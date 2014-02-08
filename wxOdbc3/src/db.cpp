@@ -27,7 +27,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_ODBC
+//#if wxUSE_ODBC
 
 #ifndef WX_PRECOMP
     #include "wx/object.h"
@@ -51,7 +51,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "wx/db.h"
+#include "db.h"
 
 // DLL options compatibility check:
 WX_CHECK_BUILD_OPTIONS("wxODBC")
@@ -4520,5 +4520,5 @@ int WXDLLIMPEXP_ODBC NumberDbConnectionsInUse(void)
 #endif
 
 
-#endif
+//#endif
  // wxUSE_ODBC
