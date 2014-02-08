@@ -25,6 +25,7 @@
 #ifndef _WX_DB_H_
 #define _WX_DB_H_
 
+#include "wxOdbc3.h"
 
 // BJO 20000503: introduce new GetColumns members which are more database independent and
 //               return columns in the order they were created
@@ -296,6 +297,7 @@ enum wxODBC_ERRORS
     #define SQL_MAX_CONNECTSTR_LEN 1024
 #endif
 
+//class __declspec(dllexport) wxDbConnectInf
 
 class WXDLLIMPEXP_ODBC wxDbConnectInf
 {
