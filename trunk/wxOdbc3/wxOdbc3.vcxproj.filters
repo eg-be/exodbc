@@ -19,6 +19,12 @@
     <ClInclude Include="include\dbtable.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\wxOdbc3.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\dbkeyg.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\db.cpp">
