@@ -19,12 +19,14 @@
 #ifndef DBTABLE_DOT_H
 #define DBTABLE_DOT_H
 
+#include "wxOdbc3.h"
+
 #include "wx/defs.h"
 
 #include "db.h"
 
 #include "wx/variant.h"
-#include "wx/dbkeyg.h"
+#include "dbkeyg.h"
 
 const int   wxDB_ROWID_LEN       = 24;  // 18 is the max, 24 is in case it gets larger
 const int   wxDB_DEFAULT_CURSOR  = 0;

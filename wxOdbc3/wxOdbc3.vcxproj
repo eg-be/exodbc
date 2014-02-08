@@ -12,7 +12,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\db.h" />
+    <ClInclude Include="include\dbkeyg.h" />
     <ClInclude Include="include\dbtable.h" />
+    <ClInclude Include="include\wxOdbc3.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\db.cpp">
@@ -60,7 +62,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;WXODBC3_EXPORTS;WXUSINGDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;WXODBC3_EXPORTS;WXUSINGDLL;wxUSE_UNICODE_WCHAR;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\wxWidgets-3.0.0\include;$(SolutionDir)\wxWidgets-3.0.0\include\msvc;$(ProjectDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
