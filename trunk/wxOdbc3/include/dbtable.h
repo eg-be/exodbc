@@ -21,7 +21,7 @@
 
 #include "wx/defs.h"
 
-#include "wx/db.h"
+#include "db.h"
 
 #include "wx/variant.h"
 #include "wx/dbkeyg.h"

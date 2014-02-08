@@ -17,7 +17,7 @@
     #pragma hdrstop
 #endif
 
-#if wxUSE_ODBC
+//#if wxUSE_ODBC
 
 #ifndef WX_PRECOMP
     #include "wx/object.h"
@@ -42,7 +42,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "wx/dbtable.h"
+#include "dbtable.h"
 
 #ifdef __UNIX__
 // The HPUX preprocessor lines below were commented out on 8/20/97
@@ -2943,4 +2943,4 @@ void wxDbTable::SetKey(const GenericKey& k)
 }  // wxDbTable::SetKey()
 
 
-#endif  // wxUSE_ODBC
+//#endif  // wxUSE_ODBC
