@@ -1,0 +1,39 @@
+/*!
+ * \file Version.h
+ * \author Elias Gerber <egerber@gmx.net>
+ * \date 28.12.2013
+ * 
+ * File to generate Version.h from using the UpdateVersion.ps1 script.
+ */ 
+
+#pragma once
+#ifndef VERSION_H
+#define VERSION_H
+
+// Same component headers
+// Other headers
+// System headers
+#define HATTRICK_VERSION_MAJOR		0
+#define HATTRICK_VERSION_MINOR		1
+#define HATTRICK_VERSION_BUILD		0
+#define HATTRICK_VERSION_REV		$WCREV$
+#define HATTRICK_VERSION_STRING		"0, 1, 0, $WCREV$\0"
+
+#define HATTRICK_MIXED_REV_RANGE	$WCMIXED?"Mixed Range":"Exact Revision"$
+#define HATTRICK_REV_RANGE			"$WCRANGE$"
+
+#define HATTRICK_SVN_REPO			"$WCURL$"
+#define HATTRICK_SVN_DATE			"$WCDATE$"
+
+#define HATTRICK_SVN_LOCAL_MODS		$WCMODS?"Has local modifications":"No local modifications"$
+
+// Forward declarations
+// --------------------
+
+// Structs
+// -------
+
+// Classes
+// -------
+
+#endif // VERSION_H

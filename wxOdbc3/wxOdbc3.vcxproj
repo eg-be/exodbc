@@ -26,6 +26,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Version.h.template" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{021A7F83-D491-491B-B4E9-93F4F56340C1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -92,6 +95,12 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\wxWidgets\lib\vc_dll;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>powershell -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Updating Versioninfo</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
