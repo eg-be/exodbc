@@ -23,13 +23,25 @@ class wxDb;
 // Structs
 // -------
 
-// QueryTypes
+// NotExistingTable
+// ----------------
+class NotExistingTable : public wxDbTable
+{
+public:
+	NotExistingTable(wxDb* pDb);
+	~NotExistingTable() {};
+
+	int		m_idNotExisting;
+};
+
+
+// QueryTypesTable
 // ----------
 class QueryTypesTable : public wxDbTable
 {
 public:
 	QueryTypesTable(wxDb* pDb);
-	~QueryTypesTable();
+	~QueryTypesTable() {};
 
 	int		m_idQueryTypes;
 };

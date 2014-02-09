@@ -45,40 +45,74 @@ void DbTableTest::setUp()
 	m_pConnectInfMySql = new wxDbConnectInf(NULL, MYSQL_DSN, MYSQL_USER, MYSQL_PASS);
 	m_pDbMySql = new wxDb(m_pConnectInfMySql->GetHenv());
 	CPPUNIT_ASSERT( m_pDbMySql->Open(m_pConnectInfMySql) );
+
+	m_pQueryTypesTable = new QueryTypesTable(m_pDbMySql);
+	m_pNotExistingTable = new NotExistingTable(m_pDbMySql);
 }
 
 
 void DbTableTest::tearDown()
 {
+	delete m_pQueryTypesTable;
+	delete m_pNotExistingTable;
+
 	delete m_pConnectInfMySql;
 	delete m_pDbMySql;
 }
 
 
-void DbTableTest::testOpen()
+void DbTableTest::testOpenExistingNoChecks()
 {
 	// Open without any checking
-	QueryTypesTable* pQueryTypesTable = new QueryTypesTable(m_pDbMySql);
-	CPPUNIT_ASSERT_NO_THROW( pQueryTypesTable->Open(false, false) );
-	delete pQueryTypesTable;
-
-	// Open with checking privileges
-	pQueryTypesTable = new QueryTypesTable(m_pDbMySql);
-	CPPUNIT_ASSERT_NO_THROW( pQueryTypesTable->Open(true, false) );
-	delete pQueryTypesTable;
-
-	// Open with checking existance
-	pQueryTypesTable = new QueryTypesTable(m_pDbMySql);
-	CPPUNIT_ASSERT_NO_THROW( pQueryTypesTable->Open(false, true) );
-	delete pQueryTypesTable;
-
-	// Open with checking both
-	pQueryTypesTable = new QueryTypesTable(m_pDbMySql);
-	CPPUNIT_ASSERT_NO_THROW( pQueryTypesTable->Open(true, true) );
-	delete pQueryTypesTable;
-
+	CPPUNIT_ASSERT( m_pQueryTypesTable->Open(false, false) );
 }
 
+
+void DbTableTest::testOpenExistingCheckPrivilegs()
+{
+	// Open with checking privileges
+	CPPUNIT_ASSERT( m_pQueryTypesTable->Open(true, false) );
+}
+
+
+void DbTableTest::testOpenExistingCheckExistance()
+{
+	CPPUNIT_ASSERT( m_pQueryTypesTable->Open(false, true) );
+}
+
+
+void DbTableTest::testOpenExistingCheckBoth()
+{
+	CPPUNIT_ASSERT( m_pQueryTypesTable->Open(true, true) );
+}
+
+
+void DbTableTest::testOpenNotExistingNoChecks()
+{
+	// Open without any checking - should work even if table does not exist
+	CPPUNIT_ASSERT( m_pNotExistingTable->Open(false, false) );
+}
+
+
+void DbTableTest::testOpenNotExistingCheckPrivilegs()
+{
+	// Open with checking privileges - should fail, how to have privs on a non existing table=
+	CPPUNIT_ASSERT_ASSERTION_FAIL( CPPUNIT_ASSERT(m_pNotExistingTable->Open(true, false)) );
+}
+
+
+void DbTableTest::testOpenNotExistingCheckExistance()
+{
+	// must fail
+	CPPUNIT_ASSERT_ASSERTION_FAIL( CPPUNIT_ASSERT(m_pNotExistingTable->Open(false, true)) );
+}
+
+
+void DbTableTest::testOpenNotExistingCheckBoth()
+{
+	// must fail
+	CPPUNIT_ASSERT_ASSERTION_FAIL( CPPUNIT_ASSERT(m_pNotExistingTable->Open(true, true)) );
+}
 // Interfaces
 // ----------
 
