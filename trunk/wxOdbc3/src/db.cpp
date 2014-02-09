@@ -3660,8 +3660,8 @@ bool wxDb::TablePrivileges(const wxString &tableName, const wxString &priv, cons
 {
     wxASSERT(tableName.length());
 
-    wxDbTablePrivilegeInfo  result;
-    SQLLEN  cbRetVal;
+	wxDbTablePrivilegeInfo  result;
+	SQLLEN  cbRetVal;
     RETCODE retcode;
 
     // We probably need to be able to dynamically set this based on
