@@ -1,3 +1,18 @@
+/*!
+ * \file wxOdbc3.h
+ * \author Elias Gerber <egerber@gmx.net>
+ * \date 09.02.2014
+ * 
+ * [Brief Header-file description]
+ */ 
+
+#pragma once
+#ifndef WXODBC3_H
+#define WXODBC3_H
+
+// Defines to dll-import/export
+// ----------------------------
+
 #define WXODBC3EXPORT __declspec(dllexport)
 #define WXODBC3IMPORT __declspec(dllimport)
 
@@ -11,3 +26,6 @@
 #    define WXDLLIMPEXP_ODBC
 #    define WXDLLIMPEXP_DATA_ODBC(type) type
 #endif
+
+
+#endif // WXODBC3_H

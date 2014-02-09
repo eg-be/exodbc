@@ -7,6 +7,7 @@
 // Modified by: George Tasker
 //              Bart Jourquin
 //              Mark Johnson, wxWindows@mj10777.de
+//				Elias Gerber, eg@zame.ch
 // Mods:        Dec, 1998:
 //                -Added support for SQL statement logging and database cataloging
 //                     April, 1999

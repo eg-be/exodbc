@@ -5,6 +5,7 @@
 // Modified by: George Tasker
 //              Bart Jourquin
 //              Mark Johnson
+//				Elias Gerber, eg@zame.ch
 // Created:     9.96
 // RCS-ID:      $Id: dbtable.h 61872 2009-09-09 22:37:05Z VZ $
 // Copyright:   (c) 1996 Remstar International, Inc.
