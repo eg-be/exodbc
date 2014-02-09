@@ -20,6 +20,8 @@
 // --------------------
 class wxDbConnectInf;
 class wxDb;
+class QueryTypesTable;
+class NotExistingTable;
 
 // Structs
 // -------
@@ -29,18 +31,37 @@ class wxDb;
 class DbTableTest : public CPPUNIT_NS::TestFixture
 {
 	CPPUNIT_TEST_SUITE( DbTableTest );
-	CPPUNIT_TEST( testOpen );
+	CPPUNIT_TEST( testOpenExistingNoChecks );
+	CPPUNIT_TEST( testOpenExistingCheckPrivilegs );
+	CPPUNIT_TEST( testOpenExistingCheckExistance );
+	CPPUNIT_TEST( testOpenExistingCheckBoth );
+
+	CPPUNIT_TEST( testOpenNotExistingNoChecks );
+	CPPUNIT_TEST( testOpenNotExistingCheckPrivilegs );
+	CPPUNIT_TEST( testOpenNotExistingCheckExistance );
+	CPPUNIT_TEST( testOpenNotExistingCheckBoth );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
 	void setUp();
 	void tearDown();
 
-	void testOpen();
+	void testOpenExistingNoChecks();
+	void testOpenExistingCheckPrivilegs();
+	void testOpenExistingCheckExistance();
+	void testOpenExistingCheckBoth();
+
+	void testOpenNotExistingNoChecks();
+	void testOpenNotExistingCheckPrivilegs();
+	void testOpenNotExistingCheckExistance();
+	void testOpenNotExistingCheckBoth();
 
 private:
-	wxDbConnectInf* m_pConnectInfMySql;
-	wxDb*			m_pDbMySql;
+	wxDbConnectInf*		m_pConnectInfMySql;
+	wxDb*				m_pDbMySql;
+
+	QueryTypesTable*	m_pQueryTypesTable;
+	NotExistingTable*	m_pNotExistingTable;
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( DbTableTest );
 
