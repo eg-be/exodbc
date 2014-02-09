@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\DbParams.h" />
     <ClInclude Include="test\DbTest.h" />
   </ItemGroup>
   <ItemGroup>
@@ -70,14 +71,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;ELICOMMONTEST_EXPORTS;BOOST_ALL_DYN_LINK;BOOST_LIB_DIAGNOSTIC;CPPUNIT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\cppunit\include;$(ProjectDir)\include;$(ProjectDir)\src;$(ProjectDir)\test;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;WXODBC3_IMPORTS;WXUSINGDLL;CPPUNIT_DLL;DBDEBUG_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\wxWidgets\include;$(SolutionDir)\3rdParty\wxWidgets\include\msvc;$(SolutionDir)\3rdParty\cppunit\include;$(ProjectDir)\include;$(ProjectDir)\src;$(ProjectDir)\test;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zm113 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\cppunit\lib;$(SolutionDir)\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\cppunit\lib;$(SolutionDir)\3rdParty\wxWidgets\lib\vc_dll;$(SolutionDir)\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>cppunitd_dll.lib;wxOdbc3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

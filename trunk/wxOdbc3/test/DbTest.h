@@ -18,27 +18,40 @@
 
 // Forward declarations
 // --------------------
+class wxDbConnectInf;
+class wxDb;
 
 // Structs
 // -------
 
 // Classes
 // -------
+class DbConnectInfTest : public CPPUNIT_NS::TestFixture
+{
+	CPPUNIT_TEST_SUITE( DbConnectInfTest );
+	CPPUNIT_TEST( testAllocHenv );
+	CPPUNIT_TEST_SUITE_END();
+
+public:
+	void testAllocHenv();
+};
+CPPUNIT_TEST_SUITE_REGISTRATION( DbConnectInfTest );
+
 class DbTest : public CPPUNIT_NS::TestFixture
 { 
 	CPPUNIT_TEST_SUITE( DbTest );
-	CPPUNIT_TEST( testFail );
-	CPPUNIT_TEST( testOk );
+	CPPUNIT_TEST( testOpen );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
 	void setUp();
 	void tearDown();
-	void testFail();
-	void testOk();
+	void testOpen();
 
+private:
+	wxDbConnectInf* m_pConnectInfMySql;
+	wxDb*			m_pDbMySql;
 };
-
 CPPUNIT_TEST_SUITE_REGISTRATION( DbTest );
 
 #endif // DBTEST_H
