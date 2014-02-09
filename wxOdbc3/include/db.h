@@ -297,8 +297,6 @@ enum wxODBC_ERRORS
     #define SQL_MAX_CONNECTSTR_LEN 1024
 #endif
 
-//class __declspec(dllexport) wxDbConnectInf
-
 class WXDLLIMPEXP_ODBC wxDbConnectInf
 {
     private:
