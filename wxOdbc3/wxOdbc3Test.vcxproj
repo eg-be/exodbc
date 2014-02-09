@@ -12,11 +12,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\DbParams.h" />
+    <ClInclude Include="test\DbTableTest.h" />
     <ClInclude Include="test\DbTest.h" />
+    <ClInclude Include="test\TestTables.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="test\DbTableTest.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="test\DbTest.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="test\TestTables.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="test\wxOdbc3Test.cpp">
