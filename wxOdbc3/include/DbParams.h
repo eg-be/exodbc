@@ -17,6 +17,8 @@
 #define MYSQL_DSN			L"wxodbc3MySql"
 #define MYSQL_USER			L"wxodbc3"
 #define MYSQL_PASS			L"wxodbc3"
+//#define MYSQL_USER			L"root"
+//#define MYSQL_PASS			L"super$ql"
 
 // Forward declarations
 // --------------------
