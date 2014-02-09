@@ -13,19 +13,19 @@
 // Same component headers
 // Other headers
 // System headers
-#define HATTRICK_VERSION_MAJOR		0
-#define HATTRICK_VERSION_MINOR		1
-#define HATTRICK_VERSION_BUILD		0
-#define HATTRICK_VERSION_REV		$WCREV$
-#define HATTRICK_VERSION_STRING		"0, 1, 0, $WCREV$\0"
+#define WXODBC3_VERSION_MAJOR		0
+#define WXODBC3_VERSION_MINOR		1
+#define WXODBC3_VERSION_BUILD		0
+#define WXODBC3_VERSION_REV			$WCREV$
+#define WXODBC3_VERSION_STRING		"0, 1, 0, $WCREV$\0"
 
-#define HATTRICK_MIXED_REV_RANGE	$WCMIXED?"Mixed Range":"Exact Revision"$
-#define HATTRICK_REV_RANGE			"$WCRANGE$"
+#define WXODBC3_MIXED_REV_RANGE	$WCMIXED?"Mixed Range":"Exact Revision"$
+#define WXODBC3_REV_RANGE			"$WCRANGE$"
 
-#define HATTRICK_SVN_REPO			"$WCURL$"
-#define HATTRICK_SVN_DATE			"$WCDATE$"
+#define WXODBC3_SVN_REPO			"$WCURL$"
+#define WXODBC3_SVN_DATE			"$WCDATE$"
 
-#define HATTRICK_SVN_LOCAL_MODS		$WCMODS?"Has local modifications":"No local modifications"$
+#define WXODBC3_SVN_LOCAL_MODS		$WCMODS?"Has local modifications":"No local modifications"$
 
 // Forward declarations
 // --------------------
