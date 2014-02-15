@@ -250,23 +250,23 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
             if (SQLGetStmtOption(hstmtInternal, SQL_CURSOR_TYPE, &cursorType) != SQL_SUCCESS)
                 pDb->DispAllErrors(henv, hdbc, hstmtInternal);
 #ifdef DBDEBUG_CONSOLE
-            cout << wxT("Static cursor changed to: ");
+            std::wcout << wxT("Static cursor changed to: ");
             switch(cursorType)
             {
             case SQL_CURSOR_FORWARD_ONLY:
-                cout << wxT("Forward Only");
+                std::wcout << wxT("Forward Only");
                 break;
             case SQL_CURSOR_STATIC:
-                cout << wxT("Static");
+                std::wcout << wxT("Static");
                 break;
             case SQL_CURSOR_KEYSET_DRIVEN:
-                cout << wxT("Keyset Driven");
+                std::wcout << wxT("Keyset Driven");
                 break;
             case SQL_CURSOR_DYNAMIC:
-                cout << wxT("Dynamic");
+                std::wcout << wxT("Dynamic");
                 break;
             }
-            cout << endl << endl;
+            std::wcout << std::endl << std::endl;
 #endif
             // BJO20000425
             if (pDb->FwdOnlyCursors() && cursorType != SQL_CURSOR_FORWARD_ONLY)
@@ -289,7 +289,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const wxString &tblName, const UWORD num
     }
 #ifdef DBDEBUG_CONSOLE
     else
-        cout << wxT("Cursor Type set to STATIC") << endl << endl;
+        std::wcout << wxT("Cursor Type set to STATIC") << std::endl << std::endl;
 #endif
 
     if (!queryOnly)
@@ -1409,7 +1409,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
     wxString sqlStmt;
 
 #ifdef DBDEBUG_CONSOLE
-    cout << wxT("Creating Table ") << tableName << wxT("...") << endl;
+    std::wcout << wxT("Creating Table ") << tableName << wxT("...") << std::endl;
 #endif
 
     // Drop table first
@@ -1423,29 +1423,29 @@ bool wxDbTable::CreateTable(bool attemptDrop)
         // Exclude derived columns since they are NOT part of the base table
         if (colDefs[i].DerivedCol)
             continue;
-        cout << i + 1 << wxT(": ") << colDefs[i].ColName << wxT("; ");
+        std::wcout << i + 1 << wxT(": ") << colDefs[i].ColName << wxT("; ");
         switch(colDefs[i].DbDataType)
         {
             case DB_DATA_TYPE_VARCHAR:
-                cout << pDb->GetTypeInfVarchar().TypeName << wxT("(") << (int)(colDefs[i].SzDataObj / sizeof(wxChar)) << wxT(")");
+                std::wcout << pDb->GetTypeInfVarchar().TypeName << wxT("(") << (int)(colDefs[i].SzDataObj / sizeof(wxChar)) << wxT(")");
                 break;
             case DB_DATA_TYPE_MEMO:
-                cout << pDb->GetTypeInfMemo().TypeName;
+                std::wcout << pDb->GetTypeInfMemo().TypeName;
                 break;
             case DB_DATA_TYPE_INTEGER:
-                cout << pDb->GetTypeInfInteger().TypeName;
+                std::wcout << pDb->GetTypeInfInteger().TypeName;
                 break;
             case DB_DATA_TYPE_FLOAT:
-                cout << pDb->GetTypeInfFloat().TypeName;
+                std::wcout << pDb->GetTypeInfFloat().TypeName;
                 break;
             case DB_DATA_TYPE_DATE:
-                cout << pDb->GetTypeInfDate().TypeName;
+                std::wcout << pDb->GetTypeInfDate().TypeName;
                 break;
             case DB_DATA_TYPE_BLOB:
-                cout << pDb->GetTypeInfBlob().TypeName;
+                std::wcout << pDb->GetTypeInfBlob().TypeName;
                 break;
         }
-        cout << endl;
+        std::wcout << std::endl;
     }
 #endif
 
@@ -1594,7 +1594,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
     pDb->WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl;
+    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
 #endif
 
     // Execute the CREATE TABLE statement
@@ -1635,7 +1635,7 @@ bool wxDbTable::DropTable()
     pDb->WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl;
+    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
 #endif
 
     RETCODE retcode = SQLExecDirect(hstmt, (SQLTCHAR FAR *) sqlStmt.c_str().AsWChar(), SQL_NTS);
@@ -1803,7 +1803,7 @@ bool wxDbTable::CreateIndex(const wxString &indexName, bool unique, UWORD numInd
     pDb->WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl << endl;
+    std::wcout << std::endl << sqlStmt.c_str() << std::endl << std::endl;
 #endif
 
     // Execute the CREATE INDEX statement
@@ -1856,7 +1856,7 @@ bool wxDbTable::DropIndex(const wxString &indexName)
     pDb->WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl;
+    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
 #endif
     RETCODE retcode = SQLExecDirect(hstmt, (SQLTCHAR FAR *) sqlStmt.c_str().AsWChar(), SQL_NTS);
     if (retcode != SQL_SUCCESS)
@@ -2014,7 +2014,7 @@ bool wxDbTable::Update(void)
     pDb->WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl << endl;
+    std::wcout << std::endl << sqlStmt.c_str() << std::endl << std::endl;
 #endif
 
     // Execute the SQL UPDATE statement
@@ -2052,7 +2052,7 @@ bool wxDbTable::UpdateWhere(const wxString &pWhereClause)
     pDb->WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl << endl;
+    std::wcout << std::endl << sqlStmt.c_str() << std::endl << std::endl;
 #endif
 
     // Execute the SQL UPDATE statement

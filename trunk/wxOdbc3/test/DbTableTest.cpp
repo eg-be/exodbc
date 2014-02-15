@@ -137,6 +137,18 @@ void DbTableTest::testOpenNotExistingCheckBoth()
 	// must fail
 	CPPUNIT_ASSERT_ASSERTION_FAIL( CPPUNIT_ASSERT(m_pNotExistingTable->Open(true, true)) );
 }
+
+
+void DbTableTest::testQueryInteger()
+{
+	CPPUNIT_ASSERT( m_connectedMySql );
+
+	// test for min-max values
+	wxString sqlstmt = L"SELECT * FROM wxodbc3.integertypes WHERE idintgertypes = 1";
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(sqlstmt) );
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext() );
+
+}
 // Interfaces
 // ----------
 
