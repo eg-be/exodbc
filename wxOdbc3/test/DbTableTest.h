@@ -41,7 +41,7 @@ class DbTableTest : public CPPUNIT_NS::TestFixture
 	CPPUNIT_TEST( testOpenNotExistingCheckExistance );
 	CPPUNIT_TEST( testOpenNotExistingCheckBoth );
 
-	CPPUNIT_TEST( testQueryInteger );
+	CPPUNIT_TEST( testIntTypes );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -58,14 +58,14 @@ public:
 	void testOpenNotExistingCheckExistance();
 	void testOpenNotExistingCheckBoth();
 
-	void testQueryInteger();
+	void testIntTypes();
 
 private:
 	wxDbConnectInf*		m_pConnectInfMySql;
 	wxDb*				m_pDbMySql;
 	bool				m_connectedMySql;
 
-	IntTypesTable*	m_pQueryTypesTable;
+	IntTypesTable*		m_pIntTypesTable;
 	NotExistingTable*	m_pNotExistingTable;
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( DbTableTest );
