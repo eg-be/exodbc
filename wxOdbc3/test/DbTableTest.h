@@ -20,7 +20,7 @@
 // --------------------
 class wxDbConnectInf;
 class wxDb;
-class QueryTypesTable;
+class IntTypesTable;
 class NotExistingTable;
 
 // Structs
@@ -61,7 +61,7 @@ private:
 	wxDb*				m_pDbMySql;
 	bool				m_connectedMySql;
 
-	QueryTypesTable*	m_pQueryTypesTable;
+	IntTypesTable*	m_pQueryTypesTable;
 	NotExistingTable*	m_pNotExistingTable;
 };
 CPPUNIT_TEST_SUITE_REGISTRATION( DbTableTest );

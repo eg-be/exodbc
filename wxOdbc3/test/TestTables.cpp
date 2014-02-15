@@ -26,10 +26,10 @@ NotExistingTable::NotExistingTable(wxDb* pDb)
 
 // QueryTypesTable
 // ---------------
-QueryTypesTable::QueryTypesTable(wxDb* pDb)
-	: wxDbTable(pDb, L"querytypes", 1)
+IntTypesTable::IntTypesTable(wxDb* pDb)
+	: wxDbTable(pDb, L"IntegerTypes", 1)
 {
-	SetColDefs(0, L"idquerytypes", DB_DATA_TYPE_INTEGER, &m_idQueryTypes, SQL_C_LONG, sizeof(m_idQueryTypes), true);
+	SetColDefs(0, L"idintegertypes", DB_DATA_TYPE_INTEGER, &m_idQueryTypes, SQL_C_LONG, sizeof(m_idQueryTypes), true);
 }
 
 
