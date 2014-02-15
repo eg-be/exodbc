@@ -22,11 +22,13 @@
 // Same component headers
 #include "DbParams.h"
 #include "TestTables.h"
+#include "wxOdbc3Test.h"
 
 // Other headers
 #include "cppunit/config/SourcePrefix.h"
 #include "db.h"
 #include "dbtable.h"
+#include <vector>
 
 // Static consts
 // -------------
@@ -136,6 +138,46 @@ void DbTableTest::testOpenNotExistingCheckBoth()
 
 	// must fail
 	CPPUNIT_ASSERT_ASSERTION_FAIL( CPPUNIT_ASSERT(m_pNotExistingTable->Open(true, true)) );
+}
+
+
+void DbTableTest::testQueryInteger()
+{
+//	CPPUNIT_ASSERT( m_connectedMySql );
+
+	wxDbConnectInf* pConnectInfMySql = new wxDbConnectInf(NULL, MYSQL_DSN, MYSQL_USER, MYSQL_PASS);
+	wxDb* pDbMySql = new wxDb(pConnectInfMySql->GetHenv());
+	bool conn = pDbMySql->Open(pConnectInfMySql);
+	CPPUNIT_ASSERT( conn );
+
+	if( conn )
+	{
+		IntTypesTable* pTable = new IntTypesTable(pDbMySql);
+		bool ok2 = pTable->Open(false, false);
+		std::vector<wxString> errs = pDbMySql->GetErrorList();
+//		wxString sqlstmt = L"SELECT \"idintegertypes\" FROM \"wxodbc3\".\"integertypes\"";
+		wxString sqlstmt = L"SELECT IDT1 FROM TEST.T1";
+		bool ok1 = pTable->QueryBySqlStmt(sqlstmt);
+		errs = pDbMySql->GetErrorList();
+		while(pTable->GetNext())
+		{
+			int p = 3;
+		}
+	}
+
+//	// test for min-max values
+//	wxString sqlstmt = L"SELECT * FROM wxodbc3.integertypes";
+////	TEST_SQL( m_pQueryTypesTable->QueryBySqlStmt(sqlstmt), m_pDbMySql );
+//	bool ok1 = m_pQueryTypesTable->QueryBySqlStmt(sqlstmt);
+//	CPPUNIT_ASSERT(ok1);
+//	bool ok = m_pQueryTypesTable->GetNext();
+//	while(ok)
+//	{
+//		ok = m_pQueryTypesTable->GetNext();
+//		int p = 3;
+//	}
+//	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext() );
+//	CPPUNIT_ASSERT_EQUAL( (int8_t) -128, m_pQueryTypesTable->m_tinyInt );
 }
 // Interfaces
 // ----------

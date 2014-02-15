@@ -28,6 +28,8 @@
 
 #include "wxOdbc3.h"
 
+#include <vector>
+
 // BJO 20000503: introduce new GetColumns members which are more database independent and
 //               return columns in the order they were created
 #define OLD_GETCOLUMNS 1
@@ -722,6 +724,8 @@ public:
     bool         SetSqlLogging(wxDbSqlLogState state, const wxString &filename = SQL_LOG_FILENAME,
                                bool append = false);
     bool         WriteSqlLog(const wxString &logMsg);
+
+	std::vector<wxString> GetErrorList() const;
 
     wxDBMS       Dbms(void);
     bool         ModifyColumn(const wxString &tableName, const wxString &columnName,

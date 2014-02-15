@@ -15,6 +15,7 @@
     <ClInclude Include="test\DbTableTest.h" />
     <ClInclude Include="test\DbTest.h" />
     <ClInclude Include="test\TestTables.h" />
+    <ClInclude Include="test\wxOdbc3Test.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\DbTableTest.cpp">

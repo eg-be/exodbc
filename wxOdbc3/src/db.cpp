@@ -3849,9 +3849,26 @@ bool wxDb::WriteSqlLog(const wxString &logMsg)
     if (wxFputs(wxT("\n"),   fpSqlLog) == EOF)
         return false;
 
+
+
     return true;
 
 }  // wxDb::WriteSqlLog()
+
+
+std::vector<wxString> wxDb::GetErrorList() const
+{
+	std::vector<wxString> list;
+	
+	for (int i = 0; i < DB_MAX_ERROR_HISTORY; i++)
+	{
+		if (errorList[i])
+		{
+			list.push_back(wxString(errorList[i]));
+		}
+	}
+	return list;
+}
 
 
 /********** wxDb::Dbms() **********/
