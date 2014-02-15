@@ -15,6 +15,7 @@
 #include "dbtable.h"
 
 // System headers
+#include <stdint.h>
 
 // Forward declarations
 // --------------------
@@ -37,13 +38,14 @@ public:
 
 // QueryTypesTable
 // ----------
-class QueryTypesTable : public wxDbTable
+class IntTypesTable : public wxDbTable
 {
 public:
-	QueryTypesTable(wxDb* pDb);
-	~QueryTypesTable() {};
+	IntTypesTable(wxDb* pDb);
+	~IntTypesTable() {};
 
-	int		m_idQueryTypes;
+	
+	int32_t		m_idQueryTypes;
 };
 
 
