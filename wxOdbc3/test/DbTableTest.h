@@ -40,6 +40,8 @@ class DbTableTest : public CPPUNIT_NS::TestFixture
 	CPPUNIT_TEST( testOpenNotExistingCheckPrivilegs );
 	CPPUNIT_TEST( testOpenNotExistingCheckExistance );
 	CPPUNIT_TEST( testOpenNotExistingCheckBoth );
+
+	CPPUNIT_TEST( testQueryInteger );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -55,6 +57,8 @@ public:
 	void testOpenNotExistingCheckPrivilegs();
 	void testOpenNotExistingCheckExistance();
 	void testOpenNotExistingCheckBoth();
+
+	void testQueryInteger();
 
 private:
 	wxDbConnectInf*		m_pConnectInfMySql;

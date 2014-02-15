@@ -812,13 +812,13 @@ bool wxDb::open(bool failOnDataTypeUnsupported)
         return false;
 
 #ifdef DBDEBUG_CONSOLE
-    cout << wxT("VARCHAR DATA TYPE: ") << typeInfVarchar.TypeName << endl;
-    cout << wxT("INTEGER DATA TYPE: ") << typeInfInteger.TypeName << endl;
-    cout << wxT("FLOAT   DATA TYPE: ") << typeInfFloat.TypeName << endl;
-    cout << wxT("DATE    DATA TYPE: ") << typeInfDate.TypeName << endl;
-    cout << wxT("BLOB    DATA TYPE: ") << typeInfBlob.TypeName << endl;
-    cout << wxT("MEMO    DATA TYPE: ") << typeInfMemo.TypeName << endl;
-    cout << endl;
+    std::wcout << wxT("VARCHAR DATA TYPE: ") << typeInfVarchar.TypeName << std::endl;
+    std::wcout << wxT("INTEGER DATA TYPE: ") << typeInfInteger.TypeName << std::endl;
+    std::wcout << wxT("FLOAT   DATA TYPE: ") << typeInfFloat.TypeName << std::endl;
+    std::wcout << wxT("DATE    DATA TYPE: ") << typeInfDate.TypeName << std::endl;
+    std::wcout << wxT("BLOB    DATA TYPE: ") << typeInfBlob.TypeName << std::endl;
+    std::wcout << wxT("MEMO    DATA TYPE: ") << typeInfMemo.TypeName << std::endl;
+    std::wcout << std::endl;
 #endif
 
     // Completed Successfully
@@ -847,9 +847,9 @@ bool wxDb::Open(const wxString& inConnectStr, SQLHWND parentWnd, bool failOnData
 
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_SUCCESS)
-            cout << wxT("SQLSetConnectOption(CURSOR_LIB) successful") << endl;
+            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) successful") << std::endl;
         else
-            cout << wxT("SQLSetConnectOption(CURSOR_LIB) failed") << endl;
+            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) failed") << std::endl;
 #else
         wxUnusedVar(retcode);
 #endif
@@ -897,9 +897,9 @@ bool wxDb::Open(const wxString &Dsn, const wxString &Uid, const wxString &AuthSt
 
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_SUCCESS)
-            cout << wxT("SQLSetConnectOption(CURSOR_LIB) successful") << endl;
+            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) successful") << std::endl;
         else
-            cout << wxT("SQLSetConnectOption(CURSOR_LIB) failed") << endl;
+            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) failed") << std::endl;
 #else
         wxUnusedVar( retcode );
 #endif
@@ -950,9 +950,9 @@ bool wxDb::Open(wxDb *copyDb)
 
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_SUCCESS)
-            cout << wxT("SQLSetConnectOption(CURSOR_LIB) successful") << endl;
+            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) successful") << std::endl;
         else
-            cout << wxT("SQLSetConnectOption(CURSOR_LIB) failed") << endl;
+            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) failed") << std::endl;
 #else
         wxUnusedVar( retcode );
 #endif
@@ -1086,13 +1086,13 @@ bool wxDb::Open(wxDb *copyDb)
     typeInfMemo.MaximumScale     = copyDb->typeInfMemo.MaximumScale;
 
 #ifdef DBDEBUG_CONSOLE
-    cout << wxT("VARCHAR DATA TYPE: ") << typeInfVarchar.TypeName << endl;
-    cout << wxT("INTEGER DATA TYPE: ") << typeInfInteger.TypeName << endl;
-    cout << wxT("FLOAT   DATA TYPE: ") << typeInfFloat.TypeName << endl;
-    cout << wxT("DATE    DATA TYPE: ") << typeInfDate.TypeName << endl;
-    cout << wxT("BLOB    DATA TYPE: ") << typeInfBlob.TypeName << endl;
-    cout << wxT("MEMO    DATA TYPE: ") << typeInfMemo.TypeName << endl;
-    cout << endl;
+    std::wcout << wxT("VARCHAR DATA TYPE: ") << typeInfVarchar.TypeName << std::endl;
+    std::wcout << wxT("INTEGER DATA TYPE: ") << typeInfInteger.TypeName << std::endl;
+    std::wcout << wxT("FLOAT   DATA TYPE: ") << typeInfFloat.TypeName << std::endl;
+    std::wcout << wxT("DATE    DATA TYPE: ") << typeInfDate.TypeName << std::endl;
+    std::wcout << wxT("BLOB    DATA TYPE: ") << typeInfBlob.TypeName << std::endl;
+    std::wcout << wxT("MEMO    DATA TYPE: ") << typeInfMemo.TypeName << std::endl;
+    std::wcout << std::endl;
 #endif
 
     // Completed Successfully
@@ -1135,37 +1135,37 @@ bool wxDb::setConnectionOptions(void)
     // Display the connection options to verify them
 #ifdef DBDEBUG_CONSOLE
     long l;
-    cout << wxT("****** CONNECTION OPTIONS ******") << endl;
+    std::wcout << wxT("****** CONNECTION OPTIONS ******") << std::endl;
 
     retcode = SQLGetConnectOption(hdbc, SQL_AUTOCOMMIT, &l);
     if (retcode != SQL_SUCCESS)
         return(DispAllErrors(henv, hdbc));
-    cout << wxT("AUTOCOMMIT: ") << (l == SQL_AUTOCOMMIT_OFF ? "OFF" : "ON") << endl;
+    std::wcout << wxT("AUTOCOMMIT: ") << (l == SQL_AUTOCOMMIT_OFF ? "OFF" : "ON") << std::endl;
 
     retcode = SQLGetConnectOption(hdbc, SQL_ODBC_CURSORS, &l);
     if (retcode != SQL_SUCCESS)
         return(DispAllErrors(henv, hdbc));
-    cout << wxT("ODBC CURSORS: ");
+    std::wcout << wxT("ODBC CURSORS: ");
     switch(l)
     {
         case(SQL_CUR_USE_IF_NEEDED):
-            cout << wxT("SQL_CUR_USE_IF_NEEDED");
+            std::wcout << wxT("SQL_CUR_USE_IF_NEEDED");
             break;
         case(SQL_CUR_USE_ODBC):
-            cout << wxT("SQL_CUR_USE_ODBC");
+            std::wcout << wxT("SQL_CUR_USE_ODBC");
             break;
         case(SQL_CUR_USE_DRIVER):
-            cout << wxT("SQL_CUR_USE_DRIVER");
+            std::wcout << wxT("SQL_CUR_USE_DRIVER");
             break;
     }
-    cout << endl;
+    std::wcout << std::endl;
 
-    retcode = SQLGetConnectOption(hdbc, SQL_OPT_TRACE, &l)
+    retcode = SQLGetConnectOption(hdbc, SQL_OPT_TRACE, &l);
     if (retcode != SQL_SUCCESS)
         return(DispAllErrors(henv, hdbc));
-    cout << wxT("TRACING: ") << (l == SQL_OPT_TRACE_OFF ? wxT("OFF") : wxT("ON")) << endl;
+    std::wcout << wxT("TRACING: ") << (l == SQL_OPT_TRACE_OFF ? wxT("OFF") : wxT("ON")) << std::endl;
 
-    cout << endl;
+    std::wcout << std::endl;
 #endif
 
     // Completed Successfully
@@ -1434,198 +1434,198 @@ bool wxDb::getDbInfo(bool failOnDataTypeUnsupported)
     }
 
 #ifdef DBDEBUG_CONSOLE
-    cout << wxT("***** DATA SOURCE INFORMATION *****") << endl;
-    cout << wxT(wxT("SERVER Name: ") << dbInf.serverName << endl;
-    cout << wxT("DBMS Name: ") << dbInf.dbmsName << wxT("; DBMS Version: ") << dbInf.dbmsVer << endl;
-    cout << wxT("ODBC Version: ") << dbInf.odbcVer << wxT("; Driver Version: ") << dbInf.driverVer << endl;
+    std::wcout << wxT("***** DATA SOURCE INFORMATION *****") << std::endl;
+    std::wcout << wxT("SERVER Name: ") << dbInf.serverName << std::endl;
+    std::wcout << wxT("DBMS Name: ") << dbInf.dbmsName << wxT("; DBMS Version: ") << dbInf.dbmsVer << std::endl;
+    std::wcout << wxT("ODBC Version: ") << dbInf.odbcVer << wxT("; Driver Version: ") << dbInf.driverVer << std::endl;
 
-    cout << wxT("API Conf. Level: ");
+    std::wcout << wxT("API Conf. Level: ");
     switch(dbInf.apiConfLvl)
     {
-        case SQL_OAC_NONE:      cout << wxT("None");       break;
-        case SQL_OAC_LEVEL1:    cout << wxT("Level 1");    break;
-        case SQL_OAC_LEVEL2:    cout << wxT("Level 2");    break;
+        case SQL_OAC_NONE:      std::wcout << wxT("None");       break;
+        case SQL_OAC_LEVEL1:    std::wcout << wxT("Level 1");    break;
+        case SQL_OAC_LEVEL2:    std::wcout << wxT("Level 2");    break;
     }
-    cout << endl;
+    std::wcout << std::endl;
 
-    cout << wxT("SAG CLI Conf. Level: ");
+    std::wcout << wxT("SAG CLI Conf. Level: ");
     switch(dbInf.cliConfLvl)
     {
-        case SQL_OSCC_NOT_COMPLIANT:    cout << wxT("Not Compliant");    break;
-        case SQL_OSCC_COMPLIANT:        cout << wxT("Compliant");        break;
+        case SQL_OSCC_NOT_COMPLIANT:    std::wcout << wxT("Not Compliant");    break;
+        case SQL_OSCC_COMPLIANT:        std::wcout << wxT("Compliant");        break;
     }
-    cout << endl;
+    std::wcout << std::endl;
 
-    cout << wxT("SQL Conf. Level: ");
+    std::wcout << wxT("SQL Conf. Level: ");
     switch(dbInf.sqlConfLvl)
     {
-        case SQL_OSC_MINIMUM:     cout << wxT("Minimum Grammar");     break;
-        case SQL_OSC_CORE:        cout << wxT("Core Grammar");        break;
-        case SQL_OSC_EXTENDED:    cout << wxT("Extended Grammar");    break;
+        case SQL_OSC_MINIMUM:     std::wcout << wxT("Minimum Grammar");     break;
+        case SQL_OSC_CORE:        std::wcout << wxT("Core Grammar");        break;
+        case SQL_OSC_EXTENDED:    std::wcout << wxT("Extended Grammar");    break;
     }
-    cout << endl;
+    std::wcout << std::endl;
 
-    cout << wxT("Max. Connections: ")       << dbInf.maxConnections   << endl;
-    cout << wxT("Outer Joins: ")            << dbInf.outerJoins       << endl;
-    cout << wxT("Support for Procedures: ") << dbInf.procedureSupport << endl;
-    cout << wxT("All tables accessible : ") << dbInf.accessibleTables << endl;
-    cout << wxT("Cursor COMMIT Behavior: ");
+    std::wcout << wxT("Max. Connections: ")       << dbInf.maxConnections   << std::endl;
+    std::wcout << wxT("Outer Joins: ")            << dbInf.outerJoins       << std::endl;
+    std::wcout << wxT("Support for Procedures: ") << dbInf.procedureSupport << std::endl;
+    std::wcout << wxT("All tables accessible : ") << dbInf.accessibleTables << std::endl;
+    std::wcout << wxT("Cursor COMMIT Behavior: ");
     switch(dbInf.cursorCommitBehavior)
     {
-        case SQL_CB_DELETE:        cout << wxT("Delete cursors");      break;
-        case SQL_CB_CLOSE:         cout << wxT("Close cursors");       break;
-        case SQL_CB_PRESERVE:      cout << wxT("Preserve cursors");    break;
+        case SQL_CB_DELETE:        std::wcout << wxT("Delete cursors");      break;
+        case SQL_CB_CLOSE:         std::wcout << wxT("Close cursors");       break;
+        case SQL_CB_PRESERVE:      std::wcout << wxT("Preserve cursors");    break;
     }
-    cout << endl;
+    std::wcout << std::endl;
 
-    cout << wxT("Cursor ROLLBACK Behavior: ");
+    std::wcout << wxT("Cursor ROLLBACK Behavior: ");
     switch(dbInf.cursorRollbackBehavior)
     {
-        case SQL_CB_DELETE:      cout << wxT("Delete cursors");      break;
-        case SQL_CB_CLOSE:       cout << wxT("Close cursors");       break;
-        case SQL_CB_PRESERVE:    cout << wxT("Preserve cursors");    break;
+        case SQL_CB_DELETE:      std::wcout << wxT("Delete cursors");      break;
+        case SQL_CB_CLOSE:       std::wcout << wxT("Close cursors");       break;
+        case SQL_CB_PRESERVE:    std::wcout << wxT("Preserve cursors");    break;
     }
-    cout << endl;
+    std::wcout << std::endl;
 
-    cout << wxT("Support NOT NULL clause: ");
+    std::wcout << wxT("Support NOT NULL clause: ");
     switch(dbInf.supportNotNullClause)
     {
-        case SQL_NNC_NULL:        cout << wxT("No");        break;
-        case SQL_NNC_NON_NULL:    cout << wxT("Yes");       break;
+        case SQL_NNC_NULL:        std::wcout << wxT("No");        break;
+        case SQL_NNC_NON_NULL:    std::wcout << wxT("Yes");       break;
     }
-    cout << endl;
+    std::wcout << std::endl;
 
-    cout << wxT("Support IEF (Ref. Integrity): ") << dbInf.supportIEF   << endl;
-    cout << wxT("Login Timeout: ")                << dbInf.loginTimeout << endl;
+    std::wcout << wxT("Support IEF (Ref. Integrity): ") << dbInf.supportIEF   << std::endl;
+    std::wcout << wxT("Login Timeout: ")                << dbInf.loginTimeout << std::endl;
 
-    cout << endl << endl << wxT("more ...") << endl;
+    std::wcout << std::endl << std::endl << wxT("more ...") << std::endl;
     getchar();
 
-    cout << wxT("Default Transaction Isolation: ";
+    std::wcout << wxT("Default Transaction Isolation: ");
     switch(dbInf.txnIsolation)
     {
-        case SQL_TXN_READ_UNCOMMITTED:  cout << wxT("Read Uncommitted");    break;
-        case SQL_TXN_READ_COMMITTED:    cout << wxT("Read Committed");      break;
-        case SQL_TXN_REPEATABLE_READ:   cout << wxT("Repeatable Read");     break;
-        case SQL_TXN_SERIALIZABLE:      cout << wxT("Serializable");        break;
+        case SQL_TXN_READ_UNCOMMITTED:  std::wcout << wxT("Read Uncommitted");    break;
+        case SQL_TXN_READ_COMMITTED:    std::wcout << wxT("Read Committed");      break;
+        case SQL_TXN_REPEATABLE_READ:   std::wcout << wxT("Repeatable Read");     break;
+        case SQL_TXN_SERIALIZABLE:      std::wcout << wxT("Serializable");        break;
 #ifdef ODBC_V20
-        case SQL_TXN_VERSIONING:        cout << wxT("Versioning");          break;
+        case SQL_TXN_VERSIONING:        std::wcout << wxT("Versioning");          break;
 #endif
     }
-    cout << endl;
+    std::wcout << std::endl;
 
-    cout << wxT("Transaction Isolation Options: ");
+    std::wcout << wxT("Transaction Isolation Options: ");
     if (dbInf.txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
-        cout << wxT("Read Uncommitted, ");
+        std::wcout << wxT("Read Uncommitted, ");
     if (dbInf.txnIsolationOptions & SQL_TXN_READ_COMMITTED)
-        cout << wxT("Read Committed, ");
+        std::wcout << wxT("Read Committed, ");
     if (dbInf.txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
-        cout << wxT("Repeatable Read, ");
+        std::wcout << wxT("Repeatable Read, ");
     if (dbInf.txnIsolationOptions & SQL_TXN_SERIALIZABLE)
-        cout << wxT("Serializable, ");
+        std::wcout << wxT("Serializable, ");
 #ifdef ODBC_V20
     if (dbInf.txnIsolationOptions & SQL_TXN_VERSIONING)
-        cout << wxT("Versioning");
+        std::wcout << wxT("Versioning");
 #endif
-    cout << endl;
+    std::wcout << std::endl;
 
-    cout << wxT("Fetch Directions Supported:") << endl << wxT("   ");
+    std::wcout << wxT("Fetch Directions Supported:") << std::endl << wxT("   ");
     if (dbInf.fetchDirections & SQL_FD_FETCH_NEXT)
-        cout << wxT("Next, ");
+        std::wcout << wxT("Next, ");
     if (dbInf.fetchDirections & SQL_FD_FETCH_PRIOR)
-        cout << wxT("Prev, ");
+        std::wcout << wxT("Prev, ");
     if (dbInf.fetchDirections & SQL_FD_FETCH_FIRST)
-        cout << wxT("First, ");
+        std::wcout << wxT("First, ");
     if (dbInf.fetchDirections & SQL_FD_FETCH_LAST)
-        cout << wxT("Last, ");
+        std::wcout << wxT("Last, ");
     if (dbInf.fetchDirections & SQL_FD_FETCH_ABSOLUTE)
-        cout << wxT("Absolute, ");
+        std::wcout << wxT("Absolute, ");
     if (dbInf.fetchDirections & SQL_FD_FETCH_RELATIVE)
-        cout << wxT("Relative, ");
+        std::wcout << wxT("Relative, ");
 #ifdef ODBC_V20
     if (dbInf.fetchDirections & SQL_FD_FETCH_RESUME)
-        cout << wxT("Resume, ");
+        std::wcout << wxT("Resume, ");
 #endif
     if (dbInf.fetchDirections & SQL_FD_FETCH_BOOKMARK)
-        cout << wxT("Bookmark");
-    cout << endl;
+        std::wcout << wxT("Bookmark");
+    std::wcout << std::endl;
 
-    cout << wxT("Lock Types Supported (SQLSetPos): ");
+    std::wcout << wxT("Lock Types Supported (SQLSetPos): ");
     if (dbInf.lockTypes & SQL_LCK_NO_CHANGE)
-        cout << wxT("No Change, ");
+        std::wcout << wxT("No Change, ");
     if (dbInf.lockTypes & SQL_LCK_EXCLUSIVE)
-        cout << wxT("Exclusive, ");
+        std::wcout << wxT("Exclusive, ");
     if (dbInf.lockTypes & SQL_LCK_UNLOCK)
-        cout << wxT("UnLock");
-    cout << endl;
+        std::wcout << wxT("UnLock");
+    std::wcout << std::endl;
 
-    cout << wxT("Position Operations Supported (SQLSetPos): ");
+    std::wcout << wxT("Position Operations Supported (SQLSetPos): ");
     if (dbInf.posOperations & SQL_POS_POSITION)
-        cout << wxT("Position, ");
+        std::wcout << wxT("Position, ");
     if (dbInf.posOperations & SQL_POS_REFRESH)
-        cout << wxT("Refresh, ");
+        std::wcout << wxT("Refresh, ");
     if (dbInf.posOperations & SQL_POS_UPDATE)
-        cout << wxT("Upd, "));
+        std::wcout << wxT("Upd, ");
     if (dbInf.posOperations & SQL_POS_DELETE)
-        cout << wxT("Del, ");
+        std::wcout << wxT("Del, ");
     if (dbInf.posOperations & SQL_POS_ADD)
-        cout << wxT("Add");
-    cout << endl;
+        std::wcout << wxT("Add");
+    std::wcout << std::endl;
 
-    cout << wxT("Positioned Statements Supported: ");
+    std::wcout << wxT("Positioned Statements Supported: ");
     if (dbInf.posStmts & SQL_PS_POSITIONED_DELETE)
-        cout << wxT("Pos delete, ");
+        std::wcout << wxT("Pos delete, ");
     if (dbInf.posStmts & SQL_PS_POSITIONED_UPDATE)
-        cout << wxT("Pos update, ");
+        std::wcout << wxT("Pos update, ");
     if (dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE)
-        cout << wxT("Select for update");
-    cout << endl;
+        std::wcout << wxT("Select for update");
+    std::wcout << std::endl;
 
-    cout << wxT("Scroll Concurrency: ");
+    std::wcout << wxT("Scroll Concurrency: ");
     if (dbInf.scrollConcurrency & SQL_SCCO_READ_ONLY)
-        cout << wxT("Read Only, ");
+        std::wcout << wxT("Read Only, ");
     if (dbInf.scrollConcurrency & SQL_SCCO_LOCK)
-        cout << wxT("Lock, ");
+        std::wcout << wxT("Lock, ");
     if (dbInf.scrollConcurrency & SQL_SCCO_OPT_ROWVER)
-        cout << wxT("Opt. Rowver, ");
+        std::wcout << wxT("Opt. Rowver, ");
     if (dbInf.scrollConcurrency & SQL_SCCO_OPT_VALUES)
-        cout << wxT("Opt. Values");
-    cout << endl;
+        std::wcout << wxT("Opt. Values");
+    std::wcout << std::endl;
 
-    cout << wxT("Scroll Options: ");
+    std::wcout << wxT("Scroll Options: ");
     if (dbInf.scrollOptions & SQL_SO_FORWARD_ONLY)
-        cout << wxT("Fwd Only, ");
+        std::wcout << wxT("Fwd Only, ");
     if (dbInf.scrollOptions & SQL_SO_STATIC)
-        cout << wxT("Static, ");
+        std::wcout << wxT("Static, ");
     if (dbInf.scrollOptions & SQL_SO_KEYSET_DRIVEN)
-        cout << wxT("Keyset Driven, ");
+        std::wcout << wxT("Keyset Driven, ");
     if (dbInf.scrollOptions & SQL_SO_DYNAMIC)
-        cout << wxT("Dynamic, ");
+        std::wcout << wxT("Dynamic, ");
     if (dbInf.scrollOptions & SQL_SO_MIXED)
-        cout << wxT("Mixed");
-    cout << endl;
+        std::wcout << wxT("Mixed");
+    std::wcout << std::endl;
 
-    cout << wxT("Static Sensitivity: ");
+    std::wcout << wxT("Static Sensitivity: ");
     if (dbInf.staticSensitivity & SQL_SS_ADDITIONS)
-        cout << wxT("Additions, ");
+        std::wcout << wxT("Additions, ");
     if (dbInf.staticSensitivity & SQL_SS_DELETIONS)
-        cout << wxT("Deletions, ");
+        std::wcout << wxT("Deletions, ");
     if (dbInf.staticSensitivity & SQL_SS_UPDATES)
-        cout << wxT("Updates");
-    cout << endl;
+        std::wcout << wxT("Updates");
+    std::wcout << std::endl;
 
-    cout << wxT("Transaction Capable?: ");
+    std::wcout << wxT("Transaction Capable?: ");
     switch(dbInf.txnCapable)
     {
-        case SQL_TC_NONE:          cout << wxT("No");            break;
-        case SQL_TC_DML:           cout << wxT("DML Only");      break;
-        case SQL_TC_DDL_COMMIT:    cout << wxT("DDL Commit");    break;
-        case SQL_TC_DDL_IGNORE:    cout << wxT("DDL Ignore");    break;
-        case SQL_TC_ALL:           cout << wxT("DDL & DML");     break;
+        case SQL_TC_NONE:          std::wcout << wxT("No");            break;
+        case SQL_TC_DML:           std::wcout << wxT("DML Only");      break;
+        case SQL_TC_DDL_COMMIT:    std::wcout << wxT("DDL Commit");    break;
+        case SQL_TC_DDL_IGNORE:    std::wcout << wxT("DDL Ignore");    break;
+        case SQL_TC_ALL:           std::wcout << wxT("DDL & DML");     break;
     }
-    cout << endl;
+    std::wcout << std::endl;
 
-    cout << endl;
+    std::wcout << std::endl;
 #endif
 
     // Completed Successfully
@@ -1656,7 +1656,7 @@ bool wxDb::getDataTypeInfo(SWORD fSqlType, wxDbSqlTypeInfo &structSQLTypeInfo)
     {
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_NO_DATA_FOUND)
-            cout << wxT("SQL_NO_DATA_FOUND fetching information about data type.") << endl;
+            std::wcout << wxT("SQL_NO_DATA_FOUND fetching information about data type.") << std::endl;
 #endif
         DispAllErrors(henv, hdbc, hstmt);
         SQLFreeStmt(hstmt, SQL_CLOSE);
@@ -1842,8 +1842,8 @@ bool wxDb::DispAllErrors(HENV aHenv, HDBC aHdbc, HSTMT aHstmt)
         {
 #ifdef DBDEBUG_CONSOLE
             // When run in console mode, use standard out to display errors.
-            cout << odbcErrMsg.c_str() << endl;
-            cout << wxT("Press any key to continue...") << endl;
+            std::wcout << odbcErrMsg.c_str() << std::endl;
+            std::wcout << wxT("Press any key to continue...") << std::endl;
             getchar();
 #endif
 
@@ -1883,8 +1883,8 @@ void wxDb::DispNextError(void)
 
 #ifdef DBDEBUG_CONSOLE
     // When run in console mode, use standard out to display errors.
-    cout << odbcErrMsg.c_str() << endl;
-    cout << wxT("Press any key to continue...")  << endl;
+    std::wcout << odbcErrMsg.c_str() << std::endl;
+    std::wcout << wxT("Press any key to continue...")  << std::endl;
     getchar();
 #endif
 
@@ -2155,7 +2155,7 @@ bool wxDb::Grant(int privileges, const wxString &tableName, const wxString &user
     sqlStmt += userList;
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl;
+    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
 #endif
 
     WriteSqlLog(sqlStmt);
@@ -2192,7 +2192,7 @@ bool wxDb::CreateView(const wxString &viewName, const wxString &colList,
     WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << sqlStmt.c_str() << endl;
+    std::wcout << sqlStmt.c_str() << std::endl;
 #endif
 
     return(ExecSql(sqlStmt));
@@ -2216,7 +2216,7 @@ bool wxDb::DropView(const wxString &viewName)
     WriteSqlLog(sqlStmt);
 
 #ifdef DBDEBUG_CONSOLE
-    cout << endl << sqlStmt.c_str() << endl;
+    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
 #endif
 
     if (SQLExecDirect(hstmt, (SQLTCHAR FAR *) sqlStmt.c_str().AsWChar(), SQL_NTS) != SQL_SUCCESS)
@@ -3925,7 +3925,7 @@ wxDBMS wxDb::Dbms(void)
 
 #ifdef DBDEBUG_CONSOLE
                // When run in console mode, use standard out to display errors.
-               cout << "Database connecting to: " << dbInf.dbmsName << endl;
+               std::wcout << "Database connecting to: " << dbInf.dbmsName << std::endl;
 #endif  // DBDEBUG_CONSOLE
 
     wxLogDebug(wxT("Database connecting to: "));
@@ -4429,8 +4429,8 @@ int wxDbCreateDataSource(const wxString &driverName, const wxString &dsn, const 
         {
 #ifdef DBDEBUG_CONSOLE
                // When run in console mode, use standard out to display errors.
-               cout << errMsg << endl;
-               cout << wxT("Press any key to continue...") << endl;
+               std::wcout << errMsg << std::endl;
+               std::wcout << wxT("Press any key to continue...") << std::endl;
                getchar();
 #endif  // DBDEBUG_CONSOLE
 
