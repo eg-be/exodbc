@@ -58,7 +58,7 @@ public:
 	uint32_t	m_uint; // 0 	4294967295
 	uint64_t	m_ubigInt; // 0 	18446744073709551615
 
-	int32_t		m_idTest;
+//	int32_t		m_idTest;
 
 };
 
