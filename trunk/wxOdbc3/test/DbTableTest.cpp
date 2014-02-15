@@ -156,7 +156,8 @@ void DbTableTest::testQueryInteger()
 		bool ok2 = pTable->Open(false, false);
 		std::vector<wxString> errs = pDbMySql->GetErrorList();
 //		wxString sqlstmt = L"SELECT \"idintegertypes\" FROM \"wxodbc3\".\"integertypes\"";
-		wxString sqlstmt = L"SELECT IDT1 FROM TEST.T1";
+//		wxString sqlstmt = L"SELECT IDT1 FROM TEST.T1";
+		wxString sqlstmt = L"SELECT idintegertypes FROM wxodbc3.integertypes";		
 		bool ok1 = pTable->QueryBySqlStmt(sqlstmt);
 		errs = pDbMySql->GetErrorList();
 		while(pTable->GetNext())
