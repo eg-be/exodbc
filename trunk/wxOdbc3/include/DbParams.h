@@ -14,15 +14,13 @@
 // Other headers
 // System headers
 
-//#define MYSQL_DSN			L"TEST"
-//#define MYSQL_USER			L"db2admin"
-//#define MYSQL_PASS			L"super$ql"
+#define DB2_DSN				L"wxodbc3Db2"
+#define DB2_USER			L"db2admin"
+#define DB2_PASS			L"super$ql"
 
 #define MYSQL_DSN			L"wxodbc3MySql"
 #define MYSQL_USER			L"wxodbc3"
 #define MYSQL_PASS			L"wxodbc3"
-//#define MYSQL_USER			L"root"
-//#define MYSQL_PASS			L"super$ql"
 
 // Forward declarations
 // --------------------
