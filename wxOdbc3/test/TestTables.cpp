@@ -28,9 +28,9 @@ NotExistingTable::NotExistingTable(wxDb* pDb)
 // QueryTypesTable
 // ---------------
 IntTypesTable::IntTypesTable(wxDb* pDb)
-//	: wxDbTable(pDb, L"integertypes", 4, L"", wxDB_QUERY_ONLY)
+	: wxDbTable(pDb, L"integertypes", 4, L"", wxDB_QUERY_ONLY)
 //: wxDbTable(pDb, L"wxodbc3.integertypes", 1, L"", wxDB_QUERY_ONLY)
-: wxDbTable(pDb, L"TEST.T1", 1, L"", wxDB_QUERY_ONLY)
+//: wxDbTable(pDb, L"TEST.T1", 1, L"", wxDB_QUERY_ONLY)
 {	
 	m_idIntegerTypes = 13;
 	m_tinyInt = 0;
@@ -47,9 +47,9 @@ IntTypesTable::IntTypesTable(wxDb* pDb)
 
 	int32_t* pAddr = &m_idIntegerTypes;
 
-	SetColDefs(0, L"IDT1", DB_DATA_TYPE_INTEGER, &m_idTest, SQL_C_SLONG, sizeof(m_idTest), true, false, false, false);
+//	SetColDefs(0, L"IDT1", DB_DATA_TYPE_INTEGER, &m_idTest, SQL_C_SLONG, sizeof(m_idTest), true, false, false, false);
 
-//	SetColDefs(0, L"idintegertypes", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
+	SetColDefs(0, L"idintegertypes", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
 	//SetColDefs(1, L"smallint", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), true, false, false, false);
 	//SetColDefs(2, L"int", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), true, false, false, false);
 	//SetColDefs(3, L"bigint", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), true, false, false, false);
