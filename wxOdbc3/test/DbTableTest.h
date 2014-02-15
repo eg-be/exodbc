@@ -59,6 +59,7 @@ public:
 private:
 	wxDbConnectInf*		m_pConnectInfMySql;
 	wxDb*				m_pDbMySql;
+	bool				m_connectedMySql;
 
 	QueryTypesTable*	m_pQueryTypesTable;
 	NotExistingTable*	m_pNotExistingTable;
