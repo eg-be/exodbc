@@ -36,16 +36,16 @@ public:
 };
 
 
-// QueryTypesTable
+// IntTypesTable
 // ----------
 class IntTypesTable : public wxDbTable
 {
 public:
 
 	IntTypesTable(wxDb* pDb);
-	~IntTypesTable() {};
+	virtual ~IntTypesTable() {};
 
-	// Sizes of Types					Bytes		Min						Max
+									// Sizes of Types					Bytes		Min						Max
 	int32_t		m_idIntegerTypes;	//	4
 	int8_t		m_tinyInt;			//	1			-128 					127
 	int16_t		m_smallInt;			//	2			-32768 					32767
@@ -60,5 +60,18 @@ public:
 	uint64_t	m_ubigInt;			//	8 			0						18446744073709551615
 };
 
+// CharTypesTable
+// --------------
+class CharTypesTable : public wxDbTable
+{
+public:
+
+	CharTypesTable(wxDb* pDb);
+	virtual ~CharTypesTable() {};
+
+	int32_t		m_idCharTypes;
+	wchar_t		m_varchar[128 + 1];
+	wchar_t		m_char[128 + 1];
+};
 
 #endif // TESTTABLES_H

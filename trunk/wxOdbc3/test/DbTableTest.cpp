@@ -208,7 +208,69 @@ void DbTableTest::testIntTypes()
 	CPPUNIT_ASSERT( m_pIntTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 15"));
 	CPPUNIT_ASSERT( m_pIntTypesTable->GetNext());
 	CPPUNIT_ASSERT_EQUAL( (uint64_t) 18446744073709551615, m_pIntTypesTable->m_ubigInt );
-}
-// Interfaces
-// ----------
 
+	// Test for NULL-Values
+	CPPUNIT_ASSERT( !m_pIntTypesTable->IsColNull(0) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(1) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(2) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(3) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(4) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(5) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(6) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(7) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(8) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(9) );
+	CPPUNIT_ASSERT( !m_pIntTypesTable->IsColNull(10) );
+
+	CPPUNIT_ASSERT( m_pIntTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 1"));
+	CPPUNIT_ASSERT( m_pIntTypesTable->GetNext());
+	CPPUNIT_ASSERT( !m_pIntTypesTable->IsColNull(0) );
+	CPPUNIT_ASSERT( !m_pIntTypesTable->IsColNull(1) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(2) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(3) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(4) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(5) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(6) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(7) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(8) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(9) );
+	CPPUNIT_ASSERT( m_pIntTypesTable->IsColNull(10) );	
+}
+
+
+void DbTableTest::testCharTypes()
+{
+	CPPUNIT_ASSERT( m_connectedMySql );
+
+	CharTypesTable* pTable = new CharTypesTable(m_pDbMySql);
+	CPPUNIT_ASSERT( pTable->Open() );
+
+	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
+	CPPUNIT_ASSERT( pTable->GetNext() );
+	CPPUNIT_ASSERT_EQUAL( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_varchar));
+
+	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 2"));
+	CPPUNIT_ASSERT( pTable->GetNext() );
+	CPPUNIT_ASSERT_EQUAL( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_char));
+
+	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 3"));
+	CPPUNIT_ASSERT( pTable->GetNext() );
+	CPPUNIT_ASSERT_EQUAL( wxString(L"הצüאיט"), wxString(pTable->m_varchar));
+
+	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 4"));
+	CPPUNIT_ASSERT( pTable->GetNext() );
+	CPPUNIT_ASSERT_EQUAL( wxString(L"הצüאיט"), wxString(pTable->m_char));
+
+	// Test for NULL-Values
+	CPPUNIT_ASSERT( !pTable->IsColNull(0) );
+	CPPUNIT_ASSERT( pTable->IsColNull(1) );
+	CPPUNIT_ASSERT( !pTable->IsColNull(2) );
+
+	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
+	CPPUNIT_ASSERT( pTable->GetNext() );
+	CPPUNIT_ASSERT( !pTable->IsColNull(0) );
+	CPPUNIT_ASSERT( !pTable->IsColNull(1) );
+	CPPUNIT_ASSERT( pTable->IsColNull(2) );
+
+	delete pTable;
+}
