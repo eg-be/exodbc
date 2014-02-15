@@ -143,42 +143,69 @@ void DbTableTest::testOpenNotExistingCheckBoth()
 
 void DbTableTest::testQueryInteger()
 {
-//	CPPUNIT_ASSERT( m_connectedMySql );
+	// Open table
+	CPPUNIT_ASSERT( m_pQueryTypesTable->Open() );
+	// test for min-max values
+//	TEST_SQL( m_pQueryTypesTable->QueryBySqlStmt(sqlstmt), m_pDbMySql );
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 1"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int8_t) -128, m_pQueryTypesTable->m_tinyInt );
 
-	wxDbConnectInf* pConnectInfMySql = new wxDbConnectInf(NULL, MYSQL_DSN, MYSQL_USER, MYSQL_PASS);
-	wxDb* pDbMySql = new wxDb(pConnectInfMySql->GetHenv());
-	bool conn = pDbMySql->Open(pConnectInfMySql);
-	CPPUNIT_ASSERT( conn );
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 2"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int8_t) 127, m_pQueryTypesTable->m_tinyInt );
 
-	if( conn )
-	{
-		IntTypesTable* pTable = new IntTypesTable(pDbMySql);
-		bool ok2 = pTable->Open(false, false);
-		std::vector<wxString> errs = pDbMySql->GetErrorList();
-//		wxString sqlstmt = L"SELECT \"idintegertypes\" FROM \"wxodbc3\".\"integertypes\"";
-//		wxString sqlstmt = L"SELECT IDT1 FROM TEST.T1";
-		wxString sqlstmt = L"SELECT idintegertypes FROM wxodbc3.integertypes";		
-		bool ok1 = pTable->QueryBySqlStmt(sqlstmt);
-		errs = pDbMySql->GetErrorList();
-		while(pTable->GetNext())
-		{
-			int p = 3;
-		}
-	}
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 3"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int16_t) -32768, m_pQueryTypesTable->m_smallInt );
 
-//	// test for min-max values
-//	wxString sqlstmt = L"SELECT * FROM wxodbc3.integertypes";
-////	TEST_SQL( m_pQueryTypesTable->QueryBySqlStmt(sqlstmt), m_pDbMySql );
-//	bool ok1 = m_pQueryTypesTable->QueryBySqlStmt(sqlstmt);
-//	CPPUNIT_ASSERT(ok1);
-//	bool ok = m_pQueryTypesTable->GetNext();
-//	while(ok)
-//	{
-//		ok = m_pQueryTypesTable->GetNext();
-//		int p = 3;
-//	}
-//	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext() );
-//	CPPUNIT_ASSERT_EQUAL( (int8_t) -128, m_pQueryTypesTable->m_tinyInt );
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 4"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int16_t) 32767, m_pQueryTypesTable->m_smallInt );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 5"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int32_t) -8388608, m_pQueryTypesTable->m_mediumInt );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 6"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int32_t) 8388607, m_pQueryTypesTable->m_mediumInt );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int32_t) -2147483648, m_pQueryTypesTable->m_int );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 8"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int32_t) 2147483647, m_pQueryTypesTable->m_int );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 9"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int64_t) -9223372036854775808, m_pQueryTypesTable->m_bigInt );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 10"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (int64_t) 9223372036854775807, m_pQueryTypesTable->m_bigInt );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 11"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (uint8_t) 255, m_pQueryTypesTable->m_utinyInt );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 12"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (uint16_t) 65535, m_pQueryTypesTable->m_usmallInt );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 13"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (uint32_t) 16777215, m_pQueryTypesTable->m_umediumInt );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 14"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (uint32_t) 4294967295, m_pQueryTypesTable->m_uint );
+
+	CPPUNIT_ASSERT( m_pQueryTypesTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 15"));
+	CPPUNIT_ASSERT( m_pQueryTypesTable->GetNext());
+	CPPUNIT_ASSERT_EQUAL( (uint64_t) 18446744073709551615, m_pQueryTypesTable->m_ubigInt );
 }
 // Interfaces
 // ----------
