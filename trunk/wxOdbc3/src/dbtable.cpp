@@ -579,6 +579,7 @@ bool wxDbTable::bindCols(HSTMT cursor)
     UWORD i;
     for (i = 0; i < m_numCols; i++)
     {
+		wxDbColDef def = colDefs[i];
         if (SQLBindCol(cursor, (UWORD)(i+1), colDefs[i].SqlCtype, (UCHAR*) colDefs[i].PtrDataObj,
                        colDefs[i].SzDataObj, &colDefs[i].CbValue ) != SQL_SUCCESS)
           return (pDb->DispAllErrors(henv, hdbc, cursor));
