@@ -44,6 +44,7 @@ class DbTableTest : public CPPUNIT_NS::TestFixture
 	CPPUNIT_TEST( testIntTypes );
 	CPPUNIT_TEST( testCharTypes );
 	CPPUNIT_TEST( testFloatTypes );
+	CPPUNIT_TEST( testDateTypes );
 	CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -63,6 +64,7 @@ public:
 	void testIntTypes();
 	void testCharTypes();
 	void testFloatTypes();
+	void testDateTypes();
 
 private:
 

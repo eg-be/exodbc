@@ -320,9 +320,8 @@ void DbTableTest::testFloatTypes()
 	{
 
 		pTable = new FloatTypesTable(m_pDbMySql);
-		//CPPUNIT_ASSERT( pTable->Open() );
-		bool ok = pTable->Open();
-		std::vector<wxString> err = m_pDbMySql->GetErrorList();
+		
+		CPPUNIT_ASSERT( pTable->Open() );
 
 		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 1"));
 		CPPUNIT_ASSERT( pTable->GetNext() );
@@ -366,4 +365,28 @@ void DbTableTest::testFloatTypes()
 	
 	if(pTable)
 		delete pTable;
+}
+
+
+void DbTableTest::testDateTypes()
+{
+	CPPUNIT_ASSERT( m_connectedMySql );
+
+	DateTypesTable* pTable = NULL;
+	try
+	{
+
+		pTable = new DateTypesTable(m_pDbMySql);
+
+		CPPUNIT_ASSERT( pTable->Open() );
+
+		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 1"));
+//		CPPUNIT_ASSERT( pTable->GetNext() );
+//		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_float );
+
+	}
+	CATCH_LOG_RETHROW_DELETE_TABLE(pTable)
+
+		if(pTable)
+			delete pTable;
 }
