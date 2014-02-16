@@ -65,6 +65,7 @@ public:
 	void testFloatTypes();
 
 private:
+
 	wxDbConnectInf*		m_pConnectInfMySql;
 	wxDb*				m_pDbMySql;
 	bool				m_connectedMySql;
