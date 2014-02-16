@@ -82,8 +82,9 @@ public:
 	FloatTypesTable(wxDb* pDb);
 	virtual ~FloatTypesTable() {};
 
-	int32_t		m_idFloatTypes;
-	double		m_float;
-	double		m_double;
+	int32_t				m_idFloatTypes;
+	double				m_float;
+	double				m_double;
+	SQL_NUMERIC_STRUCT	m_decimal;
 };
 #endif // TESTTABLES_H

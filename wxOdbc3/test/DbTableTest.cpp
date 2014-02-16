@@ -313,6 +313,19 @@ void DbTableTest::testFloatTypes()
 		CPPUNIT_ASSERT( pTable->GetNext() );
 		CPPUNIT_ASSERT_EQUAL( -3.141592, pTable->m_double );
 
+		// Numeric is not working, see Ticket #15
+//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 7"));
+//		CPPUNIT_ASSERT( pTable->GetNext() );
+////		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_decimal );
+//
+//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 8"));
+//		CPPUNIT_ASSERT( pTable->GetNext() );
+//		//CPPUNIT_ASSERT_EQUAL( 3.141592, pTable->m_decimal );
+//
+//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 9"));
+//		CPPUNIT_ASSERT( pTable->GetNext() );
+//		//CPPUNIT_ASSERT_EQUAL( -3.141592, pTable->m_decimal );
+
 	}
 	catch(CPPUNIT_NS::Exception e)
 	{
