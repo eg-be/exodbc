@@ -88,7 +88,7 @@ CharTypesTable::CharTypesTable(wxDb* pDb)
 // FloatTypesTable
 // ---------------
 FloatTypesTable::FloatTypesTable(wxDb* pDb)
-	: wxDbTable(pDb, L"floattypes", 4, L"", wxDB_QUERY_ONLY)
+	: wxDbTable(pDb, L"floattypes", 3, L"", wxDB_QUERY_ONLY)
 {
 	m_idFloatTypes	= 0;
 	m_float			= 0;
@@ -98,6 +98,28 @@ FloatTypesTable::FloatTypesTable(wxDb* pDb)
 	SetColDefs(0, L"idfloattypes", DB_DATA_TYPE_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), true, false, false, false);
 	SetColDefs(1, L"float", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
 	SetColDefs(2, L"double", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
-	SetColDefs(3, L"decimal", DB_DATA_TYPE_FLOAT, &m_decimal, SQL_C_NUMERIC, sizeof(m_decimal), false, false, false, false);
+	// TODO: Fails with MySql ODBC 3.51 with a restricted attribute error (not supported by driver maybe?)
+	// Its an odbc 3 feature
+//	SetColDefs(3, L"decimal", DB_DATA_TYPE_FLOAT, &m_decimal, SQL_C_NUMERIC, sizeof(m_decimal), false, false, false, false);
+
+}
+
+
+// DateTypesTable
+// ---------------
+DateTypesTable::DateTypesTable(wxDb* pDb)
+	: wxDbTable(pDb, L"datetypes", 2, L"", wxDB_QUERY_ONLY)
+{
+	m_idDateTypes		= 0;
+	ZeroMemory(&m_date, sizeof(m_date));
+	ZeroMemory(&m_datetime, sizeof(m_datetime));
+	ZeroMemory(&m_time, sizeof(m_time));
+	ZeroMemory(&m_timestamp, sizeof(m_timestamp));
+
+	SetColDefs(0, L"iddatetypes", DB_DATA_TYPE_INTEGER, &m_idDateTypes, SQL_C_SLONG, sizeof(m_idDateTypes), true, false, false, false);
+	SetColDefs(1, L"date", DB_DATA_TYPE_DATE, &m_date, SQL_C_TYPE_DATE, sizeof(m_date), false, false, false, false);
+//	SetColDefs(1, L"datetime", DB_DATA_TYPE_DATE, &m_datetime, SQL_C_TYPE_TIMESTAMP, sizeof(m_datetime), false, false, false, false);
+//	SetColDefs(1, L"time", DB_DATA_TYPE_DATE, &m_time, SQL_C_TYPE_TIME, sizeof(m_time), false, false, false, false);
+//	SetColDefs(1, L"timestamp", DB_DATA_TYPE_DATE, &m_timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(m_timestamp), false, false, false, false);
 
 }

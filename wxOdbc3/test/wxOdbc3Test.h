@@ -1,20 +1,20 @@
 // Some helper functions
 // ---------------------
-void PrintErrors(wxDb* pDb, const wxString& file, int line);
+void PrintErrors(wxDb* pDb, const wxString& file, int line, const wxString& function);
 
 // Some helper macros
 // ------------------
 #define CATCH_LOG_RETHROW \
 catch(CPPUNIT_NS::Exception e) \
 { \
-	PrintErrors(m_pDbMySql, __TFILE__, __LINE__); \
+	PrintErrors(m_pDbMySql, __TFILE__, __LINE__, __FUNCTIONW__); \
 	throw e; \
 }
 
 #define CATCH_LOG_RETHROW_DELETE_TABLE(pTable) \
 	catch(CPPUNIT_NS::Exception e) \
 { \
-	PrintErrors(m_pDbMySql, __TFILE__, __LINE__); \
+	PrintErrors(m_pDbMySql, __TFILE__, __LINE__, __FUNCTIONW__); \
 	if(pTable) \
 		delete pTable; \
 	throw e; \

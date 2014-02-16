@@ -87,4 +87,19 @@ public:
 	double				m_double;
 	SQL_NUMERIC_STRUCT	m_decimal;
 };
+
+// DateTypesTable
+// --------------
+class DateTypesTable : public wxDbTable
+{
+public:
+	DateTypesTable(wxDb* pDb);
+	virtual ~DateTypesTable() {};
+
+	int32_t					m_idDateTypes;
+	SQL_DATE_STRUCT			m_date;
+	SQL_TIMESTAMP_STRUCT	m_datetime;
+	SQL_TIME_STRUCT			m_time;
+	SQL_TIME_STRUCT			m_timestamp;
+};
 #endif // TESTTABLES_H
