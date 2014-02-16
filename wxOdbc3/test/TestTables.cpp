@@ -79,12 +79,23 @@ CharTypesTable::CharTypesTable(wxDb* pDb)
 	m_varchar[0]	= 0;
 	m_char[0]		= 0;
 
-	int p = sizeof(m_varchar);
-	int q = sizeof(m_char);
-
 	SetColDefs(0, L"idchartypes", DB_DATA_TYPE_INTEGER, &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes), true, false, false, false);
 	SetColDefs(1, L"varchar", DB_DATA_TYPE_VARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), false, false, false, false);
 	SetColDefs(2, L"char", DB_DATA_TYPE_VARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), false, false, false, false);
 }
 
 
+// FloatTypesTable
+// ---------------
+FloatTypesTable::FloatTypesTable(wxDb* pDb)
+	: wxDbTable(pDb, L"floattypes", 3, L"", wxDB_QUERY_ONLY)
+{
+	m_idFloatTypes	= 0;
+	m_float			= 0;
+	m_double		= 0;
+
+	SetColDefs(0, L"idfloattypes", DB_DATA_TYPE_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), true, false, false, false);
+	SetColDefs(1, L"float", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
+	SetColDefs(2, L"double", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
+
+}

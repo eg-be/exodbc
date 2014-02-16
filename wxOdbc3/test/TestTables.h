@@ -74,4 +74,16 @@ public:
 	wchar_t		m_char[128 + 1];
 };
 
+// FloatTypesTable
+// ---------------
+class FloatTypesTable : public wxDbTable
+{
+public:
+	FloatTypesTable(wxDb* pDb);
+	virtual ~FloatTypesTable() {};
+
+	int32_t		m_idFloatTypes;
+	double		m_float;
+	double		m_double;
+};
 #endif // TESTTABLES_H

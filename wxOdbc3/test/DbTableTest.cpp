@@ -274,3 +274,67 @@ void DbTableTest::testCharTypes()
 
 	delete pTable;
 }
+
+
+void DbTableTest::testFloatTypes()
+{
+	CPPUNIT_ASSERT( m_connectedMySql );
+	
+	FloatTypesTable* pTable = NULL;
+	try
+	{
+
+		pTable = new FloatTypesTable(m_pDbMySql);
+		//CPPUNIT_ASSERT( pTable->Open() );
+		bool ok = pTable->Open();
+		std::vector<wxString> err = m_pDbMySql->GetErrorList();
+
+		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 1"));
+		CPPUNIT_ASSERT( pTable->GetNext() );
+		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_float );
+
+		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 2"));
+		CPPUNIT_ASSERT( pTable->GetNext() );
+		CPPUNIT_ASSERT_EQUAL( 3.141, pTable->m_float );
+
+		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 3"));
+		CPPUNIT_ASSERT( pTable->GetNext() );
+		CPPUNIT_ASSERT_EQUAL( -3.141, pTable->m_float );
+
+		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 4"));
+		CPPUNIT_ASSERT( pTable->GetNext() );
+		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_double );
+
+		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 5"));
+		CPPUNIT_ASSERT( pTable->GetNext() );
+		CPPUNIT_ASSERT_EQUAL( 3.141592, pTable->m_double );
+
+		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 6"));
+		CPPUNIT_ASSERT( pTable->GetNext() );
+		CPPUNIT_ASSERT_EQUAL( -3.141592, pTable->m_double );
+
+	}
+	catch(CPPUNIT_NS::Exception e)
+	{
+		std::vector<wxString> errors = m_pDbMySql->GetErrorList();
+		bool first = false;
+		for(size_t i = 0; i < errors.size(); i++)
+		{
+			if(errors[i].Len() > 0)
+			{
+				if(!first)
+				{
+					std::wcout << L"\n";
+					first = true;
+				}
+				std::wcout << errors[i] << L"\n";
+			}
+		}
+		if(pTable)
+			delete pTable;
+		throw e;
+	}
+	
+	if(pTable)
+		delete pTable;
+}
