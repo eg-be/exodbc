@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{78243cd2-15d6-44ef-baef-bfd34b636e96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{efda45fd-2513-40b3-baa8-058ffd58b3d3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test\DbTest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DbParams.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="test\DbTableTest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="test\TestTables.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="test\wxOdbc3Test.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="test\DbTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test\wxOdbc3Test.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test\DbTableTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test\TestTables.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
