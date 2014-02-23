@@ -229,8 +229,6 @@ namespace DB2
 			CPPUNIT_ASSERT( pTable->Open( ) );
 
 			// test for min-max values 
-			// CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM \"wxodbc3\".\"integertypes\" WHERE \"idintegertypes\" = 1"));
-			// CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 1"));
 			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 1"));
 			CPPUNIT_ASSERT( pTable->GetNext());
 			CPPUNIT_ASSERT_EQUAL( (int16_t) -32768, pTable->m_smallInt );
@@ -304,6 +302,8 @@ namespace DB2
 			CPPUNIT_ASSERT_EQUAL( wxString(L"הצüאיט                                                                                                                    "), wxString(pTable->m_char));
 
 			// Test for NULL-Values
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.CHARTYPES WHERE IDCHARTYPES = 4"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
 			CPPUNIT_ASSERT( !pTable->IsColNull(0) );
 			CPPUNIT_ASSERT( pTable->IsColNull(1) );
 			CPPUNIT_ASSERT( !pTable->IsColNull(2) );
@@ -321,60 +321,74 @@ namespace DB2
 	}
 
 
-	//void TableTestBase::testFloatTypes()
-	//{
-	//	CPPUNIT_ASSERT( m_connectedMySql );
+	void TableTestBase::testFloatTypes()
+	{
+		CPPUNIT_ASSERT( m_connectedDb2 );
 
-	//	FloatTypesTable* pTable = NULL;
-	//	try
-	//	{
-	//		pTable = new FloatTypesTable(m_pDbMySql);
+		FloatTypesTable* pTable = NULL;
+		try
+		{
+			pTable = new FloatTypesTable(m_pDbDb2);
 
-	//		CPPUNIT_ASSERT( pTable->Open() );
+			CPPUNIT_ASSERT( pTable->Open() );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 1"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_float );
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 1"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_float );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 2"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( 3.141, pTable->m_float );
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 2"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( 3.141, pTable->m_float );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 3"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( -3.141, pTable->m_float );
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 3"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( -3.141, pTable->m_float );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 4"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_double );
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 4"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_double );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 5"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( 3.141592, pTable->m_double );
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 5"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( 3.141592, pTable->m_double );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 6"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( -3.141592, pTable->m_double );
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 6"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( -3.141592, pTable->m_double );
 
-	//		// Numeric is not working, see Ticket #15
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 7"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( wxString(L"0.0000000000"), wxString(pTable->m_decimal_15_10 ));
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 7"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( 0.0f, pTable->m_real );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 8"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( wxString(L"33333.1415926530"), wxString(pTable->m_decimal_15_10 ));
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 8"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( 3.141592f, pTable->m_real);
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 9"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( wxString(L"-33333.1415926530"), wxString(pTable->m_decimal_15_10 ) );
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 9"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( -3.141592f, pTable->m_real );
 
-	//	}
-	//	CATCH_LOG_RETHROW_DELETE_TABLE(pTable)
+			// Test for NULL Values
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 1"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT( !pTable->IsColNull(0) );
+			CPPUNIT_ASSERT( pTable->IsColNull(1) );
+			CPPUNIT_ASSERT( !pTable->IsColNull(2) );
+			CPPUNIT_ASSERT( pTable->IsColNull(3) );
 
-	//		if(pTable)
-	//			delete pTable;
-	//}
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 4"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT( !pTable->IsColNull(0) );
+			CPPUNIT_ASSERT( !pTable->IsColNull(1) );
+			CPPUNIT_ASSERT( pTable->IsColNull(2) );
+			CPPUNIT_ASSERT( pTable->IsColNull(3) );
+
+		}
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbDb2, pTable)
+
+			if(pTable)
+				delete pTable;
+	}
 
 
 	//void TableTestBase::testDateTypes()
