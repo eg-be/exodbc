@@ -11,6 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Db2Params.h" />
+    <ClInclude Include="include\Db2TestTables.h" />
     <ClInclude Include="include\GenericDbTest.h" />
     <ClInclude Include="include\GenericTestTables.h" />
     <ClInclude Include="include\MySqlParams.h" />
@@ -20,6 +22,9 @@
     <ClInclude Include="test\wxOdbc3Test.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Db2TestTables.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\GenericDbTest.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
