@@ -52,7 +52,7 @@ namespace DB2
 		void testOpenNotExistingCheckBoth();
 
 		void testIntTypes();
-		//void testCharTypes();
+		void testCharTypes();
 		//void testFloatTypes();
 		//void testDateTypes();
 
@@ -86,7 +86,7 @@ namespace DB2_10_05
 		CPPUNIT_TEST( testOpenNotExistingCheckBoth );
 
 		CPPUNIT_TEST( testIntTypes );
-		//CPPUNIT_TEST( testCharTypes );
+		CPPUNIT_TEST( testCharTypes );
 		//CPPUNIT_TEST( testFloatTypes );
 		//CPPUNIT_TEST( testDateTypes );
 		CPPUNIT_TEST_SUITE_END();
