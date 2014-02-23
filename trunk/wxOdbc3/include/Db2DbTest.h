@@ -1,14 +1,14 @@
 /*!
- * \file DbTest.h
+ * \file Db2DbTest.h
  * \author Elias Gerber <eg@zame.ch>
- * \date 22.09.2013
+ * \date 23.02.2014
  * 
  * [Brief Header-file description]
  */ 
 
 #pragma once
-#ifndef MYSQLDBTEST_H
-#define MYSQLDBTEST_H
+#ifndef DB2DBTEST_H
+#define DB2DBTEST_H
 
 // Same component headers
 // Other headers
@@ -25,7 +25,7 @@ class wxDb;
 // -------
 
 
-namespace MySql
+namespace DB2
 {
 
 // DbTest
@@ -35,8 +35,8 @@ class DbTestBase
 
 public:
 	DbTestBase()
-		: m_pConnectInfMySql(NULL)
-		, m_pDbMySql(NULL)
+		: m_pConnectInfDb2(NULL)
+		, m_pDbDb2(NULL)
 	{}
 
 public:
@@ -46,19 +46,19 @@ public:
 	void testOpen();
 
 protected:
-	wxDbConnectInf* m_pConnectInfMySql;
-	wxDb*			m_pDbMySql;
+	wxDbConnectInf* m_pConnectInfDb2;
+	wxDb*			m_pDbDb2;
 
 	std::wstring		m_dsn;
 };
 
 }
 
-namespace MySql_3_51
+namespace DB2_10_05
 {
 	class DbTest
 		: public CPPUNIT_NS::TestFixture
-		, public MySql::DbTestBase
+		, public DB2::DbTestBase
 	{
 		CPPUNIT_TEST_SUITE( DbTest );
 		CPPUNIT_TEST( testOpen );
@@ -73,22 +73,4 @@ namespace MySql_3_51
 }
 
 
-namespace MySql_5_2
-{
-	class DbTest
-		: public CPPUNIT_NS::TestFixture
-		, public MySql::DbTestBase
-	{
-		CPPUNIT_TEST_SUITE( DbTest );
-		CPPUNIT_TEST( testOpen );
-		CPPUNIT_TEST_SUITE_END();
-
-	public:
-		virtual void setUp();
-		virtual void tearDown();
-
-	};
-	CPPUNIT_TEST_SUITE_REGISTRATION( DbTest );
-}
-
-#endif // MYSQLDBTEST_H
+#endif // DB2DBTEST_H
