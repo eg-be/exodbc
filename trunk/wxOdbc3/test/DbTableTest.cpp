@@ -353,11 +353,11 @@ void DbTableTest::testFloatTypes()
 
 		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 8"));
 		CPPUNIT_ASSERT( pTable->GetNext() );
-		CPPUNIT_ASSERT_EQUAL( wxString(L"3.1415926530"), wxString(pTable->m_decimal_15_10 ));
+		CPPUNIT_ASSERT_EQUAL( wxString(L"33333.1415926530"), wxString(pTable->m_decimal_15_10 ));
 
 		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 9"));
 		CPPUNIT_ASSERT( pTable->GetNext() );
-		CPPUNIT_ASSERT_EQUAL( wxString(L"-3.1415926530"), wxString(pTable->m_decimal_15_10 ) );
+		CPPUNIT_ASSERT_EQUAL( wxString(L"-33333.1415926530"), wxString(pTable->m_decimal_15_10 ) );
 
 	}
 	CATCH_LOG_RETHROW_DELETE_TABLE(pTable)
