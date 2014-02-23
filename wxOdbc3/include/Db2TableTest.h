@@ -54,7 +54,7 @@ namespace DB2
 		void testIntTypes();
 		void testCharTypes();
 		void testFloatTypes();
-		//void testDateTypes();
+		void testDateTypes();
 
 	protected:
 
@@ -88,7 +88,7 @@ namespace DB2_10_05
 		CPPUNIT_TEST( testIntTypes );
 		CPPUNIT_TEST( testCharTypes );
 		CPPUNIT_TEST( testFloatTypes );
-		//CPPUNIT_TEST( testDateTypes );
+		CPPUNIT_TEST( testDateTypes );
 		CPPUNIT_TEST_SUITE_END();
 
 	public:

@@ -416,27 +416,28 @@ namespace DB2
 	}
 
 
-	//void TableTestBase::testDateTypes()
-	//{
-	//	CPPUNIT_ASSERT( m_connectedMySql );
+	void TableTestBase::testDateTypes()
+	{
+		CPPUNIT_ASSERT( m_connectedDb2 );
 
-	//	DateTypesTable* pTable = NULL;
-	//	try
-	//	{
+		DateTypesTable* pTable = NULL;
+		try
+		{
 
-	//		pTable = new DateTypesTable(m_pDbMySql);
+			pTable = new DateTypesTable(m_pDbDb2);
 
-	//		CPPUNIT_ASSERT( pTable->Open() );
+			CPPUNIT_ASSERT( pTable->Open() );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 1"));
-	//		//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		//		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_float );
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC.DATETYPES WHERE IDDATETYPES = 1"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			//CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_float );
+			INT P = 3;
 
-	//	}
-	//	CATCH_LOG_RETHROW_DELETE_TABLE(pTable)
+		}
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbDb2, pTable)
 
-	//		if(pTable)
-	//			delete pTable;
-	//}
+			if(pTable)
+				delete pTable;
+	}
 
 }
