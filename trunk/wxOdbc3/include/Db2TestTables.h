@@ -43,20 +43,20 @@ namespace DB2
 		int64_t		m_bigInt;			//	8			-9223372036854775808 	9223372036854775807
 	};
 	
-	//// CharTypesTable
-	//// --------------
-	//class CharTypesTable : public wxDbTable
-	//{
-	//public:
-	//
-	//	CharTypesTable(wxDb* pDb);
-	//	virtual ~CharTypesTable() {};
-	//
-	//	int32_t		m_idCharTypes;
-	//	wchar_t		m_varchar[128 + 1];
-	//	wchar_t		m_char[128 + 1];
-	//};
-	//
+	// CharTypesTable
+	// --------------
+	class CharTypesTable : public wxDbTable
+	{
+	public:
+	
+		CharTypesTable(wxDb* pDb);
+		virtual ~CharTypesTable() {};
+	
+		int32_t		m_idCharTypes;
+		wchar_t		m_varchar[128 + 1];
+		wchar_t		m_char[128 + 1];
+	};
+	
 	//// FloatTypesTable
 	//// ---------------
 	//class FloatTypesTable : public wxDbTable

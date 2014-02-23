@@ -276,48 +276,49 @@ namespace DB2
 	}
 
 
-	//void TableTestBase::testCharTypes()
-	//{
-	//	CPPUNIT_ASSERT( m_connectedMySql );
+	void TableTestBase::testCharTypes()
+	{
+		CPPUNIT_ASSERT( m_connectedDb2 );
 
-	//	CharTypesTable* pTable = NULL;
-	//	try
-	//	{
-	//		pTable = new CharTypesTable(m_pDbMySql);
-	//		CPPUNIT_ASSERT( pTable->Open() );
+		CharTypesTable* pTable = NULL;
+		try
+		{
+			pTable = new CharTypesTable(m_pDbDb2);
+			CPPUNIT_ASSERT( pTable->Open() );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_varchar));
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.CHARTYPES WHERE IDCHARTYPES = 1"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_varchar));
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 2"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_char));
+			// Note: DB2 pads with whitespaces
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.CHARTYPES WHERE IDCHARTYPES = 2"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 "), wxString(pTable->m_char));
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 3"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( wxString(L"הצüאיט"), wxString(pTable->m_varchar));
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.CHARTYPES WHERE IDCHARTYPES = 3"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"הצüאיט"), wxString(pTable->m_varchar));
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 4"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT_EQUAL( wxString(L"הצüאיט"), wxString(pTable->m_char));
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.CHARTYPES WHERE IDCHARTYPES = 4"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"הצüאיט                                                                                                                    "), wxString(pTable->m_char));
 
-	//		// Test for NULL-Values
-	//		CPPUNIT_ASSERT( !pTable->IsColNull(0) );
-	//		CPPUNIT_ASSERT( pTable->IsColNull(1) );
-	//		CPPUNIT_ASSERT( !pTable->IsColNull(2) );
+			// Test for NULL-Values
+			CPPUNIT_ASSERT( !pTable->IsColNull(0) );
+			CPPUNIT_ASSERT( pTable->IsColNull(1) );
+			CPPUNIT_ASSERT( !pTable->IsColNull(2) );
 
-	//		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
-	//		CPPUNIT_ASSERT( pTable->GetNext() );
-	//		CPPUNIT_ASSERT( !pTable->IsColNull(0) );
-	//		CPPUNIT_ASSERT( !pTable->IsColNull(1) );
-	//		CPPUNIT_ASSERT( pTable->IsColNull(2) );
-	//	}
-	//	CATCH_LOG_RETHROW_DELETE_TABLE(pTable);
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.CHARTYPES WHERE IDCHARTYPES = 1"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT( !pTable->IsColNull(0) );
+			CPPUNIT_ASSERT( !pTable->IsColNull(1) );
+			CPPUNIT_ASSERT( pTable->IsColNull(2) );
+		}
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbDb2, pTable);
 
-	//	if(pTable)
-	//		delete pTable;
-	//}
+		if(pTable)
+			delete pTable;
+	}
 
 
 	//void TableTestBase::testFloatTypes()
