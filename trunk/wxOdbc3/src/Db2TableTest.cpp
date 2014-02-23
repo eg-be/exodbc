@@ -381,6 +381,18 @@ namespace DB2
 			CPPUNIT_ASSERT( pTable->GetNext() );
 			CPPUNIT_ASSERT_EQUAL( wxString(L"-33333,1415926530"), wxString(pTable->m_decimal_15_10 ) );
 
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 13"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"0"), wxString(pTable->m_decimal_10_0 ));
+
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 14"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"1234567890"), wxString(pTable->m_decimal_10_0 ));
+
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 15"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"-1234567890"), wxString(pTable->m_decimal_10_0 ) );
+
 			// Test for NULL Values
 			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 1"));
 			CPPUNIT_ASSERT( pTable->GetNext() );
