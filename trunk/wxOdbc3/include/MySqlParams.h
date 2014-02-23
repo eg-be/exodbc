@@ -1,22 +1,18 @@
 /*!
- * \file DbParams.h
- * \author Elias Gerber <egerber@gmx.net>
+ * \file MySqlParams.h
+ * \author Elias Gerber <eg@zame.ch>
  * \date 09.02.2014
  * 
  * Parameters to connect to different datasources
  */ 
 
 #pragma once
-#ifndef DBPARAMS_H
-#define DBPARAMS_H
+#ifndef MYSQLPARAMS_H
+#define MYSQLPARAMS_H
 
 // Same component headers
 // Other headers
 // System headers
-
-#define DB2_DSN				L"wxodbc3Db2"
-#define DB2_USER			L"db2admin"
-#define DB2_PASS			L"super$ql"
 
 #define MYSQL_5_2_DSN		L"wxOdbc3_MySql_5.2"
 #define MYSQL_3_51_DSN		L"wxOdbc3_MySql_3.51"
@@ -34,4 +30,4 @@
 
 
 
-#endif // DBPARAMS_H
+#endif // MYSQLPARAMS_H

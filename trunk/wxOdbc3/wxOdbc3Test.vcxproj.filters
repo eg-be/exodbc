@@ -30,6 +30,12 @@
     <ClInclude Include="include\GenericDbTest.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Db2TestTables.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Db2Params.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test\wxOdbc3Test.cpp">
@@ -48,6 +54,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\GenericDbTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Db2TestTables.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
