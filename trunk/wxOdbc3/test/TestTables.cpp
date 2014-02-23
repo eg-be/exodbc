@@ -100,8 +100,9 @@ FloatTypesTable::FloatTypesTable(wxDb* pDb)
 	SetColDefs(0, L"idfloattypes", DB_DATA_TYPE_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), true, false, false, false);
 	SetColDefs(1, L"float", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
 	SetColDefs(2, L"double", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
-	SetColDefs(3, L"decimal_10_0", DB_DATA_TYPE_VARCHAR, m_decimal_10_0, SQL_C_WCHAR, sizeof(m_decimal_10_0), false, false, false, false);
-	SetColDefs(4, L"decimal_15_10", DB_DATA_TYPE_VARCHAR, m_decimal_15_10, SQL_C_WCHAR, sizeof(m_decimal_15_10), false, false, false, false);
+	SetColDefs(3, L"decimal_15_10", DB_DATA_TYPE_VARCHAR, m_decimal_15_10, SQL_C_WCHAR, sizeof(m_decimal_15_10), false, false, false, false);
+	SetColDefs(4, L"decimal_10_0", DB_DATA_TYPE_VARCHAR, m_decimal_10_0, SQL_C_WCHAR, sizeof(m_decimal_10_0), false, false, false, false);
+
 	// TODO: Fails with MySql ODBC 3.51 with a restricted attribute error (not supported by driver maybe?)
 	// Its an odbc 3 feature
 //	SetColDefs(3, L"decimal", DB_DATA_TYPE_FLOAT, &m_decimal, SQL_C_NUMERIC, sizeof(m_decimal), false, false, false, false);
