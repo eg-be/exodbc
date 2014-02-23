@@ -9,33 +9,45 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="test\DbTest.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DbParams.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="test\DbTableTest.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="test\TestTables.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="test\wxOdbc3Test.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MySqlTestTables.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MySqlParams.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MySqlTableTest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MySqlDbTest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GenericTestTables.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GenericDbTest.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test\DbTest.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="test\wxOdbc3Test.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="test\DbTableTest.cpp">
+    <ClCompile Include="test\MySqlTestTables.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="test\TestTables.cpp">
+    <ClCompile Include="test\MySqlTableTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test\MySqlDbTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GenericTestTables.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GenericDbTest.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

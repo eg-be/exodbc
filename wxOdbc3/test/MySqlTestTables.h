@@ -24,18 +24,6 @@ class wxDb;
 // Structs
 // -------
 
-// NotExistingTable
-// ----------------
-class NotExistingTable : public wxDbTable
-{
-public:
-	NotExistingTable(wxDb* pDb);
-	~NotExistingTable() {};
-
-	int		m_idNotExisting;
-};
-
-
 // IntTypesTable
 // ----------
 class IntTypesTable : public wxDbTable
