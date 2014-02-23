@@ -69,8 +69,8 @@ namespace DB2
 		double				m_float;
 		double				m_double;
 		float				m_real;
-		//wchar_t				m_decimal_15_10[15 + 3];
-		//wchar_t				m_decimal_10_0[10 + 3];
+		wchar_t				m_decimal_15_10[15 + 3];
+		wchar_t				m_decimal_10_0[10 + 3];
 		//SQL_NUMERIC_STRUCT	m_decimal;
 	};
 	
