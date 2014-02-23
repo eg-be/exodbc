@@ -1,5 +1,5 @@
 /*!
-* \file DbTableTest.cpp
+* \file MySqlTableTest.cpp
 * \author Elias Gerber <eg@zame.ch>
 * \date 09.02.2014
 * 
@@ -115,7 +115,7 @@ namespace MySql
 			// Open without any checking
 			CPPUNIT_ASSERT( pTable->Open(false, false) );
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable);
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable);
 		if(pTable)
 			delete pTable;
 	}
@@ -141,7 +141,7 @@ namespace MySql
 			pTable = new IntTypesTable(m_pDbMySql);
 			CPPUNIT_ASSERT( pTable->Open(false, true) );
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable);
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable);
 		if(pTable)
 			delete pTable;
 	}
@@ -172,7 +172,7 @@ namespace MySql
 				CPPUNIT_ASSERT( pTable->Open(false, false) );
 			}
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable);
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable);
 		if(pTable)
 			delete pTable;
 	}
@@ -189,7 +189,7 @@ namespace MySql
 			// Open with checking privileges - should fail, how to have privs on a non existing table=
 			CPPUNIT_ASSERT_ASSERTION_FAIL( CPPUNIT_ASSERT( pTable->Open(true, false)) );
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable);
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable);
 		if(pTable)
 			delete pTable;
 	}
@@ -206,7 +206,7 @@ namespace MySql
 			// must fail
 			CPPUNIT_ASSERT_ASSERTION_FAIL( CPPUNIT_ASSERT( pTable->Open(false, true)) );
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable);
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable);
 		if(pTable)
 			delete pTable;
 	}
@@ -223,7 +223,7 @@ namespace MySql
 			// must fail
 			CPPUNIT_ASSERT_ASSERTION_FAIL( CPPUNIT_ASSERT( pTable->Open(true, true)) );
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable);
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable);
 		if(pTable)
 			delete pTable;
 	}
@@ -334,7 +334,7 @@ namespace MySql
 			CPPUNIT_ASSERT( pTable->IsColNull(9) );
 			CPPUNIT_ASSERT( pTable->IsColNull(10) );	
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable);
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable);
 		if(pTable)
 			delete pTable;
 	}
@@ -377,7 +377,7 @@ namespace MySql
 			CPPUNIT_ASSERT( !pTable->IsColNull(1) );
 			CPPUNIT_ASSERT( pTable->IsColNull(2) );
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable);
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable);
 
 		if(pTable)
 			delete pTable;
@@ -433,7 +433,7 @@ namespace MySql
 			CPPUNIT_ASSERT_EQUAL( wxString(L"-33333.1415926530"), wxString(pTable->m_decimal_15_10 ) );
 
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable)
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable)
 
 		if(pTable)
 			delete pTable;
@@ -457,7 +457,7 @@ namespace MySql
 			//		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_float );
 
 		}
-		CATCH_LOG_RETHROW_DELETE_TABLE(pTable)
+		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable)
 
 		if(pTable)
 			delete pTable;

@@ -4,17 +4,17 @@ void PrintErrors(wxDb* pDb, const wxString& file, int line, const wxString& func
 
 // Some helper macros
 // ------------------
-#define CATCH_LOG_RETHROW \
+#define CATCH_LOG_RETHROW(pDb) \
 catch(CPPUNIT_NS::Exception e) \
 { \
-	PrintErrors(m_pDbMySql, __TFILE__, __LINE__, __FUNCTIONW__); \
+	PrintErrors(pDb, __TFILE__, __LINE__, __FUNCTIONW__); \
 	throw e; \
 }
 
-#define CATCH_LOG_RETHROW_DELETE_TABLE(pTable) \
+#define CATCH_LOG_RETHROW_DELETE_TABLE(pDb, pTable) \
 	catch(CPPUNIT_NS::Exception e) \
 { \
-	PrintErrors(m_pDbMySql, __TFILE__, __LINE__, __FUNCTIONW__); \
+	PrintErrors(pDb, __TFILE__, __LINE__, __FUNCTIONW__); \
 	if(pTable) \
 		delete pTable; \
 	throw e; \
