@@ -57,22 +57,23 @@ namespace DB2
 		wchar_t		m_char[128 + 1];
 	};
 	
-	//// FloatTypesTable
-	//// ---------------
-	//class FloatTypesTable : public wxDbTable
-	//{
-	//public:
-	//	FloatTypesTable(wxDb* pDb);
-	//	virtual ~FloatTypesTable() {};
-	//
-	//	int32_t				m_idFloatTypes;
-	//	double				m_float;
-	//	double				m_double;
-	//	wchar_t				m_decimal_15_10[15 + 3];
-	//	wchar_t				m_decimal_10_0[10 + 3];
-	//	//SQL_NUMERIC_STRUCT	m_decimal;
-	//};
-	//
+	// FloatTypesTable
+	// ---------------
+	class FloatTypesTable : public wxDbTable
+	{
+	public:
+		FloatTypesTable(wxDb* pDb);
+		virtual ~FloatTypesTable() {};
+	
+		int32_t				m_idFloatTypes;
+		double				m_float;
+		double				m_double;
+		float				m_real;
+		//wchar_t				m_decimal_15_10[15 + 3];
+		//wchar_t				m_decimal_10_0[10 + 3];
+		//SQL_NUMERIC_STRUCT	m_decimal;
+	};
+	
 	//// DateTypesTable
 	//// --------------
 	//class DateTypesTable : public wxDbTable

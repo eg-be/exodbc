@@ -50,6 +50,7 @@ namespace MySql
 		uint32_t	m_umediumInt;		//	3			0					 	16777215
 		uint32_t	m_uint;				//	4 			0						4294967295
 		uint64_t	m_ubigInt;			//	8 			0						18446744073709551615
+
 	};
 
 	// CharTypesTable

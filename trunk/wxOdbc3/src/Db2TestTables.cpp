@@ -51,31 +51,24 @@ namespace DB2
 	}
 	
 	
-	//// FloatTypesTable
-	//// ---------------
-	//FloatTypesTable::FloatTypesTable(wxDb* pDb)
-	//	: wxDbTable(pDb, L"floattypes", 5, L"", wxDB_QUERY_ONLY)
-	//{
-	//	m_idFloatTypes	= 0;
-	//	m_float			= 0;
-	//	m_double		= 0;
-	//	m_decimal_10_0[0] = 0;
-	//	m_decimal_15_10[0] = 0;
-	//	//ZeroMemory(&m_decimal, sizeof(m_decimal));
-	//
-	//	SetColDefs(0, L"idfloattypes", DB_DATA_TYPE_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), true, false, false, false);
-	//	SetColDefs(1, L"float", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
-	//	SetColDefs(2, L"double", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
-	//	SetColDefs(3, L"decimal_15_10", DB_DATA_TYPE_VARCHAR, m_decimal_15_10, SQL_C_WCHAR, sizeof(m_decimal_15_10), false, false, false, false);
-	//	SetColDefs(4, L"decimal_10_0", DB_DATA_TYPE_VARCHAR, m_decimal_10_0, SQL_C_WCHAR, sizeof(m_decimal_10_0), false, false, false, false);
-	//
-	//	// TODO: Fails with MySql ODBC 3.51 with a restricted attribute error (not supported by driver maybe?)
-	//	// Its an odbc 3 feature
-	////	SetColDefs(3, L"decimal", DB_DATA_TYPE_FLOAT, &m_decimal, SQL_C_NUMERIC, sizeof(m_decimal), false, false, false, false);
-	//
-	//}
-	//
-	//
+	// FloatTypesTable
+	// ---------------
+	FloatTypesTable::FloatTypesTable(wxDb* pDb)
+		: wxDbTable(pDb, L"FLOATTYPES", 4, L"", wxDB_QUERY_ONLY)
+	{
+		m_idFloatTypes	= 0;
+		m_float			= 0.0;
+		m_double		= 0.0;
+		m_real			= 0.0f;
+	
+		SetColDefs(0, L"IDFLOATTYPES", DB_DATA_TYPE_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), true, false, false, false);
+		SetColDefs(1, L"DOUBLE", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
+		SetColDefs(2, L"FLOAT", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
+		SetColDefs(3, L"REAL", DB_DATA_TYPE_VARCHAR, &m_real, SQL_C_FLOAT, sizeof(m_real), false, false, false, false);
+		
+	}
+	
+	
 	//// DateTypesTable
 	//// ---------------
 	//DateTypesTable::DateTypesTable(wxDb* pDb)
