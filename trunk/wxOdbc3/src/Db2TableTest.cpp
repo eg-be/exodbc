@@ -368,6 +368,19 @@ namespace DB2
 			CPPUNIT_ASSERT( pTable->GetNext() );
 			CPPUNIT_ASSERT_EQUAL( -3.141592f, pTable->m_real );
 
+			// Note: DB2 inserts a comma 
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 10"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"0,0000000000"), wxString(pTable->m_decimal_15_10 ));
+
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 11"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"33333,1415926530"), wxString(pTable->m_decimal_15_10 ));
+
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 12"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"-33333,1415926530"), wxString(pTable->m_decimal_15_10 ) );
+
 			// Test for NULL Values
 			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.FLOATTYPES WHERE IDFLOATTYPES = 1"));
 			CPPUNIT_ASSERT( pTable->GetNext() );
