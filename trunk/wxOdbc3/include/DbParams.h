@@ -18,7 +18,8 @@
 #define DB2_USER			L"db2admin"
 #define DB2_PASS			L"super$ql"
 
-#define MYSQL_DSN			L"wxodbc3MySql"
+//#define MYSQL_DSN			L"MYSQL_3.51"
+#define MYSQL_DSN			L"MYSQL_5.3"
 #define MYSQL_USER			L"wxodbc3"
 #define MYSQL_PASS			L"wxodbc3"
 
