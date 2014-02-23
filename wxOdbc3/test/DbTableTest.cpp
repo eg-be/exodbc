@@ -318,7 +318,6 @@ void DbTableTest::testFloatTypes()
 	FloatTypesTable* pTable = NULL;
 	try
 	{
-
 		pTable = new FloatTypesTable(m_pDbMySql);
 		
 		CPPUNIT_ASSERT( pTable->Open() );
@@ -350,15 +349,15 @@ void DbTableTest::testFloatTypes()
 		// Numeric is not working, see Ticket #15
 		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 7"));
 		CPPUNIT_ASSERT( pTable->GetNext() );
-//		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_decimal );
+		CPPUNIT_ASSERT_EQUAL( wxString(L"0.000000000"), wxString(pTable->m_decimal_10_0 ));
 
 		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 8"));
 		CPPUNIT_ASSERT( pTable->GetNext() );
-		//CPPUNIT_ASSERT_EQUAL( 3.141592, pTable->m_decimal );
+		CPPUNIT_ASSERT_EQUAL( wxString(L"3.141592653"), wxString(pTable->m_decimal_10_0 ));
 
 		CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 9"));
 		CPPUNIT_ASSERT( pTable->GetNext() );
-		//CPPUNIT_ASSERT_EQUAL( -3.141592, pTable->m_decimal );
+		CPPUNIT_ASSERT_EQUAL( wxString(L"-3.14159265"), wxString(pTable->m_decimal_10_0 ) );
 
 	}
 	CATCH_LOG_RETHROW_DELETE_TABLE(pTable)
