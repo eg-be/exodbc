@@ -420,6 +420,7 @@ namespace MySql
 			CPPUNIT_ASSERT_EQUAL( -3.141592, pTable->m_double );
 
 			// Numeric is not working, see Ticket #15
+			// Note: MySQL uses as '.'
 			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 7"));
 			CPPUNIT_ASSERT( pTable->GetNext() );
 			CPPUNIT_ASSERT_EQUAL( wxString(L"0.0000000000"), wxString(pTable->m_decimal_15_10 ));
@@ -432,6 +433,17 @@ namespace MySql
 			CPPUNIT_ASSERT( pTable->GetNext() );
 			CPPUNIT_ASSERT_EQUAL( wxString(L"-33333.1415926530"), wxString(pTable->m_decimal_15_10 ) );
 
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 10"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"0"), wxString(pTable->m_decimal_10_0 ));
+
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 11"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"1234567890"), wxString(pTable->m_decimal_10_0 ));
+
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 12"));
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( wxString(L"-1234567890"), wxString(pTable->m_decimal_10_0 ) );
 		}
 		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable)
 
