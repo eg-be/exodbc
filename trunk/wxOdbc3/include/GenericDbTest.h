@@ -1,5 +1,5 @@
 /*!
- * \file DbTest.h
+ * \file GenericDbTest.h
  * \author Elias Gerber <eg@zame.ch>
  * \date 22.09.2013
  * 
@@ -7,8 +7,8 @@
  */ 
 
 #pragma once
-#ifndef DBTEST_H
-#define DBTEST_H
+#ifndef GENERICDBTEST_H
+#define GENERICDBTEST_H
 
 // Same component headers
 // Other headers
@@ -38,23 +38,4 @@ public:
 CPPUNIT_TEST_SUITE_REGISTRATION( DbConnectInfTest );
 
 
-// DbTest
-// ------
-class DbTest : public CPPUNIT_NS::TestFixture
-{ 
-	CPPUNIT_TEST_SUITE( DbTest );
-	CPPUNIT_TEST( testOpen );
-	CPPUNIT_TEST_SUITE_END();
-
-public:
-	void setUp();
-	void tearDown();
-	void testOpen();
-
-private:
-	wxDbConnectInf* m_pConnectInfMySql;
-	wxDb*			m_pDbMySql;
-};
-CPPUNIT_TEST_SUITE_REGISTRATION( DbTest );
-
-#endif // DBTEST_H
+#endif // GENERICDBTEST_H
