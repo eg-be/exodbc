@@ -96,6 +96,7 @@ namespace MySql
 		SQL_TIMESTAMP_STRUCT	m_datetime;
 		SQL_TIME_STRUCT			m_time;
 		SQL_TIMESTAMP_STRUCT	m_timestamp;
+		SQLSMALLINT				m_year;
 	};
 
 }
