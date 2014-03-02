@@ -108,7 +108,7 @@ namespace MySql
 	// DateTypesTable
 	// ---------------
 	DateTypesTable::DateTypesTable(wxDb* pDb)
-		: wxDbTable(pDb, L"datetypes", 5, L"", wxDB_QUERY_ONLY)
+		: wxDbTable(pDb, L"datetypes", 6, L"", wxDB_QUERY_ONLY)
 	{
 		m_idDateTypes		= 0;
 		ZeroMemory(&m_date, sizeof(m_date));
@@ -122,7 +122,7 @@ namespace MySql
 		SetColDefs(2, L"datetime", DB_DATA_TYPE_DATE, &m_datetime, SQL_C_TIMESTAMP, sizeof(m_datetime), false, false, false, false);
 		SetColDefs(3, L"time", DB_DATA_TYPE_DATE, &m_time, SQL_C_TIME, sizeof(m_time), false, false, false, false);
 		SetColDefs(4, L"timestamp", DB_DATA_TYPE_DATE, &m_timestamp, SQL_C_TIMESTAMP, sizeof(m_timestamp), false, false, false, false);
-
+		SetColDefs(5, L"year", DB_DATA_TYPE_INTEGER, &m_year, SQL_C_SSHORT, sizeof(m_year), false, false, false, false);
 	}
 
 }

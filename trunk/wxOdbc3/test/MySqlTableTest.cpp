@@ -493,6 +493,8 @@ namespace MySql
 			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 55, pTable->m_timestamp.minute);
 			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 56, pTable->m_timestamp.second);
 			// Note: MySql has no nanoseconds?
+
+			CPPUNIT_ASSERT_EQUAL( (SQLSMALLINT) 1983, pTable->m_year);
 		}
 		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable)
 
