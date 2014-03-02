@@ -366,6 +366,9 @@ class WXDLLIMPEXP_ODBC wxDbConnectInf
         void             SetDescription(const wxString &desc)   { Description   = desc;     }
         void             SetFileType(const wxString &fileType)  { FileType      = fileType; }
         void             SetDefaultDir(const wxString &defDir)  { DefaultDir    = defDir;   }
+
+		bool			SetSqlAttrOdbcVersion(int version);		
+		int				ReadSqlAttrOdbcVersion();
 };  // class wxDbConnectInf
 
 
@@ -741,7 +744,6 @@ public:
     // DO NOT USE THESE FUNCTIONS, OR MEMORY LEAKS MAY OCCUR
     void         incrementTableCount() { nTables++; return; }
     void         decrementTableCount() { nTables--; return; }
-
 };  // wxDb
 
 

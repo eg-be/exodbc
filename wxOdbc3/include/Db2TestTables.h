@@ -85,7 +85,11 @@ namespace DB2
 		int32_t					m_idDateTypes;
 		SQL_DATE_STRUCT			m_date;
 		SQL_TIME_STRUCT			m_time;
-		SQL_TIME_STRUCT			m_timestamp;
+		SQL_TIMESTAMP_STRUCT	m_timestamp;
+
+		wchar_t					m_cdate[100 + 1];
+		wchar_t					m_ctime[100 + 1];
+		wchar_t					m_ctimestamp[100 + 1];
 	};
 
 }

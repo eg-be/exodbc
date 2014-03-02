@@ -88,6 +88,11 @@ namespace MySql
 	{
 		// Create DbConnectInfs for various databases
 		m_pConnectInfMySql = new wxDbConnectInf(NULL, dsn, MYSQL_USER, MYSQL_PASS);
+
+		// bool ok = m_pConnectInfMySql->SetSqlAttrOdbcVersion(SQL_OV_ODBC2);
+		unsigned long odbcVersion = m_pConnectInfMySql->ReadSqlAttrOdbcVersion();
+		CPPUNIT_ASSERT_EQUAL(SQL_OV_ODBC2, odbcVersion);
+
 		m_pDbMySql = new wxDb(m_pConnectInfMySql->GetHenv());
 		m_connectedMySql = m_pDbMySql->Open(m_pConnectInfMySql);
 
@@ -465,9 +470,29 @@ namespace MySql
 			CPPUNIT_ASSERT( pTable->Open() );
 
 			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 1"));
-			//		CPPUNIT_ASSERT( pTable->GetNext() );
-			//		CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_float );
+			CPPUNIT_ASSERT( pTable->GetNext() );
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 26, pTable->m_date.day);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 1, pTable->m_date.month);
+			CPPUNIT_ASSERT_EQUAL( (SQLSMALLINT) 1983, pTable->m_date.year);
 
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 26, pTable->m_datetime.day);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 1, pTable->m_datetime.month);
+			CPPUNIT_ASSERT_EQUAL( (SQLSMALLINT) 1983, pTable->m_datetime.year);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 13, pTable->m_datetime.hour);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 55, pTable->m_datetime.minute);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 56, pTable->m_datetime.second);
+
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 13, pTable->m_time.hour);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 55, pTable->m_time.minute);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 56, pTable->m_time.second);		
+			
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 26, pTable->m_timestamp.day);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 1, pTable->m_timestamp.month);
+			CPPUNIT_ASSERT_EQUAL( (SQLSMALLINT) 1983, pTable->m_timestamp.year);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 13, pTable->m_timestamp.hour);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 55, pTable->m_timestamp.minute);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 56, pTable->m_timestamp.second);
+			// Note: MySql has no nanoseconds?
 		}
 		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbMySql, pTable)
 

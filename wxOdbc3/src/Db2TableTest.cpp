@@ -68,6 +68,12 @@ namespace DB2
 	{
 		// Create DbConnectInfs for various databases
 		m_pConnectInfDb2 = new wxDbConnectInf(NULL, dsn, DB2_USER, DB2_PASS);
+
+		unsigned long odbcVersion = m_pConnectInfDb2->ReadSqlAttrOdbcVersion();
+		CPPUNIT_ASSERT_EQUAL(SQL_OV_ODBC2, odbcVersion);
+
+		//bool ok = m_pConnectInfDb2->SetSqlAttrOdbcVersion(SQL_OV_ODBC3);
+
 		m_pDbDb2 = new wxDb(m_pConnectInfDb2->GetHenv());
 		m_connectedDb2 = m_pDbDb2->Open(m_pConnectInfDb2);
 
@@ -425,13 +431,26 @@ namespace DB2
 		{
 
 			pTable = new DateTypesTable(m_pDbDb2);
-
 			CPPUNIT_ASSERT( pTable->Open() );
 
-			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC.DATETYPES WHERE IDDATETYPES = 1"));
+			CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.DATETYPES WHERE IDDATETYPES = 1"));
 			CPPUNIT_ASSERT( pTable->GetNext() );
-			//CPPUNIT_ASSERT_EQUAL( 0.0, pTable->m_float );
-			INT P = 3;
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 26, pTable->m_date.day);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 1, pTable->m_date.month);
+			CPPUNIT_ASSERT_EQUAL( (SQLSMALLINT) 1983, pTable->m_date.year);
+
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 26, pTable->m_timestamp.day);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 1, pTable->m_timestamp.month);
+			CPPUNIT_ASSERT_EQUAL( (SQLSMALLINT) 1983, pTable->m_timestamp.year);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 13, pTable->m_timestamp.hour);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 55, pTable->m_timestamp.minute);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 56, pTable->m_timestamp.second);
+			// Note: DB2 has nanoseconds precision
+			CPPUNIT_ASSERT_EQUAL( (SQLUINTEGER) 123456000, pTable->m_timestamp.fraction);
+
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 13, pTable->m_time.hour);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 55, pTable->m_time.minute);
+			CPPUNIT_ASSERT_EQUAL( (SQLUSMALLINT) 56, pTable->m_time.second);
 
 		}
 		CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbDb2, pTable)

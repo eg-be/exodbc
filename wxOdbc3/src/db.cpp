@@ -175,6 +175,10 @@ bool wxDbConnectInf::AllocHenv()
     wxASSERT(!Henv);
 
     // Initialize the ODBC Environment for Database Operations
+
+	// If we initialize using odbc3 we will fail:  See Ticket # 17
+	//if (SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &Henv) != SQL_SUCCESS)
+
     if (SQLAllocEnv(&Henv) != SQL_SUCCESS)
     {
         wxLogDebug(wxT("A problem occurred while trying to get a connection to the data source"));
@@ -234,6 +238,40 @@ void wxDbConnectInf::SetConnectionStr(const wxString &connectStr)
     wxStrncpy(ConnectionStr, connectStr, WXSIZEOF(ConnectionStr)-1);
     ConnectionStr[WXSIZEOF(ConnectionStr)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetConnectionStr()
+
+
+bool wxDbConnectInf::SetSqlAttrOdbcVersion(int version)
+{
+	// TODO: This never worked. Its odbc 3. See Ticket # 17
+	wxASSERT(false);
+
+	if( ! (version == SQL_OV_ODBC2 || version == SQL_OV_ODBC3 || version == SQL_OV_ODBC3_80))
+	{
+		return false;
+	}
+	SQLINTEGER v = version;
+	SQLRETURN ret = SQLSetEnvAttr(Henv, SQL_ATTR_ODBC_VERSION, &v, NULL);
+	if(ret == SQL_SUCCESS)
+		return true;
+	SQLWCHAR sqlState[5 + 1];
+	SQLINTEGER nativeErr;
+	SQLWCHAR msg[256 + 1];
+	SQLSMALLINT msgLength;
+	ret = SQLGetDiagRec(SQL_HANDLE_ENV, Henv, 1, sqlState, &nativeErr, msg, 256, &msgLength);
+	return false;
+}
+
+
+int wxDbConnectInf::ReadSqlAttrOdbcVersion()
+{
+	int value;
+	SQLRETURN ret = SQLGetEnvAttr(Henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
+	if(ret != SQL_SUCCESS)
+		return 0;
+
+	return value;
+}
+
 
 
 /********** wxDbColFor Constructor **********/

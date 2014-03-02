@@ -83,10 +83,12 @@ namespace DB2
 		ZeroMemory(&m_time, sizeof(m_time));
 		ZeroMemory(&m_timestamp, sizeof(m_timestamp));
 	
+		// Note: We are odbc v. 2, therefore use the old s-type (without type: SQL_C_DATE instead of SQL_C_TYPE_DATE). See Ticket # 17
 		SetColDefs(0, L"IDDATETYPES", DB_DATA_TYPE_INTEGER, &m_idDateTypes, SQL_C_SLONG, sizeof(m_idDateTypes), true, false, false, false);
-		SetColDefs(1, L"DATE", DB_DATA_TYPE_DATE, &m_date, SQL_C_TYPE_DATE, sizeof(m_date), false, false, false, false);
-		SetColDefs(2, L"TIME", DB_DATA_TYPE_DATE, &m_time, SQL_C_TYPE_TIME, sizeof(m_time), false, false, false, false);
-		SetColDefs(3, L"TIMESTAMP", DB_DATA_TYPE_DATE, &m_timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(m_timestamp), false, false, false, false);
+		SetColDefs(1, L"DATE", DB_DATA_TYPE_DATE, &m_date, SQL_C_DATE, sizeof(m_date), false, false, false, false);
+		SetColDefs(2, L"TIME", DB_DATA_TYPE_DATE, &m_time, SQL_C_TIME, sizeof(m_time), false, false, false, false);
+		SetColDefs(3, L"TIMESTAMP", DB_DATA_TYPE_DATE, &m_timestamp, SQL_C_TIMESTAMP, sizeof(m_timestamp), false, false, false, false);
+
 	
 	}
 
