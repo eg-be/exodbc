@@ -5,6 +5,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxOdbc3", "wxOdbc3\wxOdbc3.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxOdbc3Test", "wxOdbc3\wxOdbc3Test.vcxproj", "{BEB90DC6-CB3D-42EA-B9A4-25C0424B3A7F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxOdbc3GoogleTest", "wxOdbc3\wxOdbc3GoogleTest.vcxproj", "{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -19,6 +21,10 @@ Global
 		{BEB90DC6-CB3D-42EA-B9A4-25C0424B3A7F}.Debug|Win32.Build.0 = Debug|Win32
 		{BEB90DC6-CB3D-42EA-B9A4-25C0424B3A7F}.Release|Win32.ActiveCfg = Release|Win32
 		{BEB90DC6-CB3D-42EA-B9A4-25C0424B3A7F}.Release|Win32.Build.0 = Release|Win32
+		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Debug|Win32.ActiveCfg = Debug|Win32
+		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Debug|Win32.Build.0 = Debug|Win32
+		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Release|Win32.ActiveCfg = Release|Win32
+		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
