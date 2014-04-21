@@ -39,7 +39,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>$(Configuration)\GoogleTest</IntDir>
+    <IntDir>$(Configuration)\GoogleTest\</IntDir>
     <OutDir>$(SolutionDir)\Bin\$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -51,14 +51,14 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir)/wxOdbc3GoogleTest;$(Solutiondir)\3rdParty\googletest\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WXODBC3_IMPORTS;WXUSINGDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\wxWidgets\include\msvc;$(SolutionDir)\3rdParty\wxWidgets\include;$(Solutiondir)\3rdParty\googletest\include;$(ProjectDir)/wxOdbc3GoogleTest;$(ProjectDir)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\googletest\msvc\gtest-md\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\googletest\msvc\gtest-md\Debug;$(SolutionDir)\3rdParty\wxWidgets\lib\vc_dll;$(SolutionDir)\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>gtestd.lib;wxOdbc3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -83,10 +83,12 @@
     <None Include="wxOdbc3GoogleTest\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="wxOdbc3GoogleTest\DbTest.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\stdafx.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="wxOdbc3GoogleTest\DbTest.h" />
     <ClInclude Include="wxOdbc3GoogleTest\stdafx.h" />
     <ClInclude Include="wxOdbc3GoogleTest\targetver.h" />
   </ItemGroup>

@@ -27,12 +27,18 @@
     <ClCompile Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wxOdbc3GoogleTest\DbTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wxOdbc3GoogleTest\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wxOdbc3GoogleTest\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wxOdbc3GoogleTest\DbTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
