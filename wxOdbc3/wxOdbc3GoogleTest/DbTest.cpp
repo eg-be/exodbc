@@ -15,27 +15,71 @@
 
 using namespace std;
 
+
 namespace wxOdbc3Test
 {
-
-	TEST_F(DbTest, OpenForwardOnly_MySql_3_51)
+/*	template<size_t dsn, size_t b, std::wstring s>*/
+	wxDbConnectInf* CreateMySqlConnectInf()
 	{
-		OpenTest(MYSQL_3_51_DSN, MYSQL_USER, MYSQL_PASS, true);
+// 		size_t ddsn = dsn;
+// 		size_t bb = b;
+		return new wxDbConnectInf(NULL, MYSQL_3_51_DSN, MYSQL_USER, MYSQL_PASS);
 	}
 
-	TEST_F(DbTest, OpenNotForwardOnly_MySql_3_51)
+	void DbTest::SetUp()
 	{
-		OpenTest(MYSQL_3_51_DSN, MYSQL_USER, MYSQL_PASS, false);
+		//m_pConnectInf = (*GetParam())();
+		//const char* u = GetParam();
 	}
 
-	TEST_F(DbTest, OpenForwardOnly_DB2)
+	void DbTest::TearDown()
 	{
-		OpenTest(DB2_DSN, DB2_USER, DB2_PASS, true);
+		delete m_pConnectInf;
+		m_pConnectInf = NULL;
 	}
 
-	TEST_F(DbTest, OpenNotForwardOnly_DB2)
+	//TEST_F(DbTest, OpenForwardOnly_MySql_3_51)
+	//{
+	//	OpenTest(MYSQL_3_51_DSN, MYSQL_USER, MYSQL_PASS, true);
+	//}
+
+	//TEST_F(DbTest, OpenNotForwardOnly_MySql_3_51)
+	//{
+	//	OpenTest(MYSQL_3_51_DSN, MYSQL_USER, MYSQL_PASS, false);
+	//}
+
+	//TEST_F(DbTest, OpenForwardOnly_DB2)
+	//{
+	//	OpenTest(DB2_DSN, DB2_USER, DB2_PASS, true);
+	//}
+
+	//TEST_F(DbTest, OpenNotForwardOnly_DB2)
+	//{
+	//	OpenTest(DB2_DSN, DB2_USER, DB2_PASS, false);
+	//}
+
+	TEST_P(DbTest, OpenTest)
 	{
-		OpenTest(DB2_DSN, DB2_USER, DB2_PASS, false);
+		HENV henv = m_pConnectInf->GetHenv();
+		if(!henv)
+		{
+			//delete pConnectInf;
+			ASSERT_TRUE(henv);
+		}
+
+		wxDb* pDb = new wxDb(henv, true);
+
+		// Open without failing on unsupported datatypes
+		EXPECT_TRUE(pDb->Open(m_pConnectInf, false));
+		pDb->Close();
+		delete pDb;
+
+		// Open with failing on unsupported datatypes
+		pDb = new wxDb(henv, true);
+		EXPECT_TRUE(pDb->Open(m_pConnectInf, true));
+		pDb->Close();
+
+		delete pDb;
 	}
 
 	void DbTest::OpenTest(const std::wstring dsn, const std::wstring user, const std::wstring pass, bool forwardOnlyCursors)
