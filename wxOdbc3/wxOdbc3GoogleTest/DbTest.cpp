@@ -15,21 +15,15 @@
 
 using namespace std;
 
-
 namespace wxOdbc3Test
 {
-/*	template<size_t dsn, size_t b, std::wstring s>*/
-	wxDbConnectInf* CreateMySqlConnectInf()
-	{
-// 		size_t ddsn = dsn;
-// 		size_t bb = b;
-		return new wxDbConnectInf(NULL, MYSQL_3_51_DSN, MYSQL_USER, MYSQL_PASS);
-	}
 
 	void DbTest::SetUp()
 	{
-		//m_pConnectInf = (*GetParam())();
-		//const char* u = GetParam();
+		SOdbcInfo odbcInfo = GetParam();
+		m_pConnectInf = new wxDbConnectInf(NULL, odbcInfo.m_dsn, odbcInfo.m_username, odbcInfo.m_password);
+		m_forwardOnlyCursors = (odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		int a = 3;
 	}
 
 	void DbTest::TearDown()
@@ -61,13 +55,9 @@ namespace wxOdbc3Test
 	TEST_P(DbTest, OpenTest)
 	{
 		HENV henv = m_pConnectInf->GetHenv();
-		if(!henv)
-		{
-			//delete pConnectInf;
-			ASSERT_TRUE(henv);
-		}
+		ASSERT_TRUE(henv);
 
-		wxDb* pDb = new wxDb(henv, true);
+		wxDb* pDb = new wxDb(henv, m_forwardOnlyCursors);
 
 		// Open without failing on unsupported datatypes
 		EXPECT_TRUE(pDb->Open(m_pConnectInf, false));
@@ -75,10 +65,9 @@ namespace wxOdbc3Test
 		delete pDb;
 
 		// Open with failing on unsupported datatypes
-		pDb = new wxDb(henv, true);
+		pDb = new wxDb(henv, m_forwardOnlyCursors);
 		EXPECT_TRUE(pDb->Open(m_pConnectInf, true));
 		pDb->Close();
-
 		delete pDb;
 	}
 
