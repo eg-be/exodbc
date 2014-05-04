@@ -10,6 +10,7 @@
 
 #include "DbTableTest.h"
 #include "GenericTestTables.h"
+#include "db.h"
 //#include "MySqlParams.h"
 //#include "Db2Params.h"
 //#include "db.h"
@@ -24,9 +25,44 @@ namespace wxOdbc3Test
 	//	OpenTest(MYSQL_3_51_DSN, MYSQL_USER, MYSQL_PASS, true);
 	//}
 
-
-	void DbTableTest::TestCharTypes(CharTypesTable* pTable)
+	void DbTableTest::SetUpTestCase()
 	{
+//		SOdbcInfo oi = GetParam();
+		int p = 3;
+	}
+//
+//	void DbTableTest::TearDownTestCase()
+//	{
+//		int p = 3;
+//	}
+
+	void DbTableTest::SetUp()
+	{
+		SOdbcInfo odbcInfo = GetParam();
+		m_pConnectInf = new wxDbConnectInf(NULL, odbcInfo.m_dsn, odbcInfo.m_username, odbcInfo.m_password);
+		HENV henv = m_pConnectInf->GetHenv();
+		ASSERT_TRUE(henv  != 0);
+		m_pDb = new wxDb(henv, odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+	}
+
+	void DbTableTest::TearDown()
+	{
+		delete m_pDb;
+		delete m_pConnectInf;
+	}
+
+	TEST_P(DbTableTest, ReadCharTypes)
+	{
+		EXPECT_TRUE(false);
+	}
+
+	TEST_P(DbTableTest, ReadIntTypes)
+	{
+		EXPECT_TRUE(false);
+	}
+
+//	void DbTableTest::TestCharTypes(CharTypesTable* pTable)
+	//{
 		//CPPUNIT_ASSERT( m_connectedDb2 );
 
 		//IntTypesTable* pTable = NULL;
@@ -79,7 +115,7 @@ namespace wxOdbc3Test
 		//CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbDb2, pTable);
 		//if(pTable)
 		//	delete pTable;
-	}
+	//}
 
 
 	//void DbTest::OpenTest(const std::wstring dsn, const std::wstring user, const std::wstring pass, bool forwardOnlyCursors)
