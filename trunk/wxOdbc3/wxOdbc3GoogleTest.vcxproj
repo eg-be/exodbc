@@ -51,7 +51,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WXODBC3_IMPORTS;WXUSINGDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WXODBC3_IMPORTS;WXUSINGDLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\wxWidgets\include\msvc;$(SolutionDir)\3rdParty\wxWidgets\include;$(Solutiondir)\3rdParty\googletest\include;$(ProjectDir)/wxOdbc3GoogleTest;$(ProjectDir)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -83,12 +83,16 @@
     <None Include="wxOdbc3GoogleTest\ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="wxOdbc3GoogleTest\DbTableTest.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\DbTest.cpp" />
+    <ClCompile Include="wxOdbc3GoogleTest\GenericTestTables.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\stdafx.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="wxOdbc3GoogleTest\DbTableTest.h" />
     <ClInclude Include="wxOdbc3GoogleTest\DbTest.h" />
+    <ClInclude Include="wxOdbc3GoogleTest\GenericTestTables.h" />
     <ClInclude Include="wxOdbc3GoogleTest\stdafx.h" />
     <ClInclude Include="wxOdbc3GoogleTest\targetver.h" />
   </ItemGroup>
