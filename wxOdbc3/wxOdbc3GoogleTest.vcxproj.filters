@@ -36,6 +36,9 @@
     <ClCompile Include="wxOdbc3GoogleTest\GenericTestTables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wxOdbc3GoogleTest\TestParams.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wxOdbc3GoogleTest\stdafx.h">
@@ -51,6 +54,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wxOdbc3GoogleTest\GenericTestTables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wxOdbc3GoogleTest\TestParams.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

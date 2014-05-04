@@ -120,6 +120,9 @@
     <ClCompile Include="wxOdbc3GoogleTest\DbTest.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\GenericTestTables.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\stdafx.cpp" />
+    <ClCompile Include="wxOdbc3GoogleTest\TestParams.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +131,7 @@
     <ClInclude Include="wxOdbc3GoogleTest\GenericTestTables.h" />
     <ClInclude Include="wxOdbc3GoogleTest\stdafx.h" />
     <ClInclude Include="wxOdbc3GoogleTest\targetver.h" />
+    <ClInclude Include="wxOdbc3GoogleTest\TestParams.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

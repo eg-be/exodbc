@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-
+#include "TestParams.h"
 #include "MySqlParams.h"
 #include "Db2Params.h"
 
@@ -9,37 +9,6 @@ class wxDbConnectInf;
 
 namespace wxOdbc3Test
 {
-	struct SOdbcInfo
-	{
-		enum CursorType
-		{
-			forwardOnlyCursors,
-			notForwardOnlyCursors
-		};
-
-		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, CursorType cursorType) 
-			: m_dsn(dsn)
-			, m_username(username)
-			, m_password(password)
-			, m_cursorType(cursorType)
-		{};
-		std::wstring m_dsn;
-		std::wstring m_username;
-		std::wstring m_password;
-		CursorType m_cursorType;
-	};
-
-	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi) {
-		std::wstringstream wos;
-		wos << L"DSN: " << oi.m_dsn.c_str() 
-			<< L"; Username: " << oi.m_username.c_str()
-			<< L"; Password: " << oi.m_password.c_str() 
-			<< L"; Forward-Only Cursor: " << (oi.m_cursorType == SOdbcInfo::forwardOnlyCursors);
-		std::string s;
-		eli::w2mbNoThrow(wos.str(), s);
-		return os << s.c_str();
-	}
-
 	class DbTest : public ::testing::TestWithParam<SOdbcInfo>
 	{
 	protected:
