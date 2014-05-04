@@ -98,61 +98,6 @@ namespace wxOdbc3Test
 	//	EXPECT_TRUE(true);
 	//}
 
-//	void DbTableTest::TestCharTypes(CharTypesTable* pTable)
-	//{
-		//EXPECT_TRUE( m_connectedDb2 );
-
-		//IntTypesTable* pTable = NULL;
-		//try
-		//{
-		//	pTable = new IntTypesTable(m_pDbDb2);
-		//	// Open table
-		//	EXPECT_TRUE( pTable->Open( ) );
-
-		//	// test for min-max values 
-		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 1"));
-		//	EXPECT_TRUE( pTable->GetNext());
-		//	EXPECT_EQ( (int16_t) -32768, pTable->m_smallInt );
-
-		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 2"));
-		//	EXPECT_TRUE( pTable->GetNext());
-		//	EXPECT_EQ( (int16_t) 32767, pTable->m_smallInt );
-
-		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 3"));
-		//	EXPECT_TRUE( pTable->GetNext());
-		//	EXPECT_EQ( (int32_t) -2147483648, pTable->m_int );
-
-		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 4"));
-		//	EXPECT_TRUE( pTable->GetNext());
-		//	EXPECT_EQ( (int32_t) 2147483647, pTable->m_int );
-
-		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 5"));
-		//	EXPECT_TRUE( pTable->GetNext());
-		//	EXPECT_EQ( (int64_t) -9223372036854775808, pTable->m_bigInt );
-
-		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 6"));
-		//	EXPECT_TRUE( pTable->GetNext());
-		//	EXPECT_EQ( (int64_t) 9223372036854775807, pTable->m_bigInt );
-
-		//	// Test for NULL-Values
-		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 1"));
-		//	EXPECT_TRUE( pTable->GetNext());
-		//	EXPECT_TRUE( !pTable->IsColNull(0) );
-		//	EXPECT_TRUE( !pTable->IsColNull(1) );
-		//	EXPECT_TRUE( pTable->IsColNull(2) );
-		//	EXPECT_TRUE( pTable->IsColNull(3) );
-
-		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 3"));
-		//	EXPECT_TRUE( pTable->GetNext());
-		//	EXPECT_TRUE( !pTable->IsColNull(0) );
-		//	EXPECT_TRUE( pTable->IsColNull(1) );
-		//	EXPECT_TRUE( !pTable->IsColNull(2) );
-		//	EXPECT_TRUE( pTable->IsColNull(3) );
-		//}
-		//CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbDb2, pTable);
-		//if(pTable)
-		//	delete pTable;
-	//}
 
 
 	//void DbTest::OpenTest(const std::wstring dsn, const std::wstring user, const std::wstring pass, bool forwardOnlyCursors)
