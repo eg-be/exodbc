@@ -43,6 +43,7 @@ namespace wxOdbc3Test
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
 		m_pDb = new wxDb(henv, odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		ASSERT_TRUE(m_pDb->Open(m_pConnectInf));
 	}
 
 	void DbTableTest::TearDown()
@@ -53,64 +54,100 @@ namespace wxOdbc3Test
 
 	TEST_P(DbTableTest, ReadCharTypes)
 	{
-		EXPECT_TRUE(false);
+		CharTypesTable* pTable = new CharTypesTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		// Note: We trim the values read from the db on the right side, as for example db2 pads with ' ' by default
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_varchar));
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 2"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_char).Trim());
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 3"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L"הצüאיט"), wxString(pTable->m_varchar).Trim());
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 4"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L"הצüאיט"), wxString(pTable->m_char).Trim());
+
+		// Test for NULL-Values
+		EXPECT_TRUE( !pTable->IsColNull(0) );
+		EXPECT_TRUE( pTable->IsColNull(1) );
+		EXPECT_TRUE( !pTable->IsColNull(2) );
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_TRUE( !pTable->IsColNull(0) );
+		EXPECT_TRUE( !pTable->IsColNull(1) );
+		EXPECT_TRUE( pTable->IsColNull(2) );
+
+		delete pTable;
 	}
 
-	TEST_P(DbTableTest, ReadIntTypes)
-	{
-		EXPECT_TRUE(false);
-	}
+	//TEST_P(DbTableTest, ReadIntTypes)
+	//{
+	//	EXPECT_TRUE(true);
+	//}
 
 //	void DbTableTest::TestCharTypes(CharTypesTable* pTable)
 	//{
-		//CPPUNIT_ASSERT( m_connectedDb2 );
+		//EXPECT_TRUE( m_connectedDb2 );
 
 		//IntTypesTable* pTable = NULL;
 		//try
 		//{
 		//	pTable = new IntTypesTable(m_pDbDb2);
 		//	// Open table
-		//	CPPUNIT_ASSERT( pTable->Open( ) );
+		//	EXPECT_TRUE( pTable->Open( ) );
 
 		//	// test for min-max values 
-		//	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 1"));
-		//	CPPUNIT_ASSERT( pTable->GetNext());
-		//	CPPUNIT_ASSERT_EQUAL( (int16_t) -32768, pTable->m_smallInt );
+		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 1"));
+		//	EXPECT_TRUE( pTable->GetNext());
+		//	EXPECT_EQ( (int16_t) -32768, pTable->m_smallInt );
 
-		//	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 2"));
-		//	CPPUNIT_ASSERT( pTable->GetNext());
-		//	CPPUNIT_ASSERT_EQUAL( (int16_t) 32767, pTable->m_smallInt );
+		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 2"));
+		//	EXPECT_TRUE( pTable->GetNext());
+		//	EXPECT_EQ( (int16_t) 32767, pTable->m_smallInt );
 
-		//	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 3"));
-		//	CPPUNIT_ASSERT( pTable->GetNext());
-		//	CPPUNIT_ASSERT_EQUAL( (int32_t) -2147483648, pTable->m_int );
+		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 3"));
+		//	EXPECT_TRUE( pTable->GetNext());
+		//	EXPECT_EQ( (int32_t) -2147483648, pTable->m_int );
 
-		//	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 4"));
-		//	CPPUNIT_ASSERT( pTable->GetNext());
-		//	CPPUNIT_ASSERT_EQUAL( (int32_t) 2147483647, pTable->m_int );
+		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 4"));
+		//	EXPECT_TRUE( pTable->GetNext());
+		//	EXPECT_EQ( (int32_t) 2147483647, pTable->m_int );
 
-		//	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 5"));
-		//	CPPUNIT_ASSERT( pTable->GetNext());
-		//	CPPUNIT_ASSERT_EQUAL( (int64_t) -9223372036854775808, pTable->m_bigInt );
+		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 5"));
+		//	EXPECT_TRUE( pTable->GetNext());
+		//	EXPECT_EQ( (int64_t) -9223372036854775808, pTable->m_bigInt );
 
-		//	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 6"));
-		//	CPPUNIT_ASSERT( pTable->GetNext());
-		//	CPPUNIT_ASSERT_EQUAL( (int64_t) 9223372036854775807, pTable->m_bigInt );
+		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 6"));
+		//	EXPECT_TRUE( pTable->GetNext());
+		//	EXPECT_EQ( (int64_t) 9223372036854775807, pTable->m_bigInt );
 
 		//	// Test for NULL-Values
-		//	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 1"));
-		//	CPPUNIT_ASSERT( pTable->GetNext());
-		//	CPPUNIT_ASSERT( !pTable->IsColNull(0) );
-		//	CPPUNIT_ASSERT( !pTable->IsColNull(1) );
-		//	CPPUNIT_ASSERT( pTable->IsColNull(2) );
-		//	CPPUNIT_ASSERT( pTable->IsColNull(3) );
+		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 1"));
+		//	EXPECT_TRUE( pTable->GetNext());
+		//	EXPECT_TRUE( !pTable->IsColNull(0) );
+		//	EXPECT_TRUE( !pTable->IsColNull(1) );
+		//	EXPECT_TRUE( pTable->IsColNull(2) );
+		//	EXPECT_TRUE( pTable->IsColNull(3) );
 
-		//	CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 3"));
-		//	CPPUNIT_ASSERT( pTable->GetNext());
-		//	CPPUNIT_ASSERT( !pTable->IsColNull(0) );
-		//	CPPUNIT_ASSERT( pTable->IsColNull(1) );
-		//	CPPUNIT_ASSERT( !pTable->IsColNull(2) );
-		//	CPPUNIT_ASSERT( pTable->IsColNull(3) );
+		//	EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM WXODBC3.INTEGERTYPES WHERE IDINTEGERTYPES = 3"));
+		//	EXPECT_TRUE( pTable->GetNext());
+		//	EXPECT_TRUE( !pTable->IsColNull(0) );
+		//	EXPECT_TRUE( pTable->IsColNull(1) );
+		//	EXPECT_TRUE( !pTable->IsColNull(2) );
+		//	EXPECT_TRUE( pTable->IsColNull(3) );
 		//}
 		//CATCH_LOG_RETHROW_DELETE_TABLE(m_pDbDb2, pTable);
 		//if(pTable)
