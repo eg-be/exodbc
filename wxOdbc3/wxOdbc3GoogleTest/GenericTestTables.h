@@ -45,8 +45,8 @@ namespace wxOdbc3Test
 		CharTypesTable(wxDb* pDb);
 		virtual ~CharTypesTable() {};
 
-		int32_t		m_idCharTypes;
-		wchar_t		m_varchar[128 + 1];
-		wchar_t		m_char[128 + 1];
+		SQLINTEGER	m_idCharTypes;
+		SQLWCHAR	m_varchar[128 + 1];
+		SQLWCHAR	m_char[128 + 1];
 	};
 }
