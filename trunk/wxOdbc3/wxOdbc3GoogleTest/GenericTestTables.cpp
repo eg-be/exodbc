@@ -44,7 +44,7 @@ namespace wxOdbc3Test
 	// IntTypesTable
 	// ---------------
 	IntTypesTable::IntTypesTable(wxDb* pDb)
-		: wxDbTable(pDb, L"INTEGERTYPES", 5, L"", wxDB_QUERY_ONLY)
+		: wxDbTable(pDb, L"INTEGERTYPES", 7, L"", wxDB_QUERY_ONLY)
 	{	
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
@@ -58,6 +58,8 @@ namespace wxOdbc3Test
 		SetColDefs(1, L"SMALLINT", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
 		SetColDefs(2, L"INT", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
 		SetColDefs(3, L"BIGINT", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), false, false, false, false);	
-		SetColDefs(3, L"USMALLINT", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_usmallInt), false, false, false, false);	
+		SetColDefs(4, L"USMALLINT", DB_DATA_TYPE_INTEGER, &m_usmallInt, SQL_C_USHORT, sizeof(m_usmallInt), false, false, false, false);	
+		SetColDefs(5, L"UINT", DB_DATA_TYPE_INTEGER, &m_uint, SQL_C_ULONG, sizeof(m_usmallInt), false, false, false, false);	
+		SetColDefs(6, L"UBIGINT", DB_DATA_TYPE_INTEGER, &m_ubigInt, SQL_C_UBIGINT, sizeof(m_usmallInt), false, false, false, false);	
 	}
 }

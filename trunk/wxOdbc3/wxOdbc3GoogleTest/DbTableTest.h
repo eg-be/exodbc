@@ -19,6 +19,7 @@ namespace wxOdbc3Test
 	protected:
 		wxDb*	m_pDb;
 		wxDbConnectInf* m_pConnectInf;
+		SOdbcInfo m_odbcInfo;
 		virtual void SetUp();
 		virtual void TearDown();
 
