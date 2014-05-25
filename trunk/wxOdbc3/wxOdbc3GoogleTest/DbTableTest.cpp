@@ -51,6 +51,45 @@ namespace wxOdbc3Test
 		delete m_pDb;
 		delete m_pConnectInf;
 	}
+
+	TEST_P(DbTableTest, ReadDateTypes)
+	{
+		DateTypesTable* pTable = new DateTypesTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 26, pTable->m_date.day);
+		EXPECT_EQ( 01, pTable->m_date.month);
+		EXPECT_EQ( 1983, pTable->m_date.year);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 13, pTable->m_time.hour);
+		EXPECT_EQ( 55, pTable->m_time.minute);
+		EXPECT_EQ( 56, pTable->m_time.second);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 26, pTable->m_timestamp.day);
+		EXPECT_EQ( 01, pTable->m_timestamp.month);
+		EXPECT_EQ( 1983, pTable->m_timestamp.year);
+		EXPECT_EQ( 13, pTable->m_timestamp.hour);
+		EXPECT_EQ( 55, pTable->m_timestamp.minute);
+		EXPECT_EQ( 56, pTable->m_timestamp.second);
+		
+		// MySql does not have fractions, ibm db2 adds '000' at the end (?)
+		if(m_odbcInfo.m_dsn == DB2_DSN)
+		{
+			EXPECT_EQ( 123456000, pTable->m_timestamp.fraction);
+		}
+
+		delete pTable;
+	}
 	
 	TEST_P(DbTableTest, ReadIntTypes)
 	{

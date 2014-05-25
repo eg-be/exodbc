@@ -71,4 +71,18 @@ namespace wxOdbc3Test
 		SQLBIGINT		m_bigInt;			//	8 			-9223372036854775808 	9223372036854775807
 		SQLUBIGINT		m_ubigInt;			//	8 			0						18446744073709551615
 	};
+
+	// DateTypesTable
+	// --------------
+	class DateTypesTable : public wxDbTable
+	{
+	public:
+		DateTypesTable(wxDb* pDb);
+		virtual ~DateTypesTable() {};
+
+		int32_t					m_idDateTypes;
+		SQL_DATE_STRUCT			m_date;
+		SQL_TIME_STRUCT			m_time;
+		SQL_TIMESTAMP_STRUCT	m_timestamp;
+	};
 }
