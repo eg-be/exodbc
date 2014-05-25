@@ -49,4 +49,26 @@ namespace wxOdbc3Test
 		SQLWCHAR	m_varchar[128 + 1];
 		SQLWCHAR	m_char[128 + 1];
 	};
+
+	// IntTypesTable
+	// ----------
+	class IntTypesTable : public wxDbTable
+	{
+	public:
+
+		IntTypesTable(wxDb* pDb);
+		virtual ~IntTypesTable() {};
+
+		// Size of Type							Bytes		Min						Max
+		SQLINTEGER		m_idIntegerTypes;	//	4
+		
+		SQLSMALLINT		m_smallInt;			//	2			-32768 					32767
+		SQLUSMALLINT	m_usmallInt;		//	2 			0						65535
+
+		SQLINTEGER		m_int;				//	4			-2147483648 			2147483647
+		SQLUINTEGER		m_uint;				//	8			0						4294967295
+		
+		SQLBIGINT		m_bigInt;			//	8 			-9223372036854775808 	9223372036854775807
+		SQLUBIGINT		m_ubigInt;			//	8 			0						18446744073709551615
+	};
 }

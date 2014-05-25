@@ -51,7 +51,43 @@ namespace wxOdbc3Test
 		delete m_pDb;
 		delete m_pConnectInf;
 	}
+	
+	TEST_P(DbTableTest, ReadIntTypes)
+	{
+		IntTypesTable* pTable = new IntTypesTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
 
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( -32768, pTable->m_smallInt);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 2"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 32767, pTable->m_smallInt);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 3"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( -2147483648, pTable->m_int);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 4"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 2147483647, pTable->m_int);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 5"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( -9223372036854775808, pTable->m_bigInt);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 6"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
+
+		delete pTable;
+	}
+	
 	TEST_P(DbTableTest, ReadCharTypes)
 	{
 		CharTypesTable* pTable = new CharTypesTable(m_pDb);
