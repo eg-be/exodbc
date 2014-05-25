@@ -10,6 +10,9 @@ namespace wxOdbc3Test
 			notForwardOnlyCursors
 		};
 
+		SOdbcInfo()
+		{ }
+
 		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, CursorType cursorType) 
 			: m_dsn(dsn)
 			, m_username(username)

@@ -38,11 +38,11 @@ namespace wxOdbc3Test
 
 	void DbTableTest::SetUp()
 	{
-		SOdbcInfo odbcInfo = GetParam();
-		m_pConnectInf = new wxDbConnectInf(NULL, odbcInfo.m_dsn, odbcInfo.m_username, odbcInfo.m_password);
+		m_odbcInfo = GetParam();
+		m_pConnectInf = new wxDbConnectInf(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
-		m_pDb = new wxDb(henv, odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		m_pDb = new wxDb(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
 		ASSERT_TRUE(m_pDb->Open(m_pConnectInf));
 	}
 
@@ -71,7 +71,7 @@ namespace wxOdbc3Test
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( -2147483648, pTable->m_int);
+		EXPECT_EQ( INT_MIN /* -2147483648 */, pTable->m_int);
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 4"));
 		EXPECT_TRUE( pTable->GetNext() );
@@ -79,11 +79,44 @@ namespace wxOdbc3Test
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 5"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( -9223372036854775808, pTable->m_bigInt);
+		EXPECT_EQ( LLONG_MIN /* -9223372036854775808 */, pTable->m_bigInt);
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 6"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
+
+		// IBM DB2 has no support for unsigned int types
+		if(m_odbcInfo.m_dsn != DB2_DSN)
+		{
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( 0, pTable->m_usmallInt);
+
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 8"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( 65535, pTable->m_usmallInt);
+
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 9"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( 0, pTable->m_uint);
+
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 10"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( 4294967295, pTable->m_uint);
+
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 11"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( 0, pTable->m_ubigInt);
+
+			// With the 5.2 odbc driver bigint seems to be wrong?
+			if(m_odbcInfo.m_dsn != MYSQL_5_2_DSN)
+			{
+				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 12"));
+				EXPECT_TRUE( pTable->GetNext() );
+				EXPECT_EQ( 18446744073709551615, pTable->m_ubigInt);
+			}
+
+		}
 
 		delete pTable;
 	}
