@@ -88,6 +88,14 @@ namespace wxOdbc3Test
 			EXPECT_EQ( 123456000, pTable->m_timestamp.fraction);
 		}
 
+		// Test for NULL
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 2"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_FALSE( pTable->IsColNull(0) );
+		EXPECT_TRUE( pTable->IsColNull(1) );
+		EXPECT_TRUE( pTable->IsColNull(2) );
+		EXPECT_TRUE( pTable->IsColNull(3) );
+
 		delete pTable;
 	}
 	
@@ -154,7 +162,44 @@ namespace wxOdbc3Test
 				EXPECT_TRUE( pTable->GetNext() );
 				EXPECT_EQ( 18446744073709551615, pTable->m_ubigInt);
 			}
+		}
 
+		// Test for NULL-Values
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 1"));
+		EXPECT_TRUE( pTable->GetNext());
+
+		EXPECT_FALSE( pTable->IsColNull(0) );
+		EXPECT_FALSE( pTable->IsColNull(1) );
+		EXPECT_TRUE( pTable->IsColNull(2) );
+		EXPECT_TRUE( pTable->IsColNull(3) );
+		if(m_odbcInfo.m_dsn != DB2_DSN)
+		{
+			EXPECT_TRUE( pTable->IsColNull(4) );
+			EXPECT_TRUE( pTable->IsColNull(5) );
+			EXPECT_TRUE( pTable->IsColNull(6) );
+		}
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 3"));
+		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_FALSE( pTable->IsColNull(2) );
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 5"));
+		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_FALSE( pTable->IsColNull(3) );
+
+		if(m_odbcInfo.m_dsn != DB2_DSN)
+		{
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
+			EXPECT_TRUE( pTable->GetNext());
+			EXPECT_FALSE( pTable->IsColNull(4) );
+
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 9"));
+			EXPECT_TRUE( pTable->GetNext());
+			EXPECT_FALSE( pTable->IsColNull(5) );
+
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 11"));
+			EXPECT_TRUE( pTable->GetNext());
+			EXPECT_FALSE( pTable->IsColNull(6) );
 		}
 
 		delete pTable;
@@ -188,14 +233,14 @@ namespace wxOdbc3Test
 		EXPECT_EQ( wxString(L"הצüאיט"), wxString(pTable->m_char).Trim());
 
 		// Test for NULL-Values
-		EXPECT_TRUE( !pTable->IsColNull(0) );
+		EXPECT_FALSE( pTable->IsColNull(0) );
 		EXPECT_TRUE( pTable->IsColNull(1) );
-		EXPECT_TRUE( !pTable->IsColNull(2) );
+		EXPECT_FALSE( pTable->IsColNull(2) );
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_TRUE( !pTable->IsColNull(0) );
-		EXPECT_TRUE( !pTable->IsColNull(1) );
+		EXPECT_FALSE( pTable->IsColNull(0) );
+		EXPECT_FALSE( pTable->IsColNull(1) );
 		EXPECT_TRUE( pTable->IsColNull(2) );
 
 		delete pTable;
