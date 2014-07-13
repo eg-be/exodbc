@@ -246,6 +246,43 @@ namespace wxOdbc3Test
 		delete pTable;
 	}
 
+
+	TEST_P(DbTableTest, ReadFloatTypes)
+	{		
+		FloatTypesTable* pTable = new FloatTypesTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 0.0, pTable->m_float);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 2"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 3.141, pTable->m_float);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 3"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( -3.141, pTable->m_float);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 4"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 0.0, pTable->m_double);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 5"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 3.141592, pTable->m_double);
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 6"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( -3.141592, pTable->m_double);
+
+		delete pTable;
+	}
+
 	//TEST_P(DbTableTest, ReadIntTypes)
 	//{
 	//	EXPECT_TRUE(true);
