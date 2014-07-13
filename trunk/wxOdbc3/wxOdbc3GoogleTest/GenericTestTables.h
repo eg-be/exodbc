@@ -119,4 +119,16 @@ namespace wxOdbc3Test
 
 	private:
 	};
+
+	// BlobTypesTable
+	// --------------
+	class BlobTypesTable : public wxDbTable
+	{
+	public:
+		BlobTypesTable(wxDb* pDb);
+		virtual ~BlobTypesTable() {};
+
+		SQLINTEGER		m_idBlobTypes;
+		SQLCHAR			m_blob[16];
+	};
 }

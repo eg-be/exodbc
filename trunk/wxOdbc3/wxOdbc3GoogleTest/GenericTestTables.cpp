@@ -123,4 +123,15 @@ namespace wxOdbc3Test
 			SetColDefs(2, L"decimal_18_10", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_10, SQL_C_WCHAR, sizeof(m_wcdecimal_18_10), false, false, false, false);
 		}
 	};
+
+	// BlobTypesTable
+	// --------------
+	BlobTypesTable::BlobTypesTable(wxDb* pDb)
+		: wxDbTable(pDb, L"blobtypes", 2, L"", wxDB_QUERY_ONLY)
+	{
+		ZeroMemory(m_blob, sizeof(m_blob));
+
+		SetColDefs(0, L"idblobtypes", DB_DATA_TYPE_INTEGER, &m_idBlobTypes, SQL_C_SLONG, sizeof(m_idBlobTypes), true, false, false, false);
+		SetColDefs(1, L"blob", DB_DATA_TYPE_VARCHAR, m_blob, SQL_C_BINARY, sizeof(m_blob), false, false, false, false);
+	}
 }
