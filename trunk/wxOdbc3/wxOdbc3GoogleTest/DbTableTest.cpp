@@ -52,6 +52,9 @@ namespace wxOdbc3Test
 		delete m_pConnectInf;
 	}
 
+	// Open
+	// ----
+	// Test opening the tables we use in the later tests
 	TEST_P(DbTableTest, OpenTableNoChecks)
 	{
 		CharTypesTable* pCharTypesTable = new CharTypesTable(m_pDb);
@@ -79,6 +82,47 @@ namespace wxOdbc3Test
 		delete pBlobTypesTable;
 	}
 
+	// GetNext
+	// -------
+	// Test basic GetNext
+	TEST_P(DbTableTest, GetNextTest)
+	{
+		CharTypesTable* pTable = new CharTypesTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		// Expect 4 entries
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes"));
+		int count = 0;
+		while(pTable->GetNext() && count <= 5)
+		{
+			count++;
+		}
+		EXPECT_EQ(4, count);
+
+		// Expect no entries
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 5"));
+		EXPECT_FALSE(pTable->GetNext());
+
+		// Expect 2 entries
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes >= 2 AND idchartypes <= 3"));
+		count = 0;
+		while(pTable->GetNext() && count <= 3)
+		{
+			count++;
+		}
+		EXPECT_EQ(2, count);
+
+		delete pTable;
+
+	}
+
+	// Read
+	// ----
+	// Test reading datatypes
 	TEST_P(DbTableTest, ReadDateTypes)
 	{
 		DateTypesTable* pTable = new DateTypesTable(m_pDb);
@@ -480,6 +524,33 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 4"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_TRUE( pTable->IsColNull(1) );
+
+		delete pTable;
+	}
+
+	TEST_P(DbTableTest, WriteIntTypes)
+	{
+		IntTypesTmpTable* pTable = new IntTypesTmpTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		wxString sqlstmt;
+		sqlstmt.Printf(L"DELETE FROM wxodbc3.integertypes_tmp");
+
+		if(m_odbcInfo.m_dsn == DB2_DSN)
+		{
+			delete pTable;
+			return;
+		}
+
+
+
+		//EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp WHERE idintegertypes = 1"));
+		//EXPECT_TRUE( pTable->GetNext() );
+//		EXPECT_EQ( -32768, pTable->m_smallInt);
 
 		delete pTable;
 	}
