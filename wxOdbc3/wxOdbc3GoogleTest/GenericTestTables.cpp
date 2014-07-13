@@ -96,4 +96,20 @@ namespace wxOdbc3Test
 		SetColDefs(1, L"double", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
 		SetColDefs(2, L"float", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
 	}
+
+	// NumericTypesTable
+	// -----------------
+	NumericTypesTable::NumericTypesTable(wxDb* pDb)
+		: wxDbTable(pDb, L"numerictypes", 3, L"", wxDB_QUERY_ONLY)
+	{
+		m_idNumericTypes	= 0;
+		ZeroMemory(&m_decimal_18_0, sizeof(m_decimal_18_0));
+		ZeroMemory(&m_decimal_18_10, sizeof(m_decimal_18_10));
+
+		// TODO: This DB_DATA_TYPE * stuff is probably useless, or must be extended to support more types. 
+		// maybe used for formating to sql?
+		SetColDefs(0, L"idnumerictypes", DB_DATA_TYPE_INTEGER, &m_idNumericTypes, SQL_C_SLONG, sizeof(m_idNumericTypes), true, false, false, false);
+		SetColDefs(1, L"decimal_18_0", DB_DATA_TYPE_FLOAT, &m_decimal_18_0, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
+		SetColDefs(2, L"decimal_18_10", DB_DATA_TYPE_FLOAT, &m_decimal_18_10, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
+	};
 }
