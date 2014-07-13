@@ -54,6 +54,9 @@ namespace wxOdbc3Test
 		m_uint = 0;
 		m_ubigInt = 0;
 
+		// TODO: Note: IBM DB2 has no unsigned-cols, but we get no error and no warning?
+		// TODO: Should the error be spit when the table is opened?
+
 		SetColDefs(0, L"IDINTEGERTYPES", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
 		SetColDefs(1, L"SMALLINT", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
 		SetColDefs(2, L"INT", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
