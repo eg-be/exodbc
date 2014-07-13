@@ -99,17 +99,28 @@ namespace wxOdbc3Test
 
 	// NumericTypesTable
 	// -----------------
-	NumericTypesTable::NumericTypesTable(wxDb* pDb)
+	NumericTypesTable::NumericTypesTable(wxDb* pDb, ReadMode readMode)
 		: wxDbTable(pDb, L"numerictypes", 3, L"", wxDB_QUERY_ONLY)
+		, m_readMode(readMode)
 	{
 		m_idNumericTypes	= 0;
 		ZeroMemory(&m_decimal_18_0, sizeof(m_decimal_18_0));
 		ZeroMemory(&m_decimal_18_10, sizeof(m_decimal_18_10));
+		m_wcdecimal_18_0[0] = 0;
+		m_wcdecimal_18_10[0] = 0;
 
 		// TODO: This DB_DATA_TYPE * stuff is probably useless, or must be extended to support more types. 
 		// maybe used for formating to sql?
 		SetColDefs(0, L"idnumerictypes", DB_DATA_TYPE_INTEGER, &m_idNumericTypes, SQL_C_SLONG, sizeof(m_idNumericTypes), true, false, false, false);
-		SetColDefs(1, L"decimal_18_0", DB_DATA_TYPE_FLOAT, &m_decimal_18_0, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
-		SetColDefs(2, L"decimal_18_10", DB_DATA_TYPE_FLOAT, &m_decimal_18_10, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
+		if(m_readMode == ReasAsNumeric)
+		{
+			SetColDefs(1, L"decimal_18_0", DB_DATA_TYPE_FLOAT, &m_decimal_18_0, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
+			SetColDefs(2, L"decimal_18_10", DB_DATA_TYPE_FLOAT, &m_decimal_18_10, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
+		}
+		else if(m_readMode == ReadAsChar)
+		{
+			SetColDefs(1, L"decimal_18_0", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_0, SQL_C_WCHAR, sizeof(m_wcdecimal_18_0), false, false, false, false);
+			SetColDefs(2, L"decimal_18_10", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_10, SQL_C_WCHAR, sizeof(m_wcdecimal_18_10), false, false, false, false);
+		}
 	};
 }
