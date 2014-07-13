@@ -104,11 +104,19 @@ namespace wxOdbc3Test
 	class NumericTypesTable : public wxDbTable
 	{
 	public:
-		NumericTypesTable(wxDb* pDb);
+		enum ReadMode { ReasAsNumeric, ReadAsChar };
+		NumericTypesTable(wxDb* pDb, ReadMode readMode);
 		virtual ~NumericTypesTable() {};
 
 		SQLINTEGER			m_idNumericTypes;
 		SQL_NUMERIC_STRUCT	m_decimal_18_0;
 		SQL_NUMERIC_STRUCT	m_decimal_18_10;
+
+		SQLWCHAR			m_wcdecimal_18_0[20 + 1];
+		SQLWCHAR			m_wcdecimal_18_10[20 + 1];
+
+		const ReadMode m_readMode;
+
+	private:
 	};
 }
