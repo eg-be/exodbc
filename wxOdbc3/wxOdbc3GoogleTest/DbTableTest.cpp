@@ -404,6 +404,60 @@ namespace wxOdbc3Test
 	}
 
 
+	TEST_P(DbTableTest, ReadBlobTypes)
+	{
+		BlobTypesTable* pTable = new BlobTypesTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		SQLCHAR empty[] = {	0, 0, 0, 0,
+							0, 0, 0, 0,
+							0, 0, 0, 0,
+							0, 0, 0, 0
+		};
+
+		SQLCHAR ff[] = {	255, 255, 255, 255,
+							255, 255, 255, 255,
+							255, 255, 255, 255,
+							255, 255, 255, 255
+		};
+
+		SQLCHAR abc[] = {   0xab, 0xcd, 0xef, 0xf0,
+							0x12, 0x34, 0x56, 0x78,
+							0x90, 0xab, 0xcd, 0xef,
+							0x01, 0x23, 0x45, 0x67
+		};
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ(wxString(empty, sizeof(pTable->m_blob)), wxString(pTable->m_blob, sizeof(pTable->m_blob)));
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 2"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ(wxString(ff, sizeof(pTable->m_blob)), wxString(pTable->m_blob, sizeof(pTable->m_blob)));
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 3"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ(wxString(abc, sizeof(pTable->m_blob)), wxString(pTable->m_blob, sizeof(pTable->m_blob)));
+
+		// Test for NULL
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_FALSE( pTable->IsColNull(1) );
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 4"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_TRUE( pTable->IsColNull(1) );
+
+		delete pTable;
+	}
+
+
 
 	// OLD
 	// ============
