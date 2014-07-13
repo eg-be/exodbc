@@ -52,6 +52,33 @@ namespace wxOdbc3Test
 		delete m_pConnectInf;
 	}
 
+	TEST_P(DbTableTest, OpenTableNoChecks)
+	{
+		CharTypesTable* pCharTypesTable = new CharTypesTable(m_pDb);
+		EXPECT_TRUE(pCharTypesTable->Open(false, false));
+		delete pCharTypesTable;
+
+		IntTypesTable* pIntTypesTable = new IntTypesTable(m_pDb);
+		EXPECT_TRUE(pIntTypesTable->Open(false, false));
+		delete pIntTypesTable;
+
+		DateTypesTable* pDateTypesTable = new DateTypesTable(m_pDb);
+		EXPECT_TRUE(pDateTypesTable->Open(false, false));
+		delete pDateTypesTable;
+
+		FloatTypesTable* pFloatTypesTable = new FloatTypesTable(m_pDb);
+		EXPECT_TRUE(pFloatTypesTable->Open(false, false));
+		delete pFloatTypesTable;
+
+		NumericTypesTable* pNumericTypesTable = new NumericTypesTable(m_pDb, NumericTypesTable::ReadAsChar);
+		EXPECT_TRUE(pNumericTypesTable->Open(false, false));
+		delete pNumericTypesTable;
+
+		BlobTypesTable* pBlobTypesTable = new BlobTypesTable(m_pDb);
+		EXPECT_TRUE(pBlobTypesTable->Open(false, false));
+		delete pBlobTypesTable;
+	}
+
 	TEST_P(DbTableTest, ReadDateTypes)
 	{
 		DateTypesTable* pTable = new DateTypesTable(m_pDb);
