@@ -538,7 +538,7 @@ namespace wxOdbc3Test
 		}
 
 		wxString sqlstmt;
-		sqlstmt.Printf(L"DELETE FROM wxodbc3.integertypes_tmp");
+		sqlstmt.Printf(L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0");
 
 		if(m_odbcInfo.m_dsn == DB2_DSN)
 		{
@@ -546,11 +546,33 @@ namespace wxOdbc3Test
 			return;
 		}
 
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
 
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		EXPECT_FALSE( pTable->GetNext());
 
-		//EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp WHERE idintegertypes = 1"));
-		//EXPECT_TRUE( pTable->GetNext() );
-//		EXPECT_EQ( -32768, pTable->m_smallInt);
+		sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (`idintegertypes_tmp`, `smallint`, `int`, `bigint`) VALUES (2, -32768, -2147483648, -9223372036854775808)");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_FALSE( pTable->GetNext());
+		EXPECT_EQ( -32768, pTable->m_smallInt);
+		EXPECT_EQ( INT_MIN, pTable->m_int);
+		EXPECT_EQ( -LLONG_MIN, pTable->m_bigInt);
+
+		sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (`idintegertypes_tmp`, `smallint`, `int`, `bigint`) VALUES (3, 32767, 2147483647, 9223372036854775807)");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
+		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_EQ( 32767, pTable->m_smallInt);
+		EXPECT_EQ( 2147483647, pTable->m_int);
+		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
+		EXPECT_FALSE( pTable->GetNext());
 
 		delete pTable;
 	}
