@@ -280,6 +280,17 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( -3.141592, pTable->m_double);
 
+		// Test for NULL
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_TRUE( pTable->IsColNull(1));
+		EXPECT_FALSE( pTable->IsColNull(2));
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 4"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_FALSE( pTable->IsColNull(1));
+		EXPECT_TRUE( pTable->IsColNull(2));
+
 		delete pTable;
 	}
 
@@ -378,6 +389,17 @@ namespace wxOdbc3Test
 				EXPECT_EQ( wxString(L"-12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
 			}
 	
+			// Test for NULL
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_FALSE( pTable->IsColNull(1) );
+			EXPECT_TRUE( pTable->IsColNull(2) );
+
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_TRUE( pTable->IsColNull(1) );
+			EXPECT_FALSE( pTable->IsColNull(2) );
+
 			delete pTable;
 
 	}
