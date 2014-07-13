@@ -86,7 +86,7 @@ namespace wxOdbc3Test
 		SQL_TIMESTAMP_STRUCT	m_timestamp;
 	};
 
-	//FloatTypesTable
+	// FloatTypesTable
 	// --------------
 	class FloatTypesTable : public wxDbTable
 	{
@@ -97,5 +97,18 @@ namespace wxOdbc3Test
 		SQLINTEGER				m_idFloatTypes;
 		SQLDOUBLE				m_double;
 		SQLFLOAT				m_float;
+	};
+
+	// NumbericTypesTable
+	// ------------------
+	class NumericTypesTable : public wxDbTable
+	{
+	public:
+		NumericTypesTable(wxDb* pDb);
+		virtual ~NumericTypesTable() {};
+
+		SQLINTEGER			m_idNumericTypes;
+		SQL_NUMERIC_STRUCT	m_decimal_18_0;
+		SQL_NUMERIC_STRUCT	m_decimal_18_10;
 	};
 }

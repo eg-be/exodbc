@@ -283,6 +283,85 @@ namespace wxOdbc3Test
 		delete pTable;
 	}
 
+	// TODO: Numeric things do not work at all
+	//template< class T>
+	//void changeEndianess( T & input)
+	//{
+	//	char temp[ sizeof( T ) ];
+	//	for( int j=sizeof( T )-1; j>=0; --j )
+	//		temp[sizeof(T)-j-1] = *((char *)&input+j);
+	//	memcpy( &input, temp, sizeof( T ) );
+	//}
+
+	//TEST_P(DbTableTest, ReadNumericTypes)
+	//{
+	//	NumericTypesTable* pTable = new NumericTypesTable(m_pDb);
+	//	if(!pTable->Open(false, false))
+	//	{
+	//		delete pTable;
+	//		ASSERT_FALSE(true);
+	//	}
+
+//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
+//		EXPECT_TRUE( pTable->GetNext() );
+//		void* t = (void*) &(pTable->m_decimal_18_0.val);
+//		uint16_t i = *((uint16_t*) t);
+//		uint16_t u;
+//		size_t s = sizeof(pTable->m_decimal_18_0.val);
+//		memcpy(&u, &(pTable->m_decimal_18_0.val), 16);
+//		changeEndianess<uint16_t>(u);
+//		//uint16_t i = (int) pTable->m_decimal_18_0.val;
+////		EXPECT_EQ( 0.0, pTable->m_float);
+//
+//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 2"));
+//		EXPECT_TRUE( pTable->GetNext() );
+////		i = (int) pTable->m_decimal_18_0.val;
+//		t = (void*) &(pTable->m_decimal_18_0.val);
+//		i = *((uint16_t*) t);
+//		memcpy(&u, &(pTable->m_decimal_18_0.val), 16);
+//		changeEndianess<uint16_t>(u);
+//
+//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 3"));
+//		EXPECT_TRUE( pTable->GetNext() );
+//	//	i = (int) pTable->m_decimal_18_0.val;
+//		t = (void*) &(pTable->m_decimal_18_0.val);
+//		i = *((uint16_t*) t);
+//		memcpy(&u, &(pTable->m_decimal_18_0.val), 16);
+//		changeEndianess<uint16_t>(u);
+//
+//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
+//		EXPECT_TRUE( pTable->GetNext() );
+//	//	i = (int) pTable->m_decimal_18_10.val;
+//		t = (void*) &(pTable->m_decimal_18_10.val);
+//		i = *((uint16_t*) t);
+//		memcpy(&u, &(pTable->m_decimal_18_10.val), 16);
+//		changeEndianess<uint16_t>(u);
+//
+//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 5"));
+//		EXPECT_TRUE( pTable->GetNext() );
+//	//	i = (int) pTable->m_decimal_18_10.val;
+//		t = (void*) &(pTable->m_decimal_18_10.val);
+//		i = *((uint16_t*) t);
+//		memcpy(&u, &(pTable->m_decimal_18_10.val), 16);
+//		changeEndianess<uint16_t>(u);
+//
+//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 6"));
+//		EXPECT_TRUE( pTable->GetNext() );
+//	//	i = (int) pTable->m_decimal_18_10.val;
+//		t = (void*) &(pTable->m_decimal_18_10.val);
+//		i = *((uint16_t*) t);
+//		memcpy(&u, &(pTable->m_decimal_18_10.val), 16);
+//		changeEndianess<uint16_t>(u);
+//
+//		delete pTable;
+		
+	//}
+
+
+
+	// OLD
+	// ============
+
 	//TEST_P(DbTableTest, ReadIntTypes)
 	//{
 	//	EXPECT_TRUE(true);
