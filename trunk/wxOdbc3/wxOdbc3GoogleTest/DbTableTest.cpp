@@ -483,43 +483,4 @@ namespace wxOdbc3Test
 
 		delete pTable;
 	}
-
-
-
-	// OLD
-	// ============
-
-	//TEST_P(DbTableTest, ReadIntTypes)
-	//{
-	//	EXPECT_TRUE(true);
-	//}
-
-
-
-	//void DbTest::OpenTest(const std::wstring dsn, const std::wstring user, const std::wstring pass, bool forwardOnlyCursors)
-	//{
-	//	wxDbConnectInf* pConnectInf = new wxDbConnectInf(NULL, dsn, user, pass);
-	//	HENV henv = pConnectInf->GetHenv();
-	//	if(!henv)
-	//	{
-	//		delete pConnectInf;
-	//		ASSERT_TRUE(henv);
-	//	}
-
-	//	wxDb* pDb = new wxDb(henv, forwardOnlyCursors);
-
-	//	// Open without failing on unsupported datatypes
-	//	EXPECT_TRUE(pDb->Open(pConnectInf, false));
-	//	pDb->Close();
-	//	delete pDb;
-
-	//	// Open with failing on unsupported datatypes
-	//	pDb = new wxDb(henv, forwardOnlyCursors);
-	//	EXPECT_TRUE(pDb->Open(pConnectInf, true));
-	//	pDb->Close();
-
-	//	delete pDb;
-	//	delete pConnectInf;
-	//}
-
 }
