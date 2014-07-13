@@ -347,61 +347,60 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
-			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( wxString(L"0"), wxString(pTable->m_wcdecimal_18_0));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L"0"), wxString(pTable->m_wcdecimal_18_0));
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 2"));
-			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( wxString(L"123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 2"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L"123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
 	
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 3"));
-			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 3"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
 	
-			// DB2 sends a ',', mysql sends a '.' as delimeter
-			if(m_odbcInfo.m_dsn == DB2_DSN)
-			{
-				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
-				EXPECT_TRUE( pTable->GetNext() );
-				EXPECT_EQ( wxString(L"0,0000000000"), wxString(pTable->m_wcdecimal_18_10));	
-
-				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 5"));
-				EXPECT_TRUE( pTable->GetNext() );
-				EXPECT_EQ( wxString(L"12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
-
-				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 6"));
-				EXPECT_TRUE( pTable->GetNext() );
-				EXPECT_EQ( wxString(L"-12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
-			}
-			else
-			{
-				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
-				EXPECT_TRUE( pTable->GetNext() );
-				EXPECT_EQ( wxString(L"0.0000000000"), wxString(pTable->m_wcdecimal_18_10));	
-
-				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 5"));
-				EXPECT_TRUE( pTable->GetNext() );
-				EXPECT_EQ( wxString(L"12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
-
-				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 6"));
-				EXPECT_TRUE( pTable->GetNext() );
-				EXPECT_EQ( wxString(L"-12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
-			}
-	
-			// Test for NULL
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
-			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_FALSE( pTable->IsColNull(1) );
-			EXPECT_TRUE( pTable->IsColNull(2) );
-
+		// DB2 sends a ',', mysql sends a '.' as delimeter
+		if(m_odbcInfo.m_dsn == DB2_DSN)
+		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
 			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_TRUE( pTable->IsColNull(1) );
-			EXPECT_FALSE( pTable->IsColNull(2) );
+			EXPECT_EQ( wxString(L"0,0000000000"), wxString(pTable->m_wcdecimal_18_10));	
 
-			delete pTable;
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 5"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( wxString(L"12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
 
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 6"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( wxString(L"-12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+		}
+		else
+		{
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( wxString(L"0.0000000000"), wxString(pTable->m_wcdecimal_18_10));	
+
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 5"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( wxString(L"12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 6"));
+			EXPECT_TRUE( pTable->GetNext() );
+			EXPECT_EQ( wxString(L"-12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+		}
+	
+		// Test for NULL
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_FALSE( pTable->IsColNull(1) );
+		EXPECT_TRUE( pTable->IsColNull(2) );
+
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_TRUE( pTable->IsColNull(1) );
+		EXPECT_FALSE( pTable->IsColNull(2) );
+
+		delete pTable;
 	}
 
 
