@@ -79,4 +79,21 @@ namespace wxOdbc3Test
 		SetColDefs(2, L"time", DB_DATA_TYPE_DATE, &m_time, SQL_C_TIME, sizeof(m_time), false, false, false, false);
 		SetColDefs(3, L"timestamp", DB_DATA_TYPE_DATE, &m_timestamp, SQL_C_TIMESTAMP, sizeof(m_timestamp), false, false, false, false);
 	}
+
+	// FloatTypesTable
+	// ---------------
+	FloatTypesTable::FloatTypesTable(wxDb* pDb)
+		: wxDbTable(pDb, L"floattypes", 3, L"", wxDB_QUERY_ONLY)
+	{
+		m_idFloatTypes	= 0;
+		m_double		= 0;
+		m_float			= 0;
+
+		// Note: When binding a column of type FLOAT (database-type), you still need to use SQL_C_DOUBLE
+		// SQL_C_FLOAT is for REAL (database-type), which I will not test here, mysql doesnt know about it
+		// TODO: Test it for db-2 specific test. But do that once we can determine the db-type from the wxDb object itself 
+		SetColDefs(0, L"idfloattypes", DB_DATA_TYPE_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), true, false, false, false);
+		SetColDefs(1, L"double", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
+		SetColDefs(2, L"float", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
+	}
 }

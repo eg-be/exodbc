@@ -80,9 +80,22 @@ namespace wxOdbc3Test
 		DateTypesTable(wxDb* pDb);
 		virtual ~DateTypesTable() {};
 
-		int32_t					m_idDateTypes;
+		SQLINTEGER				m_idDateTypes;
 		SQL_DATE_STRUCT			m_date;
 		SQL_TIME_STRUCT			m_time;
 		SQL_TIMESTAMP_STRUCT	m_timestamp;
+	};
+
+	//FloatTypesTable
+	// --------------
+	class FloatTypesTable : public wxDbTable
+	{
+	public:
+		FloatTypesTable(wxDb* pDb);
+		virtual ~FloatTypesTable() {};
+
+		SQLINTEGER				m_idFloatTypes;
+		SQLDOUBLE				m_double;
+		SQLFLOAT				m_float;
 	};
 }
