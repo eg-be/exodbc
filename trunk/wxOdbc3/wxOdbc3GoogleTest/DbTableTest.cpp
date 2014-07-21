@@ -505,18 +505,17 @@ namespace wxOdbc3Test
 							0x01, 0x23, 0x45, 0x67
 		};
 
-		// TODO: Use m memory compare, not string. for 0 this will not work
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ(wxString(empty, sizeof(pTable->m_blob)), wxString(pTable->m_blob, sizeof(pTable->m_blob)));
+		EXPECT_EQ(0, memcmp(empty, pTable->m_blob, sizeof(pTable->m_blob)));
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ(wxString(ff, sizeof(pTable->m_blob)), wxString(pTable->m_blob, sizeof(pTable->m_blob)));
+		EXPECT_EQ(0, memcmp(ff, pTable->m_blob, sizeof(pTable->m_blob)));
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ(wxString(abc, sizeof(pTable->m_blob)), wxString(pTable->m_blob, sizeof(pTable->m_blob)));
+		EXPECT_EQ(0, memcmp(abc, pTable->m_blob, sizeof(pTable->m_blob)));
 
 		// Test for NULL
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 1"));
