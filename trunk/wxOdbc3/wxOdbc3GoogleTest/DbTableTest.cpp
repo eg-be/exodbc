@@ -683,4 +683,41 @@ namespace wxOdbc3Test
 
 		delete pTable;
 	}
+
+	TEST_P(DbTableTest, ExecSQL_InsertFloatTypes)
+	{
+		FloatTypesTmpTable* pTable = new FloatTypesTmpTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		wxString sqlstmt;
+		sqlstmt.Printf(L"DELETE FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp >= 0");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		sqlstmt.Printf("INSERT INTO wxodbc3.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (1, -3.141592, -3.141)");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( -3.141592, pTable->m_double);
+		EXPECT_EQ( -3.141, pTable->m_float);
+		EXPECT_FALSE( pTable->GetNext() );
+
+		sqlstmt.Printf("INSERT INTO wxodbc3.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (2, 3.141592, 3.141)");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp = 2"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( 3.141592, pTable->m_double);
+		EXPECT_EQ( 3.141, pTable->m_float);
+		EXPECT_FALSE( pTable->GetNext() );
+
+
+		delete pTable;
+	}
+
 }

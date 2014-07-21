@@ -149,6 +149,19 @@ namespace wxOdbc3Test
 		SQLFLOAT				m_float;
 	};
 
+	// FloatTypesTmpTable
+	// ------------------
+	class FloatTypesTmpTable : public wxDbTable
+	{
+	public:
+		FloatTypesTmpTable(wxDb* pDb);
+		virtual ~FloatTypesTmpTable() {};
+
+		SQLINTEGER				m_idFloatTypes;
+		SQLDOUBLE				m_double;
+		SQLFLOAT				m_float;
+	};
+
 	// NumbericTypesTable
 	// ------------------
 	class NumericTypesTable : public wxDbTable
