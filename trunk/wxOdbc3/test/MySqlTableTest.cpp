@@ -48,7 +48,7 @@ namespace MySql_5_2
 
 	void TableTest::setUp()
 	{
-		m_dsn = MYSQL_5_2_DSN;
+		m_dsn = DSN_MYSQL_5_2;
 		TableTestBase::setUp(m_dsn);
 	}
 
@@ -68,7 +68,7 @@ namespace MySql_3_51
 
 	void TableTest::setUp()
 	{
-		m_dsn = MYSQL_3_51_DSN;
+		m_dsn = DSN_MYSQL_3_51;
 		TableTestBase::setUp(m_dsn);
 	}
 
@@ -87,7 +87,7 @@ namespace MySql
 	void TableTestBase::setUp(const std::wstring& dsn)
 	{
 		// Create DbConnectInfs for various databases
-		m_pConnectInfMySql = new wxDbConnectInf(NULL, dsn, MYSQL_USER, MYSQL_PASS);
+		m_pConnectInfMySql = new wxDbConnectInf(NULL, dsn, USER_MYSQL, PASS_MYSQL);
 
 		// bool ok = m_pConnectInfMySql->SetSqlAttrOdbcVersion(SQL_OV_ODBC2);
 		unsigned long odbcVersion = m_pConnectInfMySql->ReadSqlAttrOdbcVersion();
@@ -172,7 +172,7 @@ namespace MySql
 			// Open without any checking - should work even if table does not exist
 			// Some drivers report an error on binding.
 			// I dont know yet what is "correct": See Ticket #14
-			if(m_dsn != MYSQL_5_2_DSN)
+			if(m_dsn != DSN_MYSQL_5_2)
 			{
 				CPPUNIT_ASSERT( pTable->Open(false, false) );
 			}
@@ -303,7 +303,7 @@ namespace MySql
 			CPPUNIT_ASSERT_EQUAL( (uint32_t) 4294967295, pTable->m_uint );
 
 			// Fails with MySql ODBC Connector 5.x. See Ticket #16
-			if(m_dsn != MYSQL_5_2_DSN)
+			if(m_dsn != DSN_MYSQL_5_2)
 			{
 				CPPUNIT_ASSERT( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 15"));
 				CPPUNIT_ASSERT( pTable->GetNext());

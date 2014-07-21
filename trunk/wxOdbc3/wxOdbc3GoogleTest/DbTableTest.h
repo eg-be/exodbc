@@ -31,16 +31,16 @@ namespace wxOdbc3Test
 	INSTANTIATE_TEST_CASE_P(
 		MySql_3_51,
 		DbTableTest,
-		::testing::Values(	SOdbcInfo(MYSQL_3_51_DSN, MYSQL_USER, MYSQL_PASS, SOdbcInfo::forwardOnlyCursors)));
+		::testing::Values(	SOdbcInfo(DSN_MYSQL_3_51, USER_MYSQL, PASS_MYSQL, SOdbcInfo::forwardOnlyCursors)));
 
 	INSTANTIATE_TEST_CASE_P(
 		MySql_5_2,
 		DbTableTest,
-		::testing::Values(	SOdbcInfo(MYSQL_5_2_DSN, MYSQL_USER, MYSQL_PASS, SOdbcInfo::forwardOnlyCursors)));
+		::testing::Values(	SOdbcInfo(DSN_MYSQL_5_2, USER_MYSQL, PASS_MYSQL, SOdbcInfo::forwardOnlyCursors)));
 
 	INSTANTIATE_TEST_CASE_P(
 		IBM_DB2,
 		DbTableTest,
-		::testing::Values(	SOdbcInfo(DB2_DSN, DB2_USER, DB2_PASS, SOdbcInfo::forwardOnlyCursors)));
+		::testing::Values(	SOdbcInfo(DSN_DB2, USER_DB2, PASS_DB2, SOdbcInfo::forwardOnlyCursors)));
 
 }

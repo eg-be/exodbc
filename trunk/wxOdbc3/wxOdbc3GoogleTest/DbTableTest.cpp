@@ -154,7 +154,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( 56, pTable->m_timestamp.second);
 		
 		// TODO: MySql does not have fractions, ibm db2 adds '000' at the end (?)
-		if(m_odbcInfo.m_dsn == DB2_DSN)
+		if(m_odbcInfo.m_dsn == DSN_DB2)
 		{
 			EXPECT_EQ( 123456000, pTable->m_timestamp.fraction);
 		}
@@ -204,7 +204,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
 
 		// IBM DB2 has no support for unsigned int types
-		if(m_odbcInfo.m_dsn != DB2_DSN)
+		if(m_odbcInfo.m_dsn != DSN_DB2)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
 			EXPECT_TRUE( pTable->GetNext() );
@@ -228,7 +228,7 @@ namespace wxOdbc3Test
 
 			// With the 5.2 odbc driver bigint seems to be wrong?
 			// TODO: This is ugly, use some kind of disabled test, or log a warning..
-			if(m_odbcInfo.m_dsn != MYSQL_5_2_DSN)
+			if(m_odbcInfo.m_dsn != DSN_MYSQL_5_2)
 			{
 				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 12"));
 				EXPECT_TRUE( pTable->GetNext() );
@@ -244,7 +244,7 @@ namespace wxOdbc3Test
 		EXPECT_FALSE( pTable->IsColNull(1) );
 		EXPECT_TRUE( pTable->IsColNull(2) );
 		EXPECT_TRUE( pTable->IsColNull(3) );
-		if(m_odbcInfo.m_dsn != DB2_DSN)
+		if(m_odbcInfo.m_dsn != DSN_DB2)
 		{
 			EXPECT_TRUE( pTable->IsColNull(4) );
 			EXPECT_TRUE( pTable->IsColNull(5) );
@@ -259,7 +259,7 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_FALSE( pTable->IsColNull(3) );
 
-		if(m_odbcInfo.m_dsn != DB2_DSN)
+		if(m_odbcInfo.m_dsn != DSN_DB2)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
 			EXPECT_TRUE( pTable->GetNext());
@@ -432,7 +432,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
 	
 		// DB2 sends a ',', mysql sends a '.' as delimeter
-		if(m_odbcInfo.m_dsn == DB2_DSN)
+		if(m_odbcInfo.m_dsn == DSN_DB2)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
 			EXPECT_TRUE( pTable->GetNext() );
@@ -538,12 +538,6 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		//if(m_odbcInfo.m_dsn == DB2_DSN)
-		//{
-		//	delete pTable;
-		//	return;
-		//}
-
 		wxString sqlstmt;
 		sqlstmt.Printf(L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0");
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
@@ -575,7 +569,7 @@ namespace wxOdbc3Test
 		EXPECT_FALSE( pTable->GetNext());
 
 		// IBM DB2 has no support for unsigned int types
-		if(m_odbcInfo.m_dsn != DB2_DSN)
+		if(m_odbcInfo.m_dsn != DSN_DB2)
 		{
 			sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (4, 0, 0, 0)");
 			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
@@ -596,7 +590,7 @@ namespace wxOdbc3Test
 			EXPECT_EQ( 4294967295, pTable->m_uint);
 			// With the 5.2 odbc driver ubigint seems to be wrong?
 			// TODO: This is ugly, use some kind of disabled test, or log a warning..
-			if(m_odbcInfo.m_dsn != MYSQL_5_2_DSN)
+			if(m_odbcInfo.m_dsn != DSN_MYSQL_5_2)
 			{
 				EXPECT_EQ( 18446744073709551615, pTable->m_ubigInt);
 			}
@@ -663,7 +657,7 @@ namespace wxOdbc3Test
 		// Note the escaping:
 		// IBM DB2 wants to escape ' using '', mysql wants \'
 		// MYSQL needs \\ for \ 
-		if(m_odbcInfo.m_dsn == DB2_DSN)
+		if(m_odbcInfo.m_dsn == DSN_DB2)
 		{
 			sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
 		}

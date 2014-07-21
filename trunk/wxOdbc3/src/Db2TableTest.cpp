@@ -48,7 +48,7 @@ namespace DB2_10_05
 
 	void TableTest::setUp()
 	{
-		m_dsn = DB2_DSN;
+		m_dsn = DSN_DB2;
 		TableTestBase::setUp(m_dsn);
 	}
 
@@ -67,7 +67,7 @@ namespace DB2
 	void TableTestBase::setUp(const std::wstring& dsn)
 	{
 		// Create DbConnectInfs for various databases
-		m_pConnectInfDb2 = new wxDbConnectInf(NULL, dsn, DB2_USER, DB2_PASS);
+		m_pConnectInfDb2 = new wxDbConnectInf(NULL, dsn, USER_DB2, PASS_DB2);
 
 		unsigned long odbcVersion = m_pConnectInfDb2->ReadSqlAttrOdbcVersion();
 		CPPUNIT_ASSERT_EQUAL(SQL_OV_ODBC2, odbcVersion);
@@ -161,7 +161,7 @@ namespace DB2
 			// Open without any checking - should work even if table does not exist
 			// Some drivers report an error on binding.
 			// I dont know yet what is "correct": See Ticket #14
-			if(m_dsn != DB2_DSN)
+			if(m_dsn != DSN_DB2)
 			{
 				CPPUNIT_ASSERT( pTable->Open(false, false) );
 			}
