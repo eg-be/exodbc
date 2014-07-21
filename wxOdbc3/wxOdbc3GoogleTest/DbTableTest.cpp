@@ -615,18 +615,12 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		if(m_odbcInfo.m_dsn == DB2_DSN)
-		{
-			delete pTable;
-			return;
-		}
-
 		wxString sqlstmt;
 		sqlstmt.Printf(L"DELETE FROM wxodbc3.datetypes_tmp WHERE iddatetypes_tmp >= 0");
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-
-		sqlstmt.Printf("INSERT INTO wxodbc3.datetypes_tmp (iddatetypes_tmp, tdate, ttime, ttimestamp) VALUES (1, '19830126', '13:55:56', '1983-01-26T13:55:56')");
+		
+		sqlstmt.Printf("INSERT INTO wxodbc3.datetypes_tmp (iddatetypes_tmp, tdate, ttime, ttimestamp) VALUES (1, '1983-01-26', '13:55:56', '1983-01-26 13:55:56')");
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes_tmp WHERE iddatetypes_tmp = 1"));
