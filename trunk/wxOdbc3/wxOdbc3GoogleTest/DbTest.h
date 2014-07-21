@@ -19,7 +19,8 @@ namespace wxOdbc3Test
 		bool m_forwardOnlyCursors;
 	};
 
-
+	// TODO: We can keep this as an example for the params, but we must test the forward-only otherwise.
+	// TODO: Forward only only affects moving through row (?)
 	INSTANTIATE_TEST_CASE_P(
 		MySql_3_51,
 		DbTest,
