@@ -552,35 +552,32 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
 		EXPECT_FALSE( pTable->GetNext());
 
-		//sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, `smallint`, `int`, `bigint`) VALUES (1, -32768, -2147483648, -9223372036854775808)");
-		////sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, smallint, int, bigint) VALUES (1, -32768, -2147483648, -9223372036854775808)");
-		////sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, smallint, int, bigint) VALUES (1, -32768, -2147483648, -9223372036854775808)");
-		//EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		//EXPECT_TRUE( m_pDb->CommitTrans() );
+		sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		//EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
-		//EXPECT_TRUE( pTable->GetNext());
-		//EXPECT_EQ( -32768, pTable->m_smallInt);
-		//EXPECT_EQ( INT_MIN, pTable->m_int);
-		//EXPECT_EQ( -LLONG_MIN, pTable->m_bigInt);
-		//EXPECT_FALSE( pTable->GetNext());
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
+		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_EQ( -32768, pTable->m_smallInt);
+		EXPECT_EQ( INT_MIN, pTable->m_int);
+		EXPECT_EQ( -LLONG_MIN, pTable->m_bigInt);
+		EXPECT_FALSE( pTable->GetNext());
 
-		////sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (`idintegertypes_tmp`, `smallint`, `int`, `bigint`) VALUES (2, 32767, 2147483647, 9223372036854775807)");
-		//sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, smallint, int, bigint) VALUES (2, 32767, 2147483647, 9223372036854775807)");
-		//EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		//EXPECT_TRUE( m_pDb->CommitTrans() );
-		//EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
-		//EXPECT_TRUE( pTable->GetNext());
-		//EXPECT_TRUE( pTable->GetNext());
-		//EXPECT_EQ( 32767, pTable->m_smallInt);
-		//EXPECT_EQ( 2147483647, pTable->m_int);
-		//EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
-		//EXPECT_FALSE( pTable->GetNext());
+		sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (2, 32767, 2147483647, 9223372036854775807)");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
+		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_EQ( 32767, pTable->m_smallInt);
+		EXPECT_EQ( 2147483647, pTable->m_int);
+		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
+		EXPECT_FALSE( pTable->GetNext());
 
 		// IBM DB2 has no support for unsigned int types
 		if(m_odbcInfo.m_dsn != DB2_DSN)
 		{
-			sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (`idintegertypes_tmp`, `usmallint`, `uint`, `ubigint`) VALUES (4, 0, 0, 0)");
+			sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (4, 0, 0, 0)");
 			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 			EXPECT_TRUE( m_pDb->CommitTrans() );
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp = 4"));
@@ -590,7 +587,7 @@ namespace wxOdbc3Test
 			EXPECT_EQ( 0, pTable->m_ubigInt);
 			EXPECT_FALSE( pTable->GetNext());
 
-			sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (`idintegertypes_tmp`, `usmallint`, `uint`, `ubigint`) VALUES (5, 65535, 4294967295, 18446744073709551615)");
+			sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (5, 65535, 4294967295, 18446744073709551615)");
 			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 			EXPECT_TRUE( m_pDb->CommitTrans() );
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp  WHERE idintegertypes_tmp = 5"));
@@ -629,7 +626,7 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		sqlstmt.Printf("INSERT INTO wxodbc3.datetypes_tmp (`iddatetypes_tmp`, `date`, `time`, `timestamp`) VALUES (1, '19830126', '13:55:56', '1983-01-26T13:55:56')");
+		sqlstmt.Printf("INSERT INTO wxodbc3.datetypes_tmp (iddatetypes_tmp, tdate, ttime, ttimestamp) VALUES (1, '19830126', '13:55:56', '1983-01-26T13:55:56')");
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes_tmp WHERE iddatetypes_tmp = 1"));
@@ -676,7 +673,7 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
 		// Note the escaping..
-		sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (`idchartypes_tmp`, `varchar`, `char`) VALUES (1, '%s', '%s')", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+		sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 

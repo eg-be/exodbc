@@ -37,8 +37,8 @@ namespace wxOdbc3Test
 		m_char[0]		= 0;
 
 		SetColDefs(0, L"idchartypes", DB_DATA_TYPE_INTEGER, &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes), true, false, false, false);
-		SetColDefs(1, L"varchar", DB_DATA_TYPE_VARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), false, false, false, false);
-		SetColDefs(2, L"char", DB_DATA_TYPE_VARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), false, false, false, false);
+		SetColDefs(1, L"tvarchar", DB_DATA_TYPE_VARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), false, false, false, false);
+		SetColDefs(2, L"tchar", DB_DATA_TYPE_VARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), false, false, false, false);
 	}
 
 	// CharTypesTmpTable
@@ -51,8 +51,8 @@ namespace wxOdbc3Test
 		m_char[0]		= 0;
 
 		SetColDefs(0, L"idchartypes_tmp", DB_DATA_TYPE_INTEGER, &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes), true, false, false, false);
-		SetColDefs(1, L"varchar", DB_DATA_TYPE_VARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), false, false, false, false);
-		SetColDefs(2, L"char", DB_DATA_TYPE_VARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), false, false, false, false);
+		SetColDefs(1, L"tvarchar", DB_DATA_TYPE_VARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), false, false, false, false);
+		SetColDefs(2, L"tchar", DB_DATA_TYPE_VARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), false, false, false, false);
 	}
 
 	// IntTypesTable
@@ -71,13 +71,13 @@ namespace wxOdbc3Test
 		// TODO: Note: IBM DB2 has no unsigned-cols, but we get no error and no warning?
 		// TODO: Should the error be spit when the table is opened?
 
-		SetColDefs(0, L"IDINTEGERTYPES", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
-		SetColDefs(1, L"SMALLINT", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
-		SetColDefs(2, L"INT", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
-		SetColDefs(3, L"BIGINT", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), false, false, false, false);	
-		SetColDefs(4, L"USMALLINT", DB_DATA_TYPE_INTEGER, &m_usmallInt, SQL_C_USHORT, sizeof(m_usmallInt), false, false, false, false);	
-		SetColDefs(5, L"UINT", DB_DATA_TYPE_INTEGER, &m_uint, SQL_C_ULONG, sizeof(m_usmallInt), false, false, false, false);	
-		SetColDefs(6, L"UBIGINT", DB_DATA_TYPE_INTEGER, &m_ubigInt, SQL_C_UBIGINT, sizeof(m_usmallInt), false, false, false, false);	
+		SetColDefs(0, L"idintegertypes", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
+		SetColDefs(1, L"tsmallint", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
+		SetColDefs(2, L"tint", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
+		SetColDefs(3, L"tbigint", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), false, false, false, false);	
+		SetColDefs(4, L"tusmallint", DB_DATA_TYPE_INTEGER, &m_usmallInt, SQL_C_USHORT, sizeof(m_usmallInt), false, false, false, false);	
+		SetColDefs(5, L"tuint", DB_DATA_TYPE_INTEGER, &m_uint, SQL_C_ULONG, sizeof(m_usmallInt), false, false, false, false);	
+		SetColDefs(6, L"tubigint", DB_DATA_TYPE_INTEGER, &m_ubigInt, SQL_C_UBIGINT, sizeof(m_usmallInt), false, false, false, false);	
 	}
 
 	// IntTypesTmpTable
@@ -93,13 +93,13 @@ namespace wxOdbc3Test
 		m_uint = 0;
 		m_ubigInt = 0;
 
-		SetColDefs(0, L"IDINTEGERTYPES_TMP", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
-		SetColDefs(1, L"SMALLINT", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
-		SetColDefs(2, L"INT", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
-		SetColDefs(3, L"BIGINT", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), false, false, false, false);	
-		SetColDefs(4, L"USMALLINT", DB_DATA_TYPE_INTEGER, &m_usmallInt, SQL_C_USHORT, sizeof(m_usmallInt), false, false, false, false);	
-		SetColDefs(5, L"UINT", DB_DATA_TYPE_INTEGER, &m_uint, SQL_C_ULONG, sizeof(m_usmallInt), false, false, false, false);	
-		SetColDefs(6, L"UBIGINT", DB_DATA_TYPE_INTEGER, &m_ubigInt, SQL_C_UBIGINT, sizeof(m_usmallInt), false, false, false, false);	
+		SetColDefs(0, L"idintegertypes_tmp", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
+		SetColDefs(1, L"tsmallint", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
+		SetColDefs(2, L"tint", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
+		SetColDefs(3, L"tbigint", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), false, false, false, false);	
+		SetColDefs(4, L"tusmallint", DB_DATA_TYPE_INTEGER, &m_usmallInt, SQL_C_USHORT, sizeof(m_usmallInt), false, false, false, false);	
+		SetColDefs(5, L"tuint", DB_DATA_TYPE_INTEGER, &m_uint, SQL_C_ULONG, sizeof(m_usmallInt), false, false, false, false);	
+		SetColDefs(6, L"tubigint", DB_DATA_TYPE_INTEGER, &m_ubigInt, SQL_C_UBIGINT, sizeof(m_usmallInt), false, false, false, false);	
 	}
 
 	// DateTypesTable
@@ -114,9 +114,9 @@ namespace wxOdbc3Test
 
 		// Note: We are odbc v. 2, therefore use the old s-type (without type: SQL_C_DATE instead of SQL_C_TYPE_DATE). See Ticket # 17
 		SetColDefs(0, L"iddatetypes", DB_DATA_TYPE_INTEGER, &m_idDateTypes, SQL_C_SLONG, sizeof(m_idDateTypes), true, false, false, false);
-		SetColDefs(1, L"date", DB_DATA_TYPE_DATE, &m_date, SQL_C_DATE, sizeof(m_date), false, false, false, false);
-		SetColDefs(2, L"time", DB_DATA_TYPE_DATE, &m_time, SQL_C_TIME, sizeof(m_time), false, false, false, false);
-		SetColDefs(3, L"timestamp", DB_DATA_TYPE_DATE, &m_timestamp, SQL_C_TIMESTAMP, sizeof(m_timestamp), false, false, false, false);
+		SetColDefs(1, L"tdate", DB_DATA_TYPE_DATE, &m_date, SQL_C_DATE, sizeof(m_date), false, false, false, false);
+		SetColDefs(2, L"ttime", DB_DATA_TYPE_DATE, &m_time, SQL_C_TIME, sizeof(m_time), false, false, false, false);
+		SetColDefs(3, L"ttimestamp", DB_DATA_TYPE_DATE, &m_timestamp, SQL_C_TIMESTAMP, sizeof(m_timestamp), false, false, false, false);
 	}
 
 	// DateTypesTmpTable
@@ -131,9 +131,9 @@ namespace wxOdbc3Test
 
 		// Note: We are odbc v. 2, therefore use the old s-type (without type: SQL_C_DATE instead of SQL_C_TYPE_DATE). See Ticket # 17
 		SetColDefs(0, L"iddatetypes_tmp", DB_DATA_TYPE_INTEGER, &m_idDateTypes, SQL_C_SLONG, sizeof(m_idDateTypes), true, false, false, false);
-		SetColDefs(1, L"date", DB_DATA_TYPE_DATE, &m_date, SQL_C_DATE, sizeof(m_date), false, false, false, false);
-		SetColDefs(2, L"time", DB_DATA_TYPE_DATE, &m_time, SQL_C_TIME, sizeof(m_time), false, false, false, false);
-		SetColDefs(3, L"timestamp", DB_DATA_TYPE_DATE, &m_timestamp, SQL_C_TIMESTAMP, sizeof(m_timestamp), false, false, false, false);
+		SetColDefs(1, L"tdate", DB_DATA_TYPE_DATE, &m_date, SQL_C_DATE, sizeof(m_date), false, false, false, false);
+		SetColDefs(2, L"ttime", DB_DATA_TYPE_DATE, &m_time, SQL_C_TIME, sizeof(m_time), false, false, false, false);
+		SetColDefs(3, L"ttimestamp", DB_DATA_TYPE_DATE, &m_timestamp, SQL_C_TIMESTAMP, sizeof(m_timestamp), false, false, false, false);
 	}
 
 	// FloatTypesTable
@@ -149,8 +149,8 @@ namespace wxOdbc3Test
 		// SQL_C_FLOAT is for REAL (database-type), which I will not test here, mysql doesnt know about it
 		// TODO: Test it for db-2 specific test. But do that once we can determine the db-type from the wxDb object itself 
 		SetColDefs(0, L"idfloattypes", DB_DATA_TYPE_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), true, false, false, false);
-		SetColDefs(1, L"double", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
-		SetColDefs(2, L"float", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
+		SetColDefs(1, L"tdouble", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
+		SetColDefs(2, L"tfloat", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
 	}
 
 	// NumericTypesTable
@@ -170,13 +170,13 @@ namespace wxOdbc3Test
 		SetColDefs(0, L"idnumerictypes", DB_DATA_TYPE_INTEGER, &m_idNumericTypes, SQL_C_SLONG, sizeof(m_idNumericTypes), true, false, false, false);
 		if(m_readMode == ReasAsNumeric)
 		{
-			SetColDefs(1, L"decimal_18_0", DB_DATA_TYPE_FLOAT, &m_decimal_18_0, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
-			SetColDefs(2, L"decimal_18_10", DB_DATA_TYPE_FLOAT, &m_decimal_18_10, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
+			SetColDefs(1, L"tdecimal_18_0", DB_DATA_TYPE_FLOAT, &m_decimal_18_0, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
+			SetColDefs(2, L"tdecimal_18_10", DB_DATA_TYPE_FLOAT, &m_decimal_18_10, SQL_C_NUMERIC, sizeof(m_decimal_18_0), false, false, false, false);
 		}
 		else if(m_readMode == ReadAsChar)
 		{
-			SetColDefs(1, L"decimal_18_0", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_0, SQL_C_WCHAR, sizeof(m_wcdecimal_18_0), false, false, false, false);
-			SetColDefs(2, L"decimal_18_10", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_10, SQL_C_WCHAR, sizeof(m_wcdecimal_18_10), false, false, false, false);
+			SetColDefs(1, L"tdecimal_18_0", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_0, SQL_C_WCHAR, sizeof(m_wcdecimal_18_0), false, false, false, false);
+			SetColDefs(2, L"tdecimal_18_10", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_10, SQL_C_WCHAR, sizeof(m_wcdecimal_18_10), false, false, false, false);
 		}
 	};
 
@@ -188,6 +188,6 @@ namespace wxOdbc3Test
 		ZeroMemory(m_blob, sizeof(m_blob));
 
 		SetColDefs(0, L"idblobtypes", DB_DATA_TYPE_INTEGER, &m_idBlobTypes, SQL_C_SLONG, sizeof(m_idBlobTypes), true, false, false, false);
-		SetColDefs(1, L"blob", DB_DATA_TYPE_VARCHAR, m_blob, SQL_C_BINARY, sizeof(m_blob), false, false, false, false);
+		SetColDefs(1, L"tblob", DB_DATA_TYPE_VARCHAR, m_blob, SQL_C_BINARY, sizeof(m_blob), false, false, false, false);
 	}
 }
