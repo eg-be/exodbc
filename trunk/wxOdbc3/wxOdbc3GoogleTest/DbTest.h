@@ -6,6 +6,7 @@
 #include "Utils.h"
 
 class wxDbConnectInf;
+class wxDb;
 
 namespace wxOdbc3Test
 {
@@ -16,7 +17,8 @@ namespace wxOdbc3Test
 		virtual void TearDown();
 
 		wxDbConnectInf* m_pConnectInf;
-		bool m_forwardOnlyCursors;
+		wxDb*	m_pDb;
+		SOdbcInfo m_odbcInfo;
 	};
 
 	// TODO: We can keep this as an example for the params, but we must test the forward-only otherwise.
