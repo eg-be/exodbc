@@ -661,19 +661,22 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		if(m_odbcInfo.m_dsn == DB2_DSN)
-		{
-			delete pTable;
-			return;
-		}
-
 		wxString sqlstmt;
 		sqlstmt.Printf(L"DELETE FROM wxodbc3.chartypes_tmp WHERE idchartypes_tmp >= 0");
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		// Note the escaping..
-		sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+		// Note the escaping:
+		// IBM DB2 wants to escape ' using '', mysql wants \'
+		// MYSQL needs \\ for \ 
+		if(m_odbcInfo.m_dsn == DB2_DSN)
+		{
+			sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+		}
+		else
+		{
+			sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+		}
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
