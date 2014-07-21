@@ -183,6 +183,28 @@ namespace wxOdbc3Test
 	private:
 	};
 
+	// NumbericTypesTable
+	// ------------------
+	class NumericTypesTmpTable : public wxDbTable
+	{
+	public:
+		// TODO: This name is not correct. ? The test write as "numer".. mmh
+		enum ReadMode { ReasAsNumeric, ReadAsChar };
+		NumericTypesTmpTable(wxDb* pDb, ReadMode readMode);
+		virtual ~NumericTypesTmpTable() {};
+
+		SQLINTEGER			m_idNumericTypes;
+		SQL_NUMERIC_STRUCT	m_decimal_18_0;
+		SQL_NUMERIC_STRUCT	m_decimal_18_10;
+
+		SQLWCHAR			m_wcdecimal_18_0[20 + 1];
+		SQLWCHAR			m_wcdecimal_18_10[20 + 1];
+
+		const ReadMode m_readMode;
+
+	private:
+	};
+
 	// BlobTypesTable
 	// --------------
 	class BlobTypesTable : public wxDbTable

@@ -714,4 +714,57 @@ namespace wxOdbc3Test
 		delete pTable;
 	}
 
+
+	TEST_P(DbTableTest, ExecSQL_InsertNumericTypesAsChar)
+	{
+		NumericTypesTmpTable* pTable = new NumericTypesTmpTable(m_pDb, NumericTypesTmpTable::ReadAsChar);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		wxString sqlstmt;
+		sqlstmt.Printf(L"DELETE FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp >= 0");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		sqlstmt.Printf("INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (1, -123456789012345678, -12345678.9012345678)");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
+		if(m_odbcInfo.m_dsn == DSN_DB2)
+			EXPECT_EQ( wxString(L"-12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+		else
+			EXPECT_EQ( wxString(L"-12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+
+		sqlstmt.Printf("INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (2, 123456789012345678, 12345678.9012345678)");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 2"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L"123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
+		if(m_odbcInfo.m_dsn == DSN_DB2)
+			EXPECT_EQ( wxString(L"12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+		else
+			EXPECT_EQ( wxString(L"12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+		
+		sqlstmt.Printf("INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (3, 0, 0.0000000000)");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 3"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ( wxString(L"0"), wxString(pTable->m_wcdecimal_18_0));
+		if(m_odbcInfo.m_dsn == DSN_DB2)
+			EXPECT_EQ( wxString(L"0,0000000000"), wxString(pTable->m_wcdecimal_18_10));	
+		else
+			EXPECT_EQ( wxString(L"0.0000000000"), wxString(pTable->m_wcdecimal_18_10));	
+
+		delete pTable;
+	}
 }
