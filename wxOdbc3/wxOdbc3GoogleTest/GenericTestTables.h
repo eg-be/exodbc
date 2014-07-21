@@ -216,4 +216,16 @@ namespace wxOdbc3Test
 		SQLINTEGER		m_idBlobTypes;
 		SQLCHAR			m_blob[16];
 	};
+
+	// BlobTypesTmpTable
+	// --------------
+	class BlobTypesTmpTable : public wxDbTable
+	{
+	public:
+		BlobTypesTmpTable(wxDb* pDb);
+		virtual ~BlobTypesTmpTable() {};
+
+		SQLINTEGER		m_idBlobTypes;
+		SQLCHAR			m_blob[16];
+	};
 }
