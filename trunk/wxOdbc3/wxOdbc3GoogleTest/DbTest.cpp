@@ -45,6 +45,7 @@ namespace wxOdbc3Test
 		delete pDb;
 
 		// Open with failing on unsupported datatypes
+		// TODO: This test is stupid, we should also test that we fail
 		pDb = new wxDb(henv, m_forwardOnlyCursors);
 		EXPECT_TRUE(pDb->Open(m_pConnectInf, true));
 		pDb->Close();
