@@ -14,9 +14,9 @@
 // Other headers
 // System headers
 
-#define DB2_DSN				L"wxOdbc3_DB2_10.05"
-#define DB2_USER			L"db2admin"
-#define DB2_PASS			L"super$ql"
+#define DSN_DB2				L"wxOdbc3_DB2_10.05"
+#define USER_DB2			L"db2admin"
+#define PASS_DB2			L"super$ql"
 
 // Forward declarations
 // --------------------

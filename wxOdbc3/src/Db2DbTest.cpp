@@ -43,7 +43,7 @@ namespace DB2_10_05
 
 	void DbTest::setUp()
 	{
-		m_dsn = DB2_DSN;
+		m_dsn = DSN_DB2;
 		DbTestBase::setUp(m_dsn);
 	}
 
@@ -63,7 +63,7 @@ namespace DB2
 	void DbTestBase::setUp(const std::wstring& dsn)
 	{
 		// Create DbConnectInfs for various databases
-		m_pConnectInfDb2 = new wxDbConnectInf(NULL, dsn, DB2_USER, DB2_PASS);
+		m_pConnectInfDb2 = new wxDbConnectInf(NULL, dsn, USER_DB2, PASS_DB2);
 		m_pDbDb2 = new wxDb(m_pConnectInfDb2->GetHenv());
 	}
 

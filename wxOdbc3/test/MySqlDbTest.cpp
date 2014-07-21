@@ -43,7 +43,7 @@ namespace MySql_3_51
 
 	void DbTest::setUp()
 	{
-		m_dsn = MYSQL_3_51_DSN;
+		m_dsn = DSN_MYSQL_3_51;
 		DbTestBase::setUp(m_dsn);
 	}
 
@@ -63,7 +63,7 @@ namespace MySql_5_2
 
 	void DbTest::setUp()
 	{
-		m_dsn = MYSQL_5_2_DSN;
+		m_dsn = DSN_MYSQL_5_2;
 		DbTestBase::setUp(m_dsn);
 	}
 
@@ -81,7 +81,7 @@ namespace MySql
 	void DbTestBase::setUp(const std::wstring& dsn)
 	{
 		// Create DbConnectInfs for various databases
-		m_pConnectInfMySql = new wxDbConnectInf(NULL, dsn, MYSQL_USER, MYSQL_PASS);
+		m_pConnectInfMySql = new wxDbConnectInf(NULL, dsn, USER_MYSQL, PASS_MYSQL);
 		m_pDbMySql = new wxDb(m_pConnectInfMySql->GetHenv());
 	}
 

@@ -14,10 +14,10 @@
 // Other headers
 // System headers
 
-#define MYSQL_5_2_DSN		L"wxOdbc3_MySql_5.2"
-#define MYSQL_3_51_DSN		L"wxOdbc3_MySql_3.51"
-#define MYSQL_USER			L"wxodbc3"
-#define MYSQL_PASS			L"wxodbc3"
+#define DSN_MYSQL_5_2		L"wxOdbc3_MySql_5.2"
+#define DSN_MYSQL_3_51		L"wxOdbc3_MySql_3.51"
+#define USER_MYSQL			L"wxodbc3"
+#define PASS_MYSQL			L"wxodbc3"
 
 // Forward declarations
 // --------------------
