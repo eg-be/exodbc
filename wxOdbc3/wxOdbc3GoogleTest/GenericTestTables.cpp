@@ -147,8 +147,24 @@ namespace wxOdbc3Test
 
 		// Note: When binding a column of type FLOAT (database-type), you still need to use SQL_C_DOUBLE
 		// SQL_C_FLOAT is for REAL (database-type), which I will not test here, mysql doesnt know about it
-		// TODO: Test it for db-2 specific test. But do that once we can determine the db-type from the wxDb object itself 
+		// TODO: Test it for db-2 specific test (REAL-type? what did I mean?). But do that once we can determine the db-type from the wxDb object itself 
 		SetColDefs(0, L"idfloattypes", DB_DATA_TYPE_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), true, false, false, false);
+		SetColDefs(1, L"tdouble", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
+		SetColDefs(2, L"tfloat", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
+	}
+
+	// FloatTypesTable
+	// ---------------
+	FloatTypesTmpTable::FloatTypesTmpTable(wxDb* pDb)
+		: wxDbTable(pDb, L"floattypes_tmp", 3, L"", wxDB_QUERY_ONLY)
+	{
+		m_idFloatTypes	= 0;
+		m_double		= 0;
+		m_float			= 0;
+
+		// Note: When binding a column of type FLOAT (database-type), you still need to use SQL_C_DOUBLE
+		// SQL_C_FLOAT is for REAL (database-type), which I will not test here, mysql doesnt know about it
+		SetColDefs(0, L"idfloattypes_tmp", DB_DATA_TYPE_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), true, false, false, false);
 		SetColDefs(1, L"tdouble", DB_DATA_TYPE_FLOAT, &m_double, SQL_C_DOUBLE, sizeof(m_double), false, false, false, false);
 		SetColDefs(2, L"tfloat", DB_DATA_TYPE_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), false, false, false, false);
 	}
