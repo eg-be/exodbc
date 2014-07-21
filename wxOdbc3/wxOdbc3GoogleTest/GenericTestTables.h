@@ -50,6 +50,20 @@ namespace wxOdbc3Test
 		SQLWCHAR	m_char[128 + 1];
 	};
 
+	// CharTypesTmpTable
+	// --------------
+	class CharTypesTmpTable : public wxDbTable
+	{
+	public:
+
+		CharTypesTmpTable(wxDb* pDb);
+		virtual ~CharTypesTmpTable() {};
+
+		SQLINTEGER	m_idCharTypes;
+		SQLWCHAR	m_varchar[128 + 1];
+		SQLWCHAR	m_char[128 + 1];
+	};
+
 	// IntTypesTable
 	// ----------
 	class IntTypesTable : public wxDbTable
@@ -101,6 +115,20 @@ namespace wxOdbc3Test
 	public:
 		DateTypesTable(wxDb* pDb);
 		virtual ~DateTypesTable() {};
+
+		SQLINTEGER				m_idDateTypes;
+		SQL_DATE_STRUCT			m_date;
+		SQL_TIME_STRUCT			m_time;
+		SQL_TIMESTAMP_STRUCT	m_timestamp;
+	};
+
+	// DateTypesTmpTable
+	// --------------
+	class DateTypesTmpTable : public wxDbTable
+	{
+	public:
+		DateTypesTmpTable(wxDb* pDb);
+		virtual ~DateTypesTmpTable() {};
 
 		SQLINTEGER				m_idDateTypes;
 		SQL_DATE_STRUCT			m_date;

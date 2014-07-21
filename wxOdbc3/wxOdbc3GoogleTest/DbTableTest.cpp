@@ -153,7 +153,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( 55, pTable->m_timestamp.minute);
 		EXPECT_EQ( 56, pTable->m_timestamp.second);
 		
-		// MySql does not have fractions, ibm db2 adds '000' at the end (?)
+		// TODO: MySql does not have fractions, ibm db2 adds '000' at the end (?)
 		if(m_odbcInfo.m_dsn == DB2_DSN)
 		{
 			EXPECT_EQ( 123456000, pTable->m_timestamp.fraction);
@@ -529,7 +529,7 @@ namespace wxOdbc3Test
 		delete pTable;
 	}
 
-	TEST_P(DbTableTest, InsertIntTypes)
+	TEST_P(DbTableTest, ExecSQL_InsertIntTypes)
 	{
 		IntTypesTmpTable* pTable = new IntTypesTmpTable(m_pDb);
 		if(!pTable->Open(false, false))
@@ -538,15 +538,14 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		wxString sqlstmt;
-		sqlstmt.Printf(L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0");
-
 		if(m_odbcInfo.m_dsn == DB2_DSN)
 		{
 			delete pTable;
 			return;
 		}
 
+		wxString sqlstmt;
+		sqlstmt.Printf(L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0");
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
@@ -603,6 +602,41 @@ namespace wxOdbc3Test
 			}
 			EXPECT_FALSE( pTable->GetNext());
 		}
+
+		delete pTable;
+	}
+
+	TEST_P(DbTableTest, ExecSQL_InsertCharTypes)
+	{
+		CharTypesTmpTable* pTable = new CharTypesTmpTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		if(m_odbcInfo.m_dsn == DB2_DSN)
+		{
+			delete pTable;
+			return;
+		}
+
+		wxString sqlstmt;
+		sqlstmt.Printf(L"DELETE FROM wxodbc3.chartypes_tmp WHERE idchartypes_tmp >= 0");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		// Note the escaping..
+		sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (`idchartypes_tmp`, `varchar`, `char`) VALUES (1, '%s', '%s')", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		// And note the triming
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes_tmp ORDER BY idchartypes_tmp ASC"));
+		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_EQ( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_varchar));
+		EXPECT_EQ( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_char).Trim());
+		EXPECT_FALSE(pTable->GetNext());
 
 		delete pTable;
 	}
