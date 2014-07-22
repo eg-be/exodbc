@@ -11,8 +11,6 @@
 #endif
 
 #include "DbTest.h"
-#include "MySqlParams.h"
-#include "Db2Params.h"
 #include "db.h"
 
 
@@ -80,7 +78,7 @@ namespace wxOdbc3Test
 		// Note the escaping:
 		// IBM DB2 wants to escape ' using '', mysql wants \'
 		// MYSQL needs \\ for \ 
-		if(m_odbcInfo.m_dsn == DSN_DB2)
+		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
 		}
@@ -159,7 +157,8 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
-		if(m_odbcInfo.m_dsn == DSN_DB2)
+
+		if(m_pDb->Dbms() == dbmsDB2)
 			EXPECT_EQ( wxString(L"-12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
 		else
 			EXPECT_EQ( wxString(L"-12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
@@ -171,7 +170,8 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( wxString(L"123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
-		if(m_odbcInfo.m_dsn == DSN_DB2)
+
+		if(m_pDb->Dbms() == dbmsDB2)
 			EXPECT_EQ( wxString(L"12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
 		else
 			EXPECT_EQ( wxString(L"12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
@@ -183,7 +183,8 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( wxString(L"0"), wxString(pTable->m_wcdecimal_18_0));
-		if(m_odbcInfo.m_dsn == DSN_DB2)
+		
+		if(m_pDb->Dbms() == dbmsDB2)
 			EXPECT_EQ( wxString(L"0,0000000000"), wxString(pTable->m_wcdecimal_18_10));	
 		else
 			EXPECT_EQ( wxString(L"0.0000000000"), wxString(pTable->m_wcdecimal_18_10));	
@@ -231,8 +232,8 @@ namespace wxOdbc3Test
 		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
 		EXPECT_FALSE( pTable->GetNext());
 
-		// IBM DB2 has no support for unsigned int types
-		if(m_odbcInfo.m_dsn != DSN_DB2)
+		// IBM DB2 has no support for unsigned int types, so far we only know about mysql
+		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
 			sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (4, 0, 0, 0)");
 			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
@@ -253,7 +254,7 @@ namespace wxOdbc3Test
 			EXPECT_EQ( 4294967295, pTable->m_uint);
 			// With the 5.2 odbc driver ubigint seems to be wrong?
 			// TODO: This is ugly, use some kind of disabled test, or log a warning..
-			if(m_odbcInfo.m_dsn != DSN_MYSQL_5_2)
+			if(wxString(m_pDb->GetDriverVersion()) != wxString(L"05.02.0006"))
 			{
 				EXPECT_EQ( 18446744073709551615, pTable->m_ubigInt);
 			}

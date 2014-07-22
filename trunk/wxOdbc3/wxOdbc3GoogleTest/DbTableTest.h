@@ -1,8 +1,6 @@
 #include "gtest/gtest.h"
 
 #include "TestParams.h"
-#include "MySqlParams.h"
-#include "Db2Params.h"
 #include "wxOdbc3GoogleTest.h"
 
 class wxDb;

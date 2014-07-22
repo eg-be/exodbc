@@ -146,7 +146,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( 56, pTable->m_timestamp.second);
 		
 		// TODO: MySql does not have fractions, ibm db2 adds '000' at the end (?)
-		if(m_odbcInfo.m_dsn == DSN_DB2)
+		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			EXPECT_EQ( 123456000, pTable->m_timestamp.fraction);
 		}
@@ -195,8 +195,8 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
 
-		// IBM DB2 has no support for unsigned int types
-		if(m_odbcInfo.m_dsn != DSN_DB2)
+		// IBM DB2 has no support for unsigned int types, so far we know only about mysql having that
+		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
 			EXPECT_TRUE( pTable->GetNext() );
@@ -220,7 +220,7 @@ namespace wxOdbc3Test
 
 			// With the 5.2 odbc driver bigint seems to be wrong?
 			// TODO: This is ugly, use some kind of disabled test, or log a warning..
-			if(m_odbcInfo.m_dsn != DSN_MYSQL_5_2)
+			if(wxString(m_pDb->GetDriverVersion()) != wxString(L"05.02.0006"))
 			{
 				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 12"));
 				EXPECT_TRUE( pTable->GetNext() );
@@ -236,7 +236,9 @@ namespace wxOdbc3Test
 		EXPECT_FALSE( pTable->IsColNull(1) );
 		EXPECT_TRUE( pTable->IsColNull(2) );
 		EXPECT_TRUE( pTable->IsColNull(3) );
-		if(m_odbcInfo.m_dsn != DSN_DB2)
+
+		// IBM DB2 has no support for unsigned int types, so far we know only about mysql having that
+		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
 			EXPECT_TRUE( pTable->IsColNull(4) );
 			EXPECT_TRUE( pTable->IsColNull(5) );
@@ -251,7 +253,8 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_FALSE( pTable->IsColNull(3) );
 
-		if(m_odbcInfo.m_dsn != DSN_DB2)
+		// IBM DB2 has no support for unsigned int types, so far we know only about mysql having that
+		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
 			EXPECT_TRUE( pTable->GetNext());
@@ -424,7 +427,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
 	
 		// DB2 sends a ',', mysql sends a '.' as delimeter
-		if(m_odbcInfo.m_dsn == DSN_DB2)
+		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
 			EXPECT_TRUE( pTable->GetNext() );
