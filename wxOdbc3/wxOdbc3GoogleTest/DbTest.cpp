@@ -52,6 +52,16 @@ namespace wxOdbc3Test
 		pDb->Close();
 		delete pDb;
 
+		// Try to open with a different password / user, expect to fail when opening the db.
+		// TODO: Getting the HENV never fails? Add some tests for the HENV
+		wxDbConnectInf* pFailConnectInf = new wxDbConnectInf(NULL, L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
+		HENV henvFail = pFailConnectInf->GetHenv();
+		EXPECT_TRUE(henvFail != NULL);
+		wxDb* pFailDb = new wxDb(henvFail, true);
+		EXPECT_FALSE(pFailDb->Open(pFailConnectInf, false));
+		delete pFailDb;
+		delete pFailConnectInf;
+
 		// Open with failing on unsupported datatypes
 		// TODO: This test is stupid, we should also test that we fail
 		pDb = new wxDb(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
