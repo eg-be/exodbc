@@ -1,19 +1,39 @@
-// wxOdbc3GoogleTest.cpp : Defines the entry point for the console application.
-//
+/*!
+ * \file wxOdbc3GoogleTest.cpp
+ * \author Elias Gerber <egerber@gmx.net>
+ * \date 22.07.2014
+ * 
+ * Defines the entry point for the console (test-)application.
+ */ 
+
+#include "stdafx.h"
 
 // Own header
 #include "wxOdbc3GoogleTest.h"
 
-#include "stdafx.h"
+// Same component headers
+// Other headers
 #include "gtest/gtest.h"
 #include "boost/algorithm/string.hpp"
 
-
+// Globals
+// -------
 namespace wxOdbc3Test
 {
 	std::vector<SOdbcInfo> g_odbcInfos = std::vector<SOdbcInfo>();
 }
 
+// Static consts
+// -------------
+
+// Construction
+// -------------
+
+// Destructor
+// -----------
+
+// Implementation
+// --------------
 bool extractParamValue( int argc, const _TCHAR* const argv[],const std::wstring& name, std::wstring& value)
 {
 	for(int i = 0; i < argc; i++)
@@ -80,10 +100,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	if(status != 0)
 		return status;
 	
-
-
 	return RUN_ALL_TESTS();
 }
 
+// Interfaces
+// ----------
 
 

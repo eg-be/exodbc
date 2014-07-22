@@ -1,21 +1,34 @@
-//#ifdef _DEBUG
-//#define _CRTDBG_MAP_ALLOC
-//#include <stdlib.h>
-//#include <crtdbg.h>
-//#ifndef DBG_NEW
-//#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-//#define new DBG_NEW
-//#endif
-//#endif
+/*!
+ * \file DbTableTest.cpp
+ * \author Elias Gerber <egerber@gmx.net>
+ * \date 22.07.2014
+ * 
+ * [Brief CPP-file description]
+ */ 
 
+#include "stdafx.h"
+
+// Own header
 #include "DbTableTest.h"
-#include "GenericTestTables.h"
-#include "db.h"
-//#include "MySqlParams.h"
-//#include "Db2Params.h"
-//#include "db.h"
-#include "wxOdbc3GoogleTest.h"
 
+// Same component headers
+#include "wxOdbc3GoogleTest.h"
+#include "GenericTestTables.h"
+
+// Other headers
+#include "db.h"
+
+// Static consts
+// -------------
+
+// Construction
+// -------------
+
+// Destructor
+// -----------
+
+// Implementation
+// --------------
 using namespace std;
 
 namespace wxOdbc3Test
@@ -524,3 +537,6 @@ namespace wxOdbc3Test
 		delete pTable;
 	}
 }
+
+// Interfaces
+// ----------

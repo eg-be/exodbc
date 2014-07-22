@@ -1,8 +1,31 @@
+/*!
+ * \file TestParams.cpp
+ * \author Elias Gerber <egerber@gmx.net>
+ * \date 22.07.2014
+ * 
+ * [Brief CPP-file description]
+ */ 
 
+#include "stdafx.h"
+
+// Own header
 #include "TestParams.h"
 
+// Same component headers
+// Other headers
 #include <sstream>
 
+// Static consts
+// -------------
+
+// Construction
+// -------------
+
+// Destructor
+// -----------
+
+// Implementation
+// --------------
 namespace wxOdbc3Test
 {
 	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi) {
@@ -16,3 +39,6 @@ namespace wxOdbc3Test
 		return os << s.c_str();
 	}
 }
+
+// Interfaces
+// ----------
