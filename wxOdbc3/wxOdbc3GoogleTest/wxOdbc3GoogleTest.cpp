@@ -6,8 +6,6 @@
 
 #include "stdafx.h"
 #include "gtest/gtest.h"
-#include "Db2Params.h"
-#include "MySqlParams.h"
 #include "boost/algorithm/string.hpp"
 
 
