@@ -16,7 +16,6 @@
 
 // Other headers
 #include "db.h"
-#include "boost/algorithm/string.hpp"
 
 // Static consts
 // -------------

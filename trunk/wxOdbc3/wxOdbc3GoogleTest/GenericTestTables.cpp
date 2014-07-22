@@ -6,6 +6,7 @@
  * [Brief CPP-file description]
  */ 
 
+#include "stdafx.h"
 
 // Own header
 #include "GenericTestTables.h"
