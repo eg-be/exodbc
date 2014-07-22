@@ -14,31 +14,18 @@
 //#include "MySqlParams.h"
 //#include "Db2Params.h"
 //#include "db.h"
+#include "wxOdbc3GoogleTest.h"
 
 using namespace std;
 
 namespace wxOdbc3Test
 {
 
-	//TEST_F(DbTest, OpenForwardOnly_MySql_3_51)
-	//{
-	//	OpenTest(MYSQL_3_51_DSN, MYSQL_USER, MYSQL_PASS, true);
-	//}
-
-	void DbTableTest::SetUpTestCase()
-	{
-//		SOdbcInfo oi = GetParam();
-		int p = 3;
-	}
-//
-//	void DbTableTest::TearDownTestCase()
-//	{
-//		int p = 3;
-//	}
-
 	void DbTableTest::SetUp()
 	{
+		//// Called for every unit-test
 		m_odbcInfo = GetParam();
+		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 		m_pConnectInf = new wxDbConnectInf(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
@@ -48,8 +35,11 @@ namespace wxOdbc3Test
 
 	void DbTableTest::TearDown()
 	{
-		delete m_pDb;
-		delete m_pConnectInf;
+		if(m_pDb)
+			delete m_pDb;
+		if(m_pConnectInf)
+			delete m_pConnectInf;
+
 		m_pDb = NULL;
 		m_pConnectInf = NULL;
 	}
