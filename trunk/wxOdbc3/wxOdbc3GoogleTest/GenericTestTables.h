@@ -13,7 +13,6 @@
 #include "dbtable.h"
 
 // System headers
-#include <stdint.h>
 
 // Forward declarations
 // --------------------
@@ -22,6 +21,8 @@ class wxDb;
 // Structs
 // -------
 
+// Classes
+// -------
 namespace wxOdbc3Test
 {
 

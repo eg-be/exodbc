@@ -1,12 +1,34 @@
+/*!
+ * \file DbTableTest.h
+ * \author Elias Gerber <egerber@gmx.net>
+ * \date 22.07.2014
+ * 
+ * [Brief Header-file description]
+ */ 
+
+#pragma once
+#ifndef DBTABLETEST_H
+#define DBTABLETEST_H
+
+// Same component headers
+#include "wxOdbc3GoogleTest.h"
+#include "TestParams.h"
+
+// Other headers
 #include "gtest/gtest.h"
 
-#include "TestParams.h"
-#include "wxOdbc3GoogleTest.h"
+// System headers
 
+// Forward declarations
+// --------------------
 class wxDb;
 class wxDbConnectInf;
 
+// Structs
+// -------
 
+// Classes
+// -------
 namespace wxOdbc3Test
 {
 	class DbTableTest : public ::testing::TestWithParam<SOdbcInfo>
@@ -28,3 +50,6 @@ namespace wxOdbc3Test
 		DbTableTest,
 		::testing::ValuesIn(g_odbcInfos));
 }
+
+
+#endif // DBTABLETEST_H

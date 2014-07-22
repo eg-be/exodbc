@@ -9,6 +9,7 @@
 
 // Own header
 #include "GenericTestTables.h"
+
 // Same component headers
 // Other headers
 #include "db.h"
@@ -16,6 +17,14 @@
 // Static consts
 // -------------
 
+// Construction
+// -------------
+
+// Destructor
+// -----------
+
+// Implementation
+// --------------
 namespace wxOdbc3Test
 {
 	// NotExistingTable

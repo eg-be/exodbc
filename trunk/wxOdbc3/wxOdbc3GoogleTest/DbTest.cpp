@@ -1,19 +1,34 @@
+/*!
+ * \file DbTest.cpp
+ * \author Elias Gerber <egerber@gmx.net>
+ * \date 22.07.2014
+ * 
+ * [Brief CPP-file description]
+ */ 
+
+#include "stdafx.h"
+
+// Own header
+#include "DbTest.h"
+
+// Same component headers
 #include "GenericTestTables.h"
 
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#ifndef DBG_NEW
-#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-#define new DBG_NEW
-#endif
-#endif
-
-#include "DbTest.h"
+// Other headers
 #include "db.h"
 #include "boost/algorithm/string.hpp"
 
+// Static consts
+// -------------
+
+// Construction
+// -------------
+
+// Destructor
+// -----------
+
+// Implementation
+// --------------
 using namespace std;
 
 namespace wxOdbc3Test
@@ -333,3 +348,6 @@ namespace wxOdbc3Test
 		delete pTable;
 	}
 }
+
+// Interfaces
+// ----------

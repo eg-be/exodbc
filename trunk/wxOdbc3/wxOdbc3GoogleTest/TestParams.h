@@ -1,7 +1,29 @@
-#pragma  once
+/*!
+ * \file TestParams.h
+ * \author Elias Gerber <egerber@gmx.net>
+ * \date 22.07.2014
+ * 
+ * [Brief Header-file description]
+ */ 
 
+#pragma once
+#ifndef TESTPARAMS_H
+#define TESTPARAMS_H
+
+// Same component headers
+// Other headers
 #include "Utils.h"
 
+// System headers
+
+// Forward declarations
+// --------------------
+
+// Structs
+// -------
+
+// Classes
+// -------
 namespace wxOdbc3Test
 {
 	struct SOdbcInfo
@@ -30,3 +52,5 @@ namespace wxOdbc3Test
 	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi);
 
 }
+
+#endif // TESTPARAMS_H
