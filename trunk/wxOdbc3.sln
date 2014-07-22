@@ -9,36 +9,22 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EliCommon", "EliCommon\EliC
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug_Minimal|Win32 = Debug_Minimal|Win32
 		Debug|Win32 = Debug|Win32
-		Release_Minimal|Win32 = Release_Minimal|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{021A7F83-D491-491B-B4E9-93F4F56340C1}.Debug_Minimal|Win32.ActiveCfg = Debug_Minimal|Win32
-		{021A7F83-D491-491B-B4E9-93F4F56340C1}.Debug_Minimal|Win32.Build.0 = Debug_Minimal|Win32
 		{021A7F83-D491-491B-B4E9-93F4F56340C1}.Debug|Win32.ActiveCfg = Debug|Win32
 		{021A7F83-D491-491B-B4E9-93F4F56340C1}.Debug|Win32.Build.0 = Debug|Win32
-		{021A7F83-D491-491B-B4E9-93F4F56340C1}.Release_Minimal|Win32.ActiveCfg = Release_Minimal|Win32
-		{021A7F83-D491-491B-B4E9-93F4F56340C1}.Release_Minimal|Win32.Build.0 = Release_Minimal|Win32
 		{021A7F83-D491-491B-B4E9-93F4F56340C1}.Release|Win32.ActiveCfg = Release|Win32
 		{021A7F83-D491-491B-B4E9-93F4F56340C1}.Release|Win32.Build.0 = Release|Win32
-		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Debug_Minimal|Win32.ActiveCfg = Debug_Minimal|Win32
-		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Debug_Minimal|Win32.Build.0 = Debug_Minimal|Win32
 		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Debug|Win32.ActiveCfg = Debug|Win32
 		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Debug|Win32.Build.0 = Debug|Win32
-		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Release_Minimal|Win32.ActiveCfg = Release_Minimal|Win32
-		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Release_Minimal|Win32.Build.0 = Release_Minimal|Win32
 		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Release|Win32.ActiveCfg = Release|Win32
 		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Release|Win32.Build.0 = Release|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Debug_Minimal|Win32.ActiveCfg = Debug_Minimal|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Debug_Minimal|Win32.Build.0 = Debug_Minimal|Win32
 		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Debug|Win32.ActiveCfg = Debug_Minimal|Win32
 		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Debug|Win32.Build.0 = Debug_Minimal|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Release_Minimal|Win32.ActiveCfg = Release_Minimal|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Release_Minimal|Win32.Build.0 = Release_Minimal|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Release|Win32.ActiveCfg = Release|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Release|Win32.Build.0 = Release|Win32
+		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Release|Win32.ActiveCfg = Release_Minimal|Win32
+		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Release|Win32.Build.0 = Release_Minimal|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
