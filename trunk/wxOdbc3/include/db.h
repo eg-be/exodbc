@@ -687,6 +687,7 @@ public:
 
     int             GetColumnCount(const wxString &tableName, const wxChar *userID=NULL);
     const wxChar   *GetDatabaseName(void)  {return dbInf.dbmsName;}
+	const wxChar   *GetDriverVersion(void) {return dbInf.driverVer;};
     const wxString &GetDataSource(void)    {return dsn;}
     const wxString &GetDatasourceName(void){return dsn;}
     const wxString &GetUsername(void)      {return uid;}
