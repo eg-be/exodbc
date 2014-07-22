@@ -13,8 +13,6 @@
 
 // Same component headers
 // Other headers
-#include "gtest/gtest.h"
-#include "boost/algorithm/string.hpp"
 
 // Globals
 // -------

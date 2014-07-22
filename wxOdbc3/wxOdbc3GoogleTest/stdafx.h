@@ -7,9 +7,14 @@
 
 #include "targetver.h"
 
+// libs
+#include "gtest/gtest.h"
+#include "boost/algorithm/string.hpp"
+
+// system
 #include <stdio.h>
 #include <tchar.h>
-
-
+#include <string>
+#include <sstream>
 
 // TODO: reference additional headers your program requires here

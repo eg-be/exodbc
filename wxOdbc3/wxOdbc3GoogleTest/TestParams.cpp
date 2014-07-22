@@ -13,7 +13,6 @@
 
 // Same component headers
 // Other headers
-#include <sstream>
 
 // Static consts
 // -------------
