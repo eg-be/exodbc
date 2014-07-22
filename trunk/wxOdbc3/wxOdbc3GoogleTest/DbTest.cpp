@@ -12,7 +12,7 @@
 
 #include "DbTest.h"
 #include "db.h"
-
+#include "boost/algorithm/string.hpp"
 
 using namespace std;
 
@@ -58,6 +58,26 @@ namespace wxOdbc3Test
 		EXPECT_TRUE(pDb->Open(m_pConnectInf, true));
 		pDb->Close();
 		delete pDb;
+	}
+
+
+	TEST_P(DbTest, DetectDbms)
+	{
+		// We just know how we name the different odbc-sources
+		// TODO: This is not nice, but is there any other reliable way? Add to doc somewhere
+		m_odbcInfo = GetParam();
+		if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"DB2"))
+		{
+			EXPECT_TRUE(m_pDb->Dbms() == dbmsDB2);
+		}
+		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"MySql"))
+		{
+			EXPECT_TRUE(m_pDb->Dbms() == dbmsMY_SQL);
+		}
+		else
+		{
+			EXPECT_EQ(wxString(L"Unknown DSN name"), m_odbcInfo.m_dsn);
+		}
 	}
 
 
