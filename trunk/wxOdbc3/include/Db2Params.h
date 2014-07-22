@@ -14,6 +14,7 @@
 // Other headers
 // System headers
 
+#define NAME_DB2			L"DB2"
 #define DSN_DB2				L"wxOdbc3_DB2_10.05"
 #define USER_DB2			L"db2admin"
 #define PASS_DB2			L"super$ql"

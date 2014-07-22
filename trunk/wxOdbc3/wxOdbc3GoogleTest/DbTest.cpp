@@ -23,7 +23,9 @@ namespace wxOdbc3Test
 
 	void DbTest::SetUp()
 	{
+		// Set up is called for every test
 		m_odbcInfo = GetParam();
+		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 		m_pConnectInf = new wxDbConnectInf(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);

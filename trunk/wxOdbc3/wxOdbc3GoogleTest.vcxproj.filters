@@ -59,5 +59,8 @@
     <ClInclude Include="wxOdbc3GoogleTest\TestParams.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
