@@ -538,11 +538,11 @@ void wxDb::initialize()
     nTables       = 0;
     dbmsType      = dbmsUNIDENTIFIED;
 
-    wxStrcpy(sqlState,wxEmptyString);
-    wxStrcpy(errorMsg,wxEmptyString);
+    wcscpy(sqlState,wxEmptyString);
+    wcscpy(errorMsg,wxEmptyString);
     nativeError = cbErrorMsg = 0;
     for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
-        wxStrcpy(errorList[i], wxEmptyString);
+        wcscpy(errorList[i], wxEmptyString);
 
     // Init typeInf structures
     typeInfVarchar.TypeName.empty();
@@ -1053,26 +1053,26 @@ bool wxDb::Open(wxDb *copyDb)
 
     // Instead of Querying the data source for info about itself, it can just be copied
     // from the wxDb instance that was passed in (copyDb).
-    wxStrcpy(dbInf.serverName,copyDb->dbInf.serverName);
-    wxStrcpy(dbInf.databaseName,copyDb->dbInf.databaseName);
-    wxStrcpy(dbInf.dbmsName,copyDb->dbInf.dbmsName);
-    wxStrcpy(dbInf.dbmsVer,copyDb->dbInf.dbmsVer);
+    wcscpy(dbInf.serverName,copyDb->dbInf.serverName);
+    wcscpy(dbInf.databaseName,copyDb->dbInf.databaseName);
+    wcscpy(dbInf.dbmsName,copyDb->dbInf.dbmsName);
+    wcscpy(dbInf.dbmsVer,copyDb->dbInf.dbmsVer);
     dbInf.maxConnections = copyDb->dbInf.maxConnections;
     dbInf.maxStmts = copyDb->dbInf.maxStmts;
-    wxStrcpy(dbInf.driverName,copyDb->dbInf.driverName);
-    wxStrcpy(dbInf.odbcVer,copyDb->dbInf.odbcVer);
-    wxStrcpy(dbInf.drvMgrOdbcVer,copyDb->dbInf.drvMgrOdbcVer);
-    wxStrcpy(dbInf.driverVer,copyDb->dbInf.driverVer);
+    wcscpy(dbInf.driverName,copyDb->dbInf.driverName);
+    wcscpy(dbInf.odbcVer,copyDb->dbInf.odbcVer);
+    wcscpy(dbInf.drvMgrOdbcVer,copyDb->dbInf.drvMgrOdbcVer);
+    wcscpy(dbInf.driverVer,copyDb->dbInf.driverVer);
     dbInf.apiConfLvl = copyDb->dbInf.apiConfLvl;
     dbInf.cliConfLvl = copyDb->dbInf.cliConfLvl;
     dbInf.sqlConfLvl = copyDb->dbInf.sqlConfLvl;
-    wxStrcpy(dbInf.outerJoins,copyDb->dbInf.outerJoins);
-    wxStrcpy(dbInf.procedureSupport,copyDb->dbInf.procedureSupport);
-    wxStrcpy(dbInf.accessibleTables,copyDb->dbInf.accessibleTables);
+    wcscpy(dbInf.outerJoins,copyDb->dbInf.outerJoins);
+    wcscpy(dbInf.procedureSupport,copyDb->dbInf.procedureSupport);
+    wcscpy(dbInf.accessibleTables,copyDb->dbInf.accessibleTables);
     dbInf.cursorCommitBehavior = copyDb->dbInf.cursorCommitBehavior;
     dbInf.cursorRollbackBehavior = copyDb->dbInf.cursorRollbackBehavior;
     dbInf.supportNotNullClause = copyDb->dbInf.supportNotNullClause;
-    wxStrcpy(dbInf.supportIEF,copyDb->dbInf.supportIEF);
+    wcscpy(dbInf.supportIEF,copyDb->dbInf.supportIEF);
     dbInf.txnIsolation = copyDb->dbInf.txnIsolation;
     dbInf.txnIsolationOptions = copyDb->dbInf.txnIsolationOptions;
     dbInf.fetchDirections = copyDb->dbInf.fetchDirections;
@@ -1818,7 +1818,7 @@ void wxDb::Close(void)
     // Copy the error messages to a global variable
     int i;
     for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
-        wxStrcpy(DBerrorList[i], errorList[i]);
+        wcscpy(DBerrorList[i], errorList[i]);
 
     dbmsType = dbmsUNIDENTIFIED;
     dbIsOpen = false;
@@ -1946,7 +1946,7 @@ void wxDb::logError(const std::wstring &errMsg, const std::wstring &SQLState)
     {
         int i;
         for (i = 0; i < DB_MAX_ERROR_HISTORY-1; i++)
-            wxStrcpy(errorList[i], errorList[i+1]);
+            wcscpy(errorList[i], errorList[i+1]);
         pLast--;
     }
 
@@ -2642,8 +2642,8 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
             if (!colInf)
                 break;
             // Mark the end of the array
-            wxStrcpy(colInf[noCols].tableName, wxEmptyString);
-            wxStrcpy(colInf[noCols].colName, wxEmptyString);
+            wcscpy(colInf[noCols].tableName, wxEmptyString);
+            wcscpy(colInf[noCols].colName, wxEmptyString);
             colInf[noCols].sqlDataType = 0;
         }
         // Loop through each table name
@@ -2801,8 +2801,8 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, cons
             if (!colInf)
                 break;
             // Mark the end of the array
-            wxStrcpy(colInf[noCols].tableName, wxEmptyString);
-            wxStrcpy(colInf[noCols].colName, wxEmptyString);
+            wcscpy(colInf[noCols].tableName, wxEmptyString);
+            wcscpy(colInf[noCols].colName, wxEmptyString);
             colInf[noCols].sqlDataType = 0;
         }
 
@@ -2994,8 +2994,8 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
     wxDbColInf *colInf = new wxDbColInf[noCols+1];
 
     // Mark the end of the array
-    wxStrcpy(colInf[noCols].tableName, wxEmptyString);
-    wxStrcpy(colInf[noCols].colName, wxEmptyString);
+    wcscpy(colInf[noCols].tableName, wxEmptyString);
+    wcscpy(colInf[noCols].colName, wxEmptyString);
     colInf[noCols].sqlDataType = 0;
 
     // Merge ...
@@ -3057,8 +3057,8 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
             if (!colInf)
                 break;
             // Mark the end of the array
-            wxStrcpy(colInf[noCols].tableName, wxEmptyString);
-            wxStrcpy(colInf[noCols].colName, wxEmptyString);
+            wcscpy(colInf[noCols].tableName, wxEmptyString);
+            wcscpy(colInf[noCols].colName, wxEmptyString);
             colInf[noCols].sqlDataType = 0;
         }
 
@@ -4394,7 +4394,7 @@ const wchar_t WXDLLIMPEXP_ODBC *wxDbLogExtendedErrorMsg(const wchar_t *userText,
                 msg.append(L"\n");
             // Clear the errmsg buffer so the next error will not
             // end up showing the previous error that have occurred
-            wxStrcpy(pDb->errorList[i], wxEmptyString);
+            wcscpy(pDb->errorList[i], wxEmptyString);
         }
     }
     msg += L"\n";
