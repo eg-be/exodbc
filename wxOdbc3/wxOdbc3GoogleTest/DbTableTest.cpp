@@ -561,10 +561,22 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
+		// Select using '*' on complete table
 		sqlstmt.Printf("INSERT INTO wxodbc3.chartable (idchartable, col2, col3, col4) VALUES (1, 'r1_c2', 'r1_c3', 'r1_c4')");
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ(wxString(L"r1_c2"), wxString(pTable->m_col2).Trim());
+		EXPECT_EQ(wxString(L"r1_c3"), wxString(pTable->m_col3).Trim());
+		EXPECT_EQ(wxString(L"r1_c4"), wxString(pTable->m_col4).Trim());
+		EXPECT_FALSE( pTable->GetNext() );
+
+		// Select with fields on incomplete table
+		pTable->m_col2[0] = 0;
+		pTable->m_col3[0] = 0;
+		pTable->m_col4[0] = 0;
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT idchartable, col2, col3, col4 FROM wxodbc3.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ(wxString(L"r1_c2"), wxString(pTable->m_col2).Trim());
 		EXPECT_EQ(wxString(L"r1_c3"), wxString(pTable->m_col3).Trim());
@@ -590,15 +602,14 @@ namespace wxOdbc3Test
 		//EXPECT_EQ(wxString(L"r1_c4"), wxString(pIncTable->m_col4).Trim());
 		EXPECT_FALSE( pIncTable->GetNext() );
 
-		// .. But reading using '*' really works..
+		// .. But reading using '*' or 'all fields' really works..
 		pIncTable->m_col2[0] = 0;
 		pIncTable->m_col4[0] = 0;
-		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT  idchartable, col2, col3, col4 FROM wxodbc3.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pIncTable->GetNext() );
 		EXPECT_EQ(wxString(L"r1_c2"), wxString(pIncTable->m_col2).Trim());
 		EXPECT_EQ(wxString(L"r1_c4"), wxString(pIncTable->m_col4).Trim());
 		EXPECT_FALSE( pIncTable->GetNext() );
-
 
 		delete pTable;
 		delete pIncTable;
