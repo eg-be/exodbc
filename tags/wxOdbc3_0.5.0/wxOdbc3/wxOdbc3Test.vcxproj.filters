@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{78243cd2-15d6-44ef-baef-bfd34b636e96}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{efda45fd-2513-40b3-baa8-058ffd58b3d3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="test\wxOdbc3Test.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MySqlTestTables.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MySqlParams.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MySqlTableTest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="test\MySqlDbTest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GenericTestTables.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GenericDbTest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Db2TestTables.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Db2Params.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Db2DbTest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Db2TableTest.h">
+      <Filter>include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="test\wxOdbc3Test.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test\MySqlTestTables.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test\MySqlTableTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="test\MySqlDbTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GenericTestTables.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GenericDbTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Db2TestTables.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Db2DbTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Db2TableTest.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
