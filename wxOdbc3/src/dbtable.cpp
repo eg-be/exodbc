@@ -2617,7 +2617,7 @@ bool wxDbTable::SetColNull(const std::wstring &colName, bool set)
     int colNumber;
     for (colNumber = 0; colNumber < m_numCols; colNumber++)
     {
-        if (!wxStricmp(colName, colDefs[colNumber].ColName))
+        if (!_wcsicmp(colName.c_str(), colDefs[colNumber].ColName))
             break;
     }
 
