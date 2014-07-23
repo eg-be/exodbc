@@ -122,7 +122,7 @@ namespace wxOdbc3Test
 		// Note the escaping:
 		// IBM DB2 wants to escape ' using '', mysql wants \'
 		// MYSQL needs \\ for \ 
-		RecordProperty("Ticket", "??");
+		RecordProperty("Ticket", 36);
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
@@ -203,7 +203,7 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
 
-		RecordProperty("Ticket", "??");
+		RecordProperty("Ticket", 35);
 		if(m_pDb->Dbms() == dbmsDB2)
 			EXPECT_EQ( wxString(L"-12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
 		else
@@ -279,7 +279,7 @@ namespace wxOdbc3Test
 		EXPECT_FALSE( pTable->GetNext());
 
 		// IBM DB2 has no support for unsigned int types, so far we only know about mysql
-		RecordProperty("Ticket", "??");
+		RecordProperty("Ticket", 33);
 		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
 			sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (4, 0, 0, 0)");
