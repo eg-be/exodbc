@@ -27,6 +27,16 @@
 #    define WXDLLIMPEXP_DATA_ODBC(type) type
 #endif
 
+// Defines / Macros available for everybody
+// ----------------
+
+/*  size of statically declared array */
+#define EXSIZEOF(array)   (sizeof(array)/sizeof(array[0]))
+
+
+// Global Consts
+// -------------
+
 WXDLLIMPEXP_ODBC extern const wchar_t* emptyString;
 
 #endif // WXODBC3_H
