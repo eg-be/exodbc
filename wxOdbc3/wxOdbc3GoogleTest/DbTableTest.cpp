@@ -159,7 +159,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( 56, pTable->m_timestamp.second);
 		
 		// TODO: MySql does not have fractions, ibm db2 adds '000' at the end (?)
-		RecordProperty("Ticket", "??");
+		RecordProperty("Ticket", 33);
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			EXPECT_EQ( 123456000, pTable->m_timestamp.fraction);
@@ -210,7 +210,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
 
 		// IBM DB2 has no support for unsigned int types, so far we know only about mysql having that
-		RecordProperty("Ticket", "??");
+		RecordProperty("Ticket", 34);
 		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
@@ -442,7 +442,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
 	
 		// DB2 sends a ',', mysql sends a '.' as delimeter
-		RecordProperty("Ticket", "??");
+		RecordProperty("Ticket", 35);
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
