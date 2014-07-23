@@ -675,7 +675,7 @@ public:
     bool         ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& numcols);
     bool         GetNext(void);
     bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR *cbReturned);
-    bool         Grant(int privileges, const std::wstring &tableName, const std::wstring &userList = wxT("PUBLIC"));
+    bool         Grant(int privileges, const std::wstring &tableName, const std::wstring &userList = L"PUBLIC");
     int          TranslateSqlState(const std::wstring &SQLState);
     wxDbInf     *GetCatalog(const wchar_t *userID=NULL);
     bool         Catalog(const wchar_t *userID=NULL, const std::wstring &fileName=SQL_CATALOG_FILENAME);

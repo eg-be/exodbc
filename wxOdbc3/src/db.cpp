@@ -62,8 +62,8 @@ WX_CHECK_BUILD_OPTIONS("wxODBC")
 
 WXDLLIMPEXP_DATA_ODBC(wxDbList*) PtrBegDbList = 0;
 
-wchar_t const *SQL_LOG_FILENAME         = wxT("sqllog.txt");
-wchar_t const *SQL_CATALOG_FILENAME     = wxT("catalog.txt");
+wchar_t const *SQL_LOG_FILENAME         = L"sqllog.txt";
+wchar_t const *SQL_CATALOG_FILENAME     = L"catalog.txt";
 
 #ifdef __WXDEBUG__
     #include "wx/thread.h"
@@ -185,7 +185,7 @@ bool wxDbConnectInf::AllocHenv()
 
     if (SQLAllocEnv(&Henv) != SQL_SUCCESS)
     {
-        wxLogDebug(wxT("A problem occurred while trying to get a connection to the data source"));
+        // wxLogDebug(L"A problem occurred while trying to get a connection to the data source");
         return false;
     }
 
@@ -358,10 +358,10 @@ int wxDbColFor::Format(int Nation, int dbDataType, SWORD sqlDataType,
     switch(i_dbDataType)     // TBD: Still a lot of proper formatting to do
     {
         case DB_DATA_TYPE_VARCHAR:
-            s_Field = wxT("%s");
+            s_Field = L"%s";
             break;
         case DB_DATA_TYPE_INTEGER:
-            s_Field = wxT("%d");
+            s_Field = L"%d";
             break;
         case DB_DATA_TYPE_FLOAT:
             if (decimalDigits == 0)
@@ -372,23 +372,23 @@ int wxDbColFor::Format(int Nation, int dbDataType, SWORD sqlDataType,
         case DB_DATA_TYPE_DATE:
             if (i_Nation == 0)      // timestamp       YYYY-MM-DD HH:MM:SS.SSS (tested for SYBASE)
             {
-                s_Field = wxT("%04d-%02d-%02d %02d:%02d:%02d.%03d");
+                s_Field = L"%04d-%02d-%02d %02d:%02d:%02d.%03d";
             }
             if (i_Nation == 1)      // European        DD.MM.YYYY HH:MM:SS.SSS
             {
-                s_Field = wxT("%02d.%02d.%04d %02d:%02d:%02d.%03d");
+                s_Field = L"%02d.%02d.%04d %02d:%02d:%02d.%03d";
             }
             if (i_Nation == 2)      // UK              DD/MM/YYYY HH:MM:SS.SSS
             {
-                s_Field = wxT("%02d/%02d/%04d %02d:%02d:%02d.%03d");
+                s_Field = L"%02d/%02d/%04d %02d:%02d:%02d.%03d";
             }
             if (i_Nation == 3)      // International   YYYY-MM-DD HH:MM:SS.SSS
             {
-                s_Field = wxT("%04d-%02d-%02d %02d:%02d:%02d.%03d");
+                s_Field = L"%04d-%02d-%02d %02d:%02d:%02d.%03d";
             }
             if (i_Nation == 4)      // US              MM/DD/YYYY HH:MM:SS.SSS
             {
-                s_Field = wxT("%02d/%02d/%04d %02d:%02d:%02d.%03d");
+                s_Field = L"%02d/%02d/%04d %02d:%02d:%02d.%03d";
             }
             break;
           case DB_DATA_TYPE_BLOB:
@@ -513,7 +513,7 @@ wxDb::wxDb(const HENV &aHenv, bool FwdOnlyCursors)
 /********** wxDb Destructor **********/
 wxDb::~wxDb()
 {
-    wxASSERT_MSG(!IsCached(),wxT("Cached connections must not be manually deleted, use\nwxDbFreeConnection() or wxDbCloseConnections()."));
+    wxASSERT_MSG(!IsCached(), L"Cached connections must not be manually deleted, use\nwxDbFreeConnection() or wxDbCloseConnections().");
 
     if (IsOpen())
     {
@@ -854,12 +854,12 @@ bool wxDb::open(bool failOnDataTypeUnsupported)
         return false;
 
 #ifdef DBDEBUG_CONSOLE
-    std::wcout << wxT("VARCHAR DATA TYPE: ") << typeInfVarchar.TypeName << std::endl;
-    std::wcout << wxT("INTEGER DATA TYPE: ") << typeInfInteger.TypeName << std::endl;
-    std::wcout << wxT("FLOAT   DATA TYPE: ") << typeInfFloat.TypeName << std::endl;
-    std::wcout << wxT("DATE    DATA TYPE: ") << typeInfDate.TypeName << std::endl;
-    std::wcout << wxT("BLOB    DATA TYPE: ") << typeInfBlob.TypeName << std::endl;
-    std::wcout << wxT("MEMO    DATA TYPE: ") << typeInfMemo.TypeName << std::endl;
+    std::wcout << L"VARCHAR DATA TYPE: " << typeInfVarchar.TypeName << std::endl;
+    std::wcout << L"INTEGER DATA TYPE: " << typeInfInteger.TypeName << std::endl;
+    std::wcout << L"FLOAT   DATA TYPE: " << typeInfFloat.TypeName << std::endl;
+    std::wcout << L"DATE    DATA TYPE: " << typeInfDate.TypeName << std::endl;
+    std::wcout << L"BLOB    DATA TYPE: " << typeInfBlob.TypeName << std::endl;
+    std::wcout << L"MEMO    DATA TYPE: " << typeInfMemo.TypeName << std::endl;
     std::wcout << std::endl;
 #endif
 
@@ -889,9 +889,9 @@ bool wxDb::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOn
 
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_SUCCESS)
-            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) successful") << std::endl;
+            std::wcout << L"SQLSetConnectOption(CURSOR_LIB) successful" << std::endl;
         else
-            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) failed") << std::endl;
+            std::wcout << L"SQLSetConnectOption(CURSOR_LIB) failed" << std::endl;
 #else
         wxUnusedVar(retcode);
 #endif
@@ -939,9 +939,9 @@ bool wxDb::Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wst
 
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_SUCCESS)
-            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) successful") << std::endl;
+            std::wcout << L"SQLSetConnectOption(CURSOR_LIB) successful" << std::endl;
         else
-            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) failed") << std::endl;
+            std::wcout << L"SQLSetConnectOption(CURSOR_LIB) failed" << std::endl;
 #else
         wxUnusedVar( retcode );
 #endif
@@ -992,9 +992,9 @@ bool wxDb::Open(wxDb *copyDb)
 
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_SUCCESS)
-            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) successful") << std::endl;
+            std::wcout << L"SQLSetConnectOption(CURSOR_LIB) successful" << std::endl;
         else
-            std::wcout << wxT("SQLSetConnectOption(CURSOR_LIB) failed") << std::endl;
+            std::wcout << L"SQLSetConnectOption(CURSOR_LIB) failed" << std::endl;
 #else
         wxUnusedVar( retcode );
 #endif
@@ -1128,12 +1128,12 @@ bool wxDb::Open(wxDb *copyDb)
     typeInfMemo.MaximumScale     = copyDb->typeInfMemo.MaximumScale;
 
 #ifdef DBDEBUG_CONSOLE
-    std::wcout << wxT("VARCHAR DATA TYPE: ") << typeInfVarchar.TypeName << std::endl;
-    std::wcout << wxT("INTEGER DATA TYPE: ") << typeInfInteger.TypeName << std::endl;
-    std::wcout << wxT("FLOAT   DATA TYPE: ") << typeInfFloat.TypeName << std::endl;
-    std::wcout << wxT("DATE    DATA TYPE: ") << typeInfDate.TypeName << std::endl;
-    std::wcout << wxT("BLOB    DATA TYPE: ") << typeInfBlob.TypeName << std::endl;
-    std::wcout << wxT("MEMO    DATA TYPE: ") << typeInfMemo.TypeName << std::endl;
+    std::wcout << L"VARCHAR DATA TYPE: " << typeInfVarchar.TypeName << std::endl;
+    std::wcout << L"INTEGER DATA TYPE: " << typeInfInteger.TypeName << std::endl;
+    std::wcout << L"FLOAT   DATA TYPE: " << typeInfFloat.TypeName << std::endl;
+    std::wcout << L"DATE    DATA TYPE: " << typeInfDate.TypeName << std::endl;
+    std::wcout << L"BLOB    DATA TYPE: " << typeInfBlob.TypeName << std::endl;
+    std::wcout << L"MEMO    DATA TYPE: " << typeInfMemo.TypeName << std::endl;
     std::wcout << std::endl;
 #endif
 
@@ -1177,27 +1177,27 @@ bool wxDb::setConnectionOptions(void)
     // Display the connection options to verify them
 #ifdef DBDEBUG_CONSOLE
     long l;
-    std::wcout << wxT("****** CONNECTION OPTIONS ******") << std::endl;
+    std::wcout << L"****** CONNECTION OPTIONS ******" << std::endl;
 
     retcode = SQLGetConnectOption(hdbc, SQL_AUTOCOMMIT, &l);
     if (retcode != SQL_SUCCESS)
         return(DispAllErrors(henv, hdbc));
-    std::wcout << wxT("AUTOCOMMIT: ") << (l == SQL_AUTOCOMMIT_OFF ? "OFF" : "ON") << std::endl;
+    std::wcout << L"AUTOCOMMIT: " << (l == SQL_AUTOCOMMIT_OFF ? L"OFF" : L"ON") << std::endl;
 
     retcode = SQLGetConnectOption(hdbc, SQL_ODBC_CURSORS, &l);
     if (retcode != SQL_SUCCESS)
         return(DispAllErrors(henv, hdbc));
-    std::wcout << wxT("ODBC CURSORS: ");
+    std::wcout << L"ODBC CURSORS: ";
     switch(l)
     {
         case(SQL_CUR_USE_IF_NEEDED):
-            std::wcout << wxT("SQL_CUR_USE_IF_NEEDED");
+            std::wcout << L"SQL_CUR_USE_IF_NEEDED";
             break;
         case(SQL_CUR_USE_ODBC):
-            std::wcout << wxT("SQL_CUR_USE_ODBC");
+            std::wcout << L"SQL_CUR_USE_ODBC";
             break;
         case(SQL_CUR_USE_DRIVER):
-            std::wcout << wxT("SQL_CUR_USE_DRIVER");
+            std::wcout << L"SQL_CUR_USE_DRIVER";
             break;
     }
     std::wcout << std::endl;
@@ -1205,7 +1205,7 @@ bool wxDb::setConnectionOptions(void)
     retcode = SQLGetConnectOption(hdbc, SQL_OPT_TRACE, &l);
     if (retcode != SQL_SUCCESS)
         return(DispAllErrors(henv, hdbc));
-    std::wcout << wxT("TRACING: ") << (l == SQL_OPT_TRACE_OFF ? wxT("OFF") : wxT("ON")) << std::endl;
+    std::wcout << L"TRACING: " << (l == SQL_OPT_TRACE_OFF ? L"OFF" : L"ON") << std::endl;
 
     std::wcout << std::endl;
 #endif
@@ -1476,194 +1476,194 @@ bool wxDb::getDbInfo(bool failOnDataTypeUnsupported)
     }
 
 #ifdef DBDEBUG_CONSOLE
-    std::wcout << wxT("***** DATA SOURCE INFORMATION *****") << std::endl;
-    std::wcout << wxT("SERVER Name: ") << dbInf.serverName << std::endl;
-    std::wcout << wxT("DBMS Name: ") << dbInf.dbmsName << wxT("; DBMS Version: ") << dbInf.dbmsVer << std::endl;
-    std::wcout << wxT("ODBC Version: ") << dbInf.odbcVer << wxT("; Driver Version: ") << dbInf.driverVer << std::endl;
+    std::wcout << L"***** DATA SOURCE INFORMATION *****" << std::endl;
+    std::wcout << L"SERVER Name: " << dbInf.serverName << std::endl;
+    std::wcout << L"DBMS Name: " << dbInf.dbmsName << L"; DBMS Version: " << dbInf.dbmsVer << std::endl;
+    std::wcout << L"ODBC Version: " << dbInf.odbcVer << L"; Driver Version: " << dbInf.driverVer << std::endl;
 
-    std::wcout << wxT("API Conf. Level: ");
+    std::wcout << L"API Conf. Level: ";
     switch(dbInf.apiConfLvl)
     {
-        case SQL_OAC_NONE:      std::wcout << wxT("None");       break;
-        case SQL_OAC_LEVEL1:    std::wcout << wxT("Level 1");    break;
-        case SQL_OAC_LEVEL2:    std::wcout << wxT("Level 2");    break;
+        case SQL_OAC_NONE:      std::wcout << L"None";       break;
+        case SQL_OAC_LEVEL1:    std::wcout << L"Level 1";    break;
+        case SQL_OAC_LEVEL2:    std::wcout << L"Level 2";    break;
     }
     std::wcout << std::endl;
 
-    std::wcout << wxT("SAG CLI Conf. Level: ");
+    std::wcout << L"SAG CLI Conf. Level: ";
     switch(dbInf.cliConfLvl)
     {
-        case SQL_OSCC_NOT_COMPLIANT:    std::wcout << wxT("Not Compliant");    break;
-        case SQL_OSCC_COMPLIANT:        std::wcout << wxT("Compliant");        break;
+        case SQL_OSCC_NOT_COMPLIANT:    std::wcout << L"Not Compliant";    break;
+        case SQL_OSCC_COMPLIANT:        std::wcout << L"Compliant";        break;
     }
     std::wcout << std::endl;
 
-    std::wcout << wxT("SQL Conf. Level: ");
+    std::wcout << L"SQL Conf. Level: ";
     switch(dbInf.sqlConfLvl)
     {
-        case SQL_OSC_MINIMUM:     std::wcout << wxT("Minimum Grammar");     break;
-        case SQL_OSC_CORE:        std::wcout << wxT("Core Grammar");        break;
-        case SQL_OSC_EXTENDED:    std::wcout << wxT("Extended Grammar");    break;
+        case SQL_OSC_MINIMUM:     std::wcout << L"Minimum Grammar";     break;
+        case SQL_OSC_CORE:        std::wcout << L"Core Grammar";        break;
+        case SQL_OSC_EXTENDED:    std::wcout << L"Extended Grammar";    break;
     }
     std::wcout << std::endl;
 
-    std::wcout << wxT("Max. Connections: ")       << dbInf.maxConnections   << std::endl;
-    std::wcout << wxT("Outer Joins: ")            << dbInf.outerJoins       << std::endl;
-    std::wcout << wxT("Support for Procedures: ") << dbInf.procedureSupport << std::endl;
-    std::wcout << wxT("All tables accessible : ") << dbInf.accessibleTables << std::endl;
-    std::wcout << wxT("Cursor COMMIT Behavior: ");
+    std::wcout << L"Max. Connections: "       << dbInf.maxConnections   << std::endl;
+    std::wcout << L"Outer Joins: "            << dbInf.outerJoins       << std::endl;
+    std::wcout << L"Support for Procedures: " << dbInf.procedureSupport << std::endl;
+    std::wcout << L"All tables accessible : " << dbInf.accessibleTables << std::endl;
+    std::wcout << L"Cursor COMMIT Behavior: ";
     switch(dbInf.cursorCommitBehavior)
     {
-        case SQL_CB_DELETE:        std::wcout << wxT("Delete cursors");      break;
-        case SQL_CB_CLOSE:         std::wcout << wxT("Close cursors");       break;
-        case SQL_CB_PRESERVE:      std::wcout << wxT("Preserve cursors");    break;
+        case SQL_CB_DELETE:        std::wcout << L"Delete cursors";      break;
+        case SQL_CB_CLOSE:         std::wcout << L"Close cursors";       break;
+        case SQL_CB_PRESERVE:      std::wcout << L"Preserve cursors";    break;
     }
     std::wcout << std::endl;
 
-    std::wcout << wxT("Cursor ROLLBACK Behavior: ");
+    std::wcout << L"Cursor ROLLBACK Behavior: ";
     switch(dbInf.cursorRollbackBehavior)
     {
-        case SQL_CB_DELETE:      std::wcout << wxT("Delete cursors");      break;
-        case SQL_CB_CLOSE:       std::wcout << wxT("Close cursors");       break;
-        case SQL_CB_PRESERVE:    std::wcout << wxT("Preserve cursors");    break;
+        case SQL_CB_DELETE:      std::wcout << L"Delete cursors";      break;
+        case SQL_CB_CLOSE:       std::wcout << L"Close cursors";       break;
+        case SQL_CB_PRESERVE:    std::wcout << L"Preserve cursors";    break;
     }
     std::wcout << std::endl;
 
-    std::wcout << wxT("Support NOT NULL clause: ");
+    std::wcout << L"Support NOT NULL clause: ";
     switch(dbInf.supportNotNullClause)
     {
-        case SQL_NNC_NULL:        std::wcout << wxT("No");        break;
-        case SQL_NNC_NON_NULL:    std::wcout << wxT("Yes");       break;
+        case SQL_NNC_NULL:        std::wcout << L"No";        break;
+        case SQL_NNC_NON_NULL:    std::wcout << L"Yes";       break;
     }
     std::wcout << std::endl;
 
-    std::wcout << wxT("Support IEF (Ref. Integrity): ") << dbInf.supportIEF   << std::endl;
-    std::wcout << wxT("Login Timeout: ")                << dbInf.loginTimeout << std::endl;
+    std::wcout << L"Support IEF (Ref. Integrity): " << dbInf.supportIEF   << std::endl;
+    std::wcout << L"Login Timeout: "                << dbInf.loginTimeout << std::endl;
 
-    std::wcout << std::endl << std::endl << wxT("more ...") << std::endl;
+    std::wcout << std::endl << std::endl << L"more ..." << std::endl;
     getchar();
 
-    std::wcout << wxT("Default Transaction Isolation: ");
+    std::wcout << L"Default Transaction Isolation: ";
     switch(dbInf.txnIsolation)
     {
-        case SQL_TXN_READ_UNCOMMITTED:  std::wcout << wxT("Read Uncommitted");    break;
-        case SQL_TXN_READ_COMMITTED:    std::wcout << wxT("Read Committed");      break;
-        case SQL_TXN_REPEATABLE_READ:   std::wcout << wxT("Repeatable Read");     break;
-        case SQL_TXN_SERIALIZABLE:      std::wcout << wxT("Serializable");        break;
+        case SQL_TXN_READ_UNCOMMITTED:  std::wcout << L"Read Uncommitted";    break;
+        case SQL_TXN_READ_COMMITTED:    std::wcout << L"Read Committed";      break;
+        case SQL_TXN_REPEATABLE_READ:   std::wcout << L"Repeatable Read";     break;
+        case SQL_TXN_SERIALIZABLE:      std::wcout << L"Serializable";        break;
 #ifdef ODBC_V20
-        case SQL_TXN_VERSIONING:        std::wcout << wxT("Versioning");          break;
+        case SQL_TXN_VERSIONING:        std::wcout << L"Versioning";          break;
 #endif
     }
     std::wcout << std::endl;
 
-    std::wcout << wxT("Transaction Isolation Options: ");
+    std::wcout << L"Transaction Isolation Options: ";
     if (dbInf.txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
-        std::wcout << wxT("Read Uncommitted, ");
+        std::wcout << L"Read Uncommitted, ";
     if (dbInf.txnIsolationOptions & SQL_TXN_READ_COMMITTED)
-        std::wcout << wxT("Read Committed, ");
+        std::wcout << L"Read Committed, ";
     if (dbInf.txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
-        std::wcout << wxT("Repeatable Read, ");
+        std::wcout << L"Repeatable Read, ";
     if (dbInf.txnIsolationOptions & SQL_TXN_SERIALIZABLE)
-        std::wcout << wxT("Serializable, ");
+        std::wcout << L"Serializable, ";
 #ifdef ODBC_V20
     if (dbInf.txnIsolationOptions & SQL_TXN_VERSIONING)
-        std::wcout << wxT("Versioning");
+        std::wcout << L"Versioning";
 #endif
     std::wcout << std::endl;
 
-    std::wcout << wxT("Fetch Directions Supported:") << std::endl << wxT("   ");
+    std::wcout << L"Fetch Directions Supported:" << std::endl << L"   ";
     if (dbInf.fetchDirections & SQL_FD_FETCH_NEXT)
-        std::wcout << wxT("Next, ");
+        std::wcout << L"Next, ";
     if (dbInf.fetchDirections & SQL_FD_FETCH_PRIOR)
-        std::wcout << wxT("Prev, ");
+        std::wcout << L"Prev, ";
     if (dbInf.fetchDirections & SQL_FD_FETCH_FIRST)
-        std::wcout << wxT("First, ");
+        std::wcout << L"First, ";
     if (dbInf.fetchDirections & SQL_FD_FETCH_LAST)
-        std::wcout << wxT("Last, ");
+        std::wcout << L"Last, ";
     if (dbInf.fetchDirections & SQL_FD_FETCH_ABSOLUTE)
-        std::wcout << wxT("Absolute, ");
+        std::wcout << L"Absolute, ";
     if (dbInf.fetchDirections & SQL_FD_FETCH_RELATIVE)
-        std::wcout << wxT("Relative, ");
+        std::wcout << L"Relative, ";
 #ifdef ODBC_V20
     if (dbInf.fetchDirections & SQL_FD_FETCH_RESUME)
-        std::wcout << wxT("Resume, ");
+        std::wcout << L"Resume, ";
 #endif
     if (dbInf.fetchDirections & SQL_FD_FETCH_BOOKMARK)
-        std::wcout << wxT("Bookmark");
+        std::wcout << L"Bookmark";
     std::wcout << std::endl;
 
-    std::wcout << wxT("Lock Types Supported (SQLSetPos): ");
+    std::wcout << L"Lock Types Supported (SQLSetPos): ";
     if (dbInf.lockTypes & SQL_LCK_NO_CHANGE)
-        std::wcout << wxT("No Change, ");
+        std::wcout << L"No Change, ";
     if (dbInf.lockTypes & SQL_LCK_EXCLUSIVE)
-        std::wcout << wxT("Exclusive, ");
+        std::wcout << L"Exclusive, ";
     if (dbInf.lockTypes & SQL_LCK_UNLOCK)
-        std::wcout << wxT("UnLock");
+        std::wcout << L"UnLock";
     std::wcout << std::endl;
 
-    std::wcout << wxT("Position Operations Supported (SQLSetPos): ");
+    std::wcout << L"Position Operations Supported (SQLSetPos): ";
     if (dbInf.posOperations & SQL_POS_POSITION)
-        std::wcout << wxT("Position, ");
+        std::wcout << L"Position, ";
     if (dbInf.posOperations & SQL_POS_REFRESH)
-        std::wcout << wxT("Refresh, ");
+        std::wcout << L"Refresh, ";
     if (dbInf.posOperations & SQL_POS_UPDATE)
-        std::wcout << wxT("Upd, ");
+        std::wcout << L"Upd, ";
     if (dbInf.posOperations & SQL_POS_DELETE)
-        std::wcout << wxT("Del, ");
+        std::wcout << L"Del, ";
     if (dbInf.posOperations & SQL_POS_ADD)
-        std::wcout << wxT("Add");
+        std::wcout << L"Add";
     std::wcout << std::endl;
 
-    std::wcout << wxT("Positioned Statements Supported: ");
+    std::wcout << L"Positioned Statements Supported: ";
     if (dbInf.posStmts & SQL_PS_POSITIONED_DELETE)
-        std::wcout << wxT("Pos delete, ");
+        std::wcout << L"Pos delete, ";
     if (dbInf.posStmts & SQL_PS_POSITIONED_UPDATE)
-        std::wcout << wxT("Pos update, ");
+        std::wcout << L"Pos update, ";
     if (dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE)
-        std::wcout << wxT("Select for update");
+        std::wcout << L"Select for update";
     std::wcout << std::endl;
 
-    std::wcout << wxT("Scroll Concurrency: ");
+    std::wcout << L"Scroll Concurrency: ";
     if (dbInf.scrollConcurrency & SQL_SCCO_READ_ONLY)
-        std::wcout << wxT("Read Only, ");
+        std::wcout << L"Read Only, ";
     if (dbInf.scrollConcurrency & SQL_SCCO_LOCK)
-        std::wcout << wxT("Lock, ");
+        std::wcout << L"Lock, ";
     if (dbInf.scrollConcurrency & SQL_SCCO_OPT_ROWVER)
-        std::wcout << wxT("Opt. Rowver, ");
+        std::wcout << L"Opt. Rowver, ";
     if (dbInf.scrollConcurrency & SQL_SCCO_OPT_VALUES)
-        std::wcout << wxT("Opt. Values");
+        std::wcout << L"Opt. Values";
     std::wcout << std::endl;
 
-    std::wcout << wxT("Scroll Options: ");
+    std::wcout << L"Scroll Options: ";
     if (dbInf.scrollOptions & SQL_SO_FORWARD_ONLY)
-        std::wcout << wxT("Fwd Only, ");
+        std::wcout << L"Fwd Only, ";
     if (dbInf.scrollOptions & SQL_SO_STATIC)
-        std::wcout << wxT("Static, ");
+        std::wcout << L"Static, ";
     if (dbInf.scrollOptions & SQL_SO_KEYSET_DRIVEN)
-        std::wcout << wxT("Keyset Driven, ");
+        std::wcout << L"Keyset Driven, ";
     if (dbInf.scrollOptions & SQL_SO_DYNAMIC)
-        std::wcout << wxT("Dynamic, ");
+        std::wcout << L"Dynamic, ";
     if (dbInf.scrollOptions & SQL_SO_MIXED)
-        std::wcout << wxT("Mixed");
+        std::wcout << L"Mixed";
     std::wcout << std::endl;
 
-    std::wcout << wxT("Static Sensitivity: ");
+    std::wcout << L"Static Sensitivity: ";
     if (dbInf.staticSensitivity & SQL_SS_ADDITIONS)
-        std::wcout << wxT("Additions, ");
+        std::wcout << L"Additions, ";
     if (dbInf.staticSensitivity & SQL_SS_DELETIONS)
-        std::wcout << wxT("Deletions, ");
+        std::wcout << L"Deletions, ";
     if (dbInf.staticSensitivity & SQL_SS_UPDATES)
-        std::wcout << wxT("Updates");
+        std::wcout << L"Updates";
     std::wcout << std::endl;
 
-    std::wcout << wxT("Transaction Capable?: ");
+    std::wcout << L"Transaction Capable?: ";
     switch(dbInf.txnCapable)
     {
-        case SQL_TC_NONE:          std::wcout << wxT("No");            break;
-        case SQL_TC_DML:           std::wcout << wxT("DML Only");      break;
-        case SQL_TC_DDL_COMMIT:    std::wcout << wxT("DDL Commit");    break;
-        case SQL_TC_DDL_IGNORE:    std::wcout << wxT("DDL Ignore");    break;
-        case SQL_TC_ALL:           std::wcout << wxT("DDL & DML");     break;
+        case SQL_TC_NONE:          std::wcout << L"No";            break;
+        case SQL_TC_DML:           std::wcout << L"DML Only";      break;
+        case SQL_TC_DDL_COMMIT:    std::wcout << L"DDL Commit";    break;
+        case SQL_TC_DDL_IGNORE:    std::wcout << L"DDL Ignore";    break;
+        case SQL_TC_ALL:           std::wcout << L"DDL & DML";     break;
     }
     std::wcout << std::endl;
 
@@ -1698,7 +1698,7 @@ bool wxDb::getDataTypeInfo(SWORD fSqlType, wxDbSqlTypeInfo &structSQLTypeInfo)
     {
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_NO_DATA_FOUND)
-            std::wcout << wxT("SQL_NO_DATA_FOUND fetching information about data type.") << std::endl;
+            std::wcout << L"SQL_NO_DATA_FOUND fetching information about data type." << std::endl;
 #endif
         DispAllErrors(henv, hdbc, hstmt);
         SQLFreeStmt(hstmt, SQL_CLOSE);
@@ -1718,26 +1718,26 @@ bool wxDb::getDataTypeInfo(SWORD fSqlType, wxDbSqlTypeInfo &structSQLTypeInfo)
     // BJO 991209
     if (Dbms() == dbmsMY_SQL)
     {
-        if (structSQLTypeInfo.TypeName == wxT("middleint"))
-            structSQLTypeInfo.TypeName = wxT("mediumint");
-        else if (structSQLTypeInfo.TypeName == wxT("middleint unsigned"))
-            structSQLTypeInfo.TypeName = wxT("mediumint unsigned");
-        else if (structSQLTypeInfo.TypeName == wxT("integer"))
-            structSQLTypeInfo.TypeName = wxT("int");
-        else if (structSQLTypeInfo.TypeName == wxT("integer unsigned"))
-            structSQLTypeInfo.TypeName = wxT("int unsigned");
-        else if (structSQLTypeInfo.TypeName == wxT("middleint"))
-            structSQLTypeInfo.TypeName = wxT("mediumint");
-        else if (structSQLTypeInfo.TypeName == wxT("varchar"))
-            structSQLTypeInfo.TypeName = wxT("char");
+        if (structSQLTypeInfo.TypeName == L"middleint")
+            structSQLTypeInfo.TypeName = L"mediumint";
+        else if (structSQLTypeInfo.TypeName == L"middleint unsigned")
+            structSQLTypeInfo.TypeName = L"mediumint unsigned";
+        else if (structSQLTypeInfo.TypeName == L"integer")
+            structSQLTypeInfo.TypeName = L"int";
+        else if (structSQLTypeInfo.TypeName == L"integer unsigned")
+            structSQLTypeInfo.TypeName = L"int unsigned";
+        else if (structSQLTypeInfo.TypeName == L"middleint")
+            structSQLTypeInfo.TypeName = L"mediumint";
+        else if (structSQLTypeInfo.TypeName == L"varchar")
+            structSQLTypeInfo.TypeName = L"char";
     }
 
     // BJO 20000427 : OpenLink driver
-    if (!wxStrncmp(dbInf.driverName, wxT("oplodbc"), 7) ||
-        !wxStrncmp(dbInf.driverName, wxT("OLOD"), 4))
+    if (!wcsncmp(dbInf.driverName, L"oplodbc", 7) ||
+        !wcsncmp(dbInf.driverName, L"OLOD", 4))
     {
-        if (structSQLTypeInfo.TypeName == wxT("double precision"))
-            structSQLTypeInfo.TypeName = wxT("real");
+        if (structSQLTypeInfo.TypeName == L"double precision")
+            structSQLTypeInfo.TypeName = L"real";
     }
 #endif
 
@@ -1883,12 +1883,12 @@ bool wxDb::DispAllErrors(HENV aHenv, HDBC aHdbc, HSTMT aHstmt)
 #ifdef DBDEBUG_CONSOLE
             // When run in console mode, use standard out to display errors.
             std::wcout << odbcErrMsg.c_str() << std::endl;
-            std::wcout << wxT("Press any key to continue...") << std::endl;
+            std::wcout << L"Press any key to continue..." << std::endl;
             getchar();
 #endif
 
 #ifdef __WXDEBUG__
-            //wxLogDebug(odbcErrMsg,wxT("ODBC DEBUG MESSAGE from DispAllErrors()"));
+            //wxLogDebug(odbcErrMsg, L"ODBC DEBUG MESSAGE from DispAllErrors()");
 #endif
         }
     }
@@ -1923,12 +1923,12 @@ void wxDb::DispNextError(void)
 #ifdef DBDEBUG_CONSOLE
     // When run in console mode, use standard out to display errors.
     std::wcout << odbcErrMsg.c_str() << std::endl;
-    std::wcout << wxT("Press any key to continue...")  << std::endl;
+    std::wcout << L"Press any key to continue..."  << std::endl;
     getchar();
 #endif
 
 #ifdef __WXDEBUG__
-    //wxLogDebug(odbcErrMsg,wxT("ODBC DEBUG MESSAGE"));
+    //wxLogDebug(odbcErrMsg, L"ODBC DEBUG MESSAGE");
 #endif  // __WXDEBUG__
 
 } // wxDb::DispNextError()
@@ -1966,183 +1966,183 @@ void wxDb::logError(const std::wstring &errMsg, const std::wstring &SQLState)
 /**********wxDb::TranslateSqlState()  **********/
 int wxDb::TranslateSqlState(const std::wstring &SQLState)
 {
-    if (!wxStrcmp(SQLState, wxT("01000")))
+    if (SQLState == L"01000")
         return(DB_ERR_GENERAL_WARNING);
-    if (!wxStrcmp(SQLState, wxT("01002")))
+    if (SQLState == L"01002")
         return(DB_ERR_DISCONNECT_ERROR);
-    if (!wxStrcmp(SQLState, wxT("01004")))
+    if (SQLState == L"01004")
         return(DB_ERR_DATA_TRUNCATED);
-    if (!wxStrcmp(SQLState, wxT("01006")))
+    if (SQLState == L"01006")
         return(DB_ERR_PRIV_NOT_REVOKED);
-    if (!wxStrcmp(SQLState, wxT("01S00")))
+    if (SQLState == L"01S00")
         return(DB_ERR_INVALID_CONN_STR_ATTR);
-    if (!wxStrcmp(SQLState, wxT("01S01")))
+    if (SQLState == L"01S01")
         return(DB_ERR_ERROR_IN_ROW);
-    if (!wxStrcmp(SQLState, wxT("01S02")))
+    if (SQLState == L"01S02")
         return(DB_ERR_OPTION_VALUE_CHANGED);
-    if (!wxStrcmp(SQLState, wxT("01S03")))
+    if (SQLState == L"01S03")
         return(DB_ERR_NO_ROWS_UPD_OR_DEL);
-    if (!wxStrcmp(SQLState, wxT("01S04")))
+    if (SQLState == L"01S04")
         return(DB_ERR_MULTI_ROWS_UPD_OR_DEL);
-    if (!wxStrcmp(SQLState, wxT("07001")))
+    if (SQLState == L"07001")
         return(DB_ERR_WRONG_NO_OF_PARAMS);
-    if (!wxStrcmp(SQLState, wxT("07006")))
+    if (SQLState == L"07006")
         return(DB_ERR_DATA_TYPE_ATTR_VIOL);
-    if (!wxStrcmp(SQLState, wxT("08001")))
+    if (SQLState == L"08001")
         return(DB_ERR_UNABLE_TO_CONNECT);
-    if (!wxStrcmp(SQLState, wxT("08002")))
+    if (SQLState == L"08002")
         return(DB_ERR_CONNECTION_IN_USE);
-    if (!wxStrcmp(SQLState, wxT("08003")))
+    if (SQLState == L"08003")
         return(DB_ERR_CONNECTION_NOT_OPEN);
-    if (!wxStrcmp(SQLState, wxT("08004")))
+    if (SQLState == L"08004")
         return(DB_ERR_REJECTED_CONNECTION);
-    if (!wxStrcmp(SQLState, wxT("08007")))
+    if (SQLState == L"08007")
         return(DB_ERR_CONN_FAIL_IN_TRANS);
-    if (!wxStrcmp(SQLState, wxT("08S01")))
+    if (SQLState == L"08S01")
         return(DB_ERR_COMM_LINK_FAILURE);
-    if (!wxStrcmp(SQLState, wxT("21S01")))
+    if (SQLState == L"21S01")
         return(DB_ERR_INSERT_VALUE_LIST_MISMATCH);
-    if (!wxStrcmp(SQLState, wxT("21S02")))
+    if (SQLState == L"21S02")
         return(DB_ERR_DERIVED_TABLE_MISMATCH);
-    if (!wxStrcmp(SQLState, wxT("22001")))
+    if (SQLState == L"22001")
         return(DB_ERR_STRING_RIGHT_TRUNC);
-    if (!wxStrcmp(SQLState, wxT("22003")))
+    if (SQLState == L"22003")
         return(DB_ERR_NUMERIC_VALUE_OUT_OF_RNG);
-    if (!wxStrcmp(SQLState, wxT("22005")))
+    if (SQLState == L"22005")
         return(DB_ERR_ERROR_IN_ASSIGNMENT);
-    if (!wxStrcmp(SQLState, wxT("22008")))
+    if (SQLState == L"22008")
         return(DB_ERR_DATETIME_FLD_OVERFLOW);
-    if (!wxStrcmp(SQLState, wxT("22012")))
+    if (SQLState == L"22012")
         return(DB_ERR_DIVIDE_BY_ZERO);
-    if (!wxStrcmp(SQLState, wxT("22026")))
+    if (SQLState == L"22026")
         return(DB_ERR_STR_DATA_LENGTH_MISMATCH);
-    if (!wxStrcmp(SQLState, wxT("23000")))
+    if (SQLState == L"23000")
         return(DB_ERR_INTEGRITY_CONSTRAINT_VIOL);
-    if (!wxStrcmp(SQLState, wxT("24000")))
+    if (SQLState == L"24000")
         return(DB_ERR_INVALID_CURSOR_STATE);
-    if (!wxStrcmp(SQLState, wxT("25000")))
+    if (SQLState == L"25000")
         return(DB_ERR_INVALID_TRANS_STATE);
-    if (!wxStrcmp(SQLState, wxT("28000")))
+    if (SQLState == L"28000")
         return(DB_ERR_INVALID_AUTH_SPEC);
-    if (!wxStrcmp(SQLState, wxT("34000")))
+    if (SQLState == L"34000")
         return(DB_ERR_INVALID_CURSOR_NAME);
-    if (!wxStrcmp(SQLState, wxT("37000")))
+    if (SQLState == L"37000")
         return(DB_ERR_SYNTAX_ERROR_OR_ACCESS_VIOL);
-    if (!wxStrcmp(SQLState, wxT("3C000")))
+    if (SQLState == L"3C000")
         return(DB_ERR_DUPLICATE_CURSOR_NAME);
-    if (!wxStrcmp(SQLState, wxT("40001")))
+    if (SQLState == L"40001")
         return(DB_ERR_SERIALIZATION_FAILURE);
-    if (!wxStrcmp(SQLState, wxT("42000")))
+    if (SQLState == L"42000")
         return(DB_ERR_SYNTAX_ERROR_OR_ACCESS_VIOL2);
-    if (!wxStrcmp(SQLState, wxT("70100")))
+    if (SQLState == L"70100")
         return(DB_ERR_OPERATION_ABORTED);
-    if (!wxStrcmp(SQLState, wxT("IM001")))
+    if (SQLState == L"IM001")
         return(DB_ERR_UNSUPPORTED_FUNCTION);
-    if (!wxStrcmp(SQLState, wxT("IM002")))
+    if (SQLState == L"IM002")
         return(DB_ERR_NO_DATA_SOURCE);
-    if (!wxStrcmp(SQLState, wxT("IM003")))
+    if (SQLState == L"IM003")
         return(DB_ERR_DRIVER_LOAD_ERROR);
-    if (!wxStrcmp(SQLState, wxT("IM004")))
+    if (SQLState == L"IM004")
         return(DB_ERR_SQLALLOCENV_FAILED);
-    if (!wxStrcmp(SQLState, wxT("IM005")))
+    if (SQLState == L"IM005")
         return(DB_ERR_SQLALLOCCONNECT_FAILED);
-    if (!wxStrcmp(SQLState, wxT("IM006")))
+    if (SQLState == L"IM006")
         return(DB_ERR_SQLSETCONNECTOPTION_FAILED);
-    if (!wxStrcmp(SQLState, wxT("IM007")))
+    if (SQLState == L"IM007")
         return(DB_ERR_NO_DATA_SOURCE_DLG_PROHIB);
-    if (!wxStrcmp(SQLState, wxT("IM008")))
+    if (SQLState == L"IM008")
         return(DB_ERR_DIALOG_FAILED);
-    if (!wxStrcmp(SQLState, wxT("IM009")))
+    if (SQLState == L"IM009")
         return(DB_ERR_UNABLE_TO_LOAD_TRANSLATION_DLL);
-    if (!wxStrcmp(SQLState, wxT("IM010")))
+    if (SQLState == L"IM010")
         return(DB_ERR_DATA_SOURCE_NAME_TOO_LONG);
-    if (!wxStrcmp(SQLState, wxT("IM011")))
+    if (SQLState == L"IM011")
         return(DB_ERR_DRIVER_NAME_TOO_LONG);
-    if (!wxStrcmp(SQLState, wxT("IM012")))
+    if (SQLState == L"IM012")
         return(DB_ERR_DRIVER_KEYWORD_SYNTAX_ERROR);
-    if (!wxStrcmp(SQLState, wxT("IM013")))
+    if (SQLState == L"IM013")
         return(DB_ERR_TRACE_FILE_ERROR);
-    if (!wxStrcmp(SQLState, wxT("S0001")))
+    if (SQLState == L"S0001")
         return(DB_ERR_TABLE_OR_VIEW_ALREADY_EXISTS);
-    if (!wxStrcmp(SQLState, wxT("S0002")))
+    if (SQLState == L"S0002")
         return(DB_ERR_TABLE_NOT_FOUND);
-    if (!wxStrcmp(SQLState, wxT("S0011")))
+    if (SQLState == L"S0011")
         return(DB_ERR_INDEX_ALREADY_EXISTS);
-    if (!wxStrcmp(SQLState, wxT("S0012")))
+    if (SQLState == L"S0012")
         return(DB_ERR_INDEX_NOT_FOUND);
-    if (!wxStrcmp(SQLState, wxT("S0021")))
+    if (SQLState == L"S0021")
         return(DB_ERR_COLUMN_ALREADY_EXISTS);
-    if (!wxStrcmp(SQLState, wxT("S0022")))
+    if (SQLState == L"S0022")
         return(DB_ERR_COLUMN_NOT_FOUND);
-    if (!wxStrcmp(SQLState, wxT("S0023")))
+    if (SQLState == L"S0023")
         return(DB_ERR_NO_DEFAULT_FOR_COLUMN);
-    if (!wxStrcmp(SQLState, wxT("S1000")))
+    if (SQLState == L"S1000")
         return(DB_ERR_GENERAL_ERROR);
-    if (!wxStrcmp(SQLState, wxT("S1001")))
+    if (SQLState == L"S1001")
         return(DB_ERR_MEMORY_ALLOCATION_FAILURE);
-    if (!wxStrcmp(SQLState, wxT("S1002")))
+    if (SQLState == L"S1002")
         return(DB_ERR_INVALID_COLUMN_NUMBER);
-    if (!wxStrcmp(SQLState, wxT("S1003")))
+    if (SQLState == L"S1003")
         return(DB_ERR_PROGRAM_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1004")))
+    if (SQLState == L"S1004")
         return(DB_ERR_SQL_DATA_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1008")))
+    if (SQLState == L"S1008")
         return(DB_ERR_OPERATION_CANCELLED);
-    if (!wxStrcmp(SQLState, wxT("S1009")))
+    if (SQLState == L"S1009")
         return(DB_ERR_INVALID_ARGUMENT_VALUE);
-    if (!wxStrcmp(SQLState, wxT("S1010")))
+    if (SQLState == L"S1010")
         return(DB_ERR_FUNCTION_SEQUENCE_ERROR);
-    if (!wxStrcmp(SQLState, wxT("S1011")))
+    if (SQLState == L"S1011")
         return(DB_ERR_OPERATION_INVALID_AT_THIS_TIME);
-    if (!wxStrcmp(SQLState, wxT("S1012")))
+    if (SQLState == L"S1012")
         return(DB_ERR_INVALID_TRANS_OPERATION_CODE);
-    if (!wxStrcmp(SQLState, wxT("S1015")))
+    if (SQLState == L"S1015")
         return(DB_ERR_NO_CURSOR_NAME_AVAIL);
-    if (!wxStrcmp(SQLState, wxT("S1090")))
+    if (SQLState == L"S1090")
         return(DB_ERR_INVALID_STR_OR_BUF_LEN);
-    if (!wxStrcmp(SQLState, wxT("S1091")))
+    if (SQLState == L"S1091")
         return(DB_ERR_DESCRIPTOR_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1092")))
+    if (SQLState == L"S1092")
         return(DB_ERR_OPTION_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1093")))
+    if (SQLState == L"S1093")
         return(DB_ERR_INVALID_PARAM_NO);
-    if (!wxStrcmp(SQLState, wxT("S1094")))
+    if (SQLState == L"S1094")
         return(DB_ERR_INVALID_SCALE_VALUE);
-    if (!wxStrcmp(SQLState, wxT("S1095")))
+    if (SQLState == L"S1095")
         return(DB_ERR_FUNCTION_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1096")))
+    if (SQLState == L"S1096")
         return(DB_ERR_INF_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1097")))
+    if (SQLState == L"S1097")
         return(DB_ERR_COLUMN_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1098")))
+    if (SQLState == L"S1098")
         return(DB_ERR_SCOPE_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1099")))
+    if (SQLState == L"S1099")
         return(DB_ERR_NULLABLE_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1100")))
+    if (SQLState == L"S1100")
         return(DB_ERR_UNIQUENESS_OPTION_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1101")))
+    if (SQLState == L"S1101")
         return(DB_ERR_ACCURACY_OPTION_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1103")))
+    if (SQLState == L"S1103")
         return(DB_ERR_DIRECTION_OPTION_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1104")))
+    if (SQLState == L"S1104")
         return(DB_ERR_INVALID_PRECISION_VALUE);
-    if (!wxStrcmp(SQLState, wxT("S1105")))
+    if (SQLState == L"S1105")
         return(DB_ERR_INVALID_PARAM_TYPE);
-    if (!wxStrcmp(SQLState, wxT("S1106")))
+    if (SQLState == L"S1106")
         return(DB_ERR_FETCH_TYPE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1107")))
+    if (SQLState == L"S1107")
         return(DB_ERR_ROW_VALUE_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1108")))
+    if (SQLState == L"S1108")
         return(DB_ERR_CONCURRENCY_OPTION_OUT_OF_RANGE);
-    if (!wxStrcmp(SQLState, wxT("S1109")))
+    if (SQLState == L"S1109")
         return(DB_ERR_INVALID_CURSOR_POSITION);
-    if (!wxStrcmp(SQLState, wxT("S1110")))
+    if (SQLState == L"S1110")
         return(DB_ERR_INVALID_DRIVER_COMPLETION);
-    if (!wxStrcmp(SQLState, wxT("S1111")))
+    if (SQLState == L"S1111")
         return(DB_ERR_INVALID_BOOKMARK_VALUE);
-    if (!wxStrcmp(SQLState, wxT("S1C00")))
+    if (SQLState == L"S1C00")
         return(DB_ERR_DRIVER_NOT_CAPABLE);
-    if (!wxStrcmp(SQLState, wxT("S1T00")))
+    if (SQLState == L"S1T00")
         return(DB_ERR_TIMEOUT_EXPIRED);
 
     // No match
@@ -2157,40 +2157,40 @@ bool wxDb::Grant(int privileges, const std::wstring &tableName, const std::wstri
     std::wstring sqlStmt;
 
     // Build the grant statement
-    sqlStmt  = wxT("GRANT ");
+    sqlStmt  = L"GRANT ";
     if (privileges == DB_GRANT_ALL)
-        sqlStmt += wxT("ALL");
+        sqlStmt += L"ALL";
     else
     {
         int c = 0;
         if (privileges & DB_GRANT_SELECT)
         {
-            sqlStmt += wxT("SELECT");
+            sqlStmt += L"SELECT";
             c++;
         }
         if (privileges & DB_GRANT_INSERT)
         {
             if (c++)
-                sqlStmt += wxT(", ");
-            sqlStmt += wxT("INSERT");
+                sqlStmt += L", ";
+            sqlStmt += L"INSERT";
         }
         if (privileges & DB_GRANT_UPDATE)
         {
             if (c++)
-                sqlStmt += wxT(", ");
-            sqlStmt += wxT("UPDATE");
+                sqlStmt += L", ";
+            sqlStmt += L"UPDATE";
         }
         if (privileges & DB_GRANT_DELETE)
         {
             if (c++)
-                sqlStmt += wxT(", ");
-            sqlStmt += wxT("DELETE");
+                sqlStmt += L", ";
+            sqlStmt += L"DELETE";
         }
     }
 
-    sqlStmt += wxT(" ON ");
+    sqlStmt += L" ON ";
     sqlStmt += SQLTableName(tableName.c_str());
-    sqlStmt += wxT(" TO ");
+    sqlStmt += L" TO ";
     sqlStmt += userList;
 
 #ifdef DBDEBUG_CONSOLE
@@ -2215,17 +2215,17 @@ bool wxDb::CreateView(const std::wstring &viewName, const std::wstring &colList,
         return false;
 
     // Build the create view statement
-    sqlStmt  = wxT("CREATE VIEW ");
+    sqlStmt  = L"CREATE VIEW ";
     sqlStmt += viewName;
 
     if (colList.length())
     {
-        sqlStmt += wxT(" (");
+        sqlStmt += L" (";
         sqlStmt += colList;
-        sqlStmt += wxT(")");
+        sqlStmt += L")";
     }
 
-    sqlStmt += wxT(" AS ");
+    sqlStmt += L" AS ";
     sqlStmt += pSqlStmt;
 
     WriteSqlLog(sqlStmt);
@@ -2262,10 +2262,10 @@ bool wxDb::DropView(const std::wstring &viewName)
     {
         // Check for "Base table not found" error and ignore
         GetNextError(henv, hdbc, hstmt);
-        if (wxStrcmp(sqlState,wxT("S0002")))  // "Base table not found"
+        if (wxStrcmp(sqlState, L"S0002"))  // "Base table not found"
         {
             // Check for product specific error codes
-            if (!((Dbms() == dbmsSYBASE_ASA    && !wxStrcmp(sqlState,wxT("42000")))))  // 5.x (and lower?)
+            if (!((Dbms() == dbmsSYBASE_ASA    && !wxStrcmp(sqlState, L"42000"))))  // 5.x (and lower?)
             {
                 DispNextError();
                 DispAllErrors(henv, hdbc, hstmt);
@@ -2396,7 +2396,7 @@ bool wxDb::ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& nu
             default:
                 std::wstring errMsg;
 				errMsg = (boost::wformat(L"SQL Data type %ld currently not supported by wxWidgets") % (long)Sqllen).str();
-                //wxLogDebug(errMsg,wxT("ODBC DEBUG MESSAGE"));
+                //wxLogDebug(errMsg, L"ODBC DEBUG MESSAGE");
 #endif
         }
     }
@@ -3184,8 +3184,8 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
 #ifdef __WXDEBUG__
                         default:
                             std::wstring errMsg;
-                            errMsg.Printf(wxT("SQL Data type %d currently not supported by wxWidgets"), colInf[colNo].sqlDataType);
-                            wxLogDebug(errMsg,wxT("ODBC DEBUG MESSAGE"));
+                            errMsg.Printf(L"SQL Data type %d currently not supported by wxWidgets", colInf[colNo].sqlDataType);
+                            wxLogDebug(errMsg, L"ODBC DEBUG MESSAGE");
 #endif
                     }
                     colNo++;
@@ -3216,7 +3216,7 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
     // Build a generic SELECT statement which returns 0 rows
     std::wstring Stmt;
 
-    Stmt.Printf(wxT("select * from \"%s\" where 0=1"), tableName);
+    Stmt.Printf(L"select * from \"%s\" where 0=1", tableName);
 
     // Execute query
     if (SQLExecDirect(hstmt, (UCHAR FAR *) Stmt.c_str(), SQL_NTS) != SQL_SUCCESS)
@@ -3514,7 +3514,7 @@ bool wxDb::Catalog(const wchar_t *userID, const std::wstring &fileName)
     wchar_t    typeName[30+1];
     SDWORD    precision, length;
 
-    FILE *fp = wxFopen(fileName.c_str(),wxT("wt"));
+    FILE *fp = wxFopen(fileName.c_str(), L"wt");
     if (fp == NULL)
         return false;
 
@@ -3706,7 +3706,7 @@ bool wxDb::TablePrivileges(const std::wstring &tableName, const std::wstring &pr
 
     // We probably need to be able to dynamically set this based on
     // the driver type, and state.
-    wchar_t curRole[]=wxT("public");
+    wchar_t curRole[] = L"public";
 
     std::wstring TableName;
 
@@ -3985,7 +3985,7 @@ wxDBMS wxDb::Dbms(void)
                std::wcout << "Database connecting to: " << dbInf.dbmsName << std::endl;
 #endif  // DBDEBUG_CONSOLE
 
-    wxLogDebug(wxT("Database connecting to: "));
+    wxLogDebug(L"Database connecting to: ");
     wxLogDebug(dbInf.dbmsName);
 
     wchar_t baseName[25+1];
@@ -3994,67 +3994,67 @@ wxDBMS wxDb::Dbms(void)
 
     // RGG 20001025 : add support for Interbase
     // GT : Integrated to base classes on 20001121
-    if (!wxStricmp(dbInf.dbmsName,wxT("Interbase")))
+    if (!_wcsicmp(dbInf.dbmsName, L"Interbase"))
         return((wxDBMS)(dbmsType = dbmsINTERBASE));
 
     // BJO 20000428 : add support for Virtuoso
-    if (!wxStricmp(dbInf.dbmsName,wxT("OpenLink Virtuoso VDBMS")))
+    if (!_wcsicmp(dbInf.dbmsName, L"OpenLink Virtuoso VDBMS"))
       return((wxDBMS)(dbmsType = dbmsVIRTUOSO));
 
-    if (!wxStricmp(dbInf.dbmsName,wxT("Adaptive Server Anywhere")))
+    if (!_wcsicmp(dbInf.dbmsName, L"Adaptive Server Anywhere"))
         return((wxDBMS)(dbmsType = dbmsSYBASE_ASA));
 
     // BJO 20000427 : The "SQL Server" string is also returned by SQLServer when
     // connected through an OpenLink driver.
     // Is it also returned by Sybase Adapatitve server?
     // OpenLink driver name is OLOD3032.DLL for msw and oplodbc.so for unix
-    if (!wxStricmp(dbInf.dbmsName,wxT("SQL Server")))
+    if (!_wcsicmp(dbInf.dbmsName, L"SQL Server"))
     {
-      if (!wxStrncmp(dbInf.driverName, wxT("oplodbc"), 7) ||
-          !wxStrncmp(dbInf.driverName, wxT("OLOD"), 4))
+      if (!wcsncmp(dbInf.driverName, L"oplodbc", 7) ||
+          !wcsncmp(dbInf.driverName, L"OLOD", 4))
             return ((wxDBMS)(dbmsMS_SQL_SERVER));
         else
             return ((wxDBMS)(dbmsType = dbmsSYBASE_ASE));
     }
 
-    if (!wxStricmp(dbInf.dbmsName,wxT("Microsoft SQL Server")))
+    if (!_wcsicmp(dbInf.dbmsName, L"Microsoft SQL Server"))
         return((wxDBMS)(dbmsType = dbmsMS_SQL_SERVER));
 
     baseName[10] = 0;
-    if (!wxStricmp(baseName,wxT("PostgreSQL")))  // v6.5.0
+    if (!_wcsicmp(baseName, L"PostgreSQL"))  // v6.5.0
         return((wxDBMS)(dbmsType = dbmsPOSTGRES));
 
     baseName[9] = 0;
-    if (!wxStricmp(baseName,wxT("Pervasive")))
+    if (!_wcsicmp(baseName, L"Pervasive"))
         return((wxDBMS)(dbmsType = dbmsPERVASIVE_SQL));
 
     baseName[8] = 0;
-    if (!wxStricmp(baseName,wxT("Informix")))
+    if (!_wcsicmp(baseName, L"Informix"))
         return((wxDBMS)(dbmsType = dbmsINFORMIX));
 
-    if (!wxStricmp(baseName,wxT("Firebird")))
+    if (!_wcsicmp(baseName, L"Firebird"))
         return((wxDBMS)(dbmsType = dbmsFIREBIRD));
 
     baseName[6] = 0;
-    if (!wxStricmp(baseName,wxT("Oracle")))
+    if (!_wcsicmp(baseName, L"Oracle"))
         return((wxDBMS)(dbmsType = dbmsORACLE));
-    if (!wxStricmp(baseName,wxT("ACCESS")))
+    if (!_wcsicmp(baseName, L"ACCESS"))
         return((wxDBMS)(dbmsType = dbmsACCESS));
-    if (!wxStricmp(baseName,wxT("Sybase")))
+    if (!_wcsicmp(baseName, L"Sybase"))
       return((wxDBMS)(dbmsType = dbmsSYBASE_ASE));
 
     baseName[5] = 0;
-    if (!wxStricmp(baseName,wxT("DBASE")))
+    if (!_wcsicmp(baseName, L"DBASE"))
         return((wxDBMS)(dbmsType = dbmsDBASE));
-    if (!wxStricmp(baseName,wxT("xBase")))
+    if (!_wcsicmp(baseName, L"xBase"))
         return((wxDBMS)(dbmsType = dbmsXBASE_SEQUITER));
-    if (!wxStricmp(baseName,wxT("MySQL")))
+    if (!_wcsicmp(baseName, L"MySQL"))
         return((wxDBMS)(dbmsType = dbmsMY_SQL));
-    if (!wxStricmp(baseName,wxT("MaxDB")))
+    if (!_wcsicmp(baseName, L"MaxDB"))
         return((wxDBMS)(dbmsType = dbmsMAXDB));
 
     baseName[3] = 0;
-    if (!wxStricmp(baseName,wxT("DB2")))
+    if (!_wcsicmp(baseName, L"DB2"))
         return((wxDBMS)(dbmsType = dbmsDB2));
 
     return((wxDBMS)(dbmsType = dbmsUNIDENTIFIED));
@@ -4145,7 +4145,7 @@ bool wxDb::ModifyColumn(const std::wstring &tableName, const std::wstring &colum
     // for passing things like "NOT NULL"
     if (optionalParam.length())
     {
-        sqlStmt += wxT(" ");
+        sqlStmt += L" ";
         sqlStmt += optionalParam;
     }
 
@@ -4374,16 +4374,16 @@ const wchar_t WXDLLIMPEXP_ODBC *wxDbLogExtendedErrorMsg(const wchar_t *userText,
 
     if (ErrFile || ErrLine)
     {
-        msg += wxT("File: ");
+        msg += L"File: ";
         msg += ErrFile;
-        msg += wxT("   Line: ");
+        msg += L"   Line: ";
 		tStr = (boost::wformat(L"%d") % ErrLine).str();
         msg += tStr.c_str();
-        msg += wxT("\n");
+        msg += L"\n";
     }
 
-    msg.append (wxT("\nODBC errors:\n"));
-    msg += wxT("\n");
+    msg.append (L"\nODBC errors:\n");
+    msg += L"\n";
 
     // Display errors for this connection
     int i;
@@ -4393,13 +4393,13 @@ const wchar_t WXDLLIMPEXP_ODBC *wxDbLogExtendedErrorMsg(const wchar_t *userText,
         {
             msg.append(pDb->errorList[i]);
             if (wxStrcmp(pDb->errorList[i], wxEmptyString) != 0)
-                msg.append(wxT("\n"));
+                msg.append(L"\n");
             // Clear the errmsg buffer so the next error will not
             // end up showing the previous error that have occurred
             wxStrcpy(pDb->errorList[i], wxEmptyString);
         }
     }
-    msg += wxT("\n");
+    msg += L"\n";
 
     wxLogDebug(msg.c_str());
 
@@ -4454,7 +4454,7 @@ int wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn
     // NOTE: The decimal 2 is an invalid character in all keyword pairs
     // so that is why I used it, as std::wstring does not deal well with
     // embedded nulls in strings
-    setupStr.Printf(wxT("DSN=%s%cDescription=%s%cDefaultDir=%s%c"),dsn,2,description,2,defDir,2);
+    setupStr.Printf(L"DSN=%s%cDescription=%s%cDefaultDir=%s%c",dsn,2,description,2,defDir,2);
 
     // Replace the separator from above with the '\0' separator needed
     // by the SQLConfigDataSource() function
@@ -4463,7 +4463,7 @@ int wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn
     {
         k = setupStr.Find((wchar_t)2,true);
         if (k != wxNOT_FOUND)
-            setupStr[(UINT)k] = wxT('\0');
+            setupStr[(UINT)k] = L'\0';
     }
     while (k != wxNOT_FOUND);
 
@@ -4476,7 +4476,7 @@ int wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn
         DWORD retcode = 0;
         WORD cb;
         wchar_t errMsg[SQL_MAX_MESSAGE_LENGTH];
-        errMsg[0] = wxT('\0');
+        errMsg[0] = L'\0';
 
         // This function is only supported in ODBC drivers v3.0 compliant and above
         SQLInstallerError(1,&retcode,errMsg,SQL_MAX_MESSAGE_LENGTH-1,&cb);
@@ -4485,12 +4485,12 @@ int wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn
 #ifdef DBDEBUG_CONSOLE
                // When run in console mode, use standard out to display errors.
                std::wcout << errMsg << std::endl;
-               std::wcout << wxT("Press any key to continue...") << std::endl;
+               std::wcout << L"Press any key to continue..." << std::endl;
                getchar();
 #endif  // DBDEBUG_CONSOLE
 
 #ifdef __WXDEBUG__
-               wxLogDebug(errMsg,wxT("ODBC DEBUG MESSAGE"));
+               wxLogDebug(errMsg, L"ODBC DEBUG MESSAGE");
 #endif  // __WXDEBUG__
         }
     }
@@ -4500,7 +4500,7 @@ int wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn
     // Using iODBC/unixODBC or some other compiler which does not support the APIs
     // necessary to use this function, so this function is not supported
 #ifdef __WXDEBUG__
-    wxLogDebug(wxT("wxDbCreateDataSource() not available except under VC++/MSW"),wxT("ODBC DEBUG MESSAGE"));
+    wxLogDebug(L"wxDbCreateDataSource() not available except under VC++/MSW", L"ODBC DEBUG MESSAGE");
 #endif
     result = FALSE;
 #endif  // __VISUALC__
