@@ -2714,7 +2714,7 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
 
                         // Determine the wxDb data type that is used to represent the native data type of this data source
                         colInf[colNo].dbDataType = 0;
-                        if (!wxStricmp(typeInfVarchar.TypeName,colInf[colNo].typeName))
+                        if (!_wcsicmp(typeInfVarchar.TypeName.c_str(), colInf[colNo].typeName))
                         {
 #ifdef _IODBC_
                             // IODBC does not return a correct columnLength, so we set
@@ -2727,13 +2727,13 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
 #endif
                             colInf[colNo].dbDataType = DB_DATA_TYPE_VARCHAR;
                         }
-                        else if (!wxStricmp(typeInfInteger.TypeName, colInf[colNo].typeName))
+                        else if (!_wcsicmp(typeInfInteger.TypeName.c_str(), colInf[colNo].typeName))
                             colInf[colNo].dbDataType = DB_DATA_TYPE_INTEGER;
-                        else if (!wxStricmp(typeInfFloat.TypeName, colInf[colNo].typeName))
+                        else if (!_wcsicmp(typeInfFloat.TypeName.c_str(), colInf[colNo].typeName))
                             colInf[colNo].dbDataType = DB_DATA_TYPE_FLOAT;
-                        else if (!wxStricmp(typeInfDate.TypeName, colInf[colNo].typeName))
+                        else if (!_wcsicmp(typeInfDate.TypeName.c_str(), colInf[colNo].typeName))
                             colInf[colNo].dbDataType = DB_DATA_TYPE_DATE;
-                        else if (!wxStricmp(typeInfBlob.TypeName, colInf[colNo].typeName))
+                        else if (!_wcsicmp(typeInfBlob.TypeName.c_str(), colInf[colNo].typeName))
                             colInf[colNo].dbDataType = DB_DATA_TYPE_BLOB;
                         colNo++;
                     }
@@ -2886,7 +2886,7 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, cons
 
                     // Determine the wxDb data type that is used to represent the native data type of this data source
                     colInf[colNo].dbDataType = 0;
-                    if (!wxStricmp(typeInfVarchar.TypeName, colInf[colNo].typeName))
+                    if (!_wcsicmp(typeInfVarchar.TypeName.c_str(), colInf[colNo].typeName))
                     {
 #ifdef _IODBC_
                         // IODBC does not return a correct columnLength, so we set
@@ -2900,13 +2900,13 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, cons
 
                         colInf[colNo].dbDataType = DB_DATA_TYPE_VARCHAR;
                     }
-                    else if (!wxStricmp(typeInfInteger.TypeName, colInf[colNo].typeName))
+                    else if (!_wcsicmp(typeInfInteger.TypeName.c_str(), colInf[colNo].typeName))
                         colInf[colNo].dbDataType = DB_DATA_TYPE_INTEGER;
-                    else if (!wxStricmp(typeInfFloat.TypeName, colInf[colNo].typeName))
+                    else if (!_wcsicmp(typeInfFloat.TypeName.c_str(), colInf[colNo].typeName))
                         colInf[colNo].dbDataType = DB_DATA_TYPE_FLOAT;
-                    else if (!wxStricmp(typeInfDate.TypeName, colInf[colNo].typeName))
+                    else if (!_wcsicmp(typeInfDate.TypeName.c_str(), colInf[colNo].typeName))
                         colInf[colNo].dbDataType = DB_DATA_TYPE_DATE;
-                    else if (!wxStricmp(typeInfBlob.TypeName, colInf[colNo].typeName))
+                    else if (!_wcsicmp(typeInfBlob.TypeName.c_str(), colInf[colNo].typeName))
                         colInf[colNo].dbDataType = DB_DATA_TYPE_BLOB;
 
                     colNo++;
