@@ -27,5 +27,6 @@
 #    define WXDLLIMPEXP_DATA_ODBC(type) type
 #endif
 
+WXDLLIMPEXP_ODBC extern const wchar_t* emptyString;
 
 #endif // WXODBC3_H
