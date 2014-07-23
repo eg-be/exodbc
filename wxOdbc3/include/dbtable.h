@@ -49,7 +49,7 @@ const int   wxDB_NO_MORE_COLUMN_NUMBERS = -1;
 class WXDLLIMPEXP_ODBC wxDbColDef
 {
 public:
-    wxChar  ColName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
+    wchar_t  ColName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
     int     DbDataType;                         // Logical Data Type; e.g. DB_DATA_TYPE_INTEGER
     SWORD   SqlCtype;                           // C data type; e.g. SQL_C_LONG
     void   *PtrDataObj;                         // Address of the data object
@@ -80,7 +80,7 @@ public:
 class WXDLLIMPEXP_ODBC wxDbIdxDef
 {
 public:
-    wxChar  ColName[DB_MAX_COLUMN_NAME_LEN+1];
+    wchar_t  ColName[DB_MAX_COLUMN_NAME_LEN+1];
     bool    Ascending;
 };  // wxDbIdxDef
 
@@ -95,8 +95,8 @@ private:
     bool        insertable;
 
     // Private member functions
-    bool        initialize(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
-                       const wxString &qryTblName, bool qryOnly, const wxString &tblPath);
+    bool        initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
+                       const std::wstring &qryTblName, bool qryOnly, const std::wstring &tblPath);
     void        cleanup();
 
     void        setCbValueForColumn(int columnIndex);
@@ -106,16 +106,16 @@ private:
 
     bool        bindCols(HSTMT cursor);
     bool        getRec(UWORD fetchType);
-    bool        execDelete(const wxString &pSqlStmt);
-    bool        execUpdate(const wxString &pSqlStmt);
-    bool        query(int queryType, bool forUpdate, bool distinct, const wxString &pSqlStmt=wxEmptyString);
+    bool        execDelete(const std::wstring &pSqlStmt);
+    bool        execUpdate(const std::wstring &pSqlStmt);
+    bool        query(int queryType, bool forUpdate, bool distinct, const std::wstring &pSqlStmt=wxEmptyString);
 
 #if !wxODBC_BACKWARD_COMPATABILITY
 // these were public
     // Where, Order By and From clauses
-    wxString    where;               // Standard SQL where clause, minus the word WHERE
-    wxString    orderBy;             // Standard SQL order by clause, minus the ORDER BY
-    wxString    from;                // Allows for joins in a wxDbTable::Query().  Format: ",tbl,tbl..."
+    std::wstring    where;               // Standard SQL where clause, minus the word WHERE
+    std::wstring    orderBy;             // Standard SQL order by clause, minus the ORDER BY
+    std::wstring    from;                // Allows for joins in a wxDbTable::Query().  Format: ",tbl,tbl..."
 
     // ODBC Handles
     HENV        henv;           // ODBC Environment handle
@@ -135,9 +135,9 @@ private:
     wxDb       *pDb;
 
     // Table Inf.
-    wxString    tablePath;                                 // needed for dBase tables
-    wxString    tableName;                                 // Table name
-    wxString    queryTableName;                            // Query Table Name
+    std::wstring    tablePath;                                 // needed for dBase tables
+    std::wstring    tableName;                                 // Table name
+    std::wstring    queryTableName;                            // Query Table Name
     UWORD       m_numCols;                               // # of columns in the table
     bool        queryOnly;                                 // Query Only, no inserts, updates or deletes
 
@@ -179,15 +179,15 @@ public:
     wxDbColDef *colDefs;         // Array of wxDbColDef structures
 #endif
     // Public member functions
-    wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
-              const wxString &qryTblName=wxEmptyString, bool qryOnly = !wxDB_QUERY_ONLY,
-              const wxString &tblPath=wxEmptyString);
+    wxDbTable(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
+              const std::wstring &qryTblName=wxEmptyString, bool qryOnly = !wxDB_QUERY_ONLY,
+              const std::wstring &tblPath=wxEmptyString);
 
 #if WXWIN_COMPATIBILITY_2_4
     wxDEPRECATED(
-        wxDbTable(wxDb *pwxDb, const wxString &tblName, const UWORD numColumns,
-                  const wxChar *qryTblName, bool qryOnly,
-                  const wxString &tblPath)
+        wxDbTable(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
+                  const wchar_t *qryTblName, bool qryOnly,
+                  const std::wstring &tblPath)
     );
 #endif // WXWIN_COMPATIBILITY_2_4
 
@@ -196,9 +196,9 @@ public:
     bool            Open(bool checkPrivileges=false, bool checkTableExists=true);
     bool            CreateTable(bool attemptDrop=true);
     bool            DropTable(void);
-    bool            CreateIndex(const wxString &indexName, bool unique, UWORD numIndexColumns,
+    bool            CreateIndex(const std::wstring &indexName, bool unique, UWORD numIndexColumns,
                                 wxDbIdxDef *pIndexDefs, bool attemptDrop=true);
-    bool            DropIndex(const wxString &indexName);
+    bool            DropIndex(const std::wstring &indexName);
 
     // Accessors
 
@@ -206,15 +206,15 @@ public:
     // set when the wxDbTable instance is created and cannot be
     // changed, hence there is no corresponding SetXxxx function
     wxDb           *GetDb()              { return pDb; }
-    const wxString &GetTableName()       { return tableName; }
-    const wxString &GetQueryTableName()  { return queryTableName; }
-    const wxString &GetTablePath()       { return tablePath; }
+    const std::wstring &GetTableName()       { return tableName; }
+    const std::wstring &GetQueryTableName()  { return queryTableName; }
+    const std::wstring &GetTablePath()       { return tablePath; }
 
     UWORD           GetNumberOfColumns() { return m_numCols; }  // number of "defined" columns for this wxDbTable instance
 
-    const wxString &GetFromClause()      { return from; }
-    const wxString &GetOrderByClause()   { return orderBy; }
-    const wxString &GetWhereClause()     { return where; }
+    const std::wstring &GetFromClause()      { return from; }
+    const std::wstring &GetOrderByClause()   { return orderBy; }
+    const std::wstring &GetWhereClause()     { return where; }
 
     bool            IsQueryOnly()        { return queryOnly; }
 #if wxODBC_BACKWARD_COMPATABILITY
@@ -222,26 +222,26 @@ public:
     void            SetOrderByClause(const char *OrderBy) { orderBy = (char *)OrderBy; }
     void            SetWhereClause(const char *Where) { where = (char *)Where; }
 #else
-    void            SetFromClause(const wxString &From) { from = From; }
-    void            SetOrderByClause(const wxString &OrderBy) { orderBy = OrderBy; }
+    void            SetFromClause(const std::wstring &From) { from = From; }
+    void            SetOrderByClause(const std::wstring &OrderBy) { orderBy = OrderBy; }
     bool            SetOrderByColNums(UWORD first, ...);
-    void            SetWhereClause(const wxString &Where) { where = Where; }
-    void            From(const wxString &From) { from = From; }
-    void            OrderBy(const wxString &OrderBy) { orderBy = OrderBy; }
-    void            Where(const wxString &Where) { where = Where; }
-    const wxString &Where()   { return where; }
-    const wxString &OrderBy() { return orderBy; }
-    const wxString &From()    { return from; }
+    void            SetWhereClause(const std::wstring &Where) { where = Where; }
+    void            From(const std::wstring &From) { from = From; }
+    void            OrderBy(const std::wstring &OrderBy) { orderBy = OrderBy; }
+    void            Where(const std::wstring &Where) { where = Where; }
+    const std::wstring &Where()   { return where; }
+    const std::wstring &OrderBy() { return orderBy; }
+    const std::wstring &From()    { return from; }
 #endif
     int             Insert(void);
     bool            Update(void);
-    bool            Update(const wxString &pSqlStmt);
-    bool            UpdateWhere(const wxString &pWhereClause);
+    bool            Update(const std::wstring &pSqlStmt);
+    bool            UpdateWhere(const std::wstring &pWhereClause);
     bool            Delete(void);
-    bool            DeleteWhere(const wxString &pWhereClause);
+    bool            DeleteWhere(const std::wstring &pWhereClause);
     bool            DeleteMatching(void);
     virtual bool    Query(bool forUpdate = false, bool distinct = false);
-    bool            QueryBySqlStmt(const wxString &pSqlStmt);
+    bool            QueryBySqlStmt(const std::wstring &pSqlStmt);
     bool            QueryMatching(bool forUpdate = false, bool distinct = false);
     bool            QueryOnKeyFields(bool forUpdate = false, bool distinct = false);
     bool            Refresh(void);
@@ -258,17 +258,17 @@ public:
     bool            IsCursorClosedOnCommit(void);
     UWORD           GetRowNum(void);
 
-    void            BuildSelectStmt(wxString &pSqlStmt, int typeOfSelect, bool distinct);
-    void            BuildSelectStmt(wxChar *pSqlStmt, int typeOfSelect, bool distinct);
+    void            BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool distinct);
+    void            BuildSelectStmt(wchar_t *pSqlStmt, int typeOfSelect, bool distinct);
 
-    void            BuildDeleteStmt(wxString &pSqlStmt, int typeOfDel, const wxString &pWhereClause=wxEmptyString);
-    void            BuildDeleteStmt(wxChar *pSqlStmt, int typeOfDel, const wxString &pWhereClause=wxEmptyString);
+    void            BuildDeleteStmt(std::wstring &pSqlStmt, int typeOfDel, const std::wstring &pWhereClause=wxEmptyString);
+    void            BuildDeleteStmt(wchar_t *pSqlStmt, int typeOfDel, const std::wstring &pWhereClause=wxEmptyString);
 
-    void            BuildUpdateStmt(wxString &pSqlStmt, int typeOfUpdate, const wxString &pWhereClause=wxEmptyString);
-    void            BuildUpdateStmt(wxChar *pSqlStmt, int typeOfUpdate, const wxString &pWhereClause=wxEmptyString);
+    void            BuildUpdateStmt(std::wstring &pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause=wxEmptyString);
+    void            BuildUpdateStmt(wchar_t *pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause=wxEmptyString);
 
-    void            BuildWhereClause(wxString &pWhereClause, int typeOfWhere, const wxString &qualTableName=wxEmptyString, bool useLikeComparison=false);
-    void            BuildWhereClause(wxChar *pWhereClause, int typeOfWhere, const wxString &qualTableName=wxEmptyString, bool useLikeComparison=false);
+    void            BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere, const std::wstring &qualTableName=wxEmptyString, bool useLikeComparison=false);
+    void            BuildWhereClause(wchar_t *pWhereClause, int typeOfWhere, const std::wstring &qualTableName=wxEmptyString, bool useLikeComparison=false);
 
 #if wxODBC_BACKWARD_COMPATABILITY
 // The following member functions are deprecated.  You should use the BuildXxxxxStmt functions (above)
@@ -292,7 +292,7 @@ public:
     bool            SetQueryTimeout(UDWORD nSeconds);
 
     wxDbColDef     *GetColDefs() { return colDefs; }
-    bool            SetColDefs(UWORD index, const wxString &fieldName, int dataType,
+    bool            SetColDefs(UWORD index, const std::wstring &fieldName, int dataType,
                                void *pData, SWORD cType,
                                int size, bool keyField = false, bool updateable = true,
                                bool insertAllowed = true, bool derivedColumn = false);
@@ -308,12 +308,12 @@ public:
     HSTMT          *NewCursor(bool setCursor = false, bool bindColumns = true) {  return GetNewCursor(setCursor,bindColumns); }
 #endif
 
-    ULONG           Count(const wxString &args=wxT("*"));
+    ULONG           Count(const std::wstring &args=wxT("*"));
     int             DB_STATUS(void) { return(pDb->DB_STATUS); }
 
     bool            IsColNull(UWORD colNumber) const;
     bool            SetColNull(UWORD colNumber, bool set=true);
-    bool            SetColNull(const wxString &colName, bool set=true);
+    bool            SetColNull(const std::wstring &colName, bool set=true);
 #if wxODBC_BACKWARD_COMPATABILITY
 // The following member functions are deprecated.  You should use the SetColNull()
     bool            SetNull(int colNumber, bool set=true) { return (SetNull(colNumber,set)); }
