@@ -210,37 +210,37 @@ void wxDbConnectInf::FreeHenv()
 
 void wxDbConnectInf::SetDsn(const std::wstring &dsn)
 {
-    wxASSERT(dsn.length() < WXSIZEOF(Dsn));
+    wxASSERT(dsn.length() < EXSIZEOF(Dsn));
 
-    wxStrncpy(Dsn, dsn, WXSIZEOF(Dsn)-1);
-    Dsn[WXSIZEOF(Dsn)-1] = 0;  // Prevent buffer overrun
+    wxStrncpy(Dsn, dsn, EXSIZEOF(Dsn)-1);
+    Dsn[EXSIZEOF(Dsn)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetDsn()
 
 
 void wxDbConnectInf::SetUserID(const std::wstring &uid)
 {
-    wxASSERT(uid.length() < WXSIZEOF(Uid));
-    wxStrncpy(Uid, uid, WXSIZEOF(Uid)-1);
-    Uid[WXSIZEOF(Uid)-1] = 0;  // Prevent buffer overrun
+    wxASSERT(uid.length() < EXSIZEOF(Uid));
+    wxStrncpy(Uid, uid, EXSIZEOF(Uid)-1);
+    Uid[EXSIZEOF(Uid)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetUserID()
 
 
 void wxDbConnectInf::SetPassword(const std::wstring &password)
 {
-    wxASSERT(password.length() < WXSIZEOF(AuthStr));
+    wxASSERT(password.length() < EXSIZEOF(AuthStr));
 
-    wxStrncpy(AuthStr, password, WXSIZEOF(AuthStr)-1);
-    AuthStr[WXSIZEOF(AuthStr)-1] = 0;  // Prevent buffer overrun
+    wxStrncpy(AuthStr, password, EXSIZEOF(AuthStr)-1);
+    AuthStr[EXSIZEOF(AuthStr)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetPassword()
 
 void wxDbConnectInf::SetConnectionStr(const std::wstring &connectStr)
 {
-    wxASSERT(connectStr.length() < WXSIZEOF(ConnectionStr));
+    wxASSERT(connectStr.length() < EXSIZEOF(ConnectionStr));
 
     useConnectionStr = wxStrlen(connectStr) > 0;
 
-    wxStrncpy(ConnectionStr, connectStr, WXSIZEOF(ConnectionStr)-1);
-    ConnectionStr[WXSIZEOF(ConnectionStr)-1] = 0;  // Prevent buffer overrun
+    wxStrncpy(ConnectionStr, connectStr, EXSIZEOF(ConnectionStr)-1);
+    ConnectionStr[EXSIZEOF(ConnectionStr)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetConnectionStr()
 
 
@@ -756,31 +756,31 @@ bool wxDb::determineDataTypes(bool failOnDataTypeUnsupported)
         return false;
 
     // --------------- Varchar - (Variable length character string) ---------------
-    for (iIndex = 0; iIndex < WXSIZEOF(PossibleSqlCharTypes) &&
+    for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlCharTypes) &&
                      !getDataTypeInfo(PossibleSqlCharTypes[iIndex], typeInfVarchar); ++iIndex)
     {}
 
-    if (iIndex < WXSIZEOF(PossibleSqlCharTypes))
+    if (iIndex < EXSIZEOF(PossibleSqlCharTypes))
         typeInfVarchar.FsqlType = PossibleSqlCharTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
 
     // --------------- Float ---------------
-    for (iIndex = 0; iIndex < WXSIZEOF(PossibleSqlFloatTypes) &&
+    for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlFloatTypes) &&
                      !getDataTypeInfo(PossibleSqlFloatTypes[iIndex], typeInfFloat); ++iIndex)
     {}
 
-    if (iIndex < WXSIZEOF(PossibleSqlFloatTypes))
+    if (iIndex < EXSIZEOF(PossibleSqlFloatTypes))
         typeInfFloat.FsqlType = PossibleSqlFloatTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
 
     // --------------- Integer -------------
-    for (iIndex = 0; iIndex < WXSIZEOF(PossibleSqlIntegerTypes) &&
+    for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlIntegerTypes) &&
                      !getDataTypeInfo(PossibleSqlIntegerTypes[iIndex], typeInfInteger); ++iIndex)
     {}
 
-    if (iIndex < WXSIZEOF(PossibleSqlIntegerTypes))
+    if (iIndex < EXSIZEOF(PossibleSqlIntegerTypes))
         typeInfInteger.FsqlType = PossibleSqlIntegerTypes[iIndex];
     else if (failOnDataTypeUnsupported)
     {
@@ -796,31 +796,31 @@ bool wxDb::determineDataTypes(bool failOnDataTypeUnsupported)
     }
 
     // --------------- Date/Time ---------------
-    for (iIndex = 0; iIndex < WXSIZEOF(PossibleSqlDateTypes) &&
+    for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlDateTypes) &&
                      !getDataTypeInfo(PossibleSqlDateTypes[iIndex], typeInfDate); ++iIndex)
     {}
 
-    if (iIndex < WXSIZEOF(PossibleSqlDateTypes))
+    if (iIndex < EXSIZEOF(PossibleSqlDateTypes))
         typeInfDate.FsqlType = PossibleSqlDateTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
 
     // --------------- BLOB ---------------
-    for (iIndex = 0; iIndex < WXSIZEOF(PossibleSqlBlobTypes) &&
+    for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlBlobTypes) &&
                      !getDataTypeInfo(PossibleSqlBlobTypes[iIndex], typeInfBlob); ++iIndex)
     {}
 
-    if (iIndex < WXSIZEOF(PossibleSqlBlobTypes))
+    if (iIndex < EXSIZEOF(PossibleSqlBlobTypes))
         typeInfBlob.FsqlType = PossibleSqlBlobTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
 
     // --------------- MEMO ---------------
-    for (iIndex = 0; iIndex < WXSIZEOF(PossibleSqlMemoTypes) &&
+    for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlMemoTypes) &&
                      !getDataTypeInfo(PossibleSqlMemoTypes[iIndex], typeInfMemo); ++iIndex)
     {}
 
-    if (iIndex < WXSIZEOF(PossibleSqlMemoTypes))
+    if (iIndex < EXSIZEOF(PossibleSqlMemoTypes))
         typeInfMemo.FsqlType = PossibleSqlMemoTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
@@ -905,7 +905,7 @@ bool wxDb::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOn
 
     retcode = SQLDriverConnect(hdbc, parentWnd, (SQLTCHAR FAR *)inConnectionStr.c_str(),
                         (SWORD)inConnectionStr.length(), (SQLTCHAR FAR *)outConnectBuffer,
-                        WXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE );
+                        EXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE );
 
     if ((retcode != SQL_SUCCESS) &&
         (retcode != SQL_SUCCESS_WITH_INFO))
@@ -1010,7 +1010,7 @@ bool wxDb::Open(wxDb *copyDb)
 
         retcode = SQLDriverConnect(hdbc, NULL, (SQLTCHAR FAR *)inConnectionStr.c_str(),
                             (SWORD)inConnectionStr.length(), (SQLTCHAR FAR *)outConnectBuffer,
-                            WXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE);
+                            EXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE);
 
         if ((retcode != SQL_SUCCESS) &&
             (retcode != SQL_SUCCESS_WITH_INFO))
