@@ -108,7 +108,7 @@ private:
     bool        getRec(UWORD fetchType);
     bool        execDelete(const std::wstring &pSqlStmt);
     bool        execUpdate(const std::wstring &pSqlStmt);
-    bool        query(int queryType, bool forUpdate, bool distinct, const std::wstring &pSqlStmt=wxEmptyString);
+    bool        query(int queryType, bool forUpdate, bool distinct, const std::wstring &pSqlStmt=emptyString);
 
 #if !wxODBC_BACKWARD_COMPATABILITY
 // these were public
@@ -180,8 +180,8 @@ public:
 #endif
     // Public member functions
     wxDbTable(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
-              const std::wstring &qryTblName=wxEmptyString, bool qryOnly = !wxDB_QUERY_ONLY,
-              const std::wstring &tblPath=wxEmptyString);
+              const std::wstring &qryTblName=emptyString, bool qryOnly = !wxDB_QUERY_ONLY,
+              const std::wstring &tblPath=emptyString);
 
 #if WXWIN_COMPATIBILITY_2_4
     wxDEPRECATED(
@@ -261,14 +261,14 @@ public:
     void            BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool distinct);
     void            BuildSelectStmt(wchar_t *pSqlStmt, int typeOfSelect, bool distinct);
 
-    void            BuildDeleteStmt(std::wstring &pSqlStmt, int typeOfDel, const std::wstring &pWhereClause=wxEmptyString);
-    void            BuildDeleteStmt(wchar_t *pSqlStmt, int typeOfDel, const std::wstring &pWhereClause=wxEmptyString);
+    void            BuildDeleteStmt(std::wstring &pSqlStmt, int typeOfDel, const std::wstring &pWhereClause=emptyString);
+    void            BuildDeleteStmt(wchar_t *pSqlStmt, int typeOfDel, const std::wstring &pWhereClause=emptyString);
 
-    void            BuildUpdateStmt(std::wstring &pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause=wxEmptyString);
-    void            BuildUpdateStmt(wchar_t *pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause=wxEmptyString);
+    void            BuildUpdateStmt(std::wstring &pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause=emptyString);
+    void            BuildUpdateStmt(wchar_t *pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause=emptyString);
 
-    void            BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere, const std::wstring &qualTableName=wxEmptyString, bool useLikeComparison=false);
-    void            BuildWhereClause(wchar_t *pWhereClause, int typeOfWhere, const std::wstring &qualTableName=wxEmptyString, bool useLikeComparison=false);
+    void            BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere, const std::wstring &qualTableName=emptyString, bool useLikeComparison=false);
+    void            BuildWhereClause(wchar_t *pWhereClause, int typeOfWhere, const std::wstring &qualTableName=emptyString, bool useLikeComparison=false);
 
 #if wxODBC_BACKWARD_COMPATABILITY
 // The following member functions are deprecated.  You should use the BuildXxxxxStmt functions (above)

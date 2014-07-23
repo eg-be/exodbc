@@ -33,6 +33,9 @@
     <ClCompile Include="src\dbtable.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\wxOdbc3.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Version.h.template" />

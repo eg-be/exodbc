@@ -801,8 +801,8 @@ wxDbSqlLog(wxDbSqlLogState state, const std::wstring &filename = SQL_LOG_FILENAM
 
 #if 0
 // MSW/VC6 ONLY!!!  Experimental
-int WXDLLEXPORT wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn, const std::wstring &description=wxEmptyString,
-                                     bool sysDSN=false, const std::wstring &defDir=wxEmptyString, wxWindow *parent=NULL);
+int WXDLLEXPORT wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn, const std::wstring &description=emptyString,
+                                     bool sysDSN=false, const std::wstring &defDir=emptyString, wxWindow *parent=NULL);
 #endif
 
 // This routine allows you to query a driver manager

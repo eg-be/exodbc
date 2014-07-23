@@ -538,11 +538,11 @@ void wxDb::initialize()
     nTables       = 0;
     dbmsType      = dbmsUNIDENTIFIED;
 
-    wcscpy(sqlState,wxEmptyString);
-    wcscpy(errorMsg,wxEmptyString);
+    wcscpy(sqlState,emptyString);
+    wcscpy(errorMsg,emptyString);
     nativeError = cbErrorMsg = 0;
     for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
-        wcscpy(errorList[i], wxEmptyString);
+        wcscpy(errorList[i], emptyString);
 
     // Init typeInf structures
     typeInfVarchar.TypeName.empty();
@@ -835,8 +835,8 @@ bool wxDb::open(bool failOnDataTypeUnsupported)
     If using Intersolv branded ODBC drivers, this is the place where you would substitute
     your branded driver license information
 
-    SQLSetConnectOption(hdbc, 1041, (UDWORD) wxEmptyString);
-    SQLSetConnectOption(hdbc, 1042, (UDWORD) wxEmptyString);
+    SQLSetConnectOption(hdbc, 1041, (UDWORD) emptyString);
+    SQLSetConnectOption(hdbc, 1042, (UDWORD) emptyString);
 */
 
     // Mark database as open
@@ -875,9 +875,9 @@ bool wxDb::Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported
 
 bool wxDb::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported)
 {
-    dsn        = wxEmptyString;
-    uid        = wxEmptyString;
-    authStr    = wxEmptyString;
+    dsn        = emptyString;
+    uid        = emptyString;
+    authStr    = emptyString;
 
     RETCODE retcode;
 
@@ -926,8 +926,8 @@ bool wxDb::Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wst
     uid        = Uid;
     authStr    = AuthStr;
 
-    inConnectionStr = wxEmptyString;
-    outConnectionStr = wxEmptyString;
+    inConnectionStr = emptyString;
+    outConnectionStr = emptyString;
 
     RETCODE retcode;
 
@@ -1036,8 +1036,8 @@ bool wxDb::Open(wxDb *copyDb)
     If using Intersolv branded ODBC drivers, this is the place where you would substitute
     your branded driver license information
 
-    SQLSetConnectOption(hdbc, 1041, (UDWORD) wxEmptyString);
-    SQLSetConnectOption(hdbc, 1042, (UDWORD) wxEmptyString);
+    SQLSetConnectOption(hdbc, 1041, (UDWORD) emptyString);
+    SQLSetConnectOption(hdbc, 1042, (UDWORD) emptyString);
 */
 
     // Mark database as open
@@ -2642,8 +2642,8 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
             if (!colInf)
                 break;
             // Mark the end of the array
-            wcscpy(colInf[noCols].tableName, wxEmptyString);
-            wcscpy(colInf[noCols].colName, wxEmptyString);
+            wcscpy(colInf[noCols].tableName, emptyString);
+            wcscpy(colInf[noCols].colName, emptyString);
             colInf[noCols].sqlDataType = 0;
         }
         // Loop through each table name
@@ -2801,8 +2801,8 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, cons
             if (!colInf)
                 break;
             // Mark the end of the array
-            wcscpy(colInf[noCols].tableName, wxEmptyString);
-            wcscpy(colInf[noCols].colName, wxEmptyString);
+            wcscpy(colInf[noCols].tableName, emptyString);
+            wcscpy(colInf[noCols].colName, emptyString);
             colInf[noCols].sqlDataType = 0;
         }
 
@@ -2994,8 +2994,8 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
     wxDbColInf *colInf = new wxDbColInf[noCols+1];
 
     // Mark the end of the array
-    wcscpy(colInf[noCols].tableName, wxEmptyString);
-    wcscpy(colInf[noCols].colName, wxEmptyString);
+    wcscpy(colInf[noCols].tableName, emptyString);
+    wcscpy(colInf[noCols].colName, emptyString);
     colInf[noCols].sqlDataType = 0;
 
     // Merge ...
@@ -3057,8 +3057,8 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
             if (!colInf)
                 break;
             // Mark the end of the array
-            wcscpy(colInf[noCols].tableName, wxEmptyString);
-            wcscpy(colInf[noCols].colName, wxEmptyString);
+            wcscpy(colInf[noCols].tableName, emptyString);
+            wcscpy(colInf[noCols].colName, emptyString);
             colInf[noCols].sqlDataType = 0;
         }
 
@@ -4390,11 +4390,11 @@ const wchar_t WXDLLIMPEXP_ODBC *wxDbLogExtendedErrorMsg(const wchar_t *userText,
         if (pDb->errorList[i])
         {
             msg.append(pDb->errorList[i]);
-            if (wcscmp(pDb->errorList[i], wxEmptyString) != 0)
+            if (wcscmp(pDb->errorList[i], emptyString) != 0)
                 msg.append(L"\n");
             // Clear the errmsg buffer so the next error will not
             // end up showing the previous error that have occurred
-            wcscpy(pDb->errorList[i], wxEmptyString);
+            wcscpy(pDb->errorList[i], emptyString);
         }
     }
     msg += L"\n";
