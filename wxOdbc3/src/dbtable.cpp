@@ -244,7 +244,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD
     {
         // Check to see if cursor type is supported
         pDb->GetNextError(henv, hdbc, hstmtInternal);
-        if (! wxStrcmp(pDb->sqlState, L"01S02"))  // Option Value Changed
+        if (! wcscmp(pDb->sqlState, L"01S02"))  // Option Value Changed
         {
             // Datasource does not support static cursors.  Driver
             // will substitute a cursor type.  Call SQLGetStmtOption()
@@ -1699,7 +1699,7 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
             // this information
             while (!found && (j < this->m_numCols))
             {
-                if (wxStrcmp(colDefs[j].ColName,pIndexDefs[i].ColName) == 0)
+                if (wcscmp(colDefs[j].ColName,pIndexDefs[i].ColName) == 0)
                     found = true;
                 if (!found)
                     j++;
@@ -1762,7 +1762,7 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
             int j;
             for ( j = 0; j < m_numCols; ++j )
             {
-                if ( wxStrcmp( pIndexDefs[i].ColName, colDefs[j].ColName ) == 0 )
+                if ( wcscmp( pIndexDefs[i].ColName, colDefs[j].ColName ) == 0 )
                 {
                     break;
                 }
@@ -1939,7 +1939,7 @@ int wxDbTable::Insert(void)
     {
         // Check to see if integrity constraint was violated
         pDb->GetNextError(henv, hdbc, hstmtInsert);
-        if (! wxStrcmp(pDb->sqlState, L"23000"))  // Integrity constraint violated
+        if (! wcscmp(pDb->sqlState, L"23000"))  // Integrity constraint violated
             return(DB_ERR_INTEGRITY_CONSTRAINT_VIOL);
         else
         {
