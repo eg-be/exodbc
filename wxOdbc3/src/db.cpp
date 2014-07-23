@@ -893,7 +893,7 @@ bool wxDb::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOn
         else
             std::wcout << L"SQLSetConnectOption(CURSOR_LIB) failed" << std::endl;
 #else
-        wxUnusedVar(retcode);
+        //wxUnusedVar(retcode);
 #endif
     }
 
@@ -943,7 +943,7 @@ bool wxDb::Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wst
         else
             std::wcout << L"SQLSetConnectOption(CURSOR_LIB) failed" << std::endl;
 #else
-        wxUnusedVar( retcode );
+        //wxUnusedVar( retcode );
 #endif
     }
 
@@ -996,7 +996,7 @@ bool wxDb::Open(wxDb *copyDb)
         else
             std::wcout << L"SQLSetConnectOption(CURSOR_LIB) failed" << std::endl;
 #else
-        wxUnusedVar( retcode );
+        //wxUnusedVar( retcode );
 #endif
     }
 
