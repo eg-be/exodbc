@@ -43,6 +43,7 @@
 #include <string.h>
 
 #include "dbtable.h"
+#include "Helpers.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
@@ -163,8 +164,8 @@ bool wxDbTable::initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD
     tableName.empty();
     queryTableName.empty();
 
-    wxASSERT(tblName.length());
-    wxASSERT(pDb);
+    exASSERT(tblName.length());
+    exASSERT(pDb);
 
     if (!pDb)
         return false;
@@ -309,7 +310,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD
 
     // Make the default cursor the active cursor
     hstmtDefault = GetNewCursor(false,false);
-    wxASSERT(hstmtDefault);
+    exASSERT(hstmtDefault);
     hstmt = *hstmtDefault;
 
     return true;
@@ -466,7 +467,7 @@ void wxDbTable::setCbValueForColumn(int columnIndex)
 /********** wxDbTable::bindParams() **********/
 bool wxDbTable::bindParams(bool forUpdate)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly)
         return false;
 
@@ -939,7 +940,7 @@ bool wxDbTable::GetPrev(void)
 {
     if (pDb->FwdOnlyCursors())
     {
-        wxFAIL_MSG(L"GetPrev()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
+        exFAIL_MSG(L"GetPrev()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
         return false;
     }
     else
@@ -953,7 +954,7 @@ bool wxDbTable::operator--(int)
 {
     if (pDb->FwdOnlyCursors())
     {
-        wxFAIL_MSG(L"operator--:Backward scrolling cursors are not enabled for this instance of wxDbTable");
+        exFAIL_MSG(L"operator--:Backward scrolling cursors are not enabled for this instance of wxDbTable");
         return false;
     }
     else
@@ -967,7 +968,7 @@ bool wxDbTable::GetFirst(void)
 {
     if (pDb->FwdOnlyCursors())
     {
-        wxFAIL_MSG(L"GetFirst():Backward scrolling cursors are not enabled for this instance of wxDbTable");
+        exFAIL_MSG(L"GetFirst():Backward scrolling cursors are not enabled for this instance of wxDbTable");
         return false;
     }
     else
@@ -981,7 +982,7 @@ bool wxDbTable::GetLast(void)
 {
     if (pDb->FwdOnlyCursors())
     {
-        wxFAIL_MSG(L"GetLast()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
+        exFAIL_MSG(L"GetLast()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
         return false;
     }
     else
@@ -993,7 +994,7 @@ bool wxDbTable::GetLast(void)
 /********** wxDbTable::BuildDeleteStmt() **********/
 void wxDbTable::BuildDeleteStmt(std::wstring &pSqlStmt, int typeOfDel, const std::wstring &pWhereClause)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly)
         return;
 
@@ -1197,7 +1198,7 @@ void wxDbTable::BuildSelectStmt(wchar_t *pSqlStmt, int typeOfSelect, bool distin
 /********** wxDbTable::BuildUpdateStmt() **********/
 void wxDbTable::BuildUpdateStmt(std::wstring &pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly)
         return;
 
@@ -1347,7 +1348,7 @@ void wxDbTable::BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere,
                     {
                         std::wstring strMsg;
 						strMsg = (boost::wformat(L"wxDbTable::bindParams(): Unknown column type for colDefs %d colName %s") % colNumber % colDefs[colNumber].ColName).str();
-                        wxFAIL_MSG(strMsg.c_str());
+                        exFAIL_MSG(strMsg.c_str());
                     }
                     break;
             }
@@ -1541,7 +1542,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
                 //  DB2 is limited to 18 characters for index names
                 if (pDb->Dbms() == dbmsDB2)
                 {
-                    wxASSERT_MSG((wxStrlen(tableName) <= 13), L"DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters.");
+                    exASSERT_MSG((wxStrlen(tableName) <= 13), "DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters.");
                     sqlStmt += pDb->SQLTableName(tableName.substr(0, 13).c_str());
 //                    sqlStmt += tableName.substr(0, 13);
                 }
@@ -1786,7 +1787,7 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
                 sqlStmt += L" DESC";
         }
         else
-            wxASSERT_MSG(pIndexDefs[i].Ascending, L"Datasource does not support DESCending index columns");
+            exASSERT_MSG(pIndexDefs[i].Ascending, "Datasource does not support DESCending index columns");
 
         if ((i + 1) < numIndexColumns)
             sqlStmt += L",";
@@ -1925,7 +1926,7 @@ bool wxDbTable::SetOrderByColNums(UWORD first, ... )
 /********** wxDbTable::Insert() **********/
 int wxDbTable::Insert(void)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly || !insertable)
         return(DB_FAILURE);
 
@@ -1992,7 +1993,7 @@ int wxDbTable::Insert(void)
 /********** wxDbTable::Update() **********/
 bool wxDbTable::Update(void)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly)
         return false;
 
@@ -2016,7 +2017,7 @@ bool wxDbTable::Update(void)
 /********** wxDbTable::Update(pSqlStmt) **********/
 bool wxDbTable::Update(const std::wstring &pSqlStmt)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly)
         return false;
 
@@ -2030,7 +2031,7 @@ bool wxDbTable::Update(const std::wstring &pSqlStmt)
 /********** wxDbTable::UpdateWhere() **********/
 bool wxDbTable::UpdateWhere(const std::wstring &pWhereClause)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly)
         return false;
 
@@ -2054,7 +2055,7 @@ bool wxDbTable::UpdateWhere(const std::wstring &pWhereClause)
 /********** wxDbTable::Delete() **********/
 bool wxDbTable::Delete(void)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly)
         return false;
 
@@ -2075,7 +2076,7 @@ bool wxDbTable::Delete(void)
 /********** wxDbTable::DeleteWhere() **********/
 bool wxDbTable::DeleteWhere(const std::wstring &pWhereClause)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly)
         return false;
 
@@ -2096,7 +2097,7 @@ bool wxDbTable::DeleteWhere(const std::wstring &pWhereClause)
 /********** wxDbTable::DeleteMatching() **********/
 bool wxDbTable::DeleteMatching(void)
 {
-    wxASSERT(!queryOnly);
+    exASSERT(!queryOnly);
     if (queryOnly)
         return false;
 
@@ -2204,7 +2205,7 @@ bool wxDbTable::IsCursorClosedOnCommit(void)
 /********** wxDbTable::ClearMemberVar() **********/
 void wxDbTable::ClearMemberVar(UWORD colNumber, bool setToNull)
 {
-    wxASSERT(colNumber < m_numCols);
+    exASSERT(colNumber < m_numCols);
 
     switch(colDefs[colNumber].SqlCtype)
     {
@@ -2302,11 +2303,10 @@ bool wxDbTable::SetColDefs(UWORD index, const std::wstring &fieldName, int dataT
                            bool insertAllowed, bool derivedColumn)
 {
     std::wstring tmpStr;
-
     if (index >= m_numCols)  // Columns numbers are zero based....
     {
 		tmpStr = (boost::wformat(L"Specified column index (%d) exceeds the maximum number of columns (%d) registered for this table definition.  Column definition not added.") % index % m_numCols).str();
-        wxFAIL_MSG(tmpStr);
+        exFAIL_MSG(tmpStr);
         //wxLogDebug(tmpStr);
         return false;
     }
@@ -2320,7 +2320,7 @@ bool wxDbTable::SetColDefs(UWORD index, const std::wstring &fieldName, int dataT
         colDefs[index].ColName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
 
 		tmpStr = (boost::wformat(L"Column name '%s' is too long. Truncated to '%s'.") %	fieldName % colDefs[index].ColName).str();
-        wxFAIL_MSG(tmpStr);
+        exFAIL_MSG(tmpStr);
         //wxLogDebug(tmpStr);
     }
     else
@@ -2354,7 +2354,7 @@ bool wxDbTable::SetColDefs(UWORD index, const std::wstring &fieldName, int dataT
 /********** wxDbTable::SetColDefs() **********/
 wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
 {
-    wxASSERT(pColInfs);
+    exASSERT(pColInfs);
     wxDbColDataPtr *pColDataPtrs = NULL;
 
     if (pColInfs)
@@ -2414,7 +2414,7 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
                     pColDataPtrs[index].SqlCtype   = SQL_C_TIMESTAMP;
                     break;
                 case DB_DATA_TYPE_BLOB:
-                    wxFAIL_MSG(L"This form of ::SetColDefs() cannot be used with BLOB columns");
+                    exFAIL_MSG(L"This form of ::SetColDefs() cannot be used with BLOB columns");
                     pColDataPtrs[index].PtrDataObj = /*BLOB ADDITION NEEDED*/NULL;
                     pColDataPtrs[index].SzDataObj  = /*BLOB ADDITION NEEDED*/sizeof(void *);
                     pColDataPtrs[index].SqlCtype   = SQL_VARBINARY;
@@ -2488,7 +2488,7 @@ ULONG wxDbTable::Count(const std::wstring &args)
     if (!hstmtCount)
     {
         hstmtCount = GetNewCursor(false,false);
-        wxASSERT(hstmtCount);
+        exASSERT(hstmtCount);
         if (!hstmtCount)
             return(0);
     }
@@ -2641,7 +2641,7 @@ bool wxDbTable::SetColNull(const std::wstring &colName, bool set)
 HSTMT *wxDbTable::GetNewCursor(bool setCursor, bool bindColumns)
 {
     HSTMT *newHSTMT = new HSTMT;
-    wxASSERT(newHSTMT);
+    exASSERT(newHSTMT);
     if (!newHSTMT)
         return(0);
 
@@ -2724,7 +2724,7 @@ void wxDbTable::SetRowMode(const rowmode_t rowmode)
             SetCursor(hstmtDefault);
             break;
         default:
-           wxASSERT(0);
+           exASSERT(0);
     }
 }  // wxDbTable::SetRowMode()
 

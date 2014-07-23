@@ -25,6 +25,9 @@
     <ClInclude Include="include\dbkeyg.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Helpers.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\db.cpp">
@@ -34,6 +37,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\wxOdbc3.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="include\Helpers.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

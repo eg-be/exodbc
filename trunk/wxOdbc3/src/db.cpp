@@ -55,6 +55,7 @@
 #include "boost/format.hpp"
 #include <sstream>
 
+#include "Helpers.h"
 #include "db.h"
 
 // DLL options compatibility check:
@@ -176,7 +177,7 @@ bool wxDbConnectInf::AllocHenv()
 {
     // This is here to help trap if you are getting a new henv
     // without releasing an existing henv
-    wxASSERT(!Henv);
+    exASSERT(!Henv);
 
     // Initialize the ODBC Environment for Database Operations
 
@@ -197,7 +198,7 @@ bool wxDbConnectInf::AllocHenv()
 
 void wxDbConnectInf::FreeHenv()
 {
-    wxASSERT(Henv);
+    exASSERT(Henv);
 
     if (Henv)
         SQLFreeEnv(Henv);
@@ -210,7 +211,7 @@ void wxDbConnectInf::FreeHenv()
 
 void wxDbConnectInf::SetDsn(const std::wstring &dsn)
 {
-    wxASSERT(dsn.length() < EXSIZEOF(Dsn));
+    exASSERT(dsn.length() < EXSIZEOF(Dsn));
 
     wxStrncpy(Dsn, dsn, EXSIZEOF(Dsn)-1);
     Dsn[EXSIZEOF(Dsn)-1] = 0;  // Prevent buffer overrun
@@ -219,7 +220,7 @@ void wxDbConnectInf::SetDsn(const std::wstring &dsn)
 
 void wxDbConnectInf::SetUserID(const std::wstring &uid)
 {
-    wxASSERT(uid.length() < EXSIZEOF(Uid));
+    exASSERT(uid.length() < EXSIZEOF(Uid));
     wxStrncpy(Uid, uid, EXSIZEOF(Uid)-1);
     Uid[EXSIZEOF(Uid)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetUserID()
@@ -227,7 +228,7 @@ void wxDbConnectInf::SetUserID(const std::wstring &uid)
 
 void wxDbConnectInf::SetPassword(const std::wstring &password)
 {
-    wxASSERT(password.length() < EXSIZEOF(AuthStr));
+    exASSERT(password.length() < EXSIZEOF(AuthStr));
 
     wxStrncpy(AuthStr, password, EXSIZEOF(AuthStr)-1);
     AuthStr[EXSIZEOF(AuthStr)-1] = 0;  // Prevent buffer overrun
@@ -235,7 +236,7 @@ void wxDbConnectInf::SetPassword(const std::wstring &password)
 
 void wxDbConnectInf::SetConnectionStr(const std::wstring &connectStr)
 {
-    wxASSERT(connectStr.length() < EXSIZEOF(ConnectionStr));
+    exASSERT(connectStr.length() < EXSIZEOF(ConnectionStr));
 
     useConnectionStr = wxStrlen(connectStr) > 0;
 
@@ -247,7 +248,7 @@ void wxDbConnectInf::SetConnectionStr(const std::wstring &connectStr)
 bool wxDbConnectInf::SetSqlAttrOdbcVersion(int version)
 {
 	// TODO: This never worked. Its odbc 3. See Ticket # 17
-	wxASSERT(false);
+	exASSERT(false);
 
 	if( ! (version == SQL_OV_ODBC2 || version == SQL_OV_ODBC3 || version == SQL_OV_ODBC3_80))
 	{
@@ -513,7 +514,7 @@ wxDb::wxDb(const HENV &aHenv, bool FwdOnlyCursors)
 /********** wxDb Destructor **********/
 wxDb::~wxDb()
 {
-    wxASSERT_MSG(!IsCached(), L"Cached connections must not be manually deleted, use\nwxDbFreeConnection() or wxDbCloseConnections().");
+    exASSERT_MSG(!IsCached(), "Cached connections must not be manually deleted, use\nwxDbFreeConnection() or wxDbCloseConnections().");
 
     if (IsOpen())
     {
@@ -869,7 +870,7 @@ bool wxDb::open(bool failOnDataTypeUnsupported)
 
 bool wxDb::Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported)
 {
-    wxASSERT(inConnectStr.length());
+    exASSERT(inConnectStr.length());
     return Open(inConnectStr, NULL, failOnDataTypeUnsupported);
 }
 
@@ -921,7 +922,7 @@ bool wxDb::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOn
 /********** wxDb::Open() **********/
 bool wxDb::Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wstring &AuthStr, bool failOnDataTypeUnsupported)
 {
-    wxASSERT(!Dsn.empty());
+    exASSERT(!Dsn.empty());
     dsn        = Dsn;
     uid        = Uid;
     authStr    = AuthStr;
@@ -963,7 +964,7 @@ bool wxDb::Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wst
 
 bool wxDb::Open(wxDbConnectInf *dbConnectInf, bool failOnDataTypeUnsupported)
 {
-    wxASSERT(dbConnectInf);
+    exASSERT(dbConnectInf);
 
     // Use the connection string if one is present
     if (dbConnectInf->UseConnectionStr())
@@ -1790,7 +1791,7 @@ void wxDb::Close(void)
         DispAllErrors(henv, hdbc);
 
     // There should be zero Ctable objects still connected to this db object
-    wxASSERT(nTables == 0);
+    exASSERT(nTables == 0);
 
 #ifdef __WXDEBUG__
     {
@@ -1937,7 +1938,7 @@ void wxDb::DispNextError(void)
 /********** wxDb::logError() **********/
 void wxDb::logError(const std::wstring &errMsg, const std::wstring &SQLState)
 {
-    wxASSERT(errMsg.length());
+    exASSERT(errMsg.length());
 
     static int pLast = -1;
     int dbStatus;
@@ -2422,8 +2423,8 @@ bool wxDb::GetNext(void)
 /********** wxDb::GetData()  **********/
 bool wxDb::GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR *cbReturned)
 {
-    wxASSERT(pData);
-    wxASSERT(cbReturned);
+    exASSERT(pData);
+    exASSERT(cbReturned);
 
     long bufferSize = maxLen;
 
@@ -3503,7 +3504,7 @@ bool wxDb::Catalog(const wchar_t *userID, const std::wstring &fileName)
  *       to avoid undesired unbinding of columns.
  */
 {
-    wxASSERT(fileName.length());
+    exASSERT(fileName.length());
 
     RETCODE   retcode;
     SQLLEN    cb;
@@ -3621,7 +3622,7 @@ bool wxDb::TableExists(const std::wstring &tableName, const wchar_t *userID, con
  *        userID != ""    ... UserID set equal to 'userID'
  */
 {
-    wxASSERT(tableName.length());
+    exASSERT(tableName.length());
 
     std::wstring TableName;
 
@@ -3698,7 +3699,7 @@ bool wxDb::TableExists(const std::wstring &tableName, const wchar_t *userID, con
 bool wxDb::TablePrivileges(const std::wstring &tableName, const std::wstring &priv, const wchar_t *userID,
                             const wchar_t *schema, const std::wstring &WXUNUSED(tablePath))
 {
-    wxASSERT(tableName.length());
+    exASSERT(tableName.length());
 
 	wxDbTablePrivilegeInfo  result;
 	SQLLEN  cbRetVal;
@@ -3844,8 +3845,8 @@ const std::wstring wxDb::SQLColumnName(const wchar_t *colName)
 /********** wxDb::SetSqlLogging() **********/
 bool wxDb::SetSqlLogging(wxDbSqlLogState state, const std::wstring &filename, bool append)
 {
-    wxASSERT(state == sqlLogON  || state == sqlLogOFF);
-    wxASSERT(state == sqlLogOFF || filename.length());
+    exASSERT(state == sqlLogON  || state == sqlLogOFF);
+    exASSERT(state == sqlLogOFF || filename.length());
 
     if (state == sqlLogON)
     {
@@ -3875,7 +3876,7 @@ bool wxDb::SetSqlLogging(wxDbSqlLogState state, const std::wstring &filename, bo
 /********** wxDb::WriteSqlLog() **********/
 bool wxDb::WriteSqlLog(const std::wstring &logMsg)
 {
-    wxASSERT(logMsg.length());
+    exASSERT(logMsg.length());
 
     if (fpSqlLog == 0 || sqlLogState == sqlLogOFF)
         return false;
@@ -4064,9 +4065,9 @@ bool wxDb::ModifyColumn(const std::wstring &tableName, const std::wstring &colum
                         int dataType, ULONG columnLength,
                         const std::wstring &optionalParam)
 {
-    wxASSERT(tableName.length());
-    wxASSERT(columnName.length());
-    wxASSERT((dataType == DB_DATA_TYPE_VARCHAR && columnLength > 0) ||
+    exASSERT(tableName.length());
+    exASSERT(columnName.length());
+    exASSERT((dataType == DB_DATA_TYPE_VARCHAR && columnLength > 0) ||
              dataType != DB_DATA_TYPE_VARCHAR);
 
     // Must specify a columnLength if modifying a VARCHAR type column
