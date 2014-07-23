@@ -26,7 +26,7 @@
 
 // Implementation
 // --------------
-void exOnAssert(const wchar_t* file, int line, const char* function, const char* condition, const char* msg)
+void exOnAssert(const char* file, int line, const char* function, const char* condition, const char* msg)
 {
 	std::wcerr << L"ASSERTION failure!" << std::endl;
 	std::wcerr << L" File:      " << file << std::endl;

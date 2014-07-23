@@ -11,21 +11,21 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#include  "wx/wxprec.h"
+//#include  "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
+//#ifdef __BORLANDC__
+//    #pragma hdrstop
+//#endif
 
 //#if wxUSE_ODBC
 
-#ifndef WX_PRECOMP
-    #include "wx/object.h"
-    #include "wx/list.h"
-    #include "wx/string.h"
-    #include "wx/utils.h"
-    #include "wx/log.h"
-#endif
+//#ifndef WX_PRECOMP
+//    #include "wx/object.h"
+//    #include "wx/list.h"
+//    #include "wx/string.h"
+//    #include "wx/utils.h"
+//    #include "wx/log.h"
+//#endif
 
 #ifdef DBDEBUG_CONSOLE
 #if wxUSE_IOSTREAMH
@@ -36,7 +36,7 @@
     #include "wx/ioswrap.h"
 #endif
 
-#include "wx/filefn.h"
+//#include "wx/filefn.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -804,7 +804,7 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
     else if (checkPrivileges)
     {
         // Verify the user has rights to access the table.
-        bool hasPrivs wxDUMMY_INITIALIZE(true);
+        bool hasPrivs;
 
         if (pDb->Dbms() == dbmsPOSTGRES)
             hasPrivs = pDb->TablePrivileges(tableName, L"SELECT", pDb->GetUsername().c_str(), NULL, tablePath);
@@ -1488,7 +1488,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
         }
         // For varchars, append the size of the string
         if (colDefs[i].DbDataType == DB_DATA_TYPE_VARCHAR &&
-            (pDb->Dbms() != dbmsMY_SQL || pDb->GetTypeInfVarchar().TypeName != _T("text")))// ||
+            (pDb->Dbms() != dbmsMY_SQL || pDb->GetTypeInfVarchar().TypeName != L"text"))// ||
 //            colDefs[i].DbDataType == DB_DATA_TYPE_BLOB)
         {
             std::wstring s;
@@ -1542,7 +1542,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
                 //  DB2 is limited to 18 characters for index names
                 if (pDb->Dbms() == dbmsDB2)
                 {
-                    exASSERT_MSG((wxStrlen(tableName) <= 13), "DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters.");
+                    exASSERT_MSG(tableName.length() <= 13, "DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters.");
                     sqlStmt += pDb->SQLTableName(tableName.substr(0, 13).c_str());
 //                    sqlStmt += tableName.substr(0, 13);
                 }
@@ -1777,7 +1777,7 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
         }
 
         // Postgres and SQL Server 7 do not support the ASC/DESC keywords for index columns
-        if (!((pDb->Dbms() == dbmsMS_SQL_SERVER) && (wxStrncmp(pDb->dbInf.dbmsVer,_T("07"),2)==0)) &&
+        if (!((pDb->Dbms() == dbmsMS_SQL_SERVER) && (wcsncmp(pDb->dbInf.dbmsVer, L"07", 2)==0)) &&
             !(pDb->Dbms() == dbmsFIREBIRD) &&
             !(pDb->Dbms() == dbmsPOSTGRES))
         {
@@ -2316,7 +2316,7 @@ bool wxDbTable::SetColDefs(UWORD index, const std::wstring &fieldName, int dataT
 
     if (fieldName.length() > (unsigned int) DB_MAX_COLUMN_NAME_LEN)
     {
-        wxStrncpy(colDefs[index].ColName, fieldName, DB_MAX_COLUMN_NAME_LEN);
+        wcsncpy(colDefs[index].ColName, fieldName.c_str(), DB_MAX_COLUMN_NAME_LEN);
         colDefs[index].ColName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
 
 		tmpStr = (boost::wformat(L"Column name '%s' is too long. Truncated to '%s'.") %	fieldName % colDefs[index].ColName).str();
@@ -2564,7 +2564,7 @@ bool wxDbTable::Refresh(void)
     }
 
     // If unable to use the ROWID, build a where clause from the keyfields
-    if (wxStrlen(whereClause) == 0)
+    if (whereClause.empty())
         BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS, queryTableName);
 
     // Requery the record
@@ -2729,161 +2729,161 @@ void wxDbTable::SetRowMode(const rowmode_t rowmode)
 }  // wxDbTable::SetRowMode()
 
 
-wxVariant wxDbTable::GetColumn(const int colNumber) const
-{
-    wxVariant val;
-    if ((colNumber < m_numCols) && (!IsColNull((UWORD)colNumber)))
-    {
-        switch (colDefs[colNumber].SqlCtype)
-        {
-#if wxUSE_UNICODE
-    #if defined(SQL_WCHAR)
-            case SQL_WCHAR:
-    #endif
-    #if defined(SQL_WVARCHAR)
-            case SQL_WVARCHAR:
-    #endif
-#endif
-            case SQL_CHAR:
-            case SQL_VARCHAR:
-                val = (wchar_t *)(colDefs[colNumber].PtrDataObj);
-                break;
-            case SQL_C_LONG:
-            case SQL_C_SLONG:
-                val = *(long *)(colDefs[colNumber].PtrDataObj);
-                break;
-            case SQL_C_SHORT:
-            case SQL_C_SSHORT:
-                val = (long int )(*(short *)(colDefs[colNumber].PtrDataObj));
-                break;
-            case SQL_C_ULONG:
-                val = (long)(*(unsigned long *)(colDefs[colNumber].PtrDataObj));
-                break;
-            case SQL_C_TINYINT:
-                val = (long)(*(wchar_t *)(colDefs[colNumber].PtrDataObj));
-                break;
-            case SQL_C_UTINYINT:
-                val = (long)(*(wchar_t *)(colDefs[colNumber].PtrDataObj));
-                break;
-            case SQL_C_USHORT:
-                val = (long)(*(UWORD *)(colDefs[colNumber].PtrDataObj));
-                break;
-            case SQL_C_DATE:
-                val = (DATE_STRUCT *)(colDefs[colNumber].PtrDataObj);
-                break;
-            case SQL_C_TIME:
-                val = (TIME_STRUCT *)(colDefs[colNumber].PtrDataObj);
-                break;
-            case SQL_C_TIMESTAMP:
-                val = (TIMESTAMP_STRUCT *)(colDefs[colNumber].PtrDataObj);
-                break;
-            case SQL_C_DOUBLE:
-                val = *(double *)(colDefs[colNumber].PtrDataObj);
-                break;
-            default:
-                assert(0);
-        }
-    }
-    return val;
-}  // wxDbTable::GetCol()
+//wxVariant wxDbTable::GetColumn(const int colNumber) const
+//{
+//    wxVariant val;
+//    if ((colNumber < m_numCols) && (!IsColNull((UWORD)colNumber)))
+//    {
+//        switch (colDefs[colNumber].SqlCtype)
+//        {
+//#if wxUSE_UNICODE
+//    #if defined(SQL_WCHAR)
+//            case SQL_WCHAR:
+//    #endif
+//    #if defined(SQL_WVARCHAR)
+//            case SQL_WVARCHAR:
+//    #endif
+//#endif
+//            case SQL_CHAR:
+//            case SQL_VARCHAR:
+//                val = (wchar_t *)(colDefs[colNumber].PtrDataObj);
+//                break;
+//            case SQL_C_LONG:
+//            case SQL_C_SLONG:
+//                val = *(long *)(colDefs[colNumber].PtrDataObj);
+//                break;
+//            case SQL_C_SHORT:
+//            case SQL_C_SSHORT:
+//                val = (long int )(*(short *)(colDefs[colNumber].PtrDataObj));
+//                break;
+//            case SQL_C_ULONG:
+//                val = (long)(*(unsigned long *)(colDefs[colNumber].PtrDataObj));
+//                break;
+//            case SQL_C_TINYINT:
+//                val = (long)(*(wchar_t *)(colDefs[colNumber].PtrDataObj));
+//                break;
+//            case SQL_C_UTINYINT:
+//                val = (long)(*(wchar_t *)(colDefs[colNumber].PtrDataObj));
+//                break;
+//            case SQL_C_USHORT:
+//                val = (long)(*(UWORD *)(colDefs[colNumber].PtrDataObj));
+//                break;
+//            case SQL_C_DATE:
+//                val = (DATE_STRUCT *)(colDefs[colNumber].PtrDataObj);
+//                break;
+//            case SQL_C_TIME:
+//                val = (TIME_STRUCT *)(colDefs[colNumber].PtrDataObj);
+//                break;
+//            case SQL_C_TIMESTAMP:
+//                val = (TIMESTAMP_STRUCT *)(colDefs[colNumber].PtrDataObj);
+//                break;
+//            case SQL_C_DOUBLE:
+//                val = *(double *)(colDefs[colNumber].PtrDataObj);
+//                break;
+//            default:
+//                assert(0);
+//        }
+//    }
+//    return val;
+//}  // wxDbTable::GetCol()
 
 
-void wxDbTable::SetColumn(const int colNumber, const wxVariant val)
-{
-    //FIXME: Add proper wxDateTime support to wxVariant..
-    wxDateTime dateval;
-
-    SetColNull((UWORD)colNumber, val.IsNull());
-
-    if (!val.IsNull())
-    {
-        if ((colDefs[colNumber].SqlCtype == SQL_C_DATE)
-            || (colDefs[colNumber].SqlCtype == SQL_C_TIME)
-            || (colDefs[colNumber].SqlCtype == SQL_C_TIMESTAMP))
-        {
-            //Returns null if invalid!
-            if (!dateval.ParseDate(val.GetString()))
-                SetColNull((UWORD)colNumber, true);
-        }
-
-        switch (colDefs[colNumber].SqlCtype)
-        {
-#if wxUSE_UNICODE
-    #if defined(SQL_WCHAR)
-            case SQL_WCHAR:
-    #endif
-    #if defined(SQL_WVARCHAR)
-            case SQL_WVARCHAR:
-    #endif
-#endif
-            case SQL_CHAR:
-            case SQL_VARCHAR:
-                csstrncpyt((wchar_t *)(colDefs[colNumber].PtrDataObj),
-                           val.GetString().c_str(),
-                           colDefs[colNumber].SzDataObj-1);  //TODO: glt ??? * sizeof(wchar_t) ???
-                break;
-            case SQL_C_LONG:
-            case SQL_C_SLONG:
-                *(long *)(colDefs[colNumber].PtrDataObj) = val;
-                break;
-            case SQL_C_SHORT:
-            case SQL_C_SSHORT:
-                *(short *)(colDefs[colNumber].PtrDataObj) = (short)val.GetLong();
-                break;
-            case SQL_C_ULONG:
-                *(unsigned long *)(colDefs[colNumber].PtrDataObj) = val.GetLong();
-                break;
-            case SQL_C_TINYINT:
-                *(wchar_t *)(colDefs[colNumber].PtrDataObj) = val.GetChar();
-                break;
-            case SQL_C_UTINYINT:
-                *(wchar_t *)(colDefs[colNumber].PtrDataObj) = val.GetChar();
-                break;
-            case SQL_C_USHORT:
-                *(unsigned short *)(colDefs[colNumber].PtrDataObj) = (unsigned short)val.GetLong();
-                break;
-            //FIXME: Add proper wxDateTime support to wxVariant..
-            case SQL_C_DATE:
-                {
-                    DATE_STRUCT *dataptr =
-                        (DATE_STRUCT *)colDefs[colNumber].PtrDataObj;
-
-                    dataptr->year   = (SWORD)dateval.GetYear();
-                    dataptr->month  = (UWORD)(dateval.GetMonth()+1);
-                    dataptr->day    = (UWORD)dateval.GetDay();
-                }
-                break;
-            case SQL_C_TIME:
-                {
-                    TIME_STRUCT *dataptr =
-                        (TIME_STRUCT *)colDefs[colNumber].PtrDataObj;
-
-                    dataptr->hour   = dateval.GetHour();
-                    dataptr->minute = dateval.GetMinute();
-                    dataptr->second = dateval.GetSecond();
-                }
-                break;
-            case SQL_C_TIMESTAMP:
-                {
-                    TIMESTAMP_STRUCT *dataptr =
-                        (TIMESTAMP_STRUCT *)colDefs[colNumber].PtrDataObj;
-                    dataptr->year   = (SWORD)dateval.GetYear();
-                    dataptr->month  = (UWORD)(dateval.GetMonth()+1);
-                    dataptr->day    = (UWORD)dateval.GetDay();
-
-                    dataptr->hour   = dateval.GetHour();
-                    dataptr->minute = dateval.GetMinute();
-                    dataptr->second = dateval.GetSecond();
-                }
-                break;
-            case SQL_C_DOUBLE:
-                *(double *)(colDefs[colNumber].PtrDataObj) = val;
-                break;
-            default:
-                assert(0);
-        }  // switch
-    }  // if (!val.IsNull())
-}  // wxDbTable::SetCol()
+//void wxDbTable::SetColumn(const int colNumber, const wxVariant val)
+//{
+//    //FIXME: Add proper wxDateTime support to wxVariant..
+//    wxDateTime dateval;
+//
+//    SetColNull((UWORD)colNumber, val.IsNull());
+//
+//    if (!val.IsNull())
+//    {
+//        if ((colDefs[colNumber].SqlCtype == SQL_C_DATE)
+//            || (colDefs[colNumber].SqlCtype == SQL_C_TIME)
+//            || (colDefs[colNumber].SqlCtype == SQL_C_TIMESTAMP))
+//        {
+//            //Returns null if invalid!
+//            if (!dateval.ParseDate(val.GetString()))
+//                SetColNull((UWORD)colNumber, true);
+//        }
+//
+//        switch (colDefs[colNumber].SqlCtype)
+//        {
+//#if wxUSE_UNICODE
+//    #if defined(SQL_WCHAR)
+//            case SQL_WCHAR:
+//    #endif
+//    #if defined(SQL_WVARCHAR)
+//            case SQL_WVARCHAR:
+//    #endif
+//#endif
+//            case SQL_CHAR:
+//            case SQL_VARCHAR:
+//                csstrncpyt((wchar_t *)(colDefs[colNumber].PtrDataObj),
+//                           val.GetString().c_str(),
+//                           colDefs[colNumber].SzDataObj-1);  //TODO: glt ??? * sizeof(wchar_t) ???
+//                break;
+//            case SQL_C_LONG:
+//            case SQL_C_SLONG:
+//                *(long *)(colDefs[colNumber].PtrDataObj) = val;
+//                break;
+//            case SQL_C_SHORT:
+//            case SQL_C_SSHORT:
+//                *(short *)(colDefs[colNumber].PtrDataObj) = (short)val.GetLong();
+//                break;
+//            case SQL_C_ULONG:
+//                *(unsigned long *)(colDefs[colNumber].PtrDataObj) = val.GetLong();
+//                break;
+//            case SQL_C_TINYINT:
+//                *(wchar_t *)(colDefs[colNumber].PtrDataObj) = val.GetChar();
+//                break;
+//            case SQL_C_UTINYINT:
+//                *(wchar_t *)(colDefs[colNumber].PtrDataObj) = val.GetChar();
+//                break;
+//            case SQL_C_USHORT:
+//                *(unsigned short *)(colDefs[colNumber].PtrDataObj) = (unsigned short)val.GetLong();
+//                break;
+//            //FIXME: Add proper wxDateTime support to wxVariant..
+//            case SQL_C_DATE:
+//                {
+//                    DATE_STRUCT *dataptr =
+//                        (DATE_STRUCT *)colDefs[colNumber].PtrDataObj;
+//
+//                    dataptr->year   = (SWORD)dateval.GetYear();
+//                    dataptr->month  = (UWORD)(dateval.GetMonth()+1);
+//                    dataptr->day    = (UWORD)dateval.GetDay();
+//                }
+//                break;
+//            case SQL_C_TIME:
+//                {
+//                    TIME_STRUCT *dataptr =
+//                        (TIME_STRUCT *)colDefs[colNumber].PtrDataObj;
+//
+//                    dataptr->hour   = dateval.GetHour();
+//                    dataptr->minute = dateval.GetMinute();
+//                    dataptr->second = dateval.GetSecond();
+//                }
+//                break;
+//            case SQL_C_TIMESTAMP:
+//                {
+//                    TIMESTAMP_STRUCT *dataptr =
+//                        (TIMESTAMP_STRUCT *)colDefs[colNumber].PtrDataObj;
+//                    dataptr->year   = (SWORD)dateval.GetYear();
+//                    dataptr->month  = (UWORD)(dateval.GetMonth()+1);
+//                    dataptr->day    = (UWORD)dateval.GetDay();
+//
+//                    dataptr->hour   = dateval.GetHour();
+//                    dataptr->minute = dateval.GetMinute();
+//                    dataptr->second = dateval.GetSecond();
+//                }
+//                break;
+//            case SQL_C_DOUBLE:
+//                *(double *)(colDefs[colNumber].PtrDataObj) = val;
+//                break;
+//            default:
+//                assert(0);
+//        }  // switch
+//    }  // if (!val.IsNull())
+//}  // wxDbTable::SetCol()
 
 
 GenericKey wxDbTable::GetKey()

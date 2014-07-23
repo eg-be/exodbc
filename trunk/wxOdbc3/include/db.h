@@ -35,78 +35,87 @@
 #define OLD_GETCOLUMNS 1
 #define EXPERIMENTAL_WXDB_FUNCTIONS 1
 
-#include "wx/defs.h"
+//#include "wx/defs.h"
 
-#if defined(__VISUALC__)
-    // we need to include standard Windows headers but we can't include
-    // <windows.h> directly when using MFC because it includes it itself in a
-    // different manner
-    #if wxUSE_MFC
-        #include <afxwin.h>
-    #else // !wxUSE_MFC
-        #include "wx/msw/wrapwin.h"
-    #endif // wxUSE_MFC/!wxUSE_MFC
+#include <windows.h>
 
-    // If you use the wxDbCreateDataSource() function with MSW/VC6,
-    // you cannot use the iODBC headers, you must use the VC headers,
-    // plus the odbcinst.h header - gt Nov 2 2000
-    //
-    // Must add "odbccp32.lib" in \wx2\wxWidgets\src\makevc.env to the WINLIBS= line
-    //
-    #include "sql.h"
-    #include "sqlext.h"
-    //#if wxUSE_UNICODE
-    //    #include <sqlucode.h>
-    //#endif
-    #include "odbcinst.h"
-#else
-    #if defined(__WINDOWS__) && ( defined(HAVE_W32API_H) || defined(__BORLANDC__)  || defined (__DMC__))
-        #include "wx/msw/wrapwin.h"
-    #endif
-    extern "C" {
-    #if defined(wxUSE_BUILTIN_IODBC) && wxUSE_BUILTIN_IODBC
-        // Use the ones from the library
-        #include "wx/isql.h"
-        #include "wx/isqlext.h"
-        // Not available in v2.x of iODBC
-        #ifndef __WXMSW__
-          #if wxUSE_UNICODE
-          typedef wchar_t SQLTCHAR;
-          #else
-          typedef UCHAR SQLTCHAR;
-          #endif
-        #endif
-    #else // !wxUSE_BUILTIN_IODBC
-        // SQL headers define BOOL if it's not defined yet but BOOL is also
-        // defined in many other places on other systems (Motif, at least on
-        // OpenVMS; Cocoa and X11) so prevent the problem by defining it before
-        // including these headers
-        #ifndef BOOL
-            #define BOOL int
-            #include <sql.h>
-            #include <sqlext.h>
-            #undef BOOL
-        #else
-            #include <sql.h>
-            #include <sqlext.h>
-        #endif
-    #endif // wxUSE_BUILTIN_IODBC/!wxUSE_BUILTIN_IODBC
-    }
-#endif
+#include "sql.h"
+#include "sqlext.h"
 
-#if wxUSE_UNICODE
+/* There are too many false positivies for this one, particularly when using templates like wxVector<T> */
+/* class 'foo' needs to have dll-interface to be used by clients of class 'bar'" */
+#pragma warning(disable:4251)
+
+//#if defined(__VISUALC__)
+//    // we need to include standard Windows headers but we can't include
+//    // <windows.h> directly when using MFC because it includes it itself in a
+//    // different manner
+//    #if wxUSE_MFC
+//        #include <afxwin.h>
+//    #else // !wxUSE_MFC
+//        #include "wx/msw/wrapwin.h"
+//    #endif // wxUSE_MFC/!wxUSE_MFC
+//
+//    // If you use the wxDbCreateDataSource() function with MSW/VC6,
+//    // you cannot use the iODBC headers, you must use the VC headers,
+//    // plus the odbcinst.h header - gt Nov 2 2000
+//    //
+//    // Must add "odbccp32.lib" in \wx2\wxWidgets\src\makevc.env to the WINLIBS= line
+//    //
+//    #include "sql.h"
+//    #include "sqlext.h"
+//    //#if wxUSE_UNICODE
+//    //    #include <sqlucode.h>
+//    //#endif
+//    #include "odbcinst.h"
+//#else
+//    #if defined(__WINDOWS__) && ( defined(HAVE_W32API_H) || defined(__BORLANDC__)  || defined (__DMC__))
+//        #include "wx/msw/wrapwin.h"
+//    #endif
+//    extern "C" {
+//    #if defined(wxUSE_BUILTIN_IODBC) && wxUSE_BUILTIN_IODBC
+//        // Use the ones from the library
+//        #include "wx/isql.h"
+//        #include "wx/isqlext.h"
+//        // Not available in v2.x of iODBC
+//        #ifndef __WXMSW__
+//          #if wxUSE_UNICODE
+//          typedef wchar_t SQLTCHAR;
+//          #else
+//          typedef UCHAR SQLTCHAR;
+//          #endif
+//        #endif
+//    #else // !wxUSE_BUILTIN_IODBC
+//        // SQL headers define BOOL if it's not defined yet but BOOL is also
+//        // defined in many other places on other systems (Motif, at least on
+//        // OpenVMS; Cocoa and X11) so prevent the problem by defining it before
+//        // including these headers
+//        #ifndef BOOL
+//            #define BOOL int
+//            #include <sql.h>
+//            #include <sqlext.h>
+//            #undef BOOL
+//        #else
+//            #include <sql.h>
+//            #include <sqlext.h>
+//        #endif
+//    #endif // wxUSE_BUILTIN_IODBC/!wxUSE_BUILTIN_IODBC
+//    }
+//#endif
+
+//#if wxUSE_UNICODE
 #define SQL_C_WXCHAR SQL_C_WCHAR
-#else
-#define SQL_C_WXCHAR SQL_C_CHAR
-#endif
+//#else
+//#define SQL_C_WXCHAR SQL_C_CHAR
+//#endif
 
-#ifdef __DIGITALMARS__
-#if wxUSE_UNICODE
+//#ifdef __DIGITALMARS__
+//#if wxUSE_UNICODE
 typedef wchar_t SQLTCHAR;
-#else
-typedef UCHAR SQLTCHAR;
-#endif
-#endif
+//#else
+//typedef UCHAR SQLTCHAR;
+//#endif
+//#endif
 
 typedef float SFLOAT;
 typedef double SDOUBLE;
