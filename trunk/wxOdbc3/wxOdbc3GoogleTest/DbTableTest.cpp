@@ -583,7 +583,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ(wxString(L"r1_c4"), wxString(pTable->m_col4).Trim());
 		EXPECT_FALSE( pTable->GetNext() );
 
-		// Now test by reading the incomplete table: It works as we've still used the indexes "as in the db" when we've bound the columns
+		// Now test by reading the incomplete table using '*': It works as we've still used the indexes "as in the db" when we've bound the columns
 		pIncTable->m_col2[0] = 0;
 		pIncTable->m_col4[0] = 0;
 		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
