@@ -244,7 +244,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD
     {
         // Check to see if cursor type is supported
         pDb->GetNextError(henv, hdbc, hstmtInternal);
-        if (! wxStrcmp(pDb->sqlState, wxT("01S02")))  // Option Value Changed
+        if (! wxStrcmp(pDb->sqlState, L"01S02"))  // Option Value Changed
         {
             // Datasource does not support static cursors.  Driver
             // will substitute a cursor type.  Call SQLGetStmtOption()
@@ -252,20 +252,20 @@ bool wxDbTable::initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD
             if (SQLGetStmtOption(hstmtInternal, SQL_CURSOR_TYPE, &cursorType) != SQL_SUCCESS)
                 pDb->DispAllErrors(henv, hdbc, hstmtInternal);
 #ifdef DBDEBUG_CONSOLE
-            std::wcout << wxT("Static cursor changed to: ");
+            std::wcout << L"Static cursor changed to: ";
             switch(cursorType)
             {
             case SQL_CURSOR_FORWARD_ONLY:
-                std::wcout << wxT("Forward Only");
+                std::wcout << L"Forward Only";
                 break;
             case SQL_CURSOR_STATIC:
-                std::wcout << wxT("Static");
+                std::wcout << L"Static";
                 break;
             case SQL_CURSOR_KEYSET_DRIVEN:
-                std::wcout << wxT("Keyset Driven");
+                std::wcout << L"Keyset Driven";
                 break;
             case SQL_CURSOR_DYNAMIC:
-                std::wcout << wxT("Dynamic");
+                std::wcout << L"Dynamic";
                 break;
             }
             std::wcout << std::endl << std::endl;
@@ -291,7 +291,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD
     }
 #ifdef DBDEBUG_CONSOLE
     else
-        std::wcout << wxT("Cursor Type set to STATIC") << std::endl << std::endl;
+        std::wcout << L"Cursor Type set to STATIC" << std::endl << std::endl;
 #endif
 
     if (!queryOnly)
@@ -353,7 +353,7 @@ void wxDbTable::cleanup()
         {
             std::wstring msg;
 			msg = (boost::wformat(L"Unable to find the tableID in the linked\nlist of tables in use.\n\n%s") %s).str();
-            //wxLogDebug (msg,wxT("NOTICE..."));
+            //wxLogDebug (msg, L"NOTICE...");
         }
     }
 #endif
@@ -794,11 +794,11 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
     // Verify that the table exists in the database
     if (!exists)
     {
-        s = wxT("Table/view does not exist in the database");
-        if ( *(pDb->dbInf.accessibleTables) == wxT('Y'))
-            s += wxT(", or you have no permissions.\n");
+        s = L"Table/view does not exist in the database";
+        if ( *(pDb->dbInf.accessibleTables) == L'Y')
+            s += L", or you have no permissions.\n";
         else
-            s += wxT(".\n");
+            s += L".\n";
     }
     else if (checkPrivileges)
     {
@@ -806,12 +806,12 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
         bool hasPrivs wxDUMMY_INITIALIZE(true);
 
         if (pDb->Dbms() == dbmsPOSTGRES)
-            hasPrivs = pDb->TablePrivileges(tableName, wxT("SELECT"), pDb->GetUsername().c_str(), NULL, tablePath);
+            hasPrivs = pDb->TablePrivileges(tableName, L"SELECT", pDb->GetUsername().c_str(), NULL, tablePath);
         else
-            hasPrivs = pDb->TablePrivileges(tableName, wxT("SELECT"), pDb->GetUsername().c_str(), pDb->GetUsername().c_str(), tablePath);
+            hasPrivs = pDb->TablePrivileges(tableName, L"SELECT", pDb->GetUsername().c_str(), pDb->GetUsername().c_str(), tablePath);
 
         if (!hasPrivs)
-            s = wxT("Connecting user does not have sufficient privileges to access this table.\n");
+            s = L"Connecting user does not have sufficient privileges to access this table.\n";
     }
 
     if (!s.empty())
@@ -860,12 +860,12 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
             if (! colDefs[i].InsertAllowed)
                 continue;
             if (needComma)
-                sqlStmt += wxT(",");
+                sqlStmt += L",";
             sqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
             needComma = true;
         }
         needComma = false;
-        sqlStmt += wxT(") VALUES (");
+        sqlStmt += L") VALUES (";
 
         int insertableCount = 0;
 
@@ -874,12 +874,12 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
             if (! colDefs[i].InsertAllowed)
                 continue;
             if (needComma)
-                sqlStmt += wxT(",");
-            sqlStmt += wxT("?");
+                sqlStmt += L",";
+            sqlStmt += L"?";
             needComma = true;
             insertableCount++;
         }
-        sqlStmt += wxT(")");
+        sqlStmt += L")";
 
         // Prepare the insert statement for execution
         if (insertableCount)
@@ -939,7 +939,7 @@ bool wxDbTable::GetPrev(void)
 {
     if (pDb->FwdOnlyCursors())
     {
-        wxFAIL_MSG(wxT("GetPrev()::Backward scrolling cursors are not enabled for this instance of wxDbTable"));
+        wxFAIL_MSG(L"GetPrev()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
         return false;
     }
     else
@@ -953,7 +953,7 @@ bool wxDbTable::operator--(int)
 {
     if (pDb->FwdOnlyCursors())
     {
-        wxFAIL_MSG(wxT("operator--:Backward scrolling cursors are not enabled for this instance of wxDbTable"));
+        wxFAIL_MSG(L"operator--:Backward scrolling cursors are not enabled for this instance of wxDbTable");
         return false;
     }
     else
@@ -967,7 +967,7 @@ bool wxDbTable::GetFirst(void)
 {
     if (pDb->FwdOnlyCursors())
     {
-        wxFAIL_MSG(wxT("GetFirst():Backward scrolling cursors are not enabled for this instance of wxDbTable"));
+        wxFAIL_MSG(L"GetFirst():Backward scrolling cursors are not enabled for this instance of wxDbTable");
         return false;
     }
     else
@@ -981,7 +981,7 @@ bool wxDbTable::GetLast(void)
 {
     if (pDb->FwdOnlyCursors())
     {
-        wxFAIL_MSG(wxT("GetLast()::Backward scrolling cursors are not enabled for this instance of wxDbTable"));
+        wxFAIL_MSG(L"GetLast()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
         return false;
     }
     else
@@ -1028,9 +1028,9 @@ void wxDbTable::BuildDeleteStmt(std::wstring &pSqlStmt, int typeOfDel, const std
                 // based on the key fields.
                 if (SQLGetData(hstmt, (UWORD)(m_numCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
                 {
-                    pSqlStmt += wxT("ROWID = '");
+                    pSqlStmt += L"ROWID = '";
                     pSqlStmt += rowid;
-                    pSqlStmt += wxT("'");
+                    pSqlStmt += L"'";
                     break;
                 }
             }
@@ -1067,11 +1067,11 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
     whereClause.empty();
 
     // Build a select statement to query the database
-    pSqlStmt = wxT("SELECT ");
+    pSqlStmt = L"SELECT ";
 
     // SELECT DISTINCT values only?
     if (distinct)
-        pSqlStmt += wxT("DISTINCT ");
+        pSqlStmt += L"DISTINCT ";
 
     // Was a FROM clause specified to join tables to the base table?
     // Available for ::Query() only!!!
@@ -1094,11 +1094,11 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
         if ((appendFromClause || pDb->Dbms() == dbmsACCESS) && tStr.find(L'.') == std::wstring::npos)
         {
             pSqlStmt += pDb->SQLTableName(queryTableName.c_str());
-            pSqlStmt += wxT(".");
+            pSqlStmt += L".";
         }
         pSqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
         if (i + 1 < m_numCols)
-            pSqlStmt += wxT(",");
+            pSqlStmt += L",";
     }
 
     // If the datasource supports ROWID, get this column as well.  Exception: Don't retrieve
@@ -1108,16 +1108,16 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
         // If joining tables, the base table column names must be qualified to avoid ambiguity
         if (appendFromClause || pDb->Dbms() == dbmsACCESS)
         {
-            pSqlStmt += wxT(",");
+            pSqlStmt += L",";
             pSqlStmt += pDb->SQLTableName(queryTableName.c_str());
-            pSqlStmt += wxT(".ROWID");
+            pSqlStmt += L".ROWID";
         }
         else
-            pSqlStmt += wxT(",ROWID");
+            pSqlStmt += L",ROWID";
     }
 
     // Append the FROM tablename portion
-    pSqlStmt += wxT(" FROM ");
+    pSqlStmt += L" FROM ";
     pSqlStmt += pDb->SQLTableName(queryTableName.c_str());
 //    pSqlStmt += queryTableName;
 
@@ -1127,7 +1127,7 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
     // NOHOLDLOCK (the default).  Note: The "FOR UPDATE" clause
     // is parsed but ignored in SYBASE Transact-SQL.
     if (selectForUpdate && (pDb->Dbms() == dbmsSYBASE_ASA || pDb->Dbms() == dbmsSYBASE_ASE))
-        pSqlStmt += wxT(" HOLDLOCK");
+        pSqlStmt += L" HOLDLOCK";
 
     if (appendFromClause)
         pSqlStmt += from;
@@ -1143,7 +1143,7 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
             if (where.length())   // May not want a where clause!!!
 #endif
             {
-                pSqlStmt += wxT(" WHERE ");
+                pSqlStmt += L" WHERE ";
                 pSqlStmt += where;
             }
             break;
@@ -1151,7 +1151,7 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
             BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
             if (whereClause.length())
             {
-                pSqlStmt += wxT(" WHERE ");
+                pSqlStmt += L" WHERE ";
                 pSqlStmt += whereClause;
             }
             break;
@@ -1159,7 +1159,7 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
             BuildWhereClause(whereClause, DB_WHERE_MATCHING);
             if (whereClause.length())
             {
-                pSqlStmt += wxT(" WHERE ");
+                pSqlStmt += L" WHERE ";
                 pSqlStmt += whereClause;
             }
             break;
@@ -1172,7 +1172,7 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
     if (orderBy.length())
 #endif
     {
-        pSqlStmt += wxT(" ORDER BY ");
+        pSqlStmt += L" ORDER BY ";
         pSqlStmt += orderBy;
     }
 
@@ -1180,7 +1180,7 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
     // parses the FOR UPDATE clause but ignores it.  See the comment above on the
     // HOLDLOCK for Sybase.
     if (selectForUpdate && CanSelectForUpdate())
-        pSqlStmt += wxT(" FOR UPDATE");
+        pSqlStmt += L" FOR UPDATE";
 
 }  // wxDbTable::BuildSelectStmt()
 
@@ -1216,18 +1216,18 @@ void wxDbTable::BuildUpdateStmt(std::wstring &pSqlStmt, int typeOfUpdate, const 
         if (colDefs[i].Updateable)
         {
             if (!firstColumn)
-                pSqlStmt += wxT(",");
+                pSqlStmt += L",";
             else
                 firstColumn = false;
 
             pSqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
 //            pSqlStmt += colDefs[i].ColName;
-            pSqlStmt += wxT(" = ?");
+            pSqlStmt += L" = ?";
         }
     }
 
     // Append the WHERE clause to the SQL UPDATE statement
-    pSqlStmt += wxT(" WHERE ");
+    pSqlStmt += L" WHERE ";
     switch(typeOfUpdate)
     {
         case DB_UPD_KEYFIELDS:
@@ -1244,9 +1244,9 @@ void wxDbTable::BuildUpdateStmt(std::wstring &pSqlStmt, int typeOfUpdate, const 
                 // based on the key fields.
                 if (SQLGetData(hstmt, (UWORD)(m_numCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
                 {
-                    pSqlStmt += wxT("ROWID = '");
+                    pSqlStmt += L"ROWID = '";
                     pSqlStmt += rowid;
-                    pSqlStmt += wxT("'");
+                    pSqlStmt += L"'";
                     break;
                 }
             }
@@ -1295,7 +1295,7 @@ void wxDbTable::BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere,
                 continue;
             // If there is more than 1 column, join them with the keyword "AND"
             if (moreThanOneColumn)
-                pWhereClause += wxT(" AND ");
+                pWhereClause += L" AND ";
             else
                 moreThanOneColumn = true;
 
@@ -1305,14 +1305,14 @@ void wxDbTable::BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere,
             if (qualTableName.length() && tStr.find(L'.') == std::wstring::npos)
             {
                 pWhereClause += pDb->SQLTableName(qualTableName.c_str());
-                pWhereClause += wxT(".");
+                pWhereClause += L".";
             }
             pWhereClause += pDb->SQLColumnName(colDefs[colNumber].ColName);
 
             if (useLikeComparison && (colDefs[colNumber].SqlCtype == SQL_C_WXCHAR))
-                pWhereClause += wxT(" LIKE ");
+                pWhereClause += L" LIKE ";
             else
-                pWhereClause += wxT(" = ");
+                pWhereClause += L" = ";
 
             switch(colDefs[colNumber].SqlCtype)
             {
@@ -1406,7 +1406,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
     std::wstring sqlStmt;
 
 #ifdef DBDEBUG_CONSOLE
-    std::wcout << wxT("Creating Table ") << tableName << wxT("...") << std::endl;
+    std::wcout << L"Creating Table " << tableName << L"..." << std::endl;
 #endif
 
     // Drop table first
@@ -1420,11 +1420,11 @@ bool wxDbTable::CreateTable(bool attemptDrop)
         // Exclude derived columns since they are NOT part of the base table
         if (colDefs[i].DerivedCol)
             continue;
-        std::wcout << i + 1 << wxT(": ") << colDefs[i].ColName << wxT("; ");
+        std::wcout << i + 1 << L": " << colDefs[i].ColName << L"; ";
         switch(colDefs[i].DbDataType)
         {
             case DB_DATA_TYPE_VARCHAR:
-                std::wcout << pDb->GetTypeInfVarchar().TypeName << wxT("(") << (int)(colDefs[i].SzDataObj / sizeof(wchar_t)) << wxT(")");
+                std::wcout << pDb->GetTypeInfVarchar().TypeName << L"(" << (int)(colDefs[i].SzDataObj / sizeof(wchar_t)) << L")";
                 break;
             case DB_DATA_TYPE_MEMO:
                 std::wcout << pDb->GetTypeInfMemo().TypeName;
@@ -1458,11 +1458,11 @@ bool wxDbTable::CreateTable(bool attemptDrop)
             continue;
         // Comma Delimiter
         if (needComma)
-            sqlStmt += wxT(",");
+            sqlStmt += L",";
         // Column Name
         sqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
 //        sqlStmt += colDefs[i].ColName;
-        sqlStmt += wxT(" ");
+        sqlStmt += L" ";
         // Column Type
         switch(colDefs[i].DbDataType)
         {
@@ -1504,7 +1504,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
         {
             if (colDefs[i].KeyField)
             {
-                sqlStmt += wxT(" NOT NULL");
+                sqlStmt += L" NOT NULL";
             }
         }
 
@@ -1532,16 +1532,16 @@ bool wxDbTable::CreateTable(bool attemptDrop)
             case dbmsFIREBIRD:
             {
                 // MySQL goes out on this one. We also declare the relevant key NON NULL above
-                sqlStmt += wxT(",PRIMARY KEY (");
+                sqlStmt += L",PRIMARY KEY (";
                 break;
             }
             default:
             {
-                sqlStmt += wxT(",CONSTRAINT ");
+                sqlStmt += L",CONSTRAINT ";
                 //  DB2 is limited to 18 characters for index names
                 if (pDb->Dbms() == dbmsDB2)
                 {
-                    wxASSERT_MSG((wxStrlen(tableName) <= 13), wxT("DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters."));
+                    wxASSERT_MSG((wxStrlen(tableName) <= 13), L"DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters.");
                     sqlStmt += pDb->SQLTableName(tableName.substr(0, 13).c_str());
 //                    sqlStmt += tableName.substr(0, 13);
                 }
@@ -1549,7 +1549,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
                     sqlStmt += pDb->SQLTableName(tableName.c_str());
 //                    sqlStmt += tableName;
 
-                sqlStmt += wxT("_PIDX PRIMARY KEY (");
+                sqlStmt += L"_PIDX PRIMARY KEY (";
                 break;
             }
         }
@@ -1560,7 +1560,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
             if (colDefs[i].KeyField)
             {
                 if (j++) // Multi part key, comma separate names
-                    sqlStmt += wxT(",");
+                    sqlStmt += L",";
                 sqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
 
                 if (pDb->Dbms() == dbmsMY_SQL &&
@@ -1572,20 +1572,20 @@ bool wxDbTable::CreateTable(bool attemptDrop)
                 }
             }
         }
-        sqlStmt += wxT(")");
+        sqlStmt += L")";
 
         if (pDb->Dbms() == dbmsINFORMIX ||
             pDb->Dbms() == dbmsSYBASE_ASA ||
             pDb->Dbms() == dbmsSYBASE_ASE)
         {
-            sqlStmt += wxT(" CONSTRAINT ");
+            sqlStmt += L" CONSTRAINT ";
             sqlStmt += pDb->SQLTableName(tableName.c_str());
 //            sqlStmt += tableName;
-            sqlStmt += wxT("_PIDX");
+            sqlStmt += L"_PIDX";
         }
     }
     // Append the closing parentheses for the create table statement
-    sqlStmt += wxT(")");
+    sqlStmt += L")";
 
     pDb->WriteSqlLog(sqlStmt);
 
@@ -1638,14 +1638,14 @@ bool wxDbTable::DropTable()
     {
         // Check for "Base table not found" error and ignore
         pDb->GetNextError(henv, hdbc, hstmt);
-        if (wxStrcmp(pDb->sqlState, wxT("S0002")) /*&&
-            wxStrcmp(pDb->sqlState, wxT("S1000"))*/)  // "Base table not found"
+        if (wcscmp(pDb->sqlState, L"S0002") /*&&
+            wcscmp(pDb->sqlState, L"S1000")*/)  // "Base table not found"
         {
             // Check for product specific error codes
-            if (!((pDb->Dbms() == dbmsSYBASE_ASA    && !wxStrcmp(pDb->sqlState,wxT("42000")))   ||  // 5.x (and lower?)
-                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wxStrcmp(pDb->sqlState,wxT("37000")))   ||
-                  (pDb->Dbms() == dbmsPERVASIVE_SQL && !wxStrcmp(pDb->sqlState,wxT("S1000")))   ||  // Returns an S1000 then an S0002
-                  (pDb->Dbms() == dbmsPOSTGRES      && !wxStrcmp(pDb->sqlState,wxT("08S01")))))
+            if (!((pDb->Dbms() == dbmsSYBASE_ASA    && !wcscmp(pDb->sqlState, L"42000"))   ||  // 5.x (and lower?)
+                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(pDb->sqlState, L"37000"))   ||
+                  (pDb->Dbms() == dbmsPERVASIVE_SQL && !wcscmp(pDb->sqlState, L"S1000"))   ||  // Returns an S1000 then an S0002
+                  (pDb->Dbms() == dbmsPOSTGRES      && !wcscmp(pDb->sqlState, L"08S01"))))
             {
                 pDb->DispNextError();
                 pDb->DispAllErrors(henv, hdbc, hstmt);
@@ -1709,7 +1709,7 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
             {
                 ok = pDb->ModifyColumn(tableName, pIndexDefs[i].ColName,
                                         colDefs[j].DbDataType, (int)(colDefs[j].SzDataObj / sizeof(wchar_t)),
-                                        wxT("NOT NULL"));
+                                        L"NOT NULL");
 
                 if (!ok)
                 {
@@ -1736,17 +1736,17 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
     }
 
     // Build a CREATE INDEX statement
-    sqlStmt = wxT("CREATE ");
+    sqlStmt = L"CREATE ";
     if (unique)
-        sqlStmt += wxT("UNIQUE ");
+        sqlStmt += L"UNIQUE ";
 
-    sqlStmt += wxT("INDEX ");
+    sqlStmt += L"INDEX ";
     sqlStmt += pDb->SQLTableName(indexName.c_str());
-    sqlStmt += wxT(" ON ");
+    sqlStmt += L" ON ";
 
     sqlStmt += pDb->SQLTableName(tableName.c_str());
 //    sqlStmt += tableName;
-    sqlStmt += wxT(" (");
+    sqlStmt += L" (";
 
     // Append list of columns making up index
     int i;
@@ -1781,19 +1781,19 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
             !(pDb->Dbms() == dbmsPOSTGRES))
         {
             if (pIndexDefs[i].Ascending)
-                sqlStmt += wxT(" ASC");
+                sqlStmt += L" ASC";
             else
-                sqlStmt += wxT(" DESC");
+                sqlStmt += L" DESC";
         }
         else
-            wxASSERT_MSG(pIndexDefs[i].Ascending, _T("Datasource does not support DESCending index columns"));
+            wxASSERT_MSG(pIndexDefs[i].Ascending, L"Datasource does not support DESCending index columns");
 
         if ((i + 1) < numIndexColumns)
-            sqlStmt += wxT(",");
+            sqlStmt += L",";
     }
 
     // Append closing parentheses
-    sqlStmt += wxT(")");
+    sqlStmt += L")";
 
     pDb->WriteSqlLog(sqlStmt);
 
@@ -1853,18 +1853,18 @@ bool wxDbTable::DropIndex(const std::wstring &indexName)
     {
         // Check for "Index not found" error and ignore
         pDb->GetNextError(henv, hdbc, hstmt);
-        if (wxStrcmp(pDb->sqlState,wxT("S0012")))  // "Index not found"
+        if (wcscmp(pDb->sqlState, L"S0012"))  // "Index not found"
         {
             // Check for product specific error codes
-            if (!((pDb->Dbms() == dbmsSYBASE_ASA    && !wxStrcmp(pDb->sqlState,wxT("42000"))) ||  // v5.x (and lower?)
-                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wxStrcmp(pDb->sqlState,wxT("37000"))) ||
-                  (pDb->Dbms() == dbmsMS_SQL_SERVER && !wxStrcmp(pDb->sqlState,wxT("S1000"))) ||
-                  (pDb->Dbms() == dbmsINTERBASE     && !wxStrcmp(pDb->sqlState,wxT("S1000"))) ||
-                  (pDb->Dbms() == dbmsMAXDB         && !wxStrcmp(pDb->sqlState,wxT("S1000"))) ||
-                  (pDb->Dbms() == dbmsFIREBIRD      && !wxStrcmp(pDb->sqlState,wxT("HY000"))) ||
-                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wxStrcmp(pDb->sqlState,wxT("S0002"))) ||  // Base table not found
-                  (pDb->Dbms() == dbmsMY_SQL        && !wxStrcmp(pDb->sqlState,wxT("42S12"))) ||  // tested by Christopher Ludwik Marino-Cebulski using v3.23.21beta
-                  (pDb->Dbms() == dbmsPOSTGRES      && !wxStrcmp(pDb->sqlState,wxT("08S01")))
+            if (!((pDb->Dbms() == dbmsSYBASE_ASA    && !wcscmp(pDb->sqlState, L"42000")) ||  // v5.x (and lower?)
+                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(pDb->sqlState, L"37000")) ||
+                  (pDb->Dbms() == dbmsMS_SQL_SERVER && !wcscmp(pDb->sqlState, L"S1000")) ||
+                  (pDb->Dbms() == dbmsINTERBASE     && !wcscmp(pDb->sqlState, L"S1000")) ||
+                  (pDb->Dbms() == dbmsMAXDB         && !wcscmp(pDb->sqlState, L"S1000")) ||
+                  (pDb->Dbms() == dbmsFIREBIRD      && !wcscmp(pDb->sqlState, L"HY000")) ||
+                  (pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(pDb->sqlState, L"S0002")) ||  // Base table not found
+                  (pDb->Dbms() == dbmsMY_SQL        && !wcscmp(pDb->sqlState, L"42S12")) ||  // tested by Christopher Ludwik Marino-Cebulski using v3.23.21beta
+                  (pDb->Dbms() == dbmsPOSTGRES      && !wcscmp(pDb->sqlState, L"08S01"))
                ))
             {
                 pDb->DispNextError();
@@ -1909,7 +1909,7 @@ bool wxDbTable::SetOrderByColNums(UWORD first, ... )
         }
 
         if (colNumber != first)
-            tempStr += wxT(",");
+            tempStr += L",";
 
         tempStr += colDefs[colNumber].ColName;
         colNumber = va_arg (argptr, int);
@@ -1939,7 +1939,7 @@ int wxDbTable::Insert(void)
     {
         // Check to see if integrity constraint was violated
         pDb->GetNextError(henv, hdbc, hstmtInsert);
-        if (! wxStrcmp(pDb->sqlState, wxT("23000")))  // Integrity constraint violated
+        if (! wxStrcmp(pDb->sqlState, L"23000"))  // Integrity constraint violated
             return(DB_ERR_INTEGRITY_CONSTRAINT_VIOL);
         else
         {
@@ -2414,7 +2414,7 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
                     pColDataPtrs[index].SqlCtype   = SQL_C_TIMESTAMP;
                     break;
                 case DB_DATA_TYPE_BLOB:
-                    wxFAIL_MSG(wxT("This form of ::SetColDefs() cannot be used with BLOB columns"));
+                    wxFAIL_MSG(L"This form of ::SetColDefs() cannot be used with BLOB columns");
                     pColDataPtrs[index].PtrDataObj = /*BLOB ADDITION NEEDED*/NULL;
                     pColDataPtrs[index].SzDataObj  = /*BLOB ADDITION NEEDED*/sizeof(void *);
                     pColDataPtrs[index].SqlCtype   = SQL_VARBINARY;
@@ -2459,9 +2459,9 @@ ULONG wxDbTable::Count(const std::wstring &args)
     SQLLEN cb;
 
     // Build a "SELECT COUNT(*) FROM queryTableName [WHERE whereClause]" SQL Statement
-    sqlStmt  = wxT("SELECT COUNT(");
+    sqlStmt  = L"SELECT COUNT(";
     sqlStmt += args;
-    sqlStmt += wxT(") FROM ");
+    sqlStmt += L") FROM ";
     sqlStmt += pDb->SQLTableName(queryTableName.c_str());
 //    sqlStmt += queryTableName;
 #if wxODBC_BACKWARD_COMPATABILITY
@@ -2478,7 +2478,7 @@ ULONG wxDbTable::Count(const std::wstring &args)
     if (where.length())
 #endif
     {
-        sqlStmt += wxT(" WHERE ");
+        sqlStmt += L" WHERE ";
         sqlStmt += where;
     }
 
@@ -2557,9 +2557,9 @@ bool wxDbTable::Refresh(void)
         {
             whereClause += pDb->SQLTableName(queryTableName.c_str());
 //            whereClause += queryTableName;
-            whereClause += wxT(".ROWID = '");
+            whereClause += L".ROWID = '";
             whereClause += rowid;
-            whereClause += wxT("'");
+            whereClause += L"'";
         }
     }
 

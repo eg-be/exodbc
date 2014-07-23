@@ -308,7 +308,7 @@ public:
     HSTMT          *NewCursor(bool setCursor = false, bool bindColumns = true) {  return GetNewCursor(setCursor,bindColumns); }
 #endif
 
-    ULONG           Count(const std::wstring &args=wxT("*"));
+    ULONG           Count(const std::wstring &args = L"*");
     int             DB_STATUS(void) { return(pDb->DB_STATUS); }
 
     bool            IsColNull(UWORD colNumber) const;
