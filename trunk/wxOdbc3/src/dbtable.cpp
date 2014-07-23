@@ -1056,7 +1056,7 @@ void wxDbTable::BuildDeleteStmt(wchar_t *pSqlStmt, int typeOfDel, const std::wst
 {
     std::wstring tempSqlStmt;
     BuildDeleteStmt(tempSqlStmt, typeOfDel, pWhereClause);
-    wxStrcpy(pSqlStmt, tempSqlStmt);
+    wcscpy(pSqlStmt, tempSqlStmt.c_str());
 }  // wxDbTable::BuildDeleteStmt()
 
 
@@ -1190,7 +1190,7 @@ void wxDbTable::BuildSelectStmt(wchar_t *pSqlStmt, int typeOfSelect, bool distin
 {
     std::wstring tempSqlStmt;
     BuildSelectStmt(tempSqlStmt, typeOfSelect, distinct);
-    wxStrcpy(pSqlStmt, tempSqlStmt);
+    wcscpy(pSqlStmt, tempSqlStmt.c_str());
 }  // wxDbTable::BuildSelectStmt()
 
 
@@ -1267,7 +1267,7 @@ void wxDbTable::BuildUpdateStmt(wchar_t *pSqlStmt, int typeOfUpdate, const std::
 {
     std::wstring tempSqlStmt;
     BuildUpdateStmt(tempSqlStmt, typeOfUpdate, pWhereClause);
-    wxStrcpy(pSqlStmt, tempSqlStmt);
+    wcscpy(pSqlStmt, tempSqlStmt.c_str());
 }  // BuildUpdateStmt()
 
 
@@ -1363,7 +1363,7 @@ void wxDbTable::BuildWhereClause(wchar_t *pWhereClause, int typeOfWhere,
 {
     std::wstring tempSqlStmt;
     BuildWhereClause(tempSqlStmt, typeOfWhere, qualTableName, useLikeComparison);
-    wxStrcpy(pWhereClause, tempSqlStmt);
+    wcscpy(pWhereClause, tempSqlStmt.c_str());
 }  // wxDbTable::BuildWhereClause()
 
 
@@ -2324,7 +2324,7 @@ bool wxDbTable::SetColDefs(UWORD index, const std::wstring &fieldName, int dataT
         //wxLogDebug(tmpStr);
     }
     else
-        wxStrcpy(colDefs[index].ColName, fieldName);
+        wcscpy(colDefs[index].ColName, fieldName.c_str());
 
     colDefs[index].DbDataType       = dataType;
     colDefs[index].PtrDataObj       = pData;
