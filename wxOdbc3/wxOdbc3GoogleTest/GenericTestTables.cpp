@@ -201,8 +201,8 @@ namespace wxOdbc3Test
 		}
 		else if(m_readMode == ReadAsChar)
 		{
-			SetColDefs(1, L"tdecimal_18_0", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_0, SQL_C_WCHAR, sizeof(m_wcdecimal_18_0), false, false, false, false);
-			SetColDefs(2, L"tdecimal_18_10", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_10, SQL_C_WCHAR, sizeof(m_wcdecimal_18_10), false, false, false, false);
+			SetColDefs(1, L"tdecimal_18_0", DB_DATA_TYPE_VARCHAR, m_wcdecimal_18_0, SQL_C_WCHAR, sizeof(m_wcdecimal_18_0), false, false, false, false);
+			SetColDefs(2, L"tdecimal_18_10", DB_DATA_TYPE_VARCHAR, m_wcdecimal_18_10, SQL_C_WCHAR, sizeof(m_wcdecimal_18_10), false, false, false, false);
 		}
 	};
 
@@ -228,8 +228,8 @@ namespace wxOdbc3Test
 		}
 		else if(m_readMode == ReadAsChar)
 		{
-			SetColDefs(1, L"tdecimal_18_0", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_0, SQL_C_WCHAR, sizeof(m_wcdecimal_18_0), false, false, false, false);
-			SetColDefs(2, L"tdecimal_18_10", DB_DATA_TYPE_VARCHAR, &m_wcdecimal_18_10, SQL_C_WCHAR, sizeof(m_wcdecimal_18_10), false, false, false, false);
+			SetColDefs(1, L"tdecimal_18_0", DB_DATA_TYPE_VARCHAR, m_wcdecimal_18_0, SQL_C_WCHAR, sizeof(m_wcdecimal_18_0), false, false, false, false);
+			SetColDefs(2, L"tdecimal_18_10", DB_DATA_TYPE_VARCHAR, m_wcdecimal_18_10, SQL_C_WCHAR, sizeof(m_wcdecimal_18_10), false, false, false, false);
 		}
 	};
 
@@ -253,5 +253,37 @@ namespace wxOdbc3Test
 
 		SetColDefs(0, L"idblobtypes_tmp", DB_DATA_TYPE_INTEGER, &m_idBlobTypes, SQL_C_SLONG, sizeof(m_idBlobTypes), true, false, false, false);
 		SetColDefs(1, L"tblob", DB_DATA_TYPE_VARCHAR, m_blob, SQL_C_BINARY, sizeof(m_blob), false, false, false, false);
+	}
+
+	// CharTable
+	// ---------
+	CharTable::CharTable(wxDb* pDb)
+		: wxDbTable(pDb, L"chartable", 4, L"", wxDB_QUERY_ONLY)
+	{
+		m_idCharTable	= 0;
+		m_col2[0] = 0;
+		m_col3[0] = 0;
+		m_col4[0] = 0;
+
+		SetColDefs(0, L"idchartable", DB_DATA_TYPE_INTEGER, &m_idCharTable, SQL_C_SLONG, sizeof(m_idCharTable), true, false, false, false);
+		SetColDefs(1, L"col2", DB_DATA_TYPE_VARCHAR, m_col2, SQL_C_WCHAR, sizeof(m_col2), false, false, false, false);
+		SetColDefs(2, L"col3", DB_DATA_TYPE_VARCHAR, m_col3, SQL_C_WCHAR, sizeof(m_col3), false, false, false, false);
+		SetColDefs(3, L"col4", DB_DATA_TYPE_VARCHAR, m_col4, SQL_C_WCHAR, sizeof(m_col4), false, false, false, false);
+	}
+
+	// IncompleteCharTable
+	// -------------------
+	IncompleteCharTable::IncompleteCharTable(wxDb* pDb)
+		: wxDbTable(pDb, L"chartable", 4, L"", wxDB_QUERY_ONLY)
+	{
+		m_idCharTable	= 0;
+		m_col2[0] = 0;
+		//m_col3[0] = 0;
+		m_col4[0] = 0;
+
+		SetColDefs(0, L"idchartable", DB_DATA_TYPE_INTEGER, &m_idCharTable, SQL_C_SLONG, sizeof(m_idCharTable), true, false, false, false);
+		SetColDefs(1, L"col2", DB_DATA_TYPE_VARCHAR, m_col2, SQL_C_WCHAR, sizeof(m_col2), false, false, false, false);
+		//SetColDefs(2, L"col3", DB_DATA_TYPE_VARCHAR, m_col3, SQL_C_WCHAR, sizeof(m_col3), false, false, false, false);
+		SetColDefs(3, L"col4", DB_DATA_TYPE_VARCHAR, m_col4, SQL_C_WCHAR, sizeof(m_col4), false, false, false, false);
 	}
 }

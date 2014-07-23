@@ -159,6 +159,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( 56, pTable->m_timestamp.second);
 		
 		// TODO: MySql does not have fractions, ibm db2 adds '000' at the end (?)
+		RecordProperty("Ticket", "??");
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			EXPECT_EQ( 123456000, pTable->m_timestamp.fraction);
@@ -209,6 +210,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
 
 		// IBM DB2 has no support for unsigned int types, so far we know only about mysql having that
+		RecordProperty("Ticket", "??");
 		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
@@ -440,6 +442,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
 	
 		// DB2 sends a ',', mysql sends a '.' as delimeter
+		RecordProperty("Ticket", "??");
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
@@ -535,6 +538,70 @@ namespace wxOdbc3Test
 		EXPECT_TRUE( pTable->IsColNull(1) );
 
 		delete pTable;
+	}
+
+	TEST_P(DbTableTest, ReadIncompleteTable)
+	{
+		CharTable* pTable = new CharTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+		IncompleteCharTable* pIncTable = new IncompleteCharTable(m_pDb);
+		if(!pIncTable->Open(false, false))
+		{
+			delete pTable;
+			delete pIncTable;
+			ASSERT_FALSE(true);
+		}
+
+		wxString sqlstmt;
+		sqlstmt.Printf(L"DELETE FROM wxodbc3.chartable WHERE idchartable >= 0");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		sqlstmt.Printf("INSERT INTO wxodbc3.chartable (idchartable, col2, col3, col4) VALUES (1, 'r1_c2', 'r1_c3', 'r1_c4')");
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pTable->GetNext() );
+		EXPECT_EQ(wxString(L"r1_c2"), wxString(pTable->m_col2).Trim());
+		EXPECT_EQ(wxString(L"r1_c3"), wxString(pTable->m_col3).Trim());
+		EXPECT_EQ(wxString(L"r1_c4"), wxString(pTable->m_col4).Trim());
+		EXPECT_FALSE( pTable->GetNext() );
+
+		// Now test by reading the incomplete table: It works as we've still used the indexes "as in the db" when we've bound the columns
+		pIncTable->m_col2[0] = 0;
+		pIncTable->m_col4[0] = 0;
+		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pIncTable->GetNext() );
+		EXPECT_EQ(wxString(L"r1_c2"), wxString(pIncTable->m_col2).Trim());
+		EXPECT_EQ(wxString(L"r1_c4"), wxString(pIncTable->m_col4).Trim());
+		EXPECT_FALSE( pIncTable->GetNext() );
+
+		// It does not work if you do not use the '*' to select, see ticket #15
+		RecordProperty("Ticket", 15);
+		pIncTable->m_col2[0] = 0;
+		pIncTable->m_col4[0] = 0;
+		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT idchartable, col2, col4 FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pIncTable->GetNext() );
+		//EXPECT_EQ(wxString(L"r1_c2"), wxString(pIncTable->m_col2).Trim());
+		//EXPECT_EQ(wxString(L"r1_c4"), wxString(pIncTable->m_col4).Trim());
+		EXPECT_FALSE( pIncTable->GetNext() );
+
+		// .. But reading using '*' really works..
+		pIncTable->m_col2[0] = 0;
+		pIncTable->m_col4[0] = 0;
+		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pIncTable->GetNext() );
+		EXPECT_EQ(wxString(L"r1_c2"), wxString(pIncTable->m_col2).Trim());
+		EXPECT_EQ(wxString(L"r1_c4"), wxString(pIncTable->m_col4).Trim());
+		EXPECT_FALSE( pIncTable->GetNext() );
+
+
+		delete pTable;
+		delete pIncTable;
 	}
 }
 
