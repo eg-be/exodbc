@@ -21,29 +21,29 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "wx/wxprec.h"
+//#include "wx/wxprec.h"
 
-#ifdef __BORLANDC__
-    #pragma hdrstop
-#endif
+//#ifdef __BORLANDC__
+//    #pragma hdrstop
+//#endif
 
 //#if wxUSE_ODBC
 
-#ifndef WX_PRECOMP
-    #include "wx/object.h"
-    #include "wx/list.h"
-    #include "wx/string.h"
-    #include "wx/utils.h"
-    #include "wx/log.h"
-    #include "wx/app.h"
-#endif
+//#ifndef WX_PRECOMP
+//    #include "wx/object.h"
+//    #include "wx/list.h"
+//    #include "wx/string.h"
+//    #include "wx/utils.h"
+//    #include "wx/log.h"
+//    #include "wx/app.h"
+//#endif
 
 #ifdef DBDEBUG_CONSOLE
     #include "wx/ioswrap.h"
 #endif
 
-#include "wx/filefn.h"
-#include "wx/wxchar.h"
+//#include "wx/filefn.h"
+//#include "wx/wxchar.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -55,11 +55,12 @@
 #include "boost/format.hpp"
 #include <sstream>
 
-#include "Helpers.h"
 #include "db.h"
+#include "Helpers.h"
+
 
 // DLL options compatibility check:
-WX_CHECK_BUILD_OPTIONS("wxODBC")
+//WX_CHECK_BUILD_OPTIONS("wxODBC")
 
 WXDLLIMPEXP_DATA_ODBC(wxDbList*) PtrBegDbList = 0;
 
@@ -213,7 +214,7 @@ void wxDbConnectInf::SetDsn(const std::wstring &dsn)
 {
     exASSERT(dsn.length() < EXSIZEOF(Dsn));
 
-    wxStrncpy(Dsn, dsn, EXSIZEOF(Dsn)-1);
+	wcsncpy(Dsn, dsn.c_str(), EXSIZEOF(Dsn) - 1);
     Dsn[EXSIZEOF(Dsn)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetDsn()
 
@@ -221,7 +222,7 @@ void wxDbConnectInf::SetDsn(const std::wstring &dsn)
 void wxDbConnectInf::SetUserID(const std::wstring &uid)
 {
     exASSERT(uid.length() < EXSIZEOF(Uid));
-    wxStrncpy(Uid, uid, EXSIZEOF(Uid)-1);
+    wcsncpy(Uid, uid.c_str(), EXSIZEOF(Uid)-1);
     Uid[EXSIZEOF(Uid)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetUserID()
 
@@ -230,7 +231,7 @@ void wxDbConnectInf::SetPassword(const std::wstring &password)
 {
     exASSERT(password.length() < EXSIZEOF(AuthStr));
 
-    wxStrncpy(AuthStr, password, EXSIZEOF(AuthStr)-1);
+    wcsncpy(AuthStr, password.c_str(), EXSIZEOF(AuthStr)-1);
     AuthStr[EXSIZEOF(AuthStr)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetPassword()
 
@@ -238,9 +239,9 @@ void wxDbConnectInf::SetConnectionStr(const std::wstring &connectStr)
 {
     exASSERT(connectStr.length() < EXSIZEOF(ConnectionStr));
 
-    useConnectionStr = wxStrlen(connectStr) > 0;
+    useConnectionStr = connectStr.length() > 0;
 
-    wxStrncpy(ConnectionStr, connectStr, EXSIZEOF(ConnectionStr)-1);
+    wcsncpy(ConnectionStr, connectStr.c_str(), EXSIZEOF(ConnectionStr)-1);
     ConnectionStr[EXSIZEOF(ConnectionStr)-1] = 0;  // Prevent buffer overrun
 }  // wxDbConnectInf::SetConnectionStr()
 
@@ -609,7 +610,7 @@ const wchar_t *wxDb::convertUserID(const wchar_t *userID, std::wstring &UserID)
 {
     if (userID)
     {
-        if (!wxStrlen(userID))
+        if (!wcslen(userID))
             UserID = uid;
         else
             UserID = userID;
@@ -1951,7 +1952,7 @@ void wxDb::logError(const std::wstring &errMsg, const std::wstring &SQLState)
         pLast--;
     }
 
-    wxStrncpy(errorList[pLast], errMsg, DB_MAX_ERROR_MSG_LEN);
+    wcsncpy(errorList[pLast], errMsg.c_str(), DB_MAX_ERROR_MSG_LEN);
     errorList[pLast][DB_MAX_ERROR_MSG_LEN-1] = 0;
 
     if (SQLState.length())
@@ -2345,7 +2346,7 @@ bool wxDb::ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& nu
             return false;
         }
 
-        wxStrncpy(pColInf[colNum].colName, name, DB_MAX_COLUMN_NAME_LEN);
+        wcsncpy(pColInf[colNum].colName, name, DB_MAX_COLUMN_NAME_LEN);
         pColInf[colNum].colName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
 
         if (SQLColAttributes(hstmt, (UWORD)(colNum+1), SQL_COLUMN_TYPE,
@@ -2522,7 +2523,7 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
             GetData( 5, SQL_C_SSHORT, &iKeySeq,     0,                         &cb);
             GetData( 7, SQL_C_WXCHAR,  szFkTable,   DB_MAX_TABLE_NAME_LEN+1,   &cb);
             GetData( 8, SQL_C_WXCHAR,  szFkCol,     DB_MAX_COLUMN_NAME_LEN+1,  &cb);
-			tempStream << _T('[') << szFkTable << _T(']');  // [ ] in case there is a blank in the Table name
+			tempStream << L'[' << szFkTable << L']';  // [ ] in case there is a blank in the Table name
 //            tempStr << _T('[') << szFkTable << _T(']');  // [ ] in case there is a blank in the Table name
         }  // if
     }  // while
@@ -2535,7 +2536,7 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
         {   // Find the Column name
             if (!wcscmp(colInf[i].colName, szPkCol))           // We have found the Column, store the Information
             {
-                wxStrncpy(colInf[i].PkTableName, tempStr.c_str(), DB_MAX_TABLE_NAME_LEN);  // Name of the Tables where this Primary Key is used as a Foreign Key
+                wcsncpy(colInf[i].PkTableName, tempStr.c_str(), DB_MAX_TABLE_NAME_LEN);  // Name of the Tables where this Primary Key is used as a Foreign Key
                 colInf[i].PkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
             }
         }
@@ -2573,7 +2574,7 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
                 if (!wcscmp(colInf[i].colName,szFkCol))       // We have found the (Foreign Key) Column
                 {
                     colInf[i].FkCol = iKeySeq;                  // Which Foreign Key is this (first, second usw.) ?
-                    wxStrncpy(colInf[i].FkTableName, szFkTable, DB_MAX_TABLE_NAME_LEN);  // Name of the Table where this Foriegn is the Primary Key
+                    wcsncpy(colInf[i].FkTableName, szFkTable, DB_MAX_TABLE_NAME_LEN);  // Name of the Table where this Foriegn is the Primary Key
                     colInf[i].FkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
                 } // if
             }  // for
@@ -3628,15 +3629,16 @@ bool wxDb::TableExists(const std::wstring &tableName, const wchar_t *userID, con
 
     if (Dbms() == dbmsDBASE)
     {
-        std::wstring dbName;
-        if (tablePath.length())
-			dbName = (boost::wformat(L"%s/%s.dbf") % tablePath % tableName).str();
-        else
-			dbName = (boost::wformat(L"%s.dbf") % tableName).str();
+		exFAIL_MSG(L"dbmsDBASE support is not enabled");
+   //     std::wstring dbName;
+   //     if (tablePath.length())
+			//dbName = (boost::wformat(L"%s/%s.dbf") % tablePath % tableName).str();
+   //     else
+			//dbName = (boost::wformat(L"%s.dbf") % tableName).str();
 
-        bool exists;
-        exists = wxFileExists(dbName);
-        return exists;
+   //     bool exists;
+   //     exists = wxFileExists(dbName);
+   //     return exists;
     }
 
     std::wstring UserID;
@@ -3697,7 +3699,7 @@ bool wxDb::TableExists(const std::wstring &tableName, const wchar_t *userID, con
 
 /********** wxDb::TablePrivileges() **********/
 bool wxDb::TablePrivileges(const std::wstring &tableName, const std::wstring &priv, const wchar_t *userID,
-                            const wchar_t *schema, const std::wstring &WXUNUSED(tablePath))
+                            const wchar_t *schema, const std::wstring& tablePath)
 {
     exASSERT(tableName.length());
 
@@ -3819,10 +3821,10 @@ const std::wstring wxDb::SQLTableName(const wchar_t *tableName)
     std::wstring TableName;
 
     if (Dbms() == dbmsACCESS)
-        TableName = _T("\"");
+        TableName = L"\"";
     TableName += tableName;
     if (Dbms() == dbmsACCESS)
-        TableName += _T("\"");
+        TableName += L"\"";
 
     return TableName;
 }  // wxDb::SQLTableName()
@@ -3833,10 +3835,10 @@ const std::wstring wxDb::SQLColumnName(const wchar_t *colName)
     std::wstring ColName;
 
     if (Dbms() == dbmsACCESS)
-        ColName = _T("\"");
+        ColName = L"\"";
     ColName += colName;
     if (Dbms() == dbmsACCESS)
-        ColName += _T("\"");
+        ColName += L"\"";
 
     return ColName;
 }  // wxDb::SQLColumnName()
@@ -3984,11 +3986,11 @@ wxDBMS wxDb::Dbms(void)
                std::wcout << "Database connecting to: " << dbInf.dbmsName << std::endl;
 #endif  // DBDEBUG_CONSOLE
 
-    wxLogDebug(L"Database connecting to: ");
-    wxLogDebug(dbInf.dbmsName);
+    //wxLogDebug(L"Database connecting to: ");
+    //wxLogDebug(dbInf.dbmsName);
 
     wchar_t baseName[25+1];
-    wxStrncpy(baseName, dbInf.dbmsName, 25);
+    wcsncpy(baseName, dbInf.dbmsName, 25);
     baseName[25] = 0;
 
     // RGG 20001025 : add support for Interbase
@@ -4103,10 +4105,10 @@ bool wxDb::ModifyColumn(const std::wstring &tableName, const std::wstring &colum
     switch (Dbms())
     {
         case dbmsORACLE :
-            alterSlashModify = _T("MODIFY");
+            alterSlashModify = L"MODIFY";
             break;
         case dbmsMS_SQL_SERVER :
-            alterSlashModify = _T("ALTER COLUMN");
+            alterSlashModify = L"ALTER COLUMN";
             break;
         case dbmsUNIDENTIFIED :
             return false;
@@ -4118,7 +4120,7 @@ bool wxDb::ModifyColumn(const std::wstring &tableName, const std::wstring &colum
         case dbmsDBASE :
         case dbmsXBASE_SEQUITER :
         default :
-            alterSlashModify = _T("MODIFY");
+            alterSlashModify = L"MODIFY";
             break;
     }
 
@@ -4134,7 +4136,7 @@ bool wxDb::ModifyColumn(const std::wstring &tableName, const std::wstring &colum
 
     // For varchars only, append the size of the column
     if (dataType == DB_DATA_TYPE_VARCHAR &&
-        (Dbms() != dbmsMY_SQL || dataTypeName != _T("text")))
+        (Dbms() != dbmsMY_SQL || dataTypeName != L"text"))
     {
         std::wstring s;
 		s = (boost::wformat(L"(%lu)") % columnLength).str();
@@ -4400,7 +4402,7 @@ const wchar_t WXDLLIMPEXP_ODBC *wxDbLogExtendedErrorMsg(const wchar_t *userText,
     }
     msg += L"\n";
 
-    wxLogDebug(msg.c_str());
+    //wxLogDebug(msg.c_str());
 
     return msg.c_str();
 }  // wxDbLogExtendedErrorMsg()

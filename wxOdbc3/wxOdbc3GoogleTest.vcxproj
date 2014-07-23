@@ -53,12 +53,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WXODBC3_IMPORTS;WXUSINGDLL;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(SolutionDir)\3rdParty\wxWidgets\include\msvc;$(SolutionDir)\3rdParty\wxWidgets\include;$(Solutiondir)\3rdParty\googletest\include;$(SolutionDir)\EliCommon\include;$(ProjectDir)\wxOdbc3GoogleTest;$(ProjectDir)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(Solutiondir)\3rdParty\googletest\include;$(SolutionDir)\EliCommon\include;$(ProjectDir)\wxOdbc3GoogleTest;$(ProjectDir)\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\googletest\msvc\gtest-md\Debug;$(SolutionDir)\3rdParty\wxWidgets\lib\vc_dll;$(SolutionDir)\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\googletest\msvc\gtest-md\Debug;$(SolutionDir)\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtestd.lib;wxOdbc3.lib;EliCommonMin.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

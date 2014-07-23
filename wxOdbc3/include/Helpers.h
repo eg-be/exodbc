@@ -14,11 +14,12 @@
 // Other headers
 // System headers
 #include <string>
+#include <iostream>
 
 // Forward declarations
 // --------------------
 
-extern void exOnAssert(const wchar_t* file, int line, const char* function, const char* condition, const char* msg);
+extern void exOnAssert(const char* file, int line, const char* function, const char* condition, const char* msg);
 
 // Macros available for everybody
 // ----------------
@@ -31,7 +32,7 @@ extern void exOnAssert(const wchar_t* file, int line, const char* function, cons
 #define exASSERT_MSG(cond, msg)										\
 do {																\
 	if ( !(cond) )  {												\
-		exOnAssert(__TFILE__, __LINE__, __FUNCTION__,#cond,msg);	\
+		exOnAssert(__FILE__, __LINE__, __FUNCTION__,#cond,msg);	\
 		__debugbreak();												\
 	}                                                               \
 } while ( 0 )

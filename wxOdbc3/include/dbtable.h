@@ -22,11 +22,11 @@
 
 #include "wxOdbc3.h"
 
-#include "wx/defs.h"
+//#include "wx/defs.h"
 
 #include "db.h"
 
-#include "wx/variant.h"
+//#include "wx/variant.h"
 #include "dbkeyg.h"
 
 const int   wxDB_ROWID_LEN       = 24;  // 18 is the max, 24 is in case it gets larger
@@ -330,8 +330,8 @@ public:
     virtual     wxVariant    GetCol(const int colNumber) const { return GetColumn(colNumber); };
     virtual     void         SetCol(const int colNumber, const wxVariant value)  { return SetColumn(colNumber, value); };
 #endif
-    virtual     wxVariant    GetColumn(const int colNumber) const ;
-    virtual     void         SetColumn(const int colNumber, const wxVariant value);
+//    virtual     wxVariant    GetColumn(const int colNumber) const ;
+//    virtual     void         SetColumn(const int colNumber, const wxVariant value);
     virtual     GenericKey   GetKey(void);
     virtual     void         SetKey(const GenericKey &key);
 
