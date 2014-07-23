@@ -36,7 +36,6 @@
 #define EXPERIMENTAL_WXDB_FUNCTIONS 1
 
 #include "wx/defs.h"
-#include "wx/string.h"
 
 #if defined(__VISUALC__)
     // we need to include standard Windows headers but we can't include
@@ -322,9 +321,9 @@ class WXDLLIMPEXP_ODBC wxDbConnectInf
     public:
 
         wxDbConnectInf();
-        wxDbConnectInf(HENV henv, const std::wstring &dsn, const std::wstring &userID=wxEmptyString,
-                       const std::wstring &password=wxEmptyString, const std::wstring &defaultDir=wxEmptyString,
-                       const std::wstring &description=wxEmptyString, const std::wstring &fileType=wxEmptyString);
+        wxDbConnectInf(HENV henv, const std::wstring &dsn, const std::wstring &userID = std::wstring(),
+                       const std::wstring &password = std::wstring(), const std::wstring &defaultDir = std::wstring(),
+                       const std::wstring &description = std::wstring(), const std::wstring &fileType = std::wstring());
 
         ~wxDbConnectInf();
 
@@ -709,10 +708,10 @@ public:
 
     // tableName can refer to a table, view, alias or synonym
     bool         TableExists(const std::wstring &tableName, const wchar_t *userID=NULL,
-                             const std::wstring &tablePath=wxEmptyString);
+                             const std::wstring &tablePath = std::wstring());
     bool         TablePrivileges(const std::wstring &tableName, const std::wstring &priv,
                                  const wchar_t *userID=NULL, const wchar_t *schema=NULL,
-                                 const std::wstring &path=wxEmptyString);
+                                 const std::wstring &path = std::wstring());
 
     // These two functions return the table name or column name in a form ready
     // for use in SQL statements.  For example, if the datasource allows spaces
@@ -722,7 +721,7 @@ public:
     const std::wstring  SQLTableName(const wchar_t *tableName);
     const std::wstring  SQLColumnName(const wchar_t *colName);
 
-    void         LogError(const std::wstring &errMsg, const std::wstring &SQLState = wxEmptyString)
+    void         LogError(const std::wstring &errMsg, const std::wstring &SQLState = std::wstring())
                         { logError(errMsg, SQLState); }
     void         SetDebugErrorMessages(bool state) { silent = !state; }
     bool         SetSqlLogging(wxDbSqlLogState state, const std::wstring &filename = SQL_LOG_FILENAME,
@@ -734,7 +733,7 @@ public:
     wxDBMS       Dbms(void);
     bool         ModifyColumn(const std::wstring &tableName, const std::wstring &columnName,
                               int dataType, ULONG columnLength=0,
-                              const std::wstring &optionalParam=wxEmptyString);
+                              const std::wstring &optionalParam = std::wstring());
 
     bool         FwdOnlyCursors(void)  {return fwdOnlyCursors;}
 
