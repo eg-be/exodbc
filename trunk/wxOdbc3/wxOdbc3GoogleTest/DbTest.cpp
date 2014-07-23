@@ -16,6 +16,8 @@
 
 // Other headers
 #include "db.h"
+#include "boost/format.hpp"
+#include "boost/algorithm/string.hpp"
 
 // Static consts
 // -------------
@@ -100,7 +102,7 @@ namespace wxOdbc3Test
 		}
 		else
 		{
-			EXPECT_EQ(wxString(L"Unknown DSN name"), m_odbcInfo.m_dsn);
+			EXPECT_EQ(std::wstring(L"Unknown DSN name"), m_odbcInfo.m_dsn);
 		}
 	}
 
@@ -114,8 +116,7 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		wxString sqlstmt;
-		sqlstmt.Printf(L"DELETE FROM wxodbc3.chartypes_tmp WHERE idchartypes_tmp >= 0");
+		std::wstring sqlstmt = L"DELETE FROM wxodbc3.chartypes_tmp WHERE idchartypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
@@ -125,11 +126,11 @@ namespace wxOdbc3Test
 		RecordProperty("Ticket", 36);
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+			sqlstmt = (boost::wformat(L"INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
 		}
 		else
 		{
-			sqlstmt.Printf("INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+			sqlstmt = (boost::wformat(L"INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
 		}
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
@@ -137,8 +138,8 @@ namespace wxOdbc3Test
 		// And note the triming
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes_tmp ORDER BY idchartypes_tmp ASC"));
 		EXPECT_TRUE( pTable->GetNext());
-		EXPECT_EQ( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_varchar));
-		EXPECT_EQ( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_char).Trim());
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(pTable->m_varchar));
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(pTable->m_char)));
 		EXPECT_FALSE(pTable->GetNext());
 
 		delete pTable;
@@ -153,12 +154,11 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		wxString sqlstmt;
-		sqlstmt.Printf(L"DELETE FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp >= 0");
+		std::wstring sqlstmt = L"DELETE FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		sqlstmt.Printf("INSERT INTO wxodbc3.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (1, -3.141592, -3.141)");
+		sqlstmt = L"INSERT INTO wxodbc3.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (1, -3.141592, -3.141)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp = 1"));
@@ -167,7 +167,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( -3.141, pTable->m_float);
 		EXPECT_FALSE( pTable->GetNext() );
 
-		sqlstmt.Printf("INSERT INTO wxodbc3.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (2, 3.141592, 3.141)");
+		sqlstmt = L"INSERT INTO wxodbc3.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (2, 3.141592, 3.141)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp = 2"));
@@ -190,50 +190,50 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		wxString sqlstmt;
-		sqlstmt.Printf(L"DELETE FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp >= 0");
+		std::wstring sqlstmt;
+		sqlstmt = L"DELETE FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		sqlstmt.Printf("INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (1, -123456789012345678, -12345678.9012345678)");
+		sqlstmt = L"INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (1, -123456789012345678, -12345678.9012345678)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
+		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(pTable->m_wcdecimal_18_0));
 
 		RecordProperty("Ticket", 35);
 		if(m_pDb->Dbms() == dbmsDB2)
-			EXPECT_EQ( wxString(L"-12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 		else
-			EXPECT_EQ( wxString(L"-12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 
-		sqlstmt.Printf("INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (2, 123456789012345678, 12345678.9012345678)");
+		sqlstmt = L"INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (2, 123456789012345678, 12345678.9012345678)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L"123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
+		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(pTable->m_wcdecimal_18_0));
 
 		if(m_pDb->Dbms() == dbmsDB2)
-			EXPECT_EQ( wxString(L"12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"12345678,9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 		else
-			EXPECT_EQ( wxString(L"12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 
-		sqlstmt.Printf("INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (3, 0, 0.0000000000)");
+		sqlstmt = L"INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (3, 0, 0.0000000000)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L"0"), wxString(pTable->m_wcdecimal_18_0));
+		EXPECT_EQ( std::wstring(L"0"), std::wstring(pTable->m_wcdecimal_18_0));
 		
 		if(m_pDb->Dbms() == dbmsDB2)
-			EXPECT_EQ( wxString(L"0,0000000000"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
 		else
-			EXPECT_EQ( wxString(L"0.0000000000"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
 
 		delete pTable;
 	}
@@ -248,15 +248,15 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		wxString sqlstmt;
-		sqlstmt.Printf(L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0");
+		std::wstring sqlstmt;
+		sqlstmt = L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
 		EXPECT_FALSE( pTable->GetNext());
 
-		sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)");
+		sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
@@ -267,7 +267,7 @@ namespace wxOdbc3Test
 		EXPECT_EQ( -LLONG_MIN, pTable->m_bigInt);
 		EXPECT_FALSE( pTable->GetNext());
 
-		sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (2, 32767, 2147483647, 9223372036854775807)");
+		sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (2, 32767, 2147483647, 9223372036854775807)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
@@ -282,7 +282,7 @@ namespace wxOdbc3Test
 		RecordProperty("Ticket", 33);
 		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
-			sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (4, 0, 0, 0)");
+			sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (4, 0, 0, 0)";
 			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 			EXPECT_TRUE( m_pDb->CommitTrans() );
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp = 4"));
@@ -292,7 +292,7 @@ namespace wxOdbc3Test
 			EXPECT_EQ( 0, pTable->m_ubigInt);
 			EXPECT_FALSE( pTable->GetNext());
 
-			sqlstmt.Printf("INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (5, 65535, 4294967295, 18446744073709551615)");
+			sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (5, 65535, 4294967295, 18446744073709551615)";
 			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 			EXPECT_TRUE( m_pDb->CommitTrans() );
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp  WHERE idintegertypes_tmp = 5"));
@@ -301,7 +301,7 @@ namespace wxOdbc3Test
 			EXPECT_EQ( 4294967295, pTable->m_uint);
 			// With the 5.2 odbc driver ubigint seems to be wrong?
 			// TODO: This is ugly, use some kind of disabled test, or log a warning..
-			if(wxString(m_pDb->GetDriverVersion()) != wxString(L"05.02.0006"))
+			if(std::wstring(m_pDb->GetDriverVersion()) != std::wstring(L"05.02.0006"))
 			{
 				EXPECT_EQ( 18446744073709551615, pTable->m_ubigInt);
 			}
@@ -320,12 +320,12 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		wxString sqlstmt;
-		sqlstmt.Printf(L"DELETE FROM wxodbc3.datetypes_tmp WHERE iddatetypes_tmp >= 0");
+		std::wstring sqlstmt;
+		sqlstmt = L"DELETE FROM wxodbc3.datetypes_tmp WHERE iddatetypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		sqlstmt.Printf("INSERT INTO wxodbc3.datetypes_tmp (iddatetypes_tmp, tdate, ttime, ttimestamp) VALUES (1, '1983-01-26', '13:55:56', '1983-01-26 13:55:56')");
+		sqlstmt = L"INSERT INTO wxodbc3.datetypes_tmp (iddatetypes_tmp, tdate, ttime, ttimestamp) VALUES (1, '1983-01-26', '13:55:56', '1983-01-26 13:55:56')";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes_tmp WHERE iddatetypes_tmp = 1"));

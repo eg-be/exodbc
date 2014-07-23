@@ -72,7 +72,7 @@
         // Not available in v2.x of iODBC
         #ifndef __WXMSW__
           #if wxUSE_UNICODE
-          typedef wxChar SQLTCHAR;
+          typedef wchar_t SQLTCHAR;
           #else
           typedef UCHAR SQLTCHAR;
           #endif
@@ -103,7 +103,7 @@
 
 #ifdef __DIGITALMARS__
 #if wxUSE_UNICODE
-typedef wxChar SQLTCHAR;
+typedef wchar_t SQLTCHAR;
 #else
 typedef UCHAR SQLTCHAR;
 #endif
@@ -147,8 +147,8 @@ enum enumDummy {enumDum1};
 
 const int wxDB_PATH_MAX                 = 254;
 
-extern WXDLLIMPEXP_DATA_ODBC(wxChar const *) SQL_LOG_FILENAME;
-extern WXDLLIMPEXP_DATA_ODBC(wxChar const *) SQL_CATALOG_FILENAME;
+extern WXDLLIMPEXP_DATA_ODBC(wchar_t const *) SQL_LOG_FILENAME;
+extern WXDLLIMPEXP_DATA_ODBC(wchar_t const *) SQL_CATALOG_FILENAME;
 
 // Database Globals
 const int DB_TYPE_NAME_LEN            = 40;
@@ -308,23 +308,23 @@ class WXDLLIMPEXP_ODBC wxDbConnectInf
 
     public:
         HENV Henv;
-        wxChar Dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
-        wxChar Uid[SQL_MAX_USER_NAME_LEN+1];               // User ID
-        wxChar AuthStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)
-        wxChar ConnectionStr[SQL_MAX_CONNECTSTR_LEN+1];    // Connection string (password)
+        wchar_t Dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
+        wchar_t Uid[SQL_MAX_USER_NAME_LEN+1];               // User ID
+        wchar_t AuthStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)
+        wchar_t ConnectionStr[SQL_MAX_CONNECTSTR_LEN+1];    // Connection string (password)
 
-        wxString Description;                              // Not sure what the max length is
-        wxString FileType;                                 // Not sure what the max length is
+        std::wstring Description;                              // Not sure what the max length is
+        std::wstring FileType;                                 // Not sure what the max length is
 
         // Optionals needed for some databases like dBase
-        wxString DefaultDir;                               // Directory that db file resides in
+        std::wstring DefaultDir;                               // Directory that db file resides in
 
     public:
 
         wxDbConnectInf();
-        wxDbConnectInf(HENV henv, const wxString &dsn, const wxString &userID=wxEmptyString,
-                       const wxString &password=wxEmptyString, const wxString &defaultDir=wxEmptyString,
-                       const wxString &description=wxEmptyString, const wxString &fileType=wxEmptyString);
+        wxDbConnectInf(HENV henv, const std::wstring &dsn, const std::wstring &userID=wxEmptyString,
+                       const std::wstring &password=wxEmptyString, const std::wstring &defaultDir=wxEmptyString,
+                       const std::wstring &description=wxEmptyString, const std::wstring &fileType=wxEmptyString);
 
         ~wxDbConnectInf();
 
@@ -336,36 +336,36 @@ class WXDLLIMPEXP_ODBC wxDbConnectInf
         // Accessors
         const HENV       &GetHenv()          { return Henv; }
 
-        const wxChar    *GetDsn()           { return Dsn; }
+        const wchar_t    *GetDsn()           { return Dsn; }
 
-        const wxChar    *GetUid()           { return Uid; }
-        const wxChar    *GetUserID()        { return Uid; }
+        const wchar_t    *GetUid()           { return Uid; }
+        const wchar_t    *GetUserID()        { return Uid; }
 
-        const wxChar    *GetAuthStr()       { return AuthStr; }
-        const wxChar    *GetPassword()      { return AuthStr; }
+        const wchar_t    *GetAuthStr()       { return AuthStr; }
+        const wchar_t    *GetPassword()      { return AuthStr; }
 
-        const wxChar    *GetConnectionStr() { return ConnectionStr; }
+        const wchar_t    *GetConnectionStr() { return ConnectionStr; }
         bool             UseConnectionStr() { return useConnectionStr; }
 
-        const wxChar    *GetDescription()   { return Description; }
-        const wxChar    *GetFileType()      { return FileType; }
-        const wxChar    *GetDefaultDir()    { return DefaultDir; }
+        const wchar_t    *GetDescription()   { return Description.c_str(); }
+        const wchar_t    *GetFileType()      { return FileType.c_str(); }
+        const wchar_t    *GetDefaultDir()    { return DefaultDir.c_str(); }
 
         void             SetHenv(const HENV henv)               { Henv = henv; }
 
-        void             SetDsn(const wxString &dsn);
+        void             SetDsn(const std::wstring &dsn);
 
-        void             SetUserID(const wxString &userID);
-        void             SetUid(const wxString &uid)            { SetUserID(uid); }
+        void             SetUserID(const std::wstring &userID);
+        void             SetUid(const std::wstring &uid)            { SetUserID(uid); }
 
-        void             SetPassword(const wxString &password);
-        void             SetAuthStr(const wxString &authstr)    { SetPassword(authstr); }
+        void             SetPassword(const std::wstring &password);
+        void             SetAuthStr(const std::wstring &authstr)    { SetPassword(authstr); }
 
-        void             SetConnectionStr(const wxString &connectStr);
+        void             SetConnectionStr(const std::wstring &connectStr);
 
-        void             SetDescription(const wxString &desc)   { Description   = desc;     }
-        void             SetFileType(const wxString &fileType)  { FileType      = fileType; }
-        void             SetDefaultDir(const wxString &defDir)  { DefaultDir    = defDir;   }
+        void             SetDescription(const std::wstring &desc)   { Description   = desc;     }
+        void             SetFileType(const std::wstring &fileType)  { FileType      = fileType; }
+        void             SetDefaultDir(const std::wstring &defDir)  { DefaultDir    = defDir;   }
 
 		bool			SetSqlAttrOdbcVersion(int version);		
 		int				ReadSqlAttrOdbcVersion();
@@ -374,7 +374,7 @@ class WXDLLIMPEXP_ODBC wxDbConnectInf
 
 struct WXDLLIMPEXP_ODBC wxDbSqlTypeInfo
 {
-    wxString    TypeName;
+    std::wstring    TypeName;
     SWORD       FsqlType;
     long        Precision;
     short       CaseSensitive;
@@ -385,9 +385,9 @@ struct WXDLLIMPEXP_ODBC wxDbSqlTypeInfo
 class WXDLLIMPEXP_ODBC wxDbColFor
 {
 public:
-    wxString       s_Field;              // Formatted String for Output
-    wxString       s_Format[7];          // Formatted Objects - TIMESTAMP has the biggest (7)
-    wxString       s_Amount[7];          // Formatted Objects - amount of things that can be formatted
+    std::wstring       s_Field;              // Formatted String for Output
+    std::wstring       s_Format[7];          // Formatted Objects - TIMESTAMP has the biggest (7)
+    std::wstring       s_Amount[7];          // Formatted Objects - amount of things that can be formatted
     int            i_Amount[7];          // Formatted Objects - TT MM YYYY HH MM SS m
     int            i_Nation;             // 0 = timestamp , 1=EU, 2=UK, 3=International, 4=US
     int            i_dbDataType;         // conversion of the 'sqlDataType' to the generic data type used by these classes
@@ -404,24 +404,24 @@ public:
 class WXDLLIMPEXP_ODBC wxDbColInf
 {
 public:
-    wxChar       catalog[128+1];
-    wxChar       schema[128+1];
-    wxChar       tableName[DB_MAX_TABLE_NAME_LEN+1];
-    wxChar       colName[DB_MAX_COLUMN_NAME_LEN+1];
+    wchar_t       catalog[128+1];
+    wchar_t       schema[128+1];
+    wchar_t       tableName[DB_MAX_TABLE_NAME_LEN+1];
+    wchar_t       colName[DB_MAX_COLUMN_NAME_LEN+1];
     SWORD        sqlDataType;
-    wxChar       typeName[128+1];
+    wchar_t       typeName[128+1];
     SWORD        columnLength;
     SWORD        bufferSize;
     short        decimalDigits;
     short        numPrecRadix;
     short        nullable;
-    wxChar       remarks[254+1];
+    wchar_t       remarks[254+1];
     int          dbDataType;  // conversion of the 'sqlDataType' to the generic data type used by these classes
  // mj10777.19991224 : new
     int          PkCol;       // Primary key column       0=No; 1= First Key, 2 = Second Key etc.
-    wxChar       PkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Tables that use this PKey as a FKey
+    wchar_t       PkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Tables that use this PKey as a FKey
     int          FkCol;       // Foreign key column       0=No; 1= First Key, 2 = Second Key etc.
-    wxChar       FkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Foreign key table name
+    wchar_t       FkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Foreign key table name
     wxDbColFor  *pColFor;                              // How should this columns be formatted
 
     wxDbColInf();
@@ -434,9 +434,9 @@ public:
 class WXDLLIMPEXP_ODBC wxDbTableInf        // Description of a Table
 {
 public:
-    wxChar      tableName[DB_MAX_TABLE_NAME_LEN+1];
-    wxChar      tableType[254+1];           // "TABLE" or "SYSTEM TABLE" etc.
-    wxChar      tableRemarks[254+1];
+    wchar_t      tableName[DB_MAX_TABLE_NAME_LEN+1];
+    wchar_t      tableType[254+1];           // "TABLE" or "SYSTEM TABLE" etc.
+    wchar_t      tableRemarks[254+1];
     UWORD       numCols;                    // How many Columns does this Table have: GetColumnCount(..);
     wxDbColInf *pColInf;                    // pColInf = NULL ; User can later call GetColumns(..);
 
@@ -450,8 +450,8 @@ public:
 class WXDLLIMPEXP_ODBC wxDbInf     // Description of a Database
 {
 public:
-    wxChar        catalog[128+1];
-    wxChar        schema[128+1];
+    wchar_t        catalog[128+1];
+    wchar_t        schema[128+1];
     int           numTables;           // How many tables does this database have
     wxDbTableInf *pTableInf;           // pTableInf = new wxDbTableInf[numTables];
 
@@ -511,7 +511,7 @@ enum wxDBMS
 // will overwrite the errors of the previously destroyed wxDb object in
 // this variable.
 
-extern WXDLLIMPEXP_DATA_ODBC(wxChar)
+extern WXDLLIMPEXP_DATA_ODBC(wchar_t)
     DBerrorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN+1];
 
 
@@ -521,11 +521,11 @@ private:
     bool             dbIsOpen;
     bool             dbIsCached;      // Was connection created by caching functions
     bool             dbOpenedWithConnectionString;  // Was the database connection opened with a connection string
-    wxString         dsn;             // Data source name
-    wxString         uid;             // User ID
-    wxString         authStr;         // Authorization string (password)
-    wxString         inConnectionStr; // Connection string used to connect to the database
-    wxString         outConnectionStr;// Connection string returned by the database when a connection is successfully opened
+    std::wstring         dsn;             // Data source name
+    std::wstring         uid;             // User ID
+    std::wstring         authStr;         // Authorization string (password)
+    std::wstring         inConnectionStr; // Connection string used to connect to the database
+    std::wstring         outConnectionStr;// Connection string returned by the database when a connection is successfully opened
     FILE            *fpSqlLog;        // Sql Log file pointer
     wxDbSqlLogState  sqlLogState;     // On or Off
     bool             fwdOnlyCursors;
@@ -535,8 +535,8 @@ private:
     bool             getDbInfo(bool failOnDataTypeUnsupported=true);
     bool             getDataTypeInfo(SWORD fSqlType, wxDbSqlTypeInfo &structSQLTypeInfo);
     bool             setConnectionOptions(void);
-    void             logError(const wxString &errMsg, const wxString &SQLState);
-    const wxChar    *convertUserID(const wxChar *userID, wxString &UserID);
+    void             logError(const std::wstring &errMsg, const std::wstring &SQLState);
+    const wchar_t    *convertUserID(const wchar_t *userID, std::wstring &UserID);
     bool             determineDataTypes(bool failOnDataTypeUnsupported);
     void             initialize();
     bool             open(bool failOnDataTypeUnsupported=true);
@@ -592,17 +592,17 @@ public:
     // datasource when the datasource is first opened.
     struct
     {
-        wxChar dbmsName[40];                             // Name of the dbms product
-        wxChar dbmsVer[64];                              // Version # of the dbms product
-        wxChar driverName[40];                           // Driver name
-        wxChar odbcVer[60];                              // ODBC version of the driver
-        wxChar drvMgrOdbcVer[60];                        // ODBC version of the driver manager
-        wxChar driverVer[60];                            // Driver version
-        wxChar serverName[80];                           // Server Name, typically a connect string
-        wxChar databaseName[128];                        // Database filename
-        wxChar outerJoins[2];                            // Indicates whether the data source supports outer joins
-        wxChar procedureSupport[2];                      // Indicates whether the data source supports stored procedures
-        wxChar accessibleTables[2];                      // Indicates whether the data source only reports accessible tables in SQLTables.
+        wchar_t dbmsName[40];                             // Name of the dbms product
+        wchar_t dbmsVer[64];                              // Version # of the dbms product
+        wchar_t driverName[40];                           // Driver name
+        wchar_t odbcVer[60];                              // ODBC version of the driver
+        wchar_t drvMgrOdbcVer[60];                        // ODBC version of the driver manager
+        wchar_t driverVer[60];                            // Driver version
+        wchar_t serverName[80];                           // Server Name, typically a connect string
+        wchar_t databaseName[128];                        // Database filename
+        wchar_t outerJoins[2];                            // Indicates whether the data source supports outer joins
+        wchar_t procedureSupport[2];                      // Indicates whether the data source supports stored procedures
+        wchar_t accessibleTables[2];                      // Indicates whether the data source only reports accessible tables in SQLTables.
         UWORD  maxConnections;                           // Maximum # of connections the data source supports
         UWORD  maxStmts;                                 // Maximum # of HSTMTs per HDBC
         UWORD  apiConfLvl;                               // ODBC API conformance level
@@ -611,7 +611,7 @@ public:
         UWORD  cursorCommitBehavior;                     // Indicates how cursors are affected by a db commit
         UWORD  cursorRollbackBehavior;                   // Indicates how cursors are affected by a db rollback
         UWORD  supportNotNullClause;                     // Indicates if data source supports NOT NULL clause
-        wxChar supportIEF[2];                            // Integrity Enhancement Facility (Referential Integrity)
+        wchar_t supportIEF[2];                            // Integrity Enhancement Facility (Referential Integrity)
         UDWORD txnIsolation;                             // Default transaction isolation level supported by the driver
         UDWORD txnIsolationOptions;                      // Transaction isolation level options available
         UDWORD fetchDirections;                          // Fetch directions supported
@@ -631,13 +631,13 @@ public:
 #ifdef __VMS
    // The DECC compiler chokes when in db.cpp the array is accessed outside
    // its bounds. Maybe this change should also applied for other platforms.
-    wxChar errorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN+1];
+    wchar_t errorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN+1];
 #else
-    wxChar errorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN];
+    wchar_t errorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN];
 #endif
-    wxChar errorMsg[SQL_MAX_MESSAGE_LENGTH];
+    wchar_t errorMsg[SQL_MAX_MESSAGE_LENGTH];
     SQLINTEGER nativeError;
-    wxChar sqlState[20];
+    wchar_t sqlState[20];
 
 #if wxODBC_BACKWARD_COMPATABILITY
     // Information about logical data types VARCHAR, INTEGER, FLOAT and DATE.
@@ -658,10 +658,10 @@ public:
     ~wxDb();
 
     // Data Source Name, User ID, Password and whether open should fail on data type not supported
-    bool         Open(const wxString& inConnectStr, bool failOnDataTypeUnsupported=true);
+    bool         Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported=true);
                     ///This version of Open will open the odbc source selection dialog. Cast a wxWindow::GetHandle() to SQLHWND to use.
-    bool         Open(const wxString& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported=true);
-    bool         Open(const wxString &Dsn, const wxString &Uid, const wxString &AuthStr, bool failOnDataTypeUnsupported=true);
+    bool         Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported=true);
+    bool         Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wstring &AuthStr, bool failOnDataTypeUnsupported=true);
     bool         Open(wxDbConnectInf *dbConnectInf, bool failOnDataTypeUnsupported=true);
     bool         Open(wxDb *copyDb);  // pointer to a wxDb whose connection info should be copied rather than re-queried
     void         Close(void);
@@ -670,30 +670,30 @@ public:
     bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
     bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
     void         DispNextError(void);
-    bool         CreateView(const wxString &viewName, const wxString &colList, const wxString &pSqlStmt, bool attemptDrop=true);
-    bool         DropView(const wxString &viewName);
-    bool         ExecSql(const wxString &pSqlStmt);
-    bool         ExecSql(const wxString &pSqlStmt, wxDbColInf** columns, short& numcols);
+    bool         CreateView(const std::wstring &viewName, const std::wstring &colList, const std::wstring &pSqlStmt, bool attemptDrop=true);
+    bool         DropView(const std::wstring &viewName);
+    bool         ExecSql(const std::wstring &pSqlStmt);
+    bool         ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& numcols);
     bool         GetNext(void);
     bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR *cbReturned);
-    bool         Grant(int privileges, const wxString &tableName, const wxString &userList = wxT("PUBLIC"));
-    int          TranslateSqlState(const wxString &SQLState);
-    wxDbInf     *GetCatalog(const wxChar *userID=NULL);
-    bool         Catalog(const wxChar *userID=NULL, const wxString &fileName=SQL_CATALOG_FILENAME);
-    int          GetKeyFields(const wxString &tableName, wxDbColInf* colInf, UWORD noCols);
+    bool         Grant(int privileges, const std::wstring &tableName, const std::wstring &userList = wxT("PUBLIC"));
+    int          TranslateSqlState(const std::wstring &SQLState);
+    wxDbInf     *GetCatalog(const wchar_t *userID=NULL);
+    bool         Catalog(const wchar_t *userID=NULL, const std::wstring &fileName=SQL_CATALOG_FILENAME);
+    int          GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD noCols);
 
-    wxDbColInf  *GetColumns(wxChar *tableName[], const wxChar *userID=NULL);
-    wxDbColInf  *GetColumns(const wxString &tableName, UWORD *numCols, const wxChar *userID=NULL);
+    wxDbColInf  *GetColumns(wchar_t *tableName[], const wchar_t *userID=NULL);
+    wxDbColInf  *GetColumns(const std::wstring &tableName, UWORD *numCols, const wchar_t *userID=NULL);
 
-    int             GetColumnCount(const wxString &tableName, const wxChar *userID=NULL);
-    const wxChar   *GetDatabaseName(void)  {return dbInf.dbmsName;}
-	const wxChar   *GetDriverVersion(void) {return dbInf.driverVer;};
-    const wxString &GetDataSource(void)    {return dsn;}
-    const wxString &GetDatasourceName(void){return dsn;}
-    const wxString &GetUsername(void)      {return uid;}
-    const wxString &GetPassword(void)      {return authStr;}
-    const wxString &GetConnectionInStr(void)  {return inConnectionStr;}
-    const wxString &GetConnectionOutStr(void) {return outConnectionStr;}
+    int             GetColumnCount(const std::wstring &tableName, const wchar_t *userID=NULL);
+    const wchar_t   *GetDatabaseName(void)  {return dbInf.dbmsName;}
+	const wchar_t   *GetDriverVersion(void) {return dbInf.driverVer;};
+    const std::wstring &GetDataSource(void)    {return dsn;}
+    const std::wstring &GetDatasourceName(void){return dsn;}
+    const std::wstring &GetUsername(void)      {return uid;}
+    const std::wstring &GetPassword(void)      {return authStr;}
+    const std::wstring &GetConnectionInStr(void)  {return inConnectionStr;}
+    const std::wstring &GetConnectionOutStr(void) {return outConnectionStr;}
     bool            IsOpen(void)           {return dbIsOpen;}
     bool            OpenedWithConnectionString(void) {return dbOpenedWithConnectionString;}
     HENV            GetHENV(void)          {return henv;}
@@ -708,38 +708,38 @@ public:
     wxDbSqlTypeInfo GetTypeInfMemo()       {return typeInfMemo;}
 
     // tableName can refer to a table, view, alias or synonym
-    bool         TableExists(const wxString &tableName, const wxChar *userID=NULL,
-                             const wxString &tablePath=wxEmptyString);
-    bool         TablePrivileges(const wxString &tableName, const wxString &priv,
-                                 const wxChar *userID=NULL, const wxChar *schema=NULL,
-                                 const wxString &path=wxEmptyString);
+    bool         TableExists(const std::wstring &tableName, const wchar_t *userID=NULL,
+                             const std::wstring &tablePath=wxEmptyString);
+    bool         TablePrivileges(const std::wstring &tableName, const std::wstring &priv,
+                                 const wchar_t *userID=NULL, const wchar_t *schema=NULL,
+                                 const std::wstring &path=wxEmptyString);
 
     // These two functions return the table name or column name in a form ready
     // for use in SQL statements.  For example, if the datasource allows spaces
     // in the table name or column name, the returned string will have the
     // correct enclosing marks around the name to allow it to be properly
     // included in a SQL statement
-    const wxString  SQLTableName(const wxChar *tableName);
-    const wxString  SQLColumnName(const wxChar *colName);
+    const std::wstring  SQLTableName(const wchar_t *tableName);
+    const std::wstring  SQLColumnName(const wchar_t *colName);
 
-    void         LogError(const wxString &errMsg, const wxString &SQLState = wxEmptyString)
+    void         LogError(const std::wstring &errMsg, const std::wstring &SQLState = wxEmptyString)
                         { logError(errMsg, SQLState); }
     void         SetDebugErrorMessages(bool state) { silent = !state; }
-    bool         SetSqlLogging(wxDbSqlLogState state, const wxString &filename = SQL_LOG_FILENAME,
+    bool         SetSqlLogging(wxDbSqlLogState state, const std::wstring &filename = SQL_LOG_FILENAME,
                                bool append = false);
-    bool         WriteSqlLog(const wxString &logMsg);
+    bool         WriteSqlLog(const std::wstring &logMsg);
 
-	std::vector<wxString> GetErrorList() const;
+	std::vector<std::wstring> GetErrorList() const;
 
     wxDBMS       Dbms(void);
-    bool         ModifyColumn(const wxString &tableName, const wxString &columnName,
+    bool         ModifyColumn(const std::wstring &tableName, const std::wstring &columnName,
                               int dataType, ULONG columnLength=0,
-                              const wxString &optionalParam=wxEmptyString);
+                              const std::wstring &optionalParam=wxEmptyString);
 
     bool         FwdOnlyCursors(void)  {return fwdOnlyCursors;}
 
     // return the string with all special SQL characters escaped
-    wxString     EscapeSqlChars(const wxString& value);
+    std::wstring     EscapeSqlChars(const std::wstring& value);
 
     // These two functions are provided strictly for use by wxDbTable.
     // DO NOT USE THESE FUNCTIONS, OR MEMORY LEAKS MAY OCCUR
@@ -755,10 +755,10 @@ public:
 struct wxDbList
 {
     wxDbList *PtrPrev;       // Pointer to previous item in the list
-    wxString  Dsn;           // Data Source Name
-    wxString  Uid;           // User ID
-    wxString  AuthStr;       // Authorization string (password)
-    wxString  ConnectionStr; // Connection string used instead of DSN
+    std::wstring  Dsn;           // Data Source Name
+    std::wstring  Uid;           // User ID
+    std::wstring  AuthStr;       // Authorization string (password)
+    std::wstring  ConnectionStr; // Connection string used instead of DSN
     wxDb     *PtrDb;         // Pointer to the wxDb object
     bool      Free;          // Is item free or in use?
     wxDbList *PtrNext;       // Pointer to next item in the list
@@ -770,7 +770,7 @@ struct wxDbList
 class wxTablesInUse : public wxObject
 {
     public:
-        const wxChar  *tableName;
+        const wchar_t  *tableName;
         ULONG          tableID;
         class wxDb    *pDb;
 };  // wxTablesInUse
@@ -788,22 +788,22 @@ int   WXDLLIMPEXP_ODBC  wxDbConnectionsInUse(void);
 
 // Writes a message to the wxLog window (stdout usually) when an internal error
 // situation occurs.  This function only works in DEBUG builds
-const wxChar WXDLLIMPEXP_ODBC *
-wxDbLogExtendedErrorMsg(const wxChar *userText,
+const wchar_t WXDLLIMPEXP_ODBC *
+wxDbLogExtendedErrorMsg(const wchar_t *userText,
                         wxDb *pDb,
-                        const wxChar *ErrFile,
+                        const wchar_t *ErrFile,
                         int ErrLine);
 
 
 // This function sets the sql log state for all open wxDb objects
 bool WXDLLIMPEXP_ODBC
-wxDbSqlLog(wxDbSqlLogState state, const wxString &filename = SQL_LOG_FILENAME);
+wxDbSqlLog(wxDbSqlLogState state, const std::wstring &filename = SQL_LOG_FILENAME);
 
 
 #if 0
 // MSW/VC6 ONLY!!!  Experimental
-int WXDLLEXPORT wxDbCreateDataSource(const wxString &driverName, const wxString &dsn, const wxString &description=wxEmptyString,
-                                     bool sysDSN=false, const wxString &defDir=wxEmptyString, wxWindow *parent=NULL);
+int WXDLLEXPORT wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn, const std::wstring &description=wxEmptyString,
+                                     bool sysDSN=false, const std::wstring &defDir=wxEmptyString, wxWindow *parent=NULL);
 #endif
 
 // This routine allows you to query a driver manager
@@ -811,7 +811,7 @@ int WXDLLEXPORT wxDbCreateDataSource(const wxString &driverName, const wxString 
 // the first time using SQL_FETCH_FIRST.  Continue to call it
 // using SQL_FETCH_NEXT until you've exhausted the list.
 bool WXDLLIMPEXP_ODBC
-wxDbGetDataSource(HENV henv, wxChar *Dsn, SWORD DsnMaxLength, wxChar *DsDesc,
+wxDbGetDataSource(HENV henv, wchar_t *Dsn, SWORD DsnMaxLength, wchar_t *DsDesc,
                   SWORD DsDescMaxLength, UWORD direction = SQL_FETCH_NEXT);
 
 
@@ -849,7 +849,7 @@ bool  WXDLLIMPEXP_ODBC  FreeDbConnection(wxDB *pDb);
 void  WXDLLIMPEXP_ODBC  CloseDbConnections(void);
 int   WXDLLIMPEXP_ODBC  NumberDbConnectionsInUse(void);
 
-bool SqlLog(sqlLog state, const wxChar *filename = SQL_LOG_FILENAME);
+bool SqlLog(sqlLog state, const wchar_t *filename = SQL_LOG_FILENAME);
 
 bool WXDLLIMPEXP_ODBC
 GetDataSource(HENV henv, char *Dsn, SWORD DsnMaxLength, char *DsDesc, SWORD DsDescMaxLength,

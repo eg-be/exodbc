@@ -235,7 +235,7 @@ namespace wxOdbc3Test
 
 			// With the 5.2 odbc driver bigint seems to be wrong?
 			// TODO: This is ugly, use some kind of disabled test, or log a warning..
-			if(wxString(m_pDb->GetDriverVersion()) != wxString(L"05.02.0006"))
+			if(std::wstring(m_pDb->GetDriverVersion()) != std::wstring(L"05.02.0006"))
 			{
 				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 12"));
 				EXPECT_TRUE( pTable->GetNext() );
@@ -300,19 +300,19 @@ namespace wxOdbc3Test
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_varchar));
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(pTable->m_varchar));
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), wxString(pTable->m_char).Trim());
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(pTable->m_char)));
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L"הצüאיט"), wxString(pTable->m_varchar).Trim());
+		EXPECT_EQ( std::wstring(L"הצüאיט"), boost::trim_right_copy(std::wstring(pTable->m_varchar)));
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 4"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L"הצüאיט"), wxString(pTable->m_char).Trim());
+		EXPECT_EQ( std::wstring(L"הצüאיט"), boost::trim_right_copy(std::wstring(pTable->m_char)));
 
 		// Test for NULL-Values
 		EXPECT_FALSE( pTable->IsColNull(0) );
@@ -431,15 +431,15 @@ namespace wxOdbc3Test
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L"0"), wxString(pTable->m_wcdecimal_18_0));
+		EXPECT_EQ( std::wstring(L"0"), std::wstring(pTable->m_wcdecimal_18_0));
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L"123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
+		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(pTable->m_wcdecimal_18_0));
 	
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ( wxString(L"-123456789012345678"), wxString(pTable->m_wcdecimal_18_0));
+		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(pTable->m_wcdecimal_18_0));
 	
 		// DB2 sends a ',', mysql sends a '.' as delimeter
 		RecordProperty("Ticket", 35);
@@ -447,29 +447,29 @@ namespace wxOdbc3Test
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
 			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( wxString(L"0,0000000000"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
 
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 5"));
 			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( wxString(L"12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"12345678,9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 6"));
 			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( wxString(L"-12345678,9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 		}
 		else
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
 			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( wxString(L"0.0000000000"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
 
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 5"));
 			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( wxString(L"12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 6"));
 			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( wxString(L"-12345678.9012345678"), wxString(pTable->m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 		}
 	
 		// Test for NULL
@@ -556,20 +556,20 @@ namespace wxOdbc3Test
 			ASSERT_FALSE(true);
 		}
 
-		wxString sqlstmt;
-		sqlstmt.Printf(L"DELETE FROM wxodbc3.chartable WHERE idchartable >= 0");
+		std::wstring sqlstmt;
+		sqlstmt = L"DELETE FROM wxodbc3.chartable WHERE idchartable >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
 		// Select using '*' on complete table
-		sqlstmt.Printf("INSERT INTO wxodbc3.chartable (idchartable, col2, col3, col4) VALUES (1, 'r1_c2', 'r1_c3', 'r1_c4')");
+		sqlstmt = L"INSERT INTO wxodbc3.chartable (idchartable, col2, col3, col4) VALUES (1, 'r1_c2', 'r1_c3', 'r1_c4')";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ(wxString(L"r1_c2"), wxString(pTable->m_col2).Trim());
-		EXPECT_EQ(wxString(L"r1_c3"), wxString(pTable->m_col3).Trim());
-		EXPECT_EQ(wxString(L"r1_c4"), wxString(pTable->m_col4).Trim());
+		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(pTable->m_col2)));
+		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(pTable->m_col3)));
+		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(pTable->m_col4)));
 		EXPECT_FALSE( pTable->GetNext() );
 
 		// Select with fields on incomplete table
@@ -578,9 +578,9 @@ namespace wxOdbc3Test
 		pTable->m_col4[0] = 0;
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT idchartable, col2, col3, col4 FROM wxodbc3.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
-		EXPECT_EQ(wxString(L"r1_c2"), wxString(pTable->m_col2).Trim());
-		EXPECT_EQ(wxString(L"r1_c3"), wxString(pTable->m_col3).Trim());
-		EXPECT_EQ(wxString(L"r1_c4"), wxString(pTable->m_col4).Trim());
+		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(pTable->m_col2)));
+		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(pTable->m_col3)));
+		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(pTable->m_col4)));
 		EXPECT_FALSE( pTable->GetNext() );
 
 		// Now test by reading the incomplete table using '*': It works as we've still used the indexes "as in the db" when we've bound the columns
@@ -588,8 +588,8 @@ namespace wxOdbc3Test
 		pIncTable->m_col4[0] = 0;
 		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pIncTable->GetNext() );
-		EXPECT_EQ(wxString(L"r1_c2"), wxString(pIncTable->m_col2).Trim());
-		EXPECT_EQ(wxString(L"r1_c4"), wxString(pIncTable->m_col4).Trim());
+		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(pIncTable->m_col2)));
+		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(pIncTable->m_col4)));
 		EXPECT_FALSE( pIncTable->GetNext() );
 
 		// It does not work if you do not use the '*' to select, see ticket #15
@@ -598,8 +598,8 @@ namespace wxOdbc3Test
 		pIncTable->m_col4[0] = 0;
 		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT idchartable, col2, col4 FROM wxodbc3.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pIncTable->GetNext() );
-		//EXPECT_EQ(wxString(L"r1_c2"), wxString(pIncTable->m_col2).Trim());
-		//EXPECT_EQ(wxString(L"r1_c4"), wxString(pIncTable->m_col4).Trim());
+		//EXPECT_EQ(std::wstring(L"r1_c2"), std::wstring(pIncTable->m_col2).Trim());
+		//EXPECT_EQ(std::wstring(L"r1_c4"), std::wstring(pIncTable->m_col4).Trim());
 		EXPECT_FALSE( pIncTable->GetNext() );
 
 		// .. But reading using '*' or 'all fields' really works..
@@ -607,8 +607,8 @@ namespace wxOdbc3Test
 		pIncTable->m_col4[0] = 0;
 		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT  idchartable, col2, col3, col4 FROM wxodbc3.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pIncTable->GetNext() );
-		EXPECT_EQ(wxString(L"r1_c2"), wxString(pIncTable->m_col2).Trim());
-		EXPECT_EQ(wxString(L"r1_c4"), wxString(pIncTable->m_col4).Trim());
+		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(pIncTable->m_col2)));
+		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(pIncTable->m_col4)));
 		EXPECT_FALSE( pIncTable->GetNext() );
 
 		delete pTable;
