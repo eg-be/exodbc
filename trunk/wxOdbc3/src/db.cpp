@@ -2262,10 +2262,10 @@ bool wxDb::DropView(const std::wstring &viewName)
     {
         // Check for "Base table not found" error and ignore
         GetNextError(henv, hdbc, hstmt);
-        if (wxStrcmp(sqlState, L"S0002"))  // "Base table not found"
+        if (wcscmp(sqlState, L"S0002"))  // "Base table not found"
         {
             // Check for product specific error codes
-            if (!((Dbms() == dbmsSYBASE_ASA    && !wxStrcmp(sqlState, L"42000"))))  // 5.x (and lower?)
+            if (!((Dbms() == dbmsSYBASE_ASA    && !wcscmp(sqlState, L"42000"))))  // 5.x (and lower?)
             {
                 DispNextError();
                 DispAllErrors(henv, hdbc, hstmt);
@@ -2487,7 +2487,7 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
             GetData( 5, SQL_C_SSHORT, &iKeySeq,    0,                        &cb);
             //-------
             for (i=0;i<noCols;i++)                          // Find the Column name
-                if (!wxStrcmp(colInf[i].colName,szPkCol))   // We have found the Column
+                if (!wcscmp(colInf[i].colName,szPkCol))   // We have found the Column
                     colInf[i].PkCol = iKeySeq;              // Which Primary Key is this (first, second usw.) ?
         }  // if
     }  // while
@@ -2532,7 +2532,7 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
     {
         for (i=0; i<noCols; i++)
         {   // Find the Column name
-            if (!wxStrcmp(colInf[i].colName, szPkCol))           // We have found the Column, store the Information
+            if (!wcscmp(colInf[i].colName, szPkCol))           // We have found the Column, store the Information
             {
                 wxStrncpy(colInf[i].PkTableName, tempStr.c_str(), DB_MAX_TABLE_NAME_LEN);  // Name of the Tables where this Primary Key is used as a Foreign Key
                 colInf[i].PkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
@@ -2569,7 +2569,7 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
             //-------
             for (i=0; i<noCols; i++)                            // Find the Column name
             {
-                if (!wxStrcmp(colInf[i].colName,szFkCol))       // We have found the (Foreign Key) Column
+                if (!wcscmp(colInf[i].colName,szFkCol))       // We have found the (Foreign Key) Column
                 {
                     colInf[i].FkCol = iKeySeq;                  // Which Foreign Key is this (first, second usw.) ?
                     wxStrncpy(colInf[i].FkTableName, szFkTable, DB_MAX_TABLE_NAME_LEN);  // Name of the Table where this Foriegn is the Primary Key
@@ -2881,7 +2881,7 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, cons
                     {
                         std::wstring s = colInf[colNo].typeName;
 						boost::algorithm::to_lower(s);
-                        wxStrcmp(colInf[colNo].typeName, s.c_str());
+                        wcscmp(colInf[colNo].typeName, s.c_str());
                     }
 
                     // Determine the wxDb data type that is used to represent the native data type of this data source
@@ -3568,7 +3568,7 @@ bool wxDb::Catalog(const wchar_t *userID, const std::wstring &fileName)
         GetData(7,SQL_C_SLONG,   (UCHAR *)&precision,   0,                       &cb);
         GetData(8,SQL_C_SLONG,   (UCHAR *)&length,      0,                       &cb);
 
-        if (wxStrcmp(tblName, tblNameSave.c_str()))
+        if (wcscmp(tblName, tblNameSave.c_str()))
         {
             if (cnt)
 				fputws(L"\n", fp);
@@ -3791,14 +3791,14 @@ bool wxDb::TablePrivileges(const std::wstring &tableName, const std::wstring &pr
         }
 
 		if(boost::algorithm::iequals(UserID, result.grantee) &&
-            !wxStrcmp(result.privilege,priv))
+            !wcscmp(result.privilege, priv.c_str()))
         {
             SQLFreeStmt(hstmt, SQL_CLOSE);
             return true;
         }
 
-        if (!wxStrcmp(result.grantee,curRole) &&
-            !wxStrcmp(result.privilege,priv))
+        if (!wcscmp(result.grantee,curRole) &&
+            !wcscmp(result.privilege, priv.c_str()))
         {
             SQLFreeStmt(hstmt, SQL_CLOSE);
             return true;
@@ -4198,7 +4198,7 @@ wxDb WXDLLIMPEXP_ODBC *wxDbGetConnection(wxDbConnectInf *pDbConfig, bool FwdOnly
             if (pDbConfig->UseConnectionStr())
             {
                 if (pList->PtrDb->OpenedWithConnectionString() &&
-                     (!wxStrcmp(pDbConfig->GetConnectionStr(), pList->ConnectionStr)))
+                     (!wcscmp(pDbConfig->GetConnectionStr(), pList->ConnectionStr.c_str())))
                 {
                     // Found a free connection
                     pList->Free = false;
@@ -4208,7 +4208,7 @@ wxDb WXDLLIMPEXP_ODBC *wxDbGetConnection(wxDbConnectInf *pDbConfig, bool FwdOnly
             else
             {
                 if (!pList->PtrDb->OpenedWithConnectionString() &&
-                     (!wxStrcmp(pDbConfig->GetDsn(), pList->Dsn)))
+                     (!wcscmp(pDbConfig->GetDsn(), pList->Dsn.c_str())))
                 {
                     // Found a free connection
                     pList->Free = false;
@@ -4219,14 +4219,14 @@ wxDb WXDLLIMPEXP_ODBC *wxDbGetConnection(wxDbConnectInf *pDbConfig, bool FwdOnly
 
         if (pDbConfig->UseConnectionStr())
         {
-            if (!wxStrcmp(pDbConfig->GetConnectionStr(), pList->ConnectionStr))
+            if (!wcscmp(pDbConfig->GetConnectionStr(), pList->ConnectionStr.c_str()))
                 matchingDbConnection = pList->PtrDb;
         }
         else
         {
-            if (!wxStrcmp(pDbConfig->GetDsn(), pList->Dsn) &&
-                !wxStrcmp(pDbConfig->GetUserID(), pList->Uid) &&
-                !wxStrcmp(pDbConfig->GetPassword(), pList->AuthStr))
+            if (!wcscmp(pDbConfig->GetDsn(), pList->Dsn.c_str()) &&
+                !wcscmp(pDbConfig->GetUserID(), pList->Uid.c_str()) &&
+                !wcscmp(pDbConfig->GetPassword(), pList->AuthStr.c_str()))
                 matchingDbConnection = pList->PtrDb;
         }
     }
@@ -4390,7 +4390,7 @@ const wchar_t WXDLLIMPEXP_ODBC *wxDbLogExtendedErrorMsg(const wchar_t *userText,
         if (pDb->errorList[i])
         {
             msg.append(pDb->errorList[i]);
-            if (wxStrcmp(pDb->errorList[i], wxEmptyString) != 0)
+            if (wcscmp(pDb->errorList[i], wxEmptyString) != 0)
                 msg.append(L"\n");
             // Clear the errmsg buffer so the next error will not
             // end up showing the previous error that have occurred
