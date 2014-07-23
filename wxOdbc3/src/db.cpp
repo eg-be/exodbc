@@ -1541,7 +1541,7 @@ bool wxDb::getDbInfo(bool failOnDataTypeUnsupported)
     std::wcout << L"Login Timeout: "                << dbInf.loginTimeout << std::endl;
 
     std::wcout << std::endl << std::endl << L"more ..." << std::endl;
-    getchar();
+    // getchar();
 
     std::wcout << L"Default Transaction Isolation: ";
     switch(dbInf.txnIsolation)
