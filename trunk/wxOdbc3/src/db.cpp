@@ -3514,7 +3514,7 @@ bool wxDb::Catalog(const wchar_t *userID, const std::wstring &fileName)
     wchar_t    typeName[30+1];
     SDWORD    precision, length;
 
-    FILE *fp = wxFopen(fileName.c_str(), L"wt");
+    FILE *fp = _wfopen(fileName.c_str(), L"wt");
     if (fp == NULL)
         return false;
 
@@ -3571,24 +3571,24 @@ bool wxDb::Catalog(const wchar_t *userID, const std::wstring &fileName)
         if (wxStrcmp(tblName, tblNameSave.c_str()))
         {
             if (cnt)
-                wxFputs(wxT("\n"), fp);
-            wxFputs(wxT("================================ "), fp);
-            wxFputs(wxT("================================ "), fp);
-            wxFputs(wxT("===================== "), fp);
-            wxFputs(wxT("========= "), fp);
-            wxFputs(wxT("=========\n"), fp);
+				fputws(L"\n", fp);
+            fputws(L"================================ ", fp);
+            fputws(L"================================ ", fp);
+            fputws(L"===================== ", fp);
+            fputws(L"========= ", fp);
+            fputws(L"=========\n", fp);
 			outStr = (boost::wformat(L"%-32s %-32s %-21s %9s %9s\n") % L"TABLE NAME" % L"COLUMN NAME" % L"DATA TYPE" % L"PRECISION" % L"LENGTH").str();
-            wxFputs(outStr.c_str(), fp);
-            wxFputs(wxT("================================ "), fp);
-            wxFputs(wxT("================================ "), fp);
-            wxFputs(wxT("===================== "), fp);
-            wxFputs(wxT("========= "), fp);
-            wxFputs(wxT("=========\n"), fp);
+            fputws(outStr.c_str(), fp);
+            fputws(L"================================ ", fp);
+            fputws(L"================================ ", fp);
+            fputws(L"===================== ", fp);
+            fputws(L"========= ", fp);
+            fputws(L"=========\n", fp);
             tblNameSave = tblName;
         }
 
 		outStr = (boost::wformat(L"%-32s %-32s (%04d)%-15s %9ld %9ld\n") % tblName % colName % sqlDataType % typeName % precision % length).str();
-        if (wxFputs(outStr.c_str(), fp) == EOF)
+        if (fputws(outStr.c_str(), fp) == EOF)
         {
             SQLFreeStmt(hstmt, SQL_CLOSE);
             fclose(fp);
@@ -3745,7 +3745,7 @@ bool wxDb::TablePrivileges(const std::wstring &tableName, const std::wstring &pr
     }
 
 #ifdef DBDEBUG_CONSOLE
-    wxFprintf(stderr ,wxT("SQLTablePrivileges() returned %i \n"),retcode);
+	std::wcerr << L"SQLTablePrivileges() returned " << retcode << std::endl;
 #endif
 
     if ((retcode != SQL_SUCCESS) && (retcode != SQL_SUCCESS_WITH_INFO))
@@ -3781,9 +3781,7 @@ bool wxDb::TablePrivileges(const std::wstring &tableName, const std::wstring &pr
             return(DispAllErrors(henv, hdbc, hstmt));
         }
 #ifdef DBDEBUG_CONSOLE
-        wxFprintf(stderr,wxT("Scanning %s privilege on table %s.%s granted by %s to %s\n"),
-                result.privilege,result.tableOwner,result.tableName,
-                result.grantor, result.grantee);
+		std::wcerr << "Scanning " << result.privilege <<" privilege on table " << result.tableOwner << "." << result.tableName << " granted by " << result.grantor << " to " << result.grantee << std::endl;
 #endif
 
 		if(boost::algorithm::iequals(UserID, result.tableOwner))
@@ -3853,7 +3851,7 @@ bool wxDb::SetSqlLogging(wxDbSqlLogState state, const std::wstring &filename, bo
     {
         if (fpSqlLog == 0)
         {
-            fpSqlLog = wxFopen(filename.c_str(), (append ? wxT("at") : wxT("wt")));
+            fpSqlLog = _wfopen(filename.c_str(), (append ? L"at" : L"wt"));
             if (fpSqlLog == NULL)
                 return false;
         }
@@ -3882,11 +3880,11 @@ bool wxDb::WriteSqlLog(const std::wstring &logMsg)
     if (fpSqlLog == 0 || sqlLogState == sqlLogOFF)
         return false;
 
-    if (wxFputs(wxT("\n"),   fpSqlLog) == EOF)
+	if (fputws(L"\n", fpSqlLog) == EOF)
         return false;
-    if (wxFputs(logMsg, fpSqlLog) == EOF)
+	if (fputws(logMsg.c_str(), fpSqlLog) == EOF)
         return false;
-    if (wxFputs(wxT("\n"),   fpSqlLog) == EOF)
+	if (fputws(L"\n", fpSqlLog) == EOF)
         return false;
 
 
