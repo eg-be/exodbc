@@ -13,6 +13,9 @@
 
 // Same component headers
 // Other headers
+#include "boost/log/trivial.hpp"
+#include "boost/log/core.hpp"
+#include "boost/log/expressions.hpp"
 
 // Globals
 // -------
@@ -98,7 +101,18 @@ int _tmain(int argc, _TCHAR* argv[])
 	if(status != 0)
 		return status;
 	
-	return RUN_ALL_TESTS();
+	// Set a filter for the logging
+#ifndef _DEBUG
+	boost::log::core::get()->set_filter
+		(
+			boost::log::trivial::severity >= boost::log::trivial::warning
+		);
+#endif
+	int result = RUN_ALL_TESTS();
+	std::wcerr << L"Any key to exit";
+	getchar();
+	
+	return result;
 }
 
 // Interfaces
