@@ -58,7 +58,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\googletest\msvc\gtest-md\Debug;$(SolutionDir)\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib;$(SolutionDir)\3rdParty\googletest\msvc\gtest-md\Debug;$(SolutionDir)\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtestd.lib;wxOdbc3.lib;EliCommonMin.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

@@ -21,6 +21,7 @@
 
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
+#include "boost/log/trivial.hpp"
 #include <vector>
 
 
@@ -313,7 +314,7 @@ void wxDbTable::cleanup()
         {
             std::wstring msg;
 			msg = (boost::wformat(L"Unable to find the tableID in the vector\n of tables in use.\n\n%s") %s).str();
-            //wxLogDebug (msg, L"NOTICE...");
+			BOOST_LOG_TRIVIAL(debug) << msg;
         }
     }
 #endif
@@ -2255,7 +2256,6 @@ bool wxDbTable::SetColDefs(UWORD index, const std::wstring &fieldName, int dataT
     {
 		tmpStr = (boost::wformat(L"Specified column index (%d) exceeds the maximum number of columns (%d) registered for this table definition.  Column definition not added.") % index % m_numCols).str();
         exFAIL_MSG(tmpStr);
-        //wxLogDebug(tmpStr);
         return false;
     }
 
@@ -2269,7 +2269,6 @@ bool wxDbTable::SetColDefs(UWORD index, const std::wstring &fieldName, int dataT
 
 		tmpStr = (boost::wformat(L"Column name '%s' is too long. Truncated to '%s'.") %	fieldName % colDefs[index].ColName).str();
         exFAIL_MSG(tmpStr);
-        //wxLogDebug(tmpStr);
     }
     else
         wcscpy(colDefs[index].ColName, fieldName.c_str());

@@ -12,6 +12,8 @@
 
 // Same component headers
 // Other headers
+#include "boost/log/trivial.hpp"
+
 // System headers
 #include <string>
 #include <iostream>
@@ -47,6 +49,7 @@ do {																\
 // exFAIL must become something that will always trigger something, not depending on any flags
 #define exFAIL_MSG(msg)												\
 do {																\
+	BOOST_LOG_TRIVIAL(error) << msg;								\
 	std::wcerr << msg << std::endl;									\
 } while ( 0 )
 
