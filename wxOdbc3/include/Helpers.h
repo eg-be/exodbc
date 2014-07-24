@@ -50,7 +50,6 @@ do {																\
 #define exFAIL_MSG(msg)												\
 do {																\
 	BOOST_LOG_TRIVIAL(error) << msg;								\
-	std::wcerr << msg << std::endl;									\
 } while ( 0 )
 
 // Structs

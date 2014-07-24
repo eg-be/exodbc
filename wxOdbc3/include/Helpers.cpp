@@ -14,6 +14,7 @@
 // Same component headers
 // Other headers
 #include <iostream>
+#include <sstream>
 
 // Static consts
 // -------------
@@ -28,15 +29,17 @@
 // --------------
 void exOnAssert(const char* file, int line, const char* function, const char* condition, const char* msg)
 {
-	std::wcerr << L"ASSERTION failure!" << std::endl;
-	std::wcerr << L" File:      " << file << std::endl;
-	std::wcerr << L" Line:      " << line << std::endl;
-	std::wcerr << L" Function:  " << function << std::endl;
-	std::wcerr << L" Condition: " << condition << std::endl;
+	std::wstringstream ws;
+	ws 	<< L"ASSERTION failure!" << std::endl;
+	ws	<< L" File:      " << file << std::endl;
+	ws	<< L" Line:      " << line << std::endl;
+	ws	<< L" Function:  " << function << std::endl;
+	ws	<< L" Condition: " << condition << std::endl;
 	if(msg)
 	{
-		std::wcerr << L" Msg:       " << msg << std::endl;
+		ws << L" Msg:       " << msg << std::endl;
 	}
+	BOOST_LOG_TRIVIAL(error) << ws.str();
 }
 
 
