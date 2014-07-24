@@ -1085,13 +1085,9 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
     // Was a FROM clause specified to join tables to the base table?
     // Available for ::Query() only!!!
     bool appendFromClause = false;
-#if wxODBC_BACKWARD_COMPATABILITY
-    if (typeOfSelect == DB_SELECT_WHERE && from && wxStrlen(from))
-        appendFromClause = true;
-#else
+
     if (typeOfSelect == DB_SELECT_WHERE && from.length())
         appendFromClause = true;
-#endif
 
     // Add the column list
     int i;
@@ -1146,11 +1142,8 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
     switch(typeOfSelect)
     {
         case DB_SELECT_WHERE:
-#if wxODBC_BACKWARD_COMPATABILITY
-            if (where && wxStrlen(where))   // May not want a where clause!!!
-#else
+
             if (where.length())   // May not want a where clause!!!
-#endif
             {
                 pSqlStmt += L" WHERE ";
                 pSqlStmt += where;
@@ -1175,11 +1168,7 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
     }
 
     // Append the ORDER BY clause
-#if wxODBC_BACKWARD_COMPATABILITY
-    if (orderBy && wxStrlen(orderBy))
-#else
     if (orderBy.length())
-#endif
     {
         pSqlStmt += L" ORDER BY ";
         pSqlStmt += orderBy;
@@ -2472,19 +2461,11 @@ ULONG wxDbTable::Count(const std::wstring &args)
     sqlStmt += L") FROM ";
     sqlStmt += pDb->SQLTableName(queryTableName.c_str());
 //    sqlStmt += queryTableName;
-#if wxODBC_BACKWARD_COMPATABILITY
-    if (from && wxStrlen(from))
-#else
     if (from.length())
-#endif
         sqlStmt += from;
 
     // Add the where clause if one is provided
-#if wxODBC_BACKWARD_COMPATABILITY
-    if (where && wxStrlen(where))
-#else
     if (where.length())
-#endif
     {
         sqlStmt += L" WHERE ";
         sqlStmt += where;
@@ -2540,14 +2521,9 @@ bool wxDbTable::Refresh(void)
     // Switch to the internal cursor so any active cursors are not corrupted
     HSTMT currCursor = GetCursor();
     hstmt = hstmtInternal;
-#if wxODBC_BACKWARD_COMPATABILITY
-    // Save the where and order by clauses
-    wchar_t *saveWhere = where;
-    wchar_t *saveOrderBy = orderBy;
-#else
     std::wstring saveWhere = where;
     std::wstring saveOrderBy = orderBy;
-#endif
+
     // Build a where clause to refetch the record with.  Try and use the
     // ROWID if it's available, ow use the key fields.
     std::wstring whereClause;

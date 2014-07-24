@@ -4537,48 +4537,5 @@ bool wxDbGetDataSource(HENV henv, wchar_t *Dsn, SWORD DsnMaxLength, wchar_t *DsD
 }  // wxDbGetDataSource()
 
 
-// Change this to 0 to remove use of all deprecated functions
-#if wxODBC_BACKWARD_COMPATABILITY
-/********************************************************************
- ********************************************************************
- *
- * The following functions are all DEPRECATED and are included for
- * backward compatibility reasons only
- *
- ********************************************************************
- ********************************************************************/
-bool SqlLog(sqlLog state, const wchar_t *filename)
-{
-    return wxDbSqlLog((enum wxDbSqlLogState)state, filename);
-}
-/***** DEPRECATED: use wxGetDataSource() *****/
-bool GetDataSource(HENV henv, char *Dsn, SWORD DsnMax, char *DsDesc, SWORD DsDescMax,
-                         UWORD direction)
-{
-    return wxDbGetDataSource(henv, Dsn, DsnMax, DsDesc, DsDescMax, direction);
-}
-/***** DEPRECATED: use wxDbGetConnection() *****/
-wxDb WXDLLIMPEXP_ODBC *GetDbConnection(DbStuff *pDbStuff, bool FwdOnlyCursors)
-{
-    return wxDbGetConnection((wxDbConnectInf *)pDbStuff, FwdOnlyCursors);
-}
-/***** DEPRECATED: use wxDbFreeConnection() *****/
-bool WXDLLIMPEXP_ODBC FreeDbConnection(wxDb *pDb)
-{
-    return wxDbFreeConnection(pDb);
-}
-/***** DEPRECATED: use wxDbCloseConnections() *****/
-void WXDLLIMPEXP_ODBC CloseDbConnections(void)
-{
-    wxDbCloseConnections();
-}
-/***** DEPRECATED: use wxDbConnectionsInUse() *****/
-int WXDLLIMPEXP_ODBC NumberDbConnectionsInUse(void)
-{
-    return wxDbConnectionsInUse();
-}
-#endif
-
-
 //#endif
  // wxUSE_ODBC
