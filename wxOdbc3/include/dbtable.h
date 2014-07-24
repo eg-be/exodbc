@@ -148,14 +148,6 @@ public:
               const std::wstring &qryTblName=emptyString, bool qryOnly = !wxDB_QUERY_ONLY,
               const std::wstring &tblPath=emptyString);
 
-#if WXWIN_COMPATIBILITY_2_4
-    wxDEPRECATED(
-        wxDbTable(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
-                  const wchar_t *qryTblName, bool qryOnly,
-                  const std::wstring &tblPath)
-    );
-#endif // WXWIN_COMPATIBILITY_2_4
-
     virtual ~wxDbTable();
 
     bool            Open(bool checkPrivileges=false, bool checkTableExists=true);

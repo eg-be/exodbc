@@ -117,18 +117,6 @@ wxDbTable::wxDbTable(wxDb *pwxDb, const std::wstring &tblName, const UWORD numCo
 }  // wxDbTable::wxDbTable()
 
 
-/***** DEPRECATED: use wxDbTable::wxDbTable() format above *****/
-#if WXWIN_COMPATIBILITY_2_4
-wxDbTable::wxDbTable(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
-                    const wchar_t *qryTblName, bool qryOnly, const std::wstring &tblPath)
-{
-    std::wstring tempQryTblName;
-    tempQryTblName = qryTblName;
-    if (!initialize(pwxDb, tblName, numColumns, tempQryTblName, qryOnly, tblPath))
-        cleanup();
-}  // wxDbTable::wxDbTable()
-#endif // WXWIN_COMPATIBILITY_2_4
-
 
 /********** wxDbTable::~wxDbTable() **********/
 wxDbTable::~wxDbTable()
