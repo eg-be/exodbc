@@ -289,4 +289,4 @@ public:
 };  // wxDbTable
 
 
-#endif
+#endif // DBTABLE_DOT_H

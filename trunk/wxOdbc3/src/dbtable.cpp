@@ -17,7 +17,6 @@
 //    #pragma hdrstop
 //#endif
 
-//#if wxUSE_ODBC
 
 //#ifndef WX_PRECOMP
 //    #include "wx/object.h"
@@ -2915,5 +2914,3 @@ void wxDbTable::SetKey(const GenericKey& k)
     }
 }  // wxDbTable::SetKey()
 
-
-//#endif  // wxUSE_ODBC

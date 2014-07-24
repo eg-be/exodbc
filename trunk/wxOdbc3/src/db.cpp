@@ -27,8 +27,6 @@
 //    #pragma hdrstop
 //#endif
 
-//#if wxUSE_ODBC
-
 //#ifndef WX_PRECOMP
 //    #include "wx/object.h"
 //    #include "wx/list.h"
@@ -4536,6 +4534,3 @@ bool wxDbGetDataSource(HENV henv, wchar_t *Dsn, SWORD DsnMaxLength, wchar_t *DsD
 
 }  // wxDbGetDataSource()
 
-
-//#endif
- // wxUSE_ODBC
