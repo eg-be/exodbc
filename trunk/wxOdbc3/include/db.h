@@ -549,7 +549,6 @@ private:
     void             initialize();
     bool             open(bool failOnDataTypeUnsupported=true);
 
-#if !wxODBC_BACKWARD_COMPATABILITY
     // ODBC handles
     HENV  henv;        // ODBC Environment handle
     HDBC  hdbc;        // ODBC DB Connection handle
@@ -573,7 +572,6 @@ private:
     wxDbSqlTypeInfo typeInfDate;
     wxDbSqlTypeInfo typeInfBlob;
     wxDbSqlTypeInfo typeInfMemo;
-#endif
 
 public:
 
@@ -583,18 +581,6 @@ public:
     bool             GetDataTypeInfo(SWORD fSqlType, wxDbSqlTypeInfo &structSQLTypeInfo)
                             { return getDataTypeInfo(fSqlType, structSQLTypeInfo); }
 
-#if wxODBC_BACKWARD_COMPATABILITY
-    // ODBC handles
-    HENV  henv;        // ODBC Environment handle
-    HDBC  hdbc;        // ODBC DB Connection handle
-    HSTMT hstmt;       // ODBC Statement handle
-
-    //Error reporting mode
-    bool silent;
-
-    // Number of Ctable objects connected to this db object.  FOR INTERNAL USE ONLY!!!
-    unsigned int nTables;
-#endif
 
     // The following structure contains database information gathered from the
     // datasource when the datasource is first opened.
@@ -646,20 +632,6 @@ public:
     wchar_t errorMsg[SQL_MAX_MESSAGE_LENGTH];
     SQLINTEGER nativeError;
     wchar_t sqlState[20];
-
-#if wxODBC_BACKWARD_COMPATABILITY
-    // Information about logical data types VARCHAR, INTEGER, FLOAT and DATE.
-     //
-    // This information is obtained from the ODBC driver by use of the
-    // SQLGetTypeInfo() function.  The key piece of information is the
-    // type name the data source uses for each logical data type.
-    // e.g. VARCHAR; Oracle calls it VARCHAR2.
-    wxDbSqlTypeInfo typeInfVarchar;
-    wxDbSqlTypeInfo typeInfInteger;
-    wxDbSqlTypeInfo typeInfFloat;
-    wxDbSqlTypeInfo typeInfDate;
-    wxDbSqlTypeInfo typeInfBlob;
-#endif
 
     // Public member functions
     wxDb(const HENV &aHenv, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
@@ -822,48 +794,6 @@ bool WXDLLIMPEXP_ODBC
 wxDbGetDataSource(HENV henv, wchar_t *Dsn, SWORD DsnMaxLength, wchar_t *DsDesc,
                   SWORD DsDescMaxLength, UWORD direction = SQL_FETCH_NEXT);
 
-
-// Change this to 0 to remove use of all deprecated functions
-#if wxODBC_BACKWARD_COMPATABILITY
-//#################################################################################
-//############### DEPRECATED functions for backward compatibility #################
-//#################################################################################
-
-// Backward compability structures/classes.  This will eventually go away
-const int DB_PATH_MAX      = wxDB_PATH_MAX;
-
-typedef wxDb                 wxDB;
-typedef wxDbTableInf         wxTableInf;
-typedef wxDbColInf           wxColInf;
-typedef wxDbColInf           CcolInf;
-typedef wxDbColFor           wxColFor;
-typedef wxDbSqlTypeInfo      SqlTypeInfo;
-typedef wxDbSqlTypeInfo      wxSqlTypeInfo;
-typedef enum wxDbSqlLogState sqlLog;
-typedef enum wxDbSqlLogState wxSqlLogState;
-typedef enum wxDBMS          dbms;
-typedef enum wxDBMS          DBMS;
-typedef wxODBC_ERRORS        ODBC_ERRORS;
-typedef wxDbConnectInf       DbStuff;
-typedef wxDbList             DbList;
-#ifdef __WXDEBUG__
-typedef wxTablesInUse        CstructTablesInUse;
-#endif
-
-// Deprecated function names that are replaced by the function names listed above
-wxDB  WXDLLIMPEXP_ODBC
-*GetDbConnection(DbStuff *pDbStuff, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
-bool  WXDLLIMPEXP_ODBC  FreeDbConnection(wxDB *pDb);
-void  WXDLLIMPEXP_ODBC  CloseDbConnections(void);
-int   WXDLLIMPEXP_ODBC  NumberDbConnectionsInUse(void);
-
-bool SqlLog(sqlLog state, const wchar_t *filename = SQL_LOG_FILENAME);
-
-bool WXDLLIMPEXP_ODBC
-GetDataSource(HENV henv, char *Dsn, SWORD DsnMaxLength, char *DsDesc, SWORD DsDescMaxLength,
-              UWORD direction = SQL_FETCH_NEXT);
-
-#endif  // Deprecated structures/classes/functions
 
 #endif // _WX_DB_H_
 

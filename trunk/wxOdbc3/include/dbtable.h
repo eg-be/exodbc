@@ -110,8 +110,6 @@ private:
     bool        execUpdate(const std::wstring &pSqlStmt);
     bool        query(int queryType, bool forUpdate, bool distinct, const std::wstring &pSqlStmt=emptyString);
 
-#if !wxODBC_BACKWARD_COMPATABILITY
-// these were public
     // Where, Order By and From clauses
     std::wstring    where;               // Standard SQL where clause, minus the word WHERE
     std::wstring    orderBy;             // Standard SQL order by clause, minus the ORDER BY
@@ -143,41 +141,8 @@ private:
 
     // Column Definitions
     wxDbColDef *colDefs;         // Array of wxDbColDef structures
-#endif
+
 public:
-#if wxODBC_BACKWARD_COMPATABILITY
-    // Where, Order By and From clauses
-    char       *where;          // Standard SQL where clause, minus the word WHERE
-    char       *orderBy;        // Standard SQL order by clause, minus the ORDER BY
-    char       *from;           // Allows for joins in a wxDbTable::Query().  Format: ",tbl,tbl..."
-
-    // ODBC Handles
-    HENV        henv;           // ODBC Environment handle
-    HDBC        hdbc;           // ODBC DB Connection handle
-    HSTMT       hstmt;          // ODBC Statement handle
-    HSTMT      *hstmtDefault;   // Default cursor
-    HSTMT       hstmtInsert;    // ODBC Statement handle used specifically for inserts
-    HSTMT       hstmtDelete;    // ODBC Statement handle used specifically for deletes
-    HSTMT       hstmtUpdate;    // ODBC Statement handle used specifically for updates
-    HSTMT       hstmtInternal;  // ODBC Statement handle used internally only
-    HSTMT      *hstmtCount;     // ODBC Statement handle used by Count() function (No binding of columns)
-
-    // Flags
-    bool        selectForUpdate;
-
-    // Pointer to the database object this table belongs to
-    wxDb       *pDb;
-
-    // Table Inf.
-    char        tablePath[wxDB_PATH_MAX];                  // needed for dBase tables
-    char        tableName[DB_MAX_TABLE_NAME_LEN+1];        // Table name
-    char        queryTableName[DB_MAX_TABLE_NAME_LEN+1];   // Query Table Name
-    UWORD       m_numCols;                               // # of columns in the table
-    bool        queryOnly;                                 // Query Only, no inserts, updates or deletes
-
-    // Column Definitions
-    wxDbColDef *colDefs;         // Array of wxDbColDef structures
-#endif
     // Public member functions
     wxDbTable(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
               const std::wstring &qryTblName=emptyString, bool qryOnly = !wxDB_QUERY_ONLY,
@@ -217,11 +182,6 @@ public:
     const std::wstring &GetWhereClause()     { return where; }
 
     bool            IsQueryOnly()        { return queryOnly; }
-#if wxODBC_BACKWARD_COMPATABILITY
-    void            SetFromClause(const char *From) { from = (char *)From; }
-    void            SetOrderByClause(const char *OrderBy) { orderBy = (char *)OrderBy; }
-    void            SetWhereClause(const char *Where) { where = (char *)Where; }
-#else
     void            SetFromClause(const std::wstring &From) { from = From; }
     void            SetOrderByClause(const std::wstring &OrderBy) { orderBy = OrderBy; }
     bool            SetOrderByColNums(UWORD first, ...);
@@ -232,7 +192,7 @@ public:
     const std::wstring &Where()   { return where; }
     const std::wstring &OrderBy() { return orderBy; }
     const std::wstring &From()    { return from; }
-#endif
+
     int             Insert(void);
     bool            Update(void);
     bool            Update(const std::wstring &pSqlStmt);
@@ -270,22 +230,7 @@ public:
     void            BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere, const std::wstring &qualTableName=emptyString, bool useLikeComparison=false);
     void            BuildWhereClause(wchar_t *pWhereClause, int typeOfWhere, const std::wstring &qualTableName=emptyString, bool useLikeComparison=false);
 
-#if wxODBC_BACKWARD_COMPATABILITY
-// The following member functions are deprecated.  You should use the BuildXxxxxStmt functions (above)
-    void            GetSelectStmt(char *pSqlStmt, int typeOfSelect, bool distinct)
-                           { BuildSelectStmt(pSqlStmt,typeOfSelect,distinct); }
-    void            GetDeleteStmt(char *pSqlStmt, int typeOfDel, const char *pWhereClause = NULL)
-                           { BuildDeleteStmt(pSqlStmt,typeOfDel,pWhereClause); }
-    void            GetUpdateStmt(char *pSqlStmt, int typeOfUpdate, const char *pWhereClause = NULL)
-                           { BuildUpdateStmt(pSqlStmt,typeOfUpdate,pWhereClause); }
-    void            GetWhereClause(char *pWhereClause, int typeOfWhere,
-                                   const char *qualTableName = NULL, bool useLikeComparison=false)
-                           { BuildWhereClause(pWhereClause,typeOfWhere,qualTableName,useLikeComparison); }
-#endif
     bool            CanSelectForUpdate(void);
-#if wxODBC_BACKWARD_COMPATABILITY
-    bool            CanUpdByROWID(void) { return CanUpdateByRowID(); };
-#endif
     bool            CanUpdateByROWID(void);
     void            ClearMemberVar(UWORD colNumber, bool setToNull=false);
     void            ClearMemberVars(bool setToNull=false);
@@ -303,10 +248,6 @@ public:
     void            SetCursor(HSTMT *hstmtActivate = (void **) wxDB_DEFAULT_CURSOR);
     HSTMT           GetCursor(void) { return(hstmt); }
     HSTMT          *GetNewCursor(bool setCursor = false, bool bindColumns = true);
-#if wxODBC_BACKWARD_COMPATABILITY
-// The following member function is deprecated.  You should use the GetNewCursor
-    HSTMT          *NewCursor(bool setCursor = false, bool bindColumns = true) {  return GetNewCursor(setCursor,bindColumns); }
-#endif
 
     ULONG           Count(const std::wstring &args = L"*");
     int             DB_STATUS(void) { return(pDb->DB_STATUS); }
@@ -314,11 +255,7 @@ public:
     bool            IsColNull(UWORD colNumber) const;
     bool            SetColNull(UWORD colNumber, bool set=true);
     bool            SetColNull(const std::wstring &colName, bool set=true);
-#if wxODBC_BACKWARD_COMPATABILITY
-// The following member functions are deprecated.  You should use the SetColNull()
-    bool            SetNull(int colNumber, bool set=true) { return (SetNull(colNumber,set)); }
-    bool            SetNull(const char *colName, bool set=true) { return (SetNull(colName,set)); }
-#endif
+
 #ifdef __WXDEBUG__
     ULONG           GetTableID() { return tableID; }
 #endif
@@ -326,10 +263,6 @@ public:
 //TODO: Need to Document
     typedef     enum  { WX_ROW_MODE_QUERY , WX_ROW_MODE_INDIVIDUAL } rowmode_t;
     virtual     void         SetRowMode(const rowmode_t rowmode);
-#if wxODBC_BACKWARD_COMPATABILITY
-    virtual     wxVariant    GetCol(const int colNumber) const { return GetColumn(colNumber); };
-    virtual     void         SetCol(const int colNumber, const wxVariant value)  { return SetColumn(colNumber, value); };
-#endif
 //    virtual     wxVariant    GetColumn(const int colNumber) const ;
 //    virtual     void         SetColumn(const int colNumber, const wxVariant value);
     virtual     GenericKey   GetKey(void);
@@ -355,26 +288,5 @@ public:
 //TODO: Need to Document
 };  // wxDbTable
 
-
-// Change this to 0 to remove use of all deprecated functions
-#if wxODBC_BACKWARD_COMPATABILITY
-//#################################################################################
-//############### DEPRECATED functions for backward compatibility #################
-//#################################################################################
-
-// Backward compability.  These will eventually go away
-typedef wxDbTable       wxTable;
-typedef wxDbIdxDef      wxIdxDef;
-typedef wxDbIdxDef      CidxDef;
-typedef wxDbColDef      wxColDef;
-typedef wxDbColDef      CcolDef;
-typedef wxDbColDataPtr  wxColDataPtr;
-typedef wxDbColDataPtr  CcolDataPtr;
-
-const int   ROWID           = wxDB_ROWID_LEN;
-const int   DEFAULT_CURSOR  = wxDB_DEFAULT_CURSOR;
-const bool  QUERY_ONLY      = wxDB_QUERY_ONLY;
-const bool  DISABLE_VIEW    = wxDB_DISABLE_VIEW;
-#endif
 
 #endif
