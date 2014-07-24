@@ -54,6 +54,7 @@
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
 #include <sstream>
+#include <vector>
 
 #include "db.h"
 #include "Helpers.h"
@@ -68,9 +69,10 @@ wchar_t const *SQL_LOG_FILENAME         = L"sqllog.txt";
 wchar_t const *SQL_CATALOG_FILENAME     = L"catalog.txt";
 
 #ifdef __WXDEBUG__
-    #include "wx/thread.h"
+//    #include "wx/thread.h"
 
-    extern wxList TablesInUse;
+//    extern wxList TablesInUse;
+	extern std::vector<wxTablesInUse*> TablesInUse;
 #if wxUSE_THREADS
     extern wxCriticalSection csTablesInUse;
 #endif // wxUSE_THREADS
@@ -1800,19 +1802,21 @@ void wxDb::Close(void)
         wxCriticalSectionLocker lock(csTablesInUse);
 #endif // wxUSE_THREADS
         wxTablesInUse *tiu;
-        wxList::compatibility_iterator pNode;
-        pNode = TablesInUse.GetFirst();
+		std::vector<wxTablesInUse*>::const_iterator it = TablesInUse.begin();
+        //wxList::compatibility_iterator pNode;
+        //pNode = TablesInUse.GetFirst();
         std::wstring s,s2;
-        while (pNode)
+        while (it != TablesInUse.end())
         {
-            tiu = (wxTablesInUse *)pNode->GetData();
+            tiu = *it;;
             if (tiu->pDb == this)
             {
 				s = (boost::wformat(L"(%-20s)     tableID:[%6lu]     pDb:[%p]") % tiu->tableName % tiu->tableID % static_cast<void*>(tiu->pDb)).str();
 				s2 = (boost::wformat(L"Orphaned table found using pDb:[%p]") % static_cast<void*>(this)).str();
-                wxLogDebug(s.c_str(),s2.c_str());
+                //wxLogDebug(s.c_str(),s2.c_str());
             }
-            pNode = pNode->GetNext();
+			it++;
+            //pNode = pNode->GetNext();
         }
     }
 #endif
