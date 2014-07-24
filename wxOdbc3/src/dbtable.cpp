@@ -26,20 +26,12 @@
 //    #include "wx/log.h"
 //#endif
 
-#ifdef DBDEBUG_CONSOLE
-#if wxUSE_IOSTREAMH
-    #include <iostream.h>
-#else
-    #include <iostream>
-#endif
-    #include "wx/ioswrap.h"
-#endif
-
 //#include "wx/filefn.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 
 #include "dbtable.h"
 #include "Helpers.h"

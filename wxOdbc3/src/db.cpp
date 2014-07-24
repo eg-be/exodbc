@@ -37,7 +37,7 @@
 //#endif
 
 #ifdef DBDEBUG_CONSOLE
-    #include "wx/ioswrap.h"
+//    #include "wx/ioswrap.h"
 #endif
 
 //#include "wx/filefn.h"
