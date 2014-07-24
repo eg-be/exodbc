@@ -111,7 +111,7 @@
 
 //#ifdef __DIGITALMARS__
 //#if wxUSE_UNICODE
-typedef wchar_t SQLTCHAR;
+//typedef wchar_t SQLTCHAR;
 //#else
 //typedef UCHAR SQLTCHAR;
 //#endif
