@@ -29,6 +29,8 @@
 
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
+#include "boost/log/trivial.hpp"
+
 #include <sstream>
 #include <vector>
 
@@ -161,7 +163,7 @@ bool wxDbConnectInf::AllocHenv()
 
     if (SQLAllocEnv(&Henv) != SQL_SUCCESS)
     {
-        // wxLogDebug(L"A problem occurred while trying to get a connection to the data source");
+		BOOST_LOG_TRIVIAL(debug) << L"A problem occurred while trying to get a connection to the data source";
         return false;
     }
 
@@ -1515,7 +1517,7 @@ bool wxDb::getDbInfo(bool failOnDataTypeUnsupported)
     std::wcout << L"Login Timeout: "                << dbInf.loginTimeout << std::endl;
 
     std::wcout << std::endl << std::endl << L"more ..." << std::endl;
-    // getchar();
+    getchar();
 
     std::wcout << L"Default Transaction Isolation: ";
     switch(dbInf.txnIsolation)
@@ -1775,15 +1777,15 @@ void wxDb::Close(void)
 		std::vector<wxTablesInUse*>::const_iterator it = TablesInUse.begin();
         //wxList::compatibility_iterator pNode;
         //pNode = TablesInUse.GetFirst();
-        std::wstring s,s2;
+        std::wstring s1, s2;
         while (it != TablesInUse.end())
         {
             tiu = *it;;
             if (tiu->pDb == this)
             {
-				s = (boost::wformat(L"(%-20s)     tableID:[%6lu]     pDb:[%p]") % tiu->tableName % tiu->tableID % static_cast<void*>(tiu->pDb)).str();
+				s1 = (boost::wformat(L"(%-20s)     tableID:[%6lu]     pDb:[%p]") % tiu->tableName % tiu->tableID % static_cast<void*>(tiu->pDb)).str();
 				s2 = (boost::wformat(L"Orphaned table found using pDb:[%p]") % static_cast<void*>(this)).str();
-                //wxLogDebug(s.c_str(),s2.c_str());
+				BOOST_LOG_TRIVIAL(debug) << s1 << s2;
             }
 			it++;
             //pNode = pNode->GetNext();
@@ -1864,7 +1866,7 @@ bool wxDb::DispAllErrors(HENV aHenv, HDBC aHdbc, HSTMT aHstmt)
 #endif
 
 #ifdef __WXDEBUG__
-            //wxLogDebug(odbcErrMsg, L"ODBC DEBUG MESSAGE from DispAllErrors()");
+			BOOST_LOG_TRIVIAL(debug) <<  L"ODBC DEBUG MESSAGE from DispAllErrors(): " << odbcErrMsg;
 #endif
         }
     }
@@ -1904,7 +1906,7 @@ void wxDb::DispNextError(void)
 #endif
 
 #ifdef __WXDEBUG__
-    //wxLogDebug(odbcErrMsg, L"ODBC DEBUG MESSAGE");
+	BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << odbcErrMsg;
 #endif  // __WXDEBUG__
 
 } // wxDb::DispNextError()
@@ -2370,7 +2372,7 @@ bool wxDb::ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& nu
             default:
                 std::wstring errMsg;
 				errMsg = (boost::wformat(L"SQL Data type %ld currently not supported by wxWidgets") % (long)Sqllen).str();
-                //wxLogDebug(errMsg, L"ODBC DEBUG MESSAGE");
+				BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << errMsg;
 #endif
         }
     }
@@ -3159,7 +3161,7 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
                         default:
                             std::wstring errMsg;
                             errMsg.Printf(L"SQL Data type %d currently not supported by wxWidgets", colInf[colNo].sqlDataType);
-                            wxLogDebug(errMsg, L"ODBC DEBUG MESSAGE");
+							BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << errMsg;
 #endif
                     }
                     colNo++;
@@ -3958,8 +3960,7 @@ wxDBMS wxDb::Dbms(void)
                std::wcout << "Database connecting to: " << dbInf.dbmsName << std::endl;
 #endif  // DBDEBUG_CONSOLE
 
-    //wxLogDebug(L"Database connecting to: ");
-    //wxLogDebug(dbInf.dbmsName);
+	BOOST_LOG_TRIVIAL(debug) << L"Database connecting to: " << dbInf.dbmsName;
 
     wchar_t baseName[25+1];
     wcsncpy(baseName, dbInf.dbmsName, 25);
@@ -4374,7 +4375,7 @@ const wchar_t WXDLLIMPEXP_ODBC *wxDbLogExtendedErrorMsg(const wchar_t *userText,
     }
     msg += L"\n";
 
-    //wxLogDebug(msg.c_str());
+	BOOST_LOG_TRIVIAL(debug) << msg;
 
     return msg.c_str();
 }  // wxDbLogExtendedErrorMsg()
@@ -4463,7 +4464,7 @@ int wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn
 #endif  // DBDEBUG_CONSOLE
 
 #ifdef __WXDEBUG__
-               wxLogDebug(errMsg, L"ODBC DEBUG MESSAGE");
+			   BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << errMsg;
 #endif  // __WXDEBUG__
         }
     }
@@ -4473,7 +4474,7 @@ int wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn
     // Using iODBC/unixODBC or some other compiler which does not support the APIs
     // necessary to use this function, so this function is not supported
 #ifdef __WXDEBUG__
-    wxLogDebug(L"wxDbCreateDataSource() not available except under VC++/MSW", L"ODBC DEBUG MESSAGE");
+	BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << L"wxDbCreateDataSource() not available except under VC++/MSW";
 #endif
     result = FALSE;
 #endif  // __VISUALC__
