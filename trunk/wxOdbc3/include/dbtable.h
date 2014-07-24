@@ -22,11 +22,8 @@
 
 #include "wxOdbc3.h"
 
-//#include "wx/defs.h"
-
 #include "db.h"
 
-//#include "wx/variant.h"
 #include "dbkeyg.h"
 
 const int   wxDB_ROWID_LEN       = 24;  // 18 is the max, 24 is in case it gets larger

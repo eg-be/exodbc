@@ -11,23 +11,6 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-//#include  "wx/wxprec.h"
-
-//#ifdef __BORLANDC__
-//    #pragma hdrstop
-//#endif
-
-
-//#ifndef WX_PRECOMP
-//    #include "wx/object.h"
-//    #include "wx/list.h"
-//    #include "wx/string.h"
-//    #include "wx/utils.h"
-//    #include "wx/log.h"
-//#endif
-
-//#include "wx/filefn.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,23 +23,12 @@
 #include "boost/format.hpp"
 #include <vector>
 
-#ifdef __UNIX__
-// The HPUX preprocessor lines below were commented out on 8/20/97
-// because macros.h currently redefines DEBUG and is unneeded.
-// #  ifdef HPUX
-// #    include <macros.h>
-// #  endif
-#  ifdef LINUX
-#    include <sys/minmax.h>
-#  endif
-#endif
 
 ULONG lastTableID = 0;
 
 
 #ifdef __WXDEBUG__
 //    #include "wx/thread.h"
-
 //    wxList TablesInUse;
 	std::vector<wxTablesInUse*> TablesInUse;
 #if wxUSE_THREADS
