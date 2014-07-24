@@ -42,7 +42,7 @@
 #include "sql.h"
 #include "sqlext.h"
 
-/* There are too many false positivies for this one, particularly when using templates like wxVector<T> */
+/* There are too many false positives for this one, particularly when using templates like wxVector<T> */
 /* class 'foo' needs to have dll-interface to be used by clients of class 'bar'" */
 #pragma warning(disable:4251)
 
@@ -774,8 +774,8 @@ struct wxDbList
 
 
 #ifdef __WXDEBUG__
-#include "wx/object.h"
-class wxTablesInUse : public wxObject
+//#include "wx/object.h"
+struct wxTablesInUse
 {
     public:
         const wchar_t  *tableName;

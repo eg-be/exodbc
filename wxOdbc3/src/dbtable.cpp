@@ -47,6 +47,7 @@
 
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
+#include <vector>
 
 #ifdef __UNIX__
 // The HPUX preprocessor lines below were commented out on 8/20/97
@@ -63,9 +64,10 @@ ULONG lastTableID = 0;
 
 
 #ifdef __WXDEBUG__
-    #include "wx/thread.h"
+//    #include "wx/thread.h"
 
-    wxList TablesInUse;
+//    wxList TablesInUse;
+	std::vector<wxTablesInUse*> TablesInUse;
 #if wxUSE_THREADS
     wxCriticalSection csTablesInUse;
 #endif // wxUSE_THREADS
@@ -207,7 +209,7 @@ bool wxDbTable::initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD
 #if wxUSE_THREADS
         wxCriticalSectionLocker lock(csTablesInUse);
 #endif // wxUSE_THREADS
-        TablesInUse.Append(tableInUse);
+        TablesInUse.push_back(tableInUse);
     }
 #endif
 
@@ -332,28 +334,34 @@ void wxDbTable::cleanup()
     {
         bool found = false;
 
-        wxList::compatibility_iterator pNode;
+        //wxList::compatibility_iterator pNode;
+		std::vector<wxTablesInUse*>::iterator it = TablesInUse.begin();
         {
 #if wxUSE_THREADS
             wxCriticalSectionLocker lock(csTablesInUse);
 #endif // wxUSE_THREADS
-            pNode = TablesInUse.GetFirst();
-            while (!found && pNode)
+            // pNode = TablesInUse.GetFirst();
+            while (!found && it != TablesInUse.end())
             {
-                if (((wxTablesInUse *)pNode->GetData())->tableID == tableID)
+				wxTablesInUse* pNode = *it;
+				if(pNode->tableID == tableID)
+//                if (((wxTablesInUse *)pNode->GetData())->tableID == tableID)
                 {
                     found = true;
-                    delete (wxTablesInUse *)pNode->GetData();
-                    TablesInUse.Erase(pNode);
+					TablesInUse.erase(it);
+					delete pNode;
+                    //delete (wxTablesInUse *)pNode->GetData();
+                    //TablesInUse.Erase(pNode);
                 }
                 else
-                    pNode = pNode->GetNext();
+					it++;
+                    //pNode = pNode->GetNext();
             }
         }
         if (!found)
         {
             std::wstring msg;
-			msg = (boost::wformat(L"Unable to find the tableID in the linked\nlist of tables in use.\n\n%s") %s).str();
+			msg = (boost::wformat(L"Unable to find the tableID in the vector\n of tables in use.\n\n%s") %s).str();
             //wxLogDebug (msg, L"NOTICE...");
         }
     }
