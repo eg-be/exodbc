@@ -21,28 +21,6 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-//#include "wx/wxprec.h"
-
-//#ifdef __BORLANDC__
-//    #pragma hdrstop
-//#endif
-
-//#ifndef WX_PRECOMP
-//    #include "wx/object.h"
-//    #include "wx/list.h"
-//    #include "wx/string.h"
-//    #include "wx/utils.h"
-//    #include "wx/log.h"
-//    #include "wx/app.h"
-//#endif
-
-#ifdef DBDEBUG_CONSOLE
-//    #include "wx/ioswrap.h"
-#endif
-
-//#include "wx/filefn.h"
-//#include "wx/wxchar.h"
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -58,9 +36,6 @@
 #include "Helpers.h"
 
 
-// DLL options compatibility check:
-//WX_CHECK_BUILD_OPTIONS("wxODBC")
-
 WXDLLIMPEXP_DATA_ODBC(wxDbList*) PtrBegDbList = 0;
 
 wchar_t const *SQL_LOG_FILENAME         = L"sqllog.txt";
@@ -68,7 +43,6 @@ wchar_t const *SQL_CATALOG_FILENAME     = L"catalog.txt";
 
 #ifdef __WXDEBUG__
 //    #include "wx/thread.h"
-
 //    extern wxList TablesInUse;
 	extern std::vector<wxTablesInUse*> TablesInUse;
 #if wxUSE_THREADS
