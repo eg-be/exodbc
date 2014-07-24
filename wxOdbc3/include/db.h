@@ -39,8 +39,10 @@
 
 #include <windows.h>
 
-#include "sql.h"
-#include "sqlext.h"
+#include <sql.h>
+#include <sqlext.h>
+#include <sqlucode.h>
+#include <odbcinst.h>
 
 /* There are too many false positives for this one, particularly when using templates like wxVector<T> */
 /* class 'foo' needs to have dll-interface to be used by clients of class 'bar'" */
@@ -103,11 +105,7 @@
 //    }
 //#endif
 
-//#if wxUSE_UNICODE
 #define SQL_C_WXCHAR SQL_C_WCHAR
-//#else
-//#define SQL_C_WXCHAR SQL_C_CHAR
-//#endif
 
 //#ifdef __DIGITALMARS__
 //#if wxUSE_UNICODE

@@ -330,14 +330,12 @@ int wxDbColFor::Format(int Nation, int dbDataType, SWORD sqlDataType,
     if (i_dbDataType == 0)                                        // Filter unsupported dbDataTypes
     {
         if ((i_sqlDataType == SQL_VARCHAR)
-#if wxUSE_UNICODE
     #if defined(SQL_WCHAR)
             || (i_sqlDataType == SQL_WCHAR)
     #endif
     #if defined(SQL_WVARCHAR)
             || (i_sqlDataType == SQL_WVARCHAR)
     #endif
-#endif
             || (i_sqlDataType == SQL_LONGVARCHAR))
             i_dbDataType = DB_DATA_TYPE_VARCHAR;
         if ((i_sqlDataType == SQL_C_DATE) || (i_sqlDataType == SQL_C_TIMESTAMP))
@@ -644,11 +642,11 @@ bool wxDb::determineDataTypes(bool failOnDataTypeUnsupported)
     // NOTE: The first type in this enumeration that is determined to be supported by the
     //       datasource/driver is the one that will be used.
     SWORD PossibleSqlCharTypes[] = {
-#if wxUSE_UNICODE && defined(SQL_WVARCHAR)
+#if defined(SQL_WVARCHAR)
         SQL_WVARCHAR,
 #endif
         SQL_VARCHAR,
-#if wxUSE_UNICODE && defined(SQL_WVARCHAR)
+#if defined(SQL_WVARCHAR)
         SQL_WCHAR,
 #endif
         SQL_CHAR
@@ -2361,14 +2359,12 @@ bool wxDb::ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& nu
 
         switch (Sqllen)
         {
-#if wxUSE_UNICODE
     #if defined(SQL_WCHAR)
             case SQL_WCHAR:
     #endif
     #if defined(SQL_WVARCHAR)
             case SQL_WVARCHAR:
     #endif
-#endif
             case SQL_VARCHAR:
             case SQL_CHAR:
                 pColInf[colNum].dbDataType = DB_DATA_TYPE_VARCHAR;
