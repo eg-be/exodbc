@@ -29,7 +29,11 @@
 
 // Global Consts
 // -------------
-WXDLLIMPEXP_ODBC extern const wchar_t* emptyString;
+namespace exodbc
+{
 
+	WXDLLIMPEXP_ODBC extern const wchar_t* emptyString;
+
+}
 
 #endif // WXODBC3_H

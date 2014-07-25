@@ -85,6 +85,10 @@ enum enumDummy {enumDum1};
 #endif
 #endif
 
+namespace exodbc
+{
+
+
 const int wxDB_PATH_MAX                 = 254;
 
 extern WXDLLIMPEXP_DATA_ODBC(wchar_t const *) SQL_LOG_FILENAME;
@@ -728,6 +732,7 @@ bool WXDLLIMPEXP_ODBC
 wxDbGetDataSource(HENV henv, wchar_t *Dsn, SWORD DsnMaxLength, wchar_t *DsDesc,
                   SWORD DsDescMaxLength, UWORD direction = SQL_FETCH_NEXT);
 
+}
 
 #endif // _WX_DB_H_
 

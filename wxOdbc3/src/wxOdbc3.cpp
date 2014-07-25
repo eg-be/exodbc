@@ -16,6 +16,7 @@
 
 // Static consts
 // -------------
+namespace exodbc {
 const wchar_t* emptyString = L"";
 
 // Construction
@@ -30,3 +31,4 @@ const wchar_t* emptyString = L"";
 // Interfaces
 // ----------
 
+}

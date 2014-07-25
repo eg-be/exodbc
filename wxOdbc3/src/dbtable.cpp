@@ -24,6 +24,9 @@
 #include "boost/log/trivial.hpp"
 #include <vector>
 
+namespace exodbc
+{
+
 
 ULONG lastTableID = 0;
 
@@ -2865,3 +2868,4 @@ void wxDbTable::SetKey(const GenericKey& k)
     }
 }  // wxDbTable::SetKey()
 
+}
