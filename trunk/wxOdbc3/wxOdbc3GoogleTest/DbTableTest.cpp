@@ -16,6 +16,7 @@
 #include "GenericTestTables.h"
 
 // Other headers
+#include "DbEnvironment.h"
 #include "db.h"
 
 // Static consts
@@ -40,7 +41,7 @@ namespace wxOdbc3Test
 		//// Called for every unit-test
 		m_odbcInfo = GetParam();
 		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		m_pConnectInf = new wxDbConnectInf(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+		m_pConnectInf = new DbEnvironment(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
 		m_pDb = new wxDb(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);

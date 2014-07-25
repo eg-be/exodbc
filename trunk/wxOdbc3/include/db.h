@@ -86,9 +86,15 @@ enum enumDummy {enumDum1};
 #endif
 #endif
 
+// Forward declarations
+// --------------------
+
 namespace exodbc
 {
+	class DbEnvironment;
 
+	// Consts
+	// ------
 
 	const int wxDB_PATH_MAX                 = 254;
 
@@ -228,93 +234,6 @@ namespace exodbc
 		DB_ERR_DRIVER_NOT_CAPABLE,                         // SqlState = 'S1C00'
 		DB_ERR_TIMEOUT_EXPIRED                             // SqlState = 'S1T00'
 	};
-
-#ifndef MAXNAME
-#define MAXNAME         31
-#endif
-
-#ifndef SQL_MAX_AUTHSTR_LEN
-	// There does not seem to be a standard for this, so I am
-	// defaulting to the value that MS uses
-#define SQL_MAX_AUTHSTR_LEN MAXNAME
-#endif
-
-#ifndef SQL_MAX_CONNECTSTR_LEN
-	// There does not seem to be a standard for this, so I am
-	// defaulting to the value that MS recommends
-#define SQL_MAX_CONNECTSTR_LEN 1024
-#endif
-
-	class WXDLLIMPEXP_ODBC wxDbConnectInf
-	{
-	private:
-		bool freeHenvOnDestroy;
-		bool useConnectionStr;
-
-	public:
-		HENV Henv;
-		wchar_t Dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
-		wchar_t Uid[SQL_MAX_USER_NAME_LEN+1];               // User ID
-		wchar_t AuthStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)
-		wchar_t ConnectionStr[SQL_MAX_CONNECTSTR_LEN+1];    // Connection string (password)
-
-		std::wstring Description;                              // Not sure what the max length is
-		std::wstring FileType;                                 // Not sure what the max length is
-
-		// Optionals needed for some databases like dBase
-		std::wstring DefaultDir;                               // Directory that db file resides in
-
-	public:
-
-		wxDbConnectInf();
-		wxDbConnectInf(HENV henv, const std::wstring &dsn, const std::wstring &userID = std::wstring(),
-			const std::wstring &password = std::wstring(), const std::wstring &defaultDir = std::wstring(),
-			const std::wstring &description = std::wstring(), const std::wstring &fileType = std::wstring());
-
-		~wxDbConnectInf();
-
-		bool             Initialize();
-
-		bool             AllocHenv();
-		void             FreeHenv();
-
-		// Accessors
-		const HENV       &GetHenv()          { return Henv; }
-
-		const wchar_t    *GetDsn()           { return Dsn; }
-
-		const wchar_t    *GetUid()           { return Uid; }
-		const wchar_t    *GetUserID()        { return Uid; }
-
-		const wchar_t    *GetAuthStr()       { return AuthStr; }
-		const wchar_t    *GetPassword()      { return AuthStr; }
-
-		const wchar_t    *GetConnectionStr() { return ConnectionStr; }
-		bool             UseConnectionStr() { return useConnectionStr; }
-
-		const wchar_t    *GetDescription()   { return Description.c_str(); }
-		const wchar_t    *GetFileType()      { return FileType.c_str(); }
-		const wchar_t    *GetDefaultDir()    { return DefaultDir.c_str(); }
-
-		void             SetHenv(const HENV henv)               { Henv = henv; }
-
-		void             SetDsn(const std::wstring &dsn);
-
-		void             SetUserID(const std::wstring &userID);
-		void             SetUid(const std::wstring &uid)            { SetUserID(uid); }
-
-		void             SetPassword(const std::wstring &password);
-		void             SetAuthStr(const std::wstring &authstr)    { SetPassword(authstr); }
-
-		void             SetConnectionStr(const std::wstring &connectStr);
-
-		void             SetDescription(const std::wstring &desc)   { Description   = desc;     }
-		void             SetFileType(const std::wstring &fileType)  { FileType      = fileType; }
-		void             SetDefaultDir(const std::wstring &defDir)  { DefaultDir    = defDir;   }
-
-		bool			SetSqlAttrOdbcVersion(int version);		
-		int				ReadSqlAttrOdbcVersion();
-	};  // class wxDbConnectInf
 
 
 	struct WXDLLIMPEXP_ODBC wxDbSqlTypeInfo
@@ -580,7 +499,7 @@ namespace exodbc
 		///This version of Open will open the odbc source selection dialog. Cast a wxWindow::GetHandle() to SQLHWND to use.
 		bool         Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported=true);
 		bool         Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wstring &AuthStr, bool failOnDataTypeUnsupported=true);
-		bool         Open(wxDbConnectInf *dbConnectInf, bool failOnDataTypeUnsupported=true);
+		bool         Open(DbEnvironment *dbConnectInf, bool failOnDataTypeUnsupported=true);
 		bool         Open(wxDb *copyDb);  // pointer to a wxDb whose connection info should be copied rather than re-queried
 		void         Close(void);
 		bool         CommitTrans(void);
@@ -699,7 +618,7 @@ namespace exodbc
 	// The following routines allow a user to get new database connections, free them
 	// for other code segments to use, or close all of them when the application has
 	// completed.
-	wxDb  WXDLLIMPEXP_ODBC *wxDbGetConnection(wxDbConnectInf *pDbConfig, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
+	wxDb  WXDLLIMPEXP_ODBC *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
 	bool  WXDLLIMPEXP_ODBC  wxDbFreeConnection(wxDb *pDb);
 	void  WXDLLIMPEXP_ODBC  wxDbCloseConnections(void);
 	int   WXDLLIMPEXP_ODBC  wxDbConnectionsInUse(void);
