@@ -62,23 +62,6 @@ namespace exodbc
 	*/
 	class WXDLLIMPEXP_ODBC DbEnvironment
 	{
-	private:
-		bool freeHenvOnDestroy;
-		bool useConnectionStr;
-
-	public:
-		HENV Henv;
-		wchar_t Dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
-		wchar_t Uid[SQL_MAX_USER_NAME_LEN+1];               // User ID
-		wchar_t AuthStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)
-		wchar_t ConnectionStr[SQL_MAX_CONNECTSTR_LEN+1];    // Connection string (password)
-
-		std::wstring Description;                              // Not sure what the max length is
-		std::wstring FileType;                                 // Not sure what the max length is
-
-		// Optionals needed for some databases like dBase
-		std::wstring DefaultDir;                               // Directory that db file resides in
-
 	public:
 
 		DbEnvironment();
@@ -94,24 +77,24 @@ namespace exodbc
 		void             FreeHenv();
 
 		// Accessors
-		const HENV       &GetHenv()          { return Henv; }
+		const HENV       &GetHenv()          { return m_henv; }
 
-		const wchar_t    *GetDsn()           { return Dsn; }
+		const wchar_t    *GetDsn()           { return m_dsn; }
 
-		const wchar_t    *GetUid()           { return Uid; }
-		const wchar_t    *GetUserID()        { return Uid; }
+		const wchar_t    *GetUid()           { return m_uid; }
+		const wchar_t    *GetUserID()        { return m_uid; }
 
-		const wchar_t    *GetAuthStr()       { return AuthStr; }
-		const wchar_t    *GetPassword()      { return AuthStr; }
+		const wchar_t    *GetAuthStr()       { return m_authStr; }
+		const wchar_t    *GetPassword()      { return m_authStr; }
 
-		const wchar_t    *GetConnectionStr() { return ConnectionStr; }
-		bool             UseConnectionStr() { return useConnectionStr; }
+		const wchar_t    *GetConnectionStr() { return m_connectionStr; }
+		bool             UseConnectionStr() { return m_useConnectionStr; }
 
-		const wchar_t    *GetDescription()   { return Description.c_str(); }
-		const wchar_t    *GetFileType()      { return FileType.c_str(); }
-		const wchar_t    *GetDefaultDir()    { return DefaultDir.c_str(); }
+		const wchar_t    *GetDescription()   { return m_description.c_str(); }
+		const wchar_t    *GetFileType()      { return m_fileType.c_str(); }
+		const wchar_t    *GetDefaultDir()    { return m_defaultDir.c_str(); }
 
-		void             SetHenv(const HENV henv)               { Henv = henv; }
+		void             SetHenv(const HENV henv)               { m_henv = henv; }
 
 		void             SetDsn(const std::wstring &dsn);
 
@@ -123,12 +106,30 @@ namespace exodbc
 
 		void             SetConnectionStr(const std::wstring &connectStr);
 
-		void             SetDescription(const std::wstring &desc)   { Description   = desc;     }
-		void             SetFileType(const std::wstring &fileType)  { FileType      = fileType; }
-		void             SetDefaultDir(const std::wstring &defDir)  { DefaultDir    = defDir;   }
+		void             SetDescription(const std::wstring &desc)   { m_description   = desc;     }
+		void             SetFileType(const std::wstring &fileType)  { m_fileType      = fileType; }
+		void             SetDefaultDir(const std::wstring &defDir)  { m_defaultDir    = defDir;   }
 
 		bool			SetSqlAttrOdbcVersion(int version);		
 		int				ReadSqlAttrOdbcVersion();
+
+	private:
+		bool m_freeHenvOnDestroy;
+		bool m_useConnectionStr;
+
+		HENV m_henv;
+		wchar_t m_dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
+		wchar_t m_uid[SQL_MAX_USER_NAME_LEN+1];               // User ID
+		wchar_t m_authStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)
+		wchar_t m_connectionStr[SQL_MAX_CONNECTSTR_LEN+1];    // Connection string (password)
+
+		std::wstring m_description;                              // Not sure what the max length is
+		std::wstring m_fileType;                                 // Not sure what the max length is
+
+		// Optionals needed for some databases like dBase
+		std::wstring m_defaultDir;                               // Directory that db file resides in
+
+
 	};  // class wxDbConnectInf
 }
 
