@@ -15,6 +15,7 @@
 #include "GenericTestTables.h"
 
 // Other headers
+#include "DbEnvironment.h"
 #include "db.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
@@ -41,7 +42,7 @@ namespace wxOdbc3Test
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
 		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		m_pConnectInf = new wxDbConnectInf(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+		m_pConnectInf = new DbEnvironment(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
 		m_pDb = new wxDb(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
@@ -71,7 +72,7 @@ namespace wxOdbc3Test
 
 		// Try to open with a different password / user, expect to fail when opening the db.
 		// TODO: Getting the HENV never fails? Add some tests for the HENV
-		wxDbConnectInf* pFailConnectInf = new wxDbConnectInf(NULL, L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
+		DbEnvironment* pFailConnectInf = new DbEnvironment(NULL, L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
 		HENV henvFail = pFailConnectInf->GetHenv();
 		EXPECT_TRUE(henvFail != NULL);
 		wxDb* pFailDb = new wxDb(henvFail, true);
