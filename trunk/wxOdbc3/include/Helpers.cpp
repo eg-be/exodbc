@@ -18,6 +18,8 @@
 
 // Static consts
 // -------------
+namespace exodbc
+{
 
 // Construction
 // -------------
@@ -42,6 +44,7 @@ void exOnAssert(const char* file, int line, const char* function, const char* co
 	BOOST_LOG_TRIVIAL(error) << ws.str();
 }
 
+}
 
 // Interfaces
 // ----------

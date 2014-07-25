@@ -16,7 +16,10 @@
 
 // Forward declarations
 // --------------------
-class wxDb;
+namespace exodbc
+{
+	class wxDb;
+}
 
 // Structs
 // -------
@@ -28,10 +31,10 @@ namespace wxOdbc3Test
 
 	// NotExistingTable
 	// ----------------
-	class NotExistingTable : public wxDbTable
+	class NotExistingTable : public exodbc::wxDbTable
 	{
 	public:
-		NotExistingTable(wxDb* pDb);
+		NotExistingTable(exodbc::wxDb* pDb);
 		~NotExistingTable() {};
 
 		int		m_idNotExisting;
@@ -39,11 +42,11 @@ namespace wxOdbc3Test
 
 	// CharTypesTable
 	// --------------
-	class CharTypesTable : public wxDbTable
+	class CharTypesTable : public exodbc::wxDbTable
 	{
 	public:
 
-		CharTypesTable(wxDb* pDb);
+		CharTypesTable(exodbc::wxDb* pDb);
 		virtual ~CharTypesTable() {};
 
 		SQLINTEGER	m_idCharTypes;
@@ -53,11 +56,11 @@ namespace wxOdbc3Test
 
 	// CharTypesTmpTable
 	// --------------
-	class CharTypesTmpTable : public wxDbTable
+	class CharTypesTmpTable : public exodbc::wxDbTable
 	{
 	public:
 
-		CharTypesTmpTable(wxDb* pDb);
+		CharTypesTmpTable(exodbc::wxDb* pDb);
 		virtual ~CharTypesTmpTable() {};
 
 		SQLINTEGER	m_idCharTypes;
@@ -67,11 +70,11 @@ namespace wxOdbc3Test
 
 	// IntTypesTable
 	// ----------
-	class IntTypesTable : public wxDbTable
+	class IntTypesTable : public exodbc::wxDbTable
 	{
 	public:
 
-		IntTypesTable(wxDb* pDb);
+		IntTypesTable(exodbc::wxDb* pDb);
 		virtual ~IntTypesTable() {};
 
 		// Size of Type							Bytes		Min						Max
@@ -89,11 +92,11 @@ namespace wxOdbc3Test
 
 	// IntTypesTmpTable
 	// ----------
-	class IntTypesTmpTable : public wxDbTable
+	class IntTypesTmpTable : public exodbc::wxDbTable
 	{
 	public:
 
-		IntTypesTmpTable(wxDb* pDb);
+		IntTypesTmpTable(exodbc::wxDb* pDb);
 		virtual ~IntTypesTmpTable() {};
 
 		// Size of Type							Bytes		Min						Max
@@ -111,10 +114,10 @@ namespace wxOdbc3Test
 
 	// DateTypesTable
 	// --------------
-	class DateTypesTable : public wxDbTable
+	class DateTypesTable : public exodbc::wxDbTable
 	{
 	public:
-		DateTypesTable(wxDb* pDb);
+		DateTypesTable(exodbc::wxDb* pDb);
 		virtual ~DateTypesTable() {};
 
 		SQLINTEGER				m_idDateTypes;
@@ -125,10 +128,10 @@ namespace wxOdbc3Test
 
 	// DateTypesTmpTable
 	// --------------
-	class DateTypesTmpTable : public wxDbTable
+	class DateTypesTmpTable : public exodbc::wxDbTable
 	{
 	public:
-		DateTypesTmpTable(wxDb* pDb);
+		DateTypesTmpTable(exodbc::wxDb* pDb);
 		virtual ~DateTypesTmpTable() {};
 
 		SQLINTEGER				m_idDateTypes;
@@ -139,10 +142,10 @@ namespace wxOdbc3Test
 
 	// FloatTypesTable
 	// --------------
-	class FloatTypesTable : public wxDbTable
+	class FloatTypesTable : public exodbc::wxDbTable
 	{
 	public:
-		FloatTypesTable(wxDb* pDb);
+		FloatTypesTable(exodbc::wxDb* pDb);
 		virtual ~FloatTypesTable() {};
 
 		SQLINTEGER				m_idFloatTypes;
@@ -152,10 +155,10 @@ namespace wxOdbc3Test
 
 	// FloatTypesTmpTable
 	// ------------------
-	class FloatTypesTmpTable : public wxDbTable
+	class FloatTypesTmpTable : public exodbc::wxDbTable
 	{
 	public:
-		FloatTypesTmpTable(wxDb* pDb);
+		FloatTypesTmpTable(exodbc::wxDb* pDb);
 		virtual ~FloatTypesTmpTable() {};
 
 		SQLINTEGER				m_idFloatTypes;
@@ -165,11 +168,11 @@ namespace wxOdbc3Test
 
 	// NumbericTypesTable
 	// ------------------
-	class NumericTypesTable : public wxDbTable
+	class NumericTypesTable : public exodbc::wxDbTable
 	{
 	public:
 		enum ReadMode { ReasAsNumeric, ReadAsChar };
-		NumericTypesTable(wxDb* pDb, ReadMode readMode);
+		NumericTypesTable(exodbc::wxDb* pDb, ReadMode readMode);
 		virtual ~NumericTypesTable() {};
 
 		SQLINTEGER			m_idNumericTypes;
@@ -186,12 +189,12 @@ namespace wxOdbc3Test
 
 	// NumbericTypesTable
 	// ------------------
-	class NumericTypesTmpTable : public wxDbTable
+	class NumericTypesTmpTable : public exodbc::wxDbTable
 	{
 	public:
 		// TODO: This name is not correct. ? The test write as "numer".. mmh
 		enum ReadMode { ReasAsNumeric, ReadAsChar };
-		NumericTypesTmpTable(wxDb* pDb, ReadMode readMode);
+		NumericTypesTmpTable(exodbc::wxDb* pDb, ReadMode readMode);
 		virtual ~NumericTypesTmpTable() {};
 
 		SQLINTEGER			m_idNumericTypes;
@@ -208,10 +211,10 @@ namespace wxOdbc3Test
 
 	// BlobTypesTable
 	// --------------
-	class BlobTypesTable : public wxDbTable
+	class BlobTypesTable : public exodbc::wxDbTable
 	{
 	public:
-		BlobTypesTable(wxDb* pDb);
+		BlobTypesTable(exodbc::wxDb* pDb);
 		virtual ~BlobTypesTable() {};
 
 		SQLINTEGER		m_idBlobTypes;
@@ -220,10 +223,10 @@ namespace wxOdbc3Test
 
 	// BlobTypesTmpTable
 	// --------------
-	class BlobTypesTmpTable : public wxDbTable
+	class BlobTypesTmpTable : public exodbc::wxDbTable
 	{
 	public:
-		BlobTypesTmpTable(wxDb* pDb);
+		BlobTypesTmpTable(exodbc::wxDb* pDb);
 		virtual ~BlobTypesTmpTable() {};
 
 		SQLINTEGER		m_idBlobTypes;
@@ -232,10 +235,10 @@ namespace wxOdbc3Test
 
 	// CharTable
 	// ---------
-	class CharTable : public wxDbTable
+	class CharTable : public exodbc::wxDbTable
 	{
 	public:
-		CharTable(wxDb* pDb);
+		CharTable(exodbc::wxDb* pDb);
 		virtual ~CharTable() {};
 
 		SQLINTEGER	m_idCharTable;
@@ -245,10 +248,10 @@ namespace wxOdbc3Test
 	};
 
 	// IncompleCharTable
-	class IncompleteCharTable : public wxDbTable
+	class IncompleteCharTable : public exodbc::wxDbTable
 	{
 	public:
-		IncompleteCharTable(wxDb* pDb);
+		IncompleteCharTable(exodbc::wxDb* pDb);
 		virtual ~IncompleteCharTable() {};
 
 		SQLINTEGER	m_idCharTable;

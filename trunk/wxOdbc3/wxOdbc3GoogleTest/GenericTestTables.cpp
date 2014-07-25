@@ -15,6 +15,7 @@
 // Other headers
 #include "db.h"
 
+using namespace exodbc;
 // Static consts
 // -------------
 

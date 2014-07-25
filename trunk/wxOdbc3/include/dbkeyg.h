@@ -17,6 +17,9 @@
 #ifndef _WX_DBGKEY_H_
 #define _WX_DBGKEY_H_
 
+namespace exodbc
+{
+
 class GenericKey
 {
 public:
@@ -37,5 +40,7 @@ private:
     void   *m_data;
     size_t  m_sz;
 };
+
+}
 
 #endif // _WX_DBGKEY_H_

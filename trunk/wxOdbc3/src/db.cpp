@@ -37,6 +37,9 @@
 #include "db.h"
 #include "Helpers.h"
 
+namespace exodbc
+{
+
 
 WXDLLIMPEXP_DATA_ODBC(wxDbList*) PtrBegDbList = 0;
 
@@ -4505,3 +4508,4 @@ bool wxDbGetDataSource(HENV henv, wchar_t *Dsn, SWORD DsnMaxLength, wchar_t *DsD
 
 }  // wxDbGetDataSource()
 
+}

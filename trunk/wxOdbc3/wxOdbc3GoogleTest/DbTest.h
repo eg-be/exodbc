@@ -22,8 +22,11 @@
 
 // Forward declarations
 // --------------------
-class wxDbConnectInf;
-class wxDb;
+namespace exodbc
+{
+	class wxDbConnectInf;
+	class wxDb;
+}
 
 // Structs
 // -------
@@ -43,8 +46,8 @@ namespace wxOdbc3Test
 		virtual void SetUp();
 		virtual void TearDown();
 
-		wxDbConnectInf* m_pConnectInf;
-		wxDb*	m_pDb;
+		exodbc::wxDbConnectInf* m_pConnectInf;
+		exodbc::wxDb*	m_pDb;
 		SOdbcInfo m_odbcInfo;
 	};
 

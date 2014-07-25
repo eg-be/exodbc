@@ -20,8 +20,10 @@
 
 // Forward declarations
 // --------------------
-
-extern void exOnAssert(const char* file, int line, const char* function, const char* condition, const char* msg);
+namespace exodbc
+{
+	extern void exOnAssert(const char* file, int line, const char* function, const char* condition, const char* msg);
+}
 
 // Macros available for everybody
 // ----------------

@@ -26,6 +26,10 @@
 
 #include "dbkeyg.h"
 
+namespace exodbc
+{
+
+
 const int   wxDB_ROWID_LEN       = 24;  // 18 is the max, 24 is in case it gets larger
 const int   wxDB_DEFAULT_CURSOR  = 0;
 const bool  wxDB_QUERY_ONLY      = true;
@@ -277,5 +281,6 @@ public:
 //TODO: Need to Document
 };  // wxDbTable
 
+}
 
 #endif // DBTABLE_DOT_H
