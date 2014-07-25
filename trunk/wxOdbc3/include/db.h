@@ -457,6 +457,7 @@ extern WXDLLIMPEXP_DATA_ODBC(wchar_t)
 
 class WXDLLIMPEXP_ODBC wxDb
 {
+	friend class wxDbTable;
 private:
     bool             dbIsOpen;
     bool             dbIsCached;      // Was connection created by caching functions
@@ -653,8 +654,9 @@ public:
     // return the string with all special SQL characters escaped
     std::wstring     EscapeSqlChars(const std::wstring& value);
 
-    // These two functions are provided strictly for use by wxDbTable.
-    // DO NOT USE THESE FUNCTIONS, OR MEMORY LEAKS MAY OCCUR
+private:
+	// These two functions are provided strictly for use by wxDbTable.
+	// DO NOT USE THESE FUNCTIONS, OR MEMORY LEAKS MAY OCCUR
     void         incrementTableCount() { nTables++; return; }
     void         decrementTableCount() { nTables--; return; }
 };  // wxDb
