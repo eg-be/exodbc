@@ -25,8 +25,8 @@ namespace exodbc
 	/********** wxDbConnectInf Constructor - form 1 **********/
 	DbEnvironment::DbEnvironment()
 	{
-		Henv = 0;
-		freeHenvOnDestroy = false;
+		m_henv = 0;
+		m_freeHenvOnDestroy = false;
 
 		Initialize();
 	}  // Constructor
@@ -35,7 +35,7 @@ namespace exodbc
 	// -----------
 	DbEnvironment::~DbEnvironment()
 	{
-		if (freeHenvOnDestroy)
+		if (m_freeHenvOnDestroy)
 		{
 			FreeHenv();
 		}
@@ -51,8 +51,8 @@ namespace exodbc
 		const std::wstring &password, const std::wstring &defaultDir,
 		const std::wstring &fileType, const std::wstring &description)
 	{
-		Henv = 0;
-		freeHenvOnDestroy = false;
+		m_henv = 0;
+		m_freeHenvOnDestroy = false;
 
 		Initialize();
 
@@ -74,21 +74,21 @@ namespace exodbc
 	/********** wxDbConnectInf::Initialize() **********/
 	bool DbEnvironment::Initialize()
 	{
-		freeHenvOnDestroy = false;
+		m_freeHenvOnDestroy = false;
 
-		if (freeHenvOnDestroy && Henv)
+		if (m_freeHenvOnDestroy && m_henv)
 			FreeHenv();
 
-		Henv = 0;
-		Dsn[0] = 0;
-		Uid[0] = 0;
-		AuthStr[0] = 0;
-		ConnectionStr[0] = 0;
-		Description.empty();
-		FileType.empty();
-		DefaultDir.empty();
+		m_henv = 0;
+		m_dsn[0] = 0;
+		m_uid[0] = 0;
+		m_authStr[0] = 0;
+		m_connectionStr[0] = 0;
+		m_description.empty();
+		m_fileType.empty();
+		m_defaultDir.empty();
 
-		useConnectionStr = false;
+		m_useConnectionStr = false;
 
 		return true;
 	}  // wxDbConnectInf::Initialize()
@@ -99,20 +99,20 @@ namespace exodbc
 	{
 		// This is here to help trap if you are getting a new henv
 		// without releasing an existing henv
-		exASSERT(!Henv);
+		exASSERT(!m_henv);
 
 		// Initialize the ODBC Environment for Database Operations
 
 		// If we initialize using odbc3 we will fail:  See Ticket # 17
 		//if (SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &Henv) != SQL_SUCCESS)
 
-		if (SQLAllocEnv(&Henv) != SQL_SUCCESS)
+		if (SQLAllocEnv(&m_henv) != SQL_SUCCESS)
 		{
 			BOOST_LOG_TRIVIAL(debug) << L"A problem occurred while trying to get a connection to the data source";
 			return false;
 		}
 
-		freeHenvOnDestroy = true;
+		m_freeHenvOnDestroy = true;
 
 		return true;
 	}  // wxDbConnectInf::AllocHenv()
@@ -120,50 +120,50 @@ namespace exodbc
 
 	void DbEnvironment::FreeHenv()
 	{
-		exASSERT(Henv);
+		exASSERT(m_henv);
 
-		if (Henv)
-			SQLFreeEnv(Henv);
+		if (m_henv)
+			SQLFreeEnv(m_henv);
 
-		Henv = 0;
-		freeHenvOnDestroy = false;
+		m_henv = 0;
+		m_freeHenvOnDestroy = false;
 
 	}  // wxDbConnectInf::FreeHenv()
 
 
 	void DbEnvironment::SetDsn(const std::wstring &dsn)
 	{
-		exASSERT(dsn.length() < EXSIZEOF(Dsn));
+		exASSERT(dsn.length() < EXSIZEOF(m_dsn));
 
-		wcsncpy(Dsn, dsn.c_str(), EXSIZEOF(Dsn) - 1);
-		Dsn[EXSIZEOF(Dsn)-1] = 0;  // Prevent buffer overrun
+		wcsncpy(m_dsn, dsn.c_str(), EXSIZEOF(m_dsn) - 1);
+		m_dsn[EXSIZEOF(m_dsn)-1] = 0;  // Prevent buffer overrun
 	}  // wxDbConnectInf::SetDsn()
 
 
 	void DbEnvironment::SetUserID(const std::wstring &uid)
 	{
-		exASSERT(uid.length() < EXSIZEOF(Uid));
-		wcsncpy(Uid, uid.c_str(), EXSIZEOF(Uid)-1);
-		Uid[EXSIZEOF(Uid)-1] = 0;  // Prevent buffer overrun
+		exASSERT(uid.length() < EXSIZEOF(m_uid));
+		wcsncpy(m_uid, uid.c_str(), EXSIZEOF(m_uid)-1);
+		m_uid[EXSIZEOF(m_uid)-1] = 0;  // Prevent buffer overrun
 	}  // wxDbConnectInf::SetUserID()
 
 
 	void DbEnvironment::SetPassword(const std::wstring &password)
 	{
-		exASSERT(password.length() < EXSIZEOF(AuthStr));
+		exASSERT(password.length() < EXSIZEOF(m_authStr));
 
-		wcsncpy(AuthStr, password.c_str(), EXSIZEOF(AuthStr)-1);
-		AuthStr[EXSIZEOF(AuthStr)-1] = 0;  // Prevent buffer overrun
+		wcsncpy(m_authStr, password.c_str(), EXSIZEOF(m_authStr)-1);
+		m_authStr[EXSIZEOF(m_authStr)-1] = 0;  // Prevent buffer overrun
 	}  // wxDbConnectInf::SetPassword()
 
 	void DbEnvironment::SetConnectionStr(const std::wstring &connectStr)
 	{
-		exASSERT(connectStr.length() < EXSIZEOF(ConnectionStr));
+		exASSERT(connectStr.length() < EXSIZEOF(m_connectionStr));
 
-		useConnectionStr = connectStr.length() > 0;
+		m_useConnectionStr = connectStr.length() > 0;
 
-		wcsncpy(ConnectionStr, connectStr.c_str(), EXSIZEOF(ConnectionStr)-1);
-		ConnectionStr[EXSIZEOF(ConnectionStr)-1] = 0;  // Prevent buffer overrun
+		wcsncpy(m_connectionStr, connectStr.c_str(), EXSIZEOF(m_connectionStr)-1);
+		m_connectionStr[EXSIZEOF(m_connectionStr)-1] = 0;  // Prevent buffer overrun
 	}  // wxDbConnectInf::SetConnectionStr()
 
 
@@ -177,14 +177,14 @@ namespace exodbc
 			return false;
 		}
 		SQLINTEGER v = version;
-		SQLRETURN ret = SQLSetEnvAttr(Henv, SQL_ATTR_ODBC_VERSION, &v, NULL);
+		SQLRETURN ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &v, NULL);
 		if(ret == SQL_SUCCESS)
 			return true;
 		SQLWCHAR sqlState[5 + 1];
 		SQLINTEGER nativeErr;
 		SQLWCHAR msg[256 + 1];
 		SQLSMALLINT msgLength;
-		ret = SQLGetDiagRec(SQL_HANDLE_ENV, Henv, 1, sqlState, &nativeErr, msg, 256, &msgLength);
+		ret = SQLGetDiagRec(SQL_HANDLE_ENV, m_henv, 1, sqlState, &nativeErr, msg, 256, &msgLength);
 		return false;
 	}
 
@@ -192,7 +192,7 @@ namespace exodbc
 	int DbEnvironment::ReadSqlAttrOdbcVersion()
 	{
 		int value;
-		SQLRETURN ret = SQLGetEnvAttr(Henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
+		SQLRETURN ret = SQLGetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
 		if(ret != SQL_SUCCESS)
 			return 0;
 
