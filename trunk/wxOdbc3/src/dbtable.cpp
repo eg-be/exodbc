@@ -52,25 +52,25 @@ void csstrncpyt(wchar_t *target, const wchar_t *source, int n)
 
 
 /********** wxDbColDef::wxDbColDef() Constructor **********/
-wxDbColDef::wxDbColDef()
+ColumnDefinition::ColumnDefinition()
 {
     Initialize();
 }  // Constructor
 
 
-bool wxDbColDef::Initialize()
+bool ColumnDefinition::Initialize()
 {
-    ColName[0]      = 0;
-    DbDataType      = DB_DATA_TYPE_INTEGER;
-    SqlCtype        = SQL_C_LONG;
-    PtrDataObj      = NULL;
-    SzDataObj       = 0;
-    KeyField        = false;
-    Updateable      = false;
-    InsertAllowed   = false;
-    DerivedCol      = false;
-    CbValue         = 0;
-    Null            = false;
+    m_ColName[0]      = 0;
+    m_DbDataType      = DB_DATA_TYPE_INTEGER;
+    m_SqlCtype        = SQL_C_LONG;
+    m_PtrDataObj      = NULL;
+    m_szDataObj       = 0;
+    m_keyField        = false;
+    m_updateable      = false;
+    m_insertAllowed   = false;
+    m_derivedCol      = false;
+    m_cbValue         = 0;
+    m_null            = false;
 
     return true;
 }  // wxDbColDef::Initialize()
@@ -176,7 +176,7 @@ bool wxDbTable::initialize(Database *pwxDb, const std::wstring &tblName, const U
 
     // Allocate space for column definitions
     if (m_numCols)
-        colDefs = new wxDbColDef[m_numCols];  // Points to the first column definition
+        colDefs = new ColumnDefinition[m_numCols];  // Points to the first column definition
 
     // Allocate statement handles for the table
     if (!queryOnly)
@@ -388,41 +388,41 @@ ODBC 3.0 says to use this form
 
 void wxDbTable::setCbValueForColumn(int columnIndex)
 {
-    switch(colDefs[columnIndex].DbDataType)
+    switch(colDefs[columnIndex].m_DbDataType)
     {
         case DB_DATA_TYPE_VARCHAR:
         case DB_DATA_TYPE_MEMO:
-            if (colDefs[columnIndex].Null)
-                colDefs[columnIndex].CbValue = SQL_NULL_DATA;
+            if (colDefs[columnIndex].m_null)
+                colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
             else
-                colDefs[columnIndex].CbValue = SQL_NTS;
+                colDefs[columnIndex].m_cbValue = SQL_NTS;
             break;
         case DB_DATA_TYPE_INTEGER:
-            if (colDefs[columnIndex].Null)
-                colDefs[columnIndex].CbValue = SQL_NULL_DATA;
+            if (colDefs[columnIndex].m_null)
+                colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
             else
-                colDefs[columnIndex].CbValue = 0;
+                colDefs[columnIndex].m_cbValue = 0;
             break;
         case DB_DATA_TYPE_FLOAT:
-            if (colDefs[columnIndex].Null)
-                colDefs[columnIndex].CbValue = SQL_NULL_DATA;
+            if (colDefs[columnIndex].m_null)
+                colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
             else
-                colDefs[columnIndex].CbValue = 0;
+                colDefs[columnIndex].m_cbValue = 0;
             break;
         case DB_DATA_TYPE_DATE:
-            if (colDefs[columnIndex].Null)
-                colDefs[columnIndex].CbValue = SQL_NULL_DATA;
+            if (colDefs[columnIndex].m_null)
+                colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
             else
-                colDefs[columnIndex].CbValue = 0;
+                colDefs[columnIndex].m_cbValue = 0;
             break;
         case DB_DATA_TYPE_BLOB:
-            if (colDefs[columnIndex].Null)
-                colDefs[columnIndex].CbValue = SQL_NULL_DATA;
+            if (colDefs[columnIndex].m_null)
+                colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
             else
-                if (colDefs[columnIndex].SqlCtype == SQL_C_WXCHAR)
-                    colDefs[columnIndex].CbValue = SQL_NTS;
+                if (colDefs[columnIndex].m_SqlCtype == SQL_C_WXCHAR)
+                    colDefs[columnIndex].m_cbValue = SQL_NTS;
                 else
-                    colDefs[columnIndex].CbValue = SQL_LEN_DATA_AT_EXEC(colDefs[columnIndex].SzDataObj);
+                    colDefs[columnIndex].m_cbValue = SQL_LEN_DATA_AT_EXEC(colDefs[columnIndex].m_szDataObj);
             break;
     }
 }
@@ -447,25 +447,25 @@ bool wxDbTable::bindParams(bool forUpdate)
     {
         if (forUpdate)
         {
-            if (!colDefs[i].Updateable)
+            if (!colDefs[i].m_updateable)
                 continue;
         }
         else
         {
-            if (!colDefs[i].InsertAllowed)
+            if (!colDefs[i].m_insertAllowed)
                 continue;
         }
 
-        switch(colDefs[i].DbDataType)
+        switch(colDefs[i].m_DbDataType)
         {
             case DB_DATA_TYPE_VARCHAR:
                 fSqlType = pDb->GetTypeInfVarchar().FsqlType;
-                precision = colDefs[i].SzDataObj;
+                precision = colDefs[i].m_szDataObj;
                 scale = 0;
                 break;
             case DB_DATA_TYPE_MEMO:
                 fSqlType = pDb->GetTypeInfMemo().FsqlType;
-                precision = colDefs[i].SzDataObj;
+                precision = colDefs[i].m_szDataObj;
                 scale = 0;
                 break;
             case DB_DATA_TYPE_INTEGER:
@@ -490,7 +490,7 @@ bool wxDbTable::bindParams(bool forUpdate)
                 break;
             case DB_DATA_TYPE_BLOB:
                 fSqlType = pDb->GetTypeInfBlob().FsqlType;
-                precision = colDefs[i].SzDataObj;
+                precision = colDefs[i].m_szDataObj;
                 scale = 0;
                 break;
         }
@@ -499,18 +499,18 @@ bool wxDbTable::bindParams(bool forUpdate)
 
         if (forUpdate)
         {
-            if (SQLBindParameter(hstmtUpdate, colNumber++, SQL_PARAM_INPUT, colDefs[i].SqlCtype,
-                                 fSqlType, precision, scale, (UCHAR*) colDefs[i].PtrDataObj,
-                                 precision+1, &colDefs[i].CbValue) != SQL_SUCCESS)
+            if (SQLBindParameter(hstmtUpdate, colNumber++, SQL_PARAM_INPUT, colDefs[i].m_SqlCtype,
+                                 fSqlType, precision, scale, (UCHAR*) colDefs[i].m_PtrDataObj,
+                                 precision+1, &colDefs[i].m_cbValue) != SQL_SUCCESS)
             {
                 return(pDb->DispAllErrors(henv, hdbc, hstmtUpdate));
             }
         }
         else
         {
-            if (SQLBindParameter(hstmtInsert, colNumber++, SQL_PARAM_INPUT, colDefs[i].SqlCtype,
-                                 fSqlType, precision, scale, (UCHAR*) colDefs[i].PtrDataObj,
-                                 precision+1, &colDefs[i].CbValue) != SQL_SUCCESS)
+            if (SQLBindParameter(hstmtInsert, colNumber++, SQL_PARAM_INPUT, colDefs[i].m_SqlCtype,
+                                 fSqlType, precision, scale, (UCHAR*) colDefs[i].m_PtrDataObj,
+                                 precision+1, &colDefs[i].m_cbValue) != SQL_SUCCESS)
             {
                 return(pDb->DispAllErrors(henv, hdbc, hstmtInsert));
             }
@@ -544,9 +544,9 @@ bool wxDbTable::bindCols(HSTMT cursor)
     UWORD i;
     for (i = 0; i < m_numCols; i++)
     {
-		wxDbColDef def = colDefs[i];
-        if (SQLBindCol(cursor, (UWORD)(i+1), colDefs[i].SqlCtype, (UCHAR*) colDefs[i].PtrDataObj,
-                       colDefs[i].SzDataObj, &colDefs[i].CbValue ) != SQL_SUCCESS)
+		ColumnDefinition def = colDefs[i];
+        if (SQLBindCol(cursor, (UWORD)(i+1), colDefs[i].m_SqlCtype, (UCHAR*) colDefs[i].m_PtrDataObj,
+                       colDefs[i].m_szDataObj, &colDefs[i].m_cbValue ) != SQL_SUCCESS)
           return (pDb->DispAllErrors(henv, hdbc, cursor));
     }
 
@@ -580,7 +580,7 @@ bool wxDbTable::getRec(UWORD fetchType)
             // of each column just read in.
             int i;
             for (i = 0; i < m_numCols; i++)
-                colDefs[i].Null = (colDefs[i].CbValue == SQL_NULL_DATA);
+                colDefs[i].m_null = (colDefs[i].m_cbValue == SQL_NULL_DATA);
         }
     }
     else
@@ -600,7 +600,7 @@ bool wxDbTable::getRec(UWORD fetchType)
             // of each column just read in.
             int i;
             for (i = 0; i < m_numCols; i++)
-                colDefs[i].Null = (colDefs[i].CbValue == SQL_NULL_DATA);
+                colDefs[i].m_null = (colDefs[i].m_cbValue == SQL_NULL_DATA);
         }
     }
 
@@ -657,10 +657,10 @@ bool wxDbTable::execUpdate(const std::wstring &pSqlStmt)
             int i;
             for (i=0; i < m_numCols; i++)
             {
-                if (colDefs[i].PtrDataObj == pParmID)
+                if (colDefs[i].m_PtrDataObj == pParmID)
                 {
                     // We found it.  Store the parameter.
-                    retcode = SQLPutData(hstmtUpdate, pParmID, colDefs[i].SzDataObj);
+                    retcode = SQLPutData(hstmtUpdate, pParmID, colDefs[i].m_szDataObj);
                     if (retcode != SQL_SUCCESS)
                     {
                         pDb->DispNextError();
@@ -738,9 +738,9 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
     m_keysize = 0;
     for (i=0; i < m_numCols; i++)
     {
-        if (colDefs[i].KeyField)
+        if (colDefs[i].m_keyField)
         {
-            m_keysize += colDefs[i].SzDataObj;
+            m_keysize += colDefs[i].m_szDataObj;
         }
     }
 
@@ -821,11 +821,11 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
 		sqlStmt = (boost::wformat(L"INSERT INTO %s (") % pDb->SQLTableName(tableName.c_str())).str();
         for (i = 0; i < m_numCols; i++)
         {
-            if (! colDefs[i].InsertAllowed)
+            if (! colDefs[i].m_insertAllowed)
                 continue;
             if (needComma)
                 sqlStmt += L",";
-            sqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
+            sqlStmt += pDb->SQLColumnName(colDefs[i].m_ColName);
             needComma = true;
         }
         needComma = false;
@@ -835,7 +835,7 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
 
         for (i = 0; i < m_numCols; i++)
         {
-            if (! colDefs[i].InsertAllowed)
+            if (! colDefs[i].m_insertAllowed)
                 continue;
             if (needComma)
                 sqlStmt += L",";
@@ -1049,14 +1049,14 @@ void wxDbTable::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool d
     std::wstring tStr;
     for (i = 0; i < m_numCols; i++)
     {
-        tStr = colDefs[i].ColName;
+        tStr = colDefs[i].m_ColName;
         // If joining tables, the base table column names must be qualified to avoid ambiguity
         if ((appendFromClause || pDb->Dbms() == dbmsACCESS) && tStr.find(L'.') == std::wstring::npos)
         {
             pSqlStmt += pDb->SQLTableName(queryTableName.c_str());
             pSqlStmt += L".";
         }
-        pSqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
+        pSqlStmt += pDb->SQLColumnName(colDefs[i].m_ColName);
         if (i + 1 < m_numCols)
             pSqlStmt += L",";
     }
@@ -1166,14 +1166,14 @@ void wxDbTable::BuildUpdateStmt(std::wstring &pSqlStmt, int typeOfUpdate, const 
     for (i = 0; i < m_numCols; i++)
     {
         // Only append Updateable columns
-        if (colDefs[i].Updateable)
+        if (colDefs[i].m_updateable)
         {
             if (!firstColumn)
                 pSqlStmt += L",";
             else
                 firstColumn = false;
 
-            pSqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
+            pSqlStmt += pDb->SQLColumnName(colDefs[i].m_ColName);
 //            pSqlStmt += colDefs[i].ColName;
             pSqlStmt += L" = ?";
         }
@@ -1240,11 +1240,11 @@ void wxDbTable::BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere,
     for (colNumber = 0; colNumber < m_numCols; colNumber++)
     {
         // Determine if this column should be included in the WHERE clause
-        if ((typeOfWhere == DB_WHERE_KEYFIELDS && colDefs[colNumber].KeyField) ||
+        if ((typeOfWhere == DB_WHERE_KEYFIELDS && colDefs[colNumber].m_keyField) ||
              (typeOfWhere == DB_WHERE_MATCHING  && (!IsColNull((UWORD)colNumber))))
         {
             // Skip over timestamp columns
-            if (colDefs[colNumber].SqlCtype == SQL_C_TIMESTAMP)
+            if (colDefs[colNumber].m_SqlCtype == SQL_C_TIMESTAMP)
                 continue;
             // If there is more than 1 column, join them with the keyword "AND"
             if (moreThanOneColumn)
@@ -1253,53 +1253,53 @@ void wxDbTable::BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere,
                 moreThanOneColumn = true;
 
             // Concatenate where phrase for the column
-            std::wstring tStr = colDefs[colNumber].ColName;
+            std::wstring tStr = colDefs[colNumber].m_ColName;
 
             if (qualTableName.length() && tStr.find(L'.') == std::wstring::npos)
             {
                 pWhereClause += pDb->SQLTableName(qualTableName.c_str());
                 pWhereClause += L".";
             }
-            pWhereClause += pDb->SQLColumnName(colDefs[colNumber].ColName);
+            pWhereClause += pDb->SQLColumnName(colDefs[colNumber].m_ColName);
 
-            if (useLikeComparison && (colDefs[colNumber].SqlCtype == SQL_C_WXCHAR))
+            if (useLikeComparison && (colDefs[colNumber].m_SqlCtype == SQL_C_WXCHAR))
                 pWhereClause += L" LIKE ";
             else
                 pWhereClause += L" = ";
 
-            switch(colDefs[colNumber].SqlCtype)
+            switch(colDefs[colNumber].m_SqlCtype)
             {
                 case SQL_C_CHAR:
 #ifdef SQL_C_WCHAR
                 case SQL_C_WCHAR:
 #endif
                 //case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
-					colValue = (boost::wformat(L"'%s'") % GetDb()->EscapeSqlChars((wchar_t *)colDefs[colNumber].PtrDataObj)).str();
+					colValue = (boost::wformat(L"'%s'") % GetDb()->EscapeSqlChars((wchar_t *)colDefs[colNumber].m_PtrDataObj)).str();
                     break;
                 case SQL_C_SHORT:
                 case SQL_C_SSHORT:
-					colValue = (boost::wformat(L"%hi") % *((SWORD *) colDefs[colNumber].PtrDataObj)).str();
+					colValue = (boost::wformat(L"%hi") % *((SWORD *) colDefs[colNumber].m_PtrDataObj)).str();
                     break;
                 case SQL_C_USHORT:
-					colValue = (boost::wformat(L"%hu") % *((UWORD *) colDefs[colNumber].PtrDataObj)).str();
+					colValue = (boost::wformat(L"%hu") % *((UWORD *) colDefs[colNumber].m_PtrDataObj)).str();
                     break;
                 case SQL_C_LONG:
                 case SQL_C_SLONG:
-					colValue = (boost::wformat(L"%li") % *((SDWORD *) colDefs[colNumber].PtrDataObj)).str();
+					colValue = (boost::wformat(L"%li") % *((SDWORD *) colDefs[colNumber].m_PtrDataObj)).str();
                     break;
                 case SQL_C_ULONG:
-					colValue = (boost::wformat(L"%lu") % *((UDWORD *) colDefs[colNumber].PtrDataObj)).str();
+					colValue = (boost::wformat(L"%lu") % *((UDWORD *) colDefs[colNumber].m_PtrDataObj)).str();
                     break;
                 case SQL_C_FLOAT:
-					colValue = (boost::wformat(L"%.6f") % *((SFLOAT *) colDefs[colNumber].PtrDataObj)).str();
+					colValue = (boost::wformat(L"%.6f") % *((SFLOAT *) colDefs[colNumber].m_PtrDataObj)).str();
                     break;
                 case SQL_C_DOUBLE:
-					colValue = (boost::wformat(L"%.6f") % *((SDOUBLE *) colDefs[colNumber].PtrDataObj)).str();
+					colValue = (boost::wformat(L"%.6f") % *((SDOUBLE *) colDefs[colNumber].m_PtrDataObj)).str();
                     break;
                 default:
                     {
                         std::wstring strMsg;
-						strMsg = (boost::wformat(L"wxDbTable::bindParams(): Unknown column type for colDefs %d colName %s") % colNumber % colDefs[colNumber].ColName).str();
+						strMsg = (boost::wformat(L"wxDbTable::bindParams(): Unknown column type for colDefs %d colName %s") % colNumber % colDefs[colNumber].m_ColName).str();
                         exFAIL_MSG(strMsg.c_str());
                     }
                     break;
@@ -1371,13 +1371,13 @@ bool wxDbTable::CreateTable(bool attemptDrop)
     for (i = 0; i < m_numCols; i++)
     {
         // Exclude derived columns since they are NOT part of the base table
-        if (colDefs[i].DerivedCol)
+        if (colDefs[i].m_derivedCol)
             continue;
-        std::wcout << i + 1 << L": " << colDefs[i].ColName << L"; ";
-        switch(colDefs[i].DbDataType)
+        std::wcout << i + 1 << L": " << colDefs[i].m_ColName << L"; ";
+        switch(colDefs[i].m_DbDataType)
         {
             case DB_DATA_TYPE_VARCHAR:
-                std::wcout << pDb->GetTypeInfVarchar().TypeName << L"(" << (int)(colDefs[i].SzDataObj / sizeof(wchar_t)) << L")";
+                std::wcout << pDb->GetTypeInfVarchar().TypeName << L"(" << (int)(colDefs[i].m_szDataObj / sizeof(wchar_t)) << L")";
                 break;
             case DB_DATA_TYPE_MEMO:
                 std::wcout << pDb->GetTypeInfMemo().TypeName;
@@ -1407,17 +1407,17 @@ bool wxDbTable::CreateTable(bool attemptDrop)
     for (i = 0; i < m_numCols; i++)
     {
         // Exclude derived columns since they are NOT part of the base table
-        if (colDefs[i].DerivedCol)
+        if (colDefs[i].m_derivedCol)
             continue;
         // Comma Delimiter
         if (needComma)
             sqlStmt += L",";
         // Column Name
-        sqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
+        sqlStmt += pDb->SQLColumnName(colDefs[i].m_ColName);
 //        sqlStmt += colDefs[i].ColName;
         sqlStmt += L" ";
         // Column Type
-        switch(colDefs[i].DbDataType)
+        switch(colDefs[i].m_DbDataType)
         {
             case DB_DATA_TYPE_VARCHAR:
                 sqlStmt += pDb->GetTypeInfVarchar().TypeName;
@@ -1439,12 +1439,12 @@ bool wxDbTable::CreateTable(bool attemptDrop)
                 break;
         }
         // For varchars, append the size of the string
-        if (colDefs[i].DbDataType == DB_DATA_TYPE_VARCHAR &&
+        if (colDefs[i].m_DbDataType == DB_DATA_TYPE_VARCHAR &&
             (pDb->Dbms() != dbmsMY_SQL || pDb->GetTypeInfVarchar().TypeName != L"text"))// ||
 //            colDefs[i].DbDataType == DB_DATA_TYPE_BLOB)
         {
             std::wstring s;
-			s = (boost::wformat(L"(%d)") % (int)(colDefs[i].SzDataObj / sizeof(wchar_t))).str();
+			s = (boost::wformat(L"(%d)") % (int)(colDefs[i].m_szDataObj / sizeof(wchar_t))).str();
             sqlStmt += s;
         }
 
@@ -1455,7 +1455,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
             pDb->Dbms() == dbmsFIREBIRD  ||
             pDb->Dbms() == dbmsMS_SQL_SERVER)
         {
-            if (colDefs[i].KeyField)
+            if (colDefs[i].m_keyField)
             {
                 sqlStmt += L" NOT NULL";
             }
@@ -1466,7 +1466,7 @@ bool wxDbTable::CreateTable(bool attemptDrop)
     // If there is a primary key defined, include it in the create statement
     for (i = j = 0; i < m_numCols; i++)
     {
-        if (colDefs[i].KeyField)
+        if (colDefs[i].m_keyField)
         {
             j++;
             break;
@@ -1510,17 +1510,17 @@ bool wxDbTable::CreateTable(bool attemptDrop)
         // List column name(s) of column(s) comprising the primary key
         for (i = j = 0; i < m_numCols; i++)
         {
-            if (colDefs[i].KeyField)
+            if (colDefs[i].m_keyField)
             {
                 if (j++) // Multi part key, comma separate names
                     sqlStmt += L",";
-                sqlStmt += pDb->SQLColumnName(colDefs[i].ColName);
+                sqlStmt += pDb->SQLColumnName(colDefs[i].m_ColName);
 
                 if (pDb->Dbms() == dbmsMY_SQL &&
-                    colDefs[i].DbDataType ==  DB_DATA_TYPE_VARCHAR)
+                    colDefs[i].m_DbDataType ==  DB_DATA_TYPE_VARCHAR)
                 {
                     std::wstring s;
-					s = (boost::wformat(L"(%d)") % (int)(colDefs[i].SzDataObj / sizeof(wchar_t))).str();
+					s = (boost::wformat(L"(%d)") % (int)(colDefs[i].m_szDataObj / sizeof(wchar_t))).str();
                     sqlStmt += s;
                 }
             }
@@ -1652,7 +1652,7 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
             // this information
             while (!found && (j < this->m_numCols))
             {
-                if (wcscmp(colDefs[j].ColName,pIndexDefs[i].ColName) == 0)
+                if (wcscmp(colDefs[j].m_ColName,pIndexDefs[i].ColName) == 0)
                     found = true;
                 if (!found)
                     j++;
@@ -1661,7 +1661,7 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
             if (found)
             {
                 ok = pDb->ModifyColumn(tableName, pIndexDefs[i].ColName,
-                                        colDefs[j].DbDataType, (int)(colDefs[j].SzDataObj / sizeof(wchar_t)),
+                                        colDefs[j].m_DbDataType, (int)(colDefs[j].m_szDataObj / sizeof(wchar_t)),
                                         L"NOT NULL");
 
                 if (!ok)
@@ -1715,15 +1715,15 @@ bool wxDbTable::CreateIndex(const std::wstring &indexName, bool unique, UWORD nu
             int j;
             for ( j = 0; j < m_numCols; ++j )
             {
-                if ( wcscmp( pIndexDefs[i].ColName, colDefs[j].ColName ) == 0 )
+                if ( wcscmp( pIndexDefs[i].ColName, colDefs[j].m_ColName ) == 0 )
                 {
                     break;
                 }
             }
-            if ( colDefs[j].DbDataType ==  DB_DATA_TYPE_VARCHAR)
+            if ( colDefs[j].m_DbDataType ==  DB_DATA_TYPE_VARCHAR)
             {
                 std::wstring s;
-				s = (boost::wformat(L"(%d)") % (int)(colDefs[i].SzDataObj / sizeof(wchar_t))).str();
+				s = (boost::wformat(L"(%d)") % (int)(colDefs[i].m_szDataObj / sizeof(wchar_t))).str();
                 sqlStmt += s;
             }
         }
@@ -1864,7 +1864,7 @@ bool wxDbTable::SetOrderByColNums(UWORD first, ... )
         if (colNumber != first)
             tempStr += L",";
 
-        tempStr += colDefs[colNumber].ColName;
+        tempStr += colDefs[colNumber].m_ColName;
         colNumber = va_arg (argptr, int);
     }
     va_end (argptr);              /* Reset variable arguments.      */
@@ -1911,10 +1911,10 @@ int wxDbTable::Insert()
             int i;
             for (i=0; i < m_numCols; i++)
             {
-                if (colDefs[i].PtrDataObj == pParmID)
+                if (colDefs[i].m_PtrDataObj == pParmID)
                 {
                     // We found it.  Store the parameter.
-                    retcode = SQLPutData(hstmtInsert, pParmID, colDefs[i].SzDataObj);
+                    retcode = SQLPutData(hstmtInsert, pParmID, colDefs[i].m_szDataObj);
                     if (retcode != SQL_SUCCESS)
                     {
                         pDb->DispNextError();
@@ -2103,7 +2103,7 @@ bool wxDbTable::IsColNull(UWORD colNumber) const
             return true;
     }
 */
-    return (colDefs[colNumber].Null);
+    return (colDefs[colNumber].m_null);
 }  // wxDbTable::IsColNull()
 
 
@@ -2159,37 +2159,37 @@ void wxDbTable::ClearMemberVar(UWORD colNumber, bool setToNull)
 {
     exASSERT(colNumber < m_numCols);
 
-    switch(colDefs[colNumber].SqlCtype)
+    switch(colDefs[colNumber].m_SqlCtype)
     {
         case SQL_C_CHAR:
 #ifdef SQL_C_WCHAR
         case SQL_C_WCHAR:
 #endif
         //case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
-            ((UCHAR FAR *) colDefs[colNumber].PtrDataObj)[0]    = 0;
+            ((UCHAR FAR *) colDefs[colNumber].m_PtrDataObj)[0]    = 0;
             break;
         case SQL_C_SSHORT:
-            *((SWORD *) colDefs[colNumber].PtrDataObj)          = 0;
+            *((SWORD *) colDefs[colNumber].m_PtrDataObj)          = 0;
             break;
         case SQL_C_USHORT:
-            *((UWORD*) colDefs[colNumber].PtrDataObj)           = 0;
+            *((UWORD*) colDefs[colNumber].m_PtrDataObj)           = 0;
             break;
         case SQL_C_LONG:
         case SQL_C_SLONG:
-            *((SDWORD *) colDefs[colNumber].PtrDataObj)         = 0;
+            *((SDWORD *) colDefs[colNumber].m_PtrDataObj)         = 0;
             break;
         case SQL_C_ULONG:
-            *((UDWORD *) colDefs[colNumber].PtrDataObj)         = 0;
+            *((UDWORD *) colDefs[colNumber].m_PtrDataObj)         = 0;
             break;
         case SQL_C_FLOAT:
-            *((SFLOAT *) colDefs[colNumber].PtrDataObj)         = 0.0f;
+            *((SFLOAT *) colDefs[colNumber].m_PtrDataObj)         = 0.0f;
             break;
         case SQL_C_DOUBLE:
-            *((SDOUBLE *) colDefs[colNumber].PtrDataObj)        = 0.0f;
+            *((SDOUBLE *) colDefs[colNumber].m_PtrDataObj)        = 0.0f;
             break;
         case SQL_C_TIMESTAMP:
             TIMESTAMP_STRUCT *pDt;
-            pDt = (TIMESTAMP_STRUCT *) colDefs[colNumber].PtrDataObj;
+            pDt = (TIMESTAMP_STRUCT *) colDefs[colNumber].m_PtrDataObj;
             pDt->year = 0;
             pDt->month = 0;
             pDt->day = 0;
@@ -2200,14 +2200,14 @@ void wxDbTable::ClearMemberVar(UWORD colNumber, bool setToNull)
             break;
         case SQL_C_DATE:
             DATE_STRUCT *pDtd;
-            pDtd = (DATE_STRUCT *) colDefs[colNumber].PtrDataObj;
+            pDtd = (DATE_STRUCT *) colDefs[colNumber].m_PtrDataObj;
             pDtd->year = 0;
             pDtd->month = 0;
             pDtd->day = 0;
             break;
         case SQL_C_TIME:
             TIME_STRUCT *pDtt;
-            pDtt = (TIME_STRUCT *) colDefs[colNumber].PtrDataObj;
+            pDtt = (TIME_STRUCT *) colDefs[colNumber].m_PtrDataObj;
             pDtt->hour = 0;
             pDtt->minute = 0;
             pDtt->second = 0;
@@ -2267,34 +2267,34 @@ bool wxDbTable::SetColDefs(UWORD index, const std::wstring &fieldName, int dataT
 
     if (fieldName.length() > (unsigned int) DB_MAX_COLUMN_NAME_LEN)
     {
-        wcsncpy(colDefs[index].ColName, fieldName.c_str(), DB_MAX_COLUMN_NAME_LEN);
-        colDefs[index].ColName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
+        wcsncpy(colDefs[index].m_ColName, fieldName.c_str(), DB_MAX_COLUMN_NAME_LEN);
+        colDefs[index].m_ColName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
 
-		tmpStr = (boost::wformat(L"Column name '%s' is too long. Truncated to '%s'.") %	fieldName % colDefs[index].ColName).str();
+		tmpStr = (boost::wformat(L"Column name '%s' is too long. Truncated to '%s'.") %	fieldName % colDefs[index].m_ColName).str();
         exFAIL_MSG(tmpStr);
     }
     else
-        wcscpy(colDefs[index].ColName, fieldName.c_str());
+        wcscpy(colDefs[index].m_ColName, fieldName.c_str());
 
-    colDefs[index].DbDataType       = dataType;
-    colDefs[index].PtrDataObj       = pData;
-    colDefs[index].SqlCtype         = cType;
-    colDefs[index].SzDataObj        = size;  //TODO: glt ??? * sizeof(wchar_t) ???
-    colDefs[index].KeyField         = keyField;
-    colDefs[index].DerivedCol       = derivedColumn;
+    colDefs[index].m_DbDataType       = dataType;
+    colDefs[index].m_PtrDataObj       = pData;
+    colDefs[index].m_SqlCtype         = cType;
+    colDefs[index].m_szDataObj        = size;  //TODO: glt ??? * sizeof(wchar_t) ???
+    colDefs[index].m_keyField         = keyField;
+    colDefs[index].m_derivedCol       = derivedColumn;
     // Derived columns by definition would NOT be "Insertable" or "Updateable"
     if (derivedColumn)
     {
-        colDefs[index].Updateable       = false;
-        colDefs[index].InsertAllowed    = false;
+        colDefs[index].m_updateable       = false;
+        colDefs[index].m_insertAllowed    = false;
     }
     else
     {
-        colDefs[index].Updateable       = updateable;
-        colDefs[index].InsertAllowed    = insertAllowed;
+        colDefs[index].m_updateable       = updateable;
+        colDefs[index].m_insertAllowed    = insertAllowed;
     }
 
-    colDefs[index].Null                 = false;
+    colDefs[index].m_null                 = false;
 
     return true;
 
@@ -2534,7 +2534,7 @@ bool wxDbTable::SetColNull(UWORD colNumber, bool set)
 {
     if (colNumber < m_numCols)
     {
-        colDefs[colNumber].Null = set;
+        colDefs[colNumber].m_null = set;
         if (set)  // Blank out the values in the member variable
            ClearMemberVar(colNumber, false);  // Must call with false here, or infinite recursion will happen
 
@@ -2554,13 +2554,13 @@ bool wxDbTable::SetColNull(const std::wstring &colName, bool set)
     int colNumber;
     for (colNumber = 0; colNumber < m_numCols; colNumber++)
     {
-        if (!_wcsicmp(colName.c_str(), colDefs[colNumber].ColName))
+        if (!_wcsicmp(colName.c_str(), colDefs[colNumber].m_ColName))
             break;
     }
 
     if (colNumber < m_numCols)
     {
-        colDefs[colNumber].Null = set;
+        colDefs[colNumber].m_null = set;
         if (set)  // Blank out the values in the member variable
            ClearMemberVar((UWORD)colNumber,false);  // Must call with false here, or infinite recursion will happen
 
@@ -2834,10 +2834,10 @@ GenericKey wxDbTable::GetKey()
     int i;
     for (i=0; i < m_numCols; i++)
     {
-        if (colDefs[i].KeyField)
+        if (colDefs[i].m_keyField)
         {
-            memcpy(blkptr,colDefs[i].PtrDataObj, colDefs[i].SzDataObj);
-            blkptr += colDefs[i].SzDataObj;
+            memcpy(blkptr,colDefs[i].m_PtrDataObj, colDefs[i].m_szDataObj);
+            blkptr += colDefs[i].m_szDataObj;
         }
     }
 
@@ -2859,11 +2859,11 @@ void wxDbTable::SetKey(const GenericKey& k)
     int i;
     for (i=0; i < m_numCols; i++)
     {
-        if (colDefs[i].KeyField)
+        if (colDefs[i].m_keyField)
         {
             SetColNull((UWORD)i, false);
-            memcpy(colDefs[i].PtrDataObj, blkptr, colDefs[i].SzDataObj);
-            blkptr += colDefs[i].SzDataObj;
+            memcpy(colDefs[i].m_PtrDataObj, blkptr, colDefs[i].m_szDataObj);
+            blkptr += colDefs[i].m_szDataObj;
         }
     }
 }  // wxDbTable::SetKey()

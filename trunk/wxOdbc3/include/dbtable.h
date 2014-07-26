@@ -29,7 +29,8 @@
 
 namespace exodbc
 {
-
+	// Consts
+	// ------
 
 	const int   wxDB_ROWID_LEN       = 24;  // 18 is the max, 24 is in case it gets larger
 	const int   wxDB_DEFAULT_CURSOR  = 0;
@@ -40,6 +41,9 @@ namespace exodbc
 	// column numbers passed to member functions
 	const int   wxDB_NO_MORE_COLUMN_NUMBERS = -1;
 
+	// Classes
+	// -------
+
 	// The following class is used to define a column of a table.
 	// The wxDbTable constructor will dynamically allocate as many of
 	// these as there are columns in the table.  The class derived
@@ -48,25 +52,25 @@ namespace exodbc
 	// wxDbTable class which allows it to create a table in the data
 	// source, exchange data between the data source and the C++
 	// object, and so on.
-	class WXDLLIMPEXP_ODBC wxDbColDef
+	class WXDLLIMPEXP_ODBC ColumnDefinition
 	{
 	public:
-		wchar_t  ColName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
-		int     DbDataType;                         // Logical Data Type; e.g. DB_DATA_TYPE_INTEGER
-		SWORD   SqlCtype;                           // C data type; e.g. SQL_C_LONG
-		void   *PtrDataObj;                         // Address of the data object
-		int     SzDataObj;                          // Size, in bytes, of the data object
-		bool    KeyField;                           // true if this column is part of the PRIMARY KEY to the table; Date fields should NOT be KeyFields.
-		bool    Updateable;                         // Specifies whether this column is updateable
-		bool    InsertAllowed;                      // Specifies whether this column should be included in an INSERT statement
-		bool    DerivedCol;                         // Specifies whether this column is a derived value
-		SQLLEN  CbValue;                            // Internal use only!!!
-		bool    Null;                               // NOT FULLY IMPLEMENTED - Allows NULL values in Inserts and Updates
-
-		wxDbColDef();
+		ColumnDefinition();
 
 		bool    Initialize();
-	};  // wxDbColDef
+
+		wchar_t	m_ColName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
+		int		m_DbDataType;                         // Logical Data Type; e.g. DB_DATA_TYPE_INTEGER
+		SWORD	m_SqlCtype;                           // C data type; e.g. SQL_C_LONG
+		void*	m_PtrDataObj;                         // Address of the data object
+		int		m_szDataObj;                          // Size, in bytes, of the data object
+		bool	m_keyField;                           // true if this column is part of the PRIMARY KEY to the table; Date fields should NOT be KeyFields.
+		bool	m_updateable;                         // Specifies whether this column is updateable
+		bool	m_insertAllowed;                      // Specifies whether this column should be included in an INSERT statement
+		bool	m_derivedCol;                         // Specifies whether this column is a derived value
+		SQLLEN	m_cbValue;                            // Internal use only!!!
+		bool	m_null;                               // NOT FULLY IMPLEMENTED - Allows NULL values in Inserts and Updates
+	};  // ColumnDefinition
 
 
 	class WXDLLIMPEXP_ODBC wxDbColDataPtr
@@ -142,7 +146,7 @@ namespace exodbc
 		bool        queryOnly;                                 // Query Only, no inserts, updates or deletes
 
 		// Column Definitions
-		wxDbColDef *colDefs;         // Array of wxDbColDef structures
+		ColumnDefinition *colDefs;         // Array of wxDbColDef structures
 
 	public:
 		// Public member functions
@@ -230,7 +234,7 @@ namespace exodbc
 		void            ClearMemberVars(bool setToNull=false);
 		bool            SetQueryTimeout(UDWORD nSeconds);
 
-		wxDbColDef     *GetColDefs() { return colDefs; }
+		ColumnDefinition     *GetColDefs() { return colDefs; }
 		bool            SetColDefs(UWORD index, const std::wstring &fieldName, int dataType,
 			void *pData, SWORD cType,
 			int size, bool keyField = false, bool updateable = true,
