@@ -398,7 +398,7 @@ namespace exodbc
 
 		friend class Table;
 
-	};  // wxDb
+	};  // Database
 
 
 	// The following routines allow a user to get new database connections, free them

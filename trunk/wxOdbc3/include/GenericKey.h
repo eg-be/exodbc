@@ -14,8 +14,9 @@
 // Branched From : gkey.h,v 1.3 2001/06/01 10:31:41
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef _WX_DBGKEY_H_
-#define _WX_DBGKEY_H_
+#pragma  once
+#ifndef GENERICKEY_H
+#define GENERICKEY_H
 
 namespace exodbc
 {
@@ -43,4 +44,4 @@ private:
 
 }
 
-#endif // _WX_DBGKEY_H_
+#endif // GENERICKEY_H
