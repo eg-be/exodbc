@@ -77,7 +77,7 @@ bool wxDbColDef::Initialize()
 
 
 /********** wxDbTable::wxDbTable() Constructor **********/
-wxDbTable::wxDbTable(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
+wxDbTable::wxDbTable(Database *pwxDb, const std::wstring &tblName, const UWORD numColumns,
                     const std::wstring &qryTblName, bool qryOnly, const std::wstring &tblPath)
 {
     if (!initialize(pwxDb, tblName, numColumns, qryTblName, qryOnly, tblPath))
@@ -93,7 +93,7 @@ wxDbTable::~wxDbTable()
 }  // wxDbTable::~wxDbTable()
 
 
-bool wxDbTable::initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
+bool wxDbTable::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD numColumns,
                     const std::wstring &qryTblName, bool qryOnly, const std::wstring &tblPath)
 {
     // Initializing member variables

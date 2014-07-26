@@ -23,7 +23,7 @@
 // --------------------
 namespace exodbc
 {
-	class wxDb;
+	class Database;
 	class DbEnvironment;
 }
 
@@ -41,7 +41,7 @@ namespace wxOdbc3Test
 		static void TearDownTestCase() {};
 
 	protected:
-		exodbc::wxDb*	m_pDb;
+		exodbc::Database*	m_pDb;
 		exodbc::DbEnvironment* m_pConnectInf;
 		SOdbcInfo m_odbcInfo;
 		virtual void SetUp();

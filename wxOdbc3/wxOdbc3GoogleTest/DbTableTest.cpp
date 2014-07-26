@@ -44,7 +44,7 @@ namespace wxOdbc3Test
 		m_pConnectInf = new DbEnvironment(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
-		m_pDb = new wxDb(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		m_pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
 		ASSERT_TRUE(m_pDb->Open(m_pConnectInf));
 	}
 

@@ -45,7 +45,7 @@ namespace wxOdbc3Test
 		m_pConnectInf = new DbEnvironment(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
-		m_pDb = new wxDb(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		m_pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
 		ASSERT_TRUE(m_pDb->Open(m_pConnectInf));
 	}
 
@@ -63,7 +63,7 @@ namespace wxOdbc3Test
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
 
-		wxDb* pDb = new wxDb(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		Database* pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
 
 		// Open without failing on unsupported datatypes
 		EXPECT_TRUE(pDb->Open(m_pConnectInf, false));
@@ -75,14 +75,14 @@ namespace wxOdbc3Test
 		DbEnvironment* pFailConnectInf = new DbEnvironment(NULL, L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
 		HENV henvFail = pFailConnectInf->GetHenv();
 		EXPECT_TRUE(henvFail != NULL);
-		wxDb* pFailDb = new wxDb(henvFail, true);
+		Database* pFailDb = new Database(henvFail, true);
 		EXPECT_FALSE(pFailDb->Open(pFailConnectInf, false));
 		delete pFailDb;
 		delete pFailConnectInf;
 
 		// Open with failing on unsupported datatypes
 		// TODO: This test is stupid, we should also test that we fail
-		pDb = new wxDb(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
 		EXPECT_TRUE(pDb->Open(m_pConnectInf, true));
 		pDb->Close();
 		delete pDb;

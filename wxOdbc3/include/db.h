@@ -176,7 +176,7 @@ namespace exodbc
 		DBerrorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN+1];
 
 
-	class WXDLLIMPEXP_ODBC wxDb
+	class WXDLLIMPEXP_ODBC Database
 	{
 		friend class wxDbTable;
 	private:
@@ -282,8 +282,8 @@ namespace exodbc
 		wchar_t sqlState[20];
 
 		// Public member functions
-		wxDb(const HENV &aHenv, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
-		~wxDb();
+		Database(const HENV &aHenv, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
+		~Database();
 
 		// Data Source Name, User ID, Password and whether open should fail on data type not supported
 		bool         Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported=true);
@@ -291,7 +291,7 @@ namespace exodbc
 		bool         Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported=true);
 		bool         Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wstring &AuthStr, bool failOnDataTypeUnsupported=true);
 		bool         Open(DbEnvironment *dbConnectInf, bool failOnDataTypeUnsupported=true);
-		bool         Open(wxDb *copyDb);  // pointer to a wxDb whose connection info should be copied rather than re-queried
+		bool         Open(Database *copyDb);  // pointer to a wxDb whose connection info should be copied rather than re-queried
 		void         Close(void);
 		bool         CommitTrans(void);
 		bool         RollbackTrans(void);
@@ -388,7 +388,7 @@ namespace exodbc
 		std::wstring  Uid;           // User ID
 		std::wstring  AuthStr;       // Authorization string (password)
 		std::wstring  ConnectionStr; // Connection string used instead of DSN
-		wxDb     *PtrDb;         // Pointer to the wxDb object
+		Database     *PtrDb;         // Pointer to the wxDb object
 		bool      Free;          // Is item free or in use?
 		wxDbList *PtrNext;       // Pointer to next item in the list
 	};
@@ -401,7 +401,7 @@ namespace exodbc
 	public:
 		const wchar_t  *tableName;
 		ULONG          tableID;
-		class wxDb    *pDb;
+		class Database    *pDb;
 	};  // wxTablesInUse
 #endif
 
@@ -409,8 +409,8 @@ namespace exodbc
 	// The following routines allow a user to get new database connections, free them
 	// for other code segments to use, or close all of them when the application has
 	// completed.
-	wxDb  WXDLLIMPEXP_ODBC *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
-	bool  WXDLLIMPEXP_ODBC  wxDbFreeConnection(wxDb *pDb);
+	Database  WXDLLIMPEXP_ODBC *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
+	bool  WXDLLIMPEXP_ODBC  wxDbFreeConnection(Database *pDb);
 	void  WXDLLIMPEXP_ODBC  wxDbCloseConnections(void);
 	int   WXDLLIMPEXP_ODBC  wxDbConnectionsInUse(void);
 
@@ -419,7 +419,7 @@ namespace exodbc
 	// situation occurs.  This function only works in DEBUG builds
 	const wchar_t WXDLLIMPEXP_ODBC *
 		wxDbLogExtendedErrorMsg(const wchar_t *userText,
-		wxDb *pDb,
+		Database *pDb,
 		const wchar_t *ErrFile,
 		int ErrLine);
 
