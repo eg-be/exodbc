@@ -49,7 +49,7 @@ namespace exodbc
 		void*		PtrDataObj;
 		int			SzDataObj;
 		SWORD		SqlCtype;
-	};  // ColumnDataPtr
+	};  // SColumnDataPtr
 
 
 	// This structure is used when creating secondary indexes.
@@ -58,7 +58,7 @@ namespace exodbc
 	public:
 		wchar_t		ColName[DB_MAX_COLUMN_NAME_LEN+1];
 		bool		Ascending;
-	};  // wxDbIdxDef
+	};  // SIndexDefinition
 
 	// Classes
 	// -------
@@ -283,7 +283,7 @@ namespace exodbc
 		//      void unmodify() {m_recstatus=unmodified; }
 		//      recStatus m_recstatus;
 		//TODO: Need to Document
-	};  // wxDbTable
+	};  // Table
 
 }	// namespace exodbc
 

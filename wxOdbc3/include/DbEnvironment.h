@@ -65,9 +65,9 @@ namespace exodbc
 	public:
 
 		DbEnvironment();
-		DbEnvironment(HENV henv, const std::wstring &dsn, const std::wstring &userID = std::wstring(),
-			const std::wstring &password = std::wstring(), const std::wstring &defaultDir = std::wstring(),
-			const std::wstring &description = std::wstring(), const std::wstring &fileType = std::wstring());
+		DbEnvironment(HENV henv, const std::wstring& dsn, const std::wstring& userID = std::wstring(),
+			const std::wstring& password = std::wstring(), const std::wstring& defaultDir = std::wstring(),
+			const std::wstring& description = std::wstring(), const std::wstring& fileType = std::wstring());
 
 		~DbEnvironment();
 
@@ -77,22 +77,22 @@ namespace exodbc
 		void             FreeHenv();
 
 		// Accessors
-		const HENV       &GetHenv()          { return m_henv; }
+		const HENV&		GetHenv()          { return m_henv; }
 
-		const wchar_t    *GetDsn()           { return m_dsn; }
+		const wchar_t*	GetDsn()           { return m_dsn; }
 
-		const wchar_t    *GetUid()           { return m_uid; }
-		const wchar_t    *GetUserID()        { return m_uid; }
+		const wchar_t*	GetUid()           { return m_uid; }
+		const wchar_t*	GetUserID()        { return m_uid; }
 
-		const wchar_t    *GetAuthStr()       { return m_authStr; }
-		const wchar_t    *GetPassword()      { return m_authStr; }
+		const wchar_t*	GetAuthStr()       { return m_authStr; }
+		const wchar_t*	GetPassword()      { return m_authStr; }
 
-		const wchar_t    *GetConnectionStr() { return m_connectionStr; }
-		bool             UseConnectionStr() { return m_useConnectionStr; }
+		const wchar_t*	GetConnectionStr() { return m_connectionStr; }
+		bool			UseConnectionStr() { return m_useConnectionStr; }
 
-		const wchar_t    *GetDescription()   { return m_description.c_str(); }
-		const wchar_t    *GetFileType()      { return m_fileType.c_str(); }
-		const wchar_t    *GetDefaultDir()    { return m_defaultDir.c_str(); }
+		const wchar_t*	GetDescription()   { return m_description.c_str(); }
+		const wchar_t*	GetFileType()      { return m_fileType.c_str(); }
+		const wchar_t*	GetDefaultDir()    { return m_defaultDir.c_str(); }
 
 		void             SetHenv(const HENV henv)               { m_henv = henv; }
 
@@ -130,7 +130,7 @@ namespace exodbc
 		std::wstring m_defaultDir;                               // Directory that db file resides in
 
 
-	};  // class wxDbConnectInf
+	};  // class DbEnvironment
 }
 
 
