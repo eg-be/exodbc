@@ -21,7 +21,7 @@
 #ifndef DBTABLE_H
 #define DBTABLE_H
 
-#include "wxOdbc3.h"
+#include "exOdbc.h"
 
 #include "Database.h"
 

@@ -17,7 +17,7 @@
     <ClInclude Include="include\GenericKey.h" />
     <ClInclude Include="include\Table.h" />
     <ClInclude Include="include\Helpers.h" />
-    <ClInclude Include="include\wxOdbc3.h" />
+    <ClInclude Include="include\exOdbc.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Helpers.cpp">
@@ -36,7 +36,7 @@
     <ClCompile Include="src\DbEnvironment.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\wxOdbc3.cpp">
+    <ClCompile Include="src\exOdbc.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -53,6 +53,7 @@
     <ProjectGuid>{021A7F83-D491-491B-B4E9-93F4F56340C1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>wxOdbc3</RootNamespace>
+    <ProjectName>exOdbc3</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
