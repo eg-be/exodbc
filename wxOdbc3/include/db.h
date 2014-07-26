@@ -43,10 +43,6 @@
 #include <sqlucode.h>
 #include <odbcinst.h>
 
-/* There are too many false positives for this one, particularly when using templates like wxVector<T> */
-/* class 'foo' needs to have dll-interface to be used by clients of class 'bar'" */
-#pragma warning(disable:4251)
-
 // This was defined by a macro testing if wxUNICODE is set
 #define SQL_C_WXCHAR SQL_C_WCHAR
 
@@ -86,156 +82,16 @@ enum enumDummy {enumDum1};
 #endif
 #endif
 
-// Forward declarations
-// --------------------
 
 namespace exodbc
 {
+	// Forward declarations
+	// --------------------
 	class DbEnvironment;
+	class ColumnFormatter;
 
-	// Consts
+	// Structs
 	// ------
-
-	const int wxDB_PATH_MAX                 = 254;
-
-	extern WXDLLIMPEXP_DATA_ODBC(wchar_t const *) SQL_LOG_FILENAME;
-	extern WXDLLIMPEXP_DATA_ODBC(wchar_t const *) SQL_CATALOG_FILENAME;
-
-	// Database Globals
-	const int DB_TYPE_NAME_LEN            = 40;
-	const int DB_MAX_STATEMENT_LEN        = 4096;
-	const int DB_MAX_WHERE_CLAUSE_LEN     = 2048;
-	const int DB_MAX_ERROR_MSG_LEN        = 512;
-	const int DB_MAX_ERROR_HISTORY        = 5;
-	const int DB_MAX_TABLE_NAME_LEN       = 128;
-	const int DB_MAX_COLUMN_NAME_LEN      = 128;
-
-	const int DB_DATA_TYPE_VARCHAR        = 1;
-	const int DB_DATA_TYPE_INTEGER        = 2;
-	const int DB_DATA_TYPE_FLOAT          = 3;
-	const int DB_DATA_TYPE_DATE           = 4;
-	const int DB_DATA_TYPE_BLOB           = 5;
-	const int DB_DATA_TYPE_MEMO           = 6;
-
-	const int DB_SELECT_KEYFIELDS         = 1;
-	const int DB_SELECT_WHERE             = 2;
-	const int DB_SELECT_MATCHING          = 3;
-	const int DB_SELECT_STATEMENT         = 4;
-
-	const int DB_UPD_KEYFIELDS            = 1;
-	const int DB_UPD_WHERE                = 2;
-
-	const int DB_DEL_KEYFIELDS            = 1;
-	const int DB_DEL_WHERE                = 2;
-	const int DB_DEL_MATCHING             = 3;
-
-	const int DB_WHERE_KEYFIELDS          = 1;
-	const int DB_WHERE_MATCHING           = 2;
-
-	const int DB_GRANT_SELECT             = 1;
-	const int DB_GRANT_INSERT             = 2;
-	const int DB_GRANT_UPDATE             = 4;
-	const int DB_GRANT_DELETE             = 8;
-	const int DB_GRANT_ALL                = DB_GRANT_SELECT | DB_GRANT_INSERT | DB_GRANT_UPDATE | DB_GRANT_DELETE;
-
-	// ODBC Error codes (derived from ODBC SqlState codes)
-	enum wxODBC_ERRORS
-	{
-		DB_FAILURE                        = 0,
-		DB_SUCCESS                        = 1,
-		DB_ERR_NOT_IN_USE,
-		DB_ERR_GENERAL_WARNING,                            // SqlState = '01000'
-		DB_ERR_DISCONNECT_ERROR,                           // SqlState = '01002'
-		DB_ERR_DATA_TRUNCATED,                             // SqlState = '01004'
-		DB_ERR_PRIV_NOT_REVOKED,                           // SqlState = '01006'
-		DB_ERR_INVALID_CONN_STR_ATTR,                      // SqlState = '01S00'
-		DB_ERR_ERROR_IN_ROW,                               // SqlState = '01S01'
-		DB_ERR_OPTION_VALUE_CHANGED,                       // SqlState = '01S02'
-		DB_ERR_NO_ROWS_UPD_OR_DEL,                         // SqlState = '01S03'
-		DB_ERR_MULTI_ROWS_UPD_OR_DEL,                      // SqlState = '01S04'
-		DB_ERR_WRONG_NO_OF_PARAMS,                         // SqlState = '07001'
-		DB_ERR_DATA_TYPE_ATTR_VIOL,                        // SqlState = '07006'
-		DB_ERR_UNABLE_TO_CONNECT,                          // SqlState = '08001'
-		DB_ERR_CONNECTION_IN_USE,                          // SqlState = '08002'
-		DB_ERR_CONNECTION_NOT_OPEN,                        // SqlState = '08003'
-		DB_ERR_REJECTED_CONNECTION,                        // SqlState = '08004'
-		DB_ERR_CONN_FAIL_IN_TRANS,                         // SqlState = '08007'
-		DB_ERR_COMM_LINK_FAILURE,                          // SqlState = '08S01'
-		DB_ERR_INSERT_VALUE_LIST_MISMATCH,                 // SqlState = '21S01'
-		DB_ERR_DERIVED_TABLE_MISMATCH,                     // SqlState = '21S02'
-		DB_ERR_STRING_RIGHT_TRUNC,                         // SqlState = '22001'
-		DB_ERR_NUMERIC_VALUE_OUT_OF_RNG,                   // SqlState = '22003'
-		DB_ERR_ERROR_IN_ASSIGNMENT,                        // SqlState = '22005'
-		DB_ERR_DATETIME_FLD_OVERFLOW,                      // SqlState = '22008'
-		DB_ERR_DIVIDE_BY_ZERO,                             // SqlState = '22012'
-		DB_ERR_STR_DATA_LENGTH_MISMATCH,                   // SqlState = '22026'
-		DB_ERR_INTEGRITY_CONSTRAINT_VIOL,                  // SqlState = '23000'
-		DB_ERR_INVALID_CURSOR_STATE,                       // SqlState = '24000'
-		DB_ERR_INVALID_TRANS_STATE,                        // SqlState = '25000'
-		DB_ERR_INVALID_AUTH_SPEC,                          // SqlState = '28000'
-		DB_ERR_INVALID_CURSOR_NAME,                        // SqlState = '34000'
-		DB_ERR_SYNTAX_ERROR_OR_ACCESS_VIOL,                // SqlState = '37000'
-		DB_ERR_DUPLICATE_CURSOR_NAME,                      // SqlState = '3C000'
-		DB_ERR_SERIALIZATION_FAILURE,                      // SqlState = '40001'
-		DB_ERR_SYNTAX_ERROR_OR_ACCESS_VIOL2,               // SqlState = '42000'
-		DB_ERR_OPERATION_ABORTED,                          // SqlState = '70100'
-		DB_ERR_UNSUPPORTED_FUNCTION,                       // SqlState = 'IM001'
-		DB_ERR_NO_DATA_SOURCE,                             // SqlState = 'IM002'
-		DB_ERR_DRIVER_LOAD_ERROR,                          // SqlState = 'IM003'
-		DB_ERR_SQLALLOCENV_FAILED,                         // SqlState = 'IM004'
-		DB_ERR_SQLALLOCCONNECT_FAILED,                     // SqlState = 'IM005'
-		DB_ERR_SQLSETCONNECTOPTION_FAILED,                 // SqlState = 'IM006'
-		DB_ERR_NO_DATA_SOURCE_DLG_PROHIB,                  // SqlState = 'IM007'
-		DB_ERR_DIALOG_FAILED,                              // SqlState = 'IM008'
-		DB_ERR_UNABLE_TO_LOAD_TRANSLATION_DLL,             // SqlState = 'IM009'
-		DB_ERR_DATA_SOURCE_NAME_TOO_LONG,                  // SqlState = 'IM010'
-		DB_ERR_DRIVER_NAME_TOO_LONG,                       // SqlState = 'IM011'
-		DB_ERR_DRIVER_KEYWORD_SYNTAX_ERROR,                // SqlState = 'IM012'
-		DB_ERR_TRACE_FILE_ERROR,                           // SqlState = 'IM013'
-		DB_ERR_TABLE_OR_VIEW_ALREADY_EXISTS,               // SqlState = 'S0001'
-		DB_ERR_TABLE_NOT_FOUND,                            // SqlState = 'S0002'
-		DB_ERR_INDEX_ALREADY_EXISTS,                       // SqlState = 'S0011'
-		DB_ERR_INDEX_NOT_FOUND,                            // SqlState = 'S0012'
-		DB_ERR_COLUMN_ALREADY_EXISTS,                      // SqlState = 'S0021'
-		DB_ERR_COLUMN_NOT_FOUND,                           // SqlState = 'S0022'
-		DB_ERR_NO_DEFAULT_FOR_COLUMN,                      // SqlState = 'S0023'
-		DB_ERR_GENERAL_ERROR,                              // SqlState = 'S1000'
-		DB_ERR_MEMORY_ALLOCATION_FAILURE,                  // SqlState = 'S1001'
-		DB_ERR_INVALID_COLUMN_NUMBER,                      // SqlState = 'S1002'
-		DB_ERR_PROGRAM_TYPE_OUT_OF_RANGE,                  // SqlState = 'S1003'
-		DB_ERR_SQL_DATA_TYPE_OUT_OF_RANGE,                 // SqlState = 'S1004'
-		DB_ERR_OPERATION_CANCELLED,                        // SqlState = 'S1008'
-		DB_ERR_INVALID_ARGUMENT_VALUE,                     // SqlState = 'S1009'
-		DB_ERR_FUNCTION_SEQUENCE_ERROR,                    // SqlState = 'S1010'
-		DB_ERR_OPERATION_INVALID_AT_THIS_TIME,             // SqlState = 'S1011'
-		DB_ERR_INVALID_TRANS_OPERATION_CODE,               // SqlState = 'S1012'
-		DB_ERR_NO_CURSOR_NAME_AVAIL,                       // SqlState = 'S1015'
-		DB_ERR_INVALID_STR_OR_BUF_LEN,                     // SqlState = 'S1090'
-		DB_ERR_DESCRIPTOR_TYPE_OUT_OF_RANGE,               // SqlState = 'S1091'
-		DB_ERR_OPTION_TYPE_OUT_OF_RANGE,                   // SqlState = 'S1092'
-		DB_ERR_INVALID_PARAM_NO,                           // SqlState = 'S1093'
-		DB_ERR_INVALID_SCALE_VALUE,                        // SqlState = 'S1094'
-		DB_ERR_FUNCTION_TYPE_OUT_OF_RANGE,                 // SqlState = 'S1095'
-		DB_ERR_INF_TYPE_OUT_OF_RANGE,                      // SqlState = 'S1096'
-		DB_ERR_COLUMN_TYPE_OUT_OF_RANGE,                   // SqlState = 'S1097'
-		DB_ERR_SCOPE_TYPE_OUT_OF_RANGE,                    // SqlState = 'S1098'
-		DB_ERR_NULLABLE_TYPE_OUT_OF_RANGE,                 // SqlState = 'S1099'
-		DB_ERR_UNIQUENESS_OPTION_TYPE_OUT_OF_RANGE,        // SqlState = 'S1100'
-		DB_ERR_ACCURACY_OPTION_TYPE_OUT_OF_RANGE,          // SqlState = 'S1101'
-		DB_ERR_DIRECTION_OPTION_OUT_OF_RANGE,              // SqlState = 'S1103'
-		DB_ERR_INVALID_PRECISION_VALUE,                    // SqlState = 'S1104'
-		DB_ERR_INVALID_PARAM_TYPE,                         // SqlState = 'S1105'
-		DB_ERR_FETCH_TYPE_OUT_OF_RANGE,                    // SqlState = 'S1106'
-		DB_ERR_ROW_VALUE_OUT_OF_RANGE,                     // SqlState = 'S1107'
-		DB_ERR_CONCURRENCY_OPTION_OUT_OF_RANGE,            // SqlState = 'S1108'
-		DB_ERR_INVALID_CURSOR_POSITION,                    // SqlState = 'S1109'
-		DB_ERR_INVALID_DRIVER_COMPLETION,                  // SqlState = 'S1110'
-		DB_ERR_INVALID_BOOKMARK_VALUE,                     // SqlState = 'S1111'
-		DB_ERR_DRIVER_NOT_CAPABLE,                         // SqlState = 'S1C00'
-		DB_ERR_TIMEOUT_EXPIRED                             // SqlState = 'S1T00'
-	};
-
-
 	struct WXDLLIMPEXP_ODBC wxDbSqlTypeInfo
 	{
 		std::wstring    TypeName;
@@ -243,25 +99,6 @@ namespace exodbc
 		long        Precision;
 		short       CaseSensitive;
 		short       MaximumScale;
-	};
-
-
-	class WXDLLIMPEXP_ODBC wxDbColFor
-	{
-	public:
-		std::wstring       s_Field;              // Formatted String for Output
-		std::wstring       s_Format[7];          // Formatted Objects - TIMESTAMP has the biggest (7)
-		std::wstring       s_Amount[7];          // Formatted Objects - amount of things that can be formatted
-		int            i_Amount[7];          // Formatted Objects - TT MM YYYY HH MM SS m
-		int            i_Nation;             // 0 = timestamp , 1=EU, 2=UK, 3=International, 4=US
-		int            i_dbDataType;         // conversion of the 'sqlDataType' to the generic data type used by these classes
-		SWORD          i_sqlDataType;
-
-		wxDbColFor();
-		~wxDbColFor(){}
-
-		void           Initialize();
-		int            Format(int Nation, int dbDataType, SWORD sqlDataType, short columnLength, short decimalDigits);
 	};
 
 
@@ -286,7 +123,7 @@ namespace exodbc
 		wchar_t       PkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Tables that use this PKey as a FKey
 		int          FkCol;       // Foreign key column       0=No; 1= First Key, 2 = Second Key etc.
 		wchar_t       FkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Foreign key table name
-		wxDbColFor  *pColFor;                              // How should this columns be formatted
+		ColumnFormatter  *pColFor;                              // How should this columns be formatted
 
 		wxDbColInf();
 		~wxDbColInf();
@@ -295,7 +132,7 @@ namespace exodbc
 	};
 
 
-	class WXDLLIMPEXP_ODBC wxDbTableInf        // Description of a Table
+	class WXDLLIMPEXP_ODBC wxDbTableInf        // Description of a Table: Used only in the Description of a database, (catalog info)
 	{
 	public:
 		wchar_t      tableName[DB_MAX_TABLE_NAME_LEN+1];
@@ -311,7 +148,7 @@ namespace exodbc
 	};
 
 
-	class WXDLLIMPEXP_ODBC wxDbInf     // Description of a Database
+	class WXDLLIMPEXP_ODBC wxDbInf     // Description of a Database: Used so far only when fetching the "catalog"
 	{
 	public:
 		wchar_t        catalog[128+1];
@@ -324,48 +161,6 @@ namespace exodbc
 
 		bool          Initialize();
 	};
-
-
-	enum wxDbSqlLogState
-	{
-		sqlLogOFF,
-		sqlLogON
-	};
-
-	// These are the databases currently tested and working with these classes
-	// See the comments in wxDb::Dbms() for exceptions/issues with
-	// each of these database engines
-	enum wxDBMS
-	{
-		dbmsUNIDENTIFIED,
-		dbmsORACLE,
-		dbmsSYBASE_ASA,        // Adaptive Server Anywhere
-		dbmsSYBASE_ASE,        // Adaptive Server Enterprise
-		dbmsMS_SQL_SERVER,
-		dbmsMY_SQL,
-		dbmsPOSTGRES,
-		dbmsACCESS,
-		dbmsDBASE,
-		dbmsINFORMIX,
-		dbmsVIRTUOSO,
-		dbmsDB2,
-		dbmsINTERBASE,
-		dbmsPERVASIVE_SQL,
-		dbmsXBASE_SEQUITER,
-		dbmsFIREBIRD,
-		dbmsMAXDB,
-		dbmsFuture1,
-		dbmsFuture2,
-		dbmsFuture3,
-		dbmsFuture4,
-		dbmsFuture5,
-		dbmsFuture6,
-		dbmsFuture7,
-		dbmsFuture8,
-		dbmsFuture9,
-		dbmsFuture10
-	};
-
 
 	// The wxDb::errorList is copied to this variable when the wxDb object
 	// is closed.  This way, the error list is still available after the
