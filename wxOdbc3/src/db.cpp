@@ -127,56 +127,56 @@ bool wxDbColInf::Initialize()
 
 
 /********** wxDbTableInf Constructor ********/
-wxDbTableInf::wxDbTableInf()
+DbCatalogTable::DbCatalogTable()
 {
     Initialize();
 }  // wxDbTableInf::wxDbTableInf()
 
 
 /********** wxDbTableInf Constructor ********/
-wxDbTableInf::~wxDbTableInf()
+DbCatalogTable::~DbCatalogTable()
 {
-    if (pColInf)
-        delete [] pColInf;
-    pColInf = NULL;
+    if (m_pColInf)
+        delete [] m_pColInf;
+    m_pColInf = NULL;
 }  // wxDbTableInf::~wxDbTableInf()
 
 
-bool wxDbTableInf::Initialize()
+bool DbCatalogTable::Initialize()
 {
-    tableName[0]    = 0;
-    tableType[0]    = 0;
-    tableRemarks[0] = 0;
-    numCols         = 0;
-    pColInf         = NULL;
+    m_tableName[0]    = 0;
+    m_tableType[0]    = 0;
+    m_tableRemarks[0] = 0;
+    m_numCols         = 0;
+    m_pColInf         = NULL;
 
     return true;
 }  // wxDbTableInf::Initialize()
 
 
 /********** wxDbInf Constructor *************/
-wxDbInf::wxDbInf()
+DbCatalog::DbCatalog()
 {
     Initialize();
 }  // wxDbInf::wxDbInf()
 
 
 /********** wxDbInf Destructor *************/
-wxDbInf::~wxDbInf()
+DbCatalog::~DbCatalog()
 {
-  if (pTableInf)
-    delete [] pTableInf;
-  pTableInf = NULL;
+  if (m_pTableInf)
+    delete [] m_pTableInf;
+  m_pTableInf = NULL;
 }  // wxDbInf::~wxDbInf()
 
 
 /********** wxDbInf::Initialize() *************/
-bool wxDbInf::Initialize()
+bool DbCatalog::Initialize()
 {
-    catalog[0]      = 0;
-    schema[0]       = 0;
-    numTables       = 0;
-    pTableInf       = NULL;
+    m_catalog[0]      = 0;
+    m_schema[0]       = 0;
+    m_numTables       = 0;
+    m_pTableInf       = NULL;
 
     return true;
 }  // wxDbInf::Initialize()
@@ -1360,7 +1360,7 @@ bool wxDb::getDbInfo(bool failOnDataTypeUnsupported)
 
 
 /********** wxDb::getDataTypeInfo() **********/
-bool wxDb::getDataTypeInfo(SWORD fSqlType, wxDbSqlTypeInfo &structSQLTypeInfo)
+bool wxDb::getDataTypeInfo(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)
 {
 /*
  * fSqlType will be something like SQL_VARCHAR.  This parameter determines
@@ -3052,7 +3052,7 @@ int wxDb::GetColumnCount(const std::wstring &tableName, const wchar_t *userID)
 
 
 /********** wxDb::GetCatalog() *******/
-wxDbInf *wxDb::GetCatalog(const wchar_t *userID)
+DbCatalog *wxDb::GetCatalog(const wchar_t *userID)
 /*
  * ---------------------------------------------------------------------
  * -- 19991203 : mj10777 : Create                                 ------
@@ -3087,7 +3087,7 @@ wxDbInf *wxDb::GetCatalog(const wchar_t *userID)
     //-------------------------------------------------------------
     // Create the Database Array of catalog entries
 
-    wxDbInf *pDbInf = new wxDbInf;
+    DbCatalog *pDbInf = new DbCatalog;
 
     //-------------------------------------------------------------
     // Table Information
@@ -3133,24 +3133,24 @@ wxDbInf *wxDb::GetCatalog(const wchar_t *userID)
         {
             if (pass == 1)  // First pass, just count the Tables
             {
-                if (pDbInf->numTables == 0)
+                if (pDbInf->m_numTables == 0)
                 {
-                    GetData( 1, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->catalog,  128+1, &cb);
-                    GetData( 2, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->schema,   128+1, &cb);
+                    GetData( 1, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_catalog,  128+1, &cb);
+                    GetData( 2, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_schema,   128+1, &cb);
                  }
-                 pDbInf->numTables++;      // Counter for Tables
+                 pDbInf->m_numTables++;      // Counter for Tables
             }  // if (pass == 1)
             if (pass == 2) // Create and fill the Table entries
             {
-                if (pDbInf->pTableInf == NULL)   // Has the Table Array been created
+                if (pDbInf->m_pTableInf == NULL)   // Has the Table Array been created
                 {  // no, then create the Array
-                    pDbInf->pTableInf = new wxDbTableInf[pDbInf->numTables];
+                    pDbInf->m_pTableInf = new DbCatalogTable[pDbInf->m_numTables];
                     noTab = 0;
                 } // if (pDbInf->pTableInf == NULL)   // Has the Table Array been created
 
-                GetData( 3, SQL_C_WXCHAR,   (UCHAR*)  (pDbInf->pTableInf+noTab)->tableName,    DB_MAX_TABLE_NAME_LEN+1, &cb);
-                GetData( 4, SQL_C_WXCHAR,   (UCHAR*)  (pDbInf->pTableInf+noTab)->tableType,    30+1,                    &cb);
-                GetData( 5, SQL_C_WXCHAR,   (UCHAR*)  (pDbInf->pTableInf+noTab)->tableRemarks, 254+1,                   &cb);
+                GetData( 3, SQL_C_WXCHAR,   (UCHAR*)  (pDbInf->m_pTableInf+noTab)->m_tableName,    DB_MAX_TABLE_NAME_LEN+1, &cb);
+                GetData( 4, SQL_C_WXCHAR,   (UCHAR*)  (pDbInf->m_pTableInf+noTab)->m_tableType,    30+1,                    &cb);
+                GetData( 5, SQL_C_WXCHAR,   (UCHAR*)  (pDbInf->m_pTableInf+noTab)->m_tableRemarks, 254+1,                   &cb);
 
                 noTab++;
             }  // if
@@ -3159,9 +3159,9 @@ wxDbInf *wxDb::GetCatalog(const wchar_t *userID)
     SQLFreeStmt(hstmt, SQL_CLOSE);
 
     // Query how many columns are in each table
-    for (noTab=0;noTab<pDbInf->numTables;noTab++)
+    for (noTab=0;noTab<pDbInf->m_numTables;noTab++)
     {
-        (pDbInf->pTableInf+noTab)->numCols = (UWORD)GetColumnCount((pDbInf->pTableInf+noTab)->tableName, UserID.c_str());
+        (pDbInf->m_pTableInf+noTab)->m_numCols = (UWORD)GetColumnCount((pDbInf->m_pTableInf+noTab)->m_tableName, UserID.c_str());
     }
 
     return pDbInf;
