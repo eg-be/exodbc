@@ -9,7 +9,7 @@
 //#include "stdafx.h"
 
 // Own header
-#include "wxOdbc3.h"
+#include "exOdbc.h"
 
 // Same component headers
 // Other headers

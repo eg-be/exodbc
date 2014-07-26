@@ -11,7 +11,7 @@
 #define COLUMNFORMATTER_H
 
 // Same component headers
-#include "wxOdbc3.h"
+#include "exOdbc.h"
 
 // Other headers
 #include <sqltypes.h>

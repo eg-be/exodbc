@@ -11,7 +11,7 @@
 #define DBENVIRONMENT_H
 
 // Same component headers
-#include "wxOdbc3.h"
+#include "exOdbc.h"
 #include "Helpers.h"
 
 // Other headers
