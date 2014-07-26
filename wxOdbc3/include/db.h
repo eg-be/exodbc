@@ -103,33 +103,34 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class WXDLLIMPEXP_ODBC wxDbColInf
+	class WXDLLIMPEXP_ODBC ColumnInfo
 	{
 	public:
-		wchar_t       catalog[128+1];
-		wchar_t       schema[128+1];
-		wchar_t       tableName[DB_MAX_TABLE_NAME_LEN+1];
-		wchar_t       colName[DB_MAX_COLUMN_NAME_LEN+1];
-		SWORD        sqlDataType;
-		wchar_t       typeName[128+1];
-		SWORD        columnLength;
-		SWORD        bufferSize;
-		short        decimalDigits;
-		short        numPrecRadix;
-		short        nullable;
-		wchar_t       remarks[254+1];
-		int          dbDataType;  // conversion of the 'sqlDataType' to the generic data type used by these classes
-		// mj10777.19991224 : new
-		int          PkCol;       // Primary key column       0=No; 1= First Key, 2 = Second Key etc.
-		wchar_t       PkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Tables that use this PKey as a FKey
-		int          FkCol;       // Foreign key column       0=No; 1= First Key, 2 = Second Key etc.
-		wchar_t       FkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Foreign key table name
-		ColumnFormatter  *pColFor;                              // How should this columns be formatted
-
-		wxDbColInf();
-		~wxDbColInf();
+		ColumnInfo();
+		~ColumnInfo();
 
 		bool Initialize();
+
+		wchar_t			m_catalog[128+1];
+		wchar_t			m_schema[128+1];
+		wchar_t			m_tableName[DB_MAX_TABLE_NAME_LEN+1];
+		wchar_t			m_colName[DB_MAX_COLUMN_NAME_LEN+1];
+		SWORD			m_sqlDataType;
+		wchar_t			m_typeName[128+1];
+		SWORD			m_columnLength;
+		SWORD			m_bufferSize;
+		short			m_decimalDigits;
+		short			m_numPrecRadix;
+		short			m_nullable;
+		wchar_t			m_remarks[254+1];
+		int				m_dbDataType;  // conversion of the 'sqlDataType' to the generic data type used by these classes
+		// mj10777.19991224 : new
+		int				m_pkCol;       // Primary key column       0=No; 1= First Key, 2 = Second Key etc.
+		wchar_t			m_pkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Tables that use this PKey as a FKey
+		int				m_fkCol;       // Foreign key column       0=No; 1= First Key, 2 = Second Key etc.
+		wchar_t			m_fkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Foreign key table name
+		ColumnFormatter* m_pColFor;                              // How should this columns be formatted
+
 	};
 
 
@@ -139,13 +140,13 @@ namespace exodbc
 		DbCatalogTable();
 		~DbCatalogTable();
 
+		bool             Initialize();
+
 		wchar_t		m_tableName[DB_MAX_TABLE_NAME_LEN+1];
 		wchar_t		m_tableType[254+1];           // "TABLE" or "SYSTEM TABLE" etc.
 		wchar_t		m_tableRemarks[254+1];
 		UWORD		m_numCols;                    // How many Columns does this Table have: GetColumnCount(..);
-		wxDbColInf*	m_pColInf;                    // pColInf = NULL ; User can later call GetColumns(..);
-
-		bool             Initialize();
+		ColumnInfo*	m_pColInf;                    // pColInf = NULL ; User can later call GetColumns(..);
 	};
 
 
@@ -155,12 +156,12 @@ namespace exodbc
 		DbCatalog();
 		~DbCatalog();
 
+		bool          Initialize();
+
 		wchar_t			m_catalog[128+1];
 		wchar_t			m_schema[128+1];
 		int				m_numTables;           // How many tables does this database have
 		DbCatalogTable*	m_pTableInf;           // pTableInf = new wxDbTableInf[numTables];
-
-		bool          Initialize();
 	};
 
 	// The wxDb::errorList is copied to this variable when the wxDb object
@@ -275,13 +276,7 @@ namespace exodbc
 		// ODBC Error Inf.
 		SWORD  cbErrorMsg;
 		int    DB_STATUS;
-#ifdef __VMS
-		// The DECC compiler chokes when in db.cpp the array is accessed outside
-		// its bounds. Maybe this change should also applied for other platforms.
-		wchar_t errorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN+1];
-#else
 		wchar_t errorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN];
-#endif
 		wchar_t errorMsg[SQL_MAX_MESSAGE_LENGTH];
 		SQLINTEGER nativeError;
 		wchar_t sqlState[20];
@@ -306,17 +301,17 @@ namespace exodbc
 		bool         CreateView(const std::wstring &viewName, const std::wstring &colList, const std::wstring &pSqlStmt, bool attemptDrop=true);
 		bool         DropView(const std::wstring &viewName);
 		bool         ExecSql(const std::wstring &pSqlStmt);
-		bool         ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& numcols);
+		bool         ExecSql(const std::wstring &pSqlStmt, ColumnInfo** columns, short& numcols);
 		bool         GetNext(void);
 		bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR *cbReturned);
 		bool         Grant(int privileges, const std::wstring &tableName, const std::wstring &userList = L"PUBLIC");
 		int          TranslateSqlState(const std::wstring &SQLState);
 		DbCatalog     *GetCatalog(const wchar_t *userID=NULL);
 		bool         Catalog(const wchar_t *userID=NULL, const std::wstring &fileName=SQL_CATALOG_FILENAME);
-		int          GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD noCols);
+		int          GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UWORD noCols);
 
-		wxDbColInf  *GetColumns(wchar_t *tableName[], const wchar_t *userID=NULL);
-		wxDbColInf  *GetColumns(const std::wstring &tableName, UWORD *numCols, const wchar_t *userID=NULL);
+		ColumnInfo  *GetColumns(wchar_t *tableName[], const wchar_t *userID=NULL);
+		ColumnInfo  *GetColumns(const std::wstring &tableName, UWORD *numCols, const wchar_t *userID=NULL);
 
 		int             GetColumnCount(const std::wstring &tableName, const wchar_t *userID=NULL);
 		const wchar_t   *GetDatabaseName(void)  {return dbInf.dbmsName;}

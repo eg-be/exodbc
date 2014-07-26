@@ -2302,7 +2302,7 @@ bool wxDbTable::SetColDefs(UWORD index, const std::wstring &fieldName, int dataT
 
 
 /********** wxDbTable::SetColDefs() **********/
-wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
+wxDbColDataPtr* wxDbTable::SetColDefs(ColumnInfo *pColInfs, UWORD numCols)
 {
     exASSERT(pColInfs);
     wxDbColDataPtr *pColDataPtrs = NULL;
@@ -2316,21 +2316,21 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
         for (index = 0; index < numCols; index++)
         {
             // Process the fields
-            switch (pColInfs[index].dbDataType)
+            switch (pColInfs[index].m_dbDataType)
             {
                 case DB_DATA_TYPE_VARCHAR:
-                   pColDataPtrs[index].PtrDataObj = new wchar_t[pColInfs[index].bufferSize+(1*sizeof(wchar_t))];
-                   pColDataPtrs[index].SzDataObj  = pColInfs[index].bufferSize+(1*sizeof(wchar_t));
+                   pColDataPtrs[index].PtrDataObj = new wchar_t[pColInfs[index].m_bufferSize+(1*sizeof(wchar_t))];
+                   pColDataPtrs[index].SzDataObj  = pColInfs[index].m_bufferSize+(1*sizeof(wchar_t));
                    pColDataPtrs[index].SqlCtype   = SQL_C_WXCHAR;
                    break;
                 case DB_DATA_TYPE_MEMO:
-                   pColDataPtrs[index].PtrDataObj = new wchar_t[pColInfs[index].bufferSize+(1*sizeof(wchar_t))];
-                   pColDataPtrs[index].SzDataObj  = pColInfs[index].bufferSize+(1*sizeof(wchar_t));
+                   pColDataPtrs[index].PtrDataObj = new wchar_t[pColInfs[index].m_bufferSize+(1*sizeof(wchar_t))];
+                   pColDataPtrs[index].SzDataObj  = pColInfs[index].m_bufferSize+(1*sizeof(wchar_t));
                    pColDataPtrs[index].SqlCtype   = SQL_C_WXCHAR;
                    break;
                 case DB_DATA_TYPE_INTEGER:
                     // Can be long or short
-                    if (pColInfs[index].bufferSize == sizeof(long))
+                    if (pColInfs[index].m_bufferSize == sizeof(long))
                     {
                       pColDataPtrs[index].PtrDataObj = new long;
                       pColDataPtrs[index].SzDataObj  = sizeof(long);
@@ -2345,7 +2345,7 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
                     break;
                 case DB_DATA_TYPE_FLOAT:
                     // Can be float or double
-                    if (pColInfs[index].bufferSize == sizeof(float))
+                    if (pColInfs[index].m_bufferSize == sizeof(float))
                     {
                         pColDataPtrs[index].PtrDataObj = new float;
                         pColDataPtrs[index].SzDataObj  = sizeof(float);
@@ -2371,7 +2371,7 @@ wxDbColDataPtr* wxDbTable::SetColDefs(wxDbColInf *pColInfs, UWORD numCols)
                     break;
             }
             if (pColDataPtrs[index].PtrDataObj != NULL)
-                SetColDefs (index,pColInfs[index].colName,pColInfs[index].dbDataType, pColDataPtrs[index].PtrDataObj, pColDataPtrs[index].SqlCtype, pColDataPtrs[index].SzDataObj);
+                SetColDefs (index,pColInfs[index].m_colName,pColInfs[index].m_dbDataType, pColDataPtrs[index].PtrDataObj, pColDataPtrs[index].SqlCtype, pColDataPtrs[index].SzDataObj);
             else
             {
                 // Unable to build all the column definitions, as either one of

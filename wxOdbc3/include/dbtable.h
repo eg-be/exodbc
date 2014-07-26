@@ -235,7 +235,7 @@ namespace exodbc
 			void *pData, SWORD cType,
 			int size, bool keyField = false, bool updateable = true,
 			bool insertAllowed = true, bool derivedColumn = false);
-		wxDbColDataPtr *SetColDefs(wxDbColInf *colInfs, UWORD numCols);
+		wxDbColDataPtr *SetColDefs(ColumnInfo *colInfs, UWORD numCols);
 
 		bool            CloseCursor(HSTMT cursor);
 		bool            DeleteCursor(HSTMT *hstmtDel);
