@@ -86,41 +86,41 @@ typedef struct
 
 
 /********** wxDbColInf Constructor **********/
-wxDbColInf::wxDbColInf()
+ColumnInfo::ColumnInfo()
 {
     Initialize();
 }  // wxDbColInf::wxDbColInf()
 
 
 /********** wxDbColInf Destructor ********/
-wxDbColInf::~wxDbColInf()
+ColumnInfo::~ColumnInfo()
 {
-    if (pColFor)
-        delete pColFor;
-    pColFor = NULL;
+    if (m_pColFor)
+        delete m_pColFor;
+    m_pColFor = NULL;
 }  // wxDbColInf::~wxDbColInf()
 
 
-bool wxDbColInf::Initialize()
+bool ColumnInfo::Initialize()
 {
-    catalog[0]      = 0;
-    schema[0]       = 0;
-    tableName[0]    = 0;
-    colName[0]      = 0;
-    sqlDataType     = 0;
-    typeName[0]     = 0;
-    columnLength    = 0;
-    bufferSize      = 0;
-    decimalDigits   = 0;
-    numPrecRadix    = 0;
-    nullable        = 0;
-    remarks[0]      = 0;
-    dbDataType      = 0;
-    PkCol           = 0;
-    PkTableName[0]  = 0;
-    FkCol           = 0;
-    FkTableName[0]  = 0;
-    pColFor         = NULL;
+    m_catalog[0]      = 0;
+    m_schema[0]       = 0;
+    m_tableName[0]    = 0;
+    m_colName[0]      = 0;
+    m_sqlDataType     = 0;
+    m_typeName[0]     = 0;
+    m_columnLength    = 0;
+    m_bufferSize      = 0;
+    m_decimalDigits   = 0;
+    m_numPrecRadix    = 0;
+    m_nullable        = 0;
+    m_remarks[0]      = 0;
+    m_dbDataType      = 0;
+    m_pkCol           = 0;
+    m_pkTableName[0]  = 0;
+    m_fkCol           = 0;
+    m_fkTableName[0]  = 0;
+    m_pColFor         = NULL;
 
     return true;
 }  // wxDbColInf::Initialize()
@@ -1992,7 +1992,7 @@ bool wxDb::ExecSql(const std::wstring &pSqlStmt)
 
 
 /********** wxDb::ExecSql() with column info **********/
-bool wxDb::ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& numcols)
+bool wxDb::ExecSql(const std::wstring &pSqlStmt, ColumnInfo** columns, short& numcols)
 {
     //execute the statement first
     if (!ExecSql(pSqlStmt))
@@ -2015,7 +2015,7 @@ bool wxDb::ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& nu
     wchar_t name[DB_MAX_COLUMN_NAME_LEN+1];
     SWORD Sword;
     SQLLEN Sqllen;
-    wxDbColInf* pColInf = new wxDbColInf[noCols];
+    ColumnInfo* pColInf = new ColumnInfo[noCols];
 
     // Fill in column information (name, datatype)
     for (colNum = 0; colNum < noCols; colNum++)
@@ -2029,8 +2029,8 @@ bool wxDb::ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& nu
             return false;
         }
 
-        wcsncpy(pColInf[colNum].colName, name, DB_MAX_COLUMN_NAME_LEN);
-        pColInf[colNum].colName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
+        wcsncpy(pColInf[colNum].m_colName, name, DB_MAX_COLUMN_NAME_LEN);
+        pColInf[colNum].m_colName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
 
         if (SQLColAttributes(hstmt, (UWORD)(colNum+1), SQL_COLUMN_TYPE,
             NULL, 0, &Sword, &Sqllen) != SQL_SUCCESS)
@@ -2050,30 +2050,30 @@ bool wxDb::ExecSql(const std::wstring &pSqlStmt, wxDbColInf** columns, short& nu
     #endif
             case SQL_VARCHAR:
             case SQL_CHAR:
-                pColInf[colNum].dbDataType = DB_DATA_TYPE_VARCHAR;
+                pColInf[colNum].m_dbDataType = DB_DATA_TYPE_VARCHAR;
                 break;
             case SQL_LONGVARCHAR:
-                pColInf[colNum].dbDataType = DB_DATA_TYPE_MEMO;
+                pColInf[colNum].m_dbDataType = DB_DATA_TYPE_MEMO;
                 break;
             case SQL_TINYINT:
             case SQL_SMALLINT:
             case SQL_INTEGER:
             case SQL_BIT:
-                pColInf[colNum].dbDataType = DB_DATA_TYPE_INTEGER;
+                pColInf[colNum].m_dbDataType = DB_DATA_TYPE_INTEGER;
                 break;
             case SQL_DOUBLE:
             case SQL_DECIMAL:
             case SQL_NUMERIC:
             case SQL_FLOAT:
             case SQL_REAL:
-                pColInf[colNum].dbDataType = DB_DATA_TYPE_FLOAT;
+                pColInf[colNum].m_dbDataType = DB_DATA_TYPE_FLOAT;
                 break;
             case SQL_DATE:
             case SQL_TIMESTAMP:
-                pColInf[colNum].dbDataType = DB_DATA_TYPE_DATE;
+                pColInf[colNum].m_dbDataType = DB_DATA_TYPE_DATE;
                 break;
             case SQL_BINARY:
-                pColInf[colNum].dbDataType = DB_DATA_TYPE_BLOB;
+                pColInf[colNum].m_dbDataType = DB_DATA_TYPE_BLOB;
                 break;
 #ifdef __WXDEBUG__
             default:
@@ -2125,7 +2125,7 @@ bool wxDb::GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FA
 
 
 /********** wxDb::GetKeyFields() **********/
-int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD noCols)
+int wxDb::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UWORD noCols)
 {
     wchar_t       szPkTable[DB_MAX_TABLE_NAME_LEN+1];  /* Primary key table name */
     wchar_t       szFkTable[DB_MAX_TABLE_NAME_LEN+1];  /* Foreign key table name */
@@ -2170,8 +2170,8 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
             GetData( 5, SQL_C_SSHORT, &iKeySeq,    0,                        &cb);
             //-------
             for (i=0;i<noCols;i++)                          // Find the Column name
-                if (!wcscmp(colInf[i].colName,szPkCol))   // We have found the Column
-                    colInf[i].PkCol = iKeySeq;              // Which Primary Key is this (first, second usw.) ?
+                if (!wcscmp(colInf[i].m_colName,szPkCol))   // We have found the Column
+                    colInf[i].m_pkCol = iKeySeq;              // Which Primary Key is this (first, second usw.) ?
         }  // if
     }  // while
     SQLFreeStmt(hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated).      */
@@ -2215,10 +2215,10 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
     {
         for (i=0; i<noCols; i++)
         {   // Find the Column name
-            if (!wcscmp(colInf[i].colName, szPkCol))           // We have found the Column, store the Information
+            if (!wcscmp(colInf[i].m_colName, szPkCol))           // We have found the Column, store the Information
             {
-                wcsncpy(colInf[i].PkTableName, tempStr.c_str(), DB_MAX_TABLE_NAME_LEN);  // Name of the Tables where this Primary Key is used as a Foreign Key
-                colInf[i].PkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
+                wcsncpy(colInf[i].m_pkTableName, tempStr.c_str(), DB_MAX_TABLE_NAME_LEN);  // Name of the Tables where this Primary Key is used as a Foreign Key
+                colInf[i].m_pkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
             }
         }
     }  // if
@@ -2252,11 +2252,11 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
             //-------
             for (i=0; i<noCols; i++)                            // Find the Column name
             {
-                if (!wcscmp(colInf[i].colName,szFkCol))       // We have found the (Foreign Key) Column
+                if (!wcscmp(colInf[i].m_colName,szFkCol))       // We have found the (Foreign Key) Column
                 {
-                    colInf[i].FkCol = iKeySeq;                  // Which Foreign Key is this (first, second usw.) ?
-                    wcsncpy(colInf[i].FkTableName, szFkTable, DB_MAX_TABLE_NAME_LEN);  // Name of the Table where this Foriegn is the Primary Key
-                    colInf[i].FkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
+                    colInf[i].m_fkCol = iKeySeq;                  // Which Foreign Key is this (first, second usw.) ?
+                    wcsncpy(colInf[i].m_fkTableName, szFkTable, DB_MAX_TABLE_NAME_LEN);  // Name of the Table where this Foriegn is the Primary Key
+                    colInf[i].m_fkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
                 } // if
             }  // for
         }  // if
@@ -2270,7 +2270,7 @@ int wxDb::GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD 
 
 #if OLD_GETCOLUMNS
 /********** wxDb::GetColumns() **********/
-wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
+ColumnInfo *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
 /*
  *        1) The last array element of the tableName[] argument must be zero (null).
  *            This is how the end of the array is detected.
@@ -2300,7 +2300,7 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
 {
     UWORD       noCols = 0;
     UWORD       colNo  = 0;
-    wxDbColInf *colInf = 0;
+    ColumnInfo *colInf = 0;
 
     RETCODE  retcode;
     SQLLEN   cb;
@@ -2321,13 +2321,13 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
             if (noCols == 0)  // Probably a bogus table name(s)
                 break;
             // Allocate n wxDbColInf objects to hold the column information
-            colInf = new wxDbColInf[noCols+1];
+            colInf = new ColumnInfo[noCols+1];
             if (!colInf)
                 break;
             // Mark the end of the array
-            wcscpy(colInf[noCols].tableName, emptyString);
-            wcscpy(colInf[noCols].colName, emptyString);
-            colInf[noCols].sqlDataType = 0;
+            wcscpy(colInf[noCols].m_tableName, emptyString);
+            wcscpy(colInf[noCols].m_colName, emptyString);
+            colInf[noCols].m_sqlDataType = 0;
         }
         // Loop through each table name
         int tbl;
@@ -2382,42 +2382,42 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
                     if (colNo < noCols)  // Some extra error checking to prevent memory overwrites
                     {
                         // NOTE: Only the ODBC 1.x fields are retrieved
-                        GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].catalog,      128+1,                    &cb);
-                        GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].schema,       128+1,                    &cb);
-                        GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].tableName,    DB_MAX_TABLE_NAME_LEN+1,  &cb);
-                        GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].colName,      DB_MAX_COLUMN_NAME_LEN+1, &cb);
-                        GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].sqlDataType,  0,                        &cb);
-                        GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].typeName,     128+1,                    &cb);
-                        GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].columnLength, 0,                        &cb);
-                        GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].bufferSize,   0,                        &cb);
-                        GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].decimalDigits,0,                        &cb);
-                        GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].numPrecRadix, 0,                        &cb);
-                        GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].nullable,     0,                        &cb);
-                        GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].remarks,      254+1,                    &cb);
+                        GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_catalog,      128+1,                    &cb);
+                        GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_schema,       128+1,                    &cb);
+                        GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_tableName,    DB_MAX_TABLE_NAME_LEN+1,  &cb);
+                        GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_colName,      DB_MAX_COLUMN_NAME_LEN+1, &cb);
+                        GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_sqlDataType,  0,                        &cb);
+                        GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_typeName,     128+1,                    &cb);
+                        GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].m_columnLength, 0,                        &cb);
+                        GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_bufferSize,   0,                        &cb);
+                        GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_decimalDigits,0,                        &cb);
+                        GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_numPrecRadix, 0,                        &cb);
+                        GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_nullable,     0,                        &cb);
+                        GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_remarks,      254+1,                    &cb);
 
                         // Determine the wxDb data type that is used to represent the native data type of this data source
-                        colInf[colNo].dbDataType = 0;
-                        if (!_wcsicmp(typeInfVarchar.TypeName.c_str(), colInf[colNo].typeName))
+                        colInf[colNo].m_dbDataType = 0;
+                        if (!_wcsicmp(typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
                         {
 #ifdef _IODBC_
                             // IODBC does not return a correct columnLength, so we set
                             // columnLength = bufferSize if no column length was returned
                             // IODBC returns the columnLength in bufferSize. (bug)
-                            if (colInf[colNo].columnLength < 1)
+                            if (colInf[colNo].m_columnLength < 1)
                             {
-                               colInf[colNo].columnLength = colInf[colNo].bufferSize;
+                               colInf[colNo].m_columnLength = colInf[colNo].m_bufferSize;
                             }
 #endif
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_VARCHAR;
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
                         }
-                        else if (!_wcsicmp(typeInfInteger.TypeName.c_str(), colInf[colNo].typeName))
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_INTEGER;
-                        else if (!_wcsicmp(typeInfFloat.TypeName.c_str(), colInf[colNo].typeName))
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_FLOAT;
-                        else if (!_wcsicmp(typeInfDate.TypeName.c_str(), colInf[colNo].typeName))
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_DATE;
-                        else if (!_wcsicmp(typeInfBlob.TypeName.c_str(), colInf[colNo].typeName))
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_BLOB;
+                        else if (!_wcsicmp(typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
+                        else if (!_wcsicmp(typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
+                        else if (!_wcsicmp(typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
+                        else if (!_wcsicmp(typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
                         colNo++;
                     }
                 }
@@ -2441,7 +2441,7 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
 
 /********** wxDb::GetColumns() **********/
 
-wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, const wchar_t *userID)
+ColumnInfo *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, const wchar_t *userID)
 //
 // Same as the above GetColumns() function except this one gets columns
 // only for a single table, and if 'numCols' is not NULL, the number of
@@ -2459,7 +2459,7 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, cons
 {
     UWORD       noCols = 0;
     UWORD       colNo  = 0;
-    wxDbColInf *colInf = 0;
+    ColumnInfo *colInf = 0;
 
     RETCODE  retcode;
     SQLLEN   cb;
@@ -2480,13 +2480,13 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, cons
             if (noCols == 0)  // Probably a bogus table name(s)
                 break;
             // Allocate n wxDbColInf objects to hold the column information
-            colInf = new wxDbColInf[noCols+1];
+            colInf = new ColumnInfo[noCols+1];
             if (!colInf)
                 break;
             // Mark the end of the array
-            wcscpy(colInf[noCols].tableName, emptyString);
-            wcscpy(colInf[noCols].colName, emptyString);
-            colInf[noCols].sqlDataType = 0;
+            wcscpy(colInf[noCols].m_tableName, emptyString);
+            wcscpy(colInf[noCols].m_colName, emptyString);
+            colInf[noCols].m_sqlDataType = 0;
         }
 
         TableName = tableName;
@@ -2540,57 +2540,57 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, cons
                 if (colNo < noCols)  // Some extra error checking to prevent memory overwrites
                 {
                     // NOTE: Only the ODBC 1.x fields are retrieved
-                    GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].catalog,      128+1,                     &cb);
-                    GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].schema,       128+1,                     &cb);
-                    GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].tableName,    DB_MAX_TABLE_NAME_LEN+1,   &cb);
-                    GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].colName,      DB_MAX_COLUMN_NAME_LEN+1,  &cb);
-                    GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].sqlDataType,  0,                         &cb);
-                    GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].typeName,     128+1,                     &cb);
-                    GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].columnLength, 0,                         &cb);
+                    GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_catalog,      128+1,                     &cb);
+                    GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_schema,       128+1,                     &cb);
+                    GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_tableName,    DB_MAX_TABLE_NAME_LEN+1,   &cb);
+                    GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_colName,      DB_MAX_COLUMN_NAME_LEN+1,  &cb);
+                    GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_sqlDataType,  0,                         &cb);
+                    GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_typeName,     128+1,                     &cb);
+                    GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].m_columnLength, 0,                         &cb);
                     // BJO 991214 : SQL_C_SSHORT instead of SQL_C_SLONG, otherwise fails on Sparc (probably all 64 bit architectures)
-                    GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].bufferSize,   0,                         &cb);
-                    GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].decimalDigits,0,                         &cb);
-                    GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].numPrecRadix, 0,                         &cb);
-                    GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].nullable,     0,                         &cb);
-                    GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].remarks,      254+1,                     &cb);
+                    GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_bufferSize,   0,                         &cb);
+                    GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_decimalDigits,0,                         &cb);
+                    GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_numPrecRadix, 0,                         &cb);
+                    GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_nullable,     0,                         &cb);
+                    GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_remarks,      254+1,                     &cb);
                     // Start Values for Primary/Foriegn Key (=No)
-                    colInf[colNo].PkCol = 0;           // Primary key column   0=No; 1= First Key, 2 = Second Key etc.
-                    colInf[colNo].PkTableName[0] = 0;  // Tablenames where Primary Key is used as a Foreign Key
-                    colInf[colNo].FkCol = 0;           // Foreign key column   0=No; 1= First Key, 2 = Second Key etc.
-                    colInf[colNo].FkTableName[0] = 0;  // Foreign key table name
+                    colInf[colNo].m_pkCol = 0;           // Primary key column   0=No; 1= First Key, 2 = Second Key etc.
+                    colInf[colNo].m_pkTableName[0] = 0;  // Tablenames where Primary Key is used as a Foreign Key
+                    colInf[colNo].m_fkCol = 0;           // Foreign key column   0=No; 1= First Key, 2 = Second Key etc.
+                    colInf[colNo].m_fkTableName[0] = 0;  // Foreign key table name
 
                     // BJO 20000428 : Virtuoso returns type names with upper cases!
                     if (Dbms() == dbmsVIRTUOSO)
                     {
-                        std::wstring s = colInf[colNo].typeName;
+                        std::wstring s = colInf[colNo].m_typeName;
 						boost::algorithm::to_lower(s);
-                        wcscmp(colInf[colNo].typeName, s.c_str());
+                        wcscmp(colInf[colNo].m_typeName, s.c_str());
                     }
 
                     // Determine the wxDb data type that is used to represent the native data type of this data source
-                    colInf[colNo].dbDataType = 0;
-                    if (!_wcsicmp(typeInfVarchar.TypeName.c_str(), colInf[colNo].typeName))
+                    colInf[colNo].m_dbDataType = 0;
+                    if (!_wcsicmp(typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
                     {
 #ifdef _IODBC_
                         // IODBC does not return a correct columnLength, so we set
                         // columnLength = bufferSize if no column length was returned
                         // IODBC returns the columnLength in bufferSize. (bug)
-                        if (colInf[colNo].columnLength < 1)
+                        if (colInf[colNo].m_columnLength < 1)
                         {
-                           colInf[colNo].columnLength = colInf[colNo].bufferSize;
+                           colInf[colNo].m_columnLength = colInf[colNo].m_bufferSize;
                         }
 #endif
 
-                        colInf[colNo].dbDataType = DB_DATA_TYPE_VARCHAR;
+                        colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
                     }
-                    else if (!_wcsicmp(typeInfInteger.TypeName.c_str(), colInf[colNo].typeName))
-                        colInf[colNo].dbDataType = DB_DATA_TYPE_INTEGER;
-                    else if (!_wcsicmp(typeInfFloat.TypeName.c_str(), colInf[colNo].typeName))
-                        colInf[colNo].dbDataType = DB_DATA_TYPE_FLOAT;
-                    else if (!_wcsicmp(typeInfDate.TypeName.c_str(), colInf[colNo].typeName))
-                        colInf[colNo].dbDataType = DB_DATA_TYPE_DATE;
-                    else if (!_wcsicmp(typeInfBlob.TypeName.c_str(), colInf[colNo].typeName))
-                        colInf[colNo].dbDataType = DB_DATA_TYPE_BLOB;
+                    else if (!_wcsicmp(typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
+                        colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
+                    else if (!_wcsicmp(typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
+                        colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
+                    else if (!_wcsicmp(typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
+                        colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
+                    else if (!_wcsicmp(typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
+                        colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
 
                     colNo++;
                 }
@@ -2644,11 +2644,11 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, UWORD *numCols, cons
 typedef struct
 {
     UWORD noCols;
-    wxDbColInf *colInf;
+    ColumnInfo *colInf;
 } _TableColumns;
 
 
-wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
+ColumnInfo *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
 {
     int i, j;
     // The last array element of the tableName[] argument must be zero (null).
@@ -2674,12 +2674,12 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
     }
 
     // Now merge all the separate table infos
-    wxDbColInf *colInf = new wxDbColInf[noCols+1];
+    ColumnInfo *colInf = new ColumnInfo[noCols+1];
 
     // Mark the end of the array
-    wcscpy(colInf[noCols].tableName, emptyString);
-    wcscpy(colInf[noCols].colName, emptyString);
-    colInf[noCols].sqlDataType = 0;
+    wcscpy(colInf[noCols].m_tableName, emptyString);
+    wcscpy(colInf[noCols].m_colName, emptyString);
+    colInf[noCols].m_sqlDataType = 0;
 
     // Merge ...
     int offset = 0;
@@ -2698,7 +2698,7 @@ wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const wchar_t *userID)
 }  // wxDb::GetColumns()  -- NEW
 
 
-wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const wchar_t *userID)
+ColumnInfo *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const wchar_t *userID)
 //
 // Same as the above GetColumns() function except this one gets columns
 // only for a single table, and if 'numCols' is not NULL, the number of
@@ -2715,7 +2715,7 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
 {
     UWORD       noCols = 0;
     UWORD       colNo  = 0;
-    wxDbColInf *colInf = 0;
+    ColumnInfo *colInf = 0;
 
     RETCODE  retcode;
     SDWORD   cb;
@@ -2736,13 +2736,13 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
             if (noCols == 0)  // Probably a bogus table name(s)
                 break;
             // Allocate n wxDbColInf objects to hold the column information
-            colInf = new wxDbColInf[noCols+1];
+            colInf = new ColumnInfo[noCols+1];
             if (!colInf)
                 break;
             // Mark the end of the array
-            wcscpy(colInf[noCols].tableName, emptyString);
-            wcscpy(colInf[noCols].colName, emptyString);
-            colInf[noCols].sqlDataType = 0;
+            wcscpy(colInf[noCols].m_tableName, emptyString);
+            wcscpy(colInf[noCols].m_colName, emptyString);
+            colInf[noCols].m_sqlDataType = 0;
         }
 
         TableName = tableName;
@@ -2796,38 +2796,38 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
                 if (colNo < noCols)  // Some extra error checking to prevent memory overwrites
                 {
                     // NOTE: Only the ODBC 1.x fields are retrieved
-                    GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].catalog,      128+1,                     &cb);
-                    GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].schema,       128+1,                     &cb);
-                    GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].tableName,    DB_MAX_TABLE_NAME_LEN+1,   &cb);
-                    GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].colName,      DB_MAX_COLUMN_NAME_LEN+1,  &cb);
-                    GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].sqlDataType,  0,                         &cb);
-                    GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].typeName,     128+1,                     &cb);
-                    GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].columnLength, 0,                         &cb);
-                    GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].bufferSize,   0,                         &cb);
-                    GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].decimalDigits,0,                         &cb);
-                    GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].numPrecRadix, 0,                         &cb);
-                    GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].nullable,     0,                         &cb);
-                    GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].remarks,      254+1,                     &cb);
+                    GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_catalog,      128+1,                     &cb);
+                    GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_schema,       128+1,                     &cb);
+                    GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_tableName,    DB_MAX_TABLE_NAME_LEN+1,   &cb);
+                    GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_colName,      DB_MAX_COLUMN_NAME_LEN+1,  &cb);
+                    GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_sqlDataType,  0,                         &cb);
+                    GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_typeName,     128+1,                     &cb);
+                    GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].m_columnLength, 0,                         &cb);
+                    GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_bufferSize,   0,                         &cb);
+                    GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_decimalDigits,0,                         &cb);
+                    GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_numPrecRadix, 0,                         &cb);
+                    GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_nullable,     0,                         &cb);
+                    GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_remarks,      254+1,                     &cb);
                     // Start Values for Primary/Foriegn Key (=No)
-                    colInf[colNo].PkCol = 0;           // Primary key column   0=No; 1= First Key, 2 = Second Key etc.
-                    colInf[colNo].PkTableName[0] = 0;  // Tablenames where Primary Key is used as a Foreign Key
-                    colInf[colNo].FkCol = 0;           // Foreign key column   0=No; 1= First Key, 2 = Second Key etc.
-                    colInf[colNo].FkTableName[0] = 0;  // Foreign key table name
+                    colInf[colNo].m_pkCol = 0;           // Primary key column   0=No; 1= First Key, 2 = Second Key etc.
+                    colInf[colNo].m_pkTableName[0] = 0;  // Tablenames where Primary Key is used as a Foreign Key
+                    colInf[colNo].m_fkCol = 0;           // Foreign key column   0=No; 1= First Key, 2 = Second Key etc.
+                    colInf[colNo].m_fkTableName[0] = 0;  // Foreign key table name
 
 #ifdef _IODBC_
                     // IODBC does not return a correct columnLength, so we set
                     // columnLength = bufferSize if no column length was returned
                     // IODBC returns the columnLength in bufferSize. (bug)
-                    if (colInf[colNo].columnLength < 1)
+                    if (colInf[colNo].m_columnLength < 1)
                     {
-                       colInf[colNo].columnLength = colInf[colNo].bufferSize;
+                       colInf[colNo].m_columnLength = colInf[colNo].m_bufferSize;
                     }
 #endif
 
                     // Determine the wxDb data type that is used to represent the native data type of this data source
-                    colInf[colNo].dbDataType = 0;
+                    colInf[colNo].m_dbDataType = 0;
                     // Get the intern datatype
-                    switch (colInf[colNo].sqlDataType)
+                    switch (colInf[colNo].m_sqlDataType)
                     {
 #if wxUSE_UNICODE
     #if defined(SQL_WCHAR)
@@ -2839,35 +2839,35 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
 #endif
                         case SQL_VARCHAR:
                         case SQL_CHAR:
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_VARCHAR;
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
                         break;
                         case SQL_LONGVARCHAR:
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_MEMO;
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_MEMO;
                             break;
                         case SQL_TINYINT:
                         case SQL_SMALLINT:
                         case SQL_INTEGER:
                         case SQL_BIT:
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_INTEGER;
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
                             break;
                         case SQL_DOUBLE:
                         case SQL_DECIMAL:
                         case SQL_NUMERIC:
                         case SQL_FLOAT:
                         case SQL_REAL:
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_FLOAT;
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
                             break;
                         case SQL_DATE:
                         case SQL_TIMESTAMP:
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_DATE;
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
                             break;
                         case SQL_BINARY:
-                            colInf[colNo].dbDataType = DB_DATA_TYPE_BLOB;
+                            colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
                             break;
 #ifdef __WXDEBUG__
                         default:
                             std::wstring errMsg;
-                            errMsg.Printf(L"SQL Data type %d currently not supported by wxWidgets", colInf[colNo].sqlDataType);
+                            errMsg.Printf(L"SQL Data type %d currently not supported by wxWidgets", colInf[colNo].m_sqlDataType);
 							BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << errMsg;
 #endif
                     }
@@ -2940,13 +2940,13 @@ wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const 
         // Where is this name in the array ?
         for (i = colNum ; i < noCols ; i++)
         {
-            std::wstring Name2 =  colInf[i].colName;
+            std::wstring Name2 =  colInf[i].m_colName;
             Name2 = Name2.Upper();
             if (Name2 == Name1)
             {
                 if (colNum != i) // swap to sort
                 {
-                    wxDbColInf tmpColInf = colInf[colNum];
+                    ColumnInfo tmpColInf = colInf[colNum];
                     colInf[colNum] =  colInf[i];
                     colInf[i] = tmpColInf;
                 }
