@@ -13,16 +13,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\db.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\dbtable.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\wxOdbc3.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\dbkeyg.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\Helpers.h">
@@ -34,11 +28,14 @@
     <ClInclude Include="include\ColumnFormatter.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Database.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\GenericKey.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\db.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\dbtable.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -52,6 +49,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ColumnFormatter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Database.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

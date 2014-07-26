@@ -17,7 +17,7 @@
 
 // Other headers
 #include "DbEnvironment.h"
-#include "db.h"
+#include "Database.h"
 
 // Static consts
 // -------------

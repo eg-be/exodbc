@@ -13,7 +13,7 @@
 
 // Same component headers
 // Other headers
-#include "db.h"
+#include "Database.h"
 
 using namespace exodbc;
 // Static consts
