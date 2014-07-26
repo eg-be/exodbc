@@ -92,16 +92,17 @@ namespace exodbc
 
 	// Structs
 	// ------
-	struct WXDLLIMPEXP_ODBC wxDbSqlTypeInfo
+	struct WXDLLIMPEXP_ODBC SqlTypeInfo
 	{
-		std::wstring    TypeName;
-		SWORD       FsqlType;
-		long        Precision;
-		short       CaseSensitive;
-		short       MaximumScale;
+		std::wstring	TypeName;
+		SWORD			FsqlType;
+		long			Precision;
+		short			CaseSensitive;
+		short			MaximumScale;
 	};
 
-
+	// Classes
+	// -------
 	class WXDLLIMPEXP_ODBC wxDbColInf
 	{
 	public:
@@ -132,32 +133,32 @@ namespace exodbc
 	};
 
 
-	class WXDLLIMPEXP_ODBC wxDbTableInf        // Description of a Table: Used only in the Description of a database, (catalog info)
+	class WXDLLIMPEXP_ODBC DbCatalogTable        // Description of a Table: Used only in the Description of a database, (catalog info)
 	{
 	public:
-		wchar_t      tableName[DB_MAX_TABLE_NAME_LEN+1];
-		wchar_t      tableType[254+1];           // "TABLE" or "SYSTEM TABLE" etc.
-		wchar_t      tableRemarks[254+1];
-		UWORD       numCols;                    // How many Columns does this Table have: GetColumnCount(..);
-		wxDbColInf *pColInf;                    // pColInf = NULL ; User can later call GetColumns(..);
+		DbCatalogTable();
+		~DbCatalogTable();
 
-		wxDbTableInf();
-		~wxDbTableInf();
+		wchar_t		m_tableName[DB_MAX_TABLE_NAME_LEN+1];
+		wchar_t		m_tableType[254+1];           // "TABLE" or "SYSTEM TABLE" etc.
+		wchar_t		m_tableRemarks[254+1];
+		UWORD		m_numCols;                    // How many Columns does this Table have: GetColumnCount(..);
+		wxDbColInf*	m_pColInf;                    // pColInf = NULL ; User can later call GetColumns(..);
 
 		bool             Initialize();
 	};
 
 
-	class WXDLLIMPEXP_ODBC wxDbInf     // Description of a Database: Used so far only when fetching the "catalog"
+	class WXDLLIMPEXP_ODBC DbCatalog     // Description of a Database: Used so far only when fetching the "catalog"
 	{
 	public:
-		wchar_t        catalog[128+1];
-		wchar_t        schema[128+1];
-		int           numTables;           // How many tables does this database have
-		wxDbTableInf *pTableInf;           // pTableInf = new wxDbTableInf[numTables];
+		DbCatalog();
+		~DbCatalog();
 
-		wxDbInf();
-		~wxDbInf();
+		wchar_t			m_catalog[128+1];
+		wchar_t			m_schema[128+1];
+		int				m_numTables;           // How many tables does this database have
+		DbCatalogTable*	m_pTableInf;           // pTableInf = new wxDbTableInf[numTables];
 
 		bool          Initialize();
 	};
@@ -193,7 +194,7 @@ namespace exodbc
 
 		// Private member functions
 		bool             getDbInfo(bool failOnDataTypeUnsupported=true);
-		bool             getDataTypeInfo(SWORD fSqlType, wxDbSqlTypeInfo &structSQLTypeInfo);
+		bool             getDataTypeInfo(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo);
 		bool             setConnectionOptions(void);
 		void             logError(const std::wstring &errMsg, const std::wstring &SQLState);
 		const wchar_t    *convertUserID(const wchar_t *userID, std::wstring &UserID);
@@ -218,19 +219,19 @@ namespace exodbc
 		// SQLGetTypeInfo() function.  The key piece of information is the
 		// type name the data source uses for each logical data type.
 		// e.g. VARCHAR; Oracle calls it VARCHAR2.
-		wxDbSqlTypeInfo typeInfVarchar;
-		wxDbSqlTypeInfo typeInfInteger;
-		wxDbSqlTypeInfo typeInfFloat;
-		wxDbSqlTypeInfo typeInfDate;
-		wxDbSqlTypeInfo typeInfBlob;
-		wxDbSqlTypeInfo typeInfMemo;
+		SqlTypeInfo typeInfVarchar;
+		SqlTypeInfo typeInfInteger;
+		SqlTypeInfo typeInfFloat;
+		SqlTypeInfo typeInfDate;
+		SqlTypeInfo typeInfBlob;
+		SqlTypeInfo typeInfMemo;
 
 	public:
 
 		void             setCached(bool cached)  { dbIsCached = cached; }  // This function must only be called by wxDbGetConnection() and wxDbCloseConnections!!!
 		bool             IsCached() { return dbIsCached; }
 
-		bool             GetDataTypeInfo(SWORD fSqlType, wxDbSqlTypeInfo &structSQLTypeInfo)
+		bool             GetDataTypeInfo(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)
 		{ return getDataTypeInfo(fSqlType, structSQLTypeInfo); }
 
 
@@ -310,7 +311,7 @@ namespace exodbc
 		bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR *cbReturned);
 		bool         Grant(int privileges, const std::wstring &tableName, const std::wstring &userList = L"PUBLIC");
 		int          TranslateSqlState(const std::wstring &SQLState);
-		wxDbInf     *GetCatalog(const wchar_t *userID=NULL);
+		DbCatalog     *GetCatalog(const wchar_t *userID=NULL);
 		bool         Catalog(const wchar_t *userID=NULL, const std::wstring &fileName=SQL_CATALOG_FILENAME);
 		int          GetKeyFields(const std::wstring &tableName, wxDbColInf* colInf, UWORD noCols);
 
@@ -332,12 +333,12 @@ namespace exodbc
 		HDBC            GetHDBC(void)          {return hdbc;}
 		HSTMT           GetHSTMT(void)         {return hstmt;}
 		int             GetTableCount()        {return nTables;}  // number of tables using this connection
-		wxDbSqlTypeInfo GetTypeInfVarchar()    {return typeInfVarchar;}
-		wxDbSqlTypeInfo GetTypeInfInteger()    {return typeInfInteger;}
-		wxDbSqlTypeInfo GetTypeInfFloat()      {return typeInfFloat;}
-		wxDbSqlTypeInfo GetTypeInfDate()       {return typeInfDate;}
-		wxDbSqlTypeInfo GetTypeInfBlob()       {return typeInfBlob;}
-		wxDbSqlTypeInfo GetTypeInfMemo()       {return typeInfMemo;}
+		SqlTypeInfo GetTypeInfVarchar()    {return typeInfVarchar;}
+		SqlTypeInfo GetTypeInfInteger()    {return typeInfInteger;}
+		SqlTypeInfo GetTypeInfFloat()      {return typeInfFloat;}
+		SqlTypeInfo GetTypeInfDate()       {return typeInfDate;}
+		SqlTypeInfo GetTypeInfBlob()       {return typeInfBlob;}
+		SqlTypeInfo GetTypeInfMemo()       {return typeInfMemo;}
 
 		// tableName can refer to a table, view, alias or synonym
 		bool         TableExists(const std::wstring &tableName, const wchar_t *userID=NULL,
