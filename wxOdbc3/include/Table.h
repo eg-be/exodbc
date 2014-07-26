@@ -43,7 +43,7 @@ namespace exodbc
 
 	// Structs
 	// -------
-	struct EXODBCAPI ColumnDataPtr
+	struct EXODBCAPI SColumnDataPtr
 	{
 	public:
 		void*		PtrDataObj;
@@ -53,7 +53,7 @@ namespace exodbc
 
 
 	// This structure is used when creating secondary indexes.
-	struct EXODBCAPI IndexDefinition
+	struct EXODBCAPI SIndexDefinition
 	{
 	public:
 		wchar_t		ColName[DB_MAX_COLUMN_NAME_LEN+1];
@@ -105,7 +105,7 @@ namespace exodbc
 		bool            Open(bool checkPrivileges = false, bool checkTableExists = true);
 		bool            CreateTable(bool attemptDrop = true);
 		bool            DropTable();
-		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, IndexDefinition* pIndexDefs, bool attemptDrop = true);
+		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, SIndexDefinition* pIndexDefs, bool attemptDrop = true);
 		bool            DropIndex(const std::wstring& indexName);
 
 		// Accessors
@@ -182,7 +182,7 @@ namespace exodbc
 		ColumnDefinition* GetColDefs() { return m_colDefs; }
 		bool            SetColDefs(UWORD index, const std::wstring& fieldName, int dataType, void* pData, SWORD cType, int size, bool keyField = false, 
 									bool updateable = true, bool insertAllowed = true, bool derivedColumn = false);
-		ColumnDataPtr* SetColDefs(ColumnInfo* colInfs, UWORD numCols);
+		SColumnDataPtr* SetColDefs(ColumnInfo* colInfs, UWORD numCols);
 
 		bool            CloseCursor(HSTMT cursor);
 		bool            DeleteCursor(HSTMT* hstmtDel);
@@ -197,7 +197,7 @@ namespace exodbc
 		bool            SetColNull(UWORD colNumber, bool set = true);
 		bool            SetColNull(const std::wstring& colName, bool set = true);
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 		ULONG           GetTableID() { return m_tableID; }
 #endif
 
