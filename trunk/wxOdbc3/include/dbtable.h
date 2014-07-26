@@ -97,7 +97,7 @@ namespace exodbc
 		bool        insertable;
 
 		// Private member functions
-		bool        initialize(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
+		bool        initialize(Database *pwxDb, const std::wstring &tblName, const UWORD numColumns,
 			const std::wstring &qryTblName, bool qryOnly, const std::wstring &tblPath);
 		void        cleanup();
 
@@ -132,7 +132,7 @@ namespace exodbc
 		bool        selectForUpdate;
 
 		// Pointer to the database object this table belongs to
-		wxDb       *pDb;
+		Database       *pDb;
 
 		// Table Inf.
 		std::wstring    tablePath;                                 // needed for dBase tables
@@ -146,7 +146,7 @@ namespace exodbc
 
 	public:
 		// Public member functions
-		wxDbTable(wxDb *pwxDb, const std::wstring &tblName, const UWORD numColumns,
+		wxDbTable(Database *pwxDb, const std::wstring &tblName, const UWORD numColumns,
 			const std::wstring &qryTblName=emptyString, bool qryOnly = !wxDB_QUERY_ONLY,
 			const std::wstring &tblPath=emptyString);
 
@@ -164,7 +164,7 @@ namespace exodbc
 		// The member variables returned by these accessors are all
 		// set when the wxDbTable instance is created and cannot be
 		// changed, hence there is no corresponding SetXxxx function
-		wxDb           *GetDb()              { return pDb; }
+		Database           *GetDb()              { return pDb; }
 		const std::wstring &GetTableName()       { return tableName; }
 		const std::wstring &GetQueryTableName()  { return queryTableName; }
 		const std::wstring &GetTablePath()       { return tablePath; }

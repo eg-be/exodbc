@@ -31,7 +31,7 @@ namespace wxOdbc3Test
 {
 	// NotExistingTable
 	// ----------------
-	NotExistingTable::NotExistingTable(wxDb* pDb)
+	NotExistingTable::NotExistingTable(Database* pDb)
 		: wxDbTable(pDb, L"notexisting", 1)
 	{
 		SetColDefs(0, L"idnotexisting", DB_DATA_TYPE_INTEGER, &m_idNotExisting, SQL_C_LONG, sizeof(m_idNotExisting), true);
@@ -40,7 +40,7 @@ namespace wxOdbc3Test
 
 	// CharTypesTable
 	// --------------
-	CharTypesTable::CharTypesTable(wxDb* pDb)
+	CharTypesTable::CharTypesTable(Database* pDb)
 		: wxDbTable(pDb, L"chartypes", 3, L"", wxDB_QUERY_ONLY)
 	{
 		m_idCharTypes	= 0;
@@ -54,7 +54,7 @@ namespace wxOdbc3Test
 
 	// CharTypesTmpTable
 	// --------------
-	CharTypesTmpTable::CharTypesTmpTable(wxDb* pDb)
+	CharTypesTmpTable::CharTypesTmpTable(Database* pDb)
 		: wxDbTable(pDb, L"chartypes_tmp", 3, L"", wxDB_QUERY_ONLY)
 	{
 		m_idCharTypes	= 0;
@@ -68,7 +68,7 @@ namespace wxOdbc3Test
 
 	// IntTypesTable
 	// ---------------
-	IntTypesTable::IntTypesTable(wxDb* pDb)
+	IntTypesTable::IntTypesTable(Database* pDb)
 		: wxDbTable(pDb, L"integertypes", 7, L"", wxDB_QUERY_ONLY)
 	{	
 		m_idIntegerTypes = 0;
@@ -93,7 +93,7 @@ namespace wxOdbc3Test
 
 	// IntTypesTmpTable
 	// ---------------
-	IntTypesTmpTable::IntTypesTmpTable(wxDb* pDb)
+	IntTypesTmpTable::IntTypesTmpTable(Database* pDb)
 		: wxDbTable(pDb, L"integertypes_tmp", 7, L"", wxDB_QUERY_ONLY)
 	{	
 		m_idIntegerTypes = 0;
@@ -115,7 +115,7 @@ namespace wxOdbc3Test
 
 	// DateTypesTable
 	// ---------------
-	DateTypesTable::DateTypesTable(wxDb* pDb)
+	DateTypesTable::DateTypesTable(Database* pDb)
 		: wxDbTable(pDb, L"datetypes", 4, L"", wxDB_QUERY_ONLY)
 	{
 		m_idDateTypes		= 0;
@@ -132,7 +132,7 @@ namespace wxOdbc3Test
 
 	// DateTypesTmpTable
 	// ---------------
-	DateTypesTmpTable::DateTypesTmpTable(wxDb* pDb)
+	DateTypesTmpTable::DateTypesTmpTable(Database* pDb)
 		: wxDbTable(pDb, L"datetypes_tmp", 4, L"", wxDB_QUERY_ONLY)
 	{
 		m_idDateTypes		= 0;
@@ -149,7 +149,7 @@ namespace wxOdbc3Test
 
 	// FloatTypesTable
 	// ---------------
-	FloatTypesTable::FloatTypesTable(wxDb* pDb)
+	FloatTypesTable::FloatTypesTable(Database* pDb)
 		: wxDbTable(pDb, L"floattypes", 3, L"", wxDB_QUERY_ONLY)
 	{
 		m_idFloatTypes	= 0;
@@ -166,7 +166,7 @@ namespace wxOdbc3Test
 
 	// FloatTypesTable
 	// ---------------
-	FloatTypesTmpTable::FloatTypesTmpTable(wxDb* pDb)
+	FloatTypesTmpTable::FloatTypesTmpTable(Database* pDb)
 		: wxDbTable(pDb, L"floattypes_tmp", 3, L"", wxDB_QUERY_ONLY)
 	{
 		m_idFloatTypes	= 0;
@@ -182,7 +182,7 @@ namespace wxOdbc3Test
 
 	// NumericTypesTable
 	// -----------------
-	NumericTypesTable::NumericTypesTable(wxDb* pDb, ReadMode readMode)
+	NumericTypesTable::NumericTypesTable(Database* pDb, ReadMode readMode)
 		: wxDbTable(pDb, L"numerictypes", 3, L"", wxDB_QUERY_ONLY)
 		, m_readMode(readMode)
 	{
@@ -209,7 +209,7 @@ namespace wxOdbc3Test
 
 	// NumericTypesTable
 	// -----------------
-	NumericTypesTmpTable::NumericTypesTmpTable(wxDb* pDb, ReadMode readMode)
+	NumericTypesTmpTable::NumericTypesTmpTable(Database* pDb, ReadMode readMode)
 		: wxDbTable(pDb, L"numerictypes_tmp", 3, L"", wxDB_QUERY_ONLY)
 		, m_readMode(readMode)
 	{
@@ -236,7 +236,7 @@ namespace wxOdbc3Test
 
 	// BlobTypesTable
 	// --------------
-	BlobTypesTable::BlobTypesTable(wxDb* pDb)
+	BlobTypesTable::BlobTypesTable(Database* pDb)
 		: wxDbTable(pDb, L"blobtypes", 2, L"", wxDB_QUERY_ONLY)
 	{
 		ZeroMemory(m_blob, sizeof(m_blob));
@@ -247,7 +247,7 @@ namespace wxOdbc3Test
 
 	// BlobTypesTmpTable
 	// --------------
-	BlobTypesTmpTable::BlobTypesTmpTable(wxDb* pDb)
+	BlobTypesTmpTable::BlobTypesTmpTable(Database* pDb)
 		: wxDbTable(pDb, L"blobtypes_tmp", 2, L"", wxDB_QUERY_ONLY)
 	{
 		ZeroMemory(m_blob, sizeof(m_blob));
@@ -258,7 +258,7 @@ namespace wxOdbc3Test
 
 	// CharTable
 	// ---------
-	CharTable::CharTable(wxDb* pDb)
+	CharTable::CharTable(Database* pDb)
 		: wxDbTable(pDb, L"chartable", 4, L"", wxDB_QUERY_ONLY)
 	{
 		m_idCharTable	= 0;
@@ -274,7 +274,7 @@ namespace wxOdbc3Test
 
 	// IncompleteCharTable
 	// -------------------
-	IncompleteCharTable::IncompleteCharTable(wxDb* pDb)
+	IncompleteCharTable::IncompleteCharTable(Database* pDb)
 		: wxDbTable(pDb, L"chartable", 4, L"", wxDB_QUERY_ONLY)
 	{
 		m_idCharTable	= 0;

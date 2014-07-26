@@ -25,7 +25,7 @@
 namespace exodbc
 {
 	class DbEnvironment;
-	class wxDb;
+	class Database;
 }
 
 // Structs
@@ -47,7 +47,7 @@ namespace wxOdbc3Test
 		virtual void TearDown();
 
 		exodbc::DbEnvironment* m_pConnectInf;
-		exodbc::wxDb*	m_pDb;
+		exodbc::Database*	m_pDb;
 		SOdbcInfo m_odbcInfo;
 	};
 
