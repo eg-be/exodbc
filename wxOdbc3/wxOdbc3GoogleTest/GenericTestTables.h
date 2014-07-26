@@ -10,7 +10,7 @@
 
 // Same component headers
 // Other headers
-#include "dbtable.h"
+#include "Table.h"
 
 // System headers
 
@@ -31,7 +31,7 @@ namespace wxOdbc3Test
 
 	// NotExistingTable
 	// ----------------
-	class NotExistingTable : public exodbc::wxDbTable
+	class NotExistingTable : public exodbc::Table
 	{
 	public:
 		NotExistingTable(exodbc::Database* pDb);
@@ -42,7 +42,7 @@ namespace wxOdbc3Test
 
 	// CharTypesTable
 	// --------------
-	class CharTypesTable : public exodbc::wxDbTable
+	class CharTypesTable : public exodbc::Table
 	{
 	public:
 
@@ -56,7 +56,7 @@ namespace wxOdbc3Test
 
 	// CharTypesTmpTable
 	// --------------
-	class CharTypesTmpTable : public exodbc::wxDbTable
+	class CharTypesTmpTable : public exodbc::Table
 	{
 	public:
 
@@ -70,7 +70,7 @@ namespace wxOdbc3Test
 
 	// IntTypesTable
 	// ----------
-	class IntTypesTable : public exodbc::wxDbTable
+	class IntTypesTable : public exodbc::Table
 	{
 	public:
 
@@ -92,7 +92,7 @@ namespace wxOdbc3Test
 
 	// IntTypesTmpTable
 	// ----------
-	class IntTypesTmpTable : public exodbc::wxDbTable
+	class IntTypesTmpTable : public exodbc::Table
 	{
 	public:
 
@@ -114,7 +114,7 @@ namespace wxOdbc3Test
 
 	// DateTypesTable
 	// --------------
-	class DateTypesTable : public exodbc::wxDbTable
+	class DateTypesTable : public exodbc::Table
 	{
 	public:
 		DateTypesTable(exodbc::Database* pDb);
@@ -128,7 +128,7 @@ namespace wxOdbc3Test
 
 	// DateTypesTmpTable
 	// --------------
-	class DateTypesTmpTable : public exodbc::wxDbTable
+	class DateTypesTmpTable : public exodbc::Table
 	{
 	public:
 		DateTypesTmpTable(exodbc::Database* pDb);
@@ -142,7 +142,7 @@ namespace wxOdbc3Test
 
 	// FloatTypesTable
 	// --------------
-	class FloatTypesTable : public exodbc::wxDbTable
+	class FloatTypesTable : public exodbc::Table
 	{
 	public:
 		FloatTypesTable(exodbc::Database* pDb);
@@ -155,7 +155,7 @@ namespace wxOdbc3Test
 
 	// FloatTypesTmpTable
 	// ------------------
-	class FloatTypesTmpTable : public exodbc::wxDbTable
+	class FloatTypesTmpTable : public exodbc::Table
 	{
 	public:
 		FloatTypesTmpTable(exodbc::Database* pDb);
@@ -168,7 +168,7 @@ namespace wxOdbc3Test
 
 	// NumbericTypesTable
 	// ------------------
-	class NumericTypesTable : public exodbc::wxDbTable
+	class NumericTypesTable : public exodbc::Table
 	{
 	public:
 		enum ReadMode { ReasAsNumeric, ReadAsChar };
@@ -189,7 +189,7 @@ namespace wxOdbc3Test
 
 	// NumbericTypesTable
 	// ------------------
-	class NumericTypesTmpTable : public exodbc::wxDbTable
+	class NumericTypesTmpTable : public exodbc::Table
 	{
 	public:
 		// TODO: This name is not correct. ? The test write as "numer".. mmh
@@ -211,7 +211,7 @@ namespace wxOdbc3Test
 
 	// BlobTypesTable
 	// --------------
-	class BlobTypesTable : public exodbc::wxDbTable
+	class BlobTypesTable : public exodbc::Table
 	{
 	public:
 		BlobTypesTable(exodbc::Database* pDb);
@@ -223,7 +223,7 @@ namespace wxOdbc3Test
 
 	// BlobTypesTmpTable
 	// --------------
-	class BlobTypesTmpTable : public exodbc::wxDbTable
+	class BlobTypesTmpTable : public exodbc::Table
 	{
 	public:
 		BlobTypesTmpTable(exodbc::Database* pDb);
@@ -235,7 +235,7 @@ namespace wxOdbc3Test
 
 	// CharTable
 	// ---------
-	class CharTable : public exodbc::wxDbTable
+	class CharTable : public exodbc::Table
 	{
 	public:
 		CharTable(exodbc::Database* pDb);
@@ -248,7 +248,7 @@ namespace wxOdbc3Test
 	};
 
 	// IncompleCharTable
-	class IncompleteCharTable : public exodbc::wxDbTable
+	class IncompleteCharTable : public exodbc::Table
 	{
 	public:
 		IncompleteCharTable(exodbc::Database* pDb);

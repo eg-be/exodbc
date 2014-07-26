@@ -15,7 +15,7 @@
     <ClInclude Include="include\Database.h" />
     <ClInclude Include="include\DbEnvironment.h" />
     <ClInclude Include="include\GenericKey.h" />
-    <ClInclude Include="include\dbtable.h" />
+    <ClInclude Include="include\Table.h" />
     <ClInclude Include="include\Helpers.h" />
     <ClInclude Include="include\wxOdbc3.h" />
   </ItemGroup>
@@ -29,7 +29,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\dbtable.cpp">
+    <ClCompile Include="src\Table.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
