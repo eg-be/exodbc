@@ -524,14 +524,14 @@ bool wxDbTable::bindParams(bool forUpdate)
 
 
 /********** wxDbTable::bindInsertParams() **********/
-bool wxDbTable::bindInsertParams(void)
+bool wxDbTable::bindInsertParams()
 {
     return bindParams(false);
 }  // wxDbTable::bindInsertParams()
 
 
 /********** wxDbTable::bindUpdateParams() **********/
-bool wxDbTable::bindUpdateParams(void)
+bool wxDbTable::bindUpdateParams()
 {
     return bindParams(true);
 }  // wxDbTable::bindUpdateParams()
@@ -783,9 +783,9 @@ bool wxDbTable::Open(bool checkPrivileges, bool checkTableExists)
         std::wstring p;
 
         if (!tablePath.empty())
-			p = (boost::wformat(L"Error opening '%s/%s'.\n") %tablePath %tableName).str();
+			p = (boost::wformat(L"Error OpenImpling '%s/%s'.\n") %tablePath %tableName).str();
         else
-			p = (boost::wformat(L"Error opening '%s'.\n") %tableName).str();
+			p = (boost::wformat(L"Error OpenImpling '%s'.\n") %tableName).str();
 
         p += s;
         pDb->LogError(p);
@@ -899,7 +899,7 @@ bool wxDbTable::QueryOnKeyFields(bool forUpdate, bool distinct)
 
 
 /********** wxDbTable::GetPrev() **********/
-bool wxDbTable::GetPrev(void)
+bool wxDbTable::GetPrev()
 {
     if (pDb->FwdOnlyCursors())
     {
@@ -927,7 +927,7 @@ bool wxDbTable::operator--(int)
 
 
 /********** wxDbTable::GetFirst() **********/
-bool wxDbTable::GetFirst(void)
+bool wxDbTable::GetFirst()
 {
     if (pDb->FwdOnlyCursors())
     {
@@ -941,7 +941,7 @@ bool wxDbTable::GetFirst(void)
 
 
 /********** wxDbTable::GetLast() **********/
-bool wxDbTable::GetLast(void)
+bool wxDbTable::GetLast()
 {
     if (pDb->FwdOnlyCursors())
     {
@@ -1321,7 +1321,7 @@ void wxDbTable::BuildWhereClause(wchar_t *pWhereClause, int typeOfWhere,
 
 
 /********** wxDbTable::GetRowNum() **********/
-UWORD wxDbTable::GetRowNum(void)
+UWORD wxDbTable::GetRowNum()
 {
     UDWORD rowNum;
 
@@ -1876,7 +1876,7 @@ bool wxDbTable::SetOrderByColNums(UWORD first, ... )
 
 
 /********** wxDbTable::Insert() **********/
-int wxDbTable::Insert(void)
+int wxDbTable::Insert()
 {
     exASSERT(!queryOnly);
     if (queryOnly || !insertable)
@@ -1943,7 +1943,7 @@ int wxDbTable::Insert(void)
 
 
 /********** wxDbTable::Update() **********/
-bool wxDbTable::Update(void)
+bool wxDbTable::Update()
 {
     exASSERT(!queryOnly);
     if (queryOnly)
@@ -2005,7 +2005,7 @@ bool wxDbTable::UpdateWhere(const std::wstring &pWhereClause)
 
 
 /********** wxDbTable::Delete() **********/
-bool wxDbTable::Delete(void)
+bool wxDbTable::Delete()
 {
     exASSERT(!queryOnly);
     if (queryOnly)
@@ -2047,7 +2047,7 @@ bool wxDbTable::DeleteWhere(const std::wstring &pWhereClause)
 
 
 /********** wxDbTable::DeleteMatching() **********/
-bool wxDbTable::DeleteMatching(void)
+bool wxDbTable::DeleteMatching()
 {
     exASSERT(!queryOnly);
     if (queryOnly)
@@ -2108,7 +2108,7 @@ bool wxDbTable::IsColNull(UWORD colNumber) const
 
 
 /********** wxDbTable::CanSelectForUpdate() **********/
-bool wxDbTable::CanSelectForUpdate(void)
+bool wxDbTable::CanSelectForUpdate()
 {
     if (queryOnly)
         return false;
@@ -2126,7 +2126,7 @@ bool wxDbTable::CanSelectForUpdate(void)
 
 
 /********** wxDbTable::CanUpdateByROWID() **********/
-bool wxDbTable::CanUpdateByROWID(void)
+bool wxDbTable::CanUpdateByROWID()
 {
 /*
  * NOTE: Returning false for now until this can be debugged,
@@ -2143,7 +2143,7 @@ bool wxDbTable::CanUpdateByROWID(void)
 
 
 /********** wxDbTable::IsCursorClosedOnCommit() **********/
-bool wxDbTable::IsCursorClosedOnCommit(void)
+bool wxDbTable::IsCursorClosedOnCommit()
 {
     if (pDb->dbInf.cursorCommitBehavior == SQL_CB_PRESERVE)
         return false;
@@ -2467,7 +2467,7 @@ ULONG wxDbTable::Count(const std::wstring &args)
 
 
 /********** wxDbTable::Refresh() **********/
-bool wxDbTable::Refresh(void)
+bool wxDbTable::Refresh()
 {
     bool result = true;
 

@@ -27,7 +27,7 @@ public:
     GenericKey(const GenericKey &ref)   { clone(ref.m_data,ref.m_sz); }
     ~GenericKey()                       { free(m_data); }
 
-    void *GetBlk(void) const { return m_data; }
+    void *GetBlk() const { return m_data; }
 
 private:
     void clone(void *blk, size_t sz)
