@@ -31,7 +31,7 @@ namespace exodbc
 ULONG lastTableID = 0;
 
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 //    #include "wx/thread.h"
 //    wxList TablesInUse;
 	std::vector<STablesInUse*> TablesInUse;
@@ -154,7 +154,7 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
     m_tableID = ++lastTableID;
 	s = (boost::wformat(L"wxDbTable constructor (%-20s) tableID:[%6lu] pDb:[%p]") %tblName %m_tableID % static_cast<void*>(m_pDb)).str();
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
     STablesInUse *tableInUse;
     tableInUse            = new STablesInUse();
     tableInUse->tableName = tblName.c_str();
@@ -284,7 +284,7 @@ void Table::cleanup()
         m_pDb->WriteSqlLog(s);
     }
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
     if (m_tableID)
     {
         bool found = false;
@@ -1621,7 +1621,7 @@ bool Table::DropTable()
 
 /********** wxDbTable::CreateIndex() **********/
 bool Table::CreateIndex(const std::wstring &indexName, bool unique, UWORD numIndexColumns,
-                                     IndexDefinition *pIndexDefs, bool attemptDrop)
+                                     SIndexDefinition *pIndexDefs, bool attemptDrop)
 {
     std::wstring sqlStmt;
 
@@ -2302,16 +2302,16 @@ bool Table::SetColDefs(UWORD index, const std::wstring &fieldName, int dataType,
 
 
 /********** wxDbTable::SetColDefs() **********/
-ColumnDataPtr* Table::SetColDefs(ColumnInfo *pColInfs, UWORD numCols)
+SColumnDataPtr* Table::SetColDefs(ColumnInfo *pColInfs, UWORD numCols)
 {
     exASSERT(pColInfs);
-    ColumnDataPtr *pColDataPtrs = NULL;
+    SColumnDataPtr *pColDataPtrs = NULL;
 
     if (pColInfs)
     {
         UWORD index;
 
-        pColDataPtrs = new ColumnDataPtr[numCols+1];
+        pColDataPtrs = new SColumnDataPtr[numCols+1];
 
         for (index = 0; index < numCols; index++)
         {

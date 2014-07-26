@@ -44,7 +44,7 @@ namespace exodbc
 {
 	SDbList* PtrBegDbList = 0;
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 	//    #include "wx/thread.h"
 	//    extern wxList TablesInUse;
 	extern std::vector<STablesInUse*> TablesInUse;
@@ -1473,7 +1473,7 @@ namespace exodbc
 		// There should be zero Ctable objects still connected to this db object
 		exASSERT(nTables == 0);
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 		{
 #if wxUSE_THREADS
 			wxCriticalSectionLocker lock(csTablesInUse);
@@ -1570,7 +1570,7 @@ namespace exodbc
 				getchar();
 #endif
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 				BOOST_LOG_TRIVIAL(debug) <<  L"ODBC DEBUG MESSAGE from DispAllErrors(): " << odbcErrMsg;
 #endif
 			}
@@ -1610,9 +1610,9 @@ namespace exodbc
 		getchar();
 #endif
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 		BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << odbcErrMsg;
-#endif  // __WXDEBUG__
+#endif  // EXODBCDEBUG
 
 	} // wxDb::DispNextError()
 
@@ -2073,7 +2073,7 @@ namespace exodbc
 			case SQL_BINARY:
 				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_BLOB;
 				break;
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 			default:
 				std::wstring errMsg;
 				errMsg = (boost::wformat(L"SQL Data type %ld currently not supported by wxWidgets") % (long)Sqllen).str();
@@ -2862,7 +2862,7 @@ namespace exodbc
 						case SQL_BINARY:
 							colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
 							break;
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 						default:
 							std::wstring errMsg;
 							errMsg.Printf(L"SQL Data type %d currently not supported by wxWidgets", colInf[colNo].m_sqlDataType);
@@ -4168,9 +4168,9 @@ namespace exodbc
 				getchar();
 #endif  // DBDEBUG_CONSOLE
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 				BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << errMsg;
-#endif  // __WXDEBUG__
+#endif  // EXODBCDEBUG
 			}
 		}
 		else
@@ -4178,7 +4178,7 @@ namespace exodbc
 #else
 		// Using iODBC/unixODBC or some other compiler which does not support the APIs
 		// necessary to use this function, so this function is not supported
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 		BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << L"wxDbCreateDataSource() not available except under VC++/MSW";
 #endif
 		result = FALSE;

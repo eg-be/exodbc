@@ -119,7 +119,7 @@ namespace exodbc
 	};
 
 
-#ifdef __WXDEBUG__
+#ifdef EXODBCDEBUG
 	struct STablesInUse
 	{
 	public:
