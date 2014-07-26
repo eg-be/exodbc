@@ -16,7 +16,7 @@
 
 // Other headers
 #include "DbEnvironment.h"
-#include "db.h"
+#include "Database.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
 

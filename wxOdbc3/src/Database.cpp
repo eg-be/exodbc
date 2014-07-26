@@ -34,7 +34,7 @@
 #include <sstream>
 #include <vector>
 
-#include "db.h"
+#include "Database.h"
 #include "DbEnvironment.h"
 #include "ColumnFormatter.h"
 #include "Helpers.h"

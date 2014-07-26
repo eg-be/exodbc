@@ -23,9 +23,9 @@
 
 #include "wxOdbc3.h"
 
-#include "db.h"
+#include "Database.h"
 
-#include "dbkeyg.h"
+#include "GenericKey.h"
 
 namespace exodbc
 {
