@@ -103,8 +103,8 @@ namespace exodbc
 
 		void        setCbValueForColumn(int columnIndex);
 		bool        bindParams(bool forUpdate);  // called by the other 'bind' functions
-		bool        bindInsertParams(void);
-		bool        bindUpdateParams(void);
+		bool        bindInsertParams();
+		bool        bindUpdateParams();
 
 		bool        bindCols(HSTMT cursor);
 		bool        getRec(UWORD fetchType);
@@ -154,7 +154,7 @@ namespace exodbc
 
 		bool            Open(bool checkPrivileges=false, bool checkTableExists=true);
 		bool            CreateTable(bool attemptDrop=true);
-		bool            DropTable(void);
+		bool            DropTable();
 		bool            CreateIndex(const std::wstring &indexName, bool unique, UWORD numIndexColumns,
 			wxDbIdxDef *pIndexDefs, bool attemptDrop=true);
 		bool            DropIndex(const std::wstring &indexName);
@@ -187,30 +187,30 @@ namespace exodbc
 		const std::wstring &OrderBy() { return orderBy; }
 		const std::wstring &From()    { return from; }
 
-		int             Insert(void);
-		bool            Update(void);
+		int             Insert();
+		bool            Update();
 		bool            Update(const std::wstring &pSqlStmt);
 		bool            UpdateWhere(const std::wstring &pWhereClause);
-		bool            Delete(void);
+		bool            Delete();
 		bool            DeleteWhere(const std::wstring &pWhereClause);
-		bool            DeleteMatching(void);
+		bool            DeleteMatching();
 		virtual bool    Query(bool forUpdate = false, bool distinct = false);
 		bool            QueryBySqlStmt(const std::wstring &pSqlStmt);
 		bool            QueryMatching(bool forUpdate = false, bool distinct = false);
 		bool            QueryOnKeyFields(bool forUpdate = false, bool distinct = false);
-		bool            Refresh(void);
-		bool            GetNext(void)   { return(getRec(SQL_FETCH_NEXT));  }
+		bool            Refresh();
+		bool            GetNext()   { return(getRec(SQL_FETCH_NEXT));  }
 		bool            operator++(int) { return(getRec(SQL_FETCH_NEXT));  }
 
 		/***** These four functions only work with wxDb instances that are defined  *****
 		***** as not being FwdOnlyCursors                                          *****/
-		bool            GetPrev(void);
+		bool            GetPrev();
 		bool            operator--(int);
-		bool            GetFirst(void);
-		bool            GetLast(void);
+		bool            GetFirst();
+		bool            GetLast();
 
-		bool            IsCursorClosedOnCommit(void);
-		UWORD           GetRowNum(void);
+		bool            IsCursorClosedOnCommit();
+		UWORD           GetRowNum();
 
 		void            BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool distinct);
 		void            BuildSelectStmt(wchar_t *pSqlStmt, int typeOfSelect, bool distinct);
@@ -224,8 +224,8 @@ namespace exodbc
 		void            BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere, const std::wstring &qualTableName=emptyString, bool useLikeComparison=false);
 		void            BuildWhereClause(wchar_t *pWhereClause, int typeOfWhere, const std::wstring &qualTableName=emptyString, bool useLikeComparison=false);
 
-		bool            CanSelectForUpdate(void);
-		bool            CanUpdateByROWID(void);
+		bool            CanSelectForUpdate();
+		bool            CanUpdateByROWID();
 		void            ClearMemberVar(UWORD colNumber, bool setToNull=false);
 		void            ClearMemberVars(bool setToNull=false);
 		bool            SetQueryTimeout(UDWORD nSeconds);
@@ -240,11 +240,11 @@ namespace exodbc
 		bool            CloseCursor(HSTMT cursor);
 		bool            DeleteCursor(HSTMT *hstmtDel);
 		void            SetCursor(HSTMT *hstmtActivate = (void **) wxDB_DEFAULT_CURSOR);
-		HSTMT           GetCursor(void) { return(hstmt); }
+		HSTMT           GetCursor() { return(hstmt); }
 		HSTMT          *GetNewCursor(bool setCursor = false, bool bindColumns = true);
 
 		ULONG           Count(const std::wstring &args = L"*");
-		int             DB_STATUS(void) { return(pDb->DB_STATUS); }
+		int             DB_STATUS() { return(pDb->DB_STATUS); }
 
 		bool            IsColNull(UWORD colNumber) const;
 		bool            SetColNull(UWORD colNumber, bool set=true);
@@ -259,7 +259,7 @@ namespace exodbc
 		virtual     void         SetRowMode(const rowmode_t rowmode);
 		//    virtual     wxVariant    GetColumn(const int colNumber) const ;
 		//    virtual     void         SetColumn(const int colNumber, const wxVariant value);
-		virtual     GenericKey   GetKey(void);
+		virtual     GenericKey   GetKey();
 		virtual     void         SetKey(const GenericKey &key);
 
 	private:

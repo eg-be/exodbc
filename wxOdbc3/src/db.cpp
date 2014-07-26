@@ -2,7 +2,7 @@
 // Name:        src/common/db.cpp
 // Purpose:     Implementation of the wxDb class.  The wxDb class represents a connection
 //              to an ODBC data source.  The wxDb class allows operations on the data
-//              source such as opening and closing the data source.
+//              source such as OpenImpling and closing the data source.
 // Author:      Doug Card
 // Modified by: George Tasker
 //              Bart Jourquin
@@ -186,10 +186,10 @@ bool DbCatalog::Initialize()
 Database::Database(const HENV &aHenv, bool FwdOnlyCursors)
 {
     // Copy the HENV into the db class
-    henv = aHenv;
-    fwdOnlyCursors = FwdOnlyCursors;
+    m_henv = aHenv;
+    m_fwdOnlyCursors = FwdOnlyCursors;
 
-    initialize();
+    Initialize();
 } // wxDb::wxDb()
 
 
@@ -208,7 +208,7 @@ Database::~Database()
 
 /********** PRIVATE! wxDb::initialize PRIVATE! **********/
 /********** wxDb::initialize() **********/
-void Database::initialize()
+void Database::Initialize()
 /*
  * Private member function that sets all wxDb member variables to
  * known values at creation of the wxDb
@@ -216,10 +216,10 @@ void Database::initialize()
 {
     int i;
 
-    fpSqlLog      = 0;            // Sql Log file pointer
-    sqlLogState   = sqlLogOFF;    // By default, logging is turned off
+    m_fpSqlLog      = 0;            // Sql Log file pointer
+    m_sqlLogState   = sqlLogOFF;    // By default, logging is turned off
     nTables       = 0;
-    dbmsType      = dbmsUNIDENTIFIED;
+    m_dbmsType      = dbmsUNIDENTIFIED;
 
     wcscpy(sqlState,emptyString);
     wcscpy(errorMsg,emptyString);
@@ -228,71 +228,71 @@ void Database::initialize()
         wcscpy(errorList[i], emptyString);
 
     // Init typeInf structures
-    typeInfVarchar.TypeName.empty();
-    typeInfVarchar.FsqlType      = 0;
-    typeInfVarchar.Precision     = 0;
-    typeInfVarchar.CaseSensitive = 0;
-    typeInfVarchar.MaximumScale  = 0;
+    m_typeInfVarchar.TypeName.empty();
+    m_typeInfVarchar.FsqlType      = 0;
+    m_typeInfVarchar.Precision     = 0;
+    m_typeInfVarchar.CaseSensitive = 0;
+    m_typeInfVarchar.MaximumScale  = 0;
 
-    typeInfInteger.TypeName.empty();
-    typeInfInteger.FsqlType      = 0;
-    typeInfInteger.Precision     = 0;
-    typeInfInteger.CaseSensitive = 0;
-    typeInfInteger.MaximumScale  = 0;
+    m_typeInfInteger.TypeName.empty();
+    m_typeInfInteger.FsqlType      = 0;
+    m_typeInfInteger.Precision     = 0;
+    m_typeInfInteger.CaseSensitive = 0;
+    m_typeInfInteger.MaximumScale  = 0;
 
-    typeInfFloat.TypeName.empty();
-    typeInfFloat.FsqlType      = 0;
-    typeInfFloat.Precision     = 0;
-    typeInfFloat.CaseSensitive = 0;
-    typeInfFloat.MaximumScale  = 0;
+    m_typeInfFloat.TypeName.empty();
+    m_typeInfFloat.FsqlType      = 0;
+    m_typeInfFloat.Precision     = 0;
+    m_typeInfFloat.CaseSensitive = 0;
+    m_typeInfFloat.MaximumScale  = 0;
 
-    typeInfDate.TypeName.empty();
-    typeInfDate.FsqlType      = 0;
-    typeInfDate.Precision     = 0;
-    typeInfDate.CaseSensitive = 0;
-    typeInfDate.MaximumScale  = 0;
+    m_typeInfDate.TypeName.empty();
+    m_typeInfDate.FsqlType      = 0;
+    m_typeInfDate.Precision     = 0;
+    m_typeInfDate.CaseSensitive = 0;
+    m_typeInfDate.MaximumScale  = 0;
 
-    typeInfBlob.TypeName.empty();
-    typeInfBlob.FsqlType      = 0;
-    typeInfBlob.Precision     = 0;
-    typeInfBlob.CaseSensitive = 0;
-    typeInfBlob.MaximumScale  = 0;
+    m_typeInfBlob.TypeName.empty();
+    m_typeInfBlob.FsqlType      = 0;
+    m_typeInfBlob.Precision     = 0;
+    m_typeInfBlob.CaseSensitive = 0;
+    m_typeInfBlob.MaximumScale  = 0;
 
-    typeInfMemo.TypeName.empty();
-    typeInfMemo.FsqlType      = 0;
-    typeInfMemo.Precision     = 0;
-    typeInfMemo.CaseSensitive = 0;
-    typeInfMemo.MaximumScale  = 0;
+    m_typeInfMemo.TypeName.empty();
+    m_typeInfMemo.FsqlType      = 0;
+    m_typeInfMemo.Precision     = 0;
+    m_typeInfMemo.CaseSensitive = 0;
+    m_typeInfMemo.MaximumScale  = 0;
 
     // Error reporting is turned OFF by default
-    silent = true;
+    m_silent = true;
 
     // Allocate a data source connection handle
-    if (SQLAllocConnect(henv, &hdbc) != SQL_SUCCESS)
-        DispAllErrors(henv);
+    if (SQLAllocConnect(m_henv, &m_hdbc) != SQL_SUCCESS)
+        DispAllErrors(m_henv);
 
     // Initialize the db status flag
     DB_STATUS = 0;
 
-    // Mark database as not open as of yet
-    dbIsOpen = false;
-    dbIsCached = false;
-    dbOpenedWithConnectionString = false;
+    // Mark database as not OpenImpl as of yet
+    m_dbIsOpen = false;
+    m_dbIsCached = false;
+    m_dbOpenedWithConnectionString = false;
 }  // wxDb::initialize()
 
 
-/********** PRIVATE! wxDb::convertUserID PRIVATE! **********/
+/********** PRIVATE! wxDb::ConvertUserIDImpl PRIVATE! **********/
 //
 // NOTE: Return value from this function MUST be copied
 //       immediately, as the value is not good after
 //       this function has left scope.
 //
-const wchar_t *Database::convertUserID(const wchar_t *userID, std::wstring &UserID)
+const wchar_t *Database::ConvertUserIDImpl(const wchar_t *userID, std::wstring &UserID)
 {
     if (userID)
     {
         if (!wcslen(userID))
-            UserID = uid;
+            UserID = m_uid;
         else
             UserID = userID;
     }
@@ -311,10 +311,10 @@ const wchar_t *Database::convertUserID(const wchar_t *userID, std::wstring &User
 		boost::algorithm::to_upper(UserID);
 
     return UserID.c_str();
-}  // wxDb::convertUserID()
+}  // wxDb::ConvertUserIDImpl()
 
 
-bool Database::determineDataTypes(bool failOnDataTypeUnsupported)
+bool Database::DetermineDataTypesImpl(bool failOnDataTypeUnsupported)
 {
     size_t iIndex;
 
@@ -398,7 +398,7 @@ bool Database::determineDataTypes(bool failOnDataTypeUnsupported)
     //
     // The way it was determined which SQL data types to use was by calling SQLGetInfo
     // for all of the possible SQL data types to see which ones were supported.  If
-    // a type is not supported, the SQLFetch() that's called from getDataTypeInfo()
+    // a type is not supported, the SQLFetch() that's called from GetDataTypeInfoImpl()
     // fails with SQL_NO_DATA_FOUND.  This is ugly because I'm sure the three SQL data
     // types I've selected below will not always be what we want.  These are just
     // what happened to work against an Oracle 7/Intersolv combination.  The following is
@@ -435,84 +435,84 @@ bool Database::determineDataTypes(bool failOnDataTypeUnsupported)
     // SQL_INTEGER            type name = 'LONG', Precision = 10
 
     // Query the data source for info about itself
-    if (!getDbInfo(failOnDataTypeUnsupported))
+    if (!GetDbInfoImpl(failOnDataTypeUnsupported))
         return false;
 
     // --------------- Varchar - (Variable length character string) ---------------
     for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlCharTypes) &&
-                     !getDataTypeInfo(PossibleSqlCharTypes[iIndex], typeInfVarchar); ++iIndex)
+                     !GetDataTypeInfoImpl(PossibleSqlCharTypes[iIndex], m_typeInfVarchar); ++iIndex)
     {}
 
     if (iIndex < EXSIZEOF(PossibleSqlCharTypes))
-        typeInfVarchar.FsqlType = PossibleSqlCharTypes[iIndex];
+        m_typeInfVarchar.FsqlType = PossibleSqlCharTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
 
     // --------------- Float ---------------
     for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlFloatTypes) &&
-                     !getDataTypeInfo(PossibleSqlFloatTypes[iIndex], typeInfFloat); ++iIndex)
+                     !GetDataTypeInfoImpl(PossibleSqlFloatTypes[iIndex], m_typeInfFloat); ++iIndex)
     {}
 
     if (iIndex < EXSIZEOF(PossibleSqlFloatTypes))
-        typeInfFloat.FsqlType = PossibleSqlFloatTypes[iIndex];
+        m_typeInfFloat.FsqlType = PossibleSqlFloatTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
 
     // --------------- Integer -------------
     for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlIntegerTypes) &&
-                     !getDataTypeInfo(PossibleSqlIntegerTypes[iIndex], typeInfInteger); ++iIndex)
+                     !GetDataTypeInfoImpl(PossibleSqlIntegerTypes[iIndex], m_typeInfInteger); ++iIndex)
     {}
 
     if (iIndex < EXSIZEOF(PossibleSqlIntegerTypes))
-        typeInfInteger.FsqlType = PossibleSqlIntegerTypes[iIndex];
+        m_typeInfInteger.FsqlType = PossibleSqlIntegerTypes[iIndex];
     else if (failOnDataTypeUnsupported)
     {
         // If no non-floating point data types are supported, we'll
         // use the type assigned for floats to store integers as well
-        if (!getDataTypeInfo(typeInfFloat.FsqlType, typeInfInteger))
+        if (!GetDataTypeInfoImpl(m_typeInfFloat.FsqlType, m_typeInfInteger))
         {
             if (failOnDataTypeUnsupported)
                 return false;
         }
         else
-            typeInfInteger.FsqlType = typeInfFloat.FsqlType;
+            m_typeInfInteger.FsqlType = m_typeInfFloat.FsqlType;
     }
 
     // --------------- Date/Time ---------------
     for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlDateTypes) &&
-                     !getDataTypeInfo(PossibleSqlDateTypes[iIndex], typeInfDate); ++iIndex)
+                     !GetDataTypeInfoImpl(PossibleSqlDateTypes[iIndex], m_typeInfDate); ++iIndex)
     {}
 
     if (iIndex < EXSIZEOF(PossibleSqlDateTypes))
-        typeInfDate.FsqlType = PossibleSqlDateTypes[iIndex];
+        m_typeInfDate.FsqlType = PossibleSqlDateTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
 
     // --------------- BLOB ---------------
     for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlBlobTypes) &&
-                     !getDataTypeInfo(PossibleSqlBlobTypes[iIndex], typeInfBlob); ++iIndex)
+                     !GetDataTypeInfoImpl(PossibleSqlBlobTypes[iIndex], m_typeInfBlob); ++iIndex)
     {}
 
     if (iIndex < EXSIZEOF(PossibleSqlBlobTypes))
-        typeInfBlob.FsqlType = PossibleSqlBlobTypes[iIndex];
+        m_typeInfBlob.FsqlType = PossibleSqlBlobTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
 
     // --------------- MEMO ---------------
     for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlMemoTypes) &&
-                     !getDataTypeInfo(PossibleSqlMemoTypes[iIndex], typeInfMemo); ++iIndex)
+                     !GetDataTypeInfoImpl(PossibleSqlMemoTypes[iIndex], m_typeInfMemo); ++iIndex)
     {}
 
     if (iIndex < EXSIZEOF(PossibleSqlMemoTypes))
-        typeInfMemo.FsqlType = PossibleSqlMemoTypes[iIndex];
+        m_typeInfMemo.FsqlType = PossibleSqlMemoTypes[iIndex];
     else if (failOnDataTypeUnsupported)
         return false;
 
     return true;
-}  // wxDb::determineDataTypes
+}  // wxDb::DetermineDataTypesImpl
 
 
-bool Database::open(bool failOnDataTypeUnsupported)
+bool Database::OpenImpl(bool failOnDataTypeUnsupported)
 {
 /*
     If using Intersolv branded ODBC drivers, this is the place where you would substitute
@@ -522,27 +522,27 @@ bool Database::open(bool failOnDataTypeUnsupported)
     SQLSetConnectOption(hdbc, 1042, (UDWORD) emptyString);
 */
 
-    // Mark database as open
-    dbIsOpen = true;
+    // Mark database as OpenImpl
+    m_dbIsOpen = true;
 
     // Allocate a statement handle for the database connection
-    if (SQLAllocStmt(hdbc, &hstmt) != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc));
+    if (SQLAllocStmt(m_hdbc, &m_hstmt) != SQL_SUCCESS)
+        return(DispAllErrors(m_henv, m_hdbc));
 
     // Set Connection Options
-    if (!setConnectionOptions())
+    if (!SetConnectionOptionsImpl())
         return false;
 
-    if (!determineDataTypes(failOnDataTypeUnsupported))
+    if (!DetermineDataTypesImpl(failOnDataTypeUnsupported))
         return false;
 
 #ifdef DBDEBUG_CONSOLE
-    std::wcout << L"VARCHAR DATA TYPE: " << typeInfVarchar.TypeName << std::endl;
-    std::wcout << L"INTEGER DATA TYPE: " << typeInfInteger.TypeName << std::endl;
-    std::wcout << L"FLOAT   DATA TYPE: " << typeInfFloat.TypeName << std::endl;
-    std::wcout << L"DATE    DATA TYPE: " << typeInfDate.TypeName << std::endl;
-    std::wcout << L"BLOB    DATA TYPE: " << typeInfBlob.TypeName << std::endl;
-    std::wcout << L"MEMO    DATA TYPE: " << typeInfMemo.TypeName << std::endl;
+    std::wcout << L"VARCHAR DATA TYPE: " << m_typeInfVarchar.TypeName << std::endl;
+    std::wcout << L"INTEGER DATA TYPE: " << m_typeInfInteger.TypeName << std::endl;
+    std::wcout << L"FLOAT   DATA TYPE: " << m_typeInfFloat.TypeName << std::endl;
+    std::wcout << L"DATE    DATA TYPE: " << m_typeInfDate.TypeName << std::endl;
+    std::wcout << L"BLOB    DATA TYPE: " << m_typeInfBlob.TypeName << std::endl;
+    std::wcout << L"MEMO    DATA TYPE: " << m_typeInfMemo.TypeName << std::endl;
     std::wcout << std::endl;
 #endif
 
@@ -558,9 +558,9 @@ bool Database::Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsuppo
 
 bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported)
 {
-    dsn        = emptyString;
-    uid        = emptyString;
-    authStr    = emptyString;
+    m_dsn        = emptyString;
+    m_uid        = emptyString;
+    m_authStr    = emptyString;
 
     RETCODE retcode;
 
@@ -568,7 +568,7 @@ bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool fa
     {
         // Specify that the ODBC cursor library be used, if needed.  This must be
         // specified before the connection is made.
-        retcode = SQLSetConnectOption(hdbc, SQL_ODBC_CURSORS, SQL_CUR_USE_IF_NEEDED);
+        retcode = SQLSetConnectOption(m_hdbc, SQL_ODBC_CURSORS, SQL_CUR_USE_IF_NEEDED);
 
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_SUCCESS)
@@ -584,33 +584,33 @@ bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool fa
     SQLTCHAR outConnectBuffer[SQL_MAX_CONNECTSTR_LEN+1];  // MS recommends at least 1k buffer
     short outConnectBufferLen;
 
-    inConnectionStr = inConnectStr;
+    m_inConnectionStr = inConnectStr;
 
-    retcode = SQLDriverConnect(hdbc, parentWnd, (SQLTCHAR FAR *)inConnectionStr.c_str(),
-                        (SWORD)inConnectionStr.length(), (SQLTCHAR FAR *)outConnectBuffer,
+    retcode = SQLDriverConnect(m_hdbc, parentWnd, (SQLTCHAR FAR *)m_inConnectionStr.c_str(),
+                        (SWORD)m_inConnectionStr.length(), (SQLTCHAR FAR *)outConnectBuffer,
                         EXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE );
 
     if ((retcode != SQL_SUCCESS) &&
         (retcode != SQL_SUCCESS_WITH_INFO))
-        return(DispAllErrors(henv, hdbc));
+        return(DispAllErrors(m_henv, m_hdbc));
 
     outConnectBuffer[outConnectBufferLen] = 0;
-    outConnectionStr = outConnectBuffer;
-    dbOpenedWithConnectionString = true;
+    m_outConnectionStr = outConnectBuffer;
+    m_dbOpenedWithConnectionString = true;
 
-    return open(failOnDataTypeUnsupported);
+    return OpenImpl(failOnDataTypeUnsupported);
 }
 
 /********** wxDb::Open() **********/
 bool Database::Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wstring &AuthStr, bool failOnDataTypeUnsupported)
 {
     exASSERT(!Dsn.empty());
-    dsn        = Dsn;
-    uid        = Uid;
-    authStr    = AuthStr;
+    m_dsn        = Dsn;
+    m_uid        = Uid;
+    m_authStr    = AuthStr;
 
-    inConnectionStr = emptyString;
-    outConnectionStr = emptyString;
+    m_inConnectionStr = emptyString;
+    m_outConnectionStr = emptyString;
 
     RETCODE retcode;
 
@@ -618,7 +618,7 @@ bool Database::Open(const std::wstring &Dsn, const std::wstring &Uid, const std:
     {
         // Specify that the ODBC cursor library be used, if needed.  This must be
         // specified before the connection is made.
-        retcode = SQLSetConnectOption(hdbc, SQL_ODBC_CURSORS, SQL_CUR_USE_IF_NEEDED);
+        retcode = SQLSetConnectOption(m_hdbc, SQL_ODBC_CURSORS, SQL_CUR_USE_IF_NEEDED);
 
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_SUCCESS)
@@ -631,15 +631,15 @@ bool Database::Open(const std::wstring &Dsn, const std::wstring &Uid, const std:
     }
 
     // Connect to the data source
-    retcode = SQLConnect(hdbc, (SQLTCHAR FAR *) dsn.c_str(), SQL_NTS,
-                         (SQLTCHAR FAR *) uid.c_str(), SQL_NTS,
-                         (SQLTCHAR FAR *) authStr.c_str(), SQL_NTS);
+    retcode = SQLConnect(m_hdbc, (SQLTCHAR FAR *) m_dsn.c_str(), SQL_NTS,
+                         (SQLTCHAR FAR *) m_uid.c_str(), SQL_NTS,
+                         (SQLTCHAR FAR *) m_authStr.c_str(), SQL_NTS);
 
     if ((retcode != SQL_SUCCESS) &&
         (retcode != SQL_SUCCESS_WITH_INFO))
-        return(DispAllErrors(henv, hdbc));
+        return(DispAllErrors(m_henv, m_hdbc));
 
-    return open(failOnDataTypeUnsupported);
+    return OpenImpl(failOnDataTypeUnsupported);
 
 } // wxDb::Open()
 
@@ -659,11 +659,11 @@ bool Database::Open(DbEnvironment *dbConnectInf, bool failOnDataTypeUnsupported)
 
 bool Database::Open(Database *copyDb)
 {
-    dsn              = copyDb->GetDatasourceName();
-    uid              = copyDb->GetUsername();
-    authStr          = copyDb->GetPassword();
-    inConnectionStr  = copyDb->GetConnectionInStr();
-    outConnectionStr = copyDb->GetConnectionOutStr();
+    m_dsn              = copyDb->GetDatasourceName();
+    m_uid              = copyDb->GetUsername();
+    m_authStr          = copyDb->GetPassword();
+    m_inConnectionStr  = copyDb->GetConnectionInStr();
+    m_outConnectionStr = copyDb->GetConnectionOutStr();
 
     RETCODE retcode;
 
@@ -671,7 +671,7 @@ bool Database::Open(Database *copyDb)
     {
         // Specify that the ODBC cursor library be used, if needed.  This must be
         // specified before the connection is made.
-        retcode = SQLSetConnectOption(hdbc, SQL_ODBC_CURSORS, SQL_CUR_USE_IF_NEEDED);
+        retcode = SQLSetConnectOption(m_hdbc, SQL_ODBC_CURSORS, SQL_CUR_USE_IF_NEEDED);
 
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_SUCCESS)
@@ -689,31 +689,31 @@ bool Database::Open(Database *copyDb)
         SQLTCHAR outConnectBuffer[SQL_MAX_CONNECTSTR_LEN+1];
         short outConnectBufferLen;
 
-        inConnectionStr = copyDb->GetConnectionInStr();
+        m_inConnectionStr = copyDb->GetConnectionInStr();
 
-        retcode = SQLDriverConnect(hdbc, NULL, (SQLTCHAR FAR *)inConnectionStr.c_str(),
-                            (SWORD)inConnectionStr.length(), (SQLTCHAR FAR *)outConnectBuffer,
+        retcode = SQLDriverConnect(m_hdbc, NULL, (SQLTCHAR FAR *)m_inConnectionStr.c_str(),
+                            (SWORD)m_inConnectionStr.length(), (SQLTCHAR FAR *)outConnectBuffer,
                             EXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE);
 
         if ((retcode != SQL_SUCCESS) &&
             (retcode != SQL_SUCCESS_WITH_INFO))
-            return(DispAllErrors(henv, hdbc));
+            return(DispAllErrors(m_henv, m_hdbc));
 
         outConnectBuffer[outConnectBufferLen] = 0;
-        outConnectionStr = outConnectBuffer;
-        dbOpenedWithConnectionString = true;
+        m_outConnectionStr = outConnectBuffer;
+        m_dbOpenedWithConnectionString = true;
     }
     else
     {
         // Connect to the data source
-        retcode = SQLConnect(hdbc, (SQLTCHAR FAR *) dsn.c_str(), SQL_NTS,
-                             (SQLTCHAR FAR *) uid.c_str(), SQL_NTS,
-                             (SQLTCHAR FAR *) authStr.c_str(), SQL_NTS);
+        retcode = SQLConnect(m_hdbc, (SQLTCHAR FAR *) m_dsn.c_str(), SQL_NTS,
+                             (SQLTCHAR FAR *) m_uid.c_str(), SQL_NTS,
+                             (SQLTCHAR FAR *) m_authStr.c_str(), SQL_NTS);
     }
 
     if ((retcode != SQL_SUCCESS) &&
         (retcode != SQL_SUCCESS_WITH_INFO))
-        return(DispAllErrors(henv, hdbc));
+        return(DispAllErrors(m_henv, m_hdbc));
 
 /*
     If using Intersolv branded ODBC drivers, this is the place where you would substitute
@@ -723,15 +723,15 @@ bool Database::Open(Database *copyDb)
     SQLSetConnectOption(hdbc, 1042, (UDWORD) emptyString);
 */
 
-    // Mark database as open
-    dbIsOpen = true;
+    // Mark database as OpenImpl
+    m_dbIsOpen = true;
 
     // Allocate a statement handle for the database connection
-    if (SQLAllocStmt(hdbc, &hstmt) != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc));
+    if (SQLAllocStmt(m_hdbc, &m_hstmt) != SQL_SUCCESS)
+        return(DispAllErrors(m_henv, m_hdbc));
 
     // Set Connection Options
-    if (!setConnectionOptions())
+    if (!SetConnectionOptionsImpl())
         return false;
 
     // Instead of Querying the data source for info about itself, it can just be copied
@@ -769,54 +769,54 @@ bool Database::Open(Database *copyDb)
     dbInf.loginTimeout = copyDb->dbInf.loginTimeout;
 
     // VARCHAR = Variable length character string
-    typeInfVarchar.FsqlType         = copyDb->typeInfVarchar.FsqlType;
-    typeInfVarchar.TypeName         = copyDb->typeInfVarchar.TypeName;
-    typeInfVarchar.Precision        = copyDb->typeInfVarchar.Precision;
-    typeInfVarchar.CaseSensitive    = copyDb->typeInfVarchar.CaseSensitive;
-    typeInfVarchar.MaximumScale     = copyDb->typeInfVarchar.MaximumScale;
+    m_typeInfVarchar.FsqlType         = copyDb->m_typeInfVarchar.FsqlType;
+    m_typeInfVarchar.TypeName         = copyDb->m_typeInfVarchar.TypeName;
+    m_typeInfVarchar.Precision        = copyDb->m_typeInfVarchar.Precision;
+    m_typeInfVarchar.CaseSensitive    = copyDb->m_typeInfVarchar.CaseSensitive;
+    m_typeInfVarchar.MaximumScale     = copyDb->m_typeInfVarchar.MaximumScale;
 
     // Float
-    typeInfFloat.FsqlType         = copyDb->typeInfFloat.FsqlType;
-    typeInfFloat.TypeName         = copyDb->typeInfFloat.TypeName;
-    typeInfFloat.Precision        = copyDb->typeInfFloat.Precision;
-    typeInfFloat.CaseSensitive    = copyDb->typeInfFloat.CaseSensitive;
-    typeInfFloat.MaximumScale     = copyDb->typeInfFloat.MaximumScale;
+    m_typeInfFloat.FsqlType         = copyDb->m_typeInfFloat.FsqlType;
+    m_typeInfFloat.TypeName         = copyDb->m_typeInfFloat.TypeName;
+    m_typeInfFloat.Precision        = copyDb->m_typeInfFloat.Precision;
+    m_typeInfFloat.CaseSensitive    = copyDb->m_typeInfFloat.CaseSensitive;
+    m_typeInfFloat.MaximumScale     = copyDb->m_typeInfFloat.MaximumScale;
 
     // Integer
-    typeInfInteger.FsqlType         = copyDb->typeInfInteger.FsqlType;
-    typeInfInteger.TypeName         = copyDb->typeInfInteger.TypeName;
-    typeInfInteger.Precision        = copyDb->typeInfInteger.Precision;
-    typeInfInteger.CaseSensitive    = copyDb->typeInfInteger.CaseSensitive;
-    typeInfInteger.MaximumScale     = copyDb->typeInfInteger.MaximumScale;
+    m_typeInfInteger.FsqlType         = copyDb->m_typeInfInteger.FsqlType;
+    m_typeInfInteger.TypeName         = copyDb->m_typeInfInteger.TypeName;
+    m_typeInfInteger.Precision        = copyDb->m_typeInfInteger.Precision;
+    m_typeInfInteger.CaseSensitive    = copyDb->m_typeInfInteger.CaseSensitive;
+    m_typeInfInteger.MaximumScale     = copyDb->m_typeInfInteger.MaximumScale;
 
     // Date/Time
-    typeInfDate.FsqlType         = copyDb->typeInfDate.FsqlType;
-    typeInfDate.TypeName         = copyDb->typeInfDate.TypeName;
-    typeInfDate.Precision        = copyDb->typeInfDate.Precision;
-    typeInfDate.CaseSensitive    = copyDb->typeInfDate.CaseSensitive;
-    typeInfDate.MaximumScale     = copyDb->typeInfDate.MaximumScale;
+    m_typeInfDate.FsqlType         = copyDb->m_typeInfDate.FsqlType;
+    m_typeInfDate.TypeName         = copyDb->m_typeInfDate.TypeName;
+    m_typeInfDate.Precision        = copyDb->m_typeInfDate.Precision;
+    m_typeInfDate.CaseSensitive    = copyDb->m_typeInfDate.CaseSensitive;
+    m_typeInfDate.MaximumScale     = copyDb->m_typeInfDate.MaximumScale;
 
     // Blob
-    typeInfBlob.FsqlType         = copyDb->typeInfBlob.FsqlType;
-    typeInfBlob.TypeName         = copyDb->typeInfBlob.TypeName;
-    typeInfBlob.Precision        = copyDb->typeInfBlob.Precision;
-    typeInfBlob.CaseSensitive    = copyDb->typeInfBlob.CaseSensitive;
-    typeInfBlob.MaximumScale     = copyDb->typeInfBlob.MaximumScale;
+    m_typeInfBlob.FsqlType         = copyDb->m_typeInfBlob.FsqlType;
+    m_typeInfBlob.TypeName         = copyDb->m_typeInfBlob.TypeName;
+    m_typeInfBlob.Precision        = copyDb->m_typeInfBlob.Precision;
+    m_typeInfBlob.CaseSensitive    = copyDb->m_typeInfBlob.CaseSensitive;
+    m_typeInfBlob.MaximumScale     = copyDb->m_typeInfBlob.MaximumScale;
 
     // Memo
-    typeInfMemo.FsqlType         = copyDb->typeInfMemo.FsqlType;
-    typeInfMemo.TypeName         = copyDb->typeInfMemo.TypeName;
-    typeInfMemo.Precision        = copyDb->typeInfMemo.Precision;
-    typeInfMemo.CaseSensitive    = copyDb->typeInfMemo.CaseSensitive;
-    typeInfMemo.MaximumScale     = copyDb->typeInfMemo.MaximumScale;
+    m_typeInfMemo.FsqlType         = copyDb->m_typeInfMemo.FsqlType;
+    m_typeInfMemo.TypeName         = copyDb->m_typeInfMemo.TypeName;
+    m_typeInfMemo.Precision        = copyDb->m_typeInfMemo.Precision;
+    m_typeInfMemo.CaseSensitive    = copyDb->m_typeInfMemo.CaseSensitive;
+    m_typeInfMemo.MaximumScale     = copyDb->m_typeInfMemo.MaximumScale;
 
 #ifdef DBDEBUG_CONSOLE
-    std::wcout << L"VARCHAR DATA TYPE: " << typeInfVarchar.TypeName << std::endl;
-    std::wcout << L"INTEGER DATA TYPE: " << typeInfInteger.TypeName << std::endl;
-    std::wcout << L"FLOAT   DATA TYPE: " << typeInfFloat.TypeName << std::endl;
-    std::wcout << L"DATE    DATA TYPE: " << typeInfDate.TypeName << std::endl;
-    std::wcout << L"BLOB    DATA TYPE: " << typeInfBlob.TypeName << std::endl;
-    std::wcout << L"MEMO    DATA TYPE: " << typeInfMemo.TypeName << std::endl;
+    std::wcout << L"VARCHAR DATA TYPE: " << m_typeInfVarchar.TypeName << std::endl;
+    std::wcout << L"INTEGER DATA TYPE: " << m_typeInfInteger.TypeName << std::endl;
+    std::wcout << L"FLOAT   DATA TYPE: " << m_typeInfFloat.TypeName << std::endl;
+    std::wcout << L"DATE    DATA TYPE: " << m_typeInfDate.TypeName << std::endl;
+    std::wcout << L"BLOB    DATA TYPE: " << m_typeInfBlob.TypeName << std::endl;
+    std::wcout << L"MEMO    DATA TYPE: " << m_typeInfMemo.TypeName << std::endl;
     std::wcout << std::endl;
 #endif
 
@@ -825,8 +825,8 @@ bool Database::Open(Database *copyDb)
 } // wxDb::Open() 2
 
 
-/********** wxDb::setConnectionOptions() **********/
-bool Database::setConnectionOptions(void)
+/********** wxDb::SetConnectionOptionsImpl() **********/
+bool Database::SetConnectionOptionsImpl()
 /*
  * NOTE: The Intersolv/Oracle 7 driver was "Not Capable" of setting the login timeout.
  */
@@ -837,12 +837,12 @@ bool Database::setConnectionOptions(void)
     // are database specific and need to call the Dbms() function.
     RETCODE retcode;
 
-    retcode = SQLGetInfo(hdbc, SQL_DBMS_NAME, (UCHAR *) dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR *) dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-        return(DispAllErrors(henv, hdbc));
+        return(DispAllErrors(m_henv, m_hdbc));
 
-    /* retcode = */ SQLSetConnectOption(hdbc, SQL_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF);
-    /* retcode = */ SQLSetConnectOption(hdbc, SQL_OPT_TRACE, SQL_OPT_TRACE_OFF);
+    /* retcode = */ SQLSetConnectOption(m_hdbc, SQL_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF);
+    /* retcode = */ SQLSetConnectOption(m_hdbc, SQL_OPT_TRACE, SQL_OPT_TRACE_OFF);
 //  SQLSetConnectOption(hdbc, SQL_TXN_ISOLATION, SQL_TXN_READ_COMMITTED);  // No dirty reads
 
     // By default, MS Sql Server closes cursors on commit and rollback.  The following
@@ -854,7 +854,7 @@ bool Database::setConnectionOptions(void)
     {
         const long SQL_PRESERVE_CURSORS = 1204L;
         const long SQL_PC_ON = 1L;
-        /* retcode = */ SQLSetConnectOption(hdbc, SQL_PRESERVE_CURSORS, SQL_PC_ON);
+        /* retcode = */ SQLSetConnectOption(m_hdbc, SQL_PRESERVE_CURSORS, SQL_PC_ON);
     }
 
     // Display the connection options to verify them
@@ -862,14 +862,14 @@ bool Database::setConnectionOptions(void)
     long l;
     std::wcout << L"****** CONNECTION OPTIONS ******" << std::endl;
 
-    retcode = SQLGetConnectOption(hdbc, SQL_AUTOCOMMIT, &l);
+    retcode = SQLGetConnectOption(m_hdbc, SQL_AUTOCOMMIT, &l);
     if (retcode != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc));
+        return(DispAllErrors(m_henv, m_hdbc));
     std::wcout << L"AUTOCOMMIT: " << (l == SQL_AUTOCOMMIT_OFF ? L"OFF" : L"ON") << std::endl;
 
-    retcode = SQLGetConnectOption(hdbc, SQL_ODBC_CURSORS, &l);
+    retcode = SQLGetConnectOption(m_hdbc, SQL_ODBC_CURSORS, &l);
     if (retcode != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc));
+        return(DispAllErrors(m_henv, m_hdbc));
     std::wcout << L"ODBC CURSORS: ";
     switch(l)
     {
@@ -885,9 +885,9 @@ bool Database::setConnectionOptions(void)
     }
     std::wcout << std::endl;
 
-    retcode = SQLGetConnectOption(hdbc, SQL_OPT_TRACE, &l);
+    retcode = SQLGetConnectOption(m_hdbc, SQL_OPT_TRACE, &l);
     if (retcode != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc));
+        return(DispAllErrors(m_henv, m_hdbc));
     std::wcout << L"TRACING: " << (l == SQL_OPT_TRACE_OFF ? L"OFF" : L"ON") << std::endl;
 
     std::wcout << std::endl;
@@ -896,35 +896,35 @@ bool Database::setConnectionOptions(void)
     // Completed Successfully
     return true;
 
-} // wxDb::setConnectionOptions()
+} // wxDb::SetConnectionOptionsImpl()
 
 
 /********** wxDb::getDbInfo() **********/
-bool Database::getDbInfo(bool failOnDataTypeUnsupported)
+bool Database::GetDbInfoImpl(bool failOnDataTypeUnsupported)
 {
     SWORD cb;
     RETCODE retcode;
 
-    retcode = SQLGetInfo(hdbc, SQL_SERVER_NAME, (UCHAR*) dbInf.serverName, sizeof(dbInf.serverName), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_SERVER_NAME, (UCHAR*) dbInf.serverName, sizeof(dbInf.serverName), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_DATABASE_NAME, (UCHAR*) dbInf.databaseName, sizeof(dbInf.databaseName), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_DATABASE_NAME, (UCHAR*) dbInf.databaseName, sizeof(dbInf.databaseName), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_DBMS_NAME, (UCHAR*) dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR*) dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
@@ -932,228 +932,228 @@ bool Database::getDbInfo(bool failOnDataTypeUnsupported)
     // 16-Mar-1999
     // After upgrading to MSVC6, the original 20 char buffer below was insufficient,
     // causing database connectivity to fail in some cases.
-    retcode = SQLGetInfo(hdbc, SQL_DBMS_VER, (UCHAR*) dbInf.dbmsVer, sizeof(dbInf.dbmsVer), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_DBMS_VER, (UCHAR*) dbInf.dbmsVer, sizeof(dbInf.dbmsVer), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_ACTIVE_CONNECTIONS, (UCHAR*) &dbInf.maxConnections, sizeof(dbInf.maxConnections), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_CONNECTIONS, (UCHAR*) &dbInf.maxConnections, sizeof(dbInf.maxConnections), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_ACTIVE_STATEMENTS, (UCHAR*) &dbInf.maxStmts, sizeof(dbInf.maxStmts), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_STATEMENTS, (UCHAR*) &dbInf.maxStmts, sizeof(dbInf.maxStmts), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_DRIVER_NAME, (UCHAR*) dbInf.driverName, sizeof(dbInf.driverName), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_NAME, (UCHAR*) dbInf.driverName, sizeof(dbInf.driverName), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_DRIVER_ODBC_VER, (UCHAR*) dbInf.odbcVer, sizeof(dbInf.odbcVer), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, (UCHAR*) dbInf.odbcVer, sizeof(dbInf.odbcVer), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_ODBC_VER, (UCHAR*) dbInf.drvMgrOdbcVer, sizeof(dbInf.drvMgrOdbcVer), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_ODBC_VER, (UCHAR*) dbInf.drvMgrOdbcVer, sizeof(dbInf.drvMgrOdbcVer), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_DRIVER_VER, (UCHAR*) dbInf.driverVer, sizeof(dbInf.driverVer), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_VER, (UCHAR*) dbInf.driverVer, sizeof(dbInf.driverVer), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_ODBC_API_CONFORMANCE, (UCHAR*) &dbInf.apiConfLvl, sizeof(dbInf.apiConfLvl), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_ODBC_API_CONFORMANCE, (UCHAR*) &dbInf.apiConfLvl, sizeof(dbInf.apiConfLvl), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, (UCHAR*) &dbInf.cliConfLvl, sizeof(dbInf.cliConfLvl), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, (UCHAR*) &dbInf.cliConfLvl, sizeof(dbInf.cliConfLvl), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
         // Not all drivers support this call - Nick Gorham(unixODBC)
         dbInf.cliConfLvl = 0;
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_ODBC_SQL_CONFORMANCE, (UCHAR*) &dbInf.sqlConfLvl, sizeof(dbInf.sqlConfLvl), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_CONFORMANCE, (UCHAR*) &dbInf.sqlConfLvl, sizeof(dbInf.sqlConfLvl), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_OUTER_JOINS, (UCHAR*) dbInf.outerJoins, sizeof(dbInf.outerJoins), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_OUTER_JOINS, (UCHAR*) dbInf.outerJoins, sizeof(dbInf.outerJoins), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_PROCEDURES, (UCHAR*) dbInf.procedureSupport, sizeof(dbInf.procedureSupport), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_PROCEDURES, (UCHAR*) dbInf.procedureSupport, sizeof(dbInf.procedureSupport), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_ACCESSIBLE_TABLES, (UCHAR*) dbInf.accessibleTables, sizeof(dbInf.accessibleTables), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, (UCHAR*) dbInf.accessibleTables, sizeof(dbInf.accessibleTables), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, (UCHAR*) &dbInf.cursorCommitBehavior, sizeof(dbInf.cursorCommitBehavior), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, (UCHAR*) &dbInf.cursorCommitBehavior, sizeof(dbInf.cursorCommitBehavior), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, (UCHAR*) &dbInf.cursorRollbackBehavior, sizeof(dbInf.cursorRollbackBehavior), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, (UCHAR*) &dbInf.cursorRollbackBehavior, sizeof(dbInf.cursorRollbackBehavior), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_NON_NULLABLE_COLUMNS, (UCHAR*) &dbInf.supportNotNullClause, sizeof(dbInf.supportNotNullClause), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, (UCHAR*) &dbInf.supportNotNullClause, sizeof(dbInf.supportNotNullClause), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_ODBC_SQL_OPT_IEF, (UCHAR*) dbInf.supportIEF, sizeof(dbInf.supportIEF), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, (UCHAR*) dbInf.supportIEF, sizeof(dbInf.supportIEF), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_DEFAULT_TXN_ISOLATION, (UCHAR*) &dbInf.txnIsolation, sizeof(dbInf.txnIsolation), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, (UCHAR*) &dbInf.txnIsolation, sizeof(dbInf.txnIsolation), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_TXN_ISOLATION_OPTION, (UCHAR*) &dbInf.txnIsolationOptions, sizeof(dbInf.txnIsolationOptions), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, (UCHAR*) &dbInf.txnIsolationOptions, sizeof(dbInf.txnIsolationOptions), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_FETCH_DIRECTION, (UCHAR*) &dbInf.fetchDirections, sizeof(dbInf.fetchDirections), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_FETCH_DIRECTION, (UCHAR*) &dbInf.fetchDirections, sizeof(dbInf.fetchDirections), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_LOCK_TYPES, (UCHAR*) &dbInf.lockTypes, sizeof(dbInf.lockTypes), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_LOCK_TYPES, (UCHAR*) &dbInf.lockTypes, sizeof(dbInf.lockTypes), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_POS_OPERATIONS, (UCHAR*) &dbInf.posOperations, sizeof(dbInf.posOperations), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_POS_OPERATIONS, (UCHAR*) &dbInf.posOperations, sizeof(dbInf.posOperations), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_POSITIONED_STATEMENTS, (UCHAR*) &dbInf.posStmts, sizeof(dbInf.posStmts), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, (UCHAR*) &dbInf.posStmts, sizeof(dbInf.posStmts), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_SCROLL_CONCURRENCY, (UCHAR*) &dbInf.scrollConcurrency, sizeof(dbInf.scrollConcurrency), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_CONCURRENCY, (UCHAR*) &dbInf.scrollConcurrency, sizeof(dbInf.scrollConcurrency), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_SCROLL_OPTIONS, (UCHAR*) &dbInf.scrollOptions, sizeof(dbInf.scrollOptions), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_OPTIONS, (UCHAR*) &dbInf.scrollOptions, sizeof(dbInf.scrollOptions), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_STATIC_SENSITIVITY, (UCHAR*) &dbInf.staticSensitivity, sizeof(dbInf.staticSensitivity), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_STATIC_SENSITIVITY, (UCHAR*) &dbInf.staticSensitivity, sizeof(dbInf.staticSensitivity), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_TXN_CAPABLE, (UCHAR*) &dbInf.txnCapable, sizeof(dbInf.txnCapable), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_TXN_CAPABLE, (UCHAR*) &dbInf.txnCapable, sizeof(dbInf.txnCapable), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
 
-    retcode = SQLGetInfo(hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &dbInf.loginTimeout, sizeof(dbInf.loginTimeout), &cb);
+    retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &dbInf.loginTimeout, sizeof(dbInf.loginTimeout), &cb);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
     {
-        DispAllErrors(henv, hdbc);
+        DispAllErrors(m_henv, m_hdbc);
         if (failOnDataTypeUnsupported)
             return false;
     }
@@ -1359,8 +1359,8 @@ bool Database::getDbInfo(bool failOnDataTypeUnsupported)
 } // wxDb::getDbInfo()
 
 
-/********** wxDb::getDataTypeInfo() **********/
-bool Database::getDataTypeInfo(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)
+/********** wxDb::GetDataTypeInfoImpl() **********/
+bool Database::GetDataTypeInfoImpl(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)
 {
 /*
  * fSqlType will be something like SQL_VARCHAR.  This parameter determines
@@ -1372,27 +1372,27 @@ bool Database::getDataTypeInfo(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)
     SQLLEN  cbRet;
 
     // Get information about the data type specified
-    if (SQLGetTypeInfo(hstmt, fSqlType) != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc, hstmt));
+    if (SQLGetTypeInfo(m_hstmt, fSqlType) != SQL_SUCCESS)
+        return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
 
     // Fetch the record
-    retcode = SQLFetch(hstmt);
+    retcode = SQLFetch(m_hstmt);
     if (retcode != SQL_SUCCESS)
     {
 #ifdef DBDEBUG_CONSOLE
         if (retcode == SQL_NO_DATA_FOUND)
             std::wcout << L"SQL_NO_DATA_FOUND fetching information about data type." << std::endl;
 #endif
-        DispAllErrors(henv, hdbc, hstmt);
-        SQLFreeStmt(hstmt, SQL_CLOSE);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
+        SQLFreeStmt(m_hstmt, SQL_CLOSE);
         return false;
     }
 
     wchar_t typeName[DB_TYPE_NAME_LEN+1];
 
     // Obtain columns from the record
-    if (SQLGetData(hstmt, 1, SQL_C_WXCHAR, typeName, sizeof(typeName), &cbRet) != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc, hstmt));
+    if (SQLGetData(m_hstmt, 1, SQL_C_WXCHAR, typeName, sizeof(typeName), &cbRet) != SQL_SUCCESS)
+        return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
 
     structSQLTypeInfo.TypeName = typeName;
 
@@ -1424,53 +1424,53 @@ bool Database::getDataTypeInfo(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)
     }
 #endif
 
-    if (SQLGetData(hstmt, 3, SQL_C_LONG, (UCHAR*) &structSQLTypeInfo.Precision, 0, &cbRet) != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc, hstmt));
-    if (SQLGetData(hstmt, 8, SQL_C_SHORT, (UCHAR*) &structSQLTypeInfo.CaseSensitive, 0, &cbRet) != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc, hstmt));
+    if (SQLGetData(m_hstmt, 3, SQL_C_LONG, (UCHAR*) &structSQLTypeInfo.Precision, 0, &cbRet) != SQL_SUCCESS)
+        return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+    if (SQLGetData(m_hstmt, 8, SQL_C_SHORT, (UCHAR*) &structSQLTypeInfo.CaseSensitive, 0, &cbRet) != SQL_SUCCESS)
+        return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
 //    if (SQLGetData(hstmt, 14, SQL_C_SHORT, (UCHAR*) &structSQLTypeInfo.MinimumScale, 0, &cbRet) != SQL_SUCCESS)
 //        return(DispAllErrors(henv, hdbc, hstmt));
 
-    if (SQLGetData(hstmt, 15, SQL_C_SHORT,(UCHAR*)  &structSQLTypeInfo.MaximumScale, 0, &cbRet) != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc, hstmt));
+    if (SQLGetData(m_hstmt, 15, SQL_C_SHORT,(UCHAR*)  &structSQLTypeInfo.MaximumScale, 0, &cbRet) != SQL_SUCCESS)
+        return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
 
     if (structSQLTypeInfo.MaximumScale < 0)
         structSQLTypeInfo.MaximumScale = 0;
 
-    // Close the statement handle which closes open cursors
-    if (SQLFreeStmt(hstmt, SQL_CLOSE) != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc, hstmt));
+    // Close the statement handle which closes OpenImpl cursors
+    if (SQLFreeStmt(m_hstmt, SQL_CLOSE) != SQL_SUCCESS)
+        return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
 
     // Completed Successfully
     return true;
 
-} // wxDb::getDataTypeInfo()
+} // wxDb::GetDataTypeInfoImpl()
 
 
 /********** wxDb::Close() **********/
-void Database::Close(void)
+void Database::Close()
 {
     // Close the Sql Log file
-    if (fpSqlLog)
+    if (m_fpSqlLog)
     {
-        fclose(fpSqlLog);
-        fpSqlLog = 0;
+        fclose(m_fpSqlLog);
+        m_fpSqlLog = 0;
     }
 
     // Free statement handle
-    if (dbIsOpen)
+    if (m_dbIsOpen)
     {
-        if (SQLFreeStmt(hstmt, SQL_DROP) != SQL_SUCCESS)
-            DispAllErrors(henv, hdbc);
+        if (SQLFreeStmt(m_hstmt, SQL_DROP) != SQL_SUCCESS)
+            DispAllErrors(m_henv, m_hdbc);
     }
 
     // Disconnect from the datasource
-    if (SQLDisconnect(hdbc) != SQL_SUCCESS)
-        DispAllErrors(henv, hdbc);
+    if (SQLDisconnect(m_hdbc) != SQL_SUCCESS)
+        DispAllErrors(m_henv, m_hdbc);
 
     // Free the connection to the datasource
-    if (SQLFreeConnect(hdbc) != SQL_SUCCESS)
-        DispAllErrors(henv, hdbc);
+    if (SQLFreeConnect(m_hdbc) != SQL_SUCCESS)
+        DispAllErrors(m_henv, m_hdbc);
 
     // There should be zero Ctable objects still connected to this db object
     exASSERT(nTables == 0);
@@ -1505,20 +1505,20 @@ void Database::Close(void)
     for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
         wcscpy(DBerrorList[i], errorList[i]);
 
-    dbmsType = dbmsUNIDENTIFIED;
-    dbIsOpen = false;
+    m_dbmsType = dbmsUNIDENTIFIED;
+    m_dbIsOpen = false;
 
 } // wxDb::Close()
 
 
 /********** wxDb::CommitTrans() **********/
-bool Database::CommitTrans(void)
+bool Database::CommitTrans()
 {
     if (this)
     {
         // Commit the transaction
-        if (SQLTransact(henv, hdbc, SQL_COMMIT) != SQL_SUCCESS)
-            return(DispAllErrors(henv, hdbc));
+        if (SQLTransact(m_henv, m_hdbc, SQL_COMMIT) != SQL_SUCCESS)
+            return(DispAllErrors(m_henv, m_hdbc));
     }
 
     // Completed successfully
@@ -1528,11 +1528,11 @@ bool Database::CommitTrans(void)
 
 
 /********** wxDb::RollbackTrans() **********/
-bool Database::RollbackTrans(void)
+bool Database::RollbackTrans()
 {
     // Rollback the transaction
-    if (SQLTransact(henv, hdbc, SQL_ROLLBACK) != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc));
+    if (SQLTransact(m_henv, m_hdbc, SQL_ROLLBACK) != SQL_SUCCESS)
+        return(DispAllErrors(m_henv, m_hdbc));
 
     // Completed successfully
     return true;
@@ -1548,7 +1548,7 @@ bool Database::DispAllErrors(HENV aHenv, HDBC aHdbc, HSTMT aHstmt)
  * actual error(s) that just occurred on the previous request of the datasource.
  *
  * The function will retrieve each error condition from the datasource and
- * Printf the codes/text values into a string which it then logs via logError().
+ * Printf the codes/text values into a string which it then logs via LogErrorImpl().
  * If in DBDEBUG_CONSOLE mode, the constructed string will be displayed in the console
  * window and program execution will be paused until the user presses a key.
  *
@@ -1562,8 +1562,8 @@ bool Database::DispAllErrors(HENV aHenv, HDBC aHdbc, HSTMT aHstmt)
    while (SQLError(aHenv, aHdbc, aHstmt, (SQLTCHAR FAR *) sqlState, &nativeError, (SQLTCHAR FAR *) errorMsg, SQL_MAX_MESSAGE_LENGTH - 1, &cbErrorMsg) == SQL_SUCCESS)
      {
 		 odbcErrMsg = (boost::wformat(L"SQL State = %s\nNative Error Code = %li\nError Message = %s\n") % sqlState % (long)nativeError % errorMsg).str();
-        logError(odbcErrMsg, sqlState);
-        if (!silent)
+        LogErrorImpl(odbcErrMsg, sqlState);
+        if (!m_silent)
         {
 #ifdef DBDEBUG_CONSOLE
             // When run in console mode, use standard out to display errors.
@@ -1595,14 +1595,14 @@ bool Database::GetNextError(HENV aHenv, HDBC aHdbc, HSTMT aHstmt)
 
 
 /********** wxDb::DispNextError() **********/
-void Database::DispNextError(void)
+void Database::DispNextError()
 {
     std::wstring odbcErrMsg;
 
 	odbcErrMsg = (boost::wformat(L"SQL State = %s\nNative Error Code = %li\nError Message = %s\n") % sqlState % (long)nativeError % errorMsg).str();
-    logError(odbcErrMsg, sqlState);
+    LogErrorImpl(odbcErrMsg, sqlState);
 
-    if (silent)
+    if (m_silent)
         return;
 
 #ifdef DBDEBUG_CONSOLE
@@ -1619,8 +1619,8 @@ void Database::DispNextError(void)
 } // wxDb::DispNextError()
 
 
-/********** wxDb::logError() **********/
-void Database::logError(const std::wstring &errMsg, const std::wstring &SQLState)
+/********** wxDb::LogErrorImpl() **********/
+void Database::LogErrorImpl(const std::wstring &errMsg, const std::wstring &SQLState)
 {
     exASSERT(errMsg.length());
 
@@ -1645,7 +1645,7 @@ void Database::logError(const std::wstring &errMsg, const std::wstring &SQLState
     // Add the errmsg to the sql log
     WriteSqlLog(errMsg);
 
-}  // wxDb::logError()
+}  // wxDb::LogErrorImpl()
 
 
 /**********wxDb::TranslateSqlState()  **********/
@@ -1943,17 +1943,17 @@ bool Database::DropView(const std::wstring &viewName)
     std::wcout << std::endl << sqlStmt.c_str() << std::endl;
 #endif
 
-    if (SQLExecDirect(hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
+    if (SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
     {
         // Check for "Base table not found" error and ignore
-        GetNextError(henv, hdbc, hstmt);
+        GetNextError(m_henv, m_hdbc, m_hstmt);
         if (wcscmp(sqlState, L"S0002"))  // "Base table not found"
         {
             // Check for product specific error codes
             if (!((Dbms() == dbmsSYBASE_ASA    && !wcscmp(sqlState, L"42000"))))  // 5.x (and lower?)
             {
                 DispNextError();
-                DispAllErrors(henv, hdbc, hstmt);
+                DispAllErrors(m_henv, m_hdbc, m_hstmt);
                 RollbackTrans();
                 return false;
             }
@@ -1974,9 +1974,9 @@ bool Database::ExecSql(const std::wstring &pSqlStmt)
 {
     RETCODE retcode;
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
-    retcode = SQLExecDirect(hstmt, (SQLTCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
+    retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
     if (retcode == SQL_SUCCESS ||
         (Dbms() == dbmsDB2 && (retcode == SQL_SUCCESS_WITH_INFO || retcode == SQL_NO_DATA_FOUND)))
     {
@@ -1984,7 +1984,7 @@ bool Database::ExecSql(const std::wstring &pSqlStmt)
     }
     else
     {
-        DispAllErrors(henv, hdbc, hstmt);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
         return false;
     }
 
@@ -1999,9 +1999,9 @@ bool Database::ExecSql(const std::wstring &pSqlStmt, ColumnInfo** columns, short
         return false;
 
     SWORD noCols;
-    if (SQLNumResultCols(hstmt, &noCols) != SQL_SUCCESS)
+    if (SQLNumResultCols(m_hstmt, &noCols) != SQL_SUCCESS)
     {
-        DispAllErrors(henv, hdbc, hstmt);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
         return false;
     }
 
@@ -2020,11 +2020,11 @@ bool Database::ExecSql(const std::wstring &pSqlStmt, ColumnInfo** columns, short
     // Fill in column information (name, datatype)
     for (colNum = 0; colNum < noCols; colNum++)
     {
-        if (SQLColAttributes(hstmt, (UWORD)(colNum+1), SQL_COLUMN_NAME,
+        if (SQLColAttributes(m_hstmt, (UWORD)(colNum+1), SQL_COLUMN_NAME,
             name, sizeof(name),
             &Sword, &Sqllen) != SQL_SUCCESS)
         {
-            DispAllErrors(henv, hdbc, hstmt);
+            DispAllErrors(m_henv, m_hdbc, m_hstmt);
             delete[] pColInf;
             return false;
         }
@@ -2032,10 +2032,10 @@ bool Database::ExecSql(const std::wstring &pSqlStmt, ColumnInfo** columns, short
         wcsncpy(pColInf[colNum].m_colName, name, DB_MAX_COLUMN_NAME_LEN);
         pColInf[colNum].m_colName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
 
-        if (SQLColAttributes(hstmt, (UWORD)(colNum+1), SQL_COLUMN_TYPE,
+        if (SQLColAttributes(m_hstmt, (UWORD)(colNum+1), SQL_COLUMN_TYPE,
             NULL, 0, &Sword, &Sqllen) != SQL_SUCCESS)
         {
-            DispAllErrors(henv, hdbc, hstmt);
+            DispAllErrors(m_henv, m_hdbc, m_hstmt);
             delete[] pColInf;
             return false;
         }
@@ -2089,13 +2089,13 @@ bool Database::ExecSql(const std::wstring &pSqlStmt, ColumnInfo** columns, short
 }  // wxDb::ExecSql()
 
 /********** wxDb::GetNext()  **********/
-bool Database::GetNext(void)
+bool Database::GetNext()
 {
-    if (SQLFetch(hstmt) == SQL_SUCCESS)
+    if (SQLFetch(m_hstmt) == SQL_SUCCESS)
         return true;
     else
     {
-        DispAllErrors(henv, hdbc, hstmt);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
         return false;
     }
 
@@ -2113,11 +2113,11 @@ bool Database::GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLE
     if (cType == SQL_C_WXCHAR)
         bufferSize = maxLen * sizeof(wchar_t);
 
-    if (SQLGetData(hstmt, colNo, cType, pData, bufferSize, cbReturned) == SQL_SUCCESS)
+    if (SQLGetData(m_hstmt, colNo, cType, pData, bufferSize, cbReturned) == SQL_SUCCESS)
         return true;
     else
     {
-        DispAllErrors(henv, hdbc, hstmt);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
         return false;
     }
 
@@ -2152,7 +2152,7 @@ int Database::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UW
     /*---------------------------------------------------------------------*/
     /* Get the names of the columns in the primary key.                    */
     /*---------------------------------------------------------------------*/
-    retcode = SQLPrimaryKeys(hstmt,
+    retcode = SQLPrimaryKeys(m_hstmt,
                              NULL, 0,                               /* Catalog name  */
                              NULL, 0,                               /* Schema name   */
                              (SQLTCHAR FAR *) tableName.c_str(), SQL_NTS); /* Table name    */
@@ -2163,7 +2163,7 @@ int Database::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UW
     /*---------------------------------------------------------------------*/
     while ((retcode == SQL_SUCCESS) || (retcode == SQL_SUCCESS_WITH_INFO))
     {
-        retcode = SQLFetch(hstmt);
+        retcode = SQLFetch(m_hstmt);
         if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
         {
             GetData( 4, SQL_C_WXCHAR,  szPkCol,    DB_MAX_COLUMN_NAME_LEN+1, &cb);
@@ -2174,12 +2174,12 @@ int Database::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UW
                     colInf[i].m_pkCol = iKeySeq;              // Which Primary Key is this (first, second usw.) ?
         }  // if
     }  // while
-    SQLFreeStmt(hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated).      */
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated).      */
 
     /*---------------------------------------------------------------------*/
     /* Get all the foreign keys that refer to tableName primary key.       */
     /*---------------------------------------------------------------------*/
-    retcode = SQLForeignKeys(hstmt,
+    retcode = SQLForeignKeys(m_hstmt,
                              NULL, 0,                            /* Primary catalog */
                              NULL, 0,                            /* Primary schema  */
                              (SQLTCHAR FAR *)tableName.c_str(), SQL_NTS,/* Primary table   */
@@ -2196,7 +2196,7 @@ int Database::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UW
     szPkCol[0] = 0;
     while ((retcode == SQL_SUCCESS) || (retcode == SQL_SUCCESS_WITH_INFO))
     {
-        retcode = SQLFetch(hstmt);
+        retcode = SQLFetch(m_hstmt);
         if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
         {
             GetData( 3, SQL_C_WXCHAR,  szPkTable,   DB_MAX_TABLE_NAME_LEN+1,   &cb);
@@ -2223,12 +2223,12 @@ int Database::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UW
         }
     }  // if
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated). */
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated). */
 
     /*---------------------------------------------------------------------*/
     /* Get all the foreign keys in the tablename table.                    */
     /*---------------------------------------------------------------------*/
-    retcode = SQLForeignKeys(hstmt,
+    retcode = SQLForeignKeys(m_hstmt,
                              NULL, 0,                             /* Primary catalog   */
                              NULL, 0,                             /* Primary schema    */
                              NULL, 0,                             /* Primary table     */
@@ -2243,7 +2243,7 @@ int Database::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UW
     /*---------------------------------------------------------------------*/
     while ((retcode == SQL_SUCCESS) || (retcode == SQL_SUCCESS_WITH_INFO))
     {
-        retcode = SQLFetch(hstmt);
+        retcode = SQLFetch(m_hstmt);
         if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
         {
             GetData( 3, SQL_C_WXCHAR,  szPkTable,   DB_MAX_TABLE_NAME_LEN+1,  &cb);
@@ -2261,7 +2261,7 @@ int Database::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UW
             }  // for
         }  // if
     }  // while
-    SQLFreeStmt(hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated). */
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated). */
 
     return TRUE;
 
@@ -2308,7 +2308,7 @@ ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
     std::wstring TableName;
 
     std::wstring UserID;
-    convertUserID(userID,UserID);
+    ConvertUserIDImpl(userID,UserID);
 
     // Pass 1 - Determine how many columns there are.
     // Pass 2 - Allocate the wxDbColInf array and fill in
@@ -2341,7 +2341,7 @@ ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
                 (Dbms() == dbmsINTERBASE))
                 boost::algorithm::to_upper(TableName);
 
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
             // MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
             // use the call below that leaves out the user name
@@ -2350,7 +2350,7 @@ ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
                 Dbms() != dbmsACCESS &&
                 Dbms() != dbmsMS_SQL_SERVER)
             {
-                retcode = SQLColumns(hstmt,
+                retcode = SQLColumns(m_hstmt,
                                      NULL, 0,                                // All qualifiers
                                      (SQLTCHAR *) UserID.c_str(), SQL_NTS,      // Owner
                                      (SQLTCHAR *) TableName.c_str(), SQL_NTS,
@@ -2358,7 +2358,7 @@ ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
             }
             else
             {
-                retcode = SQLColumns(hstmt,
+                retcode = SQLColumns(m_hstmt,
                                      NULL, 0,                                // All qualifiers
                                      NULL, 0,                                // Owner
                                      (SQLTCHAR *) TableName.c_str(), SQL_NTS,
@@ -2366,14 +2366,14 @@ ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
             }
             if (retcode != SQL_SUCCESS)
             {  // Error occurred, abort
-                DispAllErrors(henv, hdbc, hstmt);
+                DispAllErrors(m_henv, m_hdbc, m_hstmt);
                 if (colInf)
                     delete [] colInf;
-                SQLFreeStmt(hstmt, SQL_CLOSE);
+                SQLFreeStmt(m_hstmt, SQL_CLOSE);
                 return(0);
             }
 
-            while ((retcode = SQLFetch(hstmt)) == SQL_SUCCESS)
+            while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
             {
                 if (pass == 1)  // First pass, just add up the number of columns
                     noCols++;
@@ -2397,7 +2397,7 @@ ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
 
                         // Determine the wxDb data type that is used to represent the native data type of this data source
                         colInf[colNo].m_dbDataType = 0;
-                        if (!_wcsicmp(typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
+                        if (!_wcsicmp(m_typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
                         {
 #ifdef _IODBC_
                             // IODBC does not return a correct columnLength, so we set
@@ -2410,13 +2410,13 @@ ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
 #endif
                             colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
                         }
-                        else if (!_wcsicmp(typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
+                        else if (!_wcsicmp(m_typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
                             colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
-                        else if (!_wcsicmp(typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
+                        else if (!_wcsicmp(m_typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
                             colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
-                        else if (!_wcsicmp(typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
+                        else if (!_wcsicmp(m_typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
                             colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
-                        else if (!_wcsicmp(typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
+                        else if (!_wcsicmp(m_typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
                             colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
                         colNo++;
                     }
@@ -2424,16 +2424,16 @@ ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
             }
             if (retcode != SQL_NO_DATA_FOUND)
             {  // Error occurred, abort
-                DispAllErrors(henv, hdbc, hstmt);
+                DispAllErrors(m_henv, m_hdbc, m_hstmt);
                 if (colInf)
                     delete [] colInf;
-                SQLFreeStmt(hstmt, SQL_CLOSE);
+                SQLFreeStmt(m_hstmt, SQL_CLOSE);
                 return(0);
             }
         }
     }
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
     return colInf;
 
 }  // wxDb::GetColumns()
@@ -2467,7 +2467,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, 
     std::wstring TableName;
 
     std::wstring UserID;
-    convertUserID(userID,UserID);
+    ConvertUserIDImpl(userID,UserID);
 
     // Pass 1 - Determine how many columns there are.
     // Pass 2 - Allocate the wxDbColInf array and fill in
@@ -2497,7 +2497,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, 
             (Dbms() == dbmsINTERBASE))
             boost::algorithm::to_upper(TableName);
 
-        SQLFreeStmt(hstmt, SQL_CLOSE);
+        SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
         // MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
         // use the call below that leaves out the user name
@@ -2506,7 +2506,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, 
             Dbms() != dbmsACCESS &&
             Dbms() != dbmsMS_SQL_SERVER)
         {
-            retcode = SQLColumns(hstmt,
+            retcode = SQLColumns(m_hstmt,
                                  NULL, 0,                                // All qualifiers
                                  (SQLTCHAR *) UserID.c_str(), SQL_NTS,    // Owner
                                  (SQLTCHAR *) TableName.c_str(), SQL_NTS,
@@ -2514,7 +2514,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, 
         }
         else
         {
-            retcode = SQLColumns(hstmt,
+            retcode = SQLColumns(m_hstmt,
                                  NULL, 0,                                 // All qualifiers
                                  NULL, 0,                                 // Owner
                                  (SQLTCHAR *) TableName.c_str(), SQL_NTS,
@@ -2522,16 +2522,16 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, 
         }
         if (retcode != SQL_SUCCESS)
         {  // Error occurred, abort
-            DispAllErrors(henv, hdbc, hstmt);
+            DispAllErrors(m_henv, m_hdbc, m_hstmt);
             if (colInf)
                 delete [] colInf;
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
             if (numCols)
                 *numCols = 0;
             return(0);
         }
 
-        while ((retcode = SQLFetch(hstmt)) == SQL_SUCCESS)
+        while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
         {
             if (pass == 1)  // First pass, just add up the number of columns
                 noCols++;
@@ -2569,7 +2569,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, 
 
                     // Determine the wxDb data type that is used to represent the native data type of this data source
                     colInf[colNo].m_dbDataType = 0;
-                    if (!_wcsicmp(typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
+                    if (!_wcsicmp(m_typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
                     {
 #ifdef _IODBC_
                         // IODBC does not return a correct columnLength, so we set
@@ -2583,13 +2583,13 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, 
 
                         colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
                     }
-                    else if (!_wcsicmp(typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
+                    else if (!_wcsicmp(m_typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
                         colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
-                    else if (!_wcsicmp(typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
+                    else if (!_wcsicmp(m_typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
                         colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
-                    else if (!_wcsicmp(typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
+                    else if (!_wcsicmp(m_typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
                         colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
-                    else if (!_wcsicmp(typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
+                    else if (!_wcsicmp(m_typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
                         colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
 
                     colNo++;
@@ -2598,17 +2598,17 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, 
         }
         if (retcode != SQL_NO_DATA_FOUND)
         {  // Error occurred, abort
-            DispAllErrors(henv, hdbc, hstmt);
+            DispAllErrors(m_henv, m_hdbc, m_hstmt);
             if (colInf)
                 delete [] colInf;
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
             if (numCols)
                 *numCols = 0;
             return(0);
         }
     }
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
     // Store Primary and Foriegn Keys
     GetKeyFields(tableName,colInf,noCols);
@@ -2723,7 +2723,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, co
     std::wstring TableName;
 
     std::wstring UserID;
-    convertUserID(userID,UserID);
+    ConvertUserIDImpl(userID,UserID);
 
     // Pass 1 - Determine how many columns there are.
     // Pass 2 - Allocate the wxDbColInf array and fill in
@@ -2753,7 +2753,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, co
             (Dbms() == dbmsINTERBASE))
             TableName = TableName.Upper();
 
-        SQLFreeStmt(hstmt, SQL_CLOSE);
+        SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
         // MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
         // use the call below that leaves out the user name
@@ -2762,7 +2762,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, co
             Dbms() != dbmsACCESS &&
             Dbms() != dbmsMS_SQL_SERVER)
         {
-            retcode = SQLColumns(hstmt,
+            retcode = SQLColumns(m_hstmt,
                                  NULL, 0,                              // All qualifiers
                                  (UCHAR *) UserID.c_str(), SQL_NTS,    // Owner
                                  (UCHAR *) TableName.c_str(), SQL_NTS,
@@ -2770,7 +2770,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, co
         }
         else
         {
-            retcode = SQLColumns(hstmt,
+            retcode = SQLColumns(m_hstmt,
                                  NULL, 0,                              // All qualifiers
                                  NULL, 0,                              // Owner
                                  (UCHAR *) TableName.c_str(), SQL_NTS,
@@ -2778,16 +2778,16 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, co
         }
         if (retcode != SQL_SUCCESS)
         {  // Error occurred, abort
-            DispAllErrors(henv, hdbc, hstmt);
+            DispAllErrors(m_henv, m_hdbc, m_hstmt);
             if (colInf)
                 delete [] colInf;
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
             if (numCols)
                 *numCols = 0;
             return(0);
         }
 
-        while ((retcode = SQLFetch(hstmt)) == SQL_SUCCESS)
+        while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
         {
             if (pass == 1)  // First pass, just add up the number of columns
                 noCols++;
@@ -2877,17 +2877,17 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, co
         }
         if (retcode != SQL_NO_DATA_FOUND)
         {  // Error occurred, abort
-            DispAllErrors(henv, hdbc, hstmt);
+            DispAllErrors(m_henv, m_hdbc, m_hstmt);
             if (colInf)
                 delete [] colInf;
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
             if (numCols)
                 *numCols = 0;
             return(0);
         }
     }
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
     // Store Primary and Foreign Keys
     GetKeyFields(tableName,colInf,noCols);
@@ -2902,16 +2902,16 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, co
     Stmt.Printf(L"select * from \"%s\" where 0=1", tableName);
 
     // Execute query
-    if (SQLExecDirect(hstmt, (UCHAR FAR *) Stmt.c_str(), SQL_NTS) != SQL_SUCCESS)
+    if (SQLExecDirect(m_hstmt, (UCHAR FAR *) Stmt.c_str(), SQL_NTS) != SQL_SUCCESS)
     {
-        DispAllErrors(henv, hdbc, hstmt);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
         return NULL;
     }
 
     // Get the number of result columns
-    if (SQLNumResultCols (hstmt, &noCols) != SQL_SUCCESS)
+    if (SQLNumResultCols (m_hstmt, &noCols) != SQL_SUCCESS)
     {
-        DispAllErrors(henv, hdbc, hstmt);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
         return NULL;
     }
 
@@ -2926,11 +2926,11 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, co
     SDWORD Sdword;
     for (colNum = 0; colNum < noCols; colNum++)
     {
-        if (SQLColAttributes(hstmt,colNum+1, SQL_COLUMN_NAME,
+        if (SQLColAttributes(m_hstmt,colNum+1, SQL_COLUMN_NAME,
             name, sizeof(name),
             &Sword, &Sdword) != SQL_SUCCESS)
         {
-            DispAllErrors(henv, hdbc, hstmt);
+            DispAllErrors(m_henv, m_hdbc, m_hstmt);
             return NULL;
         }
 
@@ -2954,7 +2954,7 @@ ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, co
             }
         }
     }
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
     ///////////////////////////////////////////////////////////////////////////
     // End sorting
@@ -2994,7 +2994,7 @@ int Database::GetColumnCount(const std::wstring &tableName, const wchar_t *userI
     std::wstring TableName;
 
     std::wstring UserID;
-    convertUserID(userID,UserID);
+    ConvertUserIDImpl(userID,UserID);
 
     TableName = tableName;
     // Oracle and Interbase table names are uppercase only, so force
@@ -3004,7 +3004,7 @@ int Database::GetColumnCount(const std::wstring &tableName, const wchar_t *userI
         (Dbms() == dbmsINTERBASE))
 		boost::algorithm::to_upper(TableName);
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
     // MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
     // use the call below that leaves out the user name
@@ -3013,7 +3013,7 @@ int Database::GetColumnCount(const std::wstring &tableName, const wchar_t *userI
         Dbms() != dbmsACCESS &&
         Dbms() != dbmsMS_SQL_SERVER)
     {
-        retcode = SQLColumns(hstmt,
+        retcode = SQLColumns(m_hstmt,
                              NULL, 0,                                // All qualifiers
                              (SQLTCHAR *) UserID.c_str(), SQL_NTS,      // Owner
                              (SQLTCHAR *) TableName.c_str(), SQL_NTS,
@@ -3021,7 +3021,7 @@ int Database::GetColumnCount(const std::wstring &tableName, const wchar_t *userI
     }
     else
     {
-        retcode = SQLColumns(hstmt,
+        retcode = SQLColumns(m_hstmt,
                              NULL, 0,                                // All qualifiers
                              NULL, 0,                                // Owner
                              (SQLTCHAR *) TableName.c_str(), SQL_NTS,
@@ -3029,23 +3029,23 @@ int Database::GetColumnCount(const std::wstring &tableName, const wchar_t *userI
     }
     if (retcode != SQL_SUCCESS)
     {  // Error occurred, abort
-        DispAllErrors(henv, hdbc, hstmt);
-        SQLFreeStmt(hstmt, SQL_CLOSE);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
+        SQLFreeStmt(m_hstmt, SQL_CLOSE);
         return(-1);
     }
 
     // Count the columns
-    while ((retcode = SQLFetch(hstmt)) == SQL_SUCCESS)
+    while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
         noCols++;
 
     if (retcode != SQL_NO_DATA_FOUND)
     {  // Error occurred, abort
-        DispAllErrors(henv, hdbc, hstmt);
-        SQLFreeStmt(hstmt, SQL_CLOSE);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
+        SQLFreeStmt(m_hstmt, SQL_CLOSE);
         return(-1);
     }
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
     return noCols;
 
 }  // wxDb::GetColumnCount()
@@ -3082,7 +3082,7 @@ DbCatalog *Database::GetCatalog(const wchar_t *userID)
     std::wstring tblNameSave;
 
     std::wstring UserID;
-    convertUserID(userID,UserID);
+    ConvertUserIDImpl(userID,UserID);
 
     //-------------------------------------------------------------
     // Create the Database Array of catalog entries
@@ -3098,7 +3098,7 @@ DbCatalog *Database::GetCatalog(const wchar_t *userID)
 
     for (pass = 1; pass <= 2; pass++)
     {
-        SQLFreeStmt(hstmt, SQL_CLOSE);   // Close if Open
+        SQLFreeStmt(m_hstmt, SQL_CLOSE);   // Close if Open
         tblNameSave.empty();
 
         if (!UserID.empty() &&
@@ -3106,7 +3106,7 @@ DbCatalog *Database::GetCatalog(const wchar_t *userID)
             Dbms() != dbmsACCESS &&
             Dbms() != dbmsMS_SQL_SERVER)
         {
-            retcode = SQLTables(hstmt,
+            retcode = SQLTables(m_hstmt,
                                 NULL, 0,                             // All qualifiers
                                 (SQLTCHAR *) UserID.c_str(), SQL_NTS,   // User specified
                                 NULL, 0,                             // All tables
@@ -3114,7 +3114,7 @@ DbCatalog *Database::GetCatalog(const wchar_t *userID)
         }
         else
         {
-            retcode = SQLTables(hstmt,
+            retcode = SQLTables(m_hstmt,
                                 NULL, 0,           // All qualifiers
                                 NULL, 0,           // User specified
                                 NULL, 0,           // All tables
@@ -3123,13 +3123,13 @@ DbCatalog *Database::GetCatalog(const wchar_t *userID)
 
         if (retcode != SQL_SUCCESS)
         {
-            DispAllErrors(henv, hdbc, hstmt);
+            DispAllErrors(m_henv, m_hdbc, m_hstmt);
             pDbInf = NULL;
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
             return pDbInf;
         }
 
-        while ((retcode = SQLFetch(hstmt)) == SQL_SUCCESS)   // Table Information
+        while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
         {
             if (pass == 1)  // First pass, just count the Tables
             {
@@ -3156,7 +3156,7 @@ DbCatalog *Database::GetCatalog(const wchar_t *userID)
             }  // if
         }  // while
     }  // for
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
     // Query how many columns are in each table
     for (noTab=0;noTab<pDbInf->m_numTables;noTab++)
@@ -3201,10 +3201,10 @@ bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
     if (fp == NULL)
         return false;
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
     std::wstring UserID;
-    convertUserID(userID,UserID);
+    ConvertUserIDImpl(userID,UserID);
 
     if (!UserID.empty() &&
         Dbms() != dbmsMY_SQL &&
@@ -3213,7 +3213,7 @@ bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
         Dbms() != dbmsINTERBASE &&
         Dbms() != dbmsMS_SQL_SERVER)
     {
-        retcode = SQLColumns(hstmt,
+        retcode = SQLColumns(m_hstmt,
                              NULL, 0,                                // All qualifiers
                              (SQLTCHAR *) UserID.c_str(), SQL_NTS,      // User specified
                              NULL, 0,                                // All tables
@@ -3221,7 +3221,7 @@ bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
     }
     else
     {
-        retcode = SQLColumns(hstmt,
+        retcode = SQLColumns(m_hstmt,
                              NULL, 0,    // All qualifiers
                              NULL, 0,    // User specified
                              NULL, 0,    // All tables
@@ -3229,7 +3229,7 @@ bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
     }
     if (retcode != SQL_SUCCESS)
     {
-        DispAllErrors(henv, hdbc, hstmt);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
         fclose(fp);
         return false;
     }
@@ -3240,7 +3240,7 @@ bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
 
     while (true)
     {
-        retcode = SQLFetch(hstmt);
+        retcode = SQLFetch(m_hstmt);
         if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
             break;
 
@@ -3273,7 +3273,7 @@ bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
 		outStr = (boost::wformat(L"%-32s %-32s (%04d)%-15s %9ld %9ld\n") % tblName % colName % sqlDataType % typeName % precision % length).str();
         if (fputws(outStr.c_str(), fp) == EOF)
         {
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
             fclose(fp);
             return false;
         }
@@ -3281,9 +3281,9 @@ bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
     }
 
     if (retcode != SQL_NO_DATA_FOUND)
-        DispAllErrors(henv, hdbc, hstmt);
+        DispAllErrors(m_henv, m_hdbc, m_hstmt);
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
     fclose(fp);
     return(retcode == SQL_NO_DATA_FOUND);
@@ -3323,7 +3323,7 @@ bool Database::TableExists(const std::wstring &tableName, const wchar_t *userID,
     }
 
     std::wstring UserID;
-    convertUserID(userID,UserID);
+    ConvertUserIDImpl(userID,UserID);
 
     TableName = tableName;
     // Oracle and Interbase table names are uppercase only, so force
@@ -3333,7 +3333,7 @@ bool Database::TableExists(const std::wstring &tableName, const wchar_t *userID,
         (Dbms() == dbmsINTERBASE))
         boost::algorithm::to_upper(TableName);
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
     RETCODE retcode;
 
     // Some databases cannot accept a user name when looking up table names,
@@ -3347,7 +3347,7 @@ bool Database::TableExists(const std::wstring &tableName, const wchar_t *userID,
         Dbms() != dbmsINTERBASE &&
         Dbms() != dbmsPERVASIVE_SQL)
     {
-        retcode = SQLTables(hstmt,
+        retcode = SQLTables(m_hstmt,
                             NULL, 0,                                  // All qualifiers
                             (SQLTCHAR *) UserID.c_str(), SQL_NTS,        // Only tables owned by this user
                             (SQLTCHAR FAR *)TableName.c_str(), SQL_NTS,
@@ -3355,23 +3355,23 @@ bool Database::TableExists(const std::wstring &tableName, const wchar_t *userID,
     }
     else
     {
-        retcode = SQLTables(hstmt,
+        retcode = SQLTables(m_hstmt,
                             NULL, 0,                                  // All qualifiers
                             NULL, 0,                                  // All owners
                             (SQLTCHAR FAR *)TableName.c_str(), SQL_NTS,
                             NULL, 0);                                 // All table types
     }
     if (retcode != SQL_SUCCESS)
-        return(DispAllErrors(henv, hdbc, hstmt));
+        return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
 
-    retcode = SQLFetch(hstmt);
+    retcode = SQLFetch(m_hstmt);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
     {
-        SQLFreeStmt(hstmt, SQL_CLOSE);
-        return(DispAllErrors(henv, hdbc, hstmt));
+        SQLFreeStmt(m_hstmt, SQL_CLOSE);
+        return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
     }
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
     return true;
 
@@ -3395,8 +3395,8 @@ bool Database::TablePrivileges(const std::wstring &tableName, const std::wstring
     std::wstring TableName;
 
     std::wstring UserID,Schema;
-    convertUserID(userID,UserID);
-    convertUserID(schema,Schema);
+    ConvertUserIDImpl(userID,UserID);
+    ConvertUserIDImpl(schema,Schema);
 
     TableName = tableName;
     // Oracle and Interbase table names are uppercase only, so force
@@ -3406,7 +3406,7 @@ bool Database::TablePrivileges(const std::wstring &tableName, const std::wstring
         (Dbms() == dbmsINTERBASE))
 		boost::algorithm::to_upper(TableName);
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
     // Some databases cannot accept a user name when looking up table names,
     // so we use the call below that leaves out the user name
@@ -3415,14 +3415,14 @@ bool Database::TablePrivileges(const std::wstring &tableName, const std::wstring
         Dbms() != dbmsACCESS &&
         Dbms() != dbmsMS_SQL_SERVER)
     {
-        retcode = SQLTablePrivileges(hstmt,
+        retcode = SQLTablePrivileges(m_hstmt,
                                      NULL, 0,                                    // Catalog
                                      (SQLTCHAR FAR *)Schema.c_str(), SQL_NTS,               // Schema
                                      (SQLTCHAR FAR *)TableName.c_str(), SQL_NTS);
     }
     else
     {
-        retcode = SQLTablePrivileges(hstmt,
+        retcode = SQLTablePrivileges(m_hstmt,
                                      NULL, 0,                                    // Catalog
                                      NULL, 0,                                    // Schema
                                      (SQLTCHAR FAR *)TableName.c_str(), SQL_NTS);
@@ -3433,36 +3433,36 @@ bool Database::TablePrivileges(const std::wstring &tableName, const std::wstring
 #endif
 
     if ((retcode != SQL_SUCCESS) && (retcode != SQL_SUCCESS_WITH_INFO))
-        return (DispAllErrors(henv, hdbc, hstmt));
+        return (DispAllErrors(m_henv, m_hdbc, m_hstmt));
 
     bool failed = false;
-    retcode = SQLFetch(hstmt);
+    retcode = SQLFetch(m_hstmt);
     while (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
     {
-        if (SQLGetData(hstmt, 1, SQL_C_WXCHAR, (UCHAR*) result.tableQual, sizeof(result.tableQual), &cbRetVal) != SQL_SUCCESS)
+        if (SQLGetData(m_hstmt, 1, SQL_C_WXCHAR, (UCHAR*) result.tableQual, sizeof(result.tableQual), &cbRetVal) != SQL_SUCCESS)
             failed = true;
 
-        if (!failed && SQLGetData(hstmt, 2, SQL_C_WXCHAR, (UCHAR*) result.tableOwner, sizeof(result.tableOwner), &cbRetVal) != SQL_SUCCESS)
+        if (!failed && SQLGetData(m_hstmt, 2, SQL_C_WXCHAR, (UCHAR*) result.tableOwner, sizeof(result.tableOwner), &cbRetVal) != SQL_SUCCESS)
             failed = true;
 
-        if (!failed && SQLGetData(hstmt, 3, SQL_C_WXCHAR, (UCHAR*) result.tableName, sizeof(result.tableName), &cbRetVal) != SQL_SUCCESS)
+        if (!failed && SQLGetData(m_hstmt, 3, SQL_C_WXCHAR, (UCHAR*) result.tableName, sizeof(result.tableName), &cbRetVal) != SQL_SUCCESS)
             failed = true;
 
-        if (!failed && SQLGetData(hstmt, 4, SQL_C_WXCHAR, (UCHAR*) result.grantor, sizeof(result.grantor), &cbRetVal) != SQL_SUCCESS)
+        if (!failed && SQLGetData(m_hstmt, 4, SQL_C_WXCHAR, (UCHAR*) result.grantor, sizeof(result.grantor), &cbRetVal) != SQL_SUCCESS)
             failed = true;
 
-        if (!failed && SQLGetData(hstmt, 5, SQL_C_WXCHAR, (UCHAR*) result.grantee, sizeof(result.grantee), &cbRetVal) != SQL_SUCCESS)
+        if (!failed && SQLGetData(m_hstmt, 5, SQL_C_WXCHAR, (UCHAR*) result.grantee, sizeof(result.grantee), &cbRetVal) != SQL_SUCCESS)
             failed = true;
 
-        if (!failed && SQLGetData(hstmt, 6, SQL_C_WXCHAR, (UCHAR*) result.privilege, sizeof(result.privilege), &cbRetVal) != SQL_SUCCESS)
+        if (!failed && SQLGetData(m_hstmt, 6, SQL_C_WXCHAR, (UCHAR*) result.privilege, sizeof(result.privilege), &cbRetVal) != SQL_SUCCESS)
             failed = true;
 
-        if (!failed && SQLGetData(hstmt, 7, SQL_C_WXCHAR, (UCHAR*) result.grantable, sizeof(result.grantable), &cbRetVal) != SQL_SUCCESS)
+        if (!failed && SQLGetData(m_hstmt, 7, SQL_C_WXCHAR, (UCHAR*) result.grantable, sizeof(result.grantable), &cbRetVal) != SQL_SUCCESS)
             failed = true;
 
         if (failed)
         {
-            return(DispAllErrors(henv, hdbc, hstmt));
+            return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
         }
 #ifdef DBDEBUG_CONSOLE
 		std::wcerr << "Scanning " << result.privilege <<" privilege on table " << result.tableOwner << "." << result.tableName << " granted by " << result.grantor << " to " << result.grantee << std::endl;
@@ -3470,28 +3470,28 @@ bool Database::TablePrivileges(const std::wstring &tableName, const std::wstring
 
 		if(boost::algorithm::iequals(UserID, result.tableOwner))
         {
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
             return true;
         }
 
 		if(boost::algorithm::iequals(UserID, result.grantee) &&
             !wcscmp(result.privilege, priv.c_str()))
         {
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
             return true;
         }
 
         if (!wcscmp(result.grantee,curRole) &&
             !wcscmp(result.privilege, priv.c_str()))
         {
-            SQLFreeStmt(hstmt, SQL_CLOSE);
+            SQLFreeStmt(m_hstmt, SQL_CLOSE);
             return true;
         }
 
-        retcode = SQLFetch(hstmt);
+        retcode = SQLFetch(m_hstmt);
     }
 
-    SQLFreeStmt(hstmt, SQL_CLOSE);
+    SQLFreeStmt(m_hstmt, SQL_CLOSE);
     return false;
 
 }  // wxDb::TablePrivileges
@@ -3533,24 +3533,24 @@ bool Database::SetSqlLogging(wxDbSqlLogState state, const std::wstring &filename
 
     if (state == sqlLogON)
     {
-        if (fpSqlLog == 0)
+        if (m_fpSqlLog == 0)
         {
-            fpSqlLog = _wfopen(filename.c_str(), (append ? L"at" : L"wt"));
-            if (fpSqlLog == NULL)
+            m_fpSqlLog = _wfopen(filename.c_str(), (append ? L"at" : L"wt"));
+            if (m_fpSqlLog == NULL)
                 return false;
         }
     }
     else  // sqlLogOFF
     {
-        if (fpSqlLog)
+        if (m_fpSqlLog)
         {
-            if (fclose(fpSqlLog))
+            if (fclose(m_fpSqlLog))
                 return false;
-            fpSqlLog = 0;
+            m_fpSqlLog = 0;
         }
     }
 
-    sqlLogState = state;
+    m_sqlLogState = state;
     return true;
 
 }  // wxDb::SetSqlLogging()
@@ -3561,14 +3561,14 @@ bool Database::WriteSqlLog(const std::wstring &logMsg)
 {
     exASSERT(logMsg.length());
 
-    if (fpSqlLog == 0 || sqlLogState == sqlLogOFF)
+    if (m_fpSqlLog == 0 || m_sqlLogState == sqlLogOFF)
         return false;
 
-	if (fputws(L"\n", fpSqlLog) == EOF)
+	if (fputws(L"\n", m_fpSqlLog) == EOF)
         return false;
-	if (fputws(logMsg.c_str(), fpSqlLog) == EOF)
+	if (fputws(logMsg.c_str(), m_fpSqlLog) == EOF)
         return false;
-	if (fputws(L"\n", fpSqlLog) == EOF)
+	if (fputws(L"\n", m_fpSqlLog) == EOF)
         return false;
 
 
@@ -3594,7 +3594,7 @@ std::vector<std::wstring> Database::GetErrorList() const
 
 
 /********** wxDb::Dbms() **********/
-wxDBMS Database::Dbms(void)
+wxDBMS Database::Dbms()
 /*
  * Be aware that not all database engines use the exact same syntax, and not
  * every ODBC compliant database is compliant to the same level of compliancy.
@@ -3659,8 +3659,8 @@ wxDBMS Database::Dbms(void)
     // Should only need to do this once for each new database connection
     // so return the value we already determined it to be to save time
     // and lots of string comparisons
-    if (dbmsType != dbmsUNIDENTIFIED)
-        return(dbmsType);
+    if (m_dbmsType != dbmsUNIDENTIFIED)
+        return(m_dbmsType);
 
 #ifdef DBDEBUG_CONSOLE
                // When run in console mode, use standard out to display errors.
@@ -3676,14 +3676,14 @@ wxDBMS Database::Dbms(void)
     // RGG 20001025 : add support for Interbase
     // GT : Integrated to base classes on 20001121
     if (!_wcsicmp(dbInf.dbmsName, L"Interbase"))
-        return((wxDBMS)(dbmsType = dbmsINTERBASE));
+        return((wxDBMS)(m_dbmsType = dbmsINTERBASE));
 
     // BJO 20000428 : add support for Virtuoso
     if (!_wcsicmp(dbInf.dbmsName, L"OpenLink Virtuoso VDBMS"))
-      return((wxDBMS)(dbmsType = dbmsVIRTUOSO));
+      return((wxDBMS)(m_dbmsType = dbmsVIRTUOSO));
 
     if (!_wcsicmp(dbInf.dbmsName, L"Adaptive Server Anywhere"))
-        return((wxDBMS)(dbmsType = dbmsSYBASE_ASA));
+        return((wxDBMS)(m_dbmsType = dbmsSYBASE_ASA));
 
     // BJO 20000427 : The "SQL Server" string is also returned by SQLServer when
     // connected through an OpenLink driver.
@@ -3695,50 +3695,50 @@ wxDBMS Database::Dbms(void)
           !wcsncmp(dbInf.driverName, L"OLOD", 4))
             return ((wxDBMS)(dbmsMS_SQL_SERVER));
         else
-            return ((wxDBMS)(dbmsType = dbmsSYBASE_ASE));
+            return ((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
     }
 
     if (!_wcsicmp(dbInf.dbmsName, L"Microsoft SQL Server"))
-        return((wxDBMS)(dbmsType = dbmsMS_SQL_SERVER));
+        return((wxDBMS)(m_dbmsType = dbmsMS_SQL_SERVER));
 
     baseName[10] = 0;
     if (!_wcsicmp(baseName, L"PostgreSQL"))  // v6.5.0
-        return((wxDBMS)(dbmsType = dbmsPOSTGRES));
+        return((wxDBMS)(m_dbmsType = dbmsPOSTGRES));
 
     baseName[9] = 0;
     if (!_wcsicmp(baseName, L"Pervasive"))
-        return((wxDBMS)(dbmsType = dbmsPERVASIVE_SQL));
+        return((wxDBMS)(m_dbmsType = dbmsPERVASIVE_SQL));
 
     baseName[8] = 0;
     if (!_wcsicmp(baseName, L"Informix"))
-        return((wxDBMS)(dbmsType = dbmsINFORMIX));
+        return((wxDBMS)(m_dbmsType = dbmsINFORMIX));
 
     if (!_wcsicmp(baseName, L"Firebird"))
-        return((wxDBMS)(dbmsType = dbmsFIREBIRD));
+        return((wxDBMS)(m_dbmsType = dbmsFIREBIRD));
 
     baseName[6] = 0;
     if (!_wcsicmp(baseName, L"Oracle"))
-        return((wxDBMS)(dbmsType = dbmsORACLE));
+        return((wxDBMS)(m_dbmsType = dbmsORACLE));
     if (!_wcsicmp(baseName, L"ACCESS"))
-        return((wxDBMS)(dbmsType = dbmsACCESS));
+        return((wxDBMS)(m_dbmsType = dbmsACCESS));
     if (!_wcsicmp(baseName, L"Sybase"))
-      return((wxDBMS)(dbmsType = dbmsSYBASE_ASE));
+      return((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
 
     baseName[5] = 0;
     if (!_wcsicmp(baseName, L"DBASE"))
-        return((wxDBMS)(dbmsType = dbmsDBASE));
+        return((wxDBMS)(m_dbmsType = dbmsDBASE));
     if (!_wcsicmp(baseName, L"xBase"))
-        return((wxDBMS)(dbmsType = dbmsXBASE_SEQUITER));
+        return((wxDBMS)(m_dbmsType = dbmsXBASE_SEQUITER));
     if (!_wcsicmp(baseName, L"MySQL"))
-        return((wxDBMS)(dbmsType = dbmsMY_SQL));
+        return((wxDBMS)(m_dbmsType = dbmsMY_SQL));
     if (!_wcsicmp(baseName, L"MaxDB"))
-        return((wxDBMS)(dbmsType = dbmsMAXDB));
+        return((wxDBMS)(m_dbmsType = dbmsMAXDB));
 
     baseName[3] = 0;
     if (!_wcsicmp(baseName, L"DB2"))
-        return((wxDBMS)(dbmsType = dbmsDB2));
+        return((wxDBMS)(m_dbmsType = dbmsDB2));
 
-    return((wxDBMS)(dbmsType = dbmsUNIDENTIFIED));
+    return((wxDBMS)(m_dbmsType = dbmsUNIDENTIFIED));
 
 }  // wxDb::Dbms()
 
@@ -3763,19 +3763,19 @@ bool Database::ModifyColumn(const std::wstring &tableName, const std::wstring &c
     switch(dataType)
     {
         case DB_DATA_TYPE_VARCHAR :
-            dataTypeName = typeInfVarchar.TypeName;
+            dataTypeName = m_typeInfVarchar.TypeName;
             break;
         case DB_DATA_TYPE_INTEGER :
-            dataTypeName = typeInfInteger.TypeName;
+            dataTypeName = m_typeInfInteger.TypeName;
             break;
         case DB_DATA_TYPE_FLOAT :
-            dataTypeName = typeInfFloat.TypeName;
+            dataTypeName = m_typeInfFloat.TypeName;
             break;
         case DB_DATA_TYPE_DATE :
-            dataTypeName = typeInfDate.TypeName;
+            dataTypeName = m_typeInfDate.TypeName;
             break;
         case DB_DATA_TYPE_BLOB :
-            dataTypeName = typeInfBlob.TypeName;
+            dataTypeName = m_typeInfBlob.TypeName;
             break;
         default:
             return false;
@@ -3870,7 +3870,7 @@ Database WXDLLIMPEXP_ODBC *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdO
     Database *matchingDbConnection = NULL;
 
     // Scan the linked list searching for an available database connection
-    // that's already been opened but is currently not in use.
+    // that's already been OpenImpled but is currently not in use.
     for (pList = PtrBegDbList; pList; pList = pList->PtrNext)
     {
         // The database connection must be for the same datasource
@@ -3942,24 +3942,24 @@ Database WXDLLIMPEXP_ODBC *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdO
 
     pList->PtrDb = new Database(pDbConfig->GetHenv(), FwdOnlyCursors);
 
-    bool opened;
+    bool OpenImpled;
 
     if (!matchingDbConnection)
     {
         if (pDbConfig->UseConnectionStr())
         {
-            opened = pList->PtrDb->Open(pDbConfig->GetConnectionStr());
+            OpenImpled = pList->PtrDb->Open(pDbConfig->GetConnectionStr());
         }
         else
         {
-            opened = pList->PtrDb->Open(pDbConfig->GetDsn(), pDbConfig->GetUserID(), pDbConfig->GetPassword());
+            OpenImpled = pList->PtrDb->Open(pDbConfig->GetDsn(), pDbConfig->GetUserID(), pDbConfig->GetPassword());
         }
     }
     else
-        opened = pList->PtrDb->Open(matchingDbConnection);
+        OpenImpled = pList->PtrDb->Open(matchingDbConnection);
 
     // Connect to the datasource
-    if (opened)
+    if (OpenImpled)
     {
         pList->PtrDb->setCached(true);  // Prevent a user from deleting a cached connection
         pList->PtrDb->SetSqlLogging(SQLLOGstate, SQLLOGfn, true);
@@ -3972,7 +3972,7 @@ Database WXDLLIMPEXP_ODBC *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdO
         else
             PtrBegDbList = 0;        // Empty list again
 
-        pList->PtrDb->CommitTrans(); // Commit any open transactions on wxDb object
+        pList->PtrDb->CommitTrans(); // Commit any OpenImpl transactions on wxDb object
         pList->PtrDb->Close();       // Close the wxDb object
         delete pList->PtrDb;         // Deletes the wxDb object
         delete pList;                // Deletes the linked list object
@@ -4001,7 +4001,7 @@ bool WXDLLIMPEXP_ODBC wxDbFreeConnection(Database *pDb)
 
 
 /********** wxDbCloseConnections() **********/
-void WXDLLIMPEXP_ODBC wxDbCloseConnections(void)
+void WXDLLIMPEXP_ODBC wxDbCloseConnections()
 {
     wxDbList *pList, *pNext;
 
@@ -4009,7 +4009,7 @@ void WXDLLIMPEXP_ODBC wxDbCloseConnections(void)
     for (pList = PtrBegDbList; pList; pList = pNext)
     {
         pNext = pList->PtrNext;       // Save the pointer to next
-        pList->PtrDb->CommitTrans();  // Commit any open transactions on wxDb object
+        pList->PtrDb->CommitTrans();  // Commit any OpenImpl transactions on wxDb object
         pList->PtrDb->Close();        // Close the wxDb object
         pList->PtrDb->setCached(false);  // Allows deletion of the wxDb instance
         delete pList->PtrDb;          // Deletes the wxDb object
@@ -4023,7 +4023,7 @@ void WXDLLIMPEXP_ODBC wxDbCloseConnections(void)
 
 
 /********** wxDbConnectionsInUse() **********/
-int WXDLLIMPEXP_ODBC wxDbConnectionsInUse(void)
+int WXDLLIMPEXP_ODBC wxDbConnectionsInUse()
 {
     wxDbList *pList;
     int cnt = 0;
