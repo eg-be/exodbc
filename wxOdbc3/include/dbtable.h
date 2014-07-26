@@ -59,9 +59,9 @@ namespace exodbc
 
 		bool    Initialize();
 
-		wchar_t	m_ColName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
-		int		m_DbDataType;                         // Logical Data Type; e.g. DB_DATA_TYPE_INTEGER
-		SWORD	m_SqlCtype;                           // C data type; e.g. SQL_C_LONG
+		wchar_t	m_colName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
+		int		m_dbDataType;                         // Logical Data Type; e.g. DB_DATA_TYPE_INTEGER
+		SWORD	m_sqlCtype;                           // C data type; e.g. SQL_C_LONG
 		void*	m_PtrDataObj;                         // Address of the data object
 		int		m_szDataObj;                          // Size, in bytes, of the data object
 		bool	m_keyField;                           // true if this column is part of the PRIMARY KEY to the table; Date fields should NOT be KeyFields.
