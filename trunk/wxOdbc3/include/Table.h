@@ -43,7 +43,7 @@ namespace exodbc
 
 	// Structs
 	// -------
-	struct WXDLLIMPEXP_ODBC ColumnDataPtr
+	struct EXODBCAPI ColumnDataPtr
 	{
 	public:
 		void*		PtrDataObj;
@@ -53,7 +53,7 @@ namespace exodbc
 
 
 	// This structure is used when creating secondary indexes.
-	struct WXDLLIMPEXP_ODBC IndexDefinition
+	struct EXODBCAPI IndexDefinition
 	{
 	public:
 		wchar_t		ColName[DB_MAX_COLUMN_NAME_LEN+1];
@@ -71,7 +71,7 @@ namespace exodbc
 	// wxDbTable class which allows it to create a table in the data
 	// source, exchange data between the data source and the C++
 	// object, and so on.
-	class WXDLLIMPEXP_ODBC ColumnDefinition
+	class EXODBCAPI ColumnDefinition
 	{
 	public:
 		ColumnDefinition();
@@ -92,7 +92,7 @@ namespace exodbc
 	};  // ColumnDefinition
 
 
-	class WXDLLIMPEXP_ODBC Table
+	class EXODBCAPI Table
 	{
 	public:
 		// Public member functions

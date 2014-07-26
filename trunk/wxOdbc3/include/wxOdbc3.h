@@ -13,18 +13,10 @@
 // Defines to dll-import/export
 // ----------------------------
 
-#define WXODBC3EXPORT __declspec(dllexport)
-#define WXODBC3IMPORT __declspec(dllimport)
-
-#ifdef WXODBC3_EXPORTS
-#    define WXDLLIMPEXP_ODBC WXODBC3EXPORT
-#    define WXDLLIMPEXP_DATA_ODBC(type) WXODBC3EXPORT type
-#elif defined(WXODBC3_IMPORTS)
-#    define WXDLLIMPEXP_ODBC WXODBC3IMPORT
-#    define WXDLLIMPEXP_DATA_ODBC(type) WXODBC3IMPORT type
-#else /* not making nor using DLL */
-#    define WXDLLIMPEXP_ODBC
-#    define WXDLLIMPEXP_DATA_ODBC(type) type
+#ifdef EXODBC_EXPORTS
+	#define EXODBCAPI __declspec(dllexport)
+#else
+	#define EXODBCAPI __declspec(dllimport)
 #endif
 
 /* There are too many false positives for this one, particularly when using templates like wxVector<T> */
@@ -44,9 +36,9 @@ namespace exodbc
 
 	// Global Consts
 	// -------------
-	extern WXDLLIMPEXP_ODBC const wchar_t* emptyString;
-	extern WXDLLIMPEXP_ODBC const wchar_t* SQL_LOG_FILENAME;
-	extern WXDLLIMPEXP_ODBC const wchar_t* SQL_CATALOG_FILENAME;
+	extern EXODBCAPI const wchar_t* emptyString;
+	extern EXODBCAPI const wchar_t* SQL_LOG_FILENAME;
+	extern EXODBCAPI const wchar_t* SQL_CATALOG_FILENAME;
 
 	const int wxDB_PATH_MAX                 = 254;
 

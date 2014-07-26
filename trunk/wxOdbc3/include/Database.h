@@ -92,7 +92,7 @@ namespace exodbc
 
 	// Structs
 	// ------
-	struct WXDLLIMPEXP_ODBC SqlTypeInfo
+	struct EXODBCAPI SqlTypeInfo
 	{
 		std::wstring	TypeName;
 		SWORD			FsqlType;
@@ -103,7 +103,7 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class WXDLLIMPEXP_ODBC ColumnInfo
+	class EXODBCAPI ColumnInfo
 	{
 	public:
 		ColumnInfo();
@@ -134,7 +134,7 @@ namespace exodbc
 	};
 
 
-	class WXDLLIMPEXP_ODBC DbCatalogTable        // Description of a Table: Used only in the Description of a database, (catalog info)
+	class EXODBCAPI DbCatalogTable        // Description of a Table: Used only in the Description of a database, (catalog info)
 	{
 	public:
 		DbCatalogTable();
@@ -150,7 +150,7 @@ namespace exodbc
 	};
 
 
-	class WXDLLIMPEXP_ODBC DbCatalog     // Description of a Database: Used so far only when fetching the "catalog"
+	class EXODBCAPI DbCatalog     // Description of a Database: Used so far only when fetching the "catalog"
 	{
 	public:
 		DbCatalog();
@@ -172,11 +172,10 @@ namespace exodbc
 	// will overwrite the errors of the previously destroyed wxDb object in
 	// this variable.
 
-	extern WXDLLIMPEXP_DATA_ODBC(wchar_t)
-		DBerrorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN+1];
+	extern wchar_t DBerrorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN+1];
 
 
-	class WXDLLIMPEXP_ODBC Database
+	class EXODBCAPI Database
 	{
 		// The following structure contains database information gathered from the
 		// datasource when the datasource is first OpenImpled.
@@ -406,15 +405,15 @@ namespace exodbc
 	// The following routines allow a user to get new database connections, free them
 	// for other code segments to use, or close all of them when the application has
 	// completed.
-	Database  WXDLLIMPEXP_ODBC *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
-	bool  WXDLLIMPEXP_ODBC  wxDbFreeConnection(Database *pDb);
-	void  WXDLLIMPEXP_ODBC  wxDbCloseConnections();
-	int   WXDLLIMPEXP_ODBC  wxDbConnectionsInUse();
+	Database  EXODBCAPI *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
+	bool  EXODBCAPI  wxDbFreeConnection(Database *pDb);
+	void  EXODBCAPI  wxDbCloseConnections();
+	int   EXODBCAPI  wxDbConnectionsInUse();
 
 
 	// Writes a message to the wxLog window (stdout usually) when an internal error
 	// situation occurs.  This function only works in DEBUG builds
-	const wchar_t WXDLLIMPEXP_ODBC *
+	const wchar_t EXODBCAPI *
 		wxDbLogExtendedErrorMsg(const wchar_t *userText,
 		Database *pDb,
 		const wchar_t *ErrFile,
@@ -422,7 +421,7 @@ namespace exodbc
 
 
 	// This function sets the sql log state for all OpenImpl wxDb objects
-	bool WXDLLIMPEXP_ODBC
+	bool EXODBCAPI
 		wxDbSqlLog(wxDbSqlLogState state, const std::wstring &filename = SQL_LOG_FILENAME);
 
 
@@ -436,7 +435,7 @@ namespace exodbc
 	// for a list of available datasources.  Call this routine
 	// the first time using SQL_FETCH_FIRST.  Continue to call it
 	// using SQL_FETCH_NEXT until you've exhausted the list.
-	bool WXDLLIMPEXP_ODBC
+	bool EXODBCAPI
 		wxDbGetDataSource(HENV henv, wchar_t *Dsn, SWORD DsnMaxLength, wchar_t *DsDesc,
 		SWORD DsDescMaxLength, UWORD direction = SQL_FETCH_NEXT);
 
