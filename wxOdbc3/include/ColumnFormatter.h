@@ -31,7 +31,7 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class WXDLLIMPEXP_ODBC ColumnFormatter
+	class EXODBCAPI ColumnFormatter
 	{
 	public:
 		std::wstring       s_Field;              // Formatted String for Output

@@ -60,7 +60,7 @@ namespace exodbc
 	* This class will allocate the so called Environment-Handle that is required
 	* for all later operations.
 	*/
-	class WXDLLIMPEXP_ODBC DbEnvironment
+	class EXODBCAPI DbEnvironment
 	{
 	public:
 
