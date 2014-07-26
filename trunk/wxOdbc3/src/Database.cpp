@@ -42,12 +42,12 @@
 
 namespace exodbc
 {
-	wxDbList* PtrBegDbList = 0;
+	SDbList* PtrBegDbList = 0;
 
 #ifdef __WXDEBUG__
 	//    #include "wx/thread.h"
 	//    extern wxList TablesInUse;
-	extern std::vector<wxTablesInUse*> TablesInUse;
+	extern std::vector<STablesInUse*> TablesInUse;
 #if wxUSE_THREADS
 	extern wxCriticalSection csTablesInUse;
 #endif // wxUSE_THREADS
@@ -1358,7 +1358,7 @@ namespace exodbc
 
 
 	/********** wxDb::GetDataTypeInfoImpl() **********/
-	bool Database::GetDataTypeInfoImpl(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)
+	bool Database::GetDataTypeInfoImpl(SWORD fSqlType, SSqlTypeInfo &structSQLTypeInfo)
 	{
 		/*
 		* fSqlType will be something like SQL_VARCHAR.  This parameter determines
@@ -1478,8 +1478,8 @@ namespace exodbc
 #if wxUSE_THREADS
 			wxCriticalSectionLocker lock(csTablesInUse);
 #endif // wxUSE_THREADS
-			wxTablesInUse *tiu;
-			std::vector<wxTablesInUse*>::const_iterator it = TablesInUse.begin();
+			STablesInUse *tiu;
+			std::vector<STablesInUse*>::const_iterator it = TablesInUse.begin();
 			//wxList::compatibility_iterator pNode;
 			//pNode = TablesInUse.GetFirst();
 			std::wstring s1, s2;
@@ -3858,7 +3858,7 @@ namespace exodbc
 	/********** wxDbGetConnection() **********/
 	Database EXODBCAPI *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdOnlyCursors)
 	{
-		wxDbList *pList;
+		SDbList *pList;
 
 		// Used to keep a pointer to a DB connection that matches the requested
 		// DSN and FwdOnlyCursors settings, even if it is not FREE, so that the
@@ -3919,14 +3919,14 @@ namespace exodbc
 			// Find the end of the list
 			for (pList = PtrBegDbList; pList->PtrNext; pList = pList->PtrNext);
 			// Append a new list item
-			pList->PtrNext = new wxDbList;
+			pList->PtrNext = new SDbList;
 			pList->PtrNext->PtrPrev = pList;
 			pList = pList->PtrNext;
 		}
 		else  // Empty list
 		{
 			// Create the first node on the list
-			pList = PtrBegDbList = new wxDbList;
+			pList = PtrBegDbList = new SDbList;
 			pList->PtrPrev = 0;
 		}
 
@@ -3983,7 +3983,7 @@ namespace exodbc
 	/********** wxDbFreeConnection() **********/
 	bool EXODBCAPI wxDbFreeConnection(Database *pDb)
 	{
-		wxDbList *pList;
+		SDbList *pList;
 
 		// Scan the linked list searching for the database connection
 		for (pList = PtrBegDbList; pList; pList = pList->PtrNext)
@@ -4001,7 +4001,7 @@ namespace exodbc
 	/********** wxDbCloseConnections() **********/
 	void EXODBCAPI wxDbCloseConnections()
 	{
-		wxDbList *pList, *pNext;
+		SDbList *pList, *pNext;
 
 		// Traverse the linked list closing database connections and freeing memory as I go.
 		for (pList = PtrBegDbList; pList; pList = pNext)
@@ -4023,7 +4023,7 @@ namespace exodbc
 	/********** wxDbConnectionsInUse() **********/
 	int EXODBCAPI wxDbConnectionsInUse()
 	{
-		wxDbList *pList;
+		SDbList *pList;
 		int cnt = 0;
 
 		// Scan the linked list counting db connections that are currently in use
@@ -4090,7 +4090,7 @@ namespace exodbc
 	bool wxDbSqlLog(wxDbSqlLogState state, const wchar_t *filename)
 	{
 		bool append = false;
-		wxDbList *pList;
+		SDbList *pList;
 
 		for (pList = PtrBegDbList; pList; pList = pList->PtrNext)
 		{

@@ -34,7 +34,7 @@ ULONG lastTableID = 0;
 #ifdef __WXDEBUG__
 //    #include "wx/thread.h"
 //    wxList TablesInUse;
-	std::vector<wxTablesInUse*> TablesInUse;
+	std::vector<STablesInUse*> TablesInUse;
 #if wxUSE_THREADS
     wxCriticalSection csTablesInUse;
 #endif // wxUSE_THREADS
@@ -155,8 +155,8 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
 	s = (boost::wformat(L"wxDbTable constructor (%-20s) tableID:[%6lu] pDb:[%p]") %tblName %m_tableID % static_cast<void*>(m_pDb)).str();
 
 #ifdef __WXDEBUG__
-    wxTablesInUse *tableInUse;
-    tableInUse            = new wxTablesInUse();
+    STablesInUse *tableInUse;
+    tableInUse            = new STablesInUse();
     tableInUse->tableName = tblName.c_str();
     tableInUse->tableID   = m_tableID;
     tableInUse->pDb       = m_pDb;
@@ -290,7 +290,7 @@ void Table::cleanup()
         bool found = false;
 
         //wxList::compatibility_iterator pNode;
-		std::vector<wxTablesInUse*>::iterator it = TablesInUse.begin();
+		std::vector<STablesInUse*>::iterator it = TablesInUse.begin();
         {
 #if wxUSE_THREADS
             wxCriticalSectionLocker lock(csTablesInUse);
@@ -298,7 +298,7 @@ void Table::cleanup()
             // pNode = TablesInUse.GetFirst();
             while (!found && it != TablesInUse.end())
             {
-				wxTablesInUse* pNode = *it;
+				STablesInUse* pNode = *it;
 				if(pNode->tableID == m_tableID)
 //                if (((wxTablesInUse *)pNode->GetData())->tableID == tableID)
                 {

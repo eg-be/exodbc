@@ -107,6 +107,11 @@
     <ClInclude Include="wxOdbc3GoogleTest\TestParams.h" />
     <ClInclude Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="wxOdbc3.vcxproj">
+      <Project>{021a7f83-d491-491b-b4e9-93f4f56340c1}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
