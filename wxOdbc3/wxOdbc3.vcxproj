@@ -44,6 +44,11 @@
   <ItemGroup>
     <None Include="Version.h.template" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EliCommon\EliCommon.vcxproj">
+      <Project>{a5dd0bf0-d13e-4d85-b4a6-9b3f1e295869}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{021A7F83-D491-491B-B4E9-93F4F56340C1}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

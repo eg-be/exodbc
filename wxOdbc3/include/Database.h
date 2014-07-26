@@ -89,10 +89,11 @@ namespace exodbc
 	// --------------------
 	class DbEnvironment;
 	class ColumnFormatter;
+	class Database;
 
 	// Structs
 	// ------
-	struct EXODBCAPI SqlTypeInfo
+	struct EXODBCAPI SSqlTypeInfo
 	{
 		std::wstring	TypeName;
 		SWORD			FsqlType;
@@ -100,6 +101,33 @@ namespace exodbc
 		short			CaseSensitive;
 		short			MaximumScale;
 	};
+
+	// This structure forms a node in a linked list.  The linked list of "DbList" objects
+	// keeps track of allocated database connections.  This allows the application to
+	// OpenImpl more than one database connection through ODBC for multiple transaction support
+	// or for multiple database support.
+	struct SDbList
+	{
+		SDbList *PtrPrev;       // Pointer to previous item in the list
+		std::wstring  Dsn;           // Data Source Name
+		std::wstring  Uid;           // User ID
+		std::wstring  AuthStr;       // Authorization string (password)
+		std::wstring  ConnectionStr; // Connection string used instead of DSN
+		Database     *PtrDb;         // Pointer to the wxDb object
+		bool      Free;          // Is item free or in use?
+		SDbList *PtrNext;       // Pointer to next item in the list
+	};
+
+
+#ifdef __WXDEBUG__
+	struct STablesInUse
+	{
+	public:
+		const wchar_t  *tableName;
+		ULONG          tableID;
+		class Database    *pDb;
+	};  // STablesInUse
+#endif
 
 	// Classes
 	// -------
@@ -219,7 +247,7 @@ namespace exodbc
 		void             setCached(bool cached)  { m_dbIsCached = cached; }  // This function must only be called by wxDbGetConnection() and wxDbCloseConnections!!!
 		bool             IsCached() { return m_dbIsCached; }
 
-		bool             GetDataTypeInfo(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)	{ return GetDataTypeInfoImpl(fSqlType, structSQLTypeInfo); }
+		bool             GetDataTypeInfo(SWORD fSqlType, SSqlTypeInfo &structSQLTypeInfo)	{ return GetDataTypeInfoImpl(fSqlType, structSQLTypeInfo); }
 
 		// ODBC Error Inf.
 		SWORD  cbErrorMsg;
@@ -276,12 +304,12 @@ namespace exodbc
 		HDBC            GetHDBC()          {return m_hdbc;}
 		HSTMT           GetHSTMT()         {return m_hstmt;}
 		int             GetTableCount()        {return nTables;}  // number of tables using this connection
-		SqlTypeInfo GetTypeInfVarchar()    {return m_typeInfVarchar;}
-		SqlTypeInfo GetTypeInfInteger()    {return m_typeInfInteger;}
-		SqlTypeInfo GetTypeInfFloat()      {return m_typeInfFloat;}
-		SqlTypeInfo GetTypeInfDate()       {return m_typeInfDate;}
-		SqlTypeInfo GetTypeInfBlob()       {return m_typeInfBlob;}
-		SqlTypeInfo GetTypeInfMemo()       {return m_typeInfMemo;}
+		SSqlTypeInfo GetTypeInfVarchar()    {return m_typeInfVarchar;}
+		SSqlTypeInfo GetTypeInfInteger()    {return m_typeInfInteger;}
+		SSqlTypeInfo GetTypeInfFloat()      {return m_typeInfFloat;}
+		SSqlTypeInfo GetTypeInfDate()       {return m_typeInfDate;}
+		SSqlTypeInfo GetTypeInfBlob()       {return m_typeInfBlob;}
+		SSqlTypeInfo GetTypeInfMemo()       {return m_typeInfMemo;}
 
 		// tableName can refer to a table, view, alias or synonym
 		bool         TableExists(const std::wstring& tableName, const wchar_t* userID = NULL, const std::wstring& tablePath = std::wstring());
@@ -316,7 +344,7 @@ namespace exodbc
 		void             Initialize();
 
 		bool			GetDbInfoImpl(bool failOnDataTypeUnsupported = true);
-		bool			GetDataTypeInfoImpl(SWORD fSqlType, SqlTypeInfo& structSQLTypeInfo);
+		bool			GetDataTypeInfoImpl(SWORD fSqlType, SSqlTypeInfo& structSQLTypeInfo);
 		bool			SetConnectionOptionsImpl();
 		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 		const wchar_t*	ConvertUserIDImpl(const wchar_t* userID, std::wstring& UserID);
@@ -351,12 +379,12 @@ namespace exodbc
 		// SQLGetTypeInfo() function.  The key piece of information is the
 		// type name the data source uses for each logical data type.
 		// e.g. VARCHAR; Oracle calls it VARCHAR2.
-		SqlTypeInfo m_typeInfVarchar;
-		SqlTypeInfo m_typeInfInteger;
-		SqlTypeInfo m_typeInfFloat;
-		SqlTypeInfo m_typeInfDate;
-		SqlTypeInfo m_typeInfBlob;
-		SqlTypeInfo m_typeInfMemo;
+		SSqlTypeInfo m_typeInfVarchar;
+		SSqlTypeInfo m_typeInfInteger;
+		SSqlTypeInfo m_typeInfFloat;
+		SSqlTypeInfo m_typeInfDate;
+		SSqlTypeInfo m_typeInfBlob;
+		SSqlTypeInfo m_typeInfMemo;
 
 
 	private:
@@ -371,35 +399,6 @@ namespace exodbc
 		friend class Table;
 
 	};  // wxDb
-
-
-	// This structure forms a node in a linked list.  The linked list of "DbList" objects
-	// keeps track of allocated database connections.  This allows the application to
-	// OpenImpl more than one database connection through ODBC for multiple transaction support
-	// or for multiple database support.
-	struct wxDbList
-	{
-		wxDbList *PtrPrev;       // Pointer to previous item in the list
-		std::wstring  Dsn;           // Data Source Name
-		std::wstring  Uid;           // User ID
-		std::wstring  AuthStr;       // Authorization string (password)
-		std::wstring  ConnectionStr; // Connection string used instead of DSN
-		Database     *PtrDb;         // Pointer to the wxDb object
-		bool      Free;          // Is item free or in use?
-		wxDbList *PtrNext;       // Pointer to next item in the list
-	};
-
-
-#ifdef __WXDEBUG__
-	//#include "wx/object.h"
-	struct wxTablesInUse
-	{
-	public:
-		const wchar_t  *tableName;
-		ULONG          tableID;
-		class Database    *pDb;
-	};  // wxTablesInUse
-#endif
 
 
 	// The following routines allow a user to get new database connections, free them
