@@ -18,7 +18,7 @@ namespace exodbc {
 
 	// Static consts
 	// -------------
-	const wchar_t* emptyString = L"";
+	const wchar_t* emptyString				= L"";
 	const wchar_t* SQL_LOG_FILENAME         = L"sqllog.txt";
 	const wchar_t* SQL_CATALOG_FILENAME     = L"catalog.txt";
 
