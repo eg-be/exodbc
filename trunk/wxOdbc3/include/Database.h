@@ -369,7 +369,7 @@ namespace exodbc
 		// Number of Ctable objects connected to this db object.  FOR INTERNAL USE ONLY!!!
 		unsigned int nTables;
 
-		friend class wxDbTable;
+		friend class Table;
 
 	};  // wxDb
 
