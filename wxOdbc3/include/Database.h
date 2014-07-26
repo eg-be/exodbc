@@ -178,15 +178,6 @@ namespace exodbc
 
 	class WXDLLIMPEXP_ODBC Database
 	{
-		friend class wxDbTable;
-
-	public:
-
-		void             setCached(bool cached)  { m_dbIsCached = cached; }  // This function must only be called by wxDbGetConnection() and wxDbCloseConnections!!!
-		bool             IsCached() { return m_dbIsCached; }
-
-		bool             GetDataTypeInfo(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)	{ return GetDataTypeInfoImpl(fSqlType, structSQLTypeInfo); }
-
 		// The following structure contains database information gathered from the
 		// datasource when the datasource is first OpenImpled.
 		struct
@@ -223,6 +214,13 @@ namespace exodbc
 			UWORD  txnCapable;                               // Indicates if the data source supports transactions
 			UDWORD loginTimeout;                             // Number seconds to wait for a login request
 		} dbInf;
+
+	public:
+
+		void             setCached(bool cached)  { m_dbIsCached = cached; }  // This function must only be called by wxDbGetConnection() and wxDbCloseConnections!!!
+		bool             IsCached() { return m_dbIsCached; }
+
+		bool             GetDataTypeInfo(SWORD fSqlType, SqlTypeInfo &structSQLTypeInfo)	{ return GetDataTypeInfoImpl(fSqlType, structSQLTypeInfo); }
 
 		// ODBC Error Inf.
 		SWORD  cbErrorMsg;
@@ -370,6 +368,9 @@ namespace exodbc
 
 		// Number of Ctable objects connected to this db object.  FOR INTERNAL USE ONLY!!!
 		unsigned int nTables;
+
+		friend class wxDbTable;
+
 	};  // wxDb
 
 
