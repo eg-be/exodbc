@@ -6,7 +6,7 @@
 * [Brief CPP-file description]
 */ 
 
-//#include "stdafx.h"
+#include "stdafx.h"
 
 // Own header
 #include "exOdbc.h"

@@ -34,11 +34,14 @@
     <ClInclude Include="include\exOdbc.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="src\stdafx.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\targetver.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\Helpers.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\DbEnvironment.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -52,6 +55,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\exOdbc.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stdafx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Helpers.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

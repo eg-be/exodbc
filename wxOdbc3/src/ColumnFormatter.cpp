@@ -6,14 +6,13 @@
 * [Brief CPP-file description]
 */ 
 
-//#include "stdafx.h"
+#include "stdafx.h"
 
 // Own header
 #include "ColumnFormatter.h"
 
 // Same component headers
 // Other headers
-#include "boost/format.hpp"
 
 namespace exodbc
 {
