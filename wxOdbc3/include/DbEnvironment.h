@@ -20,6 +20,7 @@
 #include <sql.h>
 #include <sqlext.h>
 #include <string>
+#include <vector>
 
 /* There are too many false positives for this one, particularly when using templates like wxVector<T> */
 /* class 'foo' needs to have dll-interface to be used by clients of class 'bar'" */
@@ -48,6 +49,21 @@ namespace exodbc
 {
 	// Structs
 	// -------
+
+	/*!
+	* \brief Contains information about DataSource-Entries from the driver-manager
+	* 
+	* \see ListDataSources
+	*/
+	struct EXODBCAPI SDataSource
+	{
+		SDataSource() { Initialize(); };
+
+		void Initialize() { Dsn[0] = 0; };
+		wchar_t Dsn[SQL_MAX_DSN_LENGTH  + 1];
+
+		std::wstring m_description;
+	};
 
 	// Classes
 	// -------
@@ -112,6 +128,9 @@ namespace exodbc
 
 		bool			SetSqlAttrOdbcVersion(int version);		
 		int				ReadSqlAttrOdbcVersion();
+
+		enum ListMode { All, System, User };
+		std::vector<SDataSource> ListDataSources(ListMode mode = All);
 
 	private:
 		bool m_freeHenvOnDestroy;

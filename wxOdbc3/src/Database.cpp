@@ -4183,25 +4183,4 @@ namespace exodbc
 	}  // wxDbCreateDataSource()
 #endif
 
-
-	/********** wxDbGetDataSource() **********/
-	bool wxDbGetDataSource(HENV henv, wchar_t *Dsn, SWORD DsnMaxLength, wchar_t *DsDesc,
-		SWORD DsDescMaxLength, UWORD direction)
-		/*
-		* Dsn and DsDesc will contain the data source name and data source
-		* description upon return
-		*/
-	{
-		SWORD cb1,cb2;
-		SWORD lengthDsn = (SWORD)(DsnMaxLength*sizeof(wchar_t));
-		SWORD lengthDsDesc = (SWORD)(DsDescMaxLength*sizeof(wchar_t));
-
-		if (SQLDataSources(henv, direction, (SQLTCHAR FAR *) Dsn, lengthDsn, &cb1,
-			(SQLTCHAR FAR *) DsDesc, lengthDsDesc, &cb2) == SQL_SUCCESS)
-			return true;
-		else
-			return false;
-
-	}  // wxDbGetDataSource()
-
 }
