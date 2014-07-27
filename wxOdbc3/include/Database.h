@@ -27,21 +27,22 @@
 #ifndef DB_H
 #define DB_H
 
+// Same component headers
 #include "exOdbc.h"
 
+// Other headers
+// System headers
 #include <vector>
+#include <windows.h>
+#include <sql.h>
+#include <sqlext.h>
+#include <sqlucode.h>
+#include <odbcinst.h>
 
 // BJO 20000503: introduce new GetColumns members which are more database independent and
 //               return columns in the order they were created
 #define OLD_GETCOLUMNS 1
 #define EXPERIMENTAL_WXDB_FUNCTIONS 1
-
-#include <windows.h>
-
-#include <sql.h>
-#include <sqlext.h>
-#include <sqlucode.h>
-#include <odbcinst.h>
 
 // This was defined by a macro testing if wxUNICODE is set
 #define SQL_C_WXCHAR SQL_C_WCHAR

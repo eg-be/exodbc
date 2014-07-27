@@ -23,10 +23,15 @@
 
 #include "stdafx.h"
 
+// Own header
 #include "Database.h"
+
+// Same component headers
 #include "DbEnvironment.h"
 #include "ColumnFormatter.h"
 #include "Helpers.h"
+
+// Other headers
 
 
 namespace exodbc

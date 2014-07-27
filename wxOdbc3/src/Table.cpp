@@ -13,8 +13,13 @@
 
 #include "stdafx.h"
 
+// Own header
 #include "Table.h"
+
+// Same component headers
 #include "Helpers.h"
+
+// Same component headers
 
 namespace exodbc
 {
