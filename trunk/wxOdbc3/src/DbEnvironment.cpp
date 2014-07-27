@@ -16,6 +16,8 @@
 // Static consts
 // -------------
 
+using namespace std;
+
 namespace exodbc
 {
 
@@ -198,6 +200,68 @@ namespace exodbc
 
 		return value;
 	}
+
+	vector<SDataSource> DbEnvironment::ListDataSources(ListMode mode /* = All */)
+	{
+		SQLSMALLINT nameBufferLength, descBufferLength = 0;
+		wchar_t nameBuffer[SQL_MAX_DSN_LENGTH + 1];
+
+		vector<SDataSource> dataSources;
+
+		SQLUSMALLINT direction = SQL_FETCH_FIRST;
+		if(mode == System)
+			direction = SQL_FETCH_FIRST_SYSTEM;
+		else if(mode == User)
+			direction = SQL_FETCH_FIRST_USER;
+
+		// We need two passed, I dont know the max length of the description
+		// I also dont know if the order how they are returned is the same
+		// Or while doing the two iterations, sources might get added / removed
+		// So we remember the max length of the buffer, and use that in the second pass
+		// Like that we might miss some parts of the descriptions.. 
+		SQLSMALLINT maxDescLength = 0;
+		SQLRETURN res = SQL_NO_DATA;
+		res = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
+		if(res == SQL_NO_DATA)
+		{
+			return dataSources;
+		}
+		do
+		{
+			// Remember the max length 
+			if(descBufferLength > maxDescLength)
+				maxDescLength = descBufferLength;
+			// Go on fetching lengths of descriptions
+			res = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
+		}while(res == SQL_SUCCESS || res == SQL_SUCCESS_WITH_INFO);
+		if(res != SQL_NO_DATA)
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"ListDataSources did not end with SQL_NO_DATA when determining max desc buffer length";
+		}
+		// Now fetch with description
+		wchar_t* descBuffer = new wchar_t[maxDescLength + 1];
+		res = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer, maxDescLength + 1, &descBufferLength);
+		if(res == SQL_NO_DATA)
+		{
+			delete[] descBuffer;
+			return dataSources;
+		}
+		do
+		{
+			// Store dataSource
+			SDataSource ds;
+			wcscpy(ds.Dsn, nameBuffer);
+			ds.m_description = descBuffer;
+			dataSources.push_back(ds);
+			res = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer, maxDescLength + 1, &descBufferLength);
+		}while(res == SQL_SUCCESS || res == SQL_SUCCESS_WITH_INFO);
+		if(res != SQL_NO_DATA)
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"ListDataSources did not end with SQL_NO_DATA when listening DataSources";
+		}
+		return dataSources;
+	}
+
 	// Interfaces
 	// ----------
 

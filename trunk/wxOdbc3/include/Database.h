@@ -430,14 +430,6 @@ namespace exodbc
 		bool sysDSN=false, const std::wstring &defDir=emptyString, wxWindow *parent=NULL);
 #endif
 
-	// This routine allows you to query a driver manager
-	// for a list of available datasources.  Call this routine
-	// the first time using SQL_FETCH_FIRST.  Continue to call it
-	// using SQL_FETCH_NEXT until you've exhausted the list.
-	bool EXODBCAPI
-		wxDbGetDataSource(HENV henv, wchar_t *Dsn, SWORD DsnMaxLength, wchar_t *DsDesc,
-		SWORD DsDescMaxLength, UWORD direction = SQL_FETCH_NEXT);
-
 }	// namespace exodbc
 
 #endif // DB_H

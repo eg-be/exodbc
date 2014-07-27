@@ -36,8 +36,10 @@ namespace exOdbcTest
 		static void TearDownTestCase() {};
 
 	protected:
-		virtual void SetUp() {};
-		virtual void TearDown() {};
+		virtual void SetUp();
+		virtual void TearDown();
+
+		SOdbcInfo m_odbcInfo;
 	};
 
 	INSTANTIATE_TEST_CASE_P(
