@@ -21,11 +21,13 @@
 #ifndef DBTABLE_H
 #define DBTABLE_H
 
+// Same component headers
 #include "exOdbc.h"
-
 #include "Database.h"
-
 #include "GenericKey.h"
+
+// Other headers
+// System headers
 
 namespace exodbc
 {

@@ -13,14 +13,23 @@
 #include "boost/log/trivial.hpp"
 
 // system
-#include <stdio.h>
-#include <tchar.h>
-#include <string.h>
+#include <windows.h>
 #include <sstream>
-#include <assert.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <vector>
-#include <iostream>
+#include <string>
+//#include <cstdio>
+//#include <tchar>
+//#include <string.h>
+//#include <assert.h>
+//#include <stdlib.h>
+//#include <ctype.h>
+//#include <vector>
+//#include <iostream>
+
+// odbc-things
+#include <sql.h>
+#include <sqlext.h>
+#include <sqlucode.h>
+#include <odbcinst.h>
+
 
 // TODO: reference additional headers your program requires here
