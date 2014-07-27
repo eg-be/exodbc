@@ -259,6 +259,8 @@ namespace exodbc
 		{
 			BOOST_LOG_TRIVIAL(warning) << L"ListDataSources did not end with SQL_NO_DATA when listening DataSources";
 		}
+
+		delete[] descBuffer;
 		return dataSources;
 	}
 
