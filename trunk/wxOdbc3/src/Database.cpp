@@ -2827,14 +2827,8 @@ namespace exodbc
 						// Get the intern datatype
 						switch (colInf[colNo].m_sqlDataType)
 						{
-#if wxUSE_UNICODE
-#if defined(SQL_WCHAR)
 						case SQL_WCHAR:
-#endif
-#if defined(SQL_WVARCHAR)
 						case SQL_WVARCHAR:
-#endif
-#endif
 						case SQL_VARCHAR:
 						case SQL_CHAR:
 							colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;

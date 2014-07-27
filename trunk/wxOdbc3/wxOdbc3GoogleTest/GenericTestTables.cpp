@@ -27,7 +27,7 @@ using namespace exodbc;
 
 // Implementation
 // --------------
-namespace wxOdbc3Test
+namespace exOdbcTest
 {
 	// NotExistingTable
 	// ----------------

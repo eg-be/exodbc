@@ -25,7 +25,7 @@
 
 // Implementation
 // --------------
-namespace wxOdbc3Test
+namespace exOdbcTest
 {
 	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi) {
 		std::wstringstream wos;

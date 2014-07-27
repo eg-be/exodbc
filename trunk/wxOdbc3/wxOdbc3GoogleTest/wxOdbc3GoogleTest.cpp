@@ -19,7 +19,7 @@
 
 // Globals
 // -------
-namespace wxOdbc3Test
+namespace exOdbcTest
 {
 	std::vector<SOdbcInfo> g_odbcInfos = std::vector<SOdbcInfo>();
 }
@@ -53,7 +53,7 @@ bool extractParamValue( int argc, const _TCHAR* const argv[],const std::wstring&
 int _tmain(int argc, _TCHAR* argv[])
 {
 	using namespace std;
-	using namespace wxOdbc3Test;
+	using namespace exOdbcTest;
 
 	int status = 0;
 

@@ -22,7 +22,7 @@
 
 // Globals
 // -------
-namespace wxOdbc3Test
+namespace exOdbcTest
 {
 	extern std::vector<SOdbcInfo> g_odbcInfos;
 }

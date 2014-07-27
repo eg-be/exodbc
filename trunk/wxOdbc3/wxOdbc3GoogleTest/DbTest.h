@@ -33,7 +33,7 @@ namespace exodbc
 
 // Classes
 // -------
-namespace wxOdbc3Test
+namespace exOdbcTest
 {
 	class DbTest : public ::testing::TestWithParam<SOdbcInfo>
 	{
