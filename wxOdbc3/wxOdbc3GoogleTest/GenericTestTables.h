@@ -26,7 +26,7 @@ namespace exodbc
 
 // Classes
 // -------
-namespace wxOdbc3Test
+namespace exOdbcTest
 {
 
 	// NotExistingTable

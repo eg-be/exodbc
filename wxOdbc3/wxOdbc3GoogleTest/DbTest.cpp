@@ -34,7 +34,7 @@
 using namespace std;
 using namespace exodbc;
 
-namespace wxOdbc3Test
+namespace exOdbcTest
 {
 
 	void DbTest::SetUp()

@@ -24,7 +24,7 @@
 
 // Classes
 // -------
-namespace wxOdbc3Test
+namespace exOdbcTest
 {
 	struct SOdbcInfo
 	{
