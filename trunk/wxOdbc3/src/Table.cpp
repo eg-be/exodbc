@@ -11,18 +11,10 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <iostream>
+#include "stdafx.h"
 
 #include "Table.h"
 #include "Helpers.h"
-
-#include "boost/algorithm/string.hpp"
-#include "boost/format.hpp"
-#include "boost/log/trivial.hpp"
-#include <vector>
 
 namespace exodbc
 {

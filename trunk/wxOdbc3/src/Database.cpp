@@ -21,18 +21,7 @@
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
 
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <ctype.h>
-
-#include "boost/algorithm/string.hpp"
-#include "boost/format.hpp"
-#include "boost/log/trivial.hpp"
-
-#include <sstream>
-#include <vector>
+#include "stdafx.h"
 
 #include "Database.h"
 #include "DbEnvironment.h"
