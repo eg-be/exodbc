@@ -172,9 +172,9 @@ namespace exodbc
 
 		bool             Initialize();
 
-		wchar_t		m_tableName[DB_MAX_TABLE_NAME_LEN+1];
-		wchar_t		m_tableType[254+1];           // "TABLE" or "SYSTEM TABLE" etc.
-		wchar_t		m_tableRemarks[254+1];
+		std::wstring		m_tableName;
+		std::wstring		m_tableType;           // "TABLE" or "SYSTEM TABLE" etc.
+		std::wstring		m_tableRemarks;
 		UWORD		m_numCols;                    // How many Columns does this Table have: GetColumnCount(..);
 		ColumnInfo*	m_pColInf;                    // pColInf = NULL ; User can later call GetColumns(..);
 	};
@@ -239,7 +239,7 @@ namespace exodbc
 			SQLUSMALLINT  maxCatalogNameLen;					// Max length of a catalog name. Can be 0 if no limit, or limit is unknown
 			SQLUSMALLINT  maxSchemaNameLen;						// Max length of a schema name. Can be 0 if no limit, or limit is unknown
 			SQLUSMALLINT  maxTableNameLen;						// Max length of a table name. Can be 0 if no limit, or limit is unknown
-		} dbInf;
+		} m_dbInf;
 
 	public:
 
@@ -290,8 +290,8 @@ namespace exodbc
 		ColumnInfo*		GetColumns(const std::wstring& tableName, UWORD* numCols, const wchar_t* userID=NULL);
 
 		int					GetColumnCount(const std::wstring& tableName, const wchar_t* userID=NULL);
-		const wchar_t*		GetDatabaseName()  {return dbInf.dbmsName;}
-		const wchar_t*		GetDriverVersion() {return dbInf.driverVer;};
+		const wchar_t*		GetDatabaseName()  {return m_dbInf.dbmsName;}
+		const wchar_t*		GetDriverVersion() {return m_dbInf.driverVer;}
 		const std::wstring& GetDataSource()    {return m_dsn;}
 		const std::wstring& GetDatasourceName(){return m_dsn;}
 		const std::wstring& GetUsername()      {return m_uid;}
