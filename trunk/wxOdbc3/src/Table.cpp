@@ -756,7 +756,7 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
     if (!exists)
     {
         s = L"Table/view does not exist in the database";
-        if ( *(m_pDb->dbInf.accessibleTables) == L'Y')
+        if ( *(m_pDb->m_dbInf.accessibleTables) == L'Y')
             s += L", or you have no permissions.\n";
         else
             s += L".\n";
@@ -1726,7 +1726,7 @@ bool Table::CreateIndex(const std::wstring &indexName, bool unique, UWORD numInd
         }
 
         // Postgres and SQL Server 7 do not support the ASC/DESC keywords for index columns
-        if (!((m_pDb->Dbms() == dbmsMS_SQL_SERVER) && (wcsncmp(m_pDb->dbInf.dbmsVer, L"07", 2)==0)) &&
+        if (!((m_pDb->Dbms() == dbmsMS_SQL_SERVER) && (wcsncmp(m_pDb->m_dbInf.dbmsVer, L"07", 2)==0)) &&
             !(m_pDb->Dbms() == dbmsFIREBIRD) &&
             !(m_pDb->Dbms() == dbmsPOSTGRES))
         {
@@ -2114,7 +2114,7 @@ bool Table::CanSelectForUpdate()
         return false;
 
     if ((m_pDb->Dbms() == dbmsORACLE) ||
-        (m_pDb->dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE))
+        (m_pDb->m_dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE))
         return true;
     else
         return false;
@@ -2142,7 +2142,7 @@ bool Table::CanUpdateByROWID()
 /********** wxDbTable::IsCursorClosedOnCommit() **********/
 bool Table::IsCursorClosedOnCommit()
 {
-    if (m_pDb->dbInf.cursorCommitBehavior == SQL_CB_PRESERVE)
+    if (m_pDb->m_dbInf.cursorCommitBehavior == SQL_CB_PRESERVE)
         return false;
     else
         return true;

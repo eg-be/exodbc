@@ -136,9 +136,6 @@ namespace exodbc
 
 	bool DbCatalogTable::Initialize()
 	{
-		m_tableName[0]    = 0;
-		m_tableType[0]    = 0;
-		m_tableRemarks[0] = 0;
 		m_numCols         = 0;
 		m_pColInf         = NULL;
 
@@ -702,37 +699,37 @@ namespace exodbc
 
 		// Instead of Querying the data source for info about itself, it can just be copied
 		// from the wxDb instance that was passed in (copyDb).
-		wcscpy(dbInf.serverName,copyDb->dbInf.serverName);
-		wcscpy(dbInf.databaseName,copyDb->dbInf.databaseName);
-		wcscpy(dbInf.dbmsName,copyDb->dbInf.dbmsName);
-		wcscpy(dbInf.dbmsVer,copyDb->dbInf.dbmsVer);
-		dbInf.maxConnections = copyDb->dbInf.maxConnections;
-		dbInf.maxStmts = copyDb->dbInf.maxStmts;
-		wcscpy(dbInf.driverName,copyDb->dbInf.driverName);
-		wcscpy(dbInf.odbcVer,copyDb->dbInf.odbcVer);
-		wcscpy(dbInf.drvMgrOdbcVer,copyDb->dbInf.drvMgrOdbcVer);
-		wcscpy(dbInf.driverVer,copyDb->dbInf.driverVer);
-		dbInf.apiConfLvl = copyDb->dbInf.apiConfLvl;
-		dbInf.cliConfLvl = copyDb->dbInf.cliConfLvl;
-		dbInf.sqlConfLvl = copyDb->dbInf.sqlConfLvl;
-		wcscpy(dbInf.outerJoins,copyDb->dbInf.outerJoins);
-		wcscpy(dbInf.procedureSupport,copyDb->dbInf.procedureSupport);
-		wcscpy(dbInf.accessibleTables,copyDb->dbInf.accessibleTables);
-		dbInf.cursorCommitBehavior = copyDb->dbInf.cursorCommitBehavior;
-		dbInf.cursorRollbackBehavior = copyDb->dbInf.cursorRollbackBehavior;
-		dbInf.supportNotNullClause = copyDb->dbInf.supportNotNullClause;
-		wcscpy(dbInf.supportIEF,copyDb->dbInf.supportIEF);
-		dbInf.txnIsolation = copyDb->dbInf.txnIsolation;
-		dbInf.txnIsolationOptions = copyDb->dbInf.txnIsolationOptions;
-		dbInf.fetchDirections = copyDb->dbInf.fetchDirections;
-		dbInf.lockTypes = copyDb->dbInf.lockTypes;
-		dbInf.posOperations = copyDb->dbInf.posOperations;
-		dbInf.posStmts = copyDb->dbInf.posStmts;
-		dbInf.scrollConcurrency = copyDb->dbInf.scrollConcurrency;
-		dbInf.scrollOptions = copyDb->dbInf.scrollOptions;
-		dbInf.staticSensitivity = copyDb->dbInf.staticSensitivity;
-		dbInf.txnCapable = copyDb->dbInf.txnCapable;
-		dbInf.loginTimeout = copyDb->dbInf.loginTimeout;
+		wcscpy(m_dbInf.serverName,copyDb->m_dbInf.serverName);
+		wcscpy(m_dbInf.databaseName,copyDb->m_dbInf.databaseName);
+		wcscpy(m_dbInf.dbmsName,copyDb->m_dbInf.dbmsName);
+		wcscpy(m_dbInf.dbmsVer,copyDb->m_dbInf.dbmsVer);
+		m_dbInf.maxConnections = copyDb->m_dbInf.maxConnections;
+		m_dbInf.maxStmts = copyDb->m_dbInf.maxStmts;
+		wcscpy(m_dbInf.driverName,copyDb->m_dbInf.driverName);
+		wcscpy(m_dbInf.odbcVer,copyDb->m_dbInf.odbcVer);
+		wcscpy(m_dbInf.drvMgrOdbcVer,copyDb->m_dbInf.drvMgrOdbcVer);
+		wcscpy(m_dbInf.driverVer,copyDb->m_dbInf.driverVer);
+		m_dbInf.apiConfLvl = copyDb->m_dbInf.apiConfLvl;
+		m_dbInf.cliConfLvl = copyDb->m_dbInf.cliConfLvl;
+		m_dbInf.sqlConfLvl = copyDb->m_dbInf.sqlConfLvl;
+		wcscpy(m_dbInf.outerJoins,copyDb->m_dbInf.outerJoins);
+		wcscpy(m_dbInf.procedureSupport,copyDb->m_dbInf.procedureSupport);
+		wcscpy(m_dbInf.accessibleTables,copyDb->m_dbInf.accessibleTables);
+		m_dbInf.cursorCommitBehavior = copyDb->m_dbInf.cursorCommitBehavior;
+		m_dbInf.cursorRollbackBehavior = copyDb->m_dbInf.cursorRollbackBehavior;
+		m_dbInf.supportNotNullClause = copyDb->m_dbInf.supportNotNullClause;
+		wcscpy(m_dbInf.supportIEF,copyDb->m_dbInf.supportIEF);
+		m_dbInf.txnIsolation = copyDb->m_dbInf.txnIsolation;
+		m_dbInf.txnIsolationOptions = copyDb->m_dbInf.txnIsolationOptions;
+		m_dbInf.fetchDirections = copyDb->m_dbInf.fetchDirections;
+		m_dbInf.lockTypes = copyDb->m_dbInf.lockTypes;
+		m_dbInf.posOperations = copyDb->m_dbInf.posOperations;
+		m_dbInf.posStmts = copyDb->m_dbInf.posStmts;
+		m_dbInf.scrollConcurrency = copyDb->m_dbInf.scrollConcurrency;
+		m_dbInf.scrollOptions = copyDb->m_dbInf.scrollOptions;
+		m_dbInf.staticSensitivity = copyDb->m_dbInf.staticSensitivity;
+		m_dbInf.txnCapable = copyDb->m_dbInf.txnCapable;
+		m_dbInf.loginTimeout = copyDb->m_dbInf.loginTimeout;
 
 		// VARCHAR = Variable length character string
 		m_typeInfVarchar.FsqlType         = copyDb->m_typeInfVarchar.FsqlType;
@@ -803,7 +800,7 @@ namespace exodbc
 		// are database specific and need to call the Dbms() function.
 		RETCODE retcode;
 
-		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR *) dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR *) m_dbInf.dbmsName, sizeof(m_dbInf.dbmsName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
 			return(DispAllErrors(m_henv, m_hdbc));
 
@@ -871,7 +868,7 @@ namespace exodbc
 		SWORD cb;
 		RETCODE retcode;
 
-		retcode = SQLGetInfo(m_hdbc, SQL_SERVER_NAME, (UCHAR*) dbInf.serverName, sizeof(dbInf.serverName), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_SERVER_NAME, (UCHAR*) m_dbInf.serverName, sizeof(m_dbInf.serverName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -879,7 +876,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_DATABASE_NAME, (UCHAR*) dbInf.databaseName, sizeof(dbInf.databaseName), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_DATABASE_NAME, (UCHAR*) m_dbInf.databaseName, sizeof(m_dbInf.databaseName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -887,7 +884,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR*) dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR*) m_dbInf.dbmsName, sizeof(m_dbInf.dbmsName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -898,7 +895,7 @@ namespace exodbc
 		// 16-Mar-1999
 		// After upgrading to MSVC6, the original 20 char buffer below was insufficient,
 		// causing database connectivity to fail in some cases.
-		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_VER, (UCHAR*) dbInf.dbmsVer, sizeof(dbInf.dbmsVer), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_VER, (UCHAR*) m_dbInf.dbmsVer, sizeof(m_dbInf.dbmsVer), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -906,7 +903,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_CONNECTIONS, (UCHAR*) &dbInf.maxConnections, sizeof(dbInf.maxConnections), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_CONNECTIONS, (UCHAR*) &m_dbInf.maxConnections, sizeof(m_dbInf.maxConnections), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -914,7 +911,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_STATEMENTS, (UCHAR*) &dbInf.maxStmts, sizeof(dbInf.maxStmts), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_STATEMENTS, (UCHAR*) &m_dbInf.maxStmts, sizeof(m_dbInf.maxStmts), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -922,7 +919,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_NAME, (UCHAR*) dbInf.driverName, sizeof(dbInf.driverName), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_NAME, (UCHAR*) m_dbInf.driverName, sizeof(m_dbInf.driverName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -930,7 +927,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, (UCHAR*) dbInf.odbcVer, sizeof(dbInf.odbcVer), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, (UCHAR*) m_dbInf.odbcVer, sizeof(m_dbInf.odbcVer), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -938,7 +935,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_VER, (UCHAR*) dbInf.drvMgrOdbcVer, sizeof(dbInf.drvMgrOdbcVer), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_VER, (UCHAR*) m_dbInf.drvMgrOdbcVer, sizeof(m_dbInf.drvMgrOdbcVer), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -946,7 +943,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_VER, (UCHAR*) dbInf.driverVer, sizeof(dbInf.driverVer), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_VER, (UCHAR*) m_dbInf.driverVer, sizeof(m_dbInf.driverVer), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -954,7 +951,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_API_CONFORMANCE, (UCHAR*) &dbInf.apiConfLvl, sizeof(dbInf.apiConfLvl), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_API_CONFORMANCE, (UCHAR*) &m_dbInf.apiConfLvl, sizeof(m_dbInf.apiConfLvl), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -962,17 +959,17 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, (UCHAR*) &dbInf.cliConfLvl, sizeof(dbInf.cliConfLvl), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, (UCHAR*) &m_dbInf.cliConfLvl, sizeof(m_dbInf.cliConfLvl), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			// Not all drivers support this call - Nick Gorham(unixODBC)
-			dbInf.cliConfLvl = 0;
+			m_dbInf.cliConfLvl = 0;
 			DispAllErrors(m_henv, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_CONFORMANCE, (UCHAR*) &dbInf.sqlConfLvl, sizeof(dbInf.sqlConfLvl), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_CONFORMANCE, (UCHAR*) &m_dbInf.sqlConfLvl, sizeof(m_dbInf.sqlConfLvl), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -980,7 +977,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_OUTER_JOINS, (UCHAR*) dbInf.outerJoins, sizeof(dbInf.outerJoins), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_OUTER_JOINS, (UCHAR*) m_dbInf.outerJoins, sizeof(m_dbInf.outerJoins), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -988,7 +985,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_PROCEDURES, (UCHAR*) dbInf.procedureSupport, sizeof(dbInf.procedureSupport), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_PROCEDURES, (UCHAR*) m_dbInf.procedureSupport, sizeof(m_dbInf.procedureSupport), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -996,7 +993,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, (UCHAR*) dbInf.accessibleTables, sizeof(dbInf.accessibleTables), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, (UCHAR*) m_dbInf.accessibleTables, sizeof(m_dbInf.accessibleTables), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1004,7 +1001,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, (UCHAR*) &dbInf.cursorCommitBehavior, sizeof(dbInf.cursorCommitBehavior), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, (UCHAR*) &m_dbInf.cursorCommitBehavior, sizeof(m_dbInf.cursorCommitBehavior), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1012,7 +1009,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, (UCHAR*) &dbInf.cursorRollbackBehavior, sizeof(dbInf.cursorRollbackBehavior), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, (UCHAR*) &m_dbInf.cursorRollbackBehavior, sizeof(m_dbInf.cursorRollbackBehavior), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1020,7 +1017,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, (UCHAR*) &dbInf.supportNotNullClause, sizeof(dbInf.supportNotNullClause), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, (UCHAR*) &m_dbInf.supportNotNullClause, sizeof(m_dbInf.supportNotNullClause), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1028,7 +1025,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, (UCHAR*) dbInf.supportIEF, sizeof(dbInf.supportIEF), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, (UCHAR*) m_dbInf.supportIEF, sizeof(m_dbInf.supportIEF), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1036,7 +1033,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, (UCHAR*) &dbInf.txnIsolation, sizeof(dbInf.txnIsolation), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, (UCHAR*) &m_dbInf.txnIsolation, sizeof(m_dbInf.txnIsolation), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1044,7 +1041,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, (UCHAR*) &dbInf.txnIsolationOptions, sizeof(dbInf.txnIsolationOptions), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, (UCHAR*) &m_dbInf.txnIsolationOptions, sizeof(m_dbInf.txnIsolationOptions), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1052,7 +1049,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_FETCH_DIRECTION, (UCHAR*) &dbInf.fetchDirections, sizeof(dbInf.fetchDirections), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_FETCH_DIRECTION, (UCHAR*) &m_dbInf.fetchDirections, sizeof(m_dbInf.fetchDirections), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1060,7 +1057,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_LOCK_TYPES, (UCHAR*) &dbInf.lockTypes, sizeof(dbInf.lockTypes), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_LOCK_TYPES, (UCHAR*) &m_dbInf.lockTypes, sizeof(m_dbInf.lockTypes), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1068,7 +1065,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_POS_OPERATIONS, (UCHAR*) &dbInf.posOperations, sizeof(dbInf.posOperations), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_POS_OPERATIONS, (UCHAR*) &m_dbInf.posOperations, sizeof(m_dbInf.posOperations), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1076,7 +1073,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, (UCHAR*) &dbInf.posStmts, sizeof(dbInf.posStmts), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, (UCHAR*) &m_dbInf.posStmts, sizeof(m_dbInf.posStmts), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1084,7 +1081,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_CONCURRENCY, (UCHAR*) &dbInf.scrollConcurrency, sizeof(dbInf.scrollConcurrency), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_CONCURRENCY, (UCHAR*) &m_dbInf.scrollConcurrency, sizeof(m_dbInf.scrollConcurrency), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1092,7 +1089,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_OPTIONS, (UCHAR*) &dbInf.scrollOptions, sizeof(dbInf.scrollOptions), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_OPTIONS, (UCHAR*) &m_dbInf.scrollOptions, sizeof(m_dbInf.scrollOptions), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1100,7 +1097,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_STATIC_SENSITIVITY, (UCHAR*) &dbInf.staticSensitivity, sizeof(dbInf.staticSensitivity), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_STATIC_SENSITIVITY, (UCHAR*) &m_dbInf.staticSensitivity, sizeof(m_dbInf.staticSensitivity), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1108,7 +1105,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_TXN_CAPABLE, (UCHAR*) &dbInf.txnCapable, sizeof(dbInf.txnCapable), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_TXN_CAPABLE, (UCHAR*) &m_dbInf.txnCapable, sizeof(m_dbInf.txnCapable), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1116,7 +1113,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &dbInf.loginTimeout, sizeof(dbInf.loginTimeout), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &m_dbInf.loginTimeout, sizeof(m_dbInf.loginTimeout), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1124,7 +1121,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &dbInf.maxCatalogNameLen, sizeof(dbInf.maxCatalogNameLen), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &m_dbInf.maxCatalogNameLen, sizeof(m_dbInf.maxCatalogNameLen), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1132,7 +1129,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &dbInf.maxSchemaNameLen, sizeof(dbInf.maxSchemaNameLen), &cb);
+		retcode = SQLGetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &m_dbInf.maxSchemaNameLen, sizeof(m_dbInf.maxSchemaNameLen), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1140,7 +1137,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &dbInf.maxTableNameLen, sizeof(dbInf.maxTableNameLen), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &m_dbInf.maxTableNameLen, sizeof(m_dbInf.maxTableNameLen), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(m_henv, m_hdbc);
@@ -1150,12 +1147,12 @@ namespace exodbc
 
 #ifdef DBDEBUG_CONSOLE
 		std::wcout << L"***** DATA SOURCE INFORMATION *****" << std::endl;
-		std::wcout << L"SERVER Name: " << dbInf.serverName << std::endl;
-		std::wcout << L"DBMS Name: " << dbInf.dbmsName << L"; DBMS Version: " << dbInf.dbmsVer << std::endl;
-		std::wcout << L"ODBC Version: " << dbInf.odbcVer << L"; Driver Version: " << dbInf.driverVer << std::endl;
+		std::wcout << L"SERVER Name: " << m_dbInf.serverName << std::endl;
+		std::wcout << L"DBMS Name: " << m_dbInf.dbmsName << L"; DBMS Version: " << m_dbInf.dbmsVer << std::endl;
+		std::wcout << L"ODBC Version: " << m_dbInf.odbcVer << L"; Driver Version: " << m_dbInf.driverVer << std::endl;
 
 		std::wcout << L"API Conf. Level: ";
-		switch(dbInf.apiConfLvl)
+		switch(m_dbInf.apiConfLvl)
 		{
 		case SQL_OAC_NONE:      std::wcout << L"None";       break;
 		case SQL_OAC_LEVEL1:    std::wcout << L"Level 1";    break;
@@ -1164,7 +1161,7 @@ namespace exodbc
 		std::wcout << std::endl;
 
 		std::wcout << L"SAG CLI Conf. Level: ";
-		switch(dbInf.cliConfLvl)
+		switch(m_dbInf.cliConfLvl)
 		{
 		case SQL_OSCC_NOT_COMPLIANT:    std::wcout << L"Not Compliant";    break;
 		case SQL_OSCC_COMPLIANT:        std::wcout << L"Compliant";        break;
@@ -1172,7 +1169,7 @@ namespace exodbc
 		std::wcout << std::endl;
 
 		std::wcout << L"SQL Conf. Level: ";
-		switch(dbInf.sqlConfLvl)
+		switch(m_dbInf.sqlConfLvl)
 		{
 		case SQL_OSC_MINIMUM:     std::wcout << L"Minimum Grammar";     break;
 		case SQL_OSC_CORE:        std::wcout << L"Core Grammar";        break;
@@ -1180,12 +1177,12 @@ namespace exodbc
 		}
 		std::wcout << std::endl;
 
-		std::wcout << L"Max. Connections: "       << dbInf.maxConnections   << std::endl;
-		std::wcout << L"Outer Joins: "            << dbInf.outerJoins       << std::endl;
-		std::wcout << L"Support for Procedures: " << dbInf.procedureSupport << std::endl;
-		std::wcout << L"All tables accessible : " << dbInf.accessibleTables << std::endl;
+		std::wcout << L"Max. Connections: "       << m_dbInf.maxConnections   << std::endl;
+		std::wcout << L"Outer Joins: "            << m_dbInf.outerJoins       << std::endl;
+		std::wcout << L"Support for Procedures: " << m_dbInf.procedureSupport << std::endl;
+		std::wcout << L"All tables accessible : " << m_dbInf.accessibleTables << std::endl;
 		std::wcout << L"Cursor COMMIT Behavior: ";
-		switch(dbInf.cursorCommitBehavior)
+		switch(m_dbInf.cursorCommitBehavior)
 		{
 		case SQL_CB_DELETE:        std::wcout << L"Delete cursors";      break;
 		case SQL_CB_CLOSE:         std::wcout << L"Close cursors";       break;
@@ -1194,7 +1191,7 @@ namespace exodbc
 		std::wcout << std::endl;
 
 		std::wcout << L"Cursor ROLLBACK Behavior: ";
-		switch(dbInf.cursorRollbackBehavior)
+		switch(m_dbInf.cursorRollbackBehavior)
 		{
 		case SQL_CB_DELETE:      std::wcout << L"Delete cursors";      break;
 		case SQL_CB_CLOSE:       std::wcout << L"Close cursors";       break;
@@ -1203,21 +1200,21 @@ namespace exodbc
 		std::wcout << std::endl;
 
 		std::wcout << L"Support NOT NULL clause: ";
-		switch(dbInf.supportNotNullClause)
+		switch(m_dbInf.supportNotNullClause)
 		{
 		case SQL_NNC_NULL:        std::wcout << L"No";        break;
 		case SQL_NNC_NON_NULL:    std::wcout << L"Yes";       break;
 		}
 		std::wcout << std::endl;
 
-		std::wcout << L"Support IEF (Ref. Integrity): " << dbInf.supportIEF   << std::endl;
-		std::wcout << L"Login Timeout: "                << dbInf.loginTimeout << std::endl;
+		std::wcout << L"Support IEF (Ref. Integrity): " << m_dbInf.supportIEF   << std::endl;
+		std::wcout << L"Login Timeout: "                << m_dbInf.loginTimeout << std::endl;
 
 		std::wcout << std::endl << std::endl << L"more ..." << std::endl;
 		getchar();
 
 		std::wcout << L"Default Transaction Isolation: ";
-		switch(dbInf.txnIsolation)
+		switch(m_dbInf.txnIsolation)
 		{
 		case SQL_TXN_READ_UNCOMMITTED:  std::wcout << L"Read Uncommitted";    break;
 		case SQL_TXN_READ_COMMITTED:    std::wcout << L"Read Committed";      break;
@@ -1230,107 +1227,107 @@ namespace exodbc
 		std::wcout << std::endl;
 
 		std::wcout << L"Transaction Isolation Options: ";
-		if (dbInf.txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
+		if (m_dbInf.txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
 			std::wcout << L"Read Uncommitted, ";
-		if (dbInf.txnIsolationOptions & SQL_TXN_READ_COMMITTED)
+		if (m_dbInf.txnIsolationOptions & SQL_TXN_READ_COMMITTED)
 			std::wcout << L"Read Committed, ";
-		if (dbInf.txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
+		if (m_dbInf.txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
 			std::wcout << L"Repeatable Read, ";
-		if (dbInf.txnIsolationOptions & SQL_TXN_SERIALIZABLE)
+		if (m_dbInf.txnIsolationOptions & SQL_TXN_SERIALIZABLE)
 			std::wcout << L"Serializable, ";
 #ifdef ODBC_V20
-		if (dbInf.txnIsolationOptions & SQL_TXN_VERSIONING)
+		if (m_dbInf.txnIsolationOptions & SQL_TXN_VERSIONING)
 			std::wcout << L"Versioning";
 #endif
 		std::wcout << std::endl;
 
 		std::wcout << L"Fetch Directions Supported:" << std::endl << L"   ";
-		if (dbInf.fetchDirections & SQL_FD_FETCH_NEXT)
+		if (m_dbInf.fetchDirections & SQL_FD_FETCH_NEXT)
 			std::wcout << L"Next, ";
-		if (dbInf.fetchDirections & SQL_FD_FETCH_PRIOR)
+		if (m_dbInf.fetchDirections & SQL_FD_FETCH_PRIOR)
 			std::wcout << L"Prev, ";
-		if (dbInf.fetchDirections & SQL_FD_FETCH_FIRST)
+		if (m_dbInf.fetchDirections & SQL_FD_FETCH_FIRST)
 			std::wcout << L"First, ";
-		if (dbInf.fetchDirections & SQL_FD_FETCH_LAST)
+		if (m_dbInf.fetchDirections & SQL_FD_FETCH_LAST)
 			std::wcout << L"Last, ";
-		if (dbInf.fetchDirections & SQL_FD_FETCH_ABSOLUTE)
+		if (m_dbInf.fetchDirections & SQL_FD_FETCH_ABSOLUTE)
 			std::wcout << L"Absolute, ";
-		if (dbInf.fetchDirections & SQL_FD_FETCH_RELATIVE)
+		if (m_dbInf.fetchDirections & SQL_FD_FETCH_RELATIVE)
 			std::wcout << L"Relative, ";
 #ifdef ODBC_V20
-		if (dbInf.fetchDirections & SQL_FD_FETCH_RESUME)
+		if (m_dbInf.fetchDirections & SQL_FD_FETCH_RESUME)
 			std::wcout << L"Resume, ";
 #endif
-		if (dbInf.fetchDirections & SQL_FD_FETCH_BOOKMARK)
+		if (m_dbInf.fetchDirections & SQL_FD_FETCH_BOOKMARK)
 			std::wcout << L"Bookmark";
 		std::wcout << std::endl;
 
 		std::wcout << L"Lock Types Supported (SQLSetPos): ";
-		if (dbInf.lockTypes & SQL_LCK_NO_CHANGE)
+		if (m_dbInf.lockTypes & SQL_LCK_NO_CHANGE)
 			std::wcout << L"No Change, ";
-		if (dbInf.lockTypes & SQL_LCK_EXCLUSIVE)
+		if (m_dbInf.lockTypes & SQL_LCK_EXCLUSIVE)
 			std::wcout << L"Exclusive, ";
-		if (dbInf.lockTypes & SQL_LCK_UNLOCK)
+		if (m_dbInf.lockTypes & SQL_LCK_UNLOCK)
 			std::wcout << L"UnLock";
 		std::wcout << std::endl;
 
 		std::wcout << L"Position Operations Supported (SQLSetPos): ";
-		if (dbInf.posOperations & SQL_POS_POSITION)
+		if (m_dbInf.posOperations & SQL_POS_POSITION)
 			std::wcout << L"Position, ";
-		if (dbInf.posOperations & SQL_POS_REFRESH)
+		if (m_dbInf.posOperations & SQL_POS_REFRESH)
 			std::wcout << L"Refresh, ";
-		if (dbInf.posOperations & SQL_POS_UPDATE)
+		if (m_dbInf.posOperations & SQL_POS_UPDATE)
 			std::wcout << L"Upd, ";
-		if (dbInf.posOperations & SQL_POS_DELETE)
+		if (m_dbInf.posOperations & SQL_POS_DELETE)
 			std::wcout << L"Del, ";
-		if (dbInf.posOperations & SQL_POS_ADD)
+		if (m_dbInf.posOperations & SQL_POS_ADD)
 			std::wcout << L"Add";
 		std::wcout << std::endl;
 
 		std::wcout << L"Positioned Statements Supported: ";
-		if (dbInf.posStmts & SQL_PS_POSITIONED_DELETE)
+		if (m_dbInf.posStmts & SQL_PS_POSITIONED_DELETE)
 			std::wcout << L"Pos delete, ";
-		if (dbInf.posStmts & SQL_PS_POSITIONED_UPDATE)
+		if (m_dbInf.posStmts & SQL_PS_POSITIONED_UPDATE)
 			std::wcout << L"Pos update, ";
-		if (dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE)
+		if (m_dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE)
 			std::wcout << L"Select for update";
 		std::wcout << std::endl;
 
 		std::wcout << L"Scroll Concurrency: ";
-		if (dbInf.scrollConcurrency & SQL_SCCO_READ_ONLY)
+		if (m_dbInf.scrollConcurrency & SQL_SCCO_READ_ONLY)
 			std::wcout << L"Read Only, ";
-		if (dbInf.scrollConcurrency & SQL_SCCO_LOCK)
+		if (m_dbInf.scrollConcurrency & SQL_SCCO_LOCK)
 			std::wcout << L"Lock, ";
-		if (dbInf.scrollConcurrency & SQL_SCCO_OPT_ROWVER)
+		if (m_dbInf.scrollConcurrency & SQL_SCCO_OPT_ROWVER)
 			std::wcout << L"Opt. Rowver, ";
-		if (dbInf.scrollConcurrency & SQL_SCCO_OPT_VALUES)
+		if (m_dbInf.scrollConcurrency & SQL_SCCO_OPT_VALUES)
 			std::wcout << L"Opt. Values";
 		std::wcout << std::endl;
 
 		std::wcout << L"Scroll Options: ";
-		if (dbInf.scrollOptions & SQL_SO_FORWARD_ONLY)
+		if (m_dbInf.scrollOptions & SQL_SO_FORWARD_ONLY)
 			std::wcout << L"Fwd Only, ";
-		if (dbInf.scrollOptions & SQL_SO_STATIC)
+		if (m_dbInf.scrollOptions & SQL_SO_STATIC)
 			std::wcout << L"Static, ";
-		if (dbInf.scrollOptions & SQL_SO_KEYSET_DRIVEN)
+		if (m_dbInf.scrollOptions & SQL_SO_KEYSET_DRIVEN)
 			std::wcout << L"Keyset Driven, ";
-		if (dbInf.scrollOptions & SQL_SO_DYNAMIC)
+		if (m_dbInf.scrollOptions & SQL_SO_DYNAMIC)
 			std::wcout << L"Dynamic, ";
-		if (dbInf.scrollOptions & SQL_SO_MIXED)
+		if (m_dbInf.scrollOptions & SQL_SO_MIXED)
 			std::wcout << L"Mixed";
 		std::wcout << std::endl;
 
 		std::wcout << L"Static Sensitivity: ";
-		if (dbInf.staticSensitivity & SQL_SS_ADDITIONS)
+		if (m_dbInf.staticSensitivity & SQL_SS_ADDITIONS)
 			std::wcout << L"Additions, ";
-		if (dbInf.staticSensitivity & SQL_SS_DELETIONS)
+		if (m_dbInf.staticSensitivity & SQL_SS_DELETIONS)
 			std::wcout << L"Deletions, ";
-		if (dbInf.staticSensitivity & SQL_SS_UPDATES)
+		if (m_dbInf.staticSensitivity & SQL_SS_UPDATES)
 			std::wcout << L"Updates";
 		std::wcout << std::endl;
 
 		std::wcout << L"Transaction Capable?: ";
-		switch(dbInf.txnCapable)
+		switch(m_dbInf.txnCapable)
 		{
 		case SQL_TC_NONE:          std::wcout << L"No";            break;
 		case SQL_TC_DML:           std::wcout << L"DML Only";      break;
@@ -1406,8 +1403,8 @@ namespace exodbc
 		}
 
 		// BJO 20000427 : OpenLink driver
-		if (!wcsncmp(dbInf.driverName, L"oplodbc", 7) ||
-			!wcsncmp(dbInf.driverName, L"OLOD", 4))
+		if (!wcsncmp(m_dbInf.driverName, L"oplodbc", 7) ||
+			!wcsncmp(m_dbInf.driverName, L"OLOD", 4))
 		{
 			if (structSQLTypeInfo.TypeName == L"double precision")
 				structSQLTypeInfo.TypeName = L"real";
@@ -3110,29 +3107,36 @@ namespace exodbc
 			return pDbInf;
 		}
 
-		// TODO:
-		// To determine the actual lengths of the TABLE_CAT, TABLE_SCHEM, and TABLE_NAME columns, 
-		// an application can call SQLGetInfo with the SQL_MAX_CATALOG_NAME_LEN, SQL_MAX_SCHEMA_NAME_LEN,
-		// and SQL_MAX_TABLE_NAME_LEN information types.
-		// see: http://msdn.microsoft.com/en-us/library/ms711831%28v=vs.85%29.aspx
+		wchar_t* cat = new wchar_t[m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN + 1];
+		wchar_t* schem = new wchar_t[m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN + 1];
+		wchar_t* tableName = new wchar_t[m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN + 1];
+		wchar_t* tableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN + 1];
+		wchar_t* tableRemarks = new wchar_t[DB_MAX_TABLE_REMARKS_LEN + 1];
+
 		while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
 		{
 			// store schemas and catalogs found
-			wchar_t cat[DB_MAX_CATALOG_NAME_LEN + 1];
-			wchar_t schem[DB_MAX_SCHEMA_NAME_LEN + 1];
 			cat[0] = 0;
 			schem[0] = 0;
-			if(GetData( 1, SQL_C_WCHAR, cat,  DB_MAX_CATALOG_NAME_LEN+1, &cb))
+			tableName[0] = 0;
+			tableType[0] = 0;
+			tableRemarks[0] = 0;
+
+			if(GetData( 1, SQL_C_WCHAR, cat, m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN + 1, &cb))
 				pDbInf->m_catalogs.insert(std::wstring(cat));
 
-			if(GetData( 2, SQL_C_WCHAR, schem,   DB_MAX_SCHEMA_NAME_LEN+1, &cb))
+			if(GetData( 2, SQL_C_WCHAR, schem, m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN + 1, &cb))
 				pDbInf->m_schemas.insert(std::wstring(schem));
+
+			GetData( 3, SQL_C_WCHAR, tableName, m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN + 1, &cb);
+			GetData( 4, SQL_C_WCHAR, tableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb);
+			GetData( 5, SQL_C_WCHAR, tableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb);
 
 			// Create the entry
 			DbCatalogTable table;
-			GetData( 3, SQL_C_WCHAR,   (UCHAR*)  table.m_tableName,    DB_MAX_TABLE_NAME_LEN+1, &cb);
-			GetData( 4, SQL_C_WCHAR,   (UCHAR*)  table.m_tableType,    30+1,                    &cb);
-			GetData( 5, SQL_C_WCHAR,   (UCHAR*)  table.m_tableRemarks, 254+1,                   &cb);
+			table.m_tableName = tableName;
+			table.m_tableType = tableType;
+			table.m_tableRemarks = tableRemarks;
 			pDbInf->m_tables.push_back(table);
 		}  // while
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -3143,6 +3147,12 @@ namespace exodbc
 		{
 			(*it).m_numCols = GetColumnCount((*it).m_tableName, NULL);
 		}
+
+		delete[] cat;
+		delete[] schem;
+		delete[] tableName;
+		delete[] tableType;
+		delete[] tableRemarks;
 
 		return pDbInf;
 
@@ -3641,41 +3651,41 @@ namespace exodbc
 
 #ifdef DBDEBUG_CONSOLE
 		// When run in console mode, use standard out to display errors.
-		std::wcout << "Database connecting to: " << dbInf.dbmsName << std::endl;
+		std::wcout << "Database connecting to: " << m_dbInf.dbmsName << std::endl;
 #endif  // DBDEBUG_CONSOLE
 
-		BOOST_LOG_TRIVIAL(debug) << L"Database connecting to: " << dbInf.dbmsName;
+		BOOST_LOG_TRIVIAL(debug) << L"Database connecting to: " << m_dbInf.dbmsName;
 
 		wchar_t baseName[25+1];
-		wcsncpy(baseName, dbInf.dbmsName, 25);
+		wcsncpy(baseName, m_dbInf.dbmsName, 25);
 		baseName[25] = 0;
 
 		// RGG 20001025 : add support for Interbase
 		// GT : Integrated to base classes on 20001121
-		if (!_wcsicmp(dbInf.dbmsName, L"Interbase"))
+		if (!_wcsicmp(m_dbInf.dbmsName, L"Interbase"))
 			return((wxDBMS)(m_dbmsType = dbmsINTERBASE));
 
 		// BJO 20000428 : add support for Virtuoso
-		if (!_wcsicmp(dbInf.dbmsName, L"OpenLink Virtuoso VDBMS"))
+		if (!_wcsicmp(m_dbInf.dbmsName, L"OpenLink Virtuoso VDBMS"))
 			return((wxDBMS)(m_dbmsType = dbmsVIRTUOSO));
 
-		if (!_wcsicmp(dbInf.dbmsName, L"Adaptive Server Anywhere"))
+		if (!_wcsicmp(m_dbInf.dbmsName, L"Adaptive Server Anywhere"))
 			return((wxDBMS)(m_dbmsType = dbmsSYBASE_ASA));
 
 		// BJO 20000427 : The "SQL Server" string is also returned by SQLServer when
 		// connected through an OpenLink driver.
 		// Is it also returned by Sybase Adapatitve server?
 		// OpenLink driver name is OLOD3032.DLL for msw and oplodbc.so for unix
-		if (!_wcsicmp(dbInf.dbmsName, L"SQL Server"))
+		if (!_wcsicmp(m_dbInf.dbmsName, L"SQL Server"))
 		{
-			if (!wcsncmp(dbInf.driverName, L"oplodbc", 7) ||
-				!wcsncmp(dbInf.driverName, L"OLOD", 4))
+			if (!wcsncmp(m_dbInf.driverName, L"oplodbc", 7) ||
+				!wcsncmp(m_dbInf.driverName, L"OLOD", 4))
 				return ((wxDBMS)(dbmsMS_SQL_SERVER));
 			else
 				return ((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
 		}
 
-		if (!_wcsicmp(dbInf.dbmsName, L"Microsoft SQL Server"))
+		if (!_wcsicmp(m_dbInf.dbmsName, L"Microsoft SQL Server"))
 			return((wxDBMS)(m_dbmsType = dbmsMS_SQL_SERVER));
 
 		baseName[10] = 0;

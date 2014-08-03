@@ -43,15 +43,17 @@ namespace exodbc
 	const int wxDB_PATH_MAX                 = 254;
 
 	// Database Globals
-	const int DB_TYPE_NAME_LEN            = 40;
-	const int DB_MAX_STATEMENT_LEN        = 4096;
-	const int DB_MAX_WHERE_CLAUSE_LEN     = 2048;
-	const int DB_MAX_ERROR_MSG_LEN        = 512;
-	const int DB_MAX_ERROR_HISTORY        = 5;
-	const int DB_MAX_TABLE_NAME_LEN       = 128;	// TODO: This value is sometimes also available from dbInf
-	const int DB_MAX_SCHEMA_NAME_LEN      = 128;	// TODO: This value is sometimes also available from dbInf
-	const int DB_MAX_CATALOG_NAME_LEN     = 128;	// TODO: This value is sometimes also available from dbInf
-	const int DB_MAX_COLUMN_NAME_LEN      = 128;
+	const int DB_TYPE_NAME_LEN				= 40;
+	const int DB_MAX_STATEMENT_LEN			= 4096;
+	const int DB_MAX_WHERE_CLAUSE_LEN		= 2048;
+	const int DB_MAX_ERROR_MSG_LEN			= 512;
+	const int DB_MAX_ERROR_HISTORY			= 5;
+	const int DB_MAX_TABLE_NAME_LEN			= 128;	// This value is sometimes also available from dbInf: dbInf.tableNameLen != 0
+	const int DB_MAX_SCHEMA_NAME_LEN		= 128;	// This value is sometimes also available from dbInf: dbInf.schemaNameLen != 0
+	const int DB_MAX_CATALOG_NAME_LEN		= 128;	// This value is sometimes also available from dbInf: dbInf.catalogNameLen != 0
+	const int DB_MAX_COLUMN_NAME_LEN		= 128;
+	const int DB_MAX_TABLE_TYPE_LEN			= 128;
+	const int DB_MAX_TABLE_REMARKS_LEN		= 128;
 
 	const int DB_DATA_TYPE_VARCHAR        = 1;
 	const int DB_DATA_TYPE_INTEGER        = 2;
