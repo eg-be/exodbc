@@ -189,8 +189,9 @@ namespace exodbc
 
 		wchar_t			m_catalog[128+1];
 		wchar_t			m_schema[128+1];
-		int				m_numTables;           // How many tables does this database have
-		DbCatalogTable*	m_pTableInf;           // pTableInf = new wxDbTableInf[numTables];
+//		int				m_numTables;           // How many tables does this database have
+		std::vector<DbCatalogTable> m_tables;
+//		DbCatalogTable*	m_pTableInf;           // pTableInf = new wxDbTableInf[numTables];
 	};
 
 	// The wxDb::errorList is copied to this variable when the wxDb object
