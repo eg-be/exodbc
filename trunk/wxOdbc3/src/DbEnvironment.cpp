@@ -120,7 +120,7 @@ namespace exodbc
 			// I dont know why we cannot use the value stored in m_requestedOdbcVersion. It just works with the constants
 			SQLRETURN ret;
 			if(m_requestedOdbcVersion == SQL_OV_ODBC3)
-				ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) 12, NULL);
+				ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
 			else if(m_requestedOdbcVersion == SQL_OV_ODBC3_80)
 				ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
 			else
