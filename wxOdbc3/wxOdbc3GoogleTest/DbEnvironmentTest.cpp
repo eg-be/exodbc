@@ -63,6 +63,10 @@ namespace exOdbcTest
 
 		EXPECT_FALSE(pEnv_vInvalid->SetOdbcVersion(123445));
 
+		EXPECT_EQ(SQL_OV_ODBC2, pEnv_v2->GetOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC3, pEnv_v3->GetOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC3_80, pEnv_v3_80->GetOdbcVersion());
+
 		delete pEnv_v2;
 		delete pEnv_v3;
 		delete pEnv_v3_80;
