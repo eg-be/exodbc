@@ -279,8 +279,10 @@ namespace exodbc
 	//       immediately, as the value is not good after
 	//       this function has left scope.
 	//
-	const wchar_t *Database::ConvertUserIDImpl(const wchar_t *userID, std::wstring &UserID)
+	std::wstring Database::ConvertUserIDImpl(const wchar_t* userID)
 	{
+		std::wstring UserID;
+
 		if (userID)
 		{
 			if (!wcslen(userID))
@@ -302,7 +304,7 @@ namespace exodbc
 			(Dbms() == dbmsMAXDB))
 			boost::algorithm::to_upper(UserID);
 
-		return UserID.c_str();
+		return UserID;
 	}  // wxDb::ConvertUserIDImpl()
 
 
@@ -2299,8 +2301,7 @@ namespace exodbc
 
 		std::wstring TableName;
 
-		std::wstring UserID;
-		ConvertUserIDImpl(userID,UserID);
+		std::wstring UserID = ConvertUserIDImpl(userID);
 
 		// Pass 1 - Determine how many columns there are.
 		// Pass 2 - Allocate the wxDbColInf array and fill in
@@ -2458,8 +2459,7 @@ namespace exodbc
 
 		std::wstring TableName;
 
-		std::wstring UserID;
-		ConvertUserIDImpl(userID,UserID);
+		std::wstring UserID = ConvertUserIDImpl(userID);
 
 		// Pass 1 - Determine how many columns there are.
 		// Pass 2 - Allocate the wxDbColInf array and fill in
@@ -2979,8 +2979,7 @@ namespace exodbc
 
 		std::wstring TableName;
 
-		std::wstring UserID;
-		ConvertUserIDImpl(userID,UserID);
+		std::wstring UserID = ConvertUserIDImpl(userID);
 
 		TableName = tableName;
 		// Oracle and Interbase table names are uppercase only, so force
@@ -3067,8 +3066,7 @@ namespace exodbc
 		SQLLEN   cb;
 		std::wstring tblNameSave;
 
-		std::wstring UserID;
-		ConvertUserIDImpl(userID,UserID);
+		std::wstring UserID = ConvertUserIDImpl(userID);
 
 		//-------------------------------------------------------------
 		// Create the Database Array of catalog entries
@@ -3189,8 +3187,7 @@ namespace exodbc
 
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
-		std::wstring UserID;
-		ConvertUserIDImpl(userID,UserID);
+		std::wstring UserID = ConvertUserIDImpl(userID);
 
 		if (!UserID.empty() &&
 			Dbms() != dbmsMY_SQL &&
@@ -3308,8 +3305,7 @@ namespace exodbc
 			//     return exists;
 		}
 
-		std::wstring UserID;
-		ConvertUserIDImpl(userID,UserID);
+		std::wstring UserID = ConvertUserIDImpl(userID);
 
 		TableName = tableName;
 		// Oracle and Interbase table names are uppercase only, so force
@@ -3380,9 +3376,8 @@ namespace exodbc
 
 		std::wstring TableName;
 
-		std::wstring UserID,Schema;
-		ConvertUserIDImpl(userID,UserID);
-		ConvertUserIDImpl(schema,Schema);
+		std::wstring UserID = ConvertUserIDImpl(userID);
+		std::wstring Schema = ConvertUserIDImpl(schema);
 
 		TableName = tableName;
 		// Oracle and Interbase table names are uppercase only, so force
