@@ -156,9 +156,9 @@ namespace exodbc
 	/********** wxDbInf Destructor *************/
 	DbCatalog::~DbCatalog()
 	{
-		if (m_pTableInf)
-			delete [] m_pTableInf;
-		m_pTableInf = NULL;
+		//if (m_pTableInf)
+		//	delete [] m_pTableInf;
+		//m_pTableInf = NULL;
 	}  // wxDbInf::~wxDbInf()
 
 
@@ -167,8 +167,8 @@ namespace exodbc
 	{
 		m_catalog[0]      = 0;
 		m_schema[0]       = 0;
-		m_numTables       = 0;
-		m_pTableInf       = NULL;
+//		m_numTables       = 0;
+//		m_pTableInf       = NULL;
 
 		return true;
 	}  // wxDbInf::Initialize()
@@ -3037,7 +3037,7 @@ namespace exodbc
 
 
 	/********** wxDb::GetCatalog() *******/
-	DbCatalog *Database::GetCatalog(const wchar_t *userID)
+	DbCatalog* Database::GetCatalog(const wchar_t *userID)
 		/*
 		* ---------------------------------------------------------------------
 		* -- 19991203 : mj10777 : Create                                 ------
@@ -3060,8 +3060,6 @@ namespace exodbc
 		*       to avoid undesired unbinding of columns.
 		*/
 	{
-		int      noTab = 0;     // Counter while filling table entries
-		int      pass;
 		RETCODE  retcode;
 		SQLLEN   cb;
 		std::wstring tblNameSave;
@@ -3069,88 +3067,76 @@ namespace exodbc
 		std::wstring UserID = ConvertUserIDImpl(userID);
 
 		//-------------------------------------------------------------
-		// Create the Database Array of catalog entries
+		// Create the Database vector of catalog entries
 
-		DbCatalog *pDbInf = new DbCatalog;
+		DbCatalog* pDbInf = new DbCatalog;
 
-		//-------------------------------------------------------------
-		// Table Information
-		// Pass 1 - Determine how many Tables there are.
-		// Pass 2 - Create the Table array and fill it
-		//        - Create the Cols array = NULL
-		//-------------------------------------------------------------
+		SQLFreeStmt(m_hstmt, SQL_CLOSE);   // Close if Open
+		tblNameSave.empty();
 
-		for (pass = 1; pass <= 2; pass++)
+		if (!UserID.empty() &&
+			Dbms() != dbmsMY_SQL &&
+			Dbms() != dbmsACCESS &&
+			Dbms() != dbmsMS_SQL_SERVER)
 		{
-			SQLFreeStmt(m_hstmt, SQL_CLOSE);   // Close if Open
-			tblNameSave.empty();
+			retcode = SQLTables(m_hstmt,
+				NULL, 0,                             // All qualifiers
+				(SQLTCHAR *) UserID.c_str(), SQL_NTS,   // User specified
+				NULL, 0,                             // All tables
+				NULL, 0);                            // All columns
+		}
+		else
+		{
+			retcode = SQLTables(m_hstmt,
+				NULL, 0,           // All qualifiers - CatalogName
+				NULL, 0,           // User specified - SchemaName
+				NULL, 0,           // All tables - TableName
+				NULL, 0);          // All columns - TableType
+		}
 
-			if (!UserID.empty() &&
-				Dbms() != dbmsMY_SQL &&
-				Dbms() != dbmsACCESS &&
-				Dbms() != dbmsMS_SQL_SERVER)
+		if (retcode != SQL_SUCCESS)
+		{
+			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			pDbInf = NULL;
+			SQLFreeStmt(m_hstmt, SQL_CLOSE);
+			return pDbInf;
+		}
+
+		// TODO:
+		// To determine the actual lengths of the TABLE_CAT, TABLE_SCHEM, and TABLE_NAME columns, 
+		// an application can call SQLGetInfo with the SQL_MAX_CATALOG_NAME_LEN, SQL_MAX_SCHEMA_NAME_LEN,
+		// and SQL_MAX_TABLE_NAME_LEN information types.
+		// see: http://msdn.microsoft.com/en-us/library/ms711831%28v=vs.85%29.aspx
+
+		bool first = true;
+		while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
+		{
+			if(first)
 			{
-				retcode = SQLTables(m_hstmt,
-					NULL, 0,                             // All qualifiers
-					(SQLTCHAR *) UserID.c_str(), SQL_NTS,   // User specified
-					NULL, 0,                             // All tables
-					NULL, 0);                            // All columns
+				GetData( 1, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_catalog,  128+1, &cb);
+				GetData( 2, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_schema,   128+1, &cb);
+				first = false;
 			}
-			else
-			{
-				retcode = SQLTables(m_hstmt,
-					NULL, 0,           // All qualifiers
-					NULL, 0,           // User specified
-					NULL, 0,           // All tables
-					NULL, 0);          // All columns
-			}
 
-			if (retcode != SQL_SUCCESS)
-			{
-				DispAllErrors(m_henv, m_hdbc, m_hstmt);
-				pDbInf = NULL;
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-				return pDbInf;
-			}
-
-			while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
-			{
-				if (pass == 1)  // First pass, just count the Tables
-				{
-					if (pDbInf->m_numTables == 0)
-					{
-						GetData( 1, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_catalog,  128+1, &cb);
-						GetData( 2, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_schema,   128+1, &cb);
-					}
-					pDbInf->m_numTables++;      // Counter for Tables
-				}  // if (pass == 1)
-				if (pass == 2) // Create and fill the Table entries
-				{
-					if (pDbInf->m_pTableInf == NULL)   // Has the Table Array been created
-					{  // no, then create the Array
-						pDbInf->m_pTableInf = new DbCatalogTable[pDbInf->m_numTables];
-						noTab = 0;
-					} // if (pDbInf->pTableInf == NULL)   // Has the Table Array been created
-
-					GetData( 3, SQL_C_WXCHAR,   (UCHAR*)  (pDbInf->m_pTableInf+noTab)->m_tableName,    DB_MAX_TABLE_NAME_LEN+1, &cb);
-					GetData( 4, SQL_C_WXCHAR,   (UCHAR*)  (pDbInf->m_pTableInf+noTab)->m_tableType,    30+1,                    &cb);
-					GetData( 5, SQL_C_WXCHAR,   (UCHAR*)  (pDbInf->m_pTableInf+noTab)->m_tableRemarks, 254+1,                   &cb);
-
-					noTab++;
-				}  // if
-			}  // while
-		}  // for
+			// Create the entry
+			DbCatalogTable table;
+			GetData( 3, SQL_C_WXCHAR,   (UCHAR*)  table.m_tableName,    DB_MAX_TABLE_NAME_LEN+1, &cb);
+			GetData( 4, SQL_C_WXCHAR,   (UCHAR*)  table.m_tableType,    30+1,                    &cb);
+			GetData( 5, SQL_C_WXCHAR,   (UCHAR*)  table.m_tableRemarks, 254+1,                   &cb);
+			pDbInf->m_tables.push_back(table);
+		}  // while
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
 		// Query how many columns are in each table
-		for (noTab=0;noTab<pDbInf->m_numTables;noTab++)
+		std::vector<DbCatalogTable>::iterator it;
+		for(it = pDbInf->m_tables.begin(); it != pDbInf->m_tables.end(); it++)
 		{
-			(pDbInf->m_pTableInf+noTab)->m_numCols = (UWORD)GetColumnCount((pDbInf->m_pTableInf+noTab)->m_tableName, UserID.c_str());
+			(*it).m_numCols = GetColumnCount((*it).m_tableName, UserID.c_str());
 		}
 
 		return pDbInf;
 
-	}  // wxDb::GetCatalog()
+	}  // Database::GetCatalog()
 
 
 	/********** wxDb::Catalog() **********/

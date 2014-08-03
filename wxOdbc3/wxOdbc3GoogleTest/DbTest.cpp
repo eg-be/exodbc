@@ -109,6 +109,13 @@ namespace exOdbcTest
 	}
 
 
+	TEST_P(DbTest, GetCatalog)
+	{
+		DbCatalog* pCat = m_pDb->GetCatalog();
+		delete pCat;
+	}
+
+
 	TEST_P(DbTest, ExecSql_InsertCharTypes)
 	{
 		CharTypesTmpTable* pTable = new CharTypesTmpTable(m_pDb);
