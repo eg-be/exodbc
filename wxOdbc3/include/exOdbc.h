@@ -48,7 +48,9 @@ namespace exodbc
 	const int DB_MAX_WHERE_CLAUSE_LEN     = 2048;
 	const int DB_MAX_ERROR_MSG_LEN        = 512;
 	const int DB_MAX_ERROR_HISTORY        = 5;
-	const int DB_MAX_TABLE_NAME_LEN       = 128;
+	const int DB_MAX_TABLE_NAME_LEN       = 128;	// TODO: This value is sometimes also available from dbInf
+	const int DB_MAX_SCHEMA_NAME_LEN      = 128;	// TODO: This value is sometimes also available from dbInf
+	const int DB_MAX_CATALOG_NAME_LEN     = 128;	// TODO: This value is sometimes also available from dbInf
 	const int DB_MAX_COLUMN_NAME_LEN      = 128;
 
 	const int DB_DATA_TYPE_VARCHAR        = 1;
