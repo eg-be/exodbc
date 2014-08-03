@@ -82,6 +82,7 @@ namespace exodbc
 		if (m_freeHenvOnDestroy && m_henv)
 			FreeHenv();
 
+		m_requestedOdbcVersion = SQL_OV_ODBC2;
 		m_henv = 0;
 		m_dsn[0] = 0;
 		m_uid[0] = 0;
@@ -109,10 +110,37 @@ namespace exodbc
 		// If we initialize using odbc3 we will fail:  See Ticket # 17
 		//if (SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &Henv) != SQL_SUCCESS)
 
-		if (SQLAllocEnv(&m_henv) != SQL_SUCCESS)
+		if(m_requestedOdbcVersion >= SQL_OV_ODBC3)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"A problem occurred while trying to get a connection to the data source";
-			return false;
+			if(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv) != SQL_SUCCESS)
+			{
+				BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocHandle (Odbc v3.x): " << GetLastError();
+				return false;
+			}
+			// I dont know why we cannot use the value stored in m_requestedOdbcVersion. It just works with the constants
+			SQLRETURN ret;
+			if(m_requestedOdbcVersion == SQL_OV_ODBC3)
+				ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) 12, NULL);
+			else if(m_requestedOdbcVersion == SQL_OV_ODBC3_80)
+				ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
+			else
+			{
+				BOOST_LOG_TRIVIAL(debug) << L"Unknown ODBC Version value: " << m_requestedOdbcVersion;
+				return false;
+			}
+			if(ret != SQL_SUCCESS)
+			{
+				BOOST_LOG_TRIVIAL(debug) << L"Failed to set ODBC Version of SQL Environment to " << m_requestedOdbcVersion << L": " << GetLastError();
+				return false;
+			}
+		}
+		else
+		{
+			if (SQLAllocEnv(&m_henv) != SQL_SUCCESS)
+			{
+				BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocEnv (Odbc v2.x)";
+				return false;
+			}
 		}
 
 		m_freeHenvOnDestroy = true;
@@ -170,34 +198,69 @@ namespace exodbc
 	}  // wxDbConnectInf::SetConnectionStr()
 
 
-	bool DbEnvironment::SetSqlAttrOdbcVersion(int version)
+	bool DbEnvironment::SetOdbcVersion(int version)
 	{
 		// TODO: This never worked. Its odbc 3. See Ticket # 17
-		exASSERT(false);
+		// Must be set before we've allocated a handle
+		exASSERT(m_henv == NULL);
 
 		if( ! (version == SQL_OV_ODBC2 || version == SQL_OV_ODBC3 || version == SQL_OV_ODBC3_80))
 		{
 			return false;
 		}
-		SQLINTEGER v = version;
-		SQLRETURN ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &v, NULL);
-		if(ret == SQL_SUCCESS)
-			return true;
-		SQLWCHAR sqlState[5 + 1];
-		SQLINTEGER nativeErr;
-		SQLWCHAR msg[256 + 1];
-		SQLSMALLINT msgLength;
-		ret = SQLGetDiagRec(SQL_HANDLE_ENV, m_henv, 1, sqlState, &nativeErr, msg, 256, &msgLength);
-		return false;
+		m_requestedOdbcVersion = version;
+		return true;
+
+		//SQLINTEGER v = version;
+		//SQLRETURN ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &v, NULL);
+		//if(ret == SQL_SUCCESS)
+		//	return true;
+		//SQLWCHAR sqlState[5 + 1];
+		//SQLINTEGER nativeErr;
+		//SQLWCHAR msg[256 + 1];
+		//SQLSMALLINT msgLength;
+		//ret = SQLGetDiagRec(SQL_HANDLE_ENV, m_henv, 1, sqlState, &nativeErr, msg, 256, &msgLength);
+		//return false;
 	}
 
 
-	int DbEnvironment::ReadSqlAttrOdbcVersion()
+	SErrorInfo DbEnvironment::GetLastError()
+	{
+		SErrorInfo ei;
+		ei.NativeError = 0;
+		ei.SqlState[0] = 0;
+
+		// Determine msg-length
+		SQLSMALLINT msgLength;
+		SQLRETURN ret = SQLGetDiagRec(SQL_HANDLE_ENV, m_henv, 1, ei.SqlState, &ei.NativeError, NULL, NULL, &msgLength);
+		if(ret != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"SQLGetDiagRec failed with return code " << ret;
+			return ei;
+		}
+		SQLWCHAR* msg = new SQLWCHAR[msgLength + 1];
+		ret = SQLGetDiagRec(SQL_HANDLE_ENV, m_henv, 1, ei.SqlState, &ei.NativeError, msg, msgLength + 1, &msgLength);
+		if(ret != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"SQLGetDiagRec failed with return code " << ret;
+			return ei;
+		}
+
+		ei.Msg = msg;
+		return ei;
+	}
+
+
+	int DbEnvironment::GetOdbcVersion()
 	{
 		int value;
 		SQLRETURN ret = SQLGetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
 		if(ret != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to read SQL_ATTR_ODBC_VERSION";
+			GetLastError();
 			return 0;
+		}
 
 		return value;
 	}
@@ -267,5 +330,30 @@ namespace exodbc
 
 	// Interfaces
 	// ----------
+	std::wostream& operator<< (std::wostream &out, const SErrorInfo& ei)
+	{
+		out << L"SQLSTATE " << ei.SqlState << L"; Native Error: " << ei.NativeError << L"; " << ei.Msg.c_str();
+		return out;
+	}
 
+	std::ostream& operator<< (std::ostream &out, const SErrorInfo& ei)
+	{
+
+		out << "SQLSTATE " << w2s(ei.SqlState) << "; Native Error: " << ei.NativeError << "; " << w2s(ei.Msg);
+		return out;
+	}
+
+	// TODO: see http://stackoverflow.com/questions/22984225/boost-log-ignores-overloaded-stream-insertion-operator
+	std::string w2s(const std::wstring& w)
+	{
+		std::stringstream ss;
+
+		for(size_t i = 0; i < w.length(); i++)
+		{
+			char c = (char) w[i];
+			ss << c;
+		}
+
+		return ss.str();
+	}
 }

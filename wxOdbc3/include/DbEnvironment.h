@@ -65,6 +65,20 @@ namespace exodbc
 		std::wstring m_description;
 	};
 
+	struct EXODBCAPI SErrorInfo
+	{
+		SQLWCHAR		SqlState[5 + 1];
+		SQLINTEGER		NativeError;
+		std::wstring	Msg;
+		friend std::wostream& operator<< (std::wostream &out, const SErrorInfo& ei);
+		friend std::ostream& operator<<(std::ostream& os, const SErrorInfo& ei);
+	
+	};
+
+	std::string w2s(const std::wstring& w);
+
+//	std::ostream& operator<< (std::ostream& stream, const SErrorInfo& ei) { stream << L"foo"; return stream; };
+
 	// Classes
 	// -------
 	/*!
@@ -88,6 +102,8 @@ namespace exodbc
 		~DbEnvironment();
 
 		bool             Initialize();
+
+		SErrorInfo		GetLastError();
 
 		bool             AllocHenv();
 		void             FreeHenv();
@@ -126,8 +142,8 @@ namespace exodbc
 		void             SetFileType(const std::wstring &fileType)  { m_fileType      = fileType; }
 		void             SetDefaultDir(const std::wstring &defDir)  { m_defaultDir    = defDir;   }
 
-		bool			SetSqlAttrOdbcVersion(int version);		
-		int				ReadSqlAttrOdbcVersion();
+		bool			SetOdbcVersion(int version);		
+		int				GetOdbcVersion();
 
 		enum ListMode { All, System, User };
 		std::vector<SDataSource> ListDataSources(ListMode mode = All);
@@ -135,6 +151,8 @@ namespace exodbc
 	private:
 		bool m_freeHenvOnDestroy;
 		bool m_useConnectionStr;
+
+		int m_requestedOdbcVersion;							// This must be SQL_OV_ODBC2, SQL_OV_ODBC3 or SQL_OV_ODBC3_80
 
 		HENV m_henv;
 		wchar_t m_dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
