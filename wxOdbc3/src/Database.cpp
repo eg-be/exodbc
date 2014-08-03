@@ -146,34 +146,6 @@ namespace exodbc
 	}  // wxDbTableInf::Initialize()
 
 
-	/********** wxDbInf Constructor *************/
-	DbCatalog::DbCatalog()
-	{
-		Initialize();
-	}  // wxDbInf::wxDbInf()
-
-
-	/********** wxDbInf Destructor *************/
-	DbCatalog::~DbCatalog()
-	{
-		//if (m_pTableInf)
-		//	delete [] m_pTableInf;
-		//m_pTableInf = NULL;
-	}  // wxDbInf::~wxDbInf()
-
-
-	/********** wxDbInf::Initialize() *************/
-	bool DbCatalog::Initialize()
-	{
-		m_catalog[0]      = 0;
-		m_schema[0]       = 0;
-//		m_numTables       = 0;
-//		m_pTableInf       = NULL;
-
-		return true;
-	}  // wxDbInf::Initialize()
-
-
 	/********** wxDb Constructor **********/
 	Database::Database(const HENV &aHenv, bool FwdOnlyCursors)
 	{
@@ -3061,7 +3033,7 @@ namespace exodbc
 
 
 	/********** wxDb::GetCatalog() *******/
-	DbCatalog* Database::GetCatalog(const wchar_t *userID)
+	SDbCatalog* Database::GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName)
 		/*
 		* ---------------------------------------------------------------------
 		* -- 19991203 : mj10777 : Create                                 ------
@@ -3088,26 +3060,37 @@ namespace exodbc
 		SQLLEN   cb;
 		std::wstring tblNameSave;
 
-		std::wstring UserID = ConvertUserIDImpl(userID);
-
 		//-------------------------------------------------------------
 		// Create the Database vector of catalog entries
 
-		DbCatalog* pDbInf = new DbCatalog;
+		SDbCatalog* pDbInf = new SDbCatalog;
 
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);   // Close if Open
 		tblNameSave.empty();
 
-		if (!UserID.empty() &&
-			Dbms() != dbmsMY_SQL &&
-			Dbms() != dbmsACCESS &&
-			Dbms() != dbmsMS_SQL_SERVER)
+		if (!catalogName.empty() && !schemaName.empty())
 		{
 			retcode = SQLTables(m_hstmt,
-				NULL, 0,                             // All qualifiers
-				(SQLTCHAR *) UserID.c_str(), SQL_NTS,   // User specified
+				(SQLWCHAR *) catalogName.c_str(), SQL_NTS,                    
+				(SQLWCHAR *) schemaName.c_str(), SQL_NTS, 
 				NULL, 0,                             // All tables
 				NULL, 0);                            // All columns
+		}
+		else if(!catalogName.empty())
+		{
+			retcode = SQLTables(m_hstmt,
+				(SQLWCHAR *) catalogName.c_str(), SQL_NTS,           // All qualifiers - CatalogName
+				NULL, 0,           // User specified - SchemaName
+				NULL, 0,           // All tables - TableName
+				NULL, 0);          // All columns - TableType
+		}
+		else if(!schemaName.empty())
+		{
+			retcode = SQLTables(m_hstmt,
+				NULL, 0,           // All qualifiers - CatalogName
+				(SQLWCHAR *) schemaName.c_str(), SQL_NTS,           // User specified - SchemaName
+				NULL, 0,           // All tables - TableName
+				NULL, 0);          // All columns - TableType
 		}
 		else
 		{
@@ -3117,6 +3100,7 @@ namespace exodbc
 				NULL, 0,           // All tables - TableName
 				NULL, 0);          // All columns - TableType
 		}
+
 
 		if (retcode != SQL_SUCCESS)
 		{
@@ -3131,22 +3115,24 @@ namespace exodbc
 		// an application can call SQLGetInfo with the SQL_MAX_CATALOG_NAME_LEN, SQL_MAX_SCHEMA_NAME_LEN,
 		// and SQL_MAX_TABLE_NAME_LEN information types.
 		// see: http://msdn.microsoft.com/en-us/library/ms711831%28v=vs.85%29.aspx
-
-		bool first = true;
 		while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
 		{
-			if(first)
-			{
-				GetData( 1, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_catalog,  DB_MAX_CATALOG_NAME_LEN+1, &cb);
-				GetData( 2, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_schema,   DB_MAX_SCHEMA_NAME_LEN+1, &cb);
-				first = false;
-			}
+			// store schemas and catalogs found
+			wchar_t cat[DB_MAX_CATALOG_NAME_LEN + 1];
+			wchar_t schem[DB_MAX_SCHEMA_NAME_LEN + 1];
+			cat[0] = 0;
+			schem[0] = 0;
+			if(GetData( 1, SQL_C_WCHAR, cat,  DB_MAX_CATALOG_NAME_LEN+1, &cb))
+				pDbInf->m_catalogs.insert(std::wstring(cat));
+
+			if(GetData( 2, SQL_C_WCHAR, schem,   DB_MAX_SCHEMA_NAME_LEN+1, &cb))
+				pDbInf->m_schemas.insert(std::wstring(schem));
 
 			// Create the entry
 			DbCatalogTable table;
-			GetData( 3, SQL_C_WXCHAR,   (UCHAR*)  table.m_tableName,    DB_MAX_TABLE_NAME_LEN+1, &cb);
-			GetData( 4, SQL_C_WXCHAR,   (UCHAR*)  table.m_tableType,    30+1,                    &cb);
-			GetData( 5, SQL_C_WXCHAR,   (UCHAR*)  table.m_tableRemarks, 254+1,                   &cb);
+			GetData( 3, SQL_C_WCHAR,   (UCHAR*)  table.m_tableName,    DB_MAX_TABLE_NAME_LEN+1, &cb);
+			GetData( 4, SQL_C_WCHAR,   (UCHAR*)  table.m_tableType,    30+1,                    &cb);
+			GetData( 5, SQL_C_WCHAR,   (UCHAR*)  table.m_tableRemarks, 254+1,                   &cb);
 			pDbInf->m_tables.push_back(table);
 		}  // while
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -3155,7 +3141,7 @@ namespace exodbc
 		std::vector<DbCatalogTable>::iterator it;
 		for(it = pDbInf->m_tables.begin(); it != pDbInf->m_tables.end(); it++)
 		{
-			(*it).m_numCols = GetColumnCount((*it).m_tableName, UserID.c_str());
+			(*it).m_numCols = GetColumnCount((*it).m_tableName, NULL);
 		}
 
 		return pDbInf;

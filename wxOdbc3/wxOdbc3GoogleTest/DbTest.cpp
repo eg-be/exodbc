@@ -111,8 +111,20 @@ namespace exOdbcTest
 
 	TEST_P(DbTest, GetCatalog)
 	{
-		DbCatalog* pCat = m_pDb->GetCatalog();
-		delete pCat;
+		SDbCatalog* pCat = NULL;
+		if(m_pDb->Dbms() == dbmsDB2)
+		{
+			pCat = m_pDb->GetCatalog(L"", L"WXODBC3");
+		}
+		else if(m_pDb->Dbms() == dbmsMY_SQL)
+		{
+			pCat = m_pDb->GetCatalog(L"wxodbc3", L"");
+		}
+
+		EXPECT_EQ(12, pCat->m_tables.size());
+
+		if(pCat)
+			delete pCat;
 	}
 
 
