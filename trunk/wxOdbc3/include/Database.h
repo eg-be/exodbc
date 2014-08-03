@@ -33,6 +33,7 @@
 // Other headers
 // System headers
 #include <vector>
+#include <set>
 #include <windows.h>
 #include <sql.h>
 #include <sqlext.h>
@@ -179,19 +180,12 @@ namespace exodbc
 	};
 
 
-	class EXODBCAPI DbCatalog     // Description of a Database: Used so far only when fetching the "catalog"
+	struct EXODBCAPI SDbCatalog     // Description of a Database: Used so far only when fetching the "catalog"
 	{
 	public:
-		DbCatalog();
-		~DbCatalog();
-
-		bool          Initialize();
-
-		wchar_t			m_catalog[DB_MAX_CATALOG_NAME_LEN+1];
-		wchar_t			m_schema[DB_MAX_SCHEMA_NAME_LEN+1];
-//		int				m_numTables;           // How many tables does this database have
 		std::vector<DbCatalogTable> m_tables;
-//		DbCatalogTable*	m_pTableInf;           // pTableInf = new wxDbTableInf[numTables];
+		std::set<std::wstring> m_catalogs;
+		std::set<std::wstring> m_schemas;
 	};
 
 	// The wxDb::errorList is copied to this variable when the wxDb object
@@ -287,7 +281,8 @@ namespace exodbc
 		bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR* cbReturned);
 		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
 		int          TranslateSqlState(const std::wstring& SQLState);
-		DbCatalog*	 GetCatalog(const wchar_t* userID = NULL);
+		SDbCatalog*	 GetCatalog() { return GetCatalog(L"", L""); };
+		SDbCatalog*	 GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName);
 		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
 		int          GetKeyFields(const std::wstring& tableName, ColumnInfo* colInf, UWORD noCols);
 

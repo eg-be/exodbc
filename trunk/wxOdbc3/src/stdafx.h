@@ -16,6 +16,7 @@
 #include <windows.h>
 #include <sstream>
 #include <string>
+#include <set>
 //#include <cstdio>
 //#include <tchar>
 //#include <string.h>
