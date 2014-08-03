@@ -1152,6 +1152,30 @@ namespace exodbc
 				return false;
 		}
 
+		retcode = SQLGetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &dbInf.maxCatalogNameLen, sizeof(dbInf.maxCatalogNameLen), &cb);
+		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
+		{
+			DispAllErrors(m_henv, m_hdbc);
+			if (failOnDataTypeUnsupported)
+				return false;
+		}
+
+		retcode = SQLGetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &dbInf.maxSchemaNameLen, sizeof(dbInf.maxSchemaNameLen), &cb);
+		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
+		{
+			DispAllErrors(m_henv, m_hdbc);
+			if (failOnDataTypeUnsupported)
+				return false;
+		}
+
+		retcode = SQLGetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &dbInf.maxTableNameLen, sizeof(dbInf.maxTableNameLen), &cb);
+		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
+		{
+			DispAllErrors(m_henv, m_hdbc);
+			if (failOnDataTypeUnsupported)
+				return false;
+		}
+
 #ifdef DBDEBUG_CONSOLE
 		std::wcout << L"***** DATA SOURCE INFORMATION *****" << std::endl;
 		std::wcout << L"SERVER Name: " << dbInf.serverName << std::endl;
@@ -3113,8 +3137,8 @@ namespace exodbc
 		{
 			if(first)
 			{
-				GetData( 1, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_catalog,  128+1, &cb);
-				GetData( 2, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_schema,   128+1, &cb);
+				GetData( 1, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_catalog,  DB_MAX_CATALOG_NAME_LEN+1, &cb);
+				GetData( 2, SQL_C_WXCHAR,   (UCHAR*)  pDbInf->m_schema,   DB_MAX_SCHEMA_NAME_LEN+1, &cb);
 				first = false;
 			}
 

@@ -187,8 +187,8 @@ namespace exodbc
 
 		bool          Initialize();
 
-		wchar_t			m_catalog[128+1];
-		wchar_t			m_schema[128+1];
+		wchar_t			m_catalog[DB_MAX_CATALOG_NAME_LEN+1];
+		wchar_t			m_schema[DB_MAX_SCHEMA_NAME_LEN+1];
 //		int				m_numTables;           // How many tables does this database have
 		std::vector<DbCatalogTable> m_tables;
 //		DbCatalogTable*	m_pTableInf;           // pTableInf = new wxDbTableInf[numTables];
@@ -242,6 +242,9 @@ namespace exodbc
 			UDWORD staticSensitivity;                        // Indicates if additions, deletions and updates can be detected
 			UWORD  txnCapable;                               // Indicates if the data source supports transactions
 			UDWORD loginTimeout;                             // Number seconds to wait for a login request
+			SQLUSMALLINT  maxCatalogNameLen;					// Max length of a catalog name. Can be 0 if no limit, or limit is unknown
+			SQLUSMALLINT  maxSchemaNameLen;						// Max length of a schema name. Can be 0 if no limit, or limit is unknown
+			SQLUSMALLINT  maxTableNameLen;						// Max length of a table name. Can be 0 if no limit, or limit is unknown
 		} dbInf;
 
 	public:
