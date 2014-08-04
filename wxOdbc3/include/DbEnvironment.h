@@ -65,18 +65,6 @@ namespace exodbc
 		std::wstring m_description;
 	};
 
-	struct EXODBCAPI SErrorInfo
-	{
-		SQLWCHAR		SqlState[5 + 1];
-		SQLINTEGER		NativeError;
-		std::wstring	Msg;
-		friend std::wostream& operator<< (std::wostream &out, const SErrorInfo& ei);
-		friend std::ostream& operator<<(std::ostream& os, const SErrorInfo& ei);
-	
-	};
-
-	std::string w2s(const std::wstring& w);
-
 //	std::ostream& operator<< (std::ostream& stream, const SErrorInfo& ei) { stream << L"foo"; return stream; };
 
 	// Classes

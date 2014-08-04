@@ -85,6 +85,33 @@ namespace exodbc
 
 	// Structs
 	// -------
+
+	/*!
+	* \brief Store error-information from odbc
+	* 
+	*/
+	struct EXODBCAPI SErrorInfo
+	{
+		SQLWCHAR		SqlState[5 + 1];
+		SQLINTEGER		NativeError;
+		std::wstring	Msg;
+		friend std::wostream& operator<< (std::wostream &out, const SErrorInfo& ei);
+		friend std::ostream& operator<<(std::ostream& os, const SErrorInfo& ei);
+	};
+
+	
+	/*!
+	 * \brief Very ugly conversion of small to wide - DO NOT USE, see Ticket #44
+	 * 
+	 * Transforms from wide to small by simple taking the char-values. Remove as soon as #44 is done.
+	 * \param const std::wstring& w
+	 * \return std::string
+	*/
+	std::string w2s(const std::wstring& w);
+
+	// Enums
+	// -----
+
 	// ODBC Error codes (derived from ODBC SqlState codes)
 	enum wxODBC_ERRORS
 	{
