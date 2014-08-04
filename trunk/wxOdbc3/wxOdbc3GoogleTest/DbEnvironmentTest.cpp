@@ -51,17 +51,14 @@ namespace exOdbcTest
 		DbEnvironment* pEnv_v2 = new DbEnvironment();
 		DbEnvironment* pEnv_v3 = new DbEnvironment();
 		DbEnvironment* pEnv_v3_80 = new DbEnvironment();
-		DbEnvironment* pEnv_vInvalid = new DbEnvironment();
 		
-		pEnv_v2->SetOdbcVersion(SQL_OV_ODBC2);
-		pEnv_v3->SetOdbcVersion(SQL_OV_ODBC3);
-		pEnv_v3_80->SetOdbcVersion(SQL_OV_ODBC3_80);
+		pEnv_v2->SetOdbcVersion(OV_2);
+		pEnv_v3->SetOdbcVersion(OV_3);
+		pEnv_v3_80->SetOdbcVersion(OV_3_8);
 
 		EXPECT_TRUE(pEnv_v2->AllocHenv());
 		EXPECT_TRUE(pEnv_v3->AllocHenv());
 		EXPECT_TRUE(pEnv_v3_80->AllocHenv());
-
-		EXPECT_FALSE(pEnv_vInvalid->SetOdbcVersion(123445));
 
 		EXPECT_EQ(SQL_OV_ODBC2, pEnv_v2->GetOdbcVersion());
 		EXPECT_EQ(SQL_OV_ODBC3, pEnv_v3->GetOdbcVersion());
@@ -70,7 +67,6 @@ namespace exOdbcTest
 		delete pEnv_v2;
 		delete pEnv_v3;
 		delete pEnv_v3_80;
-		delete pEnv_vInvalid;
 
 	}
 

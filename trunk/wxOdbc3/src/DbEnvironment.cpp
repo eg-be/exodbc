@@ -82,7 +82,7 @@ namespace exodbc
 		if (m_freeHenvOnDestroy && m_henv)
 			FreeHenv();
 
-		m_requestedOdbcVersion = SQL_OV_ODBC2;
+		m_requestedOdbcVersion = OV_2;
 		m_henv = 0;
 		m_dsn[0] = 0;
 		m_uid[0] = 0;
@@ -110,7 +110,7 @@ namespace exodbc
 		// If we initialize using odbc3 we will fail:  See Ticket # 17
 		//if (SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &Henv) != SQL_SUCCESS)
 
-		if(m_requestedOdbcVersion >= SQL_OV_ODBC3)
+		if(m_requestedOdbcVersion >= OV_3)
 		{
 			if(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv) != SQL_SUCCESS)
 			{
@@ -119,9 +119,9 @@ namespace exodbc
 			}
 			// I dont know why we cannot use the value stored in m_requestedOdbcVersion. It just works with the constants
 			SQLRETURN ret;
-			if(m_requestedOdbcVersion == SQL_OV_ODBC3)
+			if(m_requestedOdbcVersion == OV_3)
 				ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
-			else if(m_requestedOdbcVersion == SQL_OV_ODBC3_80)
+			else if(m_requestedOdbcVersion == OV_3_8)
 				ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
 			else
 			{
@@ -198,29 +198,13 @@ namespace exodbc
 	}  // wxDbConnectInf::SetConnectionStr()
 
 
-	bool DbEnvironment::SetOdbcVersion(int version)
+	bool DbEnvironment::SetOdbcVersion(OdbcVersion version)
 	{
-		// TODO: This never worked. Its odbc 3. See Ticket # 17
 		// Must be set before we've allocated a handle
 		exASSERT(m_henv == NULL);
 
-		if( ! (version == SQL_OV_ODBC2 || version == SQL_OV_ODBC3 || version == SQL_OV_ODBC3_80))
-		{
-			return false;
-		}
 		m_requestedOdbcVersion = version;
 		return true;
-
-		//SQLINTEGER v = version;
-		//SQLRETURN ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &v, NULL);
-		//if(ret == SQL_SUCCESS)
-		//	return true;
-		//SQLWCHAR sqlState[5 + 1];
-		//SQLINTEGER nativeErr;
-		//SQLWCHAR msg[256 + 1];
-		//SQLSMALLINT msgLength;
-		//ret = SQLGetDiagRec(SQL_HANDLE_ENV, m_henv, 1, sqlState, &nativeErr, msg, 256, &msgLength);
-		//return false;
 	}
 
 
@@ -251,18 +235,27 @@ namespace exodbc
 	}
 
 
-	int DbEnvironment::GetOdbcVersion()
+	OdbcVersion DbEnvironment::GetOdbcVersion()
 	{
-		int value;
+		unsigned long value = 0;
 		SQLRETURN ret = SQLGetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
 		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to read SQL_ATTR_ODBC_VERSION";
-			GetLastError();
-			return 0;
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to read SQL_ATTR_ODBC_VERSION: " << GetLastError();
+			return OV_UNKNOWN;
 		}
 
-		return value;
+		switch(value)
+		{
+		case SQL_OV_ODBC2:
+			return OV_2;
+		case SQL_OV_ODBC3:
+			return OV_3;
+		case SQL_OV_ODBC3_80:
+			return OV_3_8;
+		}
+
+		return OV_UNKNOWN;
 	}
 
 	vector<SDataSource> DbEnvironment::ListDataSources(ListMode mode /* = All */)
