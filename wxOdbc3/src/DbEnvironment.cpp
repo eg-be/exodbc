@@ -231,6 +231,7 @@ namespace exodbc
 		}
 
 		ei.Msg = msg;
+		delete[] msg;
 		return ei;
 	}
 
