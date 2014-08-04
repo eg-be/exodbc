@@ -330,30 +330,5 @@ namespace exodbc
 
 	// Interfaces
 	// ----------
-	std::wostream& operator<< (std::wostream &out, const SErrorInfo& ei)
-	{
-		out << L"SQLSTATE " << ei.SqlState << L"; Native Error: " << ei.NativeError << L"; " << ei.Msg.c_str();
-		return out;
-	}
 
-	std::ostream& operator<< (std::ostream &out, const SErrorInfo& ei)
-	{
-
-		out << "SQLSTATE " << w2s(ei.SqlState) << "; Native Error: " << ei.NativeError << "; " << w2s(ei.Msg);
-		return out;
-	}
-
-	// TODO: see http://stackoverflow.com/questions/22984225/boost-log-ignores-overloaded-stream-insertion-operator
-	std::string w2s(const std::wstring& w)
-	{
-		std::stringstream ss;
-
-		for(size_t i = 0; i < w.length(); i++)
-		{
-			char c = (char) w[i];
-			ss << c;
-		}
-
-		return ss.str();
-	}
 }
