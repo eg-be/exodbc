@@ -111,6 +111,13 @@ namespace exodbc
 
 	// Enums
 	// -----
+	enum OdbcVersion
+	{
+		OV_UNKNOWN = 0,
+		OV_2 = 2UL,
+		OV_3 = 3UL,
+		OV_3_8 = 380UL
+	};
 
 	// ODBC Error codes (derived from ODBC SqlState codes)
 	enum wxODBC_ERRORS

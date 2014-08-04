@@ -130,8 +130,8 @@ namespace exodbc
 		void             SetFileType(const std::wstring &fileType)  { m_fileType      = fileType; }
 		void             SetDefaultDir(const std::wstring &defDir)  { m_defaultDir    = defDir;   }
 
-		bool			SetOdbcVersion(int version);		
-		int				GetOdbcVersion();
+		bool			SetOdbcVersion(OdbcVersion version);		
+		OdbcVersion		GetOdbcVersion();
 
 		enum ListMode { All, System, User };
 		std::vector<SDataSource> ListDataSources(ListMode mode = All);
@@ -140,7 +140,7 @@ namespace exodbc
 		bool m_freeHenvOnDestroy;
 		bool m_useConnectionStr;
 
-		int m_requestedOdbcVersion;							// This must be SQL_OV_ODBC2, SQL_OV_ODBC3 or SQL_OV_ODBC3_80
+		OdbcVersion m_requestedOdbcVersion;					// This must be SQL_OV_ODBC2, SQL_OV_ODBC3 or SQL_OV_ODBC3_80
 
 		HENV m_henv;
 		wchar_t m_dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
