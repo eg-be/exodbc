@@ -94,7 +94,7 @@ namespace exodbc
 		SErrorInfo		GetLastError();
 
 		bool             AllocHenv();
-		void             FreeHenv();
+		bool             FreeHenv();
 
 		// Accessors
 		const HENV&		GetHenv()          { return m_henv; }

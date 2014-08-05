@@ -106,41 +106,33 @@ namespace exodbc
 		exASSERT(!m_henv);
 
 		// Initialize the ODBC Environment for Database Operations
-
-		// If we initialize using odbc3 we will fail:  See Ticket # 17
-		//if (SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &Henv) != SQL_SUCCESS)
-
-		if(m_requestedOdbcVersion >= OV_3)
+		if(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv) != SQL_SUCCESS)
 		{
-			if(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv) != SQL_SUCCESS)
-			{
-				BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocHandle (Odbc v3.x): " << GetLastError();
-				return false;
-			}
-			// I dont know why we cannot use the value stored in m_requestedOdbcVersion. It just works with the constants
-			SQLRETURN ret;
-			if(m_requestedOdbcVersion == OV_3)
-				ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
-			else if(m_requestedOdbcVersion == OV_3_8)
-				ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
-			else
-			{
-				BOOST_LOG_TRIVIAL(debug) << L"Unknown ODBC Version value: " << m_requestedOdbcVersion;
-				return false;
-			}
-			if(ret != SQL_SUCCESS)
-			{
-				BOOST_LOG_TRIVIAL(debug) << L"Failed to set ODBC Version of SQL Environment to " << m_requestedOdbcVersion << L": " << GetLastError();
-				return false;
-			}
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocHandle (Odbc v3.x): " << GetLastError();
+			return false;
 		}
-		else
+		// I dont know why we cannot use the value stored in m_requestedOdbcVersion. It just works with the constants
+		SQLRETURN ret;
+		switch(m_requestedOdbcVersion)
 		{
-			if (SQLAllocEnv(&m_henv) != SQL_SUCCESS)
-			{
-				BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocEnv (Odbc v2.x)";
-				return false;
-			}
+		case OV_2:
+			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC2, NULL);
+			break;
+		case OV_3:
+			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
+			break;
+		case OV_3_8:
+			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
+			break;
+		default:
+			BOOST_LOG_TRIVIAL(debug) << L"Unknown ODBC Version value: " << m_requestedOdbcVersion;
+			return false;
+		}
+
+		if(ret != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to set ODBC Version of SQL Environment to " << m_requestedOdbcVersion << L": " << GetLastError();
+			return false;
 		}
 
 		m_freeHenvOnDestroy = true;
@@ -149,15 +141,25 @@ namespace exodbc
 	}  // wxDbConnectInf::AllocHenv()
 
 
-	void DbEnvironment::FreeHenv()
+	bool DbEnvironment::FreeHenv()
 	{
 		exASSERT(m_henv);
 
+		SQLRETURN ret = SQL_SUCCESS;
+
 		if (m_henv)
-			SQLFreeEnv(m_henv);
+		{
+			ret = SQLFreeHandle(SQL_HANDLE_ENV, m_henv);
+		}
+		if(ret != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to free env-handle for odbc-version " << m_requestedOdbcVersion << L": " << GetLastError();
+		}
 
 		m_henv = 0;
 		m_freeHenvOnDestroy = false;
+
+		return ret == SQL_SUCCESS;
 
 	}  // wxDbConnectInf::FreeHenv()
 

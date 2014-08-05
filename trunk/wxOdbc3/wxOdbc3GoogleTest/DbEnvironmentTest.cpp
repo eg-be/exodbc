@@ -67,7 +67,32 @@ namespace exOdbcTest
 		delete pEnv_v2;
 		delete pEnv_v3;
 		delete pEnv_v3_80;
+	}
 
+
+	TEST_P(DbEnvironmentTest, FreeHenv)
+	{
+		DbEnvironment* pEnv_v2 = new DbEnvironment();
+		DbEnvironment* pEnv_v3 = new DbEnvironment();
+		DbEnvironment* pEnv_v3_80 = new DbEnvironment();
+
+		pEnv_v2->SetOdbcVersion(OV_2);
+		pEnv_v3->SetOdbcVersion(OV_3);
+		pEnv_v3_80->SetOdbcVersion(OV_3_8);
+
+		EXPECT_TRUE(pEnv_v2->AllocHenv());
+		EXPECT_TRUE(pEnv_v3->AllocHenv());
+		EXPECT_TRUE(pEnv_v3_80->AllocHenv());
+
+		EXPECT_TRUE(pEnv_v2->FreeHenv());
+		EXPECT_TRUE(pEnv_v3->FreeHenv());
+		EXPECT_TRUE(pEnv_v3_80->FreeHenv());
+		
+		// TODO: Test to test if we fail (we do so) if there are still open databases on that handle?
+
+		delete pEnv_v2;
+		delete pEnv_v3;
+		delete pEnv_v3_80;
 	}
 
 	TEST_P(DbEnvironmentTest, ListDataSources)

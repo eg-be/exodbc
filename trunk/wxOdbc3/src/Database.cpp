@@ -229,8 +229,12 @@ namespace exodbc
 		m_silent = true;
 
 		// Allocate a data source connection handle
-		if (SQLAllocConnect(m_henv, &m_hdbc) != SQL_SUCCESS)
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, m_henv, &m_hdbc);
+		if(ret != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"Failed";
 			DispAllErrors(m_henv);
+		}
 
 		// Initialize the db status flag
 		DB_STATUS = 0;
@@ -1456,8 +1460,12 @@ namespace exodbc
 			DispAllErrors(m_henv, m_hdbc);
 
 		// Free the connection to the datasource
-		if (SQLFreeConnect(m_hdbc) != SQL_SUCCESS)
-			DispAllErrors(m_henv, m_hdbc);
+
+		if (SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc) != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to free DBC-Handle: ";
+			DispAllErrors(m_henv);
+		}
 
 		// There should be zero Ctable objects still connected to this db object
 		exASSERT(nTables == 0);
