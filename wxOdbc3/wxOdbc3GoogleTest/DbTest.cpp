@@ -51,8 +51,12 @@ namespace exOdbcTest
 
 	void DbTest::TearDown()
 	{
-		delete m_pConnectInf;
-		delete m_pDb;
+		if(m_pDb)
+			delete m_pDb;
+
+		if(m_pConnectInf)
+			delete m_pConnectInf;
+
 		m_pConnectInf = NULL;
 		m_pDb = NULL;
 	}
@@ -108,6 +112,26 @@ namespace exOdbcTest
 		}
 	}
 
+
+	TEST_P(DbTest, OpenOdbc3)
+	{
+		DbEnvironment env;
+		ASSERT_TRUE(env.SetOdbcVersion(OV_3));
+		ASSERT_TRUE(env.AllocHenv());
+		HENV henv = env.GetHenv();
+		ASSERT_TRUE(henv != NULL);
+
+		Database db(henv);
+		EXPECT_TRUE(db.GetHDBC() != NULL);
+
+		//ASSERT_TRUE(m_pConnectInf->SetOdbcVersion(OV_3));
+		//HENV henv = m_pConnectInf->GetHenv();
+		//ASSERT_TRUE(henv  != 0);
+		//m_pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		//ASSERT_TRUE(m_pDb->Open(m_pConnectInf));
+
+		db.Close();
+	}
 
 	TEST_P(DbTest, GetCatalog)
 	{
