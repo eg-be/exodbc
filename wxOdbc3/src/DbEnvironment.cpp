@@ -130,16 +130,22 @@ namespace exodbc
 		if (m_henv)
 		{
 			ret = SQLFreeHandle(SQL_HANDLE_ENV, m_henv);
-			m_henv = NULL;
-			m_freeHenvOnDestroy = false;
-		}
-		if(ret != SQL_SUCCESS)
-		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to free env-handle: " << GetLastEnvError(m_henv);
+			if(ret != SQL_SUCCESS)
+			{
+				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+				if(ret == SQL_ERROR)
+					BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_ENV (return code was SQL_ERROR, handle is still valid): " << GetLastEnvError(m_henv);
+				else
+					BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_ENV (return code was " << ret << L", handle is invalid)";
+			}
+			if(ret != SQL_ERROR)
+			{
+				m_freeHenvOnDestroy = false;
+				m_henv = NULL;
+			}
 		}
 
 		return ret == SQL_SUCCESS;
-
 	}
 
 
