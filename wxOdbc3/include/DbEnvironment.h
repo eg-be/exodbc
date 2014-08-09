@@ -80,8 +80,11 @@ namespace exodbc
 	*/
 	class EXODBCAPI DbEnvironment
 	{
-	public:
+	private:
+		// Prevent copies. We would mess up the env-handle.
+		DbEnvironment(const DbEnvironment& other) {};
 
+	public:
 		/*!
 		 * \fn	DbEnvironment::DbEnvironment();
 		 *
