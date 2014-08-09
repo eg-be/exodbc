@@ -92,6 +92,12 @@ namespace exodbc
 	*/
 	struct EXODBCAPI SErrorInfo
 	{
+		SErrorInfo()
+		{
+			SqlState[0] = 0;
+			NativeError = 0;
+		}
+
 		SQLWCHAR		SqlState[5 + 1];
 		SQLINTEGER		NativeError;
 		std::wstring	Msg;
@@ -108,6 +114,8 @@ namespace exodbc
 	 * \return std::string
 	*/
 	std::string w2s(const std::wstring& w);
+
+	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = NULL, SQLHANDLE hDbc = NULL, SQLHANDLE hStmt = NULL);
 
 	// Enums
 	// -----

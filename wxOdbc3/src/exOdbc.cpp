@@ -12,6 +12,8 @@
 #include "exOdbc.h"
 
 // Same component headers
+#include "Helpers.h"
+
 // Other headers
 
 namespace exodbc {
@@ -49,5 +51,63 @@ namespace exodbc {
 		}
 
 		return ss.str();
+	}
+
+	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = NULL */, SQLHANDLE hDbc /* = NULL */, SQLHANDLE hStmt /* = NULL */)
+	{
+		exASSERT(hEnv != NULL || hDbc != NULL || hStmt != NULL);
+
+
+		std::vector<SErrorInfo> errors;
+		SQLHANDLE handle = NULL;
+		SQLSMALLINT handleType = NULL;
+
+		for(int i = 0; i < 3; i++)
+		{
+			if(i == 0 && hEnv)
+			{
+				handle = hEnv;
+				handleType = SQL_HANDLE_ENV;
+			}
+			else if(i == 1 && hDbc)
+			{
+				handle = hDbc;
+				handleType = SQL_HANDLE_DBC;
+			}
+			else if(i == 2 && hStmt)
+			{
+				handle = hStmt;
+				handleType = SQL_HANDLE_STMT;
+			}
+			else
+				continue;
+
+			SQLSMALLINT recNr = 1;
+			SQLRETURN ret = SQL_SUCCESS;
+
+			while(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
+			{
+				SErrorInfo errInfo;
+				SQLWCHAR errMsg[SQL_MAX_MESSAGE_LENGTH + 1];
+				errMsg[0] = 0;
+				SQLSMALLINT cb = 0;
+				ret = SQLGetDiagRec(handleType, handle, recNr, errInfo.SqlState, &errInfo.NativeError, errMsg, SQL_MAX_MESSAGE_LENGTH + 1, &cb);
+				if(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
+				{
+					errInfo.Msg = errMsg;
+					errors.push_back(errInfo);
+					if(ret == SQL_SUCCESS_WITH_INFO)
+						BOOST_LOG_TRIVIAL(warning) << L"Error msg from recNr " << recNr << L" got truncated";
+				}
+				++recNr;
+			}
+
+			if(ret != SQL_NO_DATA)
+			{
+				BOOST_LOG_TRIVIAL(warning) << L"SQLGetDiagRec did not end with SQL_NO_DATE (100) but with " << ret;
+			}
+		}
+
+		return errors;
 	}
 }
