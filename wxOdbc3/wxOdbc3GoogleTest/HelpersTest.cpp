@@ -54,6 +54,7 @@ namespace exOdbcTest
 		EXPECT_FALSE(SQL_NULL_HDBC == hDbc);
 
 		// Allocating from a hDbc handle should not work
+		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings"; 
 		SQLHANDLE hCopy = hDbc;
 		SQLHANDLE hFail = AllocDbcHandle(hCopy);
 		EXPECT_EQ(SQL_NULL_HDBC, hFail);
@@ -70,6 +71,7 @@ namespace exOdbcTest
 		ASSERT_FALSE(SQL_NULL_HDBC == hDbc);
 
 		// freeing twice should not work
+		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings";
 		SQLHANDLE hCopy = hDbc;
 		EXPECT_TRUE(FreeDbcHandle(hDbc));
 		
