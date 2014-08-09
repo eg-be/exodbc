@@ -83,18 +83,18 @@ namespace exodbc
 	public:
 
 		DbEnvironment();
-		DbEnvironment(HENV henv, const std::wstring& dsn, const std::wstring& userID = std::wstring(),
-			const std::wstring& password = std::wstring(), const std::wstring& defaultDir = std::wstring(),
-			const std::wstring& description = std::wstring(), const std::wstring& fileType = std::wstring());
+		DbEnvironment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring());
+		DbEnvironment(const std::wstring& connectionString);
 
 		~DbEnvironment();
 
-		bool             Initialize();
+		bool			Initialize();
 
 		SErrorInfo		GetLastError();
 
-		bool             AllocHenv();
-		bool             FreeHenv();
+		bool			AllocHenv();
+		bool			FreeHenv();
+		bool			HaveHenv()			{ return m_henv != NULL; };
 
 		// Accessors
 		const HENV&		GetHenv()          { return m_henv; }
@@ -110,25 +110,11 @@ namespace exodbc
 		const wchar_t*	GetConnectionStr() { return m_connectionStr; }
 		bool			UseConnectionStr() { return m_useConnectionStr; }
 
-		const wchar_t*	GetDescription()   { return m_description.c_str(); }
-		const wchar_t*	GetFileType()      { return m_fileType.c_str(); }
-		const wchar_t*	GetDefaultDir()    { return m_defaultDir.c_str(); }
+		void			SetDsn(const std::wstring& dsn);
+		void			SetUserID(const std::wstring& userID);
+		void			SetPassword(const std::wstring &password);
 
-		void             SetHenv(const HENV henv)               { m_henv = henv; }
-
-		void             SetDsn(const std::wstring &dsn);
-
-		void             SetUserID(const std::wstring &userID);
-		void             SetUid(const std::wstring &uid)            { SetUserID(uid); }
-
-		void             SetPassword(const std::wstring &password);
-		void             SetAuthStr(const std::wstring &authstr)    { SetPassword(authstr); }
-
-		void             SetConnectionStr(const std::wstring &connectStr);
-
-		void             SetDescription(const std::wstring &desc)   { m_description   = desc;     }
-		void             SetFileType(const std::wstring &fileType)  { m_fileType      = fileType; }
-		void             SetDefaultDir(const std::wstring &defDir)  { m_defaultDir    = defDir;   }
+		void			SetConnectionStr(const std::wstring &connectStr);
 
 		bool			SetOdbcVersion(OdbcVersion version);		
 		OdbcVersion		GetOdbcVersion();
@@ -140,20 +126,13 @@ namespace exodbc
 		bool m_freeHenvOnDestroy;
 		bool m_useConnectionStr;
 
-		OdbcVersion m_requestedOdbcVersion;					// This must be SQL_OV_ODBC2, SQL_OV_ODBC3 or SQL_OV_ODBC3_80
+		OdbcVersion m_requestedOdbcVersion;					// Sets to SQL_OV_ODBC2, SQL_OV_ODBC3 or SQL_OV_ODBC3_80, see AllocHenv
 
 		HENV m_henv;
 		wchar_t m_dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
 		wchar_t m_uid[SQL_MAX_USER_NAME_LEN+1];               // User ID
 		wchar_t m_authStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)
 		wchar_t m_connectionStr[SQL_MAX_CONNECTSTR_LEN+1];    // Connection string (password)
-
-		std::wstring m_description;                              // Not sure what the max length is
-		std::wstring m_fileType;                                 // Not sure what the max length is
-
-		// Optionals needed for some databases like dBase
-		std::wstring m_defaultDir;                               // Directory that db file resides in
-
 
 	};  // class DbEnvironment
 }

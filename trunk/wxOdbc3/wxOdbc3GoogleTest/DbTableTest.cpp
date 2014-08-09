@@ -41,7 +41,7 @@ namespace exOdbcTest
 		//// Called for every unit-test
 		m_odbcInfo = GetParam();
 		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		m_pConnectInf = new DbEnvironment(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+		m_pConnectInf = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
 		m_pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);

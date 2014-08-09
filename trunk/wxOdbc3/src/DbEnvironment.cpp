@@ -25,14 +25,39 @@ namespace exodbc
 
 	// Construction
 	// -------------
-	/********** wxDbConnectInf Constructor - form 1 **********/
 	DbEnvironment::DbEnvironment()
 	{
 		m_henv = 0;
 		m_freeHenvOnDestroy = false;
 
 		Initialize();
-	}  // Constructor
+	} 
+
+	DbEnvironment::DbEnvironment(const std::wstring& dsn, const std::wstring& userID, const std::wstring& password)
+		: m_henv(NULL)
+		, m_freeHenvOnDestroy(false)
+	{
+		Initialize();
+		AllocHenv(); // note: might fail
+
+		SetDsn(dsn);
+		SetUserID(userID);
+		SetPassword(password);
+	}
+
+	DbEnvironment::DbEnvironment(const std::wstring& connectionString)
+		: m_henv(NULL)
+		, m_freeHenvOnDestroy(false)
+	{
+		m_henv = 0;
+		m_freeHenvOnDestroy = false;
+
+		Initialize();
+		AllocHenv(); // note: might fail
+
+		SetConnectionStr(connectionString);
+	}
+
 
 	// Destructor
 	// -----------
@@ -40,47 +65,18 @@ namespace exodbc
 	{
 		if (m_freeHenvOnDestroy)
 		{
-			FreeHenv();
+			FreeHenv(); // note: might fail
 		}
-	}  // wxDbConnectInf Destructor
+	}
 
 	// Implementation
 	// --------------
-
-
-
-	/********** wxDbConnectInf Constructor - form 2 **********/
-	DbEnvironment::DbEnvironment(HENV henv, const std::wstring &dsn, const std::wstring &userID,
-		const std::wstring &password, const std::wstring &defaultDir,
-		const std::wstring &fileType, const std::wstring &description)
-	{
-		m_henv = 0;
-		m_freeHenvOnDestroy = false;
-
-		Initialize();
-
-		if (henv)
-			SetHenv(henv);
-		else
-			AllocHenv();
-
-		SetDsn(dsn);
-		SetUserID(userID);
-		SetPassword(password);
-		SetDescription(description);
-		SetFileType(fileType);
-		SetDefaultDir(defaultDir);
-	}  // wxDbConnectInf Constructor
-
-
-
-	/********** wxDbConnectInf::Initialize() **********/
 	bool DbEnvironment::Initialize()
 	{
-		m_freeHenvOnDestroy = false;
+		exASSERT(m_henv == NULL);
 
-		if (m_freeHenvOnDestroy && m_henv)
-			FreeHenv();
+		m_henv = NULL;
+		m_freeHenvOnDestroy = false;
 
 		m_requestedOdbcVersion = OV_2;
 		m_henv = 0;
@@ -88,14 +84,11 @@ namespace exodbc
 		m_uid[0] = 0;
 		m_authStr[0] = 0;
 		m_connectionStr[0] = 0;
-		m_description.empty();
-		m_fileType.empty();
-		m_defaultDir.empty();
 
 		m_useConnectionStr = false;
 
 		return true;
-	}  // wxDbConnectInf::Initialize()
+	}
 
 
 	/********** wxDbConnectInf::AllocHenv() **********/
@@ -108,10 +101,11 @@ namespace exodbc
 		// Initialize the ODBC Environment for Database Operations
 		if(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv) != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocHandle (Odbc v3.x): " << GetLastError();
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocHandle: " << GetLastError();
 			return false;
 		}
 		// I dont know why we cannot use the value stored in m_requestedOdbcVersion. It just works with the constants
+		// because the SQLPOINTER is interpreted as an int value.. for int-attrs..
 		SQLRETURN ret;
 		switch(m_requestedOdbcVersion)
 		{
@@ -138,7 +132,7 @@ namespace exodbc
 		m_freeHenvOnDestroy = true;
 
 		return true;
-	}  // wxDbConnectInf::AllocHenv()
+	}
 
 
 	bool DbEnvironment::FreeHenv()
@@ -150,18 +144,17 @@ namespace exodbc
 		if (m_henv)
 		{
 			ret = SQLFreeHandle(SQL_HANDLE_ENV, m_henv);
+			m_henv = NULL;
+			m_freeHenvOnDestroy = false;
 		}
 		if(ret != SQL_SUCCESS)
 		{
 			BOOST_LOG_TRIVIAL(debug) << L"Failed to free env-handle for odbc-version " << m_requestedOdbcVersion << L": " << GetLastError();
 		}
 
-		m_henv = 0;
-		m_freeHenvOnDestroy = false;
-
 		return ret == SQL_SUCCESS;
 
-	}  // wxDbConnectInf::FreeHenv()
+	}
 
 
 	void DbEnvironment::SetDsn(const std::wstring &dsn)
@@ -296,7 +289,8 @@ namespace exodbc
 		}while(res == SQL_SUCCESS || res == SQL_SUCCESS_WITH_INFO);
 		if(res != SQL_NO_DATA)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"ListDataSources did not end with SQL_NO_DATA when determining max desc buffer length";
+			BOOST_LOG_TRIVIAL(warning) << L"ListDataSources did not end with SQL_NO_DATA (" << SQL_NO_DATA << L") but with " << res 
+				<< L" when determining max desc buffer length";
 		}
 		// Now fetch with description
 		wchar_t* descBuffer = new wchar_t[maxDescLength + 1];
@@ -317,7 +311,8 @@ namespace exodbc
 		}while(res == SQL_SUCCESS || res == SQL_SUCCESS_WITH_INFO);
 		if(res != SQL_NO_DATA)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"ListDataSources did not end with SQL_NO_DATA when listening DataSources";
+			BOOST_LOG_TRIVIAL(warning) << L"ListDataSources did not end with SQL_NO_DATA (" << SQL_NO_DATA << L") but with " << res 
+				<< L" when listening DataSources";
 		}
 
 		delete[] descBuffer;
