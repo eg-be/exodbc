@@ -85,10 +85,15 @@ enum enumDummy {enumDum1};
 #endif
 
 
+// Forward declarations
+// --------------------
+namespace exOdbcTest
+{
+	class DbTest;
+}
+
 namespace exodbc
 {
-	// Forward declarations
-	// --------------------
 	class DbEnvironment;
 	class ColumnFormatter;
 	class Database;
@@ -201,6 +206,8 @@ namespace exodbc
 
 	class EXODBCAPI Database
 	{
+	public:
+
 		// The following structure contains database information gathered from the
 		// datasource when the datasource is first OpenImpled.
 		struct
@@ -254,7 +261,7 @@ namespace exodbc
 		wchar_t sqlState[20];
 
 		// Public member functions
-		Database(const DbEnvironment& env);
+		Database(const DbEnvironment* const pEnv);
 		Database(const HENV &aHenv, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
 		~Database();
 
@@ -338,7 +345,7 @@ namespace exodbc
 
 	private:
 		// Private member functions
-		void             Initialize();
+		void			Initialize();
 
 		bool			GetDbInfoImpl(bool failOnDataTypeUnsupported = true);
 		bool			GetDataTypeInfoImpl(SWORD fSqlType, SSqlTypeInfo& structSQLTypeInfo);

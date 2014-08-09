@@ -68,6 +68,13 @@ namespace exOdbcTest
 	}
 
 
+	TEST_P(DbTest, OpenFromEnv)
+	{
+		Database db(m_pConnectInf);
+		int p = 3;
+	}
+
+
 	TEST_P(DbTest, Open)
 	{
 		HENV henv = m_pConnectInf->GetHenv();

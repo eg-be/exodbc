@@ -91,6 +91,7 @@
     <ClCompile Include="wxOdbc3GoogleTest\DbTableTest.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\DbTest.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\GenericTestTables.cpp" />
+    <ClCompile Include="wxOdbc3GoogleTest\HelpersTest.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -105,6 +106,7 @@
     <ClInclude Include="wxOdbc3GoogleTest\DbTableTest.h" />
     <ClInclude Include="wxOdbc3GoogleTest\DbTest.h" />
     <ClInclude Include="wxOdbc3GoogleTest\GenericTestTables.h" />
+    <ClInclude Include="wxOdbc3GoogleTest\HelpersTest.h" />
     <ClInclude Include="wxOdbc3GoogleTest\stdafx.h" />
     <ClInclude Include="wxOdbc3GoogleTest\targetver.h" />
     <ClInclude Include="wxOdbc3GoogleTest\TestParams.h" />

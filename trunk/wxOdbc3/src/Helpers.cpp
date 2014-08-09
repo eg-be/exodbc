@@ -132,9 +132,12 @@ namespace exodbc
 
 	SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors)
 	{
-		exASSERT(hEnv);
+		std::vector<SErrorInfo> errs;
+		if(hEnv)
+			errs = GetAllErrors(hEnv);
+		else
+			BOOST_LOG_TRIVIAL(warning) << L"Cannot fetch errors, hEnv is NULL";
 
-		std::vector<SErrorInfo> errs = GetAllErrors(hEnv);
 		totalErrors = errs.size();
 		if(totalErrors > 0)
 			return errs[0];
@@ -145,9 +148,12 @@ namespace exodbc
 
 	SErrorInfo GetLastDbcError(SQLHANDLE hDbc, SQLSMALLINT& totalErrors)
 	{
-		exASSERT(hDbc);
+		std::vector<SErrorInfo> errs;
+		if(hDbc)
+			errs = GetAllErrors(NULL, hDbc);
+		else
+			BOOST_LOG_TRIVIAL(warning) << L"Cannot fetch errors, hDbc is NULL";
 
-		std::vector<SErrorInfo> errs = GetAllErrors(NULL, hDbc);
 		totalErrors = errs.size();
 		if(totalErrors > 0)
 			return errs[0];
@@ -158,9 +164,12 @@ namespace exodbc
 
 	SErrorInfo GetLastStmtError(SQLHANDLE hStmt, SQLSMALLINT& totalErrors)
 	{
-		exASSERT(hStmt);
+		std::vector<SErrorInfo> errs;
+		if(hStmt)
+			errs = GetAllErrors(NULL, NULL, hStmt);
+		else
+			BOOST_LOG_TRIVIAL(warning) << L"Cannot fetch errors, hStmt is NULL";
 
-		std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, hStmt);
 		totalErrors = errs.size();
 		if(totalErrors > 0)
 			return errs[0];
@@ -171,16 +180,12 @@ namespace exodbc
 
 	SErrorInfo GetLastEnvError(SQLHANDLE hEnv)
 	{
-		exASSERT(hEnv);
-
 		SQLSMALLINT tot = 0;
 		return GetLastEnvError(hEnv, tot);
 	}
 
 	SErrorInfo GetLastDbcError(SQLHANDLE hDbc)
 	{
-		exASSERT(hDbc);
-
 		SQLSMALLINT tot = 0;
 		return GetLastDbcError(hDbc, tot);
 	}
@@ -188,10 +193,47 @@ namespace exodbc
 
 	SErrorInfo GetLastStmtError(SQLHANDLE hStmt)
 	{
-		exASSERT(hStmt);
-
 		SQLSMALLINT tot = 0;
 		return GetLastStmtError(hStmt, tot);
+	}
+
+
+	SQLHANDLE AllocDbcHandle(const SQLHANDLE& hEnv)
+	{
+		exASSERT(hEnv);
+
+		SQLHANDLE handle = NULL;
+
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, hEnv, &handle);
+		if(ret != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(error) << L"Failed to SQLAllocHandle of type SQL_HANDLE_DBC, (return code was " << ret << L"): " << GetLastEnvError(hEnv);
+			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HDESCin case of failure
+			return handle;
+		}
+
+		return handle;
+	}
+
+	bool FreeDbcHandle(SQLHANDLE& hDbc)
+	{
+		exASSERT(hDbc);
+
+		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, hDbc);
+		if(ret != SQL_SUCCESS)
+		{
+			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+			if(ret == SQL_ERROR)
+				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_DBC (return code was SQL_ERROR, handle is still valid): " << GetLastDbcError(hDbc);
+			else
+				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_DBC (return code was " << ret << L", handle is invalid)";
+		}
+		if(ret != SQL_SUCCESS || ret != SQL_ERROR)
+		{
+			hDbc = NULL;
+		}
+
+		return hDbc == NULL;
 	}
 
 }
