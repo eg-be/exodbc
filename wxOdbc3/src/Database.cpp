@@ -504,7 +504,7 @@ namespace exodbc
 		}
 
 		// Set Connection Options
-		if (!SetConnectionOptions())
+		if (!SetConnectionAttributes())
 			return false;
 
 		if (!DetermineDataTypesImpl(failOnDataTypeUnsupported))
@@ -613,79 +613,25 @@ namespace exodbc
 
 
 
-	bool Database::SetConnectionOptions()
+	bool Database::SetConnectionAttributes()
 	{
-		SWORD cb;
-
-		//exASSERT(m_hdbc != SQL_NULL_HDBC);
-		//SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, NULL);
-		//if(ret != SQL_SUCCESS)
-		//{
-		//	BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_AUTOCOMMIT to OFF" << GetLastDbcError(m_hdbc);
-		//}
-
-		//ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, SQL_OPT_TRACE_OFF, NULL);
-		//if(ret != SQL_SUCCESS)
-		//{
-		//	BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_TRACE to OFF" << GetLastDbcError(m_hdbc);
-		//}
-
-		/* retcode = */ SQLSetConnectOption(m_hdbc, SQL_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF);
-		/* retcode = */ SQLSetConnectOption(m_hdbc, SQL_OPT_TRACE, SQL_OPT_TRACE_OFF);
-		//  SQLSetConnectOption(hdbc, SQL_TXN_ISOLATION, SQL_TXN_READ_COMMITTED);  // No dirty reads
-
-		// By default, MS Sql Server closes cursors on commit and rollback.  The following
-		// call to SQLSetConnectOption() is needed to force SQL Server to preserve cursors
-		// after a transaction.  This is a driver specific option and is not part of the
-		// ODBC standard.  Note: this behavior is specific to the ODBC interface to SQL Server.
-		// The database settings don't have any effect one way or the other.
-		if (Dbms() == dbmsMS_SQL_SERVER)
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, NULL);
+		if(ret != SQL_SUCCESS)
 		{
-			const long SQL_PRESERVE_CURSORS = 1204L;
-			const long SQL_PC_ON = 1L;
-			/* retcode = */ SQLSetConnectOption(m_hdbc, SQL_PRESERVE_CURSORS, SQL_PC_ON);
+			BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_AUTOCOMMIT to OFF" << GetLastDbcError(m_hdbc);
 		}
 
-		// Display the connection options to verify them
-#ifdef DBDEBUG_CONSOLE
-		long l;
-		std::wcout << L"****** CONNECTION OPTIONS ******" << std::endl;
-
-		retcode = SQLGetConnectOption(m_hdbc, SQL_AUTOCOMMIT, &l);
-		if (retcode != SQL_SUCCESS)
-			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
-		std::wcout << L"AUTOCOMMIT: " << (l == SQL_AUTOCOMMIT_OFF ? L"OFF" : L"ON") << std::endl;
-
-		retcode = SQLGetConnectOption(m_hdbc, SQL_ODBC_CURSORS, &l);
-		if (retcode != SQL_SUCCESS)
-			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
-		std::wcout << L"ODBC CURSORS: ";
-		switch(l)
+		ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, SQL_OPT_TRACE_OFF, NULL);
+		if(ret != SQL_SUCCESS)
 		{
-		case(SQL_CUR_USE_IF_NEEDED):
-			std::wcout << L"SQL_CUR_USE_IF_NEEDED";
-			break;
-		case(SQL_CUR_USE_ODBC):
-			std::wcout << L"SQL_CUR_USE_ODBC";
-			break;
-		case(SQL_CUR_USE_DRIVER):
-			std::wcout << L"SQL_CUR_USE_DRIVER";
-			break;
+			BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_TRACE to OFF" << GetLastDbcError(m_hdbc);
 		}
-		std::wcout << std::endl;
-
-		retcode = SQLGetConnectOption(m_hdbc, SQL_OPT_TRACE, &l);
-		if (retcode != SQL_SUCCESS)
-			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
-		std::wcout << L"TRACING: " << (l == SQL_OPT_TRACE_OFF ? L"OFF" : L"ON") << std::endl;
-
-		std::wcout << std::endl;
-#endif
 
 		// Completed Successfully
 		return true;
 
-	} // wxDb::SetConnectionOptionsImpl()
+	}
 
 
 	/********** wxDb::getDbInfo() **********/
