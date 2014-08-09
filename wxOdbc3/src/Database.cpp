@@ -616,20 +616,23 @@ namespace exodbc
 	bool Database::SetConnectionAttributes()
 	{
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
+		bool ok = true;
 		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, NULL);
 		if(ret != SQL_SUCCESS)
 		{
 			BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_AUTOCOMMIT to OFF" << GetLastDbcError(m_hdbc);
+			ok = false;
 		}
 
 		ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, SQL_OPT_TRACE_OFF, NULL);
 		if(ret != SQL_SUCCESS)
 		{
 			BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_TRACE to OFF" << GetLastDbcError(m_hdbc);
+			ok = false;
 		}
 
 		// Completed Successfully
-		return true;
+		return ok;
 
 	}
 
