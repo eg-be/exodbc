@@ -496,13 +496,12 @@ namespace exodbc
 		*/
 
 		// Allocate a statement handle for the database connection
-		if(SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt) != SQL_SUCCESS)
+		m_hstmt = AllocStmtHandle(m_hdbc);
+		if(m_hstmt == SQL_NULL_HSTMT)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate Stmt-Handle";
-			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
+			BOOST_LOG_TRIVIAL(warning) << L"OpenImpl failed to Allocated Stmt-handle";
+			return false;
 		}
-		//if (SQLAllocStmt(m_hdbc, &m_hstmt) != SQL_SUCCESS)
-		//	return(DispAllErrors(m_henv, m_hdbc));
 
 		// Set Connection Options
 		if (!SetConnectionOptionsImpl())
@@ -1273,10 +1272,9 @@ namespace exodbc
 		// Free statement handle
 		if (m_dbIsOpen)
 		{
-			if(SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt) != SQL_SUCCESS)
+			if(!FreeStmtHandle(m_hstmt))
 			{
-				BOOST_LOG_TRIVIAL(debug) << L"Failed to free Stmt-Handle";
-				DispAllErrors(SQL_NULL_HENV, m_hdbc);
+				BOOST_LOG_TRIVIAL(warning) << L"Close failed to Free Stmt-handle";
 			}
 
 			// Disconnect from the datasource			

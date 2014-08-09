@@ -129,8 +129,29 @@ namespace exodbc
 	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc);
 	extern EXODBCAPI SErrorInfo GetLastStmError(SQLHANDLE hStmt);
 
+	/*!
+	 * \fn	extern EXODBCAPI SQLHANDLE AllocDbcHandle(const SQLHANDLE& hEnv);
+	 *
+	 * \brief	Allocate DBC handle.
+	 *
+	 * \param	hEnv	The ENV-handle.
+	 *
+	 * \return	A DBC-handle or a SQL_NULL_HDBC-handle
+	 */
 	extern EXODBCAPI SQLHANDLE	AllocDbcHandle(const SQLHANDLE& hEnv);
+
+	/*!
+	 * \fn	extern EXODBCAPI bool FreeDbcHandle(SQLHANDLE& hDbc);
+	 *
+	 * \brief	Free DBC handle.
+	 *
+	 * \param [in,out]	hDbc	The DBC-handle.
+	 *
+	 * \return	true if it succeeds, false if it fails. Sets hDbc to SQL_NULL_HDBC if succeeds.
+	 */
 	extern EXODBCAPI bool		FreeDbcHandle(SQLHANDLE& hDbc);
+	extern EXODBCAPI SQLHANDLE	AllocStmtHandle(const SQLHANDLE& hDbc);
+	extern EXODBCAPI bool		FreeStmtHandle(SQLHANDLE& hStmt);
 
 	// Classes
 	// -------
