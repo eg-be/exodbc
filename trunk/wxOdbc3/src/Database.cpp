@@ -287,7 +287,7 @@ namespace exodbc
 	}  // wxDb::ConvertUserIDImpl()
 
 
-	bool Database::DetermineDataTypesImpl(bool failOnDataTypeUnsupported)
+	bool Database::DetermineDataTypes(bool failOnDataTypeUnsupported)
 	{
 		size_t iIndex;
 
@@ -407,10 +407,6 @@ namespace exodbc
 		// SQL_DOUBLE             type name = 'DOUBLE', Precision = 15
 		// SQL_INTEGER            type name = 'LONG', Precision = 10
 
-		// Query the data source for info about itself
-		if (!GetDbInfoImpl(failOnDataTypeUnsupported))
-			return false;
-
 		// --------------- Varchar - (Variable length character string) ---------------
 		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlCharTypes) &&
 			!GetDataTypeInfoImpl(PossibleSqlCharTypes[iIndex], m_typeInfVarchar); ++iIndex)
@@ -507,7 +503,11 @@ namespace exodbc
 		if (!SetConnectionAttributes())
 			return false;
 
-		if (!DetermineDataTypesImpl(failOnDataTypeUnsupported))
+		// Query the data source for info about itself
+		if (!GetDbInfoImpl(failOnDataTypeUnsupported))
+			return false;
+
+		if (!DetermineDataTypes(failOnDataTypeUnsupported))
 			return false;
 
 #ifdef DBDEBUG_CONSOLE
