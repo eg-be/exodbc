@@ -396,7 +396,7 @@ namespace exodbc
 
 		bool			GetDbInfoImpl(bool failOnDataTypeUnsupported = true);
 		bool			GetDataTypeInfoImpl(SWORD fSqlType, SSqlTypeInfo& structSQLTypeInfo);
-		bool			SetConnectionOptions();
+		bool			SetConnectionAttributes();
 		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
 		bool             DetermineDataTypesImpl(bool failOnDataTypeUnsupported);
