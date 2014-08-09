@@ -243,9 +243,6 @@ namespace exodbc
 
 	public:
 
-		void             setCached(bool cached)  { m_dbIsCached = cached; }  // This function must only be called by wxDbGetConnection() and wxDbCloseConnections!!!
-		bool             IsCached() { return m_dbIsCached; }
-
 		bool             GetDataTypeInfo(SWORD fSqlType, SSqlTypeInfo &structSQLTypeInfo)	{ return GetDataTypeInfoImpl(fSqlType, structSQLTypeInfo); }
 
 		// ODBC Error Inf.
@@ -267,7 +264,6 @@ namespace exodbc
 		bool         Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported = true);
 		bool         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr, bool failOnDataTypeUnsupported = true);
 		bool         Open(DbEnvironment* dbConnectInf, bool failOnDataTypeUnsupported = true);
-		bool         Open(Database* copyDb);  // pointer to a wxDb whose connection info should be copied rather than re-queried
 		void         Close();
 		bool         CommitTrans();
 		bool         RollbackTrans();
@@ -354,7 +350,6 @@ namespace exodbc
 
 		// Members
 		bool				m_dbIsOpen;
-		bool				m_dbIsCached;      // Was connection created by caching functions
 		bool				m_dbOpenedWithConnectionString;  // Was the database connection OpenImpled with a connection string
 		std::wstring		m_dsn;             // Data source name
 		std::wstring		m_uid;             // User ID
@@ -400,15 +395,6 @@ namespace exodbc
 		friend class Table;
 
 	};  // Database
-
-
-	// The following routines allow a user to get new database connections, free them
-	// for other code segments to use, or close all of them when the application has
-	// completed.
-	Database  EXODBCAPI *wxDbGetConnection(DbEnvironment *pDbConfig, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
-	bool  EXODBCAPI  wxDbFreeConnection(Database *pDb);
-	void  EXODBCAPI  wxDbCloseConnections();
-	int   EXODBCAPI  wxDbConnectionsInUse();
 
 
 	// Writes a message to the wxLog window (stdout usually) when an internal error
