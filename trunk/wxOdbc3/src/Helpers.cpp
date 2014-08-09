@@ -228,12 +228,12 @@ namespace exodbc
 			else
 				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_DBC (return code was " << ret << L", handle is invalid)";
 		}
-		if(ret != SQL_SUCCESS || ret != SQL_ERROR)
+		if(ret != SQL_ERROR)
 		{
 			hDbc = NULL;
 		}
 
-		return hDbc == NULL;
+		return ret == SQL_SUCCESS;
 	}
 
 }

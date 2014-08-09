@@ -71,7 +71,7 @@ namespace exOdbcTest
 	TEST_P(DbTest, OpenFromEnv)
 	{
 		Database db(m_pConnectInf);
-		int p = 3;
+//		int p = 3;
 	}
 
 
