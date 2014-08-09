@@ -143,21 +143,15 @@ namespace exodbc
 	}  // wxDbTableInf::Initialize()
 
 	Database::Database(const DbEnvironment* const pEnv)
-		: m_dbIsOpen(false)
+		: m_hdbc(SQL_NULL_HDBC)
 	{
-//		exASSERT(pEnv);
+		exASSERT(pEnv);
 
-		//m_hdbc = AllocDbcHandle(pEnv->GetHenv());
-		//FreeDbcHandle(m_hdbc);
-		//m_henv = pEnv->GetHenv();
+		// TODO: We want to remove the reference to the env-handle completely from this class
+		m_henv = pEnv->GetHenv();
 
-//		SQLHANDLE hdbc = AllocDbcHandle(pEnv->GetHenv());
-//		FreeDbcHandle(hdbc);
-//		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, pEnv->GetHenv(), &hdbc);
-//		m_henv = env.GetHenv();
-
-		// Fails because m_henv is not set:
-		// Initialize();
+		Initialize();
+		m_hdbc = AllocDbcHandle(pEnv->GetHenv());
 	}
 
 	/********** wxDb Constructor **********/
@@ -168,6 +162,7 @@ namespace exodbc
 		m_fwdOnlyCursors = FwdOnlyCursors;
 
 		Initialize();
+		m_hdbc = AllocDbcHandle(aHenv);
 	} // wxDb::wxDb()
 
 
@@ -242,14 +237,6 @@ namespace exodbc
 
 		// Error reporting is turned OFF by default
 		m_silent = true;
-
-		// Allocate a data source connection handle
-		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, m_henv, &m_hdbc);
-		if(ret != SQL_SUCCESS)
-		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed";
-			DispAllErrors(m_henv);
-		}
 
 		// Initialize the db status flag
 		DB_STATUS = 0;
