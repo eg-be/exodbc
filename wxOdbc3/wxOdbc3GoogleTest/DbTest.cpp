@@ -71,6 +71,9 @@ namespace exOdbcTest
 	TEST_P(DbTest, OpenFromEnv)
 	{
 		Database db(m_pConnectInf);
+
+		// TODO: We need to fix this need for close
+		db.Close();
 //		int p = 3;
 	}
 
