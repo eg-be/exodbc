@@ -399,7 +399,7 @@ namespace exodbc
 		bool			SetConnectionAttributes();
 		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
-		bool             DetermineDataTypesImpl(bool failOnDataTypeUnsupported);
+		bool             DetermineDataTypes(bool failOnDataTypeUnsupported);
 		bool             OpenImpl(bool failOnDataTypeUnsupported = true);
 
 		// Members
