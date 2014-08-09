@@ -52,7 +52,13 @@ namespace exOdbcTest
 	void DbTest::TearDown()
 	{
 		if(m_pDb)
+		{
+			// Why do we need to commit with DB2? We did not start anything??
+			m_pDb->CommitTrans();
+
+			m_pDb->Close();
 			delete m_pDb;
+		}
 
 		if(m_pConnectInf)
 			delete m_pConnectInf;
@@ -81,6 +87,7 @@ namespace exOdbcTest
 		EXPECT_TRUE(henvFail != NULL);
 		Database* pFailDb = new Database(henvFail, true);
 		EXPECT_FALSE(pFailDb->Open(pFailConnectInf, false));
+		pFailDb->Close();
 		delete pFailDb;
 		delete pFailConnectInf;
 

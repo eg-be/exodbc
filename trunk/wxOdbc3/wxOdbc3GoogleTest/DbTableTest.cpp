@@ -51,7 +51,13 @@ namespace exOdbcTest
 	void DbTableTest::TearDown()
 	{
 		if(m_pDb)
+		{
+			// Why do we need to commit with DB2? We did not start anything??
+			m_pDb->CommitTrans();
+
+			m_pDb->Close();
 			delete m_pDb;
+		}
 		if(m_pConnectInf)
 			delete m_pConnectInf;
 
@@ -122,7 +128,9 @@ namespace exOdbcTest
 			count++;
 		}
 		EXPECT_EQ(2, count);
-
+	
+		// Why the hell is this needed for DB2?
+//		m_pDb->CommitTrans();
 		delete pTable;
 
 	}

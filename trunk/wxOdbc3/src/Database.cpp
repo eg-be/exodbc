@@ -493,8 +493,13 @@ namespace exodbc
 		m_dbIsOpen = true;
 
 		// Allocate a statement handle for the database connection
-		if (SQLAllocStmt(m_hdbc, &m_hstmt) != SQL_SUCCESS)
+		if(SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt) != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate Stmt-Handle";
 			return(DispAllErrors(m_henv, m_hdbc));
+		}
+		//if (SQLAllocStmt(m_hdbc, &m_hstmt) != SQL_SUCCESS)
+		//	return(DispAllErrors(m_henv, m_hdbc));
 
 		// Set Connection Options
 		if (!SetConnectionOptionsImpl())
@@ -694,8 +699,12 @@ namespace exodbc
 		m_dbIsOpen = true;
 
 		// Allocate a statement handle for the database connection
-		if (SQLAllocStmt(m_hdbc, &m_hstmt) != SQL_SUCCESS)
+		if(SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt) != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate Stmt-Handle";
 			return(DispAllErrors(m_henv, m_hdbc));
+		}
+//		if (SQLAllocStmt(m_hdbc, &m_hstmt) != SQL_SUCCESS)
 
 		// Set Connection Options
 		if (!SetConnectionOptionsImpl())
@@ -1451,8 +1460,13 @@ namespace exodbc
 		// Free statement handle
 		if (m_dbIsOpen)
 		{
-			if (SQLFreeStmt(m_hstmt, SQL_DROP) != SQL_SUCCESS)
+			if(SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt) != SQL_SUCCESS)
+			{
+				BOOST_LOG_TRIVIAL(debug) << L"Failed to free Stmt-Handle";
 				DispAllErrors(m_henv, m_hdbc);
+			}
+			//if (SQLFreeStmt(m_hstmt, SQL_DROP) != SQL_SUCCESS)
+			//	DispAllErrors(m_henv, m_hdbc);
 		}
 
 		// Disconnect from the datasource
@@ -1552,6 +1566,12 @@ namespace exodbc
 		* of the user's request, so that the calling code can then process the error message log.
 		*/
 	{
+		std::vector<SErrorInfo> errs = GetAllErrors(aHenv, aHdbc, aHstmt);
+		for(size_t i = 0; i < errs.size(); i++)
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"Have ODBC Error #" << i << L": " << errs[i];
+		}
+ 
 		std::wstring odbcErrMsg;
 
 		while (SQLError(aHenv, aHdbc, aHstmt, (SQLTCHAR FAR *) sqlState, &nativeError, (SQLTCHAR FAR *) errorMsg, SQL_MAX_MESSAGE_LENGTH - 1, &cbErrorMsg) == SQL_SUCCESS)
