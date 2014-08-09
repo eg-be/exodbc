@@ -42,11 +42,11 @@ namespace exOdbcTest
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
 		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		m_pConnectInf = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
-		HENV henv = m_pConnectInf->GetHenv();
+		m_pDbEnv = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+		HENV henv = m_pDbEnv->GetHenv();
 		ASSERT_TRUE(henv  != 0);
 		m_pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
-		ASSERT_TRUE(m_pDb->Open(m_pConnectInf));
+		ASSERT_TRUE(m_pDb->Open(m_pDbEnv));
 	}
 
 	void DbTest::TearDown()
@@ -60,17 +60,17 @@ namespace exOdbcTest
 			delete m_pDb;
 		}
 
-		if(m_pConnectInf)
-			delete m_pConnectInf;
+		if(m_pDbEnv)
+			delete m_pDbEnv;
 
-		m_pConnectInf = NULL;
+		m_pDbEnv = NULL;
 		m_pDb = NULL;
 	}
 
 
 	TEST_P(DbTest, OpenFromEnv)
 	{
-		Database db(m_pConnectInf);
+		Database db(m_pDbEnv);
 
 		// TODO: We need to fix this need for close
 		db.Close();
@@ -80,13 +80,13 @@ namespace exOdbcTest
 
 	TEST_P(DbTest, Open)
 	{
-		HENV henv = m_pConnectInf->GetHenv();
+		HENV henv = m_pDbEnv->GetHenv();
 		ASSERT_TRUE(henv  != 0);
 
 		Database* pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
 
 		// Open without failing on unsupported datatypes
-		EXPECT_TRUE(pDb->Open(m_pConnectInf, false));
+		EXPECT_TRUE(pDb->Open(m_pDbEnv, false));
 		pDb->Close();
 		delete pDb;
 
@@ -104,7 +104,7 @@ namespace exOdbcTest
 		// Open with failing on unsupported datatypes
 		// TODO: This test is stupid, we should also test that we fail
 		pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
-		EXPECT_TRUE(pDb->Open(m_pConnectInf, true));
+		EXPECT_TRUE(pDb->Open(m_pDbEnv, true));
 		pDb->Close();
 		delete pDb;
 	}

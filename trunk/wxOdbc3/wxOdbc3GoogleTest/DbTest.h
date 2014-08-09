@@ -46,7 +46,7 @@ namespace exOdbcTest
 		virtual void SetUp();
 		virtual void TearDown();
 
-		exodbc::DbEnvironment* m_pConnectInf;
+		exodbc::DbEnvironment* m_pDbEnv;
 		exodbc::Database*	m_pDb;
 		SOdbcInfo m_odbcInfo;
 	};
