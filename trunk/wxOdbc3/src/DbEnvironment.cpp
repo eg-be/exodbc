@@ -24,28 +24,39 @@ namespace exodbc
 
 
 	// Construction
-	// -------------
+	// ------------
+	
 	DbEnvironment::DbEnvironment()
+		: m_henv(NULL)
+		, m_freeHenvOnDestroy(false)
 	{
-		m_henv = 0;
-		m_freeHenvOnDestroy = false;
-
 		Initialize();
+	}
+	
+	
+	DbEnvironment::DbEnvironment(OdbcVersion odbcVersion)
+		: m_henv(NULL)
+		, m_freeHenvOnDestroy(false)
+	{
+		Initialize();
+		AllocHenv();
+		SetOdbcVersion(odbcVersion);
 	} 
 
-	DbEnvironment::DbEnvironment(const std::wstring& dsn, const std::wstring& userID, const std::wstring& password)
+	DbEnvironment::DbEnvironment(const std::wstring& dsn, const std::wstring& userID, const std::wstring& password, OdbcVersion odbcVersion /* = OV_3 */ )
 		: m_henv(NULL)
 		, m_freeHenvOnDestroy(false)
 	{
 		Initialize();
 		AllocHenv(); // note: might fail
+		SetOdbcVersion(odbcVersion);
 
 		SetDsn(dsn);
 		SetUserID(userID);
 		SetPassword(password);
 	}
 
-	DbEnvironment::DbEnvironment(const std::wstring& connectionString)
+	DbEnvironment::DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion /* = OV_3 */ )
 		: m_henv(NULL)
 		, m_freeHenvOnDestroy(false)
 	{
@@ -54,6 +65,7 @@ namespace exodbc
 
 		Initialize();
 		AllocHenv(); // note: might fail
+		SetOdbcVersion(odbcVersion);
 
 		SetConnectionStr(connectionString);
 	}
@@ -78,7 +90,6 @@ namespace exodbc
 		m_henv = NULL;
 		m_freeHenvOnDestroy = false;
 
-		m_requestedOdbcVersion = OV_2;
 		m_henv = 0;
 		m_dsn[0] = 0;
 		m_uid[0] = 0;
@@ -91,7 +102,6 @@ namespace exodbc
 	}
 
 
-	/********** wxDbConnectInf::AllocHenv() **********/
 	bool DbEnvironment::AllocHenv()
 	{
 		// This is here to help trap if you are getting a new henv
@@ -102,30 +112,6 @@ namespace exodbc
 		if(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv) != SQL_SUCCESS)
 		{
 			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocHandle: " << GetLastError();
-			return false;
-		}
-		// I dont know why we cannot use the value stored in m_requestedOdbcVersion. It just works with the constants
-		// because the SQLPOINTER is interpreted as an int value.. for int-attrs..
-		SQLRETURN ret;
-		switch(m_requestedOdbcVersion)
-		{
-		case OV_2:
-			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC2, NULL);
-			break;
-		case OV_3:
-			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
-			break;
-		case OV_3_8:
-			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
-			break;
-		default:
-			BOOST_LOG_TRIVIAL(debug) << L"Unknown ODBC Version value: " << m_requestedOdbcVersion;
-			return false;
-		}
-
-		if(ret != SQL_SUCCESS)
-		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to set ODBC Version of SQL Environment to " << m_requestedOdbcVersion << L": " << GetLastError();
 			return false;
 		}
 
@@ -149,7 +135,7 @@ namespace exodbc
 		}
 		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to free env-handle for odbc-version " << m_requestedOdbcVersion << L": " << GetLastError();
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to free env-handle: " << GetLastError();
 		}
 
 		return ret == SQL_SUCCESS;
@@ -163,7 +149,7 @@ namespace exodbc
 
 		wcsncpy(m_dsn, dsn.c_str(), EXSIZEOF(m_dsn) - 1);
 		m_dsn[EXSIZEOF(m_dsn)-1] = 0;  // Prevent buffer overrun
-	}  // wxDbConnectInf::SetDsn()
+	} 
 
 
 	void DbEnvironment::SetUserID(const std::wstring &uid)
@@ -171,7 +157,7 @@ namespace exodbc
 		exASSERT(uid.length() < EXSIZEOF(m_uid));
 		wcsncpy(m_uid, uid.c_str(), EXSIZEOF(m_uid)-1);
 		m_uid[EXSIZEOF(m_uid)-1] = 0;  // Prevent buffer overrun
-	}  // wxDbConnectInf::SetUserID()
+	}
 
 
 	void DbEnvironment::SetPassword(const std::wstring &password)
@@ -180,7 +166,7 @@ namespace exodbc
 
 		wcsncpy(m_authStr, password.c_str(), EXSIZEOF(m_authStr)-1);
 		m_authStr[EXSIZEOF(m_authStr)-1] = 0;  // Prevent buffer overrun
-	}  // wxDbConnectInf::SetPassword()
+	}
 
 	void DbEnvironment::SetConnectionStr(const std::wstring &connectStr)
 	{
@@ -190,15 +176,39 @@ namespace exodbc
 
 		wcsncpy(m_connectionStr, connectStr.c_str(), EXSIZEOF(m_connectionStr)-1);
 		m_connectionStr[EXSIZEOF(m_connectionStr)-1] = 0;  // Prevent buffer overrun
-	}  // wxDbConnectInf::SetConnectionStr()
+	}
 
 
 	bool DbEnvironment::SetOdbcVersion(OdbcVersion version)
 	{
-		// Must be set before we've allocated a handle
-		exASSERT(m_henv == NULL);
+		exASSERT(m_henv);
 
-		m_requestedOdbcVersion = version;
+		// I dont know why we cannot use the value stored in m_requestedOdbcVersion. It just works with the constants
+		// because the SQLPOINTER is interpreted as an int value.. for int-attrs..
+		SQLRETURN ret;
+		switch(version)
+		{
+		case OV_2:
+			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC2, NULL);
+			break;
+		case OV_3:
+			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
+			break;
+		case OV_3_8:
+			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
+			break;
+		default:
+			BOOST_LOG_TRIVIAL(debug) << L"Unknown ODBC Version value: " << version;
+			return false;
+		}
+
+		if(ret != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to set ODBC Version of SQL Environment to " << version << L": " << GetLastError();
+			return false;
+		}
+
+
 		return true;
 	}
 

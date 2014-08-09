@@ -46,19 +46,21 @@ namespace exOdbcTest
 
 	}
 
+
 	TEST_P(DbEnvironmentTest, SetOdbcVersion)
 	{
+		// Test with setting it explict
 		DbEnvironment* pEnv_v2 = new DbEnvironment();
 		DbEnvironment* pEnv_v3 = new DbEnvironment();
 		DbEnvironment* pEnv_v3_80 = new DbEnvironment();
 		
-		pEnv_v2->SetOdbcVersion(OV_2);
-		pEnv_v3->SetOdbcVersion(OV_3);
-		pEnv_v3_80->SetOdbcVersion(OV_3_8);
-
 		EXPECT_TRUE(pEnv_v2->AllocHenv());
 		EXPECT_TRUE(pEnv_v3->AllocHenv());
 		EXPECT_TRUE(pEnv_v3_80->AllocHenv());
+
+		EXPECT_TRUE(pEnv_v2->SetOdbcVersion(OV_2));
+		EXPECT_TRUE(pEnv_v3->SetOdbcVersion(OV_3));
+		EXPECT_TRUE(pEnv_v3_80->SetOdbcVersion(OV_3_8));
 
 		EXPECT_EQ(SQL_OV_ODBC2, pEnv_v2->GetOdbcVersion());
 		EXPECT_EQ(SQL_OV_ODBC3, pEnv_v3->GetOdbcVersion());
@@ -76,13 +78,13 @@ namespace exOdbcTest
 		DbEnvironment* pEnv_v3 = new DbEnvironment();
 		DbEnvironment* pEnv_v3_80 = new DbEnvironment();
 
-		pEnv_v2->SetOdbcVersion(OV_2);
-		pEnv_v3->SetOdbcVersion(OV_3);
-		pEnv_v3_80->SetOdbcVersion(OV_3_8);
-
 		EXPECT_TRUE(pEnv_v2->AllocHenv());
 		EXPECT_TRUE(pEnv_v3->AllocHenv());
 		EXPECT_TRUE(pEnv_v3_80->AllocHenv());
+
+		pEnv_v2->SetOdbcVersion(OV_2);
+		pEnv_v3->SetOdbcVersion(OV_3);
+		pEnv_v3_80->SetOdbcVersion(OV_3_8);
 
 		EXPECT_TRUE(pEnv_v2->FreeHenv());
 		EXPECT_TRUE(pEnv_v3->FreeHenv());
@@ -97,13 +99,14 @@ namespace exOdbcTest
 
 	TEST_P(DbEnvironmentTest, ListDataSources)
 	{
-		DbEnvironment* pEnv = new DbEnvironment();
-		bool allocatedHenv = pEnv->AllocHenv();
-		if(!allocatedHenv)
+		DbEnvironment* pEnv = new DbEnvironment(OV_3);
+		bool haveEnvHandle = pEnv->HaveHenv();
+		if(!haveEnvHandle)
 		{
 			delete pEnv;
-			ASSERT_TRUE(allocatedHenv);
+			ASSERT_TRUE(haveEnvHandle);
 		}
+
 
 		vector<SDataSource> dataSources = pEnv->ListDataSources();
 
