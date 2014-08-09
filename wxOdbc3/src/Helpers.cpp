@@ -224,9 +224,9 @@ namespace exodbc
 		{
 			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
 			if(ret == SQL_ERROR)
-				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_DBC (return code was SQL_ERROR, handle is still valid): " << GetLastDbcError(hDbc);
+				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HANDLE_DBC (return code was SQL_ERROR, handle is still valid): " << GetLastDbcError(hDbc);
 			else
-				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_DBC (return code was " << ret << L", handle is invalid)";
+				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HANDLE_DBC (return code was " << ret << L", handle is invalid)";
 		}
 		if(ret != SQL_ERROR)
 		{
@@ -257,7 +257,7 @@ namespace exodbc
 	{
 		exASSERT(hStmt);
 
-		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, hStmt);
+		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
 		if(ret != SQL_SUCCESS)
 		{
 			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
