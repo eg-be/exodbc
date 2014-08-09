@@ -504,7 +504,7 @@ namespace exodbc
 		}
 
 		// Set Connection Options
-		if (!SetConnectionOptionsImpl())
+		if (!SetConnectionOptions())
 			return false;
 
 		if (!DetermineDataTypesImpl(failOnDataTypeUnsupported))
@@ -562,7 +562,7 @@ namespace exodbc
 		return OpenImpl(failOnDataTypeUnsupported);
 	}
 
-	/********** wxDb::Open() **********/
+
 	bool Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr, bool failOnDataTypeUnsupported)
 	{
 		exASSERT(!dsn.empty());
@@ -613,21 +613,22 @@ namespace exodbc
 
 
 
-	/********** wxDb::SetConnectionOptionsImpl() **********/
-	bool Database::SetConnectionOptionsImpl()
-		/*
-		* NOTE: The Intersolv/Oracle 7 driver was "Not Capable" of setting the login timeout.
-		*/
+	bool Database::SetConnectionOptions()
 	{
 		SWORD cb;
 
-		// I need to get the DBMS name here, because some of the connection options
-		// are database specific and need to call the Dbms() function.
-		RETCODE retcode;
+		//exASSERT(m_hdbc != SQL_NULL_HDBC);
+		//SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, NULL);
+		//if(ret != SQL_SUCCESS)
+		//{
+		//	BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_AUTOCOMMIT to OFF" << GetLastDbcError(m_hdbc);
+		//}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR *) m_dbInf.dbmsName, sizeof(m_dbInf.dbmsName), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
+		//ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, SQL_OPT_TRACE_OFF, NULL);
+		//if(ret != SQL_SUCCESS)
+		//{
+		//	BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_TRACE to OFF" << GetLastDbcError(m_hdbc);
+		//}
 
 		/* retcode = */ SQLSetConnectOption(m_hdbc, SQL_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF);
 		/* retcode = */ SQLSetConnectOption(m_hdbc, SQL_OPT_TRACE, SQL_OPT_TRACE_OFF);
