@@ -42,7 +42,7 @@ namespace exOdbcTest
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
 		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		m_pConnectInf = new DbEnvironment(NULL, m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+		m_pConnectInf = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pConnectInf->GetHenv();
 		ASSERT_TRUE(henv  != 0);
 		m_pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
@@ -82,7 +82,7 @@ namespace exOdbcTest
 
 		// Try to open with a different password / user, expect to fail when opening the db.
 		// TODO: Getting the HENV never fails? Add some tests for the HENV
-		DbEnvironment* pFailConnectInf = new DbEnvironment(NULL, L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
+		DbEnvironment* pFailConnectInf = new DbEnvironment(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
 		HENV henvFail = pFailConnectInf->GetHenv();
 		EXPECT_TRUE(henvFail != NULL);
 		Database* pFailDb = new Database(henvFail, true);
