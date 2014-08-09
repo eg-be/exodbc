@@ -156,6 +156,7 @@ namespace exodbc
 
 	/********** wxDb Constructor **********/
 	Database::Database(const HENV &aHenv, bool FwdOnlyCursors)
+		: m_hdbc(SQL_NULL_HDBC)
 	{
 		// Copy the HENV into the db class
 		m_henv = aHenv;
@@ -166,16 +167,19 @@ namespace exodbc
 	} // wxDb::wxDb()
 
 
-	/********** wxDb Destructor **********/
 	Database::~Database()
 	{
 		if (IsOpen())
 		{
 			Close();
 		}
-	}  // wxDb destructor
 
-
+		// Free the connection to the datasource
+		if(m_hdbc != SQL_NULL_HDBC)
+		{
+			FreeDbcHandle(m_hdbc);
+		}
+	}
 
 	/********** PRIVATE! wxDb::initialize PRIVATE! **********/
 	/********** wxDb::initialize() **********/
@@ -1301,12 +1305,6 @@ namespace exodbc
 				DispAllErrors(SQL_NULL_HENV, m_hdbc);
 
 			m_dbIsOpen = false;
-		}
-
-		// Free the connection to the datasource
-		if (SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc) != SQL_SUCCESS)
-		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to free DBC-Handle: " << GetLastEnvError(m_henv);
 		}
 
 		// There should be zero Ctable objects still connected to this db object
