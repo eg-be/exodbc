@@ -1312,8 +1312,7 @@ namespace exodbc
 
 		if (SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc) != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to free DBC-Handle: ";
-			DispAllErrors(m_henv);
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to free DBC-Handle: " << GetLastEnvError(m_henv);
 		}
 
 		// There should be zero Ctable objects still connected to this db object
