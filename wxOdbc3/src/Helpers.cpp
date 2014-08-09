@@ -278,7 +278,7 @@ namespace exodbc
 	{
 		exASSERT(hDbc != NULL);
 		SQLRETURN ret = SQLGetInfo(hDbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue);
-		if(ret != SQL_SUCCESS || ret != SQL_SUCCESS_WITH_INFO)
+		if( ! (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO))
 		{
 			BOOST_LOG_TRIVIAL(warning) << L"Failed with return-value " << ret << L" to GetInfo for type " << fInfoType << L": " << GetLastDbcError(hDbc);
 		}

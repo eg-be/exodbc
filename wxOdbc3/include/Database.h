@@ -322,6 +322,7 @@ namespace exodbc
 		SSqlTypeInfo GetTypeInfDate()       {return m_typeInfDate;}
 		SSqlTypeInfo GetTypeInfBlob()       {return m_typeInfBlob;}
 		SSqlTypeInfo GetTypeInfMemo()       {return m_typeInfMemo;}
+		SDbInfo GetDbInfo()					{return m_dbInf;}
 
 		// tableName can refer to a table, view, alias or synonym
 		bool         TableExists(const std::wstring& tableName, const wchar_t* userID = NULL, const std::wstring& tablePath = std::wstring());
@@ -355,7 +356,7 @@ namespace exodbc
 		// Private member functions
 		void			Initialize();
 
-		bool			GetDbInfoImpl(bool failOnDataTypeUnsupported = true);
+		bool			ReadDbInfo(SDbInfo& dbInfo);
 		bool			GetDataTypeInfoImpl(SWORD fSqlType, SSqlTypeInfo& structSQLTypeInfo);
 		bool			SetConnectionAttributes();
 		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
