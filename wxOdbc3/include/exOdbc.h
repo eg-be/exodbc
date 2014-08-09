@@ -94,6 +94,31 @@ namespace exodbc
 		{
 			dbmsName[0] = 0;
 			dbmsVer[0] = 0;
+			driverName[0] = 0;
+			odbcVer[0] = 0;
+			drvMgrOdbcVer[0] = 0;
+			driverVer[0] = 0;
+			serverName[0] = 0;
+			databaseName[0] = 0;
+			outerJoins[0] = 0;
+			procedureSupport[0] = 0;
+			accessibleTables[0] = 0;
+			maxConnections = 0;
+			maxStmts = 0;
+			cliConfLvl = 0;
+			cursorCommitBehavior = 0;
+			cursorRollbackBehavior = 0;
+			supportNotNullClause = 0;
+			supportIEF[0] = 0;
+			txnIsolation = 0;
+			txnIsolationOptions = 0;
+			posOperations = 0;
+			posStmts = 0;
+			scrollOptions = 0;
+			txnCapable = 0;
+			maxCatalogNameLen = 0;
+			maxSchemaNameLen = 0;
+			maxTableNameLen = 0;
 		}
 
 		// [Output] Pointer to a buffer in which to return the information. Depending on the InfoType requested, 
