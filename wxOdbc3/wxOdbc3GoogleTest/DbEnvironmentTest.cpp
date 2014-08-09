@@ -39,6 +39,7 @@ namespace exOdbcTest
 	{
 		m_odbcInfo = GetParam();
 		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
+		RecordProperty("OdbcVersion", m_odbcInfo.m_odbcVersion);
 	}
 
 	void DbEnvironmentTest::TearDown()
@@ -47,68 +48,62 @@ namespace exOdbcTest
 	}
 
 
-	TEST_P(DbEnvironmentTest, SetOdbcVersion)
+	TEST_P(DbEnvironmentTest, AllocHenv)
 	{
-		// Test with setting it explict
-		DbEnvironment* pEnv_v2 = new DbEnvironment();
-		DbEnvironment* pEnv_v3 = new DbEnvironment();
-		DbEnvironment* pEnv_v3_80 = new DbEnvironment();
-		
-		EXPECT_TRUE(pEnv_v2->AllocHenv());
-		EXPECT_TRUE(pEnv_v3->AllocHenv());
-		EXPECT_TRUE(pEnv_v3_80->AllocHenv());
-
-		EXPECT_TRUE(pEnv_v2->SetOdbcVersion(OV_2));
-		EXPECT_TRUE(pEnv_v3->SetOdbcVersion(OV_3));
-		EXPECT_TRUE(pEnv_v3_80->SetOdbcVersion(OV_3_8));
-
-		EXPECT_EQ(SQL_OV_ODBC2, pEnv_v2->GetOdbcVersion());
-		EXPECT_EQ(SQL_OV_ODBC3, pEnv_v3->GetOdbcVersion());
-		EXPECT_EQ(SQL_OV_ODBC3_80, pEnv_v3_80->GetOdbcVersion());
-
-		delete pEnv_v2;
-		delete pEnv_v3;
-		delete pEnv_v3_80;
+		DbEnvironment env;
+		EXPECT_TRUE(env.AllocHenv());
 	}
 
 
 	TEST_P(DbEnvironmentTest, FreeHenv)
 	{
-		DbEnvironment* pEnv_v2 = new DbEnvironment();
-		DbEnvironment* pEnv_v3 = new DbEnvironment();
-		DbEnvironment* pEnv_v3_80 = new DbEnvironment();
-
-		EXPECT_TRUE(pEnv_v2->AllocHenv());
-		EXPECT_TRUE(pEnv_v3->AllocHenv());
-		EXPECT_TRUE(pEnv_v3_80->AllocHenv());
-
-		pEnv_v2->SetOdbcVersion(OV_2);
-		pEnv_v3->SetOdbcVersion(OV_3);
-		pEnv_v3_80->SetOdbcVersion(OV_3_8);
-
-		EXPECT_TRUE(pEnv_v2->FreeHenv());
-		EXPECT_TRUE(pEnv_v3->FreeHenv());
-		EXPECT_TRUE(pEnv_v3_80->FreeHenv());
+		DbEnvironment env;
+		ASSERT_TRUE(env.AllocHenv());
+		EXPECT_TRUE(env.FreeHenv());
 		
 		// TODO: Test to test if we fail (we do so) if there are still open databases on that handle?
+	}
 
-		delete pEnv_v2;
-		delete pEnv_v3;
-		delete pEnv_v3_80;
+
+	TEST_P(DbEnvironmentTest, SetConnectionString)
+	{
+		DbEnvironment env;
+		EXPECT_FALSE(env.UseConnectionStr());
+
+		env.SetConnectionStr(L"FooString");
+		EXPECT_TRUE(env.UseConnectionStr());
+
+		env.SetConnectionStr(L"");
+		EXPECT_FALSE(env.UseConnectionStr());
+	}
+
+
+	TEST_P(DbEnvironmentTest, SetOdbcVersion)
+	{
+		// Test with setting it explict
+		DbEnvironment env_v2;
+		DbEnvironment env_v3;
+		DbEnvironment env_v3_80;
+
+		ASSERT_TRUE(env_v2.AllocHenv());
+		ASSERT_TRUE(env_v3.AllocHenv());
+		ASSERT_TRUE(env_v3_80.AllocHenv());
+
+		EXPECT_TRUE(env_v2.SetOdbcVersion(OV_2));
+		EXPECT_TRUE(env_v3.SetOdbcVersion(OV_3));
+		EXPECT_TRUE(env_v3_80.SetOdbcVersion(OV_3_8));
+
+		EXPECT_EQ(SQL_OV_ODBC2, env_v2.GetOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC3, env_v3.GetOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC3_80, env_v3_80.GetOdbcVersion());
 	}
 
 	TEST_P(DbEnvironmentTest, ListDataSources)
 	{
-		DbEnvironment* pEnv = new DbEnvironment(OV_3);
-		bool haveEnvHandle = pEnv->HaveHenv();
-		if(!haveEnvHandle)
-		{
-			delete pEnv;
-			ASSERT_TRUE(haveEnvHandle);
-		}
+		DbEnvironment env(OV_3);
+		ASSERT_TRUE(env.HaveHenv());
 
-
-		vector<SDataSource> dataSources = pEnv->ListDataSources();
+		vector<SDataSource> dataSources = env.ListDataSources();
 
 		// Expect that we find our DataSource in the list
 		bool foundDataSource = false;
@@ -125,7 +120,6 @@ namespace exOdbcTest
 
 		EXPECT_TRUE(foundDataSource);
 
-		delete pEnv;
 	}
 	// Interfaces
 	// ----------

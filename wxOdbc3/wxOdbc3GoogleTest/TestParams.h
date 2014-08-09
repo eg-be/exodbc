@@ -12,6 +12,7 @@
 
 // Same component headers
 // Other headers
+#include "exOdbc.h"
 #include "Utils.h"
 
 // System headers
@@ -37,15 +38,17 @@ namespace exOdbcTest
 		SOdbcInfo()
 		{ }
 
-		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, CursorType cursorType) 
+		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, CursorType cursorType, exodbc::OdbcVersion odbcVersion) 
 			: m_dsn(dsn)
 			, m_username(username)
 			, m_password(password)
 			, m_cursorType(cursorType)
+			, m_odbcVersion(odbcVersion)
 		{};
 		std::wstring m_dsn;
 		std::wstring m_username;
 		std::wstring m_password;
+		exodbc::OdbcVersion m_odbcVersion;
 		CursorType m_cursorType;
 	};
 
