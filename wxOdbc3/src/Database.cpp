@@ -490,9 +490,6 @@ namespace exodbc
 		SQLSetConnectOption(hdbc, 1042, (UDWORD) emptyString);
 		*/
 
-		// Mark database as OpenImpl
-		m_dbIsOpen = true;
-
 		// Allocate a statement handle for the database connection
 		if(SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt) != SQL_SUCCESS)
 		{
@@ -611,6 +608,9 @@ namespace exodbc
 		if ((retcode != SQL_SUCCESS) &&
 			(retcode != SQL_SUCCESS_WITH_INFO))
 			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
+
+		// Mark database as Open
+		m_dbIsOpen = true;
 
 		return OpenImpl(failOnDataTypeUnsupported);
 
@@ -1297,11 +1297,16 @@ namespace exodbc
 			}
 			//if (SQLFreeStmt(m_hstmt, SQL_DROP) != SQL_SUCCESS)
 			//	DispAllErrors(SQL_NULL_HENV, m_hdbc);
+
+			// Disconnect from the datasource			
+			if (SQLDisconnect(m_hdbc) != SQL_SUCCESS)
+				DispAllErrors(SQL_NULL_HENV, m_hdbc);
+
+			m_dbIsOpen = false;
 		}
 
-		// Disconnect from the datasource
-		if (SQLDisconnect(m_hdbc) != SQL_SUCCESS)
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
+
+
 
 		// Free the connection to the datasource
 
@@ -1345,7 +1350,7 @@ namespace exodbc
 			wcscpy(DBerrorList[i], errorList[i]);
 
 		m_dbmsType = dbmsUNIDENTIFIED;
-		m_dbIsOpen = false;
+
 
 	} // wxDb::Close()
 

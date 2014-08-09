@@ -356,7 +356,7 @@ namespace exodbc
 		bool             OpenImpl(bool failOnDataTypeUnsupported = true);
 
 		// Members
-		bool				m_dbIsOpen;
+		bool				m_dbIsOpen;	// Set to true after SQLConnect was successful
 		bool				m_dbOpenedWithConnectionString;  // Was the database connection OpenImpled with a connection string
 		std::wstring		m_dsn;             // Data source name
 		std::wstring		m_uid;             // User ID
