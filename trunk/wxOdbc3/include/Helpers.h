@@ -53,9 +53,14 @@ namespace exodbc
 // exFAIL must become something that will always trigger something, not depending on any flags
 #define exFAIL_MSG(msg)												\
 	do {																\
-	BOOST_LOG_TRIVIAL(error) << msg;								\
+	BOOST_LOG_TRIVIAL(error) << #msg;								\
 	} while ( 0 )
 
+#define exNOT_IMPL	\
+	do {			\
+		BOOST_LOG_TRIVIAL(error) << __FILE__ << L" (" << __LINE__ << L"): Not Implemented";	\
+		exASSERT_MSG(false, "Not Implemented");	\
+	} while( 0 )	\
 
 namespace exodbc
 {
