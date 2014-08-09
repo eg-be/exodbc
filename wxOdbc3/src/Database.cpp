@@ -1295,8 +1295,6 @@ namespace exodbc
 				BOOST_LOG_TRIVIAL(debug) << L"Failed to free Stmt-Handle";
 				DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			}
-			//if (SQLFreeStmt(m_hstmt, SQL_DROP) != SQL_SUCCESS)
-			//	DispAllErrors(SQL_NULL_HENV, m_hdbc);
 
 			// Disconnect from the datasource			
 			if (SQLDisconnect(m_hdbc) != SQL_SUCCESS)
@@ -1305,11 +1303,7 @@ namespace exodbc
 			m_dbIsOpen = false;
 		}
 
-
-
-
 		// Free the connection to the datasource
-
 		if (SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc) != SQL_SUCCESS)
 		{
 			BOOST_LOG_TRIVIAL(debug) << L"Failed to free DBC-Handle: " << GetLastEnvError(m_henv);
