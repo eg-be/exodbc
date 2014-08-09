@@ -111,7 +111,7 @@ namespace exodbc
 		// Initialize the ODBC Environment for Database Operations
 		if(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv) != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocHandle: " << GetLastError();
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocHandle: " << GetLastEnvError(m_henv);
 			return false;
 		}
 
@@ -135,7 +135,7 @@ namespace exodbc
 		}
 		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to free env-handle: " << GetLastError();
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to free env-handle: " << GetLastEnvError(m_henv);
 		}
 
 		return ret == SQL_SUCCESS;
@@ -204,40 +204,12 @@ namespace exodbc
 
 		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to set ODBC Version of SQL Environment to " << version << L": " << GetLastError();
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to set ODBC Version of SQL Environment to " << version << L": " << GetLastEnvError(m_henv);
 			return false;
 		}
 
 
 		return true;
-	}
-
-
-	SErrorInfo DbEnvironment::GetLastError()
-	{
-		SErrorInfo ei;
-		ei.NativeError = 0;
-		ei.SqlState[0] = 0;
-
-		// Determine msg-length
-		SQLSMALLINT msgLength;
-		SQLRETURN ret = SQLGetDiagRec(SQL_HANDLE_ENV, m_henv, 1, ei.SqlState, &ei.NativeError, NULL, NULL, &msgLength);
-		if(ret != SQL_SUCCESS)
-		{
-			BOOST_LOG_TRIVIAL(debug) << L"SQLGetDiagRec failed with return code " << ret;
-			return ei;
-		}
-		SQLWCHAR* msg = new SQLWCHAR[msgLength + 1];
-		ret = SQLGetDiagRec(SQL_HANDLE_ENV, m_henv, 1, ei.SqlState, &ei.NativeError, msg, msgLength + 1, &msgLength);
-		if(ret != SQL_SUCCESS)
-		{
-			BOOST_LOG_TRIVIAL(debug) << L"SQLGetDiagRec failed with return code " << ret;
-			return ei;
-		}
-
-		ei.Msg = msg;
-		delete[] msg;
-		return ei;
 	}
 
 
@@ -247,7 +219,7 @@ namespace exodbc
 		SQLRETURN ret = SQLGetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
 		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to read SQL_ATTR_ODBC_VERSION: " << GetLastError();
+			BOOST_LOG_TRIVIAL(debug) << L"Failed to read SQL_ATTR_ODBC_VERSION: " << GetLastEnvError(m_henv);
 			return OV_UNKNOWN;
 		}
 

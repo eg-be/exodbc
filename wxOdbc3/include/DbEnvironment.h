@@ -142,8 +142,6 @@ namespace exodbc
 		 */
 		bool			Initialize();
 
-		SErrorInfo		GetLastError();
-
 		/*!
 		 * \fn	bool DbEnvironment::AllocHenv();
 		 *

@@ -130,6 +130,70 @@ namespace exodbc
 	}
 
 
+	SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors)
+	{
+		exASSERT(hEnv);
+
+		std::vector<SErrorInfo> errs = GetAllErrors(hEnv);
+		totalErrors = errs.size();
+		if(totalErrors > 0)
+			return errs[0];
+
+		return SErrorInfo();
+	}
+
+
+	SErrorInfo GetLastDbcError(SQLHANDLE hDbc, SQLSMALLINT& totalErrors)
+	{
+		exASSERT(hDbc);
+
+		std::vector<SErrorInfo> errs = GetAllErrors(NULL, hDbc);
+		totalErrors = errs.size();
+		if(totalErrors > 0)
+			return errs[0];
+
+		return SErrorInfo();
+	}
+
+
+	SErrorInfo GetLastStmtError(SQLHANDLE hStmt, SQLSMALLINT& totalErrors)
+	{
+		exASSERT(hStmt);
+
+		std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, hStmt);
+		totalErrors = errs.size();
+		if(totalErrors > 0)
+			return errs[0];
+
+		return SErrorInfo();
+	}
+
+
+	SErrorInfo GetLastEnvError(SQLHANDLE hEnv)
+	{
+		exASSERT(hEnv);
+
+		SQLSMALLINT tot = 0;
+		return GetLastEnvError(hEnv, tot);
+	}
+
+	SErrorInfo GetLastDbcError(SQLHANDLE hDbc)
+	{
+		exASSERT(hDbc);
+
+		SQLSMALLINT tot = 0;
+		return GetLastDbcError(hDbc, tot);
+	}
+
+
+	SErrorInfo GetLastStmtError(SQLHANDLE hStmt)
+	{
+		exASSERT(hStmt);
+
+		SQLSMALLINT tot = 0;
+		return GetLastStmtError(hStmt, tot);
+	}
+
 }
 
 // Interfaces
