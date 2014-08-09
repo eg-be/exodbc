@@ -274,6 +274,23 @@ namespace exodbc
 		return ret == SQL_SUCCESS;
 	}
 
+	bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
+	{
+		exASSERT(hDbc != NULL);
+		SQLRETURN ret = SQLGetInfo(hDbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue);
+		if(ret != SQL_SUCCESS || ret != SQL_SUCCESS_WITH_INFO)
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"Failed with return-value " << ret << L" to GetInfo for type " << fInfoType << L": " << GetLastDbcError(hDbc);
+		}
+
+		if(ret == SQL_SUCCESS_WITH_INFO)
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"GetInfo for type " << fInfoType << L" returned with SQL_SUCCESS_WITH_INFO";
+		}
+
+		return (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
+	}
+
 }
 
 // Interfaces

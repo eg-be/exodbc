@@ -643,6 +643,13 @@ namespace exodbc
 		SWORD cb;
 		RETCODE retcode;
 
+		// SQLGetInfo gets null-terminated by the driver. It needs buffer-lengths (not char-lengts), even in unicode
+		// see http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
+		// so it works with sizeof and statically declared arrays
+		
+		bool ok = true;
+		ok = GetInfo(m_hdbc, SQL_SERVER_NAME, m_dbInf.serverName, sizeof(m_dbInf.serverName), &cb);
+
 		retcode = SQLGetInfo(m_hdbc, SQL_SERVER_NAME, (UCHAR*) m_dbInf.serverName, sizeof(m_dbInf.serverName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
@@ -667,9 +674,6 @@ namespace exodbc
 				return false;
 		}
 
-		// 16-Mar-1999
-		// After upgrading to MSVC6, the original 20 char buffer below was insufficient,
-		// causing database connectivity to fail in some cases.
 		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_VER, (UCHAR*) m_dbInf.dbmsVer, sizeof(m_dbInf.dbmsVer), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
@@ -678,7 +682,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_CONNECTIONS, (UCHAR*) &m_dbInf.maxConnections, sizeof(m_dbInf.maxConnections), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, (UCHAR*) &m_dbInf.maxConnections, sizeof(m_dbInf.maxConnections), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(SQL_NULL_HENV, m_hdbc);
@@ -686,7 +690,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_STATEMENTS, (UCHAR*) &m_dbInf.maxStmts, sizeof(m_dbInf.maxStmts), &cb);
+		retcode = SQLGetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, (UCHAR*) &m_dbInf.maxStmts, sizeof(m_dbInf.maxStmts), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(SQL_NULL_HENV, m_hdbc);
@@ -726,27 +730,11 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_API_CONFORMANCE, (UCHAR*) &m_dbInf.apiConfLvl, sizeof(m_dbInf.apiConfLvl), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
 		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, (UCHAR*) &m_dbInf.cliConfLvl, sizeof(m_dbInf.cliConfLvl), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			// Not all drivers support this call - Nick Gorham(unixODBC)
 			m_dbInf.cliConfLvl = 0;
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_CONFORMANCE, (UCHAR*) &m_dbInf.sqlConfLvl, sizeof(m_dbInf.sqlConfLvl), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
 			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
@@ -824,22 +812,6 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_FETCH_DIRECTION, (UCHAR*) &m_dbInf.fetchDirections, sizeof(m_dbInf.fetchDirections), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_LOCK_TYPES, (UCHAR*) &m_dbInf.lockTypes, sizeof(m_dbInf.lockTypes), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
 		retcode = SQLGetInfo(m_hdbc, SQL_POS_OPERATIONS, (UCHAR*) &m_dbInf.posOperations, sizeof(m_dbInf.posOperations), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
@@ -856,23 +828,7 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_CONCURRENCY, (UCHAR*) &m_dbInf.scrollConcurrency, sizeof(m_dbInf.scrollConcurrency), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
 		retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_OPTIONS, (UCHAR*) &m_dbInf.scrollOptions, sizeof(m_dbInf.scrollOptions), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_STATIC_SENSITIVITY, (UCHAR*) &m_dbInf.staticSensitivity, sizeof(m_dbInf.staticSensitivity), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
 			DispAllErrors(SQL_NULL_HENV, m_hdbc);
@@ -888,13 +844,14 @@ namespace exodbc
 				return false;
 		}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &m_dbInf.loginTimeout, sizeof(m_dbInf.loginTimeout), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
+		// SQL_LOGIN_TIMEOUT is a Connection-Attribute
+		//retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &m_dbInf.loginTimeout, sizeof(m_dbInf.loginTimeout), &cb);
+		//if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
+		//{
+		//	DispAllErrors(SQL_NULL_HENV, m_hdbc);
+		//	if (failOnDataTypeUnsupported)
+		//		return false;
+		//}
 
 		retcode = SQLGetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &m_dbInf.maxCatalogNameLen, sizeof(m_dbInf.maxCatalogNameLen), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
