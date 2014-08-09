@@ -72,7 +72,8 @@ namespace exOdbcTest
 	{
 		Database db(m_pDbEnv);
 
-		// TODO: We need to fix this need for close
+		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
+
 		db.Close();
 //		int p = 3;
 	}
@@ -96,6 +97,7 @@ namespace exOdbcTest
 		HENV henvFail = pFailConnectInf->GetHenv();
 		EXPECT_TRUE(henvFail != NULL);
 		Database* pFailDb = new Database(henvFail, true);
+		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings";
 		EXPECT_FALSE(pFailDb->Open(pFailConnectInf, false));
 		pFailDb->Close();
 		delete pFailDb;
