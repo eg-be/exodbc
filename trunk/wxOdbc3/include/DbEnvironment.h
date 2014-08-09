@@ -89,7 +89,6 @@ namespace exodbc
 		 * 			You must manually call AllocHandle() and SetOdbcVersion after 
 		 * 			creating the object.
 		 */
-
 		DbEnvironment();
 
 		/*!
@@ -99,7 +98,6 @@ namespace exodbc
 		 *
 		 * \param	odbcVersion	The ODBC version.
 		 */
-
 		DbEnvironment(OdbcVersion odbcVersion);
 
 		/*!
@@ -113,7 +111,6 @@ namespace exodbc
 		 * \param	password   	(Optional) the password.
 		 * \param	odbcVersion	(Optional) the ODBC version.
 		 */
-
 		DbEnvironment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
 
 		/*!
@@ -125,7 +122,6 @@ namespace exodbc
 		 * \param	connectionString	The connection string.
 		 * \param	odbcVersion			(Optional) the ODBC version.
 		 */
-
 		DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
 
 		/*!
@@ -133,7 +129,6 @@ namespace exodbc
 		 *
 		 * \brief	Destructor. Tries to free the env-handle, if one is allocated.
 		 */
-
 		~DbEnvironment();
 
 		/*!
@@ -258,7 +253,7 @@ namespace exodbc
 		 *
 		 * \brief	List data sources.
 		 *
-		 * \param	mode	(Optional) Decide to list all dsns, or only user / system dsns.
+		 * \param	mode	(Optional) Decide to list all DSNs, or only user / system DSNs.
 		 *
 		 * \return	A std::vector&lt;SDataSource&gt;
 		 */
