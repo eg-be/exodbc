@@ -577,12 +577,12 @@ namespace exodbc
 	}
 
 	/********** wxDb::Open() **********/
-	bool Database::Open(const std::wstring &Dsn, const std::wstring &Uid, const std::wstring &AuthStr, bool failOnDataTypeUnsupported)
+	bool Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr, bool failOnDataTypeUnsupported)
 	{
-		exASSERT(!Dsn.empty());
-		m_dsn        = Dsn;
-		m_uid        = Uid;
-		m_authStr    = AuthStr;
+		exASSERT(!dsn.empty());
+		m_dsn        = m_dsn;
+		m_uid        = m_uid;
+		m_authStr    = m_authStr;
 
 		m_inConnectionStr = emptyString;
 		m_outConnectionStr = emptyString;
