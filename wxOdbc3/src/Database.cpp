@@ -142,11 +142,17 @@ namespace exodbc
 		return true;
 	}  // wxDbTableInf::Initialize()
 
-	Database::Database(const DbEnvironment& env)
+	Database::Database(const DbEnvironment* const pEnv)
 	{
-		m_henv = env.GetHenv();
+		exASSERT(pEnv);
 
-		Initialize();
+//		SQLHANDLE hdbc = AllocDbcHandle(pEnv->GetHenv());
+//		FreeDbcHandle(hdbc);
+//		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, pEnv->GetHenv(), &hdbc);
+//		m_henv = env.GetHenv();
+
+		// Fails because m_henv is not set:
+		// Initialize();
 	}
 
 	/********** wxDb Constructor **********/

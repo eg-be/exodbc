@@ -111,6 +111,16 @@ namespace exodbc
 	 */
 	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = NULL, SQLHANDLE hDbc = NULL, SQLHANDLE hStmt = NULL);
 
+	/*!
+	 * \fn	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors);
+	 *
+	 * \brief	Gets the last environment error, if one is available.
+	 *
+	 * \param	hEnv			   	The environment. If NULL, a warning is logged and Default SErrorInfo object returned.
+	 * \param [in,out]	totalErrors	The total errors.
+	 *
+	 * \return	The last environment error, or the default SErrorInfo object if no error could be fetched.
+	 */
 	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors);
 	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc, SQLSMALLINT& totalErrors);
 	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt, SQLSMALLINT& totalErrors);
@@ -118,6 +128,9 @@ namespace exodbc
 	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv);
 	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc);
 	extern EXODBCAPI SErrorInfo GetLastStmError(SQLHANDLE hStmt);
+
+	extern EXODBCAPI SQLHANDLE	AllocDbcHandle(const SQLHANDLE& hEnv);
+	extern EXODBCAPI bool		FreeDbcHandle(SQLHANDLE& hDbc);
 
 	// Classes
 	// -------
