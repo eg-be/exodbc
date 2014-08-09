@@ -144,6 +144,7 @@ namespace exodbc
 
 	Database::Database(const DbEnvironment* const pEnv)
 		: m_hdbc(SQL_NULL_HDBC)
+		, m_fwdOnlyCursors(true)
 	{
 		exASSERT(pEnv);
 
