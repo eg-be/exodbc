@@ -304,6 +304,7 @@ namespace exodbc
 		const std::wstring& GetConnectionOutStr() {return m_outConnectionStr;}
 		bool            IsOpen()           {return m_dbIsOpen;}
 		bool            OpenedWithConnectionString() {return m_dbOpenedWithConnectionString;}
+		bool			HasHdbc()			{ return m_hdbc != SQL_NULL_HDBC; };
 		HENV            GetHENV()          {return m_henv;}
 		HDBC            GetHDBC()          {return m_hdbc;}
 		HSTMT           GetHSTMT()         {return m_hstmt;}
