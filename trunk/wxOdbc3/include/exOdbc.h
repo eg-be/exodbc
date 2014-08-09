@@ -86,6 +86,52 @@ namespace exodbc
 	// Structs
 	// -------
 
+	// The following structure contains database information gathered from the
+	// datasource when the datasource is first OpenImpled.
+	struct EXODBCAPI SDbInfo
+	{
+		SDbInfo()
+		{
+			dbmsName[0] = 0;
+			dbmsVer[0] = 0;
+		}
+
+		// [Output] Pointer to a buffer in which to return the information. Depending on the InfoType requested, 
+		// the information returned will be one of the following: a null-terminated character string, an SQLUSMALLINT value, 
+		// an SQLUINTEGER bitmask, an SQLUINTEGER flag, a SQLUINTEGER binary value, or a SQLULEN value.
+		// See: http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
+
+		SQLWCHAR dbmsName[SQL_MAX_DSN_LENGTH + 1];		// Name of the dbms product
+		SQLWCHAR dbmsVer[64];							// Version # of the dbms product
+		SQLWCHAR driverName[40];						// Driver name
+		SQLWCHAR odbcVer[60];							// ODBC version of the driver
+		SQLWCHAR drvMgrOdbcVer[60];						// ODBC version of the driver manager
+		SQLWCHAR driverVer[60];							// Driver version
+		SQLWCHAR serverName[80];						// Server Name, typically a connect string
+		SQLWCHAR databaseName[128];						// Database filename
+		SQLWCHAR outerJoins[2];							// Indicates whether the data source supports outer joins
+		SQLWCHAR procedureSupport[2];					// Indicates whether the data source supports stored procedures
+		SQLWCHAR accessibleTables[2];					// Indicates whether the data source only reports accessible tables in SQLTables.
+		SQLUSMALLINT  maxConnections;					// Maximum # of connections the data source supports
+		SQLUSMALLINT  maxStmts;							// Maximum # of HSTMTs per HDBC
+		SQLUSMALLINT cliConfLvl;						// Indicates whether the data source is SAG compliant
+		SQLUSMALLINT cursorCommitBehavior;				// Indicates how cursors are affected by a db commit
+		SQLUSMALLINT cursorRollbackBehavior;			// Indicates how cursors are affected by a db rollback
+		SQLUSMALLINT supportNotNullClause;				// Indicates if data source supports NOT NULL clause
+		SQLWCHAR supportIEF[2];							// Integrity Enhancement Facility (Referential Integrity)
+		SQLUINTEGER txnIsolation;						// Default transaction isolation level supported by the driver
+		SQLUINTEGER txnIsolationOptions;				// Transaction isolation level options available
+		SQLINTEGER posOperations;						// Position operations supported in SQLSetPos
+		SQLINTEGER posStmts;							// An SQLINTEGER bitmask enumerating the supported positioned SQL statements.
+		SQLUINTEGER scrollOptions;						// Scroll Options supported for scrollable cursors
+		SQLUSMALLINT txnCapable;						// Indicates if the data source supports transactions
+		// TODO: Connection attribute
+		//			UDWORD loginTimeout;                             // Number seconds to wait for a login request
+		SQLUSMALLINT  maxCatalogNameLen;				// Max length of a catalog name. Can be 0 if no limit, or limit is unknown
+		SQLUSMALLINT  maxSchemaNameLen;					// Max length of a schema name. Can be 0 if no limit, or limit is unknown
+		SQLUSMALLINT  maxTableNameLen;					// Max length of a table name. Can be 0 if no limit, or limit is unknown
+	};
+
 	// Enums
 	// -----
 	enum OdbcVersion

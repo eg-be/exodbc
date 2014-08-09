@@ -207,46 +207,7 @@ namespace exodbc
 	class EXODBCAPI Database
 	{
 	public:
-
-		// The following structure contains database information gathered from the
-		// datasource when the datasource is first OpenImpled.
-		struct
-		{
-			wchar_t dbmsName[40];                             // Name of the dbms product
-			wchar_t dbmsVer[64];                              // Version # of the dbms product
-			wchar_t driverName[40];                           // Driver name
-			wchar_t odbcVer[60];                              // ODBC version of the driver
-			wchar_t drvMgrOdbcVer[60];                        // ODBC version of the driver manager
-			wchar_t driverVer[60];                            // Driver version
-			wchar_t serverName[80];                           // Server Name, typically a connect string
-			wchar_t databaseName[128];                        // Database filename
-			wchar_t outerJoins[2];                            // Indicates whether the data source supports outer joins
-			wchar_t procedureSupport[2];                      // Indicates whether the data source supports stored procedures
-			wchar_t accessibleTables[2];                      // Indicates whether the data source only reports accessible tables in SQLTables.
-			UWORD  maxConnections;                           // Maximum # of connections the data source supports
-			UWORD  maxStmts;                                 // Maximum # of HSTMTs per HDBC
-			UWORD  apiConfLvl;                               // ODBC API conformance level
-			UWORD  cliConfLvl;                               // Indicates whether the data source is SAG compliant
-			UWORD  sqlConfLvl;                               // SQL conformance level
-			UWORD  cursorCommitBehavior;                     // Indicates how cursors are affected by a db commit
-			UWORD  cursorRollbackBehavior;                   // Indicates how cursors are affected by a db rollback
-			UWORD  supportNotNullClause;                     // Indicates if data source supports NOT NULL clause
-			wchar_t supportIEF[2];                            // Integrity Enhancement Facility (Referential Integrity)
-			UDWORD txnIsolation;                             // Default transaction isolation level supported by the driver
-			UDWORD txnIsolationOptions;                      // Transaction isolation level options available
-			UDWORD fetchDirections;                          // Fetch directions supported
-			UDWORD lockTypes;                                // Lock types supported in SQLSetPos
-			UDWORD posOperations;                            // Position operations supported in SQLSetPos
-			UDWORD posStmts;                                 // Position statements supported
-			UDWORD scrollConcurrency;                        // Concurrency control options supported for scrollable cursors
-			UDWORD scrollOptions;                            // Scroll Options supported for scrollable cursors
-			UDWORD staticSensitivity;                        // Indicates if additions, deletions and updates can be detected
-			UWORD  txnCapable;                               // Indicates if the data source supports transactions
-			UDWORD loginTimeout;                             // Number seconds to wait for a login request
-			SQLUSMALLINT  maxCatalogNameLen;					// Max length of a catalog name. Can be 0 if no limit, or limit is unknown
-			SQLUSMALLINT  maxSchemaNameLen;						// Max length of a schema name. Can be 0 if no limit, or limit is unknown
-			SQLUSMALLINT  maxTableNameLen;						// Max length of a table name. Can be 0 if no limit, or limit is unknown
-		} m_dbInf;
+		SDbInfo m_dbInf;
 
 	public:
 

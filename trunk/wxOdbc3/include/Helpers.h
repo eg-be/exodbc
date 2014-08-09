@@ -153,6 +153,8 @@ namespace exodbc
 	extern EXODBCAPI SQLHANDLE	AllocStmtHandle(const SQLHANDLE& hDbc);
 	extern EXODBCAPI bool		FreeStmtHandle(SQLHANDLE& hStmt);
 
+	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
+
 	// Classes
 	// -------
 
