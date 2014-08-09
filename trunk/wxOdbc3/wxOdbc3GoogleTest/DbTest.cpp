@@ -87,6 +87,7 @@ namespace exOdbcTest
 		SDbInfo dbInfo = db.GetDbInfo();
 		std::wstring sInfo = dbInfo.ToStr();
 
+		EXPECT_TRUE(sInfo.length() > 0);
 		BOOST_LOG_TRIVIAL(info) << sInfo;
 
 		db.Close();
