@@ -97,7 +97,7 @@ namespace exodbc
 		/*!
 		 * \fn	DbEnvironment::DbEnvironment(OdbcVersion odbcVersion);
 		 *
-		 * \brief	Constructor. Initializes the env-handle and sets the odbdc-version.
+		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
 		 *
 		 * \param	odbcVersion	The ODBC version.
 		 */
@@ -106,7 +106,7 @@ namespace exodbc
 		/*!
 		 * \fn	DbEnvironment::DbEnvironment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
 		 *
-		 * \brief	Constructor. Initializes the env-handle and sets the odbdc-version.
+		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
 		 * 			The connection-information is set to not use a connection-string when connecting to the database later.
 		 *
 		 * \param	dsn		   	The dsn.
@@ -119,8 +119,8 @@ namespace exodbc
 		/*!
 		 * \fn	DbEnvironment::DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
 		 *
-		 * \brief	Constructor. Initializes the env-handle and sets the odbdc-version.
-		 * 			Connectoin-information is set to use a connection-string when connecting to the database laster.
+		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
+		 * 			Connection-information is set to use a connection-string when connecting to the database laster.
 		 *
 		 * \param	connectionString	The connection string.
 		 * \param	odbcVersion			(Optional) the ODBC version.
