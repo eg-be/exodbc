@@ -143,8 +143,13 @@ namespace exodbc
 	}  // wxDbTableInf::Initialize()
 
 	Database::Database(const DbEnvironment* const pEnv)
+		: m_dbIsOpen(false)
 	{
-		exASSERT(pEnv);
+//		exASSERT(pEnv);
+
+		//m_hdbc = AllocDbcHandle(pEnv->GetHenv());
+		//FreeDbcHandle(m_hdbc);
+		//m_henv = pEnv->GetHenv();
 
 //		SQLHANDLE hdbc = AllocDbcHandle(pEnv->GetHenv());
 //		FreeDbcHandle(hdbc);

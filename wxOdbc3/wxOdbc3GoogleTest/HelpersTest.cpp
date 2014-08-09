@@ -53,6 +53,11 @@ namespace exOdbcTest
 		SQLHANDLE hDbc = AllocDbcHandle(env.GetHenv());
 		EXPECT_FALSE(SQL_NULL_HDBC == hDbc);
 
+		// Allocating from a hDbc handle should not work
+		SQLHANDLE hCopy = hDbc;
+		SQLHANDLE hFail = AllocDbcHandle(hCopy);
+		EXPECT_EQ(SQL_NULL_HDBC, hFail);
+
 		FreeDbcHandle(hDbc);
 	}
 
@@ -64,8 +69,11 @@ namespace exOdbcTest
 		SQLHANDLE hDbc = AllocDbcHandle(env.GetHenv());
 		ASSERT_FALSE(SQL_NULL_HDBC == hDbc);
 
+		// freeing twice should not work
+		SQLHANDLE hCopy = hDbc;
 		EXPECT_TRUE(FreeDbcHandle(hDbc));
-
+		
+		EXPECT_FALSE(FreeDbcHandle(hCopy));
 	}
 	// Interfaces
 	// ----------
