@@ -91,7 +91,7 @@ namespace exodbc
 	* \param const std::wstring& w
 	* \return std::string
 	*/
-	std::string w2s(const std::wstring& w);
+	extern std::string w2s(const std::wstring& w);
 
 	/*!
 	 * \fn	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = NULL, SQLHANDLE hDbc = NULL, SQLHANDLE hStmt = NULL);
@@ -104,7 +104,15 @@ namespace exodbc
 	 *
 	 * \return	all errors.
 	 */
-	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = NULL, SQLHANDLE hDbc = NULL, SQLHANDLE hStmt = NULL);
+	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = NULL, SQLHANDLE hDbc = NULL, SQLHANDLE hStmt = NULL);
+
+	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors);
+	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc, SQLSMALLINT& totalErrors);
+	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt, SQLSMALLINT& totalErrors);
+
+	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv);
+	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc);
+	extern EXODBCAPI SErrorInfo GetLastStmError(SQLHANDLE hStmt);
 
 	// Classes
 	// -------

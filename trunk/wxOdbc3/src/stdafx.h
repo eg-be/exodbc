@@ -32,5 +32,8 @@
 #include <sqlucode.h>
 #include <odbcinst.h>
 
+// our stuff
+#include "Helpers.h"
+
 
 // TODO: reference additional headers your program requires here
