@@ -123,8 +123,8 @@ namespace exOdbcTest
 	TEST_P(DbTest, OpenOdbc3)
 	{
 		DbEnvironment env;
-		ASSERT_TRUE(env.SetOdbcVersion(OV_3));
 		ASSERT_TRUE(env.AllocHenv());
+		ASSERT_TRUE(env.SetOdbcVersion(OV_3));
 		HENV henv = env.GetHenv();
 		ASSERT_TRUE(henv != NULL);
 

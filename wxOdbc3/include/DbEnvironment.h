@@ -82,18 +82,100 @@ namespace exodbc
 	{
 	public:
 
+		/*!
+		 * \fn	DbEnvironment::DbEnvironment();
+		 *
+		 * \brief	Default constructor.
+		 * 			You must manually call AllocHandle() and SetOdbcVersion after 
+		 * 			creating the object.
+		 */
+
 		DbEnvironment();
-		DbEnvironment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring());
-		DbEnvironment(const std::wstring& connectionString);
+
+		/*!
+		 * \fn	DbEnvironment::DbEnvironment(OdbcVersion odbcVersion);
+		 *
+		 * \brief	Constructor. Initializes the env-handle and sets the odbdc-version.
+		 *
+		 * \param	odbcVersion	The ODBC version.
+		 */
+
+		DbEnvironment(OdbcVersion odbcVersion);
+
+		/*!
+		 * \fn	DbEnvironment::DbEnvironment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
+		 *
+		 * \brief	Constructor. Initializes the env-handle and sets the odbdc-version.
+		 * 			The connection-information is set to not use a connection-string when connecting to the database later.
+		 *
+		 * \param	dsn		   	The dsn.
+		 * \param	userID	   	(Optional) identifier for the user.
+		 * \param	password   	(Optional) the password.
+		 * \param	odbcVersion	(Optional) the ODBC version.
+		 */
+
+		DbEnvironment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
+
+		/*!
+		 * \fn	DbEnvironment::DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
+		 *
+		 * \brief	Constructor. Initializes the env-handle and sets the odbdc-version.
+		 * 			Connectoin-information is set to use a connection-string when connecting to the database laster.
+		 *
+		 * \param	connectionString	The connection string.
+		 * \param	odbcVersion			(Optional) the ODBC version.
+		 */
+
+		DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
+
+		/*!
+		 * \fn	DbEnvironment::~DbEnvironment();
+		 *
+		 * \brief	Destructor. Tries to free the env-handle, if one is allocated.
+		 */
 
 		~DbEnvironment();
 
+		/*!
+		 * \fn	bool DbEnvironment::Initialize();
+		 *
+		 * \brief	Initializes this object.
+		 * 			Set all members to 0.
+		 * 			Cannot be called if a Henv is allocated.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool			Initialize();
 
 		SErrorInfo		GetLastError();
 
+		/*!
+		 * \fn	bool DbEnvironment::AllocHenv();
+		 *
+		 * \brief	Tries to allocate a new Henv and set the ODBC-Version.
+		 * 			Cannot be called if a Henv is allocated.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool			AllocHenv();
+
+		/*!
+		 * \fn	bool DbEnvironment::FreeHenv();
+		 *
+		 * \brief	Tries to free an allocated Henv.
+		 * 			Can only be called if a Henv is allocated.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool			FreeHenv();
+
+		/*!
+		 * \fn	bool DbEnvironment::HaveHenv()
+		 *
+		 * \brief	Returns true is a Henv is allocated.
+		 *
+		 * \return	Returns true is a Henv is allocated.
+		 */
 		bool			HaveHenv()			{ return m_henv != NULL; };
 
 		// Accessors
@@ -110,23 +192,81 @@ namespace exodbc
 		const wchar_t*	GetConnectionStr() { return m_connectionStr; }
 		bool			UseConnectionStr() { return m_useConnectionStr; }
 
+		/*!
+		 * \fn	void DbEnvironment::SetDsn(const std::wstring& dsn);
+		 *
+		 * \brief	Sets a dsn.
+		 *
+		 * \param	dsn	The dsn. Cannot be longer than SQL_MAX_DSN_LENGTH
+		 */
 		void			SetDsn(const std::wstring& dsn);
+
+		/*!
+		 * \fn	void DbEnvironment::SetUserID(const std::wstring& userID);
+		 *
+		 * \brief	Sets user identifier.
+		 *
+		 * \param	userID	Identifier for the user. Cannot be longer than SQL_MAX_USER_NAME_LEN
+		 */
 		void			SetUserID(const std::wstring& userID);
+
+		/*!
+		 * \fn	void DbEnvironment::SetPassword(const std::wstring &password);
+		 *
+		 * \brief	Sets a password.
+		 *
+		 * \param	password	The password. Cannot be longer than SQL_MAX_AUTHSTR_LEN
+		 */
 		void			SetPassword(const std::wstring &password);
 
+		/*!
+		 * \fn	void DbEnvironment::SetConnectionStr(const std::wstring &connectStr);
+		 *
+		 * \brief	Sets connection string.
+		 *
+		 * \param	connectStr	The connect string. Cannot be longer than SQL_MAX_CONNECTSTR_LEN
+		 * 						Notes the connection-information to use a connection-string when
+		 * 						connecting to the database if called with a non-empty connection
+		 * 						string. Removed if called with an empty connection string.
+		 */
 		void			SetConnectionStr(const std::wstring &connectStr);
 
+		/*!
+		 * \fn	bool DbEnvironment::SetOdbcVersion(OdbcVersion version);
+		 *
+		 * \brief	Sets ODBC version.
+		 *
+		 * \param	version	The version.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool			SetOdbcVersion(OdbcVersion version);		
+
+		/*!
+		 * \fn	OdbcVersion DbEnvironment::GetOdbcVersion();
+		 *
+		 * \brief	Gets ODBC version.
+		 *
+		 * \return	The ODBC version or OV_UNKNOWN if reading the version fails.
+		 */
 		OdbcVersion		GetOdbcVersion();
 
 		enum ListMode { All, System, User };
+
+		/*!
+		 * \fn	std::vector<SDataSource> DbEnvironment::ListDataSources(ListMode mode = All);
+		 *
+		 * \brief	List data sources.
+		 *
+		 * \param	mode	(Optional) Decide to list all dsns, or only user / system dsns.
+		 *
+		 * \return	A std::vector&lt;SDataSource&gt;
+		 */
 		std::vector<SDataSource> ListDataSources(ListMode mode = All);
 
 	private:
 		bool m_freeHenvOnDestroy;
 		bool m_useConnectionStr;
-
-		OdbcVersion m_requestedOdbcVersion;					// Sets to SQL_OV_ODBC2, SQL_OV_ODBC3 or SQL_OV_ODBC3_80, see AllocHenv
 
 		HENV m_henv;
 		wchar_t m_dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
