@@ -265,11 +265,57 @@ namespace exodbc
 		Database(const HENV &aHenv, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
 		~Database();
 
-		// Data Source Name, User ID, Password and whether OpenImpl should fail on data type not supported
-		bool         Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported=true);
-		///This version of Open will OpenImpl the odbc source selection dialog. Cast a wxWindow::GetHandle() to SQLHWND to use.
+		/*!
+		 * \fn	bool Database::Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported=true);
+		 *
+		 * \brief	Connect using a prepared connection-String.
+		 * 			Uses SQLDriverConnect without a window-handle to connect
+		 *
+		 * \param	connectStr			 		The connect string.
+		 * \param	failOnDataTypeUnsupported	(Optional) true if fail on data type unsupported.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
+		bool         Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported = true);
+
+		/*!
+		 * \fn	bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported = true);
+		 *
+		 * \brief	This version of Open will display the odbc source selection dialog, using SQLDriverConnect. Cast a
+		 * 			wxWindow::GetHandle() to SQLHWND to use.
+		 *
+		 * \param	inConnectStr			 	The in connect string.
+		 * \param	parentWnd				 	The parent window.
+		 * \param	failOnDataTypeUnsupported	(Optional) true if fail on data type unsupported.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool         Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported = true);
+
+		/*!
+		 * \fn	bool Database::Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr, bool failOnDataTypeUnsupported = true);
+		 *
+		 * \brief	Opens the connectiong using SQLConnect with the passed parameters.
+		 *
+		 * \param	Dsn						 	The dsn.
+		 * \param	Uid						 	The UID.
+		 * \param	AuthStr					 	The authentication string.
+		 * \param	failOnDataTypeUnsupported	(Optional) true if fail on data type unsupported.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr, bool failOnDataTypeUnsupported = true);
+
+		/*!
+		 * \fn	bool Database::Open(DbEnvironment* dbConnectInf, bool failOnDataTypeUnsupported = true);
+		 *
+		 * \brief	Opens by using the information from the passed DbEnvironment
+		 *
+		 * \param [in,out]	dbConnectInf	 	If non-null, the database connect inf.
+		 * \param	failOnDataTypeUnsupported	(Optional) true if fail on data type unsupported.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool         Open(DbEnvironment* dbConnectInf, bool failOnDataTypeUnsupported = true);
 		void         Close();
 		bool         CommitTrans();
