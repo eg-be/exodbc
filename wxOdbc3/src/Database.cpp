@@ -527,7 +527,7 @@ namespace exodbc
 
 	bool Database::Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported)
 	{
-		exASSERT(inConnectStr.length());
+		exASSERT(inConnectStr.length() > 0);
 		return Open(inConnectStr, NULL, failOnDataTypeUnsupported);
 	}
 
@@ -537,36 +537,23 @@ namespace exodbc
 		m_uid        = emptyString;
 		m_authStr    = emptyString;
 
-		RETCODE retcode;
+		SQLRETURN retcode;
 
-		if (!FwdOnlyCursors())
-		{
-			// Specify that the ODBC cursor library be used, if needed.  This must be
-			// specified before the connection is made.
-			retcode = SQLSetConnectOption(m_hdbc, SQL_ODBC_CURSORS, SQL_CUR_USE_IF_NEEDED);
-
-#ifdef DBDEBUG_CONSOLE
-			if (retcode == SQL_SUCCESS)
-				std::wcout << L"SQLSetConnectOption(CURSOR_LIB) successful" << std::endl;
-			else
-				std::wcout << L"SQLSetConnectOption(CURSOR_LIB) failed" << std::endl;
-#else
-			//wxUnusedVar(retcode);
-#endif
-		}
-
+		// TODO: See notes about forwardCursor in Open Method with dsn, user, pass 
+		
 		// Connect to the data source
-		SQLTCHAR outConnectBuffer[SQL_MAX_CONNECTSTR_LEN+1];  // MS recommends at least 1k buffer
-		short outConnectBufferLen;
+		SQLWCHAR outConnectBuffer[SQL_MAX_CONNECTSTR_LEN + 1];  // MS recommends at least 1k buffer
+		SQLSMALLINT outConnectBufferLen;
 
 		m_inConnectionStr = inConnectStr;
 
-		retcode = SQLDriverConnect(m_hdbc, parentWnd, (SQLTCHAR FAR *)m_inConnectionStr.c_str(),
-			(SWORD)m_inConnectionStr.length(), (SQLTCHAR FAR *)outConnectBuffer,
+		retcode = SQLDriverConnect(m_hdbc, parentWnd, 
+			(SQLWCHAR*) m_inConnectionStr.c_str(),
+			m_inConnectionStr.length(), 
+			(SQLWCHAR*) outConnectBuffer,
 			EXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE );
 
-		if ((retcode != SQL_SUCCESS) &&
-			(retcode != SQL_SUCCESS_WITH_INFO))
+		if (retcode != SQL_SUCCESS)
 			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
 
 		outConnectBuffer[outConnectBufferLen] = 0;
@@ -580,46 +567,38 @@ namespace exodbc
 	bool Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr, bool failOnDataTypeUnsupported)
 	{
 		exASSERT(!dsn.empty());
-		m_dsn        = m_dsn;
-		m_uid        = m_uid;
-		m_authStr    = m_authStr;
 
-		m_inConnectionStr = emptyString;
-		m_outConnectionStr = emptyString;
+		m_dsn        = dsn;
+		m_uid        = uid;
+		m_authStr    = authStr;
 
-		RETCODE retcode;
+		// Not using a connection-string
+		m_inConnectionStr = L"";
+		m_outConnectionStr = L"";
 
-		if (!FwdOnlyCursors())
-		{
-			// Specify that the ODBC cursor library be used, if needed.  This must be
-			// specified before the connection is made.
-			retcode = SQLSetConnectOption(m_hdbc, SQL_ODBC_CURSORS, SQL_CUR_USE_IF_NEEDED);
-
-#ifdef DBDEBUG_CONSOLE
-			if (retcode == SQL_SUCCESS)
-				std::wcout << L"SQLSetConnectOption(CURSOR_LIB) successful" << std::endl;
-			else
-				std::wcout << L"SQLSetConnectOption(CURSOR_LIB) failed" << std::endl;
-#else
-			//wxUnusedVar( retcode );
-#endif
-		}
+		// TODO: Note about the forward-only cursors: This will be removed soon, see: 
+		// http://msdn.microsoft.com/en-us/library/ms713605%28v=vs.85%29.aspx -> SQL_ATTR_ODBC_CURSORS
+		// MS recommends to use the drivers lib (not modify here ? ). There is a statement-attribute to
+		// set the cursor-scrolling: http://msdn.microsoft.com/en-us/library/ms710272%28v=vs.85%29.aspx
+		//  -> http://msdn.microsoft.com/en-us/library/ms712631%28v=vs.85%29.aspx -> SQL_ATTR_CURSOR_SCROLLABLE
 
 		// Connect to the data source
-		retcode = SQLConnect(m_hdbc, (SQLTCHAR FAR *) m_dsn.c_str(), SQL_NTS,
-			(SQLTCHAR FAR *) m_uid.c_str(), SQL_NTS,
-			(SQLTCHAR FAR *) m_authStr.c_str(), SQL_NTS);
+		SQLRETURN retcode = SQLConnect(m_hdbc, 
+			(SQLWCHAR*) m_dsn.c_str(), SQL_NTS,
+			(SQLWCHAR*) m_uid.c_str(), SQL_NTS,
+			(SQLWCHAR*) m_authStr.c_str(), SQL_NTS);
 
-		if ((retcode != SQL_SUCCESS) &&
-			(retcode != SQL_SUCCESS_WITH_INFO))
+		if (retcode != SQL_SUCCESS)
+		{
 			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
+		}
 
 		// Mark database as Open
 		m_dbIsOpen = true;
 
 		return OpenImpl(failOnDataTypeUnsupported);
 
-	} // wxDb::Open()
+	}
 
 
 	bool Database::Open(DbEnvironment *dbConnectInf, bool failOnDataTypeUnsupported)
@@ -630,9 +609,8 @@ namespace exodbc
 		if (dbConnectInf->UseConnectionStr())
 			return Open(dbConnectInf->GetConnectionStr(), failOnDataTypeUnsupported);
 		else
-			return Open(dbConnectInf->GetDsn(), dbConnectInf->GetUserID(),
-			dbConnectInf->GetPassword(), failOnDataTypeUnsupported);
-	}  // wxDb::Open()
+			return Open(dbConnectInf->GetDsn(), dbConnectInf->GetUserID(), dbConnectInf->GetPassword(), failOnDataTypeUnsupported);
+	}
 
 
 
