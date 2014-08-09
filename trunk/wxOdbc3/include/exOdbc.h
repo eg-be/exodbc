@@ -90,36 +90,7 @@ namespace exodbc
 	// datasource when the datasource is first OpenImpled.
 	struct EXODBCAPI SDbInfo
 	{
-		SDbInfo()
-		{
-			dbmsName[0] = 0;
-			dbmsVer[0] = 0;
-			driverName[0] = 0;
-			odbcVer[0] = 0;
-			drvMgrOdbcVer[0] = 0;
-			driverVer[0] = 0;
-			serverName[0] = 0;
-			databaseName[0] = 0;
-			outerJoins[0] = 0;
-			procedureSupport[0] = 0;
-			accessibleTables[0] = 0;
-			maxConnections = 0;
-			maxStmts = 0;
-			cliConfLvl = 0;
-			cursorCommitBehavior = 0;
-			cursorRollbackBehavior = 0;
-			supportNotNullClause = 0;
-			supportIEF[0] = 0;
-			txnIsolation = 0;
-			txnIsolationOptions = 0;
-			posOperations = 0;
-			posStmts = 0;
-			scrollOptions = 0;
-			txnCapable = 0;
-			maxCatalogNameLen = 0;
-			maxSchemaNameLen = 0;
-			maxTableNameLen = 0;
-		}
+		SDbInfo();
 
 		// [Output] Pointer to a buffer in which to return the information. Depending on the InfoType requested, 
 		// the information returned will be one of the following: a null-terminated character string, an SQLUSMALLINT value, 
@@ -155,6 +126,8 @@ namespace exodbc
 		SQLUSMALLINT  maxCatalogNameLen;				// Max length of a catalog name. Can be 0 if no limit, or limit is unknown
 		SQLUSMALLINT  maxSchemaNameLen;					// Max length of a schema name. Can be 0 if no limit, or limit is unknown
 		SQLUSMALLINT  maxTableNameLen;					// Max length of a table name. Can be 0 if no limit, or limit is unknown
+
+		std::wstring ToStr() const;
 	};
 
 	// Enums

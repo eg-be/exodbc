@@ -78,6 +78,20 @@ namespace exOdbcTest
 //		int p = 3;
 	}
 
+	TEST_P(DbTest, GetDbInfo)
+	{
+		Database db(m_pDbEnv);
+
+		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
+
+		SDbInfo dbInfo = db.GetDbInfo();
+		std::wstring sInfo = dbInfo.ToStr();
+
+		BOOST_LOG_TRIVIAL(info) << sInfo;
+
+		db.Close();
+
+	}
 
 	TEST_P(DbTest, Open)
 	{

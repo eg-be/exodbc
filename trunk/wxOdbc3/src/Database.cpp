@@ -504,7 +504,7 @@ namespace exodbc
 			return false;
 
 		// Query the data source for info about itself
-		if (!GetDbInfoImpl(failOnDataTypeUnsupported))
+		if (!ReadDbInfo(m_dbInf))
 			return false;
 
 		if (!DetermineDataTypes(failOnDataTypeUnsupported))
@@ -637,215 +637,42 @@ namespace exodbc
 	}
 
 
-	/********** wxDb::getDbInfo() **********/
-	bool Database::GetDbInfoImpl(bool failOnDataTypeUnsupported)
+	bool Database::ReadDbInfo(SDbInfo& dbInf)
 	{
 		SWORD cb;
-		RETCODE retcode;
 
 		// SQLGetInfo gets null-terminated by the driver. It needs buffer-lengths (not char-lengts), even in unicode
 		// see http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
 		// so it works with sizeof and statically declared arrays
 		
 		bool ok = true;
-		ok = GetInfo(m_hdbc, SQL_SERVER_NAME, m_dbInf.serverName, sizeof(m_dbInf.serverName), &cb);
+		ok = GetInfo(m_hdbc, SQL_SERVER_NAME, dbInf.serverName, sizeof(dbInf.serverName), &cb);
+		ok = GetInfo(m_hdbc, SQL_DATABASE_NAME, dbInf.databaseName, sizeof(dbInf.databaseName), &cb);
+		ok = GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
+		ok = GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.dbmsVer, sizeof(dbInf.dbmsVer), &cb);
+		ok = GetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, &dbInf.maxConnections, sizeof(dbInf.maxConnections), &cb);
+		ok = GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.maxStmts, sizeof(dbInf.maxStmts), &cb);
+		ok = GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.driverName, sizeof(dbInf.driverName), &cb);
+		ok = GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.odbcVer, sizeof(dbInf.odbcVer), &cb);
+		ok = GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.drvMgrOdbcVer, sizeof(dbInf.drvMgrOdbcVer), &cb);
+		ok = GetInfo(m_hdbc, SQL_DRIVER_VER, dbInf.driverVer, sizeof(dbInf.driverVer), &cb);
+		ok = GetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, &dbInf.cliConfLvl, sizeof(dbInf.cliConfLvl), &cb);
+		ok = GetInfo(m_hdbc, SQL_OUTER_JOINS, dbInf.outerJoins, sizeof(dbInf.outerJoins), &cb);
+		ok = GetInfo(m_hdbc, SQL_PROCEDURES, dbInf.procedureSupport, sizeof(dbInf.procedureSupport), &cb);
+		ok = GetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, dbInf.accessibleTables, sizeof(dbInf.accessibleTables), &cb);
+		ok = GetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, &dbInf.cursorCommitBehavior, sizeof(dbInf.cursorCommitBehavior), &cb);
+		ok = GetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, &dbInf.cursorRollbackBehavior, sizeof(dbInf.cursorRollbackBehavior), &cb);
+		ok = GetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, &dbInf.supportNotNullClause, sizeof(dbInf.supportNotNullClause), &cb);
+		ok = GetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, dbInf.supportIEF, sizeof(dbInf.supportIEF), &cb);
+		ok = GetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, &dbInf.txnIsolation, sizeof(dbInf.txnIsolation), &cb);
+		ok = GetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, &dbInf.txnIsolationOptions, sizeof(dbInf.txnIsolationOptions), &cb);
+		ok = GetInfo(m_hdbc, SQL_POS_OPERATIONS, &dbInf.posOperations, sizeof(dbInf.posOperations), &cb);
+		ok = GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &dbInf.posStmts, sizeof(dbInf.posStmts), &cb);
+		ok = GetInfo(m_hdbc, SQL_SCROLL_OPTIONS, &dbInf.scrollOptions, sizeof(dbInf.scrollOptions), &cb);
+		ok = GetInfo(m_hdbc, SQL_TXN_CAPABLE, &dbInf.txnCapable, sizeof(dbInf.txnCapable), &cb);
 
-		retcode = SQLGetInfo(m_hdbc, SQL_SERVER_NAME, (UCHAR*) m_dbInf.serverName, sizeof(m_dbInf.serverName), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_DATABASE_NAME, (UCHAR*) m_dbInf.databaseName, sizeof(m_dbInf.databaseName), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR*) m_dbInf.dbmsName, sizeof(m_dbInf.dbmsName), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_VER, (UCHAR*) m_dbInf.dbmsVer, sizeof(m_dbInf.dbmsVer), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, (UCHAR*) &m_dbInf.maxConnections, sizeof(m_dbInf.maxConnections), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, (UCHAR*) &m_dbInf.maxStmts, sizeof(m_dbInf.maxStmts), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_NAME, (UCHAR*) m_dbInf.driverName, sizeof(m_dbInf.driverName), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, (UCHAR*) m_dbInf.odbcVer, sizeof(m_dbInf.odbcVer), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_VER, (UCHAR*) m_dbInf.drvMgrOdbcVer, sizeof(m_dbInf.drvMgrOdbcVer), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_VER, (UCHAR*) m_dbInf.driverVer, sizeof(m_dbInf.driverVer), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, (UCHAR*) &m_dbInf.cliConfLvl, sizeof(m_dbInf.cliConfLvl), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			// Not all drivers support this call - Nick Gorham(unixODBC)
-			m_dbInf.cliConfLvl = 0;
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_OUTER_JOINS, (UCHAR*) m_dbInf.outerJoins, sizeof(m_dbInf.outerJoins), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_PROCEDURES, (UCHAR*) m_dbInf.procedureSupport, sizeof(m_dbInf.procedureSupport), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, (UCHAR*) m_dbInf.accessibleTables, sizeof(m_dbInf.accessibleTables), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, (UCHAR*) &m_dbInf.cursorCommitBehavior, sizeof(m_dbInf.cursorCommitBehavior), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, (UCHAR*) &m_dbInf.cursorRollbackBehavior, sizeof(m_dbInf.cursorRollbackBehavior), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, (UCHAR*) &m_dbInf.supportNotNullClause, sizeof(m_dbInf.supportNotNullClause), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, (UCHAR*) m_dbInf.supportIEF, sizeof(m_dbInf.supportIEF), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, (UCHAR*) &m_dbInf.txnIsolation, sizeof(m_dbInf.txnIsolation), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, (UCHAR*) &m_dbInf.txnIsolationOptions, sizeof(m_dbInf.txnIsolationOptions), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_POS_OPERATIONS, (UCHAR*) &m_dbInf.posOperations, sizeof(m_dbInf.posOperations), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, (UCHAR*) &m_dbInf.posStmts, sizeof(m_dbInf.posStmts), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_OPTIONS, (UCHAR*) &m_dbInf.scrollOptions, sizeof(m_dbInf.scrollOptions), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_TXN_CAPABLE, (UCHAR*) &m_dbInf.txnCapable, sizeof(m_dbInf.txnCapable), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		// SQL_LOGIN_TIMEOUT is a Connection-Attribute
-		//retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &m_dbInf.loginTimeout, sizeof(m_dbInf.loginTimeout), &cb);
+		// TODO: SQL_LOGIN_TIMEOUT is a Connection-Attribute
+		//retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &dbInf.loginTimeout, sizeof(dbInf.loginTimeout), &cb);
 		//if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		//{
 		//	DispAllErrors(SQL_NULL_HENV, m_hdbc);
@@ -853,229 +680,18 @@ namespace exodbc
 		//		return false;
 		//}
 
-		retcode = SQLGetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &m_dbInf.maxCatalogNameLen, sizeof(m_dbInf.maxCatalogNameLen), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
+		ok = GetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &dbInf.maxCatalogNameLen, sizeof(dbInf.maxCatalogNameLen), &cb);
+		ok = GetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &dbInf.maxSchemaNameLen, sizeof(dbInf.maxSchemaNameLen), &cb);
+		ok = GetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &dbInf.maxTableNameLen, sizeof(dbInf.maxTableNameLen), &cb);
+
+		if(!ok)
 		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
+			BOOST_LOG_TRIVIAL(warning) << L"Not all Database Infos could be queried";
 		}
 
-		retcode = SQLGetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &m_dbInf.maxSchemaNameLen, sizeof(m_dbInf.maxSchemaNameLen), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-		retcode = SQLGetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &m_dbInf.maxTableNameLen, sizeof(m_dbInf.maxTableNameLen), &cb);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		{
-			DispAllErrors(SQL_NULL_HENV, m_hdbc);
-			if (failOnDataTypeUnsupported)
-				return false;
-		}
-
-#ifdef DBDEBUG_CONSOLE
-		std::wcout << L"***** DATA SOURCE INFORMATION *****" << std::endl;
-		std::wcout << L"SERVER Name: " << m_dbInf.serverName << std::endl;
-		std::wcout << L"DBMS Name: " << m_dbInf.dbmsName << L"; DBMS Version: " << m_dbInf.dbmsVer << std::endl;
-		std::wcout << L"ODBC Version: " << m_dbInf.odbcVer << L"; Driver Version: " << m_dbInf.driverVer << std::endl;
-
-		std::wcout << L"API Conf. Level: ";
-		switch(m_dbInf.apiConfLvl)
-		{
-		case SQL_OAC_NONE:      std::wcout << L"None";       break;
-		case SQL_OAC_LEVEL1:    std::wcout << L"Level 1";    break;
-		case SQL_OAC_LEVEL2:    std::wcout << L"Level 2";    break;
-		}
-		std::wcout << std::endl;
-
-		std::wcout << L"SAG CLI Conf. Level: ";
-		switch(m_dbInf.cliConfLvl)
-		{
-		case SQL_OSCC_NOT_COMPLIANT:    std::wcout << L"Not Compliant";    break;
-		case SQL_OSCC_COMPLIANT:        std::wcout << L"Compliant";        break;
-		}
-		std::wcout << std::endl;
-
-		std::wcout << L"SQL Conf. Level: ";
-		switch(m_dbInf.sqlConfLvl)
-		{
-		case SQL_OSC_MINIMUM:     std::wcout << L"Minimum Grammar";     break;
-		case SQL_OSC_CORE:        std::wcout << L"Core Grammar";        break;
-		case SQL_OSC_EXTENDED:    std::wcout << L"Extended Grammar";    break;
-		}
-		std::wcout << std::endl;
-
-		std::wcout << L"Max. Connections: "       << m_dbInf.maxConnections   << std::endl;
-		std::wcout << L"Outer Joins: "            << m_dbInf.outerJoins       << std::endl;
-		std::wcout << L"Support for Procedures: " << m_dbInf.procedureSupport << std::endl;
-		std::wcout << L"All tables accessible : " << m_dbInf.accessibleTables << std::endl;
-		std::wcout << L"Cursor COMMIT Behavior: ";
-		switch(m_dbInf.cursorCommitBehavior)
-		{
-		case SQL_CB_DELETE:        std::wcout << L"Delete cursors";      break;
-		case SQL_CB_CLOSE:         std::wcout << L"Close cursors";       break;
-		case SQL_CB_PRESERVE:      std::wcout << L"Preserve cursors";    break;
-		}
-		std::wcout << std::endl;
-
-		std::wcout << L"Cursor ROLLBACK Behavior: ";
-		switch(m_dbInf.cursorRollbackBehavior)
-		{
-		case SQL_CB_DELETE:      std::wcout << L"Delete cursors";      break;
-		case SQL_CB_CLOSE:       std::wcout << L"Close cursors";       break;
-		case SQL_CB_PRESERVE:    std::wcout << L"Preserve cursors";    break;
-		}
-		std::wcout << std::endl;
-
-		std::wcout << L"Support NOT NULL clause: ";
-		switch(m_dbInf.supportNotNullClause)
-		{
-		case SQL_NNC_NULL:        std::wcout << L"No";        break;
-		case SQL_NNC_NON_NULL:    std::wcout << L"Yes";       break;
-		}
-		std::wcout << std::endl;
-
-		std::wcout << L"Support IEF (Ref. Integrity): " << m_dbInf.supportIEF   << std::endl;
-		std::wcout << L"Login Timeout: "                << m_dbInf.loginTimeout << std::endl;
-
-		std::wcout << std::endl << std::endl << L"more ..." << std::endl;
-		getchar();
-
-		std::wcout << L"Default Transaction Isolation: ";
-		switch(m_dbInf.txnIsolation)
-		{
-		case SQL_TXN_READ_UNCOMMITTED:  std::wcout << L"Read Uncommitted";    break;
-		case SQL_TXN_READ_COMMITTED:    std::wcout << L"Read Committed";      break;
-		case SQL_TXN_REPEATABLE_READ:   std::wcout << L"Repeatable Read";     break;
-		case SQL_TXN_SERIALIZABLE:      std::wcout << L"Serializable";        break;
-#ifdef ODBC_V20
-		case SQL_TXN_VERSIONING:        std::wcout << L"Versioning";          break;
-#endif
-		}
-		std::wcout << std::endl;
-
-		std::wcout << L"Transaction Isolation Options: ";
-		if (m_dbInf.txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
-			std::wcout << L"Read Uncommitted, ";
-		if (m_dbInf.txnIsolationOptions & SQL_TXN_READ_COMMITTED)
-			std::wcout << L"Read Committed, ";
-		if (m_dbInf.txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
-			std::wcout << L"Repeatable Read, ";
-		if (m_dbInf.txnIsolationOptions & SQL_TXN_SERIALIZABLE)
-			std::wcout << L"Serializable, ";
-#ifdef ODBC_V20
-		if (m_dbInf.txnIsolationOptions & SQL_TXN_VERSIONING)
-			std::wcout << L"Versioning";
-#endif
-		std::wcout << std::endl;
-
-		std::wcout << L"Fetch Directions Supported:" << std::endl << L"   ";
-		if (m_dbInf.fetchDirections & SQL_FD_FETCH_NEXT)
-			std::wcout << L"Next, ";
-		if (m_dbInf.fetchDirections & SQL_FD_FETCH_PRIOR)
-			std::wcout << L"Prev, ";
-		if (m_dbInf.fetchDirections & SQL_FD_FETCH_FIRST)
-			std::wcout << L"First, ";
-		if (m_dbInf.fetchDirections & SQL_FD_FETCH_LAST)
-			std::wcout << L"Last, ";
-		if (m_dbInf.fetchDirections & SQL_FD_FETCH_ABSOLUTE)
-			std::wcout << L"Absolute, ";
-		if (m_dbInf.fetchDirections & SQL_FD_FETCH_RELATIVE)
-			std::wcout << L"Relative, ";
-#ifdef ODBC_V20
-		if (m_dbInf.fetchDirections & SQL_FD_FETCH_RESUME)
-			std::wcout << L"Resume, ";
-#endif
-		if (m_dbInf.fetchDirections & SQL_FD_FETCH_BOOKMARK)
-			std::wcout << L"Bookmark";
-		std::wcout << std::endl;
-
-		std::wcout << L"Lock Types Supported (SQLSetPos): ";
-		if (m_dbInf.lockTypes & SQL_LCK_NO_CHANGE)
-			std::wcout << L"No Change, ";
-		if (m_dbInf.lockTypes & SQL_LCK_EXCLUSIVE)
-			std::wcout << L"Exclusive, ";
-		if (m_dbInf.lockTypes & SQL_LCK_UNLOCK)
-			std::wcout << L"UnLock";
-		std::wcout << std::endl;
-
-		std::wcout << L"Position Operations Supported (SQLSetPos): ";
-		if (m_dbInf.posOperations & SQL_POS_POSITION)
-			std::wcout << L"Position, ";
-		if (m_dbInf.posOperations & SQL_POS_REFRESH)
-			std::wcout << L"Refresh, ";
-		if (m_dbInf.posOperations & SQL_POS_UPDATE)
-			std::wcout << L"Upd, ";
-		if (m_dbInf.posOperations & SQL_POS_DELETE)
-			std::wcout << L"Del, ";
-		if (m_dbInf.posOperations & SQL_POS_ADD)
-			std::wcout << L"Add";
-		std::wcout << std::endl;
-
-		std::wcout << L"Positioned Statements Supported: ";
-		if (m_dbInf.posStmts & SQL_PS_POSITIONED_DELETE)
-			std::wcout << L"Pos delete, ";
-		if (m_dbInf.posStmts & SQL_PS_POSITIONED_UPDATE)
-			std::wcout << L"Pos update, ";
-		if (m_dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE)
-			std::wcout << L"Select for update";
-		std::wcout << std::endl;
-
-		std::wcout << L"Scroll Concurrency: ";
-		if (m_dbInf.scrollConcurrency & SQL_SCCO_READ_ONLY)
-			std::wcout << L"Read Only, ";
-		if (m_dbInf.scrollConcurrency & SQL_SCCO_LOCK)
-			std::wcout << L"Lock, ";
-		if (m_dbInf.scrollConcurrency & SQL_SCCO_OPT_ROWVER)
-			std::wcout << L"Opt. Rowver, ";
-		if (m_dbInf.scrollConcurrency & SQL_SCCO_OPT_VALUES)
-			std::wcout << L"Opt. Values";
-		std::wcout << std::endl;
-
-		std::wcout << L"Scroll Options: ";
-		if (m_dbInf.scrollOptions & SQL_SO_FORWARD_ONLY)
-			std::wcout << L"Fwd Only, ";
-		if (m_dbInf.scrollOptions & SQL_SO_STATIC)
-			std::wcout << L"Static, ";
-		if (m_dbInf.scrollOptions & SQL_SO_KEYSET_DRIVEN)
-			std::wcout << L"Keyset Driven, ";
-		if (m_dbInf.scrollOptions & SQL_SO_DYNAMIC)
-			std::wcout << L"Dynamic, ";
-		if (m_dbInf.scrollOptions & SQL_SO_MIXED)
-			std::wcout << L"Mixed";
-		std::wcout << std::endl;
-
-		std::wcout << L"Static Sensitivity: ";
-		if (m_dbInf.staticSensitivity & SQL_SS_ADDITIONS)
-			std::wcout << L"Additions, ";
-		if (m_dbInf.staticSensitivity & SQL_SS_DELETIONS)
-			std::wcout << L"Deletions, ";
-		if (m_dbInf.staticSensitivity & SQL_SS_UPDATES)
-			std::wcout << L"Updates";
-		std::wcout << std::endl;
-
-		std::wcout << L"Transaction Capable?: ";
-		switch(m_dbInf.txnCapable)
-		{
-		case SQL_TC_NONE:          std::wcout << L"No";            break;
-		case SQL_TC_DML:           std::wcout << L"DML Only";      break;
-		case SQL_TC_DDL_COMMIT:    std::wcout << L"DDL Commit";    break;
-		case SQL_TC_DDL_IGNORE:    std::wcout << L"DDL Ignore";    break;
-		case SQL_TC_ALL:           std::wcout << L"DDL & DML";     break;
-		}
-		std::wcout << std::endl;
-
-		std::wcout << std::endl;
-#endif
-
-		// Completed Successfully
-		return true;
-
-	} // wxDb::getDbInfo()
+		// Completed
+		return ok;
+	}
 
 
 	/********** wxDb::GetDataTypeInfoImpl() **********/
