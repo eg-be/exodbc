@@ -142,6 +142,12 @@ namespace exodbc
 		return true;
 	}  // wxDbTableInf::Initialize()
 
+	Database::Database(const DbEnvironment& env)
+	{
+		m_henv = env.GetHenv();
+
+		Initialize();
+	}
 
 	/********** wxDb Constructor **********/
 	Database::Database(const HENV &aHenv, bool FwdOnlyCursors)
