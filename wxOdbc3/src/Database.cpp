@@ -3159,7 +3159,7 @@ namespace exodbc
 
 		if (Dbms() == dbmsDBASE)
 		{
-			exFAIL_MSG(L"dbmsDBASE support is not enabled");
+			exFAIL_MSG("dbmsDBASE support is not enabled");
 			//     std::wstring dbName;
 			//     if (tablePath.length())
 			//dbName = (boost::wformat(L"%s/%s.dbf") % tablePath % tableName).str();

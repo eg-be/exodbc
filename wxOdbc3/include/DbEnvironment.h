@@ -82,7 +82,7 @@ namespace exodbc
 	{
 	private:
 		// Prevent copies. We would mess up the env-handle.
-		DbEnvironment(const DbEnvironment& other) {};
+		DbEnvironment(const DbEnvironment& other) { exNOT_IMPL; };
 
 	public:
 		/*!
