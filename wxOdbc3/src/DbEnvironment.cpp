@@ -213,7 +213,7 @@ namespace exodbc
 	}
 
 
-	OdbcVersion DbEnvironment::GetOdbcVersion()
+	OdbcVersion DbEnvironment::GetOdbcVersion() const
 	{
 		unsigned long value = 0;
 		SQLRETURN ret = SQLGetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
@@ -236,7 +236,7 @@ namespace exodbc
 		return OV_UNKNOWN;
 	}
 
-	vector<SDataSource> DbEnvironment::ListDataSources(ListMode mode /* = All */)
+	vector<SDataSource> DbEnvironment::ListDataSources(ListMode mode /* = All */) const
 	{
 		SQLSMALLINT nameBufferLength, descBufferLength = 0;
 		wchar_t nameBuffer[SQL_MAX_DSN_LENGTH + 1];

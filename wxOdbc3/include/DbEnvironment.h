@@ -86,7 +86,7 @@ namespace exodbc
 		 * \fn	DbEnvironment::DbEnvironment();
 		 *
 		 * \brief	Default constructor.
-		 * 			You must manually call AllocHandle() and SetOdbcVersion after 
+		 * 			You must manually call AllocHandle() and SetOdbcVersion() after 
 		 * 			creating the object.
 		 */
 		DbEnvironment();
@@ -169,21 +169,21 @@ namespace exodbc
 		 *
 		 * \return	Returns true is a Henv is allocated.
 		 */
-		bool			HaveHenv()			{ return m_henv != NULL; };
+		bool			HaveHenv() const	{ return m_henv != NULL; };
 
 		// Accessors
-		const HENV&		GetHenv()          { return m_henv; }
+		const HENV&		GetHenv() const		{ return m_henv; };
 
-		const wchar_t*	GetDsn()           { return m_dsn; }
+		const wchar_t*	GetDsn() const		{ return m_dsn; };
 
-		const wchar_t*	GetUid()           { return m_uid; }
-		const wchar_t*	GetUserID()        { return m_uid; }
+		const wchar_t*	GetUid() const		{ return m_uid; };
+		const wchar_t*	GetUserID() const	{ return m_uid; }
 
-		const wchar_t*	GetAuthStr()       { return m_authStr; }
-		const wchar_t*	GetPassword()      { return m_authStr; }
+		const wchar_t*	GetAuthStr() const	{ return m_authStr; }
+		const wchar_t*	GetPassword() const	{ return m_authStr; }
 
-		const wchar_t*	GetConnectionStr() { return m_connectionStr; }
-		bool			UseConnectionStr() { return m_useConnectionStr; }
+		const wchar_t*	GetConnectionStr() const { return m_connectionStr; }
+		bool			UseConnectionStr() const { return m_useConnectionStr; }
 
 		/*!
 		 * \fn	void DbEnvironment::SetDsn(const std::wstring& dsn);
@@ -242,7 +242,7 @@ namespace exodbc
 		 *
 		 * \return	The ODBC version or OV_UNKNOWN if reading the version fails.
 		 */
-		OdbcVersion		GetOdbcVersion();
+		OdbcVersion		GetOdbcVersion() const;
 
 		enum ListMode { All, System, User };
 
@@ -255,7 +255,7 @@ namespace exodbc
 		 *
 		 * \return	A std::vector&lt;SDataSource&gt;
 		 */
-		std::vector<SDataSource> ListDataSources(ListMode mode = All);
+		std::vector<SDataSource> ListDataSources(ListMode mode = All) const;
 
 	private:
 		bool m_freeHenvOnDestroy;
