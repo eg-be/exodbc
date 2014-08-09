@@ -497,7 +497,7 @@ namespace exodbc
 		if(SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt) != SQL_SUCCESS)
 		{
 			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate Stmt-Handle";
-			return(DispAllErrors(m_henv, m_hdbc));
+			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
 		}
 		//if (SQLAllocStmt(m_hdbc, &m_hstmt) != SQL_SUCCESS)
 		//	return(DispAllErrors(m_henv, m_hdbc));
@@ -565,7 +565,7 @@ namespace exodbc
 
 		if ((retcode != SQL_SUCCESS) &&
 			(retcode != SQL_SUCCESS_WITH_INFO))
-			return(DispAllErrors(m_henv, m_hdbc));
+			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
 
 		outConnectBuffer[outConnectBufferLen] = 0;
 		m_outConnectionStr = outConnectBuffer;
@@ -610,7 +610,7 @@ namespace exodbc
 
 		if ((retcode != SQL_SUCCESS) &&
 			(retcode != SQL_SUCCESS_WITH_INFO))
-			return(DispAllErrors(m_henv, m_hdbc));
+			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
 
 		return OpenImpl(failOnDataTypeUnsupported);
 
@@ -645,7 +645,7 @@ namespace exodbc
 
 		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR *) m_dbInf.dbmsName, sizeof(m_dbInf.dbmsName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-			return(DispAllErrors(m_henv, m_hdbc));
+			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
 
 		/* retcode = */ SQLSetConnectOption(m_hdbc, SQL_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF);
 		/* retcode = */ SQLSetConnectOption(m_hdbc, SQL_OPT_TRACE, SQL_OPT_TRACE_OFF);
@@ -670,12 +670,12 @@ namespace exodbc
 
 		retcode = SQLGetConnectOption(m_hdbc, SQL_AUTOCOMMIT, &l);
 		if (retcode != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc));
+			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
 		std::wcout << L"AUTOCOMMIT: " << (l == SQL_AUTOCOMMIT_OFF ? L"OFF" : L"ON") << std::endl;
 
 		retcode = SQLGetConnectOption(m_hdbc, SQL_ODBC_CURSORS, &l);
 		if (retcode != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc));
+			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
 		std::wcout << L"ODBC CURSORS: ";
 		switch(l)
 		{
@@ -693,7 +693,7 @@ namespace exodbc
 
 		retcode = SQLGetConnectOption(m_hdbc, SQL_OPT_TRACE, &l);
 		if (retcode != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc));
+			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
 		std::wcout << L"TRACING: " << (l == SQL_OPT_TRACE_OFF ? L"OFF" : L"ON") << std::endl;
 
 		std::wcout << std::endl;
@@ -714,7 +714,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_SERVER_NAME, (UCHAR*) m_dbInf.serverName, sizeof(m_dbInf.serverName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -722,7 +722,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_DATABASE_NAME, (UCHAR*) m_dbInf.databaseName, sizeof(m_dbInf.databaseName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -730,7 +730,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_NAME, (UCHAR*) m_dbInf.dbmsName, sizeof(m_dbInf.dbmsName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -741,7 +741,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_DBMS_VER, (UCHAR*) m_dbInf.dbmsVer, sizeof(m_dbInf.dbmsVer), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -749,7 +749,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_CONNECTIONS, (UCHAR*) &m_dbInf.maxConnections, sizeof(m_dbInf.maxConnections), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -757,7 +757,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_ACTIVE_STATEMENTS, (UCHAR*) &m_dbInf.maxStmts, sizeof(m_dbInf.maxStmts), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -765,7 +765,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_NAME, (UCHAR*) m_dbInf.driverName, sizeof(m_dbInf.driverName), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -773,7 +773,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, (UCHAR*) m_dbInf.odbcVer, sizeof(m_dbInf.odbcVer), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -781,7 +781,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_VER, (UCHAR*) m_dbInf.drvMgrOdbcVer, sizeof(m_dbInf.drvMgrOdbcVer), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -789,7 +789,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_DRIVER_VER, (UCHAR*) m_dbInf.driverVer, sizeof(m_dbInf.driverVer), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -797,7 +797,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_API_CONFORMANCE, (UCHAR*) &m_dbInf.apiConfLvl, sizeof(m_dbInf.apiConfLvl), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -807,7 +807,7 @@ namespace exodbc
 		{
 			// Not all drivers support this call - Nick Gorham(unixODBC)
 			m_dbInf.cliConfLvl = 0;
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -815,7 +815,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_CONFORMANCE, (UCHAR*) &m_dbInf.sqlConfLvl, sizeof(m_dbInf.sqlConfLvl), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -823,7 +823,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_OUTER_JOINS, (UCHAR*) m_dbInf.outerJoins, sizeof(m_dbInf.outerJoins), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -831,7 +831,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_PROCEDURES, (UCHAR*) m_dbInf.procedureSupport, sizeof(m_dbInf.procedureSupport), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -839,7 +839,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, (UCHAR*) m_dbInf.accessibleTables, sizeof(m_dbInf.accessibleTables), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -847,7 +847,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, (UCHAR*) &m_dbInf.cursorCommitBehavior, sizeof(m_dbInf.cursorCommitBehavior), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -855,7 +855,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, (UCHAR*) &m_dbInf.cursorRollbackBehavior, sizeof(m_dbInf.cursorRollbackBehavior), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -863,7 +863,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, (UCHAR*) &m_dbInf.supportNotNullClause, sizeof(m_dbInf.supportNotNullClause), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -871,7 +871,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, (UCHAR*) m_dbInf.supportIEF, sizeof(m_dbInf.supportIEF), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -879,7 +879,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, (UCHAR*) &m_dbInf.txnIsolation, sizeof(m_dbInf.txnIsolation), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -887,7 +887,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, (UCHAR*) &m_dbInf.txnIsolationOptions, sizeof(m_dbInf.txnIsolationOptions), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -895,7 +895,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_FETCH_DIRECTION, (UCHAR*) &m_dbInf.fetchDirections, sizeof(m_dbInf.fetchDirections), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -903,7 +903,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_LOCK_TYPES, (UCHAR*) &m_dbInf.lockTypes, sizeof(m_dbInf.lockTypes), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -911,7 +911,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_POS_OPERATIONS, (UCHAR*) &m_dbInf.posOperations, sizeof(m_dbInf.posOperations), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -919,7 +919,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, (UCHAR*) &m_dbInf.posStmts, sizeof(m_dbInf.posStmts), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -927,7 +927,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_CONCURRENCY, (UCHAR*) &m_dbInf.scrollConcurrency, sizeof(m_dbInf.scrollConcurrency), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -935,7 +935,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_SCROLL_OPTIONS, (UCHAR*) &m_dbInf.scrollOptions, sizeof(m_dbInf.scrollOptions), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -943,7 +943,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_STATIC_SENSITIVITY, (UCHAR*) &m_dbInf.staticSensitivity, sizeof(m_dbInf.staticSensitivity), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -951,7 +951,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_TXN_CAPABLE, (UCHAR*) &m_dbInf.txnCapable, sizeof(m_dbInf.txnCapable), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -959,7 +959,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &m_dbInf.loginTimeout, sizeof(m_dbInf.loginTimeout), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -967,7 +967,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &m_dbInf.maxCatalogNameLen, sizeof(m_dbInf.maxCatalogNameLen), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -975,7 +975,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &m_dbInf.maxSchemaNameLen, sizeof(m_dbInf.maxSchemaNameLen), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -983,7 +983,7 @@ namespace exodbc
 		retcode = SQLGetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &m_dbInf.maxTableNameLen, sizeof(m_dbInf.maxTableNameLen), &cb);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
 		{
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			if (failOnDataTypeUnsupported)
 				return false;
 		}
@@ -1203,7 +1203,7 @@ namespace exodbc
 
 		// Get information about the data type specified
 		if (SQLGetTypeInfo(m_hstmt, fSqlType) != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 
 		// Fetch the record
 		retcode = SQLFetch(m_hstmt);
@@ -1213,7 +1213,7 @@ namespace exodbc
 			if (retcode == SQL_NO_DATA_FOUND)
 				std::wcout << L"SQL_NO_DATA_FOUND fetching information about data type." << std::endl;
 #endif
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			SQLFreeStmt(m_hstmt, SQL_CLOSE);
 			return false;
 		}
@@ -1222,7 +1222,7 @@ namespace exodbc
 
 		// Obtain columns from the record
 		if (SQLGetData(m_hstmt, 1, SQL_C_WXCHAR, typeName, sizeof(typeName), &cbRet) != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 
 		structSQLTypeInfo.TypeName = typeName;
 
@@ -1255,21 +1255,21 @@ namespace exodbc
 #endif
 
 		if (SQLGetData(m_hstmt, 3, SQL_C_LONG, (UCHAR*) &structSQLTypeInfo.Precision, 0, &cbRet) != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 		if (SQLGetData(m_hstmt, 8, SQL_C_SHORT, (UCHAR*) &structSQLTypeInfo.CaseSensitive, 0, &cbRet) != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 		//    if (SQLGetData(hstmt, 14, SQL_C_SHORT, (UCHAR*) &structSQLTypeInfo.MinimumScale, 0, &cbRet) != SQL_SUCCESS)
 		//        return(DispAllErrors(henv, hdbc, hstmt));
 
 		if (SQLGetData(m_hstmt, 15, SQL_C_SHORT,(UCHAR*)  &structSQLTypeInfo.MaximumScale, 0, &cbRet) != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 
 		if (structSQLTypeInfo.MaximumScale < 0)
 			structSQLTypeInfo.MaximumScale = 0;
 
 		// Close the statement handle which closes OpenImpl cursors
 		if (SQLFreeStmt(m_hstmt, SQL_CLOSE) != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 
 		// Completed Successfully
 		return true;
@@ -1293,15 +1293,15 @@ namespace exodbc
 			if(SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt) != SQL_SUCCESS)
 			{
 				BOOST_LOG_TRIVIAL(debug) << L"Failed to free Stmt-Handle";
-				DispAllErrors(m_henv, m_hdbc);
+				DispAllErrors(SQL_NULL_HENV, m_hdbc);
 			}
 			//if (SQLFreeStmt(m_hstmt, SQL_DROP) != SQL_SUCCESS)
-			//	DispAllErrors(m_henv, m_hdbc);
+			//	DispAllErrors(SQL_NULL_HENV, m_hdbc);
 		}
 
 		// Disconnect from the datasource
 		if (SQLDisconnect(m_hdbc) != SQL_SUCCESS)
-			DispAllErrors(m_henv, m_hdbc);
+			DispAllErrors(SQL_NULL_HENV, m_hdbc);
 
 		// Free the connection to the datasource
 
@@ -1402,30 +1402,30 @@ namespace exodbc
 			BOOST_LOG_TRIVIAL(warning) << L"Have ODBC Error #" << i << L": " << errs[i];
 		}
  
-		std::wstring odbcErrMsg;
-
-		while (SQLError(aHenv, aHdbc, aHstmt, (SQLTCHAR FAR *) sqlState, &nativeError, (SQLTCHAR FAR *) errorMsg, SQL_MAX_MESSAGE_LENGTH - 1, &cbErrorMsg) == SQL_SUCCESS)
-		{
-			odbcErrMsg = (boost::wformat(L"SQL State = %s\nNative Error Code = %li\nError Message = %s\n") % sqlState % (long)nativeError % errorMsg).str();
-			LogErrorImpl(odbcErrMsg, sqlState);
-			if (!m_silent)
-			{
-#ifdef DBDEBUG_CONSOLE
-				// When run in console mode, use standard out to display errors.
-				std::wcout << odbcErrMsg.c_str() << std::endl;
-				std::wcout << L"Press any key to continue..." << std::endl;
-				getchar();
-#endif
-
-#ifdef EXODBCDEBUG
-				BOOST_LOG_TRIVIAL(debug) <<  L"ODBC DEBUG MESSAGE from DispAllErrors(): " << odbcErrMsg;
-#endif
-			}
-		}
+//		std::wstring odbcErrMsg;
+//
+//		while (SQLError(aHenv, aHdbc, aHstmt, (SQLTCHAR FAR *) sqlState, &nativeError, (SQLTCHAR FAR *) errorMsg, SQL_MAX_MESSAGE_LENGTH - 1, &cbErrorMsg) == SQL_SUCCESS)
+//		{
+//			odbcErrMsg = (boost::wformat(L"SQL State = %s\nNative Error Code = %li\nError Message = %s\n") % sqlState % (long)nativeError % errorMsg).str();
+//			LogErrorImpl(odbcErrMsg, sqlState);
+//			if (!m_silent)
+//			{
+//#ifdef DBDEBUG_CONSOLE
+//				// When run in console mode, use standard out to display errors.
+//				std::wcout << odbcErrMsg.c_str() << std::endl;
+//				std::wcout << L"Press any key to continue..." << std::endl;
+//				getchar();
+//#endif
+//
+//#ifdef EXODBCDEBUG
+//				BOOST_LOG_TRIVIAL(debug) <<  L"ODBC DEBUG MESSAGE from DispAllErrors(): " << odbcErrMsg;
+//#endif
+//			}
+//		}
 
 		return false;  // This function always returns false.
 
-	} // wxDb::DispAllErrors()
+	}
 
 
 	/********** wxDb::GetNextError() **********/
@@ -1798,7 +1798,7 @@ namespace exodbc
 				if (!((Dbms() == dbmsSYBASE_ASA    && !wcscmp(sqlState, L"42000"))))  // 5.x (and lower?)
 				{
 					DispNextError();
-					DispAllErrors(m_henv, m_hdbc, m_hstmt);
+					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 					RollbackTrans();
 					return false;
 				}
@@ -1829,7 +1829,7 @@ namespace exodbc
 		}
 		else
 		{
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			return false;
 		}
 
@@ -1846,7 +1846,7 @@ namespace exodbc
 		SWORD noCols;
 		if (SQLNumResultCols(m_hstmt, &noCols) != SQL_SUCCESS)
 		{
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			return false;
 		}
 
@@ -1869,7 +1869,7 @@ namespace exodbc
 				name, sizeof(name),
 				&Sword, &Sqllen) != SQL_SUCCESS)
 			{
-				DispAllErrors(m_henv, m_hdbc, m_hstmt);
+				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 				delete[] pColInf;
 				return false;
 			}
@@ -1880,7 +1880,7 @@ namespace exodbc
 			if (SQLColAttributes(m_hstmt, (UWORD)(colNum+1), SQL_COLUMN_TYPE,
 				NULL, 0, &Sword, &Sqllen) != SQL_SUCCESS)
 			{
-				DispAllErrors(m_henv, m_hdbc, m_hstmt);
+				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 				delete[] pColInf;
 				return false;
 			}
@@ -1940,7 +1940,7 @@ namespace exodbc
 			return true;
 		else
 		{
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			return false;
 		}
 
@@ -1962,7 +1962,7 @@ namespace exodbc
 			return true;
 		else
 		{
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			return false;
 		}
 
@@ -2210,7 +2210,7 @@ namespace exodbc
 				}
 				if (retcode != SQL_SUCCESS)
 				{  // Error occurred, abort
-					DispAllErrors(m_henv, m_hdbc, m_hstmt);
+					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 					if (colInf)
 						delete [] colInf;
 					SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2268,7 +2268,7 @@ namespace exodbc
 				}
 				if (retcode != SQL_NO_DATA_FOUND)
 				{  // Error occurred, abort
-					DispAllErrors(m_henv, m_hdbc, m_hstmt);
+					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 					if (colInf)
 						delete [] colInf;
 					SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2365,7 +2365,7 @@ namespace exodbc
 			}
 			if (retcode != SQL_SUCCESS)
 			{  // Error occurred, abort
-				DispAllErrors(m_henv, m_hdbc, m_hstmt);
+				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 				if (colInf)
 					delete [] colInf;
 				SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2441,7 +2441,7 @@ namespace exodbc
 			}
 			if (retcode != SQL_NO_DATA_FOUND)
 			{  // Error occurred, abort
-				DispAllErrors(m_henv, m_hdbc, m_hstmt);
+				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 				if (colInf)
 					delete [] colInf;
 				SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2621,7 +2621,7 @@ namespace exodbc
 			}
 			if (retcode != SQL_SUCCESS)
 			{  // Error occurred, abort
-				DispAllErrors(m_henv, m_hdbc, m_hstmt);
+				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 				if (colInf)
 					delete [] colInf;
 				SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2714,7 +2714,7 @@ namespace exodbc
 			}
 			if (retcode != SQL_NO_DATA_FOUND)
 			{  // Error occurred, abort
-				DispAllErrors(m_henv, m_hdbc, m_hstmt);
+				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 				if (colInf)
 					delete [] colInf;
 				SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2741,14 +2741,14 @@ namespace exodbc
 		// Execute query
 		if (SQLExecDirect(m_hstmt, (UCHAR FAR *) Stmt.c_str(), SQL_NTS) != SQL_SUCCESS)
 		{
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			return NULL;
 		}
 
 		// Get the number of result columns
 		if (SQLNumResultCols (m_hstmt, &noCols) != SQL_SUCCESS)
 		{
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			return NULL;
 		}
 
@@ -2767,7 +2767,7 @@ namespace exodbc
 				name, sizeof(name),
 				&Sword, &Sdword) != SQL_SUCCESS)
 			{
-				DispAllErrors(m_henv, m_hdbc, m_hstmt);
+				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 				return NULL;
 			}
 
@@ -2865,7 +2865,7 @@ namespace exodbc
 		}
 		if (retcode != SQL_SUCCESS)
 		{  // Error occurred, abort
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			SQLFreeStmt(m_hstmt, SQL_CLOSE);
 			return(-1);
 		}
@@ -2876,7 +2876,7 @@ namespace exodbc
 
 		if (retcode != SQL_NO_DATA_FOUND)
 		{  // Error occurred, abort
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			SQLFreeStmt(m_hstmt, SQL_CLOSE);
 			return(-1);
 		}
@@ -2959,7 +2959,7 @@ namespace exodbc
 
 		if (retcode != SQL_SUCCESS)
 		{
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			pDbInf = NULL;
 			SQLFreeStmt(m_hstmt, SQL_CLOSE);
 			return pDbInf;
@@ -3076,7 +3076,7 @@ namespace exodbc
 		}
 		if (retcode != SQL_SUCCESS)
 		{
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 			fclose(fp);
 			return false;
 		}
@@ -3128,7 +3128,7 @@ namespace exodbc
 		}
 
 		if (retcode != SQL_NO_DATA_FOUND)
-			DispAllErrors(m_henv, m_hdbc, m_hstmt);
+			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
 
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
@@ -3208,13 +3208,13 @@ namespace exodbc
 				NULL, 0);                                 // All table types
 		}
 		if (retcode != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 
 		retcode = SQLFetch(m_hstmt);
 		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
 		{
 			SQLFreeStmt(m_hstmt, SQL_CLOSE);
-			return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 		}
 
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -3278,7 +3278,7 @@ namespace exodbc
 #endif
 
 		if ((retcode != SQL_SUCCESS) && (retcode != SQL_SUCCESS_WITH_INFO))
-			return (DispAllErrors(m_henv, m_hdbc, m_hstmt));
+			return (DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 
 		bool failed = false;
 		retcode = SQLFetch(m_hstmt);
@@ -3307,7 +3307,7 @@ namespace exodbc
 
 			if (failed)
 			{
-				return(DispAllErrors(m_henv, m_hdbc, m_hstmt));
+				return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
 			}
 #ifdef DBDEBUG_CONSOLE
 			std::wcerr << "Scanning " << result.privilege <<" privilege on table " << result.tableOwner << "." << result.tableName << " granted by " << result.grantor << " to " << result.grantee << std::endl;
