@@ -343,6 +343,8 @@ namespace exodbc
 		// return the string with all special SQL characters escaped
 		std::wstring     EscapeSqlChars(const std::wstring& value);
 
+		// TODO: Make this private, fix test friend-thing
+		std::vector<SSqlTypeInfo> GetAllDataTypesInfo();
 
 	private:
 		// Private member functions
@@ -350,6 +352,7 @@ namespace exodbc
 
 		bool			ReadDbInfo(SDbInfo& dbInfo);
 		bool			GetDataTypeInfoImpl(SWORD fSqlType, SSqlTypeInfo& structSQLTypeInfo);
+//		std::vector<SSqlTypeInfo> GetAllDataTypesInfo();
 		bool			SetConnectionAttributes();
 		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 		std::wstring	ConvertUserIDImpl(const wchar_t* userID);

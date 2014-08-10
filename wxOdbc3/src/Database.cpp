@@ -694,6 +694,14 @@ namespace exodbc
 	}
 
 
+	std::vector<SSqlTypeInfo> Database::GetAllDataTypesInfo()
+	{
+		std::vector<SSqlTypeInfo> types;
+
+		return types;
+	}
+
+
 	/********** wxDb::GetDataTypeInfoImpl() **********/
 	bool Database::GetDataTypeInfoImpl(SWORD fSqlType, SSqlTypeInfo &structSQLTypeInfo)
 	{

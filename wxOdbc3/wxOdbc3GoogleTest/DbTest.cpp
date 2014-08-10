@@ -78,6 +78,19 @@ namespace exOdbcTest
 //		int p = 3;
 	}
 
+	// TODO: Test Close. Close should return a value if succeeded
+
+	TEST_P(DbTest, GetAllDataTypesInfo)
+	{
+		Database db(m_pDbEnv);
+
+		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
+
+		std::vector<exodbc::SSqlTypeInfo> types = db.GetAllDataTypesInfo();
+
+		db.Close();
+	}
+
 	TEST_P(DbTest, GetDbInfo)
 	{
 		Database db(m_pDbEnv);
