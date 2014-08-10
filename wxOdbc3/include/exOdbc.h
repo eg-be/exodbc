@@ -175,6 +175,8 @@ namespace exodbc
 		bool			NumPrecRadixIsNull; // 18
 		SQLINTEGER		IntervalPrecision;	// 19 [ODBC 3.0, NULLABLE] If the data type is an interval data type, then this column contains the value of the interval leading precision. Otherwise, this column is NULL.
 		bool			IntervalPrecisionIsNull; // 19
+
+		std::wstring ToStr() const;
 	};
 
 	// Enums

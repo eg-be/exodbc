@@ -208,4 +208,70 @@ namespace exodbc {
 		IntervalPrecisionIsNull = false;
 	}
 
+	std::wstring SSqlTypeInfo::ToStr() const
+	{
+		std::wstringstream ws;
+		std::wstring sNull = L"NULL";
+
+		ws << L"***** DATA TYPE INFORMATION *****" << std::endl;
+		ws << L"Name:                    " << TypeName << std::endl;
+		ws << L"  SQL Type:              " << FsqlType << std::endl;
+		ws << L"  Precision:             " << (PrecisionIsNull ? L"NULL" : (boost::wformat(L"%d") %Precision).str()) << std::endl;
+		ws << L"  Literal Prefix:        " << (LiteralPrefixIsNull ? L"NULL" : LiteralPrefix) << std::endl;
+		ws << L"  Literal Suffix:        " << (LiteralSuffixIsNull ? L"NULL" : LiteralSuffix) << std::endl;
+		ws << L"  Create Params:         " << (CreateParamsIsNull ? L"NULL" : CreateParams) << std::endl;
+		
+		ws << L"  Nullable:              ";
+		switch(Nullable)
+		{
+		case SQL_NO_NULLS:
+			ws << L"SQL_NO_NULL";
+			break;
+		case SQL_NULLABLE:
+			ws << L"SQL_NULLABLE";
+			break;
+		case SQL_NULLABLE_UNKNOWN:
+			ws << L"SQL_NULLABLE_UNKNOWN";
+			break;
+		default:
+			ws << L"???";
+			break;
+		}
+		ws << std::endl;
+		
+		ws << L"  Case Sensitive:        " << (CaseSensitive == SQL_TRUE ? L"SQL_TRUE" : L"SQL_FALSE") << std::endl;
+		ws << L"  Searchable:            ";
+		switch(Searchable)
+		{
+		case SQL_PRED_NONE:
+			ws << L"SQL_PRED_NONE";
+			break;
+		case SQL_PRED_CHAR:
+			ws << L"SQL_PRED_CHAR";
+			break;
+		case SQL_PRED_BASIC:
+			ws << L"SQL_PRED_BASIC";
+			break;
+		case SQL_SEARCHABLE:
+			ws << L"SQL_SEARCHABLE";
+			break;
+		default:
+			ws << L"???";
+			break;
+		}
+		ws << std::endl;
+
+		ws << L"  Unsigned:              " << (UnsignedIsNull ? L"NULL" : (Unsigned == SQL_TRUE ? L"SQL_TRUE" : L"SQL_FALSE")) << std::endl;
+		ws << L"  Fixed Precision Scale: " << (FixedPrecisionScale == SQL_TRUE ? L"SQL_TRUE" : L"SQL_FALSE") << std::endl;
+		ws << L"  Auto Unique Value:     " << (AutoUniqueValueIsNull ? L"NULL" : (AutoUniqueValue == SQL_TRUE ? L"SQL_TRUE" : L"SQL_FALSE")) << std::endl;
+		ws << L"  Local Type Name:       " << (LocalTypeNameIsNull ? L"NULL" : LocalTypeName) << std::endl;
+		ws << L"  Minimum Scale:         " << (MinimumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") %MinimumScale).str()) << std::endl;
+		ws << L"  Maximum Scale:         " << (MaximumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") %MaximumScale).str()) << std::endl;
+		ws << L"  SQL Data type:         " << SqlDataType << std::endl; 
+		ws << L"  SQL Date Time Sub:     " << (SqlDateTimeSubIsNull ? L"NULL" : (boost::wformat(L"%d") %SqlDateTimeSub).str()) << std::endl;
+		ws << L"  Num Prec Radix:        " << (NumPrecRadixIsNull ? L"NULL" : (boost::wformat(L"%d") %NumPrecRadix).str()) << std::endl;
+		ws << L"  Interval Precision:    " << (IntervalPrecisionIsNull ? L"NULL" : (boost::wformat(L"%d") %IntervalPrecision).str()) << std::endl;
+		return ws.str();
+	}
+
 }
