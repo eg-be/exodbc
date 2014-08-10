@@ -16,9 +16,7 @@
 #include "Database.h"
 #include "DbEnvironment.h"
 
-using namespace exodbc;
-
-namespace exOdbcTest
+namespace exodbc
 {
 
 
@@ -80,4 +78,4 @@ namespace exOdbcTest
 	// Interfaces
 	// ----------
 
-}
+} // namespace exodbc

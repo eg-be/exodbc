@@ -26,7 +26,7 @@ namespace exodbc
 
 // Classes
 // -------
-namespace exOdbcTest
+namespace exodbc
 {
 
 	// NotExistingTable
@@ -260,4 +260,4 @@ namespace exOdbcTest
 		//SQLWCHAR	m_col3[128 + 1];
 		SQLWCHAR	m_col4[128 + 2];
 	};
-}
+} // namespace exodbc

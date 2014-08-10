@@ -31,9 +31,9 @@
 // Implementation
 // --------------
 using namespace std;
-using namespace exodbc;
+//using namespace exodbc;
 
-namespace exOdbcTest
+namespace exodbc
 {
 
 	void DbTableTest::SetUp()
@@ -624,7 +624,9 @@ namespace exOdbcTest
 		delete pTable;
 		delete pIncTable;
 	}
-}
+
 
 // Interfaces
 // ----------
+
+} // namespace exodbc

@@ -32,9 +32,8 @@
 // Implementation
 // --------------
 using namespace std;
-using namespace exodbc;
 
-namespace exOdbcTest
+namespace exodbc
 {
 
 	void DbTest::SetUp()
@@ -87,7 +86,6 @@ namespace exOdbcTest
 		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
 
 		std::vector<exodbc::SSqlTypeInfo> types = db.GetAllDataTypesInfo();
-
 		db.Close();
 	}
 
@@ -441,7 +439,8 @@ namespace exOdbcTest
 
 		delete pTable;
 	}
-}
 
-// Interfaces
-// ----------
+	// Interfaces
+	// ----------
+
+} //namespace exodbc

@@ -1,10 +1,10 @@
 /*!
- * \file wxOdbc3GoogleTest.h
- * \author Elias Gerber <egerber@gmx.net>
- * \date 22.07.2014
- * 
- * [Brief Header-file description]
- */ 
+* \file wxOdbc3GoogleTest.h
+* \author Elias Gerber <egerber@gmx.net>
+* \date 22.07.2014
+* 
+* [Brief Header-file description]
+*/ 
 
 #pragma once
 #ifndef WXODBC3GOOGLETEST_H
@@ -22,15 +22,17 @@
 
 // Globals
 // -------
-namespace exOdbcTest
+namespace exodbc
 {
 	extern std::vector<SOdbcInfo> g_odbcInfos;
-}
 
-// Structs
-// -------
+	// Structs
+	// -------
 
-// Classes
-// -------
+	// Classes
+	// -------
+
+} // namespace exodbc
+
 
 #endif // WXODBC3GOOGLETEST_H

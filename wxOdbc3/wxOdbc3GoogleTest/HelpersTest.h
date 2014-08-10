@@ -23,7 +23,7 @@
 // Forward declarations
 // --------------------
 
-namespace exOdbcTest
+namespace exodbc
 {
 
 
@@ -51,5 +51,5 @@ namespace exOdbcTest
 		HelpersTest,
 		::testing::ValuesIn(g_odbcInfos));
 
-}
+} // namespace exodbc
 #endif // HELPERSTEST_H

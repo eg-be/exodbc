@@ -17,7 +17,7 @@
 
 using namespace exodbc;
 
-namespace exOdbcTest
+namespace exodbc
 {
 
 
@@ -124,4 +124,4 @@ namespace exOdbcTest
 	// Interfaces
 	// ----------
 
-}
+} // namespace exodbc

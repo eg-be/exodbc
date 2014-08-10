@@ -25,7 +25,7 @@
 
 // Implementation
 // --------------
-namespace exOdbcTest
+namespace exodbc
 {
 	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi) {
 		std::wstringstream wos;
@@ -37,7 +37,10 @@ namespace exOdbcTest
 		eli::w2mbNoThrow(wos.str(), s);
 		return os << s.c_str();
 	}
-}
 
-// Interfaces
-// ----------
+
+	// Interfaces
+	// ----------
+	
+	 
+} // namespace exodbc

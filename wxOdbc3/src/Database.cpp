@@ -698,6 +698,8 @@ namespace exodbc
 	{
 		std::vector<SSqlTypeInfo> types;
 
+
+
 		return types;
 	}
 
