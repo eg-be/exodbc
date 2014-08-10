@@ -93,6 +93,7 @@ namespace exodbc
 		for(it = types.begin(); it != types.end(); it++)
 		{
 			SSqlTypeInfo t = *it;
+			BOOST_LOG_TRIVIAL(info) << L"TypeInfo of database connected to " << m_odbcInfo.m_dsn << std::endl << t.ToStr();
 			// TODO: print type
 			int p = 3;
 		}
@@ -110,7 +111,7 @@ namespace exodbc
 		std::wstring sInfo = dbInfo.ToStr();
 
 		EXPECT_TRUE(sInfo.length() > 0);
-		BOOST_LOG_TRIVIAL(info) << sInfo;
+		BOOST_LOG_TRIVIAL(info) << L"DbInfo of database connected to DSN " << m_odbcInfo.m_dsn << std::endl << sInfo;
 
 		db.Close();
 
