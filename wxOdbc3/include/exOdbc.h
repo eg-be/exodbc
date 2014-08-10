@@ -130,6 +130,50 @@ namespace exodbc
 		std::wstring ToStr() const;
 	};
 
+	/*!
+	 * \struct	SSQlTypeInfo
+	 *
+	 * \brief	Contains DataType informations read from the database uppon Open().
+	 * 			See http://msdn.microsoft.com/en-us/library/ms714632%28v=vs.85%29.aspx
+	 * 			
+	 */
+	struct EXODBCAPI SSqlTypeInfo
+	{
+		SSqlTypeInfo();
+
+		std::wstring	TypeName;			//  1 Data source–dependent data-type name
+		SQLSMALLINT		FsqlType;			//  2 SQL data type. This can be an ODBC SQL data type or a driver-specific SQL data type.
+		SQLINTEGER		Precision;			//  3 [NULLABLE] The maximum column size that the server supports for this data type. For numeric data, this is the maximum precision. For string data, this is the length in characters. For datetime data types, this is the length in characters of the string representation (assuming the maximum allowed precision of the fractional seconds component). NULL is returned for data types where column size is not applicable.
+		bool			ColumSizeIsNull;	//  3 
+		std::wstring	LiteralPrefix;		//  4 [NULLABLE] Character or characters used to prefix a literal; for example, a single quotation mark (') for character data types or 0x for binary data types
+		bool			LiteralPrefixIsNull;//  4
+		std::wstring	LiteralSuffix;		//  5 [NULLABLE] Character or characters used to terminate a literal; for example, a single quotation mark (') for character data types;
+		bool			LiteralSuffixIsNull;//  5
+		std::wstring	CreateParams;		//  6 [NULLABLE] A list of keywords, separated by commas, corresponding to each parameter that the application may specify in parentheses when using the name that is returned in the TYPE_NAME field.
+		bool			CreateParamsIsNull; //  6
+		SQLSMALLINT		Nullable;			//  7 Whether the data type accepts a NULL value: SQL_NO_NULLS, SQL_NULLABLE or	SQL_NULLABLE_UNKNOWN.
+		SQLSMALLINT		CaseSensitive;		//  8 Whether a character data type is case-sensitive in collations and comparisons: SQL_TRUE or SQL_FALSE
+		SQLSMALLINT		Searchable;			//  9 How the data type is used in a WHERE clause: SQL_PRED_NONE (no use), SQL_PRED_CHAR (only with LIKE), SQL_PRED_BASIC (all except LIKE), SQL_SEARCHABLE (anything)
+		SQLSMALLINT		Unsigned;			// 10 [NULLABLE] Whether the data type is unsigned: SQL_TRUE or SQL_FALSE
+		bool			UnsignedIsNull;		// 10 
+		SQLSMALLINT		FixedPrecisionScale;// 11 Whether the data type has predefined fixed precision and scale (which are data source–specific), such as a money data type: SQL_TRUE or SQL_FALSE
+		SQLSMALLINT		AutoUniqueValue;	// 12 [NULLABLE] Whether the data type is autoincrementing: SQL_TRUE or SQL_FALSE
+		bool			AutoUniqueValueIsNull; // 12
+		std::wstring	LocalTypeName;		// 13 [NULLABLE] localized version of the data source–dependent name of the data type.
+		bool			LocalTypeNameIsNull;// 13
+		SQLSMALLINT		MinimumScale;		// 14 [NULLABLE] The minimum scale of the data type on the data source. If a data type has a fixed scale, the MINIMUM_SCALE and MAXIMUM_SCALE columns both contain this value.
+		bool			MinimumScaleIsNull; // 14
+		SQLSMALLINT		MaximumScale;		// 15 [NULLABLE] The maximum scale of the data type on the data source. NULL is returned where scale is not applicable. 
+		bool			MaximumScaleIsNull;	// 15
+		SQLSMALLINT		SqlDataType;		// 16 [ODBC 3.0] The value of the SQL data type as it appears in the SQL_DESC_TYPE field of the descriptor. This column is the same as the DATA_TYPE column, except for interval and datetime data types.
+		SQLSMALLINT		SqlDateTimeSub;		// 17 [ODBC 3.0, NULLABLE] When the value of SQL_DATA_TYPE is SQL_DATETIME or SQL_INTERVAL, this column contains the datetime/interval subcode. For data types other than datetime and interval, this field is NULL.
+		bool			SqlDateTimeSubIsNull; // 17
+		SQLINTEGER		NumPrecRadix;		// 18 [ODBC 3.0, NULLABLE] If the data type is an approximate numeric type, this column contains the value 2 to indicate that COLUMN_SIZE specifies a number of bits. For exact numeric types, this column contains the value 10 to indicate that COLUMN_SIZE specifies a number of decimal digits. Otherwise, this column is NULL.
+		bool			NumPrecRadixIsNull; // 18
+		SQLINTEGER		IntervalPrecision;	// 19 [ODBC 3.0, NULLABLE] If the data type is an interval data type, then this column contains the value of the interval leading precision. Otherwise, this column is NULL.
+		bool			IntervalPrecisionIsNull; // 19
+	};
+
 	// Enums
 	// -----
 	enum OdbcVersion

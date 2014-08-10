@@ -177,4 +177,35 @@ namespace exodbc {
 		return ws.str();
 	}
 
+
+	SSqlTypeInfo::SSqlTypeInfo()
+	{
+		FsqlType = 0;
+		Precision = 0;
+		ColumSizeIsNull = false;
+		LiteralPrefixIsNull = false;
+		LiteralSuffixIsNull = false;
+		CreateParamsIsNull = false;
+		Nullable = SQL_NULLABLE_UNKNOWN;
+		CaseSensitive = SQL_FALSE;
+		Searchable = SQL_PRED_NONE;
+		Unsigned = SQL_FALSE;
+		UnsignedIsNull = false;
+		FixedPrecisionScale = SQL_FALSE;
+		AutoUniqueValue = SQL_FALSE;
+		AutoUniqueValueIsNull = false;
+		LocalTypeNameIsNull = false;
+		MinimumScale = 0;
+		MinimumScaleIsNull = false;
+		MaximumScale = 0;
+		MaximumScaleIsNull = false;
+		SqlDataType = 0;
+		SqlDateTimeSub = 0;
+		SqlDateTimeSubIsNull = false;
+		NumPrecRadix = 0;
+		NumPrecRadixIsNull = false;
+		IntervalPrecision = 0;
+		IntervalPrecisionIsNull = false;
+	}
+
 }
