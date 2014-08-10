@@ -102,7 +102,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		return status;
 	
 	// Set a filter for the logging
-#ifndef _DEBUG
+#if !_DEBUG
 	boost::log::core::get()->set_filter
 		(
 			boost::log::trivial::severity >= boost::log::trivial::warning
