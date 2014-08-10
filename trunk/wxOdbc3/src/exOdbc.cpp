@@ -61,11 +61,11 @@ namespace exodbc {
 	{
 		std::wstringstream ws;
 		ws << L"***** DATA SOURCE INFORMATION *****" << std::endl;
-		ws << L"SERVER Name: " << serverName << std::endl;
-		ws << L"DBMS Name: " << dbmsName << L"; DBMS Version: " << dbmsVer << std::endl;
-		ws << L"ODBC Version: " << odbcVer << L"; Driver Version: " << driverVer << std::endl;
+		ws << L" SERVER Name: " << serverName << std::endl;
+		ws << L"  DBMS Name: " << dbmsName << L"; DBMS Version: " << dbmsVer << std::endl;
+		ws << L"  ODBC Version: " << odbcVer << L"; Driver Version: " << driverVer << std::endl;
 
-		ws << L"SAG CLI Conf. Level: ";
+		ws << L"  SAG CLI Conf. Level: ";
 		switch(cliConfLvl)
 		{
 		case SQL_OSCC_NOT_COMPLIANT:    ws << L"Not Compliant";    break;
@@ -73,11 +73,11 @@ namespace exodbc {
 		}
 		ws << std::endl;
 
-		ws << L"Max. Connections: "       << maxConnections   << std::endl;
-		ws << L"Outer Joins: "            << outerJoins       << std::endl;
-		ws << L"Support for Procedures: " << procedureSupport << std::endl;
-		ws << L"All tables accessible : " << accessibleTables << std::endl;
-		ws << L"Cursor COMMIT Behavior: ";
+		ws << L"  Max. Connections: "       << maxConnections   << std::endl;
+		ws << L"  Outer Joins: "            << outerJoins       << std::endl;
+		ws << L"  Support for Procedures: " << procedureSupport << std::endl;
+		ws << L"  All tables accessible : " << accessibleTables << std::endl;
+		ws << L"  Cursor COMMIT Behavior: ";
 		switch(cursorCommitBehavior)
 		{
 		case SQL_CB_DELETE:        ws << L"Delete cursors";      break;
@@ -86,7 +86,7 @@ namespace exodbc {
 		}
 		ws << std::endl;
 
-		ws << L"Cursor ROLLBACK Behavior: ";
+		ws << L"  Cursor ROLLBACK Behavior: ";
 		switch(cursorRollbackBehavior)
 		{
 		case SQL_CB_DELETE:      ws << L"Delete cursors";      break;
@@ -95,7 +95,7 @@ namespace exodbc {
 		}
 		ws << std::endl;
 
-		ws << L"Support NOT NULL clause: ";
+		ws << L"  Support NOT NULL clause: ";
 		switch(supportNotNullClause)
 		{
 		case SQL_NNC_NULL:        ws << L"No";        break;
@@ -103,9 +103,9 @@ namespace exodbc {
 		}
 		ws << std::endl;
 
-		ws << L"Support IEF (Ref. Integrity): " << supportIEF   << std::endl;
+		ws << L"  Support IEF (Ref. Integrity): " << supportIEF   << std::endl;
 
-		ws << L"Default Transaction Isolation: ";
+		ws << L"  Default Transaction Isolation: ";
 		switch(txnIsolation)
 		{
 		case SQL_TXN_READ_UNCOMMITTED:  ws << L"Read Uncommitted";    break;
@@ -115,7 +115,7 @@ namespace exodbc {
 		}
 		ws << std::endl;
 
-		ws << L"Transaction Isolation Options: ";
+		ws << L"  Transaction Isolation Options: ";
 		if (txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
 			ws << L"Read Uncommitted, ";
 		if (txnIsolationOptions & SQL_TXN_READ_COMMITTED)
@@ -126,7 +126,7 @@ namespace exodbc {
 			ws << L"Serializable, ";
 		ws << std::endl;
 
-		ws << L"Position Operations Supported (SQLSetPos): ";
+		ws << L"  Position Operations Supported (SQLSetPos): ";
 		if (posOperations & SQL_POS_POSITION)
 			ws << L"Position, ";
 		if (posOperations & SQL_POS_REFRESH)
@@ -139,7 +139,7 @@ namespace exodbc {
 			ws << L"Add";
 		ws << std::endl;
 
-		ws << L"Positioned Statements Supported: ";
+		ws << L"  Positioned Statements Supported: ";
 		if (posStmts & SQL_PS_POSITIONED_DELETE)
 			ws << L"Pos delete, ";
 		if (posStmts & SQL_PS_POSITIONED_UPDATE)
@@ -148,7 +148,7 @@ namespace exodbc {
 			ws << L"Select for update";
 		ws << std::endl;
 
-		ws << L"Scroll Options: ";
+		ws << L"  Scroll Options: ";
 		if (scrollOptions & SQL_SO_FORWARD_ONLY)
 			ws << L"Fwd Only, ";
 		if (scrollOptions & SQL_SO_STATIC)
@@ -161,7 +161,7 @@ namespace exodbc {
 			ws << L"Mixed";
 		ws << std::endl;
 
-		ws << L"Transaction Capable?: ";
+		ws << L"  Transaction Capable?: ";
 		switch(txnCapable)
 		{
 		case SQL_TC_NONE:          ws << L"No";            break;
@@ -170,8 +170,6 @@ namespace exodbc {
 		case SQL_TC_DDL_IGNORE:    ws << L"DDL Ignore";    break;
 		case SQL_TC_ALL:           ws << L"DDL & DML";     break;
 		}
-		ws << std::endl;
-
 		ws << std::endl;
 
 		return ws.str();
@@ -214,7 +212,7 @@ namespace exodbc {
 		std::wstring sNull = L"NULL";
 
 		ws << L"***** DATA TYPE INFORMATION *****" << std::endl;
-		ws << L"Name:                    " << TypeName << std::endl;
+		ws << L" Name:                   " << TypeName << std::endl;
 		ws << L"  SQL Type:              " << FsqlType << std::endl;
 		ws << L"  Precision:             " << (PrecisionIsNull ? L"NULL" : (boost::wformat(L"%d") %Precision).str()) << std::endl;
 		ws << L"  Literal Prefix:        " << (LiteralPrefixIsNull ? L"NULL" : LiteralPrefix) << std::endl;
