@@ -694,13 +694,105 @@ namespace exodbc
 	}
 
 
-	std::vector<SSqlTypeInfo> Database::GetAllDataTypesInfo()
+	bool Database::GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types)
 	{
-		std::vector<SSqlTypeInfo> types;
+		SQLRETURN ret;
+
+		types.clear();
+
+		// Close an eventually open cursor
+		if(!CloseStmtHandle(m_hstmt))
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"Failed to free Statement before fetching DataTypesInfo";
+			return false;
+		}
+
+		ret = SQLGetTypeInfo(m_hstmt, SQL_ALL_TYPES);
+		if(ret != SQL_SUCCESS)
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"SQLGetTypeInfo for SQL_ALL_TYPES failed with ret " << ret << L": " << GetLastStmtError(m_hstmt);
+			return false;
+		}
+
+		ret = SQLFetch(m_hstmt);
+		int count = 0;
+		SQLWCHAR typeName[DB_TYPE_NAME_LEN + 1];
+		SQLWCHAR literalPrefix[DB_MAX_LITERAL_PREFIX_LEN + 1];
+		SQLWCHAR literalSuffix[DB_MAX_LITERAL_SUFFIX_LEN + 1];
+		SQLWCHAR createParams[DB_MAX_CREATE_PARAMS_LIST_LEN + 1];
+		SQLWCHAR localTypeName[DB_TYPE_NAME_LEN + 1];
+		SQLLEN cb;
+		while(ret == SQL_SUCCESS)
+		{
+			typeName[0] = 0;
+			literalPrefix[0] = 0;
+			literalSuffix[0] = 0;
+			createParams[0] = 0;
+			localTypeName[0] = 0;
+			SSqlTypeInfo info;
+
+			cb = 0;
+			bool ok = true;
+			ok = GetData3(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
+			if(ok)
+				info.TypeName = typeName;
+			bool haveName = ok;
+
+			ok = GetData3(m_hstmt, 2, SQL_C_SSHORT, &info.FsqlType, sizeof(info.FsqlType), &cb, NULL);
+			ok = GetData3(m_hstmt, 3, SQL_C_SLONG, &info.Precision, sizeof(info.Precision), &cb, &info.PrecisionIsNull);
+			ok = GetData3(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.LiteralPrefixIsNull, true);
+			if(ok)
+				info.LiteralPrefix = literalPrefix;
+			ok = GetData3(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.LiteralSuffixIsNull, true);
+			if(ok)
+				info.LiteralSuffix = literalSuffix;
+			ok = GetData3(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.CreateParamsIsNull, true);
+			if(ok)
+				info.CreateParams = createParams;
+			ok = GetData3(m_hstmt, 7, SQL_C_SSHORT, &info.Nullable, sizeof(info.Nullable), &cb, NULL);
+			ok = GetData3(m_hstmt, 8, SQL_C_SSHORT, &info.CaseSensitive, sizeof(info.CaseSensitive), &cb, NULL);
+			ok = GetData3(m_hstmt, 9, SQL_C_SSHORT, &info.Searchable, sizeof(info.Searchable), &cb, NULL);
+			ok = GetData3(m_hstmt, 10, SQL_C_SSHORT, &info.Unsigned, sizeof(info.Unsigned), &cb, &info.UnsignedIsNull);
+			ok = GetData3(m_hstmt, 11, SQL_C_SSHORT, &info.FixedPrecisionScale, sizeof(info.FixedPrecisionScale), &cb, NULL);
+			ok = GetData3(m_hstmt, 12, SQL_C_SSHORT, &info.AutoUniqueValue, sizeof(info.AutoUniqueValue), &cb, &info.AutoUniqueValueIsNull);
+			ok = GetData3(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.LocalTypeNameIsNull, true);
+			if(ok)
+				info.LocalTypeName = localTypeName;
+			ok = GetData3(m_hstmt, 14, SQL_C_SSHORT, &info.MinimumScale, sizeof(info.MinimumScale), &cb, &info.MinimumScaleIsNull);
+			ok = GetData3(m_hstmt, 15, SQL_C_SSHORT, &info.MaximumScale, sizeof(info.MaximumScale), &cb, &info.MaximumScaleIsNull);
+			ok = GetData3(m_hstmt, 16, SQL_C_SSHORT, &info.SqlDataType, sizeof(info.SqlDataType), &cb, NULL);
+			ok = GetData3(m_hstmt, 17, SQL_C_SSHORT, &info.SqlDateTimeSub, sizeof(info.SqlDateTimeSub), &cb, &info.SqlDateTimeSubIsNull);
+			ok = GetData3(m_hstmt, 18, SQL_C_SSHORT, &info.NumPrecRadix, sizeof(info.NumPrecRadix), &cb, &info.NumPrecRadixIsNull);
+			ok = GetData3(m_hstmt, 19, SQL_C_SSHORT, &info.IntervalPrecision, sizeof(info.IntervalPrecision), &cb, &info.IntervalPrecisionIsNull);
+
+			if(ok)
+			{
+				types.push_back(info);
+			}
+			else
+			{
+				BOOST_LOG_TRIVIAL(warning) << L"Failed to determine properties of type '" << (haveName ? info.TypeName : L"unknown-type") << L"'"; 
+			}
+
+			count++;
+			ret = SQLFetch(m_hstmt);
+		}
+
+		if(ret != SQL_NO_DATA)
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"SQLFetch did not end with SQL_NO_DATA while fetching DataTypes, but with " << ret << L": " << GetLastStmtError(m_hstmt);
+			return false;
+		}
 
 
+		// We are done, close cursor
+		if(!CloseStmtHandle(m_hstmt))
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"Failed to free Statement after fetching DataTypesInfo";
+			return false;
+		}
 
-		return types;
+		return true;
 	}
 
 

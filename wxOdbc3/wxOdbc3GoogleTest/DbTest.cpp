@@ -85,7 +85,18 @@ namespace exodbc
 
 		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
 
-		std::vector<exodbc::SSqlTypeInfo> types = db.GetAllDataTypesInfo();
+		std::vector<SSqlTypeInfo> types;
+		bool ok = db.GetAllDataTypesInfo(types);
+		EXPECT_TRUE(ok);
+
+		std::vector<SSqlTypeInfo>::const_iterator it;
+		for(it = types.begin(); it != types.end(); it++)
+		{
+			SSqlTypeInfo t = *it;
+			// TODO: print type
+			int p = 3;
+		}
+
 		db.Close();
 	}
 

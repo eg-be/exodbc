@@ -274,6 +274,28 @@ namespace exodbc
 		return ret == SQL_SUCCESS;
 	}
 
+
+	bool CloseStmtHandle(const SQLHANDLE& hStmt)
+	{
+		exASSERT(hStmt);
+
+		SQLRETURN ret = SQLFreeStmt(hStmt, SQL_CLOSE);
+		if(ret != SQL_SUCCESS)
+		{
+			if(ret == SQL_SUCCESS_WITH_INFO || ret == SQL_ERROR)
+			{
+				BOOST_LOG_TRIVIAL(warning) << L"Failed to free Stmt, SQLFreeStmt with SQL_CLOSE returned with " << ret << L": " << GetLastStmtError(hStmt);
+			}
+			else
+			{
+				BOOST_LOG_TRIVIAL(warning) << L"Failed to free Stmt, SQLFreeStmt with SQL_CLOSE returned with " << ret;
+			}
+		}
+
+		return ret == SQL_SUCCESS;
+	}
+
+
 	bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
 	{
 		exASSERT(hDbc != NULL);
@@ -289,6 +311,57 @@ namespace exodbc
 		}
 
 		return (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
+	}
+
+
+	bool GetData3(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
+	{
+		exASSERT(hStmt != SQL_NULL_HSTMT);
+		if(nullTerminate)
+		{
+			exASSERT(targetType == SQL_C_CHAR || targetType == SQL_C_WCHAR);
+		}
+
+		SQLRETURN ret = SQLGetData(hStmt, colOrParamNr, targetType, targetValue, bufferLen, strLenOrIndPtr);
+		if( ! (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO))
+		{
+			if(ret == SQL_ERROR)
+			{
+				BOOST_LOG_TRIVIAL(error) << L"GetData failed with SQL_ERROR: " << GetLastStmtError(hStmt);
+			}
+			else
+			{
+				BOOST_LOG_TRIVIAL(error) << L"GetData failed with return-value " << ret;
+			}
+		}
+		else // ret is SQL_SUCCESS or SQL_SUCCESS_WITH_INFO
+		{
+			if(pIsNull)
+			{
+				*pIsNull = *strLenOrIndPtr == SQL_NULL_DATA;
+			}
+			if(nullTerminate && (!pIsNull || !*pIsNull))
+			{
+				exASSERT(*strLenOrIndPtr != SQL_NO_TOTAL);
+				if(targetType == SQL_C_CHAR)
+				{
+					char* pc = (char*) targetValue;
+					pc[*strLenOrIndPtr] = 0;
+				}
+				else
+				{
+					wchar_t* pw = (wchar_t*) targetValue;
+					int p = *strLenOrIndPtr / sizeof(wchar_t);
+					pw[ *strLenOrIndPtr / sizeof(wchar_t)] = 0;
+				}
+			}
+		}
+		if(ret == SQL_SUCCESS_WITH_INFO)
+		{
+			BOOST_LOG_TRIVIAL(warning) << L"GetData completed with SQL_SUCCESS_WITH_INFO: " << GetLastStmtError(hStmt);
+		}
+
+		return ret == SQL_SUCCESS;
 	}
 
 }

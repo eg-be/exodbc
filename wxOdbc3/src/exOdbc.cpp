@@ -182,7 +182,7 @@ namespace exodbc {
 	{
 		FsqlType = 0;
 		Precision = 0;
-		ColumSizeIsNull = false;
+		PrecisionIsNull = false;
 		LiteralPrefixIsNull = false;
 		LiteralSuffixIsNull = false;
 		CreateParamsIsNull = false;

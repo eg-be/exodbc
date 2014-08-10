@@ -127,7 +127,7 @@ namespace exodbc
 
 	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv);
 	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc);
-	extern EXODBCAPI SErrorInfo GetLastStmError(SQLHANDLE hStmt);
+	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt);
 
 	/*!
 	 * \fn	extern EXODBCAPI SQLHANDLE AllocDbcHandle(const SQLHANDLE& hEnv);
@@ -153,8 +153,10 @@ namespace exodbc
 	extern EXODBCAPI SQLHANDLE	AllocStmtHandle(const SQLHANDLE& hDbc);
 	extern EXODBCAPI bool		FreeStmtHandle(SQLHANDLE& hStmt);
 
-	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
+	extern EXODBCAPI bool		CloseStmtHandle(const SQLHANDLE& hStmt);
 
+	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
+	extern EXODBCAPI bool		GetData3(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
 	// Classes
 	// -------
 

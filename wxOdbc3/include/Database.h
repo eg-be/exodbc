@@ -351,7 +351,7 @@ namespace exodbc
 
 	private:
 		// Private member functions			
-		std::vector<SSqlTypeInfo> GetAllDataTypesInfo();
+		bool GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types);
 
 		void			Initialize();
 
