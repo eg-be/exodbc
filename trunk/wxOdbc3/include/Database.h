@@ -99,15 +99,7 @@ namespace exodbc
 	class Database;
 
 	// Structs
-	// ------
-	struct EXODBCAPI SSqlTypeInfo
-	{
-		std::wstring	TypeName;
-		SWORD			FsqlType;
-		long			Precision;
-		short			CaseSensitive;
-		short			MaximumScale;
-	};
+	// -------
 
 	// This structure forms a node in a linked list.  The linked list of "DbList" objects
 	// keeps track of allocated database connections.  This allows the application to
