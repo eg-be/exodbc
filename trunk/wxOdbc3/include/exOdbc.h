@@ -54,6 +54,9 @@ namespace exodbc
 	const int DB_MAX_COLUMN_NAME_LEN		= 128;
 	const int DB_MAX_TABLE_TYPE_LEN			= 128;
 	const int DB_MAX_TABLE_REMARKS_LEN		= 128;
+	const int DB_MAX_LITERAL_PREFIX_LEN		= 128;
+	const int DB_MAX_LITERAL_SUFFIX_LEN		= 128;
+	const int DB_MAX_CREATE_PARAMS_LIST_LEN = 512;	
 
 	const int DB_DATA_TYPE_VARCHAR        = 1;
 	const int DB_DATA_TYPE_INTEGER        = 2;
@@ -144,7 +147,7 @@ namespace exodbc
 		std::wstring	TypeName;			//  1 Data source–dependent data-type name
 		SQLSMALLINT		FsqlType;			//  2 SQL data type. This can be an ODBC SQL data type or a driver-specific SQL data type.
 		SQLINTEGER		Precision;			//  3 [NULLABLE] The maximum column size that the server supports for this data type. For numeric data, this is the maximum precision. For string data, this is the length in characters. For datetime data types, this is the length in characters of the string representation (assuming the maximum allowed precision of the fractional seconds component). NULL is returned for data types where column size is not applicable.
-		bool			ColumSizeIsNull;	//  3 
+		bool			PrecisionIsNull;	//  3 
 		std::wstring	LiteralPrefix;		//  4 [NULLABLE] Character or characters used to prefix a literal; for example, a single quotation mark (') for character data types or 0x for binary data types
 		bool			LiteralPrefixIsNull;//  4
 		std::wstring	LiteralSuffix;		//  5 [NULLABLE] Character or characters used to terminate a literal; for example, a single quotation mark (') for character data types;
