@@ -122,7 +122,7 @@ namespace exodbc
 
 			if(ret != SQL_NO_DATA)
 			{
-				BOOST_LOG_TRIVIAL(warning) << L"SQLGetDiagRec did not end with SQL_NO_DATE (100) but with " << ret;
+				BOOST_LOG_TRIVIAL(warning) << L"SQLGetDiagRec did not end with SQL_NO_DATA (100) but with " << ret;
 			}
 		}
 
