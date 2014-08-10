@@ -31,7 +31,9 @@
 #include "exOdbc.h"
 
 // Other headers
-#include "gtest/gtest_prod.h"
+#if EXODBC3_TEST
+	#include "gtest/gtest_prod.h"
+#endif
 
 // System headers
 #include <vector>
@@ -195,7 +197,14 @@ namespace exodbc
 
 	class EXODBCAPI Database
 	{
+		// Test helpers:
+#if EXODBC3_TEST
+		friend class DbTest;
+		FRIEND_TEST(DbTest, GetAllDataTypesInfo); 
+#endif
+
 	public:
+		// TODO: Remove this from public
 		SDbInfo m_dbInf;
 
 	public:
@@ -341,10 +350,7 @@ namespace exodbc
 		std::wstring     EscapeSqlChars(const std::wstring& value);
 
 	private:
-		// Private member functions		
-		friend class DbTest;
-		FRIEND_TEST(DbTest, GetAllDataTypesInfo);
-		
+		// Private member functions			
 		std::vector<SSqlTypeInfo> GetAllDataTypesInfo();
 
 		void			Initialize();
