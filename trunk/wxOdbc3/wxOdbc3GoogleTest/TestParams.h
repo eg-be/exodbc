@@ -25,7 +25,7 @@
 
 // Classes
 // -------
-namespace exOdbcTest
+namespace exodbc
 {
 	struct SOdbcInfo
 	{
@@ -54,6 +54,6 @@ namespace exOdbcTest
 
 	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi);
 
-}
+} // namespace exodbc
 
 #endif // TESTPARAMS_H

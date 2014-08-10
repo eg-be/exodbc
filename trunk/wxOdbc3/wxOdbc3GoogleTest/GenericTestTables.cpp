@@ -15,7 +15,6 @@
 // Other headers
 #include "Database.h"
 
-using namespace exodbc;
 // Static consts
 // -------------
 
@@ -27,7 +26,7 @@ using namespace exodbc;
 
 // Implementation
 // --------------
-namespace exOdbcTest
+namespace exodbc
 {
 	// NotExistingTable
 	// ----------------
@@ -287,4 +286,4 @@ namespace exOdbcTest
 		//SetColDefs(2, L"col3", DB_DATA_TYPE_VARCHAR, m_col3, SQL_C_WCHAR, sizeof(m_col3), false, false, false, false);
 		SetColDefs(3, L"col4", DB_DATA_TYPE_VARCHAR, m_col4, SQL_C_WCHAR, sizeof(m_col4), false, false, false, false);
 	}
-}
+} // namespace exodbc

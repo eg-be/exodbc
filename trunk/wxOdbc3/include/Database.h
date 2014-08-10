@@ -31,6 +31,8 @@
 #include "exOdbc.h"
 
 // Other headers
+#include "gtest/gtest_prod.h"
+
 // System headers
 #include <vector>
 #include <set>
@@ -87,11 +89,6 @@ enum enumDummy {enumDum1};
 
 // Forward declarations
 // --------------------
-namespace exOdbcTest
-{
-	class DbTest;
-}
-
 namespace exodbc
 {
 	class DbEnvironment;
@@ -343,16 +340,17 @@ namespace exodbc
 		// return the string with all special SQL characters escaped
 		std::wstring     EscapeSqlChars(const std::wstring& value);
 
-		// TODO: Make this private, fix test friend-thing
+	private:
+		// Private member functions		
+		friend class DbTest;
+		FRIEND_TEST(DbTest, GetAllDataTypesInfo);
+		
 		std::vector<SSqlTypeInfo> GetAllDataTypesInfo();
 
-	private:
-		// Private member functions
 		void			Initialize();
 
 		bool			ReadDbInfo(SDbInfo& dbInfo);
 		bool			GetDataTypeInfoImpl(SWORD fSqlType, SSqlTypeInfo& structSQLTypeInfo);
-//		std::vector<SSqlTypeInfo> GetAllDataTypesInfo();
 		bool			SetConnectionAttributes();
 		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 		std::wstring	ConvertUserIDImpl(const wchar_t* userID);

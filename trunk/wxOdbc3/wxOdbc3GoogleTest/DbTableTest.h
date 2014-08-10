@@ -32,7 +32,7 @@ namespace exodbc
 
 // Classes
 // -------
-namespace exOdbcTest
+namespace exodbc
 {
 	class DbTableTest : public ::testing::TestWithParam<SOdbcInfo>
 	{
@@ -52,7 +52,7 @@ namespace exOdbcTest
 		ParametrizedOdbc,
 		DbTableTest,
 		::testing::ValuesIn(g_odbcInfos));
-}
+} // namespace exodbc
 
 
 #endif // DBTABLETEST_H

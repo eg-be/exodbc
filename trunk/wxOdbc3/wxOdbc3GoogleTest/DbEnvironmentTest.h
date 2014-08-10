@@ -21,7 +21,7 @@
 // Forward declarations
 // --------------------
 
-namespace exOdbcTest
+namespace exodbc
 {
 	// Structs
 	// -------
@@ -46,6 +46,6 @@ namespace exOdbcTest
 		ParametrizedOdbc,
 		DbEnvironmentTest,
 		::testing::ValuesIn(g_odbcInfos));
-}
+} // namespace exodbc
 
 #endif // DBENVIRONMENTTEST_H
