@@ -176,6 +176,7 @@ namespace exodbc
 		SQLINTEGER		IntervalPrecision;	// 19 [ODBC 3.0, NULLABLE] If the data type is an interval data type, then this column contains the value of the interval leading precision. Otherwise, this column is NULL.
 		bool			IntervalPrecisionIsNull; // 19
 
+		std::wstring ToOneLineStr(bool withHeaderLines = false, bool withEndLine = false) const;
 		std::wstring ToStr() const;
 	};
 

@@ -98,6 +98,8 @@ namespace exodbc
 	*/
 	extern std::string w2s(const std::wstring& w);
 
+	extern EXODBCAPI std::wstring SqlTrueFalse2s(SQLSMALLINT b);
+
 	/*!
 	 * \fn	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = NULL, SQLHANDLE hDbc = NULL, SQLHANDLE hStmt = NULL);
 	 *

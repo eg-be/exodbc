@@ -206,6 +206,73 @@ namespace exodbc {
 		IntervalPrecisionIsNull = false;
 	}
 
+	std::wstring SSqlTypeInfo::ToOneLineStr(bool withHeaderLines /* = false */, bool withEndLine /* = false */) const
+	{
+		std::wstringstream ws;
+		if(withHeaderLines)
+		{
+			ws << (boost::wformat(L"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str() << std::endl;
+			ws << (boost::wformat(L"| %8s | %8d | %34s | %40s | %5s | %10s | %8s | %6s | %6s | %10s | %10s | %10s | %5s | %5s | %5s | %5s | %5s | %5s | %34s |") %L"SQLType" %L"SQLType3" %L"TypeName" %L"Local TypeName" %L"Unsig" %L"Precision" %L"Nullable" %L"AutoI" %L"CaseS." %L"Searchable" %L"Prefix" %L"Suffix" %L"FixPS" %L"MinSc" %L"MaxSc" %L"DTS3" %L"NuPR" %L"IntPr" %L"Create Params").str() << std::endl;
+			ws << (boost::wformat(L"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str() << std::endl;
+		}
+
+		std::wstring sPrecision = (PrecisionIsNull ? L"NULL" : (boost::wformat(L"%d") %Precision).str());
+		std::wstring sLiteralPrefix = LiteralPrefixIsNull ? L"NULL" : LiteralPrefix;
+		std::wstring sLiteralSuffix = LiteralSuffixIsNull ? L"NULL" : LiteralSuffix;
+		std::wstring sCreateParams = CreateParamsIsNull ? L"NULL" : CreateParams;
+		std::wstring sNullable = L"???";
+		std::wstring sCaseSensitive = SqlTrueFalse2s(CaseSensitive);
+		std::wstring sSearchable = L"???";		
+		std::wstring sUnsigned = UnsignedIsNull ? L"NULL" : SqlTrueFalse2s(Unsigned);
+		std::wstring sFixedPrecisionScale = SqlTrueFalse2s(FixedPrecisionScale);
+		std::wstring sAutoUniqueValue = AutoUniqueValueIsNull ? L"NULL" : SqlTrueFalse2s(AutoUniqueValue);
+		std::wstring sLocalTypeName = LocalTypeNameIsNull ? L"NULL" : LocalTypeName;
+		std::wstring sMinimumScale = MinimumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") %MinimumScale).str();
+		std::wstring sMaximumScale = MaximumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") %MaximumScale).str();
+		std::wstring sSqlDateTimeSub = SqlDateTimeSubIsNull ? L"NULL" : (boost::wformat(L"%d") %SqlDateTimeSub).str();
+		std::wstring sNumPrecRadix = NumPrecRadixIsNull ? L"NULL" : (boost::wformat(L"%d") %NumPrecRadix).str();
+		std::wstring sIntervalPrecision = IntervalPrecisionIsNull ? L"NULL" : (boost::wformat(L"%d") %IntervalPrecision).str();
+
+		switch(Nullable)
+		{
+		case SQL_NO_NULLS:
+				sNullable = L"NO_NULLS";
+				break;
+			case SQL_NULLABLE:
+				sNullable = L"NULLABLE";
+				break;
+			default:
+				sNullable = L"UNKNOWN";
+		}
+		switch(Searchable)
+		{
+		case SQL_PRED_NONE:
+			sSearchable = L"PRED_NONE";
+			break;
+		case SQL_PRED_CHAR:
+			sSearchable = L"PRED_CHAR";
+			break;
+		case SQL_PRED_BASIC:
+			sSearchable = L"PRED_BASIC";
+			break;
+		case SQL_SEARCHABLE:
+			sSearchable = L"SEARCHABLE";
+			break;
+		}
+
+		std::wstring s =       (boost::wformat(L"| %8s | %8d | %34s | %40s | %5s | %10s | %8s | %6s | %6s | %10s | %10s | %10s | %5s | %5s | %5s | %5s | %5s | %5s | %34s |") %FsqlType %SqlDataType %TypeName %sLocalTypeName %sUnsigned %sPrecision %sNullable %sAutoUniqueValue %sCaseSensitive %sSearchable %sLiteralPrefix %sLiteralSuffix %sFixedPrecisionScale %sMinimumScale %sMinimumScale %sSqlDateTimeSub %sNumPrecRadix %sIntervalPrecision %sCreateParams).str();
+
+		ws << s;
+
+		if(withEndLine)
+		{
+			ws << std::endl;
+			ws << (boost::wformat(L"-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str();			
+		}
+
+		return ws.str();
+	}
+
 	std::wstring SSqlTypeInfo::ToStr() const
 	{
 		std::wstringstream ws;

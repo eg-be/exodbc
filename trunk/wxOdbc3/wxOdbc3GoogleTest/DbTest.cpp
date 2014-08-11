@@ -88,15 +88,25 @@ namespace exodbc
 		std::vector<SSqlTypeInfo> types;
 		bool ok = db.GetAllDataTypesInfo(types);
 		EXPECT_TRUE(ok);
+		EXPECT_TRUE(types.size() > 0);
 
-		std::vector<SSqlTypeInfo>::const_iterator it;
-		for(it = types.begin(); it != types.end(); it++)
+		std::wstringstream ws;
+		ws << L"TypeInfo of database with DSN '" << m_odbcInfo.m_dsn << L"', total " << types.size() << L" types reported:" << std::endl;
+		bool first = true;
+		std::vector<SSqlTypeInfo>::const_iterator it = types.begin();
+		while(it != types.end())
 		{
 			SSqlTypeInfo t = *it;
-			BOOST_LOG_TRIVIAL(info) << L"TypeInfo of database connected to " << m_odbcInfo.m_dsn << std::endl << t.ToStr();
-			// TODO: print type
-			int p = 3;
+
+			++it;
+
+			ws << t.ToOneLineStr(first, it == types.end()) << std::endl;
+			if(first)
+				first = false;
+
 		}
+
+		BOOST_LOG_TRIVIAL(info) << ws.str();
 
 		db.Close();
 	}

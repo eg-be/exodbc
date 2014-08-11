@@ -784,7 +784,6 @@ namespace exodbc
 			return false;
 		}
 
-
 		// We are done, close cursor
 		if(!CloseStmtHandle(m_hstmt))
 		{
