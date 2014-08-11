@@ -70,6 +70,19 @@ namespace exodbc
 		return ss.str();
 	}
 
+	std::wstring SqlTrueFalse2s(SQLSMALLINT b)
+	{
+		switch(b)
+		{
+		case SQL_TRUE:
+			return L"TRUE";
+		case SQL_FALSE:
+			return L"FALSE";
+		default:
+			return L"?????";
+		}
+	}
+
 	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = NULL */, SQLHANDLE hDbc /* = NULL */, SQLHANDLE hStmt /* = NULL */)
 	{
 		exASSERT(hEnv != NULL || hDbc != NULL || hStmt != NULL);
