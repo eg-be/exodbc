@@ -105,9 +105,9 @@ namespace exodbc
 		virtual ~Table();
 
 		bool            Open(bool checkPrivileges = false, bool checkTableExists = true);
-		bool            CreateTable(bool attemptDrop = true);
+		//bool            CreateTable(bool attemptDrop = true);
 		bool            DropTable();
-		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, SIndexDefinition* pIndexDefs, bool attemptDrop = true);
+//		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, SIndexDefinition* pIndexDefs, bool attemptDrop = true);
 		bool            DropIndex(const std::wstring& indexName);
 
 		// Accessors
@@ -216,9 +216,9 @@ namespace exodbc
 		void        cleanup();
 
 		void        setCbValueForColumn(int columnIndex);
-		bool        bindParams(bool forUpdate);  // called by the other 'bind' functions
-		bool        bindInsertParams();
-		bool        bindUpdateParams();
+//		bool        bindParams(bool forUpdate);  // called by the other 'bind' functions
+		//bool        bindInsertParams();
+		//bool        bindUpdateParams();
 
 		bool        bindCols(HSTMT cursor);
 		bool        getRec(UWORD fetchType);

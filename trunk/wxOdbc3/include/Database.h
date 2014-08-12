@@ -295,8 +295,8 @@ namespace exodbc
 		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
 		int          GetKeyFields(const std::wstring& tableName, ColumnInfo* colInf, UWORD noCols);
 
-		ColumnInfo*		GetColumns(wchar_t* tableName[], const wchar_t* userID = NULL);
-		ColumnInfo*		GetColumns(const std::wstring& tableName, UWORD* numCols, const wchar_t* userID=NULL);
+		//ColumnInfo*		GetColumns(wchar_t* tableName[], const wchar_t* userID = NULL);
+		//ColumnInfo*		GetColumns(const std::wstring& tableName, UWORD* numCols, const wchar_t* userID=NULL);
 
 		int					GetColumnCount(const std::wstring& tableName, const wchar_t* userID=NULL);
 		const wchar_t*		GetDatabaseName()  {return m_dbInf.dbmsName;}
@@ -314,12 +314,12 @@ namespace exodbc
 		HDBC            GetHDBC()          {return m_hdbc;}
 		HSTMT           GetHSTMT()         {return m_hstmt;}
 		int             GetTableCount()        {return nTables;}  // number of tables using this connection
-		SSqlTypeInfo GetTypeInfVarchar()    {return m_typeInfVarchar;}
-		SSqlTypeInfo GetTypeInfInteger()    {return m_typeInfInteger;}
-		SSqlTypeInfo GetTypeInfFloat()      {return m_typeInfFloat;}
-		SSqlTypeInfo GetTypeInfDate()       {return m_typeInfDate;}
-		SSqlTypeInfo GetTypeInfBlob()       {return m_typeInfBlob;}
-		SSqlTypeInfo GetTypeInfMemo()       {return m_typeInfMemo;}
+		//SSqlTypeInfo GetTypeInfVarchar()    {return m_typeInfVarchar;}
+		//SSqlTypeInfo GetTypeInfInteger()    {return m_typeInfInteger;}
+		//SSqlTypeInfo GetTypeInfFloat()      {return m_typeInfFloat;}
+		//SSqlTypeInfo GetTypeInfDate()       {return m_typeInfDate;}
+		//SSqlTypeInfo GetTypeInfBlob()       {return m_typeInfBlob;}
+		//SSqlTypeInfo GetTypeInfMemo()       {return m_typeInfMemo;}
 		SDbInfo GetDbInfo()					{return m_dbInf;}
 
 		// tableName can refer to a table, view, alias or synonym
@@ -342,7 +342,7 @@ namespace exodbc
 		std::vector<std::wstring> GetErrorList() const;
 
 		wxDBMS       Dbms();
-		bool         ModifyColumn(const std::wstring& tableName, const std::wstring& columnName, int dataType, ULONG columnLength = 0, const std::wstring& optionalParam = std::wstring());
+		//bool         ModifyColumn(const std::wstring& tableName, const std::wstring& columnName, int dataType, ULONG columnLength = 0, const std::wstring& optionalParam = std::wstring());
 
 		bool         FwdOnlyCursors()  {return m_fwdOnlyCursors;}
 
@@ -360,7 +360,7 @@ namespace exodbc
 		bool			SetConnectionAttributes();
 		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
-		bool             DetermineDataTypes(bool failOnDataTypeUnsupported);
+		//bool             DetermineDataTypes(bool failOnDataTypeUnsupported);
 		bool             OpenImpl(bool failOnDataTypeUnsupported = true);
 
 		// Members
@@ -390,12 +390,12 @@ namespace exodbc
 		// SQLGetTypeInfo() function.  The key piece of information is the
 		// type name the data source uses for each logical data type.
 		// e.g. VARCHAR; Oracle calls it VARCHAR2.
-		SSqlTypeInfo m_typeInfVarchar;
-		SSqlTypeInfo m_typeInfInteger;
-		SSqlTypeInfo m_typeInfFloat;
-		SSqlTypeInfo m_typeInfDate;
-		SSqlTypeInfo m_typeInfBlob;
-		SSqlTypeInfo m_typeInfMemo;
+		//SSqlTypeInfo m_typeInfVarchar;
+		//SSqlTypeInfo m_typeInfInteger;
+		//SSqlTypeInfo m_typeInfFloat;
+		//SSqlTypeInfo m_typeInfDate;
+		//SSqlTypeInfo m_typeInfBlob;
+		//SSqlTypeInfo m_typeInfMemo;
 
 
 	private:
