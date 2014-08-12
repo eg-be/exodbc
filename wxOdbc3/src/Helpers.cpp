@@ -83,6 +83,98 @@ namespace exodbc
 		}
 	}
 
+
+	std::wstring SqlType2s(SQLSMALLINT sqlType)
+	{
+		switch(sqlType)
+		{
+		case SQL_CHAR:
+			return L"CHAR";
+		case SQL_VARCHAR:
+			return L"VARCHAR";
+		case SQL_LONGVARCHAR:
+			return L"LONGVARCHAR";
+		case SQL_WCHAR:
+			return L"WCHAR";
+		case SQL_WVARCHAR:
+			return L"WVARCHAR";
+		case SQL_WLONGVARCHAR:
+			return L"WLONGVARCHAR";
+		case SQL_DECIMAL:
+			return L"DECIMAL";
+		case SQL_NUMERIC:
+			return L"NUMERIC";
+		case SQL_SMALLINT:
+			return L"SMALLINT";
+		case SQL_INTEGER:
+			return L"INTEGER";
+		case SQL_REAL:
+			return L"REAL";
+		case SQL_FLOAT:
+			return L"FLOAT";
+		case SQL_DOUBLE:
+			return L"DOUBLE";
+		case SQL_BIT:
+			return L"BIT";
+		case SQL_TINYINT:
+			return L"TINYINT";
+		case SQL_BIGINT:
+			return L"BIGINT";
+		case SQL_BINARY:
+			return L"BINARY";
+		case SQL_VARBINARY:
+			return L"VARBINARY";
+		case SQL_LONGVARBINARY:
+			return L"LONGVARBINARY";
+		case SQL_TYPE_DATE:	//[6]
+			return L"TYPE_DATE";
+		case SQL_TYPE_TIME: //[6]
+			return L"TYPE_TIME";
+		case SQL_TYPE_TIMESTAMP: //[6]
+			return L"TYPE_TIMESTAMP";
+		case SQL_DATE:
+			return L"DATE";
+		case SQL_TIME:
+			return L"TIME";
+		case SQL_TIMESTAMP:
+			return L"TIMESTAMP";
+//		case SQL_TYPE_UTCDATETIME:
+//			return L"TYPE_UTCDATETIME";
+//		case SQL_TYPE_UTCTIME:
+//			return L"TYPE_UTCTIME";
+		case SQL_INTERVAL_MONTH: //[7]
+			return L"INTERVAL_MONTH";
+		case SQL_INTERVAL_YEAR: //[7]
+			return L"INTERVAL_YEAR";
+		case SQL_INTERVAL_YEAR_TO_MONTH: //[7]
+			return L"INTERVAL_YEAR_TO_MONTH";
+		case SQL_INTERVAL_DAY: //[7]
+			return L"INTERVAL_DAY";
+		case SQL_INTERVAL_HOUR: ///[7]
+			return L"INTERVAL_HOUR";
+		case SQL_INTERVAL_MINUTE: //[7]
+			return L"INTERVAL_MINUTE";
+		case SQL_INTERVAL_SECOND: //[7]
+			return L"INTERVAL_SECOND";
+		case SQL_INTERVAL_DAY_TO_HOUR: //[7]
+			return L"INTERVAL_DAY_TO_HOUR";
+		case SQL_INTERVAL_DAY_TO_MINUTE: //[7]
+			return L"INTERVAL_DAY_TO_MINUTE";
+		case SQL_INTERVAL_DAY_TO_SECOND: //[7]
+			return L"INTERVAL_DAY_TO_SECOND";
+		case SQL_INTERVAL_HOUR_TO_MINUTE: //[7]
+			return L"INTERVAL_HOUR_TO_MINUTE";
+		case SQL_INTERVAL_HOUR_TO_SECOND: //[7]
+			return L"INTERVAL_HOUR_TO_SECOND";
+		case SQL_INTERVAL_MINUTE_TO_SECOND: //[7]
+			return L"INTERVAL_MINUTE_TO_SECOND";
+		case SQL_GUID:
+			return L"GUID";
+		default:
+			return L"???";
+		}
+	}
+
 	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = NULL */, SQLHANDLE hDbc /* = NULL */, SQLHANDLE hStmt /* = NULL */)
 	{
 		exASSERT(hEnv != NULL || hDbc != NULL || hStmt != NULL);
@@ -335,6 +427,7 @@ namespace exodbc
 			exASSERT(targetType == SQL_C_CHAR || targetType == SQL_C_WCHAR);
 		}
 
+		bool isNull;
 		SQLRETURN ret = SQLGetData(hStmt, colOrParamNr, targetType, targetValue, bufferLen, strLenOrIndPtr);
 		if( ! (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO))
 		{
@@ -349,11 +442,12 @@ namespace exodbc
 		}
 		else // ret is SQL_SUCCESS or SQL_SUCCESS_WITH_INFO
 		{
+			isNull = (*strLenOrIndPtr == SQL_NULL_DATA);
 			if(pIsNull)
-			{
-				*pIsNull = *strLenOrIndPtr == SQL_NULL_DATA;
-			}
-			if(nullTerminate && (!pIsNull || !*pIsNull))
+				*pIsNull = isNull;
+
+			// a string that is null does not get terminated. just dont use it.
+			if(nullTerminate && !isNull)
 			{
 				exASSERT(*strLenOrIndPtr != SQL_NO_TOTAL);
 				if(targetType == SQL_C_CHAR)
