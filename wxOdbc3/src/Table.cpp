@@ -425,113 +425,113 @@ void Table::setCbValueForColumn(int columnIndex)
 }
 
 /********** wxDbTable::bindParams() **********/
-bool Table::bindParams(bool forUpdate)
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly)
-        return false;
-
-    SWORD   fSqlType    = 0;
-    SDWORD  precision   = 0;
-    SWORD   scale       = 0;
-
-    // Bind each column of the table that should be bound
-    // to a parameter marker
-    int i;
-    UWORD colNumber;
-
-    for (i=0, colNumber=1; i < m_numCols; i++)
-    {
-        if (forUpdate)
-        {
-            if (!m_colDefs[i].m_updateable)
-                continue;
-        }
-        else
-        {
-            if (!m_colDefs[i].m_insertAllowed)
-                continue;
-        }
-
-        switch(m_colDefs[i].m_dbDataType)
-        {
-            case DB_DATA_TYPE_VARCHAR:
-                fSqlType = m_pDb->GetTypeInfVarchar().FsqlType;
-                precision = m_colDefs[i].m_szDataObj;
-                scale = 0;
-                break;
-            case DB_DATA_TYPE_MEMO:
-                fSqlType = m_pDb->GetTypeInfMemo().FsqlType;
-                precision = m_colDefs[i].m_szDataObj;
-                scale = 0;
-                break;
-            case DB_DATA_TYPE_INTEGER:
-                fSqlType = m_pDb->GetTypeInfInteger().FsqlType;
-                precision = m_pDb->GetTypeInfInteger().Precision;
-                scale = 0;
-                break;
-            case DB_DATA_TYPE_FLOAT:
-                fSqlType = m_pDb->GetTypeInfFloat().FsqlType;
-                precision = m_pDb->GetTypeInfFloat().Precision;
-                scale = m_pDb->GetTypeInfFloat().MaximumScale;
-                // SQL Sybase Anywhere v5.5 returned a negative number for the
-                // MaxScale.  This caused ODBC to kick out an error on ibscale.
-                // I check for this here and set the scale = precision.
-                //if (scale < 0)
-                // scale = (short) precision;
-                break;
-            case DB_DATA_TYPE_DATE:
-                fSqlType = m_pDb->GetTypeInfDate().FsqlType;
-                precision = m_pDb->GetTypeInfDate().Precision;
-                scale = 0;
-                break;
-            case DB_DATA_TYPE_BLOB:
-                fSqlType = m_pDb->GetTypeInfBlob().FsqlType;
-                precision = m_colDefs[i].m_szDataObj;
-                scale = 0;
-                break;
-        }
-
-        setCbValueForColumn(i);
-
-        if (forUpdate)
-        {
-            if (SQLBindParameter(m_hstmtUpdate, colNumber++, SQL_PARAM_INPUT, m_colDefs[i].m_sqlCtype,
-                                 fSqlType, precision, scale, (UCHAR*) m_colDefs[i].m_ptrDataObj,
-                                 precision+1, &m_colDefs[i].m_cbValue) != SQL_SUCCESS)
-            {
-                return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate));
-            }
-        }
-        else
-        {
-            if (SQLBindParameter(m_hstmtInsert, colNumber++, SQL_PARAM_INPUT, m_colDefs[i].m_sqlCtype,
-                                 fSqlType, precision, scale, (UCHAR*) m_colDefs[i].m_ptrDataObj,
-                                 precision+1, &m_colDefs[i].m_cbValue) != SQL_SUCCESS)
-            {
-                return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert));
-            }
-        }
-    }
-
-    // Completed successfully
-    return true;
-
-}  // wxDbTable::bindParams()
+//bool Table::bindParams(bool forUpdate)
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly)
+//        return false;
+//
+//    SWORD   fSqlType    = 0;
+//    SDWORD  precision   = 0;
+//    SWORD   scale       = 0;
+//
+//    // Bind each column of the table that should be bound
+//    // to a parameter marker
+//    int i;
+//    UWORD colNumber;
+//
+//    for (i=0, colNumber=1; i < m_numCols; i++)
+//    {
+//        if (forUpdate)
+//        {
+//            if (!m_colDefs[i].m_updateable)
+//                continue;
+//        }
+//        else
+//        {
+//            if (!m_colDefs[i].m_insertAllowed)
+//                continue;
+//        }
+//
+//        switch(m_colDefs[i].m_dbDataType)
+//        {
+//            case DB_DATA_TYPE_VARCHAR:
+//                fSqlType = m_pDb->GetTypeInfVarchar().FsqlType;
+//                precision = m_colDefs[i].m_szDataObj;
+//                scale = 0;
+//                break;
+//            case DB_DATA_TYPE_MEMO:
+//                fSqlType = m_pDb->GetTypeInfMemo().FsqlType;
+//                precision = m_colDefs[i].m_szDataObj;
+//                scale = 0;
+//                break;
+//            case DB_DATA_TYPE_INTEGER:
+//                fSqlType = m_pDb->GetTypeInfInteger().FsqlType;
+//                precision = m_pDb->GetTypeInfInteger().Precision;
+//                scale = 0;
+//                break;
+//            case DB_DATA_TYPE_FLOAT:
+//                fSqlType = m_pDb->GetTypeInfFloat().FsqlType;
+//                precision = m_pDb->GetTypeInfFloat().Precision;
+//                scale = m_pDb->GetTypeInfFloat().MaximumScale;
+//                // SQL Sybase Anywhere v5.5 returned a negative number for the
+//                // MaxScale.  This caused ODBC to kick out an error on ibscale.
+//                // I check for this here and set the scale = precision.
+//                //if (scale < 0)
+//                // scale = (short) precision;
+//                break;
+//            case DB_DATA_TYPE_DATE:
+//                fSqlType = m_pDb->GetTypeInfDate().FsqlType;
+//                precision = m_pDb->GetTypeInfDate().Precision;
+//                scale = 0;
+//                break;
+//            case DB_DATA_TYPE_BLOB:
+//                fSqlType = m_pDb->GetTypeInfBlob().FsqlType;
+//                precision = m_colDefs[i].m_szDataObj;
+//                scale = 0;
+//                break;
+//        }
+//
+//        setCbValueForColumn(i);
+//
+//        if (forUpdate)
+//        {
+//            if (SQLBindParameter(m_hstmtUpdate, colNumber++, SQL_PARAM_INPUT, m_colDefs[i].m_sqlCtype,
+//                                 fSqlType, precision, scale, (UCHAR*) m_colDefs[i].m_ptrDataObj,
+//                                 precision+1, &m_colDefs[i].m_cbValue) != SQL_SUCCESS)
+//            {
+//                return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate));
+//            }
+//        }
+//        else
+//        {
+//            if (SQLBindParameter(m_hstmtInsert, colNumber++, SQL_PARAM_INPUT, m_colDefs[i].m_sqlCtype,
+//                                 fSqlType, precision, scale, (UCHAR*) m_colDefs[i].m_ptrDataObj,
+//                                 precision+1, &m_colDefs[i].m_cbValue) != SQL_SUCCESS)
+//            {
+//                return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert));
+//            }
+//        }
+//    }
+//
+//    // Completed successfully
+//    return true;
+//
+//}  // wxDbTable::bindParams()
 
 
 /********** wxDbTable::bindInsertParams() **********/
-bool Table::bindInsertParams()
-{
-    return bindParams(false);
-}  // wxDbTable::bindInsertParams()
-
-
-/********** wxDbTable::bindUpdateParams() **********/
-bool Table::bindUpdateParams()
-{
-    return bindParams(true);
-}  // wxDbTable::bindUpdateParams()
+//bool Table::bindInsertParams()
+//{
+//    return bindParams(false);
+//}  // wxDbTable::bindInsertParams()
+//
+//
+///********** wxDbTable::bindUpdateParams() **********/
+//bool Table::bindUpdateParams()
+//{
+//    return bindParams(true);
+//}  // wxDbTable::bindUpdateParams()
 
 
 /********** wxDbTable::bindCols() **********/
@@ -794,11 +794,13 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
     // the wxDbTable object and the ODBC record.
     if (!m_queryOnly)
     {
-        if (!bindInsertParams())                    // Inserts
-            return false;
+		// commented because of missing datatype-info
+		exASSERT(false);
+        //if (!bindInsertParams())                    // Inserts
+        //    return false;
 
-        if (!bindUpdateParams())                    // Updates
-            return false;
+        //if (!bindUpdateParams())                    // Updates
+        //    return false;
     }
 
     if (!bindCols(*m_hstmtDefault))                   // Selects
@@ -1347,222 +1349,222 @@ bool Table::CloseCursor(HSTMT cursor)
 
 
 /********** wxDbTable::CreateTable() **********/
-bool Table::CreateTable(bool attemptDrop)
-{
-    if (!m_pDb)
-        return false;
-
-    int i, j;
-    std::wstring sqlStmt;
-
-#ifdef DBDEBUG_CONSOLE
-    std::wcout << L"Creating Table " << m_tableName << L"..." << std::endl;
-#endif
-
-    // Drop table first
-    if (attemptDrop && !DropTable())
-        return false;
-
-    // Create the table
-#ifdef DBDEBUG_CONSOLE
-    for (i = 0; i < m_numCols; i++)
-    {
-        // Exclude derived columns since they are NOT part of the base table
-        if (m_colDefs[i].m_derivedCol)
-            continue;
-        std::wcout << i + 1 << L": " << m_colDefs[i].m_colName << L"; ";
-        switch(m_colDefs[i].m_dbDataType)
-        {
-            case DB_DATA_TYPE_VARCHAR:
-                std::wcout << m_pDb->GetTypeInfVarchar().TypeName << L"(" << (int)(m_colDefs[i].m_szDataObj / sizeof(wchar_t)) << L")";
-                break;
-            case DB_DATA_TYPE_MEMO:
-                std::wcout << m_pDb->GetTypeInfMemo().TypeName;
-                break;
-            case DB_DATA_TYPE_INTEGER:
-                std::wcout << m_pDb->GetTypeInfInteger().TypeName;
-                break;
-            case DB_DATA_TYPE_FLOAT:
-                std::wcout << m_pDb->GetTypeInfFloat().TypeName;
-                break;
-            case DB_DATA_TYPE_DATE:
-                std::wcout << m_pDb->GetTypeInfDate().TypeName;
-                break;
-            case DB_DATA_TYPE_BLOB:
-                std::wcout << m_pDb->GetTypeInfBlob().TypeName;
-                break;
-        }
-        std::wcout << std::endl;
-    }
-#endif
-
-    // Build a CREATE TABLE string from the colDefs structure.
-    bool needComma = false;
-
-	sqlStmt = (boost::wformat(L"CREATE TABLE %s (") % m_pDb->SQLTableName(m_tableName.c_str())).str();
-
-    for (i = 0; i < m_numCols; i++)
-    {
-        // Exclude derived columns since they are NOT part of the base table
-        if (m_colDefs[i].m_derivedCol)
-            continue;
-        // Comma Delimiter
-        if (needComma)
-            sqlStmt += L",";
-        // Column Name
-        sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
-//        sqlStmt += colDefs[i].ColName;
-        sqlStmt += L" ";
-        // Column Type
-        switch(m_colDefs[i].m_dbDataType)
-        {
-            case DB_DATA_TYPE_VARCHAR:
-                sqlStmt += m_pDb->GetTypeInfVarchar().TypeName;
-                break;
-            case DB_DATA_TYPE_MEMO:
-                sqlStmt += m_pDb->GetTypeInfMemo().TypeName;
-                break;
-            case DB_DATA_TYPE_INTEGER:
-                sqlStmt += m_pDb->GetTypeInfInteger().TypeName;
-                break;
-            case DB_DATA_TYPE_FLOAT:
-                sqlStmt += m_pDb->GetTypeInfFloat().TypeName;
-                break;
-            case DB_DATA_TYPE_DATE:
-                sqlStmt += m_pDb->GetTypeInfDate().TypeName;
-                break;
-            case DB_DATA_TYPE_BLOB:
-                sqlStmt += m_pDb->GetTypeInfBlob().TypeName;
-                break;
-        }
-        // For varchars, append the size of the string
-        if (m_colDefs[i].m_dbDataType == DB_DATA_TYPE_VARCHAR &&
-            (m_pDb->Dbms() != dbmsMY_SQL || m_pDb->GetTypeInfVarchar().TypeName != L"text"))// ||
-//            colDefs[i].DbDataType == DB_DATA_TYPE_BLOB)
-        {
-            std::wstring s;
-			s = (boost::wformat(L"(%d)") % (int)(m_colDefs[i].m_szDataObj / sizeof(wchar_t))).str();
-            sqlStmt += s;
-        }
-
-        if (m_pDb->Dbms() == dbmsDB2 ||
-            m_pDb->Dbms() == dbmsMY_SQL ||
-            m_pDb->Dbms() == dbmsSYBASE_ASE  ||
-            m_pDb->Dbms() == dbmsINTERBASE  ||
-            m_pDb->Dbms() == dbmsFIREBIRD  ||
-            m_pDb->Dbms() == dbmsMS_SQL_SERVER)
-        {
-            if (m_colDefs[i].m_keyField)
-            {
-                sqlStmt += L" NOT NULL";
-            }
-        }
-
-        needComma = true;
-    }
-    // If there is a primary key defined, include it in the create statement
-    for (i = j = 0; i < m_numCols; i++)
-    {
-        if (m_colDefs[i].m_keyField)
-        {
-            j++;
-            break;
-        }
-    }
-    if ( j && (m_pDb->Dbms() != dbmsDBASE)
-        && (m_pDb->Dbms() != dbmsXBASE_SEQUITER) )  // Found a keyfield
-    {
-        switch (m_pDb->Dbms())
-        {
-            case dbmsACCESS:
-            case dbmsINFORMIX:
-            case dbmsSYBASE_ASA:
-            case dbmsSYBASE_ASE:
-            case dbmsMY_SQL:
-            case dbmsFIREBIRD:
-            {
-                // MySQL goes out on this one. We also declare the relevant key NON NULL above
-                sqlStmt += L",PRIMARY KEY (";
-                break;
-            }
-            default:
-            {
-                sqlStmt += L",CONSTRAINT ";
-                //  DB2 is limited to 18 characters for index names
-                if (m_pDb->Dbms() == dbmsDB2)
-                {
-                    exASSERT_MSG(m_tableName.length() <= 13, "DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters.");
-                    sqlStmt += m_pDb->SQLTableName(m_tableName.substr(0, 13).c_str());
-//                    sqlStmt += tableName.substr(0, 13);
-                }
-                else
-                    sqlStmt += m_pDb->SQLTableName(m_tableName.c_str());
-//                    sqlStmt += tableName;
-
-                sqlStmt += L"_PIDX PRIMARY KEY (";
-                break;
-            }
-        }
-
-        // List column name(s) of column(s) comprising the primary key
-        for (i = j = 0; i < m_numCols; i++)
-        {
-            if (m_colDefs[i].m_keyField)
-            {
-                if (j++) // Multi part key, comma separate names
-                    sqlStmt += L",";
-                sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
-
-                if (m_pDb->Dbms() == dbmsMY_SQL &&
-                    m_colDefs[i].m_dbDataType ==  DB_DATA_TYPE_VARCHAR)
-                {
-                    std::wstring s;
-					s = (boost::wformat(L"(%d)") % (int)(m_colDefs[i].m_szDataObj / sizeof(wchar_t))).str();
-                    sqlStmt += s;
-                }
-            }
-        }
-        sqlStmt += L")";
-
-        if (m_pDb->Dbms() == dbmsINFORMIX ||
-            m_pDb->Dbms() == dbmsSYBASE_ASA ||
-            m_pDb->Dbms() == dbmsSYBASE_ASE)
-        {
-            sqlStmt += L" CONSTRAINT ";
-            sqlStmt += m_pDb->SQLTableName(m_tableName.c_str());
-//            sqlStmt += tableName;
-            sqlStmt += L"_PIDX";
-        }
-    }
-    // Append the closing parentheses for the create table statement
-    sqlStmt += L")";
-
-    m_pDb->WriteSqlLog(sqlStmt);
-
-#ifdef DBDEBUG_CONSOLE
-    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
-#endif
-
-    // Execute the CREATE TABLE statement
-    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
-    if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-    {
-        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
-        m_pDb->RollbackTrans();
-        CloseCursor(m_hstmt);
-        return false;
-    }
-
-    // Commit the transaction and close the cursor
-    if (!m_pDb->CommitTrans())
-        return false;
-    if (!CloseCursor(m_hstmt))
-        return false;
-
-    // Database table created successfully
-    return true;
-
-} // wxDbTable::CreateTable()
+//bool Table::CreateTable(bool attemptDrop)
+//{
+//    if (!m_pDb)
+//        return false;
+//
+//    int i, j;
+//    std::wstring sqlStmt;
+//
+//#ifdef DBDEBUG_CONSOLE
+//    std::wcout << L"Creating Table " << m_tableName << L"..." << std::endl;
+//#endif
+//
+//    // Drop table first
+//    if (attemptDrop && !DropTable())
+//        return false;
+//
+//    // Create the table
+//#ifdef DBDEBUG_CONSOLE
+//    for (i = 0; i < m_numCols; i++)
+//    {
+//        // Exclude derived columns since they are NOT part of the base table
+//        if (m_colDefs[i].m_derivedCol)
+//            continue;
+//        std::wcout << i + 1 << L": " << m_colDefs[i].m_colName << L"; ";
+//        switch(m_colDefs[i].m_dbDataType)
+//        {
+//            case DB_DATA_TYPE_VARCHAR:
+//                std::wcout << m_pDb->GetTypeInfVarchar().TypeName << L"(" << (int)(m_colDefs[i].m_szDataObj / sizeof(wchar_t)) << L")";
+//                break;
+//            case DB_DATA_TYPE_MEMO:
+//                std::wcout << m_pDb->GetTypeInfMemo().TypeName;
+//                break;
+//            case DB_DATA_TYPE_INTEGER:
+//                std::wcout << m_pDb->GetTypeInfInteger().TypeName;
+//                break;
+//            case DB_DATA_TYPE_FLOAT:
+//                std::wcout << m_pDb->GetTypeInfFloat().TypeName;
+//                break;
+//            case DB_DATA_TYPE_DATE:
+//                std::wcout << m_pDb->GetTypeInfDate().TypeName;
+//                break;
+//            case DB_DATA_TYPE_BLOB:
+//                std::wcout << m_pDb->GetTypeInfBlob().TypeName;
+//                break;
+//        }
+//        std::wcout << std::endl;
+//    }
+//#endif
+//
+//    // Build a CREATE TABLE string from the colDefs structure.
+//    bool needComma = false;
+//
+//	sqlStmt = (boost::wformat(L"CREATE TABLE %s (") % m_pDb->SQLTableName(m_tableName.c_str())).str();
+//
+//    for (i = 0; i < m_numCols; i++)
+//    {
+//        // Exclude derived columns since they are NOT part of the base table
+//        if (m_colDefs[i].m_derivedCol)
+//            continue;
+//        // Comma Delimiter
+//        if (needComma)
+//            sqlStmt += L",";
+//        // Column Name
+//        sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
+////        sqlStmt += colDefs[i].ColName;
+//        sqlStmt += L" ";
+//        // Column Type
+//        switch(m_colDefs[i].m_dbDataType)
+//        {
+//            case DB_DATA_TYPE_VARCHAR:
+//                sqlStmt += m_pDb->GetTypeInfVarchar().TypeName;
+//                break;
+//            case DB_DATA_TYPE_MEMO:
+//                sqlStmt += m_pDb->GetTypeInfMemo().TypeName;
+//                break;
+//            case DB_DATA_TYPE_INTEGER:
+//                sqlStmt += m_pDb->GetTypeInfInteger().TypeName;
+//                break;
+//            case DB_DATA_TYPE_FLOAT:
+//                sqlStmt += m_pDb->GetTypeInfFloat().TypeName;
+//                break;
+//            case DB_DATA_TYPE_DATE:
+//                sqlStmt += m_pDb->GetTypeInfDate().TypeName;
+//                break;
+//            case DB_DATA_TYPE_BLOB:
+//                sqlStmt += m_pDb->GetTypeInfBlob().TypeName;
+//                break;
+//        }
+//        // For varchars, append the size of the string
+//        if (m_colDefs[i].m_dbDataType == DB_DATA_TYPE_VARCHAR &&
+//            (m_pDb->Dbms() != dbmsMY_SQL || m_pDb->GetTypeInfVarchar().TypeName != L"text"))// ||
+////            colDefs[i].DbDataType == DB_DATA_TYPE_BLOB)
+//        {
+//            std::wstring s;
+//			s = (boost::wformat(L"(%d)") % (int)(m_colDefs[i].m_szDataObj / sizeof(wchar_t))).str();
+//            sqlStmt += s;
+//        }
+//
+//        if (m_pDb->Dbms() == dbmsDB2 ||
+//            m_pDb->Dbms() == dbmsMY_SQL ||
+//            m_pDb->Dbms() == dbmsSYBASE_ASE  ||
+//            m_pDb->Dbms() == dbmsINTERBASE  ||
+//            m_pDb->Dbms() == dbmsFIREBIRD  ||
+//            m_pDb->Dbms() == dbmsMS_SQL_SERVER)
+//        {
+//            if (m_colDefs[i].m_keyField)
+//            {
+//                sqlStmt += L" NOT NULL";
+//            }
+//        }
+//
+//        needComma = true;
+//    }
+//    // If there is a primary key defined, include it in the create statement
+//    for (i = j = 0; i < m_numCols; i++)
+//    {
+//        if (m_colDefs[i].m_keyField)
+//        {
+//            j++;
+//            break;
+//        }
+//    }
+//    if ( j && (m_pDb->Dbms() != dbmsDBASE)
+//        && (m_pDb->Dbms() != dbmsXBASE_SEQUITER) )  // Found a keyfield
+//    {
+//        switch (m_pDb->Dbms())
+//        {
+//            case dbmsACCESS:
+//            case dbmsINFORMIX:
+//            case dbmsSYBASE_ASA:
+//            case dbmsSYBASE_ASE:
+//            case dbmsMY_SQL:
+//            case dbmsFIREBIRD:
+//            {
+//                // MySQL goes out on this one. We also declare the relevant key NON NULL above
+//                sqlStmt += L",PRIMARY KEY (";
+//                break;
+//            }
+//            default:
+//            {
+//                sqlStmt += L",CONSTRAINT ";
+//                //  DB2 is limited to 18 characters for index names
+//                if (m_pDb->Dbms() == dbmsDB2)
+//                {
+//                    exASSERT_MSG(m_tableName.length() <= 13, "DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters.");
+//                    sqlStmt += m_pDb->SQLTableName(m_tableName.substr(0, 13).c_str());
+////                    sqlStmt += tableName.substr(0, 13);
+//                }
+//                else
+//                    sqlStmt += m_pDb->SQLTableName(m_tableName.c_str());
+////                    sqlStmt += tableName;
+//
+//                sqlStmt += L"_PIDX PRIMARY KEY (";
+//                break;
+//            }
+//        }
+//
+//        // List column name(s) of column(s) comprising the primary key
+//        for (i = j = 0; i < m_numCols; i++)
+//        {
+//            if (m_colDefs[i].m_keyField)
+//            {
+//                if (j++) // Multi part key, comma separate names
+//                    sqlStmt += L",";
+//                sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
+//
+//                if (m_pDb->Dbms() == dbmsMY_SQL &&
+//                    m_colDefs[i].m_dbDataType ==  DB_DATA_TYPE_VARCHAR)
+//                {
+//                    std::wstring s;
+//					s = (boost::wformat(L"(%d)") % (int)(m_colDefs[i].m_szDataObj / sizeof(wchar_t))).str();
+//                    sqlStmt += s;
+//                }
+//            }
+//        }
+//        sqlStmt += L")";
+//
+//        if (m_pDb->Dbms() == dbmsINFORMIX ||
+//            m_pDb->Dbms() == dbmsSYBASE_ASA ||
+//            m_pDb->Dbms() == dbmsSYBASE_ASE)
+//        {
+//            sqlStmt += L" CONSTRAINT ";
+//            sqlStmt += m_pDb->SQLTableName(m_tableName.c_str());
+////            sqlStmt += tableName;
+//            sqlStmt += L"_PIDX";
+//        }
+//    }
+//    // Append the closing parentheses for the create table statement
+//    sqlStmt += L")";
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//#ifdef DBDEBUG_CONSOLE
+//    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
+//#endif
+//
+//    // Execute the CREATE TABLE statement
+//    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
+//    if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+//    {
+//        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
+//        m_pDb->RollbackTrans();
+//        CloseCursor(m_hstmt);
+//        return false;
+//    }
+//
+//    // Commit the transaction and close the cursor
+//    if (!m_pDb->CommitTrans())
+//        return false;
+//    if (!CloseCursor(m_hstmt))
+//        return false;
+//
+//    // Database table created successfully
+//    return true;
+//
+//} // wxDbTable::CreateTable()
 
 
 /********** wxDbTable::DropTable() **********/
@@ -1617,160 +1619,160 @@ bool Table::DropTable()
 
 
 /********** wxDbTable::CreateIndex() **********/
-bool Table::CreateIndex(const std::wstring &indexName, bool unique, UWORD numIndexColumns,
-                                     SIndexDefinition *pIndexDefs, bool attemptDrop)
-{
-    std::wstring sqlStmt;
-
-    // Drop the index first
-    if (attemptDrop && !DropIndex(indexName))
-        return false;
-
-    // MySQL (and possibly Sybase ASE?? - gt) require that any columns which are used as portions
-    // of an index have the columns defined as "NOT NULL".  During initial table creation though,
-    // it may not be known which columns are necessarily going to be part of an index (e.g. the
-    // table was created, then months later you determine that an additional index while
-    // give better performance, so you want to add an index).
-    //
-    // The following block of code will modify the column definition to make the column be
-    // defined with the "NOT NULL" qualifier.
-    if (m_pDb->Dbms() == dbmsMY_SQL)
-    {
-        std::wstring sqlStmt;
-        int i;
-        bool ok = true;
-        for (i = 0; i < numIndexColumns && ok; i++)
-        {
-            int   j = 0;
-            bool  found = false;
-            // Find the column definition that has the ColName that matches the
-            // index column name.  We need to do this to get the DB_DATA_TYPE of
-            // the index column, as MySQL's syntax for the ALTER column requires
-            // this information
-            while (!found && (j < this->m_numCols))
-            {
-                if (wcscmp(m_colDefs[j].m_colName,pIndexDefs[i].ColName) == 0)
-                    found = true;
-                if (!found)
-                    j++;
-            }
-
-            if (found)
-            {
-                ok = m_pDb->ModifyColumn(m_tableName, pIndexDefs[i].ColName,
-                                        m_colDefs[j].m_dbDataType, (int)(m_colDefs[j].m_szDataObj / sizeof(wchar_t)),
-                                        L"NOT NULL");
-
-                if (!ok)
-                {
-                    #if 0
-                    // retcode is not used
-                    wxODBC_ERRORS retcode;
-                    // Oracle returns a DB_ERR_GENERAL_ERROR if the column is already
-                    // defined to be NOT NULL, but reportedly MySQL doesn't mind.
-                    // This line is just here for debug checking of the value
-                    retcode = (wxODBC_ERRORS)pDb->DB_STATUS;
-                    #endif
-                }
-            }
-            else
-                ok = false;
-        }
-        if (ok)
-            m_pDb->CommitTrans();
-        else
-        {
-            m_pDb->RollbackTrans();
-            return false;
-        }
-    }
-
-    // Build a CREATE INDEX statement
-    sqlStmt = L"CREATE ";
-    if (unique)
-        sqlStmt += L"UNIQUE ";
-
-    sqlStmt += L"INDEX ";
-    sqlStmt += m_pDb->SQLTableName(indexName.c_str());
-    sqlStmt += L" ON ";
-
-    sqlStmt += m_pDb->SQLTableName(m_tableName.c_str());
-//    sqlStmt += tableName;
-    sqlStmt += L" (";
-
-    // Append list of columns making up index
-    int i;
-    for (i = 0; i < numIndexColumns; i++)
-    {
-        sqlStmt += m_pDb->SQLColumnName(pIndexDefs[i].ColName);
-//        sqlStmt += pIndexDefs[i].ColName;
-
-        // MySQL requires a key length on VARCHAR keys
-        if ( m_pDb->Dbms() == dbmsMY_SQL )
-        {
-            // Find the details on this column
-            int j;
-            for ( j = 0; j < m_numCols; ++j )
-            {
-                if ( wcscmp( pIndexDefs[i].ColName, m_colDefs[j].m_colName ) == 0 )
-                {
-                    break;
-                }
-            }
-            if ( m_colDefs[j].m_dbDataType ==  DB_DATA_TYPE_VARCHAR)
-            {
-                std::wstring s;
-				s = (boost::wformat(L"(%d)") % (int)(m_colDefs[i].m_szDataObj / sizeof(wchar_t))).str();
-                sqlStmt += s;
-            }
-        }
-
-        // Postgres and SQL Server 7 do not support the ASC/DESC keywords for index columns
-        if (!((m_pDb->Dbms() == dbmsMS_SQL_SERVER) && (wcsncmp(m_pDb->m_dbInf.dbmsVer, L"07", 2)==0)) &&
-            !(m_pDb->Dbms() == dbmsFIREBIRD) &&
-            !(m_pDb->Dbms() == dbmsPOSTGRES))
-        {
-            if (pIndexDefs[i].Ascending)
-                sqlStmt += L" ASC";
-            else
-                sqlStmt += L" DESC";
-        }
-        else
-            exASSERT_MSG(pIndexDefs[i].Ascending, "Datasource does not support DESCending index columns");
-
-        if ((i + 1) < numIndexColumns)
-            sqlStmt += L",";
-    }
-
-    // Append closing parentheses
-    sqlStmt += L")";
-
-    m_pDb->WriteSqlLog(sqlStmt);
-
-#ifdef DBDEBUG_CONSOLE
-    std::wcout << std::endl << sqlStmt.c_str() << std::endl << std::endl;
-#endif
-
-    // Execute the CREATE INDEX statement
-    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
-    if (retcode != SQL_SUCCESS)
-    {
-        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
-        m_pDb->RollbackTrans();
-        CloseCursor(m_hstmt);
-        return false;
-    }
-
-    // Commit the transaction and close the cursor
-    if (! m_pDb->CommitTrans())
-        return false;
-    if (! CloseCursor(m_hstmt))
-        return false;
-
-    // Index Created Successfully
-    return true;
-
-}  // wxDbTable::CreateIndex()
+//bool Table::CreateIndex(const std::wstring &indexName, bool unique, UWORD numIndexColumns,
+//                                     SIndexDefinition *pIndexDefs, bool attemptDrop)
+//{
+//    std::wstring sqlStmt;
+//
+//    // Drop the index first
+//    if (attemptDrop && !DropIndex(indexName))
+//        return false;
+//
+//    // MySQL (and possibly Sybase ASE?? - gt) require that any columns which are used as portions
+//    // of an index have the columns defined as "NOT NULL".  During initial table creation though,
+//    // it may not be known which columns are necessarily going to be part of an index (e.g. the
+//    // table was created, then months later you determine that an additional index while
+//    // give better performance, so you want to add an index).
+//    //
+//    // The following block of code will modify the column definition to make the column be
+//    // defined with the "NOT NULL" qualifier.
+//    if (m_pDb->Dbms() == dbmsMY_SQL)
+//    {
+//        std::wstring sqlStmt;
+//        int i;
+//        bool ok = true;
+//        for (i = 0; i < numIndexColumns && ok; i++)
+//        {
+//            int   j = 0;
+//            bool  found = false;
+//            // Find the column definition that has the ColName that matches the
+//            // index column name.  We need to do this to get the DB_DATA_TYPE of
+//            // the index column, as MySQL's syntax for the ALTER column requires
+//            // this information
+//            while (!found && (j < this->m_numCols))
+//            {
+//                if (wcscmp(m_colDefs[j].m_colName,pIndexDefs[i].ColName) == 0)
+//                    found = true;
+//                if (!found)
+//                    j++;
+//            }
+//
+//            if (found)
+//            {
+//                ok = m_pDb->ModifyColumn(m_tableName, pIndexDefs[i].ColName,
+//                                        m_colDefs[j].m_dbDataType, (int)(m_colDefs[j].m_szDataObj / sizeof(wchar_t)),
+//                                        L"NOT NULL");
+//
+//                if (!ok)
+//                {
+//                    #if 0
+//                    // retcode is not used
+//                    wxODBC_ERRORS retcode;
+//                    // Oracle returns a DB_ERR_GENERAL_ERROR if the column is already
+//                    // defined to be NOT NULL, but reportedly MySQL doesn't mind.
+//                    // This line is just here for debug checking of the value
+//                    retcode = (wxODBC_ERRORS)pDb->DB_STATUS;
+//                    #endif
+//                }
+//            }
+//            else
+//                ok = false;
+//        }
+//        if (ok)
+//            m_pDb->CommitTrans();
+//        else
+//        {
+//            m_pDb->RollbackTrans();
+//            return false;
+//        }
+//    }
+//
+//    // Build a CREATE INDEX statement
+//    sqlStmt = L"CREATE ";
+//    if (unique)
+//        sqlStmt += L"UNIQUE ";
+//
+//    sqlStmt += L"INDEX ";
+//    sqlStmt += m_pDb->SQLTableName(indexName.c_str());
+//    sqlStmt += L" ON ";
+//
+//    sqlStmt += m_pDb->SQLTableName(m_tableName.c_str());
+////    sqlStmt += tableName;
+//    sqlStmt += L" (";
+//
+//    // Append list of columns making up index
+//    int i;
+//    for (i = 0; i < numIndexColumns; i++)
+//    {
+//        sqlStmt += m_pDb->SQLColumnName(pIndexDefs[i].ColName);
+////        sqlStmt += pIndexDefs[i].ColName;
+//
+//        // MySQL requires a key length on VARCHAR keys
+//        if ( m_pDb->Dbms() == dbmsMY_SQL )
+//        {
+//            // Find the details on this column
+//            int j;
+//            for ( j = 0; j < m_numCols; ++j )
+//            {
+//                if ( wcscmp( pIndexDefs[i].ColName, m_colDefs[j].m_colName ) == 0 )
+//                {
+//                    break;
+//                }
+//            }
+//            if ( m_colDefs[j].m_dbDataType ==  DB_DATA_TYPE_VARCHAR)
+//            {
+//                std::wstring s;
+//				s = (boost::wformat(L"(%d)") % (int)(m_colDefs[i].m_szDataObj / sizeof(wchar_t))).str();
+//                sqlStmt += s;
+//            }
+//        }
+//
+//        // Postgres and SQL Server 7 do not support the ASC/DESC keywords for index columns
+//        if (!((m_pDb->Dbms() == dbmsMS_SQL_SERVER) && (wcsncmp(m_pDb->m_dbInf.dbmsVer, L"07", 2)==0)) &&
+//            !(m_pDb->Dbms() == dbmsFIREBIRD) &&
+//            !(m_pDb->Dbms() == dbmsPOSTGRES))
+//        {
+//            if (pIndexDefs[i].Ascending)
+//                sqlStmt += L" ASC";
+//            else
+//                sqlStmt += L" DESC";
+//        }
+//        else
+//            exASSERT_MSG(pIndexDefs[i].Ascending, "Datasource does not support DESCending index columns");
+//
+//        if ((i + 1) < numIndexColumns)
+//            sqlStmt += L",";
+//    }
+//
+//    // Append closing parentheses
+//    sqlStmt += L")";
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//#ifdef DBDEBUG_CONSOLE
+//    std::wcout << std::endl << sqlStmt.c_str() << std::endl << std::endl;
+//#endif
+//
+//    // Execute the CREATE INDEX statement
+//    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
+//    if (retcode != SQL_SUCCESS)
+//    {
+//        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
+//        m_pDb->RollbackTrans();
+//        CloseCursor(m_hstmt);
+//        return false;
+//    }
+//
+//    // Commit the transaction and close the cursor
+//    if (! m_pDb->CommitTrans())
+//        return false;
+//    if (! CloseCursor(m_hstmt))
+//        return false;
+//
+//    // Index Created Successfully
+//    return true;
+//
+//}  // wxDbTable::CreateIndex()
 
 
 /********** wxDbTable::DropIndex() **********/
@@ -1873,70 +1875,70 @@ bool Table::SetOrderByColNums(UWORD first, ... )
 
 
 /********** wxDbTable::Insert() **********/
-int Table::Insert()
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly || !m_insertable)
-        return(DB_FAILURE);
-
-    bindInsertParams();
-
-    // Insert the record by executing the already prepared insert statement
-    RETCODE retcode;
-    retcode = SQLExecute(m_hstmtInsert);
-    if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO &&
-        retcode != SQL_NEED_DATA)
-    {
-        // Check to see if integrity constraint was violated
-        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmtInsert);
-        if (! wcscmp(m_pDb->sqlState, L"23000"))  // Integrity constraint violated
-            return(DB_ERR_INTEGRITY_CONSTRAINT_VIOL);
-        else
-        {
-            m_pDb->DispNextError();
-            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
-            return(DB_FAILURE);
-        }
-    }
-    if (retcode == SQL_NEED_DATA)
-    {
-        PTR pParmID;
-        retcode = SQLParamData(m_hstmtInsert, &pParmID);
-        while (retcode == SQL_NEED_DATA)
-        {
-            // Find the parameter
-            int i;
-            for (i=0; i < m_numCols; i++)
-            {
-                if (m_colDefs[i].m_ptrDataObj == pParmID)
-                {
-                    // We found it.  Store the parameter.
-                    retcode = SQLPutData(m_hstmtInsert, pParmID, m_colDefs[i].m_szDataObj);
-                    if (retcode != SQL_SUCCESS)
-                    {
-                        m_pDb->DispNextError();
-                        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
-                        return(DB_FAILURE);
-                    }
-                    break;
-                }
-            }
-            retcode = SQLParamData(m_hstmtInsert, &pParmID);
-            if (retcode != SQL_SUCCESS &&
-                retcode != SQL_SUCCESS_WITH_INFO)
-            {
-                // record was not inserted
-                m_pDb->DispNextError();
-                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
-                return(DB_FAILURE);
-            }
-        }
-    }
-
-    // Record inserted into the datasource successfully
-    return(DB_SUCCESS);
-
-}  // wxDbTable::Insert()
+//int Table::Insert()
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly || !m_insertable)
+//        return(DB_FAILURE);
+//
+//    bindInsertParams();
+//
+//    // Insert the record by executing the already prepared insert statement
+//    RETCODE retcode;
+//    retcode = SQLExecute(m_hstmtInsert);
+//    if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO &&
+//        retcode != SQL_NEED_DATA)
+//    {
+//        // Check to see if integrity constraint was violated
+//        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmtInsert);
+//        if (! wcscmp(m_pDb->sqlState, L"23000"))  // Integrity constraint violated
+//            return(DB_ERR_INTEGRITY_CONSTRAINT_VIOL);
+//        else
+//        {
+//            m_pDb->DispNextError();
+//            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
+//            return(DB_FAILURE);
+//        }
+//    }
+//    if (retcode == SQL_NEED_DATA)
+//    {
+//        PTR pParmID;
+//        retcode = SQLParamData(m_hstmtInsert, &pParmID);
+//        while (retcode == SQL_NEED_DATA)
+//        {
+//            // Find the parameter
+//            int i;
+//            for (i=0; i < m_numCols; i++)
+//            {
+//                if (m_colDefs[i].m_ptrDataObj == pParmID)
+//                {
+//                    // We found it.  Store the parameter.
+//                    retcode = SQLPutData(m_hstmtInsert, pParmID, m_colDefs[i].m_szDataObj);
+//                    if (retcode != SQL_SUCCESS)
+//                    {
+//                        m_pDb->DispNextError();
+//                        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
+//                        return(DB_FAILURE);
+//                    }
+//                    break;
+//                }
+//            }
+//            retcode = SQLParamData(m_hstmtInsert, &pParmID);
+//            if (retcode != SQL_SUCCESS &&
+//                retcode != SQL_SUCCESS_WITH_INFO)
+//            {
+//                // record was not inserted
+//                m_pDb->DispNextError();
+//                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
+//                return(DB_FAILURE);
+//            }
+//        }
+//    }
+//
+//    // Record inserted into the datasource successfully
+//    return(DB_SUCCESS);
+//
+//}  // wxDbTable::Insert()
 
 
 /********** wxDbTable::Update() **********/

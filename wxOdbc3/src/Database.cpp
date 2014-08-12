@@ -203,42 +203,42 @@ namespace exodbc
 		for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
 			wcscpy(errorList[i], emptyString);
 
-		// Init typeInf structures
-		m_typeInfVarchar.TypeName.empty();
-		m_typeInfVarchar.FsqlType      = 0;
-		m_typeInfVarchar.Precision     = 0;
-		m_typeInfVarchar.CaseSensitive = 0;
-		m_typeInfVarchar.MaximumScale  = 0;
+		//// Init typeInf structures
+		//m_typeInfVarchar.TypeName.empty();
+		//m_typeInfVarchar.FsqlType      = 0;
+		//m_typeInfVarchar.Precision     = 0;
+		//m_typeInfVarchar.CaseSensitive = 0;
+		//m_typeInfVarchar.MaximumScale  = 0;
 
-		m_typeInfInteger.TypeName.empty();
-		m_typeInfInteger.FsqlType      = 0;
-		m_typeInfInteger.Precision     = 0;
-		m_typeInfInteger.CaseSensitive = 0;
-		m_typeInfInteger.MaximumScale  = 0;
+		//m_typeInfInteger.TypeName.empty();
+		//m_typeInfInteger.FsqlType      = 0;
+		//m_typeInfInteger.Precision     = 0;
+		//m_typeInfInteger.CaseSensitive = 0;
+		//m_typeInfInteger.MaximumScale  = 0;
 
-		m_typeInfFloat.TypeName.empty();
-		m_typeInfFloat.FsqlType      = 0;
-		m_typeInfFloat.Precision     = 0;
-		m_typeInfFloat.CaseSensitive = 0;
-		m_typeInfFloat.MaximumScale  = 0;
+		//m_typeInfFloat.TypeName.empty();
+		//m_typeInfFloat.FsqlType      = 0;
+		//m_typeInfFloat.Precision     = 0;
+		//m_typeInfFloat.CaseSensitive = 0;
+		//m_typeInfFloat.MaximumScale  = 0;
 
-		m_typeInfDate.TypeName.empty();
-		m_typeInfDate.FsqlType      = 0;
-		m_typeInfDate.Precision     = 0;
-		m_typeInfDate.CaseSensitive = 0;
-		m_typeInfDate.MaximumScale  = 0;
+		//m_typeInfDate.TypeName.empty();
+		//m_typeInfDate.FsqlType      = 0;
+		//m_typeInfDate.Precision     = 0;
+		//m_typeInfDate.CaseSensitive = 0;
+		//m_typeInfDate.MaximumScale  = 0;
 
-		m_typeInfBlob.TypeName.empty();
-		m_typeInfBlob.FsqlType      = 0;
-		m_typeInfBlob.Precision     = 0;
-		m_typeInfBlob.CaseSensitive = 0;
-		m_typeInfBlob.MaximumScale  = 0;
+		//m_typeInfBlob.TypeName.empty();
+		//m_typeInfBlob.FsqlType      = 0;
+		//m_typeInfBlob.Precision     = 0;
+		//m_typeInfBlob.CaseSensitive = 0;
+		//m_typeInfBlob.MaximumScale  = 0;
 
-		m_typeInfMemo.TypeName.empty();
-		m_typeInfMemo.FsqlType      = 0;
-		m_typeInfMemo.Precision     = 0;
-		m_typeInfMemo.CaseSensitive = 0;
-		m_typeInfMemo.MaximumScale  = 0;
+		//m_typeInfMemo.TypeName.empty();
+		//m_typeInfMemo.FsqlType      = 0;
+		//m_typeInfMemo.Precision     = 0;
+		//m_typeInfMemo.CaseSensitive = 0;
+		//m_typeInfMemo.MaximumScale  = 0;
 
 		// Error reporting is turned OFF by default
 		m_silent = true;
@@ -287,198 +287,198 @@ namespace exodbc
 	}  // wxDb::ConvertUserIDImpl()
 
 
-	bool Database::DetermineDataTypes(bool failOnDataTypeUnsupported)
-	{
-		size_t iIndex;
-
-		// These are the possible SQL types we check for use against the datasource we are connected
-		// to for the purpose of determining which data type to use for the basic character strings
-		// column types
-		//
-		// NOTE: The first type in this enumeration that is determined to be supported by the
-		//       datasource/driver is the one that will be used.
-		SWORD PossibleSqlCharTypes[] = {
-#if defined(SQL_WVARCHAR)
-			SQL_WVARCHAR,
-#endif
-			SQL_VARCHAR,
-#if defined(SQL_WVARCHAR)
-			SQL_WCHAR,
-#endif
-			SQL_CHAR
-		};
-
-		// These are the possible SQL types we check for use against the datasource we are connected
-		// to for the purpose of determining which data type to use for the basic non-floating point
-		// column types
-		//
-		// NOTE: The first type in this enumeration that is determined to be supported by the
-		//       datasource/driver is the one that will be used.
-		SWORD PossibleSqlIntegerTypes[] = {
-			SQL_INTEGER
-		};
-
-		// These are the possible SQL types we check for use against the datasource we are connected
-		// to for the purpose of determining which data type to use for the basic floating point number
-		// column types
-		//
-		// NOTE: The first type in this enumeration that is determined to be supported by the
-		//       datasource/driver is the one that will be used.
-		SWORD PossibleSqlFloatTypes[] = {
-			SQL_DOUBLE,
-			SQL_REAL,
-			SQL_FLOAT,
-			SQL_DECIMAL,
-			SQL_NUMERIC
-		};
-
-		// These are the possible SQL types we check for use agains the datasource we are connected
-		// to for the purpose of determining which data type to use for the date/time column types
-		//
-		// NOTE: The first type in this enumeration that is determined to be supported by the
-		//       datasource/driver is the one that will be used.
-		SWORD PossibleSqlDateTypes[] = {
-			SQL_TIMESTAMP,
-			SQL_DATE,
-#ifdef SQL_DATETIME
-			SQL_DATETIME
-#endif
-		};
-
-		// These are the possible SQL types we check for use agains the datasource we are connected
-		// to for the purpose of determining which data type to use for the BLOB column types.
-		//
-		// NOTE: The first type in this enumeration that is determined to be supported by the
-		//       datasource/driver is the one that will be used.
-		SWORD PossibleSqlBlobTypes[] = {
-			SQL_LONGVARBINARY,
-			SQL_VARBINARY
-		};
-
-		// These are the possible SQL types we check for use agains the datasource we are connected
-		// to for the purpose of determining which data type to use for the MEMO column types
-		// (a type which allow to store large strings; like VARCHAR just with a bigger precision)
-		//
-		// NOTE: The first type in this enumeration that is determined to be supported by the
-		//       datasource/driver is the one that will be used.
-		SWORD PossibleSqlMemoTypes[] = {
-			SQL_LONGVARCHAR,
-		};
-
-
-		// Query the data source regarding data type information
-
-		//
-		// The way it was determined which SQL data types to use was by calling SQLGetInfo
-		// for all of the possible SQL data types to see which ones were supported.  If
-		// a type is not supported, the SQLFetch() that's called from GetDataTypeInfoImpl()
-		// fails with SQL_NO_DATA_FOUND.  This is ugly because I'm sure the three SQL data
-		// types I've selected below will not always be what we want.  These are just
-		// what happened to work against an Oracle 7/Intersolv combination.  The following is
-		// a complete list of the results I got back against the Oracle 7 database:
-		//
-		// SQL_BIGINT             SQL_NO_DATA_FOUND
-		// SQL_BINARY             SQL_NO_DATA_FOUND
-		// SQL_BIT                SQL_NO_DATA_FOUND
-		// SQL_CHAR               type name = 'CHAR', Precision = 255
-		// SQL_DATE               SQL_NO_DATA_FOUND
-		// SQL_DECIMAL            type name = 'NUMBER', Precision = 38
-		// SQL_DOUBLE             type name = 'NUMBER', Precision = 15
-		// SQL_FLOAT              SQL_NO_DATA_FOUND
-		// SQL_INTEGER            SQL_NO_DATA_FOUND
-		// SQL_LONGVARBINARY      type name = 'LONG RAW', Precision = 2 billion
-		// SQL_LONGVARCHAR        type name = 'LONG', Precision = 2 billion
-		// SQL_NUMERIC            SQL_NO_DATA_FOUND
-		// SQL_REAL               SQL_NO_DATA_FOUND
-		// SQL_SMALLINT           SQL_NO_DATA_FOUND
-		// SQL_TIME               SQL_NO_DATA_FOUND
-		// SQL_TIMESTAMP          type name = 'DATE', Precision = 19
-		// SQL_VARBINARY          type name = 'RAW', Precision = 255
-		// SQL_VARCHAR            type name = 'VARCHAR2', Precision = 2000
-		// =====================================================================
-		// Results from a Microsoft Access 7.0 db, using a driver from Microsoft
-		//
-		// SQL_VARCHAR            type name = 'TEXT', Precision = 255
-		// SQL_TIMESTAMP          type name = 'DATETIME'
-		// SQL_DECIMAL            SQL_NO_DATA_FOUND
-		// SQL_NUMERIC            type name = 'CURRENCY', Precision = 19
-		// SQL_FLOAT              SQL_NO_DATA_FOUND
-		// SQL_REAL               type name = 'SINGLE', Precision = 7
-		// SQL_DOUBLE             type name = 'DOUBLE', Precision = 15
-		// SQL_INTEGER            type name = 'LONG', Precision = 10
-
-		// --------------- Varchar - (Variable length character string) ---------------
-		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlCharTypes) &&
-			!GetDataTypeInfoImpl(PossibleSqlCharTypes[iIndex], m_typeInfVarchar); ++iIndex)
-		{}
-
-		if (iIndex < EXSIZEOF(PossibleSqlCharTypes))
-			m_typeInfVarchar.FsqlType = PossibleSqlCharTypes[iIndex];
-		else if (failOnDataTypeUnsupported)
-			return false;
-
-		// --------------- Float ---------------
-		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlFloatTypes) &&
-			!GetDataTypeInfoImpl(PossibleSqlFloatTypes[iIndex], m_typeInfFloat); ++iIndex)
-		{}
-
-		if (iIndex < EXSIZEOF(PossibleSqlFloatTypes))
-			m_typeInfFloat.FsqlType = PossibleSqlFloatTypes[iIndex];
-		else if (failOnDataTypeUnsupported)
-			return false;
-
-		// --------------- Integer -------------
-		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlIntegerTypes) &&
-			!GetDataTypeInfoImpl(PossibleSqlIntegerTypes[iIndex], m_typeInfInteger); ++iIndex)
-		{}
-
-		if (iIndex < EXSIZEOF(PossibleSqlIntegerTypes))
-			m_typeInfInteger.FsqlType = PossibleSqlIntegerTypes[iIndex];
-		else if (failOnDataTypeUnsupported)
-		{
-			// If no non-floating point data types are supported, we'll
-			// use the type assigned for floats to store integers as well
-			if (!GetDataTypeInfoImpl(m_typeInfFloat.FsqlType, m_typeInfInteger))
-			{
-				if (failOnDataTypeUnsupported)
-					return false;
-			}
-			else
-				m_typeInfInteger.FsqlType = m_typeInfFloat.FsqlType;
-		}
-
-		// --------------- Date/Time ---------------
-		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlDateTypes) &&
-			!GetDataTypeInfoImpl(PossibleSqlDateTypes[iIndex], m_typeInfDate); ++iIndex)
-		{}
-
-		if (iIndex < EXSIZEOF(PossibleSqlDateTypes))
-			m_typeInfDate.FsqlType = PossibleSqlDateTypes[iIndex];
-		else if (failOnDataTypeUnsupported)
-			return false;
-
-		// --------------- BLOB ---------------
-		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlBlobTypes) &&
-			!GetDataTypeInfoImpl(PossibleSqlBlobTypes[iIndex], m_typeInfBlob); ++iIndex)
-		{}
-
-		if (iIndex < EXSIZEOF(PossibleSqlBlobTypes))
-			m_typeInfBlob.FsqlType = PossibleSqlBlobTypes[iIndex];
-		else if (failOnDataTypeUnsupported)
-			return false;
-
-		// --------------- MEMO ---------------
-		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlMemoTypes) &&
-			!GetDataTypeInfoImpl(PossibleSqlMemoTypes[iIndex], m_typeInfMemo); ++iIndex)
-		{}
-
-		if (iIndex < EXSIZEOF(PossibleSqlMemoTypes))
-			m_typeInfMemo.FsqlType = PossibleSqlMemoTypes[iIndex];
-		else if (failOnDataTypeUnsupported)
-			return false;
-
-		return true;
-	}  // wxDb::DetermineDataTypesImpl
+//	bool Database::DetermineDataTypes(bool failOnDataTypeUnsupported)
+//	{
+//		size_t iIndex;
+//
+//		// These are the possible SQL types we check for use against the datasource we are connected
+//		// to for the purpose of determining which data type to use for the basic character strings
+//		// column types
+//		//
+//		// NOTE: The first type in this enumeration that is determined to be supported by the
+//		//       datasource/driver is the one that will be used.
+//		SWORD PossibleSqlCharTypes[] = {
+//#if defined(SQL_WVARCHAR)
+//			SQL_WVARCHAR,
+//#endif
+//			SQL_VARCHAR,
+//#if defined(SQL_WVARCHAR)
+//			SQL_WCHAR,
+//#endif
+//			SQL_CHAR
+//		};
+//
+//		// These are the possible SQL types we check for use against the datasource we are connected
+//		// to for the purpose of determining which data type to use for the basic non-floating point
+//		// column types
+//		//
+//		// NOTE: The first type in this enumeration that is determined to be supported by the
+//		//       datasource/driver is the one that will be used.
+//		SWORD PossibleSqlIntegerTypes[] = {
+//			SQL_INTEGER
+//		};
+//
+//		// These are the possible SQL types we check for use against the datasource we are connected
+//		// to for the purpose of determining which data type to use for the basic floating point number
+//		// column types
+//		//
+//		// NOTE: The first type in this enumeration that is determined to be supported by the
+//		//       datasource/driver is the one that will be used.
+//		SWORD PossibleSqlFloatTypes[] = {
+//			SQL_DOUBLE,
+//			SQL_REAL,
+//			SQL_FLOAT,
+//			SQL_DECIMAL,
+//			SQL_NUMERIC
+//		};
+//
+//		// These are the possible SQL types we check for use agains the datasource we are connected
+//		// to for the purpose of determining which data type to use for the date/time column types
+//		//
+//		// NOTE: The first type in this enumeration that is determined to be supported by the
+//		//       datasource/driver is the one that will be used.
+//		SWORD PossibleSqlDateTypes[] = {
+//			SQL_TIMESTAMP,
+//			SQL_DATE,
+//#ifdef SQL_DATETIME
+//			SQL_DATETIME
+//#endif
+//		};
+//
+//		// These are the possible SQL types we check for use agains the datasource we are connected
+//		// to for the purpose of determining which data type to use for the BLOB column types.
+//		//
+//		// NOTE: The first type in this enumeration that is determined to be supported by the
+//		//       datasource/driver is the one that will be used.
+//		SWORD PossibleSqlBlobTypes[] = {
+//			SQL_LONGVARBINARY,
+//			SQL_VARBINARY
+//		};
+//
+//		// These are the possible SQL types we check for use agains the datasource we are connected
+//		// to for the purpose of determining which data type to use for the MEMO column types
+//		// (a type which allow to store large strings; like VARCHAR just with a bigger precision)
+//		//
+//		// NOTE: The first type in this enumeration that is determined to be supported by the
+//		//       datasource/driver is the one that will be used.
+//		SWORD PossibleSqlMemoTypes[] = {
+//			SQL_LONGVARCHAR,
+//		};
+//
+//
+//		// Query the data source regarding data type information
+//
+//		//
+//		// The way it was determined which SQL data types to use was by calling SQLGetInfo
+//		// for all of the possible SQL data types to see which ones were supported.  If
+//		// a type is not supported, the SQLFetch() that's called from GetDataTypeInfoImpl()
+//		// fails with SQL_NO_DATA_FOUND.  This is ugly because I'm sure the three SQL data
+//		// types I've selected below will not always be what we want.  These are just
+//		// what happened to work against an Oracle 7/Intersolv combination.  The following is
+//		// a complete list of the results I got back against the Oracle 7 database:
+//		//
+//		// SQL_BIGINT             SQL_NO_DATA_FOUND
+//		// SQL_BINARY             SQL_NO_DATA_FOUND
+//		// SQL_BIT                SQL_NO_DATA_FOUND
+//		// SQL_CHAR               type name = 'CHAR', Precision = 255
+//		// SQL_DATE               SQL_NO_DATA_FOUND
+//		// SQL_DECIMAL            type name = 'NUMBER', Precision = 38
+//		// SQL_DOUBLE             type name = 'NUMBER', Precision = 15
+//		// SQL_FLOAT              SQL_NO_DATA_FOUND
+//		// SQL_INTEGER            SQL_NO_DATA_FOUND
+//		// SQL_LONGVARBINARY      type name = 'LONG RAW', Precision = 2 billion
+//		// SQL_LONGVARCHAR        type name = 'LONG', Precision = 2 billion
+//		// SQL_NUMERIC            SQL_NO_DATA_FOUND
+//		// SQL_REAL               SQL_NO_DATA_FOUND
+//		// SQL_SMALLINT           SQL_NO_DATA_FOUND
+//		// SQL_TIME               SQL_NO_DATA_FOUND
+//		// SQL_TIMESTAMP          type name = 'DATE', Precision = 19
+//		// SQL_VARBINARY          type name = 'RAW', Precision = 255
+//		// SQL_VARCHAR            type name = 'VARCHAR2', Precision = 2000
+//		// =====================================================================
+//		// Results from a Microsoft Access 7.0 db, using a driver from Microsoft
+//		//
+//		// SQL_VARCHAR            type name = 'TEXT', Precision = 255
+//		// SQL_TIMESTAMP          type name = 'DATETIME'
+//		// SQL_DECIMAL            SQL_NO_DATA_FOUND
+//		// SQL_NUMERIC            type name = 'CURRENCY', Precision = 19
+//		// SQL_FLOAT              SQL_NO_DATA_FOUND
+//		// SQL_REAL               type name = 'SINGLE', Precision = 7
+//		// SQL_DOUBLE             type name = 'DOUBLE', Precision = 15
+//		// SQL_INTEGER            type name = 'LONG', Precision = 10
+//
+//		// --------------- Varchar - (Variable length character string) ---------------
+//		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlCharTypes) &&
+//			!GetDataTypeInfoImpl(PossibleSqlCharTypes[iIndex], m_typeInfVarchar); ++iIndex)
+//		{}
+//
+//		if (iIndex < EXSIZEOF(PossibleSqlCharTypes))
+//			m_typeInfVarchar.FsqlType = PossibleSqlCharTypes[iIndex];
+//		else if (failOnDataTypeUnsupported)
+//			return false;
+//
+//		// --------------- Float ---------------
+//		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlFloatTypes) &&
+//			!GetDataTypeInfoImpl(PossibleSqlFloatTypes[iIndex], m_typeInfFloat); ++iIndex)
+//		{}
+//
+//		if (iIndex < EXSIZEOF(PossibleSqlFloatTypes))
+//			m_typeInfFloat.FsqlType = PossibleSqlFloatTypes[iIndex];
+//		else if (failOnDataTypeUnsupported)
+//			return false;
+//
+//		// --------------- Integer -------------
+//		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlIntegerTypes) &&
+//			!GetDataTypeInfoImpl(PossibleSqlIntegerTypes[iIndex], m_typeInfInteger); ++iIndex)
+//		{}
+//
+//		if (iIndex < EXSIZEOF(PossibleSqlIntegerTypes))
+//			m_typeInfInteger.FsqlType = PossibleSqlIntegerTypes[iIndex];
+//		else if (failOnDataTypeUnsupported)
+//		{
+//			// If no non-floating point data types are supported, we'll
+//			// use the type assigned for floats to store integers as well
+//			if (!GetDataTypeInfoImpl(m_typeInfFloat.FsqlType, m_typeInfInteger))
+//			{
+//				if (failOnDataTypeUnsupported)
+//					return false;
+//			}
+//			else
+//				m_typeInfInteger.FsqlType = m_typeInfFloat.FsqlType;
+//		}
+//
+//		// --------------- Date/Time ---------------
+//		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlDateTypes) &&
+//			!GetDataTypeInfoImpl(PossibleSqlDateTypes[iIndex], m_typeInfDate); ++iIndex)
+//		{}
+//
+//		if (iIndex < EXSIZEOF(PossibleSqlDateTypes))
+//			m_typeInfDate.FsqlType = PossibleSqlDateTypes[iIndex];
+//		else if (failOnDataTypeUnsupported)
+//			return false;
+//
+//		// --------------- BLOB ---------------
+//		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlBlobTypes) &&
+//			!GetDataTypeInfoImpl(PossibleSqlBlobTypes[iIndex], m_typeInfBlob); ++iIndex)
+//		{}
+//
+//		if (iIndex < EXSIZEOF(PossibleSqlBlobTypes))
+//			m_typeInfBlob.FsqlType = PossibleSqlBlobTypes[iIndex];
+//		else if (failOnDataTypeUnsupported)
+//			return false;
+//
+//		// --------------- MEMO ---------------
+//		for (iIndex = 0; iIndex < EXSIZEOF(PossibleSqlMemoTypes) &&
+//			!GetDataTypeInfoImpl(PossibleSqlMemoTypes[iIndex], m_typeInfMemo); ++iIndex)
+//		{}
+//
+//		if (iIndex < EXSIZEOF(PossibleSqlMemoTypes))
+//			m_typeInfMemo.FsqlType = PossibleSqlMemoTypes[iIndex];
+//		else if (failOnDataTypeUnsupported)
+//			return false;
+//
+//		return true;
+//	}  // wxDb::DetermineDataTypesImpl
 
 
 	bool Database::OpenImpl(bool failOnDataTypeUnsupported)
@@ -507,8 +507,9 @@ namespace exodbc
 		if (!ReadDbInfo(m_dbInf))
 			return false;
 
-		if (!DetermineDataTypes(failOnDataTypeUnsupported))
-			return false;
+		// TODO: Continue here
+		//if (!DetermineDataTypes(failOnDataTypeUnsupported))
+		//	return false;
 
 #ifdef DBDEBUG_CONSOLE
 		std::wcout << L"VARCHAR DATA TYPE: " << m_typeInfVarchar.TypeName << std::endl;
@@ -1710,698 +1711,698 @@ namespace exodbc
 	}  // wxDb::GetKeyFields()
 
 
-#if OLD_GETCOLUMNS
-	/********** wxDb::GetColumns() **********/
-	ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
-		/*
-		*        1) The last array element of the tableName[] argument must be zero (null).
-		*            This is how the end of the array is detected.
-		*        2) This function returns an array of wxDbColInf structures.  If no columns
-		*            were found, or an error occurred, this pointer will be zero (null).  THE
-		*            CALLING FUNCTION IS RESPONSIBLE FOR DELETING THE MEMORY RETURNED WHEN IT
-		*            IS FINISHED WITH IT.  i.e.
-		*
-		*            wxDbColInf *colInf = pDb->GetColumns(tableList, userID);
-		*            if (colInf)
-		*            {
-		*                // Use the column inf
-		*                .......
-		*                // Destroy the memory
-		*                delete [] colInf;
-		*            }
-		*
-		* userID is evaluated in the following manner:
-		*        userID == NULL  ... UserID is ignored
-		*        userID == ""    ... UserID set equal to 'this->uid'
-		*        userID != ""    ... UserID set equal to 'userID'
-		*
-		* NOTE: ALL column bindings associated with this wxDb instance are unbound
-		*       by this function.  This function should use its own wxDb instance
-		*       to avoid undesired unbinding of columns.
-		*/
-	{
-		UWORD       noCols = 0;
-		UWORD       colNo  = 0;
-		ColumnInfo *colInf = 0;
-
-		RETCODE  retcode;
-		SQLLEN   cb;
-
-		std::wstring TableName;
-
-		std::wstring UserID = ConvertUserIDImpl(userID);
-
-		// Pass 1 - Determine how many columns there are.
-		// Pass 2 - Allocate the wxDbColInf array and fill in
-		//                the array with the column information.
-		int pass;
-		for (pass = 1; pass <= 2; pass++)
-		{
-			if (pass == 2)
-			{
-				if (noCols == 0)  // Probably a bogus table name(s)
-					break;
-				// Allocate n wxDbColInf objects to hold the column information
-				colInf = new ColumnInfo[noCols+1];
-				if (!colInf)
-					break;
-				// Mark the end of the array
-				wcscpy(colInf[noCols].m_tableName, emptyString);
-				wcscpy(colInf[noCols].m_colName, emptyString);
-				colInf[noCols].m_sqlDataType = 0;
-			}
-			// Loop through each table name
-			int tbl;
-			for (tbl = 0; tableName[tbl]; tbl++)
-			{
-				TableName = tableName[tbl];
-				// Oracle and Interbase table names are uppercase only, so force
-				// the name to uppercase just in case programmer forgot to do this
-				if ((Dbms() == dbmsORACLE) ||
-					(Dbms() == dbmsFIREBIRD) ||
-					(Dbms() == dbmsINTERBASE))
-					boost::algorithm::to_upper(TableName);
-
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-				// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
-				// use the call below that leaves out the user name
-				if (!UserID.empty() &&
-					Dbms() != dbmsMY_SQL &&
-					Dbms() != dbmsACCESS &&
-					Dbms() != dbmsMS_SQL_SERVER)
-				{
-					retcode = SQLColumns(m_hstmt,
-						NULL, 0,                                // All qualifiers
-						(SQLTCHAR *) UserID.c_str(), SQL_NTS,      // Owner
-						(SQLTCHAR *) TableName.c_str(), SQL_NTS,
-						NULL, 0);                               // All columns
-				}
-				else
-				{
-					retcode = SQLColumns(m_hstmt,
-						NULL, 0,                                // All qualifiers
-						NULL, 0,                                // Owner
-						(SQLTCHAR *) TableName.c_str(), SQL_NTS,
-						NULL, 0);                               // All columns
-				}
-				if (retcode != SQL_SUCCESS)
-				{  // Error occurred, abort
-					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-					if (colInf)
-						delete [] colInf;
-					SQLFreeStmt(m_hstmt, SQL_CLOSE);
-					return(0);
-				}
-
-				while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
-				{
-					if (pass == 1)  // First pass, just add up the number of columns
-						noCols++;
-					else  // Pass 2; Fill in the array of structures
-					{
-						if (colNo < noCols)  // Some extra error checking to prevent memory overwrites
-						{
-							// NOTE: Only the ODBC 1.x fields are retrieved
-							GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_catalog,      128+1,                    &cb);
-							GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_schema,       128+1,                    &cb);
-							GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_tableName,    DB_MAX_TABLE_NAME_LEN+1,  &cb);
-							GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_colName,      DB_MAX_COLUMN_NAME_LEN+1, &cb);
-							GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_sqlDataType,  0,                        &cb);
-							GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_typeName,     128+1,                    &cb);
-							GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].m_columnLength, 0,                        &cb);
-							GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_bufferSize,   0,                        &cb);
-							GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_decimalDigits,0,                        &cb);
-							GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_numPrecRadix, 0,                        &cb);
-							GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_nullable,     0,                        &cb);
-							GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_remarks,      254+1,                    &cb);
-
-							// Determine the wxDb data type that is used to represent the native data type of this data source
-							colInf[colNo].m_dbDataType = 0;
-							if (!_wcsicmp(m_typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
-							{
-#ifdef _IODBC_
-								// IODBC does not return a correct columnLength, so we set
-								// columnLength = bufferSize if no column length was returned
-								// IODBC returns the columnLength in bufferSize. (bug)
-								if (colInf[colNo].m_columnLength < 1)
-								{
-									colInf[colNo].m_columnLength = colInf[colNo].m_bufferSize;
-								}
-#endif
-								colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
-							}
-							else if (!_wcsicmp(m_typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
-								colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
-							else if (!_wcsicmp(m_typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
-								colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
-							else if (!_wcsicmp(m_typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
-								colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
-							else if (!_wcsicmp(m_typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
-								colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
-							colNo++;
-						}
-					}
-				}
-				if (retcode != SQL_NO_DATA_FOUND)
-				{  // Error occurred, abort
-					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-					if (colInf)
-						delete [] colInf;
-					SQLFreeStmt(m_hstmt, SQL_CLOSE);
-					return(0);
-				}
-			}
-		}
-
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-		return colInf;
-
-	}  // wxDb::GetColumns()
-
-
-	/********** wxDb::GetColumns() **********/
-
-	ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, const wchar_t *userID)
-		//
-		// Same as the above GetColumns() function except this one gets columns
-		// only for a single table, and if 'numCols' is not NULL, the number of
-		// columns stored in the returned wxDbColInf is set in '*numCols'
-		//
-		// userID is evaluated in the following manner:
-		//        userID == NULL  ... UserID is ignored
-		//        userID == ""    ... UserID set equal to 'this->uid'
-		//        userID != ""    ... UserID set equal to 'userID'
-		//
-		// NOTE: ALL column bindings associated with this wxDb instance are unbound
-		//       by this function.  This function should use its own wxDb instance
-		//       to avoid undesired unbinding of columns.
-
-	{
-		UWORD       noCols = 0;
-		UWORD       colNo  = 0;
-		ColumnInfo *colInf = 0;
-
-		RETCODE  retcode;
-		SQLLEN   cb;
-
-		std::wstring TableName;
-
-		std::wstring UserID = ConvertUserIDImpl(userID);
-
-		// Pass 1 - Determine how many columns there are.
-		// Pass 2 - Allocate the wxDbColInf array and fill in
-		//                the array with the column information.
-		int pass;
-		for (pass = 1; pass <= 2; pass++)
-		{
-			if (pass == 2)
-			{
-				if (noCols == 0)  // Probably a bogus table name(s)
-					break;
-				// Allocate n wxDbColInf objects to hold the column information
-				colInf = new ColumnInfo[noCols+1];
-				if (!colInf)
-					break;
-				// Mark the end of the array
-				wcscpy(colInf[noCols].m_tableName, emptyString);
-				wcscpy(colInf[noCols].m_colName, emptyString);
-				colInf[noCols].m_sqlDataType = 0;
-			}
-
-			TableName = tableName;
-			// Oracle and Interbase table names are uppercase only, so force
-			// the name to uppercase just in case programmer forgot to do this
-			if ((Dbms() == dbmsORACLE) ||
-				(Dbms() == dbmsFIREBIRD) ||
-				(Dbms() == dbmsINTERBASE))
-				boost::algorithm::to_upper(TableName);
-
-			SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-			// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
-			// use the call below that leaves out the user name
-			if (!UserID.empty() &&
-				Dbms() != dbmsMY_SQL &&
-				Dbms() != dbmsACCESS &&
-				Dbms() != dbmsMS_SQL_SERVER)
-			{
-				retcode = SQLColumns(m_hstmt,
-					NULL, 0,                                // All qualifiers
-					(SQLTCHAR *) UserID.c_str(), SQL_NTS,    // Owner
-					(SQLTCHAR *) TableName.c_str(), SQL_NTS,
-					NULL, 0);                               // All columns
-			}
-			else
-			{
-				retcode = SQLColumns(m_hstmt,
-					NULL, 0,                                 // All qualifiers
-					NULL, 0,                                 // Owner
-					(SQLTCHAR *) TableName.c_str(), SQL_NTS,
-					NULL, 0);                                // All columns
-			}
-			if (retcode != SQL_SUCCESS)
-			{  // Error occurred, abort
-				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-				if (colInf)
-					delete [] colInf;
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-				if (numCols)
-					*numCols = 0;
-				return(0);
-			}
-
-			while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
-			{
-				if (pass == 1)  // First pass, just add up the number of columns
-					noCols++;
-				else  // Pass 2; Fill in the array of structures
-				{
-					if (colNo < noCols)  // Some extra error checking to prevent memory overwrites
-					{
-						// NOTE: Only the ODBC 1.x fields are retrieved
-						GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_catalog,      128+1,                     &cb);
-						GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_schema,       128+1,                     &cb);
-						GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_tableName,    DB_MAX_TABLE_NAME_LEN+1,   &cb);
-						GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_colName,      DB_MAX_COLUMN_NAME_LEN+1,  &cb);
-						GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_sqlDataType,  0,                         &cb);
-						GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_typeName,     128+1,                     &cb);
-						GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].m_columnLength, 0,                         &cb);
-						// BJO 991214 : SQL_C_SSHORT instead of SQL_C_SLONG, otherwise fails on Sparc (probably all 64 bit architectures)
-						GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_bufferSize,   0,                         &cb);
-						GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_decimalDigits,0,                         &cb);
-						GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_numPrecRadix, 0,                         &cb);
-						GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_nullable,     0,                         &cb);
-						GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_remarks,      254+1,                     &cb);
-						// Start Values for Primary/Foriegn Key (=No)
-						colInf[colNo].m_pkCol = 0;           // Primary key column   0=No; 1= First Key, 2 = Second Key etc.
-						colInf[colNo].m_pkTableName[0] = 0;  // Tablenames where Primary Key is used as a Foreign Key
-						colInf[colNo].m_fkCol = 0;           // Foreign key column   0=No; 1= First Key, 2 = Second Key etc.
-						colInf[colNo].m_fkTableName[0] = 0;  // Foreign key table name
-
-						// BJO 20000428 : Virtuoso returns type names with upper cases!
-						if (Dbms() == dbmsVIRTUOSO)
-						{
-							std::wstring s = colInf[colNo].m_typeName;
-							boost::algorithm::to_lower(s);
-							wcscmp(colInf[colNo].m_typeName, s.c_str());
-						}
-
-						// Determine the wxDb data type that is used to represent the native data type of this data source
-						colInf[colNo].m_dbDataType = 0;
-						if (!_wcsicmp(m_typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
-						{
-#ifdef _IODBC_
-							// IODBC does not return a correct columnLength, so we set
-							// columnLength = bufferSize if no column length was returned
-							// IODBC returns the columnLength in bufferSize. (bug)
-							if (colInf[colNo].m_columnLength < 1)
-							{
-								colInf[colNo].m_columnLength = colInf[colNo].m_bufferSize;
-							}
-#endif
-
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
-						}
-						else if (!_wcsicmp(m_typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
-						else if (!_wcsicmp(m_typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
-						else if (!_wcsicmp(m_typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
-						else if (!_wcsicmp(m_typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
-
-						colNo++;
-					}
-				}
-			}
-			if (retcode != SQL_NO_DATA_FOUND)
-			{  // Error occurred, abort
-				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-				if (colInf)
-					delete [] colInf;
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-				if (numCols)
-					*numCols = 0;
-				return(0);
-			}
-		}
-
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-		// Store Primary and Foriegn Keys
-		GetKeyFields(tableName,colInf,noCols);
-
-		if (numCols)
-			*numCols = noCols;
-		return colInf;
-
-	}  // wxDb::GetColumns()
-
-
-#else  // New GetColumns
-
-
-	/*
-	BJO 20000503
-	These are tentative new GetColumns members which should be more database
-	independent and which always returns the columns in the order they were
-	created.
-
-	- The first one (wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const
-	wchar_t* userID)) calls the second implementation for each separate table
-	before merging the results. This makes the code easier to maintain as
-	only one member (the second) makes the real work
-	- wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const
-	wchar_t *userID) is a little bit improved
-	- It doesn't anymore rely on the type-name to find out which database-type
-	each column has
-	- It ends by sorting the columns, so that they are returned in the same
-	order they were created
-	*/
-
-	typedef struct
-	{
-		UWORD noCols;
-		ColumnInfo *colInf;
-	} _TableColumns;
-
-
-	ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
-	{
-		int i, j;
-		// The last array element of the tableName[] argument must be zero (null).
-		// This is how the end of the array is detected.
-
-		UWORD noCols = 0;
-
-		// How many tables ?
-		int tbl;
-		for (tbl = 0 ; tableName[tbl]; tbl++);
-
-		// Create a table to maintain the columns for each separate table
-		_TableColumns *TableColumns = new _TableColumns[tbl];
-
-		// Fill the table
-		for (i = 0 ; i < tbl ; i++)
-
-		{
-			TableColumns[i].colInf = GetColumns(tableName[i], &TableColumns[i].noCols, userID);
-			if (TableColumns[i].colInf == NULL)
-				return NULL;
-			noCols += TableColumns[i].noCols;
-		}
-
-		// Now merge all the separate table infos
-		ColumnInfo *colInf = new ColumnInfo[noCols+1];
-
-		// Mark the end of the array
-		wcscpy(colInf[noCols].m_tableName, emptyString);
-		wcscpy(colInf[noCols].m_colName, emptyString);
-		colInf[noCols].m_sqlDataType = 0;
-
-		// Merge ...
-		int offset = 0;
-
-		for (i = 0 ; i < tbl ; i++)
-		{
-			for (j = 0 ; j < TableColumns[i].noCols ; j++)
-			{
-				colInf[offset++] = TableColumns[i].colInf[j];
-			}
-		}
-
-		delete [] TableColumns;
-
-		return colInf;
-	}  // wxDb::GetColumns()  -- NEW
-
-
-	ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, const wchar_t *userID)
-		//
-		// Same as the above GetColumns() function except this one gets columns
-		// only for a single table, and if 'numCols' is not NULL, the number of
-		// columns stored in the returned wxDbColInf is set in '*numCols'
-		//
-		// userID is evaluated in the following manner:
-		//        userID == NULL  ... UserID is ignored
-		//        userID == ""    ... UserID set equal to 'this->uid'
-		//        userID != ""    ... UserID set equal to 'userID'
-		//
-		// NOTE: ALL column bindings associated with this wxDb instance are unbound
-		//       by this function.  This function should use its own wxDb instance
-		//       to avoid undesired unbinding of columns.
-	{
-		UWORD       noCols = 0;
-		UWORD       colNo  = 0;
-		ColumnInfo *colInf = 0;
-
-		RETCODE  retcode;
-		SDWORD   cb;
-
-		std::wstring TableName;
-
-		std::wstring UserID;
-		ConvertUserIDImpl(userID,UserID);
-
-		// Pass 1 - Determine how many columns there are.
-		// Pass 2 - Allocate the wxDbColInf array and fill in
-		//                the array with the column information.
-		int pass;
-		for (pass = 1; pass <= 2; pass++)
-		{
-			if (pass == 2)
-			{
-				if (noCols == 0)  // Probably a bogus table name(s)
-					break;
-				// Allocate n wxDbColInf objects to hold the column information
-				colInf = new ColumnInfo[noCols+1];
-				if (!colInf)
-					break;
-				// Mark the end of the array
-				wcscpy(colInf[noCols].m_tableName, emptyString);
-				wcscpy(colInf[noCols].m_colName, emptyString);
-				colInf[noCols].m_sqlDataType = 0;
-			}
-
-			TableName = tableName;
-			// Oracle and Interbase table names are uppercase only, so force
-			// the name to uppercase just in case programmer forgot to do this
-			if ((Dbms() == dbmsORACLE) ||
-				(Dbms() == dbmsFIREBIRD) ||
-				(Dbms() == dbmsINTERBASE))
-				TableName = TableName.Upper();
-
-			SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-			// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
-			// use the call below that leaves out the user name
-			if (!UserID.empty() &&
-				Dbms() != dbmsMY_SQL &&
-				Dbms() != dbmsACCESS &&
-				Dbms() != dbmsMS_SQL_SERVER)
-			{
-				retcode = SQLColumns(m_hstmt,
-					NULL, 0,                              // All qualifiers
-					(UCHAR *) UserID.c_str(), SQL_NTS,    // Owner
-					(UCHAR *) TableName.c_str(), SQL_NTS,
-					NULL, 0);                             // All columns
-			}
-			else
-			{
-				retcode = SQLColumns(m_hstmt,
-					NULL, 0,                              // All qualifiers
-					NULL, 0,                              // Owner
-					(UCHAR *) TableName.c_str(), SQL_NTS,
-					NULL, 0);                             // All columns
-			}
-			if (retcode != SQL_SUCCESS)
-			{  // Error occurred, abort
-				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-				if (colInf)
-					delete [] colInf;
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-				if (numCols)
-					*numCols = 0;
-				return(0);
-			}
-
-			while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
-			{
-				if (pass == 1)  // First pass, just add up the number of columns
-					noCols++;
-				else  // Pass 2; Fill in the array of structures
-				{
-					if (colNo < noCols)  // Some extra error checking to prevent memory overwrites
-					{
-						// NOTE: Only the ODBC 1.x fields are retrieved
-						GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_catalog,      128+1,                     &cb);
-						GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_schema,       128+1,                     &cb);
-						GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_tableName,    DB_MAX_TABLE_NAME_LEN+1,   &cb);
-						GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_colName,      DB_MAX_COLUMN_NAME_LEN+1,  &cb);
-						GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_sqlDataType,  0,                         &cb);
-						GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_typeName,     128+1,                     &cb);
-						GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].m_columnLength, 0,                         &cb);
-						GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_bufferSize,   0,                         &cb);
-						GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_decimalDigits,0,                         &cb);
-						GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_numPrecRadix, 0,                         &cb);
-						GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_nullable,     0,                         &cb);
-						GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_remarks,      254+1,                     &cb);
-						// Start Values for Primary/Foriegn Key (=No)
-						colInf[colNo].m_pkCol = 0;           // Primary key column   0=No; 1= First Key, 2 = Second Key etc.
-						colInf[colNo].m_pkTableName[0] = 0;  // Tablenames where Primary Key is used as a Foreign Key
-						colInf[colNo].m_fkCol = 0;           // Foreign key column   0=No; 1= First Key, 2 = Second Key etc.
-						colInf[colNo].m_fkTableName[0] = 0;  // Foreign key table name
-
-#ifdef _IODBC_
-						// IODBC does not return a correct columnLength, so we set
-						// columnLength = bufferSize if no column length was returned
-						// IODBC returns the columnLength in bufferSize. (bug)
-						if (colInf[colNo].m_columnLength < 1)
-						{
-							colInf[colNo].m_columnLength = colInf[colNo].m_bufferSize;
-						}
-#endif
-
-						// Determine the wxDb data type that is used to represent the native data type of this data source
-						colInf[colNo].m_dbDataType = 0;
-						// Get the intern datatype
-						switch (colInf[colNo].m_sqlDataType)
-						{
-						case SQL_WCHAR:
-						case SQL_WVARCHAR:
-						case SQL_VARCHAR:
-						case SQL_CHAR:
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
-							break;
-						case SQL_LONGVARCHAR:
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_MEMO;
-							break;
-						case SQL_TINYINT:
-						case SQL_SMALLINT:
-						case SQL_INTEGER:
-						case SQL_BIT:
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
-							break;
-						case SQL_DOUBLE:
-						case SQL_DECIMAL:
-						case SQL_NUMERIC:
-						case SQL_FLOAT:
-						case SQL_REAL:
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
-							break;
-						case SQL_DATE:
-						case SQL_TIMESTAMP:
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
-							break;
-						case SQL_BINARY:
-							colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
-							break;
-#ifdef EXODBCDEBUG
-						default:
-							std::wstring errMsg;
-							errMsg.Printf(L"SQL Data type %d currently not supported by wxWidgets", colInf[colNo].m_sqlDataType);
-							BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << errMsg;
-#endif
-						}
-						colNo++;
-					}
-				}
-			}
-			if (retcode != SQL_NO_DATA_FOUND)
-			{  // Error occurred, abort
-				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-				if (colInf)
-					delete [] colInf;
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-				if (numCols)
-					*numCols = 0;
-				return(0);
-			}
-		}
-
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-		// Store Primary and Foreign Keys
-		GetKeyFields(tableName,colInf,noCols);
-
-		///////////////////////////////////////////////////////////////////////////
-		// Now sort the the columns in order to make them appear in the right order
-		///////////////////////////////////////////////////////////////////////////
-
-		// Build a generic SELECT statement which returns 0 rows
-		std::wstring Stmt;
-
-		Stmt.Printf(L"select * from \"%s\" where 0=1", tableName);
-
-		// Execute query
-		if (SQLExecDirect(m_hstmt, (UCHAR FAR *) Stmt.c_str(), SQL_NTS) != SQL_SUCCESS)
-		{
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-			return NULL;
-		}
-
-		// Get the number of result columns
-		if (SQLNumResultCols (m_hstmt, &noCols) != SQL_SUCCESS)
-		{
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-			return NULL;
-		}
-
-		if (noCols == 0) // Probably a bogus table name
-			return NULL;
-
-		//  Get the name
-		int i;
-		short colNum;
-		UCHAR name[100];
-		SWORD Sword;
-		SDWORD Sdword;
-		for (colNum = 0; colNum < noCols; colNum++)
-		{
-			if (SQLColAttributes(m_hstmt,colNum+1, SQL_COLUMN_NAME,
-				name, sizeof(name),
-				&Sword, &Sdword) != SQL_SUCCESS)
-			{
-				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-				return NULL;
-			}
-
-			std::wstring Name1 = name;
-			Name1 = Name1.Upper();
-
-			// Where is this name in the array ?
-			for (i = colNum ; i < noCols ; i++)
-			{
-				std::wstring Name2 =  colInf[i].m_colName;
-				Name2 = Name2.Upper();
-				if (Name2 == Name1)
-				{
-					if (colNum != i) // swap to sort
-					{
-						ColumnInfo tmpColInf = colInf[colNum];
-						colInf[colNum] =  colInf[i];
-						colInf[i] = tmpColInf;
-					}
-					break;
-				}
-			}
-		}
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-		///////////////////////////////////////////////////////////////////////////
-		// End sorting
-		///////////////////////////////////////////////////////////////////////////
-
-		if (numCols)
-			*numCols = noCols;
-		return colInf;
-
-	}  // wxDb::GetColumns()
-
-
-#endif  // #else OLD_GETCOLUMNS
+//#if OLD_GETCOLUMNS
+//	/********** wxDb::GetColumns() **********/
+//	ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
+//		/*
+//		*        1) The last array element of the tableName[] argument must be zero (null).
+//		*            This is how the end of the array is detected.
+//		*        2) This function returns an array of wxDbColInf structures.  If no columns
+//		*            were found, or an error occurred, this pointer will be zero (null).  THE
+//		*            CALLING FUNCTION IS RESPONSIBLE FOR DELETING THE MEMORY RETURNED WHEN IT
+//		*            IS FINISHED WITH IT.  i.e.
+//		*
+//		*            wxDbColInf *colInf = pDb->GetColumns(tableList, userID);
+//		*            if (colInf)
+//		*            {
+//		*                // Use the column inf
+//		*                .......
+//		*                // Destroy the memory
+//		*                delete [] colInf;
+//		*            }
+//		*
+//		* userID is evaluated in the following manner:
+//		*        userID == NULL  ... UserID is ignored
+//		*        userID == ""    ... UserID set equal to 'this->uid'
+//		*        userID != ""    ... UserID set equal to 'userID'
+//		*
+//		* NOTE: ALL column bindings associated with this wxDb instance are unbound
+//		*       by this function.  This function should use its own wxDb instance
+//		*       to avoid undesired unbinding of columns.
+//		*/
+//	{
+//		UWORD       noCols = 0;
+//		UWORD       colNo  = 0;
+//		ColumnInfo *colInf = 0;
+//
+//		RETCODE  retcode;
+//		SQLLEN   cb;
+//
+//		std::wstring TableName;
+//
+//		std::wstring UserID = ConvertUserIDImpl(userID);
+//
+//		// Pass 1 - Determine how many columns there are.
+//		// Pass 2 - Allocate the wxDbColInf array and fill in
+//		//                the array with the column information.
+//		int pass;
+//		for (pass = 1; pass <= 2; pass++)
+//		{
+//			if (pass == 2)
+//			{
+//				if (noCols == 0)  // Probably a bogus table name(s)
+//					break;
+//				// Allocate n wxDbColInf objects to hold the column information
+//				colInf = new ColumnInfo[noCols+1];
+//				if (!colInf)
+//					break;
+//				// Mark the end of the array
+//				wcscpy(colInf[noCols].m_tableName, emptyString);
+//				wcscpy(colInf[noCols].m_colName, emptyString);
+//				colInf[noCols].m_sqlDataType = 0;
+//			}
+//			// Loop through each table name
+//			int tbl;
+//			for (tbl = 0; tableName[tbl]; tbl++)
+//			{
+//				TableName = tableName[tbl];
+//				// Oracle and Interbase table names are uppercase only, so force
+//				// the name to uppercase just in case programmer forgot to do this
+//				if ((Dbms() == dbmsORACLE) ||
+//					(Dbms() == dbmsFIREBIRD) ||
+//					(Dbms() == dbmsINTERBASE))
+//					boost::algorithm::to_upper(TableName);
+//
+//				SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//
+//				// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
+//				// use the call below that leaves out the user name
+//				if (!UserID.empty() &&
+//					Dbms() != dbmsMY_SQL &&
+//					Dbms() != dbmsACCESS &&
+//					Dbms() != dbmsMS_SQL_SERVER)
+//				{
+//					retcode = SQLColumns(m_hstmt,
+//						NULL, 0,                                // All qualifiers
+//						(SQLTCHAR *) UserID.c_str(), SQL_NTS,      // Owner
+//						(SQLTCHAR *) TableName.c_str(), SQL_NTS,
+//						NULL, 0);                               // All columns
+//				}
+//				else
+//				{
+//					retcode = SQLColumns(m_hstmt,
+//						NULL, 0,                                // All qualifiers
+//						NULL, 0,                                // Owner
+//						(SQLTCHAR *) TableName.c_str(), SQL_NTS,
+//						NULL, 0);                               // All columns
+//				}
+//				if (retcode != SQL_SUCCESS)
+//				{  // Error occurred, abort
+//					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//					if (colInf)
+//						delete [] colInf;
+//					SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//					return(0);
+//				}
+//
+//				while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+//				{
+//					if (pass == 1)  // First pass, just add up the number of columns
+//						noCols++;
+//					else  // Pass 2; Fill in the array of structures
+//					{
+//						if (colNo < noCols)  // Some extra error checking to prevent memory overwrites
+//						{
+//							// NOTE: Only the ODBC 1.x fields are retrieved
+//							GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_catalog,      128+1,                    &cb);
+//							GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_schema,       128+1,                    &cb);
+//							GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_tableName,    DB_MAX_TABLE_NAME_LEN+1,  &cb);
+//							GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_colName,      DB_MAX_COLUMN_NAME_LEN+1, &cb);
+//							GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_sqlDataType,  0,                        &cb);
+//							GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_typeName,     128+1,                    &cb);
+//							GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].m_columnLength, 0,                        &cb);
+//							GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_bufferSize,   0,                        &cb);
+//							GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_decimalDigits,0,                        &cb);
+//							GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_numPrecRadix, 0,                        &cb);
+//							GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_nullable,     0,                        &cb);
+//							GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_remarks,      254+1,                    &cb);
+//
+//							// Determine the wxDb data type that is used to represent the native data type of this data source
+//							colInf[colNo].m_dbDataType = 0;
+//							if (!_wcsicmp(m_typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
+//							{
+//#ifdef _IODBC_
+//								// IODBC does not return a correct columnLength, so we set
+//								// columnLength = bufferSize if no column length was returned
+//								// IODBC returns the columnLength in bufferSize. (bug)
+//								if (colInf[colNo].m_columnLength < 1)
+//								{
+//									colInf[colNo].m_columnLength = colInf[colNo].m_bufferSize;
+//								}
+//#endif
+//								colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
+//							}
+//							else if (!_wcsicmp(m_typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
+//								colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
+//							else if (!_wcsicmp(m_typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
+//								colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
+//							else if (!_wcsicmp(m_typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
+//								colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
+//							else if (!_wcsicmp(m_typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
+//								colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
+//							colNo++;
+//						}
+//					}
+//				}
+//				if (retcode != SQL_NO_DATA_FOUND)
+//				{  // Error occurred, abort
+//					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//					if (colInf)
+//						delete [] colInf;
+//					SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//					return(0);
+//				}
+//			}
+//		}
+//
+//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//		return colInf;
+//
+//	}  // wxDb::GetColumns()
+//
+//
+//	/********** wxDb::GetColumns() **********/
+//
+//	ColumnInfo *Database::GetColumns(const std::wstring &tableName, UWORD *numCols, const wchar_t *userID)
+//		//
+//		// Same as the above GetColumns() function except this one gets columns
+//		// only for a single table, and if 'numCols' is not NULL, the number of
+//		// columns stored in the returned wxDbColInf is set in '*numCols'
+//		//
+//		// userID is evaluated in the following manner:
+//		//        userID == NULL  ... UserID is ignored
+//		//        userID == ""    ... UserID set equal to 'this->uid'
+//		//        userID != ""    ... UserID set equal to 'userID'
+//		//
+//		// NOTE: ALL column bindings associated with this wxDb instance are unbound
+//		//       by this function.  This function should use its own wxDb instance
+//		//       to avoid undesired unbinding of columns.
+//
+//	{
+//		UWORD       noCols = 0;
+//		UWORD       colNo  = 0;
+//		ColumnInfo *colInf = 0;
+//
+//		RETCODE  retcode;
+//		SQLLEN   cb;
+//
+//		std::wstring TableName;
+//
+//		std::wstring UserID = ConvertUserIDImpl(userID);
+//
+//		// Pass 1 - Determine how many columns there are.
+//		// Pass 2 - Allocate the wxDbColInf array and fill in
+//		//                the array with the column information.
+//		int pass;
+//		for (pass = 1; pass <= 2; pass++)
+//		{
+//			if (pass == 2)
+//			{
+//				if (noCols == 0)  // Probably a bogus table name(s)
+//					break;
+//				// Allocate n wxDbColInf objects to hold the column information
+//				colInf = new ColumnInfo[noCols+1];
+//				if (!colInf)
+//					break;
+//				// Mark the end of the array
+//				wcscpy(colInf[noCols].m_tableName, emptyString);
+//				wcscpy(colInf[noCols].m_colName, emptyString);
+//				colInf[noCols].m_sqlDataType = 0;
+//			}
+//
+//			TableName = tableName;
+//			// Oracle and Interbase table names are uppercase only, so force
+//			// the name to uppercase just in case programmer forgot to do this
+//			if ((Dbms() == dbmsORACLE) ||
+//				(Dbms() == dbmsFIREBIRD) ||
+//				(Dbms() == dbmsINTERBASE))
+//				boost::algorithm::to_upper(TableName);
+//
+//			SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//
+//			// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
+//			// use the call below that leaves out the user name
+//			if (!UserID.empty() &&
+//				Dbms() != dbmsMY_SQL &&
+//				Dbms() != dbmsACCESS &&
+//				Dbms() != dbmsMS_SQL_SERVER)
+//			{
+//				retcode = SQLColumns(m_hstmt,
+//					NULL, 0,                                // All qualifiers
+//					(SQLTCHAR *) UserID.c_str(), SQL_NTS,    // Owner
+//					(SQLTCHAR *) TableName.c_str(), SQL_NTS,
+//					NULL, 0);                               // All columns
+//			}
+//			else
+//			{
+//				retcode = SQLColumns(m_hstmt,
+//					NULL, 0,                                 // All qualifiers
+//					NULL, 0,                                 // Owner
+//					(SQLTCHAR *) TableName.c_str(), SQL_NTS,
+//					NULL, 0);                                // All columns
+//			}
+//			if (retcode != SQL_SUCCESS)
+//			{  // Error occurred, abort
+//				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//				if (colInf)
+//					delete [] colInf;
+//				SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//				if (numCols)
+//					*numCols = 0;
+//				return(0);
+//			}
+//
+//			while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+//			{
+//				if (pass == 1)  // First pass, just add up the number of columns
+//					noCols++;
+//				else  // Pass 2; Fill in the array of structures
+//				{
+//					if (colNo < noCols)  // Some extra error checking to prevent memory overwrites
+//					{
+//						// NOTE: Only the ODBC 1.x fields are retrieved
+//						GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_catalog,      128+1,                     &cb);
+//						GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_schema,       128+1,                     &cb);
+//						GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_tableName,    DB_MAX_TABLE_NAME_LEN+1,   &cb);
+//						GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_colName,      DB_MAX_COLUMN_NAME_LEN+1,  &cb);
+//						GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_sqlDataType,  0,                         &cb);
+//						GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_typeName,     128+1,                     &cb);
+//						GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].m_columnLength, 0,                         &cb);
+//						// BJO 991214 : SQL_C_SSHORT instead of SQL_C_SLONG, otherwise fails on Sparc (probably all 64 bit architectures)
+//						GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_bufferSize,   0,                         &cb);
+//						GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_decimalDigits,0,                         &cb);
+//						GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_numPrecRadix, 0,                         &cb);
+//						GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_nullable,     0,                         &cb);
+//						GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_remarks,      254+1,                     &cb);
+//						// Start Values for Primary/Foriegn Key (=No)
+//						colInf[colNo].m_pkCol = 0;           // Primary key column   0=No; 1= First Key, 2 = Second Key etc.
+//						colInf[colNo].m_pkTableName[0] = 0;  // Tablenames where Primary Key is used as a Foreign Key
+//						colInf[colNo].m_fkCol = 0;           // Foreign key column   0=No; 1= First Key, 2 = Second Key etc.
+//						colInf[colNo].m_fkTableName[0] = 0;  // Foreign key table name
+//
+//						// BJO 20000428 : Virtuoso returns type names with upper cases!
+//						if (Dbms() == dbmsVIRTUOSO)
+//						{
+//							std::wstring s = colInf[colNo].m_typeName;
+//							boost::algorithm::to_lower(s);
+//							wcscmp(colInf[colNo].m_typeName, s.c_str());
+//						}
+//
+//						// Determine the wxDb data type that is used to represent the native data type of this data source
+//						colInf[colNo].m_dbDataType = 0;
+//						if (!_wcsicmp(m_typeInfVarchar.TypeName.c_str(), colInf[colNo].m_typeName))
+//						{
+//#ifdef _IODBC_
+//							// IODBC does not return a correct columnLength, so we set
+//							// columnLength = bufferSize if no column length was returned
+//							// IODBC returns the columnLength in bufferSize. (bug)
+//							if (colInf[colNo].m_columnLength < 1)
+//							{
+//								colInf[colNo].m_columnLength = colInf[colNo].m_bufferSize;
+//							}
+//#endif
+//
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
+//						}
+//						else if (!_wcsicmp(m_typeInfInteger.TypeName.c_str(), colInf[colNo].m_typeName))
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
+//						else if (!_wcsicmp(m_typeInfFloat.TypeName.c_str(), colInf[colNo].m_typeName))
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
+//						else if (!_wcsicmp(m_typeInfDate.TypeName.c_str(), colInf[colNo].m_typeName))
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
+//						else if (!_wcsicmp(m_typeInfBlob.TypeName.c_str(), colInf[colNo].m_typeName))
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
+//
+//						colNo++;
+//					}
+//				}
+//			}
+//			if (retcode != SQL_NO_DATA_FOUND)
+//			{  // Error occurred, abort
+//				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//				if (colInf)
+//					delete [] colInf;
+//				SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//				if (numCols)
+//					*numCols = 0;
+//				return(0);
+//			}
+//		}
+//
+//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//
+//		// Store Primary and Foriegn Keys
+//		GetKeyFields(tableName,colInf,noCols);
+//
+//		if (numCols)
+//			*numCols = noCols;
+//		return colInf;
+//
+//	}  // wxDb::GetColumns()
+//
+//
+//#else  // New GetColumns
+//
+//
+//	/*
+//	BJO 20000503
+//	These are tentative new GetColumns members which should be more database
+//	independent and which always returns the columns in the order they were
+//	created.
+//
+//	- The first one (wxDbColInf *wxDb::GetColumns(wchar_t *tableName[], const
+//	wchar_t* userID)) calls the second implementation for each separate table
+//	before merging the results. This makes the code easier to maintain as
+//	only one member (the second) makes the real work
+//	- wxDbColInf *wxDb::GetColumns(const std::wstring &tableName, int *numCols, const
+//	wchar_t *userID) is a little bit improved
+//	- It doesn't anymore rely on the type-name to find out which database-type
+//	each column has
+//	- It ends by sorting the columns, so that they are returned in the same
+//	order they were created
+//	*/
+//
+//	typedef struct
+//	{
+//		UWORD noCols;
+//		ColumnInfo *colInf;
+//	} _TableColumns;
+//
+//
+//	ColumnInfo *Database::GetColumns(wchar_t *tableName[], const wchar_t *userID)
+//	{
+//		int i, j;
+//		// The last array element of the tableName[] argument must be zero (null).
+//		// This is how the end of the array is detected.
+//
+//		UWORD noCols = 0;
+//
+//		// How many tables ?
+//		int tbl;
+//		for (tbl = 0 ; tableName[tbl]; tbl++);
+//
+//		// Create a table to maintain the columns for each separate table
+//		_TableColumns *TableColumns = new _TableColumns[tbl];
+//
+//		// Fill the table
+//		for (i = 0 ; i < tbl ; i++)
+//
+//		{
+//			TableColumns[i].colInf = GetColumns(tableName[i], &TableColumns[i].noCols, userID);
+//			if (TableColumns[i].colInf == NULL)
+//				return NULL;
+//			noCols += TableColumns[i].noCols;
+//		}
+//
+//		// Now merge all the separate table infos
+//		ColumnInfo *colInf = new ColumnInfo[noCols+1];
+//
+//		// Mark the end of the array
+//		wcscpy(colInf[noCols].m_tableName, emptyString);
+//		wcscpy(colInf[noCols].m_colName, emptyString);
+//		colInf[noCols].m_sqlDataType = 0;
+//
+//		// Merge ...
+//		int offset = 0;
+//
+//		for (i = 0 ; i < tbl ; i++)
+//		{
+//			for (j = 0 ; j < TableColumns[i].noCols ; j++)
+//			{
+//				colInf[offset++] = TableColumns[i].colInf[j];
+//			}
+//		}
+//
+//		delete [] TableColumns;
+//
+//		return colInf;
+//	}  // wxDb::GetColumns()  -- NEW
+//
+//
+//	ColumnInfo *Database::GetColumns(const std::wstring &tableName, int *numCols, const wchar_t *userID)
+//		//
+//		// Same as the above GetColumns() function except this one gets columns
+//		// only for a single table, and if 'numCols' is not NULL, the number of
+//		// columns stored in the returned wxDbColInf is set in '*numCols'
+//		//
+//		// userID is evaluated in the following manner:
+//		//        userID == NULL  ... UserID is ignored
+//		//        userID == ""    ... UserID set equal to 'this->uid'
+//		//        userID != ""    ... UserID set equal to 'userID'
+//		//
+//		// NOTE: ALL column bindings associated with this wxDb instance are unbound
+//		//       by this function.  This function should use its own wxDb instance
+//		//       to avoid undesired unbinding of columns.
+//	{
+//		UWORD       noCols = 0;
+//		UWORD       colNo  = 0;
+//		ColumnInfo *colInf = 0;
+//
+//		RETCODE  retcode;
+//		SDWORD   cb;
+//
+//		std::wstring TableName;
+//
+//		std::wstring UserID;
+//		ConvertUserIDImpl(userID,UserID);
+//
+//		// Pass 1 - Determine how many columns there are.
+//		// Pass 2 - Allocate the wxDbColInf array and fill in
+//		//                the array with the column information.
+//		int pass;
+//		for (pass = 1; pass <= 2; pass++)
+//		{
+//			if (pass == 2)
+//			{
+//				if (noCols == 0)  // Probably a bogus table name(s)
+//					break;
+//				// Allocate n wxDbColInf objects to hold the column information
+//				colInf = new ColumnInfo[noCols+1];
+//				if (!colInf)
+//					break;
+//				// Mark the end of the array
+//				wcscpy(colInf[noCols].m_tableName, emptyString);
+//				wcscpy(colInf[noCols].m_colName, emptyString);
+//				colInf[noCols].m_sqlDataType = 0;
+//			}
+//
+//			TableName = tableName;
+//			// Oracle and Interbase table names are uppercase only, so force
+//			// the name to uppercase just in case programmer forgot to do this
+//			if ((Dbms() == dbmsORACLE) ||
+//				(Dbms() == dbmsFIREBIRD) ||
+//				(Dbms() == dbmsINTERBASE))
+//				TableName = TableName.Upper();
+//
+//			SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//
+//			// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
+//			// use the call below that leaves out the user name
+//			if (!UserID.empty() &&
+//				Dbms() != dbmsMY_SQL &&
+//				Dbms() != dbmsACCESS &&
+//				Dbms() != dbmsMS_SQL_SERVER)
+//			{
+//				retcode = SQLColumns(m_hstmt,
+//					NULL, 0,                              // All qualifiers
+//					(UCHAR *) UserID.c_str(), SQL_NTS,    // Owner
+//					(UCHAR *) TableName.c_str(), SQL_NTS,
+//					NULL, 0);                             // All columns
+//			}
+//			else
+//			{
+//				retcode = SQLColumns(m_hstmt,
+//					NULL, 0,                              // All qualifiers
+//					NULL, 0,                              // Owner
+//					(UCHAR *) TableName.c_str(), SQL_NTS,
+//					NULL, 0);                             // All columns
+//			}
+//			if (retcode != SQL_SUCCESS)
+//			{  // Error occurred, abort
+//				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//				if (colInf)
+//					delete [] colInf;
+//				SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//				if (numCols)
+//					*numCols = 0;
+//				return(0);
+//			}
+//
+//			while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+//			{
+//				if (pass == 1)  // First pass, just add up the number of columns
+//					noCols++;
+//				else  // Pass 2; Fill in the array of structures
+//				{
+//					if (colNo < noCols)  // Some extra error checking to prevent memory overwrites
+//					{
+//						// NOTE: Only the ODBC 1.x fields are retrieved
+//						GetData( 1, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_catalog,      128+1,                     &cb);
+//						GetData( 2, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_schema,       128+1,                     &cb);
+//						GetData( 3, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_tableName,    DB_MAX_TABLE_NAME_LEN+1,   &cb);
+//						GetData( 4, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_colName,      DB_MAX_COLUMN_NAME_LEN+1,  &cb);
+//						GetData( 5, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_sqlDataType,  0,                         &cb);
+//						GetData( 6, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_typeName,     128+1,                     &cb);
+//						GetData( 7, SQL_C_SLONG,  (UCHAR*) &colInf[colNo].m_columnLength, 0,                         &cb);
+//						GetData( 8, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_bufferSize,   0,                         &cb);
+//						GetData( 9, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_decimalDigits,0,                         &cb);
+//						GetData(10, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_numPrecRadix, 0,                         &cb);
+//						GetData(11, SQL_C_SSHORT, (UCHAR*) &colInf[colNo].m_nullable,     0,                         &cb);
+//						GetData(12, SQL_C_WXCHAR, (UCHAR*)  colInf[colNo].m_remarks,      254+1,                     &cb);
+//						// Start Values for Primary/Foriegn Key (=No)
+//						colInf[colNo].m_pkCol = 0;           // Primary key column   0=No; 1= First Key, 2 = Second Key etc.
+//						colInf[colNo].m_pkTableName[0] = 0;  // Tablenames where Primary Key is used as a Foreign Key
+//						colInf[colNo].m_fkCol = 0;           // Foreign key column   0=No; 1= First Key, 2 = Second Key etc.
+//						colInf[colNo].m_fkTableName[0] = 0;  // Foreign key table name
+//
+//#ifdef _IODBC_
+//						// IODBC does not return a correct columnLength, so we set
+//						// columnLength = bufferSize if no column length was returned
+//						// IODBC returns the columnLength in bufferSize. (bug)
+//						if (colInf[colNo].m_columnLength < 1)
+//						{
+//							colInf[colNo].m_columnLength = colInf[colNo].m_bufferSize;
+//						}
+//#endif
+//
+//						// Determine the wxDb data type that is used to represent the native data type of this data source
+//						colInf[colNo].m_dbDataType = 0;
+//						// Get the intern datatype
+//						switch (colInf[colNo].m_sqlDataType)
+//						{
+//						case SQL_WCHAR:
+//						case SQL_WVARCHAR:
+//						case SQL_VARCHAR:
+//						case SQL_CHAR:
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_VARCHAR;
+//							break;
+//						case SQL_LONGVARCHAR:
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_MEMO;
+//							break;
+//						case SQL_TINYINT:
+//						case SQL_SMALLINT:
+//						case SQL_INTEGER:
+//						case SQL_BIT:
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_INTEGER;
+//							break;
+//						case SQL_DOUBLE:
+//						case SQL_DECIMAL:
+//						case SQL_NUMERIC:
+//						case SQL_FLOAT:
+//						case SQL_REAL:
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_FLOAT;
+//							break;
+//						case SQL_DATE:
+//						case SQL_TIMESTAMP:
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_DATE;
+//							break;
+//						case SQL_BINARY:
+//							colInf[colNo].m_dbDataType = DB_DATA_TYPE_BLOB;
+//							break;
+//#ifdef EXODBCDEBUG
+//						default:
+//							std::wstring errMsg;
+//							errMsg.Printf(L"SQL Data type %d currently not supported by wxWidgets", colInf[colNo].m_sqlDataType);
+//							BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << errMsg;
+//#endif
+//						}
+//						colNo++;
+//					}
+//				}
+//			}
+//			if (retcode != SQL_NO_DATA_FOUND)
+//			{  // Error occurred, abort
+//				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//				if (colInf)
+//					delete [] colInf;
+//				SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//				if (numCols)
+//					*numCols = 0;
+//				return(0);
+//			}
+//		}
+//
+//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//
+//		// Store Primary and Foreign Keys
+//		GetKeyFields(tableName,colInf,noCols);
+//
+//		///////////////////////////////////////////////////////////////////////////
+//		// Now sort the the columns in order to make them appear in the right order
+//		///////////////////////////////////////////////////////////////////////////
+//
+//		// Build a generic SELECT statement which returns 0 rows
+//		std::wstring Stmt;
+//
+//		Stmt.Printf(L"select * from \"%s\" where 0=1", tableName);
+//
+//		// Execute query
+//		if (SQLExecDirect(m_hstmt, (UCHAR FAR *) Stmt.c_str(), SQL_NTS) != SQL_SUCCESS)
+//		{
+//			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//			return NULL;
+//		}
+//
+//		// Get the number of result columns
+//		if (SQLNumResultCols (m_hstmt, &noCols) != SQL_SUCCESS)
+//		{
+//			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//			return NULL;
+//		}
+//
+//		if (noCols == 0) // Probably a bogus table name
+//			return NULL;
+//
+//		//  Get the name
+//		int i;
+//		short colNum;
+//		UCHAR name[100];
+//		SWORD Sword;
+//		SDWORD Sdword;
+//		for (colNum = 0; colNum < noCols; colNum++)
+//		{
+//			if (SQLColAttributes(m_hstmt,colNum+1, SQL_COLUMN_NAME,
+//				name, sizeof(name),
+//				&Sword, &Sdword) != SQL_SUCCESS)
+//			{
+//				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//				return NULL;
+//			}
+//
+//			std::wstring Name1 = name;
+//			Name1 = Name1.Upper();
+//
+//			// Where is this name in the array ?
+//			for (i = colNum ; i < noCols ; i++)
+//			{
+//				std::wstring Name2 =  colInf[i].m_colName;
+//				Name2 = Name2.Upper();
+//				if (Name2 == Name1)
+//				{
+//					if (colNum != i) // swap to sort
+//					{
+//						ColumnInfo tmpColInf = colInf[colNum];
+//						colInf[colNum] =  colInf[i];
+//						colInf[i] = tmpColInf;
+//					}
+//					break;
+//				}
+//			}
+//		}
+//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//
+//		///////////////////////////////////////////////////////////////////////////
+//		// End sorting
+//		///////////////////////////////////////////////////////////////////////////
+//
+//		if (numCols)
+//			*numCols = noCols;
+//		return colInf;
+//
+//	}  // wxDb::GetColumns()
+//
+//
+//#endif  // #else OLD_GETCOLUMNS
 
 
 	/********** wxDb::GetColumnCount() **********/
@@ -3185,96 +3186,96 @@ namespace exodbc
 	}  // wxDb::Dbms()
 
 
-	bool Database::ModifyColumn(const std::wstring &tableName, const std::wstring &columnName,
-		int dataType, ULONG columnLength,
-		const std::wstring &optionalParam)
-	{
-		exASSERT(tableName.length());
-		exASSERT(columnName.length());
-		exASSERT((dataType == DB_DATA_TYPE_VARCHAR && columnLength > 0) ||
-			dataType != DB_DATA_TYPE_VARCHAR);
+	//bool Database::ModifyColumn(const std::wstring &tableName, const std::wstring &columnName,
+	//	int dataType, ULONG columnLength,
+	//	const std::wstring &optionalParam)
+	//{
+	//	exASSERT(tableName.length());
+	//	exASSERT(columnName.length());
+	//	exASSERT((dataType == DB_DATA_TYPE_VARCHAR && columnLength > 0) ||
+	//		dataType != DB_DATA_TYPE_VARCHAR);
 
-		// Must specify a columnLength if modifying a VARCHAR type column
-		if (dataType == DB_DATA_TYPE_VARCHAR && !columnLength)
-			return false;
+	//	// Must specify a columnLength if modifying a VARCHAR type column
+	//	if (dataType == DB_DATA_TYPE_VARCHAR && !columnLength)
+	//		return false;
 
-		std::wstring dataTypeName;
-		std::wstring sqlStmt;
-		std::wstring alterSlashModify;
+	//	std::wstring dataTypeName;
+	//	std::wstring sqlStmt;
+	//	std::wstring alterSlashModify;
 
-		switch(dataType)
-		{
-		case DB_DATA_TYPE_VARCHAR :
-			dataTypeName = m_typeInfVarchar.TypeName;
-			break;
-		case DB_DATA_TYPE_INTEGER :
-			dataTypeName = m_typeInfInteger.TypeName;
-			break;
-		case DB_DATA_TYPE_FLOAT :
-			dataTypeName = m_typeInfFloat.TypeName;
-			break;
-		case DB_DATA_TYPE_DATE :
-			dataTypeName = m_typeInfDate.TypeName;
-			break;
-		case DB_DATA_TYPE_BLOB :
-			dataTypeName = m_typeInfBlob.TypeName;
-			break;
-		default:
-			return false;
-		}
+	//	switch(dataType)
+	//	{
+	//	case DB_DATA_TYPE_VARCHAR :
+	//		dataTypeName = m_typeInfVarchar.TypeName;
+	//		break;
+	//	case DB_DATA_TYPE_INTEGER :
+	//		dataTypeName = m_typeInfInteger.TypeName;
+	//		break;
+	//	case DB_DATA_TYPE_FLOAT :
+	//		dataTypeName = m_typeInfFloat.TypeName;
+	//		break;
+	//	case DB_DATA_TYPE_DATE :
+	//		dataTypeName = m_typeInfDate.TypeName;
+	//		break;
+	//	case DB_DATA_TYPE_BLOB :
+	//		dataTypeName = m_typeInfBlob.TypeName;
+	//		break;
+	//	default:
+	//		return false;
+	//	}
 
-		// Set the modify or alter syntax depending on the type of database connected to
-		switch (Dbms())
-		{
-		case dbmsORACLE :
-			alterSlashModify = L"MODIFY";
-			break;
-		case dbmsMS_SQL_SERVER :
-			alterSlashModify = L"ALTER COLUMN";
-			break;
-		case dbmsUNIDENTIFIED :
-			return false;
-		case dbmsSYBASE_ASA :
-		case dbmsSYBASE_ASE :
-		case dbmsMY_SQL :
-		case dbmsPOSTGRES :
-		case dbmsACCESS :
-		case dbmsDBASE :
-		case dbmsXBASE_SEQUITER :
-		default :
-			alterSlashModify = L"MODIFY";
-			break;
-		}
+	//	// Set the modify or alter syntax depending on the type of database connected to
+	//	switch (Dbms())
+	//	{
+	//	case dbmsORACLE :
+	//		alterSlashModify = L"MODIFY";
+	//		break;
+	//	case dbmsMS_SQL_SERVER :
+	//		alterSlashModify = L"ALTER COLUMN";
+	//		break;
+	//	case dbmsUNIDENTIFIED :
+	//		return false;
+	//	case dbmsSYBASE_ASA :
+	//	case dbmsSYBASE_ASE :
+	//	case dbmsMY_SQL :
+	//	case dbmsPOSTGRES :
+	//	case dbmsACCESS :
+	//	case dbmsDBASE :
+	//	case dbmsXBASE_SEQUITER :
+	//	default :
+	//		alterSlashModify = L"MODIFY";
+	//		break;
+	//	}
 
-		// create the SQL statement
-		if ( Dbms() == dbmsMY_SQL )
-		{
-			sqlStmt = (boost::wformat(L"ALTER TABLE %s %s %s %s") % tableName % alterSlashModify % columnName % dataTypeName).str();
-		}
-		else
-		{
-			sqlStmt = (boost::wformat(L"ALTER TABLE \"%s\" \"%s\" \"%s\" %s") % tableName % alterSlashModify % columnName % dataTypeName).str();
-		}
+	//	// create the SQL statement
+	//	if ( Dbms() == dbmsMY_SQL )
+	//	{
+	//		sqlStmt = (boost::wformat(L"ALTER TABLE %s %s %s %s") % tableName % alterSlashModify % columnName % dataTypeName).str();
+	//	}
+	//	else
+	//	{
+	//		sqlStmt = (boost::wformat(L"ALTER TABLE \"%s\" \"%s\" \"%s\" %s") % tableName % alterSlashModify % columnName % dataTypeName).str();
+	//	}
 
-		// For varchars only, append the size of the column
-		if (dataType == DB_DATA_TYPE_VARCHAR &&
-			(Dbms() != dbmsMY_SQL || dataTypeName != L"text"))
-		{
-			std::wstring s;
-			s = (boost::wformat(L"(%lu)") % columnLength).str();
-			sqlStmt += s;
-		}
+	//	// For varchars only, append the size of the column
+	//	if (dataType == DB_DATA_TYPE_VARCHAR &&
+	//		(Dbms() != dbmsMY_SQL || dataTypeName != L"text"))
+	//	{
+	//		std::wstring s;
+	//		s = (boost::wformat(L"(%lu)") % columnLength).str();
+	//		sqlStmt += s;
+	//	}
 
-		// for passing things like "NOT NULL"
-		if (optionalParam.length())
-		{
-			sqlStmt += L" ";
-			sqlStmt += optionalParam;
-		}
+	//	// for passing things like "NOT NULL"
+	//	if (optionalParam.length())
+	//	{
+	//		sqlStmt += L" ";
+	//		sqlStmt += optionalParam;
+	//	}
 
-		return ExecSql(sqlStmt);
+	//	return ExecSql(sqlStmt);
 
-	} // wxDb::ModifyColumn()
+	//} // wxDb::ModifyColumn()
 
 	/********** wxDb::EscapeSqlChars() **********/
 	std::wstring Database::EscapeSqlChars(const std::wstring& valueOrig)
