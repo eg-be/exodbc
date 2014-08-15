@@ -717,7 +717,7 @@ namespace exodbc
 		SQLWCHAR literalPrefix[DB_MAX_LITERAL_PREFIX_LEN + 1];
 		SQLWCHAR literalSuffix[DB_MAX_LITERAL_SUFFIX_LEN + 1];
 		SQLWCHAR createParams[DB_MAX_CREATE_PARAMS_LIST_LEN + 1];
-		SQLWCHAR localTypeName[DB_TYPE_NAME_LEN + 1];
+		SQLWCHAR localTypeName[DB_LOCAL_TYPE_NAME_LEN + 1];
 		SQLLEN cb;
 		while(ret == SQL_SUCCESS)
 		{
@@ -737,8 +737,11 @@ namespace exodbc
 			ok = ok & GetData3(m_hstmt, 2, SQL_C_SSHORT, &info.FsqlType, sizeof(info.FsqlType), &cb, NULL);
 			ok = ok & GetData3(m_hstmt, 3, SQL_C_SLONG, &info.Precision, sizeof(info.Precision), &cb, &info.PrecisionIsNull);
 			ok = ok & GetData3(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.LiteralPrefixIsNull, true);
+			info.LiteralPrefix = literalPrefix;
 			ok = ok & GetData3(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.LiteralSuffixIsNull, true);
+			info.LiteralSuffix = literalSuffix;
 			ok = ok & GetData3(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.CreateParamsIsNull, true);
+			info.CreateParams = createParams;
 			ok = ok & GetData3(m_hstmt, 7, SQL_C_SSHORT, &info.Nullable, sizeof(info.Nullable), &cb, NULL);
 			ok = ok & GetData3(m_hstmt, 8, SQL_C_SSHORT, &info.CaseSensitive, sizeof(info.CaseSensitive), &cb, NULL);
 			ok = ok & GetData3(m_hstmt, 9, SQL_C_SSHORT, &info.Searchable, sizeof(info.Searchable), &cb, NULL);
@@ -746,6 +749,7 @@ namespace exodbc
 			ok = ok & GetData3(m_hstmt, 11, SQL_C_SSHORT, &info.FixedPrecisionScale, sizeof(info.FixedPrecisionScale), &cb, NULL);
 			ok = ok & GetData3(m_hstmt, 12, SQL_C_SSHORT, &info.AutoUniqueValue, sizeof(info.AutoUniqueValue), &cb, &info.AutoUniqueValueIsNull);
 			ok = ok & GetData3(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.LocalTypeNameIsNull, true);
+			info.LocalTypeName = localTypeName;
 			ok = ok & GetData3(m_hstmt, 14, SQL_C_SSHORT, &info.MinimumScale, sizeof(info.MinimumScale), &cb, &info.MinimumScaleIsNull);
 			ok = ok & GetData3(m_hstmt, 15, SQL_C_SSHORT, &info.MaximumScale, sizeof(info.MaximumScale), &cb, &info.MaximumScaleIsNull);
 			ok = ok & GetData3(m_hstmt, 16, SQL_C_SSHORT, &info.SqlDataType, sizeof(info.SqlDataType), &cb, NULL);
