@@ -44,6 +44,7 @@ namespace exodbc
 
 	// Database Globals
 	const int DB_TYPE_NAME_LEN				= 40;
+	const int DB_LOCAL_TYPE_NAME_LEN		= 256;
 	const int DB_MAX_STATEMENT_LEN			= 4096;
 	const int DB_MAX_WHERE_CLAUSE_LEN		= 2048;
 	const int DB_MAX_ERROR_MSG_LEN			= 512;
