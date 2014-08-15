@@ -52,7 +52,7 @@ namespace exodbc
 	{
 		if(m_pDb)
 		{
-			// Why do we need to commit with DB2? We did not start anything??
+			// TODO: Why do we need to commit with DB2? We did not start anything??
 			m_pDb->CommitTrans();
 
 			m_pDb->Close();
@@ -78,6 +78,17 @@ namespace exodbc
 	}
 
 	// TODO: Test Close. Close should return a value if succeeded
+	TEST_P(DbTest, Close)
+	{
+		// Try to close a db that really is open
+		Database db1(m_pDbEnv);
+		ASSERT_TRUE(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
+		EXPECT_TRUE(db1.Close());
+
+		// And one that is not open
+		Database db2(m_pDbEnv);
+		EXPECT_FALSE(db2.Close());
+	}
 
 	TEST_P(DbTest, GetAllDataTypesInfo)
 	{

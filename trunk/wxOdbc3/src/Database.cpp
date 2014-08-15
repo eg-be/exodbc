@@ -507,19 +507,13 @@ namespace exodbc
 		if (!ReadDbInfo(m_dbInf))
 			return false;
 
+		// Query the datatypes
+		if (!GetAllDataTypesInfo(m_datatypes))
+			return false;
+
 		// TODO: Continue here
 		//if (!DetermineDataTypes(failOnDataTypeUnsupported))
 		//	return false;
-
-#ifdef DBDEBUG_CONSOLE
-		std::wcout << L"VARCHAR DATA TYPE: " << m_typeInfVarchar.TypeName << std::endl;
-		std::wcout << L"INTEGER DATA TYPE: " << m_typeInfInteger.TypeName << std::endl;
-		std::wcout << L"FLOAT   DATA TYPE: " << m_typeInfFloat.TypeName << std::endl;
-		std::wcout << L"DATE    DATA TYPE: " << m_typeInfDate.TypeName << std::endl;
-		std::wcout << L"BLOB    DATA TYPE: " << m_typeInfBlob.TypeName << std::endl;
-		std::wcout << L"MEMO    DATA TYPE: " << m_typeInfMemo.TypeName << std::endl;
-		std::wcout << std::endl;
-#endif
 
 		// Completed Successfully
 		return true;
@@ -697,6 +691,8 @@ namespace exodbc
 
 	bool Database::GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types)
 	{
+		bool allOk = true;
+
 		SQLRETURN ret;
 
 		types.clear();
@@ -733,38 +729,29 @@ namespace exodbc
 			SSqlTypeInfo info;
 
 			cb = 0;
-			bool ok = true;
-			ok = GetData3(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
+			bool ok = GetData3(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
 			if(ok)
 				info.TypeName = typeName;
 			bool haveName = ok;
 
-			ok = GetData3(m_hstmt, 2, SQL_C_SSHORT, &info.FsqlType, sizeof(info.FsqlType), &cb, NULL);
-			ok = GetData3(m_hstmt, 3, SQL_C_SLONG, &info.Precision, sizeof(info.Precision), &cb, &info.PrecisionIsNull);
-			ok = GetData3(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.LiteralPrefixIsNull, true);
-			if(ok)
-				info.LiteralPrefix = literalPrefix;
-			ok = GetData3(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.LiteralSuffixIsNull, true);
-			if(ok)
-				info.LiteralSuffix = literalSuffix;
-			ok = GetData3(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.CreateParamsIsNull, true);
-			if(ok)
-				info.CreateParams = createParams;
-			ok = GetData3(m_hstmt, 7, SQL_C_SSHORT, &info.Nullable, sizeof(info.Nullable), &cb, NULL);
-			ok = GetData3(m_hstmt, 8, SQL_C_SSHORT, &info.CaseSensitive, sizeof(info.CaseSensitive), &cb, NULL);
-			ok = GetData3(m_hstmt, 9, SQL_C_SSHORT, &info.Searchable, sizeof(info.Searchable), &cb, NULL);
-			ok = GetData3(m_hstmt, 10, SQL_C_SSHORT, &info.Unsigned, sizeof(info.Unsigned), &cb, &info.UnsignedIsNull);
-			ok = GetData3(m_hstmt, 11, SQL_C_SSHORT, &info.FixedPrecisionScale, sizeof(info.FixedPrecisionScale), &cb, NULL);
-			ok = GetData3(m_hstmt, 12, SQL_C_SSHORT, &info.AutoUniqueValue, sizeof(info.AutoUniqueValue), &cb, &info.AutoUniqueValueIsNull);
-			ok = GetData3(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.LocalTypeNameIsNull, true);
-			if(ok)
-				info.LocalTypeName = localTypeName;
-			ok = GetData3(m_hstmt, 14, SQL_C_SSHORT, &info.MinimumScale, sizeof(info.MinimumScale), &cb, &info.MinimumScaleIsNull);
-			ok = GetData3(m_hstmt, 15, SQL_C_SSHORT, &info.MaximumScale, sizeof(info.MaximumScale), &cb, &info.MaximumScaleIsNull);
-			ok = GetData3(m_hstmt, 16, SQL_C_SSHORT, &info.SqlDataType, sizeof(info.SqlDataType), &cb, NULL);
-			ok = GetData3(m_hstmt, 17, SQL_C_SSHORT, &info.SqlDateTimeSub, sizeof(info.SqlDateTimeSub), &cb, &info.SqlDateTimeSubIsNull);
-			ok = GetData3(m_hstmt, 18, SQL_C_SSHORT, &info.NumPrecRadix, sizeof(info.NumPrecRadix), &cb, &info.NumPrecRadixIsNull);
-			ok = GetData3(m_hstmt, 19, SQL_C_SSHORT, &info.IntervalPrecision, sizeof(info.IntervalPrecision), &cb, &info.IntervalPrecisionIsNull);
+			ok = ok & GetData3(m_hstmt, 2, SQL_C_SSHORT, &info.FsqlType, sizeof(info.FsqlType), &cb, NULL);
+			ok = ok & GetData3(m_hstmt, 3, SQL_C_SLONG, &info.Precision, sizeof(info.Precision), &cb, &info.PrecisionIsNull);
+			ok = ok & GetData3(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.LiteralPrefixIsNull, true);
+			ok = ok & GetData3(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.LiteralSuffixIsNull, true);
+			ok = ok & GetData3(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.CreateParamsIsNull, true);
+			ok = ok & GetData3(m_hstmt, 7, SQL_C_SSHORT, &info.Nullable, sizeof(info.Nullable), &cb, NULL);
+			ok = ok & GetData3(m_hstmt, 8, SQL_C_SSHORT, &info.CaseSensitive, sizeof(info.CaseSensitive), &cb, NULL);
+			ok = ok & GetData3(m_hstmt, 9, SQL_C_SSHORT, &info.Searchable, sizeof(info.Searchable), &cb, NULL);
+			ok = ok & GetData3(m_hstmt, 10, SQL_C_SSHORT, &info.Unsigned, sizeof(info.Unsigned), &cb, &info.UnsignedIsNull);
+			ok = ok & GetData3(m_hstmt, 11, SQL_C_SSHORT, &info.FixedPrecisionScale, sizeof(info.FixedPrecisionScale), &cb, NULL);
+			ok = ok & GetData3(m_hstmt, 12, SQL_C_SSHORT, &info.AutoUniqueValue, sizeof(info.AutoUniqueValue), &cb, &info.AutoUniqueValueIsNull);
+			ok = ok & GetData3(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.LocalTypeNameIsNull, true);
+			ok = ok & GetData3(m_hstmt, 14, SQL_C_SSHORT, &info.MinimumScale, sizeof(info.MinimumScale), &cb, &info.MinimumScaleIsNull);
+			ok = ok & GetData3(m_hstmt, 15, SQL_C_SSHORT, &info.MaximumScale, sizeof(info.MaximumScale), &cb, &info.MaximumScaleIsNull);
+			ok = ok & GetData3(m_hstmt, 16, SQL_C_SSHORT, &info.SqlDataType, sizeof(info.SqlDataType), &cb, NULL);
+			ok = ok & GetData3(m_hstmt, 17, SQL_C_SSHORT, &info.SqlDateTimeSub, sizeof(info.SqlDateTimeSub), &cb, &info.SqlDateTimeSubIsNull);
+			ok = ok & GetData3(m_hstmt, 18, SQL_C_SSHORT, &info.NumPrecRadix, sizeof(info.NumPrecRadix), &cb, &info.NumPrecRadixIsNull);
+			ok = ok & GetData3(m_hstmt, 19, SQL_C_SSHORT, &info.IntervalPrecision, sizeof(info.IntervalPrecision), &cb, &info.IntervalPrecisionIsNull);
 
 			if(ok)
 			{
@@ -772,7 +759,8 @@ namespace exodbc
 			}
 			else
 			{
-				BOOST_LOG_TRIVIAL(warning) << L"Failed to determine properties of type '" << (haveName ? info.TypeName : L"unknown-type") << L"'"; 
+				BOOST_LOG_TRIVIAL(error) << L"Failed to determine properties of type '" << (haveName ? info.TypeName : L"unknown-type") << L"'"; 
+				allOk = false;
 			}
 
 			count++;
@@ -781,18 +769,18 @@ namespace exodbc
 
 		if(ret != SQL_NO_DATA)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"SQLFetch did not end with SQL_NO_DATA while fetching DataTypes, but with " << ret << L": " << GetLastStmtError(m_hstmt);
+			BOOST_LOG_TRIVIAL(error) << L"SQLFetch did not end with SQL_NO_DATA while fetching DataTypes, but with " << ret << L": " << GetLastStmtError(m_hstmt);
 			return false;
 		}
 
 		// We are done, close cursor
 		if(!CloseStmtHandle(m_hstmt))
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"Failed to free Statement after fetching DataTypesInfo";
+			BOOST_LOG_TRIVIAL(error) << L"Failed to Close Statement after fetching DataTypesInfo";
 			return false;
 		}
 
-		return true;
+		return allOk;
 	}
 
 
@@ -885,8 +873,13 @@ namespace exodbc
 
 
 	/********** wxDb::Close() **********/
-	void Database::Close()
+	bool Database::Close()
 	{
+		// There should be zero Ctable objects still connected to this db object
+		exASSERT(nTables == 0);
+
+		bool ok = true;
+
 		// Close the Sql Log file
 		if (m_fpSqlLog)
 		{
@@ -899,18 +892,22 @@ namespace exodbc
 		{
 			if(!FreeStmtHandle(m_hstmt))
 			{
-				BOOST_LOG_TRIVIAL(warning) << L"Close failed to Free Stmt-handle";
+				BOOST_LOG_TRIVIAL(warning) << L"Close failed to Free Stmt-handle: " << GetLastStmtError(m_hstmt);
+				ok  = false;
 			}
 
-			// Disconnect from the datasource			
+			// Anyway try to disconnect from the datasource
 			if (SQLDisconnect(m_hdbc) != SQL_SUCCESS)
-				DispAllErrors(SQL_NULL_HENV, m_hdbc);
+			{
+				BOOST_LOG_TRIVIAL(error) << L"Close failed to free DB-Connection handle: " << GetLastDbcError(m_hdbc);
+				ok = false;
+			}
 
-			m_dbIsOpen = false;
+			if(ok)
+			{
+				m_dbIsOpen = false;
+			}
 		}
-
-		// There should be zero Ctable objects still connected to this db object
-		exASSERT(nTables == 0);
 
 #ifdef EXODBCDEBUG
 		{
@@ -944,8 +941,9 @@ namespace exodbc
 
 		m_dbmsType = dbmsUNIDENTIFIED;
 
+		return ok;
 
-	} // wxDb::Close()
+	}
 
 
 	/********** wxDb::CommitTrans() **********/
