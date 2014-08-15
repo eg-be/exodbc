@@ -435,7 +435,7 @@ namespace exodbc
 			{
 				BOOST_LOG_TRIVIAL(error) << L"GetData failed with SQL_ERROR: " << GetLastStmtError(hStmt);
 			}
-			else
+			else if(!ret == SQL_SUCCESS_WITH_INFO) // we report that later
 			{
 				BOOST_LOG_TRIVIAL(error) << L"GetData failed with return-value " << ret;
 			}
@@ -465,7 +465,7 @@ namespace exodbc
 		}
 		if(ret == SQL_SUCCESS_WITH_INFO)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"GetData completed with SQL_SUCCESS_WITH_INFO: " << GetLastStmtError(hStmt);
+			BOOST_LOG_TRIVIAL(error) << L"GetData completed with SQL_SUCCESS_WITH_INFO: " << GetLastStmtError(hStmt);
 		}
 
 		return ret == SQL_SUCCESS;

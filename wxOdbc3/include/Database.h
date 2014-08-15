@@ -276,7 +276,11 @@ namespace exodbc
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool         Open(DbEnvironment* dbConnectInf, bool failOnDataTypeUnsupported = true);
-		void         Close();
+		
+		
+		bool         Close();
+
+
 		bool         CommitTrans();
 		bool         RollbackTrans();
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
@@ -364,6 +368,7 @@ namespace exodbc
 		bool             OpenImpl(bool failOnDataTypeUnsupported = true);
 
 		// Members
+		std::vector<SSqlTypeInfo> m_datatypes; // Queried from DB during Open
 		bool				m_dbIsOpen;	// Set to true after SQLConnect was successful
 		bool				m_dbOpenedWithConnectionString;  // Was the database connection OpenImpled with a connection string
 		std::wstring		m_dsn;             // Data source name
