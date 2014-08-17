@@ -132,8 +132,7 @@ namespace exodbc
 	}  // wxDbTableInf::Initialize()
 
 	Database::Database(const DbEnvironment* const pEnv)
-		: m_hdbc(SQL_NULL_HDBC)
-		, m_fwdOnlyCursors(true)
+		: m_fwdOnlyCursors(true)
 	{
 		exASSERT(pEnv);
 
@@ -141,20 +140,31 @@ namespace exodbc
 		m_henv = pEnv->GetHenv();
 
 		Initialize();
-		m_hdbc = AllocDbcHandle(pEnv->GetHenv());
+
+		// Allocate the DBC-Handle
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, pEnv->GetHenv(), &m_hdbc);
+		if(ret != SQL_SUCCESS)
+		{
+			LOG_ENV_ERROR(pEnv->GetHenv(), ret, SQLAllocHandle);
+		}
 	}
 
 	/********** wxDb Constructor **********/
-	Database::Database(const HENV &aHenv, bool FwdOnlyCursors)
-		: m_hdbc(SQL_NULL_HDBC)
+	Database::Database(const HENV& aHenv, bool FwdOnlyCursors)
 	{
 		// Copy the HENV into the db class
 		m_henv = aHenv;
 		m_fwdOnlyCursors = FwdOnlyCursors;
 
 		Initialize();
-		m_hdbc = AllocDbcHandle(aHenv);
-	} // wxDb::wxDb()
+
+		// Allocate the DBC-Handle
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, aHenv, &m_hdbc);
+		if(ret != SQL_SUCCESS)
+		{
+			LOG_ENV_ERROR(aHenv, ret, SQLAllocHandle);
+		}
+	}
 
 
 	Database::~Database()
@@ -164,18 +174,27 @@ namespace exodbc
 			Close();
 		}
 
-		// Free the connection to the datasource
-		if(m_hdbc != SQL_NULL_HDBC)
+		// Free the connection-handle
+		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc);
+		if(ret != SQL_SUCCESS)
 		{
-			FreeDbcHandle(m_hdbc);
+			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+			if(ret == SQL_ERROR)
+			{
+				LOG_DBC_ERROR(m_hdbc, ret, SQLFreeHandle);
+			}
+		}
+		if(ret == SQL_SUCCESS)
+		{
+			m_hdbc = SQL_NULL_HDBC;
 		}
 	}
 
 	void Database::Initialize()
 	{
 		// Handles created by this db
-		m_hdbc = NULL;
-		m_hstmt = NULL;
+		m_hdbc = SQL_NULL_HDBC;
+		m_hstmt = SQL_NULL_HSTMT;
 
 		//m_fpSqlLog      = 0;            // Sql Log file pointer
 		//m_sqlLogState   = sqlLogOFF;    // By default, logging is turned off

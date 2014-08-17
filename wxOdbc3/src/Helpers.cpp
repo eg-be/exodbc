@@ -175,10 +175,9 @@ namespace exodbc
 		}
 	}
 
-	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = NULL */, SQLHANDLE hDbc /* = NULL */, SQLHANDLE hStmt /* = NULL */)
+	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = SQL_NULL_HENV */, SQLHANDLE hDbc /* = SQL_NULL_HDBC */, SQLHANDLE hStmt /* = SQL_NULL_HSTMT */)
 	{
-		exASSERT(hEnv != NULL || hDbc != NULL || hStmt != NULL);
-
+		exASSERT(hEnv != SQL_NULL_HENV || hDbc != SQL_NULL_HDBC || hStmt != SQL_NULL_HSTMT);
 
 		std::vector<SErrorInfo> errors;
 		SQLHANDLE handle = NULL;
@@ -302,23 +301,6 @@ namespace exodbc
 		return GetLastStmtError(hStmt, tot);
 	}
 
-
-	SQLHANDLE AllocDbcHandle(const SQLHANDLE& hEnv)
-	{
-		exASSERT(hEnv);
-
-		SQLHANDLE handle = SQL_NULL_HENV;
-
-		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, hEnv, &handle);
-		if(ret != SQL_SUCCESS)
-		{
-			BOOST_LOG_TRIVIAL(error) << L"Failed to SQLAllocHandle of type SQL_HANDLE_DBC, (return code was " << ret << L"): " << GetLastEnvError(hEnv);
-			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HDESCin case of failure
-			return handle;
-		}
-
-		return handle;
-	}
 
 	bool FreeDbcHandle(SQLHANDLE& hDbc)
 	{
