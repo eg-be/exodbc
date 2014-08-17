@@ -351,7 +351,7 @@ namespace exodbc
 	}
 
 
-	bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
+	bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
 	{
 		exASSERT(hStmt != SQL_NULL_HSTMT);
 		if(nullTerminate)
@@ -360,7 +360,7 @@ namespace exodbc
 		}
 
 		bool isNull;
-		SQLRETURN ret = SQLGetData(hStmt, colOrParamNr, targetType, targetValue, bufferLen, strLenOrIndPtr);
+		SQLRETURN ret = SQLGetData(hStmt, colOrParamNr, targetType, pTargetValue, bufferLen, strLenOrIndPtr);
 		if( ! (ret == SQL_SUCCESS ))
 		{
 			LOG_ERROR_STMT_MSG(hStmt, ret, SQLGetData, (boost::wformat(L"SGLGetData failed for Column %d") %colOrParamNr).str());
@@ -379,14 +379,16 @@ namespace exodbc
 				exASSERT(*strLenOrIndPtr != SQL_NO_TOTAL);
 				if(targetType == SQL_C_CHAR)
 				{
-					char* pc = (char*) targetValue;
+					char* pc = (char*) pTargetValue;
+					exASSERT(bufferLen >= *strLenOrIndPtr);
 					pc[*strLenOrIndPtr] = 0;
 				}
 				else
 				{
-					wchar_t* pw = (wchar_t*) targetValue;
+					wchar_t* pw = (wchar_t*) pTargetValue;
 					int p = *strLenOrIndPtr / sizeof(wchar_t);
-					pw[ *strLenOrIndPtr / sizeof(wchar_t)] = 0;
+					exASSERT(bufferLen >= p);
+					pw[ p ] = 0;
 				}
 			}
 		}
