@@ -154,7 +154,7 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
 #ifdef EXODBCDEBUG
     STablesInUse *tableInUse;
     tableInUse            = new STablesInUse();
-    tableInUse->tableName = tblName.c_str();
+    tableInUse->tableName = tblName.c_str();    
     tableInUse->tableID   = m_tableID;
     tableInUse->pDb       = m_pDb;
     {
