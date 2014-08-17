@@ -328,6 +328,15 @@ namespace exodbc
 
 		int			GetColumnCount(const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring catalogName = L"");
 
+		// TODO: Continue here: Get back the following stuff
+		//
+		// Some kind of search-thing 
+		// bool		FindTable(const std::wstring& tableSearchName, const std::wstring& schemaSearchName = L"", const std::wstring catalogSearchName = L"", std::vector<DbCatalogTable>& catalogEntries);
+		// and the exist and check privs things
+		//		bool         TableExists(const std::wstring& tableName, const wchar_t* userID = NULL, const std::wstring& tablePath = std::wstring());
+		//		bool         TablePrivileges(const std::wstring& tableName, const std::wstring& priv, const wchar_t* userID = NULL, const wchar_t* schema = NULL, const std::wstring& path = std::wstring());
+
+
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		void         DispNextError();
