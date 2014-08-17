@@ -2281,8 +2281,7 @@ namespace exodbc
 	//}  // wxDb::GetColumnCount()
 
 
-	/********** wxDb::GetCatalog() *******/
-	SDbCatalog* Database::GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName)
+	bool Database::GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo)
 		/*
 		* ---------------------------------------------------------------------
 		* -- 19991203 : mj10777 : Create                                 ------
@@ -2308,13 +2307,20 @@ namespace exodbc
 		RETCODE  retcode;
 		SQLLEN   cb;
 		std::wstring tblNameSave;
+		bool allOk = true;
 
 		//-------------------------------------------------------------
 		// Create the Database vector of catalog entries
 
-		SDbCatalog* pDbInf = new SDbCatalog;
+		SDbCatalog dbInf;
 
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);   // Close if Open
+		// Close Statement 
+		retcode = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		if(retcode != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(m_hstmt, retcode, CloseStmtHandle(IgnoreNotOpen) );
+			return false;
+		}
 		tblNameSave.empty();
 
 		if (!catalogName.empty() && !schemaName.empty())
@@ -2353,10 +2359,11 @@ namespace exodbc
 
 		if (retcode != SQL_SUCCESS)
 		{
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-			pDbInf = NULL;
-			SQLFreeStmt(m_hstmt, SQL_CLOSE);
-			return pDbInf;
+			LOG_ERROR_STMT(m_hstmt, retcode, SQLTables);
+
+			// Silently try to close and fail
+			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+			return false;
 		}
 
 		wchar_t* cat = new wchar_t[m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN + 1];
@@ -2365,8 +2372,11 @@ namespace exodbc
 		wchar_t* tableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN + 1];
 		wchar_t* tableRemarks = new wchar_t[DB_MAX_TABLE_REMARKS_LEN + 1];
 
+		int count = 0;
 		while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
 		{
+			bool ok = true;
+
 			// store schemas and catalogs found
 			cat[0] = 0;
 			schem[0] = 0;
@@ -2374,24 +2384,46 @@ namespace exodbc
 			tableType[0] = 0;
 			tableRemarks[0] = 0;
 
-			if(GetData( 1, SQL_C_WCHAR, cat, m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN + 1, &cb))
-				pDbInf->m_catalogs.insert(std::wstring(cat));
+			ok = ok & GetData3(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData3(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData3(m_hstmt, 3, SQL_C_WCHAR, tableName, m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData3(m_hstmt, 4, SQL_C_WCHAR, tableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData3(m_hstmt, 5, SQL_C_WCHAR, tableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb, NULL, true);
 
-			if(GetData( 2, SQL_C_WCHAR, schem, m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN + 1, &cb))
-				pDbInf->m_schemas.insert(std::wstring(schem));
+			count++;
+			if(ok)
+			{
+				// Create the entry
+				DbCatalogTable table;
+				table.m_tableName = tableName;
+				table.m_tableType = tableType;
+				table.m_tableRemarks = tableRemarks;
+				table.m_schema = schem;
+				table.m_catalog = cat;
 
-			GetData( 3, SQL_C_WCHAR, tableName, m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN + 1, &cb);
-			GetData( 4, SQL_C_WCHAR, tableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb);
-			GetData( 5, SQL_C_WCHAR, tableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb);
+				dbInf.m_tables.push_back(table);
+				dbInf.m_catalogs.insert(cat);
+				dbInf.m_schemas.insert(schem);
+			}
+			else
+			{
+				BOOST_LOG_TRIVIAL(error) << L"Failed to get CatalogInfo for Record " << count;
+				allOk = false;
+			}
+		}
 
-			// Create the entry
-			DbCatalogTable table;
-			table.m_tableName = tableName;
-			table.m_tableType = tableType;
-			table.m_tableRemarks = tableRemarks;
-			pDbInf->m_tables.push_back(table);
-		}  // while
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+		if(retcode != SQL_NO_DATA)
+		{
+			LOG_ERROR_EXPECTED_SQL_NO_DATA(retcode, GetData());
+			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+			delete[] cat;
+			delete[] schem;
+			delete[] tableName;
+			delete[] tableType;
+			delete[] tableRemarks;
+			return false;
+		}
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// Query how many columns are in each table
 		//std::vector<DbCatalogTable>::iterator it;
@@ -2406,7 +2438,9 @@ namespace exodbc
 		delete[] tableType;
 		delete[] tableRemarks;
 
-		return pDbInf;
+		catalogInfo = dbInf;
+
+		return allOk;
 
 	}  // Database::GetCatalog()
 

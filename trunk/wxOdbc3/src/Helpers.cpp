@@ -361,18 +361,13 @@ namespace exodbc
 
 		bool isNull;
 		SQLRETURN ret = SQLGetData(hStmt, colOrParamNr, targetType, targetValue, bufferLen, strLenOrIndPtr);
-		if( ! (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO))
+		if( ! (ret == SQL_SUCCESS ))
 		{
-			if(ret == SQL_ERROR)
-			{
-				BOOST_LOG_TRIVIAL(error) << L"GetData failed with SQL_ERROR: " << GetLastStmtError(hStmt);
-			}
-			else if(!ret == SQL_SUCCESS_WITH_INFO) // we report that later
-			{
-				BOOST_LOG_TRIVIAL(error) << L"GetData failed with return-value " << ret;
-			}
+			LOG_ERROR_STMT_MSG(hStmt, ret, SQLGetData, (boost::wformat(L"SGLGetData failed for Column %d") %colOrParamNr).str());
+			return false;
 		}
-		else // ret is SQL_SUCCESS or SQL_SUCCESS_WITH_INFO
+
+		// ret is SQL_SUCCESS
 		{
 			isNull = (*strLenOrIndPtr == SQL_NULL_DATA);
 			if(pIsNull)
@@ -395,12 +390,8 @@ namespace exodbc
 				}
 			}
 		}
-		if(ret == SQL_SUCCESS_WITH_INFO)
-		{
-			BOOST_LOG_TRIVIAL(error) << L"GetData completed with SQL_SUCCESS_WITH_INFO: " << GetLastStmtError(hStmt);
-		}
 
-		return ret == SQL_SUCCESS;
+		return true;
 	}
 
 }

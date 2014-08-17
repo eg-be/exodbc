@@ -273,20 +273,19 @@ namespace exodbc
 
 	TEST_P(DbTest, GetCatalog)
 	{
-		SDbCatalog* pCat = NULL;
+		SDbCatalog cat;
+		EXPECT_TRUE(m_pDb->GetCatalog(L"", L"", cat));
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			pCat = m_pDb->GetCatalog(L"", L"WXODBC3");
+			EXPECT_TRUE(cat.m_schemas.find(L"WXODBC3") != cat.m_schemas.end());
+			EXPECT_TRUE(m_pDb->GetCatalog(L"", L"WXODBC3", cat));
 		}
 		else if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
-			pCat = m_pDb->GetCatalog(L"wxodbc3", L"");
+			EXPECT_TRUE(cat.m_catalogs.find(L"wxodbc3") != cat.m_catalogs.end());
+			EXPECT_TRUE(m_pDb->GetCatalog(L"wxodbc3", L"", cat));
 		}
-
-		EXPECT_EQ(12, pCat->m_tables.size());
-
-		if(pCat)
-			delete pCat;
+		EXPECT_EQ(12, cat.m_tables.size());
 	}
 
 
