@@ -62,6 +62,7 @@ namespace exodbc
 		exASSERT_MSG(false, "Not Implemented");	\
 	} while( 0 )	\
 
+
 namespace exodbc
 {
 
@@ -164,5 +165,19 @@ namespace exodbc
 
 }
 
+#define LOG_ODBC_ERROR(hEnv, hDbc, hStmt) \
+	do { \
+		std::vector<SErrorInfo> errs = GetAllErrors(hEnv, hDbc, hStmt); \
+		std::vector<SErrorInfo>::const_iterator it; \
+		std::wstringstream ws; \
+		ws << __FILEW__ << L"(" << __LINE__ << L")::" << __FUNCTIONW__ << L": "; \
+		for(it = errs.begin(); it != errs.end(); it++) \
+		{ \
+			const SErrorInfo& err = *it; \
+			ws <<  err; \
+		} \
+	} while( 0 ) \ 
+
+#define LOG_ENV_ERROR(hEnv) LOG_ODBC_ERROR(hEnv, NULL, NULL)
 
 #endif // HELPERS_H
