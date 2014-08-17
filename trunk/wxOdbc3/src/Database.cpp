@@ -177,24 +177,13 @@ namespace exodbc
 		m_hdbc = NULL;
 		m_hstmt = NULL;
 
-		int i;
-
 		m_fpSqlLog      = 0;            // Sql Log file pointer
 		m_sqlLogState   = sqlLogOFF;    // By default, logging is turned off
 		nTables       = 0;
 		m_dbmsType      = dbmsUNIDENTIFIED;
 
-		wcscpy(sqlState,emptyString);
-		wcscpy(errorMsg,emptyString);
-		nativeError = cbErrorMsg = 0;
-		for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
-			wcscpy(errorList[i], emptyString);
-
 		// Error reporting is turned OFF by default
 		m_silent = true;
-
-		// Initialize the db status flag
-		DB_STATUS = 0;
 
 		// Mark database as not OpenImpl as of yet
 		m_dbIsOpen = false;
@@ -876,70 +865,6 @@ namespace exodbc
 
 	}
 
-
-	/********** wxDb::GetNextError() **********/
-	bool Database::GetNextError(HENV aHenv, HDBC aHdbc, HSTMT aHstmt)
-	{
-		if (SQLError(aHenv, aHdbc, aHstmt, (SQLTCHAR FAR *) sqlState, &nativeError, (SQLTCHAR FAR *) errorMsg, SQL_MAX_MESSAGE_LENGTH - 1, &cbErrorMsg) == SQL_SUCCESS)
-			return true;
-		else
-			return false;
-
-	} // wxDb::GetNextError()
-
-
-	/********** wxDb::DispNextError() **********/
-	void Database::DispNextError()
-	{
-		std::wstring odbcErrMsg;
-
-		odbcErrMsg = (boost::wformat(L"SQL State = %s\nNative Error Code = %li\nError Message = %s\n") % sqlState % (long)nativeError % errorMsg).str();
-		LogErrorImpl(odbcErrMsg, sqlState);
-
-		if (m_silent)
-			return;
-
-#ifdef DBDEBUG_CONSOLE
-		// When run in console mode, use standard out to display errors.
-		std::wcout << odbcErrMsg.c_str() << std::endl;
-		std::wcout << L"Press any key to continue..."  << std::endl;
-		getchar();
-#endif
-
-#ifdef EXODBCDEBUG
-		BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << odbcErrMsg;
-#endif  // EXODBCDEBUG
-
-	} // wxDb::DispNextError()
-
-
-	/********** wxDb::LogErrorImpl() **********/
-	void Database::LogErrorImpl(const std::wstring &errMsg, const std::wstring &SQLState)
-	{
-		exASSERT(errMsg.length());
-
-		static int pLast = -1;
-		int dbStatus;
-
-		if (++pLast == DB_MAX_ERROR_HISTORY)
-		{
-			int i;
-			for (i = 0; i < DB_MAX_ERROR_HISTORY-1; i++)
-				wcscpy(errorList[i], errorList[i+1]);
-			pLast--;
-		}
-
-		wcsncpy(errorList[pLast], errMsg.c_str(), DB_MAX_ERROR_MSG_LEN);
-		errorList[pLast][DB_MAX_ERROR_MSG_LEN-1] = 0;
-
-		if (SQLState.length())
-			if ((dbStatus = TranslateSqlState(SQLState)) != DB_ERR_FUNCTION_SEQUENCE_ERROR)
-				DB_STATUS = dbStatus;
-
-		// Add the errmsg to the sql log
-		WriteSqlLog(errMsg);
-
-	}  // wxDb::LogErrorImpl()
 
 
 	/**********wxDb::TranslateSqlState()  **********/
