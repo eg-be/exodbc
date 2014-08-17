@@ -1209,26 +1209,21 @@ namespace exodbc
 //	}  // wxDb::DropView()
 
 
-	/********** wxDb::ExecSql()  **********/
-	bool Database::ExecSql(const std::wstring &pSqlStmt)
+	bool Database::ExecSql(const std::wstring& sqlStmt)
 	{
 		RETCODE retcode;
 
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
-		retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
-		if (retcode == SQL_SUCCESS ||
-			(Dbms() == dbmsDB2 && (retcode == SQL_SUCCESS_WITH_INFO || retcode == SQL_NO_DATA_FOUND)))
+		retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
+		if(retcode != SQL_SUCCESS)
 		{
-			return true;
-		}
-		else
-		{
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+			LOG_ERROR_STMT_MSG(m_hstmt, retcode, SQLExecDirect, (boost::wformat(L"Failed to execute Stmt '%s'") %sqlStmt).str());
 			return false;
 		}
 
-	}  // wxDb::ExecSql()
+		return true;
+	}
 
 
 //	/********** wxDb::ExecSql() with column info **********/

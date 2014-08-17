@@ -252,18 +252,17 @@ namespace exodbc
 		 */
 		bool         Open(DbEnvironment* dbConnectInf, bool failOnDataTypeUnsupported = true);
 		
-		
 		bool         Close();
 
-
+		bool         ExecSql(const std::wstring& pSqlStmt);
 		bool         CommitTrans();
 		bool         RollbackTrans();
+
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		void         DispNextError();
 //		bool         CreateView(const std::wstring& viewName, const std::wstring& colList, const std::wstring& pSqlStmt, bool attemptDrop = true);
 //		bool         DropView(const std::wstring& viewName);
-		bool         ExecSql(const std::wstring& pSqlStmt);
 //		bool         ExecSql(const std::wstring& pSqlStmt, ColumnInfo** columns, short& numcols);
 		bool         GetNext();
 		bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR* cbReturned);
