@@ -807,33 +807,35 @@ namespace exodbc
 	}
 
 
-	/********** wxDb::CommitTrans() **********/
 	bool Database::CommitTrans()
 	{
-		if (this)
+		// Commit the transaction
+		SQLRETURN ret = SQLEndTran(SQL_HANDLE_DBC, m_hdbc, SQL_COMMIT);
+		if( ret != SQL_SUCCESS)
 		{
-			// Commit the transaction
-			if (SQLTransact(m_henv, m_hdbc, SQL_COMMIT) != SQL_SUCCESS)
-				return(DispAllErrors(m_henv, m_hdbc));
+			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLEndTran, L"Failed to Commit Transaction");
+			return false;
 		}
 
 		// Completed successfully
 		return true;
+	}
 
-	} // wxDb::CommitTrans()
 
 
-	/********** wxDb::RollbackTrans() **********/
 	bool Database::RollbackTrans()
 	{
 		// Rollback the transaction
-		if (SQLTransact(m_henv, m_hdbc, SQL_ROLLBACK) != SQL_SUCCESS)
-			return(DispAllErrors(m_henv, m_hdbc));
+		SQLRETURN ret = SQLEndTran(SQL_HANDLE_DBC, m_hdbc, SQL_ROLLBACK);
+		if( ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLEndTran, L"Failed to Rollback Transaction");
+			return false;
+		}
 
 		// Completed successfully
 		return true;
-
-	} // wxDb::RollbackTrans()
+	}
 
 
 	/********** wxDb::DispAllErrors() **********/
