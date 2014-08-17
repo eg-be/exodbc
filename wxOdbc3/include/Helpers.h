@@ -132,7 +132,8 @@ namespace exodbc
 	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc);
 	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt);
 
-	extern EXODBCAPI bool		CloseStmtHandle(const SQLHANDLE& hStmt);
+	enum CloseMode { FailIfNotOpen, IgnoreNotOpen};
+	extern EXODBCAPI SQLRETURN	CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode);
 
 	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
 	extern EXODBCAPI bool		GetData3(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
@@ -143,8 +144,9 @@ namespace exodbc
 }
 
 
-#define LOG_ODBC_ERROR(hEnv, hDbc, hStmt, ret, SqlFunction, msgStr) \
+#define LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg) \
 	do { \
+		std::wstring msgStr(msg); \
 		std::vector<SErrorInfo> errs = GetAllErrors(hEnv, hDbc, hStmt); \
 		std::vector<SErrorInfo>::const_iterator it; \
 		std::wstringstream handles; \
@@ -153,7 +155,7 @@ namespace exodbc
 		if(hStmt) handles << L"Stmt=" << hStmt << L";"; \
 		std::wstringstream ws; \
 		ws << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " ; \
-		if(msgStr.length() >= 0) \
+		if(msgStr.length() > 0) \
 			ws << msgStr << L": "; \
 		ws << L"ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", with " << errs.size() << L" ODBC-Error(s) from handle(s) '" << handles.str() << L"': "; \
 		for(it = errs.begin(); it != errs.end(); it++) \
@@ -164,13 +166,24 @@ namespace exodbc
 		BOOST_LOG_TRIVIAL(error) << ws.str(); \
 	} while( 0 )
 
-#define LOG_ENV_ERROR(hEnv, ret, SqlFunction) LOG_ODBC_ERROR(hEnv, NULL, NULL, ret, SqlFunction)
-#define LOG_DBC_ERROR(hDbc, ret, SqlFunction) LOG_ODBC_ERROR(NULL, hDbc, NULL, ret, SqlFunction)
-#define LOG_STMT_ERROR(hStmt, ret, SqlFunction) LOG_ODBC_ERROR(NULL, NULL, hStmt, ret, SqlFunction)
+#define LOG_ERROR_ODBC(hEnv, hDbc, hStmt, ret, SqlFunction) LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, L"")
 
-#define LOG_SQL_NO_SUCCESS_ERROR(ret, SqlFunction) \
+#define LOG_ERROR_ENV_MSG(hEnv, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(hEnv, NULL, NULL, ret, SqlFunction, msgStr)
+#define LOG_ERROR_DBC_MSG(hDbc, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(NULL, hDbc, NULL, ret, SqlFunction, msgStr)
+#define LOG_ERROR_STMT_MSG(hStmt, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(NULL, NULL, hStmt, ret, SqlFunction, msgStr)
+
+#define LOG_ERROR_ENV(hEnv, ret, SqlFunction) LOG_ERROR_ODBC(hEnv, NULL, NULL, ret, SqlFunction)
+#define LOG_ERROR_DBC(hDbc, ret, SqlFunction) LOG_ERROR_ODBC(NULL, hDbc, NULL, ret, SqlFunction)
+#define LOG_ERROR_STMT(hStmt, ret, SqlFunction) LOG_ERROR_ODBC(NULL, NULL, hStmt, ret, SqlFunction)
+
+#define LOG_ERROR_SQL_NO_SUCCESS(ret, SqlFunction) \
 	do { \
-		BOOST_LOG_TRIVIAL(error) <<__FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret; \
+		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret; \
+	} while( 0 )
+
+#define LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SqlFunction) \
+	do { \
+	BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", but we expected SQL_NO_DATA (" << SQL_NO_DATA << L")"; \
 	} while( 0 )
 
 #endif // HELPERS_H
