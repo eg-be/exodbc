@@ -52,17 +52,6 @@ namespace exodbc
 
 	static std::wstring SQLLOGfn = SQL_LOG_FILENAME;
 
-	// The wxDb::errorList is copied to this variable when the wxDb object
-	// is closed.  This way, the error list is still available after the
-	// database object is closed.  This is necessary if the database
-	// connection fails so the calling application can show the operator
-	// why the connection failed.  Note: as each wxDb object is closed, it
-	// will overwrite the errors of the previously destroyed wxDb object in
-	// this variable.  NOTE: This occurs during a CLOSE, not a FREEing of the
-	// connection
-	wchar_t DBerrorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN+1];
-
-
 	// This type defines the return row-struct form
 	// SQLTablePrivileges, and is used by wxDB::TablePrivileges.
 	typedef struct
@@ -895,15 +884,7 @@ namespace exodbc
 		}
 #endif
 
-		// Copy the error messages to a global variable
-		int i;
-		for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
-			wcscpy(DBerrorList[i], errorList[i]);
-
-		m_dbmsType = dbmsUNIDENTIFIED;
-
 		return true;
-
 	}
 
 
