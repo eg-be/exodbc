@@ -193,10 +193,6 @@ namespace exodbc
 #endif
 
 	public:
-		// TODO: Remove this from public
-		SDbInfo m_dbInf;
-
-	public:
 
 		// Public member functions
 		Database(const DbEnvironment* const pEnv);
@@ -346,6 +342,8 @@ namespace exodbc
 		bool             OpenImpl(bool failOnDataTypeUnsupported = true);
 
 		// Members
+		SDbInfo				m_dbInf;
+
 		std::vector<SSqlTypeInfo> m_datatypes; // Queried from DB during Open
 		bool				m_dbIsOpen;	// Set to true after SQLConnect was successful
 		bool				m_dbOpenedWithConnectionString;  // Was the database connection OpenImpled with a connection string
