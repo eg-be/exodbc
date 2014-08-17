@@ -138,35 +138,37 @@ namespace exodbc
 	/*!
 	 * \fn	extern EXODBCAPI bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
 	 *
-	 * \brief	Gets an information.
+	 * \brief	A wrapper to SQLGetInfo. See http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
 	 *
 	 * \param	hDbc					The dbc.
 	 * \param	fInfoType				Type of the information.
-	 * \param	rgbInfoValue			The RGB information value.
-	 * \param	cbInfoValueMax			The information value maximum.
-	 * \param [in,out]	pcbInfoValue	If non-null, the pcb information value.
+	 * \param	rgbInfoValue			Output buffer pointer.
+	 * \param	cbInfoValueMax			Length of buffer.
+	 * \param [in,out]	pcbInfoValue	Out-pointer for total length in bytes (excluding null-terminate char for string-values).
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
-	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
+	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
 
 	/*!
 	 * \fn	extern EXODBCAPI bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
 	 *
-	 * \brief	Gets a data.
+	 * \brief	Gets one field of a record of the passed stmt-handle.
 	 *
-	 * \param	hStmt				  	The statement.
+	 * \param	hStmt				  	The statement-handle.
 	 * \param	colOrParamNr		  	The col or parameter nr.
 	 * \param	targetType			  	Type of the target.
-	 * \param	targetValue			  	Target value.
+	 * \param	pTargetValue			Pointer to the target buffer.
 	 * \param	bufferLen			  	Length of the buffer.
-	 * \param [in,out]	strLenOrIndPtr	If non-null, the length or ind pointer.
-	 * \param [in,out]	pIsNull		  	If non-null, the is null.
-	 * \param	nullTerminate		  	(Optional) true to null terminate.
+	 * \param [in,out]	strLenOrIndPtr	Pointer to return the number of bytes read.
+	 * \param [in,out]	pIsNull		  	If pIsNull is not NULL, set to TRUE if the field is NULL. Ignored if pIsNull is NULL.
+	 * \param	nullTerminate		  	(Optional) true to null terminate. Can only be set if targetType is SQL_C_WCHAR or SQL_C_CHAR.
+	 * 									Will null-terminate at strLenOrIndPtr-value.
+	 * 									TODO: Test that this works
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
-	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
+	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
 
 	// Classes
 	// -------

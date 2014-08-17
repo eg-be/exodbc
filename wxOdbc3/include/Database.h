@@ -303,7 +303,9 @@ namespace exodbc
 		/*!
 		 * \fn	bool Database::GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo);
 		 *
-		 * \brief	Gets a catalog.
+		 * \brief	List all tables, catalogs and schemes in a SDbCatalog.
+		 * 			If Odbc > 3.0 you can use search-patterns.
+		 * 			See: http://msdn.microsoft.com/en-us/library/ms711831%28v=vs.85%29.aspx
 		 *
 		 * \param	catalogName		   	Name of the catalog.
 		 * \param	schemaName		   	Name of the schema.
@@ -316,7 +318,7 @@ namespace exodbc
 		/*!
 		 * \fn	bool Database::GetCatalog(SDbCatalog& catalogInfo)
 		 *
-		 * \brief	Gets a catalog.
+		 * \brief	Calls GetCatalog with empty values for catalog- and scheme-name
 		 *
 		 * \param [in,out]	catalogInfo	Information describing the catalog.
 		 *
