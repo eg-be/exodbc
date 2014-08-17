@@ -177,8 +177,8 @@ namespace exodbc
 		m_hdbc = NULL;
 		m_hstmt = NULL;
 
-		m_fpSqlLog      = 0;            // Sql Log file pointer
-		m_sqlLogState   = sqlLogOFF;    // By default, logging is turned off
+		//m_fpSqlLog      = 0;            // Sql Log file pointer
+		//m_sqlLogState   = sqlLogOFF;    // By default, logging is turned off
 		nTables       = 0;
 		m_dbmsType      = dbmsUNIDENTIFIED;
 
@@ -733,11 +733,11 @@ namespace exodbc
 		exASSERT(nTables == 0);
 
 		// Close the Sql Log file
-		if (m_fpSqlLog)
-		{
-			fclose(m_fpSqlLog);
-			m_fpSqlLog = 0;
-		}
+		//if (m_fpSqlLog)
+		//{
+		//	fclose(m_fpSqlLog);
+		//	m_fpSqlLog = 0;
+		//}
 
 		// Free statement handle
 		if (m_dbIsOpen)
@@ -1055,137 +1055,137 @@ namespace exodbc
 	}  // wxDb::TranslateSqlState()
 
 
-	/**********  wxDb::Grant() **********/
-	bool Database::Grant(int privileges, const std::wstring &tableName, const std::wstring &userList)
-	{
-		std::wstring sqlStmt;
-
-		// Build the grant statement
-		sqlStmt  = L"GRANT ";
-		if (privileges == DB_GRANT_ALL)
-			sqlStmt += L"ALL";
-		else
-		{
-			int c = 0;
-			if (privileges & DB_GRANT_SELECT)
-			{
-				sqlStmt += L"SELECT";
-				c++;
-			}
-			if (privileges & DB_GRANT_INSERT)
-			{
-				if (c++)
-					sqlStmt += L", ";
-				sqlStmt += L"INSERT";
-			}
-			if (privileges & DB_GRANT_UPDATE)
-			{
-				if (c++)
-					sqlStmt += L", ";
-				sqlStmt += L"UPDATE";
-			}
-			if (privileges & DB_GRANT_DELETE)
-			{
-				if (c++)
-					sqlStmt += L", ";
-				sqlStmt += L"DELETE";
-			}
-		}
-
-		sqlStmt += L" ON ";
-		sqlStmt += SQLTableName(tableName.c_str());
-		sqlStmt += L" TO ";
-		sqlStmt += userList;
-
-#ifdef DBDEBUG_CONSOLE
-		std::wcout << std::endl << sqlStmt.c_str() << std::endl;
-#endif
-
-		WriteSqlLog(sqlStmt);
-
-		return(ExecSql(sqlStmt));
-
-	}  // wxDb::Grant()
-
-
-	/********** wxDb::CreateView() **********/
-	bool Database::CreateView(const std::wstring &viewName, const std::wstring &colList,
-		const std::wstring &pSqlStmt, bool attemptDrop)
-	{
-		std::wstring sqlStmt;
-
-		// Drop the view first
-		if (attemptDrop && !DropView(viewName))
-			return false;
-
-		// Build the create view statement
-		sqlStmt  = L"CREATE VIEW ";
-		sqlStmt += viewName;
-
-		if (colList.length())
-		{
-			sqlStmt += L" (";
-			sqlStmt += colList;
-			sqlStmt += L")";
-		}
-
-		sqlStmt += L" AS ";
-		sqlStmt += pSqlStmt;
-
-		WriteSqlLog(sqlStmt);
-
-#ifdef DBDEBUG_CONSOLE
-		std::wcout << sqlStmt.c_str() << std::endl;
-#endif
-
-		return(ExecSql(sqlStmt));
-
-	}  // wxDb::CreateView()
+//	/**********  wxDb::Grant() **********/
+//	bool Database::Grant(int privileges, const std::wstring &tableName, const std::wstring &userList)
+//	{
+//		std::wstring sqlStmt;
+//
+//		// Build the grant statement
+//		sqlStmt  = L"GRANT ";
+//		if (privileges == DB_GRANT_ALL)
+//			sqlStmt += L"ALL";
+//		else
+//		{
+//			int c = 0;
+//			if (privileges & DB_GRANT_SELECT)
+//			{
+//				sqlStmt += L"SELECT";
+//				c++;
+//			}
+//			if (privileges & DB_GRANT_INSERT)
+//			{
+//				if (c++)
+//					sqlStmt += L", ";
+//				sqlStmt += L"INSERT";
+//			}
+//			if (privileges & DB_GRANT_UPDATE)
+//			{
+//				if (c++)
+//					sqlStmt += L", ";
+//				sqlStmt += L"UPDATE";
+//			}
+//			if (privileges & DB_GRANT_DELETE)
+//			{
+//				if (c++)
+//					sqlStmt += L", ";
+//				sqlStmt += L"DELETE";
+//			}
+//		}
+//
+//		sqlStmt += L" ON ";
+//		sqlStmt += SQLTableName(tableName.c_str());
+//		sqlStmt += L" TO ";
+//		sqlStmt += userList;
+//
+//#ifdef DBDEBUG_CONSOLE
+//		std::wcout << std::endl << sqlStmt.c_str() << std::endl;
+//#endif
+//
+//		WriteSqlLog(sqlStmt);
+//
+//		return(ExecSql(sqlStmt));
+//
+//	}  // wxDb::Grant()
 
 
-	/********** wxDb::DropView()  **********/
-	bool Database::DropView(const std::wstring &viewName)
-	{
-		/*
-		* NOTE: This function returns true if the View does not exist, but
-		*       only for identified databases.  Code will need to be added
-		*            below for any other databases when those databases are defined
-		*       to handle this situation consistently
-		*/
-		std::wstring sqlStmt;
+//	/********** wxDb::CreateView() **********/
+//	bool Database::CreateView(const std::wstring &viewName, const std::wstring &colList,
+//		const std::wstring &pSqlStmt, bool attemptDrop)
+//	{
+//		std::wstring sqlStmt;
+//
+//		// Drop the view first
+//		if (attemptDrop && !DropView(viewName))
+//			return false;
+//
+//		// Build the create view statement
+//		sqlStmt  = L"CREATE VIEW ";
+//		sqlStmt += viewName;
+//
+//		if (colList.length())
+//		{
+//			sqlStmt += L" (";
+//			sqlStmt += colList;
+//			sqlStmt += L")";
+//		}
+//
+//		sqlStmt += L" AS ";
+//		sqlStmt += pSqlStmt;
+//
+//		WriteSqlLog(sqlStmt);
+//
+//#ifdef DBDEBUG_CONSOLE
+//		std::wcout << sqlStmt.c_str() << std::endl;
+//#endif
+//
+//		return(ExecSql(sqlStmt));
+//
+//	}  // wxDb::CreateView()
 
-		sqlStmt = (boost::wformat(L"DROP VIEW %s") % viewName).str();
 
-		WriteSqlLog(sqlStmt);
-
-#ifdef DBDEBUG_CONSOLE
-		std::wcout << std::endl << sqlStmt.c_str() << std::endl;
-#endif
-
-		if (SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
-		{
-			// Check for "Base table not found" error and ignore
-			GetNextError(m_henv, m_hdbc, m_hstmt);
-			if (wcscmp(sqlState, L"S0002"))  // "Base table not found"
-			{
-				// Check for product specific error codes
-				if (!((Dbms() == dbmsSYBASE_ASA    && !wcscmp(sqlState, L"42000"))))  // 5.x (and lower?)
-				{
-					DispNextError();
-					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-					RollbackTrans();
-					return false;
-				}
-			}
-		}
-
-		// Commit the transaction
-		if (!CommitTrans())
-			return false;
-
-		return true;
-
-	}  // wxDb::DropView()
+//	/********** wxDb::DropView()  **********/
+//	bool Database::DropView(const std::wstring &viewName)
+//	{
+//		/*
+//		* NOTE: This function returns true if the View does not exist, but
+//		*       only for identified databases.  Code will need to be added
+//		*            below for any other databases when those databases are defined
+//		*       to handle this situation consistently
+//		*/
+//		std::wstring sqlStmt;
+//
+//		sqlStmt = (boost::wformat(L"DROP VIEW %s") % viewName).str();
+//
+//		WriteSqlLog(sqlStmt);
+//
+//#ifdef DBDEBUG_CONSOLE
+//		std::wcout << std::endl << sqlStmt.c_str() << std::endl;
+//#endif
+//
+//		if (SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
+//		{
+//			// Check for "Base table not found" error and ignore
+//			GetNextError(m_henv, m_hdbc, m_hstmt);
+//			if (wcscmp(sqlState, L"S0002"))  // "Base table not found"
+//			{
+//				// Check for product specific error codes
+//				if (!((Dbms() == dbmsSYBASE_ASA    && !wcscmp(sqlState, L"42000"))))  // 5.x (and lower?)
+//				{
+//					DispNextError();
+//					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//					RollbackTrans();
+//					return false;
+//				}
+//			}
+//		}
+//
+//		// Commit the transaction
+//		if (!CommitTrans())
+//			return false;
+//
+//		return true;
+//
+//	}  // wxDb::DropView()
 
 
 	/********** wxDb::ExecSql()  **********/
@@ -1210,102 +1210,102 @@ namespace exodbc
 	}  // wxDb::ExecSql()
 
 
-	/********** wxDb::ExecSql() with column info **********/
-	bool Database::ExecSql(const std::wstring &pSqlStmt, ColumnInfo** columns, short& numcols)
-	{
-		//execute the statement first
-		if (!ExecSql(pSqlStmt))
-			return false;
-
-		SWORD noCols;
-		if (SQLNumResultCols(m_hstmt, &noCols) != SQL_SUCCESS)
-		{
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-			return false;
-		}
-
-		if (noCols == 0)
-			return false;
-		else
-			numcols = noCols;
-
-		//  Get column information
-		short colNum;
-		wchar_t name[DB_MAX_COLUMN_NAME_LEN+1];
-		SWORD Sword;
-		SQLLEN Sqllen;
-		ColumnInfo* pColInf = new ColumnInfo[noCols];
-
-		// Fill in column information (name, datatype)
-		for (colNum = 0; colNum < noCols; colNum++)
-		{
-			if (SQLColAttributes(m_hstmt, (UWORD)(colNum+1), SQL_COLUMN_NAME,
-				name, sizeof(name),
-				&Sword, &Sqllen) != SQL_SUCCESS)
-			{
-				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-				delete[] pColInf;
-				return false;
-			}
-
-			wcsncpy(pColInf[colNum].m_colName, name, DB_MAX_COLUMN_NAME_LEN);
-			pColInf[colNum].m_colName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
-
-			if (SQLColAttributes(m_hstmt, (UWORD)(colNum+1), SQL_COLUMN_TYPE,
-				NULL, 0, &Sword, &Sqllen) != SQL_SUCCESS)
-			{
-				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-				delete[] pColInf;
-				return false;
-			}
-
-			switch (Sqllen)
-			{
-#if defined(SQL_WCHAR)
-			case SQL_WCHAR:
-#endif
-#if defined(SQL_WVARCHAR)
-			case SQL_WVARCHAR:
-#endif
-			case SQL_VARCHAR:
-			case SQL_CHAR:
-				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_VARCHAR;
-				break;
-			case SQL_LONGVARCHAR:
-				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_MEMO;
-				break;
-			case SQL_TINYINT:
-			case SQL_SMALLINT:
-			case SQL_INTEGER:
-			case SQL_BIT:
-				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_INTEGER;
-				break;
-			case SQL_DOUBLE:
-			case SQL_DECIMAL:
-			case SQL_NUMERIC:
-			case SQL_FLOAT:
-			case SQL_REAL:
-				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_FLOAT;
-				break;
-			case SQL_DATE:
-			case SQL_TIMESTAMP:
-				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_DATE;
-				break;
-			case SQL_BINARY:
-				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_BLOB;
-				break;
-#ifdef EXODBCDEBUG
-			default:
-				std::wstring errMsg;
-				errMsg = (boost::wformat(L"SQL Data type %ld currently not supported by wxWidgets") % (long)Sqllen).str();
-				BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << errMsg;
-#endif
-			}
-		}
-
-		*columns = pColInf;
-		return true;
-	}  // wxDb::ExecSql()
+//	/********** wxDb::ExecSql() with column info **********/
+//	bool Database::ExecSql(const std::wstring &pSqlStmt, ColumnInfo** columns, short& numcols)
+//	{
+//		//execute the statement first
+//		if (!ExecSql(pSqlStmt))
+//			return false;
+//
+//		SWORD noCols;
+//		if (SQLNumResultCols(m_hstmt, &noCols) != SQL_SUCCESS)
+//		{
+//			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//			return false;
+//		}
+//
+//		if (noCols == 0)
+//			return false;
+//		else
+//			numcols = noCols;
+//
+//		//  Get column information
+//		short colNum;
+//		wchar_t name[DB_MAX_COLUMN_NAME_LEN+1];
+//		SWORD Sword;
+//		SQLLEN Sqllen;
+//		ColumnInfo* pColInf = new ColumnInfo[noCols];
+//
+//		// Fill in column information (name, datatype)
+//		for (colNum = 0; colNum < noCols; colNum++)
+//		{
+//			if (SQLColAttributes(m_hstmt, (UWORD)(colNum+1), SQL_COLUMN_NAME,
+//				name, sizeof(name),
+//				&Sword, &Sqllen) != SQL_SUCCESS)
+//			{
+//				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//				delete[] pColInf;
+//				return false;
+//			}
+//
+//			wcsncpy(pColInf[colNum].m_colName, name, DB_MAX_COLUMN_NAME_LEN);
+//			pColInf[colNum].m_colName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
+//
+//			if (SQLColAttributes(m_hstmt, (UWORD)(colNum+1), SQL_COLUMN_TYPE,
+//				NULL, 0, &Sword, &Sqllen) != SQL_SUCCESS)
+//			{
+//				DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+//				delete[] pColInf;
+//				return false;
+//			}
+//
+//			switch (Sqllen)
+//			{
+//#if defined(SQL_WCHAR)
+//			case SQL_WCHAR:
+//#endif
+//#if defined(SQL_WVARCHAR)
+//			case SQL_WVARCHAR:
+//#endif
+//			case SQL_VARCHAR:
+//			case SQL_CHAR:
+//				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_VARCHAR;
+//				break;
+//			case SQL_LONGVARCHAR:
+//				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_MEMO;
+//				break;
+//			case SQL_TINYINT:
+//			case SQL_SMALLINT:
+//			case SQL_INTEGER:
+//			case SQL_BIT:
+//				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_INTEGER;
+//				break;
+//			case SQL_DOUBLE:
+//			case SQL_DECIMAL:
+//			case SQL_NUMERIC:
+//			case SQL_FLOAT:
+//			case SQL_REAL:
+//				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_FLOAT;
+//				break;
+//			case SQL_DATE:
+//			case SQL_TIMESTAMP:
+//				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_DATE;
+//				break;
+//			case SQL_BINARY:
+//				pColInf[colNum].m_dbDataType = DB_DATA_TYPE_BLOB;
+//				break;
+//#ifdef EXODBCDEBUG
+//			default:
+//				std::wstring errMsg;
+//				errMsg = (boost::wformat(L"SQL Data type %ld currently not supported by wxWidgets") % (long)Sqllen).str();
+//				BOOST_LOG_TRIVIAL(debug) << L"ODBC DEBUG MESSAGE: " << errMsg;
+//#endif
+//			}
+//		}
+//
+//		*columns = pColInf;
+//		return true;
+//	}  // wxDb::ExecSql()
 
 	/********** wxDb::GetNext()  **********/
 	bool Database::GetNext()
@@ -1344,147 +1344,147 @@ namespace exodbc
 
 
 	/********** wxDb::GetKeyFields() **********/
-	int Database::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UWORD noCols)
-	{
-		wchar_t       szPkTable[DB_MAX_TABLE_NAME_LEN+1];  /* Primary key table name */
-		wchar_t       szFkTable[DB_MAX_TABLE_NAME_LEN+1];  /* Foreign key table name */
-		SWORD        iKeySeq;
-		wchar_t       szPkCol[DB_MAX_COLUMN_NAME_LEN+1];   /* Primary key column     */
-		wchar_t       szFkCol[DB_MAX_COLUMN_NAME_LEN+1];   /* Foreign key column     */
-		SQLRETURN    retcode;
-		SQLLEN       cb;
-		SWORD        i;
-		std::wstring     tempStr;
-		/*
-		* -----------------------------------------------------------------------
-		* -- 19991224 : mj10777 : Create                                   ------
-		* --          : Three things are done and stored here :            ------
-		* --          : 1) which Column(s) is/are Primary Key(s)           ------
-		* --          : 2) which tables use this Key as a Foreign Key      ------
-		* --          : 3) which columns are Foreign Key and the name      ------
-		* --          :     of the Table where the Key is the Primary Key  -----
-		* --          : Called from GetColumns(const std::wstring &tableName,  ------
-		* --                           int *numCols,const wchar_t *userID ) ------
-		* -----------------------------------------------------------------------
-		*/
+	//int Database::GetKeyFields(const std::wstring &tableName, ColumnInfo* colInf, UWORD noCols)
+	//{
+	//	wchar_t       szPkTable[DB_MAX_TABLE_NAME_LEN+1];  /* Primary key table name */
+	//	wchar_t       szFkTable[DB_MAX_TABLE_NAME_LEN+1];  /* Foreign key table name */
+	//	SWORD        iKeySeq;
+	//	wchar_t       szPkCol[DB_MAX_COLUMN_NAME_LEN+1];   /* Primary key column     */
+	//	wchar_t       szFkCol[DB_MAX_COLUMN_NAME_LEN+1];   /* Foreign key column     */
+	//	SQLRETURN    retcode;
+	//	SQLLEN       cb;
+	//	SWORD        i;
+	//	std::wstring     tempStr;
+	//	/*
+	//	* -----------------------------------------------------------------------
+	//	* -- 19991224 : mj10777 : Create                                   ------
+	//	* --          : Three things are done and stored here :            ------
+	//	* --          : 1) which Column(s) is/are Primary Key(s)           ------
+	//	* --          : 2) which tables use this Key as a Foreign Key      ------
+	//	* --          : 3) which columns are Foreign Key and the name      ------
+	//	* --          :     of the Table where the Key is the Primary Key  -----
+	//	* --          : Called from GetColumns(const std::wstring &tableName,  ------
+	//	* --                           int *numCols,const wchar_t *userID ) ------
+	//	* -----------------------------------------------------------------------
+	//	*/
 
-		/*---------------------------------------------------------------------*/
-		/* Get the names of the columns in the primary key.                    */
-		/*---------------------------------------------------------------------*/
-		retcode = SQLPrimaryKeys(m_hstmt,
-			NULL, 0,                               /* Catalog name  */
-			NULL, 0,                               /* Schema name   */
-			(SQLTCHAR FAR *) tableName.c_str(), SQL_NTS); /* Table name    */
+	//	/*---------------------------------------------------------------------*/
+	//	/* Get the names of the columns in the primary key.                    */
+	//	/*---------------------------------------------------------------------*/
+	//	retcode = SQLPrimaryKeys(m_hstmt,
+	//		NULL, 0,                               /* Catalog name  */
+	//		NULL, 0,                               /* Schema name   */
+	//		(SQLTCHAR FAR *) tableName.c_str(), SQL_NTS); /* Table name    */
 
-		/*---------------------------------------------------------------------*/
-		/* Fetch and display the result set. This will be a list of the        */
-		/* columns in the primary key of the tableName table.                  */
-		/*---------------------------------------------------------------------*/
-		while ((retcode == SQL_SUCCESS) || (retcode == SQL_SUCCESS_WITH_INFO))
-		{
-			retcode = SQLFetch(m_hstmt);
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
-			{
-				GetData( 4, SQL_C_WXCHAR,  szPkCol,    DB_MAX_COLUMN_NAME_LEN+1, &cb);
-				GetData( 5, SQL_C_SSHORT, &iKeySeq,    0,                        &cb);
-				//-------
-				for (i=0;i<noCols;i++)                          // Find the Column name
-					if (!wcscmp(colInf[i].m_colName,szPkCol))   // We have found the Column
-						colInf[i].m_pkCol = iKeySeq;              // Which Primary Key is this (first, second usw.) ?
-			}  // if
-		}  // while
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated).      */
+	//	/*---------------------------------------------------------------------*/
+	//	/* Fetch and display the result set. This will be a list of the        */
+	//	/* columns in the primary key of the tableName table.                  */
+	//	/*---------------------------------------------------------------------*/
+	//	while ((retcode == SQL_SUCCESS) || (retcode == SQL_SUCCESS_WITH_INFO))
+	//	{
+	//		retcode = SQLFetch(m_hstmt);
+	//		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+	//		{
+	//			GetData( 4, SQL_C_WXCHAR,  szPkCol,    DB_MAX_COLUMN_NAME_LEN+1, &cb);
+	//			GetData( 5, SQL_C_SSHORT, &iKeySeq,    0,                        &cb);
+	//			//-------
+	//			for (i=0;i<noCols;i++)                          // Find the Column name
+	//				if (!wcscmp(colInf[i].m_colName,szPkCol))   // We have found the Column
+	//					colInf[i].m_pkCol = iKeySeq;              // Which Primary Key is this (first, second usw.) ?
+	//		}  // if
+	//	}  // while
+	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated).      */
 
-		/*---------------------------------------------------------------------*/
-		/* Get all the foreign keys that refer to tableName primary key.       */
-		/*---------------------------------------------------------------------*/
-		retcode = SQLForeignKeys(m_hstmt,
-			NULL, 0,                            /* Primary catalog */
-			NULL, 0,                            /* Primary schema  */
-			(SQLTCHAR FAR *)tableName.c_str(), SQL_NTS,/* Primary table   */
-			NULL, 0,                            /* Foreign catalog */
-			NULL, 0,                            /* Foreign schema  */
-			NULL, 0);                           /* Foreign table   */
+	//	/*---------------------------------------------------------------------*/
+	//	/* Get all the foreign keys that refer to tableName primary key.       */
+	//	/*---------------------------------------------------------------------*/
+	//	retcode = SQLForeignKeys(m_hstmt,
+	//		NULL, 0,                            /* Primary catalog */
+	//		NULL, 0,                            /* Primary schema  */
+	//		(SQLTCHAR FAR *)tableName.c_str(), SQL_NTS,/* Primary table   */
+	//		NULL, 0,                            /* Foreign catalog */
+	//		NULL, 0,                            /* Foreign schema  */
+	//		NULL, 0);                           /* Foreign table   */
 
-		/*---------------------------------------------------------------------*/
-		/* Fetch and display the result set. This will be all of the foreign   */
-		/* keys in other tables that refer to the tableName  primary key.      */
-		/*---------------------------------------------------------------------*/
-		tempStr.empty();
-		std::wstringstream tempStream;
-		szPkCol[0] = 0;
-		while ((retcode == SQL_SUCCESS) || (retcode == SQL_SUCCESS_WITH_INFO))
-		{
-			retcode = SQLFetch(m_hstmt);
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
-			{
-				GetData( 3, SQL_C_WXCHAR,  szPkTable,   DB_MAX_TABLE_NAME_LEN+1,   &cb);
-				GetData( 4, SQL_C_WXCHAR,  szPkCol,     DB_MAX_COLUMN_NAME_LEN+1,  &cb);
-				GetData( 5, SQL_C_SSHORT, &iKeySeq,     0,                         &cb);
-				GetData( 7, SQL_C_WXCHAR,  szFkTable,   DB_MAX_TABLE_NAME_LEN+1,   &cb);
-				GetData( 8, SQL_C_WXCHAR,  szFkCol,     DB_MAX_COLUMN_NAME_LEN+1,  &cb);
-				tempStream << L'[' << szFkTable << L']';  // [ ] in case there is a blank in the Table name
-				//            tempStr << _T('[') << szFkTable << _T(']');  // [ ] in case there is a blank in the Table name
-			}  // if
-		}  // while
+	//	/*---------------------------------------------------------------------*/
+	//	/* Fetch and display the result set. This will be all of the foreign   */
+	//	/* keys in other tables that refer to the tableName  primary key.      */
+	//	/*---------------------------------------------------------------------*/
+	//	tempStr.empty();
+	//	std::wstringstream tempStream;
+	//	szPkCol[0] = 0;
+	//	while ((retcode == SQL_SUCCESS) || (retcode == SQL_SUCCESS_WITH_INFO))
+	//	{
+	//		retcode = SQLFetch(m_hstmt);
+	//		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+	//		{
+	//			GetData( 3, SQL_C_WXCHAR,  szPkTable,   DB_MAX_TABLE_NAME_LEN+1,   &cb);
+	//			GetData( 4, SQL_C_WXCHAR,  szPkCol,     DB_MAX_COLUMN_NAME_LEN+1,  &cb);
+	//			GetData( 5, SQL_C_SSHORT, &iKeySeq,     0,                         &cb);
+	//			GetData( 7, SQL_C_WXCHAR,  szFkTable,   DB_MAX_TABLE_NAME_LEN+1,   &cb);
+	//			GetData( 8, SQL_C_WXCHAR,  szFkCol,     DB_MAX_COLUMN_NAME_LEN+1,  &cb);
+	//			tempStream << L'[' << szFkTable << L']';  // [ ] in case there is a blank in the Table name
+	//			//            tempStr << _T('[') << szFkTable << _T(']');  // [ ] in case there is a blank in the Table name
+	//		}  // if
+	//	}  // while
 
-		tempStr = tempStream.str();
-		boost::trim_right(tempStr);     // Get rid of any unneeded blanks
-		if (!tempStr.empty())
-		{
-			for (i=0; i<noCols; i++)
-			{   // Find the Column name
-				if (!wcscmp(colInf[i].m_colName, szPkCol))           // We have found the Column, store the Information
-				{
-					wcsncpy(colInf[i].m_pkTableName, tempStr.c_str(), DB_MAX_TABLE_NAME_LEN);  // Name of the Tables where this Primary Key is used as a Foreign Key
-					colInf[i].m_pkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
-				}
-			}
-		}  // if
+	//	tempStr = tempStream.str();
+	//	boost::trim_right(tempStr);     // Get rid of any unneeded blanks
+	//	if (!tempStr.empty())
+	//	{
+	//		for (i=0; i<noCols; i++)
+	//		{   // Find the Column name
+	//			if (!wcscmp(colInf[i].m_colName, szPkCol))           // We have found the Column, store the Information
+	//			{
+	//				wcsncpy(colInf[i].m_pkTableName, tempStr.c_str(), DB_MAX_TABLE_NAME_LEN);  // Name of the Tables where this Primary Key is used as a Foreign Key
+	//				colInf[i].m_pkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
+	//			}
+	//		}
+	//	}  // if
 
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated). */
+	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated). */
 
-		/*---------------------------------------------------------------------*/
-		/* Get all the foreign keys in the tablename table.                    */
-		/*---------------------------------------------------------------------*/
-		retcode = SQLForeignKeys(m_hstmt,
-			NULL, 0,                             /* Primary catalog   */
-			NULL, 0,                             /* Primary schema    */
-			NULL, 0,                             /* Primary table     */
-			NULL, 0,                             /* Foreign catalog   */
-			NULL, 0,                             /* Foreign schema    */
-			(SQLTCHAR *)tableName.c_str(), SQL_NTS);/* Foreign table     */
+	//	/*---------------------------------------------------------------------*/
+	//	/* Get all the foreign keys in the tablename table.                    */
+	//	/*---------------------------------------------------------------------*/
+	//	retcode = SQLForeignKeys(m_hstmt,
+	//		NULL, 0,                             /* Primary catalog   */
+	//		NULL, 0,                             /* Primary schema    */
+	//		NULL, 0,                             /* Primary table     */
+	//		NULL, 0,                             /* Foreign catalog   */
+	//		NULL, 0,                             /* Foreign schema    */
+	//		(SQLTCHAR *)tableName.c_str(), SQL_NTS);/* Foreign table     */
 
-		/*---------------------------------------------------------------------*/
-		/*  Fetch and display the result set. This will be all of the          */
-		/*  primary keys in other tables that are referred to by foreign       */
-		/*  keys in the tableName table.                                       */
-		/*---------------------------------------------------------------------*/
-		while ((retcode == SQL_SUCCESS) || (retcode == SQL_SUCCESS_WITH_INFO))
-		{
-			retcode = SQLFetch(m_hstmt);
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
-			{
-				GetData( 3, SQL_C_WXCHAR,  szPkTable,   DB_MAX_TABLE_NAME_LEN+1,  &cb);
-				GetData( 5, SQL_C_SSHORT, &iKeySeq,     0,                        &cb);
-				GetData( 8, SQL_C_WXCHAR,  szFkCol,     DB_MAX_COLUMN_NAME_LEN+1, &cb);
-				//-------
-				for (i=0; i<noCols; i++)                            // Find the Column name
-				{
-					if (!wcscmp(colInf[i].m_colName,szFkCol))       // We have found the (Foreign Key) Column
-					{
-						colInf[i].m_fkCol = iKeySeq;                  // Which Foreign Key is this (first, second usw.) ?
-						wcsncpy(colInf[i].m_fkTableName, szFkTable, DB_MAX_TABLE_NAME_LEN);  // Name of the Table where this Foriegn is the Primary Key
-						colInf[i].m_fkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
-					} // if
-				}  // for
-			}  // if
-		}  // while
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated). */
+	//	/*---------------------------------------------------------------------*/
+	//	/*  Fetch and display the result set. This will be all of the          */
+	//	/*  primary keys in other tables that are referred to by foreign       */
+	//	/*  keys in the tableName table.                                       */
+	//	/*---------------------------------------------------------------------*/
+	//	while ((retcode == SQL_SUCCESS) || (retcode == SQL_SUCCESS_WITH_INFO))
+	//	{
+	//		retcode = SQLFetch(m_hstmt);
+	//		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+	//		{
+	//			GetData( 3, SQL_C_WXCHAR,  szPkTable,   DB_MAX_TABLE_NAME_LEN+1,  &cb);
+	//			GetData( 5, SQL_C_SSHORT, &iKeySeq,     0,                        &cb);
+	//			GetData( 8, SQL_C_WXCHAR,  szFkCol,     DB_MAX_COLUMN_NAME_LEN+1, &cb);
+	//			//-------
+	//			for (i=0; i<noCols; i++)                            // Find the Column name
+	//			{
+	//				if (!wcscmp(colInf[i].m_colName,szFkCol))       // We have found the (Foreign Key) Column
+	//				{
+	//					colInf[i].m_fkCol = iKeySeq;                  // Which Foreign Key is this (first, second usw.) ?
+	//					wcsncpy(colInf[i].m_fkTableName, szFkTable, DB_MAX_TABLE_NAME_LEN);  // Name of the Table where this Foriegn is the Primary Key
+	//					colInf[i].m_fkTableName[DB_MAX_TABLE_NAME_LEN] = 0;  // Prevent buffer overrun
+	//				} // if
+	//			}  // for
+	//		}  // if
+	//	}  // while
+	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);  /* Close the cursor (the hstmt is still allocated). */
 
-		return TRUE;
+	//	return TRUE;
 
-	}  // wxDb::GetKeyFields()
+	//}  // wxDb::GetKeyFields()
 
 
 //#if OLD_GETCOLUMNS
@@ -2181,84 +2181,84 @@ namespace exodbc
 //#endif  // #else OLD_GETCOLUMNS
 
 
-	/********** wxDb::GetColumnCount() **********/
-	int Database::GetColumnCount(const std::wstring &tableName, const wchar_t *userID)
-		/*
-		* Returns a count of how many columns are in a table.
-		* If an error occurs in computing the number of columns
-		* this function will return a -1 for the count
-		*
-		* userID is evaluated in the following manner:
-		*        userID == NULL  ... UserID is ignored
-		*        userID == ""    ... UserID set equal to 'this->uid'
-		*        userID != ""    ... UserID set equal to 'userID'
-		*
-		* NOTE: ALL column bindings associated with this wxDb instance are unbound
-		*       by this function.  This function should use its own wxDb instance
-		*       to avoid undesired unbinding of columns.
-		*/
-	{
-		UWORD    noCols = 0;
+	///********** wxDb::GetColumnCount() **********/
+	//int Database::GetColumnCount(const std::wstring &tableName, const wchar_t *userID)
+	//	/*
+	//	* Returns a count of how many columns are in a table.
+	//	* If an error occurs in computing the number of columns
+	//	* this function will return a -1 for the count
+	//	*
+	//	* userID is evaluated in the following manner:
+	//	*        userID == NULL  ... UserID is ignored
+	//	*        userID == ""    ... UserID set equal to 'this->uid'
+	//	*        userID != ""    ... UserID set equal to 'userID'
+	//	*
+	//	* NOTE: ALL column bindings associated with this wxDb instance are unbound
+	//	*       by this function.  This function should use its own wxDb instance
+	//	*       to avoid undesired unbinding of columns.
+	//	*/
+	//{
+	//	UWORD    noCols = 0;
 
-		RETCODE  retcode;
+	//	RETCODE  retcode;
 
-		std::wstring TableName;
+	//	std::wstring TableName;
 
-		std::wstring UserID = ConvertUserIDImpl(userID);
+	//	std::wstring UserID = ConvertUserIDImpl(userID);
 
-		TableName = tableName;
-		// Oracle and Interbase table names are uppercase only, so force
-		// the name to uppercase just in case programmer forgot to do this
-		if ((Dbms() == dbmsORACLE) ||
-			(Dbms() == dbmsFIREBIRD) ||
-			(Dbms() == dbmsINTERBASE))
-			boost::algorithm::to_upper(TableName);
+	//	TableName = tableName;
+	//	// Oracle and Interbase table names are uppercase only, so force
+	//	// the name to uppercase just in case programmer forgot to do this
+	//	if ((Dbms() == dbmsORACLE) ||
+	//		(Dbms() == dbmsFIREBIRD) ||
+	//		(Dbms() == dbmsINTERBASE))
+	//		boost::algorithm::to_upper(TableName);
 
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
-		// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
-		// use the call below that leaves out the user name
-		if (!UserID.empty() &&
-			Dbms() != dbmsMY_SQL &&
-			Dbms() != dbmsACCESS &&
-			Dbms() != dbmsMS_SQL_SERVER)
-		{
-			retcode = SQLColumns(m_hstmt,
-				NULL, 0,                                // All qualifiers
-				(SQLTCHAR *) UserID.c_str(), SQL_NTS,      // Owner
-				(SQLTCHAR *) TableName.c_str(), SQL_NTS,
-				NULL, 0);                               // All columns
-		}
-		else
-		{
-			retcode = SQLColumns(m_hstmt,
-				NULL, 0,                                // All qualifiers
-				NULL, 0,                                // Owner
-				(SQLTCHAR *) TableName.c_str(), SQL_NTS,
-				NULL, 0);                               // All columns
-		}
-		if (retcode != SQL_SUCCESS)
-		{  // Error occurred, abort
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-			SQLFreeStmt(m_hstmt, SQL_CLOSE);
-			return(-1);
-		}
+	//	// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
+	//	// use the call below that leaves out the user name
+	//	if (!UserID.empty() &&
+	//		Dbms() != dbmsMY_SQL &&
+	//		Dbms() != dbmsACCESS &&
+	//		Dbms() != dbmsMS_SQL_SERVER)
+	//	{
+	//		retcode = SQLColumns(m_hstmt,
+	//			NULL, 0,                                // All qualifiers
+	//			(SQLTCHAR *) UserID.c_str(), SQL_NTS,      // Owner
+	//			(SQLTCHAR *) TableName.c_str(), SQL_NTS,
+	//			NULL, 0);                               // All columns
+	//	}
+	//	else
+	//	{
+	//		retcode = SQLColumns(m_hstmt,
+	//			NULL, 0,                                // All qualifiers
+	//			NULL, 0,                                // Owner
+	//			(SQLTCHAR *) TableName.c_str(), SQL_NTS,
+	//			NULL, 0);                               // All columns
+	//	}
+	//	if (retcode != SQL_SUCCESS)
+	//	{  // Error occurred, abort
+	//		DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+	//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+	//		return(-1);
+	//	}
 
-		// Count the columns
-		while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
-			noCols++;
+	//	// Count the columns
+	//	while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+	//		noCols++;
 
-		if (retcode != SQL_NO_DATA_FOUND)
-		{  // Error occurred, abort
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-			SQLFreeStmt(m_hstmt, SQL_CLOSE);
-			return(-1);
-		}
+	//	if (retcode != SQL_NO_DATA_FOUND)
+	//	{  // Error occurred, abort
+	//		DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+	//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+	//		return(-1);
+	//	}
 
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-		return noCols;
+	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);
+	//	return noCols;
 
-	}  // wxDb::GetColumnCount()
+	//}  // wxDb::GetColumnCount()
 
 
 	/********** wxDb::GetCatalog() *******/
@@ -2374,11 +2374,11 @@ namespace exodbc
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
 		// Query how many columns are in each table
-		std::vector<DbCatalogTable>::iterator it;
-		for(it = pDbInf->m_tables.begin(); it != pDbInf->m_tables.end(); it++)
-		{
-			(*it).m_numCols = GetColumnCount((*it).m_tableName, NULL);
-		}
+		//std::vector<DbCatalogTable>::iterator it;
+		//for(it = pDbInf->m_tables.begin(); it != pDbInf->m_tables.end(); it++)
+		//{
+		//	(*it).m_numCols = GetColumnCount((*it).m_tableName, NULL);
+		//}
 
 		delete[] cat;
 		delete[] schem;
@@ -2391,425 +2391,425 @@ namespace exodbc
 	}  // Database::GetCatalog()
 
 
-	/********** wxDb::Catalog() **********/
-	bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
-		/*
-		* Creates the text file specified in 'filename' which will contain
-		* a minimal data dictionary of all tables accessible by the user specified
-		* in 'userID'
-		*
-		* userID is evaluated in the following manner:
-		*        userID == NULL  ... UserID is ignored
-		*        userID == ""    ... UserID set equal to 'this->uid'
-		*        userID != ""    ... UserID set equal to 'userID'
-		*
-		* NOTE: ALL column bindings associated with this wxDb instance are unbound
-		*       by this function.  This function should use its own wxDb instance
-		*       to avoid undesired unbinding of columns.
-		*/
-	{
-		exASSERT(fileName.length());
-
-		RETCODE   retcode;
-		SQLLEN    cb;
-		wchar_t    tblName[DB_MAX_TABLE_NAME_LEN+1];
-		std::wstring  tblNameSave;
-		wchar_t    colName[DB_MAX_COLUMN_NAME_LEN+1];
-		SWORD     sqlDataType;
-		wchar_t    typeName[30+1];
-		SDWORD    precision, length;
-
-		FILE *fp = _wfopen(fileName.c_str(), L"wt");
-		if (fp == NULL)
-			return false;
-
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-		std::wstring UserID = ConvertUserIDImpl(userID);
-
-		if (!UserID.empty() &&
-			Dbms() != dbmsMY_SQL &&
-			Dbms() != dbmsACCESS &&
-			Dbms() != dbmsFIREBIRD &&
-			Dbms() != dbmsINTERBASE &&
-			Dbms() != dbmsMS_SQL_SERVER)
-		{
-			retcode = SQLColumns(m_hstmt,
-				NULL, 0,                                // All qualifiers
-				(SQLTCHAR *) UserID.c_str(), SQL_NTS,      // User specified
-				NULL, 0,                                // All tables
-				NULL, 0);                               // All columns
-		}
-		else
-		{
-			retcode = SQLColumns(m_hstmt,
-				NULL, 0,    // All qualifiers
-				NULL, 0,    // User specified
-				NULL, 0,    // All tables
-				NULL, 0);   // All columns
-		}
-		if (retcode != SQL_SUCCESS)
-		{
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-			fclose(fp);
-			return false;
-		}
-
-		std::wstring outStr;
-		tblNameSave.empty();
-		int cnt = 0;
-
-		while (true)
-		{
-			retcode = SQLFetch(m_hstmt);
-			if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-				break;
-
-			GetData(3,SQL_C_WXCHAR,  (UCHAR *) tblName,     DB_MAX_TABLE_NAME_LEN+1, &cb);
-			GetData(4,SQL_C_WXCHAR,  (UCHAR *) colName,     DB_MAX_COLUMN_NAME_LEN+1,&cb);
-			GetData(5,SQL_C_SSHORT,  (UCHAR *)&sqlDataType, 0,                       &cb);
-			GetData(6,SQL_C_WXCHAR,  (UCHAR *) typeName,    sizeof(typeName),        &cb);
-			GetData(7,SQL_C_SLONG,   (UCHAR *)&precision,   0,                       &cb);
-			GetData(8,SQL_C_SLONG,   (UCHAR *)&length,      0,                       &cb);
-
-			if (wcscmp(tblName, tblNameSave.c_str()))
-			{
-				if (cnt)
-					fputws(L"\n", fp);
-				fputws(L"================================ ", fp);
-				fputws(L"================================ ", fp);
-				fputws(L"===================== ", fp);
-				fputws(L"========= ", fp);
-				fputws(L"=========\n", fp);
-				outStr = (boost::wformat(L"%-32s %-32s %-21s %9s %9s\n") % L"TABLE NAME" % L"COLUMN NAME" % L"DATA TYPE" % L"PRECISION" % L"LENGTH").str();
-				fputws(outStr.c_str(), fp);
-				fputws(L"================================ ", fp);
-				fputws(L"================================ ", fp);
-				fputws(L"===================== ", fp);
-				fputws(L"========= ", fp);
-				fputws(L"=========\n", fp);
-				tblNameSave = tblName;
-			}
-
-			outStr = (boost::wformat(L"%-32s %-32s (%04d)%-15s %9ld %9ld\n") % tblName % colName % sqlDataType % typeName % precision % length).str();
-			if (fputws(outStr.c_str(), fp) == EOF)
-			{
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-				fclose(fp);
-				return false;
-			}
-			cnt++;
-		}
-
-		if (retcode != SQL_NO_DATA_FOUND)
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-		fclose(fp);
-		return(retcode == SQL_NO_DATA_FOUND);
-
-	}  // wxDb::Catalog()
-
-
-	bool Database::TableExists(const std::wstring &tableName, const wchar_t *userID, const std::wstring &tablePath)
-		/*
-		* Table name can refer to a table, view, alias or synonym.  Returns true
-		* if the object exists in the database.  This function does not indicate
-		* whether or not the user has privleges to query or perform other functions
-		* on the table.
-		*
-		* userID is evaluated in the following manner:
-		*        userID == NULL  ... UserID is ignored
-		*        userID == ""    ... UserID set equal to 'this->uid'
-		*        userID != ""    ... UserID set equal to 'userID'
-		*/
-	{
-		exASSERT(tableName.length());
-
-		std::wstring TableName;
-
-		if (Dbms() == dbmsDBASE)
-		{
-			exFAIL_MSG("dbmsDBASE support is not enabled");
-			//     std::wstring dbName;
-			//     if (tablePath.length())
-			//dbName = (boost::wformat(L"%s/%s.dbf") % tablePath % tableName).str();
-			//     else
-			//dbName = (boost::wformat(L"%s.dbf") % tableName).str();
-
-			//     bool exists;
-			//     exists = wxFileExists(dbName);
-			//     return exists;
-		}
-
-		std::wstring UserID = ConvertUserIDImpl(userID);
-
-		TableName = tableName;
-		// Oracle and Interbase table names are uppercase only, so force
-		// the name to uppercase just in case programmer forgot to do this
-		if ((Dbms() == dbmsORACLE) ||
-			(Dbms() == dbmsFIREBIRD) ||
-			(Dbms() == dbmsINTERBASE))
-			boost::algorithm::to_upper(TableName);
-
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-		RETCODE retcode;
-
-		// Some databases cannot accept a user name when looking up table names,
-		// so we use the call below that leaves out the user name
-		if (!UserID.empty() &&
-			Dbms() != dbmsMY_SQL &&
-			Dbms() != dbmsACCESS &&
-			Dbms() != dbmsMS_SQL_SERVER &&
-			Dbms() != dbmsDB2 &&
-			Dbms() != dbmsFIREBIRD &&
-			Dbms() != dbmsINTERBASE &&
-			Dbms() != dbmsPERVASIVE_SQL)
-		{
-			retcode = SQLTables(m_hstmt,
-				NULL, 0,                                  // All qualifiers
-				(SQLTCHAR *) UserID.c_str(), SQL_NTS,        // Only tables owned by this user
-				(SQLTCHAR FAR *)TableName.c_str(), SQL_NTS,
-				NULL, 0);                                 // All table types
-		}
-		else
-		{
-			retcode = SQLTables(m_hstmt,
-				NULL, 0,                                  // All qualifiers
-				NULL, 0,                                  // All owners
-				(SQLTCHAR FAR *)TableName.c_str(), SQL_NTS,
-				NULL, 0);                                 // All table types
-		}
-		if (retcode != SQL_SUCCESS)
-			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
-
-		retcode = SQLFetch(m_hstmt);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-		{
-			SQLFreeStmt(m_hstmt, SQL_CLOSE);
-			return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
-		}
-
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-		return true;
-
-	}  // wxDb::TableExists()
-
-
-	/********** wxDb::TablePrivileges() **********/
-	bool Database::TablePrivileges(const std::wstring &tableName, const std::wstring &priv, const wchar_t *userID,
-		const wchar_t *schema, const std::wstring& tablePath)
-	{
-		exASSERT(tableName.length());
-
-		wxDbTablePrivilegeInfo  result;
-		SQLLEN  cbRetVal;
-		RETCODE retcode;
-
-		// We probably need to be able to dynamically set this based on
-		// the driver type, and state.
-		wchar_t curRole[] = L"public";
-
-		std::wstring TableName;
-
-		std::wstring UserID = ConvertUserIDImpl(userID);
-		std::wstring Schema = ConvertUserIDImpl(schema);
-
-		TableName = tableName;
-		// Oracle and Interbase table names are uppercase only, so force
-		// the name to uppercase just in case programmer forgot to do this
-		if ((Dbms() == dbmsORACLE) ||
-			(Dbms() == dbmsFIREBIRD) ||
-			(Dbms() == dbmsINTERBASE))
-			boost::algorithm::to_upper(TableName);
-
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-
-		// Some databases cannot accept a user name when looking up table names,
-		// so we use the call below that leaves out the user name
-		if (!Schema.empty() &&
-			Dbms() != dbmsMY_SQL &&
-			Dbms() != dbmsACCESS &&
-			Dbms() != dbmsMS_SQL_SERVER)
-		{
-			retcode = SQLTablePrivileges(m_hstmt,
-				NULL, 0,                                    // Catalog
-				(SQLTCHAR FAR *)Schema.c_str(), SQL_NTS,               // Schema
-				(SQLTCHAR FAR *)TableName.c_str(), SQL_NTS);
-		}
-		else
-		{
-			retcode = SQLTablePrivileges(m_hstmt,
-				NULL, 0,                                    // Catalog
-				NULL, 0,                                    // Schema
-				(SQLTCHAR FAR *)TableName.c_str(), SQL_NTS);
-		}
-
-#ifdef DBDEBUG_CONSOLE
-		std::wcerr << L"SQLTablePrivileges() returned " << retcode << std::endl;
-#endif
-
-		if ((retcode != SQL_SUCCESS) && (retcode != SQL_SUCCESS_WITH_INFO))
-			return (DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
-
-		bool failed = false;
-		retcode = SQLFetch(m_hstmt);
-		while (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
-		{
-			if (SQLGetData(m_hstmt, 1, SQL_C_WXCHAR, (UCHAR*) result.tableQual, sizeof(result.tableQual), &cbRetVal) != SQL_SUCCESS)
-				failed = true;
-
-			if (!failed && SQLGetData(m_hstmt, 2, SQL_C_WXCHAR, (UCHAR*) result.tableOwner, sizeof(result.tableOwner), &cbRetVal) != SQL_SUCCESS)
-				failed = true;
-
-			if (!failed && SQLGetData(m_hstmt, 3, SQL_C_WXCHAR, (UCHAR*) result.tableName, sizeof(result.tableName), &cbRetVal) != SQL_SUCCESS)
-				failed = true;
-
-			if (!failed && SQLGetData(m_hstmt, 4, SQL_C_WXCHAR, (UCHAR*) result.grantor, sizeof(result.grantor), &cbRetVal) != SQL_SUCCESS)
-				failed = true;
-
-			if (!failed && SQLGetData(m_hstmt, 5, SQL_C_WXCHAR, (UCHAR*) result.grantee, sizeof(result.grantee), &cbRetVal) != SQL_SUCCESS)
-				failed = true;
-
-			if (!failed && SQLGetData(m_hstmt, 6, SQL_C_WXCHAR, (UCHAR*) result.privilege, sizeof(result.privilege), &cbRetVal) != SQL_SUCCESS)
-				failed = true;
-
-			if (!failed && SQLGetData(m_hstmt, 7, SQL_C_WXCHAR, (UCHAR*) result.grantable, sizeof(result.grantable), &cbRetVal) != SQL_SUCCESS)
-				failed = true;
-
-			if (failed)
-			{
-				return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
-			}
-#ifdef DBDEBUG_CONSOLE
-			std::wcerr << "Scanning " << result.privilege <<" privilege on table " << result.tableOwner << "." << result.tableName << " granted by " << result.grantor << " to " << result.grantee << std::endl;
-#endif
-
-			if(boost::algorithm::iequals(UserID, result.tableOwner))
-			{
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-				return true;
-			}
-
-			if(boost::algorithm::iequals(UserID, result.grantee) &&
-				!wcscmp(result.privilege, priv.c_str()))
-			{
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-				return true;
-			}
-
-			if (!wcscmp(result.grantee,curRole) &&
-				!wcscmp(result.privilege, priv.c_str()))
-			{
-				SQLFreeStmt(m_hstmt, SQL_CLOSE);
-				return true;
-			}
-
-			retcode = SQLFetch(m_hstmt);
-		}
-
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-		return false;
-
-	}  // wxDb::TablePrivileges
-
-
-	const std::wstring Database::SQLTableName(const wchar_t *tableName)
-	{
-		std::wstring TableName;
-
-		if (Dbms() == dbmsACCESS)
-			TableName = L"\"";
-		TableName += tableName;
-		if (Dbms() == dbmsACCESS)
-			TableName += L"\"";
-
-		return TableName;
-	}  // wxDb::SQLTableName()
-
-
-	const std::wstring Database::SQLColumnName(const wchar_t *colName)
-	{
-		std::wstring ColName;
-
-		if (Dbms() == dbmsACCESS)
-			ColName = L"\"";
-		ColName += colName;
-		if (Dbms() == dbmsACCESS)
-			ColName += L"\"";
-
-		return ColName;
-	}  // wxDb::SQLColumnName()
-
-
-	/********** wxDb::SetSqlLogging() **********/
-	bool Database::SetSqlLogging(wxDbSqlLogState state, const std::wstring &filename, bool append)
-	{
-		exASSERT(state == sqlLogON  || state == sqlLogOFF);
-		exASSERT(state == sqlLogOFF || filename.length());
-
-		if (state == sqlLogON)
-		{
-			if (m_fpSqlLog == 0)
-			{
-				m_fpSqlLog = _wfopen(filename.c_str(), (append ? L"at" : L"wt"));
-				if (m_fpSqlLog == NULL)
-					return false;
-			}
-		}
-		else  // sqlLogOFF
-		{
-			if (m_fpSqlLog)
-			{
-				if (fclose(m_fpSqlLog))
-					return false;
-				m_fpSqlLog = 0;
-			}
-		}
-
-		m_sqlLogState = state;
-		return true;
-
-	}  // wxDb::SetSqlLogging()
-
-
-	/********** wxDb::WriteSqlLog() **********/
-	bool Database::WriteSqlLog(const std::wstring &logMsg)
-	{
-		exASSERT(logMsg.length());
-
-		if (m_fpSqlLog == 0 || m_sqlLogState == sqlLogOFF)
-			return false;
-
-		if (fputws(L"\n", m_fpSqlLog) == EOF)
-			return false;
-		if (fputws(logMsg.c_str(), m_fpSqlLog) == EOF)
-			return false;
-		if (fputws(L"\n", m_fpSqlLog) == EOF)
-			return false;
-
-
-
-		return true;
-
-	}  // wxDb::WriteSqlLog()
-
-
-	std::vector<std::wstring> Database::GetErrorList() const
-	{
-		std::vector<std::wstring> list;
-
-		for (int i = 0; i < DB_MAX_ERROR_HISTORY; i++)
-		{
-			if (errorList[i])
-			{
-				list.push_back(std::wstring(errorList[i]));
-			}
-		}
-		return list;
-	}
+	///********** wxDb::Catalog() **********/
+	//bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
+	//	/*
+	//	* Creates the text file specified in 'filename' which will contain
+	//	* a minimal data dictionary of all tables accessible by the user specified
+	//	* in 'userID'
+	//	*
+	//	* userID is evaluated in the following manner:
+	//	*        userID == NULL  ... UserID is ignored
+	//	*        userID == ""    ... UserID set equal to 'this->uid'
+	//	*        userID != ""    ... UserID set equal to 'userID'
+	//	*
+	//	* NOTE: ALL column bindings associated with this wxDb instance are unbound
+	//	*       by this function.  This function should use its own wxDb instance
+	//	*       to avoid undesired unbinding of columns.
+	//	*/
+	//{
+	//	exASSERT(fileName.length());
+
+	//	RETCODE   retcode;
+	//	SQLLEN    cb;
+	//	wchar_t    tblName[DB_MAX_TABLE_NAME_LEN+1];
+	//	std::wstring  tblNameSave;
+	//	wchar_t    colName[DB_MAX_COLUMN_NAME_LEN+1];
+	//	SWORD     sqlDataType;
+	//	wchar_t    typeName[30+1];
+	//	SDWORD    precision, length;
+
+	//	FILE *fp = _wfopen(fileName.c_str(), L"wt");
+	//	if (fp == NULL)
+	//		return false;
+
+	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);
+
+	//	std::wstring UserID = ConvertUserIDImpl(userID);
+
+	//	if (!UserID.empty() &&
+	//		Dbms() != dbmsMY_SQL &&
+	//		Dbms() != dbmsACCESS &&
+	//		Dbms() != dbmsFIREBIRD &&
+	//		Dbms() != dbmsINTERBASE &&
+	//		Dbms() != dbmsMS_SQL_SERVER)
+	//	{
+	//		retcode = SQLColumns(m_hstmt,
+	//			NULL, 0,                                // All qualifiers
+	//			(SQLTCHAR *) UserID.c_str(), SQL_NTS,      // User specified
+	//			NULL, 0,                                // All tables
+	//			NULL, 0);                               // All columns
+	//	}
+	//	else
+	//	{
+	//		retcode = SQLColumns(m_hstmt,
+	//			NULL, 0,    // All qualifiers
+	//			NULL, 0,    // User specified
+	//			NULL, 0,    // All tables
+	//			NULL, 0);   // All columns
+	//	}
+	//	if (retcode != SQL_SUCCESS)
+	//	{
+	//		DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+	//		fclose(fp);
+	//		return false;
+	//	}
+
+	//	std::wstring outStr;
+	//	tblNameSave.empty();
+	//	int cnt = 0;
+
+	//	while (true)
+	//	{
+	//		retcode = SQLFetch(m_hstmt);
+	//		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+	//			break;
+
+	//		GetData(3,SQL_C_WXCHAR,  (UCHAR *) tblName,     DB_MAX_TABLE_NAME_LEN+1, &cb);
+	//		GetData(4,SQL_C_WXCHAR,  (UCHAR *) colName,     DB_MAX_COLUMN_NAME_LEN+1,&cb);
+	//		GetData(5,SQL_C_SSHORT,  (UCHAR *)&sqlDataType, 0,                       &cb);
+	//		GetData(6,SQL_C_WXCHAR,  (UCHAR *) typeName,    sizeof(typeName),        &cb);
+	//		GetData(7,SQL_C_SLONG,   (UCHAR *)&precision,   0,                       &cb);
+	//		GetData(8,SQL_C_SLONG,   (UCHAR *)&length,      0,                       &cb);
+
+	//		if (wcscmp(tblName, tblNameSave.c_str()))
+	//		{
+	//			if (cnt)
+	//				fputws(L"\n", fp);
+	//			fputws(L"================================ ", fp);
+	//			fputws(L"================================ ", fp);
+	//			fputws(L"===================== ", fp);
+	//			fputws(L"========= ", fp);
+	//			fputws(L"=========\n", fp);
+	//			outStr = (boost::wformat(L"%-32s %-32s %-21s %9s %9s\n") % L"TABLE NAME" % L"COLUMN NAME" % L"DATA TYPE" % L"PRECISION" % L"LENGTH").str();
+	//			fputws(outStr.c_str(), fp);
+	//			fputws(L"================================ ", fp);
+	//			fputws(L"================================ ", fp);
+	//			fputws(L"===================== ", fp);
+	//			fputws(L"========= ", fp);
+	//			fputws(L"=========\n", fp);
+	//			tblNameSave = tblName;
+	//		}
+
+	//		outStr = (boost::wformat(L"%-32s %-32s (%04d)%-15s %9ld %9ld\n") % tblName % colName % sqlDataType % typeName % precision % length).str();
+	//		if (fputws(outStr.c_str(), fp) == EOF)
+	//		{
+	//			SQLFreeStmt(m_hstmt, SQL_CLOSE);
+	//			fclose(fp);
+	//			return false;
+	//		}
+	//		cnt++;
+	//	}
+
+	//	if (retcode != SQL_NO_DATA_FOUND)
+	//		DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+
+	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);
+
+	//	fclose(fp);
+	//	return(retcode == SQL_NO_DATA_FOUND);
+
+	//}  // wxDb::Catalog()
+
+
+	//bool Database::TableExists(const std::wstring &tableName, const wchar_t *userID, const std::wstring &tablePath)
+	//	/*
+	//	* Table name can refer to a table, view, alias or synonym.  Returns true
+	//	* if the object exists in the database.  This function does not indicate
+	//	* whether or not the user has privleges to query or perform other functions
+	//	* on the table.
+	//	*
+	//	* userID is evaluated in the following manner:
+	//	*        userID == NULL  ... UserID is ignored
+	//	*        userID == ""    ... UserID set equal to 'this->uid'
+	//	*        userID != ""    ... UserID set equal to 'userID'
+	//	*/
+	//{
+	//	exASSERT(tableName.length());
+
+	//	std::wstring TableName;
+
+	//	if (Dbms() == dbmsDBASE)
+	//	{
+	//		exFAIL_MSG("dbmsDBASE support is not enabled");
+	//		//     std::wstring dbName;
+	//		//     if (tablePath.length())
+	//		//dbName = (boost::wformat(L"%s/%s.dbf") % tablePath % tableName).str();
+	//		//     else
+	//		//dbName = (boost::wformat(L"%s.dbf") % tableName).str();
+
+	//		//     bool exists;
+	//		//     exists = wxFileExists(dbName);
+	//		//     return exists;
+	//	}
+
+	//	std::wstring UserID = ConvertUserIDImpl(userID);
+
+	//	TableName = tableName;
+	//	// Oracle and Interbase table names are uppercase only, so force
+	//	// the name to uppercase just in case programmer forgot to do this
+	//	if ((Dbms() == dbmsORACLE) ||
+	//		(Dbms() == dbmsFIREBIRD) ||
+	//		(Dbms() == dbmsINTERBASE))
+	//		boost::algorithm::to_upper(TableName);
+
+	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);
+	//	RETCODE retcode;
+
+	//	// Some databases cannot accept a user name when looking up table names,
+	//	// so we use the call below that leaves out the user name
+	//	if (!UserID.empty() &&
+	//		Dbms() != dbmsMY_SQL &&
+	//		Dbms() != dbmsACCESS &&
+	//		Dbms() != dbmsMS_SQL_SERVER &&
+	//		Dbms() != dbmsDB2 &&
+	//		Dbms() != dbmsFIREBIRD &&
+	//		Dbms() != dbmsINTERBASE &&
+	//		Dbms() != dbmsPERVASIVE_SQL)
+	//	{
+	//		retcode = SQLTables(m_hstmt,
+	//			NULL, 0,                                  // All qualifiers
+	//			(SQLTCHAR *) UserID.c_str(), SQL_NTS,        // Only tables owned by this user
+	//			(SQLTCHAR FAR *)TableName.c_str(), SQL_NTS,
+	//			NULL, 0);                                 // All table types
+	//	}
+	//	else
+	//	{
+	//		retcode = SQLTables(m_hstmt,
+	//			NULL, 0,                                  // All qualifiers
+	//			NULL, 0,                                  // All owners
+	//			(SQLTCHAR FAR *)TableName.c_str(), SQL_NTS,
+	//			NULL, 0);                                 // All table types
+	//	}
+	//	if (retcode != SQL_SUCCESS)
+	//		return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
+
+	//	retcode = SQLFetch(m_hstmt);
+	//	if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+	//	{
+	//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+	//		return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
+	//	}
+
+	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);
+
+	//	return true;
+
+	//}  // wxDb::TableExists()
+
+
+//	/********** wxDb::TablePrivileges() **********/
+//	bool Database::TablePrivileges(const std::wstring &tableName, const std::wstring &priv, const wchar_t *userID,
+//		const wchar_t *schema, const std::wstring& tablePath)
+//	{
+//		exASSERT(tableName.length());
+//
+//		wxDbTablePrivilegeInfo  result;
+//		SQLLEN  cbRetVal;
+//		RETCODE retcode;
+//
+//		// We probably need to be able to dynamically set this based on
+//		// the driver type, and state.
+//		wchar_t curRole[] = L"public";
+//
+//		std::wstring TableName;
+//
+//		std::wstring UserID = ConvertUserIDImpl(userID);
+//		std::wstring Schema = ConvertUserIDImpl(schema);
+//
+//		TableName = tableName;
+//		// Oracle and Interbase table names are uppercase only, so force
+//		// the name to uppercase just in case programmer forgot to do this
+//		if ((Dbms() == dbmsORACLE) ||
+//			(Dbms() == dbmsFIREBIRD) ||
+//			(Dbms() == dbmsINTERBASE))
+//			boost::algorithm::to_upper(TableName);
+//
+//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//
+//		// Some databases cannot accept a user name when looking up table names,
+//		// so we use the call below that leaves out the user name
+//		if (!Schema.empty() &&
+//			Dbms() != dbmsMY_SQL &&
+//			Dbms() != dbmsACCESS &&
+//			Dbms() != dbmsMS_SQL_SERVER)
+//		{
+//			retcode = SQLTablePrivileges(m_hstmt,
+//				NULL, 0,                                    // Catalog
+//				(SQLTCHAR FAR *)Schema.c_str(), SQL_NTS,               // Schema
+//				(SQLTCHAR FAR *)TableName.c_str(), SQL_NTS);
+//		}
+//		else
+//		{
+//			retcode = SQLTablePrivileges(m_hstmt,
+//				NULL, 0,                                    // Catalog
+//				NULL, 0,                                    // Schema
+//				(SQLTCHAR FAR *)TableName.c_str(), SQL_NTS);
+//		}
+//
+//#ifdef DBDEBUG_CONSOLE
+//		std::wcerr << L"SQLTablePrivileges() returned " << retcode << std::endl;
+//#endif
+//
+//		if ((retcode != SQL_SUCCESS) && (retcode != SQL_SUCCESS_WITH_INFO))
+//			return (DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
+//
+//		bool failed = false;
+//		retcode = SQLFetch(m_hstmt);
+//		while (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
+//		{
+//			if (SQLGetData(m_hstmt, 1, SQL_C_WXCHAR, (UCHAR*) result.tableQual, sizeof(result.tableQual), &cbRetVal) != SQL_SUCCESS)
+//				failed = true;
+//
+//			if (!failed && SQLGetData(m_hstmt, 2, SQL_C_WXCHAR, (UCHAR*) result.tableOwner, sizeof(result.tableOwner), &cbRetVal) != SQL_SUCCESS)
+//				failed = true;
+//
+//			if (!failed && SQLGetData(m_hstmt, 3, SQL_C_WXCHAR, (UCHAR*) result.tableName, sizeof(result.tableName), &cbRetVal) != SQL_SUCCESS)
+//				failed = true;
+//
+//			if (!failed && SQLGetData(m_hstmt, 4, SQL_C_WXCHAR, (UCHAR*) result.grantor, sizeof(result.grantor), &cbRetVal) != SQL_SUCCESS)
+//				failed = true;
+//
+//			if (!failed && SQLGetData(m_hstmt, 5, SQL_C_WXCHAR, (UCHAR*) result.grantee, sizeof(result.grantee), &cbRetVal) != SQL_SUCCESS)
+//				failed = true;
+//
+//			if (!failed && SQLGetData(m_hstmt, 6, SQL_C_WXCHAR, (UCHAR*) result.privilege, sizeof(result.privilege), &cbRetVal) != SQL_SUCCESS)
+//				failed = true;
+//
+//			if (!failed && SQLGetData(m_hstmt, 7, SQL_C_WXCHAR, (UCHAR*) result.grantable, sizeof(result.grantable), &cbRetVal) != SQL_SUCCESS)
+//				failed = true;
+//
+//			if (failed)
+//			{
+//				return(DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt));
+//			}
+//#ifdef DBDEBUG_CONSOLE
+//			std::wcerr << "Scanning " << result.privilege <<" privilege on table " << result.tableOwner << "." << result.tableName << " granted by " << result.grantor << " to " << result.grantee << std::endl;
+//#endif
+//
+//			if(boost::algorithm::iequals(UserID, result.tableOwner))
+//			{
+//				SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//				return true;
+//			}
+//
+//			if(boost::algorithm::iequals(UserID, result.grantee) &&
+//				!wcscmp(result.privilege, priv.c_str()))
+//			{
+//				SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//				return true;
+//			}
+//
+//			if (!wcscmp(result.grantee,curRole) &&
+//				!wcscmp(result.privilege, priv.c_str()))
+//			{
+//				SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//				return true;
+//			}
+//
+//			retcode = SQLFetch(m_hstmt);
+//		}
+//
+//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+//		return false;
+//
+//	}  // wxDb::TablePrivileges
+
+
+	//const std::wstring Database::SQLTableName(const wchar_t *tableName)
+	//{
+	//	std::wstring TableName;
+
+	//	if (Dbms() == dbmsACCESS)
+	//		TableName = L"\"";
+	//	TableName += tableName;
+	//	if (Dbms() == dbmsACCESS)
+	//		TableName += L"\"";
+
+	//	return TableName;
+	//}  // wxDb::SQLTableName()
+
+
+	//const std::wstring Database::SQLColumnName(const wchar_t *colName)
+	//{
+	//	std::wstring ColName;
+
+	//	if (Dbms() == dbmsACCESS)
+	//		ColName = L"\"";
+	//	ColName += colName;
+	//	if (Dbms() == dbmsACCESS)
+	//		ColName += L"\"";
+
+	//	return ColName;
+	//}  // wxDb::SQLColumnName()
+
+
+	///********** wxDb::SetSqlLogging() **********/
+	//bool Database::SetSqlLogging(wxDbSqlLogState state, const std::wstring &filename, bool append)
+	//{
+	//	exASSERT(state == sqlLogON  || state == sqlLogOFF);
+	//	exASSERT(state == sqlLogOFF || filename.length());
+
+	//	if (state == sqlLogON)
+	//	{
+	//		if (m_fpSqlLog == 0)
+	//		{
+	//			m_fpSqlLog = _wfopen(filename.c_str(), (append ? L"at" : L"wt"));
+	//			if (m_fpSqlLog == NULL)
+	//				return false;
+	//		}
+	//	}
+	//	else  // sqlLogOFF
+	//	{
+	//		if (m_fpSqlLog)
+	//		{
+	//			if (fclose(m_fpSqlLog))
+	//				return false;
+	//			m_fpSqlLog = 0;
+	//		}
+	//	}
+
+	//	m_sqlLogState = state;
+	//	return true;
+
+	//}  // wxDb::SetSqlLogging()
+
+
+	///********** wxDb::WriteSqlLog() **********/
+	//bool Database::WriteSqlLog(const std::wstring &logMsg)
+	//{
+	//	exASSERT(logMsg.length());
+
+	//	if (m_fpSqlLog == 0 || m_sqlLogState == sqlLogOFF)
+	//		return false;
+
+	//	if (fputws(L"\n", m_fpSqlLog) == EOF)
+	//		return false;
+	//	if (fputws(logMsg.c_str(), m_fpSqlLog) == EOF)
+	//		return false;
+	//	if (fputws(L"\n", m_fpSqlLog) == EOF)
+	//		return false;
+
+
+
+	//	return true;
+
+	//}  // wxDb::WriteSqlLog()
+
+
+	//std::vector<std::wstring> Database::GetErrorList() const
+	//{
+	//	std::vector<std::wstring> list;
+
+	//	for (int i = 0; i < DB_MAX_ERROR_HISTORY; i++)
+	//	{
+	//		if (errorList[i])
+	//		{
+	//			list.push_back(std::wstring(errorList[i]));
+	//		}
+	//	}
+	//	return list;
+	//}
 
 
 	/********** wxDb::Dbms() **********/
@@ -3076,72 +3076,72 @@ namespace exodbc
 	} // wxDb::EscapeSqlChars()
 
 
-	/********** wxDbLogExtendedErrorMsg() **********/
-	// DEBUG ONLY function
-	const wchar_t EXODBCAPI *wxDbLogExtendedErrorMsg(const wchar_t *userText,
-		Database *pDb,
-		const wchar_t *ErrFile,
-		int ErrLine)
-	{
-		static std::wstring msg;
-		msg = userText;
+	///********** wxDbLogExtendedErrorMsg() **********/
+	//// DEBUG ONLY function
+	//const wchar_t EXODBCAPI *wxDbLogExtendedErrorMsg(const wchar_t *userText,
+	//	Database *pDb,
+	//	const wchar_t *ErrFile,
+	//	int ErrLine)
+	//{
+	//	static std::wstring msg;
+	//	msg = userText;
 
-		std::wstring tStr;
+	//	std::wstring tStr;
 
-		if (ErrFile || ErrLine)
-		{
-			msg += L"File: ";
-			msg += ErrFile;
-			msg += L"   Line: ";
-			tStr = (boost::wformat(L"%d") % ErrLine).str();
-			msg += tStr.c_str();
-			msg += L"\n";
-		}
+	//	if (ErrFile || ErrLine)
+	//	{
+	//		msg += L"File: ";
+	//		msg += ErrFile;
+	//		msg += L"   Line: ";
+	//		tStr = (boost::wformat(L"%d") % ErrLine).str();
+	//		msg += tStr.c_str();
+	//		msg += L"\n";
+	//	}
 
-		msg.append (L"\nODBC errors:\n");
-		msg += L"\n";
+	//	msg.append (L"\nODBC errors:\n");
+	//	msg += L"\n";
 
-		// Display errors for this connection
-		int i;
-		for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
-		{
-			if (pDb->errorList[i])
-			{
-				msg.append(pDb->errorList[i]);
-				if (wcscmp(pDb->errorList[i], emptyString) != 0)
-					msg.append(L"\n");
-				// Clear the errmsg buffer so the next error will not
-				// end up showing the previous error that have occurred
-				wcscpy(pDb->errorList[i], emptyString);
-			}
-		}
-		msg += L"\n";
+	//	// Display errors for this connection
+	//	int i;
+	//	for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
+	//	{
+	//		if (pDb->errorList[i])
+	//		{
+	//			msg.append(pDb->errorList[i]);
+	//			if (wcscmp(pDb->errorList[i], emptyString) != 0)
+	//				msg.append(L"\n");
+	//			// Clear the errmsg buffer so the next error will not
+	//			// end up showing the previous error that have occurred
+	//			wcscpy(pDb->errorList[i], emptyString);
+	//		}
+	//	}
+	//	msg += L"\n";
 
-		BOOST_LOG_TRIVIAL(debug) << msg;
+	//	BOOST_LOG_TRIVIAL(debug) << msg;
 
-		return msg.c_str();
-	}  // wxDbLogExtendedErrorMsg()
+	//	return msg.c_str();
+	//}  // wxDbLogExtendedErrorMsg()
 
 
-	/********** wxDbSqlLog() **********/
-	bool wxDbSqlLog(wxDbSqlLogState state, const wchar_t *filename)
-	{
-		bool append = false;
-		SDbList *pList;
+	///********** wxDbSqlLog() **********/
+	//bool wxDbSqlLog(wxDbSqlLogState state, const wchar_t *filename)
+	//{
+	//	bool append = false;
+	//	SDbList *pList;
 
-		for (pList = PtrBegDbList; pList; pList = pList->PtrNext)
-		{
-			if (!pList->PtrDb->SetSqlLogging(state,filename,append))
-				return false;
-			append = true;
-		}
+	//	for (pList = PtrBegDbList; pList; pList = pList->PtrNext)
+	//	{
+	//		if (!pList->PtrDb->SetSqlLogging(state,filename,append))
+	//			return false;
+	//		append = true;
+	//	}
 
-		SQLLOGstate = state;
-		SQLLOGfn = filename;
+	//	SQLLOGstate = state;
+	//	SQLLOGfn = filename;
 
-		return true;
+	//	return true;
 
-	}  // wxDbSqlLog()
+	//}  // wxDbSqlLog()
 
 
 #if 0

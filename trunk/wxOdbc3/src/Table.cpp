@@ -165,7 +165,7 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
     }
 #endif
 
-    m_pDb->WriteSqlLog(s);
+//    m_pDb->WriteSqlLog(s);
 
     // Grab the HENV and HDBC from the wxDb object
     m_henv = m_pDb->GetHENV();
@@ -278,7 +278,7 @@ void Table::cleanup()
     if (m_pDb)
     {
 		s = (boost::wformat(L"wxDbTable destructor (%-20s) tableID:[%6lu] pDb:[%p]") % m_tableName %m_tableID %static_cast<void*>(m_pDb)).str();
-        m_pDb->WriteSqlLog(s);
+//        m_pDb->WriteSqlLog(s);
     }
 
 #ifdef EXODBCDEBUG
@@ -629,61 +629,61 @@ bool Table::execDelete(const std::wstring &pSqlStmt)
 }  // wxDbTable::execDelete()
 
 
-/********** wxDbTable::execUpdate() **********/
-bool Table::execUpdate(const std::wstring &pSqlStmt)
-{
-    RETCODE retcode;
+///********** wxDbTable::execUpdate() **********/
+//bool Table::execUpdate(const std::wstring &pSqlStmt)
+//{
+//    RETCODE retcode;
+//
+//    // Execute the UPDATE statement
+//    retcode = SQLExecDirect(m_hstmtUpdate, (SQLTCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
+//
+//    if (retcode == SQL_SUCCESS ||
+//        retcode == SQL_NO_DATA_FOUND ||
+//        retcode == SQL_SUCCESS_WITH_INFO)
+//    {
+//        // Record updated successfully
+//        return true;
+//    }
+//    else if (retcode == SQL_NEED_DATA)
+//    {
+//        PTR pParmID;
+//        retcode = SQLParamData(m_hstmtUpdate, &pParmID);
+//        while (retcode == SQL_NEED_DATA)
+//        {
+//            // Find the parameter
+//            int i;
+//            for (i=0; i < m_numCols; i++)
+//            {
+//                if (m_colDefs[i].m_ptrDataObj == pParmID)
+//                {
+//                    // We found it.  Store the parameter.
+//                    retcode = SQLPutData(m_hstmtUpdate, pParmID, m_colDefs[i].m_szDataObj);
+//                    if (retcode != SQL_SUCCESS)
+//                    {
+//                        m_pDb->DispNextError();
+//                        return m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate);
+//                    }
+//                    break;
+//                }
+//            }
+//            retcode = SQLParamData(m_hstmtUpdate, &pParmID);
+//        }
+//        if (retcode == SQL_SUCCESS ||
+//            retcode == SQL_NO_DATA_FOUND ||
+//            retcode == SQL_SUCCESS_WITH_INFO)
+//        {
+//            // Record updated successfully
+//            return true;
+//        }
+//    }
+//
+//    // Problem updating record
+//    return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate));
+//
+//}  // wxDbTable::execUpdate()
 
-    // Execute the UPDATE statement
-    retcode = SQLExecDirect(m_hstmtUpdate, (SQLTCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
 
-    if (retcode == SQL_SUCCESS ||
-        retcode == SQL_NO_DATA_FOUND ||
-        retcode == SQL_SUCCESS_WITH_INFO)
-    {
-        // Record updated successfully
-        return true;
-    }
-    else if (retcode == SQL_NEED_DATA)
-    {
-        PTR pParmID;
-        retcode = SQLParamData(m_hstmtUpdate, &pParmID);
-        while (retcode == SQL_NEED_DATA)
-        {
-            // Find the parameter
-            int i;
-            for (i=0; i < m_numCols; i++)
-            {
-                if (m_colDefs[i].m_ptrDataObj == pParmID)
-                {
-                    // We found it.  Store the parameter.
-                    retcode = SQLPutData(m_hstmtUpdate, pParmID, m_colDefs[i].m_szDataObj);
-                    if (retcode != SQL_SUCCESS)
-                    {
-                        m_pDb->DispNextError();
-                        return m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate);
-                    }
-                    break;
-                }
-            }
-            retcode = SQLParamData(m_hstmtUpdate, &pParmID);
-        }
-        if (retcode == SQL_SUCCESS ||
-            retcode == SQL_NO_DATA_FOUND ||
-            retcode == SQL_SUCCESS_WITH_INFO)
-        {
-            // Record updated successfully
-            return true;
-        }
-    }
-
-    // Problem updating record
-    return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate));
-
-}  // wxDbTable::execUpdate()
-
-
-/********** wxDbTable::query() **********/
+// ********** wxDbTable::query() **********/
 bool Table::query(int queryType, bool forUpdate, bool distinct, const std::wstring &pSqlStmt)
 {
     std::wstring sqlStmt;
@@ -697,8 +697,9 @@ bool Table::query(int queryType, bool forUpdate, bool distinct, const std::wstri
     // Set the SQL SELECT string
     if (queryType != DB_SELECT_STATEMENT)               // A select statement was not passed in,
     {                                                   // so generate a select statement.
-        BuildSelectStmt(sqlStmt, queryType, distinct);
-        m_pDb->WriteSqlLog(sqlStmt);
+		exASSERT(false);
+//        BuildSelectStmt(sqlStmt, queryType, distinct);
+//        m_pDb->WriteSqlLog(sqlStmt);
     }
 
     // Make sure the cursor is closed first
@@ -746,10 +747,11 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
     bool exists = true;
     if (checkTableExists)
     {
-        if (m_pDb->Dbms() == dbmsPOSTGRES)
-            exists = m_pDb->TableExists(m_tableName, NULL, m_tablePath);
-        else
-            exists = m_pDb->TableExists(m_tableName, m_pDb->GetUsername().c_str(), m_tablePath);
+		exASSERT(false);
+        //if (m_pDb->Dbms() == dbmsPOSTGRES)
+        //    exists = m_pDb->TableExists(m_tableName, NULL, m_tablePath);
+        //else
+        //    exists = m_pDb->TableExists(m_tableName, m_pDb->GetUsername().c_str(), m_tablePath);
     }
 
     // Verify that the table exists in the database
@@ -763,32 +765,33 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
     }
     else if (checkPrivileges)
     {
+		exASSERT(false);
         // Verify the user has rights to access the table.
-        bool hasPrivs;
+        //bool hasPrivs;
 
-        if (m_pDb->Dbms() == dbmsPOSTGRES)
-            hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), NULL, m_tablePath);
-        else
-            hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), m_pDb->GetUsername().c_str(), m_tablePath);
+        //if (m_pDb->Dbms() == dbmsPOSTGRES)
+        //    hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), NULL, m_tablePath);
+        //else
+        //    hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), m_pDb->GetUsername().c_str(), m_tablePath);
 
-        if (!hasPrivs)
-            s = L"Connecting user does not have sufficient privileges to access this table.\n";
+        //if (!hasPrivs)
+        //    s = L"Connecting user does not have sufficient privileges to access this table.\n";
     }
 
-    if (!s.empty())
-    {
-        std::wstring p;
+   // if (!s.empty())
+   // {
+   //     std::wstring p;
 
-        if (!m_tablePath.empty())
-			p = (boost::wformat(L"Error OpenImpling '%s/%s'.\n") %m_tablePath %m_tableName).str();
-        else
-			p = (boost::wformat(L"Error OpenImpling '%s'.\n") %m_tableName).str();
+   //     if (!m_tablePath.empty())
+			//p = (boost::wformat(L"Error OpenImpling '%s/%s'.\n") %m_tablePath %m_tableName).str();
+   //     else
+			//p = (boost::wformat(L"Error OpenImpling '%s'.\n") %m_tableName).str();
 
-        p += s;
-        m_pDb->LogError(p);
+   //     p += s;
+   //     m_pDb->LogError(p);
 
-        return false;
-    }
+   //     return false;
+   // }
 
     // Bind the member variables for field exchange between
     // the wxDbTable object and the ODBC record.
@@ -816,42 +819,43 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
     // Build an insert statement using parameter markers
     if (!m_queryOnly && m_numCols > 0)
     {
-        bool needComma = false;
-		sqlStmt = (boost::wformat(L"INSERT INTO %s (") % m_pDb->SQLTableName(m_tableName.c_str())).str();
-        for (i = 0; i < m_numCols; i++)
-        {
-            if (! m_colDefs[i].m_insertAllowed)
-                continue;
-            if (needComma)
-                sqlStmt += L",";
-            sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
-            needComma = true;
-        }
-        needComma = false;
-        sqlStmt += L") VALUES (";
+		exASSERT(false);
+  //      bool needComma = false;
+		//sqlStmt = (boost::wformat(L"INSERT INTO %s (") % m_pDb->SQLTableName(m_tableName.c_str())).str();
+  //      for (i = 0; i < m_numCols; i++)
+  //      {
+  //          if (! m_colDefs[i].m_insertAllowed)
+  //              continue;
+  //          if (needComma)
+  //              sqlStmt += L",";
+  //          sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
+  //          needComma = true;
+  //      }
+  //      needComma = false;
+  //      sqlStmt += L") VALUES (";
 
-        int insertableCount = 0;
+  //      int insertableCount = 0;
 
-        for (i = 0; i < m_numCols; i++)
-        {
-            if (! m_colDefs[i].m_insertAllowed)
-                continue;
-            if (needComma)
-                sqlStmt += L",";
-            sqlStmt += L"?";
-            needComma = true;
-            insertableCount++;
-        }
-        sqlStmt += L")";
+  //      for (i = 0; i < m_numCols; i++)
+  //      {
+  //          if (! m_colDefs[i].m_insertAllowed)
+  //              continue;
+  //          if (needComma)
+  //              sqlStmt += L",";
+  //          sqlStmt += L"?";
+  //          needComma = true;
+  //          insertableCount++;
+  //      }
+  //      sqlStmt += L")";
 
-        // Prepare the insert statement for execution
-        if (insertableCount)
-        {
-            if (SQLPrepare(m_hstmtInsert, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
-                return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert));
-        }
-        else
-            m_insertable = false;
+  //      // Prepare the insert statement for execution
+  //      if (insertableCount)
+  //      {
+  //          if (SQLPrepare(m_hstmtInsert, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
+  //              return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert));
+  //      }
+  //      else
+  //          m_insertable = false;
     }
 
     // Completed successfully
@@ -860,19 +864,19 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
 }  // wxDbTable::Open()
 
 
-/********** wxDbTable::Query() **********/
-bool Table::Query(bool forUpdate, bool distinct)
-{
-
-    return(query(DB_SELECT_WHERE, forUpdate, distinct));
-
-}  // wxDbTable::Query()
+///********** wxDbTable::Query() **********/
+//bool Table::Query(bool forUpdate, bool distinct)
+//{
+//
+//    return(query(DB_SELECT_WHERE, forUpdate, distinct));
+//
+//}  // wxDbTable::Query()
 
 
 /********** wxDbTable::QueryBySqlStmt() **********/
 bool Table::QueryBySqlStmt(const std::wstring &pSqlStmt)
 {
-    m_pDb->WriteSqlLog(pSqlStmt);
+//    m_pDb->WriteSqlLog(pSqlStmt);
 
     return(query(DB_SELECT_STATEMENT, false, false, pSqlStmt));
 
@@ -953,370 +957,370 @@ bool Table::GetLast()
 }  // wxDbTable::GetLast()
 
 
-/********** wxDbTable::BuildDeleteStmt() **********/
-void Table::BuildDeleteStmt(std::wstring &pSqlStmt, int typeOfDel, const std::wstring &pWhereClause)
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly)
-        return;
-
-    std::wstring whereClause;
-
-    whereClause.empty();
-
-    // Handle the case of DeleteWhere() and the where clause is blank.  It should
-    // delete all records from the database in this case.
-    if (typeOfDel == DB_DEL_WHERE && (pWhereClause.length() == 0))
-    {
-		pSqlStmt = (boost::wformat(L"DELETE FROM %s") %m_pDb->SQLTableName(m_tableName.c_str())).str();
-        return;
-    }
-
-	pSqlStmt = (boost::wformat(L"DELETE FROM %s WHERE ") % m_pDb->SQLTableName(m_tableName.c_str())).str();
-
-    // Append the WHERE clause to the SQL DELETE statement
-    switch(typeOfDel)
-    {
-        case DB_DEL_KEYFIELDS:
-            // If the datasource supports the ROWID column, build
-            // the where on ROWID for efficiency purposes.
-            // e.g. DELETE FROM PARTS WHERE ROWID = '111.222.333'
-            if (CanUpdateByROWID())
-            {
-                SQLLEN cb;
-                wchar_t   rowid[wxDB_ROWID_LEN+1];
-
-                // Get the ROWID value.  If not successful retreiving the ROWID,
-                // simply fall down through the code and build the WHERE clause
-                // based on the key fields.
-                if (SQLGetData(m_hstmt, (UWORD)(m_numCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
-                {
-                    pSqlStmt += L"ROWID = '";
-                    pSqlStmt += rowid;
-                    pSqlStmt += L"'";
-                    break;
-                }
-            }
-            // Unable to delete by ROWID, so build a WHERE
-            // clause based on the keyfields.
-            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
-            pSqlStmt += whereClause;
-            break;
-        case DB_DEL_WHERE:
-            pSqlStmt += pWhereClause;
-            break;
-        case DB_DEL_MATCHING:
-            BuildWhereClause(whereClause, DB_WHERE_MATCHING);
-            pSqlStmt += whereClause;
-            break;
-    }
-
-}  // BuildDeleteStmt()
-
-
-/***** DEPRECATED: use wxDbTable::BuildDeleteStmt(std::wstring &....) form *****/
-void Table::BuildDeleteStmt(wchar_t *pSqlStmt, int typeOfDel, const std::wstring &pWhereClause)
-{
-    std::wstring tempSqlStmt;
-    BuildDeleteStmt(tempSqlStmt, typeOfDel, pWhereClause);
-    wcscpy(pSqlStmt, tempSqlStmt.c_str());
-}  // wxDbTable::BuildDeleteStmt()
+///********** wxDbTable::BuildDeleteStmt() **********/
+//void Table::BuildDeleteStmt(std::wstring &pSqlStmt, int typeOfDel, const std::wstring &pWhereClause)
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly)
+//        return;
+//
+//    std::wstring whereClause;
+//
+//    whereClause.empty();
+//
+//    // Handle the case of DeleteWhere() and the where clause is blank.  It should
+//    // delete all records from the database in this case.
+//    if (typeOfDel == DB_DEL_WHERE && (pWhereClause.length() == 0))
+//    {
+//		pSqlStmt = (boost::wformat(L"DELETE FROM %s") %m_pDb->SQLTableName(m_tableName.c_str())).str();
+//        return;
+//    }
+//
+//	pSqlStmt = (boost::wformat(L"DELETE FROM %s WHERE ") % m_pDb->SQLTableName(m_tableName.c_str())).str();
+//
+//    // Append the WHERE clause to the SQL DELETE statement
+//    switch(typeOfDel)
+//    {
+//        case DB_DEL_KEYFIELDS:
+//            // If the datasource supports the ROWID column, build
+//            // the where on ROWID for efficiency purposes.
+//            // e.g. DELETE FROM PARTS WHERE ROWID = '111.222.333'
+//            if (CanUpdateByROWID())
+//            {
+//                SQLLEN cb;
+//                wchar_t   rowid[wxDB_ROWID_LEN+1];
+//
+//                // Get the ROWID value.  If not successful retreiving the ROWID,
+//                // simply fall down through the code and build the WHERE clause
+//                // based on the key fields.
+//                if (SQLGetData(m_hstmt, (UWORD)(m_numCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
+//                {
+//                    pSqlStmt += L"ROWID = '";
+//                    pSqlStmt += rowid;
+//                    pSqlStmt += L"'";
+//                    break;
+//                }
+//            }
+//            // Unable to delete by ROWID, so build a WHERE
+//            // clause based on the keyfields.
+//            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
+//            pSqlStmt += whereClause;
+//            break;
+//        case DB_DEL_WHERE:
+//            pSqlStmt += pWhereClause;
+//            break;
+//        case DB_DEL_MATCHING:
+//            BuildWhereClause(whereClause, DB_WHERE_MATCHING);
+//            pSqlStmt += whereClause;
+//            break;
+//    }
+//
+//}  // BuildDeleteStmt()
 
 
-/********** wxDbTable::BuildSelectStmt() **********/
-void Table::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool distinct)
-{
-    std::wstring whereClause;
-    whereClause.empty();
-
-    // Build a select statement to query the database
-    pSqlStmt = L"SELECT ";
-
-    // SELECT DISTINCT values only?
-    if (distinct)
-        pSqlStmt += L"DISTINCT ";
-
-    // Was a FROM clause specified to join tables to the base table?
-    // Available for ::Query() only!!!
-    bool appendFromClause = false;
-
-    if (typeOfSelect == DB_SELECT_WHERE && m_from.length())
-        appendFromClause = true;
-
-    // Add the column list
-    int i;
-    std::wstring tStr;
-    for (i = 0; i < m_numCols; i++)
-    {
-        tStr = m_colDefs[i].m_colName;
-        // If joining tables, the base table column names must be qualified to avoid ambiguity
-        if ((appendFromClause || m_pDb->Dbms() == dbmsACCESS) && tStr.find(L'.') == std::wstring::npos)
-        {
-            pSqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
-            pSqlStmt += L".";
-        }
-        pSqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
-        if (i + 1 < m_numCols)
-            pSqlStmt += L",";
-    }
-
-    // If the datasource supports ROWID, get this column as well.  Exception: Don't retrieve
-    // the ROWID if querying distinct records.  The rowid will always be unique.
-    if (!distinct && CanUpdateByROWID())
-    {
-        // If joining tables, the base table column names must be qualified to avoid ambiguity
-        if (appendFromClause || m_pDb->Dbms() == dbmsACCESS)
-        {
-            pSqlStmt += L",";
-            pSqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
-            pSqlStmt += L".ROWID";
-        }
-        else
-            pSqlStmt += L",ROWID";
-    }
-
-    // Append the FROM tablename portion
-    pSqlStmt += L" FROM ";
-    pSqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
-//    pSqlStmt += queryTableName;
-
-    // Sybase uses the HOLDLOCK keyword to lock a record during query.
-    // The HOLDLOCK keyword follows the table name in the from clause.
-    // Each table in the from clause must specify HOLDLOCK or
-    // NOHOLDLOCK (the default).  Note: The "FOR UPDATE" clause
-    // is parsed but ignored in SYBASE Transact-SQL.
-    if (m_selectForUpdate && (m_pDb->Dbms() == dbmsSYBASE_ASA || m_pDb->Dbms() == dbmsSYBASE_ASE))
-        pSqlStmt += L" HOLDLOCK";
-
-    if (appendFromClause)
-        pSqlStmt += m_from;
-
-    // Append the WHERE clause.  Either append the where clause for the class
-    // or build a where clause.  The typeOfSelect determines this.
-    switch(typeOfSelect)
-    {
-        case DB_SELECT_WHERE:
-
-            if (m_where.length())   // May not want a where clause!!!
-            {
-                pSqlStmt += L" WHERE ";
-                pSqlStmt += m_where;
-            }
-            break;
-        case DB_SELECT_KEYFIELDS:
-            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
-            if (whereClause.length())
-            {
-                pSqlStmt += L" WHERE ";
-                pSqlStmt += whereClause;
-            }
-            break;
-        case DB_SELECT_MATCHING:
-            BuildWhereClause(whereClause, DB_WHERE_MATCHING);
-            if (whereClause.length())
-            {
-                pSqlStmt += L" WHERE ";
-                pSqlStmt += whereClause;
-            }
-            break;
-    }
-
-    // Append the ORDER BY clause
-    if (m_orderBy.length())
-    {
-        pSqlStmt += L" ORDER BY ";
-        pSqlStmt += m_orderBy;
-    }
-
-    // SELECT FOR UPDATE if told to do so and the datasource is capable.  Sybase
-    // parses the FOR UPDATE clause but ignores it.  See the comment above on the
-    // HOLDLOCK for Sybase.
-    if (m_selectForUpdate && CanSelectForUpdate())
-        pSqlStmt += L" FOR UPDATE";
-
-}  // wxDbTable::BuildSelectStmt()
+///***** DEPRECATED: use wxDbTable::BuildDeleteStmt(std::wstring &....) form *****/
+//void Table::BuildDeleteStmt(wchar_t *pSqlStmt, int typeOfDel, const std::wstring &pWhereClause)
+//{
+//    std::wstring tempSqlStmt;
+//    BuildDeleteStmt(tempSqlStmt, typeOfDel, pWhereClause);
+//    wcscpy(pSqlStmt, tempSqlStmt.c_str());
+//}  // wxDbTable::BuildDeleteStmt()
 
 
-/***** DEPRECATED: use wxDbTable::BuildSelectStmt(std::wstring &....) form *****/
-void Table::BuildSelectStmt(wchar_t *pSqlStmt, int typeOfSelect, bool distinct)
-{
-    std::wstring tempSqlStmt;
-    BuildSelectStmt(tempSqlStmt, typeOfSelect, distinct);
-    wcscpy(pSqlStmt, tempSqlStmt.c_str());
-}  // wxDbTable::BuildSelectStmt()
+///********** wxDbTable::BuildSelectStmt() **********/
+//void Table::BuildSelectStmt(std::wstring &pSqlStmt, int typeOfSelect, bool distinct)
+//{
+//    std::wstring whereClause;
+//    whereClause.empty();
+//
+//    // Build a select statement to query the database
+//    pSqlStmt = L"SELECT ";
+//
+//    // SELECT DISTINCT values only?
+//    if (distinct)
+//        pSqlStmt += L"DISTINCT ";
+//
+//    // Was a FROM clause specified to join tables to the base table?
+//    // Available for ::Query() only!!!
+//    bool appendFromClause = false;
+//
+//    if (typeOfSelect == DB_SELECT_WHERE && m_from.length())
+//        appendFromClause = true;
+//
+//    // Add the column list
+//    int i;
+//    std::wstring tStr;
+//    for (i = 0; i < m_numCols; i++)
+//    {
+//        tStr = m_colDefs[i].m_colName;
+//        // If joining tables, the base table column names must be qualified to avoid ambiguity
+//        if ((appendFromClause || m_pDb->Dbms() == dbmsACCESS) && tStr.find(L'.') == std::wstring::npos)
+//        {
+//            pSqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
+//            pSqlStmt += L".";
+//        }
+//        pSqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
+//        if (i + 1 < m_numCols)
+//            pSqlStmt += L",";
+//    }
+//
+//    // If the datasource supports ROWID, get this column as well.  Exception: Don't retrieve
+//    // the ROWID if querying distinct records.  The rowid will always be unique.
+//    if (!distinct && CanUpdateByROWID())
+//    {
+//        // If joining tables, the base table column names must be qualified to avoid ambiguity
+//        if (appendFromClause || m_pDb->Dbms() == dbmsACCESS)
+//        {
+//            pSqlStmt += L",";
+//            pSqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
+//            pSqlStmt += L".ROWID";
+//        }
+//        else
+//            pSqlStmt += L",ROWID";
+//    }
+//
+//    // Append the FROM tablename portion
+//    pSqlStmt += L" FROM ";
+//    pSqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
+////    pSqlStmt += queryTableName;
+//
+//    // Sybase uses the HOLDLOCK keyword to lock a record during query.
+//    // The HOLDLOCK keyword follows the table name in the from clause.
+//    // Each table in the from clause must specify HOLDLOCK or
+//    // NOHOLDLOCK (the default).  Note: The "FOR UPDATE" clause
+//    // is parsed but ignored in SYBASE Transact-SQL.
+//    if (m_selectForUpdate && (m_pDb->Dbms() == dbmsSYBASE_ASA || m_pDb->Dbms() == dbmsSYBASE_ASE))
+//        pSqlStmt += L" HOLDLOCK";
+//
+//    if (appendFromClause)
+//        pSqlStmt += m_from;
+//
+//    // Append the WHERE clause.  Either append the where clause for the class
+//    // or build a where clause.  The typeOfSelect determines this.
+//    switch(typeOfSelect)
+//    {
+//        case DB_SELECT_WHERE:
+//
+//            if (m_where.length())   // May not want a where clause!!!
+//            {
+//                pSqlStmt += L" WHERE ";
+//                pSqlStmt += m_where;
+//            }
+//            break;
+//        case DB_SELECT_KEYFIELDS:
+//            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
+//            if (whereClause.length())
+//            {
+//                pSqlStmt += L" WHERE ";
+//                pSqlStmt += whereClause;
+//            }
+//            break;
+//        case DB_SELECT_MATCHING:
+//            BuildWhereClause(whereClause, DB_WHERE_MATCHING);
+//            if (whereClause.length())
+//            {
+//                pSqlStmt += L" WHERE ";
+//                pSqlStmt += whereClause;
+//            }
+//            break;
+//    }
+//
+//    // Append the ORDER BY clause
+//    if (m_orderBy.length())
+//    {
+//        pSqlStmt += L" ORDER BY ";
+//        pSqlStmt += m_orderBy;
+//    }
+//
+//    // SELECT FOR UPDATE if told to do so and the datasource is capable.  Sybase
+//    // parses the FOR UPDATE clause but ignores it.  See the comment above on the
+//    // HOLDLOCK for Sybase.
+//    if (m_selectForUpdate && CanSelectForUpdate())
+//        pSqlStmt += L" FOR UPDATE";
+//
+//}  // wxDbTable::BuildSelectStmt()
 
 
-/********** wxDbTable::BuildUpdateStmt() **********/
-void Table::BuildUpdateStmt(std::wstring &pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause)
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly)
-        return;
-
-    std::wstring whereClause;
-    whereClause.empty();
-
-    bool firstColumn = true;
-
-	pSqlStmt = (boost::wformat(L"UPDATE %s SET ") % m_pDb->SQLTableName(m_tableName.c_str())).str();
-
-    // Append a list of columns to be updated
-    int i;
-    for (i = 0; i < m_numCols; i++)
-    {
-        // Only append Updateable columns
-        if (m_colDefs[i].m_updateable)
-        {
-            if (!firstColumn)
-                pSqlStmt += L",";
-            else
-                firstColumn = false;
-
-            pSqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
-//            pSqlStmt += colDefs[i].ColName;
-            pSqlStmt += L" = ?";
-        }
-    }
-
-    // Append the WHERE clause to the SQL UPDATE statement
-    pSqlStmt += L" WHERE ";
-    switch(typeOfUpdate)
-    {
-        case DB_UPD_KEYFIELDS:
-            // If the datasource supports the ROWID column, build
-            // the where on ROWID for efficiency purposes.
-            // e.g. UPDATE PARTS SET Col1 = ?, Col2 = ? WHERE ROWID = '111.222.333'
-            if (CanUpdateByROWID())
-            {
-                SQLLEN cb;
-                wchar_t rowid[wxDB_ROWID_LEN+1];
-
-                // Get the ROWID value.  If not successful retreiving the ROWID,
-                // simply fall down through the code and build the WHERE clause
-                // based on the key fields.
-                if (SQLGetData(m_hstmt, (UWORD)(m_numCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
-                {
-                    pSqlStmt += L"ROWID = '";
-                    pSqlStmt += rowid;
-                    pSqlStmt += L"'";
-                    break;
-                }
-            }
-            // Unable to delete by ROWID, so build a WHERE
-            // clause based on the keyfields.
-            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
-            pSqlStmt += whereClause;
-            break;
-        case DB_UPD_WHERE:
-            pSqlStmt += pWhereClause;
-            break;
-    }
-}  // BuildUpdateStmt()
+///***** DEPRECATED: use wxDbTable::BuildSelectStmt(std::wstring &....) form *****/
+//void Table::BuildSelectStmt(wchar_t *pSqlStmt, int typeOfSelect, bool distinct)
+//{
+//    std::wstring tempSqlStmt;
+//    BuildSelectStmt(tempSqlStmt, typeOfSelect, distinct);
+//    wcscpy(pSqlStmt, tempSqlStmt.c_str());
+//}  // wxDbTable::BuildSelectStmt()
 
 
-/***** DEPRECATED: use wxDbTable::BuildUpdateStmt(std::wstring &....) form *****/
-void Table::BuildUpdateStmt(wchar_t *pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause)
-{
-    std::wstring tempSqlStmt;
-    BuildUpdateStmt(tempSqlStmt, typeOfUpdate, pWhereClause);
-    wcscpy(pSqlStmt, tempSqlStmt.c_str());
-}  // BuildUpdateStmt()
+///********** wxDbTable::BuildUpdateStmt() **********/
+//void Table::BuildUpdateStmt(std::wstring &pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause)
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly)
+//        return;
+//
+//    std::wstring whereClause;
+//    whereClause.empty();
+//
+//    bool firstColumn = true;
+//
+//	pSqlStmt = (boost::wformat(L"UPDATE %s SET ") % m_pDb->SQLTableName(m_tableName.c_str())).str();
+//
+//    // Append a list of columns to be updated
+//    int i;
+//    for (i = 0; i < m_numCols; i++)
+//    {
+//        // Only append Updateable columns
+//        if (m_colDefs[i].m_updateable)
+//        {
+//            if (!firstColumn)
+//                pSqlStmt += L",";
+//            else
+//                firstColumn = false;
+//
+//            pSqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
+////            pSqlStmt += colDefs[i].ColName;
+//            pSqlStmt += L" = ?";
+//        }
+//    }
+//
+//    // Append the WHERE clause to the SQL UPDATE statement
+//    pSqlStmt += L" WHERE ";
+//    switch(typeOfUpdate)
+//    {
+//        case DB_UPD_KEYFIELDS:
+//            // If the datasource supports the ROWID column, build
+//            // the where on ROWID for efficiency purposes.
+//            // e.g. UPDATE PARTS SET Col1 = ?, Col2 = ? WHERE ROWID = '111.222.333'
+//            if (CanUpdateByROWID())
+//            {
+//                SQLLEN cb;
+//                wchar_t rowid[wxDB_ROWID_LEN+1];
+//
+//                // Get the ROWID value.  If not successful retreiving the ROWID,
+//                // simply fall down through the code and build the WHERE clause
+//                // based on the key fields.
+//                if (SQLGetData(m_hstmt, (UWORD)(m_numCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
+//                {
+//                    pSqlStmt += L"ROWID = '";
+//                    pSqlStmt += rowid;
+//                    pSqlStmt += L"'";
+//                    break;
+//                }
+//            }
+//            // Unable to delete by ROWID, so build a WHERE
+//            // clause based on the keyfields.
+//            BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS);
+//            pSqlStmt += whereClause;
+//            break;
+//        case DB_UPD_WHERE:
+//            pSqlStmt += pWhereClause;
+//            break;
+//    }
+//}  // BuildUpdateStmt()
 
 
-/********** wxDbTable::BuildWhereClause() **********/
-void Table::BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere,
-                                 const std::wstring &qualTableName, bool useLikeComparison)
-/*
- * Note: BuildWhereClause() currently ignores timestamp columns.
- *       They are not included as part of the where clause.
- */
-{
-    bool moreThanOneColumn = false;
-    std::wstring colValue;
-
-    // Loop through the columns building a where clause as you go
-    int colNumber;
-    for (colNumber = 0; colNumber < m_numCols; colNumber++)
-    {
-        // Determine if this column should be included in the WHERE clause
-        if ((typeOfWhere == DB_WHERE_KEYFIELDS && m_colDefs[colNumber].m_keyField) ||
-             (typeOfWhere == DB_WHERE_MATCHING  && (!IsColNull((UWORD)colNumber))))
-        {
-            // Skip over timestamp columns
-            if (m_colDefs[colNumber].m_sqlCtype == SQL_C_TIMESTAMP)
-                continue;
-            // If there is more than 1 column, join them with the keyword "AND"
-            if (moreThanOneColumn)
-                pWhereClause += L" AND ";
-            else
-                moreThanOneColumn = true;
-
-            // Concatenate where phrase for the column
-            std::wstring tStr = m_colDefs[colNumber].m_colName;
-
-            if (qualTableName.length() && tStr.find(L'.') == std::wstring::npos)
-            {
-                pWhereClause += m_pDb->SQLTableName(qualTableName.c_str());
-                pWhereClause += L".";
-            }
-            pWhereClause += m_pDb->SQLColumnName(m_colDefs[colNumber].m_colName);
-
-            if (useLikeComparison && (m_colDefs[colNumber].m_sqlCtype == SQL_C_WXCHAR))
-                pWhereClause += L" LIKE ";
-            else
-                pWhereClause += L" = ";
-
-            switch(m_colDefs[colNumber].m_sqlCtype)
-            {
-                case SQL_C_CHAR:
-#ifdef SQL_C_WCHAR
-                case SQL_C_WCHAR:
-#endif
-                //case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
-					colValue = (boost::wformat(L"'%s'") % GetDb()->EscapeSqlChars((wchar_t *)m_colDefs[colNumber].m_ptrDataObj)).str();
-                    break;
-                case SQL_C_SHORT:
-                case SQL_C_SSHORT:
-					colValue = (boost::wformat(L"%hi") % *((SWORD *) m_colDefs[colNumber].m_ptrDataObj)).str();
-                    break;
-                case SQL_C_USHORT:
-					colValue = (boost::wformat(L"%hu") % *((UWORD *) m_colDefs[colNumber].m_ptrDataObj)).str();
-                    break;
-                case SQL_C_LONG:
-                case SQL_C_SLONG:
-					colValue = (boost::wformat(L"%li") % *((SDWORD *) m_colDefs[colNumber].m_ptrDataObj)).str();
-                    break;
-                case SQL_C_ULONG:
-					colValue = (boost::wformat(L"%lu") % *((UDWORD *) m_colDefs[colNumber].m_ptrDataObj)).str();
-                    break;
-                case SQL_C_FLOAT:
-					colValue = (boost::wformat(L"%.6f") % *((SFLOAT *) m_colDefs[colNumber].m_ptrDataObj)).str();
-                    break;
-                case SQL_C_DOUBLE:
-					colValue = (boost::wformat(L"%.6f") % *((SDOUBLE *) m_colDefs[colNumber].m_ptrDataObj)).str();
-                    break;
-                default:
-                    {
-                        std::wstring strMsg;
-						strMsg = (boost::wformat(L"wxDbTable::bindParams(): Unknown column type for colDefs %d colName %s") % colNumber % m_colDefs[colNumber].m_colName).str();
-                        exFAIL_MSG(strMsg.c_str());
-                    }
-                    break;
-            }
-            pWhereClause += colValue;
-        }
-    }
-}  // wxDbTable::BuildWhereClause()
+///***** DEPRECATED: use wxDbTable::BuildUpdateStmt(std::wstring &....) form *****/
+//void Table::BuildUpdateStmt(wchar_t *pSqlStmt, int typeOfUpdate, const std::wstring &pWhereClause)
+//{
+//    std::wstring tempSqlStmt;
+//    BuildUpdateStmt(tempSqlStmt, typeOfUpdate, pWhereClause);
+//    wcscpy(pSqlStmt, tempSqlStmt.c_str());
+//}  // BuildUpdateStmt()
 
 
-/***** DEPRECATED: use wxDbTable::BuildWhereClause(std::wstring &....) form *****/
-void Table::BuildWhereClause(wchar_t *pWhereClause, int typeOfWhere,
-                                 const std::wstring &qualTableName, bool useLikeComparison)
-{
-    std::wstring tempSqlStmt;
-    BuildWhereClause(tempSqlStmt, typeOfWhere, qualTableName, useLikeComparison);
-    wcscpy(pWhereClause, tempSqlStmt.c_str());
-}  // wxDbTable::BuildWhereClause()
+///********** wxDbTable::BuildWhereClause() **********/
+//void Table::BuildWhereClause(std::wstring &pWhereClause, int typeOfWhere,
+//                                 const std::wstring &qualTableName, bool useLikeComparison)
+///*
+// * Note: BuildWhereClause() currently ignores timestamp columns.
+// *       They are not included as part of the where clause.
+// */
+//{
+//    bool moreThanOneColumn = false;
+//    std::wstring colValue;
+//
+//    // Loop through the columns building a where clause as you go
+//    int colNumber;
+//    for (colNumber = 0; colNumber < m_numCols; colNumber++)
+//    {
+//        // Determine if this column should be included in the WHERE clause
+//        if ((typeOfWhere == DB_WHERE_KEYFIELDS && m_colDefs[colNumber].m_keyField) ||
+//             (typeOfWhere == DB_WHERE_MATCHING  && (!IsColNull((UWORD)colNumber))))
+//        {
+//            // Skip over timestamp columns
+//            if (m_colDefs[colNumber].m_sqlCtype == SQL_C_TIMESTAMP)
+//                continue;
+//            // If there is more than 1 column, join them with the keyword "AND"
+//            if (moreThanOneColumn)
+//                pWhereClause += L" AND ";
+//            else
+//                moreThanOneColumn = true;
+//
+//            // Concatenate where phrase for the column
+//            std::wstring tStr = m_colDefs[colNumber].m_colName;
+//
+//            if (qualTableName.length() && tStr.find(L'.') == std::wstring::npos)
+//            {
+//                pWhereClause += m_pDb->SQLTableName(qualTableName.c_str());
+//                pWhereClause += L".";
+//            }
+//            pWhereClause += m_pDb->SQLColumnName(m_colDefs[colNumber].m_colName);
+//
+//            if (useLikeComparison && (m_colDefs[colNumber].m_sqlCtype == SQL_C_WXCHAR))
+//                pWhereClause += L" LIKE ";
+//            else
+//                pWhereClause += L" = ";
+//
+//            switch(m_colDefs[colNumber].m_sqlCtype)
+//            {
+//                case SQL_C_CHAR:
+//#ifdef SQL_C_WCHAR
+//                case SQL_C_WCHAR:
+//#endif
+//                //case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
+//					colValue = (boost::wformat(L"'%s'") % GetDb()->EscapeSqlChars((wchar_t *)m_colDefs[colNumber].m_ptrDataObj)).str();
+//                    break;
+//                case SQL_C_SHORT:
+//                case SQL_C_SSHORT:
+//					colValue = (boost::wformat(L"%hi") % *((SWORD *) m_colDefs[colNumber].m_ptrDataObj)).str();
+//                    break;
+//                case SQL_C_USHORT:
+//					colValue = (boost::wformat(L"%hu") % *((UWORD *) m_colDefs[colNumber].m_ptrDataObj)).str();
+//                    break;
+//                case SQL_C_LONG:
+//                case SQL_C_SLONG:
+//					colValue = (boost::wformat(L"%li") % *((SDWORD *) m_colDefs[colNumber].m_ptrDataObj)).str();
+//                    break;
+//                case SQL_C_ULONG:
+//					colValue = (boost::wformat(L"%lu") % *((UDWORD *) m_colDefs[colNumber].m_ptrDataObj)).str();
+//                    break;
+//                case SQL_C_FLOAT:
+//					colValue = (boost::wformat(L"%.6f") % *((SFLOAT *) m_colDefs[colNumber].m_ptrDataObj)).str();
+//                    break;
+//                case SQL_C_DOUBLE:
+//					colValue = (boost::wformat(L"%.6f") % *((SDOUBLE *) m_colDefs[colNumber].m_ptrDataObj)).str();
+//                    break;
+//                default:
+//                    {
+//                        std::wstring strMsg;
+//						strMsg = (boost::wformat(L"wxDbTable::bindParams(): Unknown column type for colDefs %d colName %s") % colNumber % m_colDefs[colNumber].m_colName).str();
+//                        exFAIL_MSG(strMsg.c_str());
+//                    }
+//                    break;
+//            }
+//            pWhereClause += colValue;
+//        }
+//    }
+//}  // wxDbTable::BuildWhereClause()
+
+
+///***** DEPRECATED: use wxDbTable::BuildWhereClause(std::wstring &....) form *****/
+//void Table::BuildWhereClause(wchar_t *pWhereClause, int typeOfWhere,
+//                                 const std::wstring &qualTableName, bool useLikeComparison)
+//{
+//    std::wstring tempSqlStmt;
+//    BuildWhereClause(tempSqlStmt, typeOfWhere, qualTableName, useLikeComparison);
+//    wcscpy(pWhereClause, tempSqlStmt.c_str());
+//}  // wxDbTable::BuildWhereClause()
 
 
 /********** wxDbTable::GetRowNum() **********/
@@ -1941,129 +1945,129 @@ bool Table::SetOrderByColNums(UWORD first, ... )
 //}  // wxDbTable::Insert()
 
 
-/********** wxDbTable::Update() **********/
-bool Table::Update()
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly)
-        return false;
-
-    std::wstring sqlStmt;
-
-    // Build the SQL UPDATE statement
-    BuildUpdateStmt(sqlStmt, DB_UPD_KEYFIELDS);
-
-    m_pDb->WriteSqlLog(sqlStmt);
-
-#ifdef DBDEBUG_CONSOLE
-    std::wcout << std::endl << sqlStmt.c_str() << std::endl << std::endl;
-#endif
-
-    // Execute the SQL UPDATE statement
-    return(execUpdate(sqlStmt));
-
-}  // wxDbTable::Update()
-
-
-/********** wxDbTable::Update(pSqlStmt) **********/
-bool Table::Update(const std::wstring &pSqlStmt)
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly)
-        return false;
-
-    m_pDb->WriteSqlLog(pSqlStmt);
-
-    return(execUpdate(pSqlStmt));
-
-}  // wxDbTable::Update(pSqlStmt)
+///********** wxDbTable::Update() **********/
+//bool Table::Update()
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly)
+//        return false;
+//
+//    std::wstring sqlStmt;
+//
+//    // Build the SQL UPDATE statement
+//    BuildUpdateStmt(sqlStmt, DB_UPD_KEYFIELDS);
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//#ifdef DBDEBUG_CONSOLE
+//    std::wcout << std::endl << sqlStmt.c_str() << std::endl << std::endl;
+//#endif
+//
+//    // Execute the SQL UPDATE statement
+//    return(execUpdate(sqlStmt));
+//
+//}  // wxDbTable::Update()
 
 
-/********** wxDbTable::UpdateWhere() **********/
-bool Table::UpdateWhere(const std::wstring &pWhereClause)
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly)
-        return false;
-
-    std::wstring sqlStmt;
-
-    // Build the SQL UPDATE statement
-    BuildUpdateStmt(sqlStmt, DB_UPD_WHERE, pWhereClause);
-
-    m_pDb->WriteSqlLog(sqlStmt);
-
-#ifdef DBDEBUG_CONSOLE
-    std::wcout << std::endl << sqlStmt.c_str() << std::endl << std::endl;
-#endif
-
-    // Execute the SQL UPDATE statement
-    return(execUpdate(sqlStmt));
-
-}  // wxDbTable::UpdateWhere()
+///********** wxDbTable::Update(pSqlStmt) **********/
+//bool Table::Update(const std::wstring &pSqlStmt)
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly)
+//        return false;
+//
+//    m_pDb->WriteSqlLog(pSqlStmt);
+//
+//    return(execUpdate(pSqlStmt));
+//
+//}  // wxDbTable::Update(pSqlStmt)
 
 
-/********** wxDbTable::Delete() **********/
-bool Table::Delete()
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly)
-        return false;
-
-    std::wstring sqlStmt;
-    sqlStmt.empty();
-
-    // Build the SQL DELETE statement
-    BuildDeleteStmt(sqlStmt, DB_DEL_KEYFIELDS);
-
-    m_pDb->WriteSqlLog(sqlStmt);
-
-    // Execute the SQL DELETE statement
-    return(execDelete(sqlStmt));
-
-}  // wxDbTable::Delete()
-
-
-/********** wxDbTable::DeleteWhere() **********/
-bool Table::DeleteWhere(const std::wstring &pWhereClause)
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly)
-        return false;
-
-    std::wstring sqlStmt;
-    sqlStmt.empty();
-
-    // Build the SQL DELETE statement
-    BuildDeleteStmt(sqlStmt, DB_DEL_WHERE, pWhereClause);
-
-    m_pDb->WriteSqlLog(sqlStmt);
-
-    // Execute the SQL DELETE statement
-    return(execDelete(sqlStmt));
-
-}  // wxDbTable::DeleteWhere()
+///********** wxDbTable::UpdateWhere() **********/
+//bool Table::UpdateWhere(const std::wstring &pWhereClause)
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly)
+//        return false;
+//
+//    std::wstring sqlStmt;
+//
+//    // Build the SQL UPDATE statement
+//    BuildUpdateStmt(sqlStmt, DB_UPD_WHERE, pWhereClause);
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//#ifdef DBDEBUG_CONSOLE
+//    std::wcout << std::endl << sqlStmt.c_str() << std::endl << std::endl;
+//#endif
+//
+//    // Execute the SQL UPDATE statement
+//    return(execUpdate(sqlStmt));
+//
+//}  // wxDbTable::UpdateWhere()
 
 
-/********** wxDbTable::DeleteMatching() **********/
-bool Table::DeleteMatching()
-{
-    exASSERT(!m_queryOnly);
-    if (m_queryOnly)
-        return false;
+///********** wxDbTable::Delete() **********/
+//bool Table::Delete()
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly)
+//        return false;
+//
+//    std::wstring sqlStmt;
+//    sqlStmt.empty();
+//
+//    // Build the SQL DELETE statement
+//    BuildDeleteStmt(sqlStmt, DB_DEL_KEYFIELDS);
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//    // Execute the SQL DELETE statement
+//    return(execDelete(sqlStmt));
+//
+//}  // wxDbTable::Delete()
 
-    std::wstring sqlStmt;
-    sqlStmt.empty();
 
-    // Build the SQL DELETE statement
-    BuildDeleteStmt(sqlStmt, DB_DEL_MATCHING);
+///********** wxDbTable::DeleteWhere() **********/
+//bool Table::DeleteWhere(const std::wstring &pWhereClause)
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly)
+//        return false;
+//
+//    std::wstring sqlStmt;
+//    sqlStmt.empty();
+//
+//    // Build the SQL DELETE statement
+//    BuildDeleteStmt(sqlStmt, DB_DEL_WHERE, pWhereClause);
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//    // Execute the SQL DELETE statement
+//    return(execDelete(sqlStmt));
+//
+//}  // wxDbTable::DeleteWhere()
 
-    m_pDb->WriteSqlLog(sqlStmt);
 
-    // Execute the SQL DELETE statement
-    return(execDelete(sqlStmt));
-
-}  // wxDbTable::DeleteMatching()
+///********** wxDbTable::DeleteMatching() **********/
+//bool Table::DeleteMatching()
+//{
+//    exASSERT(!m_queryOnly);
+//    if (m_queryOnly)
+//        return false;
+//
+//    std::wstring sqlStmt;
+//    sqlStmt.empty();
+//
+//    // Build the SQL DELETE statement
+//    BuildDeleteStmt(sqlStmt, DB_DEL_MATCHING);
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//    // Execute the SQL DELETE statement
+//    return(execDelete(sqlStmt));
+//
+//}  // wxDbTable::DeleteMatching()
 
 
 /********** wxDbTable::IsColNull() **********/
@@ -2400,132 +2404,132 @@ void Table::SetCursor(HSTMT *hstmtActivate)
 }  // wxDbTable::SetCursor()
 
 
-/********** wxDbTable::Count(const std::wstring &) **********/
-ULONG Table::Count(const std::wstring &args)
-{
-    ULONG count;
-    std::wstring sqlStmt;
-    SQLLEN cb;
+///********** wxDbTable::Count(const std::wstring &) **********/
+//ULONG Table::Count(const std::wstring &args)
+//{
+//    ULONG count;
+//    std::wstring sqlStmt;
+//    SQLLEN cb;
+//
+//    // Build a "SELECT COUNT(*) FROM queryTableName [WHERE whereClause]" SQL Statement
+//    sqlStmt  = L"SELECT COUNT(";
+//    sqlStmt += args;
+//    sqlStmt += L") FROM ";
+//    sqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
+////    sqlStmt += queryTableName;
+//    if (m_from.length())
+//        sqlStmt += m_from;
+//
+//    // Add the where clause if one is provided
+//    if (m_where.length())
+//    {
+//        sqlStmt += L" WHERE ";
+//        sqlStmt += m_where;
+//    }
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//    // Initialize the Count cursor if it's not already initialized
+//    if (!m_hstmtCount)
+//    {
+//        m_hstmtCount = GetNewCursor(false,false);
+//        exASSERT(m_hstmtCount);
+//        if (!m_hstmtCount)
+//            return(0);
+//    }
+//
+//    // Execute the SQL statement
+//    if (SQLExecDirect(*m_hstmtCount, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
+//    {
+//        m_pDb->DispAllErrors(m_henv, m_hdbc, *m_hstmtCount);
+//        return(0);
+//    }
+//
+//    // Fetch the record
+//    if (SQLFetch(*m_hstmtCount) != SQL_SUCCESS)
+//    {
+//        m_pDb->DispAllErrors(m_henv, m_hdbc, *m_hstmtCount);
+//        return(0);
+//    }
+//
+//    // Obtain the result
+//    if (SQLGetData(*m_hstmtCount, (UWORD)1, SQL_C_ULONG, &count, sizeof(count), &cb) != SQL_SUCCESS)
+//    {
+//        m_pDb->DispAllErrors(m_henv, m_hdbc, *m_hstmtCount);
+//        return(0);
+//    }
+//
+//    // Free the cursor
+//    if (SQLFreeStmt(*m_hstmtCount, SQL_CLOSE) != SQL_SUCCESS)
+//        m_pDb->DispAllErrors(m_henv, m_hdbc, *m_hstmtCount);
+//
+//    // Return the record count
+//    return(count);
+//
+//}  // wxDbTable::Count()
 
-    // Build a "SELECT COUNT(*) FROM queryTableName [WHERE whereClause]" SQL Statement
-    sqlStmt  = L"SELECT COUNT(";
-    sqlStmt += args;
-    sqlStmt += L") FROM ";
-    sqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
-//    sqlStmt += queryTableName;
-    if (m_from.length())
-        sqlStmt += m_from;
 
-    // Add the where clause if one is provided
-    if (m_where.length())
-    {
-        sqlStmt += L" WHERE ";
-        sqlStmt += m_where;
-    }
-
-    m_pDb->WriteSqlLog(sqlStmt);
-
-    // Initialize the Count cursor if it's not already initialized
-    if (!m_hstmtCount)
-    {
-        m_hstmtCount = GetNewCursor(false,false);
-        exASSERT(m_hstmtCount);
-        if (!m_hstmtCount)
-            return(0);
-    }
-
-    // Execute the SQL statement
-    if (SQLExecDirect(*m_hstmtCount, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
-    {
-        m_pDb->DispAllErrors(m_henv, m_hdbc, *m_hstmtCount);
-        return(0);
-    }
-
-    // Fetch the record
-    if (SQLFetch(*m_hstmtCount) != SQL_SUCCESS)
-    {
-        m_pDb->DispAllErrors(m_henv, m_hdbc, *m_hstmtCount);
-        return(0);
-    }
-
-    // Obtain the result
-    if (SQLGetData(*m_hstmtCount, (UWORD)1, SQL_C_ULONG, &count, sizeof(count), &cb) != SQL_SUCCESS)
-    {
-        m_pDb->DispAllErrors(m_henv, m_hdbc, *m_hstmtCount);
-        return(0);
-    }
-
-    // Free the cursor
-    if (SQLFreeStmt(*m_hstmtCount, SQL_CLOSE) != SQL_SUCCESS)
-        m_pDb->DispAllErrors(m_henv, m_hdbc, *m_hstmtCount);
-
-    // Return the record count
-    return(count);
-
-}  // wxDbTable::Count()
-
-
-/********** wxDbTable::Refresh() **********/
-bool Table::Refresh()
-{
-    bool result = true;
-
-    // Switch to the internal cursor so any active cursors are not corrupted
-    HSTMT currCursor = GetCursor();
-    m_hstmt = m_hstmtInternal;
-    std::wstring saveWhere = m_where;
-    std::wstring saveOrderBy = m_orderBy;
-
-    // Build a where clause to refetch the record with.  Try and use the
-    // ROWID if it's available, ow use the key fields.
-    std::wstring whereClause;
-    whereClause.empty();
-
-    if (CanUpdateByROWID())
-    {
-        SQLLEN cb;
-        wchar_t rowid[wxDB_ROWID_LEN+1];
-
-        // Get the ROWID value.  If not successful retreiving the ROWID,
-        // simply fall down through the code and build the WHERE clause
-        // based on the key fields.
-        if (SQLGetData(m_hstmt, (UWORD)(m_numCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
-        {
-            whereClause += m_pDb->SQLTableName(m_queryTableName.c_str());
-//            whereClause += queryTableName;
-            whereClause += L".ROWID = '";
-            whereClause += rowid;
-            whereClause += L"'";
-        }
-    }
-
-    // If unable to use the ROWID, build a where clause from the keyfields
-    if (whereClause.empty())
-        BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS, m_queryTableName);
-
-    // Requery the record
-    m_where = whereClause;
-    m_orderBy.empty();
-    if (!Query())
-        result = false;
-
-    if (result && !GetNext())
-        result = false;
-
-    // Switch back to original cursor
-    SetCursor(&currCursor);
-
-    // Free the internal cursor
-    if (SQLFreeStmt(m_hstmtInternal, SQL_CLOSE) != SQL_SUCCESS)
-        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal);
-
-    // Restore the original where and order by clauses
-    m_where   = saveWhere;
-    m_orderBy = saveOrderBy;
-
-    return(result);
-
-}  // wxDbTable::Refresh()
+///********** wxDbTable::Refresh() **********/
+//bool Table::Refresh()
+//{
+//    bool result = true;
+//
+//    // Switch to the internal cursor so any active cursors are not corrupted
+//    HSTMT currCursor = GetCursor();
+//    m_hstmt = m_hstmtInternal;
+//    std::wstring saveWhere = m_where;
+//    std::wstring saveOrderBy = m_orderBy;
+//
+//    // Build a where clause to refetch the record with.  Try and use the
+//    // ROWID if it's available, ow use the key fields.
+//    std::wstring whereClause;
+//    whereClause.empty();
+//
+//    if (CanUpdateByROWID())
+//    {
+//        SQLLEN cb;
+//        wchar_t rowid[wxDB_ROWID_LEN+1];
+//
+//        // Get the ROWID value.  If not successful retreiving the ROWID,
+//        // simply fall down through the code and build the WHERE clause
+//        // based on the key fields.
+//        if (SQLGetData(m_hstmt, (UWORD)(m_numCols+1), SQL_C_WXCHAR, (UCHAR*) rowid, sizeof(rowid), &cb) == SQL_SUCCESS)
+//        {
+//            whereClause += m_pDb->SQLTableName(m_queryTableName.c_str());
+////            whereClause += queryTableName;
+//            whereClause += L".ROWID = '";
+//            whereClause += rowid;
+//            whereClause += L"'";
+//        }
+//    }
+//
+//    // If unable to use the ROWID, build a where clause from the keyfields
+//    if (whereClause.empty())
+//        BuildWhereClause(whereClause, DB_WHERE_KEYFIELDS, m_queryTableName);
+//
+//    // Requery the record
+//    m_where = whereClause;
+//    m_orderBy.empty();
+//    if (!Query())
+//        result = false;
+//
+//    if (result && !GetNext())
+//        result = false;
+//
+//    // Switch back to original cursor
+//    SetCursor(&currCursor);
+//
+//    // Free the internal cursor
+//    if (SQLFreeStmt(m_hstmtInternal, SQL_CLOSE) != SQL_SUCCESS)
+//        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal);
+//
+//    // Restore the original where and order by clauses
+//    m_where   = saveWhere;
+//    m_orderBy = saveOrderBy;
+//
+//    return(result);
+//
+//}  // wxDbTable::Refresh()
 
 
 /********** wxDbTable::SetColNull() **********/

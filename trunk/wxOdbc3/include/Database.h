@@ -314,8 +314,8 @@ namespace exodbc
 		// in the table name or column name, the returned string will have the
 		// correct enclosing marks around the name to allow it to be properly
 		// included in a SQL statement
-		const std::wstring  SQLTableName(const wchar_t* tableName);
-		const std::wstring  SQLColumnName(const wchar_t* colName);
+		//const std::wstring  SQLTableName(const wchar_t* tableName);
+		//const std::wstring  SQLColumnName(const wchar_t* colName);
 
 //		void         LogError(const std::wstring& errMsg, const std::wstring& SQLState = std::wstring()) { LogErrorImpl(errMsg, SQLState); }
 //		void         SetDebugErrorMessages(bool state) { m_silent = !state; }
@@ -354,8 +354,8 @@ namespace exodbc
 		std::wstring		m_authStr;         // Authorization string (password)
 		std::wstring		m_inConnectionStr; // Connection string used to connect to the database
 		std::wstring		m_outConnectionStr;// Connection string returned by the database when a connection is successfully OpenImpled
-		FILE*				m_fpSqlLog;        // Sql Log file pointer
-		wxDbSqlLogState		m_sqlLogState;     // On or Off
+//		FILE*				m_fpSqlLog;        // Sql Log file pointer
+//		wxDbSqlLogState		m_sqlLogState;     // On or Off
 		bool				m_fwdOnlyCursors;
 		wxDBMS				m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 
@@ -397,16 +397,16 @@ namespace exodbc
 
 	// Writes a message to the wxLog window (stdout usually) when an internal error
 	// situation occurs.  This function only works in DEBUG builds
-	const wchar_t EXODBCAPI *
-		wxDbLogExtendedErrorMsg(const wchar_t *userText,
-		Database *pDb,
-		const wchar_t *ErrFile,
-		int ErrLine);
+	//const wchar_t EXODBCAPI *
+	//	wxDbLogExtendedErrorMsg(const wchar_t *userText,
+	//	Database *pDb,
+	//	const wchar_t *ErrFile,
+	//	int ErrLine);
 
 
 	// This function sets the sql log state for all OpenImpl wxDb objects
-	bool EXODBCAPI
-		wxDbSqlLog(wxDbSqlLogState state, const std::wstring &filename = SQL_LOG_FILENAME);
+	//bool EXODBCAPI
+	//	wxDbSqlLog(wxDbSqlLogState state, const std::wstring &filename = SQL_LOG_FILENAME);
 
 
 #if 0
