@@ -2180,117 +2180,60 @@ namespace exodbc
 //#endif  // #else OLD_GETCOLUMNS
 
 
-	///********** wxDb::GetColumnCount() **********/
-	//int Database::GetColumnCount(const std::wstring &tableName, const wchar_t *userID)
-	//	/*
-	//	* Returns a count of how many columns are in a table.
-	//	* If an error occurs in computing the number of columns
-	//	* this function will return a -1 for the count
-	//	*
-	//	* userID is evaluated in the following manner:
-	//	*        userID == NULL  ... UserID is ignored
-	//	*        userID == ""    ... UserID set equal to 'this->uid'
-	//	*        userID != ""    ... UserID set equal to 'userID'
-	//	*
-	//	* NOTE: ALL column bindings associated with this wxDb instance are unbound
-	//	*       by this function.  This function should use its own wxDb instance
-	//	*       to avoid undesired unbinding of columns.
-	//	*/
-	//{
-	//	UWORD    noCols = 0;
+	int Database::GetColumnCount(const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring catalogName /* = L"" */)
+	{
+		UWORD    noCols = 0;
 
-	//	RETCODE  retcode;
+		// Free statement, ignore if already closed
+		// Close an eventually open cursor, do not care about truncation
+		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		if( ! SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
+			return false;
+		}
 
-	//	std::wstring TableName;
+		ret = SQLColumns(m_hstmt,
+				(SQLWCHAR*) catalogName.c_str(), SQL_NTS,	// catalog
+				(SQLWCHAR*) schemaName.c_str(), SQL_NTS,	// schema
+				(SQLWCHAR*) tableName.c_str(), SQL_NTS,		// tablename
+				NULL, 0);						// All columns
 
-	//	std::wstring UserID = ConvertUserIDImpl(userID);
+		if(ret != SQL_SUCCESS)
+		{
+			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+			LOG_ERROR_STMT(m_hstmt, ret, SQLColumns);
+			return -1;
+		}
 
-	//	TableName = tableName;
-	//	// Oracle and Interbase table names are uppercase only, so force
-	//	// the name to uppercase just in case programmer forgot to do this
-	//	if ((Dbms() == dbmsORACLE) ||
-	//		(Dbms() == dbmsFIREBIRD) ||
-	//		(Dbms() == dbmsINTERBASE))
-	//		boost::algorithm::to_upper(TableName);
+		// Count the columns
+		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+		{
+			noCols++;
+		}
 
-	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);
+		if(ret != SQL_NO_DATA)
+		{
+			LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
+			return -1;
+		}
 
-	//	// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
-	//	// use the call below that leaves out the user name
-	//	if (!UserID.empty() &&
-	//		Dbms() != dbmsMY_SQL &&
-	//		Dbms() != dbmsACCESS &&
-	//		Dbms() != dbmsMS_SQL_SERVER)
-	//	{
-	//		retcode = SQLColumns(m_hstmt,
-	//			NULL, 0,                                // All qualifiers
-	//			(SQLTCHAR *) UserID.c_str(), SQL_NTS,      // Owner
-	//			(SQLTCHAR *) TableName.c_str(), SQL_NTS,
-	//			NULL, 0);                               // All columns
-	//	}
-	//	else
-	//	{
-	//		retcode = SQLColumns(m_hstmt,
-	//			NULL, 0,                                // All qualifiers
-	//			NULL, 0,                                // Owner
-	//			(SQLTCHAR *) TableName.c_str(), SQL_NTS,
-	//			NULL, 0);                               // All columns
-	//	}
-	//	if (retcode != SQL_SUCCESS)
-	//	{  // Error occurred, abort
-	//		DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-	//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-	//		return(-1);
-	//	}
+		ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		if( ! SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
+			return -1;
+		}
+		return noCols;
 
-	//	// Count the columns
-	//	while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)
-	//		noCols++;
-
-	//	if (retcode != SQL_NO_DATA_FOUND)
-	//	{  // Error occurred, abort
-	//		DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-	//		SQLFreeStmt(m_hstmt, SQL_CLOSE);
-	//		return(-1);
-	//	}
-
-	//	SQLFreeStmt(m_hstmt, SQL_CLOSE);
-	//	return noCols;
-
-	//}  // wxDb::GetColumnCount()
+	}
 
 
 	bool Database::GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo)
-		/*
-		* ---------------------------------------------------------------------
-		* -- 19991203 : mj10777 : Create                                 ------
-		* --          : Creates a wxDbInf with Tables / Cols Array       ------
-		* --          : uses SQLTables and fills pTableInf;              ------
-		* --          : pColInf is set to NULL and numCols to 0;         ------
-		* --          : returns pDbInf (wxDbInf)                         ------
-		* --            - if unsuccessful (pDbInf == NULL)               ------
-		* --          : pColInf can be filled with GetColumns(..);       ------
-		* --          : numCols   can be filled with GetColumnCount(..); ------
-		* ---------------------------------------------------------------------
-		*
-		* userID is evaluated in the following manner:
-		*        userID == NULL  ... UserID is ignored
-		*        userID == ""    ... UserID set equal to 'this->uid'
-		*        userID != ""    ... UserID set equal to 'userID'
-		*
-		* NOTE: ALL column bindings associated with this wxDb instance are unbound
-		*       by this function.  This function should use its own wxDb instance
-		*       to avoid undesired unbinding of columns.
-		*/
 	{
 		RETCODE  retcode;
 		SQLLEN   cb;
-		std::wstring tblNameSave;
 		bool allOk = true;
-
-		//-------------------------------------------------------------
-		// Create the Database vector of catalog entries
-
 		SDbCatalog dbInf;
 
 		// Close Statement 
@@ -2300,7 +2243,6 @@ namespace exodbc
 			LOG_ERROR_STMT(m_hstmt, retcode, CloseStmtHandle(IgnoreNotOpen) );
 			return false;
 		}
-		tblNameSave.empty();
 
 		if (!catalogName.empty() && !schemaName.empty())
 		{
@@ -2405,11 +2347,20 @@ namespace exodbc
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// Query how many columns are in each table
-		//std::vector<DbCatalogTable>::iterator it;
-		//for(it = pDbInf->m_tables.begin(); it != pDbInf->m_tables.end(); it++)
-		//{
-		//	(*it).m_numCols = GetColumnCount((*it).m_tableName, NULL);
-		//}
+		std::vector<DbCatalogTable>::iterator it;
+		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
+		{
+			int count = GetColumnCount((*it).m_tableName, (*it).m_schema, (*it).m_catalog);
+			if(count < 0)
+			{
+				allOk = false;
+				BOOST_LOG_TRIVIAL(error) << L"Failed to Get ColumnCount for table '" << (*it).m_tableName << L"'";
+			}
+			else
+			{
+				(*it).m_numCols = count;
+			}
+		}
 
 		delete[] cat;
 		delete[] schem;
