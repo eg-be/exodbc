@@ -197,52 +197,52 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
 
     if (SQLSetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
     {
-        // Check to see if cursor type is supported
-        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmtInternal);
-        if (! wcscmp(m_pDb->sqlState, L"01S02"))  // Option Value Changed
-        {
-            // Datasource does not support static cursors.  Driver
-            // will substitute a cursor type.  Call SQLGetStmtOption()
-            // to determine which cursor type was selected.
-            if (SQLGetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, &m_cursorType) != SQL_SUCCESS)
-                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal);
-#ifdef DBDEBUG_CONSOLE
-            std::wcout << L"Static cursor changed to: ";
-            switch(m_cursorType)
-            {
-            case SQL_CURSOR_FORWARD_ONLY:
-                std::wcout << L"Forward Only";
-                break;
-            case SQL_CURSOR_STATIC:
-                std::wcout << L"Static";
-                break;
-            case SQL_CURSOR_KEYSET_DRIVEN:
-                std::wcout << L"Keyset Driven";
-                break;
-            case SQL_CURSOR_DYNAMIC:
-                std::wcout << L"Dynamic";
-                break;
-            }
-            std::wcout << std::endl << std::endl;
-#endif
-            // BJO20000425
-            if (m_pDb->FwdOnlyCursors() && m_cursorType != SQL_CURSOR_FORWARD_ONLY)
-            {
-                // Force the use of a forward only cursor...
-                m_cursorType = SQL_CURSOR_FORWARD_ONLY;
-                if (SQLSetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
-                {
-                    // Should never happen
-                    m_pDb->GetNextError(m_henv, m_hdbc, m_hstmtInternal);
-                    return false;
-                }
-            }
-        }
-        else
-        {
-            m_pDb->DispNextError();
-            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal);
-        }
+//        // Check to see if cursor type is supported
+//        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmtInternal);
+//        if (! wcscmp(m_pDb->sqlState, L"01S02"))  // Option Value Changed
+//        {
+//            // Datasource does not support static cursors.  Driver
+//            // will substitute a cursor type.  Call SQLGetStmtOption()
+//            // to determine which cursor type was selected.
+//            if (SQLGetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, &m_cursorType) != SQL_SUCCESS)
+//                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal);
+//#ifdef DBDEBUG_CONSOLE
+//            std::wcout << L"Static cursor changed to: ";
+//            switch(m_cursorType)
+//            {
+//            case SQL_CURSOR_FORWARD_ONLY:
+//                std::wcout << L"Forward Only";
+//                break;
+//            case SQL_CURSOR_STATIC:
+//                std::wcout << L"Static";
+//                break;
+//            case SQL_CURSOR_KEYSET_DRIVEN:
+//                std::wcout << L"Keyset Driven";
+//                break;
+//            case SQL_CURSOR_DYNAMIC:
+//                std::wcout << L"Dynamic";
+//                break;
+//            }
+//            std::wcout << std::endl << std::endl;
+//#endif
+//            // BJO20000425
+//            if (m_pDb->FwdOnlyCursors() && m_cursorType != SQL_CURSOR_FORWARD_ONLY)
+//            {
+//                // Force the use of a forward only cursor...
+//                m_cursorType = SQL_CURSOR_FORWARD_ONLY;
+//                if (SQLSetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
+//                {
+//                    // Should never happen
+//                    m_pDb->GetNextError(m_henv, m_hdbc, m_hstmtInternal);
+//                    return false;
+//                }
+//            }
+//        }
+//        else
+//        {
+//            m_pDb->DispNextError();
+//            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal);
+//        }
     }
 #ifdef DBDEBUG_CONSOLE
     else
@@ -1568,54 +1568,54 @@ bool Table::CloseCursor(HSTMT cursor)
 
 
 /********** wxDbTable::DropTable() **********/
-bool Table::DropTable()
-{
-    // NOTE: This function returns true if the Table does not exist, but
-    //       only for identified databases.  Code will need to be added
-    //       below for any other databases when those databases are defined
-    //       to handle this situation consistently
-
-    std::wstring sqlStmt;
-
-	sqlStmt = (boost::wformat(L"DROP TABLE %s") % m_pDb->SQLTableName(m_tableName.c_str())).str();
-
-    m_pDb->WriteSqlLog(sqlStmt);
-
-#ifdef DBDEBUG_CONSOLE
-    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
-#endif
-
-    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
-    if (retcode != SQL_SUCCESS)
-    {
-        // Check for "Base table not found" error and ignore
-        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmt);
-        if (wcscmp(m_pDb->sqlState, L"S0002") /*&&
-            wcscmp(pDb->sqlState, L"S1000")*/)  // "Base table not found"
-        {
-            // Check for product specific error codes
-            if (!((m_pDb->Dbms() == dbmsSYBASE_ASA    && !wcscmp(m_pDb->sqlState, L"42000"))   ||  // 5.x (and lower?)
-                  (m_pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"37000"))   ||
-                  (m_pDb->Dbms() == dbmsPERVASIVE_SQL && !wcscmp(m_pDb->sqlState, L"S1000"))   ||  // Returns an S1000 then an S0002
-                  (m_pDb->Dbms() == dbmsPOSTGRES      && !wcscmp(m_pDb->sqlState, L"08S01"))))
-            {
-                m_pDb->DispNextError();
-                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
-                m_pDb->RollbackTrans();
-//                CloseCursor(hstmt);
-                return false;
-            }
-        }
-    }
-
-    // Commit the transaction and close the cursor
-    if (! m_pDb->CommitTrans())
-        return false;
-    if (! CloseCursor(m_hstmt))
-        return false;
-
-    return true;
-}  // wxDbTable::DropTable()
+//bool Table::DropTable()
+//{
+//    // NOTE: This function returns true if the Table does not exist, but
+//    //       only for identified databases.  Code will need to be added
+//    //       below for any other databases when those databases are defined
+//    //       to handle this situation consistently
+//
+//    std::wstring sqlStmt;
+//
+//	sqlStmt = (boost::wformat(L"DROP TABLE %s") % m_pDb->SQLTableName(m_tableName.c_str())).str();
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//#ifdef DBDEBUG_CONSOLE
+//    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
+//#endif
+//
+//    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
+//    if (retcode != SQL_SUCCESS)
+//    {
+//        // Check for "Base table not found" error and ignore
+//        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmt);
+//        if (wcscmp(m_pDb->sqlState, L"S0002") /*&&
+//            wcscmp(pDb->sqlState, L"S1000")*/)  // "Base table not found"
+//        {
+//            // Check for product specific error codes
+//            if (!((m_pDb->Dbms() == dbmsSYBASE_ASA    && !wcscmp(m_pDb->sqlState, L"42000"))   ||  // 5.x (and lower?)
+//                  (m_pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"37000"))   ||
+//                  (m_pDb->Dbms() == dbmsPERVASIVE_SQL && !wcscmp(m_pDb->sqlState, L"S1000"))   ||  // Returns an S1000 then an S0002
+//                  (m_pDb->Dbms() == dbmsPOSTGRES      && !wcscmp(m_pDb->sqlState, L"08S01"))))
+//            {
+//                m_pDb->DispNextError();
+//                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
+//                m_pDb->RollbackTrans();
+////                CloseCursor(hstmt);
+//                return false;
+//            }
+//        }
+//    }
+//
+//    // Commit the transaction and close the cursor
+//    if (! m_pDb->CommitTrans())
+//        return false;
+//    if (! CloseCursor(m_hstmt))
+//        return false;
+//
+//    return true;
+//}  // wxDbTable::DropTable()
 
 
 /********** wxDbTable::CreateIndex() **********/
@@ -1776,66 +1776,66 @@ bool Table::DropTable()
 
 
 /********** wxDbTable::DropIndex() **********/
-bool Table::DropIndex(const std::wstring &indexName)
-{
-    // NOTE: This function returns true if the Index does not exist, but
-    //       only for identified databases.  Code will need to be added
-    //       below for any other databases when those databases are defined
-    //       to handle this situation consistently
-
-    std::wstring sqlStmt;
-
-    if (m_pDb->Dbms() == dbmsACCESS || m_pDb->Dbms() == dbmsMY_SQL ||
-        m_pDb->Dbms() == dbmsDBASE /*|| Paradox needs this syntax too when we add support*/)
-		sqlStmt = (boost::wformat(L"DROP INDEX %s ON %s") % m_pDb->SQLTableName(indexName.c_str()) % m_pDb->SQLTableName(m_tableName.c_str())).str();
-    else if ((m_pDb->Dbms() == dbmsMS_SQL_SERVER) ||
-             (m_pDb->Dbms() == dbmsSYBASE_ASE) ||
-             (m_pDb->Dbms() == dbmsXBASE_SEQUITER))
-		sqlStmt = (boost::wformat(L"DROP INDEX %s.%s") % m_pDb->SQLTableName(m_tableName.c_str()) % m_pDb->SQLTableName(indexName.c_str())).str();
-    else
-		sqlStmt = (boost::wformat(L"DROP INDEX %s") % m_pDb->SQLTableName(indexName.c_str())).str();
-
-    m_pDb->WriteSqlLog(sqlStmt);
-
-#ifdef DBDEBUG_CONSOLE
-    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
-#endif
-    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
-    if (retcode != SQL_SUCCESS)
-    {
-        // Check for "Index not found" error and ignore
-        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmt);
-        if (wcscmp(m_pDb->sqlState, L"S0012"))  // "Index not found"
-        {
-            // Check for product specific error codes
-            if (!((m_pDb->Dbms() == dbmsSYBASE_ASA    && !wcscmp(m_pDb->sqlState, L"42000")) ||  // v5.x (and lower?)
-                  (m_pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"37000")) ||
-                  (m_pDb->Dbms() == dbmsMS_SQL_SERVER && !wcscmp(m_pDb->sqlState, L"S1000")) ||
-                  (m_pDb->Dbms() == dbmsINTERBASE     && !wcscmp(m_pDb->sqlState, L"S1000")) ||
-                  (m_pDb->Dbms() == dbmsMAXDB         && !wcscmp(m_pDb->sqlState, L"S1000")) ||
-                  (m_pDb->Dbms() == dbmsFIREBIRD      && !wcscmp(m_pDb->sqlState, L"HY000")) ||
-                  (m_pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"S0002")) ||  // Base table not found
-                  (m_pDb->Dbms() == dbmsMY_SQL        && !wcscmp(m_pDb->sqlState, L"42S12")) ||  // tested by Christopher Ludwik Marino-Cebulski using v3.23.21beta
-                  (m_pDb->Dbms() == dbmsPOSTGRES      && !wcscmp(m_pDb->sqlState, L"08S01"))
-               ))
-            {
-                m_pDb->DispNextError();
-                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
-                m_pDb->RollbackTrans();
-                CloseCursor(m_hstmt);
-                return false;
-            }
-        }
-    }
-
-    // Commit the transaction and close the cursor
-    if (! m_pDb->CommitTrans())
-        return false;
-    if (! CloseCursor(m_hstmt))
-        return false;
-
-    return true;
-}  // wxDbTable::DropIndex()
+//bool Table::DropIndex(const std::wstring &indexName)
+//{
+//    // NOTE: This function returns true if the Index does not exist, but
+//    //       only for identified databases.  Code will need to be added
+//    //       below for any other databases when those databases are defined
+//    //       to handle this situation consistently
+//
+//    std::wstring sqlStmt;
+//
+//    if (m_pDb->Dbms() == dbmsACCESS || m_pDb->Dbms() == dbmsMY_SQL ||
+//        m_pDb->Dbms() == dbmsDBASE /*|| Paradox needs this syntax too when we add support*/)
+//		sqlStmt = (boost::wformat(L"DROP INDEX %s ON %s") % m_pDb->SQLTableName(indexName.c_str()) % m_pDb->SQLTableName(m_tableName.c_str())).str();
+//    else if ((m_pDb->Dbms() == dbmsMS_SQL_SERVER) ||
+//             (m_pDb->Dbms() == dbmsSYBASE_ASE) ||
+//             (m_pDb->Dbms() == dbmsXBASE_SEQUITER))
+//		sqlStmt = (boost::wformat(L"DROP INDEX %s.%s") % m_pDb->SQLTableName(m_tableName.c_str()) % m_pDb->SQLTableName(indexName.c_str())).str();
+//    else
+//		sqlStmt = (boost::wformat(L"DROP INDEX %s") % m_pDb->SQLTableName(indexName.c_str())).str();
+//
+//    m_pDb->WriteSqlLog(sqlStmt);
+//
+//#ifdef DBDEBUG_CONSOLE
+//    std::wcout << std::endl << sqlStmt.c_str() << std::endl;
+//#endif
+//    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
+//    if (retcode != SQL_SUCCESS)
+//    {
+//        // Check for "Index not found" error and ignore
+//        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmt);
+//        if (wcscmp(m_pDb->sqlState, L"S0012"))  // "Index not found"
+//        {
+//            // Check for product specific error codes
+//            if (!((m_pDb->Dbms() == dbmsSYBASE_ASA    && !wcscmp(m_pDb->sqlState, L"42000")) ||  // v5.x (and lower?)
+//                  (m_pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"37000")) ||
+//                  (m_pDb->Dbms() == dbmsMS_SQL_SERVER && !wcscmp(m_pDb->sqlState, L"S1000")) ||
+//                  (m_pDb->Dbms() == dbmsINTERBASE     && !wcscmp(m_pDb->sqlState, L"S1000")) ||
+//                  (m_pDb->Dbms() == dbmsMAXDB         && !wcscmp(m_pDb->sqlState, L"S1000")) ||
+//                  (m_pDb->Dbms() == dbmsFIREBIRD      && !wcscmp(m_pDb->sqlState, L"HY000")) ||
+//                  (m_pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"S0002")) ||  // Base table not found
+//                  (m_pDb->Dbms() == dbmsMY_SQL        && !wcscmp(m_pDb->sqlState, L"42S12")) ||  // tested by Christopher Ludwik Marino-Cebulski using v3.23.21beta
+//                  (m_pDb->Dbms() == dbmsPOSTGRES      && !wcscmp(m_pDb->sqlState, L"08S01"))
+//               ))
+//            {
+//                m_pDb->DispNextError();
+//                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
+//                m_pDb->RollbackTrans();
+//                CloseCursor(m_hstmt);
+//                return false;
+//            }
+//        }
+//    }
+//
+//    // Commit the transaction and close the cursor
+//    if (! m_pDb->CommitTrans())
+//        return false;
+//    if (! CloseCursor(m_hstmt))
+//        return false;
+//
+//    return true;
+//}  // wxDbTable::DropIndex()
 
 
 /********** wxDbTable::SetOrderByColNums() **********/

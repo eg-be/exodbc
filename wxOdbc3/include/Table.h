@@ -106,9 +106,9 @@ namespace exodbc
 
 		bool            Open(bool checkPrivileges = false, bool checkTableExists = true);
 		//bool            CreateTable(bool attemptDrop = true);
-		bool            DropTable();
+//		bool            DropTable();
 //		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, SIndexDefinition* pIndexDefs, bool attemptDrop = true);
-		bool            DropIndex(const std::wstring& indexName);
+//		bool            DropIndex(const std::wstring& indexName);
 
 		// Accessors
 
@@ -193,7 +193,6 @@ namespace exodbc
 		HSTMT*			GetNewCursor(bool setCursor = false, bool bindColumns = true);
 
 		ULONG           Count(const std::wstring& args = L"*");
-		int             DB_STATUS() { return(m_pDb->DB_STATUS); }
 
 		bool            IsColNull(UWORD colNumber) const;
 		bool            SetColNull(UWORD colNumber, bool set = true);

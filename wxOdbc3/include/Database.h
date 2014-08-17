@@ -198,14 +198,6 @@ namespace exodbc
 
 	public:
 
-		// ODBC Error Inf.
-		SWORD  cbErrorMsg;
-		int    DB_STATUS;
-		wchar_t errorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN];
-		wchar_t errorMsg[SQL_MAX_MESSAGE_LENGTH];
-		SQLINTEGER nativeError;
-		wchar_t sqlState[20];
-
 		// Public member functions
 		Database(const DbEnvironment* const pEnv);
 		Database(const HENV &aHenv, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
@@ -271,25 +263,25 @@ namespace exodbc
 		bool         CommitTrans();
 		bool         RollbackTrans();
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
-		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
-		void         DispNextError();
-		bool         CreateView(const std::wstring& viewName, const std::wstring& colList, const std::wstring& pSqlStmt, bool attemptDrop = true);
-		bool         DropView(const std::wstring& viewName);
+//		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
+//		void         DispNextError();
+//		bool         CreateView(const std::wstring& viewName, const std::wstring& colList, const std::wstring& pSqlStmt, bool attemptDrop = true);
+//		bool         DropView(const std::wstring& viewName);
 		bool         ExecSql(const std::wstring& pSqlStmt);
-		bool         ExecSql(const std::wstring& pSqlStmt, ColumnInfo** columns, short& numcols);
+//		bool         ExecSql(const std::wstring& pSqlStmt, ColumnInfo** columns, short& numcols);
 		bool         GetNext();
 		bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR* cbReturned);
-		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
+//		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
 		int          TranslateSqlState(const std::wstring& SQLState);
 		SDbCatalog*	 GetCatalog() { return GetCatalog(L"", L""); };
 		SDbCatalog*	 GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName);
-		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
-		int          GetKeyFields(const std::wstring& tableName, ColumnInfo* colInf, UWORD noCols);
+//		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
+//		int          GetKeyFields(const std::wstring& tableName, ColumnInfo* colInf, UWORD noCols);
 
 		//ColumnInfo*		GetColumns(wchar_t* tableName[], const wchar_t* userID = NULL);
 		//ColumnInfo*		GetColumns(const std::wstring& tableName, UWORD* numCols, const wchar_t* userID=NULL);
 
-		int					GetColumnCount(const std::wstring& tableName, const wchar_t* userID=NULL);
+//		int					GetColumnCount(const std::wstring& tableName, const wchar_t* userID=NULL);
 		const wchar_t*		GetDatabaseName()  {return m_dbInf.dbmsName;}
 		const wchar_t*		GetDriverVersion() {return m_dbInf.driverVer;}
 		const std::wstring& GetDataSource()    {return m_dsn;}
@@ -314,8 +306,8 @@ namespace exodbc
 		SDbInfo GetDbInfo()					{return m_dbInf;}
 
 		// tableName can refer to a table, view, alias or synonym
-		bool         TableExists(const std::wstring& tableName, const wchar_t* userID = NULL, const std::wstring& tablePath = std::wstring());
-		bool         TablePrivileges(const std::wstring& tableName, const std::wstring& priv, const wchar_t* userID = NULL, const wchar_t* schema = NULL, const std::wstring& path = std::wstring());
+//		bool         TableExists(const std::wstring& tableName, const wchar_t* userID = NULL, const std::wstring& tablePath = std::wstring());
+//		bool         TablePrivileges(const std::wstring& tableName, const std::wstring& priv, const wchar_t* userID = NULL, const wchar_t* schema = NULL, const std::wstring& path = std::wstring());
 
 		// These two functions return the table name or column name in a form ready
 		// for use in SQL statements.  For example, if the datasource allows spaces
@@ -325,12 +317,12 @@ namespace exodbc
 		const std::wstring  SQLTableName(const wchar_t* tableName);
 		const std::wstring  SQLColumnName(const wchar_t* colName);
 
-		void         LogError(const std::wstring& errMsg, const std::wstring& SQLState = std::wstring()) { LogErrorImpl(errMsg, SQLState); }
-		void         SetDebugErrorMessages(bool state) { m_silent = !state; }
-		bool         SetSqlLogging(wxDbSqlLogState state, const std::wstring& filename = SQL_LOG_FILENAME, bool append = false);
-		bool         WriteSqlLog(const std::wstring& logMsg);
+//		void         LogError(const std::wstring& errMsg, const std::wstring& SQLState = std::wstring()) { LogErrorImpl(errMsg, SQLState); }
+//		void         SetDebugErrorMessages(bool state) { m_silent = !state; }
+//		bool         SetSqlLogging(wxDbSqlLogState state, const std::wstring& filename = SQL_LOG_FILENAME, bool append = false);
+//		bool         WriteSqlLog(const std::wstring& logMsg);
 
-		std::vector<std::wstring> GetErrorList() const;
+//		std::vector<std::wstring> GetErrorList() const;
 
 		wxDBMS       Dbms();
 		//bool         ModifyColumn(const std::wstring& tableName, const std::wstring& columnName, int dataType, ULONG columnLength = 0, const std::wstring& optionalParam = std::wstring());
@@ -342,13 +334,13 @@ namespace exodbc
 
 	private:
 		// Private member functions			
-		bool GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types);
+		bool			GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types);
 
 		void			Initialize();
 
 		bool			ReadDbInfo(SDbInfo& dbInfo);
 		bool			SetConnectionAttributes();
-		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
+//		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
 		//bool             DetermineDataTypes(bool failOnDataTypeUnsupported);
 		bool             OpenImpl(bool failOnDataTypeUnsupported = true);
