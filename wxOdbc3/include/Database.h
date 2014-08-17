@@ -300,6 +300,9 @@ namespace exodbc
 		 */
 		bool         RollbackTrans();
 
+		bool		 GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo);
+		bool		 GetCatalog(SDbCatalog& catalogInfo)				{ return GetCatalog(L"", L"", catalogInfo); };
+
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		void         DispNextError();
@@ -309,8 +312,6 @@ namespace exodbc
 		bool         GetNext();
 //		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
 		int          TranslateSqlState(const std::wstring& SQLState);
-		bool		 GetCatalog(SDbCatalog& catalogInfo) { return GetCatalog(L"", L"", catalogInfo); };
-		bool		 GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo);
 //		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
 //		int          GetKeyFields(const std::wstring& tableName, ColumnInfo* colInf, UWORD noCols);
 
