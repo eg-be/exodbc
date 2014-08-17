@@ -288,6 +288,17 @@ namespace exodbc
 		EXPECT_EQ(12, cat.m_tables.size());
 	}
 
+	TEST_P(DbTest, GetColumnCount)
+	{
+		if(m_pDb->Dbms() == dbmsDB2)
+		{
+			EXPECT_EQ(4, m_pDb->GetColumnCount(L"INTEGERTYPES"));
+		}
+		else if(m_pDb->Dbms() == dbmsMY_SQL)
+		{
+			EXPECT_EQ(7, m_pDb->GetColumnCount(L"integertypes"));
+		}
+	}
 
 	TEST_P(DbTest, ExecSql_InsertCharTypes)
 	{

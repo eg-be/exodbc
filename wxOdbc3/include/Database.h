@@ -324,7 +324,9 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		 GetCatalog(SDbCatalog& catalogInfo)				{ return GetCatalog(L"", L"", catalogInfo); };
+		bool		GetCatalog(SDbCatalog& catalogInfo)				{ return GetCatalog(L"", L"", catalogInfo); };
+
+		int			GetColumnCount(const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring catalogName = L"");
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
