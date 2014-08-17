@@ -1210,7 +1210,7 @@ namespace exodbc
 //	}  // wxDb::DropView()
 
 
-	bool Database::ExecSql(const std::wstring& sqlStmt)
+	bool Database::ExecSql(const std::wstring& sqlStmt, ExecFailMode mode /* = NotFailOnNoData */)
 	{
 		RETCODE retcode;
 
@@ -1219,8 +1219,11 @@ namespace exodbc
 		retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
 		if(retcode != SQL_SUCCESS)
 		{
-			LOG_ERROR_STMT_MSG(m_hstmt, retcode, SQLExecDirect, (boost::wformat(L"Failed to execute Stmt '%s'") %sqlStmt).str());
-			return false;
+			if( ! (mode == NotFailOnNoData && retcode == SQL_NO_DATA))
+			{
+				LOG_ERROR_STMT_MSG(m_hstmt, retcode, SQLExecDirect, (boost::wformat(L"Failed to execute Stmt '%s'") %sqlStmt).str());
+				return false;
+			}
 		}
 
 		return true;

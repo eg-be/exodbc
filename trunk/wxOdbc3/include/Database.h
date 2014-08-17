@@ -262,16 +262,23 @@ namespace exodbc
 		 */
 		bool         Close();
 
-		/*!
-		 * \fn	bool Database::ExecSql(const std::wstring& sqlStmt);
+		enum ExecFailMode { FailOnNoData, NotFailOnNoData };
+		/**
+		 * \fn	bool Database::ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = NotFailOnNoData);
 		 *
 		 * \brief	Executes the SQL operation on the internal stmt-handle.
 		 *
+		 * \author	Eli
+		 * \date	17.08.2014
+		 *
 		 * \param	sqlStmt	The SQL statement.
+		 * \param	mode   	If FailOnNoData is set, false is returned if SQL returns NO_DATA.
+		 * 					This happens for example on DB2 if you do a DELETE with a WHERE
+		 * 					clause and no records are deleted.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         ExecSql(const std::wstring& sqlStmt);
+		bool         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = NotFailOnNoData);
 
 		/*!
 		 * \fn	bool Database::CommitTrans();
