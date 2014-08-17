@@ -135,7 +135,37 @@ namespace exodbc
 	enum CloseMode { FailIfNotOpen, IgnoreNotOpen};
 	extern EXODBCAPI SQLRETURN	CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode);
 
+	/*!
+	 * \fn	extern EXODBCAPI bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
+	 *
+	 * \brief	Gets an information.
+	 *
+	 * \param	hDbc					The dbc.
+	 * \param	fInfoType				Type of the information.
+	 * \param	rgbInfoValue			The RGB information value.
+	 * \param	cbInfoValueMax			The information value maximum.
+	 * \param [in,out]	pcbInfoValue	If non-null, the pcb information value.
+	 *
+	 * \return	true if it succeeds, false if it fails.
+	 */
 	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
+
+	/*!
+	 * \fn	extern EXODBCAPI bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
+	 *
+	 * \brief	Gets a data.
+	 *
+	 * \param	hStmt				  	The statement.
+	 * \param	colOrParamNr		  	The col or parameter nr.
+	 * \param	targetType			  	Type of the target.
+	 * \param	targetValue			  	Target value.
+	 * \param	bufferLen			  	Length of the buffer.
+	 * \param [in,out]	strLenOrIndPtr	If non-null, the length or ind pointer.
+	 * \param [in,out]	pIsNull		  	If non-null, the is null.
+	 * \param	nullTerminate		  	(Optional) true to null terminate.
+	 *
+	 * \return	true if it succeeds, false if it fails.
+	 */
 	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
 
 	// Classes
