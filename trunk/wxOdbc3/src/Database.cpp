@@ -178,10 +178,15 @@ namespace exodbc
 		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc);
 		if(ret != SQL_SUCCESS)
 		{
-			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched, use our standard logger
 			if(ret == SQL_ERROR)
 			{
 				LOG_DBC_ERROR(m_hdbc, ret, SQLFreeHandle);
+			}
+			else
+			{
+				// We cannot get any error-info here
+				LOG_SQL_NO_SUCCESS_ERROR(ret, SQLFreeHandle);
 			}
 		}
 		if(ret == SQL_SUCCESS)
@@ -441,19 +446,14 @@ namespace exodbc
 
 	bool Database::OpenImpl(bool failOnDataTypeUnsupported)
 	{
-		/*
-		If using Intersolv branded ODBC drivers, this is the place where you would substitute
-		your branded driver license information
-
-		SQLSetConnectOption(hdbc, 1041, (UDWORD) emptyString);
-		SQLSetConnectOption(hdbc, 1042, (UDWORD) emptyString);
-		*/
+		exASSERT(m_hstmt == SQL_NULL_HSTMT);
 
 		// Allocate a statement handle for the database connection
-		m_hstmt = AllocStmtHandle(m_hdbc);
-		if(m_hstmt == SQL_NULL_HSTMT)
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
+		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"OpenImpl failed to Allocated Stmt-handle";
+			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
+			LOG_DBC_ERROR(m_hdbc, ret, SQLAllocHandle);
 			return false;
 		}
 
@@ -468,10 +468,6 @@ namespace exodbc
 		// Query the datatypes
 		if (!GetAllDataTypesInfo(m_datatypes))
 			return false;
-
-		// TODO: Continue here
-		//if (!DetermineDataTypes(failOnDataTypeUnsupported))
-		//	return false;
 
 		// Completed Successfully
 		return true;
@@ -506,7 +502,10 @@ namespace exodbc
 			EXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE );
 
 		if (retcode != SQL_SUCCESS)
-			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
+		{
+			LOG_DBC_ERROR(m_hdbc, retcode, SQLDriverConnect);
+			return false;
+		}
 
 		outConnectBuffer[outConnectBufferLen] = 0;
 		m_outConnectionStr = outConnectBuffer;
@@ -542,7 +541,8 @@ namespace exodbc
 
 		if (retcode != SQL_SUCCESS)
 		{
-			return(DispAllErrors(SQL_NULL_HENV, m_hdbc));
+			LOG_DBC_ERROR(m_hdbc, retcode, SQLConnect);
+			return false;
 		}
 
 		// Mark database as Open
@@ -751,20 +751,21 @@ namespace exodbc
 		// There should be zero Ctable objects still connected to this db object
 		exASSERT(nTables == 0);
 
-		// Close the Sql Log file
-		//if (m_fpSqlLog)
-		//{
-		//	fclose(m_fpSqlLog);
-		//	m_fpSqlLog = 0;
-		//}
-
 		// Free statement handle
 		if (m_dbIsOpen)
 		{
-			// We do not fail completely if we cannot free the stmt-handle, maybe we already failed creating it
-			if(!FreeStmtHandle(m_hstmt))
+			SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+			if(ret != SQL_SUCCESS)
 			{
-				BOOST_LOG_TRIVIAL(warning) << L"Close failed to Free Stmt-handle: " << GetLastStmtError(m_hstmt);
+				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+				if(ret == SQL_ERROR)
+				{
+					LOG_STMT_ERROR(m_hstmt, ret, SqlFreeHandle);
+				}
+				else
+				{
+					LOG_SQL_NO_SUCCESS_ERROR(ret, SQLFreeHandle);
+				}
 			}
 
 			// Anyway try to disconnect from the datasource

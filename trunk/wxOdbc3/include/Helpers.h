@@ -132,13 +132,11 @@ namespace exodbc
 	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc);
 	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt);
 
-	extern EXODBCAPI SQLHANDLE	AllocStmtHandle(const SQLHANDLE& hDbc);
-	extern EXODBCAPI bool		FreeStmtHandle(SQLHANDLE& hStmt);
-
 	extern EXODBCAPI bool		CloseStmtHandle(const SQLHANDLE& hStmt);
 
 	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
 	extern EXODBCAPI bool		GetData3(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
+
 	// Classes
 	// -------
 
@@ -154,11 +152,11 @@ namespace exodbc
 		if(hDbc) handles << L"Dbc=" << hDbc << L";"; \
 		if(hStmt) handles << L"Stmt=" << hStmt << L";"; \
 		std::wstringstream ws; \
-		ws << __FILEW__ << L"(" << __LINE__ << L")::" << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", with " << errs.size() << L" ODBC-Error(s) from handle(s) '" << handles.str() << L"': "; \
+		ws << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", with " << errs.size() << L" ODBC-Error(s) from handle(s) '" << handles.str() << L"': "; \
 		for(it = errs.begin(); it != errs.end(); it++) \
 		{ \
 			const SErrorInfo& err = *it; \
-			ws << std::endl << err; \
+			ws << std::endl << L"\t" << err; \
 		} \
 		BOOST_LOG_TRIVIAL(error) << ws.str(); \
 	} while( 0 )
@@ -166,5 +164,10 @@ namespace exodbc
 #define LOG_ENV_ERROR(hEnv, ret, SqlFunction) LOG_ODBC_ERROR(hEnv, NULL, NULL, ret, SqlFunction)
 #define LOG_DBC_ERROR(hDbc, ret, SqlFunction) LOG_ODBC_ERROR(NULL, hDbc, NULL, ret, SqlFunction)
 #define LOG_STMT_ERROR(hStmt, ret, SqlFunction) LOG_ODBC_ERROR(NULL, NULL, hStmt, ret, SqlFunction)
+
+#define LOG_SQL_NO_SUCCESS_ERROR(ret, SqlFunction) \
+	do { \
+		BOOST_LOG_TRIVIAL(error) <<__FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret; \
+	} while( 0 )
 
 #endif // HELPERS_H
