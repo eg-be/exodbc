@@ -121,7 +121,7 @@ namespace exodbc
 	struct STablesInUse
 	{
 	public:
-		const wchar_t  *tableName;
+		std::wstring   tableName;
 		ULONG          tableID;
 		class Database    *pDb;
 	};  // STablesInUse

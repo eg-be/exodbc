@@ -192,6 +192,35 @@ namespace exodbc
 	}
 
 
+	TEST_P(DbTest, TestCommitTransaction)
+	{
+		IntTypesTmpTable* pTable = new IntTypesTmpTable(m_pDb);
+		if(!pTable->Open(false, false))
+		{
+			delete pTable;
+			ASSERT_FALSE(true);
+		}
+
+		std::wstring sqlstmt;
+		sqlstmt = L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0";
+		ASSERT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		ASSERT_TRUE( m_pDb->CommitTrans() );
+
+		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		ASSERT_FALSE( pTable->GetNext());
+
+		sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		// Test: If we do not commit we still have zero records
+		// TOOD: Why do we get the records here? We need to read more about autocommit and stuff like that, but lets fix the tables first
+		//ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		//EXPECT_FALSE( pTable->GetNext());
+		// Once we commit we have one record
+		ASSERT_TRUE( m_pDb->CommitTrans() );
+		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		EXPECT_TRUE( pTable->GetNext());
+	}
+
 	TEST_P(DbTest, OpenOdbc3)
 	{
 		DbEnvironment env;

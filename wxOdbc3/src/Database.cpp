@@ -769,9 +769,10 @@ namespace exodbc
 
 			// Anyway try to disconnect from the datasource
 			// This is a critical error.
-			if (SQLDisconnect(m_hdbc) != SQL_SUCCESS)
+			ret = SQLDisconnect(m_hdbc);
+			if(ret != SQL_SUCCESS)
 			{
-				BOOST_LOG_TRIVIAL(error) << L"Close failed to free DB-Connection handle: " << GetLastDbcError(m_hdbc);
+				LOG_ERROR_DBC(m_hdbc, ret, SQLDisconnect);
 				return false;
 			}
 
@@ -793,8 +794,8 @@ namespace exodbc
 				tiu = *it;;
 				if (tiu->pDb == this)
 				{
-					s1 = (boost::wformat(L"(%-20s)     tableID:[%6lu]     pDb:[%p]") % tiu->tableName % tiu->tableID % static_cast<void*>(tiu->pDb)).str();
-					s2 = (boost::wformat(L"Orphaned table found using pDb:[%p]") % static_cast<void*>(this)).str();
+					s1 = (boost::wformat(L"Orphaned table found using pDb [%p]: ") % this).str();
+					s2 = (boost::wformat(L"(%-20s)     tableID:[%6lu]     pDb:[%p]") % tiu->tableName % tiu->tableID % this).str();
 					BOOST_LOG_TRIVIAL(debug) << s1 << s2;
 				}
 				it++;

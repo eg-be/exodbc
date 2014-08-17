@@ -24,7 +24,7 @@
 // --------------------
 namespace exodbc
 {
-	extern void exOnAssert(const char* file, int line, const char* function, const char* condition, const char* msg);
+	extern void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg);
 }
 
 // Macros available for everybody
@@ -38,7 +38,7 @@ namespace exodbc
 #define exASSERT_MSG(cond, msg)										\
 	do {																\
 	if ( !(cond) )  {												\
-	exOnAssert(__FILE__, __LINE__, __FUNCTION__,#cond,msg);	\
+	exOnAssert(__FILEW__, __LINE__, __FUNCTIONW__,L#cond,msg);	\
 	__debugbreak();												\
 	}                                                               \
 	} while ( 0 )
@@ -48,18 +48,18 @@ namespace exodbc
 
 // a version without any additional message, don't use unless condition
 // itself is fully self-explanatory
-#define exASSERT(cond) exASSERT_MSG(cond, (const char*)NULL)
+#define exASSERT(cond) exASSERT_MSG(cond, L"")
 
 // exFAIL must become something that will always trigger something, not depending on any flags
 #define exFAIL_MSG(msg)												\
-	do {																\
-	BOOST_LOG_TRIVIAL(error) << #msg;								\
+	do {															\
+	BOOST_LOG_TRIVIAL(error) << msg;								\
 	} while ( 0 )
 
 #define exNOT_IMPL	\
 	do {			\
-		BOOST_LOG_TRIVIAL(error) << __FILE__ << L" (" << __LINE__ << L"): Not Implemented";	\
-		exASSERT_MSG(false, "Not Implemented");	\
+		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L" (" << __LINE__ << L"): Not Implemented";	\
+		exASSERT_MSG(false, L"Not Implemented");	\
 	} while( 0 )	
 
 

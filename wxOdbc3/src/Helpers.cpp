@@ -27,7 +27,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void exOnAssert(const char* file, int line, const char* function, const char* condition, const char* msg)
+	void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg)
 	{
 		std::wstringstream ws;
 		ws 	<< L"ASSERTION failure!" << std::endl;
@@ -35,7 +35,7 @@ namespace exodbc
 		ws	<< L" Line:      " << line << std::endl;
 		ws	<< L" Function:  " << function << std::endl;
 		ws	<< L" Condition: " << condition << std::endl;
-		if(msg)
+		if(msg.length() > 0)
 		{
 			ws << L" Msg:       " << msg << std::endl;
 		}
