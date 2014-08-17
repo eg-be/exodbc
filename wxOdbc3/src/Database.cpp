@@ -182,14 +182,12 @@ namespace exodbc
 		}
 	}
 
-	/********** PRIVATE! wxDb::initialize PRIVATE! **********/
-	/********** wxDb::initialize() **********/
 	void Database::Initialize()
-		/*
-		* Private member function that sets all wxDb member variables to
-		* known values at creation of the wxDb
-		*/
 	{
+		// Handles created by this db
+		m_hdbc = NULL;
+		m_hstmt = NULL;
+
 		int i;
 
 		m_fpSqlLog      = 0;            // Sql Log file pointer
@@ -203,43 +201,6 @@ namespace exodbc
 		for (i = 0; i < DB_MAX_ERROR_HISTORY; i++)
 			wcscpy(errorList[i], emptyString);
 
-		//// Init typeInf structures
-		//m_typeInfVarchar.TypeName.empty();
-		//m_typeInfVarchar.FsqlType      = 0;
-		//m_typeInfVarchar.Precision     = 0;
-		//m_typeInfVarchar.CaseSensitive = 0;
-		//m_typeInfVarchar.MaximumScale  = 0;
-
-		//m_typeInfInteger.TypeName.empty();
-		//m_typeInfInteger.FsqlType      = 0;
-		//m_typeInfInteger.Precision     = 0;
-		//m_typeInfInteger.CaseSensitive = 0;
-		//m_typeInfInteger.MaximumScale  = 0;
-
-		//m_typeInfFloat.TypeName.empty();
-		//m_typeInfFloat.FsqlType      = 0;
-		//m_typeInfFloat.Precision     = 0;
-		//m_typeInfFloat.CaseSensitive = 0;
-		//m_typeInfFloat.MaximumScale  = 0;
-
-		//m_typeInfDate.TypeName.empty();
-		//m_typeInfDate.FsqlType      = 0;
-		//m_typeInfDate.Precision     = 0;
-		//m_typeInfDate.CaseSensitive = 0;
-		//m_typeInfDate.MaximumScale  = 0;
-
-		//m_typeInfBlob.TypeName.empty();
-		//m_typeInfBlob.FsqlType      = 0;
-		//m_typeInfBlob.Precision     = 0;
-		//m_typeInfBlob.CaseSensitive = 0;
-		//m_typeInfBlob.MaximumScale  = 0;
-
-		//m_typeInfMemo.TypeName.empty();
-		//m_typeInfMemo.FsqlType      = 0;
-		//m_typeInfMemo.Precision     = 0;
-		//m_typeInfMemo.CaseSensitive = 0;
-		//m_typeInfMemo.MaximumScale  = 0;
-
 		// Error reporting is turned OFF by default
 		m_silent = true;
 
@@ -249,7 +210,7 @@ namespace exodbc
 		// Mark database as not OpenImpl as of yet
 		m_dbIsOpen = false;
 		m_dbOpenedWithConnectionString = false;
-	}  // wxDb::initialize()
+	}
 
 
 	/********** PRIVATE! wxDb::ConvertUserIDImpl PRIVATE! **********/
@@ -882,8 +843,6 @@ namespace exodbc
 		// There should be zero Ctable objects still connected to this db object
 		exASSERT(nTables == 0);
 
-		bool ok = true;
-
 		// Close the Sql Log file
 		if (m_fpSqlLog)
 		{
@@ -894,23 +853,21 @@ namespace exodbc
 		// Free statement handle
 		if (m_dbIsOpen)
 		{
+			// We do not fail completely if we cannot free the stmt-handle, maybe we already failed creating it
 			if(!FreeStmtHandle(m_hstmt))
 			{
 				BOOST_LOG_TRIVIAL(warning) << L"Close failed to Free Stmt-handle: " << GetLastStmtError(m_hstmt);
-				ok  = false;
 			}
 
 			// Anyway try to disconnect from the datasource
+			// This is a critical error.
 			if (SQLDisconnect(m_hdbc) != SQL_SUCCESS)
 			{
 				BOOST_LOG_TRIVIAL(error) << L"Close failed to free DB-Connection handle: " << GetLastDbcError(m_hdbc);
-				ok = false;
+				return false;
 			}
 
-			if(ok)
-			{
-				m_dbIsOpen = false;
-			}
+			m_dbIsOpen = false;
 		}
 
 #ifdef EXODBCDEBUG
@@ -945,7 +902,7 @@ namespace exodbc
 
 		m_dbmsType = dbmsUNIDENTIFIED;
 
-		return ok;
+		return true;
 
 	}
 
