@@ -139,17 +139,17 @@ namespace exodbc
 		const std::wstring& From()    { return m_from; }
 
 		int             Insert();
-		bool            Update();
-		bool            Update(const std::wstring& pSqlStmt);
-		bool            UpdateWhere(const std::wstring& pWhereClause);
-		bool            Delete();
-		bool            DeleteWhere(const std::wstring& pWhereClause);
-		bool            DeleteMatching();
-		virtual bool    Query(bool forUpdate = false, bool distinct = false);
+		//bool            Update();
+		//bool            Update(const std::wstring& pSqlStmt);
+		//bool            UpdateWhere(const std::wstring& pWhereClause);
+		//bool            Delete();
+		//bool            DeleteWhere(const std::wstring& pWhereClause);
+		//bool            DeleteMatching();
+//		virtual bool    Query(bool forUpdate = false, bool distinct = false);
 		bool            QueryBySqlStmt(const std::wstring& pSqlStmt);
 		bool            QueryMatching(bool forUpdate = false, bool distinct = false);
 		bool            QueryOnKeyFields(bool forUpdate = false, bool distinct = false);
-		bool            Refresh();
+		//bool            Refresh();
 		bool            GetNext()		{ return(getRec(SQL_FETCH_NEXT));  }
 		bool            operator++(int) { return(getRec(SQL_FETCH_NEXT));  }
 
@@ -163,17 +163,17 @@ namespace exodbc
 		bool            IsCursorClosedOnCommit();
 		UWORD           GetRowNum();
 
-		void            BuildSelectStmt(std::wstring& pSqlStmt, int typeOfSelect, bool distinct);
-		void            BuildSelectStmt(wchar_t* pSqlStmt, int typeOfSelect, bool distinct);
+		//void            BuildSelectStmt(std::wstring& pSqlStmt, int typeOfSelect, bool distinct);
+		//void            BuildSelectStmt(wchar_t* pSqlStmt, int typeOfSelect, bool distinct);
 
-		void            BuildDeleteStmt(std::wstring& pSqlStmt, int typeOfDel, const std::wstring& pWhereClause = emptyString);
-		void            BuildDeleteStmt(wchar_t* pSqlStmt, int typeOfDel, const std::wstring& pWhereClause = emptyString);
+//		void            BuildDeleteStmt(std::wstring& pSqlStmt, int typeOfDel, const std::wstring& pWhereClause = emptyString);
+		//void            BuildDeleteStmt(wchar_t* pSqlStmt, int typeOfDel, const std::wstring& pWhereClause = emptyString);
 
-		void            BuildUpdateStmt(std::wstring& pSqlStmt, int typeOfUpdate, const std::wstring& pWhereClause = emptyString);
-		void            BuildUpdateStmt(wchar_t* pSqlStmt, int typeOfUpdate, const std::wstring& pWhereClause = emptyString);
+		//void            BuildUpdateStmt(std::wstring& pSqlStmt, int typeOfUpdate, const std::wstring& pWhereClause = emptyString);
+		//void            BuildUpdateStmt(wchar_t* pSqlStmt, int typeOfUpdate, const std::wstring& pWhereClause = emptyString);
 
-		void            BuildWhereClause(std::wstring& pWhereClause, int typeOfWhere, const std::wstring& qualTableName = emptyString, bool useLikeComparison = false);
-		void            BuildWhereClause(wchar_t* pWhereClause, int typeOfWhere, const std::wstring &qualTableName = emptyString, bool useLikeComparison = false);
+		//void            BuildWhereClause(std::wstring& pWhereClause, int typeOfWhere, const std::wstring& qualTableName = emptyString, bool useLikeComparison = false);
+		//void            BuildWhereClause(wchar_t* pWhereClause, int typeOfWhere, const std::wstring &qualTableName = emptyString, bool useLikeComparison = false);
 
 		bool            CanSelectForUpdate();
 		bool            CanUpdateByROWID();
@@ -192,7 +192,7 @@ namespace exodbc
 		HSTMT           GetCursor() { return(m_hstmt); }
 		HSTMT*			GetNewCursor(bool setCursor = false, bool bindColumns = true);
 
-		ULONG           Count(const std::wstring& args = L"*");
+		//ULONG           Count(const std::wstring& args = L"*");
 
 		bool            IsColNull(UWORD colNumber) const;
 		bool            SetColNull(UWORD colNumber, bool set = true);
@@ -222,7 +222,7 @@ namespace exodbc
 		bool        bindCols(HSTMT cursor);
 		bool        getRec(UWORD fetchType);
 		bool        execDelete(const std::wstring& pSqlStmt);
-		bool        execUpdate(const std::wstring& pSqlStmt);
+//		bool        execUpdate(const std::wstring& pSqlStmt);
 		bool        query(int queryType, bool forUpdate, bool distinct, const std::wstring& pSqlStmt = emptyString);
 
 		// Where, Order By and From clauses
