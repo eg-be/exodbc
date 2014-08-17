@@ -300,7 +300,28 @@ namespace exodbc
 		 */
 		bool         RollbackTrans();
 
+		/*!
+		 * \fn	bool Database::GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo);
+		 *
+		 * \brief	Gets a catalog.
+		 *
+		 * \param	catalogName		   	Name of the catalog.
+		 * \param	schemaName		   	Name of the schema.
+		 * \param [in,out]	catalogInfo	Information describing the catalog.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool		 GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo);
+
+		/*!
+		 * \fn	bool Database::GetCatalog(SDbCatalog& catalogInfo)
+		 *
+		 * \brief	Gets a catalog.
+		 *
+		 * \param [in,out]	catalogInfo	Information describing the catalog.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool		 GetCatalog(SDbCatalog& catalogInfo)				{ return GetCatalog(L"", L"", catalogInfo); };
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
