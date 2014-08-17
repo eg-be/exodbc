@@ -184,17 +184,6 @@ namespace exodbc
 		std::set<std::wstring> m_schemas;
 	};
 
-	// The wxDb::errorList is copied to this variable when the wxDb object
-	// is closed.  This way, the error list is still available after the
-	// database object is closed.  This is necessary if the database
-	// connection fails so the calling application can show the operator
-	// why the connection failed.  Note: as each wxDb object is closed, it
-	// will overwrite the errors of the previously destroyed wxDb object in
-	// this variable.
-
-	extern wchar_t DBerrorList[DB_MAX_ERROR_HISTORY][DB_MAX_ERROR_MSG_LEN+1];
-
-
 	class EXODBCAPI Database
 	{
 		// Test helpers:
