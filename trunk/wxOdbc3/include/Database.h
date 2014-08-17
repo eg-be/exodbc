@@ -198,8 +198,6 @@ namespace exodbc
 
 	public:
 
-		bool             GetDataTypeInfo(SWORD fSqlType, SSqlTypeInfo &structSQLTypeInfo)	{ return GetDataTypeInfoImpl(fSqlType, structSQLTypeInfo); }
-
 		// ODBC Error Inf.
 		SWORD  cbErrorMsg;
 		int    DB_STATUS;
@@ -349,7 +347,6 @@ namespace exodbc
 		void			Initialize();
 
 		bool			ReadDbInfo(SDbInfo& dbInfo);
-		bool			GetDataTypeInfoImpl(SWORD fSqlType, SSqlTypeInfo& structSQLTypeInfo);
 		bool			SetConnectionAttributes();
 		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
