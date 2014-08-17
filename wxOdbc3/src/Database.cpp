@@ -573,7 +573,7 @@ namespace exodbc
 		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, NULL);
 		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_AUTOCOMMIT to OFF" << GetLastDbcError(m_hdbc);
+			LOG_DBC_ERROR(m_hdbc, ret, SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, NULL));
 			ok = false;
 		}
 

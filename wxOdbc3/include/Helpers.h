@@ -143,7 +143,7 @@ namespace exodbc
 }
 
 
-#define LOG_ODBC_ERROR(hEnv, hDbc, hStmt, ret, SqlFunction) \
+#define LOG_ODBC_ERROR(hEnv, hDbc, hStmt, ret, SqlFunction, msgStr) \
 	do { \
 		std::vector<SErrorInfo> errs = GetAllErrors(hEnv, hDbc, hStmt); \
 		std::vector<SErrorInfo>::const_iterator it; \
@@ -152,7 +152,10 @@ namespace exodbc
 		if(hDbc) handles << L"Dbc=" << hDbc << L";"; \
 		if(hStmt) handles << L"Stmt=" << hStmt << L";"; \
 		std::wstringstream ws; \
-		ws << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", with " << errs.size() << L" ODBC-Error(s) from handle(s) '" << handles.str() << L"': "; \
+		ws << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " ; \
+		if(msgStr.length() >= 0) \
+			ws << msgStr << L": "; \
+		ws << L"ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", with " << errs.size() << L" ODBC-Error(s) from handle(s) '" << handles.str() << L"': "; \
 		for(it = errs.begin(); it != errs.end(); it++) \
 		{ \
 			const SErrorInfo& err = *it; \
