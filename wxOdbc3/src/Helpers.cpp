@@ -323,44 +323,6 @@ namespace exodbc
 		return ret == SQL_SUCCESS;
 	}
 
-	SQLHANDLE AllocStmtHandle(const SQLHANDLE& hDbc)
-	{
-		exASSERT(hDbc);
-
-		SQLHANDLE handle = SQL_NULL_HSTMT;
-
-		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &handle);
-		if(ret != SQL_SUCCESS)
-		{
-			BOOST_LOG_TRIVIAL(error) << L"Failed to SQLAllocHandle of type SQL_HANDLE_STMT, (return code was " << ret << L"): " << GetLastEnvError(hDbc);
-			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HDESCin case of failure
-			return handle;
-		}
-
-		return handle;
-	}
-
-	bool FreeStmtHandle(SQLHANDLE& hStmt)
-	{
-		exASSERT(hStmt);
-
-		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
-		if(ret != SQL_SUCCESS)
-		{
-			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-			if(ret == SQL_ERROR)
-				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_STMT (return code was SQL_ERROR, handle is still valid): " << GetLastDbcError(hStmt);
-			else
-				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_STMT (return code was " << ret << L", handle is invalid)";
-		}
-		if(ret != SQL_ERROR)
-		{
-			hStmt = SQL_NULL_HSTMT;
-		}
-
-		return ret == SQL_SUCCESS;
-	}
-
 
 	bool CloseStmtHandle(const SQLHANDLE& hStmt)
 	{
