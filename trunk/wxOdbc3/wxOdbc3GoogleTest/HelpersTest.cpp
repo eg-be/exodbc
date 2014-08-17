@@ -43,38 +43,38 @@ namespace exodbc
 	{
 	}
 
-	TEST_P(HelpersTest, AllocDbcHandle)
-	{
-		DbEnvironment env(m_odbcInfo.m_odbcVersion);
-		ASSERT_TRUE(env.HaveHenv());
+	//TEST_P(HelpersTest, AllocDbcHandle)
+	//{
+	//	DbEnvironment env(m_odbcInfo.m_odbcVersion);
+	//	ASSERT_TRUE(env.HaveHenv());
 
-		SQLHANDLE hDbc = AllocDbcHandle(env.GetHenv());
-		EXPECT_FALSE(SQL_NULL_HDBC == hDbc);
+	//	SQLHANDLE hDbc = AllocDbcHandle(env.GetHenv());
+	//	EXPECT_FALSE(SQL_NULL_HDBC == hDbc);
 
-		// Allocating from a hDbc handle should not work
-		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings"; 
-		SQLHANDLE hCopy = hDbc;
-		SQLHANDLE hFail = AllocDbcHandle(hCopy);
-		EXPECT_EQ(SQL_NULL_HDBC, hFail);
+	//	// Allocating from a hDbc handle should not work
+	//	BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings"; 
+	//	SQLHANDLE hCopy = hDbc;
+	//	SQLHANDLE hFail = AllocDbcHandle(hCopy);
+	//	EXPECT_EQ(SQL_NULL_HDBC, hFail);
 
-		FreeDbcHandle(hDbc);
-	}
+	//	FreeDbcHandle(hDbc);
+	//}
 
-	TEST_P(HelpersTest, FreeDbcHandle)
-	{
-		DbEnvironment env(m_odbcInfo.m_odbcVersion);
-		ASSERT_TRUE(env.HaveHenv());
+	//TEST_P(HelpersTest, FreeDbcHandle)
+	//{
+	//	DbEnvironment env(m_odbcInfo.m_odbcVersion);
+	//	ASSERT_TRUE(env.HaveHenv());
 
-		SQLHANDLE hDbc = AllocDbcHandle(env.GetHenv());
-		ASSERT_FALSE(SQL_NULL_HDBC == hDbc);
+	//	SQLHANDLE hDbc = AllocDbcHandle(env.GetHenv());
+	//	ASSERT_FALSE(SQL_NULL_HDBC == hDbc);
 
-		// freeing twice should not work
-		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings";
-		SQLHANDLE hCopy = hDbc;
-		EXPECT_TRUE(FreeDbcHandle(hDbc));
-		
-		EXPECT_FALSE(FreeDbcHandle(hCopy));
-	}
+	//	// freeing twice should not work
+	//	BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings";
+	//	SQLHANDLE hCopy = hDbc;
+	//	EXPECT_TRUE(FreeDbcHandle(hDbc));
+	//	
+	//	EXPECT_FALSE(FreeDbcHandle(hCopy));
+	//}
 	// Interfaces
 	// ----------
 

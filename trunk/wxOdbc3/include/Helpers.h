@@ -60,7 +60,7 @@ namespace exodbc
 	do {			\
 		BOOST_LOG_TRIVIAL(error) << __FILE__ << L" (" << __LINE__ << L"): Not Implemented";	\
 		exASSERT_MSG(false, "Not Implemented");	\
-	} while( 0 )	\
+	} while( 0 )	
 
 
 namespace exodbc
@@ -112,7 +112,7 @@ namespace exodbc
 	 *
 	 * \return	all errors.
 	 */
-	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = NULL, SQLHANDLE hDbc = NULL, SQLHANDLE hStmt = NULL);
+	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = SQL_NULL_HENV, SQLHANDLE hDbc = SQL_NULL_HDBC, SQLHANDLE hStmt = SQL_NULL_HSTMT);
 
 	/*!
 	 * \fn	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors);
@@ -132,27 +132,6 @@ namespace exodbc
 	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc);
 	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt);
 
-	/*!
-	 * \fn	extern EXODBCAPI SQLHANDLE AllocDbcHandle(const SQLHANDLE& hEnv);
-	 *
-	 * \brief	Allocate DBC handle.
-	 *
-	 * \param	hEnv	The ENV-handle.
-	 *
-	 * \return	A DBC-handle or a SQL_NULL_HDBC-handle
-	 */
-	extern EXODBCAPI SQLHANDLE	AllocDbcHandle(const SQLHANDLE& hEnv);
-
-	/*!
-	 * \fn	extern EXODBCAPI bool FreeDbcHandle(SQLHANDLE& hDbc);
-	 *
-	 * \brief	Free DBC handle.
-	 *
-	 * \param [in,out]	hDbc	The DBC-handle.
-	 *
-	 * \return	true if it succeeds, false if it fails. Sets hDbc to SQL_NULL_HDBC if succeeds.
-	 */
-	extern EXODBCAPI bool		FreeDbcHandle(SQLHANDLE& hDbc);
 	extern EXODBCAPI SQLHANDLE	AllocStmtHandle(const SQLHANDLE& hDbc);
 	extern EXODBCAPI bool		FreeStmtHandle(SQLHANDLE& hStmt);
 
@@ -165,19 +144,27 @@ namespace exodbc
 
 }
 
-#define LOG_ODBC_ERROR(hEnv, hDbc, hStmt) \
+
+#define LOG_ODBC_ERROR(hEnv, hDbc, hStmt, ret, SqlFunction) \
 	do { \
 		std::vector<SErrorInfo> errs = GetAllErrors(hEnv, hDbc, hStmt); \
 		std::vector<SErrorInfo>::const_iterator it; \
+		std::wstringstream handles; \
+		if(hEnv) handles << L"Env=" << hEnv << L";"; \
+		if(hDbc) handles << L"Dbc=" << hDbc << L";"; \
+		if(hStmt) handles << L"Stmt=" << hStmt << L";"; \
 		std::wstringstream ws; \
-		ws << __FILEW__ << L"(" << __LINE__ << L")::" << __FUNCTIONW__ << L": "; \
+		ws << __FILEW__ << L"(" << __LINE__ << L")::" << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", with " << errs.size() << L" ODBC-Error(s) from handle(s) '" << handles.str() << L"': "; \
 		for(it = errs.begin(); it != errs.end(); it++) \
 		{ \
 			const SErrorInfo& err = *it; \
-			ws <<  err; \
+			ws << std::endl << err; \
 		} \
-	} while( 0 ) \ 
+		BOOST_LOG_TRIVIAL(error) << ws.str(); \
+	} while( 0 )
 
-#define LOG_ENV_ERROR(hEnv) LOG_ODBC_ERROR(hEnv, NULL, NULL)
+#define LOG_ENV_ERROR(hEnv, ret, SqlFunction) LOG_ODBC_ERROR(hEnv, NULL, NULL, ret, SqlFunction)
+#define LOG_DBC_ERROR(hDbc, ret, SqlFunction) LOG_ODBC_ERROR(NULL, hDbc, NULL, ret, SqlFunction)
+#define LOG_STMT_ERROR(hStmt, ret, SqlFunction) LOG_ODBC_ERROR(NULL, NULL, hStmt, ret, SqlFunction)
 
 #endif // HELPERS_H

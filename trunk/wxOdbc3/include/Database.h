@@ -329,7 +329,7 @@ namespace exodbc
 		std::wstring     EscapeSqlChars(const std::wstring& value);
 
 	private:
-		// Private member functions			
+		// Private member functions
 		bool			GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types);
 
 		void			Initialize();
