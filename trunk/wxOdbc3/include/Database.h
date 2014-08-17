@@ -251,11 +251,44 @@ namespace exodbc
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool         Open(DbEnvironment* dbConnectInf, bool failOnDataTypeUnsupported = true);
-		
+
+		/*!
+		 * \fn	bool Database::Close();
+		 *
+		 * \brief	If this database is open, closes the stmt-handle and the connection to the db.
+		 *
+		 * \return	True if not open or closing the Db-connection works, False if closing the db-
+		 * 			connection fails.
+		 */
 		bool         Close();
 
-		bool         ExecSql(const std::wstring& pSqlStmt);
+		/*!
+		 * \fn	bool Database::ExecSql(const std::wstring& sqlStmt);
+		 *
+		 * \brief	Executes the SQL operation.
+		 *
+		 * \param	sqlStmt	The SQL statement.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
+		bool         ExecSql(const std::wstring& sqlStmt);
+
+		/*!
+		 * \fn	bool Database::CommitTrans();
+		 *
+		 * \brief	Commits a transaction.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool         CommitTrans();
+
+		/*!
+		 * \fn	bool Database::RollbackTrans();
+		 *
+		 * \brief	Rolls back a transaction.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool         RollbackTrans();
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
