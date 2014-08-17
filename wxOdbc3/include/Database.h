@@ -171,6 +171,8 @@ namespace exodbc
 		std::wstring		m_tableName;
 		std::wstring		m_tableType;           // "TABLE" or "SYSTEM TABLE" etc.
 		std::wstring		m_tableRemarks;
+		std::wstring		m_catalog;
+		std::wstring		m_schema;
 		UWORD		m_numCols;                    // How many Columns does this Table have: GetColumnCount(..);
 		ColumnInfo*	m_pColInf;                    // pColInf = NULL ; User can later call GetColumns(..);
 	};
@@ -308,8 +310,8 @@ namespace exodbc
 		bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR* cbReturned);
 //		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
 		int          TranslateSqlState(const std::wstring& SQLState);
-		SDbCatalog*	 GetCatalog() { return GetCatalog(L"", L""); };
-		SDbCatalog*	 GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName);
+		bool		 GetCatalog(SDbCatalog& catalogInfo) { return GetCatalog(L"", L"", catalogInfo); };
+		bool		 GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo);
 //		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
 //		int          GetKeyFields(const std::wstring& tableName, ColumnInfo* colInf, UWORD noCols);
 

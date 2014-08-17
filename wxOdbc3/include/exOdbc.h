@@ -54,7 +54,7 @@ namespace exodbc
 	const int DB_MAX_CATALOG_NAME_LEN		= 128;	// This value is sometimes also available from dbInf: dbInf.catalogNameLen != 0
 	const int DB_MAX_COLUMN_NAME_LEN		= 128;
 	const int DB_MAX_TABLE_TYPE_LEN			= 128;
-	const int DB_MAX_TABLE_REMARKS_LEN		= 128;
+	const int DB_MAX_TABLE_REMARKS_LEN		= 512;
 	const int DB_MAX_LITERAL_PREFIX_LEN		= 128;
 	const int DB_MAX_LITERAL_SUFFIX_LEN		= 128;
 	const int DB_MAX_CREATE_PARAMS_LIST_LEN = 512;	
