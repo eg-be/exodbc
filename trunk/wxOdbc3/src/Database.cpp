@@ -145,7 +145,7 @@ namespace exodbc
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, pEnv->GetHenv(), &m_hdbc);
 		if(ret != SQL_SUCCESS)
 		{
-			LOG_ENV_ERROR(pEnv->GetHenv(), ret, SQLAllocHandle);
+			LOG_ERROR_ENV(pEnv->GetHenv(), ret, SQLAllocHandle);
 		}
 	}
 
@@ -162,7 +162,7 @@ namespace exodbc
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, aHenv, &m_hdbc);
 		if(ret != SQL_SUCCESS)
 		{
-			LOG_ENV_ERROR(aHenv, ret, SQLAllocHandle);
+			LOG_ERROR_ENV(aHenv, ret, SQLAllocHandle);
 		}
 	}
 
@@ -181,12 +181,12 @@ namespace exodbc
 			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched, use our standard logger
 			if(ret == SQL_ERROR)
 			{
-				LOG_DBC_ERROR(m_hdbc, ret, SQLFreeHandle);
+				LOG_ERROR_DBC(m_hdbc, ret, SQLFreeHandle);
 			}
 			else
 			{
 				// We cannot get any error-info here
-				LOG_SQL_NO_SUCCESS_ERROR(ret, SQLFreeHandle);
+				LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
 			}
 		}
 		if(ret == SQL_SUCCESS)
@@ -453,7 +453,7 @@ namespace exodbc
 		if(ret != SQL_SUCCESS)
 		{
 			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
-			LOG_DBC_ERROR(m_hdbc, ret, SQLAllocHandle);
+			LOG_ERROR_DBC(m_hdbc, ret, SQLAllocHandle);
 			return false;
 		}
 
@@ -503,7 +503,7 @@ namespace exodbc
 
 		if (retcode != SQL_SUCCESS)
 		{
-			LOG_DBC_ERROR(m_hdbc, retcode, SQLDriverConnect);
+			LOG_ERROR_DBC(m_hdbc, retcode, SQLDriverConnect);
 			return false;
 		}
 
@@ -541,7 +541,7 @@ namespace exodbc
 
 		if (retcode != SQL_SUCCESS)
 		{
-			LOG_DBC_ERROR(m_hdbc, retcode, SQLConnect);
+			LOG_ERROR_DBC(m_hdbc, retcode, SQLConnect);
 			return false;
 		}
 
@@ -573,14 +573,14 @@ namespace exodbc
 		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, NULL);
 		if(ret != SQL_SUCCESS)
 		{
-			LOG_DBC_ERROR(m_hdbc, ret, SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, NULL));
+			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_AUTOCOMMIT to AUTOCOMMIT_OFF");
 			ok = false;
 		}
 
 		ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, SQL_OPT_TRACE_OFF, NULL);
 		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"Failed to set ConnectAttr SQL_ATTR_TRACE to OFF" << GetLastDbcError(m_hdbc);
+			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_TRACE to OPT_TRACE_OFF");
 			ok = false;
 		}
 
@@ -639,7 +639,7 @@ namespace exodbc
 
 		if(!ok)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"Not all Database Infos could be queried";
+			BOOST_LOG_TRIVIAL(error) << L"Not all Database Infos could be queried";
 		}
 
 		// Completed
@@ -650,22 +650,20 @@ namespace exodbc
 	bool Database::GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types)
 	{
 		bool allOk = true;
-
-		SQLRETURN ret;
-
 		types.clear();
 
-		// Close an eventually open cursor
-		if(!CloseStmtHandle(m_hstmt))
+		// Close an eventually open cursor, do not care about truncation
+		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		if( ! SQL_SUCCEEDED(ret))
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"Failed to free Statement before fetching DataTypesInfo";
+			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
 			return false;
 		}
 
 		ret = SQLGetTypeInfo(m_hstmt, SQL_ALL_TYPES);
 		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"SQLGetTypeInfo for SQL_ALL_TYPES failed with ret " << ret << L": " << GetLastStmtError(m_hstmt);
+			LOG_ERROR_STMT(m_hstmt, ret, SQLGetTypeInfo);
 			return false;
 		}
 
@@ -731,14 +729,15 @@ namespace exodbc
 
 		if(ret != SQL_NO_DATA)
 		{
-			BOOST_LOG_TRIVIAL(error) << L"SQLFetch did not end with SQL_NO_DATA while fetching DataTypes, but with " << ret << L": " << GetLastStmtError(m_hstmt);
+			LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
 			return false;
 		}
 
-		// We are done, close cursor
-		if(!CloseStmtHandle(m_hstmt))
+		// We are done, close cursor, do not care about truncation
+		ret = CloseStmtHandle(m_hstmt, FailIfNotOpen);
+		if( ! SQL_SUCCEEDED(ret))
 		{
-			BOOST_LOG_TRIVIAL(error) << L"Failed to Close Statement after fetching DataTypesInfo";
+			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle);
 			return false;
 		}
 
@@ -760,11 +759,11 @@ namespace exodbc
 				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
 				if(ret == SQL_ERROR)
 				{
-					LOG_STMT_ERROR(m_hstmt, ret, SqlFreeHandle);
+					LOG_ERROR_STMT(m_hstmt, ret, SqlFreeHandle);
 				}
 				else
 				{
-					LOG_SQL_NO_SUCCESS_ERROR(ret, SQLFreeHandle);
+					LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
 				}
 			}
 

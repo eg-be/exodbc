@@ -324,24 +324,17 @@ namespace exodbc
 	}
 
 
-	bool CloseStmtHandle(const SQLHANDLE& hStmt)
+	SQLRETURN CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode)
 	{
 		exASSERT(hStmt);
 
-		SQLRETURN ret = SQLFreeStmt(hStmt, SQL_CLOSE);
-		if(ret != SQL_SUCCESS)
-		{
-			if(ret == SQL_SUCCESS_WITH_INFO || ret == SQL_ERROR)
-			{
-				BOOST_LOG_TRIVIAL(warning) << L"Failed to free Stmt, SQLFreeStmt with SQL_CLOSE returned with " << ret << L": " << GetLastStmtError(hStmt);
-			}
-			else
-			{
-				BOOST_LOG_TRIVIAL(warning) << L"Failed to free Stmt, SQLFreeStmt with SQL_CLOSE returned with " << ret;
-			}
-		}
+		SQLRETURN ret;
+		if(mode == IgnoreNotOpen)
+			ret = SQLFreeStmt(hStmt, SQL_CLOSE);
+		else
+			ret = SQLCloseCursor(hStmt);
 
-		return ret == SQL_SUCCESS;
+		return ret;
 	}
 
 
@@ -349,17 +342,12 @@ namespace exodbc
 	{
 		exASSERT(hDbc != NULL);
 		SQLRETURN ret = SQLGetInfo(hDbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue);
-		if( ! (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO))
+		if( ret != SQL_SUCCESS )
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"Failed with return-value " << ret << L" to GetInfo for type " << fInfoType << L": " << GetLastDbcError(hDbc);
+			LOG_ERROR_DBC_MSG(hDbc, ret, SQLGetInfo, (boost::wformat(L"GetInfo for fInfoType %d failed") %fInfoType).str());
 		}
 
-		if(ret == SQL_SUCCESS_WITH_INFO)
-		{
-			BOOST_LOG_TRIVIAL(warning) << L"GetInfo for type " << fInfoType << L" returned with SQL_SUCCESS_WITH_INFO";
-		}
-
-		return (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
+		return ret == SQL_SUCCESS;
 	}
 
 
