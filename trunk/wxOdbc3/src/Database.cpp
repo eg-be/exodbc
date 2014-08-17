@@ -685,33 +685,33 @@ namespace exodbc
 			SSqlTypeInfo info;
 
 			cb = 0;
-			bool ok = GetData3(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
+			bool ok = GetData(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
 			if(ok)
 				info.TypeName = typeName;
 			bool haveName = ok;
 
-			ok = ok & GetData3(m_hstmt, 2, SQL_C_SSHORT, &info.FsqlType, sizeof(info.FsqlType), &cb, NULL);
-			ok = ok & GetData3(m_hstmt, 3, SQL_C_SLONG, &info.Precision, sizeof(info.Precision), &cb, &info.PrecisionIsNull);
-			ok = ok & GetData3(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.LiteralPrefixIsNull, true);
+			ok = ok & GetData(m_hstmt, 2, SQL_C_SSHORT, &info.FsqlType, sizeof(info.FsqlType), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 3, SQL_C_SLONG, &info.Precision, sizeof(info.Precision), &cb, &info.PrecisionIsNull);
+			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.LiteralPrefixIsNull, true);
 			info.LiteralPrefix = literalPrefix;
-			ok = ok & GetData3(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.LiteralSuffixIsNull, true);
+			ok = ok & GetData(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.LiteralSuffixIsNull, true);
 			info.LiteralSuffix = literalSuffix;
-			ok = ok & GetData3(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.CreateParamsIsNull, true);
+			ok = ok & GetData(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.CreateParamsIsNull, true);
 			info.CreateParams = createParams;
-			ok = ok & GetData3(m_hstmt, 7, SQL_C_SSHORT, &info.Nullable, sizeof(info.Nullable), &cb, NULL);
-			ok = ok & GetData3(m_hstmt, 8, SQL_C_SSHORT, &info.CaseSensitive, sizeof(info.CaseSensitive), &cb, NULL);
-			ok = ok & GetData3(m_hstmt, 9, SQL_C_SSHORT, &info.Searchable, sizeof(info.Searchable), &cb, NULL);
-			ok = ok & GetData3(m_hstmt, 10, SQL_C_SSHORT, &info.Unsigned, sizeof(info.Unsigned), &cb, &info.UnsignedIsNull);
-			ok = ok & GetData3(m_hstmt, 11, SQL_C_SSHORT, &info.FixedPrecisionScale, sizeof(info.FixedPrecisionScale), &cb, NULL);
-			ok = ok & GetData3(m_hstmt, 12, SQL_C_SSHORT, &info.AutoUniqueValue, sizeof(info.AutoUniqueValue), &cb, &info.AutoUniqueValueIsNull);
-			ok = ok & GetData3(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.LocalTypeNameIsNull, true);
+			ok = ok & GetData(m_hstmt, 7, SQL_C_SSHORT, &info.Nullable, sizeof(info.Nullable), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 8, SQL_C_SSHORT, &info.CaseSensitive, sizeof(info.CaseSensitive), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 9, SQL_C_SSHORT, &info.Searchable, sizeof(info.Searchable), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 10, SQL_C_SSHORT, &info.Unsigned, sizeof(info.Unsigned), &cb, &info.UnsignedIsNull);
+			ok = ok & GetData(m_hstmt, 11, SQL_C_SSHORT, &info.FixedPrecisionScale, sizeof(info.FixedPrecisionScale), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 12, SQL_C_SSHORT, &info.AutoUniqueValue, sizeof(info.AutoUniqueValue), &cb, &info.AutoUniqueValueIsNull);
+			ok = ok & GetData(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.LocalTypeNameIsNull, true);
 			info.LocalTypeName = localTypeName;
-			ok = ok & GetData3(m_hstmt, 14, SQL_C_SSHORT, &info.MinimumScale, sizeof(info.MinimumScale), &cb, &info.MinimumScaleIsNull);
-			ok = ok & GetData3(m_hstmt, 15, SQL_C_SSHORT, &info.MaximumScale, sizeof(info.MaximumScale), &cb, &info.MaximumScaleIsNull);
-			ok = ok & GetData3(m_hstmt, 16, SQL_C_SSHORT, &info.SqlDataType, sizeof(info.SqlDataType), &cb, NULL);
-			ok = ok & GetData3(m_hstmt, 17, SQL_C_SSHORT, &info.SqlDateTimeSub, sizeof(info.SqlDateTimeSub), &cb, &info.SqlDateTimeSubIsNull);
-			ok = ok & GetData3(m_hstmt, 18, SQL_C_SSHORT, &info.NumPrecRadix, sizeof(info.NumPrecRadix), &cb, &info.NumPrecRadixIsNull);
-			ok = ok & GetData3(m_hstmt, 19, SQL_C_SSHORT, &info.IntervalPrecision, sizeof(info.IntervalPrecision), &cb, &info.IntervalPrecisionIsNull);
+			ok = ok & GetData(m_hstmt, 14, SQL_C_SSHORT, &info.MinimumScale, sizeof(info.MinimumScale), &cb, &info.MinimumScaleIsNull);
+			ok = ok & GetData(m_hstmt, 15, SQL_C_SSHORT, &info.MaximumScale, sizeof(info.MaximumScale), &cb, &info.MaximumScaleIsNull);
+			ok = ok & GetData(m_hstmt, 16, SQL_C_SSHORT, &info.SqlDataType, sizeof(info.SqlDataType), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 17, SQL_C_SSHORT, &info.SqlDateTimeSub, sizeof(info.SqlDateTimeSub), &cb, &info.SqlDateTimeSubIsNull);
+			ok = ok & GetData(m_hstmt, 18, SQL_C_SSHORT, &info.NumPrecRadix, sizeof(info.NumPrecRadix), &cb, &info.NumPrecRadixIsNull);
+			ok = ok & GetData(m_hstmt, 19, SQL_C_SSHORT, &info.IntervalPrecision, sizeof(info.IntervalPrecision), &cb, &info.IntervalPrecisionIsNull);
 
 			if(ok)
 			{
@@ -1340,27 +1340,6 @@ namespace exodbc
 
 	}  // wxDb::GetNext()
 
-
-	/********** wxDb::GetData()  **********/
-	bool Database::GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR *cbReturned)
-	{
-		exASSERT(pData);
-		exASSERT(cbReturned);
-
-		long bufferSize = maxLen;
-
-		if (cType == SQL_C_WXCHAR)
-			bufferSize = maxLen * sizeof(wchar_t);
-
-		if (SQLGetData(m_hstmt, colNo, cType, pData, bufferSize, cbReturned) == SQL_SUCCESS)
-			return true;
-		else
-		{
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-			return false;
-		}
-
-	}  // wxDb::GetData()
 
 
 	/********** wxDb::GetKeyFields() **********/
@@ -2384,11 +2363,11 @@ namespace exodbc
 			tableType[0] = 0;
 			tableRemarks[0] = 0;
 
-			ok = ok & GetData3(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN + 1, &cb, NULL, true);
-			ok = ok & GetData3(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN + 1, &cb, NULL, true);
-			ok = ok & GetData3(m_hstmt, 3, SQL_C_WCHAR, tableName, m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN + 1, &cb, NULL, true);
-			ok = ok & GetData3(m_hstmt, 4, SQL_C_WCHAR, tableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
-			ok = ok & GetData3(m_hstmt, 5, SQL_C_WCHAR, tableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 3, SQL_C_WCHAR, tableName, m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, tableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 5, SQL_C_WCHAR, tableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb, NULL, true);
 
 			count++;
 			if(ok)
@@ -2442,7 +2421,7 @@ namespace exodbc
 
 		return allOk;
 
-	}  // Database::GetCatalog()
+	}
 
 
 	///********** wxDb::Catalog() **********/

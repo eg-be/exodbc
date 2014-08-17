@@ -307,7 +307,6 @@ namespace exodbc
 //		bool         DropView(const std::wstring& viewName);
 //		bool         ExecSql(const std::wstring& pSqlStmt, ColumnInfo** columns, short& numcols);
 		bool         GetNext();
-		bool         GetData(UWORD colNo, SWORD cType, PTR pData, SDWORD maxLen, SQLLEN FAR* cbReturned);
 //		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
 		int          TranslateSqlState(const std::wstring& SQLState);
 		bool		 GetCatalog(SDbCatalog& catalogInfo) { return GetCatalog(L"", L"", catalogInfo); };
