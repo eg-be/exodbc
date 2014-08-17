@@ -265,7 +265,7 @@ namespace exodbc
 		/*!
 		 * \fn	bool Database::ExecSql(const std::wstring& sqlStmt);
 		 *
-		 * \brief	Executes the SQL operation.
+		 * \brief	Executes the SQL operation on the internal stmt-handle.
 		 *
 		 * \param	sqlStmt	The SQL statement.
 		 *
@@ -276,7 +276,7 @@ namespace exodbc
 		/*!
 		 * \fn	bool Database::CommitTrans();
 		 *
-		 * \brief	Commits a transaction.
+		 * \brief	Commits all transaction associated with this database.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
@@ -285,7 +285,7 @@ namespace exodbc
 		/*!
 		 * \fn	bool Database::RollbackTrans();
 		 *
-		 * \brief	Rolls back a transaction.
+		 * \brief	Rolls back all transaction associated with this database.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
