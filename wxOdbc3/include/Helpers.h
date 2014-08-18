@@ -170,6 +170,14 @@ namespace exodbc
 	 */
 	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
 
+	enum GetCatalogInfoMode
+	{
+		AllCatalogs,
+		AllSchemas,
+		AllTableTypes
+	};
+	extern EXODBCAPI bool		GetCatalogInfo(GetCatalogInfoMode mode, std::vector<std::wstring>& results);
+
 	// Classes
 	// -------
 

@@ -396,6 +396,67 @@ namespace exodbc
 		return true;
 	}
 
+
+	bool GetCatalogInfo(SQLHANDLE hStmt, GetCatalogInfoMode mode, std::vector<std::wstring>& results)
+	{
+		results.empty();
+
+		SQLPOINTER catalogName = NULL;
+		SQLPOINTER schemaName = NULL;
+		SQLPOINTER tableTypeName = NULL;
+
+		switch(mode)
+		{
+		case AllCatalogs:
+			catalogName = SQL_ALL_CATALOGS;
+			break;
+		case AllSchemas:
+			schemaName = SQL_ALL_SCHEMAS;
+			break;
+		case AllTableTypes:
+			tableTypeName = SQL_ALL_TABLE_TYPES;
+			break;
+		}
+
+		// Close Statement 
+		SQLRETURN ret = CloseStmtHandle(hStmt, IgnoreNotOpen);
+		if(ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(hStmt, ret, CloseStmtHandle(IgnoreNotOpen) );
+			return false;
+		}
+
+		ret = SQLTables(hStmt,
+				(SQLWCHAR*) catalogName, SQL_NTS,                    
+				(SQLWCHAR*) schemaName, SQL_NTS, 
+				NULL, 0,
+				(SQLWCHAR*) tableTypeName, SQL_NTS);
+		
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(hStmt, ret, SQLTables);
+
+			// Silently try to close and fail
+			CloseStmtHandle(hStmt, IgnoreNotOpen);
+			return false;
+		}
+
+		int count = 0;
+		while ((ret = SQLFetch(hStmt)) == SQL_SUCCESS)   // Table Information
+		{
+
+		}
+
+		if(ret != SQL_NO_DATA)
+		{
+			LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, GetData());
+			CloseStmtHandle(hStmt, IgnoreNotOpen);
+			return false;
+		}
+		CloseStmtHandle(hStmt, IgnoreNotOpen);
+		return false;
+	}
+
 }
 
 // Interfaces
