@@ -2375,6 +2375,29 @@ namespace exodbc
 	}
 
 
+	bool Database::GetCatalogs(std::vector<std::wstring>& catalogs)
+	{
+		catalogs.empty();
+
+		return false;
+	}
+
+
+	bool Database::GetSchemas(std::vector<std::wstring>& schemas)
+	{
+		schemas.empty();
+
+		return false;
+	}
+
+
+	bool Database::GetTables(std::vector<std::wstring>& tables)
+	{
+		tables.empty();
+
+		return false;
+	}
+
 	///********** wxDb::Catalog() **********/
 	//bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
 	//	/*

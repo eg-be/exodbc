@@ -326,6 +326,10 @@ namespace exodbc
 		 */
 		bool		GetCatalog(SDbCatalog& catalogInfo)				{ return GetCatalog(L"", L"", catalogInfo); };
 
+		bool		GetCatalogs(std::vector<std::wstring>& catalogs);
+		bool		GetSchemas(std::vector<std::wstring>& schemas);
+		bool		GetTables(std::vector<std::wstring>& tables);
+
 		int			GetColumnCount(const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring catalogName = L"");
 
 		// TODO: Continue here: Get back the following stuff
