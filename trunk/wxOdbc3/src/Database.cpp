@@ -107,29 +107,6 @@ namespace exodbc
 	}  // wxDbColInf::Initialize()
 
 
-	/********** wxDbTableInf Constructor ********/
-	DbCatalogTable::DbCatalogTable()
-	{
-		Initialize();
-	}  // wxDbTableInf::wxDbTableInf()
-
-
-	/********** wxDbTableInf Constructor ********/
-	DbCatalogTable::~DbCatalogTable()
-	{
-		if (m_pColInf)
-			delete [] m_pColInf;
-		m_pColInf = NULL;
-	}  // wxDbTableInf::~wxDbTableInf()
-
-
-	bool DbCatalogTable::Initialize()
-	{
-		m_numCols         = 0;
-		m_pColInf         = NULL;
-
-		return true;
-	}  // wxDbTableInf::Initialize()
 
 	Database::Database(const DbEnvironment* const pEnv)
 		: m_fwdOnlyCursors(true)
@@ -2309,7 +2286,7 @@ namespace exodbc
 	}
 
 
-	bool Database::GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo)
+	bool Database::ReadCompleteCatalog(SDbCatalog& catalogInfo)
 	{
 		RETCODE  retcode;
 		SQLLEN   cb;
@@ -2324,39 +2301,11 @@ namespace exodbc
 			return false;
 		}
 
-		if (!catalogName.empty() && !schemaName.empty())
-		{
-			retcode = SQLTables(m_hstmt,
-				(SQLWCHAR *) catalogName.c_str(), SQL_NTS,                    
-				(SQLWCHAR *) schemaName.c_str(), SQL_NTS, 
-				NULL, 0,                             // All tables
-				NULL, 0);                            // All columns
-		}
-		else if(!catalogName.empty())
-		{
-			retcode = SQLTables(m_hstmt,
-				(SQLWCHAR *) catalogName.c_str(), SQL_NTS,           // All qualifiers - CatalogName
-				NULL, 0,           // User specified - SchemaName
-				NULL, 0,           // All tables - TableName
-				NULL, 0);          // All columns - TableType
-		}
-		else if(!schemaName.empty())
-		{
-			retcode = SQLTables(m_hstmt,
-				NULL, 0,           // All qualifiers - CatalogName
-				(SQLWCHAR *) schemaName.c_str(), SQL_NTS,           // User specified - SchemaName
-				NULL, 0,           // All tables - TableName
-				NULL, 0);          // All columns - TableType
-		}
-		else
-		{
-			retcode = SQLTables(m_hstmt,
-				NULL, 0,           // All qualifiers - CatalogName
-				NULL, 0,           // User specified - SchemaName
-				NULL, 0,           // All tables - TableName
-				NULL, 0);          // All columns - TableType
-		}
-
+		retcode = SQLTables(m_hstmt,
+			NULL, NULL,
+			NULL, NULL,
+			NULL, NULL,
+			NULL, NULL);
 
 		if (retcode != SQL_SUCCESS)
 		{
@@ -2367,10 +2316,10 @@ namespace exodbc
 			return false;
 		}
 
-		wchar_t* cat = new wchar_t[m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN_DEFAULT + 1];
-		wchar_t* schem = new wchar_t[m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN_DEFAULT + 1];
-		wchar_t* tableName = new wchar_t[m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN_DEFAULT + 1];
-		wchar_t* tableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN + 1];
+		wchar_t* cat = new wchar_t[m_dbInf.GetMaxCatalogNameLen()];
+		wchar_t* schem = new wchar_t[m_dbInf.GetMaxSchemaNameLen()];
+		wchar_t* tableName = new wchar_t[m_dbInf.GetMaxTableNameLen()];
+		wchar_t* btableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN + 1];
 		wchar_t* tableRemarks = new wchar_t[DB_MAX_TABLE_REMARKS_LEN + 1];
 
 		int count = 0;
@@ -2382,13 +2331,13 @@ namespace exodbc
 			cat[0] = 0;
 			schem[0] = 0;
 			tableName[0] = 0;
-			tableType[0] = 0;
+			btableType[0] = 0;
 			tableRemarks[0] = 0;
 
-			ok = ok & GetData(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN_DEFAULT + 1, &cb, NULL, true);
-			ok = ok & GetData(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN_DEFAULT + 1, &cb, NULL, true);
-			ok = ok & GetData(m_hstmt, 3, SQL_C_WCHAR, tableName, m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN_DEFAULT + 1, &cb, NULL, true);
-			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, tableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.GetMaxCatalogNameLen(), &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.GetMaxSchemaNameLen(), &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 3, SQL_C_WCHAR, tableName, m_dbInf.GetMaxTableNameLen(), &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, btableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
 			ok = ok & GetData(m_hstmt, 5, SQL_C_WCHAR, tableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb, NULL, true);
 
 			count++;
@@ -2397,7 +2346,7 @@ namespace exodbc
 				// Create the entry
 				DbCatalogTable table;
 				table.m_tableName = tableName;
-				table.m_tableType = tableType;
+				table.m_tableType = btableType;
 				table.m_tableRemarks = tableRemarks;
 				table.m_schema = schem;
 				table.m_catalog = cat;
@@ -2420,32 +2369,16 @@ namespace exodbc
 			delete[] cat;
 			delete[] schem;
 			delete[] tableName;
-			delete[] tableType;
+			delete[] btableType;
 			delete[] tableRemarks;
 			return false;
 		}
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
-		// Query how many columns are in each table
-		std::vector<DbCatalogTable>::iterator it;
-		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
-		{
-			int count = GetColumnCount((*it).m_tableName, (*it).m_schema, (*it).m_catalog);
-			if(count < 0)
-			{
-				allOk = false;
-				BOOST_LOG_TRIVIAL(error) << L"Failed to Get ColumnCount for table '" << (*it).m_tableName << L"'";
-			}
-			else
-			{
-				(*it).m_numCols = count;
-			}
-		}
-
 		delete[] cat;
 		delete[] schem;
 		delete[] tableName;
-		delete[] tableType;
+		delete[] btableType;
 		delete[] tableRemarks;
 
 		catalogInfo = dbInf;
@@ -3118,27 +3051,27 @@ namespace exodbc
 
 	//} // wxDb::ModifyColumn()
 
-	/********** wxDb::EscapeSqlChars() **********/
-	std::wstring Database::EscapeSqlChars(const std::wstring& valueOrig)
-	{
-		std::wstring value(valueOrig);
-		switch (Dbms())
-		{
-		case dbmsACCESS:
-			// Access doesn't seem to care about backslashes, so only escape single quotes.
-			boost::algorithm::replace_all(value, L"'", L"''");
-			break;
+	///********** wxDb::EscapeSqlChars() **********/
+	//std::wstring Database::EscapeSqlChars(const std::wstring& valueOrig)
+	//{
+	//	std::wstring value(valueOrig);
+	//	switch (Dbms())
+	//	{
+	//	case dbmsACCESS:
+	//		// Access doesn't seem to care about backslashes, so only escape single quotes.
+	//		boost::algorithm::replace_all(value, L"'", L"''");
+	//		break;
 
-		default:
-			// All the others are supposed to be the same for now, add special
-			// handling for them if necessary
-			boost::algorithm::replace_all(value, L"\\", L"\\\\");
-			boost::algorithm::replace_all(value, L"'", L"\\'");
-			break;
-		}
+	//	default:
+	//		// All the others are supposed to be the same for now, add special
+	//		// handling for them if necessary
+	//		boost::algorithm::replace_all(value, L"\\", L"\\\\");
+	//		boost::algorithm::replace_all(value, L"'", L"\\'");
+	//		break;
+	//	}
 
-		return value;
-	} // wxDb::EscapeSqlChars()
+	//	return value;
+	//} // wxDb::EscapeSqlChars()
 
 
 	///********** wxDbLogExtendedErrorMsg() **********/

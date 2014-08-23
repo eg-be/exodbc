@@ -163,18 +163,14 @@ namespace exodbc
 	class EXODBCAPI DbCatalogTable        // Description of a Table: Used only in the Description of a database, (catalog info)
 	{
 	public:
-		DbCatalogTable();
-		~DbCatalogTable();
-
-		bool             Initialize();
+		DbCatalogTable() {};
+		~DbCatalogTable() {};
 
 		std::wstring		m_tableName;
 		std::wstring		m_tableType;           // "TABLE" or "SYSTEM TABLE" etc.
 		std::wstring		m_tableRemarks;
 		std::wstring		m_catalog;
 		std::wstring		m_schema;
-		UWORD		m_numCols;                    // How many Columns does this Table have: GetColumnCount(..);
-		ColumnInfo*	m_pColInf;                    // pColInf = NULL ; User can later call GetColumns(..);
 	};
 
 
@@ -300,31 +296,16 @@ namespace exodbc
 		 */
 		bool         RollbackTrans();
 
-		/*!
-		 * \fn	bool Database::GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo);
+		/**
+		 * \fn	bool Database::ReadCompleteCatalog(SDbCatalog& catalogInfo);
 		 *
-		 * \brief	List all tables, catalogs and schemes in a SDbCatalog.
-		 * 			If Odbc > 3.0 you can use search-patterns.
-		 * 			See: http://msdn.microsoft.com/en-us/library/ms711831%28v=vs.85%29.aspx
-		 *
-		 * \param	catalogName		   	Name of the catalog.
-		 * \param	schemaName		   	Name of the schema.
-		 * \param [in,out]	catalogInfo	Information describing the catalog.
-		 *
-		 * \return	true if it succeeds, false if it fails.
-		 */
-		bool		 GetCatalog(const std::wstring& catalogName, const std::wstring& schemaName, SDbCatalog& catalogInfo);
-
-		/*!
-		 * \fn	bool Database::GetCatalog(SDbCatalog& catalogInfo)
-		 *
-		 * \brief	Calls GetCatalog with empty values for catalog- and scheme-name
+		 * \brief	Reads complete catalog.
 		 *
 		 * \param [in,out]	catalogInfo	Information describing the catalog.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		GetCatalog(SDbCatalog& catalogInfo)						{ return GetCatalog(L"", L"", catalogInfo); };
+		bool		ReadCompleteCatalog(SDbCatalog& catalogInfo);
 
 		bool		ReadCatalogs(std::vector<std::wstring>& catalogs)		{ return ReadCatalogInfo(AllCatalogs, catalogs); };
 		bool		ReadSchemas(std::vector<std::wstring>& schemas)			{ return ReadCatalogInfo(AllSchemas, schemas); };
@@ -405,7 +386,7 @@ namespace exodbc
 		bool         FwdOnlyCursors()  {return m_fwdOnlyCursors;}
 
 		// return the string with all special SQL characters escaped
-		std::wstring     EscapeSqlChars(const std::wstring& value);
+		//std::wstring     EscapeSqlChars(const std::wstring& value);
 
 	private:
 		// Private member functions
