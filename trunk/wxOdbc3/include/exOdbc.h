@@ -49,9 +49,9 @@ namespace exodbc
 	const int DB_MAX_WHERE_CLAUSE_LEN		= 2048;
 	const int DB_MAX_ERROR_MSG_LEN			= 512;
 	const int DB_MAX_ERROR_HISTORY			= 5;
-	const int DB_MAX_TABLE_NAME_LEN			= 128;	// This value is sometimes also available from dbInf: dbInf.tableNameLen != 0
-	const int DB_MAX_SCHEMA_NAME_LEN		= 128;	// This value is sometimes also available from dbInf: dbInf.schemaNameLen != 0
-	const int DB_MAX_CATALOG_NAME_LEN		= 128;	// This value is sometimes also available from dbInf: dbInf.catalogNameLen != 0
+	const int DB_MAX_TABLE_NAME_LEN_DEFAULT			= 128;	// This value is sometimes also available from dbInf: dbInf.tableNameLen != 0
+	const int DB_MAX_SCHEMA_NAME_LEN_DEFAULT		= 128;	// This value is sometimes also available from dbInf: dbInf.schemaNameLen != 0
+	const int DB_MAX_CATALOG_NAME_LEN_DEFAULT		= 128;	// This value is sometimes also available from dbInf: dbInf.catalogNameLen != 0
 	const int DB_MAX_COLUMN_NAME_LEN		= 128;
 	const int DB_MAX_TABLE_TYPE_LEN			= 128;
 	const int DB_MAX_TABLE_REMARKS_LEN		= 512;
@@ -132,6 +132,11 @@ namespace exodbc
 		SQLUSMALLINT  maxTableNameLen;					// Max length of a table name. Can be 0 if no limit, or limit is unknown
 
 		std::wstring ToStr() const;
+
+		SQLUSMALLINT GetMaxCatalogNameLen() const;
+		SQLUSMALLINT GetMaxSchemaNameLen() const;
+		SQLUSMALLINT GetMaxTableNameLen() const;
+		SQLUSMALLINT GetMaxTableTypeNameLen() const { return DB_MAX_TABLE_TYPE_LEN; };
 	};
 
 	/*!

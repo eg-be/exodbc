@@ -175,6 +175,20 @@ namespace exodbc {
 		return ws.str();
 	}
 
+	SQLUSMALLINT SDbInfo::GetMaxCatalogNameLen() const
+	{
+		return maxCatalogNameLen != 0 ? maxCatalogNameLen : DB_MAX_CATALOG_NAME_LEN_DEFAULT;
+	}
+
+	SQLUSMALLINT SDbInfo::GetMaxSchemaNameLen() const
+	{
+		return maxSchemaNameLen != 0 ? maxSchemaNameLen : DB_MAX_SCHEMA_NAME_LEN_DEFAULT;
+	}
+
+	SQLUSMALLINT SDbInfo::GetMaxTableNameLen() const
+	{
+		return maxTableNameLen != 0 ? maxTableNameLen : DB_MAX_TABLE_NAME_LEN_DEFAULT;
+	}
 
 	SSqlTypeInfo::SSqlTypeInfo()
 	{
