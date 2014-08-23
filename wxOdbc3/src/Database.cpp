@@ -215,39 +215,39 @@ namespace exodbc
 	}
 
 
-	/********** PRIVATE! wxDb::ConvertUserIDImpl PRIVATE! **********/
-	//
-	// NOTE: Return value from this function MUST be copied
-	//       immediately, as the value is not good after
-	//       this function has left scope.
-	//
-	std::wstring Database::ConvertUserIDImpl(const wchar_t* userID)
-	{
-		std::wstring UserID;
+	///********** PRIVATE! wxDb::ConvertUserIDImpl PRIVATE! **********/
+	////
+	//// NOTE: Return value from this function MUST be copied
+	////       immediately, as the value is not good after
+	////       this function has left scope.
+	////
+	//std::wstring Database::ConvertUserIDImpl(const wchar_t* userID)
+	//{
+	//	std::wstring UserID;
 
-		if (userID)
-		{
-			if (!wcslen(userID))
-				UserID = m_uid;
-			else
-				UserID = userID;
-		}
-		else
-			UserID.empty();
+	//	if (userID)
+	//	{
+	//		if (!wcslen(userID))
+	//			UserID = m_uid;
+	//		else
+	//			UserID = userID;
+	//	}
+	//	else
+	//		UserID.empty();
 
-		// dBase does not use user names, and some drivers fail if you try to pass one
-		if ( Dbms() == dbmsDBASE
-			|| Dbms() == dbmsXBASE_SEQUITER )
-			UserID.empty();
+	//	// dBase does not use user names, and some drivers fail if you try to pass one
+	//	if ( Dbms() == dbmsDBASE
+	//		|| Dbms() == dbmsXBASE_SEQUITER )
+	//		UserID.empty();
 
-		// Some databases require user names to be specified in uppercase,
-		// so force the name to uppercase
-		if ((Dbms() == dbmsORACLE) ||
-			(Dbms() == dbmsMAXDB))
-			boost::algorithm::to_upper(UserID);
+	//	// Some databases require user names to be specified in uppercase,
+	//	// so force the name to uppercase
+	//	if ((Dbms() == dbmsORACLE) ||
+	//		(Dbms() == dbmsMAXDB))
+	//		boost::algorithm::to_upper(UserID);
 
-		return UserID;
-	}  // wxDb::ConvertUserIDImpl()
+	//	return UserID;
+	//}  // wxDb::ConvertUserIDImpl()
 
 
 //	bool Database::DetermineDataTypes(bool failOnDataTypeUnsupported)
@@ -645,6 +645,86 @@ namespace exodbc
 		// Completed
 		return ok;
 	}
+
+
+	bool Database::ReadCatalogInfo(ReadCatalogInfoMode mode, std::vector<std::wstring>& results)
+	{
+		results.empty();
+
+		SQLPOINTER catalogName = L"";
+		SQLPOINTER schemaName = L"";
+		SQLPOINTER tableTypeName = L"";
+
+		SQLSMALLINT colNr = 0;
+		SQLUSMALLINT bufferLen = 0;
+
+		switch(mode)
+		{
+		case AllCatalogs:
+			catalogName = SQL_ALL_CATALOGS;
+			colNr = 1;
+			bufferLen = m_dbInf.GetMaxCatalogNameLen();
+			break;
+		case AllSchemas:
+			schemaName = SQL_ALL_SCHEMAS;
+			colNr = 2;
+			bufferLen = m_dbInf.GetMaxSchemaNameLen();
+			break;
+		case AllTableTypes:
+			tableTypeName = SQL_ALL_TABLE_TYPES;
+			colNr = 4;
+			bufferLen = m_dbInf.GetMaxTableTypeNameLen();
+			break;
+		default:
+			exASSERT(false);
+		}
+
+		// Close Statement 
+		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		if(ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen) );
+			return false;
+		}
+
+		ret = SQLTables(m_hstmt,
+			(SQLWCHAR*) catalogName, SQL_NTS,   // catname                 
+			(SQLWCHAR*) schemaName, SQL_NTS,   // schema name
+			L"", SQL_NTS,							// table name
+			(SQLWCHAR*) tableTypeName, SQL_NTS);
+
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, SQLTables);
+
+			// Silently try to close and fail
+			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+			return false;
+		}
+
+		// Read data
+		SQLWCHAR* buffer = new SQLWCHAR[bufferLen];
+		SQLLEN cb;
+		bool ok = true;
+		while (ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
+		{
+			ok = GetData(m_hstmt, colNr, SQL_C_WXCHAR, buffer, bufferLen, &cb, NULL, true);
+			if(ok)
+				results.push_back(buffer);
+		}
+
+		if(ok && ret != SQL_NO_DATA)
+		{
+			LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, GetData());
+			ok = false;
+		}
+		
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		delete[] buffer;
+		
+		return ok;
+	}
+
 
 
 	bool Database::GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types)
@@ -2287,9 +2367,9 @@ namespace exodbc
 			return false;
 		}
 
-		wchar_t* cat = new wchar_t[m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN + 1];
-		wchar_t* schem = new wchar_t[m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN + 1];
-		wchar_t* tableName = new wchar_t[m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN + 1];
+		wchar_t* cat = new wchar_t[m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN_DEFAULT + 1];
+		wchar_t* schem = new wchar_t[m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN_DEFAULT + 1];
+		wchar_t* tableName = new wchar_t[m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN_DEFAULT + 1];
 		wchar_t* tableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN + 1];
 		wchar_t* tableRemarks = new wchar_t[DB_MAX_TABLE_REMARKS_LEN + 1];
 
@@ -2305,9 +2385,9 @@ namespace exodbc
 			tableType[0] = 0;
 			tableRemarks[0] = 0;
 
-			ok = ok & GetData(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN + 1, &cb, NULL, true);
-			ok = ok & GetData(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN + 1, &cb, NULL, true);
-			ok = ok & GetData(m_hstmt, 3, SQL_C_WCHAR, tableName, m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN + 1, &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.maxCatalogNameLen ? m_dbInf.maxCatalogNameLen + 1: DB_MAX_CATALOG_NAME_LEN_DEFAULT + 1, &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.maxSchemaNameLen ? m_dbInf.maxSchemaNameLen + 1: DB_MAX_SCHEMA_NAME_LEN_DEFAULT + 1, &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 3, SQL_C_WCHAR, tableName, m_dbInf.maxTableNameLen ? m_dbInf.maxTableNameLen + 1: DB_MAX_TABLE_NAME_LEN_DEFAULT + 1, &cb, NULL, true);
 			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, tableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
 			ok = ok & GetData(m_hstmt, 5, SQL_C_WCHAR, tableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb, NULL, true);
 
@@ -2375,28 +2455,6 @@ namespace exodbc
 	}
 
 
-	bool Database::GetCatalogs(std::vector<std::wstring>& catalogs)
-	{
-		catalogs.empty();
-
-		return false;
-	}
-
-
-	bool Database::GetSchemas(std::vector<std::wstring>& schemas)
-	{
-		schemas.empty();
-
-		return false;
-	}
-
-
-	bool Database::GetTables(std::vector<std::wstring>& tables)
-	{
-		tables.empty();
-
-		return false;
-	}
 
 	///********** wxDb::Catalog() **********/
 	//bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)

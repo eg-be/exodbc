@@ -139,7 +139,7 @@ namespace exodbc
 
 		wchar_t			m_catalog[128+1];
 		wchar_t			m_schema[128+1];
-		wchar_t			m_tableName[DB_MAX_TABLE_NAME_LEN+1];
+		wchar_t			m_tableName[DB_MAX_TABLE_NAME_LEN_DEFAULT+1];
 		wchar_t			m_colName[DB_MAX_COLUMN_NAME_LEN+1];
 		SWORD			m_sqlDataType;
 		wchar_t			m_typeName[128+1];
@@ -152,9 +152,9 @@ namespace exodbc
 		int				m_dbDataType;  // conversion of the 'sqlDataType' to the generic data type used by these classes
 		// mj10777.19991224 : new
 		int				m_pkCol;       // Primary key column       0=No; 1= First Key, 2 = Second Key etc.
-		wchar_t			m_pkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Tables that use this PKey as a FKey
+		wchar_t			m_pkTableName[DB_MAX_TABLE_NAME_LEN_DEFAULT+1]; // Tables that use this PKey as a FKey
 		int				m_fkCol;       // Foreign key column       0=No; 1= First Key, 2 = Second Key etc.
-		wchar_t			m_fkTableName[DB_MAX_TABLE_NAME_LEN+1]; // Foreign key table name
+		wchar_t			m_fkTableName[DB_MAX_TABLE_NAME_LEN_DEFAULT+1]; // Foreign key table name
 		ColumnFormatter* m_pColFor;                              // How should this columns be formatted
 
 	};
@@ -324,11 +324,11 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		GetCatalog(SDbCatalog& catalogInfo)				{ return GetCatalog(L"", L"", catalogInfo); };
+		bool		GetCatalog(SDbCatalog& catalogInfo)						{ return GetCatalog(L"", L"", catalogInfo); };
 
-		bool		GetCatalogs(std::vector<std::wstring>& catalogs);
-		bool		GetSchemas(std::vector<std::wstring>& schemas);
-		bool		GetTables(std::vector<std::wstring>& tables);
+		bool		ReadCatalogs(std::vector<std::wstring>& catalogs)		{ return ReadCatalogInfo(AllCatalogs, catalogs); };
+		bool		ReadSchemas(std::vector<std::wstring>& schemas)			{ return ReadCatalogInfo(AllSchemas, schemas); };
+		bool		ReadTableTypes(std::vector<std::wstring>& tableTypes)	{ return ReadCatalogInfo(AllTableTypes, tableTypes); };
 
 		int			GetColumnCount(const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring catalogName = L"");
 
@@ -416,9 +416,18 @@ namespace exodbc
 		bool			ReadDbInfo(SDbInfo& dbInfo);
 		bool			SetConnectionAttributes();
 //		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
-		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
+//		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
 		//bool             DetermineDataTypes(bool failOnDataTypeUnsupported);
 		bool             OpenImpl(bool failOnDataTypeUnsupported = true);
+
+		enum ReadCatalogInfoMode
+		{
+			AllCatalogs,
+			AllSchemas,
+			AllTableTypes
+		};
+		bool			ReadCatalogInfo(ReadCatalogInfoMode mode, std::vector<std::wstring>& results);
+
 
 		// Members
 		SDbInfo				m_dbInf;

@@ -271,6 +271,27 @@ namespace exodbc
 		db.Close();
 	}
 
+	TEST_P(DbTest, ReadCatalogs)
+	{
+		std::vector<std::wstring> cats;
+		EXPECT_TRUE(m_pDb->ReadCatalogs(cats));
+		int p = 3;
+	}
+
+	TEST_P(DbTest, ReadSchemas)
+	{
+		std::vector<std::wstring> schemas;
+		EXPECT_TRUE(m_pDb->ReadSchemas(schemas));
+		int p = 3;
+	}
+
+	TEST_P(DbTest, ReadTableTypes)
+	{
+		std::vector<std::wstring> tableTypes;
+		EXPECT_TRUE(m_pDb->ReadTableTypes(tableTypes));
+		int p = 3;
+	}
+
 	TEST_P(DbTest, GetCatalog)
 	{
 		SDbCatalog cat;
