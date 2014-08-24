@@ -120,6 +120,7 @@ namespace exodbc
 
 		BOOST_LOG_TRIVIAL(info) << ws.str();
 
+		// This is need for ms-sql server.
 		db.CommitTrans();
 
 		db.Close();
