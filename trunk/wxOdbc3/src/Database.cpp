@@ -2397,7 +2397,7 @@ namespace exodbc
 			++colCount;
 		}
 
-		if(ret != SQL_NO_DATA)
+		if(ok && ret != SQL_NO_DATA)
 		{
 			LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
 			ok = false;
@@ -2447,6 +2447,149 @@ namespace exodbc
 		return ReadColumnCount(tables[0]);
 	}
 
+
+	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges)
+	{
+		// Query the tables that match
+		std::vector<SDbCatalogTable> tables;
+		if(!FindTables(tableName, schemaName, catalogName, L"", tables))
+		{
+			LOG_ERROR(L"Searching tables failed");
+			return false;
+		}
+
+		if(tables.size() == 0)
+		{
+			LOG_ERROR((boost::wformat(L"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			return false;
+		}
+		if(tables.size() != 1)
+		{
+			LOG_ERROR((boost::wformat(L"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			return false;
+		}
+
+		// Forward the call		
+		return ReadTablePrivileges(tables[0], privileges);
+	}
+
+
+	bool Database::ReadTablePrivileges(const SDbCatalogTable& table, std::vector<SCatalogTablePrivilege>& privileges)
+	{
+		privileges.clear();
+
+		// Free statement, ignore if already closed
+		// Close an eventually open cursor, do not care about truncation
+		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		if( ! SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
+			return false;
+		}
+
+		// Note: The schema and table name arguments are Pattern Value arguments
+		// The catalog name is an ordinary argument. if we do not have one in the
+		// DbCatalogTable, we set it to an empty string
+		std::wstring catalogQueryName = L"";
+		if(!table.m_isCatalogNull)
+			catalogQueryName = table.m_catalog;
+
+		// we always have a tablename, but only sometimes a schema
+		SQLWCHAR* pSchemaBuff = NULL;
+		if(!table.m_isSchemaNull)
+		{
+			pSchemaBuff = new SQLWCHAR[table.m_schema.length() + 1];
+			wcscpy(pSchemaBuff, table.m_schema.c_str());
+		}
+
+		// Query privs
+		bool ok = true;
+		wchar_t* buffCatalog = new wchar_t[m_dbInf.GetMaxCatalogNameLen()];
+		wchar_t* buffSchema = new wchar_t[m_dbInf.GetMaxSchemaNameLen()];
+		wchar_t* buffTableName = new wchar_t[m_dbInf.GetMaxTableNameLen()];
+		wchar_t* buffGrantor = new wchar_t[DB_MAX_GRANTEE_LEN + 1];
+		wchar_t* buffGrantee = new wchar_t[DB_MAX_GRANTEE_LEN + 1];
+		wchar_t* buffPrivilege = new wchar_t[DB_MAX_PRIVILEGES_LEN + 1];
+		wchar_t* buffGrantable = new wchar_t[DB_MAX_IS_GRANTABLE_LEN + 1];
+
+		ret = SQLTablePrivileges(m_hstmt, 
+			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,
+			pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,
+			(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS);
+		if(ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, SQLTablePrivileges);
+			ok = false;
+		}
+		else
+		{
+			while(ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+			{
+				bool haveAllData = true;
+
+				buffCatalog[0] = 0;
+				buffSchema[0] = 0;
+				buffTableName[0] = 0;
+				buffGrantor[0] = 0;
+				buffGrantee[0] = 0;
+				buffPrivilege[0] = 0;
+				buffGrantable[0] = 0;
+
+				SCatalogTablePrivilege priv;
+				SQLLEN cb;
+				haveAllData = haveAllData & GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen(), &cb, &priv.m_isCatalogNull, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen(), &cb, &priv.m_isSchemaNull, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen(), &cb, NULL, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 4, SQL_C_WCHAR, buffGrantor, DB_MAX_GRANTOR_LEN + 1, &cb, &priv.m_isGrantorNull, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_WCHAR, buffGrantee, DB_MAX_GRANTEE_LEN + 1, &cb, NULL, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 6, SQL_C_WCHAR, buffPrivilege, DB_MAX_PRIVILEGES_LEN + 1, &cb, NULL, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 7, SQL_C_WCHAR, buffGrantable, DB_MAX_IS_GRANTABLE_LEN * 2 + 2, &cb, &priv.m_isGrantableNull, true);
+
+				if(!haveAllData)
+				{
+					ok = false;
+					LOG_ERROR(L"Failed to Read Data from a record while reading privileges tables");
+				}
+				else
+				{
+					if(!priv.m_isCatalogNull)
+						priv.m_catalogName = buffCatalog;
+					if(!priv.m_isSchemaNull)
+						priv.m_schemaName = buffSchema;
+					priv.m_tableName = buffTableName;
+					if(!priv.m_isGrantorNull)
+						priv.m_grantor = buffGrantor;
+					priv.m_grantee = buffGrantee;
+					priv.m_privilege = buffPrivilege;
+					if(!priv.m_isGrantableNull)
+						priv.m_grantable = buffGrantable;
+
+					privileges.push_back(priv);
+				}
+			}
+			
+			if(ok && ret != SQL_NO_DATA)
+			{
+				LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
+				ok = false;
+			}
+		}
+
+		// Close, ignore all errs
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+
+		delete[] buffCatalog;
+		delete[] buffSchema;
+		delete[] buffTableName;
+		delete[] buffGrantor;
+		delete[] buffGrantee;
+		delete[] buffPrivilege;
+		delete[] buffGrantable;
+
+		if(pSchemaBuff)
+			delete[] pSchemaBuff;
+		return ok;
+	}
 
 	bool Database::ReadCompleteCatalog(SDbCatalog& catalogInfo)
 	{

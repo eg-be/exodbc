@@ -58,6 +58,10 @@ namespace exodbc
 	const int DB_MAX_LITERAL_PREFIX_LEN		= 128;
 	const int DB_MAX_LITERAL_SUFFIX_LEN		= 128;
 	const int DB_MAX_CREATE_PARAMS_LIST_LEN = 512;	
+	const int DB_MAX_GRANTOR_LEN			= 128;
+	const int DB_MAX_GRANTEE_LEN			= 128;
+	const int DB_MAX_PRIVILEGES_LEN			= 128;
+	const int DB_MAX_IS_GRANTABLE_LEN		= 4;
 
 	const int DB_DATA_TYPE_VARCHAR        = 1;
 	const int DB_DATA_TYPE_INTEGER        = 2;
@@ -216,10 +220,25 @@ namespace exodbc
 	 */
 	struct EXODBCAPI SDbCatalog     // Description of a Database: Used so far only when fetching the "catalog"
 	{
-	public:
 		std::vector<SDbCatalogTable> m_tables;
 		std::set<std::wstring> m_catalogs;
 		std::set<std::wstring> m_schemas;
+	};
+
+	struct EXODBCAPI SCatalogTablePrivilege
+	{
+		std::wstring	m_catalogName;
+		std::wstring	m_schemaName;
+		std::wstring	m_tableName;
+		std::wstring	m_grantor;
+		std::wstring	m_grantee;
+		std::wstring	m_privilege;
+		std::wstring	m_grantable;
+
+		bool			m_isCatalogNull;
+		bool			m_isSchemaNull;
+		bool			m_isGrantorNull;
+		bool			m_isGrantableNull;
 	};
 
 	// Enums
