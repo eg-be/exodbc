@@ -32,16 +32,14 @@ namespace exodbc
 		SOdbcInfo()
 		{ }
 
-		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, exodbc::OdbcVersion odbcVersion) 
+		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password) 
 			: m_dsn(dsn)
 			, m_username(username)
 			, m_password(password)
-			, m_odbcVersion(odbcVersion)
 		{};
 		std::wstring m_dsn;
 		std::wstring m_username;
 		std::wstring m_password;
-		exodbc::OdbcVersion m_odbcVersion;
 	};
 
 	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi);
