@@ -564,31 +564,31 @@ namespace exodbc
 		// so it works with sizeof and statically declared arrays
 		
 		bool ok = true;
-		ok = GetInfo(m_hdbc, SQL_SERVER_NAME, dbInf.serverName, sizeof(dbInf.serverName), &cb);
-		ok = GetInfo(m_hdbc, SQL_DATABASE_NAME, dbInf.databaseName, sizeof(dbInf.databaseName), &cb);
-		ok = GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
-		ok = GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.dbmsVer, sizeof(dbInf.dbmsVer), &cb);
-		ok = GetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, &dbInf.maxConnections, sizeof(dbInf.maxConnections), &cb);
-		ok = GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.maxStmts, sizeof(dbInf.maxStmts), &cb);
-		ok = GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.driverName, sizeof(dbInf.driverName), &cb);
-		ok = GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.odbcVer, sizeof(dbInf.odbcVer), &cb);
-		ok = GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.drvMgrOdbcVer, sizeof(dbInf.drvMgrOdbcVer), &cb);
-		ok = GetInfo(m_hdbc, SQL_DRIVER_VER, dbInf.driverVer, sizeof(dbInf.driverVer), &cb);
-		ok = GetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, &dbInf.cliConfLvl, sizeof(dbInf.cliConfLvl), &cb);
-		ok = GetInfo(m_hdbc, SQL_OUTER_JOINS, dbInf.outerJoins, sizeof(dbInf.outerJoins), &cb);
-		ok = GetInfo(m_hdbc, SQL_PROCEDURES, dbInf.procedureSupport, sizeof(dbInf.procedureSupport), &cb);
-		ok = GetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, dbInf.accessibleTables, sizeof(dbInf.accessibleTables), &cb);
-		ok = GetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, &dbInf.cursorCommitBehavior, sizeof(dbInf.cursorCommitBehavior), &cb);
-		ok = GetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, &dbInf.cursorRollbackBehavior, sizeof(dbInf.cursorRollbackBehavior), &cb);
-		ok = GetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, &dbInf.supportNotNullClause, sizeof(dbInf.supportNotNullClause), &cb);
-		ok = GetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, dbInf.supportIEF, sizeof(dbInf.supportIEF), &cb);
-		ok = GetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, &dbInf.txnIsolation, sizeof(dbInf.txnIsolation), &cb);
-		ok = GetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, &dbInf.txnIsolationOptions, sizeof(dbInf.txnIsolationOptions), &cb);
-		ok = GetInfo(m_hdbc, SQL_POS_OPERATIONS, &dbInf.posOperations, sizeof(dbInf.posOperations), &cb);
-		ok = GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &dbInf.posStmts, sizeof(dbInf.posStmts), &cb);
-		ok = GetInfo(m_hdbc, SQL_SCROLL_OPTIONS, &dbInf.scrollOptions, sizeof(dbInf.scrollOptions), &cb);
-		ok = GetInfo(m_hdbc, SQL_TXN_CAPABLE, &dbInf.txnCapable, sizeof(dbInf.txnCapable), &cb);
-		ok = GetInfo(m_hdbc, SQL_SEARCH_PATTERN_ESCAPE, &dbInf.searchPatternEscape, sizeof(dbInf.searchPatternEscape), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_SERVER_NAME, dbInf.serverName, sizeof(dbInf.serverName), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DATABASE_NAME, dbInf.databaseName, sizeof(dbInf.databaseName), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.dbmsVer, sizeof(dbInf.dbmsVer), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, &dbInf.maxConnections, sizeof(dbInf.maxConnections), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.maxStmts, sizeof(dbInf.maxStmts), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.driverName, sizeof(dbInf.driverName), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.odbcVer, sizeof(dbInf.odbcVer), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.drvMgrOdbcVer, sizeof(dbInf.drvMgrOdbcVer), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_VER, dbInf.driverVer, sizeof(dbInf.driverVer), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, &dbInf.cliConfLvl, sizeof(dbInf.cliConfLvl), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_OUTER_JOINS, dbInf.outerJoins, sizeof(dbInf.outerJoins), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_PROCEDURES, dbInf.procedureSupport, sizeof(dbInf.procedureSupport), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, dbInf.accessibleTables, sizeof(dbInf.accessibleTables), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, &dbInf.cursorCommitBehavior, sizeof(dbInf.cursorCommitBehavior), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, &dbInf.cursorRollbackBehavior, sizeof(dbInf.cursorRollbackBehavior), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, &dbInf.supportNotNullClause, sizeof(dbInf.supportNotNullClause), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, dbInf.supportIEF, sizeof(dbInf.supportIEF), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, &dbInf.txnIsolation, sizeof(dbInf.txnIsolation), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, &dbInf.txnIsolationOptions, sizeof(dbInf.txnIsolationOptions), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_POS_OPERATIONS, &dbInf.posOperations, sizeof(dbInf.posOperations), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &dbInf.posStmts, sizeof(dbInf.posStmts), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_SCROLL_OPTIONS, &dbInf.scrollOptions, sizeof(dbInf.scrollOptions), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_TXN_CAPABLE, &dbInf.txnCapable, sizeof(dbInf.txnCapable), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_SEARCH_PATTERN_ESCAPE, &dbInf.searchPatternEscape, sizeof(dbInf.searchPatternEscape), &cb);
 
 		// TODO: SQL_LOGIN_TIMEOUT is a Connection-Attribute
 		//retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &dbInf.loginTimeout, sizeof(dbInf.loginTimeout), &cb);
@@ -599,9 +599,9 @@ namespace exodbc
 		//		return false;
 		//}
 
-		ok = GetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &dbInf.maxCatalogNameLen, sizeof(dbInf.maxCatalogNameLen), &cb);
-		ok = GetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &dbInf.maxSchemaNameLen, sizeof(dbInf.maxSchemaNameLen), &cb);
-		ok = GetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &dbInf.maxTableNameLen, sizeof(dbInf.maxTableNameLen), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &dbInf.maxCatalogNameLen, sizeof(dbInf.maxCatalogNameLen), &cb);
+		ok = ok & GetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &dbInf.maxSchemaNameLen, sizeof(dbInf.maxSchemaNameLen), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &dbInf.maxTableNameLen, sizeof(dbInf.maxTableNameLen), &cb);
 
 		if(!ok)
 		{
