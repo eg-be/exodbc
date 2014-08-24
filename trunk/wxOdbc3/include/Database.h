@@ -342,15 +342,39 @@ namespace exodbc
 		 */
 		bool		ReadTableTypes(std::vector<std::wstring>& tableTypes)	{ return ReadCatalogInfo(AllTableTypes, tableTypes); };
 
+		/*!
+		 * \fn	int Database::ReadColumnCount(const DbCatalogTable& table);
+		 *
+		 * \brief	Queries the database using SQLColumns to determine the number of columns of
+		 * 			the passed Table (which should have been queried from the catalog, using
+		 * 			FindTable or similar).
+		 * 			Note: No checks are done to ensure the passed table matches only one table
+		 * 			of the database. You might get confusing results if you have for example
+		 * 			search-patterns set as table name in the passed DbCatalogTable.
+		 *
+		 * \param	table	The table.
+		 *
+		 * \return	The column count, or -1 in case of failure
+		 */
 		int			ReadColumnCount(const DbCatalogTable& table);
+
+		/*!
+		 * \fn	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
+		 *
+		 * \brief	Reads column count for one table. First the database is queried for a table
+		 * 			that matches the passed arguments. If not exactly one such table is found this
+		 * 			function fails.
+		 * 			If exactly one table is found, the call is forwarded to ReadColumnCount
+		 *
+		 * \param	tableName  	Name of the table.
+		 * \param	schemaName 	Name of the schema.
+		 * \param	catalogName	Name of the catalog.
+		 *
+		 * \return	The column count or -1 in case of failure
+		 */
 		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
 
 		// TODO: Continue here: Get back the following stuff
-		//
-		// Some kind of search-thing 
-		// bool		FindTable(const std::wstring& tableSearchName, const std::wstring& schemaSearchName = L"", const std::wstring catalogSearchName = L"", std::vector<DbCatalogTable>& catalogEntries);
-		// and the exist and check privs things
-		//		bool         TableExists(const std::wstring& tableName, const wchar_t* userID = NULL, const std::wstring& tablePath = std::wstring());
 		//		bool         TablePrivileges(const std::wstring& tableName, const std::wstring& priv, const wchar_t* userID = NULL, const wchar_t* schema = NULL, const std::wstring& path = std::wstring());
 
 		/*!
