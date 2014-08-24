@@ -588,6 +588,7 @@ namespace exodbc
 		ok = GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &dbInf.posStmts, sizeof(dbInf.posStmts), &cb);
 		ok = GetInfo(m_hdbc, SQL_SCROLL_OPTIONS, &dbInf.scrollOptions, sizeof(dbInf.scrollOptions), &cb);
 		ok = GetInfo(m_hdbc, SQL_TXN_CAPABLE, &dbInf.txnCapable, sizeof(dbInf.txnCapable), &cb);
+		ok = GetInfo(m_hdbc, SQL_SEARCH_PATTERN_ESCAPE, &dbInf.searchPatternEscape, sizeof(dbInf.searchPatternEscape), &cb);
 
 		// TODO: SQL_LOGIN_TIMEOUT is a Connection-Attribute
 		//retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &dbInf.loginTimeout, sizeof(dbInf.loginTimeout), &cb);
