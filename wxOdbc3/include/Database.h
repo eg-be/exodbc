@@ -245,7 +245,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         Open(DbEnvironment* dbConnectInf);
+		bool         Open(const DbEnvironment* const pEnv);
 
 		/*!
 		 * \fn	bool Database::Close();
