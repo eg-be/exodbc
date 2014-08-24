@@ -404,7 +404,6 @@ namespace exodbc
 		bool            IsOpen()           {return m_dbIsOpen;}
 		bool            OpenedWithConnectionString() {return m_dbOpenedWithConnectionString;}
 		bool			HasHdbc()			{ return m_hdbc != SQL_NULL_HDBC; };
-		HENV            GetHENV()          {return m_henv;}
 		HDBC            GetHDBC()          {return m_hdbc;}
 		HSTMT           GetHSTMT()         {return m_hstmt;}
 		int             GetTableCount()        {return nTables;}  // number of tables using this connection
@@ -482,7 +481,6 @@ namespace exodbc
 		wxDBMS				m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 
 		// ODBC handles
-		HENV  m_henv;        // ODBC Environment handle
 		HDBC  m_hdbc;        // ODBC DB Connection handle
 		HSTMT m_hstmt;       // ODBC Statement handle
 

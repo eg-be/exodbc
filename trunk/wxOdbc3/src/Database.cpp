@@ -113,9 +113,6 @@ namespace exodbc
 	{
 		exASSERT(pEnv);
 
-		// TODO: We want to remove the reference to the env-handle completely from this class
-		m_henv = pEnv->GetHenv();
-
 		Initialize();
 
 		// Allocate the DBC-Handle
@@ -129,8 +126,6 @@ namespace exodbc
 	/********** wxDb Constructor **********/
 	Database::Database(const HENV& aHenv, bool FwdOnlyCursors)
 	{
-		// Copy the HENV into the db class
-		m_henv = aHenv;
 		m_fwdOnlyCursors = FwdOnlyCursors;
 
 		Initialize();

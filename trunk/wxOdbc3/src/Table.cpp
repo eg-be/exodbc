@@ -95,7 +95,6 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
 {
     // Initializing member variables
     m_pDb                 = pwxDb;                    // Pointer to the wxDb object
-    m_henv                = 0;
     m_hdbc                = 0;
     m_hstmt               = 0;
     m_hstmtGridQuery               = 0;
@@ -168,7 +167,6 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
 //    m_pDb->WriteSqlLog(s);
 
     // Grab the HENV and HDBC from the wxDb object
-    m_henv = m_pDb->GetHENV();
     m_hdbc = m_pDb->GetHDBC();
 
     // Allocate space for column definitions
@@ -180,17 +178,17 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
     {
         // Allocate a separate statement handle for performing inserts
         if (SQLAllocStmt(m_hdbc, &m_hstmtInsert) != SQL_SUCCESS)
-            m_pDb->DispAllErrors(m_henv, m_hdbc);
+            m_pDb->DispAllErrors(NULL, m_hdbc);
         // Allocate a separate statement handle for performing deletes
         if (SQLAllocStmt(m_hdbc, &m_hstmtDelete) != SQL_SUCCESS)
-            m_pDb->DispAllErrors(m_henv, m_hdbc);
+            m_pDb->DispAllErrors(NULL, m_hdbc);
         // Allocate a separate statement handle for performing updates
         if (SQLAllocStmt(m_hdbc, &m_hstmtUpdate) != SQL_SUCCESS)
-            m_pDb->DispAllErrors(m_henv, m_hdbc);
+            m_pDb->DispAllErrors(NULL, m_hdbc);
     }
     // Allocate a separate statement handle for internal use
     if (SQLAllocStmt(m_hdbc, &m_hstmtInternal) != SQL_SUCCESS)
-        m_pDb->DispAllErrors(m_henv, m_hdbc);
+        m_pDb->DispAllErrors(NULL, m_hdbc);
 
     // Set the cursor type for the statement handles
     m_cursorType = SQL_CURSOR_STATIC;
@@ -253,13 +251,13 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
     {
         // Set the cursor type for the INSERT statement handle
         if (SQLSetStmtOption(m_hstmtInsert, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
-            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
+            m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert);
         // Set the cursor type for the DELETE statement handle
         if (SQLSetStmtOption(m_hstmtDelete, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
-            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtDelete);
+            m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete);
         // Set the cursor type for the UPDATE statement handle
         if (SQLSetStmtOption(m_hstmtUpdate, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
-            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate);
+            m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate);
     }
 
     // Make the default cursor the active cursor
@@ -337,7 +335,7 @@ ODBC 3.0 says to use this form
             if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
 */
             if (SQLFreeStmt(m_hstmtInsert, SQL_DROP) != SQL_SUCCESS)
-                m_pDb->DispAllErrors(m_henv, m_hdbc);
+                m_pDb->DispAllErrors(NULL, m_hdbc);
         }
 
         if (m_hstmtDelete)
@@ -347,7 +345,7 @@ ODBC 3.0 says to use this form
             if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
 */
             if (SQLFreeStmt(m_hstmtDelete, SQL_DROP) != SQL_SUCCESS)
-                m_pDb->DispAllErrors(m_henv, m_hdbc);
+                m_pDb->DispAllErrors(NULL, m_hdbc);
         }
 
         if (m_hstmtUpdate)
@@ -357,14 +355,14 @@ ODBC 3.0 says to use this form
             if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
 */
             if (SQLFreeStmt(m_hstmtUpdate, SQL_DROP) != SQL_SUCCESS)
-                m_pDb->DispAllErrors(m_henv, m_hdbc);
+                m_pDb->DispAllErrors(NULL, m_hdbc);
         }
     }
 
     if (m_hstmtInternal)
     {
         if (SQLFreeStmt(m_hstmtInternal, SQL_DROP) != SQL_SUCCESS)
-            m_pDb->DispAllErrors(m_henv, m_hdbc);
+            m_pDb->DispAllErrors(NULL, m_hdbc);
     }
 
     // Delete dynamically allocated cursors
@@ -500,7 +498,7 @@ void Table::setCbValueForColumn(int columnIndex)
 //                                 fSqlType, precision, scale, (UCHAR*) m_colDefs[i].m_ptrDataObj,
 //                                 precision+1, &m_colDefs[i].m_cbValue) != SQL_SUCCESS)
 //            {
-//                return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate));
+//                return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate));
 //            }
 //        }
 //        else
@@ -509,7 +507,7 @@ void Table::setCbValueForColumn(int columnIndex)
 //                                 fSqlType, precision, scale, (UCHAR*) m_colDefs[i].m_ptrDataObj,
 //                                 precision+1, &m_colDefs[i].m_cbValue) != SQL_SUCCESS)
 //            {
-//                return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert));
+//                return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert));
 //            }
 //        }
 //    }
@@ -544,7 +542,7 @@ bool Table::bindCols(HSTMT cursor)
 		ColumnDefinition def = m_colDefs[i];
         if (SQLBindCol(cursor, (UWORD)(i+1), m_colDefs[i].m_sqlCtype, (UCHAR*) m_colDefs[i].m_ptrDataObj,
                        m_colDefs[i].m_szDataObj, &m_colDefs[i].m_cbValue ) != SQL_SUCCESS)
-          return (m_pDb->DispAllErrors(m_henv, m_hdbc, cursor));
+          return (m_pDb->DispAllErrors(NULL, m_hdbc, cursor));
     }
 
     // Completed successfully
@@ -569,7 +567,7 @@ bool Table::getRec(UWORD fetchType)
             if (retcode == SQL_NO_DATA_FOUND)
                 return false;
             else
-                return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt));
+                return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt));
         }
         else
         {
@@ -589,7 +587,7 @@ bool Table::getRec(UWORD fetchType)
             if (retcode == SQL_NO_DATA_FOUND)
                 return false;
             else
-                return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt));
+                return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt));
         }
         else
         {
@@ -624,7 +622,7 @@ bool Table::execDelete(const std::wstring &pSqlStmt)
     }
 
     // Problem deleting record
-    return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtDelete));
+    return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete));
 
 }  // wxDbTable::execDelete()
 
@@ -661,7 +659,7 @@ bool Table::execDelete(const std::wstring &pSqlStmt)
 //                    if (retcode != SQL_SUCCESS)
 //                    {
 //                        m_pDb->DispNextError();
-//                        return m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate);
+//                        return m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate);
 //                    }
 //                    break;
 //                }
@@ -678,7 +676,7 @@ bool Table::execDelete(const std::wstring &pSqlStmt)
 //    }
 //
 //    // Problem updating record
-//    return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate));
+//    return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate));
 //
 //}  // wxDbTable::execUpdate()
 
@@ -710,7 +708,7 @@ bool Table::query(int queryType, bool forUpdate, bool distinct, const std::wstri
     int retcode;
     retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) (queryType == DB_SELECT_STATEMENT ? pSqlStmt.c_str() : sqlStmt.c_str()), SQL_NTS);
     if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-        return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt));
+        return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt));
 
     // Completed successfully
     return true;
@@ -852,7 +850,7 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
   //      if (insertableCount)
   //      {
   //          if (SQLPrepare(m_hstmtInsert, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
-  //              return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert));
+  //              return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert));
   //      }
   //      else
   //          m_insertable = false;
@@ -1330,7 +1328,7 @@ UWORD Table::GetRowNum()
 
     if (SQLGetStmtOption(m_hstmt, SQL_ROW_NUMBER, (UCHAR*) &rowNum) != SQL_SUCCESS)
     {
-        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
+        m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt);
         return(0);
     }
 
@@ -1344,7 +1342,7 @@ UWORD Table::GetRowNum()
 bool Table::CloseCursor(HSTMT cursor)
 {
     if (SQLFreeStmt(cursor, SQL_CLOSE) != SQL_SUCCESS)
-        return(m_pDb->DispAllErrors(m_henv, m_hdbc, cursor));
+        return(m_pDb->DispAllErrors(NULL, m_hdbc, cursor));
 
     // Completed successfully
     return true;
@@ -1553,7 +1551,7 @@ bool Table::CloseCursor(HSTMT cursor)
 //    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
 //    if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
 //    {
-//        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
+//        m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt);
 //        m_pDb->RollbackTrans();
 //        CloseCursor(m_hstmt);
 //        return false;
@@ -1604,7 +1602,7 @@ bool Table::CloseCursor(HSTMT cursor)
 //                  (m_pDb->Dbms() == dbmsPOSTGRES      && !wcscmp(m_pDb->sqlState, L"08S01"))))
 //            {
 //                m_pDb->DispNextError();
-//                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
+//                m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt);
 //                m_pDb->RollbackTrans();
 ////                CloseCursor(hstmt);
 //                return false;
@@ -1761,7 +1759,7 @@ bool Table::CloseCursor(HSTMT cursor)
 //    RETCODE retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
 //    if (retcode != SQL_SUCCESS)
 //    {
-//        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
+//        m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt);
 //        m_pDb->RollbackTrans();
 //        CloseCursor(m_hstmt);
 //        return false;
@@ -1824,7 +1822,7 @@ bool Table::CloseCursor(HSTMT cursor)
 //               ))
 //            {
 //                m_pDb->DispNextError();
-//                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmt);
+//                m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt);
 //                m_pDb->RollbackTrans();
 //                CloseCursor(m_hstmt);
 //                return false;
@@ -1900,7 +1898,7 @@ bool Table::SetOrderByColNums(UWORD first, ... )
 //        else
 //        {
 //            m_pDb->DispNextError();
-//            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
+//            m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert);
 //            return(DB_FAILURE);
 //        }
 //    }
@@ -1921,7 +1919,7 @@ bool Table::SetOrderByColNums(UWORD first, ... )
 //                    if (retcode != SQL_SUCCESS)
 //                    {
 //                        m_pDb->DispNextError();
-//                        m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
+//                        m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert);
 //                        return(DB_FAILURE);
 //                    }
 //                    break;
@@ -1933,7 +1931,7 @@ bool Table::SetOrderByColNums(UWORD first, ... )
 //            {
 //                // record was not inserted
 //                m_pDb->DispNextError();
-//                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert);
+//                m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert);
 //                return(DB_FAILURE);
 //            }
 //        }
@@ -2238,13 +2236,13 @@ void Table::ClearMemberVars(bool setToNull)
 bool Table::SetQueryTimeout(UDWORD nSeconds)
 {
     if (SQLSetStmtOption(m_hstmtInsert, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
-        return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInsert));
+        return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert));
     if (SQLSetStmtOption(m_hstmtUpdate, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
-        return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtUpdate));
+        return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate));
     if (SQLSetStmtOption(m_hstmtDelete, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
-        return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtDelete));
+        return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete));
     if (SQLSetStmtOption(m_hstmtInternal, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
-        return(m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal));
+        return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInternal));
 
     // Completed Successfully
     return true;
@@ -2587,14 +2585,14 @@ HSTMT *Table::GetNewCursor(bool setCursor, bool bindColumns)
 
     if (SQLAllocStmt(m_hdbc, newHSTMT) != SQL_SUCCESS)
     {
-        m_pDb->DispAllErrors(m_henv, m_hdbc);
+        m_pDb->DispAllErrors(NULL, m_hdbc);
         delete newHSTMT;
         return(0);
     }
 
     if (SQLSetStmtOption(*newHSTMT, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
     {
-        m_pDb->DispAllErrors(m_henv, m_hdbc, *newHSTMT);
+        m_pDb->DispAllErrors(NULL, m_hdbc, *newHSTMT);
         delete newHSTMT;
         return(0);
     }
@@ -2631,7 +2629,7 @@ ODBC 3.0 says to use this form
 */
     if (SQLFreeStmt(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
     {
-        m_pDb->DispAllErrors(m_henv, m_hdbc);
+        m_pDb->DispAllErrors(NULL, m_hdbc);
         result = false;
     }
 
