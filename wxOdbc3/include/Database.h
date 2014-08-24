@@ -357,6 +357,25 @@ namespace exodbc
 		//		bool         TableExists(const std::wstring& tableName, const wchar_t* userID = NULL, const std::wstring& tablePath = std::wstring());
 		//		bool         TablePrivileges(const std::wstring& tableName, const std::wstring& priv, const wchar_t* userID = NULL, const wchar_t* schema = NULL, const std::wstring& path = std::wstring());
 
+		/*!
+		 * \fn	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
+		 *
+		 * \brief	Searches for tables using SQLTables. If any of the parameters passed is empty, SQLTables will be called
+		 * 			with a NULL value for that parameter, which indicates that we do not care about that param.
+		 * 			The attribute SQL_ATTR_METADATA_ID should default to FALSE, so all parameters are treated as pattern value
+		 * 			arguments (case sensitive, but you can use search patterns).
+		 * 			See: http://msdn.microsoft.com/en-us/library/ms711831%28v=vs.85%29.aspx
+		 *
+		 * \param	tableName	  	Name of the table.
+		 * \param	schemaName	  	Name of the schema.
+		 * \param	catalogName   	Name of the catalog.
+		 * \param	tableType	  	Type of the table.
+		 * \param [in,out]	tables	The tables found that match the search-criteria.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
+		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
+
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);

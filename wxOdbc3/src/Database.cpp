@@ -2244,6 +2244,130 @@ namespace exodbc
 //
 //#endif  // #else OLD_GETCOLUMNS
 
+	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables)
+	{
+		// Clear tables
+		tables.clear();
+
+		// Free statement, ignore if already closed
+		// Close an eventually open cursor, do not care about truncation
+		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		if( ! SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
+			return false;
+		}
+
+		SQLWCHAR* pTableName = NULL;
+		SQLWCHAR* pSchemaName = NULL;
+		SQLWCHAR* pCatalogName = NULL;
+		SQLWCHAR* pTableType = NULL;
+
+		if(tableName.length() > 0)
+		{
+			pTableName = new SQLWCHAR[tableName.length() + 1];
+			wcscpy(pTableName, tableName.c_str());
+		}
+		if(schemaName.length() > 0)
+		{
+			pSchemaName = new SQLWCHAR[schemaName.length() + 1];
+			wcscpy(pSchemaName, schemaName.c_str());
+		}
+		if(catalogName.length() > 0)
+		{
+			pCatalogName = new SQLWCHAR[catalogName.length() + 1];
+			wcscpy(pCatalogName, catalogName.c_str());
+		}
+		if(tableType.length() > 0)
+		{
+			pTableType = new SQLWCHAR[tableType.length() + 1];
+			wcscpy(pTableType, tableType.c_str());
+		}
+
+		wchar_t* buffCatalog = new wchar_t[m_dbInf.GetMaxCatalogNameLen()];
+		wchar_t* buffSchema = new wchar_t[m_dbInf.GetMaxSchemaNameLen()];
+		wchar_t* buffTableName = new wchar_t[m_dbInf.GetMaxTableNameLen()];
+		wchar_t* buffTableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN + 1];
+		wchar_t* buffTableRemarks = new wchar_t[DB_MAX_TABLE_REMARKS_LEN + 1];
+
+		bool ok = true;
+		// Query db
+		ret = SQLTables(m_hstmt,
+			pCatalogName, pCatalogName ? SQL_NTS : NULL,   // catname                 
+			pSchemaName, pSchemaName ? SQL_NTS : NULL,   // schema name
+			pTableName, pTableName ? SQL_NTS : NULL,							// table name
+			pTableType, pTableType ? SQL_NTS : NULL);
+
+		if(ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, SQLTables);
+			ok = false;
+		}
+		else
+		{
+			buffCatalog[0] = 0;
+			buffSchema[0] = 0;
+			buffTableName[0] = 0;
+			buffTableType[0] = 0;
+			buffTableRemarks[0] = 0;
+
+			while(ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+			{
+				DbCatalogTable table;
+				bool haveAllData = true;
+				SQLLEN cb;
+				haveAllData = haveAllData & GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen(), &cb, &table.m_isCatalogNull, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen(), &cb, &table.m_isSchemaNull, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen(), &cb, NULL, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 4, SQL_C_WCHAR, buffTableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_WCHAR, buffTableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb, NULL, true);
+
+				if(!haveAllData)
+				{
+					ok = false;
+					LOG_ERROR(L"Failed to Read Data from a record while finding tables");
+				}
+				else
+				{
+					if(!table.m_isCatalogNull)
+						table.m_catalog = buffCatalog;
+					if(!table.m_isSchemaNull)
+						table.m_schema = buffSchema;
+					table.m_tableName = buffTableName;
+					table.m_tableType = buffTableType;
+					table.m_tableRemarks = buffTableRemarks;
+					tables.push_back(table);
+				}
+
+			}
+			if(ret != SQL_NO_DATA)
+			{
+				LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
+				ok = false;
+			}
+		}
+
+		// Close, ignore all errs
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+
+		delete[] buffCatalog;
+		delete[] buffSchema;
+		delete[] buffTableName;
+		delete[] buffTableType;
+		delete[] buffTableRemarks;
+
+		if(pTableName)
+			delete[] pTableName;
+		if(pSchemaName)
+			delete[] pSchemaName;
+		if(pCatalogName)
+			delete[] pCatalogName;
+		if(pTableType)
+			delete[] pTableType;
+
+		return ok;
+	}
+
 
 	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring catalogName /* = L"" */)
 	{
@@ -2296,107 +2420,25 @@ namespace exodbc
 
 	bool Database::ReadCompleteCatalog(SDbCatalog& catalogInfo)
 	{
-		RETCODE  retcode;
-		SQLLEN   cb;
-		bool allOk = true;
 		SDbCatalog dbInf;
 
-		// Close Statement 
-		retcode = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		if(retcode != SQL_SUCCESS)
+		if(!FindTables(L"", L"", L"", L"", dbInf.m_tables))
 		{
-			LOG_ERROR_STMT(m_hstmt, retcode, CloseStmtHandle(IgnoreNotOpen) );
 			return false;
 		}
 
-		retcode = SQLTables(m_hstmt,
-			NULL, NULL,
-			NULL, NULL,
-			NULL, NULL,
-			NULL, NULL);
-
-		if (retcode != SQL_SUCCESS)
+		std::vector<DbCatalogTable>::const_iterator it;
+		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
 		{
-			LOG_ERROR_STMT(m_hstmt, retcode, SQLTables);
-
-			// Silently try to close and fail
-			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-			return false;
+			const DbCatalogTable& table = *it;
+			if(!table.m_isCatalogNull)
+				dbInf.m_catalogs.insert(table.m_catalog);
+			if(!table.m_isSchemaNull)
+				dbInf.m_schemas.insert(table.m_schema);
 		}
-
-		wchar_t* cat = new wchar_t[m_dbInf.GetMaxCatalogNameLen()];
-		wchar_t* schem = new wchar_t[m_dbInf.GetMaxSchemaNameLen()];
-		wchar_t* tableName = new wchar_t[m_dbInf.GetMaxTableNameLen()];
-		wchar_t* btableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN + 1];
-		wchar_t* tableRemarks = new wchar_t[DB_MAX_TABLE_REMARKS_LEN + 1];
-
-		int count = 0;
-		while ((retcode = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
-		{
-			bool ok = true;
-
-			// store schemas and catalogs found
-			cat[0] = 0;
-			schem[0] = 0;
-			tableName[0] = 0;
-			btableType[0] = 0;
-			tableRemarks[0] = 0;
-			bool isCatNull = false;
-			bool isSchemaNull = false;
-
-			ok = ok & GetData(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.GetMaxCatalogNameLen(), &cb, &isCatNull, true);
-			ok = ok & GetData(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.GetMaxSchemaNameLen(), &cb, &isSchemaNull, true);
-			ok = ok & GetData(m_hstmt, 3, SQL_C_WCHAR, tableName, m_dbInf.GetMaxTableNameLen(), &cb, NULL, true);
-			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, btableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
-			ok = ok & GetData(m_hstmt, 5, SQL_C_WCHAR, tableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb, NULL, true);
-
-			count++;
-			if(ok)
-			{
-				// Create the entry
-				DbCatalogTable table;
-				table.m_tableName = tableName;
-				table.m_tableType = btableType;
-				table.m_tableRemarks = tableRemarks;
-				table.m_schema = schem;
-				table.m_catalog = cat;
-				table.m_isCatalogNull = isCatNull;
-				table.m_isSchemaNull = isSchemaNull;
-
-				dbInf.m_tables.push_back(table);
-				dbInf.m_catalogs.insert(cat);
-				dbInf.m_schemas.insert(schem);
-			}
-			else
-			{
-				BOOST_LOG_TRIVIAL(error) << L"Failed to get CatalogInfo for Record " << count;
-				allOk = false;
-			}
-		}
-
-		if(retcode != SQL_NO_DATA)
-		{
-			LOG_ERROR_EXPECTED_SQL_NO_DATA(retcode, GetData());
-			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-			delete[] cat;
-			delete[] schem;
-			delete[] tableName;
-			delete[] btableType;
-			delete[] tableRemarks;
-			return false;
-		}
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-
-		delete[] cat;
-		delete[] schem;
-		delete[] tableName;
-		delete[] btableType;
-		delete[] tableRemarks;
 
 		catalogInfo = dbInf;
-
-		return allOk;
-
+		return true;
 	}
 
 
