@@ -277,7 +277,7 @@ namespace exodbc
 		EXPECT_TRUE(m_pDb->ReadCatalogs(cats));
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			// DB2 does not support catalogs (?) it reports zero catalogs
+			// DB2 does not support catalogs. it reports zero catalogs
 			EXPECT_EQ(0, cats.size());
 		}
 		else if(m_pDb->Dbms() == dbmsMY_SQL)
@@ -316,6 +316,69 @@ namespace exodbc
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"VIEW") != tableTypes.end());
 	}
 
+	TEST_P(DbTest, FindTables)
+	{
+		std::vector<DbCatalogTable> tables;
+		std::wstring tableName;
+		std::wstring schemaName;
+		std::wstring catalogName;
+		if(m_pDb->Dbms() == dbmsMY_SQL)
+		{
+			// We know that mySql uses catalogs, not schemas:
+			tableName = L"integertypes";
+			schemaName = L"";
+			catalogName = L"wxodbc3";
+		}
+		else if(m_pDb->Dbms() == dbmsDB2)
+		{
+			// We know that DB2 uses schemas:
+			tableName = L"INTEGERTYPES";
+			schemaName = L"WXODBC3";
+			catalogName = L"";
+		}
+		// Find one table by using only the table-name as search param
+		EXPECT_TRUE(m_pDb->FindTables(tableName, L"", L"", L"", tables));
+		EXPECT_EQ(1, tables.size());
+		// Find one table by using table-name and schema/catalog
+		EXPECT_TRUE(m_pDb->FindTables(tableName, schemaName, catalogName, L"", tables));
+		EXPECT_EQ(1, tables.size());
+		// In all cases, we should not find anything if we use a schema or a catalog that does not exist
+		// Note: When using MySQL-Odbc driver, if 'do not use INFORMATION_SCHEMA' is set, this will fail due to an access denied for database "wrongCatalog"
+		EXPECT_TRUE(m_pDb->FindTables(tableName, L"WrongSchema", L"", L"", tables));
+		EXPECT_EQ(0, tables.size());
+		EXPECT_TRUE(m_pDb->FindTables(tableName, L"", L"WrongCatalog", L"", tables));
+		EXPECT_EQ(0, tables.size());
+		// Also, we have a table, not a view
+		EXPECT_TRUE(m_pDb->FindTables(tableName, L"", L"", L"VIEW", tables));
+		EXPECT_EQ(0, tables.size());
+		EXPECT_TRUE(m_pDb->FindTables(tableName, L"", L"", L"TABLE", tables));
+		EXPECT_EQ(1, tables.size());
+		// What about search-patterns? Note: Not use for table-type
+		// TODO: They just dont work with MySql 3.51 ?
+		EXPECT_TRUE(m_pDb->FindTables(tableName, L"%", L"%", L"", tables));
+		EXPECT_EQ(1, tables.size());
+		if(tables.size() > 0)
+		{
+			EXPECT_EQ(tableName, tables[0].m_tableName);
+			EXPECT_EQ(schemaName, tables[0].m_schema);
+			EXPECT_EQ(catalogName, tables[0].m_catalog);
+		}
+		std::wstring schemaPattern = schemaName;
+		if(schemaName.length() > 0)
+			schemaPattern = (boost::wformat(L"%%%s%%") %schemaName).str();
+		std::wstring catalogPattern = catalogName;
+		if(catalogName.length() > 0)
+			catalogPattern = (boost::wformat(L"%%%s%%") %catalogName).str();
+		EXPECT_TRUE(m_pDb->FindTables(tableName, schemaPattern, catalogPattern, L"", tables));
+		EXPECT_EQ(1, tables.size());
+		if(tables.size() > 0)
+		{
+			EXPECT_EQ(tableName, tables[0].m_tableName);
+			EXPECT_EQ(schemaName, tables[0].m_schema);
+			EXPECT_EQ(catalogName, tables[0].m_catalog);
+		}
+	}
+
 	TEST_P(DbTest, ReadCompleteCatalog)
 	{
 		SDbCatalog cat;
@@ -332,7 +395,7 @@ namespace exodbc
 		EXPECT_TRUE(cat.m_tables.size() >= 12);
 	}
 
-	TEST_P(DbTest, GetColumnCount)
+	TEST_P(DbTest, ReadColumnCount)
 	{
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
