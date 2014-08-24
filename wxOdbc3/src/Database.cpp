@@ -423,7 +423,7 @@ namespace exodbc
 			return false;
 
 		// Query the datatypes
-		if (!GetAllDataTypesInfo(m_datatypes))
+		if (!ReadDataTypesInfo(m_datatypes))
 			return false;
 
 		// Completed Successfully
@@ -692,7 +692,7 @@ namespace exodbc
 
 
 
-	bool Database::GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types)
+	bool Database::ReadDataTypesInfo(std::vector<SSqlTypeInfo>& types)
 	{
 		bool allOk = true;
 		types.clear();

@@ -91,14 +91,14 @@ namespace exodbc
 		//EXPECT_FALSE(db2.Close());
 	}
 
-	TEST_P(DbTest, GetAllDataTypesInfo)
+	TEST_P(DbTest, ReadDataTypesInfo)
 	{
 		Database db(m_pDbEnv);
 
 		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		std::vector<SSqlTypeInfo> types;
-		bool ok = db.GetAllDataTypesInfo(types);
+		bool ok = db.ReadDataTypesInfo(types);
 		EXPECT_TRUE(ok);
 		EXPECT_TRUE(types.size() > 0);
 

@@ -189,7 +189,7 @@ namespace exodbc
 		// Test helpers:
 #if EXODBC3_TEST
 		friend class DbTest;
-		FRIEND_TEST(DbTest, GetAllDataTypesInfo); 
+		FRIEND_TEST(DbTest, ReadDataTypesInfo); 
 #endif
 
 	public:
@@ -237,11 +237,11 @@ namespace exodbc
 		bool         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
 
 		/*!
-		 * \fn	bool Database::Open(DbEnvironment* dbConnectInf);
+		 * \fn	bool Database::Open(onst DbEnvironment* const pEnv);
 		 *
 		 * \brief	Opens by using the information from the passed DbEnvironment
 		 *
-		 * \param [in,out]	dbConnectInf	 	If non-null, the database connect inf.
+		 * \param [in,out]	pEnv	 	Pointer to the DbEnvironment to use to connect.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
@@ -439,7 +439,7 @@ namespace exodbc
 
 	private:
 		// Private member functions
-		bool			GetAllDataTypesInfo(std::vector<SSqlTypeInfo>& types);
+		bool			ReadDataTypesInfo(std::vector<SSqlTypeInfo>& types);
 
 		void			Initialize();
 
