@@ -199,57 +199,53 @@ namespace exodbc
 		~Database();
 
 		/*!
-		 * \fn	bool Database::Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported=true);
+		 * \fn	bool Database::Open(const std::wstring& inConnectStr);
 		 *
 		 * \brief	Connect using a prepared connection-String.
 		 * 			Uses SQLDriverConnect without a window-handle to connect
 		 *
 		 * \param	connectStr			 		The connect string.
-		 * \param	failOnDataTypeUnsupported	(Optional) true if fail on data type unsupported.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported = true);
+		bool         Open(const std::wstring& inConnectStr);
 
 		/*!
-		 * \fn	bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported = true);
+		 * \fn	bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd);
 		 *
 		 * \brief	This version of Open will display the odbc source selection dialog, using SQLDriverConnect. Cast a
 		 * 			wxWindow::GetHandle() to SQLHWND to use.
 		 *
 		 * \param	inConnectStr			 	The in connect string.
 		 * \param	parentWnd				 	The parent window.
-		 * \param	failOnDataTypeUnsupported	(Optional) true if fail on data type unsupported.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported = true);
+		bool         Open(const std::wstring& inConnectStr, SQLHWND parentWnd);
 
 		/*!
-		 * \fn	bool Database::Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr, bool failOnDataTypeUnsupported = true);
+		 * \fn	bool Database::Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
 		 *
 		 * \brief	Opens the connectiong using SQLConnect with the passed parameters.
 		 *
 		 * \param	Dsn						 	The dsn.
 		 * \param	Uid						 	The UID.
 		 * \param	AuthStr					 	The authentication string.
-		 * \param	failOnDataTypeUnsupported	(Optional) true if fail on data type unsupported.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr, bool failOnDataTypeUnsupported = true);
+		bool         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
 
 		/*!
-		 * \fn	bool Database::Open(DbEnvironment* dbConnectInf, bool failOnDataTypeUnsupported = true);
+		 * \fn	bool Database::Open(DbEnvironment* dbConnectInf);
 		 *
 		 * \brief	Opens by using the information from the passed DbEnvironment
 		 *
 		 * \param [in,out]	dbConnectInf	 	If non-null, the database connect inf.
-		 * \param	failOnDataTypeUnsupported	(Optional) true if fail on data type unsupported.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         Open(DbEnvironment* dbConnectInf, bool failOnDataTypeUnsupported = true);
+		bool         Open(DbEnvironment* dbConnectInf);
 
 		/*!
 		 * \fn	bool Database::Close();
@@ -452,7 +448,7 @@ namespace exodbc
 //		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 //		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
 		//bool             DetermineDataTypes(bool failOnDataTypeUnsupported);
-		bool             OpenImpl(bool failOnDataTypeUnsupported = true);
+		bool             OpenImpl();
 
 		enum ReadCatalogInfoMode
 		{

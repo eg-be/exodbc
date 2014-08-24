@@ -71,7 +71,7 @@ namespace exodbc
 	{
 		Database db(m_pDbEnv);
 
-		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
+		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		db.Close();
 //		int p = 3;
@@ -82,7 +82,7 @@ namespace exodbc
 	{
 		// Try to close a db that really is open
 		Database db1(m_pDbEnv);
-		ASSERT_TRUE(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
+		ASSERT_TRUE(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		EXPECT_TRUE(db1.Close());
 
 		// TODO: Close works okay, does not return false if there is nothing to do
@@ -95,7 +95,7 @@ namespace exodbc
 	{
 		Database db(m_pDbEnv);
 
-		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
+		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		std::vector<SSqlTypeInfo> types;
 		bool ok = db.GetAllDataTypesInfo(types);
@@ -127,7 +127,7 @@ namespace exodbc
 	{
 		Database db(m_pDbEnv);
 
-		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, false));
+		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		SDbInfo dbInfo = db.GetDbInfo();
 		std::wstring sInfo = dbInfo.ToStr();
@@ -147,7 +147,7 @@ namespace exodbc
 		Database* pDb = new Database(m_pDbEnv);
 
 		// Open without failing on unsupported datatypes
-		EXPECT_TRUE(pDb->Open(m_pDbEnv, false));
+		EXPECT_TRUE(pDb->Open(m_pDbEnv));
 		pDb->Close();
 		delete pDb;
 
@@ -157,7 +157,7 @@ namespace exodbc
 		EXPECT_TRUE(pFailEnv->GetHenv() != NULL);
 		Database* pFailDb = new Database(pFailEnv);
 		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings";
-		EXPECT_FALSE(pFailDb->Open(pFailEnv, false));
+		EXPECT_FALSE(pFailDb->Open(pFailEnv));
 		pFailDb->Close();
 		delete pFailDb;
 		delete pFailEnv;
@@ -165,7 +165,7 @@ namespace exodbc
 		// Open with failing on unsupported datatypes
 		// TODO: This test is stupid, we should also test that we fail
 		pDb = new Database(m_pDbEnv);
-		EXPECT_TRUE(pDb->Open(m_pDbEnv, true));
+		EXPECT_TRUE(pDb->Open(m_pDbEnv));
 		pDb->Close();
 		delete pDb;
 	}
