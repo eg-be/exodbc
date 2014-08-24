@@ -123,21 +123,6 @@ namespace exodbc
 		}
 	}
 
-	/********** wxDb Constructor **********/
-	Database::Database(const HENV& aHenv, bool FwdOnlyCursors)
-	{
-		m_fwdOnlyCursors = FwdOnlyCursors;
-
-		Initialize();
-
-		// Allocate the DBC-Handle
-		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, aHenv, &m_hdbc);
-		if(ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_ENV(aHenv, ret, SQLAllocHandle);
-		}
-	}
-
 
 	Database::~Database()
 	{

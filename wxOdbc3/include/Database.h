@@ -196,7 +196,6 @@ namespace exodbc
 
 		// Public member functions
 		Database(const DbEnvironment* const pEnv);
-		Database(const HENV &aHenv, bool FwdOnlyCursors=(bool)wxODBC_FWD_ONLY_CURSORS);
 		~Database();
 
 		/*!

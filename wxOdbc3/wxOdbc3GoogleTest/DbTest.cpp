@@ -44,7 +44,7 @@ namespace exodbc
 		m_pDbEnv = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pDbEnv->GetHenv();
 		ASSERT_TRUE(henv  != 0);
-		m_pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		m_pDb = new Database(m_pDbEnv);
 		ASSERT_TRUE(m_pDb->Open(m_pDbEnv));
 	}
 
@@ -144,7 +144,7 @@ namespace exodbc
 		HENV henv = m_pDbEnv->GetHenv();
 		ASSERT_TRUE(henv  != 0);
 
-		Database* pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		Database* pDb = new Database(m_pDbEnv);
 
 		// Open without failing on unsupported datatypes
 		EXPECT_TRUE(pDb->Open(m_pDbEnv, false));
@@ -153,19 +153,18 @@ namespace exodbc
 
 		// Try to open with a different password / user, expect to fail when opening the db.
 		// TODO: Getting the HENV never fails? Add some tests for the HENV
-		DbEnvironment* pFailConnectInf = new DbEnvironment(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
-		HENV henvFail = pFailConnectInf->GetHenv();
-		EXPECT_TRUE(henvFail != NULL);
-		Database* pFailDb = new Database(henvFail, true);
+		DbEnvironment* pFailEnv = new DbEnvironment(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
+		EXPECT_TRUE(pFailEnv->GetHenv() != NULL);
+		Database* pFailDb = new Database(pFailEnv);
 		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings";
-		EXPECT_FALSE(pFailDb->Open(pFailConnectInf, false));
+		EXPECT_FALSE(pFailDb->Open(pFailEnv, false));
 		pFailDb->Close();
 		delete pFailDb;
-		delete pFailConnectInf;
+		delete pFailEnv;
 
 		// Open with failing on unsupported datatypes
 		// TODO: This test is stupid, we should also test that we fail
-		pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
+		pDb = new Database(m_pDbEnv);
 		EXPECT_TRUE(pDb->Open(m_pDbEnv, true));
 		pDb->Close();
 		delete pDb;
@@ -250,26 +249,6 @@ namespace exodbc
 		delete pTable;
 	}
 
-
-	TEST_P(DbTest, OpenOdbc3)
-	{
-		DbEnvironment env;
-		ASSERT_TRUE(env.AllocHenv());
-		ASSERT_TRUE(env.SetOdbcVersion(OV_3));
-		HENV henv = env.GetHenv();
-		ASSERT_TRUE(henv != NULL);
-
-		Database db(henv);
-		EXPECT_TRUE(db.GetHDBC() != NULL);
-
-		//ASSERT_TRUE(m_pConnectInf->SetOdbcVersion(OV_3));
-		//HENV henv = m_pConnectInf->GetHenv();
-		//ASSERT_TRUE(henv  != 0);
-		//m_pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
-		//ASSERT_TRUE(m_pDb->Open(m_pConnectInf));
-
-		db.Close();
-	}
 
 	TEST_P(DbTest, ReadCatalogs)
 	{
