@@ -108,7 +108,7 @@ namespace exodbc
 		}
 
 		// Expect 4 entries
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes"));
 		int count = 0;
 		while(pTable->GetNext() && count <= 5)
 		{
@@ -117,11 +117,11 @@ namespace exodbc
 		EXPECT_EQ(4, count);
 
 		// Expect no entries
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 5"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 5"));
 		EXPECT_FALSE(pTable->GetNext());
 
 		// Expect 2 entries
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes >= 2 AND idchartypes <= 3"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes >= 2 AND idchartypes <= 3"));
 		count = 0;
 		while(pTable->GetNext() && count <= 3)
 		{
@@ -147,19 +147,19 @@ namespace exodbc
 			ASSERT_FALSE(true);
 		}
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 26, pTable->m_date.day);
 		EXPECT_EQ( 01, pTable->m_date.month);
 		EXPECT_EQ( 1983, pTable->m_date.year);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 13, pTable->m_time.hour);
 		EXPECT_EQ( 55, pTable->m_time.minute);
 		EXPECT_EQ( 56, pTable->m_time.second);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 26, pTable->m_timestamp.day);
 		EXPECT_EQ( 01, pTable->m_timestamp.month);
@@ -176,7 +176,7 @@ namespace exodbc
 		}
 
 		// Test for NULL
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes WHERE iddatetypes = 2"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_FALSE( pTable->IsColNull(0) );
 		EXPECT_TRUE( pTable->IsColNull(1) );
@@ -195,27 +195,27 @@ namespace exodbc
 			ASSERT_FALSE(true);
 		}
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( -32768, pTable->m_smallInt);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 2"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 32767, pTable->m_smallInt);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 3"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( INT_MIN /* -2147483648 */, pTable->m_int);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 4"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 4"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 2147483647, pTable->m_int);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 5"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( LLONG_MIN /* -9223372036854775808 */, pTable->m_bigInt);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 6"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 6"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
 
@@ -223,23 +223,23 @@ namespace exodbc
 		RecordProperty("Ticket", 34);
 		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 7"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( 0, pTable->m_usmallInt);
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 8"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 8"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( 65535, pTable->m_usmallInt);
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 9"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 9"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( 0, pTable->m_uint);
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 10"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 10"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( 4294967295, pTable->m_uint);
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 11"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 11"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( 0, pTable->m_ubigInt);
 
@@ -247,14 +247,14 @@ namespace exodbc
 			// TODO: This is ugly, use some kind of disabled test, or log a warning..
 			if(std::wstring(m_pDb->GetDriverVersion()) != std::wstring(L"05.02.0006"))
 			{
-				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 12"));
+				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 12"));
 				EXPECT_TRUE( pTable->GetNext() );
 				EXPECT_EQ( 18446744073709551615, pTable->m_ubigInt);
 			}
 		}
 
 		// Test for NULL-Values
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
 		EXPECT_TRUE( pTable->GetNext());
 
 		EXPECT_FALSE( pTable->IsColNull(0) );
@@ -270,26 +270,26 @@ namespace exodbc
 			EXPECT_TRUE( pTable->IsColNull(6) );
 		}
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 3"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3"));
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_FALSE( pTable->IsColNull(2) );
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 5"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5"));
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_FALSE( pTable->IsColNull(3) );
 
 		// IBM DB2 has no support for unsigned int types, so far we know only about mysql having that
 		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 7"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 7"));
 			EXPECT_TRUE( pTable->GetNext());
 			EXPECT_FALSE( pTable->IsColNull(4) );
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 9"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 9"));
 			EXPECT_TRUE( pTable->GetNext());
 			EXPECT_FALSE( pTable->IsColNull(5) );
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes WHERE idintegertypes = 11"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 11"));
 			EXPECT_TRUE( pTable->GetNext());
 			EXPECT_FALSE( pTable->IsColNull(6) );
 		}
@@ -308,19 +308,19 @@ namespace exodbc
 
 		// Note: We trim the values read from the db on the right side, as for example db2 pads with ' ' by default
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(pTable->m_varchar));
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 2"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(pTable->m_char)));
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 3"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L"הצüאיט"), boost::trim_right_copy(std::wstring(pTable->m_varchar)));
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 4"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 4"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L"הצüאיט"), boost::trim_right_copy(std::wstring(pTable->m_char)));
 
@@ -329,7 +329,7 @@ namespace exodbc
 		EXPECT_TRUE( pTable->IsColNull(1) );
 		EXPECT_FALSE( pTable->IsColNull(2) );
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes WHERE idchartypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_FALSE( pTable->IsColNull(0) );
 		EXPECT_FALSE( pTable->IsColNull(1) );
@@ -348,37 +348,37 @@ namespace exodbc
 			ASSERT_FALSE(true);
 		}
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 0.0, pTable->m_float);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 2"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 3.141, pTable->m_float);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 3"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( -3.141, pTable->m_float);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 4"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 0.0, pTable->m_double);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 5"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 5"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 3.141592, pTable->m_double);
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 6"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 6"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( -3.141592, pTable->m_double);
 
 		// Test for NULL
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_TRUE( pTable->IsColNull(1));
 		EXPECT_FALSE( pTable->IsColNull(2));
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes WHERE idfloattypes = 4"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_FALSE( pTable->IsColNull(1));
 		EXPECT_TRUE( pTable->IsColNull(2));
@@ -405,7 +405,7 @@ namespace exodbc
 	//		ASSERT_FALSE(true);
 	//	}
 
-//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
+//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
 //		EXPECT_TRUE( pTable->GetNext() );
 //		void* t = (void*) &(pTable->m_decimal_18_0.val);
 //		uint16_t i = *((uint16_t*) t);
@@ -416,7 +416,7 @@ namespace exodbc
 //		//uint16_t i = (int) pTable->m_decimal_18_0.val;
 ////		EXPECT_EQ( 0.0, pTable->m_float);
 //
-//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 2"));
+//		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 2"));
 //		EXPECT_TRUE( pTable->GetNext() );
 ////		i = (int) pTable->m_decimal_18_0.val;
 //		t = (void*) &(pTable->m_decimal_18_0.val);
@@ -439,15 +439,15 @@ namespace exodbc
 			ASSERT_FALSE(true);
 		}
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L"0"), std::wstring(pTable->m_wcdecimal_18_0));
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 2"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(pTable->m_wcdecimal_18_0));
 	
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 3"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(pTable->m_wcdecimal_18_0));
 	
@@ -455,40 +455,40 @@ namespace exodbc
 		RecordProperty("Ticket", 35);
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 5"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( std::wstring(L"12345678,9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 6"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 		}
 		else
 		{
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 5"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 6"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6"));
 			EXPECT_TRUE( pTable->GetNext() );
 			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 		}
 	
 		// Test for NULL
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_FALSE( pTable->IsColNull(1) );
 		EXPECT_TRUE( pTable->IsColNull(2) );
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes WHERE idnumerictypes = 4"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_TRUE( pTable->IsColNull(1) );
 		EXPECT_FALSE( pTable->IsColNull(2) );
@@ -506,7 +506,7 @@ namespace exodbc
 			ASSERT_FALSE(true);
 		}
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		SQLCHAR empty[] = {	0, 0, 0, 0,
 							0, 0, 0, 0,
@@ -526,24 +526,24 @@ namespace exodbc
 							0x01, 0x23, 0x45, 0x67
 		};
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ(0, memcmp(empty, pTable->m_blob, sizeof(pTable->m_blob)));
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 2"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ(0, memcmp(ff, pTable->m_blob, sizeof(pTable->m_blob)));
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 3"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ(0, memcmp(abc, pTable->m_blob, sizeof(pTable->m_blob)));
 
 		// Test for NULL
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_FALSE( pTable->IsColNull(1) );
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.blobtypes WHERE idblobtypes = 4"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 4"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_TRUE( pTable->IsColNull(1) );
 
@@ -567,15 +567,15 @@ namespace exodbc
 		}
 
 		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM wxodbc3.chartable WHERE idchartable >= 0";
+		sqlstmt = L"DELETE FROM exodbc.chartable WHERE idchartable >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
 		// Select using '*' on complete table
-		sqlstmt = L"INSERT INTO wxodbc3.chartable (idchartable, col2, col3, col4) VALUES (1, 'r1_c2', 'r1_c3', 'r1_c4')";
+		sqlstmt = L"INSERT INTO exodbc.chartable (idchartable, col2, col3, col4) VALUES (1, 'r1_c2', 'r1_c3', 'r1_c4')";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(pTable->m_col2)));
 		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(pTable->m_col3)));
@@ -586,7 +586,7 @@ namespace exodbc
 		pTable->m_col2[0] = 0;
 		pTable->m_col3[0] = 0;
 		pTable->m_col4[0] = 0;
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT idchartable, col2, col3, col4 FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT idchartable, col2, col3, col4 FROM exodbc.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(pTable->m_col2)));
 		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(pTable->m_col3)));
@@ -596,7 +596,7 @@ namespace exodbc
 		// Now test by reading the incomplete table using '*': It works as we've still used the indexes "as in the db" when we've bound the columns
 		pIncTable->m_col2[0] = 0;
 		pIncTable->m_col4[0] = 0;
-		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pIncTable->GetNext() );
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(pIncTable->m_col2)));
 		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(pIncTable->m_col4)));
@@ -606,7 +606,7 @@ namespace exodbc
 		RecordProperty("Ticket", 15);
 		pIncTable->m_col2[0] = 0;
 		pIncTable->m_col4[0] = 0;
-		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT idchartable, col2, col4 FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT idchartable, col2, col4 FROM exodbc.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pIncTable->GetNext() );
 		//EXPECT_EQ(std::wstring(L"r1_c2"), std::wstring(pIncTable->m_col2).Trim());
 		//EXPECT_EQ(std::wstring(L"r1_c4"), std::wstring(pIncTable->m_col4).Trim());
@@ -615,7 +615,7 @@ namespace exodbc
 		// .. But reading using '*' or 'all fields' really works..
 		pIncTable->m_col2[0] = 0;
 		pIncTable->m_col4[0] = 0;
-		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT  idchartable, col2, col3, col4 FROM wxodbc3.chartable WHERE idchartable = 1"));
+		EXPECT_TRUE( pIncTable->QueryBySqlStmt(L"SELECT  idchartable, col2, col3, col4 FROM exodbc.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE( pIncTable->GetNext() );
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(pIncTable->m_col2)));
 		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(pIncTable->m_col4)));
