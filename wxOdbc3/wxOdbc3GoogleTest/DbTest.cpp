@@ -184,6 +184,10 @@ namespace exodbc
 		{
 			EXPECT_TRUE(m_pDb->Dbms() == dbmsMY_SQL);
 		}
+		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"SqlServer"))
+		{
+			EXPECT_TRUE(m_pDb->Dbms() == dbmsMS_SQL_SERVER);
+		}
 		else
 		{
 			EXPECT_EQ(std::wstring(L"Unknown DSN name"), m_odbcInfo.m_dsn);
@@ -254,15 +258,17 @@ namespace exodbc
 	{
 		std::vector<std::wstring> cats;
 		EXPECT_TRUE(m_pDb->ReadCatalogs(cats));
-		if(m_pDb->Dbms() == dbmsDB2)
+		switch(m_pDb->Dbms())
 		{
+		case dbmsDB2:
 			// DB2 does not support catalogs. it reports zero catalogs
 			EXPECT_EQ(0, cats.size());
-		}
-		else if(m_pDb->Dbms() == dbmsMY_SQL)
-		{
-			// MySQL reports our test-db as a catalog
+			break;
+		case dbmsMS_SQL_SERVER:
+		case dbmsMY_SQL:
+			// Those report our test-db as a catalog
 			EXPECT_TRUE(std::find(cats.begin(), cats.end(), L"exodbc") != cats.end());
+			break;
 		}
 	}
 
@@ -270,6 +276,26 @@ namespace exodbc
 	{
 		std::vector<std::wstring> schemas;
 		EXPECT_TRUE(m_pDb->ReadSchemas(schemas));
+		switch(m_pDb->Dbms())
+		{
+		case dbmsDB2:
+			// DB2 reports our test-db as a schema
+			EXPECT_TRUE(schemas.size() > 0);
+			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"EXODBC") != schemas.end());
+			break;
+		case dbmsMY_SQL:
+			// Mysql reports one schema with an empty name
+			EXPECT_TRUE(schemas.size() == 1);
+			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"") != schemas.end());
+			break;
+		case dbmsMS_SQL_SERVER:
+			// ms sql server reported at least 3 schemas:
+			EXPECT_TRUE(schemas.size() >= 3);
+			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"dbo") != schemas.end());
+			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"INFORMATION_SCHEMA") != schemas.end());
+			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"sys") != schemas.end());
+			break;
+		}
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			// DB2 has a wonderful correct schema for our test-db
