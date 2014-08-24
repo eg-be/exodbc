@@ -275,13 +275,35 @@ namespace exodbc
 	{
 		std::vector<std::wstring> cats;
 		EXPECT_TRUE(m_pDb->ReadCatalogs(cats));
-		int p = 3;
+		if(m_pDb->Dbms() == dbmsDB2)
+		{
+			// DB2 does not support catalogs (?) it reports zero catalogs
+			EXPECT_EQ(0, cats.size());
+		}
+		else if(m_pDb->Dbms() == dbmsMY_SQL)
+		{
+			// MySQL reports our test-db as a catalog
+			EXPECT_TRUE(std::find(cats.begin(), cats.end(), L"wxodbc3") != cats.end());
+		}
 	}
 
 	TEST_P(DbTest, ReadSchemas)
 	{
 		std::vector<std::wstring> schemas;
 		EXPECT_TRUE(m_pDb->ReadSchemas(schemas));
+		if(m_pDb->Dbms() == dbmsDB2)
+		{
+			// DB2 has a wonderful correct schema for our test-db
+			EXPECT_TRUE(schemas.size() > 0);
+			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"WXODBC3") != schemas.end());
+		}
+		else if(m_pDb->Dbms() == dbmsMY_SQL)
+		{
+			// MySQL reports exactly one schema with an empty name
+			EXPECT_TRUE(schemas.size() == 1);
+			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"") != schemas.end());
+		}
+
 		int p = 3;
 	}
 
@@ -289,13 +311,16 @@ namespace exodbc
 	{
 		std::vector<std::wstring> tableTypes;
 		EXPECT_TRUE(m_pDb->ReadTableTypes(tableTypes));
-		int p = 3;
+		// Check that we have at least a type TABLE and a type VIEW
+		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"TABLE") != tableTypes.end());
+		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"VIEW") != tableTypes.end());
 	}
 
 	TEST_P(DbTest, ReadCompleteCatalog)
 	{
 		SDbCatalog cat;
 		EXPECT_TRUE(m_pDb->ReadCompleteCatalog(cat));
+		// TODO: This is confusing. DB2 reports schemas, what is correct, but mysql reports catalogs?? wtf?
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
 			EXPECT_TRUE(cat.m_schemas.find(L"WXODBC3") != cat.m_schemas.end());
@@ -311,11 +336,11 @@ namespace exodbc
 	{
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			EXPECT_EQ(4, m_pDb->GetColumnCount(L"INTEGERTYPES"));
+			EXPECT_EQ(4, m_pDb->ReadColumnCount(L"INTEGERTYPES"));
 		}
 		else if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
-			EXPECT_EQ(7, m_pDb->GetColumnCount(L"integertypes"));
+			EXPECT_EQ(7, m_pDb->ReadColumnCount(L"integertypes"));
 		}
 	}
 

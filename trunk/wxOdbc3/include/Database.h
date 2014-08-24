@@ -171,6 +171,8 @@ namespace exodbc
 		std::wstring		m_tableRemarks;
 		std::wstring		m_catalog;
 		std::wstring		m_schema;
+		bool				m_isCatalogNull;
+		bool				m_isSchemaNull;
 	};
 
 
@@ -299,7 +301,9 @@ namespace exodbc
 		/**
 		 * \fn	bool Database::ReadCompleteCatalog(SDbCatalog& catalogInfo);
 		 *
-		 * \brief	Reads complete catalog.
+		 * \brief	Reads complete catalog. Queries the database using SQLTables with no search-string 
+		 * 			set at all. All parameters all NULL. This is due to the fact that SQL_ATTR_METADATA_ID
+		 * 			is not really implemented by all databases, so keep it simple.
 		 *
 		 * \param [in,out]	catalogInfo	Information describing the catalog.
 		 *
@@ -307,11 +311,43 @@ namespace exodbc
 		 */
 		bool		ReadCompleteCatalog(SDbCatalog& catalogInfo);
 
+		/*!
+		 * \fn	bool Database::ReadCatalogs(std::vector<std::wstring>& catalogs)
+		 *
+		 * \brief	Reads all Catalogs that are defined in the DB. This calls SQLTables with 
+		 * 			SQL_ALL_CATALOGS as catalog-name.
+		 *
+		 * \param [in,out]	catalogs	The catalogs.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool		ReadCatalogs(std::vector<std::wstring>& catalogs)		{ return ReadCatalogInfo(AllCatalogs, catalogs); };
+
+		/*!
+		 * \fn	bool exodbc::Database::ReadSchemas(std::vector<std::wstring>& schemas)
+		 *
+		 * \brief	Reads all schemas that are defined in the DB. This calls SQLTbles with
+		 * 			SQL_ALL_SCHEMAS as schema-name.
+		 *
+		 * \param [in,out]	schemas	The schemas.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool		ReadSchemas(std::vector<std::wstring>& schemas)			{ return ReadCatalogInfo(AllSchemas, schemas); };
+
+		/*!
+		 * \fn	bool exodbc::Database::ReadTableTypes(std::vector<std::wstring>& tableTypes)
+		 *
+		 * \brief	Reads all table types that are defined by the DB. This call SQLTables with
+		 * 			SQL_ALL_TABLE_TYPES as table-type.
+		 *
+		 * \param [in,out]	tableTypes	List of types of the tables.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool		ReadTableTypes(std::vector<std::wstring>& tableTypes)	{ return ReadCatalogInfo(AllTableTypes, tableTypes); };
 
-		int			GetColumnCount(const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring catalogName = L"");
+		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring catalogName = L"");
 
 		// TODO: Continue here: Get back the following stuff
 		//
