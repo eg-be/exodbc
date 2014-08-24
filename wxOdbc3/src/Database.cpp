@@ -2225,7 +2225,7 @@ namespace exodbc
 //
 //#endif  // #else OLD_GETCOLUMNS
 
-	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables)
+	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<SDbCatalogTable>& tables)
 	{
 		// Clear tables
 		tables.clear();
@@ -2294,7 +2294,7 @@ namespace exodbc
 
 			while(ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 			{
-				DbCatalogTable table;
+				SDbCatalogTable table;
 				bool haveAllData = true;
 				SQLLEN cb;
 				haveAllData = haveAllData & GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen(), &cb, &table.m_isCatalogNull, true);
@@ -2349,7 +2349,7 @@ namespace exodbc
 		return ok;
 	}
 
-	int Database::ReadColumnCount(const DbCatalogTable& table)
+	int Database::ReadColumnCount(const SDbCatalogTable& table)
 	{
 		// Free statement, ignore if already closed
 		// Close an eventually open cursor, do not care about truncation
@@ -2425,7 +2425,7 @@ namespace exodbc
 	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName)
 	{
 		// Query the tables that match
-		std::vector<DbCatalogTable> tables;
+		std::vector<SDbCatalogTable> tables;
 		if(!FindTables(tableName, schemaName, catalogName, L"", tables))
 		{
 			LOG_ERROR(L"Searching tables failed");
@@ -2457,10 +2457,10 @@ namespace exodbc
 			return false;
 		}
 
-		std::vector<DbCatalogTable>::const_iterator it;
+		std::vector<SDbCatalogTable>::const_iterator it;
 		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
 		{
-			const DbCatalogTable& table = *it;
+			const SDbCatalogTable& table = *it;
 			if(!table.m_isCatalogNull)
 				dbInf.m_catalogs.insert(table.m_catalog);
 			if(!table.m_isSchemaNull)

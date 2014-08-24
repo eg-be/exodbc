@@ -90,8 +90,12 @@ namespace exodbc
 	// Structs
 	// -------
 
-	// The following structure contains database information gathered from the
-	// datasource when the datasource is first OpenImpled.
+	/*!
+	 * \struct	SDbInfo
+	 *
+	 * \brief	The following structure contains database information gathered from the datasource
+	 * 			when the datasource is first OpenImpled.
+	 */
 	struct EXODBCAPI SDbInfo
 	{
 		SDbInfo();
@@ -184,6 +188,38 @@ namespace exodbc
 
 		std::wstring ToOneLineStr(bool withHeaderLines = false, bool withEndLine = false) const;
 		std::wstring ToStr() const;
+	};
+
+	/*!
+	 * \struct	SDbCatalogTable
+	 *
+	 * \brief	Description of a table fetched using the catalog function SQLTables
+	 */
+	struct EXODBCAPI SDbCatalogTable        // Description of a Table: Used only in the Description of a database, (catalog info)
+	{
+	public:
+		SDbCatalogTable();
+
+		std::wstring		m_tableName;
+		std::wstring		m_tableType;           // "TABLE" or "SYSTEM TABLE" etc.
+		std::wstring		m_tableRemarks;
+		std::wstring		m_catalog;
+		std::wstring		m_schema;
+		bool				m_isCatalogNull;
+		bool				m_isSchemaNull;
+	};
+
+	/*!
+	 * \struct	SDbCatalog
+	 *
+	 * \brief	Description of the catalog of a database
+	 */
+	struct EXODBCAPI SDbCatalog     // Description of a Database: Used so far only when fetching the "catalog"
+	{
+	public:
+		std::vector<SDbCatalogTable> m_tables;
+		std::set<std::wstring> m_catalogs;
+		std::set<std::wstring> m_schemas;
 	};
 
 	// Enums

@@ -297,7 +297,7 @@ namespace exodbc
 
 	TEST_P(DbTest, FindTables)
 	{
-		std::vector<DbCatalogTable> tables;
+		std::vector<SDbCatalogTable> tables;
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
