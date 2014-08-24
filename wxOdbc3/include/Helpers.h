@@ -170,6 +170,22 @@ namespace exodbc
 	 */
 	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
 
+	/*!
+	 * \fn	extern EXODBCAPI bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value);
+	 *
+	 * \brief	Gets string data. Allocates a wchar_t buffer with maxNrOfChars wchars + one char for the null-terminate:
+	 * 			wchar_t* buff = new buff[maxNrOfChars + 1];
+	 * 			Then calls GetData with that buffer and takes into account that GetData needs a buffer-size, not a char-size.
+	 * 			If the data is null or reading fails, value is set to an empty string.
+	 *
+	 * \param	hStmt		 	The statement.
+	 * \param	colNr		 	The col nr.
+	 * \param	maxNrOfChars 	The maximum nr of characters.
+	 * \param [in,out]	value	The value.
+	 *
+	 * \return	true if it succeeds, false if it fails.
+	 */
+	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull = NULL);
 
 	// Classes
 	// -------

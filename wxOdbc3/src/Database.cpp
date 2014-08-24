@@ -2504,13 +2504,6 @@ namespace exodbc
 
 		// Query privs
 		bool ok = true;
-		wchar_t* buffCatalog = new wchar_t[m_dbInf.GetMaxCatalogNameLen()];
-		wchar_t* buffSchema = new wchar_t[m_dbInf.GetMaxSchemaNameLen()];
-		wchar_t* buffTableName = new wchar_t[m_dbInf.GetMaxTableNameLen()];
-		wchar_t* buffGrantor = new wchar_t[DB_MAX_GRANTEE_LEN + 1];
-		wchar_t* buffGrantee = new wchar_t[DB_MAX_GRANTEE_LEN + 1];
-		wchar_t* buffPrivilege = new wchar_t[DB_MAX_PRIVILEGES_LEN + 1];
-		wchar_t* buffGrantable = new wchar_t[DB_MAX_IS_GRANTABLE_LEN + 1];
 
 		ret = SQLTablePrivileges(m_hstmt, 
 			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,
@@ -2527,23 +2520,22 @@ namespace exodbc
 			{
 				bool haveAllData = true;
 
-				buffCatalog[0] = 0;
-				buffSchema[0] = 0;
-				buffTableName[0] = 0;
-				buffGrantor[0] = 0;
-				buffGrantee[0] = 0;
-				buffPrivilege[0] = 0;
-				buffGrantable[0] = 0;
-
 				SCatalogTablePrivilege priv;
-				SQLLEN cb;
-				haveAllData = haveAllData & GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen(), &cb, &priv.m_isCatalogNull, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen(), &cb, &priv.m_isSchemaNull, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen(), &cb, NULL, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 4, SQL_C_WCHAR, buffGrantor, DB_MAX_GRANTOR_LEN + 1, &cb, &priv.m_isGrantorNull, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_WCHAR, buffGrantee, DB_MAX_GRANTEE_LEN + 1, &cb, NULL, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 6, SQL_C_WCHAR, buffPrivilege, DB_MAX_PRIVILEGES_LEN + 1, &cb, NULL, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 7, SQL_C_WCHAR, buffGrantable, DB_MAX_IS_GRANTABLE_LEN * 2 + 2, &cb, &priv.m_isGrantableNull, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
+				haveAllData = haveAllData & GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
+				haveAllData = haveAllData & GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
+				haveAllData = haveAllData & GetData(m_hstmt, 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);
+				haveAllData = haveAllData & GetData(m_hstmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
+				haveAllData = haveAllData & GetData(m_hstmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
+				haveAllData = haveAllData & GetData(m_hstmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
+
+				//haveAllData = haveAllData & GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen(), &cb, &priv.m_isCatalogNull, true);
+				//haveAllData = haveAllData & GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen(), &cb, &priv.m_isSchemaNull, true);
+				//haveAllData = haveAllData & GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen(), &cb, NULL, true);
+				//haveAllData = haveAllData & GetData(m_hstmt, 4, SQL_C_WCHAR, buffGrantor, DB_MAX_GRANTOR_LEN + 1, &cb, &priv.m_isGrantorNull, true);
+				//haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_WCHAR, buffGrantee, DB_MAX_GRANTEE_LEN + 1, &cb, NULL, true);
+				//haveAllData = haveAllData & GetData(m_hstmt, 6, SQL_C_WCHAR, buffPrivilege, DB_MAX_PRIVILEGES_LEN + 1, &cb, NULL, true);
+				//haveAllData = haveAllData & GetData(m_hstmt, 7, SQL_C_WCHAR, buffGrantable, DB_MAX_IS_GRANTABLE_LEN * 2 + 2, &cb, &priv.m_isGrantableNull, true);
 
 				if(!haveAllData)
 				{
@@ -2552,18 +2544,6 @@ namespace exodbc
 				}
 				else
 				{
-					if(!priv.m_isCatalogNull)
-						priv.m_catalogName = buffCatalog;
-					if(!priv.m_isSchemaNull)
-						priv.m_schemaName = buffSchema;
-					priv.m_tableName = buffTableName;
-					if(!priv.m_isGrantorNull)
-						priv.m_grantor = buffGrantor;
-					priv.m_grantee = buffGrantee;
-					priv.m_privilege = buffPrivilege;
-					if(!priv.m_isGrantableNull)
-						priv.m_grantable = buffGrantable;
-
 					privileges.push_back(priv);
 				}
 			}
@@ -2577,14 +2557,6 @@ namespace exodbc
 
 		// Close, ignore all errs
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-
-		delete[] buffCatalog;
-		delete[] buffSchema;
-		delete[] buffTableName;
-		delete[] buffGrantor;
-		delete[] buffGrantee;
-		delete[] buffPrivilege;
-		delete[] buffGrantable;
 
 		if(pSchemaBuff)
 			delete[] pSchemaBuff;
