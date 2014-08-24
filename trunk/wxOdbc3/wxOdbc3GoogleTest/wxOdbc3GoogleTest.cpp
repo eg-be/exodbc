@@ -92,7 +92,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	for(size_t i = 0; status == 0 && i < dsns.size(); i++)
 	{
-		g_odbcInfos.push_back(SOdbcInfo(dsns[i], users[i], passes[i], exodbc::OV_3));
+		g_odbcInfos.push_back(SOdbcInfo(dsns[i], users[i], passes[i]));
 	}
 
 	// Note: We cannot call Init earlier, we must call it after we've set up the global with the param-values

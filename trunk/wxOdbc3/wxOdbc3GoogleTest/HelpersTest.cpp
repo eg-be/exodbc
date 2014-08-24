@@ -36,7 +36,6 @@ namespace exodbc
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
 		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		RecordProperty("OdbcVersion", m_odbcInfo.m_odbcVersion);
 	}
 
 	void HelpersTest::TearDown()
