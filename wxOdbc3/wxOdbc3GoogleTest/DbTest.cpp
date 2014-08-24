@@ -201,22 +201,22 @@ namespace exodbc
 		}
 
 		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0";
+		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
 		ASSERT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		ASSERT_TRUE( m_pDb->CommitTrans() );
 
-		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		ASSERT_FALSE( pTable->GetNext());
 
-		sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
+		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		// Test: If we do not commit we still have zero records
 		// TOOD: Why do we get the records here? We need to read more about autocommit and stuff like that, but lets fix the tables first
-		//ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		//ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		//EXPECT_FALSE( pTable->GetNext());
 		// Once we commit we have one record
 		ASSERT_TRUE( m_pDb->CommitTrans() );
-		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_TRUE( pTable->GetNext());
 
 		delete pTable;
@@ -232,18 +232,18 @@ namespace exodbc
 		}
 
 		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0";
+		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
 		ASSERT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		ASSERT_TRUE( m_pDb->CommitTrans() );
 
-		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		ASSERT_FALSE( pTable->GetNext());
 
-		sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
+		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		// We rollback and expect no record
 		ASSERT_TRUE( m_pDb->RollbackTrans() );
-		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_FALSE( pTable->GetNext());
 
 		delete pTable;
@@ -262,7 +262,7 @@ namespace exodbc
 		else if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
 			// MySQL reports our test-db as a catalog
-			EXPECT_TRUE(std::find(cats.begin(), cats.end(), L"wxodbc3") != cats.end());
+			EXPECT_TRUE(std::find(cats.begin(), cats.end(), L"exodbc") != cats.end());
 		}
 	}
 
@@ -274,7 +274,7 @@ namespace exodbc
 		{
 			// DB2 has a wonderful correct schema for our test-db
 			EXPECT_TRUE(schemas.size() > 0);
-			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"WXODBC3") != schemas.end());
+			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"EXODBC") != schemas.end());
 		}
 		else if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
@@ -304,13 +304,13 @@ namespace exodbc
 			// We know that mySql uses catalogs, not schemas:
 			tableName = L"integertypes";
 			schemaName = L"";
-			catalogName = L"wxodbc3";
+			catalogName = L"exodbc";
 		}
 		else if(m_pDb->Dbms() == dbmsDB2)
 		{
 			// We know that DB2 uses schemas:
 			tableName = L"INTEGERTYPES";
-			schemaName = L"WXODBC3";
+			schemaName = L"EXODBC";
 			catalogName = L"";
 		}
 		// TODO: With MySql we get no results here?
@@ -329,13 +329,13 @@ namespace exodbc
 			// We know that mySql uses catalogs, not schemas:
 			tableName = L"integertypes";
 			schemaName = L"";
-			catalogName = L"wxodbc3";
+			catalogName = L"exodbc";
 		}
 		else if(m_pDb->Dbms() == dbmsDB2)
 		{
 			// We know that DB2 uses schemas:
 			tableName = L"INTEGERTYPES";
-			schemaName = L"WXODBC3";
+			schemaName = L"EXODBC";
 			catalogName = L"";
 		}
 		// Find one table by using only the table-name as search param
@@ -388,11 +388,11 @@ namespace exodbc
 		// TODO: This is confusing. DB2 reports schemas, what is correct, but mysql reports catalogs?? wtf?
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			EXPECT_TRUE(cat.m_schemas.find(L"WXODBC3") != cat.m_schemas.end());
+			EXPECT_TRUE(cat.m_schemas.find(L"EXODBC") != cat.m_schemas.end());
 		}
 		else if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
-			EXPECT_TRUE(cat.m_catalogs.find(L"wxodbc3") != cat.m_catalogs.end());
+			EXPECT_TRUE(cat.m_catalogs.find(L"exodbc") != cat.m_catalogs.end());
 		}
 		EXPECT_TRUE(cat.m_tables.size() >= 12);
 	}
@@ -407,14 +407,14 @@ namespace exodbc
 		{
 			// DB2 has schemas
 			tableName = L"INTEGERTYPES";
-			schemaName = L"WXODBC3";
+			schemaName = L"EXODBC";
 			nrCols = 4;
 		}
 		else if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
 			// mysql has catalogs
 			tableName = L"integertypes";
-			catalogName = L"wxodbc3";
+			catalogName = L"exodbc";
 			nrCols = 7;
 		}
 		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, schemaName, catalogName));
@@ -431,7 +431,7 @@ namespace exodbc
 			ASSERT_FALSE(true);
 		}
 
-		std::wstring sqlstmt = L"DELETE FROM wxodbc3.chartypes_tmp WHERE idchartypes_tmp >= 0";
+		std::wstring sqlstmt = L"DELETE FROM exodbc.chartypes_tmp WHERE idchartypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
@@ -441,17 +441,17 @@ namespace exodbc
 		RecordProperty("Ticket", 36);
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			sqlstmt = (boost::wformat(L"INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
+			sqlstmt = (boost::wformat(L"INSERT INTO exodbc.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
 		}
 		else
 		{
-			sqlstmt = (boost::wformat(L"INSERT INTO wxodbc3.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
+			sqlstmt = (boost::wformat(L"INSERT INTO exodbc.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
 		}
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
 		// And note the triming
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.chartypes_tmp ORDER BY idchartypes_tmp ASC"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes_tmp ORDER BY idchartypes_tmp ASC"));
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(pTable->m_varchar));
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(pTable->m_char)));
@@ -469,23 +469,23 @@ namespace exodbc
 			ASSERT_FALSE(true);
 		}
 
-		std::wstring sqlstmt = L"DELETE FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp >= 0";
+		std::wstring sqlstmt = L"DELETE FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		sqlstmt = L"INSERT INTO wxodbc3.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (1, -3.141592, -3.141)";
+		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (1, -3.141592, -3.141)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( -3.141592, pTable->m_double);
 		EXPECT_EQ( -3.141, pTable->m_float);
 		EXPECT_FALSE( pTable->GetNext() );
 
-		sqlstmt = L"INSERT INTO wxodbc3.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (2, 3.141592, 3.141)";
+		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (2, 3.141592, 3.141)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.floattypes_tmp WHERE idfloattypes_tmp = 2"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 3.141592, pTable->m_double);
 		EXPECT_EQ( 3.141, pTable->m_float);
@@ -506,15 +506,15 @@ namespace exodbc
 		}
 
 		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp >= 0";
+		sqlstmt = L"DELETE FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		sqlstmt = L"INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (1, -123456789012345678, -12345678.9012345678)";
+		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (1, -123456789012345678, -12345678.9012345678)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(pTable->m_wcdecimal_18_0));
 
@@ -524,11 +524,11 @@ namespace exodbc
 		else
 			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 
-		sqlstmt = L"INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (2, 123456789012345678, 12345678.9012345678)";
+		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (2, 123456789012345678, 12345678.9012345678)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 2"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 2"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(pTable->m_wcdecimal_18_0));
 
@@ -537,11 +537,11 @@ namespace exodbc
 		else
 			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(pTable->m_wcdecimal_18_10));	
 
-		sqlstmt = L"INSERT INTO wxodbc3.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (3, 0, 0.0000000000)";
+		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (3, 0, 0.0000000000)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.numerictypes_tmp WHERE idnumerictypes_tmp = 3"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 3"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L"0"), std::wstring(pTable->m_wcdecimal_18_0));
 		
@@ -564,28 +564,28 @@ namespace exodbc
 		}
 
 		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp >= 0";
+		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_FALSE( pTable->GetNext());
 
-		sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
+		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_EQ( -32768, pTable->m_smallInt);
 		EXPECT_EQ( INT_MIN, pTable->m_int);
 		EXPECT_EQ( -LLONG_MIN, pTable->m_bigInt);
 		EXPECT_FALSE( pTable->GetNext());
 
-		sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (2, 32767, 2147483647, 9223372036854775807)";
+		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (2, 32767, 2147483647, 9223372036854775807)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_EQ( 32767, pTable->m_smallInt);
@@ -597,20 +597,20 @@ namespace exodbc
 		RecordProperty("Ticket", 33);
 		if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
-			sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (4, 0, 0, 0)";
+			sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (4, 0, 0, 0)";
 			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 			EXPECT_TRUE( m_pDb->CommitTrans() );
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp WHERE idintegertypes_tmp = 4"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp = 4"));
 			EXPECT_TRUE( pTable->GetNext());
 			EXPECT_EQ( 0, pTable->m_usmallInt);
 			EXPECT_EQ( 0, pTable->m_uint);
 			EXPECT_EQ( 0, pTable->m_ubigInt);
 			EXPECT_FALSE( pTable->GetNext());
 
-			sqlstmt = L"INSERT INTO wxodbc3.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (5, 65535, 4294967295, 18446744073709551615)";
+			sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (5, 65535, 4294967295, 18446744073709551615)";
 			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 			EXPECT_TRUE( m_pDb->CommitTrans() );
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.integertypes_tmp  WHERE idintegertypes_tmp = 5"));
+			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp  WHERE idintegertypes_tmp = 5"));
 			EXPECT_TRUE( pTable->GetNext());
 			EXPECT_EQ( 65535, pTable->m_usmallInt);
 			EXPECT_EQ( 4294967295, pTable->m_uint);
@@ -636,14 +636,14 @@ namespace exodbc
 		}
 
 		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM wxodbc3.datetypes_tmp WHERE iddatetypes_tmp >= 0";
+		sqlstmt = L"DELETE FROM exodbc.datetypes_tmp WHERE iddatetypes_tmp >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		sqlstmt = L"INSERT INTO wxodbc3.datetypes_tmp (iddatetypes_tmp, tdate, ttime, ttimestamp) VALUES (1, '1983-01-26', '13:55:56', '1983-01-26 13:55:56')";
+		sqlstmt = L"INSERT INTO exodbc.datetypes_tmp (iddatetypes_tmp, tdate, ttime, ttimestamp) VALUES (1, '1983-01-26', '13:55:56', '1983-01-26 13:55:56')";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM wxodbc3.datetypes_tmp WHERE iddatetypes_tmp = 1"));
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes_tmp WHERE iddatetypes_tmp = 1"));
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 26, pTable->m_date.day);
 		EXPECT_EQ( 01, pTable->m_date.month);
