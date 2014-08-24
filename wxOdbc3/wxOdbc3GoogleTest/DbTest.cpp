@@ -282,8 +282,6 @@ namespace exodbc
 			EXPECT_TRUE(schemas.size() == 1);
 			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"") != schemas.end());
 		}
-
-		int p = 3;
 	}
 
 	TEST_P(DbTest, ReadTableTypes)
@@ -293,6 +291,30 @@ namespace exodbc
 		// Check that we have at least a type TABLE and a type VIEW
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"TABLE") != tableTypes.end());
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"VIEW") != tableTypes.end());
+	}
+
+	TEST_P(DbTest, ReadPrivileges)
+	{
+		std::vector<SCatalogTablePrivilege> privs;
+		std::wstring tableName;
+		std::wstring schemaName;
+		std::wstring catalogName;
+		if(m_pDb->Dbms() == dbmsMY_SQL)
+		{
+			// We know that mySql uses catalogs, not schemas:
+			tableName = L"integertypes";
+			schemaName = L"";
+			catalogName = L"wxodbc3";
+		}
+		else if(m_pDb->Dbms() == dbmsDB2)
+		{
+			// We know that DB2 uses schemas:
+			tableName = L"INTEGERTYPES";
+			schemaName = L"WXODBC3";
+			catalogName = L"";
+		}
+		EXPECT_TRUE(m_pDb->ReadTablePrivileges(tableName, schemaName, catalogName, privs));
+		int p = 3;
 	}
 
 	TEST_P(DbTest, FindTables)

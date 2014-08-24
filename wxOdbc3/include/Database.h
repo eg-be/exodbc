@@ -349,8 +349,11 @@ namespace exodbc
 		 * \return	The column count or -1 in case of failure
 		 */
 		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
+		
+		bool		ReadTablePrivileges(const SDbCatalogTable& table, std::vector<SCatalogTablePrivilege>& privileges);
 
-		// TODO: Continue here: Get back the following stuff
+		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges);
+
 		//		bool         TablePrivileges(const std::wstring& tableName, const std::wstring& priv, const wchar_t* userID = NULL, const wchar_t* schema = NULL, const std::wstring& path = std::wstring());
 
 		/*!
