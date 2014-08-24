@@ -55,6 +55,7 @@ namespace exodbc {
 		maxCatalogNameLen = 0;
 		maxSchemaNameLen = 0;
 		maxTableNameLen = 0;
+		searchPatternEscape[0] = 0;
 	}
 
 	std::wstring SDbInfo::ToStr() const

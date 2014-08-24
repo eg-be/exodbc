@@ -130,7 +130,7 @@ namespace exodbc
 		SQLUSMALLINT  maxCatalogNameLen;				// Max length of a catalog name. Can be 0 if no limit, or limit is unknown
 		SQLUSMALLINT  maxSchemaNameLen;					// Max length of a schema name. Can be 0 if no limit, or limit is unknown
 		SQLUSMALLINT  maxTableNameLen;					// Max length of a table name. Can be 0 if no limit, or limit is unknown
-
+		SQLWCHAR		searchPatternEscape[2];			// SQL_SEARCH_PATTERN_ESCAPE: How to escape string-search patterns in pattern-value arguments in catalog functions
 		std::wstring ToStr() const;
 
 		SQLUSMALLINT GetMaxCatalogNameLen() const;
