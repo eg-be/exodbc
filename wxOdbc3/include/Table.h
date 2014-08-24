@@ -231,7 +231,7 @@ namespace exodbc
 		std::wstring    m_from;                // Allows for joins in a wxDbTable::Query().  Format: ",tbl,tbl..."
 
 		// ODBC Handles
-		HENV        m_henv;           // ODBC Environment handle
+//		HENV        m_henv;           // ODBC Environment handle
 		HDBC        m_hdbc;           // ODBC DB Connection handle
 		HSTMT       m_hstmt;          // ODBC Statement handle
 		HSTMT*		m_hstmtDefault;   // Default cursor
