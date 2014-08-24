@@ -2348,11 +2348,8 @@ namespace exodbc
 		return ok;
 	}
 
-
-	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring catalogName /* = L"" */)
+	int Database::ReadColumnCount(const DbCatalogTable& table)
 	{
-		UWORD    noCols = 0;
-
 		// Free statement, ignore if already closed
 		// Close an eventually open cursor, do not care about truncation
 		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
@@ -2362,39 +2359,91 @@ namespace exodbc
 			return false;
 		}
 
+		// Note: The schema and table name arguments are Pattern Value arguments
+		// The catalog name is an ordinary argument. if we do not have one in the
+		// DbCatalogTable, we set it to an empty string
+		std::wstring catalogQueryName = L"";
+		if(!table.m_isCatalogNull)
+			catalogQueryName = table.m_catalog;
+
+		// we always have a tablename, but only sometimes a schema
+		SQLWCHAR* pSchemaBuff = NULL;
+		if(!table.m_isSchemaNull)
+		{
+			pSchemaBuff = new SQLWCHAR[table.m_schema.length() + 1];
+			wcscpy(pSchemaBuff, table.m_schema.c_str());
+		}
+
+		// Query columns
+		bool ok = true;
+		int colCount = 0;
 		ret = SQLColumns(m_hstmt,
-				(SQLWCHAR*) catalogName.c_str(), SQL_NTS,	// catalog
-				(SQLWCHAR*) schemaName.c_str(), SQL_NTS,	// schema
-				(SQLWCHAR*) tableName.c_str(), SQL_NTS,		// tablename
-				NULL, 0);						// All columns
+			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,	// catalog
+			pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,	// schema
+			(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS,		// tablename
+			NULL, 0);						// All columns
 
 		if(ret != SQL_SUCCESS)
 		{
 			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 			LOG_ERROR_STMT(m_hstmt, ret, SQLColumns);
-			return -1;
+			ok = false;
 		}
 
 		// Count the columns
-		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+		while (ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
-			noCols++;
+			++colCount;
 		}
 
 		if(ret != SQL_NO_DATA)
 		{
 			LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
-			return -1;
+			ok = false;
 		}
 
 		ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 		if( ! SQL_SUCCEEDED(ret))
 		{
 			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
-			return -1;
+			ok = false;
 		}
-		return noCols;
 
+		if(pSchemaBuff)
+		{
+			delete[] pSchemaBuff;
+		}
+
+		if(ok)
+			return colCount;
+
+		return -1;
+	}
+
+
+	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName)
+	{
+		// Query the tables that match
+		std::vector<DbCatalogTable> tables;
+		if(!FindTables(tableName, schemaName, catalogName, L"", tables))
+		{
+			LOG_ERROR(L"Searching tables failed");
+			return false;
+		}
+
+		if(tables.size() == 0)
+		{
+			LOG_ERROR((boost::wformat(L"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			return false;
+		}
+		if(tables.size() != 1)
+		{
+			LOG_ERROR((boost::wformat(L"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			return false;
+		}
+
+		// Forward the call		
+		return ReadColumnCount(tables[0]);
 	}
 
 
