@@ -41,11 +41,11 @@ namespace exodbc
 		//// Called for every unit-test
 		m_odbcInfo = GetParam();
 		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		m_pConnectInf = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
-		HENV henv = m_pConnectInf->GetHenv();
+		m_pEnv = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+		HENV henv = m_pEnv->GetHenv();
 		ASSERT_TRUE(henv  != 0);
-		m_pDb = new Database(henv, m_odbcInfo.m_cursorType == SOdbcInfo::forwardOnlyCursors);
-		ASSERT_TRUE(m_pDb->Open(m_pConnectInf));
+		m_pDb = new Database(m_pEnv);
+		ASSERT_TRUE(m_pDb->Open(m_pEnv));
 	}
 
 	void DbTableTest::TearDown()
@@ -58,11 +58,11 @@ namespace exodbc
 			m_pDb->Close();
 			delete m_pDb;
 		}
-		if(m_pConnectInf)
-			delete m_pConnectInf;
+		if(m_pEnv)
+			delete m_pEnv;
 
 		m_pDb = NULL;
-		m_pConnectInf = NULL;
+		m_pEnv = NULL;
 	}
 
 	// Open
