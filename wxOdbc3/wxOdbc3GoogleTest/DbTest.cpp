@@ -376,14 +376,27 @@ namespace exodbc
 
 	TEST_P(DbTest, ReadColumnCount)
 	{
+		std::wstring tableName = L"";
+		std::wstring schemaName = L"";
+		std::wstring catalogName = L"";
+		int nrCols = 0;
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			EXPECT_EQ(4, m_pDb->ReadColumnCount(L"INTEGERTYPES"));
+			// DB2 has schemas
+			tableName = L"INTEGERTYPES";
+			schemaName = L"WXODBC3";
+			nrCols = 4;
 		}
 		else if(m_pDb->Dbms() == dbmsMY_SQL)
 		{
-			EXPECT_EQ(7, m_pDb->ReadColumnCount(L"integertypes"));
+			// mysql has catalogs
+			tableName = L"integertypes";
+			catalogName = L"wxodbc3";
+			nrCols = 7;
 		}
+		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, schemaName, catalogName));
+		// we should also work if we just search by the tableName, as long as tableName is unique within db
+		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, L"", L""));
 	}
 
 	TEST_P(DbTest, ExecSql_InsertCharTypes)

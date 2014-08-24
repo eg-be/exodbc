@@ -342,7 +342,8 @@ namespace exodbc
 		 */
 		bool		ReadTableTypes(std::vector<std::wstring>& tableTypes)	{ return ReadCatalogInfo(AllTableTypes, tableTypes); };
 
-		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring catalogName = L"");
+		int			ReadColumnCount(const DbCatalogTable& table);
+		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
 
 		// TODO: Continue here: Get back the following stuff
 		//
@@ -370,7 +371,6 @@ namespace exodbc
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
-
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
