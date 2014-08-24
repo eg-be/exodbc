@@ -396,7 +396,24 @@ namespace exodbc
 		return true;
 	}
 
+	bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
+	{
+		value = L"";
+		wchar_t* buffer = new wchar_t[maxNrOfChars + 1];
+		size_t buffSize = sizeof(wchar_t) * (maxNrOfChars + 1);
+		SQLLEN cb;
+		bool isNull = false;
+		bool ok = GetData(hStmt, colOrParamNr, SQL_C_WCHAR, buffer, buffSize, &cb, &isNull, true);
+		if(ok && !isNull)
+		{
+			value = buffer;
+		}
+		if(pIsNull)
+			*pIsNull = isNull;
 
+		delete[] buffer;
+		return ok;
+	}
 }
 
 // Interfaces
