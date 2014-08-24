@@ -160,30 +160,6 @@ namespace exodbc
 	};
 
 
-	class EXODBCAPI DbCatalogTable        // Description of a Table: Used only in the Description of a database, (catalog info)
-	{
-	public:
-		DbCatalogTable() {};
-		~DbCatalogTable() {};
-
-		std::wstring		m_tableName;
-		std::wstring		m_tableType;           // "TABLE" or "SYSTEM TABLE" etc.
-		std::wstring		m_tableRemarks;
-		std::wstring		m_catalog;
-		std::wstring		m_schema;
-		bool				m_isCatalogNull;
-		bool				m_isSchemaNull;
-	};
-
-
-	struct EXODBCAPI SDbCatalog     // Description of a Database: Used so far only when fetching the "catalog"
-	{
-	public:
-		std::vector<DbCatalogTable> m_tables;
-		std::set<std::wstring> m_catalogs;
-		std::set<std::wstring> m_schemas;
-	};
-
 	class EXODBCAPI Database
 	{
 		// Test helpers:
@@ -356,7 +332,7 @@ namespace exodbc
 		 *
 		 * \return	The column count, or -1 in case of failure
 		 */
-		int			ReadColumnCount(const DbCatalogTable& table);
+		int			ReadColumnCount(const SDbCatalogTable& table);
 
 		/*!
 		 * \fn	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
@@ -394,7 +370,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
+		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<SDbCatalogTable>& tables);
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);

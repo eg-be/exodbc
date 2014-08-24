@@ -221,6 +221,13 @@ namespace exodbc {
 		IntervalPrecisionIsNull = false;
 	}
 
+	SDbCatalogTable::SDbCatalogTable()
+		: m_isCatalogNull(false)
+		, m_isSchemaNull(false)
+	{
+
+	}
+
 	std::wstring SSqlTypeInfo::ToOneLineStr(bool withHeaderLines /* = false */, bool withEndLine /* = false */) const
 	{
 		std::wstringstream ws;
