@@ -216,7 +216,11 @@ namespace exodbc
 
 #define LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SqlFunction) \
 	do { \
-	BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", but we expected SQL_NO_DATA (" << SQL_NO_DATA << L")"; \
+		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", but we expected SQL_NO_DATA (" << SQL_NO_DATA << L")"; \
 	} while( 0 )
 
+#define LOG_ERROR(msg) \
+	do { \
+		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " << msg; \
+	} while( 0 )
 #endif // HELPERS_H
