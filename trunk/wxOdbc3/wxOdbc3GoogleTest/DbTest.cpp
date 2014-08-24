@@ -293,7 +293,7 @@ namespace exodbc
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"VIEW") != tableTypes.end());
 	}
 
-	TEST_P(DbTest, ReadPrivileges)
+	TEST_P(DbTest, ReadTablePrivileges)
 	{
 		std::vector<SCatalogTablePrivilege> privs;
 		std::wstring tableName;
@@ -313,6 +313,7 @@ namespace exodbc
 			schemaName = L"WXODBC3";
 			catalogName = L"";
 		}
+		// TODO: With MySql we get no results here?
 		EXPECT_TRUE(m_pDb->ReadTablePrivileges(tableName, schemaName, catalogName, privs));
 		int p = 3;
 	}
