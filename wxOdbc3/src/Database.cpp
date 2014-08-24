@@ -401,7 +401,7 @@ namespace exodbc
 //	}  // wxDb::DetermineDataTypesImpl
 
 
-	bool Database::OpenImpl(bool failOnDataTypeUnsupported)
+	bool Database::OpenImpl()
 	{
 		exASSERT(m_hstmt == SQL_NULL_HSTMT);
 
@@ -430,13 +430,13 @@ namespace exodbc
 		return true;
 	}
 
-	bool Database::Open(const std::wstring& inConnectStr, bool failOnDataTypeUnsupported)
+	bool Database::Open(const std::wstring& inConnectStr)
 	{
 		exASSERT(inConnectStr.length() > 0);
-		return Open(inConnectStr, NULL, failOnDataTypeUnsupported);
+		return Open(inConnectStr, NULL);
 	}
 
-	bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd, bool failOnDataTypeUnsupported)
+	bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd)
 	{
 		m_dsn        = emptyString;
 		m_uid        = emptyString;
@@ -468,11 +468,11 @@ namespace exodbc
 		m_outConnectionStr = outConnectBuffer;
 		m_dbOpenedWithConnectionString = true;
 
-		return OpenImpl(failOnDataTypeUnsupported);
+		return OpenImpl();
 	}
 
 
-	bool Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr, bool failOnDataTypeUnsupported)
+	bool Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr)
 	{
 		exASSERT(!dsn.empty());
 
@@ -505,20 +505,20 @@ namespace exodbc
 		// Mark database as Open
 		m_dbIsOpen = true;
 
-		return OpenImpl(failOnDataTypeUnsupported);
+		return OpenImpl();
 
 	}
 
 
-	bool Database::Open(DbEnvironment *dbConnectInf, bool failOnDataTypeUnsupported)
+	bool Database::Open(DbEnvironment *dbConnectInf)
 	{
 		exASSERT(dbConnectInf);
 
 		// Use the connection string if one is present
 		if (dbConnectInf->UseConnectionStr())
-			return Open(dbConnectInf->GetConnectionStr(), failOnDataTypeUnsupported);
+			return Open(dbConnectInf->GetConnectionStr());
 		else
-			return Open(dbConnectInf->GetDsn(), dbConnectInf->GetUserID(), dbConnectInf->GetPassword(), failOnDataTypeUnsupported);
+			return Open(dbConnectInf->GetDsn(), dbConnectInf->GetUserID(), dbConnectInf->GetPassword());
 	}
 
 
