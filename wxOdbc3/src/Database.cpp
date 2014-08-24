@@ -547,19 +547,27 @@ namespace exodbc
 	{
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
 		bool ok = true;
-		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, SQL_AUTOCOMMIT_OFF, NULL);
+		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_OFF, NULL);
 		if(ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_AUTOCOMMIT to AUTOCOMMIT_OFF");
 			ok = false;
 		}
 
-		ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, SQL_OPT_TRACE_OFF, NULL);
+		ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, NULL);
 		if(ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_TRACE to OPT_TRACE_OFF");
 			ok = false;
 		}
+
+		// Note: This is unsupported SQL_ATTR_METADATA_ID by most drivers. It should default to OFF
+		//ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_METADATA_ID, (SQLPOINTER) SQL_TRUE, NULL);
+		//if(ret != SQL_SUCCESS)
+		//{
+		//	LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_METADATA_ID to SQL_FALSE");
+		//	ok = false;
+		//}
 
 		// Completed Successfully
 		return ok;
@@ -2237,7 +2245,7 @@ namespace exodbc
 //#endif  // #else OLD_GETCOLUMNS
 
 
-	int Database::GetColumnCount(const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring catalogName /* = L"" */)
+	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring catalogName /* = L"" */)
 	{
 		UWORD    noCols = 0;
 
@@ -2333,9 +2341,11 @@ namespace exodbc
 			tableName[0] = 0;
 			btableType[0] = 0;
 			tableRemarks[0] = 0;
+			bool isCatNull = false;
+			bool isSchemaNull = false;
 
-			ok = ok & GetData(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.GetMaxCatalogNameLen(), &cb, NULL, true);
-			ok = ok & GetData(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.GetMaxSchemaNameLen(), &cb, NULL, true);
+			ok = ok & GetData(m_hstmt, 1, SQL_C_WCHAR, cat, m_dbInf.GetMaxCatalogNameLen(), &cb, &isCatNull, true);
+			ok = ok & GetData(m_hstmt, 2, SQL_C_WCHAR, schem, m_dbInf.GetMaxSchemaNameLen(), &cb, &isSchemaNull, true);
 			ok = ok & GetData(m_hstmt, 3, SQL_C_WCHAR, tableName, m_dbInf.GetMaxTableNameLen(), &cb, NULL, true);
 			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, btableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
 			ok = ok & GetData(m_hstmt, 5, SQL_C_WCHAR, tableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb, NULL, true);
@@ -2350,6 +2360,8 @@ namespace exodbc
 				table.m_tableRemarks = tableRemarks;
 				table.m_schema = schem;
 				table.m_catalog = cat;
+				table.m_isCatalogNull = isCatNull;
+				table.m_isSchemaNull = isSchemaNull;
 
 				dbInf.m_tables.push_back(table);
 				dbInf.m_catalogs.insert(cat);
