@@ -812,6 +812,10 @@ namespace exodbc
 					LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
 				}
 			}
+			else
+			{
+				m_hstmt = SQL_NULL_HSTMT;
+			}
 
 			// Anyway try to disconnect from the datasource
 			// This is a critical error.
@@ -2528,14 +2532,6 @@ namespace exodbc
 				haveAllData = haveAllData & GetData(m_hstmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
 				haveAllData = haveAllData & GetData(m_hstmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
 				haveAllData = haveAllData & GetData(m_hstmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
-
-				//haveAllData = haveAllData & GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen(), &cb, &priv.m_isCatalogNull, true);
-				//haveAllData = haveAllData & GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen(), &cb, &priv.m_isSchemaNull, true);
-				//haveAllData = haveAllData & GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen(), &cb, NULL, true);
-				//haveAllData = haveAllData & GetData(m_hstmt, 4, SQL_C_WCHAR, buffGrantor, DB_MAX_GRANTOR_LEN + 1, &cb, &priv.m_isGrantorNull, true);
-				//haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_WCHAR, buffGrantee, DB_MAX_GRANTEE_LEN + 1, &cb, NULL, true);
-				//haveAllData = haveAllData & GetData(m_hstmt, 6, SQL_C_WCHAR, buffPrivilege, DB_MAX_PRIVILEGES_LEN + 1, &cb, NULL, true);
-				//haveAllData = haveAllData & GetData(m_hstmt, 7, SQL_C_WCHAR, buffGrantable, DB_MAX_IS_GRANTABLE_LEN * 2 + 2, &cb, &priv.m_isGrantableNull, true);
 
 				if(!haveAllData)
 				{
