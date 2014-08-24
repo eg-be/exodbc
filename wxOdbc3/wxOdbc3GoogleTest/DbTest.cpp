@@ -120,6 +120,8 @@ namespace exodbc
 
 		BOOST_LOG_TRIVIAL(info) << ws.str();
 
+		db.CommitTrans();
+
 		db.Close();
 	}
 
