@@ -325,21 +325,27 @@ namespace exodbc
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
-		if(m_pDb->Dbms() == dbmsMY_SQL)
+		switch(m_pDb->Dbms())
 		{
+		case dbmsMY_SQL:
 			// We know that mySql uses catalogs, not schemas:
 			tableName = L"integertypes";
 			schemaName = L"";
 			catalogName = L"exodbc";
-		}
-		else if(m_pDb->Dbms() == dbmsDB2)
-		{
+			break;
+		case dbmsDB2:
 			// We know that DB2 uses schemas:
 			tableName = L"INTEGERTYPES";
 			schemaName = L"EXODBC";
 			catalogName = L"";
+			break;
+		case dbmsMS_SQL_SERVER:
+			// And ms also uses catalogs, and some strange dbo schemaName
+			tableName = L"integertypes";
+			schemaName = L"dbo";
+			catalogName = L"exodbc";
 		}
-		// TODO: With MySql we get no results here?
+		// TODO: With MySql and ms sql we get no results here?
 		EXPECT_TRUE(m_pDb->ReadTablePrivileges(tableName, schemaName, catalogName, privs));
 		int p = 3;
 	}
