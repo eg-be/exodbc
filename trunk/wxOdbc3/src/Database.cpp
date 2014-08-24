@@ -510,15 +510,15 @@ namespace exodbc
 	}
 
 
-	bool Database::Open(DbEnvironment *dbConnectInf)
+	bool Database::Open(const DbEnvironment* const pEnv)
 	{
-		exASSERT(dbConnectInf);
+		exASSERT(pEnv);
 
 		// Use the connection string if one is present
-		if (dbConnectInf->UseConnectionStr())
-			return Open(dbConnectInf->GetConnectionStr());
+		if (pEnv->UseConnectionStr())
+			return Open(pEnv->GetConnectionStr());
 		else
-			return Open(dbConnectInf->GetDsn(), dbConnectInf->GetUserID(), dbConnectInf->GetPassword());
+			return Open(pEnv->GetDsn(), pEnv->GetUserID(), pEnv->GetPassword());
 	}
 
 
