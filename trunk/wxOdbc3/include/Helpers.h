@@ -193,7 +193,7 @@ namespace exodbc
 }
 
 
-#define LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg) \
+#define LOG_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg, logLevel) \
 	do { \
 		std::wstring msgStr(msg); \
 		std::vector<SErrorInfo> errs = GetAllErrors(hEnv, hDbc, hStmt); \
@@ -212,18 +212,41 @@ namespace exodbc
 			const SErrorInfo& err = *it; \
 			ws << std::endl << L"\t" << err; \
 		} \
-		BOOST_LOG_TRIVIAL(error) << ws.str(); \
+		BOOST_LOG_TRIVIAL(logLevel) << ws.str(); \
 	} while( 0 )
 
+#define LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg, error)
+#define LOG_WARNING_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg, warning)
+#define LOG_INFO_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg, info)
+
 #define LOG_ERROR_ODBC(hEnv, hDbc, hStmt, ret, SqlFunction) LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, L"")
+#define LOG_WARNING_ODBC(hEnv, hDbc, hStmt, ret, SqlFunction) LOG_WARNING_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, L"")
+#define LOG_INFO_ODBC(hEnv, hDbc, hStmt, ret, SqlFunction) LOG_INFO_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, L"")
 
 #define LOG_ERROR_ENV_MSG(hEnv, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(hEnv, NULL, NULL, ret, SqlFunction, msgStr)
 #define LOG_ERROR_DBC_MSG(hDbc, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(NULL, hDbc, NULL, ret, SqlFunction, msgStr)
 #define LOG_ERROR_STMT_MSG(hStmt, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(NULL, NULL, hStmt, ret, SqlFunction, msgStr)
 
+#define LOG_WARNING_ENV_MSG(hEnv, ret, SqlFunction, msgStr) LOG_WARNING_ODBC_MSG(hEnv, NULL, NULL, ret, SqlFunction, msgStr)
+#define LOG_WARNING_DBC_MSG(hDbc, ret, SqlFunction, msgStr) LOG_WARNING_ODBC_MSG(NULL, hDbc, NULL, ret, SqlFunction, msgStr)
+#define LOG_WARNING_STMT_MSG(hStmt, ret, SqlFunction, msgStr) LOG_WARNING_ODBC_MSG(NULL, NULL, hStmt, ret, SqlFunction, msgStr)
+
+#define LOG_INFO_ENV_MSG(hEnv, ret, SqlFunction, msgStr) LOG_INFO_ODBC_MSG(hEnv, NULL, NULL, ret, SqlFunction, msgStr)
+#define LOG_INFO_DBC_MSG(hDbc, ret, SqlFunction, msgStr) LOG_INFO_ODBC_MSG(NULL, hDbc, NULL, ret, SqlFunction, msgStr)
+#define LOG_INFO_STMT_MSG(hStmt, ret, SqlFunction, msgStr) LOG_INFO_ODBC_MSG(NULL, NULL, hStmt, ret, SqlFunction, msgStr)
+
 #define LOG_ERROR_ENV(hEnv, ret, SqlFunction) LOG_ERROR_ODBC(hEnv, NULL, NULL, ret, SqlFunction)
 #define LOG_ERROR_DBC(hDbc, ret, SqlFunction) LOG_ERROR_ODBC(NULL, hDbc, NULL, ret, SqlFunction)
 #define LOG_ERROR_STMT(hStmt, ret, SqlFunction) LOG_ERROR_ODBC(NULL, NULL, hStmt, ret, SqlFunction)
+
+#define LOG_WARNING_ENV(hEnv, ret, SqlFunction) LOG_WARNING_ODBC(hEnv, NULL, NULL, ret, SqlFunction)
+#define LOG_WARNING_DBC(hDbc, ret, SqlFunction) LOG_WARNING_ODBC(NULL, hDbc, NULL, ret, SqlFunction)
+#define LOG_WARNING_STMT(hStmt, ret, SqlFunction) LOG_WARNING_ODBC(NULL, NULL, hStmt, ret, SqlFunction)
+
+#define LOG_INFO_ENV(hEnv, ret, SqlFunction) LOG_INFO_ODBC(hEnv, NULL, NULL, ret, SqlFunction)
+#define LOG_INFO_DBC(hDbc, ret, SqlFunction) LOG_INFO_ODBC(NULL, hDbc, NULL, ret, SqlFunction)
+#define LOG_INFO_STMT(hStmt, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, hStmt, ret, SqlFunction)
+
 
 #define LOG_ERROR_SQL_NO_SUCCESS(ret, SqlFunction) \
 	do { \

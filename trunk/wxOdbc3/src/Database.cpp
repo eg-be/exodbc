@@ -491,15 +491,19 @@ namespace exodbc
 		//  -> http://msdn.microsoft.com/en-us/library/ms712631%28v=vs.85%29.aspx -> SQL_ATTR_CURSOR_SCROLLABLE
 
 		// Connect to the data source
-		SQLRETURN retcode = SQLConnect(m_hdbc, 
+		SQLRETURN ret = SQLConnect(m_hdbc, 
 			(SQLWCHAR*) m_dsn.c_str(), SQL_NTS,
 			(SQLWCHAR*) m_uid.c_str(), SQL_NTS,
 			(SQLWCHAR*) m_authStr.c_str(), SQL_NTS);
 
-		if (retcode != SQL_SUCCESS)
+		if (!SQL_SUCCEEDED(ret))
 		{
-			LOG_ERROR_DBC(m_hdbc, retcode, SQLConnect);
+			LOG_ERROR_DBC(m_hdbc, ret, SQLConnect);
 			return false;
+		}
+		if(ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_DBC_MSG(m_hdbc, ret, SQLConnect, L"SQLConnect returned with SQL_SUCCESS_WITH_INFO");
 		}
 
 		// Mark database as Open
