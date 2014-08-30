@@ -2993,12 +2993,7 @@ namespace exodbc
 		if (m_dbmsType != dbmsUNIDENTIFIED)
 			return(m_dbmsType);
 
-#ifdef DBDEBUG_CONSOLE
-		// When run in console mode, use standard out to display errors.
-		std::wcout << "Database connecting to: " << m_dbInf.dbmsName << std::endl;
-#endif  // DBDEBUG_CONSOLE
-
-		BOOST_LOG_TRIVIAL(debug) << L"Database connecting to: " << m_dbInf.dbmsName;
+		LOG_DEBUG((boost::wformat(L"Database connecting to: %s") %m_dbInf.dbmsName).str());
 
 		wchar_t baseName[25+1];
 		wcsncpy(baseName, m_dbInf.dbmsName, 25);

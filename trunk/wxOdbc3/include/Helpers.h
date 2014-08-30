@@ -215,51 +215,68 @@ namespace exodbc
 		BOOST_LOG_TRIVIAL(logLevel) << ws.str(); \
 	} while( 0 )
 
+// ODBC-Loggers, with a message
 #define LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg, error)
 #define LOG_WARNING_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg, warning)
 #define LOG_INFO_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, msg, info)
 
+// ODBC-Loggers, no message
 #define LOG_ERROR_ODBC(hEnv, hDbc, hStmt, ret, SqlFunction) LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, L"")
 #define LOG_WARNING_ODBC(hEnv, hDbc, hStmt, ret, SqlFunction) LOG_WARNING_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, L"")
 #define LOG_INFO_ODBC(hEnv, hDbc, hStmt, ret, SqlFunction) LOG_INFO_ODBC_MSG(hEnv, hDbc, hStmt, ret, SqlFunction, L"")
 
+// Log ODBC-Errors, from a specific handle (env, dbc or stmt), with a message
 #define LOG_ERROR_ENV_MSG(hEnv, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(hEnv, NULL, NULL, ret, SqlFunction, msgStr)
 #define LOG_ERROR_DBC_MSG(hDbc, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(NULL, hDbc, NULL, ret, SqlFunction, msgStr)
 #define LOG_ERROR_STMT_MSG(hStmt, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(NULL, NULL, hStmt, ret, SqlFunction, msgStr)
 
+// Log ODBC-Warnings, from a specific handle (env, dbc or stmt), with a message
 #define LOG_WARNING_ENV_MSG(hEnv, ret, SqlFunction, msgStr) LOG_WARNING_ODBC_MSG(hEnv, NULL, NULL, ret, SqlFunction, msgStr)
 #define LOG_WARNING_DBC_MSG(hDbc, ret, SqlFunction, msgStr) LOG_WARNING_ODBC_MSG(NULL, hDbc, NULL, ret, SqlFunction, msgStr)
 #define LOG_WARNING_STMT_MSG(hStmt, ret, SqlFunction, msgStr) LOG_WARNING_ODBC_MSG(NULL, NULL, hStmt, ret, SqlFunction, msgStr)
 
+// Log ODBC-Infos, from a specific handle (env, dbc or stmt), with a message
 #define LOG_INFO_ENV_MSG(hEnv, ret, SqlFunction, msgStr) LOG_INFO_ODBC_MSG(hEnv, NULL, NULL, ret, SqlFunction, msgStr)
 #define LOG_INFO_DBC_MSG(hDbc, ret, SqlFunction, msgStr) LOG_INFO_ODBC_MSG(NULL, hDbc, NULL, ret, SqlFunction, msgStr)
 #define LOG_INFO_STMT_MSG(hStmt, ret, SqlFunction, msgStr) LOG_INFO_ODBC_MSG(NULL, NULL, hStmt, ret, SqlFunction, msgStr)
 
+// Log ODBC-Errors, from a specific handle (env, dbc or stmt), no message
 #define LOG_ERROR_ENV(hEnv, ret, SqlFunction) LOG_ERROR_ODBC(hEnv, NULL, NULL, ret, SqlFunction)
 #define LOG_ERROR_DBC(hDbc, ret, SqlFunction) LOG_ERROR_ODBC(NULL, hDbc, NULL, ret, SqlFunction)
 #define LOG_ERROR_STMT(hStmt, ret, SqlFunction) LOG_ERROR_ODBC(NULL, NULL, hStmt, ret, SqlFunction)
 
+// Log ODBC-Warnings, from a specific handle (env, dbc or stmt), no message
 #define LOG_WARNING_ENV(hEnv, ret, SqlFunction) LOG_WARNING_ODBC(hEnv, NULL, NULL, ret, SqlFunction)
 #define LOG_WARNING_DBC(hDbc, ret, SqlFunction) LOG_WARNING_ODBC(NULL, hDbc, NULL, ret, SqlFunction)
 #define LOG_WARNING_STMT(hStmt, ret, SqlFunction) LOG_WARNING_ODBC(NULL, NULL, hStmt, ret, SqlFunction)
 
+// Log ODBC-Infos, from a specific handle (env, dbc or stmt), no message
 #define LOG_INFO_ENV(hEnv, ret, SqlFunction) LOG_INFO_ODBC(hEnv, NULL, NULL, ret, SqlFunction)
 #define LOG_INFO_DBC(hDbc, ret, SqlFunction) LOG_INFO_ODBC(NULL, hDbc, NULL, ret, SqlFunction)
 #define LOG_INFO_STMT(hStmt, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, hStmt, ret, SqlFunction)
 
-
+// Log NO_SUCESS
 #define LOG_ERROR_SQL_NO_SUCCESS(ret, SqlFunction) \
 	do { \
 		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret; \
 	} while( 0 )
 
+// Log expected NO_DATA
 #define LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SqlFunction) \
 	do { \
 		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", but we expected SQL_NO_DATA (" << SQL_NO_DATA << L")"; \
 	} while( 0 )
 
-#define LOG_ERROR(msg) \
+// Generic Log-entry
+#define LOG_MSG(logLevel, msg) \
 	do { \
-		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " << msg; \
+	BOOST_LOG_TRIVIAL(logLevel) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " << msg; \
 	} while( 0 )
+
+// Generic Log-entry shortcuts
+#define LOG_ERROR(msg) LOG_MSG(error, msg)
+#define LOG_WARNING(msg) LOG_MSG(warning, msg)
+#define LOG_INFO(msg) LOG_MSG(info, msg)
+#define LOG_DEBUG(msg) LOG_MSG(debug, msg)
+
 #endif // HELPERS_H
