@@ -429,7 +429,7 @@ namespace exodbc
 //		bool         CreateView(const std::wstring& viewName, const std::wstring& colList, const std::wstring& pSqlStmt, bool attemptDrop = true);
 //		bool         DropView(const std::wstring& viewName);
 //		bool         ExecSql(const std::wstring& pSqlStmt, ColumnInfo** columns, short& numcols);
-		bool         GetNext();
+//		bool         GetNext();
 //		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
 		int          TranslateSqlState(const std::wstring& SQLState);
 //		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
