@@ -83,6 +83,10 @@ namespace exodbc
 		// Try to close a db that really is open
 		Database db1(m_pDbEnv);
 		ASSERT_TRUE(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+
+		if(db1.Dbms() == dbmsMS_SQL_SERVER)
+			db1.CommitTrans();
+
 		EXPECT_TRUE(db1.Close());
 
 		// TODO: Close works okay, does not return false if there is nothing to do
