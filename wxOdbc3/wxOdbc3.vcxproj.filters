@@ -40,6 +40,9 @@
     <ClInclude Include="src\targetver.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DbEnvironment.cpp">
@@ -66,5 +69,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Version.h.template" />
+    <None Include="wxOdbc3.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="wxOdbc3.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
