@@ -2459,53 +2459,29 @@ namespace exodbc
 
 	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName)
 	{
-		// Query the tables that match
-		std::vector<SDbCatalogTable> tables;
-		if(!FindTables(tableName, schemaName, catalogName, L"", tables))
+		// Find one matching table
+		SDbCatalogTable table;
+		if(!FindOneTable(tableName, schemaName, catalogName, table))
 		{
-			LOG_ERROR(L"Searching tables failed");
 			return false;
 		}
 
-		if(tables.size() == 0)
-		{
-			LOG_ERROR((boost::wformat(L"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
-			return -1;
-		}
-		if(tables.size() != 1)
-		{
-			LOG_ERROR((boost::wformat(L"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
-			return -1;
-		}
-
 		// Forward the call		
-		return ReadColumnCount(tables[0]);
+		return ReadColumnCount(table);
 	}
 
 
 	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges)
 	{
-		// Query the tables that match
-		std::vector<SDbCatalogTable> tables;
-		if(!FindTables(tableName, schemaName, catalogName, L"", tables))
+		// Find one matching table
+		SDbCatalogTable table;
+		if(!FindOneTable(tableName, schemaName, catalogName, table))
 		{
-			LOG_ERROR(L"Searching tables failed");
-			return false;
-		}
-
-		if(tables.size() == 0)
-		{
-			LOG_ERROR((boost::wformat(L"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
-			return false;
-		}
-		if(tables.size() != 1)
-		{
-			LOG_ERROR((boost::wformat(L"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
 			return false;
 		}
 
 		// Forward the call		
-		return ReadTablePrivileges(tables[0], privileges);
+		return ReadTablePrivileges(table, privileges);
 	}
 
 
