@@ -69,12 +69,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Version.h.template" />
-    <None Include="wxOdbc3.rc2">
+    <None Include="exOdbc.rc2">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="wxOdbc3.rc">
+    <ResourceCompile Include="exOdbc.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

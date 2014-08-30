@@ -47,7 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Version.h.template" />
-    <None Include="wxOdbc3.rc2" />
+    <None Include="exOdbc.rc2" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EliCommon\EliCommon.vcxproj">
@@ -55,7 +55,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="wxOdbc3.rc" />
+    <ResourceCompile Include="exOdbc.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{021A7F83-D491-491B-B4E9-93F4F56340C1}</ProjectGuid>
