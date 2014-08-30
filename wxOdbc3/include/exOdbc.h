@@ -414,35 +414,35 @@ namespace exodbc
 	// These are the databases currently tested and working with these classes
 	// See the comments in wxDb::Dbms() for exceptions/issues with
 	// each of these database engines
-	enum wxDBMS
+	enum DatabaseProduct
 	{
 		dbmsUNIDENTIFIED,
-		dbmsORACLE,
-		dbmsSYBASE_ASA,        // Adaptive Server Anywhere
-		dbmsSYBASE_ASE,        // Adaptive Server Enterprise
+		//dbmsORACLE,
+		//dbmsSYBASE_ASA,        // Adaptive Server Anywhere
+		//dbmsSYBASE_ASE,        // Adaptive Server Enterprise
 		dbmsMS_SQL_SERVER,
 		dbmsMY_SQL,
-		dbmsPOSTGRES,
-		dbmsACCESS,
-		dbmsDBASE,
-		dbmsINFORMIX,
-		dbmsVIRTUOSO,
+		//dbmsPOSTGRES,
+		//dbmsACCESS,
+		//dbmsDBASE,
+		//dbmsINFORMIX,
+		//dbmsVIRTUOSO,
 		dbmsDB2,
-		dbmsINTERBASE,
-		dbmsPERVASIVE_SQL,
-		dbmsXBASE_SEQUITER,
-		dbmsFIREBIRD,
-		dbmsMAXDB,
-		dbmsFuture1,
-		dbmsFuture2,
-		dbmsFuture3,
-		dbmsFuture4,
-		dbmsFuture5,
-		dbmsFuture6,
-		dbmsFuture7,
-		dbmsFuture8,
-		dbmsFuture9,
-		dbmsFuture10
+		//dbmsINTERBASE,
+		//dbmsPERVASIVE_SQL,
+		//dbmsXBASE_SEQUITER,
+		//dbmsFIREBIRD,
+		//dbmsMAXDB,
+		//dbmsFuture1,
+		//dbmsFuture2,
+		//dbmsFuture3,
+		//dbmsFuture4,
+		//dbmsFuture5,
+		//dbmsFuture6,
+		//dbmsFuture7,
+		//dbmsFuture8,
+		//dbmsFuture9,
+		//dbmsFuture10
 	};
 
 

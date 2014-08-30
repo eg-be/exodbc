@@ -2930,7 +2930,7 @@ namespace exodbc
 
 
 	/********** wxDb::Dbms() **********/
-	wxDBMS Database::Dbms()
+	DatabaseProduct Database::Dbms()
 		/*
 		* Be aware that not all database engines use the exact same syntax, and not
 		* every ODBC compliant database is compliant to the same level of compliancy.
@@ -3006,72 +3006,72 @@ namespace exodbc
 
 		// RGG 20001025 : add support for Interbase
 		// GT : Integrated to base classes on 20001121
-		if (!_wcsicmp(m_dbInf.dbmsName, L"Interbase"))
-			return((wxDBMS)(m_dbmsType = dbmsINTERBASE));
+		//if (!_wcsicmp(m_dbInf.dbmsName, L"Interbase"))
+		//	return((wxDBMS)(m_dbmsType = dbmsINTERBASE));
 
 		// BJO 20000428 : add support for Virtuoso
-		if (!_wcsicmp(m_dbInf.dbmsName, L"OpenLink Virtuoso VDBMS"))
-			return((wxDBMS)(m_dbmsType = dbmsVIRTUOSO));
+		//if (!_wcsicmp(m_dbInf.dbmsName, L"OpenLink Virtuoso VDBMS"))
+		//	return((wxDBMS)(m_dbmsType = dbmsVIRTUOSO));
 
-		if (!_wcsicmp(m_dbInf.dbmsName, L"Adaptive Server Anywhere"))
-			return((wxDBMS)(m_dbmsType = dbmsSYBASE_ASA));
+		//if (!_wcsicmp(m_dbInf.dbmsName, L"Adaptive Server Anywhere"))
+		//	return((wxDBMS)(m_dbmsType = dbmsSYBASE_ASA));
 
 		// BJO 20000427 : The "SQL Server" string is also returned by SQLServer when
 		// connected through an OpenLink driver.
 		// Is it also returned by Sybase Adapatitve server?
 		// OpenLink driver name is OLOD3032.DLL for msw and oplodbc.so for unix
-		if (!_wcsicmp(m_dbInf.dbmsName, L"SQL Server"))
+		if (!_wcsicmp(m_dbInf.dbmsName, L"Microsoft SQL Server"))
 		{
-			if (!wcsncmp(m_dbInf.driverName, L"oplodbc", 7) ||
-				!wcsncmp(m_dbInf.driverName, L"OLOD", 4))
-				return ((wxDBMS)(dbmsMS_SQL_SERVER));
-			else
-				return ((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
+			//if (!wcsncmp(m_dbInf.driverName, L"oplodbc", 7) ||
+			//	!wcsncmp(m_dbInf.driverName, L"OLOD", 4))
+				return ((DatabaseProduct)(dbmsMS_SQL_SERVER));
+			//else
+			//	return ((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
 		}
 
 		if (!_wcsicmp(m_dbInf.dbmsName, L"Microsoft SQL Server"))
-			return((wxDBMS)(m_dbmsType = dbmsMS_SQL_SERVER));
+			return((DatabaseProduct)(m_dbmsType = dbmsMS_SQL_SERVER));
 
-		baseName[10] = 0;
-		if (!_wcsicmp(baseName, L"PostgreSQL"))  // v6.5.0
-			return((wxDBMS)(m_dbmsType = dbmsPOSTGRES));
+		//baseName[10] = 0;
+		//if (!_wcsicmp(baseName, L"PostgreSQL"))  // v6.5.0
+		//	return((wxDBMS)(m_dbmsType = dbmsPOSTGRES));
 
-		baseName[9] = 0;
-		if (!_wcsicmp(baseName, L"Pervasive"))
-			return((wxDBMS)(m_dbmsType = dbmsPERVASIVE_SQL));
+		//baseName[9] = 0;
+		//if (!_wcsicmp(baseName, L"Pervasive"))
+		//	return((wxDBMS)(m_dbmsType = dbmsPERVASIVE_SQL));
 
-		baseName[8] = 0;
-		if (!_wcsicmp(baseName, L"Informix"))
-			return((wxDBMS)(m_dbmsType = dbmsINFORMIX));
+		//baseName[8] = 0;
+		//if (!_wcsicmp(baseName, L"Informix"))
+		//	return((wxDBMS)(m_dbmsType = dbmsINFORMIX));
 
-		if (!_wcsicmp(baseName, L"Firebird"))
-			return((wxDBMS)(m_dbmsType = dbmsFIREBIRD));
+		//if (!_wcsicmp(baseName, L"Firebird"))
+		//	return((wxDBMS)(m_dbmsType = dbmsFIREBIRD));
 
-		baseName[6] = 0;
-		if (!_wcsicmp(baseName, L"Oracle"))
-			return((wxDBMS)(m_dbmsType = dbmsORACLE));
-		if (!_wcsicmp(baseName, L"ACCESS"))
-			return((wxDBMS)(m_dbmsType = dbmsACCESS));
-		if (!_wcsicmp(baseName, L"Sybase"))
-			return((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
+		//baseName[6] = 0;
+		//if (!_wcsicmp(baseName, L"Oracle"))
+		//	return((wxDBMS)(m_dbmsType = dbmsORACLE));
+		//if (!_wcsicmp(baseName, L"ACCESS"))
+		//	return((wxDBMS)(m_dbmsType = dbmsACCESS));
+		//if (!_wcsicmp(baseName, L"Sybase"))
+		//	return((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
 
 		baseName[5] = 0;
-		if (!_wcsicmp(baseName, L"DBASE"))
-			return((wxDBMS)(m_dbmsType = dbmsDBASE));
-		if (!_wcsicmp(baseName, L"xBase"))
-			return((wxDBMS)(m_dbmsType = dbmsXBASE_SEQUITER));
+		//if (!_wcsicmp(baseName, L"DBASE"))
+		//	return((wxDBMS)(m_dbmsType = dbmsDBASE));
+		//if (!_wcsicmp(baseName, L"xBase"))
+		//	return((wxDBMS)(m_dbmsType = dbmsXBASE_SEQUITER));
 		if (!_wcsicmp(baseName, L"MySQL"))
-			return((wxDBMS)(m_dbmsType = dbmsMY_SQL));
-		if (!_wcsicmp(baseName, L"MaxDB"))
-			return((wxDBMS)(m_dbmsType = dbmsMAXDB));
+			return((DatabaseProduct)(m_dbmsType = dbmsMY_SQL));
+		//if (!_wcsicmp(baseName, L"MaxDB"))
+		//	return((wxDBMS)(m_dbmsType = dbmsMAXDB));
 
 		baseName[3] = 0;
 		if (!_wcsicmp(baseName, L"DB2"))
-			return((wxDBMS)(m_dbmsType = dbmsDB2));
+			return((DatabaseProduct)(m_dbmsType = dbmsDB2));
 
-		return((wxDBMS)(m_dbmsType = dbmsUNIDENTIFIED));
+		return((DatabaseProduct)(m_dbmsType = dbmsUNIDENTIFIED));
 
-	}  // wxDb::Dbms()
+	}
 
 
 	//bool Database::ModifyColumn(const std::wstring &tableName, const std::wstring &columnName,

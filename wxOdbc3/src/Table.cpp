@@ -124,10 +124,10 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
         return false;
 
     m_tableName = tblName;                        // Table Name
-    if ((m_pDb->Dbms() == dbmsORACLE) ||
-        (m_pDb->Dbms() == dbmsFIREBIRD) ||
-        (m_pDb->Dbms() == dbmsINTERBASE))
-        boost::algorithm::to_upper(m_tableName);
+    //if ((m_pDb->Dbms() == dbmsORACLE) ||
+    //    (m_pDb->Dbms() == dbmsFIREBIRD) ||
+    //    (m_pDb->Dbms() == dbmsINTERBASE))
+    //    boost::algorithm::to_upper(m_tableName);
 
     if (tblPath.length())
         m_tablePath = tblPath;                    // Table Path - used for dBase files
@@ -139,10 +139,10 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
     else
         m_queryTableName = tblName;
 
-    if ((m_pDb->Dbms() == dbmsORACLE) ||
-        (m_pDb->Dbms() == dbmsFIREBIRD) ||
-        (m_pDb->Dbms() == dbmsINTERBASE))
-        boost::algorithm::to_upper(m_queryTableName);
+    //if ((m_pDb->Dbms() == dbmsORACLE) ||
+    //    (m_pDb->Dbms() == dbmsFIREBIRD) ||
+    //    (m_pDb->Dbms() == dbmsINTERBASE))
+    //    boost::algorithm::to_upper(m_queryTableName);
 
     m_pDb->incrementTableCount();
 
@@ -2117,7 +2117,7 @@ bool Table::CanSelectForUpdate()
     if (m_pDb->Dbms() == dbmsMY_SQL)
         return false;
 
-    if ((m_pDb->Dbms() == dbmsORACLE) ||
+    if (/*(m_pDb->Dbms() == dbmsORACLE) ||*/
         (m_pDb->m_dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE))
         return true;
     else
