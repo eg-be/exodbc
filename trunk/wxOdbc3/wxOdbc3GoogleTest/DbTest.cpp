@@ -84,8 +84,11 @@ namespace exodbc
 		Database db1(m_pDbEnv);
 		ASSERT_TRUE(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
+		// only ms sql server needs a commit trans here so far?
 		if(db1.Dbms() == dbmsMS_SQL_SERVER)
+		{
 			db1.CommitTrans();
+		}
 
 		EXPECT_TRUE(db1.Close());
 
