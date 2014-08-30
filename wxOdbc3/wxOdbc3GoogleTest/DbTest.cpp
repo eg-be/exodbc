@@ -209,11 +209,11 @@ namespace exodbc
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
-		ASSERT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		ASSERT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		ASSERT_FALSE( pTable->GetNext());
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		EXPECT_FALSE( pTable->GetNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
@@ -222,8 +222,8 @@ namespace exodbc
 		//ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		//EXPECT_FALSE( pTable->GetNext());
 		// Once we commit we have one record
-		ASSERT_TRUE( m_pDb->CommitTrans() );
-		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_TRUE( pTable->GetNext());
 
 		delete pTable;
@@ -240,17 +240,17 @@ namespace exodbc
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
-		ASSERT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		ASSERT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		ASSERT_FALSE( pTable->GetNext());
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		EXPECT_FALSE( pTable->GetNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		// We rollback and expect no record
-		ASSERT_TRUE( m_pDb->RollbackTrans() );
-		ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		EXPECT_TRUE( m_pDb->RollbackTrans() );
+		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_FALSE( pTable->GetNext());
 
 		delete pTable;
@@ -474,7 +474,7 @@ namespace exodbc
 		// IBM DB2 wants to escape ' using '', mysql wants \'
 		// MYSQL needs \\ for \ 
 		RecordProperty("Ticket", 36);
-		if(m_pDb->Dbms() == dbmsDB2)
+		if(m_pDb->Dbms() == dbmsDB2 || m_pDb->Dbms() == dbmsMS_SQL_SERVER)
 		{
 			sqlstmt = (boost::wformat(L"INSERT INTO exodbc.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
 		}
