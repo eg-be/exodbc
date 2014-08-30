@@ -98,7 +98,7 @@ namespace exodbc
 	 * \struct	SDbInfo
 	 *
 	 * \brief	The following structure contains database information gathered from the datasource
-	 * 			when the datasource is first OpenImpled.
+	 * 			when the datasource is first Opened.
 	 */
 	struct EXODBCAPI SDbInfo
 	{
@@ -195,6 +195,46 @@ namespace exodbc
 	};
 
 	/*!
+	 * \struct	SCatalogColumnInfo
+	 *
+	 * \brief	Information about a column fetched using the catalog
+	 * 			function SQLColumns.
+	 * 			See: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
+	 */
+	struct EXODBCAPI SCatalogColumnInfo
+	{
+		std::wstring	m_catalogName;		// [NULLABLE] Catalog name
+		std::wstring	m_schemaName;		// [NULLABLE] Schema name
+		std::wstring	m_tableName;		// Table name
+		std::wstring	m_columnName;		// Column Name. Empty for columns without a name
+		SQLSMALLINT		m_sqlType;			// SQL data type
+		std::wstring	m_typeName;			// Data source-dependant type name
+		SQLINTEGER		m_columnSize;		// [NULLABLE] for char-columns the max length in characters; numeric total nr of digits or total number of bits, see numPrecRadix.
+		SQLINTEGER		m_bufferSize;		// [NULLABLE] Length of bits needed for SQLGetDat, SQLFetch if used with SQL_C_DEFAULT.
+		SQLSMALLINT		m_decimalDigits;	// [NULLABLE] Total number of significant digits right of decimal. For time-stuff: number of digits in fractional part, ..
+		SQLSMALLINT		m_numPrecRadix;		// [NULLABLE] See msdn, defines nr. of decimal digits.
+		SQLSMALLINT		m_nullable;			// SQL_NO_NULLS, SQL_NULLABLE or SQL_NULLABLE_UNKNOWN
+		std::wstring	m_remarks;			// [NULLABLE] Description
+		std::wstring	m_defaultValue;		// [NULLABLE] Default value
+		SQLSMALLINT		m_sqlDataType;		// [ODBC 3.0] Sql Data Type
+		SQLSMALLINT		m_sqlDatetimeSub;	// [ODBC 3.0, NULLABLE] The subtype code for datetime and interval data types
+		SQLSMALLINT		m_charOctetLength;	// [ODBC 3.0, NULLABLE] The maximum length in bytes of a character or binary data type column. 
+		SQLSMALLINT		m_ordinalPosition;	// [ODBC 3.0] The ordinal position of the column in the table. The first column in the table is number 1.
+		std::wstring	m_isNullable;		// [ODBC 3.0] NO, YES or zero-length string if unknown
+
+		bool			m_isCatalogNull;
+		bool			m_isSchemaNull;
+		bool			m_isColumnSizeNull;
+		bool			m_isBufferSizeNull;
+		bool			m_isDecimalDigitsNull;
+		bool			m_isNumPrecRadixNull;
+		bool			m_isRemarksNull;
+		bool			m_isDefaultValueNull;
+		bool			m_isDatetimeSubNull;
+		bool			m_isCharOctetLengthNull;
+	};
+
+	/*!
 	 * \struct	SDbCatalogTable
 	 *
 	 * \brief	Description of a table fetched using the catalog function SQLTables
@@ -225,6 +265,11 @@ namespace exodbc
 		std::set<std::wstring> m_schemas;
 	};
 
+	/*!
+	 * \struct	SCatalogTablePrivilege
+	 *
+	 * \brief	TablePrivileges fetched using the catalog function SQLTablePrivilege
+	 */
 	struct EXODBCAPI SCatalogTablePrivilege
 	{
 		std::wstring	m_catalogName;
