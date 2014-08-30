@@ -457,7 +457,7 @@ namespace exodbc
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(pTable->m_wcdecimal_18_0));
 	
-		// DB2 sends a ',', mysql sends a '.' as delimeter
+		// DB2 sends a ',', mysql/ms sends a '.' as delimeter
 		RecordProperty("Ticket", 35);
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
@@ -477,7 +477,11 @@ namespace exodbc
 		{
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
 			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
+			// ms does not send first 0 ?
+			if(m_pDb->Dbms() == dbmsMS_SQL_SERVER)
+				EXPECT_EQ( std::wstring(L".0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
+			else
+				EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
 
 			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5"));
 			EXPECT_TRUE( pTable->GetNext() );
