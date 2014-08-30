@@ -582,8 +582,12 @@ namespace exodbc
 		
 		if(m_pDb->Dbms() == dbmsDB2)
 			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
-		else
+		else if(m_pDb->Dbms() == dbmsMY_SQL)
 			EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
+		else if(m_pDb->Dbms() == dbmsMS_SQL_SERVER)
+			EXPECT_EQ( std::wstring(L".0000000000"), std::wstring(pTable->m_wcdecimal_18_10));	
+		else
+			EXPECT_TRUE(false);
 
 		delete pTable;
 	}
