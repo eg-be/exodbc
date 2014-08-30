@@ -697,6 +697,32 @@ namespace exodbc
 	}
 
 
+	bool Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, SDbCatalogTable& table)
+	{
+		// Query the tables that match
+		std::vector<SDbCatalogTable> tables;
+		if(!FindTables(tableName, schemaName, catalogName, L"", tables))
+		{
+			LOG_ERROR((boost::wformat(L"Searching tables failed while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			return false;
+		}
+
+		if(tables.size() == 0)
+		{
+			LOG_ERROR((boost::wformat(L"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			return false;
+		}
+		if(tables.size() != 1)
+		{
+			LOG_ERROR((boost::wformat(L"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			return false;
+		}
+
+		table = tables[0];
+		return true;
+	}
+
+
 
 	bool Database::ReadDataTypesInfo(std::vector<SSqlTypeInfo>& types)
 	{
@@ -2565,7 +2591,21 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns)
+	bool Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogColumnInfo>& columns)
+	{
+		// Find one matching table
+		SDbCatalogTable table;
+		if(!FindOneTable(tableName, schemaName, catalogName, table))
+		{
+			return false;
+		}
+
+		// Forward the call		
+		return ReadTableColumnInfo(table, columns);
+	}
+
+
+	bool Database::ReadTableColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns)
 	{
 		// Clear result
 		columns.empty();
@@ -2615,15 +2655,37 @@ namespace exodbc
 		{
 			bool haveAllData = true;
 
+			SQLLEN cb;
 			SCatalogColumnInfo colInfo;
 			haveAllData = haveAllData & GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);
-			//haveAllData = haveAllData & GetData(m_hstmt, 4, m_dbInf.GetMaxC, priv.m_grantor, &priv.m_isGrantorNull);
-			//haveAllData = haveAllData & GetData(m_hstmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
-			//haveAllData = haveAllData & GetData(m_hstmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
-			//haveAllData = haveAllData & GetData(m_hstmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), colInfo.m_columnName);
+			haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_SSHORT, &colInfo.m_sqlType, sizeof(colInfo.m_sqlType), &cb, NULL);
+			haveAllData = haveAllData & GetData(m_hstmt, 6, DB_TYPE_NAME_LEN, colInfo.m_typeName);
+			haveAllData = haveAllData & GetData(m_hstmt, 7, SQL_C_SLONG, &colInfo.m_columnSize, sizeof(colInfo.m_columnSize), &cb, &colInfo.m_isColumnSizeNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 8, SQL_C_SLONG, &colInfo.m_bufferSize, sizeof(colInfo.m_bufferSize), &cb, &colInfo.m_isBufferSizeNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 9, SQL_C_SSHORT, &colInfo.m_decimalDigits, sizeof(colInfo.m_decimalDigits), &cb, &colInfo.m_isDecimalDigitsNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 10, SQL_C_SSHORT, &colInfo.m_numPrecRadix, sizeof(colInfo.m_numPrecRadix), &cb, &colInfo.m_isNumPrecRadixNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 11, SQL_C_SSHORT, &colInfo.m_nullable, sizeof(colInfo.m_nullable), &cb, NULL);
+			haveAllData = haveAllData & GetData(m_hstmt, 12, DB_MAX_COLUMN_REMARKS_LEN, colInfo.m_remarks, &colInfo.m_isRemarksNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, colInfo.m_defaultValue, &colInfo.m_isDefaultValueNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 14, SQL_C_SSHORT, &colInfo.m_sqlDataType, sizeof(colInfo.m_sqlDataType), &cb, NULL);
+			haveAllData = haveAllData & GetData(m_hstmt, 15, SQL_C_SSHORT, &colInfo.m_sqlDatetimeSub, sizeof(colInfo.m_sqlDatetimeSub), &cb, &colInfo.m_isDatetimeSubNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 16, SQL_C_SLONG, &colInfo.m_charOctetLength, sizeof(colInfo.m_charOctetLength), &cb, &colInfo.m_isCharOctetLengthNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 17, SQL_C_SLONG, &colInfo.m_ordinalPosition, sizeof(colInfo.m_ordinalPosition), &cb, NULL);
+			haveAllData = haveAllData & GetData(m_hstmt, 18, DB_MAX_YES_NO_LEN, colInfo.m_isNullable, &colInfo.m_isIsNullableNull);
 
+
+			if(!haveAllData)
+			{
+				ok = false;
+				LOG_ERROR(L"Failed to Read Data from a record while reading table columns");
+			}
+			else
+			{
+				columns.push_back(colInfo);
+			}
 		}
 
 		if(ok && ret != SQL_NO_DATA)
