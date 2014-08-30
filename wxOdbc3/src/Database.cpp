@@ -2993,7 +2993,7 @@ namespace exodbc
 		if (m_dbmsType != dbmsUNIDENTIFIED)
 			return(m_dbmsType);
 
-		LOG_DEBUG((boost::wformat(L"Database connecting to: %s") %m_dbInf.dbmsName).str());
+		LOG_DEBUG((boost::wformat(L"Database connected to: %s") %m_dbInf.dbmsName).str());
 
 		wchar_t baseName[25+1];
 		wcsncpy(baseName, m_dbInf.dbmsName, 25);
