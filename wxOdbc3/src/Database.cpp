@@ -503,7 +503,7 @@ namespace exodbc
 		}
 		if(ret == SQL_SUCCESS_WITH_INFO)
 		{
-			LOG_WARNING_DBC_MSG(m_hdbc, ret, SQLConnect, L"SQLConnect returned with SQL_SUCCESS_WITH_INFO");
+			LOG_INFO_DBC_MSG(m_hdbc, ret, SQLConnect, L"SQLConnect returned with SQL_SUCCESS_WITH_INFO");
 		}
 
 		// Mark database as Open
@@ -2443,12 +2443,12 @@ namespace exodbc
 		if(tables.size() == 0)
 		{
 			LOG_ERROR((boost::wformat(L"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
-			return false;
+			return -1;
 		}
 		if(tables.size() != 1)
 		{
 			LOG_ERROR((boost::wformat(L"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
-			return false;
+			return -1;
 		}
 
 		// Forward the call		

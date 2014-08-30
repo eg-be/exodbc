@@ -243,12 +243,13 @@ namespace exodbc
 		return OV_UNKNOWN;
 	}
 
-	vector<SDataSource> DbEnvironment::ListDataSources(ListMode mode /* = All */) const
+	bool DbEnvironment::ListDataSources(ListMode mode, vector<SDataSource>& dataSources) const
 	{
 		SQLSMALLINT nameBufferLength, descBufferLength = 0;
 		wchar_t nameBuffer[SQL_MAX_DSN_LENGTH + 1];
 
-		vector<SDataSource> dataSources;
+		// empty result-vector
+		dataSources.empty();
 
 		SQLUSMALLINT direction = SQL_FETCH_FIRST;
 		if(mode == System)
@@ -266,8 +267,15 @@ namespace exodbc
 		res = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
 		if(res == SQL_NO_DATA)
 		{
-			return dataSources;
+			// no data at all, but succeeded, else we would have an err-state
+			return true;
 		}
+		if(res != SQL_SUCCESS)
+		{
+			LOG_ERROR_ENV(m_henv, res, SQLDataSources);
+			return false;
+		}
+
 		do
 		{
 			// Remember the max length 
@@ -276,9 +284,10 @@ namespace exodbc
 			// Go on fetching lengths of descriptions
 			res = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
 		}while(res == SQL_SUCCESS || res == SQL_SUCCESS_WITH_INFO);
-		if(res != SQL_NO_ACTION)
+		if(res != SQL_NO_DATA)
 		{
 			LOG_ERROR_EXPECTED_SQL_NO_DATA(res, SQLDataSources);
+			return false;
 		}
 
 		// Now fetch with description
@@ -287,7 +296,7 @@ namespace exodbc
 		if(res == SQL_NO_DATA)
 		{
 			delete[] descBuffer;
-			return dataSources;
+			return false;
 		}
 		do
 		{
@@ -301,10 +310,11 @@ namespace exodbc
 		if(res != SQL_NO_DATA)
 		{
 			LOG_ERROR_EXPECTED_SQL_NO_DATA(res, SQLDataSources);
+			return false;
 		}
 
 		delete[] descBuffer;
-		return dataSources;
+		return true;
 	}
 
 	// Interfaces

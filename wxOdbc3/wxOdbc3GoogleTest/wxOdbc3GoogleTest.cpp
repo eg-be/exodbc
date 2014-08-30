@@ -102,12 +102,15 @@ int _tmain(int argc, _TCHAR* argv[])
 		return status;
 	
 	// Set a filter for the logging
-#if !_DEBUG
 	boost::log::core::get()->set_filter
 		(
+#if _DEBUG
+			boost::log::trivial::severity >= boost::log::trivial::debug
+#else
 			boost::log::trivial::severity >= boost::log::trivial::warning
-		);
 #endif
+		);
+
 	int result = RUN_ALL_TESTS();
 	std::wcerr << L"Any key to exit";
 	getchar();
