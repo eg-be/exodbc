@@ -201,15 +201,15 @@ namespace exodbc
 	};
 
 	/*!
-	 * \struct	SCatalogColumnInfo
+	 * \struct	STableColumnInfo
 	 *
 	 * \brief	Information about a column fetched using the catalog
 	 * 			function SQLColumns.
 	 * 			See: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
 	 */
-	struct EXODBCAPI SCatalogColumnInfo
+	struct EXODBCAPI STableColumnInfo
 	{
-		SCatalogColumnInfo();
+		STableColumnInfo();
 
 		std::wstring	m_catalogName;		// [NULLABLE] Catalog name
 		std::wstring	m_schemaName;		// [NULLABLE] Schema name
@@ -244,14 +244,14 @@ namespace exodbc
 	};
 
 	/*!
-	 * \struct	SDbCatalogTable
+	 * \struct	STableInfoo
 	 *
 	 * \brief	Description of a table fetched using the catalog function SQLTables
 	 */
-	struct EXODBCAPI SDbCatalogTable        // Description of a Table: Used only in the Description of a database, (catalog info)
+	struct EXODBCAPI STableInfo        // Description of a Table: Used only in the Description of a database, (catalog info)
 	{
 	public:
-		SDbCatalogTable();
+		STableInfo();
 
 		std::wstring		m_tableName;
 		std::wstring		m_tableType;           // "TABLE" or "SYSTEM TABLE" etc.
@@ -267,19 +267,19 @@ namespace exodbc
 	 *
 	 * \brief	Description of the catalog of a database
 	 */
-	struct EXODBCAPI SDbCatalog     // Description of a Database: Used so far only when fetching the "catalog"
+	struct EXODBCAPI SDbCatalogInfo     // Description of a Database: Used so far only when fetching the "catalog"
 	{
-		std::vector<SDbCatalogTable> m_tables;
+		std::vector<STableInfo> m_tables;
 		std::set<std::wstring> m_catalogs;
 		std::set<std::wstring> m_schemas;
 	};
 
 	/*!
-	 * \struct	SCatalogTablePrivilege
+	 * \struct	STablePrivilegesInfo
 	 *
 	 * \brief	TablePrivileges fetched using the catalog function SQLTablePrivilege
 	 */
-	struct EXODBCAPI SCatalogTablePrivilege
+	struct EXODBCAPI STablePrivilegesInfo
 	{
 		std::wstring	m_catalogName;
 		std::wstring	m_schemaName;

@@ -697,10 +697,10 @@ namespace exodbc
 	}
 
 
-	bool Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, SDbCatalogTable& table)
+	bool Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, STableInfo& table)
 	{
 		// Query the tables that match
-		std::vector<SDbCatalogTable> tables;
+		std::vector<STableInfo> tables;
 		if(!FindTables(tableName, schemaName, catalogName, L"", tables))
 		{
 			LOG_ERROR((boost::wformat(L"Searching tables failed while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
@@ -2260,7 +2260,7 @@ namespace exodbc
 //
 //#endif  // #else OLD_GETCOLUMNS
 
-	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<SDbCatalogTable>& tables)
+	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableInfo>& tables)
 	{
 		// Clear tables
 		tables.clear();
@@ -2329,7 +2329,7 @@ namespace exodbc
 
 			while(ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 			{
-				SDbCatalogTable table;
+				STableInfo table;
 				bool haveAllData = true;
 				SQLLEN cb;
 				haveAllData = haveAllData & GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen(), &cb, &table.m_isCatalogNull, true);
@@ -2384,7 +2384,7 @@ namespace exodbc
 		return ok;
 	}
 
-	int Database::ReadColumnCount(const SDbCatalogTable& table)
+	int Database::ReadColumnCount(const STableInfo& table)
 	{
 		// Free statement, ignore if already closed
 		// Close an eventually open cursor, do not care about truncation
@@ -2460,7 +2460,7 @@ namespace exodbc
 	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName)
 	{
 		// Find one matching table
-		SDbCatalogTable table;
+		STableInfo table;
 		if(!FindOneTable(tableName, schemaName, catalogName, table))
 		{
 			return false;
@@ -2471,10 +2471,10 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges)
+	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STablePrivilegesInfo>& privileges)
 	{
 		// Find one matching table
-		SDbCatalogTable table;
+		STableInfo table;
 		if(!FindOneTable(tableName, schemaName, catalogName, table))
 		{
 			return false;
@@ -2485,7 +2485,7 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTablePrivileges(const SDbCatalogTable& table, std::vector<SCatalogTablePrivilege>& privileges)
+	bool Database::ReadTablePrivileges(const STableInfo& table, std::vector<STablePrivilegesInfo>& privileges)
 	{
 		privileges.clear();
 
@@ -2531,7 +2531,7 @@ namespace exodbc
 			{
 				bool haveAllData = true;
 
-				SCatalogTablePrivilege priv;
+				STablePrivilegesInfo priv;
 				haveAllData = haveAllData & GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
 				haveAllData = haveAllData & GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
 				haveAllData = haveAllData & GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
@@ -2567,10 +2567,10 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogColumnInfo>& columns)
+	bool Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STableColumnInfo>& columns)
 	{
 		// Find one matching table
-		SDbCatalogTable table;
+		STableInfo table;
 		if(!FindOneTable(tableName, schemaName, catalogName, table))
 		{
 			return false;
@@ -2581,7 +2581,7 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTableColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns)
+	bool Database::ReadTableColumnInfo(const STableInfo& table, std::vector<STableColumnInfo>& columns)
 	{
 		// Clear result
 		columns.empty();
@@ -2632,7 +2632,7 @@ namespace exodbc
 			bool haveAllData = true;
 
 			SQLLEN cb;
-			SCatalogColumnInfo colInfo;
+			STableColumnInfo colInfo;
 			haveAllData = haveAllData & GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);
@@ -2686,19 +2686,19 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadCompleteCatalog(SDbCatalog& catalogInfo)
+	bool Database::ReadCompleteCatalog(SDbCatalogInfo& catalogInfo)
 	{
-		SDbCatalog dbInf;
+		SDbCatalogInfo dbInf;
 
 		if(!FindTables(L"", L"", L"", L"", dbInf.m_tables))
 		{
 			return false;
 		}
 
-		std::vector<SDbCatalogTable>::const_iterator it;
+		std::vector<STableInfo>::const_iterator it;
 		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
 		{
-			const SDbCatalogTable& table = *it;
+			const STableInfo& table = *it;
 			if(!table.m_isCatalogNull)
 				dbInf.m_catalogs.insert(table.m_catalog);
 			if(!table.m_isSchemaNull)
