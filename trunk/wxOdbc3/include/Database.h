@@ -349,12 +349,34 @@ namespace exodbc
 		 * \return	The column count or -1 in case of failure
 		 */
 		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
-		
+
+		/*!
+		 * \fn	bool Database::ReadTablePrivileges(const SDbCatalogTable& table, std::vector<SCatalogTablePrivilege>& privileges);
+		 *
+		 * \brief	Reads table privileges for the table(s) matching the passed SCatalogTable description.
+		 *
+		 * \param	table			  	Defines the tablename, type, schema and catalog to search for privileges.
+		 * \param [in,out]	privileges	The privileges.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool		ReadTablePrivileges(const SDbCatalogTable& table, std::vector<SCatalogTablePrivilege>& privileges);
 
+		/*!
+		 * \fn	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges);
+		 *
+		 * \brief	Reads table privileges of exactly one table. This method will fail if not
+		 * 			exactly one table is found matching the passed arguments.
+		 *
+		 * \param	tableName		  	Name of the table.
+		 * \param	schemaName		  	Name of the schema.
+		 * \param	catalogName		  	Name of the catalog.
+		 * \param [in,out]	privileges	The privileges.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
 		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges);
 
-		//		bool         TablePrivileges(const std::wstring& tableName, const std::wstring& priv, const wchar_t* userID = NULL, const wchar_t* schema = NULL, const std::wstring& path = std::wstring());
 
 		/*!
 		 * \fn	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
