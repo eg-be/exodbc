@@ -480,7 +480,7 @@ namespace exodbc
 
 //		std::vector<std::wstring> GetErrorList() const;
 
-		wxDBMS       Dbms();
+		DatabaseProduct       Dbms();
 		//bool         ModifyColumn(const std::wstring& tableName, const std::wstring& columnName, int dataType, ULONG columnLength = 0, const std::wstring& optionalParam = std::wstring());
 
 		bool         FwdOnlyCursors()  {return m_fwdOnlyCursors;}
@@ -538,7 +538,7 @@ namespace exodbc
 //		FILE*				m_fpSqlLog;        // Sql Log file pointer
 //		wxDbSqlLogState		m_sqlLogState;     // On or Off
 		bool				m_fwdOnlyCursors;
-		wxDBMS				m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
+		DatabaseProduct				m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 
 		// ODBC handles
 		HDBC  m_hdbc;        // ODBC DB Connection handle
