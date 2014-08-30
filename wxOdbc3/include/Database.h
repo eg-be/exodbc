@@ -439,7 +439,7 @@ namespace exodbc
 		//ColumnInfo*		GetColumns(const std::wstring& tableName, UWORD* numCols, const wchar_t* userID=NULL);
 
 //		int					GetColumnCount(const std::wstring& tableName, const wchar_t* userID=NULL);
-		const wchar_t*		GetDatabaseName()  {return m_dbInf.dbmsName;}
+		const wchar_t*		GetDatabaseName()  {return m_dbInf.m_dbmsName;}
 		const wchar_t*		GetDriverVersion() {return m_dbInf.driverVer;}
 		const std::wstring& GetDataSource()    {return m_dsn;}
 		const std::wstring& GetDatasourceName(){return m_dsn;}
