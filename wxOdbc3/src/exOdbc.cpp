@@ -191,6 +191,11 @@ namespace exodbc {
 		return maxTableNameLen != 0 ? maxTableNameLen : DB_MAX_TABLE_NAME_LEN_DEFAULT;
 	}
 
+	SQLUSMALLINT SDbInfo::GetMaxColumnNameLen() const
+	{
+		return m_maxColumnNameLen != 0 ? m_maxColumnNameLen : DB_MAX_COLUMN_NAME_LEN_DEFAULT;
+	}
+
 	SSqlTypeInfo::SSqlTypeInfo()
 	{
 		FsqlType = 0;

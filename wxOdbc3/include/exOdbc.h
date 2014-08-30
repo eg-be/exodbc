@@ -52,6 +52,7 @@ namespace exodbc
 	const int DB_MAX_TABLE_NAME_LEN_DEFAULT			= 128;	// This value is sometimes also available from dbInf: dbInf.tableNameLen != 0
 	const int DB_MAX_SCHEMA_NAME_LEN_DEFAULT		= 128;	// This value is sometimes also available from dbInf: dbInf.schemaNameLen != 0
 	const int DB_MAX_CATALOG_NAME_LEN_DEFAULT		= 128;	// This value is sometimes also available from dbInf: dbInf.catalogNameLen != 0
+	const int DB_MAX_COLUMN_NAME_LEN_DEFAULT		= 128;	// Value available from SDbInfo
 	const int DB_MAX_COLUMN_NAME_LEN		= 128;
 	const int DB_MAX_TABLE_TYPE_LEN			= 128;
 	const int DB_MAX_TABLE_REMARKS_LEN		= 512;
@@ -138,12 +139,14 @@ namespace exodbc
 		SQLUSMALLINT  maxCatalogNameLen;				// Max length of a catalog name. Can be 0 if no limit, or limit is unknown
 		SQLUSMALLINT  maxSchemaNameLen;					// Max length of a schema name. Can be 0 if no limit, or limit is unknown
 		SQLUSMALLINT  maxTableNameLen;					// Max length of a table name. Can be 0 if no limit, or limit is unknown
+		SQLUSMALLINT	m_maxColumnNameLen;				// Max length of a column name. Can be 0 if no limit, or limit is unknown
 		SQLWCHAR		searchPatternEscape[2];			// SQL_SEARCH_PATTERN_ESCAPE: How to escape string-search patterns in pattern-value arguments in catalog functions
 		std::wstring ToStr() const;
 
 		SQLUSMALLINT GetMaxCatalogNameLen() const;
 		SQLUSMALLINT GetMaxSchemaNameLen() const;
 		SQLUSMALLINT GetMaxTableNameLen() const;
+		SQLUSMALLINT GetMaxColumnNameLen() const;
 		SQLUSMALLINT GetMaxTableTypeNameLen() const { return DB_MAX_TABLE_TYPE_LEN; };
 	};
 
