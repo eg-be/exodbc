@@ -113,10 +113,10 @@ namespace exodbc
 		// an SQLUINTEGER bitmask, an SQLUINTEGER flag, a SQLUINTEGER binary value, or a SQLULEN value.
 		// See: http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
 
-		SQLWCHAR dbmsName[SQL_MAX_DSN_LENGTH + 1];		// Name of the dbms product
-		SQLWCHAR dbmsVer[64];							// Version # of the dbms product
-		SQLWCHAR driverName[40];						// Driver name
-		SQLWCHAR odbcVer[60];							// ODBC version of the driver
+		SQLWCHAR m_dbmsName[SQL_MAX_DSN_LENGTH + 1];		// Name of the dbms product
+		SQLWCHAR m_dbmsVer[64];							// Version # of the dbms product
+		SQLWCHAR m_driverName[40];						// Driver name
+		SQLWCHAR m_odbcVer[60];							// ODBC version of the driver
 		SQLWCHAR drvMgrOdbcVer[60];						// ODBC version of the driver manager
 		SQLWCHAR driverVer[60];							// Driver version
 		SQLWCHAR serverName[80];						// Server Name, typically a connect string
@@ -164,37 +164,37 @@ namespace exodbc
 	{
 		SSqlTypeInfo();
 
-		std::wstring	TypeName;			//  1 Data source–dependent data-type name
-		SQLSMALLINT		FsqlType;			//  2 SQL data type. This can be an ODBC SQL data type or a driver-specific SQL data type.
-		SQLINTEGER		Precision;			//  3 [NULLABLE] The maximum column size that the server supports for this data type. For numeric data, this is the maximum precision. For string data, this is the length in characters. For datetime data types, this is the length in characters of the string representation (assuming the maximum allowed precision of the fractional seconds component). NULL is returned for data types where column size is not applicable.
-		bool			PrecisionIsNull;	//  3 
-		std::wstring	LiteralPrefix;		//  4 [NULLABLE] Character or characters used to prefix a literal; for example, a single quotation mark (') for character data types or 0x for binary data types
-		bool			LiteralPrefixIsNull;//  4
-		std::wstring	LiteralSuffix;		//  5 [NULLABLE] Character or characters used to terminate a literal; for example, a single quotation mark (') for character data types;
-		bool			LiteralSuffixIsNull;//  5
-		std::wstring	CreateParams;		//  6 [NULLABLE] A list of keywords, separated by commas, corresponding to each parameter that the application may specify in parentheses when using the name that is returned in the TYPE_NAME field.
-		bool			CreateParamsIsNull; //  6
-		SQLSMALLINT		Nullable;			//  7 Whether the data type accepts a NULL value: SQL_NO_NULLS, SQL_NULLABLE or	SQL_NULLABLE_UNKNOWN.
-		SQLSMALLINT		CaseSensitive;		//  8 Whether a character data type is case-sensitive in collations and comparisons: SQL_TRUE or SQL_FALSE
-		SQLSMALLINT		Searchable;			//  9 How the data type is used in a WHERE clause: SQL_PRED_NONE (no use), SQL_PRED_CHAR (only with LIKE), SQL_PRED_BASIC (all except LIKE), SQL_SEARCHABLE (anything)
-		SQLSMALLINT		Unsigned;			// 10 [NULLABLE] Whether the data type is unsigned: SQL_TRUE or SQL_FALSE
-		bool			UnsignedIsNull;		// 10 
-		SQLSMALLINT		FixedPrecisionScale;// 11 Whether the data type has predefined fixed precision and scale (which are data source–specific), such as a money data type: SQL_TRUE or SQL_FALSE
-		SQLSMALLINT		AutoUniqueValue;	// 12 [NULLABLE] Whether the data type is autoincrementing: SQL_TRUE or SQL_FALSE
-		bool			AutoUniqueValueIsNull; // 12
-		std::wstring	LocalTypeName;		// 13 [NULLABLE] localized version of the data source–dependent name of the data type.
-		bool			LocalTypeNameIsNull;// 13
-		SQLSMALLINT		MinimumScale;		// 14 [NULLABLE] The minimum scale of the data type on the data source. If a data type has a fixed scale, the MINIMUM_SCALE and MAXIMUM_SCALE columns both contain this value.
-		bool			MinimumScaleIsNull; // 14
-		SQLSMALLINT		MaximumScale;		// 15 [NULLABLE] The maximum scale of the data type on the data source. NULL is returned where scale is not applicable. 
-		bool			MaximumScaleIsNull;	// 15
-		SQLSMALLINT		SqlDataType;		// 16 [ODBC 3.0] The value of the SQL data type as it appears in the SQL_DESC_TYPE field of the descriptor. This column is the same as the DATA_TYPE column, except for interval and datetime data types.
-		SQLSMALLINT		SqlDateTimeSub;		// 17 [ODBC 3.0, NULLABLE] When the value of SQL_DATA_TYPE is SQL_DATETIME or SQL_INTERVAL, this column contains the datetime/interval subcode. For data types other than datetime and interval, this field is NULL.
-		bool			SqlDateTimeSubIsNull; // 17
-		SQLINTEGER		NumPrecRadix;		// 18 [ODBC 3.0, NULLABLE] If the data type is an approximate numeric type, this column contains the value 2 to indicate that COLUMN_SIZE specifies a number of bits. For exact numeric types, this column contains the value 10 to indicate that COLUMN_SIZE specifies a number of decimal digits. Otherwise, this column is NULL.
-		bool			NumPrecRadixIsNull; // 18
-		SQLINTEGER		IntervalPrecision;	// 19 [ODBC 3.0, NULLABLE] If the data type is an interval data type, then this column contains the value of the interval leading precision. Otherwise, this column is NULL.
-		bool			IntervalPrecisionIsNull; // 19
+		std::wstring	m_typeName;			//  1 Data source dependent data-type name
+		SQLSMALLINT		m_sqlType;			//  2 SQL data type. This can be an ODBC SQL data type or a driver-specific SQL data type.
+		SQLINTEGER		m_columnSize;			//  3 [NULLABLE] The maximum column size that the server supports for this data type. For numeric data, this is the maximum precision. For string data, this is the length in characters. For datetime data types, this is the length in characters of the string representation (assuming the maximum allowed precision of the fractional seconds component). NULL is returned for data types where column size is not applicable.
+		bool			m_columnSizeIsNull;	//  3 
+		std::wstring	m_literalPrefix;		//  4 [NULLABLE] Character or characters used to prefix a literal; for example, a single quotation mark (') for character data types or 0x for binary data types
+		bool			m_literalPrefixIsNull;//  4
+		std::wstring	m_literalSuffix;		//  5 [NULLABLE] Character or characters used to terminate a literal; for example, a single quotation mark (') for character data types;
+		bool			m_literalSuffixIsNull;//  5
+		std::wstring	m_createParams;		//  6 [NULLABLE] A list of keywords, separated by commas, corresponding to each parameter that the application may specify in parentheses when using the name that is returned in the TYPE_NAME field.
+		bool			m_createParamsIsNull; //  6
+		SQLSMALLINT		m_nullable;			//  7 Whether the data type accepts a NULL value: SQL_NO_NULLS, SQL_NULLABLE or	SQL_NULLABLE_UNKNOWN.
+		SQLSMALLINT		m_caseSensitive;		//  8 Whether a character data type is case-sensitive in collations and comparisons: SQL_TRUE or SQL_FALSE
+		SQLSMALLINT		m_searchable;			//  9 How the data type is used in a WHERE clause: SQL_PRED_NONE (no use), SQL_PRED_CHAR (only with LIKE), SQL_PRED_BASIC (all except LIKE), SQL_SEARCHABLE (anything)
+		SQLSMALLINT		m_unsigned;			// 10 [NULLABLE] Whether the data type is unsigned: SQL_TRUE or SQL_FALSE
+		bool			m_unsignedIsNull;		// 10 
+		SQLSMALLINT		m_fixedPrecisionScale;// 11 Whether the data type has predefined fixed precision and scale (which are data source–specific), such as a money data type: SQL_TRUE or SQL_FALSE
+		SQLSMALLINT		m_autoUniqueValue;	// 12 [NULLABLE] Whether the data type is autoincrementing: SQL_TRUE or SQL_FALSE
+		bool			m_autoUniqueValueIsNull; // 12
+		std::wstring	m_localTypeName;		// 13 [NULLABLE] localized version of the data source–dependent name of the data type.
+		bool			m_localTypeNameIsNull;// 13
+		SQLSMALLINT		m_minimumScale;		// 14 [NULLABLE] The minimum scale of the data type on the data source. If a data type has a fixed scale, the MINIMUM_SCALE and MAXIMUM_SCALE columns both contain this value.
+		bool			m_minimumScaleIsNull; // 14
+		SQLSMALLINT		m_maximumScale;		// 15 [NULLABLE] The maximum scale of the data type on the data source. NULL is returned where scale is not applicable. 
+		bool			m_maximumScaleIsNull;	// 15
+		SQLSMALLINT		m_sqlDataType;		// 16 [ODBC 3.0] The value of the SQL data type as it appears in the SQL_DESC_TYPE field of the descriptor. This column is the same as the DATA_TYPE column, except for interval and datetime data types.
+		SQLSMALLINT		m_sqlDateTimeSub;		// 17 [ODBC 3.0, NULLABLE] When the value of SQL_DATA_TYPE is SQL_DATETIME or SQL_INTERVAL, this column contains the datetime/interval subcode. For data types other than datetime and interval, this field is NULL.
+		bool			m_sqlDateTimeSubIsNull; // 17
+		SQLINTEGER		m_numPrecRadix;		// 18 [ODBC 3.0, NULLABLE] If the data type is an approximate numeric type, this column contains the value 2 to indicate that COLUMN_SIZE specifies a number of bits. For exact numeric types, this column contains the value 10 to indicate that COLUMN_SIZE specifies a number of decimal digits. Otherwise, this column is NULL.
+		bool			m_numPrecRadixIsNull; // 18
+		SQLINTEGER		m_intervalPrecision;	// 19 [ODBC 3.0, NULLABLE] If the data type is an interval data type, then this column contains the value of the interval leading precision. Otherwise, this column is NULL.
+		bool			m_intervalPrecisionIsNull; // 19
 
 		std::wstring ToOneLineStr(bool withHeaderLines = false, bool withEndLine = false) const;
 		std::wstring ToStr() const;
@@ -216,7 +216,7 @@ namespace exodbc
 		std::wstring	m_tableName;		// Table name
 		std::wstring	m_columnName;		// Column Name. Empty for columns without a name
 		SQLSMALLINT		m_sqlType;			// SQL data type
-		std::wstring	m_typeName;			// Data source-dependant type name
+		std::wstring	m_typeName;			// Data source-dependent type name
 		SQLINTEGER		m_columnSize;		// [NULLABLE] for char-columns the max length in characters; numeric total nr of digits or total number of bits, see numPrecRadix.
 		SQLINTEGER		m_bufferSize;		// [NULLABLE] Length of bits needed for SQLGetDat, SQLFetch if used with SQL_C_DEFAULT.
 		SQLSMALLINT		m_decimalDigits;	// [NULLABLE] Total number of significant digits right of decimal. For time-stuff: number of digits in fractional part, ..

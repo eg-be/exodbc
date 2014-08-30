@@ -570,12 +570,12 @@ namespace exodbc
 		bool ok = true;
 		ok = ok & GetInfo(m_hdbc, SQL_SERVER_NAME, dbInf.serverName, sizeof(dbInf.serverName), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_DATABASE_NAME, dbInf.databaseName, sizeof(dbInf.databaseName), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.dbmsName, sizeof(dbInf.dbmsName), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.dbmsVer, sizeof(dbInf.dbmsVer), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.m_dbmsName, sizeof(dbInf.m_dbmsName), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.m_dbmsVer, sizeof(dbInf.m_dbmsVer), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, &dbInf.maxConnections, sizeof(dbInf.maxConnections), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.maxStmts, sizeof(dbInf.maxStmts), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.driverName, sizeof(dbInf.driverName), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.odbcVer, sizeof(dbInf.odbcVer), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.m_driverName, sizeof(dbInf.m_driverName), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.m_odbcVer, sizeof(dbInf.m_odbcVer), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.drvMgrOdbcVer, sizeof(dbInf.drvMgrOdbcVer), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_VER, dbInf.driverVer, sizeof(dbInf.driverVer), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, &dbInf.cliConfLvl, sizeof(dbInf.cliConfLvl), &cb);
@@ -764,31 +764,31 @@ namespace exodbc
 			cb = 0;
 			bool ok = GetData(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
 			if(ok)
-				info.TypeName = typeName;
+				info.m_typeName = typeName;
 			bool haveName = ok;
 
-			ok = ok & GetData(m_hstmt, 2, SQL_C_SSHORT, &info.FsqlType, sizeof(info.FsqlType), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 3, SQL_C_SLONG, &info.Precision, sizeof(info.Precision), &cb, &info.PrecisionIsNull);
-			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.LiteralPrefixIsNull, true);
-			info.LiteralPrefix = literalPrefix;
-			ok = ok & GetData(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.LiteralSuffixIsNull, true);
-			info.LiteralSuffix = literalSuffix;
-			ok = ok & GetData(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.CreateParamsIsNull, true);
-			info.CreateParams = createParams;
-			ok = ok & GetData(m_hstmt, 7, SQL_C_SSHORT, &info.Nullable, sizeof(info.Nullable), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 8, SQL_C_SSHORT, &info.CaseSensitive, sizeof(info.CaseSensitive), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 9, SQL_C_SSHORT, &info.Searchable, sizeof(info.Searchable), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 10, SQL_C_SSHORT, &info.Unsigned, sizeof(info.Unsigned), &cb, &info.UnsignedIsNull);
-			ok = ok & GetData(m_hstmt, 11, SQL_C_SSHORT, &info.FixedPrecisionScale, sizeof(info.FixedPrecisionScale), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 12, SQL_C_SSHORT, &info.AutoUniqueValue, sizeof(info.AutoUniqueValue), &cb, &info.AutoUniqueValueIsNull);
-			ok = ok & GetData(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.LocalTypeNameIsNull, true);
-			info.LocalTypeName = localTypeName;
-			ok = ok & GetData(m_hstmt, 14, SQL_C_SSHORT, &info.MinimumScale, sizeof(info.MinimumScale), &cb, &info.MinimumScaleIsNull);
-			ok = ok & GetData(m_hstmt, 15, SQL_C_SSHORT, &info.MaximumScale, sizeof(info.MaximumScale), &cb, &info.MaximumScaleIsNull);
-			ok = ok & GetData(m_hstmt, 16, SQL_C_SSHORT, &info.SqlDataType, sizeof(info.SqlDataType), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 17, SQL_C_SSHORT, &info.SqlDateTimeSub, sizeof(info.SqlDateTimeSub), &cb, &info.SqlDateTimeSubIsNull);
-			ok = ok & GetData(m_hstmt, 18, SQL_C_SSHORT, &info.NumPrecRadix, sizeof(info.NumPrecRadix), &cb, &info.NumPrecRadixIsNull);
-			ok = ok & GetData(m_hstmt, 19, SQL_C_SSHORT, &info.IntervalPrecision, sizeof(info.IntervalPrecision), &cb, &info.IntervalPrecisionIsNull);
+			ok = ok & GetData(m_hstmt, 2, SQL_C_SSHORT, &info.m_sqlType, sizeof(info.m_sqlType), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 3, SQL_C_SLONG, &info.m_columnSize, sizeof(info.m_columnSize), &cb, &info.m_columnSizeIsNull);
+			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.m_literalPrefixIsNull, true);
+			info.m_literalPrefix = literalPrefix;
+			ok = ok & GetData(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.m_literalSuffixIsNull, true);
+			info.m_literalSuffix = literalSuffix;
+			ok = ok & GetData(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.m_createParamsIsNull, true);
+			info.m_createParams = createParams;
+			ok = ok & GetData(m_hstmt, 7, SQL_C_SSHORT, &info.m_nullable, sizeof(info.m_nullable), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 8, SQL_C_SSHORT, &info.m_caseSensitive, sizeof(info.m_caseSensitive), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 9, SQL_C_SSHORT, &info.m_searchable, sizeof(info.m_searchable), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 10, SQL_C_SSHORT, &info.m_unsigned, sizeof(info.m_unsigned), &cb, &info.m_unsignedIsNull);
+			ok = ok & GetData(m_hstmt, 11, SQL_C_SSHORT, &info.m_fixedPrecisionScale, sizeof(info.m_fixedPrecisionScale), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 12, SQL_C_SSHORT, &info.m_autoUniqueValue, sizeof(info.m_autoUniqueValue), &cb, &info.m_autoUniqueValueIsNull);
+			ok = ok & GetData(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.m_localTypeNameIsNull, true);
+			info.m_localTypeName = localTypeName;
+			ok = ok & GetData(m_hstmt, 14, SQL_C_SSHORT, &info.m_minimumScale, sizeof(info.m_minimumScale), &cb, &info.m_minimumScaleIsNull);
+			ok = ok & GetData(m_hstmt, 15, SQL_C_SSHORT, &info.m_maximumScale, sizeof(info.m_maximumScale), &cb, &info.m_maximumScaleIsNull);
+			ok = ok & GetData(m_hstmt, 16, SQL_C_SSHORT, &info.m_sqlDataType, sizeof(info.m_sqlDataType), &cb, NULL);
+			ok = ok & GetData(m_hstmt, 17, SQL_C_SSHORT, &info.m_sqlDateTimeSub, sizeof(info.m_sqlDateTimeSub), &cb, &info.m_sqlDateTimeSubIsNull);
+			ok = ok & GetData(m_hstmt, 18, SQL_C_SSHORT, &info.m_numPrecRadix, sizeof(info.m_numPrecRadix), &cb, &info.m_numPrecRadixIsNull);
+			ok = ok & GetData(m_hstmt, 19, SQL_C_SSHORT, &info.m_intervalPrecision, sizeof(info.m_intervalPrecision), &cb, &info.m_intervalPrecisionIsNull);
 
 			if(ok)
 			{
@@ -796,7 +796,7 @@ namespace exodbc
 			}
 			else
 			{
-				LOG_ERROR((boost::wformat(L"Failed to determine properties of type '%s'") % (haveName ? info.TypeName : L"unknown-type")).str()); 
+				LOG_ERROR((boost::wformat(L"Failed to determine properties of type '%s'") % (haveName ? info.m_typeName : L"unknown-type")).str()); 
 				allOk = false;
 			}
 
@@ -2998,10 +2998,10 @@ namespace exodbc
 		if (m_dbmsType != dbmsUNIDENTIFIED)
 			return(m_dbmsType);
 
-		LOG_DEBUG((boost::wformat(L"Database connected to: %s") %m_dbInf.dbmsName).str());
+		LOG_DEBUG((boost::wformat(L"Database connected to: %s") %m_dbInf.m_dbmsName).str());
 
 		wchar_t baseName[25+1];
-		wcsncpy(baseName, m_dbInf.dbmsName, 25);
+		wcsncpy(baseName, m_dbInf.m_dbmsName, 25);
 		baseName[25] = 0;
 
 		// RGG 20001025 : add support for Interbase
@@ -3020,7 +3020,7 @@ namespace exodbc
 		// connected through an OpenLink driver.
 		// Is it also returned by Sybase Adapatitve server?
 		// OpenLink driver name is OLOD3032.DLL for msw and oplodbc.so for unix
-		if (!_wcsicmp(m_dbInf.dbmsName, L"Microsoft SQL Server"))
+		if (!_wcsicmp(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
 		{
 			//if (!wcsncmp(m_dbInf.driverName, L"oplodbc", 7) ||
 			//	!wcsncmp(m_dbInf.driverName, L"OLOD", 4))
@@ -3029,7 +3029,7 @@ namespace exodbc
 			//	return ((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
 		}
 
-		if (!_wcsicmp(m_dbInf.dbmsName, L"Microsoft SQL Server"))
+		if (!_wcsicmp(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
 			return((DatabaseProduct)(m_dbmsType = dbmsMS_SQL_SERVER));
 
 		//baseName[10] = 0;
