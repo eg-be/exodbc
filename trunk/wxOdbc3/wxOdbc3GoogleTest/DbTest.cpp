@@ -358,9 +358,29 @@ namespace exodbc
 			schemaName = L"exodbc";
 			catalogName = L"exodbc";
 		}
-		// TODO: With MySql and ms sql we get no results here?
+		// TODO: With MySql we get no results here?
 		EXPECT_TRUE(m_pDb->ReadTablePrivileges(tableName, schemaName, catalogName, privs));
-		int p = 3;
+		bool canSelect = false;
+		bool canInsert = false;
+		bool canDelete = false;
+		bool canUpdate = false;
+		std::vector<SCatalogTablePrivilege>::const_iterator it;
+		for(it = privs.begin(); it != privs.end(); it++)
+		{
+			const SCatalogTablePrivilege& priv = *it;
+			if(priv.m_privilege == L"SELECT")
+				canSelect = true;
+			if(priv.m_privilege == L"INSERT")
+				canInsert = true;
+			if(priv.m_privilege == L"DELETE")
+				canDelete = true;
+			if(priv.m_privilege == L"UPDATE")
+				canUpdate = true;
+		}
+		EXPECT_TRUE(canSelect);
+		EXPECT_TRUE(canInsert);
+		EXPECT_TRUE(canUpdate);
+		EXPECT_TRUE(canDelete);
 	}
 
 	TEST_P(DbTest, FindTables)
