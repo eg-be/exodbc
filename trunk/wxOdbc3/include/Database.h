@@ -280,7 +280,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadCompleteCatalog(SDbCatalog& catalogInfo);
+		bool		ReadCompleteCatalog(SDbCatalogInfo& catalogInfo);
 
 		/*!
 		 * \fn	bool Database::ReadCatalogs(std::vector<std::wstring>& catalogs)
@@ -332,7 +332,7 @@ namespace exodbc
 		 *
 		 * \return	The column count, or -1 in case of failure
 		 */
-		int			ReadColumnCount(const SDbCatalogTable& table);
+		int			ReadColumnCount(const STableInfo& table);
 
 		/*!
 		 * \fn	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
@@ -360,7 +360,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTablePrivileges(const SDbCatalogTable& table, std::vector<SCatalogTablePrivilege>& privileges);
+		bool		ReadTablePrivileges(const STableInfo& table, std::vector<STablePrivilegesInfo>& privileges);
 
 		/*!
 		 * \fn	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges);
@@ -375,7 +375,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges);
+		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STablePrivilegesInfo>& privileges);
 
 		/*!
 		 * \fn	bool Database::ReadTableColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns);
@@ -387,7 +387,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTableColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns);
+		bool		ReadTableColumnInfo(const STableInfo& table, std::vector<STableColumnInfo>& columns);
 
 		/*!
 		 * \fn	bool exodbc::Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogColumnInfo>& columns);
@@ -402,7 +402,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogColumnInfo>& columns);
+		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STableColumnInfo>& columns);
 
 		/*!
 		 * \fn	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
@@ -421,7 +421,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<SDbCatalogTable>& tables);
+		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableInfo>& tables);
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
@@ -522,7 +522,7 @@ namespace exodbc
 		 *
 		 * \return	true if exactly one table matches the passed search-criterias name, schema and catalog, false else.
 		 */
-		bool			FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, SDbCatalogTable& table);
+		bool			FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, STableInfo& table);
 
 		// Members
 		SDbInfo				m_dbInf;

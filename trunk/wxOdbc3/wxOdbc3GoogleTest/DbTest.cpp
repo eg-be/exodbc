@@ -334,7 +334,7 @@ namespace exodbc
 
 	TEST_P(DbTest, ReadTablePrivileges)
 	{
-		std::vector<SCatalogTablePrivilege> privs;
+		std::vector<STablePrivilegesInfo> privs;
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
@@ -364,10 +364,10 @@ namespace exodbc
 		bool canInsert = false;
 		bool canDelete = false;
 		bool canUpdate = false;
-		std::vector<SCatalogTablePrivilege>::const_iterator it;
+		std::vector<STablePrivilegesInfo>::const_iterator it;
 		for(it = privs.begin(); it != privs.end(); it++)
 		{
-			const SCatalogTablePrivilege& priv = *it;
+			const STablePrivilegesInfo& priv = *it;
 			if(priv.m_privilege == L"SELECT")
 				canSelect = true;
 			if(priv.m_privilege == L"INSERT")
@@ -386,7 +386,7 @@ namespace exodbc
 
 	TEST_P(DbTest, ReadTableColumnInfo)
 	{
-		std::vector<SCatalogColumnInfo> cols;
+		std::vector<STableColumnInfo> cols;
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
@@ -413,7 +413,7 @@ namespace exodbc
 		EXPECT_TRUE(m_pDb->ReadTableColumnInfo(tableName, schemaName, catalogName, cols));
 		// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
 		ASSERT_TRUE(cols.size() == 3);
-		SCatalogColumnInfo col = cols[2];
+		STableColumnInfo col = cols[2];
 		EXPECT_FALSE(col.m_isNumPrecRadixNull);
 		EXPECT_FALSE(col.m_isColumnSizeNull);
 		EXPECT_FALSE(col.m_isDecimalDigitsNull);
@@ -424,7 +424,7 @@ namespace exodbc
 
 	TEST_P(DbTest, FindTables)
 	{
-		std::vector<SDbCatalogTable> tables;
+		std::vector<STableInfo> tables;
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
@@ -493,7 +493,7 @@ namespace exodbc
 
 	TEST_P(DbTest, ReadCompleteCatalog)
 	{
-		SDbCatalog cat;
+		SDbCatalogInfo cat;
 		EXPECT_TRUE(m_pDb->ReadCompleteCatalog(cat));
 		// TODO: This is confusing. DB2 reports schemas, what is correct, but mysql reports catalogs?? wtf?
 		if(m_pDb->Dbms() == dbmsDB2)

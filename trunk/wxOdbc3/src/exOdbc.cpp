@@ -226,7 +226,7 @@ namespace exodbc {
 		IntervalPrecisionIsNull = false;
 	}
 
-	SCatalogColumnInfo::SCatalogColumnInfo()
+	STableColumnInfo::STableColumnInfo()
 		: m_sqlType(0)
 		, m_columnSize(0)
 		, m_bufferSize(0)
@@ -250,7 +250,7 @@ namespace exodbc {
 		, m_isIsNullableNull(false)
 	{ }
 
-	SDbCatalogTable::SDbCatalogTable()
+	STableInfo::STableInfo()
 		: m_isCatalogNull(false)
 		, m_isSchemaNull(false)
 	{
