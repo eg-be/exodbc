@@ -609,7 +609,7 @@ namespace exodbc
 
 		if(!ok)
 		{
-			BOOST_LOG_TRIVIAL(error) << L"Not all Database Infos could be queried";
+			LOG_ERROR(L"Not all Database Infos could be queried");
 		}
 
 		// Completed
@@ -769,7 +769,7 @@ namespace exodbc
 			}
 			else
 			{
-				BOOST_LOG_TRIVIAL(error) << L"Failed to determine properties of type '" << (haveName ? info.TypeName : L"unknown-type") << L"'"; 
+				LOG_ERROR((boost::wformat(L"Failed to determine properties of type '%s'") % (haveName ? info.TypeName : L"unknown-type")).str()); 
 				allOk = false;
 			}
 
@@ -850,7 +850,7 @@ namespace exodbc
 				{
 					s1 = (boost::wformat(L"Orphaned table found using pDb [%p]: ") % this).str();
 					s2 = (boost::wformat(L"(%-20s)     tableID:[%6lu]     pDb:[%p]") % tiu->tableName % tiu->tableID % this).str();
-					BOOST_LOG_TRIVIAL(debug) << s1 << s2;
+					LOG_DEBUG((boost::wformat(L"%s%s") %s1 %s2).str());
 				}
 				it++;
 				//pNode = pNode->GetNext();
@@ -913,7 +913,7 @@ namespace exodbc
 		std::vector<SErrorInfo> errs = GetAllErrors(aHenv, aHdbc, aHstmt);
 		for(size_t i = 0; i < errs.size(); i++)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"Have ODBC Error #" << i << L": " << errs[i];
+			LOG_ERROR((boost::wformat(L"Have ODBC Error #%d: %s") %i %errs[i]).str());
 		}
  
 //		std::wstring odbcErrMsg;

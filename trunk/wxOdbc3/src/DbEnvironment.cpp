@@ -109,9 +109,10 @@ namespace exodbc
 		exASSERT(!m_henv);
 
 		// Initialize the ODBC Environment for Database Operations
-		if(SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv) != SQL_SUCCESS)
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv);
+		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to allocate an odbc environment handle using SqlAllocHandle: " << GetLastEnvError(m_henv);
+			LOG_ERROR_ENV_MSG(m_henv, ret, SQLAllocHandle, L"Failed to allocated ODBC-Env Handle");
 			return false;
 		}
 
@@ -134,9 +135,9 @@ namespace exodbc
 			{
 				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
 				if(ret == SQL_ERROR)
-					BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_ENV (return code was SQL_ERROR, handle is still valid): " << GetLastEnvError(m_henv);
+					LOG_ERROR_ENV_MSG(m_henv, ret, SQLFreeHandle, L"Freeing ODBC-Env Handle failed with SQL_ERROR, handle is still valid");
 				else
-					BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HDNCLE_ENV (return code was " << ret << L", handle is invalid)";
+					LOG_ERROR_ENV_MSG(m_henv, ret, SQLFreeHandle, L"Freeing ODBC-Env Handle failed, handle is invalid");
 			}
 			if(ret != SQL_ERROR)
 			{
@@ -204,13 +205,13 @@ namespace exodbc
 			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
 			break;
 		default:
-			BOOST_LOG_TRIVIAL(debug) << L"Unknown ODBC Version value: " << version;
+			LOG_ERROR((boost::wformat(L"Unknown ODBC Version value: %d") %version).str());
 			return false;
 		}
 
 		if(ret != SQL_SUCCESS)
 		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to set ODBC Version of SQL Environment to " << version << L": " << GetLastEnvError(m_henv);
+			LOG_ERROR_ENV_MSG(m_henv, ret, SQLSetEnvAttr, (boost::wformat(L"Failed to set SQL_ATTR_ODBC_VERSION to value %d") %version).str());
 			return false;
 		}
 
@@ -275,11 +276,11 @@ namespace exodbc
 			// Go on fetching lengths of descriptions
 			res = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
 		}while(res == SQL_SUCCESS || res == SQL_SUCCESS_WITH_INFO);
-		if(res != SQL_NO_DATA)
+		if(res != SQL_NO_ACTION)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"ListDataSources did not end with SQL_NO_DATA (" << SQL_NO_DATA << L") but with " << res 
-				<< L" when determining max desc buffer length";
+			LOG_ERROR_EXPECTED_SQL_NO_DATA(res, SQLDataSources);
 		}
+
 		// Now fetch with description
 		wchar_t* descBuffer = new wchar_t[maxDescLength + 1];
 		res = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer, maxDescLength + 1, &descBufferLength);
@@ -299,8 +300,7 @@ namespace exodbc
 		}while(res == SQL_SUCCESS || res == SQL_SUCCESS_WITH_INFO);
 		if(res != SQL_NO_DATA)
 		{
-			BOOST_LOG_TRIVIAL(warning) << L"ListDataSources did not end with SQL_NO_DATA (" << SQL_NO_DATA << L") but with " << res 
-				<< L" when listening DataSources";
+			LOG_ERROR_EXPECTED_SQL_NO_DATA(res, SQLDataSources);
 		}
 
 		delete[] descBuffer;
