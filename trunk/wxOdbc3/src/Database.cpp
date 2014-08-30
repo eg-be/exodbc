@@ -1408,18 +1408,18 @@ namespace exodbc
 //		return true;
 //	}  // wxDb::ExecSql()
 
-	/********** wxDb::GetNext()  **********/
-	bool Database::GetNext()
-	{
-		if (SQLFetch(m_hstmt) == SQL_SUCCESS)
-			return true;
-		else
-		{
-			DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
-			return false;
-		}
+	///********** wxDb::GetNext()  **********/
+	//bool Database::GetNext()
+	//{
+	//	if (SQLFetch(m_hstmt) == SQL_SUCCESS)
+	//		return true;
+	//	else
+	//	{
+	//		DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
+	//		return false;
+	//	}
 
-	}  // wxDb::GetNext()
+	//}  // wxDb::GetNext()
 
 
 
