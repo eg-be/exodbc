@@ -606,6 +606,7 @@ namespace exodbc
 		ok = ok & GetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &dbInf.maxCatalogNameLen, sizeof(dbInf.maxCatalogNameLen), &cb);
 		ok = ok & GetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &dbInf.maxSchemaNameLen, sizeof(dbInf.maxSchemaNameLen), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &dbInf.maxTableNameLen, sizeof(dbInf.maxTableNameLen), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_MAX_COLUMN_NAME_LEN, &dbInf.m_maxColumnNameLen, sizeof(dbInf.m_maxColumnNameLen), &cb);
 
 		if(!ok)
 		{
@@ -2562,6 +2563,90 @@ namespace exodbc
 			delete[] pSchemaBuff;
 		return ok;
 	}
+
+
+	bool Database::ReadColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns)
+	{
+		// Clear result
+		columns.empty();
+
+		// Free statement, ignore if already closed
+		// Close an eventually open cursor, do not care about truncation
+		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		if( ! SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
+			return false;
+		}
+
+		// Note: The schema and table name arguments are Pattern Value arguments
+		// The catalog name is an ordinary argument. if we do not have one in the
+		// DbCatalogTable, we set it to an empty string
+		std::wstring catalogQueryName = L"";
+		if(!table.m_isCatalogNull)
+			catalogQueryName = table.m_catalog;
+
+		// we always have a tablename, but only sometimes a schema
+		SQLWCHAR* pSchemaBuff = NULL;
+		if(!table.m_isSchemaNull)
+		{
+			pSchemaBuff = new SQLWCHAR[table.m_schema.length() + 1];
+			wcscpy(pSchemaBuff, table.m_schema.c_str());
+		}
+
+		// Query columns
+		bool ok = true;
+		int colCount = 0;
+		ret = SQLColumns(m_hstmt,
+			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,	// catalog
+			pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,	// schema
+			(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS,		// tablename
+			NULL, 0);						// All columns
+
+		if(ret != SQL_SUCCESS)
+		{
+			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+			LOG_ERROR_STMT(m_hstmt, ret, SQLColumns);
+			ok = false;
+		}
+
+		// Iterate columns
+		while (ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+		{
+			bool haveAllData = true;
+
+			SCatalogColumnInfo colInfo;
+			haveAllData = haveAllData & GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);
+			//haveAllData = haveAllData & GetData(m_hstmt, 4, m_dbInf.GetMaxC, priv.m_grantor, &priv.m_isGrantorNull);
+			//haveAllData = haveAllData & GetData(m_hstmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
+			//haveAllData = haveAllData & GetData(m_hstmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
+			//haveAllData = haveAllData & GetData(m_hstmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
+
+		}
+
+		if(ok && ret != SQL_NO_DATA)
+		{
+			LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
+			ok = false;
+		}
+
+		ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		if( ! SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
+			ok = false;
+		}
+
+		if(pSchemaBuff)
+		{
+			delete[] pSchemaBuff;
+		}
+
+		return ok;
+	}
+
 
 	bool Database::ReadCompleteCatalog(SDbCatalog& catalogInfo)
 	{

@@ -377,6 +377,8 @@ namespace exodbc
 		 */
 		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges);
 
+		bool		ReadColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns);
+
 
 		/*!
 		 * \fn	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
