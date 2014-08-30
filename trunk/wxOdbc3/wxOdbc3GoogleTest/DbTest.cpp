@@ -73,8 +73,13 @@ namespace exodbc
 
 		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
+		// only ms sql server needs a commit trans here so far?
+		if(db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			db.CommitTrans();
+		}
+		
 		db.Close();
-//		int p = 3;
 	}
 
 	// TODO: Test Close. Close should return a value if succeeded
@@ -127,8 +132,11 @@ namespace exodbc
 
 		BOOST_LOG_TRIVIAL(info) << ws.str();
 
-		// This is need for ms-sql server.
-		db.CommitTrans();
+		// TODO: needed for ms only (?)
+		if(db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			db.CommitTrans();
+		}
 
 		db.Close();
 	}
@@ -145,6 +153,12 @@ namespace exodbc
 		EXPECT_TRUE(sInfo.length() > 0);
 		BOOST_LOG_TRIVIAL(info) << L"DbInfo of database connected to DSN " << m_odbcInfo.m_dsn << std::endl << sInfo;
 
+		// TODO: needed for ms only (?)
+		if(db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			db.CommitTrans();
+		}
+
 		db.Close();
 
 	}
@@ -156,8 +170,15 @@ namespace exodbc
 
 		Database* pDb = new Database(m_pDbEnv);
 
-		// Open without failing on unsupported datatypes
+		// Open an existing database
 		EXPECT_TRUE(pDb->Open(m_pDbEnv));
+
+		// only ms sql server needs a commit trans here so far?
+		if(pDb->Dbms() == dbmsMS_SQL_SERVER)
+		{
+			pDb->CommitTrans();
+		}
+		
 		pDb->Close();
 		delete pDb;
 
@@ -166,18 +187,11 @@ namespace exodbc
 		DbEnvironment* pFailEnv = new DbEnvironment(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
 		EXPECT_TRUE(pFailEnv->GetHenv() != NULL);
 		Database* pFailDb = new Database(pFailEnv);
-		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings";
+		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit errors";
 		EXPECT_FALSE(pFailDb->Open(pFailEnv));
 		pFailDb->Close();
 		delete pFailDb;
 		delete pFailEnv;
-
-		// Open with failing on unsupported datatypes
-		// TODO: This test is stupid, we should also test that we fail
-		pDb = new Database(m_pDbEnv);
-		EXPECT_TRUE(pDb->Open(m_pDbEnv));
-		pDb->Close();
-		delete pDb;
 	}
 
 
@@ -274,6 +288,7 @@ namespace exodbc
 			// DB2 does not support catalogs. it reports zero catalogs
 			EXPECT_EQ(0, cats.size());
 			break;
+
 		case dbmsMS_SQL_SERVER:
 		case dbmsMY_SQL:
 			// Those report our test-db as a catalog
@@ -301,22 +316,10 @@ namespace exodbc
 		case dbmsMS_SQL_SERVER:
 			// ms sql server reported at least 3 schemas:
 			EXPECT_TRUE(schemas.size() >= 3);
-			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"dbo") != schemas.end());
+			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"exodbc") != schemas.end());
 			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"INFORMATION_SCHEMA") != schemas.end());
 			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"sys") != schemas.end());
 			break;
-		}
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			// DB2 has a wonderful correct schema for our test-db
-			EXPECT_TRUE(schemas.size() > 0);
-			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"EXODBC") != schemas.end());
-		}
-		else if(m_pDb->Dbms() == dbmsMY_SQL)
-		{
-			// MySQL reports exactly one schema with an empty name
-			EXPECT_TRUE(schemas.size() == 1);
-			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"") != schemas.end());
 		}
 	}
 
@@ -350,9 +353,9 @@ namespace exodbc
 			catalogName = L"";
 			break;
 		case dbmsMS_SQL_SERVER:
-			// And ms also uses catalogs, and some strange dbo schemaName
+			// And ms uses catalogs, which map to dbs and schemaName
 			tableName = L"integertypes";
-			schemaName = L"dbo";
+			schemaName = L"exodbc";
 			catalogName = L"exodbc";
 		}
 		// TODO: With MySql and ms sql we get no results here?
@@ -366,19 +369,25 @@ namespace exodbc
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
-		if(m_pDb->Dbms() == dbmsMY_SQL)
+		switch(m_pDb->Dbms())
 		{
+		case dbmsMY_SQL:
 			// We know that mySql uses catalogs, not schemas:
 			tableName = L"integertypes";
 			schemaName = L"";
 			catalogName = L"exodbc";
-		}
-		else if(m_pDb->Dbms() == dbmsDB2)
-		{
+			break;
+		case dbmsDB2:
 			// We know that DB2 uses schemas:
 			tableName = L"INTEGERTYPES";
 			schemaName = L"EXODBC";
 			catalogName = L"";
+			break;
+		case dbmsMS_SQL_SERVER:
+			// And ms uses catalogs, which map to dbs and schemaName
+			tableName = L"integertypes";
+			schemaName = L"exodbc";
+			catalogName = L"exodbc";
 		}
 		// Find one table by using only the table-name as search param
 		EXPECT_TRUE(m_pDb->FindTables(tableName, L"", L"", L"", tables));
@@ -445,19 +454,27 @@ namespace exodbc
 		std::wstring schemaName = L"";
 		std::wstring catalogName = L"";
 		int nrCols = 0;
-		if(m_pDb->Dbms() == dbmsDB2)
+		switch(m_pDb->Dbms())
 		{
+		case dbmsDB2:
 			// DB2 has schemas
 			tableName = L"INTEGERTYPES";
 			schemaName = L"EXODBC";
 			nrCols = 4;
-		}
-		else if(m_pDb->Dbms() == dbmsMY_SQL)
-		{
+			break;
+		case dbmsMY_SQL:
 			// mysql has catalogs
 			tableName = L"integertypes";
 			catalogName = L"exodbc";
 			nrCols = 7;
+			break;
+		case dbmsMS_SQL_SERVER:
+			// ms has catalogs and schemas
+			tableName = L"integertypes";
+			catalogName = L"exodbc";
+			schemaName = L"exodbc";
+			nrCols = 4;
+			break;
 		}
 		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, schemaName, catalogName));
 		// we should also work if we just search by the tableName, as long as tableName is unique within db

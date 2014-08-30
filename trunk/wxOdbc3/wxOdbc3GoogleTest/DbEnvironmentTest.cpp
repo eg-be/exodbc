@@ -102,7 +102,8 @@ namespace exodbc
 		DbEnvironment env(OV_3);
 		ASSERT_TRUE(env.HaveHenv());
 
-		vector<SDataSource> dataSources = env.ListDataSources();
+		vector<SDataSource> dataSources;
+		ASSERT_TRUE(env.ListDataSources(DbEnvironment::All, dataSources));
 
 		// Expect that we find our DataSource in the list
 		bool foundDataSource = false;

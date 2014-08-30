@@ -250,15 +250,16 @@ namespace exodbc
 		enum ListMode { All, System, User };
 
 		/*!
-		 * \fn	std::vector<SDataSource> DbEnvironment::ListDataSources(ListMode mode = All);
+		 * \fn	bool DbEnvironment::ListDataSources(ListMode mode = All, std::vector<SDataSource>& dataSources) const;
 		 *
 		 * \brief	List data sources.
 		 *
-		 * \param	mode	(Optional) Decide to list all DSNs, or only user / system DSNs.
+		 * \param	mode			   	Decide to list all DSNs, or only user / system DSNs.
+		 * \param [in,out]	dataSources	The data sources.
 		 *
-		 * \return	A std::vector&lt;SDataSource&gt;
-		 */
-		std::vector<SDataSource> ListDataSources(ListMode mode = All) const;
+		 * \return	true if succeeds, false if fails
+		 */		
+		bool ListDataSources(ListMode mode, std::vector<SDataSource>& dataSources) const;
 
 	private:
 		bool m_freeHenvOnDestroy;
