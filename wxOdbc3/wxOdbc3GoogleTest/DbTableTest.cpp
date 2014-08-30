@@ -168,12 +168,18 @@ namespace exodbc
 		EXPECT_EQ( 55, pTable->m_timestamp.minute);
 		EXPECT_EQ( 56, pTable->m_timestamp.second);
 		
-		// TODO: MySql does not have fractions, ibm db2 adds '000' at the end (?)
+		// TODO: Fractions are different, but maybe because we cannot enter them precisely with the guis of the tools ?
 		RecordProperty("Ticket", 33);
-		if(m_pDb->Dbms() == dbmsDB2)
+		SQLUINTEGER fraction = 0;
+		switch(m_pDb->Dbms())
 		{
-			EXPECT_EQ( 123456000, pTable->m_timestamp.fraction);
+		case dbmsDB2:
+			fraction = 123456000;
+			break;
+		case dbmsMS_SQL_SERVER:
+			fraction = 123000000;
 		}
+		EXPECT_EQ( fraction, pTable->m_timestamp.fraction);
 
 		// Test for NULL
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 2"));
