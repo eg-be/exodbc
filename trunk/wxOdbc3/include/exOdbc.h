@@ -56,6 +56,8 @@ namespace exodbc
 	const int DB_MAX_COLUMN_NAME_LEN		= 128;
 	const int DB_MAX_TABLE_TYPE_LEN			= 128;
 	const int DB_MAX_TABLE_REMARKS_LEN		= 512;
+	const int DB_MAX_COLUMN_REMARKS_LEN		= 512;
+	const int DB_MAX_COLUMN_DEFAULT_LEN		= 512;
 	const int DB_MAX_LITERAL_PREFIX_LEN		= 128;
 	const int DB_MAX_LITERAL_SUFFIX_LEN		= 128;
 	const int DB_MAX_CREATE_PARAMS_LIST_LEN = 512;	
@@ -63,6 +65,7 @@ namespace exodbc
 	const int DB_MAX_GRANTEE_LEN			= 128;
 	const int DB_MAX_PRIVILEGES_LEN			= 128;
 	const int DB_MAX_IS_GRANTABLE_LEN		= 4;
+	const int DB_MAX_YES_NO_LEN				= 3;
 
 	const int DB_DATA_TYPE_VARCHAR        = 1;
 	const int DB_DATA_TYPE_INTEGER        = 2;
@@ -206,6 +209,8 @@ namespace exodbc
 	 */
 	struct EXODBCAPI SCatalogColumnInfo
 	{
+		SCatalogColumnInfo();
+
 		std::wstring	m_catalogName;		// [NULLABLE] Catalog name
 		std::wstring	m_schemaName;		// [NULLABLE] Schema name
 		std::wstring	m_tableName;		// Table name
@@ -221,8 +226,8 @@ namespace exodbc
 		std::wstring	m_defaultValue;		// [NULLABLE] Default value
 		SQLSMALLINT		m_sqlDataType;		// [ODBC 3.0] Sql Data Type
 		SQLSMALLINT		m_sqlDatetimeSub;	// [ODBC 3.0, NULLABLE] The subtype code for datetime and interval data types
-		SQLSMALLINT		m_charOctetLength;	// [ODBC 3.0, NULLABLE] The maximum length in bytes of a character or binary data type column. 
-		SQLSMALLINT		m_ordinalPosition;	// [ODBC 3.0] The ordinal position of the column in the table. The first column in the table is number 1.
+		SQLINTEGER		m_charOctetLength;	// [ODBC 3.0, NULLABLE] The maximum length in bytes of a character or binary data type column. 
+		SQLINTEGER		m_ordinalPosition;	// [ODBC 3.0] The ordinal position of the column in the table. The first column in the table is number 1.
 		std::wstring	m_isNullable;		// [ODBC 3.0] NO, YES or zero-length string if unknown
 
 		bool			m_isCatalogNull;
@@ -235,6 +240,7 @@ namespace exodbc
 		bool			m_isDefaultValueNull;
 		bool			m_isDatetimeSubNull;
 		bool			m_isCharOctetLengthNull;
+		bool			m_isIsNullableNull;
 	};
 
 	/*!

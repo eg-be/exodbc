@@ -383,6 +383,45 @@ namespace exodbc
 		EXPECT_TRUE(canDelete);
 	}
 
+
+	TEST_P(DbTest, ReadTableColumnInfo)
+	{
+		std::vector<SCatalogColumnInfo> cols;
+		std::wstring tableName;
+		std::wstring schemaName;
+		std::wstring catalogName;
+		switch(m_pDb->Dbms())
+		{
+		case dbmsMY_SQL:
+			// We know that mySql uses catalogs, not schemas:
+			tableName = L"numerictypes";
+			schemaName = L"";
+			catalogName = L"exodbc";
+			break;
+		case dbmsDB2:
+			// We know that DB2 uses schemas:
+			tableName = L"NUMERICTYPES";
+			schemaName = L"EXODBC";
+			catalogName = L"";
+			break;
+		case dbmsMS_SQL_SERVER:
+			// And ms uses catalogs, which map to dbs and schemaName
+			tableName = L"numerictypes";
+			schemaName = L"exodbc";
+			catalogName = L"exodbc";
+		}
+		EXPECT_TRUE(m_pDb->ReadTableColumnInfo(tableName, schemaName, catalogName, cols));
+		// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
+		ASSERT_TRUE(cols.size() == 3);
+		SCatalogColumnInfo col = cols[2];
+		EXPECT_FALSE(col.m_isNumPrecRadixNull);
+		EXPECT_FALSE(col.m_isColumnSizeNull);
+		EXPECT_FALSE(col.m_isDecimalDigitsNull);
+		EXPECT_EQ(10, col.m_numPrecRadix);
+		EXPECT_EQ(18, col.m_columnSize);
+		EXPECT_EQ(10, col.m_decimalDigits);
+	}
+
 	TEST_P(DbTest, FindTables)
 	{
 		std::vector<SDbCatalogTable> tables;

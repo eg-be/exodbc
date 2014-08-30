@@ -226,6 +226,30 @@ namespace exodbc {
 		IntervalPrecisionIsNull = false;
 	}
 
+	SCatalogColumnInfo::SCatalogColumnInfo()
+		: m_sqlType(0)
+		, m_columnSize(0)
+		, m_bufferSize(0)
+		, m_decimalDigits(0)
+		, m_numPrecRadix(0)
+		, m_nullable(SQL_NULLABLE_UNKNOWN)
+		, m_sqlDataType(0)
+		, m_sqlDatetimeSub(0)
+		, m_charOctetLength(0)
+		, m_ordinalPosition(0)
+		, m_isCatalogNull(false)
+		, m_isSchemaNull(false)
+		, m_isColumnSizeNull(false)
+		, m_isBufferSizeNull(false)
+		, m_isDecimalDigitsNull(false)
+		, m_isNumPrecRadixNull(false)
+		, m_isRemarksNull(false)
+		, m_isDefaultValueNull(false)
+		, m_isDatetimeSubNull(false)
+		, m_isCharOctetLengthNull(false)
+		, m_isIsNullableNull(false)
+	{ }
+
 	SDbCatalogTable::SDbCatalogTable()
 		: m_isCatalogNull(false)
 		, m_isSchemaNull(false)

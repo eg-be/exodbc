@@ -377,8 +377,32 @@ namespace exodbc
 		 */
 		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges);
 
-		bool		ReadColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns);
+		/*!
+		 * \fn	bool Database::ReadTableColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns);
+		 *
+		 * \brief	Reads table column information for the passed table.
+		 *
+		 * \param	table		   	The table.
+		 * \param [in,out]	columns	The columns.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
+		bool		ReadTableColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns);
 
+		/*!
+		 * \fn	bool exodbc::Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogColumnInfo>& columns);
+		 *
+		 * \brief	Reads table column information for exactly one table. This method will fail if the passed arguments
+		 * 			do not match exactly one table.
+		 *
+		 * \param	tableName	   	Name of the table.
+		 * \param	schemaName	   	Name of the schema.
+		 * \param	catalogName	   	Name of the catalog.
+		 * \param [in,out]	columns	The columns.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
+		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogColumnInfo>& columns);
 
 		/*!
 		 * \fn	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
@@ -485,6 +509,20 @@ namespace exodbc
 		};
 		bool			ReadCatalogInfo(ReadCatalogInfoMode mode, std::vector<std::wstring>& results);
 
+		/*!
+		 * \fn	bool Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges, SDbCatalogTable& table);
+		 *
+		 * \brief	Searches for tables that match the passed arguments, return true if exactly one such table is found.
+		 * 			The table that matches is copied to the argument table.
+		 *
+		 * \param	tableName		  	Name of the table.
+		 * \param	schemaName		  	Name of the schema.
+		 * \param	catalogName		  	Name of the catalog.
+		 * \param [in,out]	table	  	The table.
+		 *
+		 * \return	true if exactly one table matches the passed search-criterias name, schema and catalog, false else.
+		 */
+		bool			FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, SDbCatalogTable& table);
 
 		// Members
 		SDbInfo				m_dbInf;
