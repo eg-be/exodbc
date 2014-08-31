@@ -114,6 +114,11 @@ namespace exodbc
 		Database db(m_pDbEnv);
 		ASSERT_TRUE(db.Open(m_pDbEnv));
 
+		if(db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			LOG_WARNING(L"This test is supposed to spit warning if connected against MS Sql Server and Ticket #51 is not fixed yet");
+		}
+
 		// We default to manual commit
 		EXPECT_EQ(TM_MANUAL_COMMIT, db.GetTransactionMode());
 		EXPECT_EQ(TM_MANUAL_COMMIT, db.ReadTransactionMode());
