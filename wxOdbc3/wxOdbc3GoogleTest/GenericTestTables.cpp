@@ -68,48 +68,33 @@ namespace exodbc
 	// IntTypesTable
 	// ---------------
 	IntTypesTable::IntTypesTable(Database* pDb)
-		: Table(pDb, L"integertypes", 7, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"integertypes", 4, L"", wxDB_QUERY_ONLY)
 	{	
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
 		m_int = 0;
 		m_bigInt = 0;
-		m_usmallInt = 0;
-		m_uint = 0;
-		m_ubigInt = 0;
-
-		// TODO: Note: IBM DB2 has no unsigned-cols, but we get no error and no warning?
-		// TODO: Should the error be spit when the table is opened?
 
 		SetColDefs(0, L"idintegertypes", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
 		SetColDefs(1, L"tsmallint", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
 		SetColDefs(2, L"tint", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
 		SetColDefs(3, L"tbigint", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), false, false, false, false);	
-		SetColDefs(4, L"tusmallint", DB_DATA_TYPE_INTEGER, &m_usmallInt, SQL_C_USHORT, sizeof(m_usmallInt), false, false, false, false);	
-		SetColDefs(5, L"tuint", DB_DATA_TYPE_INTEGER, &m_uint, SQL_C_ULONG, sizeof(m_usmallInt), false, false, false, false);	
-		SetColDefs(6, L"tubigint", DB_DATA_TYPE_INTEGER, &m_ubigInt, SQL_C_UBIGINT, sizeof(m_usmallInt), false, false, false, false);	
 	}
 
 	// IntTypesTmpTable
 	// ---------------
 	IntTypesTmpTable::IntTypesTmpTable(Database* pDb)
-		: Table(pDb, L"integertypes_tmp", 7, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"integertypes_tmp", 4, L"", wxDB_QUERY_ONLY)
 	{	
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
 		m_int = 0;
 		m_bigInt = 0;
-		m_usmallInt = 0;
-		m_uint = 0;
-		m_ubigInt = 0;
 
 		SetColDefs(0, L"idintegertypes_tmp", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
 		SetColDefs(1, L"tsmallint", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
 		SetColDefs(2, L"tint", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
 		SetColDefs(3, L"tbigint", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), false, false, false, false);	
-		SetColDefs(4, L"tusmallint", DB_DATA_TYPE_INTEGER, &m_usmallInt, SQL_C_USHORT, sizeof(m_usmallInt), false, false, false, false);	
-		SetColDefs(5, L"tuint", DB_DATA_TYPE_INTEGER, &m_uint, SQL_C_ULONG, sizeof(m_usmallInt), false, false, false, false);	
-		SetColDefs(6, L"tubigint", DB_DATA_TYPE_INTEGER, &m_ubigInt, SQL_C_UBIGINT, sizeof(m_usmallInt), false, false, false, false);	
 	}
 
 	// DateTypesTable
