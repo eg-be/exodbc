@@ -512,27 +512,24 @@ namespace exodbc
 		std::wstring tableName = L"";
 		std::wstring schemaName = L"";
 		std::wstring catalogName = L"";
-		int nrCols = 0;
+		int nrCols = 4;
 		switch(m_pDb->Dbms())
 		{
 		case dbmsDB2:
 			// DB2 has schemas
 			tableName = L"INTEGERTYPES";
 			schemaName = L"EXODBC";
-			nrCols = 4;
 			break;
 		case dbmsMY_SQL:
 			// mysql has catalogs
 			tableName = L"integertypes";
 			catalogName = L"exodbc";
-			nrCols = 7;
 			break;
 		case dbmsMS_SQL_SERVER:
 			// ms has catalogs and schemas
 			tableName = L"integertypes";
 			catalogName = L"exodbc";
 			schemaName = L"exodbc";
-			nrCols = 4;
 			break;
 		}
 		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, schemaName, catalogName));
@@ -714,36 +711,6 @@ namespace exodbc
 		EXPECT_EQ( 2147483647, pTable->m_int);
 		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
 		EXPECT_FALSE( pTable->GetNext());
-
-		// IBM DB2 has no support for unsigned int types, so far we only know about mysql
-		RecordProperty("Ticket", 33);
-		if(m_pDb->Dbms() == dbmsMY_SQL)
-		{
-			sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (4, 0, 0, 0)";
-			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-			EXPECT_TRUE( m_pDb->CommitTrans() );
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp = 4"));
-			EXPECT_TRUE( pTable->GetNext());
-			EXPECT_EQ( 0, pTable->m_usmallInt);
-			EXPECT_EQ( 0, pTable->m_uint);
-			EXPECT_EQ( 0, pTable->m_ubigInt);
-			EXPECT_FALSE( pTable->GetNext());
-
-			sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tusmallint, tuint, tubigint) VALUES (5, 65535, 4294967295, 18446744073709551615)";
-			EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-			EXPECT_TRUE( m_pDb->CommitTrans() );
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp  WHERE idintegertypes_tmp = 5"));
-			EXPECT_TRUE( pTable->GetNext());
-			EXPECT_EQ( 65535, pTable->m_usmallInt);
-			EXPECT_EQ( 4294967295, pTable->m_uint);
-			// With the 5.2 odbc driver ubigint seems to be wrong?
-			// TODO: This is ugly, use some kind of disabled test, or log a warning..
-			if(std::wstring(m_pDb->GetDriverVersion()) != std::wstring(L"05.02.0006"))
-			{
-				EXPECT_EQ( 18446744073709551615, pTable->m_ubigInt);
-			}
-			EXPECT_FALSE( pTable->GetNext());
-		}
 
 		delete pTable;
 	}

@@ -225,40 +225,6 @@ namespace exodbc
 		EXPECT_TRUE( pTable->GetNext() );
 		EXPECT_EQ( 9223372036854775807, pTable->m_bigInt);
 
-		// IBM DB2 has no support for unsigned int types, so far we know only about mysql having that
-		RecordProperty("Ticket", 34);
-		if(m_pDb->Dbms() == dbmsMY_SQL)
-		{
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 7"));
-			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( 0, pTable->m_usmallInt);
-
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 8"));
-			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( 65535, pTable->m_usmallInt);
-
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 9"));
-			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( 0, pTable->m_uint);
-
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 10"));
-			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( 4294967295, pTable->m_uint);
-
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 11"));
-			EXPECT_TRUE( pTable->GetNext() );
-			EXPECT_EQ( 0, pTable->m_ubigInt);
-
-			// With the 5.2 odbc driver bigint seems to be wrong?
-			// TODO: This is ugly, use some kind of disabled test, or log a warning..
-			if(std::wstring(m_pDb->GetDriverVersion()) != std::wstring(L"05.02.0006"))
-			{
-				EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 12"));
-				EXPECT_TRUE( pTable->GetNext() );
-				EXPECT_EQ( 18446744073709551615, pTable->m_ubigInt);
-			}
-		}
-
 		// Test for NULL-Values
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
 		EXPECT_TRUE( pTable->GetNext());
@@ -268,14 +234,6 @@ namespace exodbc
 		EXPECT_TRUE( pTable->IsColNull(2) );
 		EXPECT_TRUE( pTable->IsColNull(3) );
 
-		// IBM DB2 has no support for unsigned int types, so far we know only about mysql having that
-		if(m_pDb->Dbms() == dbmsMY_SQL)
-		{
-			EXPECT_TRUE( pTable->IsColNull(4) );
-			EXPECT_TRUE( pTable->IsColNull(5) );
-			EXPECT_TRUE( pTable->IsColNull(6) );
-		}
-
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3"));
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_FALSE( pTable->IsColNull(2) );
@@ -283,22 +241,6 @@ namespace exodbc
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5"));
 		EXPECT_TRUE( pTable->GetNext());
 		EXPECT_FALSE( pTable->IsColNull(3) );
-
-		// IBM DB2 has no support for unsigned int types, so far we know only about mysql having that
-		if(m_pDb->Dbms() == dbmsMY_SQL)
-		{
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 7"));
-			EXPECT_TRUE( pTable->GetNext());
-			EXPECT_FALSE( pTable->IsColNull(4) );
-
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 9"));
-			EXPECT_TRUE( pTable->GetNext());
-			EXPECT_FALSE( pTable->IsColNull(5) );
-
-			EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 11"));
-			EXPECT_TRUE( pTable->GetNext());
-			EXPECT_FALSE( pTable->IsColNull(6) );
-		}
 
 		delete pTable;
 	}
