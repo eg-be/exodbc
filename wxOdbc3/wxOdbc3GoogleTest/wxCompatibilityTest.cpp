@@ -52,9 +52,9 @@ namespace exodbc
 			{
 				if(m_pDb->Dbms() == dbmsMS_SQL_SERVER)
 				{
-					// So far only ms needs this? we need to fix this. has something to do with autocommit set to no, so also a
+					// So far only ms needs this? we need to fix this. has something to do with auto commit set to no, so also a
 					// a select starts a transaction that must be closed or so.
-					EXPECT_TRUE(m_pDb->CommitTrans());
+					//EXPECT_TRUE(m_pDb->CommitTrans());
 				}
 				EXPECT_TRUE(m_pDb->Close());
 			}

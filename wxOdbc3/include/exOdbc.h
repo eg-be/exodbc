@@ -305,6 +305,19 @@ namespace exodbc
 		OV_3_8 = 380UL
 	};
 
+	/*!
+	 * \enum	TransactionMode
+	 *
+	 * \brief	Defines whether auto commit is on or off.
+	 * 			see: http://msdn.microsoft.com/en-us/library/ms713600%28v=vs.85%29.aspx
+	 * 			
+	 */
+	enum TransactionMode
+	{
+		TM_AUTO_COMMIT,
+		TM_MANUAL_COMMIT // commit
+	};
+
 	// ODBC Error codes (derived from ODBC SqlState codes)
 	enum wxODBC_ERRORS
 	{
