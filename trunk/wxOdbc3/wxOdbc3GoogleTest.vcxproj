@@ -99,6 +99,7 @@
     <ClCompile Include="wxOdbc3GoogleTest\TestParams.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="wxOdbc3GoogleTest\wxCompatibilityTest.cpp" />
     <ClCompile Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -110,6 +111,7 @@
     <ClInclude Include="wxOdbc3GoogleTest\stdafx.h" />
     <ClInclude Include="wxOdbc3GoogleTest\targetver.h" />
     <ClInclude Include="wxOdbc3GoogleTest\TestParams.h" />
+    <ClInclude Include="wxOdbc3GoogleTest\wxCompatibilityTest.h" />
     <ClInclude Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.h" />
   </ItemGroup>
   <ItemGroup>
