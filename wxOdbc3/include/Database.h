@@ -424,16 +424,14 @@ namespace exodbc
 		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableInfo>& tables);
 
 		/*!
-		 * \fn	bool Database::ReadTransactionMode(TransactionMode& mode);
+		 * \fn	TransactionMode Database::ReadTransactionMode();
 		 *
-		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT.
-		 * 			The internal flag m_transactionMode is not changed.
+		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT. The internal flag
+		 * 			m_transactionMode is not changed.
 		 *
-		 * \param [in,out]	mode	The mode read from the database.
-		 *
-		 * \return	true if it succeeds, false if it fails.
+		 * \return	TM_UNKNOWN if fails, else the mode currently set
 		 */
-		bool		ReadTransactionMode(TransactionMode& mode);
+		TransactionMode		ReadTransactionMode();
 
 		/*!
 		 * \fn	bool Database::SetTransactionMode(TransactionMode mode);

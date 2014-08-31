@@ -314,6 +314,7 @@ namespace exodbc
 	 */
 	enum TransactionMode
 	{
+		TM_UNKNOWN,
 		TM_AUTO_COMMIT,
 		TM_MANUAL_COMMIT // commit
 	};
