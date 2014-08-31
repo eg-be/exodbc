@@ -19,14 +19,12 @@ namespace exodbc
 {
 	//Static consts
 	// -------------
+	
 	//Construction
 	// -------------
-	//Destructor
-	// -----------
-	//Implementation
-	// --------------
 	void wxCompatibilityTest::SetUp()
 	{
+		// Run for every test
 		m_pDb = NULL;
 		m_odbcInfo = GetParam();
 		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
@@ -42,9 +40,12 @@ namespace exodbc
 		m_pDb = new Database(&m_env);
 		ASSERT_TRUE(m_pDb->Open(&m_env));
 	}
-
+	
+	//Destructor
+	// -----------
 	void wxCompatibilityTest::TearDown()
 	{
+		// Run after every test
 		if(m_pDb)
 		{
 			if(m_pDb->IsOpen())
@@ -60,6 +61,10 @@ namespace exodbc
 			delete m_pDb;
 		}
 	}
+	
+	//Implementation
+	// --------------
+
 
 	TEST_P(wxCompatibilityTest, FooTest)
 	{
