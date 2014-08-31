@@ -45,6 +45,9 @@
     <ClCompile Include="wxOdbc3GoogleTest\HelpersTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="wxOdbc3GoogleTest\wxCompatibilityTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wxOdbc3GoogleTest\stdafx.h">
@@ -72,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wxOdbc3GoogleTest\HelpersTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="wxOdbc3GoogleTest\wxCompatibilityTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
