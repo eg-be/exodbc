@@ -169,6 +169,9 @@ namespace exodbc
 		// Mark database as not OpenImpl as of yet
 		m_dbIsOpen = false;
 		m_dbOpenedWithConnectionString = false;
+
+		// transaction is not known until connected and set
+		m_transactionMode = TM_UNKNOWN;
 	}
 
 
@@ -2703,27 +2706,30 @@ namespace exodbc
 		return true;
 	}
 
-	bool Database::ReadTransactionMode(TransactionMode& mode)
+	TransactionMode Database::ReadTransactionMode()
 	{
-		SQLUSMALLINT modeValue;
-		SQLSMALLINT cb;
-		if(!GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &modeValue, sizeof(modeValue), &cb))
-			return false;
+		SQLUINTEGER modeValue;
+		SQLINTEGER cb;
+		SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, &modeValue, sizeof(modeValue), &cb);
+		if(ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLGetConnectAttr, L"Failed to read Attr SQL_ATTR_AUTOCOMMIT");
+			return TM_UNKNOWN;
+		}
+
+		TransactionMode mode = TM_UNKNOWN;
 
 		if(modeValue == SQL_AUTOCOMMIT_OFF)
 			mode = TM_MANUAL_COMMIT;
 		else if(modeValue == SQL_AUTOCOMMIT_ON)
 			mode = TM_AUTO_COMMIT;
-		else
-			return false;
 
-		return true;
+		return mode;
 	}
 
 
 	bool Database::SetTransactionMode(TransactionMode mode)
 	{
-		bool ok = true;
 		SQLRETURN ret;
 		std::wstring errStringMode;
 		if(mode == TM_MANUAL_COMMIT)
@@ -2737,17 +2743,20 @@ namespace exodbc
 			errStringMode = L"SQL_AUTOCOMMIT_ON";
 		}
 
-		if(ret != SQL_SUCCESS)
+		if(ret == SQL_SUCCESS_WITH_INFO)
 		{
-			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Cannot set ATTR_AUTOCOMMIT to %s") %errStringMode).str());
-			ok = false;
-		}
-		else
-		{
-			m_transactionMode = mode;
+			LOG_WARNING_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Setting ATTR_AUTOCOMMIT to %s returned with SQL_SUCCESS_WITH_INFO") %errStringMode).str());
 		}
 
-		return ok;
+		if(SQL_SUCCEEDED(ret))
+		{
+			m_transactionMode = mode;
+			return true;
+		}
+
+		LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Cannot set ATTR_AUTOCOMMIT to %s") %errStringMode).str());
+
+		return false;
 	}
 
 	///********** wxDb::Catalog() **********/

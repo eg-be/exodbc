@@ -103,6 +103,37 @@ namespace exodbc
 		//EXPECT_FALSE(db2.Close());
 	}
 
+	TEST_P(DbTest, ReadTransactionMode)
+	{
+		// We default to manual commit
+		EXPECT_EQ(TM_MANUAL_COMMIT, m_pDb->ReadTransactionMode());
+	}
+
+	TEST_P(DbTest, SetTransactionMode)
+	{
+		Database db(m_pDbEnv);
+		ASSERT_TRUE(db.Open(m_pDbEnv));
+
+		// We default to manual commit
+		EXPECT_EQ(TM_MANUAL_COMMIT, db.GetTransactionMode());
+		EXPECT_EQ(TM_MANUAL_COMMIT, db.ReadTransactionMode());
+
+		// Switch to auto
+		EXPECT_TRUE(db.SetTransactionMode(TM_AUTO_COMMIT));
+		// internal member should already be updated
+		EXPECT_EQ(TM_AUTO_COMMIT, db.GetTransactionMode());
+		EXPECT_EQ(TM_AUTO_COMMIT, db.ReadTransactionMode());
+
+		// and back to manual
+		EXPECT_TRUE(db.SetTransactionMode(TM_MANUAL_COMMIT));
+		// internal member should already be updated
+		EXPECT_EQ(TM_MANUAL_COMMIT, db.GetTransactionMode());
+		EXPECT_EQ(TM_MANUAL_COMMIT, db.ReadTransactionMode());
+
+		// Close db
+		db.Close();
+	}
+
 	TEST_P(DbTest, ReadDataTypesInfo)
 	{
 		Database db(m_pDbEnv);
