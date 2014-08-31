@@ -425,11 +425,15 @@ namespace exodbc
 		if (!ReadDbInfo(m_dbInf))
 			return false;
 
+		// Try to detect the type - this will update our internal type on the first call
+		Dbms();
+
 		// Query the datatypes
 		if (!ReadDataTypesInfo(m_datatypes))
 			return false;
 
 		// Completed Successfully
+		LOG_DEBUG((boost::wformat(L"Opened connection to database %s") %m_dbInf.m_dbmsName).str());
 		return true;
 	}
 
@@ -853,6 +857,8 @@ namespace exodbc
 				LOG_ERROR_DBC(m_hdbc, ret, SQLDisconnect);
 				return false;
 			}
+
+			LOG_DEBUG((boost::wformat(L"Closed connection to database %s") %m_dbInf.m_dbmsName).str());
 
 			m_dbIsOpen = false;
 		}
@@ -3046,11 +3052,25 @@ namespace exodbc
 		if (m_dbmsType != dbmsUNIDENTIFIED)
 			return(m_dbmsType);
 
-		LOG_DEBUG((boost::wformat(L"Database connected to: %s") %m_dbInf.m_dbmsName).str());
+		if(boost::algorithm::contains(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
+		{
+			m_dbmsType = dbmsMS_SQL_SERVER;
+		}
+		else if(boost::algorithm::contains(m_dbInf.m_dbmsName, L"MySQL"))
+		{
+			m_dbmsType = dbmsMY_SQL;
+		}
+		else if(boost::algorithm::contains(m_dbInf.m_dbmsName, L"DB2"))
+		{
+			m_dbmsType = dbmsDB2;
+		}
 
-		wchar_t baseName[25+1];
-		wcsncpy(baseName, m_dbInf.m_dbmsName, 25);
-		baseName[25] = 0;
+		if(m_dbmsType == dbmsUNIDENTIFIED)
+		{
+			LOG_WARNING((boost::wformat(L"Connect to unknown database: %s") %m_dbInf.m_dbmsName).str());
+		}
+
+		return m_dbmsType;
 
 		// RGG 20001025 : add support for Interbase
 		// GT : Integrated to base classes on 20001121
@@ -3068,17 +3088,17 @@ namespace exodbc
 		// connected through an OpenLink driver.
 		// Is it also returned by Sybase Adapatitve server?
 		// OpenLink driver name is OLOD3032.DLL for msw and oplodbc.so for unix
-		if (!_wcsicmp(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
-		{
+		//if (!_wcsicmp(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
+		//{
 			//if (!wcsncmp(m_dbInf.driverName, L"oplodbc", 7) ||
 			//	!wcsncmp(m_dbInf.driverName, L"OLOD", 4))
-				return ((DatabaseProduct)(dbmsMS_SQL_SERVER));
+				//return ((DatabaseProduct)(dbmsMS_SQL_SERVER));
 			//else
 			//	return ((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
-		}
+		//}
 
-		if (!_wcsicmp(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
-			return((DatabaseProduct)(m_dbmsType = dbmsMS_SQL_SERVER));
+		//if (!_wcsicmp(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
+		//	return((DatabaseProduct)(m_dbmsType = dbmsMS_SQL_SERVER));
 
 		//baseName[10] = 0;
 		//if (!_wcsicmp(baseName, L"PostgreSQL"))  // v6.5.0
@@ -3103,21 +3123,21 @@ namespace exodbc
 		//if (!_wcsicmp(baseName, L"Sybase"))
 		//	return((wxDBMS)(m_dbmsType = dbmsSYBASE_ASE));
 
-		baseName[5] = 0;
+		//baseName[5] = 0;
 		//if (!_wcsicmp(baseName, L"DBASE"))
 		//	return((wxDBMS)(m_dbmsType = dbmsDBASE));
 		//if (!_wcsicmp(baseName, L"xBase"))
 		//	return((wxDBMS)(m_dbmsType = dbmsXBASE_SEQUITER));
-		if (!_wcsicmp(baseName, L"MySQL"))
-			return((DatabaseProduct)(m_dbmsType = dbmsMY_SQL));
+		//if (!_wcsicmp(baseName, L"MySQL"))
+		//	return((DatabaseProduct)(m_dbmsType = dbmsMY_SQL));
 		//if (!_wcsicmp(baseName, L"MaxDB"))
 		//	return((wxDBMS)(m_dbmsType = dbmsMAXDB));
 
-		baseName[3] = 0;
-		if (!_wcsicmp(baseName, L"DB2"))
-			return((DatabaseProduct)(m_dbmsType = dbmsDB2));
+		//baseName[3] = 0;
+		//if (!_wcsicmp(baseName, L"DB2"))
+		//	return((DatabaseProduct)(m_dbmsType = dbmsDB2));
 
-		return((DatabaseProduct)(m_dbmsType = dbmsUNIDENTIFIED));
+		//return((DatabaseProduct)(m_dbmsType = dbmsUNIDENTIFIED));
 
 	}
 
