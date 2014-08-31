@@ -10,6 +10,7 @@
 // libs
 #include "gtest/gtest.h"
 #include "boost/algorithm/string.hpp"
+#include "boost/format.hpp"
 
 // system
 #include <stdio.h>

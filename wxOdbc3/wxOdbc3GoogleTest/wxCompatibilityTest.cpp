@@ -529,6 +529,147 @@ namespace exodbc
 		}
 	}
 
+
+	TEST_P(wxCompatibilityTest, ExecSql_InsertCharTypes)
+	{
+		CharTypesTmpTable table(m_pDb);
+		ASSERT_TRUE(table.Open(false, false));
+
+		std::wstring sqlstmt = L"DELETE FROM exodbc.chartypes_tmp WHERE idchartypes_tmp >= 0";
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		// Note the escaping:
+		// IBM DB2 wants to escape ' using '', mysql wants \'
+		// MYSQL needs \\ for \ 
+		RecordProperty("Ticket", 36);
+		if(m_pDb->Dbms() == dbmsDB2 || m_pDb->Dbms() == dbmsMS_SQL_SERVER)
+		{
+			sqlstmt = (boost::wformat(L"INSERT INTO exodbc.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
+		}
+		else
+		{
+			sqlstmt = (boost::wformat(L"INSERT INTO exodbc.chartypes_tmp (idchartypes_tmp, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
+		}
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		// And note the triming
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes_tmp ORDER BY idchartypes_tmp ASC"));
+		EXPECT_TRUE( table.GetNext());
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(table.m_varchar));
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(table.m_char)));
+		EXPECT_FALSE(table.GetNext());
+
+		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
+		// SQLExecDirect), but not after one of the catalog functions ?
+		if(m_pDb->Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_pDb->CommitTrans());
+		}
+	}
+
+
+	TEST_P(wxCompatibilityTest, ExecSQL_InsertFloatTypes)
+	{
+		FloatTypesTmpTable table(m_pDb);
+		ASSERT_TRUE(table.Open(false, false));
+
+		std::wstring sqlstmt = L"DELETE FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp >= 0";
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (1, -3.141592, -3.141)";
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp = 1"));
+		EXPECT_TRUE( table.GetNext() );
+		EXPECT_EQ( -3.141592, table.m_double);
+		EXPECT_EQ( -3.141, table.m_float);
+		EXPECT_FALSE( table.GetNext() );
+
+		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (2, 3.141592, 3.141)";
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp = 2"));
+		EXPECT_TRUE( table.GetNext() );
+		EXPECT_EQ( 3.141592, table.m_double);
+		EXPECT_EQ( 3.141, table.m_float);
+		EXPECT_FALSE( table.GetNext() );
+
+		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
+		// SQLExecDirect), but not after one of the catalog functions ?
+		if(m_pDb->Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_pDb->CommitTrans());
+		}
+	}
+
+	TEST_P(wxCompatibilityTest, ExecSQL_InsertNumericTypesAsChar)
+	{
+		NumericTypesTmpTable table(m_pDb, NumericTypesTmpTable::ReadAsChar);
+		ASSERT_TRUE(table.Open(false, false));
+
+		std::wstring sqlstmt;
+		sqlstmt = L"DELETE FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp >= 0";
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+
+		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (1, -123456789012345678, -12345678.9012345678)";
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 1"));
+		EXPECT_TRUE( table.GetNext() );
+		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
+
+		RecordProperty("Ticket", 35);
+		if(m_pDb->Dbms() == dbmsDB2)
+			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
+		else
+			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
+
+		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (2, 123456789012345678, 12345678.9012345678)";
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 2"));
+		EXPECT_TRUE( table.GetNext() );
+		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
+
+		if(m_pDb->Dbms() == dbmsDB2)
+			EXPECT_EQ( std::wstring(L"12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
+		else
+			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
+
+		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (3, 0, 0.0000000000)";
+		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_pDb->CommitTrans() );
+		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 3"));
+		EXPECT_TRUE( table.GetNext() );
+		EXPECT_EQ( std::wstring(L"0"), std::wstring(table.m_wcdecimal_18_0));
+
+		if(m_pDb->Dbms() == dbmsDB2)
+			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(table.m_wcdecimal_18_10));	
+		else if(m_pDb->Dbms() == dbmsMY_SQL)
+			EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(table.m_wcdecimal_18_10));	
+		else if(m_pDb->Dbms() == dbmsMS_SQL_SERVER)
+			EXPECT_EQ( std::wstring(L".0000000000"), std::wstring(table.m_wcdecimal_18_10));	
+		else
+			EXPECT_TRUE(false);
+
+		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
+		// SQLExecDirect), but not after one of the catalog functions ?
+		if(m_pDb->Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_pDb->CommitTrans());
+		}
+	}
+
+
+
+
 	//Interfaces
 	// ----------
 	// 
