@@ -423,6 +423,42 @@ namespace exodbc
 		 */
 		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableInfo>& tables);
 
+		/*!
+		 * \fn	bool Database::ReadTransactionMode(TransactionMode& mode);
+		 *
+		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT.
+		 * 			The internal flag m_transactionMode is not changed.
+		 *
+		 * \param [in,out]	mode	The mode read from the database.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
+		bool		ReadTransactionMode(TransactionMode& mode);
+
+		/*!
+		 * \fn	bool Database::SetTransactionMode(TransactionMode mode);
+		 *
+		 * \brief	Sets transaction mode on the database, using the attribute SQL_ATTR_AUTOCOMMIT.
+		 * 			This will also update the internal flag m_transactionMode, if changing the mode
+		 * 			was successful.
+		 * \see	GetTransactionMode()
+		 *
+		 * \param	mode	The mode to set.
+		 *
+		 * \return	true if it succeeds, false if it fails.
+		 */
+		bool		SetTransactionMode(TransactionMode mode);
+
+		/*!
+		 * \fn	TransactionMode Database::GetTransactionMode()
+		 *
+		 * \brief	Gets transaction mode from the internally cached value.
+		 * \see		SetTransactionMode(TransactionMode mode)
+		 *
+		 * \return	The transaction mode.
+		 */
+		TransactionMode GetTransactionMode() { return m_transactionMode; };
+
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		void         DispNextError();
@@ -546,6 +582,8 @@ namespace exodbc
 
 		//Error reporting mode
 		bool m_silent;
+
+		TransactionMode		m_transactionMode;
 
 		// Information about logical data types VARCHAR, INTEGER, FLOAT and DATE.
 		//

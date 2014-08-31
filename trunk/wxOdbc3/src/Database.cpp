@@ -530,15 +530,9 @@ namespace exodbc
 	bool Database::SetConnectionAttributes()
 	{
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
-		bool ok = true;
-		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_OFF, NULL);
-		if(ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_AUTOCOMMIT to AUTOCOMMIT_OFF");
-			ok = false;
-		}
+		bool ok = SetTransactionMode(TM_MANUAL_COMMIT);
 
-		ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, NULL);
+		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, NULL);
 		if(ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_TRACE to OPT_TRACE_OFF");
@@ -2709,7 +2703,52 @@ namespace exodbc
 		return true;
 	}
 
+	bool Database::ReadTransactionMode(TransactionMode& mode)
+	{
+		SQLUSMALLINT modeValue;
+		SQLSMALLINT cb;
+		if(!GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &modeValue, sizeof(modeValue), &cb))
+			return false;
 
+		if(modeValue == SQL_AUTOCOMMIT_OFF)
+			mode = TM_MANUAL_COMMIT;
+		else if(modeValue == SQL_AUTOCOMMIT_ON)
+			mode = TM_AUTO_COMMIT;
+		else
+			return false;
+
+		return true;
+	}
+
+
+	bool Database::SetTransactionMode(TransactionMode mode)
+	{
+		bool ok = true;
+		SQLRETURN ret;
+		std::wstring errStringMode;
+		if(mode == TM_MANUAL_COMMIT)
+		{
+			ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_OFF, NULL);
+			errStringMode = L"SQL_AUTOCOMMIT_OFF";
+		}
+		else
+		{
+			ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_ON, NULL);
+			errStringMode = L"SQL_AUTOCOMMIT_ON";
+		}
+
+		if(ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Cannot set ATTR_AUTOCOMMIT to %s") %errStringMode).str());
+			ok = false;
+		}
+		else
+		{
+			m_transactionMode = mode;
+		}
+
+		return ok;
+	}
 
 	///********** wxDb::Catalog() **********/
 	//bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
