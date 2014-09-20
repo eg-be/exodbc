@@ -13,7 +13,6 @@
 // Same component headers
 // Other headers
 #include "exOdbc.h"
-#include "Utils.h"
 
 // System headers
 

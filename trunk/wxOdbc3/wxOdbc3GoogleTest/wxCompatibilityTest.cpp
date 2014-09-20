@@ -29,7 +29,7 @@ namespace exodbc
 		// Run for every test
 		m_pDb = NULL;
 		m_odbcInfo = GetParam();
-		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
+//		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 
 		// Set up environment
 		m_env.SetDsn(m_odbcInfo.m_dsn);

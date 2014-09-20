@@ -40,7 +40,7 @@ namespace exodbc
 	{
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
-		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
+//		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 		m_pDbEnv = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		HENV henv = m_pDbEnv->GetHenv();
 		ASSERT_TRUE(henv  != 0);
