@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by EliCommon.rc
+// Used by exOdbc.rc
 
 // Next default values for new objects
 // 
