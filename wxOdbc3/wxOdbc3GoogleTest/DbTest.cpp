@@ -393,6 +393,7 @@ namespace exodbc
 			tableName = L"integertypes";
 			schemaName = L"exodbc";
 			catalogName = L"exodbc";
+			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #52");
 		}
 		// TODO: With MySql we get no results here?
 		EXPECT_TRUE(m_pDb->ReadTablePrivileges(tableName, schemaName, catalogName, privs));
