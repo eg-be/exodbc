@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxOdbc3", "wxOdbc3\wxOdbc3.vcxproj", "{021A7F83-D491-491B-B4E9-93F4F56340C1}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "exOdbc", "wxOdbc3\wxOdbc3.vcxproj", "{021A7F83-D491-491B-B4E9-93F4F56340C1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wxOdbc3GoogleTest", "wxOdbc3\wxOdbc3GoogleTest.vcxproj", "{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EliCommon", "EliCommon\EliCommon.vcxproj", "{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "exOdbcGoogleTest", "wxOdbc3\wxOdbc3GoogleTest.vcxproj", "{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,10 +19,6 @@ Global
 		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Debug|Win32.Build.0 = Debug|Win32
 		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Release|Win32.ActiveCfg = Release|Win32
 		{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}.Release|Win32.Build.0 = Release|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Debug|Win32.ActiveCfg = Debug_Minimal|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Debug|Win32.Build.0 = Debug_Minimal|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Release|Win32.ActiveCfg = Release_Minimal|Win32
-		{A5DD0BF0-D13E-4D85-B4A6-9B3F1E295869}.Release|Win32.Build.0 = Release_Minimal|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

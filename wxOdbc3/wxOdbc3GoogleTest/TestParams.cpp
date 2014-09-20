@@ -33,7 +33,20 @@ namespace exodbc
 			<< L"; Username: " << oi.m_username.c_str()
 			<< L"; Password: " << oi.m_password.c_str();
 		std::string s;
-		eli::w2mbNoThrow(wos.str(), s);
+
+		// TODO: Resolve with ticket #44 #53
+		//	eli::w2mbNoThrow(wos.str(), s);
+		// hack around
+		std::wstring ws = wos.str();
+		std::stringstream ss;
+		for(size_t i = 0; i < ws.length(); i++)
+		{
+			char c = (char) ws[i];
+			ss << c;
+		}
+		s = ss.str();
+		// end hack
+
 		return os << s.c_str();
 	}
 

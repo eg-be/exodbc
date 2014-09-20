@@ -38,7 +38,7 @@ namespace exodbc
 	void DbEnvironmentTest::SetUp()
 	{
 		m_odbcInfo = GetParam();
-		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
+//		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 	}
 
 	void DbEnvironmentTest::TearDown()

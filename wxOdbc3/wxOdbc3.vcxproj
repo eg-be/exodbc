@@ -50,11 +50,6 @@
     <None Include="exOdbc.rc2" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EliCommon\EliCommon.vcxproj">
-      <Project>{a5dd0bf0-d13e-4d85-b4a6-9b3f1e295869}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="exOdbc.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

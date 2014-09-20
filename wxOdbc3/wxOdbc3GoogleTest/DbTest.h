@@ -15,7 +15,6 @@
 #include "TestParams.h"
 
 // Other headers
-#include "Utils.h"
 #include "gtest/gtest.h"
 
 // System headers
