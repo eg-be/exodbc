@@ -14,7 +14,7 @@
     <ProjectGuid>{886ADD9A-F0DE-413F-A2EA-C024FB74BDF5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>wxOdbc3GoogleTest</RootNamespace>
-    <ProjectName>exOdbcGoogleTest</ProjectName>
+    <ProjectName>exOdbcGTest</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_v100|Win32'" Label="Configuration">
@@ -56,7 +56,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;BOOST_ALL_DYN_LINK;EXODBC3_TEST;EXODBC3_IMPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(SolutionDir)\3rdParty\googletest\include;$(SolutionDir)\exOdbc3\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(SolutionDir)\3rdParty\googletest\include;$(SolutionDir)\exOdbc\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -73,7 +73,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;_SCL_SECURE_NO_WARNINGS;BOOST_ALL_DYN_LINK;EXODBC3_TEST;EXODBC3_IMPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(SolutionDir)\3rdParty\wxWidgets\include\msvc;$(SolutionDir)\3rdParty\wxWidgets\include;$(Solutiondir)\3rdParty\googletest\include;$(ProjectDir)\wxOdbc3GoogleTest;$(ProjectDir)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(SolutionDir)\3rdParty\googletest\include;$(SolutionDir)\exOdbc\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -84,11 +84,6 @@
       <AdditionalDependencies>gtest.lib;exOdbc_v100.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ProjectReference Include="exOdbc.vcxproj">
-      <Project>{021a7f83-d491-491b-b4e9-93f4f56340c1}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\DbEnvironmentTest.h" />
     <ClInclude Include="src\DbTableTest.h" />
@@ -114,6 +109,11 @@
     <ClCompile Include="src\TestParams.cpp" />
     <ClCompile Include="src\wxCompatibilityTest.cpp" />
     <ClCompile Include="src\wxOdbc3GoogleTest.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\exOdbc\exOdbc.vcxproj">
+      <Project>{021a7f83-d491-491b-b4e9-93f4f56340c1}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
