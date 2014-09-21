@@ -85,39 +85,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
-    <None Include="wxOdbc3GoogleTest\ReadMe.txt" />
+    <ClInclude Include="exOdbcGTest\DbEnvironmentTest.h" />
+    <ClInclude Include="exOdbcGTest\DbTableTest.h" />
+    <ClInclude Include="exOdbcGTest\DbTest.h" />
+    <ClInclude Include="exOdbcGTest\GenericTestTables.h" />
+    <ClInclude Include="exOdbcGTest\HelpersTest.h" />
+    <ClInclude Include="exOdbcGTest\stdafx.h" />
+    <ClInclude Include="exOdbcGTest\targetver.h" />
+    <ClInclude Include="exOdbcGTest\TestParams.h" />
+    <ClInclude Include="exOdbcGTest\wxCompatibilityTest.h" />
+    <ClInclude Include="exOdbcGTest\wxOdbc3GoogleTest.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="wxOdbc3GoogleTest\DbEnvironmentTest.cpp" />
-    <ClCompile Include="wxOdbc3GoogleTest\DbTableTest.cpp" />
-    <ClCompile Include="wxOdbc3GoogleTest\DbTest.cpp" />
-    <ClCompile Include="wxOdbc3GoogleTest\GenericTestTables.cpp" />
-    <ClCompile Include="wxOdbc3GoogleTest\HelpersTest.cpp" />
-    <ClCompile Include="wxOdbc3GoogleTest\stdafx.cpp">
+    <ClCompile Include="exOdbcGTest\DbEnvironmentTest.cpp" />
+    <ClCompile Include="exOdbcGTest\DbTableTest.cpp" />
+    <ClCompile Include="exOdbcGTest\DbTest.cpp" />
+    <ClCompile Include="exOdbcGTest\GenericTestTables.cpp" />
+    <ClCompile Include="exOdbcGTest\HelpersTest.cpp" />
+    <ClCompile Include="exOdbcGTest\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v100|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_v100|Win32'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="wxOdbc3GoogleTest\TestParams.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v100|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="wxOdbc3GoogleTest\wxCompatibilityTest.cpp" />
-    <ClCompile Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.cpp" />
+    <ClCompile Include="exOdbcGTest\TestParams.cpp" />
+    <ClCompile Include="exOdbcGTest\wxCompatibilityTest.cpp" />
+    <ClCompile Include="exOdbcGTest\wxOdbc3GoogleTest.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="wxOdbc3GoogleTest\DbEnvironmentTest.h" />
-    <ClInclude Include="wxOdbc3GoogleTest\DbTableTest.h" />
-    <ClInclude Include="wxOdbc3GoogleTest\DbTest.h" />
-    <ClInclude Include="wxOdbc3GoogleTest\GenericTestTables.h" />
-    <ClInclude Include="wxOdbc3GoogleTest\HelpersTest.h" />
-    <ClInclude Include="wxOdbc3GoogleTest\stdafx.h" />
-    <ClInclude Include="wxOdbc3GoogleTest\targetver.h" />
-    <ClInclude Include="wxOdbc3GoogleTest\TestParams.h" />
-    <ClInclude Include="wxOdbc3GoogleTest\wxCompatibilityTest.h" />
-    <ClInclude Include="wxOdbc3GoogleTest\wxOdbc3GoogleTest.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="wxOdbc3.vcxproj">
+    <ProjectReference Include="exOdbc.vcxproj">
       <Project>{021a7f83-d491-491b-b4e9-93f4f56340c1}</Project>
     </ProjectReference>
   </ItemGroup>
