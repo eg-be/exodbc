@@ -15,63 +15,63 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="exOdbcGTest\DbEnvironmentTest.h">
+    <ClInclude Include="src\DbEnvironmentTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exOdbcGTest\DbTableTest.h">
+    <ClInclude Include="src\DbTableTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exOdbcGTest\DbTest.h">
+    <ClInclude Include="src\DbTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exOdbcGTest\GenericTestTables.h">
+    <ClInclude Include="src\GenericTestTables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exOdbcGTest\HelpersTest.h">
+    <ClInclude Include="src\HelpersTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exOdbcGTest\stdafx.h">
+    <ClInclude Include="src\stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exOdbcGTest\targetver.h">
+    <ClInclude Include="src\targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exOdbcGTest\TestParams.h">
+    <ClInclude Include="src\TestParams.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exOdbcGTest\wxCompatibilityTest.h">
+    <ClInclude Include="src\wxCompatibilityTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="exOdbcGTest\wxOdbc3GoogleTest.h">
+    <ClInclude Include="src\wxOdbc3GoogleTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="exOdbcGTest\DbEnvironmentTest.cpp">
+    <ClCompile Include="src\DbEnvironmentTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exOdbcGTest\DbTableTest.cpp">
+    <ClCompile Include="src\DbTableTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exOdbcGTest\DbTest.cpp">
+    <ClCompile Include="src\DbTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exOdbcGTest\GenericTestTables.cpp">
+    <ClCompile Include="src\GenericTestTables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exOdbcGTest\HelpersTest.cpp">
+    <ClCompile Include="src\HelpersTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exOdbcGTest\stdafx.cpp">
+    <ClCompile Include="src\stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exOdbcGTest\TestParams.cpp">
+    <ClCompile Include="src\TestParams.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exOdbcGTest\wxCompatibilityTest.cpp">
+    <ClCompile Include="src\wxCompatibilityTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="exOdbcGTest\wxOdbc3GoogleTest.cpp">
+    <ClCompile Include="src\wxOdbc3GoogleTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
