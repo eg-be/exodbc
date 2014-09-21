@@ -1,9 +1,11 @@
 /*!
-* \file DbEnvironment.h
-* \author Elias Gerber <egerber@gmx.net>
-* \date 25.07.2014
-* 
-* [Brief Header-file description]
+ * \file DbEnvironment.h
+ * \author Elias Gerber <eg@zame.ch>
+ * \date 25.07.2014
+ * \brief Header file for the DbEnvironment class and its helpers.
+ * 
+ * The DbEnvironment class corresponds to the wxDbConnectInf class
+ * from wxWidgets 2.8.
 */ 
 
 #pragma once
@@ -70,12 +72,14 @@ namespace exodbc
 	// Classes
 	// -------
 	/*!
+	* \class DbEnvironment
+	*
 	* \brief Information about the data source we want to connect.
 	* 
 	* Stores information about the ODBC-Source we want to connect to, including
 	* source-name, username and password, or alternatively, a connection-string.
 	* 
-	* This class will allocate the so called Environment-Handle that is required
+	* This class will allocate the Environment-Handle that is required
 	* for all later operations.
 	*/
 	class EXODBCAPI DbEnvironment
