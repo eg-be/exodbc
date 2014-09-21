@@ -17,6 +17,21 @@
 #include "boost/log/core.hpp"
 #include "boost/log/expressions.hpp"
 
+// Debug
+#include "DebugNew.h"
+
+//#ifdef _DEBUG
+//	#include <crtdbg.h>
+//	#define MYDEBUG_NEW   new( _NORMAL_BLOCK, __FILE__, __LINE__)
+//	// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
+//	//allocations to be of _CLIENT_BLOCK type
+//	#define new MYDEBUG_NEW
+//#else
+//	#define MYDEBUG_NEW
+//#endif // _DEBUG
+
+
+
 // Globals
 // -------
 namespace exodbc
@@ -54,6 +69,10 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	using namespace std;
 	using namespace exodbc;
+
+#ifdef _DEBUG
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif
 
 	int status = 0;
 

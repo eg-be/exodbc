@@ -48,6 +48,9 @@
     <ClInclude Include="src\exOdbcGTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\DebugNew.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DbEnvironmentTest.cpp">
