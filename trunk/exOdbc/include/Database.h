@@ -1,27 +1,39 @@
-///////////////////////////////////////////////////////////////////////////////
-// Name:        wx/db.h
-// Purpose:     Header file wxDb class.  The wxDb class represents a connection
-//              to an ODBC data source.  The wxDb class allows operations on the data
-//              source such as OpenImpling and closing the data source.
-// Author:      Doug Card
-// Modified by: George Tasker
-//              Bart Jourquin
-//              Mark Johnson, wxWindows@mj10777.de
-//				Elias Gerber, eg@zame.ch
-// Mods:        Dec, 1998:
-//                -Added support for SQL statement logging and database cataloging
-//                     April, 1999
-//                -Added QUERY_ONLY mode support to reduce default number of cursors
-//                -Added additional SQL logging code
-//                -Added DEBUG-ONLY tracking of Ctable objects to detect orphaned DB connections
-//                -Set ODBC option to only read committed writes to the DB so all
-//                     databases operate the same in that respect
-//
-// Created:     9.96
-// RCS-ID:      $Id: db.h 56697 2008-11-07 22:45:47Z VZ $
-// Copyright:   (c) 1996 Remstar International, Inc.
-// Licence:     wxWindows licence
-///////////////////////////////////////////////////////////////////////////////
+/*!
+* \file DbEnvironment.h
+* \author Elias Gerber <eg@zame.ch>
+* \date 25.07.2014
+*
+* Header file for the Database class and its helpers.
+* This file was originally wx/db.h from wxWidgets 2.8.
+* Most of the code has been rewritten, a lot of functionality
+* not needed and not tested so far has been droped.
+*
+* For completion, here follows the old wxWidgets header:
+*
+* ///////////////////////////////////////////////////////////////////////////////
+* // Name:        wx/db.h
+* // Purpose:     Header file wxDb class.  The wxDb class represents a connection
+* //              to an ODBC data source.  The wxDb class allows operations on the data
+* //              source such as OpenImpling and closing the data source.
+* // Author:      Doug Card
+* // Modified by: George Tasker
+* //              Bart Jourquin
+* //              Mark Johnson, wxWindows@mj10777.de
+* // Mods:        Dec, 1998:
+* //                -Added support for SQL statement logging and database cataloging
+* //                     April, 1999
+* //                -Added QUERY_ONLY mode support to reduce default number of cursors
+* //                -Added additional SQL logging code
+* //                -Added DEBUG-ONLY tracking of Ctable objects to detect orphaned DB connections
+* //                -Set ODBC option to only read committed writes to the DB so all
+* //                     databases operate the same in that respect
+* //
+* // Created:     9.96
+* // RCS-ID:      $Id: db.h 56697 2008-11-07 22:45:47Z VZ $
+* // Copyright:   (c) 1996 Remstar International, Inc.
+* // Licence:     wxWindows licence
+* ///////////////////////////////////////////////////////////////////////////////
+*/
 
 #pragma once
 #ifndef DB_H
