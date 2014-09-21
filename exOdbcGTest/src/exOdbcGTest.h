@@ -7,8 +7,8 @@
 */ 
 
 #pragma once
-#ifndef WXODBC3GOOGLETEST_H
-#define WXODBC3GOOGLETEST_H
+#ifndef EXODBCGTEST_H
+#define EXODBCGTEST_H
 
 // Same component headers
 #include "TestParams.h"
@@ -35,4 +35,4 @@ namespace exodbc
 } // namespace exodbc
 
 
-#endif // WXODBC3GOOGLETEST_H
+#endif // EXODBCGTEST_H

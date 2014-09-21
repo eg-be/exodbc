@@ -9,7 +9,7 @@
 #include "stdafx.h"
 
 // Own header
-#include "wxOdbc3GoogleTest.h"
+#include "exOdbcGTest.h"
 
 // Same component headers
 // Other headers

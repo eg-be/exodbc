@@ -42,11 +42,11 @@
     <ClInclude Include="src\wxCompatibilityTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\wxOdbc3GoogleTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\exOdbcGTest.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -71,10 +71,10 @@
     <ClCompile Include="src\TestParams.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\wxCompatibilityTest.cpp">
+    <ClCompile Include="src\exOdbcGTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\wxOdbc3GoogleTest.cpp">
+    <ClCompile Include="src\wxCompatibilityTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
