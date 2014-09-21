@@ -103,6 +103,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <PreBuildEvent>
+      <Command>powershell -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Updating VersionInfo</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_v100|Win32'">
     <ClCompile>
