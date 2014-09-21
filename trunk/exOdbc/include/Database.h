@@ -171,6 +171,12 @@ namespace exodbc
 	public:
 
 		// Public member functions
+		/*!
+		 * \brief	Create a new Database-instance. The instance will be using the passed
+		 *			DbEnvironment.
+		 * \param	pEnv		The DbEnvironment to use to create this database and its connection.
+		 *						Do not free the DbEnvironment before you free the Database.
+		*/
 		Database(const DbEnvironment* const pEnv);
 		~Database();
 
