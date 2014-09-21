@@ -19,6 +19,9 @@
 #include "DbEnvironment.h"
 #include "Database.h"
 
+// Debug
+#include "DebugNew.h"
+
 // Static consts
 // -------------
 

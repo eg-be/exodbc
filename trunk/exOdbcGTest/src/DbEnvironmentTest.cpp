@@ -15,7 +15,8 @@
 // Other headers
 #include "DbEnvironment.h"
 
-using namespace exodbc;
+// Debug
+#include "DebugNew.h"
 
 namespace exodbc
 {
