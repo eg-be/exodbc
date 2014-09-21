@@ -2,6 +2,7 @@
 * \file Database.h
 * \author Elias Gerber <eg@zame.ch>
 * \date 25.07.2014
+* \brief Header file for the Database class and its helpers.
 *
 * Header file for the Database class and its helpers.
 * This file was originally wx/db.h from wxWidgets 2.8.
