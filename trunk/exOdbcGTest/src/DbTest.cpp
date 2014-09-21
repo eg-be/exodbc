@@ -20,6 +20,9 @@
 #include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
 
+// Debug
+#include "DebugNew.h"
+
 // Static consts
 // -------------
 

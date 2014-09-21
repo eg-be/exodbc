@@ -16,6 +16,9 @@
 #include "Database.h"
 #include "DbEnvironment.h"
 
+// Debug
+#include "DebugNew.h"
+
 namespace exodbc
 {
 
