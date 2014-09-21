@@ -17,6 +17,9 @@
 // Other headers
 #include "Database.h"
 
+// Debug
+#include "DebugNew.h"
+
 namespace exodbc
 {
 	//Static consts

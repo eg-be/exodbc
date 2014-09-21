@@ -20,17 +20,6 @@
 // Debug
 #include "DebugNew.h"
 
-//#ifdef _DEBUG
-//	#include <crtdbg.h>
-//	#define MYDEBUG_NEW   new( _NORMAL_BLOCK, __FILE__, __LINE__)
-//	// Replace _NORMAL_BLOCK with _CLIENT_BLOCK if you want the
-//	//allocations to be of _CLIENT_BLOCK type
-//	#define new MYDEBUG_NEW
-//#else
-//	#define MYDEBUG_NEW
-//#endif // _DEBUG
-
-
 
 // Globals
 // -------
