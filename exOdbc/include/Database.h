@@ -169,11 +169,14 @@ namespace exodbc
 #endif
 
 	public:
-
-		// Public member functions
 		/*!
 		 * \brief	Create a new Database-instance. The instance will be using the passed
 		 *			DbEnvironment.
+		 *			The Database will try to create a new Db-Connection handle during construction.
+		 *			No Exception is thrown if doing so fails, you can use HasHdbc() to check if
+		 *			creating the Db-Connection handle was successfull.
+		 *			The handle will be freed by the Database on destruction.
+		 *
 		 * \param	pEnv		The DbEnvironment to use to create this database and its connection.
 		 *						Do not free the DbEnvironment before you free the Database.
 		*/
