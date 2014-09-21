@@ -1,9 +1,8 @@
 /*!
  * \file Version.h
- * \author Elias Gerber <egerber@gmx.net>
+ * \author Elias Gerber <eg@zame.ch>
  * \date 28.12.2013
- * 
- * File to generate Version.h from using the UpdateVersion.ps1 script.
+ * \brief File to generate Version.h from Version.hm.template using the UpdateVersion.ps1 script.
  */ 
 
 #pragma once

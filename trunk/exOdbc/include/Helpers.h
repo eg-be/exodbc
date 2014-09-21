@@ -2,8 +2,7 @@
 * \file Helpers.h
 * \author Elias Gerber <egerber@gmx.net>
 * \date 23.07.2014
-* 
-* [Brief Header-file description]
+* \brief Header file for generic Helpers, mostly about error-handling and assertions.
 */ 
 
 #pragma once

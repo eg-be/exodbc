@@ -1,25 +1,39 @@
-///////////////////////////////////////////////////////////////////////////////
-// Name:        src/common/db.cpp
-// Purpose:     Implementation of the wxDb class.  The wxDb class represents a connection
-//              to an ODBC data source.  The wxDb class allows operations on the data
-//              source such as OpenImpling and closing the data source.
-// Author:      Doug Card
-// Modified by: George Tasker
-//              Bart Jourquin
-//              Mark Johnson, wxWindows@mj10777.de
-// Mods:        Dec, 1998:
-//                -Added support for SQL statement logging and database cataloging
-// Mods:        April, 1999
-//                -Added QUERY_ONLY mode support to reduce default number of cursors
-//                -Added additional SQL logging code
-//                -Added DEBUG-ONLY tracking of wxTable objects to detect orphaned DB connections
-//                -Set ODBC option to only read committed writes to the DB so all
-//                   databases operate the same in that respect
-// Created:     9.96
-// RCS-ID:      $Id: db.cpp 52489 2008-03-14 14:14:57Z JS $
-// Copyright:   (c) 1996 Remstar International, Inc.
-// Licence:     wxWindows licence
-///////////////////////////////////////////////////////////////////////////////
+/*!
+* \file Database.cpp
+* \author Elias Gerber <eg@zame.ch>
+* \date 25.07.2014
+* \brief Source file for the Database class and its helpers.
+*
+* Source file for the Database class and its helpers.
+* This file was originally wx/db.cpp from wxWidgets 2.8.
+* Most of the code has been rewritten, a lot of functionality
+* not needed and not tested so far has been droped.
+*
+* For completion, here follows the old wxWidgets header:
+*
+* ///////////////////////////////////////////////////////////////////////////////<br>
+* // Name:        src/common/db.cpp<br>
+* // Purpose:     Implementation of the wxDb class.  The wxDb class represents a connection<br>
+* //              to an ODBC data source.  The wxDb class allows operations on the data<br>
+* //              source such as OpenImpling and closing the data source.<br>
+* // Author:      Doug Card<br>
+* // Modified by: George Tasker<br>
+* //              Bart Jourquin<br>
+* //              Mark Johnson, wxWindows@mj10777.de<br>
+* // Mods:        Dec, 1998:<br>
+* //                -Added support for SQL statement logging and database cataloging<br>
+* // Mods:        April, 1999<br>
+* //                -Added QUERY_ONLY mode support to reduce default number of cursors<br>
+* //                -Added additional SQL logging code<br>
+* //                -Added DEBUG-ONLY tracking of wxTable objects to detect orphaned DB connections<br>
+* //                -Set ODBC option to only read committed writes to the DB so all<br>
+* //                   databases operate the same in that respect<br>
+* // Created:     9.96<br>
+* // RCS-ID:      $Id: db.cpp 52489 2008-03-14 14:14:57Z JS $<br>
+* // Copyright:   (c) 1996 Remstar International, Inc.<br>
+* // Licence:     wxWindows licence<br>
+* ///////////////////////////////////////////////////////////////////////////////<br>
+*/
 
 #include "stdafx.h"
 

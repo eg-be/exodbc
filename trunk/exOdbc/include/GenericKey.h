@@ -1,18 +1,27 @@
-///////////////////////////////////////////////////////////////////////////////
-// Name:        dbkeyg.h
-// Purpose:     Generic key support for wxDbTable
-// Author:      Roger Gammans
-// Modified by:
-// Created:
-// RCS-ID:      $Id: dbkeyg.h 29077 2004-09-10 12:56:07Z ABX $
-// Copyright:   (c) 1999 The Computer Surgery (roger@computer-surgery.co.uk)
-// Licence:     wxWindows licence
-//
-// NOTE : There is no CPP file to go along with this
-//
-///////////////////////////////////////////////////////////////////////////////
-// Branched From : gkey.h,v 1.3 2001/06/01 10:31:41
-///////////////////////////////////////////////////////////////////////////////
+/*!
+* \file GenericKey.h
+* \author Elias Gerber <eg@zame.ch>
+* \date 26.07.2014
+* \brief Unused leftover from wxWidgets 2.8. Will be removed soon.
+*
+* For completion, here is the original wxWidgets header:
+*
+* / ///////////////////////////////////////////////////////////////////////////////<br>
+* // Name:        dbkeyg.h<br>
+* // Purpose:     Generic key support for wxDbTable<br>
+* // Author:      Roger Gammans<br>
+* // Modified by:<br>
+* // Created:<br>
+* // RCS-ID:      $Id: dbkeyg.h 29077 2004-09-10 12:56:07Z ABX $<br>
+* // Copyright:   (c) 1999 The Computer Surgery (roger@computer-surgery.co.uk)<br>
+* // Licence:     wxWindows licence<br>
+* //<br>
+* // NOTE : There is no CPP file to go along with this<br>
+* //<br>
+* ///////////////////////////////////////////////////////////////////////////////<br>
+* // Branched From : gkey.h,v 1.3 2001/06/01 10:31:41<br>
+* ///////////////////////////////////////////////////////////////////////////////<br>
+*/
 
 #pragma  once
 #ifndef GENERICKEY_H

@@ -2,8 +2,7 @@
 * \file ColumnFormatter.cpp
 * \author Elias Gerber <egerber@gmx.net>
 * \date 26.07.2014
-* 
-* [Brief CPP-file description]
+* \brief Unused leftover from wxWidgets 2.8. Will be removed soon.
 */ 
 
 #include "stdafx.h"

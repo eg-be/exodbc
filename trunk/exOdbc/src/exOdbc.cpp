@@ -1,9 +1,8 @@
 /*!
 * \file wxOdbc3.cpp
-* \author Elias Gerber <egerber@gmx.net>
+* \author Elias Gerber <eg@zame.ch>
 * \date 23.07.2014
-* 
-* [Brief CPP-file description]
+* \brief Source file for the stuff from exOdbc.h
 */ 
 
 #include "stdafx.h"
