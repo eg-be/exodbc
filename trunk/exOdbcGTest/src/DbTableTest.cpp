@@ -12,7 +12,7 @@
 #include "DbTableTest.h"
 
 // Same component headers
-#include "wxOdbc3GoogleTest.h"
+#include "exOdbcGTest.h"
 #include "GenericTestTables.h"
 
 // Other headers

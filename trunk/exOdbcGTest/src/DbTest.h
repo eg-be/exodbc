@@ -11,7 +11,7 @@
 #define DBTEST_H
 
 // Same component headers
-#include "wxOdbc3GoogleTest.h"
+#include "exOdbcGTest.h"
 #include "TestParams.h"
 
 // Other headers
