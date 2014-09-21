@@ -64,6 +64,12 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib;$(SolutionDir)\3rdParty\googletest\msvc\gtest-md\Debug;$(SolutionDir)\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtestd.lib;exOdbc_v100.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>powershell -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Updating VersionInfo</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_v100|Win32'">
     <ClCompile>
@@ -83,8 +89,15 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib;$(SolutionDir)\3rdParty\googletest\msvc\gtest-md\Release;$(SolutionDir)\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtest.lib;exOdbc_v100.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>powershell -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>Updating VersionInfo</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\DbEnvironmentTest.h" />
     <ClInclude Include="src\DbTableTest.h" />
     <ClInclude Include="src\DbTest.h" />
@@ -114,6 +127,13 @@
     <ProjectReference Include="..\exOdbc\exOdbc.vcxproj">
       <Project>{021a7f83-d491-491b-b4e9-93f4f56340c1}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="exOdbcGTest.rc2" />
+    <None Include="Version.h.template" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="exOdbcGTest.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
