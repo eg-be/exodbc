@@ -15,6 +15,9 @@
 // Other headers
 #include "Database.h"
 
+// Debug
+#include "DebugNew.h"
+
 // Static consts
 // -------------
 
