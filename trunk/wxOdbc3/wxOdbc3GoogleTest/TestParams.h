@@ -42,6 +42,7 @@ namespace exodbc
 	};
 
 	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi);
+	::std::wostream& operator<<(::std::wostream& os, const SOdbcInfo& oi);
 
 } // namespace exodbc
 

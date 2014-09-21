@@ -187,7 +187,7 @@ namespace exodbc
 		std::wstring sInfo = dbInfo.ToStr();
 
 		EXPECT_TRUE(sInfo.length() > 0);
-		BOOST_LOG_TRIVIAL(info) << L"DbInfo of database connected to DSN " << m_odbcInfo.m_dsn << std::endl << sInfo;
+		BOOST_LOG_TRIVIAL(info) << L"DbInfo of database connected to DSN " << m_odbcInfo.m_dsn.c_str() << std::endl << sInfo.c_str();
 
 		// TODO: needed for ms only (?)
 		if(db.Dbms() == dbmsMS_SQL_SERVER)

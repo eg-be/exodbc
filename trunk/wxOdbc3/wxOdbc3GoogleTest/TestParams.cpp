@@ -51,6 +51,15 @@ namespace exodbc
 	}
 
 
+	::std::wostream& operator<<(::std::wostream& wos, const SOdbcInfo& oi) {
+		wos << L"DSN: " << oi.m_dsn.c_str() 
+			<< L"; Username: " << oi.m_username.c_str()
+			<< L"; Password: " << oi.m_password.c_str();
+
+		return wos;
+	}
+
+
 	// Interfaces
 	// ----------
 	

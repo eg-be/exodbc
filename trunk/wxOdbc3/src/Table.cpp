@@ -312,7 +312,7 @@ void Table::cleanup()
         {
             std::wstring msg;
 			msg = (boost::wformat(L"Unable to find the tableID in the vector\n of tables in use.\n\n%s") %s).str();
-			BOOST_LOG_TRIVIAL(debug) << msg;
+			BOOST_LOG_TRIVIAL(debug) << msg.c_str();
         }
     }
 #endif
@@ -2259,7 +2259,7 @@ bool Table::SetColDefs(UWORD index, const std::wstring &fieldName, int dataType,
     if (index >= m_numCols)  // Columns numbers are zero based....
     {
 		tmpStr = (boost::wformat(L"Specified column index (%d) exceeds the maximum number of columns (%d) registered for this table definition.  Column definition not added.") % index % m_numCols).str();
-        exFAIL_MSG(tmpStr);
+        exFAIL_MSG(tmpStr.c_str());
         return false;
     }
 
@@ -2272,7 +2272,7 @@ bool Table::SetColDefs(UWORD index, const std::wstring &fieldName, int dataType,
         m_colDefs[index].m_colName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
 
 		tmpStr = (boost::wformat(L"Column name '%s' is too long. Truncated to '%s'.") %	fieldName % m_colDefs[index].m_colName).str();
-        exFAIL_MSG(tmpStr);
+        exFAIL_MSG(tmpStr.c_str());
     }
     else
         wcscpy(m_colDefs[index].m_colName, fieldName.c_str());
