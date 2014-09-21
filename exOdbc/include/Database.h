@@ -213,7 +213,7 @@ namespace exodbc
 		bool         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
 
 		/*!
-		 * \fn	bool Database::Open(onst DbEnvironment* const pEnv);
+		 * \fn	bool Database::Open(const DbEnvironment* const pEnv);
 		 *
 		 * \brief	Opens by using the information from the passed DbEnvironment
 		 *
@@ -319,14 +319,14 @@ namespace exodbc
 		bool		ReadTableTypes(std::vector<std::wstring>& tableTypes)	{ return ReadCatalogInfo(AllTableTypes, tableTypes); };
 
 		/*!
-		 * \fn	int Database::ReadColumnCount(const DbCatalogTable& table);
+		 * \fn	int Database::ReadColumnCount(const STableInfo& table);
 		 *
 		 * \brief	Queries the database using SQLColumns to determine the number of columns of
 		 * 			the passed Table (which should have been queried from the catalog, using
 		 * 			FindTable or similar).
 		 * 			Note: No checks are done to ensure the passed table matches only one table
 		 * 			of the database. You might get confusing results if you have for example
-		 * 			search-patterns set as table name in the passed DbCatalogTable.
+		 * 			search-patterns set as table name in the passed STableInfo table.
 		 *
 		 * \param	table	The table.
 		 *
@@ -351,7 +351,7 @@ namespace exodbc
 		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
 
 		/*!
-		 * \fn	bool Database::ReadTablePrivileges(const SDbCatalogTable& table, std::vector<SCatalogTablePrivilege>& privileges);
+		 * \fn	bool Database::ReadTablePrivileges(const STableInfo& table, std::vector<STablePrivilegesInfo>& privileges);
 		 *
 		 * \brief	Reads table privileges for the table(s) matching the passed SCatalogTable description.
 		 *
