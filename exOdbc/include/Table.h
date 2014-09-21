@@ -1,20 +1,28 @@
-///////////////////////////////////////////////////////////////////////////////
-// Name:        dbtable.h
-// Purpose:     Declaration of the wxDbTable class.
-// Author:      Doug Card
-// Modified by: George Tasker
-//              Bart Jourquin
-//              Mark Johnson
-//				Elias Gerber, eg@zame.ch
-// Created:     9.96
-// RCS-ID:      $Id: dbtable.h 61872 2009-09-09 22:37:05Z VZ $
-// Copyright:   (c) 1996 Remstar International, Inc.
-// Licence:     wxWindows licence
-///////////////////////////////////////////////////////////////////////////////
-
-/*
-// SYNOPSIS START
-// SYNOPSIS STOP
+/*!
+* \file Table.h
+* \author Elias Gerber <eg@zame.ch>
+* \date 25.07.2014
+* \brief Header file for the Table class and its helpers.
+*
+* Header file for the Table class and its helpers.
+* This file was originally wx/dbtable.h from wxWidgets 2.8.
+* Most of the code has been rewritten, a lot of functionality
+* not needed and not tested so far has been droped.
+*
+* For completion, here follows the old wxWidgets header:
+* 
+* ///////////////////////////////////////////////////////////////////////////////<br>
+* // Name:        dbtable.h<br>
+* // Purpose:     Declaration of the wxDbTable class.<br>
+* // Author:      Doug Card<br>
+* // Modified by: George Tasker<br>
+* //              Bart Jourquin<br>
+* //              Mark Johnson<br>
+* // Created:     9.96<br>
+* // RCS-ID:      $Id: dbtable.h 61872 2009-09-09 22:37:05Z VZ $<br>
+* // Copyright:   (c) 1996 Remstar International, Inc.<br>
+* // Licence:     wxWindows licence<br>
+* ///////////////////////////////////////////////////////////////////////////////<br>
 */
 
 #pragma once

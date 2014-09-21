@@ -1,9 +1,9 @@
 /*!
 * \file DbEnvironment.cpp
-* \author Elias Gerber <egerber@gmx.net>
+* \author Elias Gerber <eg@zame.ch>
 * \date 25.07.2014
-* 
-* [Brief CPP-file description]
+* \brief Source file for the DbEnvironment class and its helpers.
+*
 */ 
 
 #include "stdafx.h"

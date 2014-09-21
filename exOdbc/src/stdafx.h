@@ -1,7 +1,13 @@
-// stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently, but
-// are changed infrequently
-//
+/*!
+* \file stdafx.h
+* \author Elias Gerber <eg@zame.ch>
+* \date 23.07.2014
+* \brief Goes into precompiled header.
+*
+* Include file for standard system include files,
+* or project specific include files that are used frequently, but
+* are changed infrequently
+*/
 
 #pragma once
 

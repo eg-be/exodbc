@@ -1,10 +1,9 @@
 /*!
- * \file wxOdbc3.h
- * \author Elias Gerber <egerber@gmx.net>
+ * \file exOdbc.h
+ * \author Elias Gerber <eg@zame.ch>
  * \date 09.02.2014
- * 
- * [Brief Header-file description]
- */ 
+ * \brief Header file to set up dll import/exports, consts, structs used often, etc.
+*/ 
 
 #pragma once
 #ifndef WXODBC3_H

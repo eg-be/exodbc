@@ -1,9 +1,10 @@
 /*!
 * \file ColumnFormatter.h
-* \author Elias Gerber <egerber@gmx.net>
+* \author Elias Gerber <eg@zame.ch>
 * \date 26.07.2014
+* \brief Unused leftover from wxWidgets 2.8. Will be removed soon.
 * 
-* Contains a Formatter class that is UNUSED (?)
+* Contains a Formatter class that is UNUSED (?). This was wxDbColFor in wxWidgets 2.8
 */ 
 
 #pragma once

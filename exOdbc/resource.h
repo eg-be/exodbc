@@ -1,3 +1,11 @@
+/*!
+* \file resource.h
+* \author Elias Gerber <eg@zame.ch>
+* \date 23.07.2014
+* \brief Resources
+*
+*/
+
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by exOdbc.rc

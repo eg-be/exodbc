@@ -1,3 +1,11 @@
+/*!
+* \file targetver.h
+* \author Elias Gerber <eg@zame.ch>
+* \date 23.07.2014
+* \brief Define windows platform.
+*
+*/
+
 #pragma once
 
 // Including SDKDDKVer.h defines the highest available Windows platform.
