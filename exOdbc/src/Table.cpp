@@ -11,18 +11,18 @@
 *
 * For completion, here follows the old wxWidgets header:
 *
-* ///////////////////////////////////////////////////////////////////////////////
-* // Name:        src/common/dbtable.cpp
-* // Purpose:     Implementation of the wxDbTable class.
-* // Author:      Doug Card
-* // Modified by: George Tasker
-* //              Bart Jourquin
-* //              Mark Johnson
-* // Created:     9.96
-* // RCS-ID:      $Id: dbtable.cpp 48685 2007-09-14 19:02:28Z VZ $
-* // Copyright:   (c) 1996 Remstar International, Inc.
-* // Licence:     wxWindows licence
-* ///////////////////////////////////////////////////////////////////////////////
+* ///////////////////////////////////////////////////////////////////////////////<br>
+* // Name:        src/common/dbtable.cpp<br>
+* // Purpose:     Implementation of the wxDbTable class.<br>
+* // Author:      Doug Card<br>
+* // Modified by: George Tasker<br>
+* //              Bart Jourquin<br>
+* //              Mark Johnson<br>
+* // Created:     9.96<br>
+* // RCS-ID:      $Id: dbtable.cpp 48685 2007-09-14 19:02:28Z VZ $<br>
+* // Copyright:   (c) 1996 Remstar International, Inc.<br>
+* // Licence:     wxWindows licence<br>
+* ///////////////////////////////////////////////////////////////////////////////<br>
 */
 
 #include "stdafx.h"
