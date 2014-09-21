@@ -363,7 +363,7 @@ namespace exodbc
 		bool		ReadTablePrivileges(const STableInfo& table, std::vector<STablePrivilegesInfo>& privileges);
 
 		/*!
-		 * \fn	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges);
+		 * \fn	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STablePrivilegesInfo>& privileges);
 		 *
 		 * \brief	Reads table privileges of exactly one table. This method will fail if not
 		 * 			exactly one table is found matching the passed arguments.
@@ -378,7 +378,7 @@ namespace exodbc
 		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STablePrivilegesInfo>& privileges);
 
 		/*!
-		 * \fn	bool Database::ReadTableColumnInfo(const SDbCatalogTable& table, std::vector<SCatalogColumnInfo>& columns);
+		 * \fn	bool Database::ReadTableColumnInfo(const STableInfo& table, std::vector<STableColumnInfo>& columns);
 		 *
 		 * \brief	Reads table column information for the passed table.
 		 *
@@ -390,7 +390,7 @@ namespace exodbc
 		bool		ReadTableColumnInfo(const STableInfo& table, std::vector<STableColumnInfo>& columns);
 
 		/*!
-		 * \fn	bool exodbc::Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogColumnInfo>& columns);
+		 * \fn	bool exodbc::Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STableColumnInfo>& columns);
 		 *
 		 * \brief	Reads table column information for exactly one table. This method will fail if the passed arguments
 		 * 			do not match exactly one table.
