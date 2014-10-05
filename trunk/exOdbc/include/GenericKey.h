@@ -33,27 +33,32 @@
 
 namespace exodbc
 {
+	/*!
+	* \class GenericKey
+	*
+	* \brief Unused leftover from wxWidgets 2.8. Will probably be removed soon.
+	*
+	*/
+	class GenericKey
+	{
+	public:
+		GenericKey(void *blk, size_t sz)    { clone(blk, sz); }
+		GenericKey(const GenericKey &ref)   { clone(ref.m_data, ref.m_sz); }
+		~GenericKey()                       { free(m_data); }
 
-class GenericKey
-{
-public:
-    GenericKey(void *blk, size_t sz)    { clone(blk,sz); }
-    GenericKey(const GenericKey &ref)   { clone(ref.m_data,ref.m_sz); }
-    ~GenericKey()                       { free(m_data); }
+		void *GetBlk() const { return m_data; }
 
-    void *GetBlk() const { return m_data; }
+	private:
+		void clone(void *blk, size_t sz)
+		{
+			m_data = malloc(sz);
+			memcpy(m_data, blk, sz);
+			m_sz = sz;
+		}
 
-private:
-    void clone(void *blk, size_t sz)
-    {
-        m_data = malloc(sz);
-        memcpy(m_data,blk,sz);
-        m_sz = sz;
-    }
-
-    void   *m_data;
-    size_t  m_sz;
-};
+		void   *m_data;
+		size_t  m_sz;
+	};
 
 }
 
