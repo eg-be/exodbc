@@ -98,7 +98,7 @@ namespace exodbc
 	// -------
 
 	/*!
-	 * \struct	SDbInfo
+	 * \class	SDbInfo
 	 *
 	 * \brief	The following structure contains database information gathered from the datasource
 	 * 			when the datasource is first Opened.
@@ -153,7 +153,7 @@ namespace exodbc
 	};
 
 	/*!
-	 * \struct	SSQlTypeInfo
+	 * \class	SSqlTypeInfo
 	 *
 	 * \brief	Contains DataType informations read from the database uppon Open().
 	 * 			See http://msdn.microsoft.com/en-us/library/ms714632%28v=vs.85%29.aspx
@@ -200,7 +200,7 @@ namespace exodbc
 	};
 
 	/*!
-	 * \struct	STableColumnInfo
+	 * \classt	STableColumnInfo
 	 *
 	 * \brief	Information about a column fetched using the catalog
 	 * 			function SQLColumns.
@@ -243,7 +243,7 @@ namespace exodbc
 	};
 
 	/*!
-	 * \struct	STableInfoo
+	 * \class	STableInfo
 	 *
 	 * \brief	Description of a table fetched using the catalog function SQLTables
 	 */
@@ -262,11 +262,11 @@ namespace exodbc
 	};
 
 	/*!
-	 * \struct	SDbCatalog
+	 * \class	SDbCatalogInfo
 	 *
 	 * \brief	Description of the catalog of a database
 	 */
-	struct EXODBCAPI SDbCatalogInfo     // Description of a Database: Used so far only when fetching the "catalog"
+	struct EXODBCAPI SDbCatalogInfo
 	{
 		std::vector<STableInfo> m_tables;
 		std::set<std::wstring> m_catalogs;
@@ -274,7 +274,7 @@ namespace exodbc
 	};
 
 	/*!
-	 * \struct	STablePrivilegesInfo
+	 * \class	STablePrivilegesInfo
 	 *
 	 * \brief	TablePrivileges fetched using the catalog function SQLTablePrivilege
 	 */
@@ -298,10 +298,10 @@ namespace exodbc
 	// -----
 	enum OdbcVersion
 	{
-		OV_UNKNOWN = 0,
-		OV_2 = 2UL,
-		OV_3 = 3UL,
-		OV_3_8 = 380UL
+		OV_UNKNOWN = 0, //< Unknown Version
+		OV_2 = 2UL,		//< Version 2.x
+		OV_3 = 3UL,		//< Version 3.x
+		OV_3_8 = 380UL	//< Version 3.8
 	};
 
 	/*!
@@ -313,9 +313,9 @@ namespace exodbc
 	 */
 	enum TransactionMode
 	{
-		TM_UNKNOWN,
-		TM_AUTO_COMMIT,
-		TM_MANUAL_COMMIT // commit
+		TM_UNKNOWN,			//< Unknown Commit mode
+		TM_AUTO_COMMIT,		//< Autocommit on
+		TM_MANUAL_COMMIT	//< Autocommit off
 	};
 
 	// ODBC Error codes (derived from ODBC SqlState codes)
@@ -429,18 +429,18 @@ namespace exodbc
 	// each of these database engines
 	enum DatabaseProduct
 	{
-		dbmsUNIDENTIFIED,
+		dbmsUNIDENTIFIED,	//< Unknown DB
 		//dbmsORACLE,
 		//dbmsSYBASE_ASA,        // Adaptive Server Anywhere
 		//dbmsSYBASE_ASE,        // Adaptive Server Enterprise
-		dbmsMS_SQL_SERVER,
-		dbmsMY_SQL,
+		dbmsMS_SQL_SERVER,	//< Microsoft SQL Server
+		dbmsMY_SQL,			//< MySQL
 		//dbmsPOSTGRES,
 		//dbmsACCESS,
 		//dbmsDBASE,
 		//dbmsINFORMIX,
 		//dbmsVIRTUOSO,
-		dbmsDB2,
+		dbmsDB2,			//< IBM DB2
 		//dbmsINTERBASE,
 		//dbmsPERVASIVE_SQL,
 		//dbmsXBASE_SEQUITER,

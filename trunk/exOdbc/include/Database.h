@@ -113,10 +113,17 @@ namespace exodbc
 	// Structs
 	// -------
 
-	// This structure forms a node in a linked list.  The linked list of "DbList" objects
-	// keeps track of allocated database connections.  This allows the application to
-	// OpenImpl more than one database connection through ODBC for multiple transaction support
-	// or for multiple database support.
+	/*!
+	* \class	SDbList From wxWidgets 2.8, to detect orphaned tables. Needs to be overworked
+	*
+	* \brief	Description of the catalog of a database
+	* 
+	* This structure forms a node in a linked list.  The linked list of "DbList" objects
+	* keeps track of allocated database connections.  This allows the application to
+	* OpenImpl more than one database connection through ODBC for multiple transaction support
+	* or for multiple database support.
+	*
+	*/
 	struct SDbList
 	{
 		SDbList *PtrPrev;       // Pointer to previous item in the list
