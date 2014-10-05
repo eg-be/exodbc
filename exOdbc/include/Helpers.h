@@ -68,8 +68,9 @@ namespace exodbc
 	// Structs
 	// -------
 	/*!
-	* \brief Store error-information from odbc
-	* 
+	* \class SErrorInfo
+	*
+	* \brief Store error-information from odbc 
 	*/
 	struct EXODBCAPI SErrorInfo
 	{
@@ -98,11 +99,23 @@ namespace exodbc
 	*/
 	extern std::string w2s(const std::wstring& w);
 
-	extern EXODBCAPI std::wstring SqlTrueFalse2s(SQLSMALLINT b);
-	extern EXODBCAPI std::wstring SqlType2s(SQLSMALLINT sqlType);
 	/*!
-	 * \fn	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = NULL, SQLHANDLE hDbc = NULL, SQLHANDLE hStmt = NULL);
-	 *
+	* \brief Returns the string TRUE, FALSE or ????? for the values SQL_TRUE, SQL_FALSE or anything else.
+	*
+	* \param SQLSMALLINT b SQL_TRUE or SQL_FALSE
+	* \return std::wstring TRUE, FALSE or ?????
+	*/
+	extern EXODBCAPI std::wstring SqlTrueFalse2s(SQLSMALLINT b);
+	
+	/*!
+	* \brief Transform the SQL_types like SQL_CHAR, SQL_NUMERIC, etc. to some string.
+	*
+	* \param SQLSMALLINT sqlType
+	* \return std::wstring
+	*/
+	extern EXODBCAPI std::wstring SqlType2s(SQLSMALLINT sqlType);
+
+	/*!
 	 * \brief	Gets all errors for all passed handles.
 	 *
 	 * \param	hEnv 	(Optional) the environment.
@@ -114,24 +127,75 @@ namespace exodbc
 	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = SQL_NULL_HENV, SQLHANDLE hDbc = SQL_NULL_HDBC, SQLHANDLE hStmt = SQL_NULL_HSTMT);
 
 	/*!
-	 * \fn	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors);
-	 *
 	 * \brief	Gets the last environment error, if one is available.
 	 *
-	 * \param	hEnv			   	The environment. If NULL, a warning is logged and Default SErrorInfo object returned.
-	 * \param [in,out]	totalErrors	The total errors.
+	 * \param	hEnv		The environment. If NULL, a warning is logged and Default SErrorInfo object returned.
+	 * \param [out]	totalErrors	The total number of errors available.
 	 *
 	 * \return	The last environment error, or the default SErrorInfo object if no error could be fetched.
 	 */
 	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors);
+
+	/*!
+	* \brief	Gets the last Dbc error, if one is available.
+	*
+	* \param	hDbc		The database handle. If NULL, a warning is logged and Default SErrorInfo object returned.
+	* \param [out]	totalErrors	The total number of errors available.
+	*
+	* \return	The last dbc error, or the default SErrorInfo object if no error could be fetched.
+	*/
 	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc, SQLSMALLINT& totalErrors);
+
+	/*!
+	* \brief	Gets the last statement error, if one is available.
+	*
+	* \param	hEnv		The statement. If NULL, a warning is logged and Default SErrorInfo object returned.
+	* \param [out]	totalErrors	The total number of errors available.
+	*
+	* \return	The last statement error, or the default SErrorInfo object if no error could be fetched.
+	*/
 	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt, SQLSMALLINT& totalErrors);
 
+	/*!
+	* \brief	Gets the last environment error, if one is available.
+	*
+	* \param	hEnv		The environment. If NULL, a warning is logged and Default SErrorInfo object returned.
+	*
+	* \return	The last environment error, or the default SErrorInfo object if no error could be fetched.
+	*/
 	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv);
+
+	/*!
+	* \brief	Gets the last Dbc error, if one is available.
+	*
+	* \param	hDbc		The database handle. If NULL, a warning is logged and Default SErrorInfo object returned.
+	*
+	* \return	The last dbc error, or the default SErrorInfo object if no error could be fetched.
+	*/
 	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc);
+
+	/*!
+	* \brief	Gets the last statement error, if one is available.
+	*
+	* \param	hEnv		The statement. If NULL, a warning is logged and Default SErrorInfo object returned.
+	*
+	* \return	The last statement error, or the default SErrorInfo object if no error could be fetched.
+	*/
 	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt);
 
-	enum CloseMode { FailIfNotOpen, IgnoreNotOpen};
+	enum CloseMode
+	{ 
+		FailIfNotOpen,	//< Returns false if Cursor is not open. 
+		IgnoreNotOpen	//< Returns true also if cursor was not open
+	};
+	
+	/*!
+	* \brief	Close the cursor associated with the passed statement handle.
+	*
+	* \param	hStmt		The statement handle.
+	* \param	mode		Determine wheter the function should fail if the curso is not open.
+	* \return	Depends on CloseMode
+	*/
 	extern EXODBCAPI SQLRETURN	CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode);
 
 	/*!

@@ -328,10 +328,16 @@ namespace exodbc
 		exASSERT(hStmt);
 
 		SQLRETURN ret;
-		if(mode == IgnoreNotOpen)
+		if (mode == IgnoreNotOpen)
+		{
+			//  calling SQLFreeStmt with the SQL_CLOSE option has no effect on the application if no cursor is open on the statement
 			ret = SQLFreeStmt(hStmt, SQL_CLOSE);
+		}
 		else
+		{
+			// SQLCloseCursor returns SQLSTATE 24000 (Invalid cursor state) if no cursor is open. 
 			ret = SQLCloseCursor(hStmt);
+		}
 
 		return ret;
 	}

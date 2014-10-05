@@ -74,13 +74,16 @@ namespace exodbc
 	/*!
 	* \class DbEnvironment
 	*
-	* \brief Information about the data source we want to connect.
-	* 
-	* Stores information about the ODBC-Source we want to connect to, including
-	* source-name, username and password, or alternatively, a connection-string.
+	* \brief Represents the ODBC-Environment. Every Database needs an environment, 
+	* but one environment can be used to open multiple databases.
 	* 
 	* This class will allocate the Environment-Handle that is required
-	* for all later operations.
+	* for all later operations and sets the ODBC Version to 3.x or higher.
+	* The handle is freed on destruction.
+	*
+	* The information needed to connect to a database (dsn, username, pw or 
+	* connection-string) can be stored inside this object, but it is not required.
+	* 
 	*/
 	class EXODBCAPI DbEnvironment
 	{
@@ -152,7 +155,7 @@ namespace exodbc
 		/*!
 		 * \fn	bool DbEnvironment::AllocHenv();
 		 *
-		 * \brief	Tries to allocate a new Henv and set the ODBC-Version.
+		 * \brief	Tries to allocate a new Henv.
 		 * 			Cannot be called if a Henv is allocated.
 		 *
 		 * \return	true if it succeeds, false if it fails.

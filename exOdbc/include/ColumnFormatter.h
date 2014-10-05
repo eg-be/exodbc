@@ -22,8 +22,6 @@
 
 namespace exodbc
 {
-
-
 	// Forward declarations
 	// --------------------
 
@@ -32,6 +30,12 @@ namespace exodbc
 
 	// Classes
 	// -------
+	/*!
+	* \class ColumnFormatter
+	*
+	* \brief Unused leftover from wxWidgets 2.8. Will probably be removed soon.
+	*
+	*/
 	class EXODBCAPI ColumnFormatter
 	{
 	public:
