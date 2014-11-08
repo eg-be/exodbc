@@ -64,7 +64,6 @@ int _tmain(int argc, _TCHAR* argv[])
 #endif
 
 	int status = 0;
-
 	if(argc < 4)
 	{
 		// Not enough args
