@@ -53,9 +53,11 @@ namespace exodbc
 	// -------
 
 	/*!
-	* \brief Contains information about DataSource-Entries from the driver-manager
+	* \class SDataSource
+	*
+	* \brief Contains information about one DataSource-Entry from the driver-manager
 	* 
-	* \see ListDataSources
+	* \see DbEnvironment::ListDataSources
 	*/
 	struct EXODBCAPI SDataSource
 	{
