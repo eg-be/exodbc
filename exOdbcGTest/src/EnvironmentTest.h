@@ -1,5 +1,5 @@
 /*!
-* \file DbEnvironmentTest.h
+* \file EnvironmentTest.h
 * \author Elias Gerber <egerber@gmx.net>
 * \date 27.07.2014
 * 
@@ -7,8 +7,8 @@
 */ 
 
 #pragma once
-#ifndef DBENVIRONMENTTEST_H
-#define DBENVIRONMENTTEST_H
+#ifndef EnvironmentTEST_H
+#define EnvironmentTEST_H
 
 // Same component headers
 #include "exOdbcGTest.h"
@@ -27,7 +27,7 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class DbEnvironmentTest : public ::testing::TestWithParam<SOdbcInfo>
+	class EnvironmentTest : public ::testing::TestWithParam<SOdbcInfo>
 	{
 
 	public:
@@ -43,8 +43,8 @@ namespace exodbc
 
 	INSTANTIATE_TEST_CASE_P(
 		ParametrizedOdbc,
-		DbEnvironmentTest,
+		EnvironmentTest,
 		::testing::ValuesIn(g_odbcInfos));
 } // namespace exodbc
 
-#endif // DBENVIRONMENTTEST_H
+#endif // EnvironmentTEST_H

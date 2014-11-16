@@ -183,9 +183,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="src\DbEnvironmentTest.h" />
-    <ClInclude Include="src\DbTableTest.h" />
-    <ClInclude Include="src\DbTest.h" />
+    <ClInclude Include="src\EnvironmentTest.h" />
+    <ClInclude Include="src\TableTest.h" />
+    <ClInclude Include="src\DatabaseTest.h" />
     <ClInclude Include="src\DebugNew.h" />
     <ClInclude Include="src\exOdbcGTest.h" />
     <ClInclude Include="src\GenericTestTables.h" />
@@ -196,9 +196,9 @@
     <ClInclude Include="src\wxCompatibilityTest.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\DbEnvironmentTest.cpp" />
-    <ClCompile Include="src\DbTableTest.cpp" />
-    <ClCompile Include="src\DbTest.cpp" />
+    <ClCompile Include="src\EnvironmentTest.cpp" />
+    <ClCompile Include="src\TableTest.cpp" />
+    <ClCompile Include="src\DatabaseTest.cpp" />
     <ClCompile Include="src\exOdbcGTest.cpp" />
     <ClCompile Include="src\GenericTestTables.cpp" />
     <ClCompile Include="src\HelpersTest.cpp" />

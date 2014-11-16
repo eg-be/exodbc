@@ -14,7 +14,7 @@
 // Same component headers
 // Other headers
 #include "Database.h"
-#include "DbEnvironment.h"
+#include "Environment.h"
 
 // Debug
 #include "DebugNew.h"
@@ -47,7 +47,7 @@ namespace exodbc
 
 	//TEST_P(HelpersTest, AllocDbcHandle)
 	//{
-	//	DbEnvironment env(m_odbcInfo.m_odbcVersion);
+	//	Environment env(m_odbcInfo.m_odbcVersion);
 	//	ASSERT_TRUE(env.HaveHenv());
 
 	//	SQLHANDLE hDbc = AllocDbcHandle(env.GetHenv());
@@ -64,7 +64,7 @@ namespace exodbc
 
 	//TEST_P(HelpersTest, FreeDbcHandle)
 	//{
-	//	DbEnvironment env(m_odbcInfo.m_odbcVersion);
+	//	Environment env(m_odbcInfo.m_odbcVersion);
 	//	ASSERT_TRUE(env.HaveHenv());
 
 	//	SQLHANDLE hDbc = AllocDbcHandle(env.GetHenv());

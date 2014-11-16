@@ -9,13 +9,13 @@
 #include "stdafx.h"
 
 // Own header
-#include "DbTest.h"
+#include "DatabaseTest.h"
 
 // Same component headers
 #include "GenericTestTables.h"
 
 // Other headers
-#include "DbEnvironment.h"
+#include "Environment.h"
 #include "Database.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
@@ -39,7 +39,7 @@ using namespace std;
 namespace exodbc
 {
 
-	void DbTest::SetUp()
+	void DatabaseTest::SetUp()
 	{
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
@@ -50,7 +50,7 @@ namespace exodbc
 		ASSERT_TRUE(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
-	void DbTest::TearDown()
+	void DatabaseTest::TearDown()
 	{
 		if(m_db.IsOpen())
 		{
@@ -62,7 +62,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DbTest, OpenFromEnv)
+	TEST_P(DatabaseTest, OpenFromEnv)
 	{
 		Database db(m_env);
 
@@ -78,7 +78,7 @@ namespace exodbc
 	}
 
 	// TODO: Test Close. Close should return a value if succeeded
-	TEST_P(DbTest, Close)
+	TEST_P(DatabaseTest, Close)
 	{
 		// Try to close a db that really is open
 		Database db1(m_env);
@@ -98,13 +98,13 @@ namespace exodbc
 		//EXPECT_FALSE(db2.Close());
 	}
 
-	TEST_P(DbTest, ReadTransactionMode)
+	TEST_P(DatabaseTest, ReadTransactionMode)
 	{
 		// We default to manual commit
 		EXPECT_EQ(TM_MANUAL_COMMIT, m_db.ReadTransactionMode());
 	}
 
-	TEST_P(DbTest, SetTransactionMode)
+	TEST_P(DatabaseTest, SetTransactionMode)
 	{
 		Database db(m_env);
 		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
@@ -134,7 +134,7 @@ namespace exodbc
 		db.Close();
 	}
 
-	TEST_P(DbTest, ReadDataTypesInfo)
+	TEST_P(DatabaseTest, ReadDataTypesInfo)
 	{
 		Database db(m_env);
 
@@ -172,7 +172,7 @@ namespace exodbc
 		db.Close();
 	}
 
-	TEST_P(DbTest, GetDbInfo)
+	TEST_P(DatabaseTest, GetDbInfo)
 	{
 		Database db(m_env);
 
@@ -194,10 +194,10 @@ namespace exodbc
 
 	}
 
-	TEST_P(DbTest, Open)
+	TEST_P(DatabaseTest, Open)
 	{		
 		// Open an existing db by passing the Env to the ctor and reading the params from the Environment (the old wx-way)
-		DbEnvironment env(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, OV_3);
+		Environment env(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, OV_3);
 		EXPECT_TRUE(env.HaveHenv());
 		Database db(env);
 		EXPECT_TRUE(db.Open(&env));
@@ -226,7 +226,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DbTest, DetectDbms)
+	TEST_P(DatabaseTest, DetectDbms)
 	{
 		// We just know how we name the different odbc-sources
 		// TODO: This is not nice, but is there any other reliable way? Add to doc somewhere
@@ -250,7 +250,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DbTest, TestCommitTransaction)
+	TEST_P(DatabaseTest, TestCommitTransaction)
 	{
 		IntTypesTmpTable* pTable = new IntTypesTmpTable(&m_db);
 		if(!pTable->Open(false, false))
@@ -281,7 +281,7 @@ namespace exodbc
 		delete pTable;
 	}
 
-	TEST_P(DbTest, TestRollbackTransaction)
+	TEST_P(DatabaseTest, TestRollbackTransaction)
 	{
 		IntTypesTmpTable* pTable = new IntTypesTmpTable(&m_db);
 		if(!pTable->Open(false, false))
@@ -309,7 +309,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DbTest, ReadCatalogs)
+	TEST_P(DatabaseTest, ReadCatalogs)
 	{
 		std::vector<std::wstring> cats;
 		EXPECT_TRUE(m_db.ReadCatalogs(cats));
@@ -328,7 +328,7 @@ namespace exodbc
 		}
 	}
 
-	TEST_P(DbTest, ReadSchemas)
+	TEST_P(DatabaseTest, ReadSchemas)
 	{
 		std::vector<std::wstring> schemas;
 		EXPECT_TRUE(m_db.ReadSchemas(schemas));
@@ -354,7 +354,7 @@ namespace exodbc
 		}
 	}
 
-	TEST_P(DbTest, ReadTableTypes)
+	TEST_P(DatabaseTest, ReadTableTypes)
 	{
 		std::vector<std::wstring> tableTypes;
 		EXPECT_TRUE(m_db.ReadTableTypes(tableTypes));
@@ -363,7 +363,7 @@ namespace exodbc
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"VIEW") != tableTypes.end());
 	}
 
-	TEST_P(DbTest, ReadTablePrivileges)
+	TEST_P(DatabaseTest, ReadTablePrivileges)
 	{
 		std::vector<STablePrivilegesInfo> privs;
 		std::wstring tableName;
@@ -416,7 +416,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DbTest, ReadTableColumnInfo)
+	TEST_P(DatabaseTest, ReadTableColumnInfo)
 	{
 		std::vector<STableColumnInfo> cols;
 		std::wstring tableName;
@@ -454,7 +454,7 @@ namespace exodbc
 		EXPECT_EQ(10, col.m_decimalDigits);
 	}
 
-	TEST_P(DbTest, FindTables)
+	TEST_P(DatabaseTest, FindTables)
 	{
 		std::vector<STableInfo> tables;
 		std::wstring tableName;
@@ -523,7 +523,7 @@ namespace exodbc
 		}
 	}
 
-	TEST_P(DbTest, ReadCompleteCatalog)
+	TEST_P(DatabaseTest, ReadCompleteCatalog)
 	{
 		SDbCatalogInfo cat;
 		EXPECT_TRUE(m_db.ReadCompleteCatalog(cat));
@@ -539,7 +539,7 @@ namespace exodbc
 		EXPECT_TRUE(cat.m_tables.size() >= 12);
 	}
 
-	TEST_P(DbTest, ReadColumnCount)
+	TEST_P(DatabaseTest, ReadColumnCount)
 	{
 		std::wstring tableName = L"";
 		std::wstring schemaName = L"";

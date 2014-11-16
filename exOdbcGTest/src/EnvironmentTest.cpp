@@ -1,5 +1,5 @@
 /*!
-* \file DbEnvironmentTest.cpp
+* \file EnvironmentTest.cpp
 * \author Elias Gerber <egerber@gmx.net>
 * \date 27.07.2014
 * 
@@ -9,11 +9,11 @@
 #include "stdafx.h"
 
 // Own header
-#include "DbEnvironmentTest.h"
+#include "EnvironmentTest.h"
 
 // Same component headers
 // Other headers
-#include "DbEnvironment.h"
+#include "Environment.h"
 
 // Debug
 #include "DebugNew.h"
@@ -36,28 +36,28 @@ namespace exodbc
 	using namespace std;
 	using namespace exodbc;
 
-	void DbEnvironmentTest::SetUp()
+	void EnvironmentTest::SetUp()
 	{
 		m_odbcInfo = GetParam();
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 	}
 
-	void DbEnvironmentTest::TearDown()
+	void EnvironmentTest::TearDown()
 	{
 
 	}
 
 
-	TEST_P(DbEnvironmentTest, AllocHenv)
+	TEST_P(EnvironmentTest, AllocHenv)
 	{
-		DbEnvironment env;
+		Environment env;
 		EXPECT_TRUE(env.AllocHenv());
 	}
 
 
-	TEST_P(DbEnvironmentTest, FreeHenv)
+	TEST_P(EnvironmentTest, FreeHenv)
 	{
-		DbEnvironment env;
+		Environment env;
 		ASSERT_TRUE(env.AllocHenv());
 		EXPECT_TRUE(env.FreeHenv());
 		
@@ -65,9 +65,9 @@ namespace exodbc
 	}
 
 
-	TEST_P(DbEnvironmentTest, SetConnectionString)
+	TEST_P(EnvironmentTest, SetConnectionString)
 	{
-		DbEnvironment env;
+		Environment env;
 		EXPECT_FALSE(env.UseConnectionStr());
 
 		env.SetConnectionStr(L"FooString");
@@ -78,12 +78,12 @@ namespace exodbc
 	}
 
 
-	TEST_P(DbEnvironmentTest, SetOdbcVersion)
+	TEST_P(EnvironmentTest, SetOdbcVersion)
 	{
 		// Test with setting it explict
-		DbEnvironment env_v2;
-		DbEnvironment env_v3;
-		DbEnvironment env_v3_80;
+		Environment env_v2;
+		Environment env_v3;
+		Environment env_v3_80;
 
 		ASSERT_TRUE(env_v2.AllocHenv());
 		ASSERT_TRUE(env_v3.AllocHenv());
@@ -98,13 +98,13 @@ namespace exodbc
 		EXPECT_EQ(SQL_OV_ODBC3_80, env_v3_80.GetOdbcVersion());
 	}
 
-	TEST_P(DbEnvironmentTest, ListDataSources)
+	TEST_P(EnvironmentTest, ListDataSources)
 	{
-		DbEnvironment env(OV_3);
+		Environment env(OV_3);
 		ASSERT_TRUE(env.HaveHenv());
 
 		vector<SDataSource> dataSources;
-		ASSERT_TRUE(env.ListDataSources(DbEnvironment::All, dataSources));
+		ASSERT_TRUE(env.ListDataSources(Environment::All, dataSources));
 
 		// Expect that we find our DataSource in the list
 		bool foundDataSource = false;

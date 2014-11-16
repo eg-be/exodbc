@@ -1,15 +1,15 @@
 /*!
-* \file DbEnvironment.cpp
+* \file Environment.cpp
 * \author Elias Gerber <eg@zame.ch>
 * \date 25.07.2014
-* \brief Source file for the DbEnvironment class and its helpers.
+* \brief Source file for the Environment class and its helpers.
 *
 */ 
 
 #include "stdafx.h"
 
 // Own header
-#include "DbEnvironment.h"
+#include "Environment.h"
 
 // Same component headers
 // Other headers
@@ -26,14 +26,14 @@ namespace exodbc
 	// Construction
 	// ------------
 	
-	DbEnvironment::DbEnvironment()
+	Environment::Environment()
 	{
 		// Note: Init will set members to NULL
 		Initialize();
 	}
 	
 	
-	DbEnvironment::DbEnvironment(OdbcVersion odbcVersion)
+	Environment::Environment(OdbcVersion odbcVersion)
 	{
 		// Note: Init will set members to NULL
 		Initialize();
@@ -41,7 +41,7 @@ namespace exodbc
 		SetOdbcVersion(odbcVersion);
 	} 
 
-	DbEnvironment::DbEnvironment(const std::wstring& dsn, const std::wstring& userID, const std::wstring& password, OdbcVersion odbcVersion /* = OV_3 */ )
+	Environment::Environment(const std::wstring& dsn, const std::wstring& userID, const std::wstring& password, OdbcVersion odbcVersion /* = OV_3 */ )
 	{
 		// Note: Init will set members to NULL
 		Initialize();
@@ -53,7 +53,7 @@ namespace exodbc
 		SetPassword(password);
 	}
 
-	DbEnvironment::DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion /* = OV_3 */ )
+	Environment::Environment(const std::wstring& connectionString, OdbcVersion odbcVersion /* = OV_3 */ )
 	{
 		// Note: Init will set members to NULL
 		Initialize();
@@ -66,7 +66,7 @@ namespace exodbc
 
 	// Destructor
 	// -----------
-	DbEnvironment::~DbEnvironment()
+	Environment::~Environment()
 	{
 		if (m_henv != SQL_NULL_HENV)
 		{
@@ -76,7 +76,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	bool DbEnvironment::Initialize()
+	bool Environment::Initialize()
 	{
 		m_henv = NULL;
 
@@ -92,7 +92,7 @@ namespace exodbc
 	}
 
 
-	bool DbEnvironment::AllocHenv()
+	bool Environment::AllocHenv()
 	{
 		// This is here to help trap if you are getting a new henv
 		// without releasing an existing henv
@@ -116,7 +116,7 @@ namespace exodbc
 	}
 
 
-	bool DbEnvironment::FreeHenv()
+	bool Environment::FreeHenv()
 	{
 		exASSERT(m_henv);
 
@@ -143,7 +143,7 @@ namespace exodbc
 	}
 
 
-	void DbEnvironment::SetDsn(const std::wstring &dsn)
+	void Environment::SetDsn(const std::wstring &dsn)
 	{
 		exASSERT(dsn.length() < EXSIZEOF(m_dsn));
 
@@ -152,7 +152,7 @@ namespace exodbc
 	} 
 
 
-	void DbEnvironment::SetUserID(const std::wstring &uid)
+	void Environment::SetUserID(const std::wstring &uid)
 	{
 		exASSERT(uid.length() < EXSIZEOF(m_uid));
 		wcsncpy(m_uid, uid.c_str(), EXSIZEOF(m_uid)-1);
@@ -160,7 +160,7 @@ namespace exodbc
 	}
 
 
-	void DbEnvironment::SetPassword(const std::wstring &password)
+	void Environment::SetPassword(const std::wstring &password)
 	{
 		exASSERT(password.length() < EXSIZEOF(m_authStr));
 
@@ -168,7 +168,7 @@ namespace exodbc
 		m_authStr[EXSIZEOF(m_authStr)-1] = 0;  // Prevent buffer overrun
 	}
 
-	void DbEnvironment::SetConnectionStr(const std::wstring &connectStr)
+	void Environment::SetConnectionStr(const std::wstring &connectStr)
 	{
 		exASSERT(connectStr.length() < EXSIZEOF(m_connectionStr));
 
@@ -179,7 +179,7 @@ namespace exodbc
 	}
 
 
-	bool DbEnvironment::SetOdbcVersion(OdbcVersion version)
+	bool Environment::SetOdbcVersion(OdbcVersion version)
 	{
 		exASSERT(m_henv);
 
@@ -213,7 +213,7 @@ namespace exodbc
 	}
 
 
-	OdbcVersion DbEnvironment::GetOdbcVersion() const
+	OdbcVersion Environment::GetOdbcVersion() const
 	{
 		unsigned long value = 0;
 		SQLRETURN ret = SQLGetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
@@ -236,7 +236,7 @@ namespace exodbc
 		return OV_UNKNOWN;
 	}
 
-	bool DbEnvironment::ListDataSources(ListMode mode, vector<SDataSource>& dataSources) const
+	bool Environment::ListDataSources(ListMode mode, vector<SDataSource>& dataSources) const
 	{
 		SQLSMALLINT nameBufferLength, descBufferLength = 0;
 		wchar_t nameBuffer[SQL_MAX_DSN_LENGTH + 1];
