@@ -208,6 +208,12 @@ namespace exodbc
 		exASSERT(m_hdbc == SQL_NULL_HDBC);
 		exASSERT(env.HaveHenv());
 
+		if (m_hdbc != SQL_NULL_HDBC)
+		{
+			LOG_ERROR(L"Cannot Allocate a new HDBC while the existing member is not NULL");
+			return false;
+		}
+
 		// Allocate the DBC-Handle
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, env.GetHenv(), &m_hdbc);
 		if (ret != SQL_SUCCESS)
