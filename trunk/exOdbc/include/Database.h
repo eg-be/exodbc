@@ -510,8 +510,6 @@ namespace exodbc
 		TransactionMode		ReadTransactionMode();
 
 		/*!
-		 * \fn	bool Database::SetTransactionMode(TransactionMode mode);
-		 *
 		 * \brief	Sets transaction mode on the database, using the attribute SQL_ATTR_AUTOCOMMIT.
 		 * 			This will also update the internal flag m_transactionMode, if changing the mode
 		 * 			was successful.
@@ -524,8 +522,6 @@ namespace exodbc
 		bool		SetTransactionMode(TransactionMode mode);
 
 		/*!
-		 * \fn	TransactionMode Database::GetTransactionMode()
-		 *
 		 * \brief	Gets transaction mode from the internally cached value.
 		 * \see		SetTransactionMode(TransactionMode mode)
 		 *
@@ -533,9 +529,30 @@ namespace exodbc
 		 */
 		TransactionMode GetTransactionMode() { return m_transactionMode; };
 
+		/*!
+		* \brief	Queries the database for the attribute SQL_TXN_ISOLATION.
+		*
+		* \return	TI_UNKNOWN if fails, else the mode currently set
+		*/
 		TransactionIsolationMode ReadTransactionIsolationMode();
 
+		/*!
+		* \brief	Sets transaction mode on the database, using the attribute SQL_TXN_ISOLATION.
+		*
+		* \param	mode	The mode to set.
+		*
+		* \return	true if it succeeds, false if it fails.
+		*/
 		bool		SetTransactionIsolationMode(TransactionIsolationMode mode);
+
+		/*!
+		* \brief	Returns true if the database supports the mode passed.
+		*
+		* \param	mode	The mode to test
+		*
+		* \return	true if mode supported by database.
+		*/
+		bool		CanSetTransactionIsolationMode(TransactionIsolationMode mode);
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
