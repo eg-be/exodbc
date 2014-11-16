@@ -179,7 +179,16 @@ namespace exodbc
 
 	};
 
-
+	/*!
+	* \class Database
+	*
+	* \brief Represents the ODBC-Database. Every Database needs an Environment.
+	* 
+	* This class will allocate the Database-Handle that is required
+	* to connect to the Database. It provides methods for opening and closing a
+	* connection to a database and basic operations for querying the database.
+	*
+	*/
 	class EXODBCAPI Database
 	{
 		// Test helpers:
@@ -190,8 +199,9 @@ namespace exodbc
 	public:
 		/*!
 		* \brief	Default Constructor. You will need to manually allocate the DBC-Handle.
-		* \detailed	Default Constructor. You will need to call AllocateHenv() afterwards.
-		*
+		* \detailed	Default Constructor. You will need to call AllocateHenv() afterwards to
+		*			allocate the Database-handle.
+		* \see		AllocateHenv()
 		*/
 		Database();
 
