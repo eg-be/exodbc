@@ -16,16 +16,13 @@
 
 // Other headers
 #include "gtest/gtest.h"
+#include "DbEnvironment.h"
+#include "Database.h"
 
 // System headers
 
 // Forward declarations
 // --------------------
-namespace exodbc
-{
-	class DbEnvironment;
-	class Database;
-}
 
 // Structs
 // -------
@@ -45,8 +42,8 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 
-		exodbc::DbEnvironment* m_pDbEnv;
-		exodbc::Database*	m_pDb;
+		exodbc::DbEnvironment m_env;
+		exodbc::Database	m_db;
 		SOdbcInfo m_odbcInfo;
 	};
 

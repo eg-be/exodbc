@@ -44,35 +44,27 @@ namespace exodbc
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		m_pDbEnv = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
-		HENV henv = m_pDbEnv->GetHenv();
-		ASSERT_TRUE(henv  != 0);
-		m_pDb = new Database(m_pDbEnv);
-		ASSERT_TRUE(m_pDb->Open(m_pDbEnv));
+		ASSERT_TRUE(m_env.AllocHenv());
+		ASSERT_TRUE(m_env.SetOdbcVersion(OV_3));
+		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
+		ASSERT_TRUE(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
 	void DbTest::TearDown()
 	{
-		if(m_pDb)
+		if(m_db.IsOpen())
 		{
 			// TODO: Why do we need to commit with DB2? We did not start anything??
-			m_pDb->CommitTrans();
+			m_db.CommitTrans();
 
-			m_pDb->Close();
-			delete m_pDb;
+			m_db.Close();
 		}
-
-		if(m_pDbEnv)
-			delete m_pDbEnv;
-
-		m_pDbEnv = NULL;
-		m_pDb = NULL;
 	}
 
 
 	TEST_P(DbTest, OpenFromEnv)
 	{
-		Database db(m_pDbEnv);
+		Database db(m_env);
 
 		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
@@ -89,7 +81,7 @@ namespace exodbc
 	TEST_P(DbTest, Close)
 	{
 		// Try to close a db that really is open
-		Database db1(m_pDbEnv);
+		Database db1(m_env);
 		ASSERT_TRUE(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		// only ms sql server needs a commit trans here so far?
@@ -109,13 +101,13 @@ namespace exodbc
 	TEST_P(DbTest, ReadTransactionMode)
 	{
 		// We default to manual commit
-		EXPECT_EQ(TM_MANUAL_COMMIT, m_pDb->ReadTransactionMode());
+		EXPECT_EQ(TM_MANUAL_COMMIT, m_db.ReadTransactionMode());
 	}
 
 	TEST_P(DbTest, SetTransactionMode)
 	{
-		Database db(m_pDbEnv);
-		ASSERT_TRUE(db.Open(m_pDbEnv));
+		Database db(m_env);
+		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		if(db.Dbms() == dbmsMS_SQL_SERVER)
 		{
@@ -144,7 +136,7 @@ namespace exodbc
 
 	TEST_P(DbTest, ReadDataTypesInfo)
 	{
-		Database db(m_pDbEnv);
+		Database db(m_env);
 
 		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
@@ -182,7 +174,7 @@ namespace exodbc
 
 	TEST_P(DbTest, GetDbInfo)
 	{
-		Database db(m_pDbEnv);
+		Database db(m_env);
 
 		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
@@ -203,13 +195,12 @@ namespace exodbc
 	}
 
 	TEST_P(DbTest, Open)
-	{
-		HENV henv = m_pDbEnv->GetHenv();
-		ASSERT_TRUE(henv  != 0);
-		
-		// Open an existing db by passing the Env to the ctor and reading the params from the Environment
-		Database db(m_pDbEnv);
-		EXPECT_TRUE(db.Open(m_pDbEnv));
+	{		
+		// Open an existing db by passing the Env to the ctor and reading the params from the Environment (the old wx-way)
+		DbEnvironment env(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, OV_3);
+		EXPECT_TRUE(env.HaveHenv());
+		Database db(env);
+		EXPECT_TRUE(db.Open(&env));
 		// only ms sql server needs a commit trans here so far (before closing)?
 		if(db.Dbms() == dbmsMS_SQL_SERVER)
 		{
@@ -217,10 +208,10 @@ namespace exodbc
 		}
 		db.Close();
 
-		// Open an existing db using the default c'tor and reading params from the Env
+		// Open an existing db using the default c'tor and setting params on db
 		Database db2;
-		EXPECT_TRUE(db2.AllocateHdbc(*m_pDbEnv));
-		EXPECT_TRUE(db2.Open(m_pDbEnv));
+		EXPECT_TRUE(db2.AllocateHdbc(env));
+		EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		// only ms sql server needs a commit trans here so far (before closing)?
 		if (db2.Dbms() == dbmsMS_SQL_SERVER)
 		{
@@ -229,7 +220,7 @@ namespace exodbc
 		db2.Close();
 
 		// Try to open with a different password / user, expect to fail when opening the db.
-		Database failDb(m_pDbEnv);
+		Database failDb(m_env);
 		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit errors";
 		EXPECT_FALSE(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"));
 	}
@@ -242,15 +233,15 @@ namespace exodbc
 		m_odbcInfo = GetParam();
 		if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"DB2"))
 		{
-			EXPECT_TRUE(m_pDb->Dbms() == dbmsDB2);
+			EXPECT_TRUE(m_db.Dbms() == dbmsDB2);
 		}
 		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"MySql"))
 		{
-			EXPECT_TRUE(m_pDb->Dbms() == dbmsMY_SQL);
+			EXPECT_TRUE(m_db.Dbms() == dbmsMY_SQL);
 		}
 		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"SqlServer"))
 		{
-			EXPECT_TRUE(m_pDb->Dbms() == dbmsMS_SQL_SERVER);
+			EXPECT_TRUE(m_db.Dbms() == dbmsMS_SQL_SERVER);
 		}
 		else
 		{
@@ -261,7 +252,7 @@ namespace exodbc
 
 	TEST_P(DbTest, TestCommitTransaction)
 	{
-		IntTypesTmpTable* pTable = new IntTypesTmpTable(m_pDb);
+		IntTypesTmpTable* pTable = new IntTypesTmpTable(&m_db);
 		if(!pTable->Open(false, false))
 		{
 			delete pTable;
@@ -270,20 +261,20 @@ namespace exodbc
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
-		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_db.CommitTrans() );
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_FALSE( pTable->GetNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
-		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		// Test: If we do not commit we still have zero records
 		// TOOD: Why do we get the records here? We need to read more about autocommit and stuff like that, but lets fix the tables first
 		//ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		//EXPECT_FALSE( pTable->GetNext());
 		// Once we commit we have one record
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( m_db.CommitTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_TRUE( pTable->GetNext());
 
@@ -292,7 +283,7 @@ namespace exodbc
 
 	TEST_P(DbTest, TestRollbackTransaction)
 	{
-		IntTypesTmpTable* pTable = new IntTypesTmpTable(m_pDb);
+		IntTypesTmpTable* pTable = new IntTypesTmpTable(&m_db);
 		if(!pTable->Open(false, false))
 		{
 			delete pTable;
@@ -301,16 +292,16 @@ namespace exodbc
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
-		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_db.CommitTrans() );
 
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_FALSE( pTable->GetNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
-		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
+		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		// We rollback and expect no record
-		EXPECT_TRUE( m_pDb->RollbackTrans() );
+		EXPECT_TRUE( m_db.RollbackTrans() );
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_FALSE( pTable->GetNext());
 
@@ -321,8 +312,8 @@ namespace exodbc
 	TEST_P(DbTest, ReadCatalogs)
 	{
 		std::vector<std::wstring> cats;
-		EXPECT_TRUE(m_pDb->ReadCatalogs(cats));
-		switch(m_pDb->Dbms())
+		EXPECT_TRUE(m_db.ReadCatalogs(cats));
+		switch(m_db.Dbms())
 		{
 		case dbmsDB2:
 			// DB2 does not support catalogs. it reports zero catalogs
@@ -340,8 +331,8 @@ namespace exodbc
 	TEST_P(DbTest, ReadSchemas)
 	{
 		std::vector<std::wstring> schemas;
-		EXPECT_TRUE(m_pDb->ReadSchemas(schemas));
-		switch(m_pDb->Dbms())
+		EXPECT_TRUE(m_db.ReadSchemas(schemas));
+		switch(m_db.Dbms())
 		{
 		case dbmsDB2:
 			// DB2 reports our test-db as a schema
@@ -366,7 +357,7 @@ namespace exodbc
 	TEST_P(DbTest, ReadTableTypes)
 	{
 		std::vector<std::wstring> tableTypes;
-		EXPECT_TRUE(m_pDb->ReadTableTypes(tableTypes));
+		EXPECT_TRUE(m_db.ReadTableTypes(tableTypes));
 		// Check that we have at least a type TABLE and a type VIEW
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"TABLE") != tableTypes.end());
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"VIEW") != tableTypes.end());
@@ -378,7 +369,7 @@ namespace exodbc
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
-		switch(m_pDb->Dbms())
+		switch(m_db.Dbms())
 		{
 		case dbmsMY_SQL:
 			// We know that mySql uses catalogs, not schemas:
@@ -400,7 +391,7 @@ namespace exodbc
 			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #52");
 		}
 		// TODO: With MySql we get no results here?
-		EXPECT_TRUE(m_pDb->ReadTablePrivileges(tableName, schemaName, catalogName, privs));
+		EXPECT_TRUE(m_db.ReadTablePrivileges(tableName, schemaName, catalogName, privs));
 		bool canSelect = false;
 		bool canInsert = false;
 		bool canDelete = false;
@@ -431,7 +422,7 @@ namespace exodbc
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
-		switch(m_pDb->Dbms())
+		switch(m_db.Dbms())
 		{
 		case dbmsMY_SQL:
 			// We know that mySql uses catalogs, not schemas:
@@ -451,7 +442,7 @@ namespace exodbc
 			schemaName = L"exodbc";
 			catalogName = L"exodbc";
 		}
-		EXPECT_TRUE(m_pDb->ReadTableColumnInfo(tableName, schemaName, catalogName, cols));
+		EXPECT_TRUE(m_db.ReadTableColumnInfo(tableName, schemaName, catalogName, cols));
 		// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
 		ASSERT_TRUE(cols.size() == 3);
 		STableColumnInfo col = cols[2];
@@ -469,7 +460,7 @@ namespace exodbc
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
-		switch(m_pDb->Dbms())
+		switch(m_db.Dbms())
 		{
 		case dbmsMY_SQL:
 			// We know that mySql uses catalogs, not schemas:
@@ -490,25 +481,25 @@ namespace exodbc
 			catalogName = L"exodbc";
 		}
 		// Find one table by using only the table-name as search param
-		EXPECT_TRUE(m_pDb->FindTables(tableName, L"", L"", L"", tables));
+		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"", L"", tables));
 		EXPECT_EQ(1, tables.size());
 		// Find one table by using table-name and schema/catalog
-		EXPECT_TRUE(m_pDb->FindTables(tableName, schemaName, catalogName, L"", tables));
+		EXPECT_TRUE(m_db.FindTables(tableName, schemaName, catalogName, L"", tables));
 		EXPECT_EQ(1, tables.size());
 		// In all cases, we should not find anything if we use a schema or a catalog that does not exist
 		// Note: When using MySQL-Odbc driver, if 'do not use INFORMATION_SCHEMA' is set, this will fail due to an access denied for database "wrongCatalog"
-		EXPECT_TRUE(m_pDb->FindTables(tableName, L"WrongSchema", L"", L"", tables));
+		EXPECT_TRUE(m_db.FindTables(tableName, L"WrongSchema", L"", L"", tables));
 		EXPECT_EQ(0, tables.size());
-		EXPECT_TRUE(m_pDb->FindTables(tableName, L"", L"WrongCatalog", L"", tables));
+		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"WrongCatalog", L"", tables));
 		EXPECT_EQ(0, tables.size());
 		// Also, we have a table, not a view
-		EXPECT_TRUE(m_pDb->FindTables(tableName, L"", L"", L"VIEW", tables));
+		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"", L"VIEW", tables));
 		EXPECT_EQ(0, tables.size());
-		EXPECT_TRUE(m_pDb->FindTables(tableName, L"", L"", L"TABLE", tables));
+		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"", L"TABLE", tables));
 		EXPECT_EQ(1, tables.size());
 		// What about search-patterns? Note: Not use for table-type
 		// TODO: They just dont work with MySql 3.51 ?
-		EXPECT_TRUE(m_pDb->FindTables(tableName, L"%", L"%", L"", tables));
+		EXPECT_TRUE(m_db.FindTables(tableName, L"%", L"%", L"", tables));
 		EXPECT_EQ(1, tables.size());
 		if(tables.size() > 0)
 		{
@@ -522,7 +513,7 @@ namespace exodbc
 		std::wstring catalogPattern = catalogName;
 		if(catalogName.length() > 0)
 			catalogPattern = (boost::wformat(L"%%%s%%") %catalogName).str();
-		EXPECT_TRUE(m_pDb->FindTables(tableName, schemaPattern, catalogPattern, L"", tables));
+		EXPECT_TRUE(m_db.FindTables(tableName, schemaPattern, catalogPattern, L"", tables));
 		EXPECT_EQ(1, tables.size());
 		if(tables.size() > 0)
 		{
@@ -535,13 +526,13 @@ namespace exodbc
 	TEST_P(DbTest, ReadCompleteCatalog)
 	{
 		SDbCatalogInfo cat;
-		EXPECT_TRUE(m_pDb->ReadCompleteCatalog(cat));
+		EXPECT_TRUE(m_db.ReadCompleteCatalog(cat));
 		// TODO: This is confusing. DB2 reports schemas, what is correct, but mysql reports catalogs?? wtf?
-		if(m_pDb->Dbms() == dbmsDB2)
+		if(m_db.Dbms() == dbmsDB2)
 		{
 			EXPECT_TRUE(cat.m_schemas.find(L"EXODBC") != cat.m_schemas.end());
 		}
-		else if(m_pDb->Dbms() == dbmsMY_SQL)
+		else if(m_db.Dbms() == dbmsMY_SQL)
 		{
 			EXPECT_TRUE(cat.m_catalogs.find(L"exodbc") != cat.m_catalogs.end());
 		}
@@ -554,7 +545,7 @@ namespace exodbc
 		std::wstring schemaName = L"";
 		std::wstring catalogName = L"";
 		int nrCols = 4;
-		switch(m_pDb->Dbms())
+		switch(m_db.Dbms())
 		{
 		case dbmsDB2:
 			// DB2 has schemas
@@ -573,9 +564,9 @@ namespace exodbc
 			schemaName = L"exodbc";
 			break;
 		}
-		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, schemaName, catalogName));
+		EXPECT_EQ(nrCols, m_db.ReadColumnCount(tableName, schemaName, catalogName));
 		// we should also work if we just search by the tableName, as long as tableName is unique within db
-		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, L"", L""));
+		EXPECT_EQ(nrCols, m_db.ReadColumnCount(tableName, L"", L""));
 	}
 
 
