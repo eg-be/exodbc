@@ -68,10 +68,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		// Not enough args
 		wcerr << L"Not enough arguments!\n";
-		wcerr << L"Usage: wxOdbc3GoogleTest --dsn=dsn1,dsn2,..,dsnN --user=user1,user2,..,userN --pass=pass1,pass2,..,passN\n";
+		wcerr << L"Usage: wxOdbc3GoogleTest --dsn=dsn1,dsn2,..,dsnN --user=user1,user2,..,userN --pass=pass1,pass2,..,passN [--logLevel=0-5]\n";
+		wcerr << L" logLevel: 0: trace; 1: debug; 2: info; 3: warning; 4: error; 5: fatal\n";
+		wcerr << L"           Default is warning (3)\n";
 		status = 10;
 	}
-	std::wstring dsn, user, pass;
+	std::wstring dsn, user, pass, logLevelS;
 	if(!extractParamValue(argc, argv, L"--dsn=", dsn))
 	{
 		wcerr << L"Missing argument --dsn=\n";
@@ -86,6 +88,16 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		wcerr << L"Missing argument --pass=\n";
 		status = 11;
+	}
+	int logLevel = 3;
+	if (extractParamValue(argc, argv, L"--logLevel=", logLevelS))
+	{
+		std::wistringstream convert(logLevelS);
+		if (!(convert >> logLevel) || logLevel < 0 || logLevel > 5)
+		{
+			wcout << L"Warning: LogLevel is not a value in the range 0-5. Falling back to default 'warning' (3)\n";
+			logLevel = 3;
+		}
 	}
 	vector<wstring> dsns, users, passes;
 	boost::split(dsns, dsn, boost::is_any_of(L","));
@@ -111,11 +123,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	// Set a filter for the logging
 	boost::log::core::get()->set_filter
 		(
-#if _DEBUG
-			boost::log::trivial::severity >= boost::log::trivial::debug
-#else
-			boost::log::trivial::severity >= boost::log::trivial::warning
-#endif
+			boost::log::trivial::severity >= logLevel
 		);
 
 	int result = RUN_ALL_TESTS();
