@@ -271,7 +271,6 @@ namespace exodbc
 		bool ListDataSources(ListMode mode, std::vector<SDataSource>& dataSources) const;
 
 	private:
-		bool m_freeHenvOnDestroy;
 		bool m_useConnectionStr;
 
 		HENV m_henv;

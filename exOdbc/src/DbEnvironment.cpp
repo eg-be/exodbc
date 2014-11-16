@@ -27,7 +27,6 @@ namespace exodbc
 	// ------------
 	
 	DbEnvironment::DbEnvironment()
-		: m_freeHenvOnDestroy(false)
 	{
 		// Note: Init will set members to NULL
 		Initialize();
@@ -35,7 +34,6 @@ namespace exodbc
 	
 	
 	DbEnvironment::DbEnvironment(OdbcVersion odbcVersion)
-		: m_freeHenvOnDestroy(false)
 	{
 		// Note: Init will set members to NULL
 		Initialize();
@@ -44,7 +42,6 @@ namespace exodbc
 	} 
 
 	DbEnvironment::DbEnvironment(const std::wstring& dsn, const std::wstring& userID, const std::wstring& password, OdbcVersion odbcVersion /* = OV_3 */ )
-		: m_freeHenvOnDestroy(false)
 	{
 		// Note: Init will set members to NULL
 		Initialize();
@@ -57,7 +54,6 @@ namespace exodbc
 	}
 
 	DbEnvironment::DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion /* = OV_3 */ )
-		: m_freeHenvOnDestroy(false)
 	{
 		// Note: Init will set members to NULL
 		Initialize();
@@ -72,7 +68,7 @@ namespace exodbc
 	// -----------
 	DbEnvironment::~DbEnvironment()
 	{
-		if (m_freeHenvOnDestroy)
+		if (m_henv != SQL_NULL_HENV)
 		{
 			FreeHenv(); // note: might fail
 		}
@@ -83,7 +79,6 @@ namespace exodbc
 	bool DbEnvironment::Initialize()
 	{
 		m_henv = NULL;
-		m_freeHenvOnDestroy = false;
 
 		m_henv = 0;
 		m_dsn[0] = 0;
@@ -117,8 +112,6 @@ namespace exodbc
 			return false;
 		}
 
-		m_freeHenvOnDestroy = true;
-
 		return true;
 	}
 
@@ -142,8 +135,7 @@ namespace exodbc
 			}
 			if(ret != SQL_ERROR)
 			{
-				m_freeHenvOnDestroy = false;
-				m_henv = NULL;
+				m_henv = SQL_NULL_HENV;
 			}
 		}
 
