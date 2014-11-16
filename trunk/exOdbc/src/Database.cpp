@@ -596,6 +596,8 @@ namespace exodbc
 			ok = false;
 		}
 
+		// Note: It seems SQLSetConnectAttr does not need an additional CommitTrans(); (See #51)
+
 		// Note: This is unsupported SQL_ATTR_METADATA_ID by most drivers. It should default to OFF
 		//ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_METADATA_ID, (SQLPOINTER) SQL_TRUE, NULL);
 		//if(ret != SQL_SUCCESS)
@@ -663,6 +665,8 @@ namespace exodbc
 		{
 			LOG_ERROR(L"Not all Database Infos could be queried");
 		}
+
+		// Note: It seems SQLGetInfo does not need an additional CommitTrans(); (See #51)
 
 		// Completed
 		return ok;
@@ -742,6 +746,13 @@ namespace exodbc
 		}
 		
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+
+		// If Autocommit is off, we need to commit on certain db-systems, see #51
+		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
+		}
+
 		delete[] buffer;
 		
 		return ok;
@@ -867,6 +878,12 @@ namespace exodbc
 		{
 			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle);
 			return false;
+		}
+
+		// If Autocommit is off, we need to commit on certain db-systems, see #51
+		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
 		}
 
 		return allOk;
@@ -2419,6 +2436,12 @@ namespace exodbc
 		// Close, ignore all errs
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
+		// If Autocommit is off, we need to commit on certain db-systems, see #51
+		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
+		}
+
 		delete[] buffCatalog;
 		delete[] buffSchema;
 		delete[] buffTableName;
@@ -2496,6 +2519,12 @@ namespace exodbc
 		{
 			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
 			ok = false;
+		}
+
+		// If Autocommit is off, we need to commit on certain db-systems, see #51
+		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
 		}
 
 		if(pSchemaBuff)
@@ -2614,6 +2643,12 @@ namespace exodbc
 		// Close, ignore all errs
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
+		// If Autocommit is off, we need to commit on certain db-systems, see #51
+		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
+		}
+
 		if(pSchemaBuff)
 			delete[] pSchemaBuff;
 		return ok;
@@ -2728,6 +2763,12 @@ namespace exodbc
 		{
 			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
 			ok = false;
+		}
+
+		// If Autocommit is off, we need to commit on certain db-systems, see #51
+		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
 		}
 
 		if(pSchemaBuff)

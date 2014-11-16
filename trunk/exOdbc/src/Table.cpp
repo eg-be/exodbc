@@ -759,11 +759,24 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
     bool exists = true;
     if (checkTableExists)
     {
-		exASSERT(false);
-        //if (m_pDb->Dbms() == dbmsPOSTGRES)
-        //    exists = m_pDb->TableExists(m_tableName, NULL, m_tablePath);
-        //else
-        //    exists = m_pDb->TableExists(m_tableName, m_pDb->GetUsername().c_str(), m_tablePath);
+		std::vector<STableInfo> matchingTables;
+		if (!m_pDb->FindTables(m_tableName, L"", L"", L"", matchingTables))
+		{
+			// FindTables failed totally
+			return false;
+		}
+
+		// We need exactly one table
+		if (matchingTables.size() == 0)
+		{
+			LOG_ERROR((boost::wformat(L"FindTables did not find any table matching the TableName '%s'") % m_tableName).str());
+			return false;
+		}
+		else if (matchingTables.size() > 1)
+		{
+			LOG_ERROR((boost::wformat(L"FindTables found more than one table matching the TableName '%s'") % m_tableName).str());
+			return false;
+		}
     }
 
     // Verify that the table exists in the database

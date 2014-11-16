@@ -195,6 +195,8 @@ namespace exodbc
 #if EXODBC3_TEST
 		friend class DatabaseTest;
 		FRIEND_TEST(DatabaseTest, ReadDataTypesInfo); 
+		FRIEND_TEST(DatabaseTest, SetConnectionAttributes);
+		FRIEND_TEST(DatabaseTest, ReadDbInfo);
 #endif
 	public:
 		/*!
