@@ -101,7 +101,13 @@ namespace exodbc
 	{
 		// This is here to help trap if you are getting a new henv
 		// without releasing an existing henv
-		exASSERT(!m_henv);
+		exASSERT(m_henv == SQL_NULL_HENV);
+
+		if (m_henv != SQL_NULL_HENV)
+		{
+			LOG_ERROR(L"Cannot Allocate a new HENV while the existing member is not NULL");
+			return false;
+		}
 
 		// Initialize the ODBC Environment for Database Operations
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv);
