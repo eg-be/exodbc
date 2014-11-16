@@ -2904,6 +2904,10 @@ namespace exodbc
 		return false;
 	}
 
+	bool Database::CanSetTransactionIsolationMode(TransactionIsolationMode mode)
+	{
+		return (m_dbInf.txnIsolationOptions & (SQLUINTEGER) mode);
+	}
 
 	///********** wxDb::Catalog() **********/
 	//bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)

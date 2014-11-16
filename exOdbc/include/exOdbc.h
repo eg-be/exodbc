@@ -320,7 +320,7 @@ namespace exodbc
 	 */
 	enum TransactionMode
 	{
-		TM_UNKNOWN = -1,			//< Unknown Commit mode
+		TM_UNKNOWN = 50000,			//< Unknown Commit mode
 		TM_AUTO_COMMIT = SQL_AUTOCOMMIT,		//< Autocommit on
 		TM_MANUAL_COMMIT = SQL_AUTOCOMMIT_OFF	//< Autocommit off
 	};
@@ -333,7 +333,7 @@ namespace exodbc
 	*/
 	enum TransactionIsolationMode
 	{
-		TI_UNKNOWN = -1,
+		TI_UNKNOWN = 50000,
 		TI_READ_UNCOMMITTED = SQL_TXN_READ_UNCOMMITTED,
 		TI_READ_COMMITTED = SQL_TXN_READ_COMMITTED,
 		TI_REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,
