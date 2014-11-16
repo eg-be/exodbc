@@ -234,14 +234,49 @@ namespace exodbc
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
-		// Test: If we do not commit we still have zero records
-		// TOOD: Why do we get the records here? We need to read more about autocommit and stuff like that, but lets fix the tables first
-		//ASSERT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		//EXPECT_FALSE( pTable->GetNext());
-		// Once we commit we have one record
+
+		// TODO: There is still a lot wrong with Ticket #51 and Tables
+		//// TODO / Note: If we try to read now from a different database, we do not see the inserted recorded until it is commited
+		//// BUT: Microsoft SQL Server will just block the second database while a transaction is open
+		//// We need to examine that behaviour, it must be some option.
+		//if (m_db.Dbms() != dbmsMS_SQL_SERVER)
+		//{
+		//	Database db2(m_env);
+		//	EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		//	{
+		//		IntTypesTmpTable table2(&db2);
+		//		EXPECT_TRUE(table2.Open(false, false));
+		//		EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		//		EXPECT_FALSE(table2.GetNext());
+		//	}
+		//	// TODO: see #51
+		//	if (db2.GetTransactionMode() != TM_AUTO_COMMIT)
+		//	{
+		//		EXPECT_TRUE(m_db.CommitTrans());
+		//	}
+		//	EXPECT_TRUE(db2.Close());
+		//}
+
+		// Once we commit we have one record, also in a differnt database
 		EXPECT_TRUE( m_db.CommitTrans() );
 		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_TRUE( table.GetNext());
+
+		//Database db2(m_env);
+		//EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		//{
+		//	IntTypesTmpTable table2(&db2);
+		//	EXPECT_TRUE(table2.Open(false, false));
+		//	EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		//	EXPECT_TRUE(table2.GetNext());
+		//}
+		//// TODO: See #51
+		//if (db2.GetTransactionMode() != TM_AUTO_COMMIT)
+		//{
+		//	EXPECT_TRUE(m_db.CommitTrans());
+		//}
+
+		//EXPECT_TRUE(db2.Close());
 
 		// TODO: Need to fix this in the Table, see #51
 		if (m_db.GetTransactionMode() != TM_AUTO_COMMIT)
