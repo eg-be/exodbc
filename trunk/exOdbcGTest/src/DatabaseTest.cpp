@@ -221,20 +221,16 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, TestCommitTransaction)
 	{
-		IntTypesTmpTable* pTable = new IntTypesTmpTable(&m_db);
-		if(!pTable->Open(false, false))
-		{
-			delete pTable;
-			ASSERT_FALSE(true);
-		}
+		IntTypesTmpTable table(&m_db);
+		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_db.CommitTrans() );
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		EXPECT_FALSE( pTable->GetNext());
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		EXPECT_FALSE( table.GetNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
@@ -244,47 +240,41 @@ namespace exodbc
 		//EXPECT_FALSE( pTable->GetNext());
 		// Once we commit we have one record
 		EXPECT_TRUE( m_db.CommitTrans() );
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		EXPECT_TRUE( pTable->GetNext());
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		EXPECT_TRUE( table.GetNext());
 
 		// TODO: Need to fix this in the Table, see #51
 		if (m_db.GetTransactionMode() != TM_AUTO_COMMIT)
 		{
 			EXPECT_TRUE(m_db.CommitTrans());
 		}
-		delete pTable;
 	}
 
 	TEST_P(DatabaseTest, TestRollbackTransaction)
 	{
-		IntTypesTmpTable* pTable = new IntTypesTmpTable(&m_db);
-		if(!pTable->Open(false, false))
-		{
-			delete pTable;
-			ASSERT_FALSE(true);
-		}
+		IntTypesTmpTable table(&m_db);
+		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_db.CommitTrans() );
 
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		EXPECT_FALSE( pTable->GetNext());
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		EXPECT_FALSE( table.GetNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		// We rollback and expect no record
 		EXPECT_TRUE( m_db.RollbackTrans() );
-		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		EXPECT_FALSE( pTable->GetNext());
+		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		EXPECT_FALSE( table.GetNext());
 
 		// TODO: Need to fix this in the Table, see #51
 		if (m_db.GetTransactionMode() != TM_AUTO_COMMIT)
 		{
 			EXPECT_TRUE(m_db.CommitTrans());
 		}
-		delete pTable;
 	}
 
 
