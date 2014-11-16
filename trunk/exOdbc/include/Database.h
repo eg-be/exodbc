@@ -106,7 +106,7 @@ enum enumDummy {enumDum1};
 // --------------------
 namespace exodbc
 {
-	class DbEnvironment;
+	class Environment;
 	class ColumnFormatter;
 	class Database;
 
@@ -184,8 +184,8 @@ namespace exodbc
 	{
 		// Test helpers:
 #if EXODBC3_TEST
-		friend class DbTest;
-		FRIEND_TEST(DbTest, ReadDataTypesInfo); 
+		friend class DatabaseTest;
+		FRIEND_TEST(DatabaseTest, ReadDataTypesInfo); 
 #endif
 	public:
 		/*!
@@ -197,30 +197,30 @@ namespace exodbc
 
 		/*!
 		* \brief	Create a new Database-instance. The instance will be using the passed
-		*			DbEnvironment.
+		*			Environment.
 		* \detailed	The Database will try to create a new Db-Connection handle during construction.
 		*				No Exception is thrown if doing so fails, you can use HasHdbc() to check if
 		*				creating the Db-Connection handle was successfull.
 		*				The handle will be freed by the Database on destruction.
 		*
-		* \param	pEnv		The DbEnvironment to use to create this database and its connection.
-		*						Do not free the DbEnvironment before you free the Database.
+		* \param	pEnv		The Environment to use to create this database and its connection.
+		*						Do not free the Environment before you free the Database.
 		*/
-		Database(const DbEnvironment& env);
+		Database(const Environment& env);
 
 		/*!
 		 * \brief	Create a new Database-instance. The instance will be using the passed
-		 *			DbEnvironment. Note: This constructor is here for compatibility with wxWidgets.
+		 *			Environment. Note: This constructor is here for compatibility with wxWidgets.
 		 * \detailed	The Database will try to create a new Db-Connection handle during construction.
 		 *				No Exception is thrown if doing so fails, you can use HasHdbc() to check if
 		 *				creating the Db-Connection handle was successfull.
 		 *				The handle will be freed by the Database on destruction.
 		 *				Note: This function is here for compatibility with wxWidgets which used pointers
 		 *
-		 * \param	pEnv		The DbEnvironment to use to create this database and its connection.
-		 *						Do not free the DbEnvironment before you free the Database.
+		 * \param	pEnv		The Environment to use to create this database and its connection.
+		 *						Do not free the Environment before you free the Database.
 		*/
-		Database(const DbEnvironment* const pEnv);
+		Database(const Environment* const pEnv);
 		
 		~Database();
 
@@ -233,10 +233,10 @@ namespace exodbc
 		*			The DBC-handle will be freed by the Database on destruction.
 		*			Can only be called if no handle is allocated yet
 		*
-		* \param	env		The DbEnvironment to use to create this connection-handle.
-		*						Do not free the DbEnvironment before you free the Database.
+		* \param	env		The Environment to use to create this connection-handle.
+		*						Do not free the Environment before you free the Database.
 		*/
-		bool		AllocateHdbc(const DbEnvironment& env);
+		bool		AllocateHdbc(const Environment& env);
 
 		/*!
 		 * \fn	bool Database::Open(const std::wstring& inConnectStr);
@@ -277,15 +277,15 @@ namespace exodbc
 		bool         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
 
 		/*!
-		 * \fn	bool Database::Open(const DbEnvironment* const pEnv);
+		 * \fn	bool Database::Open(const Environment* const pEnv);
 		 *
-		 * \brief	Opens by using the information from the passed DbEnvironment
+		 * \brief	Opens by using the information from the passed Environment
 		 *
-		 * \param [in,out]	pEnv	 	Pointer to the DbEnvironment to use to connect.
+		 * \param [in,out]	pEnv	 	Pointer to the Environment to use to connect.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         Open(const DbEnvironment* const pEnv);
+		bool         Open(const Environment* const pEnv);
 
 		/*!
 		 * \fn	bool Database::Close();

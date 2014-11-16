@@ -9,14 +9,14 @@
 #include "stdafx.h"
 
 // Own header
-#include "DbTableTest.h"
+#include "TableTest.h"
 
 // Same component headers
 #include "exOdbcGTest.h"
 #include "GenericTestTables.h"
 
 // Other headers
-#include "DbEnvironment.h"
+#include "Environment.h"
 #include "Database.h"
 
 // Debug
@@ -39,7 +39,7 @@ using namespace std;
 namespace exodbc
 {
 
-	void DbTableTest::SetUp()
+	void TableTest::SetUp()
 	{
 		// Called for every unit-test
 		m_odbcInfo = GetParam();
@@ -52,7 +52,7 @@ namespace exodbc
 		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
 
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		//m_pEnv = new DbEnvironment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+		//m_pEnv = new Environment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		//HENV henv = m_pEnv->GetHenv();
 		//ASSERT_TRUE(henv  != 0);
 
@@ -60,7 +60,7 @@ namespace exodbc
 		//ASSERT_TRUE(m_pDb->Open(m_pEnv));
 	}
 
-	void DbTableTest::TearDown()
+	void TableTest::TearDown()
 	{
 		//if(m_pDb)
 		//{
@@ -79,7 +79,7 @@ namespace exodbc
 
 	// Open
 	// ----
-	TEST_P(DbTableTest, Open)
+	TEST_P(TableTest, Open)
 	{
 	}
 

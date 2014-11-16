@@ -41,7 +41,7 @@
 #include "Database.h"
 
 // Same component headers
-#include "DbEnvironment.h"
+#include "Environment.h"
 #include "ColumnFormatter.h"
 #include "Helpers.h"
 
@@ -127,7 +127,7 @@ namespace exodbc
 		Initialize();
 	}
 
-	Database::Database(const DbEnvironment& env)
+	Database::Database(const Environment& env)
 	{
 		// Note: Init will set members to NULL
 		Initialize();
@@ -136,7 +136,7 @@ namespace exodbc
 		AllocateHdbc(env);
 	}
 
-	Database::Database(const DbEnvironment* const pEnv)
+	Database::Database(const Environment* const pEnv)
 		: m_fwdOnlyCursors(true)
 	{
 		exASSERT(pEnv);
@@ -203,7 +203,7 @@ namespace exodbc
 	}
 
 
-	bool Database::AllocateHdbc(const DbEnvironment& env)
+	bool Database::AllocateHdbc(const Environment& env)
 	{
 		exASSERT(m_hdbc == SQL_NULL_HDBC);
 		exASSERT(env.HaveHenv());
@@ -571,7 +571,7 @@ namespace exodbc
 	}
 
 
-	bool Database::Open(const DbEnvironment* const pEnv)
+	bool Database::Open(const Environment* const pEnv)
 	{
 		exASSERT(pEnv);
 

@@ -1,16 +1,16 @@
 /*!
- * \file DbEnvironment.h
+ * \file Environment.h
  * \author Elias Gerber <eg@zame.ch>
  * \date 25.07.2014
- * \brief Header file for the DbEnvironment class and its helpers.
+ * \brief Header file for the Environment class and its helpers.
  * 
- * The DbEnvironment class corresponds to the wxDbConnectInf class
+ * The Environment class corresponds to the wxDbConnectInf class
  * from wxWidgets 2.8.
 */ 
 
 #pragma once
-#ifndef DBENVIRONMENT_H
-#define DBENVIRONMENT_H
+#ifndef Environment_H
+#define Environment_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -57,7 +57,7 @@ namespace exodbc
 	*
 	* \brief Contains information about one DataSource-Entry from the driver-manager
 	* 
-	* \see DbEnvironment::ListDataSources
+	* \see Environment::ListDataSources
 	*/
 	struct EXODBCAPI SDataSource
 	{
@@ -74,7 +74,7 @@ namespace exodbc
 	// Classes
 	// -------
 	/*!
-	* \class DbEnvironment
+	* \class Environment
 	*
 	* \brief Represents the ODBC-Environment. Every Database needs an environment, 
 	* but one environment can be used to open multiple databases.
@@ -87,33 +87,33 @@ namespace exodbc
 	* connection-string) can be stored inside this object, but it is not required.
 	* 
 	*/
-	class EXODBCAPI DbEnvironment
+	class EXODBCAPI Environment
 	{
 	private:
 		// Prevent copies. We would mess up the env-handle.
-		DbEnvironment(const DbEnvironment& other) { exNOT_IMPL; };
+		Environment(const Environment& other) { exNOT_IMPL; };
 
 	public:
 		/*!
-		 * \fn	DbEnvironment::DbEnvironment();
+		 * \fn	Environment::Environment();
 		 *
 		 * \brief	Default constructor.
 		 * 			You must manually call AllocHandle() and SetOdbcVersion() after 
 		 * 			creating the object.
 		 */
-		DbEnvironment();
+		Environment();
 
 		/*!
-		 * \fn	DbEnvironment::DbEnvironment(OdbcVersion odbcVersion);
+		 * \fn	Environment::Environment(OdbcVersion odbcVersion);
 		 *
 		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
 		 *
 		 * \param	odbcVersion	The ODBC version.
 		 */
-		DbEnvironment(OdbcVersion odbcVersion);
+		Environment(OdbcVersion odbcVersion);
 
 		/*!
-		 * \fn	DbEnvironment::DbEnvironment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
+		 * \fn	Environment::Environment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
 		 *
 		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
 		 * 			The connection-information is set to not use a connection-string when connecting to the database later.
@@ -123,10 +123,10 @@ namespace exodbc
 		 * \param	password   	(Optional) the password.
 		 * \param	odbcVersion	(Optional) the ODBC version.
 		 */
-		DbEnvironment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
+		Environment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
 
 		/*!
-		 * \fn	DbEnvironment::DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
+		 * \fn	Environment::Environment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
 		 *
 		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
 		 * 			Connection-information is set to use a connection-string when connecting to the database laster.
@@ -134,17 +134,17 @@ namespace exodbc
 		 * \param	connectionString	The connection string.
 		 * \param	odbcVersion			(Optional) the ODBC version.
 		 */
-		DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
+		Environment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
 
 		/*!
-		 * \fn	DbEnvironment::~DbEnvironment();
+		 * \fn	Environment::~Environment();
 		 *
 		 * \brief	Destructor. Tries to free the env-handle, if one is allocated.
 		 */
-		~DbEnvironment();
+		~Environment();
 
 		/*!
-		 * \fn	bool DbEnvironment::Initialize();
+		 * \fn	bool Environment::Initialize();
 		 *
 		 * \brief	Initializes this object.
 		 * 			Set all members to 0.
@@ -155,7 +155,7 @@ namespace exodbc
 		bool			Initialize();
 
 		/*!
-		 * \fn	bool DbEnvironment::AllocHenv();
+		 * \fn	bool Environment::AllocHenv();
 		 *
 		 * \brief	Tries to allocate a new Henv.
 		 * 			Cannot be called if a Henv is allocated.
@@ -165,7 +165,7 @@ namespace exodbc
 		bool			AllocHenv();
 
 		/*!
-		 * \fn	bool DbEnvironment::FreeHenv();
+		 * \fn	bool Environment::FreeHenv();
 		 *
 		 * \brief	Tries to free an allocated Henv.
 		 * 			Can only be called if a Henv is allocated.
@@ -175,7 +175,7 @@ namespace exodbc
 		bool			FreeHenv();
 
 		/*!
-		 * \fn	bool DbEnvironment::HaveHenv()
+		 * \fn	bool Environment::HaveHenv()
 		 *
 		 * \brief	Returns true is a Henv is allocated.
 		 *
@@ -198,7 +198,7 @@ namespace exodbc
 		bool			UseConnectionStr() const { return m_useConnectionStr; }
 
 		/*!
-		 * \fn	void DbEnvironment::SetDsn(const std::wstring& dsn);
+		 * \fn	void Environment::SetDsn(const std::wstring& dsn);
 		 *
 		 * \brief	Sets a dsn.
 		 *
@@ -207,7 +207,7 @@ namespace exodbc
 		void			SetDsn(const std::wstring& dsn);
 
 		/*!
-		 * \fn	void DbEnvironment::SetUserID(const std::wstring& userID);
+		 * \fn	void Environment::SetUserID(const std::wstring& userID);
 		 *
 		 * \brief	Sets user identifier.
 		 *
@@ -216,7 +216,7 @@ namespace exodbc
 		void			SetUserID(const std::wstring& userID);
 
 		/*!
-		 * \fn	void DbEnvironment::SetPassword(const std::wstring &password);
+		 * \fn	void Environment::SetPassword(const std::wstring &password);
 		 *
 		 * \brief	Sets a password.
 		 *
@@ -225,7 +225,7 @@ namespace exodbc
 		void			SetPassword(const std::wstring &password);
 
 		/*!
-		 * \fn	void DbEnvironment::SetConnectionStr(const std::wstring &connectStr);
+		 * \fn	void Environment::SetConnectionStr(const std::wstring &connectStr);
 		 *
 		 * \brief	Sets connection string.
 		 *
@@ -237,7 +237,7 @@ namespace exodbc
 		void			SetConnectionStr(const std::wstring &connectStr);
 
 		/*!
-		 * \fn	bool DbEnvironment::SetOdbcVersion(OdbcVersion version);
+		 * \fn	bool Environment::SetOdbcVersion(OdbcVersion version);
 		 *
 		 * \brief	Sets ODBC version.
 		 *
@@ -248,7 +248,7 @@ namespace exodbc
 		bool			SetOdbcVersion(OdbcVersion version);		
 
 		/*!
-		 * \fn	OdbcVersion DbEnvironment::GetOdbcVersion();
+		 * \fn	OdbcVersion Environment::GetOdbcVersion();
 		 *
 		 * \brief	Gets ODBC version.
 		 *
@@ -259,7 +259,7 @@ namespace exodbc
 		enum ListMode { All, System, User };
 
 		/*!
-		 * \fn	bool DbEnvironment::ListDataSources(ListMode mode = All, std::vector<SDataSource>& dataSources) const;
+		 * \fn	bool Environment::ListDataSources(ListMode mode = All, std::vector<SDataSource>& dataSources) const;
 		 *
 		 * \brief	List data sources.
 		 *
@@ -279,8 +279,8 @@ namespace exodbc
 		wchar_t m_authStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)
 		wchar_t m_connectionStr[SQL_MAX_CONNECTSTR_LEN+1];    // Connection string (password)
 
-	};  // class DbEnvironment
+	};  // class Environment
 }
 
 
-#endif // DBENVIRONMENT_H
+#endif // Environment_H

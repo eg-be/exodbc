@@ -18,7 +18,7 @@
 
 // Other headers
 #include "gtest/gtest.h"
-#include "DbEnvironment.h"
+#include "Environment.h"
 
 // System headers
 
@@ -42,7 +42,7 @@ namespace exodbc
 
 	protected:
 		SOdbcInfo m_odbcInfo;
-		exodbc::DbEnvironment	m_env;
+		exodbc::Environment	m_env;
 		exodbc::Database*		m_pDb;
 
 		virtual void SetUp();
