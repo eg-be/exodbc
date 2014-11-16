@@ -120,21 +120,32 @@ namespace exodbc
 		return true;
 	}  // wxDbColInf::Initialize()
 
+	Database::Database()
+		: m_fwdOnlyCursors(true)
+	{
+		// Note: Init will set members to NULL
+		Initialize();
+	}
 
+	Database::Database(const DbEnvironment& env)
+	{
+		// Note: Init will set members to NULL
+		Initialize();
+
+		// Allocate the DBC-Handle
+		AllocateHdbc(env);
+	}
 
 	Database::Database(const DbEnvironment* const pEnv)
 		: m_fwdOnlyCursors(true)
 	{
 		exASSERT(pEnv);
 
+		// Note: Init will set members to NULL
 		Initialize();
 
 		// Allocate the DBC-Handle
-		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, pEnv->GetHenv(), &m_hdbc);
-		if(ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_ENV(pEnv->GetHenv(), ret, SQLAllocHandle);
-		}
+		AllocateHdbc(*pEnv);
 	}
 
 
@@ -145,24 +156,27 @@ namespace exodbc
 			Close();
 		}
 
-		// Free the connection-handle
-		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc);
-		if(ret != SQL_SUCCESS)
+		// Free the connection-handle if it is allocated
+		if (HasHdbc())
 		{
-			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched, use our standard logger
-			if(ret == SQL_ERROR)
+			SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc);
+			if (ret != SQL_SUCCESS)
 			{
-				LOG_ERROR_DBC(m_hdbc, ret, SQLFreeHandle);
+				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched, use our standard logger
+				if (ret == SQL_ERROR)
+				{
+					LOG_ERROR_DBC(m_hdbc, ret, SQLFreeHandle);
+				}
+				else
+				{
+					// We cannot get any error-info here
+					LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
+				}
 			}
-			else
+			if (ret == SQL_SUCCESS)
 			{
-				// We cannot get any error-info here
-				LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
+				m_hdbc = SQL_NULL_HDBC;
 			}
-		}
-		if(ret == SQL_SUCCESS)
-		{
-			m_hdbc = SQL_NULL_HDBC;
 		}
 	}
 
@@ -186,6 +200,22 @@ namespace exodbc
 
 		// transaction is not known until connected and set
 		m_transactionMode = TM_UNKNOWN;
+	}
+
+
+	bool Database::AllocateHdbc(const DbEnvironment& env)
+	{
+		exASSERT(m_hdbc == SQL_NULL_HDBC);
+		exASSERT(env.HaveHenv());
+
+		// Allocate the DBC-Handle
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, env.GetHenv(), &m_hdbc);
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_ENV(env.GetHenv(), ret, SQLAllocHandle);
+		}
+
+		return ret == SQL_SUCCESS;
 	}
 
 
