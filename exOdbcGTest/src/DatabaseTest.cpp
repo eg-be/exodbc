@@ -54,10 +54,10 @@ namespace exodbc
 	{
 		if(m_db.IsOpen())
 		{
-			// TODO: Why do we need to commit with DB2? We did not start anything??
-			m_db.CommitTrans();
-
-			m_db.Close();
+			// TODO: Why do we need to commit with most databases? We did not start anything??
+			// Probably because of we did not commit after one of the select statements
+			EXPECT_TRUE(m_db.CommitTrans());
+			EXPECT_TRUE(m_db.Close());
 		}
 	}
 

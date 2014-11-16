@@ -50,37 +50,27 @@ namespace exodbc
 
 		// And database
 		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
-
-//		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		//m_pEnv = new Environment(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
-		//HENV henv = m_pEnv->GetHenv();
-		//ASSERT_TRUE(henv  != 0);
-
-		//m_pDb = new Database(m_pEnv);
-		//ASSERT_TRUE(m_pDb->Open(m_pEnv));
+		ASSERT_TRUE(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
 	void TableTest::TearDown()
 	{
-		//if(m_pDb)
-		//{
-		//	// Why do we need to commit with DB2? We did not start anything??
-		//	m_pDb->CommitTrans();
-
-		//	m_pDb->Close();
-		//	delete m_pDb;
-		//}
-		//if(m_pEnv)
-		//	delete m_pEnv;
-
-		//m_pDb = NULL;
-		//m_pEnv = NULL;
+		if (m_db.IsOpen())
+		{
+			// Microsoft Sql Server needs a CommitTrans()
+			if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+			{
+				EXPECT_TRUE(m_db.CommitTrans());
+			}
+			EXPECT_TRUE(m_db.Close());
+		}
 	}
 
 	// Open
 	// ----
 	TEST_P(TableTest, Open)
 	{
+
 	}
 
 	// GetNext
