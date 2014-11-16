@@ -78,6 +78,35 @@ namespace exodbc
 		EXPECT_TRUE(db.Close());
 	}
 
+	TEST_P(DatabaseTest, ReadTransactionIsolationMode)
+	{
+		TransactionIsolationMode tiMode = m_db.ReadTransactionIsolationMode();
+		EXPECT_NE(TI_UNKNOWN, tiMode);
+	}
+
+	TEST_P(DatabaseTest, SetTransactionIsolationMode)
+	{
+		TransactionIsolationMode tiMode = TI_READ_COMMITTED;
+		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+		tiMode = m_db.ReadTransactionIsolationMode();
+		EXPECT_EQ(TI_READ_COMMITTED, tiMode);
+
+		tiMode = TI_READ_UNCOMMITTED;
+		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+		tiMode = m_db.ReadTransactionIsolationMode();
+		EXPECT_EQ(TI_READ_UNCOMMITTED, tiMode);
+
+		tiMode = TI_REPEATABLE_READ;
+		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+		tiMode = m_db.ReadTransactionIsolationMode();
+		EXPECT_EQ(TI_REPEATABLE_READ, tiMode);
+
+		tiMode = TI_SERIALIZABLE;
+		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+		tiMode = m_db.ReadTransactionIsolationMode();
+		EXPECT_EQ(TI_SERIALIZABLE, tiMode);
+
+	}
 
 	TEST_P(DatabaseTest, Open)
 	{		

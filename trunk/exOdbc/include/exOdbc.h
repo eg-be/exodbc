@@ -318,6 +318,15 @@ namespace exodbc
 		TM_MANUAL_COMMIT	//< Autocommit off
 	};
 
+	enum TransactionIsolationMode
+	{
+		TI_UNKNOWN = 0,
+		TI_READ_UNCOMMITTED = SQL_TXN_READ_UNCOMMITTED,
+		TI_READ_COMMITTED = SQL_TXN_READ_COMMITTED,
+		TI_REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,
+		TI_SERIALIZABLE = SQL_TXN_SERIALIZABLE
+	};
+
 	// ODBC Error codes (derived from ODBC SqlState codes)
 	enum wxODBC_ERRORS
 	{

@@ -533,6 +533,10 @@ namespace exodbc
 		 */
 		TransactionMode GetTransactionMode() { return m_transactionMode; };
 
+		TransactionIsolationMode ReadTransactionIsolationMode();
+
+		bool		SetTransactionIsolationMode(TransactionIsolationMode mode);
+
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		void         DispNextError();

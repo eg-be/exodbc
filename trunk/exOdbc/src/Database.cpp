@@ -2825,6 +2825,32 @@ namespace exodbc
 	}
 
 
+	TransactionIsolationMode Database::ReadTransactionIsolationMode()
+	{
+		SQLUINTEGER modeValue;
+		SQLINTEGER cb;
+		SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_ATTR_TXN_ISOLATION, &modeValue, sizeof(modeValue), &cb);
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLGetConnectAttr, L"Failed to read Attr SQL_ATTR_TXN_ISOLATION");
+			return TI_UNKNOWN;
+		}
+
+		switch (modeValue)
+		{
+		case SQL_TXN_READ_UNCOMMITTED:
+			return TI_READ_UNCOMMITTED;
+		case SQL_TXN_READ_COMMITTED:
+			return TI_READ_COMMITTED;
+		case SQL_TXN_REPEATABLE_READ:
+			return TI_REPEATABLE_READ;
+		case SQL_TXN_SERIALIZABLE:
+			return TI_SERIALIZABLE;
+		}
+
+		return TI_UNKNOWN;
+	}
+
 	bool Database::SetTransactionMode(TransactionMode mode)
 	{
 		SQLRETURN ret;
@@ -2855,6 +2881,29 @@ namespace exodbc
 
 		return false;
 	}
+
+
+	bool Database::SetTransactionIsolationMode(TransactionIsolationMode mode)
+	{
+		SQLRETURN ret;
+		std::wstring errStringMode;
+		ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, NULL);
+
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Setting SQL_ATTR_TXN_ISOLATION to %d returned with SQL_SUCCESS_WITH_INFO") % mode).str());
+		}
+
+		if (SQL_SUCCEEDED(ret))
+		{
+			return true;
+		}
+
+		LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Cannot set SQL_ATTR_TXN_ISOLATION to %d") % mode).str());
+
+		return false;
+	}
+
 
 	///********** wxDb::Catalog() **********/
 	//bool Database::Catalog(const wchar_t *userID, const std::wstring &fileName)
