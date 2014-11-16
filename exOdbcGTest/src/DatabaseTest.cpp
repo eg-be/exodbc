@@ -54,27 +54,50 @@ namespace exodbc
 	{
 		if(m_db.IsOpen())
 		{
-			// TODO: Why do we need to commit with most databases? We did not start anything??
-			// Probably because of we did not commit after one of the select statements
-			EXPECT_TRUE(m_db.CommitTrans());
 			EXPECT_TRUE(m_db.Close());
 		}
 	}
 
-
-	TEST_P(DatabaseTest, OpenFromEnv)
+	TEST_P(DatabaseTest, SetConnectionAttributes)
 	{
 		Database db(m_env);
+		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
-		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		EXPECT_TRUE(db.SetConnectionAttributes());
+		// Note: On this and the following small friend-tests we manually close to fail because of #51
+		EXPECT_TRUE(db.Close());
+	}
 
-		// only ms sql server needs a commit trans here so far?
-		if(db.Dbms() == dbmsMS_SQL_SERVER)
-		{
-			db.CommitTrans();
-		}
-		
-		db.Close();
+	TEST_P(DatabaseTest, ReadDbInfo)
+	{
+		Database db(m_env);
+		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+
+		SDbInfo dbInfo;
+		EXPECT_TRUE(db.ReadDbInfo(dbInfo));
+		EXPECT_TRUE(db.Close());
+	}
+
+
+	TEST_P(DatabaseTest, Open)
+	{		
+		// Open an existing db by passing the Env to the ctor and reading the params from the Environment (the old wx-way)
+		Environment env(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, OV_3);
+		EXPECT_TRUE(env.HaveHenv());
+		Database db(env);
+		EXPECT_TRUE(db.Open(&env));
+		EXPECT_TRUE(db.Close());
+
+		// Open an existing db using the default c'tor and setting params on db
+		Database db2;
+		EXPECT_TRUE(db2.AllocateHdbc(env));
+		EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		EXPECT_TRUE(db2.Close());
+
+		// Try to open with a different password / user, expect to fail when opening the db.
+		Database failDb(m_env);
+		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit errors";
+		EXPECT_FALSE(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"));
 	}
 
 	// TODO: Test Close. Close should return a value if succeeded
@@ -83,12 +106,6 @@ namespace exodbc
 		// Try to close a db that really is open
 		Database db1(m_env);
 		ASSERT_TRUE(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-
-		// only ms sql server needs a commit trans here so far?
-		if(db1.Dbms() == dbmsMS_SQL_SERVER)
-		{
-			db1.CommitTrans();
-		}
 
 		EXPECT_TRUE(db1.Close());
 
@@ -109,11 +126,6 @@ namespace exodbc
 		Database db(m_env);
 		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
-		if(db.Dbms() == dbmsMS_SQL_SERVER)
-		{
-			LOG_WARNING(L"This test is supposed to spit warning if connected against MS Sql Server and Ticket #51 is not fixed yet");
-		}
-
 		// We default to manual commit
 		EXPECT_EQ(TM_MANUAL_COMMIT, db.GetTransactionMode());
 		EXPECT_EQ(TM_MANUAL_COMMIT, db.ReadTransactionMode());
@@ -131,7 +143,7 @@ namespace exodbc
 		EXPECT_EQ(TM_MANUAL_COMMIT, db.ReadTransactionMode());
 
 		// Close db
-		db.Close();
+		EXPECT_TRUE(db.Close());
 	}
 
 	TEST_P(DatabaseTest, ReadDataTypesInfo)
@@ -163,13 +175,7 @@ namespace exodbc
 
 		BOOST_LOG_TRIVIAL(info) << ws.str();
 
-		// TODO: needed for ms only (?)
-		if(db.Dbms() == dbmsMS_SQL_SERVER)
-		{
-			db.CommitTrans();
-		}
-
-		db.Close();
+		EXPECT_TRUE(db.Close());
 	}
 
 	TEST_P(DatabaseTest, GetDbInfo)
@@ -184,45 +190,8 @@ namespace exodbc
 		EXPECT_TRUE(sInfo.length() > 0);
 		BOOST_LOG_TRIVIAL(info) << L"DbInfo of database connected to DSN " << m_odbcInfo.m_dsn.c_str() << std::endl << sInfo.c_str();
 
-		// TODO: needed for ms only (?)
-		if(db.Dbms() == dbmsMS_SQL_SERVER)
-		{
-			db.CommitTrans();
-		}
+		EXPECT_TRUE(db.Close());
 
-		db.Close();
-
-	}
-
-	TEST_P(DatabaseTest, Open)
-	{		
-		// Open an existing db by passing the Env to the ctor and reading the params from the Environment (the old wx-way)
-		Environment env(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, OV_3);
-		EXPECT_TRUE(env.HaveHenv());
-		Database db(env);
-		EXPECT_TRUE(db.Open(&env));
-		// only ms sql server needs a commit trans here so far (before closing)?
-		if(db.Dbms() == dbmsMS_SQL_SERVER)
-		{
-			db.CommitTrans();
-		}
-		db.Close();
-
-		// Open an existing db using the default c'tor and setting params on db
-		Database db2;
-		EXPECT_TRUE(db2.AllocateHdbc(env));
-		EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		// only ms sql server needs a commit trans here so far (before closing)?
-		if (db2.Dbms() == dbmsMS_SQL_SERVER)
-		{
-			db2.CommitTrans();
-		}
-		db2.Close();
-
-		// Try to open with a different password / user, expect to fail when opening the db.
-		Database failDb(m_env);
-		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit errors";
-		EXPECT_FALSE(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"));
 	}
 
 
@@ -278,6 +247,11 @@ namespace exodbc
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_TRUE( pTable->GetNext());
 
+		// TODO: Need to fix this in the Table, see #51
+		if (m_db.GetTransactionMode() != TM_AUTO_COMMIT)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
 		delete pTable;
 	}
 
@@ -305,6 +279,11 @@ namespace exodbc
 		EXPECT_TRUE( pTable->QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_FALSE( pTable->GetNext());
 
+		// TODO: Need to fix this in the Table, see #51
+		if (m_db.GetTransactionMode() != TM_AUTO_COMMIT)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
 		delete pTable;
 	}
 

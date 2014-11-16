@@ -68,8 +68,19 @@ namespace exodbc
 
 	// Open
 	// ----
-	TEST_P(TableTest, Open)
+	TEST_P(TableTest, OpenWithoutCheck)
 	{
+		// Open a table without checking for privileges or existence
+		IntTypesTable table(&m_db);
+		EXPECT_TRUE(table.Open(false, false));
+	}
+
+	TEST_P(TableTest, OpenCheckExistance)
+	{
+		// Open a table with checking for existence
+		//EXPECT_TRUE(m_db.SetTransactionMode(exodbc::TM_AUTO_COMMIT));
+		IntTypesTable table(&m_db);
+		EXPECT_TRUE(table.Open(false, true));
 
 	}
 
