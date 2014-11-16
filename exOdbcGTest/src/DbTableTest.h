@@ -16,16 +16,13 @@
 
 // Other headers
 #include "gtest/gtest.h"
+#include "DbEnvironment.h"
+#include "Database.h"
 
 // System headers
 
 // Forward declarations
 // --------------------
-namespace exodbc
-{
-	class Database;
-	class DbEnvironment;
-}
 
 // Structs
 // -------
@@ -41,6 +38,8 @@ namespace exodbc
 		static void TearDownTestCase() {};
 
 	protected:
+		exodbc::DbEnvironment m_env;
+		exodbc::Database m_db;
 		exodbc::Database*	m_pDb;
 		exodbc::DbEnvironment* m_pEnv;
 		SOdbcInfo m_odbcInfo;

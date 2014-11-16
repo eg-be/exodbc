@@ -206,31 +206,32 @@ namespace exodbc
 	{
 		HENV henv = m_pDbEnv->GetHenv();
 		ASSERT_TRUE(henv  != 0);
-
-		Database* pDb = new Database(m_pDbEnv);
-
-		// Open an existing database
-		EXPECT_TRUE(pDb->Open(m_pDbEnv));
-
-		// only ms sql server needs a commit trans here so far?
-		if(pDb->Dbms() == dbmsMS_SQL_SERVER)
-		{
-			pDb->CommitTrans();
-		}
 		
-		pDb->Close();
-		delete pDb;
+		// Open an existing db by passing the Env to the ctor and reading the params from the Environment
+		Database db(m_pDbEnv);
+		EXPECT_TRUE(db.Open(m_pDbEnv));
+		// only ms sql server needs a commit trans here so far (before closing)?
+		if(db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			db.CommitTrans();
+		}
+		db.Close();
+
+		// Open an existing db using the default c'tor and reading params from the Env
+		Database db2;
+		EXPECT_TRUE(db2.AllocateHdbc(*m_pDbEnv));
+		EXPECT_TRUE(db2.Open(m_pDbEnv));
+		// only ms sql server needs a commit trans here so far (before closing)?
+		if (db2.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			db2.CommitTrans();
+		}
+		db2.Close();
 
 		// Try to open with a different password / user, expect to fail when opening the db.
-		// TODO: Getting the HENV never fails? Add some tests for the HENV
-		DbEnvironment* pFailEnv = new DbEnvironment(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword");
-		EXPECT_TRUE(pFailEnv->GetHenv() != NULL);
-		Database* pFailDb = new Database(pFailEnv);
+		Database failDb(m_pDbEnv);
 		BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit errors";
-		EXPECT_FALSE(pFailDb->Open(pFailEnv));
-		pFailDb->Close();
-		delete pFailDb;
-		delete pFailEnv;
+		EXPECT_FALSE(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"));
 	}
 
 

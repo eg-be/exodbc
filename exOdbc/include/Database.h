@@ -187,21 +187,56 @@ namespace exodbc
 		friend class DbTest;
 		FRIEND_TEST(DbTest, ReadDataTypesInfo); 
 #endif
-
 	public:
 		/*!
+		* \brief	Default Constructor. You will need to manually allocate the DBC-Handle.
+		* \detailed	Default Constructor. You will need to call AllocateHenv() afterwards.
+		*
+		*/
+		Database();
+
+		/*!
+		* \brief	Create a new Database-instance. The instance will be using the passed
+		*			DbEnvironment.
+		* \detailed	The Database will try to create a new Db-Connection handle during construction.
+		*				No Exception is thrown if doing so fails, you can use HasHdbc() to check if
+		*				creating the Db-Connection handle was successfull.
+		*				The handle will be freed by the Database on destruction.
+		*
+		* \param	pEnv		The DbEnvironment to use to create this database and its connection.
+		*						Do not free the DbEnvironment before you free the Database.
+		*/
+		Database(const DbEnvironment& env);
+
+		/*!
 		 * \brief	Create a new Database-instance. The instance will be using the passed
-		 *			DbEnvironment.
+		 *			DbEnvironment. Note: This constructor is here for compatibility with wxWidgets.
 		 * \detailed	The Database will try to create a new Db-Connection handle during construction.
 		 *				No Exception is thrown if doing so fails, you can use HasHdbc() to check if
 		 *				creating the Db-Connection handle was successfull.
 		 *				The handle will be freed by the Database on destruction.
+		 *				Note: This function is here for compatibility with wxWidgets which used pointers
 		 *
 		 * \param	pEnv		The DbEnvironment to use to create this database and its connection.
 		 *						Do not free the DbEnvironment before you free the Database.
 		*/
 		Database(const DbEnvironment* const pEnv);
+		
 		~Database();
+
+		/*!
+		* \brief	Tries to allocate a new DBC-Handle from the passed Environment and stores that
+		*			DBC-Handle for later use internally. Will be freed on destruction.
+		* \detailed	The Database will try to create a new Db-Connection using the Environment-handle
+		*			from the passed Environment. This newly created Connection-Handle is stored 
+		*			for later use. 
+		*			The DBC-handle will be freed by the Database on destruction.
+		*			Can only be called if no handle is allocated yet
+		*
+		* \param	env		The DbEnvironment to use to create this connection-handle.
+		*						Do not free the DbEnvironment before you free the Database.
+		*/
+		bool		AllocateHdbc(const DbEnvironment& env);
 
 		/*!
 		 * \fn	bool Database::Open(const std::wstring& inConnectStr);

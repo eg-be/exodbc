@@ -27,26 +27,26 @@ namespace exodbc
 	// ------------
 	
 	DbEnvironment::DbEnvironment()
-		: m_henv(NULL)
-		, m_freeHenvOnDestroy(false)
+		: m_freeHenvOnDestroy(false)
 	{
+		// Note: Init will set members to NULL
 		Initialize();
 	}
 	
 	
 	DbEnvironment::DbEnvironment(OdbcVersion odbcVersion)
-		: m_henv(NULL)
-		, m_freeHenvOnDestroy(false)
+		: m_freeHenvOnDestroy(false)
 	{
+		// Note: Init will set members to NULL
 		Initialize();
 		AllocHenv();
 		SetOdbcVersion(odbcVersion);
 	} 
 
 	DbEnvironment::DbEnvironment(const std::wstring& dsn, const std::wstring& userID, const std::wstring& password, OdbcVersion odbcVersion /* = OV_3 */ )
-		: m_henv(NULL)
-		, m_freeHenvOnDestroy(false)
+		: m_freeHenvOnDestroy(false)
 	{
+		// Note: Init will set members to NULL
 		Initialize();
 		AllocHenv(); // note: might fail
 		SetOdbcVersion(odbcVersion);
@@ -57,12 +57,9 @@ namespace exodbc
 	}
 
 	DbEnvironment::DbEnvironment(const std::wstring& connectionString, OdbcVersion odbcVersion /* = OV_3 */ )
-		: m_henv(NULL)
-		, m_freeHenvOnDestroy(false)
+		: m_freeHenvOnDestroy(false)
 	{
-		m_henv = 0;
-		m_freeHenvOnDestroy = false;
-
+		// Note: Init will set members to NULL
 		Initialize();
 		AllocHenv(); // note: might fail
 		SetOdbcVersion(odbcVersion);
@@ -85,8 +82,6 @@ namespace exodbc
 	// --------------
 	bool DbEnvironment::Initialize()
 	{
-		exASSERT(m_henv == NULL);
-
 		m_henv = NULL;
 		m_freeHenvOnDestroy = false;
 
