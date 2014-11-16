@@ -296,6 +296,13 @@ namespace exodbc
 
 	// Enums
 	// -----
+	/*!
+	* \enum	OdbcVersion
+	*
+	* \brief	Defines the ODBC-Version to be set.
+	* 			see: http://msdn.microsoft.com/en-us/library/ms709316%28v=vs.85%29.aspx
+	*
+	*/
 	enum OdbcVersion
 	{
 		OV_UNKNOWN = 0, //< Unknown Version
@@ -318,6 +325,12 @@ namespace exodbc
 		TM_MANUAL_COMMIT = SQL_AUTOCOMMIT_OFF	//< Autocommit off
 	};
 
+	/*!
+	* \enum	TransactionIsolationMode
+	*
+	* \brief	Defines the Transaction Isolation Mode
+	*			see: http://msdn.microsoft.com/en-us/library/ms709374%28v=vs.85%29.aspx
+	*/
 	enum TransactionIsolationMode
 	{
 		TI_UNKNOWN = -1,
