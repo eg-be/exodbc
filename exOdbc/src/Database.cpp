@@ -1363,6 +1363,8 @@ namespace exodbc
 
 	bool Database::ExecSql(const std::wstring& sqlStmt, ExecFailMode mode /* = NotFailOnNoData */)
 	{
+		exASSERT(IsOpen());
+
 		RETCODE retcode;
 
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2887,7 +2889,16 @@ namespace exodbc
 	{
 		SQLRETURN ret;
 		std::wstring errStringMode;
-		ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, NULL);
+#if defined HAVE_MSODBCSQL_H
+		if (mode == TI_SNAPSHOT)
+		{
+			ret = SQLSetConnectAttr(m_hdbc, (SQL_COPT_SS_TXN_ISOLATION), (SQLPOINTER)mode, NULL);
+		}
+		else
+#endif
+		{
+			ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, NULL);
+		}
 
 		if (ret == SQL_SUCCESS_WITH_INFO)
 		{
@@ -2906,7 +2917,7 @@ namespace exodbc
 
 	bool Database::CanSetTransactionIsolationMode(TransactionIsolationMode mode)
 	{
-		return (m_dbInf.txnIsolationOptions & (SQLUINTEGER) mode);
+		return (m_dbInf.txnIsolationOptions & (SQLUINTEGER) mode) != 0;
 	}
 
 	///********** wxDb::Catalog() **********/

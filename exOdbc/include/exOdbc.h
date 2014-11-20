@@ -28,6 +28,9 @@
 #include <sqlext.h>
 #include <sqlucode.h>
 #include <odbcinst.h>
+#if defined HAVE_MSODBCSQL_H
+	#include "msodbcsql.h"
+#endif
 
 namespace exodbc
 {
@@ -338,6 +341,9 @@ namespace exodbc
 		TI_READ_COMMITTED = SQL_TXN_READ_COMMITTED,
 		TI_REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,
 		TI_SERIALIZABLE = SQL_TXN_SERIALIZABLE
+#if defined HAVE_MSODBCSQL_H
+		, TI_SNAPSHOT = SQL_TXN_SS_SNAPSHOT
+#endif
 	};
 
 	// ODBC Error codes (derived from ODBC SqlState codes)

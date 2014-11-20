@@ -274,47 +274,66 @@ namespace exodbc
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 
 		// TODO: There is still a lot wrong with Ticket #51 and Tables
-		//// TODO / Note: If we try to read now from a different database, we do not see the inserted recorded until it is commited
-		//// BUT: Microsoft SQL Server will just block the second database while a transaction is open
-		//// We need to examine that behaviour, it must be some option.
-		//if (m_db.Dbms() != dbmsMS_SQL_SERVER)
-		//{
-		//	Database db2(m_env);
-		//	EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		//	{
-		//		IntTypesTmpTable table2(&db2);
-		//		EXPECT_TRUE(table2.Open(false, false));
-		//		EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		//		EXPECT_FALSE(table2.GetNext());
-		//	}
-		//	// TODO: see #51
-		//	if (db2.GetTransactionMode() != TM_AUTO_COMMIT)
-		//	{
-		//		EXPECT_TRUE(m_db.CommitTrans());
-		//	}
-		//	EXPECT_TRUE(db2.Close());
-		//}
+		// Note: If we try to read now from a different database, we do not see the inserted recorded until it is committed
+		// BUT: Microsoft SQL Server will just block the second database while a transaction is open
+		// We need to examine that behavior, it must be some option. -> Yes, it is the SNAPSHOT Transaction isolation
+		{
+			Database db2(m_env);
+			EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			// This is extremely confusing: Why do we need to switch to AUTO_COMMIT to set the transaction mode to SNAPSHOT?
+			// Note: Setting the transaction mode works always, but doing a query afterwards only if it was set during an auto-commit-mode ?? 
+			// TODO: WTF???
+			// I guess I got it now: If we change the Transaction-mode on the Connection-Handle, we need to get a new statement-handle afterwards or so:
+			// Or: If we set the transaction-mode in the database itself at the very beginning, before the statement-handle of the database is opened
+			// thing work fine, without the need to change the transaction-mode
+			if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+			{
+#if HAVE_MSODBCSQL_H
+				EXPECT_TRUE(db2.SetTransactionMode(TM_AUTO_COMMIT));
+				EXPECT_TRUE(db2.SetTransactionIsolationMode(TI_SNAPSHOT));
+				EXPECT_TRUE(db2.SetTransactionMode(TM_MANUAL_COMMIT));
+				IntTypesTmpTable table2(&db2);
+				EXPECT_TRUE(table2.Open(false, false));
+				EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+				EXPECT_FALSE(table2.GetNext());
+#else
+				LOG_WARNING(L"Test runs agains MS SQL Server but HAVE_MSODBCSQL_H is not defined. Cannot run test without setting Transaction Mode to Snapshot, or the test would block");
+				EXPECT_TRUE(false);
+#endif
+			}
+			else
+			{
+				EXPECT_TRUE(db2.SetTransactionIsolationMode(TI_READ_COMMITTED));
+				IntTypesTmpTable table2(&db2);
+				EXPECT_TRUE(table2.Open(false, false));
+				EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+				EXPECT_FALSE(table2.GetNext());
+			}
+			// TODO: see #51
+			if (db2.GetTransactionMode() != TM_AUTO_COMMIT)
+			{
+				EXPECT_TRUE(db2.CommitTrans());
+			}
+			EXPECT_TRUE(db2.Close());
+		}
 
-		// Once we commit we have one record, also in a differnt database
+		// Once we commit we have one record, also in a different database
 		EXPECT_TRUE( m_db.CommitTrans() );
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		EXPECT_TRUE( table.GetNext());
 
-		//Database db2(m_env);
-		//EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		//{
-		//	IntTypesTmpTable table2(&db2);
-		//	EXPECT_TRUE(table2.Open(false, false));
-		//	EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		//	EXPECT_TRUE(table2.GetNext());
-		//}
-		//// TODO: See #51
-		//if (db2.GetTransactionMode() != TM_AUTO_COMMIT)
-		//{
-		//	EXPECT_TRUE(m_db.CommitTrans());
-		//}
-
-		//EXPECT_TRUE(db2.Close());
+		Database db2(m_env);
+		EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		{
+			IntTypesTmpTable table2(&db2);
+			EXPECT_TRUE(table2.Open(false, false));
+			EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+			EXPECT_TRUE(table2.GetNext());
+		}
+		// TODO: see #51
+		if (db2.GetTransactionMode() != TM_AUTO_COMMIT)
+		{
+			EXPECT_TRUE(db2.CommitTrans());
+		}
+		EXPECT_TRUE(db2.Close());
 
 		// TODO: Need to fix this in the Table, see #51
 		if (m_db.GetTransactionMode() != TM_AUTO_COMMIT)
