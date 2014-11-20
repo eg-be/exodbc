@@ -38,6 +38,10 @@
 #include <sqlext.h>
 #include <sqlucode.h>
 #include <odbcinst.h>
+// If we have the header for the MS SQL Server, include it
+#if defined HAVE_MSODBCSQL_H
+	#include "msodbcsql.h"
+#endif
 
 // our stuff
 #include "Helpers.h"
