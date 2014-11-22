@@ -90,21 +90,37 @@ namespace exodbc
 		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_READ_COMMITTED, tiMode);
+		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TI_READ_UNCOMMITTED;
 		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_READ_UNCOMMITTED, tiMode);
+		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TI_REPEATABLE_READ;
 		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_REPEATABLE_READ, tiMode);
+		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TI_SERIALIZABLE;
 		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_SERIALIZABLE, tiMode);
+		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
+
+		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			tiMode = TI_SNAPSHOT;
+			EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+			tiMode = m_db.ReadTransactionIsolationMode();
+			EXPECT_EQ(TI_SNAPSHOT, tiMode);
+			EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
+		}
+
+		// Commit any ongoing transaction so we do not fail when closing the db
+		m_db.CommitTrans();
 	}
 
 	TEST_P(DatabaseTest, CanSetTransactionIsolationMode)
@@ -257,7 +273,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, TestCommitTransaction)
+	TEST_P(DatabaseTest, CommitTransaction)
 	{
 		IntTypesTmpTable table(&m_db);
 		ASSERT_TRUE(table.Open(false, false));
@@ -289,9 +305,7 @@ namespace exodbc
 			if (m_db.Dbms() == dbmsMS_SQL_SERVER)
 			{
 #if HAVE_MSODBCSQL_H
-				EXPECT_TRUE(db2.SetTransactionMode(TM_AUTO_COMMIT));
 				EXPECT_TRUE(db2.SetTransactionIsolationMode(TI_SNAPSHOT));
-				EXPECT_TRUE(db2.SetTransactionMode(TM_MANUAL_COMMIT));
 				IntTypesTmpTable table2(&db2);
 				EXPECT_TRUE(table2.Open(false, false));
 				EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));

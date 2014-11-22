@@ -2848,6 +2848,8 @@ namespace exodbc
 			return TI_REPEATABLE_READ;
 		case SQL_TXN_SERIALIZABLE:
 			return TI_SERIALIZABLE;
+		case SQL_TXN_SS_SNAPSHOT:
+			return TI_SNAPSHOT;
 		}
 
 		return TI_UNKNOWN;
@@ -2887,12 +2889,33 @@ namespace exodbc
 
 	bool Database::SetTransactionIsolationMode(TransactionIsolationMode mode)
 	{
+		// Close the Cursor on the internal statement-handle
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		
+		// If Autocommit is off, we need to commit on certain db-systems, see #51
+		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
+		}
+
 		SQLRETURN ret;
 		std::wstring errStringMode;
 #if defined HAVE_MSODBCSQL_H
 		if (mode == TI_SNAPSHOT)
 		{
+			// Its confusing: MsSql Server 2014 seems to be unable to change the snapshot isolation if the commit mode is not set to autocommit
+			// If we do not set it to auto first, the next statement executed will complain that it was started under a different isolation mode than snapshot
+			bool wasManualCommit = false;
+			if (GetTransactionMode() == TM_MANUAL_COMMIT)
+			{
+				wasManualCommit = true;
+				SetTransactionMode(TM_AUTO_COMMIT);
+			}
 			ret = SQLSetConnectAttr(m_hdbc, (SQL_COPT_SS_TXN_ISOLATION), (SQLPOINTER)mode, NULL);
+			if (wasManualCommit)
+			{
+				SetTransactionMode(TM_MANUAL_COMMIT);
+			}
 		}
 		else
 #endif
