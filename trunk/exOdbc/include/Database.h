@@ -188,6 +188,12 @@ namespace exodbc
 	* to connect to the Database. It provides methods for opening and closing a
 	* connection to a database and basic operations for querying the database.
 	*
+	* There are some naming conventions used with the methods inside this class:
+	* A method named ReadXXX will read a value a property from the database and
+	* update the internally cached value (if there is one) if reading was successful.
+	* A method named GetXXX will return the internally cached value of the property.
+	* A method named SetXXX will try to set the property on the database. If successfull,
+	* an eventually internally cached value will be updated.
 	*/
 	class EXODBCAPI Database
 	{
@@ -500,34 +506,32 @@ namespace exodbc
 		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableInfo>& tables);
 
 		/*!
-		 * \fn	TransactionMode Database::ReadTransactionMode();
-		 *
 		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT. The internal flag
-		 * 			m_transactionMode is not changed.
+		 * 			m_commitMode is updated with the value red from the database.
 		 *
-		 * \return	TM_UNKNOWN if fails, else the mode currently set
+		 * \return	CM_UNKNOWN if fails, else the mode currently set
 		 */
-		TransactionMode		ReadTransactionMode();
+		CommitMode		ReadCommitMode();
 
 		/*!
 		 * \brief	Sets transaction mode on the database, using the attribute SQL_ATTR_AUTOCOMMIT.
-		 * 			This will also update the internal flag m_transactionMode, if changing the mode
+		 * 			This will also update the internal flag m_commitMode, if changing the mode
 		 * 			was successful.
-		 * \see	GetTransactionMode()
+		 * \see		GetCommitMode()
 		 *
 		 * \param	mode	The mode to set.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		SetTransactionMode(TransactionMode mode);
+		bool		SetCommitMode(CommitMode mode);
 
 		/*!
 		 * \brief	Gets transaction mode from the internally cached value.
-		 * \see		SetTransactionMode(TransactionMode mode)
+		 * \see		SetCommitMode()
 		 *
 		 * \return	The transaction mode.
 		 */
-		TransactionMode GetTransactionMode() { return m_transactionMode; };
+		CommitMode GetCommitMode() { return m_commitMode; };
 
 		/*!
 		* \brief	Queries the database for the attribute SQL_TXN_ISOLATION.
@@ -538,6 +542,9 @@ namespace exodbc
 
 		/*!
 		* \brief	Sets transaction mode on the database, using the attribute SQL_TXN_ISOLATION.
+		*			Calling this method will first close the internal statement-handle.
+		*			If the transaction mode is set to TM_MANUAL it will then commit any ongoing transaction.
+		*			
 		*
 		* \param	mode	The mode to set.
 		*
@@ -678,7 +685,7 @@ namespace exodbc
 		//Error reporting mode
 		bool m_silent;
 
-		TransactionMode		m_transactionMode;
+		CommitMode		m_commitMode;
 
 		// Information about logical data types VARCHAR, INTEGER, FLOAT and DATE.
 		//

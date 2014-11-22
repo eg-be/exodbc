@@ -315,17 +315,17 @@ namespace exodbc
 	};
 
 	/*!
-	 * \enum	TransactionMode
+	 * \enum	CommitMode
 	 *
 	 * \brief	Defines whether auto commit is on or off.
 	 * 			see: http://msdn.microsoft.com/en-us/library/ms713600%28v=vs.85%29.aspx
 	 * 			
 	 */
-	enum TransactionMode
+	enum CommitMode
 	{
-		TM_UNKNOWN = 50000,			//< Unknown Commit mode
-		TM_AUTO_COMMIT = SQL_AUTOCOMMIT,		//< Autocommit on
-		TM_MANUAL_COMMIT = SQL_AUTOCOMMIT_OFF	//< Autocommit off
+		CM_UNKNOWN = 50000,			//< Unknown Commit mode
+		CM_AUTO_COMMIT = SQL_AUTOCOMMIT,		//< Autocommit on
+		CM_MANUAL_COMMIT = SQL_AUTOCOMMIT_OFF	//< Autocommit off
 	};
 
 	/*!
