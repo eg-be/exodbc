@@ -199,7 +199,7 @@ namespace exodbc
 		m_dbOpenedWithConnectionString = false;
 
 		// transaction is not known until connected and set
-		m_transactionMode = TM_UNKNOWN;
+		m_commitMode = CM_UNKNOWN;
 	}
 
 
@@ -587,7 +587,7 @@ namespace exodbc
 	bool Database::SetConnectionAttributes()
 	{
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
-		bool ok = SetTransactionMode(TM_MANUAL_COMMIT);
+		bool ok = SetCommitMode(CM_MANUAL_COMMIT);
 
 		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, NULL);
 		if(ret != SQL_SUCCESS)
@@ -748,7 +748,7 @@ namespace exodbc
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
 		{
 			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
 		}
@@ -881,7 +881,7 @@ namespace exodbc
 		}
 
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
 		{
 			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
 		}
@@ -2439,7 +2439,7 @@ namespace exodbc
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
 		{
 			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
 		}
@@ -2524,7 +2524,7 @@ namespace exodbc
 		}
 
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
 		{
 			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
 		}
@@ -2646,7 +2646,7 @@ namespace exodbc
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
 		{
 			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
 		}
@@ -2768,7 +2768,7 @@ namespace exodbc
 		}
 
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
 		{
 			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
 		}
@@ -2805,7 +2805,7 @@ namespace exodbc
 		return true;
 	}
 
-	TransactionMode Database::ReadTransactionMode()
+	CommitMode Database::ReadCommitMode()
 	{
 		SQLUINTEGER modeValue;
 		SQLINTEGER cb;
@@ -2813,15 +2813,17 @@ namespace exodbc
 		if(ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLGetConnectAttr, L"Failed to read Attr SQL_ATTR_AUTOCOMMIT");
-			return TM_UNKNOWN;
+			return CM_UNKNOWN;
 		}
 
-		TransactionMode mode = TM_UNKNOWN;
+		CommitMode mode = CM_UNKNOWN;
 
 		if(modeValue == SQL_AUTOCOMMIT_OFF)
-			mode = TM_MANUAL_COMMIT;
+			mode = CM_MANUAL_COMMIT;
 		else if(modeValue == SQL_AUTOCOMMIT_ON)
-			mode = TM_AUTO_COMMIT;
+			mode = CM_AUTO_COMMIT;
+
+		m_commitMode = mode;
 
 		return mode;
 	}
@@ -2855,11 +2857,11 @@ namespace exodbc
 		return TI_UNKNOWN;
 	}
 
-	bool Database::SetTransactionMode(TransactionMode mode)
+	bool Database::SetCommitMode(CommitMode mode)
 	{
 		SQLRETURN ret;
 		std::wstring errStringMode;
-		if(mode == TM_MANUAL_COMMIT)
+		if(mode == CM_MANUAL_COMMIT)
 		{
 			ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_OFF, NULL);
 			errStringMode = L"SQL_AUTOCOMMIT_OFF";
@@ -2877,7 +2879,7 @@ namespace exodbc
 
 		if(SQL_SUCCEEDED(ret))
 		{
-			m_transactionMode = mode;
+			m_commitMode = mode;
 			return true;
 		}
 
@@ -2893,7 +2895,7 @@ namespace exodbc
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 		
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetTransactionMode() != TM_AUTO_COMMIT && !CommitTrans())
+		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
 		{
 			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
 		}
@@ -2906,15 +2908,15 @@ namespace exodbc
 			// Its confusing: MsSql Server 2014 seems to be unable to change the snapshot isolation if the commit mode is not set to autocommit
 			// If we do not set it to auto first, the next statement executed will complain that it was started under a different isolation mode than snapshot
 			bool wasManualCommit = false;
-			if (GetTransactionMode() == TM_MANUAL_COMMIT)
+			if (GetCommitMode() == CM_MANUAL_COMMIT)
 			{
 				wasManualCommit = true;
-				SetTransactionMode(TM_AUTO_COMMIT);
+				SetCommitMode(CM_AUTO_COMMIT);
 			}
 			ret = SQLSetConnectAttr(m_hdbc, (SQL_COPT_SS_TXN_ISOLATION), (SQLPOINTER)mode, NULL);
 			if (wasManualCommit)
 			{
-				SetTransactionMode(TM_MANUAL_COMMIT);
+				SetCommitMode(CM_MANUAL_COMMIT);
 			}
 		}
 		else

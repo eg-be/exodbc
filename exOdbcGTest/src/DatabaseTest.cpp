@@ -169,32 +169,32 @@ namespace exodbc
 		//EXPECT_FALSE(db2.Close());
 	}
 
-	TEST_P(DatabaseTest, ReadTransactionMode)
+	TEST_P(DatabaseTest, ReadCommitMode)
 	{
 		// We default to manual commit
-		EXPECT_EQ(TM_MANUAL_COMMIT, m_db.ReadTransactionMode());
+		EXPECT_EQ(CM_MANUAL_COMMIT, m_db.ReadCommitMode());
 	}
 
-	TEST_P(DatabaseTest, SetTransactionMode)
+	TEST_P(DatabaseTest, SetCommitMode)
 	{
 		Database db(m_env);
 		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		// We default to manual commit
-		EXPECT_EQ(TM_MANUAL_COMMIT, db.GetTransactionMode());
-		EXPECT_EQ(TM_MANUAL_COMMIT, db.ReadTransactionMode());
+		EXPECT_EQ(CM_MANUAL_COMMIT, db.GetCommitMode());
+		EXPECT_EQ(CM_MANUAL_COMMIT, db.ReadCommitMode());
 
 		// Switch to auto
-		EXPECT_TRUE(db.SetTransactionMode(TM_AUTO_COMMIT));
+		EXPECT_TRUE(db.SetCommitMode(CM_AUTO_COMMIT));
 		// internal member should already be updated
-		EXPECT_EQ(TM_AUTO_COMMIT, db.GetTransactionMode());
-		EXPECT_EQ(TM_AUTO_COMMIT, db.ReadTransactionMode());
+		EXPECT_EQ(CM_AUTO_COMMIT, db.GetCommitMode());
+		EXPECT_EQ(CM_AUTO_COMMIT, db.ReadCommitMode());
 
 		// and back to manual
-		EXPECT_TRUE(db.SetTransactionMode(TM_MANUAL_COMMIT));
+		EXPECT_TRUE(db.SetCommitMode(CM_MANUAL_COMMIT));
 		// internal member should already be updated
-		EXPECT_EQ(TM_MANUAL_COMMIT, db.GetTransactionMode());
-		EXPECT_EQ(TM_MANUAL_COMMIT, db.ReadTransactionMode());
+		EXPECT_EQ(CM_MANUAL_COMMIT, db.GetCommitMode());
+		EXPECT_EQ(CM_MANUAL_COMMIT, db.ReadCommitMode());
 
 		// Close db
 		EXPECT_TRUE(db.Close());
@@ -324,7 +324,7 @@ namespace exodbc
 				EXPECT_FALSE(table2.GetNext());
 			}
 			// TODO: see #51
-			if (db2.GetTransactionMode() != TM_AUTO_COMMIT)
+			if (db2.GetCommitMode() != CM_AUTO_COMMIT)
 			{
 				EXPECT_TRUE(db2.CommitTrans());
 			}
@@ -343,14 +343,14 @@ namespace exodbc
 			EXPECT_TRUE(table2.GetNext());
 		}
 		// TODO: see #51
-		if (db2.GetTransactionMode() != TM_AUTO_COMMIT)
+		if (db2.GetCommitMode() != CM_AUTO_COMMIT)
 		{
 			EXPECT_TRUE(db2.CommitTrans());
 		}
 		EXPECT_TRUE(db2.Close());
 
 		// TODO: Need to fix this in the Table, see #51
-		if (m_db.GetTransactionMode() != TM_AUTO_COMMIT)
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT)
 		{
 			EXPECT_TRUE(m_db.CommitTrans());
 		}
@@ -377,7 +377,7 @@ namespace exodbc
 		EXPECT_FALSE( table.GetNext());
 
 		// TODO: Need to fix this in the Table, see #51
-		if (m_db.GetTransactionMode() != TM_AUTO_COMMIT)
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT)
 		{
 			EXPECT_TRUE(m_db.CommitTrans());
 		}
