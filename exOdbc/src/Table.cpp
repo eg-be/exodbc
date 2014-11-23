@@ -185,7 +185,7 @@ namespace exodbc
 		m_hdbc = SQL_NULL_HDBC;
 		m_hstmt = SQL_NULL_HSTMT;
 		m_hstmtDefault = SQL_NULL_HSTMT;                        // Initialized below
-		m_hstmtCount = SQL_NULL_HSTMT;                        // Initialized first time it is needed
+//		m_hstmtCount = SQL_NULL_HSTMT;                        // Initialized first time it is needed
 		m_hstmtInsert = SQL_NULL_HSTMT;
 		m_hstmtDelete = SQL_NULL_HSTMT;
 		m_hstmtUpdate = SQL_NULL_HSTMT;
@@ -425,8 +425,8 @@ namespace exodbc
 		if (m_hstmtDefault)
 			DeleteCursor(m_hstmtDefault);
 
-		if (m_hstmtCount)
-			DeleteCursor(m_hstmtCount);
+		//if (m_hstmtCount)
+		//	DeleteCursor(m_hstmtCount);
 
 	}  // wxDbTable::cleanup()
 
@@ -438,18 +438,54 @@ namespace exodbc
 	}
 
 
-	size_t Table::Count(const std::wstring& whereStatement)
+	bool Table::Count(const std::wstring& whereStatement, size_t& count)
 	{
 		exASSERT(IsOpen());
-
-		std::wstring sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") %m_tableInfo.GetSqlName() %whereStatement).str();
-		SQLRETURN ret = SQLExecDirect(m_hstmtCount, (SQLWCHAR*) sqlstmt.c_str(), SQL_NTS);
+		bool ok = false;
+		bool isNull = false;
+		std::wstring sqlstmt;
+		if ( ! whereStatement.empty())
+		{
+			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") % m_tableInfo.GetSqlName() % whereStatement).str();
+		}
+		else
+		{
+			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetSqlName()).str();
+		}
+		SQLRETURN ret = SQLExecDirect(m_hStmtCount, (SQLWCHAR*) sqlstmt.c_str(), SQL_NTS);
 		if (ret != SQL_SUCCESS)
 		{
-
+			LOG_ERROR_DBC(m_pDb->GetHDBC(), ret, SQLExecDirect);
+			LOG_ERROR_STMT(m_hStmtCount, ret, SQLExecDirect);
+		}
+		else
+		{
+			ret = SQLFetch(m_hStmtCount);
+			if (ret != SQL_SUCCESS)
+			{
+				LOG_ERROR_STMT(m_hStmtCount, ret, SQLFetch);
+			}
+			else
+			{
+				SQLINTEGER cb;
+				ok = GetData(m_hStmtCount, 1, SQL_C_ULONG, &count, sizeof(count), &cb, &isNull);
+				if (ok && isNull)
+				{
+					LOG_ERROR((boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt).str());
+				}
+			}
 		}
 
-		return false;
+		// Close the Cursor on the internal statement-handle
+		CloseStmtHandle(m_hStmtCount, IgnoreNotOpen);
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_pDb->GetCommitMode() != CM_AUTO_COMMIT && !m_pDb->CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
+		}
+
+		return ok && !isNull;
 	}
 
 

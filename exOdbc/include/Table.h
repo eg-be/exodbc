@@ -286,10 +286,12 @@ namespace exodbc
 
 		/*!
 		* \brief	Counts how many rows would be selected in this table by the passed WHERE clause.
-		*			Do not include 'WHERE' in the passed where clause.
-		* \return	The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
+		* \detailed	If whereStatement is empty, no WHERE clause is added
+		* \param	whereStatement Do not include 'WHERE' in the passed where clause
+		* \param count The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
+		* \return	True if successful
 		*/
-		size_t			Count(const std::wstring& whereStatement);
+		bool			Count(const std::wstring& whereStatement, size_t& count);
 
 		/*!
 		* \brief	Get the OpenMode of this Table
@@ -422,7 +424,7 @@ namespace exodbc
 		HSTMT       m_hstmtDelete;    // ODBC Statement handle used specifically for deletes
 		HSTMT       m_hstmtUpdate;    // ODBC Statement handle used specifically for updates
 		HSTMT       m_hstmtInternal;  // ODBC Statement handle used internally only
-		HSTMT*		m_hstmtCount;     // ODBC Statement handle used by Count() function (No binding of columns)
+//		HSTMT*		m_hstmtCount;     // ODBC Statement handle used by Count() function (No binding of columns)
 
 		// Flags
 		bool        m_selectForUpdate;
