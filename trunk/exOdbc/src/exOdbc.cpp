@@ -274,6 +274,7 @@ namespace exodbc {
 		{
 			ws << m_schema << L".";
 		}
+		ws << m_tableName;
 		return ws.str();
 	}
 

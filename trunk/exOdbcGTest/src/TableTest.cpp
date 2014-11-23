@@ -87,6 +87,35 @@ namespace exodbc
 		EXPECT_FALSE(neTable.Open(false, true));
 	}
 
+	// Count
+	// -----
+	TEST_P(TableTest, Count)
+	{
+		FloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(table.Open(false, true));
+
+		size_t all;
+		EXPECT_TRUE(table.Count(L"", all));
+		EXPECT_EQ(6, all);
+
+		// TODO: We need some GetColumnName function for things like that
+		size_t some;
+		std::wstring whereStmt = L"tdouble > 0";
+		if (m_db.Dbms() == dbmsDB2)
+		{
+			whereStmt = L"TDOUBLE > 0";
+		}
+		EXPECT_TRUE(table.Count(whereStmt, some));
+		EXPECT_EQ(1, some);
+		whereStmt = L"tdouble > 0 OR tfloat > 0";
+		if (m_db.Dbms() == dbmsDB2)
+		{
+			whereStmt = L"TDOUBLE > 0 OR TFLOAT > 0";
+		}
+		EXPECT_TRUE(table.Count(whereStmt, some));
+		EXPECT_EQ(2, some);
+	}
+
 	// GetNext
 	// -------
 
