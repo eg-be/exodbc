@@ -32,7 +32,6 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Database.h"
-#include "GenericKey.h"
 
 // Other headers
 // System headers
@@ -265,33 +264,6 @@ namespace exodbc
 		// Column Definitions
 		ColumnDefinition* m_colDefs;         // Array of wxDbColDef structures
 
-
-		//TODO: Need to Document
-		typedef     enum  { WX_ROW_MODE_QUERY , WX_ROW_MODE_INDIVIDUAL } rowmode_t;
-		virtual     void         SetRowMode(const rowmode_t rowmode);
-		//    virtual     wxVariant    GetColumn(const int colNumber) const ;
-		//    virtual     void         SetColumn(const int colNumber, const wxVariant value);
-		virtual     GenericKey   GetKey();
-		virtual     void         SetKey(const GenericKey &key);
-
-	private:
-		HSTMT*		m_hstmtGridQuery;
-		rowmode_t   m_rowmode;
-		size_t      m_keysize;
-
-		//      typedef enum {unmodified=0, UpdatePending, InsertPending } recStatus;
-
-		//      recStatus  get_ModifiedStatus() { return m_recstatus; }
-
-		//      void modify() {
-		//          if (m_recstatus==unmodified)
-		//              m_recstatus=UpdatePending;
-		//      }
-		//  protected:
-		//      void insertify() {m_recstatus=InsertPending; }
-		//      void unmodify() {m_recstatus=unmodified; }
-		//      recStatus m_recstatus;
-		//TODO: Need to Document
 	};  // Table
 
 }	// namespace exodbc

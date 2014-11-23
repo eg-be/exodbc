@@ -22,9 +22,6 @@
     <ClInclude Include="include\Database.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\GenericKey.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\Table.h">
       <Filter>include</Filter>
     </ClInclude>

@@ -111,7 +111,6 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
     m_pDb                 = pwxDb;                    // Pointer to the wxDb object
     m_hdbc                = 0;
     m_hstmt               = 0;
-    m_hstmtGridQuery               = 0;
     m_hstmtDefault        = 0;                        // Initialized below
     m_hstmtCount          = 0;                        // Initialized first time it is needed
     m_hstmtInsert         = 0;
@@ -385,9 +384,6 @@ ODBC 3.0 says to use this form
 
     if (m_hstmtCount)
         DeleteCursor(m_hstmtCount);
-
-    if (m_hstmtGridQuery)
-        DeleteCursor(m_hstmtGridQuery);
 
 }  // wxDbTable::cleanup()
 
@@ -739,21 +735,8 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
     if (!m_pDb)
         return false;
 
-    int i;
     std::wstring sqlStmt;
     std::wstring s;
-
-    // Calculate the maximum size of the concatenated
-    // keys for use with wxDbGrid
-    m_keysize = 0;
-    for (i=0; i < m_numCols; i++)
-    {
-        if (m_colDefs[i].m_keyField)
-        {
-            m_keysize += m_colDefs[i].m_szDataObj;
-        }
-    }
-
     s.empty();
 
     bool exists = true;
@@ -2674,32 +2657,6 @@ ODBC 3.0 says to use this form
 
 }  // wxDbTable::DeleteCursor()
 
-//////////////////////////////////////////////////////////////
-// wxDbGrid support functions
-//////////////////////////////////////////////////////////////
-
-void Table::SetRowMode(const rowmode_t rowmode)
-{
-    if (!m_hstmtGridQuery)
-    {
-        m_hstmtGridQuery = GetNewCursor(false,false);
-        if (!bindCols(*m_hstmtGridQuery))
-            return;
-    }
-
-    m_rowmode = rowmode;
-    switch (m_rowmode)
-    {
-        case WX_ROW_MODE_QUERY:
-            SetCursor(m_hstmtGridQuery);
-            break;
-        case WX_ROW_MODE_INDIVIDUAL:
-            SetCursor(m_hstmtDefault);
-            break;
-        default:
-           exASSERT(0);
-    }
-}  // wxDbTable::SetRowMode()
 
 
 //wxVariant wxDbTable::GetColumn(const int colNumber) const
@@ -2857,51 +2814,5 @@ void Table::SetRowMode(const rowmode_t rowmode)
 //        }  // switch
 //    }  // if (!val.IsNull())
 //}  // wxDbTable::SetCol()
-
-
-GenericKey Table::GetKey()
-{
-    void *blk;
-    wchar_t *blkptr;
-
-    blk = malloc(m_keysize);
-    blkptr = (wchar_t *) blk;
-
-    int i;
-    for (i=0; i < m_numCols; i++)
-    {
-        if (m_colDefs[i].m_keyField)
-        {
-            memcpy(blkptr,m_colDefs[i].m_ptrDataObj, m_colDefs[i].m_szDataObj);
-            blkptr += m_colDefs[i].m_szDataObj;
-        }
-    }
-
-    GenericKey k = GenericKey(blk, m_keysize);
-    free(blk);
-
-    return k;
-}  // wxDbTable::GetKey()
-
-
-void Table::SetKey(const GenericKey& k)
-{
-    void    *blk;
-    wchar_t  *blkptr;
-
-    blk = k.GetBlk();
-    blkptr = (wchar_t *)blk;
-
-    int i;
-    for (i=0; i < m_numCols; i++)
-    {
-        if (m_colDefs[i].m_keyField)
-        {
-            SetColNull((UWORD)i, false);
-            memcpy(m_colDefs[i].m_ptrDataObj, blkptr, m_colDefs[i].m_szDataObj);
-            blkptr += m_colDefs[i].m_szDataObj;
-        }
-    }
-}  // wxDbTable::SetKey()
 
 }
