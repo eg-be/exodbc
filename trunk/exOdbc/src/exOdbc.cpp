@@ -263,6 +263,20 @@ namespace exodbc {
 		return ws.str();
 	}
 
+	std::wstring STableInfo::GetSqlName() const
+	{
+		std::wstringstream ws;
+		if (HasCatalog())
+		{
+			ws << m_catalog << L"."; 
+		}
+		if (HasSchema())
+		{
+			ws << m_schema << L".";
+		}
+		return ws.str();
+	}
+
 	std::wstring SSqlTypeInfo::ToOneLineStr(bool withHeaderLines /* = false */, bool withEndLine /* = false */) const
 	{
 		std::wstringstream ws;

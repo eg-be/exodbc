@@ -1357,7 +1357,7 @@ namespace exodbc
 
 		SQLFreeStmt(m_hstmt, SQL_CLOSE);
 
-		retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS);
+		retcode = SQLExecDirect(m_hstmt, (SQLWCHAR*) sqlStmt.c_str(), SQL_NTS);
 		if(retcode != SQL_SUCCESS)
 		{
 			if( ! (mode == NotFailOnNoData && retcode == SQL_NO_DATA))

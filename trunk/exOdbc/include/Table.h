@@ -249,12 +249,15 @@ namespace exodbc
 		*/
 		bool            Open(bool checkPrivileges = false, bool checkTableExists = true);
 
-		//bool            CreateTable(bool attemptDrop = true);
-		//		bool            DropTable();
-		//		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, SIndexDefinition* pIndexDefs, bool attemptDrop = true);
-		//		bool            DropIndex(const std::wstring& indexName);
 
-		// Accessors
+		/*!
+		* \brief	Check if the database is Open
+		*
+		* \return	True if Open() was already called succesfull
+		*/
+		bool			IsOpen() const { return m_isOpen; };
+
+
 
 		/*!
 		* \brief	Get the database that was set during constructions.
@@ -281,13 +284,26 @@ namespace exodbc
 		*/
 		STableInfo			GetTableInfo() const;
 
+		/*!
+		* \brief	Counts how many rows would be selected in this table by the passed WHERE clause.
+		*			Do not include 'WHERE' in the passed where clause.
+		* \return	The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
+		*/
+		size_t			Count(const std::wstring& whereStatement);
+
+		/*!
+		* \brief	Get the OpenMode of this Table
+		* \return	True if this table was created using READ_ONLY
+		*/
+		bool            IsQueryOnly()        { return m_openMode == READ_ONLY; }
+
+
 		UWORD           GetNumberOfColumns() { return m_numCols; }  // number of "defined" columns for this wxDbTable instance
 
 		const std::wstring& GetFromClause()      { return m_from; }
 		const std::wstring& GetOrderByClause()   { return m_orderBy; }
 		const std::wstring& GetWhereClause()     { return m_where; }
 
-		bool            IsQueryOnly()        { return m_openMode == READ_ONLY; }
 		void            SetFromClause(const std::wstring& From) { m_from = From; }
 		void            SetOrderByClause(const std::wstring& OrderBy) { m_orderBy = OrderBy; }
 		bool            SetOrderByColNums(UWORD first, ...);
@@ -363,8 +379,18 @@ namespace exodbc
 	private:
 		UDWORD      m_cursorType;
 
-		// Private member functions
+		/*!
+		* \brief	Initializes the member-vars, allocates statements and sets statement options
+		* \param	pDb Db this table is connected to. Used to get the DBC-Handle to create statements
+		*
+		* \return	true if it succeeds, false if it fails.
+		*/
 		bool        Initialize(Database* pDb);
+
+		HSTMT		AllocateStatement();
+		
+		bool		FreeStatement(HSTMT stmt);
+
 		void        cleanup();
 
 		void        setCbValueForColumn(int columnIndex);
@@ -408,8 +434,10 @@ namespace exodbc
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		const OpenMode		m_openMode;				///< Read-only or writable
+		bool				m_isOpen;				///< Set to true after Open has been called
 
 		// Table information set during construction, that was used to find the matching STableInfo if none was passed
+		// Note: We make them public, as they are all const
 	public:
 		const std::wstring  m_initialTableName;		///< Table name set on construction
 		const std::wstring	m_initialSchemaName;	///< Schema name set on construction
@@ -430,6 +458,14 @@ namespace exodbc
 	private:
 		size_t m_tableId; ///< Given by calling Database::RegisterTable() during Initialization.
 #endif
+
+		// OLD stuff:
+		// ----------
+		//bool            CreateTable(bool attemptDrop = true);
+		//		bool            DropTable();
+		//		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, SIndexDefinition* pIndexDefs, bool attemptDrop = true);
+		//		bool            DropIndex(const std::wstring& indexName);
+
 
 	};  // Table
 
