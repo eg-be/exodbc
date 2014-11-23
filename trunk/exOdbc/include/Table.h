@@ -359,13 +359,6 @@ namespace exodbc
 		bool            SetColNull(UWORD colNumber, bool set = true);
 		bool            SetColNull(const std::wstring& colName, bool set = true);
 
-#ifdef EXODBCDEBUG
-		ULONG           GetTableID() { return m_tableID; }
-#endif
-
-	private:
-		ULONG       m_tableID;  // Used for debugging.  This can help to match up mismatched constructors/destructors
-
 		// Private member variables
 		UDWORD      m_cursorType;
 
@@ -423,6 +416,13 @@ namespace exodbc
 
 		// Column Definitions
 		ColumnDefinition* m_colDefs;         // Array of wxDbColDef structures
+
+#ifdef EXODBCDEBUG
+	public:
+		size_t				GetTableId() const { return m_tableId; }
+	private:
+		size_t m_tableId; ///< Given by calling Database::RegisterTable() during Initialization.
+#endif
 
 	};  // Table
 

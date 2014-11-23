@@ -58,6 +58,23 @@ namespace exodbc
 		}
 	}
 
+#ifdef EXODBCDEBUG
+	// We disable this test to avoid trapping into an assertion 
+	TEST_P(DatabaseTest, DISABLED_DetectOrphanedTables)
+	{
+		Database db(m_env);
+		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		IntTypesTable t1(&db, m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(t1.Open());
+		{
+			CharTypesTable t2(&db, m_odbcInfo.m_namesCase);
+			EXPECT_TRUE(t2.Open());
+		}
+		LOG_DEBUG(L"You should see an orphaned IntTypesTable table now");
+		db.Close();
+	}
+#endif
+
 	TEST_P(DatabaseTest, SetConnectionAttributes)
 	{
 		Database db(m_env);

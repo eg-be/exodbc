@@ -42,16 +42,6 @@ namespace exodbc
 ULONG lastTableID = 0;
 
 
-#ifdef EXODBCDEBUG
-//    #include "wx/thread.h"
-//    wxList TablesInUse;
-	std::vector<STablesInUse*> TablesInUse;
-#if wxUSE_THREADS
-    wxCriticalSection csTablesInUse;
-#endif // wxUSE_THREADS
-#endif
-
-
 void csstrncpyt(wchar_t *target, const wchar_t *source, int n)
 {
     while ( (*target++ = *source++) != '\0' && --n != 0 )
@@ -196,7 +186,6 @@ bool Table::Initialize(Database* pDb)
     m_hstmtUpdate         = SQL_NULL_HSTMT;
     m_hstmtInternal       = SQL_NULL_HSTMT;
     m_colDefs             = 0;	///< TODO: Change
-    m_tableID             = 0;	///< TODO: ?
     m_where.empty();                                  // Where clause
     m_orderBy.empty();                                // Order By clause
     m_from.empty();                                   // From clause
@@ -204,24 +193,10 @@ bool Table::Initialize(Database* pDb)
 
 	// TODO: The old code automatically turned table names into upper case for some dbs, does that make sense?
 
-    m_pDb->incrementTableCount();
-
     std::wstring s;
-    m_tableID = ++lastTableID;
-	s = (boost::wformat(L"wxDbTable constructor (%-20s) tableID:[%6lu] pDb:[%p]") %m_initialTableName %m_tableID % static_cast<void*>(m_pDb)).str();
 
 #ifdef EXODBCDEBUG
-    STablesInUse *tableInUse;
-    tableInUse            = new STablesInUse();
-    tableInUse->tableName = m_initialTableName.c_str();    
-    tableInUse->tableID   = m_tableID;
-    tableInUse->pDb       = m_pDb;
-    {
-#if wxUSE_THREADS
-        wxCriticalSectionLocker lock(csTablesInUse);
-#endif // wxUSE_THREADS
-        TablesInUse.push_back(tableInUse);
-    }
+	m_tableId = m_pDb->RegisterTable(this);
 #endif
 
 //    m_pDb->WriteSqlLog(s);
@@ -333,53 +308,10 @@ bool Table::Initialize(Database* pDb)
 void Table::cleanup()
 {
     std::wstring s;
-    if (m_pDb)
-    {
-		s = (boost::wformat(L"wxDbTable destructor (%-20s) tableID:[%6lu] pDb:[%p]") % m_initialTableName %m_tableID %static_cast<void*>(m_pDb)).str();
-//        m_pDb->WriteSqlLog(s);
-    }
 
 #ifdef EXODBCDEBUG
-    if (m_tableID)
-    {
-        bool found = false;
-
-        //wxList::compatibility_iterator pNode;
-		std::vector<STablesInUse*>::iterator it = TablesInUse.begin();
-        {
-#if wxUSE_THREADS
-            wxCriticalSectionLocker lock(csTablesInUse);
-#endif // wxUSE_THREADS
-            // pNode = TablesInUse.GetFirst();
-            while (!found && it != TablesInUse.end())
-            {
-				STablesInUse* pNode = *it;
-				if(pNode->tableID == m_tableID)
-//                if (((wxTablesInUse *)pNode->GetData())->tableID == tableID)
-                {
-                    found = true;
-					TablesInUse.erase(it);
-					delete pNode;
-                    //delete (wxTablesInUse *)pNode->GetData();
-                    //TablesInUse.Erase(pNode);
-                }
-                else
-					it++;
-                    //pNode = pNode->GetNext();
-            }
-        }
-        if (!found)
-        {
-            std::wstring msg;
-			msg = (boost::wformat(L"Unable to find the tableID in the vector\n of tables in use.\n\n%s") %s).str();
-			BOOST_LOG_TRIVIAL(debug) << msg.c_str();
-        }
-    }
+	m_pDb->UnregisterTable(this);
 #endif
-
-    // Decrement the wxDb table count
-    if (m_pDb)
-        m_pDb->decrementTableCount();
 
     // Delete memory allocated for column definitions
     if (m_colDefs)
@@ -824,7 +756,6 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
 	{
 		return false;
 	}
-
 
 	// If we are asked to create our columns automatically, read the column information
 	if (!m_manualColumns)
@@ -2186,16 +2117,17 @@ bool Table::IsColNull(UWORD colNumber) const
 /********** wxDbTable::CanSelectForUpdate() **********/
 bool Table::CanSelectForUpdate()
 {
-    if (IsQueryOnly())
-        return false;
+	// Broken
+	//if (IsQueryOnly())
+    //    return false;
 
-    if (m_pDb->Dbms() == dbmsMY_SQL)
-        return false;
+    //if (m_pDb->Dbms() == dbmsMY_SQL)
+    //    return false;
 
-    if (/*(m_pDb->Dbms() == dbmsORACLE) ||*/
-        (m_pDb->m_dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE))
-        return true;
-    else
+    //if (/*(m_pDb->Dbms() == dbmsORACLE) ||*/
+    //    (m_pDb->m_dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE))
+    //    return true;
+    //else
         return false;
 
 }  // wxDbTable::CanSelectForUpdate()
@@ -2221,9 +2153,9 @@ bool Table::CanUpdateByROWID()
 /********** wxDbTable::IsCursorClosedOnCommit() **********/
 bool Table::IsCursorClosedOnCommit()
 {
-    if (m_pDb->m_dbInf.cursorCommitBehavior == SQL_CB_PRESERVE)
-        return false;
-    else
+    //if (m_pDb->m_dbInf.cursorCommitBehavior == SQL_CB_PRESERVE)
+    //    return false;
+    //else
         return true;
 
 }  // wxDbTable::IsCursorClosedOnCommit()
