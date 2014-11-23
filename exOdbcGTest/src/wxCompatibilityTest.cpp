@@ -75,22 +75,22 @@ namespace exodbc
 	// This also tests that calling the old Open(checkPrivs, checkExists) function still returns true
 	TEST_P(wxCompatibilityTest, OpenTableNoChecks)
 	{
-		CharTypesTable charTypesTable(m_pDb);
+		CharTypesTable charTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(charTypesTable.Open(false, false));
 
-		IntTypesTable intTypesTable(m_pDb);
+		IntTypesTable intTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(intTypesTable.Open(false, false));
 
-		DateTypesTable dateTypesTable(m_pDb);
+		DateTypesTable dateTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(dateTypesTable.Open(false, false));
 
-		FloatTypesTable floatTypesTable(m_pDb);
+		FloatTypesTable floatTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(floatTypesTable.Open(false, false));
 
-		NumericTypesTable numericTypesTable(m_pDb, NumericTypesTable::ReadAsChar);
+		NumericTypesTable numericTypesTable(m_pDb, NumericTypesTable::ReadAsChar, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(numericTypesTable.Open(false, false));
 
-		BlobTypesTable blobTypesTable(m_pDb);
+		BlobTypesTable blobTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(blobTypesTable.Open(false, false));
 	}
 
@@ -98,7 +98,7 @@ namespace exodbc
 	// Test basic GetNext
 	TEST_P(wxCompatibilityTest, GetNextTest)
 	{
-		CharTypesTable table(m_pDb);
+		CharTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		// Expect 4 entries
@@ -134,7 +134,7 @@ namespace exodbc
 	// Test reading datatypes
 	TEST_P(wxCompatibilityTest, ReadDateTypes)
 	{
-		DateTypesTable table(m_pDb);
+		DateTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
@@ -189,7 +189,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ReadIntTypes)
 	{
-		IntTypesTable table(m_pDb);
+		IntTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
@@ -243,7 +243,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ReadCharTypes)
 	{
-		CharTypesTable table(m_pDb);
+		CharTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		// Note: We trim the values read from the db on the right side, as for example db2 pads with ' ' by default
@@ -287,7 +287,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ReadFloatTypes)
 	{		
-		FloatTypesTable table(m_pDb);
+		FloatTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1"));
@@ -336,7 +336,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ReadNumericTypesAsChar)
 	{
-		NumericTypesTable table(m_pDb, NumericTypesTable::ReadAsChar);
+		NumericTypesTable table(m_pDb, NumericTypesTable::ReadAsChar, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
@@ -408,7 +408,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ReadBlobTypes)
 	{
-		BlobTypesTable table(m_pDb);
+		BlobTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
@@ -464,8 +464,8 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ReadIncompleteTable)
 	{
-		CharTable table(m_pDb);
-		IncompleteCharTable incTable(m_pDb);
+		CharTable table(m_pDb, m_odbcInfo.m_namesCase);
+		IncompleteCharTable incTable(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 		ASSERT_TRUE(incTable.Open(false, false));
 
@@ -535,7 +535,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSql_InsertCharTypes)
 	{
-		CharTypesTmpTable table(m_pDb);
+		CharTypesTmpTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt = L"DELETE FROM exodbc.chartypes_tmp WHERE idchartypes_tmp >= 0";
@@ -575,7 +575,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertFloatTypes)
 	{
-		FloatTypesTmpTable table(m_pDb);
+		FloatTypesTmpTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt = L"DELETE FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp >= 0";
@@ -610,7 +610,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertNumericTypesAsChar)
 	{
-		NumericTypesTmpTable table(m_pDb, NumericTypesTmpTable::ReadAsChar);
+		NumericTypesTmpTable table(m_pDb, NumericTypesTmpTable::ReadAsChar, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;
@@ -672,7 +672,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertIntTypes)
 	{
-		IntTypesTmpTable table(m_pDb);
+		IntTypesTmpTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;
@@ -716,7 +716,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertDateTypes)
 	{
-		DateTypesTmpTable table(m_pDb);
+		DateTypesTmpTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;

@@ -71,7 +71,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenWithoutCheck)
 	{
 		// Open a table without checking for privileges or existence
-		IntTypesTable table(&m_db);
+		IntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(table.Open(false, false));
 	}
 

@@ -57,7 +57,7 @@ namespace exodbc
 	{
 	public:
 
-		CharTypesTable(exodbc::Database* pDb);
+		CharTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~CharTypesTable() {};
 
 		SQLINTEGER	m_idCharTypes;
@@ -71,7 +71,7 @@ namespace exodbc
 	{
 	public:
 
-		CharTypesTmpTable(exodbc::Database* pDb);
+		CharTypesTmpTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~CharTypesTmpTable() {};
 
 		SQLINTEGER	m_idCharTypes;
@@ -102,7 +102,7 @@ namespace exodbc
 	{
 	public:
 
-		IntTypesTmpTable(exodbc::Database* pDb);
+		IntTypesTmpTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~IntTypesTmpTable() {};
 
 		// Size of Type							Bytes		Min						Max
@@ -118,7 +118,7 @@ namespace exodbc
 	class DateTypesTable : public exodbc::Table
 	{
 	public:
-		DateTypesTable(exodbc::Database* pDb);
+		DateTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~DateTypesTable() {};
 
 		SQLINTEGER				m_idDateTypes;
@@ -132,7 +132,7 @@ namespace exodbc
 	class DateTypesTmpTable : public exodbc::Table
 	{
 	public:
-		DateTypesTmpTable(exodbc::Database* pDb);
+		DateTypesTmpTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~DateTypesTmpTable() {};
 
 		SQLINTEGER				m_idDateTypes;
@@ -146,7 +146,7 @@ namespace exodbc
 	class FloatTypesTable : public exodbc::Table
 	{
 	public:
-		FloatTypesTable(exodbc::Database* pDb);
+		FloatTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~FloatTypesTable() {};
 
 		SQLINTEGER				m_idFloatTypes;
@@ -159,7 +159,7 @@ namespace exodbc
 	class FloatTypesTmpTable : public exodbc::Table
 	{
 	public:
-		FloatTypesTmpTable(exodbc::Database* pDb);
+		FloatTypesTmpTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~FloatTypesTmpTable() {};
 
 		SQLINTEGER				m_idFloatTypes;
@@ -173,7 +173,7 @@ namespace exodbc
 	{
 	public:
 		enum ReadMode { ReasAsNumeric, ReadAsChar };
-		NumericTypesTable(exodbc::Database* pDb, ReadMode readMode);
+		NumericTypesTable(exodbc::Database* pDb, ReadMode readMode, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~NumericTypesTable() {};
 
 		SQLINTEGER			m_idNumericTypes;
@@ -195,7 +195,7 @@ namespace exodbc
 	public:
 		// TODO: This name is not correct. ? The test write as "numer".. mmh
 		enum ReadMode { ReasAsNumeric, ReadAsChar };
-		NumericTypesTmpTable(exodbc::Database* pDb, ReadMode readMode);
+		NumericTypesTmpTable(exodbc::Database* pDb, ReadMode readMode, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~NumericTypesTmpTable() {};
 
 		SQLINTEGER			m_idNumericTypes;
@@ -215,7 +215,7 @@ namespace exodbc
 	class BlobTypesTable : public exodbc::Table
 	{
 	public:
-		BlobTypesTable(exodbc::Database* pDb);
+		BlobTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~BlobTypesTable() {};
 
 		SQLINTEGER		m_idBlobTypes;
@@ -227,7 +227,7 @@ namespace exodbc
 	class BlobTypesTmpTable : public exodbc::Table
 	{
 	public:
-		BlobTypesTmpTable(exodbc::Database* pDb);
+		BlobTypesTmpTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~BlobTypesTmpTable() {};
 
 		SQLINTEGER		m_idBlobTypes;
@@ -239,7 +239,7 @@ namespace exodbc
 	class CharTable : public exodbc::Table
 	{
 	public:
-		CharTable(exodbc::Database* pDb);
+		CharTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~CharTable() {};
 
 		SQLINTEGER	m_idCharTable;
@@ -252,7 +252,7 @@ namespace exodbc
 	class IncompleteCharTable : public exodbc::Table
 	{
 	public:
-		IncompleteCharTable(exodbc::Database* pDb);
+		IncompleteCharTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~IncompleteCharTable() {};
 
 		SQLINTEGER	m_idCharTable;

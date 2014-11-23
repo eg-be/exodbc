@@ -280,7 +280,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, CommitTransaction)
 	{
-		IntTypesTmpTable table(&m_db);
+		IntTypesTmpTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;
@@ -311,7 +311,7 @@ namespace exodbc
 			{
 #if HAVE_MSODBCSQL_H
 				EXPECT_TRUE(db2.SetTransactionIsolationMode(TI_SNAPSHOT));
-				IntTypesTmpTable table2(&db2);
+				IntTypesTmpTable table2(&db2, m_odbcInfo.m_namesCase);
 				EXPECT_TRUE(table2.Open(false, false));
 				EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 				EXPECT_FALSE(table2.GetNext());
@@ -323,7 +323,7 @@ namespace exodbc
 			else
 			{
 				EXPECT_TRUE(db2.SetTransactionIsolationMode(TI_READ_COMMITTED));
-				IntTypesTmpTable table2(&db2);
+				IntTypesTmpTable table2(&db2, m_odbcInfo.m_namesCase);
 				EXPECT_TRUE(table2.Open(false, false));
 				EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 				EXPECT_FALSE(table2.GetNext());
@@ -342,7 +342,7 @@ namespace exodbc
 		Database db2(m_env);
 		EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		{
-			IntTypesTmpTable table2(&db2);
+			IntTypesTmpTable table2(&db2, m_odbcInfo.m_namesCase);
 			EXPECT_TRUE(table2.Open(false, false));
 			EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 			EXPECT_TRUE(table2.GetNext());
@@ -361,9 +361,9 @@ namespace exodbc
 		}
 	}
 
-	TEST_P(DatabaseTest, TestRollbackTransaction)
+	TEST_P(DatabaseTest, RollbackTransaction)
 	{
-		IntTypesTmpTable table(&m_db);
+		IntTypesTmpTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;
@@ -449,6 +449,7 @@ namespace exodbc
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
+		std::wstring typeName;
 		switch(m_db.Dbms())
 		{
 		case dbmsMY_SQL:
@@ -456,22 +457,25 @@ namespace exodbc
 			tableName = L"integertypes";
 			schemaName = L"";
 			catalogName = L"exodbc";
+			typeName = L"";
 			break;
 		case dbmsDB2:
 			// We know that DB2 uses schemas:
 			tableName = L"INTEGERTYPES";
 			schemaName = L"EXODBC";
 			catalogName = L"";
+			typeName = L"";
 			break;
 		case dbmsMS_SQL_SERVER:
 			// And ms uses catalogs, which map to dbs and schemaName
 			tableName = L"integertypes";
 			schemaName = L"exodbc";
 			catalogName = L"exodbc";
+			typeName = L"";
 			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #52");
 		}
 		// TODO: With MySql we get no results here?
-		EXPECT_TRUE(m_db.ReadTablePrivileges(tableName, schemaName, catalogName, privs));
+		EXPECT_TRUE(m_db.ReadTablePrivileges(tableName, schemaName, catalogName, typeName, privs));
 		bool canSelect = false;
 		bool canInsert = false;
 		bool canDelete = false;
@@ -502,6 +506,7 @@ namespace exodbc
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
+		std::wstring typeName;
 		switch(m_db.Dbms())
 		{
 		case dbmsMY_SQL:
@@ -509,20 +514,23 @@ namespace exodbc
 			tableName = L"numerictypes";
 			schemaName = L"";
 			catalogName = L"exodbc";
+			typeName = L"";
 			break;
 		case dbmsDB2:
 			// We know that DB2 uses schemas:
 			tableName = L"NUMERICTYPES";
 			schemaName = L"EXODBC";
 			catalogName = L"";
+			typeName = L"";
 			break;
 		case dbmsMS_SQL_SERVER:
 			// And ms uses catalogs, which map to dbs and schemaName
 			tableName = L"numerictypes";
 			schemaName = L"exodbc";
 			catalogName = L"exodbc";
+			typeName = L"";
 		}
-		EXPECT_TRUE(m_db.ReadTableColumnInfo(tableName, schemaName, catalogName, cols));
+		EXPECT_TRUE(m_db.ReadTableColumnInfo(tableName, schemaName, catalogName, typeName, cols));
 		// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
 		ASSERT_TRUE(cols.size() == 3);
 		STableColumnInfo col = cols[2];
@@ -624,6 +632,7 @@ namespace exodbc
 		std::wstring tableName = L"";
 		std::wstring schemaName = L"";
 		std::wstring catalogName = L"";
+		std::wstring typeName = L"";
 		int nrCols = 4;
 		switch(m_db.Dbms())
 		{
@@ -644,9 +653,9 @@ namespace exodbc
 			schemaName = L"exodbc";
 			break;
 		}
-		EXPECT_EQ(nrCols, m_db.ReadColumnCount(tableName, schemaName, catalogName));
+		EXPECT_EQ(nrCols, m_db.ReadColumnCount(tableName, schemaName, catalogName, typeName));
 		// we should also work if we just search by the tableName, as long as tableName is unique within db
-		EXPECT_EQ(nrCols, m_db.ReadColumnCount(tableName, L"", L""));
+		EXPECT_EQ(nrCols, m_db.ReadColumnCount(tableName, L"", L"", L""));
 	}
 
 

@@ -89,9 +89,76 @@ bool ColumnDefinition::Initialize()
 // Construction
 // ------------
 Table::Table(Database* pDb, size_t numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, OpenMode openMode /* = READ_WRITE */)
+	: m_numCols(numColumns)
+	, m_manualColumns(true)
+	, m_initialTableName(tableName)
+	, m_initialSchemaName(schemaName)
+	, m_initialCatalogName(catalogName)
+	, m_initialTypeName(tableType)
+	, m_openMode(openMode)
+	, m_haveTableInfo(false)
 {
 	exASSERT(pDb);
-	if (!initialize(pDb, tableName, numColumns, openMode))
+	if (!Initialize(pDb))
+	{
+		cleanup();
+	}
+}
+
+
+
+Table::Table(Database* pDb, size_t numColumns, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
+	: m_numCols(numColumns)
+	, m_manualColumns(true)
+	, m_initialTableName(L"")
+	, m_initialSchemaName(L"")
+	, m_initialCatalogName(L"")
+	, m_initialTypeName(L"")
+	, m_openMode(openMode)
+	, m_haveTableInfo(true)
+	, m_tableInfo(tableInfo)
+{
+	exASSERT(pDb);
+	if (!Initialize(pDb))
+	{
+		cleanup();
+	}
+}
+
+
+
+Table::Table(Database* pDb, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, const OpenMode openMode /* = READ_WRITE */)
+	: m_numCols(0)
+	, m_manualColumns(false)
+	, m_initialTableName(tableName)
+	, m_initialSchemaName(schemaName)
+	, m_initialCatalogName(catalogName)
+	, m_initialTypeName(tableType)
+	, m_openMode(openMode)
+	, m_haveTableInfo(false)
+{
+	exASSERT(pDb);
+	if (!Initialize(pDb))
+	{
+		cleanup();
+	}
+}
+
+
+
+Table::Table(Database* pDb, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
+	: m_numCols(0)
+	, m_manualColumns(false)
+	, m_initialTableName(L"")
+	, m_initialSchemaName(L"")
+	, m_initialCatalogName(L"")
+	, m_initialTypeName(L"")
+	, m_openMode(openMode)
+	, m_haveTableInfo(true)
+	, m_tableInfo(tableInfo)
+{
+	exASSERT(pDb);
+	if (!Initialize(pDb))
 	{
 		cleanup();
 	}
@@ -107,58 +174,46 @@ Table::~Table()
 
 // Implementation
 // --------------
-bool Table::initialize(Database* pDb, const std::wstring &tblName, size_t numColumns, OpenMode openMode)
+bool Table::Initialize(Database* pDb)
 {
 	exASSERT(pDb);
+	if (!pDb)
+	{
+		LOG_ERROR(L"Database is required");
+		return false;
+	}
 
     // Initializing member variables
+	// Note: m_haveTableInfo must have been set before this function is called - it is not modified by this Initialize
+
     m_pDb                 = pDb;                    // Pointer to the wxDb object
-    m_hdbc                = 0;
-    m_hstmt               = 0;
-    m_hstmtDefault        = 0;                        // Initialized below
-    m_hstmtCount          = 0;                        // Initialized first time it is needed
-    m_hstmtInsert         = 0;
-    m_hstmtDelete         = 0;
-    m_hstmtUpdate         = 0;
-    m_hstmtInternal       = 0;
-    m_colDefs             = 0;
-    m_tableID             = 0;
-    m_numCols           = numColumns;               // Number of columns in the table
+    m_hdbc                = SQL_NULL_HDBC;
+    m_hstmt               = SQL_NULL_HSTMT;
+    m_hstmtDefault        = SQL_NULL_HSTMT;                        // Initialized below
+    m_hstmtCount          = SQL_NULL_HSTMT;                        // Initialized first time it is needed
+    m_hstmtInsert         = SQL_NULL_HSTMT;
+    m_hstmtDelete         = SQL_NULL_HSTMT;
+    m_hstmtUpdate         = SQL_NULL_HSTMT;
+    m_hstmtInternal       = SQL_NULL_HSTMT;
+    m_colDefs             = 0;	///< TODO: Change
+    m_tableID             = 0;	///< TODO: ?
     m_where.empty();                                  // Where clause
     m_orderBy.empty();                                // Order By clause
     m_from.empty();                                   // From clause
     m_selectForUpdate     = false;                    // SELECT ... FOR UPDATE; Indicates whether to include the FOR UPDATE phrase
-	m_openMode = openMode;
-    m_insertable          = true;
-    m_tableName.empty();
 
-    exASSERT(tblName.length());
-    exASSERT(m_pDb);
-
-    if (!m_pDb)
-        return false;
-
-    m_tableName = tblName;                        // Table Name
-    //if ((m_pDb->Dbms() == dbmsORACLE) ||
-    //    (m_pDb->Dbms() == dbmsFIREBIRD) ||
-    //    (m_pDb->Dbms() == dbmsINTERBASE))
-    //    boost::algorithm::to_upper(m_tableName);
-
-    //if ((m_pDb->Dbms() == dbmsORACLE) ||
-    //    (m_pDb->Dbms() == dbmsFIREBIRD) ||
-    //    (m_pDb->Dbms() == dbmsINTERBASE))
-    //    boost::algorithm::to_upper(m_queryTableName);
+	// TODO: The old code automatically turned table names into upper case for some dbs, does that make sense?
 
     m_pDb->incrementTableCount();
 
     std::wstring s;
     m_tableID = ++lastTableID;
-	s = (boost::wformat(L"wxDbTable constructor (%-20s) tableID:[%6lu] pDb:[%p]") %tblName %m_tableID % static_cast<void*>(m_pDb)).str();
+	s = (boost::wformat(L"wxDbTable constructor (%-20s) tableID:[%6lu] pDb:[%p]") %m_initialTableName %m_tableID % static_cast<void*>(m_pDb)).str();
 
 #ifdef EXODBCDEBUG
     STablesInUse *tableInUse;
     tableInUse            = new STablesInUse();
-    tableInUse->tableName = tblName.c_str();    
+    tableInUse->tableName = m_initialTableName.c_str();    
     tableInUse->tableID   = m_tableID;
     tableInUse->pDb       = m_pDb;
     {
@@ -280,7 +335,7 @@ void Table::cleanup()
     std::wstring s;
     if (m_pDb)
     {
-		s = (boost::wformat(L"wxDbTable destructor (%-20s) tableID:[%6lu] pDb:[%p]") % m_tableName %m_tableID %static_cast<void*>(m_pDb)).str();
+		s = (boost::wformat(L"wxDbTable destructor (%-20s) tableID:[%6lu] pDb:[%p]") % m_initialTableName %m_tableID %static_cast<void*>(m_pDb)).str();
 //        m_pDb->WriteSqlLog(s);
     }
 
@@ -381,6 +436,12 @@ ODBC 3.0 says to use this form
 
 
 /***************************** PRIVATE FUNCTIONS *****************************/
+
+STableInfo Table::GetTableInfo() const
+{
+	exASSERT(m_haveTableInfo);
+	return m_tableInfo;
+}
 
 
 void Table::setCbValueForColumn(int columnIndex)
@@ -721,7 +782,6 @@ bool Table::query(int queryType, bool forUpdate, bool distinct, const std::wstri
 /***************************** PUBLIC FUNCTIONS *****************************/
 
 
-/********** wxDbTable::Open() **********/
 bool Table::Open(bool checkPrivileges, bool checkTableExists)
 {
 	if (!m_pDb)
@@ -734,47 +794,49 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
     std::wstring s;
     s.empty();
 
-    bool exists = true;
-    if (checkTableExists)
+	// If we do not already have a STableInfo for our table, we absolutely must find one
+	bool foundTable = false;
+	bool searchedTable = false;
+	if (!m_haveTableInfo)
+	{
+		if (!m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName, m_tableInfo))
+		{
+			return false;
+		}
+		m_haveTableInfo = true;
+		searchedTable = true;
+		foundTable = true;
+	}
+
+	// If we are asked to check existence and have not just proved we exist, find table
+    if (checkTableExists && !foundTable && !searchedTable)
     {
-		std::vector<STableInfo> matchingTables;
-		if (!m_pDb->FindTables(m_tableName, L"", L"", L"", matchingTables))
+		if (!m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName, m_tableInfo))
 		{
-			// FindTables failed totally
 			return false;
 		}
+		m_haveTableInfo = true;
+		searchedTable = true;
+		foundTable = true;
+    }
+	// not found?
+	if (checkTableExists && !foundTable)
+	{
+		return false;
+	}
 
-		// We need exactly one table
-		if (matchingTables.size() == 0)
-		{
-			LOG_ERROR((boost::wformat(L"FindTables did not find any table matching the TableName '%s'") % m_tableName).str());
-			return false;
-		}
-		else if (matchingTables.size() > 1)
-		{
-			LOG_ERROR((boost::wformat(L"FindTables found more than one table matching the TableName '%s'") % m_tableName).str());
-			return false;
-		}
 
-		// 
+	// If we are asked to create our columns automatically, read the column information
+	if (!m_manualColumns)
+	{
 		std::vector<STableColumnInfo> columns;
-		if (!m_pDb->ReadTableColumnInfo(matchingTables[0], columns))
+		if (!m_pDb->ReadTableColumnInfo(m_tableInfo, columns))
 		{
-			LOG_ERROR((boost::wformat(L"Failed to read ColumnInfo for Table '%s'") % matchingTables[0].GetFullTableName()).str());
 			return false;
 		}
-    }
+	}
 
-    // Verify that the table exists in the database
-    if (!exists)
-    {
-        s = L"Table/view does not exist in the database";
-        if ( *(m_pDb->m_dbInf.accessibleTables) == L'Y')
-            s += L", or you have no permissions.\n";
-        else
-            s += L".\n";
-    }
-    else if (checkPrivileges)
+	if (checkPrivileges)
     {
 		exASSERT(false);
         // Verify the user has rights to access the table.

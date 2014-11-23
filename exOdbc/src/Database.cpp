@@ -765,24 +765,24 @@ namespace exodbc
 	}
 
 
-	bool Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, STableInfo& table)
+	bool Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, STableInfo& table)
 	{
 		// Query the tables that match
 		std::vector<STableInfo> tables;
-		if(!FindTables(tableName, schemaName, catalogName, L"", tables))
+		if(!FindTables(tableName, schemaName, catalogName, tableType, tables))
 		{
-			LOG_ERROR((boost::wformat(L"Searching tables failed while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			LOG_ERROR((boost::wformat(L"Searching tables failed while searching for: tableName: '%s', schemName: '%s', catalogName: '%s', typeName : '%s'") %tableName %schemaName %catalogName %tableType).str());
 			return false;
 		}
 
 		if(tables.size() == 0)
 		{
-			LOG_ERROR((boost::wformat(L"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			LOG_ERROR((boost::wformat(L"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s', typeName : '%s'") %tableName %schemaName %catalogName %tableType).str());
 			return false;
 		}
 		if(tables.size() != 1)
 		{
-			LOG_ERROR((boost::wformat(L"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s'") %tableName %schemaName %catalogName).str());
+			LOG_ERROR((boost::wformat(L"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s', typeName : '%s'") %tableName %schemaName %catalogName %tableType).str());
 			return false;
 		}
 
@@ -2547,11 +2547,11 @@ namespace exodbc
 	}
 
 
-	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName)
+	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType)
 	{
 		// Find one matching table
 		STableInfo table;
-		if(!FindOneTable(tableName, schemaName, catalogName, table))
+		if(!FindOneTable(tableName, schemaName, catalogName, tableType, table))
 		{
 			return false;
 		}
@@ -2561,11 +2561,11 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STablePrivilegesInfo>& privileges)
+	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STablePrivilegesInfo>& privileges)
 	{
 		// Find one matching table
 		STableInfo table;
-		if(!FindOneTable(tableName, schemaName, catalogName, table))
+		if(!FindOneTable(tableName, schemaName, catalogName, tableType, table))
 		{
 			return false;
 		}
@@ -2663,11 +2663,11 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STableColumnInfo>& columns)
+	bool Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableColumnInfo>& columns)
 	{
 		// Find one matching table
 		STableInfo table;
-		if(!FindOneTable(tableName, schemaName, catalogName, table))
+		if(!FindOneTable(tableName, schemaName, catalogName, tableType, table))
 		{
 			return false;
 		}
