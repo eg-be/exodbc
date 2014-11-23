@@ -777,6 +777,14 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
 			LOG_ERROR((boost::wformat(L"FindTables found more than one table matching the TableName '%s'") % m_tableName).str());
 			return false;
 		}
+
+		// 
+		std::vector<STableColumnInfo> columns;
+		if (!m_pDb->ReadTableColumnInfo(matchingTables[0], columns))
+		{
+			LOG_ERROR((boost::wformat(L"Failed to read ColumnInfo for Table '%s'") % matchingTables[0].GetFullTableName()).str());
+			return false;
+		}
     }
 
     // Verify that the table exists in the database

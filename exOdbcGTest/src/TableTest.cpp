@@ -80,6 +80,11 @@ namespace exodbc
 		// Open a table with checking for existence
 		IntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(table.Open(false, true));
+
+		// Open a non-existing table
+		LOG_ERROR(L"Warning: This test is supposed to spit errors");
+		NotExistingTable neTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_FALSE(neTable.Open(false, true));
 	}
 
 	// GetNext

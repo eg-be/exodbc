@@ -45,7 +45,7 @@ namespace exodbc
 	class NotExistingTable : public exodbc::Table
 	{
 	public:
-		NotExistingTable(exodbc::Database* pDb);
+		NotExistingTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		~NotExistingTable() {};
 
 		int		m_idNotExisting;

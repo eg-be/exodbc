@@ -46,10 +46,10 @@ namespace exodbc
 
 	// NotExistingTable
 	// ----------------
-	NotExistingTable::NotExistingTable(Database* pDb)
-		: Table(pDb, L"notexisting", 1)
+	NotExistingTable::NotExistingTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
+		: Table(pDb, TestTables::GetTableName(L"notexisting", namesCase), 1)
 	{
-		SetColDefs(0, L"idnotexisting", DB_DATA_TYPE_INTEGER, &m_idNotExisting, SQL_C_LONG, sizeof(m_idNotExisting), true);
+		SetColDefs(0, TestTables::GetColName(L"idnotexisting", namesCase), DB_DATA_TYPE_INTEGER, &m_idNotExisting, SQL_C_LONG, sizeof(m_idNotExisting), true);
 
 	}
 
