@@ -32,6 +32,7 @@
 namespace exodbc
 {
 //	typedef boost::variant<SQLUSMALLINT*, SQLSMALLINT*, SQLUINTEGER*, SQLINTEGER*, SQLUBIGINT*, SQLBIGINT*> IntegerVariant;
+	// We could also use just one variant for all types that are simple (not binary)?
 	typedef boost::variant<SQLUSMALLINT, SQLSMALLINT, SQLUINTEGER, SQLINTEGER, SQLUBIGINT, SQLBIGINT> IntegerVariant;
 	typedef boost::variant<SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT> TimestampVariant;
 	
@@ -57,6 +58,13 @@ namespace exodbc
 
 		ColumnBuffer(const ColumnBuffer& other);
 
+		bool BindColumnBuffer(HSTMT hStmt);
+
+		size_t GetBufferSize() const;
+		void* GetBuffer();
+
+		SQLINTEGER GetInt();
+
 	private:
 		ColumnBuffer() {};
 
@@ -70,8 +78,12 @@ namespace exodbc
 		bool m_allocatedBuffer;
 		
 		boost::any* m_pBuffer;
-		BufferVariant m_buffer;
-		IntegerVariant m_intVar;
+		BufferVariant m_buffer;	///< Maybe we want one variant for all types?
+		IntegerVariant m_intVar;	///< Or a logical variant?
+		char*		m_pBinaryBuffer; ///< Allocated if this column has binary data
+		wchar_t*	m_pWCharBuffer;	///< Allocated if this column has char-data
+
+		SQLLEN		m_cb;	///< The length indicator set during Bind for this column
 
 	};  // class ColumnBuffer
 }
