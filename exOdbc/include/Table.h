@@ -41,10 +41,7 @@ namespace exodbc
 	// Consts
 	// ------
 
-	const int   wxDB_ROWID_LEN       = 24;  // 18 is the max, 24 is in case it gets larger
 	const int   wxDB_DEFAULT_CURSOR  = 0;
-	const bool  wxDB_QUERY_ONLY      = true;
-	const bool  wxDB_DISABLE_VIEW    = true;
 
 	// Used to indicate end of a variable length list of
 	// column numbers passed to member functions
@@ -117,27 +114,40 @@ namespace exodbc
 	class EXODBCAPI Table
 	{
 	public:
+
 		/*!
-		* \brief	Create a new Table-instance. The instance will be using the passed Database
-		*			and use the information from tableInfo to query the database about all its columns
-		*			during Open() and bind them.
-		* \detailed	
+		* \enum OpenMode
+		* \brief Defines if a table is opened read-only or writable
+		*/
+		enum OpenMode
+		{
+			READ_ONLY,	///< Only query the table using SELECT statements
+			READ_WRITE	///< Open the table for querying and modifying
+		};
+
+		/*!
+		* \brief	Create a new Table-instance from the Database pDb using the table definition 
+		*			from tableInfo.
+		* \detailed	Note that when this constructor is used, the internal STableInfo object is not
+		*			queried from the database, but the passed tableInfo is used for all later operations.
+		* \see		Open()
+		* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		*					you've freed the Table.
+		* \param	tableInfo Definition of the table.
+		* \param	openMode Define if the table shall be opened read-only or not
+		*/
+		Table(Database* pDb, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
+
+		/*!
+		* \brief	Create a new Table-instance from the Database pDb by querying the database
+		*			about a table named tableName
+		* \detailed During Open the database will be queried for a table named tableName.
 		*
 		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
-		* \param	tableInfo Should contain at least the tableName
+		* \param	tableName	Table name
 		*/
-		Table(Database* pDb, const STableInfo& tableInfo, bool qryOnly = !wxDB_QUERY_ONLY);
-
-		///*!
-		//* \brief	As Table(Database* pDb, const STableInfo& tableInfo, bool qryOnly = !wxDB_QUERY_ONLY)
-		//*			but with only the tableName set in the STableInfo tableInfo.
-		//* \detailed
-		//*
-		//* \param	pDb		The Database this Table belongs to. Do not free the Database before
-		//*					you've freed the Table.
-		//*/
-		//explicit Table(Database* pDb, const std::wstring& tableName, bool qryOnly = !wxDB_QUERY_ONLY);
+		Table(Database* pDb, bool qryOnly, const std::wstring& tableName);
 
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
@@ -149,11 +159,11 @@ namespace exodbc
 		* \param	tableName Table name
 		* \param	numColumns The number of columns of the Table.
 		* \param	qryTblName unused, leftover from wx, will probably be removed soon
-		* \param	queryOnly If true, less statements will be bound and only SELECT operations are possible.
+		* \param	openMode Define if the table shall be opened read-only or not
 		* \param	tblPath unused, leftover from wx, will probably be removed soon
 		*/
 		Table(Database* pwxDb, const std::wstring& tablName, const UWORD numColumns,
-			const std::wstring& qryTblName=emptyString, bool queryOnly = !wxDB_QUERY_ONLY,
+			const std::wstring& qryTblName=emptyString, OpenMode openMode = READ_WRITE,
 			const std::wstring& tblPath=emptyString);
 
 		virtual ~Table();
@@ -180,7 +190,7 @@ namespace exodbc
 		const std::wstring& GetOrderByClause()   { return m_orderBy; }
 		const std::wstring& GetWhereClause()     { return m_where; }
 
-		bool            IsQueryOnly()        { return m_queryOnly; }
+		bool            IsQueryOnly()        { return m_openMode == READ_ONLY; }
 		void            SetFromClause(const std::wstring& From) { m_from = From; }
 		void            SetOrderByClause(const std::wstring& OrderBy) { m_orderBy = OrderBy; }
 		bool            SetOrderByColNums(UWORD first, ...);
@@ -265,7 +275,7 @@ namespace exodbc
 
 		// Private member functions
 		bool        initialize(Database* pwxDb, const std::wstring& tblName, const UWORD numColumns,
-								const std::wstring& qryTblName, bool qryOnly, const std::wstring& tblPath);
+								const std::wstring& qryTblName, OpenMode openMode, const std::wstring& tblPath);
 		void        cleanup();
 
 		void        setCbValueForColumn(int columnIndex);
@@ -302,11 +312,14 @@ namespace exodbc
 		Database*		m_pDb;
 
 		// Table Inf.
+		bool			m_haveTableInfo;	///< True if m_tableInfo has been set
+		STableInfo		m_tableInfo;		///< TableInfo fetched from the db or set through constructor
+
 		std::wstring    m_tablePath;                                 // needed for dBase tables
 		std::wstring    m_tableName;                                 // Table name
 		std::wstring    m_queryTableName;                            // Query Table Name
 		UWORD       m_numCols;                               // # of columns in the table
-		bool        m_queryOnly;                                 // Query Only, no inserts, updates or deletes
+		OpenMode		m_openMode;                                 ///< Read-only or writable
 
 		// Column Definitions
 		ColumnDefinition* m_colDefs;         // Array of wxDbColDef structures
