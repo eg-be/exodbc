@@ -79,6 +79,8 @@ namespace exodbc
 		wchar_t        grantable[3+1];
 	} wxDbTablePrivilegeInfo;
 
+	// Construction
+	// ------------
 
 	/********** wxDbColInf Constructor **********/
 	ColumnInfo::ColumnInfo()
@@ -148,6 +150,8 @@ namespace exodbc
 		AllocateHdbc(*pEnv);
 	}
 
+	// Destructor
+	// -----------
 
 	Database::~Database()
 	{
@@ -180,6 +184,8 @@ namespace exodbc
 		}
 	}
 
+	// Implementation
+	// --------------
 	void Database::Initialize()
 	{
 		// Handles created by this db
