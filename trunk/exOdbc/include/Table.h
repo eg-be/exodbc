@@ -129,20 +129,20 @@ namespace exodbc
 		*/
 		Table(Database* pDb, const STableInfo& tableInfo, bool qryOnly = !wxDB_QUERY_ONLY);
 
-		/*!
-		* \brief	As Table(Database* pDb, const STableInfo& tableInfo, bool qryOnly = !wxDB_QUERY_ONLY)
-		*			but with only the tableName set in the STableInfo tableInfo.
-		* \detailed
-		*
-		* \param	pDb		The Database this Table belongs to. Do not free the Database before
-		*					you've freed the Table.
-		*/
-		// Table(Database* pDb, const std::wstring& tableName, bool qryOnly = !wxDB_QUERY_ONLY);
+		///*!
+		//* \brief	As Table(Database* pDb, const STableInfo& tableInfo, bool qryOnly = !wxDB_QUERY_ONLY)
+		//*			but with only the tableName set in the STableInfo tableInfo.
+		//* \detailed
+		//*
+		//* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		//*					you've freed the Table.
+		//*/
+		//explicit Table(Database* pDb, const std::wstring& tableName, bool qryOnly = !wxDB_QUERY_ONLY);
 
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
 		*			During Open() only those columns you have set using SetColDefs will be bound.
-		* \detailed
+		* \detailed 
 		*
 		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
