@@ -44,12 +44,13 @@
 #include "exOdbc.h"
 
 // Other headers
-#if EXODBC3_TEST
+#if EXODBC_TEST
 	#include "gtest/gtest_prod.h"
 #endif
 
 // System headers
 #include <vector>
+#include <map>
 #include <set>
 #include <windows.h>
 #include <sql.h>
@@ -108,43 +109,23 @@ namespace exodbc
 {
 	class Environment;
 	class ColumnFormatter;
-	class Database;
+	class Table;
 
 	// Structs
 	// -------
 
-	/*!
-	* \class	SDbList From wxWidgets 2.8, to detect orphaned tables. Needs to be overworked
-	*
-	* \brief	Description of the catalog of a database
-	* 
-	* This structure forms a node in a linked list.  The linked list of "DbList" objects
-	* keeps track of allocated database connections.  This allows the application to
-	* OpenImpl more than one database connection through ODBC for multiple transaction support
-	* or for multiple database support.
-	*
-	*/
-	struct SDbList
-	{
-		SDbList *PtrPrev;       // Pointer to previous item in the list
-		std::wstring  Dsn;           // Data Source Name
-		std::wstring  Uid;           // User ID
-		std::wstring  AuthStr;       // Authorization string (password)
-		std::wstring  ConnectionStr; // Connection string used instead of DSN
-		Database     *PtrDb;         // Pointer to the wxDb object
-		bool      Free;          // Is item free or in use?
-		SDbList *PtrNext;       // Pointer to next item in the list
-	};
-
-
-#ifdef EXODBCDEBUG
+#if defined EXODBCDEBUG
 	struct STablesInUse
 	{
 	public:
-		std::wstring   tableName;
-		ULONG          tableID;
-		class Database    *pDb;
-	};  // STablesInUse
+		std::wstring	m_initialTableName;
+		std::wstring	m_initialSchema;
+		std::wstring	m_initialCatalog;
+		std::wstring	m_initialType;
+		size_t			m_tableId;
+
+		std::wstring ToString() const { return m_initialCatalog + L"::" + m_initialSchema + L"::" + m_initialTableName ;  };
+	};
 #endif
 
 	// Classes
@@ -198,7 +179,7 @@ namespace exodbc
 	class EXODBCAPI Database
 	{
 		// Test helpers:
-#if EXODBC3_TEST
+#if EXODBC_TEST
 		friend class DatabaseTest;
 		FRIEND_TEST(DatabaseTest, ReadDataTypesInfo); 
 		FRIEND_TEST(DatabaseTest, SetConnectionAttributes);
@@ -608,7 +589,6 @@ namespace exodbc
 		bool			HasHdbc()			{ return m_hdbc != SQL_NULL_HDBC; };
 		HDBC            GetHDBC()          {return m_hdbc;}
 		HSTMT           GetHSTMT()         {return m_hstmt;}
-		int             GetTableCount()        {return nTables;}  // number of tables using this connection
 		//SSqlTypeInfo GetTypeInfVarchar()    {return m_typeInfVarchar;}
 		//SSqlTypeInfo GetTypeInfInteger()    {return m_typeInfInteger;}
 		//SSqlTypeInfo GetTypeInfFloat()      {return m_typeInfFloat;}
@@ -682,13 +662,10 @@ namespace exodbc
 		DatabaseProduct				m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 
 		// ODBC handles
-		HDBC  m_hdbc;        // ODBC DB Connection handle
-		HSTMT m_hstmt;       // ODBC Statement handle
+		HDBC  m_hdbc;        ///< ODBC DB Connection handle
+		HSTMT m_hstmt;       ///< ODBC Statement handle
 
-		//Error reporting mode
-		bool m_silent;
-
-		CommitMode		m_commitMode;
+		CommitMode		m_commitMode;	///< Commit Mode set currently
 
 		// Information about logical data types VARCHAR, INTEGER, FLOAT and DATE.
 		//
@@ -703,40 +680,19 @@ namespace exodbc
 		//SSqlTypeInfo m_typeInfBlob;
 		//SSqlTypeInfo m_typeInfMemo;
 
-
+#if defined EXODBCDEBUG
+		// Helpers to detect orphaned tables
 	private:
-		// These two functions are provided strictly for use by wxDbTable.
-		// DO NOT USE THESE FUNCTIONS, OR MEMORY LEAKS MAY OCCUR
-		void         incrementTableCount() { nTables++; return; }
-		void         decrementTableCount() { nTables--; return; }
-
-		// Number of Ctable objects connected to this db object.  FOR INTERNAL USE ONLY!!!
-		unsigned int nTables;
-
+		size_t	m_lastTableId;
+		std::vector<STablesInUse> m_test;
+		std::map<size_t, STablesInUse>	m_tablesInUse;
+		size_t RegisterTable(const Table* const pTable);
+		bool UnregisterTable(const Table* const pTable);
 		friend class Table;
 
-	};  // Database
-
-
-	// Writes a message to the wxLog window (stdout usually) when an internal error
-	// situation occurs.  This function only works in DEBUG builds
-	//const wchar_t EXODBCAPI *
-	//	wxDbLogExtendedErrorMsg(const wchar_t *userText,
-	//	Database *pDb,
-	//	const wchar_t *ErrFile,
-	//	int ErrLine);
-
-
-	// This function sets the sql log state for all OpenImpl wxDb objects
-	//bool EXODBCAPI
-	//	wxDbSqlLog(wxDbSqlLogState state, const std::wstring &filename = SQL_LOG_FILENAME);
-
-
-#if 0
-	// MSW/VC6 ONLY!!!  Experimental
-	int WXDLLEXPORT wxDbCreateDataSource(const std::wstring &driverName, const std::wstring &dsn, const std::wstring &description=emptyString,
-		bool sysDSN=false, const std::wstring &defDir=emptyString, wxWindow *parent=NULL);
 #endif
+
+	};  // Database
 
 }	// namespace exodbc
 

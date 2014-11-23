@@ -44,23 +44,13 @@
 #include "Environment.h"
 #include "ColumnFormatter.h"
 #include "Helpers.h"
+#include "Table.h"
 
 // Other headers
 
 
 namespace exodbc
 {
-	SDbList* PtrBegDbList = 0;
-
-#ifdef EXODBCDEBUG
-	//    #include "wx/thread.h"
-	//    extern wxList TablesInUse;
-	extern std::vector<STablesInUse*> TablesInUse;
-#if wxUSE_THREADS
-	extern wxCriticalSection csTablesInUse;
-#endif // wxUSE_THREADS
-#endif
-
 	// SQL Log defaults to be used by GetDbConnection
 	wxDbSqlLogState SQLLOGstate = sqlLogOFF;
 
@@ -194,13 +184,13 @@ namespace exodbc
 
 		//m_fpSqlLog      = 0;            // Sql Log file pointer
 		//m_sqlLogState   = sqlLogOFF;    // By default, logging is turned off
-		nTables       = 0;
 		m_dbmsType      = dbmsUNIDENTIFIED;
 
-		// Error reporting is turned OFF by default
-		m_silent = true;
+#ifdef EXODBCDEBUG
+		m_lastTableId = 1;
+#endif
 
-		// Mark database as not OpenImpl as of yet
+		// Mark database as not Open as of yet
 		m_dbIsOpen = false;
 		m_dbOpenedWithConnectionString = false;
 
@@ -898,8 +888,25 @@ namespace exodbc
 
 	bool Database::Close()
 	{
-		// There should be zero Ctable objects still connected to this db object
-		exASSERT(nTables == 0);
+
+#ifdef EXODBCDEBUG
+		// List orphaned tables in Debug build
+		{
+			if (m_tablesInUse.size() > 0)
+			{
+				std::map<size_t, STablesInUse>::const_iterator it;
+				std::wstring msg = (boost::wformat(L"Orphaned tables found in Db with DSN '%s'\n") % m_dsn).str();
+				std::wstring tablesList;
+				for (it = m_tablesInUse.begin(); it != m_tablesInUse.end(); it++)
+				{
+					const STablesInUse& tableInUse = it->second;
+					tablesList = (boost::wformat(L"%s  Table '%s' (id: %d)\n") %tablesList % tableInUse.ToString() % tableInUse.m_tableId).str();
+				}
+				LOG_DEBUG((boost::wformat(L"%s%s") % msg %tablesList).str());
+				exASSERT(false);
+			}
+		}
+#endif
 
 		// Free statement handle
 		if (m_dbIsOpen)
@@ -935,31 +942,6 @@ namespace exodbc
 
 			m_dbIsOpen = false;
 		}
-
-#ifdef EXODBCDEBUG
-		{
-#if wxUSE_THREADS
-			wxCriticalSectionLocker lock(csTablesInUse);
-#endif // wxUSE_THREADS
-			STablesInUse *tiu;
-			std::vector<STablesInUse*>::const_iterator it = TablesInUse.begin();
-			//wxList::compatibility_iterator pNode;
-			//pNode = TablesInUse.GetFirst();
-			std::wstring s1, s2;
-			while (it != TablesInUse.end())
-			{
-				tiu = *it;;
-				if (tiu->pDb == this)
-				{
-					s1 = (boost::wformat(L"Orphaned table found using pDb [%p]: ") % this).str();
-					s2 = (boost::wformat(L"(%-20s)     tableID:[%6lu]     pDb:[%p]") % tiu->tableName % tiu->tableID % this).str();
-					LOG_DEBUG((boost::wformat(L"%s%s") %s1 %s2).str());
-				}
-				it++;
-				//pNode = pNode->GetNext();
-			}
-		}
-#endif
 
 		return true;
 	}
@@ -3511,6 +3493,30 @@ namespace exodbc
 
 	//}  // wxDbSqlLog()
 
+#if defined EXODBCDEBUG
+	size_t Database::RegisterTable(const Table* const pTable)
+	{
+		STablesInUse tableInUse;
+		tableInUse.m_tableId = m_lastTableId++;
+		tableInUse.m_initialTableName = pTable->m_initialTableName;
+		tableInUse.m_initialSchema = pTable->m_initialSchemaName;
+		tableInUse.m_initialCatalog = pTable->m_initialCatalogName;
+		tableInUse.m_initialType = pTable->m_initialTypeName;
+		m_tablesInUse[tableInUse.m_tableId] = tableInUse;
+		return tableInUse.m_tableId;
+	}
+
+	bool Database::UnregisterTable(const Table* const pTable)
+	{
+		std::map<size_t, STablesInUse>::const_iterator it = m_tablesInUse.find(pTable->GetTableId());
+		if (it != m_tablesInUse.end())
+		{
+			m_tablesInUse.erase(it);
+			return true;
+		}
+		return false;
+	}
+#endif
 
 #if 0
 	/********** wxDbCreateDataSource() **********/
