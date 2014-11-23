@@ -262,6 +262,8 @@ namespace exodbc
 		std::wstring		m_schema;
 		bool				m_isCatalogNull;
 		bool				m_isSchemaNull;
+
+		std::wstring		GetFullTableName() const;
 	};
 
 	/*!
