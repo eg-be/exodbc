@@ -31,6 +31,19 @@
 // --------------
 namespace exodbc
 {
+	namespace TestTables
+	{
+		std::wstring GetTableName(const std::wstring& tableName, NameCase nameCase)
+		{
+			return (nameCase == NC_UPPER ? boost::algorithm::to_upper_copy(tableName) : boost::algorithm::to_lower_copy(tableName));
+		}
+
+		std::wstring GetColName(const std::wstring& columnName, NameCase nameCase)
+		{
+			return GetTableName(columnName, nameCase);
+		}
+	}
+
 	// NotExistingTable
 	// ----------------
 	NotExistingTable::NotExistingTable(Database* pDb)
@@ -70,18 +83,18 @@ namespace exodbc
 
 	// IntTypesTable
 	// ---------------
-	IntTypesTable::IntTypesTable(Database* pDb)
-		: Table(pDb, L"integertypes", 4, L"", wxDB_QUERY_ONLY)
+	IntTypesTable::IntTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */ )
+		: Table(pDb, TestTables::GetTableName(L"integertypes", namesCase), 4, L"", wxDB_QUERY_ONLY)
 	{	
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
 		m_int = 0;
 		m_bigInt = 0;
 
-		SetColDefs(0, L"idintegertypes", DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
-		SetColDefs(1, L"tsmallint", DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
-		SetColDefs(2, L"tint", DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
-		SetColDefs(3, L"tbigint", DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), false, false, false, false);	
+		SetColDefs(0, TestTables::GetColName(L"idintegertypes", namesCase), DB_DATA_TYPE_INTEGER, &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes), true, false, false, false);
+		SetColDefs(1, TestTables::GetColName(L"tsmallint", namesCase), DB_DATA_TYPE_INTEGER, &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt), false, false, false, false);
+		SetColDefs(2, TestTables::GetColName(L"tint", namesCase), DB_DATA_TYPE_INTEGER, &m_int, SQL_C_SLONG, sizeof(m_int), false, false, false, false);
+		SetColDefs(3, TestTables::GetColName(L"tbigint", namesCase), DB_DATA_TYPE_INTEGER, &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt), false, false, false, false);
 	}
 
 	// IntTypesTmpTable

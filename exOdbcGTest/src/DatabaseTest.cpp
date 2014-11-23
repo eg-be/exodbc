@@ -112,11 +112,16 @@ namespace exodbc
 
 		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
 		{
+#if defined HAVE_MSODBCSQL_H
 			tiMode = TI_SNAPSHOT;
 			EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
 			tiMode = m_db.ReadTransactionIsolationMode();
 			EXPECT_EQ(TI_SNAPSHOT, tiMode);
 			EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
+#else
+			LOG_WARNING(L"Skipping test because testing against Ms Sql Server but msodbcsql.h is missing");
+			EXPECT_TRUE(false);
+#endif
 		}
 
 		// Commit any ongoing transaction so we do not fail when closing the db
@@ -544,7 +549,7 @@ namespace exodbc
 			catalogName = L"exodbc";
 			break;
 		case dbmsDB2:
-			// We know that DB2 uses schemas:
+			// We know that DB2 uses schemas (and uppercase):
 			tableName = L"INTEGERTYPES";
 			schemaName = L"EXODBC";
 			catalogName = L"";

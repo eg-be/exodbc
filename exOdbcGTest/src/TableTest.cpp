@@ -78,10 +78,8 @@ namespace exodbc
 	TEST_P(TableTest, OpenCheckExistance)
 	{
 		// Open a table with checking for existence
-		//EXPECT_TRUE(m_db.SetTransactionMode(exodbc::TM_AUTO_COMMIT));
-		IntTypesTable table(&m_db);
+		IntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(table.Open(false, true));
-
 	}
 
 	// GetNext
