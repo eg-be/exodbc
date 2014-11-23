@@ -315,6 +315,8 @@ namespace exodbc
 		*/
 		bool			Count(const std::wstring& whereStatement, size_t& count);
 
+		bool			Select(const std::wstring& whereStatement);
+
 		/*!
 		* \brief	Get the OpenMode of this Table
 		* \return	True if this table was created using READ_ONLY

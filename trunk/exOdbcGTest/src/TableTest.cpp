@@ -93,6 +93,7 @@ namespace exodbc
 		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
 		exodbc::Table table(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(table.Open(false, true));
+		bool ok = table.Select(L"");
 		int p = 3;
 	}
 

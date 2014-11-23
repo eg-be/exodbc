@@ -476,6 +476,62 @@ namespace exodbc
 	}
 
 
+	bool Table::Select(const std::wstring& whereStatement)
+	{
+		exASSERT(IsOpen());
+		bool ok = false;
+		std::wstring sqlstmt;
+		if (!whereStatement.empty())
+		{
+			sqlstmt = (boost::wformat(L"SELECT * FROM %s WHERE %s") % m_tableInfo.GetSqlName() % whereStatement).str();
+		}
+		else
+		{
+			sqlstmt = (boost::wformat(L"SELECT * FROM %s") % m_tableInfo.GetSqlName()).str();
+		}
+		SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_DBC(m_pDb->GetHDBC(), ret, SQLExecDirect);
+			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLExecDirect);
+		}
+		else
+		{
+			ret = SQLFetch(m_hStmtSelect);
+			if (ret != SQL_SUCCESS)
+			{
+				LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFetch);
+			}
+			else
+			{
+				for (int i = 0; i < m_columnBuffers.size(); i++)
+				{
+					int val = m_columnBuffers[i].GetInt();
+					int p = 3;
+				}
+				ok = true;
+				SQLINTEGER cb;
+				//ok = GetData(m_hStmtCount, 1, SQL_C_ULONG, &count, sizeof(count), &cb, &isNull);
+				//if (ok && isNull)
+				//{
+				//	LOG_ERROR((boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt).str());
+				//}
+			}
+		}
+
+		// Close the Cursor on the internal statement-handle
+		CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_pDb->GetCommitMode() != CM_AUTO_COMMIT && !m_pDb->CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
+		}
+
+		return ok;
+	}
+
+
 	/***************************** PRIVATE FUNCTIONS *****************************/
 
 
@@ -873,6 +929,7 @@ namespace exodbc
 			{
 				SColumnInfo colInfo = *it;
 				ColumnBuffer colBuff(colInfo);
+				bool bound = colBuff.BindColumnBuffer(m_hStmtSelect);
 				m_columnBuffers.push_back(colBuff);
 			}
 		}

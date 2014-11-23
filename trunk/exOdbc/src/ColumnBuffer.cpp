@@ -87,7 +87,6 @@ namespace exodbc
 	// --------------
 	bool ColumnBuffer::AllocateBuffer(const SColumnInfo& columnInfo)
 	{
-		LOG_ERROR(L"Alloc");
 		wstring s = SqlType2s(columnInfo.m_sqlDataType);
 		//		boost::variant<boost::variant<SQLUSMALLINT, SQLSMALLINT>, boost::variant<>> numeric;
 
@@ -121,6 +120,82 @@ namespace exodbc
 			int o = 3;
 		}
 		return allocated;
+	}
+
+	void* ColumnBuffer::GetBuffer()
+	{
+		void* pBuffer = NULL;
+		switch (m_columnInfo.m_sqlDataType)
+		{
+		case SQL_SMALLINT:
+			return static_cast<void*>(&(boost::get<SQLSMALLINT>(m_intVar)));
+		case SQL_INTEGER:
+			return static_cast<void*>(&(boost::get<SQLINTEGER>(m_intVar)));
+		case SQL_BIGINT:
+			return static_cast<void*>(&(boost::get<SQLBIGINT>(m_intVar)));
+		default:
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+		}
+		return pBuffer;
+	}
+
+	size_t ColumnBuffer::GetBufferSize() const
+	{
+		switch (m_columnInfo.m_sqlDataType)
+		{
+		case SQL_SMALLINT:
+			return sizeof(SQLSMALLINT);
+		case SQL_INTEGER:
+			return sizeof(SQLINTEGER);
+		case SQL_BIGINT:
+			return sizeof(SQLBIGINT);
+		default:
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+		}
+		return 0;
+	}
+
+	SQLINTEGER ColumnBuffer::GetInt()
+	{
+		SQLINTEGER i = -1;
+		switch (m_columnInfo.m_sqlDataType)
+		{
+		case SQL_INTEGER:
+			i = boost::get<SQLINTEGER>(m_intVar);
+			break;
+		default:
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+		}
+		return i;
+	}
+
+	bool ColumnBuffer::BindColumnBuffer(HSTMT hStmt)
+	{
+		void* pBuffer = GetBuffer();
+		size_t buffSize = GetBufferSize();
+		SQLRETURN ret = 0;
+		bool notBound = false;
+		switch (m_columnInfo.m_sqlDataType)
+		{
+		case SQL_SMALLINT:
+			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SSHORT, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			break;
+		case SQL_INTEGER:
+			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SLONG, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			break;
+		case SQL_BIGINT:
+			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SBIGINT, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			break;
+		default:
+			notBound = true;
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+		}
+		if (!notBound && ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
+			return false;
+		}
+		return true;
 	}
 
 	// Interfaces
