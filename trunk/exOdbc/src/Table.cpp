@@ -39,19 +39,6 @@ namespace exodbc
 {
 
 
-	ULONG lastTableID = 0;
-
-
-	void csstrncpyt(wchar_t *target, const wchar_t *source, int n)
-	{
-		while ((*target++ = *source++) != '\0' && --n != 0)
-			;
-
-		*target = '\0';
-	}
-
-
-
 	/********** wxDbColDef::wxDbColDef() Constructor **********/
 	ColumnDefinition::ColumnDefinition()
 	{
@@ -897,21 +884,6 @@ namespace exodbc
 			//if (!hasPrivs)
 			//    s = L"Connecting user does not have sufficient privileges to access this table.\n";
 		}
-
-		// if (!s.empty())
-		// {
-		//     std::wstring p;
-
-		//     if (!m_tablePath.empty())
-		//p = (boost::wformat(L"Error OpenImpling '%s/%s'.\n") %m_tablePath %m_tableName).str();
-		//     else
-		//p = (boost::wformat(L"Error OpenImpling '%s'.\n") %m_tableName).str();
-
-		//     p += s;
-		//     m_pDb->LogError(p);
-
-		//     return false;
-		// }
 
 		// Bind the member variables for field exchange between
 		// the wxDbTable object and the ODBC record.
