@@ -732,8 +732,11 @@ bool Table::query(int queryType, bool forUpdate, bool distinct, const std::wstri
 /********** wxDbTable::Open() **********/
 bool Table::Open(bool checkPrivileges, bool checkTableExists)
 {
-    if (!m_pDb)
-        return false;
+	if (!m_pDb)
+	{
+		LOG_ERROR(L"No Database set");
+		return false;
+	}
 
     std::wstring sqlStmt;
     std::wstring s;

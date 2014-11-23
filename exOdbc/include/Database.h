@@ -192,7 +192,7 @@ namespace exodbc
 	* A method named ReadXXX will read a value a property from the database and
 	* update the internally cached value (if there is one) if reading was successful.
 	* A method named GetXXX will return the internally cached value of the property.
-	* A method named SetXXX will try to set the property on the database. If successfull,
+	* A method named SetXXX will try to set the property on the database. If successful,
 	* an eventually internally cached value will be updated.
 	*/
 	class EXODBCAPI Database
