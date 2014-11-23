@@ -100,13 +100,60 @@ namespace exodbc
 		bool	m_null;                               // NOT FULLY IMPLEMENTED - Allows NULL values in Inserts and Updates
 	};  // ColumnDefinition
 
-
+	/*!
+	* \class Table
+	*
+	* \brief Represent a Table from a Database. Every Table needs a Database.
+	*
+	* This class will allocate the Statements-Handles that are required
+	* to query and modify the table.
+	* A table can be constructed either manually by setting the definitions
+	* for the columns or by letting the table query itself about its columns.
+	* A table must be opened after construction by calling Open().
+	*
+	* All statements will be freed on destruction of the Table. You should not
+	* Destroy the database before the Table is destroyed.
+	*/
 	class EXODBCAPI Table
 	{
 	public:
-		// Public member functions
-		Table(Database* pwxDb, const std::wstring& tblName, const UWORD numColumns,
-			const std::wstring& qryTblName=emptyString, bool qryOnly = !wxDB_QUERY_ONLY,
+		/*!
+		* \brief	Create a new Table-instance. The instance will be using the passed Database
+		*			and use the information from tableInfo to query the database about all its columns
+		*			during Open() and bind them.
+		* \detailed	
+		*
+		* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		*					you've freed the Table.
+		* \param	tableInfo Should contain at least the tableName
+		*/
+		Table(Database* pDb, const STableInfo& tableInfo, bool qryOnly = !wxDB_QUERY_ONLY);
+
+		/*!
+		* \brief	As Table(Database* pDb, const STableInfo& tableInfo, bool qryOnly = !wxDB_QUERY_ONLY)
+		*			but with only the tableName set in the STableInfo tableInfo.
+		* \detailed
+		*
+		* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		*					you've freed the Table.
+		*/
+		// Table(Database* pDb, const std::wstring& tableName, bool qryOnly = !wxDB_QUERY_ONLY);
+
+		/*!
+		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
+		*			During Open() only those columns you have set using SetColDefs will be bound.
+		* \detailed
+		*
+		* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		*					you've freed the Table.
+		* \param	tableName Table name
+		* \param	numColumns The number of columns of the Table.
+		* \param	qryTblName unused, leftover from wx, will probably be removed soon
+		* \param	queryOnly If true, less statements will be bound and only SELECT operations are possible.
+		* \param	tblPath unused, leftover from wx, will probably be removed soon
+		*/
+		Table(Database* pwxDb, const std::wstring& tablName, const UWORD numColumns,
+			const std::wstring& qryTblName=emptyString, bool queryOnly = !wxDB_QUERY_ONLY,
 			const std::wstring& tblPath=emptyString);
 
 		virtual ~Table();
