@@ -32,8 +32,11 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Database.h"
+#include "ColumnBuffer.h"
 
 // Other headers
+#include "boost/any.hpp"
+
 // System headers
 
 namespace exodbc
@@ -68,6 +71,25 @@ namespace exodbc
 
 	// Classes
 	// -------
+
+	class EXODBCAPI ColDef
+	{
+	public:
+		ColDef(bool allocateBuffer);
+		// boost::any somehow:
+		//SQL_TIMESTAMP_STRUCT ts;
+		//ts.fraction = 26;
+		//ts.hour = 7;
+		//ts.year = 2017;
+		//boost::any a1 = ts;
+		//size_t l1 = sizeof(ts);
+		//size_t l2 = sizeof(a1);
+		//SQL_TIMESTAMP_STRUCT* t2 = &(boost::any_cast<SQL_TIMESTAMP_STRUCT>(a1));
+
+	private:
+		boost::any m_value;
+		SColumnInfo columnInfo;
+	};
 
 	// The following class is used to define a column of a table.
 	// The wxDbTable constructor will dynamically allocate as many of
@@ -437,6 +459,8 @@ namespace exodbc
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		const OpenMode		m_openMode;				///< Read-only or writable
 		bool				m_isOpen;				///< Set to true after Open has been called
+		std::vector<ColumnBuffer> m_columnBuffers;	///< Created during Open when Columns are read
+
 
 		// Table information set during construction, that was used to find the matching STableInfo if none was passed
 		// Note: We make them public, as they are all const

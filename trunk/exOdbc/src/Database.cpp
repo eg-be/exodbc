@@ -2645,7 +2645,7 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableColumnInfo>& columns)
+	bool Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<SColumnInfo>& columns)
 	{
 		// Find one matching table
 		STableInfo table;
@@ -2659,7 +2659,7 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTableColumnInfo(const STableInfo& table, std::vector<STableColumnInfo>& columns)
+	bool Database::ReadTableColumnInfo(const STableInfo& table, std::vector<SColumnInfo>& columns)
 	{
 		// Clear result
 		columns.empty();
@@ -2710,7 +2710,7 @@ namespace exodbc
 			bool haveAllData = true;
 
 			SQLLEN cb;
-			STableColumnInfo colInfo;
+			SColumnInfo colInfo;
 			haveAllData = haveAllData & GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);

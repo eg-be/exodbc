@@ -203,15 +203,16 @@ namespace exodbc
 	};
 
 	/*!
-	 * \classt	STableColumnInfo
+	 * \classt	SColumnInfo
 	 *
 	 * \brief	Information about a column fetched using the catalog
 	 * 			function SQLColumns.
 	 * 			See: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
 	 */
-	struct EXODBCAPI STableColumnInfo
+	struct EXODBCAPI SColumnInfo
 	{
-		STableColumnInfo();
+	public:
+		SColumnInfo();
 
 		std::wstring	m_catalogName;		// [NULLABLE] Catalog name
 		std::wstring	m_schemaName;		// [NULLABLE] Schema name
