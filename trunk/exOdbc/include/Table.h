@@ -10,7 +10,7 @@
 * not needed and not tested so far has been droped.
 *
 * For completion, here follows the old wxWidgets header:
-* 
+*
 * ///////////////////////////////////////////////////////////////////////////////<br>
 * // Name:        dbtable.h<br>
 * // Purpose:     Declaration of the wxDbTable class.<br>
@@ -41,7 +41,7 @@ namespace exodbc
 	// Consts
 	// ------
 
-	const int   wxDB_DEFAULT_CURSOR  = 0;
+	const int   wxDB_DEFAULT_CURSOR = 0;
 
 	// Used to indicate end of a variable length list of
 	// column numbers passed to member functions
@@ -62,7 +62,7 @@ namespace exodbc
 	struct EXODBCAPI SIndexDefinition
 	{
 	public:
-		wchar_t		ColName[DB_MAX_COLUMN_NAME_LEN+1];
+		wchar_t		ColName[DB_MAX_COLUMN_NAME_LEN + 1];
 		bool		Ascending;
 	};  // SIndexDefinition
 
@@ -84,7 +84,7 @@ namespace exodbc
 
 		bool    Initialize();
 
-		wchar_t	m_colName[DB_MAX_COLUMN_NAME_LEN+1];  // Column Name
+		wchar_t	m_colName[DB_MAX_COLUMN_NAME_LEN + 1];  // Column Name
 		int		m_dbDataType;                         // Logical Data Type; e.g. DB_DATA_TYPE_INTEGER
 		SWORD	m_sqlCtype;                           // C data type; e.g. SQL_C_LONG
 		void*	m_ptrDataObj;                         // Address of the data object
@@ -111,11 +111,11 @@ namespace exodbc
 	* Columns bound to the table will be updated with the values of the current record
 	* this table points to. Calling methods like Update(), Delete() or Insert() will
 	* modify the table in the database using the current values.
-	* 
+	*
 	* A table that queries the database about its columns will always bind all columns.
 	* A table where columns are defined manually will only bind those columns defined.
 	* This is handy if you have a large table and are ony interested in the values of
-	* a few columns. 
+	* a few columns.
 	*
 	* The database will always be queried for a table matching the given values in the
 	* constructor, except one of the constructors where a STableInfo structure
@@ -141,7 +141,7 @@ namespace exodbc
 		};
 
 		/*!
-		* \brief	Create a new Table-instance from the Database pDb using the table definition 
+		* \brief	Create a new Table-instance from the Database pDb using the table definition
 		*			from tableInfo. The table will read its column-definitions from the database
 		*			automatically during Open() and bind all columns.
 		* \detailed	Note that when this constructor is used, the internal STableInfo object is not
@@ -241,7 +241,7 @@ namespace exodbc
 		*			is allowed to do the required operations like Select, Update, Insert or Delete,
 		*			depending on the OpenMode value passed during construction.
 		* \param	checkTableExists If true, the database will always be queried if a table matching the
-		*			passed definition during constructions actually exists in the database. Setting this 
+		*			passed definition during constructions actually exists in the database. Setting this
 		*			value to false makes only sense	if you've passed a STableInfo, as else the Table
 		*			is required to query the database anyway (and fail if not found).
 		*
@@ -250,9 +250,9 @@ namespace exodbc
 		bool            Open(bool checkPrivileges = false, bool checkTableExists = true);
 
 		//bool            CreateTable(bool attemptDrop = true);
-//		bool            DropTable();
-//		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, SIndexDefinition* pIndexDefs, bool attemptDrop = true);
-//		bool            DropIndex(const std::wstring& indexName);
+		//		bool            DropTable();
+		//		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, SIndexDefinition* pIndexDefs, bool attemptDrop = true);
+		//		bool            DropIndex(const std::wstring& indexName);
 
 		// Accessors
 
@@ -270,7 +270,7 @@ namespace exodbc
 		* \see		GetTableInfo()
 		* \return	Returns true if this table has a STableInfo set that can be fetched using GetTableInfo()
 		*/
-		bool				HaveTableInfo() const { return m_haveTableInfo;  }
+		bool				HaveTableInfo() const { return m_haveTableInfo; }
 
 		/*!
 		* \brief	Return the Table information of this Table.
@@ -306,13 +306,13 @@ namespace exodbc
 		//bool            Delete();
 		//bool            DeleteWhere(const std::wstring& pWhereClause);
 		//bool            DeleteMatching();
-//		virtual bool    Query(bool forUpdate = false, bool distinct = false);
+		//		virtual bool    Query(bool forUpdate = false, bool distinct = false);
 		bool            QueryBySqlStmt(const std::wstring& pSqlStmt);
 		bool            QueryMatching(bool forUpdate = false, bool distinct = false);
 		bool            QueryOnKeyFields(bool forUpdate = false, bool distinct = false);
 		//bool            Refresh();
-		bool            GetNext()		{ return(getRec(SQL_FETCH_NEXT));  }
-		bool            operator++(int) { return(getRec(SQL_FETCH_NEXT));  }
+		bool            GetNext()		{ return(getRec(SQL_FETCH_NEXT)); }
+		bool            operator++(int) { return(getRec(SQL_FETCH_NEXT)); }
 
 		/***** These four functions only work with wxDb instances that are defined  *****
 		***** as not being FwdOnlyCursors                                          *****/
@@ -327,7 +327,7 @@ namespace exodbc
 		//void            BuildSelectStmt(std::wstring& pSqlStmt, int typeOfSelect, bool distinct);
 		//void            BuildSelectStmt(wchar_t* pSqlStmt, int typeOfSelect, bool distinct);
 
-//		void            BuildDeleteStmt(std::wstring& pSqlStmt, int typeOfDel, const std::wstring& pWhereClause = emptyString);
+		//		void            BuildDeleteStmt(std::wstring& pSqlStmt, int typeOfDel, const std::wstring& pWhereClause = emptyString);
 		//void            BuildDeleteStmt(wchar_t* pSqlStmt, int typeOfDel, const std::wstring& pWhereClause = emptyString);
 
 		//void            BuildUpdateStmt(std::wstring& pSqlStmt, int typeOfUpdate, const std::wstring& pWhereClause = emptyString);
@@ -343,13 +343,13 @@ namespace exodbc
 		bool            SetQueryTimeout(UDWORD nSeconds);
 
 		ColumnDefinition* GetColDefs() { return m_colDefs; }
-		bool            SetColDefs(UWORD index, const std::wstring& fieldName, int dataType, void* pData, SWORD cType, int size, bool keyField = false, 
-									bool updateable = true, bool insertAllowed = true, bool derivedColumn = false);
+		bool            SetColDefs(UWORD index, const std::wstring& fieldName, int dataType, void* pData, SWORD cType, int size, bool keyField = false,
+			bool updateable = true, bool insertAllowed = true, bool derivedColumn = false);
 		SColumnDataPtr* SetColDefs(ColumnInfo* colInfs, UWORD numCols);
 
 		bool            CloseCursor(HSTMT cursor);
 		bool            DeleteCursor(HSTMT* hstmtDel);
-		void            SetCursor(HSTMT* hstmtActivate = (void **) wxDB_DEFAULT_CURSOR);
+		void            SetCursor(HSTMT* hstmtActivate = (void **)wxDB_DEFAULT_CURSOR);
 		HSTMT           GetCursor() { return(m_hstmt); }
 		HSTMT*			GetNewCursor(bool setCursor = false, bool bindColumns = true);
 
@@ -359,7 +359,8 @@ namespace exodbc
 		bool            SetColNull(UWORD colNumber, bool set = true);
 		bool            SetColNull(const std::wstring& colName, bool set = true);
 
-		// Private member variables
+		// Private member variables and functions
+	private:
 		UDWORD      m_cursorType;
 
 		// Private member functions
@@ -367,14 +368,14 @@ namespace exodbc
 		void        cleanup();
 
 		void        setCbValueForColumn(int columnIndex);
-//		bool        bindParams(bool forUpdate);  // called by the other 'bind' functions
+		//		bool        bindParams(bool forUpdate);  // called by the other 'bind' functions
 		//bool        bindInsertParams();
 		//bool        bindUpdateParams();
 
 		bool        bindCols(HSTMT cursor);
 		bool        getRec(UWORD fetchType);
 		bool        execDelete(const std::wstring& pSqlStmt);
-//		bool        execUpdate(const std::wstring& pSqlStmt);
+		//		bool        execUpdate(const std::wstring& pSqlStmt);
 		bool        query(int queryType, bool forUpdate, bool distinct, const std::wstring& pSqlStmt = emptyString);
 
 		// Where, Order By and From clauses
@@ -383,7 +384,11 @@ namespace exodbc
 		std::wstring    m_from;                // Allows for joins in a wxDbTable::Query().  Format: ",tbl,tbl..."
 
 		// ODBC Handles
-//		HENV        m_henv;           // ODBC Environment handle
+		HSTMT		m_hStmtSelect;	///< Statement-handle used to do selects.
+		HSTMT		m_hStmtCount;	///< Statement-handle used to do counts. Columns are not bound.
+
+		// Old handles below, should all be replaced by new implementations
+		//		HENV        m_henv;           // ODBC Environment handle
 		HDBC        m_hdbc;           // ODBC DB Connection handle
 		HSTMT       m_hstmt;          // ODBC Statement handle
 		HSTMT*		m_hstmtDefault;   // Default cursor
@@ -405,14 +410,16 @@ namespace exodbc
 		const OpenMode		m_openMode;				///< Read-only or writable
 
 		// Table information set during construction, that was used to find the matching STableInfo if none was passed
+	public:
 		const std::wstring  m_initialTableName;		///< Table name set on construction
 		const std::wstring	m_initialSchemaName;	///< Schema name set on construction
 		const std::wstring	m_initialCatalogName;	///< Catalog name set on construction
 		const std::wstring	m_initialTypeName;		////< Type name set on construction
 
 		// Column information
+	private:
 		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
-		const size_t		m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database
+		size_t				m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database
 
 		// Column Definitions
 		ColumnDefinition* m_colDefs;         // Array of wxDbColDef structures

@@ -624,8 +624,8 @@ namespace exodbc
 		// return the string with all special SQL characters escaped
 		//std::wstring     EscapeSqlChars(const std::wstring& value);
 
-	private:
 		// Private member functions
+	private:
 		bool			ReadDataTypesInfo(std::vector<SSqlTypeInfo>& types);
 
 		void			Initialize();
