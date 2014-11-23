@@ -119,7 +119,7 @@ namespace exodbc
 	*
 	* The database will always be queried for a table matching the given values in the
 	* constructor, except one of the constructors where a STableInfo structure
-	* is passed.
+	* is passed was used.
 	*
 	* A table must be opened after construction by calling Open().
 	*
@@ -256,11 +256,30 @@ namespace exodbc
 
 		// Accessors
 
-		// The member variables returned by these accessors are all
-		// set when the wxDbTable instance is created and cannot be
-		// changed, hence there is no corresponding SetXxxx function
-		Database*			GetDb()              { return m_pDb; }
-		const std::wstring& GetTableName()       { return m_tableName; }
+		/*!
+		* \brief	Get the database that was set during constructions.
+		*
+		* \return	Database this Table belongs to.
+		*/
+		Database*			GetDb() const		{ return m_pDb; }
+
+		/*!
+		* \brief	Check if the Table-Information is set on this Table.
+		* \detailed	Returns true if the internal member of the STableInfo contains a value either
+		*			set during Construction or fetched from the Database during Open().
+		* \see		GetTableInfo()
+		* \return	Returns true if this table has a STableInfo set that can be fetched using GetTableInfo()
+		*/
+		bool				HaveTableInfo() const { return m_haveTableInfo;  }
+
+		/*!
+		* \brief	Return the Table information of this Table.
+		* \detailed	Returns the STableInfo of this table, if one has been set either during construction
+		*			or one was read during Open().
+		* \see		HaveTableInfo()
+		* \return	Returns true if this table has a STableInfo set that can be fetched using GetTableInfo()
+		*/
+		STableInfo			GetTableInfo() const;
 
 		UWORD           GetNumberOfColumns() { return m_numCols; }  // number of "defined" columns for this wxDbTable instance
 
@@ -349,10 +368,9 @@ namespace exodbc
 
 		// Private member variables
 		UDWORD      m_cursorType;
-		bool        m_insertable;
 
 		// Private member functions
-		bool        initialize(Database* pDb, const std::wstring& tblName, size_t numColumns, OpenMode openMode);
+		bool        Initialize(Database* pDb);
 		void        cleanup();
 
 		void        setCbValueForColumn(int columnIndex);
@@ -388,13 +406,20 @@ namespace exodbc
 		// Pointer to the database object this table belongs to
 		Database*		m_pDb;
 
-		// Table Inf.
-		bool			m_haveTableInfo;	///< True if m_tableInfo has been set
-		STableInfo		m_tableInfo;		///< TableInfo fetched from the db or set through constructor
+		// Table Information
+		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
+		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
+		const OpenMode		m_openMode;				///< Read-only or writable
 
-		std::wstring    m_tableName;                                 // Table name
-		size_t			m_numCols;                               //< # of columns in the table. Either set from user during constructor, or read from the database
-		OpenMode		m_openMode;                                 ///< Read-only or writable
+		// Table information set during construction, that was used to find the matching STableInfo if none was passed
+		const std::wstring  m_initialTableName;		///< Table name set on construction
+		const std::wstring	m_initialSchemaName;	///< Schema name set on construction
+		const std::wstring	m_initialCatalogName;	///< Catalog name set on construction
+		const std::wstring	m_initialTypeName;		////< Type name set on construction
+
+		// Column information
+		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
+		const size_t		m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database
 
 		// Column Definitions
 		ColumnDefinition* m_colDefs;         // Array of wxDbColDef structures

@@ -427,10 +427,11 @@ namespace exodbc
 		 * \param	tableName  	Name of the table.
 		 * \param	schemaName 	Name of the schema.
 		 * \param	catalogName	Name of the catalog.
+		 * \param	tableType	Table Type name
 		 *
 		 * \return	The column count or -1 in case of failure
 		 */
-		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
+		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
 
 		/*!
 		 * \fn	bool Database::ReadTablePrivileges(const STableInfo& table, std::vector<STablePrivilegesInfo>& privileges);
@@ -453,11 +454,12 @@ namespace exodbc
 		 * \param	tableName		  	Name of the table.
 		 * \param	schemaName		  	Name of the schema.
 		 * \param	catalogName		  	Name of the catalog.
+		 * \param	tableType	Table Type name
 		 * \param [in,out]	privileges	The privileges.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STablePrivilegesInfo>& privileges);
+		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STablePrivilegesInfo>& privileges);
 
 		/*!
 		 * \fn	bool Database::ReadTableColumnInfo(const STableInfo& table, std::vector<STableColumnInfo>& columns);
@@ -480,11 +482,12 @@ namespace exodbc
 		 * \param	tableName	   	Name of the table.
 		 * \param	schemaName	   	Name of the schema.
 		 * \param	catalogName	   	Name of the catalog.
+		 * \param	tableType	Table Type name
 		 * \param [in,out]	columns	The columns.
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STableColumnInfo>& columns);
+		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableColumnInfo>& columns);
 
 		/*!
 		 * \fn	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
@@ -504,6 +507,21 @@ namespace exodbc
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableInfo>& tables);
+
+		/*!
+		* \brief	Searches for tables that match the passed arguments, return true if exactly one such table is found.
+		* 			The table that matches is copied to the argument table.
+		*
+		* \param	tableName		  	Name of the table.
+		* \param	schemaName		  	Name of the schema.
+		* \param	catalogName		  	Name of the catalog.
+		* \param	tableType		  	Table Type name.
+		* \param [in,out]	table	  	The table.
+		*
+		* \return	true if exactly one table matches the passed search-criterias name, schema and catalog, false else.
+		*/
+		bool			FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, STableInfo& table);
+
 
 		/*!
 		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT. The internal flag
@@ -646,21 +664,6 @@ namespace exodbc
 			AllTableTypes
 		};
 		bool			ReadCatalogInfo(ReadCatalogInfoMode mode, std::vector<std::wstring>& results);
-
-		/*!
-		 * \fn	bool Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<SCatalogTablePrivilege>& privileges, SDbCatalogTable& table);
-		 *
-		 * \brief	Searches for tables that match the passed arguments, return true if exactly one such table is found.
-		 * 			The table that matches is copied to the argument table.
-		 *
-		 * \param	tableName		  	Name of the table.
-		 * \param	schemaName		  	Name of the schema.
-		 * \param	catalogName		  	Name of the catalog.
-		 * \param [in,out]	table	  	The table.
-		 *
-		 * \return	true if exactly one table matches the passed search-criterias name, schema and catalog, false else.
-		 */
-		bool			FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, STableInfo& table);
 
 		// Members
 		SDbInfo				m_dbInf;
