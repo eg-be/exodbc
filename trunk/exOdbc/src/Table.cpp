@@ -86,29 +86,33 @@ bool ColumnDefinition::Initialize()
     return true;
 }  // wxDbColDef::Initialize()
 
-
-/********** wxDbTable::wxDbTable() Constructor **********/
-Table::Table(Database *pwxDb, const std::wstring &tblName, const UWORD numColumns,
-                    const std::wstring &qryTblName, OpenMode openMode, const std::wstring &tblPath)
+// Construction
+// ------------
+Table::Table(Database* pDb, size_t numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, OpenMode openMode /* = READ_WRITE */)
 {
-    if (!initialize(pwxDb, tblName, numColumns, qryTblName, openMode, tblPath))
-        cleanup();
-}  // wxDbTable::wxDbTable()
+	exASSERT(pDb);
+	if (!initialize(pDb, tableName, numColumns, openMode))
+	{
+		cleanup();
+	}
+}
 
 
-
-/********** wxDbTable::~wxDbTable() **********/
+// Destructor
+// -----------
 Table::~Table()
 {
     this->cleanup();
-}  // wxDbTable::~wxDbTable()
+}
 
-
-bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD numColumns,
-                    const std::wstring &qryTblName, OpenMode openMode, const std::wstring &tblPath)
+// Implementation
+// --------------
+bool Table::initialize(Database* pDb, const std::wstring &tblName, size_t numColumns, OpenMode openMode)
 {
+	exASSERT(pDb);
+
     // Initializing member variables
-    m_pDb                 = pwxDb;                    // Pointer to the wxDb object
+    m_pDb                 = pDb;                    // Pointer to the wxDb object
     m_hdbc                = 0;
     m_hstmt               = 0;
     m_hstmtDefault        = 0;                        // Initialized below
@@ -126,9 +130,7 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
     m_selectForUpdate     = false;                    // SELECT ... FOR UPDATE; Indicates whether to include the FOR UPDATE phrase
 	m_openMode = openMode;
     m_insertable          = true;
-    m_tablePath.empty();
     m_tableName.empty();
-    m_queryTableName.empty();
 
     exASSERT(tblName.length());
     exASSERT(m_pDb);
@@ -141,16 +143,6 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
     //    (m_pDb->Dbms() == dbmsFIREBIRD) ||
     //    (m_pDb->Dbms() == dbmsINTERBASE))
     //    boost::algorithm::to_upper(m_tableName);
-
-    if (tblPath.length())
-        m_tablePath = tblPath;                    // Table Path - used for dBase files
-    else
-        m_tablePath.empty();
-
-    if (qryTblName.length())                    // Name of the table/view to query
-        m_queryTableName = qryTblName;
-    else
-        m_queryTableName = tblName;
 
     //if ((m_pDb->Dbms() == dbmsORACLE) ||
     //    (m_pDb->Dbms() == dbmsFIREBIRD) ||
@@ -583,7 +575,7 @@ bool Table::getRec(UWORD fetchType)
         {
             // Set the Null member variable to indicate the Null state
             // of each column just read in.
-            int i;
+            size_t i;
             for (i = 0; i < m_numCols; i++)
                 m_colDefs[i].m_null = (m_colDefs[i].m_cbValue == SQL_NULL_DATA);
         }
@@ -603,7 +595,7 @@ bool Table::getRec(UWORD fetchType)
         {
             // Set the Null member variable to indicate the Null state
             // of each column just read in.
-            int i;
+            size_t i;
             for (i = 0; i < m_numCols; i++)
                 m_colDefs[i].m_null = (m_colDefs[i].m_cbValue == SQL_NULL_DATA);
         }
@@ -2244,7 +2236,7 @@ void Table::ClearMemberVar(UWORD colNumber, bool setToNull)
 /********** wxDbTable::ClearMemberVars() **********/
 void Table::ClearMemberVars(bool setToNull)
 {
-    int i;
+    size_t i;
 
     // Loop through the columns setting each member variable to zero
     for (i=0; i < m_numCols; i++)
@@ -2573,7 +2565,7 @@ bool Table::SetColNull(UWORD colNumber, bool set)
 /********** wxDbTable::SetColNull() **********/
 bool Table::SetColNull(const std::wstring &colName, bool set)
 {
-    int colNumber;
+    size_t colNumber;
     for (colNumber = 0; colNumber < m_numCols; colNumber++)
     {
         if (!_wcsicmp(colName.c_str(), m_colDefs[colNumber].m_colName))

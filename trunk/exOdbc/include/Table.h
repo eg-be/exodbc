@@ -104,8 +104,23 @@ namespace exodbc
 	*
 	* This class will allocate the Statements-Handles that are required
 	* to query and modify the table.
-	* A table can be constructed either manually by setting the definitions
-	* for the columns or by letting the table query itself about its columns.
+	* Depending on which constructor is used, a table will query the database
+	* about its column-definitions later automatically, or the column-definitions
+	* must be set manually using SetColDefs().
+	* During Open() the table will "bind" a buffer to every defined column.
+	* Columns bound to the table will be updated with the values of the current record
+	* this table points to. Calling methods like Update(), Delete() or Insert() will
+	* modify the table in the database using the current values.
+	* 
+	* A table that queries the database about its columns will always bind all columns.
+	* A table where columns are defined manually will only bind those columns defined.
+	* This is handy if you have a large table and are ony interested in the values of
+	* a few columns. 
+	*
+	* The database will always be queried for a table matching the given values in the
+	* constructor, except one of the constructors where a STableInfo structure
+	* is passed.
+	*
 	* A table must be opened after construction by calling Open().
 	*
 	* All statements will be freed on destruction of the Table. You should not
@@ -127,48 +142,113 @@ namespace exodbc
 
 		/*!
 		* \brief	Create a new Table-instance from the Database pDb using the table definition 
-		*			from tableInfo.
+		*			from tableInfo. The table will read its column-definitions from the database
+		*			automatically during Open() and bind all columns.
 		* \detailed	Note that when this constructor is used, the internal STableInfo object is not
 		*			queried from the database, but the passed tableInfo is used for all later operations.
-		* \see		Open()
+		*			This is handy if you've located the detailed table-information already from the Database
+		*			using its Database::FindTables() function and want to avoid that is operation is
+		*			executed again during Open().
 		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	tableInfo Definition of the table.
 		* \param	openMode Define if the table shall be opened read-only or not
+		*
+		* \see		Open()
 		*/
 		Table(Database* pDb, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
 
+
 		/*!
 		* \brief	Create a new Table-instance from the Database pDb by querying the database
-		*			about a table named tableName
-		* \detailed During Open the database will be queried for a table named tableName.
+		*			about a table with the given values for name, schema, catalog and type.
+		*			The table will read its column-definitions from the database
+		*			automatically during Open() and bind all columns.
+		* \detailed During Open() the database will be queried for a table matching the given values.
+		*			If any of the values is an empty string it is ignored when searching for the table
+		*			in the database.
 		*
 		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	tableName	Table name
+		* \param	schemaName	Schema name
+		* \param	catalogName	Catalog name
+		* \param	tableType	Table type
+		* \param	openMode Define if the table shall be opened read-only or not
+		*
+		* \see		Open()
 		*/
-		Table(Database* pDb, bool qryOnly, const std::wstring& tableName);
+		Table(Database* pDb, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", const OpenMode openMode = READ_WRITE);
+
 
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
-		*			During Open() only those columns you have set using SetColDefs will be bound.
-		* \detailed 
+		*			During Open() only those columns you have set using SetColDefs() will be bound.
+		* \detailed During Open() the database will be queried for a table matching the given values.
+		*			If any of the values is an empty string it is ignored when searching for the table
+		*			in the database.
 		*
 		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
-		* \param	tableName Table name
 		* \param	numColumns The number of columns of the Table.
-		* \param	qryTblName unused, leftover from wx, will probably be removed soon
+		* \param	tableName Table name
+		* \param	schemaName	Schema name
+		* \param	catalogName	Catalog name
+		* \param	tableType	Table type
 		* \param	openMode Define if the table shall be opened read-only or not
-		* \param	tblPath unused, leftover from wx, will probably be removed soon
+		*
+		* \see		Open()
+		* \see		SetColDefs()
 		*/
-		Table(Database* pwxDb, const std::wstring& tablName, const UWORD numColumns,
-			const std::wstring& qryTblName=emptyString, OpenMode openMode = READ_WRITE,
-			const std::wstring& tblPath=emptyString);
+		Table(Database* pDb, size_t numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", OpenMode openMode = READ_WRITE);
+
+		/*!
+		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
+		*			During Open() only those columns you have set using SetColDefs() will be bound.
+		* \detailed During Open the database will be queried for a table named tableName, ignoring
+		*			schema and catalog-name and table-type.
+		*			Note that when this constructor is used, the internal STableInfo object is not
+		*			queried from the database, but the passed tableInfo is used for all later operations.
+		*			This is handy if you've located the detailed table-information already from the Database
+		*			using its Database::FindTables() function and want to avoid that is operation is
+		*			executed again during Open().
+		*
+		* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		*					you've freed the Table.
+		* \param	numColumns The number of columns of the Table.
+		* \param	tableInfo Definition of the table.
+		* \param	openMode Define if the table shall be opened read-only or not
+		*
+		* \see		Open()
+		* \see		SetColDefs()
+		*/
+		Table(Database* pDb, size_t numColumns, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
 
 		virtual ~Table();
 
+		/*!
+		* \brief	Opens the Table and either binds the already defined columns or queries the database
+		*			about the columns of this table.
+		* \detailed If no STableInfo object has been passed during construction the database is first
+		*			queried for a table matching the parameters passed. If not exactly one such table is
+		*			found Open will fail.
+		*			If no columns have been defined using SetColDefs() the database is queried for all
+		*			columns of this table. Afterwards the columns are bound to their buffers, allocated
+		*			automatically during Open. If columns have been defined manually using SetColDefs(),
+		*			the buffers passed there are used to bind only those columns defined manually.
+		*
+		* \param	checkPrivileges If true, the database will be queried checking if the current user
+		*			is allowed to do the required operations like Select, Update, Insert or Delete,
+		*			depending on the OpenMode value passed during construction.
+		* \param	checkTableExists If true, the database will always be queried if a table matching the
+		*			passed definition during constructions actually exists in the database. Setting this 
+		*			value to false makes only sense	if you've passed a STableInfo, as else the Table
+		*			is required to query the database anyway (and fail if not found).
+		*
+		* \return	true if it succeeds, false if it fails.
+		*/
 		bool            Open(bool checkPrivileges = false, bool checkTableExists = true);
+
 		//bool            CreateTable(bool attemptDrop = true);
 //		bool            DropTable();
 //		bool            CreateIndex(const std::wstring& indexName, bool unique, UWORD numIndexColumns, SIndexDefinition* pIndexDefs, bool attemptDrop = true);
@@ -181,8 +261,6 @@ namespace exodbc
 		// changed, hence there is no corresponding SetXxxx function
 		Database*			GetDb()              { return m_pDb; }
 		const std::wstring& GetTableName()       { return m_tableName; }
-		const std::wstring& GetQueryTableName()  { return m_queryTableName; }
-		const std::wstring& GetTablePath()       { return m_tablePath; }
 
 		UWORD           GetNumberOfColumns() { return m_numCols; }  // number of "defined" columns for this wxDbTable instance
 
@@ -274,8 +352,7 @@ namespace exodbc
 		bool        m_insertable;
 
 		// Private member functions
-		bool        initialize(Database* pwxDb, const std::wstring& tblName, const UWORD numColumns,
-								const std::wstring& qryTblName, OpenMode openMode, const std::wstring& tblPath);
+		bool        initialize(Database* pDb, const std::wstring& tblName, size_t numColumns, OpenMode openMode);
 		void        cleanup();
 
 		void        setCbValueForColumn(int columnIndex);
@@ -315,10 +392,8 @@ namespace exodbc
 		bool			m_haveTableInfo;	///< True if m_tableInfo has been set
 		STableInfo		m_tableInfo;		///< TableInfo fetched from the db or set through constructor
 
-		std::wstring    m_tablePath;                                 // needed for dBase tables
 		std::wstring    m_tableName;                                 // Table name
-		std::wstring    m_queryTableName;                            // Query Table Name
-		UWORD       m_numCols;                               // # of columns in the table
+		size_t			m_numCols;                               //< # of columns in the table. Either set from user during constructor, or read from the database
 		OpenMode		m_openMode;                                 ///< Read-only or writable
 
 		// Column Definitions
