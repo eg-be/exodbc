@@ -2850,8 +2850,10 @@ namespace exodbc
 			return TI_REPEATABLE_READ;
 		case SQL_TXN_SERIALIZABLE:
 			return TI_SERIALIZABLE;
+#if defined HAVE_MSODBCSQL_H
 		case SQL_TXN_SS_SNAPSHOT:
 			return TI_SNAPSHOT;
+#endif
 		}
 
 		return TI_UNKNOWN;

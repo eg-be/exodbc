@@ -28,6 +28,17 @@ namespace exodbc
 // -------
 namespace exodbc
 {
+	namespace TestTables
+	{
+		enum NameCase
+		{
+			NC_UPPER,	///< Tables will be created using all UPPERCASE letters for table- and column-names
+			NC_LOWER	///< Tables will be created using all lowercase letters for table- and column-names
+		};
+
+		std::wstring GetTableName(const std::wstring& tableName, NameCase nameCase);
+		std::wstring GetColName(const std::wstring& columnName, NameCase nameCase);
+	}
 
 	// NotExistingTable
 	// ----------------
@@ -74,7 +85,7 @@ namespace exodbc
 	{
 	public:
 
-		IntTypesTable(exodbc::Database* pDb);
+		IntTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
 		virtual ~IntTypesTable() {};
 
 		// Size of Type							Bytes		Min						Max

@@ -68,12 +68,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		// Not enough args
 		wcerr << L"Not enough arguments!\n";
-		wcerr << L"Usage: wxOdbc3GoogleTest --dsn=dsn1,dsn2,..,dsnN --user=user1,user2,..,userN --pass=pass1,pass2,..,passN [--logLevel=0-5]\n";
+		wcerr << L"Usage: wxOdbc3GoogleTest --dsn=dsn1,dsn2,..,dsnN    --user=user1,user2,..,userN --pass=pass1,pass2,..,passN [--case=u|l,u|l,...,u|l] [--logLevel=0-5] \n";
 		wcerr << L" logLevel: 0: trace; 1: debug; 2: info; 3: warning; 4: error; 5: fatal\n";
 		wcerr << L"           Default is warning (3)\n";
+		wcerr << L" case: Defines the case of the table- and column-names to be used during the tests. If not given\n";
+		wcerr << L"       lowercase-letters are used. If parameter is used, it must be set for every dsn entry\n";
+		wcerr << L"             l: lower: All table- and column-names for the test tables will be in lowercase-letters (default)\n";
+		wcerr << L"             u: upper: All table- and column-names for the test tables will be in UPPERCASE-letters\n";
 		status = 10;
 	}
-	std::wstring dsn, user, pass, logLevelS;
+	std::wstring dsn, user, pass, logLevelS, caseS;
+	bool haveCase = false;
 	if(!extractParamValue(argc, argv, L"--dsn=", dsn))
 	{
 		wcerr << L"Missing argument --dsn=\n";
@@ -99,19 +104,37 @@ int _tmain(int argc, _TCHAR* argv[])
 			logLevel = 3;
 		}
 	}
-	vector<wstring> dsns, users, passes;
+	haveCase = extractParamValue(argc, argv, L"--case=", caseS);
+	vector<wstring> dsns, users, passes, cases;
 	boost::split(dsns, dsn, boost::is_any_of(L","));
 	boost::split(users, user, boost::is_any_of(L","));
 	boost::split(passes, pass, boost::is_any_of(L","));
-	if(! (dsns.size() == users.size() && dsns.size() == passes.size()))
+	if (haveCase)
 	{
-		std::wcerr << L"Not equal number of dsn, user and passwords\n";
+		boost::split(cases, caseS, boost::is_any_of(L","));
+	}
+	if(! (dsns.size() == users.size() && dsns.size() == passes.size() && ( !haveCase || dsns.size() == cases.size()) ))
+	{
+		std::wcerr << L"Not equal number of dsn, user and password (and maybe case)\n";
 		status = 12;
 	}
-
+	// default to lowerCase with cases
+	if (!haveCase)
+	{
+		for (size_t i = 0; i < dsns.size(); i++)
+		{
+			cases.push_back(L"l");
+		}
+	}
 	for(size_t i = 0; status == 0 && i < dsns.size(); i++)
 	{
-		g_odbcInfos.push_back(SOdbcInfo(dsns[i], users[i], passes[i]));
+		TestTables::NameCase nameCase = TestTables::NC_LOWER;
+		if (cases[i] == L"u")
+			nameCase = TestTables::NC_UPPER;
+		else if (cases[i] != L"l")
+			wcout << L"Warning: Unknown case '" << cases[i] << L"' falling back to default of 'l' (lowercase)\n";
+
+		g_odbcInfos.push_back(SOdbcInfo(dsns[i], users[i], passes[i], cases[i] == L"l" ? TestTables::NC_LOWER : TestTables::NC_UPPER));
 	}
 
 	// Note: We cannot call Init earlier, we must call it after we've set up the global with the param-values
