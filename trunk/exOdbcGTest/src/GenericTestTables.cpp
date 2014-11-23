@@ -56,7 +56,7 @@ namespace exodbc
 	// CharTypesTable
 	// --------------
 	CharTypesTable::CharTypesTable(Database* pDb)
-		: Table(pDb, L"chartypes", 3, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"chartypes", 3, L"", Table::READ_ONLY)
 	{
 		m_idCharTypes	= 0;
 		m_varchar[0]	= 0;
@@ -70,7 +70,7 @@ namespace exodbc
 	// CharTypesTmpTable
 	// --------------
 	CharTypesTmpTable::CharTypesTmpTable(Database* pDb)
-		: Table(pDb, L"chartypes_tmp", 3, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"chartypes_tmp", 3, L"", Table::READ_ONLY)
 	{
 		m_idCharTypes	= 0;
 		m_varchar[0]	= 0;
@@ -84,7 +84,7 @@ namespace exodbc
 	// IntTypesTable
 	// ---------------
 	IntTypesTable::IntTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */ )
-		: Table(pDb, TestTables::GetTableName(L"integertypes", namesCase), 4, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, TestTables::GetTableName(L"integertypes", namesCase), 4, L"", Table::READ_ONLY)
 	{	
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
@@ -100,7 +100,7 @@ namespace exodbc
 	// IntTypesTmpTable
 	// ---------------
 	IntTypesTmpTable::IntTypesTmpTable(Database* pDb)
-		: Table(pDb, L"integertypes_tmp", 4, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"integertypes_tmp", 4, L"", Table::READ_ONLY)
 	{	
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
@@ -116,7 +116,7 @@ namespace exodbc
 	// DateTypesTable
 	// ---------------
 	DateTypesTable::DateTypesTable(Database* pDb)
-		: Table(pDb, L"datetypes", 4, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"datetypes", 4, L"", Table::READ_ONLY)
 	{
 		m_idDateTypes		= 0;
 		ZeroMemory(&m_date, sizeof(m_date));
@@ -133,7 +133,7 @@ namespace exodbc
 	// DateTypesTmpTable
 	// ---------------
 	DateTypesTmpTable::DateTypesTmpTable(Database* pDb)
-		: Table(pDb, L"datetypes_tmp", 4, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"datetypes_tmp", 4, L"", Table::READ_ONLY)
 	{
 		m_idDateTypes		= 0;
 		ZeroMemory(&m_date, sizeof(m_date));
@@ -150,7 +150,7 @@ namespace exodbc
 	// FloatTypesTable
 	// ---------------
 	FloatTypesTable::FloatTypesTable(Database* pDb)
-		: Table(pDb, L"floattypes", 3, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"floattypes", 3, L"", Table::READ_ONLY)
 	{
 		m_idFloatTypes	= 0;
 		m_double		= 0;
@@ -167,7 +167,7 @@ namespace exodbc
 	// FloatTypesTable
 	// ---------------
 	FloatTypesTmpTable::FloatTypesTmpTable(Database* pDb)
-		: Table(pDb, L"floattypes_tmp", 3, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"floattypes_tmp", 3, L"", Table::READ_ONLY)
 	{
 		m_idFloatTypes	= 0;
 		m_double		= 0;
@@ -183,7 +183,7 @@ namespace exodbc
 	// NumericTypesTable
 	// -----------------
 	NumericTypesTable::NumericTypesTable(Database* pDb, ReadMode readMode)
-		: Table(pDb, L"numerictypes", 3, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"numerictypes", 3, L"", Table::READ_ONLY)
 		, m_readMode(readMode)
 	{
 		m_idNumericTypes	= 0;
@@ -210,7 +210,7 @@ namespace exodbc
 	// NumericTypesTable
 	// -----------------
 	NumericTypesTmpTable::NumericTypesTmpTable(Database* pDb, ReadMode readMode)
-		: Table(pDb, L"numerictypes_tmp", 3, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"numerictypes_tmp", 3, L"", Table::READ_ONLY)
 		, m_readMode(readMode)
 	{
 		m_idNumericTypes	= 0;
@@ -237,7 +237,7 @@ namespace exodbc
 	// BlobTypesTable
 	// --------------
 	BlobTypesTable::BlobTypesTable(Database* pDb)
-		: Table(pDb, L"blobtypes", 2, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"blobtypes", 2, L"", Table::READ_ONLY)
 	{
 		ZeroMemory(m_blob, sizeof(m_blob));
 
@@ -248,7 +248,7 @@ namespace exodbc
 	// BlobTypesTmpTable
 	// --------------
 	BlobTypesTmpTable::BlobTypesTmpTable(Database* pDb)
-		: Table(pDb, L"blobtypes_tmp", 2, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"blobtypes_tmp", 2, L"", Table::READ_ONLY)
 	{
 		ZeroMemory(m_blob, sizeof(m_blob));
 
@@ -259,7 +259,7 @@ namespace exodbc
 	// CharTable
 	// ---------
 	CharTable::CharTable(Database* pDb)
-		: Table(pDb, L"chartable", 4, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"chartable", 4, L"", Table::READ_ONLY)
 	{
 		m_idCharTable	= 0;
 		m_col2[0] = 0;
@@ -275,7 +275,7 @@ namespace exodbc
 	// IncompleteCharTable
 	// -------------------
 	IncompleteCharTable::IncompleteCharTable(Database* pDb)
-		: Table(pDb, L"chartable", 4, L"", wxDB_QUERY_ONLY)
+		: Table(pDb, L"chartable", 4, L"", Table::READ_ONLY)
 	{
 		m_idCharTable	= 0;
 		m_col2[0] = 0;

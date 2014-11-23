@@ -89,9 +89,9 @@ bool ColumnDefinition::Initialize()
 
 /********** wxDbTable::wxDbTable() Constructor **********/
 Table::Table(Database *pwxDb, const std::wstring &tblName, const UWORD numColumns,
-                    const std::wstring &qryTblName, bool qryOnly, const std::wstring &tblPath)
+                    const std::wstring &qryTblName, OpenMode openMode, const std::wstring &tblPath)
 {
-    if (!initialize(pwxDb, tblName, numColumns, qryTblName, qryOnly, tblPath))
+    if (!initialize(pwxDb, tblName, numColumns, qryTblName, openMode, tblPath))
         cleanup();
 }  // wxDbTable::wxDbTable()
 
@@ -105,7 +105,7 @@ Table::~Table()
 
 
 bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD numColumns,
-                    const std::wstring &qryTblName, bool qryOnly, const std::wstring &tblPath)
+                    const std::wstring &qryTblName, OpenMode openMode, const std::wstring &tblPath)
 {
     // Initializing member variables
     m_pDb                 = pwxDb;                    // Pointer to the wxDb object
@@ -124,7 +124,7 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
     m_orderBy.empty();                                // Order By clause
     m_from.empty();                                   // From clause
     m_selectForUpdate     = false;                    // SELECT ... FOR UPDATE; Indicates whether to include the FOR UPDATE phrase
-    m_queryOnly           = qryOnly;
+	m_openMode = openMode;
     m_insertable          = true;
     m_tablePath.empty();
     m_tableName.empty();
@@ -187,7 +187,7 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
         m_colDefs = new ColumnDefinition[m_numCols];  // Points to the first column definition
 
     // Allocate statement handles for the table
-    if (!m_queryOnly)
+    if (!IsQueryOnly())
     {
         // Allocate a separate statement handle for performing inserts
         if (SQLAllocStmt(m_hdbc, &m_hstmtInsert) != SQL_SUCCESS)
@@ -260,7 +260,7 @@ bool Table::initialize(Database *pwxDb, const std::wstring &tblName, const UWORD
         std::wcout << L"Cursor Type set to STATIC" << std::endl << std::endl;
 #endif
 
-    if (!m_queryOnly)
+    if (!IsQueryOnly())
     {
         // Set the cursor type for the INSERT statement handle
         if (SQLSetStmtOption(m_hstmtInsert, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
@@ -339,7 +339,7 @@ void Table::cleanup()
         delete [] m_colDefs;
 
     // Free statement handles
-    if (!m_queryOnly)
+    if (!IsQueryOnly())
     {
         if (m_hstmtInsert)
         {
@@ -814,7 +814,7 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
 
     // Bind the member variables for field exchange between
     // the wxDbTable object and the ODBC record.
-    if (!m_queryOnly)
+    if (!IsQueryOnly())
     {
 		// commented because of missing datatype-info
 		exASSERT(false);
@@ -836,7 +836,7 @@ bool Table::Open(bool checkPrivileges, bool checkTableExists)
      */
 
     // Build an insert statement using parameter markers
-    if (!m_queryOnly && m_numCols > 0)
+    if (!IsQueryOnly() && m_numCols > 0)
     {
 		exASSERT(false);
   //      bool needComma = false;
@@ -2132,7 +2132,7 @@ bool Table::IsColNull(UWORD colNumber) const
 /********** wxDbTable::CanSelectForUpdate() **********/
 bool Table::CanSelectForUpdate()
 {
-    if (m_queryOnly)
+    if (IsQueryOnly())
         return false;
 
     if (m_pDb->Dbms() == dbmsMY_SQL)
