@@ -263,7 +263,12 @@ namespace exodbc
 		bool				m_isCatalogNull;
 		bool				m_isSchemaNull;
 
+		bool				HasSchema() const { return !m_isSchemaNull && m_schema.length() > 0; };
+		bool				HasCatalog() const { return !m_isCatalogNull && m_catalog.length() > 0; };
+
 		std::wstring		GetFullTableName() const;
+
+		std::wstring		GetSqlName() const;
 	};
 
 	/*!

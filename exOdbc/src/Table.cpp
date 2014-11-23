@@ -175,8 +175,13 @@ namespace exodbc
 
 		// Initializing member variables
 		// Note: m_haveTableInfo must have been set before this function is called - it is not modified by this Initialize
+		m_isOpen = false;
 
 		m_pDb = pDb;                    // Pointer to the wxDb object
+		m_hStmtCount = SQL_NULL_HSTMT;
+		m_hStmtSelect = SQL_NULL_HSTMT;
+
+		// Old handles
 		m_hdbc = SQL_NULL_HDBC;
 		m_hstmt = SQL_NULL_HSTMT;
 		m_hstmtDefault = SQL_NULL_HSTMT;                        // Initialized below
@@ -208,6 +213,15 @@ namespace exodbc
 		if (m_numCols)
 			m_colDefs = new ColumnDefinition[m_numCols];  // Points to the first column definition
 
+		// Allocate handles needed
+		m_hStmtCount = AllocateStatement();
+		m_hStmtSelect = AllocateStatement();
+		if (!(m_hStmtSelect && m_hStmtCount))
+		{
+			return false;
+		}
+
+		// Old handle-stuff
 		// Allocate statement handles for the table
 		if (!IsQueryOnly())
 		{
@@ -305,6 +319,51 @@ namespace exodbc
 	}  // wxDbTable::initialize()
 
 
+	HSTMT Table::AllocateStatement()
+	{
+		exASSERT(m_pDb);
+		exASSERT(m_pDb->IsOpen());
+		exASSERT(m_pDb->GetHDBC());
+
+		// Allocate a statement handle for the database connection
+		HSTMT stmt;
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_pDb->GetHDBC(), &stmt);
+		if (ret != SQL_SUCCESS)
+		{
+			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
+			LOG_ERROR_DBC(m_hdbc, ret, SQLAllocHandle);
+		}
+		return stmt;
+	}
+
+
+	bool Table::FreeStatement(HSTMT hStmt)
+	{
+		exASSERT(m_pDb);
+		exASSERT(m_pDb->IsOpen());
+		exASSERT(m_pDb->HasHdbc());
+
+		// Free statement handle
+		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
+		if (ret != SQL_SUCCESS)
+		{
+			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+			if (ret == SQL_ERROR)
+			{
+				LOG_ERROR_STMT(hStmt, ret, SqlFreeHandle);
+			}
+			else
+			{
+				LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
+			}
+		}
+		else
+		{
+			hStmt = SQL_NULL_HSTMT;
+		}
+		return ret == SQL_SUCCESS;
+	}
+
 	void Table::cleanup()
 	{
 		std::wstring s;
@@ -317,6 +376,11 @@ namespace exodbc
 		if (m_colDefs)
 			delete[] m_colDefs;
 
+		// Free allocated statements
+		FreeStatement(m_hStmtCount);
+		FreeStatement(m_hStmtSelect);
+
+		// Old statement stuff
 		// Free statement handles
 		if (!IsQueryOnly())
 		{
@@ -367,13 +431,30 @@ namespace exodbc
 	}  // wxDbTable::cleanup()
 
 
-	/***************************** PRIVATE FUNCTIONS *****************************/
-
 	STableInfo Table::GetTableInfo() const
 	{
 		exASSERT(m_haveTableInfo);
 		return m_tableInfo;
 	}
+
+
+	size_t Table::Count(const std::wstring& whereStatement)
+	{
+		exASSERT(IsOpen());
+
+		std::wstring sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") %m_tableInfo.GetSqlName() %whereStatement).str();
+		SQLRETURN ret = SQLExecDirect(m_hstmtCount, (SQLWCHAR*) sqlstmt.c_str(), SQL_NTS);
+		if (ret != SQL_SUCCESS)
+		{
+
+		}
+
+		return false;
+	}
+
+
+	/***************************** PRIVATE FUNCTIONS *****************************/
+
 
 
 	void Table::setCbValueForColumn(int columnIndex)
@@ -606,7 +687,7 @@ namespace exodbc
 		RETCODE retcode;
 
 		// Execute the DELETE statement
-		retcode = SQLExecDirect(m_hstmtDelete, (SQLTCHAR FAR *) pSqlStmt.c_str(), SQL_NTS);
+		retcode = SQLExecDirect(m_hstmtDelete, (SQLWCHAR*) pSqlStmt.c_str(), SQL_NTS);
 
 		if (retcode == SQL_SUCCESS ||
 			retcode == SQL_NO_DATA_FOUND ||
@@ -716,17 +797,9 @@ namespace exodbc
 
 	bool Table::Open(bool checkPrivileges, bool checkTableExists)
 	{
-		if (!m_pDb)
-		{
-			LOG_ERROR(L"No Database set");
-			return false;
-		}
-
-		if (!m_pDb->IsOpen())
-		{
-			LOG_ERROR(L"Database not open");
-			return false;
-		}
+		exASSERT(m_pDb);
+		exASSERT(m_pDb->IsOpen());
+		exASSERT(!IsOpen());
 
 		std::wstring sqlStmt;
 		std::wstring s;
@@ -870,9 +943,10 @@ namespace exodbc
 		}
 
 		// Completed successfully
+		m_isOpen = true;
 		return true;
 
-	}  // wxDbTable::Open()
+	}
 
 
 	///********** wxDbTable::Query() **********/
