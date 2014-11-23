@@ -452,7 +452,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTableColumnInfo(const STableInfo& table, std::vector<STableColumnInfo>& columns);
+		bool		ReadTableColumnInfo(const STableInfo& table, std::vector<SColumnInfo>& columns);
 
 		/*!
 		 * \fn	bool exodbc::Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STableColumnInfo>& columns);
@@ -468,7 +468,7 @@ namespace exodbc
 		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableColumnInfo>& columns);
+		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<SColumnInfo>& columns);
 
 		/*!
 		 * \fn	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);

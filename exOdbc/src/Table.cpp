@@ -862,12 +862,19 @@ namespace exodbc
 		// If we are asked to create our columns automatically, read the column information
 		if (!m_manualColumns)
 		{
-			std::vector<STableColumnInfo> columns;
+			std::vector<SColumnInfo> columns;
 			if (!m_pDb->ReadTableColumnInfo(m_tableInfo, columns))
 			{
 				return false;
 			}
 			m_numCols = columns.size();
+			std::vector<SColumnInfo>::const_iterator it;
+			for (it = columns.begin(); it != columns.end(); it++)
+			{
+				SColumnInfo colInfo = *it;
+				ColumnBuffer colBuff(colInfo);
+				m_columnBuffers.push_back(colBuff);
+			}
 		}
 
 		if (checkPrivileges)
@@ -898,11 +905,16 @@ namespace exodbc
 			//    return false;
 		}
 
-		if (!bindCols(*m_hstmtDefault))                   // Selects
-			return false;
+		if (m_manualColumns)
+		{
+			// The old wx-way of binding params
+			// TODO: Replace with new method once done
+			if (!bindCols(*m_hstmtDefault))                   // Selects
+				return false;
 
-		if (!bindCols(m_hstmtInternal))                   // Internal use only
-			return false;
+			if (!bindCols(m_hstmtInternal))                   // Internal use only
+				return false;
+		}
 
 		/*
 		* Do NOT bind the hstmtCount cursor!!!

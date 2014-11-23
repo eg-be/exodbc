@@ -18,6 +18,7 @@
 // Other headers
 #include "Environment.h"
 #include "Database.h"
+#include "boost/any.hpp"
 
 // Debug
 #include "DebugNew.h"
@@ -68,14 +69,14 @@ namespace exodbc
 
 	// Open
 	// ----
-	TEST_P(TableTest, OpenWithoutCheck)
+	TEST_P(TableTest, OpenManualWithoutCheck)
 	{
 		// Open a table without checking for privileges or existence
 		IntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(table.Open(false, false));
 	}
 
-	TEST_P(TableTest, OpenCheckExistance)
+	TEST_P(TableTest, OpenManualCheckExistence)
 	{
 		// Open a table with checking for existence
 		IntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
@@ -85,6 +86,14 @@ namespace exodbc
 		LOG_ERROR(L"Warning: This test is supposed to spit errors");
 		NotExistingTable neTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_FALSE(neTable.Open(false, true));
+	}
+
+	TEST_P(TableTest, OpenAutoCheckExistence)
+	{
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		exodbc::Table table(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(table.Open(false, true));
+		int p = 3;
 	}
 
 	// Count

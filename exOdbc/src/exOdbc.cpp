@@ -225,7 +225,7 @@ namespace exodbc {
 		m_intervalPrecisionIsNull = false;
 	}
 
-	STableColumnInfo::STableColumnInfo()
+	SColumnInfo::SColumnInfo()
 		: m_sqlType(0)
 		, m_columnSize(0)
 		, m_bufferSize(0)
