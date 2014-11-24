@@ -44,15 +44,29 @@ namespace exodbc
 	/*!
 	* \class ColumnBuffer
 	*
-	* \brief Provides the buffer to transfer date from a column of a record.
+	* \brief Provides the buffer to transfer data from a column of a record.
 	*
-	*
+	* A ColumnBuffer can allocate a corresponding buffer-type automatically
+	* by reading the sql-type info from the passed SColumnInfo. 
+	* You can also manually pass a pointer to a buffer and the sql-type of 
+	* the buffer.
+	* Last there is an option to try to let the odbc-driver to convert everything
+	* to a string.
 	*/
 	class EXODBCAPI ColumnBuffer
 	{
 	public:
+		/*!
+		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
+		*			using the information from columnInfo.
+		* \detailed	Might fail if SQL-type is not supported. 
+		*		TODO: Some way to check that
+		*
+		* \see		???()
+		*/
 		ColumnBuffer(const SColumnInfo& columnInfo);
-//		ColumnBuffer(const SColumnInfo& columnInfo, boost::any* pBuffer);
+
+		//		ColumnBuffer(const SColumnInfo& columnInfo, boost::any* pBuffer);
 //		ColumnBuffer(const STableColumnInfo& columnInfo, void* pBuffer);
 	private:
 		// We cannot be copied
