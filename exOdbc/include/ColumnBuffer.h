@@ -15,7 +15,6 @@
 #include "Helpers.h"
 
 // Other headers
-#include "boost/any.hpp"
 #include "boost/variant.hpp"
 
 // System headers
@@ -53,35 +52,51 @@ namespace exodbc
 	{
 	public:
 		ColumnBuffer(const SColumnInfo& columnInfo);
-		ColumnBuffer(const SColumnInfo& columnInfo, boost::any* pBuffer);
+//		ColumnBuffer(const SColumnInfo& columnInfo, boost::any* pBuffer);
 //		ColumnBuffer(const STableColumnInfo& columnInfo, void* pBuffer);
+	private:
+		// We cannot be copied
+		ColumnBuffer(const ColumnBuffer& other) {};
+		ColumnBuffer() {};
 
-		ColumnBuffer(const ColumnBuffer& other);
+	public:
 
 		bool BindColumnBuffer(HSTMT hStmt);
 
-		size_t GetBufferSize() const;
-		void* GetBuffer();
+		//Note: All These Get-Methods could throw a boost::bad_get
+		SQLSMALLINT GetSmallInt() const;
+		SQLINTEGER GetInt() const;
+		SQLBIGINT GetBigInt() const;
 
-		SQLINTEGER GetInt();
+		SQLLEN GetCb() const {	return  m_cb;	};
 
-	private:
-		ColumnBuffer() {};
+		bool IsNull() const { return m_cb == SQL_NULL_DATA; };
+		bool NoTotal() const { return m_cb == SQL_NO_TOTAL; };
+
+		SColumnInfo GetColumnInfo() const { return m_columnInfo; };
+
+		bool IsIntType() const;
+
+		bool IsSmallInt() const { return m_columnInfo.m_sqlDataType == SQL_SMALLINT; };
+		bool IsInt() const { return m_columnInfo.m_sqlDataType == SQL_INTEGER; };
+		bool IsBigInt() const { return m_columnInfo.m_sqlDataType == SQL_BIGINT; };
 
 	public:
 		~ColumnBuffer();
 
 	private:
+		size_t GetBufferSize() const;
+		void* GetBuffer();
+
 		bool AllocateBuffer(const SColumnInfo& columnInfo);
 
 		SColumnInfo m_columnInfo;
 		bool m_allocatedBuffer;
 		
-		boost::any* m_pBuffer;
-		BufferVariant m_buffer;	///< Maybe we want one variant for all types?
+		//BufferVariant m_buffer;	///< Maybe we want one variant for all types?
 		IntegerVariant m_intVar;	///< Or a logical variant?
 		char*		m_pBinaryBuffer; ///< Allocated if this column has binary data
-		wchar_t*	m_pWCharBuffer;	///< Allocated if this column has char-data
+		SQLWCHAR*	m_pWCharBuffer;	///< Allocated if this column has char-data
 
 		SQLLEN		m_cb;	///< The length indicator set during Bind for this column
 

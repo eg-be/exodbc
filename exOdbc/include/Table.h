@@ -315,7 +315,39 @@ namespace exodbc
 		*/
 		bool			Count(const std::wstring& whereStatement, size_t& count);
 
+		/*!
+		* \brief	Executes a 'SELECT *' for the Table using the passed WHERE clause.
+		* \detailed	If successful, a Select-Query is open. You can iterate the records
+		*			using SelectNext() to access the values of the records.
+		*			The cursor is positioned before the first records, so you must call
+		*			SelectNext() to access the first record.
+		*			If whereStatement is empty, no WHERE clause is added.
+		* \param	whereStatement Do not include 'WHERE' in the passed where clause
+		* \see		SelectNext()
+		* \see		SelectClose();
+		* \return	True if successful
+		*/
 		bool			Select(const std::wstring& whereStatement);
+
+		/*!
+		* \brief	Fetches the next record fromt the current active Select() recordset.
+		* \detailed	If successful, the ColumnBuffer(s) bound to this table will contain 
+		*			the field-values of the currently selected record.
+		*			Fails if no Select-Query is open.
+		* \see		SelectNext()
+		* \return	True if next record has been fetched, false if no more records exist.
+		*/
+		bool			SelectNext();
+
+		/*!
+		* \brief	Closes an eventually open Select-Query.
+		* \detailed	closeMode determines if the function fails if no Select-Query is open.
+		* \param	closeMode If set to FailIfNotOpen the function will fail if no Select-Query
+		*			is open.
+		* \see		Select()
+		* \return	Depends on closeMode.
+		*/
+		bool			SelectClose(CloseMode closeMode);
 
 		/*!
 		* \brief	Get the OpenMode of this Table
@@ -461,7 +493,7 @@ namespace exodbc
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		const OpenMode		m_openMode;				///< Read-only or writable
 		bool				m_isOpen;				///< Set to true after Open has been called
-		std::vector<ColumnBuffer> m_columnBuffers;	///< Created during Open when Columns are read
+		std::vector<ColumnBuffer*> m_columnBuffers;	///< Created during Open when Columns are read
 
 
 		// Table information set during construction, that was used to find the matching STableInfo if none was passed

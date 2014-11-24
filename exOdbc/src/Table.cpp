@@ -358,7 +358,15 @@ namespace exodbc
 #ifdef EXODBCDEBUG
 		m_pDb->UnregisterTable(this);
 #endif
+		// Delete ColumnBuffers
+		std::vector<ColumnBuffer*>::iterator it;
+		for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		{
+			delete (*it);
+		}
+		m_columnBuffers.clear();
 
+		// Old Column stuff
 		// Delete memory allocated for column definitions
 		if (m_colDefs)
 			delete[] m_colDefs;
@@ -479,6 +487,9 @@ namespace exodbc
 	bool Table::Select(const std::wstring& whereStatement)
 	{
 		exASSERT(IsOpen());
+
+		bool closed = CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
+
 		bool ok = false;
 		std::wstring sqlstmt;
 		if (!whereStatement.empty())
@@ -497,25 +508,58 @@ namespace exodbc
 		}
 		else
 		{
-			ret = SQLFetch(m_hStmtSelect);
-			if (ret != SQL_SUCCESS)
+			int row = -1;
+			while ((ret = SQLFetch(m_hStmtSelect)) == SQL_SUCCESS)
 			{
-				LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFetch);
-			}
-			else
-			{
-				for (int i = 0; i < m_columnBuffers.size(); i++)
+				row++;
+				if (ret != SQL_SUCCESS)
 				{
-					int val = m_columnBuffers[i].GetInt();
-					int p = 3;
+					LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFetch);
 				}
-				ok = true;
-				SQLINTEGER cb;
-				//ok = GetData(m_hStmtCount, 1, SQL_C_ULONG, &count, sizeof(count), &cb, &isNull);
-				//if (ok && isNull)
-				//{
-				//	LOG_ERROR((boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt).str());
-				//}
+				else
+				{
+//					for (int i = 0; i < m_columnBuffers.size(); i++)
+					std::vector<ColumnBuffer*>::const_iterator it;
+					int col = 0;
+					for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+					{
+						ColumnBuffer* pBuff = *it;
+						SQLSMALLINT si = 0;
+						SQLINTEGER i = 0;
+						SQLBIGINT bi = 0;
+						if (!pBuff->IsNull() && pBuff->IsSmallInt())
+						{
+							si = pBuff->GetSmallInt();
+						}
+						else if (!pBuff->IsNull() && pBuff->IsInt())
+						{
+							i = pBuff->GetInt();
+						}
+						else if (!pBuff->IsNull() && pBuff->IsBigInt())
+						{
+							bi = pBuff->GetBigInt();
+						}
+						col++;
+						//int val = m_columnBuffers[i].GetInt();
+						//bool isNull = m_columnBuffers[i].IsNull();
+						//if (!isNull)
+						//{
+						//	int p = 3;
+						//}
+						//int p = 3;
+					}
+					ok = true;
+					SQLINTEGER cb;
+					//ok = GetData(m_hStmtCount, 1, SQL_C_ULONG, &count, sizeof(count), &cb, &isNull);
+					//if (ok && isNull)
+					//{
+					//	LOG_ERROR((boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt).str());
+					//}
+				}
+			}
+			if (ret != SQL_NO_DATA)
+			{
+				LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
 			}
 		}
 
@@ -928,9 +972,9 @@ namespace exodbc
 			for (it = columns.begin(); it != columns.end(); it++)
 			{
 				SColumnInfo colInfo = *it;
-				ColumnBuffer colBuff(colInfo);
-				bool bound = colBuff.BindColumnBuffer(m_hStmtSelect);
-				m_columnBuffers.push_back(colBuff);
+				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo);
+				bool bound = pColBuff->BindColumnBuffer(m_hStmtSelect);
+				m_columnBuffers.push_back(pColBuff);
 			}
 		}
 
@@ -965,7 +1009,7 @@ namespace exodbc
 		if (m_manualColumns)
 		{
 			// The old wx-way of binding params
-			// TODO: Replace with new method once done
+			 // TODO: Replace with new method once done
 			if (!bindCols(*m_hstmtDefault))                   // Selects
 				return false;
 
