@@ -2412,9 +2412,9 @@ namespace exodbc
 				else
 				{
 					if(!table.m_isCatalogNull)
-						table.m_catalog = buffCatalog;
+						table.m_catalogName = buffCatalog;
 					if(!table.m_isSchemaNull)
-						table.m_schema = buffSchema;
+						table.m_schemaName = buffSchema;
 					table.m_tableName = buffTableName;
 					table.m_tableType = buffTableType;
 					table.m_tableRemarks = buffTableRemarks;
@@ -2465,14 +2465,14 @@ namespace exodbc
 		// DbCatalogTable, we set it to an empty string
 		std::wstring catalogQueryName = L"";
 		if(!table.m_isCatalogNull)
-			catalogQueryName = table.m_catalog;
+			catalogQueryName = table.m_catalogName;
 
 		// we always have a tablename, but only sometimes a schema
 		SQLWCHAR* pSchemaBuff = NULL;
 		if(!table.m_isSchemaNull)
 		{
-			pSchemaBuff = new SQLWCHAR[table.m_schema.length() + 1];
-			wcscpy(pSchemaBuff, table.m_schema.c_str());
+			pSchemaBuff = new SQLWCHAR[table.m_schemaName.length() + 1];
+			wcscpy(pSchemaBuff, table.m_schemaName.c_str());
 		}
 
 		// Query columns
@@ -2564,14 +2564,14 @@ namespace exodbc
 		// DbCatalogTable, we set it to an empty string
 		std::wstring catalogQueryName = L"";
 		if(!table.m_isCatalogNull)
-			catalogQueryName = table.m_catalog;
+			catalogQueryName = table.m_catalogName;
 
 		// we always have a tablename, but only sometimes a schema
 		SQLWCHAR* pSchemaBuff = NULL;
 		if(!table.m_isSchemaNull)
 		{
-			pSchemaBuff = new SQLWCHAR[table.m_schema.length() + 1];
-			wcscpy(pSchemaBuff, table.m_schema.c_str());
+			pSchemaBuff = new SQLWCHAR[table.m_schemaName.length() + 1];
+			wcscpy(pSchemaBuff, table.m_schemaName.c_str());
 		}
 
 		// Query privs
@@ -2660,14 +2660,14 @@ namespace exodbc
 		// DbCatalogTable, we set it to an empty string
 		std::wstring catalogQueryName = L"";
 		if(!table.m_isCatalogNull)
-			catalogQueryName = table.m_catalog;
+			catalogQueryName = table.m_catalogName;
 
 		// we always have a tablename, but only sometimes a schema
 		SQLWCHAR* pSchemaBuff = NULL;
 		if(!table.m_isSchemaNull)
 		{
-			pSchemaBuff = new SQLWCHAR[table.m_schema.length() + 1];
-			wcscpy(pSchemaBuff, table.m_schema.c_str());
+			pSchemaBuff = new SQLWCHAR[table.m_schemaName.length() + 1];
+			wcscpy(pSchemaBuff, table.m_schemaName.c_str());
 		}
 
 		// Query columns
@@ -2760,9 +2760,9 @@ namespace exodbc
 		{
 			const STableInfo& table = *it;
 			if(!table.m_isCatalogNull)
-				dbInf.m_catalogs.insert(table.m_catalog);
+				dbInf.m_catalogs.insert(table.m_catalogName);
 			if(!table.m_isSchemaNull)
-				dbInf.m_schemas.insert(table.m_schema);
+				dbInf.m_schemas.insert(table.m_schemaName);
 		}
 
 		catalogInfo = dbInf;

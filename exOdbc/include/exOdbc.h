@@ -244,6 +244,12 @@ namespace exodbc
 		bool			m_isDatetimeSubNull;
 		bool			m_isCharOctetLengthNull;
 		bool			m_isIsNullableNull;
+
+		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
+		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
+
+		std::wstring		GetSqlName() const;
+
 	};
 
 	/*!
@@ -259,15 +265,13 @@ namespace exodbc
 		std::wstring		m_tableName;
 		std::wstring		m_tableType;           // "TABLE" or "SYSTEM TABLE" etc.
 		std::wstring		m_tableRemarks;
-		std::wstring		m_catalog;
-		std::wstring		m_schema;
+		std::wstring		m_catalogName;
+		std::wstring		m_schemaName;
 		bool				m_isCatalogNull;
 		bool				m_isSchemaNull;
 
-		bool				HasSchema() const { return !m_isSchemaNull && m_schema.length() > 0; };
-		bool				HasCatalog() const { return !m_isCatalogNull && m_catalog.length() > 0; };
-
-		std::wstring		GetFullTableName() const;
+		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
+		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
 		std::wstring		GetSqlName() const;
 	};

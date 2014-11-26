@@ -609,8 +609,8 @@ namespace exodbc
 		if(tables.size() > 0)
 		{
 			EXPECT_EQ(tableName, tables[0].m_tableName);
-			EXPECT_EQ(schemaName, tables[0].m_schema);
-			EXPECT_EQ(catalogName, tables[0].m_catalog);
+			EXPECT_EQ(schemaName, tables[0].m_schemaName);
+			EXPECT_EQ(catalogName, tables[0].m_catalogName);
 		}
 		std::wstring schemaPattern = schemaName;
 		if(schemaName.length() > 0)
@@ -623,8 +623,8 @@ namespace exodbc
 		if(tables.size() > 0)
 		{
 			EXPECT_EQ(tableName, tables[0].m_tableName);
-			EXPECT_EQ(schemaName, tables[0].m_schema);
-			EXPECT_EQ(catalogName, tables[0].m_catalog);
+			EXPECT_EQ(schemaName, tables[0].m_schemaName);
+			EXPECT_EQ(catalogName, tables[0].m_catalogName);
 		}
 	}
 

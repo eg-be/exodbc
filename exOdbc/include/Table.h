@@ -336,6 +336,7 @@ namespace exodbc
 		*			The cursor is positioned before the first records, so you must call
 		*			SelectNext() to access the first record.
 		*			If whereStatement is empty, no WHERE clause is added.
+		*			If a statement is open, the statement is closed.
 		* \param	whereStatement Do not include 'WHERE' in the passed where clause
 		* \see		SelectNext()
 		* \see		SelectClose();

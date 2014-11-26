@@ -489,7 +489,12 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 
-		CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
+		if (IsSelectOpen())
+		{
+			exASSERT(CloseStmtHandle(m_hStmtSelect, FailIfNotOpen));
+			m_selectQueryOpen = false;
+		}
+		exDEBUG(EnsureStmtIsClosed(m_hStmtSelect, m_pDb->Dbms()));
 
 		bool ok = false;
 		std::wstring sqlstmt;

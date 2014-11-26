@@ -256,23 +256,37 @@ namespace exodbc {
 
 	}
 
-	std::wstring STableInfo::GetFullTableName() const
-	{
-		std::wstringstream ws;
-		ws << m_catalog << L":" << m_schema << L":" << m_tableName;
-		return ws.str();
-	}
 
 	std::wstring STableInfo::GetSqlName() const
 	{
+		exASSERT(!m_tableName.empty());
+
 		std::wstringstream ws;
 		if (HasCatalog())
 		{
-			ws << m_catalog << L"."; 
+			ws << m_catalogName << L"."; 
 		}
 		if (HasSchema())
 		{
-			ws << m_schema << L".";
+			ws << m_schemaName << L".";
+		}
+		ws << m_tableName;
+		return ws.str();
+	}
+
+
+	std::wstring SColumnInfo::GetSqlName() const
+	{
+		exASSERT(!m_tableName.empty());
+
+		std::wstringstream ws;
+		if (HasCatalog())
+		{
+			ws << m_catalogName << L".";
+		}
+		if (HasSchema())
+		{
+			ws << m_schemaName << L".";
 		}
 		ws << m_tableName;
 		return ws.str();
