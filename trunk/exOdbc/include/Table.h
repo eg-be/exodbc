@@ -390,7 +390,7 @@ namespace exodbc
 		*			columns bound.
 		* \return	Numbers of column this table has.
 		*/
-		size_t		GetNumberOfColumns() const { return m_numCols; }  // number of "defined" columns for this wxDbTable instance
+		size_t		GetNumberOfColumns() const { return m_numCols; };
 
 
 		const std::wstring& GetFromClause()      { return m_from; }
@@ -480,11 +480,33 @@ namespace exodbc
 		*/
 		bool        Initialize(Database* pDb);
 
+
+		/*!
+		* \brief	Allocates a new Statement-handle using the Database of this Table.
+		*
+		* \return	New Statement handle or SQL_NULL_HSTMT in case of failure.
+		*/
 		HSTMT		AllocateStatement();
-		
+
+
+		/*!
+		* \brief	Frees the passed Statement handle.
+		*
+		* \return	True if freed successully.
+		*/
 		bool		FreeStatement(HSTMT stmt);
 
+
 		void        cleanup();
+
+
+		/*!
+		* \brief	Iterates the bound columns and returns the field part of a statement.
+		* \detailed	Queries each bound column for its SqlName.
+		* \return	A string in the form "Field1, Field2, .., FieldN"
+		*/
+		std::wstring BuildFieldsStatement() const;
+
 
 		void        setCbValueForColumn(int columnIndex);
 		//		bool        bindParams(bool forUpdate);  // called by the other 'bind' functions
@@ -530,8 +552,12 @@ namespace exodbc
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		const OpenMode		m_openMode;				///< Read-only or writable
 		bool				m_isOpen;				///< Set to true after Open has been called
-		std::vector<ColumnBuffer*> m_columnBuffers;	///< Created during Open when Columns are read
 
+		// Column information
+		std::vector<ColumnBuffer*> m_columnBuffers;	///< Created during Open when Columns are read
+		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
+		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
+		size_t				m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database
 
 		// Table information set during construction, that was used to find the matching STableInfo if none was passed
 		// Note: We make them public, as they are all const
@@ -541,11 +567,7 @@ namespace exodbc
 		const std::wstring	m_initialCatalogName;	///< Catalog name set on construction
 		const std::wstring	m_initialTypeName;		////< Type name set on construction
 
-		// Column information
 	private:
-		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
-		size_t				m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database
-
 		// Column Definitions
 		ColumnDefinition* m_colDefs;         // Array of wxDbColDef structures
 

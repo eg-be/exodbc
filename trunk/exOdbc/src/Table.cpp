@@ -32,6 +32,7 @@
 
 // Same component headers
 #include "Helpers.h"
+#include "ColumnBuffer.h"
 
 // Same component headers
 
@@ -168,6 +169,7 @@ namespace exodbc
 		m_hStmtCount = SQL_NULL_HSTMT;
 		m_hStmtSelect = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
+		m_fieldsStatement = L"";
 
 		// Old handles
 		m_hdbc = SQL_NULL_HDBC;
@@ -327,10 +329,6 @@ namespace exodbc
 
 	bool Table::FreeStatement(HSTMT hStmt)
 	{
-		exASSERT(m_pDb);
-		exASSERT(m_pDb->IsOpen());
-		exASSERT(m_pDb->HasHdbc());
-
 		// Free statement handle
 		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
 		if (ret != SQL_SUCCESS)
@@ -351,6 +349,27 @@ namespace exodbc
 		}
 		return ret == SQL_SUCCESS;
 	}
+
+
+	std::wstring Table::BuildFieldsStatement() const
+	{
+		exASSERT(m_columnBuffers.size() > 0);
+
+		std::wstring fields = L"";
+		std::vector<ColumnBuffer*>::const_iterator it = m_columnBuffers.begin();
+		while (it != m_columnBuffers.end())
+		{
+			fields += (*it)->GetColumnInfo().GetSqlName();
+			++it;
+			if (it != m_columnBuffers.end())
+			{
+				fields += L", ";
+			}
+		}
+
+		return fields;
+	}
+
 
 	void Table::cleanup()
 	{
@@ -993,9 +1012,13 @@ namespace exodbc
 			{
 				SColumnInfo colInfo = *it;
 				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo);
-				bool bound = pColBuff->BindColumnBuffer(m_hStmtSelect);
+				if (!pColBuff->BindColumnBuffer(m_hStmtSelect))
+				{
+					return false;
+				}
 				m_columnBuffers.push_back(pColBuff);
 			}
+			m_fieldsStatement = BuildFieldsStatement();
 		}
 
 		if (checkPrivileges)

@@ -172,7 +172,7 @@ namespace exodbc
 
 		// Try to open with a different password / user, expect to fail when opening the db.
 		Database failDb(m_env);
-		BOOST_LOG_TRIVIAL(error) << L"Warning: This test is supposed to spit errors";
+		LOG_ERROR("Warning: This test is supposed to spit errors");
 		EXPECT_FALSE(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"));
 	}
 
