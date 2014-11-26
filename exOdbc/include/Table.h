@@ -164,6 +164,17 @@ namespace exodbc
 
 
 		/*!
+		* \enum ColumnBindingMode
+		* \brief Defines which columns are bound
+		*/
+		enum ColumnBindingMode
+		{
+			ALL_COLUMNS,	///< During Open all Columns will be read and bound automatically
+			ONLY_DEFINED_COLUMNS	///< During Open only Columns you have defined using SetColDefs() will be bound
+		};
+
+
+		/*!
 		* \brief	Create a new Table-instance from the Database pDb using the table definition
 		*			from tableInfo. The table will read its column-definitions from the database
 		*			automatically during Open() and bind all columns.
