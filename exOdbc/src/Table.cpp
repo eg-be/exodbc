@@ -167,6 +167,7 @@ namespace exodbc
 		m_pDb = pDb;                    // Pointer to the wxDb object
 		m_hStmtCount = SQL_NULL_HSTMT;
 		m_hStmtSelect = SQL_NULL_HSTMT;
+		m_selectQueryOpen = false;
 
 		// Old handles
 		m_hdbc = SQL_NULL_HDBC;
@@ -488,7 +489,7 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 
-		bool closed = CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
+		CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
 
 		bool ok = false;
 		std::wstring sqlstmt;
@@ -508,6 +509,7 @@ namespace exodbc
 		}
 		else
 		{
+			m_selectQueryOpen = true;
 			int row = -1;
 			while ((ret = SQLFetch(m_hStmtSelect)) == SQL_SUCCESS)
 			{
@@ -574,6 +576,12 @@ namespace exodbc
 
 		return ok;
 	}
+
+
+	//bool Table::SelectClose(CloseMode closeMode)
+	//{
+	//	
+	//}
 
 
 	/***************************** PRIVATE FUNCTIONS *****************************/

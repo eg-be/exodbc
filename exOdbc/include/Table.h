@@ -162,6 +162,7 @@ namespace exodbc
 			READ_WRITE	///< Open the table for querying and modifying
 		};
 
+
 		/*!
 		* \brief	Create a new Table-instance from the Database pDb using the table definition
 		*			from tableInfo. The table will read its column-definitions from the database
@@ -224,6 +225,7 @@ namespace exodbc
 		*/
 		Table(Database* pDb, size_t numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", OpenMode openMode = READ_WRITE);
 
+
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
 		*			During Open() only those columns you have set using SetColDefs() will be bound.
@@ -246,7 +248,9 @@ namespace exodbc
 		*/
 		Table(Database* pDb, size_t numColumns, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
 
+
 		virtual ~Table();
+
 
 		/*!
 		* \brief	Opens the Table and either binds the already defined columns or queries the database
@@ -280,6 +284,12 @@ namespace exodbc
 		bool			IsOpen() const { return m_isOpen; };
 
 
+		/*!
+		* \brief	Get the OpenMode of this Table
+		* \return	True if this table was created using READ_ONLY
+		*/
+		bool            IsQueryOnly()        { return m_openMode == READ_ONLY; }
+
 
 		/*!
 		* \brief	Get the database that was set during constructions.
@@ -287,6 +297,7 @@ namespace exodbc
 		* \return	Database this Table belongs to.
 		*/
 		Database*			GetDb() const		{ return m_pDb; }
+
 
 		/*!
 		* \brief	Check if the Table-Information is set on this Table.
@@ -297,6 +308,7 @@ namespace exodbc
 		*/
 		bool				HaveTableInfo() const { return m_haveTableInfo; }
 
+
 		/*!
 		* \brief	Return the Table information of this Table.
 		* \detailed	Returns the STableInfo of this table, if one has been set either during construction
@@ -306,6 +318,7 @@ namespace exodbc
 		*/
 		STableInfo			GetTableInfo() const;
 
+
 		/*!
 		* \brief	Counts how many rows would be selected in this table by the passed WHERE clause.
 		* \detailed	If whereStatement is empty, no WHERE clause is added
@@ -314,6 +327,7 @@ namespace exodbc
 		* \return	True if successful
 		*/
 		bool			Count(const std::wstring& whereStatement, size_t& count);
+
 
 		/*!
 		* \brief	Executes a 'SELECT *' for the Table using the passed WHERE clause.
@@ -329,6 +343,7 @@ namespace exodbc
 		*/
 		bool			Select(const std::wstring& whereStatement);
 
+
 		/*!
 		* \brief	Fetches the next record fromt the current active Select() recordset.
 		* \detailed	If successful, the ColumnBuffer(s) bound to this table will contain 
@@ -338,6 +353,7 @@ namespace exodbc
 		* \return	True if next record has been fetched, false if no more records exist.
 		*/
 		bool			SelectNext();
+
 
 		/*!
 		* \brief	Closes an eventually open Select-Query.
@@ -349,11 +365,13 @@ namespace exodbc
 		*/
 		bool			SelectClose(CloseMode closeMode);
 
+
 		/*!
-		* \brief	Get the OpenMode of this Table
-		* \return	True if this table was created using READ_ONLY
+		* \brief	Check if a Select() Query is open.
+		* \return	True if a Select() Query is open and rows can be iterated using SelectNext()
 		*/
-		bool            IsQueryOnly()        { return m_openMode == READ_ONLY; }
+		bool			IsSelectOpen() const { return m_selectQueryOpen; };
+
 
 
 		UWORD           GetNumberOfColumns() { return m_numCols; }  // number of "defined" columns for this wxDbTable instance
@@ -470,6 +488,8 @@ namespace exodbc
 		// ODBC Handles
 		HSTMT		m_hStmtSelect;	///< Statement-handle used to do selects.
 		HSTMT		m_hStmtCount;	///< Statement-handle used to do counts. Columns are not bound.
+
+		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
 
 		// Old handles below, should all be replaced by new implementations
 		//		HENV        m_henv;           // ODBC Environment handle

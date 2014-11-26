@@ -193,10 +193,10 @@ namespace exodbc
 	* \brief	Close the cursor associated with the passed statement handle.
 	*
 	* \param	hStmt		The statement handle.
-	* \param	mode		Determine wheter the function should fail if the curso is not open.
+	* \param	mode		Determine whether the function should fail if the cursor is not open.
 	* \return	Depends on CloseMode
 	*/
-	extern EXODBCAPI SQLRETURN	CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode);
+	extern EXODBCAPI bool	CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode);
 
 	/*!
 	 * \fn	extern EXODBCAPI bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
