@@ -93,8 +93,15 @@ namespace exodbc
 		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
 		exodbc::Table table(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(table.Open(false, true));
-		bool ok = table.Select(L"");
-		int p = 3;
+
+		// Open a non-existing table
+		LOG_ERROR(L"Warning: This test is supposed to spit errors");
+		std::wstring neName = TestTables::GetTableName(L"notexistring", m_odbcInfo.m_namesCase);
+		exodbc::Table neTable(&m_db, neName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_FALSE(neTable.Open(false, true));
+
+//		bool ok = table.Select(L"");
+//		int p = 3;
 	}
 
 	// Count
