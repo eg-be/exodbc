@@ -32,21 +32,35 @@ namespace exodbc
 /*  size of statically declared array */
 #define EXSIZEOF(array)   (sizeof(array)/sizeof(array[0]))
 
-// A much simpler form of the exASSERT-Macro
+/*!
+* \brief exASSERT_MSG(cond, msg) - MACRO
+*
+* If cond evalutes to false, this Macro will always call exOnAssert()
+* If _DEBUG is defined, it will call __debugbreak() to let you trap 
+* into the debugger.
+*/
 #ifdef _DEBUG
-#define exASSERT_MSG(cond, msg)										\
-	do {																\
+#define exASSERT_MSG(cond, msg)											\
+do {																\
 	if ( !(cond) )  {												\
-	exOnAssert(__FILEW__, __LINE__, __FUNCTIONW__,L#cond,msg);	\
-	__debugbreak();												\
+		exOnAssert(__FILEW__, __LINE__, __FUNCTIONW__,L#cond,msg);	\
+		__debugbreak();												\
 	}                                                               \
-	} while ( 0 )
+} while ( 0 )
 #else
-#define exASSERT_MSG(cond, msg)
+#define exASSERT_MSG(cond, msg)										\
+do {																\
+	if ( !(cond) )  {												\
+		exOnAssert(__FILEW__, __LINE__, __FUNCTIONW__,L#cond,msg);	\
+	}                                                               \
+} while ( 0 )
 #endif
 
-// a version without any additional message, don't use unless condition
-// itself is fully self-explanatory
+/*!
+* \brief exASSERT(cond) - MACRO
+*
+* This macro is a simple shorthand to the macro exASSERT_MSG(const, msg), passing an empty message
+*/
 #define exASSERT(cond) exASSERT_MSG(cond, L"")
 
 // exFAIL must become something that will always trigger something, not depending on any flags
@@ -210,10 +224,12 @@ namespace exodbc
 	*			Note: This function is probably only used in debug-assertions to detect erroneously
 	*			open statements.
 	*			Note: This function will only work correctly when working with an odbc 3.x driver
+	*			Note: This function does not work using MySQL ODBC Driver ?
 	* \param	hStmt		The statement handle.
+	* \param	dbms		The Database-Type connected to. 
 	* \return	True if hStmt was already closed when the function was called.
 	*/
-	extern EXODBCAPI bool	EnsureStmtIsClosed(const SQLHANDLE& hStmt);
+	extern EXODBCAPI bool	EnsureStmtIsClosed(const SQLHANDLE& hStmt, DatabaseProduct dbms);
 
 
 	/*!

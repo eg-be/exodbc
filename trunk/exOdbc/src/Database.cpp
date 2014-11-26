@@ -52,22 +52,22 @@
 namespace exodbc
 {
 	// SQL Log defaults to be used by GetDbConnection
-	wxDbSqlLogState SQLLOGstate = sqlLogOFF;
+//	wxDbSqlLogState SQLLOGstate = sqlLogOFF;
 
-	static std::wstring SQLLOGfn = SQL_LOG_FILENAME;
+//	static std::wstring SQLLOGfn = SQL_LOG_FILENAME;
 
-	// This type defines the return row-struct form
-	// SQLTablePrivileges, and is used by wxDB::TablePrivileges.
-	typedef struct
-	{
-		wchar_t        tableQual[128+1];
-		wchar_t        tableOwner[128+1];
-		wchar_t        tableName[128+1];
-		wchar_t        grantor[128+1];
-		wchar_t        grantee[128+1];
-		wchar_t        privilege[128+1];
-		wchar_t        grantable[3+1];
-	} wxDbTablePrivilegeInfo;
+	//// This type defines the return row-struct form
+	//// SQLTablePrivileges, and is used by wxDB::TablePrivileges.
+	//typedef struct
+	//{
+	//	wchar_t        tableQual[128+1];
+	//	wchar_t        tableOwner[128+1];
+	//	wchar_t        tableName[128+1];
+	//	wchar_t        grantor[128+1];
+	//	wchar_t        grantee[128+1];
+	//	wchar_t        privilege[128+1];
+	//	wchar_t        grantable[3+1];
+	//} wxDbTablePrivilegeInfo;
 
 	// Construction
 	// ------------
@@ -181,6 +181,7 @@ namespace exodbc
 		// Handles created by this db
 		m_hdbc = SQL_NULL_HDBC;
 		m_hstmt = SQL_NULL_HSTMT;
+		m_hstmtExecSql = SQL_NULL_HSTMT;
 
 		//m_fpSqlLog      = 0;            // Sql Log file pointer
 		//m_sqlLogState   = sqlLogOFF;    // By default, logging is turned off
@@ -453,10 +454,18 @@ namespace exodbc
 	bool Database::OpenImpl()
 	{
 		exASSERT(m_hstmt == SQL_NULL_HSTMT);
+		exASSERT(m_hstmtExecSql == SQL_NULL_HSTMT);
 
-		// Allocate a statement handle for the database connection
+		// Allocate a statement handle for the database connection to use internal and the exec-handle
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
 		if(ret != SQL_SUCCESS)
+		{
+			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
+			LOG_ERROR_DBC(m_hdbc, ret, SQLAllocHandle);
+			return false;
+		}
+		ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmtExecSql);
+		if (ret != SQL_SUCCESS)
 		{
 			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
 			LOG_ERROR_DBC(m_hdbc, ret, SQLAllocHandle);
@@ -584,6 +593,7 @@ namespace exodbc
 	{
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
 		bool ok = SetCommitMode(CM_MANUAL_COMMIT);
+		//bool ok = SetCommitMode(CM_AUTO_COMMIT);
 
 		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, NULL);
 		if(ret != SQL_SUCCESS)
@@ -893,7 +903,7 @@ namespace exodbc
 		}
 #endif
 
-		// Free statement handle
+		// Free statement handles
 		if (m_dbIsOpen)
 		{
 			SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
@@ -913,6 +923,24 @@ namespace exodbc
 			{
 				m_hstmt = SQL_NULL_HSTMT;
 			}
+			ret = SQLFreeHandle(SQL_HANDLE_STMT, m_hstmtExecSql);
+			if (ret != SQL_SUCCESS)
+			{
+				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+				if (ret == SQL_ERROR)
+				{
+					LOG_ERROR_STMT(m_hstmtExecSql, ret, SqlFreeHandle);
+				}
+				else
+				{
+					LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
+				}
+			}
+			else
+			{
+				m_hstmtExecSql = SQL_NULL_HSTMT;
+			}
+
 
 			// Anyway try to disconnect from the datasource
 			// This is a critical error.
@@ -1013,192 +1041,192 @@ namespace exodbc
 
 
 
-	/**********wxDb::TranslateSqlState()  **********/
-	int Database::TranslateSqlState(const std::wstring &SQLState)
-	{
-		if (SQLState == L"01000")
-			return(DB_ERR_GENERAL_WARNING);
-		if (SQLState == L"01002")
-			return(DB_ERR_DISCONNECT_ERROR);
-		if (SQLState == L"01004")
-			return(DB_ERR_DATA_TRUNCATED);
-		if (SQLState == L"01006")
-			return(DB_ERR_PRIV_NOT_REVOKED);
-		if (SQLState == L"01S00")
-			return(DB_ERR_INVALID_CONN_STR_ATTR);
-		if (SQLState == L"01S01")
-			return(DB_ERR_ERROR_IN_ROW);
-		if (SQLState == L"01S02")
-			return(DB_ERR_OPTION_VALUE_CHANGED);
-		if (SQLState == L"01S03")
-			return(DB_ERR_NO_ROWS_UPD_OR_DEL);
-		if (SQLState == L"01S04")
-			return(DB_ERR_MULTI_ROWS_UPD_OR_DEL);
-		if (SQLState == L"07001")
-			return(DB_ERR_WRONG_NO_OF_PARAMS);
-		if (SQLState == L"07006")
-			return(DB_ERR_DATA_TYPE_ATTR_VIOL);
-		if (SQLState == L"08001")
-			return(DB_ERR_UNABLE_TO_CONNECT);
-		if (SQLState == L"08002")
-			return(DB_ERR_CONNECTION_IN_USE);
-		if (SQLState == L"08003")
-			return(DB_ERR_CONNECTION_NOT_OPEN);
-		if (SQLState == L"08004")
-			return(DB_ERR_REJECTED_CONNECTION);
-		if (SQLState == L"08007")
-			return(DB_ERR_CONN_FAIL_IN_TRANS);
-		if (SQLState == L"08S01")
-			return(DB_ERR_COMM_LINK_FAILURE);
-		if (SQLState == L"21S01")
-			return(DB_ERR_INSERT_VALUE_LIST_MISMATCH);
-		if (SQLState == L"21S02")
-			return(DB_ERR_DERIVED_TABLE_MISMATCH);
-		if (SQLState == L"22001")
-			return(DB_ERR_STRING_RIGHT_TRUNC);
-		if (SQLState == L"22003")
-			return(DB_ERR_NUMERIC_VALUE_OUT_OF_RNG);
-		if (SQLState == L"22005")
-			return(DB_ERR_ERROR_IN_ASSIGNMENT);
-		if (SQLState == L"22008")
-			return(DB_ERR_DATETIME_FLD_OVERFLOW);
-		if (SQLState == L"22012")
-			return(DB_ERR_DIVIDE_BY_ZERO);
-		if (SQLState == L"22026")
-			return(DB_ERR_STR_DATA_LENGTH_MISMATCH);
-		if (SQLState == L"23000")
-			return(DB_ERR_INTEGRITY_CONSTRAINT_VIOL);
-		if (SQLState == L"24000")
-			return(DB_ERR_INVALID_CURSOR_STATE);
-		if (SQLState == L"25000")
-			return(DB_ERR_INVALID_TRANS_STATE);
-		if (SQLState == L"28000")
-			return(DB_ERR_INVALID_AUTH_SPEC);
-		if (SQLState == L"34000")
-			return(DB_ERR_INVALID_CURSOR_NAME);
-		if (SQLState == L"37000")
-			return(DB_ERR_SYNTAX_ERROR_OR_ACCESS_VIOL);
-		if (SQLState == L"3C000")
-			return(DB_ERR_DUPLICATE_CURSOR_NAME);
-		if (SQLState == L"40001")
-			return(DB_ERR_SERIALIZATION_FAILURE);
-		if (SQLState == L"42000")
-			return(DB_ERR_SYNTAX_ERROR_OR_ACCESS_VIOL2);
-		if (SQLState == L"70100")
-			return(DB_ERR_OPERATION_ABORTED);
-		if (SQLState == L"IM001")
-			return(DB_ERR_UNSUPPORTED_FUNCTION);
-		if (SQLState == L"IM002")
-			return(DB_ERR_NO_DATA_SOURCE);
-		if (SQLState == L"IM003")
-			return(DB_ERR_DRIVER_LOAD_ERROR);
-		if (SQLState == L"IM004")
-			return(DB_ERR_SQLALLOCENV_FAILED);
-		if (SQLState == L"IM005")
-			return(DB_ERR_SQLALLOCCONNECT_FAILED);
-		if (SQLState == L"IM006")
-			return(DB_ERR_SQLSETCONNECTOPTION_FAILED);
-		if (SQLState == L"IM007")
-			return(DB_ERR_NO_DATA_SOURCE_DLG_PROHIB);
-		if (SQLState == L"IM008")
-			return(DB_ERR_DIALOG_FAILED);
-		if (SQLState == L"IM009")
-			return(DB_ERR_UNABLE_TO_LOAD_TRANSLATION_DLL);
-		if (SQLState == L"IM010")
-			return(DB_ERR_DATA_SOURCE_NAME_TOO_LONG);
-		if (SQLState == L"IM011")
-			return(DB_ERR_DRIVER_NAME_TOO_LONG);
-		if (SQLState == L"IM012")
-			return(DB_ERR_DRIVER_KEYWORD_SYNTAX_ERROR);
-		if (SQLState == L"IM013")
-			return(DB_ERR_TRACE_FILE_ERROR);
-		if (SQLState == L"S0001")
-			return(DB_ERR_TABLE_OR_VIEW_ALREADY_EXISTS);
-		if (SQLState == L"S0002")
-			return(DB_ERR_TABLE_NOT_FOUND);
-		if (SQLState == L"S0011")
-			return(DB_ERR_INDEX_ALREADY_EXISTS);
-		if (SQLState == L"S0012")
-			return(DB_ERR_INDEX_NOT_FOUND);
-		if (SQLState == L"S0021")
-			return(DB_ERR_COLUMN_ALREADY_EXISTS);
-		if (SQLState == L"S0022")
-			return(DB_ERR_COLUMN_NOT_FOUND);
-		if (SQLState == L"S0023")
-			return(DB_ERR_NO_DEFAULT_FOR_COLUMN);
-		if (SQLState == L"S1000")
-			return(DB_ERR_GENERAL_ERROR);
-		if (SQLState == L"S1001")
-			return(DB_ERR_MEMORY_ALLOCATION_FAILURE);
-		if (SQLState == L"S1002")
-			return(DB_ERR_INVALID_COLUMN_NUMBER);
-		if (SQLState == L"S1003")
-			return(DB_ERR_PROGRAM_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1004")
-			return(DB_ERR_SQL_DATA_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1008")
-			return(DB_ERR_OPERATION_CANCELLED);
-		if (SQLState == L"S1009")
-			return(DB_ERR_INVALID_ARGUMENT_VALUE);
-		if (SQLState == L"S1010")
-			return(DB_ERR_FUNCTION_SEQUENCE_ERROR);
-		if (SQLState == L"S1011")
-			return(DB_ERR_OPERATION_INVALID_AT_THIS_TIME);
-		if (SQLState == L"S1012")
-			return(DB_ERR_INVALID_TRANS_OPERATION_CODE);
-		if (SQLState == L"S1015")
-			return(DB_ERR_NO_CURSOR_NAME_AVAIL);
-		if (SQLState == L"S1090")
-			return(DB_ERR_INVALID_STR_OR_BUF_LEN);
-		if (SQLState == L"S1091")
-			return(DB_ERR_DESCRIPTOR_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1092")
-			return(DB_ERR_OPTION_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1093")
-			return(DB_ERR_INVALID_PARAM_NO);
-		if (SQLState == L"S1094")
-			return(DB_ERR_INVALID_SCALE_VALUE);
-		if (SQLState == L"S1095")
-			return(DB_ERR_FUNCTION_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1096")
-			return(DB_ERR_INF_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1097")
-			return(DB_ERR_COLUMN_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1098")
-			return(DB_ERR_SCOPE_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1099")
-			return(DB_ERR_NULLABLE_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1100")
-			return(DB_ERR_UNIQUENESS_OPTION_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1101")
-			return(DB_ERR_ACCURACY_OPTION_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1103")
-			return(DB_ERR_DIRECTION_OPTION_OUT_OF_RANGE);
-		if (SQLState == L"S1104")
-			return(DB_ERR_INVALID_PRECISION_VALUE);
-		if (SQLState == L"S1105")
-			return(DB_ERR_INVALID_PARAM_TYPE);
-		if (SQLState == L"S1106")
-			return(DB_ERR_FETCH_TYPE_OUT_OF_RANGE);
-		if (SQLState == L"S1107")
-			return(DB_ERR_ROW_VALUE_OUT_OF_RANGE);
-		if (SQLState == L"S1108")
-			return(DB_ERR_CONCURRENCY_OPTION_OUT_OF_RANGE);
-		if (SQLState == L"S1109")
-			return(DB_ERR_INVALID_CURSOR_POSITION);
-		if (SQLState == L"S1110")
-			return(DB_ERR_INVALID_DRIVER_COMPLETION);
-		if (SQLState == L"S1111")
-			return(DB_ERR_INVALID_BOOKMARK_VALUE);
-		if (SQLState == L"S1C00")
-			return(DB_ERR_DRIVER_NOT_CAPABLE);
-		if (SQLState == L"S1T00")
-			return(DB_ERR_TIMEOUT_EXPIRED);
+	///**********wxDb::TranslateSqlState()  **********/
+	//int Database::TranslateSqlState(const std::wstring &SQLState)
+	//{
+	//	if (SQLState == L"01000")
+	//		return(DB_ERR_GENERAL_WARNING);
+	//	if (SQLState == L"01002")
+	//		return(DB_ERR_DISCONNECT_ERROR);
+	//	if (SQLState == L"01004")
+	//		return(DB_ERR_DATA_TRUNCATED);
+	//	if (SQLState == L"01006")
+	//		return(DB_ERR_PRIV_NOT_REVOKED);
+	//	if (SQLState == L"01S00")
+	//		return(DB_ERR_INVALID_CONN_STR_ATTR);
+	//	if (SQLState == L"01S01")
+	//		return(DB_ERR_ERROR_IN_ROW);
+	//	if (SQLState == L"01S02")
+	//		return(DB_ERR_OPTION_VALUE_CHANGED);
+	//	if (SQLState == L"01S03")
+	//		return(DB_ERR_NO_ROWS_UPD_OR_DEL);
+	//	if (SQLState == L"01S04")
+	//		return(DB_ERR_MULTI_ROWS_UPD_OR_DEL);
+	//	if (SQLState == L"07001")
+	//		return(DB_ERR_WRONG_NO_OF_PARAMS);
+	//	if (SQLState == L"07006")
+	//		return(DB_ERR_DATA_TYPE_ATTR_VIOL);
+	//	if (SQLState == L"08001")
+	//		return(DB_ERR_UNABLE_TO_CONNECT);
+	//	if (SQLState == L"08002")
+	//		return(DB_ERR_CONNECTION_IN_USE);
+	//	if (SQLState == L"08003")
+	//		return(DB_ERR_CONNECTION_NOT_OPEN);
+	//	if (SQLState == L"08004")
+	//		return(DB_ERR_REJECTED_CONNECTION);
+	//	if (SQLState == L"08007")
+	//		return(DB_ERR_CONN_FAIL_IN_TRANS);
+	//	if (SQLState == L"08S01")
+	//		return(DB_ERR_COMM_LINK_FAILURE);
+	//	if (SQLState == L"21S01")
+	//		return(DB_ERR_INSERT_VALUE_LIST_MISMATCH);
+	//	if (SQLState == L"21S02")
+	//		return(DB_ERR_DERIVED_TABLE_MISMATCH);
+	//	if (SQLState == L"22001")
+	//		return(DB_ERR_STRING_RIGHT_TRUNC);
+	//	if (SQLState == L"22003")
+	//		return(DB_ERR_NUMERIC_VALUE_OUT_OF_RNG);
+	//	if (SQLState == L"22005")
+	//		return(DB_ERR_ERROR_IN_ASSIGNMENT);
+	//	if (SQLState == L"22008")
+	//		return(DB_ERR_DATETIME_FLD_OVERFLOW);
+	//	if (SQLState == L"22012")
+	//		return(DB_ERR_DIVIDE_BY_ZERO);
+	//	if (SQLState == L"22026")
+	//		return(DB_ERR_STR_DATA_LENGTH_MISMATCH);
+	//	if (SQLState == L"23000")
+	//		return(DB_ERR_INTEGRITY_CONSTRAINT_VIOL);
+	//	if (SQLState == L"24000")
+	//		return(DB_ERR_INVALID_CURSOR_STATE);
+	//	if (SQLState == L"25000")
+	//		return(DB_ERR_INVALID_TRANS_STATE);
+	//	if (SQLState == L"28000")
+	//		return(DB_ERR_INVALID_AUTH_SPEC);
+	//	if (SQLState == L"34000")
+	//		return(DB_ERR_INVALID_CURSOR_NAME);
+	//	if (SQLState == L"37000")
+	//		return(DB_ERR_SYNTAX_ERROR_OR_ACCESS_VIOL);
+	//	if (SQLState == L"3C000")
+	//		return(DB_ERR_DUPLICATE_CURSOR_NAME);
+	//	if (SQLState == L"40001")
+	//		return(DB_ERR_SERIALIZATION_FAILURE);
+	//	if (SQLState == L"42000")
+	//		return(DB_ERR_SYNTAX_ERROR_OR_ACCESS_VIOL2);
+	//	if (SQLState == L"70100")
+	//		return(DB_ERR_OPERATION_ABORTED);
+	//	if (SQLState == L"IM001")
+	//		return(DB_ERR_UNSUPPORTED_FUNCTION);
+	//	if (SQLState == L"IM002")
+	//		return(DB_ERR_NO_DATA_SOURCE);
+	//	if (SQLState == L"IM003")
+	//		return(DB_ERR_DRIVER_LOAD_ERROR);
+	//	if (SQLState == L"IM004")
+	//		return(DB_ERR_SQLALLOCENV_FAILED);
+	//	if (SQLState == L"IM005")
+	//		return(DB_ERR_SQLALLOCCONNECT_FAILED);
+	//	if (SQLState == L"IM006")
+	//		return(DB_ERR_SQLSETCONNECTOPTION_FAILED);
+	//	if (SQLState == L"IM007")
+	//		return(DB_ERR_NO_DATA_SOURCE_DLG_PROHIB);
+	//	if (SQLState == L"IM008")
+	//		return(DB_ERR_DIALOG_FAILED);
+	//	if (SQLState == L"IM009")
+	//		return(DB_ERR_UNABLE_TO_LOAD_TRANSLATION_DLL);
+	//	if (SQLState == L"IM010")
+	//		return(DB_ERR_DATA_SOURCE_NAME_TOO_LONG);
+	//	if (SQLState == L"IM011")
+	//		return(DB_ERR_DRIVER_NAME_TOO_LONG);
+	//	if (SQLState == L"IM012")
+	//		return(DB_ERR_DRIVER_KEYWORD_SYNTAX_ERROR);
+	//	if (SQLState == L"IM013")
+	//		return(DB_ERR_TRACE_FILE_ERROR);
+	//	if (SQLState == L"S0001")
+	//		return(DB_ERR_TABLE_OR_VIEW_ALREADY_EXISTS);
+	//	if (SQLState == L"S0002")
+	//		return(DB_ERR_TABLE_NOT_FOUND);
+	//	if (SQLState == L"S0011")
+	//		return(DB_ERR_INDEX_ALREADY_EXISTS);
+	//	if (SQLState == L"S0012")
+	//		return(DB_ERR_INDEX_NOT_FOUND);
+	//	if (SQLState == L"S0021")
+	//		return(DB_ERR_COLUMN_ALREADY_EXISTS);
+	//	if (SQLState == L"S0022")
+	//		return(DB_ERR_COLUMN_NOT_FOUND);
+	//	if (SQLState == L"S0023")
+	//		return(DB_ERR_NO_DEFAULT_FOR_COLUMN);
+	//	if (SQLState == L"S1000")
+	//		return(DB_ERR_GENERAL_ERROR);
+	//	if (SQLState == L"S1001")
+	//		return(DB_ERR_MEMORY_ALLOCATION_FAILURE);
+	//	if (SQLState == L"S1002")
+	//		return(DB_ERR_INVALID_COLUMN_NUMBER);
+	//	if (SQLState == L"S1003")
+	//		return(DB_ERR_PROGRAM_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1004")
+	//		return(DB_ERR_SQL_DATA_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1008")
+	//		return(DB_ERR_OPERATION_CANCELLED);
+	//	if (SQLState == L"S1009")
+	//		return(DB_ERR_INVALID_ARGUMENT_VALUE);
+	//	if (SQLState == L"S1010")
+	//		return(DB_ERR_FUNCTION_SEQUENCE_ERROR);
+	//	if (SQLState == L"S1011")
+	//		return(DB_ERR_OPERATION_INVALID_AT_THIS_TIME);
+	//	if (SQLState == L"S1012")
+	//		return(DB_ERR_INVALID_TRANS_OPERATION_CODE);
+	//	if (SQLState == L"S1015")
+	//		return(DB_ERR_NO_CURSOR_NAME_AVAIL);
+	//	if (SQLState == L"S1090")
+	//		return(DB_ERR_INVALID_STR_OR_BUF_LEN);
+	//	if (SQLState == L"S1091")
+	//		return(DB_ERR_DESCRIPTOR_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1092")
+	//		return(DB_ERR_OPTION_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1093")
+	//		return(DB_ERR_INVALID_PARAM_NO);
+	//	if (SQLState == L"S1094")
+	//		return(DB_ERR_INVALID_SCALE_VALUE);
+	//	if (SQLState == L"S1095")
+	//		return(DB_ERR_FUNCTION_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1096")
+	//		return(DB_ERR_INF_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1097")
+	//		return(DB_ERR_COLUMN_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1098")
+	//		return(DB_ERR_SCOPE_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1099")
+	//		return(DB_ERR_NULLABLE_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1100")
+	//		return(DB_ERR_UNIQUENESS_OPTION_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1101")
+	//		return(DB_ERR_ACCURACY_OPTION_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1103")
+	//		return(DB_ERR_DIRECTION_OPTION_OUT_OF_RANGE);
+	//	if (SQLState == L"S1104")
+	//		return(DB_ERR_INVALID_PRECISION_VALUE);
+	//	if (SQLState == L"S1105")
+	//		return(DB_ERR_INVALID_PARAM_TYPE);
+	//	if (SQLState == L"S1106")
+	//		return(DB_ERR_FETCH_TYPE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1107")
+	//		return(DB_ERR_ROW_VALUE_OUT_OF_RANGE);
+	//	if (SQLState == L"S1108")
+	//		return(DB_ERR_CONCURRENCY_OPTION_OUT_OF_RANGE);
+	//	if (SQLState == L"S1109")
+	//		return(DB_ERR_INVALID_CURSOR_POSITION);
+	//	if (SQLState == L"S1110")
+	//		return(DB_ERR_INVALID_DRIVER_COMPLETION);
+	//	if (SQLState == L"S1111")
+	//		return(DB_ERR_INVALID_BOOKMARK_VALUE);
+	//	if (SQLState == L"S1C00")
+	//		return(DB_ERR_DRIVER_NOT_CAPABLE);
+	//	if (SQLState == L"S1T00")
+	//		return(DB_ERR_TIMEOUT_EXPIRED);
 
-		// No match
-		return(0);
+	//	// No match
+	//	return(0);
 
-	}  // wxDb::TranslateSqlState()
+	//}  // wxDb::TranslateSqlState()
 
 
 //	/**********  wxDb::Grant() **********/
@@ -1340,14 +1368,14 @@ namespace exodbc
 
 		RETCODE retcode;
 
-		SQLFreeStmt(m_hstmt, SQL_CLOSE);
+		SQLFreeStmt(m_hstmtExecSql, SQL_CLOSE);
 
-		retcode = SQLExecDirect(m_hstmt, (SQLWCHAR*) sqlStmt.c_str(), SQL_NTS);
+		retcode = SQLExecDirect(m_hstmtExecSql, (SQLWCHAR*) sqlStmt.c_str(), SQL_NTS);
 		if(retcode != SQL_SUCCESS)
 		{
 			if( ! (mode == NotFailOnNoData && retcode == SQL_NO_DATA))
 			{
-				LOG_ERROR_STMT_MSG(m_hstmt, retcode, SQLExecDirect, (boost::wformat(L"Failed to execute Stmt '%s'") %sqlStmt).str());
+				LOG_ERROR_STMT_MSG(m_hstmtExecSql, retcode, SQLExecDirect, (boost::wformat(L"Failed to execute Stmt '%s'") %sqlStmt).str());
 				return false;
 			}
 		}
@@ -2307,12 +2335,10 @@ namespace exodbc
 
 	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableInfo>& tables)
 	{
+		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
+
 		// Clear tables
 		tables.clear();
-
-		// Free statement, ignore if already closed
-		// Close an eventually open cursor, do not care about truncation
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		SQLWCHAR* pTableName = NULL;
 		SQLWCHAR* pSchemaName = NULL;
@@ -2432,9 +2458,7 @@ namespace exodbc
 
 	int Database::ReadColumnCount(const STableInfo& table)
 	{
-		// Free statement, ignore if already closed
-		// Close an eventually open cursor, do not care about truncation
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
 
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
@@ -2492,8 +2516,10 @@ namespace exodbc
 			delete[] pSchemaBuff;
 		}
 
-		if(ok)
+		if (ok)
+		{
 			return colCount;
+		}
 
 		return -1;
 	}
@@ -2531,9 +2557,7 @@ namespace exodbc
 	{
 		privileges.clear();
 
-		// Free statement, ignore if already closed
-		// Close an eventually open cursor, do not care about truncation
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
 
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
@@ -2626,12 +2650,10 @@ namespace exodbc
 
 	bool Database::ReadTableColumnInfo(const STableInfo& table, std::vector<SColumnInfo>& columns)
 	{
+		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
+
 		// Clear result
 		columns.empty();
-
-		// Free statement, ignore if already closed
-		// Close an eventually open cursor, do not care about truncation
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
@@ -2659,7 +2681,6 @@ namespace exodbc
 
 		if(ret != SQL_SUCCESS)
 		{
-			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 			LOG_ERROR_STMT(m_hstmt, ret, SQLColumns);
 			ok = false;
 		}
@@ -2835,10 +2856,12 @@ namespace exodbc
 
 
 	bool Database::SetTransactionIsolationMode(TransactionIsolationMode mode)
-	{
-		// Close the Cursor on the internal statement-handle
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		
+	{	
+		// We need to ensure cursors are closed:
+		// The internal statement should be closed, the exec-statement could be open
+		EnsureStmtIsClosed(m_hstmt, m_dbmsType);
+		CloseStmtHandle(m_hstmtExecSql, IgnoreNotOpen);
+
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
 		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
 		{

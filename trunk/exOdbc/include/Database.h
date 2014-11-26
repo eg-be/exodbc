@@ -576,7 +576,7 @@ namespace exodbc
 //		bool         ExecSql(const std::wstring& pSqlStmt, ColumnInfo** columns, short& numcols);
 //		bool         GetNext();
 //		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
-		int          TranslateSqlState(const std::wstring& SQLState);
+//		int          TranslateSqlState(const std::wstring& SQLState);
 //		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
 //		int          GetKeyFields(const std::wstring& tableName, ColumnInfo* colInf, UWORD noCols);
 
@@ -596,7 +596,7 @@ namespace exodbc
 		bool            OpenedWithConnectionString() {return m_dbOpenedWithConnectionString;}
 		bool			HasHdbc()			{ return m_hdbc != SQL_NULL_HDBC; };
 		HDBC            GetHDBC()          {return m_hdbc;}
-		HSTMT           GetHSTMT()         {return m_hstmt;}
+		//HSTMT           GetHSTMT()         {return m_hstmt;}
 		//SSqlTypeInfo GetTypeInfVarchar()    {return m_typeInfVarchar;}
 		//SSqlTypeInfo GetTypeInfInteger()    {return m_typeInfInteger;}
 		//SSqlTypeInfo GetTypeInfFloat()      {return m_typeInfFloat;}

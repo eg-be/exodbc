@@ -351,20 +351,21 @@ namespace exodbc
 	}
 
 
-	bool EnsureStmtIsClosed(const SQLHANDLE& hStmt)
+	bool EnsureStmtIsClosed(const SQLHANDLE& hStmt, DatabaseProduct dbms)
 	{
 		exASSERT(hStmt);
 		SQLRETURN ret;
-
+		bool wasOpen = false;
 		// SQLCloseCursor returns SQLSTATE 24000 (Invalid cursor state) if no cursor is open. 
+		// TODO: Using the MySQL ODBC Driver this function never fails ?
 		ret = SQLCloseCursor(hStmt);
-		if (ret == SQL_SUCCESS)
+		if (ret == SQL_SUCCESS && dbms != dbmsMY_SQL)
 		{
 			// The Cursor was open as closing worked fine
-			LOG_ERROR(L"Closing the Cursor worked fine, but we expected that it was already closed");
-			return false;
+			LOG_WARNING(L"Closing the Cursor worked fine, but we expected that it was already closed");
+			wasOpen = true;
 		}
-		else
+		else if (dbms != dbmsMY_SQL)
 		{
 			// We would expect SQLSTATE 24000
 			const std::vector<SErrorInfo>& errs = GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, hStmt);
@@ -386,6 +387,7 @@ namespace exodbc
 				LOG_ERROR(ws.str());
 			}
 		}
+		return !wasOpen;
 	}
 
 
