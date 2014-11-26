@@ -14,6 +14,10 @@
 #include "TestParams.h"
 
 // Other headers
+#include "boost/log/trivial.hpp"
+#include "boost/log/core.hpp"
+#include "boost/log/expressions.hpp"
+
 // System headers
 #include <vector>
 
@@ -26,11 +30,33 @@ namespace exodbc
 {
 	extern std::vector<SOdbcInfo> g_odbcInfos;
 
+	extern boost::log::trivial::severity_level g_logSeverity;
+	
 	// Structs
 	// -------
 
 	// Classes
 	// -------
+	struct LogLevelError
+	{
+	public:
+		LogLevelError() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::error; };
+
+		~LogLevelError() { g_logSeverity = m_originalLevel; };
+	
+	private:
+		boost::log::trivial::severity_level m_originalLevel;
+	};
+
+	struct LogLevelFatal
+	{
+		LogLevelFatal() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::fatal; };
+
+		~LogLevelFatal() { g_logSeverity = m_originalLevel; };
+
+	private:
+		boost::log::trivial::severity_level m_originalLevel;
+	};
 
 } // namespace exodbc
 

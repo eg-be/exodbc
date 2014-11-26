@@ -942,7 +942,7 @@ namespace exodbc
 			}
 
 
-			// Anyway try to disconnect from the datasource
+			// Anyway try to disconnect from the data source
 			// This is a critical error.
 			ret = SQLDisconnect(m_hdbc);
 			if(ret != SQL_SUCCESS)
