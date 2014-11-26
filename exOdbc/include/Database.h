@@ -167,7 +167,15 @@ namespace exodbc
 	* 
 	* This class will allocate the Database-Handle that is required
 	* to connect to the Database. It provides methods for opening and closing a
-	* connection to a database and basic operations for querying the database.
+	* connection to a database - see Open() and Close(). 
+	* There is basic support executing SQL on the Database directly
+	* using the generic ExecSql() and CommitTrans() functions.
+	* The ExecSQL() function uses its own Statement, so it will never be influenced
+	* by any of the Catalog-functions.
+	*
+	* The class provides methods to access the catalog functions of the database
+	* to for example query all available catalogs, schemas and tables, or 
+	* read the privileges, etc.
 	*
 	* There are some naming conventions used with the methods inside this class:
 	* A method named ReadXXX will read a value a property from the database and
@@ -663,7 +671,8 @@ namespace exodbc
 
 		// ODBC handles
 		HDBC  m_hdbc;        ///< ODBC DB Connection handle
-		HSTMT m_hstmt;       ///< ODBC Statement handle
+		HSTMT m_hstmt;       ///< ODBC Statement handle used for all internal functions except ExecSql()
+		HSTMT m_hstmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
 
 		CommitMode		m_commitMode;	///< Commit Mode set currently
 

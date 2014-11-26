@@ -351,6 +351,51 @@ namespace exodbc
 	}
 
 
+	bool EnsureStmtIsClosed(const SQLHANDLE& hStmt)
+	{
+		exASSERT(hStmt);
+		SQLRETURN ret;
+
+		// SQLCloseCursor returns SQLSTATE 24000 (Invalid cursor state) if no cursor is open. 
+		ret = SQLCloseCursor(hStmt);
+		if (ret == SQL_SUCCESS)
+		{
+			// The Cursor was open as closing worked fine
+			LOG_ERROR(L"Closing the Cursor worked fine, but we expected that it was already closed");
+			return false;
+		}
+		else
+		{
+			// We would expect SQLSTATE 24000
+			const std::vector<SErrorInfo>& errs = GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, hStmt);
+			std::vector<SErrorInfo>::const_iterator it;
+			bool haveOtherErrs = false;
+			std::wstringstream ws;
+			ws << L"SQLCloseCursor returned a different error than the expected SQLSTATE 24000:\n";
+			for (it = errs.begin(); it != errs.end(); it++)
+			{
+				if ( ! CompareSqlState(it->SqlState, SqlState::INVALID_CURSOR_STATE))
+				{
+					// but we have something different
+					haveOtherErrs = true;
+					ws << *it << L"\n";
+				}
+			}
+			if (haveOtherErrs)
+			{
+				LOG_ERROR(ws.str());
+			}
+		}
+	}
+
+
+	bool CompareSqlState(const wchar_t* sqlState1, const wchar_t* sqlState2)
+	{
+		exASSERT(sqlState1);
+		exASSERT(sqlState2);
+		return (wcsncmp(sqlState1, sqlState2, 5) == 0);
+	}
+
 	bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
 	{
 		exASSERT(hDbc != NULL);

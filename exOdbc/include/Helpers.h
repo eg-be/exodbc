@@ -189,6 +189,7 @@ namespace exodbc
 		IgnoreNotOpen	//< Returns true also if cursor was not open
 	};
 	
+
 	/*!
 	* \brief	Close the cursor associated with the passed statement handle.
 	*
@@ -197,6 +198,32 @@ namespace exodbc
 	* \return	Depends on CloseMode
 	*/
 	extern EXODBCAPI bool	CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode);
+
+
+	/*!
+	* \brief	Ensure that the passed Statement-handle is closed after this function returns.
+	* \detailed	The function expects that the passed Statement-handle is already closed. It will
+	*			try to close the statement again, and if it does not fail (which means the statement
+	*			was still open) the function will return false and log an error.
+	*			If it fails to close the statement (as the statement was already closed) it will return
+	*			true and log nothing.
+	*			Note: This function is probably only used in debug-assertions to detect erroneously
+	*			open statements.
+	*			Note: This function will only work correctly when working with an odbc 3.x driver
+	* \param	hStmt		The statement handle.
+	* \return	True if hStmt was already closed when the function was called.
+	*/
+	extern EXODBCAPI bool	EnsureStmtIsClosed(const SQLHANDLE& hStmt);
+
+
+	/*!
+	* \brief	Compares two SQL-States, returns true if they are equal. 
+	* \detailed	This is a imple shorthand to a wcsncmp with a max of 5 chars
+	* \param	sqlState1	First SQL-State
+	* \param	sqlState2	Second SQL-State
+	* \return	True if the strings sqlState1 and sqlState2 are equal for the first 5 chars
+	*/
+	extern EXODBCAPI bool	CompareSqlState(const wchar_t* sqlState1, const wchar_t* sqlState2);
 
 	/*!
 	 * \fn	extern EXODBCAPI bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
