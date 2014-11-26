@@ -354,6 +354,13 @@ namespace exodbc
 #endif
 	};
 
+	// List the well-known SQL-State we need in the code
+	namespace SqlState
+	{
+		const wchar_t INVALID_CURSOR_STATE[6] = L"24000";
+	}
+
+
 	// ODBC Error codes (derived from ODBC SqlState codes)
 	enum wxODBC_ERRORS
 	{
