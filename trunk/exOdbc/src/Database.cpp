@@ -702,14 +702,9 @@ namespace exodbc
 		}
 
 		// Close Statement 
-		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		if(ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen) );
-			return false;
-		}
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
-		ret = SQLTables(m_hstmt,
+		SQLRETURN ret = SQLTables(m_hstmt,
 			(SQLWCHAR*) catalogName, SQL_NTS,   // catname                 
 			(SQLWCHAR*) schemaName, SQL_NTS,   // schema name
 			L"", SQL_NTS,							// table name
@@ -788,14 +783,9 @@ namespace exodbc
 		types.clear();
 
 		// Close an eventually open cursor, do not care about truncation
-		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		if( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
-			return false;
-		}
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
-		ret = SQLGetTypeInfo(m_hstmt, SQL_ALL_TYPES);
+		SQLRETURN ret = SQLGetTypeInfo(m_hstmt, SQL_ALL_TYPES);
 		if(ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_STMT(m_hstmt, ret, SQLGetTypeInfo);
@@ -869,12 +859,7 @@ namespace exodbc
 		}
 
 		// We are done, close cursor, do not care about truncation
-		ret = CloseStmtHandle(m_hstmt, FailIfNotOpen);
-		if( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle);
-			return false;
-		}
+		CloseStmtHandle(m_hstmt, FailIfNotOpen);
 
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
 		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
@@ -2327,12 +2312,7 @@ namespace exodbc
 
 		// Free statement, ignore if already closed
 		// Close an eventually open cursor, do not care about truncation
-		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		if( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
-			return false;
-		}
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		SQLWCHAR* pTableName = NULL;
 		SQLWCHAR* pSchemaName = NULL;
@@ -2368,7 +2348,7 @@ namespace exodbc
 
 		bool ok = true;
 		// Query db
-		ret = SQLTables(m_hstmt,
+		SQLRETURN ret = SQLTables(m_hstmt,
 			pCatalogName, pCatalogName ? SQL_NTS : NULL,   // catname                 
 			pSchemaName, pSchemaName ? SQL_NTS : NULL,   // schema name
 			pTableName, pTableName ? SQL_NTS : NULL,							// table name
@@ -2454,12 +2434,7 @@ namespace exodbc
 	{
 		// Free statement, ignore if already closed
 		// Close an eventually open cursor, do not care about truncation
-		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		if( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
-			return false;
-		}
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
@@ -2479,7 +2454,7 @@ namespace exodbc
 		// Query columns
 		bool ok = true;
 		int colCount = 0;
-		ret = SQLColumns(m_hstmt,
+		SQLRETURN ret = SQLColumns(m_hstmt,
 			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,	// catalog
 			pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,	// schema
 			(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS,		// tablename
@@ -2504,12 +2479,7 @@ namespace exodbc
 			ok = false;
 		}
 
-		ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		if( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
-			ok = false;
-		}
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
 		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
@@ -2563,12 +2533,7 @@ namespace exodbc
 
 		// Free statement, ignore if already closed
 		// Close an eventually open cursor, do not care about truncation
-		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		if( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
-			return false;
-		}
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
@@ -2588,7 +2553,7 @@ namespace exodbc
 		// Query privs
 		bool ok = true;
 
-		ret = SQLTablePrivileges(m_hstmt, 
+		SQLRETURN ret = SQLTablePrivileges(m_hstmt,
 			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,
 			pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,
 			(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS);
@@ -2666,12 +2631,7 @@ namespace exodbc
 
 		// Free statement, ignore if already closed
 		// Close an eventually open cursor, do not care about truncation
-		SQLRETURN ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		if( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
-			return false;
-		}
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
@@ -2691,7 +2651,7 @@ namespace exodbc
 		// Query columns
 		bool ok = true;
 		int colCount = 0;
-		ret = SQLColumns(m_hstmt,
+		SQLRETURN ret = SQLColumns(m_hstmt,
 			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,	// catalog
 			pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,	// schema
 			(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS,		// tablename
@@ -2748,12 +2708,7 @@ namespace exodbc
 			ok = false;
 		}
 
-		ret = CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		if( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, CloseStmtHandle(IgnoreNotOpen));
-			ok = false;
-		}
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		// If Autocommit is off, we need to commit on certain db-systems, see #51
 		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
