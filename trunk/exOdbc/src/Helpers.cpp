@@ -398,6 +398,21 @@ namespace exodbc
 		return (wcsncmp(sqlState1, sqlState2, 5) == 0);
 	}
 
+
+	SQLSMALLINT GetResultColumnsCount(SQLHANDLE hStmt)
+	{
+		exASSERT(hStmt);
+
+		SQLSMALLINT count = 0;
+		SQLRETURN ret = SQLNumResultCols(hStmt, &count);
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(hStmt, ret, SQLNumResultCols);
+			count = -1;
+		}
+		return count;
+	}
+
 	bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
 	{
 		exASSERT(hDbc != NULL);

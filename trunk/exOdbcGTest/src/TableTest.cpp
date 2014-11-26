@@ -129,6 +129,7 @@ namespace exodbc
 		// As soon as the columns are searched, we expect to fail
 		{
 			LogLevelFatal llFatal;
+			LOG_ERROR(L"Warning: This test is supposed to spit errors");
 			STableInfo neTableInfo;
 			neTableInfo.m_tableName = L"NotExisting";
 			Table neTable(&m_db, neTableInfo, Table::READ_ONLY);
