@@ -213,7 +213,9 @@ namespace exodbc
 		*
 		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
-		* \param	numColumns The number of columns of the Table.
+		* \param	numColumns The number of columns of the Table. Note: This must not be equal
+		*			with the number of Columns you define later (but it must be larger or equal).
+		*			It should be the number of columns the Table really has in the database.
 		* \param	tableName Table name
 		* \param	schemaName	Schema name
 		* \param	catalogName	Catalog name
@@ -239,7 +241,9 @@ namespace exodbc
 		*
 		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
-		* \param	numColumns The number of columns of the Table.
+		* \param	numColumns The number of columns of the Table. Note: This must not be equal
+		*			with the number of Columns you define later (but it must be larger or equal).
+		*			It should be the number of columns the Table really has in the database.
 		* \param	tableInfo Definition of the table.
 		* \param	openMode Define if the table shall be opened read-only or not
 		*

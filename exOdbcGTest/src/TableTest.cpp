@@ -71,9 +71,18 @@ namespace exodbc
 	// ----
 	TEST_P(TableTest, OpenManualWithoutCheck)
 	{
-		// Open a table without checking for privileges or existence
+		// Open an existing table without checking for privileges or existence
 		IntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(table.Open(false, false));
+
+		// If we pass in the STableInfo directly we should also be able to "open"
+		// a totally non-sense table:
+		STableInfo neTableInfo;
+		neTableInfo.m_tableName = L"NotExisting";
+		Table neTable(&m_db, 2, neTableInfo, Table::READ_ONLY);
+		// TODO: Here we must set some columns
+		EXPECT_TRUE(neTable.Open(false, false));
+		// TODO: So we can prove in the test that we will fail doing a SELECT later
 	}
 
 	TEST_P(TableTest, OpenManualCheckExistence)
@@ -86,6 +95,25 @@ namespace exodbc
 		LOG_ERROR(L"Warning: This test is supposed to spit errors");
 		NotExistingTable neTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_FALSE(neTable.Open(false, true));
+	}
+
+	TEST_P(TableTest, OpenAutoWithoutCheck)
+	{
+		// Open an auto-table without checking for privileges or existence
+		// This makes only sense if we've already determined the correct STableInfo structure
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		STableInfo tableInfo;
+		EXPECT_TRUE(m_db.FindOneTable(tableName, L"", L"", L"", tableInfo));
+
+		exodbc::Table table(&m_db, tableInfo, Table::READ_ONLY);
+		EXPECT_TRUE(table.Open(false, false));
+
+		// If we try to open an auto-table this will never work if you've passed invalid information:
+		// As soon as the columns are searched, we expect to fail
+		STableInfo neTableInfo;
+		neTableInfo.m_tableName = L"NotExisting";
+		Table neTable(&m_db, neTableInfo, Table::READ_ONLY);
+		EXPECT_FALSE(neTable.Open(false, false));
 	}
 
 	TEST_P(TableTest, OpenAutoCheckExistence)
