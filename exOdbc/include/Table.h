@@ -277,7 +277,7 @@ namespace exodbc
 		*
 		* \return	true if it succeeds, false if it fails.
 		*/
-		bool            Open(bool checkPrivileges = false, bool checkTableExists = true);
+		bool		Open(bool checkPrivileges = false, bool checkTableExists = true);
 
 
 		/*!
@@ -285,14 +285,14 @@ namespace exodbc
 		*
 		* \return	True if Open() was already called succesfull
 		*/
-		bool			IsOpen() const { return m_isOpen; };
+		bool		IsOpen() const { return m_isOpen; };
 
 
 		/*!
 		* \brief	Get the OpenMode of this Table
 		* \return	True if this table was created using READ_ONLY
 		*/
-		bool            IsQueryOnly()        { return m_openMode == READ_ONLY; }
+		bool		IsQueryOnly()        { return m_openMode == READ_ONLY; }
 
 
 		/*!
@@ -300,7 +300,7 @@ namespace exodbc
 		*
 		* \return	Database this Table belongs to.
 		*/
-		Database*			GetDb() const		{ return m_pDb; }
+		Database*	GetDb() const		{ return m_pDb; }
 
 
 		/*!
@@ -310,7 +310,7 @@ namespace exodbc
 		* \see		GetTableInfo()
 		* \return	Returns true if this table has a STableInfo set that can be fetched using GetTableInfo()
 		*/
-		bool				HaveTableInfo() const { return m_haveTableInfo; }
+		bool		HaveTableInfo() const { return m_haveTableInfo; }
 
 
 		/*!
@@ -320,7 +320,7 @@ namespace exodbc
 		* \see		HaveTableInfo()
 		* \return	Returns true if this table has a STableInfo set that can be fetched using GetTableInfo()
 		*/
-		STableInfo			GetTableInfo() const;
+		STableInfo	GetTableInfo() const;
 
 
 		/*!
@@ -330,12 +330,14 @@ namespace exodbc
 		* \param count The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
 		* \return	True if successful
 		*/
-		bool			Count(const std::wstring& whereStatement, size_t& count);
+		bool		Count(const std::wstring& whereStatement, size_t& count);
 
 
 		/*!
-		* \brief	Executes a 'SELECT *' for the Table using the passed WHERE clause.
-		* \detailed	If successful, a Select-Query is open. You can iterate the records
+		* \brief	Executes a 'SELECT col1, col2, .., colN' for the Table using the passed WHERE clause.
+		* \detailed	The SELECT-Query is built using the column information available to this Table.
+		*			It does not use the '*'.
+		*			If successful, a Select-Query is open. You can iterate the records
 		*			using SelectNext() to access the values of the records.
 		*			The cursor is positioned before the first records, so you must call
 		*			SelectNext() to access the first record.
@@ -346,7 +348,7 @@ namespace exodbc
 		* \see		SelectClose();
 		* \return	True if successful
 		*/
-		bool			Select(const std::wstring& whereStatement);
+		bool		Select(const std::wstring& whereStatement);
 
 
 		/*!
@@ -357,7 +359,7 @@ namespace exodbc
 		* \see		SelectNext()
 		* \return	True if next record has been fetched, false if no more records exist.
 		*/
-		bool			SelectNext();
+		bool		SelectNext();
 
 
 		/*!
@@ -368,18 +370,28 @@ namespace exodbc
 		* \see		Select()
 		* \return	Depends on closeMode.
 		*/
-		bool			SelectClose(CloseMode closeMode);
+		bool		SelectClose(CloseMode closeMode);
 
 
 		/*!
 		* \brief	Check if a Select() Query is open.
 		* \return	True if a Select() Query is open and rows can be iterated using SelectNext()
 		*/
-		bool			IsSelectOpen() const { return m_selectQueryOpen; };
+		bool		IsSelectOpen() const { return m_selectQueryOpen; };
 
 
+		/*!
+		* \brief	Returns the number of columns this table has.
+		* \detailed	If columns were set manually on the table, this is the value that has been 
+		*			passed as the total number of columns of the table. It must not be equal
+		*			with the number of columns bound.
+		*			If columns were created automatically, this is the total of columns reported
+		*			by the database for this table and should be equal with the number of
+		*			columns bound.
+		* \return	Numbers of column this table has.
+		*/
+		size_t		GetNumberOfColumns() const { return m_numCols; }  // number of "defined" columns for this wxDbTable instance
 
-		UWORD           GetNumberOfColumns() { return m_numCols; }  // number of "defined" columns for this wxDbTable instance
 
 		const std::wstring& GetFromClause()      { return m_from; }
 		const std::wstring& GetOrderByClause()   { return m_orderBy; }
