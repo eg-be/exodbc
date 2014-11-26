@@ -936,6 +936,8 @@ namespace exodbc
 		exASSERT(m_pDb);
 		exASSERT(m_pDb->IsOpen());
 		exASSERT(!IsOpen());
+		// TODO: Add a check to ensure if in manual mode at least one column has been defined
+//		exASSERT_MSG(!m_manualColumns || m_numCols > 0, L"You must Define at least one column if using manual Column mode");
 
 		std::wstring sqlStmt;
 		std::wstring s;
@@ -981,6 +983,11 @@ namespace exodbc
 				return false;
 			}
 			m_numCols = columns.size();
+			if (m_numCols == 0)
+			{
+				LOG_ERROR((boost::wformat(L"No columns found for table '%s'") %m_tableInfo.GetSqlName()).str());
+				return false;
+			}
 			std::vector<SColumnInfo>::const_iterator it;
 			for (it = columns.begin(); it != columns.end(); it++)
 			{
