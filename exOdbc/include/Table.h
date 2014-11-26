@@ -363,14 +363,11 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Closes an eventually open Select-Query.
-		* \detailed	closeMode determines if the function fails if no Select-Query is open.
-		* \param	closeMode If set to FailIfNotOpen the function will fail if no Select-Query
-		*			is open.
+		* \brief	Closes an open Select-Query. Fails if no Select is open.
 		* \see		Select()
 		* \return	Depends on closeMode.
 		*/
-		bool		SelectClose(CloseMode closeMode);
+		bool		SelectClose();
 
 
 		/*!

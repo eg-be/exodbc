@@ -18,7 +18,9 @@
 // Other headers
 #include "Environment.h"
 #include "Database.h"
-#include "boost/any.hpp"
+#include "boost/log/trivial.hpp"
+#include "boost/log/core.hpp"
+#include "boost/log/expressions.hpp"
 
 // Debug
 #include "DebugNew.h"
@@ -43,6 +45,8 @@ namespace exodbc
 	void TableTest::SetUp()
 	{
 		// Called for every unit-test
+		m_pIntTypesAutoTable = NULL;
+
 		m_odbcInfo = GetParam();
 		
 		// Set up Env
@@ -52,10 +56,20 @@ namespace exodbc
 		// And database
 		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
 		ASSERT_TRUE(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+
+		// And an Auto-table
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		m_pIntTypesAutoTable = new Table(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(m_pIntTypesAutoTable->Open(false, true));
 	}
 
 	void TableTest::TearDown()
 	{
+		if (m_pIntTypesAutoTable && m_pIntTypesAutoTable->IsOpen())
+		{
+			delete m_pIntTypesAutoTable;
+			m_pIntTypesAutoTable = NULL;
+		}
 		if (m_db.IsOpen())
 		{
 			// Microsoft Sql Server needs a CommitTrans()
@@ -92,9 +106,12 @@ namespace exodbc
 		EXPECT_TRUE(table.Open(false, true));
 
 		// Open a non-existing table
-		LOG_ERROR(L"Warning: This test is supposed to spit errors");
-		NotExistingTable neTable(&m_db, m_odbcInfo.m_namesCase);
-		EXPECT_FALSE(neTable.Open(false, true));
+		{
+			LogLevelFatal llFatal;
+			LOG_ERROR(L"Warning: This test is supposed to spit errors");
+			NotExistingTable neTable(&m_db, m_odbcInfo.m_namesCase);
+			EXPECT_FALSE(neTable.Open(false, true));
+		}
 	}
 
 	TEST_P(TableTest, OpenAutoWithoutCheck)
@@ -110,10 +127,13 @@ namespace exodbc
 
 		// If we try to open an auto-table this will never work if you've passed invalid information:
 		// As soon as the columns are searched, we expect to fail
-		STableInfo neTableInfo;
-		neTableInfo.m_tableName = L"NotExisting";
-		Table neTable(&m_db, neTableInfo, Table::READ_ONLY);
-		EXPECT_FALSE(neTable.Open(false, false));
+		{
+			LogLevelFatal llFatal;
+			STableInfo neTableInfo;
+			neTableInfo.m_tableName = L"NotExisting";
+			Table neTable(&m_db, neTableInfo, Table::READ_ONLY);
+			EXPECT_FALSE(neTable.Open(false, false));
+		}
 	}
 
 	TEST_P(TableTest, OpenAutoCheckExistence)
@@ -123,13 +143,78 @@ namespace exodbc
 		EXPECT_TRUE(table.Open(false, true));
 
 		// Open a non-existing table
-		LOG_ERROR(L"Warning: This test is supposed to spit errors");
-		std::wstring neName = TestTables::GetTableName(L"notexistring", m_odbcInfo.m_namesCase);
-		exodbc::Table neTable(&m_db, neName, L"", L"", L"", Table::READ_ONLY);
-		EXPECT_FALSE(neTable.Open(false, true));
+		{
+			LogLevelFatal llFatal;
+			LOG_ERROR(L"Warning: This test is supposed to spit errors");
+			std::wstring neName = TestTables::GetTableName(L"notexistring", m_odbcInfo.m_namesCase);
+			exodbc::Table neTable(&m_db, neName, L"", L"", L"", Table::READ_ONLY);
+			EXPECT_FALSE(neTable.Open(false, true));
+		}
+	}
 
-//		bool ok = table.Select(L"");
-//		int p = 3;
+	// Select / GetNext
+	// ----------------
+	TEST_P(TableTest, Select)
+	{
+		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
+		ASSERT_TRUE(m_pIntTypesAutoTable->IsOpen());
+
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select(L""));
+
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
+
+	TEST_P(TableTest, SelectNext)
+	{
+		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
+		ASSERT_TRUE(m_pIntTypesAutoTable->IsOpen());
+
+		// We expect 6 Records
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select(L""));
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
+
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
+
+	TEST_P(TableTest, SelectClose)
+	{
+		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
+		ASSERT_TRUE(m_pIntTypesAutoTable->IsOpen());
+		
+		// Do something that opens a transaction
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select(L""));
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		// On MySql, closing works always
+		if (m_db.Dbms() != dbmsMY_SQL)
+		{
+			LogLevelFatal llFatal;
+			LOG_ERROR(L"Warning: This test is supposed to spit errors");
+			EXPECT_FALSE(m_pIntTypesAutoTable->SelectClose());
+		}
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
 	}
 
 	// Count

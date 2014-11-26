@@ -26,6 +26,7 @@
 namespace exodbc
 {
 	std::vector<SOdbcInfo> g_odbcInfos = std::vector<SOdbcInfo>();
+	boost::log::trivial::severity_level g_logSeverity = boost::log::trivial::error;
 }
 
 // Static consts
@@ -144,9 +145,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		return status;
 	
 	// Set a filter for the logging
+	// Also update the global value
+	g_logSeverity = (boost::log::trivial::severity_level) logLevel;
 	boost::log::core::get()->set_filter
 		(
-			boost::log::trivial::severity >= logLevel
+		boost::log::trivial::severity >= boost::ref(g_logSeverity)
 		);
 
 	int result = RUN_ALL_TESTS();

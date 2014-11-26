@@ -515,15 +515,14 @@ namespace exodbc
 		}
 		exDEBUG(EnsureStmtIsClosed(m_hStmtSelect, m_pDb->Dbms()));
 
-		bool ok = false;
 		std::wstring sqlstmt;
 		if (!whereStatement.empty())
 		{
-			sqlstmt = (boost::wformat(L"SELECT * FROM %s WHERE %s") % m_tableInfo.GetSqlName() % whereStatement).str();
+			sqlstmt = (boost::wformat(L"SELECT %s FROM %s WHERE %s")%m_fieldsStatement % m_tableInfo.GetSqlName() % whereStatement).str();
 		}
 		else
 		{
-			sqlstmt = (boost::wformat(L"SELECT * FROM %s") % m_tableInfo.GetSqlName()).str();
+			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % m_fieldsStatement % m_tableInfo.GetSqlName()).str();
 		}
 		SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
 		if (ret != SQL_SUCCESS)
@@ -534,78 +533,95 @@ namespace exodbc
 		else
 		{
 			m_selectQueryOpen = true;
-			int row = -1;
-			while ((ret = SQLFetch(m_hStmtSelect)) == SQL_SUCCESS)
-			{
-				row++;
-				if (ret != SQL_SUCCESS)
-				{
-					LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFetch);
-				}
-				else
-				{
-//					for (int i = 0; i < m_columnBuffers.size(); i++)
-					std::vector<ColumnBuffer*>::const_iterator it;
-					int col = 0;
-					for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-					{
-						ColumnBuffer* pBuff = *it;
-						SQLSMALLINT si = 0;
-						SQLINTEGER i = 0;
-						SQLBIGINT bi = 0;
-						if (!pBuff->IsNull() && pBuff->IsSmallInt())
-						{
-							si = pBuff->GetSmallInt();
-						}
-						else if (!pBuff->IsNull() && pBuff->IsInt())
-						{
-							i = pBuff->GetInt();
-						}
-						else if (!pBuff->IsNull() && pBuff->IsBigInt())
-						{
-							bi = pBuff->GetBigInt();
-						}
-						col++;
-						//int val = m_columnBuffers[i].GetInt();
-						//bool isNull = m_columnBuffers[i].IsNull();
-						//if (!isNull)
-						//{
-						//	int p = 3;
-						//}
-						//int p = 3;
-					}
-					ok = true;
-					SQLINTEGER cb;
-					//ok = GetData(m_hStmtCount, 1, SQL_C_ULONG, &count, sizeof(count), &cb, &isNull);
-					//if (ok && isNull)
-					//{
-					//	LOG_ERROR((boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt).str());
-					//}
-				}
-			}
-			if (ret != SQL_NO_DATA)
-			{
-				LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
-			}
 		}
+//			int row = -1;
+//			while ((ret = SQLFetch(m_hStmtSelect)) == SQL_SUCCESS)
+//			{
+//				row++;
+//				if (ret != SQL_SUCCESS)
+//				{
+//					LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFetch);
+//				}
+//				else
+//				{
+////					for (int i = 0; i < m_columnBuffers.size(); i++)
+//					std::vector<ColumnBuffer*>::const_iterator it;
+//					int col = 0;
+//					for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+//					{
+//						ColumnBuffer* pBuff = *it;
+//						SQLSMALLINT si = 0;
+//						SQLINTEGER i = 0;
+//						SQLBIGINT bi = 0;
+//						if (!pBuff->IsNull() && pBuff->IsSmallInt())
+//						{
+//							si = pBuff->GetSmallInt();
+//						}
+//						else if (!pBuff->IsNull() && pBuff->IsInt())
+//						{
+//							i = pBuff->GetInt();
+//						}
+//						else if (!pBuff->IsNull() && pBuff->IsBigInt())
+//						{
+//							bi = pBuff->GetBigInt();
+//						}
+//						col++;
+//						//int val = m_columnBuffers[i].GetInt();
+//						//bool isNull = m_columnBuffers[i].IsNull();
+//						//if (!isNull)
+//						//{
+//						//	int p = 3;
+//						//}
+//						//int p = 3;
+//					}
+//					ok = true;
+//					SQLINTEGER cb;
+//					//ok = GetData(m_hStmtCount, 1, SQL_C_ULONG, &count, sizeof(count), &cb, &isNull);
+//					//if (ok && isNull)
+//					//{
+//					//	LOG_ERROR((boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt).str());
+//					//}
+//				}
+//			}
+//			if (ret != SQL_NO_DATA)
+//			{
+//				LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
+//			}
+//		}
 
-		// Close the Cursor on the internal statement-handle
-		CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
+		//// Close the Cursor on the internal statement-handle
+		//CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
 
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_pDb->GetCommitMode() != CM_AUTO_COMMIT && !m_pDb->CommitTrans())
-		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
-		}
+		//// If Auto commit is off, we need to commit on certain db-systems, see #51
+		//if (m_pDb->GetCommitMode() != CM_AUTO_COMMIT && !m_pDb->CommitTrans())
+		//{
+		//	LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
+		//}
 
-		return ok;
+		return m_selectQueryOpen;
 	}
 
 
-	//bool Table::SelectClose(CloseMode closeMode)
-	//{
-	//	
-	//}
+	bool Table::SelectNext()
+	{
+		exASSERT(IsSelectOpen());
+		
+		SQLRETURN ret = SQLFetch(m_hStmtSelect);
+		if ( ! (ret == SQL_SUCCESS || ret == SQL_NO_DATA))
+		{
+			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFetch);
+		}
+
+		return ret == SQL_SUCCESS;
+	}
+
+	
+	bool Table::SelectClose()
+	{
+		exASSERT(IsSelectOpen());
+
+		return CloseStmtHandle(m_hStmtSelect, FailIfNotOpen);
+	}
 
 
 	/***************************** PRIVATE FUNCTIONS *****************************/
