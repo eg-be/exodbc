@@ -253,24 +253,33 @@ namespace exodbc
 	*/
 	extern EXODBCAPI bool	CompareSqlState(const wchar_t* sqlState1, const wchar_t* sqlState2);
 
+	
 	/*!
-	 * \fn	extern EXODBCAPI bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
-	 *
-	 * \brief	A wrapper to SQLGetInfo. See http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
+	* \brief	A wrapper to SQLNumResultCols.
+	* \detailed	Counts how many columns are available on the result set of the
+	*			passed Statement handle. Fails if statement is in wrong state
+	* \param	hStmt		The statement handle.
+	* \see		http://msdn.microsoft.com/en-us/library/ms715393%28v=vs.85%29.aspx
+	* \return	True if hStmt was already closed when the function was called.
+	*/
+	extern EXODBCAPI SQLSMALLINT GetResultColumnsCount(SQLHANDLE hStmt);
+
+
+	/*!
+	 * \brief	A wrapper to SQLGetInfo.
 	 *
 	 * \param	hDbc					The dbc.
 	 * \param	fInfoType				Type of the information.
 	 * \param	rgbInfoValue			Output buffer pointer.
 	 * \param	cbInfoValueMax			Length of buffer.
 	 * \param [in,out]	pcbInfoValue	Out-pointer for total length in bytes (excluding null-terminate char for string-values).
-	 *
+	 * \see		http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
 	 * \return	true if it succeeds, false if it fails.
 	 */
 	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
 
+
 	/*!
-	 * \fn	extern EXODBCAPI bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER targetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
-	 *
 	 * \brief	Gets one field of a record of the passed stmt-handle.
 	 *
 	 * \param	hStmt				  	The statement-handle.
@@ -288,9 +297,8 @@ namespace exodbc
 	 */
 	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
 
+
 	/*!
-	 * \fn	extern EXODBCAPI bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value);
-	 *
 	 * \brief	Gets string data. Allocates a wchar_t buffer with maxNrOfChars wchars + one char for the null-terminate:
 	 * 			wchar_t* buff = new buff[maxNrOfChars + 1];
 	 * 			Then calls GetData with that buffer and takes into account that GetData needs a buffer-size, not a char-size.
