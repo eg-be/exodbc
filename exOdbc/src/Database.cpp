@@ -2685,9 +2685,13 @@ namespace exodbc
 			ok = false;
 		}
 
-		// Iterate columns
+		// Iterate rows
+		// Ensure ordinal-position is increasing constantly by one, starting at one
+		SQLINTEGER m_lastIndex = 0;
 		while (ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
+			// Fetch data from columns
+
 			bool haveAllData = true;
 
 			SQLLEN cb;
@@ -2711,6 +2715,11 @@ namespace exodbc
 			haveAllData = haveAllData & GetData(m_hstmt, 17, SQL_C_SLONG, &colInfo.m_ordinalPosition, sizeof(colInfo.m_ordinalPosition), &cb, NULL);
 			haveAllData = haveAllData & GetData(m_hstmt, 18, DB_MAX_YES_NO_LEN, colInfo.m_isNullable, &colInfo.m_isIsNullableNull);
 
+			if (++m_lastIndex != colInfo.m_ordinalPosition)
+			{
+				ok = false;
+				LOG_ERROR(L"Columns are not ordered strictly by ordinal position");
+			}
 
 			if(!haveAllData)
 			{

@@ -278,6 +278,7 @@ namespace exodbc {
 	std::wstring SColumnInfo::GetSqlName() const
 	{
 		exASSERT(!m_tableName.empty());
+		exASSERT(!m_columnName.empty());
 
 		std::wstringstream ws;
 		if (HasCatalog())
@@ -288,7 +289,7 @@ namespace exodbc {
 		{
 			ws << m_schemaName << L".";
 		}
-		ws << m_tableName;
+		ws << m_tableName << L"." << m_columnName;
 		return ws.str();
 	}
 
