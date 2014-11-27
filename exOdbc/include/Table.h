@@ -169,7 +169,7 @@ namespace exodbc
 		*/
 		enum ColumnBindingMode
 		{
-			ALL_COLUMNS,	///< During Open all Columns will be read and bound automatically
+			ALL_COLUMNS,			///< During Open all Columns will be read and bound automatically
 			ONLY_DEFINED_COLUMNS	///< During Open only Columns you have defined using SetColDefs() will be bound
 		};
 
@@ -388,6 +388,11 @@ namespace exodbc
 		bool		IsSelectOpen() const { return m_selectQueryOpen; };
 
 
+		bool		GetColumnValue(SQLSMALLINT columnNumber, SQLSMALLINT& smallInt) const;
+		bool		GetColumnValue(SQLSMALLINT columnNumber, SQLINTEGER& i) const;
+		bool		GetColumnValue(SQLSMALLINT columnNumber, SQLBIGINT& bigInt) const;
+
+
 		/*!
 		* \brief	Returns the number of columns this table has.
 		* \detailed	If columns were set manually on the table, this is the value that has been 
@@ -514,6 +519,9 @@ namespace exodbc
 		* \return	A string in the form "Field1, Field2, .., FieldN"
 		*/
 		std::wstring BuildFieldsStatement() const;
+
+
+		const ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnNumber) const;
 
 
 		void        setCbValueForColumn(int columnIndex);

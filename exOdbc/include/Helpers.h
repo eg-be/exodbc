@@ -125,6 +125,7 @@ namespace exodbc
 	*/
 	extern std::string w2s(const std::wstring& w);
 
+
 	/*!
 	* \brief Returns the string TRUE, FALSE or ????? for the values SQL_TRUE, SQL_FALSE or anything else.
 	*
@@ -133,6 +134,7 @@ namespace exodbc
 	*/
 	extern EXODBCAPI std::wstring SqlTrueFalse2s(SQLSMALLINT b);
 	
+
 	/*!
 	* \brief Transform the SQL_types like SQL_CHAR, SQL_NUMERIC, etc. to some string.
 	*
@@ -140,6 +142,26 @@ namespace exodbc
 	* \return std::wstring
 	*/
 	extern EXODBCAPI std::wstring SqlType2s(SQLSMALLINT sqlType);
+
+	
+	/*!
+	* \brief Transform the SQL C-types like SQL_C_SLONG, SQL_C_WCHAR, etc. to some string, like "SQL_C_SLONG", etc.
+	*
+	* \param SQLSMALLINT sqlCType
+	* \return std::wstring
+	*/
+	extern EXODBCAPI std::wstring SqLCType2s(SQLSMALLINT sqlCType);
+
+
+	/*!
+	* \brief	Transform the SQL C-types like SQL_C_SLONG, SQL_C_WCHAR, etc. to the corresponding string value of the ODBC C Type.
+	*			Like SQL_C_SLONG becomes "SQLINTEGER"
+	*
+	* \param SQLSMALLINT sqlCType
+	* \return std::wstring
+	*/
+	extern EXODBCAPI std::wstring SqlCType2OdbcS(SQLSMALLINT sqlCType);
+
 
 	/*!
 	 * \brief	Gets all errors for all passed handles.
