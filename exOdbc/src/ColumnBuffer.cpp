@@ -202,6 +202,9 @@ namespace exodbc
 			return sizeof(SQLBIGINT);
 		case SQL_CHAR:
 		case SQL_VARCHAR:
+			// We could calculate the length using m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR)
+			// TODO: or also use the char_octet_length. Maybe this would be cleaner - some dbs
+			// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
 			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
 				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR);
