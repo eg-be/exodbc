@@ -170,6 +170,7 @@ namespace exodbc
 		m_hStmtSelect = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
+		m_charBindingMode = BIND_AS_REPORTED;
 
 		// Old handles
 		m_hdbc = SQL_NULL_HDBC;
@@ -391,6 +392,13 @@ namespace exodbc
 #ifdef EXODBCDEBUG
 		m_pDb->UnregisterTable(this);
 #endif
+		// Unbind ColumnBuffers
+		SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFreeStmt);
+		}
+
 		// Delete ColumnBuffers
 		std::vector<ColumnBuffer*>::iterator it;
 		for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
@@ -631,6 +639,24 @@ namespace exodbc
 
 	
 	bool Table::GetColumnValue(SQLSMALLINT columnNumber, std::wstring& str) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			str = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
+
+	bool Table::GetColumnValue(SQLSMALLINT columnNumber, std::string& str) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
 		if (!pBuff || pBuff->IsNull())
@@ -1050,7 +1076,7 @@ namespace exodbc
 			for (it = columns.begin(); it != columns.end(); it++)
 			{
 				SColumnInfo colInfo = *it;
-				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo);
+				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_charBindingMode);
 				if (!pColBuff->BindColumnBuffer(m_hStmtSelect))
 				{
 					return false;
@@ -1149,6 +1175,13 @@ namespace exodbc
 		m_isOpen = true;
 		return true;
 
+	}
+
+
+	void Table::SetCharBindingMode(CharBindingMode mode)
+	{
+		exASSERT(!IsOpen());
+		m_charBindingMode = mode;
 	}
 
 
