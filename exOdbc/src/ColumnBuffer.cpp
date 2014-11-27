@@ -32,19 +32,6 @@ namespace exodbc
 		m_allocatedBuffer = AllocateBuffer(m_columnInfo);
 	}
 
-	//ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, boost::any* pBuffer)
-	//	: m_columnInfo(columnInfo)
-	//	, m_allocatedBuffer(false)
-	//{
-	//	//m_pBuffer = pBuffer;
-	//	//m_createdBuffer = false;
-	//}
-
-
-	//ColumnBuffer::ColumnBuffer(const STableColumnInfo& columnInfo, void* pBuffer)
-	//{
-	//	m_createdBuffer = false;
-	//}
 
 	// Destructor
 	// -----------
@@ -97,8 +84,77 @@ namespace exodbc
 
 	}
 
+
 	// Implementation
 	// --------------
+	bool ColumnBuffer::BindColumnBuffer(HSTMT hStmt)
+	{
+		exASSERT(m_allocatedBuffer);
+		exASSERT(!m_isBound);
+
+		void* pBuffer = NULL;
+		try
+		{
+			pBuffer = GetBuffer();
+		}
+		catch (boost::bad_get ex)
+		{
+			LOG_ERROR(L"Failed in GetBuffer() - probably allocated buffer type does not match sql type in SColumnInfo.");
+			exASSERT(false);
+			return false;
+		}
+		size_t buffSize = GetBufferSize();
+		SQLRETURN ret = 0;
+		bool notBound = false;
+		m_cb = 0;
+		switch (m_columnInfo.m_sqlDataType)
+		{
+		case SQL_SMALLINT:
+			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SSHORT, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			break;
+		case SQL_INTEGER:
+			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SLONG, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			break;
+		case SQL_BIGINT:
+			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SBIGINT, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			break;
+		case SQL_CHAR:
+		case SQL_VARCHAR:
+			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
+			{
+				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			}
+			else
+			{
+				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_WCHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			}
+			break;
+		case SQL_WCHAR:
+		case SQL_WVARCHAR:
+			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
+			{
+				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			}
+			else
+			{
+				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_WCHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			}
+			break;
+		default:
+			notBound = true;
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+		}
+		if (!notBound && ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
+			notBound = true;
+		}
+
+		m_isBound = !notBound;
+		return m_isBound;
+	}
+
+
 	bool ColumnBuffer::AllocateBuffer(const SColumnInfo& columnInfo)
 	{
 		exASSERT(!m_allocatedBuffer);
@@ -149,6 +205,7 @@ namespace exodbc
 		}
 		return m_allocatedBuffer;
 	}
+
 
 	void* ColumnBuffer::GetBuffer()
 	{
@@ -235,10 +292,17 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 		exASSERT(m_isBound);
 
+		// TODO: We should not use the SQL-Data type here for the visitor. In there its only
+		// used for the exception-message. The visitor is trying to convert from an ODBC-C-TYPE!!
+
 		// We use the BigIntVisitor here. It will always succeed to convert if 
 		// the underlying Value is an int-value or throw otherwise
 		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
 		// But we are only allowed to Downcast this to a Smallint if the original value was a smallint
+		
+		// TODO: We should do this by determining the type of the Variant
+		// Then we would be independent of sqlDataType, except during binding
+
 		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT))
 		{
 			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SSHORT);
@@ -332,72 +396,8 @@ namespace exodbc
 	}
 
 
-	bool ColumnBuffer::BindColumnBuffer(HSTMT hStmt)
-	{
-		exASSERT(m_allocatedBuffer);
-		exASSERT(!m_isBound);
-
-		void* pBuffer = GetBuffer();
-		size_t buffSize = GetBufferSize();
-		SQLRETURN ret = 0;
-		bool notBound = false;
-		m_cb = 0;
-		switch (m_columnInfo.m_sqlDataType)
-		{
-		case SQL_SMALLINT:
-			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SSHORT, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			break;
-		case SQL_INTEGER:
-			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SLONG, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			break;
-		case SQL_BIGINT:
-			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SBIGINT, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			break;
-		case SQL_CHAR:
-		case SQL_VARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-			{
-				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			}
-			else
-			{
-				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_WCHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			}
-			break;
-		case SQL_WCHAR:
-		case SQL_WVARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-			{
-				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			}
-			else
-			{
-				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_WCHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			}
-			break;
-		default:
-			notBound = true;
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
-		}
-		if (!notBound && ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
-			notBound = true;
-		}
-
-		m_isBound = !notBound;
-		return m_isBound;
-	}
 
 
-	//SQLBIGINT BigintVisitor::operator()(SQLINTEGER i) const
-	//{
-	//	if (!(m_sqlDataType == SQL_SMALLINT || m_sqlDataType == SQL_INTEGER))
-	//	{
-	//		
-	//	}
-	//	return i;
-	//}
 
 	// Interfaces
 	// ----------

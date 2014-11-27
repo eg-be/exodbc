@@ -42,6 +42,7 @@ namespace exodbc
 
 	// Classes
 	// -------
+	
 	/*!
 	* \class ColumnBuffer
 	*
@@ -86,8 +87,29 @@ namespace exodbc
 		*/
 		ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode);
 
-		//		ColumnBuffer(const SColumnInfo& columnInfo, boost::any* pBuffer);
-//		ColumnBuffer(const STableColumnInfo& columnInfo, void* pBuffer);
+
+		/*!
+		* \brief	Create a new ColumnBuffer that will use the buffer given inside BufferPtrVariant.
+		* \detailed	The constructor will not try to allocate a buffer on its own but update
+		*			its internal variant with the value of the passed bufferVariant and the corresponding
+		*			information.
+		*			The ColumnBuffer will not take ownership of the passed bufferVariant and will
+		*			not delete it.
+		*			Note that using this constructor you can pass almost any combination of conversions 
+		*			from SQL Types to ODBC C Types to the driver.
+		* \param columnInfo	The Information about the column we bind.
+		* \param sqlCType	The ODBC C Type of the buffer. This value will be forwarded to the driver during SQLBindCol. 
+		* \param buffer		The buffer to be used for binding.
+		* \param bufferSize	The size of the buffer used for binding.
+		*
+		* \see	HaveBuffer()
+		* \see	Bind()
+		*/
+		ColumnBuffer(SQLSMALLINT sqlCType, SQLINTEGER ordinalPosition, BufferPtrVariant bufferVariant, SQLLEN bufferSize);
+
+
+		~ColumnBuffer();
+
 	private:
 		// We cannot be copied
 		ColumnBuffer(const ColumnBuffer& other) {};
@@ -107,6 +129,7 @@ namespace exodbc
 		* \brief	Tries to bind the buffer to the column using SQLBindCol.
 		* \detailed	Fails if no buffer is allocated or if already bound.
 		*			The driver might fail to bind the column to the type.
+		* \param	hStmt ODBC Statement handle to bind this ColumnBuffer to.
 		* \return	True if bound successful.
 		*/
 		bool BindColumnBuffer(HSTMT hStmt);
@@ -165,41 +188,96 @@ namespace exodbc
 		CharBindingMode GetCharBindingMode() const { return m_charBindingMode; };
 
 		// Operators
-		//Note: All These Get-Methods could throw a boost::bad_get ?? still true ??
+		// ---------
+
+		/*!
+		* \brief	Cast the current value to a SQLSMALLINT if possible.
+		* \detailed	Fails if not bound.
+		* \return	Current value as SQLSMALLINT.
+		* \throw	CastException If value cannot be casted to an SQLSMALLINT or if data loss would occur.
+		*/
 		operator SQLSMALLINT() const;
 
 
 		/*!
-		* \brief	Cast the current value to an SQLINTEGER if possible.
+		* \brief	Cast the current value to a SQLINTEGER if possible.
+		* \detailed	Fails if not bound.
 		* \return	Current value as SQLINTEGER.
-		* \throw	CastException
+		* \throw	CastException If value cannot be casted to an SQLINTEGER or if data loss would occur.
 		*/
 		operator SQLINTEGER() const;
+
+
+		/*!
+		* \brief	Cast the current value to a SQLBIGINT if possible.
+		* \detailed	Fails if not bound.
+		* \return	Current value as SQLBIGINT.
+		* \throw	CastException If value cannot be casted to an SQLBIGINT.
+		*/
 		operator SQLBIGINT() const;
+
+
+		/*!
+		* \brief	Cast the current value to a std::wstring if possible.
+		* \detailed	Fails if not bound.
+		* \return	Current value as std::wstring.
+		* \throw	CastException If value cannot be casted to an std::wstring.
+		*/
 		operator std::wstring() const;
+
+		
+		/*!
+		* \brief	Cast the current value to a std::wstring if possible.
+		* \detailed	Fails if not bound.
+		* \return	Current value as std::wstring.
+		* \throw	CastException If value cannot be casted to an std::wstring.
+		*/
 		operator std::string() const;
 
-	public:
-		~ColumnBuffer();
-
 	private:
+
+		/*!
+		* \brief	Determine the buffer size needed for the current SQL-Type given in SColumnInfo.
+		* \detailed The size of types with fixed lengths is given by sizeof() (like sizeof(SQLINTEGER).
+		*			For char-types the size is calculated by '(fieldlength + 1) * sizeof(char-type)',
+		*			where char-type is SQLCCHAR or SQLWCHAR. One extra space is allocated for the 
+		*			terminating \0.
+		* \return	CharBindingMode set.
+		*/
 		size_t GetBufferSize() const;
+
+
+		/*!
+		* \brief	Get the allocated buffer as a void*.
+		* \detailed Determines the type using the SColumnInfo and gets the pointer from the variant.
+		* \return	CharBindingMode set.
+		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
+		*/
 		void* GetBuffer();
 
+
+		/*!
+		* \brief	Get the allocated buffer as a void*.
+		* \detailed Determines the type using the SColumnInfo and gets the pointer from the variant.
+		* \return	CharBindingMode set.
+		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
+		*/
 		bool AllocateBuffer(const SColumnInfo& columnInfo);
 
-		// Access to ptrs inside variant
+
+		// Helpers to quickly access the pointers inside the variant.
+		// All of these could throw a boost::bad_get
 		SQLSMALLINT*	GetSmallIntPtr() const;
 		SQLINTEGER*		GetIntPtr() const;
 		SQLBIGINT*		GetBigIntPtr() const;
 		SQLCHAR*		GetCharPtr() const;
 		SQLWCHAR*		GetWCharPtr() const;
 
-		SColumnInfo m_columnInfo;
-		bool m_allocatedBuffer;
-		bool m_isBound;
+		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer
+		bool m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction.
+		bool m_isBound;				///< True if BindColumnBuffer() was successful.
 		
-		CharBindingMode m_charBindingMode;
+		CharBindingMode m_charBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
 
 		BufferPtrVariant m_intPtrVar;	///< Variant that holds the actual buffer
 
@@ -208,6 +286,13 @@ namespace exodbc
 	};  // class ColumnBuffer
 
 
+	/*!
+	* \class CastException
+	*
+	* \brief Thrown if a Visitor cannot cast a value.
+	*
+	* Contains information about the source-type and the cast-target-type.
+	*/
 	class CastException :
 		public boost::exception,
 		public std::exception
@@ -225,15 +310,34 @@ namespace exodbc
 	private:
 		std::string m_what;
 	public:
-		const SQLSMALLINT m_sqlSourceType;
-		const SQLSMALLINT m_sqlCType;
-	};
+		const SQLSMALLINT m_sqlSourceType;	///< Sql Type used as source value for the cast.
+		const SQLSMALLINT m_sqlCType;		///< ODBC C Type used as destination value for the cast.
+	};	// class CastException
+	
 
-
+	/*!
+	* \class BigIntVisitor
+	*
+	* \brief Visitor to cast current value to a SQLBIGINT.
+	*
+	* This Visitor can cast the following sources to a SQLBIGINT:
+	* 
+	* - SQLSMALLINT*
+	* - SQLINTEGER*
+	* - SQLBIGINT*
+	* 
+	* It will throw a CastException on the following source-types:
+	* - SQLCHAR*
+	* - SQLWCHAR*
+	* 
+	*/
 	class BigintVisitor
 		: public boost::static_visitor < SQLBIGINT >
 	{
 	public:
+		
+		// TODO: We should not use the SQL-Data type here for the visitor. In there its only
+		// used for the exception-message. The visitor is trying to convert from an ODBC-C-TYPE!!
 		BigintVisitor(SQLSMALLINT sqlDataType)
 			: m_sqlDataType(sqlDataType) {};
 
@@ -245,9 +349,25 @@ namespace exodbc
 	
 	private:
 		SQLSMALLINT m_sqlDataType;
-	};
+	};	// class BigintVisitor
 
 
+	/*!
+	* \class WStringVisitor
+	*
+	* \brief Visitor to cast current value to a std::wstring .
+	*
+	* This Visitor can cast the following sources to a std::wstring :
+	*
+	* - SQLSMALLINT*
+	* - SQLINTEGER*
+	* - SQLBIGINT*
+	* - SQLWCHAR*
+	* 
+	* It will throw a CastException on the following source-types:
+	* - SQLCHAR*
+	*
+	*/
 	class WStringVisitor
 		: public boost::static_visitor < std::wstring >
 	{
@@ -263,9 +383,25 @@ namespace exodbc
 
 	private:
 		SQLSMALLINT m_sqlDataType;
-	};
+	};	// class WStringVisitor
 
 
+	/*!
+	* \class StringVisitor
+	*
+	* \brief Visitor to cast current value to a std::string .
+	*
+	* This Visitor can cast the following sources to a std::string :
+	*
+	* - SQLSMALLINT*
+	* - SQLINTEGER*
+	* - SQLBIGINT*
+	* - SQLCHAR*
+	*
+	* It will throw a CastException on the following source-types:
+	* - SQLWCHAR*
+	*
+	*/
 	class StringVisitor
 		: public boost::static_visitor < std::string >
 	{
@@ -281,7 +417,7 @@ namespace exodbc
 
 	private:
 		SQLSMALLINT m_sqlDataType;
-	};
+	};	// class StringVisitor
 
 }
 
