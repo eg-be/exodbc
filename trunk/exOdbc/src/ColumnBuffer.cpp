@@ -48,7 +48,25 @@ namespace exodbc
 	// -----------
 	ColumnBuffer::~ColumnBuffer()
 	{
-
+		try
+		{
+			switch (m_columnInfo.m_sqlDataType)
+			{
+			case SQL_SMALLINT:
+				delete GetSmallIntPtr();
+				break;
+			case SQL_INTEGER:
+				delete GetIntPtr();
+				break;
+			case SQL_BIGINT:
+				delete GetBigIntPtr();
+				break;
+			}
+		}
+		catch (boost::bad_get ex)
+		{
+			LOG_ERROR(ex.what());
+		}
 	}
 
 	// Implementation
@@ -65,13 +83,13 @@ namespace exodbc
 		switch (columnInfo.m_sqlDataType)
 		{
 		case SQL_SMALLINT:
-			m_intVar = SQLSMALLINT(0);
+			m_intPtrVar = new SQLSMALLINT(0);
 			break;
 		case SQL_INTEGER:
-			m_intVar = SQLINTEGER(0);
+			m_intPtrVar = new SQLINTEGER(0);
 			break;
 		case SQL_BIGINT:
-			m_intVar = SQLBIGINT(0);
+			m_intPtrVar = new SQLBIGINT(0);
 			break;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
@@ -99,11 +117,11 @@ namespace exodbc
 		switch (m_columnInfo.m_sqlDataType)
 		{
 		case SQL_SMALLINT:
-			return static_cast<void*>(&(boost::get<SQLSMALLINT>(m_intVar)));
+			return static_cast<void*>(boost::get<SQLSMALLINT*>(m_intPtrVar));
 		case SQL_INTEGER:
-			return static_cast<void*>(&(boost::get<SQLINTEGER>(m_intVar)));
+			return static_cast<void*>(boost::get<SQLINTEGER*>(m_intPtrVar));
 		case SQL_BIGINT:
-			return static_cast<void*>(&(boost::get<SQLBIGINT>(m_intVar)));
+			return static_cast<void*>(boost::get<SQLBIGINT*>(m_intPtrVar));
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -134,7 +152,7 @@ namespace exodbc
 			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SSHORT);
 			// else we are safe to downcast the bigint to a smallInt
 		}
-		return (SQLSMALLINT)boost::apply_visitor(BigintVisitor(), m_intVar);
+		return (SQLSMALLINT)boost::apply_visitor(BigintVisitor(), m_intPtrVar);
 	}
 
 
@@ -145,7 +163,7 @@ namespace exodbc
 			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SLONG);
 			// else we are safe to downcast the bigint to an int
 		}
-		return (SQLINTEGER) boost::apply_visitor(BigintVisitor(), m_intVar);
+		return (SQLINTEGER) boost::apply_visitor(BigintVisitor(), m_intPtrVar);
 	}
 
 
@@ -156,8 +174,7 @@ namespace exodbc
 			// We cannot convert to an int if its not an int-type
 			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SBIGINT);
 		}
-
-		return boost::apply_visitor(BigintVisitor(), m_intVar);
+		return boost::apply_visitor(BigintVisitor(), m_intPtrVar);
 	}
 
 
@@ -165,37 +182,28 @@ namespace exodbc
 	{
 		if (IsIntType())
 		{
-			return boost::apply_visitor(WStringVisitor(), m_intVar);
+			return boost::apply_visitor(WStringVisitor(), m_intPtrVar);
 		}
 		throw CastException(m_columnInfo.m_sqlDataType, SQL_C_WCHAR);
 	}
 
 
-	SQLSMALLINT ColumnBuffer::GetSmallInt() const
+	SQLSMALLINT* ColumnBuffer::GetSmallIntPtr() const
 	{
-		exASSERT(IsIntType());
-		exASSERT(!IsNull());
-
 		// Could throw boost::bad_get
-		return boost::get<SQLSMALLINT>(m_intVar);
+		return boost::get<SQLSMALLINT*>(m_intPtrVar);
 	}
 
-	SQLINTEGER ColumnBuffer::GetInt() const
+	SQLINTEGER* ColumnBuffer::GetIntPtr() const
 	{
-		exASSERT(IsIntType());
-		exASSERT(!IsNull());
-
 		// Could throw boost::bad_get
-		return boost::get<SQLINTEGER>(m_intVar);
+		return boost::get<SQLINTEGER*>(m_intPtrVar);
 	}
 
-	SQLBIGINT ColumnBuffer::GetBigInt() const
+	SQLBIGINT* ColumnBuffer::GetBigIntPtr() const
 	{
-		exASSERT(IsIntType());
-		exASSERT(!IsNull());
-
 		// Could throw boost::bad_get
-		return boost::get<SQLBIGINT>(m_intVar);
+		return boost::get<SQLBIGINT*>(m_intPtrVar);
 	}
 
 	bool ColumnBuffer::BindColumnBuffer(HSTMT hStmt)

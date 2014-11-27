@@ -32,10 +32,10 @@ namespace exodbc
 {
 //	typedef boost::variant<SQLUSMALLINT*, SQLSMALLINT*, SQLUINTEGER*, SQLINTEGER*, SQLUBIGINT*, SQLBIGINT*> IntegerVariant;
 	// We could also use just one variant for all types that are simple (not binary)?
-	typedef boost::variant<SQLSMALLINT, SQLINTEGER, SQLBIGINT> IntegerVariant;
-	typedef boost::variant<SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT> TimestampVariant;
+	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*> IntegerPtrVariant;
+//	typedef boost::variant<SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT> TimestampVariant;
 	
-	typedef boost::variant<IntegerVariant, TimestampVariant> BufferVariant;
+//	typedef boost::variant<IntegerVariant, TimestampVariant> BufferVariant;
 	// Structs
 	// -------
 
@@ -91,11 +91,6 @@ namespace exodbc
 		bool IsBigInt() const { return m_columnInfo.m_sqlDataType == SQL_BIGINT; };
 		bool IsIntType() const { return (IsSmallInt() || IsInt() || IsBigInt()); };
 
-		// Access to values
-		SQLSMALLINT GetSmallInt() const;
-		SQLINTEGER GetInt() const;
-		SQLBIGINT GetBigInt() const;
-
 		// Operators
 		operator SQLSMALLINT() const;
 		operator SQLINTEGER() const;
@@ -111,11 +106,16 @@ namespace exodbc
 
 		bool AllocateBuffer(const SColumnInfo& columnInfo);
 
+		// Access to ptrs inside variant
+		SQLSMALLINT* GetSmallIntPtr() const;
+		SQLINTEGER* GetIntPtr() const;
+		SQLBIGINT* GetBigIntPtr() const;
+
 		SColumnInfo m_columnInfo;
 		bool m_allocatedBuffer;
 		
 		//BufferVariant m_buffer;	///< Maybe we want one variant for all types?
-		IntegerVariant m_intVar;	///< Or a logical variant?
+		IntegerPtrVariant m_intPtrVar;	///< Or a logical variant?
 		char*		m_pBinaryBuffer; ///< Allocated if this column has binary data
 		SQLWCHAR*	m_pWCharBuffer;	///< Allocated if this column has char-data
 
@@ -129,9 +129,9 @@ namespace exodbc
 	{
 	public:
 
-		SQLBIGINT operator()(SQLSMALLINT smallInt) const { return smallInt;  };
-		SQLBIGINT operator()(SQLINTEGER i) const { return i; };
-		SQLBIGINT operator()(SQLBIGINT bigInt) const { return bigInt; };
+		SQLBIGINT operator()(SQLSMALLINT* smallInt) const { return *smallInt;  };
+		SQLBIGINT operator()(SQLINTEGER* i) const { return *i; };
+		SQLBIGINT operator()(SQLBIGINT* bigInt) const { return *bigInt; };
 	};
 
 	class WStringVisitor
@@ -139,9 +139,9 @@ namespace exodbc
 	{
 	public:
 
-		std::wstring operator()(SQLSMALLINT smallInt) const { return (boost::wformat(L"%d") % smallInt).str(); };
-		std::wstring operator()(SQLINTEGER i) const { return (boost::wformat(L"%d") % i).str(); };
-		std::wstring operator()(SQLBIGINT bigInt) const { return (boost::wformat(L"%d") % bigInt).str(); };
+		std::wstring operator()(SQLSMALLINT* smallInt) const { return (boost::wformat(L"%d") % *smallInt).str(); };
+		std::wstring operator()(SQLINTEGER* i) const { return (boost::wformat(L"%d") % *i).str(); };
+		std::wstring operator()(SQLBIGINT* bigInt) const { return (boost::wformat(L"%d") % *bigInt).str(); };
 	};
 
 
