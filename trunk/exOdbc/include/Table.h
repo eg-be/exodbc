@@ -181,38 +181,6 @@ namespace exodbc
 
 
 		/*!
-		* \enum		CharBindingMode
-		* \brief	Provide additional information how to bind SQL_CHAR, SQL_WCHAR, SQL_VARCHAR and SQL_WVARCHAR columns
-		* \detailed Usually when a table binds a column it will query the database about the SQL-Type and create the
-		*			corresponding buffer-type. Using this option you can specify that columns reported as SQL_CHAR 
-		*			will be bound to a SQLWCHAR* buffer, or the other way round.
-		*			This comes in handy as drivers are usually quite good about converting wide-stuff to non-wide stuff,
-		*			but doing that in the code is just a pain.
-		*/
-		enum CharBindingMode
-		{
-			BIND_AS_REPORTED,	///< Use the type reported by the DB for the buffer (default)
-			BIND_AS_CHAR,		///< Bind also SQL_WCHAR and SQL_WVARCHAR columns to a SQLCHAR* buffer
-			BIND_AS_WCHAR		///< Bind also SQL_CHAR and SQL_VARCHAR columns to a SQLWCHAR* buffer
-		};
-
-
-		/*!
-		* \enum		CharTrimOption
-		* \brief	Define whether you want to trim string and wstring values returned from the Table functions GetColumnValue()
-		* \detailed	Note that setting this flag will not modify the actual data-buffer, but only the string-values
-		*			returned by the GetColumnValue() functions.
-		*			Default is TRIM_NO
-		*/
-		enum CharTrimOption
-		{
-			TRIM_NO		= 0x0L,	///< No Trimming of wstring or string (default)
-			TRIM_LEFT	= 0x1L,	///< Trim left
-			TRIM_RIGHT	= 0x2L	///< Trim right
-		};
-
-
-		/*!
 		* \brief	Create a new Table-instance from the Database pDb using the table definition
 		*			from tableInfo. The table will read its column-definitions from the database
 		*			automatically during Open() and bind all columns.
