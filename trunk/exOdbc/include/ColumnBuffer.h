@@ -77,10 +77,12 @@ namespace exodbc
 		/*!
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
 		*			using the datatype-information from the passed SColumnInfo.
-		* \detailed	Might fail if SQL-type is not supported. 
-		*		TODO: Some way to check that
+		* \detailed	The constructor will try to allocate a corresponding buffer.
+		* \param columnInfo	The Information about the column we bind.
+		* \param mode		How Character columns should be bound
 		*
-		* \see		???()
+		* \see	HaveBuffer()
+		* \see	Bind()
 		*/
 		ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode);
 
@@ -92,28 +94,86 @@ namespace exodbc
 		ColumnBuffer() {};
 
 	public:
+		/*!
+		* \brief	Returns true if this ColumnBuffer has a buffer ready.
+		* \detailed	This can be either true because during construction a buffer
+		*			was allocated or because you've manually set a buffer.
+		* \return	True if buffer is ready.
+		*/
+		bool HaveBuffer() const { return m_allocatedBuffer; };
 
+
+		/*!
+		* \brief	Tries to bind the buffer to the column using SQLBindCol.
+		* \detailed	Fails if no buffer is allocated or if already bound.
+		*			The driver might fail to bind the column to the type.
+		* \return	True if bound successful.
+		*/
 		bool BindColumnBuffer(HSTMT hStmt);
 
-		//Note: All These Get-Methods could throw a boost::bad_get
-		SQLLEN GetCb() const {	return  m_cb;	};
 
-		bool IsNull() const { return m_cb == SQL_NULL_DATA; };
-		bool NoTotal() const { return m_cb == SQL_NO_TOTAL; };
+		/*!
+		* \brief	Returns true if this ColumnBuffer is bound.
+		* \return	True if Column is bound.
+		*/
+		bool IsBound() const { return m_isBound; };
 
+
+		/*!
+		* \brief	Access the length indicator passed to SQLBindCol.
+		* \detailed	Fails if no buffer is allocated or not bound.
+		* \return	Length indicator bound to column.
+		*/
+		SQLLEN GetCb() const { exASSERT(HaveBuffer()); exASSERT(IsBound()); return  m_cb; };
+
+
+		/*!
+		* \brief	Check if the current value is NULL.
+		* \detailed	Fails if no buffer is allocated or not bound.
+		* \return	True if current value is Null.
+		*/
+		bool IsNull() const { exASSERT(HaveBuffer()); exASSERT(IsBound()); return m_cb == SQL_NULL_DATA; };
+
+		
+		/*!
+		* \brief	Check if the is SQL_NO_TOTAL.
+		* \detailed	Fails if no buffer is allocated or not bound.
+		* \return	True if current value is SQL_NO_TOTAL.
+		*/
+		bool NoTotal() const { exASSERT(HaveBuffer()); exASSERT(IsBound()); return m_cb == SQL_NO_TOTAL; };
+
+
+		/*!
+		* \brief	Get the SColumnInfo used within this ColumnBuffer.
+		* \return	SColumnInfo set on this ColumnBuffer.
+		*/
 		SColumnInfo GetColumnInfo() const { return m_columnInfo; };
 
+
+		/*!
+		* \brief	Set how Chars should be bound.
+		* \detailed	Fails if already bound.
+		* \see		CharBindingMode
+		*/
 		void SetCharBindingMode(CharBindingMode mode) { exASSERT(!m_isBound); m_charBindingMode = mode; }
+
+
+		/*!
+		* \brief	Get the currently set CharBindingMode.
+		* \return	CharBindingMode set.
+		*/
 		CharBindingMode GetCharBindingMode() const { return m_charBindingMode; };
 
-		//// Type Information
-		//bool IsSmallInt() const { return m_columnInfo.m_sqlDataType == SQL_SMALLINT; };
-		//bool IsInt() const { return m_columnInfo.m_sqlDataType == SQL_INTEGER; };
-		//bool IsBigInt() const { return m_columnInfo.m_sqlDataType == SQL_BIGINT; };
-		//bool IsIntType() const { return (IsSmallInt() || IsInt() || IsBigInt()); };
-
 		// Operators
+		//Note: All These Get-Methods could throw a boost::bad_get ?? still true ??
 		operator SQLSMALLINT() const;
+
+
+		/*!
+		* \brief	Cast the current value to an SQLINTEGER if possible.
+		* \return	Current value as SQLINTEGER.
+		* \throw	CastException
+		*/
 		operator SQLINTEGER() const;
 		operator SQLBIGINT() const;
 		operator std::wstring() const;
