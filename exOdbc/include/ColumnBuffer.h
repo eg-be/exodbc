@@ -31,12 +31,12 @@
 
 namespace exodbc
 {
-//	typedef boost::variant<SQLUSMALLINT*, SQLSMALLINT*, SQLUINTEGER*, SQLINTEGER*, SQLUBIGINT*, SQLBIGINT*> IntegerVariant;
-	// We could also use just one variant for all types that are simple (not binary)?
-	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, SQLCHAR*, SQLWCHAR*> IntegerPtrVariant;
-//	typedef boost::variant<SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT> TimestampVariant;
-	
-//	typedef boost::variant<IntegerVariant, TimestampVariant> BufferVariant;
+	// Typedefs
+	// --------
+
+	// The Variant we use to store pointers to the actual buffer
+	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, SQLCHAR*, SQLWCHAR*> BufferPtrVariant;
+
 	// Structs
 	// -------
 
@@ -48,11 +48,16 @@ namespace exodbc
 	* \brief Provides the buffer to transfer data from a column of a record.
 	*
 	* A ColumnBuffer can allocate a corresponding buffer-type automatically
-	* by reading the sql-type info from the passed SColumnInfo. 
-	* You can also manually pass a pointer to a buffer and the sql-type of 
-	* the buffer.
+	* by reading the sql-type info from the passed SColumnInfo, or by using a
+	* buffer provided during construction. In that case you must also pass the
+	* ODBC C-Type of the buffer.
+	* There are options about wide-chars: You can either enforce that a column
+	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
+	* a SQLWCHAR* buffer and the other way round, using the CharBindingMode
+	* value.
 	* Last there is an option to try to let the odbc-driver to convert everything
-	* to a string.
+	* to a (w)string.
+	* 
 	*/
 	class EXODBCAPI ColumnBuffer
 	{
@@ -65,7 +70,7 @@ namespace exodbc
 		*
 		* \see		???()
 		*/
-		ColumnBuffer(const SColumnInfo& columnInfo, Table::CharBindingMode mode);
+		ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode);
 
 		//		ColumnBuffer(const SColumnInfo& columnInfo, boost::any* pBuffer);
 //		ColumnBuffer(const STableColumnInfo& columnInfo, void* pBuffer);
@@ -86,8 +91,8 @@ namespace exodbc
 
 		SColumnInfo GetColumnInfo() const { return m_columnInfo; };
 
-		void SetCharBindingMode(Table::CharBindingMode mode) { exASSERT(!m_isBound); m_charBindingMode = mode; }
-		Table::CharBindingMode GetCharBindingMode() const { return m_charBindingMode; };
+		void SetCharBindingMode(CharBindingMode mode) { exASSERT(!m_isBound); m_charBindingMode = mode; }
+		CharBindingMode GetCharBindingMode() const { return m_charBindingMode; };
 
 		//// Type Information
 		//bool IsSmallInt() const { return m_columnInfo.m_sqlDataType == SQL_SMALLINT; };
@@ -122,9 +127,9 @@ namespace exodbc
 		bool m_allocatedBuffer;
 		bool m_isBound;
 		
-		Table::CharBindingMode m_charBindingMode;
+		CharBindingMode m_charBindingMode;
 
-		IntegerPtrVariant m_intPtrVar;	///< Variant that holds the actual buffer
+		BufferPtrVariant m_intPtrVar;	///< Variant that holds the actual buffer
 
 		SQLLEN		m_cb;	///< The length indicator set during Bind for this column
 
