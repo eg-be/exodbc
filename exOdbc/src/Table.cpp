@@ -629,6 +629,24 @@ namespace exodbc
 		return true;
 	}
 
+	
+	bool Table::GetColumnValue(SQLSMALLINT columnNumber, std::wstring& str) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			str = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
 	/***************************** PRIVATE FUNCTIONS *****************************/
 
 

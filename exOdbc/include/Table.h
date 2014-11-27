@@ -392,6 +392,8 @@ namespace exodbc
 		bool		GetColumnValue(SQLSMALLINT columnNumber, SQLINTEGER& i) const;
 		bool		GetColumnValue(SQLSMALLINT columnNumber, SQLBIGINT& bigInt) const;
 
+		bool		GetColumnValue(SQLSMALLINT columnNumber, std::wstring& str) const;
+
 
 		/*!
 		* \brief	Returns the number of columns this table has.

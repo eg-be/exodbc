@@ -171,9 +171,12 @@ namespace exodbc
 		EXPECT_TRUE(db2.Close());
 
 		// Try to open with a different password / user, expect to fail when opening the db.
-		Database failDb(m_env);
-		LOG_ERROR("Warning: This test is supposed to spit errors");
-		EXPECT_FALSE(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"));
+		{
+			LogLevelFatal llf;
+			Database failDb(m_env);
+			LOG_ERROR("Warning: This test is supposed to spit errors");
+			EXPECT_FALSE(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"));
+		}
 	}
 
 	// TODO: Test Close. Close should return a value if succeeded
