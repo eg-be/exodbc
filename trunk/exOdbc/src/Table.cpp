@@ -371,6 +371,19 @@ namespace exodbc
 	}
 
 
+	const ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnNumber) const
+	{
+		exASSERT(IsOpen());
+		exASSERT(columnNumber < m_columnBuffers.size());
+		if (!IsOpen() || columnNumber >= m_columnBuffers.size())
+		{
+			return NULL;
+		}
+
+		return m_columnBuffers[columnNumber];
+	}
+
+
 	void Table::cleanup()
 	{
 		std::wstring s;
@@ -558,10 +571,63 @@ namespace exodbc
 	bool Table::SelectClose()
 	{
 		exASSERT(IsSelectOpen());
-
-		return CloseStmtHandle(m_hStmtSelect, FailIfNotOpen);
+		m_selectQueryOpen = ! CloseStmtHandle(m_hStmtSelect, FailIfNotOpen);
+		return ! m_selectQueryOpen;
 	}
 
+
+	bool Table::GetColumnValue(SQLSMALLINT columnNumber, SQLSMALLINT& smallInt) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			smallInt = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
+
+	bool Table::GetColumnValue(SQLSMALLINT columnNumber, SQLINTEGER& i) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			i = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
+
+	bool Table::GetColumnValue(SQLSMALLINT columnNumber, SQLBIGINT& bigInt) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			bigInt = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
 
 	/***************************** PRIVATE FUNCTIONS *****************************/
 

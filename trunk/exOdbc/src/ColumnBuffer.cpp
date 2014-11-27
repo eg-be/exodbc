@@ -126,11 +126,48 @@ namespace exodbc
 		return 0;
 	}
 
-	bool ColumnBuffer::IsIntType() const
+
+	ColumnBuffer::operator SQLSMALLINT() const
 	{
-		return m_columnInfo.m_sqlDataType == SQL_SMALLINT
-			|| m_columnInfo.m_sqlDataType == SQL_INTEGER
-			|| m_columnInfo.m_sqlDataType == SQL_BIGINT;
+		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT))
+		{
+			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SSHORT);
+			// else we are safe to downcast the bigint to a smallInt
+		}
+		return (SQLSMALLINT)boost::apply_visitor(BigintVisitor(), m_intVar);
+	}
+
+
+	ColumnBuffer::operator SQLINTEGER() const
+	{
+		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT || m_columnInfo.m_sqlDataType == SQL_INTEGER))
+		{
+			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SLONG);
+			// else we are safe to downcast the bigint to an int
+		}
+		return (SQLINTEGER) boost::apply_visitor(BigintVisitor(), m_intVar);
+	}
+
+
+	ColumnBuffer::operator SQLBIGINT() const
+	{
+		if (! IsIntType())
+		{
+			// We cannot convert to an int if its not an int-type
+			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SBIGINT);
+		}
+
+		return boost::apply_visitor(BigintVisitor(), m_intVar);
+	}
+
+
+	ColumnBuffer::operator std::wstring() const
+	{
+		if (IsIntType())
+		{
+			return boost::apply_visitor(WStringVisitor(), m_intVar);
+		}
+		throw CastException(m_columnInfo.m_sqlDataType, SQL_C_WCHAR);
 	}
 
 
@@ -190,6 +227,16 @@ namespace exodbc
 		}
 		return true;
 	}
+
+
+	//SQLBIGINT BigintVisitor::operator()(SQLINTEGER i) const
+	//{
+	//	if (!(m_sqlDataType == SQL_SMALLINT || m_sqlDataType == SQL_INTEGER))
+	//	{
+	//		
+	//	}
+	//	return i;
+	//}
 
 	// Interfaces
 	// ----------

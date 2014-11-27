@@ -203,6 +203,8 @@ namespace exodbc
 		// Do something that opens a transaction
 		EXPECT_TRUE(m_pIntTypesAutoTable->Select(L""));
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		// We should be closed now
+		EXPECT_FALSE(m_pIntTypesAutoTable->IsSelectOpen());
 		// On MySql, closing works always
 		if (m_db.Dbms() != dbmsMY_SQL)
 		{
@@ -247,11 +249,102 @@ namespace exodbc
 		EXPECT_EQ(2, some);
 	}
 
-	// GetNext
-	// -------
+	// GetValues
+	// ---------
+	TEST_P(TableTest, GetIntValues)
+	{
+		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
+		ASSERT_TRUE(m_pIntTypesAutoTable->IsOpen());
 
-	// Read
-	// ----
+		// Test values
+		SQLSMALLINT s = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT b = 0;
+
+		// We expect 6 Records
+		std::wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select( (boost::wformat(L"%d = 1") %idName).str()));
+		// The first column has a smallint set, we can read that as any int value -32768
+		SQLBIGINT colVal = -32768;
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, s));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, i));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, b));
+		EXPECT_EQ(colVal, s);
+		EXPECT_EQ(colVal, i);
+		EXPECT_EQ(colVal, b);
+		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 2") % idName).str()));
+		// The first column has a smallint set, we can read that as any int value -32768
+		colVal = 32767;
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, s));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, i));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, b));
+		EXPECT_EQ(colVal, s);
+		EXPECT_EQ(colVal, i);
+		EXPECT_EQ(colVal, b);
+		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 3") % idName).str()));
+		// The 2nd column has a int set, we can read that as any int value -2147483648
+		colVal = INT_MIN;
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(2, s));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, i));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, b));
+		EXPECT_EQ(colVal, i);
+		EXPECT_EQ(colVal, b);
+		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 4") % idName).str()));
+		// The 2nd column has a int set, we can read that as any int value 2147483647
+		colVal = 2147483647;
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(2, s));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, i));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, b));
+		EXPECT_EQ(colVal, i);
+		EXPECT_EQ(colVal, b);
+		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 5") % idName).str()));
+		// The 3rd column has a bigint set, we can read that as any int value -9223372036854775808
+		colVal = (-9223372036854775807 - 1);
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(3, s));
+		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(3, i));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(3, b));
+		EXPECT_EQ(colVal, b);
+		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 6") % idName).str()));
+		// The 3rd column has a bigint set, we can read that as any int value 9223372036854775807
+		colVal = 9223372036854775807;
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(3, s));
+		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(3, i));
+		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(3, b));
+		EXPECT_EQ(colVal, b);
+		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
 
 
 // Interfaces

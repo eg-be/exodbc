@@ -174,6 +174,132 @@ namespace exodbc
 		}
 	}
 
+
+	std::wstring SqLCType2s(SQLSMALLINT sqlCType)
+	{
+		switch (sqlCType)
+		{
+		case SQL_C_STINYINT:
+			return L"SQL_C_STINYINT";
+		case SQL_C_UTINYINT:
+			return L"SQL_C_UTINYINT";
+		case SQL_C_SSHORT:
+			return L"SQL_C_SSHORT";
+		case SQL_C_USHORT:
+			return L"SQL_C_USHORT";
+		case SQL_C_SLONG:
+			return L"SQL_C_SLONG";
+		case SQL_C_ULONG:
+			// Note: This is also the type for SQL_C_BOOKMARK
+			return L"SQL_C_ULONG";
+		case SQL_C_SBIGINT:
+			return L"SQL_C_SBIGINT";
+		case SQL_C_UBIGINT:
+			return L"SQL_C_UBIGINT";
+		case SQL_C_CHAR:
+			return L"SQL_C_CHAR";
+		case SQL_C_WCHAR:
+			return L"SQL_C_WCHAR";
+		case SQL_C_FLOAT:
+			return L"SQL_C_FLOAT";
+		case SQL_C_DOUBLE:
+			return L"SQL_C_DOUBLE";
+		case SQL_C_BIT:
+			return L"SQL_C_BIT";
+		case SQL_C_BINARY:
+			// Note: This is also the type for SQL_C_VARBOOKMARK:
+			return L"SQL_C_BINARY";
+		//case SQL_C_BOOKMARK:
+		//	return L"SQL_C_BOOKMARK";
+		//case SQL_C_VARBOOKMARK:
+		//	return L"SQL_C_VARBOOKMARK";
+		case SQL_C_TYPE_DATE:
+			return L"SQL_C_TYPE_DATE";
+		case SQL_C_TYPE_TIME:
+			return L"SQL_C_TYPE_TIME";
+		case SQL_C_TYPE_TIMESTAMP:
+			return L"SQL_C_TYPE_TIMESTAMP";
+		case SQL_C_NUMERIC:
+			return L"SQL_C_NUMERIC";
+		case SQL_C_GUID:
+			return L"SQL_C_GUID";
+
+		// Old odbc 2.x values
+		case SQL_C_DATE:
+			return L"SQL_C_DATE";
+		case SQL_C_TIME:
+			return L"SQL_C_TIME";
+		case SQL_C_TIMESTAMP:
+			return L"SQL_C_TIMESTAMP";
+
+		default:
+			return L"???";
+		}
+	}
+
+
+	std::wstring SqlCType2OdbcS(SQLSMALLINT sqlCType)
+	{
+		switch (sqlCType)
+		{
+		case SQL_C_STINYINT:
+			return L"SQLSCHAR";
+		case SQL_C_UTINYINT:
+			return L"SQLCHAR";
+		case SQL_C_SSHORT:
+			return L"SQLSMALLINT";
+		case SQL_C_USHORT:
+			return L"SQLUSMALLINT";
+		case SQL_C_SLONG:
+			return L"SQLINTEGER";
+		case SQL_C_ULONG:
+			// Note: This is also the type for SQL_C_BOOKMARK
+			return L"SQLUINTEGER";
+		case SQL_C_SBIGINT:
+			return L"SQLBIGNT";
+		case SQL_C_UBIGINT:
+			return L"SQLUBIGINT";
+		case SQL_C_CHAR:
+			return L"SQLCHAR*";
+		case SQL_C_WCHAR:
+			return L"SQLWCHAR*";
+		case SQL_C_FLOAT:
+			return L"SQLREAL";
+		case SQL_C_DOUBLE:
+			return L"SQLDOUBLE";
+		case SQL_C_BIT:
+			return L"SQLCHAR";
+		case SQL_C_BINARY:
+			// Note: This is also the type for SQL_C_VARBOOKMARK:
+			return L"SQLCHAR*";
+			//case SQL_C_BOOKMARK:
+			//	return L"SQL_C_BOOKMARK";
+			//case SQL_C_VARBOOKMARK:
+			//	return L"SQL_C_VARBOOKMARK";
+		case SQL_C_TYPE_DATE:
+			return L"SQL_DATE_STRUCT";
+		case SQL_C_TYPE_TIME:
+			return L"SQL_TIME_STRUCT";
+		case SQL_C_TYPE_TIMESTAMP:
+			return L"SQL_TIMESTAMP_STRUCT";
+		case SQL_C_NUMERIC:
+			return L"SQL_NUMERIC_STRUCT";
+		case SQL_C_GUID:
+			return L"SQL_GUID";
+
+			// Old odbc 2.x values
+		case SQL_C_DATE:
+			return L"SQL_DATE_STRUCT";
+		case SQL_C_TIME:
+			return L"SQL_TIME_STRUCT";
+		case SQL_C_TIMESTAMP:
+			return L"SQL_TIMESTAMP_STRUCT";
+
+		default:
+			return L"???";
+		}
+	}
+
 	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = SQL_NULL_HENV */, SQLHANDLE hDbc /* = SQL_NULL_HDBC */, SQLHANDLE hStmt /* = SQL_NULL_HSTMT */)
 	{
 		exASSERT(hEnv != SQL_NULL_HENV || hDbc != SQL_NULL_HDBC || hStmt != SQL_NULL_HSTMT);
