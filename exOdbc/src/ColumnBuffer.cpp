@@ -305,6 +305,7 @@ namespace exodbc
 
 		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT))
 		{
+			// TODO: FIx IT
 			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SSHORT);
 		}
 		return (SQLSMALLINT)bigVal;
@@ -322,6 +323,7 @@ namespace exodbc
 		// But we are only allowed to downcast this to an Int if we are not loosing information
 		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT || m_columnInfo.m_sqlDataType == SQL_INTEGER))
 		{
+			// TODO: Fix IT
 			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SLONG);
 		}
 		return (SQLINTEGER)bigVal;

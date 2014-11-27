@@ -55,8 +55,8 @@ namespace exodbc
 	* Last there is an option to try to let the odbc-driver to convert everything
 	* to a (w)string.
 	*
-	* If the buffer-information is read from the passed SColumnInfo, the driver will
-	* create a buffer type depending on the value of the SqlDataType. The following is
+	* If the buffer-information is read from the passed SColumnInfo, the ColumnBuffer will
+	* allocate a buffer type depending on the value of the SqlDataType. The following is
 	* a list of all supported SQL-Types and the buffer-type created.
 	*
 	* SQL-Type					| Buffer-Type
@@ -298,11 +298,11 @@ namespace exodbc
 		public std::exception
 	{
 	public:
-		CastException(SQLSMALLINT sqlSourceType, SQLSMALLINT sqlCType)
-			: m_sqlSourceType(sqlSourceType)
-			, m_sqlCType(sqlCType)
+		CastException(SQLSMALLINT cSourceType, SQLSMALLINT cDestType)
+			: m_cSourceType(cSourceType)
+			, m_cDestType(cDestType)
 		{
-			m_what = (boost::format("Cannot cast from SQL Type %s (%d) to ODBC C Type %s (%d)") % w2s(SqlType2s(m_sqlSourceType)) % m_sqlSourceType % w2s(SqlCType2OdbcS(sqlCType)) % m_sqlCType).str();
+			m_what = (boost::format("Cannot cast from ODBC C Type %s (%d) to ODBC C Type %s (%d)") % w2s(SqlCType2OdbcS(m_cSourceType)) % m_cSourceType % w2s(SqlCType2OdbcS(m_cDestType)) % m_cDestType).str();
 		}
 
 		virtual const char* what() const throw() { return m_what.c_str(); };
@@ -310,13 +310,13 @@ namespace exodbc
 	private:
 		std::string m_what;
 	public:
-		const SQLSMALLINT m_sqlSourceType;	///< Sql Type used as source value for the cast.
-		const SQLSMALLINT m_sqlCType;		///< ODBC C Type used as destination value for the cast.
+		const SQLSMALLINT m_cSourceType;	///< Sql Type used as source value for the cast.
+		const SQLSMALLINT m_cDestType;		///< ODBC C Type used as destination value for the cast.
 	};	// class CastException
 	
 
 	/*!
-	* \class BigIntVisitor
+	* \class BigintVisitor
 	*
 	* \brief Visitor to cast current value to a SQLBIGINT.
 	*
