@@ -198,19 +198,17 @@ namespace exodbc
 
 
 		/*!
-		* \enum		CharTrimOptions
-		* \brief	Define whether you want to 
-		* \detailed Usually when a table binds a column it will query the database about the SQL-Type and create the
-		*			corresponding buffer-type. Using this option you can specify that columns reported as SQL_CHAR
-		*			will be bound to a SQLWCHAR* buffer, or the other way round.
-		*			This comes in handy as drivers are usually quite good about converting wide-stuff to non-wide stuff,
-		*			but doing that in the code is just a pain.
+		* \enum		CharTrimOption
+		* \brief	Define whether you want to trim string and wstring values returned from the Table functions GetColumnValue()
+		* \detailed	Note that setting this flag will not modify the actual data-buffer, but only the string-values
+		*			returned by the GetColumnValue() functions.
+		*			Default is TRIM_NO
 		*/
-		enum CharTrimOptions
+		enum CharTrimOption
 		{
-			TRIM_NO		= 0x0L,
-			TRIM_LEFT	= 0x1L,
-			TRIM_RIGHT	= 0x2L
+			TRIM_NO		= 0x0L,	///< No Trimming of wstring or string (default)
+			TRIM_LEFT	= 0x1L,	///< Trim left
+			TRIM_RIGHT	= 0x2L	///< Trim right
 		};
 
 
@@ -365,6 +363,18 @@ namespace exodbc
 		* \see		SetCharBindingMode()
 		*/
 		CharBindingMode	GetCharBindingMode() { return m_charBindingMode; };
+
+
+		/*!
+		* \brief	Set a CharTrimOption. Setting to TRIM_NO will clear all other flags.
+		*/
+		void		SetCharTrimOption(CharTrimOption option) { option == TRIM_NO ? m_charTrimFlags = TRIM_NO : m_charTrimFlags |= option; };
+
+
+		/*!
+		* \brief	Test if a CharTrimOption is set.
+		*/
+		bool		TestCharTrimOption(CharTrimOption option) const { return (m_charTrimFlags & option) != 0;  };
 
 
 		/*!
@@ -632,6 +642,7 @@ namespace exodbc
 		const OpenMode		m_openMode;				///< Read-only or writable
 		CharBindingMode		m_charBindingMode;		///< Store the char-binding of this table. Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
+		unsigned int		m_charTrimFlags;			///< Bitmask for the CharTrimOption Flags
 
 		// Column information
 		std::vector<ColumnBuffer*> m_columnBuffers;	///< Created during Open when Columns are read

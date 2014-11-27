@@ -204,21 +204,21 @@ namespace exodbc
 		case SQL_VARCHAR:
 			if (m_charBindingMode == Table::BIND_AS_CHAR || Table::BIND_AS_REPORTED)
 			{
-				return m_columnInfo.m_columnSize * sizeof(SQLCHAR) + 10;
+				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR);
 			}
 			else
 			{
-				return m_columnInfo.m_columnSize * sizeof(SQLWCHAR) + 10;
+				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLWCHAR);
 			}
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
 			if (m_charBindingMode == Table::BIND_AS_WCHAR || Table::BIND_AS_REPORTED)
 			{
-				return m_columnInfo.m_columnSize * sizeof(SQLWCHAR) + 10;
+				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLWCHAR);
 			}
 			else
 			{
-				return m_columnInfo.m_columnSize * sizeof(SQLCHAR) + 10;
+				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR);
 			}
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());

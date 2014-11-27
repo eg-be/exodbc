@@ -362,6 +362,8 @@ namespace exodbc
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		charTypesAutoTable.SetCharBindingMode(Table::BIND_AS_WCHAR);
 		EXPECT_TRUE(charTypesAutoTable.Open(false, true));
+		// We want to trim on the right side for DB2 and sql server
+		charTypesAutoTable.SetCharTrimOption(Table::TRIM_RIGHT);
 
 		std::wstring str;
 
@@ -406,51 +408,55 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DISABLED_GetCharValues)
+	TEST_P(TableTest, GetCharValues)
 	{
-		//ASSERT_TRUE(m_pCharTypesAutoTable != NULL);
-		//ASSERT_TRUE(m_pCharTypesAutoTable->IsOpen());
+		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
+		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		charTypesAutoTable.SetCharBindingMode(Table::BIND_AS_CHAR);
+		EXPECT_TRUE(charTypesAutoTable.Open(false, true));
+		// We want to trim on the right side for DB2 and also sql server
+		charTypesAutoTable.SetCharTrimOption(Table::TRIM_RIGHT);
 
-		//std::string str;
+		std::string str;
 
-		//// We expect 6 Records
-		//std::wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
-		//EXPECT_TRUE(m_pCharTypesAutoTable->Select((boost::wformat(L"%d = 1") % idName).str()));
-		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectNext());
-		//EXPECT_TRUE(m_pCharTypesAutoTable->GetColumnValue(1, str));
-		//EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", str);
-		//EXPECT_FALSE(m_pCharTypesAutoTable->SelectNext());
-		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectClose());
+		// We expect 6 Records
+		std::wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 1") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(1, str));
+		EXPECT_EQ(std::string(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), str);
+		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.SelectClose());
 
-		//EXPECT_TRUE(m_pCharTypesAutoTable->Select((boost::wformat(L"%d = 2") % idName).str()));
-		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectNext());
-		//EXPECT_TRUE(m_pCharTypesAutoTable->GetColumnValue(2, str));
-		//EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", str);
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 2") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(2, str));
+		EXPECT_EQ(std::string(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), str);
 
-		//EXPECT_FALSE(m_pCharTypesAutoTable->SelectNext());
-		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectClose());
+		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.SelectClose());
 
-		//EXPECT_TRUE(m_pCharTypesAutoTable->Select((boost::wformat(L"%d = 3") % idName).str()));
-		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectNext());
-		//EXPECT_TRUE(m_pCharTypesAutoTable->GetColumnValue(1, str));
-		//EXPECT_EQ("הצüאיט", str);
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 3") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(1, str));
+		EXPECT_EQ(std::string("הצüאיט"), str);
 
-		//EXPECT_FALSE(m_pCharTypesAutoTable->SelectNext());
-		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectClose());
+		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.SelectClose());
 
-		//EXPECT_TRUE(m_pCharTypesAutoTable->Select((boost::wformat(L"%d = 4") % idName).str()));
-		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectNext());
-		//EXPECT_TRUE(m_pCharTypesAutoTable->GetColumnValue(2, str));
-		//EXPECT_EQ("הצüאיט", str);
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 4") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(2, str));
+		EXPECT_EQ(std::string("הצüאיט"), str);
 
-		//EXPECT_FALSE(m_pCharTypesAutoTable->SelectNext());
-		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectClose());
+		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.SelectClose());
 
-		//// If Auto commit is off, we need to commit on certain db-systems, see #51
-		//if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		//{
-		//	EXPECT_TRUE(m_db.CommitTrans());
-		//}
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
 	}
 
 

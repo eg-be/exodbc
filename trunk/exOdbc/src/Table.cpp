@@ -171,6 +171,7 @@ namespace exodbc
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
 		m_charBindingMode = BIND_AS_REPORTED;
+		m_charTrimFlags = TRIM_NO;
 
 		// Old handles
 		m_hdbc = SQL_NULL_HDBC;
@@ -652,6 +653,16 @@ namespace exodbc
 		{
 			return false;
 		}
+
+		if (TestCharTrimOption(TRIM_LEFT))
+		{
+			boost::trim_left(str);
+		}
+		if (TestCharTrimOption(TRIM_RIGHT))
+		{
+			boost::trim_right(str);
+		}
+
 		return true;
 	}
 
@@ -670,6 +681,16 @@ namespace exodbc
 		{
 			return false;
 		}
+
+		if (TestCharTrimOption(TRIM_LEFT))
+		{
+			boost::trim_left(str);
+		}
+		if (TestCharTrimOption(TRIM_RIGHT))
+		{
+			boost::trim_right(str);
+		}
+
 		return true;
 	}
 
