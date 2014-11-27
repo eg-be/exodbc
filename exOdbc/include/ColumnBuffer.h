@@ -51,20 +51,32 @@ namespace exodbc
 	* by reading the sql-type info from the passed SColumnInfo, or by using a
 	* buffer provided during construction. In that case you must also pass the
 	* ODBC C-Type of the buffer.
-	* There are options about wide-chars: You can either enforce that a column
+	* Last there is an option to try to let the odbc-driver to convert everything
+	* to a (w)string.
+	*
+	* If the buffer-information is read from the passed SColumnInfo, the driver will
+	* create a buffer type depending on the value of the SqlDataType. The following is
+	* a list of all supported SQL-Types and the buffer-type created.
+	*
+	* SQL-Type					| Buffer-Type
+	* --------------------------|------------
+	* SQL_SMALLINT				| SQLSMALLINT*
+	* SQL_INTEGER				| SQLINTEGER*
+	* SQL_BIGINT				| SQLBIGINT*
+	* SQL_CHAR / SQL_VARCHAR	| SQLCHAR* [1]
+	* SQL_WCHAR / SQL_WVARCHAR	| SQLWCHAR* [1]
+	* 
+	* [1] There are options about wide-chars: You can either enforce that a column
 	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
 	* a SQLWCHAR* buffer and the other way round, using the CharBindingMode
 	* value.
-	* Last there is an option to try to let the odbc-driver to convert everything
-	* to a (w)string.
-	* 
 	*/
 	class EXODBCAPI ColumnBuffer
 	{
 	public:
 		/*!
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
-		*			using the information from columnInfo.
+		*			using the datatype-information from the passed SColumnInfo.
 		* \detailed	Might fail if SQL-type is not supported. 
 		*		TODO: Some way to check that
 		*
