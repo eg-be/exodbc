@@ -48,7 +48,7 @@ namespace exodbc
 		m_pIntTypesAutoTable = NULL;
 
 		m_odbcInfo = GetParam();
-		
+
 		// Set up Env
 		ASSERT_TRUE(m_env.AllocHenv());
 		ASSERT_TRUE(m_env.SetOdbcVersion(OV_3));
@@ -58,10 +58,11 @@ namespace exodbc
 		ASSERT_TRUE(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		// And an Auto-table
-		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
-		m_pIntTypesAutoTable = new Table(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		m_pIntTypesAutoTable = new Table(&m_db, intTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(m_pIntTypesAutoTable->Open(false, true));
 	}
+
 
 	void TableTest::TearDown()
 	{
@@ -353,6 +354,103 @@ namespace exodbc
 		{
 			EXPECT_TRUE(m_db.CommitTrans());
 		}
+	}
+
+	TEST_P(TableTest, GetWCharValues)
+	{
+		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
+		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		charTypesAutoTable.SetCharBindingMode(Table::BIND_AS_WCHAR);
+		EXPECT_TRUE(charTypesAutoTable.Open(false, true));
+
+		std::wstring str;
+
+		// We expect 6 Records
+		std::wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 1") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(1, str));
+		EXPECT_EQ(std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), str);
+		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.SelectClose());
+
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 2") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(2, str));
+		EXPECT_EQ(std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), str);
+
+		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.SelectClose());
+
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 3") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(1, str));
+		EXPECT_EQ(std::wstring(L"הצüאיט"), str);
+
+		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.SelectClose());
+
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 4") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(2, str));
+		EXPECT_EQ(std::wstring(L"הצüאיט"), str);
+
+		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.SelectClose());
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
+
+
+	TEST_P(TableTest, DISABLED_GetCharValues)
+	{
+		//ASSERT_TRUE(m_pCharTypesAutoTable != NULL);
+		//ASSERT_TRUE(m_pCharTypesAutoTable->IsOpen());
+
+		//std::string str;
+
+		//// We expect 6 Records
+		//std::wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
+		//EXPECT_TRUE(m_pCharTypesAutoTable->Select((boost::wformat(L"%d = 1") % idName).str()));
+		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectNext());
+		//EXPECT_TRUE(m_pCharTypesAutoTable->GetColumnValue(1, str));
+		//EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", str);
+		//EXPECT_FALSE(m_pCharTypesAutoTable->SelectNext());
+		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectClose());
+
+		//EXPECT_TRUE(m_pCharTypesAutoTable->Select((boost::wformat(L"%d = 2") % idName).str()));
+		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectNext());
+		//EXPECT_TRUE(m_pCharTypesAutoTable->GetColumnValue(2, str));
+		//EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", str);
+
+		//EXPECT_FALSE(m_pCharTypesAutoTable->SelectNext());
+		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectClose());
+
+		//EXPECT_TRUE(m_pCharTypesAutoTable->Select((boost::wformat(L"%d = 3") % idName).str()));
+		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectNext());
+		//EXPECT_TRUE(m_pCharTypesAutoTable->GetColumnValue(1, str));
+		//EXPECT_EQ("הצüאיט", str);
+
+		//EXPECT_FALSE(m_pCharTypesAutoTable->SelectNext());
+		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectClose());
+
+		//EXPECT_TRUE(m_pCharTypesAutoTable->Select((boost::wformat(L"%d = 4") % idName).str()));
+		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectNext());
+		//EXPECT_TRUE(m_pCharTypesAutoTable->GetColumnValue(2, str));
+		//EXPECT_EQ("הצüאיט", str);
+
+		//EXPECT_FALSE(m_pCharTypesAutoTable->SelectNext());
+		//EXPECT_TRUE(m_pCharTypesAutoTable->SelectClose());
+
+		//// If Auto commit is off, we need to commit on certain db-systems, see #51
+		//if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		//{
+		//	EXPECT_TRUE(m_db.CommitTrans());
+		//}
 	}
 
 

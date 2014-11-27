@@ -23,9 +23,11 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo)
+	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, Table::CharBindingMode mode)
 		: m_columnInfo(columnInfo)
+		, m_isBound(false)
 		, m_allocatedBuffer(false)
+		, m_charBindingMode(mode)
 	{
 		m_allocatedBuffer = AllocateBuffer(m_columnInfo);
 	}
@@ -48,37 +50,60 @@ namespace exodbc
 	// -----------
 	ColumnBuffer::~ColumnBuffer()
 	{
-		try
+		if (m_allocatedBuffer)
 		{
-			switch (m_columnInfo.m_sqlDataType)
+			try
 			{
-			case SQL_SMALLINT:
-				delete GetSmallIntPtr();
-				break;
-			case SQL_INTEGER:
-				delete GetIntPtr();
-				break;
-			case SQL_BIGINT:
-				delete GetBigIntPtr();
-				break;
+				switch (m_columnInfo.m_sqlDataType)
+				{
+				case SQL_SMALLINT:
+					delete GetSmallIntPtr();
+					break;
+				case SQL_INTEGER:
+					delete GetIntPtr();
+					break;
+				case SQL_BIGINT:
+					delete GetBigIntPtr();
+					break;
+				case SQL_CHAR:
+				case SQL_VARCHAR:
+					if (m_charBindingMode == Table::BIND_AS_CHAR || Table::BIND_AS_REPORTED)
+					{
+						delete[] GetCharPtr();
+					}
+					else
+					{
+						delete[] GetWCharPtr();
+					}
+					break;
+				case SQL_WCHAR:
+				case SQL_WVARCHAR:
+					if (m_charBindingMode == Table::BIND_AS_WCHAR || Table::BIND_AS_REPORTED)
+					{
+						delete[] GetWCharPtr();
+					}
+					else
+					{
+						delete[] GetCharPtr();
+					}
+					break;
+				}
+			}
+			catch (boost::bad_get ex)
+			{
+				LOG_ERROR(ex.what());
 			}
 		}
-		catch (boost::bad_get ex)
-		{
-			LOG_ERROR(ex.what());
-		}
+
 	}
 
 	// Implementation
 	// --------------
 	bool ColumnBuffer::AllocateBuffer(const SColumnInfo& columnInfo)
 	{
-		wstring s = SqlType2s(columnInfo.m_sqlDataType);
-		//		boost::variant<boost::variant<SQLUSMALLINT, SQLSMALLINT>, boost::variant<>> numeric;
+		exASSERT(!m_allocatedBuffer);
+		exASSERT(!m_isBound);
 
-		//bool allocated = false;
-		//SQLSMALLINT* pInt = 0;
-		//SQLSMALLINT a = 0;
 		bool failed = false;
 		switch (columnInfo.m_sqlDataType)
 		{
@@ -91,28 +116,44 @@ namespace exodbc
 		case SQL_BIGINT:
 			m_intPtrVar = new SQLBIGINT(0);
 			break;
+		case SQL_CHAR:
+		case SQL_VARCHAR:
+			if (m_charBindingMode == Table::BIND_AS_CHAR || Table::BIND_AS_REPORTED)
+			{
+				m_intPtrVar = new SQLCHAR[GetBufferSize() + 1];
+			}
+			else
+			{
+				m_intPtrVar = new SQLWCHAR[GetBufferSize() + 1];
+			}
+			break;
+		case SQL_WCHAR:
+		case SQL_WVARCHAR:
+			if (m_charBindingMode == Table::BIND_AS_WCHAR || Table::BIND_AS_REPORTED)
+			{
+				m_intPtrVar = new SQLWCHAR[GetBufferSize() + 1];
+			}
+			else
+			{
+				m_intPtrVar = new SQLCHAR[GetBufferSize() + 1];
+			}
+			break;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
 			failed = true;
-//			allocated = false;
 		}
-		//if (m_columnInfo.m_sqlDataType == SQL_SMALLINT)
-		//{
-		//	SQLSMALLINT* bc = &(boost::get<SQLSMALLINT>(m_intVar));
-		//	*bc = 35;
-		//	int p = 3;
-		//}
-		//if (m_columnInfo.m_sqlDataType == SQL_SMALLINT)
-		//{
-		//	SQLSMALLINT zz = boost::get<SQLSMALLINT>(m_intVar);
-		//	int o = 3;
-		//}
-		return !failed;
-//		return allocated;
+
+		if (!failed)
+		{
+			m_allocatedBuffer = true;
+		}
+		return m_allocatedBuffer;
 	}
 
 	void* ColumnBuffer::GetBuffer()
 	{
+		exASSERT(m_allocatedBuffer);
+
 		void* pBuffer = NULL;
 		switch (m_columnInfo.m_sqlDataType)
 		{
@@ -122,11 +163,32 @@ namespace exodbc
 			return static_cast<void*>(boost::get<SQLINTEGER*>(m_intPtrVar));
 		case SQL_BIGINT:
 			return static_cast<void*>(boost::get<SQLBIGINT*>(m_intPtrVar));
+		case SQL_CHAR:
+		case SQL_VARCHAR:
+			if (m_charBindingMode == Table::BIND_AS_CHAR || Table::BIND_AS_REPORTED)
+			{
+				return static_cast<void*>(boost::get<SQLCHAR*>(m_intPtrVar));
+			}
+			else
+			{
+				return static_cast<void*>(boost::get<SQLWCHAR*>(m_intPtrVar));
+			}
+		case SQL_WCHAR:
+		case SQL_WVARCHAR:
+			if (m_charBindingMode == Table::BIND_AS_WCHAR || Table::BIND_AS_REPORTED)
+			{
+				return static_cast<void*>(boost::get<SQLWCHAR*>(m_intPtrVar));
+			}
+			else
+			{
+				return static_cast<void*>(boost::get<SQLCHAR*>(m_intPtrVar));
+			}
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
 		return pBuffer;
 	}
+
 
 	size_t ColumnBuffer::GetBufferSize() const
 	{
@@ -138,6 +200,26 @@ namespace exodbc
 			return sizeof(SQLINTEGER);
 		case SQL_BIGINT:
 			return sizeof(SQLBIGINT);
+		case SQL_CHAR:
+		case SQL_VARCHAR:
+			if (m_charBindingMode == Table::BIND_AS_CHAR || Table::BIND_AS_REPORTED)
+			{
+				return m_columnInfo.m_columnSize * sizeof(SQLCHAR) + 10;
+			}
+			else
+			{
+				return m_columnInfo.m_columnSize * sizeof(SQLWCHAR) + 10;
+			}
+		case SQL_WCHAR:
+		case SQL_WVARCHAR:
+			if (m_charBindingMode == Table::BIND_AS_WCHAR || Table::BIND_AS_REPORTED)
+			{
+				return m_columnInfo.m_columnSize * sizeof(SQLWCHAR) + 10;
+			}
+			else
+			{
+				return m_columnInfo.m_columnSize * sizeof(SQLCHAR) + 10;
+			}
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -147,67 +229,111 @@ namespace exodbc
 
 	ColumnBuffer::operator SQLSMALLINT() const
 	{
+		exASSERT(m_allocatedBuffer);
+		exASSERT(m_isBound);
+
+		// We use the BigIntVisitor here. It will always succeed to convert if 
+		// the underlying Value is an int-value or throw otherwise
+		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
+		// But we are only allowed to Downcast this to a Smallint if the original value was a smallint
 		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT))
 		{
 			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SSHORT);
-			// else we are safe to downcast the bigint to a smallInt
 		}
-		return (SQLSMALLINT)boost::apply_visitor(BigintVisitor(), m_intPtrVar);
+		return (SQLSMALLINT)bigVal;
 	}
 
 
 	ColumnBuffer::operator SQLINTEGER() const
 	{
+		exASSERT(m_allocatedBuffer);
+		exASSERT(m_isBound);
+
+		// We use the BigIntVisitor here. It will always succeed to convert if 
+		// the underlying Value is an int-value or throw otherwise
+		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
+		// But we are only allowed to downcast this to an Int if we are not loosing information
 		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT || m_columnInfo.m_sqlDataType == SQL_INTEGER))
 		{
 			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SLONG);
-			// else we are safe to downcast the bigint to an int
 		}
-		return (SQLINTEGER) boost::apply_visitor(BigintVisitor(), m_intPtrVar);
+		return (SQLINTEGER)bigVal;
 	}
 
 
 	ColumnBuffer::operator SQLBIGINT() const
 	{
-		if (! IsIntType())
-		{
-			// We cannot convert to an int if its not an int-type
-			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SBIGINT);
-		}
-		return boost::apply_visitor(BigintVisitor(), m_intPtrVar);
+		exASSERT(m_allocatedBuffer);
+		exASSERT(m_isBound);
+
+		return boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
 	}
 
 
 	ColumnBuffer::operator std::wstring() const
 	{
-		if (IsIntType())
-		{
-			return boost::apply_visitor(WStringVisitor(), m_intPtrVar);
-		}
-		throw CastException(m_columnInfo.m_sqlDataType, SQL_C_WCHAR);
+		exASSERT(m_allocatedBuffer);
+		exASSERT(m_isBound);
+
+		return boost::apply_visitor(WStringVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
+	}
+
+
+	ColumnBuffer::operator std::string() const
+	{
+		exASSERT(m_allocatedBuffer);
+		exASSERT(m_isBound);
+
+		return boost::apply_visitor(StringVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
 	}
 
 
 	SQLSMALLINT* ColumnBuffer::GetSmallIntPtr() const
 	{
+		exASSERT(m_allocatedBuffer);
+
 		// Could throw boost::bad_get
 		return boost::get<SQLSMALLINT*>(m_intPtrVar);
 	}
 
 	SQLINTEGER* ColumnBuffer::GetIntPtr() const
 	{
+		exASSERT(m_allocatedBuffer);
+
 		// Could throw boost::bad_get
 		return boost::get<SQLINTEGER*>(m_intPtrVar);
 	}
 
 	SQLBIGINT* ColumnBuffer::GetBigIntPtr() const
 	{
+		exASSERT(m_allocatedBuffer);
+
 		// Could throw boost::bad_get
 		return boost::get<SQLBIGINT*>(m_intPtrVar);
 	}
 
+	SQLCHAR* ColumnBuffer::GetCharPtr() const
+	{
+		exASSERT(m_allocatedBuffer);
+
+		// Could throw boost::bad_get
+		return boost::get<SQLCHAR*>(m_intPtrVar);
+	}
+
+	SQLWCHAR* ColumnBuffer::GetWCharPtr() const
+	{
+		exASSERT(m_allocatedBuffer);
+
+		// Could throw boost::bad_get
+		return boost::get<SQLWCHAR*>(m_intPtrVar);
+	}
+
+
 	bool ColumnBuffer::BindColumnBuffer(HSTMT hStmt)
 	{
+		exASSERT(m_allocatedBuffer);
+		exASSERT(!m_isBound);
+
 		void* pBuffer = GetBuffer();
 		size_t buffSize = GetBufferSize();
 		SQLRETURN ret = 0;
@@ -224,6 +350,28 @@ namespace exodbc
 		case SQL_BIGINT:
 			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SBIGINT, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
 			break;
+		case SQL_CHAR:
+		case SQL_VARCHAR:
+			if (m_charBindingMode == Table::BIND_AS_CHAR || Table::BIND_AS_REPORTED)
+			{
+				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			}
+			else
+			{
+				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_WCHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			}
+			break;
+		case SQL_WCHAR:
+		case SQL_WVARCHAR:
+			if (m_charBindingMode == Table::BIND_AS_CHAR || Table::BIND_AS_REPORTED)
+			{
+				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			}
+			else
+			{
+				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_WCHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
+			}
+			break;
 		default:
 			notBound = true;
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
@@ -231,9 +379,11 @@ namespace exodbc
 		if (!notBound && ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
-			return false;
+			notBound = true;
 		}
-		return true;
+
+		m_isBound = !notBound;
+		return m_isBound;
 	}
 
 

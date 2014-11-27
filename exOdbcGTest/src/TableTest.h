@@ -47,6 +47,7 @@ namespace exodbc
 		exodbc::Database*	m_pDb;
 		exodbc::Environment* m_pEnv;
 		exodbc::Table* m_pIntTypesAutoTable;
+
 		SOdbcInfo m_odbcInfo;
 		virtual void SetUp();
 		virtual void TearDown();

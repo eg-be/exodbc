@@ -13,6 +13,7 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Helpers.h"
+#include "Table.h"
 
 // Other headers
 #include "boost/variant.hpp"
@@ -32,7 +33,7 @@ namespace exodbc
 {
 //	typedef boost::variant<SQLUSMALLINT*, SQLSMALLINT*, SQLUINTEGER*, SQLINTEGER*, SQLUBIGINT*, SQLBIGINT*> IntegerVariant;
 	// We could also use just one variant for all types that are simple (not binary)?
-	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*> IntegerPtrVariant;
+	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, SQLCHAR*, SQLWCHAR*> IntegerPtrVariant;
 //	typedef boost::variant<SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT> TimestampVariant;
 	
 //	typedef boost::variant<IntegerVariant, TimestampVariant> BufferVariant;
@@ -64,7 +65,7 @@ namespace exodbc
 		*
 		* \see		???()
 		*/
-		ColumnBuffer(const SColumnInfo& columnInfo);
+		ColumnBuffer(const SColumnInfo& columnInfo, Table::CharBindingMode mode);
 
 		//		ColumnBuffer(const SColumnInfo& columnInfo, boost::any* pBuffer);
 //		ColumnBuffer(const STableColumnInfo& columnInfo, void* pBuffer);
@@ -85,17 +86,21 @@ namespace exodbc
 
 		SColumnInfo GetColumnInfo() const { return m_columnInfo; };
 
-		// Type Information
-		bool IsSmallInt() const { return m_columnInfo.m_sqlDataType == SQL_SMALLINT; };
-		bool IsInt() const { return m_columnInfo.m_sqlDataType == SQL_INTEGER; };
-		bool IsBigInt() const { return m_columnInfo.m_sqlDataType == SQL_BIGINT; };
-		bool IsIntType() const { return (IsSmallInt() || IsInt() || IsBigInt()); };
+		void SetCharBindingMode(Table::CharBindingMode mode) { exASSERT(!m_isBound); m_charBindingMode = mode; }
+		Table::CharBindingMode GetCharBindingMode() const { return m_charBindingMode; };
+
+		//// Type Information
+		//bool IsSmallInt() const { return m_columnInfo.m_sqlDataType == SQL_SMALLINT; };
+		//bool IsInt() const { return m_columnInfo.m_sqlDataType == SQL_INTEGER; };
+		//bool IsBigInt() const { return m_columnInfo.m_sqlDataType == SQL_BIGINT; };
+		//bool IsIntType() const { return (IsSmallInt() || IsInt() || IsBigInt()); };
 
 		// Operators
 		operator SQLSMALLINT() const;
 		operator SQLINTEGER() const;
 		operator SQLBIGINT() const;
 		operator std::wstring() const;
+		operator std::string() const;
 
 	public:
 		~ColumnBuffer();
@@ -107,42 +112,23 @@ namespace exodbc
 		bool AllocateBuffer(const SColumnInfo& columnInfo);
 
 		// Access to ptrs inside variant
-		SQLSMALLINT* GetSmallIntPtr() const;
-		SQLINTEGER* GetIntPtr() const;
-		SQLBIGINT* GetBigIntPtr() const;
+		SQLSMALLINT*	GetSmallIntPtr() const;
+		SQLINTEGER*		GetIntPtr() const;
+		SQLBIGINT*		GetBigIntPtr() const;
+		SQLCHAR*		GetCharPtr() const;
+		SQLWCHAR*		GetWCharPtr() const;
 
 		SColumnInfo m_columnInfo;
 		bool m_allocatedBuffer;
+		bool m_isBound;
 		
-		//BufferVariant m_buffer;	///< Maybe we want one variant for all types?
-		IntegerPtrVariant m_intPtrVar;	///< Or a logical variant?
-		char*		m_pBinaryBuffer; ///< Allocated if this column has binary data
-		SQLWCHAR*	m_pWCharBuffer;	///< Allocated if this column has char-data
+		Table::CharBindingMode m_charBindingMode;
+
+		IntegerPtrVariant m_intPtrVar;	///< Variant that holds the actual buffer
 
 		SQLLEN		m_cb;	///< The length indicator set during Bind for this column
 
 	};  // class ColumnBuffer
-
-
-	class BigintVisitor
-		: public boost::static_visitor < SQLBIGINT >
-	{
-	public:
-
-		SQLBIGINT operator()(SQLSMALLINT* smallInt) const { return *smallInt;  };
-		SQLBIGINT operator()(SQLINTEGER* i) const { return *i; };
-		SQLBIGINT operator()(SQLBIGINT* bigInt) const { return *bigInt; };
-	};
-
-	class WStringVisitor
-		: public boost::static_visitor < std::wstring >
-	{
-	public:
-
-		std::wstring operator()(SQLSMALLINT* smallInt) const { return (boost::wformat(L"%d") % *smallInt).str(); };
-		std::wstring operator()(SQLINTEGER* i) const { return (boost::wformat(L"%d") % *i).str(); };
-		std::wstring operator()(SQLBIGINT* bigInt) const { return (boost::wformat(L"%d") % *bigInt).str(); };
-	};
 
 
 	class CastException :
@@ -156,7 +142,7 @@ namespace exodbc
 		{
 			m_what = (boost::format("Cannot cast from SQL Type %s (%d) to ODBC C Type %s (%d)") % w2s(SqlType2s(m_sqlSourceType)) % m_sqlSourceType % w2s(SqlCType2OdbcS(sqlCType)) % m_sqlCType).str();
 		}
-		
+
 		virtual const char* what() const throw() { return m_what.c_str(); };
 
 	private:
@@ -164,6 +150,60 @@ namespace exodbc
 	public:
 		const SQLSMALLINT m_sqlSourceType;
 		const SQLSMALLINT m_sqlCType;
+	};
+
+
+	class BigintVisitor
+		: public boost::static_visitor < SQLBIGINT >
+	{
+	public:
+		BigintVisitor(SQLSMALLINT sqlDataType)
+			: m_sqlDataType(sqlDataType) {};
+
+		SQLBIGINT operator()(SQLSMALLINT* smallInt) const { return *smallInt;  };
+		SQLBIGINT operator()(SQLINTEGER* i) const { return *i; };
+		SQLBIGINT operator()(SQLBIGINT* bigInt) const { return *bigInt; };
+		SQLBIGINT operator()(SQLCHAR* pChar) const { throw CastException(m_sqlDataType, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQLWCHAR* pWChar) const { throw CastException(m_sqlDataType, SQL_C_SBIGINT); };
+	
+	private:
+		SQLSMALLINT m_sqlDataType;
+	};
+
+
+	class WStringVisitor
+		: public boost::static_visitor < std::wstring >
+	{
+	public:
+		WStringVisitor(SQLSMALLINT sqlDataType)
+			: m_sqlDataType(sqlDataType) {};
+
+		std::wstring operator()(SQLSMALLINT* smallInt) const { return (boost::wformat(L"%d") % *smallInt).str(); };
+		std::wstring operator()(SQLINTEGER* i) const { return (boost::wformat(L"%d") % *i).str(); };
+		std::wstring operator()(SQLBIGINT* bigInt) const { return (boost::wformat(L"%d") % *bigInt).str(); };
+		std::wstring operator()(SQLCHAR* pChar) const{ throw CastException(m_sqlDataType, SQL_C_WCHAR); };
+		std::wstring operator()(SQLWCHAR* pWChar) const { return pWChar; };
+
+	private:
+		SQLSMALLINT m_sqlDataType;
+	};
+
+
+	class StringVisitor
+		: public boost::static_visitor < std::string >
+	{
+	public:
+		StringVisitor(SQLSMALLINT sqlDataType)
+			: m_sqlDataType(sqlDataType) {};
+
+		std::string operator()(SQLSMALLINT* smallInt) const { return (boost::format("%d") % *smallInt).str(); };
+		std::string operator()(SQLINTEGER* i) const { return (boost::format("%d") % *i).str(); };
+		std::string operator()(SQLBIGINT* bigInt) const { return (boost::format("%d") % *bigInt).str(); };
+		std::string operator()(SQLCHAR* pChar) const { return (char*)pChar; };
+		std::string operator()(SQLWCHAR* pWChar) const { throw CastException(m_sqlDataType, SQL_C_CHAR); };
+
+	private:
+		SQLSMALLINT m_sqlDataType;
 	};
 
 }

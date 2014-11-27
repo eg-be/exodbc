@@ -32,12 +32,18 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Database.h"
-#include "ColumnBuffer.h"
 
 // Other headers
 #include "boost/any.hpp"
 
 // System headers
+
+// Forward declarations
+// --------------------
+namespace exodbc
+{
+	class ColumnBuffer;
+}
 
 namespace exodbc
 {
@@ -175,6 +181,40 @@ namespace exodbc
 
 
 		/*!
+		* \enum		CharBindingMode
+		* \brief	Provide additional information how to bind SQL_CHAR, SQL_WCHAR, SQL_VARCHAR and SQL_WVARCHAR columns
+		* \detailed Usually when a table binds a column it will query the database about the SQL-Type and create the
+		*			corresponding buffer-type. Using this option you can specify that columns reported as SQL_CHAR 
+		*			will be bound to a SQLWCHAR* buffer, or the other way round.
+		*			This comes in handy as drivers are usually quite good about converting wide-stuff to non-wide stuff,
+		*			but doing that in the code is just a pain.
+		*/
+		enum CharBindingMode
+		{
+			BIND_AS_REPORTED,	///< Use the type reported by the DB for the buffer (default)
+			BIND_AS_CHAR,		///< Bind also SQL_WCHAR and SQL_WVARCHAR columns to a SQLCHAR* buffer
+			BIND_AS_WCHAR		///< Bind also SQL_CHAR and SQL_VARCHAR columns to a SQLWCHAR* buffer
+		};
+
+
+		/*!
+		* \enum		CharTrimOptions
+		* \brief	Define whether you want to 
+		* \detailed Usually when a table binds a column it will query the database about the SQL-Type and create the
+		*			corresponding buffer-type. Using this option you can specify that columns reported as SQL_CHAR
+		*			will be bound to a SQLWCHAR* buffer, or the other way round.
+		*			This comes in handy as drivers are usually quite good about converting wide-stuff to non-wide stuff,
+		*			but doing that in the code is just a pain.
+		*/
+		enum CharTrimOptions
+		{
+			TRIM_NO		= 0x0L,
+			TRIM_LEFT	= 0x1L,
+			TRIM_RIGHT	= 0x2L
+		};
+
+
+		/*!
 		* \brief	Create a new Table-instance from the Database pDb using the table definition
 		*			from tableInfo. The table will read its column-definitions from the database
 		*			automatically during Open() and bind all columns.
@@ -285,6 +325,7 @@ namespace exodbc
 		*			passed definition during constructions actually exists in the database. Setting this
 		*			value to false makes only sense	if you've passed a STableInfo, as else the Table
 		*			is required to query the database anyway (and fail if not found).
+		* \see		IsOpen()
 		*
 		* \return	true if it succeeds, false if it fails.
 		*/
@@ -295,6 +336,7 @@ namespace exodbc
 		* \brief	Check if the database is Open
 		*
 		* \return	True if Open() was already called succesfull
+		* \see		Open()
 		*/
 		bool		IsOpen() const { return m_isOpen; };
 
@@ -304,6 +346,25 @@ namespace exodbc
 		* \return	True if this table was created using READ_ONLY
 		*/
 		bool		IsQueryOnly()        { return m_openMode == READ_ONLY; }
+
+
+		/*!
+		* \brief	Set the CharBindingMode. Must be called before Open().
+		* \detailed	This will set the CharBindingMode globally for this table.
+		*			It can still be overridden for specific columns by defining
+		*			it for that column.
+		* \return	CharBindingMode
+		* \see		GetCharBindingMode()
+		*/
+		void		SetCharBindingMode(CharBindingMode mode);
+
+
+		/*!
+		* \brief	Get the CharBindingMode of this table.
+		* \return	CharBindingMode
+		* \see		SetCharBindingMode()
+		*/
+		CharBindingMode	GetCharBindingMode() { return m_charBindingMode; };
 
 
 		/*!
@@ -393,7 +454,7 @@ namespace exodbc
 		bool		GetColumnValue(SQLSMALLINT columnNumber, SQLBIGINT& bigInt) const;
 
 		bool		GetColumnValue(SQLSMALLINT columnNumber, std::wstring& str) const;
-
+		bool		GetColumnValue(SQLSMALLINT columnNumber, std::string& str) const;
 
 		/*!
 		* \brief	Returns the number of columns this table has.
@@ -569,6 +630,7 @@ namespace exodbc
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		const OpenMode		m_openMode;				///< Read-only or writable
+		CharBindingMode		m_charBindingMode;		///< Store the char-binding of this table. Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
 
 		// Column information

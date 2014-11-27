@@ -472,16 +472,16 @@ namespace exodbc
 			return false;
 		}
 
-		// Set Connection Options
-		if (!SetConnectionAttributes())
-			return false;
-
 		// Query the data source for info about itself
 		if (!ReadDbInfo(m_dbInf))
 			return false;
 
 		// Try to detect the type - this will update our internal type on the first call
 		Dbms();
+
+		// Set Connection Options
+		if (!SetConnectionAttributes())
+			return false;
 
 		// Query the datatypes
 		if (!ReadDataTypesInfo(m_datatypes))
