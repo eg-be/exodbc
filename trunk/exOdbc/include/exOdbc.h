@@ -377,23 +377,6 @@ namespace exodbc
 	};
 
 
-	/*!
-	* \enum		CharTrimOption
-	* \brief	Define whether you want to trim string and wstring values returned from the Table functions GetColumnValue()
-	* \detailed	Note that setting this flag will not modify the actual data-buffer, but only the string-values
-	*			returned by the GetColumnValue() functions.
-	*			Default is TRIM_NO
-	*/
-	enum CharTrimOption
-	{
-		TRIM_NO = 0x0L,		///< No Trimming of wstring or string (default)
-		TRIM_LEFT = 0x1L,	///< Trim left
-		TRIM_RIGHT = 0x2L	///< Trim right
-	};
-
-
-
-
 	// List the well-known SQL-State we need in the code
 	namespace SqlState
 	{
