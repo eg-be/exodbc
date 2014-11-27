@@ -67,7 +67,7 @@ namespace exodbc
 					break;
 				case SQL_CHAR:
 				case SQL_VARCHAR:
-					if (m_charBindingMode == BIND_AS_CHAR || BIND_AS_REPORTED)
+					if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 					{
 						delete[] GetCharPtr();
 					}
@@ -78,7 +78,7 @@ namespace exodbc
 					break;
 				case SQL_WCHAR:
 				case SQL_WVARCHAR:
-					if (m_charBindingMode == BIND_AS_WCHAR || BIND_AS_REPORTED)
+					if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 					{
 						delete[] GetWCharPtr();
 					}
@@ -118,7 +118,7 @@ namespace exodbc
 			break;
 		case SQL_CHAR:
 		case SQL_VARCHAR:
-			if (m_charBindingMode == BIND_AS_CHAR || BIND_AS_REPORTED)
+			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
 				m_intPtrVar = new SQLCHAR[GetBufferSize() + 1];
 			}
@@ -129,7 +129,7 @@ namespace exodbc
 			break;
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
-			if (m_charBindingMode == BIND_AS_WCHAR || BIND_AS_REPORTED)
+			if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
 				m_intPtrVar = new SQLWCHAR[GetBufferSize() + 1];
 			}
@@ -165,7 +165,7 @@ namespace exodbc
 			return static_cast<void*>(boost::get<SQLBIGINT*>(m_intPtrVar));
 		case SQL_CHAR:
 		case SQL_VARCHAR:
-			if (m_charBindingMode == BIND_AS_CHAR || BIND_AS_REPORTED)
+			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
 				return static_cast<void*>(boost::get<SQLCHAR*>(m_intPtrVar));
 			}
@@ -175,7 +175,7 @@ namespace exodbc
 			}
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
-			if (m_charBindingMode == BIND_AS_WCHAR || BIND_AS_REPORTED)
+			if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
 				return static_cast<void*>(boost::get<SQLWCHAR*>(m_intPtrVar));
 			}
@@ -202,7 +202,7 @@ namespace exodbc
 			return sizeof(SQLBIGINT);
 		case SQL_CHAR:
 		case SQL_VARCHAR:
-			if (m_charBindingMode == BIND_AS_CHAR || BIND_AS_REPORTED)
+			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
 				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR);
 			}
@@ -212,7 +212,7 @@ namespace exodbc
 			}
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
-			if (m_charBindingMode == BIND_AS_WCHAR || BIND_AS_REPORTED)
+			if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
 				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLWCHAR);
 			}
@@ -352,7 +352,7 @@ namespace exodbc
 			break;
 		case SQL_CHAR:
 		case SQL_VARCHAR:
-			if (m_charBindingMode == BIND_AS_CHAR || BIND_AS_REPORTED)
+			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
 				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
 			}
@@ -363,7 +363,7 @@ namespace exodbc
 			break;
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
-			if (m_charBindingMode == BIND_AS_CHAR || BIND_AS_REPORTED)
+			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
 				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
 			}

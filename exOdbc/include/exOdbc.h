@@ -51,10 +51,10 @@ namespace exodbc
 	const int DB_MAX_WHERE_CLAUSE_LEN		= 2048;
 	const int DB_MAX_ERROR_MSG_LEN			= 512;
 	const int DB_MAX_ERROR_HISTORY			= 5;
-	const int DB_MAX_TABLE_NAME_LEN_DEFAULT			= 128;	// This value is sometimes also available from dbInf: dbInf.tableNameLen != 0
-	const int DB_MAX_SCHEMA_NAME_LEN_DEFAULT		= 128;	// This value is sometimes also available from dbInf: dbInf.schemaNameLen != 0
-	const int DB_MAX_CATALOG_NAME_LEN_DEFAULT		= 128;	// This value is sometimes also available from dbInf: dbInf.catalogNameLen != 0
-	const int DB_MAX_COLUMN_NAME_LEN_DEFAULT		= 128;	// Value available from SDbInfo
+	const int DB_MAX_TABLE_NAME_LEN_DEFAULT			= 128;	///< This value is sometimes also available from SDbInfo. \see SDbInfo::maxTabLeNameLen
+	const int DB_MAX_SCHEMA_NAME_LEN_DEFAULT		= 128;	///< This value is sometimes also available from SDbInfo. \see SDbInfo::maxSchemaNameLen
+	const int DB_MAX_CATALOG_NAME_LEN_DEFAULT		= 128;	///< This value is sometimes also available from SDbInfo. \see SDbInfo::catalogNameLen
+	const int DB_MAX_COLUMN_NAME_LEN_DEFAULT		= 128;	///< Value sometimes available from SDbInfo. \see SdbInfo::maxColumnNameLen
 	const int DB_MAX_COLUMN_NAME_LEN		= 128;
 	const int DB_MAX_TABLE_TYPE_LEN			= 128;
 	const int DB_MAX_TABLE_REMARKS_LEN		= 512;
@@ -141,11 +141,11 @@ namespace exodbc
 		SQLUSMALLINT txnCapable;						// Indicates if the data source supports transactions
 		// TODO: Connection attribute
 		//			UDWORD loginTimeout;                             // Number seconds to wait for a login request
-		SQLUSMALLINT  maxCatalogNameLen;				// Max length of a catalog name. Can be 0 if no limit, or limit is unknown
-		SQLUSMALLINT  maxSchemaNameLen;					// Max length of a schema name. Can be 0 if no limit, or limit is unknown
-		SQLUSMALLINT  maxTableNameLen;					// Max length of a table name. Can be 0 if no limit, or limit is unknown
-		SQLUSMALLINT	m_maxColumnNameLen;				// Max length of a column name. Can be 0 if no limit, or limit is unknown
-		SQLWCHAR		searchPatternEscape[2];			// SQL_SEARCH_PATTERN_ESCAPE: How to escape string-search patterns in pattern-value arguments in catalog functions
+		SQLUSMALLINT  maxCatalogNameLen;				///< Max length of a catalog name. Can be 0 if no limit, or limit is unknown
+		SQLUSMALLINT  maxSchemaNameLen;					///< Max length of a schema name. Can be 0 if no limit, or limit is unknown
+		SQLUSMALLINT  maxTableNameLen;					///< Max length of a table name. Can be 0 if no limit, or limit is unknown
+		SQLUSMALLINT	m_maxColumnNameLen;				///< Max length of a column name. Can be 0 if no limit, or limit is unknown
+		SQLWCHAR		searchPatternEscape[2];			///< SQL_SEARCH_PATTERN_ESCAPE: How to escape string-search patterns in pattern-value arguments in catalog functions
 		std::wstring ToStr() const;
 
 		SQLUSMALLINT GetMaxCatalogNameLen() const;
@@ -369,11 +369,48 @@ namespace exodbc
 	*			This comes in handy as drivers are usually quite good about converting wide-stuff to non-wide stuff,
 	*			but doing that in the code is just a pain.
 	*/
-	enum CharBindingMode
+	enum class CharBindingMode
 	{
 		BIND_AS_REPORTED,	///< Use the type reported by the DB for the buffer (default)
 		BIND_AS_CHAR,		///< Bind also SQL_WCHAR and SQL_WVARCHAR columns to a SQLCHAR* buffer
 		BIND_AS_WCHAR		///< Bind also SQL_CHAR and SQL_VARCHAR columns to a SQLWCHAR* buffer
+	};
+
+
+	// Known Databases
+	// ---------------
+	// These are the databases currently tested and working with these classes
+	// See the comments in wxDb::Dbms() for exceptions/issues with
+	// each of these database engines
+	enum DatabaseProduct
+	{
+		dbmsUNIDENTIFIED,	//< Unknown DB
+		//dbmsORACLE,
+		//dbmsSYBASE_ASA,        // Adaptive Server Anywhere
+		//dbmsSYBASE_ASE,        // Adaptive Server Enterprise
+		dbmsMS_SQL_SERVER,	//< Microsoft SQL Server
+		dbmsMY_SQL,			//< MySQL
+		//dbmsPOSTGRES,
+		//dbmsACCESS,
+		//dbmsDBASE,
+		//dbmsINFORMIX,
+		//dbmsVIRTUOSO,
+		dbmsDB2,			//< IBM DB2
+		//dbmsINTERBASE,
+		//dbmsPERVASIVE_SQL,
+		//dbmsXBASE_SEQUITER,
+		//dbmsFIREBIRD,
+		//dbmsMAXDB,
+		//dbmsFuture1,
+		//dbmsFuture2,
+		//dbmsFuture3,
+		//dbmsFuture4,
+		//dbmsFuture5,
+		//dbmsFuture6,
+		//dbmsFuture7,
+		//dbmsFuture8,
+		//dbmsFuture9,
+		//dbmsFuture10
 	};
 
 
@@ -487,42 +524,6 @@ namespace exodbc
 	//	sqlLogOFF,
 	//	sqlLogON
 	//};
-
-	// Known Databases
-	// ---------------
-	// These are the databases currently tested and working with these classes
-	// See the comments in wxDb::Dbms() for exceptions/issues with
-	// each of these database engines
-	enum DatabaseProduct
-	{
-		dbmsUNIDENTIFIED,	//< Unknown DB
-		//dbmsORACLE,
-		//dbmsSYBASE_ASA,        // Adaptive Server Anywhere
-		//dbmsSYBASE_ASE,        // Adaptive Server Enterprise
-		dbmsMS_SQL_SERVER,	//< Microsoft SQL Server
-		dbmsMY_SQL,			//< MySQL
-		//dbmsPOSTGRES,
-		//dbmsACCESS,
-		//dbmsDBASE,
-		//dbmsINFORMIX,
-		//dbmsVIRTUOSO,
-		dbmsDB2,			//< IBM DB2
-		//dbmsINTERBASE,
-		//dbmsPERVASIVE_SQL,
-		//dbmsXBASE_SEQUITER,
-		//dbmsFIREBIRD,
-		//dbmsMAXDB,
-		//dbmsFuture1,
-		//dbmsFuture2,
-		//dbmsFuture3,
-		//dbmsFuture4,
-		//dbmsFuture5,
-		//dbmsFuture6,
-		//dbmsFuture7,
-		//dbmsFuture8,
-		//dbmsFuture9,
-		//dbmsFuture10
-	};
 
 
 }
