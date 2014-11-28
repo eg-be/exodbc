@@ -42,38 +42,22 @@ namespace exodbc
 		{
 			try
 			{
-				switch (m_columnInfo.m_sqlDataType)
+				switch (m_bufferType)
 				{
-				case SQL_SMALLINT:
+				case SQL_C_SSHORT:
 					delete GetSmallIntPtr();
 					break;
-				case SQL_INTEGER:
+				case SQL_C_SLONG:
 					delete GetIntPtr();
 					break;
-				case SQL_BIGINT:
+				case SQL_C_SBIGINT:
 					delete GetBigIntPtr();
 					break;
-				case SQL_CHAR:
-				case SQL_VARCHAR:
-					if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-					{
-						delete[] GetCharPtr();
-					}
-					else
-					{
-						delete[] GetWCharPtr();
-					}
+				case SQL_C_CHAR:
+					delete[] GetCharPtr();
 					break;
-				case SQL_WCHAR:
-				case SQL_WVARCHAR:
-					if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-					{
-						delete[] GetWCharPtr();
-					}
-					else
-					{
-						delete[] GetCharPtr();
-					}
+				case SQL_C_WCHAR:
+					delete[] GetWCharPtr();
 					break;
 				default:
 					exASSERT(false);
@@ -222,36 +206,20 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 
 		void* pBuffer = NULL;
-		switch (m_columnInfo.m_sqlDataType)
+		switch (m_bufferType)
 		{
-		case SQL_SMALLINT:
+		case SQL_C_SSHORT:
 			return static_cast<void*>(boost::get<SQLSMALLINT*>(m_bufferPtr));
-		case SQL_INTEGER:
+		case SQL_C_SLONG:
 			return static_cast<void*>(boost::get<SQLINTEGER*>(m_bufferPtr));
-		case SQL_BIGINT:
+		case SQL_C_SBIGINT:
 			return static_cast<void*>(boost::get<SQLBIGINT*>(m_bufferPtr));
-		case SQL_CHAR:
-		case SQL_VARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-			{
-				return static_cast<void*>(boost::get<SQLCHAR*>(m_bufferPtr));
-			}
-			else
-			{
-				return static_cast<void*>(boost::get<SQLWCHAR*>(m_bufferPtr));
-			}
-		case SQL_WCHAR:
-		case SQL_WVARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-			{
-				return static_cast<void*>(boost::get<SQLWCHAR*>(m_bufferPtr));
-			}
-			else
-			{
-				return static_cast<void*>(boost::get<SQLCHAR*>(m_bufferPtr));
-			}
+		case SQL_C_CHAR:
+			return static_cast<void*>(boost::get<SQLCHAR*>(m_bufferPtr));
+		case SQL_C_WCHAR:
+			return static_cast<void*>(boost::get<SQLWCHAR*>(m_bufferPtr));
 		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+			exASSERT(false);
 		}
 		return pBuffer;
 	}
