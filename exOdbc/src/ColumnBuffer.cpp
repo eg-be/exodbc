@@ -28,6 +28,7 @@ namespace exodbc
 		, m_isBound(false)
 		, m_allocatedBuffer(false)
 		, m_charBindingMode(mode)
+		, m_bufferType(0)
 	{
 		m_allocatedBuffer = AllocateBuffer(m_columnInfo);
 	}
@@ -74,6 +75,8 @@ namespace exodbc
 						delete[] GetCharPtr();
 					}
 					break;
+				default:
+					exASSERT(false);
 				}
 			}
 			catch (boost::bad_get ex)
@@ -164,34 +167,41 @@ namespace exodbc
 		switch (columnInfo.m_sqlDataType)
 		{
 		case SQL_SMALLINT:
-			m_intPtrVar = new SQLSMALLINT(0);
+			m_bufferPtr = new SQLSMALLINT(0);
+			m_bufferType = SQL_C_SSHORT;
 			break;
 		case SQL_INTEGER:
-			m_intPtrVar = new SQLINTEGER(0);
+			m_bufferPtr = new SQLINTEGER(0);
+			m_bufferType = SQL_C_SLONG;
 			break;
 		case SQL_BIGINT:
-			m_intPtrVar = new SQLBIGINT(0);
+			m_bufferPtr = new SQLBIGINT(0);
+			m_bufferType = SQL_C_SBIGINT;
 			break;
 		case SQL_CHAR:
 		case SQL_VARCHAR:
 			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
-				m_intPtrVar = new SQLCHAR[GetBufferSize() + 1];
+				m_bufferPtr = new SQLCHAR[GetBufferSize() + 1];
+				m_bufferType = SQL_C_CHAR;
 			}
 			else
 			{
-				m_intPtrVar = new SQLWCHAR[GetBufferSize() + 1];
+				m_bufferPtr = new SQLWCHAR[GetBufferSize() + 1];
+				m_bufferType = SQL_C_WCHAR;
 			}
 			break;
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
 			if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
-				m_intPtrVar = new SQLWCHAR[GetBufferSize() + 1];
+				m_bufferPtr = new SQLWCHAR[GetBufferSize() + 1];
+				m_bufferType = SQL_C_WCHAR;
 			}
 			else
 			{
-				m_intPtrVar = new SQLCHAR[GetBufferSize() + 1];
+				m_bufferPtr = new SQLCHAR[GetBufferSize() + 1];
+				m_bufferType = SQL_C_CHAR;
 			}
 			break;
 		default:
@@ -215,30 +225,30 @@ namespace exodbc
 		switch (m_columnInfo.m_sqlDataType)
 		{
 		case SQL_SMALLINT:
-			return static_cast<void*>(boost::get<SQLSMALLINT*>(m_intPtrVar));
+			return static_cast<void*>(boost::get<SQLSMALLINT*>(m_bufferPtr));
 		case SQL_INTEGER:
-			return static_cast<void*>(boost::get<SQLINTEGER*>(m_intPtrVar));
+			return static_cast<void*>(boost::get<SQLINTEGER*>(m_bufferPtr));
 		case SQL_BIGINT:
-			return static_cast<void*>(boost::get<SQLBIGINT*>(m_intPtrVar));
+			return static_cast<void*>(boost::get<SQLBIGINT*>(m_bufferPtr));
 		case SQL_CHAR:
 		case SQL_VARCHAR:
 			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
-				return static_cast<void*>(boost::get<SQLCHAR*>(m_intPtrVar));
+				return static_cast<void*>(boost::get<SQLCHAR*>(m_bufferPtr));
 			}
 			else
 			{
-				return static_cast<void*>(boost::get<SQLWCHAR*>(m_intPtrVar));
+				return static_cast<void*>(boost::get<SQLWCHAR*>(m_bufferPtr));
 			}
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
 			if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
-				return static_cast<void*>(boost::get<SQLWCHAR*>(m_intPtrVar));
+				return static_cast<void*>(boost::get<SQLWCHAR*>(m_bufferPtr));
 			}
 			else
 			{
-				return static_cast<void*>(boost::get<SQLCHAR*>(m_intPtrVar));
+				return static_cast<void*>(boost::get<SQLCHAR*>(m_bufferPtr));
 			}
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
@@ -297,7 +307,7 @@ namespace exodbc
 
 		// We use the BigIntVisitor here. It will always succeed to convert if 
 		// the underlying Value is an int-value or throw otherwise
-		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
+		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
 		// But we are only allowed to Downcast this to a Smallint if the original value was a smallint
 		
 		// TODO: We should do this by determining the type of the Variant
@@ -319,7 +329,7 @@ namespace exodbc
 
 		// We use the BigIntVisitor here. It will always succeed to convert if 
 		// the underlying Value is an int-value or throw otherwise
-		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
+		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
 		// But we are only allowed to downcast this to an Int if we are not loosing information
 		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT || m_columnInfo.m_sqlDataType == SQL_INTEGER))
 		{
@@ -335,7 +345,7 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 		exASSERT(m_isBound);
 
-		return boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
+		return boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
 	}
 
 
@@ -344,7 +354,7 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 		exASSERT(m_isBound);
 
-		return boost::apply_visitor(WStringVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
+		return boost::apply_visitor(WStringVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
 	}
 
 
@@ -353,7 +363,7 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 		exASSERT(m_isBound);
 
-		return boost::apply_visitor(StringVisitor(m_columnInfo.m_sqlDataType), m_intPtrVar);
+		return boost::apply_visitor(StringVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
 	}
 
 
@@ -362,7 +372,7 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 
 		// Could throw boost::bad_get
-		return boost::get<SQLSMALLINT*>(m_intPtrVar);
+		return boost::get<SQLSMALLINT*>(m_bufferPtr);
 	}
 
 	SQLINTEGER* ColumnBuffer::GetIntPtr() const
@@ -370,7 +380,7 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 
 		// Could throw boost::bad_get
-		return boost::get<SQLINTEGER*>(m_intPtrVar);
+		return boost::get<SQLINTEGER*>(m_bufferPtr);
 	}
 
 	SQLBIGINT* ColumnBuffer::GetBigIntPtr() const
@@ -378,7 +388,7 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 
 		// Could throw boost::bad_get
-		return boost::get<SQLBIGINT*>(m_intPtrVar);
+		return boost::get<SQLBIGINT*>(m_bufferPtr);
 	}
 
 	SQLCHAR* ColumnBuffer::GetCharPtr() const
@@ -386,7 +396,7 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 
 		// Could throw boost::bad_get
-		return boost::get<SQLCHAR*>(m_intPtrVar);
+		return boost::get<SQLCHAR*>(m_bufferPtr);
 	}
 
 	SQLWCHAR* ColumnBuffer::GetWCharPtr() const
@@ -394,7 +404,7 @@ namespace exodbc
 		exASSERT(m_allocatedBuffer);
 
 		// Could throw boost::bad_get
-		return boost::get<SQLWCHAR*>(m_intPtrVar);
+		return boost::get<SQLWCHAR*>(m_bufferPtr);
 	}
 
 

@@ -275,11 +275,12 @@ namespace exodbc
 
 		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer
 		bool m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction.
+		SQLSMALLINT m_bufferType;	///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc.
 		bool m_isBound;				///< True if BindColumnBuffer() was successful.
 		
 		CharBindingMode m_charBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
 
-		BufferPtrVariant m_intPtrVar;	///< Variant that holds the actual buffer
+		BufferPtrVariant m_bufferPtr;	///< Variant that holds the pointer to the actual buffer
 
 		SQLLEN		m_cb;	///< The length indicator set during Bind for this column
 
