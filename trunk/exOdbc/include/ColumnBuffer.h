@@ -49,10 +49,10 @@ namespace exodbc
 	* \brief Provides the buffer to transfer data from a column of a record.
 	*
 	* A ColumnBuffer can allocate a corresponding buffer-type automatically
-	* by reading the sql-type info from the passed SColumnInfo, or by using a
+	* by reading the SQL-type info from the passed SColumnInfo, or by using a
 	* buffer provided during construction. In that case you must also pass the
 	* ODBC C-Type of the buffer.
-	* Last there is an option to try to let the odbc-driver to convert everything
+	* Last there is an option to try to let the ODBC-driver to convert everything
 	* to a (w)string.
 	*
 	* If the buffer-information is read from the passed SColumnInfo, the ColumnBuffer will
@@ -97,15 +97,15 @@ namespace exodbc
 		*			not delete it.
 		*			Note that using this constructor you can pass almost any combination of conversions 
 		*			from SQL Types to ODBC C Types to the driver.
-		* \param columnInfo	The Information about the column we bind.
 		* \param sqlCType	The ODBC C Type of the buffer. This value will be forwarded to the driver during SQLBindCol. 
-		* \param buffer		The buffer to be used for binding.
-		* \param bufferSize	The size of the buffer used for binding.
+		* \param ordinalPosition The ordinal position of the column in the table. Numbering starts at 1 (!)
+		* \param bufferPtrVarian Pointer to allocated buffer for the given sqlCType.
+		* \param bufferSize	Size of the allocated buffer.
 		*
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, SQLINTEGER ordinalPosition, BufferPtrVariant bufferVariant, SQLLEN bufferSize);
+		ColumnBuffer(SQLSMALLINT sqlCType, SQLINTEGER ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize);
 
 
 		~ColumnBuffer();
@@ -132,14 +132,14 @@ namespace exodbc
 		* \param	hStmt ODBC Statement handle to bind this ColumnBuffer to.
 		* \return	True if bound successful.
 		*/
-		bool BindColumnBuffer(HSTMT hStmt);
+		bool Bind(HSTMT hStmt);
 
 
 		/*!
 		* \brief	Returns true if this ColumnBuffer is bound.
 		* \return	True if Column is bound.
 		*/
-		bool IsBound() const { return m_isBound; };
+		bool IsBound() const { return m_bound; };
 
 
 		/*!
@@ -178,7 +178,7 @@ namespace exodbc
 		* \detailed	Fails if already bound.
 		* \see		CharBindingMode
 		*/
-		void SetCharBindingMode(CharBindingMode mode) { exASSERT(!m_isBound); m_charBindingMode = mode; }
+		void SetCharBindingMode(CharBindingMode mode) { exASSERT(!m_bound); m_charBindingMode = mode; }
 
 
 		/*!
@@ -238,19 +238,33 @@ namespace exodbc
 
 		/*!
 		* \brief	Determine the buffer size needed for the current SQL-Type given in SColumnInfo.
-		* \detailed The size of types with fixed lengths is given by sizeof() (like sizeof(SQLINTEGER).
+		* \detailed This is used internally if no buffer-size and buffer is given and the buffer must
+		*			thus be allocated automatically.
+		*			Must be called after m_bufferType is set.
+		*			The size of types with fixed lengths is given by sizeof() (like sizeof(SQLINTEGER).
 		*			For char-types the size is calculated by '(fieldlength + 1) * sizeof(char-type)',
 		*			where char-type is SQLCCHAR or SQLWCHAR. One extra space is allocated for the 
 		*			terminating \0.
-		* \return	CharBindingMode set.
+		* \return	Size of the allocated buffer
 		*/
-		size_t GetBufferSize() const;
+		size_t DetermineBufferSize() const;
+
+
+		/*!
+		* \brief	Determine the buffer type for the current SQL type given in SColumnInfo.
+		* \detailed This is used internally if no buffer-size and buffer is given and the buffer must
+		*			thus be allocated automatically.
+		*			See ColumnBuffer description for what SQL type is mapped to what buffer.
+		* \return	Needed buffer size according to SQL type form SColumnInfo or 0 in case of failure.
+		*/
+		SQLSMALLINT DetermineBufferType() const;
 
 
 		/*!
 		* \brief	Get the allocated buffer as a void*.
 		* \detailed Determines the type using the SColumnInfo and gets the pointer from the variant.
-		* \return	CharBindingMode set.
+		*			Fails if no buffer is allocated.
+		* \return	void* to the current buffer.
 		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
 		*/
 		void* GetBuffer();
@@ -259,7 +273,7 @@ namespace exodbc
 		/*!
 		* \brief	Get the allocated buffer as a void*.
 		* \detailed Determines the type using the SColumnInfo and gets the pointer from the variant.
-		* \return	CharBindingMode set.
+		* \return	true if buffer is allocated.
 		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
 		*/
 		bool AllocateBuffer(const SColumnInfo& columnInfo);
@@ -274,9 +288,10 @@ namespace exodbc
 		SQLWCHAR*		GetWCharPtr() const;
 
 		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer
-		bool m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction.
-		SQLSMALLINT m_bufferType;	///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc.
-		bool m_isBound;				///< True if BindColumnBuffer() was successful.
+		bool m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
+		SQLSMALLINT m_bufferType;	///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
+		SQLINTEGER	m_bufferSize;	///< Size of an allocated or set from constructor buffer.
+		bool m_bound;				///< True if Bind() was successful.
 		
 		CharBindingMode m_charBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
 
