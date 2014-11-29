@@ -109,6 +109,20 @@ namespace exodbc
 		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize);
 
 
+		/*!
+		* \brief	Create a new ColumnBuffer that will convert everything to a string (bind to a char* or wchar* buffer).
+		* \detailed	The constructor will try to allocate a char* or wchar* buffer that has enough space
+		*			for the passed stringLen (+ trailing zero).
+		* \param ordinalPosition	The ordinal position of the column in the table. Numbering starts at 1 (!)
+		* \param stringLen			The String-length of the buffer. This is not byte-length!
+		* \param mode				Determines if char* or wchar* buffers are allocated. You are not allowed
+		*							to use CharBindingMode::BIND_AS_REPORTED .
+		* \see	HaveBuffer()
+		* \see	Bind()
+		*/
+		ColumnBuffer(SQLUSMALLINT ordinalPosition, SQLLEN stringLen, CharBindingMode mode);
+
+
 		~ColumnBuffer();
 
 	private:
@@ -123,7 +137,7 @@ namespace exodbc
 		*			was allocated or because you've manually set a buffer.
 		* \return	True if buffer is ready.
 		*/
-		bool HaveBuffer() const { return m_allocatedBuffer; };
+		bool HaveBuffer() const { return m_haveBuffer; };
 
 
 		/*!
@@ -290,6 +304,7 @@ namespace exodbc
 
 		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer
 		SQLUSMALLINT m_columnNr;	///< Either set on construction or read from SColumnInfo::m_ordinalPosition
+		bool m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
 		bool m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
 		SQLSMALLINT m_bufferType;	///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
 		SQLINTEGER	m_bufferSize;	///< Size of an allocated or set from constructor buffer.
@@ -352,21 +367,12 @@ namespace exodbc
 	class BigintVisitor
 		: public boost::static_visitor < SQLBIGINT >
 	{
-	public:
-		
-		// TODO: We should not use the SQL-Data type here for the visitor. In there its only
-		// used for the exception-message. The visitor is trying to convert from an ODBC-C-TYPE!!
-		BigintVisitor(SQLSMALLINT sqlDataType)
-			: m_sqlDataType(sqlDataType) {};
-
+	public:		
 		SQLBIGINT operator()(SQLSMALLINT* smallInt) const { return *smallInt;  };
 		SQLBIGINT operator()(SQLINTEGER* i) const { return *i; };
 		SQLBIGINT operator()(SQLBIGINT* bigInt) const { return *bigInt; };
-		SQLBIGINT operator()(SQLCHAR* pChar) const { throw CastException(m_sqlDataType, SQL_C_SBIGINT); };
-		SQLBIGINT operator()(SQLWCHAR* pWChar) const { throw CastException(m_sqlDataType, SQL_C_SBIGINT); };
-	
-	private:
-		SQLSMALLINT m_sqlDataType;
+		SQLBIGINT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_SBIGINT); };
 	};	// class BigintVisitor
 
 
@@ -390,17 +396,11 @@ namespace exodbc
 		: public boost::static_visitor < std::wstring >
 	{
 	public:
-		WStringVisitor(SQLSMALLINT sqlDataType)
-			: m_sqlDataType(sqlDataType) {};
-
 		std::wstring operator()(SQLSMALLINT* smallInt) const { return (boost::wformat(L"%d") % *smallInt).str(); };
 		std::wstring operator()(SQLINTEGER* i) const { return (boost::wformat(L"%d") % *i).str(); };
 		std::wstring operator()(SQLBIGINT* bigInt) const { return (boost::wformat(L"%d") % *bigInt).str(); };
-		std::wstring operator()(SQLCHAR* pChar) const{ throw CastException(m_sqlDataType, SQL_C_WCHAR); };
+		std::wstring operator()(SQLCHAR* pChar) const{ throw CastException(SQL_C_CHAR, SQL_C_WCHAR); };
 		std::wstring operator()(SQLWCHAR* pWChar) const { return pWChar; };
-
-	private:
-		SQLSMALLINT m_sqlDataType;
 	};	// class WStringVisitor
 
 
@@ -424,17 +424,11 @@ namespace exodbc
 		: public boost::static_visitor < std::string >
 	{
 	public:
-		StringVisitor(SQLSMALLINT sqlDataType)
-			: m_sqlDataType(sqlDataType) {};
-
 		std::string operator()(SQLSMALLINT* smallInt) const { return (boost::format("%d") % *smallInt).str(); };
 		std::string operator()(SQLINTEGER* i) const { return (boost::format("%d") % *i).str(); };
 		std::string operator()(SQLBIGINT* bigInt) const { return (boost::format("%d") % *bigInt).str(); };
 		std::string operator()(SQLCHAR* pChar) const { return (char*)pChar; };
-		std::string operator()(SQLWCHAR* pWChar) const { throw CastException(m_sqlDataType, SQL_C_CHAR); };
-
-	private:
-		SQLSMALLINT m_sqlDataType;
+		std::string operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_CHAR); };
 	};	// class StringVisitor
 
 }

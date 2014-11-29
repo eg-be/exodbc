@@ -27,6 +27,7 @@ namespace exodbc
 		: m_columnInfo(columnInfo)
 		, m_bound(false)
 		, m_allocatedBuffer(false)
+		, m_haveBuffer(false)
 		, m_charBindingMode(mode)
 		, m_bufferType(0)
 		, m_bufferSize(0)
@@ -36,12 +37,14 @@ namespace exodbc
 		exASSERT(columnInfo.m_sqlDataType != 0);
 
 		m_allocatedBuffer = AllocateBuffer(m_columnInfo);
+		m_haveBuffer = m_allocatedBuffer;
 	}
 
 
 	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize)
 		: m_bound(false)
 		, m_allocatedBuffer(false)
+		, m_haveBuffer(true)
 		, m_charBindingMode(CharBindingMode::BIND_AS_REPORTED)
 		, m_bufferType(sqlCType)
 		, m_bufferSize(bufferSize)
@@ -95,7 +98,7 @@ namespace exodbc
 	// --------------
 	bool ColumnBuffer::Bind(HSTMT hStmt)
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 		exASSERT(!m_bound);
 		exASSERT(m_bufferType != 0);
 		exASSERT(m_bufferSize > 0);
@@ -127,6 +130,7 @@ namespace exodbc
 	{
 		exASSERT(!m_allocatedBuffer);
 		exASSERT(!m_bound);
+		exASSERT(!m_haveBuffer);
 
 		m_bufferType = DetermineBufferType();
 		if (!m_bufferType)
@@ -172,7 +176,7 @@ namespace exodbc
 
 	void* ColumnBuffer::GetBuffer()
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 
 		void* pBuffer = NULL;
 		switch (m_bufferType)
@@ -197,6 +201,7 @@ namespace exodbc
 	size_t ColumnBuffer::DetermineBufferSize() const
 	{
 		exASSERT(m_bufferType != 0);
+		exASSERT(m_columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);
 
 		// if the determined buffer type is a simple type its just sizeof
 		switch (m_bufferType)
@@ -242,6 +247,8 @@ namespace exodbc
 
 	SQLSMALLINT ColumnBuffer::DetermineBufferType() const
 	{
+		exASSERT(m_columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);
+
 		switch (m_columnInfo.m_sqlDataType)
 		{
 		case SQL_SMALLINT:
@@ -279,24 +286,17 @@ namespace exodbc
 
 	ColumnBuffer::operator SQLSMALLINT() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
-
-		// TODO: We should not use the SQL-Data type here for the visitor. In there its only
-		// used for the exception-message. The visitor is trying to convert from an ODBC-C-TYPE!!
 
 		// We use the BigIntVisitor here. It will always succeed to convert if 
 		// the underlying Value is an int-value or throw otherwise
-		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
-		// But we are only allowed to Downcast this to a Smallint if the original value was a smallint
+		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(), m_bufferPtr);
 		
-		// TODO: We should do this by determining the type of the Variant
-		// Then we would be independent of sqlDataType, except during binding
-
-		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT))
+		// But we are only allowed to Downcast this to a Smallint if the original value was a smallint
+		if ( m_bufferType != SQL_C_SSHORT)
 		{
-			// TODO: FIx IT
-			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SSHORT);
+			throw CastException(m_bufferType, SQL_C_SSHORT);
 		}
 		return (SQLSMALLINT)bigVal;
 	}
@@ -304,17 +304,17 @@ namespace exodbc
 
 	ColumnBuffer::operator SQLINTEGER() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
 		// We use the BigIntVisitor here. It will always succeed to convert if 
 		// the underlying Value is an int-value or throw otherwise
-		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
+		SQLBIGINT bigVal = boost::apply_visitor(BigintVisitor(), m_bufferPtr);
 		// But we are only allowed to downcast this to an Int if we are not loosing information
-		if (!(m_columnInfo.m_sqlDataType == SQL_SMALLINT || m_columnInfo.m_sqlDataType == SQL_INTEGER))
+		if (!( m_bufferType == SQL_C_SSHORT || m_bufferType == SQL_C_SLONG))
 		{
 			// TODO: Fix IT
-			throw CastException(m_columnInfo.m_sqlDataType, SQL_C_SLONG);
+			throw CastException(m_bufferType, SQL_C_SLONG);
 		}
 		return (SQLINTEGER)bigVal;
 	}
@@ -322,34 +322,34 @@ namespace exodbc
 
 	ColumnBuffer::operator SQLBIGINT() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		return boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
+		return boost::apply_visitor(BigintVisitor(), m_bufferPtr);
 	}
 
 
 	ColumnBuffer::operator std::wstring() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		return boost::apply_visitor(WStringVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
+		return boost::apply_visitor(WStringVisitor(), m_bufferPtr);
 	}
 
 
 	ColumnBuffer::operator std::string() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		return boost::apply_visitor(StringVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
+		return boost::apply_visitor(StringVisitor(), m_bufferPtr);
 	}
 
 
 	SQLSMALLINT* ColumnBuffer::GetSmallIntPtr() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 
 		// Could throw boost::bad_get
 		return boost::get<SQLSMALLINT*>(m_bufferPtr);
@@ -357,7 +357,7 @@ namespace exodbc
 
 	SQLINTEGER* ColumnBuffer::GetIntPtr() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 
 		// Could throw boost::bad_get
 		return boost::get<SQLINTEGER*>(m_bufferPtr);
@@ -365,7 +365,7 @@ namespace exodbc
 
 	SQLBIGINT* ColumnBuffer::GetBigIntPtr() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 
 		// Could throw boost::bad_get
 		return boost::get<SQLBIGINT*>(m_bufferPtr);
@@ -373,7 +373,7 @@ namespace exodbc
 
 	SQLCHAR* ColumnBuffer::GetCharPtr() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 
 		// Could throw boost::bad_get
 		return boost::get<SQLCHAR*>(m_bufferPtr);
@@ -381,7 +381,7 @@ namespace exodbc
 
 	SQLWCHAR* ColumnBuffer::GetWCharPtr() const
 	{
-		exASSERT(m_allocatedBuffer);
+		exASSERT(m_haveBuffer);
 
 		// Could throw boost::bad_get
 		return boost::get<SQLWCHAR*>(m_bufferPtr);
