@@ -30,10 +30,28 @@ namespace exodbc
 		, m_charBindingMode(mode)
 		, m_bufferType(0)
 		, m_bufferSize(0)
+		, m_columnNr((SQLUSMALLINT) columnInfo.m_ordinalPosition)
 	{
+		exASSERT(m_columnNr > 0);
+		exASSERT(columnInfo.m_sqlDataType != 0);
+
 		m_allocatedBuffer = AllocateBuffer(m_columnInfo);
 	}
 
+
+	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize)
+		: m_bound(false)
+		, m_allocatedBuffer(false)
+		, m_charBindingMode(CharBindingMode::BIND_AS_REPORTED)
+		, m_bufferType(sqlCType)
+		, m_bufferSize(bufferSize)
+		, m_columnNr(ordinalPosition)
+		, m_bufferPtr(bufferPtrVariant)
+	{
+		exASSERT(sqlCType != 0);
+		exASSERT(ordinalPosition > 0);
+		exASSERT(bufferSize > 0);
+	}
 
 	// Destructor
 	// -----------
