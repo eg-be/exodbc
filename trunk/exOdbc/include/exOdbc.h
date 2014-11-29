@@ -169,7 +169,7 @@ namespace exodbc
 		std::wstring	m_typeName;					///<  1 Data source dependent data-type name
 		SQLSMALLINT		m_sqlType;					///<  2 SQL data type. This can be an ODBC SQL data type or a driver-specific SQL data type.
 		SQLINTEGER		m_columnSize;				///<  3 [NULLABLE] The maximum column size that the server supports for this data type. For numeric data, this is the maximum precision. For string data, this is the length in characters. For datetime data types, this is the length in characters of the string representation (assuming the maximum allowed precision of the fractional seconds component). NULL is returned for data types where column size is not applicable.
-		bool			m_columnSizeIsNull;			///<  3 See SSqlTypeInfo::m_columnSizeIsNull
+		bool			m_columnSizeIsNull;			///<  3 See SSqlTypeInfo::m_columnSize
 		std::wstring	m_literalPrefix;			///<  4 [NULLABLE] Character or characters used to prefix a literal; for example, a single quotation mark (') for character data types or 0x for binary data types
 		bool			m_literalPrefixIsNull;		///<  4 See SSqlTypeInfo::m_literalPrefix
 		std::wstring	m_literalSuffix;			///<  5 [NULLABLE] Character or characters used to terminate a literal; for example, a single quotation mark (') for character data types;
@@ -233,17 +233,17 @@ namespace exodbc
 		SQLINTEGER		m_ordinalPosition;	///< [ODBC 3.0] The ordinal position of the column in the table. The first column in the table is number 1.
 		std::wstring	m_isNullable;		///< [ODBC 3.0] NO, YES or zero-length string if unknown
 
-		bool			m_isCatalogNull;			///< See SSqlTypeInfo::m_catalogName
-		bool			m_isSchemaNull;				///< See SSqlTypeInfo::m_schemaName
-		bool			m_isColumnSizeNull;			///< See SSqlTypeInfo::m_columnSize
-		bool			m_isBufferSizeNull;			///< See SSqlTypeInfo::m_bufferSize
-		bool			m_isDecimalDigitsNull;		///< See SSqlTypeInfo::m_decimalDigits
-		bool			m_isNumPrecRadixNull;		///< See SSqlTypeInfo::m_numPrecRadix
-		bool			m_isRemarksNull;			///< See SSqlTypeInfo::m_remarks
-		bool			m_isDefaultValueNull;		///< See SSqlTypeInfo::m_defaultValue
-		bool			m_isDatetimeSubNull;		///< See SSqlTypeInfo::m_sqlDatetimeSub
-		bool			m_isCharOctetLengthNull;	///< See SSqlTypeInfo::m_charOctetLength
-		bool			m_isIsNullableNull;			///< See SSqlTypeInfo::isNullable
+		bool			m_isCatalogNull;			///< See SColumnInfo::m_catalogName
+		bool			m_isSchemaNull;				///< See SColumnInfo::m_schemaName
+		bool			m_isColumnSizeNull;			///< See SColumnInfo::m_columnSize
+		bool			m_isBufferSizeNull;			///< See SColumnInfo::m_bufferSize
+		bool			m_isDecimalDigitsNull;		///< See SColumnInfo::m_decimalDigits
+		bool			m_isNumPrecRadixNull;		///< See SColumnInfo::m_numPrecRadix
+		bool			m_isRemarksNull;			///< See SColumnInfo::m_remarks
+		bool			m_isDefaultValueNull;		///< See SColumnInfo::m_defaultValue
+		bool			m_isDatetimeSubNull;		///< See SColumnInfo::m_sqlDatetimeSub
+		bool			m_isCharOctetLengthNull;	///< See SColumnInfo::m_charOctetLength
+		bool			m_isIsNullableNull;			///< See SColumnInfo::isNullable
 
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
