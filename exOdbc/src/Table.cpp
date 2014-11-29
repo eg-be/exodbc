@@ -1098,7 +1098,7 @@ namespace exodbc
 			{
 				SColumnInfo colInfo = *it;
 				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_charBindingMode);
-				if (!pColBuff->BindColumnBuffer(m_hStmtSelect))
+				if (!pColBuff->Bind(m_hStmtSelect))
 				{
 					return false;
 				}

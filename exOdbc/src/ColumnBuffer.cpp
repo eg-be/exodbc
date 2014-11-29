@@ -25,10 +25,11 @@ namespace exodbc
 	// ------------
 	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode)
 		: m_columnInfo(columnInfo)
-		, m_isBound(false)
+		, m_bound(false)
 		, m_allocatedBuffer(false)
 		, m_charBindingMode(mode)
 		, m_bufferType(0)
+		, m_bufferSize(0)
 	{
 		m_allocatedBuffer = AllocateBuffer(m_columnInfo);
 	}
@@ -74,10 +75,12 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	bool ColumnBuffer::BindColumnBuffer(HSTMT hStmt)
+	bool ColumnBuffer::Bind(HSTMT hStmt)
 	{
 		exASSERT(m_allocatedBuffer);
-		exASSERT(!m_isBound);
+		exASSERT(!m_bound);
+		exASSERT(m_bufferType != 0);
+		exASSERT(m_bufferSize > 0);
 
 		void* pBuffer = NULL;
 		try
@@ -90,103 +93,51 @@ namespace exodbc
 			exASSERT(false);
 			return false;
 		}
-		size_t buffSize = GetBufferSize();
-		SQLRETURN ret = 0;
-		bool notBound = false;
-		m_cb = 0;
-		switch (m_columnInfo.m_sqlDataType)
-		{
-		case SQL_SMALLINT:
-			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SSHORT, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			break;
-		case SQL_INTEGER:
-			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SLONG, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			break;
-		case SQL_BIGINT:
-			ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_SBIGINT, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			break;
-		case SQL_CHAR:
-		case SQL_VARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-			{
-				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			}
-			else
-			{
-				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_WCHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			}
-			break;
-		case SQL_WCHAR:
-		case SQL_WVARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-			{
-				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_CHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			}
-			else
-			{
-				ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, SQL_C_WCHAR, (SQLPOINTER*)pBuffer, buffSize, &m_cb);
-			}
-			break;
-		default:
-			notBound = true;
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
-		}
-		if (!notBound && ret != SQL_SUCCESS)
+
+		SQLRETURN ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, m_bufferType, (SQLPOINTER*)pBuffer, m_bufferSize, &m_cb);
+		if (ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
-			notBound = true;
-		}
+		};
 
-		m_isBound = !notBound;
-		return m_isBound;
+		m_bound = ( ret == SQL_SUCCESS );
+		return m_bound;
 	}
 
 
 	bool ColumnBuffer::AllocateBuffer(const SColumnInfo& columnInfo)
 	{
 		exASSERT(!m_allocatedBuffer);
-		exASSERT(!m_isBound);
+		exASSERT(!m_bound);
+
+		m_bufferType = DetermineBufferType();
+		if (!m_bufferType)
+		{
+			return false;
+		}
+		m_bufferSize = DetermineBufferSize();
+		if (!m_bufferSize)
+		{
+			return false;
+		}
 
 		bool failed = false;
-		switch (columnInfo.m_sqlDataType)
+		switch (m_bufferType)
 		{
-		case SQL_SMALLINT:
+		case SQL_C_SSHORT:
 			m_bufferPtr = new SQLSMALLINT(0);
-			m_bufferType = SQL_C_SSHORT;
 			break;
-		case SQL_INTEGER:
+		case SQL_C_SLONG:
 			m_bufferPtr = new SQLINTEGER(0);
-			m_bufferType = SQL_C_SLONG;
 			break;
-		case SQL_BIGINT:
+		case SQL_C_SBIGINT:
 			m_bufferPtr = new SQLBIGINT(0);
-			m_bufferType = SQL_C_SBIGINT;
 			break;
-		case SQL_CHAR:
-		case SQL_VARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-			{
-				m_bufferPtr = new SQLCHAR[GetBufferSize() + 1];
-				m_bufferType = SQL_C_CHAR;
-			}
-			else
-			{
-				m_bufferPtr = new SQLWCHAR[GetBufferSize() + 1];
-				m_bufferType = SQL_C_WCHAR;
-			}
+		case SQL_C_CHAR:
+			m_bufferPtr = new SQLCHAR[m_bufferSize];
 			break;
-		case SQL_WCHAR:
-		case SQL_WVARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
-			{
-				m_bufferPtr = new SQLWCHAR[GetBufferSize() + 1];
-				m_bufferType = SQL_C_WCHAR;
-			}
-			else
-			{
-				m_bufferPtr = new SQLCHAR[GetBufferSize() + 1];
-				m_bufferType = SQL_C_CHAR;
-			}
+		case SQL_C_WCHAR:
+			m_bufferPtr = new SQLWCHAR[m_bufferSize];
 			break;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
@@ -225,38 +176,81 @@ namespace exodbc
 	}
 
 
-	size_t ColumnBuffer::GetBufferSize() const
+	size_t ColumnBuffer::DetermineBufferSize() const
 	{
-		switch (m_columnInfo.m_sqlDataType)
+		exASSERT(m_bufferType != 0);
+
+		// if the determined buffer type is a simple type its just sizeof
+		switch (m_bufferType)
 		{
-		case SQL_SMALLINT:
+		case SQL_C_SSHORT:
 			return sizeof(SQLSMALLINT);
-		case SQL_INTEGER:
+		case SQL_C_SLONG:
 			return sizeof(SQLINTEGER);
-		case SQL_BIGINT:
+		case SQL_C_SBIGINT:
 			return sizeof(SQLBIGINT);
-		case SQL_CHAR:
-		case SQL_VARCHAR:
-			// We could calculate the length using m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR)
-			// TODO: or also use the char_octet_length. Maybe this would be cleaner - some dbs
-			// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
-			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
+		case SQL_C_CHAR:
+			// else it determines on the ColumnInfo too:
+			// If it is a char or (w)char or (w)varchar calculate the string length as if we've used SQL_C_CHAR
+			if (m_columnInfo.m_sqlDataType == SQL_CHAR || m_columnInfo.m_sqlDataType == SQL_VARCHAR || 
+				m_columnInfo.m_sqlDataType == SQL_WCHAR || m_columnInfo.m_sqlDataType == SQL_WVARCHAR)
 			{
+				// We could calculate the length using m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR)
+				// TODO: or also use the char_octet_length. Maybe this would be cleaner - some dbs
+				// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
 				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR);
 			}
 			else
 			{
+				// Should never happen. 
+				exASSERT(false);
+			}
+		case SQL_C_WCHAR:
+			if (m_columnInfo.m_sqlDataType == SQL_CHAR || m_columnInfo.m_sqlDataType == SQL_VARCHAR ||
+				m_columnInfo.m_sqlDataType == SQL_WCHAR || m_columnInfo.m_sqlDataType == SQL_WVARCHAR)
+			{
 				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLWCHAR);
+			}
+			else
+			{
+				exASSERT(false);
+			}
+		default:
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+		}
+		return 0;
+	}
+
+
+	SQLSMALLINT ColumnBuffer::DetermineBufferType() const
+	{
+		switch (m_columnInfo.m_sqlDataType)
+		{
+		case SQL_SMALLINT:
+			return SQL_C_SSHORT;
+		case SQL_INTEGER:
+			return SQL_C_SLONG;
+		case SQL_BIGINT:
+			return SQL_C_SBIGINT;
+		case SQL_CHAR:
+		case SQL_VARCHAR:
+			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
+			{
+				return SQL_C_CHAR;
+			}
+			else
+			{
+				return SQL_C_WCHAR;
 			}
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
 			if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
 			{
-				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLWCHAR);
+				return SQL_C_WCHAR;
 			}
 			else
 			{
-				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR);
+				return SQL_C_CHAR;
 			}
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
@@ -268,7 +262,7 @@ namespace exodbc
 	ColumnBuffer::operator SQLSMALLINT() const
 	{
 		exASSERT(m_allocatedBuffer);
-		exASSERT(m_isBound);
+		exASSERT(m_bound);
 
 		// TODO: We should not use the SQL-Data type here for the visitor. In there its only
 		// used for the exception-message. The visitor is trying to convert from an ODBC-C-TYPE!!
@@ -293,7 +287,7 @@ namespace exodbc
 	ColumnBuffer::operator SQLINTEGER() const
 	{
 		exASSERT(m_allocatedBuffer);
-		exASSERT(m_isBound);
+		exASSERT(m_bound);
 
 		// We use the BigIntVisitor here. It will always succeed to convert if 
 		// the underlying Value is an int-value or throw otherwise
@@ -311,7 +305,7 @@ namespace exodbc
 	ColumnBuffer::operator SQLBIGINT() const
 	{
 		exASSERT(m_allocatedBuffer);
-		exASSERT(m_isBound);
+		exASSERT(m_bound);
 
 		return boost::apply_visitor(BigintVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
 	}
@@ -320,7 +314,7 @@ namespace exodbc
 	ColumnBuffer::operator std::wstring() const
 	{
 		exASSERT(m_allocatedBuffer);
-		exASSERT(m_isBound);
+		exASSERT(m_bound);
 
 		return boost::apply_visitor(WStringVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
 	}
@@ -329,7 +323,7 @@ namespace exodbc
 	ColumnBuffer::operator std::string() const
 	{
 		exASSERT(m_allocatedBuffer);
-		exASSERT(m_isBound);
+		exASSERT(m_bound);
 
 		return boost::apply_visitor(StringVisitor(m_columnInfo.m_sqlDataType), m_bufferPtr);
 	}
