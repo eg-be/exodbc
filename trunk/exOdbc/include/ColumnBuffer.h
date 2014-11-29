@@ -127,7 +127,7 @@ namespace exodbc
 
 	private:
 		// We cannot be copied
-		ColumnBuffer(const ColumnBuffer& other) {};
+		ColumnBuffer(const ColumnBuffer& other) { exASSERT(false);  };
 		ColumnBuffer() {};
 
 	public:

@@ -58,6 +58,17 @@ namespace exodbc
 		boost::log::trivial::severity_level m_originalLevel;
 	};
 
+
+	struct LogLevelDebug
+	{
+		LogLevelDebug() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::debug; };
+
+		~LogLevelDebug() { g_logSeverity = m_originalLevel; };
+
+	private:
+		boost::log::trivial::severity_level m_originalLevel;
+	};
+
 } // namespace exodbc
 
 
