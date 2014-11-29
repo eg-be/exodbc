@@ -70,8 +70,11 @@ namespace exodbc
 			CharTypesTable t2(&db, m_odbcInfo.m_namesCase);
 			EXPECT_TRUE(t2.Open());
 		}
-		LOG_DEBUG(L"You should see an orphaned IntTypesTable table now");
-		db.Close();
+		{
+			LogLevelDebug lld;
+			LOG_DEBUG(L"You should see an orphaned IntTypesTable table now");
+			db.Close();
+		}
 	}
 #endif
 
