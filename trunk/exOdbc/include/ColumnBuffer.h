@@ -96,7 +96,8 @@ namespace exodbc
 		*			The ColumnBuffer will not take ownership of the passed bufferVariant and will
 		*			not delete it.
 		*			Note that using this constructor you can pass almost any combination of conversions 
-		*			from SQL Types to ODBC C Types to the driver.
+		*			from SQL Types to ODBC C Types to the driver. Bind() will fail if the driver does not
+		*			support the given conversion.
 		* \param sqlCType	The ODBC C Type of the buffer. This value will be forwarded to the driver during SQLBindCol. 
 		* \param ordinalPosition The ordinal position of the column in the table. Numbering starts at 1 (!)
 		* \param bufferPtrVarian Pointer to allocated buffer for the given sqlCType.
@@ -105,7 +106,7 @@ namespace exodbc
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, SQLINTEGER ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize);
+		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize);
 
 
 		~ColumnBuffer();
@@ -288,6 +289,7 @@ namespace exodbc
 		SQLWCHAR*		GetWCharPtr() const;
 
 		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer
+		SQLUSMALLINT m_columnNr;	///< Either set on construction or read from SColumnInfo::m_ordinalPosition
 		bool m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
 		SQLSMALLINT m_bufferType;	///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
 		SQLINTEGER	m_bufferSize;	///< Size of an allocated or set from constructor buffer.
