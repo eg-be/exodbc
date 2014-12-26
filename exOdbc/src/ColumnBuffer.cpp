@@ -32,16 +32,18 @@ namespace exodbc
 		, m_bufferType(0)
 		, m_bufferSize(0)
 		, m_columnNr((SQLUSMALLINT) columnInfo.m_ordinalPosition)
+		, m_haveColumnInfo(true)
 	{
 		exASSERT(m_columnNr > 0);
 		exASSERT(columnInfo.m_sqlDataType != 0);
 
+		m_queryName = m_columnInfo.GetSqlName();
 		m_allocatedBuffer = AllocateBuffer(m_columnInfo);
 		m_haveBuffer = m_allocatedBuffer;
 	}
 
 
-	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize)
+	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName)
 		: m_bound(false)
 		, m_allocatedBuffer(false)
 		, m_haveBuffer(true)
@@ -50,10 +52,13 @@ namespace exodbc
 		, m_bufferSize(bufferSize)
 		, m_columnNr(ordinalPosition)
 		, m_bufferPtr(bufferPtrVariant)
+		, m_haveColumnInfo(false)
+		, m_queryName(queryName)
 	{
 		exASSERT(sqlCType != 0);
 		exASSERT(ordinalPosition > 0);
 		exASSERT(bufferSize > 0);
+		exASSERT(!m_queryName.empty());
 	}
 
 	// Destructor

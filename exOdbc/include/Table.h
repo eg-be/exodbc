@@ -32,6 +32,7 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Database.h"
+#include "ColumnBuffer.h"
 
 // Other headers
 #include "boost/any.hpp"
@@ -142,8 +143,9 @@ namespace exodbc
 	*
 	* A table that queries the database about its columns will always bind all columns.
 	* A table where columns are defined manually will only bind those columns defined.
-	* This is handy if you have a large table and are ony interested in the values of
+	* This is handy if you have a large table and are only interested in the values of
 	* a few columns.
+	* Note if a name is something like columnIndex it will refer to the zero based index.
 	*
 	* The database will always be queried for a table matching the given values in the
 	* constructor, except one of the constructors where a STableInfo structure
@@ -442,12 +444,12 @@ namespace exodbc
 		bool		IsSelectOpen() const { return m_selectQueryOpen; };
 
 
-		bool		GetColumnValue(SQLSMALLINT columnNumber, SQLSMALLINT& smallInt) const;
-		bool		GetColumnValue(SQLSMALLINT columnNumber, SQLINTEGER& i) const;
-		bool		GetColumnValue(SQLSMALLINT columnNumber, SQLBIGINT& bigInt) const;
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const;
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLINTEGER& i) const;
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLBIGINT& bigInt) const;
 
-		bool		GetColumnValue(SQLSMALLINT columnNumber, std::wstring& str) const;
-		bool		GetColumnValue(SQLSMALLINT columnNumber, std::string& str) const;
+		bool		GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const;
+		bool		GetColumnValue(SQLSMALLINT columnIndex, std::string& str) const;
 
 		/*!
 		* \brief	Returns the number of columns this table has.
@@ -460,6 +462,8 @@ namespace exodbc
 		* \return	Numbers of column this table has.
 		*/
 		size_t		GetNumberOfColumns() const { return m_numCols; };
+
+		void		SetColumn(SQLUSMALLINT columnNr, const std::wstring& queryName, SQLSMALLINT sqlCType, BufferPtrVariant pBuffer, SQLLEN bufferSize);
 
 
 		const std::wstring& GetFromClause()      { return m_from; }
@@ -577,7 +581,14 @@ namespace exodbc
 		std::wstring BuildFieldsStatement() const;
 
 
-		const ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnNumber) const;
+		/*!
+		* \brief	Return a defined ColumnBuffer or NULL.
+		* \detailed	Searches the internal map of ColumnBuffers for a ColumnBuffer with
+		*			the given columnIndex (zero based).
+		*			Uses exDEBUG.
+		* \return	ColumnBuffer or NULL if none found.
+		*/
+		const ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
 
 
 		void        setCbValueForColumn(int columnIndex);
@@ -628,7 +639,7 @@ namespace exodbc
 		unsigned int		m_charTrimFlags;			///< Bitmask for the CharTrimOption Flags
 
 		// Column information
-		std::vector<ColumnBuffer*> m_columnBuffers;	///< Created during Open when Columns are read
+		std::map<int, ColumnBuffer*> m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
 		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
 		size_t				m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database

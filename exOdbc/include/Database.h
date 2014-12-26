@@ -451,11 +451,9 @@ namespace exodbc
 		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STablePrivilegesInfo>& privileges);
 
 		/*!
-		 * \fn	bool Database::ReadTableColumnInfo(const STableInfo& table, std::vector<STableColumnInfo>& columns);
-		 *
-		 * \brief	Reads table column information for the passed table.
-		 *
-		 * \param	table		   	The table.
+		 * \brief		Reads table column information for the passed table.
+		 * \detailed	Returned table columns are ordered by TABLE_CAT, TABLE_SCHEM, TABLE_NAME, and ORDINAL_POSITION. 
+		 * \param		table The table.
 		 * \param [in,out]	columns	The columns.
 		 *
 		 * \return	true if it succeeds, false if it fails.
@@ -463,8 +461,6 @@ namespace exodbc
 		bool		ReadTableColumnInfo(const STableInfo& table, std::vector<SColumnInfo>& columns);
 
 		/*!
-		 * \fn	bool exodbc::Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STableColumnInfo>& columns);
-		 *
 		 * \brief	Reads table column information for exactly one table. This method will fail if the passed arguments
 		 * 			do not match exactly one table.
 		 *
