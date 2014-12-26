@@ -31,19 +31,6 @@
 // --------------
 namespace exodbc
 {
-	namespace TestTables
-	{
-		std::wstring GetTableName(const std::wstring& tableName, NameCase nameCase)
-		{
-			return (nameCase == NC_UPPER ? boost::algorithm::to_upper_copy(tableName) : boost::algorithm::to_lower_copy(tableName));
-		}
-
-		std::wstring GetColName(const std::wstring& columnName, NameCase nameCase)
-		{
-			return GetTableName(columnName, nameCase);
-		}
-	}
-
 	// NotExistingTable
 	// ----------------
 	NotExistingTable::NotExistingTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)

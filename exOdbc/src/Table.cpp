@@ -705,16 +705,16 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnNr, const std::wstring& queryName, SQLSMALLINT sqlCType, BufferPtrVariant pBuffer, SQLLEN bufferSize)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize)
 	{
 		exASSERT(m_manualColumns);
-		exASSERT(columnNr >= 0);
-		exASSERT(columnNr < m_numCols);
+		exASSERT(columnIndex >= 0);
+		exASSERT(columnIndex < m_numCols);
 		exASSERT( ! queryName.empty());
 		exASSERT(bufferSize > 0);
 
-		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, columnNr + 1, pBuffer, bufferSize, queryName);
-		m_columnBuffers[columnNr] = pColumnBuffer;
+		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, columnIndex + 1, pBuffer, bufferSize, queryName);
+		m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 
 	/***************************** PRIVATE FUNCTIONS *****************************/
@@ -1102,7 +1102,7 @@ namespace exodbc
 			return false;
 		}
 
-		// If we are asked to create our columns automatically, read the column information
+		// If we are asked to create our columns automatically, read the column information and create the buffers
 		if (!m_manualColumns)
 		{
 			std::vector<SColumnInfo> columns;
@@ -1121,16 +1121,12 @@ namespace exodbc
 			{
 				SColumnInfo colInfo = columns[columnIndex];
 				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_charBindingMode);
-				if (!pColBuff->Bind(m_hStmtSelect))
-				{
-					delete pColBuff;
-					return false;
-				}
 				m_columnBuffers[columnIndex] = pColBuff;
 			}
-			// Prepare the FieldStatement to be used for selects
-			m_fieldsStatement = BuildFieldsStatement();
 		}
+
+		// Prepare the FieldStatement to be used for selects
+		m_fieldsStatement = BuildFieldsStatement();
 
 		if (checkPrivileges)
 		{
@@ -1160,16 +1156,25 @@ namespace exodbc
 			//    return false;
 		}
 
-		if (m_manualColumns)
+		for (std::map<int, ColumnBuffer*>::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
-			// The old wx-way of binding params
-			 // TODO: Replace with new method once done
-			if (!bindCols(*m_hstmtDefault))                   // Selects
+			ColumnBuffer* pBuffer = it->second;
+			if (!pBuffer->Bind(m_hStmtSelect))
+			{
 				return false;
-
-			if (!bindCols(m_hstmtInternal))                   // Internal use only
-				return false;
+			}
 		}
+
+		//if (m_manualColumns)
+		//{
+		//	// The old wx-way of binding params
+		//	 // TODO: Replace with new method once done
+		//	if (!bindCols(*m_hstmtDefault))                   // Selects
+		//		return false;
+
+		//	if (!bindCols(m_hstmtInternal))                   // Internal use only
+		//		return false;
+		//}
 
 		/*
 		* Do NOT bind the hstmtCount cursor!!!

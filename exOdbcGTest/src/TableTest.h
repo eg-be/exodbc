@@ -26,6 +26,7 @@
 namespace exodbc
 {
 	class Table;
+	class MIntTypesTable;
 }
 
 // Structs
@@ -47,6 +48,7 @@ namespace exodbc
 		exodbc::Database*	m_pDb;
 		exodbc::Environment* m_pEnv;
 		exodbc::Table* m_pIntTypesAutoTable;
+		exodbc::MIntTypesTable* m_pIntTypesManualTable;
 
 		SOdbcInfo m_odbcInfo;
 		virtual void SetUp();
