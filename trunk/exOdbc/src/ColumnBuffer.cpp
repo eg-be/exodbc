@@ -120,7 +120,7 @@ namespace exodbc
 			return false;
 		}
 
-		SQLRETURN ret = SQLBindCol(hStmt, (SQLUSMALLINT)m_columnInfo.m_ordinalPosition, m_bufferType, (SQLPOINTER*)pBuffer, m_bufferSize, &m_cb);
+		SQLRETURN ret = SQLBindCol(hStmt, m_columnNr, m_bufferType, (SQLPOINTER*)pBuffer, m_bufferSize, &m_cb);
 		if (ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_STMT(hStmt, ret, SQLBindCol);

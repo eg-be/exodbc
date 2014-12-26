@@ -13,7 +13,7 @@
 
 // Same component headers
 #include "exOdbcGTest.h"
-#include "GenericTestTables.h"
+#include "ManualTestTables.h"
 
 // Other headers
 #include "Environment.h"
@@ -46,6 +46,7 @@ namespace exodbc
 	{
 		// Called for every unit-test
 		m_pIntTypesAutoTable = NULL;
+		m_pIntTypesManualTable = NULL;
 
 		m_odbcInfo = GetParam();
 
@@ -57,19 +58,28 @@ namespace exodbc
 		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
 		ASSERT_TRUE(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
-		// And an Auto-table
+		// And some tables with auto-columns
 		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
 		m_pIntTypesAutoTable = new Table(&m_db, intTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(m_pIntTypesAutoTable->Open(false, true));
+
+		// And some tables with manual-columns
+		m_pIntTypesManualTable = new MIntTypesTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(m_pIntTypesManualTable->Open(false, true));
 	}
 
 
 	void TableTest::TearDown()
 	{
-		if (m_pIntTypesAutoTable && m_pIntTypesAutoTable->IsOpen())
+		if (m_pIntTypesAutoTable)
 		{
 			delete m_pIntTypesAutoTable;
 			m_pIntTypesAutoTable = NULL;
+		}
+		if (m_pIntTypesManualTable)
+		{
+			delete m_pIntTypesManualTable;
+			m_pIntTypesManualTable = NULL;
 		}
 		if (m_db.IsOpen())
 		{
@@ -82,12 +92,13 @@ namespace exodbc
 		}
 	}
 
+
 	// Open
 	// ----
 	TEST_P(TableTest, OpenManualWithoutCheck)
 	{
 		// Open an existing table without checking for privileges or existence
-		IntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(table.Open(false, false));
 
 		// If we pass in the STableInfo directly we should also be able to "open"
@@ -95,15 +106,17 @@ namespace exodbc
 		STableInfo neTableInfo;
 		neTableInfo.m_tableName = L"NotExisting";
 		Table neTable(&m_db, 2, neTableInfo, Table::READ_ONLY);
-		// TODO: Here we must set some columns
+		SQLINTEGER idNotExisting = 0;
+		neTable.SetColumn(0, L"idNotExistring", &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting));
 		EXPECT_TRUE(neTable.Open(false, false));
 		// TODO: So we can prove in the test that we will fail doing a SELECT later
 	}
 
+
 	TEST_P(TableTest, OpenManualCheckExistence)
 	{
 		// Open a table with checking for existence
-		IntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(table.Open(false, true));
 
 		// Open a non-existing table
@@ -114,6 +127,7 @@ namespace exodbc
 			EXPECT_FALSE(neTable.Open(false, true));
 		}
 	}
+
 
 	TEST_P(TableTest, OpenAutoWithoutCheck)
 	{
@@ -138,6 +152,7 @@ namespace exodbc
 		}
 	}
 
+
 	TEST_P(TableTest, OpenAutoCheckExistence)
 	{
 		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
@@ -153,6 +168,7 @@ namespace exodbc
 			EXPECT_FALSE(neTable.Open(false, true));
 		}
 	}
+
 
 	// Select / GetNext
 	// ----------------
@@ -171,6 +187,7 @@ namespace exodbc
 			EXPECT_TRUE(m_db.CommitTrans());
 		}
 	}
+
 
 	TEST_P(TableTest, SelectNext)
 	{
@@ -196,6 +213,7 @@ namespace exodbc
 		}
 	}
 
+
 	TEST_P(TableTest, SelectClose)
 	{
 		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
@@ -220,6 +238,7 @@ namespace exodbc
 			EXPECT_TRUE(m_db.CommitTrans());
 		}
 	}
+
 
 	// Count
 	// -----
@@ -250,9 +269,10 @@ namespace exodbc
 		EXPECT_EQ(2, some);
 	}
 
+
 	// GetValues
 	// ---------
-	TEST_P(TableTest, GetIntValues)
+	TEST_P(TableTest, GetAutoIntValues)
 	{
 		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
 		ASSERT_TRUE(m_pIntTypesAutoTable->IsOpen());
@@ -265,7 +285,7 @@ namespace exodbc
 
 		// We expect 6 Records
 		std::wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select( (boost::wformat(L"%d = 1") %idName).str()));
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select( (boost::wformat(L"%s = 1") %idName).str()));
 		// The first column has a smallint set, we can read that as any int value -32768
 		SQLBIGINT colVal = -32768;
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
@@ -281,7 +301,7 @@ namespace exodbc
 		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 2") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 2") % idName).str()));
 		colVal = 32767;
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
 		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, s));
@@ -296,7 +316,7 @@ namespace exodbc
 		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 3") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 3") % idName).str()));
 		// The 2nd column has a int set, we can read that as int or bigint value -2147483648
 		colVal = INT_MIN;
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
@@ -311,7 +331,7 @@ namespace exodbc
 		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 4") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 4") % idName).str()));
 		colVal = 2147483647;
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
 		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(2, s));
@@ -324,7 +344,7 @@ namespace exodbc
 		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 5") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 5") % idName).str()));
 		// The 3rd column has a bigint set, we can read that as bigint value -9223372036854775808
 		colVal = (-9223372036854775807 - 1);
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
@@ -337,7 +357,7 @@ namespace exodbc
 		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%d = 6") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 6") % idName).str()));
 		colVal = 9223372036854775807;
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
 		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(3, s));
@@ -355,6 +375,46 @@ namespace exodbc
 			EXPECT_TRUE(m_db.CommitTrans());
 		}
 	}
+
+
+	TEST_P(TableTest, GetManualIntValues)
+	{
+		ASSERT_TRUE(m_pIntTypesManualTable != NULL);
+		ASSERT_TRUE(m_pIntTypesManualTable->IsOpen());
+
+		// Just check that the buffers are correct
+		std::wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
+		EXPECT_EQ(-32768, m_pIntTypesManualTable->m_smallInt);
+
+		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
+		EXPECT_EQ(32767, m_pIntTypesManualTable->m_smallInt);
+
+		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
+		EXPECT_EQ(INT_MIN, m_pIntTypesManualTable->m_int);
+
+		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
+		EXPECT_EQ(2147483647, m_pIntTypesManualTable->m_int);
+
+		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
+		EXPECT_EQ((-9223372036854775807 - 1), m_pIntTypesManualTable->m_bigInt);
+
+		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
+		EXPECT_EQ(9223372036854775807, m_pIntTypesManualTable->m_bigInt);
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
+
 
 	TEST_P(TableTest, GetWCharValues)
 	{

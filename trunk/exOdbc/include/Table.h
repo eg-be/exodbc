@@ -463,7 +463,7 @@ namespace exodbc
 		*/
 		size_t		GetNumberOfColumns() const { return m_numCols; };
 
-		void		SetColumn(SQLUSMALLINT columnNr, const std::wstring& queryName, SQLSMALLINT sqlCType, BufferPtrVariant pBuffer, SQLLEN bufferSize);
+		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize);
 
 
 		const std::wstring& GetFromClause()      { return m_from; }
