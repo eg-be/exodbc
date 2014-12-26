@@ -86,6 +86,9 @@ namespace exodbc
 				case SQL_C_WCHAR:
 					delete[] GetWCharPtr();
 					break;
+				case SQL_C_DOUBLE:
+					delete[] GetDoublePtr();
+					break;
 				default:
 					exASSERT(false);
 				}
@@ -166,6 +169,9 @@ namespace exodbc
 		case SQL_C_WCHAR:
 			m_bufferPtr = new SQLWCHAR[m_bufferSize];
 			break;
+		case SQL_C_DOUBLE:
+			m_bufferPtr = new SQLDOUBLE(0.0);
+			break;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
 			failed = true;
@@ -196,6 +202,8 @@ namespace exodbc
 			return static_cast<void*>(boost::get<SQLCHAR*>(m_bufferPtr));
 		case SQL_C_WCHAR:
 			return static_cast<void*>(boost::get<SQLWCHAR*>(m_bufferPtr));
+		case SQL_C_DOUBLE:
+			return static_cast<void*>(boost::get<SQLDOUBLE*>(m_bufferPtr));
 		default:
 			exASSERT(false);
 		}
@@ -243,6 +251,8 @@ namespace exodbc
 			{
 				exASSERT(false);
 			}
+		case SQL_C_DOUBLE:
+			return sizeof(SQLDOUBLE);
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -282,6 +292,9 @@ namespace exodbc
 			{
 				return SQL_C_CHAR;
 			}
+		case SQL_DOUBLE:
+		case SQL_FLOAT:
+			return SQL_C_DOUBLE;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -390,6 +403,14 @@ namespace exodbc
 
 		// Could throw boost::bad_get
 		return boost::get<SQLWCHAR*>(m_bufferPtr);
+	}
+
+	SQLDOUBLE* ColumnBuffer::GetDoublePtr() const
+	{
+		exASSERT(m_haveBuffer);
+
+		// Could throw boost::bad_get
+		return boost::get<SQLDOUBLE*>(m_bufferPtr);
 	}
 
 

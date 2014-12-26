@@ -34,7 +34,7 @@ namespace exodbc
 	// --------
 
 	// The Variant we use to store pointers to the actual buffer
-	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, SQLCHAR*, SQLWCHAR*> BufferPtrVariant;
+	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, SQLCHAR*, SQLWCHAR*, SQLDOUBLE*> BufferPtrVariant;
 
 	// Structs
 	// -------
@@ -66,6 +66,8 @@ namespace exodbc
 	* SQL_BIGINT				| SQLBIGINT*
 	* SQL_CHAR / SQL_VARCHAR	| SQLCHAR* [1]
 	* SQL_WCHAR / SQL_WVARCHAR	| SQLWCHAR* [1]
+	* SQL_DOUBLE				| SQLDOUBLE*
+	* SQL_FLOAT					| SQLDOUBLE*
 	* 
 	* [1] There are options about wide-chars: You can either enforce that a column
 	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
@@ -322,6 +324,7 @@ namespace exodbc
 		SQLBIGINT*		GetBigIntPtr() const;
 		SQLCHAR*		GetCharPtr() const;
 		SQLWCHAR*		GetWCharPtr() const;
+		SQLDOUBLE*		GetDoublePtr() const;
 
 		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer, only available if m_haveColumnInfo is true.
 		bool		m_haveColumnInfo;	///< True if m_columnInfo contains a valid info-object.
@@ -385,6 +388,7 @@ namespace exodbc
 	* It will throw a CastException on the following source-types:
 	* - SQLCHAR*
 	* - SQLWCHAR*
+	* - SQLDOUBLE*
 	* 
 	*/
 	class BigintVisitor
@@ -396,6 +400,7 @@ namespace exodbc
 		SQLBIGINT operator()(SQLBIGINT* bigInt) const { return *bigInt; };
 		SQLBIGINT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_SBIGINT); };
 	};	// class BigintVisitor
 
 
@@ -410,6 +415,7 @@ namespace exodbc
 	* - SQLINTEGER*
 	* - SQLBIGINT*
 	* - SQLWCHAR*
+	* - SQLDOUBLE*
 	* 
 	* It will throw a CastException on the following source-types:
 	* - SQLCHAR*
@@ -424,6 +430,7 @@ namespace exodbc
 		std::wstring operator()(SQLBIGINT* bigInt) const { return (boost::wformat(L"%d") % *bigInt).str(); };
 		std::wstring operator()(SQLCHAR* pChar) const{ throw CastException(SQL_C_CHAR, SQL_C_WCHAR); };
 		std::wstring operator()(SQLWCHAR* pWChar) const { return pWChar; };
+		std::wstring operator()(SQLDOUBLE* pDouble) const { return (boost::wformat(L"%f") % *pDouble).str(); };
 	};	// class WStringVisitor
 
 
@@ -438,6 +445,7 @@ namespace exodbc
 	* - SQLINTEGER*
 	* - SQLBIGINT*
 	* - SQLCHAR*
+	* - SQLDOUBLE*
 	*
 	* It will throw a CastException on the following source-types:
 	* - SQLWCHAR*
@@ -452,6 +460,7 @@ namespace exodbc
 		std::string operator()(SQLBIGINT* bigInt) const { return (boost::format("%d") % *bigInt).str(); };
 		std::string operator()(SQLCHAR* pChar) const { return (char*)pChar; };
 		std::string operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_CHAR); };
+		std::string operator()(SQLDOUBLE* pDouble) const { return (boost::format("%f") % *pDouble).str(); };
 	};	// class StringVisitor
 
 }

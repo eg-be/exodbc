@@ -244,7 +244,7 @@ namespace exodbc
 	// -----
 	TEST_P(TableTest, Count)
 	{
-		FloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(table.Open(false, true));
 
 		size_t all;
