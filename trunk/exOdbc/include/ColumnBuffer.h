@@ -13,7 +13,6 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Helpers.h"
-#include "Table.h"
 
 // Other headers
 #include "boost/variant.hpp"
@@ -51,7 +50,8 @@ namespace exodbc
 	* A ColumnBuffer can allocate a corresponding buffer-type automatically
 	* by reading the SQL-type info from the passed SColumnInfo, or by using a
 	* buffer provided during construction. In that case you must also pass the
-	* ODBC C-Type of the buffer.
+	* ODBC C-Type of the buffer and the query name of the corresponding column.
+	*
 	* Last there is an option to try to let the ODBC-driver to convert everything
 	* to a (w)string.
 	*
@@ -77,7 +77,7 @@ namespace exodbc
 	public:
 		/*!
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
-		*			using the datatype-information from the passed SColumnInfo.
+		*			using the data type information from the passed SColumnInfo.
 		* \detailed	The constructor will try to allocate a corresponding buffer.
 		* \param columnInfo	The Information about the column we bind.
 		* \param mode		How Character columns should be bound
@@ -102,11 +102,12 @@ namespace exodbc
 		* \param ordinalPosition The ordinal position of the column in the table. Numbering starts at 1 (!)
 		* \param bufferPtrVarian Pointer to allocated buffer for the given sqlCType.
 		* \param bufferSize	Size of the allocated buffer.
+		* \param queryName Name of the column that corresponds to this buffer.
 		*
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize);
+		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName);
 
 
 		/*!
@@ -115,12 +116,14 @@ namespace exodbc
 		*			for the passed stringLen (+ trailing zero).
 		* \param ordinalPosition	The ordinal position of the column in the table. Numbering starts at 1 (!)
 		* \param stringLen			The String-length of the buffer. This is not byte-length!
-		* \param mode				Determines if char* or wchar* buffers are allocated. You are not allowed
+		* \param mode				Determines if a char* or a wchar* buffer is allocated. You are not allowed
 		*							to use CharBindingMode::BIND_AS_REPORTED .
+		* \param queryName			Name of the column that corresponds to this buffer.
+		*
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLUSMALLINT ordinalPosition, SQLLEN stringLen, CharBindingMode mode);
+		ColumnBuffer(SQLUSMALLINT ordinalPosition, SQLLEN stringLen, CharBindingMode mode, const std::wstring& queryName);
 
 
 		~ColumnBuffer();
@@ -182,10 +185,28 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Get the SColumnInfo used within this ColumnBuffer.
-		* \return	SColumnInfo set on this ColumnBuffer.
+		* \brief	Check if a valid SColumnInfo is available for this ColumnBuffer.
+		* \detailed	True if this ColumnBuffer was created by passing a SColumnInfo object.
+		* \return	True if a SColumnInfo can be fetched using GetColumnInfo.
+		* \see		GetColumnInfo()
 		*/
-		SColumnInfo GetColumnInfo() const { return m_columnInfo; };
+		bool HaveColumnInfo() const { return  m_haveColumnInfo; };
+
+
+		/*!
+		* \brief	Get the SColumnInfo used within this ColumnBuffer.
+		* \detailed	Fails if no SColumnInfo has been set on this ColumnBuffer.
+		* \return	SColumnInfo set on this ColumnBuffer.
+		* \see		HaveColumnInfo()
+		*/
+		SColumnInfo GetColumnInfo() const { exASSERT(m_haveColumnInfo);  return m_columnInfo; };
+
+
+		/*!
+		* \brief	Get the query name for this ColumnBuffer.
+		* \return	The query name of the column matching this ColumnBuffer.
+		*/
+		const std::wstring& GetQueryName() const { return m_queryName; };
 
 
 		/*!
@@ -236,7 +257,7 @@ namespace exodbc
 		* \brief	Cast the current value to a std::wstring if possible.
 		* \detailed	Fails if not bound.
 		* \return	Current value as std::wstring.
-		* \throw	CastException If value cannot be casted to an std::wstring.
+		* \throw	CastException If value cannot be casted to a std::wstring.
 		*/
 		operator std::wstring() const;
 
@@ -245,7 +266,7 @@ namespace exodbc
 		* \brief	Cast the current value to a std::wstring if possible.
 		* \detailed	Fails if not bound.
 		* \return	Current value as std::wstring.
-		* \throw	CastException If value cannot be casted to an std::wstring.
+		* \throw	CastException If value cannot be casted to a std::string.
 		*/
 		operator std::string() const;
 
@@ -302,7 +323,9 @@ namespace exodbc
 		SQLCHAR*		GetCharPtr() const;
 		SQLWCHAR*		GetWCharPtr() const;
 
-		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer
+		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer, only available if m_haveColumnInfo is true.
+		bool		m_haveColumnInfo;	///< True if m_columnInfo contains a valid info-object.
+		std::wstring m_queryName;	///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
 		SQLUSMALLINT m_columnNr;	///< Either set on construction or read from SColumnInfo::m_ordinalPosition
 		bool m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
 		bool m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()

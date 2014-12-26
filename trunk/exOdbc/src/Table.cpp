@@ -358,10 +358,11 @@ namespace exodbc
 		exASSERT(m_columnBuffers.size() > 0);
 
 		std::wstring fields = L"";
-		std::vector<ColumnBuffer*>::const_iterator it = m_columnBuffers.begin();
+		std::map<int, ColumnBuffer*>::const_iterator it = m_columnBuffers.begin();
 		while (it != m_columnBuffers.end())
 		{
-			fields += (*it)->GetColumnInfo().GetSqlName();
+			ColumnBuffer* pBuffer = it->second;
+			fields += pBuffer->GetQueryName();
 			++it;
 			if (it != m_columnBuffers.end())
 			{
@@ -373,16 +374,24 @@ namespace exodbc
 	}
 
 
-	const ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnNumber) const
+	const ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnIndex) const
 	{
-		exASSERT(IsOpen());
-		exASSERT(columnNumber < m_columnBuffers.size());
-		if (!IsOpen() || columnNumber >= m_columnBuffers.size())
+		exDEBUG(IsOpen());
+		exDEBUG(columnIndex < m_numCols);
+		exDEBUG(m_columnBuffers.find(columnIndex) != m_columnBuffers.end());
+
+		if (!IsOpen() || columnIndex >= m_numCols)
 		{
 			return NULL;
 		}
 
-		return m_columnBuffers[columnNumber];
+		std::map<int, ColumnBuffer*>::const_iterator it = m_columnBuffers.find(columnIndex);
+		if (it == m_columnBuffers.end())
+		{
+			return NULL;
+		}
+
+		return it->second;
 	}
 
 
@@ -401,10 +410,11 @@ namespace exodbc
 		}
 
 		// Delete ColumnBuffers
-		std::vector<ColumnBuffer*>::iterator it;
+		std::map<int, ColumnBuffer*>::iterator it;
 		for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
-			delete (*it);
+			ColumnBuffer* pBuffer = it->second;
+			delete pBuffer;
 		}
 		m_columnBuffers.clear();
 
@@ -585,9 +595,9 @@ namespace exodbc
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnNumber, SQLSMALLINT& smallInt) const
+	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const
 	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
 		if (!pBuff || pBuff->IsNull())
 			return false;
 
@@ -603,9 +613,9 @@ namespace exodbc
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnNumber, SQLINTEGER& i) const
+	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQLINTEGER& i) const
 	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
 		if (!pBuff || pBuff->IsNull())
 			return false;
 
@@ -621,9 +631,9 @@ namespace exodbc
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnNumber, SQLBIGINT& bigInt) const
+	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQLBIGINT& bigInt) const
 	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
 		if (!pBuff || pBuff->IsNull())
 			return false;
 
@@ -639,9 +649,9 @@ namespace exodbc
 	}
 
 	
-	bool Table::GetColumnValue(SQLSMALLINT columnNumber, std::wstring& str) const
+	bool Table::GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const
 	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
 		if (!pBuff || pBuff->IsNull())
 			return false;
 
@@ -692,6 +702,19 @@ namespace exodbc
 		}
 
 		return true;
+	}
+
+
+	void Table::SetColumn(SQLUSMALLINT columnNr, const std::wstring& queryName, SQLSMALLINT sqlCType, BufferPtrVariant pBuffer, SQLLEN bufferSize)
+	{
+		exASSERT(m_manualColumns);
+		exASSERT(columnNr >= 0);
+		exASSERT(columnNr < m_numCols);
+		exASSERT( ! queryName.empty());
+		exASSERT(bufferSize > 0);
+
+		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, columnNr + 1, pBuffer, bufferSize, queryName);
+		m_columnBuffers[columnNr] = pColumnBuffer;
 	}
 
 	/***************************** PRIVATE FUNCTIONS *****************************/
@@ -1087,23 +1110,25 @@ namespace exodbc
 			{
 				return false;
 			}
+			// Remember column sizes and create ColumnBuffers
 			m_numCols = columns.size();
 			if (m_numCols == 0)
 			{
 				LOG_ERROR((boost::wformat(L"No columns found for table '%s'") %m_tableInfo.GetSqlName()).str());
 				return false;
 			}
-			std::vector<SColumnInfo>::const_iterator it;
-			for (it = columns.begin(); it != columns.end(); it++)
+			for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++)
 			{
-				SColumnInfo colInfo = *it;
+				SColumnInfo colInfo = columns[columnIndex];
 				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_charBindingMode);
 				if (!pColBuff->Bind(m_hStmtSelect))
 				{
+					delete pColBuff;
 					return false;
 				}
-				m_columnBuffers.push_back(pColBuff);
+				m_columnBuffers[columnIndex] = pColBuff;
 			}
+			// Prepare the FieldStatement to be used for selects
 			m_fieldsStatement = BuildFieldsStatement();
 		}
 
