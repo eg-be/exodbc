@@ -369,7 +369,14 @@ namespace exodbc
 			return SQL_C_TYPE_TIMESTAMP;
 #if HAVE_MSODBCSQL_H
 		case SQL_SS_TIME2:
-			return SQL_C_SS_TIME2;
+			if (m_odbcVersion >= OV_3_8)
+			{
+				return SQL_C_SS_TIME2;
+			}
+			else
+			{
+				return SQL_C_TYPE_TIME;
+			}
 #endif
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());

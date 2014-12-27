@@ -557,12 +557,19 @@ namespace exodbc
 		const Environment* GetEnvironment() const { return m_pEnv; };
 
 		/*!
-		* \brief	Read the ODBC version from the connection information.
+		* \brief	Read the ODBC version supported by the driver.
 		* \detailed	Fails if not connected. Does not read the version from the environment
 		*			but from the SDbInfo populated during connecting to the database.
 		* \return	ODBC version or OV_UNKNOWN.
 		*/
-		OdbcVersion GetOdbcVersion() const;
+		OdbcVersion GetDriverOdbcVersion() const;
+
+		/*!
+		* \brief	Determines which ODBC Version to use.
+		* \detailed	Chooses the max ODBC Version that is supported by the environment and the driver.
+		* \return	Max ODBC version supported by driver and env or OV_UNKNOWN.
+		*/
+		OdbcVersion GetMaxSupportedOdbcVersion() const;
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
@@ -580,8 +587,7 @@ namespace exodbc
 		//ColumnInfo*		GetColumns(const std::wstring& tableName, UWORD* numCols, const wchar_t* userID=NULL);
 
 //		int					GetColumnCount(const std::wstring& tableName, const wchar_t* userID=NULL);
-//		const std::wstring&	GetDatabaseName()  {return m_dbInf.m_dbmsName;}
-//		const std::wstring&	GetDriverVersion() {return m_dbInf.driverVer;}
+		const std::wstring&	GetDatabaseName()  {return m_dbInf.m_dbmsName;}
 		const std::wstring& GetDataSource()    {return m_dsn;}
 		const std::wstring& GetDatasourceName(){return m_dsn;}
 		const std::wstring& GetUsername()      {return m_uid;}
