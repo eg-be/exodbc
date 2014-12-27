@@ -753,10 +753,22 @@ namespace exodbc
 		EXPECT_TRUE(env38.HasHenv());
 		Database db38(env38);
 		EXPECT_TRUE(db38.HasHdbc());
-
+		EXPECT_TRUE(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		Table dTable38(&db38, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(dTable38.Open(false, true));
+		EXPECT_TRUE(dTable38.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(dTable38.SelectNext());
+		EXPECT_TRUE(dTable38.GetColumnValue(2, time));
+		EXPECT_EQ(13, time.hour);
+		EXPECT_EQ(55, time.minute);
+		EXPECT_EQ(56, time.second);
 #endif
 
 		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (db38.GetCommitMode() != CM_AUTO_COMMIT && (db38.Dbms() == dbmsDB2 || db38.Dbms() == dbmsMS_SQL_SERVER))
+		{
+			EXPECT_TRUE(db38.CommitTrans());
+		}
 		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
 		{
 			EXPECT_TRUE(m_db.CommitTrans());
