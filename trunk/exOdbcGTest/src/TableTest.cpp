@@ -663,6 +663,8 @@ namespace exodbc
 		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 2") % idName).str()));
 		EXPECT_TRUE(dTable.SelectNext());
 		EXPECT_TRUE(dTable.GetColumnValue(3, timestamp));
+		SQLINTEGER av;
+		bool ok = dTable.SelectColumnAttribute(3, CA_PRECISION, av);
 		if (m_db.Dbms() == dbmsDB2)
 		{
 			EXPECT_EQ((SQLUINTEGER) 1, timestamp.fraction);

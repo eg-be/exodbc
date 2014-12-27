@@ -389,33 +389,35 @@ namespace exodbc
 	// each of these database engines
 	enum DatabaseProduct
 	{
-		dbmsUNIDENTIFIED,	//< Unknown DB
+		dbmsUNIDENTIFIED,	///< Unknown DB
 		//dbmsORACLE,
 		//dbmsSYBASE_ASA,        // Adaptive Server Anywhere
 		//dbmsSYBASE_ASE,        // Adaptive Server Enterprise
-		dbmsMS_SQL_SERVER,	//< Microsoft SQL Server
-		dbmsMY_SQL,			//< MySQL
+		dbmsMS_SQL_SERVER,	///< Microsoft SQL Server
+		dbmsMY_SQL,			///< MySQL
 		//dbmsPOSTGRES,
 		//dbmsACCESS,
 		//dbmsDBASE,
 		//dbmsINFORMIX,
 		//dbmsVIRTUOSO,
-		dbmsDB2,			//< IBM DB2
+		dbmsDB2,			///< IBM DB2
 		//dbmsINTERBASE,
 		//dbmsPERVASIVE_SQL,
 		//dbmsXBASE_SEQUITER,
 		//dbmsFIREBIRD,
 		//dbmsMAXDB,
-		//dbmsFuture1,
-		//dbmsFuture2,
-		//dbmsFuture3,
-		//dbmsFuture4,
-		//dbmsFuture5,
-		//dbmsFuture6,
-		//dbmsFuture7,
-		//dbmsFuture8,
-		//dbmsFuture9,
-		//dbmsFuture10
+	};
+
+	
+	/*!
+	* \enum		ColumnAttribute
+	* \brief	A helper for the arguments in SQLColAttribute.
+	* \see		http://msdn.microsoft.com/en-us/library/ms713558%28v=vs.85%29.aspx
+	* \see		Table::SelectColumnAttribute()
+	*/
+	enum ColumnAttribute
+	{
+		CA_PRECISION = SQL_DESC_PRECISION ///< A numeric value that for a numeric data type denotes the applicable precision, For data types SQL_TYPE_TIME, SQL_TYPE_TIMESTAMP, and all the interval data types that represent a time interval, its value is the applicable precision of the fractional seconds component. 
 	};
 
 
