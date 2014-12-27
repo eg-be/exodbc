@@ -248,13 +248,13 @@ namespace exodbc
 		bool			SetOdbcVersion(OdbcVersion version);		
 
 		/*!
-		 * \fn	OdbcVersion Environment::GetOdbcVersion();
+		 * \fn	OdbcVersion Environment::ReadOdbcVersion();
 		 *
 		 * \brief	Gets ODBC version.
 		 *
 		 * \return	The ODBC version or OV_UNKNOWN if reading the version fails.
 		 */
-		OdbcVersion		GetOdbcVersion() const;
+		OdbcVersion		ReadOdbcVersion() const;
 
 		enum ListMode { All, System, User };
 

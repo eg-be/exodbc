@@ -546,7 +546,7 @@ namespace exodbc
 		exASSERT(hDbc != NULL);
 		SQLSMALLINT bufferSize = 0;
 		SQLRETURN ret = SQLGetInfo(hDbc, fInfoType, NULL, NULL, &bufferSize);
-		if (ret != SQL_SUCCESS)
+		if ( ! SQL_SUCCEEDED(ret))
 		{
 			LOG_ERROR_DBC_MSG(hDbc, ret, SQLGetInfo, (boost::wformat(L"GetInfo for fInfoType %d failed") % fInfoType).str());
 			return false;
@@ -562,7 +562,7 @@ namespace exodbc
 		bool ok = GetInfo(hDbc, fInfoType, (SQLPOINTER)buff, bufferSize, &cb);
 		if (ok)
 		{
-			sValue.assign(buff);
+			sValue = buff;
 		}
 		delete[] buff;
 		return ok;

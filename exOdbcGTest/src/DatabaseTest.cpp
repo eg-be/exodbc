@@ -132,7 +132,7 @@ namespace exodbc
 
 		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
 		{
-#if defined HAVE_MSODBCSQL_H
+#if HAVE_MSODBCSQL_H
 			tiMode = TI_SNAPSHOT;
 			EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
 			tiMode = m_db.ReadTransactionIsolationMode();
@@ -339,7 +339,7 @@ namespace exodbc
 				EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 				EXPECT_FALSE(table2.GetNext());
 #else
-				LOG_WARNING(L"Test runs agains MS SQL Server but HAVE_MSODBCSQL_H is not defined. Cannot run test without setting Transaction Mode to Snapshot, or the test would block");
+				LOG_WARNING(L"Test runs agains MS SQL Server but HAVE_MSODBCSQL_H is not defined to 1. Cannot run test without setting Transaction Mode to Snapshot, or the test would block");
 				EXPECT_TRUE(false);
 #endif
 			}

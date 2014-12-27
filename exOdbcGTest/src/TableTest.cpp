@@ -52,7 +52,8 @@ namespace exodbc
 
 		// Set up Env
 		ASSERT_TRUE(m_env.AllocHenv());
-		ASSERT_TRUE(m_env.SetOdbcVersion(OV_3));
+		// Try to set to the highest version available: We need that for the tests to run correct
+		ASSERT_TRUE(m_env.SetOdbcVersion(OV_3_8));
 
 		// And database
 		ASSERT_TRUE(m_db.AllocateHdbc(m_env));

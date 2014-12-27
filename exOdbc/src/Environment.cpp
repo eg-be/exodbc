@@ -213,7 +213,7 @@ namespace exodbc
 	}
 
 
-	OdbcVersion Environment::GetOdbcVersion() const
+	OdbcVersion Environment::ReadOdbcVersion() const
 	{
 		unsigned long value = 0;
 		SQLRETURN ret = SQLGetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);

@@ -227,7 +227,7 @@ namespace exodbc
 		 * \param	pEnv		The Environment to use to create this database and its connection.
 		 *						Do not free the Environment before you free the Database.
 		*/
-		Database(const Environment* const pEnv);
+		Database(const Environment* pEnv);
 		
 		~Database();
 
@@ -475,8 +475,6 @@ namespace exodbc
 		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<SColumnInfo>& columns);
 
 		/*!
-		 * \fn	bool Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<DbCatalogTable>& tables);
-		 *
 		 * \brief	Searches for tables using SQLTables. If any of the parameters passed is empty, SQLTables will be called
 		 * 			with a NULL value for that parameter, which indicates that we do not care about that param.
 		 * 			The attribute SQL_ATTR_METADATA_ID should default to FALSE, so all parameters are treated as pattern value
@@ -496,13 +494,11 @@ namespace exodbc
 		/*!
 		* \brief	Searches for tables that match the passed arguments, return true if exactly one such table is found.
 		* 			The table that matches is copied to the argument table.
-		*
 		* \param	tableName		  	Name of the table.
 		* \param	schemaName		  	Name of the schema.
 		* \param	catalogName		  	Name of the catalog.
 		* \param	tableType		  	Table Type name.
 		* \param [in,out]	table	  	The table.
-		*
 		* \return	true if exactly one table matches the passed search-criterias name, schema and catalog, false else.
 		*/
 		bool			FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, STableInfo& table);
@@ -511,7 +507,6 @@ namespace exodbc
 		/*!
 		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT. The internal flag
 		 * 			m_commitMode is updated with the value red from the database.
-		 *
 		 * \return	CM_UNKNOWN if fails, else the mode currently set
 		 */
 		CommitMode		ReadCommitMode();
@@ -521,9 +516,7 @@ namespace exodbc
 		 * 			This will also update the internal flag m_commitMode, if changing the mode
 		 * 			was successful.
 		 * \see		GetCommitMode()
-		 *
 		 * \param	mode	The mode to set.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		SetCommitMode(CommitMode mode);
@@ -531,14 +524,12 @@ namespace exodbc
 		/*!
 		 * \brief	Gets transaction mode from the internally cached value.
 		 * \see		SetCommitMode()
-		 *
 		 * \return	The transaction mode.
 		 */
 		CommitMode GetCommitMode() { return m_commitMode; };
 
 		/*!
 		* \brief	Queries the database for the attribute SQL_TXN_ISOLATION.
-		*
 		* \return	TI_UNKNOWN if fails, else the mode currently set
 		*/
 		TransactionIsolationMode ReadTransactionIsolationMode();
@@ -547,22 +538,31 @@ namespace exodbc
 		* \brief	Sets transaction mode on the database, using the attribute SQL_TXN_ISOLATION.
 		*			Calling this method will first close the internal statement-handle.
 		*			If the transaction mode is set to TM_MANUAL it will then commit any ongoing transaction.
-		*			
-		*
 		* \param	mode	The mode to set.
-		*
 		* \return	true if it succeeds, false if it fails.
 		*/
 		bool		SetTransactionIsolationMode(TransactionIsolationMode mode);
 
 		/*!
 		* \brief	Returns true if the database supports the mode passed.
-		*
 		* \param	mode	The mode to test
-		*
 		* \return	true if mode supported by database.
 		*/
 		bool		CanSetTransactionIsolationMode(TransactionIsolationMode mode);
+
+		/*!
+		* \brief	Get the environment used to Allocate this Database handle.
+		* \return	NULL if AllocHdbc() was not called with success.
+		*/
+		const Environment* GetEnvironment() const { return m_pEnv; };
+
+		/*!
+		* \brief	Read the ODBC version from the connection information.
+		* \detailed	Fails if not connected. Does not read the version from the environment
+		*			but from the SDbInfo populated during connecting to the database.
+		* \return	ODBC version or OV_UNKNOWN.
+		*/
+		OdbcVersion GetOdbcVersion() const;
 
 		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
@@ -580,15 +580,15 @@ namespace exodbc
 		//ColumnInfo*		GetColumns(const std::wstring& tableName, UWORD* numCols, const wchar_t* userID=NULL);
 
 //		int					GetColumnCount(const std::wstring& tableName, const wchar_t* userID=NULL);
-		const wchar_t*		GetDatabaseName()  {return m_dbInf.m_dbmsName;}
-		const wchar_t*		GetDriverVersion() {return m_dbInf.driverVer;}
+//		const std::wstring&	GetDatabaseName()  {return m_dbInf.m_dbmsName;}
+//		const std::wstring&	GetDriverVersion() {return m_dbInf.driverVer;}
 		const std::wstring& GetDataSource()    {return m_dsn;}
 		const std::wstring& GetDatasourceName(){return m_dsn;}
 		const std::wstring& GetUsername()      {return m_uid;}
 		const std::wstring& GetPassword()      {return m_authStr;}
 		const std::wstring& GetConnectionInStr()  {return m_inConnectionStr;}
 		const std::wstring& GetConnectionOutStr() {return m_outConnectionStr;}
-		bool            IsOpen()           {return m_dbIsOpen;}
+		bool            IsOpen() const           {return m_dbIsOpen;}
 		bool            OpenedWithConnectionString() {return m_dbOpenedWithConnectionString;}
 		bool			HasHdbc()			{ return m_hdbc != SQL_NULL_HDBC; };
 		HDBC            GetHDBC()          {return m_hdbc;}
@@ -664,8 +664,9 @@ namespace exodbc
 //		wxDbSqlLogState		m_sqlLogState;     // On or Off
 		bool				m_fwdOnlyCursors;
 		DatabaseProduct				m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
+		const Environment*		m_pEnv;				///< Environment used to create this Database
 
-		// ODBC handles
+		// ODBC handles created by the Database
 		HDBC  m_hdbc;        ///< ODBC DB Connection handle
 		HSTMT m_hstmt;       ///< ODBC Statement handle used for all internal functions except ExecSql()
 		HSTMT m_hstmtExecSql;	///< ODBC Statement handle used for the function ExecSql()

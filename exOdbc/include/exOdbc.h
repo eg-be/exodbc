@@ -28,7 +28,7 @@
 #include <sqlext.h>
 #include <sqlucode.h>
 #include <odbcinst.h>
-#if defined HAVE_MSODBCSQL_H
+#if HAVE_MSODBCSQL_H
 	#include "msodbcsql.h"
 #endif
 
@@ -110,42 +110,47 @@ namespace exodbc
 	{
 		SDbInfo();
 
+		~SDbInfo()
+		{
+			int p = 3;
+		}
+
 		// [Output] Pointer to a buffer in which to return the information. Depending on the InfoType requested, 
 		// the information returned will be one of the following: a null-terminated character string, an SQLUSMALLINT value, 
 		// an SQLUINTEGER bitmask, an SQLUINTEGER flag, a SQLUINTEGER binary value, or a SQLULEN value.
 		// See: http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
 
-		SQLWCHAR m_dbmsName[SQL_MAX_DSN_LENGTH + 1];		// Name of the dbms product
-		SQLWCHAR m_dbmsVer[64];							// Version # of the dbms product
-		SQLWCHAR m_driverName[40];						// Driver name
-		SQLWCHAR m_odbcVer[60];							// ODBC version of the driver
-		SQLWCHAR drvMgrOdbcVer[60];						// ODBC version of the driver manager
-		SQLWCHAR driverVer[60];							// Driver version
-		SQLWCHAR serverName[80];						// Server Name, typically a connect string
-		SQLWCHAR databaseName[128];						// Database filename
-		SQLWCHAR outerJoins[2];							// Indicates whether the data source supports outer joins
-		SQLWCHAR procedureSupport[2];					// Indicates whether the data source supports stored procedures
-		SQLWCHAR accessibleTables[2];					// Indicates whether the data source only reports accessible tables in SQLTables.
-		SQLUSMALLINT  maxConnections;					// Maximum # of connections the data source supports
-		SQLUSMALLINT  maxStmts;							// Maximum # of HSTMTs per HDBC
-		SQLUSMALLINT cliConfLvl;						// Indicates whether the data source is SAG compliant
-		SQLUSMALLINT cursorCommitBehavior;				// Indicates how cursors are affected by a db commit
-		SQLUSMALLINT cursorRollbackBehavior;			// Indicates how cursors are affected by a db rollback
-		SQLUSMALLINT supportNotNullClause;				// Indicates if data source supports NOT NULL clause
-		SQLWCHAR supportIEF[2];							// Integrity Enhancement Facility (Referential Integrity)
-		SQLUINTEGER txnIsolation;						// Default transaction isolation level supported by the driver
-		SQLUINTEGER txnIsolationOptions;				// Transaction isolation level options available
-		SQLINTEGER posOperations;						// Position operations supported in SQLSetPos
-		SQLINTEGER posStmts;							// An SQLINTEGER bitmask enumerating the supported positioned SQL statements.
-		SQLUINTEGER scrollOptions;						// Scroll Options supported for scrollable cursors
-		SQLUSMALLINT txnCapable;						// Indicates if the data source supports transactions
+		std::wstring m_dbmsName;						///< Name of the dbms product
+		std::wstring m_dbmsVer;							///< Version # of the dbms product
+		std::wstring m_driverName;						///< Driver name
+		std::wstring m_odbcVer;							///< ODBC version of the driver
+		std::wstring drvMgrOdbcVer;						///< ODBC version of the driver manager
+		std::wstring driverVer;							///< Driver version
+		std::wstring serverName;						///< Server Name, typically a connect string
+		std::wstring databaseName;						///< Database filename
+		std::wstring outerJoins;						///< Indicates whether the data source supports outer joins
+		std::wstring procedureSupport;					///< Indicates whether the data source supports stored procedures
+		std::wstring accessibleTables;					///< Indicates whether the data source only reports accessible tables in SQLTables.
+		SQLUSMALLINT  maxConnections;					///< Maximum # of connections the data source supports
+		SQLUSMALLINT  maxStmts;							///< Maximum # of HSTMTs per HDBC
+		SQLUSMALLINT cliConfLvl;						///< Indicates whether the data source is SAG compliant
+		SQLUSMALLINT cursorCommitBehavior;				///< Indicates how cursors are affected by a db commit
+		SQLUSMALLINT cursorRollbackBehavior;			///< Indicates how cursors are affected by a db rollback
+		SQLUSMALLINT supportNotNullClause;				///< Indicates if data source supports NOT NULL clause
+		std::wstring supportIEF;						///< Integrity Enhancement Facility (Referential Integrity)
+		SQLUINTEGER txnIsolation;						///< Default transaction isolation level supported by the driver
+		SQLUINTEGER txnIsolationOptions;				///< Transaction isolation level options available
+		SQLINTEGER posOperations;						///< Position operations supported in SQLSetPos
+		SQLINTEGER posStmts;							///< An SQLINTEGER bitmask enumerating the supported positioned SQL statements.
+		SQLUINTEGER scrollOptions;						///< Scroll Options supported for scrollable cursors
+		SQLUSMALLINT txnCapable;						///< Indicates if the data source supports transactions
 		// TODO: Connection attribute
 		//			UDWORD loginTimeout;                             // Number seconds to wait for a login request
 		SQLUSMALLINT  maxCatalogNameLen;				///< Max length of a catalog name. Can be 0 if no limit, or limit is unknown
 		SQLUSMALLINT  maxSchemaNameLen;					///< Max length of a schema name. Can be 0 if no limit, or limit is unknown
 		SQLUSMALLINT  maxTableNameLen;					///< Max length of a table name. Can be 0 if no limit, or limit is unknown
 		SQLUSMALLINT	m_maxColumnNameLen;				///< Max length of a column name. Can be 0 if no limit, or limit is unknown
-		SQLWCHAR		searchPatternEscape[2];			///< SQL_SEARCH_PATTERN_ESCAPE: How to escape string-search patterns in pattern-value arguments in catalog functions
+		std::wstring		searchPatternEscape;			///< SQL_SEARCH_PATTERN_ESCAPE: How to escape string-search patterns in pattern-value arguments in catalog functions
 		std::wstring ToStr() const;
 
 		SQLUSMALLINT GetMaxCatalogNameLen() const;
@@ -354,7 +359,7 @@ namespace exodbc
 		TI_READ_COMMITTED = SQL_TXN_READ_COMMITTED,
 		TI_REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,
 		TI_SERIALIZABLE = SQL_TXN_SERIALIZABLE
-#if defined HAVE_MSODBCSQL_H
+#if HAVE_MSODBCSQL_H
 		, TI_SNAPSHOT = SQL_TXN_SS_SNAPSHOT
 #endif
 	};

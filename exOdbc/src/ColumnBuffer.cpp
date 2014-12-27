@@ -23,7 +23,7 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode)
+	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode, OdbcVersion odbcVersion)
 		: m_columnInfo(columnInfo)
 		, m_bound(false)
 		, m_allocatedBuffer(false)
@@ -33,6 +33,7 @@ namespace exodbc
 		, m_bufferSize(0)
 		, m_columnNr((SQLUSMALLINT) columnInfo.m_ordinalPosition)
 		, m_haveColumnInfo(true)
+		, m_odbcVersion(odbcVersion)
 	{
 		exASSERT(m_columnNr > 0);
 		exASSERT(columnInfo.m_sqlDataType != 0);
@@ -54,6 +55,7 @@ namespace exodbc
 		, m_bufferPtr(bufferPtrVariant)
 		, m_haveColumnInfo(false)
 		, m_queryName(queryName)
+		, m_odbcVersion(OV_UNKNOWN)
 	{
 		exASSERT(sqlCType != 0);
 		exASSERT(ordinalPosition > 0);
@@ -101,6 +103,11 @@ namespace exodbc
 				case SQL_C_TIMESTAMP:
 					delete GetTimestampPtr();
 					break;
+#if HAVE_MSODBCSQL_H
+				case SQL_C_SS_TIME2:
+					delete GetTime2Ptr();
+					break;
+#endif
 				default:
 					exASSERT(false);
 				}
@@ -193,6 +200,11 @@ namespace exodbc
 		case SQL_C_TYPE_TIMESTAMP:
 			m_bufferPtr = new SQL_TIMESTAMP_STRUCT;
 			break;
+#if HAVE_MSODBCSQL_H
+		case SQL_C_SS_TIME2:
+			m_bufferPtr = new SQL_SS_TIME2_STRUCT;
+			break;
+#endif
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
 			failed = true;
@@ -234,6 +246,10 @@ namespace exodbc
 		case SQL_C_TYPE_TIMESTAMP:
 		case SQL_C_TIMESTAMP:
 			return static_cast<void*>(boost::get<SQL_TIMESTAMP_STRUCT*>(m_bufferPtr));
+#if HAVE_MSODBCSQL_H
+		case SQL_C_SS_TIME2:
+			return static_cast<void*>(boost::get<SQL_SS_TIME2_STRUCT*>(m_bufferPtr));
+#endif
 		default:
 			exASSERT(false);
 		}
@@ -293,6 +309,11 @@ namespace exodbc
 		case SQL_C_TIMESTAMP:
 			return sizeof(SQL_TIMESTAMP_STRUCT);
 			break;
+#if HAVE_MSODBCSQL_H
+		case SQL_C_SS_TIME2:
+			return sizeof(SQL_SS_TIME2_STRUCT);
+			break;
+#endif
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -346,6 +367,10 @@ namespace exodbc
 //		case SQL_TIMESTAMP:
 		case SQL_TYPE_TIMESTAMP:
 			return SQL_C_TYPE_TIMESTAMP;
+#if HAVE_MSODBCSQL_H
+		case SQL_SS_TIME2:
+			return SQL_C_SS_TIME2;
+#endif
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -537,6 +562,53 @@ namespace exodbc
 		// Could throw boost::bad_get
 		return boost::get<SQL_TIMESTAMP_STRUCT*>(m_bufferPtr);
 	}
+
+#if HAVE_MSODBCSQL_H
+	SQL_SS_TIME2_STRUCT* ColumnBuffer::GetTime2Ptr() const
+	{
+		exASSERT(m_haveBuffer);
+
+		// Could throw boost::bad_get
+		return boost::get<SQL_SS_TIME2_STRUCT*>(m_bufferPtr);
+	}
+#endif
+
+
+	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_TIME_STRUCT* pTime) const
+	{
+		SQL_TIMESTAMP_STRUCT timestamp; 
+		ZeroMemory(&timestamp, sizeof(timestamp));
+		timestamp.hour = pTime->hour; 
+		timestamp.minute = pTime->minute;
+		timestamp.second = pTime->second; 
+		return timestamp;
+	}
+
+
+	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_DATE_STRUCT* pDate) const 
+	{ 
+		SQL_TIMESTAMP_STRUCT timestamp; 
+		ZeroMemory(&timestamp, sizeof(timestamp)); 
+		timestamp.day = pDate->day; 
+		timestamp.month = pDate->month;
+		timestamp.year = pDate->year;
+		return timestamp; 
+	};
+
+
+#if HAVE_MSODBCSQL_H
+	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_SS_TIME2_STRUCT* pTime) const 
+	{ 
+		SQL_TIMESTAMP_STRUCT timestamp; 
+		ZeroMemory(&timestamp, sizeof(timestamp)); 
+		timestamp.hour = pTime->hour; 
+		timestamp.minute = pTime->minute; 
+		timestamp.second = pTime->second; 
+		timestamp.fraction = pTime->fraction; 
+		return timestamp; 
+	};
+#endif
+
 
 	// Interfaces
 	// ----------

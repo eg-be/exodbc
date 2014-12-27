@@ -27,24 +27,12 @@ namespace exodbc {
 	// --------------
 	SDbInfo::SDbInfo()
 	{
-		m_dbmsName[0] = 0;
-		m_dbmsVer[0] = 0;
-		m_driverName[0] = 0;
-		m_odbcVer[0] = 0;
-		drvMgrOdbcVer[0] = 0;
-		driverVer[0] = 0;
-		serverName[0] = 0;
-		databaseName[0] = 0;
-		outerJoins[0] = 0;
-		procedureSupport[0] = 0;
-		accessibleTables[0] = 0;
 		maxConnections = 0;
 		maxStmts = 0;
 		cliConfLvl = 0;
 		cursorCommitBehavior = 0;
 		cursorRollbackBehavior = 0;
 		supportNotNullClause = 0;
-		supportIEF[0] = 0;
 		txnIsolation = 0;
 		txnIsolationOptions = 0;
 		posOperations = 0;
@@ -54,7 +42,6 @@ namespace exodbc {
 		maxCatalogNameLen = 0;
 		maxSchemaNameLen = 0;
 		maxTableNameLen = 0;
-		searchPatternEscape[0] = 0;
 	}
 
 	std::wstring SDbInfo::ToStr() const

@@ -93,9 +93,9 @@ namespace exodbc
 		EXPECT_TRUE(env_v3.SetOdbcVersion(OV_3));
 		EXPECT_TRUE(env_v3_80.SetOdbcVersion(OV_3_8));
 
-		EXPECT_EQ(SQL_OV_ODBC2, env_v2.GetOdbcVersion());
-		EXPECT_EQ(SQL_OV_ODBC3, env_v3.GetOdbcVersion());
-		EXPECT_EQ(SQL_OV_ODBC3_80, env_v3_80.GetOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC2, env_v2.ReadOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC3, env_v3.ReadOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC3_80, env_v3_80.ReadOdbcVersion());
 	}
 
 	TEST_P(EnvironmentTest, ListDataSources)
