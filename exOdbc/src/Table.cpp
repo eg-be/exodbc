@@ -579,7 +579,7 @@ namespace exodbc
 		exASSERT(IsSelectOpen());
 		
 		SQLRETURN ret = SQLFetch(m_hStmtSelect);
-		if ( ! SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA)
+		if ( ! (SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
 		{
 			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFetch);
 		}

@@ -643,6 +643,37 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, DISABLED_GetTimestampFractionWithLeadingZeros)
+	{
+		// TODO Disabled because I dont get it how to work with leading zeros.
+		// fractions cannot be used so far
+		if (m_db.Dbms() == dbmsMY_SQL)
+		{
+			// mysql has no fractions (?)
+			return;
+		}
+
+		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(dTable.Open(false, true));
+
+		using namespace boost::algorithm;
+		SQL_TIMESTAMP_STRUCT timestamp;
+		std::wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(dTable.SelectNext());
+		EXPECT_TRUE(dTable.GetColumnValue(3, timestamp));
+		if (m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_EQ((SQLUINTEGER) 1, timestamp.fraction);
+		}
+		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			EXPECT_EQ((SQLUINTEGER) 10, timestamp.fraction);
+		}
+	}
+
+
 	TEST_P(TableTest, GetAutoDateValues)
 	{
 		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
@@ -691,6 +722,21 @@ namespace exodbc
 			EXPECT_EQ(0, timestamp.fraction);
 		}
 
+		//EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		//EXPECT_TRUE(dTable.SelectNext());
+		//EXPECT_TRUE(dTable.GetColumnValue(3, timestamp));
+		//if (m_db.Dbms() == dbmsDB2)
+		//{
+		//	EXPECT_EQ(0034, timestamp.fraction);
+		//}
+		//else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		//{
+		//	EXPECT_EQ(010, timestamp.fraction);
+		//}
+		//else
+		//{
+		//	EXPECT_EQ(0, timestamp.fraction);
+		//}
 
 		// MS SQL Server has a new SQL_TIME2_STRUCT if ODBC version is >= 3.8
 #if HAVE_MSODBCSQL_H
