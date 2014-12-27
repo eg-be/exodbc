@@ -204,6 +204,15 @@ namespace exodbc
 			return static_cast<void*>(boost::get<SQLWCHAR*>(m_bufferPtr));
 		case SQL_C_DOUBLE:
 			return static_cast<void*>(boost::get<SQLDOUBLE*>(m_bufferPtr));
+		case SQL_C_TYPE_DATE:
+		case SQL_C_DATE:
+			return static_cast<void*>(boost::get<SQL_DATE_STRUCT*>(m_bufferPtr));
+		case SQL_C_TYPE_TIME:
+		case SQL_C_TIME:
+			return static_cast<void*>(boost::get<SQL_TIME_STRUCT*>(m_bufferPtr));
+		case SQL_C_TYPE_TIMESTAMP:
+		case SQL_C_TIMESTAMP:
+			return static_cast<void*>(boost::get<SQL_TIMESTAMP_STRUCT*>(m_bufferPtr));
 		default:
 			exASSERT(false);
 		}
