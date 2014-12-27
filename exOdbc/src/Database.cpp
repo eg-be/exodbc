@@ -914,6 +914,11 @@ namespace exodbc
 			}
 		}
 #endif
+		// Rollback any ongoing Transaction if in Manual mode
+		if (GetCommitMode() == CM_MANUAL_COMMIT)
+		{
+			RollbackTrans();
+		}
 
 		// Free statement handles
 		if (m_dbIsOpen)

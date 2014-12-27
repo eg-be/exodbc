@@ -168,6 +168,8 @@ namespace exodbc
 	* This class will allocate the Database-Handle that is required
 	* to connect to the Database. It provides methods for opening and closing a
 	* connection to a database - see Open() and Close(). 
+	* If a Database is being closed and CommitMode is set to CM_MANUAL_COMMIT the
+	* Database will Rollback any ongoin transaction first.
 	* There is basic support executing SQL on the Database directly
 	* using the generic ExecSql() and CommitTrans() functions.
 	* The ExecSQL() function uses its own Statement, so it will never be influenced

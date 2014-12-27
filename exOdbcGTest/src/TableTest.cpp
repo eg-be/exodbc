@@ -84,11 +84,11 @@ namespace exodbc
 		}
 		if (m_db.IsOpen())
 		{
-			// Microsoft Sql Server needs a CommitTrans()
-			if (m_db.Dbms() == dbmsMS_SQL_SERVER)
-			{
-				EXPECT_TRUE(m_db.CommitTrans());
-			}
+			//// Microsoft Sql Server needs a CommitTrans()
+			//if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+			//{
+			//	EXPECT_TRUE(m_db.CommitTrans());
+			//}
 			EXPECT_TRUE(m_db.Close());
 		}
 	}
@@ -765,14 +765,14 @@ namespace exodbc
 #endif
 
 		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (db38.GetCommitMode() != CM_AUTO_COMMIT && (db38.Dbms() == dbmsDB2 || db38.Dbms() == dbmsMS_SQL_SERVER))
-		{
-			EXPECT_TRUE(db38.CommitTrans());
-		}
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
+		//if (db38.GetCommitMode() != CM_AUTO_COMMIT && (db38.Dbms() == dbmsDB2 || db38.Dbms() == dbmsMS_SQL_SERVER))
+		//{
+		//	EXPECT_TRUE(db38.CommitTrans());
+		//}
+		//if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		//{
+		//	EXPECT_TRUE(m_db.CommitTrans());
+		//}
 	}
 
 
