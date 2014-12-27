@@ -87,7 +87,19 @@ namespace exodbc
 					delete[] GetWCharPtr();
 					break;
 				case SQL_C_DOUBLE:
-					delete[] GetDoublePtr();
+					delete GetDoublePtr();
+					break;
+				case SQL_C_TYPE_DATE:
+				case SQL_C_DATE:
+					delete GetDatePtr();
+					break;
+				case SQL_C_TYPE_TIME:
+				case SQL_C_TIME:
+					delete GetTimePtr();
+					break;
+				case SQL_C_TYPE_TIMESTAMP:
+				case SQL_C_TIMESTAMP:
+					delete GetTimestampPtr();
 					break;
 				default:
 					exASSERT(false);
@@ -171,6 +183,15 @@ namespace exodbc
 			break;
 		case SQL_C_DOUBLE:
 			m_bufferPtr = new SQLDOUBLE(0.0);
+			break;
+		case SQL_C_TYPE_DATE:
+			m_bufferPtr = new SQL_DATE_STRUCT;
+			break;
+		case SQL_C_TYPE_TIME:
+			m_bufferPtr = new SQL_TIME_STRUCT;
+			break;
+		case SQL_C_TYPE_TIMESTAMP:
+			m_bufferPtr = new SQL_TIMESTAMP_STRUCT;
 			break;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
@@ -262,6 +283,16 @@ namespace exodbc
 			}
 		case SQL_C_DOUBLE:
 			return sizeof(SQLDOUBLE);
+		case SQL_C_TYPE_DATE:
+		case SQL_C_DATE:
+			return sizeof(SQL_DATE_STRUCT);
+		case SQL_C_TYPE_TIME:
+		case SQL_C_TIME:
+			return sizeof(SQL_TIME_STRUCT);
+		case SQL_C_TYPE_TIMESTAMP:
+		case SQL_C_TIMESTAMP:
+			return sizeof(SQL_TIMESTAMP_STRUCT);
+			break;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -271,9 +302,9 @@ namespace exodbc
 
 	SQLSMALLINT ColumnBuffer::DetermineBufferType() const
 	{
-		exASSERT(m_columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);
+		exASSERT(m_columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
 
-		switch (m_columnInfo.m_sqlDataType)
+		switch (m_columnInfo.m_sqlType)
 		{
 		case SQL_SMALLINT:
 			return SQL_C_SSHORT;
@@ -305,6 +336,16 @@ namespace exodbc
 		case SQL_FLOAT:
 		case SQL_REAL:
 			return SQL_C_DOUBLE;
+			// not valid without TYPE ?? http://msdn.microsoft.com/en-us/library/ms710150%28v=vs.85%29.aspx
+//		case SQL_DATE:
+		case SQL_TYPE_DATE:
+			return SQL_C_TYPE_DATE;
+//		case SQL_TIME:
+		case SQL_TYPE_TIME:
+			return SQL_C_TYPE_TIME;
+//		case SQL_TIMESTAMP:
+		case SQL_TYPE_TIMESTAMP:
+			return SQL_C_TYPE_TIMESTAMP;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -384,6 +425,45 @@ namespace exodbc
 	}
 
 
+	ColumnBuffer::operator SQL_DATE_STRUCT() const
+	{
+		exASSERT(m_haveBuffer);
+		exASSERT(m_bound);
+
+		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
+
+		SQL_DATE_STRUCT date;
+		date.day = timeStamp.day;
+		date.month = timeStamp.month;
+		date.year = timeStamp.year;
+		return date;
+	}
+
+
+	ColumnBuffer::operator SQL_TIME_STRUCT() const
+	{
+		exASSERT(m_haveBuffer);
+		exASSERT(m_bound);
+
+		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
+
+		SQL_TIME_STRUCT time;
+		time.hour = timeStamp.hour;
+		time.minute = timeStamp.minute;
+		time.second = timeStamp.second;
+		return time;
+	}
+
+
+	ColumnBuffer::operator SQL_TIMESTAMP_STRUCT() const
+	{
+		exASSERT(m_haveBuffer);
+		exASSERT(m_bound);
+
+		return boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
+	}
+
+
 	SQLSMALLINT* ColumnBuffer::GetSmallIntPtr() const
 	{
 		exASSERT(m_haveBuffer);
@@ -432,9 +512,31 @@ namespace exodbc
 		return boost::get<SQLDOUBLE*>(m_bufferPtr);
 	}
 
+	SQL_DATE_STRUCT* ColumnBuffer::GetDatePtr() const
+	{
+		exASSERT(m_haveBuffer);
+
+		// Could throw boost::bad_get
+		return boost::get<SQL_DATE_STRUCT*>(m_bufferPtr);
+	}
 
 
+	SQL_TIME_STRUCT* ColumnBuffer::GetTimePtr() const
+	{
+		exASSERT(m_haveBuffer);
 
+		// Could throw boost::bad_get
+		return boost::get<SQL_TIME_STRUCT*>(m_bufferPtr);
+	}
+
+
+	SQL_TIMESTAMP_STRUCT* ColumnBuffer::GetTimestampPtr() const
+	{
+		exASSERT(m_haveBuffer);
+
+		// Could throw boost::bad_get
+		return boost::get<SQL_TIMESTAMP_STRUCT*>(m_bufferPtr);
+	}
 
 	// Interfaces
 	// ----------

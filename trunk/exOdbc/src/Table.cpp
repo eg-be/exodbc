@@ -723,6 +723,60 @@ namespace exodbc
 	}
 
 
+	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			date = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
+
+	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& time) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			time = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
+
+	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& timestamp) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			timestamp = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
+
 	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize)
 	{
 		exASSERT(m_manualColumns);

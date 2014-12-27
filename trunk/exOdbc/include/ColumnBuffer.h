@@ -60,7 +60,7 @@ namespace exodbc
 	*
 	* If the buffer-information is read from the passed SColumnInfo, the ColumnBuffer will
 	* allocate a buffer type depending on the value of the SqlDataType. The following is
-	* a list of all supported SQL-Types and the buffer-type created.
+	* a list of all supported SQL-Types and the buffer-type created:
 	*
 	* SQL-Type					| Buffer-Type
 	* --------------------------|------------
@@ -72,7 +72,9 @@ namespace exodbc
 	* SQL_DOUBLE				| SQLDOUBLE*
 	* SQL_FLOAT					| SQLDOUBLE*
 	* SQL_REAL					| SQLDOUBLE*
-	* SQL_
+	* SQL_DATE					| SQL_DATE_STRUCT*
+	* SQL_TIME					| SQL_TIME_STRUCT*
+	* SQL_TIMESTAMP				| SQL_TIMESTAMP_STRUCT*
 	* 
 	* [1] There are options about wide-chars: You can either enforce that a column
 	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
@@ -265,6 +267,7 @@ namespace exodbc
 		* \detailed	Fails if not bound.
 		* \return	Current value as std::wstring.
 		* \throw	CastException If value cannot be casted to a std::wstring.
+		* \see		WStringVisitor
 		*/
 		operator std::wstring() const;
 
@@ -274,6 +277,7 @@ namespace exodbc
 		* \detailed	Fails if not bound.
 		* \return	Current value as std::wstring.
 		* \throw	CastException If value cannot be casted to a std::string.
+		* \see		StringVisitor
 		*/
 		operator std::string() const;
 
@@ -283,8 +287,39 @@ namespace exodbc
 		* \detailed	Fails if not bound.
 		* \return	Current value as SQLDOUBLE.
 		* \throw	CastException If value cannot be casted to a SQLDOUBLE.
+		* \see		DoubleVisitor
 		*/
 		operator double() const;
+
+
+		/*!
+		* \brief	Cast the current value to a SQL_DATE_STRUCT if possible.
+		* \detailed	Fails if not bound. If the value is a Timestamp, the time-part is ignored.
+		* \return	Current value as SQL_DATE_STRUCT.
+		* \throw	CastException If value cannot be casted to a SQL_DATE_STRUCT.
+		* \see		TimestampVisitor
+		*/
+		operator SQL_DATE_STRUCT() const;
+
+
+		/*!
+		* \brief	Cast the current value to a SQL_TIME_STRUCT if possible.
+		* \detailed	Fails if not bound. If the value is a Timestamp, the date-part is ignored.
+		* \return	Current value as SQL_TIME_STRUCT.
+		* \throw	CastException If value cannot be casted to a SQL_TIME_STRUCT.
+		* \see		TimestampVisitor
+		*/
+		operator SQL_TIME_STRUCT() const;
+
+
+		/*!
+		* \brief	Cast the current value to a SQL_TIMESTAMP_STRUCT if possible.
+		* \detailed	Fails if not bound.
+		* \return	Current value as SQL_TIMESTAMP_STRUCT.
+		* \throw	CastException If value cannot be casted to a SQL_TIMESTAMP_STRUCT.
+		* \see		TimestampVisitor
+		*/
+		operator SQL_TIMESTAMP_STRUCT() const;
 
 	private:
 
@@ -339,6 +374,9 @@ namespace exodbc
 		SQLCHAR*		GetCharPtr() const;
 		SQLWCHAR*		GetWCharPtr() const;
 		SQLDOUBLE*		GetDoublePtr() const;
+		SQL_DATE_STRUCT* GetDatePtr() const;
+		SQL_TIME_STRUCT* GetTimePtr() const;
+		SQL_TIMESTAMP_STRUCT* GetTimestampPtr() const;
 
 		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer, only available if m_haveColumnInfo is true.
 		bool		m_haveColumnInfo;	///< True if m_columnInfo contains a valid info-object.
@@ -399,11 +437,6 @@ namespace exodbc
 	* - SQLINTEGER*
 	* - SQLBIGINT*
 	* 
-	* It will throw a CastException on the following source-types:
-	* - SQLCHAR*
-	* - SQLWCHAR*
-	* - SQLDOUBLE*
-	* 
 	*/
 	class BigintVisitor
 		: public boost::static_visitor < SQLBIGINT >
@@ -415,9 +448,9 @@ namespace exodbc
 		SQLBIGINT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_SBIGINT); };
-		SQLBIGINT operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_SBIGINT); };
-		SQLBIGINT operator()(SQL_TIMESTAMP_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_SBIGINT); };
 	};	// class BigintVisitor
 
 
@@ -433,9 +466,6 @@ namespace exodbc
 	* - SQLBIGINT*
 	* - SQLWCHAR*
 	* - SQLDOUBLE*
-	* 
-	* It will throw a CastException on the following source-types:
-	* - SQLCHAR*
 	*
 	*/
 	class WStringVisitor
@@ -448,9 +478,9 @@ namespace exodbc
 		std::wstring operator()(SQLCHAR* pChar) const{ throw CastException(SQL_C_CHAR, SQL_C_WCHAR); };
 		std::wstring operator()(SQLWCHAR* pWChar) const { return pWChar; };
 		std::wstring operator()(SQLDOUBLE* pDouble) const { return (boost::wformat(L"%f") % *pDouble).str(); };
-		std::wstring operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_WCHAR); };
+		std::wstring operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_WCHAR); };
 		std::wstring operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_WCHAR); };
-		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_WCHAR); };
+		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_WCHAR); };
 	};	// class WStringVisitor
 
 
@@ -467,9 +497,6 @@ namespace exodbc
 	* - SQLCHAR*
 	* - SQLDOUBLE*
 	*
-	* It will throw a CastException on the following source-types:
-	* - SQLWCHAR*
-	*
 	*/
 	class StringVisitor
 		: public boost::static_visitor < std::string >
@@ -481,9 +508,9 @@ namespace exodbc
 		std::string operator()(SQLCHAR* pChar) const { return (char*)pChar; };
 		std::string operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_CHAR); };
 		std::string operator()(SQLDOUBLE* pDouble) const { return (boost::format("%f") % *pDouble).str(); };
-		std::string operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_CHAR); };
+		std::string operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_CHAR); };
 		std::string operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_CHAR); };
-		std::string operator()(SQL_TIMESTAMP_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_CHAR); };
+		std::string operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_CHAR); };
 	};	// class StringVisitor
 
 
@@ -498,11 +525,6 @@ namespace exodbc
 	* - SQLINTEGER*
 	* - SQLDOUBLE*
 	*
-	* It will throw a CastException on the following source-types:
-	* - SQLWCHAR*
-	* - SQLCHAR*
-	* - SQLBIGINT*
-	*
 	*/
 	class DoubleVisitor
 		: public boost::static_visitor < SQLDOUBLE >
@@ -514,10 +536,38 @@ namespace exodbc
 		SQLDOUBLE operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQLDOUBLE* pDouble) const { return *pDouble; };
-		SQLDOUBLE operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_DOUBLE); };
+		SQLDOUBLE operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_DOUBLE); };
-		SQLDOUBLE operator()(SQL_TIMESTAMP_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_DOUBLE); };
+		SQLDOUBLE operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_DOUBLE); };
 	};	// class DoubleVisitor
+
+
+	/*!
+	* \class TimestampVisitor
+	*
+	* \brief Visitor to cast current value to a SQL_TIMESTAMP_STRUCT.
+	*
+	* This Visitor can cast the following sources to a SQL_TIMESTAMP_STRUCT :
+	*
+	* - SQLDATE* (time is set to 00:00:00)
+	* - SQLTIME* (date is set to 00.00.0000)
+	* - SQLTIMESTAMP*
+	*
+	*/
+	class TimestampVisitor
+		: public boost::static_visitor < SQL_TIMESTAMP_STRUCT >
+	{
+	public:
+		SQL_TIMESTAMP_STRUCT operator()(SQLSMALLINT* smallInt) const { throw CastException(SQL_C_SSHORT, SQL_C_TYPE_TIMESTAMP); };
+		SQL_TIMESTAMP_STRUCT operator()(SQLINTEGER* i) const { throw CastException(SQL_C_SSHORT, SQL_C_TYPE_TIMESTAMP); };
+		SQL_TIMESTAMP_STRUCT operator()(SQLBIGINT* bigInt) const { throw CastException(SQL_C_SBIGINT, SQL_C_TYPE_TIMESTAMP); };
+		SQL_TIMESTAMP_STRUCT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_TYPE_TIMESTAMP); };
+		SQL_TIMESTAMP_STRUCT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_TYPE_TIMESTAMP); };
+		SQL_TIMESTAMP_STRUCT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_TYPE_TIMESTAMP); };
+		SQL_TIMESTAMP_STRUCT operator()(SQL_DATE_STRUCT* pDate) const { SQL_TIMESTAMP_STRUCT timestamp; ZeroMemory(&timestamp, sizeof(timestamp)); timestamp.day = pDate->day; timestamp.month = pDate->month; timestamp.year = pDate->year; return timestamp;  };
+		SQL_TIMESTAMP_STRUCT operator()(SQL_TIME_STRUCT* pTime) const { SQL_TIMESTAMP_STRUCT timestamp; ZeroMemory(&timestamp, sizeof(timestamp)); timestamp.hour = pTime->hour; timestamp.minute = pTime->minute; timestamp.second = pTime->second; return timestamp; };
+		SQL_TIMESTAMP_STRUCT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return *pTimestamp; };
+	};	// class TimestampVisitor
 }
 
 

@@ -713,6 +713,47 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, GetAutoDateValues)
+	{
+		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(dTable.Open(false, true));
+
+		using namespace boost::algorithm;
+		std::wstring str;
+		SQL_DATE_STRUCT date;
+		SQL_TIME_STRUCT time;
+		SQL_TIMESTAMP_STRUCT timestamp;
+		std::wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(dTable.SelectNext());
+		EXPECT_TRUE(dTable.GetColumnValue(1, date));
+		EXPECT_TRUE(dTable.GetColumnValue(2, time));
+		EXPECT_TRUE(dTable.GetColumnValue(3, timestamp));
+
+		//EXPECT_EQ(26, cTable.m_date.day);
+		//EXPECT_EQ(1, cTable.m_date.month);
+		//EXPECT_EQ(1983, cTable.m_date.year);
+
+		//EXPECT_EQ(13, cTable.m_time.hour);
+		//EXPECT_EQ(55, cTable.m_time.minute);
+		//EXPECT_EQ(56, cTable.m_time.second);
+
+		//EXPECT_EQ(26, cTable.m_timestamp.day);
+		//EXPECT_EQ(1, cTable.m_timestamp.month);
+		//EXPECT_EQ(1983, cTable.m_timestamp.year);
+		//EXPECT_EQ(13, cTable.m_timestamp.hour);
+		//EXPECT_EQ(55, cTable.m_timestamp.minute);
+		//EXPECT_EQ(56, cTable.m_timestamp.second);
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
+
+
 	TEST_P(TableTest, GetManualDateValues)
 	{
 		MDateTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
