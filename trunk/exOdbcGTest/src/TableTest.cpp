@@ -732,20 +732,29 @@ namespace exodbc
 		EXPECT_TRUE(dTable.GetColumnValue(2, time));
 		EXPECT_TRUE(dTable.GetColumnValue(3, timestamp));
 
-		//EXPECT_EQ(26, cTable.m_date.day);
-		//EXPECT_EQ(1, cTable.m_date.month);
-		//EXPECT_EQ(1983, cTable.m_date.year);
+		EXPECT_EQ(26, date.day);
+		EXPECT_EQ(1, date.month);
+		EXPECT_EQ(1983, date.year);
 
-		//EXPECT_EQ(13, cTable.m_time.hour);
-		//EXPECT_EQ(55, cTable.m_time.minute);
-		//EXPECT_EQ(56, cTable.m_time.second);
+		EXPECT_EQ(13, time.hour);
+		EXPECT_EQ(55, time.minute);
+		EXPECT_EQ(56, time.second);
 
-		//EXPECT_EQ(26, cTable.m_timestamp.day);
-		//EXPECT_EQ(1, cTable.m_timestamp.month);
-		//EXPECT_EQ(1983, cTable.m_timestamp.year);
-		//EXPECT_EQ(13, cTable.m_timestamp.hour);
-		//EXPECT_EQ(55, cTable.m_timestamp.minute);
-		//EXPECT_EQ(56, cTable.m_timestamp.second);
+		EXPECT_EQ(26, timestamp.day);
+		EXPECT_EQ(1, timestamp.month);
+		EXPECT_EQ(1983, timestamp.year);
+		EXPECT_EQ(13, timestamp.hour);
+		EXPECT_EQ(55, timestamp.minute);
+		EXPECT_EQ(56, timestamp.second);
+
+		// MS SQL Server has a new SQL_TIME2_STRUCT if ODBC version is >= 3.8
+#if HAVE_MSODBCSQL_H
+		Environment env38(OV_3_8);
+		EXPECT_TRUE(env38.HasHenv());
+		Database db38(env38);
+		EXPECT_TRUE(db38.HasHdbc());
+
+#endif
 
 		// If Auto commit is off, we need to commit on certain db-systems, see #51
 		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)

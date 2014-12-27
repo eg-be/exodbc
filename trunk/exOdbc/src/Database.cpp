@@ -205,7 +205,7 @@ namespace exodbc
 	bool Database::AllocateHdbc(const Environment& env)
 	{
 		exASSERT(m_hdbc == SQL_NULL_HDBC);
-		exASSERT(env.HaveHenv());
+		exASSERT(env.HasHenv());
 
 		if (m_hdbc != SQL_NULL_HDBC)
 		{
