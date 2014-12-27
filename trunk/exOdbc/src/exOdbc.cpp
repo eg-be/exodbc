@@ -27,45 +27,45 @@ namespace exodbc {
 	// --------------
 	SDbInfo::SDbInfo()
 	{
-		maxConnections = 0;
-		maxStmts = 0;
-		cliConfLvl = 0;
-		cursorCommitBehavior = 0;
-		cursorRollbackBehavior = 0;
-		supportNotNullClause = 0;
-		txnIsolation = 0;
-		txnIsolationOptions = 0;
-		posOperations = 0;
-		posStmts = 0;
-		scrollOptions = 0;
-		txnCapable = 0;
-		maxCatalogNameLen = 0;
-		maxSchemaNameLen = 0;
-		maxTableNameLen = 0;
+		m_maxConnections = 0;
+		m_maxStmts = 0;
+		m_cliConfLvl = 0;
+		m_cursorCommitBehavior = 0;
+		m_cursorRollbackBehavior = 0;
+		m_supportNotNullClause = 0;
+		m_txnIsolation = 0;
+		m_txnIsolationOptions = 0;
+		m_posOperations = 0;
+		m_posStmts = 0;
+		m_scrollOptions = 0;
+		m_txnCapable = 0;
+		m_maxCatalogNameLen = 0;
+		m_maxSchemaNameLen = 0;
+		m_maxTableNameLen = 0;
 	}
 
 	std::wstring SDbInfo::ToStr() const
 	{
 		std::wstringstream ws;
 		ws << L"***** DATA SOURCE INFORMATION *****" << std::endl;
-		ws << L" SERVER Name: " << serverName << std::endl;
+		ws << L" SERVER Name: " << m_serverName << std::endl;
 		ws << L"  DBMS Name: " << m_dbmsName << L"; DBMS Version: " << m_dbmsVer << std::endl;
-		ws << L"  ODBC Version: " << m_odbcVer << L"; Driver Version: " << driverVer << std::endl;
+		ws << L"  ODBC Version: " << m_odbcVer << L"; Driver Version: " << m_driverVer << std::endl;
 
 		ws << L"  SAG CLI Conf. Level: ";
-		switch(cliConfLvl)
+		switch(m_cliConfLvl)
 		{
 		case SQL_OSCC_NOT_COMPLIANT:    ws << L"Not Compliant";    break;
 		case SQL_OSCC_COMPLIANT:        ws << L"Compliant";        break;
 		}
 		ws << std::endl;
 
-		ws << L"  Max. Connections: "       << maxConnections   << std::endl;
-		ws << L"  Outer Joins: "            << outerJoins       << std::endl;
-		ws << L"  Support for Procedures: " << procedureSupport << std::endl;
-		ws << L"  All tables accessible : " << accessibleTables << std::endl;
+		ws << L"  Max. Connections: "       << m_maxConnections   << std::endl;
+		ws << L"  Outer Joins: "            << m_outerJoins       << std::endl;
+		ws << L"  Support for Procedures: " << m_procedureSupport << std::endl;
+		ws << L"  All tables accessible : " << m_accessibleTables << std::endl;
 		ws << L"  Cursor COMMIT Behavior: ";
-		switch(cursorCommitBehavior)
+		switch(m_cursorCommitBehavior)
 		{
 		case SQL_CB_DELETE:        ws << L"Delete cursors";      break;
 		case SQL_CB_CLOSE:         ws << L"Close cursors";       break;
@@ -74,7 +74,7 @@ namespace exodbc {
 		ws << std::endl;
 
 		ws << L"  Cursor ROLLBACK Behavior: ";
-		switch(cursorRollbackBehavior)
+		switch(m_cursorRollbackBehavior)
 		{
 		case SQL_CB_DELETE:      ws << L"Delete cursors";      break;
 		case SQL_CB_CLOSE:       ws << L"Close cursors";       break;
@@ -83,17 +83,17 @@ namespace exodbc {
 		ws << std::endl;
 
 		ws << L"  Support NOT NULL clause: ";
-		switch(supportNotNullClause)
+		switch(m_supportNotNullClause)
 		{
 		case SQL_NNC_NULL:        ws << L"No";        break;
 		case SQL_NNC_NON_NULL:    ws << L"Yes";       break;
 		}
 		ws << std::endl;
 
-		ws << L"  Support IEF (Ref. Integrity): " << supportIEF   << std::endl;
+		ws << L"  Support IEF (Ref. Integrity): " << m_supportIEF   << std::endl;
 
 		ws << L"  Default Transaction Isolation: ";
-		switch(txnIsolation)
+		switch(m_txnIsolation)
 		{
 		case SQL_TXN_READ_UNCOMMITTED:  ws << L"Read Uncommitted";    break;
 		case SQL_TXN_READ_COMMITTED:    ws << L"Read Committed";      break;
@@ -103,53 +103,53 @@ namespace exodbc {
 		ws << std::endl;
 
 		ws << L"  Transaction Isolation Options: ";
-		if (txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
+		if (m_txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
 			ws << L"Read Uncommitted, ";
-		if (txnIsolationOptions & SQL_TXN_READ_COMMITTED)
+		if (m_txnIsolationOptions & SQL_TXN_READ_COMMITTED)
 			ws << L"Read Committed, ";
-		if (txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
+		if (m_txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
 			ws << L"Repeatable Read, ";
-		if (txnIsolationOptions & SQL_TXN_SERIALIZABLE)
+		if (m_txnIsolationOptions & SQL_TXN_SERIALIZABLE)
 			ws << L"Serializable, ";
 		ws << std::endl;
 
 		ws << L"  Position Operations Supported (SQLSetPos): ";
-		if (posOperations & SQL_POS_POSITION)
+		if (m_posOperations & SQL_POS_POSITION)
 			ws << L"Position, ";
-		if (posOperations & SQL_POS_REFRESH)
+		if (m_posOperations & SQL_POS_REFRESH)
 			ws << L"Refresh, ";
-		if (posOperations & SQL_POS_UPDATE)
+		if (m_posOperations & SQL_POS_UPDATE)
 			ws << L"Upd, ";
-		if (posOperations & SQL_POS_DELETE)
+		if (m_posOperations & SQL_POS_DELETE)
 			ws << L"Del, ";
-		if (posOperations & SQL_POS_ADD)
+		if (m_posOperations & SQL_POS_ADD)
 			ws << L"Add";
 		ws << std::endl;
 
 		ws << L"  Positioned Statements Supported: ";
-		if (posStmts & SQL_PS_POSITIONED_DELETE)
+		if (m_posStmts & SQL_PS_POSITIONED_DELETE)
 			ws << L"Pos delete, ";
-		if (posStmts & SQL_PS_POSITIONED_UPDATE)
+		if (m_posStmts & SQL_PS_POSITIONED_UPDATE)
 			ws << L"Pos update, ";
-		if (posStmts & SQL_PS_SELECT_FOR_UPDATE)
+		if (m_posStmts & SQL_PS_SELECT_FOR_UPDATE)
 			ws << L"Select for update";
 		ws << std::endl;
 
 		ws << L"  Scroll Options: ";
-		if (scrollOptions & SQL_SO_FORWARD_ONLY)
+		if (m_scrollOptions & SQL_SO_FORWARD_ONLY)
 			ws << L"Fwd Only, ";
-		if (scrollOptions & SQL_SO_STATIC)
+		if (m_scrollOptions & SQL_SO_STATIC)
 			ws << L"Static, ";
-		if (scrollOptions & SQL_SO_KEYSET_DRIVEN)
+		if (m_scrollOptions & SQL_SO_KEYSET_DRIVEN)
 			ws << L"Keyset Driven, ";
-		if (scrollOptions & SQL_SO_DYNAMIC)
+		if (m_scrollOptions & SQL_SO_DYNAMIC)
 			ws << L"Dynamic, ";
-		if (scrollOptions & SQL_SO_MIXED)
+		if (m_scrollOptions & SQL_SO_MIXED)
 			ws << L"Mixed";
 		ws << std::endl;
 
 		ws << L"  Transaction Capable?: ";
-		switch(txnCapable)
+		switch(m_txnCapable)
 		{
 		case SQL_TC_NONE:          ws << L"No";            break;
 		case SQL_TC_DML:           ws << L"DML Only";      break;
@@ -164,17 +164,17 @@ namespace exodbc {
 
 	SQLUSMALLINT SDbInfo::GetMaxCatalogNameLen() const
 	{
-		return maxCatalogNameLen != 0 ? maxCatalogNameLen : DB_MAX_CATALOG_NAME_LEN_DEFAULT;
+		return m_maxCatalogNameLen != 0 ? m_maxCatalogNameLen : DB_MAX_CATALOG_NAME_LEN_DEFAULT;
 	}
 
 	SQLUSMALLINT SDbInfo::GetMaxSchemaNameLen() const
 	{
-		return maxSchemaNameLen != 0 ? maxSchemaNameLen : DB_MAX_SCHEMA_NAME_LEN_DEFAULT;
+		return m_maxSchemaNameLen != 0 ? m_maxSchemaNameLen : DB_MAX_SCHEMA_NAME_LEN_DEFAULT;
 	}
 
 	SQLUSMALLINT SDbInfo::GetMaxTableNameLen() const
 	{
-		return maxTableNameLen != 0 ? maxTableNameLen : DB_MAX_TABLE_NAME_LEN_DEFAULT;
+		return m_maxTableNameLen != 0 ? m_maxTableNameLen : DB_MAX_TABLE_NAME_LEN_DEFAULT;
 	}
 
 	SQLUSMALLINT SDbInfo::GetMaxColumnNameLen() const
