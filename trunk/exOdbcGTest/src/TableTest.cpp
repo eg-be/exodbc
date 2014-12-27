@@ -416,6 +416,109 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, GetAutoFloatValues)
+	{
+		wstring floatTypesTableName = TestTables::GetTableName(L"floattypes", m_odbcInfo.m_namesCase);
+		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(fTable.Open(false, true));
+
+		SQLDOUBLE val;
+		wstring str;
+		std::wstring idName = TestTables::GetColName(L"idfloattypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(2, val));
+		EXPECT_EQ(0.0, val);
+		// Read as str
+		EXPECT_TRUE(fTable.GetColumnValue(2, str));
+		EXPECT_EQ(L"0.000000", str);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(2, val));
+		EXPECT_EQ(3.141, val);
+		// Read as str
+		EXPECT_TRUE(fTable.GetColumnValue(2, str));
+		EXPECT_EQ(L"3.141000", str);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(2, val));
+		EXPECT_EQ(-3.141, val);
+		// Read as str
+		EXPECT_TRUE(fTable.GetColumnValue(2, str));
+		EXPECT_EQ(L"-3.141000", str);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(1, val));
+		EXPECT_EQ(0.0, val);
+		// Read as str
+		EXPECT_TRUE(fTable.GetColumnValue(1, str));
+		EXPECT_EQ(L"0.000000", str);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(1, val));
+		EXPECT_EQ(3.141592, val);
+		// Read as str
+		EXPECT_TRUE(fTable.GetColumnValue(1, str));
+		EXPECT_EQ(L"3.141592", str);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(1, val));
+		EXPECT_EQ(-3.141592, val);
+		// Read as str
+		EXPECT_TRUE(fTable.GetColumnValue(1, str));
+		EXPECT_EQ(L"-3.141592", str);
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
+
+
+	TEST_P(TableTest, GetManualFloatValues)
+	{
+		MFloatTypesTable fTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(fTable.Open(false, true));
+
+		std::wstring idName = TestTables::GetColName(L"idfloattypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_EQ(0.0, fTable.m_float);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_EQ(3.141, fTable.m_float);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_EQ(-3.141, fTable.m_float);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_EQ(0.0, fTable.m_double);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_EQ(3.141592, fTable.m_double);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_EQ(-3.141592, fTable.m_double);
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
+
+
 	TEST_P(TableTest, GetWCharValues)
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);

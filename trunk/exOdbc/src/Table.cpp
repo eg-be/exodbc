@@ -705,6 +705,24 @@ namespace exodbc
 	}
 
 
+	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			d = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
+
 	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize)
 	{
 		exASSERT(m_manualColumns);

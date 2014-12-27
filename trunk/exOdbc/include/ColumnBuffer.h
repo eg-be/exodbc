@@ -68,6 +68,7 @@ namespace exodbc
 	* SQL_WCHAR / SQL_WVARCHAR	| SQLWCHAR* [1]
 	* SQL_DOUBLE				| SQLDOUBLE*
 	* SQL_FLOAT					| SQLDOUBLE*
+	* SQL_REAL					| SQLDOUBLE*
 	* 
 	* [1] There are options about wide-chars: You can either enforce that a column
 	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
@@ -272,6 +273,15 @@ namespace exodbc
 		*/
 		operator std::string() const;
 
+
+		/*!
+		* \brief	Cast the current value to a SQLDOUBLE if possible.
+		* \detailed	Fails if not bound.
+		* \return	Current value as SQLDOUBLE.
+		* \throw	CastException If value cannot be casted to a SQLDOUBLE.
+		*/
+		operator double() const;
+
 	private:
 
 		/*!
@@ -463,6 +473,35 @@ namespace exodbc
 		std::string operator()(SQLDOUBLE* pDouble) const { return (boost::format("%f") % *pDouble).str(); };
 	};	// class StringVisitor
 
+
+	/*!
+	* \class DoubleVisitor
+	*
+	* \brief Visitor to cast current value to a SQLDOUBLE.
+	*
+	* This Visitor can cast the following sources to a SQLDOUBLE :
+	*
+	* - SQLSMALLINT*
+	* - SQLINTEGER*
+	* - SQLDOUBLE*
+	*
+	* It will throw a CastException on the following source-types:
+	* - SQLWCHAR*
+	* - SQLCHAR*
+	* - SQLBIGINT*
+	*
+	*/
+	class DoubleVisitor
+		: public boost::static_visitor < SQLDOUBLE >
+	{
+	public:
+		SQLDOUBLE operator()(SQLSMALLINT* smallInt) const { return *smallInt; };
+		SQLDOUBLE operator()(SQLINTEGER* i) const { return *i; };
+		SQLDOUBLE operator()(SQLBIGINT* bigInt) const { throw CastException(SQL_C_SBIGINT, SQL_C_DOUBLE); };
+		SQLDOUBLE operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_DOUBLE); };
+		SQLDOUBLE operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_DOUBLE); };
+		SQLDOUBLE operator()(SQLDOUBLE* pDouble) const { return *pDouble; };
+	};	// class DoubleVisitor
 }
 
 

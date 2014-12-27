@@ -294,6 +294,7 @@ namespace exodbc
 			}
 		case SQL_DOUBLE:
 		case SQL_FLOAT:
+		case SQL_REAL:
 			return SQL_C_DOUBLE;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
@@ -362,6 +363,15 @@ namespace exodbc
 		exASSERT(m_bound);
 
 		return boost::apply_visitor(StringVisitor(), m_bufferPtr);
+	}
+
+
+	ColumnBuffer::operator SQLDOUBLE() const
+	{
+		exASSERT(m_haveBuffer);
+		exASSERT(m_bound);
+
+		return boost::apply_visitor(DoubleVisitor(), m_bufferPtr);
 	}
 
 
