@@ -482,8 +482,8 @@ namespace exodbc
 
 		// Check that our ODBC-Version matches
 		OdbcVersion envVersion = m_pEnv->ReadOdbcVersion();
-		OdbcVersion connectionVersion = GetOdbcVersion();
-		if (envVersion != connectionVersion)
+		OdbcVersion connectionVersion = GetDriverOdbcVersion();
+		if (envVersion > connectionVersion)
 		{
 			LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver reported %d. The Database will be using %d") % envVersion %connectionVersion %connectionVersion).str());
 		}
@@ -2936,7 +2936,7 @@ namespace exodbc
 	}
 
 
-	OdbcVersion Database::GetOdbcVersion() const
+	OdbcVersion Database::GetDriverOdbcVersion() const
 	{
 		exASSERT(IsOpen());
 
@@ -2968,6 +2968,18 @@ namespace exodbc
 			}
 		}
 		return ov;
+	}
+
+
+	OdbcVersion Database::GetMaxSupportedOdbcVersion() const
+	{
+		OdbcVersion driverVersion = GetDriverOdbcVersion();
+		OdbcVersion envVersion = m_pEnv->ReadOdbcVersion();
+		if (driverVersion >= envVersion)
+		{
+			return envVersion;
+		}
+		return driverVersion;
 	}
 
 	///********** wxDb::Catalog() **********/

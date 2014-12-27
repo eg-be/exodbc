@@ -1191,7 +1191,7 @@ namespace exodbc
 				return false;
 			}
 			// We need to know which ODBC version we are using
-			OdbcVersion odbcVersion = m_pDb->GetEnvironment()->ReadOdbcVersion();
+			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
 			for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++)
 			{
 				SColumnInfo colInfo = columns[columnIndex];
