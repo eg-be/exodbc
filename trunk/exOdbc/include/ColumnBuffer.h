@@ -37,7 +37,11 @@ namespace exodbc
 	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, 
 		SQLCHAR*, SQLWCHAR*, 
 		SQLDOUBLE*,
-		SQL_DATE_STRUCT*, SQL_TIME_STRUCT*, SQL_TIMESTAMP_STRUCT*> BufferPtrVariant;
+		SQL_DATE_STRUCT*, SQL_TIME_STRUCT*, SQL_TIMESTAMP_STRUCT*
+#if HAVE_MSODBCSQL_H
+		,SQL_SS_TIME2_STRUCT*
+#endif
+	> BufferPtrVariant;
 
 	// Structs
 	// -------
@@ -74,12 +78,21 @@ namespace exodbc
 	* SQL_REAL					| SQLDOUBLE*
 	* SQL_DATE					| SQL_DATE_STRUCT*
 	* SQL_TIME					| SQL_TIME_STRUCT*
+	* SQL_TIME2					| SQL_TIME2_STRUCT* [2]
+	*							| SQL_TIME_STRUCT* [2]
 	* SQL_TIMESTAMP				| SQL_TIMESTAMP_STRUCT*
-	* 
+	*  
+	*
 	* [1] There are options about wide-chars: You can either enforce that a column
 	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
 	* a SQLWCHAR* buffer and the other way round, using the CharBindingMode
 	* value.
+	*
+	* [2] The SQL_TIME2 is a Microsoft SQL Server specific extension. It is only available
+	* if HAVE_MSODBCSQL_H is defined to 1. If HAVE_MSODBCSQL_H
+	* is not set to 1, the SQL-Type SQL_TIME2 is not supported. If HAVE_MSODBC_SQL_H is defined to 1 and
+	* the ODBC version is >= 3.8, SQL_TIME2 is mapped to a SQL_TIME2_STRUCT, else it is mapped
+	* to an SQL_TIME_STRUCT.
 	*/
 	class EXODBCAPI ColumnBuffer
 	{
@@ -94,7 +107,7 @@ namespace exodbc
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode);
+		ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode, OdbcVersion odbcVersion);
 
 
 		/*!
@@ -377,6 +390,9 @@ namespace exodbc
 		SQL_DATE_STRUCT* GetDatePtr() const;
 		SQL_TIME_STRUCT* GetTimePtr() const;
 		SQL_TIMESTAMP_STRUCT* GetTimestampPtr() const;
+#if HAVE_MSODBCSQL_H
+		SQL_SS_TIME2_STRUCT* GetTime2Ptr() const;
+#endif
 
 		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer, only available if m_haveColumnInfo is true.
 		bool		m_haveColumnInfo;	///< True if m_columnInfo contains a valid info-object.
@@ -387,7 +403,7 @@ namespace exodbc
 		SQLSMALLINT m_bufferType;	///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
 		SQLINTEGER	m_bufferSize;	///< Size of an allocated or set from constructor buffer.
 		bool m_bound;				///< True if Bind() was successful.
-		
+		OdbcVersion m_odbcVersion;	///< OdbcVersion passed when creating this ColumnBuffer.
 		CharBindingMode m_charBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
 
 		BufferPtrVariant m_bufferPtr;	///< Variant that holds the pointer to the actual buffer
@@ -451,6 +467,9 @@ namespace exodbc
 		SQLBIGINT operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_SBIGINT); };
+#if HAVE_MSODBCSQL_H
+		SQLBIGINT operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_SBIGINT); };
+#endif
 	};	// class BigintVisitor
 
 
@@ -481,6 +500,9 @@ namespace exodbc
 		std::wstring operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_WCHAR); };
 		std::wstring operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_WCHAR); };
 		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_WCHAR); };
+#if HAVE_MSODBCSQL_H
+		std::wstring operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_WCHAR); };
+#endif
 	};	// class WStringVisitor
 
 
@@ -511,6 +533,9 @@ namespace exodbc
 		std::string operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_CHAR); };
 		std::string operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_CHAR); };
 		std::string operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_CHAR); };
+#if HAVE_MSODBCSQL_H
+		std::string operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_CHAR); };
+#endif
 	};	// class StringVisitor
 
 
@@ -539,6 +564,9 @@ namespace exodbc
 		SQLDOUBLE operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_DOUBLE); };
+#if HAVE_MSODBCSQL_H
+		SQLDOUBLE operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_DOUBLE); };
+#endif
 	};	// class DoubleVisitor
 
 
@@ -564,9 +592,12 @@ namespace exodbc
 		SQL_TIMESTAMP_STRUCT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_TYPE_TIMESTAMP); };
 		SQL_TIMESTAMP_STRUCT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_TYPE_TIMESTAMP); };
 		SQL_TIMESTAMP_STRUCT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_TYPE_TIMESTAMP); };
-		SQL_TIMESTAMP_STRUCT operator()(SQL_DATE_STRUCT* pDate) const { SQL_TIMESTAMP_STRUCT timestamp; ZeroMemory(&timestamp, sizeof(timestamp)); timestamp.day = pDate->day; timestamp.month = pDate->month; timestamp.year = pDate->year; return timestamp;  };
-		SQL_TIMESTAMP_STRUCT operator()(SQL_TIME_STRUCT* pTime) const { SQL_TIMESTAMP_STRUCT timestamp; ZeroMemory(&timestamp, sizeof(timestamp)); timestamp.hour = pTime->hour; timestamp.minute = pTime->minute; timestamp.second = pTime->second; return timestamp; };
+		SQL_TIMESTAMP_STRUCT operator()(SQL_DATE_STRUCT* pDate) const;
+		SQL_TIMESTAMP_STRUCT operator()(SQL_TIME_STRUCT* pTime) const;
 		SQL_TIMESTAMP_STRUCT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return *pTimestamp; };
+#if HAVE_MSODBCSQL_H
+		SQL_TIMESTAMP_STRUCT operator()(SQL_SS_TIME2_STRUCT* pTime) const;
+#endif
 	};	// class TimestampVisitor
 }
 

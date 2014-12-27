@@ -33,6 +33,7 @@
 // Same component headers
 #include "Helpers.h"
 #include "ColumnBuffer.h"
+#include "Environment.h"
 
 // Same component headers
 
@@ -1189,10 +1190,12 @@ namespace exodbc
 				LOG_ERROR((boost::wformat(L"No columns found for table '%s'") %m_tableInfo.GetSqlName()).str());
 				return false;
 			}
+			// We need to know which ODBC version we are using
+			OdbcVersion odbcVersion = m_pDb->GetEnvironment()->ReadOdbcVersion();
 			for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++)
 			{
 				SColumnInfo colInfo = columns[columnIndex];
-				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_charBindingMode);
+				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_charBindingMode, odbcVersion);
 				m_columnBuffers[columnIndex] = pColBuff;
 			}
 		}

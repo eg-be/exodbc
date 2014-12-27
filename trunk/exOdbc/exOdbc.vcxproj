@@ -164,6 +164,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;BOOST_ALL_DYN_LINK;HAVE_MSODBCSQL_H;EXODBCDEBUG;EXODBC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(Solutiondir)\3rdParty\googletest\include;$(Solutiondir)\3rdParty\msSqlServer2014\Include;$(ProjectDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

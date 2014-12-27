@@ -124,7 +124,7 @@ namespace exodbc
 		// Note: Init will set members to NULL
 		Initialize();
 
-		// Allocate the DBC-Handle
+		// Allocate the DBC-Handle and set the member m_pEnv
 		AllocateHdbc(env);
 	}
 
@@ -183,6 +183,8 @@ namespace exodbc
 		m_hstmt = SQL_NULL_HSTMT;
 		m_hstmtExecSql = SQL_NULL_HSTMT;
 
+		m_pEnv = NULL;
+
 		//m_fpSqlLog      = 0;            // Sql Log file pointer
 		//m_sqlLogState   = sqlLogOFF;    // By default, logging is turned off
 		m_dbmsType      = dbmsUNIDENTIFIED;
@@ -217,6 +219,8 @@ namespace exodbc
 		{
 			LOG_ERROR_ENV(env.GetHenv(), ret, SQLAllocHandle);
 		}
+
+		m_pEnv = &env;
 
 		return ret == SQL_SUCCESS;
 	}
@@ -476,6 +480,14 @@ namespace exodbc
 		if (!ReadDbInfo(m_dbInf))
 			return false;
 
+		// Check that our ODBC-Version matches
+		OdbcVersion envVersion = m_pEnv->ReadOdbcVersion();
+		OdbcVersion connectionVersion = GetOdbcVersion();
+		if (envVersion != connectionVersion)
+		{
+			LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver reported %d. The Database will be using %d") % envVersion %connectionVersion %connectionVersion).str());
+		}
+
 		// Try to detect the type - this will update our internal type on the first call
 		Dbms();
 
@@ -627,31 +639,31 @@ namespace exodbc
 		// so it works with sizeof and statically declared arrays
 		
 		bool ok = true;
-		ok = ok & GetInfo(m_hdbc, SQL_SERVER_NAME, dbInf.serverName, sizeof(dbInf.serverName), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DATABASE_NAME, dbInf.databaseName, sizeof(dbInf.databaseName), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.m_dbmsName, sizeof(dbInf.m_dbmsName), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.m_dbmsVer, sizeof(dbInf.m_dbmsVer), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_SERVER_NAME, dbInf.serverName);
+		ok = ok & GetInfo(m_hdbc, SQL_DATABASE_NAME, dbInf.databaseName);
+		ok = ok & GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.m_dbmsName);
+		ok = ok & GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.m_dbmsVer);
 		ok = ok & GetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, &dbInf.maxConnections, sizeof(dbInf.maxConnections), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.maxStmts, sizeof(dbInf.maxStmts), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.m_driverName, sizeof(dbInf.m_driverName), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.m_odbcVer, sizeof(dbInf.m_odbcVer), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.drvMgrOdbcVer, sizeof(dbInf.drvMgrOdbcVer), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_VER, dbInf.driverVer, sizeof(dbInf.driverVer), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.m_driverName);
+		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.m_odbcVer);
+		ok = ok & GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.drvMgrOdbcVer);
+		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_VER, dbInf.driverVer);
 		ok = ok & GetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, &dbInf.cliConfLvl, sizeof(dbInf.cliConfLvl), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_OUTER_JOINS, dbInf.outerJoins, sizeof(dbInf.outerJoins), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_PROCEDURES, dbInf.procedureSupport, sizeof(dbInf.procedureSupport), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, dbInf.accessibleTables, sizeof(dbInf.accessibleTables), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_OUTER_JOINS, dbInf.outerJoins);
+		ok = ok & GetInfo(m_hdbc, SQL_PROCEDURES, dbInf.procedureSupport);
+		ok = ok & GetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, dbInf.accessibleTables);
 		ok = ok & GetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, &dbInf.cursorCommitBehavior, sizeof(dbInf.cursorCommitBehavior), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, &dbInf.cursorRollbackBehavior, sizeof(dbInf.cursorRollbackBehavior), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, &dbInf.supportNotNullClause, sizeof(dbInf.supportNotNullClause), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, dbInf.supportIEF, sizeof(dbInf.supportIEF), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, dbInf.supportIEF);
 		ok = ok & GetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, &dbInf.txnIsolation, sizeof(dbInf.txnIsolation), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, &dbInf.txnIsolationOptions, sizeof(dbInf.txnIsolationOptions), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_POS_OPERATIONS, &dbInf.posOperations, sizeof(dbInf.posOperations), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &dbInf.posStmts, sizeof(dbInf.posStmts), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_SCROLL_OPTIONS, &dbInf.scrollOptions, sizeof(dbInf.scrollOptions), &cb);
 		ok = ok & GetInfo(m_hdbc, SQL_TXN_CAPABLE, &dbInf.txnCapable, sizeof(dbInf.txnCapable), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_SEARCH_PATTERN_ESCAPE, &dbInf.searchPatternEscape, sizeof(dbInf.searchPatternEscape), &cb);
+		ok = ok & GetInfo(m_hdbc, SQL_SEARCH_PATTERN_ESCAPE, dbInf.searchPatternEscape);
 
 		// TODO: SQL_LOGIN_TIMEOUT is a Connection-Attribute
 		//retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &dbInf.loginTimeout, sizeof(dbInf.loginTimeout), &cb);
@@ -2823,7 +2835,7 @@ namespace exodbc
 			return TI_REPEATABLE_READ;
 		case SQL_TXN_SERIALIZABLE:
 			return TI_SERIALIZABLE;
-#if defined HAVE_MSODBCSQL_H
+#if HAVE_MSODBCSQL_H
 		case SQL_TXN_SS_SNAPSHOT:
 			return TI_SNAPSHOT;
 #endif
@@ -2879,7 +2891,7 @@ namespace exodbc
 
 		SQLRETURN ret;
 		std::wstring errStringMode;
-#if defined HAVE_MSODBCSQL_H
+#if HAVE_MSODBCSQL_H
 		if (mode == TI_SNAPSHOT)
 		{
 			// Its confusing: MsSql Server 2014 seems to be unable to change the snapshot isolation if the commit mode is not set to autocommit
@@ -2917,9 +2929,45 @@ namespace exodbc
 		return false;
 	}
 
+	
 	bool Database::CanSetTransactionIsolationMode(TransactionIsolationMode mode)
 	{
 		return (m_dbInf.txnIsolationOptions & (SQLUINTEGER) mode) != 0;
+	}
+
+
+	OdbcVersion Database::GetOdbcVersion() const
+	{
+		exASSERT(IsOpen());
+
+		OdbcVersion ov = OV_UNKNOWN;
+		std::vector<std::wstring> versions;
+		boost::split(versions, m_dbInf.m_odbcVer, boost::is_any_of(L"."));
+		if (versions.size() == 2)
+		{
+			try
+			{
+				short major = boost::lexical_cast<short>(versions[0]);
+				short minor = boost::lexical_cast<short>(versions[1]);
+				if (major >= 3 && minor >= 80)
+				{
+					ov = OV_3_8;
+				}
+				else if (major >= 3)
+				{
+					ov = OV_3;
+				}
+				else if (major >= 2)
+				{
+					ov = OV_2;
+				}
+			}
+			catch (boost::bad_lexical_cast e)
+			{
+				LOG_ERROR((boost::wformat(L"Failed to determine odbc version from string '%s'") % m_dbInf.m_odbcVer).str());
+			}
+		}
+		return ov;
 	}
 
 	///********** wxDb::Catalog() **********/
@@ -3209,22 +3257,22 @@ namespace exodbc
 		if (m_dbmsType != dbmsUNIDENTIFIED)
 			return(m_dbmsType);
 
-		if(boost::algorithm::contains(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
+		if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
 		{
 			m_dbmsType = dbmsMS_SQL_SERVER;
 		}
-		else if(boost::algorithm::contains(m_dbInf.m_dbmsName, L"MySQL"))
+		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"MySQL"))
 		{
 			m_dbmsType = dbmsMY_SQL;
 		}
-		else if(boost::algorithm::contains(m_dbInf.m_dbmsName, L"DB2"))
+		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"DB2"))
 		{
 			m_dbmsType = dbmsDB2;
 		}
 
-		if(m_dbmsType == dbmsUNIDENTIFIED)
+		if (m_dbmsType == dbmsUNIDENTIFIED)
 		{
-			LOG_WARNING((boost::wformat(L"Connect to unknown database: %s") %m_dbInf.m_dbmsName).str());
+			LOG_WARNING((boost::wformat(L"Connect to unknown database: %s") % m_dbInf.m_dbmsName).str());
 		}
 
 		return m_dbmsType;

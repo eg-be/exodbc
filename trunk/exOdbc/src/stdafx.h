@@ -18,6 +18,7 @@
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
 #include "boost/log/trivial.hpp"
+#include "boost/lexical_cast.hpp"
 
 // system
 #include <windows.h>
@@ -39,7 +40,7 @@
 #include <sqlucode.h>
 #include <odbcinst.h>
 // If we have the header for the MS SQL Server, include it
-#if defined HAVE_MSODBCSQL_H
+#if HAVE_MSODBCSQL_H
 	#include "msodbcsql.h"
 #endif
 
