@@ -45,8 +45,6 @@ namespace exodbc
 	protected:
 		exodbc::Environment m_env;
 		exodbc::Database m_db;
-		exodbc::Database*	m_pDb;
-		exodbc::Environment* m_pEnv;
 		exodbc::Table* m_pIntTypesAutoTable;
 		exodbc::MIntTypesTable* m_pIntTypesManualTable;
 

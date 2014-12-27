@@ -84,11 +84,6 @@ namespace exodbc
 		}
 		if (m_db.IsOpen())
 		{
-			//// Microsoft Sql Server needs a CommitTrans()
-			//if (m_db.Dbms() == dbmsMS_SQL_SERVER)
-			//{
-			//	EXPECT_TRUE(m_db.CommitTrans());
-			//}
 			EXPECT_TRUE(m_db.Close());
 		}
 	}
@@ -181,12 +176,6 @@ namespace exodbc
 		EXPECT_TRUE(m_pIntTypesAutoTable->Select(L""));
 
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -206,12 +195,6 @@ namespace exodbc
 		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
 
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -231,12 +214,6 @@ namespace exodbc
 			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
 			EXPECT_FALSE(m_pIntTypesAutoTable->SelectClose());
-		}
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
 		}
 	}
 
@@ -369,12 +346,6 @@ namespace exodbc
 		EXPECT_EQ(L"9223372036854775807", str);
 		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
 		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -408,12 +379,6 @@ namespace exodbc
 		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 6") % idName).str()));
 		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
 		EXPECT_EQ(9223372036854775807, m_pIntTypesManualTable->m_bigInt);
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -473,12 +438,6 @@ namespace exodbc
 		// Read as str
 		EXPECT_TRUE(fTable.GetColumnValue(1, str));
 		EXPECT_EQ(L"-3.141592", str);
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -511,12 +470,6 @@ namespace exodbc
 		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 6") % idName).str()));
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_EQ(-3.141592, fTable.m_double);
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -563,12 +516,6 @@ namespace exodbc
 
 		EXPECT_FALSE(charTypesAutoTable.SelectNext());
 		EXPECT_TRUE(charTypesAutoTable.SelectClose());
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -608,12 +555,6 @@ namespace exodbc
 		EXPECT_EQ(std::wstring(L"הצüאיט"), trim_right_copy(str));
 		EXPECT_FALSE(wTable.SelectNext());
 		EXPECT_TRUE(wTable.SelectClose());
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -660,12 +601,6 @@ namespace exodbc
 
 		EXPECT_FALSE(charTypesAutoTable.SelectNext());
 		EXPECT_TRUE(charTypesAutoTable.SelectClose());
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -705,12 +640,6 @@ namespace exodbc
 		EXPECT_EQ(std::string("הצüאיט"), trim_right_copy(str));
 		EXPECT_FALSE(cTable.SelectNext());
 		EXPECT_TRUE(cTable.SelectClose());
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 
 
@@ -747,6 +676,22 @@ namespace exodbc
 		EXPECT_EQ(55, timestamp.minute);
 		EXPECT_EQ(56, timestamp.second);
 
+		// In IBM DB2 we have 6 digits for the fractions of a timestamp
+		if (m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_EQ(123456, timestamp.fraction);
+		}
+		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			// ms has 3 digits
+			EXPECT_EQ(123, timestamp.fraction);
+		}
+		else
+		{
+			EXPECT_EQ(0, timestamp.fraction);
+		}
+
+
 		// MS SQL Server has a new SQL_TIME2_STRUCT if ODBC version is >= 3.8
 #if HAVE_MSODBCSQL_H
 		Environment env38(OV_3_8);
@@ -762,17 +707,26 @@ namespace exodbc
 		EXPECT_EQ(13, time.hour);
 		EXPECT_EQ(55, time.minute);
 		EXPECT_EQ(56, time.second);
-#endif
 
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		//if (db38.GetCommitMode() != CM_AUTO_COMMIT && (db38.Dbms() == dbmsDB2 || db38.Dbms() == dbmsMS_SQL_SERVER))
-		//{
-		//	EXPECT_TRUE(db38.CommitTrans());
-		//}
-		//if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		//{
-		//	EXPECT_TRUE(m_db.CommitTrans());
-		//}
+		// We should be able to read the value as TIME2 struct
+		SQL_SS_TIME2_STRUCT t2;
+		EXPECT_TRUE(dTable38.GetColumnValue(2, t2));
+		EXPECT_EQ(13, t2.hour);
+		EXPECT_EQ(55, t2.minute);
+		EXPECT_EQ(56, t2.second);
+		if (db38.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			// MS should also have fractions, configurable, here set to 7
+			EXPECT_TRUE(db38.GetMaxSupportedOdbcVersion() >= OV_3_8);
+			EXPECT_EQ(1234567, t2.fraction);
+		}
+		else
+		{
+			// For the other DBs we expect the fraction part to be 0, as we did not read it
+			// from a TIME2 struct, but from a normal TIME struct, without any fractions
+			EXPECT_EQ(0, t2.fraction);
+		}
+#endif
 	}
 
 
@@ -801,12 +755,6 @@ namespace exodbc
 		EXPECT_EQ(13, cTable.m_timestamp.hour);
 		EXPECT_EQ(55, cTable.m_timestamp.minute);
 		EXPECT_EQ(56, cTable.m_timestamp.second);
-
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
 // Interfaces
 // ----------

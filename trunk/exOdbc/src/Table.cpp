@@ -579,12 +579,16 @@ namespace exodbc
 		exASSERT(IsSelectOpen());
 		
 		SQLRETURN ret = SQLFetch(m_hStmtSelect);
-		if ( ! (ret == SQL_SUCCESS || ret == SQL_NO_DATA))
+		if ( ! SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA)
 		{
 			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFetch);
 		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
+		}
 
-		return ret == SQL_SUCCESS;
+		return SQL_SUCCEEDED(ret);
 	}
 
 	
@@ -776,6 +780,26 @@ namespace exodbc
 		}
 		return true;
 	}
+
+
+#if HAVE_MSODBCSQL_H
+	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		if (!pBuff || pBuff->IsNull())
+			return false;
+
+		try
+		{
+			time2 = *pBuff;
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+#endif
 
 
 	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize)

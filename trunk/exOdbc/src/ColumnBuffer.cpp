@@ -21,6 +21,29 @@ using namespace std;
 
 namespace exodbc
 {
+	void ColumnBuffer::TrimValue(SQLSMALLINT decimalDigits, SQLUINTEGER& value)
+	{
+		if (decimalDigits < 0)
+		{
+			return;
+		}
+
+		if (decimalDigits == 0)
+		{
+			value = 0;
+		}
+		SQLUINTEGER max = 1;
+		for (int i = 0; i < decimalDigits; i++)
+		{
+			max = max * 10;
+		}
+		while (value > max)
+		{
+			value /= 10;
+		}
+	}
+
+
 	// Construction
 	// ------------
 	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode, OdbcVersion odbcVersion)
@@ -34,6 +57,7 @@ namespace exodbc
 		, m_columnNr((SQLUSMALLINT) columnInfo.m_ordinalPosition)
 		, m_haveColumnInfo(true)
 		, m_odbcVersion(odbcVersion)
+		, m_decimalDigits(-1)
 	{
 		exASSERT(m_columnNr > 0);
 		exASSERT(columnInfo.m_sqlDataType != 0);
@@ -44,7 +68,7 @@ namespace exodbc
 	}
 
 
-	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName)
+	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLSMALLINT decimalDigits /* = -1 */)
 		: m_bound(false)
 		, m_allocatedBuffer(false)
 		, m_haveBuffer(true)
@@ -56,6 +80,7 @@ namespace exodbc
 		, m_haveColumnInfo(false)
 		, m_queryName(queryName)
 		, m_odbcVersion(OV_UNKNOWN)
+		, m_decimalDigits(decimalDigits)
 	{
 		exASSERT(sqlCType != 0);
 		exASSERT(ordinalPosition > 0);
@@ -385,6 +410,15 @@ namespace exodbc
 	}
 
 
+	SQLSMALLINT ColumnBuffer::GetDecimalDigitals() const
+	{
+		if (m_haveColumnInfo && !m_columnInfo.m_isDecimalDigitsNull)
+		{
+			return m_columnInfo.m_decimalDigits;
+		}
+		return m_decimalDigits;
+	}
+
 	ColumnBuffer::operator SQLSMALLINT() const
 	{
 		exASSERT(m_haveBuffer);
@@ -462,7 +496,7 @@ namespace exodbc
 		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
+		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(GetDecimalDigitals()), m_bufferPtr);
 
 		SQL_DATE_STRUCT date;
 		date.day = timeStamp.day;
@@ -477,7 +511,7 @@ namespace exodbc
 		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
+		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(GetDecimalDigitals()), m_bufferPtr);
 
 		SQL_TIME_STRUCT time;
 		time.hour = timeStamp.hour;
@@ -487,12 +521,28 @@ namespace exodbc
 	}
 
 
+	ColumnBuffer::operator SQL_SS_TIME2_STRUCT() const
+	{
+		exASSERT(m_haveBuffer);
+		exASSERT(m_bound);
+
+		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(GetDecimalDigitals()), m_bufferPtr);
+
+		SQL_SS_TIME2_STRUCT time;
+		time.hour = timeStamp.hour;
+		time.minute = timeStamp.minute;
+		time.second = timeStamp.second;
+		time.fraction = timeStamp.fraction;
+		return time;
+	}
+
+
 	ColumnBuffer::operator SQL_TIMESTAMP_STRUCT() const
 	{
 		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		return boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
+		return boost::apply_visitor(TimestampVisitor(GetDecimalDigitals()), m_bufferPtr);
 	}
 
 
@@ -587,7 +637,7 @@ namespace exodbc
 		ZeroMemory(&timestamp, sizeof(timestamp));
 		timestamp.hour = pTime->hour; 
 		timestamp.minute = pTime->minute;
-		timestamp.second = pTime->second; 
+		timestamp.second = pTime->second;
 		return timestamp;
 	}
 
@@ -603,6 +653,14 @@ namespace exodbc
 	};
 
 
+	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const
+	{
+		SQL_TIMESTAMP_STRUCT timestamp = *pTimestamp;
+		ColumnBuffer::TrimValue(m_decimalDigits, timestamp.fraction);
+		return timestamp;
+	}
+
+
 #if HAVE_MSODBCSQL_H
 	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_SS_TIME2_STRUCT* pTime) const 
 	{ 
@@ -611,7 +669,8 @@ namespace exodbc
 		timestamp.hour = pTime->hour; 
 		timestamp.minute = pTime->minute; 
 		timestamp.second = pTime->second; 
-		timestamp.fraction = pTime->fraction; 
+		timestamp.fraction = pTime->fraction;
+		ColumnBuffer::TrimValue(m_decimalDigits, timestamp.fraction);
 		return timestamp; 
 	};
 #endif
