@@ -453,6 +453,10 @@ namespace exodbc
 
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const;
 
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const;
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& date) const;
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& date) const;
+
 		/*!
 		* \brief	Returns the number of columns this table has.
 		* \detailed	If columns were set manually on the table, this is the value that has been 
