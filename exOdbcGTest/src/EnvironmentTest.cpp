@@ -101,7 +101,7 @@ namespace exodbc
 	TEST_P(EnvironmentTest, ListDataSources)
 	{
 		Environment env(OV_3);
-		ASSERT_TRUE(env.HaveHenv());
+		ASSERT_TRUE(env.HasHenv());
 
 		vector<SDataSource> dataSources;
 		ASSERT_TRUE(env.ListDataSources(Environment::All, dataSources));

@@ -155,33 +155,24 @@ namespace exodbc
 		bool			Initialize();
 
 		/*!
-		 * \fn	bool Environment::AllocHenv();
-		 *
 		 * \brief	Tries to allocate a new Henv.
 		 * 			Cannot be called if a Henv is allocated.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool			AllocHenv();
 
 		/*!
-		 * \fn	bool Environment::FreeHenv();
-		 *
 		 * \brief	Tries to free an allocated Henv.
 		 * 			Can only be called if a Henv is allocated.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool			FreeHenv();
 
 		/*!
-		 * \fn	bool Environment::HaveHenv()
-		 *
 		 * \brief	Returns true is a Henv is allocated.
-		 *
 		 * \return	Returns true is a Henv is allocated.
 		 */
-		bool			HaveHenv() const	{ return m_henv != NULL; };
+		bool			HasHenv() const	{ return m_henv != NULL; };
 
 		// Accessors
 		const HENV&		GetHenv() const		{ return m_henv; };

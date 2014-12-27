@@ -162,7 +162,7 @@ namespace exodbc
 	{		
 		// Open an existing db by passing the Env to the ctor and reading the params from the Environment (the old wx-way)
 		Environment env(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, OV_3);
-		EXPECT_TRUE(env.HaveHenv());
+		EXPECT_TRUE(env.HasHenv());
 		Database db(env);
 		EXPECT_TRUE(db.Open(&env));
 		EXPECT_TRUE(db.Close());

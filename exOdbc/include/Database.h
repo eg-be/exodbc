@@ -207,7 +207,7 @@ namespace exodbc
 		*			Environment.
 		* \detailed	The Database will try to create a new Db-Connection handle during construction.
 		*				No Exception is thrown if doing so fails, you can use HasHdbc() to check if
-		*				creating the Db-Connection handle was successfull.
+		*				creating the Db-Connection handle was successful.
 		*				The handle will be freed by the Database on destruction.
 		*
 		* \param	pEnv		The Environment to use to create this database and its connection.
@@ -220,7 +220,7 @@ namespace exodbc
 		 *			Environment. Note: This constructor is here for compatibility with wxWidgets.
 		 * \detailed	The Database will try to create a new Db-Connection handle during construction.
 		 *				No Exception is thrown if doing so fails, you can use HasHdbc() to check if
-		 *				creating the Db-Connection handle was successfull.
+		 *				creating the Db-Connection handle was successful.
 		 *				The handle will be freed by the Database on destruction.
 		 *				Note: This function is here for compatibility with wxWidgets which used pointers
 		 *
