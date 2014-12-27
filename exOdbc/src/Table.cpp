@@ -600,6 +600,19 @@ namespace exodbc
 	}
 
 
+	bool Table::SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr, SQLINTEGER& value)
+	{
+		exASSERT(IsSelectOpen());
+		value = 0;
+		SQLRETURN ret = SQLColAttribute(m_hStmtSelect, columnIndex + 1, (SQLUSMALLINT)attr, NULL, NULL, NULL, &value);
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLColAttribute);
+		}
+		return SQL_SUCCEEDED(ret);
+	}
+
+
 	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
