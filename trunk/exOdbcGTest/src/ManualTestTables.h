@@ -72,4 +72,34 @@ namespace exodbc
 		SQLDOUBLE				m_double;
 		SQLFLOAT				m_float;
 	};
+
+
+	// CharTypesTable
+	// --------------
+	class MCharTypesTable : public exodbc::Table
+	{
+	public:
+
+		MCharTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		virtual ~MCharTypesTable() {};
+
+		SQLINTEGER	m_idCharTypes;
+		SQLCHAR	m_varchar[128 + 1];
+		SQLCHAR	m_char[128 + 1];
+	};
+
+
+	// WCharTypesTable
+	// --------------
+	class MWCharTypesTable : public exodbc::Table
+	{
+	public:
+
+		MWCharTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		virtual ~MWCharTypesTable() {};
+
+		SQLINTEGER	m_idCharTypes;
+		SQLWCHAR	m_varchar[128 + 1];
+		SQLWCHAR	m_char[128 + 1];
+	};
 }
