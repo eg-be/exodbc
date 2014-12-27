@@ -647,6 +647,10 @@ namespace exodbc
 	{
 		// TODO Disabled because I dont get it how to work with leading zeros.
 		// fractions cannot be used so far
+		// Because I dont get it right, its all correct: 
+		// [b]   The value of the fraction field is the number of billionths of a second and ranges from 0 through 999,999,999 (1 less than 1 billion). 
+		// For example, the value of the fraction field for a half-second is 500,000,000, for a thousandth of a second (one millisecond) is 1,000,000, 
+		// for a millionth of a second (one microsecond) is 1,000, and for a billionth of a second (one nanosecond) is 1.
 		if (m_db.Dbms() == dbmsMY_SQL)
 		{
 			// mysql has no fractions (?)
@@ -659,6 +663,7 @@ namespace exodbc
 
 		using namespace boost::algorithm;
 		SQL_TIMESTAMP_STRUCT timestamp;
+		timestamp.fraction = 0;
 		std::wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 2") % idName).str()));
 		EXPECT_TRUE(dTable.SelectNext());
@@ -673,6 +678,13 @@ namespace exodbc
 		{
 			EXPECT_EQ((SQLUINTEGER) 10, timestamp.fraction);
 		}
+	}
+
+
+	TEST_P(TableTest, GetWCharDateValues)
+	{
+		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
 	}
 
 
