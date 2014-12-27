@@ -83,6 +83,24 @@ namespace exodbc
 	}
 
 
+	std::wstring SqlReturn2s(SQLRETURN ret)
+	{
+		switch (ret)
+		{
+		case SQL_SUCCESS:
+			return L"SUCCESS";
+		case SQL_SUCCESS_WITH_INFO:
+			return L"SUCCESS_WITH_INFO";
+		case SQL_NO_DATA:
+			return L"SQL_NO_DATA";
+		case SQL_ERROR:
+			return L"SQL_ERROR";
+		default:
+			return L"???";
+		}
+	}
+
+
 	std::wstring SqlType2s(SQLSMALLINT sqlType)
 	{
 		switch(sqlType)

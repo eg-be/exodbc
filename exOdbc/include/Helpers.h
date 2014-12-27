@@ -134,6 +134,14 @@ namespace exodbc
 	*/
 	extern EXODBCAPI std::wstring SqlTrueFalse2s(SQLSMALLINT b);
 	
+	/*!
+	* \brief Translates some often encountered SQLRETURN values to a string.
+	*
+	* \param SQLRETURN ret Return code to translate.
+	* \return std::wstring Translation or '???' if unknown.
+	*/
+	extern EXODBCAPI std::wstring SqlReturn2s(SQLRETURN ret);
+
 
 	/*!
 	* \brief Transform the SQL_types like SQL_CHAR, SQL_NUMERIC, etc. to some string.
@@ -364,11 +372,13 @@ namespace exodbc
 		if(hEnv) handles << L"Env=" << hEnv << L";"; \
 		if(hDbc) handles << L"Dbc=" << hDbc << L";"; \
 		if(hStmt) handles << L"Stmt=" << hStmt << L";"; \
+		std::wstring type = L"Error(s)"; \
+		if(ret == SQL_SUCCESS_WITH_INFO) { type = L"Info(s)"; } \
 		std::wstringstream ws; \
 		ws << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " ; \
 		if(msgStr.length() > 0) \
 			ws << msgStr << L": "; \
-		ws << L"ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", with " << errs.size() << L" ODBC-Error(s) from handle(s) '" << handles.str() << L"': "; \
+		ws << L"ODBC-Function '" << L#SqlFunction << L"' returned " << SqlReturn2s(ret) << L" (" << ret << L"), with " << errs.size() << L" ODBC-" << type << L" from handle(s) '" << handles.str() << L"': "; \
 		for(it = errs.begin(); it != errs.end(); it++) \
 		{ \
 			const SErrorInfo& err = *it; \

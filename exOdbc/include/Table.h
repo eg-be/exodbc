@@ -454,8 +454,12 @@ namespace exodbc
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const;
 
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const;
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& date) const;
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& date) const;
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& time) const;
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& timestamp) const;
+
+#if HAVE_MSODBCSQL_H
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const;
+#endif
 
 		/*!
 		* \brief	Returns the number of columns this table has.

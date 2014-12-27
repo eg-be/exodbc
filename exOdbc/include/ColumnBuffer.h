@@ -98,6 +98,16 @@ namespace exodbc
 	{
 	public:
 		/*!
+		* \brief	Keeps only the first decimalDigits in value.
+		* \detailed	Reads number decimalDigits from the left of the passed value and
+		*			removes the rest to the right. So, for example (3, 12345) becomes
+		*			123.
+		* \param	decimalDigits How many Digits to read from the left of value.
+		*
+		*/
+		static void TrimValue(SQLSMALLINT decimalDigits, SQLUINTEGER& value);
+
+		/*!
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
 		*			using the data type information from the passed SColumnInfo.
 		* \detailed	The constructor will try to allocate a corresponding buffer.
@@ -125,11 +135,15 @@ namespace exodbc
 		* \param bufferPtrVarian Pointer to allocated buffer for the given sqlCType.
 		* \param bufferSize	Size of the allocated buffer.
 		* \param queryName Name of the column that corresponds to this buffer.
+		* \param decimalDigits		Number of decimal digits. Set to -1 to indicate unknown. If set, decimal digits returned
+		*							are truncated. For example a driver might return 123456700 as the fraction part of a 
+		*							timestamp, but the actual value should be 1234567 as decimalDigits is set to 7. If you
+		*							retrieve the value using the operators / Visitors the value will be truncated to 7 digits.
 		*
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName);
+		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLSMALLINT decimalDigits = -1);
 
 
 		/*!
@@ -325,6 +339,19 @@ namespace exodbc
 		operator SQL_TIME_STRUCT() const;
 
 
+#if HAVE_MSODBCSQL_H
+		/*!
+		* \brief	Cast the current value to a SQL_SS_TIME2_STRUCT if possible.
+		* \detailed	Fails if not bound. If the value is a Timestamp, the date-part is ignored.
+		*			Only available if HAVE_MSODBCSQL_H is defined to 1.
+		* \return	Current value as SQL_SS_TIME2_STRUCT.
+		* \throw	CastException If value cannot be casted to a SQL_SS_TIME2_STRUCT.
+		* \see		TimestampVisitor
+		*/
+		operator SQL_SS_TIME2_STRUCT() const;
+#endif
+
+
 		/*!
 		* \brief	Cast the current value to a SQL_TIMESTAMP_STRUCT if possible.
 		* \detailed	Fails if not bound.
@@ -334,8 +361,8 @@ namespace exodbc
 		*/
 		operator SQL_TIMESTAMP_STRUCT() const;
 
-	private:
 
+	private:
 		/*!
 		* \brief	Determine the buffer size needed for the current SQL-Type given in SColumnInfo.
 		* \detailed This is used internally if no buffer-size and buffer is given and the buffer must
@@ -379,6 +406,16 @@ namespace exodbc
 		bool AllocateBuffer(const SColumnInfo& columnInfo);
 
 
+		/*!
+		* \brief	Return the number of decimal digits if known or -1 otherwise.
+		* \detailed If a SColumnInfo is available returns the value SColumnInfo::m_decimalDigits
+		*			if the value is not set to NULL. Else the value of m_decimalDigits is returned,
+		*			which defaults to -1.
+		* \return	Number of decimal digits if known or -1.
+		*/
+		SQLSMALLINT GetDecimalDigitals() const;
+
+
 		// Helpers to quickly access the pointers inside the variant.
 		// All of these could throw a boost::bad_get
 		SQLSMALLINT*	GetSmallIntPtr() const;
@@ -396,6 +433,7 @@ namespace exodbc
 
 		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer, only available if m_haveColumnInfo is true.
 		bool		m_haveColumnInfo;	///< True if m_columnInfo contains a valid info-object.
+		SQLSMALLINT m_decimalDigits;	///< Decimal digits, set from manual constructor.
 		std::wstring m_queryName;	///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
 		SQLUSMALLINT m_columnNr;	///< Either set on construction or read from SColumnInfo::m_ordinalPosition
 		bool m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
@@ -586,6 +624,9 @@ namespace exodbc
 		: public boost::static_visitor < SQL_TIMESTAMP_STRUCT >
 	{
 	public:
+		TimestampVisitor(SQLSMALLINT decimalDigits)
+			: m_decimalDigits(decimalDigits) {};
+
 		SQL_TIMESTAMP_STRUCT operator()(SQLSMALLINT* smallInt) const { throw CastException(SQL_C_SSHORT, SQL_C_TYPE_TIMESTAMP); };
 		SQL_TIMESTAMP_STRUCT operator()(SQLINTEGER* i) const { throw CastException(SQL_C_SSHORT, SQL_C_TYPE_TIMESTAMP); };
 		SQL_TIMESTAMP_STRUCT operator()(SQLBIGINT* bigInt) const { throw CastException(SQL_C_SBIGINT, SQL_C_TYPE_TIMESTAMP); };
@@ -594,10 +635,13 @@ namespace exodbc
 		SQL_TIMESTAMP_STRUCT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_TYPE_TIMESTAMP); };
 		SQL_TIMESTAMP_STRUCT operator()(SQL_DATE_STRUCT* pDate) const;
 		SQL_TIMESTAMP_STRUCT operator()(SQL_TIME_STRUCT* pTime) const;
-		SQL_TIMESTAMP_STRUCT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return *pTimestamp; };
+		SQL_TIMESTAMP_STRUCT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const;
 #if HAVE_MSODBCSQL_H
 		SQL_TIMESTAMP_STRUCT operator()(SQL_SS_TIME2_STRUCT* pTime) const;
 #endif
+
+	private:
+		SQLSMALLINT m_decimalDigits;
 	};	// class TimestampVisitor
 }
 
