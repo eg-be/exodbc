@@ -34,7 +34,10 @@ namespace exodbc
 	// --------
 
 	// The Variant we use to store pointers to the actual buffer
-	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, SQLCHAR*, SQLWCHAR*, SQLDOUBLE*> BufferPtrVariant;
+	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, 
+		SQLCHAR*, SQLWCHAR*, 
+		SQLDOUBLE*,
+		SQL_DATE_STRUCT*, SQL_TIME_STRUCT*, SQL_TIMESTAMP_STRUCT*> BufferPtrVariant;
 
 	// Structs
 	// -------
@@ -69,6 +72,7 @@ namespace exodbc
 	* SQL_DOUBLE				| SQLDOUBLE*
 	* SQL_FLOAT					| SQLDOUBLE*
 	* SQL_REAL					| SQLDOUBLE*
+	* SQL_
 	* 
 	* [1] There are options about wide-chars: You can either enforce that a column
 	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
@@ -411,6 +415,9 @@ namespace exodbc
 		SQLBIGINT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQL_TIMESTAMP_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_SBIGINT); };
 	};	// class BigintVisitor
 
 
@@ -441,6 +448,9 @@ namespace exodbc
 		std::wstring operator()(SQLCHAR* pChar) const{ throw CastException(SQL_C_CHAR, SQL_C_WCHAR); };
 		std::wstring operator()(SQLWCHAR* pWChar) const { return pWChar; };
 		std::wstring operator()(SQLDOUBLE* pDouble) const { return (boost::wformat(L"%f") % *pDouble).str(); };
+		std::wstring operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_WCHAR); };
+		std::wstring operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_WCHAR); };
+		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_WCHAR); };
 	};	// class WStringVisitor
 
 
@@ -471,6 +481,9 @@ namespace exodbc
 		std::string operator()(SQLCHAR* pChar) const { return (char*)pChar; };
 		std::string operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_CHAR); };
 		std::string operator()(SQLDOUBLE* pDouble) const { return (boost::format("%f") % *pDouble).str(); };
+		std::string operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_CHAR); };
+		std::string operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_CHAR); };
+		std::string operator()(SQL_TIMESTAMP_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_CHAR); };
 	};	// class StringVisitor
 
 
@@ -501,6 +514,9 @@ namespace exodbc
 		SQLDOUBLE operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQLDOUBLE* pDouble) const { return *pDouble; };
+		SQLDOUBLE operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_DOUBLE); };
+		SQLDOUBLE operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_DOUBLE); };
+		SQLDOUBLE operator()(SQL_TIMESTAMP_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_DOUBLE); };
 	};	// class DoubleVisitor
 }
 

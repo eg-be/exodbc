@@ -106,4 +106,22 @@ namespace exodbc
 		SetColumn(1, TestTables::GetColName(L"tvarchar", namesCase), m_varchar, SQL_C_WCHAR, sizeof(m_varchar));
 		SetColumn(2, TestTables::GetColName(L"tchar", namesCase), m_char, SQL_C_WCHAR, sizeof(m_char));
 	}
+
+
+	// DateTypesTable
+	// ---------------
+	MDateTypesTable::MDateTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
+		: Table(pDb, 4, TestTables::GetTableName(L"datetypes", namesCase), L"", L"", L"", Table::READ_ONLY)
+	{
+		m_idDateTypes = 0;
+		ZeroMemory(&m_date, sizeof(m_date));
+		ZeroMemory(&m_time, sizeof(m_time));
+		ZeroMemory(&m_timestamp, sizeof(m_timestamp));
+
+		// Note: We are odbc 3, therefore use the new c-type (with type: SQL_C_TYPE_DATE instead of SQL_C_DATE).
+		SetColumn(0, TestTables::GetColName(L"iddatetypes", namesCase), &m_idDateTypes, SQL_C_SLONG, sizeof(m_idDateTypes));
+		SetColumn(1, TestTables::GetColName(L"tdate", namesCase), &m_date, SQL_C_TYPE_DATE, sizeof(m_date));
+		SetColumn(2, TestTables::GetColName(L"ttime", namesCase), &m_time, SQL_C_TYPE_TIME, sizeof(m_time));
+		SetColumn(3, TestTables::GetColName(L"ttimestamp", namesCase), &m_timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(m_timestamp));
+	}
 }

@@ -712,6 +712,39 @@ namespace exodbc
 		}
 	}
 
+
+	TEST_P(TableTest, GetManualDateValues)
+	{
+		MDateTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(cTable.Open(false, true));
+
+		// Just test the values in the buffer - trimming has no effect here
+		using namespace boost::algorithm;
+		std::string str;
+		std::wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		EXPECT_EQ(26, cTable.m_date.day);
+		EXPECT_EQ(1, cTable.m_date.month);
+		EXPECT_EQ(1983, cTable.m_date.year);
+
+		EXPECT_EQ(13, cTable.m_time.hour);
+		EXPECT_EQ(55, cTable.m_time.minute);
+		EXPECT_EQ(56, cTable.m_time.second);
+
+		EXPECT_EQ(26, cTable.m_timestamp.day);
+		EXPECT_EQ(1, cTable.m_timestamp.month);
+		EXPECT_EQ(1983, cTable.m_timestamp.year);
+		EXPECT_EQ(13, cTable.m_timestamp.hour);
+		EXPECT_EQ(55, cTable.m_timestamp.minute);
+		EXPECT_EQ(56, cTable.m_timestamp.second);
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
 // Interfaces
 // ----------
 
