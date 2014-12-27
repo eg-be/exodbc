@@ -643,44 +643,6 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DISABLED_GetTimestampFractionWithLeadingZeros)
-	{
-		// TODO Disabled because I dont get it how to work with leading zeros.
-		// fractions cannot be used so far
-		// Because I dont get it right, its all correct: 
-		// [b]   The value of the fraction field is the number of billionths of a second and ranges from 0 through 999,999,999 (1 less than 1 billion). 
-		// For example, the value of the fraction field for a half-second is 500,000,000, for a thousandth of a second (one millisecond) is 1,000,000, 
-		// for a millionth of a second (one microsecond) is 1,000, and for a billionth of a second (one nanosecond) is 1.
-		if (m_db.Dbms() == dbmsMY_SQL)
-		{
-			// mysql has no fractions (?)
-			return;
-		}
-
-		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
-		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
-		EXPECT_TRUE(dTable.Open(false, true));
-
-		using namespace boost::algorithm;
-		SQL_TIMESTAMP_STRUCT timestamp;
-		timestamp.fraction = 0;
-		std::wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
-		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 2") % idName).str()));
-		EXPECT_TRUE(dTable.SelectNext());
-		EXPECT_TRUE(dTable.GetColumnValue(3, timestamp));
-		SQLINTEGER av;
-		bool ok = dTable.SelectColumnAttribute(3, CA_PRECISION, av);
-		if (m_db.Dbms() == dbmsDB2)
-		{
-			EXPECT_EQ((SQLUINTEGER) 1, timestamp.fraction);
-		}
-		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
-		{
-			EXPECT_EQ((SQLUINTEGER) 10, timestamp.fraction);
-		}
-	}
-
-
 	TEST_P(TableTest, GetWCharDateValues)
 	{
 		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
@@ -690,6 +652,11 @@ namespace exodbc
 
 	TEST_P(TableTest, GetAutoDateValues)
 	{
+		// Note how to read fractions:
+		// [b]   The value of the fraction field is the number of billionths of a second and ranges from 0 through 999,999,999 (1 less than 1 billion). 
+		// For example, the value of the fraction field for a half-second is 500,000,000, for a thousandth of a second (one millisecond) is 1,000,000, 
+		// for a millionth of a second (one microsecond) is 1,000, and for a billionth of a second (one nanosecond) is 1.
+
 		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
 		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(dTable.Open(false, true));
@@ -721,36 +688,20 @@ namespace exodbc
 		EXPECT_EQ(55, timestamp.minute);
 		EXPECT_EQ(56, timestamp.second);
 
-		// In IBM DB2 we have 6 digits for the fractions of a timestamp
+		// In IBM DB2 we have 6 digits for the fractions of a timestamp 123456 turns into 123'456'000
 		if (m_db.Dbms() == dbmsDB2)
 		{
-			EXPECT_EQ(123456, timestamp.fraction);
+			EXPECT_EQ(123456000, timestamp.fraction);
 		}
 		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
 		{
-			// ms has 3 digits
-			EXPECT_EQ(123, timestamp.fraction);
+			// ms has 3 digits 123 turns into 123'000'000
+			EXPECT_EQ(123000000, timestamp.fraction);
 		}
 		else
 		{
 			EXPECT_EQ(0, timestamp.fraction);
 		}
-
-		//EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 2") % idName).str()));
-		//EXPECT_TRUE(dTable.SelectNext());
-		//EXPECT_TRUE(dTable.GetColumnValue(3, timestamp));
-		//if (m_db.Dbms() == dbmsDB2)
-		//{
-		//	EXPECT_EQ(0034, timestamp.fraction);
-		//}
-		//else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
-		//{
-		//	EXPECT_EQ(010, timestamp.fraction);
-		//}
-		//else
-		//{
-		//	EXPECT_EQ(0, timestamp.fraction);
-		//}
 
 		// MS SQL Server has a new SQL_TIME2_STRUCT if ODBC version is >= 3.8
 #if HAVE_MSODBCSQL_H
@@ -776,9 +727,9 @@ namespace exodbc
 		EXPECT_EQ(56, t2.second);
 		if (db38.Dbms() == dbmsMS_SQL_SERVER)
 		{
-			// MS should also have fractions, configurable, here set to 7
+			// MS should also have fractions, configurable, here set to 7: 1234567 -> 123'456'700
 			EXPECT_TRUE(db38.GetMaxSupportedOdbcVersion() >= OV_3_8);
-			EXPECT_EQ(1234567, t2.fraction);
+			EXPECT_EQ(123456700, t2.fraction);
 		}
 		else
 		{
