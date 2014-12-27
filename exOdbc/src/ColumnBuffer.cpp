@@ -656,7 +656,7 @@ namespace exodbc
 	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const
 	{
 		SQL_TIMESTAMP_STRUCT timestamp = *pTimestamp;
-		ColumnBuffer::TrimValue(m_decimalDigits, timestamp.fraction);
+		//ColumnBuffer::TrimValue(m_decimalDigits, timestamp.fraction);
 		return timestamp;
 	}
 
@@ -670,7 +670,7 @@ namespace exodbc
 		timestamp.minute = pTime->minute; 
 		timestamp.second = pTime->second; 
 		timestamp.fraction = pTime->fraction;
-		ColumnBuffer::TrimValue(m_decimalDigits, timestamp.fraction);
+		//ColumnBuffer::TrimValue(m_decimalDigits, timestamp.fraction);
 		return timestamp; 
 	};
 #endif
