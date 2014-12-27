@@ -519,7 +519,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetWCharValues)
+	TEST_P(TableTest, GetAutoWCharValues)
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -571,7 +571,52 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetCharValues)
+	TEST_P(TableTest, GetManualWCharValues)
+	{
+		MWCharTypesTable wTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(wTable.Open(false, true));
+
+		// Just test the values in the buffer - trimming has no effect here
+		using namespace boost::algorithm;
+		std::wstring str;
+		std::wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(wTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(wTable.SelectNext());
+		str.assign((wchar_t*) &wTable.m_varchar);
+		EXPECT_EQ(std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), trim_right_copy(str));
+		EXPECT_FALSE(wTable.SelectNext());
+		EXPECT_TRUE(wTable.SelectClose());
+
+		EXPECT_TRUE(wTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(wTable.SelectNext());
+		str.assign((wchar_t*)&wTable.m_char);
+		EXPECT_EQ(std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), trim_right_copy(str));
+		EXPECT_FALSE(wTable.SelectNext());
+		EXPECT_TRUE(wTable.SelectClose());
+
+		EXPECT_TRUE(wTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(wTable.SelectNext());
+		str.assign((wchar_t*)&wTable.m_varchar);
+		EXPECT_EQ(std::wstring(L"הצüאיט"), trim_right_copy(str));
+		EXPECT_FALSE(wTable.SelectNext());
+		EXPECT_TRUE(wTable.SelectClose());
+
+		EXPECT_TRUE(wTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(wTable.SelectNext());
+		str.assign((wchar_t*)&wTable.m_char);
+		EXPECT_EQ(std::wstring(L"הצüאיט"), trim_right_copy(str));
+		EXPECT_FALSE(wTable.SelectNext());
+		EXPECT_TRUE(wTable.SelectClose());
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
+
+
+	TEST_P(TableTest, GetAutoCharValues)
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -622,6 +667,50 @@ namespace exodbc
 		}
 	}
 
+
+	TEST_P(TableTest, GetManualCharValues)
+	{
+		MCharTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(cTable.Open(false, true));
+
+		// Just test the values in the buffer - trimming has no effect here
+		using namespace boost::algorithm;
+		std::string str;
+		std::wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		str.assign((char*)&cTable.m_varchar);
+		EXPECT_EQ(std::string(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), trim_right_copy(str));
+		EXPECT_FALSE(cTable.SelectNext());
+		EXPECT_TRUE(cTable.SelectClose());
+
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		str.assign((char*)&cTable.m_char);
+		EXPECT_EQ(std::string(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), trim_right_copy(str));
+		EXPECT_FALSE(cTable.SelectNext());
+		EXPECT_TRUE(cTable.SelectClose());
+
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		str.assign((char*)&cTable.m_varchar);
+		EXPECT_EQ(std::string("הצüאיט"), trim_right_copy(str));
+		EXPECT_FALSE(cTable.SelectNext());
+		EXPECT_TRUE(cTable.SelectClose());
+
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		str.assign((char*)&cTable.m_char);
+		EXPECT_EQ(std::string("הצüאיט"), trim_right_copy(str));
+		EXPECT_FALSE(cTable.SelectNext());
+		EXPECT_TRUE(cTable.SelectClose());
+
+		// If Auto commit is off, we need to commit on certain db-systems, see #51
+		if (m_db.GetCommitMode() != CM_AUTO_COMMIT && m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_TRUE(m_db.CommitTrans());
+		}
+	}
 
 // Interfaces
 // ----------
