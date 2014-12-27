@@ -539,6 +539,36 @@ namespace exodbc
 		return count;
 	}
 
+
+	bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, std::wstring& sValue)
+	{
+		// Determine buffer length
+		exASSERT(hDbc != NULL);
+		SQLSMALLINT bufferSize = 0;
+		SQLRETURN ret = SQLGetInfo(hDbc, fInfoType, NULL, NULL, &bufferSize);
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR_DBC_MSG(hDbc, ret, SQLGetInfo, (boost::wformat(L"GetInfo for fInfoType %d failed") % fInfoType).str());
+			return false;
+		}
+		// According to the doc SQLGetInfo will always return byte-size. Therefore:
+		exASSERT((bufferSize % sizeof(wchar_t)) == 0);
+		// Allocate buffer, add one for terminating 0 char.
+		SQLSMALLINT charSize = (bufferSize / sizeof(wchar_t)) + 1;
+		bufferSize = charSize * sizeof(wchar_t);
+		wchar_t* buff = new wchar_t[charSize];
+		buff[0] = 0;
+		SQLSMALLINT cb;
+		bool ok = GetInfo(hDbc, fInfoType, (SQLPOINTER)buff, bufferSize, &cb);
+		if (ok)
+		{
+			sValue.assign(buff);
+		}
+		delete[] buff;
+		return ok;
+	}
+
+
 	bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
 	{
 		exASSERT(hDbc != NULL);

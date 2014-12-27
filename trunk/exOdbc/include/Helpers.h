@@ -288,6 +288,20 @@ namespace exodbc
 
 
 	/*!
+	* \brief	A wrapper to SQLGetInfo.
+	*
+	* \param	hDbc					The dbc.
+	* \param	fInfoType				Type of the information.
+	* \param [in,out]	sValue			String to receive the value read.
+	* \detailed This will first call SQLGetInfo to determine the size of the buffer, then allocate a
+	*			corresponding buffer and call GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
+	* \see		SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
+	* \return	true if it succeeds, false if it fails.
+	*/
+	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, std::wstring& sValue);
+
+
+	/*!
 	 * \brief	A wrapper to SQLGetInfo.
 	 *
 	 * \param	hDbc					The dbc.
