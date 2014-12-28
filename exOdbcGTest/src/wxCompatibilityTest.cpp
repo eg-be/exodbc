@@ -13,6 +13,7 @@
 
 // Same component headers
 #include "GenericTestTables.h"
+#include "ManualTestTables.h"
 
 // Other headers
 #include "Database.h"
@@ -75,22 +76,22 @@ namespace exodbc
 	// This also tests that calling the old Open(checkPrivs, checkExists) function still returns true
 	TEST_P(wxCompatibilityTest, OpenTableNoChecks)
 	{
-		CharTypesTable charTypesTable(m_pDb, m_odbcInfo.m_namesCase);
+		MCharTypesTable charTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(charTypesTable.Open(false, false));
 
-		IntTypesTable intTypesTable(m_pDb, m_odbcInfo.m_namesCase);
+		MIntTypesTable intTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(intTypesTable.Open(false, false));
 
-		DateTypesTable dateTypesTable(m_pDb, m_odbcInfo.m_namesCase);
+		MDateTypesTable dateTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(dateTypesTable.Open(false, false));
 
-		FloatTypesTable floatTypesTable(m_pDb, m_odbcInfo.m_namesCase);
+		MFloatTypesTable floatTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(floatTypesTable.Open(false, false));
 
-		NumericTypesTable numericTypesTable(m_pDb, NumericTypesTable::ReadAsChar, m_odbcInfo.m_namesCase);
-		EXPECT_TRUE(numericTypesTable.Open(false, false));
+//		MNumericTypesTable numericTypesTable(m_pDb, NumericTypesTable::ReadAsChar, m_odbcInfo.m_namesCase);
+//		EXPECT_TRUE(numericTypesTable.Open(false, false));
 
-		BlobTypesTable blobTypesTable(m_pDb, m_odbcInfo.m_namesCase);
+		MBlobTypesTable blobTypesTable(m_pDb, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(blobTypesTable.Open(false, false));
 	}
 
@@ -98,36 +99,30 @@ namespace exodbc
 	// Test basic GetNext
 	TEST_P(wxCompatibilityTest, GetNextTest)
 	{
-		CharTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MCharTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		// Expect 4 entries
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes"));
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes"));
 		int count = 0;
-		while(table.GetNext() && count <= 5)
+		while(table.SelectNext() && count <= 5)
 		{
 			count++;
 		}
 		EXPECT_EQ(4, count);
 
 		// Expect no entries
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 5"));
-		EXPECT_FALSE(table.GetNext());
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 5"));
+		EXPECT_FALSE(table.SelectNext());
 
 		// Expect 2 entries
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes >= 2 AND idchartypes <= 3"));
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes >= 2 AND idchartypes <= 3"));
 		count = 0;
-		while(table.GetNext() && count <= 3)
+		while(table.SelectNext() && count <= 3)
 		{
 			count++;
 		}
 		EXPECT_EQ(2, count);
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
 	}
 
 
