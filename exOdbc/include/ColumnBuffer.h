@@ -144,22 +144,6 @@ namespace exodbc
 		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLSMALLINT decimalDigits = -1);
 
 
-		/*!
-		* \brief	Create a new ColumnBuffer that will convert everything to a string (bind to a char* or wchar* buffer).
-		* \detailed	The constructor will try to allocate a char* or wchar* buffer that has enough space
-		*			for the passed stringLen (+ trailing zero).
-		* \param ordinalPosition	The ordinal position of the column in the table. Numbering starts at 1 (!)
-		* \param stringLen			The String-length of the buffer. This is not byte-length!
-		* \param mode				Determines if a char* or a wchar* buffer is allocated. You are not allowed
-		*							to use AutoBindingMode::BIND_AS_REPORTED .
-		* \param queryName			Name of the column that corresponds to this buffer.
-		*
-		* \see	HaveBuffer()
-		* \see	Bind()
-		*/
-		ColumnBuffer(SQLUSMALLINT ordinalPosition, SQLLEN stringLen, AutoBindingMode mode, const std::wstring& queryName);
-
-
 		~ColumnBuffer();
 
 	private:
