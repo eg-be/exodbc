@@ -45,8 +45,8 @@ namespace exodbc
 
 	// IntTypesTable
 	// ---------------
-	MIntTypesTable::MIntTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, 4, TestTables::GetTableName(L"integertypes", namesCase), L"", L"", L"", Table::READ_ONLY)
+	MIntTypesTable::MIntTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"IntegerTypes" */)
+		: Table(pDb, 4, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
 	{
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
@@ -62,8 +62,8 @@ namespace exodbc
 
 	// FloatTypesTable
 	// ---------------
-	MFloatTypesTable::MFloatTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, 3, TestTables::GetTableName(L"floattypes", namesCase), L"", L"", L"", Table::READ_ONLY)
+	MFloatTypesTable::MFloatTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"FloatTypes" */)
+		: Table(pDb, 3, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
 	{
 		m_idFloatTypes = 0;
 		m_double = 0;
@@ -110,8 +110,8 @@ namespace exodbc
 
 	// DateTypesTable
 	// ---------------
-	MDateTypesTable::MDateTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, 4, TestTables::GetTableName(L"datetypes", namesCase), L"", L"", L"", Table::READ_ONLY)
+	MDateTypesTable::MDateTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"DateTypes" */)
+		: Table(pDb, 4, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
 	{
 		m_idDateTypes = 0;
 		ZeroMemory(&m_date, sizeof(m_date));
@@ -128,8 +128,8 @@ namespace exodbc
 
 	// BlobTypesTable
 	// --------------
-	MBlobTypesTable::MBlobTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, 2, TestTables::GetTableName(L"blobtypes", namesCase), L"", L"", L"", Table::READ_ONLY)
+	MBlobTypesTable::MBlobTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"BlobTypes" */)
+		: Table(pDb, 2, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
 	{
 		ZeroMemory(m_blob, sizeof(m_blob));
 

@@ -48,7 +48,7 @@ namespace exodbc
 	{
 	public:
 
-		MIntTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		MIntTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER, const std::wstring& name = L"IntegerTypes");
 		virtual ~MIntTypesTable() {};
 
 		// Size of Type							Bytes		Min						Max
@@ -65,7 +65,7 @@ namespace exodbc
 	class MFloatTypesTable : public exodbc::Table
 	{
 	public:
-		MFloatTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		MFloatTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER, const std::wstring& name = L"FloatTypes");
 		virtual ~MFloatTypesTable() {};
 
 		SQLINTEGER				m_idFloatTypes;
@@ -110,7 +110,7 @@ namespace exodbc
 	class MDateTypesTable : public exodbc::Table
 	{
 	public:
-		MDateTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		MDateTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER, const std::wstring& name = L"DateTypes");
 		virtual ~MDateTypesTable() {};
 
 		SQLINTEGER				m_idDateTypes;
@@ -125,7 +125,7 @@ namespace exodbc
 	class MBlobTypesTable : public exodbc::Table
 	{
 	public:
-		MBlobTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		MBlobTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER, const std::wstring& name = L"BlobTypes");
 		virtual ~MBlobTypesTable() {};
 
 		SQLINTEGER		m_idBlobTypes;
