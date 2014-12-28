@@ -911,6 +911,43 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, GetManualBlobValues)
+	{
+		MBlobTypesTable bTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(bTable.Open(false, true));
+
+		wstring idName = TestTables::GetColName(L"idblobtypes", m_odbcInfo.m_namesCase);
+
+		SQLCHAR empty[] = { 0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+
+		SQLCHAR ff[] = { 255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255
+		};
+
+		SQLCHAR abc[] = { 0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67
+		};
+
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		EXPECT_EQ(0, memcmp(empty, bTable.m_blob, sizeof(bTable.m_blob)));
+
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		EXPECT_EQ(0, memcmp(ff, bTable.m_blob, sizeof(bTable.m_blob)));
+
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		EXPECT_EQ(0, memcmp(abc, bTable.m_blob, sizeof(bTable.m_blob)));
+	}
 // Interfaces
 // ----------
 
