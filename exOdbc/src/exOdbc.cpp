@@ -213,13 +213,13 @@ namespace exodbc {
 	}
 
 	SColumnInfo::SColumnInfo()
-		: m_sqlType(0)
+		: m_sqlType(SQL_UNKNOWN_TYPE)
 		, m_columnSize(0)
 		, m_bufferSize(0)
 		, m_decimalDigits(0)
 		, m_numPrecRadix(0)
 		, m_nullable(SQL_NULLABLE_UNKNOWN)
-		, m_sqlDataType(0)
+		, m_sqlDataType(SQL_UNKNOWN_TYPE)
 		, m_sqlDatetimeSub(0)
 		, m_charOctetLength(0)
 		, m_ordinalPosition(0)
