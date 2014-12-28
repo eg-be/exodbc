@@ -543,7 +543,8 @@ namespace exodbc
 
 		if (IsSelectOpen())
 		{
-			exASSERT(CloseStmtHandle(m_hStmtSelect, FailIfNotOpen));
+			// We are not allowed to fail here, someone might have Rollbacked a transaction and our statement is no longer open
+			exASSERT(CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen));
 			m_selectQueryOpen = false;
 		}
 		exDEBUG(EnsureStmtIsClosed(m_hStmtSelect, m_pDb->Dbms()));
