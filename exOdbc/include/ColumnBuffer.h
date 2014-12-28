@@ -374,7 +374,21 @@ namespace exodbc
 		*			terminating \0.
 		* \return	Size of the allocated buffer
 		*/
-		size_t DetermineBufferSize() const;
+		SQLINTEGER DetermineBufferSize() const;
+
+
+		/*!
+		* \brief	Tries to determine the size needed in chars if this ColumnBuffer is bound to a
+		*			char-type plus the terminating 0 char. Uses the passed SColumnInfo.
+		* \detailed Evaluates NUM_PREC_RADIX, COLUMN_SIZE and DECIMAL_DIGITS to determine the number
+		*			of chars needed to store numeric-types.
+		*			For date time types it uses ColumnSize.
+		*			For char-sizes it is the column-size.
+		*			For every type +1 is added for the terminating 0 char.
+		* \see		http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
+		* \return	Needed buffer size according to SQL type form SColumnInfo or 0 in case of failure.
+		*/
+		SQLINTEGER DetermineCharSize() const;
 
 
 		/*!
