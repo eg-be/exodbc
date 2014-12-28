@@ -823,6 +823,15 @@ namespace exodbc
 #endif
 
 
+	bool Table::IsColumnNull(SQLSMALLINT columnIndex) const
+	{
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		exASSERT(pBuff);
+		
+		return pBuff->IsNull();
+	}
+
+
 	bool Table::GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize) const
 	{
 		const ColumnBuffer* pColumnBuff = GetColumnBuffer(columnIndex);
@@ -849,6 +858,7 @@ namespace exodbc
 		exASSERT(columnIndex < m_numCols);
 		exASSERT( ! queryName.empty());
 		exASSERT(bufferSize > 0);
+		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
 
 		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, columnIndex + 1, pBuffer, bufferSize, queryName);
 		m_columnBuffers[columnIndex] = pColumnBuffer;

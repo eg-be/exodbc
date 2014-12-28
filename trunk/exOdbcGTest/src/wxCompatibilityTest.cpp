@@ -129,23 +129,23 @@ namespace exodbc
 	// Test reading datatypes
 	TEST_P(wxCompatibilityTest, ReadDateTypes)
 	{
-		DateTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MDateTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 26, table.m_date.day);
 		EXPECT_EQ( 01, table.m_date.month);
 		EXPECT_EQ( 1983, table.m_date.year);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 13, table.m_time.hour);
 		EXPECT_EQ( 55, table.m_time.minute);
 		EXPECT_EQ( 56, table.m_time.second);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 2"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 26, table.m_timestamp.day);
 		EXPECT_EQ( 01, table.m_timestamp.month);
 		EXPECT_EQ( 1983, table.m_timestamp.year);
@@ -153,8 +153,6 @@ namespace exodbc
 		EXPECT_EQ( 55, table.m_timestamp.minute);
 		EXPECT_EQ( 56, table.m_timestamp.second);
 
-		// TODO: Fractions are different, but maybe because we cannot enter them precisely with the guis of the tools ?
-		RecordProperty("Ticket", 33);
 		SQLUINTEGER fraction = 0;
 		switch(m_pDb->Dbms())
 		{
@@ -163,22 +161,27 @@ namespace exodbc
 			break;
 		case dbmsMS_SQL_SERVER:
 			fraction = 123000000;
+			break;
+		default:
+			fraction = 0;
+			break;
 		}
 		EXPECT_EQ( fraction, table.m_timestamp.fraction);
 
 		// Test for NULL
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 2"));
-		EXPECT_TRUE( table.GetNext() );
-		EXPECT_FALSE( table.IsColNull(0) );
-		EXPECT_TRUE( table.IsColNull(1) );
-		EXPECT_TRUE( table.IsColNull(2) );
-		EXPECT_TRUE( table.IsColNull(3) );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 2"));
+		EXPECT_TRUE( table.SelectNext() );
+		EXPECT_FALSE( table.IsColumnNull(0) );
+		EXPECT_TRUE(table.IsColumnNull(1));
+		EXPECT_TRUE(table.IsColumnNull(2));
+		EXPECT_FALSE(table.IsColumnNull(3));
 
-		// TODO: IBM DB2 needs a commit only after a select has been executed?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 3"));
+		EXPECT_TRUE(table.SelectNext());
+		EXPECT_FALSE(table.IsColumnNull(0));
+		EXPECT_TRUE(table.IsColumnNull(1));
+		EXPECT_TRUE(table.IsColumnNull(2));
+		EXPECT_TRUE(table.IsColumnNull(3));
 	}
 
 

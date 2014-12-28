@@ -471,23 +471,127 @@ namespace exodbc
 		bool		IsSelectOpen() const { return m_selectQueryOpen; };
 
 
+		/*!
+		* \brief	Access the current value of columnIndex as SQLSMALLINT.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] smallInt Reference to variable to copy value to.
+		* \return	True if smallInt has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQLINTEGER.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] i Reference to variable to copy value to.
+		* \return	True if i has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLINTEGER& i) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQLBIGINT.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] bigInt Reference to variable to copy value to.
+		* \return	True if bigInt has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLBIGINT& bigInt) const;
 
+
+		/*!
+		* \brief	Access the current value of columnIndex as std::wstring.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] str Reference to variable to copy value to.
+		* \return	True if str has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as std::string.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] str Reference to variable to copy value to.
+		* \return	True if str has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, std::string& str) const;
 
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQLDOUBLE.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] d Reference to variable to copy value to.
+		* \return	True if d has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const;
 
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_DATE_STRUCT.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] date Reference to variable to copy value to.
+		* \return	True if date has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_TIME_STRUCT.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] time Reference to variable to copy value to.
+		* \return	True if time has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& time) const;
+		
+		
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_TIMESTAMP_STRUCT.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] timestamp Reference to variable to copy value to.
+		* \return	True if timestamp has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& timestamp) const;
 
+
 #if HAVE_MSODBCSQL_H
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_SS_TIME2_STRUCT.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		*			This function is only available if HAVE_MSODBCSQL_H is defined to 1
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] time2 Reference to variable to copy value to.
+		* \return	True if time2 has been filled with value. False else.
+		*/
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const;
 #endif
 
+		/*!
+		* \brief	Check if the current value of a column is NULL.
+		* \detailed	Queries the length-indicator field of the ColumnBuffer to determine if
+		*			a column is NULL.
+		* \param	columnIndex Zero based index of a bound column.
+		* \return	True if current value of column is NULL.
+		*/
+		bool		IsColumnNull(SQLSMALLINT columnIndex) const;
+
+
+		/*!
+		* \brief	Access the buffer of a bound column.
+		* \detailed Points passed pointer to the buffer used to transfer data for the given column.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] pBuffer Reference to point to column buffer.
+		* \param [in,out] bufferSize Reference to length indicator, will be set on success to match
+		*			length of buffer pointed to by pBuffer.
+		* \return	True if pBuffer points to buffer and bufferSize contains value of buffer.
+		*/
 		bool		GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize) const;
 
 
@@ -503,6 +607,21 @@ namespace exodbc
 		*/
 		size_t		GetNumberOfColumns() const { return m_numCols; };
 
+
+		/*!
+		* \brief	Define a column manually. The column is bound during Open().
+		* \detailed	Pass a buffer and a description of the buffer that shall be bound to a
+		*			table column once Open() is called.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param	queryName Name of the column matching columnIndex. This name will be used
+		*			for queries.
+		* \param	pBuffer BufferPtrVariant that contains an allocated buffer of the type given
+		*			by sqlCType.
+		* \param	sqlCType SQL_C_TYPE of the buffer hold by pBuffer, like SQL_C_CHAR, SQL_C_SINTEGER, etc.
+		*			This information will be forwarded to the ODBC driver while binding the column.
+		*			The driver will try to convert the column-value to the given type.
+		* \param	bufferSize The size of the buffer pointed to by pBuffer.
+		*/
 		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize);
 
 
