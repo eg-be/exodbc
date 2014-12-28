@@ -447,6 +447,7 @@ namespace exodbc
 			schemaName = L"";
 			catalogName = L"exodbc";
 			typeName = L"";
+			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #52");
 			break;
 		case dbmsDB2:
 			// We know that DB2 uses schemas:
@@ -461,7 +462,7 @@ namespace exodbc
 			schemaName = L"exodbc";
 			catalogName = L"exodbc";
 			typeName = L"";
-			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #52");
+			break;
 		}
 		// TODO: With MySql we get no results here?
 		EXPECT_TRUE(m_db.ReadTablePrivileges(tableName, schemaName, catalogName, typeName, privs));
