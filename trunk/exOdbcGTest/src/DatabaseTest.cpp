@@ -12,7 +12,7 @@
 #include "DatabaseTest.h"
 
 // Same component headers
-#include "GenericTestTables.h"
+#include "ManualTestTables.h"
 
 // Other headers
 #include "Environment.h"
@@ -64,10 +64,10 @@ namespace exodbc
 	{
 		Database db(m_env);
 		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		IntTypesTable t1(&db, m_odbcInfo.m_namesCase);
+		MIntTypesTable t1(&db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(t1.Open());
 		{
-			CharTypesTable t2(&db, m_odbcInfo.m_namesCase);
+			MCharTypesTable t2(&db, m_odbcInfo.m_namesCase);
 			EXPECT_TRUE(t2.Open());
 		}
 		{

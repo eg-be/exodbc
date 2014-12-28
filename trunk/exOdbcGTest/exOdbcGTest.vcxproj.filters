@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\GenericTestTables.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\HelpersTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -59,9 +56,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\GenericTestTables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\HelpersTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
