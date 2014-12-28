@@ -527,12 +527,6 @@ namespace exodbc
 		// Close the Cursor on the internal statement-handle
 		CloseStmtHandle(m_hStmtCount, IgnoreNotOpen);
 
-		// If Auto commit is off, we need to commit on certain db-systems, see #51
-		if (m_pDb->GetCommitMode() != CM_AUTO_COMMIT && !m_pDb->CommitTrans())
-		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
-		}
-
 		return ok && !isNull;
 	}
 
