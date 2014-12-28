@@ -166,7 +166,7 @@ namespace exodbc
 		// Note: m_haveTableInfo must have been set before this function is called - it is not modified by this Initialize
 		m_isOpen = false;
 
-		m_pDb = pDb;                    // Pointer to the wxDb object
+		m_pDb = pDb;
 		m_hStmtCount = SQL_NULL_HSTMT;
 		m_hStmtSelect = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
@@ -175,23 +175,23 @@ namespace exodbc
 		m_charTrimFlags = TRIM_NO;
 
 		// Old handles
-		m_hdbc = SQL_NULL_HDBC;
-		m_hstmt = SQL_NULL_HSTMT;
-		m_hstmtDefault = SQL_NULL_HSTMT;                        // Initialized below
+		//m_hdbc = SQL_NULL_HDBC;
+		//m_hstmt = SQL_NULL_HSTMT;
+		//m_hstmtDefault = SQL_NULL_HSTMT;                        // Initialized below
 //		m_hstmtCount = SQL_NULL_HSTMT;                        // Initialized first time it is needed
-		m_hstmtInsert = SQL_NULL_HSTMT;
-		m_hstmtDelete = SQL_NULL_HSTMT;
-		m_hstmtUpdate = SQL_NULL_HSTMT;
-		m_hstmtInternal = SQL_NULL_HSTMT;
-		m_colDefs = 0;	///< TODO: Change
-		m_where.empty();                                  // Where clause
-		m_orderBy.empty();                                // Order By clause
-		m_from.empty();                                   // From clause
-		m_selectForUpdate = false;                    // SELECT ... FOR UPDATE; Indicates whether to include the FOR UPDATE phrase
+		//m_hstmtInsert = SQL_NULL_HSTMT;
+		//m_hstmtDelete = SQL_NULL_HSTMT;
+		//m_hstmtUpdate = SQL_NULL_HSTMT;
+		//m_hstmtInternal = SQL_NULL_HSTMT;
+//		m_colDefs = 0;	///< TODO: Change
+		//m_where.empty();                                  // Where clause
+		//m_orderBy.empty();                                // Order By clause
+		//m_from.empty();                                   // From clause
+		//m_selectForUpdate = false;                    // SELECT ... FOR UPDATE; Indicates whether to include the FOR UPDATE phrase
 
 		// TODO: The old code automatically turned table names into upper case for some dbs, does that make sense?
 
-		std::wstring s;
+		//std::wstring s;
 
 #ifdef EXODBCDEBUG
 		m_tableId = m_pDb->RegisterTable(this);
@@ -200,11 +200,11 @@ namespace exodbc
 		//    m_pDb->WriteSqlLog(s);
 
 		// Grab the HENV and HDBC from the wxDb object
-		m_hdbc = m_pDb->GetHDBC();
+		//m_hdbc = m_pDb->GetHDBC();
 
-		// Allocate space for column definitions
-		if (m_numCols)
-			m_colDefs = new ColumnDefinition[m_numCols];  // Points to the first column definition
+		//// Allocate space for column definitions
+		//if (m_numCols)
+		//	m_colDefs = new ColumnDefinition[m_numCols];  // Points to the first column definition
 
 		// Allocate handles needed
 		m_hStmtCount = AllocateStatement();
@@ -218,25 +218,25 @@ namespace exodbc
 		// Allocate statement handles for the table
 		if (!IsQueryOnly())
 		{
-			// Allocate a separate statement handle for performing inserts
-			if (SQLAllocStmt(m_hdbc, &m_hstmtInsert) != SQL_SUCCESS)
-				m_pDb->DispAllErrors(NULL, m_hdbc);
-			// Allocate a separate statement handle for performing deletes
-			if (SQLAllocStmt(m_hdbc, &m_hstmtDelete) != SQL_SUCCESS)
-				m_pDb->DispAllErrors(NULL, m_hdbc);
-			// Allocate a separate statement handle for performing updates
-			if (SQLAllocStmt(m_hdbc, &m_hstmtUpdate) != SQL_SUCCESS)
-				m_pDb->DispAllErrors(NULL, m_hdbc);
+			//// Allocate a separate statement handle for performing inserts
+			//if (SQLAllocStmt(m_hdbc, &m_hstmtInsert) != SQL_SUCCESS)
+			//	m_pDb->DispAllErrors(NULL, m_hdbc);
+			//// Allocate a separate statement handle for performing deletes
+			//if (SQLAllocStmt(m_hdbc, &m_hstmtDelete) != SQL_SUCCESS)
+			//	m_pDb->DispAllErrors(NULL, m_hdbc);
+			//// Allocate a separate statement handle for performing updates
+			//if (SQLAllocStmt(m_hdbc, &m_hstmtUpdate) != SQL_SUCCESS)
+			//	m_pDb->DispAllErrors(NULL, m_hdbc);
 		}
 		// Allocate a separate statement handle for internal use
-		if (SQLAllocStmt(m_hdbc, &m_hstmtInternal) != SQL_SUCCESS)
-			m_pDb->DispAllErrors(NULL, m_hdbc);
+		//if (SQLAllocStmt(m_hdbc, &m_hstmtInternal) != SQL_SUCCESS)
+		//	m_pDb->DispAllErrors(NULL, m_hdbc);
 
 		// Set the cursor type for the statement handles
-		m_cursorType = SQL_CURSOR_STATIC;
+		//m_cursorType = SQL_CURSOR_STATIC;
 
-		if (SQLSetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
-		{
+		//if (SQLSetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
+		//{
 			//        // Check to see if cursor type is supported
 			//        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmtInternal);
 			//        if (! wcscmp(m_pDb->sqlState, L"01S02"))  // Option Value Changed
@@ -283,33 +283,29 @@ namespace exodbc
 			//            m_pDb->DispNextError();
 			//            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal);
 			//        }
-		}
-#ifdef DBDEBUG_CONSOLE
-		else
-			std::wcout << L"Cursor Type set to STATIC" << std::endl << std::endl;
-#endif
+		//}
 
 		if (!IsQueryOnly())
 		{
-			// Set the cursor type for the INSERT statement handle
-			if (SQLSetStmtOption(m_hstmtInsert, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
-				m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert);
-			// Set the cursor type for the DELETE statement handle
-			if (SQLSetStmtOption(m_hstmtDelete, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
-				m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete);
-			// Set the cursor type for the UPDATE statement handle
-			if (SQLSetStmtOption(m_hstmtUpdate, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
-				m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate);
+			//// Set the cursor type for the INSERT statement handle
+			//if (SQLSetStmtOption(m_hstmtInsert, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
+			//	m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert);
+			//// Set the cursor type for the DELETE statement handle
+			//if (SQLSetStmtOption(m_hstmtDelete, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
+			//	m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete);
+			//// Set the cursor type for the UPDATE statement handle
+			//if (SQLSetStmtOption(m_hstmtUpdate, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
+			//	m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate);
 		}
 
 		// Make the default cursor the active cursor
-		m_hstmtDefault = GetNewCursor(false, false);
-		exASSERT(m_hstmtDefault);
-		m_hstmt = *m_hstmtDefault;
+		//m_hstmtDefault = GetNewCursor(false, false);
+		//exASSERT(m_hstmtDefault);
+		//m_hstmt = *m_hstmtDefault;
 
 		return true;
 
-	}  // wxDbTable::initialize()
+	}
 
 
 	HSTMT Table::AllocateStatement()
@@ -324,7 +320,7 @@ namespace exodbc
 		if (ret != SQL_SUCCESS)
 		{
 			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
-			LOG_ERROR_DBC(m_hdbc, ret, SQLAllocHandle);
+			LOG_ERROR_DBC(m_pDb->GetHDBC(), ret, SQLAllocHandle);
 		}
 		return stmt;
 	}
@@ -419,10 +415,10 @@ namespace exodbc
 		}
 		m_columnBuffers.clear();
 
-		// Old Column stuff
-		// Delete memory allocated for column definitions
-		if (m_colDefs)
-			delete[] m_colDefs;
+		//// Old Column stuff
+		//// Delete memory allocated for column definitions
+		//if (m_colDefs)
+		//	delete[] m_colDefs;
 
 		// Free allocated statements
 		FreeStatement(m_hStmtCount);
@@ -432,51 +428,51 @@ namespace exodbc
 		// Free statement handles
 		if (!IsQueryOnly())
 		{
-			if (m_hstmtInsert)
-			{
-				/*
-				ODBC 3.0 says to use this form
-				if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-				*/
-				if (SQLFreeStmt(m_hstmtInsert, SQL_DROP) != SQL_SUCCESS)
-					m_pDb->DispAllErrors(NULL, m_hdbc);
-			}
+			//if (m_hstmtInsert)
+			//{
+			//	/*
+			//	ODBC 3.0 says to use this form
+			//	if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
+			//	*/
+			//	if (SQLFreeStmt(m_hstmtInsert, SQL_DROP) != SQL_SUCCESS)
+			//		m_pDb->DispAllErrors(NULL, m_hdbc);
+			//}
 
-			if (m_hstmtDelete)
-			{
-				/*
-				ODBC 3.0 says to use this form
-				if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-				*/
-				if (SQLFreeStmt(m_hstmtDelete, SQL_DROP) != SQL_SUCCESS)
-					m_pDb->DispAllErrors(NULL, m_hdbc);
-			}
+			//if (m_hstmtDelete)
+			//{
+			//	/*
+			//	ODBC 3.0 says to use this form
+			//	if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
+			//	*/
+			//	if (SQLFreeStmt(m_hstmtDelete, SQL_DROP) != SQL_SUCCESS)
+			//		m_pDb->DispAllErrors(NULL, m_hdbc);
+			//}
 
-			if (m_hstmtUpdate)
-			{
-				/*
-				ODBC 3.0 says to use this form
-				if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-				*/
-				if (SQLFreeStmt(m_hstmtUpdate, SQL_DROP) != SQL_SUCCESS)
-					m_pDb->DispAllErrors(NULL, m_hdbc);
-			}
+			//if (m_hstmtUpdate)
+			//{
+			//	/*
+			//	ODBC 3.0 says to use this form
+			//	if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
+			//	*/
+			//	if (SQLFreeStmt(m_hstmtUpdate, SQL_DROP) != SQL_SUCCESS)
+			//		m_pDb->DispAllErrors(NULL, m_hdbc);
+			//}
 		}
 
-		if (m_hstmtInternal)
-		{
-			if (SQLFreeStmt(m_hstmtInternal, SQL_DROP) != SQL_SUCCESS)
-				m_pDb->DispAllErrors(NULL, m_hdbc);
-		}
+		//if (m_hstmtInternal)
+		//{
+		//	if (SQLFreeStmt(m_hstmtInternal, SQL_DROP) != SQL_SUCCESS)
+		//		m_pDb->DispAllErrors(NULL, m_hdbc);
+		//}
 
-		// Delete dynamically allocated cursors
-		if (m_hstmtDefault)
-			DeleteCursor(m_hstmtDefault);
+		//// Delete dynamically allocated cursors
+		//if (m_hstmtDefault)
+		//	DeleteCursor(m_hstmtDefault);
 
 		//if (m_hstmtCount)
 		//	DeleteCursor(m_hstmtCount);
 
-	}  // wxDbTable::cleanup()
+	}
 
 
 	STableInfo Table::GetTableInfo() const
@@ -862,46 +858,46 @@ namespace exodbc
 
 
 
-	void Table::setCbValueForColumn(int columnIndex)
-	{
-		switch (m_colDefs[columnIndex].m_dbDataType)
-		{
-		case DB_DATA_TYPE_VARCHAR:
-		case DB_DATA_TYPE_MEMO:
-			if (m_colDefs[columnIndex].m_null)
-				m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
-			else
-				m_colDefs[columnIndex].m_cbValue = SQL_NTS;
-			break;
-		case DB_DATA_TYPE_INTEGER:
-			if (m_colDefs[columnIndex].m_null)
-				m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
-			else
-				m_colDefs[columnIndex].m_cbValue = 0;
-			break;
-		case DB_DATA_TYPE_FLOAT:
-			if (m_colDefs[columnIndex].m_null)
-				m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
-			else
-				m_colDefs[columnIndex].m_cbValue = 0;
-			break;
-		case DB_DATA_TYPE_DATE:
-			if (m_colDefs[columnIndex].m_null)
-				m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
-			else
-				m_colDefs[columnIndex].m_cbValue = 0;
-			break;
-		case DB_DATA_TYPE_BLOB:
-			if (m_colDefs[columnIndex].m_null)
-				m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
-			else
-				if (m_colDefs[columnIndex].m_sqlCtype == SQL_C_WXCHAR)
-					m_colDefs[columnIndex].m_cbValue = SQL_NTS;
-				else
-					m_colDefs[columnIndex].m_cbValue = SQL_LEN_DATA_AT_EXEC(m_colDefs[columnIndex].m_szDataObj);
-			break;
-		}
-	}
+	//void Table::setCbValueForColumn(int columnIndex)
+	//{
+	//	switch (m_colDefs[columnIndex].m_dbDataType)
+	//	{
+	//	case DB_DATA_TYPE_VARCHAR:
+	//	case DB_DATA_TYPE_MEMO:
+	//		if (m_colDefs[columnIndex].m_null)
+	//			m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
+	//		else
+	//			m_colDefs[columnIndex].m_cbValue = SQL_NTS;
+	//		break;
+	//	case DB_DATA_TYPE_INTEGER:
+	//		if (m_colDefs[columnIndex].m_null)
+	//			m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
+	//		else
+	//			m_colDefs[columnIndex].m_cbValue = 0;
+	//		break;
+	//	case DB_DATA_TYPE_FLOAT:
+	//		if (m_colDefs[columnIndex].m_null)
+	//			m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
+	//		else
+	//			m_colDefs[columnIndex].m_cbValue = 0;
+	//		break;
+	//	case DB_DATA_TYPE_DATE:
+	//		if (m_colDefs[columnIndex].m_null)
+	//			m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
+	//		else
+	//			m_colDefs[columnIndex].m_cbValue = 0;
+	//		break;
+	//	case DB_DATA_TYPE_BLOB:
+	//		if (m_colDefs[columnIndex].m_null)
+	//			m_colDefs[columnIndex].m_cbValue = SQL_NULL_DATA;
+	//		else
+	//			if (m_colDefs[columnIndex].m_sqlCtype == SQL_C_WXCHAR)
+	//				m_colDefs[columnIndex].m_cbValue = SQL_NTS;
+	//			else
+	//				m_colDefs[columnIndex].m_cbValue = SQL_LEN_DATA_AT_EXEC(m_colDefs[columnIndex].m_szDataObj);
+	//		break;
+	//	}
+	//}
 
 	/********** wxDbTable::bindParams() **********/
 	//bool Table::bindParams(bool forUpdate)
@@ -1013,99 +1009,99 @@ namespace exodbc
 	//}  // wxDbTable::bindUpdateParams()
 
 
-	/********** wxDbTable::bindCols() **********/
-	bool Table::bindCols(HSTMT cursor)
-	{
-		// Bind each column of the table to a memory address for fetching data
-		UWORD i;
-		for (i = 0; i < m_numCols; i++)
-		{
-			ColumnDefinition def = m_colDefs[i];
-			if (SQLBindCol(cursor, (UWORD)(i + 1), m_colDefs[i].m_sqlCtype, (UCHAR*)m_colDefs[i].m_ptrDataObj,
-				m_colDefs[i].m_szDataObj, &m_colDefs[i].m_cbValue) != SQL_SUCCESS)
-				return (m_pDb->DispAllErrors(NULL, m_hdbc, cursor));
-		}
+	///********** wxDbTable::bindCols() **********/
+	//bool Table::bindCols(HSTMT cursor)
+	//{
+	//	// Bind each column of the table to a memory address for fetching data
+	//	UWORD i;
+	//	for (i = 0; i < m_numCols; i++)
+	//	{
+	//		ColumnDefinition def = m_colDefs[i];
+	//		if (SQLBindCol(cursor, (UWORD)(i + 1), m_colDefs[i].m_sqlCtype, (UCHAR*)m_colDefs[i].m_ptrDataObj,
+	//			m_colDefs[i].m_szDataObj, &m_colDefs[i].m_cbValue) != SQL_SUCCESS)
+	//			return (m_pDb->DispAllErrors(NULL, m_hdbc, cursor));
+	//	}
 
-		// Completed successfully
-		return true;
-	}  // wxDbTable::bindCols()
-
-
-	/********** wxDbTable::getRec() **********/
-	bool Table::getRec(UWORD fetchType)
-	{
-		RETCODE retcode;
-
-		if (!m_pDb->FwdOnlyCursors())
-		{
-			// Fetch the NEXT, PREV, FIRST or LAST record, depending on fetchType
-			SQLULEN cRowsFetched;
-			UWORD   rowStatus;
-
-			retcode = SQLExtendedFetch(m_hstmt, fetchType, 0, &cRowsFetched, &rowStatus);
-			if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-			{
-				if (retcode == SQL_NO_DATA_FOUND)
-					return false;
-				else
-					return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt));
-			}
-			else
-			{
-				// Set the Null member variable to indicate the Null state
-				// of each column just read in.
-				size_t i;
-				for (i = 0; i < m_numCols; i++)
-					m_colDefs[i].m_null = (m_colDefs[i].m_cbValue == SQL_NULL_DATA);
-			}
-		}
-		else
-		{
-			// Fetch the next record from the record set
-			retcode = SQLFetch(m_hstmt);
-			if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-			{
-				if (retcode == SQL_NO_DATA_FOUND)
-					return false;
-				else
-					return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt));
-			}
-			else
-			{
-				// Set the Null member variable to indicate the Null state
-				// of each column just read in.
-				size_t i;
-				for (i = 0; i < m_numCols; i++)
-					m_colDefs[i].m_null = (m_colDefs[i].m_cbValue == SQL_NULL_DATA);
-			}
-		}
-
-		// Completed successfully
-		return true;
-
-	}  // wxDbTable::getRec()
+	//	// Completed successfully
+	//	return true;
+	//}  // wxDbTable::bindCols()
 
 
-	/********** wxDbTable::execDelete() **********/
-	bool Table::execDelete(const std::wstring &pSqlStmt)
-	{
-		RETCODE retcode;
+	///********** wxDbTable::getRec() **********/
+	//bool Table::getRec(UWORD fetchType)
+	//{
+	//	RETCODE retcode;
 
-		// Execute the DELETE statement
-		retcode = SQLExecDirect(m_hstmtDelete, (SQLWCHAR*) pSqlStmt.c_str(), SQL_NTS);
+	//	if (!m_pDb->FwdOnlyCursors())
+	//	{
+	//		// Fetch the NEXT, PREV, FIRST or LAST record, depending on fetchType
+	//		SQLULEN cRowsFetched;
+	//		UWORD   rowStatus;
 
-		if (retcode == SQL_SUCCESS ||
-			retcode == SQL_NO_DATA_FOUND ||
-			retcode == SQL_SUCCESS_WITH_INFO)
-		{
-			// Record deleted successfully
-			return true;
-		}
+	//		retcode = SQLExtendedFetch(m_hstmt, fetchType, 0, &cRowsFetched, &rowStatus);
+	//		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+	//		{
+	//			if (retcode == SQL_NO_DATA_FOUND)
+	//				return false;
+	//			else
+	//				return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt));
+	//		}
+	//		else
+	//		{
+	//			// Set the Null member variable to indicate the Null state
+	//			// of each column just read in.
+	//			size_t i;
+	//			for (i = 0; i < m_numCols; i++)
+	//				m_colDefs[i].m_null = (m_colDefs[i].m_cbValue == SQL_NULL_DATA);
+	//		}
+	//	}
+	//	else
+	//	{
+	//		// Fetch the next record from the record set
+	//		retcode = SQLFetch(m_hstmt);
+	//		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+	//		{
+	//			if (retcode == SQL_NO_DATA_FOUND)
+	//				return false;
+	//			else
+	//				return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt));
+	//		}
+	//		else
+	//		{
+	//			// Set the Null member variable to indicate the Null state
+	//			// of each column just read in.
+	//			size_t i;
+	//			for (i = 0; i < m_numCols; i++)
+	//				m_colDefs[i].m_null = (m_colDefs[i].m_cbValue == SQL_NULL_DATA);
+	//		}
+	//	}
 
-		// Problem deleting record
-		return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete));
+	//	// Completed successfully
+	//	return true;
 
-	}  // wxDbTable::execDelete()
+	//}  // wxDbTable::getRec()
+
+
+	///********** wxDbTable::execDelete() **********/
+	//bool Table::execDelete(const std::wstring &pSqlStmt)
+	//{
+	//	RETCODE retcode;
+
+	//	// Execute the DELETE statement
+	//	retcode = SQLExecDirect(m_hstmtDelete, (SQLWCHAR*) pSqlStmt.c_str(), SQL_NTS);
+
+	//	if (retcode == SQL_SUCCESS ||
+	//		retcode == SQL_NO_DATA_FOUND ||
+	//		retcode == SQL_SUCCESS_WITH_INFO)
+	//	{
+	//		// Record deleted successfully
+	//		return true;
+	//	}
+
+	//	// Problem deleting record
+	//	return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete));
+
+	//}  // wxDbTable::execDelete()
 
 
 	///********** wxDbTable::execUpdate() **********/
@@ -1162,39 +1158,39 @@ namespace exodbc
 	//}  // wxDbTable::execUpdate()
 
 
-	// ********** wxDbTable::query() **********/
-	bool Table::query(int queryType, bool forUpdate, bool distinct, const std::wstring &pSqlStmt)
-	{
-		std::wstring sqlStmt;
+	//// ********** wxDbTable::query() **********/
+	//bool Table::query(int queryType, bool forUpdate, bool distinct, const std::wstring &pSqlStmt)
+	//{
+	//	std::wstring sqlStmt;
 
-		if (forUpdate)
-			// The user may wish to select for update, but the DBMS may not be capable
-			m_selectForUpdate = CanSelectForUpdate();
-		else
-			m_selectForUpdate = false;
+	//	if (forUpdate)
+	//		// The user may wish to select for update, but the DBMS may not be capable
+	//		m_selectForUpdate = CanSelectForUpdate();
+	//	else
+	//		m_selectForUpdate = false;
 
-		// Set the SQL SELECT string
-		if (queryType != DB_SELECT_STATEMENT)               // A select statement was not passed in,
-		{                                                   // so generate a select statement.
-			exASSERT(false);
-			//        BuildSelectStmt(sqlStmt, queryType, distinct);
-			//        m_pDb->WriteSqlLog(sqlStmt);
-		}
+	//	// Set the SQL SELECT string
+	//	if (queryType != DB_SELECT_STATEMENT)               // A select statement was not passed in,
+	//	{                                                   // so generate a select statement.
+	//		exASSERT(false);
+	//		//        BuildSelectStmt(sqlStmt, queryType, distinct);
+	//		//        m_pDb->WriteSqlLog(sqlStmt);
+	//	}
 
-		// Make sure the cursor is closed first
-		if (!CloseCursor(m_hstmt))
-			return false;
+	//	// Make sure the cursor is closed first
+	//	if (!CloseCursor(m_hstmt))
+	//		return false;
 
-		// Execute the SQL SELECT statement
-		int retcode;
-		retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) (queryType == DB_SELECT_STATEMENT ? pSqlStmt.c_str() : sqlStmt.c_str()), SQL_NTS);
-		if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
-			return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt));
+	//	// Execute the SQL SELECT statement
+	//	int retcode;
+	//	retcode = SQLExecDirect(m_hstmt, (SQLTCHAR FAR *) (queryType == DB_SELECT_STATEMENT ? pSqlStmt.c_str() : sqlStmt.c_str()), SQL_NTS);
+	//	if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO)
+	//		return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt));
 
-		// Completed successfully
-		return true;
+	//	// Completed successfully
+	//	return true;
 
-	}  // wxDbTable::query()
+	//}  // wxDbTable::query()
 
 
 	/***************************** PUBLIC FUNCTIONS *****************************/
@@ -1260,7 +1256,7 @@ namespace exodbc
 			}
 			// We need to know which ODBC version we are using
 			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
-			for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++)
+			for (int columnIndex = 0; columnIndex < (SQLSMALLINT) columns.size(); columnIndex++)
 			{
 				SColumnInfo colInfo = columns[columnIndex];
 				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion);
@@ -1388,88 +1384,88 @@ namespace exodbc
 	//}  // wxDbTable::Query()
 
 
-	/********** wxDbTable::QueryBySqlStmt() **********/
-	bool Table::QueryBySqlStmt(const std::wstring &pSqlStmt)
-	{
-		//    m_pDb->WriteSqlLog(pSqlStmt);
+	///********** wxDbTable::QueryBySqlStmt() **********/
+	//bool Table::QueryBySqlStmt(const std::wstring &pSqlStmt)
+	//{
+	//	//    m_pDb->WriteSqlLog(pSqlStmt);
 
-		return(query(DB_SELECT_STATEMENT, false, false, pSqlStmt));
+	//	return(query(DB_SELECT_STATEMENT, false, false, pSqlStmt));
 
-	}  // wxDbTable::QueryBySqlStmt()
-
-
-	/********** wxDbTable::QueryMatching() **********/
-	bool Table::QueryMatching(bool forUpdate, bool distinct)
-	{
-
-		return(query(DB_SELECT_MATCHING, forUpdate, distinct));
-
-	}  // wxDbTable::QueryMatching()
+	//}  // wxDbTable::QueryBySqlStmt()
 
 
-	/********** wxDbTable::QueryOnKeyFields() **********/
-	bool Table::QueryOnKeyFields(bool forUpdate, bool distinct)
-	{
+	///********** wxDbTable::QueryMatching() **********/
+	//bool Table::QueryMatching(bool forUpdate, bool distinct)
+	//{
 
-		return(query(DB_SELECT_KEYFIELDS, forUpdate, distinct));
+	//	return(query(DB_SELECT_MATCHING, forUpdate, distinct));
 
-	}  // wxDbTable::QueryOnKeyFields()
-
-
-	/********** wxDbTable::GetPrev() **********/
-	bool Table::GetPrev()
-	{
-		if (m_pDb->FwdOnlyCursors())
-		{
-			exFAIL_MSG(L"GetPrev()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
-			return false;
-		}
-		else
-			return(getRec(SQL_FETCH_PRIOR));
-
-	}  // wxDbTable::GetPrev()
+	//}  // wxDbTable::QueryMatching()
 
 
-	/********** wxDbTable::operator-- **********/
-	bool Table::operator--(int)
-	{
-		if (m_pDb->FwdOnlyCursors())
-		{
-			exFAIL_MSG(L"operator--:Backward scrolling cursors are not enabled for this instance of wxDbTable");
-			return false;
-		}
-		else
-			return(getRec(SQL_FETCH_PRIOR));
+	///********** wxDbTable::QueryOnKeyFields() **********/
+	//bool Table::QueryOnKeyFields(bool forUpdate, bool distinct)
+	//{
 
-	}  // wxDbTable::operator--
+	//	return(query(DB_SELECT_KEYFIELDS, forUpdate, distinct));
+
+	//}  // wxDbTable::QueryOnKeyFields()
 
 
-	/********** wxDbTable::GetFirst() **********/
-	bool Table::GetFirst()
-	{
-		if (m_pDb->FwdOnlyCursors())
-		{
-			exFAIL_MSG(L"GetFirst():Backward scrolling cursors are not enabled for this instance of wxDbTable");
-			return false;
-		}
-		else
-			return(getRec(SQL_FETCH_FIRST));
+	///********** wxDbTable::GetPrev() **********/
+	//bool Table::GetPrev()
+	//{
+	//	if (m_pDb->FwdOnlyCursors())
+	//	{
+	//		exFAIL_MSG(L"GetPrev()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
+	//		return false;
+	//	}
+	//	else
+	//		return(getRec(SQL_FETCH_PRIOR));
 
-	}  // wxDbTable::GetFirst()
+	//}  // wxDbTable::GetPrev()
 
 
-	/********** wxDbTable::GetLast() **********/
-	bool Table::GetLast()
-	{
-		if (m_pDb->FwdOnlyCursors())
-		{
-			exFAIL_MSG(L"GetLast()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
-			return false;
-		}
-		else
-			return(getRec(SQL_FETCH_LAST));
+	///********** wxDbTable::operator-- **********/
+	//bool Table::operator--(int)
+	//{
+	//	if (m_pDb->FwdOnlyCursors())
+	//	{
+	//		exFAIL_MSG(L"operator--:Backward scrolling cursors are not enabled for this instance of wxDbTable");
+	//		return false;
+	//	}
+	//	else
+	//		return(getRec(SQL_FETCH_PRIOR));
 
-	}  // wxDbTable::GetLast()
+	//}  // wxDbTable::operator--
+
+
+	///********** wxDbTable::GetFirst() **********/
+	//bool Table::GetFirst()
+	//{
+	//	if (m_pDb->FwdOnlyCursors())
+	//	{
+	//		exFAIL_MSG(L"GetFirst():Backward scrolling cursors are not enabled for this instance of wxDbTable");
+	//		return false;
+	//	}
+	//	else
+	//		return(getRec(SQL_FETCH_FIRST));
+
+	//}  // wxDbTable::GetFirst()
+
+
+	///********** wxDbTable::GetLast() **********/
+	//bool Table::GetLast()
+	//{
+	//	if (m_pDb->FwdOnlyCursors())
+	//	{
+	//		exFAIL_MSG(L"GetLast()::Backward scrolling cursors are not enabled for this instance of wxDbTable");
+	//		return false;
+	//	}
+	//	else
+	//		return(getRec(SQL_FETCH_LAST));
+
+	//}  // wxDbTable::GetLast()
 
 
 	///********** wxDbTable::BuildDeleteStmt() **********/
@@ -1838,33 +1834,33 @@ namespace exodbc
 	//}  // wxDbTable::BuildWhereClause()
 
 
-	/********** wxDbTable::GetRowNum() **********/
-	UWORD Table::GetRowNum()
-	{
-		UDWORD rowNum;
+	///********** wxDbTable::GetRowNum() **********/
+	//UWORD Table::GetRowNum()
+	//{
+	//	UDWORD rowNum;
 
-		if (SQLGetStmtOption(m_hstmt, SQL_ROW_NUMBER, (UCHAR*)&rowNum) != SQL_SUCCESS)
-		{
-			m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt);
-			return(0);
-		}
+	//	if (SQLGetStmtOption(m_hstmt, SQL_ROW_NUMBER, (UCHAR*)&rowNum) != SQL_SUCCESS)
+	//	{
+	//		m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt);
+	//		return(0);
+	//	}
 
-		// Completed successfully
-		return((UWORD)rowNum);
+	//	// Completed successfully
+	//	return((UWORD)rowNum);
 
-	}  // wxDbTable::GetRowNum()
+	//}  // wxDbTable::GetRowNum()
 
 
-	/********** wxDbTable::CloseCursor() **********/
-	bool Table::CloseCursor(HSTMT cursor)
-	{
-		if (SQLFreeStmt(cursor, SQL_CLOSE) != SQL_SUCCESS)
-			return(m_pDb->DispAllErrors(NULL, m_hdbc, cursor));
+	///********** wxDbTable::CloseCursor() **********/
+	//bool Table::CloseCursor(HSTMT cursor)
+	//{
+	//	if (SQLFreeStmt(cursor, SQL_CLOSE) != SQL_SUCCESS)
+	//		return(m_pDb->DispAllErrors(NULL, m_hdbc, cursor));
 
-		// Completed successfully
-		return true;
+	//	// Completed successfully
+	//	return true;
 
-	}  // wxDbTable::CloseCursor()
+	//}  // wxDbTable::CloseCursor()
 
 
 	/********** wxDbTable::CreateTable() **********/
@@ -2357,40 +2353,40 @@ namespace exodbc
 	//}  // wxDbTable::DropIndex()
 
 
-	/********** wxDbTable::SetOrderByColNums() **********/
-	bool Table::SetOrderByColNums(UWORD first, ...)
-	{
-		int         colNumber = first;  // using 'int' to be able to look for wxDB_NO_MORE_COLUN_NUMBERS
-		va_list     argptr;
+	///********** wxDbTable::SetOrderByColNums() **********/
+	//bool Table::SetOrderByColNums(UWORD first, ...)
+	//{
+	//	int         colNumber = first;  // using 'int' to be able to look for wxDB_NO_MORE_COLUN_NUMBERS
+	//	va_list     argptr;
 
-		bool        abort = false;
-		std::wstring    tempStr;
+	//	bool        abort = false;
+	//	std::wstring    tempStr;
 
-		va_start(argptr, first);     /* Initialize variable arguments. */
-		while (!abort && (colNumber != wxDB_NO_MORE_COLUMN_NUMBERS))
-		{
-			// Make sure the passed in column number
-			// is within the valid range of columns
-			//
-			// Valid columns are 0 thru m_numCols-1
-			if (colNumber >= m_numCols || colNumber < 0)
-			{
-				abort = true;
-				continue;
-			}
+	//	va_start(argptr, first);     /* Initialize variable arguments. */
+	//	while (!abort && (colNumber != wxDB_NO_MORE_COLUMN_NUMBERS))
+	//	{
+	//		// Make sure the passed in column number
+	//		// is within the valid range of columns
+	//		//
+	//		// Valid columns are 0 thru m_numCols-1
+	//		if (colNumber >= m_numCols || colNumber < 0)
+	//		{
+	//			abort = true;
+	//			continue;
+	//		}
 
-			if (colNumber != first)
-				tempStr += L",";
+	//		if (colNumber != first)
+	//			tempStr += L",";
 
-			tempStr += m_colDefs[colNumber].m_colName;
-			colNumber = va_arg(argptr, int);
-		}
-		va_end(argptr);              /* Reset variable arguments.      */
+	//		tempStr += m_colDefs[colNumber].m_colName;
+	//		colNumber = va_arg(argptr, int);
+	//	}
+	//	va_end(argptr);              /* Reset variable arguments.      */
 
-		SetOrderByClause(tempStr);
+	//	SetOrderByClause(tempStr);
 
-		return (!abort);
-	}  // wxDbTable::SetOrderByColNums()
+	//	return (!abort);
+	//}  // wxDbTable::SetOrderByColNums()
 
 
 	/********** wxDbTable::Insert() **********/
@@ -2585,339 +2581,339 @@ namespace exodbc
 	//}  // wxDbTable::DeleteMatching()
 
 
-	/********** wxDbTable::IsColNull() **********/
-	bool Table::IsColNull(UWORD colNumber) const
-	{
-		/*
-			This logic is just not right.  It would indicate true
-			if a numeric field were set to a value of 0.
+	///********** wxDbTable::IsColNull() **********/
+	//bool Table::IsColNull(UWORD colNumber) const
+	//{
+	//	/*
+	//		This logic is just not right.  It would indicate true
+	//		if a numeric field were set to a value of 0.
 
-			switch(colDefs[colNumber].SqlCtype)
-			{
-			case SQL_C_CHAR:
-			case SQL_C_WCHAR:
-			//case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
-			return(((UCHAR FAR *) colDefs[colNumber].PtrDataObj)[0] == 0);
-			case SQL_C_SSHORT:
-			return((  *((SWORD *) colDefs[colNumber].PtrDataObj))   == 0);
-			case SQL_C_USHORT:
-			return((   *((UWORD*) colDefs[colNumber].PtrDataObj))   == 0);
-			case SQL_C_SLONG:
-			return(( *((SDWORD *) colDefs[colNumber].PtrDataObj))   == 0);
-			case SQL_C_ULONG:
-			return(( *((UDWORD *) colDefs[colNumber].PtrDataObj))   == 0);
-			case SQL_C_FLOAT:
-			return(( *((SFLOAT *) colDefs[colNumber].PtrDataObj))   == 0);
-			case SQL_C_DOUBLE:
-			return((*((SDOUBLE *) colDefs[colNumber].PtrDataObj))   == 0);
-			case SQL_C_TIMESTAMP:
-			TIMESTAMP_STRUCT *pDt;
-			pDt = (TIMESTAMP_STRUCT *) colDefs[colNumber].PtrDataObj;
-			if (pDt->year == 0 && pDt->month == 0 && pDt->day == 0)
-			return true;
-			else
-			return false;
-			default:
-			return true;
-			}
-			*/
-		return (m_colDefs[colNumber].m_null);
-	}  // wxDbTable::IsColNull()
-
-
-	/********** wxDbTable::CanSelectForUpdate() **********/
-	bool Table::CanSelectForUpdate()
-	{
-		// Broken
-		//if (IsQueryOnly())
-		//    return false;
-
-		//if (m_pDb->Dbms() == dbmsMY_SQL)
-		//    return false;
-
-		//if (/*(m_pDb->Dbms() == dbmsORACLE) ||*/
-		//    (m_pDb->m_dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE))
-		//    return true;
-		//else
-		return false;
-
-	}  // wxDbTable::CanSelectForUpdate()
+	//		switch(colDefs[colNumber].SqlCtype)
+	//		{
+	//		case SQL_C_CHAR:
+	//		case SQL_C_WCHAR:
+	//		//case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
+	//		return(((UCHAR FAR *) colDefs[colNumber].PtrDataObj)[0] == 0);
+	//		case SQL_C_SSHORT:
+	//		return((  *((SWORD *) colDefs[colNumber].PtrDataObj))   == 0);
+	//		case SQL_C_USHORT:
+	//		return((   *((UWORD*) colDefs[colNumber].PtrDataObj))   == 0);
+	//		case SQL_C_SLONG:
+	//		return(( *((SDWORD *) colDefs[colNumber].PtrDataObj))   == 0);
+	//		case SQL_C_ULONG:
+	//		return(( *((UDWORD *) colDefs[colNumber].PtrDataObj))   == 0);
+	//		case SQL_C_FLOAT:
+	//		return(( *((SFLOAT *) colDefs[colNumber].PtrDataObj))   == 0);
+	//		case SQL_C_DOUBLE:
+	//		return((*((SDOUBLE *) colDefs[colNumber].PtrDataObj))   == 0);
+	//		case SQL_C_TIMESTAMP:
+	//		TIMESTAMP_STRUCT *pDt;
+	//		pDt = (TIMESTAMP_STRUCT *) colDefs[colNumber].PtrDataObj;
+	//		if (pDt->year == 0 && pDt->month == 0 && pDt->day == 0)
+	//		return true;
+	//		else
+	//		return false;
+	//		default:
+	//		return true;
+	//		}
+	//		*/
+	//	return (m_colDefs[colNumber].m_null);
+	//}  // wxDbTable::IsColNull()
 
 
-	/********** wxDbTable::CanUpdateByROWID() **********/
-	bool Table::CanUpdateByROWID()
-	{
-		/*
-		 * NOTE: Returning false for now until this can be debugged,
-		 *        as the ROWID is not getting updated correctly
-		 */
-		return false;
-		/*
-			if (pDb->Dbms() == dbmsORACLE)
-			return true;
-			else
-			return false;
-			*/
-	}  // wxDbTable::CanUpdateByROWID()
+	///********** wxDbTable::CanSelectForUpdate() **********/
+	//bool Table::CanSelectForUpdate()
+	//{
+	//	// Broken
+	//	//if (IsQueryOnly())
+	//	//    return false;
+
+	//	//if (m_pDb->Dbms() == dbmsMY_SQL)
+	//	//    return false;
+
+	//	//if (/*(m_pDb->Dbms() == dbmsORACLE) ||*/
+	//	//    (m_pDb->m_dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE))
+	//	//    return true;
+	//	//else
+	//	return false;
+
+	//}  // wxDbTable::CanSelectForUpdate()
 
 
-	/********** wxDbTable::IsCursorClosedOnCommit() **********/
-	bool Table::IsCursorClosedOnCommit()
-	{
-		//if (m_pDb->m_dbInf.cursorCommitBehavior == SQL_CB_PRESERVE)
-		//    return false;
-		//else
-		return true;
-
-	}  // wxDbTable::IsCursorClosedOnCommit()
-
-
-
-	/********** wxDbTable::ClearMemberVar() **********/
-	void Table::ClearMemberVar(UWORD colNumber, bool setToNull)
-	{
-		exASSERT(colNumber < m_numCols);
-
-		switch (m_colDefs[colNumber].m_sqlCtype)
-		{
-		case SQL_C_CHAR:
-#ifdef SQL_C_WCHAR
-		case SQL_C_WCHAR:
-#endif
-			//case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
-			((UCHAR FAR *) m_colDefs[colNumber].m_ptrDataObj)[0] = 0;
-			break;
-		case SQL_C_SSHORT:
-			*((SWORD *)m_colDefs[colNumber].m_ptrDataObj) = 0;
-			break;
-		case SQL_C_USHORT:
-			*((UWORD*)m_colDefs[colNumber].m_ptrDataObj) = 0;
-			break;
-		case SQL_C_LONG:
-		case SQL_C_SLONG:
-			*((SDWORD *)m_colDefs[colNumber].m_ptrDataObj) = 0;
-			break;
-		case SQL_C_ULONG:
-			*((UDWORD *)m_colDefs[colNumber].m_ptrDataObj) = 0;
-			break;
-		case SQL_C_FLOAT:
-			*((SFLOAT *)m_colDefs[colNumber].m_ptrDataObj) = 0.0f;
-			break;
-		case SQL_C_DOUBLE:
-			*((SDOUBLE *)m_colDefs[colNumber].m_ptrDataObj) = 0.0f;
-			break;
-		case SQL_C_TIMESTAMP:
-			TIMESTAMP_STRUCT *pDt;
-			pDt = (TIMESTAMP_STRUCT *)m_colDefs[colNumber].m_ptrDataObj;
-			pDt->year = 0;
-			pDt->month = 0;
-			pDt->day = 0;
-			pDt->hour = 0;
-			pDt->minute = 0;
-			pDt->second = 0;
-			pDt->fraction = 0;
-			break;
-		case SQL_C_DATE:
-			DATE_STRUCT *pDtd;
-			pDtd = (DATE_STRUCT *)m_colDefs[colNumber].m_ptrDataObj;
-			pDtd->year = 0;
-			pDtd->month = 0;
-			pDtd->day = 0;
-			break;
-		case SQL_C_TIME:
-			TIME_STRUCT *pDtt;
-			pDtt = (TIME_STRUCT *)m_colDefs[colNumber].m_ptrDataObj;
-			pDtt->hour = 0;
-			pDtt->minute = 0;
-			pDtt->second = 0;
-			break;
-		}
-
-		if (setToNull)
-			SetColNull(colNumber);
-	}  // wxDbTable::ClearMemberVar()
+	///********** wxDbTable::CanUpdateByROWID() **********/
+	//bool Table::CanUpdateByROWID()
+	//{
+	//	/*
+	//	 * NOTE: Returning false for now until this can be debugged,
+	//	 *        as the ROWID is not getting updated correctly
+	//	 */
+	//	return false;
+	//	/*
+	//		if (pDb->Dbms() == dbmsORACLE)
+	//		return true;
+	//		else
+	//		return false;
+	//		*/
+	//}  // wxDbTable::CanUpdateByROWID()
 
 
-	/********** wxDbTable::ClearMemberVars() **********/
-	void Table::ClearMemberVars(bool setToNull)
-	{
-		size_t i;
+	///********** wxDbTable::IsCursorClosedOnCommit() **********/
+	//bool Table::IsCursorClosedOnCommit()
+	//{
+	//	//if (m_pDb->m_dbInf.cursorCommitBehavior == SQL_CB_PRESERVE)
+	//	//    return false;
+	//	//else
+	//	return true;
 
-		// Loop through the columns setting each member variable to zero
-		for (i = 0; i < m_numCols; i++)
-			ClearMemberVar((UWORD)i, setToNull);
-
-	}  // wxDbTable::ClearMemberVars()
-
-
-	/********** wxDbTable::SetQueryTimeout() **********/
-	bool Table::SetQueryTimeout(UDWORD nSeconds)
-	{
-		if (SQLSetStmtOption(m_hstmtInsert, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
-			return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert));
-		if (SQLSetStmtOption(m_hstmtUpdate, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
-			return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate));
-		if (SQLSetStmtOption(m_hstmtDelete, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
-			return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete));
-		if (SQLSetStmtOption(m_hstmtInternal, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
-			return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInternal));
-
-		// Completed Successfully
-		return true;
-
-	}  // wxDbTable::SetQueryTimeout()
+	//}  // wxDbTable::IsCursorClosedOnCommit()
 
 
-	/********** wxDbTable::SetColDefs() **********/
-	bool Table::SetColDefs(UWORD index, const std::wstring &fieldName, int dataType, void *pData,
-		SWORD cType, int size, bool keyField, bool updateable,
-		bool insertAllowed, bool derivedColumn)
-	{
-		std::wstring tmpStr;
-		if (index >= m_numCols)  // Columns numbers are zero based....
-		{
-			tmpStr = (boost::wformat(L"Specified column index (%d) exceeds the maximum number of columns (%d) registered for this table definition.  Column definition not added.") % index % m_numCols).str();
-			exFAIL_MSG(tmpStr.c_str());
-			return false;
-		}
 
-		if (!m_colDefs)  // May happen if the database connection fails
-			return false;
-
-		if (fieldName.length() > (unsigned int)DB_MAX_COLUMN_NAME_LEN)
-		{
-			wcsncpy(m_colDefs[index].m_colName, fieldName.c_str(), DB_MAX_COLUMN_NAME_LEN);
-			m_colDefs[index].m_colName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
-
-			tmpStr = (boost::wformat(L"Column name '%s' is too long. Truncated to '%s'.") % fieldName % m_colDefs[index].m_colName).str();
-			exFAIL_MSG(tmpStr.c_str());
-		}
-		else
-			wcscpy(m_colDefs[index].m_colName, fieldName.c_str());
-
-		m_colDefs[index].m_dbDataType = dataType;
-		m_colDefs[index].m_ptrDataObj = pData;
-		m_colDefs[index].m_sqlCtype = cType;
-		m_colDefs[index].m_szDataObj = size;  //TODO: glt ??? * sizeof(wchar_t) ???
-		m_colDefs[index].m_keyField = keyField;
-		m_colDefs[index].m_derivedCol = derivedColumn;
-		// Derived columns by definition would NOT be "Insertable" or "Updateable"
-		if (derivedColumn)
-		{
-			m_colDefs[index].m_updateable = false;
-			m_colDefs[index].m_insertAllowed = false;
-		}
-		else
-		{
-			m_colDefs[index].m_updateable = updateable;
-			m_colDefs[index].m_insertAllowed = insertAllowed;
-		}
-
-		m_colDefs[index].m_null = false;
-
-		return true;
-
-	}  // wxDbTable::SetColDefs()
-
-
-	/********** wxDbTable::SetColDefs() **********/
-	SColumnDataPtr* Table::SetColDefs(ColumnInfo *pColInfs, UWORD numCols)
-	{
-		exASSERT(pColInfs);
-		SColumnDataPtr *pColDataPtrs = NULL;
-
-		if (pColInfs)
-		{
-			UWORD index;
-
-			pColDataPtrs = new SColumnDataPtr[numCols + 1];
-
-			for (index = 0; index < numCols; index++)
-			{
-				// Process the fields
-				switch (pColInfs[index].m_dbDataType)
-				{
-				case DB_DATA_TYPE_VARCHAR:
-					pColDataPtrs[index].PtrDataObj = new wchar_t[pColInfs[index].m_bufferSize + (1 * sizeof(wchar_t))];
-					pColDataPtrs[index].SzDataObj = pColInfs[index].m_bufferSize + (1 * sizeof(wchar_t));
-					pColDataPtrs[index].SqlCtype = SQL_C_WXCHAR;
-					break;
-				case DB_DATA_TYPE_MEMO:
-					pColDataPtrs[index].PtrDataObj = new wchar_t[pColInfs[index].m_bufferSize + (1 * sizeof(wchar_t))];
-					pColDataPtrs[index].SzDataObj = pColInfs[index].m_bufferSize + (1 * sizeof(wchar_t));
-					pColDataPtrs[index].SqlCtype = SQL_C_WXCHAR;
-					break;
-				case DB_DATA_TYPE_INTEGER:
-					// Can be long or short
-					if (pColInfs[index].m_bufferSize == sizeof(long))
-					{
-						pColDataPtrs[index].PtrDataObj = new long;
-						pColDataPtrs[index].SzDataObj = sizeof(long);
-						pColDataPtrs[index].SqlCtype = SQL_C_SLONG;
-					}
-					else
-					{
-						pColDataPtrs[index].PtrDataObj = new short;
-						pColDataPtrs[index].SzDataObj = sizeof(short);
-						pColDataPtrs[index].SqlCtype = SQL_C_SSHORT;
-					}
-					break;
-				case DB_DATA_TYPE_FLOAT:
-					// Can be float or double
-					if (pColInfs[index].m_bufferSize == sizeof(float))
-					{
-						pColDataPtrs[index].PtrDataObj = new float;
-						pColDataPtrs[index].SzDataObj = sizeof(float);
-						pColDataPtrs[index].SqlCtype = SQL_C_FLOAT;
-					}
-					else
-					{
-						pColDataPtrs[index].PtrDataObj = new double;
-						pColDataPtrs[index].SzDataObj = sizeof(double);
-						pColDataPtrs[index].SqlCtype = SQL_C_DOUBLE;
-					}
-					break;
-				case DB_DATA_TYPE_DATE:
-					pColDataPtrs[index].PtrDataObj = new TIMESTAMP_STRUCT;
-					pColDataPtrs[index].SzDataObj = sizeof(TIMESTAMP_STRUCT);
-					pColDataPtrs[index].SqlCtype = SQL_C_TIMESTAMP;
-					break;
-				case DB_DATA_TYPE_BLOB:
-					exFAIL_MSG(L"This form of ::SetColDefs() cannot be used with BLOB columns");
-					pColDataPtrs[index].PtrDataObj = /*BLOB ADDITION NEEDED*/NULL;
-					pColDataPtrs[index].SzDataObj = /*BLOB ADDITION NEEDED*/sizeof(void *);
-					pColDataPtrs[index].SqlCtype = SQL_VARBINARY;
-					break;
-				}
-				if (pColDataPtrs[index].PtrDataObj != NULL)
-					SetColDefs(index, pColInfs[index].m_colName, pColInfs[index].m_dbDataType, pColDataPtrs[index].PtrDataObj, pColDataPtrs[index].SqlCtype, pColDataPtrs[index].SzDataObj);
-				else
-				{
-					// Unable to build all the column definitions, as either one of
-					// the calls to "new" failed above, or there was a BLOB field
-					// to have a column definition for.  If BLOBs are to be used,
-					// the other form of ::SetColDefs() must be used, as it is impossible
-					// to know the maximum size to create the PtrDataObj to be.
-					delete[] pColDataPtrs;
-					return NULL;
-				}
-			}
-		}
-
-		return (pColDataPtrs);
-
-	} // wxDbTable::SetColDefs()
+//	/********** wxDbTable::ClearMemberVar() **********/
+//	void Table::ClearMemberVar(UWORD colNumber, bool setToNull)
+//	{
+//		exASSERT(colNumber < m_numCols);
+//
+//		switch (m_colDefs[colNumber].m_sqlCtype)
+//		{
+//		case SQL_C_CHAR:
+//#ifdef SQL_C_WCHAR
+//		case SQL_C_WCHAR:
+//#endif
+//			//case SQL_C_WXCHAR:  SQL_C_WXCHAR is covered by either SQL_C_CHAR or SQL_C_WCHAR
+//			((UCHAR FAR *) m_colDefs[colNumber].m_ptrDataObj)[0] = 0;
+//			break;
+//		case SQL_C_SSHORT:
+//			*((SWORD *)m_colDefs[colNumber].m_ptrDataObj) = 0;
+//			break;
+//		case SQL_C_USHORT:
+//			*((UWORD*)m_colDefs[colNumber].m_ptrDataObj) = 0;
+//			break;
+//		case SQL_C_LONG:
+//		case SQL_C_SLONG:
+//			*((SDWORD *)m_colDefs[colNumber].m_ptrDataObj) = 0;
+//			break;
+//		case SQL_C_ULONG:
+//			*((UDWORD *)m_colDefs[colNumber].m_ptrDataObj) = 0;
+//			break;
+//		case SQL_C_FLOAT:
+//			*((SFLOAT *)m_colDefs[colNumber].m_ptrDataObj) = 0.0f;
+//			break;
+//		case SQL_C_DOUBLE:
+//			*((SDOUBLE *)m_colDefs[colNumber].m_ptrDataObj) = 0.0f;
+//			break;
+//		case SQL_C_TIMESTAMP:
+//			TIMESTAMP_STRUCT *pDt;
+//			pDt = (TIMESTAMP_STRUCT *)m_colDefs[colNumber].m_ptrDataObj;
+//			pDt->year = 0;
+//			pDt->month = 0;
+//			pDt->day = 0;
+//			pDt->hour = 0;
+//			pDt->minute = 0;
+//			pDt->second = 0;
+//			pDt->fraction = 0;
+//			break;
+//		case SQL_C_DATE:
+//			DATE_STRUCT *pDtd;
+//			pDtd = (DATE_STRUCT *)m_colDefs[colNumber].m_ptrDataObj;
+//			pDtd->year = 0;
+//			pDtd->month = 0;
+//			pDtd->day = 0;
+//			break;
+//		case SQL_C_TIME:
+//			TIME_STRUCT *pDtt;
+//			pDtt = (TIME_STRUCT *)m_colDefs[colNumber].m_ptrDataObj;
+//			pDtt->hour = 0;
+//			pDtt->minute = 0;
+//			pDtt->second = 0;
+//			break;
+//		}
+//
+//		if (setToNull)
+//			SetColNull(colNumber);
+//	}  // wxDbTable::ClearMemberVar()
 
 
-	/********** wxDbTable::SetCursor() **********/
-	void Table::SetCursor(HSTMT *hstmtActivate)
-	{
-		if (hstmtActivate == wxDB_DEFAULT_CURSOR)
-			m_hstmt = *m_hstmtDefault;
-		else
-			m_hstmt = *hstmtActivate;
+	///********** wxDbTable::ClearMemberVars() **********/
+	//void Table::ClearMemberVars(bool setToNull)
+	//{
+	//	size_t i;
 
-	}  // wxDbTable::SetCursor()
+	//	// Loop through the columns setting each member variable to zero
+	//	for (i = 0; i < m_numCols; i++)
+	//		ClearMemberVar((UWORD)i, setToNull);
+
+	//}  // wxDbTable::ClearMemberVars()
+
+
+	///********** wxDbTable::SetQueryTimeout() **********/
+	//bool Table::SetQueryTimeout(UDWORD nSeconds)
+	//{
+	//	if (SQLSetStmtOption(m_hstmtInsert, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
+	//		return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert));
+	//	if (SQLSetStmtOption(m_hstmtUpdate, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
+	//		return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate));
+	//	if (SQLSetStmtOption(m_hstmtDelete, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
+	//		return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete));
+	//	if (SQLSetStmtOption(m_hstmtInternal, SQL_QUERY_TIMEOUT, nSeconds) != SQL_SUCCESS)
+	//		return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInternal));
+
+	//	// Completed Successfully
+	//	return true;
+
+	//}  // wxDbTable::SetQueryTimeout()
+
+
+	///********** wxDbTable::SetColDefs() **********/
+	//bool Table::SetColDefs(UWORD index, const std::wstring &fieldName, int dataType, void *pData,
+	//	SWORD cType, int size, bool keyField, bool updateable,
+	//	bool insertAllowed, bool derivedColumn)
+	//{
+	//	std::wstring tmpStr;
+	//	if (index >= m_numCols)  // Columns numbers are zero based....
+	//	{
+	//		tmpStr = (boost::wformat(L"Specified column index (%d) exceeds the maximum number of columns (%d) registered for this table definition.  Column definition not added.") % index % m_numCols).str();
+	//		exFAIL_MSG(tmpStr.c_str());
+	//		return false;
+	//	}
+
+	//	if (!m_colDefs)  // May happen if the database connection fails
+	//		return false;
+
+	//	if (fieldName.length() > (unsigned int)DB_MAX_COLUMN_NAME_LEN)
+	//	{
+	//		wcsncpy(m_colDefs[index].m_colName, fieldName.c_str(), DB_MAX_COLUMN_NAME_LEN);
+	//		m_colDefs[index].m_colName[DB_MAX_COLUMN_NAME_LEN] = 0;  // Prevent buffer overrun
+
+	//		tmpStr = (boost::wformat(L"Column name '%s' is too long. Truncated to '%s'.") % fieldName % m_colDefs[index].m_colName).str();
+	//		exFAIL_MSG(tmpStr.c_str());
+	//	}
+	//	else
+	//		wcscpy(m_colDefs[index].m_colName, fieldName.c_str());
+
+	//	m_colDefs[index].m_dbDataType = dataType;
+	//	m_colDefs[index].m_ptrDataObj = pData;
+	//	m_colDefs[index].m_sqlCtype = cType;
+	//	m_colDefs[index].m_szDataObj = size;  //TODO: glt ??? * sizeof(wchar_t) ???
+	//	m_colDefs[index].m_keyField = keyField;
+	//	m_colDefs[index].m_derivedCol = derivedColumn;
+	//	// Derived columns by definition would NOT be "Insertable" or "Updateable"
+	//	if (derivedColumn)
+	//	{
+	//		m_colDefs[index].m_updateable = false;
+	//		m_colDefs[index].m_insertAllowed = false;
+	//	}
+	//	else
+	//	{
+	//		m_colDefs[index].m_updateable = updateable;
+	//		m_colDefs[index].m_insertAllowed = insertAllowed;
+	//	}
+
+	//	m_colDefs[index].m_null = false;
+
+	//	return true;
+
+	//}  // wxDbTable::SetColDefs()
+
+
+	///********** wxDbTable::SetColDefs() **********/
+	//SColumnDataPtr* Table::SetColDefs(ColumnInfo *pColInfs, UWORD numCols)
+	//{
+	//	exASSERT(pColInfs);
+	//	SColumnDataPtr *pColDataPtrs = NULL;
+
+	//	if (pColInfs)
+	//	{
+	//		UWORD index;
+
+	//		pColDataPtrs = new SColumnDataPtr[numCols + 1];
+
+	//		for (index = 0; index < numCols; index++)
+	//		{
+	//			// Process the fields
+	//			switch (pColInfs[index].m_dbDataType)
+	//			{
+	//			case DB_DATA_TYPE_VARCHAR:
+	//				pColDataPtrs[index].PtrDataObj = new wchar_t[pColInfs[index].m_bufferSize + (1 * sizeof(wchar_t))];
+	//				pColDataPtrs[index].SzDataObj = pColInfs[index].m_bufferSize + (1 * sizeof(wchar_t));
+	//				pColDataPtrs[index].SqlCtype = SQL_C_WXCHAR;
+	//				break;
+	//			case DB_DATA_TYPE_MEMO:
+	//				pColDataPtrs[index].PtrDataObj = new wchar_t[pColInfs[index].m_bufferSize + (1 * sizeof(wchar_t))];
+	//				pColDataPtrs[index].SzDataObj = pColInfs[index].m_bufferSize + (1 * sizeof(wchar_t));
+	//				pColDataPtrs[index].SqlCtype = SQL_C_WXCHAR;
+	//				break;
+	//			case DB_DATA_TYPE_INTEGER:
+	//				// Can be long or short
+	//				if (pColInfs[index].m_bufferSize == sizeof(long))
+	//				{
+	//					pColDataPtrs[index].PtrDataObj = new long;
+	//					pColDataPtrs[index].SzDataObj = sizeof(long);
+	//					pColDataPtrs[index].SqlCtype = SQL_C_SLONG;
+	//				}
+	//				else
+	//				{
+	//					pColDataPtrs[index].PtrDataObj = new short;
+	//					pColDataPtrs[index].SzDataObj = sizeof(short);
+	//					pColDataPtrs[index].SqlCtype = SQL_C_SSHORT;
+	//				}
+	//				break;
+	//			case DB_DATA_TYPE_FLOAT:
+	//				// Can be float or double
+	//				if (pColInfs[index].m_bufferSize == sizeof(float))
+	//				{
+	//					pColDataPtrs[index].PtrDataObj = new float;
+	//					pColDataPtrs[index].SzDataObj = sizeof(float);
+	//					pColDataPtrs[index].SqlCtype = SQL_C_FLOAT;
+	//				}
+	//				else
+	//				{
+	//					pColDataPtrs[index].PtrDataObj = new double;
+	//					pColDataPtrs[index].SzDataObj = sizeof(double);
+	//					pColDataPtrs[index].SqlCtype = SQL_C_DOUBLE;
+	//				}
+	//				break;
+	//			case DB_DATA_TYPE_DATE:
+	//				pColDataPtrs[index].PtrDataObj = new TIMESTAMP_STRUCT;
+	//				pColDataPtrs[index].SzDataObj = sizeof(TIMESTAMP_STRUCT);
+	//				pColDataPtrs[index].SqlCtype = SQL_C_TIMESTAMP;
+	//				break;
+	//			case DB_DATA_TYPE_BLOB:
+	//				exFAIL_MSG(L"This form of ::SetColDefs() cannot be used with BLOB columns");
+	//				pColDataPtrs[index].PtrDataObj = /*BLOB ADDITION NEEDED*/NULL;
+	//				pColDataPtrs[index].SzDataObj = /*BLOB ADDITION NEEDED*/sizeof(void *);
+	//				pColDataPtrs[index].SqlCtype = SQL_VARBINARY;
+	//				break;
+	//			}
+	//			if (pColDataPtrs[index].PtrDataObj != NULL)
+	//				SetColDefs(index, pColInfs[index].m_colName, pColInfs[index].m_dbDataType, pColDataPtrs[index].PtrDataObj, pColDataPtrs[index].SqlCtype, pColDataPtrs[index].SzDataObj);
+	//			else
+	//			{
+	//				// Unable to build all the column definitions, as either one of
+	//				// the calls to "new" failed above, or there was a BLOB field
+	//				// to have a column definition for.  If BLOBs are to be used,
+	//				// the other form of ::SetColDefs() must be used, as it is impossible
+	//				// to know the maximum size to create the PtrDataObj to be.
+	//				delete[] pColDataPtrs;
+	//				return NULL;
+	//			}
+	//		}
+	//	}
+
+	//	return (pColDataPtrs);
+
+	//} // wxDbTable::SetColDefs()
+
+
+	///********** wxDbTable::SetCursor() **********/
+	//void Table::SetCursor(HSTMT *hstmtActivate)
+	//{
+	//	if (hstmtActivate == wxDB_DEFAULT_CURSOR)
+	//		m_hstmt = *m_hstmtDefault;
+	//	else
+	//		m_hstmt = *hstmtActivate;
+
+	//}  // wxDbTable::SetCursor()
 
 
 	///********** wxDbTable::Count(const std::wstring &) **********/
@@ -3048,114 +3044,114 @@ namespace exodbc
 	//}  // wxDbTable::Refresh()
 
 
-	/********** wxDbTable::SetColNull() **********/
-	bool Table::SetColNull(UWORD colNumber, bool set)
-	{
-		if (colNumber < m_numCols)
-		{
-			m_colDefs[colNumber].m_null = set;
-			if (set)  // Blank out the values in the member variable
-				ClearMemberVar(colNumber, false);  // Must call with false here, or infinite recursion will happen
+	///********** wxDbTable::SetColNull() **********/
+	//bool Table::SetColNull(UWORD colNumber, bool set)
+	//{
+	//	if (colNumber < m_numCols)
+	//	{
+	//		m_colDefs[colNumber].m_null = set;
+	//		if (set)  // Blank out the values in the member variable
+	//			ClearMemberVar(colNumber, false);  // Must call with false here, or infinite recursion will happen
 
-			setCbValueForColumn(colNumber);
+	//		setCbValueForColumn(colNumber);
 
-			return true;
-		}
-		else
-			return false;
+	//		return true;
+	//	}
+	//	else
+	//		return false;
 
-	}  // wxDbTable::SetColNull()
-
-
-	/********** wxDbTable::SetColNull() **********/
-	bool Table::SetColNull(const std::wstring &colName, bool set)
-	{
-		size_t colNumber;
-		for (colNumber = 0; colNumber < m_numCols; colNumber++)
-		{
-			if (!_wcsicmp(colName.c_str(), m_colDefs[colNumber].m_colName))
-				break;
-		}
-
-		if (colNumber < m_numCols)
-		{
-			m_colDefs[colNumber].m_null = set;
-			if (set)  // Blank out the values in the member variable
-				ClearMemberVar((UWORD)colNumber, false);  // Must call with false here, or infinite recursion will happen
-
-			setCbValueForColumn(colNumber);
-
-			return true;
-		}
-		else
-			return false;
-
-	}  // wxDbTable::SetColNull()
+	//}  // wxDbTable::SetColNull()
 
 
-	/********** wxDbTable::GetNewCursor() **********/
-	HSTMT *Table::GetNewCursor(bool setCursor, bool bindColumns)
-	{
-		HSTMT *newHSTMT = new HSTMT;
-		exASSERT(newHSTMT);
-		if (!newHSTMT)
-			return(0);
+	///********** wxDbTable::SetColNull() **********/
+	//bool Table::SetColNull(const std::wstring &colName, bool set)
+	//{
+	//	size_t colNumber;
+	//	for (colNumber = 0; colNumber < m_numCols; colNumber++)
+	//	{
+	//		if (!_wcsicmp(colName.c_str(), m_colDefs[colNumber].m_colName))
+	//			break;
+	//	}
 
-		if (SQLAllocStmt(m_hdbc, newHSTMT) != SQL_SUCCESS)
-		{
-			m_pDb->DispAllErrors(NULL, m_hdbc);
-			delete newHSTMT;
-			return(0);
-		}
+	//	if (colNumber < m_numCols)
+	//	{
+	//		m_colDefs[colNumber].m_null = set;
+	//		if (set)  // Blank out the values in the member variable
+	//			ClearMemberVar((UWORD)colNumber, false);  // Must call with false here, or infinite recursion will happen
 
-		if (SQLSetStmtOption(*newHSTMT, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
-		{
-			m_pDb->DispAllErrors(NULL, m_hdbc, *newHSTMT);
-			delete newHSTMT;
-			return(0);
-		}
+	//		setCbValueForColumn(colNumber);
 
-		if (bindColumns)
-		{
-			if (!bindCols(*newHSTMT))
-			{
-				delete newHSTMT;
-				return(0);
-			}
-		}
+	//		return true;
+	//	}
+	//	else
+	//		return false;
 
-		if (setCursor)
-			SetCursor(newHSTMT);
-
-		return(newHSTMT);
-
-	}   // wxDbTable::GetNewCursor()
+	//}  // wxDbTable::SetColNull()
 
 
-	/********** wxDbTable::DeleteCursor() **********/
-	bool Table::DeleteCursor(HSTMT *hstmtDel)
-	{
-		bool result = true;
+	///********** wxDbTable::GetNewCursor() **********/
+	//HSTMT *Table::GetNewCursor(bool setCursor, bool bindColumns)
+	//{
+	//	HSTMT *newHSTMT = new HSTMT;
+	//	exASSERT(newHSTMT);
+	//	if (!newHSTMT)
+	//		return(0);
 
-		if (!hstmtDel)  // Cursor already deleted
-			return(result);
+	//	if (SQLAllocStmt(m_hdbc, newHSTMT) != SQL_SUCCESS)
+	//	{
+	//		m_pDb->DispAllErrors(NULL, m_hdbc);
+	//		delete newHSTMT;
+	//		return(0);
+	//	}
 
-		/*
-		ODBC 3.0 says to use this form
-		if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
+	//	if (SQLSetStmtOption(*newHSTMT, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
+	//	{
+	//		m_pDb->DispAllErrors(NULL, m_hdbc, *newHSTMT);
+	//		delete newHSTMT;
+	//		return(0);
+	//	}
 
-		*/
-		if (SQLFreeStmt(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-		{
-			m_pDb->DispAllErrors(NULL, m_hdbc);
-			result = false;
-		}
+	//	if (bindColumns)
+	//	{
+	//		if (!bindCols(*newHSTMT))
+	//		{
+	//			delete newHSTMT;
+	//			return(0);
+	//		}
+	//	}
 
-		delete hstmtDel;
+	//	if (setCursor)
+	//		SetCursor(newHSTMT);
 
-		return(result);
+	//	return(newHSTMT);
 
-	}  // wxDbTable::DeleteCursor()
+	//}   // wxDbTable::GetNewCursor()
+
+
+	///********** wxDbTable::DeleteCursor() **********/
+	//bool Table::DeleteCursor(HSTMT *hstmtDel)
+	//{
+	//	bool result = true;
+
+	//	if (!hstmtDel)  // Cursor already deleted
+	//		return(result);
+
+	//	/*
+	//	ODBC 3.0 says to use this form
+	//	if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
+
+	//	*/
+	//	if (SQLFreeStmt(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
+	//	{
+	//		m_pDb->DispAllErrors(NULL, m_hdbc);
+	//		result = false;
+	//	}
+
+	//	delete hstmtDel;
+
+	//	return(result);
+
+	//}  // wxDbTable::DeleteCursor()
 
 
 
