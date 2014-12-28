@@ -556,7 +556,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertFloatTypes)
 	{
-		FloatTypesTmpTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MFloatTypesTable table(m_pDb, m_odbcInfo.m_namesCase, L"FloatTypes_tmp");
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt = L"DELETE FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp >= 0";
@@ -566,27 +566,20 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (1, -3.141592, -3.141)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp = 1"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -3.141592, table.m_double);
 		EXPECT_EQ( -3.141, table.m_float);
-		EXPECT_FALSE( table.GetNext() );
+		EXPECT_FALSE(table.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes_tmp, tdouble, tfloat) VALUES (2, 3.141592, 3.141)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp = 2"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes_tmp = 2"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 3.141592, table.m_double);
 		EXPECT_EQ( 3.141, table.m_float);
-		EXPECT_FALSE( table.GetNext() );
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
-		// SQLExecDirect), but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
+		EXPECT_FALSE(table.SelectNext());
 	}
 
 	TEST_P(wxCompatibilityTest, DISABLED_ExecSQL_InsertNumericTypesAsChar)
