@@ -80,8 +80,8 @@ namespace exodbc
 
 	// CharTypesTable
 	// --------------
-	MCharTypesTable::MCharTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, 3, TestTables::GetTableName(L"chartypes", namesCase), L"", L"", L"", Table::READ_ONLY)
+	MCharTypesTable::MCharTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
+		: Table(pDb, 3, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
@@ -95,8 +95,8 @@ namespace exodbc
 
 	// WCharTypesTable
 	// --------------
-	MWCharTypesTable::MWCharTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, 3, TestTables::GetTableName(L"chartypes", namesCase), L"", L"", L"", Table::READ_ONLY)
+	MWCharTypesTable::MWCharTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
+		: Table(pDb, 3, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;

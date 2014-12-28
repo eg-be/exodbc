@@ -523,7 +523,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSql_InsertCharTypes)
 	{
-		CharTypesTmpTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MWCharTypesTable table(m_pDb, m_odbcInfo.m_namesCase, L"CharTypes_tmp");
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt = L"DELETE FROM exodbc.chartypes_tmp WHERE idchartypes_tmp >= 0";
@@ -546,18 +546,11 @@ namespace exodbc
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
 		// And note the triming
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes_tmp ORDER BY idchartypes_tmp ASC"));
-		EXPECT_TRUE( table.GetNext());
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes_tmp ORDER BY idchartypes_tmp ASC"));
+		EXPECT_TRUE( table.SelectNext());
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(table.m_varchar));
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(table.m_char)));
-		EXPECT_FALSE(table.GetNext());
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
-		// SQLExecDirect), but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
+		EXPECT_FALSE(table.SelectNext());
 	}
 
 
@@ -596,7 +589,7 @@ namespace exodbc
 		}
 	}
 
-	TEST_P(wxCompatibilityTest, ExecSQL_InsertNumericTypesAsChar)
+	TEST_P(wxCompatibilityTest, DISABLED_ExecSQL_InsertNumericTypesAsChar)
 	{
 		NumericTypesTmpTable table(m_pDb, NumericTypesTmpTable::ReadAsChar, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
