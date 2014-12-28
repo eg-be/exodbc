@@ -251,100 +251,86 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, ReadCharTypes)
+	TEST_P(wxCompatibilityTest, ReadWCharTypes)
 	{
-		CharTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MWCharTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
 		// Note: We trim the values read from the db on the right side, as for example db2 pads with ' ' by default
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(table.m_varchar));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 2"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 2"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(table.m_char)));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 3"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 3"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"הצüאיט"), boost::trim_right_copy(std::wstring(table.m_varchar)));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 4"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 4"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"הצüאיט"), boost::trim_right_copy(std::wstring(table.m_char)));
 
 		// Test for NULL-Values
-		EXPECT_FALSE( table.IsColNull(0) );
-		EXPECT_TRUE( table.IsColNull(1) );
-		EXPECT_FALSE( table.IsColNull(2) );
+		EXPECT_FALSE( table.IsColumnNull(0) );
+		EXPECT_TRUE( table.IsColumnNull(1) );
+		EXPECT_FALSE( table.IsColumnNull(2) );
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
-		EXPECT_FALSE( table.IsColNull(0) );
-		EXPECT_FALSE( table.IsColNull(1) );
-		EXPECT_TRUE( table.IsColNull(2) );
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
-		// SQLExecDirect), but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1"));
+		EXPECT_TRUE(table.SelectNext());
+		EXPECT_FALSE( table.IsColumnNull(0) );
+		EXPECT_FALSE( table.IsColumnNull(1) );
+		EXPECT_TRUE( table.IsColumnNull(2) );
 	}
 
 
 
 	TEST_P(wxCompatibilityTest, ReadFloatTypes)
 	{		
-		FloatTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MFloatTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 0.0, table.m_float);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 2"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 2"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 3.141, table.m_float);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 3"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 3"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -3.141, table.m_float);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 0.0, table.m_double);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 5"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 5"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 3.141592, table.m_double);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 6"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 6"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -3.141592, table.m_double);
 
 		// Test for NULL
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
-		EXPECT_TRUE( table.IsColNull(1));
-		EXPECT_FALSE( table.IsColNull(2));
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1"));
+		EXPECT_TRUE(table.SelectNext());
+		EXPECT_TRUE( table.IsColumnNull(1));
+		EXPECT_FALSE( table.IsColumnNull(2));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4"));
-		EXPECT_TRUE( table.GetNext() );
-		EXPECT_FALSE( table.IsColNull(1));
-		EXPECT_TRUE( table.IsColNull(2));
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
-		// SQLExecDirect), but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4"));
+		EXPECT_TRUE(table.SelectNext());
+		EXPECT_FALSE( table.IsColumnNull(1));
+		EXPECT_TRUE( table.IsColumnNull(2));
 	}
 
 
-	TEST_P(wxCompatibilityTest, ReadNumericTypesAsChar)
+	TEST_P(wxCompatibilityTest, DISABLED_ReadNumericTypesAsChar)
 	{
 		NumericTypesTable table(m_pDb, NumericTypesTable::ReadAsChar, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
@@ -418,11 +404,11 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ReadBlobTypes)
 	{
-		BlobTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MBlobTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
+		EXPECT_TRUE(table.SelectNext());
 		SQLCHAR empty[] = {	0, 0, 0, 0,
 			0, 0, 0, 0,
 			0, 0, 0, 0,
@@ -441,38 +427,31 @@ namespace exodbc
 			0x01, 0x23, 0x45, 0x67
 		};
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ(0, memcmp(empty, table.m_blob, sizeof(table.m_blob)));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 2"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 2"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ(0, memcmp(ff, table.m_blob, sizeof(table.m_blob)));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 3"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 3"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ(0, memcmp(abc, table.m_blob, sizeof(table.m_blob)));
 
 		// Test for NULL
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
-		EXPECT_FALSE( table.IsColNull(1) );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
+		EXPECT_TRUE(table.SelectNext());
+		EXPECT_FALSE( table.IsColumnNull(1) );
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 4"));
-		EXPECT_TRUE( table.GetNext() );
-		EXPECT_TRUE( table.IsColNull(1) );
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
-		// SQLExecDirect), but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 4"));
+		EXPECT_TRUE(table.SelectNext());
+		EXPECT_TRUE( table.IsColumnNull(1) );
 	}
 
 
 
-	TEST_P(wxCompatibilityTest, ReadIncompleteTable)
+	TEST_P(wxCompatibilityTest, DISABLED_ReadIncompleteTable)
 	{
 		CharTable table(m_pDb, m_odbcInfo.m_namesCase);
 		IncompleteCharTable incTable(m_pDb, m_odbcInfo.m_namesCase);
