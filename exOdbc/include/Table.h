@@ -430,9 +430,9 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Closes an open Select-Query. Fails if no Select is open.
+		* \brief	Closes an eventually open Select-Query.
 		* \see		Select()
-		* \return	Depends on closeMode.
+		* \return	True if a statement was open and closed successfully, false otherwise.
 		*/
 		bool		SelectClose();
 

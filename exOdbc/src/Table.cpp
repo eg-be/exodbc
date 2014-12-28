@@ -595,7 +595,6 @@ namespace exodbc
 	
 	bool Table::SelectClose()
 	{
-		exASSERT(IsSelectOpen());
 		m_selectQueryOpen = ! CloseStmtHandle(m_hStmtSelect, FailIfNotOpen);
 		return ! m_selectQueryOpen;
 	}
