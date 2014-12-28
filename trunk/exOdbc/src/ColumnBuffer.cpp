@@ -190,7 +190,7 @@ namespace exodbc
 			return false;
 		}
 		m_bufferSize = DetermineBufferSize();
-		if (!m_bufferSize)
+		if (m_bufferSize <= 0)
 		{
 			return false;
 		}
@@ -282,7 +282,46 @@ namespace exodbc
 	}
 
 
-	size_t ColumnBuffer::DetermineBufferSize() const
+	SQLINTEGER ColumnBuffer::DetermineCharSize() const
+	{
+		exASSERT(m_haveColumnInfo);
+		exASSERT(m_columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);
+
+		switch (m_columnInfo.m_sqlDataType)
+		{
+		case SQL_SMALLINT:
+		case SQL_INTEGER:
+		case SQL_BIGINT:
+			if (m_columnInfo.m_isColumnSizeNull || m_columnInfo.m_isNumPrecRadixNull || m_columnInfo.m_numPrecRadix != 10)
+			{
+				return 0;
+			}
+			if (!m_columnInfo.m_isDecimalDigitsNull && m_columnInfo.m_decimalDigits > 0)
+			{
+				// +3: 1 for '.' and one for trailing zero and one for a '-'
+				return m_columnInfo.m_columnSize + 3; 
+			}
+			else
+			{
+				// +2: one for trailing zero and one for '-'
+				return m_columnInfo.m_columnSize + 2;
+			}
+		case SQL_CHAR:
+		case SQL_WCHAR:
+		case SQL_VARCHAR:
+		case SQL_WVARCHAR:
+			// TODO: We could also calculate using the char_octet_length. Maybe this would be cleaner - some dbs
+			// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
+			return m_columnInfo.m_columnSize + 1;
+		default:
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+		}
+
+		return 0;
+	}
+
+
+	SQLINTEGER ColumnBuffer::DetermineBufferSize() const
 	{
 		exASSERT(m_bufferType != 0);
 		exASSERT(m_columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);
@@ -297,31 +336,33 @@ namespace exodbc
 		case SQL_C_SBIGINT:
 			return sizeof(SQLBIGINT);
 		case SQL_C_CHAR:
-			// else it determines on the ColumnInfo too:
-			// If it is a char or (w)char or (w)varchar calculate the string length as if we've used SQL_C_CHAR
-			if (m_columnInfo.m_sqlDataType == SQL_CHAR || m_columnInfo.m_sqlDataType == SQL_VARCHAR || 
-				m_columnInfo.m_sqlDataType == SQL_WCHAR || m_columnInfo.m_sqlDataType == SQL_WVARCHAR)
-			{
-				// We could calculate the length using m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR)
-				// TODO: or also use the char_octet_length. Maybe this would be cleaner - some dbs
-				// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
-				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR);
-			}
-			else
-			{
-				// Should never happen. 
-				exASSERT(false);
-			}
+			return DetermineCharSize() * sizeof(SQLCHAR);
+			//// else it determines on the ColumnInfo too:
+			//// If it is a char or (w)char or (w)varchar calculate the string length as if we've used SQL_C_CHAR
+			//if (m_columnInfo.m_sqlDataType == SQL_CHAR || m_columnInfo.m_sqlDataType == SQL_VARCHAR || 
+			//	m_columnInfo.m_sqlDataType == SQL_WCHAR || m_columnInfo.m_sqlDataType == SQL_WVARCHAR)
+			//{
+			//	// We could calculate the length using m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR)
+			//	// TODO: or also use the char_octet_length. Maybe this would be cleaner - some dbs
+			//	// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
+			//	return (m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR);
+			//}
+			//else
+			//{
+			//	// Should never happen. 
+			//	exASSERT(false);
+			//}
 		case SQL_C_WCHAR:
-			if (m_columnInfo.m_sqlDataType == SQL_CHAR || m_columnInfo.m_sqlDataType == SQL_VARCHAR ||
-				m_columnInfo.m_sqlDataType == SQL_WCHAR || m_columnInfo.m_sqlDataType == SQL_WVARCHAR)
-			{
-				return (m_columnInfo.m_columnSize + 1) * sizeof(SQLWCHAR);
-			}
-			else
-			{
-				exASSERT(false);
-			}
+			return DetermineCharSize() * sizeof(SQLWCHAR);
+			//if (m_columnInfo.m_sqlDataType == SQL_CHAR || m_columnInfo.m_sqlDataType == SQL_VARCHAR ||
+			//	m_columnInfo.m_sqlDataType == SQL_WCHAR || m_columnInfo.m_sqlDataType == SQL_WVARCHAR)
+			//{
+			//	return (m_columnInfo.m_columnSize + 1) * sizeof(SQLWCHAR);
+			//}
+			//else
+			//{
+			//	exASSERT(false);
+			//}
 		case SQL_C_DOUBLE:
 			return sizeof(SQLDOUBLE);
 		case SQL_C_TYPE_DATE:

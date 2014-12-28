@@ -382,6 +382,48 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, GetWCharIntValues)
+	{
+		// And some tables with auto-columns
+		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		iTable.SetCharBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
+		EXPECT_TRUE(iTable.Open(false, true));
+
+		std::wstring id, smallInt, i, bigInt;
+		std::wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.GetColumnValue(1, smallInt));
+		EXPECT_EQ(L"-32768", smallInt);
+
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.GetColumnValue(1, smallInt));
+		EXPECT_EQ(L"32767", smallInt);
+
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.GetColumnValue(2, i));
+		EXPECT_EQ(L"-2147483648", i);
+
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.GetColumnValue(2, i));
+		EXPECT_EQ(L"2147483647", i);
+
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.GetColumnValue(3, bigInt));
+		EXPECT_EQ(L"-9223372036854775808", bigInt);
+
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.GetColumnValue(3, bigInt));
+		EXPECT_EQ(L"9223372036854775807", bigInt);
+	}
+
+
 	TEST_P(TableTest, GetAutoFloatValues)
 	{
 		wstring floatTypesTableName = TestTables::GetTableName(L"floattypes", m_odbcInfo.m_namesCase);
