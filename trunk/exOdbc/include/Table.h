@@ -625,22 +625,22 @@ namespace exodbc
 		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize);
 
 
-		const std::wstring& GetFromClause()      { return m_from; }
-		const std::wstring& GetOrderByClause()   { return m_orderBy; }
-		const std::wstring& GetWhereClause()     { return m_where; }
+		//const std::wstring& GetFromClause()      { return m_from; }
+		//const std::wstring& GetOrderByClause()   { return m_orderBy; }
+		//const std::wstring& GetWhereClause()     { return m_where; }
 
-		void            SetFromClause(const std::wstring& From) { m_from = From; }
-		void            SetOrderByClause(const std::wstring& OrderBy) { m_orderBy = OrderBy; }
-		bool            SetOrderByColNums(UWORD first, ...);
-		void            SetWhereClause(const std::wstring& Where) { m_where = Where; }
-		void            From(const std::wstring& From) { m_from = From; }
-		void            OrderBy(const std::wstring& OrderBy) { m_orderBy = OrderBy; }
-		void            Where(const std::wstring& Where) { m_where = Where; }
-		const std::wstring& Where()   { return m_where; }
-		const std::wstring& OrderBy() { return m_orderBy; }
-		const std::wstring& From()    { return m_from; }
+		//void            SetFromClause(const std::wstring& From) { m_from = From; }
+		//void            SetOrderByClause(const std::wstring& OrderBy) { m_orderBy = OrderBy; }
+//		bool            SetOrderByColNums(UWORD first, ...);
+		//void            SetWhereClause(const std::wstring& Where) { m_where = Where; }
+		//void            From(const std::wstring& From) { m_from = From; }
+		//void            OrderBy(const std::wstring& OrderBy) { m_orderBy = OrderBy; }
+		//void            Where(const std::wstring& Where) { m_where = Where; }
+		//const std::wstring& Where()   { return m_where; }
+		//const std::wstring& OrderBy() { return m_orderBy; }
+		//const std::wstring& From()    { return m_from; }
 
-		int             Insert();
+		//int             Insert();
 		//bool            Update();
 		//bool            Update(const std::wstring& pSqlStmt);
 		//bool            UpdateWhere(const std::wstring& pWhereClause);
@@ -648,22 +648,22 @@ namespace exodbc
 		//bool            DeleteWhere(const std::wstring& pWhereClause);
 		//bool            DeleteMatching();
 		//		virtual bool    Query(bool forUpdate = false, bool distinct = false);
-		bool            QueryBySqlStmt(const std::wstring& pSqlStmt);
-		bool            QueryMatching(bool forUpdate = false, bool distinct = false);
-		bool            QueryOnKeyFields(bool forUpdate = false, bool distinct = false);
+//		bool            QueryBySqlStmt(const std::wstring& pSqlStmt);
+//		bool            QueryMatching(bool forUpdate = false, bool distinct = false);
+//		bool            QueryOnKeyFields(bool forUpdate = false, bool distinct = false);
 		//bool            Refresh();
-		bool            GetNext()		{ return(getRec(SQL_FETCH_NEXT)); }
-		bool            operator++(int) { return(getRec(SQL_FETCH_NEXT)); }
+//		bool            GetNext()		{ return(getRec(SQL_FETCH_NEXT)); }
+//		bool            operator++(int) { return(getRec(SQL_FETCH_NEXT)); }
 
 		/***** These four functions only work with wxDb instances that are defined  *****
 		***** as not being FwdOnlyCursors                                          *****/
-		bool            GetPrev();
-		bool            operator--(int);
-		bool            GetFirst();
-		bool            GetLast();
+//		bool            GetPrev();
+//		bool            operator--(int);
+//		bool            GetFirst();
+//		bool            GetLast();
 
-		bool            IsCursorClosedOnCommit();
-		UWORD           GetRowNum();
+		//bool            IsCursorClosedOnCommit();
+		//UWORD           GetRowNum();
 
 		//void            BuildSelectStmt(std::wstring& pSqlStmt, int typeOfSelect, bool distinct);
 		//void            BuildSelectStmt(wchar_t* pSqlStmt, int typeOfSelect, bool distinct);
@@ -677,32 +677,32 @@ namespace exodbc
 		//void            BuildWhereClause(std::wstring& pWhereClause, int typeOfWhere, const std::wstring& qualTableName = emptyString, bool useLikeComparison = false);
 		//void            BuildWhereClause(wchar_t* pWhereClause, int typeOfWhere, const std::wstring &qualTableName = emptyString, bool useLikeComparison = false);
 
-		bool            CanSelectForUpdate();
-		bool            CanUpdateByROWID();
-		void            ClearMemberVar(UWORD colNumber, bool setToNull = false);
-		void            ClearMemberVars(bool setToNull = false);
-		bool            SetQueryTimeout(UDWORD nSeconds);
+		//bool            CanSelectForUpdate();
+		//bool            CanUpdateByROWID();
+//		void            ClearMemberVar(UWORD colNumber, bool setToNull = false);
+//		void            ClearMemberVars(bool setToNull = false);
+		//bool            SetQueryTimeout(UDWORD nSeconds);
 
-		ColumnDefinition* GetColDefs() { return m_colDefs; }
-		bool            SetColDefs(UWORD index, const std::wstring& fieldName, int dataType, void* pData, SWORD cType, int size, bool keyField = false,
-			bool updateable = true, bool insertAllowed = true, bool derivedColumn = false);
-		SColumnDataPtr* SetColDefs(ColumnInfo* colInfs, UWORD numCols);
+		//ColumnDefinition* GetColDefs() { return m_colDefs; }
+		//bool            SetColDefs(UWORD index, const std::wstring& fieldName, int dataType, void* pData, SWORD cType, int size, bool keyField = false,
+		//	bool updateable = true, bool insertAllowed = true, bool derivedColumn = false);
+		//SColumnDataPtr* SetColDefs(ColumnInfo* colInfs, UWORD numCols);
 
-		bool            CloseCursor(HSTMT cursor);
-		bool            DeleteCursor(HSTMT* hstmtDel);
-		void            SetCursor(HSTMT* hstmtActivate = (void **)wxDB_DEFAULT_CURSOR);
-		HSTMT           GetCursor() { return(m_hstmt); }
-		HSTMT*			GetNewCursor(bool setCursor = false, bool bindColumns = true);
+		//bool            CloseCursor(HSTMT cursor);
+		//bool            DeleteCursor(HSTMT* hstmtDel);
+		//void            SetCursor(HSTMT* hstmtActivate = (void **)wxDB_DEFAULT_CURSOR);
+		//HSTMT           GetCursor() { return(m_hstmt); }
+		//HSTMT*			GetNewCursor(bool setCursor = false, bool bindColumns = true);
 
 		//ULONG           Count(const std::wstring& args = L"*");
 
-		bool            IsColNull(UWORD colNumber) const;
-		bool            SetColNull(UWORD colNumber, bool set = true);
-		bool            SetColNull(const std::wstring& colName, bool set = true);
+//		bool            IsColNull(UWORD colNumber) const;
+//		bool            SetColNull(UWORD colNumber, bool set = true);
+//		bool            SetColNull(const std::wstring& colName, bool set = true);
 
 		// Private member variables and functions
 	private:
-		UDWORD      m_cursorType;
+		//UDWORD      m_cursorType;
 
 		/*!
 		* \brief	Initializes the member-vars, allocates statements and sets statement options
@@ -750,21 +750,21 @@ namespace exodbc
 		const ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
 
 
-		void        setCbValueForColumn(int columnIndex);
+//		void        setCbValueForColumn(int columnIndex);
 		//		bool        bindParams(bool forUpdate);  // called by the other 'bind' functions
 		//bool        bindInsertParams();
 		//bool        bindUpdateParams();
 
-		bool        bindCols(HSTMT cursor);
-		bool        getRec(UWORD fetchType);
-		bool        execDelete(const std::wstring& pSqlStmt);
+//		bool        bindCols(HSTMT cursor);
+//		bool        getRec(UWORD fetchType);
+		//bool        execDelete(const std::wstring& pSqlStmt);
 		//		bool        execUpdate(const std::wstring& pSqlStmt);
-		bool        query(int queryType, bool forUpdate, bool distinct, const std::wstring& pSqlStmt = emptyString);
+//		bool        query(int queryType, bool forUpdate, bool distinct, const std::wstring& pSqlStmt = emptyString);
 
 		// Where, Order By and From clauses
-		std::wstring    m_where;               // Standard SQL where clause, minus the word WHERE
-		std::wstring    m_orderBy;             // Standard SQL order by clause, minus the ORDER BY
-		std::wstring    m_from;                // Allows for joins in a wxDbTable::Query().  Format: ",tbl,tbl..."
+		//std::wstring    m_where;               // Standard SQL where clause, minus the word WHERE
+		//std::wstring    m_orderBy;             // Standard SQL order by clause, minus the ORDER BY
+		//std::wstring    m_from;                // Allows for joins in a wxDbTable::Query().  Format: ",tbl,tbl..."
 
 		// ODBC Handles
 		HSTMT		m_hStmtSelect;	///< Statement-handle used to do selects.
@@ -772,19 +772,19 @@ namespace exodbc
 
 		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
 
-		// Old handles below, should all be replaced by new implementations
-		//		HENV        m_henv;           // ODBC Environment handle
-		HDBC        m_hdbc;           // ODBC DB Connection handle
-		HSTMT       m_hstmt;          // ODBC Statement handle
-		HSTMT*		m_hstmtDefault;   // Default cursor
-		HSTMT       m_hstmtInsert;    // ODBC Statement handle used specifically for inserts
-		HSTMT       m_hstmtDelete;    // ODBC Statement handle used specifically for deletes
-		HSTMT       m_hstmtUpdate;    // ODBC Statement handle used specifically for updates
-		HSTMT       m_hstmtInternal;  // ODBC Statement handle used internally only
+		//// Old handles below, should all be replaced by new implementations
+		////		HENV        m_henv;           // ODBC Environment handle
+		//HSTMT       m_hstmt;          // ODBC Statement handle
+		//HSTMT*		m_hstmtDefault;   // Default cursor
+		//HDBC        m_hdbc;           // ODBC DB Connection handle
+		//HSTMT       m_hstmtInsert;    // ODBC Statement handle used specifically for inserts
+		//HSTMT       m_hstmtDelete;    // ODBC Statement handle used specifically for deletes
+		//HSTMT       m_hstmtUpdate;    // ODBC Statement handle used specifically for updates
+		//HSTMT       m_hstmtInternal;  // ODBC Statement handle used internally only
 //		HSTMT*		m_hstmtCount;     // ODBC Statement handle used by Count() function (No binding of columns)
 
 		// Flags
-		bool        m_selectForUpdate;
+		//bool        m_selectForUpdate;
 
 		// Pointer to the database object this table belongs to
 		Database*		m_pDb;
@@ -793,15 +793,15 @@ namespace exodbc
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		const OpenMode		m_openMode;				///< Read-only or writable
-		AutoBindingMode		m_autoBindingMode;		///< Store the char-binding of this table. Can still be overridden by specifying it on a column
+		AutoBindingMode		m_autoBindingMode;		///< Store the auto-binding of this table. TODO: Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
-		unsigned int		m_charTrimFlags;			///< Bitmask for the CharTrimOption Flags
+		unsigned int		m_charTrimFlags;		///< Bitmask for the CharTrimOption Flags
 
 		// Column information
 		std::map<int, ColumnBuffer*> m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
 		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
-		size_t				m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database
+		SQLSMALLINT			m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database
 
 		// Table information set during construction, that was used to find the matching STableInfo if none was passed
 		// Note: We make them public, as they are all const
@@ -813,7 +813,7 @@ namespace exodbc
 
 	private:
 		// Column Definitions
-		ColumnDefinition* m_colDefs;         // Array of wxDbColDef structures
+//		ColumnDefinition* m_colDefs;         // Array of wxDbColDef structures
 
 #ifdef EXODBCDEBUG
 	public:
