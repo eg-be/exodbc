@@ -118,6 +118,7 @@ namespace exodbc
 		SQL_TIMESTAMP_STRUCT	m_timestamp;
 	};
 
+	
 	// BlobTypesTable
 	// --------------
 	class MBlobTypesTable : public exodbc::Table
@@ -128,5 +129,36 @@ namespace exodbc
 
 		SQLINTEGER		m_idBlobTypes;
 		SQLCHAR			m_blob[16];
+	};
+
+
+	// CharTable
+	// ---------
+	class MCharTable : public exodbc::Table
+	{
+	public:
+		MCharTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		virtual ~MCharTable() {};
+
+		SQLINTEGER	m_idCharTable;
+		SQLWCHAR	m_col2[128 + 1];
+		SQLWCHAR	m_col3[128 + 1];
+		SQLWCHAR	m_col4[128 + 2];
+	};
+
+
+	// IncompleCharTable
+	// -----------------
+	class MIncompleteCharTable : public exodbc::Table
+	{
+	public:
+		MIncompleteCharTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		virtual ~MIncompleteCharTable() {};
+
+		SQLINTEGER	m_idCharTable;
+		SQLWCHAR	m_col2[128 + 1];
+		// we do not bind col3 and have a gap
+		//SQLWCHAR	m_col3[128 + 1];
+		SQLWCHAR	m_col4[128 + 2];
 	};
 }
