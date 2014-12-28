@@ -138,6 +138,21 @@ namespace exodbc
 	}
 
 
+	// MNumericTypesAsCharTable
+	// -----------------
+	MNumericTypesAsCharTable::MNumericTypesAsCharTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
+		: Table(pDb, 3, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
+	{
+		m_idNumericTypes = 0;
+		m_wcdecimal_18_0[0] = 0;
+		m_wcdecimal_18_10[0] = 0;
+
+		SetColumn(0, TestTables::GetColName(L"idnumerictypes_tmp", namesCase), &m_idNumericTypes, SQL_C_SLONG, sizeof(m_idNumericTypes));
+		SetColumn(1, TestTables::GetColName(L"tdecimal_18_0", namesCase), m_wcdecimal_18_0, SQL_C_WCHAR, sizeof(m_wcdecimal_18_0));
+		SetColumn(2, TestTables::GetColName(L"tdecimal_18_10", namesCase), m_wcdecimal_18_10, SQL_C_WCHAR, sizeof(m_wcdecimal_18_10));
+	};
+
+
 	// CharTable
 	// ---------
 	MCharTable::MCharTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
