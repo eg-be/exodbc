@@ -84,7 +84,6 @@ namespace exodbc
 		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		EXPECT_TRUE(db.SetConnectionAttributes());
-		// Note: On this and the following small friend-tests we manually close to fail because of #51
 		EXPECT_TRUE(db.Close());
 	}
 
@@ -143,9 +142,6 @@ namespace exodbc
 			EXPECT_TRUE(false);
 #endif
 		}
-
-		// Commit any ongoing transaction so we do not fail when closing the db
-		m_db.CommitTrans();
 	}
 
 	TEST_P(DatabaseTest, CanSetTransactionIsolationMode)
@@ -223,9 +219,6 @@ namespace exodbc
 		// internal member should already be updated
 		EXPECT_EQ(CM_MANUAL_COMMIT, db.GetCommitMode());
 		EXPECT_EQ(CM_MANUAL_COMMIT, db.ReadCommitMode());
-
-		// Close db
-		EXPECT_TRUE(db.Close());
 	}
 
 	TEST_P(DatabaseTest, ReadDataTypesInfo)
@@ -256,8 +249,6 @@ namespace exodbc
 		}
 
 		BOOST_LOG_TRIVIAL(info) << ws.str();
-
-		EXPECT_TRUE(db.Close());
 	}
 
 	TEST_P(DatabaseTest, GetDbInfo)
@@ -271,9 +262,6 @@ namespace exodbc
 
 		EXPECT_TRUE(sInfo.length() > 0);
 		BOOST_LOG_TRIVIAL(info) << L"DbInfo of database connected to DSN " << m_odbcInfo.m_dsn.c_str() << std::endl << sInfo.c_str();
-
-		EXPECT_TRUE(db.Close());
-
 	}
 
 
@@ -318,7 +306,6 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 
-		// TODO: There is still a lot wrong with Ticket #51 and Tables
 		// Note: If we try to read now from a different database, we do not see the inserted recorded until it is committed
 		// BUT: Microsoft SQL Server will just block the second database while a transaction is open
 		// We need to examine that behavior, it must be some option. -> Yes, it is the SNAPSHOT Transaction isolation
@@ -352,7 +339,6 @@ namespace exodbc
 				EXPECT_TRUE(iTable2.Select());
 				EXPECT_FALSE(iTable2.SelectNext());
 			}
-			EXPECT_TRUE(db2.Close());
 		}
 
 		// Once we commit we have one record, also in a different database
@@ -366,7 +352,6 @@ namespace exodbc
 			EXPECT_TRUE(iTable2.Select());
 			EXPECT_TRUE(iTable2.SelectNext());
 		}
-		EXPECT_TRUE(db2.Close());
 	}
 
 
@@ -546,6 +531,7 @@ namespace exodbc
 		EXPECT_EQ(10, col.m_decimalDigits);
 	}
 
+
 	TEST_P(DatabaseTest, FindTables)
 	{
 		std::vector<STableInfo> tables;
@@ -615,6 +601,7 @@ namespace exodbc
 		}
 	}
 
+
 	TEST_P(DatabaseTest, ReadCompleteCatalog)
 	{
 		SDbCatalogInfo cat;
@@ -630,6 +617,7 @@ namespace exodbc
 		}
 		EXPECT_TRUE(cat.m_tables.size() >= 12);
 	}
+
 
 	TEST_P(DatabaseTest, ReadColumnCount)
 	{
