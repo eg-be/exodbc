@@ -129,17 +129,14 @@ namespace exodbc
 		*			The ColumnBuffer will not take ownership of the passed bufferVariant and will
 		*			not delete it.
 		*			Note that using this constructor you can pass almost any combination of conversions 
-		*			from SQL Types to ODBC C Types to the driver. Bind() will fail if the driver does not
-		*			support the given conversion.
+		*			from SQL Types to ODBC C Types to the driver, as long as the buffer-type exists in the
+		*			BufferPtrVariant. Bind() will fail if the driver does not support the given conversion.
 		* \param sqlCType	The ODBC C Type of the buffer. This value will be forwarded to the driver during SQLBindCol. 
 		* \param ordinalPosition The ordinal position of the column in the table. Numbering starts at 1 (!)
 		* \param bufferPtrVarian Pointer to allocated buffer for the given sqlCType.
 		* \param bufferSize	Size of the allocated buffer.
 		* \param queryName Name of the column that corresponds to this buffer.
-		* \param decimalDigits		Number of decimal digits. Set to -1 to indicate unknown. If set, decimal digits returned
-		*							are truncated. For example a driver might return 123456700 as the fraction part of a 
-		*							timestamp, but the actual value should be 1234567 as decimalDigits is set to 7. If you
-		*							retrieve the value using the operators / Visitors the value will be truncated to 7 digits.
+		* \param decimalDigits		Number of decimal digits. Set to -1 to indicate unknown.
 		*
 		* \see	HaveBuffer()
 		* \see	Bind()
