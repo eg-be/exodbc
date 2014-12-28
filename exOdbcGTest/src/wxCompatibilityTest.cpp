@@ -133,13 +133,31 @@ namespace exodbc
 		ASSERT_TRUE(table.Open(false, false));
 
 		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
-		EXPECT_TRUE( table.SelectNext() );
-		EXPECT_EQ( 26, table.m_date.day);
+		if (m_pDb->Dbms() == dbmsMS_SQL_SERVER)
+		{
+			// MS will complain about data loss
+			LogLevelError llErr;
+			EXPECT_TRUE(table.SelectNext());
+		}
+		else
+		{
+			EXPECT_TRUE(table.SelectNext());
+		}
+		EXPECT_EQ(26, table.m_date.day);
 		EXPECT_EQ( 01, table.m_date.month);
 		EXPECT_EQ( 1983, table.m_date.year);
 
 		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
-		EXPECT_TRUE( table.SelectNext() );
+		if (m_pDb->Dbms() == dbmsMS_SQL_SERVER)
+		{
+			// MS will complain about data loss
+			LogLevelError llErr;
+			EXPECT_TRUE(table.SelectNext());
+		}
+		else
+		{
+			EXPECT_TRUE(table.SelectNext());
+		}
 		EXPECT_EQ( 13, table.m_time.hour);
 		EXPECT_EQ( 55, table.m_time.minute);
 		EXPECT_EQ( 56, table.m_time.second);
