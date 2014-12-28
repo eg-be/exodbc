@@ -646,7 +646,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertIntTypes)
 	{
-		IntTypesTmpTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MIntTypesTable table(m_pDb, m_odbcInfo.m_namesCase, L"IntegerTypes_tmp");
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;
@@ -654,43 +654,36 @@ namespace exodbc
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		EXPECT_FALSE( table.GetNext());
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		EXPECT_FALSE(table.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
-		EXPECT_TRUE( table.GetNext());
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -32768, table.m_smallInt);
 		EXPECT_EQ( INT_MIN, table.m_int);
 		EXPECT_EQ( -LLONG_MIN, table.m_bigInt);
-		EXPECT_FALSE( table.GetNext());
+		EXPECT_FALSE(table.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (2, 32767, 2147483647, 9223372036854775807)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
-		EXPECT_TRUE( table.GetNext());
-		EXPECT_TRUE( table.GetNext());
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes_tmp ASC"));
+		EXPECT_TRUE(table.SelectNext());
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 32767, table.m_smallInt);
 		EXPECT_EQ( 2147483647, table.m_int);
 		EXPECT_EQ( 9223372036854775807, table.m_bigInt);
-		EXPECT_FALSE( table.GetNext());
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
-		// SQLExecDirect), but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
+		EXPECT_FALSE(table.SelectNext());
 	}
 
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertDateTypes)
 	{
-		DateTypesTmpTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MDateTypesTable table(m_pDb, m_odbcInfo.m_namesCase, L"DateTypes_tmp");
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;
@@ -701,8 +694,8 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.datetypes_tmp (iddatetypes_tmp, tdate, ttime, ttimestamp) VALUES (1, '1983-01-26', '13:55:56', '1983-01-26 13:55:56')";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.datetypes_tmp WHERE iddatetypes_tmp = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes_tmp WHERE iddatetypes_tmp = 1"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 26, table.m_date.day);
 		EXPECT_EQ( 01, table.m_date.month);
 		EXPECT_EQ( 1983, table.m_date.year);
@@ -718,14 +711,7 @@ namespace exodbc
 		EXPECT_EQ( 55, table.m_timestamp.minute);
 		EXPECT_EQ( 56, table.m_timestamp.second);
 
-		EXPECT_FALSE( table.GetNext() );
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
-		// SQLExecDirect), but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
+		EXPECT_FALSE(table.SelectNext());
 	}
 
 
