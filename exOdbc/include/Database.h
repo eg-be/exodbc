@@ -58,49 +58,49 @@
 #include <sqlucode.h>
 #include <odbcinst.h>
 
-// BJO 20000503: introduce new GetColumns members which are more database independent and
-//               return columns in the order they were created
-#define OLD_GETCOLUMNS 1
-#define EXPERIMENTAL_WXDB_FUNCTIONS 1
+//// BJO 20000503: introduce new GetColumns members which are more database independent and
+////               return columns in the order they were created
+//#define OLD_GETCOLUMNS 1
+//#define EXPERIMENTAL_WXDB_FUNCTIONS 1
 
-// This was defined by a macro testing if wxUNICODE is set
-#define SQL_C_WXCHAR SQL_C_WCHAR
+//// This was defined by a macro testing if wxUNICODE is set
+//#define SQL_C_WXCHAR SQL_C_WCHAR
 
-typedef float SFLOAT;
-typedef double SDOUBLE;
-typedef unsigned int UINT;
-#define ULONG UDWORD
+//typedef float SFLOAT;
+//typedef double SDOUBLE;
+//typedef unsigned int UINT;
+//#define ULONG UDWORD
 
-#ifndef wxODBC_FWD_ONLY_CURSORS
-#define wxODBC_FWD_ONLY_CURSORS 1
-#endif
+//#ifndef wxODBC_FWD_ONLY_CURSORS
+//#define wxODBC_FWD_ONLY_CURSORS 1
+//#endif
 
-enum enumDummy {enumDum1};
+//enum enumDummy {enumDum1};
 
-#ifndef SQL_C_BOOLEAN
-#define SQL_C_BOOLEAN(datatype) (sizeof(datatype) == 1 ? SQL_C_UTINYINT : (sizeof(datatype) == 2 ? SQL_C_USHORT : SQL_C_ULONG))
-#endif
+//#ifndef SQL_C_BOOLEAN
+//#define SQL_C_BOOLEAN(datatype) (sizeof(datatype) == 1 ? SQL_C_UTINYINT : (sizeof(datatype) == 2 ? SQL_C_USHORT : SQL_C_ULONG))
+//#endif
 
-#ifndef SQL_C_ENUM
-#define SQL_C_ENUM (sizeof(enumDummy) == 2 ? SQL_C_USHORT : SQL_C_ULONG)
-#endif
+//#ifndef SQL_C_ENUM
+//#define SQL_C_ENUM (sizeof(enumDummy) == 2 ? SQL_C_USHORT : SQL_C_ULONG)
+//#endif
 
-// NOTE: If SQL_C_BLOB is defined, and it is not SQL_C_BINARY, iODBC 2.x
-//       may not function correctly.  Likely best to use SQL_C_BINARY direct
-#ifndef SQL_C_BLOB
-#ifdef SQL_C_BINARY
-#define SQL_C_BLOB SQL_C_BINARY
-#endif
-#endif
+//// NOTE: If SQL_C_BLOB is defined, and it is not SQL_C_BINARY, iODBC 2.x
+////       may not function correctly.  Likely best to use SQL_C_BINARY direct
+//#ifndef SQL_C_BLOB
+//#ifdef SQL_C_BINARY
+//#define SQL_C_BLOB SQL_C_BINARY
+//#endif
+//#endif
 
-#ifndef _WIN64
-#ifndef SQLLEN
-#define SQLLEN SQLINTEGER
-#endif
-#ifndef SQLULEN
-#define SQLULEN SQLUINTEGER
-#endif
-#endif
+//#ifndef _WIN64
+//#ifndef SQLLEN
+//#define SQLLEN SQLINTEGER
+//#endif
+//#ifndef SQLULEN
+//#define SQLULEN SQLUINTEGER
+//#endif
+//#endif
 
 
 // Forward declarations
@@ -130,35 +130,35 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class EXODBCAPI ColumnInfo
-	{
-	public:
-		ColumnInfo();
-		~ColumnInfo();
+	//class EXODBCAPI ColumnInfo
+	//{
+	//public:
+	//	ColumnInfo();
+	//	~ColumnInfo();
 
-		bool Initialize();
+	//	bool Initialize();
 
-		wchar_t			m_catalog[128+1];
-		wchar_t			m_schema[128+1];
-		wchar_t			m_tableName[DB_MAX_TABLE_NAME_LEN_DEFAULT+1];
-		wchar_t			m_colName[DB_MAX_COLUMN_NAME_LEN+1];
-		SWORD			m_sqlDataType;
-		wchar_t			m_typeName[128+1];
-		SWORD			m_columnLength;
-		SWORD			m_bufferSize;
-		short			m_decimalDigits;
-		short			m_numPrecRadix;
-		short			m_nullable;
-		wchar_t			m_remarks[254+1];
-		int				m_dbDataType;  // conversion of the 'sqlDataType' to the generic data type used by these classes
-		// mj10777.19991224 : new
-		int				m_pkCol;       // Primary key column       0=No; 1= First Key, 2 = Second Key etc.
-		wchar_t			m_pkTableName[DB_MAX_TABLE_NAME_LEN_DEFAULT+1]; // Tables that use this PKey as a FKey
-		int				m_fkCol;       // Foreign key column       0=No; 1= First Key, 2 = Second Key etc.
-		wchar_t			m_fkTableName[DB_MAX_TABLE_NAME_LEN_DEFAULT+1]; // Foreign key table name
-		ColumnFormatter* m_pColFor;                              // How should this columns be formatted
+	//	wchar_t			m_catalog[128+1];
+	//	wchar_t			m_schema[128+1];
+	//	wchar_t			m_tableName[DB_MAX_TABLE_NAME_LEN_DEFAULT+1];
+	//	wchar_t			m_colName[DB_MAX_COLUMN_NAME_LEN+1];
+	//	SWORD			m_sqlDataType;
+	//	wchar_t			m_typeName[128+1];
+	//	SWORD			m_columnLength;
+	//	SWORD			m_bufferSize;
+	//	short			m_decimalDigits;
+	//	short			m_numPrecRadix;
+	//	short			m_nullable;
+	//	wchar_t			m_remarks[254+1];
+	//	int				m_dbDataType;  // conversion of the 'sqlDataType' to the generic data type used by these classes
+	//	// mj10777.19991224 : new
+	//	int				m_pkCol;       // Primary key column       0=No; 1= First Key, 2 = Second Key etc.
+	//	wchar_t			m_pkTableName[DB_MAX_TABLE_NAME_LEN_DEFAULT+1]; // Tables that use this PKey as a FKey
+	//	int				m_fkCol;       // Foreign key column       0=No; 1= First Key, 2 = Second Key etc.
+	//	wchar_t			m_fkTableName[DB_MAX_TABLE_NAME_LEN_DEFAULT+1]; // Foreign key table name
+	//	ColumnFormatter* m_pColFor;                              // How should this columns be formatted
 
-	};
+	//};
 
 	/*!
 	* \class Database
@@ -543,7 +543,7 @@ namespace exodbc
 		*/
 		OdbcVersion GetMaxSupportedOdbcVersion() const;
 
-		bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
+		//bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 //		void         DispNextError();
 //		bool         CreateView(const std::wstring& viewName, const std::wstring& colList, const std::wstring& pSqlStmt, bool attemptDrop = true);
@@ -601,7 +601,7 @@ namespace exodbc
 		DatabaseProduct       Dbms();
 		//bool         ModifyColumn(const std::wstring& tableName, const std::wstring& columnName, int dataType, ULONG columnLength = 0, const std::wstring& optionalParam = std::wstring());
 
-		bool         FwdOnlyCursors()  {return m_fwdOnlyCursors;}
+		//bool         FwdOnlyCursors()  {return m_fwdOnlyCursors;}
 
 		// return the string with all special SQL characters escaped
 		//std::wstring     EscapeSqlChars(const std::wstring& value);
@@ -632,7 +632,7 @@ namespace exodbc
 
 		std::vector<SSqlTypeInfo> m_datatypes; // Queried from DB during Open
 		bool				m_dbIsOpen;	// Set to true after SQLConnect was successful
-		bool				m_dbOpenedWithConnectionString;  // Was the database connection OpenImpled with a connection string
+		bool				m_dbOpenedWithConnectionString;  // Was the database connection Opened with a connection string
 		std::wstring		m_dsn;             // Data source name
 		std::wstring		m_uid;             // User ID
 		std::wstring		m_authStr;         // Authorization string (password)
@@ -641,12 +641,12 @@ namespace exodbc
 //		FILE*				m_fpSqlLog;        // Sql Log file pointer
 //		wxDbSqlLogState		m_sqlLogState;     // On or Off
 		bool				m_fwdOnlyCursors;
-		DatabaseProduct				m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
-		const Environment*		m_pEnv;				///< Environment used to create this Database
+		DatabaseProduct		m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
+		const Environment*	m_pEnv;				///< Environment used to create this Database
 
 		// ODBC handles created by the Database
-		HDBC  m_hdbc;        ///< ODBC DB Connection handle
-		HSTMT m_hstmt;       ///< ODBC Statement handle used for all internal functions except ExecSql()
+		HDBC  m_hdbc;			///< ODBC DB Connection handle
+		HSTMT m_hstmt;			///< ODBC Statement handle used for all internal functions except ExecSql()
 		HSTMT m_hstmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
 
 		CommitMode		m_commitMode;	///< Commit Mode set currently

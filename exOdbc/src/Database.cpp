@@ -72,45 +72,45 @@ namespace exodbc
 	// Construction
 	// ------------
 
-	/********** wxDbColInf Constructor **********/
-	ColumnInfo::ColumnInfo()
-	{
-		Initialize();
-	}  // wxDbColInf::wxDbColInf()
+	///********** wxDbColInf Constructor **********/
+	//ColumnInfo::ColumnInfo()
+	//{
+	//	Initialize();
+	//}  // wxDbColInf::wxDbColInf()
 
 
-	/********** wxDbColInf Destructor ********/
-	ColumnInfo::~ColumnInfo()
-	{
-		if (m_pColFor)
-			delete m_pColFor;
-		m_pColFor = NULL;
-	}  // wxDbColInf::~wxDbColInf()
+	///********** wxDbColInf Destructor ********/
+	//ColumnInfo::~ColumnInfo()
+	//{
+	//	if (m_pColFor)
+	//		delete m_pColFor;
+	//	m_pColFor = NULL;
+	//}  // wxDbColInf::~wxDbColInf()
 
 
-	bool ColumnInfo::Initialize()
-	{
-		m_catalog[0]      = 0;
-		m_schema[0]       = 0;
-		m_tableName[0]    = 0;
-		m_colName[0]      = 0;
-		m_sqlDataType     = 0;
-		m_typeName[0]     = 0;
-		m_columnLength    = 0;
-		m_bufferSize      = 0;
-		m_decimalDigits   = 0;
-		m_numPrecRadix    = 0;
-		m_nullable        = 0;
-		m_remarks[0]      = 0;
-		m_dbDataType      = 0;
-		m_pkCol           = 0;
-		m_pkTableName[0]  = 0;
-		m_fkCol           = 0;
-		m_fkTableName[0]  = 0;
-		m_pColFor         = NULL;
+	//bool ColumnInfo::Initialize()
+	//{
+	//	m_catalog[0]      = 0;
+	//	m_schema[0]       = 0;
+	//	m_tableName[0]    = 0;
+	//	m_colName[0]      = 0;
+	//	m_sqlDataType     = 0;
+	//	m_typeName[0]     = 0;
+	//	m_columnLength    = 0;
+	//	m_bufferSize      = 0;
+	//	m_decimalDigits   = 0;
+	//	m_numPrecRadix    = 0;
+	//	m_nullable        = 0;
+	//	m_remarks[0]      = 0;
+	//	m_dbDataType      = 0;
+	//	m_pkCol           = 0;
+	//	m_pkTableName[0]  = 0;
+	//	m_fkCol           = 0;
+	//	m_fkTableName[0]  = 0;
+	//	m_pColFor         = NULL;
 
-		return true;
-	}  // wxDbColInf::Initialize()
+	//	return true;
+	//}  // wxDbColInf::Initialize()
 
 	Database::Database()
 		: m_fwdOnlyCursors(true)
@@ -743,7 +743,7 @@ namespace exodbc
 		bool ok = true;
 		while (ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
 		{
-			ok = GetData(m_hstmt, colNr, SQL_C_WXCHAR, buffer, bufferLen, &cb, NULL, true);
+			ok = GetData(m_hstmt, colNr, SQL_C_WCHAR, buffer, bufferLen, &cb, NULL, true);
 			if(ok)
 				results.push_back(buffer);
 		}
@@ -992,53 +992,53 @@ namespace exodbc
 	}
 
 
-	/********** wxDb::DispAllErrors() **********/
-	bool Database::DispAllErrors(HENV aHenv, HDBC aHdbc, HSTMT aHstmt)
-		/*
-		* This function is called internally whenever an error condition prevents the user's
-		* request from being executed.  This function will query the datasource as to the
-		* actual error(s) that just occurred on the previous request of the datasource.
-		*
-		* The function will retrieve each error condition from the datasource and
-		* Printf the codes/text values into a string which it then logs via LogErrorImpl().
-		* If in DBDEBUG_CONSOLE mode, the constructed string will be displayed in the console
-		* window and program execution will be paused until the user presses a key.
-		*
-		* This function always returns false, so that functions which call this function
-		* can have a line like "return (DispAllErrors(henv, hdbc));" to indicate the failure
-		* of the user's request, so that the calling code can then process the error message log.
-		*/
-	{
-		std::vector<SErrorInfo> errs = GetAllErrors(aHenv, aHdbc, aHstmt);
-		for(size_t i = 0; i < errs.size(); i++)
-		{
-			LOG_ERROR((boost::wformat(L"Have ODBC Error #%d: %s") %i %errs[i]).str());
-		}
- 
-//		std::wstring odbcErrMsg;
-//
-//		while (SQLError(aHenv, aHdbc, aHstmt, (SQLTCHAR FAR *) sqlState, &nativeError, (SQLTCHAR FAR *) errorMsg, SQL_MAX_MESSAGE_LENGTH - 1, &cbErrorMsg) == SQL_SUCCESS)
+//	/********** wxDb::DispAllErrors() **********/
+//	bool Database::DispAllErrors(HENV aHenv, HDBC aHdbc, HSTMT aHstmt)
+//		/*
+//		* This function is called internally whenever an error condition prevents the user's
+//		* request from being executed.  This function will query the datasource as to the
+//		* actual error(s) that just occurred on the previous request of the datasource.
+//		*
+//		* The function will retrieve each error condition from the datasource and
+//		* Printf the codes/text values into a string which it then logs via LogErrorImpl().
+//		* If in DBDEBUG_CONSOLE mode, the constructed string will be displayed in the console
+//		* window and program execution will be paused until the user presses a key.
+//		*
+//		* This function always returns false, so that functions which call this function
+//		* can have a line like "return (DispAllErrors(henv, hdbc));" to indicate the failure
+//		* of the user's request, so that the calling code can then process the error message log.
+//		*/
+//	{
+//		std::vector<SErrorInfo> errs = GetAllErrors(aHenv, aHdbc, aHstmt);
+//		for(size_t i = 0; i < errs.size(); i++)
 //		{
-//			odbcErrMsg = (boost::wformat(L"SQL State = %s\nNative Error Code = %li\nError Message = %s\n") % sqlState % (long)nativeError % errorMsg).str();
-//			LogErrorImpl(odbcErrMsg, sqlState);
-//			if (!m_silent)
-//			{
-//#ifdef DBDEBUG_CONSOLE
-//				// When run in console mode, use standard out to display errors.
-//				std::wcout << odbcErrMsg.c_str() << std::endl;
-//				std::wcout << L"Press any key to continue..." << std::endl;
-//				getchar();
-//#endif
-//
-//#ifdef EXODBCDEBUG
-//				BOOST_LOG_TRIVIAL(debug) <<  L"ODBC DEBUG MESSAGE from DispAllErrors(): " << odbcErrMsg;
-//#endif
-//			}
+//			LOG_ERROR((boost::wformat(L"Have ODBC Error #%d: %s") %i %errs[i]).str());
 //		}
-
-		return false;  // This function always returns false.
-
-	}
+// 
+////		std::wstring odbcErrMsg;
+////
+////		while (SQLError(aHenv, aHdbc, aHstmt, (SQLTCHAR FAR *) sqlState, &nativeError, (SQLTCHAR FAR *) errorMsg, SQL_MAX_MESSAGE_LENGTH - 1, &cbErrorMsg) == SQL_SUCCESS)
+////		{
+////			odbcErrMsg = (boost::wformat(L"SQL State = %s\nNative Error Code = %li\nError Message = %s\n") % sqlState % (long)nativeError % errorMsg).str();
+////			LogErrorImpl(odbcErrMsg, sqlState);
+////			if (!m_silent)
+////			{
+////#ifdef DBDEBUG_CONSOLE
+////				// When run in console mode, use standard out to display errors.
+////				std::wcout << odbcErrMsg.c_str() << std::endl;
+////				std::wcout << L"Press any key to continue..." << std::endl;
+////				getchar();
+////#endif
+////
+////#ifdef EXODBCDEBUG
+////				BOOST_LOG_TRIVIAL(debug) <<  L"ODBC DEBUG MESSAGE from DispAllErrors(): " << odbcErrMsg;
+////#endif
+////			}
+////		}
+//
+//		return false;  // This function always returns false.
+//
+//	}
 
 
 
