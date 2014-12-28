@@ -171,15 +171,15 @@ namespace exodbc
 		};
 
 
-		/*!
-		* \enum ColumnBindingMode
-		* \brief Defines which columns are bound
-		*/
-		enum ColumnBindingMode
-		{
-			ALL_COLUMNS,			///< During Open all Columns will be read and bound automatically
-			ONLY_DEFINED_COLUMNS	///< During Open only Columns you have defined using SetColDefs() will be bound
-		};
+		///*!
+		//* \enum ColumnBindingMode
+		//* \brief Defines which columns are bound
+		//*/
+		//enum ColumnBindingMode
+		//{
+		//	ALL_COLUMNS,			///< During Open all Columns will be read and bound automatically
+		//	ONLY_DEFINED_COLUMNS	///< During Open only Columns you have defined using SetColDefs() will be bound
+		//};
 
 
 		/*!
@@ -339,7 +339,7 @@ namespace exodbc
 		* \return	CharBindingMode
 		* \see		GetCharBindingMode()
 		*/
-		void		SetCharBindingMode(CharBindingMode mode);
+		void		SetCharBindingMode(AutoBindingMode mode);
 
 
 		/*!
@@ -347,7 +347,7 @@ namespace exodbc
 		* \return	CharBindingMode
 		* \see		SetCharBindingMode()
 		*/
-		CharBindingMode	GetCharBindingMode() { return m_charBindingMode; };
+		AutoBindingMode	GetCharBindingMode() { return m_charBindingMode; };
 
 
 		/*!
@@ -655,7 +655,7 @@ namespace exodbc
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		const OpenMode		m_openMode;				///< Read-only or writable
-		CharBindingMode		m_charBindingMode;		///< Store the char-binding of this table. Can still be overridden by specifying it on a column
+		AutoBindingMode		m_charBindingMode;		///< Store the char-binding of this table. Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
 		unsigned int		m_charTrimFlags;			///< Bitmask for the CharTrimOption Flags
 

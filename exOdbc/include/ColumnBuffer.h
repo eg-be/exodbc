@@ -117,7 +117,7 @@ namespace exodbc
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode, OdbcVersion odbcVersion);
+		ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion);
 
 
 		/*!
@@ -159,7 +159,7 @@ namespace exodbc
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLUSMALLINT ordinalPosition, SQLLEN stringLen, CharBindingMode mode, const std::wstring& queryName);
+		ColumnBuffer(SQLUSMALLINT ordinalPosition, SQLLEN stringLen, AutoBindingMode mode, const std::wstring& queryName);
 
 
 		~ColumnBuffer();
@@ -250,14 +250,14 @@ namespace exodbc
 		* \detailed	Fails if already bound.
 		* \see		CharBindingMode
 		*/
-		void SetCharBindingMode(CharBindingMode mode) { exASSERT(!m_bound); m_charBindingMode = mode; }
+		void SetCharBindingMode(AutoBindingMode mode) { exASSERT(!m_bound); m_charBindingMode = mode; }
 
 
 		/*!
 		* \brief	Get the currently set CharBindingMode.
 		* \return	CharBindingMode set.
 		*/
-		CharBindingMode GetCharBindingMode() const { return m_charBindingMode; };
+		AutoBindingMode GetCharBindingMode() const { return m_charBindingMode; };
 
 		// Operators
 		// ---------
@@ -398,12 +398,12 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Get the allocated buffer as a void*.
-		* \detailed Determines the type using the SColumnInfo and gets the pointer from the variant.
+		* \brief	Allocate a buffer in the variant.
+		* \detailed Determines the buffer type and sets m_bufferType, m_bufferSize and allocates corresponding buffer. 
+		*			Sets m_allocatedBuffer to true on success.
 		* \return	true if buffer is allocated.
-		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
 		*/
-		bool AllocateBuffer(const SColumnInfo& columnInfo);
+		bool AllocateBuffer();
 
 
 		/*!
@@ -442,7 +442,7 @@ namespace exodbc
 		SQLINTEGER	m_bufferSize;	///< Size of an allocated or set from constructor buffer.
 		bool m_bound;				///< True if Bind() was successful.
 		OdbcVersion m_odbcVersion;	///< OdbcVersion passed when creating this ColumnBuffer.
-		CharBindingMode m_charBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
+		AutoBindingMode m_charBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
 
 		BufferPtrVariant m_bufferPtr;	///< Variant that holds the pointer to the actual buffer
 

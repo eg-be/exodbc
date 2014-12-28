@@ -46,7 +46,7 @@ namespace exodbc
 
 	// Construction
 	// ------------
-	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, CharBindingMode mode, OdbcVersion odbcVersion)
+	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion)
 		: m_columnInfo(columnInfo)
 		, m_bound(false)
 		, m_allocatedBuffer(false)
@@ -63,7 +63,7 @@ namespace exodbc
 		exASSERT(columnInfo.m_sqlDataType != 0);
 
 		m_queryName = m_columnInfo.GetSqlName();
-		m_allocatedBuffer = AllocateBuffer(m_columnInfo);
+		m_allocatedBuffer = AllocateBuffer();
 		m_haveBuffer = m_allocatedBuffer;
 	}
 
@@ -72,7 +72,7 @@ namespace exodbc
 		: m_bound(false)
 		, m_allocatedBuffer(false)
 		, m_haveBuffer(true)
-		, m_charBindingMode(CharBindingMode::BIND_AS_REPORTED)
+		, m_charBindingMode(AutoBindingMode::BIND_AS_REPORTED)
 		, m_bufferType(sqlCType)
 		, m_bufferSize(bufferSize)
 		, m_columnNr(ordinalPosition)
@@ -178,7 +178,7 @@ namespace exodbc
 	}
 
 
-	bool ColumnBuffer::AllocateBuffer(const SColumnInfo& columnInfo)
+	bool ColumnBuffer::AllocateBuffer()
 	{
 		exASSERT(!m_allocatedBuffer);
 		exASSERT(!m_bound);
@@ -231,7 +231,7 @@ namespace exodbc
 			break;
 #endif
 		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_bufferType) % m_bufferType).str());
 			failed = true;
 		}
 
@@ -350,6 +350,15 @@ namespace exodbc
 	{
 		exASSERT(m_columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
 
+		if (m_charBindingMode == AutoBindingMode::BIND_ALL_AS_CHAR)
+		{
+			return SQL_C_CHAR;
+		}
+		else if (m_charBindingMode == AutoBindingMode::BIND_ALL_AS_WCHAR)
+		{
+			return SQL_C_WCHAR;
+		}
+
 		switch (m_columnInfo.m_sqlType)
 		{
 		case SQL_SMALLINT:
@@ -360,7 +369,7 @@ namespace exodbc
 			return SQL_C_SBIGINT;
 		case SQL_CHAR:
 		case SQL_VARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_CHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
+			if (m_charBindingMode == AutoBindingMode::BIND_WCHAR_AS_CHAR || m_charBindingMode == AutoBindingMode::BIND_AS_REPORTED)
 			{
 				return SQL_C_CHAR;
 			}
@@ -370,7 +379,7 @@ namespace exodbc
 			}
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
-			if (m_charBindingMode == CharBindingMode::BIND_AS_WCHAR || m_charBindingMode == CharBindingMode::BIND_AS_REPORTED)
+			if (m_charBindingMode == AutoBindingMode::BIND_CHAR_AS_WCHAR || m_charBindingMode == AutoBindingMode::BIND_AS_REPORTED)
 			{
 				return SQL_C_WCHAR;
 			}

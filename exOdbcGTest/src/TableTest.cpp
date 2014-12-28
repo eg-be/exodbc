@@ -477,7 +477,7 @@ namespace exodbc
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
-		charTypesAutoTable.SetCharBindingMode(CharBindingMode::BIND_AS_WCHAR);
+		charTypesAutoTable.SetCharBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		EXPECT_TRUE(charTypesAutoTable.Open(false, true));
 		// We want to trim on the right side for DB2 and sql server
 		charTypesAutoTable.SetCharTrimOption(Table::TRIM_RIGHT);
@@ -562,7 +562,7 @@ namespace exodbc
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
-		charTypesAutoTable.SetCharBindingMode(CharBindingMode::BIND_AS_CHAR);
+		charTypesAutoTable.SetCharBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		EXPECT_TRUE(charTypesAutoTable.Open(false, true));
 		// We want to trim on the right side for DB2 and also sql server
 		charTypesAutoTable.SetCharTrimOption(Table::TRIM_RIGHT);
