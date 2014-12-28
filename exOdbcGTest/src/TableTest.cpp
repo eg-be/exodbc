@@ -724,7 +724,11 @@ namespace exodbc
 		SQL_TIMESTAMP_STRUCT timestamp;
 		std::wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 1") % idName).str()));
-		EXPECT_TRUE(dTable.SelectNext());
+		{
+			// Microsoft will info here (which we report as warning) that the time field has been truncated (as we do not use the fancy TIME2 struct)
+			LogLevelError llE;
+			EXPECT_TRUE(dTable.SelectNext());
+		}
 		EXPECT_TRUE(dTable.GetColumnValue(1, date));
 		EXPECT_TRUE(dTable.GetColumnValue(2, time));
 		EXPECT_TRUE(dTable.GetColumnValue(3, timestamp));
@@ -769,7 +773,17 @@ namespace exodbc
 		EXPECT_TRUE(env38.HasHenv());
 		Database db38(env38);
 		EXPECT_TRUE(db38.HasHdbc());
-		EXPECT_TRUE(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_db.Dbms() == dbmsMY_SQL)
+		{
+			// My SQL does not support 3.8, the database will warn about a version-mismatch and fall back to 3.0. we know about that.
+			// TODO: Open a ticket
+			LogLevelError llE;
+			EXPECT_TRUE(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
+		else
+		{
+			EXPECT_TRUE(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 		Table dTable38(&db38, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(dTable38.Open(false, true));
 		EXPECT_TRUE(dTable38.Select((boost::wformat(L"%s = 1") % idName).str()));
@@ -811,7 +825,11 @@ namespace exodbc
 		std::string str;
 		std::wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 1") % idName).str()));
-		EXPECT_TRUE(cTable.SelectNext());
+		{
+			// Microsoft will info here (which we report as warning) that the time field has been truncated (as we do not use the fancy TIME2 struct)
+			LogLevelError llE;
+			EXPECT_TRUE(cTable.SelectNext());
+		}
 		EXPECT_EQ(26, cTable.m_date.day);
 		EXPECT_EQ(1, cTable.m_date.month);
 		EXPECT_EQ(1983, cTable.m_date.year);
