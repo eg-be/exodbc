@@ -44,10 +44,6 @@ namespace exodbc
 
 	void TableTest::SetUp()
 	{
-		// Called for every unit-test
-		m_pIntTypesAutoTable = NULL;
-		m_pIntTypesManualTable = NULL;
-
 		m_odbcInfo = GetParam();
 
 		// Set up Env
@@ -59,29 +55,11 @@ namespace exodbc
 		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
 		ASSERT_TRUE(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
-		// And some tables with auto-columns
-		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
-		m_pIntTypesAutoTable = new Table(&m_db, intTypesTableName, L"", L"", L"", Table::READ_ONLY);
-		EXPECT_TRUE(m_pIntTypesAutoTable->Open(false, true));
-
-		// And some tables with manual-columns
-		m_pIntTypesManualTable = new MIntTypesTable(&m_db, m_odbcInfo.m_namesCase);
-		EXPECT_TRUE(m_pIntTypesManualTable->Open(false, true));
 	}
 
 
 	void TableTest::TearDown()
 	{
-		if (m_pIntTypesAutoTable)
-		{
-			delete m_pIntTypesAutoTable;
-			m_pIntTypesAutoTable = NULL;
-		}
-		if (m_pIntTypesManualTable)
-		{
-			delete m_pIntTypesManualTable;
-			m_pIntTypesManualTable = NULL;
-		}
 		if (m_db.IsOpen())
 		{
 			EXPECT_TRUE(m_db.Close());
@@ -170,50 +148,53 @@ namespace exodbc
 	// ----------------
 	TEST_P(TableTest, Select)
 	{
-		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
-		ASSERT_TRUE(m_pIntTypesAutoTable->IsOpen());
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		ASSERT_TRUE(iTable.Open(false, true));
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select(L""));
+		EXPECT_TRUE(iTable.Select(L""));
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		EXPECT_TRUE(iTable.SelectClose());
 	}
 
 
 	TEST_P(TableTest, SelectNext)
 	{
-		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
-		ASSERT_TRUE(m_pIntTypesAutoTable->IsOpen());
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		ASSERT_TRUE(iTable.Open(false, true));
 
 		// We expect 6 Records
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select(L""));
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
+		EXPECT_TRUE(iTable.Select(L""));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_FALSE(iTable.SelectNext());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		EXPECT_TRUE(iTable.SelectClose());
 	}
 
 
 	TEST_P(TableTest, SelectClose)
 	{
-		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
-		ASSERT_TRUE(m_pIntTypesAutoTable->IsOpen());
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		ASSERT_TRUE(iTable.Open(false, true));
 		
 		// Do something that opens a transaction
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select(L""));
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		EXPECT_TRUE(iTable.Select(L""));
+		EXPECT_TRUE(iTable.SelectClose());
 		// We should be closed now
-		EXPECT_FALSE(m_pIntTypesAutoTable->IsSelectOpen());
+		EXPECT_FALSE(iTable.IsSelectOpen());
 		// On MySql, closing works always
 		if (m_db.Dbms() != dbmsMY_SQL)
 		{
 			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
-			EXPECT_FALSE(m_pIntTypesAutoTable->SelectClose());
+			EXPECT_FALSE(iTable.SelectClose());
 		}
 	}
 
@@ -252,8 +233,9 @@ namespace exodbc
 	// ---------
 	TEST_P(TableTest, GetAutoIntValues)
 	{
-		ASSERT_TRUE(m_pIntTypesAutoTable != NULL);
-		ASSERT_TRUE(m_pIntTypesAutoTable->IsOpen());
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		ASSERT_TRUE(iTable.Open(false, true));
 
 		// Test values
 		SQLSMALLINT s = 0;
@@ -263,122 +245,122 @@ namespace exodbc
 
 		// We expect 6 Records
 		std::wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select( (boost::wformat(L"%s = 1") %idName).str()));
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 1") % idName).str()));
 		// The first column has a smallint set, we can read that as any int value -32768
 		SQLBIGINT colVal = -32768;
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, s));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, i));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, b));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.GetColumnValue(1, s));
+		EXPECT_TRUE(iTable.GetColumnValue(1, i));
+		EXPECT_TRUE(iTable.GetColumnValue(1, b));
 		EXPECT_EQ(colVal, s);
 		EXPECT_EQ(colVal, i);
 		EXPECT_EQ(colVal, b);
 		// Read as str
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, str));
+		EXPECT_TRUE(iTable.GetColumnValue(1, str));
 		EXPECT_EQ(L"-32768", str);
-		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 2") % idName).str()));
 		colVal = 32767;
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, s));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, i));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, b));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.GetColumnValue(1, s));
+		EXPECT_TRUE(iTable.GetColumnValue(1, i));
+		EXPECT_TRUE(iTable.GetColumnValue(1, b));
 		EXPECT_EQ(colVal, s);
 		EXPECT_EQ(colVal, i);
 		EXPECT_EQ(colVal, b);
 		// Read as str
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(1, str));
+		EXPECT_TRUE(iTable.GetColumnValue(1, str));
 		EXPECT_EQ(L"32767", str);
-		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 3") % idName).str()));
 		// The 2nd column has a int set, we can read that as int or bigint value -2147483648
 		colVal = INT_MIN;
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(2, s));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, i));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, b));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_FALSE(iTable.GetColumnValue(2, s));
+		EXPECT_TRUE(iTable.GetColumnValue(2, i));
+		EXPECT_TRUE(iTable.GetColumnValue(2, b));
 		EXPECT_EQ(colVal, i);
 		EXPECT_EQ(colVal, b);
 		// Read as str
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, str));
+		EXPECT_TRUE(iTable.GetColumnValue(2, str));
 		EXPECT_EQ(L"-2147483648", str);
-		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 4") % idName).str()));
 		colVal = 2147483647;
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(2, s));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, i));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, b));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_FALSE(iTable.GetColumnValue(2, s));
+		EXPECT_TRUE(iTable.GetColumnValue(2, i));
+		EXPECT_TRUE(iTable.GetColumnValue(2, b));
 		EXPECT_EQ(colVal, i);
 		EXPECT_EQ(colVal, b);
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(2, str));
+		EXPECT_TRUE(iTable.GetColumnValue(2, str));
 		EXPECT_EQ(L"2147483647", str);
-		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 5") % idName).str()));
 		// The 3rd column has a bigint set, we can read that as bigint value -9223372036854775808
 		colVal = (-9223372036854775807 - 1);
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(3, s));
-		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(3, i));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(3, b));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_FALSE(iTable.GetColumnValue(3, s));
+		EXPECT_FALSE(iTable.GetColumnValue(3, i));
+		EXPECT_TRUE(iTable.GetColumnValue(3, b));
 		EXPECT_EQ(colVal, b);
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(3, str));
+		EXPECT_TRUE(iTable.GetColumnValue(3, str));
 		EXPECT_EQ(L"-9223372036854775808", str);
-		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectClose());
 
-		EXPECT_TRUE(m_pIntTypesAutoTable->Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 6") % idName).str()));
 		colVal = 9223372036854775807;
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(3, s));
-		EXPECT_FALSE(m_pIntTypesAutoTable->GetColumnValue(3, i));
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(3, b));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_FALSE(iTable.GetColumnValue(3, s));
+		EXPECT_FALSE(iTable.GetColumnValue(3, i));
+		EXPECT_TRUE(iTable.GetColumnValue(3, b));
 		EXPECT_EQ(colVal, b);
-		EXPECT_TRUE(m_pIntTypesAutoTable->GetColumnValue(3, str));
+		EXPECT_TRUE(iTable.GetColumnValue(3, str));
 		EXPECT_EQ(L"9223372036854775807", str);
-		EXPECT_FALSE(m_pIntTypesAutoTable->SelectNext());
-		EXPECT_TRUE(m_pIntTypesAutoTable->SelectClose());
+		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectClose());
 	}
 
 
 	TEST_P(TableTest, GetManualIntValues)
 	{
-		ASSERT_TRUE(m_pIntTypesManualTable != NULL);
-		ASSERT_TRUE(m_pIntTypesManualTable->IsOpen());
+		MIntTypesTable iTable(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_TRUE(iTable.Open(false, true));
 
 		// Just check that the buffers are correct
 		std::wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
-		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 1") % idName).str()));
-		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
-		EXPECT_EQ(-32768, m_pIntTypesManualTable->m_smallInt);
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(-32768, iTable.m_smallInt);
 
-		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 2") % idName).str()));
-		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
-		EXPECT_EQ(32767, m_pIntTypesManualTable->m_smallInt);
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(32767, iTable.m_smallInt);
 
-		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 3") % idName).str()));
-		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
-		EXPECT_EQ(INT_MIN, m_pIntTypesManualTable->m_int);
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(INT_MIN, iTable.m_int);
 
-		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 4") % idName).str()));
-		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
-		EXPECT_EQ(2147483647, m_pIntTypesManualTable->m_int);
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(2147483647, iTable.m_int);
 
-		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 5") % idName).str()));
-		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
-		EXPECT_EQ((-9223372036854775807 - 1), m_pIntTypesManualTable->m_bigInt);
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ((-9223372036854775807 - 1), iTable.m_bigInt);
 
-		EXPECT_TRUE(m_pIntTypesManualTable->Select((boost::wformat(L"%s = 6") % idName).str()));
-		EXPECT_TRUE(m_pIntTypesManualTable->SelectNext());
-		EXPECT_EQ(9223372036854775807, m_pIntTypesManualTable->m_bigInt);
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(9223372036854775807, iTable.m_bigInt);
 	}
 
 
