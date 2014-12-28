@@ -601,6 +601,15 @@ namespace exodbc
 	}
 
 
+	ColumnBuffer::operator const SQLCHAR*() const
+	{
+		exASSERT(m_haveBuffer);
+		exASSERT(m_bound);
+
+		return boost::apply_visitor(CharPtrVisitor(), m_bufferPtr);
+	}
+
+
 	SQLSMALLINT* ColumnBuffer::GetSmallIntPtr() const
 	{
 		exASSERT(m_haveBuffer);
