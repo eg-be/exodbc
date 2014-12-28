@@ -44,6 +44,10 @@ namespace exodbc
 
 	const int wxDB_PATH_MAX                 = 254;
 
+	// Some defaults when binding to chars but no reasonable char-length can be determined.
+	const int DB_MAX_BIGINT_CHAR_LENGTH = 30;
+	const int DB_MAX_DOUBLE_CHAR_LENGTH = 30;
+
 	// Database Globals
 	const int DB_TYPE_NAME_LEN				= 40;
 	const int DB_LOCAL_TYPE_NAME_LEN		= 256;

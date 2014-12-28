@@ -294,7 +294,8 @@ namespace exodbc
 		case SQL_BIGINT:
 			if (m_columnInfo.m_isColumnSizeNull || m_columnInfo.m_isNumPrecRadixNull || m_columnInfo.m_numPrecRadix != 10)
 			{
-				return 0;
+				// just return some silly default value
+				return DB_MAX_BIGINT_CHAR_LENGTH;
 			}
 			if (!m_columnInfo.m_isDecimalDigitsNull && m_columnInfo.m_decimalDigits > 0)
 			{
@@ -313,6 +314,19 @@ namespace exodbc
 			// TODO: We could also calculate using the char_octet_length. Maybe this would be cleaner - some dbs
 			// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
 			return m_columnInfo.m_columnSize + 1;
+		case SQL_DOUBLE:
+		case SQL_FLOAT:
+		case SQL_REAL:
+			if (!m_columnInfo.m_isNumPrecRadixNull && m_columnInfo.m_numPrecRadix == 10)
+			{
+				// +3: 1 for '.' and one for trailing zero and one for a '-'
+				return m_columnInfo.m_columnSize + 3;
+			}
+			else
+			{
+				// just return some silly default value
+				return DB_MAX_DOUBLE_CHAR_LENGTH;
+			}
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -337,32 +351,8 @@ namespace exodbc
 			return sizeof(SQLBIGINT);
 		case SQL_C_CHAR:
 			return DetermineCharSize() * sizeof(SQLCHAR);
-			//// else it determines on the ColumnInfo too:
-			//// If it is a char or (w)char or (w)varchar calculate the string length as if we've used SQL_C_CHAR
-			//if (m_columnInfo.m_sqlDataType == SQL_CHAR || m_columnInfo.m_sqlDataType == SQL_VARCHAR || 
-			//	m_columnInfo.m_sqlDataType == SQL_WCHAR || m_columnInfo.m_sqlDataType == SQL_WVARCHAR)
-			//{
-			//	// We could calculate the length using m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR)
-			//	// TODO: or also use the char_octet_length. Maybe this would be cleaner - some dbs
-			//	// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
-			//	return (m_columnInfo.m_columnSize + 1) * sizeof(SQLCHAR);
-			//}
-			//else
-			//{
-			//	// Should never happen. 
-			//	exASSERT(false);
-			//}
 		case SQL_C_WCHAR:
 			return DetermineCharSize() * sizeof(SQLWCHAR);
-			//if (m_columnInfo.m_sqlDataType == SQL_CHAR || m_columnInfo.m_sqlDataType == SQL_VARCHAR ||
-			//	m_columnInfo.m_sqlDataType == SQL_WCHAR || m_columnInfo.m_sqlDataType == SQL_WVARCHAR)
-			//{
-			//	return (m_columnInfo.m_columnSize + 1) * sizeof(SQLWCHAR);
-			//}
-			//else
-			//{
-			//	exASSERT(false);
-			//}
 		case SQL_C_DOUBLE:
 			return sizeof(SQLDOUBLE);
 		case SQL_C_TYPE_DATE:
