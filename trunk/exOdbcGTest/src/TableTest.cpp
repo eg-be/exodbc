@@ -891,19 +891,26 @@ namespace exodbc
 			0x01, 0x23, 0x45, 0x67
 		};
 
+		const SQLCHAR* pBlob = NULL;
+		SQLINTEGER size = 0;
+
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 1") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
-		//EXPECT_EQ(0, memcmp(empty, table.m_blob, sizeof(table.m_blob)));
+		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size));
+		EXPECT_EQ(0, memcmp(empty, pBlob, size));
 
-		//EXPECT_TRUE(table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 2"));
-		//EXPECT_TRUE(table.GetNext());
-		//EXPECT_EQ(0, memcmp(ff, table.m_blob, sizeof(table.m_blob)));
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size));
+		EXPECT_EQ(0, memcmp(ff, pBlob, size));
 
-		//EXPECT_TRUE(table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 3"));
-		//EXPECT_TRUE(table.GetNext());
-		//EXPECT_EQ(0, memcmp(abc, table.m_blob, sizeof(table.m_blob)));
-
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size));
+		EXPECT_EQ(0, memcmp(abc, pBlob, size));
 	}
+
+
 // Interfaces
 // ----------
 

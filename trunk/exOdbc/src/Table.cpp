@@ -815,6 +815,25 @@ namespace exodbc
 #endif
 
 
+	bool Table::GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize) const
+	{
+		const ColumnBuffer* pColumnBuff = GetColumnBuffer(columnIndex);
+		if (!pColumnBuff || pColumnBuff->IsNull())
+			return false;
+
+		try
+		{
+			pBuffer = *pColumnBuff;
+			bufferSize = pColumnBuff->GetBufferSize();
+		}
+		catch (CastException ex)
+		{
+			return false;
+		}
+		return true;
+	}
+
+
 	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize)
 	{
 		exASSERT(m_manualColumns);

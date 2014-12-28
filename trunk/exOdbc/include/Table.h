@@ -472,6 +472,9 @@ namespace exodbc
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const;
 #endif
 
+		bool		GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize) const;
+
+
 		/*!
 		* \brief	Returns the number of columns this table has.
 		* \detailed	If columns were set manually on the table, this is the value that has been 
