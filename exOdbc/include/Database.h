@@ -517,6 +517,7 @@ namespace exodbc
 		 * \brief	Sets transaction mode on the database, using the attribute SQL_ATTR_AUTOCOMMIT.
 		 * 			This will also update the internal flag m_commitMode, if changing the mode
 		 * 			was successful.
+		 *			This will always first Commit all ongoing transactions.
 		 * \see		GetCommitMode()
 		 * \param	mode	The mode to set.
 		 * \return	true if it succeeds, false if it fails.

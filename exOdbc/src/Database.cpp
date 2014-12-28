@@ -760,11 +760,11 @@ namespace exodbc
 		
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
-		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
-		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
-		}
+		//// If Autocommit is off, we need to commit on certain db-systems, see #51
+		//if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
+		//{
+		//	LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
+		//}
 
 		delete[] buffer;
 		
@@ -883,11 +883,11 @@ namespace exodbc
 		// We are done, close cursor, do not care about truncation
 		CloseStmtHandle(m_hstmt, FailIfNotOpen);
 
-		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
-		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
-		}
+		//// If Autocommit is off, we need to commit on certain db-systems, see #51
+		//if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
+		//{
+		//	LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
+		//}
 
 		return allOk;
 	}
@@ -2449,11 +2449,11 @@ namespace exodbc
 		// Close, ignore all errs
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
-		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
-		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
-		}
+		//// If Autocommit is off, we need to commit on certain db-systems, see #51
+		//if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
+		//{
+		//	LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
+		//}
 
 		delete[] buffCatalog;
 		delete[] buffSchema;
@@ -2522,11 +2522,11 @@ namespace exodbc
 
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
-		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
-		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
-		}
+		//// If Autocommit is off, we need to commit on certain db-systems, see #51
+		//if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
+		//{
+		//	LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
+		//}
 
 		if(pSchemaBuff)
 		{
@@ -2639,11 +2639,11 @@ namespace exodbc
 		// Close, ignore all errs
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
-		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
-		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
-		}
+		//// If Autocommit is off, we need to commit on certain db-systems, see #51
+		//if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
+		//{
+		//	LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
+		//}
 
 		if(pSchemaBuff)
 			delete[] pSchemaBuff;
@@ -2757,11 +2757,11 @@ namespace exodbc
 
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
-		// If Autocommit is off, we need to commit on certain db-systems, see #51
-		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
-		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
-		}
+		//// If Autocommit is off, we need to commit on certain db-systems, see #51
+		//if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
+		//{
+		//	LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans after a Catalog-Function failed");
+		//}
 
 		if(pSchemaBuff)
 		{
@@ -2851,6 +2851,13 @@ namespace exodbc
 
 	bool Database::SetCommitMode(CommitMode mode)
 	{
+		// If Autocommit is off, we need to commit any ongoing transaction
+		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
+		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
+		{
+			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
+		}
+
 		SQLRETURN ret;
 		std::wstring errStringMode;
 		if(mode == CM_MANUAL_COMMIT)
@@ -2888,7 +2895,8 @@ namespace exodbc
 		EnsureStmtIsClosed(m_hstmt, m_dbmsType);
 		CloseStmtHandle(m_hstmtExecSql, IgnoreNotOpen);
 
-		// If Autocommit is off, we need to commit on certain db-systems, see #51
+		// If Autocommit is off, we need to commit any ongoing transaction
+		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
 		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
 		{
 			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
