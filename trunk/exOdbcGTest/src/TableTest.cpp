@@ -870,7 +870,38 @@ namespace exodbc
 		std::wstring blobTypesTableName = TestTables::GetTableName(L"blobtypes", m_odbcInfo.m_namesCase);
 		Table bTable(&m_db, blobTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(bTable.Open(false, true));
-		int p = 3;
+
+		wstring idName = TestTables::GetColName(L"idblobtypes", m_odbcInfo.m_namesCase);
+
+		SQLCHAR empty[] = { 0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+
+		SQLCHAR ff[] = { 255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255
+		};
+
+		SQLCHAR abc[] = { 0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67
+		};
+
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		//EXPECT_EQ(0, memcmp(empty, table.m_blob, sizeof(table.m_blob)));
+
+		//EXPECT_TRUE(table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 2"));
+		//EXPECT_TRUE(table.GetNext());
+		//EXPECT_EQ(0, memcmp(ff, table.m_blob, sizeof(table.m_blob)));
+
+		//EXPECT_TRUE(table.QueryBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 3"));
+		//EXPECT_TRUE(table.GetNext());
+		//EXPECT_EQ(0, memcmp(abc, table.m_blob, sizeof(table.m_blob)));
 
 	}
 // Interfaces

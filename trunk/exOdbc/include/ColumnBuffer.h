@@ -176,7 +176,22 @@ namespace exodbc
 		*			was allocated or because you've manually set a buffer.
 		* \return	True if buffer is ready.
 		*/
-		bool HaveBuffer() const { return m_haveBuffer; };
+		bool HasBuffer() const { return m_haveBuffer; };
+
+
+		/*!
+		* \brief	Returns size of this buffer, fail if no buffer is allocated.
+		* \see		HasBuffer()
+		* \return	Buffer-size
+		*/
+		SQLINTEGER GetBufferSize() const { exASSERT(HasBuffer());  return m_bufferSize; };
+
+
+		/*!
+		* \brief	Returns type of this buffer.
+		* \return	Buffer-type.
+		*/
+		SQLSMALLINT GetBufferType() const { return m_bufferType; };
 
 
 		/*!
@@ -201,7 +216,7 @@ namespace exodbc
 		* \detailed	Fails if no buffer is allocated or not bound.
 		* \return	Length indicator bound to column.
 		*/
-		SQLLEN GetCb() const { exASSERT(HaveBuffer()); exASSERT(IsBound()); return  m_cb; };
+		SQLLEN GetCb() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return  m_cb; };
 
 
 		/*!
@@ -209,7 +224,7 @@ namespace exodbc
 		* \detailed	Fails if no buffer is allocated or not bound.
 		* \return	True if current value is Null.
 		*/
-		bool IsNull() const { exASSERT(HaveBuffer()); exASSERT(IsBound()); return m_cb == SQL_NULL_DATA; };
+		bool IsNull() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NULL_DATA; };
 
 		
 		/*!
@@ -217,7 +232,7 @@ namespace exodbc
 		* \detailed	Fails if no buffer is allocated or not bound.
 		* \return	True if current value is SQL_NO_TOTAL.
 		*/
-		bool NoTotal() const { exASSERT(HaveBuffer()); exASSERT(IsBound()); return m_cb == SQL_NO_TOTAL; };
+		bool NoTotal() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NO_TOTAL; };
 
 
 		/*!
@@ -360,6 +375,16 @@ namespace exodbc
 		* \see		TimestampVisitor
 		*/
 		operator SQL_TIMESTAMP_STRUCT() const;
+
+
+		/*!
+		* \brief	Access the current buffer value as a const SQLCHAR*
+		* \detailed	Returns the same pointer as it is stored in here. This is mainly used
+		*			for accessing binary data, to avoid to copy the binary buffer.
+		* \return	Const SQLCHAR* to the buffer-content.
+		* \see		TimestampVisitor
+		*/
+		operator const SQLCHAR*() const;
 
 
 	private:
@@ -657,6 +682,35 @@ namespace exodbc
 	private:
 		SQLSMALLINT m_decimalDigits;
 	};	// class TimestampVisitor
+
+
+	/*!
+	* \class CharPtrVisitor
+	*
+	* \brief Visitor to access the buffer.
+	*
+	* This Visitor extracts the buffer-pointer and returns it as const SQLCHAR*,
+	* which works for every datatype.
+	*
+	*/
+	class CharPtrVisitor
+		: public boost::static_visitor < const SQLCHAR* >
+	{
+	public:
+
+		const SQLCHAR* operator()(SQLSMALLINT* smallInt) const { return (const SQLCHAR*)(smallInt); };
+		const SQLCHAR* operator()(SQLINTEGER* i) const { return (const SQLCHAR*)(i); };
+		const SQLCHAR* operator()(SQLBIGINT* bigInt) const { return (const SQLCHAR*)(bigInt); };
+		const SQLCHAR* operator()(SQLCHAR* pChar) const { return (const SQLCHAR*)(pChar); };
+		const SQLCHAR* operator()(SQLWCHAR* pWChar) const { return (const SQLCHAR*)(pWChar); };
+		const SQLCHAR* operator()(SQLDOUBLE* pDouble) const { return (const SQLCHAR*)(pDouble); };
+		const SQLCHAR* operator()(SQL_DATE_STRUCT* pDate) const { return (const SQLCHAR*)(pDate); };
+		const SQLCHAR* operator()(SQL_TIME_STRUCT* pTime) const { return (const SQLCHAR*)(pTime); };
+		const SQLCHAR* operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return (const SQLCHAR*)(pTimestamp); };
+#if HAVE_MSODBCSQL_H
+		const SQLCHAR* operator()(SQL_SS_TIME2_STRUCT* pTime) const { return (const SQLCHAR*)(pTime); };
+#endif
+	};
 }
 
 
