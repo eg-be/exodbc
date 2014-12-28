@@ -303,16 +303,17 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, CommitTransaction)
 	{
-		IntTypesTmpTable table(&m_db, m_odbcInfo.m_namesCase);
-		ASSERT_TRUE(table.Open(false, false));
+		std::wstring tableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		ASSERT_TRUE(iTable.Open(false, true));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_db.CommitTrans() );
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		EXPECT_FALSE( table.GetNext());
+		EXPECT_TRUE( iTable.Select());
+		EXPECT_FALSE( iTable.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
@@ -334,10 +335,10 @@ namespace exodbc
 			{
 #if HAVE_MSODBCSQL_H
 				EXPECT_TRUE(db2.SetTransactionIsolationMode(TI_SNAPSHOT));
-				IntTypesTmpTable table2(&db2, m_odbcInfo.m_namesCase);
-				EXPECT_TRUE(table2.Open(false, false));
-				EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-				EXPECT_FALSE(table2.GetNext());
+				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", Table::READ_ONLY);
+				EXPECT_TRUE(iTable2.Open(false, true));
+				EXPECT_TRUE(iTable2.Select());
+				EXPECT_FALSE(iTable2.SelectNext());
 #else
 				LOG_WARNING(L"Test runs agains MS SQL Server but HAVE_MSODBCSQL_H is not defined to 1. Cannot run test without setting Transaction Mode to Snapshot, or the test would block");
 				EXPECT_TRUE(false);
@@ -346,15 +347,10 @@ namespace exodbc
 			else
 			{
 				EXPECT_TRUE(db2.SetTransactionIsolationMode(TI_READ_COMMITTED));
-				IntTypesTmpTable table2(&db2, m_odbcInfo.m_namesCase);
-				EXPECT_TRUE(table2.Open(false, false));
-				EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-				EXPECT_FALSE(table2.GetNext());
-			}
-			// TODO: see #51
-			if (db2.GetCommitMode() != CM_AUTO_COMMIT)
-			{
-				EXPECT_TRUE(db2.CommitTrans());
+				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", Table::READ_ONLY);
+				EXPECT_TRUE(iTable2.Open(false, true));
+				EXPECT_TRUE(iTable2.Select());
+				EXPECT_FALSE(iTable2.SelectNext());
 			}
 			EXPECT_TRUE(db2.Close());
 		}
@@ -365,24 +361,14 @@ namespace exodbc
 		Database db2(m_env);
 		EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		{
-			IntTypesTmpTable table2(&db2, m_odbcInfo.m_namesCase);
-			EXPECT_TRUE(table2.Open(false, false));
-			EXPECT_TRUE(table2.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-			EXPECT_TRUE(table2.GetNext());
-		}
-		// TODO: see #51
-		if (db2.GetCommitMode() != CM_AUTO_COMMIT)
-		{
-			EXPECT_TRUE(db2.CommitTrans());
+			exodbc::Table iTable2(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+			EXPECT_TRUE(iTable2.Open(false, true));
+			EXPECT_TRUE(iTable2.Select());
+			EXPECT_TRUE(iTable2.SelectNext());
 		}
 		EXPECT_TRUE(db2.Close());
-
-		// TODO: Need to fix this in the Table, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
 	}
+
 
 	TEST_P(DatabaseTest, RollbackTransaction)
 	{
