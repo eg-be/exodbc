@@ -541,6 +541,25 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 
+		std::wstring sqlstmt;
+		if (!whereStatement.empty())
+		{
+			sqlstmt = (boost::wformat(L"SELECT %s FROM %s WHERE %s") % m_fieldsStatement % m_tableInfo.GetSqlName() % whereStatement).str();
+		}
+		else
+		{
+			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % m_fieldsStatement % m_tableInfo.GetSqlName()).str();
+		}
+
+		return SelectBySqlStmt(sqlstmt);
+	}
+
+
+	bool Table::SelectBySqlStmt(const std::wstring& sqlStmt)
+	{
+		exASSERT(IsOpen());
+		exASSERT(!sqlStmt.empty());
+
 		if (IsSelectOpen())
 		{
 			// We are not allowed to fail here, someone might have Rollbacked a transaction and our statement is no longer open
@@ -549,16 +568,7 @@ namespace exodbc
 		}
 		exDEBUG(EnsureStmtIsClosed(m_hStmtSelect, m_pDb->Dbms()));
 
-		std::wstring sqlstmt;
-		if (!whereStatement.empty())
-		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s WHERE %s")%m_fieldsStatement % m_tableInfo.GetSqlName() % whereStatement).str();
-		}
-		else
-		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % m_fieldsStatement % m_tableInfo.GetSqlName()).str();
-		}
-		SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
 		if (ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_DBC(m_pDb->GetHDBC(), ret, SQLExecDirect);
@@ -567,8 +577,6 @@ namespace exodbc
 		else
 		{
 			m_selectQueryOpen = true;
-			// We should get as many records as we have buffers bound
-			exDEBUG(GetResultColumnsCount(m_hStmtSelect) == m_columnBuffers.size());
 		}
 
 		return m_selectQueryOpen;

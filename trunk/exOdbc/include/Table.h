@@ -419,6 +419,22 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Executes the passed SQL statement on the open Table.
+		* \detailed	Query by passing the complete SQL statement.
+		*			If successful, a Select-Query is open. You can iterate the records
+		*			using SelectNext() to access the values of the records.
+		*			The cursor is positioned before the first records, so you must call
+		*			SelectNext() to access the first record.
+		*			If a statement is open, the statement is closed.
+		* \param	sqlStmt Must be a full SQL statement like 'SELECT foo FROM A'
+		* \see		SelectNext()
+		* \see		SelectClose();
+		* \return	True if successful
+		*/
+		bool		SelectBySqlStmt(const std::wstring& sqlStmt);
+
+
+		/*!
 		* \brief	Fetches the next record fromt the current active Select() recordset.
 		* \detailed	If successful, the ColumnBuffer(s) bound to this table will contain 
 		*			the field-values of the currently selected record.
