@@ -285,9 +285,9 @@ namespace exodbc
 	SQLINTEGER ColumnBuffer::DetermineCharSize() const
 	{
 		exASSERT(m_haveColumnInfo);
-		exASSERT(m_columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);
+		exASSERT(m_columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
 
-		switch (m_columnInfo.m_sqlDataType)
+		switch (m_columnInfo.m_sqlType)
 		{
 		case SQL_SMALLINT:
 		case SQL_INTEGER:
@@ -295,7 +295,7 @@ namespace exodbc
 			if (m_columnInfo.m_isColumnSizeNull || m_columnInfo.m_isNumPrecRadixNull || m_columnInfo.m_numPrecRadix != 10)
 			{
 				// just return some silly default value
-				return DB_MAX_BIGINT_CHAR_LENGTH;
+				return DB_MAX_BIGINT_CHAR_LENGTH + 1;
 			}
 			if (!m_columnInfo.m_isDecimalDigitsNull && m_columnInfo.m_decimalDigits > 0)
 			{
@@ -325,10 +325,18 @@ namespace exodbc
 			else
 			{
 				// just return some silly default value
-				return DB_MAX_DOUBLE_CHAR_LENGTH;
+				return DB_MAX_DOUBLE_CHAR_LENGTH + 1;
 			}
+		case SQL_TYPE_DATE:
+		case SQL_TYPE_TIME:
+		case SQL_TYPE_TIMESTAMP:
+#if HAVE_MSODBCSQL_H
+		case SQL_SS_TIME2:
+#endif
+			exASSERT(!m_columnInfo.m_isColumnSizeNull);
+			return m_columnInfo.m_columnSize + 1;
 		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlType) % m_columnInfo.m_sqlType).str());
 		}
 
 		return 0;
@@ -423,13 +431,10 @@ namespace exodbc
 		case SQL_REAL:
 			return SQL_C_DOUBLE;
 			// not valid without TYPE ?? http://msdn.microsoft.com/en-us/library/ms710150%28v=vs.85%29.aspx
-//		case SQL_DATE:
 		case SQL_TYPE_DATE:
 			return SQL_C_TYPE_DATE;
-//		case SQL_TIME:
 		case SQL_TYPE_TIME:
 			return SQL_C_TYPE_TIME;
-//		case SQL_TIMESTAMP:
 		case SQL_TYPE_TIMESTAMP:
 			return SQL_C_TYPE_TIMESTAMP;
 #if HAVE_MSODBCSQL_H

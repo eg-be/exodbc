@@ -726,6 +726,35 @@ namespace exodbc
 	{
 		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
 		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		dTable.SetCharBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
+		EXPECT_TRUE(dTable.Open(false, true));
+
+		wstring sDate, sTime, sTimestamp;
+		wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(dTable.SelectNext());
+		EXPECT_TRUE(dTable.GetColumnValue(1, sDate));
+		EXPECT_EQ(L"1983-01-26", sDate);
+
+		EXPECT_TRUE(dTable.GetColumnValue(2, sTime));
+		EXPECT_TRUE(dTable.GetColumnValue(3, sTimestamp));
+
+		if (m_db.Dbms() == dbmsDB2)
+		{
+			EXPECT_EQ(L"13:55:56", sTime);
+			EXPECT_EQ(L"1983-01-26 13:55:56.000000", sTimestamp);
+		}
+		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			EXPECT_EQ(L"13:55:56.1234567", sTime);
+			EXPECT_EQ(L"1983-01-26 13:55:56.000", sTimestamp);
+		}
+		else
+		{
+			EXPECT_EQ(L"13:55:56", sTime);
+			EXPECT_EQ(L"1983-01-26 13:55:56", sTimestamp);
+		}
+
 	}
 
 
@@ -767,6 +796,10 @@ namespace exodbc
 		EXPECT_EQ(55, timestamp.minute);
 		EXPECT_EQ(56, timestamp.second);
 
+		// Test some digits stuff
+		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(dTable.SelectNext());
+		EXPECT_TRUE(dTable.GetColumnValue(3, timestamp));
 		// In IBM DB2 we have 6 digits for the fractions of a timestamp 123456 turns into 123'456'000
 		if (m_db.Dbms() == dbmsDB2)
 		{
