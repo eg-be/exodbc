@@ -372,29 +372,24 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, RollbackTransaction)
 	{
-		IntTypesTmpTable table(&m_db, m_odbcInfo.m_namesCase);
-		ASSERT_TRUE(table.Open(false, false));
+		std::wstring tableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		ASSERT_TRUE(iTable.Open(false, true));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_db.CommitTrans() );
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		EXPECT_FALSE( table.GetNext());
+		EXPECT_TRUE( iTable.Select());
+		EXPECT_FALSE( iTable.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		// We rollback and expect no record
 		EXPECT_TRUE( m_db.RollbackTrans() );
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
-		EXPECT_FALSE( table.GetNext());
-
-		// TODO: Need to fix this in the Table, see #51
-		if (m_db.GetCommitMode() != CM_AUTO_COMMIT)
-		{
-			EXPECT_TRUE(m_db.CommitTrans());
-		}
+		EXPECT_TRUE( iTable.Select());
+		EXPECT_FALSE( iTable.SelectNext());
 	}
 
 
