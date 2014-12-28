@@ -885,6 +885,10 @@ namespace exodbc
 
 	TEST_P(TableTest, GetAutoBlobValues)
 	{
+		std::wstring blobTypesTableName = TestTables::GetTableName(L"blobtypes", m_odbcInfo.m_namesCase);
+		Table bTable(&m_db, blobTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(bTable.Open(false, true));
+		int p = 3;
 
 	}
 // Interfaces
