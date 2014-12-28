@@ -80,7 +80,7 @@ namespace exodbc
 	{
 	public:
 
-		MCharTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		MCharTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER, const std::wstring& name = L"CharTypes");
 		virtual ~MCharTypesTable() {};
 
 		SQLINTEGER	m_idCharTypes;
@@ -89,13 +89,14 @@ namespace exodbc
 	};
 
 
+
 	// WCharTypesTable
 	// --------------
 	class MWCharTypesTable : public exodbc::Table
 	{
 	public:
 
-		MWCharTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		MWCharTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER, const std::wstring& name = L"CharTypes");
 		virtual ~MWCharTypesTable() {};
 
 		SQLINTEGER	m_idCharTypes;
