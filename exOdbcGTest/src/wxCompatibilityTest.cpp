@@ -12,7 +12,6 @@
 #include "wxCompatibilityTest.h"
 
 // Same component headers
-#include "GenericTestTables.h"
 #include "ManualTestTables.h"
 
 // Other headers

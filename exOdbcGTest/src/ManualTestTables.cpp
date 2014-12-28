@@ -31,18 +31,6 @@
 // --------------
 namespace exodbc
 {
-
-	// NotExistingTable
-	// ----------------
-	MNotExistingTable::MNotExistingTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, 1, TestTables::GetTableName(L"notexisting", namesCase))
-	{
-		m_idNotExisting = 0;
-
-		SetColumn(0, TestTables::GetColName(L"idnotexisting", namesCase), &m_idNotExisting, SQL_C_SLONG, sizeof(m_idNotExisting));
-	}
-
-
 	// IntTypesTable
 	// ---------------
 	MIntTypesTable::MIntTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"IntegerTypes" */)
@@ -184,5 +172,16 @@ namespace exodbc
 		SetColumn(1, TestTables::GetColName(L"col2", namesCase), m_col2, SQL_C_WCHAR, sizeof(m_col2));
 		//SetColDefs(2, L"col3", DB_DATA_TYPE_VARCHAR, m_col3, SQL_C_WCHAR, sizeof(m_col3), false, false, false, false);
 		SetColumn(3, TestTables::GetColName(L"col4", namesCase), m_col4, SQL_C_WCHAR, sizeof(m_col4));
+	}
+
+
+	// NotExistingTable
+	// ----------------
+	MNotExistingTable::MNotExistingTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
+		: Table(pDb, 1, TestTables::GetTableName(L"notexisting", namesCase))
+	{
+		m_idNotExisting = 0;
+
+		SetColumn(0, TestTables::GetColName(L"idnotexisting", namesCase), &m_idNotExisting, SQL_C_SLONG, sizeof(m_idNotExisting));
 	}
 }

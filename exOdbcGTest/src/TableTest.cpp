@@ -97,7 +97,7 @@ namespace exodbc
 		{
 			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
-			NotExistingTable neTable(&m_db, m_odbcInfo.m_namesCase);
+			MNotExistingTable neTable(&m_db, m_odbcInfo.m_namesCase);
 			EXPECT_FALSE(neTable.Open(false, true));
 		}
 	}

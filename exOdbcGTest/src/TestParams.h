@@ -11,7 +11,7 @@
 #define TESTPARAMS_H
 
 // Same component headers
-#include "GenericTestTables.h"
+#include "TestTables.h"
 
 // Other headers
 #include "exOdbc.h"

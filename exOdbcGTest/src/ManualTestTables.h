@@ -30,18 +30,6 @@ namespace exodbc
 // -------
 namespace exodbc
 {
-	// NotExistingTable
-	// ----------------
-	class MNotExistingTable : public exodbc::Table
-	{
-	public:
-		MNotExistingTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
-		~MNotExistingTable() {};
-
-		SQLINTEGER		m_idNotExisting;
-	};
-
-
 	// IntTypesTable
 	// ----------
 	class MIntTypesTable : public exodbc::Table
@@ -176,5 +164,17 @@ namespace exodbc
 		// we do not bind col3 and have a gap
 		//SQLWCHAR	m_col3[128 + 1];
 		SQLWCHAR	m_col4[128 + 2];
+	};
+
+
+	// NotExistingTable
+	// ----------------
+	class MNotExistingTable : public exodbc::Table
+	{
+	public:
+		MNotExistingTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		~MNotExistingTable() {};
+
+		SQLINTEGER		m_idNotExisting;
 	};
 }
