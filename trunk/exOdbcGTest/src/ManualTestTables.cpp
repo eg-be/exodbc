@@ -124,4 +124,16 @@ namespace exodbc
 		SetColumn(2, TestTables::GetColName(L"ttime", namesCase), &m_time, SQL_C_TYPE_TIME, sizeof(m_time));
 		SetColumn(3, TestTables::GetColName(L"ttimestamp", namesCase), &m_timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(m_timestamp));
 	}
+
+
+	// BlobTypesTable
+	// --------------
+	MBlobTypesTable::MBlobTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */)
+		: Table(pDb, 2, TestTables::GetTableName(L"blobtypes", namesCase), L"", L"", L"", Table::READ_ONLY)
+	{
+		ZeroMemory(m_blob, sizeof(m_blob));
+
+		SetColumn(0, TestTables::GetColName(L"idblobtypes", namesCase),  &m_idBlobTypes, SQL_C_SLONG, sizeof(m_idBlobTypes));
+		SetColumn(1, TestTables::GetColName(L"tblob", namesCase), m_blob, SQL_C_BINARY, sizeof(m_blob));
+	}
 }
