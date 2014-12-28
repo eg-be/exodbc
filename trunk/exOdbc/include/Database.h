@@ -302,7 +302,11 @@ namespace exodbc
 		bool         Close();
 
 
-		enum ExecFailMode { FailOnNoData, NotFailOnNoData };
+		enum ExecFailMode 
+		{ 
+			FailOnNoData,		///< Return False is ExecSql returns SQL_NO_DATA
+			NotFailOnNoData		///< Return True if ExecSql returns SLQ_NO_DATA
+		};
 		/**
 		 * \brief	Executes the SQL operation on the internal stmt-handle.
 		 * \param	sqlStmt	The SQL statement.
@@ -543,68 +547,102 @@ namespace exodbc
 		*/
 		OdbcVersion GetMaxSupportedOdbcVersion() const;
 
-		//bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
-//		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
-//		void         DispNextError();
-//		bool         CreateView(const std::wstring& viewName, const std::wstring& colList, const std::wstring& pSqlStmt, bool attemptDrop = true);
-//		bool         DropView(const std::wstring& viewName);
-//		bool         ExecSql(const std::wstring& pSqlStmt, ColumnInfo** columns, short& numcols);
-//		bool         GetNext();
-//		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
-//		int          TranslateSqlState(const std::wstring& SQLState);
-//		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
-//		int          GetKeyFields(const std::wstring& tableName, ColumnInfo* colInf, UWORD noCols);
 
-		//ColumnInfo*		GetColumns(wchar_t* tableName[], const wchar_t* userID = NULL);
-		//ColumnInfo*		GetColumns(const std::wstring& tableName, UWORD* numCols, const wchar_t* userID=NULL);
+		/*!
+		* \brief	Get Database name as reported by driver during Open().
+		* \return	Database name as reported by driver during Open().
+		*/
+		const std::wstring&	GetDatabaseName() const  { return m_dbInf.m_dbmsName; }
 
-//		int					GetColumnCount(const std::wstring& tableName, const wchar_t* userID=NULL);
-		const std::wstring&	GetDatabaseName()  {return m_dbInf.m_dbmsName;}
-		const std::wstring& GetDataSource()    {return m_dsn;}
-		const std::wstring& GetDatasourceName(){return m_dsn;}
-		const std::wstring& GetUsername()      {return m_uid;}
-		const std::wstring& GetPassword()      {return m_authStr;}
-		const std::wstring& GetConnectionInStr()  {return m_inConnectionStr;}
-		const std::wstring& GetConnectionOutStr() {return m_outConnectionStr;}
-		bool            IsOpen() const           {return m_dbIsOpen;}
-		bool            OpenedWithConnectionString() {return m_dbOpenedWithConnectionString;}
-		bool			HasHdbc()			{ return m_hdbc != SQL_NULL_HDBC; };
-		HDBC            GetHDBC()          {return m_hdbc;}
-		//HSTMT           GetHSTMT()         {return m_hstmt;}
-		//SSqlTypeInfo GetTypeInfVarchar()    {return m_typeInfVarchar;}
-		//SSqlTypeInfo GetTypeInfInteger()    {return m_typeInfInteger;}
-		//SSqlTypeInfo GetTypeInfFloat()      {return m_typeInfFloat;}
-		//SSqlTypeInfo GetTypeInfDate()       {return m_typeInfDate;}
-		//SSqlTypeInfo GetTypeInfBlob()       {return m_typeInfBlob;}
-		//SSqlTypeInfo GetTypeInfMemo()       {return m_typeInfMemo;}
-		SDbInfo GetDbInfo()					{return m_dbInf;}
 
-		// tableName can refer to a table, view, alias or synonym
-//		bool         TableExists(const std::wstring& tableName, const wchar_t* userID = NULL, const std::wstring& tablePath = std::wstring());
-//		bool         TablePrivileges(const std::wstring& tableName, const std::wstring& priv, const wchar_t* userID = NULL, const wchar_t* schema = NULL, const std::wstring& path = std::wstring());
+		/*!
+		* \brief	Get DSN set during Open().
+		* \return	DSN set during Open().
+		*/
+		const std::wstring& GetDataSourceName() const    { exDEBUG(!m_dbOpenedWithConnectionString);  return m_dsn; }
+		
 
-		// These two functions return the table name or column name in a form ready
-		// for use in SQL statements.  For example, if the datasource allows spaces
-		// in the table name or column name, the returned string will have the
-		// correct enclosing marks around the name to allow it to be properly
-		// included in a SQL statement
-		//const std::wstring  SQLTableName(const wchar_t* tableName);
-		//const std::wstring  SQLColumnName(const wchar_t* colName);
+		/*!
+		* \brief	Get DSN set during Open().
+		* \return	DSN set during Open().
+		*/
+		const std::wstring& GetDatasourceName() const { exDEBUG(!m_dbOpenedWithConnectionString);  return m_dsn; }
 
-//		void         LogError(const std::wstring& errMsg, const std::wstring& SQLState = std::wstring()) { LogErrorImpl(errMsg, SQLState); }
-//		void         SetDebugErrorMessages(bool state) { m_silent = !state; }
-//		bool         SetSqlLogging(wxDbSqlLogState state, const std::wstring& filename = SQL_LOG_FILENAME, bool append = false);
-//		bool         WriteSqlLog(const std::wstring& logMsg);
 
-//		std::vector<std::wstring> GetErrorList() const;
+		/*!
+		* \brief	Get Username set during Open().
+		* \return	Username set during Open().
+		*/
+		const std::wstring& GetUsername() const     { exDEBUG(!m_dbOpenedWithConnectionString);  return m_uid; }
 
+
+		/*!
+		* \brief	Get Password set during Open().
+		* \return	Password set during Open().
+		*/
+		const std::wstring& GetPassword() const      { exDEBUG(!m_dbOpenedWithConnectionString);  return m_authStr; }
+
+
+		/*!
+		* \brief	Get Connection String passed during Open().
+		* \return	Connection String passed during Open().
+		*/
+		const std::wstring& GetConnectionInStr() const  { exDEBUG(m_dbOpenedWithConnectionString); return m_inConnectionStr; }
+
+
+		/*!
+		* \brief	Get Connection String read from database after Open() was successful.
+		* \return	Connection String read from database after Open() was successful.
+		*/
+		const std::wstring& GetConnectionOutStr() const { exDEBUG(m_dbOpenedWithConnectionString); exDEBUG(m_dbIsOpen);  return m_outConnectionStr; }
+
+
+		/*!
+		* \brief	Check if Open() was called using a connection string.
+		* \return	True if Open() was called with a connection string.
+		*/
+		bool            OpenedWithConnectionString() const { return m_dbOpenedWithConnectionString; }
+
+
+		/*!
+		* \brief	Check if this database is connected.
+		* \return	True if Open() was called successfully.
+		*/
+		bool            IsOpen() const           { return m_dbIsOpen; }
+
+
+		/*!
+		* \brief	Check if this database has a connection handle allocated.
+		* \return	True if Connection handle is allocated.
+		* \see		AllocateHdbc()
+		*/
+		bool			HasHdbc() const			{ return m_hdbc != SQL_NULL_HDBC; };
+
+
+		/*!
+		* \brief	Get an eventually allocated connection handle.
+		* \return	Connection handle if allocated, or SQL_NULL_HDBC.
+		* \see		AllocateHdbc()
+		*/
+		HDBC            GetHDBC() const         { exDEBUG(HasHdbc()); return m_hdbc; }
+
+
+		/*!
+		* \brief	Get the SDbInfo if it is available.
+		* \detailed	During Open() the database is queried about information about itself,
+		*			if successful this information is stored in an SDbInfo internally.
+		*			SDbInfo is empty until Open() was successful.
+		* \return	SDbInfo with information corresponding to the database connected.
+		*/
+		SDbInfo GetDbInfo()	const				{ return m_dbInf; }
+
+
+		/*!
+		* \brief	Try to match the Database Name to a known DatabaseProduct value.
+		* \return	DatabaseProduct value or dbmsUNIDENTIFIED.
+		*/
 		DatabaseProduct       Dbms();
-		//bool         ModifyColumn(const std::wstring& tableName, const std::wstring& columnName, int dataType, ULONG columnLength = 0, const std::wstring& optionalParam = std::wstring());
 
-		//bool         FwdOnlyCursors()  {return m_fwdOnlyCursors;}
-
-		// return the string with all special SQL characters escaped
-		//std::wstring     EscapeSqlChars(const std::wstring& value);
 
 		// Private member functions
 	private:
@@ -614,9 +652,6 @@ namespace exodbc
 
 		bool			ReadDbInfo(SDbInfo& dbInfo);
 		bool			SetConnectionAttributes();
-//		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
-//		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
-		//bool             DetermineDataTypes(bool failOnDataTypeUnsupported);
 		bool             OpenImpl();
 
 		enum ReadCatalogInfoMode
@@ -638,8 +673,6 @@ namespace exodbc
 		std::wstring		m_authStr;         // Authorization string (password)
 		std::wstring		m_inConnectionStr; // Connection string used to connect to the database
 		std::wstring		m_outConnectionStr;// Connection string returned by the database when a connection is successfully OpenImpled
-//		FILE*				m_fpSqlLog;        // Sql Log file pointer
-//		wxDbSqlLogState		m_sqlLogState;     // On or Off
 		bool				m_fwdOnlyCursors;
 		DatabaseProduct		m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 		const Environment*	m_pEnv;				///< Environment used to create this Database
@@ -650,19 +683,6 @@ namespace exodbc
 		HSTMT m_hstmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
 
 		CommitMode		m_commitMode;	///< Commit Mode set currently
-
-		// Information about logical data types VARCHAR, INTEGER, FLOAT and DATE.
-		//
-		// This information is obtained from the ODBC driver by use of the
-		// SQLGetTypeInfo() function.  The key piece of information is the
-		// type name the data source uses for each logical data type.
-		// e.g. VARCHAR; Oracle calls it VARCHAR2.
-		//SSqlTypeInfo m_typeInfVarchar;
-		//SSqlTypeInfo m_typeInfInteger;
-		//SSqlTypeInfo m_typeInfFloat;
-		//SSqlTypeInfo m_typeInfDate;
-		//SSqlTypeInfo m_typeInfBlob;
-		//SSqlTypeInfo m_typeInfMemo;
 
 #if defined EXODBCDEBUG
 		// Helpers to detect orphaned tables
@@ -675,6 +695,81 @@ namespace exodbc
 		friend class Table;
 
 #endif
+
+		// OLD STUFF we need to think about re-adding it
+		// =========
+		// public:
+		//bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
+		//		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
+		//		void         DispNextError();
+		//		bool         CreateView(const std::wstring& viewName, const std::wstring& colList, const std::wstring& pSqlStmt, bool attemptDrop = true);
+		//		bool         DropView(const std::wstring& viewName);
+		//		bool         ExecSql(const std::wstring& pSqlStmt, ColumnInfo** columns, short& numcols);
+		//		bool         GetNext();
+		//		bool         Grant(int privileges, const std::wstring& tableName, const std::wstring& userList = L"PUBLIC");
+		//		int          TranslateSqlState(const std::wstring& SQLState);
+		//		bool         Catalog(const wchar_t* userID = NULL, const std::wstring& fileName = SQL_CATALOG_FILENAME);
+		//		int          GetKeyFields(const std::wstring& tableName, ColumnInfo* colInf, UWORD noCols);
+		//
+		//ColumnInfo*		GetColumns(wchar_t* tableName[], const wchar_t* userID = NULL);
+		//ColumnInfo*		GetColumns(const std::wstring& tableName, UWORD* numCols, const wchar_t* userID=NULL);
+		//
+		//		int					GetColumnCount(const std::wstring& tableName, const wchar_t* userID=NULL);
+		//HSTMT           GetHSTMT()         {return m_hstmt;}
+		//SSqlTypeInfo GetTypeInfVarchar()    {return m_typeInfVarchar;}
+		//SSqlTypeInfo GetTypeInfInteger()    {return m_typeInfInteger;}
+		//SSqlTypeInfo GetTypeInfFloat()      {return m_typeInfFloat;}
+		//SSqlTypeInfo GetTypeInfDate()       {return m_typeInfDate;}
+		//SSqlTypeInfo GetTypeInfBlob()       {return m_typeInfBlob;}
+		//SSqlTypeInfo GetTypeInfMemo()       {return m_typeInfMemo;}
+		//
+		//// tableName can refer to a table, view, alias or synonym
+		//		bool         TableExists(const std::wstring& tableName, const wchar_t* userID = NULL, const std::wstring& tablePath = std::wstring());
+		//		bool         TablePrivileges(const std::wstring& tableName, const std::wstring& priv, const wchar_t* userID = NULL, const wchar_t* schema = NULL, const std::wstring& path = std::wstring());
+		//
+		//// These two functions return the table name or column name in a form ready
+		//// for use in SQL statements.  For example, if the datasource allows spaces
+		//// in the table name or column name, the returned string will have the
+		//// correct enclosing marks around the name to allow it to be properly
+		//// included in a SQL statement
+		//const std::wstring  SQLTableName(const wchar_t* tableName);
+		//const std::wstring  SQLColumnName(const wchar_t* colName);
+		//
+		//		void         LogError(const std::wstring& errMsg, const std::wstring& SQLState = std::wstring()) { LogErrorImpl(errMsg, SQLState); }
+		//		void         SetDebugErrorMessages(bool state) { m_silent = !state; }
+		//		bool         SetSqlLogging(wxDbSqlLogState state, const std::wstring& filename = SQL_LOG_FILENAME, bool append = false);
+		//		bool         WriteSqlLog(const std::wstring& logMsg);
+		//
+		//		std::vector<std::wstring> GetErrorList() const;
+		//
+		//bool         ModifyColumn(const std::wstring& tableName, const std::wstring& columnName, int dataType, ULONG columnLength = 0, const std::wstring& optionalParam = std::wstring());
+		//
+		//bool         FwdOnlyCursors()  {return m_fwdOnlyCursors;}
+		//
+		// return the string with all special SQL characters escaped
+		//std::wstring     EscapeSqlChars(const std::wstring& value);
+		//
+		//
+		// private:
+		//		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
+		//		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
+		//		bool             DetermineDataTypes(bool failOnDataTypeUnsupported);
+		//
+		//		FILE*				m_fpSqlLog;        // Sql Log file pointer
+		//		wxDbSqlLogState		m_sqlLogState;     // On or Off
+		//// Information about logical data types VARCHAR, INTEGER, FLOAT and DATE.
+		////
+		//// This information is obtained from the ODBC driver by use of the
+		//// SQLGetTypeInfo() function.  The key piece of information is the
+		//// type name the data source uses for each logical data type.
+		//// e.g. VARCHAR; Oracle calls it VARCHAR2.
+		//SSqlTypeInfo m_typeInfVarchar;
+		//SSqlTypeInfo m_typeInfInteger;
+		//SSqlTypeInfo m_typeInfFloat;
+		//SSqlTypeInfo m_typeInfDate;
+		//SSqlTypeInfo m_typeInfBlob;
+		//SSqlTypeInfo m_typeInfMemo;
+
 
 	};  // Database
 
