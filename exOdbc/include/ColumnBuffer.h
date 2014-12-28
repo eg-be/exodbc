@@ -154,7 +154,7 @@ namespace exodbc
 	public:
 		/*!
 		* \brief	Returns true if this ColumnBuffer has a buffer ready.
-		* \detailed	This can be either true because during construction a buffer
+		* \detailed	This can be true either because during construction a buffer
 		*			was allocated or because you've manually set a buffer.
 		* \return	True if buffer is ready.
 		*/
@@ -415,7 +415,7 @@ namespace exodbc
 		* \return	void* to the current buffer.
 		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
 		*/
-		void* GetBuffer();
+		void* GetBuffer() const;
 
 
 		/*!

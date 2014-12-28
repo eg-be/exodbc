@@ -245,7 +245,7 @@ namespace exodbc
 	}
 
 
-	void* ColumnBuffer::GetBuffer()
+	void* ColumnBuffer::GetBuffer() const
 	{
 		exASSERT(m_haveBuffer);
 
