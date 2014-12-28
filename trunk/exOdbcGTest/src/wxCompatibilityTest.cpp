@@ -205,55 +205,49 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ReadIntTypes)
 	{
-		IntTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
+		MIntTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( -32768, table.m_smallInt);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 2"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 2"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 32767, table.m_smallInt);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( INT_MIN /* -2147483648 */, table.m_int);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 4"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 4"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 2147483647, table.m_int);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( LLONG_MIN /* -9223372036854775808 */, table.m_bigInt);
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 6"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 6"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 9223372036854775807, table.m_bigInt);
 
 		// Test for NULL-Values
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
-		EXPECT_TRUE( table.GetNext());
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
+		EXPECT_TRUE( table.SelectNext());
 
-		EXPECT_FALSE( table.IsColNull(0) );
-		EXPECT_FALSE( table.IsColNull(1) );
-		EXPECT_TRUE( table.IsColNull(2) );
-		EXPECT_TRUE( table.IsColNull(3) );
+		EXPECT_FALSE( table.IsColumnNull(0) );
+		EXPECT_FALSE( table.IsColumnNull(1) );
+		EXPECT_TRUE( table.IsColumnNull(2) );
+		EXPECT_TRUE( table.IsColumnNull(3) );
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3"));
-		EXPECT_TRUE( table.GetNext());
-		EXPECT_FALSE( table.IsColNull(2) );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3"));
+		EXPECT_TRUE( table.SelectNext());
+		EXPECT_FALSE( table.IsColumnNull(2) );
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5"));
-		EXPECT_TRUE( table.GetNext());
-		EXPECT_FALSE( table.IsColNull(3) );
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed, but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5"));
+		EXPECT_TRUE( table.SelectNext());
+		EXPECT_FALSE( table.IsColumnNull(3) );
 	}
 
 
