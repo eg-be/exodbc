@@ -171,7 +171,7 @@ namespace exodbc
 		m_hStmtSelect = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
-		m_charBindingMode = AutoBindingMode::BIND_AS_REPORTED;
+		m_autoBindingMode = AutoBindingMode::BIND_AS_REPORTED;
 		m_charTrimFlags = TRIM_NO;
 
 		// Old handles
@@ -1232,7 +1232,7 @@ namespace exodbc
 			for (int columnIndex = 0; columnIndex < columns.size(); columnIndex++)
 			{
 				SColumnInfo colInfo = columns[columnIndex];
-				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_charBindingMode, odbcVersion);
+				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion);
 				m_columnBuffers[columnIndex] = pColBuff;
 			}
 		}
@@ -1341,10 +1341,10 @@ namespace exodbc
 	}
 
 
-	void Table::SetCharBindingMode(AutoBindingMode mode)
+	void Table::SetAutoBindingMode(AutoBindingMode mode)
 	{
 		exASSERT(!IsOpen());
-		m_charBindingMode = mode;
+		m_autoBindingMode = mode;
 	}
 
 

@@ -78,14 +78,15 @@ namespace exodbc
 	* SQL_REAL					| SQLDOUBLE*
 	* SQL_DATE					| SQL_DATE_STRUCT*
 	* SQL_TIME					| SQL_TIME_STRUCT*
-	* SQL_TIME2					| SQL_TIME2_STRUCT* [2]
-	*							| SQL_TIME_STRUCT* [2]
+	* SQL_TIME2					| SQL_TIME2_STRUCT* / SQL_TIME_STRUCT* [2]
 	* SQL_TIMESTAMP				| SQL_TIMESTAMP_STRUCT*
-	*  
+	* SQL_BINARY				| SQL_CHAR*
+	* SQL_VARBINARY				| SQL_CHAR*
+	* SQL_LONGVARBINARY			| SQL_CHAR*
 	*
 	* [1] There are options about wide-chars: You can either enforce that a column
 	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
-	* a SQLWCHAR* buffer and the other way round, using the CharBindingMode
+	* a SQLWCHAR* buffer and the other way round, using the AutoBindingMode
 	* value.
 	*
 	* [2] The SQL_TIME2 is a Microsoft SQL Server specific extension. It is only available
@@ -153,7 +154,7 @@ namespace exodbc
 		* \param ordinalPosition	The ordinal position of the column in the table. Numbering starts at 1 (!)
 		* \param stringLen			The String-length of the buffer. This is not byte-length!
 		* \param mode				Determines if a char* or a wchar* buffer is allocated. You are not allowed
-		*							to use CharBindingMode::BIND_AS_REPORTED .
+		*							to use AutoBindingMode::BIND_AS_REPORTED .
 		* \param queryName			Name of the column that corresponds to this buffer.
 		*
 		* \see	HaveBuffer()
@@ -263,16 +264,16 @@ namespace exodbc
 		/*!
 		* \brief	Set how Chars should be bound.
 		* \detailed	Fails if already bound.
-		* \see		CharBindingMode
+		* \see		AutoBindingMode
 		*/
-		void SetCharBindingMode(AutoBindingMode mode) { exASSERT(!m_bound); m_charBindingMode = mode; }
+		void SetAutoBindingMode(AutoBindingMode mode) { exASSERT(!m_bound); m_autoBindingMode = mode; }
 
 
 		/*!
-		* \brief	Get the currently set CharBindingMode.
-		* \return	CharBindingMode set.
+		* \brief	Get the currently set AutoBindingMode.
+		* \return	AutoBindingMode set.
 		*/
-		AutoBindingMode GetCharBindingMode() const { return m_charBindingMode; };
+		AutoBindingMode GetAutoBindingMode() const { return m_autoBindingMode; };
 
 		// Operators
 		// ---------
@@ -481,7 +482,7 @@ namespace exodbc
 		SQLINTEGER	m_bufferSize;	///< Size of an allocated or set from constructor buffer.
 		bool m_bound;				///< True if Bind() was successful.
 		OdbcVersion m_odbcVersion;	///< OdbcVersion passed when creating this ColumnBuffer.
-		AutoBindingMode m_charBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
+		AutoBindingMode m_autoBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
 
 		BufferPtrVariant m_bufferPtr;	///< Variant that holds the pointer to the actual buffer
 

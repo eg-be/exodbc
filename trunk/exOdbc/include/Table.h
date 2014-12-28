@@ -332,22 +332,22 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Set the CharBindingMode. Must be called before Open().
-		* \detailed	This will set the CharBindingMode globally for this table.
+		* \brief	Set the AutoBindingMode. Must be called before Open().
+		* \detailed	This will set the AutoBindingMode globally for this table.
 		*			It can still be overridden for specific columns by defining
 		*			it for that column.
-		* \return	CharBindingMode
-		* \see		GetCharBindingMode()
+		* \return	AutoBindingMode
+		* \see		GetAutoBindingMode()
 		*/
-		void		SetCharBindingMode(AutoBindingMode mode);
+		void		SetAutoBindingMode(AutoBindingMode mode);
 
 
 		/*!
-		* \brief	Get the CharBindingMode of this table.
-		* \return	CharBindingMode
-		* \see		SetCharBindingMode()
+		* \brief	Get the AutoBindingMode of this table.
+		* \return	AutoBindingMode
+		* \see		SetAutoBindingMode()
 		*/
-		AutoBindingMode	GetCharBindingMode() { return m_charBindingMode; };
+		AutoBindingMode	GetAutoBindingMode() { return m_autoBindingMode; };
 
 
 		/*!
@@ -655,7 +655,7 @@ namespace exodbc
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		const OpenMode		m_openMode;				///< Read-only or writable
-		AutoBindingMode		m_charBindingMode;		///< Store the char-binding of this table. Can still be overridden by specifying it on a column
+		AutoBindingMode		m_autoBindingMode;		///< Store the char-binding of this table. Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
 		unsigned int		m_charTrimFlags;			///< Bitmask for the CharTrimOption Flags
 

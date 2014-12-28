@@ -51,7 +51,7 @@ namespace exodbc
 		, m_bound(false)
 		, m_allocatedBuffer(false)
 		, m_haveBuffer(false)
-		, m_charBindingMode(mode)
+		, m_autoBindingMode(mode)
 		, m_bufferType(0)
 		, m_bufferSize(0)
 		, m_columnNr((SQLUSMALLINT) columnInfo.m_ordinalPosition)
@@ -72,7 +72,7 @@ namespace exodbc
 		: m_bound(false)
 		, m_allocatedBuffer(false)
 		, m_haveBuffer(true)
-		, m_charBindingMode(AutoBindingMode::BIND_AS_REPORTED)
+		, m_autoBindingMode(AutoBindingMode::BIND_AS_REPORTED)
 		, m_bufferType(sqlCType)
 		, m_bufferSize(bufferSize)
 		, m_columnNr(ordinalPosition)
@@ -395,11 +395,11 @@ namespace exodbc
 	{
 		exASSERT(m_columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
 
-		if (m_charBindingMode == AutoBindingMode::BIND_ALL_AS_CHAR)
+		if (m_autoBindingMode == AutoBindingMode::BIND_ALL_AS_CHAR)
 		{
 			return SQL_C_CHAR;
 		}
-		else if (m_charBindingMode == AutoBindingMode::BIND_ALL_AS_WCHAR)
+		else if (m_autoBindingMode == AutoBindingMode::BIND_ALL_AS_WCHAR)
 		{
 			return SQL_C_WCHAR;
 		}
@@ -414,7 +414,7 @@ namespace exodbc
 			return SQL_C_SBIGINT;
 		case SQL_CHAR:
 		case SQL_VARCHAR:
-			if (m_charBindingMode == AutoBindingMode::BIND_WCHAR_AS_CHAR || m_charBindingMode == AutoBindingMode::BIND_AS_REPORTED)
+			if (m_autoBindingMode == AutoBindingMode::BIND_WCHAR_AS_CHAR || m_autoBindingMode == AutoBindingMode::BIND_AS_REPORTED)
 			{
 				return SQL_C_CHAR;
 			}
@@ -424,7 +424,7 @@ namespace exodbc
 			}
 		case SQL_WCHAR:
 		case SQL_WVARCHAR:
-			if (m_charBindingMode == AutoBindingMode::BIND_CHAR_AS_WCHAR || m_charBindingMode == AutoBindingMode::BIND_AS_REPORTED)
+			if (m_autoBindingMode == AutoBindingMode::BIND_CHAR_AS_WCHAR || m_autoBindingMode == AutoBindingMode::BIND_AS_REPORTED)
 			{
 				return SQL_C_WCHAR;
 			}

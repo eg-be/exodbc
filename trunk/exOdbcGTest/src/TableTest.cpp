@@ -369,7 +369,7 @@ namespace exodbc
 		// And some tables with auto-columns
 		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_ONLY);
-		iTable.SetCharBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
+		iTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
 		EXPECT_TRUE(iTable.Open(false, true));
 
 		std::wstring id, smallInt, i, bigInt;
@@ -501,7 +501,7 @@ namespace exodbc
 	{
 		wstring floatTypesTableName = TestTables::GetTableName(L"floattypes", m_odbcInfo.m_namesCase);
 		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_ONLY);
-		fTable.SetCharBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
+		fTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
 		EXPECT_TRUE(fTable.Open(false, true));
 
 		wstring sVal;
@@ -540,7 +540,7 @@ namespace exodbc
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
-		charTypesAutoTable.SetCharBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
+		charTypesAutoTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		EXPECT_TRUE(charTypesAutoTable.Open(false, true));
 		// We want to trim on the right side for DB2 and sql server
 		charTypesAutoTable.SetCharTrimOption(Table::TRIM_RIGHT);
@@ -625,7 +625,7 @@ namespace exodbc
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
-		charTypesAutoTable.SetCharBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
+		charTypesAutoTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		EXPECT_TRUE(charTypesAutoTable.Open(false, true));
 		// We want to trim on the right side for DB2 and also sql server
 		charTypesAutoTable.SetCharTrimOption(Table::TRIM_RIGHT);
@@ -833,7 +833,7 @@ namespace exodbc
 	{
 		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
 		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
-		dTable.SetCharBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
+		dTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
 		EXPECT_TRUE(dTable.Open(false, true));
 
 		wstring sDate, sTime, sTimestamp;
