@@ -117,4 +117,16 @@ namespace exodbc
 		SQL_TIME_STRUCT			m_time;
 		SQL_TIMESTAMP_STRUCT	m_timestamp;
 	};
+
+	// BlobTypesTable
+	// --------------
+	class MBlobTypesTable : public exodbc::Table
+	{
+	public:
+		MBlobTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER);
+		virtual ~MBlobTypesTable() {};
+
+		SQLINTEGER		m_idBlobTypes;
+		SQLCHAR			m_blob[16];
+	};
 }

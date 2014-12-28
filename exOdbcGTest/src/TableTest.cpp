@@ -528,6 +528,8 @@ namespace exodbc
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_TRUE(fTable.GetColumnValue(2, sVal));
 		//EXPECT_EQ(0.0, sVal);
+		
+		// TODO: Find a way to compare without having to diff for every db-type
 
 		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 2") % idName).str()));
 		EXPECT_TRUE(fTable.SelectNext());
@@ -879,6 +881,9 @@ namespace exodbc
 		EXPECT_EQ(55, cTable.m_timestamp.minute);
 		EXPECT_EQ(56, cTable.m_timestamp.second);
 	}
+
+
+
 // Interfaces
 // ----------
 
