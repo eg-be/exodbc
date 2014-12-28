@@ -171,7 +171,7 @@ namespace exodbc
 		m_hStmtSelect = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
-		m_charBindingMode = CharBindingMode::BIND_AS_REPORTED;
+		m_charBindingMode = AutoBindingMode::BIND_AS_REPORTED;
 		m_charTrimFlags = TRIM_NO;
 
 		// Old handles
@@ -1341,7 +1341,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetCharBindingMode(CharBindingMode mode)
+	void Table::SetCharBindingMode(AutoBindingMode mode)
 	{
 		exASSERT(!IsOpen());
 		m_charBindingMode = mode;
