@@ -108,6 +108,7 @@ namespace exodbc
 					delete GetBigIntPtr();
 					break;
 				case SQL_C_CHAR:
+				case SQL_C_BINARY:
 					delete[] GetCharPtr();
 					break;
 				case SQL_C_WCHAR:
@@ -208,6 +209,7 @@ namespace exodbc
 			m_bufferPtr = new SQLBIGINT(0);
 			break;
 		case SQL_C_CHAR:
+		case SQL_C_BINARY:
 			m_bufferPtr = new SQLCHAR[m_bufferSize];
 			break;
 		case SQL_C_WCHAR:
@@ -257,6 +259,7 @@ namespace exodbc
 		case SQL_C_SBIGINT:
 			return static_cast<void*>(boost::get<SQLBIGINT*>(m_bufferPtr));
 		case SQL_C_CHAR:
+		case SQL_C_BINARY:
 			return static_cast<void*>(boost::get<SQLCHAR*>(m_bufferPtr));
 		case SQL_C_WCHAR:
 			return static_cast<void*>(boost::get<SQLWCHAR*>(m_bufferPtr));
@@ -378,6 +381,9 @@ namespace exodbc
 			return sizeof(SQL_SS_TIME2_STRUCT);
 			break;
 #endif
+		case SQL_C_BINARY:
+			exASSERT(!m_columnInfo.m_isColumnSizeNull);
+			return m_columnInfo.m_columnSize * sizeof(SQLCHAR);
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -448,6 +454,10 @@ namespace exodbc
 				return SQL_C_TYPE_TIME;
 			}
 #endif
+		case SQL_BINARY:
+		case SQL_VARBINARY:
+		case SQL_LONGVARBINARY:
+			return SQL_C_BINARY;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
