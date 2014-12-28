@@ -415,7 +415,7 @@ namespace exodbc
 		* \see		SelectClose();
 		* \return	True if successful
 		*/
-		bool		Select(const std::wstring& whereStatement);
+		bool		Select(const std::wstring& whereStatement = L"");
 
 
 		/*!
