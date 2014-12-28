@@ -485,7 +485,7 @@ namespace exodbc
 		OdbcVersion connectionVersion = GetDriverOdbcVersion();
 		if (envVersion > connectionVersion)
 		{
-			LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver reported %d. The Database will be using %d") % envVersion %connectionVersion %connectionVersion).str());
+			LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % envVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer %connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName %connectionVersion).str());
 		}
 
 		// Try to detect the type - this will update our internal type on the first call
