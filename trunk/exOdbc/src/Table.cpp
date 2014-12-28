@@ -537,7 +537,7 @@ namespace exodbc
 	}
 
 
-	bool Table::Select(const std::wstring& whereStatement)
+	bool Table::Select(const std::wstring& whereStatement /* = L"" */)
 	{
 		exASSERT(IsOpen());
 
