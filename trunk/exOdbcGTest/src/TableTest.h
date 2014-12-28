@@ -45,8 +45,6 @@ namespace exodbc
 	protected:
 		exodbc::Environment m_env;
 		exodbc::Database m_db;
-		exodbc::Table* m_pIntTypesAutoTable;
-		exodbc::MIntTypesTable* m_pIntTypesManualTable;
 
 		SOdbcInfo m_odbcInfo;
 		virtual void SetUp();
