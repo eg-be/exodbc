@@ -204,6 +204,7 @@ namespace exodbc
 		*/
 		Database();
 
+
 		/*!
 		* \brief	Create a new Database-instance. The instance will be using the passed
 		*			Environment.
@@ -216,6 +217,7 @@ namespace exodbc
 		*						Do not free the Environment before you free the Database.
 		*/
 		Database(const Environment& env);
+
 
 		/*!
 		 * \brief	Create a new Database-instance. The instance will be using the passed
@@ -231,7 +233,9 @@ namespace exodbc
 		*/
 		Database(const Environment* pEnv);
 		
+
 		~Database();
+
 
 		/*!
 		* \brief	Tries to allocate a new DBC-Handle from the passed Environment and stores that
@@ -247,36 +251,32 @@ namespace exodbc
 		*/
 		bool		AllocateHdbc(const Environment& env);
 
+
 		/*!
-		 * \fn	bool Database::Open(const std::wstring& inConnectStr);
-		 *
+		* \deprecated
+		* \todo	Untested leftover from wxWidgets.
 		 * \brief	Connect using a prepared connection-String.
 		 * 			Uses SQLDriverConnect without a window-handle to connect
-		 *
 		 * \param	connectStr			 		The connect string.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool         Open(const std::wstring& inConnectStr);
 
+
 		/*!
-		 * \fn	bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd);
-		 *
+		 * \deprecated
+		 * \todo	Untested leftover from wxWidgets.
 		 * \brief	This version of Open will display the odbc source selection dialog, using SQLDriverConnect. Cast a
 		 * 			wxWindow::GetHandle() to SQLHWND to use.
-		 *
 		 * \param	inConnectStr			 	The in connect string.
 		 * \param	parentWnd				 	The parent window.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool         Open(const std::wstring& inConnectStr, SQLHWND parentWnd);
 
+
 		/*!
-		 * \fn	bool Database::Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
-		 *
-		 * \brief	Opens the connectiong using SQLConnect with the passed parameters.
-		 *
+		 * \brief	Opens the connection using SQLConnect with the passed parameters.
 		 * \param	Dsn						 	The dsn.
 		 * \param	Uid						 	The UID.
 		 * \param	AuthStr					 	The authentication string.
@@ -285,136 +285,104 @@ namespace exodbc
 		 */
 		bool         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
 
+
 		/*!
-		 * \fn	bool Database::Open(const Environment* const pEnv);
-		 *
 		 * \brief	Opens by using the information from the passed Environment
-		 *
 		 * \param [in,out]	pEnv	 	Pointer to the Environment to use to connect.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool         Open(const Environment* const pEnv);
 
+
 		/*!
-		 * \fn	bool Database::Close();
-		 *
 		 * \brief	If this database is open, closes the stmt-handle and the connection to the db.
-		 *
 		 * \return	True if not open or closing the Db-connection works, False if closing the db-
 		 * 			connection fails.
 		 */
 		bool         Close();
 
+
 		enum ExecFailMode { FailOnNoData, NotFailOnNoData };
 		/**
-		 * \fn	bool Database::ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = NotFailOnNoData);
-		 *
 		 * \brief	Executes the SQL operation on the internal stmt-handle.
-		 *
-		 * \author	Eli
-		 * \date	17.08.2014
-		 *
 		 * \param	sqlStmt	The SQL statement.
 		 * \param	mode   	If FailOnNoData is set, false is returned if SQL returns NO_DATA.
 		 * 					This happens for example on DB2 if you do a DELETE with a WHERE
 		 * 					clause and no records are deleted.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = NotFailOnNoData);
 
+
 		/*!
-		 * \fn	bool Database::CommitTrans();
-		 *
 		 * \brief	Commits all transaction associated with this database.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool         CommitTrans();
 
+
 		/*!
-		 * \fn	bool Database::RollbackTrans();
-		 *
 		 * \brief	Rolls back all transaction associated with this database.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool         RollbackTrans();
 
+
 		/**
-		 * \fn	bool Database::ReadCompleteCatalog(SDbCatalog& catalogInfo);
-		 *
 		 * \brief	Reads complete catalog. Queries the database using SQLTables with no search-string 
 		 * 			set at all. All parameters all NULL. This is due to the fact that SQL_ATTR_METADATA_ID
 		 * 			is not really implemented by all databases, so keep it simple.
-		 *
 		 * \param [in,out]	catalogInfo	Information describing the catalog.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		ReadCompleteCatalog(SDbCatalogInfo& catalogInfo);
 
+
 		/*!
-		 * \fn	bool Database::ReadCatalogs(std::vector<std::wstring>& catalogs)
-		 *
 		 * \brief	Reads all Catalogs that are defined in the DB. This calls SQLTables with 
 		 * 			SQL_ALL_CATALOGS as catalog-name.
-		 *
 		 * \param [in,out]	catalogs	The catalogs.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		ReadCatalogs(std::vector<std::wstring>& catalogs)		{ return ReadCatalogInfo(AllCatalogs, catalogs); };
 
+
 		/*!
-		 * \fn	bool exodbc::Database::ReadSchemas(std::vector<std::wstring>& schemas)
-		 *
 		 * \brief	Reads all schemas that are defined in the DB. This calls SQLTbles with
 		 * 			SQL_ALL_SCHEMAS as schema-name.
-		 *
 		 * \param [in,out]	schemas	The schemas.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		ReadSchemas(std::vector<std::wstring>& schemas)			{ return ReadCatalogInfo(AllSchemas, schemas); };
 
+
 		/*!
-		 * \fn	bool exodbc::Database::ReadTableTypes(std::vector<std::wstring>& tableTypes)
-		 *
 		 * \brief	Reads all table types that are defined by the DB. This call SQLTables with
 		 * 			SQL_ALL_TABLE_TYPES as table-type.
-		 *
 		 * \param [in,out]	tableTypes	List of types of the tables.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		ReadTableTypes(std::vector<std::wstring>& tableTypes)	{ return ReadCatalogInfo(AllTableTypes, tableTypes); };
 
+
 		/*!
-		 * \fn	int Database::ReadColumnCount(const STableInfo& table);
-		 *
 		 * \brief	Queries the database using SQLColumns to determine the number of columns of
 		 * 			the passed Table (which should have been queried from the catalog, using
 		 * 			FindTable or similar).
 		 * 			Note: No checks are done to ensure the passed table matches only one table
 		 * 			of the database. You might get confusing results if you have for example
 		 * 			search-patterns set as table name in the passed STableInfo table.
-		 *
 		 * \param	table	The table.
-		 *
 		 * \return	The column count, or -1 in case of failure
 		 */
 		int			ReadColumnCount(const STableInfo& table);
 
+
 		/*!
-		 * \fn	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName);
-		 *
 		 * \brief	Reads column count for one table. First the database is queried for a table
 		 * 			that matches the passed arguments. If not exactly one such table is found this
 		 * 			function fails.
 		 * 			If exactly one table is found, the call is forwarded to ReadColumnCount
-		 *
 		 * \param	tableName  	Name of the table.
 		 * \param	schemaName 	Name of the schema.
 		 * \param	catalogName	Name of the catalog.
@@ -424,57 +392,51 @@ namespace exodbc
 		 */
 		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
 
+
 		/*!
-		 * \fn	bool Database::ReadTablePrivileges(const STableInfo& table, std::vector<STablePrivilegesInfo>& privileges);
-		 *
 		 * \brief	Reads table privileges for the table(s) matching the passed SCatalogTable description.
-		 *
 		 * \param	table			  	Defines the tablename, type, schema and catalog to search for privileges.
 		 * \param [in,out]	privileges	The privileges.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		ReadTablePrivileges(const STableInfo& table, std::vector<STablePrivilegesInfo>& privileges);
 
+
 		/*!
-		 * \fn	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, std::vector<STablePrivilegesInfo>& privileges);
-		 *
 		 * \brief	Reads table privileges of exactly one table. This method will fail if not
 		 * 			exactly one table is found matching the passed arguments.
-		 *
 		 * \param	tableName		  	Name of the table.
 		 * \param	schemaName		  	Name of the schema.
 		 * \param	catalogName		  	Name of the catalog.
 		 * \param	tableType	Table Type name
 		 * \param [in,out]	privileges	The privileges.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STablePrivilegesInfo>& privileges);
+
 
 		/*!
 		 * \brief		Reads table column information for the passed table.
 		 * \detailed	Returned table columns are ordered by TABLE_CAT, TABLE_SCHEM, TABLE_NAME, and ORDINAL_POSITION. 
 		 * \param		table The table.
 		 * \param [in,out]	columns	The columns.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		ReadTableColumnInfo(const STableInfo& table, std::vector<SColumnInfo>& columns);
 
+
 		/*!
 		 * \brief	Reads table column information for exactly one table. This method will fail if the passed arguments
 		 * 			do not match exactly one table.
-		 *
 		 * \param	tableName	   	Name of the table.
 		 * \param	schemaName	   	Name of the schema.
 		 * \param	catalogName	   	Name of the catalog.
 		 * \param	tableType	Table Type name
 		 * \param [in,out]	columns	The columns.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<SColumnInfo>& columns);
+
 
 		/*!
 		 * \brief	Searches for tables using SQLTables. If any of the parameters passed is empty, SQLTables will be called
@@ -482,16 +444,15 @@ namespace exodbc
 		 * 			The attribute SQL_ATTR_METADATA_ID should default to FALSE, so all parameters are treated as pattern value
 		 * 			arguments (case sensitive, but you can use search patterns).
 		 * 			See: http://msdn.microsoft.com/en-us/library/ms711831%28v=vs.85%29.aspx
-		 *
 		 * \param	tableName	  	Name of the table.
 		 * \param	schemaName	  	Name of the schema.
 		 * \param	catalogName   	Name of the catalog.
 		 * \param	tableType	  	Type of the table.
 		 * \param [in,out]	tables	The tables found that match the search-criteria.
-		 *
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableInfo>& tables);
+
 
 		/*!
 		* \brief	Searches for tables that match the passed arguments, return true if exactly one such table is found.
@@ -513,6 +474,7 @@ namespace exodbc
 		 */
 		CommitMode		ReadCommitMode();
 
+		
 		/*!
 		 * \brief	Sets transaction mode on the database, using the attribute SQL_ATTR_AUTOCOMMIT.
 		 * 			This will also update the internal flag m_commitMode, if changing the mode
@@ -524,6 +486,7 @@ namespace exodbc
 		 */
 		bool		SetCommitMode(CommitMode mode);
 
+		
 		/*!
 		 * \brief	Gets transaction mode from the internally cached value.
 		 * \see		SetCommitMode()
@@ -531,12 +494,14 @@ namespace exodbc
 		 */
 		CommitMode GetCommitMode() { return m_commitMode; };
 
+		
 		/*!
 		* \brief	Queries the database for the attribute SQL_TXN_ISOLATION.
 		* \return	TI_UNKNOWN if fails, else the mode currently set
 		*/
 		TransactionIsolationMode ReadTransactionIsolationMode();
 
+		
 		/*!
 		* \brief	Sets transaction mode on the database, using the attribute SQL_TXN_ISOLATION.
 		*			Calling this method will first close the internal statement-handle.
@@ -546,6 +511,7 @@ namespace exodbc
 		*/
 		bool		SetTransactionIsolationMode(TransactionIsolationMode mode);
 
+		
 		/*!
 		* \brief	Returns true if the database supports the mode passed.
 		* \param	mode	The mode to test
@@ -553,12 +519,14 @@ namespace exodbc
 		*/
 		bool		CanSetTransactionIsolationMode(TransactionIsolationMode mode);
 
+	
 		/*!
 		* \brief	Get the environment used to Allocate this Database handle.
 		* \return	NULL if AllocHdbc() was not called with success.
 		*/
 		const Environment* GetEnvironment() const { return m_pEnv; };
 
+	
 		/*!
 		* \brief	Read the ODBC version supported by the driver.
 		* \detailed	Fails if not connected. Does not read the version from the environment
@@ -567,6 +535,7 @@ namespace exodbc
 		*/
 		OdbcVersion GetDriverOdbcVersion() const;
 
+	
 		/*!
 		* \brief	Determines which ODBC Version to use.
 		* \detailed	Chooses the max ODBC Version that is supported by the environment and the driver.

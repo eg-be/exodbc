@@ -57,12 +57,6 @@ namespace exodbc
 		{
 			if(m_pDb->IsOpen())
 			{
-				if(m_pDb->Dbms() == dbmsMS_SQL_SERVER)
-				{
-					// TODO: So far only ms needs this? we need to fix this. has something to do with auto commit set to no, so also a
-					// a select starts a transaction that must be closed or so.
-					EXPECT_TRUE(m_pDb->CommitTrans());
-				}
 				EXPECT_TRUE(m_pDb->Close());
 			}
 			delete m_pDb;
@@ -588,7 +582,7 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (1, -123456789012345678, -12345678.9012345678)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
+		// Note: DB2 sends a ',', mysql sends a '.' as delimeter
 		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 1"));
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
