@@ -332,75 +332,69 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, DISABLED_ReadNumericTypesAsChar)
+	TEST_P(wxCompatibilityTest, ReadNumericTypesAsChar)
 	{
-		NumericTypesTable table(m_pDb, NumericTypesTable::ReadAsChar, m_odbcInfo.m_namesCase);
+		MNumericTypesAsCharTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"0"), std::wstring(table.m_wcdecimal_18_0));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 2"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 2"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 3"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 3"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
 		// DB2 sends a ',', mysql/ms sends a '.' as delimeter
 		RecordProperty("Ticket", 35);
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
-			EXPECT_TRUE( table.GetNext() );
+			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
+			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(table.m_wcdecimal_18_10));	
 
-			EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5"));
-			EXPECT_TRUE( table.GetNext() );
+			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5"));
+			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 
-			EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6"));
-			EXPECT_TRUE( table.GetNext() );
+			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6"));
+			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 		}
 		else
 		{
-			EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
-			EXPECT_TRUE( table.GetNext() );
+			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
+			EXPECT_TRUE(table.SelectNext());
 			// ms does not send first 0 ?
 			if(m_pDb->Dbms() == dbmsMS_SQL_SERVER)
 				EXPECT_EQ( std::wstring(L".0000000000"), std::wstring(table.m_wcdecimal_18_10));	
 			else
 				EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(table.m_wcdecimal_18_10));	
 
-			EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5"));
-			EXPECT_TRUE( table.GetNext() );
+			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5"));
+			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 
-			EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6"));
-			EXPECT_TRUE( table.GetNext() );
+			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6"));
+			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 		}
 
 		// Test for NULL
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
-		EXPECT_TRUE( table.GetNext() );
-		EXPECT_FALSE( table.IsColNull(1) );
-		EXPECT_TRUE( table.IsColNull(2) );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
+		EXPECT_TRUE(table.SelectNext());
+		EXPECT_FALSE( table.IsColumnNull(1) );
+		EXPECT_TRUE( table.IsColumnNull(2) );
 
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
-		EXPECT_TRUE( table.GetNext() );
-		EXPECT_TRUE( table.IsColNull(1) );
-		EXPECT_FALSE( table.IsColNull(2) );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
+		EXPECT_TRUE(table.SelectNext());
+		EXPECT_TRUE( table.IsColumnNull(1) );
+		EXPECT_FALSE( table.IsColumnNull(2) );
 
-		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
-		// SQLExecDirect), but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
 	}
 
 
@@ -582,9 +576,9 @@ namespace exodbc
 		EXPECT_FALSE(table.SelectNext());
 	}
 
-	TEST_P(wxCompatibilityTest, DISABLED_ExecSQL_InsertNumericTypesAsChar)
+	TEST_P(wxCompatibilityTest, ExecSQL_InsertNumericTypesAsChar)
 	{
-		NumericTypesTmpTable table(m_pDb, NumericTypesTmpTable::ReadAsChar, m_odbcInfo.m_namesCase);
+		MNumericTypesAsCharTable table(m_pDb, m_odbcInfo.m_namesCase, L"NumericTypes_tmp");
 		ASSERT_TRUE(table.Open(false, false));
 
 		std::wstring sqlstmt;
@@ -596,11 +590,10 @@ namespace exodbc
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 1"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 1"));
+		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
-		RecordProperty("Ticket", 35);
 		if(m_pDb->Dbms() == dbmsDB2)
 			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 		else
@@ -610,8 +603,8 @@ namespace exodbc
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 2"));
-		EXPECT_TRUE( table.GetNext() );
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 2"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
 		if(m_pDb->Dbms() == dbmsDB2)
@@ -622,9 +615,10 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes_tmp, tdecimal_18_0, tdecimal_18_10) VALUES (3, 0, 0.0000000000)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_pDb->CommitTrans() );
-		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
-		EXPECT_TRUE( table.QueryBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 3"));
-		EXPECT_TRUE( table.GetNext() );
+		// Note: DB2 sends a ',', mysql sends a '.' as delimeter
+		// (but maybe this also depends on os settings)
+		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes_tmp = 3"));
+		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"0"), std::wstring(table.m_wcdecimal_18_0));
 
 		if(m_pDb->Dbms() == dbmsDB2)
@@ -635,14 +629,8 @@ namespace exodbc
 			EXPECT_EQ( std::wstring(L".0000000000"), std::wstring(table.m_wcdecimal_18_10));	
 		else
 			EXPECT_TRUE(false);
-
-		// TODO: IBM DB2 needs a commit only after a select has been executed (maybe because it is executed using
-		// SQLExecDirect), but not after one of the catalog functions ?
-		if(m_pDb->Dbms() == dbmsDB2)
-		{
-			EXPECT_TRUE(m_pDb->CommitTrans());
-		}
 	}
+
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertIntTypes)
 	{

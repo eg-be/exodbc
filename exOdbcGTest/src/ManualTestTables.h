@@ -133,6 +133,21 @@ namespace exodbc
 	};
 
 
+	// MNumbericTypesAsCharTable
+	// ------------------
+	class MNumericTypesAsCharTable : public exodbc::Table
+	{
+	public:
+		MNumericTypesAsCharTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER, const std::wstring& name = L"NumericTypes");
+		virtual ~MNumericTypesAsCharTable() {};
+
+		SQLINTEGER			m_idNumericTypes;
+
+		SQLWCHAR			m_wcdecimal_18_0[20 + 1];
+		SQLWCHAR			m_wcdecimal_18_10[20 + 1];
+	};
+
+
 	// CharTable
 	// ---------
 	class MCharTable : public exodbc::Table
