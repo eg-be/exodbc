@@ -515,6 +515,43 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, GetWCharFloatValues)
+	{
+		wstring floatTypesTableName = TestTables::GetTableName(L"floattypes", m_odbcInfo.m_namesCase);
+		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		fTable.SetCharBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
+		EXPECT_TRUE(fTable.Open(false, true));
+
+		wstring sVal;
+		wstring idName = TestTables::GetColName(L"idfloattypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(2, sVal));
+		//EXPECT_EQ(0.0, sVal);
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(2, sVal));
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(2, sVal));
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(1, sVal));
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(1, sVal));
+
+		EXPECT_TRUE(fTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_TRUE(fTable.GetColumnValue(1, sVal));
+
+	}
+
+
 	TEST_P(TableTest, GetAutoWCharValues)
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
