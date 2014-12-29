@@ -37,7 +37,8 @@ namespace exodbc
 	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, 
 		SQLCHAR*, SQLWCHAR*, 
 		SQLDOUBLE*,
-		SQL_DATE_STRUCT*, SQL_TIME_STRUCT*, SQL_TIMESTAMP_STRUCT*
+		SQL_DATE_STRUCT*, SQL_TIME_STRUCT*, SQL_TIMESTAMP_STRUCT*,
+		SQL_NUMERIC_STRUCT*
 #if HAVE_MSODBCSQL_H
 		,SQL_SS_TIME2_STRUCT*
 #endif
@@ -526,6 +527,7 @@ namespace exodbc
 		SQLBIGINT operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQL_NUMERIC_STRUCT* pNumeric) const { throw CastException(SQL_C_NUMERIC, SQL_C_SBIGINT); };
 #if HAVE_MSODBCSQL_H
 		SQLBIGINT operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_SBIGINT); };
 #endif
@@ -559,6 +561,7 @@ namespace exodbc
 		std::wstring operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_WCHAR); };
 		std::wstring operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_WCHAR); };
 		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_WCHAR); };
+		std::wstring operator()(SQL_NUMERIC_STRUCT* pNumeric) const { throw CastException(SQL_C_NUMERIC, SQL_C_WCHAR); };
 #if HAVE_MSODBCSQL_H
 		std::wstring operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_WCHAR); };
 #endif
@@ -592,6 +595,7 @@ namespace exodbc
 		std::string operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_CHAR); };
 		std::string operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_CHAR); };
 		std::string operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_CHAR); };
+		std::string operator()(SQL_NUMERIC_STRUCT* pNumeric) const { throw CastException(SQL_C_NUMERIC, SQL_C_CHAR); };
 #if HAVE_MSODBCSQL_H
 		std::string operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_CHAR); };
 #endif
@@ -623,6 +627,7 @@ namespace exodbc
 		SQLDOUBLE operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_DOUBLE); };
+		SQLDOUBLE operator()(SQL_NUMERIC_STRUCT* pNumeric) const { throw CastException(SQL_C_NUMERIC, SQL_C_DOUBLE); };
 #if HAVE_MSODBCSQL_H
 		SQLDOUBLE operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_DOUBLE); };
 #endif
@@ -657,6 +662,7 @@ namespace exodbc
 		SQL_TIMESTAMP_STRUCT operator()(SQL_DATE_STRUCT* pDate) const;
 		SQL_TIMESTAMP_STRUCT operator()(SQL_TIME_STRUCT* pTime) const;
 		SQL_TIMESTAMP_STRUCT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const;
+		SQL_TIMESTAMP_STRUCT operator()(SQL_NUMERIC_STRUCT* pNumeric) const { throw CastException(SQL_C_NUMERIC, SQL_C_TYPE_TIMESTAMP); };
 #if HAVE_MSODBCSQL_H
 		SQL_TIMESTAMP_STRUCT operator()(SQL_SS_TIME2_STRUCT* pTime) const;
 #endif
@@ -689,8 +695,9 @@ namespace exodbc
 		const SQLCHAR* operator()(SQL_DATE_STRUCT* pDate) const { return (const SQLCHAR*)(pDate); };
 		const SQLCHAR* operator()(SQL_TIME_STRUCT* pTime) const { return (const SQLCHAR*)(pTime); };
 		const SQLCHAR* operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return (const SQLCHAR*)(pTimestamp); };
+		const SQLCHAR* operator()(SQL_NUMERIC_STRUCT* pNumeric) const { return (const SQLCHAR*)(pNumeric); };
 #if HAVE_MSODBCSQL_H
-		const SQLCHAR* operator()(SQL_SS_TIME2_STRUCT* pTime) const { return (const SQLCHAR*)(pTime); };
+		const SQLCHAR* operator()(SQL_SS_TIME2_STRUCT* pNumeric) const { return (const SQLCHAR*)(pNumeric); };
 #endif
 	};
 }
