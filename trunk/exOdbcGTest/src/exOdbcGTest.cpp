@@ -20,7 +20,6 @@
 // Debug
 #include "DebugNew.h"
 
-
 // Globals
 // -------
 namespace exodbc

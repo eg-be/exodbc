@@ -187,7 +187,6 @@
     <ClInclude Include="src\ManualTestTables.h" />
     <ClInclude Include="src\TableTest.h" />
     <ClInclude Include="src\DatabaseTest.h" />
-    <ClInclude Include="src\DebugNew.h" />
     <ClInclude Include="src\exOdbcGTest.h" />
     <ClInclude Include="src\HelpersTest.h" />
     <ClInclude Include="src\stdafx.h" />
