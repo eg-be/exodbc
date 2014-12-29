@@ -126,6 +126,22 @@ namespace exodbc
 	}
 
 
+	// MNumericTypesTable
+	// -----------------
+	MNumericTypesTable::MNumericTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
+		: Table(pDb, 3, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
+	{
+		m_idNumericTypes = 0;
+
+		::ZeroMemory(&m_decimal_18_0, sizeof(m_decimal_18_0));
+		::ZeroMemory(&m_decimal_18_10, sizeof(m_decimal_18_10));
+
+		SetColumn(0, TestTables::GetColName(L"idnumerictypes_tmp", namesCase), &m_idNumericTypes, SQL_C_SLONG, sizeof(m_idNumericTypes));
+		//SetColumn(1, TestTables::GetColName(L"tdecimal_18_0", namesCase), m_decimal_18_0, SQL_C_NUMERIC, sizeof(m_decimal_18_0));
+		//SetColumn(2, TestTables::GetColName(L"tdecimal_18_10", namesCase), m_decimal_18_10, SQL_C_NUMERIC, sizeof(m_decimal_18_10));
+	};
+
+
 	// MNumericTypesAsCharTable
 	// -----------------
 	MNumericTypesAsCharTable::MNumericTypesAsCharTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)

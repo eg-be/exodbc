@@ -966,6 +966,14 @@ namespace exodbc
 		EXPECT_TRUE(bTable.SelectNext());
 		EXPECT_EQ(0, memcmp(abc, bTable.m_blob, sizeof(bTable.m_blob)));
 	}
+
+
+	TEST_P(TableTest, GetManualNumericValue)
+	{
+
+	}
+
+
 // Interfaces
 // ----------
 

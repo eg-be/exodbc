@@ -121,6 +121,21 @@ namespace exodbc
 	};
 
 
+	// MNumbericTypesTable
+	// ------------------
+	class MNumericTypesTable : public exodbc::Table
+	{
+	public:
+		MNumericTypesTable(exodbc::Database* pDb, TestTables::NameCase namesCase = TestTables::NC_LOWER, const std::wstring& name = L"NumericTypes");
+		virtual ~MNumericTypesTable() {};
+
+		SQLINTEGER			m_idNumericTypes;
+
+		SQL_NUMERIC_STRUCT	m_decimal_18_0;
+		SQL_NUMERIC_STRUCT	m_decimal_18_10;
+	};
+
+
 	// MNumbericTypesAsCharTable
 	// ------------------
 	class MNumericTypesAsCharTable : public exodbc::Table
