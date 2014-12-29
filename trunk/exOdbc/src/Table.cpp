@@ -492,7 +492,6 @@ namespace exodbc
 		SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
 		if (ret != SQL_SUCCESS)
 		{
-			LOG_ERROR_DBC(m_pDb->GetHDBC(), ret, SQLExecDirect);
 			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLExecDirect);
 		}
 		else
