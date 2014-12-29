@@ -16,9 +16,6 @@
     <ClInclude Include="include\Helpers.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ColumnFormatter.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\Database.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -45,9 +42,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ColumnFormatter.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\Database.cpp">
       <Filter>src</Filter>
     </ClCompile>
