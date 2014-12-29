@@ -35,7 +35,10 @@
 #include "ColumnBuffer.h"
 #include "Environment.h"
 
-// Same component headers
+// Other headers
+
+// Debug
+#include "DebugNew.h"
 
 namespace exodbc
 {

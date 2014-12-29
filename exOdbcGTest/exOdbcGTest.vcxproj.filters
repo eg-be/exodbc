@@ -36,9 +36,6 @@
     <ClInclude Include="src\exOdbcGTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\DebugNew.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\EnvironmentTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
