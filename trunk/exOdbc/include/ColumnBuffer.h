@@ -452,6 +452,7 @@ namespace exodbc
 #if HAVE_MSODBCSQL_H
 		SQL_SS_TIME2_STRUCT* GetTime2Ptr() const;
 #endif
+		SQL_NUMERIC_STRUCT* GetNumericPtr() const;
 
 		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer, only available if m_haveColumnInfo is true.
 		bool		m_haveColumnInfo;	///< True if m_columnInfo contains a valid info-object.
