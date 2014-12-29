@@ -64,6 +64,8 @@ namespace exodbc
 		exASSERT(m_columnNr > 0);
 		exASSERT(columnInfo.m_sqlDataType != 0);
 
+		// Remember some values from SColumnInfo
+		m_queryName = columnInfo.GetSqlName();
 		if (!columnInfo.m_isColumnSizeNull)
 		{
 			m_columnSize = columnInfo.m_columnSize;
@@ -73,8 +75,13 @@ namespace exodbc
 			m_decimalDigits = columnInfo.m_decimalDigits;
 		}
 
-		m_queryName = columnInfo.GetSqlName();
-		m_allocatedBuffer = AllocateBuffer(columnInfo);
+		// Create buffer
+		m_bufferType = DetermineBufferType(columnInfo.m_sqlType);
+		exASSERT(m_bufferType != 0);
+		m_bufferSize = DetermineBufferSize(columnInfo);
+		exASSERT(m_bufferSize > 0);
+
+		m_allocatedBuffer = AllocateBuffer(m_bufferType, m_bufferSize);
 		m_haveBuffer = m_allocatedBuffer;
 	}
 
@@ -191,25 +198,16 @@ namespace exodbc
 	}
 
 
-	bool ColumnBuffer::AllocateBuffer(const SColumnInfo& columnInfo)
+	bool ColumnBuffer::AllocateBuffer(SQLSMALLINT bufferType, SQLINTEGER bufferSize)
 	{
 		exASSERT(!m_allocatedBuffer);
 		exASSERT(!m_bound);
 		exASSERT(!m_haveBuffer);
-
-		m_bufferType = DetermineBufferType(columnInfo);
-		if (!m_bufferType)
-		{
-			return false;
-		}
-		m_bufferSize = DetermineBufferSize(columnInfo);
-		if (m_bufferSize <= 0)
-		{
-			return false;
-		}
+		exASSERT(bufferType != SQL_UNKNOWN_TYPE);
+		exASSERT(bufferSize > 0);
 
 		bool failed = false;
-		switch (m_bufferType)
+		switch (bufferType)
 		{
 		case SQL_C_SSHORT:
 			m_bufferPtr = new SQLSMALLINT(0);
@@ -222,10 +220,10 @@ namespace exodbc
 			break;
 		case SQL_C_CHAR:
 		case SQL_C_BINARY:
-			m_bufferPtr = new SQLCHAR[m_bufferSize];
+			m_bufferPtr = new SQLCHAR[bufferSize];
 			break;
 		case SQL_C_WCHAR:
-			m_bufferPtr = new SQLWCHAR[m_bufferSize];
+			m_bufferPtr = new SQLWCHAR[bufferSize];
 			break;
 		case SQL_C_DOUBLE:
 			m_bufferPtr = new SQLDOUBLE(0.0);
@@ -248,7 +246,7 @@ namespace exodbc
 			m_bufferPtr = new SQL_NUMERIC_STRUCT;
 			break;
 		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_bufferType) % m_bufferType).str());
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(bufferType) % bufferType).str());
 			failed = true;
 		}
 
@@ -409,9 +407,9 @@ namespace exodbc
 	}
 
 
-	SQLSMALLINT ColumnBuffer::DetermineBufferType(const SColumnInfo& columnInfo) const
+	SQLSMALLINT ColumnBuffer::DetermineBufferType(SQLSMALLINT sqlType) const
 	{
-		exASSERT(columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
+		exASSERT(sqlType != SQL_UNKNOWN_TYPE);
 
 		if (m_autoBindingMode == AutoBindingMode::BIND_ALL_AS_CHAR)
 		{
@@ -422,7 +420,7 @@ namespace exodbc
 			return SQL_C_WCHAR;
 		}
 
-		switch (columnInfo.m_sqlType)
+		switch (sqlType)
 		{
 		case SQL_SMALLINT:
 			return SQL_C_SSHORT;
@@ -480,7 +478,7 @@ namespace exodbc
 		case SQL_DECIMAL:
 			return SQL_C_NUMERIC;
 		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(sqlType) % sqlType).str());
 		}
 		return 0;
 	}

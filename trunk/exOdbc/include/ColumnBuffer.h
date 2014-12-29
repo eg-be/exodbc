@@ -402,13 +402,13 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Determine the buffer type for the current SQL type given in passed SColumnInfo.
+		* \brief	Determine the buffer type for the given SQL type .
 		* \detailed This is used internally if no buffer-size and buffer is given and the buffer must
 		*			thus be allocated automatically.
 		*			See ColumnBuffer description for what SQL type is mapped to what buffer.
 		* \return	Needed buffer size according to SQL type form SColumnInfo or 0 in case of failure.
 		*/
-		SQLSMALLINT DetermineBufferType(const SColumnInfo& columnInfo) const;
+		SQLSMALLINT DetermineBufferType(SQLSMALLINT sqlType) const;
 
 
 		/*!
@@ -423,12 +423,13 @@ namespace exodbc
 
 		/*!
 		* \brief	Allocate a buffer in the variant.
-		* \detailed Determines the buffer type from passed SDbInfo and sets m_bufferType, m_bufferSize and allocates corresponding buffer. 
+		* \detailed Allocates corresponding buffer. 
 		*			Sets m_allocatedBuffer to true on success.
-		* \param	columnInfo Used to determine buffer type, size, etc.
+		* \param	bufferType An SQL_C_TYPE like SQL_C_SSHORT to describe the type to allocate
+		* \param	bufferSize Used for types that are not as simple as a SQLSMALLINT, for example SQLWCHAR*
 		* \return	true if buffer is allocated.
 		*/
-		bool AllocateBuffer(const SColumnInfo& columnInfo);
+		bool AllocateBuffer(SQLSMALLINT bufferType, SQLINTEGER bufferSize);
 
 
 		/*!
