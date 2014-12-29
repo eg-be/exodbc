@@ -50,23 +50,23 @@ namespace exodbc
 	// Construction
 	// ------------
 	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion)
-		: m_columnInfo(columnInfo)
-		, m_bound(false)
+		: m_bound(false)
 		, m_allocatedBuffer(false)
 		, m_haveBuffer(false)
 		, m_autoBindingMode(mode)
 		, m_bufferType(0)
 		, m_bufferSize(0)
 		, m_columnNr((SQLUSMALLINT) columnInfo.m_ordinalPosition)
-		, m_haveColumnInfo(true)
 		, m_odbcVersion(odbcVersion)
 		, m_decimalDigits(-1)
 	{
 		exASSERT(m_columnNr > 0);
 		exASSERT(columnInfo.m_sqlDataType != 0);
 
-		m_queryName = m_columnInfo.GetSqlName();
-		m_allocatedBuffer = AllocateBuffer();
+		// TODO: Extract decimal digits and precision
+
+		m_queryName = columnInfo.GetSqlName();
+		m_allocatedBuffer = AllocateBuffer(columnInfo);
 		m_haveBuffer = m_allocatedBuffer;
 	}
 
@@ -80,7 +80,6 @@ namespace exodbc
 		, m_bufferSize(bufferSize)
 		, m_columnNr(ordinalPosition)
 		, m_bufferPtr(bufferPtrVariant)
-		, m_haveColumnInfo(false)
 		, m_queryName(queryName)
 		, m_odbcVersion(OV_UNKNOWN)
 		, m_decimalDigits(decimalDigits)
@@ -184,18 +183,18 @@ namespace exodbc
 	}
 
 
-	bool ColumnBuffer::AllocateBuffer()
+	bool ColumnBuffer::AllocateBuffer(const SColumnInfo& columnInfo)
 	{
 		exASSERT(!m_allocatedBuffer);
 		exASSERT(!m_bound);
 		exASSERT(!m_haveBuffer);
 
-		m_bufferType = DetermineBufferType();
+		m_bufferType = DetermineBufferType(columnInfo);
 		if (!m_bufferType)
 		{
 			return false;
 		}
-		m_bufferSize = DetermineBufferSize();
+		m_bufferSize = DetermineBufferSize(columnInfo);
 		if (m_bufferSize <= 0)
 		{
 			return false;
@@ -295,30 +294,29 @@ namespace exodbc
 	}
 
 
-	SQLINTEGER ColumnBuffer::DetermineCharSize() const
+	SQLINTEGER ColumnBuffer::DetermineCharSize(const SColumnInfo& columnInfo) const
 	{
-		exASSERT(m_haveColumnInfo);
-		exASSERT(m_columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
+		exASSERT(columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
 
-		switch (m_columnInfo.m_sqlType)
+		switch (columnInfo.m_sqlType)
 		{
 		case SQL_SMALLINT:
 		case SQL_INTEGER:
 		case SQL_BIGINT:
-			if (m_columnInfo.m_isColumnSizeNull || m_columnInfo.m_isNumPrecRadixNull || m_columnInfo.m_numPrecRadix != 10)
+			if (columnInfo.m_isColumnSizeNull || columnInfo.m_isNumPrecRadixNull || columnInfo.m_numPrecRadix != 10)
 			{
 				// just return some silly default value
 				return DB_MAX_BIGINT_CHAR_LENGTH + 1;
 			}
-			if (!m_columnInfo.m_isDecimalDigitsNull && m_columnInfo.m_decimalDigits > 0)
+			if (!columnInfo.m_isDecimalDigitsNull && columnInfo.m_decimalDigits > 0)
 			{
 				// +3: 1 for '.' and one for trailing zero and one for a '-'
-				return m_columnInfo.m_columnSize + 3; 
+				return columnInfo.m_columnSize + 3; 
 			}
 			else
 			{
 				// +2: one for trailing zero and one for '-'
-				return m_columnInfo.m_columnSize + 2;
+				return columnInfo.m_columnSize + 2;
 			}
 		case SQL_CHAR:
 		case SQL_WCHAR:
@@ -326,14 +324,14 @@ namespace exodbc
 		case SQL_WVARCHAR:
 			// TODO: We could also calculate using the char_octet_length. Maybe this would be cleaner - some dbs
 			// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
-			return m_columnInfo.m_columnSize + 1;
+			return columnInfo.m_columnSize + 1;
 		case SQL_DOUBLE:
 		case SQL_FLOAT:
 		case SQL_REAL:
-			if (!m_columnInfo.m_isNumPrecRadixNull && m_columnInfo.m_numPrecRadix == 10)
+			if (!columnInfo.m_isNumPrecRadixNull && columnInfo.m_numPrecRadix == 10)
 			{
 				// +3: 1 for '.' and one for trailing zero and one for a '-'
-				return m_columnInfo.m_columnSize + 3;
+				return columnInfo.m_columnSize + 3;
 			}
 			else
 			{
@@ -346,20 +344,20 @@ namespace exodbc
 #if HAVE_MSODBCSQL_H
 		case SQL_SS_TIME2:
 #endif
-			exASSERT(!m_columnInfo.m_isColumnSizeNull);
-			return m_columnInfo.m_columnSize + 1;
+			exASSERT(!columnInfo.m_isColumnSizeNull);
+			return columnInfo.m_columnSize + 1;
 		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlType) % m_columnInfo.m_sqlType).str());
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlType) % columnInfo.m_sqlType).str());
 		}
 
 		return 0;
 	}
 
 
-	SQLINTEGER ColumnBuffer::DetermineBufferSize() const
+	SQLINTEGER ColumnBuffer::DetermineBufferSize(const SColumnInfo& columnInfo) const
 	{
 		exASSERT(m_bufferType != 0);
-		exASSERT(m_columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);
+		exASSERT(columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);
 
 		// if the determined buffer type is a simple type its just sizeof
 		switch (m_bufferType)
@@ -371,9 +369,9 @@ namespace exodbc
 		case SQL_C_SBIGINT:
 			return sizeof(SQLBIGINT);
 		case SQL_C_CHAR:
-			return DetermineCharSize() * sizeof(SQLCHAR);
+			return DetermineCharSize(columnInfo) * sizeof(SQLCHAR);
 		case SQL_C_WCHAR:
-			return DetermineCharSize() * sizeof(SQLWCHAR);
+			return DetermineCharSize(columnInfo) * sizeof(SQLWCHAR);
 		case SQL_C_DOUBLE:
 			return sizeof(SQLDOUBLE);
 		case SQL_C_TYPE_DATE:
@@ -392,20 +390,20 @@ namespace exodbc
 			break;
 #endif
 		case SQL_C_BINARY:
-			exASSERT(!m_columnInfo.m_isColumnSizeNull);
-			return m_columnInfo.m_columnSize * sizeof(SQLCHAR);
+			exASSERT(!columnInfo.m_isColumnSizeNull);
+			return columnInfo.m_columnSize * sizeof(SQLCHAR);
 		case SQL_C_NUMERIC:
 			return sizeof(SQL_NUMERIC_STRUCT);
 		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
 		}
 		return 0;
 	}
 
 
-	SQLSMALLINT ColumnBuffer::DetermineBufferType() const
+	SQLSMALLINT ColumnBuffer::DetermineBufferType(const SColumnInfo& columnInfo) const
 	{
-		exASSERT(m_columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
+		exASSERT(columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
 
 		if (m_autoBindingMode == AutoBindingMode::BIND_ALL_AS_CHAR)
 		{
@@ -416,7 +414,7 @@ namespace exodbc
 			return SQL_C_WCHAR;
 		}
 
-		switch (m_columnInfo.m_sqlType)
+		switch (columnInfo.m_sqlType)
 		{
 		case SQL_SMALLINT:
 			return SQL_C_SSHORT;
@@ -471,22 +469,14 @@ namespace exodbc
 		case SQL_LONGVARBINARY:
 			return SQL_C_BINARY;
 		case SQL_NUMERIC:
+		case SQL_DECIMAL:
 			return SQL_C_NUMERIC;
 		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
+			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
 		}
 		return 0;
 	}
 
-
-	SQLSMALLINT ColumnBuffer::GetDecimalDigitals() const
-	{
-		if (m_haveColumnInfo && !m_columnInfo.m_isDecimalDigitsNull)
-		{
-			return m_columnInfo.m_decimalDigits;
-		}
-		return m_decimalDigits;
-	}
 
 	ColumnBuffer::operator SQLSMALLINT() const
 	{
@@ -565,7 +555,7 @@ namespace exodbc
 		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(GetDecimalDigitals()), m_bufferPtr);
+		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
 
 		SQL_DATE_STRUCT date;
 		date.day = timeStamp.day;
@@ -580,7 +570,7 @@ namespace exodbc
 		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(GetDecimalDigitals()), m_bufferPtr);
+		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
 
 		SQL_TIME_STRUCT time;
 		time.hour = timeStamp.hour;
@@ -595,7 +585,7 @@ namespace exodbc
 		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(GetDecimalDigitals()), m_bufferPtr);
+		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
 
 		SQL_SS_TIME2_STRUCT time;
 		time.hour = timeStamp.hour;
@@ -611,7 +601,7 @@ namespace exodbc
 		exASSERT(m_haveBuffer);
 		exASSERT(m_bound);
 
-		return boost::apply_visitor(TimestampVisitor(GetDecimalDigitals()), m_bufferPtr);
+		return boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
 	}
 
 
@@ -744,7 +734,6 @@ namespace exodbc
 	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const
 	{
 		SQL_TIMESTAMP_STRUCT timestamp = *pTimestamp;
-		//ColumnBuffer::TrimValue(m_decimalDigits, timestamp.fraction);
 		return timestamp;
 	}
 

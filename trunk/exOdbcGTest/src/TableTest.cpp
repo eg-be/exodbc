@@ -968,8 +968,38 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetManualNumericValue)
+	TEST_P(TableTest, DISABLED_GetAutoNumericValue)
 	{
+		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
+		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(nTable.Open(false, true));
+
+		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+
+		int p = 3;
+
+	}
+
+	TEST_P(TableTest, DISABLED_GetManualNumericValue)
+	{
+		MNumericTypesTable nTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(nTable.Open(false, true));
+
+		wstring idName = TestTables::GetColName(L"idNumericTypes", m_odbcInfo.m_namesCase);
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		char buff1[8];
+		char buff2[8];
+		ZeroMemory(&buff1, sizeof(buff1));
+		ZeroMemory(&buff2, sizeof(buff2));
+		memcpy(&buff1, &nTable.m_decimal_18_10.val, sizeof(buff1));
+		memcpy(&buff2, &nTable.m_decimal_18_10.val[8], sizeof(buff2));
+		SQLUBIGINT* i1 = (SQLUBIGINT*) &buff1;
+		SQLUBIGINT* i2 = (SQLUBIGINT*) &buff2;
+//		SQLUBIGINT i = (SQLUBIGINT)nTable.m_decimal_18_0.val;
+		int p = 3;
 
 	}
 
