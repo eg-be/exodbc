@@ -146,7 +146,6 @@ namespace exodbc
 				LOG_ERROR(ex.what());
 			}
 		}
-
 	}
 
 

@@ -409,24 +409,24 @@ namespace exodbc
 		SQLPOINTER tableTypeName = L"";
 
 		SQLSMALLINT colNr = 0;
-		SQLUSMALLINT bufferLen = 0;
+		SQLUSMALLINT charLen = 0;
 
 		switch(mode)
 		{
 		case AllCatalogs:
 			catalogName = SQL_ALL_CATALOGS;
 			colNr = 1;
-			bufferLen = m_dbInf.GetMaxCatalogNameLen();
+			charLen = m_dbInf.GetMaxCatalogNameLen();
 			break;
 		case AllSchemas:
 			schemaName = SQL_ALL_SCHEMAS;
 			colNr = 2;
-			bufferLen = m_dbInf.GetMaxSchemaNameLen();
+			charLen = m_dbInf.GetMaxSchemaNameLen();
 			break;
 		case AllTableTypes:
 			tableTypeName = SQL_ALL_TABLE_TYPES;
 			colNr = 4;
-			bufferLen = m_dbInf.GetMaxTableTypeNameLen();
+			charLen = m_dbInf.GetMaxTableTypeNameLen();
 			break;
 		default:
 			exASSERT(false);
@@ -451,12 +451,12 @@ namespace exodbc
 		}
 
 		// Read data
-		SQLWCHAR* buffer = new SQLWCHAR[bufferLen];
+		SQLWCHAR* buffer = new SQLWCHAR[charLen];
 		SQLLEN cb;
 		bool ok = true;
 		while (ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
 		{
-			ok = GetData(m_hstmt, colNr, SQL_C_WCHAR, buffer, bufferLen, &cb, NULL, true);
+			ok = GetData(m_hstmt, colNr, SQL_C_WCHAR, buffer, charLen * sizeof(SQLWCHAR), &cb, NULL, true);
 			if(ok)
 				results.push_back(buffer);
 		}
@@ -760,8 +760,8 @@ namespace exodbc
 		wchar_t* buffCatalog = new wchar_t[m_dbInf.GetMaxCatalogNameLen()];
 		wchar_t* buffSchema = new wchar_t[m_dbInf.GetMaxSchemaNameLen()];
 		wchar_t* buffTableName = new wchar_t[m_dbInf.GetMaxTableNameLen()];
-		wchar_t* buffTableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN + 1];
-		wchar_t* buffTableRemarks = new wchar_t[DB_MAX_TABLE_REMARKS_LEN + 1];
+		wchar_t* buffTableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN];
+		wchar_t* buffTableRemarks = new wchar_t[DB_MAX_TABLE_REMARKS_LEN];
 
 		bool ok = true;
 		// Query db
@@ -789,11 +789,11 @@ namespace exodbc
 				STableInfo table;
 				bool haveAllData = true;
 				SQLLEN cb;
-				haveAllData = haveAllData & GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen(), &cb, &table.m_isCatalogNull, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen(), &cb, &table.m_isSchemaNull, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen(), &cb, NULL, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 4, SQL_C_WCHAR, buffTableType, DB_MAX_TABLE_TYPE_LEN + 1, &cb, NULL, true);
-				haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_WCHAR, buffTableRemarks, DB_MAX_TABLE_REMARKS_LEN + 1, &cb, NULL, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isCatalogNull, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isSchemaNull, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen() * sizeof(SQLWCHAR), &cb, NULL, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 4, SQL_C_WCHAR, buffTableType, DB_MAX_TABLE_TYPE_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
+				haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_WCHAR, buffTableRemarks, DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
 
 				if(!haveAllData)
 				{

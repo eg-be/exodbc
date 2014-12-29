@@ -330,7 +330,7 @@ namespace exodbc
 	 * \param	colOrParamNr		  	The col or parameter nr.
 	 * \param	targetType			  	Type of the target.
 	 * \param	pTargetValue			Pointer to the target buffer.
-	 * \param	bufferLen			  	Length of the buffer.
+	 * \param	bufferLen			  	Length of the buffer in Bytes (not strings!).
 	 * \param [in,out]	strLenOrIndPtr	Pointer to return the number of bytes read.
 	 * \param [in,out]	pIsNull		  	If pIsNull is not NULL, set to TRUE if the field is NULL. Ignored if pIsNull is NULL.
 	 * \param	nullTerminate		  	(Optional) true to null terminate. Can only be set if targetType is SQL_C_WCHAR or SQL_C_CHAR.
