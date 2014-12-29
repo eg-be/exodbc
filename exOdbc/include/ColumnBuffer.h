@@ -84,6 +84,8 @@ namespace exodbc
 	* SQL_BINARY				| SQL_CHAR*
 	* SQL_VARBINARY				| SQL_CHAR*
 	* SQL_LONGVARBINARY			| SQL_CHAR*
+	* SQL_NUMERIC				| SQL_NUMERIC_STRUCT*
+	* SQL_DECIMAL				| SQL_NUMERIC_STRUCT*
 	*
 	* [1] There are options about wide-chars: You can either enforce that a column
 	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
@@ -218,22 +220,22 @@ namespace exodbc
 		bool NoTotal() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NO_TOTAL; };
 
 
-		/*!
-		* \brief	Check if a valid SColumnInfo is available for this ColumnBuffer.
-		* \detailed	True if this ColumnBuffer was created by passing a SColumnInfo object.
-		* \return	True if a SColumnInfo can be fetched using GetColumnInfo.
-		* \see		GetColumnInfo()
-		*/
-		bool HaveColumnInfo() const { return  m_haveColumnInfo; };
+		///*!
+		//* \brief	Check if a valid SColumnInfo is available for this ColumnBuffer.
+		//* \detailed	True if this ColumnBuffer was created by passing a SColumnInfo object.
+		//* \return	True if a SColumnInfo can be fetched using GetColumnInfo.
+		//* \see		GetColumnInfo()
+		//*/
+		//bool HaveColumnInfo() const { return  m_haveColumnInfo; };
 
 
-		/*!
-		* \brief	Get the SColumnInfo used within this ColumnBuffer.
-		* \detailed	Fails if no SColumnInfo has been set on this ColumnBuffer.
-		* \return	SColumnInfo set on this ColumnBuffer.
-		* \see		HaveColumnInfo()
-		*/
-		SColumnInfo GetColumnInfo() const { exASSERT(m_haveColumnInfo);  return m_columnInfo; };
+		///*!
+		//* \brief	Get the SColumnInfo used within this ColumnBuffer.
+		//* \detailed	Fails if no SColumnInfo has been set on this ColumnBuffer.
+		//* \return	SColumnInfo set on this ColumnBuffer.
+		//* \see		HaveColumnInfo()
+		//*/
+		//SColumnInfo GetColumnInfo() const { exASSERT(m_haveColumnInfo);  return m_columnInfo; };
 
 
 		/*!
@@ -382,7 +384,7 @@ namespace exodbc
 		*			terminating \0.
 		* \return	Size of the allocated buffer
 		*/
-		SQLINTEGER DetermineBufferSize() const;
+		SQLINTEGER DetermineBufferSize(const SColumnInfo& columnInfo) const;
 
 
 		/*!
@@ -396,17 +398,17 @@ namespace exodbc
 		* \see		http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
 		* \return	Needed buffer size according to SQL type form SColumnInfo or 0 in case of failure.
 		*/
-		SQLINTEGER DetermineCharSize() const;
+		SQLINTEGER DetermineCharSize(const SColumnInfo& columnInfo) const;
 
 
 		/*!
-		* \brief	Determine the buffer type for the current SQL type given in SColumnInfo.
+		* \brief	Determine the buffer type for the current SQL type given in passed SColumnInfo.
 		* \detailed This is used internally if no buffer-size and buffer is given and the buffer must
 		*			thus be allocated automatically.
 		*			See ColumnBuffer description for what SQL type is mapped to what buffer.
 		* \return	Needed buffer size according to SQL type form SColumnInfo or 0 in case of failure.
 		*/
-		SQLSMALLINT DetermineBufferType() const;
+		SQLSMALLINT DetermineBufferType(const SColumnInfo& columnInfo) const;
 
 
 		/*!
@@ -421,21 +423,30 @@ namespace exodbc
 
 		/*!
 		* \brief	Allocate a buffer in the variant.
-		* \detailed Determines the buffer type and sets m_bufferType, m_bufferSize and allocates corresponding buffer. 
+		* \detailed Determines the buffer type from passed SDbInfo and sets m_bufferType, m_bufferSize and allocates corresponding buffer. 
 		*			Sets m_allocatedBuffer to true on success.
+		* \param	columnInfo Used to determine buffer type, size, etc.
 		* \return	true if buffer is allocated.
 		*/
-		bool AllocateBuffer();
+		bool AllocateBuffer(const SColumnInfo& columnInfo);
 
 
 		/*!
-		* \brief	Return the number of decimal digits if known or -1 otherwise.
-		* \detailed If a SColumnInfo is available returns the value SColumnInfo::m_decimalDigits
-		*			if the value is not set to NULL. Else the value of m_decimalDigits is returned,
-		*			which defaults to -1.
+		* \brief	Return the number of decimal digits set during construction.
 		* \return	Number of decimal digits if known or -1.
 		*/
-		SQLSMALLINT GetDecimalDigitals() const;
+		SQLSMALLINT GetDecimalDigitals() const {	return m_decimalDigits;	};
+
+
+		///*!
+		//* \brief	Return the number of decimal digits if known or -1 otherwise.
+		//* \detailed If a SColumnInfo is available returns the value SColumnInfo::m_decimalDigits
+		//*			if the value is not set to NULL. Else the value of m_decimalDigits is returned,
+		//*			which defaults to -1, but can be set when construction the ColumnBuffer by
+		//*			manually providing a buffer.
+		//* \return	Number of decimal digits if known or -1.
+		//*/
+		//SQLSMALLINT GetPrecision() const;
 
 
 		// Helpers to quickly access the pointers inside the variant.
@@ -454,9 +465,7 @@ namespace exodbc
 #endif
 		SQL_NUMERIC_STRUCT* GetNumericPtr() const;
 
-		SColumnInfo m_columnInfo;	///< ColumnInformation matching this Buffer, only available if m_haveColumnInfo is true.
-		bool		m_haveColumnInfo;	///< True if m_columnInfo contains a valid info-object.
-		SQLSMALLINT m_decimalDigits;	///< Decimal digits, set from manual constructor.
+		SQLSMALLINT m_decimalDigits;	///< Decimal digits, set during construction, -1 if not known.
 		std::wstring m_queryName;	///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
 		SQLUSMALLINT m_columnNr;	///< Either set on construction or read from SColumnInfo::m_ordinalPosition
 		bool m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
@@ -651,8 +660,6 @@ namespace exodbc
 		: public boost::static_visitor < SQL_TIMESTAMP_STRUCT >
 	{
 	public:
-		TimestampVisitor(SQLSMALLINT decimalDigits)
-			: m_decimalDigits(decimalDigits) {};
 
 		SQL_TIMESTAMP_STRUCT operator()(SQLSMALLINT* smallInt) const { throw CastException(SQL_C_SSHORT, SQL_C_TYPE_TIMESTAMP); };
 		SQL_TIMESTAMP_STRUCT operator()(SQLINTEGER* i) const { throw CastException(SQL_C_SSHORT, SQL_C_TYPE_TIMESTAMP); };
@@ -669,7 +676,6 @@ namespace exodbc
 #endif
 
 	private:
-		SQLSMALLINT m_decimalDigits;
 	};	// class TimestampVisitor
 
 
