@@ -39,35 +39,9 @@
 
 namespace exodbc
 {
-
-
-	/********** wxDbColDef::wxDbColDef() Constructor **********/
-	ColumnDefinition::ColumnDefinition()
-	{
-		Initialize();
-	}  // Constructor
-
-
-	bool ColumnDefinition::Initialize()
-	{
-		m_colName[0] = 0;
-		m_dbDataType = DB_DATA_TYPE_INTEGER;
-		m_sqlCtype = SQL_C_LONG;
-		m_ptrDataObj = NULL;
-		m_szDataObj = 0;
-		m_keyField = false;
-		m_updateable = false;
-		m_insertAllowed = false;
-		m_derivedCol = false;
-		m_cbValue = 0;
-		m_null = false;
-
-		return true;
-	}  // wxDbColDef::Initialize()
-
 	// Construction
 	// ------------
-	Table::Table(Database* pDb, size_t numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, OpenMode openMode /* = READ_WRITE */)
+	Table::Table(Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, OpenMode openMode /* = READ_WRITE */)
 		: m_numCols(numColumns)
 		, m_manualColumns(true)
 		, m_initialTableName(tableName)
@@ -85,8 +59,7 @@ namespace exodbc
 	}
 
 
-
-	Table::Table(Database* pDb, size_t numColumns, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
+	Table::Table(Database* pDb, SQLSMALLINT numColumns, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
 		: m_numCols(numColumns)
 		, m_manualColumns(true)
 		, m_initialTableName(L"")
@@ -105,7 +78,6 @@ namespace exodbc
 	}
 
 
-
 	Table::Table(Database* pDb, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, const OpenMode openMode /* = READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
@@ -122,7 +94,6 @@ namespace exodbc
 			cleanup();
 		}
 	}
-
 
 
 	Table::Table(Database* pDb, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
@@ -151,6 +122,7 @@ namespace exodbc
 		this->cleanup();
 	}
 
+
 	// Implementation
 	// --------------
 	bool Table::Initialize(Database* pDb)
@@ -174,37 +146,9 @@ namespace exodbc
 		m_autoBindingMode = AutoBindingMode::BIND_AS_REPORTED;
 		m_charTrimFlags = TRIM_NO;
 
-		// Old handles
-		//m_hdbc = SQL_NULL_HDBC;
-		//m_hstmt = SQL_NULL_HSTMT;
-		//m_hstmtDefault = SQL_NULL_HSTMT;                        // Initialized below
-//		m_hstmtCount = SQL_NULL_HSTMT;                        // Initialized first time it is needed
-		//m_hstmtInsert = SQL_NULL_HSTMT;
-		//m_hstmtDelete = SQL_NULL_HSTMT;
-		//m_hstmtUpdate = SQL_NULL_HSTMT;
-		//m_hstmtInternal = SQL_NULL_HSTMT;
-//		m_colDefs = 0;	///< TODO: Change
-		//m_where.empty();                                  // Where clause
-		//m_orderBy.empty();                                // Order By clause
-		//m_from.empty();                                   // From clause
-		//m_selectForUpdate = false;                    // SELECT ... FOR UPDATE; Indicates whether to include the FOR UPDATE phrase
-
-		// TODO: The old code automatically turned table names into upper case for some dbs, does that make sense?
-
-		//std::wstring s;
-
 #ifdef EXODBCDEBUG
 		m_tableId = m_pDb->RegisterTable(this);
 #endif
-
-		//    m_pDb->WriteSqlLog(s);
-
-		// Grab the HENV and HDBC from the wxDb object
-		//m_hdbc = m_pDb->GetHDBC();
-
-		//// Allocate space for column definitions
-		//if (m_numCols)
-		//	m_colDefs = new ColumnDefinition[m_numCols];  // Points to the first column definition
 
 		// Allocate handles needed
 		m_hStmtCount = AllocateStatement();
@@ -298,11 +242,6 @@ namespace exodbc
 			//	m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate);
 		}
 
-		// Make the default cursor the active cursor
-		//m_hstmtDefault = GetNewCursor(false, false);
-		//exASSERT(m_hstmtDefault);
-		//m_hstmt = *m_hstmtDefault;
-
 		return true;
 
 	}
@@ -394,8 +333,6 @@ namespace exodbc
 
 	void Table::cleanup()
 	{
-		std::wstring s;
-
 #ifdef EXODBCDEBUG
 		m_pDb->UnregisterTable(this);
 #endif
@@ -414,11 +351,6 @@ namespace exodbc
 			delete pBuffer;
 		}
 		m_columnBuffers.clear();
-
-		//// Old Column stuff
-		//// Delete memory allocated for column definitions
-		//if (m_colDefs)
-		//	delete[] m_colDefs;
 
 		// Free allocated statements
 		FreeStatement(m_hStmtCount);
@@ -465,13 +397,9 @@ namespace exodbc
 		//		m_pDb->DispAllErrors(NULL, m_hdbc);
 		//}
 
-		//// Delete dynamically allocated cursors
-		//if (m_hstmtDefault)
-		//	DeleteCursor(m_hstmtDefault);
 
 		//if (m_hstmtCount)
 		//	DeleteCursor(m_hstmtCount);
-
 	}
 
 
@@ -854,8 +782,173 @@ namespace exodbc
 		m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 
-	/***************************** PRIVATE FUNCTIONS *****************************/
 
+	bool Table::Open(bool checkPrivileges, bool checkTableExists)
+	{
+		exASSERT(m_pDb);
+		exASSERT(m_pDb->IsOpen());
+		exASSERT(!IsOpen());
+		// TODO: Add a check to ensure if in manual mode at least one column has been defined
+//		exASSERT_MSG(!m_manualColumns || m_numCols > 0, L"You must Define at least one column if using manual Column mode");
+
+		std::wstring sqlStmt;
+		std::wstring s;
+		s.empty();
+
+		// If we do not already have a STableInfo for our table, we absolutely must find one
+		bool foundTable = false;
+		bool searchedTable = false;
+		if (!m_haveTableInfo)
+		{
+			if (!m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName, m_tableInfo))
+			{
+				return false;
+			}
+			m_haveTableInfo = true;
+			searchedTable = true;
+			foundTable = true;
+		}
+
+		// If we are asked to check existence and have not just proved we exist, find table
+		if (checkTableExists && !foundTable && !searchedTable)
+		{
+			if (!m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName, m_tableInfo))
+			{
+				return false;
+			}
+			m_haveTableInfo = true;
+			searchedTable = true;
+			foundTable = true;
+		}
+		// not found?
+		if (checkTableExists && !foundTable)
+		{
+			return false;
+		}
+
+		// If we are asked to create our columns automatically, read the column information and create the buffers
+		if (!m_manualColumns)
+		{
+			std::vector<SColumnInfo> columns;
+			if (!m_pDb->ReadTableColumnInfo(m_tableInfo, columns))
+			{
+				return false;
+			}
+			// Remember column sizes and create ColumnBuffers
+			m_numCols = columns.size();
+			if (m_numCols == 0)
+			{
+				LOG_ERROR((boost::wformat(L"No columns found for table '%s'") %m_tableInfo.GetSqlName()).str());
+				return false;
+			}
+			// We need to know which ODBC version we are using
+			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
+			for (int columnIndex = 0; columnIndex < (SQLSMALLINT) columns.size(); columnIndex++)
+			{
+				SColumnInfo colInfo = columns[columnIndex];
+				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion);
+				m_columnBuffers[columnIndex] = pColBuff;
+			}
+		}
+
+		// Prepare the FieldStatement to be used for selects
+		m_fieldsStatement = BuildFieldsStatement();
+
+		if (checkPrivileges)
+		{
+			exASSERT(false);
+			// Verify the user has rights to access the table.
+			//bool hasPrivs;
+
+			//if (m_pDb->Dbms() == dbmsPOSTGRES)
+			//    hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), NULL, m_tablePath);
+			//else
+			//    hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), m_pDb->GetUsername().c_str(), m_tablePath);
+
+			//if (!hasPrivs)
+			//    s = L"Connecting user does not have sufficient privileges to access this table.\n";
+		}
+
+		// Bind the member variables for field exchange between
+		// the wxDbTable object and the ODBC record.
+		if (!IsQueryOnly())
+		{
+			// commented because of missing datatype-info
+			exASSERT(false);
+			//if (!bindInsertParams())                    // Inserts
+			//    return false;
+
+			//if (!bindUpdateParams())                    // Updates
+			//    return false;
+		}
+
+		for (std::map<int, ColumnBuffer*>::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		{
+			ColumnBuffer* pBuffer = it->second;
+			if (!pBuffer->Bind(m_hStmtSelect))
+			{
+				return false;
+			}
+		}
+
+
+		// Build an insert statement using parameter markers
+		if (!IsQueryOnly() && m_numCols > 0)
+		{
+			exASSERT(false);
+			//      bool needComma = false;
+			//sqlStmt = (boost::wformat(L"INSERT INTO %s (") % m_pDb->SQLTableName(m_tableName.c_str())).str();
+			//      for (i = 0; i < m_numCols; i++)
+			//      {
+			//          if (! m_colDefs[i].m_insertAllowed)
+			//              continue;
+			//          if (needComma)
+			//              sqlStmt += L",";
+			//          sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
+			//          needComma = true;
+			//      }
+			//      needComma = false;
+			//      sqlStmt += L") VALUES (";
+
+			//      int insertableCount = 0;
+
+			//      for (i = 0; i < m_numCols; i++)
+			//      {
+			//          if (! m_colDefs[i].m_insertAllowed)
+			//              continue;
+			//          if (needComma)
+			//              sqlStmt += L",";
+			//          sqlStmt += L"?";
+			//          needComma = true;
+			//          insertableCount++;
+			//      }
+			//      sqlStmt += L")";
+
+			//      // Prepare the insert statement for execution
+			//      if (insertableCount)
+			//      {
+			//          if (SQLPrepare(m_hstmtInsert, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
+			//              return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert));
+			//      }
+			//      else
+			//          m_insertable = false;
+		}
+
+		// Completed successfully
+		m_isOpen = true;
+		return true;
+
+	}
+
+
+	void Table::SetAutoBindingMode(AutoBindingMode mode)
+	{
+		exASSERT(!IsOpen());
+		m_autoBindingMode = mode;
+	}
+
+	// OLD STUF DOWN HERE
+	// ==================
 
 
 	//void Table::setCbValueForColumn(int columnIndex)
@@ -1193,186 +1286,29 @@ namespace exodbc
 	//}  // wxDbTable::query()
 
 
-	/***************************** PUBLIC FUNCTIONS *****************************/
+	///********** wxDbColDef::wxDbColDef() Constructor **********/
+	//ColumnDefinition::ColumnDefinition()
+	//{
+	//	Initialize();
+	//}  // Constructor
 
 
-	bool Table::Open(bool checkPrivileges, bool checkTableExists)
-	{
-		exASSERT(m_pDb);
-		exASSERT(m_pDb->IsOpen());
-		exASSERT(!IsOpen());
-		// TODO: Add a check to ensure if in manual mode at least one column has been defined
-//		exASSERT_MSG(!m_manualColumns || m_numCols > 0, L"You must Define at least one column if using manual Column mode");
+	//bool ColumnDefinition::Initialize()
+	//{
+	//	m_colName[0] = 0;
+	//	m_dbDataType = DB_DATA_TYPE_INTEGER;
+	//	m_sqlCtype = SQL_C_LONG;
+	//	m_ptrDataObj = NULL;
+	//	m_szDataObj = 0;
+	//	m_keyField = false;
+	//	m_updateable = false;
+	//	m_insertAllowed = false;
+	//	m_derivedCol = false;
+	//	m_cbValue = 0;
+	//	m_null = false;
 
-		std::wstring sqlStmt;
-		std::wstring s;
-		s.empty();
-
-		// If we do not already have a STableInfo for our table, we absolutely must find one
-		bool foundTable = false;
-		bool searchedTable = false;
-		if (!m_haveTableInfo)
-		{
-			if (!m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName, m_tableInfo))
-			{
-				return false;
-			}
-			m_haveTableInfo = true;
-			searchedTable = true;
-			foundTable = true;
-		}
-
-		// If we are asked to check existence and have not just proved we exist, find table
-		if (checkTableExists && !foundTable && !searchedTable)
-		{
-			if (!m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName, m_tableInfo))
-			{
-				return false;
-			}
-			m_haveTableInfo = true;
-			searchedTable = true;
-			foundTable = true;
-		}
-		// not found?
-		if (checkTableExists && !foundTable)
-		{
-			return false;
-		}
-
-		// If we are asked to create our columns automatically, read the column information and create the buffers
-		if (!m_manualColumns)
-		{
-			std::vector<SColumnInfo> columns;
-			if (!m_pDb->ReadTableColumnInfo(m_tableInfo, columns))
-			{
-				return false;
-			}
-			// Remember column sizes and create ColumnBuffers
-			m_numCols = columns.size();
-			if (m_numCols == 0)
-			{
-				LOG_ERROR((boost::wformat(L"No columns found for table '%s'") %m_tableInfo.GetSqlName()).str());
-				return false;
-			}
-			// We need to know which ODBC version we are using
-			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
-			for (int columnIndex = 0; columnIndex < (SQLSMALLINT) columns.size(); columnIndex++)
-			{
-				SColumnInfo colInfo = columns[columnIndex];
-				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion);
-				m_columnBuffers[columnIndex] = pColBuff;
-			}
-		}
-
-		// Prepare the FieldStatement to be used for selects
-		m_fieldsStatement = BuildFieldsStatement();
-
-		if (checkPrivileges)
-		{
-			exASSERT(false);
-			// Verify the user has rights to access the table.
-			//bool hasPrivs;
-
-			//if (m_pDb->Dbms() == dbmsPOSTGRES)
-			//    hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), NULL, m_tablePath);
-			//else
-			//    hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), m_pDb->GetUsername().c_str(), m_tablePath);
-
-			//if (!hasPrivs)
-			//    s = L"Connecting user does not have sufficient privileges to access this table.\n";
-		}
-
-		// Bind the member variables for field exchange between
-		// the wxDbTable object and the ODBC record.
-		if (!IsQueryOnly())
-		{
-			// commented because of missing datatype-info
-			exASSERT(false);
-			//if (!bindInsertParams())                    // Inserts
-			//    return false;
-
-			//if (!bindUpdateParams())                    // Updates
-			//    return false;
-		}
-
-		for (std::map<int, ColumnBuffer*>::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		{
-			ColumnBuffer* pBuffer = it->second;
-			if (!pBuffer->Bind(m_hStmtSelect))
-			{
-				return false;
-			}
-		}
-
-		//if (m_manualColumns)
-		//{
-		//	// The old wx-way of binding params
-		//	 // TODO: Replace with new method once done
-		//	if (!bindCols(*m_hstmtDefault))                   // Selects
-		//		return false;
-
-		//	if (!bindCols(m_hstmtInternal))                   // Internal use only
-		//		return false;
-		//}
-
-		/*
-		* Do NOT bind the hstmtCount cursor!!!
-		*/
-
-		// Build an insert statement using parameter markers
-		if (!IsQueryOnly() && m_numCols > 0)
-		{
-			exASSERT(false);
-			//      bool needComma = false;
-			//sqlStmt = (boost::wformat(L"INSERT INTO %s (") % m_pDb->SQLTableName(m_tableName.c_str())).str();
-			//      for (i = 0; i < m_numCols; i++)
-			//      {
-			//          if (! m_colDefs[i].m_insertAllowed)
-			//              continue;
-			//          if (needComma)
-			//              sqlStmt += L",";
-			//          sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
-			//          needComma = true;
-			//      }
-			//      needComma = false;
-			//      sqlStmt += L") VALUES (";
-
-			//      int insertableCount = 0;
-
-			//      for (i = 0; i < m_numCols; i++)
-			//      {
-			//          if (! m_colDefs[i].m_insertAllowed)
-			//              continue;
-			//          if (needComma)
-			//              sqlStmt += L",";
-			//          sqlStmt += L"?";
-			//          needComma = true;
-			//          insertableCount++;
-			//      }
-			//      sqlStmt += L")";
-
-			//      // Prepare the insert statement for execution
-			//      if (insertableCount)
-			//      {
-			//          if (SQLPrepare(m_hstmtInsert, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
-			//              return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert));
-			//      }
-			//      else
-			//          m_insertable = false;
-		}
-
-		// Completed successfully
-		m_isOpen = true;
-		return true;
-
-	}
-
-
-	void Table::SetAutoBindingMode(AutoBindingMode mode)
-	{
-		exASSERT(!IsOpen());
-		m_autoBindingMode = mode;
-	}
+	//	return true;
+	//}  // wxDbColDef::Initialize()
 
 
 	///********** wxDbTable::Query() **********/
