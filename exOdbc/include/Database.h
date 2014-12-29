@@ -42,6 +42,7 @@
 
 // Same component headers
 #include "exOdbc.h"
+#include "Helpers.h"
 
 // Other headers
 #if EXODBC_TEST
@@ -644,37 +645,71 @@ namespace exodbc
 		DatabaseProduct       Dbms();
 
 
-		// Private member functions
+		// Private stuff
+		// -------------
 	private:
+		
+		/*!
+		* \brief	Queries SQLGetTypeInfo to fill the passed SSqlTypeInfo struct.
+		* \param [in,out] types Filled with data types supported by the db
+		* \return	True on success.
+		*/
 		bool			ReadDataTypesInfo(std::vector<SSqlTypeInfo>& types);
 
+		
+		/*!
+		* \brief	Initialize all members to NULL / UNKNOWN.
+		*/
 		void			Initialize();
 
+
+		/*!
+		* \brief	Query the Database using SQLGetInfo.
+		* \param [in,out] dbInfo SDbInfo to populate.
+		* \return	True on success.
+		*/
 		bool			ReadDbInfo(SDbInfo& dbInfo);
+		
+		
+		/*!
+		* \brief	Set initial global attributs on the database connection handle.
+		*/
 		bool			SetConnectionAttributes();
+		
+
+		/*!
+		* \brief	Do jobs common to all Open() implementations.
+		*/
 		bool             OpenImpl();
 
+		
 		enum ReadCatalogInfoMode
 		{
-			AllCatalogs,
-			AllSchemas,
-			AllTableTypes
+			AllCatalogs,	///< Query all catalog names.
+			AllSchemas,		///< Query all schema names.
+			AllTableTypes	///< Query all table names.
 		};
+		/*!
+		* \brief	Queries the database about catalog-, schema- or table-names
+		* \param mode Determine which names to query.
+		* \param [in,out] results names.
+		*/
 		bool			ReadCatalogInfo(ReadCatalogInfoMode mode, std::vector<std::wstring>& results);
 
+
 		// Members
+		// -------
 		SDbInfo				m_dbInf;
 
-		std::vector<SSqlTypeInfo> m_datatypes; // Queried from DB during Open
-		bool				m_dbIsOpen;	// Set to true after SQLConnect was successful
-		bool				m_dbOpenedWithConnectionString;  // Was the database connection Opened with a connection string
-		std::wstring		m_dsn;             // Data source name
-		std::wstring		m_uid;             // User ID
-		std::wstring		m_authStr;         // Authorization string (password)
-		std::wstring		m_inConnectionStr; // Connection string used to connect to the database
-		std::wstring		m_outConnectionStr;// Connection string returned by the database when a connection is successfully OpenImpled
-		bool				m_fwdOnlyCursors;
-		DatabaseProduct		m_dbmsType;        // Type of datasource - i.e. Oracle, dBase, SQLServer, etc
+		std::vector<SSqlTypeInfo> m_datatypes;	///< Queried from DB during Open
+		bool				m_dbIsOpen;			///< Set to true after SQLConnect was successful
+		bool				m_dbOpenedWithConnectionString;  ///< Was the database connection Opened with a connection string
+		std::wstring		m_dsn;             ///< Data source name
+		std::wstring		m_uid;             ///< User ID
+		std::wstring		m_authStr;         ///< Authorization string (password)
+		std::wstring		m_inConnectionStr; ///< Connection string used to connect to the database
+		std::wstring		m_outConnectionStr;///< Connection string returned by the database when a connection is successfully OpenImpled
+		DatabaseProduct		m_dbmsType;        ///< Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 		const Environment*	m_pEnv;				///< Environment used to create this Database
 
 		// ODBC handles created by the Database
@@ -693,11 +728,12 @@ namespace exodbc
 		size_t RegisterTable(const Table* const pTable);
 		bool UnregisterTable(const Table* const pTable);
 		friend class Table;
-
 #endif
 
+
 		// OLD STUFF we need to think about re-adding it
-		// =========
+		// =============================================
+		//
 		// public:
 		//bool         DispAllErrors(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
 		//		bool         GetNextError(HENV aHenv, HDBC aHdbc = SQL_NULL_HDBC, HSTMT aHstmt = SQL_NULL_HSTMT);
@@ -754,7 +790,7 @@ namespace exodbc
 		//		void			LogErrorImpl(const std::wstring& errMsg, const std::wstring& SQLState);
 		//		std::wstring	ConvertUserIDImpl(const wchar_t* userID);
 		//		bool             DetermineDataTypes(bool failOnDataTypeUnsupported);
-		//
+		//		bool				m_fwdOnlyCursors;
 		//		FILE*				m_fpSqlLog;        // Sql Log file pointer
 		//		wxDbSqlLogState		m_sqlLogState;     // On or Off
 		//// Information about logical data types VARCHAR, INTEGER, FLOAT and DATE.
