@@ -59,11 +59,19 @@ namespace exodbc
 		, m_columnNr((SQLUSMALLINT) columnInfo.m_ordinalPosition)
 		, m_odbcVersion(odbcVersion)
 		, m_decimalDigits(-1)
+		, m_columnSize(-1)
 	{
 		exASSERT(m_columnNr > 0);
 		exASSERT(columnInfo.m_sqlDataType != 0);
 
-		// TODO: Extract decimal digits and precision
+		if (!columnInfo.m_isColumnSizeNull)
+		{
+			m_columnSize = columnInfo.m_columnSize;
+		}
+		if (!columnInfo.m_isDecimalDigitsNull)
+		{
+			m_decimalDigits = columnInfo.m_decimalDigits;
+		}
 
 		m_queryName = columnInfo.GetSqlName();
 		m_allocatedBuffer = AllocateBuffer(columnInfo);
