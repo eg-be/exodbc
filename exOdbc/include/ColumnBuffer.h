@@ -465,7 +465,8 @@ namespace exodbc
 #endif
 		SQL_NUMERIC_STRUCT* GetNumericPtr() const;
 
-		SQLSMALLINT m_decimalDigits;	///< Decimal digits, set during construction, -1 if not known.
+		SQLINTEGER	m_columnSize;	///< Column Size, either read from SColumnInfo during construction or set manually. -1 indicates unknown.
+		SQLSMALLINT m_decimalDigits;	///< Decimal digits, either read from SColumnInfo during construction or set manually. -1 indicates unkonwn.
 		std::wstring m_queryName;	///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
 		SQLUSMALLINT m_columnNr;	///< Either set on construction or read from SColumnInfo::m_ordinalPosition
 		bool m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
