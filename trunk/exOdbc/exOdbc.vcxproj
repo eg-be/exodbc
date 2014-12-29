@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ColumnBuffer.h" />
-    <ClInclude Include="include\ColumnFormatter.h" />
     <ClInclude Include="include\Database.h" />
     <ClInclude Include="include\Environment.h" />
     <ClInclude Include="include\Table.h" />
@@ -32,7 +31,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ColumnBuffer.cpp" />
-    <ClCompile Include="src\ColumnFormatter.cpp" />
     <ClCompile Include="src\Database.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v100|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v120|Win32'">NotUsing</PrecompiledHeader>

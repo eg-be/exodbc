@@ -42,7 +42,6 @@
 
 // Same component headers
 #include "Environment.h"
-#include "ColumnFormatter.h"
 #include "Helpers.h"
 #include "Table.h"
 
