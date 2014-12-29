@@ -137,6 +137,9 @@ namespace exodbc
 					delete GetTime2Ptr();
 					break;
 #endif
+				case SQL_C_NUMERIC:
+					delete GetNumericPtr();
+					break;
 				default:
 					exASSERT(false);
 				}
@@ -234,6 +237,9 @@ namespace exodbc
 			m_bufferPtr = new SQL_SS_TIME2_STRUCT;
 			break;
 #endif
+		case SQL_C_NUMERIC:
+			m_bufferPtr = new SQL_NUMERIC_STRUCT;
+			break;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_bufferType) % m_bufferType).str());
 			failed = true;
@@ -280,6 +286,8 @@ namespace exodbc
 		case SQL_C_SS_TIME2:
 			return static_cast<void*>(boost::get<SQL_SS_TIME2_STRUCT*>(m_bufferPtr));
 #endif
+		case SQL_C_NUMERIC:
+			return static_cast<void*>(boost::get<SQL_NUMERIC_STRUCT*>(m_bufferPtr));
 		default:
 			exASSERT(false);
 		}
@@ -386,6 +394,8 @@ namespace exodbc
 		case SQL_C_BINARY:
 			exASSERT(!m_columnInfo.m_isColumnSizeNull);
 			return m_columnInfo.m_columnSize * sizeof(SQLCHAR);
+		case SQL_C_NUMERIC:
+			return sizeof(SQL_NUMERIC_STRUCT);
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -460,6 +470,8 @@ namespace exodbc
 		case SQL_VARBINARY:
 		case SQL_LONGVARBINARY:
 			return SQL_C_BINARY;
+		case SQL_NUMERIC:
+			return SQL_C_NUMERIC;
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(m_columnInfo.m_sqlDataType) % m_columnInfo.m_sqlDataType).str());
 		}
@@ -686,6 +698,7 @@ namespace exodbc
 		return boost::get<SQL_TIMESTAMP_STRUCT*>(m_bufferPtr);
 	}
 
+
 #if HAVE_MSODBCSQL_H
 	SQL_SS_TIME2_STRUCT* ColumnBuffer::GetTime2Ptr() const
 	{
@@ -695,6 +708,15 @@ namespace exodbc
 		return boost::get<SQL_SS_TIME2_STRUCT*>(m_bufferPtr);
 	}
 #endif
+
+
+	SQL_NUMERIC_STRUCT* ColumnBuffer::GetNumericPtr() const
+	{
+		exASSERT(m_haveBuffer);
+
+		// Could throw boost::bad_get
+		return boost::get<SQL_NUMERIC_STRUCT*>(m_bufferPtr);
+	}
 
 
 	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_TIME_STRUCT* pTime) const
