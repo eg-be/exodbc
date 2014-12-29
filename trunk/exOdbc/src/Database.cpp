@@ -7,7 +7,7 @@
 * Source file for the Database class and its helpers.
 * This file was originally wx/db.cpp from wxWidgets 2.8.
 * Most of the code has been rewritten, a lot of functionality
-* not needed and not tested so far has been droped.
+* not needed and not tested so far has been dropped.
 *
 * For completion, here follows the old wxWidgets header:
 *
