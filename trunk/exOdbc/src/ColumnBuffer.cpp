@@ -201,34 +201,14 @@ namespace exodbc
 			SQLHDESC hDesc = SQL_NULL_HDESC;
 			if (GetRowDescriptorHandle(hStmt, hDesc))
 			{
-				//SQLINTEGER precision;
-				//SQLINTEGER scale;
-				//bool sk0 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, SQL_C_NUMERIC);
-				//bool sk1 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, 18);
-				//bool sk2 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, 0);
 				bool ok = true;
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, m_bufferType);
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, m_columnSize);
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, m_decimalDigits);
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)pBuffer);
-
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER) &m_cb);
+				//ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH, sizeof(SQL_NUMERIC_STRUCT));
 				m_bound = ok;
-
-				//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
-				//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
-				//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
-				//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*)&numStr, 0);
-				// TODO: if not okay, do something, fail probably.
-				//bool ok1 = GetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, precision);
-				//bool ok2 = GetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, scale);
-				//// TODO: Reading the value does not work?
-				//int p = 3;
-
-
-				// We are not bound successfully.
-				// Note: We do not call SQLFreeStatement with SQL_UNBIND here, as this would unbind all
-				// columns bound to this statement. We just mark this ColumnBuffer as not bound.
-				// TODO: Do something, fail probably
 			}
 			if (!m_bound)
 			{
@@ -240,7 +220,7 @@ namespace exodbc
 		{
 			// Non numeric columns pass the tests fine by using just SQLBindCol
 			SQLRETURN ret = SQLBindCol(hStmt, m_columnNr, m_bufferType, (SQLPOINTER*)pBuffer, m_bufferSize, &m_cb);
-			// Note: We check on purpose here only for SUCCESS, we do not tolarate loosing precision
+			// Note: We check on purpose here only for SUCCESS, we do not tolerate loosing precision
 			if (ret != SQL_SUCCESS)
 			{
 				LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
@@ -661,6 +641,15 @@ namespace exodbc
 		exASSERT(m_bound);
 
 		return boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
+	}
+
+
+	ColumnBuffer::operator SQL_NUMERIC_STRUCT() const
+	{
+		exASSERT(m_haveBuffer);
+		exASSERT(m_bound);
+
+		return boost::apply_visitor(NumericVisitor(), m_bufferPtr);
 	}
 
 

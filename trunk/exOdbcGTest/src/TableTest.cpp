@@ -49,7 +49,7 @@ namespace exodbc
 		// Set up Env
 		ASSERT_TRUE(m_env.AllocHenv());
 		// Try to set to the highest version available: We need that for the tests to run correct
-		ASSERT_TRUE(m_env.SetOdbcVersion(OV_3_8));
+		ASSERT_TRUE(m_env.SetOdbcVersion(OV_3));
 
 		// And database
 		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
@@ -968,46 +968,74 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DSABLED_GetAutoNumericValue)
+	TEST_P(TableTest, GetAutoNumericValue)
 	{
 		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(nTable.Open(false, true));
 
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
-		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 5") % idName).str()));
-		EXPECT_TRUE(nTable.SelectNext());
-		const SQLCHAR* buff = NULL;
-		SQLINTEGER buffSize = 0;
-		EXPECT_TRUE(nTable.GetBuffer(2, buff, buffSize));
-		SQL_NUMERIC_STRUCT* pNum = (SQL_NUMERIC_STRUCT*)buff;
+		SQL_NUMERIC_STRUCT numStr;
 
-		char buff1[8];
-		char buff2[8];
-		ZeroMemory(&buff1, sizeof(buff1));
-		ZeroMemory(&buff2, sizeof(buff2));
-		memcpy(&buff1, &pNum->val, sizeof(buff1));
-		memcpy(&buff2, &pNum->val[8], sizeof(buff2));
-		SQLUBIGINT* i1 = (SQLUBIGINT*)&buff1;
-		SQLUBIGINT* i2 = (SQLUBIGINT*)&buff2;
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		//EXPECT_TRUE(nTable.SelectNext());
+		nTable.SelectNext();
+		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
+		EXPECT_EQ(18, numStr.precision);
+		EXPECT_EQ(10, numStr.scale);
+		EXPECT_EQ(1, numStr.sign);
+		SQLBIGINT ex = 0;
+		SQLBIGINT* p = (SQLBIGINT*)&numStr.val;
+		EXPECT_EQ(ex, *p);
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		//EXPECT_TRUE(nTable.SelectNext());
+		nTable.SelectNext();
+		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
+		EXPECT_EQ(18, numStr.precision);
+		EXPECT_EQ(10, numStr.scale);
+		EXPECT_EQ(1, numStr.sign);
+		ex = 123456789012345678;
+		p = (SQLBIGINT*)&numStr.val;
+		EXPECT_EQ(ex, *p);
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		//EXPECT_TRUE(nTable.SelectNext());
+		nTable.SelectNext();
+		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
+		EXPECT_EQ(18, numStr.precision);
+		EXPECT_EQ(10, numStr.scale);
+		EXPECT_EQ(0, numStr.sign);
+		ex = 123456789012345678;
+		p = (SQLBIGINT*)&numStr.val;
+		EXPECT_EQ(ex, *p);
+
+
+		//const SQLCHAR* buff = NULL;
+		//SQLINTEGER buffSize = 0;
+		//EXPECT_TRUE(nTable.GetBuffer(2, buff, buffSize));
+		//SQL_NUMERIC_STRUCT* pNum = (SQL_NUMERIC_STRUCT*)buff;
+
+		//char buff1[8];
+		//char buff2[8];
+		//ZeroMemory(&buff1, sizeof(buff1));
+		//ZeroMemory(&buff2, sizeof(buff2));
+		//memcpy(&buff1, &pNum->val, sizeof(buff1));
+		//memcpy(&buff2, &pNum->val[8], sizeof(buff2));
+		//SQLUBIGINT* i1 = (SQLUBIGINT*)&buff1;
+		//SQLUBIGINT* i2 = (SQLUBIGINT*)&buff2;
 		// if precision is < 19 we can store it in a signed bigint (it has 19 digits).
 		// TODO: Note: This is just luck we can store it here without conversion, as
 		// ODBC returns little endians
-		int p = 3;
+		int u = 3;
 
 	}
 
 
 	TEST_P(TableTest, DISABLED_GetTestNumericValue)
 	{
-		//		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
-		if (m_db.Dbms() != dbmsMY_SQL)
-		{
-			//return;
-		}
-
-		SQLINTEGER strlen1;
-		SQLINTEGER a;
+//		SQLINTEGER strlen1;
+//		SQLINTEGER a;
 
 		SQLRETURN ret = 0;
 		SQL_NUMERIC_STRUCT numStr;
@@ -1027,9 +1055,9 @@ namespace exodbc
 		ret = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
 		ret = SQLConnect(hdbc, (SQLWCHAR*)m_odbcInfo.m_dsn.c_str(), SQL_NTS, (SQLWCHAR*)m_odbcInfo.m_username.c_str(), SQL_NTS, (SQLWCHAR*)m_odbcInfo.m_password.c_str(), SQL_NTS);
 		ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-		SQLSMALLINT recNr = 4;
+		SQLSMALLINT recNr = 2;
+
 		//ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
-		ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
 
 		// Use SQLBindCol to bind the NumStr to the column that is being retrieved.
 
@@ -1052,12 +1080,14 @@ namespace exodbc
 		//ret = SQLBindCol(hstmt, recNr, SQL_C_NUMERIC, &numStr, 19, &strlen1);
 		//numStr.scale = 10;
 		SQLULEN rowCount = 0;
-
-		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
-		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
-		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
-		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*)&numStr, 0);
-		ret = SQLSetDescRec(hdesc, recNr, SQL_C_NUMERIC, 0, sizeof(numStr), 5, 3, &numStr, NULL, NULL);
+		SQLLEN cb;
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)18, 0);
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)10, 0);
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*)&numStr, 0);
+//		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_OCTET_LENGTH, 0, 0);
+//		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_OCTET_LENGTH_PTR, (VOID*) &cb, 0);
+		//ret = SQLSetDescRec(hdesc, recNr, SQL_C_NUMERIC, 0, sizeof(numStr), 5, 3, &numStr, NULL, NULL);
 		if (ret != SQL_SUCCESS)
 		{
 			std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, NULL, hdesc);
@@ -1066,7 +1096,7 @@ namespace exodbc
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_TYPE, &type, SQL_IS_INTEGER, NULL);
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_SCALE, &scale, SQL_IS_INTEGER, NULL);
-
+		
 		//ret = SQLSetDescRec(hdesc, recNr, SQL_C_NUMERIC, 0, sizeof(numStr), 5, 3, &numStr, NULL, NULL);
 		//if (ret != SQL_SUCCESS)
 		//{
@@ -1074,14 +1104,30 @@ namespace exodbc
 		//	LOG_ERROR(L"hello");
 		//	//LOG_ERROR_STMT(hstmt, ret, SQLFetch);
 		//}
-		while ((ret = SQLFetch(hstmt)) != SQL_NO_DATA)
+
+		if (m_db.Dbms() == dbmsMY_SQL)
 		{
-			if (ret != SQL_SUCCESS)
-			{
-				std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, hstmt);
-				LOG_ERROR(L"hello");
-				//LOG_ERROR_STMT(hstmt, ret, SQLFetch);
-			}
+			ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
+		}
+		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3  FROM exodbc.exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
+		}
+		else
+		{
+			ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
+		}
+
+		ret = SQLFetch(hstmt);
+		if (ret != SQL_SUCCESS)
+		{
+			std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, hstmt);
+			LOG_ERROR(L"hello");
+			//LOG_ERROR_STMT(hstmt, ret, SQLFetch);
+		}
+		if (SQL_SUCCEEDED(ret))
+		{
+
 			SQLBIGINT* pInt = (SQLBIGINT*) &numStr.val;
 			// Notice that the TargetType (3rd Parameter) is SQL_ARD_TYPE, which  
 			//forces the driver to use the Application Row Descriptor with the 

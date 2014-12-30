@@ -493,6 +493,17 @@ namespace exodbc
 		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const;
 #endif
 
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_NUMERIC_STRUCT.
+		* \detailed	Casts the value if casting is possible without loosing data.
+		* \param	columnIndex Zero based index of a bound column.
+		* \param [in,out] numeric Reference to variable to copy value to.
+		* \return	True if numeric has been filled with value. False else.
+		*/
+		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_NUMERIC_STRUCT& numeric) const;
+
+
 		/*!
 		* \brief	Check if the current value of a column is NULL.
 		* \detailed	Queries the length-indicator field of the ColumnBuffer to determine if
