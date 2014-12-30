@@ -527,6 +527,16 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Return a defined ColumnBuffer or NULL.
+		* \detailed	Searches the internal map of ColumnBuffers for a ColumnBuffer with
+		*			the given columnIndex (zero based).
+		*			Uses exDEBUG.
+		* \return	ColumnBuffer or NULL if none found.
+		*/
+		const ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
+
+
+		/*!
 		* \brief	Returns the number of columns this table has.
 		* \detailed	If columns were set manually on the table, this is the value that has been 
 		*			passed as the total number of columns of the table. It must not be equal
@@ -593,16 +603,6 @@ namespace exodbc
 		* \return	A string in the form "Field1, Field2, .., FieldN"
 		*/
 		std::wstring BuildFieldsStatement() const;
-
-
-		/*!
-		* \brief	Return a defined ColumnBuffer or NULL.
-		* \detailed	Searches the internal map of ColumnBuffers for a ColumnBuffer with
-		*			the given columnIndex (zero based).
-		*			Uses exDEBUG.
-		* \return	ColumnBuffer or NULL if none found.
-		*/
-		const ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
 
 
 		// ODBC Handles
