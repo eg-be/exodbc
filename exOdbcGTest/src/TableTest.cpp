@@ -975,7 +975,6 @@ namespace exodbc
 		EXPECT_TRUE(nTable.Open(false, true));
 
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
-		SQL_NUMERIC_STRUCT numStr;
 		const ColumnBuffer* pColId = nTable.GetColumnBuffer(0);
 		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
 		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
@@ -1026,6 +1025,7 @@ namespace exodbc
 
 	TEST_P(TableTest, GetAutoNumericValue)
 	{
+		// \note: There is a special Tests for NULL values, its complicated enough.
 		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(nTable.Open(false, true));
@@ -1035,49 +1035,29 @@ namespace exodbc
 		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
 		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
 		const ColumnBuffer* pColBuff5_3 = nTable.GetColumnBuffer(3);
-		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 4") % idName).str()));
-		EXPECT_TRUE(nTable.SelectNext());
-		//nTable.SelectNext();
-		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
-		EXPECT_EQ(18, numStr.precision);
-		EXPECT_EQ(10, numStr.scale);
-		EXPECT_EQ(1, numStr.sign);
-		SQLBIGINT ex = 0;
-		SQLBIGINT* p = (SQLBIGINT*)&numStr.val;
-		EXPECT_EQ(ex, *p);
-		EXPECT_FALSE(pColBuff18_10->IsNull());
+		SQLBIGINT ex;
+		SQLBIGINT* p;
 
-		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 1") % idName).str()));
 		EXPECT_TRUE(nTable.SelectNext());
-		//nTable.SelectNext();
-		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
+		EXPECT_TRUE(nTable.GetColumnValue(1, numStr));
 		EXPECT_EQ(18, numStr.precision);
-		EXPECT_EQ(10, numStr.scale);
+		EXPECT_EQ(0, numStr.scale);
 		EXPECT_EQ(1, numStr.sign);
-		ex = 123456789012345678;
+		ex = 0;
 		p = (SQLBIGINT*)&numStr.val;
 		EXPECT_EQ(ex, *p);
-		EXPECT_FALSE(pColBuff18_10->IsNull());
-
-		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 6") % idName).str()));
-		EXPECT_TRUE(nTable.SelectNext());
-		//nTable.SelectNext();
-		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
-		EXPECT_EQ(18, numStr.precision);
-		EXPECT_EQ(10, numStr.scale);
-		EXPECT_EQ(0, numStr.sign);
-		ex = 123456789012345678;
-		p = (SQLBIGINT*)&numStr.val;
-		EXPECT_EQ(ex, *p);
-		EXPECT_FALSE(pColBuff18_10->IsNull());
-
-		// Test for some NULL values
-		EXPECT_TRUE(pColBuff18_00->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
 
 		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 2") % idName).str()));
 		EXPECT_TRUE(nTable.SelectNext());
-		//nTable.SelectNext();
+		EXPECT_TRUE(nTable.GetColumnValue(1, numStr));
+		EXPECT_EQ(18, numStr.precision);
+		EXPECT_EQ(0, numStr.scale);
+		EXPECT_EQ(1, numStr.sign);
+		ex = 123456789012345678;
+		p = (SQLBIGINT*)&numStr.val;
+		EXPECT_EQ(ex, *p);
+		// Col 3 has a value here too.
 		EXPECT_TRUE(nTable.GetColumnValue(3, numStr));
 		EXPECT_EQ(5, numStr.precision);
 		EXPECT_EQ(3, numStr.scale);
@@ -1085,26 +1065,46 @@ namespace exodbc
 		ex = 12345;
 		p = (SQLBIGINT*)&numStr.val;
 		EXPECT_EQ(ex, *p);
-		EXPECT_FALSE(pColBuff5_3->IsNull());
 
-		//const SQLCHAR* buff = NULL;
-		//SQLINTEGER buffSize = 0;
-		//EXPECT_TRUE(nTable.GetBuffer(2, buff, buffSize));
-		//SQL_NUMERIC_STRUCT* pNum = (SQL_NUMERIC_STRUCT*)buff;
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_TRUE(nTable.GetColumnValue(1, numStr));
+		EXPECT_EQ(18, numStr.precision);
+		EXPECT_EQ(0, numStr.scale);
+		EXPECT_EQ(0, numStr.sign);
+		ex = 123456789012345678;
+		p = (SQLBIGINT*)&numStr.val;
+		EXPECT_EQ(ex, *p);
 
-		//char buff1[8];
-		//char buff2[8];
-		//ZeroMemory(&buff1, sizeof(buff1));
-		//ZeroMemory(&buff2, sizeof(buff2));
-		//memcpy(&buff1, &pNum->val, sizeof(buff1));
-		//memcpy(&buff2, &pNum->val[8], sizeof(buff2));
-		//SQLUBIGINT* i1 = (SQLUBIGINT*)&buff1;
-		//SQLUBIGINT* i2 = (SQLUBIGINT*)&buff2;
-		// if precision is < 19 we can store it in a signed bigint (it has 19 digits).
-		// TODO: Note: This is just luck we can store it here without conversion, as
-		// ODBC returns little endians
-		int u = 3;
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
+		EXPECT_EQ(18, numStr.precision);
+		EXPECT_EQ(10, numStr.scale);
+		EXPECT_EQ(1, numStr.sign);
+		ex = 0;
+		p = (SQLBIGINT*)&numStr.val;
+		EXPECT_EQ(ex, *p);
 
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
+		EXPECT_EQ(18, numStr.precision);
+		EXPECT_EQ(10, numStr.scale);
+		EXPECT_EQ(1, numStr.sign);
+		ex = 123456789012345678;
+		p = (SQLBIGINT*)&numStr.val;
+		EXPECT_EQ(ex, *p);
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
+		EXPECT_EQ(18, numStr.precision);
+		EXPECT_EQ(10, numStr.scale);
+		EXPECT_EQ(0, numStr.sign);
+		ex = 123456789012345678;
+		p = (SQLBIGINT*)&numStr.val;
+		EXPECT_EQ(ex, *p);
 	}
 
 

@@ -190,40 +190,34 @@ namespace exodbc
 		// If we want to bind a numeric type, we must set the precision and scale before binding!
 		// And binding somehow does only work if we set the Attributes manually using SetColDescField:
 		// If we bind and set then the ColDescFields PRECISION and SCALE data is only transfered to the
-		// NUMERIC_STRUCT if we explicitly call SQLGetData(.., SQL_ARD_TYPE, ..)
+		// NUMERIC_STRUCT if we explicitly call SQLGetData(.., SQL_ARD_TYPE, ..):
 		// Notice that the TargetType (3rd Parameter) is SQL_ARD_TYPE, which  
 		// forces the driver to use the Application Row Descriptor with the 
 		// specified scale and precision.
 		// But then we could also just not bind the column and transfer its data manually.
-		// Therefore: Instead of calling SQLBindCol bind the colum nmaunally using SetColDescField
+		// Therefore: Instead of calling SQLBindCol bind the columns manualy using SetColDescField
+		//
+		// \note: Not sure: Maybe we would need to call SQLBindCol first? At least its done like that here:
+		// http://www.ionu.ro/page/2/ - the only really working example I found on the web.
+		// As the tests run fine without it, leave it out. I think its not needed, it will do nothing else
+		// than what we do with the SetDescriptionField
 		if (m_bufferType == SQL_C_NUMERIC)
 		{
 			SQLHDESC hDesc = SQL_NULL_HDESC;
-			//if (GetRowDescriptorHandle(hStmt, hDesc))
+			if (GetRowDescriptorHandle(hStmt, hDesc))
 			{
-				SQLRETURN ret = SQLBindCol(hStmt, m_columnNr, m_bufferType, (SQLPOINTER*)pBuffer, m_bufferSize, &m_cb);
-				if (!SQL_SUCCEEDED(ret))
-				{
-					LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
-				}
-				else
-				{
-					if (GetRowDescriptorHandle(hStmt, hDesc))
-					{
-						bool ok = true;
-						ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, m_bufferType);
-						ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, m_columnSize);
-						ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, m_decimalDigits);
-						ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)pBuffer);
-						ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)&m_cb);
-						ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)&m_cb);
-						m_bound = ok;
-					}
-				}
+				bool ok = true;
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, m_bufferType);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, m_columnSize);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, m_decimalDigits);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)pBuffer);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)&m_cb);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)&m_cb);
+				m_bound = ok;
 			}
 			if (!m_bound)
 			{
-				// Set precision, scale, buffer-type and buffer
+				// Someting went wrong, the function above has already logged something.
 				LOG_ERROR((boost::wformat(L"Failed to bind Numeric Column '%s' (columnNr: %d)") %m_queryName %m_columnNr).str());
 			}
 		}
