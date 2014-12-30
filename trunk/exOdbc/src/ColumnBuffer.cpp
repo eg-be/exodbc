@@ -168,6 +168,44 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	//bool ColumnBuffer::TestStuff(HSTMT hStmt)
+	//{
+	//	if (m_bound && m_bufferType == SQL_C_NUMERIC && m_columnNr == 2)
+	//	{
+	//		// If we have bound to a numeric type, we must do some additional steps
+	//		SQLHDESC hDesc = SQL_NULL_HDESC;
+	//		if (!GetRowDescriptorHandle(hStmt, hDesc))
+	//		{
+	//			// We are not bound successfully.
+	//			// Note: We do not call SQLFreeStatement with SQL_UNBIND here, as this would unbind all
+	//			// columns bound to this statement. We just mark this ColumnBuffer as not bound.
+	//			// m_bound = false;
+	//		}
+	//		else
+	//		{
+	//			SQLRETURN ret1, ret2, ret3, ret4 = 0;
+	//			//ret1 = SQLSetDescField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC, 0);
+	//			//ret2 = SQLSetDescField(hDesc, m_columnNr, SQL_DESC_PRECISION, (SQLPOINTER)18, 0);
+	//			//ret3 = SQLSetDescField(hDesc, m_columnNr, SQL_DESC_SCALE, (SQLPOINTER)10, 0);
+	//			//ret4 = SQLSetDescField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&NumStr, 0);
+	//			//SQLINTEGER precision;
+	//			//SQLINTEGER scale;
+	//			//bool sk0 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, SQL_C_NUMERIC);
+	//			//bool sk1 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, 18);
+	//			//bool sk2 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, 0);
+	//			//bool sk3 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, & (SQLSMGetBuffer();
+	//			//bool sk1 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, m_columnSize);
+	//			//bool sk2 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, m_decimalDigits);
+
+	//			//bool ok1 = GetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, precision);
+	//			//bool ok2 = GetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, scale);
+	//			int p = 3;
+	//		}
+	//	}
+	//	return false;
+	//}
+
+
 	bool ColumnBuffer::Bind(HSTMT hStmt)
 	{
 		exASSERT(m_haveBuffer);
@@ -187,12 +225,69 @@ namespace exodbc
 			return false;
 		}
 
+		// If we want to bind a numeric type, we must set the precision and scale before binding!
+		if (m_bufferType == SQL_C_NUMERIC)
+		{
+			SQLHDESC hDesc = SQL_NULL_HDESC;
+			if (!GetRowDescriptorHandle(hStmt, hDesc))
+			{
+				// We are not bound successfully.
+				// Note: We do not call SQLFreeStatement with SQL_UNBIND here, as this would unbind all
+				// columns bound to this statement. We just mark this ColumnBuffer as not bound.
+				// TODO: Do something, fail probably
+				LOG_ERROR(L"ERR");
+			}
+			else
+			{
+				SQLINTEGER precision;
+				SQLINTEGER scale;
+				//bool sk0 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, SQL_C_NUMERIC);
+				//bool sk1 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, 18);
+				//bool sk2 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, 0);
+				
+				bool sk1 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, m_columnSize);
+				bool sk2 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, m_decimalDigits);
+				// TODO: if not okay, do something, fail probably.
+				bool ok1 = GetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, precision);
+				bool ok2 = GetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, scale);
+				// TODO: Reading the value does not work?
+				int p = 3;
+			}
+		}
 		SQLRETURN ret = SQLBindCol(hStmt, m_columnNr, m_bufferType, (SQLPOINTER*)pBuffer, m_bufferSize, &m_cb);
 		if (ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
-		};
+		}
+		m_bound = (ret == SQL_SUCCESS);
 
+		//if (m_bound && m_bufferType == SQL_C_NUMERIC)
+		//{
+		//	// If we have bound to a numeric type, we must do some additional steps
+		//	SQLHDESC hDesc = SQL_NULL_HDESC;
+		//	if (!GetRowDescriptorHandle(hStmt, hDesc))
+		//	{
+		//		// We are not bound successfully.
+		//		// Note: We do not call SQLFreeStatement with SQL_UNBIND here, as this would unbind all
+		//		// columns bound to this statement. We just mark this ColumnBuffer as not bound.
+		//		m_bound = false;
+		//	}
+		//	else
+		//	{
+		//		SQLINTEGER precision;
+		//		SQLINTEGER scale;
+		//		//bool sk0 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, SQL_C_NUMERIC);
+		//		//bool sk1 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, 18);
+		//		//bool sk2 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, 0);
+
+		//		//bool sk1 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, m_columnSize);
+		//		//bool sk2 = SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, m_decimalDigits);
+
+		//		//bool ok1 = GetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, precision);
+		//		//bool ok2 = GetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, scale);
+		//		int p = 3;
+		//	}
+		//}
 		m_bound = ( ret == SQL_SUCCESS );
 		return m_bound;
 	}
