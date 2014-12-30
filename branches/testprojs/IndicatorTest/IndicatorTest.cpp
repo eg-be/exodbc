@@ -15,9 +15,13 @@ insert into test.numtable (id, num) values (2, null);
 // Then create an odbc DSN entry that can be used:
 */
 
-#define DSN L"MySqlTest"
-#define USER L"User"
-#define PASS L"Pass"
+//#define DSN L"MySqlTest"
+//#define USER L"User"
+//#define PASS L"Pass"
+
+#define DSN L"exOdbc_MySql_5.3"
+#define USER L"exodbc"
+#define PASS L"testexodbc"
 
 // system
 #include <iostream>
@@ -78,6 +82,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (!SQL_SUCCEEDED(ret))
 	{
 		printErrors(SQL_HANDLE_DBC, hdbc);
+		getchar();
 		return -1;
 	}
 	ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
@@ -91,15 +96,29 @@ int _tmain(int argc, _TCHAR* argv[])
 	ZeroMemory(&numStr, sizeof(numStr));
 	SQLINTEGER indicator = 0;
 
+	// set type first, then attrs, ..
+
+	// setting it all at once row returns:
+	// SQLSTATE: IM001; nativeErr: 0 Msg : [Microsoft][ODBC Driver Manager] Driver does	not support this function
+	// ret = SQLSetDescRec(hdesc, recNr, SQL_C_NUMERIC, 0, 0, 5, 3, (SQLPOINTER*)&numStr, 0, &indicator);
+	//if (!SQL_SUCCEEDED(ret))
+	//{
+	//	printErrorsAndAbort(SQL_HANDLE_DESC, hdesc);
+	//}
+
+	// setting it one after the other works:
 	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*) SQL_C_NUMERIC, 0);
 	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*) 5, 0);
 	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*) 3, 0);
-	// Set the Indicator-pointer.
+	// .. set the Indicator-pointer.
 	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_INDICATOR_PTR, (VOID*)&indicator, 0);
 	if (!SQL_SUCCEEDED(ret))
 	{
+		// We get no error here, BUT later when Fetching we get an
+		// SQLSTATE: 22002; nativeErr: 0 Msg: [MySQL][ODBC 5.3(w) Driver][mysqld-5.6.16-log] Indicator variable required but not supplied
 		printErrorsAndAbort(SQL_HANDLE_DESC, hdesc);
 	}
+	// and last the pointer
 	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*) &numStr, 0);
 
 	// Query a null row:
@@ -113,6 +132,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (ret != SQL_SUCCESS)
 	{
 		// We get SQLSTATE 22002 here, saying indicator not bound. But it was bound without error
+		// SQLSTATE: 22002; nativeErr: 0 Msg: [MySQL][ODBC 5.3(w) Driver][mysqld-5.6.16-log] Indicator variable required but not supplied
 		printErrors(SQL_HANDLE_STMT, hstmt);
 	}
 	// No data has been fetched, indicator is not null
