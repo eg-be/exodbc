@@ -968,7 +968,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DISABLED_GetAutoNumericValue)
+	TEST_P(TableTest, DSABLED_GetAutoNumericValue)
 	{
 		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -998,7 +998,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DSABLED_GetTestNumericValue)
+	TEST_P(TableTest, DISABLED_GetTestNumericValue)
 	{
 		//		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
 		if (m_db.Dbms() != dbmsMY_SQL)
