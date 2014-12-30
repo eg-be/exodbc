@@ -133,6 +133,7 @@ namespace exodbc
 
 		SQL_NUMERIC_STRUCT	m_decimal_18_0;
 		SQL_NUMERIC_STRUCT	m_decimal_18_10;
+		SQL_NUMERIC_STRUCT	m_decimal_5_3;
 	};
 
 

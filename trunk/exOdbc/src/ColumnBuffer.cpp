@@ -86,7 +86,7 @@ namespace exodbc
 	}
 
 
-	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLSMALLINT decimalDigits /* = -1 */)
+	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 		: m_bound(false)
 		, m_allocatedBuffer(false)
 		, m_haveBuffer(true)
@@ -98,6 +98,7 @@ namespace exodbc
 		, m_queryName(queryName)
 		, m_odbcVersion(OV_UNKNOWN)
 		, m_decimalDigits(decimalDigits)
+		, m_columnSize(columnSize)
 	{
 		exASSERT(sqlCType != 0);
 		exASSERT(ordinalPosition > 0);
@@ -205,6 +206,9 @@ namespace exodbc
 		// of setting them is also important.
 		if (m_bufferType == SQL_C_NUMERIC)
 		{
+			exASSERT(m_columnSize > 0);
+			exASSERT(m_decimalDigits >= 0);
+
 			SQLHDESC hDesc = SQL_NULL_HDESC;
 			if (GetRowDescriptorHandle(hStmt, hDesc))
 			{
