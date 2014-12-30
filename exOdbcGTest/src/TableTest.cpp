@@ -1019,8 +1019,8 @@ namespace exodbc
 
 		// From the net: Set scale and precision on the struct too.
 		// http://www.tech-archive.net/Archive/Data/microsoft.public.data.odbc/2004-08/0039.html
-		numStr.precision = 5;
-		numStr.scale = 3;
+		//numStr.precision = 5;
+		//numStr.scale = 3;
 
 		ret = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
 		ret = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, SQL_IS_INTEGER);
@@ -1049,7 +1049,7 @@ namespace exodbc
 
 		// but bind after setting the attrs -> Does not work
 		// must be bound before setting the props, but even then it only works using GetData()
-		ret = SQLBindCol(hstmt, recNr, SQL_C_NUMERIC, &numStr, 19, &strlen1);
+		//ret = SQLBindCol(hstmt, recNr, SQL_C_NUMERIC, &numStr, 19, &strlen1);
 		//numStr.scale = 10;
 		SQLULEN rowCount = 0;
 
