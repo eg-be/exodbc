@@ -680,9 +680,13 @@ namespace exodbc
 		exASSERT(recordNumber > 0);
 		value = 0;
 		SQLRETURN ret = SQLGetDescField(hDesc, recordNumber, descriptionField, &value, NULL, NULL);
-		if (ret != SQL_SUCCESS)
+		if ( ! SQL_SUCCEEDED(ret))
 		{
-			LOG_ERROR(L"Failed to Get Description field");
+			LOG_ERROR_DESC(hDesc, ret, SQLGetDescField);
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_INFO_DESC(hDesc, ret, SQLGetDescField);
 		}
 		return SQL_SUCCEEDED(ret);
 	}
@@ -693,9 +697,13 @@ namespace exodbc
 		exASSERT(hDesc != SQL_NULL_HDESC);
 		exASSERT(recordNumber > 0);
 		SQLRETURN ret = SQLSetDescField(hDesc, recordNumber, descriptionField, (SQLPOINTER) value, NULL);
-		if (ret != SQL_SUCCESS)
+		if (!SQL_SUCCEEDED(ret))
 		{
-			LOG_ERROR(L"Set Description Field failed");
+			LOG_ERROR_DESC(hDesc, ret, SQLSetDescField);
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_INFO_DESC(hDesc, ret, SQLSetDescField);
 		}
 		return SQL_SUCCEEDED(ret);
 	}
@@ -709,6 +717,7 @@ namespace exodbc
 		if (!SQL_SUCCEEDED(ret))
 		{
 			LOG_ERROR_STMT(hStmt, ret, SQLGetStmtAttr);
+			hDesc = SQL_NULL_HSTMT;
 		}
 		if (ret == SQL_SUCCESS_WITH_INFO)
 		{
