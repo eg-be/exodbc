@@ -1056,6 +1056,7 @@ namespace exodbc
 		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
 		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
 		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*)&numStr, 0);
 
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_TYPE, &type, SQL_IS_INTEGER, NULL);
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
@@ -1080,8 +1081,8 @@ namespace exodbc
 			// Notice that the TargetType (3rd Parameter) is SQL_ARD_TYPE, which  
 			//forces the driver to use the Application Row Descriptor with the 
 			//specified scale and precision.
-			ret = SQLGetData(hstmt, recNr, SQL_ARD_TYPE, &numStr, 19, &a);
-			pInt = (SQLBIGINT*)&numStr.val;
+			//ret = SQLGetData(hstmt, recNr, SQL_ARD_TYPE, &numStr, 19, &a);
+			//pInt = (SQLBIGINT*)&numStr.val;
 			int p = 3;
 
 			// Check for null indicator.
