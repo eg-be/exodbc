@@ -321,15 +321,15 @@ namespace exodbc
 		}
 	}
 
-	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = SQL_NULL_HENV */, SQLHANDLE hDbc /* = SQL_NULL_HDBC */, SQLHANDLE hStmt /* = SQL_NULL_HSTMT */)
+	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = SQL_NULL_HENV */, SQLHANDLE hDbc /* = SQL_NULL_HDBC */, SQLHANDLE hStmt /* = SQL_NULL_HSTMT */, SQLHANDLE hDesc /* = SQL_NULL_HDESC */)
 	{
-		exASSERT(hEnv != SQL_NULL_HENV || hDbc != SQL_NULL_HDBC || hStmt != SQL_NULL_HSTMT);
+		exASSERT(hEnv != SQL_NULL_HENV || hDbc != SQL_NULL_HDBC || hStmt != SQL_NULL_HSTMT || hDesc != SQL_NULL_HDESC);
 
 		std::vector<SErrorInfo> errors;
 		SQLHANDLE handle = NULL;
 		SQLSMALLINT handleType = NULL;
 
-		for(int i = 0; i < 3; i++)
+		for(int i = 0; i < 4; i++)
 		{
 			if(i == 0 && hEnv)
 			{
@@ -345,6 +345,11 @@ namespace exodbc
 			{
 				handle = hStmt;
 				handleType = SQL_HANDLE_STMT;
+			}
+			else if (i == 3 && hDesc)
+			{
+				handle = hDesc;
+				handleType = SQL_HANDLE_DESC;
 			}
 			else
 				continue;

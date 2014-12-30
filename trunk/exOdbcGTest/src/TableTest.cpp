@@ -1000,7 +1000,7 @@ namespace exodbc
 
 	TEST_P(TableTest, DSABLED_GetTestNumericValue)
 	{
-//		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
+		//		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
 		if (m_db.Dbms() != dbmsMY_SQL)
 		{
 			//return;
@@ -1025,7 +1025,7 @@ namespace exodbc
 		ret = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
 		ret = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, SQL_IS_INTEGER);
 		ret = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
-		ret = SQLConnect(hdbc, (SQLWCHAR*) m_odbcInfo.m_dsn.c_str(), SQL_NTS, (SQLWCHAR*)m_odbcInfo.m_username.c_str(), SQL_NTS, (SQLWCHAR*) m_odbcInfo.m_password.c_str(), SQL_NTS);
+		ret = SQLConnect(hdbc, (SQLWCHAR*)m_odbcInfo.m_dsn.c_str(), SQL_NTS, (SQLWCHAR*)m_odbcInfo.m_username.c_str(), SQL_NTS, (SQLWCHAR*)m_odbcInfo.m_password.c_str(), SQL_NTS);
 		ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 		SQLSMALLINT recNr = 4;
 		//ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
@@ -1053,11 +1053,16 @@ namespace exodbc
 		//numStr.scale = 10;
 		SQLULEN rowCount = 0;
 
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*)&numStr, 0);
-
+		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
+		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
+		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
+		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*)&numStr, 0);
+		ret = SQLSetDescRec(hdesc, recNr, SQL_C_NUMERIC, 0, sizeof(numStr), 5, 3, &numStr, NULL, NULL);
+		if (ret != SQL_SUCCESS)
+		{
+			std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, NULL, hdesc);
+			LOG_ERROR(L"hello");
+		}
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_TYPE, &type, SQL_IS_INTEGER, NULL);
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_SCALE, &scale, SQL_IS_INTEGER, NULL);

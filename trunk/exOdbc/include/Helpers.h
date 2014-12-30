@@ -177,10 +177,11 @@ namespace exodbc
 	 * \param	hEnv 	(Optional) the environment.
 	 * \param	hDbc 	(Optional) the dbc.
 	 * \param	hStmt	(Optional) the statement.
+	 * \param	hStmt	(Optional) the description.
 	 *
 	 * \return	all errors.
 	 */
-	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = SQL_NULL_HENV, SQLHANDLE hDbc = SQL_NULL_HDBC, SQLHANDLE hStmt = SQL_NULL_HSTMT);
+	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = SQL_NULL_HENV, SQLHANDLE hDbc = SQL_NULL_HDBC, SQLHANDLE hStmt = SQL_NULL_HSTMT, SQLHANDLE hDesc = SQL_NULL_HDESC);
 
 	/*!
 	 * \brief	Gets the last environment error, if one is available.
