@@ -486,10 +486,13 @@ namespace exodbc
 		case SQL_REAL:
 			return SQL_C_DOUBLE;
 			// not valid without TYPE ?? http://msdn.microsoft.com/en-us/library/ms710150%28v=vs.85%29.aspx
+		case SQL_DATE:
 		case SQL_TYPE_DATE:
 			return SQL_C_TYPE_DATE;
+		case SQL_TIME:
 		case SQL_TYPE_TIME:
 			return SQL_C_TYPE_TIME;
+		case SQL_TIMESTAMP:
 		case SQL_TYPE_TIMESTAMP:
 			return SQL_C_TYPE_TIMESTAMP;
 #if HAVE_MSODBCSQL_H
