@@ -1038,16 +1038,17 @@ namespace exodbc
 
 		ret = SQLGetStmtAttr(hstmt, SQL_ATTR_APP_ROW_DESC, &hdesc, 0, NULL);
 
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
+		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
+		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
+		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
 
 		SQLINTEGER type, prec, scale;
-		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_TYPE, &type, SQL_IS_INTEGER, NULL);
-		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
-		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_SCALE, &scale, SQL_IS_INTEGER, NULL);
+		//ret = SQLGetDescField(hdesc, recNr, SQL_DESC_TYPE, &type, SQL_IS_INTEGER, NULL);
+		//ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
+		//ret = SQLGetDescField(hdesc, recNr, SQL_DESC_SCALE, &scale, SQL_IS_INTEGER, NULL);
 
-		// but bind after setting the attrs
+		// but bind after setting the attrs -> Does not work
+		// must be bound before setting the props, but even then it only works using GetData()
 		ret = SQLBindCol(hstmt, recNr, SQL_C_NUMERIC, &numStr, 19, &strlen1);
 		//numStr.scale = 10;
 		SQLULEN rowCount = 0;
@@ -1060,6 +1061,13 @@ namespace exodbc
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
 		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_SCALE, &scale, SQL_IS_INTEGER, NULL);
 
+		//ret = SQLSetDescRec(hdesc, recNr, SQL_C_NUMERIC, 0, sizeof(numStr), 5, 3, &numStr, NULL, NULL);
+		//if (ret != SQL_SUCCESS)
+		//{
+		//	std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, hstmt);
+		//	LOG_ERROR(L"hello");
+		//	//LOG_ERROR_STMT(hstmt, ret, SQLFetch);
+		//}
 		while ((ret = SQLFetch(hstmt)) != SQL_NO_DATA)
 		{
 			if (ret != SQL_SUCCESS)
