@@ -195,12 +195,14 @@ namespace exodbc
 		// forces the driver to use the Application Row Descriptor with the 
 		// specified scale and precision.
 		// But then we could also just not bind the column and transfer its data manually.
-		// Therefore: Instead of calling SQLBindCol bind the columns manualy using SetColDescField
+		// Therefore: Instead of calling SQLBindCol bind the columns manually using SetColDescField
 		//
 		// \note: Not sure: Maybe we would need to call SQLBindCol first? At least its done like that here:
 		// http://www.ionu.ro/page/2/ - the only really working example I found on the web.
 		// As the tests run fine without it, leave it out. I think its not needed, it will do nothing else
-		// than what we do with the SetDescriptionField
+		// than what we do with the SetDescriptionField.
+		// But it is important to set all those attributes, including octet_length_ptr! maybe the order
+		// of setting them is also important.
 		if (m_bufferType == SQL_C_NUMERIC)
 		{
 			SQLHDESC hDesc = SQL_NULL_HDESC;
@@ -217,7 +219,7 @@ namespace exodbc
 			}
 			if (!m_bound)
 			{
-				// Someting went wrong, the function above has already logged something.
+				// Something went wrong, the function above has already logged some detail.
 				LOG_ERROR((boost::wformat(L"Failed to bind Numeric Column '%s' (columnNr: %d)") %m_queryName %m_columnNr).str());
 			}
 		}
