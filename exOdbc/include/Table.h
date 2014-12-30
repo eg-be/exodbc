@@ -561,9 +561,13 @@ namespace exodbc
 		* \param	sqlCType SQL_C_TYPE of the buffer hold by pBuffer, like SQL_C_CHAR, SQL_C_SINTEGER, etc.
 		*			This information will be forwarded to the ODBC driver while binding the column.
 		*			The driver will try to convert the column-value to the given type.
+		* \param	column columnSize The number of digits of a decimal value (including the fractional part).
+		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
+		* \param	decimalDigits The number of digits of the fractional part of a decimal value.
+		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
 		* \param	bufferSize The size of the buffer pointed to by pBuffer.
 		*/
-		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize);
+		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 
 		// Private stuff

@@ -795,7 +795,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 	{
 		exASSERT(m_manualColumns);
 		exASSERT(columnIndex >= 0);
@@ -804,7 +804,7 @@ namespace exodbc
 		exASSERT(bufferSize > 0);
 		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
 
-		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, columnIndex + 1, pBuffer, bufferSize, queryName);
+		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, columnIndex + 1, pBuffer, bufferSize, queryName, columnSize, decimalDigits);
 		m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 
