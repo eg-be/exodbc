@@ -522,7 +522,7 @@ namespace exodbc
 		}
 		EXPECT_TRUE(m_db.ReadTableColumnInfo(tableName, schemaName, catalogName, typeName, cols));
 		// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
-		ASSERT_TRUE(cols.size() == 3);
+		ASSERT_TRUE(cols.size() == 4);
 		SColumnInfo col = cols[2];
 		EXPECT_FALSE(col.m_isNumPrecRadixNull);
 		EXPECT_FALSE(col.m_isColumnSizeNull);

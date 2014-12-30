@@ -968,6 +968,62 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, IsNullAutoNumericValue)
+	{
+		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
+		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(nTable.Open(false, true));
+
+		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		SQL_NUMERIC_STRUCT numStr;
+		const ColumnBuffer* pColId = nTable.GetColumnBuffer(0);
+		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
+		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
+		const ColumnBuffer* pColBuff5_3 = nTable.GetColumnBuffer(3);
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_FALSE(pColId->IsNull());
+		EXPECT_FALSE(pColBuff18_00->IsNull());
+		EXPECT_TRUE(pColBuff18_10->IsNull());
+		EXPECT_TRUE(pColBuff5_3->IsNull());
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_FALSE(pColId->IsNull());
+		EXPECT_FALSE(pColBuff18_00->IsNull());
+		EXPECT_TRUE(pColBuff18_10->IsNull());
+		EXPECT_FALSE(pColBuff5_3->IsNull());
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_FALSE(pColId->IsNull());
+		EXPECT_FALSE(pColBuff18_00->IsNull());
+		EXPECT_TRUE(pColBuff18_10->IsNull());
+		EXPECT_TRUE(pColBuff5_3->IsNull());
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_FALSE(pColId->IsNull());
+		EXPECT_TRUE(pColBuff18_00->IsNull());
+		EXPECT_FALSE(pColBuff18_10->IsNull());
+		EXPECT_TRUE(pColBuff5_3->IsNull());
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_FALSE(pColId->IsNull());
+		EXPECT_TRUE(pColBuff18_00->IsNull());
+		EXPECT_FALSE(pColBuff18_10->IsNull());
+		EXPECT_TRUE(pColBuff5_3->IsNull());
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_FALSE(pColId->IsNull());
+		EXPECT_TRUE(pColBuff18_00->IsNull());
+		EXPECT_FALSE(pColBuff18_10->IsNull());
+		EXPECT_TRUE(pColBuff5_3->IsNull());
+	}
+
+
 	TEST_P(TableTest, GetAutoNumericValue)
 	{
 		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
@@ -976,10 +1032,12 @@ namespace exodbc
 
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		SQL_NUMERIC_STRUCT numStr;
-
+		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
+		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
+		const ColumnBuffer* pColBuff5_3 = nTable.GetColumnBuffer(3);
 		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 4") % idName).str()));
-		//EXPECT_TRUE(nTable.SelectNext());
-		nTable.SelectNext();
+		EXPECT_TRUE(nTable.SelectNext());
+		//nTable.SelectNext();
 		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
 		EXPECT_EQ(18, numStr.precision);
 		EXPECT_EQ(10, numStr.scale);
@@ -987,10 +1045,11 @@ namespace exodbc
 		SQLBIGINT ex = 0;
 		SQLBIGINT* p = (SQLBIGINT*)&numStr.val;
 		EXPECT_EQ(ex, *p);
+		EXPECT_FALSE(pColBuff18_10->IsNull());
 
 		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 5") % idName).str()));
-		//EXPECT_TRUE(nTable.SelectNext());
-		nTable.SelectNext();
+		EXPECT_TRUE(nTable.SelectNext());
+		//nTable.SelectNext();
 		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
 		EXPECT_EQ(18, numStr.precision);
 		EXPECT_EQ(10, numStr.scale);
@@ -998,10 +1057,11 @@ namespace exodbc
 		ex = 123456789012345678;
 		p = (SQLBIGINT*)&numStr.val;
 		EXPECT_EQ(ex, *p);
+		EXPECT_FALSE(pColBuff18_10->IsNull());
 
 		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 6") % idName).str()));
-		//EXPECT_TRUE(nTable.SelectNext());
-		nTable.SelectNext();
+		EXPECT_TRUE(nTable.SelectNext());
+		//nTable.SelectNext();
 		EXPECT_TRUE(nTable.GetColumnValue(2, numStr));
 		EXPECT_EQ(18, numStr.precision);
 		EXPECT_EQ(10, numStr.scale);
@@ -1009,7 +1069,23 @@ namespace exodbc
 		ex = 123456789012345678;
 		p = (SQLBIGINT*)&numStr.val;
 		EXPECT_EQ(ex, *p);
+		EXPECT_FALSE(pColBuff18_10->IsNull());
 
+		// Test for some NULL values
+		EXPECT_TRUE(pColBuff18_00->IsNull());
+		EXPECT_TRUE(pColBuff5_3->IsNull());
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		//nTable.SelectNext();
+		EXPECT_TRUE(nTable.GetColumnValue(3, numStr));
+		EXPECT_EQ(5, numStr.precision);
+		EXPECT_EQ(3, numStr.scale);
+		EXPECT_EQ(1, numStr.sign);
+		ex = 12345;
+		p = (SQLBIGINT*)&numStr.val;
+		EXPECT_EQ(ex, *p);
+		EXPECT_FALSE(pColBuff5_3->IsNull());
 
 		//const SQLCHAR* buff = NULL;
 		//SQLINTEGER buffSize = 0;
@@ -1031,151 +1107,6 @@ namespace exodbc
 
 	}
 
-
-	TEST_P(TableTest, DISABLED_GetTestNumericValue)
-	{
-//		SQLINTEGER strlen1;
-//		SQLINTEGER a;
-
-		SQLRETURN ret = 0;
-		SQL_NUMERIC_STRUCT numStr;
-		SQLHENV henv = SQL_NULL_HENV;
-		SQLHDBC hdbc = SQL_NULL_HDBC;
-		SQLHSTMT hstmt = SQL_NULL_HSTMT;
-		SQLHDESC hdesc = SQL_NULL_HDESC;
-		ZeroMemory(&numStr, sizeof(numStr));
-
-		// From the net: Set scale and precision on the struct too.
-		// http://www.tech-archive.net/Archive/Data/microsoft.public.data.odbc/2004-08/0039.html
-		//numStr.precision = 5;
-		//numStr.scale = 3;
-
-		ret = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
-		ret = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, SQL_IS_INTEGER);
-		ret = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
-		ret = SQLConnect(hdbc, (SQLWCHAR*)m_odbcInfo.m_dsn.c_str(), SQL_NTS, (SQLWCHAR*)m_odbcInfo.m_username.c_str(), SQL_NTS, (SQLWCHAR*)m_odbcInfo.m_password.c_str(), SQL_NTS);
-		ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-		SQLSMALLINT recNr = 2;
-
-		//ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
-
-		// Use SQLBindCol to bind the NumStr to the column that is being retrieved.
-
-		// Get the application row descriptor for the statement handle using
-		//SQLGetStmtAttr.
-
-		ret = SQLGetStmtAttr(hstmt, SQL_ATTR_APP_ROW_DESC, &hdesc, 0, NULL);
-
-		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
-		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
-		//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
-
-		SQLINTEGER type, prec, scale;
-		//ret = SQLGetDescField(hdesc, recNr, SQL_DESC_TYPE, &type, SQL_IS_INTEGER, NULL);
-		//ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
-		//ret = SQLGetDescField(hdesc, recNr, SQL_DESC_SCALE, &scale, SQL_IS_INTEGER, NULL);
-
-		// but bind after setting the attrs -> Does not work
-		// must be bound before setting the props, but even then it only works using GetData()
-		//ret = SQLBindCol(hstmt, recNr, SQL_C_NUMERIC, &numStr, 19, &strlen1);
-		//numStr.scale = 10;
-		SQLULEN rowCount = 0;
-		SQLLEN cb;
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)18, 0);
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)10, 0);
-		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*)&numStr, 0);
-//		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_OCTET_LENGTH, 0, 0);
-//		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_OCTET_LENGTH_PTR, (VOID*) &cb, 0);
-		//ret = SQLSetDescRec(hdesc, recNr, SQL_C_NUMERIC, 0, sizeof(numStr), 5, 3, &numStr, NULL, NULL);
-		if (ret != SQL_SUCCESS)
-		{
-			std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, NULL, hdesc);
-			LOG_ERROR(L"hello");
-		}
-		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_TYPE, &type, SQL_IS_INTEGER, NULL);
-		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
-		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_SCALE, &scale, SQL_IS_INTEGER, NULL);
-		
-		//ret = SQLSetDescRec(hdesc, recNr, SQL_C_NUMERIC, 0, sizeof(numStr), 5, 3, &numStr, NULL, NULL);
-		//if (ret != SQL_SUCCESS)
-		//{
-		//	std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, hstmt);
-		//	LOG_ERROR(L"hello");
-		//	//LOG_ERROR_STMT(hstmt, ret, SQLFetch);
-		//}
-
-		if (m_db.Dbms() == dbmsMY_SQL)
-		{
-			ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
-		}
-		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
-		{
-			ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3  FROM exodbc.exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
-		}
-		else
-		{
-			ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
-		}
-
-		ret = SQLFetch(hstmt);
-		if (ret != SQL_SUCCESS)
-		{
-			std::vector<SErrorInfo> errs = GetAllErrors(NULL, NULL, hstmt);
-			LOG_ERROR(L"hello");
-			//LOG_ERROR_STMT(hstmt, ret, SQLFetch);
-		}
-		if (SQL_SUCCEEDED(ret))
-		{
-
-			SQLBIGINT* pInt = (SQLBIGINT*) &numStr.val;
-			// Notice that the TargetType (3rd Parameter) is SQL_ARD_TYPE, which  
-			//forces the driver to use the Application Row Descriptor with the 
-			//specified scale and precision.
-			//ret = SQLGetData(hstmt, recNr, SQL_ARD_TYPE, &numStr, 19, &a);
-			//pInt = (SQLBIGINT*)&numStr.val;
-			int p = 3;
-
-			// Check for null indicator.
-
-			//if (SQL_NULL_DATA == a)
-			//{
-			//	int p = 3;
-			//	printf("The final value: NULL\n");
-			//	continue;
-			//}
-
-			// Call to convert the little endian mode data into numeric data.
-
-			//long myvalue = strtohextoval();
-
-			//// The returned value in the above code is scaled to the value specified
-			////in the scale field of the numeric structure. For example 25.212 would
-			////be returned as 25212. The scale in this case is 3 hence the integer 
-			////value needs to be divided by 1000.
-
-			//divisor = 1;
-			//if (NumStr.scale > 0)
-			//{
-			//	for (i = 0; i < NumStr.scale; i++)
-			//		divisor = divisor * 10;
-			//}
-			//final_val = (float)myvalue / (float)divisor;
-
-			//// Examine the sign value returned in the sign field for the numeric
-			////structure.
-			////NOTE: The ODBC 3.0 spec required drivers to return the sign as 
-			////1 for positive numbers and 2 for negative number. This was changed in the
-			////ODBC 3.5 spec to return 0 for negative instead of 2.
-
-			//if (!NumStr.sign) sign = -1;
-			//else sign = 1;
-
-			//final_val *= sign;
-			//printf("The final value: %f\n", final_val);
-		}
-
-	}
 
 	TEST_P(TableTest, DISABLED_GetManualNumericValue)
 	{
