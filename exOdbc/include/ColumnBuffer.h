@@ -365,6 +365,16 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Cast the current value to a SQL_TIMESTAMP_STRUCT if possible.
+		* \detailed	Fails if not bound.
+		* \return	Current value as SQL_TIMESTAMP_STRUCT.
+		* \throw	CastException If value cannot be casted to a SQL_TIMESTAMP_STRUCT.
+		* \see		TimestampVisitor
+		*/
+		operator SQL_NUMERIC_STRUCT() const;
+
+
+		/*!
 		* \brief	Access the current buffer value as a const SQLCHAR*
 		* \detailed	Returns the same pointer as it is stored in here. This is mainly used
 		*			for accessing binary data, to avoid to copy the binary buffer.
@@ -527,6 +537,7 @@ namespace exodbc
 	* - SQLINTEGER*
 	* - SQLBIGINT*
 	* 
+	* \todo SQL_NUMERIC_STRUCT* if it fits into the bigint
 	*/
 	class BigintVisitor
 		: public boost::static_visitor < SQLBIGINT >
@@ -555,11 +566,12 @@ namespace exodbc
 	*
 	* This Visitor can cast the following sources to a std::wstring :
 	*
-	* - SQLSMALLINT*
-	* - SQLINTEGER*
-	* - SQLBIGINT*
-	* - SQLWCHAR*
-	* - SQLDOUBLE*
+	* - SQLSMALLINT* (Note: This will just format using %d)
+	* - SQLINTEGER* (Note: This will just format using %ld)
+	* - SQLBIGINT* (Note: This will just format using %lld)
+	* - SQLCHAR*
+	* - SQLDOUBLE* (Note: This will just format using %f)
+	* \todo DATE_STRUCT*, TIME_STRUCT*, TIMESTAMP_STRUCT*, NUMERIC_STRUCT*
 	*
 	*/
 	class WStringVisitor
@@ -567,8 +579,8 @@ namespace exodbc
 	{
 	public:
 		std::wstring operator()(SQLSMALLINT* smallInt) const { return (boost::wformat(L"%d") % *smallInt).str(); };
-		std::wstring operator()(SQLINTEGER* i) const { return (boost::wformat(L"%d") % *i).str(); };
-		std::wstring operator()(SQLBIGINT* bigInt) const { return (boost::wformat(L"%d") % *bigInt).str(); };
+		std::wstring operator()(SQLINTEGER* i) const { return (boost::wformat(L"%ld") % *i).str(); };
+		std::wstring operator()(SQLBIGINT* bigInt) const { return (boost::wformat(L"%lld") % *bigInt).str(); };
 		std::wstring operator()(SQLCHAR* pChar) const{ throw CastException(SQL_C_CHAR, SQL_C_WCHAR); };
 		std::wstring operator()(SQLWCHAR* pWChar) const { return pWChar; };
 		std::wstring operator()(SQLDOUBLE* pDouble) const { return (boost::wformat(L"%f") % *pDouble).str(); };
@@ -589,20 +601,20 @@ namespace exodbc
 	*
 	* This Visitor can cast the following sources to a std::string :
 	*
-	* - SQLSMALLINT*
-	* - SQLINTEGER*
-	* - SQLBIGINT*
+	* - SQLSMALLINT* (Note: This will just format using %d)
+	* - SQLINTEGER* (Note: This will just format using %ld)
+	* - SQLBIGINT* (Note: This will just format using %lld)
 	* - SQLCHAR*
-	* - SQLDOUBLE*
-	*
+	* - SQLDOUBLE* (Note: This will just format using %f)
+	* \todo DATE_STRUCT*, TIME_STRUCT*, TIMESTAMP_STRUCT*, NUMERIC_STRUCT*
 	*/
 	class StringVisitor
 		: public boost::static_visitor < std::string >
 	{
 	public:
 		std::string operator()(SQLSMALLINT* smallInt) const { return (boost::format("%d") % *smallInt).str(); };
-		std::string operator()(SQLINTEGER* i) const { return (boost::format("%d") % *i).str(); };
-		std::string operator()(SQLBIGINT* bigInt) const { return (boost::format("%d") % *bigInt).str(); };
+		std::string operator()(SQLINTEGER* i) const { return (boost::format("%ld") % *i).str(); };
+		std::string operator()(SQLBIGINT* bigInt) const { return (boost::format("%lld") % *bigInt).str(); };
 		std::string operator()(SQLCHAR* pChar) const { return (char*)pChar; };
 		std::string operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_CHAR); };
 		std::string operator()(SQLDOUBLE* pDouble) const { return (boost::format("%f") % *pDouble).str(); };
@@ -626,7 +638,7 @@ namespace exodbc
 	* - SQLSMALLINT*
 	* - SQLINTEGER*
 	* - SQLDOUBLE*
-	*
+	* \todo: SQL_NUMERIC_STRUCT*
 	*/
 	class DoubleVisitor
 		: public boost::static_visitor < SQLDOUBLE >
@@ -681,6 +693,39 @@ namespace exodbc
 
 	private:
 	};	// class TimestampVisitor
+
+
+	/*!
+	* \class NumericVisitor
+	*
+	* \brief Visitor to cast current value to a SQL_NUMERIC_STRUCT.
+	*
+	* This Visitor can cast the following sources to a SQL_NUMERIC_STRUCT :
+	*
+	* - SQL_NUMERIC_STRUCT*
+	* \todo SMALLINT, INTEGER, BIGINT
+	*/
+	class NumericVisitor
+		: public boost::static_visitor < SQL_NUMERIC_STRUCT >
+	{
+	public:
+
+		SQL_NUMERIC_STRUCT operator()(SQLSMALLINT* smallInt) const { throw CastException(SQL_C_SSHORT, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQLINTEGER* i) const { throw CastException(SQL_C_SSHORT, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQLBIGINT* bigInt) const { throw CastException(SQL_C_SBIGINT, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_TYPE_DATE, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQL_TIME_STRUCT* pTime) const { throw CastException(SQL_TYPE_TIME, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_TYPE_TIMESTAMP, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQL_NUMERIC_STRUCT* pNumeric) const { return *pNumeric; };
+#if HAVE_MSODBCSQL_H
+		SQL_NUMERIC_STRUCT operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_NUMERIC); };
+#endif
+
+	private:
+	};	// class NumericVisitor
 
 
 	/*!
