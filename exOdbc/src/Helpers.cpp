@@ -648,6 +648,7 @@ namespace exodbc
 		return true;
 	}
 
+
 	bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
 	{
 		value = L"";
@@ -665,6 +666,51 @@ namespace exodbc
 
 		delete[] buffer;
 		return ok;
+	}
+
+
+	bool GetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER& value)
+	{
+		exASSERT(hDesc != SQL_NULL_HDESC);
+		exASSERT(recordNumber > 0);
+		value = 0;
+		SQLRETURN ret = SQLGetDescField(hDesc, recordNumber, descriptionField, &value, NULL, NULL);
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR(L"Failed to Get Description field");
+		}
+		return SQL_SUCCEEDED(ret);
+	}
+
+
+	bool SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER value)
+	{
+		exASSERT(hDesc != SQL_NULL_HDESC);
+		exASSERT(recordNumber > 0);
+		SQLRETURN ret = SQLSetDescField(hDesc, recordNumber, descriptionField, (SQLPOINTER) value, NULL);
+		if (ret != SQL_SUCCESS)
+		{
+			LOG_ERROR(L"Set Description Field failed");
+		}
+		return SQL_SUCCEEDED(ret);
+	}
+
+
+	bool GetRowDescriptorHandle(SQLHSTMT hStmt, SQLHDESC& hDesc)
+	{
+		exASSERT(hStmt != SQL_NULL_HSTMT);
+
+		SQLRETURN ret = SQLGetStmtAttr(hStmt, SQL_ATTR_APP_ROW_DESC, &hDesc, 0, NULL);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(hStmt, ret, SQLGetStmtAttr);
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(hStmt, ret, SQLGetStmtAttr);
+		}
+
+		return SQL_SUCCEEDED(ret);
 	}
 }
 

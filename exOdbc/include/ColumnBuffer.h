@@ -220,6 +220,8 @@ namespace exodbc
 		bool NoTotal() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NO_TOTAL; };
 
 
+		//bool TestStuff(HSTMT hStmt);
+
 		///*!
 		//* \brief	Check if a valid SColumnInfo is available for this ColumnBuffer.
 		//* \detailed	True if this ColumnBuffer was created by passing a SColumnInfo object.

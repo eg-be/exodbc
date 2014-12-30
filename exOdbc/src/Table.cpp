@@ -497,6 +497,12 @@ namespace exodbc
 		else
 		{
 			m_selectQueryOpen = true;
+//			for (std::map<int, ColumnBuffer*>::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+//			{
+//				ColumnBuffer* pBuff = it->second;
+////				pBuff->TestStuff(m_hStmtSelect);
+//				int p = 3;
+//			}
 		}
 
 		return m_selectQueryOpen;

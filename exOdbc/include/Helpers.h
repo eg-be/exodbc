@@ -357,6 +357,14 @@ namespace exodbc
 	 */
 	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull = NULL);
 
+
+	extern EXODBCAPI bool		GetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER& value);
+
+
+	extern EXODBCAPI bool		SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER value);
+
+
+	extern EXODBCAPI bool		GetRowDescriptorHandle(SQLHSTMT hStmt, SQLHDESC& hDesc);
 	// Classes
 	// -------
 
