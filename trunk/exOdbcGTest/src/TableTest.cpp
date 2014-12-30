@@ -49,7 +49,7 @@ namespace exodbc
 		// Set up Env
 		ASSERT_TRUE(m_env.AllocHenv());
 		// Try to set to the highest version available: We need that for the tests to run correct
-		ASSERT_TRUE(m_env.SetOdbcVersion(OV_3));
+		ASSERT_TRUE(m_env.SetOdbcVersion(OV_3_8));
 
 		// And database
 		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
@@ -968,25 +968,37 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetAutoNumericValue)
+	TEST_P(TableTest, DISABLED_GetAutoNumericValue)
 	{
 		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(nTable.Open(false, true));
 
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
-		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 1") % idName).str()));
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 5") % idName).str()));
 		EXPECT_TRUE(nTable.SelectNext());
 		const SQLCHAR* buff = NULL;
 		SQLINTEGER buffSize = 0;
-		EXPECT_TRUE(nTable.GetBuffer(1, buff, buffSize));
+		EXPECT_TRUE(nTable.GetBuffer(2, buff, buffSize));
 		SQL_NUMERIC_STRUCT* pNum = (SQL_NUMERIC_STRUCT*)buff;
+
+		char buff1[8];
+		char buff2[8];
+		ZeroMemory(&buff1, sizeof(buff1));
+		ZeroMemory(&buff2, sizeof(buff2));
+		memcpy(&buff1, &pNum->val, sizeof(buff1));
+		memcpy(&buff2, &pNum->val[8], sizeof(buff2));
+		SQLUBIGINT* i1 = (SQLUBIGINT*)&buff1;
+		SQLUBIGINT* i2 = (SQLUBIGINT*)&buff2;
+		// if precision is < 19 we can store it in a signed bigint (it has 19 digits).
+		// TODO: Note: This is just luck we can store it here without conversion, as
+		// ODBC returns little endians
 		int p = 3;
 
 	}
 
 
-	TEST_P(TableTest, DISABLED_GetTestNumericValue)
+	TEST_P(TableTest, DSABLED_GetTestNumericValue)
 	{
 //		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
 		if (m_db.Dbms() != dbmsMY_SQL)
@@ -999,28 +1011,54 @@ namespace exodbc
 
 		SQLRETURN ret = 0;
 		SQL_NUMERIC_STRUCT numStr;
+		SQLHENV henv = SQL_NULL_HENV;
+		SQLHDBC hdbc = SQL_NULL_HDBC;
 		SQLHSTMT hstmt = SQL_NULL_HSTMT;
-		SQLHDBC hdbc = m_db.GetHDBC();
 		SQLHDESC hdesc = SQL_NULL_HDESC;
 		ZeroMemory(&numStr, sizeof(numStr));
+
+		// From the net: Set scale and precision on the struct too.
+		// http://www.tech-archive.net/Archive/Data/microsoft.public.data.odbc/2004-08/0039.html
+		numStr.precision = 5;
+		numStr.scale = 3;
+
+		ret = SQLAllocHandle(SQL_HANDLE_ENV, NULL, &henv);
+		ret = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER)SQL_OV_ODBC3, SQL_IS_INTEGER);
+		ret = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
+		ret = SQLConnect(hdbc, (SQLWCHAR*) m_odbcInfo.m_dsn.c_str(), SQL_NTS, (SQLWCHAR*)m_odbcInfo.m_username.c_str(), SQL_NTS, (SQLWCHAR*) m_odbcInfo.m_password.c_str(), SQL_NTS);
 		ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-		ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
-//		ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10  FROM exodbc.numerictypes WHERE idnumerictypes = 5", SQL_NTS);
+		SQLSMALLINT recNr = 4;
+		//ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
+		ret = SQLExecDirect(hstmt, L"SELECT idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3  FROM exodbc.numerictypes WHERE idnumerictypes = 2", SQL_NTS);
 
 		// Use SQLBindCol to bind the NumStr to the column that is being retrieved.
-
-//		ret = SQLBindCol(hstmt, 2, SQL_C_NUMERIC, &numStr, 19, &strlen1);
 
 		// Get the application row descriptor for the statement handle using
 		//SQLGetStmtAttr.
 
 		ret = SQLGetStmtAttr(hstmt, SQL_ATTR_APP_ROW_DESC, &hdesc, 0, NULL);
 
-		//ret = SQLSetDescField(hdesc, 2, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
-		ret = SQLSetDescField(hdesc, 2, SQL_DESC_PRECISION, (VOID*)18, 0);
-		ret = SQLSetDescField(hdesc, 2, SQL_DESC_SCALE, (VOID*)10, 0);
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
 
-		ret = SQLBindCol(hstmt, 2, SQL_C_NUMERIC, &numStr, 19, &strlen1);
+		SQLINTEGER type, prec, scale;
+		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_TYPE, &type, SQL_IS_INTEGER, NULL);
+		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
+		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_SCALE, &scale, SQL_IS_INTEGER, NULL);
+
+		// but bind after setting the attrs
+		ret = SQLBindCol(hstmt, recNr, SQL_C_NUMERIC, &numStr, 19, &strlen1);
+		//numStr.scale = 10;
+		SQLULEN rowCount = 0;
+
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*)SQL_C_NUMERIC, 0);
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
+		ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
+
+		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_TYPE, &type, SQL_IS_INTEGER, NULL);
+		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_PRECISION, &prec, SQL_IS_INTEGER, NULL);
+		ret = SQLGetDescField(hdesc, recNr, SQL_DESC_SCALE, &scale, SQL_IS_INTEGER, NULL);
 
 		while ((ret = SQLFetch(hstmt)) != SQL_NO_DATA)
 		{
@@ -1030,20 +1068,22 @@ namespace exodbc
 				LOG_ERROR(L"hello");
 				//LOG_ERROR_STMT(hstmt, ret, SQLFetch);
 			}
+			SQLBIGINT* pInt = (SQLBIGINT*) &numStr.val;
 			// Notice that the TargetType (3rd Parameter) is SQL_ARD_TYPE, which  
 			//forces the driver to use the Application Row Descriptor with the 
 			//specified scale and precision.
-
-			ret = SQLGetData(hstmt, 2, SQL_ARD_TYPE, &numStr, 19, &a);
+			ret = SQLGetData(hstmt, recNr, SQL_ARD_TYPE, &numStr, 19, &a);
+			pInt = (SQLBIGINT*)&numStr.val;
+			int p = 3;
 
 			// Check for null indicator.
 
-			if (SQL_NULL_DATA == a)
-			{
-				int p = 3;
-				printf("The final value: NULL\n");
-				continue;
-			}
+			//if (SQL_NULL_DATA == a)
+			//{
+			//	int p = 3;
+			//	printf("The final value: NULL\n");
+			//	continue;
+			//}
 
 			// Call to convert the little endian mode data into numeric data.
 
