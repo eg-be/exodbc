@@ -144,6 +144,14 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, OpenAutoCheckPrivs)
+	{
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		exodbc::Table table(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(table.Open(true, true));
+
+	}
+
 	// Select / GetNext
 	// ----------------
 	TEST_P(TableTest, Select)

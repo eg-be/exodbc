@@ -814,8 +814,7 @@ namespace exodbc
 		exASSERT(m_pDb);
 		exASSERT(m_pDb->IsOpen());
 		exASSERT(!IsOpen());
-		// TODO: Add a check to ensure if in manual mode at least one column has been defined
-//		exASSERT_MSG(!m_manualColumns || m_numCols > 0, L"You must Define at least one column if using manual Column mode");
+		// \note: We do not force a user to define columns.
 
 		std::wstring sqlStmt;
 		std::wstring s;
@@ -882,7 +881,26 @@ namespace exodbc
 
 		if (checkPrivileges)
 		{
-			exASSERT(false);
+			STableInfo ti;
+			ti.m_tableName = L"integertypes";
+			if (!m_pDb->ReadTablePrivileges(m_tableInfo, m_tablePrivileges) || m_tablePrivileges.size() == 0)
+			{
+				return false;
+			}
+			bool canSelect = false;
+			for (TablePrivilegesVector::const_iterator it = m_tablePrivileges.begin(); it != m_tablePrivileges.end(); it++)
+			{
+				if (boost::algorithm::iequals(L"SELECT", it->m_privilege))
+				{
+					canSelect = true;
+					break;
+				}
+			}
+			if (!canSelect)
+			{
+				return false;
+			}
+
 			// Verify the user has rights to access the table.
 			//bool hasPrivs;
 
@@ -896,7 +914,17 @@ namespace exodbc
 		}
 
 		// Bind the member variables for field exchange between
-		// the wxDbTable object and the ODBC record.
+		// the Table object and the ODBC record.
+		for (std::map<int, ColumnBuffer*>::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		{
+			ColumnBuffer* pBuffer = it->second;
+			if (!pBuffer->Bind(m_hStmtSelect))
+			{
+				return false;
+			}
+		}
+
+		// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
 		if (!IsQueryOnly())
 		{
 			// commented because of missing datatype-info
@@ -906,15 +934,6 @@ namespace exodbc
 
 			//if (!bindUpdateParams())                    // Updates
 			//    return false;
-		}
-
-		for (std::map<int, ColumnBuffer*>::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		{
-			ColumnBuffer* pBuffer = it->second;
-			if (!pBuffer->Bind(m_hStmtSelect))
-			{
-				return false;
-			}
 		}
 
 

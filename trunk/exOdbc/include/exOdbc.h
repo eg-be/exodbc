@@ -317,6 +317,7 @@ namespace exodbc
 		bool			m_isGrantorNull;
 		bool			m_isGrantableNull;
 	};
+	typedef std::vector<STablePrivilegesInfo> TablePrivilegesVector;
 
 	// Enums
 	// -----

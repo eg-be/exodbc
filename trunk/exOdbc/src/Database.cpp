@@ -957,10 +957,10 @@ namespace exodbc
 		bool ok = true;
 
 		SQLRETURN ret = SQLTablePrivileges(m_hstmt,
-			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,
+			(SQLWCHAR*)catalogQueryName.c_str(), SQL_NTS,
 			pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,
-			(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS);
-		if(ret != SQL_SUCCESS)
+			(SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS);
+		if (ret != SQL_SUCCESS)
 		{
 			LOG_ERROR_STMT(m_hstmt, ret, SQLTablePrivileges);
 			ok = false;

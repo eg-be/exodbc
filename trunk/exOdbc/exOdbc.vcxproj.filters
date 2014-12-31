@@ -43,6 +43,9 @@
     <ClInclude Include="include\DebugNew.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\TablePrivileges.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -64,6 +67,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ColumnBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TablePrivileges.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
