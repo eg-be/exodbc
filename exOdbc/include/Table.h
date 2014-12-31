@@ -625,6 +625,7 @@ namespace exodbc
 		AutoBindingMode		m_autoBindingMode;		///< Store the auto-binding of this table. TODO: Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
 		unsigned int		m_charTrimFlags;		///< Bitmask for the CharTrimOption Flags
+		std::vector<STablePrivilegesInfo> m_tablePrivileges;	///< Table Privileges read during open if checkPermission was set.
 
 		// Column information
 		std::map<int, ColumnBuffer*> m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
