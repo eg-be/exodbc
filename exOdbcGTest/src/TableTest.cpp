@@ -146,11 +146,26 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenAutoCheckPrivs)
 	{
+		// Test to open read-only:
 		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
-		exodbc::Table table(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
-		EXPECT_TRUE(table.Open(true, true));
+		exodbc::Table rTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(rTable.Open(true, true));
 
+		// Test a table that is read only: we can only open it read-only:
+		std::wstring so1Name = TestTables::GetTableName(L"selectonly", m_odbcInfo.m_namesCase);
+		exodbc::Table so1Table(&m_db, so1Name, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(so1Table.Open(true, true));
+
+		std::wstring so2Name = TestTables::GetTableName(L"selectonly", m_odbcInfo.m_namesCase);
+		exodbc::Table so2Table(&m_db, so2Name, L"", L"", L"", Table::READ_WRITE);
+		// DB2 fails here, it still reports we have insert permissions. but doing an insert later fails
+		// SQL Server reports it cannot insert, but executing the query later works. ??
+		EXPECT_FALSE(so2Table.Open(true, true));
+//		bool ok = m_db.ExecSql(L"INSERT INTO EXODBC.SELECTONLY (IDSELECTONLY) VALUES (3)");
+		bool ok = m_db.ExecSql(L"insert into exodbc.dbo.selectonly (idselectonly) values (3)");
+		int p = 3;
 	}
+
 
 	// Select / GetNext
 	// ----------------

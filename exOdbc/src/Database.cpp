@@ -918,7 +918,7 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STablePrivilegesInfo>& privileges)
+	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, TablePrivilegesVector& privileges)
 	{
 		// Find one matching table
 		STableInfo table;
@@ -932,7 +932,7 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadTablePrivileges(const STableInfo& table, std::vector<STablePrivilegesInfo>& privileges)
+	bool Database::ReadTablePrivileges(const STableInfo& table, TablePrivilegesVector& privileges)
 	{
 		privileges.clear();
 

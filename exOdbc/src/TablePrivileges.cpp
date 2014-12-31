@@ -22,11 +22,65 @@ namespace exodbc
 {
 	// Construction
 	// ------------
+	TablePrivileges::TablePrivileges()
+		: m_initialized(false)
+	{
+
+	}
+
+
+	TablePrivileges::TablePrivileges(Database* pDb, const STableInfo& tableInfo)
+		: m_initialized(false)
+	{
+		m_initialized = Initialize(pDb, tableInfo);
+	}
 
 	// Destruction
 	// -----------
+	
 
 	// Implementation
 	// --------------
+	bool TablePrivileges::Initialize(Database* pDb, const STableInfo& tableInfo)
+	{
+		exASSERT(pDb);
+
+		m_privileges = 0;
+		m_initialized = false;
+		TablePrivilegesVector tablePrivs;
+
+		if(pDb->ReadTablePrivileges(tableInfo, tablePrivs))
+		{
+			m_initialized = Parse(tablePrivs);
+		}
+
+		return m_initialized;
+	}
+
+
+	bool TablePrivileges::Parse(const TablePrivilegesVector& tablePrivs)
+	{
+		// Very simple so far
+		for (TablePrivilegesVector::const_iterator it = tablePrivs.begin(); it != tablePrivs.end(); it++)
+		{
+			if (boost::iequals(L"SELECT", it->m_privilege))
+			{
+				m_privileges |= TP_SELECT;
+			}
+			else if (boost::iequals(L"INSERT", it->m_privilege))
+			{
+				m_privileges |= TP_INSERT;
+			}
+			else if (boost::iequals(L"UPDATE", it->m_privilege))
+			{
+				m_privileges |= TP_UPDATE;
+			}
+			else if (boost::iequals(L"DELETE", it->m_privilege))
+			{
+				m_privileges |= TP_DELETE;
+			}
+		}
+		return true;
+	}
 
 } // namespace exodbc
