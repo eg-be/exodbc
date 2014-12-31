@@ -331,7 +331,7 @@ namespace exodbc
 		 * \param [in,out]	privileges	The privileges.
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTablePrivileges(const STableInfo& table, std::vector<STablePrivilegesInfo>& privileges);
+		bool		ReadTablePrivileges(const STableInfo& table, TablePrivilegesVector& privileges);
 
 
 		/*!
@@ -344,7 +344,7 @@ namespace exodbc
 		 * \param [in,out]	privileges	The privileges.
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STablePrivilegesInfo>& privileges);
+		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, TablePrivilegesVector& privileges);
 
 
 		/*!

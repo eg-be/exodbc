@@ -821,6 +821,7 @@ namespace exodbc
 		s.empty();
 
 		// If we do not already have a STableInfo for our table, we absolutely must find one
+		// \\todo: This is redundant, m_haveTableInfo and searchedTable is enough
 		bool foundTable = false;
 		bool searchedTable = false;
 		if (!m_haveTableInfo)
@@ -881,36 +882,17 @@ namespace exodbc
 
 		if (checkPrivileges)
 		{
-			STableInfo ti;
-			ti.m_tableName = L"integertypes";
-			if (!m_pDb->ReadTablePrivileges(m_tableInfo, m_tablePrivileges) || m_tablePrivileges.size() == 0)
+			if (!m_tablePrivileges.Initialize(m_pDb, m_tableInfo))
 			{
+				LOG_ERROR((boost::wformat(L"Failed to Read Table Privileges for Table '%s'") % m_tableInfo.GetSqlName()).str());
 				return false;
 			}
-			bool canSelect = false;
-			for (TablePrivilegesVector::const_iterator it = m_tablePrivileges.begin(); it != m_tablePrivileges.end(); it++)
+			// We always need to be able to select, but the rest only if we want to write
+			if ( ! ( m_tablePrivileges.IsSet(TP_SELECT) && (m_openMode == READ_ONLY || (m_tablePrivileges.AreSet(TP_INSERT | TP_UPDATE | TP_DELETE) ))) )
 			{
-				if (boost::algorithm::iequals(L"SELECT", it->m_privilege))
-				{
-					canSelect = true;
-					break;
-				}
-			}
-			if (!canSelect)
-			{
+				LOG_ERROR((boost::wformat(L"Not sufficient Privileges to Open Table '%s' for '%s'") % m_tableInfo.GetSqlName() % (m_openMode == READ_ONLY ? L"READ_ONLY" : L"READ_WRITE") ).str());
 				return false;
 			}
-
-			// Verify the user has rights to access the table.
-			//bool hasPrivs;
-
-			//if (m_pDb->Dbms() == dbmsPOSTGRES)
-			//    hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), NULL, m_tablePath);
-			//else
-			//    hasPrivs = m_pDb->TablePrivileges(m_tableName, L"SELECT", m_pDb->GetUsername().c_str(), m_pDb->GetUsername().c_str(), m_tablePath);
-
-			//if (!hasPrivs)
-			//    s = L"Connecting user does not have sufficient privileges to access this table.\n";
 		}
 
 		// Bind the member variables for field exchange between
@@ -928,7 +910,7 @@ namespace exodbc
 		if (!IsQueryOnly())
 		{
 			// commented because of missing datatype-info
-			exASSERT(false);
+			//exASSERT(false);
 			//if (!bindInsertParams())                    // Inserts
 			//    return false;
 
@@ -940,7 +922,7 @@ namespace exodbc
 		// Build an insert statement using parameter markers
 		if (!IsQueryOnly() && m_numCols > 0)
 		{
-			exASSERT(false);
+			//exASSERT(false);
 			//      bool needComma = false;
 			//sqlStmt = (boost::wformat(L"INSERT INTO %s (") % m_pDb->SQLTableName(m_tableName.c_str())).str();
 			//      for (i = 0; i < m_numCols; i++)

@@ -172,6 +172,15 @@ namespace exodbc
 
 
 	/*!
+	* \todo: Implement this, once we have flags and do no longer need to reference the table in here.
+	* \brief	Translate Table::OpenMode to String
+	* \param openMode
+	* \return std::wstring
+	*/
+	//extern EXODBCAPI std::wstring OpenMode2s(Table::OpenMode openMode);
+
+
+	/*!
 	 * \brief	Gets all errors for all passed handles.
 	 *
 	 * \param	hEnv 	(Optional) the environment.

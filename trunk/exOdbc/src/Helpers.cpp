@@ -321,6 +321,21 @@ namespace exodbc
 		}
 	}
 
+
+	//std::wstring OpenMode2s(Table::OpenMode openMode)
+	//{
+	//	switch (openMode)
+	//	{
+	//	case Table::READ_ONLY:
+	//		return L"READ_ONLY";
+	//	case Table::READ_WRITE:
+	//		return L"READ_WRITE";
+	//	default:
+	//		return L"???";
+	//	}
+	//}
+
+
 	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = SQL_NULL_HENV */, SQLHANDLE hDbc /* = SQL_NULL_HDBC */, SQLHANDLE hStmt /* = SQL_NULL_HSTMT */, SQLHANDLE hDesc /* = SQL_NULL_HDESC */)
 	{
 		exASSERT(hEnv != SQL_NULL_HENV || hDbc != SQL_NULL_HDBC || hStmt != SQL_NULL_HSTMT || hDesc != SQL_NULL_HDESC);
