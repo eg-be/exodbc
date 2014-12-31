@@ -138,6 +138,10 @@ namespace exodbc
 		* \param ordinalPosition The ordinal position of the column in the table. Numbering starts at 1 (!)
 		* \param bufferPtrVarian Pointer to allocated buffer for the given sqlCType.
 		* \param bufferSize	Size of the allocated buffer.
+		* \param	column columnSize The number of digits of a decimal value (including the fractional part).
+		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
+		* \param	decimalDigits The number of digits of the fractional part of a decimal value.
+		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
 		* \param queryName Name of the column that corresponds to this buffer.
 		* \param decimalDigits		Number of decimal digits. Set to -1 to indicate unknown.
 		*
