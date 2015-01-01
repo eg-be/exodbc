@@ -50,8 +50,7 @@ namespace exodbc
 	// Construction
 	// ------------
 	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion)
-		: m_bound(false)
-		, m_allocatedBuffer(false)
+		: m_allocatedBuffer(false)
 		, m_haveBuffer(false)
 		, m_autoBindingMode(mode)
 		, m_bufferType(0)
@@ -60,6 +59,7 @@ namespace exodbc
 		, m_odbcVersion(odbcVersion)
 		, m_decimalDigits(-1)
 		, m_columnSize(-1)
+		, m_hStmt(SQL_NULL_HSTMT)
 	{
 		exASSERT(m_columnNr > 0);
 		exASSERT(columnInfo.m_sqlDataType != 0);
@@ -87,8 +87,7 @@ namespace exodbc
 
 
 	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
-		: m_bound(false)
-		, m_allocatedBuffer(false)
+		: m_allocatedBuffer(false)
 		, m_haveBuffer(true)
 		, m_autoBindingMode(AutoBindingMode::BIND_AS_REPORTED)
 		, m_bufferType(sqlCType)
@@ -99,6 +98,7 @@ namespace exodbc
 		, m_odbcVersion(OV_UNKNOWN)
 		, m_decimalDigits(decimalDigits)
 		, m_columnSize(columnSize)
+		, m_hStmt(SQL_NULL_HSTMT)
 	{
 		exASSERT(sqlCType != 0);
 		exASSERT(ordinalPosition > 0);
@@ -110,6 +110,11 @@ namespace exodbc
 	// -----------
 	ColumnBuffer::~ColumnBuffer()
 	{
+		if (IsBound())
+		{
+			// Unbind column
+			Unbind(m_hStmt);
+		}
 		if (m_allocatedBuffer)
 		{
 			try
@@ -187,11 +192,49 @@ namespace exodbc
 
 	}
 
+
+	bool ColumnBuffer::Unbind(HSTMT hStmt)
+	{
+		exASSERT(IsBound());
+		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
+		if (m_bufferType == SQL_C_NUMERIC)
+		{
+			SQLHDESC hDesc = SQL_NULL_HDESC;
+			if (GetRowDescriptorHandle(hStmt, hDesc))
+			{
+				bool ok = true;
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, m_bufferType);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER) NULL);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER) NULL);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER) NULL);
+				if (ok)
+				{
+					m_hStmt = SQL_NULL_HSTMT;
+				}
+			}
+		}
+		else
+		{
+			SQLRETURN ret = SQLBindCol(m_hStmt, m_columnNr, m_bufferType, NULL, 0, NULL);
+			if (SQL_SUCCEEDED(ret))
+			{
+				m_hStmt = SQL_NULL_HSTMT;
+			}
+			else
+			{
+				LOG_ERROR_STMT(m_hStmt, ret, SQLBindCol);
+			}
+		}
+		return m_hStmt == SQL_NULL_HSTMT;
+	}
+
+
+
 	bool ColumnBuffer::Bind(HSTMT hStmt)
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(!m_bound);
-		exASSERT(m_bufferType != 0);
+		exASSERT(m_hStmt == SQL_NULL_HSTMT);
+		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(m_bufferSize > 0);
 
 		void* pBuffer = NULL;
@@ -237,9 +280,12 @@ namespace exodbc
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)pBuffer);
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)&m_cb);
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)&m_cb);
-				m_bound = ok;
+				if (ok)
+				{
+					m_hStmt = hStmt;
+				}
 			}
-			if (!m_bound)
+			if (m_hStmt == SQL_NULL_HSTMT)
 			{
 				// Something went wrong, the function above has already logged some detail.
 				LOG_ERROR((boost::wformat(L"Failed to bind Numeric Column '%s' (columnNr: %d)") %m_queryName %m_columnNr).str());
@@ -253,17 +299,19 @@ namespace exodbc
 			if (ret != SQL_SUCCESS)
 			{
 				LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
+				m_hStmt = SQL_NULL_HSTMT;
 			}
-			m_bound = (ret == SQL_SUCCESS);
+			m_hStmt = (ret == SQL_SUCCESS) ? hStmt : SQL_NULL_HSTMT;
 		}
-		return m_bound;
+
+		return m_hStmt != SQL_NULL_HSTMT;
 	}
 
 
 	bool ColumnBuffer::AllocateBuffer(SQLSMALLINT bufferType, SQLINTEGER bufferSize)
 	{
 		exASSERT(!m_allocatedBuffer);
-		exASSERT(!m_bound);
+		exASSERT(!IsBound());
 		exASSERT(!m_haveBuffer);
 		exASSERT(bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(bufferSize > 0);
@@ -552,7 +600,7 @@ namespace exodbc
 	ColumnBuffer::operator SQLSMALLINT() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		// We use the BigIntVisitor here. It will always succeed to convert if 
 		// the underlying Value is an int-value or throw otherwise
@@ -570,7 +618,7 @@ namespace exodbc
 	ColumnBuffer::operator SQLINTEGER() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		// We use the BigIntVisitor here. It will always succeed to convert if 
 		// the underlying Value is an int-value or throw otherwise
@@ -588,7 +636,7 @@ namespace exodbc
 	ColumnBuffer::operator SQLBIGINT() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		return boost::apply_visitor(BigintVisitor(), m_bufferPtr);
 	}
@@ -597,7 +645,7 @@ namespace exodbc
 	ColumnBuffer::operator std::wstring() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		return boost::apply_visitor(WStringVisitor(), m_bufferPtr);
 	}
@@ -606,7 +654,7 @@ namespace exodbc
 	ColumnBuffer::operator std::string() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		return boost::apply_visitor(StringVisitor(), m_bufferPtr);
 	}
@@ -615,7 +663,7 @@ namespace exodbc
 	ColumnBuffer::operator SQLDOUBLE() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		return boost::apply_visitor(DoubleVisitor(), m_bufferPtr);
 	}
@@ -624,7 +672,7 @@ namespace exodbc
 	ColumnBuffer::operator SQL_DATE_STRUCT() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
 
@@ -639,7 +687,7 @@ namespace exodbc
 	ColumnBuffer::operator SQL_TIME_STRUCT() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
 
@@ -654,7 +702,7 @@ namespace exodbc
 	ColumnBuffer::operator SQL_SS_TIME2_STRUCT() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		const SQL_TIMESTAMP_STRUCT& timeStamp = boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
 
@@ -670,7 +718,7 @@ namespace exodbc
 	ColumnBuffer::operator SQL_TIMESTAMP_STRUCT() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		return boost::apply_visitor(TimestampVisitor(), m_bufferPtr);
 	}
@@ -679,7 +727,7 @@ namespace exodbc
 	ColumnBuffer::operator SQL_NUMERIC_STRUCT() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		return boost::apply_visitor(NumericVisitor(), m_bufferPtr);
 	}
@@ -688,7 +736,7 @@ namespace exodbc
 	ColumnBuffer::operator const SQLCHAR*() const
 	{
 		exASSERT(m_haveBuffer);
-		exASSERT(m_bound);
+		exASSERT(IsBound());
 
 		return boost::apply_visitor(CharPtrVisitor(), m_bufferPtr);
 	}
