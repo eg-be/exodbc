@@ -933,22 +933,22 @@ namespace exodbc
 		};
 
 		const SQLCHAR* pBlob = NULL;
-		SQLINTEGER size = 0;
+		SQLINTEGER size, length = 0;
 
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 1") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size));
-		EXPECT_EQ(0, memcmp(empty, pBlob, size));
+		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size, length));
+		EXPECT_EQ(0, memcmp(empty, pBlob, length));
 
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 2") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size));
-		EXPECT_EQ(0, memcmp(ff, pBlob, size));
+		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size, length));
+		EXPECT_EQ(0, memcmp(ff, pBlob, length));
 
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 3") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size));
-		EXPECT_EQ(0, memcmp(abc, pBlob, size));
+		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size, length));
+		EXPECT_EQ(0, memcmp(abc, pBlob, length));
 	}
 
 

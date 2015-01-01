@@ -518,13 +518,15 @@ namespace exodbc
 		/*!
 		* \brief	Access the buffer of a bound column.
 		* \detailed Points passed pointer to the buffer used to transfer data for the given column.
+		*			
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] pBuffer Reference to point to column buffer.
-		* \param [in,out] bufferSize Reference to length indicator, will be set on success to match
+		* \param [in,out] bufferSize Reference to size of buffer, will be set on success to match
 		*			length of buffer pointed to by pBuffer.
+		* \param [in,out] lengthIndicator Will be set to the length Indicator value of the ColumnBuffer.
 		* \return	True if pBuffer points to buffer and bufferSize contains value of buffer.
 		*/
-		bool		GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize) const;
+		bool		GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const;
 
 
 		/*!

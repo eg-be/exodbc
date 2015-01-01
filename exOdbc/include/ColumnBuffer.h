@@ -194,6 +194,9 @@ namespace exodbc
 		bool Bind(HSTMT hStmt);
 
 
+		bool BindParameter(HSTMT hStmt, SQLSMALLINT parameterNumber);
+
+
 		/*!
 		* \brief	Returns true if this ColumnBuffer is bound.
 		* \return	True if Column is bound.
