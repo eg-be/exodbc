@@ -136,7 +136,7 @@ namespace exodbc
 		std::wstring	m_procedureSupport;				///< Indicates whether the data source supports stored procedures
 		std::wstring	m_accessibleTables;				///< Indicates whether the data source only reports accessible tables in SQLTables.
 		SQLUSMALLINT	m_maxConnections;				///< Maximum # of connections the data source supports
-		SQLUSMALLINT	m_maxStmts;						///< Maximum # of HSTMTs per HDBC
+		SQLUSMALLINT	m_maxStmts;						///< Maximum # of SQLHSTMTs per SQLHDBC
 		SQLUSMALLINT	m_cliConfLvl;					///< Indicates whether the data source is SAG compliant
 		SQLUSMALLINT	m_cursorCommitBehavior;			///< Indicates how cursors are affected by a db commit
 		SQLUSMALLINT	m_cursorRollbackBehavior;		///< Indicates how cursors are affected by a db rollback

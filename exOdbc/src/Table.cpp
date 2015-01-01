@@ -255,14 +255,14 @@ namespace exodbc
 	}
 
 
-	HSTMT Table::AllocateStatement()
+	SQLHSTMT Table::AllocateStatement()
 	{
 		exASSERT(m_pDb);
 		exASSERT(m_pDb->IsOpen());
 		exASSERT(m_pDb->GetHDBC());
 
 		// Allocate a statement handle for the database connection
-		HSTMT stmt;
+		SQLHSTMT stmt;
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_pDb->GetHDBC(), &stmt);
 		if (ret != SQL_SUCCESS)
 		{
@@ -273,7 +273,7 @@ namespace exodbc
 	}
 
 
-	bool Table::FreeStatement(HSTMT hStmt)
+	bool Table::FreeStatement(SQLHSTMT hStmt)
 	{
 		// Free statement handle
 		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
@@ -1169,7 +1169,7 @@ namespace exodbc
 
 
 	///********** wxDbTable::bindCols() **********/
-	//bool Table::bindCols(HSTMT cursor)
+	//bool Table::bindCols(SQLHSTMT cursor)
 	//{
 	//	// Bind each column of the table to a memory address for fetching data
 	//	UWORD i;
@@ -1854,7 +1854,7 @@ namespace exodbc
 
 
 	///********** wxDbTable::CloseCursor() **********/
-	//bool Table::CloseCursor(HSTMT cursor)
+	//bool Table::CloseCursor(SQLHSTMT cursor)
 	//{
 	//	if (SQLFreeStmt(cursor, SQL_CLOSE) != SQL_SUCCESS)
 	//		return(m_pDb->DispAllErrors(NULL, m_hdbc, cursor));
@@ -2908,7 +2908,7 @@ namespace exodbc
 
 
 	///********** wxDbTable::SetCursor() **********/
-	//void Table::SetCursor(HSTMT *hstmtActivate)
+	//void Table::SetCursor(SQLHSTMT *hstmtActivate)
 	//{
 	//	if (hstmtActivate == wxDB_DEFAULT_CURSOR)
 	//		m_hstmt = *m_hstmtDefault;
@@ -3131,7 +3131,7 @@ namespace exodbc
 
 
 	///********** wxDbTable::DeleteCursor() **********/
-	//bool Table::DeleteCursor(HSTMT *hstmtDel)
+	//bool Table::DeleteCursor(SQLHSTMT *hstmtDel)
 	//{
 	//	bool result = true;
 

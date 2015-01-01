@@ -174,7 +174,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	bool ColumnBuffer::BindParameter(HSTMT hStmt, SQLSMALLINT parameterNumber)
+	bool ColumnBuffer::BindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber)
 	{
 		void* pBuffer = NULL;
 		try
@@ -193,7 +193,7 @@ namespace exodbc
 	}
 
 
-	bool ColumnBuffer::Unbind(HSTMT hStmt)
+	bool ColumnBuffer::Unbind(SQLHSTMT hStmt)
 	{
 		exASSERT(IsBound());
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
@@ -230,7 +230,7 @@ namespace exodbc
 
 
 
-	bool ColumnBuffer::Bind(HSTMT hStmt)
+	bool ColumnBuffer::Bind(SQLHSTMT hStmt)
 	{
 		exASSERT(m_haveBuffer);
 		exASSERT(m_hStmt == SQL_NULL_HSTMT);

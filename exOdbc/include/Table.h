@@ -590,7 +590,7 @@ namespace exodbc
 		*
 		* \return	New Statement handle or SQL_NULL_HSTMT in case of failure.
 		*/
-		HSTMT		AllocateStatement();
+		SQLHSTMT		AllocateStatement();
 
 
 		/*!
@@ -598,7 +598,7 @@ namespace exodbc
 		*
 		* \return	True if freed successully.
 		*/
-		bool		FreeStatement(HSTMT stmt);
+		bool		FreeStatement(SQLHSTMT stmt);
 
 
 		void        cleanup();
@@ -615,9 +615,9 @@ namespace exodbc
 		bool		BindInsertParameters();
 
 		// ODBC Handles
-		HSTMT		m_hStmtSelect;	///< Statement-handle used to do selects.
-		HSTMT		m_hStmtCount;	///< Statement-handle used to do counts. Columns are not bound.
-		HSTMT		m_hStmtInsert;	///< Statement-handle used to do inserts. Columns are bound, a prepared statement using column-markers is created.
+		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do selects.
+		SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do counts. Columns are not bound.
+		SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do inserts. Columns are bound, a prepared statement using column-markers is created.
 
 		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
 
@@ -811,9 +811,9 @@ namespace exodbc
 		//	bool updateable = true, bool insertAllowed = true, bool derivedColumn = false);
 		//SColumnDataPtr* SetColDefs(ColumnInfo* colInfs, UWORD numCols);
 
-		//bool            CloseCursor(HSTMT cursor);
-		//bool            DeleteCursor(HSTMT* hstmtDel);
-		//void            SetCursor(HSTMT* hstmtActivate = (void **)wxDB_DEFAULT_CURSOR);
+		//bool            CloseCursor(SQLHSTMT cursor);
+		//bool            DeleteCursor(SQLHSTMT* hstmtDel);
+		//void            SetCursor(SQLHSTMT* hstmtActivate = (void **)wxDB_DEFAULT_CURSOR);
 		//HSTMT           GetCursor() { return(m_hstmt); }
 		//HSTMT*			GetNewCursor(bool setCursor = false, bool bindColumns = true);
 
@@ -831,7 +831,7 @@ namespace exodbc
 		//bool        bindInsertParams();
 		//bool        bindUpdateParams();
 
-		//		bool        bindCols(HSTMT cursor);
+		//		bool        bindCols(SQLHSTMT cursor);
 		//		bool        getRec(UWORD fetchType);
 		//bool        execDelete(const std::wstring& pSqlStmt);
 		//		bool        execUpdate(const std::wstring& pSqlStmt);
