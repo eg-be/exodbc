@@ -185,13 +185,27 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Tries to bind the buffer to the column using SQLBindCol.
+		* \brief	Tries to bind the buffer to the column using SQLBindCol
+		*			for non-numeric types, or SQLSetDescField for numeric types.
 		* \detailed	Fails if no buffer is allocated or if already bound.
 		*			The driver might fail to bind the column to the type.
+		*			On success, sets m_bound to true.
 		* \param	hStmt ODBC Statement handle to bind this ColumnBuffer to.
 		* \return	True if bound successful.
 		*/
 		bool Bind(HSTMT hStmt);
+
+
+		/*!
+		* \brief	Unbinds the buffer
+		* \detailed	Tries to unbind the buffer to the column using SQLBindCol
+		*			for non-numeric types, or SQLSetDescField for numeric types.
+		*			On success, sets m_bound to false.
+		* \param	hStmt ODBC Statement handle to unbind this ColumnBuffer from.
+		* \return	True if columnBuffer was bound to the passed hStmt and was
+		*			unbound successfully.
+		*/
+		bool Unbind(HSTMT hStmt);
 
 
 		bool BindParameter(HSTMT hStmt, SQLSMALLINT parameterNumber);
@@ -201,7 +215,7 @@ namespace exodbc
 		* \brief	Returns true if this ColumnBuffer is bound.
 		* \return	True if Column is bound.
 		*/
-		bool IsBound() const { return m_bound; };
+		bool IsBound() const { return m_hStmt != SQL_NULL_HSTMT; };
 
 
 		/*!
@@ -260,7 +274,7 @@ namespace exodbc
 		* \detailed	Fails if already bound.
 		* \see		AutoBindingMode
 		*/
-		void SetAutoBindingMode(AutoBindingMode mode) { exASSERT(!m_bound); m_autoBindingMode = mode; }
+		void SetAutoBindingMode(AutoBindingMode mode) { exASSERT(!IsBound()); m_autoBindingMode = mode; }
 
 
 		/*!
@@ -494,7 +508,7 @@ namespace exodbc
 		bool m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
 		SQLSMALLINT m_bufferType;	///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
 		SQLINTEGER	m_bufferSize;	///< Size of an allocated or set from constructor buffer.
-		bool m_bound;				///< True if Bind() was successful.
+		SQLHSTMT m_hStmt;			///< Set to the statement handle this ColumnBuffer was bound to, initialized to SQL_NULL_HSTMT
 		OdbcVersion m_odbcVersion;	///< OdbcVersion passed when creating this ColumnBuffer.
 		AutoBindingMode m_autoBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
 
