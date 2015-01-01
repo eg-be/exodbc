@@ -211,6 +211,9 @@ namespace exodbc
 		bool BindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber);
 
 
+		bool UnbindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber);
+
+
 		/*!
 		* \brief	Returns true if this ColumnBuffer is bound.
 		* \return	True if Column is bound.
@@ -484,31 +487,40 @@ namespace exodbc
 		//SQLSMALLINT GetPrecision() const;
 
 
+		struct BoundParameter
+		{
+			SQLHSTMT m_hStmt;
+			SQLUSMALLINT m_columnNumber;
+		};
+		typedef std::vector<BoundParameter> BoundParametersVector;
+
 		// Helpers to quickly access the pointers inside the variant.
 		// All of these could throw a boost::bad_get
-		SQLSMALLINT*	GetSmallIntPtr() const;
-		SQLINTEGER*		GetIntPtr() const;
-		SQLBIGINT*		GetBigIntPtr() const;
-		SQLCHAR*		GetCharPtr() const;
-		SQLWCHAR*		GetWCharPtr() const;
-		SQLDOUBLE*		GetDoublePtr() const;
-		SQL_DATE_STRUCT* GetDatePtr() const;
-		SQL_TIME_STRUCT* GetTimePtr() const;
-		SQL_TIMESTAMP_STRUCT* GetTimestampPtr() const;
+		SQLSMALLINT*			GetSmallIntPtr() const;
+		SQLINTEGER*				GetIntPtr() const;
+		SQLBIGINT*				GetBigIntPtr() const;
+		SQLCHAR*				GetCharPtr() const;
+		SQLWCHAR*				GetWCharPtr() const;
+		SQLDOUBLE*				GetDoublePtr() const;
+		SQL_DATE_STRUCT*		GetDatePtr() const;
+		SQL_TIME_STRUCT*		GetTimePtr() const;
+		SQL_TIMESTAMP_STRUCT*	GetTimestampPtr() const;
 #if HAVE_MSODBCSQL_H
-		SQL_SS_TIME2_STRUCT* GetTime2Ptr() const;
+		SQL_SS_TIME2_STRUCT*	GetTime2Ptr() const;
 #endif
-		SQL_NUMERIC_STRUCT* GetNumericPtr() const;
+		SQL_NUMERIC_STRUCT*		GetNumericPtr() const;
 
-		SQLINTEGER	m_columnSize;	///< Column Size, either read from SColumnInfo during construction or set manually. -1 indicates unknown.
-		SQLSMALLINT m_decimalDigits;	///< Decimal digits, either read from SColumnInfo during construction or set manually. -1 indicates unkonwn.
-		std::wstring m_queryName;	///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
-		SQLUSMALLINT m_columnNr;	///< Either set on construction or read from SColumnInfo::m_ordinalPosition
-		bool m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
-		bool m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
-		SQLSMALLINT m_bufferType;	///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
-		SQLINTEGER	m_bufferSize;	///< Size of an allocated or set from constructor buffer.
-		SQLHSTMT m_hStmt;			///< Set to the statement handle this ColumnBuffer was bound to, initialized to SQL_NULL_HSTMT
+		SQLINTEGER				m_columnSize;			///< Column Size, either read from SColumnInfo during construction or set manually. -1 indicates unknown.
+		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from SColumnInfo during construction or set manually. -1 indicates unkonwn.
+		std::wstring			m_queryName;			///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
+		SQLUSMALLINT			m_columnNr;				///< Either set on construction or read from SColumnInfo::m_ordinalPosition
+		bool					m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
+		bool					m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
+		SQLSMALLINT				m_bufferType;			///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
+		SQLINTEGER				m_bufferSize;			///< Size of an allocated or set from constructor buffer.
+		SQLHSTMT				m_hStmt;				///< Set to the statement handle this ColumnBuffer was bound to, initialized to SQL_NULL_HSTMT
+		BoundParametersVector	m_boundParameters;	
+
 		OdbcVersion m_odbcVersion;	///< OdbcVersion passed when creating this ColumnBuffer.
 		AutoBindingMode m_autoBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
 
