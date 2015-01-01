@@ -610,9 +610,12 @@ namespace exodbc
 		std::wstring BuildFieldsStatement() const;
 
 
+		bool		BindInsertParameters();
+
 		// ODBC Handles
 		HSTMT		m_hStmtSelect;	///< Statement-handle used to do selects.
 		HSTMT		m_hStmtCount;	///< Statement-handle used to do counts. Columns are not bound.
+		HSTMT		m_hStmtInsert;	///< Statement-handle used to do inserts. Columns are bound, a prepared statement using column-markers is created.
 
 		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
 
@@ -629,7 +632,7 @@ namespace exodbc
 		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
 
 		// Column information
-		std::map<int, ColumnBuffer*> m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
+		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
 		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
 		SQLSMALLINT			m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database

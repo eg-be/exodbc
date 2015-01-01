@@ -23,6 +23,7 @@
 #include <sqlext.h>
 #include <string>
 #include <vector>
+#include <map>
 
 
 // Forward declarations
@@ -499,6 +500,8 @@ namespace exodbc
 		SQLLEN		m_cb;	///< The length indicator set during Bind for this column
 
 	};  // class ColumnBuffer
+
+	typedef std::map<SQLUSMALLINT, ColumnBuffer*> ColumnBufferPtrMap;
 
 
 	/*!

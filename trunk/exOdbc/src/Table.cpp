@@ -144,6 +144,7 @@ namespace exodbc
 		m_pDb = pDb;
 		m_hStmtCount = SQL_NULL_HSTMT;
 		m_hStmtSelect = SQL_NULL_HSTMT;
+		m_hStmtInsert = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
 		m_autoBindingMode = AutoBindingMode::BIND_AS_REPORTED;
@@ -161,10 +162,14 @@ namespace exodbc
 			return false;
 		}
 
-		// Old handle-stuff
-		// Allocate statement handles for the table
+		// Allocate handles needed for writing
 		if (!IsQueryOnly())
 		{
+			m_hStmtInsert = AllocateStatement();
+			if (!m_hStmtInsert)
+			{
+				return false;
+			}
 			//// Allocate a separate statement handle for performing inserts
 			//if (SQLAllocStmt(m_hdbc, &m_hstmtInsert) != SQL_SUCCESS)
 			//	m_pDb->DispAllErrors(NULL, m_hdbc);
@@ -297,7 +302,7 @@ namespace exodbc
 		exASSERT(m_columnBuffers.size() > 0);
 
 		std::wstring fields = L"";
-		std::map<int, ColumnBuffer*>::const_iterator it = m_columnBuffers.begin();
+		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
 		while (it != m_columnBuffers.end())
 		{
 			ColumnBuffer* pBuffer = it->second;
@@ -313,6 +318,24 @@ namespace exodbc
 	}
 
 
+	bool Table::BindInsertParameters()
+	{
+		exASSERT(m_columnBuffers.size() > 0);
+
+		// Build a statement with parameter-markers
+
+		std::wstring insertStmt = L"";
+		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
+		while (it != m_columnBuffers.end())
+		{
+			ColumnBuffer* pBuffer = it->second;
+
+		}
+
+		return false;
+	}
+
+
 	const ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnIndex) const
 	{
 		exDEBUG(IsOpen());
@@ -324,7 +347,7 @@ namespace exodbc
 			return NULL;
 		}
 
-		std::map<int, ColumnBuffer*>::const_iterator it = m_columnBuffers.find(columnIndex);
+		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.find(columnIndex);
 		if (it == m_columnBuffers.end())
 		{
 			return NULL;
@@ -347,7 +370,7 @@ namespace exodbc
 		}
 
 		// Delete ColumnBuffers
-		std::map<int, ColumnBuffer*>::iterator it;
+		ColumnBufferPtrMap::iterator it;
 		for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
 			ColumnBuffer* pBuffer = it->second;
@@ -363,6 +386,8 @@ namespace exodbc
 		// Free statement handles
 		if (!IsQueryOnly())
 		{
+			FreeStatement(m_hStmtInsert);
+
 			//if (m_hstmtInsert)
 			//{
 			//	/*
@@ -896,8 +921,8 @@ namespace exodbc
 		}
 
 		// Bind the member variables for field exchange between
-		// the Table object and the ODBC record.
-		for (std::map<int, ColumnBuffer*>::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		// the Table object and the ODBC record for Select()
+		for (ColumnBufferPtrMap::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
 			ColumnBuffer* pBuffer = it->second;
 			if (!pBuffer->Bind(m_hStmtSelect))
@@ -909,10 +934,8 @@ namespace exodbc
 		// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
 		if (!IsQueryOnly())
 		{
-			// commented because of missing datatype-info
-			//exASSERT(false);
-			//if (!bindInsertParams())                    // Inserts
-			//    return false;
+			if (!BindInsertParameters())
+				return false;
 
 			//if (!bindUpdateParams())                    // Updates
 			//    return false;

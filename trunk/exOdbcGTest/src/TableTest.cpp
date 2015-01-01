@@ -1256,6 +1256,16 @@ namespace exodbc
 	}
 
 
+	// Insert values
+	// -------------
+	TEST_P(TableTest, InsertIntTypes)
+	{
+		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(iTable.Open(false, true));
+
+	}
+
 // Interfaces
 // ----------
 
