@@ -193,7 +193,7 @@ namespace exodbc
 		* \param	hStmt ODBC Statement handle to bind this ColumnBuffer to.
 		* \return	True if bound successful.
 		*/
-		bool Bind(HSTMT hStmt);
+		bool Bind(SQLHSTMT hStmt);
 
 
 		/*!
@@ -205,10 +205,10 @@ namespace exodbc
 		* \return	True if columnBuffer was bound to the passed hStmt and was
 		*			unbound successfully.
 		*/
-		bool Unbind(HSTMT hStmt);
+		bool Unbind(SQLHSTMT hStmt);
 
 
-		bool BindParameter(HSTMT hStmt, SQLSMALLINT parameterNumber);
+		bool BindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber);
 
 
 		/*!
@@ -242,7 +242,7 @@ namespace exodbc
 		bool NoTotal() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NO_TOTAL; };
 
 
-		//bool TestStuff(HSTMT hStmt);
+		//bool TestStuff(SQLHSTMT hStmt);
 
 		///*!
 		//* \brief	Check if a valid SColumnInfo is available for this ColumnBuffer.

@@ -175,7 +175,7 @@ namespace exodbc
 		bool			HasHenv() const	{ return m_henv != NULL; };
 
 		// Accessors
-		const HENV&		GetHenv() const		{ return m_henv; };
+		const SQLHENV&		GetHenv() const		{ return m_henv; };
 
 		const wchar_t*	GetDsn() const		{ return m_dsn; };
 
@@ -264,7 +264,7 @@ namespace exodbc
 	private:
 		bool m_useConnectionStr;
 
-		HENV m_henv;
+		SQLHENV m_henv;
 		wchar_t m_dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
 		wchar_t m_uid[SQL_MAX_USER_NAME_LEN+1];               // User ID
 		wchar_t m_authStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)

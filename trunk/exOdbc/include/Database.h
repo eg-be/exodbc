@@ -552,7 +552,7 @@ namespace exodbc
 		* \return	Connection handle if allocated, or SQL_NULL_HDBC.
 		* \see		AllocateHdbc()
 		*/
-		HDBC            GetHDBC() const         { exDEBUG(HasHdbc()); return m_hdbc; }
+		SQLHDBC            GetHDBC() const         { exDEBUG(HasHdbc()); return m_hdbc; }
 
 
 		/*!
@@ -640,9 +640,9 @@ namespace exodbc
 		const Environment*	m_pEnv;				///< Environment used to create this Database
 
 		// ODBC handles created by the Database
-		HDBC  m_hdbc;			///< ODBC DB Connection handle
-		HSTMT m_hstmt;			///< ODBC Statement handle used for all internal functions except ExecSql()
-		HSTMT m_hstmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
+		SQLHDBC  m_hdbc;			///< ODBC DB Connection handle
+		SQLHSTMT m_hstmt;			///< ODBC Statement handle used for all internal functions except ExecSql()
+		SQLHSTMT m_hstmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
 
 		CommitMode		m_commitMode;	///< Commit Mode set currently
 
