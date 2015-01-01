@@ -169,6 +169,24 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	bool ColumnBuffer::BindParameter(HSTMT hStmt, SQLSMALLINT parameterNumber)
+	{
+		void* pBuffer = NULL;
+		try
+		{
+			pBuffer = GetBuffer();
+		}
+		catch (boost::bad_get ex)
+		{
+			LOG_ERROR(L"Failed in GetBuffer() - probably allocated buffer type does not match sql type in SColumnInfo.");
+			exASSERT(false);
+			return false;
+		}
+
+		return false;
+
+	}
+
 	bool ColumnBuffer::Bind(HSTMT hStmt)
 	{
 		exASSERT(m_haveBuffer);

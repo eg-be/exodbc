@@ -322,16 +322,31 @@ namespace exodbc
 	{
 		exASSERT(m_columnBuffers.size() > 0);
 
-		// Build a statement with parameter-markers
+		int insertColumnsCount = 0;
 
-		std::wstring insertStmt = L"";
+		// Build a statement with parameter-markers
+		std::wstring insertStmt = L"INSERT INTO " + m_tableInfo.GetSqlName() + L" (";
 		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
 		while (it != m_columnBuffers.end())
 		{
 			ColumnBuffer* pBuffer = it->second;
+			insertStmt += pBuffer->GetQueryName();
+			insertColumnsCount++;
 
+			++it;
+			if (it != m_columnBuffers.end())
+			{
+				insertStmt += L", ";
+			}
 		}
+		insertStmt += L") VALUES(";
+		for (int i = 0; i < insertColumnsCount - 1; i++)
+		{
+			insertStmt += L"?, ";
+		}
+		insertStmt += L"?)";
 
+		exASSERT(insertColumnsCount > 0);
 		return false;
 	}
 
@@ -801,7 +816,7 @@ namespace exodbc
 	}
 
 
-	bool Table::GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize) const
+	bool Table::GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const
 	{
 		const ColumnBuffer* pColumnBuff = GetColumnBuffer(columnIndex);
 		if (!pColumnBuff || pColumnBuff->IsNull())
@@ -811,6 +826,7 @@ namespace exodbc
 		{
 			pBuffer = *pColumnBuff;
 			bufferSize = pColumnBuff->GetBufferSize();
+			lengthIndicator = pColumnBuff->GetCb();
 		}
 		catch (CastException ex)
 		{
