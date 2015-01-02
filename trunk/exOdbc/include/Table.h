@@ -392,6 +392,13 @@ namespace exodbc
 		bool		IsSelectOpen() const { return m_selectQueryOpen; };
 
 
+		/*
+		* \brief	Inserts the current values into the database as a new row.
+		* \detailed	
+		*/
+		bool		Insert();
+
+
 		/*!
 		* \brief	Access the current value of columnIndex as SQLSMALLINT.
 		* \detailed	Casts the value if casting is possible without loosing data.
@@ -536,7 +543,7 @@ namespace exodbc
 		*			Uses exDEBUG.
 		* \return	ColumnBuffer or NULL if none found.
 		*/
-		const ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
+		ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
 
 
 		/*!

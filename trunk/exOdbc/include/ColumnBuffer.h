@@ -45,6 +45,18 @@ namespace exodbc
 #endif
 	> BufferPtrVariant;
 
+	// When setting values, allow setting something that is not a pointer
+	typedef boost::variant<SQLSMALLINT, SQLINTEGER, SQLBIGINT,
+		SQLCHAR, SQLWCHAR,
+		SQLDOUBLE,
+		SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT,
+		SQL_NUMERIC_STRUCT
+#if HAVE_MSODBCSQL_H
+		, SQL_SS_TIME2_STRUCT*
+#endif
+	> BufferVariant;
+
+
 	// Structs
 	// -------
 
@@ -398,6 +410,8 @@ namespace exodbc
 		*/
 		operator const SQLCHAR*() const;
 
+
+		void Test(SQLSMALLINT s) { SQLSMALLINT* pS = GetSmallIntPtr(); *pS = s; };
 
 	private:
 		/*!
