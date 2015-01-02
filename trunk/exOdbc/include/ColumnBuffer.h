@@ -291,6 +291,8 @@ namespace exodbc
 		// Operators
 		// ---------
 
+		void operator=(const BufferVariant& var);
+
 		/*!
 		* \brief	Cast the current value to a SQLSMALLINT if possible.
 		* \detailed	Fails if not bound.

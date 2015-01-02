@@ -1269,6 +1269,7 @@ namespace exodbc
 
 		// Set some silly values to insert
 		ColumnBuffer* pId = iTable.GetColumnBuffer(1);
+		*pId = (SQLSMALLINT) 88;
 		pId->Test(9);
 		EXPECT_TRUE(iTable.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());

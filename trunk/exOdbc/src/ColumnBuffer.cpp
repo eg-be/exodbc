@@ -629,6 +629,12 @@ namespace exodbc
 	}
 
 
+	void ColumnBuffer::operator=(const BufferVariant& var)
+	{
+		// \todo: assign value to ptr
+	}
+
+
 	ColumnBuffer::operator SQLSMALLINT() const
 	{
 		exASSERT(m_haveBuffer);
