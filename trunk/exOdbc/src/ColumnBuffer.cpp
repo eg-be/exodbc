@@ -74,9 +74,10 @@ namespace exodbc
 		{
 			m_decimalDigits = columnInfo.m_decimalDigits;
 		}
+		m_sqlType = columnInfo.m_sqlType;
 
 		// Create buffer
-		m_bufferType = DetermineBufferType(columnInfo.m_sqlType);
+		m_bufferType = DetermineBufferType(m_sqlType);
 		exASSERT(m_bufferType != 0);
 		m_bufferSize = DetermineBufferSize(columnInfo);
 		exASSERT(m_bufferSize > 0);
@@ -86,7 +87,7 @@ namespace exodbc
 	}
 
 
-	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */, SQLSMALLINT sqlType /* = SQL_UNKNOWN_TYPE */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(true)
 		, m_autoBindingMode(AutoBindingMode::BIND_AS_REPORTED)
@@ -99,6 +100,7 @@ namespace exodbc
 		, m_decimalDigits(decimalDigits)
 		, m_columnSize(columnSize)
 		, m_hStmt(SQL_NULL_HSTMT)
+		, m_sqlType(sqlType)
 	{
 		exASSERT(sqlCType != 0);
 		exASSERT(ordinalPosition > 0);
@@ -110,11 +112,22 @@ namespace exodbc
 	// -----------
 	ColumnBuffer::~ColumnBuffer()
 	{
+		// Unbind column
 		if (IsBound())
 		{
-			// Unbind column
 			Unbind(m_hStmt);
 		}
+
+		// Unbind all parameters
+		for (BoundParameterPtrsVector::const_iterator it = m_boundParameters.begin(); it != m_boundParameters.end(); it++)
+		{
+			BoundParameter* pParam = *it;
+			UnbindParameter(pParam->m_hStmt, pParam->m_parameterNumber);
+			delete pParam;
+		}
+		m_boundParameters.clear();
+		
+		// Free buffer
 		if (m_allocatedBuffer)
 		{
 			try
@@ -176,6 +189,12 @@ namespace exodbc
 	// --------------
 	bool ColumnBuffer::BindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber)
 	{
+		exASSERT(m_haveBuffer);
+		exASSERT(hStmt != SQL_NULL_HSTMT);
+		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
+		exASSERT(m_bufferSize > 0);
+		exASSERT(parameterNumber > 0);
+
 		void* pBuffer = NULL;
 		try
 		{
@@ -187,9 +206,44 @@ namespace exodbc
 			exASSERT(false);
 			return false;
 		}
+		BoundParameter* pBp = new BoundParameter(hStmt, parameterNumber);
+		SQLRETURN ret;
+		if (m_bufferType != SQL_C_NUMERIC)
+		{
+			ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, 0, 0, pBuffer, m_bufferSize, &(pBp->m_cb));
+		}
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(hStmt, ret, SQLBindParameter);
+			delete pBp;
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(hStmt, ret, SQLBindParameter);
+		}
+		if (SQL_SUCCEEDED(ret))
+		{
+			m_boundParameters.push_back(pBp);
+		}
 
-		return false;
+		return SQL_SUCCEEDED(ret);
+	}
 
+
+	bool ColumnBuffer::UnbindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber)
+	{
+		exASSERT(m_haveBuffer);
+		exASSERT(hStmt != SQL_NULL_HSTMT);
+		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
+		exASSERT(parameterNumber > 0);
+
+		SQLRETURN ret = SQLBindParameter(hStmt, parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, 0, 0, NULL, 0, NULL);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(hStmt, ret, SQLBindParameter);
+		}
+
+		return SQL_SUCCEEDED(ret);
 	}
 
 
@@ -234,6 +288,7 @@ namespace exodbc
 	{
 		exASSERT(m_haveBuffer);
 		exASSERT(m_hStmt == SQL_NULL_HSTMT);
+		exASSERT(hStmt != SQL_NULL_HSTMT);
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(m_bufferSize > 0);
 
