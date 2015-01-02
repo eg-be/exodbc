@@ -24,29 +24,6 @@ using namespace std;
 
 namespace exodbc
 {
-	void ColumnBuffer::TrimValue(SQLSMALLINT decimalDigits, SQLUINTEGER& value)
-	{
-		if (decimalDigits < 0)
-		{
-			return;
-		}
-
-		if (decimalDigits == 0)
-		{
-			value = 0;
-		}
-		SQLUINTEGER max = 1;
-		for (int i = 0; i < decimalDigits; i++)
-		{
-			max = max * 10;
-		}
-		while (value > max)
-		{
-			value /= 10;
-		}
-	}
-
-
 	// Construction
 	// ------------
 	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion)

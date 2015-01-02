@@ -103,16 +103,6 @@ namespace exodbc
 	{
 	public:
 		/*!
-		* \brief	Keeps only the first decimalDigits in value.
-		* \detailed	Reads number decimalDigits from the left of the passed value and
-		*			removes the rest to the right. So, for example (3, 12345) becomes
-		*			123.
-		* \param	decimalDigits How many Digits to read from the left of value.
-		*
-		*/
-		static void TrimValue(SQLSMALLINT decimalDigits, SQLUINTEGER& value);
-
-		/*!
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
 		*			using the data type information from the passed SColumnInfo.
 		* \detailed	The constructor will try to allocate a corresponding buffer.
@@ -489,8 +479,8 @@ namespace exodbc
 
 		struct BoundParameter
 		{
-			BoundParameter() : m_hStmt(SQL_NULL_HSTMT), m_parameterNumber(0) {};
-			BoundParameter(SQLHSTMT hStmt, SQLUSMALLINT parameterNr) : m_hStmt(hStmt), m_parameterNumber(parameterNr) {};
+			BoundParameter() : m_hStmt(SQL_NULL_HSTMT), m_parameterNumber(0),  m_cb(0) {};
+			BoundParameter(SQLHSTMT hStmt, SQLUSMALLINT parameterNr) : m_hStmt(hStmt), m_parameterNumber(parameterNr), m_cb(0) {};
 			SQLHSTMT		m_hStmt;
 			SQLUSMALLINT	m_parameterNumber;
 			SQLINTEGER		m_cb;
