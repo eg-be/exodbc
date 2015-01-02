@@ -214,7 +214,13 @@ namespace exodbc
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(parameterNumber > 0);
 
-		SQLRETURN ret = SQLBindParameter(hStmt, parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, 0, 0, NULL, 0, NULL);
+		// \todo: Workaround for Ticket #59
+		//SQLRETURN ret = SQLBindParameter(hStmt, parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, 0, 0, NULL, 0, NULL);
+		//if (!SQL_SUCCEEDED(ret))
+		//{
+		//	LOG_ERROR_STMT(hStmt, ret, SQLBindParameter);
+		//}
+		SQLRETURN ret = SQLFreeStmt(hStmt, SQL_UNBIND);
 		if (!SQL_SUCCEEDED(ret))
 		{
 			LOG_ERROR_STMT(hStmt, ret, SQLBindParameter);
@@ -631,7 +637,64 @@ namespace exodbc
 
 	void ColumnBuffer::operator=(const BufferVariant& var)
 	{
-		// \todo: assign value to ptr
+		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
+		exASSERT(m_haveBuffer);
+
+		// \todo: assign value to ptr for all types, sometimes we will need to memcopy and need to know the length of the data
+		// For chars we could assume its null-terminated if no length is passed
+		// But we probably need a second operator which needs as parameter the length of the data for binary stuff
+		if (SQL_C_SSHORT == m_bufferType)
+		{
+			SQLSMALLINT* pColVal = GetSmallIntPtr();
+			*pColVal = boost::get<SQLSMALLINT>(var);
+		}
+		else if (SQL_C_SLONG == m_bufferType)
+		{
+			SQLINTEGER* pColVal = GetIntPtr();
+			*pColVal = boost::get<SQLINTEGER>(var);
+		}
+		else if (SQL_C_SBIGINT == m_bufferType)
+		{
+			SQLBIGINT* pColVal = GetBigIntPtr();
+			*pColVal = boost::get<SQLBIGINT>(var);
+		}
+		else if (SQL_C_DOUBLE == m_bufferType)
+		{
+			SQLDOUBLE* pColVal = GetDoublePtr();
+			*pColVal = boost::get<SQLDOUBLE>(var);
+		}
+		else if (SQL_C_TYPE_DATE == m_bufferType)
+		{
+			SQL_DATE_STRUCT* pColVal = GetDatePtr();
+			*pColVal = boost::get<SQL_DATE_STRUCT>(var);
+		}
+		else if (SQL_C_TYPE_TIME == m_bufferType)
+		{
+			SQL_TIME_STRUCT* pColVal = GetTimePtr();
+			*pColVal = boost::get<SQL_TIME_STRUCT>(var);
+		}
+		else if (SQL_C_TYPE_TIMESTAMP  == m_bufferType)
+		{
+			SQL_TIMESTAMP_STRUCT* pColVal = GetTimestampPtr();
+			*pColVal = boost::get<SQL_TIMESTAMP_STRUCT>(var);
+		}
+		else if (SQL_C_NUMERIC == m_bufferType)
+		{
+			SQL_NUMERIC_STRUCT* pColVal = GetNumericPtr();
+			*pColVal = boost::get<SQL_NUMERIC_STRUCT>(var);
+		}
+#if HAVE_MSODBCSQL_H
+		else if (SQL_C_SS_TIME2 == m_bufferType)
+		{
+			SQL_SS_TIME2_STRUCT* pColVal = GetTime2Ptr();
+			*pColVal = boost::get<SQL_SS_TIME2_STRUCT>(var);
+		}
+#endif
+		else
+		{
+			LOG_ERROR((boost::wformat(L"Not implemented Sql C Type '%s' (%d)") % SqLCType2s(m_bufferType) % m_bufferType).str());
+			exASSERT(false);
+		}
 	}
 
 
