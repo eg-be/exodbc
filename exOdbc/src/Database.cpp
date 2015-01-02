@@ -229,9 +229,9 @@ namespace exodbc
 
 	bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd)
 	{
-		m_dsn        = emptyString;
-		m_uid        = emptyString;
-		m_authStr    = emptyString;
+		m_dsn = L"";
+		m_uid = L"";
+		m_authStr = L"";
 
 		SQLRETURN retcode;
 
@@ -518,11 +518,11 @@ namespace exodbc
 
 		ret = SQLFetch(m_hstmt);
 		int count = 0;
-		SQLWCHAR typeName[DB_TYPE_NAME_LEN + 1];
+		SQLWCHAR typeName[DB_MAX_TYPE_NAME_LEN + 1];
 		SQLWCHAR literalPrefix[DB_MAX_LITERAL_PREFIX_LEN + 1];
 		SQLWCHAR literalSuffix[DB_MAX_LITERAL_SUFFIX_LEN + 1];
 		SQLWCHAR createParams[DB_MAX_CREATE_PARAMS_LIST_LEN + 1];
-		SQLWCHAR localTypeName[DB_LOCAL_TYPE_NAME_LEN + 1];
+		SQLWCHAR localTypeName[DB_MAX_LOCAL_TYPE_NAME_LEN + 1];
 		SQLLEN cb;
 		while(ret == SQL_SUCCESS)
 		{
@@ -918,6 +918,58 @@ namespace exodbc
 	}
 
 
+	bool Database::ReadTablePrimaryKeys(const STableInfo& table, TablePrimaryKeysVector& primaryKeys)
+	{
+		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
+
+		primaryKeys.clear();
+
+		SQLRETURN ret = SQLPrimaryKeys(m_hstmt, (SQLWCHAR*)table.m_catalogName.c_str(), SQL_NTS, (SQLWCHAR*)table.m_schemaName.c_str(), SQL_NTS, (SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS);
+		bool ok = SQL_SUCCEEDED(ret);
+		if (SQL_SUCCESS_WITH_INFO == ret)
+		{
+			LOG_WARNING_STMT(m_hstmt, ret, SQLPrimaryKeys);
+		}
+		if (!ok)
+		{
+			LOG_ERROR_STMT(m_hstmt, ret, SQLPrimaryKeys);
+		}
+		while (ok && (ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+		{
+			bool haveAllData = true;
+			SQLLEN cb;
+			STablePrimaryKeysInfo pk;
+			haveAllData = haveAllData & GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), pk.m_catalogName, &pk.m_isCatalogNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), pk.m_schemaName, &pk.m_isSchemaNull);
+			haveAllData = haveAllData & GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), pk.m_tableName);
+			haveAllData = haveAllData & GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), pk.m_columnName);
+			haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_SHORT, &pk.m_keySequence, sizeof(pk.m_keySequence), &cb, NULL);
+			haveAllData = haveAllData & GetData(m_hstmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, pk.m_primaryKeyName, &pk.m_isPrimaryKeyNameNull);
+
+			if (!haveAllData)
+			{
+				ok = false;
+				LOG_ERROR(L"Failed to Read Data from a record while reading table primary keys");
+			}
+			else
+			{
+				primaryKeys.push_back(pk);
+			}
+		}
+
+		if (ret != SQL_NO_DATA)
+		{
+			LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
+			ok = false;
+		}
+
+		// Close, ignore all errs
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+
+		return ok;
+	}
+
+
 	bool Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, TablePrivilegesVector& privileges)
 	{
 		// Find one matching table
@@ -1074,7 +1126,7 @@ namespace exodbc
 			haveAllData = haveAllData & GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);
 			haveAllData = haveAllData & GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), colInfo.m_columnName);
 			haveAllData = haveAllData & GetData(m_hstmt, 5, SQL_C_SSHORT, &colInfo.m_sqlType, sizeof(colInfo.m_sqlType), &cb, NULL);
-			haveAllData = haveAllData & GetData(m_hstmt, 6, DB_TYPE_NAME_LEN, colInfo.m_typeName);
+			haveAllData = haveAllData & GetData(m_hstmt, 6, DB_MAX_TYPE_NAME_LEN, colInfo.m_typeName);
 			haveAllData = haveAllData & GetData(m_hstmt, 7, SQL_C_SLONG, &colInfo.m_columnSize, sizeof(colInfo.m_columnSize), &cb, &colInfo.m_isColumnSizeNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 8, SQL_C_SLONG, &colInfo.m_bufferSize, sizeof(colInfo.m_bufferSize), &cb, &colInfo.m_isBufferSizeNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 9, SQL_C_SSHORT, &colInfo.m_decimalDigits, sizeof(colInfo.m_decimalDigits), &cb, &colInfo.m_isDecimalDigitsNull);

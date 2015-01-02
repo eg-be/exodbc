@@ -38,28 +38,21 @@ namespace exodbc
 
 	// Global Consts
 	// -------------
-	extern EXODBCAPI const wchar_t* emptyString;
-	extern EXODBCAPI const wchar_t* SQL_LOG_FILENAME;
-	extern EXODBCAPI const wchar_t* SQL_CATALOG_FILENAME;
-
-	const int wxDB_PATH_MAX                 = 254;
 
 	// Some defaults when binding to chars but no reasonable char-length can be determined.
 	const int DB_MAX_BIGINT_CHAR_LENGTH = 30;
 	const int DB_MAX_DOUBLE_CHAR_LENGTH = 30;
 
-	// Database Globals
-	const int DB_TYPE_NAME_LEN				= 40;
-	const int DB_LOCAL_TYPE_NAME_LEN		= 256;
-	const int DB_MAX_STATEMENT_LEN			= 4096;
-	const int DB_MAX_WHERE_CLAUSE_LEN		= 2048;
-	const int DB_MAX_ERROR_MSG_LEN			= 512;
-	const int DB_MAX_ERROR_HISTORY			= 5;
+	// Database Globals or defaults. The values named _DEFAULT are used as fallback
+	// if the corresponding value cannot be determined when querying the database about itself.
+	const int DB_MAX_TYPE_NAME_LEN				= 40;
+	const int DB_MAX_LOCAL_TYPE_NAME_LEN		= 256;
+//	const int DB_MAX_STATEMENT_LEN			= 4096;
+//	const int DB_MAX_WHERE_CLAUSE_LEN		= 2048;
 	const int DB_MAX_TABLE_NAME_LEN_DEFAULT			= 128;	///< This value is sometimes also available from SDbInfo::maxTableNameLen
 	const int DB_MAX_SCHEMA_NAME_LEN_DEFAULT		= 128;	///< This value is sometimes also available from SDbInfo::maxSchemaNameLen
 	const int DB_MAX_CATALOG_NAME_LEN_DEFAULT		= 128;	///< This value is sometimes also available from SDbInfo::maxCatalogNameLen
 	const int DB_MAX_COLUMN_NAME_LEN_DEFAULT		= 128;	///< Value sometimes available from SdbInfo::m_maxColumnNameLen
-	const int DB_MAX_COLUMN_NAME_LEN		= 128;
 	const int DB_MAX_TABLE_TYPE_LEN			= 128;
 	const int DB_MAX_TABLE_REMARKS_LEN		= 512;
 	const int DB_MAX_COLUMN_REMARKS_LEN		= 512;
@@ -72,34 +65,7 @@ namespace exodbc
 	const int DB_MAX_PRIVILEGES_LEN			= 128;
 	const int DB_MAX_IS_GRANTABLE_LEN		= 4;
 	const int DB_MAX_YES_NO_LEN				= 3;
-
-	const int DB_DATA_TYPE_VARCHAR        = 1;
-	const int DB_DATA_TYPE_INTEGER        = 2;
-	const int DB_DATA_TYPE_FLOAT          = 3;
-	const int DB_DATA_TYPE_DATE           = 4;
-	const int DB_DATA_TYPE_BLOB           = 5;
-	const int DB_DATA_TYPE_MEMO           = 6;
-
-	const int DB_SELECT_KEYFIELDS         = 1;
-	const int DB_SELECT_WHERE             = 2;
-	const int DB_SELECT_MATCHING          = 3;
-	const int DB_SELECT_STATEMENT         = 4;
-
-	const int DB_UPD_KEYFIELDS            = 1;
-	const int DB_UPD_WHERE                = 2;
-
-	const int DB_DEL_KEYFIELDS            = 1;
-	const int DB_DEL_WHERE                = 2;
-	const int DB_DEL_MATCHING             = 3;
-
-	const int DB_WHERE_KEYFIELDS          = 1;
-	const int DB_WHERE_MATCHING           = 2;
-
-	const int DB_GRANT_SELECT             = 1;
-	const int DB_GRANT_INSERT             = 2;
-	const int DB_GRANT_UPDATE             = 4;
-	const int DB_GRANT_DELETE             = 8;
-	const int DB_GRANT_ALL                = DB_GRANT_SELECT | DB_GRANT_INSERT | DB_GRANT_UPDATE | DB_GRANT_DELETE;
+	const int DB_MAX_PRIMARY_KEY_NAME_LEN	= 128;
 
 	// Structs
 	// -------
@@ -318,6 +284,31 @@ namespace exodbc
 		bool			m_isGrantableNull;
 	};
 	typedef std::vector<STablePrivilegesInfo> TablePrivilegesVector;
+
+
+	/*!
+	* \class	STablePrimaryKeysInfo
+	*
+	* \brief	Primary Keys of a table as fetched using SQLPrimaryKeys
+	*/
+	struct EXODBCAPI STablePrimaryKeysInfo
+	{
+		STablePrimaryKeysInfo() : m_keySequence(0), m_isPrimaryKeyNameNull(true) {};
+
+		std::wstring	m_catalogName;	///< TABLE_CAT [Nullable]. Primary key table catalog name.
+		std::wstring	m_schemaName;	///< TABLE_SCHEM [Nullable]. Primary key table schema name.
+		std::wstring	m_tableName;	///< TABLE_NAME. Primary key table name.
+		std::wstring	m_columnName;	///< COLUMN_NAME. Primary key column name.
+
+		SQLSMALLINT		m_keySequence;	///< KEY_SEQ. Column sequence number in key (starting with 1).
+		std::wstring	m_primaryKeyName;	///< PK_NAME [Nullable]. Column sequence number in key (starting with 1).
+
+		bool			m_isCatalogNull;		///< True if TABLE_CAT is Null.
+		bool			m_isSchemaNull;			///< True if TABLE_SCHEM is Null.
+		bool			m_isPrimaryKeyNameNull;	///< True if PK_NAME is Null.
+	};
+	typedef std::vector<STablePrimaryKeysInfo> TablePrimaryKeysVector;
+
 
 	// Enums
 	// -----
