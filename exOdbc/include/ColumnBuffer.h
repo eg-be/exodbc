@@ -135,21 +135,21 @@ namespace exodbc
 		*			Note that using this constructor you can pass almost any combination of conversions 
 		*			from SQL Types to ODBC C Types to the driver, as long as the buffer-type exists in the
 		*			BufferPtrVariant. Bind() will fail if the driver does not support the given conversion.
-		* \param sqlCType	The ODBC C Type of the buffer. This value will be forwarded to the driver during SQLBindCol. 
-		* \param ordinalPosition The ordinal position of the column in the table. Numbering starts at 1 (!)
-		* \param bufferPtrVarian Pointer to allocated buffer for the given sqlCType.
-		* \param bufferSize	Size of the allocated buffer.
-		* \param	column columnSize The number of digits of a decimal value (including the fractional part).
-		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
-		* \param	decimalDigits The number of digits of the fractional part of a decimal value.
-		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
-		* \param queryName Name of the column that corresponds to this buffer.
-		* \param decimalDigits		Number of decimal digits. Set to -1 to indicate unknown.
+		* \param sqlCType			The ODBC C Type of the buffer (like SQL_C_WCHAR, SQL_C_SLONG, etc.). This value will be forwarded to the driver during SQLBindCol. 
+		* \param ordinalPosition	The ordinal position of the column in the table. Numbering starts at 1 (!)
+		* \param bufferPtrVarian	Pointer to allocated buffer for the given sqlCType. Must be a buffer that can be held by a exodbc::BufferPtrVariant .
+		* \param bufferSize			Size of the allocated buffer.
+		* \param queryName			Name of the column that corresponds to this buffer.
+		* \param	columnSize		The number of digits of a decimal value (including the fractional part).
+		*							This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
+		* \param	decimalDigits	The number of digits of the fractional part of a decimal value.
+		*							This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
+		* \param	sqlType			The SQL Type of the column. This is only used if Parameter Markers are bound to this buffer, see BindParameter().
 		*
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1, SQLSMALLINT sqlType = SQL_UNKNOWN_TYPE);
 
 
 		~ColumnBuffer();
@@ -489,10 +489,13 @@ namespace exodbc
 
 		struct BoundParameter
 		{
-			SQLHSTMT m_hStmt;
-			SQLUSMALLINT m_columnNumber;
+			BoundParameter() : m_hStmt(SQL_NULL_HSTMT), m_parameterNumber(0) {};
+			BoundParameter(SQLHSTMT hStmt, SQLUSMALLINT parameterNr) : m_hStmt(hStmt), m_parameterNumber(parameterNr) {};
+			SQLHSTMT		m_hStmt;
+			SQLUSMALLINT	m_parameterNumber;
+			SQLINTEGER		m_cb;
 		};
-		typedef std::vector<BoundParameter> BoundParametersVector;
+		typedef std::vector<BoundParameter*> BoundParameterPtrsVector;
 
 		// Helpers to quickly access the pointers inside the variant.
 		// All of these could throw a boost::bad_get
@@ -514,12 +517,13 @@ namespace exodbc
 		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from SColumnInfo during construction or set manually. -1 indicates unkonwn.
 		std::wstring			m_queryName;			///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
 		SQLUSMALLINT			m_columnNr;				///< Either set on construction or read from SColumnInfo::m_ordinalPosition
+		SQLSMALLINT				m_sqlType;				///< The SQL Type of the Column, like SQL_SMALLINT. Either set on construction or read from SColumnInfo::m_sqlType.
 		bool					m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
 		bool					m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
 		SQLSMALLINT				m_bufferType;			///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
 		SQLINTEGER				m_bufferSize;			///< Size of an allocated or set from constructor buffer.
 		SQLHSTMT				m_hStmt;				///< Set to the statement handle this ColumnBuffer was bound to, initialized to SQL_NULL_HSTMT
-		BoundParametersVector	m_boundParameters;	
+		BoundParameterPtrsVector	m_boundParameters;	
 
 		OdbcVersion m_odbcVersion;	///< OdbcVersion passed when creating this ColumnBuffer.
 		AutoBindingMode m_autoBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
