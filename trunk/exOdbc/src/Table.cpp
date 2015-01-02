@@ -383,6 +383,15 @@ namespace exodbc
 		{
 			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFreeStmt);
 		}
+		// And column parameters, if we were bound rw
+		if (m_openMode == READ_WRITE)
+		{
+			ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
+			if (ret != SQL_SUCCESS)
+			{
+				LOG_ERROR_STMT(m_hStmtInsert, ret, SQLFreeStmt);
+			}
+		}
 
 		// Delete ColumnBuffers
 		ColumnBufferPtrMap::iterator it;
