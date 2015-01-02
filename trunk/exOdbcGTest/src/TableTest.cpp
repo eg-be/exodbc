@@ -1268,9 +1268,15 @@ namespace exodbc
 		ASSERT_TRUE(iTable.Open(false, true));
 
 		// Set some silly values to insert
-		ColumnBuffer* pId = iTable.GetColumnBuffer(1);
-		*pId = (SQLSMALLINT) 88;
-		pId->Test(9);
+		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
+		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
+		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
+		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
+		*pId = (SQLINTEGER)99;
+		*pSmallInt = (SQLSMALLINT)100;
+		*pInt = (SQLINTEGER)101;
+		*pBigInt = (SQLBIGINT)102;
+
 		EXPECT_TRUE(iTable.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
 
