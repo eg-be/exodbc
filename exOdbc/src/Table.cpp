@@ -368,7 +368,7 @@ namespace exodbc
 	}
 
 
-	const ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnIndex) const
+	ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnIndex) const
 	{
 		exDEBUG(IsOpen());
 		exDEBUG(columnIndex < m_numCols);
@@ -597,6 +597,25 @@ namespace exodbc
 	{
 		m_selectQueryOpen = ! CloseStmtHandle(m_hStmtSelect, FailIfNotOpen);
 		return ! m_selectQueryOpen;
+	}
+
+
+	bool Table::Insert()
+	{
+		exASSERT(IsOpen());
+		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
+		SQLRETURN ret = SQLExecute(m_hStmtInsert);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hStmtInsert, ret, SQLExecute);
+		}
+		if (SQL_SUCCESS_WITH_INFO == ret)
+		{
+			LOG_WARNING_STMT(m_hStmtInsert, ret, SQLExecute);
+		}
+
+		return SQL_SUCCEEDED(ret);
 	}
 
 

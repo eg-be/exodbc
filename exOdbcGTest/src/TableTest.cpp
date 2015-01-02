@@ -1267,6 +1267,12 @@ namespace exodbc
 		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
 		ASSERT_TRUE(iTable.Open(false, true));
 
+		// Set some silly values to insert
+		ColumnBuffer* pId = iTable.GetColumnBuffer(1);
+		pId->Test(9);
+		EXPECT_TRUE(iTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+
 	}
 
 // Interfaces
