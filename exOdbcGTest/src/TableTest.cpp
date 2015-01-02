@@ -1262,6 +1262,7 @@ namespace exodbc
 	{
 		// Clear tmp-table
 		// hm.. we need to do that first.. if not we have to type sql-syntax over and over..
+		// \todo: We need to test to insert NULL values, that is not handled at all so far.
 
 		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);

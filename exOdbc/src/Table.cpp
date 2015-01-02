@@ -318,9 +318,33 @@ namespace exodbc
 	}
 
 
+	bool Table::BindDeleteParameters()
+	{
+		exASSERT(m_columnBuffers.size() > 0);
+		exASSERT(m_openMode == READ_WRITE);
+
+		// We need to know the primary keys
+		if (! (m_tablePrimaryKeys.IsInitialized() || m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo)))
+		{
+			LOG_ERROR((boost::wformat(L"Failed to Read Primary Keys for Table '%s'") % m_tableInfo.GetSqlName()).str());
+			return false;
+		}
+
+		// Test that all primary keys are bound
+		if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
+		{
+			LOG_ERROR((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
+			return false;
+		}
+
+		return true;
+	}
+
+
 	bool Table::BindInsertParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
+		exASSERT(m_openMode == READ_WRITE);
 
 		// Build a statement with parameter-markers
 		SQLSMALLINT paramNr = 1;
@@ -995,14 +1019,10 @@ namespace exodbc
 		// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
 		if (!IsQueryOnly())
 		{
-			// We need to know the primary keys
-			if (!m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo))
-			{
-				LOG_ERROR((boost::wformat(L"Failed to Read Table Primary Keys for Table '%s'") % m_tableInfo.GetSqlName()).str());
-				return false;
-			}
-
 			if (!BindInsertParameters())
+				return false;
+
+			if (!BindDeleteParameters())
 				return false;
 
 			//if (!bindUpdateParams())                    // Updates
