@@ -646,9 +646,10 @@ namespace exodbc
 		bool		BindDeleteParameters();
 
 		// ODBC Handles
-		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do selects.
-		SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do counts. Columns are not bound.
-		SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do inserts. Columns are bound, a prepared statement using column-markers is created.
+		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
+		SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
+		SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
+		SQLHSTMT		m_hStmtDelete;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
 
 		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
 
