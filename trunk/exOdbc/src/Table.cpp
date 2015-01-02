@@ -40,6 +40,8 @@
 // Debug
 #include "DebugNew.h"
 
+using namespace std;
+
 namespace exodbc
 {
 	// Construction
@@ -145,6 +147,7 @@ namespace exodbc
 		m_hStmtCount = SQL_NULL_HSTMT;
 		m_hStmtSelect = SQL_NULL_HSTMT;
 		m_hStmtInsert = SQL_NULL_HSTMT;
+		m_hStmtDelete = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
 		m_autoBindingMode = AutoBindingMode::BIND_AS_REPORTED;
@@ -170,15 +173,11 @@ namespace exodbc
 			{
 				return false;
 			}
-			//// Allocate a separate statement handle for performing inserts
-			//if (SQLAllocStmt(m_hdbc, &m_hstmtInsert) != SQL_SUCCESS)
-			//	m_pDb->DispAllErrors(NULL, m_hdbc);
-			//// Allocate a separate statement handle for performing deletes
-			//if (SQLAllocStmt(m_hdbc, &m_hstmtDelete) != SQL_SUCCESS)
-			//	m_pDb->DispAllErrors(NULL, m_hdbc);
-			//// Allocate a separate statement handle for performing updates
-			//if (SQLAllocStmt(m_hdbc, &m_hstmtUpdate) != SQL_SUCCESS)
-			//	m_pDb->DispAllErrors(NULL, m_hdbc);
+			m_hStmtDelete = AllocateStatement();
+			if (!m_hStmtDelete)
+			{
+				return false;
+			}
 		}
 		// Allocate a separate statement handle for internal use
 		//if (SQLAllocStmt(m_hdbc, &m_hstmtInternal) != SQL_SUCCESS)
@@ -322,11 +321,19 @@ namespace exodbc
 	{
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
 
 		// We need to know the primary keys
 		if (! (m_tablePrimaryKeys.IsInitialized() || m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo)))
 		{
 			LOG_ERROR((boost::wformat(L"Failed to Read Primary Keys for Table '%s'") % m_tableInfo.GetSqlName()).str());
+			return false;
+		}
+
+		// And we need to have a primary key
+		if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
+		{
+			LOG_ERROR((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
 			return false;
 		}
 
@@ -337,6 +344,55 @@ namespace exodbc
 			return false;
 		}
 
+		// Build statement
+		wstring deleteStmt = (boost::wformat(L"DELETE FROM %s WHERE ") %m_tableInfo.GetSqlName()).str();
+		const TablePrimaryKeysVector& pKs = m_tablePrimaryKeys.GetPrimaryKeysVector();
+		TablePrimaryKeysVector::const_iterator it = pKs.begin();
+		while (it != pKs.end())
+		{
+			deleteStmt += (boost::wformat(L"%s = ?") % it->GetSqlName()).str();
+			++it;
+			if (it != pKs.end())
+			{
+				deleteStmt += L" AND ";
+			}
+		}
+
+		// Bind Parameters
+		// \todo: We silently assume that the order is the same
+		int paramNr = 1;
+		ColumnBufferPtrMap::iterator itCb;
+		for (itCb = m_columnBuffers.begin(); itCb != m_columnBuffers.end(); itCb++)
+		{
+			ColumnBuffer* pBuffer = itCb->second;
+			if (m_tablePrimaryKeys.IsPrimaryKey(pBuffer->GetQueryName()))
+			{
+				if (!pBuffer->BindParameter(m_hStmtDelete, paramNr))
+				{
+					return false;
+				}
+				else
+				{
+					paramNr++;
+				}
+			}
+		}
+
+		exASSERT(paramNr > 0);
+
+		// Prepare to delete
+		SQLRETURN ret = SQLPrepare(m_hStmtDelete, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hStmtDelete, ret, SQLPrepare);
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_hStmtDelete, ret, SQLPrepare);
+		}
+
+		return SQL_SUCCEEDED(ret);
+
 		return true;
 	}
 
@@ -345,6 +401,7 @@ namespace exodbc
 	{
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
 
 		// Build a statement with parameter-markers
 		SQLSMALLINT paramNr = 1;
@@ -432,6 +489,11 @@ namespace exodbc
 			{
 				LOG_ERROR_STMT(m_hStmtInsert, ret, SQLFreeStmt);
 			}
+			ret = SQLFreeStmt(m_hStmtDelete, SQL_RESET_PARAMS);
+			if (ret != SQL_SUCCESS)
+			{
+				LOG_ERROR_STMT(m_hStmtDelete, ret, SQLFreeStmt);
+			}
 		}
 
 		// Delete ColumnBuffers
@@ -444,44 +506,15 @@ namespace exodbc
 		m_columnBuffers.clear();
 
 		// Free allocated statements
+		// First those created always
 		FreeStatement(m_hStmtCount);
 		FreeStatement(m_hStmtSelect);
 
-		// Old statement stuff
-		// Free statement handles
 		if (!IsQueryOnly())
 		{
+			// And then those needed for writing
 			FreeStatement(m_hStmtInsert);
-
-			//if (m_hstmtInsert)
-			//{
-			//	/*
-			//	ODBC 3.0 says to use this form
-			//	if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-			//	*/
-			//	if (SQLFreeStmt(m_hstmtInsert, SQL_DROP) != SQL_SUCCESS)
-			//		m_pDb->DispAllErrors(NULL, m_hdbc);
-			//}
-
-			//if (m_hstmtDelete)
-			//{
-			//	/*
-			//	ODBC 3.0 says to use this form
-			//	if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-			//	*/
-			//	if (SQLFreeStmt(m_hstmtDelete, SQL_DROP) != SQL_SUCCESS)
-			//		m_pDb->DispAllErrors(NULL, m_hdbc);
-			//}
-
-			//if (m_hstmtUpdate)
-			//{
-			//	/*
-			//	ODBC 3.0 says to use this form
-			//	if (SQLFreeHandle(*hstmtDel, SQL_DROP) != SQL_SUCCESS)
-			//	*/
-			//	if (SQLFreeStmt(m_hstmtUpdate, SQL_DROP) != SQL_SUCCESS)
-			//		m_pDb->DispAllErrors(NULL, m_hdbc);
-			//}
+			FreeStatement(m_hStmtDelete);
 		}
 
 		//if (m_hstmtInternal)
@@ -637,6 +670,25 @@ namespace exodbc
 		if (SQL_SUCCESS_WITH_INFO == ret)
 		{
 			LOG_WARNING_STMT(m_hStmtInsert, ret, SQLExecute);
+		}
+
+		return SQL_SUCCEEDED(ret);
+	}
+
+
+	bool Table::Delete()
+	{
+		exASSERT(IsOpen());
+		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
+		SQLRETURN ret = SQLExecute(m_hStmtDelete);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hStmtDelete, ret, SQLExecute);
+		}
+		if (SQL_SUCCESS_WITH_INFO == ret)
+		{
+			LOG_WARNING_STMT(m_hStmtDelete, ret, SQLExecute);
 		}
 
 		return SQL_SUCCEEDED(ret);

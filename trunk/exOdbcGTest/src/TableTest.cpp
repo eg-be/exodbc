@@ -1258,6 +1258,20 @@ namespace exodbc
 
 	// Insert values
 	// -------------
+	TEST_P(TableTest, DeleteIntTypes)
+	{
+		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(iTable.Open(false, true));
+
+		// Set the id to delete
+		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
+		*pId = (SQLINTEGER) 99;
+		EXPECT_TRUE(iTable.Delete());
+		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+
 	TEST_P(TableTest, InsertIntTypes)
 	{
 		// Clear tmp-table
@@ -1280,8 +1294,8 @@ namespace exodbc
 
 		EXPECT_TRUE(iTable.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
-
 	}
+
 
 // Interfaces
 // ----------

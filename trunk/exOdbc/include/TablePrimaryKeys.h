@@ -72,6 +72,7 @@ namespace exodbc
 		/*!
 		* \brief	Initialize object from passed data. Marks as uninitialized first.
 		*			Marks object as initialized on success.
+		*			Note that this will not fail if tablePks is empty.
 		* \param	tablePks table primary keys
 		* \return	True on success.
 		*/
@@ -88,6 +89,12 @@ namespace exodbc
 
 
 		bool AreAllPrimaryKeysBound(const ColumnBufferPtrMap& columnBuffers) const;
+
+
+		size_t GetPrimaryKeysCount() const { exASSERT(m_initialized); return m_pksVector.size(); };
+
+
+		const TablePrimaryKeysVector& GetPrimaryKeysVector() const { exASSERT(m_initialized); return m_pksVector; };
 
 	private:
 
