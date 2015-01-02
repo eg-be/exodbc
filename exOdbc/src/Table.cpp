@@ -322,32 +322,49 @@ namespace exodbc
 	{
 		exASSERT(m_columnBuffers.size() > 0);
 
-		int insertColumnsCount = 0;
-
 		// Build a statement with parameter-markers
+		SQLSMALLINT paramNr = 1;
 		std::wstring insertStmt = L"INSERT INTO " + m_tableInfo.GetSqlName() + L" (";
 		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
 		while (it != m_columnBuffers.end())
 		{
 			ColumnBuffer* pBuffer = it->second;
+			// Bind parameter
+			if (!pBuffer->BindParameter(m_hStmtInsert, paramNr))
+			{
+				return false;
+			}
+			// prepare statement
 			insertStmt += pBuffer->GetQueryName();
-			insertColumnsCount++;
-
 			++it;
 			if (it != m_columnBuffers.end())
 			{
+				++paramNr;
 				insertStmt += L", ";
 			}
+
 		}
 		insertStmt += L") VALUES(";
-		for (int i = 0; i < insertColumnsCount - 1; i++)
+		for (int i = 1; i < paramNr; i++)
 		{
 			insertStmt += L"?, ";
 		}
 		insertStmt += L"?)";
 
-		exASSERT(insertColumnsCount > 0);
-		return false;
+		exASSERT(paramNr > 0);
+
+		// Prepare to update
+		SQLRETURN ret = SQLPrepare(m_hStmtInsert, (SQLWCHAR*) insertStmt.c_str(), SQL_NTS);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hStmtInsert, ret, SQLPrepare);
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_hStmtInsert, ret, SQLPrepare);
+		}
+
+		return SQL_SUCCEEDED(ret);
 	}
 
 

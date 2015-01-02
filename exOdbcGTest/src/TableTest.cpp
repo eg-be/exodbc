@@ -1260,6 +1260,9 @@ namespace exodbc
 	// -------------
 	TEST_P(TableTest, InsertIntTypes)
 	{
+		// Clear tmp-table
+		// hm.. we need to do that first.. if not we have to type sql-syntax over and over..
+
 		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
 		ASSERT_TRUE(iTable.Open(false, true));
