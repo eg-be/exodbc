@@ -34,6 +34,7 @@
 #include "Database.h"
 #include "ColumnBuffer.h"
 #include "TablePrivileges.h"
+#include "TablePrimaryKeys.h"
 
 // Other headers
 #include "boost/any.hpp"
@@ -639,6 +640,7 @@ namespace exodbc
 		bool				m_isOpen;				///< Set to true after Open has been called
 		unsigned int		m_charTrimFlags;		///< Bitmask for the CharTrimOption Flags
 		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
+		TablePrimaryKeys	m_tablePrimaryKeys;		///< Table Primary Keys read during Open if table was opened READ_WRITE.
 
 		// Column information
 		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().

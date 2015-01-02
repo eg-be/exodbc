@@ -995,6 +995,13 @@ namespace exodbc
 		// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
 		if (!IsQueryOnly())
 		{
+			// We need to know the primary keys
+			if (!m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo))
+			{
+				LOG_ERROR((boost::wformat(L"Failed to Read Table Primary Keys for Table '%s'") % m_tableInfo.GetSqlName()).str());
+				return false;
+			}
+
 			if (!BindInsertParameters())
 				return false;
 
