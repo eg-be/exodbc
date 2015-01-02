@@ -348,6 +348,15 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Reads table primary keys of exactly one table. 
+		* \param	table			  	Table definition to query primary keys.
+		* \param [in,out]	primaryKeys	The primary Keys found.
+		* \return	true if it succeeds, false if it fails.
+		*/
+		bool		ReadTablePrimaryKeys(const STableInfo& table, TablePrimaryKeysVector& primaryKeys);
+
+
+		/*!
 		 * \brief		Reads table column information for the passed table.
 		 * \detailed	Returned table columns are ordered by TABLE_CAT, TABLE_SCHEM, TABLE_NAME, and ORDINAL_POSITION. 
 		 * \param		table The table.

@@ -423,6 +423,7 @@ namespace exodbc
 		}
 	}
 
+
 	TEST_P(DatabaseTest, ReadTableTypes)
 	{
 		std::vector<std::wstring> tableTypes;
@@ -431,6 +432,7 @@ namespace exodbc
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"TABLE") != tableTypes.end());
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"VIEW") != tableTypes.end());
 	}
+
 
 	TEST_P(DatabaseTest, ReadTablePrivileges)
 	{
@@ -487,6 +489,45 @@ namespace exodbc
 		EXPECT_TRUE(canInsert);
 		EXPECT_TRUE(canUpdate);
 		EXPECT_TRUE(canDelete);
+	}
+
+
+	TEST_P(DatabaseTest, ReadTablePrimaryKeysInfo)
+	{
+		TablePrimaryKeysVector pks;
+		
+		// Find the table-info
+		STableInfo iInfo;
+		wstring intTableName = TestTables::GetTableName(L"IntegerTypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetColName(L"IdIntegerTypes", m_odbcInfo.m_namesCase);
+		ASSERT_TRUE(m_db.FindOneTable(intTableName, L"", L"", L"", iInfo));
+
+		EXPECT_TRUE(m_db.ReadTablePrimaryKeys(iInfo, pks));
+		EXPECT_EQ(1, pks.size());
+		if (pks.size() == 1)
+		{
+			EXPECT_EQ(idName, pks[0].m_columnName);
+		}
+
+		STableInfo mkInfo;
+		wstring multiKeyTableName = TestTables::GetTableName(L"MultiKey", m_odbcInfo.m_namesCase);
+		wstring mkId1 = TestTables::GetColName(L"id1", m_odbcInfo.m_namesCase);
+		wstring mkId2 = TestTables::GetColName(L"id2", m_odbcInfo.m_namesCase);
+		wstring mkId3 = TestTables::GetColName(L"id3", m_odbcInfo.m_namesCase);
+		ASSERT_TRUE(m_db.FindOneTable(multiKeyTableName, L"", L"", L"", mkInfo));
+
+		EXPECT_TRUE(m_db.ReadTablePrimaryKeys(mkInfo, pks));
+		EXPECT_EQ(3, pks.size());
+		if (pks.size() == 3)
+		{
+			EXPECT_EQ(mkId1, pks[0].m_columnName);
+			EXPECT_EQ(1, pks[0].m_keySequence);
+			EXPECT_EQ(mkId2, pks[1].m_columnName);
+			EXPECT_EQ(2, pks[1].m_keySequence);
+			EXPECT_EQ(mkId3, pks[2].m_columnName);
+			EXPECT_EQ(3, pks[2].m_keySequence);
+		}
+
 	}
 
 
