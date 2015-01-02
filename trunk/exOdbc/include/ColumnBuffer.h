@@ -499,6 +499,7 @@ namespace exodbc
 			BoundParameter(SQLHSTMT hStmt, SQLUSMALLINT parameterNr) : m_hStmt(hStmt), m_parameterNumber(parameterNr), m_cb(0) {};
 			SQLHSTMT		m_hStmt;
 			SQLUSMALLINT	m_parameterNumber;
+			// \todo: We must remove the m_cb and use the cb from the ColumnBuffer.
 			SQLINTEGER		m_cb;
 		};
 		typedef std::vector<BoundParameter*> BoundParameterPtrsVector;

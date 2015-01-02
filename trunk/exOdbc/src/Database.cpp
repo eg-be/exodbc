@@ -924,7 +924,10 @@ namespace exodbc
 
 		primaryKeys.clear();
 
-		SQLRETURN ret = SQLPrimaryKeys(m_hstmt, (SQLWCHAR*)table.m_catalogName.c_str(), SQL_NTS, (SQLWCHAR*)table.m_schemaName.c_str(), SQL_NTS, (SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS);
+		SQLRETURN ret = SQLPrimaryKeys(m_hstmt, 
+			table.m_catalogName.empty() ? NULL : (SQLWCHAR*)table.m_catalogName.c_str(), table.m_catalogName.empty() ? 0 : SQL_NTS,
+			table.m_schemaName.empty() ? NULL : (SQLWCHAR*)table.m_schemaName.c_str(), table.m_schemaName.empty() ? 0 : SQL_NTS,
+			(SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS);
 		bool ok = SQL_SUCCEEDED(ret);
 		if (SQL_SUCCESS_WITH_INFO == ret)
 		{
@@ -938,7 +941,7 @@ namespace exodbc
 		{
 			bool haveAllData = true;
 			SQLLEN cb;
-			STablePrimaryKeysInfo pk;
+			STablePrimaryKeyInfo pk;
 			haveAllData = haveAllData & GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), pk.m_catalogName, &pk.m_isCatalogNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), pk.m_schemaName, &pk.m_isSchemaNull);
 			haveAllData = haveAllData & GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), pk.m_tableName);

@@ -34,8 +34,6 @@
 
 namespace exodbc
 {
-
-
 	// Global Consts
 	// -------------
 
@@ -66,6 +64,127 @@ namespace exodbc
 	const int DB_MAX_IS_GRANTABLE_LEN		= 4;
 	const int DB_MAX_YES_NO_LEN				= 3;
 	const int DB_MAX_PRIMARY_KEY_NAME_LEN	= 128;
+
+
+	// Enums
+	// -----
+	/*!
+	* \enum	OdbcVersion
+	*
+	* \brief	Defines the ODBC-Version to be set.
+	* 			see: http://msdn.microsoft.com/en-us/library/ms709316%28v=vs.85%29.aspx
+	*
+	*/
+	enum OdbcVersion
+	{
+		OV_UNKNOWN = 0, //< Unknown Version
+		OV_2 = 2UL,		//< Version 2.x
+		OV_3 = 3UL,		//< Version 3.x
+		OV_3_8 = 380UL	//< Version 3.8
+	};
+
+	/*!
+	* \enum	CommitMode
+	*
+	* \brief	Defines whether auto commit is on or off.
+	* 			see: http://msdn.microsoft.com/en-us/library/ms713600%28v=vs.85%29.aspx
+	*
+	*/
+	enum CommitMode
+	{
+		CM_UNKNOWN = 50000,			//< Unknown Commit mode
+		CM_AUTO_COMMIT = SQL_AUTOCOMMIT,		//< Autocommit on
+		CM_MANUAL_COMMIT = SQL_AUTOCOMMIT_OFF	//< Autocommit off
+	};
+
+
+	/*!
+	* \enum	TransactionIsolationMode
+	*
+	* \brief	Defines the Transaction Isolation Mode
+	*			see: http://msdn.microsoft.com/en-us/library/ms709374%28v=vs.85%29.aspx
+	*/
+	enum TransactionIsolationMode
+	{
+		TI_UNKNOWN = 50000,
+		TI_READ_UNCOMMITTED = SQL_TXN_READ_UNCOMMITTED,
+		TI_READ_COMMITTED = SQL_TXN_READ_COMMITTED,
+		TI_REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,
+		TI_SERIALIZABLE = SQL_TXN_SERIALIZABLE
+#if HAVE_MSODBCSQL_H
+		, TI_SNAPSHOT = SQL_TXN_SS_SNAPSHOT
+#endif
+	};
+
+
+	/*!
+	* \enum		AutoBindingMode
+	* \brief	Provide additional information to what types to bind columns.
+	* \detailed Usually when a table binds a column it will query the database about the SQL-Type and create the
+	*			corresponding buffer-type. Using this option you can specify that columns reported as SQL_CHAR
+	*			will be bound to a SQLWCHAR* buffer, or the other way round, or that everything is bound to a
+	*			SQLCHAR* / SQLWCHAR*.
+	*			This comes in handy as drivers are usually quite good about converting wide-stuff to non-wide stuff,
+	*			but doing that in the code is just a pain.
+	*/
+	enum class AutoBindingMode
+	{
+		BIND_AS_REPORTED,	///< Use the type reported by the DB for the buffer (default)
+		BIND_WCHAR_AS_CHAR,		///< Bind also SQL_WCHAR and SQL_WVARCHAR columns to a SQLCHAR* buffer
+		BIND_CHAR_AS_WCHAR,		///< Bind also SQL_CHAR and SQL_VARCHAR columns to a SQLWCHAR* buffer
+		BIND_ALL_AS_CHAR,		///< Bind all columns as SQLCHAR, ignoring their type
+		BIND_ALL_AS_WCHAR		///< Bind all columns as SQLWCHAR* ignoring their type
+	};
+
+
+	// Known Databases
+	// ---------------
+	// These are the databases currently tested and working with these classes
+	// See the comments in wxDb::Dbms() for exceptions/issues with
+	// each of these database engines
+	enum DatabaseProduct
+	{
+		dbmsUNIDENTIFIED,	///< Unknown DB
+		//dbmsORACLE,
+		//dbmsSYBASE_ASA,        // Adaptive Server Anywhere
+		//dbmsSYBASE_ASE,        // Adaptive Server Enterprise
+		dbmsMS_SQL_SERVER,	///< Microsoft SQL Server
+		dbmsMY_SQL,			///< MySQL
+		//dbmsPOSTGRES,
+		//dbmsACCESS,
+		//dbmsDBASE,
+		//dbmsINFORMIX,
+		//dbmsVIRTUOSO,
+		dbmsDB2,			///< IBM DB2
+		//dbmsINTERBASE,
+		//dbmsPERVASIVE_SQL,
+		//dbmsXBASE_SEQUITER,
+		//dbmsFIREBIRD,
+		//dbmsMAXDB,
+	};
+
+
+	/*!
+	* \enum		ColumnAttribute
+	* \brief	A helper for the arguments in SQLColAttribute.
+	* \see		http://msdn.microsoft.com/en-us/library/ms713558%28v=vs.85%29.aspx
+	* \see		Table::SelectColumnAttribute()
+	*/
+	enum ColumnAttribute
+	{
+		CA_PRECISION = SQL_DESC_PRECISION ///< A numeric value that for a numeric data type denotes the applicable precision, For data types SQL_TYPE_TIME, SQL_TYPE_TIMESTAMP, and all the interval data types that represent a time interval, its value is the applicable precision of the fractional seconds component. 
+	};
+
+
+	enum QueryNameFlags
+	{
+		CATALOG = 0x1,
+		SCHEMA = 0x2,
+		TABLE = 0x4,
+		TYPE = 0x8,
+		COLUMN = 0x10
+	};
+
 
 	// Structs
 	// -------
@@ -223,7 +342,7 @@ namespace exodbc
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
-		std::wstring		GetSqlName() const;
+		std::wstring		GetSqlName(int flags = TABLE | COLUMN) const;
 
 	};
 
@@ -248,7 +367,7 @@ namespace exodbc
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
-		std::wstring		GetSqlName() const;
+		std::wstring		GetSqlName(int flags = CATALOG | SCHEMA | TABLE) const;
 	};
 
 	/*!
@@ -287,13 +406,13 @@ namespace exodbc
 
 
 	/*!
-	* \class	STablePrimaryKeysInfo
+	* \class	STablePrimaryKeyInfo
 	*
 	* \brief	Primary Keys of a table as fetched using SQLPrimaryKeys
 	*/
-	struct EXODBCAPI STablePrimaryKeysInfo
+	struct EXODBCAPI STablePrimaryKeyInfo
 	{
-		STablePrimaryKeysInfo() : m_keySequence(0), m_isPrimaryKeyNameNull(true) {};
+		STablePrimaryKeyInfo() : m_keySequence(0), m_isPrimaryKeyNameNull(true) {};
 
 		std::wstring	m_catalogName;	///< TABLE_CAT [Nullable]. Primary key table catalog name.
 		std::wstring	m_schemaName;	///< TABLE_SCHEM [Nullable]. Primary key table schema name.
@@ -306,118 +425,10 @@ namespace exodbc
 		bool			m_isCatalogNull;		///< True if TABLE_CAT is Null.
 		bool			m_isSchemaNull;			///< True if TABLE_SCHEM is Null.
 		bool			m_isPrimaryKeyNameNull;	///< True if PK_NAME is Null.
+
+		std::wstring GetSqlName(int flags = TABLE | COLUMN) const;
 	};
-	typedef std::vector<STablePrimaryKeysInfo> TablePrimaryKeysVector;
-
-
-	// Enums
-	// -----
-	/*!
-	* \enum	OdbcVersion
-	*
-	* \brief	Defines the ODBC-Version to be set.
-	* 			see: http://msdn.microsoft.com/en-us/library/ms709316%28v=vs.85%29.aspx
-	*
-	*/
-	enum OdbcVersion
-	{
-		OV_UNKNOWN = 0, //< Unknown Version
-		OV_2 = 2UL,		//< Version 2.x
-		OV_3 = 3UL,		//< Version 3.x
-		OV_3_8 = 380UL	//< Version 3.8
-	};
-
-	/*!
-	 * \enum	CommitMode
-	 *
-	 * \brief	Defines whether auto commit is on or off.
-	 * 			see: http://msdn.microsoft.com/en-us/library/ms713600%28v=vs.85%29.aspx
-	 * 			
-	 */
-	enum CommitMode
-	{
-		CM_UNKNOWN = 50000,			//< Unknown Commit mode
-		CM_AUTO_COMMIT = SQL_AUTOCOMMIT,		//< Autocommit on
-		CM_MANUAL_COMMIT = SQL_AUTOCOMMIT_OFF	//< Autocommit off
-	};
-
-	
-	/*!
-	* \enum	TransactionIsolationMode
-	*
-	* \brief	Defines the Transaction Isolation Mode
-	*			see: http://msdn.microsoft.com/en-us/library/ms709374%28v=vs.85%29.aspx
-	*/
-	enum TransactionIsolationMode
-	{
-		TI_UNKNOWN = 50000,
-		TI_READ_UNCOMMITTED = SQL_TXN_READ_UNCOMMITTED,
-		TI_READ_COMMITTED = SQL_TXN_READ_COMMITTED,
-		TI_REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,
-		TI_SERIALIZABLE = SQL_TXN_SERIALIZABLE
-#if HAVE_MSODBCSQL_H
-		, TI_SNAPSHOT = SQL_TXN_SS_SNAPSHOT
-#endif
-	};
-
-
-	/*!
-	* \enum		AutoBindingMode
-	* \brief	Provide additional information to what types to bind columns.
-	* \detailed Usually when a table binds a column it will query the database about the SQL-Type and create the
-	*			corresponding buffer-type. Using this option you can specify that columns reported as SQL_CHAR
-	*			will be bound to a SQLWCHAR* buffer, or the other way round, or that everything is bound to a
-	*			SQLCHAR* / SQLWCHAR*.
-	*			This comes in handy as drivers are usually quite good about converting wide-stuff to non-wide stuff,
-	*			but doing that in the code is just a pain.
-	*/
-	enum class AutoBindingMode
-	{
-		BIND_AS_REPORTED,	///< Use the type reported by the DB for the buffer (default)
-		BIND_WCHAR_AS_CHAR,		///< Bind also SQL_WCHAR and SQL_WVARCHAR columns to a SQLCHAR* buffer
-		BIND_CHAR_AS_WCHAR,		///< Bind also SQL_CHAR and SQL_VARCHAR columns to a SQLWCHAR* buffer
-		BIND_ALL_AS_CHAR,		///< Bind all columns as SQLCHAR, ignoring their type
-		BIND_ALL_AS_WCHAR		///< Bind all columns as SQLWCHAR* ignoring their type
-	};
-
-
-	// Known Databases
-	// ---------------
-	// These are the databases currently tested and working with these classes
-	// See the comments in wxDb::Dbms() for exceptions/issues with
-	// each of these database engines
-	enum DatabaseProduct
-	{
-		dbmsUNIDENTIFIED,	///< Unknown DB
-		//dbmsORACLE,
-		//dbmsSYBASE_ASA,        // Adaptive Server Anywhere
-		//dbmsSYBASE_ASE,        // Adaptive Server Enterprise
-		dbmsMS_SQL_SERVER,	///< Microsoft SQL Server
-		dbmsMY_SQL,			///< MySQL
-		//dbmsPOSTGRES,
-		//dbmsACCESS,
-		//dbmsDBASE,
-		//dbmsINFORMIX,
-		//dbmsVIRTUOSO,
-		dbmsDB2,			///< IBM DB2
-		//dbmsINTERBASE,
-		//dbmsPERVASIVE_SQL,
-		//dbmsXBASE_SEQUITER,
-		//dbmsFIREBIRD,
-		//dbmsMAXDB,
-	};
-
-	
-	/*!
-	* \enum		ColumnAttribute
-	* \brief	A helper for the arguments in SQLColAttribute.
-	* \see		http://msdn.microsoft.com/en-us/library/ms713558%28v=vs.85%29.aspx
-	* \see		Table::SelectColumnAttribute()
-	*/
-	enum ColumnAttribute
-	{
-		CA_PRECISION = SQL_DESC_PRECISION ///< A numeric value that for a numeric data type denotes the applicable precision, For data types SQL_TYPE_TIME, SQL_TYPE_TIMESTAMP, and all the interval data types that represent a time interval, its value is the applicable precision of the fractional seconds component. 
-	};
+	typedef std::vector<STablePrimaryKeyInfo> TablePrimaryKeysVector;
 
 
 	// List the well-known SQL-State we need in the code

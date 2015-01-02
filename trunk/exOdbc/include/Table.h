@@ -395,9 +395,31 @@ namespace exodbc
 
 		/*
 		* \brief	Inserts the current values into the database as a new row.
-		* \detailed	
+		* \detailed	The values in the ColumnBuffer currently bound will be inserted
+		*			into the database.
+		*			An prepared INSERT statement is used to insert the values identified
+		*			by the bound ColumnBuffers.
+		*			Fails if the table has not been opened using READ_WRITE.
+		*			This will not commit the transaction.
+		* \see		Database::CommitTrans()
+		* \return	True on success.
 		*/
 		bool		Insert();
+
+
+		/*
+		* \brief	Deletes the row identified by the values of the bound primary key columns.
+		* \detailed	A prepared DELETE statement is used to delete the row that matches all
+		*			primary keys of this Table. The values are read from the ColumnBuffers bound
+		*			to the primary key columns.
+		*			Fails if not all primary keys are bound.
+		*			Fails if no primary keys are set on the table.
+		*			Fails if the table has not been opened using READ_WRITE.
+		*			This will not commit the transaction.
+		* \see		Database::CommitTrans()
+		* \return	True on success.
+		*/
+		bool		Delete();
 
 
 		/*!
@@ -621,6 +643,7 @@ namespace exodbc
 
 
 		bool		BindInsertParameters();
+		bool		BindDeleteParameters();
 
 		// ODBC Handles
 		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do selects.

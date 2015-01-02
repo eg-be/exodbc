@@ -247,41 +247,88 @@ namespace exodbc {
 	}
 
 
-	std::wstring STableInfo::GetSqlName() const
+	std::wstring STableInfo::GetSqlName(int flags /* = CATALOG | SCHEMA | TABLE */) const
 	{
 		exASSERT(!m_tableName.empty());
 
 		std::wstringstream ws;
-		if (HasCatalog())
+		if (flags & CATALOG && HasCatalog())
 		{
 			ws << m_catalogName << L"."; 
 		}
-		if (HasSchema())
+		if (flags & SCHEMA && HasSchema())
 		{
 			ws << m_schemaName << L".";
 		}
-		ws << m_tableName;
-		return ws.str();
+		if (flags & TABLE)
+		{
+			ws << m_tableName << L".";
+		}
+
+		std::wstring str = ws.str();
+		boost::erase_last(str, L".");
+		return str;
 	}
 
 
-	std::wstring SColumnInfo::GetSqlName() const
+	std::wstring SColumnInfo::GetSqlName(int flags /* = TABLE | COLUMN */) const
 	{
 		exASSERT(!m_tableName.empty());
 		exASSERT(!m_columnName.empty());
 
 		std::wstringstream ws;
-		if (HasCatalog())
+		if (flags & CATALOG && HasCatalog())
 		{
 			ws << m_catalogName << L".";
 		}
-		if (HasSchema())
+		if (flags & SCHEMA && HasSchema())
 		{
 			ws << m_schemaName << L".";
 		}
-		ws << m_tableName << L"." << m_columnName;
-		return ws.str();
+		if (flags & TABLE)
+		{
+			ws << m_tableName << L".";
+		}
+		if (flags & COLUMN)
+		{
+			ws << m_columnName << L".";
+		}
+
+		std::wstring str = ws.str();
+		boost::erase_last(str, L".");
+		return str;
 	}
+
+
+
+	std::wstring STablePrimaryKeyInfo::GetSqlName(int flags /* = TABLE | COLUMN */) const
+	{
+		exASSERT(!m_tableName.empty());
+
+		std::wstringstream ws;
+		if (flags & CATALOG && !m_isCatalogNull)
+		{
+			ws << m_catalogName << L".";
+		}
+		if (flags & SCHEMA && !m_isSchemaNull)
+		{
+			ws << m_schemaName << L".";
+		}
+		if (flags & TABLE)
+		{
+			ws << m_tableName << L".";
+		}
+		if (flags & COLUMN)
+		{
+			ws << m_columnName << L".";
+		}
+
+		std::wstring str = ws.str();
+		boost::erase_last(str, L".");
+		return str;
+	}
+
+
 
 	std::wstring SSqlTypeInfo::ToOneLineStr(bool withHeaderLines /* = false */, bool withEndLine /* = false */) const
 	{

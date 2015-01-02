@@ -11,9 +11,11 @@
 
 // Same component headers
 #include "exOdbc.h"
+#include "ColumnBuffer.h"
 
 // Other headers
 // System headers
+#include <map>
 
 // Forward declarations
 // --------------------
@@ -82,11 +84,20 @@ namespace exodbc
 		bool IsInitialized() const { return m_initialized; };
 
 
+		bool IsPrimaryKey(const std::wstring queryName) const;
+
+
+		bool AreAllPrimaryKeysBound(const ColumnBufferPtrMap& columnBuffers) const;
+
 	private:
 
 		bool Parse(const TablePrimaryKeysVector& tablePks);
 
 		bool m_initialized;
+
+		typedef std::map<std::wstring, STablePrimaryKeyInfo> PrimaryKeysMap;
+		PrimaryKeysMap m_pksMap;
+		TablePrimaryKeysVector m_pksVector;
 	};
 
 } // namesapce exodbc
