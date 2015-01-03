@@ -51,14 +51,15 @@ namespace exodbc
 		return out;
 	}
 
-	std::ostream& operator<< (std::ostream &out, const SErrorInfo& ei)
-	{
 
-		out << "SQLSTATE " << w2s(ei.SqlState) << "; Native Error: " << ei.NativeError << "; " << w2s(ei.Msg);
-		return out;
+	std::wstring SErrorInfo::ToString() const
+	{
+		std::wstringstream ws;
+		ws << this;
+		return ws.str();
 	}
 
-	// Ticket #44
+
 	std::string w2s(const std::wstring& w)
 	{
 		std::stringstream ss;
@@ -71,6 +72,7 @@ namespace exodbc
 
 		return ss.str();
 	}
+
 
 	std::wstring SqlTrueFalse2s(SQLSMALLINT b)
 	{
@@ -477,7 +479,7 @@ namespace exodbc
 		{
 			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
 			if(ret == SQL_ERROR)
-				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HANDLE_DBC (return code was SQL_ERROR, handle is still valid): " << GetLastDbcError(hDbc);
+				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HANDLE_DBC (return code was SQL_ERROR, handle is still valid): " << GetLastDbcError(hDbc).ToString();
 			else
 				BOOST_LOG_TRIVIAL(warning) << L"Failed to SQLFreeHandle of type SQL_HANDLE_DBC (return code was " << ret << L", handle is invalid)";
 		}
