@@ -1398,6 +1398,25 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, InsertDateTypes)
+	{
+		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes_tmp", m_odbcInfo.m_namesCase);
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(dTable.Open(false, true));
+		ColumnBuffer* pId = dTable.GetColumnBuffer(0);
+		ColumnBuffer* pDate = dTable.GetColumnBuffer(1);
+		ColumnBuffer* pTime = dTable.GetColumnBuffer(2);
+		ColumnBuffer* pTimestamp = dTable.GetColumnBuffer(3);
+
+		wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		EXPECT_TRUE(dTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+
 	// Update rows
 	// -----------
 

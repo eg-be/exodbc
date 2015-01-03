@@ -744,7 +744,7 @@ namespace exodbc
 		SQLRETURN ret = SQLExecDirect(m_hStmtDeleteWhere, (SQLWCHAR*)sqlstmt.c_str(), sqlstmt.length());
 		if (!SQL_SUCCEEDED(ret) && (failOnNoData || ret != SQL_NO_DATA))
 		{
-			LOG_ERROR_STMT(m_hStmtDelete, ret, SQLExecute);
+			LOG_ERROR_STMT(m_hStmtDeleteWhere, ret, SQLExecute);
 		}
 		if (SQL_SUCCESS_WITH_INFO == ret)
 		{
@@ -752,7 +752,7 @@ namespace exodbc
 		}
 		else if (SQL_NO_DATA == ret)
 		{
-			LOG_INFO_STMT(m_hStmtDelete, ret, SQLExecute);
+			LOG_INFO_STMT(m_hStmtDeleteWhere, ret, SQLExecute);
 		}
 
 		return SQL_SUCCEEDED(ret) || (!failOnNoData && ret == SQL_NO_DATA);
