@@ -1414,6 +1414,19 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		EXPECT_TRUE(dTable.Delete(sqlstmt, false));
 		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Set some silly values
+		SQL_DATE_STRUCT date;
+		date.day = 26;
+		date.year = 1983;
+		date.month = 1;
+
+		*pId = (SQLINTEGER)101;
+		*pDate = date;
+		pTime->SetNull();
+		pTimestamp->SetNull();
+		EXPECT_TRUE(dTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
 	}
 
 
