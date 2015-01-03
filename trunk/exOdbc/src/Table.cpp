@@ -147,6 +147,7 @@ namespace exodbc
 		m_hStmtCount = SQL_NULL_HSTMT;
 		m_hStmtSelect = SQL_NULL_HSTMT;
 		m_hStmtInsert = SQL_NULL_HSTMT;
+		m_hStmtUpdate = SQL_NULL_HSTMT;
 		m_hStmtDelete = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
@@ -175,6 +176,11 @@ namespace exodbc
 			}
 			m_hStmtDelete = AllocateStatement();
 			if (!m_hStmtDelete)
+			{
+				return false;
+			}
+			m_hStmtUpdate = AllocateStatement();
+			if (!m_hStmtUpdate)
 			{
 				return false;
 			}
@@ -319,65 +325,30 @@ namespace exodbc
 
 	bool Table::BindDeleteParameters()
 	{
+		// \todo: Do want to assert this? This function assumes that all primary keys are bound
+
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(m_openMode == READ_WRITE);
 		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
 
-		// We need to know the primary keys
-		if (! (m_tablePrimaryKeys.IsInitialized() || m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo)))
-		{
-			LOG_ERROR((boost::wformat(L"Failed to Read Primary Keys for Table '%s'") % m_tableInfo.GetSqlName()).str());
-			return false;
-		}
-
-		// And we need to have a primary key
-		if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
-		{
-			LOG_ERROR((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
-			return false;
-		}
-
-		// Test that all primary keys are bound
-		if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
-		{
-			LOG_ERROR((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
-			return false;
-		}
-
 		// Build statement
-		wstring deleteStmt = (boost::wformat(L"DELETE FROM %s WHERE ") %m_tableInfo.GetSqlName()).str();
-		const TablePrimaryKeysVector& pKs = m_tablePrimaryKeys.GetPrimaryKeysVector();
-		TablePrimaryKeysVector::const_iterator it = pKs.begin();
-		while (it != pKs.end())
-		{
-			deleteStmt += (boost::wformat(L"%s = ?") % it->GetSqlName()).str();
-			++it;
-			if (it != pKs.end())
-			{
-				deleteStmt += L" AND ";
-			}
-		}
-
-		// Bind Parameters
-		// \todo: We silently assume that the order is the same
 		int paramNr = 1;
-		ColumnBufferPtrMap::iterator itCb;
-		for (itCb = m_columnBuffers.begin(); itCb != m_columnBuffers.end(); itCb++)
+		wstring deleteStmt = (boost::wformat(L"DELETE FROM %s WHERE ") %m_tableInfo.GetSqlName()).str();
+		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
-			ColumnBuffer* pBuffer = itCb->second;
-			if (m_tablePrimaryKeys.IsPrimaryKey(pBuffer->GetQueryName()))
+			ColumnBuffer* pBuffer = it->second;
+			if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
 			{
+				// Bind this parameter as primary key and include it in the statement
 				if (!pBuffer->BindParameter(m_hStmtDelete, paramNr))
 				{
 					return false;
 				}
-				else
-				{
-					paramNr++;
-				}
+				deleteStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
+				paramNr++;
 			}
 		}
-
+		boost::erase_last(deleteStmt, L" AND ");
 		exASSERT(paramNr > 0);
 
 		// Prepare to delete
@@ -397,6 +368,90 @@ namespace exodbc
 	}
 
 
+	bool Table::BindUpdateParameters()
+	{
+		exASSERT(m_columnBuffers.size() > 0);
+		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
+
+		//// We need to know the primary keys
+		//if (!(m_tablePrimaryKeys.IsInitialized() || m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo)))
+		//{
+		//	LOG_ERROR((boost::wformat(L"Failed to Read Primary Keys for Table '%s'") % m_tableInfo.GetSqlName()).str());
+		//	return false;
+		//}
+
+		//// And we need to have a primary key
+		//if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
+		//{
+		//	LOG_ERROR((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
+		//	return false;
+		//}
+
+		//// Test that all primary keys are bound
+		//if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
+		//{
+		//	LOG_ERROR((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
+		//	return false;
+		//}
+
+		// Build statement..
+		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetSqlName()).str();
+		// .. first the values to update
+		// \todo: continue here, once the property is in the columnbuffer.
+		return false;
+
+		//const TablePrimaryKeysVector& pKs = m_tablePrimaryKeys.GetPrimaryKeysVector();
+		//TablePrimaryKeysVector::const_iterator it = pKs.begin();
+		//while (it != pKs.end())
+		//{
+		//	deleteStmt += (boost::wformat(L"%s = ?") % it->GetSqlName()).str();
+		//	++it;
+		//	if (it != pKs.end())
+		//	{
+		//		deleteStmt += L" AND ";
+		//	}
+		//}
+
+		//// Bind Parameters
+		//// \todo: We silently assume that the order is the same
+		//int paramNr = 1;
+		//ColumnBufferPtrMap::iterator itCb;
+		//for (itCb = m_columnBuffers.begin(); itCb != m_columnBuffers.end(); itCb++)
+		//{
+		//	ColumnBuffer* pBuffer = itCb->second;
+		//	if (m_tablePrimaryKeys.IsPrimaryKey(pBuffer->GetQueryName()))
+		//	{
+		//		if (!pBuffer->BindParameter(m_hStmtDelete, paramNr))
+		//		{
+		//			return false;
+		//		}
+		//		else
+		//		{
+		//			paramNr++;
+		//		}
+		//	}
+		//}
+
+		//exASSERT(paramNr > 0);
+
+		//// Prepare to delete
+		//SQLRETURN ret = SQLPrepare(m_hStmtDelete, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
+		//if (!SQL_SUCCEEDED(ret))
+		//{
+		//	LOG_ERROR_STMT(m_hStmtDelete, ret, SQLPrepare);
+		//}
+		//if (ret == SQL_SUCCESS_WITH_INFO)
+		//{
+		//	LOG_WARNING_STMT(m_hStmtDelete, ret, SQLPrepare);
+		//}
+
+		//return SQL_SUCCEEDED(ret);
+
+		//return true;
+	}
+
+
 	bool Table::BindInsertParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
@@ -404,35 +459,34 @@ namespace exodbc
 		exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
 
 		// Build a statement with parameter-markers
-		SQLSMALLINT paramNr = 1;
+		SQLSMALLINT paramCount = 0;
 		std::wstring insertStmt = L"INSERT INTO " + m_tableInfo.GetSqlName() + L" (";
 		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
 		while (it != m_columnBuffers.end())
 		{
 			ColumnBuffer* pBuffer = it->second;
-			// Bind parameter
-			if (!pBuffer->BindParameter(m_hStmtInsert, paramNr))
+			// Bind parameter if it is marked an INSERTable
+			if (pBuffer->IsColumnFlagSet(CF_INSERT))
 			{
-				return false;
+				if (!pBuffer->BindParameter(m_hStmtInsert, paramCount + 1))
+				{
+					return false;
+				}
+				// prepare statement
+				insertStmt += pBuffer->GetQueryName() + L", ";
+				++paramCount;
 			}
-			// prepare statement
-			insertStmt += pBuffer->GetQueryName();
 			++it;
-			if (it != m_columnBuffers.end())
-			{
-				++paramNr;
-				insertStmt += L", ";
-			}
-
 		}
+		boost::erase_last(insertStmt, L", ");
 		insertStmt += L") VALUES(";
-		for (int i = 1; i < paramNr; i++)
+		for (int i = 1; i < paramCount; i++)
 		{
 			insertStmt += L"?, ";
 		}
 		insertStmt += L"?)";
 
-		exASSERT(paramNr > 0);
+		exASSERT(paramCount > 0);
 
 		// Prepare to update
 		SQLRETURN ret = SQLPrepare(m_hStmtInsert, (SQLWCHAR*) insertStmt.c_str(), SQL_NTS);
@@ -494,6 +548,11 @@ namespace exodbc
 			{
 				LOG_ERROR_STMT(m_hStmtDelete, ret, SQLFreeStmt);
 			}
+			ret = SQLFreeStmt(m_hStmtUpdate, SQL_RESET_PARAMS);
+			if (ret != SQL_SUCCESS)
+			{
+				LOG_ERROR_STMT(m_hStmtUpdate, ret, SQLFreeStmt);
+			}
 		}
 
 		// Delete ColumnBuffers
@@ -515,6 +574,7 @@ namespace exodbc
 			// And then those needed for writing
 			FreeStatement(m_hStmtInsert);
 			FreeStatement(m_hStmtDelete);
+			FreeStatement(m_hStmtUpdate);
 		}
 
 		//if (m_hstmtInternal)
@@ -957,7 +1017,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 	{
 		exASSERT(m_manualColumns);
 		exASSERT(columnIndex >= 0);
@@ -965,8 +1025,9 @@ namespace exodbc
 		exASSERT( ! queryName.empty());
 		exASSERT(bufferSize > 0);
 		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
+		exASSERT(flags & CF_SELECT);
 
-		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, columnIndex + 1, pBuffer, bufferSize, queryName, columnSize, decimalDigits);
+		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, columnIndex + 1, pBuffer, bufferSize, queryName, flags, columnSize, decimalDigits);
 		m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 
@@ -1031,10 +1092,12 @@ namespace exodbc
 			}
 			// We need to know which ODBC version we are using
 			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
+			// And how to open this column
+			ColumnFlags columnFlags = IsQueryOnly() ? CF_READ : CF_READ_WRITE;
 			for (int columnIndex = 0; columnIndex < (SQLSMALLINT) columns.size(); columnIndex++)
 			{
 				SColumnInfo colInfo = columns[columnIndex];
-				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion);
+				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, columnFlags);
 				m_columnBuffers[columnIndex] = pColBuff;
 			}
 		}
@@ -1071,6 +1134,34 @@ namespace exodbc
 		// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
 		if (!IsQueryOnly())
 		{
+			// We need the primary keys
+			if (!(m_tablePrimaryKeys.IsInitialized() || m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo)))
+			{
+				LOG_ERROR((boost::wformat(L"Failed to Read Primary Keys for Table '%s'") % m_tableInfo.GetSqlName()).str());
+				return false;
+			}
+
+			// And we need to have a primary key
+			if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
+			{
+				LOG_ERROR((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
+				return false;
+			}
+
+			// Test that all primary keys are bound
+			if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
+			{
+				LOG_ERROR((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
+				return false;
+			}
+
+			// Set the primary key flags on the bound Columns
+			if (!m_tablePrimaryKeys.SetPrimaryKeyFlag(m_columnBuffers))
+			{
+				LOG_ERROR((boost::wformat(L"Failed to mark Bound Columns as primary keys for table '%s'") % m_tableInfo.GetSqlName()).str());
+				return false;
+			}
+
 			if (!BindInsertParameters())
 				return false;
 

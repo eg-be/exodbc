@@ -26,7 +26,7 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion)
+	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags /* = CF_SELECT */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(false)
 		, m_autoBindingMode(mode)
@@ -37,9 +37,11 @@ namespace exodbc
 		, m_decimalDigits(-1)
 		, m_columnSize(-1)
 		, m_hStmt(SQL_NULL_HSTMT)
+		, m_flags(flags)
 	{
 		exASSERT(m_columnNr > 0);
 		exASSERT(columnInfo.m_sqlDataType != 0);
+		exASSERT(m_flags & CF_SELECT);
 
 		// Remember some values from SColumnInfo
 		m_queryName = columnInfo.GetSqlName();
@@ -64,7 +66,7 @@ namespace exodbc
 	}
 
 
-	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */, SQLSMALLINT sqlType /* = SQL_UNKNOWN_TYPE */)
+	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */, SQLSMALLINT sqlType /* = SQL_UNKNOWN_TYPE */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(true)
 		, m_autoBindingMode(AutoBindingMode::BIND_AS_REPORTED)
@@ -78,11 +80,13 @@ namespace exodbc
 		, m_columnSize(columnSize)
 		, m_hStmt(SQL_NULL_HSTMT)
 		, m_sqlType(sqlType)
+		, m_flags(flags)
 	{
 		exASSERT(sqlCType != 0);
 		exASSERT(ordinalPosition > 0);
 		exASSERT(bufferSize > 0);
 		exASSERT(!m_queryName.empty());
+		exASSERT(m_flags & CF_SELECT);
 	}
 
 	// Destructor
@@ -632,6 +636,19 @@ namespace exodbc
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(sqlType) % sqlType).str());
 		}
 		return 0;
+	}
+
+
+	void ColumnBuffer::SetPrimaryKey(bool isPrimaryKey /* = true */)
+	{
+		if (isPrimaryKey)
+		{
+			m_flags |= CF_PRIMARY_KEY;
+		}
+		else
+		{
+			m_flags &= !CF_PRIMARY_KEY;
+		}
 	}
 
 

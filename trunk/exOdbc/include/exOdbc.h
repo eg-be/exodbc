@@ -186,6 +186,20 @@ namespace exodbc
 	};
 
 
+	enum ColumnFlags
+	{
+		CF_SELECT = 0x1,
+		CF_UPDATE = 0x2,
+		CF_INSERT = 0x4,
+		CF_DELETE = 0x8,
+		CF_PRIMARY_KEY = 0x10,
+
+		CF_READ = CF_SELECT,
+		CF_WRITE = CF_UPDATE | CF_INSERT | CF_DELETE,
+		CF_READ_WRITE = CF_SELECT | CF_UPDATE | CF_INSERT | CF_DELETE
+	};
+
+
 	// Structs
 	// -------
 

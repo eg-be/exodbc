@@ -91,6 +91,9 @@ namespace exodbc
 		bool AreAllPrimaryKeysBound(const ColumnBufferPtrMap& columnBuffers) const;
 
 
+		bool SetPrimaryKeyFlag(const ColumnBufferPtrMap& columnBuffers) const;
+
+
 		size_t GetPrimaryKeysCount() const { exASSERT(m_initialized); return m_pksVector.size(); };
 
 
