@@ -325,11 +325,10 @@ namespace exodbc
 
 	bool Table::BindDeleteParameters()
 	{
-		// \todo: Do want to assert this? This function assumes that all primary keys are bound
-
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(m_openMode == READ_WRITE);
 		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
+		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
 		// Build statement
 		int paramNr = 1;
@@ -373,6 +372,7 @@ namespace exodbc
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(m_openMode == READ_WRITE);
 		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
+		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
 		//// We need to know the primary keys
 		//if (!(m_tablePrimaryKeys.IsInitialized() || m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo)))

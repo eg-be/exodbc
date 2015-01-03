@@ -118,6 +118,8 @@ namespace exodbc
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
 		*			using the data type information from the passed SColumnInfo.
 		* \detailed	The constructor will try to allocate a corresponding buffer.
+		*			Note: The constructor will examine SColumnInfo::m_isNullable and set the corresponding
+		*			ColumnFlags, overriding an eventually set value in the passed flags.
 		* \param columnInfo	The Information about the column we bind.
 		* \param mode		How Character columns should be bound
 		* \param flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
@@ -308,6 +310,18 @@ namespace exodbc
 		* \brief	Test if a ColumnFlags is set.
 		*/
 		bool IsColumnFlagSet(ColumnFlags columnFlag) const { return (m_flags & columnFlag) == columnFlag; };
+
+
+		/*!
+		* \brief	Set a ColumnFlags.
+		*/
+		void SetColumnFlag(ColumnFlags columnFlag) { m_flags |= columnFlag; };
+
+
+		/*!
+		* \brief	Clear a ColumnFlags.
+		*/
+		void ClearColumnFlag(ColumnFlags columnFlag) { m_flags &= !columnFlag; };
 
 		// Operators
 		// ---------

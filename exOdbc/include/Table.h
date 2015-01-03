@@ -398,7 +398,7 @@ namespace exodbc
 		* \detailed	The values in the ColumnBuffer currently bound will be inserted
 		*			into the database.
 		*			An prepared INSERT statement is used to insert the values identified
-		*			by the bound ColumnBuffers.
+		*			by the bound ColumnBuffers that have the flag ColumnFlags::CF_INSERT set.
 		*			Fails if the table has not been opened using READ_WRITE.
 		*			This will not commit the transaction.
 		* \see		Database::CommitTrans()
@@ -426,12 +426,15 @@ namespace exodbc
 
 		/*
 		* \brief	Updates the row identified by the values of the bound primary key columns with
-		*			the values in bound ColumnBuffers.
+		*			the values in bound ColumnBuffers, if the ColumnBuffer has the ColumnFlags::CF_UPDATE
+		*			set.
 		* \detailed	A prepared UPDATE statement is used to update the row(s) that matches all
 		*			primary key values of this Table. The key values are read from the ColumnBuffers bound
 		*			to the primary key columns. You can either use the Select(), SelectNext(), etc.
 		*			functions to load the key values of a record to delete into the buffer, or
 		*			you can manually set the values in the buffers that match the primary key columns.
+		*			The prepared statement will update the bound columns where the ColumnBuffer has 
+		*			the flag ColumnFlags::CF_UPDATE set and the flag ColumnFlags::CF_PRIMARY_KEY is not set.
 		*			Fails if not all primary keys are bound.
 		*			Fails if no primary keys are set on the table.
 		*			Fails if the table has not been opened using READ_WRITE.
