@@ -374,81 +374,57 @@ namespace exodbc
 		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
 		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
-		//// We need to know the primary keys
-		//if (!(m_tablePrimaryKeys.IsInitialized() || m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo)))
-		//{
-		//	LOG_ERROR((boost::wformat(L"Failed to Read Primary Keys for Table '%s'") % m_tableInfo.GetSqlName()).str());
-		//	return false;
-		//}
-
-		//// And we need to have a primary key
-		//if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
-		//{
-		//	LOG_ERROR((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
-		//	return false;
-		//}
-
-		//// Test that all primary keys are bound
-		//if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
-		//{
-		//	LOG_ERROR((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
-		//	return false;
-		//}
-
 		// Build statement..
 		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetSqlName()).str();
 		// .. first the values to update
-		// \todo: continue here, once the property is in the columnbuffer.
-		return false;
+		int paramNr = 1;
+		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		{
+			ColumnBuffer* pBuffer = it->second;
+			if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
+			{
+				// Bind this parameter as update parameter and include it in the statement
+				// The update params come first, so the numbering works
+				if (!pBuffer->BindParameter(m_hStmtUpdate, paramNr))
+				{
+					return false;
+				}
+				updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
+				paramNr++;
+			}
+		}
+		boost::erase_last(updateStmt, L",");
+		exASSERT(paramNr > 0);
+		updateStmt += L"WHERE ";
+		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		{
+			ColumnBuffer* pBuffer = it->second;
+			if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
+			{
+				// Bind this parameter as primary key and include it in the where part of the statement
+				// The update params come first, so the numbering works
+				if (!pBuffer->BindParameter(m_hStmtUpdate, paramNr))
+				{
+					return false;
+				}
+				updateStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
+				paramNr++;
+			}
+		}
+		boost::erase_last(updateStmt, L"AND ");
 
-		//const TablePrimaryKeysVector& pKs = m_tablePrimaryKeys.GetPrimaryKeysVector();
-		//TablePrimaryKeysVector::const_iterator it = pKs.begin();
-		//while (it != pKs.end())
-		//{
-		//	deleteStmt += (boost::wformat(L"%s = ?") % it->GetSqlName()).str();
-		//	++it;
-		//	if (it != pKs.end())
-		//	{
-		//		deleteStmt += L" AND ";
-		//	}
-		//}
+		// Prepare to update
+		SQLRETURN ret = SQLPrepare(m_hStmtUpdate, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hStmtUpdate, ret, SQLPrepare);
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_hStmtUpdate, ret, SQLPrepare);
+		}
 
-		//// Bind Parameters
-		//// \todo: We silently assume that the order is the same
-		//int paramNr = 1;
-		//ColumnBufferPtrMap::iterator itCb;
-		//for (itCb = m_columnBuffers.begin(); itCb != m_columnBuffers.end(); itCb++)
-		//{
-		//	ColumnBuffer* pBuffer = itCb->second;
-		//	if (m_tablePrimaryKeys.IsPrimaryKey(pBuffer->GetQueryName()))
-		//	{
-		//		if (!pBuffer->BindParameter(m_hStmtDelete, paramNr))
-		//		{
-		//			return false;
-		//		}
-		//		else
-		//		{
-		//			paramNr++;
-		//		}
-		//	}
-		//}
-
-		//exASSERT(paramNr > 0);
-
-		//// Prepare to delete
-		//SQLRETURN ret = SQLPrepare(m_hStmtDelete, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
-		//if (!SQL_SUCCEEDED(ret))
-		//{
-		//	LOG_ERROR_STMT(m_hStmtDelete, ret, SQLPrepare);
-		//}
-		//if (ret == SQL_SUCCESS_WITH_INFO)
-		//{
-		//	LOG_WARNING_STMT(m_hStmtDelete, ret, SQLPrepare);
-		//}
-
-		//return SQL_SUCCEEDED(ret);
-
-		//return true;
+		return SQL_SUCCEEDED(ret);
 	}
 
 
@@ -749,6 +725,25 @@ namespace exodbc
 		if (SQL_SUCCESS_WITH_INFO == ret)
 		{
 			LOG_WARNING_STMT(m_hStmtDelete, ret, SQLExecute);
+		}
+
+		return SQL_SUCCEEDED(ret);
+	}
+
+
+	bool Table::Update()
+	{
+		exASSERT(IsOpen());
+		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
+		SQLRETURN ret = SQLExecute(m_hStmtUpdate);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hStmtUpdate, ret, SQLExecute);
+		}
+		if (SQL_SUCCESS_WITH_INFO == ret)
+		{
+			LOG_WARNING_STMT(m_hStmtUpdate, ret, SQLExecute);
 		}
 
 		return SQL_SUCCEEDED(ret);
@@ -1168,8 +1163,8 @@ namespace exodbc
 			if (!BindDeleteParameters())
 				return false;
 
-			//if (!bindUpdateParams())                    // Updates
-			//    return false;
+			if (!BindUpdateParameters())
+				return false;
 		}
 
 

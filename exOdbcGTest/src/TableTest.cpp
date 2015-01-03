@@ -1297,6 +1297,32 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, UpdateIntTypes)
+	{
+		// Clear tmp-table
+		// hm.. we need to do that first.. if not we have to type sql-syntax over and over..
+		// \todo: We need to test to insert NULL values, that is not handled at all so far.
+
+		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(iTable.Open(false, true));
+
+		// Set some silly values to update, but dont touch the id
+		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
+		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
+		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
+		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
+		*pId = (SQLINTEGER)1;
+		*pSmallInt = (SQLSMALLINT)100;
+		*pInt = (SQLINTEGER)101;
+		*pBigInt = (SQLBIGINT)102;
+
+		EXPECT_TRUE(iTable.Update());
+		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+
+
 // Interfaces
 // ----------
 
