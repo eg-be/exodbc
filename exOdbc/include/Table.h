@@ -421,7 +421,22 @@ namespace exodbc
 		* \see		Database::CommitTrans()
 		* \return	True on success.
 		*/
-		bool		Delete();
+		bool		Delete(bool failOnNoData = true);
+
+
+		/*
+		* \brief	Delete the row(s) identified by the passed where statement.
+		* \detailed	A DELETE statement for this Table is created, using the passed
+		*			WHERE clause.
+		*			This uses an independent statement and will not modify the values in
+		*			the ColumnBuffers or any ongoing Select() call.
+		*			Fails if the table has not been opened using READ_WRITE.
+		*			This will not commit the transaction.
+		* \param	where WHERE clause to be used. Do not include 'WHERE', the Table will add this.
+		* \see		Database::CommitTrans()
+		* \return	True on success.
+		*/
+		bool		Delete(const std::wstring& where, bool failOnNoData = true);
 
 
 		/*
@@ -676,6 +691,8 @@ namespace exodbc
 		SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
 		SQLHSTMT		m_hStmtDelete;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
 		SQLHSTMT		m_hStmtUpdate;	///< Statement-handle used to do UPDATEs. Primary key columns are bound, a prepared statement using column-markers is created.
+		SQLHSTMT		m_hStmtDeleteWhere;	///< Statement-handle to do DELETEs using a passed WHERE clause.
+		SQLHSTMT		m_hStmtUpdateWhere;	///< Statement-handle to do UPDATEs using a passed WHERE clause.
 
 		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
 
