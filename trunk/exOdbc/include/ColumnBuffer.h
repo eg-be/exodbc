@@ -302,6 +302,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Set or clear the PrimaryKey flag.
+		* \detailed	Must be called before any parameters are bound.
 		*/
 		void SetPrimaryKey(bool isPrimaryKey = true);
 
@@ -329,7 +330,7 @@ namespace exodbc
 		* \brief	Clear a ColumnFlags.
 		* \detailed	Flags must be cleared before the ColumnBuffer is Bound!
 		*/
-		void ClearColumnFlag(ColumnFlags columnFlag) { exASSERT(!IsBound());  m_flags &= !columnFlag; };
+		void ClearColumnFlag(ColumnFlags columnFlag) { exASSERT(!IsBound());  m_flags &= ~columnFlag; };
 
 
 		// Operators
@@ -539,12 +540,10 @@ namespace exodbc
 
 		struct BoundParameter
 		{
-			BoundParameter() : m_hStmt(SQL_NULL_HSTMT), m_parameterNumber(0),  m_cb(0) {};
-			BoundParameter(SQLHSTMT hStmt, SQLUSMALLINT parameterNr) : m_hStmt(hStmt), m_parameterNumber(parameterNr), m_cb(0) {};
+			BoundParameter() : m_hStmt(SQL_NULL_HSTMT), m_parameterNumber(0) {};
+			BoundParameter(SQLHSTMT hStmt, SQLUSMALLINT parameterNr) : m_hStmt(hStmt), m_parameterNumber(parameterNr) {};
 			SQLHSTMT		m_hStmt;
 			SQLUSMALLINT	m_parameterNumber;
-			// \todo: We must remove the m_cb and use the cb from the ColumnBuffer.
-			SQLINTEGER		m_cb;
 		};
 		typedef std::vector<BoundParameter*> BoundParameterPtrsVector;
 

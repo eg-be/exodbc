@@ -1287,10 +1287,13 @@ namespace exodbc
 		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
 		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
 		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
-		*pId = (SQLINTEGER)99;
+		*pId = (SQLINTEGER)101;
 		*pSmallInt = (SQLSMALLINT)100;
 		*pInt = (SQLINTEGER)101;
 		*pBigInt = (SQLBIGINT)102;
+		pSmallInt->SetNull();
+		pInt->SetNull();
+		pBigInt->SetNull();
 
 		EXPECT_TRUE(iTable.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());

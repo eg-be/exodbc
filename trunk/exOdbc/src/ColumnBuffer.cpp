@@ -201,7 +201,7 @@ namespace exodbc
 		SQLRETURN ret;
 		if (m_bufferType != SQL_C_NUMERIC)
 		{
-			ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, 0, 0, pBuffer, m_bufferSize, &(pBp->m_cb));
+			ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, 0, 0, pBuffer, m_bufferSize, &(m_cb));
 		}
 		if (!SQL_SUCCEEDED(ret))
 		{
@@ -669,13 +669,15 @@ namespace exodbc
 
 	void ColumnBuffer::SetPrimaryKey(bool isPrimaryKey /* = true */)
 	{
+		exASSERT(m_boundParameters.size() == 0);
+
 		if (isPrimaryKey)
 		{
 			m_flags |= CF_PRIMARY_KEY;
 		}
 		else
 		{
-			m_flags &= !CF_PRIMARY_KEY;
+			m_flags &= ~CF_PRIMARY_KEY;
 		}
 	}
 
