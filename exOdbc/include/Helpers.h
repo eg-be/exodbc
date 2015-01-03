@@ -112,14 +112,15 @@ namespace exodbc
 		SQLINTEGER		NativeError;
 		std::wstring	Msg;
 		friend std::wostream& operator<< (std::wostream &out, const SErrorInfo& ei);
-		friend std::ostream& operator<<(std::ostream& os, const SErrorInfo& ei);
+
+		std::wstring ToString() const;
 	};
 
 
 	/*!
-	* \brief Very ugly conversion of small to wide - DO NOT USE, see Ticket #44
+	* \brief Ugly conversion of small to wide - use only if you know that you have only ASCII chars in w.
 	* 
-	* Transforms from wide to small by simple taking the char-values. Remove as soon as #44 is done.
+	* \detailed Transforms from wide to small by simple taking the char-values.
 	* \param const std::wstring& w
 	* \return std::string
 	*/

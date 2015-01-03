@@ -1356,36 +1356,52 @@ namespace exodbc
 	// -----------
 	TEST_P(TableTest, InsertIntTypes)
 	{
-		// Clear tmp-table
-		// hm.. we need to do that first.. if not we have to type sql-syntax over and over..
-		// \todo: We need to test to insert NULL values, that is not handled at all so far.
-
 		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
 		ASSERT_TRUE(iTable.Open(false, true));
-
-		// Set some silly values to insert
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
 		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
 		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
 		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
+
+		wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Set some silly values to insert
 		*pId = (SQLINTEGER)101;
-		*pSmallInt = (SQLSMALLINT)100;
-		*pInt = (SQLINTEGER)101;
-		*pBigInt = (SQLBIGINT)102;
-		pSmallInt->SetNull();
-		pInt->SetNull();
-		pBigInt->SetNull();
+		*pSmallInt = (SQLSMALLINT)102;
+		*pInt = (SQLINTEGER)103;
+		*pBigInt = (SQLBIGINT)104;
 
 		EXPECT_TRUE(iTable.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Open another table and read the values from there
+		Table iTable2(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(iTable2.Open(false, true));
+		ColumnBuffer* pId2 = iTable2.GetColumnBuffer(0);
+		ColumnBuffer* pSmallInt2 = iTable2.GetColumnBuffer(1);
+		ColumnBuffer* pInt2 = iTable2.GetColumnBuffer(2);
+		ColumnBuffer* pBigInt2 = iTable2.GetColumnBuffer(3);
+
+		EXPECT_TRUE(iTable2.Select());
+		EXPECT_TRUE(iTable2.SelectNext());
+
+		EXPECT_EQ(101, (SQLINTEGER)*pId2);
+		EXPECT_EQ(102, (SQLSMALLINT)*pSmallInt2);
+		EXPECT_EQ(103, (SQLINTEGER)*pInt2);
+		EXPECT_EQ(104, (SQLBIGINT)*pBigInt2);
 	}
 
 
 	// Update rows
 	// -----------
 
-	TEST_P(TableTest, UpdateIntTypes)
+	TEST_P(TableTest, DISABLED_UpdateIntTypes)
 	{
 		// Clear tmp-table
 		// hm.. we need to do that first.. if not we have to type sql-syntax over and over..
