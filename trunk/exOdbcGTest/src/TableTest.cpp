@@ -1256,7 +1256,7 @@ namespace exodbc
 	}
 
 
-	// Delete rows
+	// Delete rows: We do not test that for the different data-types, its just deleting a row.
 	// -----------
 	TEST_P(TableTest, DeleteWhere)
 	{
@@ -1267,6 +1267,8 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
+		// Note: We could also do this in one transaction.
+		// \todo: Write a separate transaction test about this, to check transaction-visiblity
 		// Try to delete eventually available leftovers, ignore if none exists
 		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
 		EXPECT_TRUE(m_db.CommitTrans());
@@ -1282,10 +1284,15 @@ namespace exodbc
 		pInt->SetNull();
 		pBigInt->SetNull();
 		EXPECT_TRUE(iTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
 
 		// Now we must have something to delete
 		EXPECT_TRUE(iTable.Delete(sqlstmt, true));
 		EXPECT_TRUE(m_db.CommitTrans());
+
+		// And fetching shall return no results at all
+		EXPECT_TRUE(iTable.Select());
+		EXPECT_FALSE(iTable.SelectNext());
 	}
 
 
@@ -1304,20 +1311,44 @@ namespace exodbc
 		// We can be sure now that nothing exists, and we will fail if we try to delete
 		EXPECT_FALSE(iTable.Delete(sqlstmt, true));
 		EXPECT_TRUE(m_db.CommitTrans());
+
+		// And fetching shall return no results at all
+		EXPECT_TRUE(iTable.Select());
+		EXPECT_FALSE(iTable.SelectNext());
 	}
 
 
-	TEST_P(TableTest, DeleteIntTypes)
+	TEST_P(TableTest, Delete)
 	{
 		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
 		ASSERT_TRUE(iTable.Open(false, true));
 
-		// Set the id to delete
-		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
-		*pId = (SQLINTEGER)99;
-		EXPECT_TRUE(iTable.Delete());
+		wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
 		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Insert a row that we want to delete
+		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
+		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
+		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
+		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
+		pSmallInt->SetNull();
+		pInt->SetNull();
+		pBigInt->SetNull();
+		*pId = (SQLINTEGER)99;
+		EXPECT_TRUE(iTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Now lets delete that row. our pId is still set to the key-value 99
+		EXPECT_TRUE(iTable.Delete());
+
+		// And fetching shall return no results at all
+		EXPECT_TRUE(iTable.Select());
+		EXPECT_FALSE(iTable.SelectNext());
 	}
 
 
