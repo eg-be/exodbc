@@ -649,6 +649,24 @@ namespace exodbc
 	}
 
 
+	bool ColumnBuffer::SetNull()
+	{
+		exASSERT(HasBuffer()); 
+		exASSERT(IsBound()); 
+		exASSERT(IsNullable());
+
+		if (IsNullable())
+		{
+			m_cb = SQL_NULL_DATA;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+
 	void ColumnBuffer::SetPrimaryKey(bool isPrimaryKey /* = true */)
 	{
 		if (isPrimaryKey)
@@ -666,6 +684,8 @@ namespace exodbc
 	{
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(m_haveBuffer);
+
+		bool unknownType = false;
 
 		// \todo: assign value to ptr for all types, sometimes we will need to memcopy and need to know the length of the data
 		// For chars we could assume its null-terminated if no length is passed
@@ -720,7 +740,14 @@ namespace exodbc
 		else
 		{
 			LOG_ERROR((boost::wformat(L"Not implemented Sql C Type '%s' (%d)") % SqLCType2s(m_bufferType) % m_bufferType).str());
+			unknownType = true;
 			exASSERT(false);
+		}
+
+		if (!unknownType)
+		{
+			// We are no longer null
+			m_cb = 0;
 		}
 	}
 

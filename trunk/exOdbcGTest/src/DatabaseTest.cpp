@@ -296,14 +296,14 @@ namespace exodbc
 		ASSERT_TRUE(iTable.Open(false, true));
 
 		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
+		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_db.CommitTrans() );
 
 		EXPECT_TRUE( iTable.Select());
 		EXPECT_FALSE( iTable.SelectNext());
 
-		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
+		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 
 		// Note: If we try to read now from a different database, we do not see the inserted recorded until it is committed
@@ -362,14 +362,14 @@ namespace exodbc
 		ASSERT_TRUE(iTable.Open(false, true));
 
 		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes_tmp >= 0";
+		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		EXPECT_TRUE( m_db.CommitTrans() );
 
 		EXPECT_TRUE( iTable.Select());
 		EXPECT_FALSE( iTable.SelectNext());
 
-		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes_tmp, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
+		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		// We rollback and expect no record
 		EXPECT_TRUE( m_db.RollbackTrans() );
