@@ -64,6 +64,7 @@ namespace exodbc
 		m_pksMap.clear();
 
 		// Very simple so far
+		// \todo: Ensure we have unique values for m_keySequence
 		m_pksVector = tablePks;
 		for (TablePrimaryKeysVector::const_iterator it = tablePks.begin(); it != tablePks.end(); it++)
 		{
@@ -111,6 +112,33 @@ namespace exodbc
 		}
 
 		return allBound;
+	}
+
+
+	bool TablePrimaryKeys::SetPrimaryKeyFlag(const ColumnBufferPtrMap& columnBuffers) const
+	{
+		exASSERT(m_initialized);
+		// \todo: Check that in Parse. Remember if we've setted all primary-keys, we just assume the query name is unique
+		set<wstring> keys;
+		for (TablePrimaryKeysVector::const_iterator it = m_pksVector.begin(); it != m_pksVector.end(); ++it)
+		{
+			keys.insert(it->GetSqlName());
+		}
+
+		ColumnBufferPtrMap::const_iterator itBuffs;
+		for (itBuffs = columnBuffers.begin(); itBuffs != columnBuffers.end() && !keys.empty(); ++itBuffs)
+		{
+			const wstring& queryName = itBuffs->second->GetQueryName();
+			if (IsPrimaryKey(queryName))
+			{
+				itBuffs->second->SetPrimaryKey(true);
+				set<wstring>::iterator itK = keys.find(queryName);
+				exASSERT(itK != keys.end());
+				keys.erase(itK);
+			}
+		}
+
+		return keys.empty();
 	}
 
 

@@ -137,9 +137,9 @@ namespace exodbc
 		::ZeroMemory(&m_decimal_18_10, sizeof(m_decimal_18_10));
 
 		SetColumn(0, TestTables::GetColName(L"idnumerictypes", namesCase), &m_idNumericTypes, SQL_C_SLONG, sizeof(m_idNumericTypes));
-		SetColumn(1, TestTables::GetColName(L"tdecimal_18_0", namesCase), &m_decimal_18_0, SQL_C_NUMERIC, sizeof(m_decimal_18_0), 18, 0);
-		SetColumn(2, TestTables::GetColName(L"tdecimal_18_10", namesCase), &m_decimal_18_10, SQL_C_NUMERIC, sizeof(m_decimal_18_10), 18, 10);
-		SetColumn(3, TestTables::GetColName(L"tdecimal_5_3", namesCase), &m_decimal_5_3, SQL_C_NUMERIC, sizeof(m_decimal_5_3), 5, 3);
+		SetColumn(1, TestTables::GetColName(L"tdecimal_18_0", namesCase), &m_decimal_18_0, SQL_C_NUMERIC, sizeof(m_decimal_18_0), CF_SELECT, 18, 0);
+		SetColumn(2, TestTables::GetColName(L"tdecimal_18_10", namesCase), &m_decimal_18_10, SQL_C_NUMERIC, sizeof(m_decimal_18_10), CF_SELECT, 18, 10);
+		SetColumn(3, TestTables::GetColName(L"tdecimal_5_3", namesCase), &m_decimal_5_3, SQL_C_NUMERIC, sizeof(m_decimal_5_3), CF_SELECT, 5, 3);
 	};
 
 

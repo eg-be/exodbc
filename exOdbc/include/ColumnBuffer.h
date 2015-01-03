@@ -120,11 +120,12 @@ namespace exodbc
 		* \detailed	The constructor will try to allocate a corresponding buffer.
 		* \param columnInfo	The Information about the column we bind.
 		* \param mode		How Character columns should be bound
+		* \param flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
 		*
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion);
+		ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT);
 
 
 		/*!
@@ -147,11 +148,13 @@ namespace exodbc
 		* \param	decimalDigits	The number of digits of the fractional part of a decimal value.
 		*							This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
 		* \param	sqlType			The SQL Type of the column. This is only used if Parameter Markers are bound to this buffer, see BindParameter().
+		* \param	flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
 		*
+		* 
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1, SQLSMALLINT sqlType = SQL_UNKNOWN_TYPE);
+		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1, SQLSMALLINT sqlType = SQL_UNKNOWN_TYPE);
 
 
 		~ColumnBuffer();
@@ -287,6 +290,24 @@ namespace exodbc
 		* \return	AutoBindingMode set.
 		*/
 		AutoBindingMode GetAutoBindingMode() const { return m_autoBindingMode; };
+
+
+		/*!
+		* \brief	Set or clear the PrimaryKey flag.
+		*/
+		void SetPrimaryKey(bool isPrimaryKey = true);
+
+
+		/*!
+		* \brief	Read the PrimaryKey flag.
+		*/
+		bool IsPrimaryKey() const { return (m_flags & CF_PRIMARY_KEY) == CF_PRIMARY_KEY; };
+
+
+		/*!
+		* \brief	Test if a ColumnFlags is set.
+		*/
+		bool IsColumnFlagSet(ColumnFlags columnFlag) const { return (m_flags & columnFlag) == columnFlag; };
 
 		// Operators
 		// ---------
@@ -520,6 +541,7 @@ namespace exodbc
 #endif
 		SQL_NUMERIC_STRUCT*		GetNumericPtr() const;
 
+		int						m_flags;				///< Flags, set during construction.
 		SQLINTEGER				m_columnSize;			///< Column Size, either read from SColumnInfo during construction or set manually. -1 indicates unknown.
 		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from SColumnInfo during construction or set manually. -1 indicates unkonwn.
 		std::wstring			m_queryName;			///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.

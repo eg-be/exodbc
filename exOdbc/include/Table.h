@@ -281,7 +281,7 @@ namespace exodbc
 		/*!
 		* \brief	Test if a CharTrimOption is set.
 		*/
-		bool		TestCharTrimOption(CharTrimOption option) const { return (m_charTrimFlags & option) != 0;  };
+		bool		TestCharTrimOption(CharTrimOption option) const { return (m_charTrimFlags & option) == option;  };
 
 
 		/*!
@@ -410,8 +410,10 @@ namespace exodbc
 		/*
 		* \brief	Deletes the row identified by the values of the bound primary key columns.
 		* \detailed	A prepared DELETE statement is used to delete the row that matches all
-		*			primary keys of this Table. The values are read from the ColumnBuffers bound
-		*			to the primary key columns.
+		*			primary keys of this Table. The key values are read from the ColumnBuffers bound
+		*			to the primary key columns. You can either use the Select(), SelectNext(), etc.
+		*			functions to load the key values of a record to delete into the buffer, or
+		*			you can manually set the values in the buffers that match the primary key columns.
 		*			Fails if not all primary keys are bound.
 		*			Fails if no primary keys are set on the table.
 		*			Fails if the table has not been opened using READ_WRITE.
@@ -420,6 +422,24 @@ namespace exodbc
 		* \return	True on success.
 		*/
 		bool		Delete();
+
+
+		/*
+		* \brief	Updates the row identified by the values of the bound primary key columns with
+		*			the values in bound ColumnBuffers.
+		* \detailed	A prepared UPDATE statement is used to update the row(s) that matches all
+		*			primary key values of this Table. The key values are read from the ColumnBuffers bound
+		*			to the primary key columns. You can either use the Select(), SelectNext(), etc.
+		*			functions to load the key values of a record to delete into the buffer, or
+		*			you can manually set the values in the buffers that match the primary key columns.
+		*			Fails if not all primary keys are bound.
+		*			Fails if no primary keys are set on the table.
+		*			Fails if the table has not been opened using READ_WRITE.
+		*			This will not commit the transaction.
+		* \see		Database::CommitTrans()
+		* \return	True on success.
+		*/
+		bool		Update();
 
 
 		/*!
@@ -599,8 +619,9 @@ namespace exodbc
 		* \param	decimalDigits The number of digits of the fractional part of a decimal value.
 		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
 		* \param	bufferSize The size of the buffer pointed to by pBuffer.
+		* \param	flags Define if a column shall be included in write-operations, is part of primary-key, etc.
 		*/
-		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 
 		// Private stuff
@@ -644,12 +665,14 @@ namespace exodbc
 
 		bool		BindInsertParameters();
 		bool		BindDeleteParameters();
+		bool		BindUpdateParameters();
 
 		// ODBC Handles
 		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
 		SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
 		SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
 		SQLHSTMT		m_hStmtDelete;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
+		SQLHSTMT		m_hStmtUpdate;	///< Statement-handle used to do UPDATEs. Primary key columns are bound, a prepared statement using column-markers is created.
 
 		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
 
