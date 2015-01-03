@@ -243,6 +243,12 @@ namespace exodbc
 		*/
 		bool IsNull() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NULL_DATA; };
 
+
+		bool SetNull();
+
+
+		bool IsNullable() const { return IsColumnFlagSet(CF_NULLABLE); };
+
 		
 		/*!
 		* \brief	Check if the is SQL_NO_TOTAL.
@@ -314,14 +320,17 @@ namespace exodbc
 
 		/*!
 		* \brief	Set a ColumnFlags.
+		* \detailed	Flags must be set before the ColumnBuffer is Bound to the buffer!
 		*/
-		void SetColumnFlag(ColumnFlags columnFlag) { m_flags |= columnFlag; };
+		void SetColumnFlag(ColumnFlags columnFlag) { exASSERT(!IsBound());  m_flags |= columnFlag; };
 
 
 		/*!
 		* \brief	Clear a ColumnFlags.
+		* \detailed	Flags must be cleared before the ColumnBuffer is Bound!
 		*/
-		void ClearColumnFlag(ColumnFlags columnFlag) { m_flags &= !columnFlag; };
+		void ClearColumnFlag(ColumnFlags columnFlag) { exASSERT(!IsBound());  m_flags &= !columnFlag; };
+
 
 		// Operators
 		// ---------
