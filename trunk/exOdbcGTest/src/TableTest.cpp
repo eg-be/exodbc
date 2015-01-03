@@ -1256,8 +1256,57 @@ namespace exodbc
 	}
 
 
-	// Insert values
-	// -------------
+	// Delete rows
+	// -----------
+	TEST_P(TableTest, DeleteWhere)
+	{
+		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(iTable.Open(false, true));
+
+		wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Try to delete eventually available leftovers, ignore if none exists
+		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Now lets insert some data:
+		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
+		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
+		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
+		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
+
+		*pId = (SQLINTEGER)103;
+		pSmallInt->SetNull();
+		pInt->SetNull();
+		pBigInt->SetNull();
+		EXPECT_TRUE(iTable.Insert());
+
+		// Now we must have something to delete
+		EXPECT_TRUE(iTable.Delete(sqlstmt, true));
+		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+
+	TEST_P(TableTest, DeleteWhereShouldReturnSQL_NO_DATA)
+	{
+		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(iTable.Open(false, true));
+
+		wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Try to delete eventually available leftovers, ignore if none exists
+		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+		// We can be sure now that nothing exists, and we will fail if we try to delete
+		EXPECT_FALSE(iTable.Delete(sqlstmt, true));
+		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+
 	TEST_P(TableTest, DeleteIntTypes)
 	{
 		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
@@ -1266,12 +1315,14 @@ namespace exodbc
 
 		// Set the id to delete
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
-		*pId = (SQLINTEGER) 99;
+		*pId = (SQLINTEGER)99;
 		EXPECT_TRUE(iTable.Delete());
 		EXPECT_TRUE(m_db.CommitTrans());
 	}
 
 
+	// Insert rows
+	// -----------
 	TEST_P(TableTest, InsertIntTypes)
 	{
 		// Clear tmp-table
@@ -1299,6 +1350,9 @@ namespace exodbc
 		EXPECT_TRUE(m_db.CommitTrans());
 	}
 
+
+	// Update rows
+	// -----------
 
 	TEST_P(TableTest, UpdateIntTypes)
 	{

@@ -149,6 +149,8 @@ namespace exodbc
 		m_hStmtInsert = SQL_NULL_HSTMT;
 		m_hStmtUpdate = SQL_NULL_HSTMT;
 		m_hStmtDelete = SQL_NULL_HSTMT;
+		m_hStmtDeleteWhere = SQL_NULL_HSTMT;
+		m_hStmtUpdateWhere = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
 		m_autoBindingMode = AutoBindingMode::BIND_AS_REPORTED;
@@ -169,21 +171,20 @@ namespace exodbc
 		// Allocate handles needed for writing
 		if (!IsQueryOnly())
 		{
-			m_hStmtInsert = AllocateStatement();
-			if (!m_hStmtInsert)
-			{
+			if((m_hStmtInsert = AllocateStatement()) == SQL_NULL_HSTMT)
 				return false;
-			}
-			m_hStmtDelete = AllocateStatement();
-			if (!m_hStmtDelete)
-			{
+
+			if((m_hStmtDelete = AllocateStatement()) == SQL_NULL_HSTMT)
 				return false;
-			}
-			m_hStmtUpdate = AllocateStatement();
-			if (!m_hStmtUpdate)
-			{
+
+			if((m_hStmtUpdate = AllocateStatement()) == SQL_NULL_HSTMT)
 				return false;
-			}
+
+			if ((m_hStmtDeleteWhere = AllocateStatement()) == SQL_NULL_HSTMT)
+				return false;
+
+			if ((m_hStmtUpdateWhere = AllocateStatement()) == SQL_NULL_HSTMT)
+				return false;
 		}
 		// Allocate a separate statement handle for internal use
 		//if (SQLAllocStmt(m_hdbc, &m_hstmtInternal) != SQL_SUCCESS)
@@ -514,21 +515,22 @@ namespace exodbc
 		// And column parameters, if we were bound rw
 		if (m_openMode == READ_WRITE)
 		{
-			ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
-			if (ret != SQL_SUCCESS)
-			{
+			if((ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS)) != SQL_SUCCESS)
 				LOG_ERROR_STMT(m_hStmtInsert, ret, SQLFreeStmt);
-			}
-			ret = SQLFreeStmt(m_hStmtDelete, SQL_RESET_PARAMS);
-			if (ret != SQL_SUCCESS)
-			{
+
+			if((ret = SQLFreeStmt(m_hStmtDelete, SQL_RESET_PARAMS)) != SQL_SUCCESS)
 				LOG_ERROR_STMT(m_hStmtDelete, ret, SQLFreeStmt);
-			}
-			ret = SQLFreeStmt(m_hStmtUpdate, SQL_RESET_PARAMS);
-			if (ret != SQL_SUCCESS)
-			{
+
+
+			if ((ret = SQLFreeStmt(m_hStmtUpdate, SQL_RESET_PARAMS)) != SQL_SUCCESS)
 				LOG_ERROR_STMT(m_hStmtUpdate, ret, SQLFreeStmt);
-			}
+
+			if ((ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_RESET_PARAMS)) != SQL_SUCCESS)
+				LOG_ERROR_STMT(m_hStmtUpdateWhere, ret, SQLFreeStmt);
+
+			if ((ret = SQLFreeStmt(m_hStmtDeleteWhere, SQL_RESET_PARAMS)) != SQL_SUCCESS)
+				LOG_ERROR_STMT(m_hStmtDeleteWhere, ret, SQLFreeStmt);
+
 		}
 
 		// Delete ColumnBuffers
@@ -551,6 +553,8 @@ namespace exodbc
 			FreeStatement(m_hStmtInsert);
 			FreeStatement(m_hStmtDelete);
 			FreeStatement(m_hStmtUpdate);
+			FreeStatement(m_hStmtUpdateWhere);
+			FreeStatement(m_hStmtDeleteWhere);
 		}
 
 		//if (m_hstmtInternal)
@@ -706,13 +710,13 @@ namespace exodbc
 	}
 
 
-	bool Table::Delete()
+	bool Table::Delete(bool failOnNoData /* = true */)
 	{
 		exASSERT(IsOpen());
 		exASSERT(m_openMode == READ_WRITE);
 		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
 		SQLRETURN ret = SQLExecute(m_hStmtDelete);
-		if (!SQL_SUCCEEDED(ret))
+		if (!SQL_SUCCEEDED(ret) && (failOnNoData || ret != SQL_NO_DATA ))
 		{
 			LOG_ERROR_STMT(m_hStmtDelete, ret, SQLExecute);
 		}
@@ -720,8 +724,38 @@ namespace exodbc
 		{
 			LOG_WARNING_STMT(m_hStmtDelete, ret, SQLExecute);
 		}
+		else if (SQL_NO_DATA == ret)
+		{
+			LOG_INFO_STMT(m_hStmtDelete, ret, SQLExecute);
+		}
 
-		return SQL_SUCCEEDED(ret);
+		return SQL_SUCCEEDED(ret) || (!failOnNoData && ret == SQL_NO_DATA);
+	}
+
+
+	bool Table::Delete(const std::wstring& where, bool failOnNoData /* = true */)
+	{
+		exASSERT(IsOpen());
+		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(m_hStmtDeleteWhere != SQL_NULL_HSTMT);
+		exASSERT(!where.empty());
+
+		wstring sqlstmt = (boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetSqlName() % where).str();
+		SQLRETURN ret = SQLExecDirect(m_hStmtDeleteWhere, (SQLWCHAR*)sqlstmt.c_str(), sqlstmt.length());
+		if (!SQL_SUCCEEDED(ret) && (failOnNoData || ret != SQL_NO_DATA))
+		{
+			LOG_ERROR_STMT(m_hStmtDelete, ret, SQLExecute);
+		}
+		if (SQL_SUCCESS_WITH_INFO == ret)
+		{
+			LOG_WARNING_STMT(m_hStmtDeleteWhere, ret, SQLExecDirect);
+		}
+		else if (SQL_NO_DATA == ret)
+		{
+			LOG_INFO_STMT(m_hStmtDelete, ret, SQLExecute);
+		}
+
+		return SQL_SUCCEEDED(ret) || (!failOnNoData && ret == SQL_NO_DATA);
 	}
 
 
