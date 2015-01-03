@@ -55,6 +55,16 @@ namespace exodbc
 		}
 		m_sqlType = columnInfo.m_sqlType;
 
+		// Update our flags with the NULLABLE flag of the passed ColumnInfo.
+		if (columnInfo.m_isNullable == L"YES")
+		{
+			SetColumnFlag(CF_NULLABLE);
+		}
+		else
+		{
+			ClearColumnFlag(CF_NULLABLE);
+		}
+
 		// Create buffer
 		m_bufferType = DetermineBufferType(m_sqlType);
 		exASSERT(m_bufferType != 0);
