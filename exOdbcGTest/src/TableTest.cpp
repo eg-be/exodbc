@@ -1431,7 +1431,14 @@ namespace exodbc
 		timestamp.hour = 13;
 		timestamp.minute = 55;
 		timestamp.second = 03;
-		timestamp.fraction = 123000000;
+		if (m_db.Dbms() != dbmsMY_SQL)
+		{
+			timestamp.fraction = 123000000;
+		}
+		else
+		{
+			timestamp.fraction = 0;
+		}
 
 		*pId = (SQLINTEGER)101;
 		*pDate = date;
@@ -1510,6 +1517,25 @@ namespace exodbc
 		EXPECT_EQ(101, (SQLINTEGER)*pId2);
 		EXPECT_EQ((SQLDOUBLE)*pDouble, (SQLDOUBLE)*pDouble2);
 		EXPECT_EQ((SQLDOUBLE)*pFloat, (SQLDOUBLE)*pFloat2);
+	}
+
+
+	TEST_P(TableTest, DISABLED_InsertNumericTypes)
+	{
+		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(nTable.Open(false, true));
+		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
+		ColumnBuffer* pDouble = nTable.GetColumnBuffer(1);
+		ColumnBuffer* pFloat = nTable.GetColumnBuffer(2);
+
+		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		EXPECT_TRUE(nTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
 	}
 
 
