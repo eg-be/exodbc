@@ -149,6 +149,7 @@ namespace exodbc
 
 		SQLWCHAR			m_wcdecimal_18_0[20 + 1];
 		SQLWCHAR			m_wcdecimal_18_10[20 + 1];
+		SQLWCHAR			m_wdecimal_5_3[20 + 1];
 	};
 
 
