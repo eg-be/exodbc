@@ -1471,7 +1471,45 @@ namespace exodbc
 		EXPECT_EQ(timestamp.minute, timestamp2.minute);
 		EXPECT_EQ(timestamp.second, timestamp2.second);
 		EXPECT_EQ(timestamp.fraction, timestamp2.fraction);
+	}
 
+
+	TEST_P(TableTest, InsertFloatTypes)
+	{
+		std::wstring floatTypesTableName = TestTables::GetTableName(L"floattypes_tmp", m_odbcInfo.m_namesCase);
+		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(fTable.Open(false, true));
+		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
+		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
+		ColumnBuffer* pFloat = fTable.GetColumnBuffer(2);
+
+		wstring idName = TestTables::GetColName(L"idfloattypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		EXPECT_TRUE(fTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Insert some values
+		*pId = (SQLINTEGER)101;
+		*pDouble = 3.14159265359;
+		*pFloat = -3.14159;
+		EXPECT_TRUE(fTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Open another table and read the values from there
+		Table fTable2(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(fTable2.Open(false, true));
+		ColumnBuffer* pId2 = fTable2.GetColumnBuffer(0);
+		ColumnBuffer* pDouble2 = fTable2.GetColumnBuffer(1);
+		ColumnBuffer* pFloat2 = fTable2.GetColumnBuffer(2);
+
+		EXPECT_TRUE(fTable2.Select());
+		EXPECT_TRUE(fTable2.SelectNext());
+
+		EXPECT_EQ(101, (SQLINTEGER)*pId2);
+		EXPECT_EQ((SQLDOUBLE)*pDouble, (SQLDOUBLE)*pDouble2);
+		EXPECT_EQ((SQLDOUBLE)*pFloat, (SQLDOUBLE)*pFloat2);
 	}
 
 
