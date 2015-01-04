@@ -201,7 +201,7 @@ namespace exodbc
 		SQLRETURN ret;
 		if (m_bufferType != SQL_C_NUMERIC)
 		{
-			ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, 0, 0, pBuffer, m_bufferSize, &(m_cb));
+			ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, m_columnSize >= 0 ? m_columnSize : 0, m_decimalDigits >= 0 ? m_decimalDigits : 0, pBuffer, m_bufferSize, &(m_cb));
 		}
 		if (!SQL_SUCCEEDED(ret))
 		{

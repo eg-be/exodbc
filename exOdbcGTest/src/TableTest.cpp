@@ -1420,13 +1420,58 @@ namespace exodbc
 		date.day = 26;
 		date.year = 1983;
 		date.month = 1;
+		SQL_TIME_STRUCT time;
+		time.hour = 13;
+		time.minute = 55;
+		time.second = 03;
+		SQL_TIMESTAMP_STRUCT timestamp;
+		timestamp.day = 26;
+		timestamp.year = 1983;
+		timestamp.month = 1;
+		timestamp.hour = 13;
+		timestamp.minute = 55;
+		timestamp.second = 03;
+		timestamp.fraction = 123000000;
 
 		*pId = (SQLINTEGER)101;
 		*pDate = date;
-		pTime->SetNull();
-		pTimestamp->SetNull();
+		*pTime = time;
+		*pTimestamp = timestamp;
 		EXPECT_TRUE(dTable.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Open another table and read the values from there
+		Table dTable2(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(dTable2.Open(false, true));
+		ColumnBuffer* pId2 = dTable2.GetColumnBuffer(0);
+		ColumnBuffer* pDate2 = dTable2.GetColumnBuffer(1);
+		ColumnBuffer* pTime2 = dTable2.GetColumnBuffer(2);
+		ColumnBuffer* pTimestamp2 = dTable2.GetColumnBuffer(3);
+
+		EXPECT_TRUE(dTable2.Select());
+		EXPECT_TRUE(dTable2.SelectNext());
+		SQL_DATE_STRUCT date2 = *pDate2;
+		SQL_TIME_STRUCT time2 = *pTime2;
+		SQL_TIMESTAMP_STRUCT timestamp2 = *pTimestamp2;
+
+		EXPECT_EQ(101, (SQLINTEGER)*pId2);
+		EXPECT_EQ(date.year, date2.year);
+		EXPECT_EQ(date.month, date2.month);
+		EXPECT_EQ(date.day, date2.day);
+
+		EXPECT_EQ(time.hour, time2.hour);
+		EXPECT_EQ(time.minute, time2.minute);
+		EXPECT_EQ(time.second, time2.second);
+
+		EXPECT_EQ(timestamp.year, timestamp2.year);
+		EXPECT_EQ(timestamp.month, timestamp2.month);
+		EXPECT_EQ(timestamp.day, timestamp2.day);
+
+		EXPECT_EQ(timestamp.hour, timestamp2.hour);
+		EXPECT_EQ(timestamp.minute, timestamp2.minute);
+		EXPECT_EQ(timestamp.second, timestamp2.second);
+		EXPECT_EQ(timestamp.fraction, timestamp2.fraction);
+
 	}
 
 
