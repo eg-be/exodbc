@@ -100,6 +100,8 @@ namespace exodbc
 			return L"SQL_NO_DATA";
 		case SQL_ERROR:
 			return L"SQL_ERROR";
+		case SQL_NEED_DATA:
+			return L"SQL_NEED_DATA";
 		default:
 			return L"???";
 		}
