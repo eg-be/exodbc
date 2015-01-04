@@ -1520,14 +1520,15 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DISABLED_InsertNumericTypes)
+	TEST_P(TableTest, InsertNumericTypes)
 	{
-		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
-		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
 		ASSERT_TRUE(nTable.Open(false, true));
 		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
-		ColumnBuffer* pDouble = nTable.GetColumnBuffer(1);
-		ColumnBuffer* pFloat = nTable.GetColumnBuffer(2);
+		ColumnBuffer* pNumeric_18_0 = nTable.GetColumnBuffer(1);
+		ColumnBuffer* pNumeric_18_10 = nTable.GetColumnBuffer(2);
+		ColumnBuffer* pNumeric_5_3 = nTable.GetColumnBuffer(3);
 
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
@@ -1536,6 +1537,27 @@ namespace exodbc
 		EXPECT_TRUE(nTable.Delete(sqlstmt, false));
 		EXPECT_TRUE(m_db.CommitTrans());
 
+		// Select a valid record from the non-tmp table
+		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
+		Table nnTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		EXPECT_TRUE(nnTable.Open(false, true));
+		SQL_NUMERIC_STRUCT numStr18_0, numStr18_10, numStr5_3;
+		EXPECT_TRUE(nnTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		EXPECT_TRUE(nnTable.SelectNext());
+		EXPECT_TRUE(nnTable.GetColumnValue(1, numStr18_0));
+		EXPECT_TRUE(nnTable.GetColumnValue(3, numStr5_3));
+		EXPECT_TRUE(nnTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(nnTable.SelectNext());
+		EXPECT_TRUE(nnTable.GetColumnValue(2, numStr18_10));
+		EXPECT_TRUE(nnTable.SelectClose());
+
+		// Insert the just read values
+		*pId = (SQLINTEGER)101;
+		*pNumeric_18_0 = numStr18_0;
+		*pNumeric_18_10 = numStr18_10;
+		*pNumeric_5_3 = numStr5_3;
+		EXPECT_TRUE(nTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
 	}
 
 

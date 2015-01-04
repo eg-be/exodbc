@@ -199,10 +199,7 @@ namespace exodbc
 		}
 		BoundParameter* pBp = new BoundParameter(hStmt, parameterNumber);
 		SQLRETURN ret;
-		if (m_bufferType != SQL_C_NUMERIC)
-		{
-			ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, m_columnSize >= 0 ? m_columnSize : 0, m_decimalDigits >= 0 ? m_decimalDigits : 0, pBuffer, m_bufferSize, &(m_cb));
-		}
+		ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, m_columnSize >= 0 ? m_columnSize : 0, m_decimalDigits >= 0 ? m_decimalDigits : 0, pBuffer, m_bufferSize, &(m_cb));
 		if (!SQL_SUCCEEDED(ret))
 		{
 			LOG_ERROR_STMT(hStmt, ret, SQLBindParameter);
@@ -212,12 +209,33 @@ namespace exodbc
 		{
 			LOG_WARNING_STMT(hStmt, ret, SQLBindParameter);
 		}
+		bool numStuffOk = true;
 		if (SQL_SUCCEEDED(ret))
+		{
+			// Do some additional steps for numeric types
+			if (m_bufferType == SQL_C_NUMERIC)
+			{
+				SQLHANDLE hDesc = SQL_NULL_HDESC;
+				if (GetRowDescriptorHandle(hStmt, hDesc))
+				{
+					bool ok = true;
+					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, m_columnSize);
+					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_SCALE, m_decimalDigits);
+					numStuffOk = ok;
+				}
+				else
+				{
+					numStuffOk = false;
+				}
+			}
+		}
+
+		if (SQL_SUCCEEDED(ret) && numStuffOk)
 		{
 			m_boundParameters.push_back(pBp);
 		}
 
-		return SQL_SUCCEEDED(ret);
+		return SQL_SUCCEEDED(ret) && numStuffOk;
 	}
 
 
