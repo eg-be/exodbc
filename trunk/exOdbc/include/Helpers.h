@@ -96,7 +96,7 @@ namespace exodbc
 	/*!
 	* \class SErrorInfo
 	*
-	* \brief Store error-information from odbc 
+	* \brief Store error-information from odbc
 	*/
 	struct EXODBCAPI SErrorInfo
 	{
@@ -119,7 +119,7 @@ namespace exodbc
 
 	/*!
 	* \brief Ugly conversion of small to wide - use only if you know that you have only ASCII chars in w.
-	* 
+	*
 	* \detailed Transforms from wide to small by simple taking the char-values.
 	* \param const std::wstring& w
 	* \return std::string
@@ -134,7 +134,7 @@ namespace exodbc
 	* \return std::wstring TRUE, FALSE or ?????
 	*/
 	extern EXODBCAPI std::wstring SqlTrueFalse2s(SQLSMALLINT b);
-	
+
 	/*!
 	* \brief Translates some often encountered SQLRETURN values to a string.
 	*
@@ -152,7 +152,7 @@ namespace exodbc
 	*/
 	extern EXODBCAPI std::wstring SqlType2s(SQLSMALLINT sqlType);
 
-	
+
 	/*!
 	* \brief Transform the SQL C-types like SQL_C_SLONG, SQL_C_WCHAR, etc. to some string, like "SQL_C_SLONG", etc.
 	*
@@ -251,11 +251,11 @@ namespace exodbc
 	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt);
 
 	enum CloseMode
-	{ 
+	{
 		FailIfNotOpen,	//< Returns false if Cursor is not open. 
 		IgnoreNotOpen	//< Returns true also if cursor was not open
 	};
-	
+
 
 	/*!
 	* \brief	Close the cursor associated with the passed statement handle.
@@ -279,14 +279,14 @@ namespace exodbc
 	*			Note: This function will only work correctly when working with an odbc 3.x driver
 	*			Note: This function does not work using MySQL ODBC Driver ?
 	* \param	hStmt		The statement handle.
-	* \param	dbms		The Database-Type connected to. 
+	* \param	dbms		The Database-Type connected to.
 	* \return	True if hStmt was already closed when the function was called.
 	*/
 	extern EXODBCAPI bool	EnsureStmtIsClosed(const SQLHANDLE& hStmt, DatabaseProduct dbms);
 
 
 	/*!
-	* \brief	Compares two SQL-States, returns true if they are equal. 
+	* \brief	Compares two SQL-States, returns true if they are equal.
 	* \detailed	This is a imple shorthand to a wcsncmp with a max of 5 chars
 	* \param	sqlState1	First SQL-State
 	* \param	sqlState2	Second SQL-State
@@ -294,7 +294,7 @@ namespace exodbc
 	*/
 	extern EXODBCAPI bool	CompareSqlState(const wchar_t* sqlState1, const wchar_t* sqlState2);
 
-	
+
 	/*!
 	* \brief	A wrapper to SQLNumResultCols.
 	* \detailed	Counts how many columns are available on the result set of the
@@ -350,7 +350,7 @@ namespace exodbc
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
-	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr,  bool* pIsNull, bool nullTerminate = false);
+	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
 
 
 	/*!
@@ -369,13 +369,17 @@ namespace exodbc
 	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull = NULL);
 
 
-	extern EXODBCAPI bool		GetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER& value);
+	//	extern EXODBCAPI bool		GetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER& value);
 
 
-	extern EXODBCAPI bool		SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER value);
+	extern EXODBCAPI bool		SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value);
 
-
-	extern EXODBCAPI bool		GetRowDescriptorHandle(SQLHSTMT hStmt, SQLHDESC& hDesc);
+	enum RowDescriptorType
+	{
+		RDT_ROW = SQL_ATTR_APP_ROW_DESC,
+		RDT_PARAM = SQL_ATTR_APP_PARAM_DESC
+	};
+	extern EXODBCAPI bool		GetRowDescriptorHandle(SQLHSTMT hStmt, RowDescriptorType type, SQLHDESC& hDesc);
 	// Classes
 	// -------
 

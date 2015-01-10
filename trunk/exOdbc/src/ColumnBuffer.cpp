@@ -215,40 +215,24 @@ namespace exodbc
 			// Do some additional steps for numeric types
 			if (m_bufferType == SQL_C_NUMERIC)
 			{
-				SQLRETURN r1, r2, r3, r4, r5;
-				SQLHANDLE hdesc = SQL_NULL_HDESC;
-				r1 = SQLGetStmtAttr(hStmt, SQL_ATTR_APP_PARAM_DESC, &hdesc, 0, NULL);
-				r2 = SQLSetDescField(hdesc, pBp->m_parameterNumber, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC, 0);
-				r3 = SQLSetDescField(hdesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize, 0);
-				r4 = SQLSetDescField(hdesc, pBp->m_parameterNumber, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits, 0);
-				r5 = SQLSetDescField(hdesc, pBp->m_parameterNumber, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer, 0);
-				//if (GetRowDescriptorHandle(hStmt, hDesc))
-				//{
-				//	bool ok = true;
-					//ret = SQLSetDescField(hDesc, pBp->m_parameterNumber, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC, 0);
-					//ret = SQLSetDescField(hDesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize, 0);
-					//ret = SQLSetDescField(hDesc, pBp->m_parameterNumber, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits, 0);
-					//ret = SQLSetDescField(hDesc, pBp->m_parameterNumber, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer, 0);
-					//ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, m_columnSize);
-					//ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_SCALE, m_decimalDigits);
-					//ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_TYPE, SQL_C_NUMERIC);
-					//ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, m_columnSize);
-					//ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_SCALE, m_decimalDigits);
-					//ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_DATA_PTR, (SQLINTEGER)pBuffer);
-					//ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)&m_cb);
-					//ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)&m_cb);
-
-				//	numStuffOk = ok;
-				//}
-				//else
-				//{
-				//	numStuffOk = false;
-				//}
+				SQLHANDLE hDesc = SQL_NULL_HDESC;
+				if (GetRowDescriptorHandle(hStmt, RDT_PARAM, hDesc))
+				{
+					bool ok = true;
+					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize);
+					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
+					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
+					numStuffOk = ok;
+				}
+				else
+				{
+					numStuffOk = false;
+				}
 			}
 		}
 
 		if (SQL_SUCCEEDED(ret) && numStuffOk)
-//		if (SQL_SUCCEEDED(ret))
 		{
 			m_boundParameters.push_back(pBp);
 		}
@@ -287,10 +271,10 @@ namespace exodbc
 		if (m_bufferType == SQL_C_NUMERIC)
 		{
 			SQLHDESC hDesc = SQL_NULL_HDESC;
-			if (GetRowDescriptorHandle(hStmt, hDesc))
+			if (GetRowDescriptorHandle(hStmt, RDT_ROW, hDesc))
 			{
 				bool ok = true;
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, m_bufferType);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER) m_bufferType);
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER) NULL);
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER) NULL);
 				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER) NULL);
@@ -359,15 +343,15 @@ namespace exodbc
 			exASSERT(m_decimalDigits >= 0);
 
 			SQLHDESC hDesc = SQL_NULL_HDESC;
-			if (GetRowDescriptorHandle(hStmt, hDesc))
+			if (GetRowDescriptorHandle(hStmt, RDT_ROW, hDesc))
 			{
 				bool ok = true;
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, m_bufferType);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, m_columnSize);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, m_decimalDigits);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)pBuffer);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)&m_cb);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)&m_cb);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER) m_bufferType);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
+				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
 				if (ok)
 				{
 					m_hStmt = hStmt;

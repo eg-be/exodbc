@@ -711,11 +711,11 @@ namespace exodbc
 	}
 
 
-	bool SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER value)
+	bool SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value)
 	{
 		exASSERT(hDesc != SQL_NULL_HDESC);
 		exASSERT(recordNumber > 0);
-		SQLRETURN ret = SQLSetDescField(hDesc, recordNumber, descriptionField, (SQLPOINTER) value, NULL);
+		SQLRETURN ret = SQLSetDescField(hDesc, recordNumber, descriptionField, value, 0);
 		if (!SQL_SUCCEEDED(ret))
 		{
 			LOG_ERROR_DESC(hDesc, ret, SQLSetDescField);
@@ -728,11 +728,11 @@ namespace exodbc
 	}
 
 
-	bool GetRowDescriptorHandle(SQLHSTMT hStmt, SQLHDESC& hDesc)
+	bool GetRowDescriptorHandle(SQLHSTMT hStmt, RowDescriptorType type, SQLHDESC& hDesc)
 	{
 		exASSERT(hStmt != SQL_NULL_HSTMT);
 
-		SQLRETURN ret = SQLGetStmtAttr(hStmt, SQL_ATTR_APP_ROW_DESC, &hDesc, 0, NULL);
+		SQLRETURN ret = SQLGetStmtAttr(hStmt, type, &hDesc, 0, NULL);
 		if (!SQL_SUCCEEDED(ret))
 		{
 			LOG_ERROR_STMT(hStmt, ret, SQLGetStmtAttr);

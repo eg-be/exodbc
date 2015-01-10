@@ -1563,11 +1563,9 @@ namespace exodbc
 		EXPECT_TRUE(m_db.CommitTrans());
 	}
 
-	TEST_P(TableTest, FuckIt_5_3)
-	{
-		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
-			return;
 
+	TEST_P(TableTest, InsertNumericTypes_5_3)
+	{
 		Table t(&m_db, L"decTable", L"dbo", L"test", L"", Table::READ_WRITE);
 
 		ASSERT_TRUE(t.Open(false, true));
@@ -1594,11 +1592,8 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, FuckIt_18_0)
+	TEST_P(TableTest, InsertNumericTypes_18_0)
 	{
-		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
-			return;
-
 		Table t(&m_db, L"dec2Table", L"dbo", L"test", L"", Table::READ_WRITE);
 
 		ASSERT_TRUE(t.Open(false, true));
@@ -1632,11 +1627,8 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, FuckIt_18_10)
+	TEST_P(TableTest, InsertNumericTypes_18_10)
 	{
-		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
-			return;
-
 		Table t(&m_db, L"dec3Table", L"dbo", L"test", L"", Table::READ_WRITE);
 
 		ASSERT_TRUE(t.Open(false, true));
@@ -1670,11 +1662,8 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, FuckIt_All)
+	TEST_P(TableTest, InsertNumericTypes_All)
 	{
-		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
-			return;
-
 		Table t(&m_db, L"numerictypes_tmp", L"", L"", L"", Table::READ_WRITE);
 
 		ASSERT_TRUE(t.Open(false, true));
