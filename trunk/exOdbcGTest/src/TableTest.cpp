@@ -1533,10 +1533,6 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
-		// Remove everything, ignoring if there was any data:
-		EXPECT_TRUE(nTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
-
 		// Select a valid record from the non-tmp table
 		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
 		Table nnTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_WRITE);
@@ -1551,12 +1547,188 @@ namespace exodbc
 		EXPECT_TRUE(nnTable.GetColumnValue(2, numStr18_10));
 		EXPECT_TRUE(nnTable.SelectClose());
 
+		// Remove everything, ignoring if there was any data:
+		EXPECT_TRUE(nTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
 		// Insert the just read values
 		*pId = (SQLINTEGER)101;
+		//pNumeric_18_0->SetNull();
+		//pNumeric_18_10->SetNull();
+		//pNumeric_5_3->SetNull();
 		*pNumeric_18_0 = numStr18_0;
 		*pNumeric_18_10 = numStr18_10;
 		*pNumeric_5_3 = numStr5_3;
 		EXPECT_TRUE(nTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+	TEST_P(TableTest, FuckIt_5_3)
+	{
+		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
+			return;
+
+		Table t(&m_db, L"decTable", L"dbo", L"test", L"", Table::READ_WRITE);
+
+		ASSERT_TRUE(t.Open(false, true));
+		ColumnBuffer* pId = t.GetColumnBuffer(0);
+		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(1);
+
+		// Remove everything, ignoring if there was any data:
+		wstring sqlstmt = (boost::wformat(L"id > 0")).str();
+		EXPECT_TRUE(t.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		SQL_NUMERIC_STRUCT numStr;
+		ZeroMemory(&numStr, sizeof(numStr));
+		numStr.val[0] = 57;
+		numStr.val[1] = 48;
+		numStr.precision = 5;
+		numStr.scale = 3;
+		numStr.sign = 1;
+
+		*pNumeric_5_3 = numStr;
+		*pId = (SQLINTEGER)300;
+		EXPECT_TRUE(t.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+
+	TEST_P(TableTest, FuckIt_18_0)
+	{
+		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
+			return;
+
+		Table t(&m_db, L"dec2Table", L"dbo", L"test", L"", Table::READ_WRITE);
+
+		ASSERT_TRUE(t.Open(false, true));
+		ColumnBuffer* pId = t.GetColumnBuffer(0);
+		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
+
+		// Remove everything, ignoring if there was any data:
+		wstring sqlstmt = (boost::wformat(L"id > 0")).str();
+		EXPECT_TRUE(t.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		SQL_NUMERIC_STRUCT numStr;
+		ZeroMemory(&numStr, sizeof(numStr));
+		numStr.val[0] = 78;
+		numStr.val[1] = 243;
+		numStr.val[2] = 48;
+		numStr.val[3] = 166;
+		numStr.val[4] = 75;
+		numStr.val[5] = 155;
+		numStr.val[6] = 182;
+		numStr.val[7] = 1;
+
+		numStr.precision = 18;
+		numStr.scale = 0;
+		numStr.sign = 1;
+
+		*pNumeric_18_0 = numStr;
+		*pId = (SQLINTEGER)300;
+		EXPECT_TRUE(t.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+
+	TEST_P(TableTest, FuckIt_18_10)
+	{
+		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
+			return;
+
+		Table t(&m_db, L"dec3Table", L"dbo", L"test", L"", Table::READ_WRITE);
+
+		ASSERT_TRUE(t.Open(false, true));
+		ColumnBuffer* pId = t.GetColumnBuffer(0);
+		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(1);
+
+		// Remove everything, ignoring if there was any data:
+		wstring sqlstmt = (boost::wformat(L"id > 0")).str();
+		EXPECT_TRUE(t.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		SQL_NUMERIC_STRUCT numStr;
+		ZeroMemory(&numStr, sizeof(numStr));
+		numStr.val[0] = 78;
+		numStr.val[1] = 243;
+		numStr.val[2] = 48;
+		numStr.val[3] = 166;
+		numStr.val[4] = 75;
+		numStr.val[5] = 155;
+		numStr.val[6] = 182;
+		numStr.val[7] = 1;
+
+		numStr.precision = 18;
+		numStr.scale = 10;
+		numStr.sign = 1;
+
+		*pNumeric_18_10 = numStr;
+		*pId = (SQLINTEGER)300;
+		EXPECT_TRUE(t.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+
+	TEST_P(TableTest, FuckIt_All)
+	{
+		if (m_db.Dbms() != dbmsMS_SQL_SERVER)
+			return;
+
+		Table t(&m_db, L"numerictypes_tmp", L"", L"", L"", Table::READ_WRITE);
+
+		ASSERT_TRUE(t.Open(false, true));
+		ColumnBuffer* pId = t.GetColumnBuffer(0);
+		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
+		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
+		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
+
+		// Remove everything, ignoring if there was any data:
+		wstring sqlstmt = (boost::wformat(L"idnumerictypes > 0")).str();
+		EXPECT_TRUE(t.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		SQL_NUMERIC_STRUCT numStr18_0;
+		ZeroMemory(&numStr18_0, sizeof(numStr18_0));
+		numStr18_0.val[0] = 78;
+		numStr18_0.val[1] = 243;
+		numStr18_0.val[2] = 48;
+		numStr18_0.val[3] = 166;
+		numStr18_0.val[4] = 75;
+		numStr18_0.val[5] = 155;
+		numStr18_0.val[6] = 182;
+		numStr18_0.val[7] = 1;
+		numStr18_0.precision = 18;
+		numStr18_0.scale = 0;
+		numStr18_0.sign = 1;
+
+		SQL_NUMERIC_STRUCT numStr18_10;
+		ZeroMemory(&numStr18_10, sizeof(numStr18_10));
+		numStr18_10.val[0] = 78;
+		numStr18_10.val[1] = 243;
+		numStr18_10.val[2] = 48;
+		numStr18_10.val[3] = 166;
+		numStr18_10.val[4] = 75;
+		numStr18_10.val[5] = 155;
+		numStr18_10.val[6] = 182;
+		numStr18_10.val[7] = 1;
+		numStr18_10.precision = 18;
+		numStr18_10.scale = 10;
+		numStr18_10.sign = 1;
+
+		SQL_NUMERIC_STRUCT numStr5_3;
+		ZeroMemory(&numStr5_3, sizeof(numStr5_3));
+		numStr5_3.val[0] = 57;
+		numStr5_3.val[1] = 48;
+		numStr5_3.precision = 5;
+		numStr5_3.scale = 3;
+		numStr5_3.sign = 1;
+
+		*pId = (SQLINTEGER)300;
+		*pNumeric_18_0 = numStr18_0;
+		*pNumeric_18_10 = numStr18_10;
+		*pNumeric_5_3 = numStr5_3;
+		EXPECT_TRUE(t.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
 	}
 
