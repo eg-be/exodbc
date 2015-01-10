@@ -333,6 +333,20 @@ namespace exodbc
 		void ClearColumnFlag(ColumnFlags columnFlag) { exASSERT(!IsBound());  m_flags &= ~columnFlag; };
 
 
+		/*!
+		* \brief	Set the value of a binary value. Copies the value into this ColumnBuffer.
+		* \detailed	If this ColumnBuffer has the type SQL_C_BINARY the value of pBuff is
+		*			copied into the Buffer of this ColumnBuffer. The Buffer is first filled with zeros,
+		*			so that the buffer will be zero-padded if bufferSize is small than the size
+		*			of the buffer allocated by this ColumnBuffer.
+		* \param	pBuff Pointer to the value to be copied.
+		* \param	bufferSize Size of the buffer pointed to by pBuff. Must be smaller or equal than
+		*			the size of the buffer allocated by this ColumnBuffer.
+		* \throw	boost::bad_get if wrong BufferType
+		*/
+		void SetBinaryValue(SQLCHAR* pBuff, SQLINTEGER bufferSize);
+
+
 		// Operators
 		// ---------
 
@@ -452,13 +466,12 @@ namespace exodbc
 		* \brief	Access the current buffer value as a const SQLCHAR*
 		* \detailed	Returns the same pointer as it is stored in here. This is mainly used
 		*			for accessing binary data, to avoid to copy the binary buffer.
+		*			Do NOT delete the pointer returned by this operator, the ColumnBuffer will.
 		* \return	Const SQLCHAR* to the buffer-content.
 		* \see		TimestampVisitor
 		*/
 		operator const SQLCHAR*() const;
 
-
-		void Test(SQLSMALLINT s) { SQLSMALLINT* pS = GetSmallIntPtr(); *pS = s; };
 
 	private:
 		/*!

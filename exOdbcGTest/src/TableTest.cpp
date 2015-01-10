@@ -1708,7 +1708,6 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-
 		EXPECT_TRUE(t.Delete(sqlstmt, false));
 		EXPECT_TRUE(m_db.CommitTrans());
 
@@ -1754,6 +1753,72 @@ namespace exodbc
 		*pNumeric_5_3 = numStr5_3;
 		EXPECT_TRUE(t.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
+	}
+
+
+	TEST_P(TableTest, InsertBlobTypes)
+	{
+		std::wstring blobTypesTmpTableName = TestTables::GetTableName(L"blobtypes_tmp", m_odbcInfo.m_namesCase);
+		Table bTable(&m_db, blobTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
+		EXPECT_TRUE(bTable.Open(false, true));
+
+		ColumnBuffer* pId = bTable.GetColumnBuffer(0);
+		ColumnBuffer* pBlob = bTable.GetColumnBuffer(1);
+
+		// Remove everything, ignoring if there was any data:
+		wstring idName = TestTables::GetColName(L"idblobtypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+		EXPECT_TRUE(bTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		SQLCHAR empty[] = { 0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+
+		SQLCHAR ff[] = { 255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255
+		};
+
+		SQLCHAR abc[] = { 0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67
+		};
+
+		// Insert some values
+		*pId = (SQLINTEGER)100;
+		pBlob->SetBinaryValue(empty, sizeof(empty));
+		EXPECT_TRUE(bTable.Insert());
+		*pId = (SQLINTEGER)101;
+		pBlob->SetBinaryValue(ff, sizeof(ff));
+		EXPECT_TRUE(bTable.Insert());
+		*pId = (SQLINTEGER)102;
+		pBlob->SetBinaryValue(abc, sizeof(abc));
+		EXPECT_TRUE(bTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Now read the inserted values
+		sqlstmt = (boost::wformat(L"%s = 100") % idName).str();
+		EXPECT_TRUE(bTable.Select(sqlstmt));
+		EXPECT_TRUE(bTable.SelectNext());
+		const SQLCHAR* pEmpty = *pBlob;
+		EXPECT_EQ(0, memcmp(empty, pEmpty, sizeof(empty)));
+
+		sqlstmt = (boost::wformat(L"%s = 101") % idName).str();
+		EXPECT_TRUE(bTable.Select(sqlstmt));
+		EXPECT_TRUE(bTable.SelectNext());
+		const SQLCHAR* pFf = *pBlob;
+		EXPECT_EQ(0, memcmp(ff, pFf, sizeof(ff)));
+
+		sqlstmt = (boost::wformat(L"%s = 102") % idName).str();
+		EXPECT_TRUE(bTable.Select(sqlstmt));
+		EXPECT_TRUE(bTable.SelectNext());
+		const SQLCHAR* pAbc = *pBlob;
+		EXPECT_EQ(0, memcmp(abc, pAbc, sizeof(abc)));
 	}
 
 
