@@ -702,6 +702,21 @@ namespace exodbc
 	}
 
 
+	void ColumnBuffer::SetBinaryValue(SQLCHAR* pBuff, SQLINTEGER bufferSize)
+	{
+		exASSERT(m_bufferType == SQL_C_BINARY);
+		exASSERT(m_haveBuffer);
+		exASSERT(bufferSize <= m_bufferSize);
+
+		// Clear our own buffer
+		SQLCHAR* pColVal = GetCharPtr();
+		ZeroMemory(pColVal, m_bufferSize);
+		// Copy from passed buffer and set length-indicator
+		memcpy(pColVal, pBuff, bufferSize);
+		m_cb = bufferSize;
+	}
+
+
 	void ColumnBuffer::operator=(const BufferVariant& var)
 	{
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
