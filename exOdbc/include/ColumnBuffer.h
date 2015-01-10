@@ -349,8 +349,27 @@ namespace exodbc
 
 		// Operators
 		// ---------
-
+		/*!
+		* \brief	Copies the passed value into this ColumnBuffer. Does not work for all types, see Details!
+		* \detailed	Copies the value of the passed BufferVariant into this Buffer.
+		*			This does not work for BinaryData - we need to know the length of the data.
+		*			The following types work:
+		*			- SQLSMALLINT
+		*			- SQLINTEGER
+		*			- SQLBIGINT
+		*			- SQLDOUBLE
+		*			- SQL_DATE_STRUCT
+		*			- SQL_TIME_STRUCT
+		*			- SQL_TIMESTAMP_STRUCT
+		*			- SQL_NUMERIC_STRUCT
+		*			- SQL_SS_TIME2_STRUCT
+		*
+		* \param	var Variant containing the value that shall be assigned to this Buffer.
+		* \see		SetBinaryValue()
+		* \throw	boost::bad_get if wrong BufferType
+		*/
 		void operator=(const BufferVariant& var);
+
 
 		/*!
 		* \brief	Cast the current value to a SQLSMALLINT if possible.
