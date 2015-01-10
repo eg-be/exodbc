@@ -1553,27 +1553,43 @@ namespace exodbc
 
 		// Insert the just read values
 		*pId = (SQLINTEGER)101;
-		//pNumeric_18_0->SetNull();
-		//pNumeric_18_10->SetNull();
-		//pNumeric_5_3->SetNull();
 		*pNumeric_18_0 = numStr18_0;
 		*pNumeric_18_10 = numStr18_10;
 		*pNumeric_5_3 = numStr5_3;
 		EXPECT_TRUE(nTable.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
+
+		// And read them again from another table and compare them
+		SQL_NUMERIC_STRUCT numStr18_0t, numStr18_10t, numStr5_3t;
+		Table nntTable(&m_db, numericTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
+		EXPECT_TRUE(nntTable.Open(false, true));
+		sqlstmt = (boost::wformat(L"%s = %d") % idName % (SQLINTEGER)*pId).str();
+		EXPECT_TRUE(nntTable.Select(sqlstmt));
+		EXPECT_TRUE(nntTable.SelectNext());
+		EXPECT_TRUE(nntTable.GetColumnValue(1, numStr18_0t));
+		EXPECT_TRUE(nntTable.GetColumnValue(2, numStr18_10t));
+		EXPECT_TRUE(nntTable.GetColumnValue(3, numStr5_3t));
+		EXPECT_TRUE(nntTable.SelectClose());
+		EXPECT_EQ(0, memcmp(&numStr18_0, &numStr18_0t, sizeof(numStr18_0)));
+		EXPECT_EQ(0, memcmp(&numStr18_10, &numStr18_10t, sizeof(numStr18_10)));
+		EXPECT_EQ(0, memcmp(&numStr5_3, &numStr5_3t, sizeof(numStr5_3)));
 	}
 
 
 	TEST_P(TableTest, InsertNumericTypes_5_3)
 	{
-		Table t(&m_db, L"decTable", L"dbo", L"test", L"", Table::READ_WRITE);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
 
 		ASSERT_TRUE(t.Open(false, true));
 		ColumnBuffer* pId = t.GetColumnBuffer(0);
-		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(1);
+		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
+		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
+		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring sqlstmt = (boost::wformat(L"id > 0")).str();
+		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") %idName).str();
 		EXPECT_TRUE(t.Delete(sqlstmt, false));
 		EXPECT_TRUE(m_db.CommitTrans());
 
@@ -1585,6 +1601,8 @@ namespace exodbc
 		numStr.scale = 3;
 		numStr.sign = 1;
 
+		pNumeric_18_0->SetNull();
+		pNumeric_18_10->SetNull();
 		*pNumeric_5_3 = numStr;
 		*pId = (SQLINTEGER)300;
 		EXPECT_TRUE(t.Insert());
@@ -1594,14 +1612,19 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_18_0)
 	{
-		Table t(&m_db, L"dec2Table", L"dbo", L"test", L"", Table::READ_WRITE);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
 
 		ASSERT_TRUE(t.Open(false, true));
 		ColumnBuffer* pId = t.GetColumnBuffer(0);
 		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
+		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
+		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring sqlstmt = (boost::wformat(L"id > 0")).str();
+		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
 		EXPECT_TRUE(t.Delete(sqlstmt, false));
 		EXPECT_TRUE(m_db.CommitTrans());
 
@@ -1621,6 +1644,8 @@ namespace exodbc
 		numStr.sign = 1;
 
 		*pNumeric_18_0 = numStr;
+		pNumeric_18_10->SetNull();
+		pNumeric_5_3->SetNull();
 		*pId = (SQLINTEGER)300;
 		EXPECT_TRUE(t.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
@@ -1629,14 +1654,19 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_18_10)
 	{
-		Table t(&m_db, L"dec3Table", L"dbo", L"test", L"", Table::READ_WRITE);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
 
 		ASSERT_TRUE(t.Open(false, true));
 		ColumnBuffer* pId = t.GetColumnBuffer(0);
-		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(1);
+		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
+		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
+		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring sqlstmt = (boost::wformat(L"id > 0")).str();
+		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
 		EXPECT_TRUE(t.Delete(sqlstmt, false));
 		EXPECT_TRUE(m_db.CommitTrans());
 
@@ -1655,7 +1685,9 @@ namespace exodbc
 		numStr.scale = 10;
 		numStr.sign = 1;
 
+		pNumeric_18_0->SetNull();
 		*pNumeric_18_10 = numStr;
+		pNumeric_5_3->SetNull();
 		*pId = (SQLINTEGER)300;
 		EXPECT_TRUE(t.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
@@ -1664,7 +1696,8 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_All)
 	{
-		Table t(&m_db, L"numerictypes_tmp", L"", L"", L"", Table::READ_WRITE);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
 
 		ASSERT_TRUE(t.Open(false, true));
 		ColumnBuffer* pId = t.GetColumnBuffer(0);
@@ -1673,7 +1706,9 @@ namespace exodbc
 		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring sqlstmt = (boost::wformat(L"idnumerictypes > 0")).str();
+		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
 		EXPECT_TRUE(t.Delete(sqlstmt, false));
 		EXPECT_TRUE(m_db.CommitTrans());
 
