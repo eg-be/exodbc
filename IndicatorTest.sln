@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IndicatorTest", "IndicatorTest\IndicatorTest.vcxproj", "{FF4D5214-DA16-4883-8B2D-B0AE0761C332}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InsertNumTest", "InsertNumTest\InsertNumTest.vcxproj", "{BE4B8147-E32F-4D63-BCDF-91AEC9D765CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -15,6 +17,10 @@ Global
 		{FF4D5214-DA16-4883-8B2D-B0AE0761C332}.Debug|Win32.Build.0 = Debug|Win32
 		{FF4D5214-DA16-4883-8B2D-B0AE0761C332}.Release|Win32.ActiveCfg = Release|Win32
 		{FF4D5214-DA16-4883-8B2D-B0AE0761C332}.Release|Win32.Build.0 = Release|Win32
+		{BE4B8147-E32F-4D63-BCDF-91AEC9D765CB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BE4B8147-E32F-4D63-BCDF-91AEC9D765CB}.Debug|Win32.Build.0 = Debug|Win32
+		{BE4B8147-E32F-4D63-BCDF-91AEC9D765CB}.Release|Win32.ActiveCfg = Release|Win32
+		{BE4B8147-E32F-4D63-BCDF-91AEC9D765CB}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
