@@ -96,9 +96,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	ZeroMemory(&numStr, sizeof(numStr));
 	SQLINTEGER indicator = 0;
 
-	// set type first, then attrs, ..
 
-	// setting it all at once row returns:
+	// Binding the column by SQLSetDescRec does not work, not supported (?). Calling returns:
 	// SQLSTATE: IM001; nativeErr: 0 Msg : [Microsoft][ODBC Driver Manager] Driver does	not support this function
 	// ret = SQLSetDescRec(hdesc, recNr, SQL_C_NUMERIC, 0, 0, 5, 3, (SQLPOINTER*)&numStr, 0, &indicator);
 	//if (!SQL_SUCCEEDED(ret))
@@ -106,20 +105,29 @@ int _tmain(int argc, _TCHAR* argv[])
 	//	printErrorsAndAbort(SQL_HANDLE_DESC, hdesc);
 	//}
 
-	// setting it one after the other works:
-	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*) SQL_C_NUMERIC, 0);
-	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*) 5, 0);
-	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*) 3, 0);
-	// .. set the Indicator-pointer.
-	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_INDICATOR_PTR, (VOID*)&indicator, 0);
-	if (!SQL_SUCCEEDED(ret))
-	{
-		// We get no error here, BUT later when Fetching we get an
-		// SQLSTATE: 22002; nativeErr: 0 Msg: [MySQL][ODBC 5.3(w) Driver][mysqld-5.6.16-log] Indicator variable required but not supplied
-		printErrorsAndAbort(SQL_HANDLE_DESC, hdesc);
-	}
-	// and last the pointer
-	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*) &numStr, 0);
+
+	//// Binding the column by SQLSetDescField one after the other works:
+	//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_TYPE, (VOID*) SQL_C_NUMERIC, 0);
+	//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*) 5, 0);
+	//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*) 3, 0);
+	//// .. but not setting the Indicator-pointer: No error is returned here:
+	//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_INDICATOR_PTR, (VOID*)&indicator, 0);
+	//if (!SQL_SUCCEEDED(ret))
+	//{
+	//	// We get no error here, BUT later when Fetching we get an
+	//	// SQLSTATE: 22002; nativeErr: 0 Msg: [MySQL][ODBC 5.3(w) Driver][mysqld-5.6.16-log] Indicator variable required but not supplied
+	//	printErrorsAndAbort(SQL_HANDLE_DESC, hdesc);
+	//}
+	//// and last the pointer
+	//ret = SQLSetDescField(hdesc, recNr, SQL_DESC_DATA_PTR, (VOID*) &numStr, 0);
+
+
+	// Binding the column using SQLBindCol:
+	// Setting the precision and scale first works fine, then bind:
+	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_PRECISION, (VOID*)5, 0);
+	ret = SQLSetDescField(hdesc, recNr, SQL_DESC_SCALE, (VOID*)3, 0);
+	ret = SQLBindCol(hstmt, recNr, SQL_C_NUMERIC, (SQLPOINTER*)&numStr, sizeof(numStr), &indicator);
+
 
 	// Query a null row:
 	ret = SQLExecDirect(hstmt, L"SELECT id, num FROM test.numtable WHERE id = 2", SQL_NTS);
@@ -135,6 +143,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		// SQLSTATE: 22002; nativeErr: 0 Msg: [MySQL][ODBC 5.3(w) Driver][mysqld-5.6.16-log] Indicator variable required but not supplied
 		printErrors(SQL_HANDLE_STMT, hstmt);
 	}
+
+	// If we have bound using SQLBindCol we need to call SQLGetData():
+	ret = SQLGetData(hstmt, recNr, SQL_C_NUMERIC, (SQLPOINTER*)&numStr, sizeof(numStr), &indicator);
+
 	// No data has been fetched, indicator is not null
 	std::wcout << L"Indicator is: ";
 	if (indicator == SQL_NULL_DATA)
@@ -162,6 +174,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		printErrors(SQL_HANDLE_STMT, hstmt);
 	}
+
+	// If we have bound using SQLBindCol we need to call SQLGetData():
+	ret = SQLGetData(hstmt, recNr, SQL_C_NUMERIC, (SQLPOINTER*)&numStr, sizeof(numStr), &indicator);
+
 	// we have the result:
 	SQLBIGINT* pInt = (SQLBIGINT*)&numStr.val;
 	std::wcout << L"Value: " << *pInt << std::endl;
