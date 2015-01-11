@@ -74,6 +74,8 @@ namespace exodbc
 		SQLINTEGER	m_idCharTypes;
 		SQLCHAR	m_varchar[128 + 1];
 		SQLCHAR	m_char[128 + 1];
+		SQLCHAR m_varchar_10[10 + 1];
+		SQLCHAR m_char_10[10 + 1];
 	};
 
 
@@ -90,6 +92,8 @@ namespace exodbc
 		SQLINTEGER	m_idCharTypes;
 		SQLWCHAR	m_varchar[128 + 1];
 		SQLWCHAR	m_char[128 + 1];
+		SQLWCHAR	m_varchar_10[10 + 1];
+		SQLWCHAR	m_char_10[10 + 1];
 	};
 
 

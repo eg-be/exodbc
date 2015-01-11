@@ -600,7 +600,20 @@ namespace exodbc
 		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(2, str));
 		EXPECT_EQ(std::wstring(L"הצüאיט"), str);
 
-		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 5") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(3, str));
+		EXPECT_EQ(std::wstring(L"abc"), str);
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(4, str));
+		EXPECT_EQ(std::wstring(L"abc"), str);
+
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 6") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(3, str));
+		EXPECT_EQ(std::wstring(L"abcde12345"), str);
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(4, str));
+		EXPECT_EQ(std::wstring(L"abcde12345"), str);
+
 		EXPECT_TRUE(charTypesAutoTable.SelectClose());
 	}
 
@@ -641,6 +654,23 @@ namespace exodbc
 		EXPECT_EQ(std::wstring(L"הצüאיט"), trim_right_copy(str));
 		EXPECT_FALSE(wTable.SelectNext());
 		EXPECT_TRUE(wTable.SelectClose());
+
+		EXPECT_TRUE(wTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(wTable.SelectNext());
+		str.assign((wchar_t*)&wTable.m_char_10);
+		EXPECT_EQ(std::wstring(L"abc"), trim_right_copy(str));
+		str.assign((wchar_t*)&wTable.m_varchar_10);
+		EXPECT_EQ(std::wstring(L"abc"), trim_right_copy(str));
+		EXPECT_TRUE(wTable.SelectClose());
+
+		EXPECT_TRUE(wTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(wTable.SelectNext());
+		str.assign((wchar_t*)&wTable.m_char_10);
+		EXPECT_EQ(std::wstring(L"abcde12345"), trim_right_copy(str));
+		str.assign((wchar_t*)&wTable.m_varchar_10);
+		EXPECT_EQ(std::wstring(L"abcde12345"), trim_right_copy(str));
+		EXPECT_TRUE(wTable.SelectClose());
+
 	}
 
 
@@ -655,7 +685,6 @@ namespace exodbc
 
 		std::string str;
 
-		// We expect 6 Records
 		std::wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 1") % idName).str()));
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
@@ -685,7 +714,20 @@ namespace exodbc
 		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(2, str));
 		EXPECT_EQ(std::string("הצüאיט"), str);
 
-		EXPECT_FALSE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 5") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(3, str));
+		EXPECT_EQ(std::string("abc"), str);
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(4, str));
+		EXPECT_EQ(std::string("abc"), str);
+
+		EXPECT_TRUE(charTypesAutoTable.Select((boost::wformat(L"%d = 6") % idName).str()));
+		EXPECT_TRUE(charTypesAutoTable.SelectNext());
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(3, str));
+		EXPECT_EQ(std::string("abcde12345"), str);
+		EXPECT_TRUE(charTypesAutoTable.GetColumnValue(4, str));
+		EXPECT_EQ(std::string("abcde12345"), str);
+
 		EXPECT_TRUE(charTypesAutoTable.SelectClose());
 	}
 
@@ -725,6 +767,22 @@ namespace exodbc
 		str.assign((char*)&cTable.m_char);
 		EXPECT_EQ(std::string("הצüאיט"), trim_right_copy(str));
 		EXPECT_FALSE(cTable.SelectNext());
+		EXPECT_TRUE(cTable.SelectClose());
+
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		str.assign((char*)&cTable.m_char_10);
+		EXPECT_EQ(std::string("abc"), trim_right_copy(str));
+		str.assign((char*)&cTable.m_varchar_10);
+		EXPECT_EQ(std::string("abc"), trim_right_copy(str));
+		EXPECT_TRUE(cTable.SelectClose());
+
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 6") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		str.assign((char*)&cTable.m_char_10);
+		EXPECT_EQ(std::string("abcde12345"), trim_right_copy(str));
+		str.assign((char*)&cTable.m_varchar_10);
+		EXPECT_EQ(std::string("abcde12345"), trim_right_copy(str));
 		EXPECT_TRUE(cTable.SelectClose());
 	}
 
@@ -1844,7 +1902,22 @@ namespace exodbc
 		*pId = (SQLINTEGER)100;
 		*pVarchar = s;
 		*pChar = s;
+		EXPECT_TRUE(cTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
 
+		// Read them back from another table
+		Table t2(&m_db, charTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
+		t2.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
+		t2.SetCharTrimOption(Table::TRIM_RIGHT);
+		EXPECT_TRUE(t2.Open(false, true));
+
+		std::string varchar2, char2;
+		EXPECT_TRUE(t2.Select((boost::wformat(L"%s = 100") % idName).str()));
+		EXPECT_TRUE(t2.SelectNext());
+		EXPECT_TRUE(t2.GetColumnValue(1, varchar2));
+		EXPECT_TRUE(t2.GetColumnValue(2, char2));
+		EXPECT_EQ(s, varchar2);
+		EXPECT_EQ(s, char2);
 	}
 
 
