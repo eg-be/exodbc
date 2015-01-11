@@ -782,6 +782,34 @@ namespace exodbc
 
 		return timestamp;
 	}
+
+
+	bool IsTimeEqual(const SQL_TIME_STRUCT& t1, const SQL_TIME_STRUCT& t2)
+	{
+		return t1.hour == t2.hour
+			&& t1.minute == t2.minute
+			&& t1.second == t2.second;
+	}
+
+
+	bool IsDateEqual(const SQL_DATE_STRUCT& d1, const SQL_DATE_STRUCT& d2)
+	{
+		return d1.day == d2.day
+			&& d1.month == d2.month
+			&& d1.year == d2.year;
+	}
+
+
+	bool IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2)
+	{
+		return ts1.hour == ts2.hour
+			&& ts1.minute == ts2.minute
+			&& ts1.second == ts2.second
+			&& ts1.fraction == ts2.fraction
+			&& ts1.day == ts2.day
+			&& ts1.month == ts2.month
+			&& ts1.year == ts2.year;
+	}
 }
 
 // Interfaces

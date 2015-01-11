@@ -2196,6 +2196,75 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, UpdateDateTypes)
+	{
+		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes_tmp", m_odbcInfo.m_namesCase);
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(dTable.Open(false, true));
+		ColumnBuffer* pId = dTable.GetColumnBuffer(0);
+		ColumnBuffer* pDate = dTable.GetColumnBuffer(1);
+		ColumnBuffer* pTime = dTable.GetColumnBuffer(2);
+		ColumnBuffer* pTimestamp = dTable.GetColumnBuffer(3);
+
+		wstring idName = TestTables::GetColName(L"iddatetypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		ASSERT_TRUE(dTable.Delete(sqlstmt, false));
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Insert some values
+		SQL_TIME_STRUCT time = InitTime(13, 55, 56);
+		SQL_DATE_STRUCT date = InitDate(26, 1, 2983);
+		SQL_TIMESTAMP_STRUCT timestamp = InitTimestamp(13, 55, 56, 0, 26, 01, 1983);
+
+		*pId = (SQLINTEGER)101;
+		*pDate = date;
+		*pTime = time;
+		*pTimestamp = timestamp;
+		ASSERT_TRUE(dTable.Insert());
+		*pId = (SQLINTEGER)102;
+		pDate->SetNull();
+		pTime->SetNull();
+		pTimestamp->SetNull();
+		ASSERT_TRUE(dTable.Insert());
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Now update the values
+		// \todo: We do not test the Fractions here. Lets fix Ticket #70 first
+		date = InitDate(20, 9, 1985);
+		time = InitTime(16, 31, 49);
+		timestamp = InitTimestamp(16, 31, 49, 0, 20, 9, 1985);
+
+		*pId = (SQLINTEGER)101;
+		pDate->SetNull();
+		pTime->SetNull();
+		pTimestamp->SetNull();
+		EXPECT_TRUE(dTable.Update());
+		*pId = (SQLINTEGER)102;
+		*pDate = date;
+		*pTime = time;
+		*pTimestamp = timestamp;
+		EXPECT_TRUE(dTable.Update());
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// And read back
+		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 101") % idName).str()));
+		EXPECT_TRUE(dTable.SelectNext());
+		EXPECT_TRUE(pDate->IsNull());
+		EXPECT_TRUE(pTime->IsNull());
+		EXPECT_TRUE(pTimestamp->IsNull());
+
+		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 102") % idName).str()));
+		EXPECT_TRUE(dTable.SelectNext());
+		EXPECT_FALSE(pDate->IsNull());
+		EXPECT_FALSE(pTime->IsNull());
+		EXPECT_FALSE(pTimestamp->IsNull());
+		EXPECT_TRUE(IsDateEqual(date, *pDate));
+		EXPECT_TRUE(IsTimeEqual(time, *pTime));
+		EXPECT_TRUE(IsTimestampEqual(timestamp, *pTimestamp));
+	}
+
 
 // Interfaces
 // ----------
