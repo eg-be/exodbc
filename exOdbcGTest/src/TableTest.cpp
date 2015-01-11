@@ -2403,6 +2403,134 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, UpdateWCharTypes)
+	{
+		std::wstring charTypesTmpTableName = TestTables::GetTableName(L"chartypes_tmp", m_odbcInfo.m_namesCase);
+		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
+		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
+		cTable.SetCharTrimOption(Table::TRIM_RIGHT);
+		EXPECT_TRUE(cTable.Open(false, true));
+
+		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
+		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
+		ColumnBuffer* pChar = cTable.GetColumnBuffer(2);
+		ColumnBuffer* pVarchar_10 = cTable.GetColumnBuffer(3);
+		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
+
+		// Remove everything, ignoring if there was any data:
+		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Insert some values:
+		// \todo: Note, in IBM DB2 special chars seem to occupy more space (two bytes`?). We cannot have more than 5 special chars if the size of the field is 10..
+		// but this might be because we bind a char to wchar or so.. hm..
+		std::wstring s100 = L"дцаий";
+		*pId = (SQLINTEGER)100;
+		*pVarchar = s100;
+		*pChar = s100;
+		*pVarchar_10 = s100;
+		*pChar_10 = s100;
+		EXPECT_TRUE(cTable.Insert());
+		std::wstring s101 = L"abcde12345";
+		*pId = (SQLINTEGER)101;
+		*pVarchar = s101;
+		*pChar = s101;
+		*pVarchar_10 = s101;
+		*pChar_10 = s101;
+		EXPECT_TRUE(cTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Select and check
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 100") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		std::wstring s2;
+		EXPECT_TRUE(cTable.GetColumnValue(1, s2));
+		EXPECT_EQ(s100, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(2, s2));
+		EXPECT_EQ(s100, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(3, s2));
+		EXPECT_EQ(s100, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(4, s2));
+		EXPECT_EQ(s100, s2);
+
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 101") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		EXPECT_TRUE(cTable.GetColumnValue(1, s2));
+		EXPECT_EQ(s101, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(2, s2));
+		EXPECT_EQ(s101, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(3, s2));
+		EXPECT_EQ(s101, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(4, s2));
+		EXPECT_EQ(s101, s2);
+	}
+
+
+	TEST_P(TableTest, UpdateCharTypes)
+	{
+		std::wstring charTypesTmpTableName = TestTables::GetTableName(L"chartypes_tmp", m_odbcInfo.m_namesCase);
+		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
+		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
+		cTable.SetCharTrimOption(Table::TRIM_RIGHT);
+		EXPECT_TRUE(cTable.Open(false, true));
+
+		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
+		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
+		ColumnBuffer* pChar = cTable.GetColumnBuffer(2);
+		ColumnBuffer* pVarchar_10 = cTable.GetColumnBuffer(3);
+		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
+
+		// Remove everything, ignoring if there was any data:
+		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Insert some values:
+		// \todo: Note, in IBM DB2 special chars seem to occupy more space (two bytes`?). We cannot have more than 5 special chars if the size of the field is 10..
+		// but this might be because we bind a char to wchar or so.. hm..
+		std::string s100 = "abcd";
+		*pId = (SQLINTEGER)100;
+		*pVarchar = s100;
+		*pChar = s100;
+		*pVarchar_10 = s100;
+		*pChar_10 = s100;
+		EXPECT_TRUE(cTable.Insert());
+		std::string s101 = "abcde12345";
+		*pId = (SQLINTEGER)101;
+		*pVarchar = s101;
+		*pChar = s101;
+		*pVarchar_10 = s101;
+		*pChar_10 = s101;
+		EXPECT_TRUE(cTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Select and check
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 100") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		std::string s2;
+		EXPECT_TRUE(cTable.GetColumnValue(1, s2));
+		EXPECT_EQ(s100, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(2, s2));
+		EXPECT_EQ(s100, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(3, s2));
+		EXPECT_EQ(s100, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(4, s2));
+		EXPECT_EQ(s100, s2);
+
+		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 101") % idName).str()));
+		EXPECT_TRUE(cTable.SelectNext());
+		EXPECT_TRUE(cTable.GetColumnValue(1, s2));
+		EXPECT_EQ(s101, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(2, s2));
+		EXPECT_EQ(s101, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(3, s2));
+		EXPECT_EQ(s101, s2);
+		EXPECT_TRUE(cTable.GetColumnValue(4, s2));
+		EXPECT_EQ(s101, s2);
+	}
 
 // Interfaces
 // ----------
