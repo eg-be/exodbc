@@ -399,6 +399,23 @@ namespace exodbc
 
 	extern EXODBCAPI bool IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2);
 
+
+	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNumeric(SQLCHAR precision, SQLSCHAR scale, SQLCHAR sign, SQLCHAR val[SQL_MAX_NUMERIC_LEN]);
+
+
+	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNullNumeric();
+
+
+	/*!
+	* \brief Convert the value of a SQL_NUMERIC_STRUCT to the long value
+	* \detailed Just copied from the ms sample.
+	* \see https://support.microsoft.com/kb/222831/en-us
+	*/
+	extern EXODBCAPI long Str2Hex2Long(unsigned char hexValue[16]);
+
+
+	extern EXODBCAPI void Long2StrHex(long value, char* hexValue);
+
 	// Classes
 	// -------
 
