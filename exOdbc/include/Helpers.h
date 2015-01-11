@@ -380,6 +380,16 @@ namespace exodbc
 		RDT_PARAM = SQL_ATTR_APP_PARAM_DESC
 	};
 	extern EXODBCAPI bool		GetRowDescriptorHandle(SQLHSTMT hStmt, RowDescriptorType type, SQLHDESC& hDesc);
+
+
+	extern EXODBCAPI SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second);
+
+
+	extern EXODBCAPI SQL_DATE_STRUCT InitDate(SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year);
+
+
+	extern EXODBCAPI SQL_TIMESTAMP_STRUCT InitTimestamp(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction, SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year);
+
 	// Classes
 	// -------
 
