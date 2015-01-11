@@ -990,15 +990,24 @@ namespace exodbc
 			0x01, 0x23, 0x45, 0x67
 		};
 
+		SQLCHAR abc_ff[] = { 0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67,
+			0xff, 0xff, 0xff, 0xff
+		};
+
 		const SQLCHAR* pBlob = NULL;
 		SQLINTEGER size, length = 0;
 
+		// Fixed size bins
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 1") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
 		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size, length));
 		EXPECT_EQ(0, memcmp(empty, pBlob, length));
 		EXPECT_EQ(16, size);
 		EXPECT_EQ(sizeof(empty), length);
+		EXPECT_TRUE(bTable.IsColumnNull(2));
 
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 2") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
@@ -1006,6 +1015,7 @@ namespace exodbc
 		EXPECT_EQ(0, memcmp(ff, pBlob, length));
 		EXPECT_EQ(16, size);
 		EXPECT_EQ(sizeof(ff), length);
+		EXPECT_TRUE(bTable.IsColumnNull(2));
 
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 3") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
@@ -1013,6 +1023,24 @@ namespace exodbc
 		EXPECT_EQ(0, memcmp(abc, pBlob, length));
 		EXPECT_EQ(16, size);
 		EXPECT_EQ(sizeof(abc), length);
+		EXPECT_TRUE(bTable.IsColumnNull(2));
+
+		// Read Varbins
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		EXPECT_TRUE(bTable.GetBuffer(2, pBlob, size, length));
+		EXPECT_EQ(0, memcmp(abc, pBlob, length));
+		EXPECT_EQ(20, size);
+		EXPECT_EQ(sizeof(abc), length);
+		EXPECT_TRUE(bTable.IsColumnNull(1));
+
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		EXPECT_TRUE(bTable.GetBuffer(2, pBlob, size, length));
+		EXPECT_EQ(0, memcmp(abc_ff, pBlob, length));
+		EXPECT_EQ(20, size);
+		EXPECT_EQ(sizeof(abc_ff), length);
+		EXPECT_TRUE(bTable.IsColumnNull(1));
 	}
 
 
@@ -1041,6 +1069,13 @@ namespace exodbc
 			0x01, 0x23, 0x45, 0x67
 		};
 
+		SQLCHAR abc_ff[] = { 0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67,
+			0xff, 0xff, 0xff, 0xff
+		};
+
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 1") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
 		EXPECT_EQ(0, memcmp(empty, bTable.m_blob, sizeof(bTable.m_blob)));
@@ -1052,6 +1087,15 @@ namespace exodbc
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 3") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
 		EXPECT_EQ(0, memcmp(abc, bTable.m_blob, sizeof(bTable.m_blob)));
+
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 4") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		EXPECT_EQ(0, memcmp(abc, bTable.m_varblob_20, sizeof(abc)));
+
+		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(bTable.SelectNext());
+		EXPECT_EQ(0, memcmp(abc_ff, bTable.m_varblob_20, sizeof(abc_ff)));
+
 	}
 
 
@@ -1828,6 +1872,7 @@ namespace exodbc
 
 		ColumnBuffer* pId = bTable.GetColumnBuffer(0);
 		ColumnBuffer* pBlob = bTable.GetColumnBuffer(1);
+		ColumnBuffer* pVarBlob_20 = bTable.GetColumnBuffer(2);
 
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idblobtypes", m_odbcInfo.m_namesCase);
@@ -1853,15 +1898,30 @@ namespace exodbc
 			0x01, 0x23, 0x45, 0x67
 		};
 
+		SQLCHAR abc_ff[] = { 0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67,
+			0xff, 0xff, 0xff, 0xff
+		};
+
 		// Insert some values
 		*pId = (SQLINTEGER)100;
 		pBlob->SetBinaryValue(empty, sizeof(empty));
+		pVarBlob_20->SetNull();
 		EXPECT_TRUE(bTable.Insert());
 		*pId = (SQLINTEGER)101;
 		pBlob->SetBinaryValue(ff, sizeof(ff));
 		EXPECT_TRUE(bTable.Insert());
 		*pId = (SQLINTEGER)102;
 		pBlob->SetBinaryValue(abc, sizeof(abc));
+		EXPECT_TRUE(bTable.Insert());
+		*pId = (SQLINTEGER)103;
+		pBlob->SetNull();
+		pVarBlob_20->SetBinaryValue(abc, sizeof(abc));
+		EXPECT_TRUE(bTable.Insert());
+		*pId = (SQLINTEGER)104;
+		pVarBlob_20->SetBinaryValue(abc_ff, sizeof(abc_ff));
 		EXPECT_TRUE(bTable.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
 
@@ -1883,6 +1943,20 @@ namespace exodbc
 		EXPECT_TRUE(bTable.SelectNext());
 		const SQLCHAR* pAbc = *pBlob;
 		EXPECT_EQ(0, memcmp(abc, pAbc, sizeof(abc)));
+
+		sqlstmt = (boost::wformat(L"%s = 103") % idName).str();
+		EXPECT_TRUE(bTable.Select(sqlstmt));
+		EXPECT_TRUE(bTable.SelectNext());
+		pAbc = *pVarBlob_20;
+		EXPECT_EQ(0, memcmp(abc, pAbc, sizeof(abc)));
+		EXPECT_EQ(sizeof(abc), pVarBlob_20->GetCb());
+
+		sqlstmt = (boost::wformat(L"%s = 104") % idName).str();
+		EXPECT_TRUE(bTable.Select(sqlstmt));
+		EXPECT_TRUE(bTable.SelectNext());
+		const SQLCHAR* pAbc_ff = *pVarBlob_20;
+		EXPECT_EQ(0, memcmp(abc_ff, pAbc_ff, sizeof(abc_ff)));
+		EXPECT_EQ(sizeof(abc_ff), pVarBlob_20->GetCb());
 	}
 
 
