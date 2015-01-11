@@ -792,7 +792,17 @@ namespace exodbc
 		}
 		else if (SQL_C_WCHAR == m_bufferType)
 		{
-			exASSERT(false);
+			SQLWCHAR* pColVal = GetWCharPtr();
+			std::wstring s = boost::get<std::wstring>(var);
+			// Check that string fits into buffer (Note: We need +1 char for null-terminating)
+			exASSERT((SQLINTEGER)s.length() < m_bufferSize);
+			// Erase buffer:
+			ZeroMemory(pColVal, m_bufferSize);
+			// Copy into buffer
+			memcpy(pColVal, s.c_str(), m_bufferSize);
+			// Null-terminate
+			pColVal[m_bufferSize - 1] = 0;
+			m_cb = SQL_NTS;
 		}
 		else if (SQL_C_TYPE_DATE == m_bufferType)
 		{
