@@ -745,6 +745,43 @@ namespace exodbc
 
 		return SQL_SUCCEEDED(ret);
 	}
+
+
+	SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second)
+	{
+		SQL_TIME_STRUCT time;
+		time.hour = hour;
+		time.minute = minute;
+		time.second = second;
+
+		return time;
+	}
+
+
+	SQL_DATE_STRUCT InitDate(SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year)
+	{
+		SQL_DATE_STRUCT date;
+		date.year = year;
+		date.month = month;
+		date.day = day;
+
+		return date;
+	}
+
+
+	SQL_TIMESTAMP_STRUCT InitTimestamp(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction, SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year)
+	{
+		SQL_TIMESTAMP_STRUCT timestamp;
+		timestamp.hour = hour;
+		timestamp.minute = minute;
+		timestamp.second = second;
+		timestamp.fraction = fraction;
+		timestamp.day = day;
+		timestamp.month = month;
+		timestamp.year = year;
+
+		return timestamp;
+	}
 }
 
 // Interfaces
