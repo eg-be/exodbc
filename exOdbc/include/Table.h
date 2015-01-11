@@ -68,7 +68,7 @@ namespace exodbc
 	* to query and modify the table.
 	* Depending on which constructor is used, a table will query the database
 	* about its column-definitions later automatically, or the column-definitions
-	* must be set manually using SetColDefs().
+	* must be set manually using SetColumn().
 	* During Open() the table will "bind" a buffer to every defined column.
 	* Columns bound to the table will be updated with the values of the current record
 	* this table points to. Calling methods like Update(), Delete() or Insert() will
@@ -162,7 +162,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
-		*			During Open() only those columns you have set using SetColDefs() will be bound.
+		*			During Open() only those columns you have set using SetColumn() will be bound.
 		* \detailed During Open() the database will be queried for a table matching the given values.
 		*			If any of the values is an empty string it is ignored when searching for the table
 		*			in the database.
@@ -179,14 +179,14 @@ namespace exodbc
 		* \param	openMode Define if the table shall be opened read-only or not
 		*
 		* \see		Open()
-		* \see		SetColDefs()
+		* \see		SetColumn()
 		*/
 		Table(Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", OpenMode openMode = READ_WRITE);
 
 
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
-		*			During Open() only those columns you have set using SetColDefs() will be bound.
+		*			During Open() only those columns you have set using SetColumn() will be bound.
 		* \detailed During Open the database will be queried for a table named tableName, ignoring
 		*			schema and catalog-name and table-type.
 		*			Note that when this constructor is used, the internal STableInfo object is not
@@ -204,7 +204,7 @@ namespace exodbc
 		* \param	openMode Define if the table shall be opened read-only or not
 		*
 		* \see		Open()
-		* \see		SetColDefs()
+		* \see		SetColumn()
 		*/
 		Table(Database* pDb, SQLSMALLINT numColumns, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
 
@@ -218,9 +218,9 @@ namespace exodbc
 		* \detailed If no STableInfo object has been passed during construction the database is first
 		*			queried for a table matching the parameters passed. If not exactly one such table is
 		*			found Open will fail.
-		*			If no columns have been defined using SetColDefs() the database is queried for all
+		*			If no columns have been defined using SetColumn() the database is queried for all
 		*			columns of this table. Afterwards the columns are bound to their buffers, allocated
-		*			automatically during Open. If columns have been defined manually using SetColDefs(),
+		*			automatically during Open. If columns have been defined manually using SetColumn(),
 		*			the buffers passed there are used to bind only those columns defined manually.
 		*
 		* \param	checkPrivileges If true, the database will be queried checking if the current user

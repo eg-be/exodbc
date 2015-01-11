@@ -402,31 +402,59 @@ namespace exodbc
 			break;
 		case SQL_C_CHAR:
 		case SQL_C_BINARY:
-			m_bufferPtr = new SQLCHAR[bufferSize];
+		{
+			SQLCHAR* pBuff = new SQLCHAR[bufferSize];
+			ZeroMemory(pBuff, bufferSize);
+			m_bufferPtr = pBuff;
 			break;
+		}
 		case SQL_C_WCHAR:
-			m_bufferPtr = new SQLWCHAR[bufferSize];
+		{
+			SQLWCHAR* pBuff = new SQLWCHAR[bufferSize];
+			ZeroMemory(pBuff, bufferSize);
+			m_bufferPtr = pBuff;
 			break;
+		}
 		case SQL_C_DOUBLE:
 			m_bufferPtr = new SQLDOUBLE(0.0);
 			break;
 		case SQL_C_TYPE_DATE:
-			m_bufferPtr = new SQL_DATE_STRUCT;
+		{
+			SQL_DATE_STRUCT* pBuff = new SQL_DATE_STRUCT;
+			ZeroMemory(pBuff, sizeof(SQL_DATE_STRUCT));
+			m_bufferPtr = pBuff;
 			break;
+		}
 		case SQL_C_TYPE_TIME:
-			m_bufferPtr = new SQL_TIME_STRUCT;
+		{
+			SQL_TIME_STRUCT* pBuff = new SQL_TIME_STRUCT;
+			ZeroMemory(pBuff, sizeof(SQL_TIME_STRUCT));
+			m_bufferPtr = pBuff;
 			break;
+		}
 		case SQL_C_TYPE_TIMESTAMP:
-			m_bufferPtr = new SQL_TIMESTAMP_STRUCT;
+		{
+			SQL_TIMESTAMP_STRUCT* pBuff = new SQL_TIMESTAMP_STRUCT;
+			ZeroMemory(pBuff, sizeof(SQL_TIMESTAMP_STRUCT));
+			m_bufferPtr = pBuff;
 			break;
+		}
 #if HAVE_MSODBCSQL_H
 		case SQL_C_SS_TIME2:
-			m_bufferPtr = new SQL_SS_TIME2_STRUCT;
+		{
+			SQL_SS_TIME2_STRUCT* pBuff = new SQL_SS_TIME2_STRUCT;
+			ZeroMemory(pBuff, sizeof(SQL_SS_TIME2_STRUCT));
+			m_bufferPtr = pBuff;
 			break;
+		}
 #endif
 		case SQL_C_NUMERIC:
-			m_bufferPtr = new SQL_NUMERIC_STRUCT;
+		{
+			SQL_NUMERIC_STRUCT* pBuff = new SQL_NUMERIC_STRUCT;
+			ZeroMemory(pBuff, sizeof(SQL_NUMERIC_STRUCT));
+			m_bufferPtr = pBuff;
 			break;
+		}
 		default:
 			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(bufferType) % bufferType).str());
 			failed = true;
@@ -689,6 +717,7 @@ namespace exodbc
 
 	void ColumnBuffer::SetPrimaryKey(bool isPrimaryKey /* = true */)
 	{
+		// Must be set before binding? 
 		exASSERT(m_boundParameters.size() == 0);
 
 		if (isPrimaryKey)
@@ -747,6 +776,24 @@ namespace exodbc
 			SQLDOUBLE* pColVal = GetDoublePtr();
 			*pColVal = boost::get<SQLDOUBLE>(var);
 		}
+		else if (SQL_C_CHAR == m_bufferType)
+		{
+			SQLCHAR* pColVal = GetCharPtr();
+			std::string s = boost::get<std::string>(var);
+			// Check that string fits into buffer (Note: We need +1 char for null-terminating)
+			exASSERT((SQLINTEGER) s.length() < m_bufferSize);
+			// Erase buffer:
+			ZeroMemory(pColVal, m_bufferSize);
+			// Copy into buffer
+			memcpy(pColVal, s.c_str(), m_bufferSize);
+			// Null-terminate
+			pColVal[m_bufferSize - 1] = 0;
+			m_cb = SQL_NTS;
+		}
+		else if (SQL_C_WCHAR == m_bufferType)
+		{
+			exASSERT(false);
+		}
 		else if (SQL_C_TYPE_DATE == m_bufferType)
 		{
 			SQL_DATE_STRUCT* pColVal = GetDatePtr();
@@ -781,7 +828,7 @@ namespace exodbc
 			exASSERT(false);
 		}
 
-		if (!unknownType)
+		if (!unknownType && !(SQL_C_CHAR == m_bufferType || SQL_C_WCHAR == m_bufferType))
 		{
 			// We are no longer null
 			m_cb = 0;
