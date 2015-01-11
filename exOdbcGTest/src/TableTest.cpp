@@ -2279,20 +2279,6 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
-		//// Select a valid record from the non-tmp table
-		//std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
-		//Table nnTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_WRITE);
-		//EXPECT_TRUE(nnTable.Open(false, true));
-		//SQL_NUMERIC_STRUCT numStr18_0, numStr18_10, numStr5_3;
-		//EXPECT_TRUE(nnTable.Select((boost::wformat(L"%s = 2") % idName).str()));
-		//EXPECT_TRUE(nnTable.SelectNext());
-		//EXPECT_TRUE(nnTable.GetColumnValue(1, numStr18_0));
-		//EXPECT_TRUE(nnTable.GetColumnValue(3, numStr5_3));
-		//EXPECT_TRUE(nnTable.Select((boost::wformat(L"%s = 5") % idName).str()));
-		//EXPECT_TRUE(nnTable.SelectNext());
-		//EXPECT_TRUE(nnTable.GetColumnValue(2, numStr18_10));
-		//EXPECT_TRUE(nnTable.SelectClose());
-
 		// Remove everything, ignoring if there was any data:
 		ASSERT_TRUE(nTable.Delete(sqlstmt, false));
 		ASSERT_TRUE(m_db.CommitTrans());
@@ -2369,6 +2355,51 @@ namespace exodbc
 		EXPECT_TRUE(pNumeric_18_0->IsNull());
 		EXPECT_TRUE(pNumeric_18_10->IsNull());
 		EXPECT_TRUE(pNumeric_5_3->IsNull());
+	}
+
+
+	TEST_P(TableTest, UpdateFloatTypes)
+	{
+		std::wstring floatTypesTableName = TestTables::GetTableName(L"floattypes_tmp", m_odbcInfo.m_namesCase);
+		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(fTable.Open(false, true));
+		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
+		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
+		ColumnBuffer* pFloat = fTable.GetColumnBuffer(2);
+
+		wstring idName = TestTables::GetColName(L"idfloattypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		ASSERT_TRUE(fTable.Delete(sqlstmt, false));
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Insert some values
+		*pId = (SQLINTEGER)101;
+		*pDouble = 3.14159265359;
+		*pFloat = -3.14159;
+		ASSERT_TRUE(fTable.Insert());
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// And update them using the key fields
+		*pDouble = -6.2343354;
+		*pFloat = 989.213;
+		EXPECT_TRUE(fTable.Update());
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Open another table and read the values from there
+		Table fTable2(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_ONLY);
+		EXPECT_TRUE(fTable2.Open(false, true));
+		ColumnBuffer* pId2 = fTable2.GetColumnBuffer(0);
+		ColumnBuffer* pDouble2 = fTable2.GetColumnBuffer(1);
+		ColumnBuffer* pFloat2 = fTable2.GetColumnBuffer(2);
+
+		EXPECT_TRUE(fTable2.Select());
+		EXPECT_TRUE(fTable2.SelectNext());
+
+		EXPECT_EQ(101, (SQLINTEGER)*pId2);
+		EXPECT_EQ((SQLDOUBLE)*pDouble, (SQLDOUBLE)*pDouble2);
+		EXPECT_EQ((SQLDOUBLE)*pFloat, (SQLDOUBLE)*pFloat2);
 	}
 
 
