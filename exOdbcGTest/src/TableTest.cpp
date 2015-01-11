@@ -1890,6 +1890,8 @@ namespace exodbc
 		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
 		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
 		ColumnBuffer* pChar = cTable.GetColumnBuffer(2);
+		ColumnBuffer* pVarchar_10 = cTable.GetColumnBuffer(3);
+		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
 
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
@@ -1902,10 +1904,24 @@ namespace exodbc
 		*pId = (SQLINTEGER)100;
 		*pVarchar = s;
 		*pChar = s;
+		pVarchar_10->SetNull();
+		pChar_10->SetNull();
 		EXPECT_TRUE(cTable.Insert());
 		EXPECT_TRUE(m_db.CommitTrans());
 
+		// Insert one value that uses all space
+		s = "abcde12345";
+		*pId = (SQLINTEGER)101;
+		pVarchar->SetNull();
+		pChar->SetNull();
+		*pVarchar_10 = s;
+		*pChar_10 = s;
+		EXPECT_TRUE(cTable.Insert());
+		EXPECT_TRUE(m_db.CommitTrans());
+
+
 		// Read them back from another table
+		s = "Hello World!";
 		Table t2(&m_db, charTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
 		t2.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		t2.SetCharTrimOption(Table::TRIM_RIGHT);
@@ -1916,6 +1932,18 @@ namespace exodbc
 		EXPECT_TRUE(t2.SelectNext());
 		EXPECT_TRUE(t2.GetColumnValue(1, varchar2));
 		EXPECT_TRUE(t2.GetColumnValue(2, char2));
+		EXPECT_TRUE(t2.IsColumnNull(3));
+		EXPECT_TRUE(t2.IsColumnNull(4));
+		EXPECT_EQ(s, varchar2);
+		EXPECT_EQ(s, char2);
+
+		s = "abcde12345";
+		EXPECT_TRUE(t2.Select((boost::wformat(L"%s = 101") % idName).str()));
+		EXPECT_TRUE(t2.SelectNext());
+		EXPECT_TRUE(t2.IsColumnNull(1));
+		EXPECT_TRUE(t2.IsColumnNull(2));
+		EXPECT_TRUE(t2.GetColumnValue(3, varchar2));
+		EXPECT_TRUE(t2.GetColumnValue(4, char2));
 		EXPECT_EQ(s, varchar2);
 		EXPECT_EQ(s, char2);
 	}
