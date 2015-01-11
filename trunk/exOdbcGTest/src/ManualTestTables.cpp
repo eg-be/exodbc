@@ -69,30 +69,39 @@ namespace exodbc
 	// CharTypesTable
 	// --------------
 	MCharTypesTable::MCharTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
-		: Table(pDb, 3, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
+		: Table(pDb, 5, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
 		m_char[0] = 0;
+		m_varchar_10[0] = 0;
+		m_char_10[0] = 0;
 
 		SetColumn(0, TestTables::GetColName(L"idchartypes", namesCase), &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes));
 		SetColumn(1, TestTables::GetColName(L"tvarchar", namesCase), m_varchar, SQL_C_CHAR, sizeof(m_varchar));
 		SetColumn(2, TestTables::GetColName(L"tchar", namesCase), m_char, SQL_C_CHAR, sizeof(m_char));
+		SetColumn(3, TestTables::GetColName(L"tvarchar_10", namesCase), m_varchar_10, SQL_C_CHAR, sizeof(m_varchar_10));
+		SetColumn(4, TestTables::GetColName(L"tchar_10", namesCase), m_char_10, SQL_C_CHAR, sizeof(m_char_10));
+
 	}
 
 
 	// WCharTypesTable
 	// --------------
 	MWCharTypesTable::MWCharTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
-		: Table(pDb, 3, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
+		: Table(pDb, 5, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
 		m_char[0] = 0;
+		m_varchar_10[0] = 0;
+		m_char_10[0] = 0;
 
 		SetColumn(0, TestTables::GetColName(L"idchartypes", namesCase), &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes));
 		SetColumn(1, TestTables::GetColName(L"tvarchar", namesCase), m_varchar, SQL_C_WCHAR, sizeof(m_varchar));
 		SetColumn(2, TestTables::GetColName(L"tchar", namesCase), m_char, SQL_C_WCHAR, sizeof(m_char));
+		SetColumn(3, TestTables::GetColName(L"tvarchar_10", namesCase), m_varchar_10, SQL_C_WCHAR, sizeof(m_varchar_10));
+		SetColumn(4, TestTables::GetColName(L"tchar_10", namesCase), m_char_10, SQL_C_WCHAR, sizeof(m_char_10));
 	}
 
 

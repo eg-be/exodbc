@@ -97,17 +97,17 @@ namespace exodbc
 		MCharTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
 
-		// Expect 4 entries
+		// Expect 6 entries
 		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes"));
 		int count = 0;
-		while(table.SelectNext() && count <= 5)
+		while(table.SelectNext() && count <= 7)
 		{
 			count++;
 		}
-		EXPECT_EQ(4, count);
+		EXPECT_EQ(6, count);
 
 		// Expect no entries
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 5"));
+		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 7"));
 		EXPECT_FALSE(table.SelectNext());
 
 		// Expect 2 entries
