@@ -997,16 +997,22 @@ namespace exodbc
 		EXPECT_TRUE(bTable.SelectNext());
 		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size, length));
 		EXPECT_EQ(0, memcmp(empty, pBlob, length));
+		EXPECT_EQ(16, size);
+		EXPECT_EQ(sizeof(empty), length);
 
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 2") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
 		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size, length));
 		EXPECT_EQ(0, memcmp(ff, pBlob, length));
+		EXPECT_EQ(16, size);
+		EXPECT_EQ(sizeof(ff), length);
 
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 3") % idName).str()));
 		EXPECT_TRUE(bTable.SelectNext());
 		EXPECT_TRUE(bTable.GetBuffer(1, pBlob, size, length));
 		EXPECT_EQ(0, memcmp(abc, pBlob, length));
+		EXPECT_EQ(16, size);
+		EXPECT_EQ(sizeof(abc), length);
 	}
 
 
