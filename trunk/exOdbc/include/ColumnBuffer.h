@@ -47,7 +47,7 @@ namespace exodbc
 
 	// When setting values, allow setting something that is not a pointer
 	typedef boost::variant<SQLSMALLINT, SQLINTEGER, SQLBIGINT,
-		SQLCHAR, SQLWCHAR,
+		std::string, std::wstring,
 		SQLDOUBLE,
 		SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT,
 		SQL_NUMERIC_STRUCT

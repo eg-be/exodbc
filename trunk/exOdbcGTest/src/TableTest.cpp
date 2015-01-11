@@ -1822,6 +1822,37 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, InsertCharTypes)
+	{
+		std::wstring charTypesTmpTableName = TestTables::GetTableName(L"chartypes_tmp", m_odbcInfo.m_namesCase);
+		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
+		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
+		EXPECT_TRUE(cTable.Open(false, true));
+
+		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
+		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
+		ColumnBuffer* pChar = cTable.GetColumnBuffer(2);
+
+		// Remove everything, ignoring if there was any data:
+		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Insert some values:
+		std::string s = "Hello World!";
+		*pId = (SQLINTEGER)100;
+		*pVarchar = s;
+		*pChar = s;
+
+	}
+
+
+	TEST_P(TableTest, DISABLED_InsertWCharTypes)
+	{
+
+	}
+
 	// Update rows
 	// -----------
 
