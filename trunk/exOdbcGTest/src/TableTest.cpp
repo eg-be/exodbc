@@ -2266,6 +2266,113 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, UpdateNumericTypes)
+	{
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(nTable.Open(false, true));
+		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
+		ColumnBuffer* pNumeric_18_0 = nTable.GetColumnBuffer(1);
+		ColumnBuffer* pNumeric_18_10 = nTable.GetColumnBuffer(2);
+		ColumnBuffer* pNumeric_5_3 = nTable.GetColumnBuffer(3);
+
+		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		//// Select a valid record from the non-tmp table
+		//std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
+		//Table nnTable(&m_db, numericTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		//EXPECT_TRUE(nnTable.Open(false, true));
+		//SQL_NUMERIC_STRUCT numStr18_0, numStr18_10, numStr5_3;
+		//EXPECT_TRUE(nnTable.Select((boost::wformat(L"%s = 2") % idName).str()));
+		//EXPECT_TRUE(nnTable.SelectNext());
+		//EXPECT_TRUE(nnTable.GetColumnValue(1, numStr18_0));
+		//EXPECT_TRUE(nnTable.GetColumnValue(3, numStr5_3));
+		//EXPECT_TRUE(nnTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		//EXPECT_TRUE(nnTable.SelectNext());
+		//EXPECT_TRUE(nnTable.GetColumnValue(2, numStr18_10));
+		//EXPECT_TRUE(nnTable.SelectClose());
+
+		// Remove everything, ignoring if there was any data:
+		ASSERT_TRUE(nTable.Delete(sqlstmt, false));
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Insert some boring 0 entries
+		SQL_NUMERIC_STRUCT num = InitNullNumeric();
+		*pId = (SQLINTEGER)100;
+		*pNumeric_18_0 = num;
+		*pNumeric_18_10 = num;
+		*pNumeric_5_3 = num;
+		ASSERT_TRUE(nTable.Insert());
+		*pId = (SQLINTEGER)101;
+		pNumeric_18_0->SetNull();
+		pNumeric_18_10->SetNull();
+		pNumeric_5_3->SetNull();
+		ASSERT_TRUE(nTable.Insert());
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Now update that with our well known entries
+		// Note: We MUST set the correct precision and scale, at least for ms!
+		SQL_NUMERIC_STRUCT num18_0;
+		SQL_NUMERIC_STRUCT num18_10;
+		SQL_NUMERIC_STRUCT num5_3;
+		ZeroMemory(&num18_0, sizeof(num18_0));
+		ZeroMemory(&num18_10, sizeof(num18_10));
+		ZeroMemory(&num5_3, sizeof(num5_3));
+		num18_0.sign = 1;
+		num18_0.scale = 0;
+		num18_0.precision = 18;
+		num18_0.val[0] = 78;
+		num18_0.val[1] = 243;
+		num18_0.val[2] = 48;
+		num18_0.val[3] = 166;
+		num18_0.val[4] = 75;
+		num18_0.val[5] = 155;
+		num18_0.val[6] = 182;
+		num18_0.val[7] = 1;
+
+		num18_10 = num18_0;
+		num18_10.scale = 10;
+
+		num5_3.sign = 1;
+		num5_3.scale = 3;
+		num5_3.precision = 5;
+		num5_3.val[0] = 57;
+		num5_3.val[1] = 48;
+
+		*pId = (SQLINTEGER)101;
+		*pNumeric_18_0 = num18_0;
+		*pNumeric_18_10 = num18_10;
+		*pNumeric_5_3 = num5_3;
+		EXPECT_TRUE(nTable.Update());
+
+		*pId = (SQLINTEGER)100;
+		pNumeric_18_0->SetNull();
+		pNumeric_18_10->SetNull();
+		pNumeric_5_3->SetNull();
+		EXPECT_TRUE(nTable.Update());
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// And read back the values
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 101") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		SQL_NUMERIC_STRUCT n18_0, n18_10, n5_3;
+		n18_0 = *pNumeric_18_0;
+		n18_10 = *pNumeric_18_10;
+		n5_3 = *pNumeric_5_3;
+		EXPECT_EQ(0, memcmp(&num18_0, &n18_0, sizeof(n18_0)));
+		EXPECT_EQ(0, memcmp(&num18_10, &n18_10, sizeof(n18_10)));
+		EXPECT_EQ(0, memcmp(&num5_3, &n5_3, sizeof(n5_3)));
+
+		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 100") % idName).str()));
+		EXPECT_TRUE(nTable.SelectNext());
+		EXPECT_TRUE(pNumeric_18_0->IsNull());
+		EXPECT_TRUE(pNumeric_18_10->IsNull());
+		EXPECT_TRUE(pNumeric_5_3->IsNull());
+	}
+
+
+
 // Interfaces
 // ----------
 
