@@ -618,7 +618,7 @@ namespace exodbc
 		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"", L"TABLE", tables));
 		EXPECT_EQ(1, tables.size());
 		// What about search-patterns? Note: Not use for table-type
-		// TODO: They just dont work with MySql 3.51 ?
+		// \todo: They just dont work with MySql 3.51 ?
 		EXPECT_TRUE(m_db.FindTables(tableName, L"%", L"%", L"", tables));
 		EXPECT_EQ(1, tables.size());
 		if(tables.size() > 0)
