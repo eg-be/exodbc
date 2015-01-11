@@ -607,7 +607,7 @@ namespace exodbc
 		EXPECT_TRUE(m_db.FindTables(tableName, schemaName, catalogName, L"", tables));
 		EXPECT_EQ(1, tables.size());
 		// In all cases, we should not find anything if we use a schema or a catalog that does not exist
-		// Note: When using MySQL-Odbc driver, if 'do not use INFORMATION_SCHEMA' is set, this will fail due to an access denied for database "wrongCatalog"
+		// \todo: Create Ticket (Info): Note: When using MySQL-Odbc driver, if 'do not use INFORMATION_SCHEMA' is set, this will fail due to an access denied for database "wrongCatalog"
 		EXPECT_TRUE(m_db.FindTables(tableName, L"WrongSchema", L"", L"", tables));
 		EXPECT_EQ(0, tables.size());
 		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"WrongCatalog", L"", tables));
