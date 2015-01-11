@@ -122,6 +122,7 @@ namespace exodbc
 
 		SQLINTEGER		m_idBlobTypes;
 		SQLCHAR			m_blob[16];
+		SQLCHAR			m_varblob_20[20];
 	};
 
 

@@ -126,12 +126,14 @@ namespace exodbc
 	// BlobTypesTable
 	// --------------
 	MBlobTypesTable::MBlobTypesTable(Database* pDb, TestTables::NameCase namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"BlobTypes" */)
-		: Table(pDb, 2, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
+		: Table(pDb, 3, TestTables::GetTableName(name, namesCase), L"", L"", L"", Table::READ_ONLY)
 	{
 		ZeroMemory(m_blob, sizeof(m_blob));
+		ZeroMemory(m_varblob_20, sizeof(m_varblob_20));
 
 		SetColumn(0, TestTables::GetColName(L"idblobtypes", namesCase),  &m_idBlobTypes, SQL_C_SLONG, sizeof(m_idBlobTypes));
 		SetColumn(1, TestTables::GetColName(L"tblob", namesCase), m_blob, SQL_C_BINARY, sizeof(m_blob));
+		SetColumn(2, TestTables::GetColName(L"tvarblob_20", namesCase), m_varblob_20, SQL_C_BINARY, sizeof(m_varblob_20));
 	}
 
 
