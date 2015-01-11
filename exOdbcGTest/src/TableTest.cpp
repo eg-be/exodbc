@@ -2099,28 +2099,100 @@ namespace exodbc
 	// Update rows
 	// -----------
 
-	TEST_P(TableTest, DISABLED_UpdateIntTypes)
+	TEST_P(TableTest, UpdateIntTypes)
 	{
-		// Clear tmp-table
-		// hm.. we need to do that first.. if not we have to type sql-syntax over and over..
-		// \todo: We need to test to insert NULL values, that is not handled at all so far.
-
 		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
 		ASSERT_TRUE(iTable.Open(false, true));
-
-		// Set some silly values to update, but dont touch the id
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
 		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
 		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
 		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
-		*pId = (SQLINTEGER)1;
-		*pSmallInt = (SQLSMALLINT)100;
-		*pInt = (SQLINTEGER)101;
-		*pBigInt = (SQLBIGINT)102;
 
+		wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		ASSERT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Insert some values
+		for (int i = 1; i < 10; i++)
+		{
+			*pId = (SQLINTEGER)i;
+			*pSmallInt = (SQLSMALLINT)i;
+			*pInt = (SQLINTEGER)i;
+			*pBigInt = (SQLBIGINT)i;
+			ASSERT_TRUE(iTable.Insert());
+		}
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Update single rows by using key-values
+		*pId = (SQLINTEGER)3;
+		*pSmallInt = (SQLSMALLINT) 101;
+		*pInt = (SQLINTEGER) 102;
+		*pBigInt = (SQLBIGINT) 103;
+		EXPECT_TRUE(iTable.Update());
+		
+		*pId = (SQLINTEGER)5;
+		*pSmallInt = (SQLSMALLINT)1001;
+		*pInt = (SQLINTEGER)1002;
+		*pBigInt = (SQLBIGINT)1003;
+		EXPECT_TRUE(iTable.Update());
+
+		// And set some values to null
+		*pId = (SQLINTEGER)7;
+		pSmallInt->SetNull();
+		*pInt = (SQLINTEGER)99;
+		*pBigInt = (SQLBIGINT)99;
+		EXPECT_TRUE(iTable.Update());
+		*pId = (SQLINTEGER)8;
+		*pSmallInt = (SQLSMALLINT)99;
+		pInt->SetNull();
+		*pBigInt = (SQLBIGINT)99;
+		EXPECT_TRUE(iTable.Update());
+		*pId = (SQLINTEGER)9;
+		*pSmallInt = (SQLSMALLINT) 99;
+		*pInt = (SQLINTEGER)99;
+		pBigInt->SetNull();
 		EXPECT_TRUE(iTable.Update());
 		EXPECT_TRUE(m_db.CommitTrans());
+
+		// Read back the just updated values
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 3") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(3, (SQLINTEGER)*pId);
+		EXPECT_EQ(101, (SQLSMALLINT)*pSmallInt);
+		EXPECT_EQ(102, (SQLINTEGER)*pInt);
+		EXPECT_EQ(103, (SQLBIGINT)*pBigInt);
+
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 5") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(5, (SQLINTEGER)*pId);
+		EXPECT_EQ(1001, (SQLSMALLINT)*pSmallInt);
+		EXPECT_EQ(1002, (SQLINTEGER)*pInt);
+		EXPECT_EQ(1003, (SQLBIGINT)*pBigInt);
+
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 7") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(7, (SQLINTEGER)*pId);
+		EXPECT_TRUE(pSmallInt->IsNull());
+		EXPECT_EQ(99, (SQLINTEGER)*pInt);
+		EXPECT_EQ(99, (SQLBIGINT)*pBigInt);
+
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 8") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(8, (SQLINTEGER)*pId);
+		EXPECT_EQ(99, (SQLSMALLINT)*pSmallInt);
+		EXPECT_TRUE(pInt->IsNull());
+		EXPECT_EQ(99, (SQLBIGINT)*pBigInt);
+
+		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 9") % idName).str()));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(9, (SQLINTEGER)*pId);
+		EXPECT_EQ(99, (SQLSMALLINT)*pSmallInt);
+		EXPECT_EQ(99, (SQLINTEGER)*pInt);
+		EXPECT_TRUE(pBigInt->IsNull());
 	}
 
 
