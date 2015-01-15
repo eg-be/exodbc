@@ -69,12 +69,12 @@ namespace exodbc
 	* \brief Provides the buffer to transfer data from a column of a record.
 	*
 	* A ColumnBuffer can allocate a corresponding buffer-type automatically
-	* by reading the SQL-type info from the passed SColumnInfo, or by using a
+	* by reading the SQL-type info from the passed SColumnInfo, or use a
 	* buffer provided during construction. In that case you must also pass the
 	* ODBC C-Type of the buffer and the query name of the corresponding column.
 	*
-	* Last there is an option to try to let the ODBC-driver to convert everything
-	* to a (w)string.
+	* There is an option to try to let the ODBC-driver to convert everything
+	* to a (w)string, see AutoBindingMode.
 	*
 	* If the buffer-information is read from the passed SColumnInfo, the ColumnBuffer will
 	* allocate a buffer type depending on the value of the SqlDataType. The following is
