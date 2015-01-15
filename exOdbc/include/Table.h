@@ -746,7 +746,7 @@ namespace exodbc
 		const std::wstring  m_initialTableName;		///< Table name set on construction
 		const std::wstring	m_initialSchemaName;	///< Schema name set on construction
 		const std::wstring	m_initialCatalogName;	///< Catalog name set on construction
-		const std::wstring	m_initialTypeName;		////< Type name set on construction
+		const std::wstring	m_initialTypeName;		///< Type name set on construction
 
 #ifdef EXODBCDEBUG
 	public:
