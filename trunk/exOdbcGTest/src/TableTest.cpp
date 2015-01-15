@@ -2615,7 +2615,6 @@ namespace exodbc
 		EXPECT_EQ(0, memcmp(pBlobBuff, empty, sizeof(empty)));
 		EXPECT_EQ(16, size);
 		EXPECT_EQ(16, length);
-
 	}
 
 
