@@ -244,9 +244,20 @@ namespace exodbc
 		bool IsNull() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NULL_DATA; };
 
 
+		/*!
+		* \brief	Sets the current value to NULL.
+		* \detailed	Fails if not NULLable.
+		* \see IsNullable()
+		* \return	True if current value has been set to Null.
+		*/
 		bool SetNull();
 
 
+		/*!
+		* \brief	Tests if ColumnFlags::CF_NULLABLE is set.
+		* \see SetNull()
+		* \return	True if current value can be set to Null.
+		*/
 		bool IsNullable() const { return IsColumnFlagSet(CF_NULLABLE); };
 
 		
