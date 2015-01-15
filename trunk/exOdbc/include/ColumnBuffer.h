@@ -570,17 +570,6 @@ namespace exodbc
 		SQLSMALLINT GetDecimalDigitals() const {	return m_decimalDigits;	};
 
 
-		///*!
-		//* \brief	Return the number of decimal digits if known or -1 otherwise.
-		//* \detailed If a SColumnInfo is available returns the value SColumnInfo::m_decimalDigits
-		//*			if the value is not set to NULL. Else the value of m_decimalDigits is returned,
-		//*			which defaults to -1, but can be set when construction the ColumnBuffer by
-		//*			manually providing a buffer.
-		//* \return	Number of decimal digits if known or -1.
-		//*/
-		//SQLSMALLINT GetPrecision() const;
-
-
 		struct BoundParameter
 		{
 			BoundParameter() : m_hStmt(SQL_NULL_HSTMT), m_parameterNumber(0) {};
