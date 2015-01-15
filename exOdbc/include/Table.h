@@ -391,7 +391,7 @@ namespace exodbc
 		bool		IsSelectOpen() const { return m_selectQueryOpen; };
 
 
-		/*
+		/*!
 		* \brief	Inserts the current values into the database as a new row.
 		* \detailed	The values in the ColumnBuffer currently bound will be inserted
 		*			into the database.
@@ -405,7 +405,7 @@ namespace exodbc
 		bool		Insert();
 
 
-		/*
+		/*!
 		* \brief	Deletes the row identified by the values of the bound primary key columns.
 		* \detailed	A prepared DELETE statement is used to delete the row that matches all
 		*			primary keys of this Table. The key values are read from the ColumnBuffers bound
@@ -424,7 +424,7 @@ namespace exodbc
 		bool		Delete(bool failOnNoData = true);
 
 
-		/*
+		/*!
 		* \brief	Delete the row(s) identified by the passed where statement.
 		* \detailed	A DELETE statement for this Table is created, using the passed
 		*			WHERE clause.
@@ -442,7 +442,7 @@ namespace exodbc
 		bool		Delete(const std::wstring& where, bool failOnNoData = true);
 
 
-		/*
+		/*!
 		* \brief	Updates the row identified by the values of the bound primary key columns with
 		*			the values in bound ColumnBuffers, if the ColumnBuffer has the ColumnFlags::CF_UPDATE
 		*			set.
@@ -463,7 +463,7 @@ namespace exodbc
 		bool		Update();
 
 
-		/*
+		/*!
 		* \brief	Updates the row identified by the passed where statement with
 		*			the values in bound ColumnBuffers, if the ColumnBuffer has the ColumnFlags::CF_UPDATE
 		*			set.
