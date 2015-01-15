@@ -418,6 +418,8 @@ namespace exodbc
 		*			Fails if no primary keys are set on the table.
 		*			Fails if the table has not been opened using READ_WRITE.
 		*			This will not commit the transaction.
+		* \param	failOnNoData If set to true the function will return false if the result of
+		*			the DELETE is SQL_NO_DATA.
 		* \see		Database::CommitTrans()
 		* \return	True on success.
 		*/
@@ -431,8 +433,11 @@ namespace exodbc
 		*			This uses an independent statement and will not modify the values in
 		*			the ColumnBuffers or any ongoing Select() call.
 		*			Fails if the table has not been opened using READ_WRITE.
+		*			Fails if where is empty.
 		*			This will not commit the transaction.
 		* \param	where WHERE clause to be used. Do not include 'WHERE', the Table will add this.
+		* \param	failOnNoData If set to true the function will return false if the result of
+		*			the DELETE is SQL_NO_DATA.
 		* \see		Database::CommitTrans()
 		* \return	True on success.
 		*/
@@ -458,6 +463,27 @@ namespace exodbc
 		* \return	True on success.
 		*/
 		bool		Update();
+
+
+		/*
+		* \brief	Updates the row identified by the passed where statement with
+		*			the values in bound ColumnBuffers, if the ColumnBuffer has the ColumnFlags::CF_UPDATE
+		*			set.
+		* \detailed	A prepared UPDATE statement is used to update the row(s) that match the passed where statement.
+		*			A prepared statement is created to update the columns bound to ColumnBuffers that have the 
+		*			flag ColumnFlags::CF_UPDATE set with the values stored in the ColumnBuffer.
+		*			The prepared statement can be executed multiple times, it is not destroyed unless the
+		*			passed where-statement changes.
+		*			Note that this will also update the bound primary-key columns (those that have the flag
+		*			ColumnFlags::CF_PRIMARY_KEY set), if the column has the flag ColumnFlags::CF_UPDATE set.
+		*			Fails if the table has not been opened using READ_WRITE.
+		*			Fails if where is empty.
+		*			This will not commit the transaction.
+		* \param	where WHERE clause to be used. Do not include 'WHERE', the Table will add this.
+		* \see		Database::CommitTrans()
+		* \return	True on success.
+		*/
+		bool		Update(const std::wstring& where);
 
 
 		/*!
@@ -708,6 +734,7 @@ namespace exodbc
 		unsigned int		m_charTrimFlags;		///< Bitmask for the CharTrimOption Flags
 		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
 		TablePrimaryKeys	m_tablePrimaryKeys;		///< Table Primary Keys read during Open if table was opened READ_WRITE.
+		std::wstring		m_lastWhereStmtUsed;	///< The where clause used last in Update(const std::wstring& where)
 
 		// Column information
 		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
