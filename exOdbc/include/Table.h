@@ -187,9 +187,7 @@ namespace exodbc
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
 		*			During Open() only those columns you have set using SetColumn() will be bound.
-		* \detailed During Open the database will be queried for a table named tableName, ignoring
-		*			schema and catalog-name and table-type.
-		*			Note that when this constructor is used, the internal STableInfo object is not
+		* \detailed Note that when this constructor is used, the internal STableInfo object is not
 		*			queried from the database, but the passed tableInfo is used for all later operations.
 		*			This is handy if you've located the detailed table-information already from the Database
 		*			using its Database::FindTables() function and want to avoid that is operation is
