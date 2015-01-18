@@ -222,6 +222,73 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, SelectHasMASEnabled)
+	{
+		// Test what happens if we Select from a table 2 records, then select the first record,
+		// then delete the second record
+		// and then try to select the second record using the still open select.
+
+		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(iTable.Open(false, true));
+		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
+		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
+		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
+		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
+
+		wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		ASSERT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Set some silly values to insert
+		*pId = (SQLINTEGER)101;
+		*pSmallInt = (SQLSMALLINT)1;
+		*pInt = (SQLINTEGER)10;
+		*pBigInt = (SQLBIGINT)100;
+		ASSERT_TRUE(iTable.Insert());
+		*pId = (SQLINTEGER)102;
+		*pSmallInt = (SQLSMALLINT)2;
+		*pInt = (SQLINTEGER)20;
+		*pBigInt = (SQLBIGINT)200;
+		ASSERT_TRUE(iTable.Insert());
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Now select those two records
+		sqlstmt = (boost::wformat(L"%s = 101 OR %s = 102 ORDER BY %s") % idName %idName %idName).str();
+		ASSERT_TRUE(iTable.Select(sqlstmt));
+		ASSERT_TRUE(iTable.SelectNext());
+		ASSERT_EQ(101, (SQLINTEGER)*pId);
+		ASSERT_EQ(1, (SQLSMALLINT)*pSmallInt);
+		ASSERT_EQ(10, (SQLINTEGER)*pInt);
+		ASSERT_EQ(100, (SQLBIGINT)*pBigInt);
+		//ASSERT_TRUE(iTable.SelectClose());
+
+		// Now delete the second record: We cannot do that if we do not have support for What are Multiple Active Statements (MAS)?
+		// MS SQL Server does not have this enabled by default
+		// \bug See Ticket # 63
+		sqlstmt = (boost::wformat(L"%s = 102") % idName).str();
+		ASSERT_TRUE(iTable.Delete(sqlstmt));
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// If MAS is enabled, we should be able to still see the result of the just deleted record, even if the result was committed inbetween
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(102, (SQLINTEGER)*pId);
+		EXPECT_EQ(2, (SQLSMALLINT)*pSmallInt);
+		EXPECT_EQ(20, (SQLINTEGER)*pInt);
+		EXPECT_EQ(200, (SQLBIGINT)*pBigInt);
+
+		// But if we try to select it again now, we will find only one result
+		EXPECT_TRUE(iTable.SelectClose());
+		sqlstmt = (boost::wformat(L"%s = 101 OR %s = 102 ORDER BY %s") % idName %idName %idName).str();
+		EXPECT_TRUE(iTable.Select(sqlstmt));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_FALSE(iTable.SelectNext());
+	}
+
+
 	// Count
 	// -----
 	TEST_P(TableTest, Count)
