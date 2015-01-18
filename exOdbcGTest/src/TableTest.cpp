@@ -2618,6 +2618,61 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, UpdateWhere)
+	{
+		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
+		ASSERT_TRUE(iTable.Open(false, true));
+		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
+		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
+		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
+		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
+
+		wstring idName = TestTables::GetColName(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		ASSERT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Insert some values
+		for (int i = 1; i < 10; i++)
+		{
+			*pId = (SQLINTEGER)i;
+			*pSmallInt = (SQLSMALLINT)i;
+			*pInt = (SQLINTEGER)i;
+			*pBigInt = (SQLBIGINT)i;
+			ASSERT_TRUE(iTable.Insert());
+		}
+		ASSERT_TRUE(m_db.CommitTrans());
+
+		// Now update using our WHERE statement. This allows us to update also key rows. Shift all values *(1000)
+		int shift = 1000;
+		for (int i = 1; i < 10; i++)
+		{
+			*pId = (SQLINTEGER) (i * shift);
+			*pSmallInt = (SQLSMALLINT)(i * shift);
+			*pInt = (SQLINTEGER)(i * shift);
+			*pBigInt = (SQLBIGINT)(i * shift);
+			sqlstmt = (boost::wformat(L"%s = %d") % idName %i).str();
+			EXPECT_TRUE(iTable.Update(sqlstmt));
+		}
+		EXPECT_TRUE(m_db.CommitTrans());
+
+		// And select them and compare
+		sqlstmt = (boost::wformat(L"%s > 0 ORDER BY %s") % idName %idName).str();
+		EXPECT_TRUE(iTable.Select(sqlstmt));
+		for (int i = 1; i < 10; i++)
+		{
+			EXPECT_TRUE(iTable.SelectNext());
+			EXPECT_EQ((i * shift), (SQLINTEGER)*pId);
+			EXPECT_EQ((i * shift), (SQLSMALLINT)*pSmallInt);
+			EXPECT_EQ((i * shift), (SQLINTEGER)*pInt);
+			EXPECT_EQ((i * shift), (SQLBIGINT)*pBigInt);
+		}
+		EXPECT_FALSE(iTable.SelectNext());
+	}
+
 
 // Interfaces
 // ----------

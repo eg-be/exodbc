@@ -778,6 +778,75 @@ namespace exodbc
 	}
 
 
+	bool Table::Update(const std::wstring& where)
+	{
+		exASSERT(IsOpen());
+		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(m_hStmtUpdateWhere != SQL_NULL_HSTMT);
+		exASSERT(!where.empty());
+		// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set
+		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetSqlName()).str();
+		// .. first the values to update
+		int paramNr = 1;
+		bool ok = true;
+		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end() && ok; it++)
+		{
+			ColumnBuffer* pBuffer = it->second;
+			if (pBuffer->IsColumnFlagSet(CF_UPDATE))
+			{
+				// Bind this parameter as update parameter and include it in the statement
+				if (!pBuffer->BindParameter(m_hStmtUpdateWhere, paramNr))
+				{
+					ok = false;
+				}
+				updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
+				paramNr++;
+			}
+		}
+		boost::erase_last(updateStmt, L",");
+		exASSERT(paramNr > 1);
+		updateStmt += (L"WHERE " + where);
+
+		// Prepare to update
+		SQLRETURN ret = SQLPrepare(m_hStmtUpdateWhere, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			ok = false;
+			LOG_ERROR_STMT(m_hStmtUpdateWhere, ret, SQLPrepare);
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_hStmtUpdateWhere, ret, SQLPrepare);
+		}
+
+		// And Execute if everything ok
+		if (ok)
+		{
+			ret = SQLExecute(m_hStmtUpdateWhere);
+			if (!SQL_SUCCEEDED(ret))
+			{
+				ok = false;
+				LOG_ERROR_STMT(m_hStmtUpdateWhere, ret, SQLExecute);
+			}
+			if (SQL_SUCCESS_WITH_INFO == ret)
+			{
+				LOG_WARNING_STMT(m_hStmtUpdateWhere, ret, SQLExecute);
+			}
+
+		}
+
+		// Always unbind all parameters at the end
+		ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			LOG_ERROR_STMT(m_hStmtUpdateWhere, ret, SQLBindParameter);
+			ok = false;
+		}
+
+		return ok;
+	}
+
+
 	bool Table::SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr, SQLINTEGER& value)
 	{
 		exASSERT(IsSelectOpen());
