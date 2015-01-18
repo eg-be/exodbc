@@ -466,7 +466,7 @@ namespace exodbc
 			typeName = L"";
 			break;
 		}
-		// TODO: With MySql we get no results here?
+		// \todo: This is simply not working with MySQL, see Ticket #76
 		EXPECT_TRUE(m_db.ReadTablePrivileges(tableName, schemaName, catalogName, typeName, privs));
 		bool canSelect = false;
 		bool canInsert = false;
