@@ -144,13 +144,13 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DISABLED_OpenAutoCheckPrivs)
+	TEST_P(TableTest, OpenAutoCheckPrivs)
 	{
 		// Test to open read-only:
 		// MySQL fails totally with the privileges stuff
 		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
 		exodbc::Table rTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
-		EXPECT_TRUE(rTable.Open(true, true));
+		ASSERT_TRUE(rTable.Open(true, true));
 
 		// Test a table that is read only: we can only open it read-only:
 		std::wstring so1Name = TestTables::GetTableName(L"selectonly", m_odbcInfo.m_namesCase);
