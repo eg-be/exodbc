@@ -470,8 +470,6 @@ namespace exodbc
 		* \detailed	A prepared UPDATE statement is used to update the row(s) that match the passed where statement.
 		*			A prepared statement is created to update the columns bound to ColumnBuffers that have the 
 		*			flag ColumnFlags::CF_UPDATE set with the values stored in the ColumnBuffer.
-		*			The prepared statement can be executed multiple times, it is not destroyed unless the
-		*			passed where-statement changes.
 		*			Note that this will also update the bound primary-key columns (those that have the flag
 		*			ColumnFlags::CF_PRIMARY_KEY set), if the column has the flag ColumnFlags::CF_UPDATE set.
 		*			Fails if the table has not been opened using READ_WRITE.
@@ -732,7 +730,6 @@ namespace exodbc
 		unsigned int		m_charTrimFlags;		///< Bitmask for the CharTrimOption Flags
 		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
 		TablePrimaryKeys	m_tablePrimaryKeys;		///< Table Primary Keys read during Open if table was opened READ_WRITE.
-		std::wstring		m_lastWhereStmtUsed;	///< The where clause used last in Update(const std::wstring& where)
 
 		// Column information
 		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
