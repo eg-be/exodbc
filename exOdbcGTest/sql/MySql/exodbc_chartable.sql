@@ -1,8 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `wxodbc3` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `wxodbc3`;
+CREATE DATABASE  IF NOT EXISTS `exodbc` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `exodbc`;
 -- MySQL dump 10.13  Distrib 5.6.13, for Win32 (x86)
 --
--- Host: localhost    Database: wxodbc3
+-- Host: localhost    Database: exodbc
 -- ------------------------------------------------------
 -- Server version	5.6.16-log
 
@@ -18,28 +18,29 @@ USE `wxodbc3`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `numerictypes`
+-- Table structure for table `chartable`
 --
 
-DROP TABLE IF EXISTS `numerictypes`;
+DROP TABLE IF EXISTS `chartable`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `numerictypes` (
-  `idnumerictypes` int(11) NOT NULL,
-  `decimal_18_0` decimal(18,0) DEFAULT NULL,
-  `decimal_18_10` decimal(18,10) DEFAULT NULL,
-  PRIMARY KEY (`idnumerictypes`)
+CREATE TABLE `chartable` (
+  `idchartable` int(11) NOT NULL,
+  `col2` varchar(128) DEFAULT NULL,
+  `col3` varchar(128) DEFAULT NULL,
+  `col4` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`idchartable`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `numerictypes`
+-- Dumping data for table `chartable`
 --
 
-LOCK TABLES `numerictypes` WRITE;
-/*!40000 ALTER TABLE `numerictypes` DISABLE KEYS */;
-INSERT INTO `numerictypes` VALUES (1,0,NULL),(2,123456789012345678,NULL),(3,-123456789012345678,NULL),(4,NULL,0.0000000000),(5,NULL,12345678.9012345678),(6,NULL,-12345678.9012345678);
-/*!40000 ALTER TABLE `numerictypes` ENABLE KEYS */;
+LOCK TABLES `chartable` WRITE;
+/*!40000 ALTER TABLE `chartable` DISABLE KEYS */;
+INSERT INTO `chartable` VALUES (1,'r1_c2','r1_c3','r1_c4');
+/*!40000 ALTER TABLE `chartable` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -51,4 +52,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-07-13 17:36:37
+-- Dump completed on 2015-01-18 16:18:04

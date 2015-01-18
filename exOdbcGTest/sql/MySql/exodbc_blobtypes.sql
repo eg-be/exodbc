@@ -1,8 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `wxodbc3` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `wxodbc3`;
+CREATE DATABASE  IF NOT EXISTS `exodbc` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `exodbc`;
 -- MySQL dump 10.13  Distrib 5.6.13, for Win32 (x86)
 --
--- Host: localhost    Database: wxodbc3
+-- Host: localhost    Database: exodbc
 -- ------------------------------------------------------
 -- Server version	5.6.16-log
 
@@ -26,7 +26,8 @@ DROP TABLE IF EXISTS `blobtypes`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `blobtypes` (
   `idblobtypes` int(11) NOT NULL,
-  `blob` blob,
+  `tblob` binary(16) DEFAULT NULL,
+  `tvarblob_20` varbinary(20) DEFAULT NULL,
   PRIMARY KEY (`idblobtypes`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -37,7 +38,7 @@ CREATE TABLE `blobtypes` (
 
 LOCK TABLES `blobtypes` WRITE;
 /*!40000 ALTER TABLE `blobtypes` DISABLE KEYS */;
-INSERT INTO `blobtypes` VALUES (1,'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0'),(2,'€€€€€€€€€€€€€€€€'),(3,'ЂЌпр4VxРЂЌп#Eg'),(4,NULL);
+INSERT INTO `blobtypes` VALUES (1,'\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',NULL),(2,'€€€€€€€€€€€€€€€€',NULL),(3,'ЂЌпр4VxРЂЌп#Eg',NULL),(4,NULL,'ЂЌпр4VxРЂЌп#Eg'),(5,NULL,'ЂЌпр4VxРЂЌп#Eg€€€€');
 /*!40000 ALTER TABLE `blobtypes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -50,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-07-13 17:36:37
+-- Dump completed on 2015-01-18 16:18:04

@@ -1,8 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `wxodbc3` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `wxodbc3`;
+CREATE DATABASE  IF NOT EXISTS `exodbc` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `exodbc`;
 -- MySQL dump 10.13  Distrib 5.6.13, for Win32 (x86)
 --
--- Host: localhost    Database: wxodbc3
+-- Host: localhost    Database: exodbc
 -- ------------------------------------------------------
 -- Server version	5.6.16-log
 
@@ -18,28 +18,30 @@ USE `wxodbc3`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `floattypes`
+-- Table structure for table `integertypes`
 --
 
-DROP TABLE IF EXISTS `floattypes`;
+DROP TABLE IF EXISTS `integertypes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `floattypes` (
-  `idfloattypes` int(11) NOT NULL,
-  `double` double DEFAULT NULL,
-  `float` float DEFAULT NULL,
-  PRIMARY KEY (`idfloattypes`)
+CREATE TABLE `integertypes` (
+  `idintegertypes` int(11) NOT NULL,
+  `tsmallint` smallint(6) DEFAULT NULL,
+  `tint` int(11) DEFAULT NULL,
+  `tbigint` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`idintegertypes`),
+  UNIQUE KEY `idQueryTypes_UNIQUE` (`idintegertypes`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `floattypes`
+-- Dumping data for table `integertypes`
 --
 
-LOCK TABLES `floattypes` WRITE;
-/*!40000 ALTER TABLE `floattypes` DISABLE KEYS */;
-INSERT INTO `floattypes` VALUES (1,NULL,0),(2,NULL,3.141),(3,NULL,-3.141),(4,0,NULL),(5,3.141592,NULL),(6,-3.141592,NULL);
-/*!40000 ALTER TABLE `floattypes` ENABLE KEYS */;
+LOCK TABLES `integertypes` WRITE;
+/*!40000 ALTER TABLE `integertypes` DISABLE KEYS */;
+INSERT INTO `integertypes` VALUES (1,-32768,NULL,NULL),(2,32767,NULL,NULL),(3,NULL,-2147483648,NULL),(4,NULL,2147483647,NULL),(5,NULL,NULL,-9223372036854775808),(6,NULL,NULL,9223372036854775807);
+/*!40000 ALTER TABLE `integertypes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -51,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-07-13 17:36:37
+-- Dump completed on 2015-01-18 16:18:04

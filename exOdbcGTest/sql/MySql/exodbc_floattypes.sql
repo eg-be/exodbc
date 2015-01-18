@@ -1,8 +1,8 @@
-CREATE DATABASE  IF NOT EXISTS `wxodbc3` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `wxodbc3`;
+CREATE DATABASE  IF NOT EXISTS `exodbc` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `exodbc`;
 -- MySQL dump 10.13  Distrib 5.6.13, for Win32 (x86)
 --
--- Host: localhost    Database: wxodbc3
+-- Host: localhost    Database: exodbc
 -- ------------------------------------------------------
 -- Server version	5.6.16-log
 
@@ -18,28 +18,28 @@ USE `wxodbc3`;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `chartypes`
+-- Table structure for table `floattypes`
 --
 
-DROP TABLE IF EXISTS `chartypes`;
+DROP TABLE IF EXISTS `floattypes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `chartypes` (
-  `idchartypes` int(11) NOT NULL,
-  `varchar` varchar(128) DEFAULT NULL,
-  `char` char(128) DEFAULT NULL,
-  PRIMARY KEY (`idchartypes`)
+CREATE TABLE `floattypes` (
+  `idfloattypes` int(11) NOT NULL,
+  `tdouble` double DEFAULT NULL,
+  `tfloat` float DEFAULT NULL,
+  PRIMARY KEY (`idfloattypes`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `chartypes`
+-- Dumping data for table `floattypes`
 --
 
-LOCK TABLES `chartypes` WRITE;
-/*!40000 ALTER TABLE `chartypes` DISABLE KEYS */;
-INSERT INTO `chartypes` VALUES (1,' !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~',NULL),(2,NULL,' !\"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~'),(3,'äöüàéè',NULL),(4,NULL,'äöüàéè');
-/*!40000 ALTER TABLE `chartypes` ENABLE KEYS */;
+LOCK TABLES `floattypes` WRITE;
+/*!40000 ALTER TABLE `floattypes` DISABLE KEYS */;
+INSERT INTO `floattypes` VALUES (1,NULL,0),(2,NULL,3.141),(3,NULL,-3.141),(4,0,NULL),(5,3.141592,NULL),(6,-3.141592,NULL);
+/*!40000 ALTER TABLE `floattypes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -51,4 +51,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-07-13 17:36:37
+-- Dump completed on 2015-01-18 16:18:05
