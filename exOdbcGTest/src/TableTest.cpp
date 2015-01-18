@@ -254,7 +254,7 @@ namespace exodbc
 
 	// GetValues
 	// ---------
-	TEST_P(TableTest, GetAutoIntValues)
+	TEST_P(TableTest, SelectAutoIntValues)
 	{
 		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
@@ -354,7 +354,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetManualIntValues)
+	TEST_P(TableTest, SelectManualIntValues)
 	{
 		MIntTypesTable iTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(iTable.Open(false, true));
@@ -387,7 +387,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetWCharIntValues)
+	TEST_P(TableTest, SelectWCharIntValues)
 	{
 		// And some tables with auto-columns
 		std::wstring intTypesTableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
@@ -429,7 +429,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetAutoFloatValues)
+	TEST_P(TableTest, SelectAutoFloatValues)
 	{
 		wstring floatTypesTableName = TestTables::GetTableName(L"floattypes", m_odbcInfo.m_namesCase);
 		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -488,7 +488,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetManualFloatValues)
+	TEST_P(TableTest, SelectManualFloatValues)
 	{
 		MFloatTypesTable fTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(fTable.Open(false, true));
@@ -520,7 +520,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetWCharFloatValues)
+	TEST_P(TableTest, SelectWCharFloatValues)
 	{
 		wstring floatTypesTableName = TestTables::GetTableName(L"floattypes", m_odbcInfo.m_namesCase);
 		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -559,7 +559,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetAutoWCharValues)
+	TEST_P(TableTest, SelectAutoWCharValues)
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -618,7 +618,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetManualWCharValues)
+	TEST_P(TableTest, SelectManualWCharValues)
 	{
 		MWCharTypesTable wTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(wTable.Open(false, true));
@@ -674,7 +674,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetAutoCharValues)
+	TEST_P(TableTest, SelectAutoCharValues)
 	{
 		std::wstring charTypesTableName = TestTables::GetTableName(L"chartypes", m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -732,7 +732,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetManualCharValues)
+	TEST_P(TableTest, SelectManualCharValues)
 	{
 		MCharTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(cTable.Open(false, true));
@@ -787,7 +787,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetAutoDateValues)
+	TEST_P(TableTest, SelectAutoDateValues)
 	{
 		// Note how to read fractions:
 		// [b]   The value of the fraction field is the number of billionths of a second and ranges from 0 through 999,999,999 (1 less than 1 billion). 
@@ -896,7 +896,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetManualDateValues)
+	TEST_P(TableTest, SelectManualDateValues)
 	{
 		MDateTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(cTable.Open(false, true));
@@ -928,7 +928,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetWCharDateValues)
+	TEST_P(TableTest, SelectWCharDateValues)
 	{
 		std::wstring dateTypesTableName = TestTables::GetTableName(L"datetypes", m_odbcInfo.m_namesCase);
 		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -964,7 +964,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetAutoBlobValues)
+	TEST_P(TableTest, SelectAutoBlobValues)
 	{
 		std::wstring blobTypesTableName = TestTables::GetTableName(L"blobtypes", m_odbcInfo.m_namesCase);
 		Table bTable(&m_db, blobTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -1044,7 +1044,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetManualBlobValues)
+	TEST_P(TableTest, SelectManualBlobValues)
 	{
 		MBlobTypesTable bTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(bTable.Open(false, true));
@@ -1154,7 +1154,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetAutoNumericValue)
+	TEST_P(TableTest, SelectAutoNumericValue)
 	{
 		// \note: There is a special Tests for NULL values, its complicated enough.
 		std::wstring numericTypesTableName = TestTables::GetTableName(L"numerictypes", m_odbcInfo.m_namesCase);
@@ -1239,7 +1239,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetManualNumericValue)
+	TEST_P(TableTest, SelectManualNumericValue)
 	{
 		MNumericTypesTable nTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(nTable.Open(false, true));
