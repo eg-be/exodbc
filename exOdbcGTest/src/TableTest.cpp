@@ -268,7 +268,7 @@ namespace exodbc
 
 		// Now delete the second record: We cannot do that if we do not have support for What are Multiple Active Statements (MAS)?
 		// MS SQL Server does not have this enabled by default
-		// \bug See Ticket # 63
+		// \bug See Ticket # 63 and # 75
 		sqlstmt = (boost::wformat(L"%s = 102") % idName).str();
 		ASSERT_TRUE(iTable.Delete(sqlstmt));
 		EXPECT_TRUE(m_db.CommitTrans());
