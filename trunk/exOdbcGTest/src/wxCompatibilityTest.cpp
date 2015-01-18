@@ -122,7 +122,7 @@ namespace exodbc
 
 
 	// Test reading datatypes
-	TEST_P(wxCompatibilityTest, ReadDateTypes)
+	TEST_P(wxCompatibilityTest, SelectDateTypes)
 	{
 		MDateTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
@@ -198,7 +198,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, ReadIntTypes)
+	TEST_P(wxCompatibilityTest, SelectIntTypes)
 	{
 		MIntTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
@@ -246,7 +246,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, ReadWCharTypes)
+	TEST_P(wxCompatibilityTest, SelectWCharTypes)
 	{
 		MWCharTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
@@ -283,7 +283,7 @@ namespace exodbc
 
 
 
-	TEST_P(wxCompatibilityTest, ReadFloatTypes)
+	TEST_P(wxCompatibilityTest, SelectFloatTypes)
 	{		
 		MFloatTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
@@ -325,7 +325,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, ReadNumericTypesAsChar)
+	TEST_P(wxCompatibilityTest, SelectNumericTypesAsChar)
 	{
 		MNumericTypesAsCharTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
@@ -391,7 +391,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, ReadBlobTypes)
+	TEST_P(wxCompatibilityTest, SelectBlobTypes)
 	{
 		MBlobTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_TRUE(table.Open(false, false));
@@ -440,7 +440,7 @@ namespace exodbc
 
 
 
-	TEST_P(wxCompatibilityTest, ReadIncompleteTable)
+	TEST_P(wxCompatibilityTest, SelectIncompleteTable)
 	{
 		MCharTable table(m_pDb, m_odbcInfo.m_namesCase);
 		MIncompleteCharTable incTable(m_pDb, m_odbcInfo.m_namesCase);
