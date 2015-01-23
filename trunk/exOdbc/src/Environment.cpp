@@ -5,7 +5,7 @@
 * \brief Source file for the Environment class and its helpers.
 *
 */ 
-
+ 
 #include "stdafx.h"
 
 // Own header
