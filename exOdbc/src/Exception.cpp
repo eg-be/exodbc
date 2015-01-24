@@ -3,6 +3,7 @@
 * \author Elias Gerber <eg@zame.ch>
 * \date 24.01.2014
 * \brief Source file for the Exception class and its helpers.
+* \copyright wxWindows Library Licence, Version 3.1
 *
 */
 

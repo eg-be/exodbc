@@ -2,6 +2,7 @@
 * \file ManualTestTables.cpp
 * \author Elias Gerber <eg@zame.ch>
 * \date 26.12.2014
+* \copyright wxWindows Library Licence, Version 3.1
 *
 * Declares classes derived from exodbc::Table that define their columns manually.
 */

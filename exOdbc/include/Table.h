@@ -3,6 +3,7 @@
 * \author Elias Gerber <eg@zame.ch>
 * \date 25.07.2014
 * \brief Header file for the Table class and its helpers.
+* \copyright wxWindows Library Licence, Version 3.1
 *
 * Header file for the Table class and its helpers.
 * This file was originally wx/dbtable.h from wxWidgets 2.8.

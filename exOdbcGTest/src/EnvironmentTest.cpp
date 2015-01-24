@@ -2,6 +2,7 @@
 * \file EnvironmentTest.cpp
 * \author Elias Gerber <egerber@gmx.net>
 * \date 27.07.2014
+* \copyright wxWindows Library Licence, Version 3.1
 * 
 * [Brief CPP-file description]
 */ 

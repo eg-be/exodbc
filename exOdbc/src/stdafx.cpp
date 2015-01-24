@@ -3,6 +3,7 @@
 * \author Elias Gerber <eg@zame.ch>
 * \date 23.07.2014
 * \brief Precompiled header.
+* \copyright wxWindows Library Licence, Version 3.1
 *
 * source file that includes just the standard includes
 * exOdbc.pch will be the pre-compiled header
