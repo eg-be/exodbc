@@ -70,7 +70,6 @@ namespace exodbc
 		std::wstring m_description;
 	};
 
-//	std::ostream& operator<< (std::ostream& stream, const SErrorInfo& ei) { stream << L"foo"; return stream; };
 
 	// Classes
 	// -------
@@ -96,26 +95,23 @@ namespace exodbc
 
 	public:
 		/*!
-		 * \fn	Environment::Environment();
-		 *
 		 * \brief	Default constructor.
 		 * 			You must manually call AllocHandle() and SetOdbcVersion() after 
 		 * 			creating the object.
 		 */
-		Environment();
+		Environment() throw();
+
 
 		/*!
-		 * \fn	Environment::Environment(OdbcVersion odbcVersion);
-		 *
 		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
 		 *
 		 * \param	odbcVersion	The ODBC version.
+		 * \throw	Exception
 		 */
 		Environment(OdbcVersion odbcVersion);
 
+
 		/*!
-		 * \fn	Environment::Environment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
-		 *
 		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
 		 * 			The connection-information is set to not use a connection-string when connecting to the database later.
 		 *
@@ -123,17 +119,18 @@ namespace exodbc
 		 * \param	userID	   	(Optional) identifier for the user.
 		 * \param	password   	(Optional) the password.
 		 * \param	odbcVersion	(Optional) the ODBC version.
+		 * \deprecated
 		 */
 		Environment(const std::wstring& dsn, const std::wstring& userID = std::wstring(), const std::wstring& password = std::wstring(), OdbcVersion odbcVersion = OV_3);
 
+
 		/*!
-		 * \fn	Environment::Environment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
-		 *
 		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
 		 * 			Connection-information is set to use a connection-string when connecting to the database laster.
 		 *
 		 * \param	connectionString	The connection string.
 		 * \param	odbcVersion			(Optional) the ODBC version.
+		 * \deprecated
 		 */
 		Environment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
 

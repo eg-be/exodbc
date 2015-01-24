@@ -12,6 +12,8 @@
 #include "Helpers.h"
 
 // Same component headers
+#include "Exception.h"
+
 // Other headers
 
 // Debug
@@ -43,6 +45,9 @@ namespace exodbc
 			ws << L" Msg:       " << msg << std::endl;
 		}
 		BOOST_LOG_TRIVIAL(error) << ws.str();
+
+		// Throw exception
+		throw AssertionException(line, file, function, condition, msg);
 	}
 
 

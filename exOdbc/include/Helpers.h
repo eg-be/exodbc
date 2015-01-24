@@ -37,15 +37,15 @@ namespace exodbc
 * \brief exASSERT_MSG(cond, msg) - MACRO
 *
 * If cond evalutes to false, this Macro will always call exOnAssert()
-* If _DEBUG is defined, it will call __debugbreak() to let you trap 
-* into the debugger.
+* If _DEBUG is defined, it will call __debugbreak() before calling exOnAssert()
+* to let you trap into the debugger.
 */
 #ifdef _DEBUG
-#define exASSERT_MSG(cond, msg)											\
+#define exASSERT_MSG(cond, msg)										\
 do {																\
 	if ( !(cond) )  {												\
-		exOnAssert(__FILEW__, __LINE__, __FUNCTIONW__,L#cond,msg);	\
 		__debugbreak();												\
+		exOnAssert(__FILEW__, __LINE__, __FUNCTIONW__,L#cond,msg);	\
 	}                                                               \
 } while ( 0 )
 #else
