@@ -2,6 +2,7 @@
 * \file HelpersTest.cpp
 * \author Elias Gerber <egerber@gmx.net>
 * \date 09.08.2014
+* \copyright wxWindows Library Licence, Version 3.1
 * 
 * [Brief CPP-file description]
 */ 

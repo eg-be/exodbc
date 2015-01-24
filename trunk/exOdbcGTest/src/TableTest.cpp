@@ -2,6 +2,7 @@
  * \file DbTableTest.cpp
  * \author Elias Gerber <egerber@gmx.net>
  * \date 22.07.2014
+ * \copyright wxWindows Library Licence, Version 3.1
  * 
  * [Brief CPP-file description]
  */ 
@@ -18,6 +19,7 @@
 // Other headers
 #include "Environment.h"
 #include "Database.h"
+#include "Exception.h"
 #include "boost/log/trivial.hpp"
 #include "boost/log/core.hpp"
 #include "boost/log/expressions.hpp"
@@ -2739,6 +2741,14 @@ namespace exodbc
 			EXPECT_EQ((i * shift), (SQLBIGINT)*pBigInt);
 		}
 		EXPECT_FALSE(iTable.SelectNext());
+	}
+
+
+	TEST_P(TableTest, FooTest)
+	{
+		AssertionException ae(__LINE__, __FILEW__, __FUNCTIONW__, L"Condition", L"MEssage");
+		wstring s = ae.ToString();
+		int p = 3;
 	}
 
 

@@ -2,6 +2,7 @@
 * \file wxOdbc3GoogleTest.h
 * \author Elias Gerber <egerber@gmx.net>
 * \date 22.07.2014
+* \copyright wxWindows Library Licence, Version 3.1
 * 
 * [Brief Header-file description]
 */ 

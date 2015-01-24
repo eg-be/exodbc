@@ -2,6 +2,7 @@
 * \file TestTables.h
 * \author Elias Gerber <eg@zame.ch>
 * \date 26.12.2014
+* \copyright wxWindows Library Licence, Version 3.1
 *
 * Declares some helpers for TestTables, like converting names to upper/lower case, etc.
 */

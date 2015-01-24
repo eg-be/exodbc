@@ -3,6 +3,7 @@
  * \author Elias Gerber <eg@zame.ch>
  * \date 09.02.2014
  * \brief Header file to set up dll import/exports, consts, structs used often, etc.
+ * \copyright wxWindows Library Licence, Version 3.1
 */ 
 
 #pragma once

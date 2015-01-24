@@ -2,6 +2,7 @@
 * \file wxCompatibilityTest.h
 * \author Elias Gerber <egerber@gmx.net>
 * \date 31.08.2014
+* \copyright wxWindows Library Licence, Version 3.1
 * 
 * Contains some tests that try to operate on
 * the table/db objects the same way as it was operated
