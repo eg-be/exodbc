@@ -84,6 +84,7 @@ namespace exodbc
 		OV_3_8 = 380UL	//< Version 3.8
 	};
 
+
 	/*!
 	* \enum	CommitMode
 	*
