@@ -49,6 +49,9 @@
     <ClInclude Include="include\TablePrimaryKeys.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Exception.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -76,6 +79,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\TablePrimaryKeys.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Exception.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

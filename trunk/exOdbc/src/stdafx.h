@@ -25,6 +25,8 @@
 #include <sstream>
 #include <string>
 #include <set>
+#include <locale>
+#include <codecvt>
 //#include <cstdio>
 //#include <tchar>
 //#include <string.h>
