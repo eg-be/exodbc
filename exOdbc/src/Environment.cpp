@@ -147,7 +147,7 @@ namespace exodbc
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
-			if (ret == SQL_INVALID_HANDLE)
+			else if (ret == SQL_INVALID_HANDLE)
 			{
 				// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
 				m_henv = SQL_NULL_HENV;

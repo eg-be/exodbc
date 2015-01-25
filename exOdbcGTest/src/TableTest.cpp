@@ -244,7 +244,7 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		ASSERT_TRUE(iTable.Delete(sqlstmt, false));
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Set some silly values to insert
 		*pId = (SQLINTEGER)101;
@@ -257,7 +257,7 @@ namespace exodbc
 		*pInt = (SQLINTEGER)20;
 		*pBigInt = (SQLBIGINT)200;
 		ASSERT_TRUE(iTable.Insert());
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now select those two records
 		sqlstmt = (boost::wformat(L"%s = 101 OR %s = 102 ORDER BY %s") % idName %idName %idName).str();
@@ -274,7 +274,7 @@ namespace exodbc
 		// See Ticket # 63 and # 75
 		sqlstmt = (boost::wformat(L"%s = 102") % idName).str();
 		ASSERT_TRUE(iTable.Delete(sqlstmt));
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// If MAS is enabled, we should be able to still see the result of the just deleted record, even if the result was committed inbetween
 		EXPECT_TRUE(iTable.SelectNext());
@@ -1449,7 +1449,7 @@ namespace exodbc
 		// \todo: Write a separate transaction test about this, to check transaction-visiblity
 		// Try to delete eventually available leftovers, ignore if none exists
 		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now lets insert some data:
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
@@ -1462,11 +1462,11 @@ namespace exodbc
 		pInt->SetNull();
 		pBigInt->SetNull();
 		EXPECT_TRUE(iTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now we must have something to delete
 		EXPECT_TRUE(iTable.Delete(sqlstmt, true));
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And fetching shall return no results at all
 		EXPECT_TRUE(iTable.Select());
@@ -1485,10 +1485,10 @@ namespace exodbc
 
 		// Try to delete eventually available leftovers, ignore if none exists
 		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 		// We can be sure now that nothing exists, and we will fail if we try to delete
 		EXPECT_FALSE(iTable.Delete(sqlstmt, true));
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And fetching shall return no results at all
 		EXPECT_TRUE(iTable.Select());
@@ -1507,7 +1507,7 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert a row that we want to delete
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
@@ -1519,7 +1519,7 @@ namespace exodbc
 		pBigInt->SetNull();
 		*pId = (SQLINTEGER)99;
 		EXPECT_TRUE(iTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now lets delete that row. our pId is still set to the key-value 99
 		EXPECT_TRUE(iTable.Delete());
@@ -1547,7 +1547,7 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Set some silly values to insert
 		*pId = (SQLINTEGER)101;
@@ -1556,7 +1556,7 @@ namespace exodbc
 		*pBigInt = (SQLBIGINT)104;
 
 		EXPECT_TRUE(iTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
 		Table iTable2(&m_db, intTypesTableName, L"", L"", L"", Table::READ_WRITE);
@@ -1591,7 +1591,7 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		EXPECT_TRUE(dTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Set some silly values
 		SQL_DATE_STRUCT date;
@@ -1623,7 +1623,7 @@ namespace exodbc
 		*pTime = time;
 		*pTimestamp = timestamp;
 		EXPECT_TRUE(dTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
 		Table dTable2(&m_db, dateTypesTableName, L"", L"", L"", Table::READ_WRITE);
@@ -1673,14 +1673,14 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		EXPECT_TRUE(fTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
 		*pId = (SQLINTEGER)101;
 		*pDouble = 3.14159265359;
 		*pFloat = -3.14159;
 		EXPECT_TRUE(fTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
 		Table fTable2(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_WRITE);
@@ -1727,7 +1727,7 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		EXPECT_TRUE(nTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Insert the just read values
 		*pId = (SQLINTEGER)101;
@@ -1735,7 +1735,7 @@ namespace exodbc
 		*pNumeric_18_10 = numStr18_10;
 		*pNumeric_5_3 = numStr5_3;
 		EXPECT_TRUE(nTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And read them again from another table and compare them
 		SQL_NUMERIC_STRUCT numStr18_0t, numStr18_10t, numStr5_3t;
@@ -1769,7 +1769,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") %idName).str();
 		EXPECT_TRUE(t.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQL_NUMERIC_STRUCT numStr;
 		ZeroMemory(&numStr, sizeof(numStr));
@@ -1784,7 +1784,7 @@ namespace exodbc
 		*pNumeric_5_3 = numStr;
 		*pId = (SQLINTEGER)300;
 		EXPECT_TRUE(t.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
 
 
@@ -1804,7 +1804,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		EXPECT_TRUE(t.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQL_NUMERIC_STRUCT numStr;
 		ZeroMemory(&numStr, sizeof(numStr));
@@ -1826,7 +1826,7 @@ namespace exodbc
 		pNumeric_5_3->SetNull();
 		*pId = (SQLINTEGER)300;
 		EXPECT_TRUE(t.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
 
 
@@ -1846,7 +1846,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		EXPECT_TRUE(t.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQL_NUMERIC_STRUCT numStr;
 		ZeroMemory(&numStr, sizeof(numStr));
@@ -1868,7 +1868,7 @@ namespace exodbc
 		pNumeric_5_3->SetNull();
 		*pId = (SQLINTEGER)300;
 		EXPECT_TRUE(t.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
 
 
@@ -1887,7 +1887,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		EXPECT_TRUE(t.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQL_NUMERIC_STRUCT numStr18_0;
 		ZeroMemory(&numStr18_0, sizeof(numStr18_0));
@@ -1930,7 +1930,7 @@ namespace exodbc
 		*pNumeric_18_10 = numStr18_10;
 		*pNumeric_5_3 = numStr5_3;
 		EXPECT_TRUE(t.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
 
 
@@ -1948,7 +1948,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idblobtypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		EXPECT_TRUE(bTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQLCHAR empty[] = { 0, 0, 0, 0,
 			0, 0, 0, 0,
@@ -1993,7 +1993,7 @@ namespace exodbc
 		*pId = (SQLINTEGER)104;
 		pVarBlob_20->SetBinaryValue(abc_ff, sizeof(abc_ff));
 		EXPECT_TRUE(bTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now read the inserted values
 		sqlstmt = (boost::wformat(L"%s = 100") % idName).str();
@@ -2047,7 +2047,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
 		std::string s = "Hello World!";
@@ -2057,7 +2057,7 @@ namespace exodbc
 		pVarchar_10->SetNull();
 		pChar_10->SetNull();
 		EXPECT_TRUE(cTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Insert one value that uses all space
 		s = "abcde12345";
@@ -2067,7 +2067,7 @@ namespace exodbc
 		*pVarchar_10 = s;
 		*pChar_10 = s;
 		EXPECT_TRUE(cTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Read them back from another table
 		s = "Hello World!";
@@ -2115,7 +2115,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
 		std::wstring s = L"Hello World!";
@@ -2125,7 +2125,7 @@ namespace exodbc
 		pVarchar_10->SetNull();
 		pChar_10->SetNull();
 		EXPECT_TRUE(cTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert one value that uses all space
 		s = L"abcde12345";
@@ -2135,7 +2135,7 @@ namespace exodbc
 		*pVarchar_10 = s;
 		*pChar_10 = s;
 		EXPECT_TRUE(cTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Read them back from another table
 		s = L"Hello World!";
@@ -2184,7 +2184,7 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		ASSERT_TRUE(iTable.Delete(sqlstmt, false));
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
 		for (int i = 1; i < 10; i++)
@@ -2195,7 +2195,7 @@ namespace exodbc
 			*pBigInt = (SQLBIGINT)i;
 			ASSERT_TRUE(iTable.Insert());
 		}
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Update single rows by using key-values
 		*pId = (SQLINTEGER)3;
@@ -2226,7 +2226,7 @@ namespace exodbc
 		*pInt = (SQLINTEGER)99;
 		pBigInt->SetNull();
 		EXPECT_TRUE(iTable.Update());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Read back the just updated values
 		EXPECT_TRUE(iTable.Select((boost::wformat(L"%s = 3") % idName).str()));
@@ -2281,7 +2281,7 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		ASSERT_TRUE(dTable.Delete(sqlstmt, false));
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
 		SQL_TIME_STRUCT time = InitTime(13, 55, 56);
@@ -2298,7 +2298,7 @@ namespace exodbc
 		pTime->SetNull();
 		pTimestamp->SetNull();
 		ASSERT_TRUE(dTable.Insert());
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now update the values
 		// \todo: We do not test the Fractions here. Lets fix Ticket #70 first
@@ -2316,7 +2316,7 @@ namespace exodbc
 		*pTime = time;
 		*pTimestamp = timestamp;
 		EXPECT_TRUE(dTable.Update());
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// And read back
 		EXPECT_TRUE(dTable.Select((boost::wformat(L"%s = 101") % idName).str()));
@@ -2351,7 +2351,7 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		ASSERT_TRUE(nTable.Delete(sqlstmt, false));
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some boring 0 entries
 		SQL_NUMERIC_STRUCT num = InitNullNumeric();
@@ -2365,7 +2365,7 @@ namespace exodbc
 		pNumeric_18_10->SetNull();
 		pNumeric_5_3->SetNull();
 		ASSERT_TRUE(nTable.Insert());
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now update that with our well known entries
 		// Note: We MUST set the correct precision and scale, at least for ms!
@@ -2407,7 +2407,7 @@ namespace exodbc
 		pNumeric_18_10->SetNull();
 		pNumeric_5_3->SetNull();
 		EXPECT_TRUE(nTable.Update());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And read back the values
 		EXPECT_TRUE(nTable.Select((boost::wformat(L"%s = 101") % idName).str()));
@@ -2442,20 +2442,20 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		ASSERT_TRUE(fTable.Delete(sqlstmt, false));
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
 		*pId = (SQLINTEGER)101;
 		*pDouble = 3.14159265359;
 		*pFloat = -3.14159;
 		ASSERT_TRUE(fTable.Insert());
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// And update them using the key fields
 		*pDouble = -6.2343354;
 		*pFloat = 989.213;
 		EXPECT_TRUE(fTable.Update());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
 		Table fTable2(&m_db, floatTypesTableName, L"", L"", L"", Table::READ_ONLY);
@@ -2491,7 +2491,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
 		// \todo: Note, in IBM DB2 special chars seem to occupy more space (two bytes`?). We cannot have more than 5 special chars if the size of the field is 10..
@@ -2510,7 +2510,7 @@ namespace exodbc
 		*pVarchar_10 = s101;
 		*pChar_10 = s101;
 		EXPECT_TRUE(cTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Select and check
 		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 100") % idName).str()));
@@ -2556,7 +2556,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
-		EXPECT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
 		// \todo: Note, in IBM DB2 special chars seem to occupy more space (two bytes`?). We cannot have more than 5 special chars if the size of the field is 10..
@@ -2575,7 +2575,7 @@ namespace exodbc
 		*pVarchar_10 = s101;
 		*pChar_10 = s101;
 		EXPECT_TRUE(cTable.Insert());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Select and check
 		EXPECT_TRUE(cTable.Select((boost::wformat(L"%s = 100") % idName).str()));
@@ -2617,7 +2617,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idblobtypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		ASSERT_TRUE(bTable.Delete(sqlstmt, false));
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQLCHAR empty[] = { 0, 0, 0, 0,
 			0, 0, 0, 0,
@@ -2653,7 +2653,7 @@ namespace exodbc
 		pBlob->SetNull();
 		pVarBlob_20->SetBinaryValue(abc_ff, sizeof(abc_ff));
 		ASSERT_TRUE(bTable.Insert());
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Update 
 		*pId = (SQLINTEGER)100;
@@ -2664,7 +2664,7 @@ namespace exodbc
 		pBlob->SetBinaryValue(empty, sizeof(empty));
 		pVarBlob_20->SetNull();
 		EXPECT_TRUE(bTable.Update());
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Re-Fetch and compare
 		EXPECT_TRUE(bTable.Select((boost::wformat(L"%s = 100") % idName).str()));
@@ -2703,7 +2703,7 @@ namespace exodbc
 
 		// Remove everything, ignoring if there was any data:
 		ASSERT_TRUE(iTable.Delete(sqlstmt, false));
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
 		for (int i = 1; i < 10; i++)
@@ -2714,7 +2714,7 @@ namespace exodbc
 			*pBigInt = (SQLBIGINT)i;
 			ASSERT_TRUE(iTable.Insert());
 		}
-		ASSERT_TRUE(m_db.CommitTrans());
+		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now update using our WHERE statement. This allows us to update also key rows. Shift all values *(1000)
 		int shift = 1000;
@@ -2727,7 +2727,7 @@ namespace exodbc
 			sqlstmt = (boost::wformat(L"%s = %d") % idName %i).str();
 			EXPECT_TRUE(iTable.Update(sqlstmt));
 		}
-		EXPECT_TRUE(m_db.CommitTrans());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And select them and compare
 		sqlstmt = (boost::wformat(L"%s > 0 ORDER BY %s") % idName %idName).str();

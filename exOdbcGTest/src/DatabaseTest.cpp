@@ -275,7 +275,7 @@ namespace exodbc
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_db.CommitTrans() );
+		EXPECT_NO_THROW( m_db.CommitTrans() );
 
 		EXPECT_TRUE( iTable.Select());
 		EXPECT_FALSE( iTable.SelectNext());
@@ -319,7 +319,7 @@ namespace exodbc
 		}
 
 		// Once we commit we have one record, also in a different database
-		EXPECT_TRUE( m_db.CommitTrans() );
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		Database db2(m_env);
 		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
@@ -341,7 +341,7 @@ namespace exodbc
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_db.CommitTrans() );
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		EXPECT_TRUE( iTable.Select());
 		EXPECT_FALSE( iTable.SelectNext());
@@ -349,7 +349,7 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
 		// We rollback and expect no record
-		EXPECT_TRUE( m_db.RollbackTrans() );
+		EXPECT_NO_THROW(m_db.RollbackTrans());
 		EXPECT_TRUE( iTable.Select());
 		EXPECT_FALSE( iTable.SelectNext());
 	}

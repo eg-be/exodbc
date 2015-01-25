@@ -255,14 +255,14 @@ namespace exodbc
 		 * \brief	Commits all transaction associated with this database.
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         CommitTrans();
+		void         CommitTrans();
 
 
 		/*!
 		 * \brief	Rolls back all transaction associated with this database.
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         RollbackTrans();
+		void         RollbackTrans();
 
 
 		/**

@@ -451,12 +451,12 @@ namespace exodbc
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.chartable WHERE idchartable >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW( m_pDb->CommitTrans() );
 
 		// Select using '*' on complete table
 		sqlstmt = L"INSERT INTO exodbc.chartable (idchartable, col2, col3, col4) VALUES (1, 'r1_c2', 'r1_c3', 'r1_c4')";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartable WHERE idchartable = 1"));
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(table.m_col2)));
@@ -516,7 +516,7 @@ namespace exodbc
 
 		std::wstring sqlstmt = L"DELETE FROM exodbc.chartypes_tmp WHERE idchartypes >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
 		// Note the escaping:
 		// IBM DB2 wants to escape ' using '', mysql wants \'
@@ -531,7 +531,7 @@ namespace exodbc
 			sqlstmt = (boost::wformat(L"INSERT INTO exodbc.chartypes_tmp (idchartypes, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
 		}
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
 		// And note the triming
 		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes_tmp ORDER BY idchartypes ASC"));
@@ -549,11 +549,11 @@ namespace exodbc
 
 		std::wstring sqlstmt = L"DELETE FROM exodbc.floattypes_tmp WHERE idfloattypes >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
 		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes, tdouble, tfloat) VALUES (1, -3.141592, -3.141)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes = 1"));
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -3.141592, table.m_double);
@@ -562,7 +562,7 @@ namespace exodbc
 
 		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes, tdouble, tfloat) VALUES (2, 3.141592, 3.141)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes = 2"));
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 3.141592, table.m_double);
@@ -578,11 +578,11 @@ namespace exodbc
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.numerictypes_tmp WHERE idnumerictypes >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
 		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes, tdecimal_18_0, tdecimal_18_10) VALUES (1, -123456789012345678, -12345678.9012345678)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		// Note: DB2 sends a ',', mysql sends a '.' as delimeter
 		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes = 1"));
 		EXPECT_TRUE( table.SelectNext() );
@@ -595,7 +595,7 @@ namespace exodbc
 
 		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes, tdecimal_18_0, tdecimal_18_10) VALUES (2, 123456789012345678, 12345678.9012345678)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
 		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes = 2"));
 		EXPECT_TRUE(table.SelectNext());
@@ -608,7 +608,7 @@ namespace exodbc
 
 		sqlstmt = L"INSERT INTO exodbc.numerictypes_tmp (idnumerictypes, tdecimal_18_0, tdecimal_18_10) VALUES (3, 0, 0.0000000000)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		// Note: DB2 sends a ',', mysql sends a '.' as delimeter
 		// (but maybe this also depends on os settings)
 		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes = 3"));
@@ -634,14 +634,14 @@ namespace exodbc
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
 		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
 		EXPECT_FALSE(table.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
 		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes ASC"));
 		EXPECT_TRUE(table.SelectNext());
@@ -652,7 +652,7 @@ namespace exodbc
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (2, 32767, 2147483647, 9223372036854775807)";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes ASC"));
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_TRUE(table.SelectNext());
@@ -671,11 +671,11 @@ namespace exodbc
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.datetypes_tmp WHERE iddatetypes >= 0";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
 		sqlstmt = L"INSERT INTO exodbc.datetypes_tmp (iddatetypes, tdate, ttime, ttimestamp) VALUES (1, '1983-01-26', '13:55:56', '1983-01-26 13:55:56')";
 		EXPECT_TRUE( m_pDb->ExecSql(sqlstmt) );
-		EXPECT_TRUE( m_pDb->CommitTrans() );
+		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes_tmp WHERE iddatetypes = 1"));
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 26, table.m_date.day);
