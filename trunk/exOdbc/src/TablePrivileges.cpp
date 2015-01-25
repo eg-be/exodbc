@@ -13,6 +13,7 @@
 
 // Same component headers
 #include "Database.h"
+#include "Exception.h"
 
 // Other headers
 
@@ -50,9 +51,15 @@ namespace exodbc
 		m_initialized = false;
 		TablePrivilegesVector tablePrivs;
 
-		if(pDb->ReadTablePrivileges(tableInfo, tablePrivs))
+		try
 		{
+			tablePrivs = pDb->ReadTablePrivileges(tableInfo);
 			m_initialized = Parse(tablePrivs);
+		}
+		catch (Exception ex)
+		{
+			LOG_ERROR(ex.ToString());
+			return false;
 		}
 
 		return m_initialized;

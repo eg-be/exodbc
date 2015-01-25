@@ -269,37 +269,37 @@ namespace exodbc
 		 * \brief	Reads complete catalog. Queries the database using SQLTables with no search-string 
 		 * 			set at all. All parameters all NULL. This is due to the fact that SQL_ATTR_METADATA_ID
 		 * 			is not really implemented by all databases, so keep it simple.
-		 * \param [in,out]	catalogInfo	Information describing the catalog.
-		 * \return	true if it succeeds, false if it fails.
+		 * \return	CatalogInfo
+		 * \throw	Exception If reading fails.
 		 */
-		bool		ReadCompleteCatalog(SDbCatalogInfo& catalogInfo);
+		SDbCatalogInfo	ReadCompleteCatalog();
 
 
 		/*!
 		 * \brief	Reads all Catalogs that are defined in the DB. This calls SQLTables with 
 		 * 			SQL_ALL_CATALOGS as catalog-name.
-		 * \param [in,out]	catalogs	The catalogs.
-		 * \return	true if it succeeds, false if it fails.
+		 * \return	Catalog names found.
+		 * \throw	Exception If reading catalogs fails.
 		 */
-		bool		ReadCatalogs(std::vector<std::wstring>& catalogs)		{ return ReadCatalogInfo(AllCatalogs, catalogs); };
+		std::vector<std::wstring>	ReadCatalogs()		{ return ReadCatalogInfo(AllCatalogs); };
 
 
 		/*!
 		 * \brief	Reads all schemas that are defined in the DB. This calls SQLTbles with
 		 * 			SQL_ALL_SCHEMAS as schema-name.
-		 * \param [in,out]	schemas	The schemas.
-		 * \return	true if it succeeds, false if it fails.
+		 * \return	Schema names found.
+		 * \throw	Exception if reading schemas fails.
 		 */
-		bool		ReadSchemas(std::vector<std::wstring>& schemas)			{ return ReadCatalogInfo(AllSchemas, schemas); };
+		std::vector<std::wstring>	ReadSchemas()			{ return ReadCatalogInfo(AllSchemas); };
 
 
 		/*!
 		 * \brief	Reads all table types that are defined by the DB. This call SQLTables with
 		 * 			SQL_ALL_TABLE_TYPES as table-type.
-		 * \param [in,out]	tableTypes	List of types of the tables.
-		 * \return	true if it succeeds, false if it fails.
+		 * \return	Table type names found.
+		 * \throw	Exception If reading table types fails.
 		 */
-		bool		ReadTableTypes(std::vector<std::wstring>& tableTypes)	{ return ReadCatalogInfo(AllTableTypes, tableTypes); };
+		std::vector<std::wstring>	ReadTableTypes()	{ return ReadCatalogInfo(AllTableTypes); };
 
 
 		/*!
@@ -310,7 +310,8 @@ namespace exodbc
 		 * 			of the database. You might get confusing results if you have for example
 		 * 			search-patterns set as table name in the passed STableInfo table.
 		 * \param	table	The table.
-		 * \return	The column count, or -1 in case of failure
+		 * \return	The column count.
+		 * \throw	Exception If counting columns fails.
 		 */
 		int			ReadColumnCount(const STableInfo& table);
 
@@ -324,19 +325,19 @@ namespace exodbc
 		 * \param	schemaName 	Name of the schema.
 		 * \param	catalogName	Name of the catalog.
 		 * \param	tableType	Table Type name
-		 *
-		 * \return	The column count or -1 in case of failure
+		 * \return	The column count for the matching table.
+		 * \throw	Exception If not exactly one table is found.
 		 */
 		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
 
 
 		/*!
 		 * \brief	Reads table privileges for the table(s) matching the passed SCatalogTable description.
-		 * \param	table			  	Defines the tablename, type, schema and catalog to search for privileges.
-		 * \param [in,out]	privileges	The privileges.
-		 * \return	true if it succeeds, false if it fails.
+		 * \param	table		Defines the tablename, type, schema and catalog to search for privileges.
+		 * \return	Privileges	matching passed table.
+		 * \throw	Exception	If reading privileges fails.
 		 */
-		bool		ReadTablePrivileges(const STableInfo& table, TablePrivilegesVector& privileges);
+		TablePrivilegesVector	ReadTablePrivileges(const STableInfo& table);
 
 
 		/*!
@@ -346,29 +347,29 @@ namespace exodbc
 		 * \param	schemaName		  	Name of the schema.
 		 * \param	catalogName		  	Name of the catalog.
 		 * \param	tableType	Table Type name
-		 * \param [in,out]	privileges	The privileges.
-		 * \return	true if it succeeds, false if it fails.
+		 * \return	Privileges for exactly one matching table.
+		 * \throw	Exception	If reading privileges fails, or not exactly one table matches.
 		 */
-		bool		ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, TablePrivilegesVector& privileges);
+		TablePrivilegesVector	ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
 
 
 		/*!
 		* \brief	Reads table primary keys of exactly one table. 
 		* \param	table			  	Table definition to query primary keys.
-		* \param [in,out]	primaryKeys	The primary Keys found.
-		* \return	true if it succeeds, false if it fails.
+		* \return	The primary Keys found.
+		* \throw	If reading primary keys fails.
 		*/
-		bool		ReadTablePrimaryKeys(const STableInfo& table, TablePrimaryKeysVector& primaryKeys);
+		TablePrimaryKeysVector		ReadTablePrimaryKeys(const STableInfo& table);
 
 
 		/*!
 		 * \brief		Reads table column information for the passed table.
 		 * \detailed	Returned table columns are ordered by TABLE_CAT, TABLE_SCHEM, TABLE_NAME, and ORDINAL_POSITION. 
 		 * \param		table The table.
-		 * \param [in,out]	columns	The columns.
-		 * \return	true if it succeeds, false if it fails.
+		 * \return		Columns of passed table.
+		 * \throw Exception If reading ColumnInfo fails.
 		 */
-		bool		ReadTableColumnInfo(const STableInfo& table, std::vector<SColumnInfo>& columns);
+		std::vector<SColumnInfo>	ReadTableColumnInfo(const STableInfo& table);
 
 
 		/*!
@@ -378,10 +379,10 @@ namespace exodbc
 		 * \param	schemaName	   	Name of the schema.
 		 * \param	catalogName	   	Name of the catalog.
 		 * \param	tableType	Table Type name
-		 * \param [in,out]	columns	The columns.
-		 * \return	true if it succeeds, false if it fails.
+		 * \return		Columns of passed table.
+		 * \throw Exception If reading ColumnInfo fails or not exactly one table matches.
 		 */
-		bool		ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<SColumnInfo>& columns);
+		std::vector<SColumnInfo>	ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
 
 
 		/*!
@@ -394,23 +395,22 @@ namespace exodbc
 		 * \param	schemaName	  	Name of the schema.
 		 * \param	catalogName   	Name of the catalog.
 		 * \param	tableType	  	Type of the table.
-		 * \param [in,out]	tables	The tables found that match the search-criteria.
-		 * \return	true if it succeeds, false if it fails.
+		 * \return	The tables found that match the search-criteria.
+		 * \throw Exception			If querying the database fails.
 		 */
-		bool		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, std::vector<STableInfo>& tables);
+		std::vector<STableInfo>		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
 
 
 		/*!
-		* \brief	Searches for tables that match the passed arguments, return true if exactly one such table is found.
-		* 			The table that matches is copied to the argument table.
+		* \brief	Searches for tables that match the passed arguments, return the table if exactly one such table is found.
 		* \param	tableName		  	Name of the table.
 		* \param	schemaName		  	Name of the schema.
 		* \param	catalogName		  	Name of the catalog.
 		* \param	tableType		  	Table Type name.
-		* \param [in,out]	table	  	The table.
-		* \return	true if exactly one table matches the passed search-criterias name, schema and catalog, false else.
+		* \return	The table info of exactly one table that matches the passed search-criterias name, schema and catalog. Throws otherwise
+		* \throw	If not exactly one table can be found
 		*/
-		bool			FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType, STableInfo& table);
+		STableInfo		FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
 
 
 		/*!
@@ -483,6 +483,7 @@ namespace exodbc
 		* \brief	Determines which ODBC Version to use.
 		* \detailed	Chooses the max ODBC Version that is supported by the environment and the driver.
 		* \return	Max ODBC version supported by driver and env or OV_UNKNOWN.
+		* \throw	Exception 
 		*/
 		OdbcVersion GetMaxSupportedOdbcVersion() const;
 
@@ -562,8 +563,9 @@ namespace exodbc
 		* \brief	Get an eventually allocated connection handle.
 		* \return	Connection handle if allocated, or SQL_NULL_HDBC.
 		* \see		AllocateHdbc()
+		* \throw	Exception If no handle is allocated.
 		*/
-		SQLHDBC            GetHDBC() const         { exDEBUG(HasHdbc()); return m_hdbc; }
+		SQLHDBC            GetHDBC() const         { exASSERT(HasHdbc()); return m_hdbc; }
 
 
 		/*!
@@ -572,8 +574,9 @@ namespace exodbc
 		*			if successful this information is stored in an SDbInfo internally.
 		*			SDbInfo is empty until Open() was successful.
 		* \return	SDbInfo with information corresponding to the database connected.
+		* \throw	Exception If database is not open yet and therefore SDbInfo is unknown.
 		*/
-		SDbInfo GetDbInfo()	const				{ return m_dbInf; }
+		SDbInfo GetDbInfo()	const				{ exASSERT(IsOpen());  return m_dbInf; }
 
 
 		/*!
@@ -632,9 +635,10 @@ namespace exodbc
 		/*!
 		* \brief	Queries the database about catalog-, schema- or table-names
 		* \param mode Determine which names to query.
-		* \param [in,out] results names.
+		* \returns  Result containing of names.
+		* \throw	Exception If reading fails.
 		*/
-		bool			ReadCatalogInfo(ReadCatalogInfoMode mode, std::vector<std::wstring>& results);
+		std::vector<std::wstring>	ReadCatalogInfo(ReadCatalogInfoMode mode);
 
 
 		// Members
