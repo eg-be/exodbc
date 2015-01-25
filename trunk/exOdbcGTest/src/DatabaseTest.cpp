@@ -100,25 +100,25 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_READ_COMMITTED, tiMode);
-		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
+		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TI_READ_UNCOMMITTED;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_READ_UNCOMMITTED, tiMode);
-		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
+		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TI_REPEATABLE_READ;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_REPEATABLE_READ, tiMode);
-		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
+		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TI_SERIALIZABLE;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_SERIALIZABLE, tiMode);
-		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
+		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
 		{
@@ -127,7 +127,7 @@ namespace exodbc
 			EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 			tiMode = m_db.ReadTransactionIsolationMode();
 			EXPECT_EQ(TI_SNAPSHOT, tiMode);
-			EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
+			EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 #else
 			LOG_WARNING(L"Skipping test because testing against Ms Sql Server but msodbcsql.h is missing");
 			EXPECT_TRUE(false);
@@ -274,14 +274,14 @@ namespace exodbc
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";
-		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
+		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
 		EXPECT_NO_THROW( m_db.CommitTrans() );
 
 		EXPECT_TRUE( iTable.Select());
 		EXPECT_FALSE( iTable.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
-		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
+		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
 
 		// Note: If we try to read now from a different database, we do not see the inserted recorded until it is committed
 		// BUT: Microsoft SQL Server will just block the second database while a transaction is open
@@ -340,14 +340,14 @@ namespace exodbc
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";
-		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
+		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		EXPECT_TRUE( iTable.Select());
 		EXPECT_FALSE( iTable.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
-		EXPECT_TRUE( m_db.ExecSql(sqlstmt) );
+		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
 		// We rollback and expect no record
 		EXPECT_NO_THROW(m_db.RollbackTrans());
 		EXPECT_TRUE( iTable.Select());

@@ -243,12 +243,12 @@ namespace exodbc
 		/**
 		 * \brief	Executes the SQL operation on the internal stmt-handle.
 		 * \param	sqlStmt	The SQL statement.
-		 * \param	mode   	If FailOnNoData is set, false is returned if SQL returns NO_DATA.
+		 * \param	mode   	If FailOnNoData is set, Exception is thrown if SQL returns NO_DATA.
 		 * 					This happens for example on DB2 if you do a DELETE with a WHERE
 		 * 					clause and no records are deleted.
-		 * \return	true if it succeeds, false if it fails.
+		 * \throw	Exception If executing SQL failed, or depending on mode if no records are affected.
 		 */
-		bool         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = NotFailOnNoData);
+		void         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = NotFailOnNoData);
 
 
 		/*!
