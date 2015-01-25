@@ -35,6 +35,7 @@
 #include "Helpers.h"
 #include "ColumnBuffer.h"
 #include "Environment.h"
+#include "Exception.h"
 
 // Other headers
 
@@ -58,10 +59,7 @@ namespace exodbc
 		, m_haveTableInfo(false)
 	{
 		exASSERT(pDb);
-		if (!Initialize(pDb))
-		{
-			cleanup();
-		}
+		Initialize(pDb);
 	}
 
 
@@ -77,10 +75,7 @@ namespace exodbc
 		, m_tableInfo(tableInfo)
 	{
 		exASSERT(pDb);
-		if (!Initialize(pDb))
-		{
-			cleanup();
-		}
+		Initialize(pDb);
 	}
 
 
@@ -95,10 +90,7 @@ namespace exodbc
 		, m_haveTableInfo(false)
 	{
 		exASSERT(pDb);
-		if (!Initialize(pDb))
-		{
-			cleanup();
-		}
+		Initialize(pDb);
 	}
 
 
@@ -114,10 +106,7 @@ namespace exodbc
 		, m_tableInfo(tableInfo)
 	{
 		exASSERT(pDb);
-		if (!Initialize(pDb))
-		{
-			cleanup();
-		}
+		Initialize(pDb);
 	}
 
 
@@ -131,14 +120,9 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	bool Table::Initialize(Database* pDb)
+	void Table::Initialize(Database* pDb)
 	{
 		exASSERT(pDb);
-		if (!pDb)
-		{
-			LOG_ERROR(L"Database is required");
-			return false;
-		}
 
 		// Initializing member variables
 		// Note: m_haveTableInfo must have been set before this function is called - it is not modified by this Initialize
@@ -164,28 +148,15 @@ namespace exodbc
 		// Allocate handles needed
 		m_hStmtCount = AllocateStatement();
 		m_hStmtSelect = AllocateStatement();
-		if (!(m_hStmtSelect && m_hStmtCount))
-		{
-			return false;
-		}
 
 		// Allocate handles needed for writing
 		if (!IsQueryOnly())
 		{
-			if((m_hStmtInsert = AllocateStatement()) == SQL_NULL_HSTMT)
-				return false;
-
-			if((m_hStmtDelete = AllocateStatement()) == SQL_NULL_HSTMT)
-				return false;
-
-			if((m_hStmtUpdate = AllocateStatement()) == SQL_NULL_HSTMT)
-				return false;
-
-			if ((m_hStmtDeleteWhere = AllocateStatement()) == SQL_NULL_HSTMT)
-				return false;
-
-			if ((m_hStmtUpdateWhere = AllocateStatement()) == SQL_NULL_HSTMT)
-				return false;
+			m_hStmtInsert = AllocateStatement();
+			m_hStmtDelete = AllocateStatement();
+			m_hStmtUpdate = AllocateStatement();
+			m_hStmtDeleteWhere = AllocateStatement();
+			m_hStmtUpdateWhere = AllocateStatement();
 		}
 		// Allocate a separate statement handle for internal use
 		//if (SQLAllocStmt(m_hdbc, &m_hstmtInternal) != SQL_SUCCESS)
@@ -256,9 +227,6 @@ namespace exodbc
 			//if (SQLSetStmtOption(m_hstmtUpdate, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
 			//	m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate);
 		}
-
-		return true;
-
 	}
 
 
@@ -271,36 +239,34 @@ namespace exodbc
 		// Allocate a statement handle for the database connection
 		SQLHSTMT stmt;
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_pDb->GetHDBC(), &stmt);
-		if (ret != SQL_SUCCESS)
-		{
-			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
-			LOG_ERROR_DBC(m_pDb->GetHDBC(), ret, SQLAllocHandle);
-		}
+		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_pDb->GetHDBC());
 		return stmt;
 	}
 
 
-	bool Table::FreeStatement(SQLHSTMT hStmt)
+	SQLHSTMT Table::FreeStatement(SQLHSTMT hStmt)
 	{
 		// Free statement handle
 		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
-		if (ret != SQL_SUCCESS)
+		if (ret == SQL_ERROR)
 		{
 			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-			if (ret == SQL_ERROR)
-			{
-				LOG_ERROR_STMT(hStmt, ret, SqlFreeHandle);
-			}
-			else
-			{
-				LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
-			}
+			SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_STMT, hStmt, L"Freeing ODBC-Statement Handle failed with SQL_ERROR, handle is still valid.");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
-		else
+		else if (ret == SQL_INVALID_HANDLE)
 		{
-			hStmt = SQL_NULL_HSTMT;
+			// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
+			hStmt = SQL_NULL_HENV;
+			SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Statement Handle failed with SQL_INVALID_HANDLE.");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
-		return ret == SQL_SUCCESS;
+		// We have SUCCESS
+		hStmt = SQL_NULL_HENV;
+
+		return hStmt;
 	}
 
 
@@ -545,17 +511,17 @@ namespace exodbc
 
 		// Free allocated statements
 		// First those created always
-		FreeStatement(m_hStmtCount);
-		FreeStatement(m_hStmtSelect);
+		m_hStmtCount = FreeStatement(m_hStmtCount);
+		m_hStmtSelect = FreeStatement(m_hStmtSelect);
 
 		if (!IsQueryOnly())
 		{
 			// And then those needed for writing
-			FreeStatement(m_hStmtInsert);
-			FreeStatement(m_hStmtDelete);
-			FreeStatement(m_hStmtUpdate);
-			FreeStatement(m_hStmtUpdateWhere);
-			FreeStatement(m_hStmtDeleteWhere);
+			m_hStmtInsert = FreeStatement(m_hStmtInsert);
+			m_hStmtDelete = FreeStatement(m_hStmtDelete);
+			m_hStmtUpdate = FreeStatement(m_hStmtUpdate);
+			m_hStmtUpdateWhere = FreeStatement(m_hStmtUpdateWhere);
+			m_hStmtDeleteWhere = FreeStatement(m_hStmtDeleteWhere);
 		}
 
 		//if (m_hstmtInternal)

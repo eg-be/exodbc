@@ -671,26 +671,29 @@ namespace exodbc
 		/*!
 		* \brief	Initializes the member-vars, allocates statements and sets statement options
 		* \param	pDb Db this table is connected to. Used to get the DBC-Handle to create statements
-		*
 		* \return	true if it succeeds, false if it fails.
+		* \throw	Exception
 		*/
-		bool        Initialize(Database* pDb);
+		void        Initialize(Database* pDb);
 
 
 		/*!
 		* \brief	Allocates a new Statement-handle using the Database of this Table.
-		*
-		* \return	New Statement handle or SQL_NULL_HSTMT in case of failure.
+		* \return	New Statement handle.
+		* \throw	Exception If allocating handle fails.
 		*/
 		SQLHSTMT		AllocateStatement();
 
 
 		/*!
 		* \brief	Frees the passed Statement handle.
-		*
-		* \return	True if freed successully.
+		* \detailed If the passed statement can be freed successfully, SQL_NULL_HSTMT is returned.
+		*			If the passed statement cannot be freed successfully because SQL_INVALID_HANDLE 
+		*			or SQL_ERROR is returned, an Exception is thrown.
+		* \return	SQL_NULL_HSTMT is statement was freed successfully.
+		* \throw	Exception If freeing statement fails.
 		*/
-		bool		FreeStatement(SQLHSTMT stmt);
+		SQLHSTMT	FreeStatement(SQLHSTMT stmt);
 
 
 		void        cleanup();
