@@ -1181,12 +1181,11 @@ namespace exodbc
 
 	void Database::SetCommitMode(CommitMode mode)
 	{
-		// If Autocommit is off, we need to commit any ongoing transaction
+		// If Autocommit is off, we need to rollback any ongoing transaction
 		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
 		if (GetCommitMode() != CM_AUTO_COMMIT)
 		{
-			// \todo: Couldn't we just rollback?
-			CommitTrans();
+			RollbackTrans();
 		}
 
 		SQLRETURN ret;
