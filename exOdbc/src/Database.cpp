@@ -1154,11 +1154,7 @@ namespace exodbc
 		SQLUINTEGER modeValue;
 		SQLINTEGER cb;
 		SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_ATTR_TXN_ISOLATION, &modeValue, sizeof(modeValue), &cb);
-		if (ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLGetConnectAttr, L"Failed to read Attr SQL_ATTR_TXN_ISOLATION");
-			return TI_UNKNOWN;
-		}
+		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to read Attr SQL_ATTR_TXN_ISOLATION");
 
 		switch (modeValue)
 		{
@@ -1206,19 +1202,18 @@ namespace exodbc
 	}
 
 
-	bool Database::SetTransactionIsolationMode(TransactionIsolationMode mode)
+	void Database::SetTransactionIsolationMode(TransactionIsolationMode mode)
 	{	
 		// We need to ensure cursors are closed:
 		// The internal statement should be closed, the exec-statement could be open
 		EnsureStmtIsClosed(m_hstmt, m_dbmsType);
 		CloseStmtHandle(m_hstmtExecSql, IgnoreNotOpen);
 
-		// If Autocommit is off, we need to commit any ongoing transaction
+		// If Autocommit is off, we need to Rollback any ongoing transaction
 		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
 		if (GetCommitMode() != CM_AUTO_COMMIT)
 		{
-			// \todo: Couldn't we just rollback?
-			CommitTrans();
+			RollbackTrans();
 		}
 
 		SQLRETURN ret;
@@ -1245,20 +1240,8 @@ namespace exodbc
 		{
 			ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, NULL);
 		}
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, (boost::wformat(L"Cannot set SQL_ATTR_TXN_ISOLATION to %d") % mode).str());
 
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Setting SQL_ATTR_TXN_ISOLATION to %d returned with SQL_SUCCESS_WITH_INFO") % mode).str());
-		}
-
-		if (SQL_SUCCEEDED(ret))
-		{
-			return true;
-		}
-
-		LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Cannot set SQL_ATTR_TXN_ISOLATION to %d") % mode).str());
-
-		return false;
 	}
 
 	

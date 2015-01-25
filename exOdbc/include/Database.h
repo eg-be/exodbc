@@ -445,7 +445,8 @@ namespace exodbc
 		
 		/*!
 		* \brief	Queries the database for the attribute SQL_TXN_ISOLATION.
-		* \return	TI_UNKNOWN if fails, else the mode currently set
+		* \return	The mode currently set or TI_UNKNOWN if read mode is unknown.
+		* \throw	Exception If reading from the database fails.
 		*/
 		TransactionIsolationMode ReadTransactionIsolationMode();
 
@@ -453,11 +454,11 @@ namespace exodbc
 		/*!
 		* \brief	Sets transaction mode on the database, using the attribute SQL_TXN_ISOLATION.
 		*			Calling this method will first close the internal statement-handle.
-		*			If the transaction mode is set to TM_MANUAL it will then commit any ongoing transaction.
+		*			If the transaction mode is set to TM_MANUAL it will then Rollback any ongoing transaction.
 		* \param	mode	The mode to set.
-		* \return	true if it succeeds, false if it fails.
+		* \throw	Exception if setting mode fails.
 		*/
-		bool		SetTransactionIsolationMode(TransactionIsolationMode mode);
+		void		SetTransactionIsolationMode(TransactionIsolationMode mode);
 
 		
 		/*!
