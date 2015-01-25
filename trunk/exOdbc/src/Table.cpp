@@ -1177,31 +1177,30 @@ namespace exodbc
 		if (!IsQueryOnly())
 		{
 			// We need the primary keys
-			if (!(m_tablePrimaryKeys.IsInitialized() || m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo)))
-			{
-				LOG_ERROR((boost::wformat(L"Failed to Read Primary Keys for Table '%s'") % m_tableInfo.GetSqlName()).str());
-				return false;
-			}
+			m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo);
 
 			// And we need to have a primary key
 			if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
 			{
-				LOG_ERROR((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
-				return false;
+				Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
 
 			// Test that all primary keys are bound
 			if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
 			{
-				LOG_ERROR((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
-				return false;
+				Exception ex((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
 
 			// Set the primary key flags on the bound Columns
 			if (!m_tablePrimaryKeys.SetPrimaryKeyFlag(m_columnBuffers))
 			{
-				LOG_ERROR((boost::wformat(L"Failed to mark Bound Columns as primary keys for table '%s'") % m_tableInfo.GetSqlName()).str());
-				return false;
+				Exception ex((boost::wformat(L"Failed to mark Bound Columns as primary keys for table '%s'") % m_tableInfo.GetSqlName()).str());
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
 
 			if (!BindInsertParameters())

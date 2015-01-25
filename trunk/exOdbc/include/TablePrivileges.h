@@ -58,8 +58,7 @@ namespace exodbc
 		/*!
 		* \brief	Create a TablePrivilege for the Table given by tableInfo.
 		* \detailed	Tries to Initialize() this TablePrivileges automatically.
-		*			This will not throw an exception if Initialization fails.
-		* \see		IsInitialized()
+		* \throw	Exception If Initialization fails.
 		*/
 		TablePrivileges(Database* pDb, const STableInfo& tableInfo);
 		
@@ -106,6 +105,7 @@ namespace exodbc
 	private:
 		/*!
 		* \brief	Parses to TablePrivilege.
+		* \throw	Exception
 		*/
 		void Parse(const TablePrivilegesVector& tablePrivs);
 

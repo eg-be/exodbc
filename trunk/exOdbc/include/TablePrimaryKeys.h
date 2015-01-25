@@ -55,6 +55,7 @@ namespace exodbc
 		* \brief	Create a TablePrimaryKeys for the Table given by tableInfo.
 		* \detailed	Tries to Initialize() this TablePrimaryKeys automatically.
 		* \see		IsInitialized()
+		* \throw	Exception If querying primary keys fails.
 		*/
 		TablePrimaryKeys(Database* pDb, const STableInfo& tableInfo);
 
@@ -65,9 +66,9 @@ namespace exodbc
 		/*!
 		* \brief	Query database about the Primary Keys of the passed Table.
 		*			Marks object as initialized on success.
-		* \return	True on success.
+		* \throw	If querying fails or parsing fails.
 		*/
-		bool Initialize(Database* pDb, const STableInfo& tableInfo);
+		void Initialize(Database* pDb, const STableInfo& tableInfo);
 
 
 		/*!
@@ -75,9 +76,9 @@ namespace exodbc
 		*			Marks object as initialized on success.
 		*			Note that this will not fail if tablePks is empty.
 		* \param	tablePks table primary keys
-		* \return	True on success.
+		* \fails	If parsing fails.
 		*/
-		bool Initialize(const TablePrimaryKeysVector& tablePks) { return Parse(tablePks); };
+		void Initialize(const TablePrimaryKeysVector& tablePks) { m_initialized = false; Parse(tablePks); m_initialized = true; };
 
 
 		/*!
@@ -101,8 +102,11 @@ namespace exodbc
 		const TablePrimaryKeysVector& GetPrimaryKeysVector() const { exASSERT(m_initialized); return m_pksVector; };
 
 	private:
-
-		bool Parse(const TablePrimaryKeysVector& tablePks);
+		/*!
+		* \brief	Parses.
+		* \throw	Exception
+		*/
+		void Parse(const TablePrimaryKeysVector& tablePks);
 
 		bool m_initialized;
 
