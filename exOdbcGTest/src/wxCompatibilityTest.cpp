@@ -41,8 +41,8 @@ namespace exodbc
 		m_env.SetDsn(m_odbcInfo.m_dsn);
 		m_env.SetUserID(m_odbcInfo.m_username);
 		m_env.SetPassword(m_odbcInfo.m_password);
-		ASSERT_TRUE(m_env.AllocHenv());
-		ASSERT_TRUE(m_env.SetOdbcVersion(OV_3));
+		m_env.AllocHenv();
+		m_env.SetOdbcVersion(OV_3);
 
 		// And the db
 		m_pDb = new Database(&m_env);

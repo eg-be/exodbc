@@ -15,7 +15,7 @@
 // Same component headers
 // Other headers
 #include "Environment.h"
-
+#include "Exception.h"
 // Debug
 #include "DebugNew.h"
 
@@ -52,17 +52,32 @@ namespace exodbc
 	TEST_P(EnvironmentTest, AllocHenv)
 	{
 		Environment env;
-		EXPECT_TRUE(env.AllocHenv());
+		ASSERT_NO_THROW(env.AllocHenv());
+		// We will fail to allocate a second one
+		// Suppress the output of the assertion helper
+		LogLevelFatal lf;
+		DontDebugBreak ddb;
+		EXPECT_THROW(env.AllocHenv(), AssertionException);
 	}
 
 
 	TEST_P(EnvironmentTest, FreeHenv)
 	{
+		// First simply test alloc - free
 		Environment env;
-		ASSERT_TRUE(env.AllocHenv());
-		EXPECT_TRUE(env.FreeHenv());
+		ASSERT_NO_THROW(env.AllocHenv());
+		EXPECT_NO_THROW(env.FreeHenv());
 		
-		// TODO: Test to test if we fail (we do so) if there are still open databases on that handle?
+		// Now test that we fail to free if there is still a database around
+		ASSERT_NO_THROW(env.AllocHenv());
+		ASSERT_NO_THROW(env.SetOdbcVersion(OV_3));
+		{
+			Database db(env);
+			EXPECT_THROW(env.FreeHenv(), SqlResultException);
+		}
+
+		// Once the database is gone, we can free the env
+		EXPECT_NO_THROW(env.FreeHenv());
 	}
 
 
@@ -86,13 +101,13 @@ namespace exodbc
 		Environment env_v3;
 		Environment env_v3_80;
 
-		ASSERT_TRUE(env_v2.AllocHenv());
-		ASSERT_TRUE(env_v3.AllocHenv());
-		ASSERT_TRUE(env_v3_80.AllocHenv());
+		ASSERT_NO_THROW(env_v2.AllocHenv());
+		ASSERT_NO_THROW(env_v3.AllocHenv());
+		ASSERT_NO_THROW(env_v3_80.AllocHenv());
 
-		EXPECT_TRUE(env_v2.SetOdbcVersion(OV_2));
-		EXPECT_TRUE(env_v3.SetOdbcVersion(OV_3));
-		EXPECT_TRUE(env_v3_80.SetOdbcVersion(OV_3_8));
+		EXPECT_NO_THROW(env_v2.SetOdbcVersion(OV_2));
+		EXPECT_NO_THROW(env_v3.SetOdbcVersion(OV_3));
+		EXPECT_NO_THROW(env_v3_80.SetOdbcVersion(OV_3_8));
 
 		EXPECT_EQ(SQL_OV_ODBC2, env_v2.ReadOdbcVersion());
 		EXPECT_EQ(SQL_OV_ODBC3, env_v3.ReadOdbcVersion());
@@ -105,7 +120,7 @@ namespace exodbc
 		ASSERT_TRUE(env.HasHenv());
 
 		vector<SDataSource> dataSources;
-		ASSERT_TRUE(env.ListDataSources(Environment::All, dataSources));
+		ASSERT_NO_THROW(dataSources = env.ListDataSources(Environment::All));
 
 		// Expect that we find our DataSource in the list
 		bool foundDataSource = false;
