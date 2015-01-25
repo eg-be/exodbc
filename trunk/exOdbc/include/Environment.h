@@ -134,12 +134,14 @@ namespace exodbc
 		 */
 		Environment(const std::wstring& connectionString, OdbcVersion odbcVersion = OV_3);
 
+
 		/*!
 		 * \fn	Environment::~Environment();
 		 *
 		 * \brief	Destructor. Tries to free the env-handle, if one is allocated.
 		 */
 		~Environment();
+
 
 		/*!
 		 * \fn	bool Environment::Initialize();
@@ -148,29 +150,33 @@ namespace exodbc
 		 * 			Set all members to 0.
 		 * 			Cannot be called if a Henv is allocated.
 		 *
-		 * \return	true if it succeeds, false if it fails.
+		 * \throw	Exception If Henv is already allocated.
 		 */
-		bool			Initialize();
+		void			Initialize();
+
 
 		/*!
 		 * \brief	Tries to allocate a new Henv.
 		 * 			Cannot be called if a Henv is allocated.
-		 * \return	true if it succeeds, false if it fails.
+		 *	\throw	Exception If Henv is already allocated or Allocating fails.
 		 */
-		bool			AllocHenv();
+		void			AllocHenv();
+
 
 		/*!
 		 * \brief	Tries to free an allocated Henv.
 		 * 			Can only be called if a Henv is allocated.
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool			FreeHenv();
+		void			FreeHenv();
+
 
 		/*!
 		 * \brief	Returns true is a Henv is allocated.
 		 * \return	Returns true is a Henv is allocated.
 		 */
-		bool			HasHenv() const	{ return m_henv != NULL; };
+		bool			HasHenv() const	{ return m_henv != SQL_NULL_HENV; };
+
 
 		// Accessors
 		const SQLHENV&		GetHenv() const		{ return m_henv; };
@@ -192,6 +198,7 @@ namespace exodbc
 		 * \brief	Sets a dsn.
 		 *
 		 * \param	dsn	The dsn. Cannot be longer than SQL_MAX_DSN_LENGTH
+		 * \deprecated
 		 */
 		void			SetDsn(const std::wstring& dsn);
 
@@ -201,6 +208,7 @@ namespace exodbc
 		 * \brief	Sets user identifier.
 		 *
 		 * \param	userID	Identifier for the user. Cannot be longer than SQL_MAX_USER_NAME_LEN
+		 * \deprecated
 		 */
 		void			SetUserID(const std::wstring& userID);
 
@@ -210,8 +218,10 @@ namespace exodbc
 		 * \brief	Sets a password.
 		 *
 		 * \param	password	The password. Cannot be longer than SQL_MAX_AUTHSTR_LEN
+		 * \deprecated
 		 */
 		void			SetPassword(const std::wstring &password);
+
 
 		/*!
 		 * \fn	void Environment::SetConnectionStr(const std::wstring &connectStr);
@@ -222,26 +232,25 @@ namespace exodbc
 		 * 						Notes the connection-information to use a connection-string when
 		 * 						connecting to the database if called with a non-empty connection
 		 * 						string. Removed if called with an empty connection string.
+		 * \deprecated
 		 */
 		void			SetConnectionStr(const std::wstring &connectStr);
 
+		
 		/*!
-		 * \fn	bool Environment::SetOdbcVersion(OdbcVersion version);
-		 *
 		 * \brief	Sets ODBC version.
 		 *
 		 * \param	version	The version.
-		 *
-		 * \return	true if it succeeds, false if it fails.
+		 * \throw	Exception
 		 */
-		bool			SetOdbcVersion(OdbcVersion version);		
+		void			SetOdbcVersion(OdbcVersion version);		
+
 
 		/*!
-		 * \fn	OdbcVersion Environment::ReadOdbcVersion();
+		 * \brief	Reads the ODBC version from the environment.
 		 *
-		 * \brief	Gets ODBC version.
-		 *
-		 * \return	The ODBC version or OV_UNKNOWN if reading the version fails.
+		 * \return	The ODBC version or OV_UNKNOWN if read version is unknown.
+		 * \throw	Exception
 		 */
 		OdbcVersion		ReadOdbcVersion() const;
 

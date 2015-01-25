@@ -13,6 +13,8 @@
 #include "Environment.h"
 
 // Same component headers
+#include "Exception.h"
+
 // Other headers
 
 // Debug
@@ -31,23 +33,27 @@ namespace exodbc
 	// ------------
 	
 	Environment::Environment()
+		: m_henv(SQL_NULL_HENV)
 	{
-		// Note: Init will set members to NULL
+		// Note: Init will set members to NULL, but asserts if m_henv is set
 		Initialize();
 	}
 	
 	
 	Environment::Environment(OdbcVersion odbcVersion)
+		: m_henv(SQL_NULL_HENV)
 	{
-		// Note: Init will set members to NULL
+		// Note: Init will set members to NULL, but asserts if m_henv is set
 		Initialize();
 		AllocHenv();
 		SetOdbcVersion(odbcVersion);
 	} 
 
+
 	Environment::Environment(const std::wstring& dsn, const std::wstring& userID, const std::wstring& password, OdbcVersion odbcVersion /* = OV_3 */ )
+		: m_henv(SQL_NULL_HENV)
 	{
-		// Note: Init will set members to NULL
+		// Note: Init will set members to NULL, but asserts if m_henv is set
 		Initialize();
 		AllocHenv(); // note: might fail
 		SetOdbcVersion(odbcVersion);
@@ -57,9 +63,11 @@ namespace exodbc
 		SetPassword(password);
 	}
 
+
 	Environment::Environment(const std::wstring& connectionString, OdbcVersion odbcVersion /* = OV_3 */ )
+		: m_henv(SQL_NULL_HENV)
 	{
-		// Note: Init will set members to NULL
+		// Note: Init will set members to NULL, but asserts if m_henv is set
 		Initialize();
 		AllocHenv(); // note: might fail
 		SetOdbcVersion(odbcVersion);
@@ -72,17 +80,28 @@ namespace exodbc
 	// -----------
 	Environment::~Environment()
 	{
-		if (m_henv != SQL_NULL_HENV)
+		if (HasHenv())
 		{
-			FreeHenv(); // note: might fail
+			try
+			{
+				FreeHenv();
+			}
+			catch (Exception e)
+			{
+				// Log and forget..
+				LOG_ERROR(e.ToString());
+			}
 		}
 	}
 
+
 	// Implementation
 	// --------------
-	bool Environment::Initialize()
+	void Environment::Initialize()
 	{
-		m_henv = NULL;
+		exASSERT(!HasHenv());
+		
+		m_henv = SQL_NULL_HENV;
 
 		m_henv = 0;
 		m_dsn[0] = 0;
@@ -91,59 +110,54 @@ namespace exodbc
 		m_connectionStr[0] = 0;
 
 		m_useConnectionStr = false;
-
-		return true;
 	}
 
 
-	bool Environment::AllocHenv()
+	void Environment::AllocHenv()
 	{
 		// This is here to help trap if you are getting a new henv
 		// without releasing an existing henv
-		exASSERT(m_henv == SQL_NULL_HENV);
-
-		if (m_henv != SQL_NULL_HENV)
-		{
-			LOG_ERROR(L"Cannot Allocate a new HENV while the existing member is not NULL");
-			return false;
-		}
+		exASSERT(!HasHenv());
 
 		// Initialize the ODBC Environment for Database Operations
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv);
-		if(ret != SQL_SUCCESS)
+		if (!SQL_SUCCEEDED(ret))
 		{
-			LOG_ERROR_ENV_MSG(m_henv, ret, SQLAllocHandle, L"Failed to allocated ODBC-Env Handle");
-			return false;
+			SqlResultException ex(L"SQLAllocHandle", ret, L"Failed to allocated ODBC-Env Handle");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
-
-		return true;
 	}
 
 
-	bool Environment::FreeHenv()
+	void Environment::FreeHenv()
 	{
 		exASSERT(m_henv);
 
 		SQLRETURN ret = SQL_SUCCESS;
 
-		if (m_henv)
+		if (SQL_NULL_HENV != m_henv)
 		{
+			// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
 			ret = SQLFreeHandle(SQL_HANDLE_ENV, m_henv);
-			if(ret != SQL_SUCCESS)
+			if (ret == SQL_ERROR)
 			{
 				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-				if(ret == SQL_ERROR)
-					LOG_ERROR_ENV_MSG(m_henv, ret, SQLFreeHandle, L"Freeing ODBC-Env Handle failed with SQL_ERROR, handle is still valid");
-				else
-					LOG_ERROR_ENV_MSG(m_henv, ret, SQLFreeHandle, L"Freeing ODBC-Env Handle failed, handle is invalid");
+				SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_ENV, m_henv, L"Freeing ODBC-Environment Handle failed with SQL_ERROR, handle is still valid. Are all Connection-handles freed?");
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
-			if(ret != SQL_ERROR)
+			if (ret == SQL_INVALID_HANDLE)
 			{
+				// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
 				m_henv = SQL_NULL_HENV;
+				SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Env Handle failed with SQL_INVALID_HANDLE.");
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
+			// We have SUCCESS
+			m_henv = SQL_NULL_HENV;
 		}
-
-		return ret == SQL_SUCCESS;
 	}
 
 
@@ -183,12 +197,11 @@ namespace exodbc
 	}
 
 
-	bool Environment::SetOdbcVersion(OdbcVersion version)
+	void Environment::SetOdbcVersion(OdbcVersion version)
 	{
-		exASSERT(m_henv);
+		exASSERT(HasHenv());
 
-		// I dont know why we cannot use the value stored in m_requestedOdbcVersion. It just works with the constants
-		// because the SQLPOINTER is interpreted as an int value.. for int-attrs..
+		// Remember: because the SQLPOINTER is interpreted as an int value.. for int-attrs..
 		SQLRETURN ret;
 		switch(version)
 		{
@@ -202,18 +215,10 @@ namespace exodbc
 			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
 			break;
 		default:
-			LOG_ERROR((boost::wformat(L"Unknown ODBC Version value: %d") %version).str());
-			return false;
+			THROW_WITH_SOURCE(IllegalArgumentException, (boost::wformat(L"Unknown ODBC Version value: %d") % version).str());
 		}
 
-		if(ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_ENV_MSG(m_henv, ret, SQLSetEnvAttr, (boost::wformat(L"Failed to set SQL_ATTR_ODBC_VERSION to value %d") %version).str());
-			return false;
-		}
-
-
-		return true;
+		THROW_IFN_SUCCEEDED_MSG(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_henv, (boost::wformat(L"Failed to set SQL_ATTR_ODBC_VERSION to value %d") % version).str());
 	}
 
 
@@ -221,11 +226,8 @@ namespace exodbc
 	{
 		unsigned long value = 0;
 		SQLRETURN ret = SQLGetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
-		if(ret != SQL_SUCCESS)
-		{
-			BOOST_LOG_TRIVIAL(debug) << L"Failed to read SQL_ATTR_ODBC_VERSION: " << GetLastEnvError(m_henv).ToString();
-			return OV_UNKNOWN;
-		}
+
+		THROW_IFN_SUCCEEDED_MSG(SQLGetEnvAttr, ret, SQL_HANDLE_ENV, m_henv, L"Failed to read SQL_ATTR_ODBC_VERSION");
 
 		switch(value)
 		{
@@ -239,6 +241,7 @@ namespace exodbc
 
 		return OV_UNKNOWN;
 	}
+
 
 	bool Environment::ListDataSources(ListMode mode, vector<SDataSource>& dataSources) const
 	{

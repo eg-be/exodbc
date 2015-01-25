@@ -346,7 +346,7 @@ namespace exodbc
 	//}
 
 
-	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv /* = SQL_NULL_HENV */, SQLHANDLE hDbc /* = SQL_NULL_HDBC */, SQLHANDLE hStmt /* = SQL_NULL_HSTMT */, SQLHANDLE hDesc /* = SQL_NULL_HDESC */)
+	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
 	{
 		exASSERT(hEnv != SQL_NULL_HENV || hDbc != SQL_NULL_HDBC || hStmt != SQL_NULL_HSTMT || hDesc != SQL_NULL_HDESC);
 
@@ -410,11 +410,30 @@ namespace exodbc
 	}
 
 
+	std::vector<SErrorInfo> GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle)
+	{
+		switch (handleType)
+		{
+		case SQL_HANDLE_ENV:
+			return GetAllErrors(handle, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC);
+		case SQL_HANDLE_DBC:
+			return GetAllErrors(SQL_NULL_HENV, handle, SQL_NULL_HSTMT, SQL_NULL_HDESC);
+		case SQL_HANDLE_STMT:
+			return GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, handle, SQL_NULL_HDESC);
+		case SQL_HANDLE_DESC:
+			return GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, handle);
+		default:
+			exASSERT_MSG(false, L"Unknown handleType");
+		}
+		return std::vector<SErrorInfo>();
+	}
+
+
 	SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors)
 	{
 		std::vector<SErrorInfo> errs;
 		if(hEnv)
-			errs = GetAllErrors(hEnv);
+			errs = GetAllErrors(SQL_HANDLE_ENV, hEnv);
 		else
 			BOOST_LOG_TRIVIAL(warning) << L"Cannot fetch errors, hEnv is NULL";
 
@@ -446,7 +465,7 @@ namespace exodbc
 	{
 		std::vector<SErrorInfo> errs;
 		if(hStmt)
-			errs = GetAllErrors(NULL, NULL, hStmt);
+			errs = GetAllErrors(SQL_HANDLE_STMT, hStmt);
 		else
 			BOOST_LOG_TRIVIAL(warning) << L"Cannot fetch errors, hStmt is NULL";
 
@@ -545,7 +564,7 @@ namespace exodbc
 		else if (dbms != dbmsMY_SQL)
 		{
 			// We would expect SQLSTATE 24000
-			const std::vector<SErrorInfo>& errs = GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, hStmt);
+			const std::vector<SErrorInfo>& errs = GetAllErrors(SQL_HANDLE_STMT, hStmt);
 			std::vector<SErrorInfo>::const_iterator it;
 			bool haveOtherErrs = false;
 			std::wstringstream ws;
