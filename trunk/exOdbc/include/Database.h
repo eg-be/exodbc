@@ -127,23 +127,21 @@ namespace exodbc
 	public:
 		/*!
 		* \brief	Default Constructor. You will need to manually allocate the DBC-Handle.
-		* \detailed	Default Constructor. You will need to call AllocateHenv() afterwards to
-		*			allocate the Database-handle.
+		* \detailed	Default Constructor. You will need to call AllocateHdbcAndReadEnvOdbcVersion() 
+		*			afterwards to allocate the Database-handle.
 		* \see		AllocateHenv()
 		*/
-		Database();
+		Database() throw();
 
 
 		/*!
 		* \brief	Create a new Database-instance. The instance will be using the passed
 		*			Environment.
 		* \detailed	The Database will try to create a new Db-Connection handle during construction.
-		*				No Exception is thrown if doing so fails, you can use HasHdbc() to check if
-		*				creating the Db-Connection handle was successful.
-		*				The handle will be freed by the Database on destruction.
-		*
-		* \param	pEnv		The Environment to use to create this database and its connection.
+		*			The handle will be freed by the Database on destruction.
+		* \param	env		The Environment to use to create this database and its connection.
 		*						Do not free the Environment before you free the Database.
+		* \throw	Exception If handle cannot be allocated
 		*/
 		Database(const Environment& env);
 
@@ -159,6 +157,7 @@ namespace exodbc
 		 *
 		 * \param	pEnv		The Environment to use to create this database and its connection.
 		 *						Do not free the Environment before you free the Database.
+		 * \deprecated
 		*/
 		Database(const Environment* pEnv);
 		
@@ -169,16 +168,18 @@ namespace exodbc
 		/*!
 		* \brief	Tries to allocate a new DBC-Handle from the passed Environment and stores that
 		*			DBC-Handle for later use internally. Will be freed on destruction.
+		*			Reads the ODBC Version from the Environment and remembers it internally.
 		* \detailed	The Database will try to create a new Db-Connection using the Environment-handle
 		*			from the passed Environment. This newly created Connection-Handle is stored 
 		*			for later use. 
 		*			The DBC-handle will be freed by the Database on destruction.
 		*			Can only be called if no handle is allocated yet
-		*
 		* \param	env		The Environment to use to create this connection-handle.
 		*						Do not free the Environment before you free the Database.
+		* \throw	Exception If a handle is already allocated, allocating fails or reading the ODBC-
+		*			version from the Environment fails.
 		*/
-		bool		AllocateHdbc(const Environment& env);
+		void		AllocateHdbcAndReadEnvOdbcVersion(const Environment& env);
 
 
 		/*!
@@ -189,7 +190,7 @@ namespace exodbc
 		 * \param	connectStr			 		The connect string.
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         Open(const std::wstring& inConnectStr);
+		void         Open(const std::wstring& inConnectStr);
 
 
 		/*!
@@ -201,7 +202,7 @@ namespace exodbc
 		 * \param	parentWnd				 	The parent window.
 		 * \return	true if it succeeds, false if it fails.
 		 */
-		bool         Open(const std::wstring& inConnectStr, SQLHWND parentWnd);
+		void         Open(const std::wstring& inConnectStr, SQLHWND parentWnd);
 
 
 		/*!
@@ -209,26 +210,29 @@ namespace exodbc
 		 * \param	Dsn						 	The dsn.
 		 * \param	Uid						 	The UID.
 		 * \param	AuthStr					 	The authentication string.
-		 *
 		 * \return	true if it succeeds, false if it fails.
+		 * \throw	Exception If Opening the Connection fails, or no Database handle is allocated.
 		 */
-		bool         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
+		void         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
 
 
 		/*!
 		 * \brief	Opens by using the information from the passed Environment
 		 * \param [in,out]	pEnv	 	Pointer to the Environment to use to connect.
 		 * \return	true if it succeeds, false if it fails.
+		 * \deprecated
 		 */
-		bool         Open(const Environment* const pEnv);
+		void         Open(const Environment* const pEnv);
 
 
 		/*!
-		 * \brief	If this database is open, closes the stmt-handle and the connection to the db.
-		 * \return	True if not open or closing the Db-connection works, False if closing the db-
-		 * 			connection fails.
+		 * \brief		If this database is open, closes the stmt-handle and the connection to the db.
+		 * \detailed	This function will fail if any of the handles cannot be freed.
+		 *				This function will rollback any open transaction if manual commit mode is set.
+		 * \detailed	If the database is not open, this function does nothing
+		 * \throw		Exception If closing the db-connection fails. 
 		 */
-		bool         Close();
+		void         Close();
 
 
 		enum ExecFailMode 
@@ -411,8 +415,10 @@ namespace exodbc
 
 		/*!
 		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT. The internal flag
-		 * 			m_commitMode is updated with the value red from the database.
-		 * \return	CM_UNKNOWN if fails, else the mode currently set
+		 * 			m_commitMode is updated with the value red from the database, if reading
+		 *			was successful. In all other cases it is set to CM_UNKNOWN.
+		 * \return	The mode currently set.
+		 * \throw	Exception If reading the commit mode fails.
 		 */
 		CommitMode		ReadCommitMode();
 
@@ -424,9 +430,9 @@ namespace exodbc
 		 *			This will always first Commit all ongoing transactions.
 		 * \see		GetCommitMode()
 		 * \param	mode	The mode to set.
-		 * \return	true if it succeeds, false if it fails.
+		 * \throw	Exception If setting on database fails. Will not update internal flag in that case.
 		 */
-		bool		SetCommitMode(CommitMode mode);
+		void		SetCommitMode(CommitMode mode);
 
 		
 		/*!
@@ -460,20 +466,14 @@ namespace exodbc
 		* \return	true if mode supported by database.
 		*/
 		bool		CanSetTransactionIsolationMode(TransactionIsolationMode mode);
-
 	
-		/*!
-		* \brief	Get the environment used to Allocate this Database handle.
-		* \return	NULL if AllocHdbc() was not called with success.
-		*/
-		const Environment* GetEnvironment() const { return m_pEnv; };
-
 	
 		/*!
 		* \brief	Read the ODBC version supported by the driver.
 		* \detailed	Fails if not connected. Does not read the version from the environment
 		*			but from the SDbInfo populated during connecting to the database.
 		* \return	ODBC version or OV_UNKNOWN.
+		* \throw	Exception If not Open or parsing the version returned from the driver fails.
 		*/
 		OdbcVersion GetDriverOdbcVersion() const;
 
@@ -587,11 +587,11 @@ namespace exodbc
 	private:
 		
 		/*!
-		* \brief	Queries SQLGetTypeInfo to fill the passed SSqlTypeInfo struct.
-		* \param [in,out] types Filled with data types supported by the db
-		* \return	True on success.
+		* \brief	Queries SQLGetTypeInfo to populate a SSqlTypeInfo struct.
+		* \return	Types Filled with data types supported by the db
+		* \throw	Exception
 		*/
-		bool			ReadDataTypesInfo(std::vector<SSqlTypeInfo>& types);
+		std::vector<SSqlTypeInfo> ReadDataTypesInfo();
 
 		
 		/*!
@@ -602,22 +602,24 @@ namespace exodbc
 
 		/*!
 		* \brief	Query the Database using SQLGetInfo.
-		* \param [in,out] dbInfo SDbInfo to populate.
-		* \return	True on success.
+		* \return	SDbInfo populated with values.
+		* \throw	Exception If reading Database info fails.
 		*/
-		bool			ReadDbInfo(SDbInfo& dbInfo);
+		SDbInfo			ReadDbInfo();
 		
 		
 		/*!
-		* \brief	Set initial global attributs on the database connection handle.
+		* \brief	Set initial global attributes on the database connection handle.
+		* \throw	Exception
 		*/
-		bool			SetConnectionAttributes();
+		void			SetConnectionAttributes();
 		
 
 		/*!
 		* \brief	Do jobs common to all Open() implementations.
+		* \throw	Exception If anything goes wrong.
 		*/
-		bool             OpenImpl();
+		void             OpenImpl();
 
 		
 		enum ReadCatalogInfoMode
@@ -647,7 +649,7 @@ namespace exodbc
 		std::wstring		m_inConnectionStr; ///< Connection string used to connect to the database
 		std::wstring		m_outConnectionStr;///< Connection string returned by the database when a connection is successfully OpenImpled
 		DatabaseProduct		m_dbmsType;        ///< Type of datasource - i.e. Oracle, dBase, SQLServer, etc
-		const Environment*	m_pEnv;				///< Environment used to create this Database
+		OdbcVersion			m_envOdbcVersion;	///< ODBC-Version read from the environment while allocating the HDBC handle.
 
 		// ODBC handles created by the Database
 		SQLHDBC  m_hdbc;			///< ODBC DB Connection handle

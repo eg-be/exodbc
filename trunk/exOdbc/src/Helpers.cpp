@@ -628,49 +628,62 @@ namespace exodbc
 	}
 
 
-	bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, std::wstring& sValue)
+	void GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, std::wstring& sValue)
 	{
 		// Determine buffer length
 		exASSERT(hDbc != NULL);
 		SQLSMALLINT bufferSize = 0;
 		SQLRETURN ret = SQLGetInfo(hDbc, fInfoType, NULL, NULL, &bufferSize);
-		if ( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_DBC_MSG(hDbc, ret, SQLGetInfo, (boost::wformat(L"GetInfo for fInfoType %d failed") % fInfoType).str());
-			return false;
-		}
+		THROW_IFN_SUCCEEDED_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, hDbc, (boost::wformat(L"GetInfo for fInfoType %d failed") % fInfoType).str());
+
 		// According to the doc SQLGetInfo will always return byte-size. Therefore:
 		exASSERT((bufferSize % sizeof(wchar_t)) == 0);
+
 		// Allocate buffer, add one for terminating 0 char.
 		SQLSMALLINT charSize = (bufferSize / sizeof(wchar_t)) + 1;
 		bufferSize = charSize * sizeof(wchar_t);
 		wchar_t* buff = new wchar_t[charSize];
 		buff[0] = 0;
 		SQLSMALLINT cb;
-		bool ok = GetInfo(hDbc, fInfoType, (SQLPOINTER)buff, bufferSize, &cb);
-		if (ok)
+
+		try
 		{
-			sValue = buff;
+			GetInfo(hDbc, fInfoType, (SQLPOINTER)buff, bufferSize, &cb);
 		}
+		catch (Exception e)
+		{
+			delete[] buff;
+			throw e;
+		}
+		sValue = buff;
 		delete[] buff;
-		return ok;
 	}
 
 
-	bool GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
+	void GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
 	{
 		exASSERT(hDbc != NULL);
 		SQLRETURN ret = SQLGetInfo(hDbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue);
-		if( ret != SQL_SUCCESS )
-		{
-			LOG_ERROR_DBC_MSG(hDbc, ret, SQLGetInfo, (boost::wformat(L"GetInfo for fInfoType %d failed") %fInfoType).str());
-		}
-
-		return ret == SQL_SUCCESS;
+		THROW_IFN_SUCCEEDED_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, hDbc, (boost::wformat(L"GetInfo for fInfoType %d failed") % fInfoType).str());
 	}
 
 
 	bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
+	{
+		try
+		{
+			GetDataEx(hStmt, colOrParamNr, targetType, pTargetValue, bufferLen, strLenOrIndPtr, pIsNull, nullTerminate);
+		}
+		catch (Exception ex)
+		{
+			LOG_ERROR(ex.ToString());
+			return false;
+		}
+		return true;
+	}
+
+
+	void GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
 	{
 		exASSERT(hStmt != SQL_NULL_HSTMT);
 		if(nullTerminate)
@@ -680,51 +693,67 @@ namespace exodbc
 
 		bool isNull;
 		SQLRETURN ret = SQLGetData(hStmt, colOrParamNr, targetType, pTargetValue, bufferLen, strLenOrIndPtr);
-		if( ! (ret == SQL_SUCCESS ))
+		THROW_IFN_SUCCEEDED_MSG(SQLGetData, ret, SQL_HANDLE_STMT, hStmt, (boost::wformat(L"SGLGetData failed for Column %d") % colOrParamNr).str());
+
+		isNull = (*strLenOrIndPtr == SQL_NULL_DATA);
+		if (pIsNull)
 		{
-			LOG_ERROR_STMT_MSG(hStmt, ret, SQLGetData, (boost::wformat(L"SGLGetData failed for Column %d") %colOrParamNr).str());
-			return false;
+			*pIsNull = isNull;
 		}
 
-		// ret is SQL_SUCCESS
+		// a string that is null does not get terminated. just dont use it.
+		if(nullTerminate && !isNull)
 		{
-			isNull = (*strLenOrIndPtr == SQL_NULL_DATA);
-			if(pIsNull)
-				*pIsNull = isNull;
-
-			// a string that is null does not get terminated. just dont use it.
-			if(nullTerminate && !isNull)
+			exASSERT(*strLenOrIndPtr != SQL_NO_TOTAL);
+			if(targetType == SQL_C_CHAR)
 			{
-				exASSERT(*strLenOrIndPtr != SQL_NO_TOTAL);
-				if(targetType == SQL_C_CHAR)
-				{
-					char* pc = (char*) pTargetValue;
-					exASSERT(bufferLen >= *strLenOrIndPtr);
-					pc[*strLenOrIndPtr] = 0;
-				}
-				else
-				{
-					wchar_t* pw = (wchar_t*) pTargetValue;
-					int p = *strLenOrIndPtr / sizeof(wchar_t);
-					exASSERT(bufferLen >= p);
-					pw[ p ] = 0;
-				}
+				char* pc = (char*) pTargetValue;
+				exASSERT(bufferLen >= *strLenOrIndPtr);
+				pc[*strLenOrIndPtr] = 0;
+			}
+			else
+			{
+				wchar_t* pw = (wchar_t*) pTargetValue;
+				int p = *strLenOrIndPtr / sizeof(wchar_t);
+				exASSERT(bufferLen >= p);
+				pw[ p ] = 0;
 			}
 		}
-
-		return true;
 	}
 
 
 	bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
+	{
+		try
+		{
+			GetDataEx(hStmt, colOrParamNr, maxNrOfChars, value, pIsNull);
+		}
+		catch (Exception ex)
+		{
+			LOG_ERROR(ex.ToString());
+			return false;
+		}
+		return true;
+	}
+
+
+	void GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
 	{
 		value = L"";
 		wchar_t* buffer = new wchar_t[maxNrOfChars + 1];
 		size_t buffSize = sizeof(wchar_t) * (maxNrOfChars + 1);
 		SQLLEN cb;
 		bool isNull = false;
-		bool ok = GetData(hStmt, colOrParamNr, SQL_C_WCHAR, buffer, buffSize, &cb, &isNull, true);
-		if(ok && !isNull)
+		try
+		{
+			GetDataEx(hStmt, colOrParamNr, SQL_C_WCHAR, buffer, buffSize, &cb, &isNull, true);
+		}
+		catch (Exception ex)
+		{
+			delete[] buffer;
+			throw ex;
+		}
+		if(!isNull)
 		{
 			value = buffer;
 		}
@@ -732,7 +761,6 @@ namespace exodbc
 			*pIsNull = isNull;
 
 		delete[] buffer;
-		return ok;
 	}
 
 

@@ -45,6 +45,7 @@
 #include "Environment.h"
 #include "Helpers.h"
 #include "Table.h"
+#include "Exception.h"
 
 // Other headers
 
@@ -68,7 +69,7 @@ namespace exodbc
 		Initialize();
 
 		// Allocate the DBC-Handle and set the member m_pEnv
-		AllocateHdbc(env);
+		AllocateHdbcAndReadEnvOdbcVersion(env);
 	}
 
 
@@ -80,7 +81,7 @@ namespace exodbc
 		Initialize();
 
 		// Allocate the DBC-Handle
-		AllocateHdbc(*pEnv);
+		AllocateHdbcAndReadEnvOdbcVersion(*pEnv);
 	}
 
 
@@ -132,8 +133,8 @@ namespace exodbc
 		m_hstmt = SQL_NULL_HSTMT;
 		m_hstmtExecSql = SQL_NULL_HSTMT;
 
-		// No env
-		m_pEnv = NULL;
+		// Environment ODBC-Version unknown
+		m_envOdbcVersion = OV_UNKNOWN;
 
 		// Dbms unknwon
 		m_dbmsType      = dbmsUNIDENTIFIED;
@@ -147,88 +148,69 @@ namespace exodbc
 	}
 
 
-	bool Database::AllocateHdbc(const Environment& env)
+	void Database::AllocateHdbcAndReadEnvOdbcVersion(const Environment& env)
 	{
-		exASSERT(m_hdbc == SQL_NULL_HDBC);
+		exASSERT(!HasHdbc());
 		exASSERT(env.HasHenv());
-
-		if (m_hdbc != SQL_NULL_HDBC)
-		{
-			LOG_ERROR(L"Cannot Allocate a new HDBC while the existing member is not NULL");
-			return false;
-		}
 
 		// Allocate the DBC-Handle
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, env.GetHenv(), &m_hdbc);
-		if (ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_ENV(env.GetHenv(), ret, SQLAllocHandle);
-		}
+		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_ENV, env.GetHenv());
 
-		m_pEnv = &env;
-
-		return ret == SQL_SUCCESS;
+		// Read the environment odbc-version
+		m_envOdbcVersion = env.ReadOdbcVersion();
 	}
 
 
-	bool Database::OpenImpl()
+	void Database::OpenImpl()
 	{
 		exASSERT(m_hstmt == SQL_NULL_HSTMT);
 		exASSERT(m_hstmtExecSql == SQL_NULL_HSTMT);
 
 		// Allocate a statement handle for the database connection to use internal and the exec-handle
+		// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
-		if(ret != SQL_SUCCESS)
-		{
-			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
-			LOG_ERROR_DBC(m_hdbc, ret, SQLAllocHandle);
-			return false;
-		}
+		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_hdbc);
+
 		ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmtExecSql);
-		if (ret != SQL_SUCCESS)
-		{
-			// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
-			LOG_ERROR_DBC(m_hdbc, ret, SQLAllocHandle);
-			return false;
-		}
+		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_hdbc);
 
 		// Query the data source for info about itself
-		if (!ReadDbInfo(m_dbInf))
-			return false;
+		m_dbInf = ReadDbInfo();
 
 		// Check that our ODBC-Version matches
-		OdbcVersion envVersion = m_pEnv->ReadOdbcVersion();
 		OdbcVersion connectionVersion = GetDriverOdbcVersion();
-		if (envVersion > connectionVersion)
+		if (m_envOdbcVersion > connectionVersion)
 		{
-			LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % envVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer %connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName %connectionVersion).str());
+			// \todo: Probably we should throw here and fail totally
+			LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % m_envOdbcVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer %connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName %connectionVersion).str());
 		}
 
 		// Try to detect the type - this will update our internal type on the first call
 		Dbms();
 
 		// Set Connection Options
-		if (!SetConnectionAttributes())
-			return false;
+		SetConnectionAttributes();
+
+		// Default to manual commit
+		SetCommitMode(CM_MANUAL_COMMIT);
 
 		// Query the datatypes
-		if (!ReadDataTypesInfo(m_datatypes))
-			return false;
+		m_datatypes = ReadDataTypesInfo();
 
 		// Completed Successfully
 		LOG_DEBUG((boost::wformat(L"Opened connection to database %s") %m_dbInf.m_dbmsName).str());
-		return true;
 	}
 
 
-	bool Database::Open(const std::wstring& inConnectStr)
+	void Database::Open(const std::wstring& inConnectStr)
 	{
 		exASSERT(inConnectStr.length() > 0);
-		return Open(inConnectStr, NULL);
+		Open(inConnectStr, NULL);
 	}
 
 
-	bool Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd)
+	void Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd)
 	{
 		m_dsn = L"";
 		m_uid = L"";
@@ -250,23 +232,20 @@ namespace exodbc
 			(SQLWCHAR*) outConnectBuffer,
 			EXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE );
 
-		if (retcode != SQL_SUCCESS)
-		{
-			LOG_ERROR_DBC(m_hdbc, retcode, SQLDriverConnect);
-			return false;
-		}
+		THROW_IFN_SUCCEEDED(SQLDriverConnect, retcode, SQL_HANDLE_DBC, m_hdbc);
 
 		outConnectBuffer[outConnectBufferLen] = 0;
 		m_outConnectionStr = outConnectBuffer;
 		m_dbOpenedWithConnectionString = true;
 
-		return OpenImpl();
+		OpenImpl();
 	}
 
 
-	bool Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr)
+	void Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr)
 	{
 		exASSERT(!dsn.empty());
+		exASSERT(HasHdbc());
 
 		m_dsn        = dsn;
 		m_uid        = uid;
@@ -276,58 +255,40 @@ namespace exodbc
 		m_inConnectionStr = L"";
 		m_outConnectionStr = L"";
 
-		// TODO: Note about the forward-only cursors: This will be removed soon, see: 
-		// http://msdn.microsoft.com/en-us/library/ms713605%28v=vs.85%29.aspx -> SQL_ATTR_ODBC_CURSORS
-		// MS recommends to use the drivers lib (not modify here ? ). There is a statement-attribute to
-		// set the cursor-scrolling: http://msdn.microsoft.com/en-us/library/ms710272%28v=vs.85%29.aspx
-		//  -> http://msdn.microsoft.com/en-us/library/ms712631%28v=vs.85%29.aspx -> SQL_ATTR_CURSOR_SCROLLABLE
-
 		// Connect to the data source
 		SQLRETURN ret = SQLConnect(m_hdbc, 
 			(SQLWCHAR*) m_dsn.c_str(), SQL_NTS,
 			(SQLWCHAR*) m_uid.c_str(), SQL_NTS,
 			(SQLWCHAR*) m_authStr.c_str(), SQL_NTS);
 
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_DBC(m_hdbc, ret, SQLConnect);
-			return false;
-		}
-		if(ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_INFO_DBC_MSG(m_hdbc, ret, SQLConnect, L"SQLConnect returned with SQL_SUCCESS_WITH_INFO");
-		}
+		THROW_IFN_SUCCEEDED(SQLConnect, ret, SQL_HANDLE_DBC, m_hdbc);
 
 		// Mark database as Open
 		m_dbIsOpen = true;
 
-		return OpenImpl();
+		// Do all the common stuff about opening
+		OpenImpl();
 	}
 
 
-	bool Database::Open(const Environment* const pEnv)
+	void Database::Open(const Environment* const pEnv)
 	{
 		exASSERT(pEnv);
 
 		// Use the connection string if one is present
 		if (pEnv->UseConnectionStr())
-			return Open(pEnv->GetConnectionStr());
+			Open(pEnv->GetConnectionStr());
 		else
-			return Open(pEnv->GetDsn(), pEnv->GetUserID(), pEnv->GetPassword());
+			Open(pEnv->GetDsn(), pEnv->GetUserID(), pEnv->GetPassword());
 	}
 
 
-	bool Database::SetConnectionAttributes()
+	void Database::SetConnectionAttributes()
 	{
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
-		bool ok = SetCommitMode(CM_MANUAL_COMMIT);
 
 		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, NULL);
-		if(ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_TRACE to OPT_TRACE_OFF");
-			ok = false;
-		}
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Cannot set ATTR_TRACE to OPT_TRACE_OFF");
 
 		// Note: This is unsupported SQL_ATTR_METADATA_ID by most drivers. It should default to OFF
 		//ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_METADATA_ID, (SQLPOINTER) SQL_TRUE, NULL);
@@ -336,46 +297,45 @@ namespace exodbc
 		//	LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_METADATA_ID to SQL_FALSE");
 		//	ok = false;
 		//}
-
-		// Completed Successfully
-		return ok;
 	}
 
 
-	bool Database::ReadDbInfo(SDbInfo& dbInf)
+	SDbInfo Database::ReadDbInfo()
 	{
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+
+		SDbInfo dbInf;
 		SWORD cb;
 
 		// SQLGetInfo gets null-terminated by the driver. It needs buffer-lengths (not char-lengts), even in unicode
 		// see http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
 		// so it works with sizeof and statically declared arrays
 		
-		bool ok = true;
-		ok = ok & GetInfo(m_hdbc, SQL_SERVER_NAME, dbInf.m_serverName);
-		ok = ok & GetInfo(m_hdbc, SQL_DATABASE_NAME, dbInf.m_databaseName);
-		ok = ok & GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.m_dbmsName);
-		ok = ok & GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.m_dbmsVer);
-		ok = ok & GetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, &dbInf.m_maxConnections, sizeof(dbInf.m_maxConnections), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.m_maxStmts, sizeof(dbInf.m_maxStmts), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.m_driverName);
-		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.m_odbcVer);
-		ok = ok & GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.m_drvMgrOdbcVer);
-		ok = ok & GetInfo(m_hdbc, SQL_DRIVER_VER, dbInf.m_driverVer);
-		ok = ok & GetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, &dbInf.m_cliConfLvl, sizeof(dbInf.m_cliConfLvl), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_OUTER_JOINS, dbInf.m_outerJoins);
-		ok = ok & GetInfo(m_hdbc, SQL_PROCEDURES, dbInf.m_procedureSupport);
-		ok = ok & GetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, dbInf.m_accessibleTables);
-		ok = ok & GetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, &dbInf.m_cursorCommitBehavior, sizeof(dbInf.m_cursorCommitBehavior), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, &dbInf.m_cursorRollbackBehavior, sizeof(dbInf.m_cursorRollbackBehavior), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, &dbInf.m_supportNotNullClause, sizeof(dbInf.m_supportNotNullClause), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, dbInf.m_supportIEF);
-		ok = ok & GetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, &dbInf.m_txnIsolation, sizeof(dbInf.m_txnIsolation), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, &dbInf.m_txnIsolationOptions, sizeof(dbInf.m_txnIsolationOptions), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_POS_OPERATIONS, &dbInf.m_posOperations, sizeof(dbInf.m_posOperations), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &dbInf.m_posStmts, sizeof(dbInf.m_posStmts), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_SCROLL_OPTIONS, &dbInf.m_scrollOptions, sizeof(dbInf.m_scrollOptions), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_TXN_CAPABLE, &dbInf.m_txnCapable, sizeof(dbInf.m_txnCapable), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_SEARCH_PATTERN_ESCAPE, dbInf.m_searchPatternEscape);
+		GetInfo(m_hdbc, SQL_SERVER_NAME, dbInf.m_serverName);
+		GetInfo(m_hdbc, SQL_DATABASE_NAME, dbInf.m_databaseName);
+		GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.m_dbmsName);
+		GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.m_dbmsVer);
+		GetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, &dbInf.m_maxConnections, sizeof(dbInf.m_maxConnections), &cb);
+		GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.m_maxStmts, sizeof(dbInf.m_maxStmts), &cb);
+		GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.m_driverName);
+		GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.m_odbcVer);
+		GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.m_drvMgrOdbcVer);
+		GetInfo(m_hdbc, SQL_DRIVER_VER, dbInf.m_driverVer);
+		GetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, &dbInf.m_cliConfLvl, sizeof(dbInf.m_cliConfLvl), &cb);
+		GetInfo(m_hdbc, SQL_OUTER_JOINS, dbInf.m_outerJoins);
+		GetInfo(m_hdbc, SQL_PROCEDURES, dbInf.m_procedureSupport);
+		GetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, dbInf.m_accessibleTables);
+		GetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, &dbInf.m_cursorCommitBehavior, sizeof(dbInf.m_cursorCommitBehavior), &cb);
+		GetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, &dbInf.m_cursorRollbackBehavior, sizeof(dbInf.m_cursorRollbackBehavior), &cb);
+		GetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, &dbInf.m_supportNotNullClause, sizeof(dbInf.m_supportNotNullClause), &cb);
+		GetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, dbInf.m_supportIEF);
+		GetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, &dbInf.m_txnIsolation, sizeof(dbInf.m_txnIsolation), &cb);
+		GetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, &dbInf.m_txnIsolationOptions, sizeof(dbInf.m_txnIsolationOptions), &cb);
+		GetInfo(m_hdbc, SQL_POS_OPERATIONS, &dbInf.m_posOperations, sizeof(dbInf.m_posOperations), &cb);
+		GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &dbInf.m_posStmts, sizeof(dbInf.m_posStmts), &cb);
+		GetInfo(m_hdbc, SQL_SCROLL_OPTIONS, &dbInf.m_scrollOptions, sizeof(dbInf.m_scrollOptions), &cb);
+		GetInfo(m_hdbc, SQL_TXN_CAPABLE, &dbInf.m_txnCapable, sizeof(dbInf.m_txnCapable), &cb);
+		GetInfo(m_hdbc, SQL_SEARCH_PATTERN_ESCAPE, dbInf.m_searchPatternEscape);
 
 		// TODO: SQL_LOGIN_TIMEOUT is a Connection-Attribute
 		//retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &dbInf.loginTimeout, sizeof(dbInf.loginTimeout), &cb);
@@ -386,18 +346,12 @@ namespace exodbc
 		//		return false;
 		//}
 
-		ok = ok & GetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &dbInf.m_maxCatalogNameLen, sizeof(dbInf.m_maxCatalogNameLen), &cb);
-		ok = ok & GetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &dbInf.m_maxSchemaNameLen, sizeof(dbInf.m_maxSchemaNameLen), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &dbInf.m_maxTableNameLen, sizeof(dbInf.m_maxTableNameLen), &cb);
-		ok = ok & GetInfo(m_hdbc, SQL_MAX_COLUMN_NAME_LEN, &dbInf.m_maxColumnNameLen, sizeof(dbInf.m_maxColumnNameLen), &cb);
+		GetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &dbInf.m_maxCatalogNameLen, sizeof(dbInf.m_maxCatalogNameLen), &cb);
+		GetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &dbInf.m_maxSchemaNameLen, sizeof(dbInf.m_maxSchemaNameLen), &cb);
+		GetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &dbInf.m_maxTableNameLen, sizeof(dbInf.m_maxTableNameLen), &cb);
+		GetInfo(m_hdbc, SQL_MAX_COLUMN_NAME_LEN, &dbInf.m_maxColumnNameLen, sizeof(dbInf.m_maxColumnNameLen), &cb);
 
-		if(!ok)
-		{
-			LOG_ERROR(L"Not all Database Infos could be queried");
-		}
-
-		// Completed
-		return ok;
+		return dbInf;
 	}
 
 
@@ -502,20 +456,15 @@ namespace exodbc
 	}
 
 
-	bool Database::ReadDataTypesInfo(std::vector<SSqlTypeInfo>& types)
+	std::vector<SSqlTypeInfo> Database::ReadDataTypesInfo()
 	{
-		bool allOk = true;
-		types.clear();
+		std::vector<SSqlTypeInfo> types;
 
 		// Close an eventually open cursor, do not care about truncation
 		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
 		SQLRETURN ret = SQLGetTypeInfo(m_hstmt, SQL_ALL_TYPES);
-		if(ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_STMT(m_hstmt, ret, SQLGetTypeInfo);
-			return false;
-		}
+		THROW_IFN_SUCCEEDED(SQLGetTypeInfo, ret, SQL_HANDLE_STMT, m_hstmt);
 
 		ret = SQLFetch(m_hstmt);
 		int count = 0;
@@ -535,62 +484,47 @@ namespace exodbc
 			SSqlTypeInfo info;
 
 			cb = 0;
-			bool ok = GetData(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
-			if(ok)
-				info.m_typeName = typeName;
-			bool haveName = ok;
+			GetDataEx(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
+			info.m_typeName = typeName;
 
-			ok = ok & GetData(m_hstmt, 2, SQL_C_SSHORT, &info.m_sqlType, sizeof(info.m_sqlType), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 3, SQL_C_SLONG, &info.m_columnSize, sizeof(info.m_columnSize), &cb, &info.m_columnSizeIsNull);
-			ok = ok & GetData(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.m_literalPrefixIsNull, true);
+			GetDataEx(m_hstmt, 2, SQL_C_SSHORT, &info.m_sqlType, sizeof(info.m_sqlType), &cb, NULL);
+			GetDataEx(m_hstmt, 3, SQL_C_SLONG, &info.m_columnSize, sizeof(info.m_columnSize), &cb, &info.m_columnSizeIsNull);
+			GetDataEx(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.m_literalPrefixIsNull, true);
 			info.m_literalPrefix = literalPrefix;
-			ok = ok & GetData(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.m_literalSuffixIsNull, true);
+			GetDataEx(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.m_literalSuffixIsNull, true);
 			info.m_literalSuffix = literalSuffix;
-			ok = ok & GetData(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.m_createParamsIsNull, true);
+			GetDataEx(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.m_createParamsIsNull, true);
 			info.m_createParams = createParams;
-			ok = ok & GetData(m_hstmt, 7, SQL_C_SSHORT, &info.m_nullable, sizeof(info.m_nullable), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 8, SQL_C_SSHORT, &info.m_caseSensitive, sizeof(info.m_caseSensitive), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 9, SQL_C_SSHORT, &info.m_searchable, sizeof(info.m_searchable), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 10, SQL_C_SSHORT, &info.m_unsigned, sizeof(info.m_unsigned), &cb, &info.m_unsignedIsNull);
-			ok = ok & GetData(m_hstmt, 11, SQL_C_SSHORT, &info.m_fixedPrecisionScale, sizeof(info.m_fixedPrecisionScale), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 12, SQL_C_SSHORT, &info.m_autoUniqueValue, sizeof(info.m_autoUniqueValue), &cb, &info.m_autoUniqueValueIsNull);
-			ok = ok & GetData(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.m_localTypeNameIsNull, true);
+			GetDataEx(m_hstmt, 7, SQL_C_SSHORT, &info.m_nullable, sizeof(info.m_nullable), &cb, NULL);
+			GetDataEx(m_hstmt, 8, SQL_C_SSHORT, &info.m_caseSensitive, sizeof(info.m_caseSensitive), &cb, NULL);
+			GetDataEx(m_hstmt, 9, SQL_C_SSHORT, &info.m_searchable, sizeof(info.m_searchable), &cb, NULL);
+			GetDataEx(m_hstmt, 10, SQL_C_SSHORT, &info.m_unsigned, sizeof(info.m_unsigned), &cb, &info.m_unsignedIsNull);
+			GetDataEx(m_hstmt, 11, SQL_C_SSHORT, &info.m_fixedPrecisionScale, sizeof(info.m_fixedPrecisionScale), &cb, NULL);
+			GetDataEx(m_hstmt, 12, SQL_C_SSHORT, &info.m_autoUniqueValue, sizeof(info.m_autoUniqueValue), &cb, &info.m_autoUniqueValueIsNull);
+			GetDataEx(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.m_localTypeNameIsNull, true);
 			info.m_localTypeName = localTypeName;
-			ok = ok & GetData(m_hstmt, 14, SQL_C_SSHORT, &info.m_minimumScale, sizeof(info.m_minimumScale), &cb, &info.m_minimumScaleIsNull);
-			ok = ok & GetData(m_hstmt, 15, SQL_C_SSHORT, &info.m_maximumScale, sizeof(info.m_maximumScale), &cb, &info.m_maximumScaleIsNull);
-			ok = ok & GetData(m_hstmt, 16, SQL_C_SSHORT, &info.m_sqlDataType, sizeof(info.m_sqlDataType), &cb, NULL);
-			ok = ok & GetData(m_hstmt, 17, SQL_C_SSHORT, &info.m_sqlDateTimeSub, sizeof(info.m_sqlDateTimeSub), &cb, &info.m_sqlDateTimeSubIsNull);
-			ok = ok & GetData(m_hstmt, 18, SQL_C_SSHORT, &info.m_numPrecRadix, sizeof(info.m_numPrecRadix), &cb, &info.m_numPrecRadixIsNull);
-			ok = ok & GetData(m_hstmt, 19, SQL_C_SSHORT, &info.m_intervalPrecision, sizeof(info.m_intervalPrecision), &cb, &info.m_intervalPrecisionIsNull);
+			GetDataEx(m_hstmt, 14, SQL_C_SSHORT, &info.m_minimumScale, sizeof(info.m_minimumScale), &cb, &info.m_minimumScaleIsNull);
+			GetDataEx(m_hstmt, 15, SQL_C_SSHORT, &info.m_maximumScale, sizeof(info.m_maximumScale), &cb, &info.m_maximumScaleIsNull);
+			GetDataEx(m_hstmt, 16, SQL_C_SSHORT, &info.m_sqlDataType, sizeof(info.m_sqlDataType), &cb, NULL);
+			GetDataEx(m_hstmt, 17, SQL_C_SSHORT, &info.m_sqlDateTimeSub, sizeof(info.m_sqlDateTimeSub), &cb, &info.m_sqlDateTimeSubIsNull);
+			GetDataEx(m_hstmt, 18, SQL_C_SSHORT, &info.m_numPrecRadix, sizeof(info.m_numPrecRadix), &cb, &info.m_numPrecRadixIsNull);
+			GetDataEx(m_hstmt, 19, SQL_C_SSHORT, &info.m_intervalPrecision, sizeof(info.m_intervalPrecision), &cb, &info.m_intervalPrecisionIsNull);
 
-			if(ok)
-			{
-				types.push_back(info);
-			}
-			else
-			{
-				LOG_ERROR((boost::wformat(L"Failed to determine properties of type '%s'") % (haveName ? info.m_typeName : L"unknown-type")).str()); 
-				allOk = false;
-			}
+			types.push_back(info);
 
 			count++;
 			ret = SQLFetch(m_hstmt);
 		}
-
-		if(ret != SQL_NO_DATA)
-		{
-			LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SQLFetch);
-			return false;
-		}
+		THROW_IFN_NO_DATA(SQLFetch, ret);
 
 		// We are done, close cursor, do not care about truncation
 		CloseStmtHandle(m_hstmt, FailIfNotOpen);
 
-		return allOk;
+		return types;
 	}
 
 
-	bool Database::Close()
+	void Database::Close()
 	{
 
 #ifdef EXODBCDEBUG
@@ -607,10 +541,17 @@ namespace exodbc
 					tablesList = (boost::wformat(L"%s  Table '%s' (id: %d)\n") %tablesList % tableInUse.ToString() % tableInUse.m_tableId).str();
 				}
 				LOG_DEBUG((boost::wformat(L"%s%s") % msg %tablesList).str());
+				// \todo: This is stupid. maybe just remove everything?
 				exASSERT(false);
 			}
 		}
 #endif
+
+		if (!IsOpen())
+		{
+			return;
+		}
+
 		// Rollback any ongoing Transaction if in Manual mode
 		if (GetCommitMode() == CM_MANUAL_COMMIT)
 		{
@@ -618,59 +559,51 @@ namespace exodbc
 		}
 
 		// Free statement handles
-		if (m_dbIsOpen)
+		// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
+		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
+		if (ret == SQL_ERROR)
 		{
-			SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
-			if(ret != SQL_SUCCESS)
-			{
-				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-				if(ret == SQL_ERROR)
-				{
-					LOG_ERROR_STMT(m_hstmt, ret, SqlFreeHandle);
-				}
-				else
-				{
-					LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
-				}
-			}
-			else
-			{
-				m_hstmt = SQL_NULL_HSTMT;
-			}
-			ret = SQLFreeHandle(SQL_HANDLE_STMT, m_hstmtExecSql);
-			if (ret != SQL_SUCCESS)
-			{
-				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-				if (ret == SQL_ERROR)
-				{
-					LOG_ERROR_STMT(m_hstmtExecSql, ret, SqlFreeHandle);
-				}
-				else
-				{
-					LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
-				}
-			}
-			else
-			{
-				m_hstmtExecSql = SQL_NULL_HSTMT;
-			}
-
-
-			// Anyway try to disconnect from the data source
-			// This is a critical error.
-			ret = SQLDisconnect(m_hdbc);
-			if(ret != SQL_SUCCESS)
-			{
-				LOG_ERROR_DBC(m_hdbc, ret, SQLDisconnect);
-				return false;
-			}
-
-			LOG_DEBUG((boost::wformat(L"Closed connection to database %s") %m_dbInf.m_dbmsName).str());
-
-			m_dbIsOpen = false;
+			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+			SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_STMT, m_hstmt, L"Freeing ODBC-Statement Handle failed with SQL_ERROR, handle is still valid.");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
+		else if (ret == SQL_INVALID_HANDLE)
+		{
+			// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
+			m_hstmt = SQL_NULL_HSTMT;
+			SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Statement Handle failed with SQL_INVALID_HANDLE.");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+		// We have SUCCESS
+		m_hstmt = SQL_NULL_HSTMT;
 
-		return true;
+		ret = SQLFreeHandle(SQL_HANDLE_STMT, m_hstmtExecSql);
+		if (ret == SQL_ERROR)
+		{
+			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+			SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_STMT, m_hstmtExecSql, L"Freeing ODBC-Statement Handle failed with SQL_ERROR, handle is still valid.");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+		else if (ret == SQL_INVALID_HANDLE)
+		{
+			// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
+			m_hstmtExecSql = SQL_NULL_HSTMT;
+			SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Statement Handle failed with SQL_INVALID_HANDLE.");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+		// We have SUCCESS
+		m_hstmtExecSql = SQL_NULL_HSTMT;
+
+		// Try to disconnect from the data source
+		ret = SQLDisconnect(m_hdbc);
+		THROW_IFN_SUCCEEDED(SQLDisconnect, ret, SQL_HANDLE_DBC, m_hdbc);
+
+		LOG_DEBUG((boost::wformat(L"Closed connection to database %s") %m_dbInf.m_dbmsName).str());
+		m_dbIsOpen = false;
 	}
 
 
@@ -1203,16 +1136,12 @@ namespace exodbc
 
 	CommitMode Database::ReadCommitMode()
 	{
+		CommitMode mode = CM_UNKNOWN;
+
 		SQLUINTEGER modeValue;
 		SQLINTEGER cb;
 		SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, &modeValue, sizeof(modeValue), &cb);
-		if(ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLGetConnectAttr, L"Failed to read Attr SQL_ATTR_AUTOCOMMIT");
-			return CM_UNKNOWN;
-		}
-
-		CommitMode mode = CM_UNKNOWN;
+		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to read Attr SQL_ATTR_AUTOCOMMIT");
 
 		if(modeValue == SQL_AUTOCOMMIT_OFF)
 			mode = CM_MANUAL_COMMIT;
@@ -1255,7 +1184,7 @@ namespace exodbc
 		return TI_UNKNOWN;
 	}
 
-	bool Database::SetCommitMode(CommitMode mode)
+	void Database::SetCommitMode(CommitMode mode)
 	{
 		// If Autocommit is off, we need to commit any ongoing transaction
 		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
@@ -1276,21 +1205,9 @@ namespace exodbc
 			ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_ON, NULL);
 			errStringMode = L"SQL_AUTOCOMMIT_ON";
 		}
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, (boost::wformat(L"Setting ATTR_AUTOCOMMIT to %s failed") % errStringMode).str());
 
-		if(ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Setting ATTR_AUTOCOMMIT to %s returned with SQL_SUCCESS_WITH_INFO") %errStringMode).str());
-		}
-
-		if(SQL_SUCCEEDED(ret))
-		{
-			m_commitMode = mode;
-			return true;
-		}
-
-		LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, (boost::wformat(L"Cannot set ATTR_AUTOCOMMIT to %s") %errStringMode).str());
-
-		return false;
+		m_commitMode = mode;
 	}
 
 
@@ -1383,7 +1300,7 @@ namespace exodbc
 			}
 			catch (boost::bad_lexical_cast e)
 			{
-				LOG_ERROR((boost::wformat(L"Failed to determine odbc version from string '%s'") % m_dbInf.m_odbcVer).str());
+				THROW_WITH_SOURCE(Exception, (boost::wformat(L"Failed to determine odbc version from string '%s'") % m_dbInf.m_odbcVer).str());
 			}
 		}
 		return ov;
@@ -1393,10 +1310,9 @@ namespace exodbc
 	OdbcVersion Database::GetMaxSupportedOdbcVersion() const
 	{
 		OdbcVersion driverVersion = GetDriverOdbcVersion();
-		OdbcVersion envVersion = m_pEnv->ReadOdbcVersion();
-		if (driverVersion >= envVersion)
+		if (driverVersion >= m_envOdbcVersion)
 		{
-			return envVersion;
+			return m_envOdbcVersion;
 		}
 		return driverVersion;
 	}
