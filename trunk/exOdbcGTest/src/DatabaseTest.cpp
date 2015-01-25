@@ -97,25 +97,25 @@ namespace exodbc
 	TEST_P(DatabaseTest, SetTransactionIsolationMode)
 	{
 		TransactionIsolationMode tiMode = TI_READ_COMMITTED;
-		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_READ_COMMITTED, tiMode);
 		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TI_READ_UNCOMMITTED;
-		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_READ_UNCOMMITTED, tiMode);
 		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TI_REPEATABLE_READ;
-		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_REPEATABLE_READ, tiMode);
 		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TI_SERIALIZABLE;
-		EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TI_SERIALIZABLE, tiMode);
 		EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
@@ -124,7 +124,7 @@ namespace exodbc
 		{
 #if HAVE_MSODBCSQL_H
 			tiMode = TI_SNAPSHOT;
-			EXPECT_TRUE(m_db.SetTransactionIsolationMode(tiMode));
+			EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 			tiMode = m_db.ReadTransactionIsolationMode();
 			EXPECT_EQ(TI_SNAPSHOT, tiMode);
 			EXPECT_TRUE(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
@@ -298,7 +298,7 @@ namespace exodbc
 			if (m_db.Dbms() == dbmsMS_SQL_SERVER)
 			{
 #if HAVE_MSODBCSQL_H
-				EXPECT_TRUE(db2.SetTransactionIsolationMode(TI_SNAPSHOT));
+				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TI_SNAPSHOT));
 				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", Table::READ_ONLY);
 				EXPECT_TRUE(iTable2.Open(false, true));
 				EXPECT_TRUE(iTable2.Select());
@@ -310,7 +310,7 @@ namespace exodbc
 			}
 			else
 			{
-				EXPECT_TRUE(db2.SetTransactionIsolationMode(TI_READ_COMMITTED));
+				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TI_READ_COMMITTED));
 				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", Table::READ_ONLY);
 				EXPECT_TRUE(iTable2.Open(false, true));
 				EXPECT_TRUE(iTable2.Select());
