@@ -243,13 +243,13 @@ namespace exodbc
 	}
 
 
-	bool Environment::ListDataSources(ListMode mode, vector<SDataSource>& dataSources) const
+	std::vector<SDataSource> Environment::ListDataSources(ListMode mode) const
 	{
 		SQLSMALLINT nameBufferLength, descBufferLength = 0;
 		wchar_t nameBuffer[SQL_MAX_DSN_LENGTH + 1];
 
 		// empty result-vector
-		dataSources.empty();
+		std::vector<SDataSource> dataSources;
 
 		SQLUSMALLINT direction = SQL_FETCH_FIRST;
 		if(mode == System)
@@ -263,40 +263,36 @@ namespace exodbc
 		// So we remember the max length of the buffer, and use that in the second pass
 		// Like that we might miss some parts of the descriptions.. 
 		SQLSMALLINT maxDescLength = 0;
-		SQLRETURN res = SQL_NO_DATA;
-		res = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
-		if(res == SQL_NO_DATA)
+		SQLRETURN ret = SQL_NO_DATA;
+		ret = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
+		if(ret == SQL_NO_DATA)
 		{
 			// no data at all, but succeeded, else we would have an err-state
-			return true;
+			return dataSources;
 		}
-		if(res != SQL_SUCCESS)
-		{
-			LOG_ERROR_ENV(m_henv, res, SQLDataSources);
-			return false;
-		}
+		THROW_IFN_SUCCEEDED(SQLDataSources, ret, SQL_HANDLE_ENV, m_henv);
 
 		do
 		{
 			// Remember the max length 
-			if(descBufferLength > maxDescLength)
+			if (descBufferLength > maxDescLength)
+			{
 				maxDescLength = descBufferLength;
+			}
 			// Go on fetching lengths of descriptions
-			res = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
-		}while(res == SQL_SUCCESS || res == SQL_SUCCESS_WITH_INFO);
-		if(res != SQL_NO_DATA)
-		{
-			LOG_ERROR_EXPECTED_SQL_NO_DATA(res, SQLDataSources);
-			return false;
-		}
+			ret = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
+		}while(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
+		THROW_IFN_NO_DATA(SQLDataSources, ret);
 
 		// Now fetch with description
 		wchar_t* descBuffer = new wchar_t[maxDescLength + 1];
-		res = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer, maxDescLength + 1, &descBufferLength);
-		if(res == SQL_NO_DATA)
+		ret = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer, maxDescLength + 1, &descBufferLength);
+		if(ret == SQL_NO_DATA)
 		{
 			delete[] descBuffer;
-			return false;
+			SqlResultException ex(L"SQLDataSources", ret, L"SQL_NO_DATA is not expected to happen here - we've found records in the previoius round, they can't be gone now!");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
 		do
 		{
@@ -305,16 +301,14 @@ namespace exodbc
 			wcscpy(ds.Dsn, nameBuffer);
 			ds.m_description = descBuffer;
 			dataSources.push_back(ds);
-			res = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer, maxDescLength + 1, &descBufferLength);
-		}while(res == SQL_SUCCESS || res == SQL_SUCCESS_WITH_INFO);
-		if(res != SQL_NO_DATA)
-		{
-			LOG_ERROR_EXPECTED_SQL_NO_DATA(res, SQLDataSources);
-			return false;
-		}
+			ret = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer, maxDescLength + 1, &descBufferLength);
+		}while(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
 
 		delete[] descBuffer;
-		return true;
+
+		THROW_IFN_NO_DATA(SQLDataSources, ret);
+
+		return dataSources;
 	}
 
 	// Interfaces

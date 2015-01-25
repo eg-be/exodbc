@@ -15,6 +15,7 @@
 #include "Exception.h"
 
 // Other headers
+#include "boost/thread/locks.hpp"
 
 // Debug
 #include "DebugNew.h"
@@ -32,6 +33,23 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	bool g_dontDebugBreak = false;
+	boost::shared_mutex g_dontDebugBreakMutex;
+
+	void SetDontDebugBreak(bool value)
+	{
+		boost::unique_lock<boost::shared_mutex> lock(g_dontDebugBreakMutex);
+		g_dontDebugBreak = value;
+	}
+
+
+	bool GetDontDebugBreak()
+	{
+		boost::shared_lock<boost::shared_mutex> lock(g_dontDebugBreakMutex);
+		return g_dontDebugBreak;
+	}
+
+
 	void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg)
 	{
 		std::wstringstream ws;

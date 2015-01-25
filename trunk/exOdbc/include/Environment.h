@@ -254,19 +254,19 @@ namespace exodbc
 		 */
 		OdbcVersion		ReadOdbcVersion() const;
 
+
 		enum ListMode { All, System, User };
 
 		/*!
-		 * \fn	bool Environment::ListDataSources(ListMode mode = All, std::vector<SDataSource>& dataSources) const;
-		 *
-		 * \brief	List data sources.
-		 *
-		 * \param	mode			   	Decide to list all DSNs, or only user / system DSNs.
-		 * \param [in,out]	dataSources	The data sources.
-		 *
-		 * \return	true if succeeds, false if fails
+		 * \brief		List data sources.
+		 * \detailed	List the Data Source Names (DSN) entries available.
+		 *				Fails if no environment handle is allocated.
+		 * \see			HasHenv()
+		 * \param	mode	Decide to list all DSNs, or only user / system DSNs.
+		 * \return	Found Data Source Names.
+		 * \throw	Exception
 		 */		
-		bool ListDataSources(ListMode mode, std::vector<SDataSource>& dataSources) const;
+		std::vector<SDataSource> ListDataSources(ListMode mode) const;
 
 	private:
 		bool m_useConnectionStr;

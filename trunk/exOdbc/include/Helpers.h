@@ -15,6 +15,7 @@
 
 // Other headers
 #include "boost/log/trivial.hpp"
+#include "boost/thread/shared_mutex.hpp"
 
 // System headers
 #include <string>
@@ -24,7 +25,24 @@
 // --------------------
 namespace exodbc
 {
+	extern bool g_dontDebugBreak;
+	extern boost::shared_mutex g_dontDebugBreakMutex;
+	extern EXODBCAPI void SetDontDebugBreak(bool value);
+	extern EXODBCAPI bool GetDontDebugBreak();
 	extern void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg);
+
+	struct DontDebugBreak
+	{
+		DontDebugBreak()
+		{
+			SetDontDebugBreak(true);
+		}
+
+		~DontDebugBreak()
+		{
+			SetDontDebugBreak(false);
+		}
+	};
 }
 
 // Macros available for everybody
@@ -44,7 +62,9 @@ namespace exodbc
 #define exASSERT_MSG(cond, msg)										\
 do {																\
 	if ( !(cond) )  {												\
-		__debugbreak();												\
+		if(!GetDontDebugBreak()) {									\
+			__debugbreak();											\
+		}															\
 		exOnAssert(__FILEW__, __LINE__, __FUNCTIONW__,L#cond,msg);	\
 	}                                                               \
 } while ( 0 )
@@ -56,6 +76,7 @@ do {																\
 	}                                                               \
 } while ( 0 )
 #endif
+
 
 /*!
 * \brief exASSERT(cond) - MACRO
@@ -565,5 +586,18 @@ namespace exodbc
 		} \
 	} while(0)
 
+#define THROW_IFN_SUCCEEDED(sqlFunctionName, sqlReturn, handleType, handle) \
+	do { \
+		THROW_IFN_SUCCEEDED_MSG(sqlFunction, sqlReturn, handleType, handle, L""); \
+	} while(0)
 
+#define THROW_IFN_NO_DATA(sqlFunctionName, sqlReturn) \
+	do { \
+		if(SQL_NO_DATA != sqlReturn) \
+		{ \
+			SqlResultException ex(L#sqlFunctionName, ret, L"Expected SQL_NO_DATA."); \
+			SET_EXCEPTION_SOURCE(ex); \
+			throw ex; \
+		} \
+	} while(0)
 #endif // HELPERS_H
