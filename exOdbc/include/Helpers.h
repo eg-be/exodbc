@@ -108,7 +108,7 @@ namespace exodbc
 			ErrorHandleType = 0;
 		}
 
-		SQLSMALLINT		ErrorHandleType; // Handle-type of the error. Is either SQL_HANDLE_ENV, SQL_HANDLE_DBC or SQL_HANDLE_STMT
+		SQLSMALLINT		ErrorHandleType; ///< Handle-type of the error. Is either SQL_HANDLE_ENV, SQL_HANDLE_DBC, SQL_HANDLE_STMT or SQL_HANDLE_DESC
 		SQLWCHAR		SqlState[5 + 1];
 		SQLINTEGER		NativeError;
 		std::wstring	Msg;
@@ -192,7 +192,11 @@ namespace exodbc
 	 *
 	 * \return	all errors.
 	 */
-	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv = SQL_NULL_HENV, SQLHANDLE hDbc = SQL_NULL_HDBC, SQLHANDLE hStmt = SQL_NULL_HSTMT, SQLHANDLE hDesc = SQL_NULL_HDESC);
+	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc);
+
+
+	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle);
+
 
 	/*!
 	 * \brief	Gets the last environment error, if one is available.
@@ -517,5 +521,49 @@ namespace exodbc
 #define LOG_WARNING(msg) LOG_MSG(warning, msg)
 #define LOG_INFO(msg) LOG_MSG(info, msg)
 #define LOG_DEBUG(msg) LOG_MSG(debug, msg)
+
+
+// Exception Helpers
+// =================
+#define SET_EXCEPTION_SOURCE(Exception) \
+	do { \
+		Exception.SetSourceInformation(__LINE__, __FILEW__, __FUNCTIONW__); \
+	} while(0)
+
+#define THROW_WITH_SOURCE(ExceptionType, msg) \
+	do { \
+		ExceptionType ex(msg); \
+		SET_EXCEPTION_SOURCE(ex); \
+		throw ex; \
+	} while(0)
+
+// Helpers to throw if not successfully
+#define THROW_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
+	do { \
+		if(!SQL_SUCCEEDED(sqlReturn)) { \
+			SqlResultException ex(L#sqlFunctionName, ret, handleType, handle, msg); \
+			SET_EXCEPTION_SOURCE(ex); \
+			throw ex; \
+		} \
+		if(SQL_SUCCESS_WITH_INFO == ret) { \
+			switch(handleType) { \
+			case SQL_HANDLE_ENV: \
+				LOG_WARNING_ODBC(handle, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC, ret, sqlFunctionName); \
+				break; \
+			case SQL_HANDLE_DBC: \
+				LOG_WARNING_ODBC(SQL_NULL_HENV, handle, SQL_NULL_HSTMT, SQL_NULL_HDESC, ret, sqlFunctionName); \
+				break; \
+			case SQL_HANDLE_STMT: \
+				LOG_WARNING_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, handle, SQL_NULL_HDESC, ret, sqlFunctionName); \
+				break; \
+			case SQL_HANDLE_DESC: \
+				LOG_INFO_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, handle, ret, sqlFunctionName); \
+				break; \
+			default: \
+				THROW_WITH_SOURCE(IllegalArgumentException, L"Unknown handleType"); \
+			} \
+		} \
+	} while(0)
+
 
 #endif // HELPERS_H

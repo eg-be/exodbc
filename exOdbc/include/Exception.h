@@ -43,15 +43,16 @@ namespace exodbc
 	{
 	public:
 		Exception() throw() : m_line(0) {};
-		Exception(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& msg) throw() : m_line(line), m_file(file), m_functionname(functionname), m_msg(msg) {};
 		Exception(const std::wstring& msg) throw() : m_msg(msg), m_line(0) {};
 
 		Exception(const exception&) throw() {};
-		
+
 		virtual ~Exception() throw() {};
-		
+
 		virtual std::wstring ToString() const throw();
 		virtual std::wstring GetName() const throw()	{ return L"Exception"; };
+
+		void SetSourceInformation(int line, const std::wstring& fileName, const std::wstring& functionName) throw();
 
 		int GetLine() const throw()						{ return m_line; };
 		std::wstring GetFile() const throw()			{ return m_file; };
@@ -80,14 +81,18 @@ namespace exodbc
 	{
 	public:
 		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition) throw()
-			: Exception(line, file, functionname, L"") 
+			: Exception()
 			, m_condition(condition)
-		{};
+		{
+			SetSourceInformation(line, file, functionname);
+		};
 
 		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition, const std::wstring& msg) throw()
-			: Exception(line, file, functionname, msg) 
+			: Exception(msg)
 			, m_condition(condition)
-		{};
+		{
+			SetSourceInformation(line, file, functionname);
+		};
 
 		virtual ~AssertionException() {};
 
@@ -97,6 +102,42 @@ namespace exodbc
 	protected:
 		std::wstring m_condition;
 	};
+
+
+	class EXODBCAPI SqlResultException
+		: public Exception
+	{
+	public:
+		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg = L"") throw();
+		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg = L"") throw();
+
+		virtual ~SqlResultException() {};
+
+		virtual std::wstring GetName() const throw() { return L"SqlResultException"; };
+		virtual std::wstring ToString() const throw();
+
+	protected:
+		void FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) throw();
+		void BuildErrorMsg(const std::wstring& sqlFunctionName, SQLRETURN ret) throw();
+
+		std::vector<SErrorInfo> m_errors;
+		std::wstring m_errorMsg;
+	};
+
+
+	class EXODBCAPI IllegalArgumentException
+		: public Exception
+	{
+	public:
+		IllegalArgumentException(const std::wstring msg) throw()
+			: Exception(msg)
+		{};
+
+		virtual ~IllegalArgumentException() {};
+
+		virtual std::wstring GetName() const throw() { return L"IllegalArgumentException"; };
+	};
+
 }
 
 
