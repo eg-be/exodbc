@@ -46,7 +46,7 @@ namespace exodbc
 
 		// And the db
 		m_pDb = new Database(&m_env);
-		ASSERT_TRUE(m_pDb->Open(&m_env));
+		ASSERT_NO_THROW(m_pDb->Open(&m_env));
 	}
 	
 	//Destructor
@@ -58,7 +58,7 @@ namespace exodbc
 		{
 			if(m_pDb->IsOpen())
 			{
-				EXPECT_TRUE(m_pDb->Close());
+				EXPECT_NO_THROW(m_pDb->Close());
 			}
 			delete m_pDb;
 		}

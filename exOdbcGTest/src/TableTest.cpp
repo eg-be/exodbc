@@ -50,13 +50,13 @@ namespace exodbc
 
 		// Set up Env
 		m_env.AllocHenv();
-		// Try to set to the highest version available: We need that for the tests to run correct
+		// Try to set to the ODBC v3 : We need that for the tests to run correct. 3.8 is not supported by all databases and we dont use specific stuff from it.
+		// except for the TIME2 things, sql server specific. those tests can create their own env.
 		m_env.SetOdbcVersion(OV_3);
 
 		// And database
-		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
-		ASSERT_TRUE(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-
+		ASSERT_NO_THROW(m_db.AllocateHdbcAndReadEnvOdbcVersion(m_env));
+		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
 
@@ -64,7 +64,7 @@ namespace exodbc
 	{
 		if (m_db.IsOpen())
 		{
-			EXPECT_TRUE(m_db.Close());
+			EXPECT_NO_THROW(m_db.Close());
 		}
 	}
 
@@ -927,13 +927,13 @@ namespace exodbc
 		if (m_db.Dbms() == dbmsMY_SQL)
 		{
 			// My SQL does not support 3.8, the database will warn about a version-mismatch and fall back to 3.0. we know about that.
-			// TODO: Open a ticket
+			// \todo: Open a ticket
 			LogLevelError llE;
-			EXPECT_TRUE(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			EXPECT_NO_THROW(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		}
 		else
 		{
-			EXPECT_TRUE(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			EXPECT_NO_THROW(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		}
 		Table dTable38(&db38, dateTypesTableName, L"", L"", L"", Table::READ_ONLY);
 		EXPECT_TRUE(dTable38.Open(false, true));

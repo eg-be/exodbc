@@ -25,9 +25,6 @@
 #include <string>
 #include <vector>
 
-/* There are too many false positives for this one, particularly when using templates like wxVector<T> */
-/* class 'foo' needs to have dll-interface to be used by clients of class 'bar'" */
-//#pragma warning(disable:4251)
 
 #ifndef MAXNAME
 #define MAXNAME         31
@@ -82,9 +79,6 @@ namespace exodbc
 	* This class will allocate the Environment-Handle that is required
 	* for all later operations and sets the ODBC Version to 3.x or higher.
 	* The handle is freed on destruction.
-	*
-	* The information needed to connect to a database (dsn, username, pw or 
-	* connection-string) can be stored inside this object, but it is not required.
 	* 
 	*/
 	class EXODBCAPI Environment
@@ -136,16 +130,14 @@ namespace exodbc
 
 
 		/*!
-		 * \fn	Environment::~Environment();
-		 *
-		 * \brief	Destructor. Tries to free the env-handle, if one is allocated.
+		 * \brief		Destructor. Tries to free the env-handle, if one is allocated.
+		 * \detailed	If freeing the handle fails an error is logged, but no Exception
+		 *				is being thrown. You will leak handles in this case.
 		 */
 		~Environment();
 
 
 		/*!
-		 * \fn	bool Environment::Initialize();
-		 *
 		 * \brief	Initializes this object.
 		 * 			Set all members to 0.
 		 * 			Cannot be called if a Henv is allocated.
@@ -166,21 +158,24 @@ namespace exodbc
 		/*!
 		 * \brief	Tries to free an allocated Henv.
 		 * 			Can only be called if a Henv is allocated.
-		 * \return	true if it succeeds, false if it fails.
+		 * \throw	Exception if no Henv is allocated
 		 */
 		void			FreeHenv();
 
 
 		/*!
 		 * \brief	Returns true is a Henv is allocated.
-		 * \return	Returns true is a Henv is allocated.
 		 */
 		bool			HasHenv() const	{ return m_henv != SQL_NULL_HENV; };
 
 
-		// Accessors
-		const SQLHENV&		GetHenv() const		{ return m_henv; };
+		/*!
+		* \brief	Returns the Environment handle.
+		* \throw	Exeption if no Henv is allocated.
+		*/
+		const SQLHENV&		GetHenv() const		{ exASSERT(HasHenv());  return m_henv; };
 
+		// all of these will be removed
 		const wchar_t*	GetDsn() const		{ return m_dsn; };
 
 		const wchar_t*	GetUid() const		{ return m_uid; };
@@ -191,6 +186,7 @@ namespace exodbc
 
 		const wchar_t*	GetConnectionStr() const { return m_connectionStr; }
 		bool			UseConnectionStr() const { return m_useConnectionStr; }
+		// end to remove section
 
 		/*!
 		 * \fn	void Environment::SetDsn(const std::wstring& dsn);
@@ -241,7 +237,7 @@ namespace exodbc
 		 * \brief	Sets ODBC version.
 		 *
 		 * \param	version	The version.
-		 * \throw	Exception
+		 * \throw	Exception if no Henv is allocated, or setting the version fails.
 		 */
 		void			SetOdbcVersion(OdbcVersion version);		
 
@@ -250,7 +246,7 @@ namespace exodbc
 		 * \brief	Reads the ODBC version from the environment.
 		 *
 		 * \return	The ODBC version or OV_UNKNOWN if read version is unknown.
-		 * \throw	Exception
+		 * \throw	Exception If no Henv is allocated, or reading the version fails.
 		 */
 		OdbcVersion		ReadOdbcVersion() const;
 

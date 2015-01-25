@@ -333,17 +333,17 @@ namespace exodbc
 
 
 	/*!
-	* \brief	A wrapper to SQLGetInfo.
-	*
-	* \param	hDbc					The dbc.
+	* \brief	A wrapper to SQLGetInfo to read a String info.
+	* 
+	* \param	hDbc					The Database connection handle.
 	* \param	fInfoType				Type of the information.
 	* \param [in,out]	sValue			String to receive the value read.
 	* \detailed This will first call SQLGetInfo to determine the size of the buffer, then allocate a
 	*			corresponding buffer and call GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
 	* \see		SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
-	* \return	true if it succeeds, false if it fails.
+	* \throw	Exception
 	*/
-	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, std::wstring& sValue);
+	extern EXODBCAPI void		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, std::wstring& sValue);
 
 
 	/*!
@@ -351,13 +351,13 @@ namespace exodbc
 	 *
 	 * \param	hDbc					The dbc.
 	 * \param	fInfoType				Type of the information.
-	 * \param	rgbInfoValue			Output buffer pointer.
+	 * \param	pInfoValue			Output buffer pointer.
 	 * \param	cbInfoValueMax			Length of buffer.
 	 * \param [in,out]	pcbInfoValue	Out-pointer for total length in bytes (excluding null-terminate char for string-values).
 	 * \see		http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
-	 * \return	true if it succeeds, false if it fails.
+	 * \throw	Exception
 	 */
-	extern EXODBCAPI bool		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
+	extern EXODBCAPI void		GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
 
 
 	/*!
@@ -372,12 +372,13 @@ namespace exodbc
 	 * \param [in,out]	pIsNull		  	If pIsNull is not NULL, set to TRUE if the field is NULL. Ignored if pIsNull is NULL.
 	 * \param	nullTerminate		  	(Optional) true to null terminate. Can only be set if targetType is SQL_C_WCHAR or SQL_C_CHAR.
 	 * 									Will null-terminate at strLenOrIndPtr-value.
-	 * 									TODO: Test that this works
+	 * \todo: Test that this works
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
-	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
+	extern EXODBCAPI void		GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
 
+	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
 
 	/*!
 	 * \brief	Gets string data. Allocates a wchar_t buffer with maxNrOfChars wchars + one char for the null-terminate:
@@ -392,8 +393,9 @@ namespace exodbc
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
-	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull = NULL);
+	extern EXODBCAPI void		GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull = NULL);
 
+	extern EXODBCAPI bool		GetData(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull = NULL);
 
 	//	extern EXODBCAPI bool		GetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER& value);
 
@@ -562,23 +564,23 @@ namespace exodbc
 #define THROW_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
 	do { \
 		if(!SQL_SUCCEEDED(sqlReturn)) { \
-			SqlResultException ex(L#sqlFunctionName, ret, handleType, handle, msg); \
+			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
 			SET_EXCEPTION_SOURCE(ex); \
 			throw ex; \
 		} \
-		if(SQL_SUCCESS_WITH_INFO == ret) { \
+		if(SQL_SUCCESS_WITH_INFO == sqlReturn) { \
 			switch(handleType) { \
 			case SQL_HANDLE_ENV: \
-				LOG_WARNING_ODBC(handle, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC, ret, sqlFunctionName); \
+				LOG_INFO_ODBC(handle, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC, sqlReturn, sqlFunctionName); \
 				break; \
 			case SQL_HANDLE_DBC: \
-				LOG_WARNING_ODBC(SQL_NULL_HENV, handle, SQL_NULL_HSTMT, SQL_NULL_HDESC, ret, sqlFunctionName); \
+				LOG_INFO_ODBC(SQL_NULL_HENV, handle, SQL_NULL_HSTMT, SQL_NULL_HDESC, sqlReturn, sqlFunctionName); \
 				break; \
 			case SQL_HANDLE_STMT: \
-				LOG_WARNING_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, handle, SQL_NULL_HDESC, ret, sqlFunctionName); \
+				LOG_INFO_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, handle, SQL_NULL_HDESC, sqlReturn, sqlFunctionName); \
 				break; \
 			case SQL_HANDLE_DESC: \
-				LOG_INFO_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, handle, ret, sqlFunctionName); \
+				LOG_INFO_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, handle, sqlReturn, sqlFunctionName); \
 				break; \
 			default: \
 				THROW_WITH_SOURCE(IllegalArgumentException, L"Unknown handleType"); \

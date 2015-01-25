@@ -18,6 +18,7 @@
 // Other headers
 #include "Environment.h"
 #include "Database.h"
+#include "Exception.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
 
@@ -47,15 +48,15 @@ namespace exodbc
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 		m_env.AllocHenv();
 		m_env.SetOdbcVersion(OV_3);
-		ASSERT_TRUE(m_db.AllocateHdbc(m_env));
-		ASSERT_TRUE(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		ASSERT_NO_THROW(m_db.AllocateHdbcAndReadEnvOdbcVersion(m_env));
+		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
 	void DatabaseTest::TearDown()
 	{
 		if(m_db.IsOpen())
 		{
-			EXPECT_TRUE(m_db.Close());
+			EXPECT_NO_THROW(m_db.Close());
 		}
 	}
 
@@ -64,7 +65,7 @@ namespace exodbc
 	TEST_P(DatabaseTest, DISABLED_DetectOrphanedTables)
 	{
 		Database db(m_env);
-		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		MIntTypesTable t1(&db, m_odbcInfo.m_namesCase);
 		EXPECT_TRUE(t1.Open());
 		{
@@ -82,21 +83,10 @@ namespace exodbc
 	TEST_P(DatabaseTest, SetConnectionAttributes)
 	{
 		Database db(m_env);
-		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
-		EXPECT_TRUE(db.SetConnectionAttributes());
-		EXPECT_TRUE(db.Close());
+		EXPECT_NO_THROW(db.SetConnectionAttributes());
 	}
 
-	TEST_P(DatabaseTest, ReadDbInfo)
-	{
-		Database db(m_env);
-		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-
-		SDbInfo dbInfo;
-		EXPECT_TRUE(db.ReadDbInfo(dbInfo));
-		EXPECT_TRUE(db.Close());
-	}
 
 	TEST_P(DatabaseTest, ReadTransactionIsolationMode)
 	{
@@ -161,34 +151,33 @@ namespace exodbc
 		Environment env(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, OV_3);
 		EXPECT_TRUE(env.HasHenv());
 		Database db(env);
-		EXPECT_TRUE(db.Open(&env));
-		EXPECT_TRUE(db.Close());
+		EXPECT_NO_THROW(db.Open(&env));
+		EXPECT_NO_THROW(db.Close());
 
 		// Open an existing db using the default c'tor and setting params on db
 		Database db2;
-		EXPECT_TRUE(db2.AllocateHdbc(env));
-		EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		EXPECT_TRUE(db2.Close());
+		ASSERT_NO_THROW(db2.AllocateHdbcAndReadEnvOdbcVersion(env));
+		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		EXPECT_NO_THROW(db2.Close());
 
 		// Try to open with a different password / user, expect to fail when opening the db.
 		{
-			LogLevelFatal llf;
 			Database failDb(m_env);
-			LOG_ERROR("Warning: This test is supposed to spit errors");
-			EXPECT_FALSE(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"));
+			EXPECT_THROW(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"), SqlResultException);
 		}
 	}
+
 
 	// TODO: Test Close. Close should return a value if succeeded
 	TEST_P(DatabaseTest, Close)
 	{
 		// Try to close a db that really is open
 		Database db1(m_env);
-		ASSERT_TRUE(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		ASSERT_NO_THROW(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
-		EXPECT_TRUE(db1.Close());
+		EXPECT_NO_THROW(db1.Close());
 
-		// TODO: Close works okay, does not return false if there is nothing to do
+		// \todo: Close works okay, does not return false if there is nothing to do
 		//// And one that is not open
 		//Database db2(m_pDbEnv);
 		//EXPECT_FALSE(db2.Close());
@@ -203,34 +192,34 @@ namespace exodbc
 	TEST_P(DatabaseTest, SetCommitMode)
 	{
 		Database db(m_env);
-		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		// We default to manual commit
 		EXPECT_EQ(CM_MANUAL_COMMIT, db.GetCommitMode());
 		EXPECT_EQ(CM_MANUAL_COMMIT, db.ReadCommitMode());
 
 		// Switch to auto
-		EXPECT_TRUE(db.SetCommitMode(CM_AUTO_COMMIT));
+		EXPECT_NO_THROW(db.SetCommitMode(CM_AUTO_COMMIT));
 		// internal member should already be updated
 		EXPECT_EQ(CM_AUTO_COMMIT, db.GetCommitMode());
 		EXPECT_EQ(CM_AUTO_COMMIT, db.ReadCommitMode());
 
 		// and back to manual
-		EXPECT_TRUE(db.SetCommitMode(CM_MANUAL_COMMIT));
+		EXPECT_NO_THROW(db.SetCommitMode(CM_MANUAL_COMMIT));
 		// internal member should already be updated
 		EXPECT_EQ(CM_MANUAL_COMMIT, db.GetCommitMode());
 		EXPECT_EQ(CM_MANUAL_COMMIT, db.ReadCommitMode());
 	}
 
+
 	TEST_P(DatabaseTest, ReadDataTypesInfo)
 	{
 		Database db(m_env);
 
-		ASSERT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		std::vector<SSqlTypeInfo> types;
-		bool ok = db.ReadDataTypesInfo(types);
-		EXPECT_TRUE(ok);
+		ASSERT_NO_THROW(types = db.ReadDataTypesInfo());
 		EXPECT_TRUE(types.size() > 0);
 
 		std::wstringstream ws;
@@ -250,19 +239,6 @@ namespace exodbc
 		}
 
 		BOOST_LOG_TRIVIAL(info) << ws.str();
-	}
-
-	TEST_P(DatabaseTest, GetDbInfo)
-	{
-		Database db(m_env);
-
-		EXPECT_TRUE(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-
-		SDbInfo dbInfo = db.GetDbInfo();
-		std::wstring sInfo = dbInfo.ToStr();
-
-		EXPECT_TRUE(sInfo.length() > 0);
-		BOOST_LOG_TRIVIAL(info) << L"DbInfo of database connected to DSN " << m_odbcInfo.m_dsn.c_str() << std::endl << sInfo.c_str();
 	}
 
 
@@ -312,7 +288,7 @@ namespace exodbc
 		// We need to examine that behavior, it must be some option. -> Yes, it is the SNAPSHOT Transaction isolation
 		{
 			Database db2(m_env);
-			EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 			// This is extremely confusing: Why do we need to switch to AUTO_COMMIT to set the transaction mode to SNAPSHOT?
 			// Note: Setting the transaction mode works always, but doing a query afterwards only if it was set during an auto-commit-mode ?? 
 			// TODO: WTF???
@@ -346,7 +322,7 @@ namespace exodbc
 		EXPECT_TRUE( m_db.CommitTrans() );
 
 		Database db2(m_env);
-		EXPECT_TRUE(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		{
 			exodbc::Table iTable2(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
 			EXPECT_TRUE(iTable2.Open(false, true));
