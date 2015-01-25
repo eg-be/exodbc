@@ -36,7 +36,8 @@ namespace exodbc
 	TablePrimaryKeys::TablePrimaryKeys(Database* pDb, const STableInfo& tableInfo)
 		: m_initialized(false)
 	{
-		m_initialized = Initialize(pDb, tableInfo);
+		Initialize(pDb, tableInfo);
+		m_initialized = true;
 	}
 
 	// Destruction
@@ -45,28 +46,20 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	bool TablePrimaryKeys::Initialize(Database* pDb, const STableInfo& tableInfo)
+	void TablePrimaryKeys::Initialize(Database* pDb, const STableInfo& tableInfo)
 	{
 		exASSERT(pDb);
 
 		m_initialized = false;
 		TablePrimaryKeysVector tablePks;
 
-		try
-		{
-			tablePks = pDb->ReadTablePrimaryKeys(tableInfo);
-			m_initialized = Parse(tablePks);
-		}
-		catch (Exception ex)
-		{
-			LOG_ERROR(ex.ToString());
-		}
-
-		return m_initialized;
+		tablePks = pDb->ReadTablePrimaryKeys(tableInfo);
+		Parse(tablePks);
+		m_initialized = true;
 	}
 
 
-	bool TablePrimaryKeys::Parse(const TablePrimaryKeysVector& tablePks)
+	void TablePrimaryKeys::Parse(const TablePrimaryKeysVector& tablePks)
 	{
 		m_pksMap.clear();
 
@@ -77,8 +70,6 @@ namespace exodbc
 		{
 			m_pksMap[it->GetSqlName()] = *it;
 		}
-
-		return true;
 	}
 
 

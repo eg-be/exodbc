@@ -34,15 +34,8 @@ namespace exodbc
 	TablePrivileges::TablePrivileges(Database* pDb, const STableInfo& tableInfo)
 		: m_initialized(false)
 	{
-		try
-		{
-			Initialize(pDb, tableInfo);
-			m_initialized = true;
-		}
-		catch (Exception ex)
-		{
-			LOG_ERROR(ex.ToString());
-		}
+		Initialize(pDb, tableInfo);
+		m_initialized = true;
 	}
 
 	// Destruction
