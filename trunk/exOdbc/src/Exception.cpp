@@ -31,13 +31,15 @@ namespace exodbc
 
 	// Destructor
 	// -----------
-
+	Exception::~Exception()
+	{
+	}
 
 	// Implementation
 	// --------------
 	const char* Exception::what() const throw()
 	{
-		return ToUtf8Str(m_msg).c_str();
+		return m_what.c_str();
 	}
 
 
@@ -46,6 +48,8 @@ namespace exodbc
 		m_line = line;
 		m_file = fileName;
 		m_functionname = functionName;
+
+		m_what = w2s(ToString());
 	}
 
 
@@ -55,7 +59,14 @@ namespace exodbc
 		ws << GetName();
 		if (m_line > 0)
 		{
-			ws << L"[" << m_file << L"(" << m_line << L")@" << m_functionname << L"]";
+			// keep only filename
+			std::wstring fname = m_file;
+			size_t pos = m_file.rfind(L"\\");
+			if (pos != std::wstring::npos && m_file.length() > pos + 1)
+			{
+				fname = m_file.substr(pos + 1);
+			}
+			ws << L"[" << fname << L"(" << m_line << L")@" << m_functionname << L"]";
 		}
 		if (!m_msg.empty())
 		{
@@ -65,43 +76,43 @@ namespace exodbc
 	}
 
 
-	std::string Exception::ToUtf8Str(const std::wstring& s) const throw()
-	{
-		try
-		{
-			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-			std::string narrow = converter.to_bytes(m_msg);
-			return narrow.c_str();
-		}
-		catch (std::exception e)
-		{
-			return e.what();
-		}
-	}
+	//std::string Exception::ToUtf8Str(const std::wstring& s) const throw()
+	//{
+	//	try
+	//	{
+	//		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	//		std::string narrow = converter.to_bytes(m_msg);
+	//		return narrow.c_str();
+	//	}
+	//	catch (std::exception e)
+	//	{
+	//		return e.what();
+	//	}
+	//}
 
 
-	std::wstring Exception::ToUtf16Str(const std::string& s) const throw()
-	{
-		try
-		{
-			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-			std::wstring wide = converter.from_bytes(s);
-			return wide;
-		}
-		catch (std::exception e)
-		{
-			try
-			{
-				std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-				std::wstring wide = converter.from_bytes(e.what());
-				return wide;
-			}
-			catch (std::exception e)
-			{
-				return L"Failed to Convert Exception-Message to wide-string";
-			}
-		}
-	}
+	//std::wstring Exception::ToUtf16Str(const std::string& s) const throw()
+	//{
+	//	try
+	//	{
+	//		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	//		std::wstring wide = converter.from_bytes(s);
+	//		return wide;
+	//	}
+	//	catch (std::exception e)
+	//	{
+	//		try
+	//		{
+	//			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	//			std::wstring wide = converter.from_bytes(e.what());
+	//			return wide;
+	//		}
+	//		catch (std::exception e)
+	//		{
+	//			return L"Failed to Convert Exception-Message to wide-string";
+	//		}
+	//	}
+	//}
 
 
 	std::wstring AssertionException::ToString() const throw()
@@ -119,6 +130,7 @@ namespace exodbc
 	{
 		// We have no Error-Info to fetch
 		BuildErrorMsg(sqlFunctionName, ret);
+		m_what = w2s(ToString());
 	}
 
 	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg /* = L"" */) throw()
@@ -127,6 +139,7 @@ namespace exodbc
 		// Fetch error-information from the database and build the error-msg
 		FetchErrorInfo(handleType, handle);
 		BuildErrorMsg(sqlFunctionName, ret);
+		m_what = w2s(ToString());
 	}
 
 
