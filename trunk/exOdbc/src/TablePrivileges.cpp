@@ -34,7 +34,15 @@ namespace exodbc
 	TablePrivileges::TablePrivileges(Database* pDb, const STableInfo& tableInfo)
 		: m_initialized(false)
 	{
-		m_initialized = Initialize(pDb, tableInfo);
+		try
+		{
+			Initialize(pDb, tableInfo);
+			m_initialized = true;
+		}
+		catch (Exception ex)
+		{
+			LOG_ERROR(ex.ToString());
+		}
 	}
 
 	// Destruction
@@ -43,7 +51,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	bool TablePrivileges::Initialize(Database* pDb, const STableInfo& tableInfo)
+	void TablePrivileges::Initialize(Database* pDb, const STableInfo& tableInfo)
 	{
 		exASSERT(pDb);
 
@@ -51,22 +59,13 @@ namespace exodbc
 		m_initialized = false;
 		TablePrivilegesVector tablePrivs;
 
-		try
-		{
-			tablePrivs = pDb->ReadTablePrivileges(tableInfo);
-			m_initialized = Parse(tablePrivs);
-		}
-		catch (Exception ex)
-		{
-			LOG_ERROR(ex.ToString());
-			return false;
-		}
-
-		return m_initialized;
+		tablePrivs = pDb->ReadTablePrivileges(tableInfo);
+		Parse(tablePrivs);
+		m_initialized = true;
 	}
 
 
-	bool TablePrivileges::Parse(const TablePrivilegesVector& tablePrivs)
+	void TablePrivileges::Parse(const TablePrivilegesVector& tablePrivs)
 	{
 		// Very simple so far
 		for (TablePrivilegesVector::const_iterator it = tablePrivs.begin(); it != tablePrivs.end(); it++)
@@ -88,7 +87,6 @@ namespace exodbc
 				m_privileges |= TP_DELETE;
 			}
 		}
-		return true;
 	}
 
 } // namespace exodbc

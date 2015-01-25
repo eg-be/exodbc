@@ -467,7 +467,7 @@ namespace exodbc
 		return it->second;
 	}
 
-
+	// \todo: Rewrite everything, together with the Close() method
 	void Table::cleanup()
 	{
 #ifdef EXODBCDEBUG
@@ -1104,45 +1104,38 @@ namespace exodbc
 
 		// If we do not already have a STableInfo for our table, we absolutely must find one
 		// \\todo: This is redundant, m_haveTableInfo and searchedTable is enough
-		bool foundTable = false;
 		bool searchedTable = false;
 		if (!m_haveTableInfo)
 		{
+			// Finding will throw if not exactly one is found
 			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
 			m_haveTableInfo = true;
 			searchedTable = true;
-			foundTable = true;
 		}
 
 		// If we are asked to check existence and have not just proved we exist, find table
-		if (checkTableExists && !foundTable && !searchedTable)
+		if (checkTableExists && !searchedTable)
 		{
+			// Will throw if not one is found
 			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
-			{
-				return false;
-			}
 			m_haveTableInfo = true;
 			searchedTable = true;
-			foundTable = true;
-		}
-		// not found?
-		if (checkTableExists && !foundTable)
-		{
-			return false;
 		}
 
 		// If we are asked to create our columns automatically, read the column information and create the buffers
 		if (!m_manualColumns)
 		{
+			// Will throw if fails
 			std::vector<SColumnInfo> columns = m_pDb->ReadTableColumnInfo(m_tableInfo);
 			// Remember column sizes and create ColumnBuffers
 			m_numCols = columns.size();
 			if (m_numCols == 0)
 			{
-				LOG_ERROR((boost::wformat(L"No columns found for table '%s'") %m_tableInfo.GetSqlName()).str());
-				return false;
+				Exception ex((boost::wformat(L"No columns found for table '%s'") % m_tableInfo.GetSqlName()).str());
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
-			// We need to know which ODBC version we are using
+			// We need to know which ODBC version we are using, might throw
 			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
 			// And how to open this column
 			ColumnFlags columnFlags = IsQueryOnly() ? CF_READ : CF_READ_WRITE;
@@ -1159,16 +1152,13 @@ namespace exodbc
 
 		if (checkPrivileges)
 		{
-			if (!m_tablePrivileges.Initialize(m_pDb, m_tableInfo))
-			{
-				LOG_ERROR((boost::wformat(L"Failed to Read Table Privileges for Table '%s'") % m_tableInfo.GetSqlName()).str());
-				return false;
-			}
+			m_tablePrivileges.Initialize(m_pDb, m_tableInfo);
 			// We always need to be able to select, but the rest only if we want to write
 			if ( ! ( m_tablePrivileges.IsSet(TP_SELECT) && (m_openMode == READ_ONLY || (m_tablePrivileges.AreSet(TP_INSERT | TP_UPDATE | TP_DELETE) ))) )
 			{
-				LOG_ERROR((boost::wformat(L"Not sufficient Privileges to Open Table '%s' for '%s'") % m_tableInfo.GetSqlName() % (m_openMode == READ_ONLY ? L"READ_ONLY" : L"READ_WRITE") ).str());
-				return false;
+				Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s' for '%s'") % m_tableInfo.GetSqlName() % (m_openMode == READ_ONLY ? L"READ_ONLY" : L"READ_WRITE") ).str());
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
 		}
 

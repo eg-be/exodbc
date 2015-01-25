@@ -232,6 +232,7 @@ namespace exodbc
 		* \see		IsOpen()
 		*
 		* \return	true if it succeeds, false if it fails.
+		* \throw	Exception If anything goes wrong.
 		*/
 		bool		Open(bool checkPrivileges = false, bool checkTableExists = true);
 
@@ -703,6 +704,7 @@ namespace exodbc
 		* \brief	Iterates the bound columns and returns the field part of a statement.
 		* \detailed	Queries each bound column for its SqlName.
 		* \return	A string in the form "Field1, Field2, .., FieldN"
+		* \throw	Exception If no ColumnBuffers are bound.
 		*/
 		std::wstring BuildFieldsStatement() const;
 
