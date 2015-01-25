@@ -632,24 +632,24 @@ namespace exodbc
 	}
 
 
-	bool Database::ExecSql(const std::wstring& sqlStmt, ExecFailMode mode /* = NotFailOnNoData */)
+	void Database::ExecSql(const std::wstring& sqlStmt, ExecFailMode mode /* = NotFailOnNoData */)
 	{
 		exASSERT(IsOpen());
 
 		RETCODE retcode;
 
-		SQLFreeStmt(m_hstmtExecSql, SQL_CLOSE);
+		CloseStmtHandle(m_hstmtExecSql, IgnoreNotOpen);
 
 		retcode = SQLExecDirect(m_hstmtExecSql, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
 		if (retcode != SQL_SUCCESS)
 		{
 			if (!(mode == NotFailOnNoData && retcode == SQL_NO_DATA))
 			{
-				LOG_ERROR_STMT_MSG(m_hstmtExecSql, retcode, SQLExecDirect, (boost::wformat(L"Failed to execute Stmt '%s'") % sqlStmt).str());
-				return false;
+				SqlResultException ex(L"SQLExecDirect", retcode, (boost::wformat(L"Failed to execute Stmt '%s'") % sqlStmt).str());
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
 		}
-		return true;
 	}
 
 

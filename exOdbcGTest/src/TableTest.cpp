@@ -165,7 +165,7 @@ namespace exodbc
 		// DB2 fails here, it still reports we have insert permissions. but doing an insert later fails
 
 		EXPECT_FALSE(so2Table.Open(true, true));
-		EXPECT_FALSE(m_db.ExecSql(L"insert into exodbc.dbo.selectonly (idselectonly) values (3)"));
+		EXPECT_THROW(m_db.ExecSql(L"insert into exodbc.dbo.selectonly (idselectonly) values (3)"), SqlResultException);
 		int p = 3;
 	}
 
