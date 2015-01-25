@@ -31,6 +31,8 @@ namespace exodbc
 
 	// Classes
 	// -------
+#pragma  warning(push)
+#pragma warning(disable:4275)
 
 	/*!
 	* \class Exception
@@ -39,18 +41,16 @@ namespace exodbc
 	*
 	*/
 	class EXODBCAPI Exception
-		: public std::exception
+		: public std::runtime_error
 	{
 	public:
-		Exception() throw() : m_line(0) {};
-		Exception(const std::wstring& msg) throw() : m_msg(msg), m_line(0) {};
+		Exception() throw() : std::runtime_error("exodbc::Exception"), m_line(0) { m_what = w2s(ToString()); };
+		Exception(const std::wstring& msg) throw() : std::runtime_error("exodbc::Exception"), m_line(0), m_msg(msg) { m_what = w2s(ToString()); };
 
-		Exception(const exception&) throw() {};
-
-		virtual ~Exception() throw() {};
+		virtual ~Exception() throw();
 
 		virtual std::wstring ToString() const throw();
-		virtual std::wstring GetName() const throw()	{ return L"Exception"; };
+		virtual std::wstring GetName() const throw()	{ return L"exodbc::Exception"; };
 
 		void SetSourceInformation(int line, const std::wstring& fileName, const std::wstring& functionName) throw();
 
@@ -66,15 +66,17 @@ namespace exodbc
 		virtual const char* what() const throw();
 
 	protected:
-		std::string ToUtf8Str(const std::wstring& s) const throw();
-		std::wstring ToUtf16Str(const std::string& s) const throw();
+		//std::string ToUtf8Str(const std::wstring& s) const throw();
+		//std::wstring ToUtf16Str(const std::string& s) const throw();
 
 		int				m_line;
 		std::wstring	m_file;
 		std::wstring	m_functionname;
 		std::wstring	m_msg;
+		std::string	m_what;
 	};
 
+#pragma warning(disable:4251)
 
 	class EXODBCAPI AssertionException
 		: public Exception
@@ -85,6 +87,7 @@ namespace exodbc
 			, m_condition(condition)
 		{
 			SetSourceInformation(line, file, functionname);
+			m_what = w2s(ToString());
 		};
 
 		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition, const std::wstring& msg) throw()
@@ -92,11 +95,12 @@ namespace exodbc
 			, m_condition(condition)
 		{
 			SetSourceInformation(line, file, functionname);
+			m_what = w2s(ToString());
 		};
 
 		virtual ~AssertionException() {};
 
-		virtual std::wstring GetName() const throw() { return L"AssertionException"; };
+		virtual std::wstring GetName() const throw() { return L"exodbc::AssertionException"; };
 		virtual std::wstring ToString() const throw();
 
 	protected:
@@ -113,7 +117,7 @@ namespace exodbc
 
 		virtual ~SqlResultException() {};
 
-		virtual std::wstring GetName() const throw() { return L"SqlResultException"; };
+		virtual std::wstring GetName() const throw() { return L"exodbc::SqlResultException"; };
 		virtual std::wstring ToString() const throw();
 
 	protected:
@@ -131,11 +135,13 @@ namespace exodbc
 	public:
 		IllegalArgumentException(const std::wstring msg) throw()
 			: Exception(msg)
-		{};
+		{
+			//m_what = w2s(ToString());
+		};
 
 		virtual ~IllegalArgumentException() {};
 
-		virtual std::wstring GetName() const throw() { return L"IllegalArgumentException"; };
+		virtual std::wstring GetName() const throw() { return L"exodbc::IllegalArgumentException"; };
 	};
 
 }

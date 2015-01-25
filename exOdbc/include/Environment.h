@@ -27,7 +27,7 @@
 
 /* There are too many false positives for this one, particularly when using templates like wxVector<T> */
 /* class 'foo' needs to have dll-interface to be used by clients of class 'bar'" */
-#pragma warning(disable:4251)
+//#pragma warning(disable:4251)
 
 #ifndef MAXNAME
 #define MAXNAME         31
