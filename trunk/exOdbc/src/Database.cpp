@@ -91,30 +91,39 @@ namespace exodbc
 	{
 		if (IsOpen())
 		{
-			Close();
+			try
+			{
+				Close();
+			}
+			catch (Exception ex)
+			{
+				LOG_ERROR(ex.ToString());
+			}
 		}
 
 		// Free the connection-handle if it is allocated
 		if (HasHdbc())
 		{
+			// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
 			SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc);
-			if (ret != SQL_SUCCESS)
+			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched, use our standard logger
+			if (ret == SQL_ERROR)
 			{
-				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched, use our standard logger
-				if (ret == SQL_ERROR)
-				{
-					LOG_ERROR_DBC(m_hdbc, ret, SQLFreeHandle);
-				}
-				else
-				{
-					// We cannot get any error-info here
-					LOG_ERROR_SQL_NO_SUCCESS(ret, SQLFreeHandle);
-				}
+				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+				SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_DBC, m_hdbc, L"Freeing ODBC-Connection Handle failed with SQL_ERROR, handle is still valid.");
+				SET_EXCEPTION_SOURCE(ex);
+				LOG_ERROR(ex.ToString());
 			}
-			if (ret == SQL_SUCCESS)
+			else if (ret == SQL_INVALID_HANDLE)
 			{
+				// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
 				m_hdbc = SQL_NULL_HDBC;
+				SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Connection Handle failed with SQL_INVALID_HANDLE.");
+				SET_EXCEPTION_SOURCE(ex);
+				LOG_ERROR(ex.ToString());
 			}
+			// We have SUCCESS
+			m_hdbc = SQL_NULL_HDBC;
 		}
 	}
 
@@ -607,33 +616,19 @@ namespace exodbc
 	}
 
 
-	bool Database::CommitTrans()
+	void Database::CommitTrans()
 	{
 		// Commit the transaction
 		SQLRETURN ret = SQLEndTran(SQL_HANDLE_DBC, m_hdbc, SQL_COMMIT);
-		if( ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLEndTran, L"Failed to Commit Transaction");
-			return false;
-		}
-
-		// Completed successfully
-		return true;
+		THROW_IFN_SUCCEEDED_MSG(SQLEndTran, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to Commit Transaction");
 	}
 
 
-	bool Database::RollbackTrans()
+	void Database::RollbackTrans()
 	{
 		// Rollback the transaction
 		SQLRETURN ret = SQLEndTran(SQL_HANDLE_DBC, m_hdbc, SQL_ROLLBACK);
-		if( ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLEndTran, L"Failed to Rollback Transaction");
-			return false;
-		}
-
-		// Completed successfully
-		return true;
+		THROW_IFN_SUCCEEDED_MSG(SQLEndTran, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to Rollback Transaction");
 	}
 
 
@@ -1188,9 +1183,10 @@ namespace exodbc
 	{
 		// If Autocommit is off, we need to commit any ongoing transaction
 		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
-		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
+		if (GetCommitMode() != CM_AUTO_COMMIT)
 		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
+			// \todo: Couldn't we just rollback?
+			CommitTrans();
 		}
 
 		SQLRETURN ret;
@@ -1220,9 +1216,10 @@ namespace exodbc
 
 		// If Autocommit is off, we need to commit any ongoing transaction
 		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
-		if (GetCommitMode() != CM_AUTO_COMMIT && !CommitTrans())
+		if (GetCommitMode() != CM_AUTO_COMMIT)
 		{
-			LOG_WARNING(L"Autocommit is off, the extra-call to CommitTrans before changing the Transaction Isolation Mode failed");
+			// \todo: Couldn't we just rollback?
+			CommitTrans();
 		}
 
 		SQLRETURN ret;
