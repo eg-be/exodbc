@@ -58,6 +58,7 @@ namespace exodbc
 		/*!
 		* \brief	Create a TablePrivilege for the Table given by tableInfo.
 		* \detailed	Tries to Initialize() this TablePrivileges automatically.
+		*			This will not throw an exception if Initialization fails.
 		* \see		IsInitialized()
 		*/
 		TablePrivileges(Database* pDb, const STableInfo& tableInfo);
@@ -69,18 +70,18 @@ namespace exodbc
 		/*!
 		* \brief	Query database about the Privileges of the passed Table.
 		*			Marks object as initialized on success.
-		* \return	True on success.
+		* \throw	Exception If querying or parsing fails.
 		*/
-		bool Initialize(Database* pDb, const STableInfo& tableInfo);
+		void Initialize(Database* pDb, const STableInfo& tableInfo);
 
 
 		/*!
 		* \brief	Initialize object from passed data. Marks as uninitialized first.
 		*			Marks object as initialized on success.
 		* \param	tablePrivs TablePrivilige s
-		* \return	True on success.
+		* \throw	Exception if Parsing passed data fails.
 		*/
-		bool Initialize(const TablePrivilegesVector& tablePrivs) { return Parse(tablePrivs); };
+		void Initialize(const TablePrivilegesVector& tablePrivs) { return Parse(tablePrivs); };
 
 
 		/*!
@@ -91,18 +92,22 @@ namespace exodbc
 
 		/*!
 		* \brief	Test if multiple TablePrivileges are set.
+		* \throw	Exception If not initialized.
 		*/
-		bool AreSet(unsigned int priv) const { return (m_privileges & priv) != 0; };
+		bool AreSet(unsigned int priv) const { exASSERT(IsInitialized());  return (m_privileges & priv) != 0; };
 		
 
 		/*!
 		* \brief	Test if a TablePrivilege is set.
+		* \throw	Exception If not initialized.
 		*/
-		bool IsSet(TablePrivilege priv) const { return (m_privileges & priv) != 0; };
+		bool IsSet(TablePrivilege priv) const { exASSERT(IsInitialized());  return (m_privileges & priv) != 0; };
 
 	private:
-
-		bool Parse(const TablePrivilegesVector& tablePrivs);
+		/*!
+		* \brief	Parses to TablePrivilege.
+		*/
+		void Parse(const TablePrivilegesVector& tablePrivs);
 
 		bool m_initialized;
 
