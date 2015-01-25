@@ -1142,10 +1142,7 @@ namespace exodbc
 		bool searchedTable = false;
 		if (!m_haveTableInfo)
 		{
-			if (!m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName, m_tableInfo))
-			{
-				return false;
-			}
+			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
 			m_haveTableInfo = true;
 			searchedTable = true;
 			foundTable = true;
@@ -1154,7 +1151,7 @@ namespace exodbc
 		// If we are asked to check existence and have not just proved we exist, find table
 		if (checkTableExists && !foundTable && !searchedTable)
 		{
-			if (!m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName, m_tableInfo))
+			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
 			{
 				return false;
 			}
@@ -1171,11 +1168,7 @@ namespace exodbc
 		// If we are asked to create our columns automatically, read the column information and create the buffers
 		if (!m_manualColumns)
 		{
-			std::vector<SColumnInfo> columns;
-			if (!m_pDb->ReadTableColumnInfo(m_tableInfo, columns))
-			{
-				return false;
-			}
+			std::vector<SColumnInfo> columns = m_pDb->ReadTableColumnInfo(m_tableInfo);
 			// Remember column sizes and create ColumnBuffers
 			m_numCols = columns.size();
 			if (m_numCols == 0)

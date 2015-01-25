@@ -13,6 +13,7 @@
 
 // Same component headers
 #include "Database.h"
+#include "Exception.h"
 
 // Other headers
 
@@ -51,9 +52,14 @@ namespace exodbc
 		m_initialized = false;
 		TablePrimaryKeysVector tablePks;
 
-		if (pDb->ReadTablePrimaryKeys(tableInfo, tablePks))
+		try
 		{
+			tablePks = pDb->ReadTablePrimaryKeys(tableInfo);
 			m_initialized = Parse(tablePks);
+		}
+		catch (Exception ex)
+		{
+			LOG_ERROR(ex.ToString());
 		}
 
 		return m_initialized;

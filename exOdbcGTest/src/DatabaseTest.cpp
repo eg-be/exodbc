@@ -358,7 +358,7 @@ namespace exodbc
 	TEST_P(DatabaseTest, ReadCatalogs)
 	{
 		std::vector<std::wstring> cats;
-		EXPECT_TRUE(m_db.ReadCatalogs(cats));
+		EXPECT_NO_THROW(cats = m_db.ReadCatalogs());
 		switch(m_db.Dbms())
 		{
 		case dbmsDB2:
@@ -377,7 +377,7 @@ namespace exodbc
 	TEST_P(DatabaseTest, ReadSchemas)
 	{
 		std::vector<std::wstring> schemas;
-		EXPECT_TRUE(m_db.ReadSchemas(schemas));
+		EXPECT_NO_THROW(schemas = m_db.ReadSchemas());
 		switch(m_db.Dbms())
 		{
 		case dbmsDB2:
@@ -404,7 +404,7 @@ namespace exodbc
 	TEST_P(DatabaseTest, ReadTableTypes)
 	{
 		std::vector<std::wstring> tableTypes;
-		EXPECT_TRUE(m_db.ReadTableTypes(tableTypes));
+		EXPECT_NO_THROW(tableTypes = m_db.ReadTableTypes());
 		// Check that we have at least a type TABLE and a type VIEW
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"TABLE") != tableTypes.end());
 		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), L"VIEW") != tableTypes.end());
@@ -444,7 +444,7 @@ namespace exodbc
 			break;
 		}
 		// \todo: This is simply not working with MySQL, see Ticket #76
-		EXPECT_TRUE(m_db.ReadTablePrivileges(tableName, schemaName, catalogName, typeName, privs));
+		EXPECT_NO_THROW(privs = m_db.ReadTablePrivileges(tableName, schemaName, catalogName, typeName));
 		bool canSelect = false;
 		bool canInsert = false;
 		bool canDelete = false;
@@ -477,9 +477,9 @@ namespace exodbc
 		STableInfo iInfo;
 		wstring intTableName = TestTables::GetTableName(L"IntegerTypes", m_odbcInfo.m_namesCase);
 		wstring idName = TestTables::GetColName(L"IdIntegerTypes", m_odbcInfo.m_namesCase);
-		ASSERT_TRUE(m_db.FindOneTable(intTableName, L"", L"", L"", iInfo));
+		ASSERT_NO_THROW(iInfo = m_db.FindOneTable(intTableName, L"", L"", L""));
 
-		EXPECT_TRUE(m_db.ReadTablePrimaryKeys(iInfo, pks));
+		EXPECT_NO_THROW(pks = m_db.ReadTablePrimaryKeys(iInfo));
 		EXPECT_EQ(1, pks.size());
 		if (pks.size() == 1)
 		{
@@ -491,9 +491,9 @@ namespace exodbc
 		wstring mkId1 = TestTables::GetColName(L"id1", m_odbcInfo.m_namesCase);
 		wstring mkId2 = TestTables::GetColName(L"id2", m_odbcInfo.m_namesCase);
 		wstring mkId3 = TestTables::GetColName(L"id3", m_odbcInfo.m_namesCase);
-		ASSERT_TRUE(m_db.FindOneTable(multiKeyTableName, L"", L"", L"", mkInfo));
+		EXPECT_NO_THROW(mkInfo = m_db.FindOneTable(multiKeyTableName, L"", L"", L""));
 
-		EXPECT_TRUE(m_db.ReadTablePrimaryKeys(mkInfo, pks));
+		EXPECT_NO_THROW(pks = m_db.ReadTablePrimaryKeys(mkInfo));
 		EXPECT_EQ(3, pks.size());
 		if (pks.size() == 3)
 		{
@@ -538,7 +538,7 @@ namespace exodbc
 			catalogName = L"exodbc";
 			typeName = L"";
 		}
-		EXPECT_TRUE(m_db.ReadTableColumnInfo(tableName, schemaName, catalogName, typeName, cols));
+		EXPECT_NO_THROW(cols = m_db.ReadTableColumnInfo(tableName, schemaName, catalogName, typeName));
 		// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
 		ASSERT_TRUE(cols.size() == 4);
 		SColumnInfo col = cols[2];
@@ -578,25 +578,25 @@ namespace exodbc
 			catalogName = L"exodbc";
 		}
 		// Find one table by using only the table-name as search param
-		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"", L"", tables));
+		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"", L"", L""));
 		EXPECT_EQ(1, tables.size());
 		// Find one table by using table-name and schema/catalog
-		EXPECT_TRUE(m_db.FindTables(tableName, schemaName, catalogName, L"", tables));
+		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, schemaName, catalogName, L""));
 		EXPECT_EQ(1, tables.size());
 		// In all cases, we should not find anything if we use a schema or a catalog that does not exist
 		// \todo: Create Ticket (Info): Note: When using MySQL-Odbc driver, if 'do not use INFORMATION_SCHEMA' is set, this will fail due to an access denied for database "wrongCatalog"
-		EXPECT_TRUE(m_db.FindTables(tableName, L"WrongSchema", L"", L"", tables));
+		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"WrongSchema", L"", L""));
 		EXPECT_EQ(0, tables.size());
-		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"WrongCatalog", L"", tables));
+		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"", L"WrongCatalog", L""));
 		EXPECT_EQ(0, tables.size());
 		// Also, we have a table, not a view
-		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"", L"VIEW", tables));
+		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"", L"", L"VIEW"));
 		EXPECT_EQ(0, tables.size());
-		EXPECT_TRUE(m_db.FindTables(tableName, L"", L"", L"TABLE", tables));
+		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"", L"", L"TABLE"));
 		EXPECT_EQ(1, tables.size());
 		// What about search-patterns? Note: Not use for table-type
 		// \todo: They just dont work with MySql 3.51 ?
-		EXPECT_TRUE(m_db.FindTables(tableName, L"%", L"%", L"", tables));
+		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"%", L"%", L""));
 		EXPECT_EQ(1, tables.size());
 		if(tables.size() > 0)
 		{
@@ -610,7 +610,7 @@ namespace exodbc
 		std::wstring catalogPattern = catalogName;
 		if(catalogName.length() > 0)
 			catalogPattern = (boost::wformat(L"%%%s%%") %catalogName).str();
-		EXPECT_TRUE(m_db.FindTables(tableName, schemaPattern, catalogPattern, L"", tables));
+		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, schemaPattern, catalogPattern, L""));
 		EXPECT_EQ(1, tables.size());
 		if(tables.size() > 0)
 		{
@@ -624,7 +624,7 @@ namespace exodbc
 	TEST_P(DatabaseTest, ReadCompleteCatalog)
 	{
 		SDbCatalogInfo cat;
-		EXPECT_TRUE(m_db.ReadCompleteCatalog(cat));
+		EXPECT_NO_THROW( cat = m_db.ReadCompleteCatalog());
 		// TODO: This is confusing. DB2 reports schemas, what is correct, but mysql reports catalogs?? wtf?
 		if(m_db.Dbms() == dbmsDB2)
 		{

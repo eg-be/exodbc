@@ -111,7 +111,7 @@ namespace exodbc
 		// This makes only sense if we've already determined the correct STableInfo structure
 		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
 		STableInfo tableInfo;
-		EXPECT_TRUE(m_db.FindOneTable(tableName, L"", L"", L"", tableInfo));
+		EXPECT_NO_THROW(tableInfo = m_db.FindOneTable(tableName, L"", L"", L""));
 
 		exodbc::Table table(&m_db, tableInfo, Table::READ_ONLY);
 		EXPECT_TRUE(table.Open(false, false));
