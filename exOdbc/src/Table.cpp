@@ -291,7 +291,7 @@ namespace exodbc
 	}
 
 
-	bool Table::BindDeleteParameters()
+	void Table::BindDeleteParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(m_openMode == READ_WRITE);
@@ -317,22 +317,11 @@ namespace exodbc
 
 		// Prepare to delete
 		SQLRETURN ret = SQLPrepare(m_hStmtDelete, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hStmtDelete, ret, SQLPrepare);
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(m_hStmtDelete, ret, SQLPrepare);
-		}
-
-		return SQL_SUCCEEDED(ret);
-
-		return true;
+		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtDelete);
 	}
 
 
-	bool Table::BindUpdateParameters()
+	void Table::BindUpdateParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(m_openMode == READ_WRITE);
@@ -374,20 +363,11 @@ namespace exodbc
 
 		// Prepare to update
 		SQLRETURN ret = SQLPrepare(m_hStmtUpdate, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hStmtUpdate, ret, SQLPrepare);
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(m_hStmtUpdate, ret, SQLPrepare);
-		}
-
-		return SQL_SUCCEEDED(ret);
+		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
 	}
 
 
-	bool Table::BindInsertParameters()
+	void Table::BindInsertParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(m_openMode == READ_WRITE);
@@ -422,16 +402,7 @@ namespace exodbc
 
 		// Prepare to update
 		SQLRETURN ret = SQLPrepare(m_hStmtInsert, (SQLWCHAR*) insertStmt.c_str(), SQL_NTS);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hStmtInsert, ret, SQLPrepare);
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(m_hStmtInsert, ret, SQLPrepare);
-		}
-
-		return SQL_SUCCEEDED(ret);
+		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtInsert);
 	}
 
 
@@ -1076,7 +1047,7 @@ namespace exodbc
 	}
 
 
-	bool Table::Open(bool checkPrivileges, bool checkTableExists)
+	void Table::Open(bool checkPrivileges, bool checkTableExists)
 	{
 		exASSERT(m_pDb);
 		exASSERT(m_pDb->IsOpen());
@@ -1185,63 +1156,14 @@ namespace exodbc
 				throw ex;
 			}
 
-			if (!BindInsertParameters())
-				return false;
-
-			if (!BindDeleteParameters())
-				return false;
-
-			if (!BindUpdateParameters())
-				return false;
-		}
-
-
-		// Build an insert statement using parameter markers
-		if (!IsQueryOnly() && m_numCols > 0)
-		{
-			//exASSERT(false);
-			//      bool needComma = false;
-			//sqlStmt = (boost::wformat(L"INSERT INTO %s (") % m_pDb->SQLTableName(m_tableName.c_str())).str();
-			//      for (i = 0; i < m_numCols; i++)
-			//      {
-			//          if (! m_colDefs[i].m_insertAllowed)
-			//              continue;
-			//          if (needComma)
-			//              sqlStmt += L",";
-			//          sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
-			//          needComma = true;
-			//      }
-			//      needComma = false;
-			//      sqlStmt += L") VALUES (";
-
-			//      int insertableCount = 0;
-
-			//      for (i = 0; i < m_numCols; i++)
-			//      {
-			//          if (! m_colDefs[i].m_insertAllowed)
-			//              continue;
-			//          if (needComma)
-			//              sqlStmt += L",";
-			//          sqlStmt += L"?";
-			//          needComma = true;
-			//          insertableCount++;
-			//      }
-			//      sqlStmt += L")";
-
-			//      // Prepare the insert statement for execution
-			//      if (insertableCount)
-			//      {
-			//          if (SQLPrepare(m_hstmtInsert, (SQLTCHAR FAR *) sqlStmt.c_str(), SQL_NTS) != SQL_SUCCESS)
-			//              return(m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert));
-			//      }
-			//      else
-			//          m_insertable = false;
+			// Build prepared statements, bind parameters.
+			BindInsertParameters();
+			BindDeleteParameters();
+			BindUpdateParameters();
 		}
 
 		// Completed successfully
 		m_isOpen = true;
-		return true;
-
 	}
 
 

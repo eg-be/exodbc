@@ -67,10 +67,10 @@ namespace exodbc
 		Database db(m_env);
 		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		MIntTypesTable t1(&db, m_odbcInfo.m_namesCase);
-		EXPECT_TRUE(t1.Open());
+		ASSERT_NO_THROW(t1.Open());
 		{
 			MCharTypesTable t2(&db, m_odbcInfo.m_namesCase);
-			EXPECT_TRUE(t2.Open());
+			ASSERT_NO_THROW(t2.Open());
 		}
 		{
 			LogLevelDebug lld;
@@ -270,7 +270,7 @@ namespace exodbc
 	{
 		std::wstring tableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
-		ASSERT_TRUE(iTable.Open(false, true));
+		ASSERT_NO_THROW(iTable.Open(false, true));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";
@@ -300,7 +300,7 @@ namespace exodbc
 #if HAVE_MSODBCSQL_H
 				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TI_SNAPSHOT));
 				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", Table::READ_ONLY);
-				EXPECT_TRUE(iTable2.Open(false, true));
+				ASSERT_NO_THROW(iTable2.Open(false, true));
 				EXPECT_TRUE(iTable2.Select());
 				EXPECT_FALSE(iTable2.SelectNext());
 #else
@@ -312,7 +312,7 @@ namespace exodbc
 			{
 				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TI_READ_COMMITTED));
 				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", Table::READ_ONLY);
-				EXPECT_TRUE(iTable2.Open(false, true));
+				ASSERT_NO_THROW(iTable2.Open(false, true));
 				EXPECT_TRUE(iTable2.Select());
 				EXPECT_FALSE(iTable2.SelectNext());
 			}
@@ -325,7 +325,7 @@ namespace exodbc
 		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		{
 			exodbc::Table iTable2(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
-			EXPECT_TRUE(iTable2.Open(false, true));
+			ASSERT_NO_THROW(iTable2.Open(false, true));
 			EXPECT_TRUE(iTable2.Select());
 			EXPECT_TRUE(iTable2.SelectNext());
 		}
@@ -336,7 +336,7 @@ namespace exodbc
 	{
 		std::wstring tableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
-		ASSERT_TRUE(iTable.Open(false, true));
+		ASSERT_NO_THROW(iTable.Open(false, true));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";

@@ -231,10 +231,9 @@ namespace exodbc
 		*			is required to query the database anyway (and fail if not found).
 		* \see		IsOpen()
 		*
-		* \return	true if it succeeds, false if it fails.
 		* \throw	Exception If anything goes wrong.
 		*/
-		bool		Open(bool checkPrivileges = false, bool checkTableExists = true);
+		void		Open(bool checkPrivileges = false, bool checkTableExists = true);
 
 
 		/*!
@@ -709,9 +708,9 @@ namespace exodbc
 		std::wstring BuildFieldsStatement() const;
 
 
-		bool		BindInsertParameters();
-		bool		BindDeleteParameters();
-		bool		BindUpdateParameters();
+		void		BindInsertParameters();
+		void		BindDeleteParameters();
+		void		BindUpdateParameters();
 
 		// ODBC Handles
 		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
