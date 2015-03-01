@@ -708,9 +708,29 @@ namespace exodbc
 		std::wstring BuildFieldsStatement() const;
 
 
+		/*!
+		* \brief	Prepares an SQL INSERT Statement to insert values for all bound columns.
+		* \throw	Exception If no ColumnBuffers are bound, not opened for writing, etc., or binding fails.
+		*/
 		void		BindInsertParameters();
+		
+		
+		/*!
+		* \brief	Prepares an SQL DELETE Statement to delete the row identified by the primary key values.
+		* \throw	Exception If no ColumnBuffers are bound, not opened for writing, etc., or binding fails
+		*			or this Table has no bound primary key columns.
+		*/
 		void		BindDeleteParameters();
+		
+
+		/*!
+		* \brief	Prepares an SQL UPDATE Statement to update the values of the (non-primary-keys) bound columns.
+		*			The rows matching the bound primary keys will be bound.
+		* \throw	Exception If no ColumnBuffers are bound, not opened for writing, etc., or binding fails
+		*			or this Table has no bound primary key columns.
+		*/
 		void		BindUpdateParameters();
+
 
 		// ODBC Handles
 		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
