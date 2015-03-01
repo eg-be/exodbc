@@ -318,6 +318,9 @@ namespace exodbc
 		}
 		EXPECT_NO_THROW(some = table.Count(whereStmt));
 		EXPECT_EQ(2, some);
+
+		// we should fail with an exception if we query using a non-sense where-stmt
+		EXPECT_THROW(table.Count(L"This query is invalid for sure"), Exception);
 	}
 
 
