@@ -298,25 +298,25 @@ namespace exodbc
 		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(false, true));
 
-		size_t all;
-		EXPECT_TRUE(table.Count(L"", all));
+		SQLUBIGINT all;
+		EXPECT_NO_THROW(all = table.Count(L""));
 		EXPECT_EQ(6, all);
 
-		// TODO: We need some GetColumnName function for things like that
-		size_t some;
+		// \todo: Check some really big table, with billions of rows
+		SQLUBIGINT some;
 		std::wstring whereStmt = L"tdouble > 0";
 		if (m_db.Dbms() == dbmsDB2)
 		{
 			whereStmt = L"TDOUBLE > 0";
 		}
-		EXPECT_TRUE(table.Count(whereStmt, some));
+		EXPECT_NO_THROW(some = table.Count(whereStmt));
 		EXPECT_EQ(1, some);
 		whereStmt = L"tdouble > 0 OR tfloat > 0";
 		if (m_db.Dbms() == dbmsDB2)
 		{
 			whereStmt = L"TDOUBLE > 0 OR TFLOAT > 0";
 		}
-		EXPECT_TRUE(table.Count(whereStmt, some));
+		EXPECT_NO_THROW(some = table.Count(whereStmt));
 		EXPECT_EQ(2, some);
 	}
 

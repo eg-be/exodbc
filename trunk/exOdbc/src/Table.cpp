@@ -502,11 +502,11 @@ namespace exodbc
 	}
 
 
-	bool Table::Count(const std::wstring& whereStatement, size_t& count)
+	SQLUBIGINT Table::Count(const std::wstring& whereStatement)
 	{
 		exASSERT(IsOpen());
-		bool ok = false;
-		bool isNull = false;
+
+		SQLUBIGINT count = 0;
 		std::wstring sqlstmt;
 		if ( ! whereStatement.empty())
 		{
@@ -516,34 +516,36 @@ namespace exodbc
 		{
 			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetSqlName()).str();
 		}
-		SQLRETURN ret = SQLExecDirect(m_hStmtCount, (SQLWCHAR*) sqlstmt.c_str(), SQL_NTS);
-		if (ret != SQL_SUCCESS)
+
+		try
 		{
-			LOG_ERROR_DBC(m_pDb->GetHDBC(), ret, SQLExecDirect);
-			LOG_ERROR_STMT(m_hStmtCount, ret, SQLExecDirect);
-		}
-		else
-		{
+			SQLRETURN ret = SQLExecDirect(m_hStmtCount, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+			THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtCount);
+			
 			ret = SQLFetch(m_hStmtCount);
-			if (ret != SQL_SUCCESS)
+			THROW_IFN_SUCCEEDED(SQLFetch, ret, SQL_HANDLE_STMT, m_hStmtCount);
+
+			bool isNull = false;
+			SQLINTEGER cb = 0;
+			GetDataEx(m_hStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
+			if (isNull)
 			{
-				LOG_ERROR_STMT(m_hStmtCount, ret, SQLFetch);
-			}
-			else
-			{
-				SQLINTEGER cb;
-				ok = GetData(m_hStmtCount, 1, SQL_C_ULONG, &count, sizeof(count), &cb, &isNull);
-				if (ok && isNull)
-				{
-					LOG_ERROR((boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt).str());
-				}
+				Exception ex(boost::str(boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt));
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
 		}
+		catch (Exception ex)
+		{
+			// always close the statement, we dont know if it was open or not
+			CloseStmtHandle(m_hStmtCount, IgnoreNotOpen);
+			throw ex;
+		}
 
-		// Close the Cursor on the internal statement-handle
-		CloseStmtHandle(m_hStmtCount, IgnoreNotOpen);
+		// always close the statement, we expect it to be open
+		exASSERT(CloseStmtHandle(m_hStmtCount, FailIfNotOpen));
 
-		return ok && !isNull;
+		return count;
 	}
 
 

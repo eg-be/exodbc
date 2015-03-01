@@ -316,10 +316,10 @@ namespace exodbc
 		* \brief	Counts how many rows would be selected in this table by the passed WHERE clause.
 		* \detailed	If whereStatement is empty, no WHERE clause is added
 		* \param	whereStatement Do not include 'WHERE' in the passed where clause
-		* \param count The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
-		* \return	True if successful
+		* \return	count The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
+		* \throw	Exception If failed.
 		*/
-		bool		Count(const std::wstring& whereStatement, size_t& count);
+		SQLUBIGINT		Count(const std::wstring& whereStatement);
 
 
 		/*!
