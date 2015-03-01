@@ -627,7 +627,7 @@ namespace exodbc
 
 #define THROW_IFN_SUCCEEDED(sqlFunctionName, sqlReturn, handleType, handle) \
 	do { \
-		THROW_IFN_SUCCEEDED_MSG(sqlFunction, sqlReturn, handleType, handle, L""); \
+		THROW_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, L""); \
 	} while(0)
 
 #define THROW_IFN_SUCCESS(sqlFunctionName, sqlReturn, handleType, handle) \

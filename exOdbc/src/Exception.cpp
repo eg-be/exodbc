@@ -168,7 +168,7 @@ namespace exodbc
 		{
 			std::wstringstream ws;
 			ws << L"SQL-Function " << sqlFunctionName << L" returned ";
-			ws << SqlReturn2s(ret) << L"(" << ret << L") with " << m_errors.size() << " ODBC-Errors";
+			ws << SqlReturn2s(ret) << L"(" << ret << L") with " << m_errors.size() << " ODBC-Error(s):";
 			m_errorMsg = ws.str();
 		}
 		catch (Exception e)
