@@ -14,6 +14,7 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Helpers.h"
+#include "Exception.h"
 
 // Other headers
 #include "boost/variant.hpp"
@@ -127,6 +128,7 @@ namespace exodbc
 		*
 		* \see	HaveBuffer()
 		* \see	Bind()
+		* \throw Exception If creating a corresponding buffer fails.
 		*/
 		ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT);
 
@@ -174,7 +176,7 @@ namespace exodbc
 		*			was allocated or because you've manually set a buffer.
 		* \return	True if buffer is ready.
 		*/
-		bool HasBuffer() const { return m_haveBuffer; };
+		bool HasBuffer() const throw() { return m_haveBuffer; };
 
 
 		/*!
@@ -189,7 +191,7 @@ namespace exodbc
 		* \brief	Returns type of this buffer.
 		* \return	Buffer-type.
 		*/
-		SQLSMALLINT GetBufferType() const { return m_bufferType; };
+		SQLSMALLINT GetBufferType() const throw() { return m_bufferType; };
 
 
 		/*!
@@ -199,9 +201,9 @@ namespace exodbc
 		*			The driver might fail to bind the column to the type.
 		*			On success, sets m_bound to true.
 		* \param	hStmt ODBC Statement handle to bind this ColumnBuffer to.
-		* \return	True if bound successful.
+		* \throw	Exception If binding fails.
 		*/
-		bool Bind(SQLHSTMT hStmt);
+		void Bind(SQLHSTMT hStmt);
 
 
 		/*!
@@ -209,30 +211,51 @@ namespace exodbc
 		* \detailed	Tries to unbind the buffer to the column using SQLBindCol
 		*			for non-numeric types, or SQLSetDescField for numeric types.
 		*			On success, sets m_bound to false.
+		*			Fails if not bound.
 		* \param	hStmt ODBC Statement handle to unbind this ColumnBuffer from.
-		* \return	True if columnBuffer was bound to the passed hStmt and was
-		*			unbound successfully.
+		* \throw	Exception If unbinding fails.
 		*/
-		bool Unbind(SQLHSTMT hStmt);
+		void Unbind(SQLHSTMT hStmt);
 
 
-		bool BindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber);
+		/*!
+		* \brief	Tries to bind the buffer as parameter using SQLBindParameter.
+		*			If the buffer type is a numeric-type, the needed attributes are set.
+		* \detailed	Fails if no buffer is allocated or if already bound.
+		*			The driver might fail to bind.
+		* \param	hStmt ODBC Prepared Statement handle to bind this ColumnBuffer as parameter to.
+		* \param	parameterNumber Parameter number corresponding to a parameter marker in the 
+		*			prepared statement handle. Must be >= 1.
+		* \throw	Exception If binding fails.
+		*/
+		void BindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber);
 
 
-		bool UnbindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber);
+		/*!
+		* \brief	Tries to unbind the buffer as parameter using SQLFreeStmt.
+		*			Note that this will unbind ALL parameters bound to passed statement, see Ticket #59
+		* \detailed	Fails if no buffer is allocated or if already bound.
+		*			The driver might fail to bind.
+		* \param	hStmt ODBC Prepared Statement handle to unbind this ColumnBuffer as parameter from.
+		* \param	parameterNumber Parameter number corresponding to a parameter marker in the
+		*			prepared statement handle. Must be >= 1.
+		* \throw	Exception If unbinding fails.
+		*/
+		void UnbindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber);
 
 
 		/*!
 		* \brief	Returns true if this ColumnBuffer is bound.
 		* \return	True if Column is bound.
 		*/
-		bool IsBound() const { return m_hStmt != SQL_NULL_HSTMT; };
+		bool IsBound() const throw() { return m_hStmt != SQL_NULL_HSTMT; };
 
 
 		/*!
 		* \brief	Access the length indicator passed to SQLBindCol.
 		* \detailed	Fails if no buffer is allocated or not bound.
 		* \return	Length indicator bound to column.
+		* \throw	Exception
 		*/
 		SQLLEN GetCb() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return  m_cb; };
 
@@ -241,6 +264,7 @@ namespace exodbc
 		* \brief	Check if the current value is NULL.
 		* \detailed	Fails if no buffer is allocated or not bound.
 		* \return	True if current value is Null.
+		* \throw	Exception
 		*/
 		bool IsNull() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NULL_DATA; };
 
@@ -249,9 +273,9 @@ namespace exodbc
 		* \brief	Sets the current value to NULL.
 		* \detailed	Fails if not NULLable.
 		* \see IsNullable()
-		* \return	True if current value has been set to Null.
+		* \throw Exception If not Nullable.
 		*/
-		bool SetNull();
+		void SetNull();
 
 
 		/*!
@@ -259,48 +283,31 @@ namespace exodbc
 		* \see SetNull()
 		* \return	True if current value can be set to Null.
 		*/
-		bool IsNullable() const { return IsColumnFlagSet(CF_NULLABLE); };
+		bool IsNullable() const throw() { return IsColumnFlagSet(CF_NULLABLE); };
 
 		
 		/*!
 		* \brief	Check if the is SQL_NO_TOTAL.
 		* \detailed	Fails if no buffer is allocated or not bound.
 		* \return	True if current value is SQL_NO_TOTAL.
+		* \throw	Exception
 		*/
 		bool NoTotal() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NO_TOTAL; };
-
-
-		//bool TestStuff(SQLHSTMT hStmt);
-
-		///*!
-		//* \brief	Check if a valid SColumnInfo is available for this ColumnBuffer.
-		//* \detailed	True if this ColumnBuffer was created by passing a SColumnInfo object.
-		//* \return	True if a SColumnInfo can be fetched using GetColumnInfo.
-		//* \see		GetColumnInfo()
-		//*/
-		//bool HaveColumnInfo() const { return  m_haveColumnInfo; };
-
-
-		///*!
-		//* \brief	Get the SColumnInfo used within this ColumnBuffer.
-		//* \detailed	Fails if no SColumnInfo has been set on this ColumnBuffer.
-		//* \return	SColumnInfo set on this ColumnBuffer.
-		//* \see		HaveColumnInfo()
-		//*/
-		//SColumnInfo GetColumnInfo() const { exASSERT(m_haveColumnInfo);  return m_columnInfo; };
 
 
 		/*!
 		* \brief	Get the query name for this ColumnBuffer.
 		* \return	The query name of the column matching this ColumnBuffer.
 		*/
-		const std::wstring& GetQueryName() const { return m_queryName; };
+		const std::wstring& GetQueryName() const throw() { return m_queryName; };
 
 
 		/*!
 		* \brief	Set how Chars should be bound.
 		* \detailed	Fails if already bound.
+		* \param	mode Mode to set.
 		* \see		AutoBindingMode
+		* \throw	Exception If already bound.
 		*/
 		void SetAutoBindingMode(AutoBindingMode mode) { exASSERT(!IsBound()); m_autoBindingMode = mode; }
 
@@ -309,12 +316,14 @@ namespace exodbc
 		* \brief	Get the currently set AutoBindingMode.
 		* \return	AutoBindingMode set.
 		*/
-		AutoBindingMode GetAutoBindingMode() const { return m_autoBindingMode; };
+		AutoBindingMode GetAutoBindingMode() const throw() { return m_autoBindingMode; };
 
 
 		/*!
 		* \brief	Set or clear the PrimaryKey flag.
 		* \detailed	Must be called before any parameters are bound.
+		* \param	isPrimaryKey True if this column is a primary key.
+		* \throw	Exception If parameters are already bound.
 		*/
 		void SetPrimaryKey(bool isPrimaryKey = true);
 
@@ -322,18 +331,19 @@ namespace exodbc
 		/*!
 		* \brief	Read the PrimaryKey flag.
 		*/
-		bool IsPrimaryKey() const { return (m_flags & CF_PRIMARY_KEY) == CF_PRIMARY_KEY; };
+		bool IsPrimaryKey() const throw() { return (m_flags & CF_PRIMARY_KEY) == CF_PRIMARY_KEY; };
 
 
 		/*!
 		* \brief	Test if a ColumnFlags is set.
 		*/
-		bool IsColumnFlagSet(ColumnFlags columnFlag) const { return (m_flags & columnFlag) == columnFlag; };
+		bool IsColumnFlagSet(ColumnFlags columnFlag) const throw() { return (m_flags & columnFlag) == columnFlag; };
 
 
 		/*!
 		* \brief	Set a ColumnFlags.
 		* \detailed	Flags must be set before the ColumnBuffer is Bound to the buffer!
+		* \throw	Exception
 		*/
 		void SetColumnFlag(ColumnFlags columnFlag) { exASSERT(!IsBound());  m_flags |= columnFlag; };
 
@@ -341,6 +351,7 @@ namespace exodbc
 		/*!
 		* \brief	Clear a ColumnFlags.
 		* \detailed	Flags must be cleared before the ColumnBuffer is Bound!
+		* \throw	Exception
 		*/
 		void ClearColumnFlag(ColumnFlags columnFlag) { exASSERT(!IsBound());  m_flags &= ~columnFlag; };
 
@@ -354,7 +365,7 @@ namespace exodbc
 		* \param	pBuff Pointer to the value to be copied.
 		* \param	bufferSize Size of the buffer pointed to by pBuff. Must be smaller or equal than
 		*			the size of the buffer allocated by this ColumnBuffer.
-		* \throw	boost::bad_get if wrong BufferType
+		* \throw	Exception If not a binary buffer, or on any other error.
 		*/
 		void SetBinaryValue(SQLCHAR* pBuff, SQLINTEGER bufferSize);
 
@@ -378,7 +389,7 @@ namespace exodbc
 		*
 		* \param	var Variant containing the value that shall be assigned to this Buffer.
 		* \see		SetBinaryValue()
-		* \throw	boost::bad_get if wrong BufferType
+		* \throw	Exception If type of buffer does not match the value passed.
 		*/
 		void operator=(const BufferVariant& var);
 
@@ -506,7 +517,7 @@ namespace exodbc
 
 	private:
 		/*!
-		* \brief	Determine the buffer size needed for the current SQL-Type given in SColumnInfo.
+		* \brief	Determine the buffer size for the buffer type given by m_bufferType 
 		* \detailed This is used internally if no buffer-size and buffer is given and the buffer must
 		*			thus be allocated automatically.
 		*			Must be called after m_bufferType is set.
@@ -514,7 +525,9 @@ namespace exodbc
 		*			For char-types the size is calculated by '(fieldlength + 1) * sizeof(char-type)',
 		*			where char-type is SQLCCHAR or SQLWCHAR. One extra space is allocated for the 
 		*			terminating \0.
-		* \return	Size of the allocated buffer
+		*			In this case the passed columnInfo is needed to read the length of the column.
+		* \return	Size of buffer for type given by m_bufferType.
+		* \throw	NotSupportedException If m_bufferType has not supported value.
 		*/
 		SQLINTEGER DetermineBufferSize(const SColumnInfo& columnInfo) const;
 
@@ -528,7 +541,8 @@ namespace exodbc
 		*			For char-sizes it is the column-size.
 		*			For every type +1 is added for the terminating 0 char.
 		* \see		http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
-		* \return	Needed buffer size according to SQL type form SColumnInfo or 0 in case of failure.
+		* \return	Needed buffer size according to SQL type from SColumnInfo.
+		* \throw	NotSupportedException if the SQL Type from SColumnInfo is not supported.
 		*/
 		SQLINTEGER DetermineCharSize(const SColumnInfo& columnInfo) const;
 
@@ -538,7 +552,8 @@ namespace exodbc
 		* \detailed This is used internally if no buffer-size and buffer is given and the buffer must
 		*			thus be allocated automatically.
 		*			See ColumnBuffer description for what SQL type is mapped to what buffer.
-		* \return	Needed buffer size according to SQL type form SColumnInfo or 0 in case of failure.
+		* \return	Needed buffer size according to SQL type form SColumnInfo
+		* \throw	NotSupportedException If SQL Type is not implemented.
 		*/
 		SQLSMALLINT DetermineBufferType(SQLSMALLINT sqlType) const;
 
@@ -549,6 +564,7 @@ namespace exodbc
 		*			Fails if no buffer is allocated.
 		* \return	void* to the current buffer.
 		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
+		* \throw	NotSupportedException if type of m_bufferType is unknown.
 		*/
 		void* GetBuffer() const;
 
@@ -559,16 +575,17 @@ namespace exodbc
 		*			Sets m_allocatedBuffer to true on success.
 		* \param	bufferType An SQL_C_TYPE like SQL_C_SSHORT to describe the type to allocate
 		* \param	bufferSize Used for types that are not as simple as a SQLSMALLINT, for example SQLWCHAR*
-		* \return	true if buffer is allocated.
+		* \throw	NotSupportedException If the bufferType is unknown.
+		* \throw	bad_alloc if allocating memory fails.
 		*/
-		bool AllocateBuffer(SQLSMALLINT bufferType, SQLINTEGER bufferSize);
+		void AllocateBuffer(SQLSMALLINT bufferType, SQLINTEGER bufferSize);
 
 
 		/*!
 		* \brief	Return the number of decimal digits set during construction.
 		* \return	Number of decimal digits if known or -1.
 		*/
-		SQLSMALLINT GetDecimalDigitals() const {	return m_decimalDigits;	};
+		SQLSMALLINT GetDecimalDigitals() const throw() {	return m_decimalDigits;	};
 
 
 		struct BoundParameter
@@ -620,34 +637,6 @@ namespace exodbc
 
 	typedef std::map<SQLUSMALLINT, ColumnBuffer*> ColumnBufferPtrMap;
 
-
-	/*!
-	* \class CastException
-	*
-	* \brief Thrown if a Visitor cannot cast a value.
-	*
-	* Contains information about the source-type and the cast-target-type.
-	*/
-	class CastException :
-		public boost::exception,
-		public std::exception
-	{
-	public:
-		CastException(SQLSMALLINT cSourceType, SQLSMALLINT cDestType)
-			: m_cSourceType(cSourceType)
-			, m_cDestType(cDestType)
-		{
-			m_what = (boost::format("Cannot cast from ODBC C Type %s (%d) to ODBC C Type %s (%d)") % w2s(SqlCType2OdbcS(m_cSourceType)) % m_cSourceType % w2s(SqlCType2OdbcS(m_cDestType)) % m_cDestType).str();
-		}
-
-		virtual const char* what() const throw() { return m_what.c_str(); };
-
-	private:
-		std::string m_what;
-	public:
-		const SQLSMALLINT m_cSourceType;	///< Sql Type used as source value for the cast.
-		const SQLSMALLINT m_cDestType;		///< ODBC C Type used as destination value for the cast.
-	};	// class CastException
 	
 
 	/*!

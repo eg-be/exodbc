@@ -195,6 +195,44 @@ namespace exodbc
 	}
 
 
+	std::wstring NotSupportedException::ToString() const throw()
+	{
+		std::wstringstream ws;
+		ws << Exception::ToString();
+		ws << L"Not Supported ";
+		switch (m_notSupported)
+		{
+		case NS_SQL_C_TYPE:
+			ws << L"SQL C Type " << SqLCType2s(m_smallInt) << L" (" << m_smallInt << L")";
+			break;
+		case NS_SQL_TYPE:
+			ws << L"SQL Type" << SqlType2s(m_smallInt) << L" (" << m_smallInt << L")";
+			break;
+		}
+		return ws.str();
+	}
+
+
+
+	std::wstring WrapperException::ToString() const throw()
+	{
+		std::wstringstream ws;
+		ws << Exception::ToString();
+		std::string w(m_ex.what());
+		ws << s2w(w);
+		return ws.str();
+	}
+
+
+	std::wstring CastException::ToString() const throw()
+	{
+		std::wstringstream ws;
+		ws << Exception::ToString();
+		ws << L"Cannot cast from ODBC C Type " << SqLCType2s(m_cSourceType) << L"(" << m_cSourceType << L") ";
+		ws << L"to ODBC C Type " << SqLCType2s(m_cDestType) << L"(" << m_cDestType << L")";
+		return ws.str();
+	}
+
 	// Interfaces
 	// ----------
 
