@@ -242,14 +242,14 @@ namespace exodbc
 		* \return	True if Open() was already called succesfull
 		* \see		Open()
 		*/
-		bool		IsOpen() const { return m_isOpen; };
+		bool		IsOpen() const throw() { return m_isOpen; };
 
 
 		/*!
 		* \brief	Get the OpenMode of this Table
 		* \return	True if this table was created using READ_ONLY
 		*/
-		bool		IsQueryOnly()        { return m_openMode == READ_ONLY; }
+		bool		IsQueryOnly() const throw()  { return m_openMode == READ_ONLY; }
 
 
 		/*!
@@ -259,6 +259,7 @@ namespace exodbc
 		*			it for that column.
 		* \return	AutoBindingMode
 		* \see		GetAutoBindingMode()
+		* \throw	Exception If already open.
 		*/
 		void		SetAutoBindingMode(AutoBindingMode mode);
 
@@ -268,19 +269,19 @@ namespace exodbc
 		* \return	AutoBindingMode
 		* \see		SetAutoBindingMode()
 		*/
-		AutoBindingMode	GetAutoBindingMode() { return m_autoBindingMode; };
+		AutoBindingMode	GetAutoBindingMode() const throw() { return m_autoBindingMode; };
 
 
 		/*!
 		* \brief	Set a CharTrimOption. Setting to TRIM_NO will clear all other flags.
 		*/
-		void		SetCharTrimOption(CharTrimOption option) { option == TRIM_NO ? m_charTrimFlags = TRIM_NO : m_charTrimFlags |= option; };
+		void		SetCharTrimOption(CharTrimOption option) throw() { option == TRIM_NO ? m_charTrimFlags = TRIM_NO : m_charTrimFlags |= option; };
 
 
 		/*!
 		* \brief	Test if a CharTrimOption is set.
 		*/
-		bool		TestCharTrimOption(CharTrimOption option) const { return (m_charTrimFlags & option) == option;  };
+		bool		TestCharTrimOption(CharTrimOption option) const throw() { return (m_charTrimFlags & option) == option;  };
 
 
 		/*!
@@ -288,7 +289,7 @@ namespace exodbc
 		*
 		* \return	Database this Table belongs to.
 		*/
-		Database*	GetDb() const		{ return m_pDb; }
+		Database*	GetDb() const throw()		{ return m_pDb; }
 
 
 		/*!
@@ -298,7 +299,7 @@ namespace exodbc
 		* \see		GetTableInfo()
 		* \return	Returns true if this table has a STableInfo set that can be fetched using GetTableInfo()
 		*/
-		bool		HaveTableInfo() const { return m_haveTableInfo; }
+		bool		HaveTableInfo() const throw() { return m_haveTableInfo; }
 
 
 		/*!
@@ -306,7 +307,7 @@ namespace exodbc
 		* \detailed	Returns the STableInfo of this table, if one has been set either during construction
 		*			or one was read during Open().
 		* \see		HaveTableInfo()
-		* \return	Returns true if this table has a STableInfo set that can be fetched using GetTableInfo()
+		* \throw	Exception if no table info is available.
 		*/
 		STableInfo	GetTableInfo() const;
 
