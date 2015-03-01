@@ -307,10 +307,7 @@ namespace exodbc
 			if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
 			{
 				// Bind this parameter as primary key and include it in the statement
-				if (!pBuffer->BindParameter(m_hStmtDelete, paramNr))
-				{
-					return false;
-				}
+				pBuffer->BindParameter(m_hStmtDelete, paramNr);
 				deleteStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
 				paramNr++;
 			}
@@ -353,10 +350,7 @@ namespace exodbc
 			{
 				// Bind this parameter as update parameter and include it in the statement
 				// The update params come first, so the numbering works
-				if (!pBuffer->BindParameter(m_hStmtUpdate, paramNr))
-				{
-					return false;
-				}
+				pBuffer->BindParameter(m_hStmtUpdate, paramNr);
 				updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
 				paramNr++;
 			}
@@ -371,10 +365,7 @@ namespace exodbc
 			{
 				// Bind this parameter as primary key and include it in the where part of the statement
 				// The update params come first, so the numbering works
-				if (!pBuffer->BindParameter(m_hStmtUpdate, paramNr))
-				{
-					return false;
-				}
+				pBuffer->BindParameter(m_hStmtUpdate, paramNr);
 				updateStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
 				paramNr++;
 			}
@@ -412,10 +403,7 @@ namespace exodbc
 			// Bind parameter if it is marked an INSERTable
 			if (pBuffer->IsColumnFlagSet(CF_INSERT))
 			{
-				if (!pBuffer->BindParameter(m_hStmtInsert, paramCount + 1))
-				{
-					return false;
-				}
+				pBuffer->BindParameter(m_hStmtInsert, paramCount + 1);
 				// prepare statement
 				insertStmt += pBuffer->GetQueryName() + L", ";
 				++paramCount;
@@ -762,10 +750,7 @@ namespace exodbc
 			if (pBuffer->IsColumnFlagSet(CF_UPDATE))
 			{
 				// Bind this parameter as update parameter and include it in the statement
-				if (!pBuffer->BindParameter(m_hStmtUpdateWhere, paramNr))
-				{
-					ok = false;
-				}
+				pBuffer->BindParameter(m_hStmtUpdateWhere, paramNr);
 				updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
 				paramNr++;
 			}
@@ -1167,10 +1152,7 @@ namespace exodbc
 		for (ColumnBufferPtrMap::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
 			ColumnBuffer* pBuffer = it->second;
-			if (!pBuffer->Bind(m_hStmtSelect))
-			{
-				return false;
-			}
+			pBuffer->Bind(m_hStmtSelect);
 		}
 
 		// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params

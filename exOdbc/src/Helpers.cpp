@@ -98,6 +98,21 @@ namespace exodbc
 	}
 
 
+	std::wstring s2w(const std::string& s)
+	{
+		std::wstringstream ws;
+
+		for (size_t i = 0; i < s.length(); i++)
+		{
+			char c = (char)s[i];
+			ws << c;
+		}
+
+		return ws.str();
+	}
+
+
+
 	std::wstring SqlTrueFalse2s(SQLSMALLINT b)
 	{
 		switch(b)
@@ -782,39 +797,24 @@ namespace exodbc
 	}
 
 
-	bool SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value)
+	void SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value)
 	{
 		exASSERT(hDesc != SQL_NULL_HDESC);
 		exASSERT(recordNumber > 0);
 		SQLRETURN ret = SQLSetDescField(hDesc, recordNumber, descriptionField, value, 0);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_DESC(hDesc, ret, SQLSetDescField);
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_INFO_DESC(hDesc, ret, SQLSetDescField);
-		}
-		return SQL_SUCCEEDED(ret);
+		THROW_IFN_SUCCEEDED(SQLSetDescField, ret, SQL_HANDLE_DESC, hDesc);
 	}
 
 
-	bool GetRowDescriptorHandle(SQLHSTMT hStmt, RowDescriptorType type, SQLHDESC& hDesc)
+	SQLHDESC GetRowDescriptorHandle(SQLHSTMT hStmt, RowDescriptorType type)
 	{
 		exASSERT(hStmt != SQL_NULL_HSTMT);
 
+		SQLHDESC hDesc = SQL_NULL_HDESC;
 		SQLRETURN ret = SQLGetStmtAttr(hStmt, type, &hDesc, 0, NULL);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(hStmt, ret, SQLGetStmtAttr);
-			hDesc = SQL_NULL_HSTMT;
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(hStmt, ret, SQLGetStmtAttr);
-		}
+		THROW_IFN_SUCCEEDED(SQLGetStmtAttr, ret, SQL_HANDLE_STMT, hStmt);
 
-		return SQL_SUCCEEDED(ret);
+		return hDesc;
 	}
 
 

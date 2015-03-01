@@ -13,6 +13,8 @@
 #include "ColumnBuffer.h"
 
 // Same component headers
+#include "Exception.h"
+
 // Other headers
 
 // Debug
@@ -68,11 +70,18 @@ namespace exodbc
 
 		// Create buffer
 		m_bufferType = DetermineBufferType(m_sqlType);
-		exASSERT(m_bufferType != 0);
 		m_bufferSize = DetermineBufferSize(columnInfo);
-		exASSERT(m_bufferSize > 0);
 
-		m_allocatedBuffer = AllocateBuffer(m_bufferType, m_bufferSize);
+		try
+		{
+			AllocateBuffer(m_bufferType, m_bufferSize);
+		}
+		catch (std::bad_alloc ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
 		m_haveBuffer = m_allocatedBuffer;
 	}
 
@@ -179,7 +188,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	bool ColumnBuffer::BindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber)
+	void ColumnBuffer::BindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber)
 	{
 		exASSERT(m_haveBuffer);
 		exASSERT(hStmt != SQL_NULL_HSTMT);
@@ -194,55 +203,37 @@ namespace exodbc
 		}
 		catch (boost::bad_get ex)
 		{
-			LOG_ERROR(L"Failed in GetBuffer() - probably allocated buffer type does not match sql type in SColumnInfo.");
-			exASSERT(false);
-			return false;
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
 		}
 		BoundParameter* pBp = new BoundParameter(hStmt, parameterNumber);
-		SQLRETURN ret;
-		ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, m_columnSize >= 0 ? m_columnSize : 0, m_decimalDigits >= 0 ? m_decimalDigits : 0, pBuffer, m_bufferSize, &(m_cb));
-		if (!SQL_SUCCEEDED(ret))
+		try
 		{
-			LOG_ERROR_STMT(hStmt, ret, SQLBindParameter);
-			delete pBp;
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(hStmt, ret, SQLBindParameter);
-		}
-		bool numStuffOk = true;
-		if (SQL_SUCCEEDED(ret))
-		{
+			SQLRETURN ret;
+			ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, m_columnSize >= 0 ? m_columnSize : 0, m_decimalDigits >= 0 ? m_decimalDigits : 0, pBuffer, m_bufferSize, &(m_cb));
+			THROW_IFN_SUCCEEDED(SQLBindParameter, ret, SQL_HANDLE_STMT, pBp->m_hStmt);
+
 			// Do some additional steps for numeric types
-			if (m_bufferType == SQL_C_NUMERIC)
+			if (SQL_C_NUMERIC == m_bufferType)
 			{
-				SQLHANDLE hDesc = SQL_NULL_HDESC;
-				if (GetRowDescriptorHandle(hStmt, RDT_PARAM, hDesc))
-				{
-					bool ok = true;
-					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
-					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize);
-					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
-					ok = ok & SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
-					numStuffOk = ok;
-				}
-				else
-				{
-					numStuffOk = false;
-				}
+				SQLHANDLE hDesc = GetRowDescriptorHandle(hStmt, RDT_PARAM);
+				SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+				SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize);
+				SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
+				SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
 			}
 		}
-
-		if (SQL_SUCCEEDED(ret) && numStuffOk)
+		catch (Exception ex)
 		{
-			m_boundParameters.push_back(pBp);
+			delete pBp;
+			throw ex;
 		}
-
-		return SQL_SUCCEEDED(ret);
+		m_boundParameters.push_back(pBp);
 	}
 
 
-	bool ColumnBuffer::UnbindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber)
+	void ColumnBuffer::UnbindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber)
 	{
 		exASSERT(m_haveBuffer);
 		exASSERT(hStmt != SQL_NULL_HSTMT);
@@ -256,53 +247,35 @@ namespace exodbc
 		//	LOG_ERROR_STMT(hStmt, ret, SQLBindParameter);
 		//}
 		SQLRETURN ret = SQLFreeStmt(hStmt, SQL_UNBIND);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(hStmt, ret, SQLBindParameter);
-		}
-
-		return SQL_SUCCEEDED(ret);
+		THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, hStmt);
 	}
 
 
-	bool ColumnBuffer::Unbind(SQLHSTMT hStmt)
+	void ColumnBuffer::Unbind(SQLHSTMT hStmt)
 	{
 		exASSERT(IsBound());
-		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
+		exASSERT(SQL_UNKNOWN_TYPE != m_bufferType);
+		exASSERT(SQL_NULL_HSTMT != hStmt);
+
 		if (m_bufferType == SQL_C_NUMERIC)
 		{
-			SQLHDESC hDesc = SQL_NULL_HDESC;
-			if (GetRowDescriptorHandle(hStmt, RDT_ROW, hDesc))
-			{
-				bool ok = true;
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER) m_bufferType);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER) NULL);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER) NULL);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER) NULL);
-				if (ok)
-				{
-					m_hStmt = SQL_NULL_HSTMT;
-				}
-			}
+			SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RDT_ROW);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER) m_bufferType);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER) NULL);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER) NULL);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER) NULL);
 		}
 		else
 		{
 			SQLRETURN ret = SQLBindCol(m_hStmt, m_columnNr, m_bufferType, NULL, 0, NULL);
-			if (SQL_SUCCEEDED(ret))
-			{
-				m_hStmt = SQL_NULL_HSTMT;
-			}
-			else
-			{
-				LOG_ERROR_STMT(m_hStmt, ret, SQLBindCol);
-			}
+			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, m_hStmt);
 		}
-		return m_hStmt == SQL_NULL_HSTMT;
+		m_hStmt = SQL_NULL_HSTMT;
 	}
 
 
 
-	bool ColumnBuffer::Bind(SQLHSTMT hStmt)
+	void ColumnBuffer::Bind(SQLHSTMT hStmt)
 	{
 		exASSERT(m_haveBuffer);
 		exASSERT(m_hStmt == SQL_NULL_HSTMT);
@@ -317,9 +290,9 @@ namespace exodbc
 		}
 		catch (boost::bad_get ex)
 		{
-			LOG_ERROR(L"Failed in GetBuffer() - probably allocated buffer type does not match sql type in SColumnInfo.");
-			exASSERT(false);
-			return false;
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
 		}
 
 		// If we want to bind a numeric type, we must set the precision and scale before binding!
@@ -343,45 +316,26 @@ namespace exodbc
 			exASSERT(m_columnSize > 0);
 			exASSERT(m_decimalDigits >= 0);
 
-			SQLHDESC hDesc = SQL_NULL_HDESC;
-			if (GetRowDescriptorHandle(hStmt, RDT_ROW, hDesc))
-			{
-				bool ok = true;
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER) m_bufferType);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
-				ok = ok & SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
-				if (ok)
-				{
-					m_hStmt = hStmt;
-				}
-			}
-			if (m_hStmt == SQL_NULL_HSTMT)
-			{
-				// Something went wrong, the function above has already logged some detail.
-				LOG_ERROR((boost::wformat(L"Failed to bind Numeric Column '%s' (columnNr: %d)") %m_queryName %m_columnNr).str());
-			}
+			SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RDT_ROW);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER) m_bufferType);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
 		}
 		else
 		{
 			// Non numeric columns pass the tests fine by using just SQLBindCol
 			SQLRETURN ret = SQLBindCol(hStmt, m_columnNr, m_bufferType, (SQLPOINTER*)pBuffer, m_bufferSize, &m_cb);
 			// Note: We check on purpose here only for SUCCESS, we do not tolerate loosing precision
-			if (ret != SQL_SUCCESS)
-			{
-				LOG_ERROR_STMT(hStmt, ret, SQLBindCol);
-				m_hStmt = SQL_NULL_HSTMT;
-			}
-			m_hStmt = (ret == SQL_SUCCESS) ? hStmt : SQL_NULL_HSTMT;
+			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
 		}
-
-		return m_hStmt != SQL_NULL_HSTMT;
+		m_hStmt = hStmt;
 	}
 
 
-	bool ColumnBuffer::AllocateBuffer(SQLSMALLINT bufferType, SQLINTEGER bufferSize)
+	void ColumnBuffer::AllocateBuffer(SQLSMALLINT bufferType, SQLINTEGER bufferSize)
 	{
 		exASSERT(!m_allocatedBuffer);
 		exASSERT(!IsBound());
@@ -389,7 +343,6 @@ namespace exodbc
 		exASSERT(bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(bufferSize > 0);
 
-		bool failed = false;
 		switch (bufferType)
 		{
 		case SQL_C_SSHORT:
@@ -457,15 +410,12 @@ namespace exodbc
 			break;
 		}
 		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(bufferType) % bufferType).str());
-			failed = true;
+			NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, bufferType);
+			SET_EXCEPTION_SOURCE(nse);
+			throw nse;
 		}
 
-		if (!failed)
-		{
-			m_allocatedBuffer = true;
-		}
-		return m_allocatedBuffer;
+		m_allocatedBuffer = true;
 	}
 
 
@@ -505,7 +455,9 @@ namespace exodbc
 		case SQL_C_NUMERIC:
 			return static_cast<void*>(boost::get<SQL_NUMERIC_STRUCT*>(m_bufferPtr));
 		default:
-			exASSERT(false);
+			NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, m_bufferType);
+			SET_EXCEPTION_SOURCE(nse);
+			throw nse;
 		}
 		return pBuffer;
 	}
@@ -563,11 +515,12 @@ namespace exodbc
 #endif
 			exASSERT(!columnInfo.m_isColumnSizeNull);
 			return columnInfo.m_columnSize + 1;
-		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlType) % columnInfo.m_sqlType).str());
 		}
 
-		return 0;
+		NotSupportedException nse(NotSupportedException::NS_SQL_TYPE, columnInfo.m_sqlType);
+		SET_EXCEPTION_SOURCE(nse);
+		throw nse;
+
 	}
 
 
@@ -611,10 +564,11 @@ namespace exodbc
 			return columnInfo.m_columnSize * sizeof(SQLCHAR);
 		case SQL_C_NUMERIC:
 			return sizeof(SQL_NUMERIC_STRUCT);
-		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(columnInfo.m_sqlDataType) % columnInfo.m_sqlDataType).str());
 		}
-		return 0;
+
+		NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, m_bufferType);
+		SET_EXCEPTION_SOURCE(nse);
+		throw nse;
 	}
 
 
@@ -691,28 +645,21 @@ namespace exodbc
 		case SQL_NUMERIC:
 		case SQL_DECIMAL:
 			return SQL_C_NUMERIC;
-		default:
-			LOG_ERROR((boost::wformat(L"Not implemented SqlDataType '%s' (%d)") % SqlType2s(sqlType) % sqlType).str());
 		}
-		return 0;
+
+		NotSupportedException nse(NotSupportedException::NS_SQL_TYPE, sqlType);
+		SET_EXCEPTION_SOURCE(nse);
+		throw nse;
 	}
 
 
-	bool ColumnBuffer::SetNull()
+	void ColumnBuffer::SetNull()
 	{
 		exASSERT(HasBuffer()); 
 		exASSERT(IsBound()); 
 		exASSERT(IsNullable());
 
-		if (IsNullable())
-		{
-			m_cb = SQL_NULL_DATA;
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		m_cb = SQL_NULL_DATA;
 	}
 
 
@@ -738,12 +685,21 @@ namespace exodbc
 		exASSERT(m_haveBuffer);
 		exASSERT(bufferSize <= m_bufferSize);
 
-		// Clear our own buffer
-		SQLCHAR* pColVal = GetCharPtr();
-		ZeroMemory(pColVal, m_bufferSize);
-		// Copy from passed buffer and set length-indicator
-		memcpy(pColVal, pBuff, bufferSize);
-		m_cb = bufferSize;
+		try
+		{
+			// Clear our own buffer
+			SQLCHAR* pColVal = GetCharPtr();
+			ZeroMemory(pColVal, m_bufferSize);
+			// Copy from passed buffer and set length-indicator
+			memcpy(pColVal, pBuff, bufferSize);
+			m_cb = bufferSize;
+		}
+		catch (boost::bad_get bg)
+		{
+			WrapperException we(bg);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
 	}
 
 
@@ -752,97 +708,105 @@ namespace exodbc
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(m_haveBuffer);
 
-		bool unknownType = false;
 
-		// \todo: assign value to ptr for all types, sometimes we will need to memcopy and need to know the length of the data
-		// For chars we could assume its null-terminated if no length is passed
-		// But we probably need a second operator which needs as parameter the length of the data for binary stuff
-		if (SQL_C_SSHORT == m_bufferType)
+		// Note that the BufferVariant set here does not allow to set binary values
+		try
 		{
-			SQLSMALLINT* pColVal = GetSmallIntPtr();
-			*pColVal = boost::get<SQLSMALLINT>(var);
-		}
-		else if (SQL_C_SLONG == m_bufferType)
-		{
-			SQLINTEGER* pColVal = GetIntPtr();
-			*pColVal = boost::get<SQLINTEGER>(var);
-		}
-		else if (SQL_C_SBIGINT == m_bufferType)
-		{
-			SQLBIGINT* pColVal = GetBigIntPtr();
-			*pColVal = boost::get<SQLBIGINT>(var);
-		}
-		else if (SQL_C_DOUBLE == m_bufferType)
-		{
-			SQLDOUBLE* pColVal = GetDoublePtr();
-			*pColVal = boost::get<SQLDOUBLE>(var);
-		}
-		else if (SQL_C_CHAR == m_bufferType)
-		{
-			SQLCHAR* pColVal = GetCharPtr();
-			std::string s = boost::get<std::string>(var);
-			// Check that string fits into buffer (Note: We need +1 char for null-terminating)
-			exASSERT((SQLINTEGER) s.length() < m_bufferSize);
-			// Erase buffer:
-			ZeroMemory(pColVal, m_bufferSize);
-			// Copy into buffer
-			memcpy(pColVal, s.c_str(), m_bufferSize);
-			// Null-terminate
-			pColVal[m_bufferSize - 1] = 0;
-			m_cb = SQL_NTS;
-		}
-		else if (SQL_C_WCHAR == m_bufferType)
-		{
-			SQLWCHAR* pColVal = GetWCharPtr();
-			std::wstring s = boost::get<std::wstring>(var);
-			// Check that string fits into buffer (Note: We need +1 char for null-terminating)
-			exASSERT((SQLINTEGER)s.length() < m_bufferSize);
-			// Erase buffer:
-			ZeroMemory(pColVal, m_bufferSize);
-			// Copy into buffer
-			memcpy(pColVal, s.c_str(), m_bufferSize);
-			// Null-terminate
-			pColVal[m_bufferSize - 1] = 0;
-			m_cb = SQL_NTS;
-		}
-		else if (SQL_C_TYPE_DATE == m_bufferType)
-		{
-			SQL_DATE_STRUCT* pColVal = GetDatePtr();
-			*pColVal = boost::get<SQL_DATE_STRUCT>(var);
-		}
-		else if (SQL_C_TYPE_TIME == m_bufferType)
-		{
-			SQL_TIME_STRUCT* pColVal = GetTimePtr();
-			*pColVal = boost::get<SQL_TIME_STRUCT>(var);
-		}
-		else if (SQL_C_TYPE_TIMESTAMP  == m_bufferType)
-		{
-			SQL_TIMESTAMP_STRUCT* pColVal = GetTimestampPtr();
-			*pColVal = boost::get<SQL_TIMESTAMP_STRUCT>(var);
-		}
-		else if (SQL_C_NUMERIC == m_bufferType)
-		{
-			SQL_NUMERIC_STRUCT* pColVal = GetNumericPtr();
-			*pColVal = boost::get<SQL_NUMERIC_STRUCT>(var);
-		}
+			if (SQL_C_SSHORT == m_bufferType)
+			{
+				SQLSMALLINT* pColVal = GetSmallIntPtr();
+				*pColVal = boost::get<SQLSMALLINT>(var);
+			}
+			else if (SQL_C_SLONG == m_bufferType)
+			{
+				SQLINTEGER* pColVal = GetIntPtr();
+				*pColVal = boost::get<SQLINTEGER>(var);
+			}
+			else if (SQL_C_SBIGINT == m_bufferType)
+			{
+				SQLBIGINT* pColVal = GetBigIntPtr();
+				*pColVal = boost::get<SQLBIGINT>(var);
+			}
+			else if (SQL_C_DOUBLE == m_bufferType)
+			{
+				SQLDOUBLE* pColVal = GetDoublePtr();
+				*pColVal = boost::get<SQLDOUBLE>(var);
+			}
+			else if (SQL_C_CHAR == m_bufferType)
+			{
+				SQLCHAR* pColVal = GetCharPtr();
+				std::string s = boost::get<std::string>(var);
+				// Check that string fits into buffer (Note: We need +1 char for null-terminating)
+				exASSERT((SQLINTEGER)s.length() < m_bufferSize);
+				// Erase buffer:
+				ZeroMemory(pColVal, m_bufferSize);
+				// Copy into buffer
+				memcpy(pColVal, s.c_str(), m_bufferSize);
+				// Null-terminate
+				pColVal[m_bufferSize - 1] = 0;
+				m_cb = SQL_NTS;
+			}
+			else if (SQL_C_WCHAR == m_bufferType)
+			{
+				SQLWCHAR* pColVal = GetWCharPtr();
+				std::wstring s = boost::get<std::wstring>(var);
+				// Check that string fits into buffer (Note: We need +1 char for null-terminating)
+				// \todo: Is this correct? comparing length against bufferSize?? Probably not.
+				exASSERT((SQLINTEGER)s.length() < m_bufferSize);
+				// Erase buffer:
+				ZeroMemory(pColVal, m_bufferSize);
+				// Copy into buffer
+				memcpy(pColVal, s.c_str(), m_bufferSize);
+				// Null-terminate
+				pColVal[m_bufferSize - 1] = 0;
+				m_cb = SQL_NTS;
+			}
+			else if (SQL_C_TYPE_DATE == m_bufferType)
+			{
+				SQL_DATE_STRUCT* pColVal = GetDatePtr();
+				*pColVal = boost::get<SQL_DATE_STRUCT>(var);
+			}
+			else if (SQL_C_TYPE_TIME == m_bufferType)
+			{
+				SQL_TIME_STRUCT* pColVal = GetTimePtr();
+				*pColVal = boost::get<SQL_TIME_STRUCT>(var);
+			}
+			else if (SQL_C_TYPE_TIMESTAMP == m_bufferType)
+			{
+				SQL_TIMESTAMP_STRUCT* pColVal = GetTimestampPtr();
+				*pColVal = boost::get<SQL_TIMESTAMP_STRUCT>(var);
+			}
+			else if (SQL_C_NUMERIC == m_bufferType)
+			{
+				SQL_NUMERIC_STRUCT* pColVal = GetNumericPtr();
+				*pColVal = boost::get<SQL_NUMERIC_STRUCT>(var);
+			}
 #if HAVE_MSODBCSQL_H
-		else if (SQL_C_SS_TIME2 == m_bufferType)
-		{
-			SQL_SS_TIME2_STRUCT* pColVal = GetTime2Ptr();
-			*pColVal = boost::get<SQL_SS_TIME2_STRUCT>(var);
-		}
+			else if (SQL_C_SS_TIME2 == m_bufferType)
+			{
+				SQL_SS_TIME2_STRUCT* pColVal = GetTime2Ptr();
+				*pColVal = boost::get<SQL_SS_TIME2_STRUCT>(var);
+			}
 #endif
-		else
-		{
-			LOG_ERROR((boost::wformat(L"Not implemented Sql C Type '%s' (%d)") % SqLCType2s(m_bufferType) % m_bufferType).str());
-			unknownType = true;
-			exASSERT(false);
-		}
+			else
+			{
+				NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, m_bufferType);
+				SET_EXCEPTION_SOURCE(nse);
+				throw nse;
+			}
 
-		if (!unknownType && !(SQL_C_CHAR == m_bufferType || SQL_C_WCHAR == m_bufferType))
+			if (!(SQL_C_CHAR == m_bufferType || SQL_C_WCHAR == m_bufferType))
+			{
+				// We are no longer null
+				m_cb = 0;
+			}
+
+		}
+		catch (boost::bad_get ex)
 		{
-			// We are no longer null
-			m_cb = 0;
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
 		}
 	}
 

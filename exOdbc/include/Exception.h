@@ -135,14 +135,96 @@ namespace exodbc
 	public:
 		IllegalArgumentException(const std::wstring msg) throw()
 			: Exception(msg)
-		{
-			//m_what = w2s(ToString());
-		};
+		{};
 
 		virtual ~IllegalArgumentException() {};
 
 		virtual std::wstring GetName() const throw() { return L"exodbc::IllegalArgumentException"; };
 	};
+
+
+	class EXODBCAPI NotSupportedException
+		: public Exception
+	{
+	public:
+		enum NOT_SUPPORTED
+		{
+			NS_SQL_C_TYPE = 1,
+			NS_SQL_TYPE = 2
+		};
+
+		NotSupportedException(NOT_SUPPORTED notSupported, SQLSMALLINT smallInt) throw()
+			: Exception()
+			, m_notSupported(notSupported)
+			, m_smallInt(smallInt)
+		{
+			m_what = w2s(ToString());
+		};
+
+		virtual ~NotSupportedException() {};
+
+		virtual std::wstring GetName() const throw() { return L"exodbc:NotSupportedException"; };
+		virtual std::wstring ToString() const throw();
+
+	private:
+		NOT_SUPPORTED m_notSupported;
+		SQLSMALLINT m_smallInt;
+	};
+
+
+	class EXODBCAPI WrapperException
+		: public Exception
+	{
+	public:
+		WrapperException(const std::exception& ex) throw()
+			: Exception()
+			, m_ex(ex)
+		{
+			m_what = w2s(ToString());
+		};
+
+		virtual ~WrapperException() {};
+
+		virtual std::wstring GetName() const throw() { return L"exodbc::WrapperException"; };
+		virtual std::wstring ToString() const throw();
+
+	private:
+		std::exception m_ex;
+	};
+
+
+	/*!
+	* \class CastException
+	*
+	* \brief Thrown if a Visitor cannot cast a value.
+	*
+	* Contains information about the source-type and the cast-target-type.
+	*/
+	class EXODBCAPI CastException
+		: public Exception
+	{
+	public:
+		CastException(SQLSMALLINT cSourceType, SQLSMALLINT cDestType)
+			: Exception()
+			, m_cSourceType(cSourceType)
+			, m_cDestType(cDestType)
+		{
+			m_what = w2s(ToString());
+		}
+
+		virtual ~CastException() {};
+
+		virtual std::wstring GetName() const throw() { return L"exodbc::CastException"; };
+		virtual std::wstring ToString() const throw();
+
+		virtual const char* what() const throw() { return m_what.c_str(); };
+
+	private:
+		std::string m_what;
+	public:
+		const SQLSMALLINT m_cSourceType;	///< Sql Type used as source value for the cast.
+		const SQLSMALLINT m_cDestType;		///< ODBC C Type used as destination value for the cast.
+	};	// class CastException
 
 }
 

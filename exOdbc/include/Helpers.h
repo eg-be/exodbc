@@ -149,6 +149,18 @@ namespace exodbc
 	extern std::string w2s(const std::wstring& w);
 
 
+
+	/*!
+	* \brief Ugly conversion of wide to small - use only if you know that you have only ASCII chars in s.
+	*
+	* \detailed Transforms small wide to wide by simple taking the char-values.
+	* \param const std::string& s
+	* \return std::wstring
+	*/
+	extern std::wstring s2w(const std::string& s);
+
+
+
 	/*!
 	* \brief Returns the string TRUE, FALSE or ????? for the values SQL_TRUE, SQL_FALSE or anything else.
 	*
@@ -399,15 +411,31 @@ namespace exodbc
 
 	//	extern EXODBCAPI bool		GetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER& value);
 
-
-	extern EXODBCAPI bool		SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value);
+	/*!
+	* \brief	A wrapper to SQLSetDescField
+	*
+	* \param	hDesc		 	The description handle to set an attribute for.
+	* \param	recordNumber	Column number to set the attribute for.
+	* \return	descriptionField Attribute to set.
+	* \return	value			Value to set.
+	* \throw	Exception
+	*/
+	extern EXODBCAPI void		SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value);
 
 	enum RowDescriptorType
 	{
 		RDT_ROW = SQL_ATTR_APP_ROW_DESC,
 		RDT_PARAM = SQL_ATTR_APP_PARAM_DESC
 	};
-	extern EXODBCAPI bool		GetRowDescriptorHandle(SQLHSTMT hStmt, RowDescriptorType type, SQLHDESC& hDesc);
+	/*!
+	* \brief	A wrapper to SQLGetStmtAttr
+	*
+	* \param	hStmt		 	The statement.
+	* \param	RowDescriptorType	Type of Description Handle to fetch from hStmt
+	* \return	Row Descriptor Handle
+	* \throw	Exception
+	*/
+	extern EXODBCAPI SQLHDESC		GetRowDescriptorHandle(SQLHSTMT hStmt, RowDescriptorType type);
 
 
 	extern EXODBCAPI SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second);
@@ -588,9 +616,23 @@ namespace exodbc
 		} \
 	} while(0)
 
+#define THROW_IFN_SUCCESS_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
+	do { \
+		if(SQL_SUCCESS != sqlReturn) { \
+			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
+			SET_EXCEPTION_SOURCE(ex); \
+			throw ex; \
+		} \
+	} while (0)
+
 #define THROW_IFN_SUCCEEDED(sqlFunctionName, sqlReturn, handleType, handle) \
 	do { \
 		THROW_IFN_SUCCEEDED_MSG(sqlFunction, sqlReturn, handleType, handle, L""); \
+	} while(0)
+
+#define THROW_IFN_SUCCESS(sqlFunctionName, sqlReturn, handleType, handle) \
+	do { \
+		THROW_IFN_SUCCESS_MSG(sqlFunctionName, sqlReturn, handleType, handle, L""); \
 	} while(0)
 
 #define THROW_IFN_NO_DATA(sqlFunctionName, sqlReturn) \
@@ -602,4 +644,7 @@ namespace exodbc
 			throw ex; \
 		} \
 	} while(0)
+
+
+
 #endif // HELPERS_H

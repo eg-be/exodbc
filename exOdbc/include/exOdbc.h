@@ -39,8 +39,8 @@ namespace exodbc
 	// -------------
 
 	// Some defaults when binding to chars but no reasonable char-length can be determined.
-	const int DB_MAX_BIGINT_CHAR_LENGTH = 30;
-	const int DB_MAX_DOUBLE_CHAR_LENGTH = 30;
+	const int DB_MAX_BIGINT_CHAR_LENGTH = 30;	///< If no reasonable char length can be determined from a columnInfo, this value is used for the size of the char-buffer (if converting bigints to char)
+	const int DB_MAX_DOUBLE_CHAR_LENGTH = 30;	///< If no reasonable char length can be determined from a columnInfo, this value is used for the size of the char-buffer (if converting doubles to char)
 
 	// Database Globals or defaults. The values named _DEFAULT are used as fallback
 	// if the corresponding value cannot be determined when querying the database about itself.
