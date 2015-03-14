@@ -636,111 +636,60 @@ namespace exodbc
 	std::vector<STableInfo> Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType)
 	{
 		exASSERT(IsOpen());
-		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
+
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_hstmt, true, true);
 
 		std::vector<STableInfo> tables;
-		Exception exc;
-		bool haveExc = false;
 
-		SQLWCHAR* pTableName = NULL;
-		SQLWCHAR* pSchemaName = NULL;
-		SQLWCHAR* pCatalogName = NULL;
-		SQLWCHAR* pTableType = NULL;
+		std::unique_ptr<SQLWCHAR[]> buffCatalog(new SQLWCHAR[m_dbInf.GetMaxCatalogNameLen()]);
+		std::unique_ptr<SQLWCHAR[]> buffSchema(new SQLWCHAR[m_dbInf.GetMaxSchemaNameLen()]);
+		std::unique_ptr<SQLWCHAR[]> buffTableName(new SQLWCHAR[m_dbInf.GetMaxTableNameLen()]);
+		std::unique_ptr<SQLWCHAR[]> buffTableType(new SQLWCHAR[DB_MAX_TABLE_TYPE_LEN]);
+		std::unique_ptr<SQLWCHAR[]> buffTableRemarks(new SQLWCHAR[DB_MAX_TABLE_REMARKS_LEN]);
 
-		if(tableName.length() > 0)
+		// Query db
+		SQLRETURN ret = SQLTables(m_hstmt,
+			catalogName.empty() ? NULL : (SQLWCHAR*) catalogName.c_str(), catalogName.empty() ? NULL : SQL_NTS,   // catname                 
+			schemaName.empty() ? NULL : (SQLWCHAR*) schemaName.c_str(), schemaName.empty() ? NULL : SQL_NTS,   // schema name
+			tableName.empty() ? NULL : (SQLWCHAR*) tableName.c_str(), tableName.empty() ? NULL : SQL_NTS,							// table name
+			tableType.empty() ? NULL : (SQLWCHAR*) tableType.c_str(), tableType.empty() ? NULL : SQL_NTS);
+		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_hstmt);
+
+		buffCatalog[0] = 0;
+		buffSchema[0] = 0;
+		buffTableName[0] = 0;
+		buffTableType[0] = 0;
+		buffTableRemarks[0] = 0;
+
+		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
-			pTableName = new SQLWCHAR[tableName.length() + 1];
-			wcscpy(pTableName, tableName.c_str());
-		}
-		if(schemaName.length() > 0)
-		{
-			pSchemaName = new SQLWCHAR[schemaName.length() + 1];
-			wcscpy(pSchemaName, schemaName.c_str());
-		}
-		if(catalogName.length() > 0)
-		{
-			pCatalogName = new SQLWCHAR[catalogName.length() + 1];
-			wcscpy(pCatalogName, catalogName.c_str());
-		}
-		if(tableType.length() > 0)
-		{
-			pTableType = new SQLWCHAR[tableType.length() + 1];
-			wcscpy(pTableType, tableType.c_str());
-		}
+			STableInfo table;
+			SQLLEN cb;
+			GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog.get(), m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isCatalogNull, true);
+			GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema.get(), m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isSchemaNull, true);
+			GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName.get(), m_dbInf.GetMaxTableNameLen() * sizeof(SQLWCHAR), &cb, NULL, true);
+			GetData(m_hstmt, 4, SQL_C_WCHAR, buffTableType.get(), DB_MAX_TABLE_TYPE_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
+			GetData(m_hstmt, 5, SQL_C_WCHAR, buffTableRemarks.get(), DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
 
-		wchar_t* buffCatalog = new wchar_t[m_dbInf.GetMaxCatalogNameLen()];
-		wchar_t* buffSchema = new wchar_t[m_dbInf.GetMaxSchemaNameLen()];
-		wchar_t* buffTableName = new wchar_t[m_dbInf.GetMaxTableNameLen()];
-		wchar_t* buffTableType = new wchar_t[DB_MAX_TABLE_TYPE_LEN];
-		wchar_t* buffTableRemarks = new wchar_t[DB_MAX_TABLE_REMARKS_LEN];
-
-		try
-		{
-			// Query db
-			SQLRETURN ret = SQLTables(m_hstmt,
-				pCatalogName, pCatalogName ? SQL_NTS : NULL,   // catname                 
-				pSchemaName, pSchemaName ? SQL_NTS : NULL,   // schema name
-				pTableName, pTableName ? SQL_NTS : NULL,							// table name
-				pTableType, pTableType ? SQL_NTS : NULL);
-			THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_hstmt);
-
-			buffCatalog[0] = 0;
-			buffSchema[0] = 0;
-			buffTableName[0] = 0;
-			buffTableType[0] = 0;
-			buffTableRemarks[0] = 0;
-
-			while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+			if (!table.m_isCatalogNull)
 			{
-				STableInfo table;
-				SQLLEN cb;
-				GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isCatalogNull, true);
-				GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isSchemaNull, true);
-				GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen() * sizeof(SQLWCHAR), &cb, NULL, true);
-				GetData(m_hstmt, 4, SQL_C_WCHAR, buffTableType, DB_MAX_TABLE_TYPE_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
-				GetData(m_hstmt, 5, SQL_C_WCHAR, buffTableRemarks, DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
-
-				if (!table.m_isCatalogNull)
-					table.m_catalogName = buffCatalog;
-				if (!table.m_isSchemaNull)
-					table.m_schemaName = buffSchema;
-				table.m_tableName = buffTableName;
-				table.m_tableType = buffTableType;
-				table.m_tableRemarks = buffTableRemarks;
-				tables.push_back(table);
+				table.m_catalogName = buffCatalog.get();
 			}
-			THROW_IFN_NO_DATA(SQLFetch, ret);
+			if (!table.m_isSchemaNull)
+			{
+				table.m_schemaName = buffSchema.get();
+			}
+			table.m_tableName = buffTableName.get();
+			table.m_tableType = buffTableType.get();
+			table.m_tableRemarks = buffTableRemarks.get();
+			tables.push_back(table);
 		}
-		catch (Exception ex)
-		{
-			exc = ex;
-			haveExc = true;
-		}
+		THROW_IFN_NO_DATA(SQLFetch, ret);
 
-		// Close, ignore all errs
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-
-		delete[] buffCatalog;
-		delete[] buffSchema;
-		delete[] buffTableName;
-		delete[] buffTableType;
-		delete[] buffTableRemarks;
-
-		if(pTableName)
-			delete[] pTableName;
-		if(pSchemaName)
-			delete[] pSchemaName;
-		if(pCatalogName)
-			delete[] pCatalogName;
-		if(pTableType)
-			delete[] pTableType;
-
-		if (haveExc)
-		{
-			throw exc;
-		}
 		return tables;
 	}
+
 
 	int Database::ReadColumnCount(const STableInfo& table)
 	{
