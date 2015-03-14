@@ -317,7 +317,7 @@ namespace exodbc
 	* \param	sqlState2	Second SQL-State
 	* \return	True if the strings sqlState1 and sqlState2 are equal for the first 5 chars
 	*/
-	extern EXODBCAPI bool	CompareSqlState(const wchar_t* sqlState1, const wchar_t* sqlState2);
+	extern EXODBCAPI bool	CompareSqlState(const SQLWCHAR* sqlState1, const SQLWCHAR* sqlState2);
 
 
 	/*!
@@ -380,7 +380,7 @@ namespace exodbc
 
 	/*!
 	 * \brief	Gets string data. Allocates a wchar_t buffer with maxNrOfChars wchars + one char for the null-terminate:
-	 * 			wchar_t* buff = new buff[maxNrOfChars + 1];
+	 * 			SQLWCHAR* buff = new buff[maxNrOfChars + 1];
 	 * 			Then calls GetData with that buffer and takes into account that GetData needs a buffer-size, not a char-size.
 	 * 			If the data is null or reading fails, value is set to an empty string.
 	 *

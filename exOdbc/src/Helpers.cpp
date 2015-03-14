@@ -612,7 +612,7 @@ namespace exodbc
 	}
 
 
-	bool CompareSqlState(const wchar_t* sqlState1, const wchar_t* sqlState2)
+	bool CompareSqlState(const SQLWCHAR* sqlState1, const SQLWCHAR* sqlState2)
 	{
 		exASSERT(sqlState1);
 		exASSERT(sqlState2);
@@ -697,8 +697,8 @@ namespace exodbc
 			}
 			else
 			{
-				wchar_t* pw = (wchar_t*) pTargetValue;
-				int p = *strLenOrIndPtr / sizeof(wchar_t);
+				SQLWCHAR* pw = (SQLWCHAR*)pTargetValue;
+				int p = *strLenOrIndPtr / sizeof(SQLWCHAR);
 				exASSERT(bufferLen >= p);
 				pw[ p ] = 0;
 			}
@@ -710,7 +710,7 @@ namespace exodbc
 	{
 		value = L"";
 		std::unique_ptr<SQLWCHAR[]> buffer(new SQLWCHAR[maxNrOfChars + 1]);
-		size_t buffSize = sizeof(wchar_t) * (maxNrOfChars + 1);
+		size_t buffSize = sizeof(SQLWCHAR) * (maxNrOfChars + 1);
 		SQLLEN cb;
 		bool isNull = false;
 
