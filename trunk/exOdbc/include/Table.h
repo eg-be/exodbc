@@ -463,11 +463,12 @@ namespace exodbc
 		*			Fails if not all primary keys are bound.
 		*			Fails if no primary keys are set on the table.
 		*			Fails if the table has not been opened using READ_WRITE.
+		*			Fails if no bound columns have the flag CF_UPDATE set.
 		*			This will not commit the transaction.
 		* \see		Database::CommitTrans()
-		* \return	True on success.
+		* \throw	Exception if failed.
 		*/
-		bool		Update();
+		void		Update();
 
 
 		/*!
@@ -484,9 +485,9 @@ namespace exodbc
 		*			This will not commit the transaction.
 		* \param	where WHERE clause to be used. Do not include 'WHERE', the Table will add this.
 		* \see		Database::CommitTrans()
-		* \return	True on success.
+		* \throw	Exception if failed.
 		*/
-		bool		Update(const std::wstring& where);
+		void		Update(const std::wstring& where);
 
 
 		/*!

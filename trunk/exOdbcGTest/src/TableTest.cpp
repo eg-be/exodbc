@@ -2197,30 +2197,30 @@ namespace exodbc
 		*pSmallInt = (SQLSMALLINT) 101;
 		*pInt = (SQLINTEGER) 102;
 		*pBigInt = (SQLBIGINT) 103;
-		EXPECT_TRUE(iTable.Update());
+		EXPECT_NO_THROW(iTable.Update());
 		
 		*pId = (SQLINTEGER)5;
 		*pSmallInt = (SQLSMALLINT)1001;
 		*pInt = (SQLINTEGER)1002;
 		*pBigInt = (SQLBIGINT)1003;
-		EXPECT_TRUE(iTable.Update());
+		EXPECT_NO_THROW(iTable.Update());
 
 		// And set some values to null
 		*pId = (SQLINTEGER)7;
 		pSmallInt->SetNull();
 		*pInt = (SQLINTEGER)99;
 		*pBigInt = (SQLBIGINT)99;
-		EXPECT_TRUE(iTable.Update());
+		EXPECT_NO_THROW(iTable.Update());
 		*pId = (SQLINTEGER)8;
 		*pSmallInt = (SQLSMALLINT)99;
 		pInt->SetNull();
 		*pBigInt = (SQLBIGINT)99;
-		EXPECT_TRUE(iTable.Update());
+		EXPECT_NO_THROW(iTable.Update());
 		*pId = (SQLINTEGER)9;
 		*pSmallInt = (SQLSMALLINT) 99;
 		*pInt = (SQLINTEGER)99;
 		pBigInt->SetNull();
-		EXPECT_TRUE(iTable.Update());
+		EXPECT_NO_THROW(iTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Read back the just updated values
@@ -2305,12 +2305,12 @@ namespace exodbc
 		pDate->SetNull();
 		pTime->SetNull();
 		pTimestamp->SetNull();
-		EXPECT_TRUE(dTable.Update());
+		EXPECT_NO_THROW(dTable.Update());
 		*pId = (SQLINTEGER)102;
 		*pDate = date;
 		*pTime = time;
 		*pTimestamp = timestamp;
-		EXPECT_TRUE(dTable.Update());
+		EXPECT_NO_THROW(dTable.Update());
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// And read back
@@ -2395,13 +2395,13 @@ namespace exodbc
 		*pNumeric_18_0 = num18_0;
 		*pNumeric_18_10 = num18_10;
 		*pNumeric_5_3 = num5_3;
-		EXPECT_TRUE(nTable.Update());
+		EXPECT_NO_THROW(nTable.Update());
 
 		*pId = (SQLINTEGER)100;
 		pNumeric_18_0->SetNull();
 		pNumeric_18_10->SetNull();
 		pNumeric_5_3->SetNull();
-		EXPECT_TRUE(nTable.Update());
+		EXPECT_NO_THROW(nTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And read back the values
@@ -2449,7 +2449,7 @@ namespace exodbc
 		// And update them using the key fields
 		*pDouble = -6.2343354;
 		*pFloat = 989.213;
-		EXPECT_TRUE(fTable.Update());
+		EXPECT_NO_THROW(fTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
@@ -2654,11 +2654,11 @@ namespace exodbc
 		*pId = (SQLINTEGER)100;
 		pBlob->SetNull();
 		pVarBlob_20->SetBinaryValue(abc, sizeof(abc));
-		EXPECT_TRUE(bTable.Update());
+		EXPECT_NO_THROW(bTable.Update());
 		*pId = (SQLINTEGER)101;
 		pBlob->SetBinaryValue(empty, sizeof(empty));
 		pVarBlob_20->SetNull();
-		EXPECT_TRUE(bTable.Update());
+		EXPECT_NO_THROW(bTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Re-Fetch and compare
@@ -2720,7 +2720,7 @@ namespace exodbc
 			*pInt = (SQLINTEGER)(i * shift);
 			*pBigInt = (SQLBIGINT)(i * shift);
 			sqlstmt = (boost::wformat(L"%s = %d") % idName %i).str();
-			EXPECT_TRUE(iTable.Update(sqlstmt));
+			EXPECT_NO_THROW(iTable.Update(sqlstmt));
 		}
 		EXPECT_NO_THROW(m_db.CommitTrans());
 

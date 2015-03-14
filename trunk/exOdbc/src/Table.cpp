@@ -661,26 +661,17 @@ namespace exodbc
 	}
 
 
-	bool Table::Update()
+	void Table::Update()
 	{
 		exASSERT(IsOpen());
 		exASSERT(m_openMode == READ_WRITE);
 		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
 		SQLRETURN ret = SQLExecute(m_hStmtUpdate);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hStmtUpdate, ret, SQLExecute);
-		}
-		if (SQL_SUCCESS_WITH_INFO == ret)
-		{
-			LOG_WARNING_STMT(m_hStmtUpdate, ret, SQLExecute);
-		}
-
-		return SQL_SUCCEEDED(ret);
+		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
 	}
 
 
-	bool Table::Update(const std::wstring& where)
+	void Table::Update(const std::wstring& where)
 	{
 		exASSERT(IsOpen());
 		exASSERT(m_openMode == READ_WRITE);
@@ -690,8 +681,7 @@ namespace exodbc
 		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetSqlName()).str();
 		// .. first the values to update
 		int paramNr = 1;
-		bool ok = true;
-		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end() && ok; it++)
+		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
 			ColumnBuffer* pBuffer = it->second;
 			if (pBuffer->IsColumnFlagSet(CF_UPDATE))
@@ -703,46 +693,20 @@ namespace exodbc
 			}
 		}
 		boost::erase_last(updateStmt, L",");
-		exASSERT(paramNr > 1);
+		exASSERT_MSG(paramNr > 1, L"No columns are bound that have the flag CF_UPDATE set");
 		updateStmt += (L"WHERE " + where);
 
 		// Prepare to update
 		SQLRETURN ret = SQLPrepare(m_hStmtUpdateWhere, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			ok = false;
-			LOG_ERROR_STMT(m_hStmtUpdateWhere, ret, SQLPrepare);
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(m_hStmtUpdateWhere, ret, SQLPrepare);
-		}
+		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 
-		// And Execute if everything ok
-		if (ok)
-		{
-			ret = SQLExecute(m_hStmtUpdateWhere);
-			if (!SQL_SUCCEEDED(ret))
-			{
-				ok = false;
-				LOG_ERROR_STMT(m_hStmtUpdateWhere, ret, SQLExecute);
-			}
-			if (SQL_SUCCESS_WITH_INFO == ret)
-			{
-				LOG_WARNING_STMT(m_hStmtUpdateWhere, ret, SQLExecute);
-			}
-
-		}
+		// And Execute
+		ret = SQLExecute(m_hStmtUpdateWhere);
+		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 
 		// Always unbind all parameters at the end
 		ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hStmtUpdateWhere, ret, SQLBindParameter);
-			ok = false;
-		}
-
-		return ok;
+		THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 	}
 
 
