@@ -366,6 +366,11 @@ namespace exodbc
 
 	std::vector<std::wstring> Database::ReadCatalogInfo(ReadCatalogInfoMode mode)
 	{
+		exASSERT(IsOpen());
+
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_hstmt, true, true);
+
 		std::vector<std::wstring> results;
 
 		SQLPOINTER catalogName = L"";
@@ -395,9 +400,6 @@ namespace exodbc
 		default:
 			exASSERT(false);
 		}
-
-		// Close Statement and make sure it closes upon exit
-		StatementCloser stmtCloser(m_hstmt, true, true);
 		
 		std::unique_ptr<SQLWCHAR[]> buffer(new SQLWCHAR[charLen]);
 		SQLRETURN ret = SQLTables(m_hstmt,
@@ -449,8 +451,8 @@ namespace exodbc
 	{
 		std::vector<SSqlTypeInfo> types;
 
-		// Close an eventually open cursor, do not care about truncation
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_hstmt, true, true);
 
 		SQLRETURN ret = SQLGetTypeInfo(m_hstmt, SQL_ALL_TYPES);
 		THROW_IFN_SUCCEEDED(SQLGetTypeInfo, ret, SQL_HANDLE_STMT, m_hstmt);
@@ -505,9 +507,6 @@ namespace exodbc
 			ret = SQLFetch(m_hstmt);
 		}
 		THROW_IFN_NO_DATA(SQLFetch, ret);
-
-		// We are done, close cursor, do not care about truncation
-		CloseStmtHandle(m_hstmt, FailIfNotOpen);
 
 		return types;
 	}
@@ -1009,7 +1008,7 @@ namespace exodbc
 	{	
 		// We need to ensure cursors are closed:
 		// The internal statement should be closed, the exec-statement could be open
-		EnsureStmtIsClosed(m_hstmt, m_dbmsType);
+		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 		CloseStmtHandle(m_hstmtExecSql, IgnoreNotOpen);
 
 		// If Autocommit is off, we need to Rollback any ongoing transaction
