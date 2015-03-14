@@ -300,9 +300,9 @@ namespace exodbc
 	*
 	* \param	hStmt		The statement handle.
 	* \param	mode		Determine whether the function should fail if the cursor is not open.
-	* \return	Depends on CloseMode
+	* \throw	Exception	Depending on CloseMode.
 	*/
-	extern EXODBCAPI bool	CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode);
+	extern EXODBCAPI void	CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode);
 
 
 	/*!

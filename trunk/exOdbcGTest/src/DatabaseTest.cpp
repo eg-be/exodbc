@@ -277,7 +277,7 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
 		EXPECT_NO_THROW( m_db.CommitTrans() );
 
-		EXPECT_TRUE( iTable.Select());
+		iTable.Select();
 		EXPECT_FALSE( iTable.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
@@ -301,7 +301,7 @@ namespace exodbc
 				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TI_SNAPSHOT));
 				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", Table::READ_ONLY);
 				ASSERT_NO_THROW(iTable2.Open(false, true));
-				EXPECT_TRUE(iTable2.Select());
+				iTable2.Select();
 				EXPECT_FALSE(iTable2.SelectNext());
 #else
 				LOG_WARNING(L"Test runs agains MS SQL Server but HAVE_MSODBCSQL_H is not defined to 1. Cannot run test without setting Transaction Mode to Snapshot, or the test would block");
@@ -313,7 +313,7 @@ namespace exodbc
 				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TI_READ_COMMITTED));
 				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", Table::READ_ONLY);
 				ASSERT_NO_THROW(iTable2.Open(false, true));
-				EXPECT_TRUE(iTable2.Select());
+				iTable2.Select();
 				EXPECT_FALSE(iTable2.SelectNext());
 			}
 		}
@@ -326,7 +326,7 @@ namespace exodbc
 		{
 			exodbc::Table iTable2(&m_db, tableName, L"", L"", L"", Table::READ_ONLY);
 			ASSERT_NO_THROW(iTable2.Open(false, true));
-			EXPECT_TRUE(iTable2.Select());
+			iTable2.Select();
 			EXPECT_TRUE(iTable2.SelectNext());
 		}
 	}
@@ -343,14 +343,14 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
-		EXPECT_TRUE( iTable.Select());
+		iTable.Select();
 		EXPECT_FALSE( iTable.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
 		// We rollback and expect no record
 		EXPECT_NO_THROW(m_db.RollbackTrans());
-		EXPECT_TRUE( iTable.Select());
+		iTable.Select();
 		EXPECT_FALSE( iTable.SelectNext());
 	}
 

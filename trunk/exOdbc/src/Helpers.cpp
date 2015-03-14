@@ -552,7 +552,7 @@ namespace exodbc
 	}
 
 
-	bool CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode)
+	void CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode)
 	{
 		exASSERT(hStmt);
 
@@ -561,22 +561,14 @@ namespace exodbc
 		{
 			//  calling SQLFreeStmt with the SQL_CLOSE option has no effect on the application if no cursor is open on the statement
 			ret = SQLFreeStmt(hStmt, SQL_CLOSE);
-			if (ret != SQL_SUCCESS)
-			{
-				LOG_ERROR_STMT(hStmt, ret, SQLFreeStmt);
-			}
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, hStmt);
 		}
 		else
 		{
 			// SQLCloseCursor returns SQLSTATE 24000 (Invalid cursor state) if no cursor is open. 
 			ret = SQLCloseCursor(hStmt);
-			if (ret != SQL_SUCCESS)
-			{
-				LOG_ERROR_STMT(hStmt, ret, SQLCloseCursor);
-			}
+			THROW_IFN_SUCCEEDED(SQLCloseCursor, ret, SQL_HANDLE_STMT, hStmt);
 		}
-
-		return ret == SQL_SUCCESS;
 	}
 
 

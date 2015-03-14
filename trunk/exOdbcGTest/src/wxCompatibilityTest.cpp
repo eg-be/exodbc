@@ -99,7 +99,7 @@ namespace exodbc
 		ASSERT_NO_THROW(table.Open(false, false));
 
 		// Expect 6 entries
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes");
 		int count = 0;
 		while(table.SelectNext() && count <= 7)
 		{
@@ -108,11 +108,11 @@ namespace exodbc
 		EXPECT_EQ(6, count);
 
 		// Expect no entries
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 7"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 7");
 		EXPECT_FALSE(table.SelectNext());
 
 		// Expect 2 entries
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes >= 2 AND idchartypes <= 3"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes >= 2 AND idchartypes <= 3");
 		count = 0;
 		while(table.SelectNext() && count <= 3)
 		{
@@ -128,7 +128,7 @@ namespace exodbc
 		MDateTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(false, false));
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1");
 		if (m_pDb->Dbms() == dbmsMS_SQL_SERVER)
 		{
 			// MS will complain about data loss
@@ -143,7 +143,7 @@ namespace exodbc
 		EXPECT_EQ( 01, table.m_date.month);
 		EXPECT_EQ( 1983, table.m_date.year);
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1");
 		if (m_pDb->Dbms() == dbmsMS_SQL_SERVER)
 		{
 			// MS will complain about data loss
@@ -158,7 +158,7 @@ namespace exodbc
 		EXPECT_EQ( 55, table.m_time.minute);
 		EXPECT_EQ( 56, table.m_time.second);
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 2"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 2");
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 26, table.m_timestamp.day);
 		EXPECT_EQ( 01, table.m_timestamp.month);
@@ -183,14 +183,14 @@ namespace exodbc
 		EXPECT_EQ( fraction, table.m_timestamp.fraction);
 
 		// Test for NULL
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 2"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 2");
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_FALSE( table.IsColumnNull(0) );
 		EXPECT_TRUE(table.IsColumnNull(1));
 		EXPECT_TRUE(table.IsColumnNull(2));
 		EXPECT_FALSE(table.IsColumnNull(3));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 3"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 3");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_FALSE(table.IsColumnNull(0));
 		EXPECT_TRUE(table.IsColumnNull(1));
@@ -204,32 +204,32 @@ namespace exodbc
 		MIntTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(false, false));
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1");
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( -32768, table.m_smallInt);
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 2"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 2");
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 32767, table.m_smallInt);
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3");
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( INT_MIN /* -2147483648 */, table.m_int);
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 4"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 4");
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 2147483647, table.m_int);
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5");
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( LLONG_MIN /* -9223372036854775808 */, table.m_bigInt);
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 6"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 6");
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( 9223372036854775807, table.m_bigInt);
 
 		// Test for NULL-Values
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1");
 		EXPECT_TRUE( table.SelectNext());
 
 		EXPECT_FALSE( table.IsColumnNull(0) );
@@ -237,11 +237,11 @@ namespace exodbc
 		EXPECT_TRUE( table.IsColumnNull(2) );
 		EXPECT_TRUE( table.IsColumnNull(3) );
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 3");
 		EXPECT_TRUE( table.SelectNext());
 		EXPECT_FALSE( table.IsColumnNull(2) );
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 5");
 		EXPECT_TRUE( table.SelectNext());
 		EXPECT_FALSE( table.IsColumnNull(3) );
 	}
@@ -254,19 +254,19 @@ namespace exodbc
 
 		// Note: We trim the values read from the db on the right side, as for example db2 pads with ' ' by default
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(table.m_varchar));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 2"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 2");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(table.m_char)));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 3"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 3");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"הצüאיט"), boost::trim_right_copy(std::wstring(table.m_varchar)));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 4"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 4");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"הצüאיט"), boost::trim_right_copy(std::wstring(table.m_char)));
 
@@ -275,7 +275,7 @@ namespace exodbc
 		EXPECT_TRUE( table.IsColumnNull(1) );
 		EXPECT_FALSE( table.IsColumnNull(2) );
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_FALSE( table.IsColumnNull(0) );
 		EXPECT_FALSE( table.IsColumnNull(1) );
@@ -289,37 +289,37 @@ namespace exodbc
 		MFloatTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(false, false));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 0.0, table.m_float);
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 2"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 2");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 3.141, table.m_float);
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 3"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 3");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -3.141, table.m_float);
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 0.0, table.m_double);
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 5"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 5");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 3.141592, table.m_double);
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 6"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 6");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -3.141592, table.m_double);
 
 		// Test for NULL
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_TRUE( table.IsColumnNull(1));
 		EXPECT_FALSE( table.IsColumnNull(2));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_FALSE( table.IsColumnNull(1));
 		EXPECT_TRUE( table.IsColumnNull(2));
@@ -331,15 +331,15 @@ namespace exodbc
 		MNumericTypesAsCharTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(false, false));
 
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"0"), std::wstring(table.m_wcdecimal_18_0));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 2"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 2");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 3"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 3");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
@@ -347,21 +347,21 @@ namespace exodbc
 		RecordProperty("Ticket", 35);
 		if(m_pDb->Dbms() == dbmsDB2)
 		{
-			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
+			table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4");
 			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(table.m_wcdecimal_18_10));	
 
-			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5"));
+			table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5");
 			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 
-			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6"));
+			table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6");
 			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 		}
 		else
 		{
-			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
+			table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4");
 			EXPECT_TRUE(table.SelectNext());
 			// ms does not send first 0 ?
 			if(m_pDb->Dbms() == dbmsMS_SQL_SERVER)
@@ -369,22 +369,22 @@ namespace exodbc
 			else
 				EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(table.m_wcdecimal_18_10));	
 
-			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5"));
+			table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5");
 			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 
-			EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6"));
+			table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6");
 			EXPECT_TRUE(table.SelectNext());
 			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 		}
 
 		// Test for NULL
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_FALSE( table.IsColumnNull(1) );
 		EXPECT_TRUE( table.IsColumnNull(2) );
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_TRUE( table.IsColumnNull(1) );
 		EXPECT_FALSE( table.IsColumnNull(2) );
@@ -397,7 +397,7 @@ namespace exodbc
 		MBlobTypesTable table(m_pDb, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(false, false));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		SQLCHAR empty[] = {	0, 0, 0, 0,
 			0, 0, 0, 0,
@@ -417,24 +417,24 @@ namespace exodbc
 			0x01, 0x23, 0x45, 0x67
 		};
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ(0, memcmp(empty, table.m_blob, sizeof(table.m_blob)));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 2"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 2");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ(0, memcmp(ff, table.m_blob, sizeof(table.m_blob)));
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 3"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 3");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ(0, memcmp(abc, table.m_blob, sizeof(table.m_blob)));
 
 		// Test for NULL
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_FALSE( table.IsColumnNull(1) );
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 4"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 4");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_TRUE( table.IsColumnNull(1) );
 	}
@@ -457,7 +457,7 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.chartable (idchartable, col2, col3, col4) VALUES (1, 'r1_c2', 'r1_c3', 'r1_c4')";
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartable WHERE idchartable = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(table.m_col2)));
 		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(table.m_col3)));
@@ -468,7 +468,7 @@ namespace exodbc
 		table.m_col2[0] = 0;
 		table.m_col3[0] = 0;
 		table.m_col4[0] = 0;
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT idchartable, col2, col3, col4 FROM exodbc.chartable WHERE idchartable = 1"));
+		table.SelectBySqlStmt(L"SELECT idchartable, col2, col3, col4 FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(table.m_col2)));
 		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(table.m_col3)));
@@ -478,7 +478,7 @@ namespace exodbc
 		// Now test by reading the incomplete table using '*': It works as we've still used the indexes "as in the db" when we've bound the columns
 		incTable.m_col2[0] = 0;
 		incTable.m_col4[0] = 0;
-		EXPECT_TRUE(incTable.SelectBySqlStmt(L"SELECT * FROM exodbc.chartable WHERE idchartable = 1"));
+		incTable.SelectBySqlStmt(L"SELECT * FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(incTable.SelectNext());
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(incTable.m_col2)));
 		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(incTable.m_col4)));
@@ -491,7 +491,7 @@ namespace exodbc
 		RecordProperty("Ticket", 15);
 		incTable.m_col2[0] = 0;
 		incTable.m_col4[0] = 0;
-		EXPECT_TRUE(incTable.SelectBySqlStmt(L"SELECT idchartable, col2, col4 FROM exodbc.chartable WHERE idchartable = 1"));
+		incTable.SelectBySqlStmt(L"SELECT idchartable, col2, col4 FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(incTable.SelectNext());
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(wstring(incTable.m_col2)));
 		EXPECT_NE(std::wstring(L"r1_c4"), boost::trim_right_copy(wstring(incTable.m_col4)));
@@ -501,7 +501,7 @@ namespace exodbc
 		// the recordset returned
 		incTable.m_col2[0] = 0;
 		incTable.m_col4[0] = 0;
-		EXPECT_TRUE(incTable.SelectBySqlStmt(L"SELECT  idchartable, col2, col3, col4 FROM exodbc.chartable WHERE idchartable = 1"));
+		incTable.SelectBySqlStmt(L"SELECT  idchartable, col2, col3, col4 FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(incTable.SelectNext());
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(incTable.m_col2)));
 		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(incTable.m_col4)));
@@ -534,7 +534,7 @@ namespace exodbc
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
 		// And note the triming
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes_tmp ORDER BY idchartypes ASC"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes_tmp ORDER BY idchartypes ASC");
 		EXPECT_TRUE( table.SelectNext());
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(table.m_varchar));
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(table.m_char)));
@@ -554,7 +554,7 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes, tdouble, tfloat) VALUES (1, -3.141592, -3.141)";
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -3.141592, table.m_double);
 		EXPECT_EQ( -3.141, table.m_float);
@@ -563,7 +563,7 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes, tdouble, tfloat) VALUES (2, 3.141592, 3.141)";
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes = 2"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes = 2");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 3.141592, table.m_double);
 		EXPECT_EQ( 3.141, table.m_float);
@@ -584,7 +584,7 @@ namespace exodbc
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		// Note: DB2 sends a ',', mysql sends a '.' as delimeter
-		EXPECT_TRUE( table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes = 1");
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
@@ -597,7 +597,7 @@ namespace exodbc
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		// TODO: DB2 sends a ',', mysql sends a '.' as delimeter
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes = 2"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes = 2");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
@@ -611,7 +611,7 @@ namespace exodbc
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		// Note: DB2 sends a ',', mysql sends a '.' as delimeter
 		// (but maybe this also depends on os settings)
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes = 3"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes_tmp WHERE idnumerictypes = 3");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"0"), std::wstring(table.m_wcdecimal_18_0));
 
@@ -636,14 +636,14 @@ namespace exodbc
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp");
 		EXPECT_FALSE(table.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, -9223372036854775808)";
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes ASC"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes ASC");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -32768, table.m_smallInt);
 		EXPECT_EQ( INT_MIN, table.m_int);
@@ -653,7 +653,7 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (2, 32767, 2147483647, 9223372036854775807)";
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes ASC"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes_tmp ORDER BY idintegertypes ASC");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 32767, table.m_smallInt);
@@ -676,7 +676,7 @@ namespace exodbc
 		sqlstmt = L"INSERT INTO exodbc.datetypes_tmp (iddatetypes, tdate, ttime, ttimestamp) VALUES (1, '1983-01-26', '13:55:56', '1983-01-26 13:55:56')";
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
-		EXPECT_TRUE(table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes_tmp WHERE iddatetypes = 1"));
+		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes_tmp WHERE iddatetypes = 1");
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( 26, table.m_date.day);
 		EXPECT_EQ( 01, table.m_date.month);
