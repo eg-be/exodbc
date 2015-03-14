@@ -460,11 +460,12 @@ namespace exodbc
 	class StatementCloser
 	{
 	public:
-		StatementCloser(SQLHSTMT hStmt) : m_hStmt(hStmt) {};
-		~StatementCloser() { CloseStmtHandle(m_hStmt, IgnoreNotOpen); }
+		StatementCloser(SQLHSTMT hStmt, bool closeOnConstruction = false, bool closeOnDestruction = true);
+		~StatementCloser();
 
 	private:
 		SQLHSTMT m_hStmt;
+		bool m_closeOnDestruction;
 	};
 }
 

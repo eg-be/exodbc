@@ -285,12 +285,11 @@ namespace exodbc
 		THROW_IFN_NO_DATA(SQLDataSources, ret);
 
 		// Now fetch with description
-		wchar_t* descBuffer = new wchar_t[maxDescLength + 1];
-		ret = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer, maxDescLength + 1, &descBufferLength);
+		std::unique_ptr<SQLWCHAR[]> descBuffer(new SQLWCHAR[maxDescLength + 1]);
+		ret = SQLDataSources(m_henv, direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
 		if(ret == SQL_NO_DATA)
 		{
-			delete[] descBuffer;
-			SqlResultException ex(L"SQLDataSources", ret, L"SQL_NO_DATA is not expected to happen here - we've found records in the previoius round, they can't be gone now!");
+			SqlResultException ex(L"SQLDataSources", ret, L"SQL_NO_DATA is not expected to happen here - we've found records in the previous round, they can't be gone now!");
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -299,12 +298,10 @@ namespace exodbc
 			// Store dataSource
 			SDataSource ds;
 			wcscpy(ds.Dsn, nameBuffer);
-			ds.m_description = descBuffer;
+			ds.m_description = descBuffer.get();
 			dataSources.push_back(ds);
-			ret = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer, maxDescLength + 1, &descBufferLength);
+			ret = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
 		}while(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
-
-		delete[] descBuffer;
 
 		THROW_IFN_NO_DATA(SQLDataSources, ret);
 

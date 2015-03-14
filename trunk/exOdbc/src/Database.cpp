@@ -396,45 +396,27 @@ namespace exodbc
 			exASSERT(false);
 		}
 
-		// Close Statement 
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_hstmt, true, true);
 		
-		SQLWCHAR* buffer = new SQLWCHAR[charLen];
-		bool haveExc = false;
-		Exception exc;
-		try
+		std::unique_ptr<SQLWCHAR[]> buffer(new SQLWCHAR[charLen]);
+		SQLRETURN ret = SQLTables(m_hstmt,
+			(SQLWCHAR*)catalogName, SQL_NTS,   // catname                 
+			(SQLWCHAR*)schemaName, SQL_NTS,   // schema name
+			L"", SQL_NTS,							// table name
+			(SQLWCHAR*)tableTypeName, SQL_NTS);
+
+		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_hstmt);
+
+		// Read data
+		SQLLEN cb;
+		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
 		{
-			SQLRETURN ret = SQLTables(m_hstmt,
-				(SQLWCHAR*)catalogName, SQL_NTS,   // catname                 
-				(SQLWCHAR*)schemaName, SQL_NTS,   // schema name
-				L"", SQL_NTS,							// table name
-				(SQLWCHAR*)tableTypeName, SQL_NTS);
-
-			THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_hstmt);
-
-			// Read data
-			SQLLEN cb;
-			while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
-			{
-				GetData(m_hstmt, colNr, SQL_C_WCHAR, buffer, charLen * sizeof(SQLWCHAR), &cb, NULL, true);
-				results.push_back(buffer);
-			}
-
-			THROW_IFN_NO_DATA(SQLFetch, ret);
+			GetData(m_hstmt, colNr, SQL_C_WCHAR, buffer.get(), charLen * sizeof(SQLWCHAR), &cb, NULL, true);
+			results.push_back(buffer.get());
 		}
-		catch (Exception ex)
-		{
-			haveExc = true;
-			exc = ex;
-		}
-		
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
 
-		delete[] buffer;
-		if (haveExc)
-		{
-			throw exc;
-		}
+		THROW_IFN_NO_DATA(SQLFetch, ret);
 
 		return results;
 	}
