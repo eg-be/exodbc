@@ -243,12 +243,12 @@ namespace exodbc
 		*pSmallInt = (SQLSMALLINT)1;
 		*pInt = (SQLINTEGER)10;
 		*pBigInt = (SQLBIGINT)100;
-		ASSERT_TRUE(iTable.Insert());
+		iTable.Insert();
 		*pId = (SQLINTEGER)102;
 		*pSmallInt = (SQLSMALLINT)2;
 		*pInt = (SQLINTEGER)20;
 		*pBigInt = (SQLBIGINT)200;
-		ASSERT_TRUE(iTable.Insert());
+		iTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now select those two records
@@ -1456,7 +1456,7 @@ namespace exodbc
 		pSmallInt->SetNull();
 		pInt->SetNull();
 		pBigInt->SetNull();
-		EXPECT_TRUE(iTable.Insert());
+		iTable.Insert();
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now we must have something to delete
@@ -1513,7 +1513,7 @@ namespace exodbc
 		pInt->SetNull();
 		pBigInt->SetNull();
 		*pId = (SQLINTEGER)99;
-		EXPECT_TRUE(iTable.Insert());
+		iTable.Insert();
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now lets delete that row. our pId is still set to the key-value 99
@@ -1550,7 +1550,7 @@ namespace exodbc
 		*pInt = (SQLINTEGER)103;
 		*pBigInt = (SQLBIGINT)104;
 
-		EXPECT_TRUE(iTable.Insert());
+		EXPECT_NO_THROW(iTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
@@ -1617,7 +1617,7 @@ namespace exodbc
 		*pDate = date;
 		*pTime = time;
 		*pTimestamp = timestamp;
-		EXPECT_TRUE(dTable.Insert());
+		EXPECT_NO_THROW(dTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
@@ -1674,7 +1674,7 @@ namespace exodbc
 		*pId = (SQLINTEGER)101;
 		*pDouble = 3.14159265359;
 		*pFloat = -3.14159;
-		EXPECT_TRUE(fTable.Insert());
+		EXPECT_NO_THROW(fTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
@@ -1729,7 +1729,7 @@ namespace exodbc
 		*pNumeric_18_0 = numStr18_0;
 		*pNumeric_18_10 = numStr18_10;
 		*pNumeric_5_3 = numStr5_3;
-		EXPECT_TRUE(nTable.Insert());
+		EXPECT_NO_THROW(nTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And read them again from another table and compare them
@@ -1778,7 +1778,7 @@ namespace exodbc
 		pNumeric_18_10->SetNull();
 		*pNumeric_5_3 = numStr;
 		*pId = (SQLINTEGER)300;
-		EXPECT_TRUE(t.Insert());
+		EXPECT_NO_THROW(t.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
 
@@ -1820,7 +1820,7 @@ namespace exodbc
 		pNumeric_18_10->SetNull();
 		pNumeric_5_3->SetNull();
 		*pId = (SQLINTEGER)300;
-		EXPECT_TRUE(t.Insert());
+		EXPECT_NO_THROW(t.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
 
@@ -1862,7 +1862,7 @@ namespace exodbc
 		*pNumeric_18_10 = numStr;
 		pNumeric_5_3->SetNull();
 		*pId = (SQLINTEGER)300;
-		EXPECT_TRUE(t.Insert());
+		EXPECT_NO_THROW(t.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
 
@@ -1924,7 +1924,7 @@ namespace exodbc
 		*pNumeric_18_0 = numStr18_0;
 		*pNumeric_18_10 = numStr18_10;
 		*pNumeric_5_3 = numStr5_3;
-		EXPECT_TRUE(t.Insert());
+		EXPECT_NO_THROW(t.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
 
@@ -1974,20 +1974,20 @@ namespace exodbc
 		*pId = (SQLINTEGER)100;
 		pBlob->SetBinaryValue(empty, sizeof(empty));
 		pVarBlob_20->SetNull();
-		EXPECT_TRUE(bTable.Insert());
+		EXPECT_NO_THROW(bTable.Insert());
 		*pId = (SQLINTEGER)101;
 		pBlob->SetBinaryValue(ff, sizeof(ff));
-		EXPECT_TRUE(bTable.Insert());
+		EXPECT_NO_THROW(bTable.Insert());
 		*pId = (SQLINTEGER)102;
 		pBlob->SetBinaryValue(abc, sizeof(abc));
-		EXPECT_TRUE(bTable.Insert());
+		EXPECT_NO_THROW(bTable.Insert());
 		*pId = (SQLINTEGER)103;
 		pBlob->SetNull();
 		pVarBlob_20->SetBinaryValue(abc, sizeof(abc));
-		EXPECT_TRUE(bTable.Insert());
+		EXPECT_NO_THROW(bTable.Insert());
 		*pId = (SQLINTEGER)104;
 		pVarBlob_20->SetBinaryValue(abc_ff, sizeof(abc_ff));
-		EXPECT_TRUE(bTable.Insert());
+		EXPECT_NO_THROW(bTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now read the inserted values
@@ -2051,7 +2051,7 @@ namespace exodbc
 		*pChar = s;
 		pVarchar_10->SetNull();
 		pChar_10->SetNull();
-		EXPECT_TRUE(cTable.Insert());
+		EXPECT_NO_THROW(cTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Insert one value that uses all space
@@ -2061,7 +2061,7 @@ namespace exodbc
 		pChar->SetNull();
 		*pVarchar_10 = s;
 		*pChar_10 = s;
-		EXPECT_TRUE(cTable.Insert());
+		EXPECT_NO_THROW(cTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Read them back from another table
@@ -2119,7 +2119,7 @@ namespace exodbc
 		*pChar = s;
 		pVarchar_10->SetNull();
 		pChar_10->SetNull();
-		EXPECT_TRUE(cTable.Insert());
+		EXPECT_NO_THROW(cTable.Insert());
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert one value that uses all space
@@ -2129,7 +2129,7 @@ namespace exodbc
 		pChar->SetNull();
 		*pVarchar_10 = s;
 		*pChar_10 = s;
-		EXPECT_TRUE(cTable.Insert());
+		EXPECT_NO_THROW(cTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Read them back from another table
@@ -2188,7 +2188,7 @@ namespace exodbc
 			*pSmallInt = (SQLSMALLINT)i;
 			*pInt = (SQLINTEGER)i;
 			*pBigInt = (SQLBIGINT)i;
-			ASSERT_TRUE(iTable.Insert());
+			ASSERT_NO_THROW(iTable.Insert());
 		}
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
@@ -2287,12 +2287,12 @@ namespace exodbc
 		*pDate = date;
 		*pTime = time;
 		*pTimestamp = timestamp;
-		ASSERT_TRUE(dTable.Insert());
+		dTable.Insert();
 		*pId = (SQLINTEGER)102;
 		pDate->SetNull();
 		pTime->SetNull();
 		pTimestamp->SetNull();
-		ASSERT_TRUE(dTable.Insert());
+		dTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now update the values
@@ -2354,12 +2354,12 @@ namespace exodbc
 		*pNumeric_18_0 = num;
 		*pNumeric_18_10 = num;
 		*pNumeric_5_3 = num;
-		ASSERT_TRUE(nTable.Insert());
+		nTable.Insert();
 		*pId = (SQLINTEGER)101;
 		pNumeric_18_0->SetNull();
 		pNumeric_18_10->SetNull();
 		pNumeric_5_3->SetNull();
-		ASSERT_TRUE(nTable.Insert());
+		nTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now update that with our well known entries
@@ -2443,7 +2443,7 @@ namespace exodbc
 		*pId = (SQLINTEGER)101;
 		*pDouble = 3.14159265359;
 		*pFloat = -3.14159;
-		ASSERT_TRUE(fTable.Insert());
+		fTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// And update them using the key fields
@@ -2497,14 +2497,14 @@ namespace exodbc
 		*pChar = s100;
 		*pVarchar_10 = s100;
 		*pChar_10 = s100;
-		EXPECT_TRUE(cTable.Insert());
+		cTable.Insert();
 		std::wstring s101 = L"abcde12345";
 		*pId = (SQLINTEGER)101;
 		*pVarchar = s101;
 		*pChar = s101;
 		*pVarchar_10 = s101;
 		*pChar_10 = s101;
-		EXPECT_TRUE(cTable.Insert());
+		cTable.Insert();
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Select and check
@@ -2562,14 +2562,14 @@ namespace exodbc
 		*pChar = s100;
 		*pVarchar_10 = s100;
 		*pChar_10 = s100;
-		EXPECT_TRUE(cTable.Insert());
+		cTable.Insert();
 		std::string s101 = "abcde12345";
 		*pId = (SQLINTEGER)101;
 		*pVarchar = s101;
 		*pChar = s101;
 		*pVarchar_10 = s101;
 		*pChar_10 = s101;
-		EXPECT_TRUE(cTable.Insert());
+		cTable.Insert();
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Select and check
@@ -2643,11 +2643,11 @@ namespace exodbc
 		*pId = (SQLINTEGER)100;
 		pBlob->SetBinaryValue(abc, sizeof(empty));
 		pVarBlob_20->SetNull();
-		ASSERT_TRUE(bTable.Insert());
+		bTable.Insert();
 		*pId = (SQLINTEGER)101;
 		pBlob->SetNull();
 		pVarBlob_20->SetBinaryValue(abc_ff, sizeof(abc_ff));
-		ASSERT_TRUE(bTable.Insert());
+		bTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Update 
@@ -2707,7 +2707,7 @@ namespace exodbc
 			*pSmallInt = (SQLSMALLINT)i;
 			*pInt = (SQLINTEGER)i;
 			*pBigInt = (SQLBIGINT)i;
-			ASSERT_TRUE(iTable.Insert());
+			ASSERT_NO_THROW(iTable.Insert());
 		}
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
