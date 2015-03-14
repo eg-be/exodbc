@@ -543,13 +543,13 @@ namespace exodbc
 		}
 
 		// always close the statement, we expect it to be open
-		exASSERT(CloseStmtHandle(m_hStmtCount, FailIfNotOpen));
+		CloseStmtHandle(m_hStmtCount, FailIfNotOpen);
 
 		return count;
 	}
 
 
-	bool Table::Select(const std::wstring& whereStatement /* = L"" */)
+	void Table::Select(const std::wstring& whereStatement /* = L"" */)
 	{
 		exASSERT(IsOpen());
 
@@ -563,11 +563,11 @@ namespace exodbc
 			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % m_fieldsStatement % m_tableInfo.GetSqlName()).str();
 		}
 
-		return SelectBySqlStmt(sqlstmt);
+		SelectBySqlStmt(sqlstmt);
 	}
 
 
-	bool Table::SelectBySqlStmt(const std::wstring& sqlStmt)
+	void Table::SelectBySqlStmt(const std::wstring& sqlStmt)
 	{
 		exASSERT(IsOpen());
 		exASSERT(!sqlStmt.empty());
@@ -575,22 +575,13 @@ namespace exodbc
 		if (IsSelectOpen())
 		{
 			// We are not allowed to fail here, someone might have Rollbacked a transaction and our statement is no longer open
-			exASSERT(CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen));
+			CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
 			m_selectQueryOpen = false;
 		}
-		exDEBUG(EnsureStmtIsClosed(m_hStmtSelect, m_pDb->Dbms()));
 
 		SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
-		if (ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLExecDirect);
-		}
-		else
-		{
-			m_selectQueryOpen = true;
-		}
-
-		return m_selectQueryOpen;
+		THROW_IFN_SUCCESS(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtSelect);
+		m_selectQueryOpen = true;
 	}
 
 
@@ -612,10 +603,10 @@ namespace exodbc
 	}
 
 	
-	bool Table::SelectClose()
+	void Table::SelectClose()
 	{
-		m_selectQueryOpen = ! CloseStmtHandle(m_hStmtSelect, FailIfNotOpen);
-		return ! m_selectQueryOpen;
+		CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
+		m_selectQueryOpen = false;
 	}
 
 

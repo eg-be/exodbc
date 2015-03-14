@@ -325,19 +325,19 @@ namespace exodbc
 		/*!
 		* \brief	Executes a 'SELECT col1, col2, .., colN' for the Table using the passed WHERE clause.
 		* \detailed	The SELECT-Query is built using the column information available to this Table.
-		*			It does not use the '*'.
+		*			It does not use the '*'. Only bound ColumnBuffers names are included in the statement.
 		*			If successful, a Select-Query is open. You can iterate the records
 		*			using SelectNext() to access the values of the records.
 		*			The cursor is positioned before the first records, so you must call
 		*			SelectNext() to access the first record.
 		*			If whereStatement is empty, no WHERE clause is added.
-		*			If a statement is open, the statement is closed.
+		*			If a select statement is open, the statement is closed first.
 		* \param	whereStatement Do not include 'WHERE' in the passed where clause
 		* \see		SelectNext()
 		* \see		SelectClose();
-		* \return	True if successful
+		* \throw	Exception If failed.
 		*/
-		bool		Select(const std::wstring& whereStatement = L"");
+		void		Select(const std::wstring& whereStatement = L"");
 
 
 		/*!
@@ -347,13 +347,14 @@ namespace exodbc
 		*			using SelectNext() to access the values of the records.
 		*			The cursor is positioned before the first records, so you must call
 		*			SelectNext() to access the first record.
-		*			If a statement is open, the statement is closed.
-		* \param	sqlStmt Must be a full SQL statement like 'SELECT foo FROM A'
+		*			If a select statement is open, the statement is closed first.
+		* \param	sqlStmt Must be a full SQL statement like 'SELECT foo FROM A WHERE x > 3'
 		* \see		SelectNext()
 		* \see		SelectClose();
 		* \return	True if successful
+		* \throw	Exception If failed.
 		*/
-		bool		SelectBySqlStmt(const std::wstring& sqlStmt);
+		void		SelectBySqlStmt(const std::wstring& sqlStmt);
 
 
 		/*!
@@ -369,10 +370,11 @@ namespace exodbc
 
 		/*!
 		* \brief	Closes an eventually open Select-Query.
+		* \detailed	This function does not fail if no select statement was open.
 		* \see		Select()
-		* \return	True if a statement was open and closed successfully, false otherwise.
+		* \throw	Exception
 		*/
-		bool		SelectClose();
+		void		SelectClose();
 
 
 		/*!
