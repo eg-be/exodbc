@@ -85,7 +85,7 @@ namespace exodbc
 	{
 	private:
 		// Prevent copies. We would mess up the env-handle.
-		Environment(const Environment& other) { exNOT_IMPL; };
+		Environment(const Environment& other) { exASSERT_MSG(false, L"Copy Constructor not Implemented"); };
 
 	public:
 		/*!

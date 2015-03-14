@@ -97,19 +97,6 @@ do {																\
 #define exDEBUG(cond)
 #endif
 
-// exFAIL must become something that will always trigger something, not depending on any flags
-#define exFAIL_MSG(msg)												\
-	do {															\
-	BOOST_LOG_TRIVIAL(error) << msg;								\
-	} while ( 0 )
-
-#define exNOT_IMPL	\
-	do {			\
-		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L" (" << __LINE__ << L"): Not Implemented";	\
-		exASSERT_MSG(false, L"Not Implemented");	\
-	} while( 0 )	
-
-
 namespace exodbc
 {
 
