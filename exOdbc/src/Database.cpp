@@ -914,7 +914,7 @@ namespace exodbc
 			{
 
 				STablePrivilegesInfo priv;
-				GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
+				GetDataEx(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
 				GetDataEx(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
 				GetDataEx(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
 				GetDataEx(m_hstmt, 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);

@@ -675,21 +675,6 @@ namespace exodbc
 	}
 
 
-	bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
-	{
-		try
-		{
-			GetDataEx(hStmt, colOrParamNr, targetType, pTargetValue, bufferLen, strLenOrIndPtr, pIsNull, nullTerminate);
-		}
-		catch (Exception ex)
-		{
-			LOG_ERROR(ex.ToString());
-			return false;
-		}
-		return true;
-	}
-
-
 	void GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
 	{
 		exASSERT(hStmt != SQL_NULL_HSTMT);
@@ -729,21 +714,6 @@ namespace exodbc
 	}
 
 
-	bool GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
-	{
-		try
-		{
-			GetDataEx(hStmt, colOrParamNr, maxNrOfChars, value, pIsNull);
-		}
-		catch (Exception ex)
-		{
-			LOG_ERROR(ex.ToString());
-			return false;
-		}
-		return true;
-	}
-
-
 	void GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
 	{
 		value = L"";
@@ -768,24 +738,6 @@ namespace exodbc
 			*pIsNull = isNull;
 
 		delete[] buffer;
-	}
-
-
-	bool GetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLINTEGER& value)
-	{
-		exASSERT(hDesc != SQL_NULL_HDESC);
-		exASSERT(recordNumber > 0);
-		value = 0;
-		SQLRETURN ret = SQLGetDescField(hDesc, recordNumber, descriptionField, &value, NULL, NULL);
-		if ( ! SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_DESC(hDesc, ret, SQLGetDescField);
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_INFO_DESC(hDesc, ret, SQLGetDescField);
-		}
-		return SQL_SUCCEEDED(ret);
 	}
 
 
