@@ -610,22 +610,13 @@ namespace exodbc
 	}
 
 
-	bool Table::Insert()
+	void Table::Insert()
 	{
 		exASSERT(IsOpen());
 		exASSERT(m_openMode == READ_WRITE);
 		exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
 		SQLRETURN ret = SQLExecute(m_hStmtInsert);
-		if (!SQL_SUCCEEDED(ret))
-		{
-			LOG_ERROR_STMT(m_hStmtInsert, ret, SQLExecute);
-		}
-		if (SQL_SUCCESS_WITH_INFO == ret)
-		{
-			LOG_WARNING_STMT(m_hStmtInsert, ret, SQLExecute);
-		}
-
-		return SQL_SUCCEEDED(ret);
+		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtInsert);
 	}
 
 

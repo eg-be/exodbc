@@ -404,9 +404,9 @@ namespace exodbc
 		*			Fails if the table has not been opened using READ_WRITE.
 		*			This will not commit the transaction.
 		* \see		Database::CommitTrans()
-		* \return	True on success.
+		* \throw	Exception on failure.
 		*/
-		bool		Insert();
+		void		Insert();
 
 
 		/*!
