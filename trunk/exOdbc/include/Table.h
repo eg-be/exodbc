@@ -423,9 +423,10 @@ namespace exodbc
 		* \param	failOnNoData If set to true the function will return false if the result of
 		*			the DELETE is SQL_NO_DATA.
 		* \see		Database::CommitTrans()
-		* \return	True on success.
+		* \throw	Exception on failure, or depending on failOnNoData, a SqlResultException if the 
+		*			call to SQLExecute fails with SQL_NO_DATA.
 		*/
-		bool		Delete(bool failOnNoData = true);
+		void		Delete(bool failOnNoData = true);
 
 
 		/*!
@@ -438,12 +439,14 @@ namespace exodbc
 		*			Fails if where is empty.
 		*			This will not commit the transaction.
 		* \param	where WHERE clause to be used. Do not include 'WHERE', the Table will add this.
+		*			Not allowed to be empty.
 		* \param	failOnNoData If set to true the function will return false if the result of
 		*			the DELETE is SQL_NO_DATA.
 		* \see		Database::CommitTrans()
-		* \return	True on success.
+		* \throw	Exception on failure, or depending on failOnNoData, a SqlResultException if the
+		*			call to SQLExecute fails with SQL_NO_DATA.
 		*/
-		bool		Delete(const std::wstring& where, bool failOnNoData = true);
+		void		Delete(const std::wstring& where, bool failOnNoData = true);
 
 
 		/*!
