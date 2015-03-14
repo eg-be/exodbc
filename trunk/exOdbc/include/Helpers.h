@@ -388,7 +388,7 @@ namespace exodbc
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
-	extern EXODBCAPI void		GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
+	extern EXODBCAPI void		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
 
 
 	/*!
@@ -404,7 +404,7 @@ namespace exodbc
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
-	extern EXODBCAPI void		GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull = NULL);
+	extern EXODBCAPI void		GetData(SQLHSTMT hStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull = NULL);
 
 
 	/*!

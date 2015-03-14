@@ -416,7 +416,7 @@ namespace exodbc
 			SQLLEN cb;
 			while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)   // Table Information
 			{
-				GetDataEx(m_hstmt, colNr, SQL_C_WCHAR, buffer, charLen * sizeof(SQLWCHAR), &cb, NULL, true);
+				GetData(m_hstmt, colNr, SQL_C_WCHAR, buffer, charLen * sizeof(SQLWCHAR), &cb, NULL, true);
 				results.push_back(buffer);
 			}
 
@@ -491,31 +491,31 @@ namespace exodbc
 			SSqlTypeInfo info;
 
 			cb = 0;
-			GetDataEx(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
+			GetData(m_hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL, true);
 			info.m_typeName = typeName;
 
-			GetDataEx(m_hstmt, 2, SQL_C_SSHORT, &info.m_sqlType, sizeof(info.m_sqlType), &cb, NULL);
-			GetDataEx(m_hstmt, 3, SQL_C_SLONG, &info.m_columnSize, sizeof(info.m_columnSize), &cb, &info.m_columnSizeIsNull);
-			GetDataEx(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.m_literalPrefixIsNull, true);
+			GetData(m_hstmt, 2, SQL_C_SSHORT, &info.m_sqlType, sizeof(info.m_sqlType), &cb, NULL);
+			GetData(m_hstmt, 3, SQL_C_SLONG, &info.m_columnSize, sizeof(info.m_columnSize), &cb, &info.m_columnSizeIsNull);
+			GetData(m_hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.m_literalPrefixIsNull, true);
 			info.m_literalPrefix = literalPrefix;
-			GetDataEx(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.m_literalSuffixIsNull, true);
+			GetData(m_hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.m_literalSuffixIsNull, true);
 			info.m_literalSuffix = literalSuffix;
-			GetDataEx(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.m_createParamsIsNull, true);
+			GetData(m_hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.m_createParamsIsNull, true);
 			info.m_createParams = createParams;
-			GetDataEx(m_hstmt, 7, SQL_C_SSHORT, &info.m_nullable, sizeof(info.m_nullable), &cb, NULL);
-			GetDataEx(m_hstmt, 8, SQL_C_SSHORT, &info.m_caseSensitive, sizeof(info.m_caseSensitive), &cb, NULL);
-			GetDataEx(m_hstmt, 9, SQL_C_SSHORT, &info.m_searchable, sizeof(info.m_searchable), &cb, NULL);
-			GetDataEx(m_hstmt, 10, SQL_C_SSHORT, &info.m_unsigned, sizeof(info.m_unsigned), &cb, &info.m_unsignedIsNull);
-			GetDataEx(m_hstmt, 11, SQL_C_SSHORT, &info.m_fixedPrecisionScale, sizeof(info.m_fixedPrecisionScale), &cb, NULL);
-			GetDataEx(m_hstmt, 12, SQL_C_SSHORT, &info.m_autoUniqueValue, sizeof(info.m_autoUniqueValue), &cb, &info.m_autoUniqueValueIsNull);
-			GetDataEx(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.m_localTypeNameIsNull, true);
+			GetData(m_hstmt, 7, SQL_C_SSHORT, &info.m_nullable, sizeof(info.m_nullable), &cb, NULL);
+			GetData(m_hstmt, 8, SQL_C_SSHORT, &info.m_caseSensitive, sizeof(info.m_caseSensitive), &cb, NULL);
+			GetData(m_hstmt, 9, SQL_C_SSHORT, &info.m_searchable, sizeof(info.m_searchable), &cb, NULL);
+			GetData(m_hstmt, 10, SQL_C_SSHORT, &info.m_unsigned, sizeof(info.m_unsigned), &cb, &info.m_unsignedIsNull);
+			GetData(m_hstmt, 11, SQL_C_SSHORT, &info.m_fixedPrecisionScale, sizeof(info.m_fixedPrecisionScale), &cb, NULL);
+			GetData(m_hstmt, 12, SQL_C_SSHORT, &info.m_autoUniqueValue, sizeof(info.m_autoUniqueValue), &cb, &info.m_autoUniqueValueIsNull);
+			GetData(m_hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.m_localTypeNameIsNull, true);
 			info.m_localTypeName = localTypeName;
-			GetDataEx(m_hstmt, 14, SQL_C_SSHORT, &info.m_minimumScale, sizeof(info.m_minimumScale), &cb, &info.m_minimumScaleIsNull);
-			GetDataEx(m_hstmt, 15, SQL_C_SSHORT, &info.m_maximumScale, sizeof(info.m_maximumScale), &cb, &info.m_maximumScaleIsNull);
-			GetDataEx(m_hstmt, 16, SQL_C_SSHORT, &info.m_sqlDataType, sizeof(info.m_sqlDataType), &cb, NULL);
-			GetDataEx(m_hstmt, 17, SQL_C_SSHORT, &info.m_sqlDateTimeSub, sizeof(info.m_sqlDateTimeSub), &cb, &info.m_sqlDateTimeSubIsNull);
-			GetDataEx(m_hstmt, 18, SQL_C_SSHORT, &info.m_numPrecRadix, sizeof(info.m_numPrecRadix), &cb, &info.m_numPrecRadixIsNull);
-			GetDataEx(m_hstmt, 19, SQL_C_SSHORT, &info.m_intervalPrecision, sizeof(info.m_intervalPrecision), &cb, &info.m_intervalPrecisionIsNull);
+			GetData(m_hstmt, 14, SQL_C_SSHORT, &info.m_minimumScale, sizeof(info.m_minimumScale), &cb, &info.m_minimumScaleIsNull);
+			GetData(m_hstmt, 15, SQL_C_SSHORT, &info.m_maximumScale, sizeof(info.m_maximumScale), &cb, &info.m_maximumScaleIsNull);
+			GetData(m_hstmt, 16, SQL_C_SSHORT, &info.m_sqlDataType, sizeof(info.m_sqlDataType), &cb, NULL);
+			GetData(m_hstmt, 17, SQL_C_SSHORT, &info.m_sqlDateTimeSub, sizeof(info.m_sqlDateTimeSub), &cb, &info.m_sqlDateTimeSubIsNull);
+			GetData(m_hstmt, 18, SQL_C_SSHORT, &info.m_numPrecRadix, sizeof(info.m_numPrecRadix), &cb, &info.m_numPrecRadixIsNull);
+			GetData(m_hstmt, 19, SQL_C_SSHORT, &info.m_intervalPrecision, sizeof(info.m_intervalPrecision), &cb, &info.m_intervalPrecisionIsNull);
 
 			types.push_back(info);
 
@@ -712,11 +712,11 @@ namespace exodbc
 			{
 				STableInfo table;
 				SQLLEN cb;
-				GetDataEx(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isCatalogNull, true);
-				GetDataEx(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isSchemaNull, true);
-				GetDataEx(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen() * sizeof(SQLWCHAR), &cb, NULL, true);
-				GetDataEx(m_hstmt, 4, SQL_C_WCHAR, buffTableType, DB_MAX_TABLE_TYPE_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
-				GetDataEx(m_hstmt, 5, SQL_C_WCHAR, buffTableRemarks, DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
+				GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog, m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isCatalogNull, true);
+				GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema, m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isSchemaNull, true);
+				GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName, m_dbInf.GetMaxTableNameLen() * sizeof(SQLWCHAR), &cb, NULL, true);
+				GetData(m_hstmt, 4, SQL_C_WCHAR, buffTableType, DB_MAX_TABLE_TYPE_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
+				GetData(m_hstmt, 5, SQL_C_WCHAR, buffTableRemarks, DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLWCHAR), &cb, NULL, true);
 
 				if (!table.m_isCatalogNull)
 					table.m_catalogName = buffCatalog;
@@ -846,12 +846,12 @@ namespace exodbc
 		{
 			SQLLEN cb;
 			STablePrimaryKeyInfo pk;
-			GetDataEx(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), pk.m_catalogName, &pk.m_isCatalogNull);
-			GetDataEx(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), pk.m_schemaName, &pk.m_isSchemaNull);
-			GetDataEx(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), pk.m_tableName);
-			GetDataEx(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), pk.m_columnName);
-			GetDataEx(m_hstmt, 5, SQL_C_SHORT, &pk.m_keySequence, sizeof(pk.m_keySequence), &cb, NULL);
-			GetDataEx(m_hstmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, pk.m_primaryKeyName, &pk.m_isPrimaryKeyNameNull);
+			GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), pk.m_catalogName, &pk.m_isCatalogNull);
+			GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), pk.m_schemaName, &pk.m_isSchemaNull);
+			GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), pk.m_tableName);
+			GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), pk.m_columnName);
+			GetData(m_hstmt, 5, SQL_C_SHORT, &pk.m_keySequence, sizeof(pk.m_keySequence), &cb, NULL);
+			GetData(m_hstmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, pk.m_primaryKeyName, &pk.m_isPrimaryKeyNameNull);
 
 			primaryKeys.push_back(pk);
 		}
@@ -914,13 +914,13 @@ namespace exodbc
 			{
 
 				STablePrivilegesInfo priv;
-				GetDataEx(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
-				GetDataEx(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
-				GetDataEx(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
-				GetDataEx(m_hstmt, 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);
-				GetDataEx(m_hstmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
-				GetDataEx(m_hstmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
-				GetDataEx(m_hstmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
+				GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
+				GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
+				GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
+				GetData(m_hstmt, 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);
+				GetData(m_hstmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
+				GetData(m_hstmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
+				GetData(m_hstmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
 
 				privileges.push_back(priv);
 			}
@@ -1008,24 +1008,24 @@ namespace exodbc
 
 				SQLLEN cb;
 				SColumnInfo colInfo;
-				GetDataEx(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
-				GetDataEx(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
-				GetDataEx(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);
-				GetDataEx(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), colInfo.m_columnName);
-				GetDataEx(m_hstmt, 5, SQL_C_SSHORT, &colInfo.m_sqlType, sizeof(colInfo.m_sqlType), &cb, NULL);
-				GetDataEx(m_hstmt, 6, DB_MAX_TYPE_NAME_LEN, colInfo.m_typeName);
-				GetDataEx(m_hstmt, 7, SQL_C_SLONG, &colInfo.m_columnSize, sizeof(colInfo.m_columnSize), &cb, &colInfo.m_isColumnSizeNull);
-				GetDataEx(m_hstmt, 8, SQL_C_SLONG, &colInfo.m_bufferSize, sizeof(colInfo.m_bufferSize), &cb, &colInfo.m_isBufferSizeNull);
-				GetDataEx(m_hstmt, 9, SQL_C_SSHORT, &colInfo.m_decimalDigits, sizeof(colInfo.m_decimalDigits), &cb, &colInfo.m_isDecimalDigitsNull);
-				GetDataEx(m_hstmt, 10, SQL_C_SSHORT, &colInfo.m_numPrecRadix, sizeof(colInfo.m_numPrecRadix), &cb, &colInfo.m_isNumPrecRadixNull);
-				GetDataEx(m_hstmt, 11, SQL_C_SSHORT, &colInfo.m_nullable, sizeof(colInfo.m_nullable), &cb, NULL);
-				GetDataEx(m_hstmt, 12, DB_MAX_COLUMN_REMARKS_LEN, colInfo.m_remarks, &colInfo.m_isRemarksNull);
-				GetDataEx(m_hstmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, colInfo.m_defaultValue, &colInfo.m_isDefaultValueNull);
-				GetDataEx(m_hstmt, 14, SQL_C_SSHORT, &colInfo.m_sqlDataType, sizeof(colInfo.m_sqlDataType), &cb, NULL);
-				GetDataEx(m_hstmt, 15, SQL_C_SSHORT, &colInfo.m_sqlDatetimeSub, sizeof(colInfo.m_sqlDatetimeSub), &cb, &colInfo.m_isDatetimeSubNull);
-				GetDataEx(m_hstmt, 16, SQL_C_SLONG, &colInfo.m_charOctetLength, sizeof(colInfo.m_charOctetLength), &cb, &colInfo.m_isCharOctetLengthNull);
-				GetDataEx(m_hstmt, 17, SQL_C_SLONG, &colInfo.m_ordinalPosition, sizeof(colInfo.m_ordinalPosition), &cb, NULL);
-				GetDataEx(m_hstmt, 18, DB_MAX_YES_NO_LEN, colInfo.m_isNullable, &colInfo.m_isIsNullableNull);
+				GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
+				GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
+				GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);
+				GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), colInfo.m_columnName);
+				GetData(m_hstmt, 5, SQL_C_SSHORT, &colInfo.m_sqlType, sizeof(colInfo.m_sqlType), &cb, NULL);
+				GetData(m_hstmt, 6, DB_MAX_TYPE_NAME_LEN, colInfo.m_typeName);
+				GetData(m_hstmt, 7, SQL_C_SLONG, &colInfo.m_columnSize, sizeof(colInfo.m_columnSize), &cb, &colInfo.m_isColumnSizeNull);
+				GetData(m_hstmt, 8, SQL_C_SLONG, &colInfo.m_bufferSize, sizeof(colInfo.m_bufferSize), &cb, &colInfo.m_isBufferSizeNull);
+				GetData(m_hstmt, 9, SQL_C_SSHORT, &colInfo.m_decimalDigits, sizeof(colInfo.m_decimalDigits), &cb, &colInfo.m_isDecimalDigitsNull);
+				GetData(m_hstmt, 10, SQL_C_SSHORT, &colInfo.m_numPrecRadix, sizeof(colInfo.m_numPrecRadix), &cb, &colInfo.m_isNumPrecRadixNull);
+				GetData(m_hstmt, 11, SQL_C_SSHORT, &colInfo.m_nullable, sizeof(colInfo.m_nullable), &cb, NULL);
+				GetData(m_hstmt, 12, DB_MAX_COLUMN_REMARKS_LEN, colInfo.m_remarks, &colInfo.m_isRemarksNull);
+				GetData(m_hstmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, colInfo.m_defaultValue, &colInfo.m_isDefaultValueNull);
+				GetData(m_hstmt, 14, SQL_C_SSHORT, &colInfo.m_sqlDataType, sizeof(colInfo.m_sqlDataType), &cb, NULL);
+				GetData(m_hstmt, 15, SQL_C_SSHORT, &colInfo.m_sqlDatetimeSub, sizeof(colInfo.m_sqlDatetimeSub), &cb, &colInfo.m_isDatetimeSubNull);
+				GetData(m_hstmt, 16, SQL_C_SLONG, &colInfo.m_charOctetLength, sizeof(colInfo.m_charOctetLength), &cb, &colInfo.m_isCharOctetLengthNull);
+				GetData(m_hstmt, 17, SQL_C_SLONG, &colInfo.m_ordinalPosition, sizeof(colInfo.m_ordinalPosition), &cb, NULL);
+				GetData(m_hstmt, 18, DB_MAX_YES_NO_LEN, colInfo.m_isNullable, &colInfo.m_isIsNullableNull);
 
 				if (++m_lastIndex != colInfo.m_ordinalPosition)
 				{
