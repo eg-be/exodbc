@@ -675,7 +675,7 @@ namespace exodbc
 	}
 
 
-	void GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
+	void GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
 	{
 		exASSERT(hStmt != SQL_NULL_HSTMT);
 		if(nullTerminate)
@@ -714,7 +714,7 @@ namespace exodbc
 	}
 
 
-	void GetDataEx(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
+	void GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
 	{
 		value = L"";
 		wchar_t* buffer = new wchar_t[maxNrOfChars + 1];
@@ -723,7 +723,7 @@ namespace exodbc
 		bool isNull = false;
 		try
 		{
-			GetDataEx(hStmt, colOrParamNr, SQL_C_WCHAR, buffer, buffSize, &cb, &isNull, true);
+			GetData(hStmt, colOrParamNr, SQL_C_WCHAR, buffer, buffSize, &cb, &isNull, true);
 		}
 		catch (Exception ex)
 		{

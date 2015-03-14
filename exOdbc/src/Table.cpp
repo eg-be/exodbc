@@ -523,7 +523,7 @@ namespace exodbc
 
 			bool isNull = false;
 			SQLINTEGER cb = 0;
-			GetDataEx(m_hStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
+			GetData(m_hStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
 			if (isNull)
 			{
 				Exception ex(boost::str(boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt));
