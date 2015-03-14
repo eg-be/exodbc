@@ -510,6 +510,7 @@ namespace exodbc
 		*			for accessing binary data, to avoid to copy the binary buffer.
 		*			Do NOT delete the pointer returned by this operator, the ColumnBuffer will.
 		* \return	Const SQLCHAR* to the buffer-content.
+		* \throw	Exception
 		* \see		TimestampVisitor
 		*/
 		operator const SQLCHAR*() const;

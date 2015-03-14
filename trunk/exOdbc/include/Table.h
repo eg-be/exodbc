@@ -495,9 +495,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] smallInt Reference to variable to copy value to.
-		* \return	True if smallInt has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const;
 
 
 		/*!
@@ -505,9 +505,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] i Reference to variable to copy value to.
-		* \return	True if i has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLINTEGER& i) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, SQLINTEGER& i) const;
 
 
 		/*!
@@ -515,9 +515,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] bigInt Reference to variable to copy value to.
-		* \return	True if bigInt has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLBIGINT& bigInt) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, SQLBIGINT& bigInt) const;
 
 
 		/*!
@@ -525,9 +525,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] str Reference to variable to copy value to.
-		* \return	True if str has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const;
 
 
 		/*!
@@ -535,9 +535,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] str Reference to variable to copy value to.
-		* \return	True if str has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, std::string& str) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, std::string& str) const;
 
 
 		/*!
@@ -545,9 +545,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] d Reference to variable to copy value to.
-		* \return	True if d has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const;
 
 
 		/*!
@@ -555,9 +555,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] date Reference to variable to copy value to.
-		* \return	True if date has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const;
 
 
 		/*!
@@ -565,9 +565,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] time Reference to variable to copy value to.
-		* \return	True if time has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& time) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& time) const;
 		
 		
 		/*!
@@ -575,9 +575,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] timestamp Reference to variable to copy value to.
-		* \return	True if timestamp has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& timestamp) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& timestamp) const;
 
 
 #if HAVE_MSODBCSQL_H
@@ -587,9 +587,9 @@ namespace exodbc
 		*			This function is only available if HAVE_MSODBCSQL_H is defined to 1
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] time2 Reference to variable to copy value to.
-		* \return	True if time2 has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const;
 #endif
 
 
@@ -598,9 +598,9 @@ namespace exodbc
 		* \detailed	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] numeric Reference to variable to copy value to.
-		* \return	True if numeric has been filled with value. False else.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		bool		GetColumnValue(SQLSMALLINT columnIndex, SQL_NUMERIC_STRUCT& numeric) const;
+		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_NUMERIC_STRUCT& numeric) const;
 
 
 		/*!
@@ -622,17 +622,17 @@ namespace exodbc
 		* \param [in,out] bufferSize Reference to size of buffer, will be set on success to match
 		*			length of buffer pointed to by pBuffer.
 		* \param [in,out] lengthIndicator Will be set to the length Indicator value of the ColumnBuffer.
-		* \return	True if pBuffer points to buffer and bufferSize contains value of buffer.
+		* throw	Exception If the column value is NULL, or columnIndex is inavlid
 		*/
-		bool		GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const;
+		void		GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const;
 
 
 		/*!
 		* \brief	Return a defined ColumnBuffer or NULL.
 		* \detailed	Searches the internal map of ColumnBuffers for a ColumnBuffer with
 		*			the given columnIndex (zero based).
-		*			Uses exDEBUG.
-		* \return	ColumnBuffer or NULL if none found.
+		* \return	ColumnBuffer.
+		* \throw	Exception
 		*/
 		ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
 
