@@ -644,26 +644,18 @@ namespace exodbc
 		THROW_IFN_SUCCEEDED_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, hDbc, (boost::wformat(L"GetInfo for fInfoType %d failed") % fInfoType).str());
 
 		// According to the doc SQLGetInfo will always return byte-size. Therefore:
-		exASSERT((bufferSize % sizeof(wchar_t)) == 0);
+		exASSERT((bufferSize % sizeof(SQLWCHAR)) == 0);
 
 		// Allocate buffer, add one for terminating 0 char.
-		SQLSMALLINT charSize = (bufferSize / sizeof(wchar_t)) + 1;
-		bufferSize = charSize * sizeof(wchar_t);
-		wchar_t* buff = new wchar_t[charSize];
+		SQLSMALLINT charSize = (bufferSize / sizeof(SQLWCHAR)) + 1;
+		bufferSize = charSize * sizeof(SQLWCHAR);
+		std::unique_ptr<SQLWCHAR[]> buff(new SQLWCHAR[charSize]);
 		buff[0] = 0;
 		SQLSMALLINT cb;
 
-		try
-		{
-			GetInfo(hDbc, fInfoType, (SQLPOINTER)buff, bufferSize, &cb);
-		}
-		catch (Exception e)
-		{
-			delete[] buff;
-			throw e;
-		}
-		sValue = buff;
-		delete[] buff;
+		GetInfo(hDbc, fInfoType, (SQLPOINTER)buff.get(), bufferSize, &cb);
+
+		sValue = buff.get();
 	}
 
 
@@ -717,27 +709,19 @@ namespace exodbc
 	void GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
 	{
 		value = L"";
-		wchar_t* buffer = new wchar_t[maxNrOfChars + 1];
+		std::unique_ptr<SQLWCHAR[]> buffer(new SQLWCHAR[maxNrOfChars + 1]);
 		size_t buffSize = sizeof(wchar_t) * (maxNrOfChars + 1);
 		SQLLEN cb;
 		bool isNull = false;
-		try
-		{
-			GetData(hStmt, colOrParamNr, SQL_C_WCHAR, buffer, buffSize, &cb, &isNull, true);
-		}
-		catch (Exception ex)
-		{
-			delete[] buffer;
-			throw ex;
-		}
+
+		GetData(hStmt, colOrParamNr, SQL_C_WCHAR, buffer.get(), buffSize, &cb, &isNull, true);
+
 		if(!isNull)
 		{
-			value = buffer;
+			value = buffer.get();
 		}
 		if(pIsNull)
 			*pIsNull = isNull;
-
-		delete[] buffer;
 	}
 
 
