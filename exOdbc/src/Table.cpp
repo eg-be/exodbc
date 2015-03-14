@@ -408,19 +408,15 @@ namespace exodbc
 
 	ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnIndex) const
 	{
-		exDEBUG(IsOpen());
-		exDEBUG(columnIndex < m_numCols);
-		exDEBUG(m_columnBuffers.find(columnIndex) != m_columnBuffers.end());
-
-		if (!IsOpen() || columnIndex >= m_numCols)
-		{
-			return NULL;
-		}
+		exASSERT(IsOpen());
+		exASSERT(columnIndex < m_numCols);
 
 		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.find(columnIndex);
 		if (it == m_columnBuffers.end())
 		{
-			return NULL;
+			IllegalArgumentException ex(boost::str(boost::wformat(L"ColumnIndex %d is not a zero-based bound ColumnBuffer") % columnIndex));
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
 
 		return it->second;
@@ -720,74 +716,35 @@ namespace exodbc
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			smallInt = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		exASSERT(!pBuff->IsNull());
+		smallInt = *pBuff;
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQLINTEGER& i) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLINTEGER& i) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			i = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		exASSERT(!pBuff->IsNull());
+		i = *pBuff;
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQLBIGINT& bigInt) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLBIGINT& bigInt) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			bigInt = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		exASSERT(!pBuff->IsNull());
+		bigInt = *pBuff;
 	}
 
 	
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			str = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
+		exASSERT(!pBuff->IsNull());
+		str = *pBuff;
 
 		if (TestCharTrimOption(TRIM_LEFT))
 		{
@@ -797,25 +754,15 @@ namespace exodbc
 		{
 			boost::trim_right(str);
 		}
-
-		return true;
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnNumber, std::string& str) const
+	void Table::GetColumnValue(SQLSMALLINT columnNumber, std::string& str) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
-		if (!pBuff || pBuff->IsNull())
-			return false;
+		exASSERT(!pBuff->IsNull());
 
-		try
-		{
-			str = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
+		str = *pBuff;
 
 		if (TestCharTrimOption(TRIM_LEFT))
 		{
@@ -825,147 +772,74 @@ namespace exodbc
 		{
 			boost::trim_right(str);
 		}
-
-		return true;
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			d = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		exASSERT(!pBuff->IsNull());
+		d = *pBuff;
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			date = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		exASSERT(!pBuff->IsNull());
+		date = *pBuff;
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& time) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& time) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			time = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		exASSERT(!pBuff->IsNull());
+		time = *pBuff;
 	}
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& timestamp) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& timestamp) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			timestamp = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		exASSERT(!pBuff->IsNull());
+		timestamp = *pBuff;
 	}
 
 
 #if HAVE_MSODBCSQL_H
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			time2 = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		exASSERT(!pBuff->IsNull());
+		time2 = *pBuff;
 	}
 #endif
 
 
-	bool Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_NUMERIC_STRUCT& numeric) const
+	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_NUMERIC_STRUCT& numeric) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (!pBuff || pBuff->IsNull())
-			return false;
-
-		try
-		{
-			numeric = *pBuff;
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		exASSERT(!pBuff->IsNull());
+		numeric = *pBuff;
 	}
 
 
 	bool Table::IsColumnNull(SQLSMALLINT columnIndex) const
 	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(pBuff);
-		
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);		
 		return pBuff->IsNull();
 	}
 
 
-	bool Table::GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const
+	void Table::GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const
 	{
 		const ColumnBuffer* pColumnBuff = GetColumnBuffer(columnIndex);
-		if (!pColumnBuff || pColumnBuff->IsNull())
-			return false;
+		exASSERT(!pColumnBuff->IsNull());
 
-		try
-		{
-			pBuffer = *pColumnBuff;
-			bufferSize = pColumnBuff->GetBufferSize();
-			lengthIndicator = pColumnBuff->GetCb();
-		}
-		catch (CastException ex)
-		{
-			return false;
-		}
-		return true;
+		pBuffer = *pColumnBuff;
+		bufferSize = pColumnBuff->GetBufferSize();
+		lengthIndicator = pColumnBuff->GetCb();
 	}
 
 
