@@ -450,7 +450,7 @@ namespace exodbc
 	// List the well-known SQL-State we need in the code
 	namespace SqlState
 	{
-		const wchar_t INVALID_CURSOR_STATE[6] = L"24000";
+		const SQLWCHAR INVALID_CURSOR_STATE[6] = L"24000";
 	}
 
 

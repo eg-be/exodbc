@@ -62,7 +62,7 @@ namespace exodbc
 		SDataSource() { Initialize(); };
 
 		void Initialize() { Dsn[0] = 0; };
-		wchar_t Dsn[SQL_MAX_DSN_LENGTH  + 1];
+		SQLWCHAR Dsn[SQL_MAX_DSN_LENGTH  + 1];
 
 		std::wstring m_description;
 	};
@@ -176,15 +176,15 @@ namespace exodbc
 		const SQLHENV&		GetHenv() const		{ exASSERT(HasHenv());  return m_henv; };
 
 		// all of these will be removed
-		const wchar_t*	GetDsn() const		{ return m_dsn; };
+		const SQLWCHAR*	GetDsn() const		{ return m_dsn; };
 
-		const wchar_t*	GetUid() const		{ return m_uid; };
-		const wchar_t*	GetUserID() const	{ return m_uid; }
+		const SQLWCHAR*	GetUid() const		{ return m_uid; };
+		const SQLWCHAR*	GetUserID() const	{ return m_uid; }
 
-		const wchar_t*	GetAuthStr() const	{ return m_authStr; }
-		const wchar_t*	GetPassword() const	{ return m_authStr; }
+		const SQLWCHAR*	GetAuthStr() const	{ return m_authStr; }
+		const SQLWCHAR*	GetPassword() const	{ return m_authStr; }
 
-		const wchar_t*	GetConnectionStr() const { return m_connectionStr; }
+		const SQLWCHAR*	GetConnectionStr() const { return m_connectionStr; }
 		bool			UseConnectionStr() const { return m_useConnectionStr; }
 		// end to remove section
 
@@ -268,10 +268,10 @@ namespace exodbc
 		bool m_useConnectionStr;
 
 		SQLHENV m_henv;
-		wchar_t m_dsn[SQL_MAX_DSN_LENGTH+1];                  // Data Source Name
-		wchar_t m_uid[SQL_MAX_USER_NAME_LEN+1];               // User ID
-		wchar_t m_authStr[SQL_MAX_AUTHSTR_LEN+1];             // Authorization string (password)
-		wchar_t m_connectionStr[SQL_MAX_CONNECTSTR_LEN+1];    // Connection string (password)
+		SQLWCHAR m_dsn[SQL_MAX_DSN_LENGTH + 1];                  // Data Source Name
+		SQLWCHAR m_uid[SQL_MAX_USER_NAME_LEN + 1];               // User ID
+		SQLWCHAR m_authStr[SQL_MAX_AUTHSTR_LEN + 1];             // Authorization string (password)
+		SQLWCHAR m_connectionStr[SQL_MAX_CONNECTSTR_LEN + 1];    // Connection string (password)
 
 	};  // class Environment
 }
