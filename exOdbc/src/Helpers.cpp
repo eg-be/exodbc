@@ -854,6 +854,32 @@ namespace exodbc
 		}
 		return value;
 	}
+
+
+	StatementCloser::StatementCloser(SQLHSTMT hStmt, bool closeOnConstruction /* = false */, bool closeOnDestruction /* = true */)
+		: m_hStmt(hStmt)
+		, m_closeOnDestruction(closeOnDestruction)
+	{
+		if (closeOnDestruction)
+		{
+			CloseStmtHandle(m_hStmt, IgnoreNotOpen);
+		}
+	}
+
+
+	StatementCloser::~StatementCloser()
+	{
+		try
+		{
+			CloseStmtHandle(m_hStmt, IgnoreNotOpen);
+		}
+		catch (Exception ex)
+		{
+			// Should never happen?
+			// \todo Ticket #100
+			LOG_ERROR(ex.ToString());
+		}		
+	}
 }
 
 // Interfaces
