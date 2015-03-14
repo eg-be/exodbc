@@ -738,7 +738,8 @@ namespace exodbc
 	TablePrimaryKeysVector Database::ReadTablePrimaryKeys(const STableInfo& table)
 	{
 		exASSERT(IsOpen());
-		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_hstmt, true, true);
 
 		TablePrimaryKeysVector primaryKeys;
 
@@ -764,9 +765,6 @@ namespace exodbc
 		}
 		THROW_IFN_NO_DATA(SQLFetch, ret);
 
-		// Close, ignore all errs
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-
 		return primaryKeys;
 	}
 
@@ -786,7 +784,9 @@ namespace exodbc
 	TablePrivilegesVector Database::ReadTablePrivileges(const STableInfo& table)
 	{
 		exASSERT(IsOpen());
-		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
+
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_hstmt, true, true);
 
 		TablePrivilegesVector privileges;
 
@@ -794,63 +794,35 @@ namespace exodbc
 		// The catalog name is an ordinary argument. if we do not have one in the
 		// DbCatalogTable, we set it to an empty string
 		std::wstring catalogQueryName = L"";
-		if(!table.m_isCatalogNull)
-			catalogQueryName = table.m_catalogName;
-
-		// we always have a tablename, but only sometimes a schema
-		SQLWCHAR* pSchemaBuff = NULL;
-		if(!table.m_isSchemaNull)
+		if (!table.m_isCatalogNull)
 		{
-			pSchemaBuff = new SQLWCHAR[table.m_schemaName.length() + 1];
-			wcscpy(pSchemaBuff, table.m_schemaName.c_str());
+			catalogQueryName = table.m_catalogName;
 		}
 
 		// Query privs
-		bool haveExc = false;
-		Exception exc;
+		// we always have a tablename, but only sometimes a schema
+		SQLRETURN ret = SQLTablePrivileges(m_hstmt,
+			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,
+			table.m_isSchemaNull ? NULL : (SQLWCHAR*) table.m_schemaName.c_str(), table.m_isSchemaNull ? NULL : SQL_NTS,
+			(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS);
+		THROW_IFN_SUCCEEDED(SQLTablePrivileges, ret, SQL_HANDLE_STMT, m_hstmt);
 
-		try
+		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
-			SQLRETURN ret = SQLTablePrivileges(m_hstmt,
-				(SQLWCHAR*)catalogQueryName.c_str(), SQL_NTS,
-				pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,
-				(SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS);
-			THROW_IFN_SUCCEEDED(SQLTablePrivileges, ret, SQL_HANDLE_STMT, m_hstmt);
 
-			while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
-			{
+			STablePrivilegesInfo priv;
+			GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
+			GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
+			GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
+			GetData(m_hstmt, 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);
+			GetData(m_hstmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
+			GetData(m_hstmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
+			GetData(m_hstmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
 
-				STablePrivilegesInfo priv;
-				GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
-				GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
-				GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
-				GetData(m_hstmt, 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);
-				GetData(m_hstmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
-				GetData(m_hstmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
-				GetData(m_hstmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
-
-				privileges.push_back(priv);
-			}
-
-			THROW_IFN_NO_DATA(SQLFetch, ret);
-		}
-		catch (Exception ex)
-		{
-			exc = ex;
-			haveExc = true;
+			privileges.push_back(priv);
 		}
 
-
-		// Close, ignore all errs
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-
-		if(pSchemaBuff)
-			delete[] pSchemaBuff;
-
-		if (haveExc)
-		{
-			throw exc;
-		}
+		THROW_IFN_NO_DATA(SQLFetch, ret);
 
 		return privileges;
 	}
@@ -871,7 +843,9 @@ namespace exodbc
 	std::vector<SColumnInfo> Database::ReadTableColumnInfo(const STableInfo& table)
 	{
 		exASSERT(IsOpen());
-		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
+
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_hstmt, true, true);
 
 		// Clear result
 		std::vector<SColumnInfo> columns;
@@ -880,88 +854,60 @@ namespace exodbc
 		// The catalog name is an ordinary argument. if we do not have one in the
 		// DbCatalogTable, we set it to an empty string
 		std::wstring catalogQueryName = L"";
-		if(!table.m_isCatalogNull)
+		if (!table.m_isCatalogNull)
+		{
 			catalogQueryName = table.m_catalogName;
-
-		// we always have a tablename, but only sometimes a schema
-		SQLWCHAR* pSchemaBuff = NULL;
-		if(!table.m_isSchemaNull)
-		{
-			pSchemaBuff = new SQLWCHAR[table.m_schemaName.length() + 1];
-			wcscpy(pSchemaBuff, table.m_schemaName.c_str());
 		}
 
-		bool haveExc = false;
-		Exception exc;
-		
-		try
+		// Query columns
+		// we always have a tablename, but only sometimes a schema		
+		int colCount = 0;
+		SQLRETURN ret = SQLColumns(m_hstmt,
+			(SQLWCHAR*)catalogQueryName.c_str(), SQL_NTS,	// catalog
+			table.m_isSchemaNull ? NULL : (SQLWCHAR*)table.m_schemaName.c_str(), table.m_isSchemaNull ? NULL : SQL_NTS,	// schema
+			(SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS,		// tablename
+			NULL, 0);						// All columns
+
+		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_hstmt);
+
+		// Iterate rows
+		// Ensure ordinal-position is increasing constantly by one, starting at one
+		SQLINTEGER m_lastIndex = 0;
+		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
-			// Query columns
-			int colCount = 0;
-			SQLRETURN ret = SQLColumns(m_hstmt,
-				(SQLWCHAR*)catalogQueryName.c_str(), SQL_NTS,	// catalog
-				pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,	// schema
-				(SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS,		// tablename
-				NULL, 0);						// All columns
+			// Fetch data from columns
 
-			THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_hstmt);
+			SQLLEN cb;
+			SColumnInfo colInfo;
+			GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
+			GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
+			GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);
+			GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), colInfo.m_columnName);
+			GetData(m_hstmt, 5, SQL_C_SSHORT, &colInfo.m_sqlType, sizeof(colInfo.m_sqlType), &cb, NULL);
+			GetData(m_hstmt, 6, DB_MAX_TYPE_NAME_LEN, colInfo.m_typeName);
+			GetData(m_hstmt, 7, SQL_C_SLONG, &colInfo.m_columnSize, sizeof(colInfo.m_columnSize), &cb, &colInfo.m_isColumnSizeNull);
+			GetData(m_hstmt, 8, SQL_C_SLONG, &colInfo.m_bufferSize, sizeof(colInfo.m_bufferSize), &cb, &colInfo.m_isBufferSizeNull);
+			GetData(m_hstmt, 9, SQL_C_SSHORT, &colInfo.m_decimalDigits, sizeof(colInfo.m_decimalDigits), &cb, &colInfo.m_isDecimalDigitsNull);
+			GetData(m_hstmt, 10, SQL_C_SSHORT, &colInfo.m_numPrecRadix, sizeof(colInfo.m_numPrecRadix), &cb, &colInfo.m_isNumPrecRadixNull);
+			GetData(m_hstmt, 11, SQL_C_SSHORT, &colInfo.m_nullable, sizeof(colInfo.m_nullable), &cb, NULL);
+			GetData(m_hstmt, 12, DB_MAX_COLUMN_REMARKS_LEN, colInfo.m_remarks, &colInfo.m_isRemarksNull);
+			GetData(m_hstmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, colInfo.m_defaultValue, &colInfo.m_isDefaultValueNull);
+			GetData(m_hstmt, 14, SQL_C_SSHORT, &colInfo.m_sqlDataType, sizeof(colInfo.m_sqlDataType), &cb, NULL);
+			GetData(m_hstmt, 15, SQL_C_SSHORT, &colInfo.m_sqlDatetimeSub, sizeof(colInfo.m_sqlDatetimeSub), &cb, &colInfo.m_isDatetimeSubNull);
+			GetData(m_hstmt, 16, SQL_C_SLONG, &colInfo.m_charOctetLength, sizeof(colInfo.m_charOctetLength), &cb, &colInfo.m_isCharOctetLengthNull);
+			GetData(m_hstmt, 17, SQL_C_SLONG, &colInfo.m_ordinalPosition, sizeof(colInfo.m_ordinalPosition), &cb, NULL);
+			GetData(m_hstmt, 18, DB_MAX_YES_NO_LEN, colInfo.m_isNullable, &colInfo.m_isIsNullableNull);
 
-			// Iterate rows
-			// Ensure ordinal-position is increasing constantly by one, starting at one
-			SQLINTEGER m_lastIndex = 0;
-			while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
+			if (++m_lastIndex != colInfo.m_ordinalPosition)
 			{
-				// Fetch data from columns
-
-				SQLLEN cb;
-				SColumnInfo colInfo;
-				GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
-				GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
-				GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);
-				GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), colInfo.m_columnName);
-				GetData(m_hstmt, 5, SQL_C_SSHORT, &colInfo.m_sqlType, sizeof(colInfo.m_sqlType), &cb, NULL);
-				GetData(m_hstmt, 6, DB_MAX_TYPE_NAME_LEN, colInfo.m_typeName);
-				GetData(m_hstmt, 7, SQL_C_SLONG, &colInfo.m_columnSize, sizeof(colInfo.m_columnSize), &cb, &colInfo.m_isColumnSizeNull);
-				GetData(m_hstmt, 8, SQL_C_SLONG, &colInfo.m_bufferSize, sizeof(colInfo.m_bufferSize), &cb, &colInfo.m_isBufferSizeNull);
-				GetData(m_hstmt, 9, SQL_C_SSHORT, &colInfo.m_decimalDigits, sizeof(colInfo.m_decimalDigits), &cb, &colInfo.m_isDecimalDigitsNull);
-				GetData(m_hstmt, 10, SQL_C_SSHORT, &colInfo.m_numPrecRadix, sizeof(colInfo.m_numPrecRadix), &cb, &colInfo.m_isNumPrecRadixNull);
-				GetData(m_hstmt, 11, SQL_C_SSHORT, &colInfo.m_nullable, sizeof(colInfo.m_nullable), &cb, NULL);
-				GetData(m_hstmt, 12, DB_MAX_COLUMN_REMARKS_LEN, colInfo.m_remarks, &colInfo.m_isRemarksNull);
-				GetData(m_hstmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, colInfo.m_defaultValue, &colInfo.m_isDefaultValueNull);
-				GetData(m_hstmt, 14, SQL_C_SSHORT, &colInfo.m_sqlDataType, sizeof(colInfo.m_sqlDataType), &cb, NULL);
-				GetData(m_hstmt, 15, SQL_C_SSHORT, &colInfo.m_sqlDatetimeSub, sizeof(colInfo.m_sqlDatetimeSub), &cb, &colInfo.m_isDatetimeSubNull);
-				GetData(m_hstmt, 16, SQL_C_SLONG, &colInfo.m_charOctetLength, sizeof(colInfo.m_charOctetLength), &cb, &colInfo.m_isCharOctetLengthNull);
-				GetData(m_hstmt, 17, SQL_C_SLONG, &colInfo.m_ordinalPosition, sizeof(colInfo.m_ordinalPosition), &cb, NULL);
-				GetData(m_hstmt, 18, DB_MAX_YES_NO_LEN, colInfo.m_isNullable, &colInfo.m_isIsNullableNull);
-
-				if (++m_lastIndex != colInfo.m_ordinalPosition)
-				{
-					Exception ex(L"Columns are not ordered strictly by ordinal position");
-					SET_EXCEPTION_SOURCE(ex);
-					throw ex;
-				}
-
-				columns.push_back(colInfo);
+				Exception ex(L"Columns are not ordered strictly by ordinal position");
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
-			THROW_IFN_NO_DATA(SQLFetch, ret);
-		}
-		catch (Exception ex)
-		{
-			haveExc = true;
-			exc = ex;
-		}
 
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-
-		if(pSchemaBuff)
-		{
-			delete[] pSchemaBuff;
+			columns.push_back(colInfo);
 		}
-
-		if (haveExc)
-		{
-			throw exc;
-		}
+		THROW_IFN_NO_DATA(SQLFetch, ret);
 
 		return columns;
 	}
