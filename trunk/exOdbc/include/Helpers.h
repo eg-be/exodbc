@@ -457,7 +457,15 @@ namespace exodbc
 
 	// Classes
 	// -------
+	class StatementCloser
+	{
+	public:
+		StatementCloser(SQLHSTMT hStmt) : m_hStmt(hStmt) {};
+		~StatementCloser() { CloseStmtHandle(m_hStmt, IgnoreNotOpen); }
 
+	private:
+		SQLHSTMT m_hStmt;
+	};
 }
 
 
