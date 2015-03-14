@@ -693,7 +693,8 @@ namespace exodbc
 
 	int Database::ReadColumnCount(const STableInfo& table)
 	{
-		exASSERT(EnsureStmtIsClosed(m_hstmt, m_dbmsType));
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_hstmt, true, true);
 
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
@@ -702,48 +703,23 @@ namespace exodbc
 		if(!table.m_isCatalogNull)
 			catalogQueryName = table.m_catalogName;
 
+		// Query columns, note:
 		// we always have a tablename, but only sometimes a schema
-		SQLWCHAR* pSchemaBuff = NULL;
-		if(!table.m_isSchemaNull)
-		{
-			pSchemaBuff = new SQLWCHAR[table.m_schemaName.length() + 1];
-			wcscpy(pSchemaBuff, table.m_schemaName.c_str());
-		}
-
-		// Query columns
 		int colCount = 0;
-		try
-		{
-			SQLRETURN ret = SQLColumns(m_hstmt,
-				(SQLWCHAR*)catalogQueryName.c_str(), SQL_NTS,	// catalog
-				pSchemaBuff, pSchemaBuff ? SQL_NTS : NULL,	// schema
-				(SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS,		// tablename
+		SQLRETURN ret = SQLColumns(m_hstmt,
+				(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,	// catalog
+				table.m_isSchemaNull ? NULL : (SQLWCHAR*) table.m_schemaName.c_str(), table.m_isSchemaNull ? NULL : SQL_NTS,	// schema
+				(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS,		// tablename
 				NULL, 0);						// All columns
 
-			THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_hstmt);
+		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_hstmt);
 
-			// Count the columns
-			while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
-			{
-				++colCount;
-			}
-			THROW_IFN_NO_DATA(SQLColumns, ret);
-		}
-		catch (Exception ex)
+		// Count the columns
+		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
-			if (pSchemaBuff)
-			{
-				delete[] pSchemaBuff;
-			}
-			CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-			throw ex;
+			++colCount;
 		}
-
-		if(pSchemaBuff)
-		{
-			delete[] pSchemaBuff;
-		}
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
+		THROW_IFN_NO_DATA(SQLColumns, ret);
 
 		return colCount;
 	}
