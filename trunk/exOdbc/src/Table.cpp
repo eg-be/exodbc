@@ -763,16 +763,13 @@ namespace exodbc
 	}
 
 
-	bool Table::SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr, SQLINTEGER& value)
+	SQLINTEGER Table::SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr)
 	{
 		exASSERT(IsSelectOpen());
-		value = 0;
+		SQLINTEGER value = 0;
 		SQLRETURN ret = SQLColAttribute(m_hStmtSelect, columnIndex + 1, (SQLUSMALLINT)attr, NULL, NULL, NULL, &value);
-		if (ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLColAttribute);
-		}
-		return SQL_SUCCEEDED(ret);
+		THROW_IFN_SUCCEEDED(SQLColAttribute, ret, SQL_HANDLE_STMT, m_hStmtSelect);
+		return value;
 	}
 
 

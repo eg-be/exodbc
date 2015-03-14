@@ -381,11 +381,11 @@ namespace exodbc
 		* \brief	A wrapper to SQLColAttributes, to fetch attributes of the columns of an open result set.
 		* \detailed	Can only be called if a Select() is open. Only for numeric attributes.
 		* \param	columnIndex zero based index of the column available in the result set.
-		* \param [in, out] value Set to attribute value if successful.
 		* \see		http://msdn.microsoft.com/en-us/library/ms713558%28v=vs.85%29.aspx
-		* \return	True if succeeded.
+		* \return	Attribute value.
+		* \throw	Exception
 		*/
-		bool		SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr, SQLINTEGER& value);
+		SQLINTEGER	SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr);
 
 
 		/*!
