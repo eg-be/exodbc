@@ -502,6 +502,9 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 
+		// Close Statement handle on exit
+		StatementCloser stmtCloser(m_hStmtCount, false, true);
+
 		SQLUBIGINT count = 0;
 		std::wstring sqlstmt;
 		if ( ! whereStatement.empty())
@@ -513,33 +516,21 @@ namespace exodbc
 			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetSqlName()).str();
 		}
 
-		try
-		{
-			SQLRETURN ret = SQLExecDirect(m_hStmtCount, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-			THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtCount);
+		SQLRETURN ret = SQLExecDirect(m_hStmtCount, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtCount);
 			
-			ret = SQLFetch(m_hStmtCount);
-			THROW_IFN_SUCCEEDED(SQLFetch, ret, SQL_HANDLE_STMT, m_hStmtCount);
+		ret = SQLFetch(m_hStmtCount);
+		THROW_IFN_SUCCEEDED(SQLFetch, ret, SQL_HANDLE_STMT, m_hStmtCount);
 
-			bool isNull = false;
-			SQLINTEGER cb = 0;
-			GetData(m_hStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
-			if (isNull)
-			{
-				Exception ex(boost::str(boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt));
-				SET_EXCEPTION_SOURCE(ex);
-				throw ex;
-			}
-		}
-		catch (Exception ex)
+		bool isNull = false;
+		SQLINTEGER cb = 0;
+		GetData(m_hStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
+		if (isNull)
 		{
-			// always close the statement, we dont know if it was open or not
-			CloseStmtHandle(m_hStmtCount, IgnoreNotOpen);
+			Exception ex(boost::str(boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt));
+			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
-
-		// always close the statement, we expect it to be open
-		CloseStmtHandle(m_hStmtCount, FailIfNotOpen);
 
 		return count;
 	}
@@ -570,9 +561,7 @@ namespace exodbc
 
 		if (IsSelectOpen())
 		{
-			// We are not allowed to fail here, someone might have Rollbacked a transaction and our statement is no longer open
-			CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
-			m_selectQueryOpen = false;
+			SelectClose();
 		}
 
 		SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
