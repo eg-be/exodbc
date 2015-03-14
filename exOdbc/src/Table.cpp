@@ -620,30 +620,26 @@ namespace exodbc
 	}
 
 
-	bool Table::Delete(bool failOnNoData /* = true */)
+	void Table::Delete(bool failOnNoData /* = true */)
 	{
 		exASSERT(IsOpen());
 		exASSERT(m_openMode == READ_WRITE);
 		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
 		SQLRETURN ret = SQLExecute(m_hStmtDelete);
-		if (!SQL_SUCCEEDED(ret) && (failOnNoData || ret != SQL_NO_DATA ))
+		if (failOnNoData && ret == SQL_NO_DATA)
 		{
-			LOG_ERROR_STMT(m_hStmtDelete, ret, SQLExecute);
+			SqlResultException ex(L"SQLExecute", ret, L"Did not expect a SQL_NO_DATA while executing a delete-query");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
-		if (SQL_SUCCESS_WITH_INFO == ret)
+		if (!(!failOnNoData && ret == SQL_NO_DATA))
 		{
-			LOG_WARNING_STMT(m_hStmtDelete, ret, SQLExecute);
+			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDelete);
 		}
-		else if (SQL_NO_DATA == ret)
-		{
-			LOG_INFO_STMT(m_hStmtDelete, ret, SQLExecute);
-		}
-
-		return SQL_SUCCEEDED(ret) || (!failOnNoData && ret == SQL_NO_DATA);
 	}
 
 
-	bool Table::Delete(const std::wstring& where, bool failOnNoData /* = true */)
+	void Table::Delete(const std::wstring& where, bool failOnNoData /* = true */)
 	{
 		exASSERT(IsOpen());
 		exASSERT(m_openMode == READ_WRITE);
@@ -652,20 +648,16 @@ namespace exodbc
 
 		wstring sqlstmt = (boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetSqlName() % where).str();
 		SQLRETURN ret = SQLExecDirect(m_hStmtDeleteWhere, (SQLWCHAR*)sqlstmt.c_str(), sqlstmt.length());
-		if (!SQL_SUCCEEDED(ret) && (failOnNoData || ret != SQL_NO_DATA))
+		if (failOnNoData && ret == SQL_NO_DATA)
 		{
-			LOG_ERROR_STMT(m_hStmtDeleteWhere, ret, SQLExecute);
+			SqlResultException ex(L"SQLExecute", ret, boost::str(boost::wformat(L"Did not expect a SQL_NO_DATA while executing the delete-query '%s'") %sqlstmt));
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
-		if (SQL_SUCCESS_WITH_INFO == ret)
+		if ( ! (!failOnNoData && ret == SQL_NO_DATA))
 		{
-			LOG_WARNING_STMT(m_hStmtDeleteWhere, ret, SQLExecDirect);
+			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDelete);
 		}
-		else if (SQL_NO_DATA == ret)
-		{
-			LOG_INFO_STMT(m_hStmtDeleteWhere, ret, SQLExecute);
-		}
-
-		return SQL_SUCCEEDED(ret) || (!failOnNoData && ret == SQL_NO_DATA);
 	}
 
 

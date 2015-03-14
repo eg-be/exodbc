@@ -235,7 +235,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Set some silly values to insert
@@ -265,7 +265,7 @@ namespace exodbc
 		// MS SQL Server does not have this enabled by default
 		// See Ticket # 63 and # 75
 		sqlstmt = (boost::wformat(L"%s = 102") % idName).str();
-		ASSERT_TRUE(iTable.Delete(sqlstmt));
+		ASSERT_NO_THROW(iTable.Delete(sqlstmt));
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// If MAS is enabled, we should be able to still see the result of the just deleted record, even if the result was committed inbetween
@@ -1443,7 +1443,7 @@ namespace exodbc
 		// Note: We could also do this in one transaction.
 		// \todo: Write a separate transaction test about this, to check transaction-visiblity
 		// Try to delete eventually available leftovers, ignore if none exists
-		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now lets insert some data:
@@ -1460,7 +1460,7 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now we must have something to delete
-		EXPECT_TRUE(iTable.Delete(sqlstmt, true));
+		EXPECT_NO_THROW(iTable.Delete(sqlstmt, true));
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And fetching shall return no results at all
@@ -1479,10 +1479,10 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Try to delete eventually available leftovers, ignore if none exists
-		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 		// We can be sure now that nothing exists, and we will fail if we try to delete
-		EXPECT_FALSE(iTable.Delete(sqlstmt, true));
+		EXPECT_THROW(iTable.Delete(sqlstmt, true), SqlResultException);
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And fetching shall return no results at all
@@ -1501,7 +1501,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert a row that we want to delete
@@ -1517,7 +1517,7 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now lets delete that row. our pId is still set to the key-value 99
-		EXPECT_TRUE(iTable.Delete());
+		EXPECT_NO_THROW(iTable.Delete());
 
 		// And fetching shall return no results at all
 		iTable.Select();
@@ -1541,7 +1541,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		EXPECT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Set some silly values to insert
@@ -1585,7 +1585,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		EXPECT_TRUE(dTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(dTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Set some silly values
@@ -1667,7 +1667,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		EXPECT_TRUE(fTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(fTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
@@ -1721,7 +1721,7 @@ namespace exodbc
 		nnTable.SelectClose();
 
 		// Remove everything, ignoring if there was any data:
-		EXPECT_TRUE(nTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(nTable.Delete(sqlstmt, false));
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Insert the just read values
@@ -1763,7 +1763,7 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") %idName).str();
-		EXPECT_TRUE(t.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQL_NUMERIC_STRUCT numStr;
@@ -1798,7 +1798,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
-		EXPECT_TRUE(t.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQL_NUMERIC_STRUCT numStr;
@@ -1840,7 +1840,7 @@ namespace exodbc
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
-		EXPECT_TRUE(t.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQL_NUMERIC_STRUCT numStr;
@@ -1881,7 +1881,7 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idnumerictypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		EXPECT_TRUE(t.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQL_NUMERIC_STRUCT numStr18_0;
@@ -1942,7 +1942,7 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idblobtypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		EXPECT_TRUE(bTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(bTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQLCHAR empty[] = { 0, 0, 0, 0,
@@ -2041,7 +2041,7 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
@@ -2109,7 +2109,7 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
@@ -2178,7 +2178,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
@@ -2275,7 +2275,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_TRUE(dTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(dTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
@@ -2345,7 +2345,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_TRUE(nTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(nTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some boring 0 entries
@@ -2436,7 +2436,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_TRUE(fTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(fTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
@@ -2485,7 +2485,7 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
@@ -2550,7 +2550,7 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idchartypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		EXPECT_TRUE(cTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
@@ -2611,7 +2611,7 @@ namespace exodbc
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetColName(L"idblobtypes", m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		ASSERT_TRUE(bTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(bTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		SQLCHAR empty[] = { 0, 0, 0, 0,
@@ -2697,7 +2697,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_TRUE(iTable.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values
