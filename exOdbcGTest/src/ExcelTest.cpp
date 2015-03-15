@@ -132,6 +132,7 @@ namespace exodbc
 			rowCount++;
 			if ((rowCount >= 4 && rowCount <= 5) || (rowCount >= 11 && rowCount <= 14))
 			{
+				// \todo: Excel fails on mixed types, see Ticket #109
 				EXPECT_TRUE(tTable.IsColumnNull(4));
 				LogLevelFatal llf;
 				DontDebugBreak ddb;
@@ -176,6 +177,7 @@ namespace exodbc
 			EXPECT_NO_THROW(tTable.GetColumnValue(3, tc));
 			if ((rowCount >= 4 && rowCount <= 5) || (rowCount >= 11 && rowCount <= 14))
 			{
+				// \todo: Excel fails on mixed types, see Ticket #109
 				EXPECT_TRUE(tTable.IsColumnNull(4));
 				LogLevelFatal llf;
 				DontDebugBreak ddb;
