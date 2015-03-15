@@ -135,6 +135,7 @@ namespace exodbc
 		* \param	openMode Define if the table shall be opened read-only or not
 		*
 		* \see		Open()
+		* \throw	Exception If allocating statements fail.
 		*/
 		Table(Database* pDb, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
 
@@ -157,6 +158,7 @@ namespace exodbc
 		* \param	openMode Define if the table shall be opened read-only or not
 		*
 		* \see		Open()
+		* \throw	Exception If allocating statements fail.
 		*/
 		Table(Database* pDb, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", const OpenMode openMode = READ_WRITE);
 
@@ -181,6 +183,7 @@ namespace exodbc
 		*
 		* \see		Open()
 		* \see		SetColumn()
+		* \throw	Exception If allocating statements fail.
 		*/
 		Table(Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", OpenMode openMode = READ_WRITE);
 
@@ -204,6 +207,7 @@ namespace exodbc
 		*
 		* \see		Open()
 		* \see		SetColumn()
+		* \throw	Exception If allocating statements fail.
 		*/
 		Table(Database* pDb, SQLSMALLINT numColumns, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
 
