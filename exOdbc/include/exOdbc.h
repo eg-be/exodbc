@@ -178,25 +178,34 @@ namespace exodbc
 	};
 
 
-	enum QueryNameFlags
+	/*!
+	* \enum QueryNameFlag
+	* \brief Define how to build a sql query name.
+	*/
+	enum QueryNameFlag
 	{
-		CATALOG = 0x1,
-		SCHEMA = 0x2,
-		TABLE = 0x4,
-		TYPE = 0x8,
-		COLUMN = 0x10
+		CATALOG = 0x1,	///< Include Catalog name in Query name.
+		SCHEMA = 0x2,	///< Include Schema name in Query name.
+		TABLE = 0x4,	///< Include Table name in Query name.
+		TYPE = 0x8,		///< Include Type name in Query name.
+		COLUMN = 0x10	///< Include Column name in Query name.
 	};
+	typedef unsigned int QueryNameFlags;
 
 
+	/*!
+	* \enum ColumnFlag
+	* \brief Define flags of a Column.
+	*/
 	enum ColumnFlag
 	{
 		CF_NONE = 0x0,
 
-		CF_SELECT = 0x1,
-		CF_UPDATE = 0x2,
-		CF_INSERT = 0x4,
-		CF_NULLABLE = 0x8,
-		CF_PRIMARY_KEY = 0x10,
+		CF_SELECT = 0x1,	///< Include Column in Selects.
+		CF_UPDATE = 0x2,	///< Include Column in Updates.
+		CF_INSERT = 0x4,	///< Include Column in Inserts.
+		CF_NULLABLE = 0x8,	///< Column is null able.
+		CF_PRIMARY_KEY = 0x10,	///< Column is primary key.
 
 		CF_READ = CF_SELECT,
 		CF_WRITE = CF_UPDATE | CF_INSERT,
@@ -206,18 +215,17 @@ namespace exodbc
 
 
 	/*!
-	* \enum AccessFlags
-	* \brief Defines which statements are allocated
-	* \see AllocateStatements()
+	* \enum AccessFlag
+	* \brief Defines how to Access a table.
 	*/
 	enum AccessFlag
 	{
 		AF_NONE = 0x0,		///< No AccessFlags, no statements are going to be created.
 
-		AF_SELECT = 0x1,	///< Allocate only Select statements (including count-statement)
-		AF_UPDATE = 0x2,	///< Allocate Update statements
-		AF_INSERT = 0x4,	///< Allocate Insert statements
-		AF_DELETE = 0x8,	///< Allocate Delete statements
+		AF_SELECT = 0x1,	///< Access for SELECTing.
+		AF_UPDATE = 0x2,	///< Access for UPDATEing.
+		AF_INSERT = 0x4,	///< Access for INSERTing.
+		AF_DELETE = 0x8,	///< Access for DELETing.
 
 		AF_READ = AF_SELECT,
 		AF_WRITE = AF_UPDATE | AF_INSERT | AF_DELETE,
@@ -225,6 +233,21 @@ namespace exodbc
 	};
 	typedef unsigned int AccessFlags;
 
+
+	/*!
+	* \enum TableOpenFlag
+	* \brief Defines how to open a table.
+	*/
+	enum TableOpenFlag
+	{
+		TOF_NONE = 0x0,				///< No special flags are set.
+		TOF_CHECK_EXISTANCE = 0x1,	///< Always check that a table identified by the STableInfo exists.
+		TOF_CHECK_PRIVILEGES = 0x2,	///< Check that we have sufficient privileges to open the table for the given AccessFlags
+		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	///< If AutoBinding is active, skip column that are not supported. Default is to fail on unsupported columns.
+		TOF_CHAR_TRIM_RIGHT = 0x8,	///< If set, string/wstring values accessed through this table are trimmed on the right before being returned as string/string
+		TOF_CHAR_TRIM_LEFT = 0x10	///< If set, string/wstring values accessed through this table are trimmed on the left before being returned as string/string
+	};
+	typedef unsigned int TableOpenFlags;
 
 	// Structs
 	// -------
@@ -382,7 +405,7 @@ namespace exodbc
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
-		std::wstring		GetSqlName(int flags = TABLE | COLUMN) const;
+		std::wstring		GetSqlName(QueryNameFlags = TABLE | COLUMN) const;
 
 	};
 
@@ -466,7 +489,7 @@ namespace exodbc
 		bool			m_isSchemaNull;			///< True if TABLE_SCHEM is Null.
 		bool			m_isPrimaryKeyNameNull;	///< True if PK_NAME is Null.
 
-		std::wstring GetSqlName(int flags = TABLE | COLUMN) const;
+		std::wstring GetSqlName(QueryNameFlags flags = TABLE | COLUMN) const;
 	};
 	typedef std::vector<STablePrimaryKeyInfo> TablePrimaryKeysVector;
 
