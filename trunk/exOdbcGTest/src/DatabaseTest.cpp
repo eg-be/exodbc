@@ -46,9 +46,9 @@ namespace exodbc
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		m_env.AllocateHenv();
+		m_env.AllocateEnvironmentHandle();
 		m_env.SetOdbcVersion(OV_3);
-		ASSERT_NO_THROW(m_db.AllocateHdbcAndReadEnvOdbcVersion(m_env));
+		ASSERT_NO_THROW(m_db.AllocateHdbc(m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
@@ -149,14 +149,14 @@ namespace exodbc
 	{		
 		// Open an existing db by passing the Env to the ctor
 		Environment env(OV_3);
-		ASSERT_TRUE(env.HasHenv());
+		ASSERT_TRUE(env.HasEnvironmentHandle());
 		Database db(env);
 		EXPECT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		EXPECT_NO_THROW(db.Close());
 
 		// Open an existing db using the default c'tor and setting params on db
 		Database db2;
-		ASSERT_NO_THROW(db2.AllocateHdbcAndReadEnvOdbcVersion(env));
+		ASSERT_NO_THROW(db2.AllocateHdbc(env));
 		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		EXPECT_NO_THROW(db2.Close());
 
