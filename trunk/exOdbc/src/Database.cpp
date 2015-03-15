@@ -192,7 +192,13 @@ namespace exodbc
 		SetConnectionAttributes();
 
 		// Default to manual commit
-		SetCommitMode(CM_MANUAL_COMMIT);
+		// \todo: Excel is unable to set a commit-mode. Maybe we would need Open flags too? See Ticket #108
+		// but excel is able to read it
+		m_commitMode = ReadCommitMode();
+		if (Dbms() != dbmsEXCEL && m_commitMode != CM_MANUAL_COMMIT)
+		{
+			SetCommitMode(CM_MANUAL_COMMIT);
+		}
 
 		// Query the datatypes
 		m_datatypes = ReadDataTypesInfo();
@@ -1078,6 +1084,10 @@ namespace exodbc
 		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"DB2"))
 		{
 			m_dbmsType = dbmsDB2;
+		}
+		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"EXCEL"))
+		{
+			m_dbmsType = dbmsEXCEL;
 		}
 
 		if (m_dbmsType == dbmsUNIDENTIFIED)

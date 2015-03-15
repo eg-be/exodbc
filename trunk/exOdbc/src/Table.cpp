@@ -523,7 +523,6 @@ namespace exodbc
 		{
 			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % m_fieldsStatement % m_tableInfo.GetSqlName()).str();
 		}
-
 		SelectBySqlStmt(sqlstmt);
 	}
 

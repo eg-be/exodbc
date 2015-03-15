@@ -184,6 +184,7 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\EnvironmentTest.h" />
+    <ClInclude Include="src\ExcelTest.h" />
     <ClInclude Include="src\ManualTestTables.h" />
     <ClInclude Include="src\TableTest.h" />
     <ClInclude Include="src\DatabaseTest.h" />
@@ -197,6 +198,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\EnvironmentTest.cpp" />
+    <ClCompile Include="src\ExcelTest.cpp" />
     <ClCompile Include="src\ManualTestTables.cpp" />
     <ClCompile Include="src\TableTest.cpp" />
     <ClCompile Include="src\DatabaseTest.cpp" />

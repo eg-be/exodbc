@@ -158,6 +158,7 @@ namespace exodbc
 		//dbmsINFORMIX,
 		//dbmsVIRTUOSO,
 		dbmsDB2,			///< IBM DB2
+		dbmsEXCEL,			///< Microsoft Excel
 		//dbmsINTERBASE,
 		//dbmsPERVASIVE_SQL,
 		//dbmsXBASE_SEQUITER,
@@ -430,7 +431,14 @@ namespace exodbc
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
+		bool				HasSpecialSqlQueryName() const throw() { return m_hasSpecialSqlQueryName; };
+		void				SetSpecialSqlQueryName(const std::wstring& specialSqlQueryName) throw() { m_hasSpecialSqlQueryName = true; m_specialSqlQueryName = specialSqlQueryName; };
+
 		std::wstring		GetSqlName(int flags = CATALOG | SCHEMA | TABLE) const;
+
+	private:
+		bool				m_hasSpecialSqlQueryName;
+		std::wstring		m_specialSqlQueryName;
 	};
 
 	/*!
