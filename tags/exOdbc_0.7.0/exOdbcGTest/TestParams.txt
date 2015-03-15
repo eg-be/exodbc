@@ -1,0 +1,4 @@
+--dsn=exOdbc_MySql_5.2,exOdbc_DB2_10.05,exOdbc_SqlServer_2014 --user=exodbc,exodbc,exodbc --pass=testexodbc,testexodbc,testexodbc
+--gtest_filter=*TableTest* --dsn=exOdbc_MySql_5.2,exOdbc_DB2_10.05,exOdbc_SqlServer_2014 --user=exodbc,exodbc,exodbc --pass=testexodbc,testexodbc,testexodbc
+
+--gtest_filter=* --case=l,u,l --logLevel=3 --dsn=exOdbc_MySql_5.2,exOdbc_DB2_10.05,exOdbc_SqlServer_2014 --user=exodbc,exodbc,exodbc --pass=testexodbc,testexodbc,testexodbc
