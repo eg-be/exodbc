@@ -81,19 +81,6 @@ namespace exodbc
 	}
 
 
-	TEST_P(EnvironmentTest, SetConnectionString)
-	{
-		Environment env;
-		EXPECT_FALSE(env.UseConnectionStr());
-
-		env.SetConnectionStr(L"FooString");
-		EXPECT_TRUE(env.UseConnectionStr());
-
-		env.SetConnectionStr(L"");
-		EXPECT_FALSE(env.UseConnectionStr());
-	}
-
-
 	TEST_P(EnvironmentTest, SetOdbcVersion)
 	{
 		// Test with setting it explict

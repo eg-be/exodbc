@@ -217,15 +217,6 @@ namespace exodbc
 
 
 		/*!
-		 * \brief	Opens by using the information from the passed Environment
-		 * \param [in,out]	pEnv	 	Pointer to the Environment to use to connect.
-		 * \return	true if it succeeds, false if it fails.
-		 * \deprecated
-		 */
-		void         Open(const Environment* const pEnv);
-
-
-		/*!
 		 * \brief		If this database is open, closes the stmt-handle and the connection to the db.
 		 * \detailed	This function will fail if any of the handles cannot be freed.
 		 *				This function will rollback any open transaction if manual commit mode is set.

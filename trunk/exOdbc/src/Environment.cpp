@@ -50,32 +50,6 @@ namespace exodbc
 	} 
 
 
-	Environment::Environment(const std::wstring& dsn, const std::wstring& userID, const std::wstring& password, OdbcVersion odbcVersion /* = OV_3 */ )
-		: m_henv(SQL_NULL_HENV)
-	{
-		// Note: Init will set members to NULL, but asserts if m_henv is set
-		Initialize();
-		AllocHenv(); // note: might fail
-		SetOdbcVersion(odbcVersion);
-
-		SetDsn(dsn);
-		SetUserID(userID);
-		SetPassword(password);
-	}
-
-
-	Environment::Environment(const std::wstring& connectionString, OdbcVersion odbcVersion /* = OV_3 */ )
-		: m_henv(SQL_NULL_HENV)
-	{
-		// Note: Init will set members to NULL, but asserts if m_henv is set
-		Initialize();
-		AllocHenv(); // note: might fail
-		SetOdbcVersion(odbcVersion);
-
-		SetConnectionStr(connectionString);
-	}
-
-
 	// Destructor
 	// -----------
 	Environment::~Environment()
@@ -102,14 +76,6 @@ namespace exodbc
 		exASSERT(!HasHenv());
 		
 		m_henv = SQL_NULL_HENV;
-
-		m_henv = 0;
-		m_dsn[0] = 0;
-		m_uid[0] = 0;
-		m_authStr[0] = 0;
-		m_connectionStr[0] = 0;
-
-		m_useConnectionStr = false;
 	}
 
 
@@ -158,42 +124,6 @@ namespace exodbc
 			// We have SUCCESS
 			m_henv = SQL_NULL_HENV;
 		}
-	}
-
-
-	void Environment::SetDsn(const std::wstring &dsn)
-	{
-		exASSERT(dsn.length() < EXSIZEOF(m_dsn));
-
-		wcsncpy(m_dsn, dsn.c_str(), EXSIZEOF(m_dsn) - 1);
-		m_dsn[EXSIZEOF(m_dsn)-1] = 0;  // Prevent buffer overrun
-	} 
-
-
-	void Environment::SetUserID(const std::wstring &uid)
-	{
-		exASSERT(uid.length() < EXSIZEOF(m_uid));
-		wcsncpy(m_uid, uid.c_str(), EXSIZEOF(m_uid)-1);
-		m_uid[EXSIZEOF(m_uid)-1] = 0;  // Prevent buffer overrun
-	}
-
-
-	void Environment::SetPassword(const std::wstring &password)
-	{
-		exASSERT(password.length() < EXSIZEOF(m_authStr));
-
-		wcsncpy(m_authStr, password.c_str(), EXSIZEOF(m_authStr)-1);
-		m_authStr[EXSIZEOF(m_authStr)-1] = 0;  // Prevent buffer overrun
-	}
-
-	void Environment::SetConnectionStr(const std::wstring &connectStr)
-	{
-		exASSERT(connectStr.length() < EXSIZEOF(m_connectionStr));
-
-		m_useConnectionStr = connectStr.length() > 0;
-
-		wcsncpy(m_connectionStr, connectStr.c_str(), EXSIZEOF(m_connectionStr)-1);
-		m_connectionStr[EXSIZEOF(m_connectionStr)-1] = 0;  // Prevent buffer overrun
 	}
 
 

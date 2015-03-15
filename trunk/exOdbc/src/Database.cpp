@@ -280,18 +280,6 @@ namespace exodbc
 	}
 
 
-	void Database::Open(const Environment* const pEnv)
-	{
-		exASSERT(pEnv);
-
-		// Use the connection string if one is present
-		if (pEnv->UseConnectionStr())
-			Open(pEnv->GetConnectionStr());
-		else
-			Open(pEnv->GetDsn(), pEnv->GetUserID(), pEnv->GetPassword());
-	}
-
-
 	void Database::SetConnectionAttributes()
 	{
 		exASSERT(m_hdbc != SQL_NULL_HDBC);

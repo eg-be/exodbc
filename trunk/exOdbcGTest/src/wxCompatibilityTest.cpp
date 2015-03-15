@@ -38,15 +38,12 @@ namespace exodbc
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 
 		// Set up environment
-		m_env.SetDsn(m_odbcInfo.m_dsn);
-		m_env.SetUserID(m_odbcInfo.m_username);
-		m_env.SetPassword(m_odbcInfo.m_password);
 		m_env.AllocHenv();
 		m_env.SetOdbcVersion(OV_3);
 
 		// And the db
 		m_pDb = new Database(&m_env);
-		ASSERT_NO_THROW(m_pDb->Open(&m_env));
+		ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 	
 	//Destructor
