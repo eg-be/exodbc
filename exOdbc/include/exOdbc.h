@@ -122,7 +122,7 @@ namespace exodbc
 	/*!
 	* \enum		AutoBindingMode
 	* \brief	Provide additional information to what types to bind columns.
-	* \detailed Usually when a table binds a column it will query the database about the SQL-Type and create the
+	* \details Usually when a table binds a column it will query the database about the SQL-Type and create the
 	*			corresponding buffer-type. Using this option you can specify that columns reported as SQL_CHAR
 	*			will be bound to a SQLWCHAR* buffer, or the other way round, or that everything is bound to a
 	*			SQLCHAR* / SQLWCHAR*.

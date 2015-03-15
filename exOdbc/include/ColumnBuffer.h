@@ -119,7 +119,7 @@ namespace exodbc
 		/*!
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
 		*			using the data type information from the passed SColumnInfo.
-		* \detailed	The constructor will try to allocate a corresponding buffer.
+		* \details	The constructor will try to allocate a corresponding buffer.
 		*			Note: The constructor will examine SColumnInfo::m_isNullable and set the corresponding
 		*			ColumnFlags, overriding an eventually set value in the passed flags.
 		* \param columnInfo	The Information about the column we bind.
@@ -135,7 +135,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Create a new ColumnBuffer that will use the buffer given inside BufferPtrVariant.
-		* \detailed	The constructor will not try to allocate a buffer on its own but update
+		* \details	The constructor will not try to allocate a buffer on its own but update
 		*			its internal variant with the value of the passed bufferVariant and the corresponding
 		*			information.
 		*			The ColumnBuffer will not take ownership of the passed bufferVariant and will
@@ -172,7 +172,7 @@ namespace exodbc
 	public:
 		/*!
 		* \brief	Returns true if this ColumnBuffer has a buffer ready.
-		* \detailed	This can be true either because during construction a buffer
+		* \details	This can be true either because during construction a buffer
 		*			was allocated or because you've manually set a buffer.
 		* \return	True if buffer is ready.
 		*/
@@ -197,7 +197,7 @@ namespace exodbc
 		/*!
 		* \brief	Tries to bind the buffer to the column using SQLBindCol
 		*			for non-numeric types, or SQLSetDescField for numeric types.
-		* \detailed	Fails if no buffer is allocated or if already bound.
+		* \details	Fails if no buffer is allocated or if already bound.
 		*			The driver might fail to bind the column to the type.
 		*			On success, sets m_bound to true.
 		* \param	hStmt ODBC Statement handle to bind this ColumnBuffer to.
@@ -208,7 +208,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Unbinds the buffer
-		* \detailed	Tries to unbind the buffer to the column using SQLBindCol
+		* \details	Tries to unbind the buffer to the column using SQLBindCol
 		*			for non-numeric types, or SQLSetDescField for numeric types.
 		*			On success, sets m_bound to false.
 		*			Fails if not bound.
@@ -221,7 +221,7 @@ namespace exodbc
 		/*!
 		* \brief	Tries to bind the buffer as parameter using SQLBindParameter.
 		*			If the buffer type is a numeric-type, the needed attributes are set.
-		* \detailed	Fails if no buffer is allocated or if already bound.
+		* \details	Fails if no buffer is allocated or if already bound.
 		*			The driver might fail to bind.
 		* \param	hStmt ODBC Prepared Statement handle to bind this ColumnBuffer as parameter to.
 		* \param	parameterNumber Parameter number corresponding to a parameter marker in the 
@@ -234,7 +234,7 @@ namespace exodbc
 		/*!
 		* \brief	Tries to unbind the buffer as parameter using SQLFreeStmt.
 		*			Note that this will unbind ALL parameters bound to passed statement, see Ticket #59
-		* \detailed	Fails if no buffer is allocated or if already bound.
+		* \details	Fails if no buffer is allocated or if already bound.
 		*			The driver might fail to bind.
 		* \param	hStmt ODBC Prepared Statement handle to unbind this ColumnBuffer as parameter from.
 		* \param	parameterNumber Parameter number corresponding to a parameter marker in the
@@ -253,7 +253,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the length indicator passed to SQLBindCol.
-		* \detailed	Fails if no buffer is allocated or not bound.
+		* \details	Fails if no buffer is allocated or not bound.
 		* \return	Length indicator bound to column.
 		* \throw	Exception
 		*/
@@ -262,7 +262,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Check if the current value is NULL.
-		* \detailed	Fails if no buffer is allocated or not bound.
+		* \details	Fails if no buffer is allocated or not bound.
 		* \return	True if current value is Null.
 		* \throw	Exception
 		*/
@@ -271,7 +271,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Sets the current value to NULL.
-		* \detailed	Fails if not NULLable.
+		* \details	Fails if not NULLable.
 		* \see IsNullable()
 		* \throw Exception If not Nullable.
 		*/
@@ -288,7 +288,7 @@ namespace exodbc
 		
 		/*!
 		* \brief	Check if the is SQL_NO_TOTAL.
-		* \detailed	Fails if no buffer is allocated or not bound.
+		* \details	Fails if no buffer is allocated or not bound.
 		* \return	True if current value is SQL_NO_TOTAL.
 		* \throw	Exception
 		*/
@@ -304,7 +304,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Set how Chars should be bound.
-		* \detailed	Fails if already bound.
+		* \details	Fails if already bound.
 		* \param	mode Mode to set.
 		* \see		AutoBindingMode
 		* \throw	Exception If already bound.
@@ -321,7 +321,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Set or clear the PrimaryKey flag.
-		* \detailed	Must be called before any parameters are bound.
+		* \details	Must be called before any parameters are bound.
 		* \param	isPrimaryKey True if this column is a primary key.
 		* \throw	Exception If parameters are already bound.
 		*/
@@ -342,7 +342,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Set a ColumnFlags.
-		* \detailed	Flags must be set before the ColumnBuffer is Bound to the buffer!
+		* \details	Flags must be set before the ColumnBuffer is Bound to the buffer!
 		* \throw	Exception
 		*/
 		void SetColumnFlag(ColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags |= columnFlag; };
@@ -350,7 +350,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Clear a ColumnFlags.
-		* \detailed	Flags must be cleared before the ColumnBuffer is Bound!
+		* \details	Flags must be cleared before the ColumnBuffer is Bound!
 		* \throw	Exception
 		*/
 		void ClearColumnFlag(ColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags &= ~columnFlag; };
@@ -358,7 +358,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Set the value of a binary value. Copies the value into this ColumnBuffer.
-		* \detailed	If this ColumnBuffer has the type SQL_C_BINARY the value of pBuff is
+		* \details	If this ColumnBuffer has the type SQL_C_BINARY the value of pBuff is
 		*			copied into the Buffer of this ColumnBuffer. The Buffer is first filled with zeros,
 		*			so that the buffer will be zero-padded if bufferSize is small than the size
 		*			of the buffer allocated by this ColumnBuffer.
@@ -374,7 +374,7 @@ namespace exodbc
 		// ---------
 		/*!
 		* \brief	Copies the passed value into this ColumnBuffer. Does not work for all types, see Details!
-		* \detailed	Copies the value of the passed BufferVariant into this Buffer.
+		* \details	Copies the value of the passed BufferVariant into this Buffer.
 		*			This does not work for BinaryData - we need to know the length of the data.
 		*			The following types work:
 		*			- SQLSMALLINT
@@ -396,7 +396,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a SQLSMALLINT if possible.
-		* \detailed	Fails if not bound.
+		* \details	Fails if not bound.
 		* \return	Current value as SQLSMALLINT.
 		* \throw	CastException If value cannot be casted to an SQLSMALLINT or if data loss would occur.
 		*/
@@ -405,7 +405,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a SQLINTEGER if possible.
-		* \detailed	Fails if not bound.
+		* \details	Fails if not bound.
 		* \return	Current value as SQLINTEGER.
 		* \throw	CastException If value cannot be casted to an SQLINTEGER or if data loss would occur.
 		*/
@@ -414,7 +414,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a SQLBIGINT if possible.
-		* \detailed	Fails if not bound.
+		* \details	Fails if not bound.
 		* \return	Current value as SQLBIGINT.
 		* \throw	CastException If value cannot be casted to an SQLBIGINT.
 		*/
@@ -423,7 +423,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a std::wstring if possible.
-		* \detailed	Fails if not bound.
+		* \details	Fails if not bound.
 		* \return	Current value as std::wstring.
 		* \throw	CastException If value cannot be casted to a std::wstring.
 		* \see		WStringVisitor
@@ -433,7 +433,7 @@ namespace exodbc
 		
 		/*!
 		* \brief	Cast the current value to a std::wstring if possible.
-		* \detailed	Fails if not bound.
+		* \details	Fails if not bound.
 		* \return	Current value as std::wstring.
 		* \throw	CastException If value cannot be casted to a std::string.
 		* \see		StringVisitor
@@ -443,7 +443,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a SQLDOUBLE if possible.
-		* \detailed	Fails if not bound.
+		* \details	Fails if not bound.
 		* \return	Current value as SQLDOUBLE.
 		* \throw	CastException If value cannot be casted to a SQLDOUBLE.
 		* \see		DoubleVisitor
@@ -453,7 +453,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a SQL_DATE_STRUCT if possible.
-		* \detailed	Fails if not bound. If the value is a Timestamp, the time-part is ignored.
+		* \details	Fails if not bound. If the value is a Timestamp, the time-part is ignored.
 		* \return	Current value as SQL_DATE_STRUCT.
 		* \throw	CastException If value cannot be casted to a SQL_DATE_STRUCT.
 		* \see		TimestampVisitor
@@ -463,7 +463,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a SQL_TIME_STRUCT if possible.
-		* \detailed	Fails if not bound. If the value is a Timestamp, the date-part is ignored.
+		* \details	Fails if not bound. If the value is a Timestamp, the date-part is ignored.
 		* \return	Current value as SQL_TIME_STRUCT.
 		* \throw	CastException If value cannot be casted to a SQL_TIME_STRUCT.
 		* \see		TimestampVisitor
@@ -474,7 +474,7 @@ namespace exodbc
 #if HAVE_MSODBCSQL_H
 		/*!
 		* \brief	Cast the current value to a SQL_SS_TIME2_STRUCT if possible.
-		* \detailed	Fails if not bound. If the value is a Timestamp, the date-part is ignored.
+		* \details	Fails if not bound. If the value is a Timestamp, the date-part is ignored.
 		*			Only available if HAVE_MSODBCSQL_H is defined to 1.
 		* \return	Current value as SQL_SS_TIME2_STRUCT.
 		* \throw	CastException If value cannot be casted to a SQL_SS_TIME2_STRUCT.
@@ -486,7 +486,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a SQL_TIMESTAMP_STRUCT if possible.
-		* \detailed	Fails if not bound.
+		* \details	Fails if not bound.
 		* \return	Current value as SQL_TIMESTAMP_STRUCT.
 		* \throw	CastException If value cannot be casted to a SQL_TIMESTAMP_STRUCT.
 		* \see		TimestampVisitor
@@ -496,7 +496,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a SQL_TIMESTAMP_STRUCT if possible.
-		* \detailed	Fails if not bound.
+		* \details	Fails if not bound.
 		* \return	Current value as SQL_TIMESTAMP_STRUCT.
 		* \throw	CastException If value cannot be casted to a SQL_TIMESTAMP_STRUCT.
 		* \see		TimestampVisitor
@@ -506,7 +506,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current buffer value as a const SQLCHAR*
-		* \detailed	Returns the same pointer as it is stored in here. This is mainly used
+		* \details	Returns the same pointer as it is stored in here. This is mainly used
 		*			for accessing binary data, to avoid to copy the binary buffer.
 		*			Do NOT delete the pointer returned by this operator, the ColumnBuffer will.
 		* \return	Const SQLCHAR* to the buffer-content.
@@ -519,7 +519,7 @@ namespace exodbc
 	private:
 		/*!
 		* \brief	Determine the buffer size for the buffer type given by m_bufferType 
-		* \detailed This is used internally if no buffer-size and buffer is given and the buffer must
+		* \details This is used internally if no buffer-size and buffer is given and the buffer must
 		*			thus be allocated automatically.
 		*			Must be called after m_bufferType is set.
 		*			The size of types with fixed lengths is given by sizeof() (like sizeof(SQLINTEGER).
@@ -536,7 +536,7 @@ namespace exodbc
 		/*!
 		* \brief	Tries to determine the size needed in chars if this ColumnBuffer is bound to a
 		*			char-type plus the terminating 0 char. Uses the passed SColumnInfo.
-		* \detailed Evaluates NUM_PREC_RADIX, COLUMN_SIZE and DECIMAL_DIGITS to determine the number
+		* \details Evaluates NUM_PREC_RADIX, COLUMN_SIZE and DECIMAL_DIGITS to determine the number
 		*			of chars needed to store numeric-types.
 		*			For date time types it uses ColumnSize.
 		*			For char-sizes it is the column-size.
@@ -550,7 +550,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Determine the buffer type for the given SQL type .
-		* \detailed This is used internally if no buffer-size and buffer is given and the buffer must
+		* \details This is used internally if no buffer-size and buffer is given and the buffer must
 		*			thus be allocated automatically.
 		*			See ColumnBuffer description for what SQL type is mapped to what buffer.
 		* \return	Needed buffer size according to SQL type form SColumnInfo
@@ -561,7 +561,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Get the allocated buffer as a void*.
-		* \detailed Determines the type using the SColumnInfo and gets the pointer from the variant.
+		* \details Determines the type using the SColumnInfo and gets the pointer from the variant.
 		*			Fails if no buffer is allocated.
 		* \return	void* to the current buffer.
 		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
@@ -572,7 +572,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Allocate a buffer in the variant.
-		* \detailed Allocates corresponding buffer. 
+		* \details Allocates corresponding buffer. 
 		*			Sets m_allocatedBuffer to true on success.
 		* \param	bufferType An SQL_C_TYPE like SQL_C_SSHORT to describe the type to allocate
 		* \param	bufferSize Used for types that are not as simple as a SQLSMALLINT, for example SQLWCHAR*

@@ -57,7 +57,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Create a TablePrivilege for the Table given by tableInfo.
-		* \detailed	Tries to Initialize() this TablePrivileges automatically.
+		* \details	Tries to Initialize() this TablePrivileges automatically.
 		* \throw	Exception If Initialization fails.
 		*/
 		TablePrivileges(const Database& db, const STableInfo& tableInfo);
