@@ -72,20 +72,6 @@ namespace exodbc
 	// Structs
 	// -------
 
-#if defined EXODBCDEBUG
-	struct STablesInUse
-	{
-	public:
-		std::wstring	m_initialTableName;
-		std::wstring	m_initialSchema;
-		std::wstring	m_initialCatalog;
-		std::wstring	m_initialType;
-		size_t			m_tableId;
-
-		std::wstring ToString() const { return m_initialCatalog + L"::" + m_initialSchema + L"::" + m_initialTableName ;  };
-	};
-#endif
-
 	// Classes
 	// -------
 
@@ -651,17 +637,6 @@ namespace exodbc
 		SQLHSTMT m_hstmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
 
 		CommitMode		m_commitMode;	///< Commit Mode set currently
-
-#if defined EXODBCDEBUG
-		// Helpers to detect orphaned tables
-	private:
-		size_t	m_lastTableId;
-		std::vector<STablesInUse> m_test;
-		std::map<size_t, STablesInUse>	m_tablesInUse;
-		size_t RegisterTable(const Table* const pTable);
-		bool UnregisterTable(const Table* const pTable);
-		friend class Table;
-#endif
 
 
 		// OLD STUFF we need to think about re-adding it

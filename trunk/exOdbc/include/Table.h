@@ -212,6 +212,26 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Allocate the statement handles required by this Table.
+		* \detailed Allocates the statements using the connection handle from the passed Database.
+		*			Do not free the Database before freeing this Table.
+		* \param	db Database this Table belongs to.
+		* \see		HasStatements()
+		*
+		* \throw	Exception If any of the handles to be allocated is not null currently.
+		*/
+		void AllocateStatements(const Database& db);
+
+
+		/*!
+		* \brief	Test if the required statements (depending on OpenMode) are allocated.
+		* \return	True if all statements are allocated
+		* \see		AllocateStatements()
+		*/
+		bool HasStatements() const throw();
+
+
+		/*!
 		* \brief	Opens the Table and either binds the already defined columns or queries the database
 		*			about the columns of this table.
 		* \detailed If no STableInfo object has been passed during construction the database is first
@@ -675,13 +695,12 @@ namespace exodbc
 		// Private stuff
 		// -------------
 	private:
+
 		/*!
-		* \brief	Initializes the member-vars, allocates statements and sets statement options
-		* \param	pDb Db this table is connected to. Used to get the DBC-Handle to create statements
-		* \return	true if it succeeds, false if it fails.
+		* \brief	Initializes the member-vars to null or defaults.
 		* \throw	Exception
 		*/
-		void        Initialize(Database* pDb);
+		void        Initialize();
 
 
 		/*!
@@ -689,7 +708,7 @@ namespace exodbc
 		* \return	New Statement handle.
 		* \throw	Exception If allocating handle fails.
 		*/
-		SQLHSTMT		AllocateStatement();
+		SQLHSTMT		AllocateStatement(const Database& db) const;
 
 
 		/*!
