@@ -407,7 +407,7 @@ namespace exodbc
 			schemaName = L"";
 			catalogName = L"exodbc";
 			typeName = L"";
-			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #52");
+			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #76");
 			break;
 		case dbmsDB2:
 			// We know that DB2 uses schemas:

@@ -334,6 +334,10 @@ namespace exodbc
 		// Now delete the second record: We cannot do that if we do not have support for What are Multiple Active Statements (MAS)?
 		// MS SQL Server does not have this enabled by default
 		// See Ticket # 63 and # 75
+		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		{
+			LOG_WARNING(L"This test is known to fail with Microsoft SQL Server 2014 (and probably others too), see Ticket #75");
+		}
 		sqlstmt = (boost::wformat(L"%s = 102") % idName).str();
 		ASSERT_NO_THROW(iTable.Delete(sqlstmt));
 		EXPECT_NO_THROW(m_db.CommitTrans());
@@ -1549,6 +1553,10 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Try to delete eventually available leftovers, ignore if none exists
+		if (m_db.Dbms() == dbmsMY_SQL)
+		{
+			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #77");
+		}
 		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 		// We can be sure now that nothing exists, and we will fail if we try to delete
