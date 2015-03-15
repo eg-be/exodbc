@@ -160,6 +160,9 @@ namespace exodbc
 
 	void Table::AllocateStatements(const Database& db)
 	{
+		exASSERT(!IsOpen());
+		exASSERT(db.IsOpen());
+
 		exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
 		exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
 		exASSERT(SQL_NULL_HSTMT == m_hStmtInsert);
@@ -244,6 +247,8 @@ namespace exodbc
 
 	void Table::FreeStatements()
 	{
+		exASSERT(!IsOpen());
+
 		// Free allocated statements
 		// First those created always
 		m_hStmtCount = FreeStatement(m_hStmtCount);
@@ -926,6 +931,16 @@ namespace exodbc
 		m_columnBuffers.clear();
 
 		m_isOpen = false;
+	}
+
+
+	void Table::SetOpenMode(const Database& db, OpenMode openMode)
+	{
+		exASSERT(!IsOpen());
+		exASSERT(db.IsOpen());
+
+		FreeStatements();
+		AllocateStatements(db);
 	}
 
 
