@@ -54,17 +54,17 @@ namespace exodbc
 	// -----------
 	Environment::~Environment()
 	{
-		if (HasEnvironmentHandle())
+		// Do not throw from here
+		try
 		{
-			try
+			if (HasEnvironmentHandle())
 			{
 				FreeEnvironmentHandle();
 			}
-			catch (Exception e)
-			{
-				// Log and forget..
-				LOG_ERROR(e.ToString());
-			}
+		}
+		catch (Exception ex)
+		{
+			LOG_ERROR(ex.ToString());
 		}
 	}
 

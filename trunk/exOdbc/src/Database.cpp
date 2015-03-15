@@ -69,7 +69,7 @@ namespace exodbc
 		Initialize();
 
 		// Allocate the DBC-Handle and set the member m_pEnv
-		AllocateHdbc(env);
+		AllocateConnectionHandle(env);
 	}
 
 
@@ -77,41 +77,21 @@ namespace exodbc
 	// -----------
 	Database::~Database()
 	{
-		if (IsOpen())
+		// Do not throw from here
+		try
 		{
-			try
+			if (IsOpen())
 			{
 				Close();
 			}
-			catch (Exception ex)
+			if (HasConnectionHandle())
 			{
-				LOG_ERROR(ex.ToString());
+				FreeConnectionHandle();
 			}
 		}
-
-		// Free the connection-handle if it is allocated
-		if (HasHdbc())
+		catch (Exception ex)
 		{
-			// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
-			SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc);
-			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched, use our standard logger
-			if (ret == SQL_ERROR)
-			{
-				// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-				SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_DBC, m_hdbc, L"Freeing ODBC-Connection Handle failed with SQL_ERROR, handle is still valid.");
-				SET_EXCEPTION_SOURCE(ex);
-				LOG_ERROR(ex.ToString());
-			}
-			else if (ret == SQL_INVALID_HANDLE)
-			{
-				// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
-				m_hdbc = SQL_NULL_HDBC;
-				SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Connection Handle failed with SQL_INVALID_HANDLE.");
-				SET_EXCEPTION_SOURCE(ex);
-				LOG_ERROR(ex.ToString());
-			}
-			// We have SUCCESS
-			m_hdbc = SQL_NULL_HDBC;
+			LOG_ERROR(ex.ToString());
 		}
 	}
 
@@ -145,9 +125,36 @@ namespace exodbc
 	}
 
 
-	void Database::AllocateHdbc(const Environment& env)
+	void Database::FreeConnectionHandle()
 	{
-		exASSERT(!HasHdbc());
+		exASSERT(HasConnectionHandle());
+
+		// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
+		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc);
+		// if SQL_ERROR is returned, the handle is still valid, error information can be fetched, use our standard logger
+		if (ret == SQL_ERROR)
+		{
+			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
+			SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_DBC, m_hdbc, L"Freeing ODBC-Connection Handle failed with SQL_ERROR, handle is still valid.");
+			SET_EXCEPTION_SOURCE(ex);
+			LOG_ERROR(ex.ToString());
+		}
+		else if (ret == SQL_INVALID_HANDLE)
+		{
+			// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
+			m_hdbc = SQL_NULL_HDBC;
+			SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Connection Handle failed with SQL_INVALID_HANDLE.");
+			SET_EXCEPTION_SOURCE(ex);
+			LOG_ERROR(ex.ToString());
+		}
+		// We have SUCCESS
+		m_hdbc = SQL_NULL_HDBC;
+	}
+
+
+	void Database::AllocateConnectionHandle(const Environment& env)
+	{
+		exASSERT(!HasConnectionHandle());
 		exASSERT(env.HasEnvironmentHandle());
 
 		// Allocate the DBC-Handle
@@ -245,7 +252,7 @@ namespace exodbc
 	void Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr)
 	{
 		exASSERT(!dsn.empty());
-		exASSERT(HasHdbc());
+		exASSERT(HasConnectionHandle());
 
 		m_dsn        = dsn;
 		m_uid        = uid;
