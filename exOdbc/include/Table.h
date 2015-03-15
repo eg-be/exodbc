@@ -95,21 +95,6 @@ namespace exodbc
 	public:
 
 		/*!
-		* \enum		CharTrimOption
-		* \brief	Define whether you want to trim string and wstring values returned from the Table functions GetColumnValue()
-		* \detailed	Note that setting this flag will not modify the actual data-buffer, but only the string-values
-		*			returned by the GetColumnValue() functions.
-		*			Default is TRIM_NO
-		*/
-		enum CharTrimOption
-		{
-			TRIM_NO = 0x0L,		///< No Trimming of wstring or string (default)
-			TRIM_LEFT = 0x1L,	///< Trim left
-			TRIM_RIGHT = 0x2L	///< Trim right
-		};
-
-
-		/*!
 		* \brief	Create a new Table-instance from the Database pDb using the table definition
 		*			from tableInfo. The table will read its column-definitions from the database
 		*			automatically during Open() and bind all columns.
@@ -238,19 +223,33 @@ namespace exodbc
 		*			If columns have been defined manually using SetColumn(),
 		*			the buffers passed there are used to bind only those columns defined manually.
 		*
-		* \param	checkPrivileges If true, the database will be queried checking if the current user
+		* \param	openFlags Set flags how to open the Table:
+		*  - TOF_CHECK_PRIVILEGES:  
+		*			If set, the database will be queried checking if the current user
 		*			is allowed to do the required operations like Select, Update, Insert or Delete,
-		*			depending on the OpenMode value passed during construction.
-		* \param	checkTableExists If true, the database will always be queried if a table matching the
+		*			depending on the AccessFlags value passed during construction or set later.
+		*  - TOF_CHECK_EXISTANCE:
+		*			If set, the database will always be queried if a table matching the
 		*			passed definition during constructions actually exists in the database. Setting this
 		*			value to false makes only sense	if you've passed a STableInfo, as else the Table
 		*			is required to query the database anyway (and fail if not found).
+		*  - TOF_SKIP_UNSUPPORTED_COLUMNS:
+		*			If set, ColumnBuffer that failed to be created with a NotSupportedException are simply
+		*			skipped. Default is to re-throw the NotSupportedException.
+		*  - TOF_CHAR_TRIM_LEFT:
+		*			If set, values retrieved using GetColumnValue(SQLSMALLINT columnIndex, std::string& str)
+		*			or GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) are trimmed on the left
+		*			before being set on str.
+		*  - TOF_CHAR_TRIM_RIGHT:
+		*			If set, values retrieved using GetColumnValue(SQLSMALLINT columnIndex, std::string& str)
+		*			or GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) are trimmed on the right
+		*			before being set on str.
 		* \see		IsOpen()
 		* \see		Close()
 		* \see		SetColumn()
 		* \throw	Exception If already open, table is not found, columns fail to bind..
 		*/
-		void		Open(const Database& db, bool checkPrivileges = false, bool checkTableExists = true);
+		void		Open(const Database& db, TableOpenFlags openFlags = TOF_CHECK_EXISTANCE);
 
 
 		/*!
@@ -297,12 +296,6 @@ namespace exodbc
 		* \see		SetAutoBindingMode()
 		*/
 		AutoBindingMode	GetAutoBindingMode() const throw() { return m_autoBindingMode; };
-
-
-		/*!
-		* \brief	Set a CharTrimOption. Setting to TRIM_NO will clear all other flags.
-		*/
-		void		SetCharTrimOption(CharTrimOption option) throw() { option == TRIM_NO ? m_charTrimFlags = TRIM_NO : m_charTrimFlags |= option; };
 
 
 		/*!
@@ -358,9 +351,25 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Test if a CharTrimOption is set.
+		* \brief	Test if a TableOpenFlag is set.
 		*/
-		bool		TestCharTrimOption(CharTrimOption option) const throw() { return (m_charTrimFlags & option) == option;  };
+		bool		TestOpenFlag(TableOpenFlag flag) const throw() { return (m_openFlags & flag) == flag;  };
+
+
+		/*!
+		* \brief	Sets or Clears the TOF_TRIM_RIGHT flag.
+		* \detailed	Note that the value set here is overriden by the value
+		*			passed to Open() in the TableOpenFlags.
+		*/
+		void		SetCharTrimRight(bool trimRight) throw();
+
+
+		/*!
+		* \brief	Sets or Clears the TOF_TRIM_LEFT flag.
+		* \detailed	Note that the value set here is overriden by the value
+		*			passed to Open() in the TableOpenFlags.
+		*/
+		void		SetCharTrimLeft(bool trimLeft) throw();
 
 
 		/*!
@@ -829,7 +838,7 @@ namespace exodbc
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		AutoBindingMode		m_autoBindingMode;		///< Store the auto-binding of this table. TODO: Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
-		unsigned int		m_charTrimFlags;		///< Bitmask for the CharTrimOption Flags
+		TableOpenFlags		m_openFlags;			///< Flags used to open the table in the call to Open().
 		AccessFlags			m_accessFlags;			///< Bitmask for the AccessFlag flags.
 		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
 		TablePrimaryKeys	m_tablePrimaryKeys;		///< Table Primary Keys read during Open if table was opened READ_WRITE.

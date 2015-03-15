@@ -178,7 +178,7 @@ namespace exodbc
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
 		m_autoBindingMode = AutoBindingMode::BIND_AS_REPORTED;
-		m_charTrimFlags = TRIM_NO;
+		m_openFlags = TOF_NONE;
 		m_accessFlags = AF_NONE;
 	}
 
@@ -709,11 +709,11 @@ namespace exodbc
 		exASSERT(!pBuff->IsNull());
 		str = *pBuff;
 
-		if (TestCharTrimOption(TRIM_LEFT))
+		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
 		{
 			boost::trim_left(str);
 		}
-		if (TestCharTrimOption(TRIM_RIGHT))
+		if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
 		{
 			boost::trim_right(str);
 		}
@@ -727,11 +727,11 @@ namespace exodbc
 
 		str = *pBuff;
 
-		if (TestCharTrimOption(TRIM_LEFT))
+		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
 		{
 			boost::trim_left(str);
 		}
-		if (TestCharTrimOption(TRIM_RIGHT))
+		if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
 		{
 			boost::trim_right(str);
 		}
@@ -821,7 +821,7 @@ namespace exodbc
 	}
 
 
-	void Table::Open(const Database& db, bool checkPrivileges, bool checkTableExists)
+	void Table::Open(const Database& db, TableOpenFlags openFlags /* = TOF_CHECK_EXISTANCE */)
 	{
 		exASSERT(db.IsOpen());
 		exASSERT(!IsOpen());
@@ -843,7 +843,7 @@ namespace exodbc
 		}
 
 		// If we are asked to check existence and have not just proved we exist, find table
-		if (checkTableExists && !searchedTable)
+		if (((openFlags & TOF_CHECK_EXISTANCE) == TOF_CHECK_EXISTANCE) && !searchedTable)
 		{
 			// Will throw if not one is found
 			m_tableInfo = db.FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
@@ -883,15 +883,32 @@ namespace exodbc
 			for (int columnIndex = 0; columnIndex < (SQLSMALLINT) columns.size(); columnIndex++)
 			{
 				SColumnInfo colInfo = columns[columnIndex];
-				ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, columnFlags);
-				m_columnBuffers[columnIndex] = pColBuff;
+				try
+				{
+					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, columnFlags);
+					m_columnBuffers[columnIndex] = pColBuff;
+				}
+				catch (NotSupportedException nse)
+				{
+					if ((openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS)
+					{
+						// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
+						LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetSqlName() % nse.ToString()));
+						continue;
+					}
+					else
+					{
+						// rethrow
+						throw nse;
+					}
+				}
 			}
 		}
 
 		// Prepare the FieldStatement to be used for selects
 		m_fieldsStatement = BuildFieldsStatement();
 
-		if (checkPrivileges)
+		if ((openFlags & TOF_CHECK_PRIVILEGES) == TOF_CHECK_PRIVILEGES)
 		{
 			m_tablePrivileges.Initialize(db, m_tableInfo);
 			// We always need to be able to select, but the rest only if we want to write
@@ -909,10 +926,13 @@ namespace exodbc
 
 		// Bind the member variables for field exchange between
 		// the Table object and the ODBC record for Select()
-		for (ColumnBufferPtrMap::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		if (TestAccessFlag(AF_SELECT))
 		{
-			ColumnBuffer* pBuffer = it->second;
-			pBuffer->Bind(m_hStmtSelect);
+			for (ColumnBufferPtrMap::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+			{
+				ColumnBuffer* pBuffer = it->second;
+				pBuffer->Bind(m_hStmtSelect);
+			}
 		}
 
 		// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
@@ -946,12 +966,22 @@ namespace exodbc
 			}
 
 			// Build prepared statements, bind parameters.
-			BindInsertParameters();
-			BindDeleteParameters();
-			BindUpdateParameters();
+			if (TestAccessFlag(AF_INSERT))
+			{
+				BindInsertParameters();
+			}
+			if (TestAccessFlag(AF_DELETE))
+			{
+				BindDeleteParameters();
+			}
+			if (TestAccessFlag(AF_UPDATE))
+			{
+				BindUpdateParameters();
+			}
 		}
 
 		// Completed successfully
+		m_openFlags = openFlags;
 		m_isOpen = true;
 	}
 
@@ -1054,6 +1084,32 @@ namespace exodbc
 		if (statementsWereAllocated)
 		{
 			AllocateStatements(db);
+		}
+	}
+
+
+	void Table::SetCharTrimLeft(bool trimLeft) throw()
+	{
+		if (trimLeft)
+		{
+			m_openFlags |= TOF_CHAR_TRIM_LEFT;
+		}
+		else
+		{
+			m_openFlags &= ~TOF_CHAR_TRIM_LEFT;
+		}
+	}
+
+
+	void Table::SetCharTrimRight(bool trimRight) throw()
+	{
+		if (trimRight)
+		{
+			m_openFlags |= TOF_CHAR_TRIM_RIGHT;
+		}
+		else
+		{
+			m_openFlags &= ~TOF_CHAR_TRIM_RIGHT;
 		}
 	}
 

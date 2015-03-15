@@ -243,7 +243,7 @@ namespace exodbc
 		TOF_NONE = 0x0,				///< No special flags are set.
 		TOF_CHECK_EXISTANCE = 0x1,	///< Always check that a table identified by the STableInfo exists.
 		TOF_CHECK_PRIVILEGES = 0x2,	///< Check that we have sufficient privileges to open the table for the given AccessFlags
-		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	///< If AutoBinding is active, skip column that are not supported. Default is to fail on unsupported columns.
+		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	///< If AutoBinding is active, skip binding of columns that are not supported. Default is to fail on unsupported columns.
 		TOF_CHAR_TRIM_RIGHT = 0x8,	///< If set, string/wstring values accessed through this table are trimmed on the right before being returned as string/string
 		TOF_CHAR_TRIM_LEFT = 0x10	///< If set, string/wstring values accessed through this table are trimmed on the left before being returned as string/string
 	};
