@@ -147,11 +147,11 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, Open)
 	{		
-		// Open an existing db by passing the Env to the ctor and reading the params from the Environment (the old wx-way)
-		Environment env(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password, OV_3);
-		EXPECT_TRUE(env.HasHenv());
+		// Open an existing db by passing the Env to the ctor
+		Environment env(OV_3);
+		ASSERT_TRUE(env.HasHenv());
 		Database db(env);
-		EXPECT_NO_THROW(db.Open(&env));
+		EXPECT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		EXPECT_NO_THROW(db.Close());
 
 		// Open an existing db using the default c'tor and setting params on db
