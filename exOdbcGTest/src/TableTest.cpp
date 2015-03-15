@@ -54,7 +54,7 @@ namespace exodbc
 		m_env.SetOdbcVersion(OV_3);
 
 		// And database
-		ASSERT_NO_THROW(m_db.AllocateHdbc(m_env));
+		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
@@ -918,7 +918,7 @@ namespace exodbc
 		Environment env38(OV_3_8);
 		EXPECT_TRUE(env38.HasEnvironmentHandle());
 		Database db38(env38);
-		EXPECT_TRUE(db38.HasHdbc());
+		EXPECT_TRUE(db38.HasConnectionHandle());
 		if (m_db.Dbms() == dbmsMY_SQL)
 		{
 			// My SQL does not support 3.8, the database will warn about a version-mismatch and fall back to 3.0. we know about that.

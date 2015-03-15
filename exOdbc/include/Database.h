@@ -127,9 +127,9 @@ namespace exodbc
 	public:
 		/*!
 		* \brief	Default Constructor. You will need to manually allocate the DBC-Handle.
-		* \detailed	Default Constructor. You will need to call AllocateHdbc() 
+		* \detailed	Default Constructor. You will need to call AllocateConnectionHandle() 
 		*			afterwards to allocate the Database-handle.
-		* \see		AllocateHdbc()
+		* \see		AllocateConnectionHandle()
 		*/
 		Database() throw();
 
@@ -164,7 +164,7 @@ namespace exodbc
 		* \throw	Exception If a handle is already allocated, allocating fails or reading the ODBC-
 		*			version from the Environment fails.
 		*/
-		void		AllocateHdbc(const Environment& env);
+		void		AllocateConnectionHandle(const Environment& env);
 
 
 		/*!
@@ -536,18 +536,18 @@ namespace exodbc
 		/*!
 		* \brief	Check if this database has a connection handle allocated.
 		* \return	True if Connection handle is allocated.
-		* \see		AllocateHdbc()
+		* \see		AllocateConnectionHandle()
 		*/
-		bool			HasHdbc() const			{ return m_hdbc != SQL_NULL_HDBC; };
+		bool			HasConnectionHandle() const throw()			{ return m_hdbc != SQL_NULL_HDBC; };
 
 
 		/*!
 		* \brief	Get an eventually allocated connection handle.
 		* \return	Connection handle if allocated, or SQL_NULL_HDBC.
-		* \see		AllocateHdbc()
+		* \see		AllocateConnectionHandle()
 		* \throw	Exception If no handle is allocated.
 		*/
-		SQLHDBC            GetHDBC() const         { exASSERT(HasHdbc()); return m_hdbc; }
+		SQLHDBC            GetConnectionHandle() const         { exASSERT(HasConnectionHandle()); return m_hdbc; }
 
 
 		/*!
@@ -584,6 +584,13 @@ namespace exodbc
 		* \brief	Initialize all members to NULL / UNKNOWN.
 		*/
 		void			Initialize();
+
+
+		/*!
+		* \brief	Frees the connection SQLFreeHandle.
+		* \throw	SqlResultException if SQLFreeHandle returns SQL_ERROR or SQL_INVALID_HANDLE
+		*/
+		void			FreeConnectionHandle();
 
 
 		/*!

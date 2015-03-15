@@ -234,12 +234,12 @@ namespace exodbc
 	{
 		exASSERT(m_pDb);
 		exASSERT(m_pDb->IsOpen());
-		exASSERT(m_pDb->GetHDBC());
+		exASSERT(m_pDb->GetConnectionHandle());
 
 		// Allocate a statement handle for the database connection
 		SQLHSTMT stmt;
-		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_pDb->GetHDBC(), &stmt);
-		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_pDb->GetHDBC());
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_pDb->GetConnectionHandle(), &stmt);
+		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_pDb->GetConnectionHandle());
 		return stmt;
 	}
 
