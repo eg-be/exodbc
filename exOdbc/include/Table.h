@@ -241,9 +241,12 @@ namespace exodbc
 		* \detailed If no STableInfo object has been passed during construction the database is first
 		*			queried for a table matching the parameters passed. If not exactly one such table is
 		*			found Open will fail.
+		*
 		*			If no columns have been defined using SetColumn() the database is queried for all
-		*			columns of this table. Afterwards the columns are bound to their buffers, allocated
-		*			automatically during Open. If columns have been defined manually using SetColumn(),
+		*			columns of this table and corresponding ColumnBuffer objects are allocated.
+		*			Afterwards the columns are bound to their buffers. 
+		*			
+		*			If columns have been defined manually using SetColumn(),
 		*			the buffers passed there are used to bind only those columns defined manually.
 		*
 		* \param	checkPrivileges If true, the database will be queried checking if the current user
@@ -254,10 +257,21 @@ namespace exodbc
 		*			value to false makes only sense	if you've passed a STableInfo, as else the Table
 		*			is required to query the database anyway (and fail if not found).
 		* \see		IsOpen()
-		*
-		* \throw	Exception If anything goes wrong.
+		* \see		Close()
+		* \see		SetColumn()
+		* \throw	Exception If already open, table is not found, columns fail to bind..
 		*/
 		void		Open(bool checkPrivileges = false, bool checkTableExists = true);
+
+
+		/*!
+		* \brief	Close the table.
+		* \detailed	Unbinds and deletes all ColumnBuffers bound to this table. The information about
+		*			this table in the STableInfo queried during Open() is kept for future use.
+		* \see		Open()
+		* \throw	Exception If not Open or unbinding fails.
+		*/
+		void		Close();
 
 
 		/*!
@@ -724,6 +738,13 @@ namespace exodbc
 		* \throw	Exception If freeing statement fails.
 		*/
 		SQLHSTMT	FreeStatement(SQLHSTMT stmt);
+
+		
+		/*!
+		* \brief	Frees the statement handles allocated during AllocateStatements().
+		* \throw	SqlResultException if freeing one of the handles fail.
+		*/
+		void		FreeStatements();
 
 
 		void        cleanup();
