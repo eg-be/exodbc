@@ -33,10 +33,10 @@ namespace exodbc
 	}
 
 
-	TablePrimaryKeys::TablePrimaryKeys(Database* pDb, const STableInfo& tableInfo)
+	TablePrimaryKeys::TablePrimaryKeys(const Database& db, const STableInfo& tableInfo)
 		: m_initialized(false)
 	{
-		Initialize(pDb, tableInfo);
+		Initialize(db, tableInfo);
 		m_initialized = true;
 	}
 
@@ -46,14 +46,14 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void TablePrimaryKeys::Initialize(Database* pDb, const STableInfo& tableInfo)
+	void TablePrimaryKeys::Initialize(const Database& db, const STableInfo& tableInfo)
 	{
-		exASSERT(pDb);
+		exASSERT(db.IsOpen());
 
 		m_initialized = false;
 		TablePrimaryKeysVector tablePks;
 
-		tablePks = pDb->ReadTablePrimaryKeys(tableInfo);
+		tablePks = db.ReadTablePrimaryKeys(tableInfo);
 		Parse(tablePks);
 		m_initialized = true;
 	}

@@ -299,7 +299,7 @@ namespace exodbc
 		 * \return	Privileges	matching passed table.
 		 * \throw	Exception	If reading privileges fails.
 		 */
-		TablePrivilegesVector	ReadTablePrivileges(const STableInfo& table);
+		TablePrivilegesVector	ReadTablePrivileges(const STableInfo& table) const;
 
 
 		/*!
@@ -312,7 +312,7 @@ namespace exodbc
 		 * \return	Privileges for exactly one matching table.
 		 * \throw	Exception	If reading privileges fails, or not exactly one table matches.
 		 */
-		TablePrivilegesVector	ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
+		TablePrivilegesVector	ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
 
 
 		/*!
@@ -321,7 +321,7 @@ namespace exodbc
 		* \return	The primary Keys found.
 		* \throw	If reading primary keys fails.
 		*/
-		TablePrimaryKeysVector		ReadTablePrimaryKeys(const STableInfo& table);
+		TablePrimaryKeysVector		ReadTablePrimaryKeys(const STableInfo& table) const;
 
 
 		/*!
@@ -331,7 +331,7 @@ namespace exodbc
 		 * \return		Columns of passed table.
 		 * \throw Exception If reading ColumnInfo fails.
 		 */
-		std::vector<SColumnInfo>	ReadTableColumnInfo(const STableInfo& table);
+		std::vector<SColumnInfo>	ReadTableColumnInfo(const STableInfo& table) const;
 
 
 		/*!
@@ -344,7 +344,7 @@ namespace exodbc
 		 * \return		Columns of passed table.
 		 * \throw Exception If reading ColumnInfo fails or not exactly one table matches.
 		 */
-		std::vector<SColumnInfo>	ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
+		std::vector<SColumnInfo>	ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
 
 
 		/*!
@@ -360,7 +360,7 @@ namespace exodbc
 		 * \return	The tables found that match the search-criteria.
 		 * \throw Exception			If querying the database fails.
 		 */
-		std::vector<STableInfo>		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
+		std::vector<STableInfo>		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
 
 
 		/*!
@@ -372,7 +372,7 @@ namespace exodbc
 		* \return	The table info of exactly one table that matches the passed search-criterias name, schema and catalog. Throws otherwise
 		* \throw	If not exactly one table can be found
 		*/
-		STableInfo		FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
+		STableInfo		FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
 
 
 		/*!

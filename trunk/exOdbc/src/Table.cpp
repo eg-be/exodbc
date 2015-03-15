@@ -48,7 +48,7 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	Table::Table(Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, OpenMode openMode /* = READ_WRITE */)
+	Table::Table(const Database& db, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, OpenMode openMode /* = READ_WRITE */)
 		: m_numCols(numColumns)
 		, m_manualColumns(true)
 		, m_initialTableName(tableName)
@@ -57,15 +57,14 @@ namespace exodbc
 		, m_initialTypeName(tableType)
 		, m_openMode(openMode)
 		, m_haveTableInfo(false)
-		, m_pDb(pDb)
 	{
-		exASSERT(pDb);
+		exASSERT(db.IsOpen());
 		Initialize();
-		AllocateStatements(*pDb);
+		AllocateStatements(db);
 	}
 
 
-	Table::Table(Database* pDb, SQLSMALLINT numColumns, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
+	Table::Table(const Database& db, SQLSMALLINT numColumns, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
 		: m_numCols(numColumns)
 		, m_manualColumns(true)
 		, m_initialTableName(L"")
@@ -75,15 +74,14 @@ namespace exodbc
 		, m_openMode(openMode)
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
-		, m_pDb(pDb)
 	{
-		exASSERT(pDb);
+		exASSERT(db.IsOpen());
 		Initialize();
-		AllocateStatements(*pDb);
+		AllocateStatements(db);
 	}
 
 
-	Table::Table(Database* pDb, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, const OpenMode openMode /* = READ_WRITE */)
+	Table::Table(const Database& db, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, const OpenMode openMode /* = READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
 		, m_initialTableName(tableName)
@@ -92,15 +90,14 @@ namespace exodbc
 		, m_initialTypeName(tableType)
 		, m_openMode(openMode)
 		, m_haveTableInfo(false)
-		, m_pDb(pDb)
 	{
-		exASSERT(pDb);
+		exASSERT(db.IsOpen());
 		Initialize();
-		AllocateStatements(*pDb);
+		AllocateStatements(db);
 	}
 
 
-	Table::Table(Database* pDb, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
+	Table::Table(const Database& db, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
 		, m_initialTableName(L"")
@@ -110,11 +107,10 @@ namespace exodbc
 		, m_openMode(openMode)
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
-		, m_pDb(pDb)
 	{
-		exASSERT(pDb);
+		exASSERT(db.IsOpen());
 		Initialize();
-		AllocateStatements(*pDb);
+		AllocateStatements(db);
 	}
 
 
@@ -774,10 +770,9 @@ namespace exodbc
 	}
 
 
-	void Table::Open(bool checkPrivileges, bool checkTableExists)
+	void Table::Open(const Database& db, bool checkPrivileges, bool checkTableExists)
 	{
-		exASSERT(m_pDb);
-		exASSERT(m_pDb->IsOpen());
+		exASSERT(db.IsOpen());
 		exASSERT(!IsOpen());
 		exASSERT(HasStatements());
 		// \note: We do not force a user to define columns.
@@ -787,12 +782,11 @@ namespace exodbc
 		s.empty();
 
 		// If we do not already have a STableInfo for our table, we absolutely must find one
-		// \\todo: This is redundant, m_haveTableInfo and searchedTable is enough
 		bool searchedTable = false;
 		if (!m_haveTableInfo)
 		{
 			// Finding will throw if not exactly one is found
-			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
+			m_tableInfo = db.FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
 			m_haveTableInfo = true;
 			searchedTable = true;
 		}
@@ -801,7 +795,7 @@ namespace exodbc
 		if (checkTableExists && !searchedTable)
 		{
 			// Will throw if not one is found
-			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
+			m_tableInfo = db.FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
 			m_haveTableInfo = true;
 			searchedTable = true;
 		}
@@ -810,7 +804,7 @@ namespace exodbc
 		if (!m_manualColumns)
 		{
 			// Will throw if fails
-			std::vector<SColumnInfo> columns = m_pDb->ReadTableColumnInfo(m_tableInfo);
+			std::vector<SColumnInfo> columns = db.ReadTableColumnInfo(m_tableInfo);
 			// Remember column sizes and create ColumnBuffers
 			m_numCols = columns.size();
 			if (m_numCols == 0)
@@ -820,7 +814,7 @@ namespace exodbc
 				throw ex;
 			}
 			// We need to know which ODBC version we are using, might throw
-			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
+			OdbcVersion odbcVersion = db.GetMaxSupportedOdbcVersion();
 			// And how to open this column
 			ColumnFlags columnFlags = IsQueryOnly() ? CF_READ : CF_READ_WRITE;
 			for (int columnIndex = 0; columnIndex < (SQLSMALLINT) columns.size(); columnIndex++)
@@ -836,7 +830,7 @@ namespace exodbc
 
 		if (checkPrivileges)
 		{
-			m_tablePrivileges.Initialize(m_pDb, m_tableInfo);
+			m_tablePrivileges.Initialize(db, m_tableInfo);
 			// We always need to be able to select, but the rest only if we want to write
 			if ( ! ( m_tablePrivileges.IsSet(TP_SELECT) && (m_openMode == READ_ONLY || (m_tablePrivileges.AreSet(TP_INSERT | TP_UPDATE | TP_DELETE) ))) )
 			{
@@ -858,7 +852,7 @@ namespace exodbc
 		if (!IsQueryOnly())
 		{
 			// We need the primary keys
-			m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo);
+			m_tablePrimaryKeys.Initialize(db, m_tableInfo);
 
 			// And we need to have a primary key
 			if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)

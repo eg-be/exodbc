@@ -31,10 +31,10 @@ namespace exodbc
 	}
 
 
-	TablePrivileges::TablePrivileges(Database* pDb, const STableInfo& tableInfo)
+	TablePrivileges::TablePrivileges(const Database& db, const STableInfo& tableInfo)
 		: m_initialized(false)
 	{
-		Initialize(pDb, tableInfo);
+		Initialize(db, tableInfo);
 		m_initialized = true;
 	}
 
@@ -44,15 +44,15 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void TablePrivileges::Initialize(Database* pDb, const STableInfo& tableInfo)
+	void TablePrivileges::Initialize(const Database& db, const STableInfo& tableInfo)
 	{
-		exASSERT(pDb);
+		exASSERT(db.IsOpen());
 
 		m_privileges = 0;
 		m_initialized = false;
 		TablePrivilegesVector tablePrivs;
 
-		tablePrivs = pDb->ReadTablePrivileges(tableInfo);
+		tablePrivs = db.ReadTablePrivileges(tableInfo);
 		Parse(tablePrivs);
 		m_initialized = true;
 	}
