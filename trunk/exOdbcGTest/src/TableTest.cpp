@@ -171,24 +171,46 @@ namespace exodbc
 	TEST_P(TableTest, Close)
 	{
 		// Create table
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(m_db, tableName, L"", L"", L"", Table::READ_ONLY);
 
 		// Close when not open must fail
+		{
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(iTable.Close(), AssertionException);
+		}
 
 		// Open a Table read-only
+		ASSERT_NO_THROW(iTable.Open(m_db, false, true));
 
 		// Close must work
+		EXPECT_NO_THROW(iTable.Close());
 
 		// Close an already closed table
+		{
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(iTable.Close(), AssertionException);
+		}
 	}
 
 
-	TEST_P(TableTest, ReOpen)
+	TEST_P(TableTest, OpenAndCloseAndOpenAndClose)
 	{
 		// Create a Table, open for reading
-		// read something
+		std::wstring tableName = TestTables::GetTableName(L"integertypes", m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+		ASSERT_NO_THROW(iTable.Open(m_db, false, true));
+
 		// Close Table
+		EXPECT_NO_THROW(iTable.Close());
+
 		// Open again for reading
-		// read something
+		EXPECT_NO_THROW(iTable.Open(m_db, false, true));
+
+		// And close again
+		EXPECT_NO_THROW(iTable.Close());
 	}
 
 
