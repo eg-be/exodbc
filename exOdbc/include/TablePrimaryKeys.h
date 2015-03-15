@@ -57,7 +57,7 @@ namespace exodbc
 		* \see		IsInitialized()
 		* \throw	Exception If querying primary keys fails.
 		*/
-		TablePrimaryKeys(Database* pDb, const STableInfo& tableInfo);
+		TablePrimaryKeys(const Database& db, const STableInfo& tableInfo);
 
 
 		~TablePrimaryKeys() {};
@@ -68,7 +68,7 @@ namespace exodbc
 		*			Marks object as initialized on success.
 		* \throw	If querying fails or parsing fails.
 		*/
-		void Initialize(Database* pDb, const STableInfo& tableInfo);
+		void Initialize(const Database& db, const STableInfo& tableInfo);
 
 
 		/*!

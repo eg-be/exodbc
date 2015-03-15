@@ -405,7 +405,7 @@ namespace exodbc
 	}
 
 
-	STableInfo Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType)
+	STableInfo Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
 	{
 		// Query the tables that match
 		std::vector<STableInfo> tables = FindTables(tableName, schemaName, catalogName, tableType);
@@ -592,7 +592,7 @@ namespace exodbc
 	}
 
 
-	std::vector<STableInfo> Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType)
+	std::vector<STableInfo> Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
 	{
 		exASSERT(IsOpen());
 
@@ -694,7 +694,7 @@ namespace exodbc
 	}
 
 
-	TablePrimaryKeysVector Database::ReadTablePrimaryKeys(const STableInfo& table)
+	TablePrimaryKeysVector Database::ReadTablePrimaryKeys(const STableInfo& table) const
 	{
 		exASSERT(IsOpen());
 		// Close Statement and make sure it closes upon exit
@@ -728,7 +728,7 @@ namespace exodbc
 	}
 
 
-	TablePrivilegesVector Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType)
+	TablePrivilegesVector Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
 	{
 		exASSERT(IsOpen());
 
@@ -740,7 +740,7 @@ namespace exodbc
 	}
 
 
-	TablePrivilegesVector Database::ReadTablePrivileges(const STableInfo& table)
+	TablePrivilegesVector Database::ReadTablePrivileges(const STableInfo& table) const
 	{
 		exASSERT(IsOpen());
 
@@ -787,7 +787,7 @@ namespace exodbc
 	}
 
 
-	std::vector<SColumnInfo> Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType)
+	std::vector<SColumnInfo> Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
 	{
 		exASSERT(IsOpen());
 
@@ -799,7 +799,7 @@ namespace exodbc
 	}
 
 
-	std::vector<SColumnInfo> Database::ReadTableColumnInfo(const STableInfo& table)
+	std::vector<SColumnInfo> Database::ReadTableColumnInfo(const STableInfo& table) const
 	{
 		exASSERT(IsOpen());
 

@@ -129,7 +129,7 @@ namespace exodbc
 		*			This is handy if you've located the detailed table-information already from the Database
 		*			using its Database::FindTables() function and want to avoid that is operation is
 		*			executed again during Open().
-		* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		* \param	db		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	tableInfo Definition of the table.
 		* \param	openMode Define if the table shall be opened read-only or not
@@ -137,7 +137,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(Database* pDb, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
+		Table(const Database& db, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
 
 
 		/*!
@@ -149,7 +149,7 @@ namespace exodbc
 		*			If any of the values is an empty string it is ignored when searching for the table
 		*			in the database.
 		*
-		* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		* \param	db		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	tableName	Table name
 		* \param	schemaName	Schema name
@@ -160,7 +160,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(Database* pDb, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", const OpenMode openMode = READ_WRITE);
+		Table(const Database& db, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", const OpenMode openMode = READ_WRITE);
 
 
 		/*!
@@ -170,7 +170,7 @@ namespace exodbc
 		*			If any of the values is an empty string it is ignored when searching for the table
 		*			in the database.
 		*
-		* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		* \param	db		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	numColumns The number of columns of the Table. Note: This must not be equal
 		*			with the number of Columns you define later (but it must be larger or equal).
@@ -185,7 +185,7 @@ namespace exodbc
 		* \see		SetColumn()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", OpenMode openMode = READ_WRITE);
+		Table(const Database& db, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", OpenMode openMode = READ_WRITE);
 
 
 		/*!
@@ -197,7 +197,7 @@ namespace exodbc
 		*			using its Database::FindTables() function and want to avoid that is operation is
 		*			executed again during Open().
 		*
-		* \param	pDb		The Database this Table belongs to. Do not free the Database before
+		* \param	db		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	numColumns The number of columns of the Table. Note: This must not be equal
 		*			with the number of Columns you define later (but it must be larger or equal).
@@ -209,7 +209,7 @@ namespace exodbc
 		* \see		SetColumn()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(Database* pDb, SQLSMALLINT numColumns, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
+		Table(const Database& db, SQLSMALLINT numColumns, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
 
 
 		virtual ~Table();
@@ -261,7 +261,7 @@ namespace exodbc
 		* \see		SetColumn()
 		* \throw	Exception If already open, table is not found, columns fail to bind..
 		*/
-		void		Open(bool checkPrivileges = false, bool checkTableExists = true);
+		void		Open(const Database& db, bool checkPrivileges = false, bool checkTableExists = true);
 
 
 		/*!
@@ -320,14 +320,6 @@ namespace exodbc
 		* \brief	Test if a CharTrimOption is set.
 		*/
 		bool		TestCharTrimOption(CharTrimOption option) const throw() { return (m_charTrimFlags & option) == option;  };
-
-
-		/*!
-		* \brief	Get the database that was set during constructions.
-		*
-		* \return	Database this Table belongs to.
-		*/
-		Database*	GetDb() const throw()		{ return m_pDb; }
 
 
 		/*!
@@ -790,9 +782,6 @@ namespace exodbc
 		SQLHSTMT		m_hStmtUpdateWhere;	///< Statement-handle to do UPDATEs using a passed WHERE clause.
 
 		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
-
-		// Pointer to the database object this table belongs to
-		Database*		m_pDb;
 
 		// Table Information
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set

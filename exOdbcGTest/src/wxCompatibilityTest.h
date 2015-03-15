@@ -44,7 +44,7 @@ namespace exodbc
 	protected:
 		SOdbcInfo m_odbcInfo;
 		exodbc::Environment	m_env;
-		exodbc::Database*		m_pDb;
+		exodbc::Database	m_db;
 
 		virtual void SetUp();
 		virtual void TearDown();

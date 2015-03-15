@@ -60,7 +60,7 @@ namespace exodbc
 		* \detailed	Tries to Initialize() this TablePrivileges automatically.
 		* \throw	Exception If Initialization fails.
 		*/
-		TablePrivileges(Database* pDb, const STableInfo& tableInfo);
+		TablePrivileges(const Database& db, const STableInfo& tableInfo);
 		
 		
 		~TablePrivileges() {};
@@ -71,7 +71,7 @@ namespace exodbc
 		*			Marks object as initialized on success.
 		* \throw	Exception If querying or parsing fails.
 		*/
-		void Initialize(Database* pDb, const STableInfo& tableInfo);
+		void Initialize(const Database& db, const STableInfo& tableInfo);
 
 
 		/*!
