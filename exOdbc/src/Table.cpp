@@ -122,7 +122,21 @@ namespace exodbc
 	// -----------
 	Table::~Table()
 	{
-		this->cleanup();
+		try
+		{
+			if (IsOpen())
+			{
+				Close();
+			}
+			if (HasStatements())
+			{
+				FreeStatements();
+			}
+		}
+		catch (Exception ex)
+		{
+			LOG_ERROR(ex.ToString());
+		}
 	}
 
 
@@ -401,59 +415,6 @@ namespace exodbc
 		}
 
 		return it->second;
-	}
-
-	// \todo: Rewrite everything, together with the Close() method
-	void Table::cleanup()
-	{
-		// Unbind ColumnBuffers
-		SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
-		if (ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFreeStmt);
-		}
-		// And column parameters, if we were bound rw
-		if (m_openMode == READ_WRITE)
-		{
-			if((ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS)) != SQL_SUCCESS)
-				LOG_ERROR_STMT(m_hStmtInsert, ret, SQLFreeStmt);
-
-			if((ret = SQLFreeStmt(m_hStmtDelete, SQL_RESET_PARAMS)) != SQL_SUCCESS)
-				LOG_ERROR_STMT(m_hStmtDelete, ret, SQLFreeStmt);
-
-
-			if ((ret = SQLFreeStmt(m_hStmtUpdate, SQL_RESET_PARAMS)) != SQL_SUCCESS)
-				LOG_ERROR_STMT(m_hStmtUpdate, ret, SQLFreeStmt);
-
-			if ((ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_RESET_PARAMS)) != SQL_SUCCESS)
-				LOG_ERROR_STMT(m_hStmtUpdateWhere, ret, SQLFreeStmt);
-
-			if ((ret = SQLFreeStmt(m_hStmtDeleteWhere, SQL_RESET_PARAMS)) != SQL_SUCCESS)
-				LOG_ERROR_STMT(m_hStmtDeleteWhere, ret, SQLFreeStmt);
-
-		}
-
-		// Delete ColumnBuffers
-		ColumnBufferPtrMap::iterator it;
-		for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		{
-			ColumnBuffer* pBuffer = it->second;
-			delete pBuffer;
-		}
-		m_columnBuffers.clear();
-
-		// \todo: throws
-		FreeStatements();
-
-		//if (m_hstmtInternal)
-		//{
-		//	if (SQLFreeStmt(m_hstmtInternal, SQL_DROP) != SQL_SUCCESS)
-		//		m_pDb->DispAllErrors(NULL, m_hdbc);
-		//}
-
-
-		//if (m_hstmtCount)
-		//	DeleteCursor(m_hstmtCount);
 	}
 
 
@@ -931,6 +892,46 @@ namespace exodbc
 
 		// Completed successfully
 		m_isOpen = true;
+	}
+
+
+	void Table::Close()
+	{
+		exASSERT(IsOpen());
+
+		// Unbind ColumnBuffers
+		SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
+		THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect);
+
+		// And column parameters, if we were bound rw
+		if (m_openMode == READ_WRITE)
+		{
+			ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert);
+
+			ret = SQLFreeStmt(m_hStmtDelete, SQL_RESET_PARAMS);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDelete);
+
+			ret = SQLFreeStmt(m_hStmtUpdate, SQL_RESET_PARAMS);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
+
+			ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_RESET_PARAMS);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
+
+			ret = SQLFreeStmt(m_hStmtDeleteWhere, SQL_RESET_PARAMS);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
+		}
+
+		// Delete ColumnBuffers
+		ColumnBufferPtrMap::iterator it;
+		for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		{
+			ColumnBuffer* pBuffer = it->second;
+			delete pBuffer;
+		}
+		m_columnBuffers.clear();
+
+		m_isOpen = false;
 	}
 
 
