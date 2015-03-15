@@ -243,6 +243,7 @@ namespace exodbc {
 	STableInfo::STableInfo()
 		: m_isCatalogNull(false)
 		, m_isSchemaNull(false)
+		, m_hasSpecialSqlQueryName(false)
 	{
 
 	}
@@ -250,6 +251,11 @@ namespace exodbc {
 
 	std::wstring STableInfo::GetSqlName(int flags /* = CATALOG | SCHEMA | TABLE */) const
 	{
+		if (m_hasSpecialSqlQueryName)
+		{
+			return m_specialSqlQueryName;
+		}
+
 		exASSERT(!m_tableName.empty());
 
 		std::wstringstream ws;
