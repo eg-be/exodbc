@@ -95,17 +95,6 @@ namespace exodbc
 	public:
 
 		/*!
-		* \enum OpenMode
-		* \brief Defines if a table is opened read-only or writable
-		*/
-		enum OpenMode
-		{
-			READ_ONLY,	///< Only query the table using SELECT statements
-			READ_WRITE	///< Open the table for querying and modifying
-		};
-
-
-		/*!
 		* \enum		CharTrimOption
 		* \brief	Define whether you want to trim string and wstring values returned from the Table functions GetColumnValue()
 		* \detailed	Note that setting this flag will not modify the actual data-buffer, but only the string-values
@@ -132,12 +121,12 @@ namespace exodbc
 		* \param	db		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	tableInfo Definition of the table.
-		* \param	openMode Define if the table shall be opened read-only or not
+		* \param	afs Define if the table shall be opened read-only or not, determines how many statements are allocated
 		*
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database& db, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
+		Table(const Database& db, const STableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
 
 
 		/*!
@@ -155,12 +144,12 @@ namespace exodbc
 		* \param	schemaName	Schema name
 		* \param	catalogName	Catalog name
 		* \param	tableType	Table type
-		* \param	openMode Define if the table shall be opened read-only or not
+		* \param	afs Define if the table shall be opened read-only or not, determines how many statements are allocated
 		*
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database& db, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", const OpenMode openMode = READ_WRITE);
+		Table(const Database& db, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", AccessFlags afs = AF_READ_WRITE);
 
 
 		/*!
@@ -179,13 +168,13 @@ namespace exodbc
 		* \param	schemaName	Schema name
 		* \param	catalogName	Catalog name
 		* \param	tableType	Table type
-		* \param	openMode Define if the table shall be opened read-only or not
+		* \param	afs Define if the table shall be opened read-only or not, determines how many statements are allocated
 		*
 		* \see		Open()
 		* \see		SetColumn()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database& db, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", OpenMode openMode = READ_WRITE);
+		Table(const Database& db, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", AccessFlags afs = AF_READ_WRITE);
 
 
 		/*!
@@ -203,13 +192,13 @@ namespace exodbc
 		*			with the number of Columns you define later (but it must be larger or equal).
 		*			It should be the number of columns the Table really has in the database.
 		* \param	tableInfo Definition of the table.
-		* \param	openMode Define if the table shall be opened read-only or not
+		* \param	afs Define if the table shall be opened read-only or not, determines how many statements are allocated
 		*
 		* \see		Open()
 		* \see		SetColumn()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database& db, SQLSMALLINT numColumns, const STableInfo& tableInfo, OpenMode openMode = READ_WRITE);
+		Table(const Database& db, SQLSMALLINT numColumns, const STableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
 
 
 		virtual ~Table();
@@ -287,26 +276,7 @@ namespace exodbc
 		* \brief	Get the OpenMode of this Table
 		* \return	True if this table was created using READ_ONLY
 		*/
-		bool		IsQueryOnly() const throw()  { return m_openMode == READ_ONLY; }
-
-
-		/*!
-		* \brief	Set the OpenMode of this Table. This can only be called on a
-		*			closed Table, so IsOpen() must returns false.
-		* \detailed	This will Free all statements associated with this table, switch
-		*			the OpenMode and then re-allocate all statements required for the
-		*			passed OpenMode.
-		*			
-		*			This function does nothing if the passed openMode is equal to the
-		*			currently active OpenMode.
-		* \param	db The Database to use to allocate the statements. Do not free the
-		*			Database before this table is freed.
-		* \param	openMode New OpenMode.
-		* \see		IsOpen()
-		* \throw	Exception If Table is not closed, or freeing and re-allocating the
-		*			statement fails.
-		*/
-		void		SetOpenMode(const Database& db, OpenMode openMode);
+		bool		IsQueryOnly() const throw()  { return TestAccessFlag(AF_READ) && !TestAccessFlag(AF_WRITE); }
 
 
 		/*!
@@ -333,6 +303,58 @@ namespace exodbc
 		* \brief	Set a CharTrimOption. Setting to TRIM_NO will clear all other flags.
 		*/
 		void		SetCharTrimOption(CharTrimOption option) throw() { option == TRIM_NO ? m_charTrimFlags = TRIM_NO : m_charTrimFlags |= option; };
+
+
+		/*!
+		* \brief	Set an AccessFlag. Can only be called if Table is Closed, so
+		*			when IsOpen() returns false.
+		* \detailed	If the flag passed is already set, this function will do nothing.
+		*			
+		*			If a change is detected, and the statements were already allocated,
+		*			the function will free all statements and re-allocate the statements
+		*			required for the current AccessFlags set.
+		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
+		*/
+		void		SetAccessFlag(const Database& db, AccessFlag ac);
+
+
+		/*!
+		* \brief	Clear an AccessFlag. Can only be called if Table is Closed, so
+		*			when IsOpen() returns false.
+		* \detailed	If the flag passed is already cleared, this function will do nothing.
+		*
+		*			If a change is detected, and the statements were already allocated,
+		*			the function will free all statements and re-allocate the statements
+		*			required for the current AccessFlags set.
+		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
+		*/
+		void		ClearAccessFlag(const Database& db, AccessFlag ac);
+
+
+		/*!
+		* \brief	Set multiple AccessFlags. Can only be called if Table is Closed, so
+		*			when IsOpen() returns false.
+		* \detailed	If the flags passed are the same as already set on the table, this
+		*			function will do nothing.
+		*
+		*			If a change is detected, and the statements were already allocated,
+		*			the function will free all statements and re-allocate the statements
+		*			required for the current AccessFlags set.
+		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
+		*/
+		void		SetAccessFlags(const Database& db, AccessFlags acs);
+
+
+		/*!
+		* \brief	Test if an AccessFlag is set.
+		*/
+		bool		TestAccessFlag(AccessFlag ac) const throw() { return (m_accessFlags & ac) == ac; };
+
+
+		/*!
+		* \brief	Get the AccessFlags bitmask.
+		*/
+		AccessFlags	GetAccessFlags() const throw() { return m_accessFlags; };
 
 
 		/*!
@@ -718,7 +740,7 @@ namespace exodbc
 		* \param	bufferSize The size of the buffer pointed to by pBuffer.
 		* \param	flags Define if a column shall be included in write-operations, is part of primary-key, etc.
 		*/
-		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlag flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 
 		// Private stuff
@@ -805,10 +827,10 @@ namespace exodbc
 		// Table Information
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
-		const OpenMode		m_openMode;				///< Read-only or writable
 		AutoBindingMode		m_autoBindingMode;		///< Store the auto-binding of this table. TODO: Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
 		unsigned int		m_charTrimFlags;		///< Bitmask for the CharTrimOption Flags
+		AccessFlags			m_accessFlags;			///< Bitmask for the AccessFlag flags.
 		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
 		TablePrimaryKeys	m_tablePrimaryKeys;		///< Table Primary Keys read during Open if table was opened READ_WRITE.
 

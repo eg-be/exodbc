@@ -337,7 +337,7 @@ namespace exodbc
 		/*!
 		* \brief	Test if a ColumnFlags is set.
 		*/
-		bool IsColumnFlagSet(ColumnFlags columnFlag) const throw() { return (m_flags & columnFlag) == columnFlag; };
+		bool IsColumnFlagSet(ColumnFlag columnFlag) const throw() { return (m_flags & columnFlag) == columnFlag; };
 
 
 		/*!
@@ -345,7 +345,7 @@ namespace exodbc
 		* \detailed	Flags must be set before the ColumnBuffer is Bound to the buffer!
 		* \throw	Exception
 		*/
-		void SetColumnFlag(ColumnFlags columnFlag) { exASSERT(!IsBound());  m_flags |= columnFlag; };
+		void SetColumnFlag(ColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags |= columnFlag; };
 
 
 		/*!
@@ -353,7 +353,7 @@ namespace exodbc
 		* \detailed	Flags must be cleared before the ColumnBuffer is Bound!
 		* \throw	Exception
 		*/
-		void ClearColumnFlag(ColumnFlags columnFlag) { exASSERT(!IsBound());  m_flags &= ~columnFlag; };
+		void ClearColumnFlag(ColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags &= ~columnFlag; };
 
 
 		/*!
@@ -614,7 +614,7 @@ namespace exodbc
 #endif
 		SQL_NUMERIC_STRUCT*		GetNumericPtr() const;
 
-		int						m_flags;				///< Flags, set during construction.
+		ColumnFlags				m_flags;				///< Flags, set during construction.
 		SQLINTEGER				m_columnSize;			///< Column Size, either read from SColumnInfo during construction or set manually. -1 indicates unknown.
 		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from SColumnInfo during construction or set manually. -1 indicates unkonwn.
 		std::wstring			m_queryName;			///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
