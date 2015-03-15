@@ -498,43 +498,49 @@ namespace exodbc
 		/*!
 		* \brief	Get DSN set during Open().
 		* \return	DSN set during Open().
+		* \throw	Exception
 		*/
-		const std::wstring& GetDataSourceName() const    { exDEBUG(!m_dbOpenedWithConnectionString);  return m_dsn; }
+		const std::wstring& GetDataSourceName() const    { exASSERT(!m_dbOpenedWithConnectionString);  return m_dsn; }
 		
 
 		/*!
 		* \brief	Get DSN set during Open().
 		* \return	DSN set during Open().
+		* \throw	Exception
 		*/
-		const std::wstring& GetDatasourceName() const { exDEBUG(!m_dbOpenedWithConnectionString);  return m_dsn; }
+		const std::wstring& GetDatasourceName() const { exASSERT(!m_dbOpenedWithConnectionString);  return m_dsn; }
 
 
 		/*!
 		* \brief	Get Username set during Open().
 		* \return	Username set during Open().
+		* \throw	Exception
 		*/
-		const std::wstring& GetUsername() const     { exDEBUG(!m_dbOpenedWithConnectionString);  return m_uid; }
+		const std::wstring& GetUsername() const     { exASSERT(!m_dbOpenedWithConnectionString);  return m_uid; }
 
 
 		/*!
 		* \brief	Get Password set during Open().
 		* \return	Password set during Open().
+		* \throw	Exception
 		*/
-		const std::wstring& GetPassword() const      { exDEBUG(!m_dbOpenedWithConnectionString);  return m_authStr; }
+		const std::wstring& GetPassword() const      { exASSERT(!m_dbOpenedWithConnectionString);  return m_authStr; }
 
 
 		/*!
 		* \brief	Get Connection String passed during Open().
 		* \return	Connection String passed during Open().
+		* \throw	Exception
 		*/
-		const std::wstring& GetConnectionInStr() const  { exDEBUG(m_dbOpenedWithConnectionString); return m_inConnectionStr; }
+		const std::wstring& GetConnectionInStr() const  { exASSERT(m_dbOpenedWithConnectionString); return m_inConnectionStr; }
 
 
 		/*!
 		* \brief	Get Connection String read from database after Open() was successful.
 		* \return	Connection String read from database after Open() was successful.
+		* \throw	Exception
 		*/
-		const std::wstring& GetConnectionOutStr() const { exDEBUG(m_dbOpenedWithConnectionString); exDEBUG(m_dbIsOpen);  return m_outConnectionStr; }
+		const std::wstring& GetConnectionOutStr() const { exASSERT(m_dbOpenedWithConnectionString); exASSERT(m_dbIsOpen);  return m_outConnectionStr; }
 
 
 		/*!
