@@ -214,6 +214,31 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, SetOpenMode)
+	{
+		// Create a Table, for reading only
+		std::wstring tableName = TestTables::GetTableName(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(m_db, tableName, L"", L"", L"", Table::READ_ONLY);
+
+		// Before opening it, change the mode, then open
+		ASSERT_NO_THROW(iTable.SetOpenMode(m_db, Table::READ_WRITE));
+		ASSERT_NO_THROW(iTable.Open(m_db, false, false));
+
+		// We cannot change the mode if the table is open
+		{
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(iTable.SetOpenMode(m_db, Table::READ_ONLY), AssertionException);
+		}
+
+		// But when we close first we can
+		EXPECT_NO_THROW(iTable.Close());
+		EXPECT_NO_THROW(iTable.SetOpenMode(m_db, Table::READ_ONLY));
+		// And we can open it again
+		EXPECT_NO_THROW(iTable.Open(m_db, false, false));
+	}
+
+
 	// Select / GetNext
 	// ----------------
 	TEST_P(TableTest, Select)

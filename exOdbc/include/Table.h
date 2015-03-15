@@ -291,6 +291,25 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Set the OpenMode of this Table. This can only be called on a
+		*			closed Table, so IsOpen() must returns false.
+		* \detailed	This will Free all statements associated with this table, switch
+		*			the OpenMode and then re-allocate all statements required for the
+		*			passed OpenMode.
+		*			
+		*			This function does nothing if the passed openMode is equal to the
+		*			currently active OpenMode.
+		* \param	db The Database to use to allocate the statements. Do not free the
+		*			Database before this table is freed.
+		* \param	openMode New OpenMode.
+		* \see		IsOpen()
+		* \throw	Exception If Table is not closed, or freeing and re-allocating the
+		*			statement fails.
+		*/
+		void		SetOpenMode(const Database& db, OpenMode openMode);
+
+
+		/*!
 		* \brief	Set the AutoBindingMode. Must be called before Open().
 		* \detailed	This will set the AutoBindingMode globally for this table.
 		*			It can still be overridden for specific columns by defining
