@@ -235,11 +235,14 @@ namespace exodbc
 
 		m_inConnectionStr = inConnectStr;
 
+		// Note: 
+		// StringLength1: [Input] Length of *InConnectionString, in characters if the string is Unicode, or bytes if string is ANSI or DBCS.
+		// BufferLength: [Input] Length of the *OutConnectionString buffer, in characters.
 		retcode = SQLDriverConnect(m_hdbc, parentWnd, 
 			(SQLWCHAR*) m_inConnectionStr.c_str(),
 			m_inConnectionStr.length(), 
-			(SQLWCHAR*) outConnectBuffer,
-			EXSIZEOF(outConnectBuffer), &outConnectBufferLen, SQL_DRIVER_COMPLETE );
+			(SQLWCHAR*) outConnectBuffer, 
+			SQL_MAX_CONNECTSTR_LEN, &outConnectBufferLen, SQL_DRIVER_COMPLETE);
 
 		THROW_IFN_SUCCEEDED(SQLDriverConnect, retcode, SQL_HANDLE_DBC, m_hdbc);
 
