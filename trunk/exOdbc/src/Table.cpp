@@ -175,12 +175,20 @@ namespace exodbc
 
 	bool Table::HasStatements() const throw()
 	{
-		return (SQL_NULL_HSTMT != m_hStmtCount
-			&& SQL_NULL_HSTMT != m_hStmtSelect
-			&& SQL_NULL_HSTMT != m_hStmtInsert
-			&& SQL_NULL_HSTMT != m_hStmtUpdate
-			&& SQL_NULL_HSTMT != m_hStmtDeleteWhere
-			&& SQL_NULL_HSTMT != m_hStmtUpdateWhere);
+		if (m_openMode == READ_ONLY)
+		{
+			return (SQL_NULL_HSTMT != m_hStmtCount
+				&& SQL_NULL_HSTMT != m_hStmtSelect);
+		}
+		else
+		{
+			return (SQL_NULL_HSTMT != m_hStmtCount
+				&& SQL_NULL_HSTMT != m_hStmtSelect
+				&& SQL_NULL_HSTMT != m_hStmtInsert
+				&& SQL_NULL_HSTMT != m_hStmtUpdate
+				&& SQL_NULL_HSTMT != m_hStmtDeleteWhere
+				&& SQL_NULL_HSTMT != m_hStmtUpdateWhere);
+		}
 	}
 
 
@@ -200,6 +208,7 @@ namespace exodbc
 	SQLHSTMT Table::FreeStatement(SQLHSTMT hStmt)
 	{
 		// Free statement handle
+		// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
 		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
 		if (ret == SQL_ERROR)
 		{
@@ -220,6 +229,25 @@ namespace exodbc
 		hStmt = SQL_NULL_HENV;
 
 		return hStmt;
+	}
+
+
+	void Table::FreeStatements()
+	{
+		// Free allocated statements
+		// First those created always
+		m_hStmtCount = FreeStatement(m_hStmtCount);
+		m_hStmtSelect = FreeStatement(m_hStmtSelect);
+
+		if (!IsQueryOnly())
+		{
+			// And then those needed for writing
+			m_hStmtInsert = FreeStatement(m_hStmtInsert);
+			m_hStmtDelete = FreeStatement(m_hStmtDelete);
+			m_hStmtUpdate = FreeStatement(m_hStmtUpdate);
+			m_hStmtUpdateWhere = FreeStatement(m_hStmtUpdateWhere);
+			m_hStmtDeleteWhere = FreeStatement(m_hStmtDeleteWhere);
+		}
 	}
 
 
@@ -414,20 +442,8 @@ namespace exodbc
 		}
 		m_columnBuffers.clear();
 
-		// Free allocated statements
-		// First those created always
-		m_hStmtCount = FreeStatement(m_hStmtCount);
-		m_hStmtSelect = FreeStatement(m_hStmtSelect);
-
-		if (!IsQueryOnly())
-		{
-			// And then those needed for writing
-			m_hStmtInsert = FreeStatement(m_hStmtInsert);
-			m_hStmtDelete = FreeStatement(m_hStmtDelete);
-			m_hStmtUpdate = FreeStatement(m_hStmtUpdate);
-			m_hStmtUpdateWhere = FreeStatement(m_hStmtUpdateWhere);
-			m_hStmtDeleteWhere = FreeStatement(m_hStmtDeleteWhere);
-		}
+		// \todo: throws
+		FreeStatements();
 
 		//if (m_hstmtInternal)
 		//{
@@ -802,6 +818,7 @@ namespace exodbc
 		exASSERT(m_pDb);
 		exASSERT(m_pDb->IsOpen());
 		exASSERT(!IsOpen());
+		exASSERT(HasStatements());
 		// \note: We do not force a user to define columns.
 
 		std::wstring sqlStmt;

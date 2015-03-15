@@ -573,8 +573,9 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Frees the connection SQLFreeHandle.
+		* \brief	Frees the database connection handle.
 		* \throw	SqlResultException if SQLFreeHandle returns SQL_ERROR or SQL_INVALID_HANDLE
+		*			Exception If no database connection handle is allocated.
 		*/
 		void			FreeConnectionHandle();
 
