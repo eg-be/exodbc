@@ -113,7 +113,7 @@ namespace exodbc
 	public:
 		/*!
 		* \brief	Default Constructor. You will need to manually allocate the DBC-Handle.
-		* \detailed	Default Constructor. You will need to call AllocateConnectionHandle() 
+		* \details	Default Constructor. You will need to call AllocateConnectionHandle() 
 		*			afterwards to allocate the Database-handle.
 		* \see		AllocateConnectionHandle()
 		*/
@@ -123,7 +123,7 @@ namespace exodbc
 		/*!
 		* \brief	Create a new Database-instance. The instance will be using the passed
 		*			Environment.
-		* \detailed	The Database will try to create a new Db-Connection handle during construction.
+		* \details	The Database will try to create a new Db-Connection handle during construction.
 		*			The handle will be freed by the Database on destruction.
 		* \param	env		The Environment to use to create this database and its connection.
 		*						Do not free the Environment before you free the Database.
@@ -140,7 +140,7 @@ namespace exodbc
 		* \brief	Tries to allocate a new DBC-Handle from the passed Environment and stores that
 		*			DBC-Handle for later use internally. Will be freed on destruction.
 		*			Reads the ODBC Version from the Environment and remembers it internally.
-		* \detailed	The Database will try to create a new Db-Connection using the Environment-handle
+		* \details	The Database will try to create a new Db-Connection using the Environment-handle
 		*			from the passed Environment. This newly created Connection-Handle is stored 
 		*			for later use. 
 		*			The DBC-handle will be freed by the Database on destruction.
@@ -189,9 +189,9 @@ namespace exodbc
 
 		/*!
 		 * \brief		If this database is open, closes the stmt-handle and the connection to the db.
-		 * \detailed	This function will fail if any of the handles cannot be freed.
+		 * \details	This function will fail if any of the handles cannot be freed.
 		 *				This function will rollback any open transaction if manual commit mode is set.
-		 * \detailed	If the database is not open, this function does nothing
+		 * \details	If the database is not open, this function does nothing
 		 * \throw		Exception If closing the db-connection fails. 
 		 */
 		void         Close();
@@ -326,7 +326,7 @@ namespace exodbc
 
 		/*!
 		 * \brief		Reads table column information for the passed table.
-		 * \detailed	Returned table columns are ordered by TABLE_CAT, TABLE_SCHEM, TABLE_NAME, and ORDINAL_POSITION. 
+		 * \details	Returned table columns are ordered by TABLE_CAT, TABLE_SCHEM, TABLE_NAME, and ORDINAL_POSITION. 
 		 * \param		table The table.
 		 * \return		Columns of passed table.
 		 * \throw Exception If reading ColumnInfo fails.
@@ -433,7 +433,7 @@ namespace exodbc
 	
 		/*!
 		* \brief	Read the ODBC version supported by the driver.
-		* \detailed	Fails if not connected. Does not read the version from the environment
+		* \details	Fails if not connected. Does not read the version from the environment
 		*			but from the SDbInfo populated during connecting to the database.
 		* \return	ODBC version or OV_UNKNOWN.
 		* \throw	Exception If not Open or parsing the version returned from the driver fails.
@@ -443,7 +443,7 @@ namespace exodbc
 	
 		/*!
 		* \brief	Determines which ODBC Version to use.
-		* \detailed	Chooses the max ODBC Version that is supported by the environment and the driver.
+		* \details	Chooses the max ODBC Version that is supported by the environment and the driver.
 		* \return	Max ODBC version supported by driver and env or OV_UNKNOWN.
 		* \throw	Exception 
 		*/
@@ -538,7 +538,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Get the SDbInfo if it is available.
-		* \detailed	During Open() the database is queried about information about itself,
+		* \details	During Open() the database is queried about information about itself,
 		*			if successful this information is stored in an SDbInfo internally.
 		*			SDbInfo is empty until Open() was successful.
 		* \return	SDbInfo with information corresponding to the database connected.

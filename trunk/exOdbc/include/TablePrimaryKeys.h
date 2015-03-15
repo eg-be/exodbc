@@ -53,7 +53,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Create a TablePrimaryKeys for the Table given by tableInfo.
-		* \detailed	Tries to Initialize() this TablePrimaryKeys automatically.
+		* \details	Tries to Initialize() this TablePrimaryKeys automatically.
 		* \see		IsInitialized()
 		* \throw	Exception If querying primary keys fails.
 		*/

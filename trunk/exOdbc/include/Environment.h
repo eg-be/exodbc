@@ -115,7 +115,7 @@ namespace exodbc
 
 		/*!
 		 * \brief		Destructor. Tries to free the env-handle, if one is allocated.
-		 * \detailed	If freeing the handle fails an error is logged, but no Exception
+		 * \details	If freeing the handle fails an error is logged, but no Exception
 		 *				is being thrown. You will leak handles in this case.
 		 */
 		~Environment();
@@ -164,7 +164,7 @@ namespace exodbc
 
 		/*!
 		 * \brief		List data sources.
-		 * \detailed	List the Data Source Names (DSN) entries available.
+		 * \details	List the Data Source Names (DSN) entries available.
 		 *				Fails if no environment handle is allocated.
 		 * \see			HasHEnv()
 		 * \param	mode	Decide to list all DSNs, or only user / system DSNs.

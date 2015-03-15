@@ -115,7 +115,7 @@ namespace exodbc
 	/*!
 	* \brief Ugly conversion of small to wide - use only if you know that you have only ASCII chars in w.
 	*
-	* \detailed Transforms from wide to small by simple taking the char-values.
+	* \details Transforms from wide to small by simple taking the char-values.
 	* \param const std::wstring& w
 	* \return std::string
 	*/
@@ -126,7 +126,7 @@ namespace exodbc
 	/*!
 	* \brief Ugly conversion of wide to small - use only if you know that you have only ASCII chars in s.
 	*
-	* \detailed Transforms small wide to wide by simple taking the char-values.
+	* \details Transforms small wide to wide by simple taking the char-values.
 	* \param const std::string& s
 	* \return std::wstring
 	*/
@@ -280,7 +280,7 @@ namespace exodbc
 
 	/*!
 	* \brief	Ensure that the passed Statement-handle is closed after this function returns.
-	* \detailed	The function expects that the passed Statement-handle is already closed. It will
+	* \details	The function expects that the passed Statement-handle is already closed. It will
 	*			try to close the statement again, and if it does not fail (which means the statement
 	*			was still open) the function will return false and log an error.
 	*			If it fails to close the statement (as the statement was already closed) it will return
@@ -298,7 +298,7 @@ namespace exodbc
 
 	/*!
 	* \brief	Compares two SQL-States, returns true if they are equal.
-	* \detailed	This is a imple shorthand to a wcsncmp with a max of 5 chars
+	* \details	This is a imple shorthand to a wcsncmp with a max of 5 chars
 	* \param	sqlState1	First SQL-State
 	* \param	sqlState2	Second SQL-State
 	* \return	True if the strings sqlState1 and sqlState2 are equal for the first 5 chars
@@ -308,7 +308,7 @@ namespace exodbc
 
 	/*!
 	* \brief	A wrapper to SQLNumResultCols.
-	* \detailed	Counts how many columns are available on the result set of the
+	* \details	Counts how many columns are available on the result set of the
 	*			passed Statement handle. Fails if statement is in wrong state
 	* \param	hStmt		The statement handle.
 	* \see		http://msdn.microsoft.com/en-us/library/ms715393%28v=vs.85%29.aspx
@@ -323,7 +323,7 @@ namespace exodbc
 	* \param	hDbc					The Database connection handle.
 	* \param	fInfoType				Type of the information.
 	* \param [in,out]	sValue			String to receive the value read.
-	* \detailed This will first call SQLGetInfo to determine the size of the buffer, then allocate a
+	* \details This will first call SQLGetInfo to determine the size of the buffer, then allocate a
 	*			corresponding buffer and call GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
 	* \see		SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
 	* \throw	Exception
@@ -433,7 +433,7 @@ namespace exodbc
 
 	/*!
 	* \brief Convert the value of a SQL_NUMERIC_STRUCT to the long value
-	* \detailed Just copied from the ms sample.
+	* \details Just copied from the ms sample.
 	* \see https://support.microsoft.com/kb/222831/en-us
 	*/
 	extern EXODBCAPI long Str2Hex2Long(unsigned char hexValue[16]);

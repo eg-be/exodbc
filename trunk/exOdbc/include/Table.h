@@ -98,7 +98,7 @@ namespace exodbc
 		* \brief	Create a new Table-instance from the Database pDb using the table definition
 		*			from tableInfo. The table will read its column-definitions from the database
 		*			automatically during Open() and bind all columns.
-		* \detailed	Note that when this constructor is used, the internal STableInfo object is not
+		* \details	Note that when this constructor is used, the internal STableInfo object is not
 		*			queried from the database, but the passed tableInfo is used for all later operations.
 		*			This is handy if you've located the detailed table-information already from the Database
 		*			using its Database::FindTables() function and want to avoid that is operation is
@@ -119,7 +119,7 @@ namespace exodbc
 		*			about a table with the given values for name, schema, catalog and type.
 		*			The table will read its column-definitions from the database
 		*			automatically during Open() and bind all columns.
-		* \detailed During Open() the database will be queried for a table matching the given values.
+		* \details During Open() the database will be queried for a table matching the given values.
 		*			If any of the values is an empty string it is ignored when searching for the table
 		*			in the database.
 		*
@@ -140,7 +140,7 @@ namespace exodbc
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
 		*			During Open() only those columns you have set using SetColumn() will be bound.
-		* \detailed During Open() the database will be queried for a table matching the given values.
+		* \details During Open() the database will be queried for a table matching the given values.
 		*			If any of the values is an empty string it is ignored when searching for the table
 		*			in the database.
 		*
@@ -165,7 +165,7 @@ namespace exodbc
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
 		*			During Open() only those columns you have set using SetColumn() will be bound.
-		* \detailed Note that when this constructor is used, the internal STableInfo object is not
+		* \details Note that when this constructor is used, the internal STableInfo object is not
 		*			queried from the database, but the passed tableInfo is used for all later operations.
 		*			This is handy if you've located the detailed table-information already from the Database
 		*			using its Database::FindTables() function and want to avoid that is operation is
@@ -191,7 +191,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Allocate the statement handles required by this Table.
-		* \detailed Allocates the statements using the connection handle from the passed Database.
+		* \details Allocates the statements using the connection handle from the passed Database.
 		*			Do not free the Database before freeing this Table.
 		* \param	db Database this Table belongs to.
 		* \see		HasStatements()
@@ -212,7 +212,7 @@ namespace exodbc
 		/*!
 		* \brief	Opens the Table and either binds the already defined columns or queries the database
 		*			about the columns of this table.
-		* \detailed If no STableInfo object has been passed during construction the database is first
+		* \details If no STableInfo object has been passed during construction the database is first
 		*			queried for a table matching the parameters passed. If not exactly one such table is
 		*			found Open will fail.
 		*
@@ -254,7 +254,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Close the table.
-		* \detailed	Unbinds and deletes all ColumnBuffers bound to this table. The information about
+		* \details	Unbinds and deletes all ColumnBuffers bound to this table. The information about
 		*			this table in the STableInfo queried during Open() is kept for future use.
 		* \see		Open()
 		* \throw	Exception If not Open or unbinding fails.
@@ -280,7 +280,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Set the AutoBindingMode. Must be called before Open().
-		* \detailed	This will set the AutoBindingMode globally for this table.
+		* \details	This will set the AutoBindingMode globally for this table.
 		*			It can still be overridden for specific columns by defining
 		*			it for that column.
 		* \return	AutoBindingMode
@@ -301,7 +301,7 @@ namespace exodbc
 		/*!
 		* \brief	Set an AccessFlag. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
-		* \detailed	If the flag passed is already set, this function will do nothing.
+		* \details	If the flag passed is already set, this function will do nothing.
 		*			
 		*			If a change is detected, and the statements were already allocated,
 		*			the function will free all statements and re-allocate the statements
@@ -314,7 +314,7 @@ namespace exodbc
 		/*!
 		* \brief	Clear an AccessFlag. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
-		* \detailed	If the flag passed is already cleared, this function will do nothing.
+		* \details	If the flag passed is already cleared, this function will do nothing.
 		*
 		*			If a change is detected, and the statements were already allocated,
 		*			the function will free all statements and re-allocate the statements
@@ -327,7 +327,7 @@ namespace exodbc
 		/*!
 		* \brief	Set multiple AccessFlags. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
-		* \detailed	If the flags passed are the same as already set on the table, this
+		* \details	If the flags passed are the same as already set on the table, this
 		*			function will do nothing.
 		*
 		*			If a change is detected, and the statements were already allocated,
@@ -358,7 +358,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Sets or Clears the TOF_TRIM_RIGHT flag.
-		* \detailed	Note that the value set here is overriden by the value
+		* \details	Note that the value set here is overriden by the value
 		*			passed to Open() in the TableOpenFlags.
 		*/
 		void		SetCharTrimRight(bool trimRight) throw();
@@ -366,7 +366,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Sets or Clears the TOF_TRIM_LEFT flag.
-		* \detailed	Note that the value set here is overriden by the value
+		* \details	Note that the value set here is overriden by the value
 		*			passed to Open() in the TableOpenFlags.
 		*/
 		void		SetCharTrimLeft(bool trimLeft) throw();
@@ -374,7 +374,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Check if the Table-Information is set on this Table.
-		* \detailed	Returns true if the internal member of the STableInfo contains a value either
+		* \details	Returns true if the internal member of the STableInfo contains a value either
 		*			set during Construction or fetched from the Database during Open().
 		* \see		GetTableInfo()
 		* \return	Returns true if this table has a STableInfo set that can be fetched using GetTableInfo()
@@ -384,7 +384,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Return the Table information of this Table.
-		* \detailed	Returns the STableInfo of this table, if one has been set either during construction
+		* \details	Returns the STableInfo of this table, if one has been set either during construction
 		*			or one was read during Open().
 		* \see		HaveTableInfo()
 		* \throw	Exception if no table info is available.
@@ -394,7 +394,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Counts how many rows would be selected in this table by the passed WHERE clause.
-		* \detailed	If whereStatement is empty, no WHERE clause is added
+		* \details	If whereStatement is empty, no WHERE clause is added
 		* \param	whereStatement Do not include 'WHERE' in the passed where clause
 		* \return	count The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
 		* \throw	Exception If failed.
@@ -404,7 +404,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Executes a 'SELECT col1, col2, .., colN' for the Table using the passed WHERE clause.
-		* \detailed	The SELECT-Query is built using the column information available to this Table.
+		* \details	The SELECT-Query is built using the column information available to this Table.
 		*			It does not use the '*'. Only bound ColumnBuffers names are included in the statement.
 		*			If successful, a Select-Query is open. You can iterate the records
 		*			using SelectNext() to access the values of the records.
@@ -422,7 +422,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Executes the passed SQL statement on the open Table.
-		* \detailed	Query by passing the complete SQL statement.
+		* \details	Query by passing the complete SQL statement.
 		*			If successful, a Select-Query is open. You can iterate the records
 		*			using SelectNext() to access the values of the records.
 		*			The cursor is positioned before the first records, so you must call
@@ -439,7 +439,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Fetches the next record fromt the current active Select() recordset.
-		* \detailed	If successful, the ColumnBuffer(s) bound to this table will contain 
+		* \details	If successful, the ColumnBuffer(s) bound to this table will contain 
 		*			the field-values of the currently selected record.
 		*			Fails if no Select-Query is open.
 		* \see		SelectNext()
@@ -450,7 +450,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Closes an eventually open Select-Query.
-		* \detailed	This function does not fail if no select statement was open.
+		* \details	This function does not fail if no select statement was open.
 		* \see		Select()
 		* \throw	Exception
 		*/
@@ -459,7 +459,7 @@ namespace exodbc
 
 		/*!
 		* \brief	A wrapper to SQLColAttributes, to fetch attributes of the columns of an open result set.
-		* \detailed	Can only be called if a Select() is open. Only for numeric attributes.
+		* \details	Can only be called if a Select() is open. Only for numeric attributes.
 		* \param	columnIndex zero based index of the column available in the result set.
 		* \see		http://msdn.microsoft.com/en-us/library/ms713558%28v=vs.85%29.aspx
 		* \return	Attribute value.
@@ -477,7 +477,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Inserts the current values into the database as a new row.
-		* \detailed	The values in the ColumnBuffer currently bound will be inserted
+		* \details	The values in the ColumnBuffer currently bound will be inserted
 		*			into the database.
 		*			An prepared INSERT statement is used to insert the values identified
 		*			by the bound ColumnBuffers that have the flag ColumnFlags::CF_INSERT set.
@@ -491,7 +491,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Deletes the row identified by the values of the bound primary key columns.
-		* \detailed	A prepared DELETE statement is used to delete the row that matches all
+		* \details	A prepared DELETE statement is used to delete the row that matches all
 		*			primary keys of this Table. The key values are read from the ColumnBuffers bound
 		*			to the primary key columns. You can either use the Select(), SelectNext(), etc.
 		*			functions to load the key values of a record to delete into the buffer, or
@@ -511,7 +511,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Delete the row(s) identified by the passed where statement.
-		* \detailed	A DELETE statement for this Table is created, using the passed
+		* \details	A DELETE statement for this Table is created, using the passed
 		*			WHERE clause.
 		*			This uses an independent statement and will not modify the values in
 		*			the ColumnBuffers or any ongoing Select() call.
@@ -533,7 +533,7 @@ namespace exodbc
 		* \brief	Updates the row identified by the values of the bound primary key columns with
 		*			the values in bound ColumnBuffers, if the ColumnBuffer has the ColumnFlags::CF_UPDATE
 		*			set.
-		* \detailed	A prepared UPDATE statement is used to update the row(s) that matches all
+		* \details	A prepared UPDATE statement is used to update the row(s) that matches all
 		*			primary key values of this Table. The key values are read from the ColumnBuffers bound
 		*			to the primary key columns. You can either use the Select(), SelectNext(), etc.
 		*			functions to load the key values of a record to delete into the buffer, or
@@ -555,7 +555,7 @@ namespace exodbc
 		* \brief	Updates the row identified by the passed where statement with
 		*			the values in bound ColumnBuffers, if the ColumnBuffer has the ColumnFlags::CF_UPDATE
 		*			set.
-		* \detailed	A prepared UPDATE statement is used to update the row(s) that match the passed where statement.
+		* \details	A prepared UPDATE statement is used to update the row(s) that match the passed where statement.
 		*			A prepared statement is created to update the columns bound to ColumnBuffers that have the 
 		*			flag ColumnFlags::CF_UPDATE set with the values stored in the ColumnBuffer.
 		*			Note that this will also update the bound primary-key columns (those that have the flag
@@ -572,7 +572,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current value of columnIndex as SQLSMALLINT.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] smallInt Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -582,7 +582,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current value of columnIndex as SQLINTEGER.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] i Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -592,7 +592,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current value of columnIndex as SQLBIGINT.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] bigInt Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -602,7 +602,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current value of columnIndex as std::wstring.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] str Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -612,7 +612,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current value of columnIndex as std::string.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] str Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -622,7 +622,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current value of columnIndex as SQLDOUBLE.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] d Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -632,7 +632,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current value of columnIndex as SQL_DATE_STRUCT.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] date Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -642,7 +642,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current value of columnIndex as SQL_TIME_STRUCT.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] time Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -652,7 +652,7 @@ namespace exodbc
 		
 		/*!
 		* \brief	Access the current value of columnIndex as SQL_TIMESTAMP_STRUCT.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] timestamp Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -663,7 +663,7 @@ namespace exodbc
 #if HAVE_MSODBCSQL_H
 		/*!
 		* \brief	Access the current value of columnIndex as SQL_SS_TIME2_STRUCT.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		*			This function is only available if HAVE_MSODBCSQL_H is defined to 1
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] time2 Reference to variable to copy value to.
@@ -675,7 +675,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the current value of columnIndex as SQL_NUMERIC_STRUCT.
-		* \detailed	Casts the value if casting is possible without loosing data.
+		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] numeric Reference to variable to copy value to.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
@@ -685,7 +685,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Check if the current value of a column is NULL.
-		* \detailed	Queries the length-indicator field of the ColumnBuffer to determine if
+		* \details	Queries the length-indicator field of the ColumnBuffer to determine if
 		*			a column is NULL.
 		* \param	columnIndex Zero based index of a bound column.
 		* \return	True if current value of column is NULL.
@@ -695,7 +695,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Access the buffer of a bound column.
-		* \detailed Points passed pointer to the buffer used to transfer data for the given column.
+		* \details Points passed pointer to the buffer used to transfer data for the given column.
 		*			
 		* \param	columnIndex Zero based index of a bound column.
 		* \param [in,out] pBuffer Reference to point to column buffer.
@@ -709,7 +709,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Return a defined ColumnBuffer or NULL.
-		* \detailed	Searches the internal map of ColumnBuffers for a ColumnBuffer with
+		* \details	Searches the internal map of ColumnBuffers for a ColumnBuffer with
 		*			the given columnIndex (zero based).
 		* \return	ColumnBuffer.
 		* \throw	Exception
@@ -719,7 +719,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Returns the number of columns this table has.
-		* \detailed	If columns were set manually on the table, this is the value that has been 
+		* \details	If columns were set manually on the table, this is the value that has been 
 		*			passed as the total number of columns of the table. It must not be equal
 		*			with the number of columns bound.
 		*			If columns were created automatically, this is the total of columns reported
@@ -732,7 +732,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Define a column manually. The column is bound during Open().
-		* \detailed	Pass a buffer and a description of the buffer that shall be bound to a
+		* \details	Pass a buffer and a description of the buffer that shall be bound to a
 		*			table column once Open() is called.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param	queryName Name of the column matching columnIndex. This name will be used
@@ -773,7 +773,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Frees the passed Statement handle.
-		* \detailed If the passed statement can be freed successfully, SQL_NULL_HSTMT is returned.
+		* \details If the passed statement can be freed successfully, SQL_NULL_HSTMT is returned.
 		*			If the passed statement cannot be freed successfully because SQL_INVALID_HANDLE 
 		*			or SQL_ERROR is returned, an Exception is thrown.
 		* \return	SQL_NULL_HSTMT is statement was freed successfully.
@@ -791,7 +791,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Iterates the bound columns and returns the field part of a statement.
-		* \detailed	Queries each bound column for its SqlName.
+		* \details	Queries each bound column for its SqlName.
 		* \return	A string in the form "Field1, Field2, .., FieldN"
 		* \throw	Exception If no ColumnBuffers are bound.
 		*/
