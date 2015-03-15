@@ -48,9 +48,6 @@ namespace exodbc
 // Macros available for everybody
 // ----------------
 
-/*  size of statically declared array */
-#define EXSIZEOF(array)   (sizeof(array)/sizeof(array[0]))
-
 /*!
 * \brief exASSERT_MSG(cond, msg) - MACRO
 *
