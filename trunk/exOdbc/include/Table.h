@@ -747,9 +747,6 @@ namespace exodbc
 		void		FreeStatements();
 
 
-		void        cleanup();
-
-
 		/*!
 		* \brief	Iterates the bound columns and returns the field part of a statement.
 		* \detailed	Queries each bound column for its SqlName.
