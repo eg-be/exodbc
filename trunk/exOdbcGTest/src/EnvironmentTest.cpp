@@ -49,15 +49,15 @@ namespace exodbc
 	}
 
 
-	TEST_P(EnvironmentTest, AllocHenv)
+	TEST_P(EnvironmentTest, AllocateHenv)
 	{
 		Environment env;
-		ASSERT_NO_THROW(env.AllocHenv());
+		ASSERT_NO_THROW(env.AllocateHenv());
 		// We will fail to allocate a second one
 		// Suppress the output of the assertion helper
 		LogLevelFatal lf;
 		DontDebugBreak ddb;
-		EXPECT_THROW(env.AllocHenv(), AssertionException);
+		EXPECT_THROW(env.AllocateHenv(), AssertionException);
 	}
 
 
@@ -65,11 +65,11 @@ namespace exodbc
 	{
 		// First simply test alloc - free
 		Environment env;
-		ASSERT_NO_THROW(env.AllocHenv());
+		ASSERT_NO_THROW(env.AllocateHenv());
 		EXPECT_NO_THROW(env.FreeHenv());
 		
 		// Now test that we fail to free if there is still a database around
-		ASSERT_NO_THROW(env.AllocHenv());
+		ASSERT_NO_THROW(env.AllocateHenv());
 		ASSERT_NO_THROW(env.SetOdbcVersion(OV_3));
 		{
 			Database db(env);
@@ -88,9 +88,9 @@ namespace exodbc
 		Environment env_v3;
 		Environment env_v3_80;
 
-		ASSERT_NO_THROW(env_v2.AllocHenv());
-		ASSERT_NO_THROW(env_v3.AllocHenv());
-		ASSERT_NO_THROW(env_v3_80.AllocHenv());
+		ASSERT_NO_THROW(env_v2.AllocateHenv());
+		ASSERT_NO_THROW(env_v3.AllocateHenv());
+		ASSERT_NO_THROW(env_v3_80.AllocateHenv());
 
 		EXPECT_NO_THROW(env_v2.SetOdbcVersion(OV_2));
 		EXPECT_NO_THROW(env_v3.SetOdbcVersion(OV_3));

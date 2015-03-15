@@ -48,7 +48,7 @@ namespace exodbc
 		m_odbcInfo = GetParam();
 
 		// Set up Env
-		m_env.AllocHenv();
+		m_env.AllocateHenv();
 		// Try to set to the ODBC v3 : We need that for the tests to run correct. 3.8 is not supported by all databases and we dont use specific stuff from it.
 		// except for the TIME2 things, sql server specific. those tests can create their own env.
 		m_env.SetOdbcVersion(OV_3);

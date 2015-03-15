@@ -124,11 +124,11 @@ namespace exodbc
 
 
 		/*!
-		 * \brief	Tries to allocate a new Henv.
+		 * \brief	Tries to allocate a new environment handle to be used by this Environment.
 		 * 			Cannot be called if a Henv is allocated.
 		 *	\throw	Exception If Henv is already allocated or Allocating fails.
 		 */
-		void			AllocHenv();
+		void			AllocateHenv();
 
 
 		/*!

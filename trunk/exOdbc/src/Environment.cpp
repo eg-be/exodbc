@@ -45,7 +45,7 @@ namespace exodbc
 	{
 		// Note: Init will set members to NULL, but asserts if m_henv is set
 		Initialize();
-		AllocHenv();
+		AllocateHenv();
 		SetOdbcVersion(odbcVersion);
 	} 
 
@@ -79,7 +79,7 @@ namespace exodbc
 	}
 
 
-	void Environment::AllocHenv()
+	void Environment::AllocateHenv()
 	{
 		// This is here to help trap if you are getting a new henv
 		// without releasing an existing henv

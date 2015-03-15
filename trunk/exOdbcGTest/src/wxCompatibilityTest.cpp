@@ -38,7 +38,7 @@ namespace exodbc
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 
 		// Set up environment
-		m_env.AllocHenv();
+		m_env.AllocateHenv();
 		m_env.SetOdbcVersion(OV_3);
 
 		// And the db
