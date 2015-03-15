@@ -46,7 +46,7 @@ namespace exodbc
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
-		m_env.AllocHenv();
+		m_env.AllocateHenv();
 		m_env.SetOdbcVersion(OV_3);
 		ASSERT_NO_THROW(m_db.AllocateHdbcAndReadEnvOdbcVersion(m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
