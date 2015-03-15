@@ -48,69 +48,93 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	Table::Table(const Database& db, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, OpenMode openMode /* = READ_WRITE */)
+	Table::Table(const Database& db, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(numColumns)
 		, m_manualColumns(true)
 		, m_initialTableName(tableName)
 		, m_initialSchemaName(schemaName)
 		, m_initialCatalogName(catalogName)
 		, m_initialTypeName(tableType)
-		, m_openMode(openMode)
 		, m_haveTableInfo(false)
 	{
 		exASSERT(db.IsOpen());
 		Initialize();
-		AllocateStatements(db);
+
+		SetAccessFlags(db, afs);
+
+		if (!HasStatements())
+		{
+			// Probably SetAccessFlags has already allocated statements, as flags have changed
+			AllocateStatement(db);
+		}
 	}
 
 
-	Table::Table(const Database& db, SQLSMALLINT numColumns, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
+	Table::Table(const Database& db, SQLSMALLINT numColumns, const STableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(numColumns)
 		, m_manualColumns(true)
 		, m_initialTableName(L"")
 		, m_initialSchemaName(L"")
 		, m_initialCatalogName(L"")
 		, m_initialTypeName(L"")
-		, m_openMode(openMode)
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
 	{
 		exASSERT(db.IsOpen());
 		Initialize();
-		AllocateStatements(db);
+
+		SetAccessFlags(db, afs);
+
+		if (!HasStatements())
+		{
+			// Probably SetAccessFlags has already allocated statements, as flags have changed
+			AllocateStatement(db);
+		}
 	}
 
 
-	Table::Table(const Database& db, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, const OpenMode openMode /* = READ_WRITE */)
+	Table::Table(const Database& db, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
 		, m_initialTableName(tableName)
 		, m_initialSchemaName(schemaName)
 		, m_initialCatalogName(catalogName)
 		, m_initialTypeName(tableType)
-		, m_openMode(openMode)
 		, m_haveTableInfo(false)
 	{
 		exASSERT(db.IsOpen());
 		Initialize();
-		AllocateStatements(db);
+
+		SetAccessFlags(db, afs);
+
+		if (!HasStatements())
+		{
+			// Probably SetAccessFlags has already allocated statements, as flags have changed
+			AllocateStatement(db);
+		}
 	}
 
 
-	Table::Table(const Database& db, const STableInfo& tableInfo, OpenMode openMode /* = READ_WRITE */)
+	Table::Table(const Database& db, const STableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
 		, m_initialTableName(L"")
 		, m_initialSchemaName(L"")
 		, m_initialCatalogName(L"")
 		, m_initialTypeName(L"")
-		, m_openMode(openMode)
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
 	{
 		exASSERT(db.IsOpen());
 		Initialize();
-		AllocateStatements(db);
+
+		SetAccessFlags(db, afs);
+
+		if (!HasStatements())
+		{
+			// Probably SetAccessFlags has already allocated statements, as flags have changed
+			AllocateStatement(db);
+		}
 	}
 
 
@@ -155,6 +179,7 @@ namespace exodbc
 		m_fieldsStatement = L"";
 		m_autoBindingMode = AutoBindingMode::BIND_AS_REPORTED;
 		m_charTrimFlags = TRIM_NO;
+		m_accessFlags = AF_NONE;
 	}
 
 
@@ -171,37 +196,50 @@ namespace exodbc
 		exASSERT(SQL_NULL_HSTMT == m_hStmtUpdateWhere);
 
 		// Allocate handles needed
-		m_hStmtCount = AllocateStatement(db);
-		m_hStmtSelect = AllocateStatement(db);
+		if (TestAccessFlag(AF_SELECT))
+		{
+			m_hStmtCount = AllocateStatement(db);
+			m_hStmtSelect = AllocateStatement(db);
+		}
 
 		// Allocate handles needed for writing
-		if (!IsQueryOnly())
+		if (TestAccessFlag(AF_INSERT))
 		{
 			m_hStmtInsert = AllocateStatement(db);
-			m_hStmtDelete = AllocateStatement(db);
+		}
+		if (TestAccessFlag(AF_UPDATE))
+		{
 			m_hStmtUpdate = AllocateStatement(db);
-			m_hStmtDeleteWhere = AllocateStatement(db);
 			m_hStmtUpdateWhere = AllocateStatement(db);
+		}
+		if (TestAccessFlag(AF_DELETE))
+		{
+			m_hStmtDelete = AllocateStatement(db);
+			m_hStmtDeleteWhere = AllocateStatement(db);
 		}
 	}
 
 
 	bool Table::HasStatements() const throw()
 	{
-		if (m_openMode == READ_ONLY)
+		bool haveAll = true;
+		if (haveAll && TestAccessFlag(AF_READ))
 		{
-			return (SQL_NULL_HSTMT != m_hStmtCount
-				&& SQL_NULL_HSTMT != m_hStmtSelect);
+			haveAll = (SQL_NULL_HSTMT != m_hStmtSelect) && (SQL_NULL_HSTMT != m_hStmtCount);
 		}
-		else
+		if (haveAll && TestAccessFlag(AF_UPDATE))
 		{
-			return (SQL_NULL_HSTMT != m_hStmtCount
-				&& SQL_NULL_HSTMT != m_hStmtSelect
-				&& SQL_NULL_HSTMT != m_hStmtInsert
-				&& SQL_NULL_HSTMT != m_hStmtUpdate
-				&& SQL_NULL_HSTMT != m_hStmtDeleteWhere
-				&& SQL_NULL_HSTMT != m_hStmtUpdateWhere);
+			haveAll = (SQL_NULL_HSTMT != m_hStmtUpdate) && (SQL_NULL_HSTMT != m_hStmtUpdateWhere);
 		}
+		if (haveAll && TestAccessFlag(AF_INSERT))
+		{
+			haveAll = (SQL_NULL_HSTMT != m_hStmtInsert);
+		}
+		if (haveAll && TestAccessFlag(AF_DELETE))
+		{
+			haveAll = (SQL_NULL_HSTMT != m_hStmtDelete) && (SQL_NULL_HSTMT != m_hStmtDeleteWhere);
+		}
+		return haveAll;
 	}
 
 
@@ -250,18 +288,26 @@ namespace exodbc
 		exASSERT(!IsOpen());
 
 		// Free allocated statements
-		// First those created always
-		m_hStmtCount = FreeStatement(m_hStmtCount);
-		m_hStmtSelect = FreeStatement(m_hStmtSelect);
-
-		if (!IsQueryOnly())
+		if (TestAccessFlag(AF_SELECT))
 		{
-			// And then those needed for writing
+			m_hStmtCount = FreeStatement(m_hStmtCount);
+			m_hStmtSelect = FreeStatement(m_hStmtSelect);
+		}
+
+		// And then those needed for writing
+		if (TestAccessFlag(AF_INSERT))
+		{
 			m_hStmtInsert = FreeStatement(m_hStmtInsert);
+		}
+		if (TestAccessFlag(AF_DELETE))
+		{
 			m_hStmtDelete = FreeStatement(m_hStmtDelete);
+			m_hStmtDeleteWhere = FreeStatement(m_hStmtDeleteWhere);
+		}
+		if (TestAccessFlag(AF_UPDATE))
+		{
 			m_hStmtUpdate = FreeStatement(m_hStmtUpdate);
 			m_hStmtUpdateWhere = FreeStatement(m_hStmtUpdateWhere);
-			m_hStmtDeleteWhere = FreeStatement(m_hStmtDeleteWhere);
 		}
 	}
 
@@ -290,7 +336,7 @@ namespace exodbc
 	void Table::BindDeleteParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
-		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(TestAccessFlag(AF_DELETE));
 		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
 		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
@@ -320,7 +366,7 @@ namespace exodbc
 	void Table::BindUpdateParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
-		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(TestAccessFlag(AF_UPDATE));
 		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
 		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
@@ -366,7 +412,7 @@ namespace exodbc
 	void Table::BindInsertParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
-		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(TestAccessFlag(AF_INSERT));
 		exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
 
 		// Build a statement with parameter-markers
@@ -526,7 +572,7 @@ namespace exodbc
 	void Table::Insert()
 	{
 		exASSERT(IsOpen());
-		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(TestAccessFlag(AF_INSERT));
 		exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
 		SQLRETURN ret = SQLExecute(m_hStmtInsert);
 		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtInsert);
@@ -536,7 +582,7 @@ namespace exodbc
 	void Table::Delete(bool failOnNoData /* = true */)
 	{
 		exASSERT(IsOpen());
-		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(TestAccessFlag(AF_DELETE));
 		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
 		SQLRETURN ret = SQLExecute(m_hStmtDelete);
 		if (failOnNoData && ret == SQL_NO_DATA)
@@ -555,7 +601,7 @@ namespace exodbc
 	void Table::Delete(const std::wstring& where, bool failOnNoData /* = true */)
 	{
 		exASSERT(IsOpen());
-		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(TestAccessFlag(AF_DELETE));
 		exASSERT(m_hStmtDeleteWhere != SQL_NULL_HSTMT);
 		exASSERT(!where.empty());
 
@@ -577,7 +623,7 @@ namespace exodbc
 	void Table::Update()
 	{
 		exASSERT(IsOpen());
-		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(TestAccessFlag(AF_UPDATE));
 		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
 		SQLRETURN ret = SQLExecute(m_hStmtUpdate);
 		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
@@ -587,7 +633,7 @@ namespace exodbc
 	void Table::Update(const std::wstring& where)
 	{
 		exASSERT(IsOpen());
-		exASSERT(m_openMode == READ_WRITE);
+		exASSERT(TestAccessFlag(AF_UPDATE));
 		exASSERT(m_hStmtUpdateWhere != SQL_NULL_HSTMT);
 		exASSERT(!where.empty());
 		// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set
@@ -760,7 +806,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlag flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 	{
 		exASSERT(m_manualColumns);
 		exASSERT(columnIndex >= 0);
@@ -821,7 +867,19 @@ namespace exodbc
 			// We need to know which ODBC version we are using, might throw
 			OdbcVersion odbcVersion = db.GetMaxSupportedOdbcVersion();
 			// And how to open this column
-			ColumnFlags columnFlags = IsQueryOnly() ? CF_READ : CF_READ_WRITE;
+			ColumnFlags columnFlags = CF_NONE;
+			if (TestAccessFlag(AF_SELECT))
+			{
+				columnFlags |= CF_SELECT;
+			}
+			if (TestAccessFlag(AF_UPDATE))
+			{
+				columnFlags |= CF_UPDATE;
+			}
+			if (TestAccessFlag(AF_INSERT))
+			{
+				columnFlags |= CF_INSERT;
+			}
 			for (int columnIndex = 0; columnIndex < (SQLSMALLINT) columns.size(); columnIndex++)
 			{
 				SColumnInfo colInfo = columns[columnIndex];
@@ -837,9 +895,13 @@ namespace exodbc
 		{
 			m_tablePrivileges.Initialize(db, m_tableInfo);
 			// We always need to be able to select, but the rest only if we want to write
-			if ( ! ( m_tablePrivileges.IsSet(TP_SELECT) && (m_openMode == READ_ONLY || (m_tablePrivileges.AreSet(TP_INSERT | TP_UPDATE | TP_DELETE) ))) )
+			if ( (TestAccessFlag(AF_SELECT) && !m_tablePrivileges.IsSet(TP_SELECT)) 
+				|| (TestAccessFlag(AF_UPDATE) && !m_tablePrivileges.IsSet(TP_UPDATE))
+				|| (TestAccessFlag(AF_INSERT) && !m_tablePrivileges.IsSet(TP_INSERT))
+				|| (TestAccessFlag(AF_DELETE) && !m_tablePrivileges.IsSet(TP_DELETE))
+				)
 			{
-				Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s' for '%s'") % m_tableInfo.GetSqlName() % (m_openMode == READ_ONLY ? L"READ_ONLY" : L"READ_WRITE") ).str());
+				Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s'") % m_tableInfo.GetSqlName()).str());
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -899,26 +961,34 @@ namespace exodbc
 		exASSERT(IsOpen());
 
 		// Unbind ColumnBuffers
-		SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
-		THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect);
+		SQLRETURN ret = SQL_SUCCESS;
+		if (TestAccessFlag(AF_SELECT))
+		{
+			ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect);
+		}
 
 		// And column parameters, if we were bound rw
-		if (m_openMode == READ_WRITE)
+		if (TestAccessFlag(AF_INSERT))
 		{
 			ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert);
-
+		}
+		if (TestAccessFlag(AF_DELETE))
+		{
 			ret = SQLFreeStmt(m_hStmtDelete, SQL_RESET_PARAMS);
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDelete);
 
+			ret = SQLFreeStmt(m_hStmtDeleteWhere, SQL_RESET_PARAMS);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
+		}
+		if (TestAccessFlag(AF_UPDATE))
+		{
 			ret = SQLFreeStmt(m_hStmtUpdate, SQL_RESET_PARAMS);
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
 
 			ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_RESET_PARAMS);
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
-
-			ret = SQLFreeStmt(m_hStmtDeleteWhere, SQL_RESET_PARAMS);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
 		}
 
 		// Delete ColumnBuffers
@@ -934,13 +1004,57 @@ namespace exodbc
 	}
 
 
-	void Table::SetOpenMode(const Database& db, OpenMode openMode)
+	void Table::SetAccessFlag(const Database& db, AccessFlag ac)
+	{
+		exASSERT(!IsOpen());
+
+		if (TestAccessFlag(ac))
+		{
+			// already set, do nothing
+			return;
+		}
+
+		AccessFlags newFlags = ( m_accessFlags | ac );
+		SetAccessFlags(db, newFlags);
+	}
+
+
+	void Table::ClearAccessFlag(const Database& db, AccessFlag ac)
+	{
+		exASSERT(!IsOpen());
+
+		if (!TestAccessFlag(ac))
+		{
+			// Not set anyway, do nothing
+			return;
+		}
+
+		AccessFlags newFlags = ( m_accessFlags & ~ac );
+		SetAccessFlags(db, newFlags);
+	}
+
+
+	void Table::SetAccessFlags(const Database& db, AccessFlags acs)
 	{
 		exASSERT(!IsOpen());
 		exASSERT(db.IsOpen());
 
-		FreeStatements();
-		AllocateStatements(db);
+		if (m_accessFlags == acs)
+		{
+			// Same flags, return
+			return;
+		}
+
+		bool statementsWereAllocated = HasStatements();
+		if (statementsWereAllocated)
+		{
+			FreeStatements();
+		}
+		m_accessFlags = acs;
+		if (statementsWereAllocated)
+		{
+			AllocateStatements(db);
+		}
 	}
 
 

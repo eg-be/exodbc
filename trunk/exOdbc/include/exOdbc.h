@@ -188,8 +188,10 @@ namespace exodbc
 	};
 
 
-	enum ColumnFlags
+	enum ColumnFlag
 	{
+		CF_NONE = 0x0,
+
 		CF_SELECT = 0x1,
 		CF_UPDATE = 0x2,
 		CF_INSERT = 0x4,
@@ -200,6 +202,28 @@ namespace exodbc
 		CF_WRITE = CF_UPDATE | CF_INSERT,
 		CF_READ_WRITE = CF_SELECT | CF_UPDATE | CF_INSERT
 	};
+	typedef unsigned int ColumnFlags;
+
+
+	/*!
+	* \enum AccessFlags
+	* \brief Defines which statements are allocated
+	* \see AllocateStatements()
+	*/
+	enum AccessFlag
+	{
+		AF_NONE = 0x0,		///< No AccessFlags, no statements are going to be created.
+
+		AF_SELECT = 0x1,	///< Allocate only Select statements (including count-statement)
+		AF_UPDATE = 0x2,	///< Allocate Update statements
+		AF_INSERT = 0x4,	///< Allocate Insert statements
+		AF_DELETE = 0x8,	///< Allocate Delete statements
+
+		AF_READ = AF_SELECT,
+		AF_WRITE = AF_UPDATE | AF_INSERT | AF_DELETE,
+		AF_READ_WRITE = AF_READ | AF_WRITE
+	};
+	typedef unsigned int AccessFlags;
 
 
 	// Structs
