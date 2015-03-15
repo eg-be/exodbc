@@ -127,9 +127,9 @@ namespace exodbc
 	public:
 		/*!
 		* \brief	Default Constructor. You will need to manually allocate the DBC-Handle.
-		* \detailed	Default Constructor. You will need to call AllocateHdbcAndReadEnvOdbcVersion() 
+		* \detailed	Default Constructor. You will need to call AllocateHdbc() 
 		*			afterwards to allocate the Database-handle.
-		* \see		AllocateHenv()
+		* \see		AllocateHdbc()
 		*/
 		Database() throw();
 
@@ -141,25 +141,10 @@ namespace exodbc
 		*			The handle will be freed by the Database on destruction.
 		* \param	env		The Environment to use to create this database and its connection.
 		*						Do not free the Environment before you free the Database.
-		* \throw	Exception If handle cannot be allocated
+		* \throw	Exception If handles cannot be allocated, or passed Environment does not have an
+		*			Environment handle to be used.
 		*/
 		Database(const Environment& env);
-
-
-		/*!
-		 * \brief	Create a new Database-instance. The instance will be using the passed
-		 *			Environment. Note: This constructor is here for compatibility with wxWidgets.
-		 * \detailed	The Database will try to create a new Db-Connection handle during construction.
-		 *				No Exception is thrown if doing so fails, you can use HasHdbc() to check if
-		 *				creating the Db-Connection handle was successful.
-		 *				The handle will be freed by the Database on destruction.
-		 *				Note: This function is here for compatibility with wxWidgets which used pointers
-		 *
-		 * \param	pEnv		The Environment to use to create this database and its connection.
-		 *						Do not free the Environment before you free the Database.
-		 * \deprecated
-		*/
-		Database(const Environment* pEnv);
 		
 
 		~Database();
@@ -179,7 +164,7 @@ namespace exodbc
 		* \throw	Exception If a handle is already allocated, allocating fails or reading the ODBC-
 		*			version from the Environment fails.
 		*/
-		void		AllocateHdbcAndReadEnvOdbcVersion(const Environment& env);
+		void		AllocateHdbc(const Environment& env);
 
 
 		/*!

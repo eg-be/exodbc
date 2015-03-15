@@ -38,11 +38,11 @@ namespace exodbc
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 
 		// Set up environment
-		m_env.AllocateHenv();
+		m_env.AllocateEnvironmentHandle();
 		m_env.SetOdbcVersion(OV_3);
 
 		// And the db
-		m_pDb = new Database(&m_env);
+		m_pDb = new Database(m_env);
 		ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 	

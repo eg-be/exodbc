@@ -48,13 +48,13 @@ namespace exodbc
 		m_odbcInfo = GetParam();
 
 		// Set up Env
-		m_env.AllocateHenv();
+		m_env.AllocateEnvironmentHandle();
 		// Try to set to the ODBC v3 : We need that for the tests to run correct. 3.8 is not supported by all databases and we dont use specific stuff from it.
 		// except for the TIME2 things, sql server specific. those tests can create their own env.
 		m_env.SetOdbcVersion(OV_3);
 
 		// And database
-		ASSERT_NO_THROW(m_db.AllocateHdbcAndReadEnvOdbcVersion(m_env));
+		ASSERT_NO_THROW(m_db.AllocateHdbc(m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
@@ -916,7 +916,7 @@ namespace exodbc
 		// MS SQL Server has a new SQL_TIME2_STRUCT if ODBC version is >= 3.8
 #if HAVE_MSODBCSQL_H
 		Environment env38(OV_3_8);
-		EXPECT_TRUE(env38.HasHenv());
+		EXPECT_TRUE(env38.HasEnvironmentHandle());
 		Database db38(env38);
 		EXPECT_TRUE(db38.HasHdbc());
 		if (m_db.Dbms() == dbmsMY_SQL)

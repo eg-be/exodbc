@@ -83,6 +83,12 @@ namespace exodbc
 	*/
 	class EXODBCAPI Environment
 	{
+	// Test helpers:
+#if EXODBC_TEST
+		friend class EnvironmentTest;
+		FRIEND_TEST(EnvironmentTest, FreeEnvironmentHandle);
+#endif
+
 	private:
 		// Prevent copies. We would mess up the env-handle.
 		Environment(const Environment& other) { exASSERT_MSG(false, L"Copy Constructor not Implemented"); };
@@ -90,17 +96,19 @@ namespace exodbc
 	public:
 		/*!
 		 * \brief	Default constructor.
-		 * 			You must manually call AllocHandle() and SetOdbcVersion() after 
+		 * 			You must manually call AllocateHandle() and SetOdbcVersion() after 
 		 * 			creating the object.
+		 * \see		AllocateEnvironmentHandle()
+		 * \see		SetOdbcVersion()
 		 */
 		Environment() throw();
 
 
 		/*!
-		 * \brief	Constructor. Tries to alloc the env-handle and to set the ODBC-version.
+		 * \brief	Constructor. Tries to alloc the environment handle and to set the ODBC-version.
 		 *
 		 * \param	odbcVersion	The ODBC version.
-		 * \throw	Exception
+		 * \throw	Exception If AllocateEnvironmentHandle() or SetOdbcVersion() fails.
 		 */
 		Environment(OdbcVersion odbcVersion);
 
@@ -114,42 +122,24 @@ namespace exodbc
 
 
 		/*!
-		 * \brief	Initializes this object.
-		 * 			Set all members to 0.
-		 * 			Cannot be called if a Henv is allocated.
-		 *
-		 * \throw	Exception If Henv is already allocated.
-		 */
-		void			Initialize();
-
-
-		/*!
 		 * \brief	Tries to allocate a new environment handle to be used by this Environment.
 		 * 			Cannot be called if a Henv is allocated.
 		 *	\throw	Exception If Henv is already allocated or Allocating fails.
 		 */
-		void			AllocateHenv();
-
-
-		/*!
-		 * \brief	Tries to free an allocated Henv.
-		 * 			Can only be called if a Henv is allocated.
-		 * \throw	Exception if no Henv is allocated
-		 */
-		void			FreeHenv();
+		void			AllocateEnvironmentHandle();
 
 
 		/*!
 		 * \brief	Returns true is a Henv is allocated.
 		 */
-		bool			HasHenv() const	{ return m_henv != SQL_NULL_HENV; };
+		bool			HasEnvironmentHandle() const	{ return m_henv != SQL_NULL_HENV; };
 
 
 		/*!
 		* \brief	Returns the Environment handle.
 		* \throw	Exeption if no Henv is allocated.
 		*/
-		const SQLHENV&		GetHenv() const		{ exASSERT(HasHenv());  return m_henv; };
+		SQLHENV			GetEnvironmentHandle() const		{ exASSERT(HasEnvironmentHandle());  return m_henv; };
 
 		
 		/*!
@@ -176,14 +166,32 @@ namespace exodbc
 		 * \brief		List data sources.
 		 * \detailed	List the Data Source Names (DSN) entries available.
 		 *				Fails if no environment handle is allocated.
-		 * \see			HasHenv()
+		 * \see			HasHEnv()
 		 * \param	mode	Decide to list all DSNs, or only user / system DSNs.
 		 * \return	Found Data Source Names.
 		 * \throw	Exception
 		 */		
 		std::vector<SDataSource> ListDataSources(ListMode mode) const;
 
+
 	private:
+		/*!
+		* \brief	Initializes this object.
+		* 			Set all members to 0.
+		* 			Cannot be called if a Henv is allocated.
+		*
+		* \throw	Exception If Henv is already allocated.
+		*/
+		void			Initialize();
+
+
+		/*!
+		* \brief	Tries to free an allocated Henv.
+		* 			Can only be called if a Henv is allocated.
+		* \throw	Exception if no Henv is allocated
+		*/
+		void			FreeEnvironmentHandle();
+
 		SQLHENV m_henv;
 	};  // class Environment
 }

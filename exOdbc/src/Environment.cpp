@@ -45,7 +45,7 @@ namespace exodbc
 	{
 		// Note: Init will set members to NULL, but asserts if m_henv is set
 		Initialize();
-		AllocateHenv();
+		AllocateEnvironmentHandle();
 		SetOdbcVersion(odbcVersion);
 	} 
 
@@ -54,11 +54,11 @@ namespace exodbc
 	// -----------
 	Environment::~Environment()
 	{
-		if (HasHenv())
+		if (HasEnvironmentHandle())
 		{
 			try
 			{
-				FreeHenv();
+				FreeEnvironmentHandle();
 			}
 			catch (Exception e)
 			{
@@ -73,17 +73,17 @@ namespace exodbc
 	// --------------
 	void Environment::Initialize()
 	{
-		exASSERT(!HasHenv());
+		exASSERT(!HasEnvironmentHandle());
 		
 		m_henv = SQL_NULL_HENV;
 	}
 
 
-	void Environment::AllocateHenv()
+	void Environment::AllocateEnvironmentHandle()
 	{
 		// This is here to help trap if you are getting a new henv
 		// without releasing an existing henv
-		exASSERT(!HasHenv());
+		exASSERT(!HasEnvironmentHandle());
 
 		// Initialize the ODBC Environment for Database Operations
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv);
@@ -96,7 +96,7 @@ namespace exodbc
 	}
 
 
-	void Environment::FreeHenv()
+	void Environment::FreeEnvironmentHandle()
 	{
 		exASSERT(m_henv);
 
@@ -129,7 +129,7 @@ namespace exodbc
 
 	void Environment::SetOdbcVersion(OdbcVersion version)
 	{
-		exASSERT(HasHenv());
+		exASSERT(HasEnvironmentHandle());
 
 		// Remember: because the SQLPOINTER is interpreted as an int value.. for int-attrs..
 		SQLRETURN ret;

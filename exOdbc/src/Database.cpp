@@ -69,19 +69,7 @@ namespace exodbc
 		Initialize();
 
 		// Allocate the DBC-Handle and set the member m_pEnv
-		AllocateHdbcAndReadEnvOdbcVersion(env);
-	}
-
-
-	Database::Database(const Environment* const pEnv)
-	{
-		exASSERT(pEnv);
-
-		// Note: Init will set members to NULL
-		Initialize();
-
-		// Allocate the DBC-Handle
-		AllocateHdbcAndReadEnvOdbcVersion(*pEnv);
+		AllocateHdbc(env);
 	}
 
 
@@ -157,14 +145,14 @@ namespace exodbc
 	}
 
 
-	void Database::AllocateHdbcAndReadEnvOdbcVersion(const Environment& env)
+	void Database::AllocateHdbc(const Environment& env)
 	{
 		exASSERT(!HasHdbc());
-		exASSERT(env.HasHenv());
+		exASSERT(env.HasEnvironmentHandle());
 
 		// Allocate the DBC-Handle
-		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, env.GetHenv(), &m_hdbc);
-		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_ENV, env.GetHenv());
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, env.GetEnvironmentHandle(), &m_hdbc);
+		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_ENV, env.GetEnvironmentHandle());
 
 		// Read the environment odbc-version
 		m_envOdbcVersion = env.ReadOdbcVersion();
