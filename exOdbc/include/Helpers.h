@@ -85,17 +85,6 @@ do {																\
 */
 #define exASSERT(cond) exASSERT_MSG(cond, L"")
 
-/*!
-* \brief exDEBUG(cond) - MACRO
-*
-* If _DEBUG is defined this macro is a simple shorthand to the macro exASSERT(const).
-# Else it does nothing
-*/
-#ifdef _DEBUG
-#define exDEBUG(cond) exASSERT(cond)
-#else
-#define exDEBUG(cond)
-#endif
 
 namespace exodbc
 {
