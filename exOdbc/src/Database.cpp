@@ -100,11 +100,6 @@ namespace exodbc
 	// --------------
 	void Database::Initialize()
 	{
-#ifdef EXODBCDEBUG
-		// Debug-helper, give unique table-ids
-		m_lastTableId = 1;
-#endif
-
 		// Handles created by this db
 		m_hdbc = SQL_NULL_HDBC;
 		m_hstmt = SQL_NULL_HSTMT;
@@ -500,27 +495,6 @@ namespace exodbc
 
 	void Database::Close()
 	{
-
-#ifdef EXODBCDEBUG
-		// List orphaned tables in Debug build
-		{
-			if (m_tablesInUse.size() > 0)
-			{
-				std::map<size_t, STablesInUse>::const_iterator it;
-				std::wstring msg = (boost::wformat(L"Orphaned tables found in Db with DSN '%s'\n") % m_dsn).str();
-				std::wstring tablesList;
-				for (it = m_tablesInUse.begin(); it != m_tablesInUse.end(); it++)
-				{
-					const STablesInUse& tableInUse = it->second;
-					tablesList = (boost::wformat(L"%s  Table '%s' (id: %d)\n") %tablesList % tableInUse.ToString() % tableInUse.m_tableId).str();
-				}
-				LOG_DEBUG((boost::wformat(L"%s%s") % msg %tablesList).str());
-				// \todo: This is stupid. maybe just remove everything?
-				exASSERT(false);
-			}
-		}
-#endif
-
 		if (!IsOpen())
 		{
 			return;
@@ -1114,31 +1088,6 @@ namespace exodbc
 		return m_dbmsType;
 	}
 
-
-#if defined EXODBCDEBUG
-	size_t Database::RegisterTable(const Table* const pTable)
-	{
-		STablesInUse tableInUse;
-		tableInUse.m_tableId = m_lastTableId++;
-		tableInUse.m_initialTableName = pTable->m_initialTableName;
-		tableInUse.m_initialSchema = pTable->m_initialSchemaName;
-		tableInUse.m_initialCatalog = pTable->m_initialCatalogName;
-		tableInUse.m_initialType = pTable->m_initialTypeName;
-		m_tablesInUse[tableInUse.m_tableId] = tableInUse;
-		return tableInUse.m_tableId;
-	}
-
-	bool Database::UnregisterTable(const Table* const pTable)
-	{
-		std::map<size_t, STablesInUse>::const_iterator it = m_tablesInUse.find(pTable->GetTableId());
-		if (it != m_tablesInUse.end())
-		{
-			m_tablesInUse.erase(it);
-			return true;
-		}
-		return false;
-	}
-#endif
 
 	// OLD STUFF we need to think about re-adding it
 	// =============================================

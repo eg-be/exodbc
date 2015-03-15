@@ -57,9 +57,11 @@ namespace exodbc
 		, m_initialTypeName(tableType)
 		, m_openMode(openMode)
 		, m_haveTableInfo(false)
+		, m_pDb(pDb)
 	{
 		exASSERT(pDb);
-		Initialize(pDb);
+		Initialize();
+		AllocateStatements(*pDb);
 	}
 
 
@@ -73,9 +75,11 @@ namespace exodbc
 		, m_openMode(openMode)
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
+		, m_pDb(pDb)
 	{
 		exASSERT(pDb);
-		Initialize(pDb);
+		Initialize();
+		AllocateStatements(*pDb);
 	}
 
 
@@ -88,9 +92,11 @@ namespace exodbc
 		, m_initialTypeName(tableType)
 		, m_openMode(openMode)
 		, m_haveTableInfo(false)
+		, m_pDb(pDb)
 	{
 		exASSERT(pDb);
-		Initialize(pDb);
+		Initialize();
+		AllocateStatements(*pDb);
 	}
 
 
@@ -104,9 +110,11 @@ namespace exodbc
 		, m_openMode(openMode)
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
+		, m_pDb(pDb)
 	{
 		exASSERT(pDb);
-		Initialize(pDb);
+		Initialize();
+		AllocateStatements(*pDb);
 	}
 
 
@@ -120,15 +128,12 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void Table::Initialize(Database* pDb)
+	void Table::Initialize()
 	{
-		exASSERT(pDb);
-
 		// Initializing member variables
 		// Note: m_haveTableInfo must have been set before this function is called - it is not modified by this Initialize
 		m_isOpen = false;
 
-		m_pDb = pDb;
 		m_hStmtCount = SQL_NULL_HSTMT;
 		m_hStmtSelect = SQL_NULL_HSTMT;
 		m_hStmtInsert = SQL_NULL_HSTMT;
@@ -140,106 +145,54 @@ namespace exodbc
 		m_fieldsStatement = L"";
 		m_autoBindingMode = AutoBindingMode::BIND_AS_REPORTED;
 		m_charTrimFlags = TRIM_NO;
+	}
 
-#ifdef EXODBCDEBUG
-		m_tableId = m_pDb->RegisterTable(this);
-#endif
+
+	void Table::AllocateStatements(const Database& db)
+	{
+		exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
+		exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
+		exASSERT(SQL_NULL_HSTMT == m_hStmtInsert);
+		exASSERT(SQL_NULL_HSTMT == m_hStmtUpdate);
+		exASSERT(SQL_NULL_HSTMT == m_hStmtDeleteWhere);
+		exASSERT(SQL_NULL_HSTMT == m_hStmtUpdateWhere);
 
 		// Allocate handles needed
-		m_hStmtCount = AllocateStatement();
-		m_hStmtSelect = AllocateStatement();
+		m_hStmtCount = AllocateStatement(db);
+		m_hStmtSelect = AllocateStatement(db);
 
 		// Allocate handles needed for writing
 		if (!IsQueryOnly())
 		{
-			m_hStmtInsert = AllocateStatement();
-			m_hStmtDelete = AllocateStatement();
-			m_hStmtUpdate = AllocateStatement();
-			m_hStmtDeleteWhere = AllocateStatement();
-			m_hStmtUpdateWhere = AllocateStatement();
-		}
-		// Allocate a separate statement handle for internal use
-		//if (SQLAllocStmt(m_hdbc, &m_hstmtInternal) != SQL_SUCCESS)
-		//	m_pDb->DispAllErrors(NULL, m_hdbc);
-
-		// Set the cursor type for the statement handles
-		//m_cursorType = SQL_CURSOR_STATIC;
-
-		//if (SQLSetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
-		//{
-			//        // Check to see if cursor type is supported
-			//        m_pDb->GetNextError(m_henv, m_hdbc, m_hstmtInternal);
-			//        if (! wcscmp(m_pDb->sqlState, L"01S02"))  // Option Value Changed
-			//        {
-			//            // Datasource does not support static cursors.  Driver
-			//            // will substitute a cursor type.  Call SQLGetStmtOption()
-			//            // to determine which cursor type was selected.
-			//            if (SQLGetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, &m_cursorType) != SQL_SUCCESS)
-			//                m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal);
-			//#ifdef DBDEBUG_CONSOLE
-			//            std::wcout << L"Static cursor changed to: ";
-			//            switch(m_cursorType)
-			//            {
-			//            case SQL_CURSOR_FORWARD_ONLY:
-			//                std::wcout << L"Forward Only";
-			//                break;
-			//            case SQL_CURSOR_STATIC:
-			//                std::wcout << L"Static";
-			//                break;
-			//            case SQL_CURSOR_KEYSET_DRIVEN:
-			//                std::wcout << L"Keyset Driven";
-			//                break;
-			//            case SQL_CURSOR_DYNAMIC:
-			//                std::wcout << L"Dynamic";
-			//                break;
-			//            }
-			//            std::wcout << std::endl << std::endl;
-			//#endif
-			//            // BJO20000425
-			//            if (m_pDb->FwdOnlyCursors() && m_cursorType != SQL_CURSOR_FORWARD_ONLY)
-			//            {
-			//                // Force the use of a forward only cursor...
-			//                m_cursorType = SQL_CURSOR_FORWARD_ONLY;
-			//                if (SQLSetStmtOption(m_hstmtInternal, SQL_CURSOR_TYPE, m_cursorType) != SQL_SUCCESS)
-			//                {
-			//                    // Should never happen
-			//                    m_pDb->GetNextError(m_henv, m_hdbc, m_hstmtInternal);
-			//                    return false;
-			//                }
-			//            }
-			//        }
-			//        else
-			//        {
-			//            m_pDb->DispNextError();
-			//            m_pDb->DispAllErrors(m_henv, m_hdbc, m_hstmtInternal);
-			//        }
-		//}
-
-		if (!IsQueryOnly())
-		{
-			//// Set the cursor type for the INSERT statement handle
-			//if (SQLSetStmtOption(m_hstmtInsert, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
-			//	m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtInsert);
-			//// Set the cursor type for the DELETE statement handle
-			//if (SQLSetStmtOption(m_hstmtDelete, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
-			//	m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtDelete);
-			//// Set the cursor type for the UPDATE statement handle
-			//if (SQLSetStmtOption(m_hstmtUpdate, SQL_CURSOR_TYPE, SQL_CURSOR_FORWARD_ONLY) != SQL_SUCCESS)
-			//	m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmtUpdate);
+			m_hStmtInsert = AllocateStatement(db);
+			m_hStmtDelete = AllocateStatement(db);
+			m_hStmtUpdate = AllocateStatement(db);
+			m_hStmtDeleteWhere = AllocateStatement(db);
+			m_hStmtUpdateWhere = AllocateStatement(db);
 		}
 	}
 
 
-	SQLHSTMT Table::AllocateStatement()
+	bool Table::HasStatements() const throw()
 	{
-		exASSERT(m_pDb);
-		exASSERT(m_pDb->IsOpen());
-		exASSERT(m_pDb->GetConnectionHandle());
+		return (SQL_NULL_HSTMT != m_hStmtCount
+			&& SQL_NULL_HSTMT != m_hStmtSelect
+			&& SQL_NULL_HSTMT != m_hStmtInsert
+			&& SQL_NULL_HSTMT != m_hStmtUpdate
+			&& SQL_NULL_HSTMT != m_hStmtDeleteWhere
+			&& SQL_NULL_HSTMT != m_hStmtUpdateWhere);
+	}
+
+
+	SQLHSTMT Table::AllocateStatement(const Database& db) const
+	{
+		exASSERT(db.IsOpen());
+		exASSERT(db.HasConnectionHandle());
 
 		// Allocate a statement handle for the database connection
 		SQLHSTMT stmt;
-		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_pDb->GetConnectionHandle(), &stmt);
-		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_pDb->GetConnectionHandle());
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, db.GetConnectionHandle(), &stmt);
+		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, db.GetConnectionHandle());
 		return stmt;
 	}
 
@@ -425,9 +378,6 @@ namespace exodbc
 	// \todo: Rewrite everything, together with the Close() method
 	void Table::cleanup()
 	{
-#ifdef EXODBCDEBUG
-		m_pDb->UnregisterTable(this);
-#endif
 		// Unbind ColumnBuffers
 		SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
 		if (ret != SQL_SUCCESS)
