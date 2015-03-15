@@ -272,7 +272,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring SColumnInfo::GetSqlName(int flags /* = TABLE | COLUMN */) const
+	std::wstring SColumnInfo::GetSqlName(QueryNameFlags flags /* = TABLE | COLUMN */) const
 	{
 		exASSERT(!m_tableName.empty());
 		exASSERT(!m_columnName.empty());
@@ -302,7 +302,7 @@ namespace exodbc {
 
 
 
-	std::wstring STablePrimaryKeyInfo::GetSqlName(int flags /* = TABLE | COLUMN */) const
+	std::wstring STablePrimaryKeyInfo::GetSqlName(QueryNameFlags flags /* = TABLE | COLUMN */) const
 	{
 		exASSERT(!m_tableName.empty());
 
