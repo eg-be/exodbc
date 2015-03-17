@@ -25,6 +25,7 @@
 // -------
 namespace exodbc
 {
+	std::wstring g_excelDsn = L"";
 	std::vector<SOdbcInfo> g_odbcInfos = std::vector<SOdbcInfo>();
 	boost::log::trivial::severity_level g_logSeverity = boost::log::trivial::error;
 }
@@ -69,7 +70,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		// Not enough args
 		wcerr << L"Not enough arguments!\n";
-		wcerr << L"Usage: wxOdbc3GoogleTest --dsn=dsn1,dsn2,..,dsnN    --user=user1,user2,..,userN --pass=pass1,pass2,..,passN [--case=u|l,u|l,...,u|l] [--logLevel=0-5] \n";
+		wcerr << L"Usage: wxOdbc3GoogleTest --dsn=dsn1,dsn2,..,dsnN    --user=user1,user2,..,userN --pass=pass1,pass2,..,passN [--case=u|l,u|l,...,u|l] [--logLevel=0-5] [--excelDsn=excelDSNName]\n";
 		wcerr << L" logLevel: 0: trace; 1: debug; 2: info; 3: warning; 4: error; 5: fatal\n";
 		wcerr << L"           Default is warning (3)\n";
 		wcerr << L" case: Defines the case of the table- and column-names to be used during the tests. If not given\n";
@@ -78,7 +79,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		wcerr << L"             u: upper: All table- and column-names for the test tables will be in UPPERCASE-letters\n";
 		status = 10;
 	}
-	std::wstring dsn, user, pass, logLevelS, caseS;
+	std::wstring dsn, user, pass, logLevelS, caseS, excelDsn;
 	bool haveCase = false;
 	if(!extractParamValue(argc, argv, L"--dsn=", dsn))
 	{
@@ -136,6 +137,12 @@ int _tmain(int argc, _TCHAR* argv[])
 			wcout << L"Warning: Unknown case '" << cases[i] << L"' falling back to default of 'l' (lowercase)\n";
 
 		g_odbcInfos.push_back(SOdbcInfo(dsns[i], users[i], passes[i], cases[i] == L"l" ? TestTables::NC_LOWER : TestTables::NC_UPPER));
+	}
+	// Read an eventually set excel Dsn
+	if (extractParamValue(argc, argv, L"--excelDsn=", excelDsn))
+	{
+		::boost::algorithm::trim(excelDsn);
+		g_excelDsn = excelDsn;
 	}
 
 	// Note: We cannot call Init earlier, we must call it after we've set up the global with the param-values
