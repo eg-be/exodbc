@@ -39,6 +39,9 @@ namespace exodbc
 
 	void ExcelTest::SetUp()
 	{
+		// Ensure an Excel-DSN is set on the command line
+		ASSERT_TRUE( ! g_excelDsn.empty());
+
 		// Set up is called for every test
 		ASSERT_NO_THROW(m_env.AllocateEnvironmentHandle());
 		ASSERT_NO_THROW(m_env.SetOdbcVersion(OV_3));
@@ -56,7 +59,7 @@ namespace exodbc
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
 		// We cannot set Commit-mode on excel
-		EXPECT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
+		EXPECT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 	}
 
 

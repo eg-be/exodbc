@@ -29,6 +29,8 @@
 // -------
 namespace exodbc
 {
+	extern std::wstring g_excelDsn;
+
 	extern std::vector<SOdbcInfo> g_odbcInfos;
 
 	extern boost::log::trivial::severity_level g_logSeverity;
