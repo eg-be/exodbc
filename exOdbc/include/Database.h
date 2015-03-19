@@ -216,6 +216,7 @@ namespace exodbc
 		/*!
 		 * \brief	Commits all transaction associated with this database.
 		 * \return	true if it succeeds, false if it fails.
+		 * \throw	Exception if no connection handle is allocated or SQLEndTran fails.
 		 */
 		void         CommitTrans();
 
@@ -223,6 +224,7 @@ namespace exodbc
 		/*!
 		 * \brief	Rolls back all transaction associated with this database.
 		 * \return	true if it succeeds, false if it fails.
+		 * \throw	Exception if no connection handle is allocated or SQLEndTran fails.
 		 */
 		void         RollbackTrans();
 
@@ -380,7 +382,7 @@ namespace exodbc
 		 * 			m_commitMode is updated with the value red from the database, if reading
 		 *			was successful. In all other cases it is set to CM_UNKNOWN.
 		 * \return	The mode currently set.
-		 * \throw	Exception If reading the commit mode fails.
+		 * \throw	Exception If reading the commit mode fails or no connection handle is allocated.
 		 */
 		CommitMode		ReadCommitMode();
 
@@ -392,7 +394,8 @@ namespace exodbc
 		 *			This will always first Rollback all ongoing transactions.
 		 * \see		GetCommitMode()
 		 * \param	mode	The mode to set.
-		 * \throw	Exception If setting on database fails. Will not update internal flag in that case.
+		 * \throw	Exception If setting on database fails or no connection handle is allocated. 
+		 *			Will not update internal flag in that case.
 		 */
 		void		SetCommitMode(CommitMode mode);
 
@@ -436,7 +439,8 @@ namespace exodbc
 		* \details	Fails if not connected. Does not read the version from the environment
 		*			but from the SDbInfo populated during connecting to the database.
 		* \return	ODBC version or OV_UNKNOWN.
-		* \throw	Exception If not Open or parsing the version returned from the driver fails.
+		* \throw	Exception If parsing the version returned from the driver fails, or the version
+		*			from the driver has not yet been read (is read during Open()).
 		*/
 		OdbcVersion GetDriverOdbcVersion() const;
 
@@ -561,7 +565,7 @@ namespace exodbc
 		/*!
 		* \brief	Queries SQLGetTypeInfo to populate a SSqlTypeInfo struct.
 		* \return	Types Filled with data types supported by the db
-		* \throw	Exception
+		* \throw	Exception If the internal statement handle is not allocated, or reading fails.
 		*/
 		std::vector<SSqlTypeInfo> ReadDataTypesInfo();
 
@@ -583,20 +587,22 @@ namespace exodbc
 		/*!
 		* \brief	Query the Database using SQLGetInfo.
 		* \return	SDbInfo populated with values.
-		* \throw	Exception If reading Database info fails.
+		* \throw	Exception If reading Database info fails or no connection handle is allocated.
 		*/
 		SDbInfo			ReadDbInfo();
 		
 		
 		/*!
 		* \brief	Set initial global attributes on the database connection handle.
-		* \throw	Exception
+		* \throw	Exception If no connection handle is allocated, or setting an attribute fails.
 		*/
 		void			SetConnectionAttributes();
 		
 
 		/*!
 		* \brief	Do jobs common to all Open() implementations.
+		* \detailed	This function will ensure that if it fails no handles
+		*			are left in an allocated state.
 		* \throw	Exception If anything goes wrong.
 		*/
 		void             OpenImpl();
