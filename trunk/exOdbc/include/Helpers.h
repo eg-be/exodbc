@@ -110,6 +110,7 @@ namespace exodbc
 
 		std::wstring ToString() const;
 	};
+	typedef std::vector<SErrorInfo> SErrorInfoVector;
 
 
 	/*!
@@ -429,6 +430,16 @@ namespace exodbc
 
 
 	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNullNumeric();
+
+
+	enum FreeStatementThrowFlag
+	{
+		FSTF_NO_THROW = 0x0,
+		FSTF_THROW_ON_SQL_ERROR = 0x01,
+		FSTF_THROW_ON_SQL_INVALID_HANDLE = 0x02
+	};
+	typedef unsigned int FreeStatementThrowFlags;
+	extern EXODBCAPI SQLHSTMT FreeStatementHandle(SQLHSTMT hStmt, FreeStatementThrowFlags flags = FSTF_THROW_ON_SQL_ERROR | FSTF_THROW_ON_SQL_INVALID_HANDLE);
 
 
 	/*!

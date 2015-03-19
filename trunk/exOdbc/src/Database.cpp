@@ -169,39 +169,57 @@ namespace exodbc
 		// Allocate a statement handle for the database connection to use internal and the exec-handle
 		// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
+		// safe to throw directly, no handle has been allocated so far
 		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_hdbc);
 
 		ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmtExecSql);
+		// Need to free the m_hstmt handle - okay to throw if we fail, no other handle allocated
+		if (!SQL_SUCCEEDED(ret))
+		{
+			m_hstmt = FreeStatementHandle(m_hstmt);
+		}
 		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_hdbc);
 
-		// Query the data source for info about itself
-		m_dbInf = ReadDbInfo();
-
-		// Check that our ODBC-Version matches
-		OdbcVersion connectionVersion = GetDriverOdbcVersion();
-		if (m_envOdbcVersion > connectionVersion)
+		// Everything else might throw, let this function free the handles in case of failure
+		try
 		{
-			// \todo: Probably we should throw here and fail totally
-			LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % m_envOdbcVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer %connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName %connectionVersion).str());
+			// Query the data source for info about itself
+			m_dbInf = ReadDbInfo();
+
+			// Check that our ODBC-Version matches
+			OdbcVersion connectionVersion = GetDriverOdbcVersion();
+			if (m_envOdbcVersion > connectionVersion)
+			{
+				// \todo: Probably we should throw here and fail totally
+				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % m_envOdbcVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer %connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName %connectionVersion).str());
+			}
+
+			// Try to detect the type - this will update our internal type on the first call
+			Dbms();
+
+			// Set Connection Options
+			SetConnectionAttributes();
+
+			// Default to manual commit
+			// \todo: Excel is unable to set a commit-mode. Maybe we would need Open flags too? See Ticket #108
+			// but excel is able to read it
+			m_commitMode = ReadCommitMode();
+			if (Dbms() != dbmsEXCEL && m_commitMode != CM_MANUAL_COMMIT)
+			{
+				SetCommitMode(CM_MANUAL_COMMIT);
+			}
+
+			// Query the datatypes
+			m_datatypes = ReadDataTypesInfo();
+
 		}
-
-		// Try to detect the type - this will update our internal type on the first call
-		Dbms();
-
-		// Set Connection Options
-		SetConnectionAttributes();
-
-		// Default to manual commit
-		// \todo: Excel is unable to set a commit-mode. Maybe we would need Open flags too? See Ticket #108
-		// but excel is able to read it
-		m_commitMode = ReadCommitMode();
-		if (Dbms() != dbmsEXCEL && m_commitMode != CM_MANUAL_COMMIT)
+		catch (Exception ex)
 		{
-			SetCommitMode(CM_MANUAL_COMMIT);
+			// Free statements and rethrow. Do not allow to throw from freeing
+			m_hstmt = FreeStatementHandle(m_hstmt, FSTF_NO_THROW);
+			m_hstmtExecSql = FreeStatementHandle(m_hstmtExecSql, FSTF_NO_THROW);
+			throw ex;
 		}
-
-		// Query the datatypes
-		m_datatypes = ReadDataTypesInfo();
 
 		// Completed Successfully
 		LOG_DEBUG((boost::wformat(L"Opened connection to database %s") %m_dbInf.m_dbmsName).str());
@@ -252,8 +270,11 @@ namespace exodbc
 
 	void Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr)
 	{
+		exASSERT(!IsOpen());
 		exASSERT(!dsn.empty());
 		exASSERT(HasConnectionHandle());
+		exASSERT(m_hstmt == SQL_NULL_HSTMT);
+		exASSERT(m_hstmtExecSql == SQL_NULL_HSTMT);
 
 		m_dsn        = dsn;
 		m_uid        = uid;
@@ -269,18 +290,42 @@ namespace exodbc
 			(SQLWCHAR*) m_uid.c_str(), SQL_NTS,
 			(SQLWCHAR*) m_authStr.c_str(), SQL_NTS);
 
+		// Do not reset an eventually allocated connection handle here.
+		// The destructor will reset it if one is allocated
 		THROW_IFN_SUCCEEDED(SQLConnect, ret, SQL_HANDLE_DBC, m_hdbc);
 
+		// Do all the common stuff about opening
+		// If we fail, disconnect
+		try
+		{
+			OpenImpl();
+		}
+		catch (Exception ex)
+		{
+			// Try to disconnect from the data source
+			ret = SQLDisconnect(m_hdbc);
+			if ( ! SQL_SUCCEEDED(ret))
+			{
+				SErrorInfoVector errs = GetAllErrors(SQL_HANDLE_DBC, m_hdbc);
+				SErrorInfoVector::const_iterator it;
+				for (it = errs.begin(); it != errs.end(); ++it)
+				{
+					LOG_ERROR(boost::str(boost::wformat(L"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
+				}
+			}
+
+			// and rethrow what went wrong originally
+			throw ex;
+		}
+		
 		// Mark database as Open
 		m_dbIsOpen = true;
-
-		// Do all the common stuff about opening
-		OpenImpl();
 	}
 
 
 	void Database::SetConnectionAttributes()
 	{
+		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
 
 		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, NULL);
@@ -298,6 +343,7 @@ namespace exodbc
 
 	SDbInfo Database::ReadDbInfo()
 	{
+		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
 
 		SDbInfo dbInf;
@@ -436,6 +482,9 @@ namespace exodbc
 
 	std::vector<SSqlTypeInfo> Database::ReadDataTypesInfo()
 	{
+		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
+		exASSERT(m_hstmt != SQL_NULL_HSTMT);
+
 		std::vector<SSqlTypeInfo> types;
 
 		// Close Statement and make sure it closes upon exit
@@ -501,6 +550,8 @@ namespace exodbc
 
 	void Database::Close()
 	{
+		// Note: We assume that we are fully opened, all statements are allocated, etc.
+		// Open() will do its own cleanup in case of failure.
 		if (!IsOpen())
 		{
 			return;
@@ -513,47 +564,12 @@ namespace exodbc
 		}
 
 		// Free statement handles
-		// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
-		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, m_hstmt);
-		if (ret == SQL_ERROR)
-		{
-			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-			SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_STMT, m_hstmt, L"Freeing ODBC-Statement Handle failed with SQL_ERROR, handle is still valid.");
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		else if (ret == SQL_INVALID_HANDLE)
-		{
-			// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
-			m_hstmt = SQL_NULL_HSTMT;
-			SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Statement Handle failed with SQL_INVALID_HANDLE.");
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		// We have SUCCESS
-		m_hstmt = SQL_NULL_HSTMT;
-
-		ret = SQLFreeHandle(SQL_HANDLE_STMT, m_hstmtExecSql);
-		if (ret == SQL_ERROR)
-		{
-			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-			SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_STMT, m_hstmtExecSql, L"Freeing ODBC-Statement Handle failed with SQL_ERROR, handle is still valid.");
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		else if (ret == SQL_INVALID_HANDLE)
-		{
-			// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
-			m_hstmtExecSql = SQL_NULL_HSTMT;
-			SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Statement Handle failed with SQL_INVALID_HANDLE.");
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		// We have SUCCESS
-		m_hstmtExecSql = SQL_NULL_HSTMT;
+		// Let FreeStatementHandle throw, so a user can call its tables and then try to close again.
+		m_hstmt = FreeStatementHandle(m_hstmt);
+		m_hstmtExecSql = FreeStatementHandle(m_hstmtExecSql);
 
 		// Try to disconnect from the data source
-		ret = SQLDisconnect(m_hdbc);
+		SQLRETURN ret = SQLDisconnect(m_hdbc);
 		THROW_IFN_SUCCEEDED(SQLDisconnect, ret, SQL_HANDLE_DBC, m_hdbc);
 
 		LOG_DEBUG((boost::wformat(L"Closed connection to database %s") %m_dbInf.m_dbmsName).str());
@@ -563,6 +579,9 @@ namespace exodbc
 
 	void Database::CommitTrans()
 	{
+		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+
 		// Commit the transaction
 		SQLRETURN ret = SQLEndTran(SQL_HANDLE_DBC, m_hdbc, SQL_COMMIT);
 		THROW_IFN_SUCCEEDED_MSG(SQLEndTran, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to Commit Transaction");
@@ -571,6 +590,9 @@ namespace exodbc
 
 	void Database::RollbackTrans()
 	{
+		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+
 		// Rollback the transaction
 		SQLRETURN ret = SQLEndTran(SQL_HANDLE_DBC, m_hdbc, SQL_ROLLBACK);
 		THROW_IFN_SUCCEEDED_MSG(SQLEndTran, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to Rollback Transaction");
@@ -899,6 +921,9 @@ namespace exodbc
 
 	CommitMode Database::ReadCommitMode()
 	{
+		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+
 		CommitMode mode = CM_UNKNOWN;
 
 		SQLUINTEGER modeValue;
@@ -945,6 +970,9 @@ namespace exodbc
 
 	void Database::SetCommitMode(CommitMode mode)
 	{
+		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+
 		// If Autocommit is off, we need to rollback any ongoing transaction
 		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
 		if (GetCommitMode() != CM_AUTO_COMMIT)
@@ -1021,7 +1049,8 @@ namespace exodbc
 
 	OdbcVersion Database::GetDriverOdbcVersion() const
 	{
-		exASSERT(IsOpen());
+		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
+		exASSERT( ! m_dbInf.m_odbcVer.empty());
 
 		OdbcVersion ov = OV_UNKNOWN;
 		std::vector<std::wstring> versions;
