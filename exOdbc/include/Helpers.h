@@ -181,16 +181,8 @@ namespace exodbc
 
 
 	/*!
-	* \todo: Implement this, once we have flags and do no longer need to reference the table in here.
-	* \brief	Translate Table::OpenMode to String
-	* \param openMode
-	* \return std::wstring
-	*/
-	//extern EXODBCAPI std::wstring OpenMode2s(Table::OpenMode openMode);
-
-
-	/*!
-	 * \brief	Gets all errors for all passed handles.
+	 * \brief	Gets all errors for all passed handles. Should never throw as long
+	 *			you pass in at least one non-NULL handle.
 	 *
 	 * \param	hEnv 	(Optional) the environment.
 	 * \param	hDbc 	(Optional) the dbc.
@@ -198,10 +190,18 @@ namespace exodbc
 	 * \param	hStmt	(Optional) the description.
 	 *
 	 * \return	all errors.
+	 * \throw	AssertionException if not at least one of the handles is not a NULL handle.
+	 *			This function will not throw if reading the errors from SQLGetDiagRec fails,
+	 *			it will just log a warning.
 	 */
 	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc);
 
 
+	/*!
+	* \brief	A shorthand to GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
+	*			you pass in at least one non-NULL handle.
+	* \see		GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
+	*/
 	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle);
 
 
