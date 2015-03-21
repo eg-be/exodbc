@@ -13,6 +13,8 @@
 #include "TestTables.h"
 
 // Same component headers
+#include "gtest/gtest.h"
+
 // Other headers
 
 // Debug
@@ -33,14 +35,85 @@ namespace exodbc
 {
 	namespace TestTables
 	{
-		std::wstring GetTableName(const std::wstring& tableName, NameCase nameCase)
+		std::wstring ConvertNameCase(const std::wstring& columnOrTableName, NameCase nameCase)
 		{
-			return (nameCase == NC_UPPER ? boost::algorithm::to_upper_copy(tableName) : boost::algorithm::to_lower_copy(tableName));
+			return (nameCase == NameCase::UPPER ? boost::algorithm::to_upper_copy(columnOrTableName) : boost::algorithm::to_lower_copy(columnOrTableName));
 		}
 
-		std::wstring GetColName(const std::wstring& columnName, NameCase nameCase)
+
+		const std::map<TestTables::Table, std::wstring> TableNames = {
+			{ Table::BLOBTYPES, L"blobtypes" },
+			{ Table::BLOBTYPES_TMP, L"blobtypes_tmp" },
+			{ Table::CHARTABLE, L"chartable" },
+			{ Table::CHARTYPES, L"chartypes" },
+			{ Table::CHARTYPES_TMP, L"chartypes_tmp" },
+			{ Table::DATETYPES, L"datetypes" },
+			{ Table::DATETYPES_TMP, L"datatypes_tmp" },
+			{ Table::FLOATTYPES, L"floattypes" },
+			{ Table::FLOATTYPES_TMP, L"floattypes_tmp" },
+			{ Table::INTEGERTYPES, L"integertypes" },
+			{ Table::INTEGERTYPES_TMP, L"integertypes_tmp" },
+			{ Table::MULTIKEY, L"multikey" },
+			{ Table::NUMERICTYPES, L"numerictypes" },
+			{ Table::NUMERICTYPES_TMP, L"numerictypes_tmp" },
+			{ Table::SELECTONLY, L"selectonly" }
+		};
+
+
+		const std::map<TestTables::Table, std::wstring> IdColumnNames = {
+			{ Table::BLOBTYPES, L"idblobtypes" },
+			{ Table::BLOBTYPES_TMP, L"idblobtypes" },
+			{ Table::CHARTABLE, L"idchartable" },
+			{ Table::CHARTYPES, L"idchartypes" },
+			{ Table::CHARTYPES_TMP, L"idchartypes" },
+			{ Table::DATETYPES, L"iddatetypes" },
+			{ Table::DATETYPES_TMP, L"iddatatypes" },
+			{ Table::FLOATTYPES, L"idfloattypes" },
+			{ Table::FLOATTYPES_TMP, L"idfloattypes" },
+			{ Table::INTEGERTYPES, L"idintegertypes" },
+			{ Table::INTEGERTYPES_TMP, L"idintegertypes" },
+			{ Table::MULTIKEY, L"idmultikey" },
+			{ Table::NUMERICTYPES, L"idnumerictypes" },
+			{ Table::NUMERICTYPES_TMP, L"idnumerictypes" },
+			{ Table::SELECTONLY, L"idselectonly" }
+		};
+
+
+		std::wstring GetTableName(TestTables::Table table, TestTables::NameCase nameCase)
 		{
-			return GetTableName(columnName, nameCase);
+			std::map<TestTables::Table, std::wstring>::const_iterator it = TableNames.find(table);
+			exASSERT(it != TableNames.end());
+			return ConvertNameCase(it->second, nameCase);
 		}
+
+
+		std::wstring GetIdColumnName(TestTables::Table table, TestTables::NameCase nameCase)
+		{
+			std::map<TestTables::Table, std::wstring>::const_iterator it = IdColumnNames.find(table);
+			exASSERT(it != IdColumnNames.end());
+			return ConvertNameCase(it->second, nameCase);
+		}
+
+
+		void ClearTestTable(TestTables::Table table, TestTables::NameCase nameCase, exodbc::Table& testTable, exodbc::Database& db)
+		{
+			std::wstring idName = GetIdColumnName(table, nameCase);
+			std::wstring sqlstmt = (boost::wformat(L"%s >= 0 OR %s < 0") % idName % idName).str();
+
+			// Remove everything, ignoring if there was any data:
+			testTable.Delete(sqlstmt, false);
+			db.CommitTrans();
+		}
+
+
+		// \todo: See ticket #82
+		//exodbc::Table GetEmptyTestTable(TestTables::Table table, TestTables::NameCase nameCase, exodbc::Database& db)
+		//{
+		//	std::wstring tableName = GetTableName(table, nameCase);
+		//	exodbc::Table t(db, tableName, L"", L"", L"", AF_READ_WRITE);
+		//	t.Open(db);
+		//	ClearTestTable(table, nameCase, t, db);
+		//	return t;
+		//}
 	}
 }
