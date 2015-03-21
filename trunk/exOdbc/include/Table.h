@@ -185,7 +185,14 @@ namespace exodbc
 		*/
 		Table(const Database& db, SQLSMALLINT numColumns, const STableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
 
+	private:
 
+		/*!
+		* \brief	Prevent copies until we implement a copy constructor who takes care of the handle(s).
+		*/
+		Table(const Table& other) :m_manualColumns(false) {};
+
+	public:
 		virtual ~Table();
 
 

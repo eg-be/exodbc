@@ -132,7 +132,13 @@ namespace exodbc
 		*/
 		Database(const Environment& env);
 		
+	private:
+		/*!
+		* \brief	Prevent copies until we implement a copy constructor who takes care of the handle(s).
+		*/
+		Database(const Database& other) {};
 
+	public:
 		~Database();
 
 
