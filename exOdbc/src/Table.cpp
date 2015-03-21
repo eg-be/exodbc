@@ -614,7 +614,7 @@ namespace exodbc
 		}
 		if ( ! (!failOnNoData && ret == SQL_NO_DATA))
 		{
-			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDelete);
+			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
 		}
 	}
 
