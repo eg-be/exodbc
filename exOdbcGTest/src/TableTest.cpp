@@ -404,7 +404,7 @@ namespace exodbc
 		std::wstring str;
 
 		// We expect 6 Records
-		std::wstring idName = TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		// The first column has a smallint set, we can read that as any int value -32768
 		SQLBIGINT colVal = -32768;
@@ -497,7 +497,7 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
 		// Just check that the buffers are correct
-		std::wstring idName = TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_EQ(-32768, iTable.m_smallInt);
@@ -533,7 +533,7 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
 		std::wstring id, smallInt, i, bigInt;
-		std::wstring idName = TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_NO_THROW(iTable.GetColumnValue(1, smallInt));
@@ -574,7 +574,7 @@ namespace exodbc
 
 		SQLDOUBLE val;
 		wstring str;
-		std::wstring idName = TestTables::ConvertNameCase(L"idfloattypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::FLOATTYPES, m_odbcInfo.m_namesCase);
 		fTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_NO_THROW(fTable.GetColumnValue(2, val));
@@ -630,7 +630,7 @@ namespace exodbc
 		MFloatTypesTable fTable(m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(fTable.Open(m_db));
 
-		std::wstring idName = TestTables::ConvertNameCase(L"idfloattypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::FLOATTYPES, m_odbcInfo.m_namesCase);
 		fTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_EQ(0.0, fTable.m_float);
@@ -665,7 +665,7 @@ namespace exodbc
 		ASSERT_NO_THROW(fTable.Open(m_db));
 
 		wstring sVal;
-		wstring idName = TestTables::ConvertNameCase(L"idfloattypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::FLOATTYPES, m_odbcInfo.m_namesCase);
 		fTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_NO_THROW(fTable.GetColumnValue(2, sVal));
@@ -708,7 +708,7 @@ namespace exodbc
 		std::wstring str;
 
 		// We expect 6 Records
-		std::wstring idName = TestTables::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase);
 		charTypesAutoTable.Select((boost::wformat(L"%d = 1") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
 		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(1, str));
@@ -763,7 +763,7 @@ namespace exodbc
 		// Just test the values in the buffer - trimming has no effect here
 		using namespace boost::algorithm;
 		std::wstring str;
-		std::wstring idName = TestTables::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase);
 		wTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(wTable.SelectNext());
 		str.assign((wchar_t*) &wTable.m_varchar);
@@ -822,7 +822,7 @@ namespace exodbc
 
 		std::string str;
 
-		std::wstring idName = TestTables::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase);
 		charTypesAutoTable.Select((boost::wformat(L"%d = 1") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
 		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(1, str));
@@ -877,7 +877,7 @@ namespace exodbc
 		// Just test the values in the buffer - trimming has no effect here
 		using namespace boost::algorithm;
 		std::string str;
-		std::wstring idName = TestTables::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase);
 		cTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(cTable.SelectNext());
 		str.assign((char*)&cTable.m_varchar);
@@ -940,7 +940,7 @@ namespace exodbc
 		SQL_DATE_STRUCT date;
 		SQL_TIME_STRUCT time;
 		SQL_TIMESTAMP_STRUCT timestamp;
-		std::wstring idName = TestTables::ConvertNameCase(L"iddatetypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::DATETYPES, m_odbcInfo.m_namesCase);
 		dTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		{
 			// Microsoft will info here (which we report as warning) that the time field has been truncated (as we do not use the fancy TIME2 struct)
@@ -1041,7 +1041,7 @@ namespace exodbc
 		// Just test the values in the buffer - trimming has no effect here
 		using namespace boost::algorithm;
 		std::string str;
-		std::wstring idName = TestTables::ConvertNameCase(L"iddatetypes", m_odbcInfo.m_namesCase);
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::DATETYPES, m_odbcInfo.m_namesCase);
 		cTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		{
 			// Microsoft will info here (which we report as warning) that the time field has been truncated (as we do not use the fancy TIME2 struct)
@@ -1073,7 +1073,7 @@ namespace exodbc
 		ASSERT_NO_THROW(dTable.Open(m_db));
 
 		wstring sDate, sTime, sTimestamp;
-		wstring idName = TestTables::ConvertNameCase(L"iddatetypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::DATETYPES, m_odbcInfo.m_namesCase);
 		dTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(dTable.SelectNext());
 		EXPECT_NO_THROW(dTable.GetColumnValue(1, sDate));
@@ -1107,7 +1107,7 @@ namespace exodbc
 		Table bTable(m_db, blobTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(bTable.Open(m_db));
 
-		wstring idName = TestTables::ConvertNameCase(L"idblobtypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::BLOBTYPES, m_odbcInfo.m_namesCase);
 
 		SQLCHAR empty[] = { 0, 0, 0, 0,
 			0, 0, 0, 0,
@@ -1186,7 +1186,7 @@ namespace exodbc
 		MBlobTypesTable bTable(m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(bTable.Open(m_db));
 
-		wstring idName = TestTables::ConvertNameCase(L"idblobtypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::BLOBTYPES, m_odbcInfo.m_namesCase);
 
 		SQLCHAR empty[] = { 0, 0, 0, 0,
 			0, 0, 0, 0,
@@ -1242,7 +1242,7 @@ namespace exodbc
 		Table nTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(nTable.Open(m_db));
 
-		wstring idName = TestTables::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		const ColumnBuffer* pColId = nTable.GetColumnBuffer(0);
 		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
 		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
@@ -1298,7 +1298,7 @@ namespace exodbc
 		Table nTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(nTable.Open(m_db));
 
-		wstring idName = TestTables::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		SQL_NUMERIC_STRUCT numStr;
 		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
 		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
@@ -1383,7 +1383,7 @@ namespace exodbc
 
 		SQLBIGINT ex;
 		SQLBIGINT* p;
-		wstring idName = TestTables::ConvertNameCase(L"idNumericTypes", m_odbcInfo.m_namesCase); 
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		nTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
 		EXPECT_EQ(18, nTable.m_decimal_18_0.precision);
@@ -1452,7 +1452,7 @@ namespace exodbc
 		Table nTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(nTable.Open(m_db));
 
-		wstring idName = TestTables::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		const ColumnBuffer* pColId = nTable.GetColumnBuffer(0);
 		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
 		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
@@ -1509,7 +1509,7 @@ namespace exodbc
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		wstring idName = TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Note: We could also do this in one transaction.
@@ -1547,7 +1547,7 @@ namespace exodbc
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		wstring idName = TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Try to delete eventually available leftovers, ignore if none exists
@@ -1573,7 +1573,7 @@ namespace exodbc
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		wstring idName = TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
@@ -1613,7 +1613,7 @@ namespace exodbc
 		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
 		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
 
-		wstring idName = TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
@@ -1657,7 +1657,7 @@ namespace exodbc
 		ColumnBuffer* pTime = dTable.GetColumnBuffer(2);
 		ColumnBuffer* pTimestamp = dTable.GetColumnBuffer(3);
 
-		wstring idName = TestTables::ConvertNameCase(L"iddatetypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
@@ -1739,7 +1739,7 @@ namespace exodbc
 		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
 		ColumnBuffer* pFloat = fTable.GetColumnBuffer(2);
 
-		wstring idName = TestTables::ConvertNameCase(L"idfloattypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
@@ -1779,7 +1779,7 @@ namespace exodbc
 		ColumnBuffer* pNumeric_18_10 = nTable.GetColumnBuffer(2);
 		ColumnBuffer* pNumeric_5_3 = nTable.GetColumnBuffer(3);
 
-		wstring idName = TestTables::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Select a valid record from the non-tmp table
@@ -1837,7 +1837,7 @@ namespace exodbc
 		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") %idName).str();
 		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
@@ -1871,7 +1871,7 @@ namespace exodbc
 		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
@@ -1913,7 +1913,7 @@ namespace exodbc
 		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
@@ -1955,7 +1955,7 @@ namespace exodbc
 		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
@@ -2016,7 +2016,7 @@ namespace exodbc
 		ColumnBuffer* pVarBlob_20 = bTable.GetColumnBuffer(2);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idblobtypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		ASSERT_NO_THROW(bTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
@@ -2115,7 +2115,7 @@ namespace exodbc
 		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
@@ -2183,7 +2183,7 @@ namespace exodbc
 		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
@@ -2250,7 +2250,7 @@ namespace exodbc
 		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
 		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
 
-		wstring idName = TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
@@ -2347,7 +2347,7 @@ namespace exodbc
 		ColumnBuffer* pTime = dTable.GetColumnBuffer(2);
 		ColumnBuffer* pTimestamp = dTable.GetColumnBuffer(3);
 
-		wstring idName = TestTables::ConvertNameCase(L"iddatetypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
@@ -2416,7 +2416,7 @@ namespace exodbc
 		ColumnBuffer* pNumeric_18_10 = nTable.GetColumnBuffer(2);
 		ColumnBuffer* pNumeric_5_3 = nTable.GetColumnBuffer(3);
 
-		wstring idName = TestTables::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
@@ -2507,7 +2507,7 @@ namespace exodbc
 		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
 		ColumnBuffer* pFloat = fTable.GetColumnBuffer(2);
 
-		wstring idName = TestTables::ConvertNameCase(L"idfloattypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
@@ -2558,7 +2558,7 @@ namespace exodbc
 		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
@@ -2623,7 +2623,7 @@ namespace exodbc
 		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
@@ -2684,7 +2684,7 @@ namespace exodbc
 		ColumnBuffer* pVarBlob_20 = bTable.GetColumnBuffer(2);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = TestTables::ConvertNameCase(L"idblobtypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		ASSERT_NO_THROW(bTable.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
@@ -2768,7 +2768,7 @@ namespace exodbc
 		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
 		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
 
-		wstring idName = TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
