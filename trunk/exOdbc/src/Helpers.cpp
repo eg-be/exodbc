@@ -141,6 +141,8 @@ namespace exodbc
 			return L"SQL_ERROR";
 		case SQL_NEED_DATA:
 			return L"SQL_NEED_DATA";
+		case SQL_INVALID_HANDLE:
+			return L"SQL_INVALID_HANDLE";
 		default:
 			return L"???";
 		}
@@ -435,7 +437,7 @@ namespace exodbc
 
 			if(ret != SQL_NO_DATA)
 			{
-				BOOST_LOG_TRIVIAL(warning) << L"SQLGetDiagRec did not end with SQL_NO_DATA (100) but with " << ret;
+				LOG_WARNING(boost::str(boost::wformat(L"Calling SQLGetDiagRec did not end with %s (%d) but with %s (%d)") % SqlReturn2s(SQL_NO_DATA) % SQL_NO_DATA %SqlReturn2s(ret) % ret));
 			}
 		}
 
