@@ -48,7 +48,7 @@ namespace exodbc
 			{ Table::CHARTYPES, L"chartypes" },
 			{ Table::CHARTYPES_TMP, L"chartypes_tmp" },
 			{ Table::DATETYPES, L"datetypes" },
-			{ Table::DATETYPES_TMP, L"datatypes_tmp" },
+			{ Table::DATETYPES_TMP, L"datetypes_tmp" },
 			{ Table::FLOATTYPES, L"floattypes" },
 			{ Table::FLOATTYPES_TMP, L"floattypes_tmp" },
 			{ Table::INTEGERTYPES, L"integertypes" },
@@ -56,7 +56,8 @@ namespace exodbc
 			{ Table::MULTIKEY, L"multikey" },
 			{ Table::NUMERICTYPES, L"numerictypes" },
 			{ Table::NUMERICTYPES_TMP, L"numerictypes_tmp" },
-			{ Table::SELECTONLY, L"selectonly" }
+			{ Table::SELECTONLY, L"selectonly" },
+			{ Table::NOT_EXISTING, L"not_existing" }
 		};
 
 
@@ -67,7 +68,7 @@ namespace exodbc
 			{ Table::CHARTYPES, L"idchartypes" },
 			{ Table::CHARTYPES_TMP, L"idchartypes" },
 			{ Table::DATETYPES, L"iddatetypes" },
-			{ Table::DATETYPES_TMP, L"iddatatypes" },
+			{ Table::DATETYPES_TMP, L"iddatetypes" },
 			{ Table::FLOATTYPES, L"idfloattypes" },
 			{ Table::FLOATTYPES_TMP, L"idfloattypes" },
 			{ Table::INTEGERTYPES, L"idintegertypes" },
@@ -75,7 +76,8 @@ namespace exodbc
 			{ Table::MULTIKEY, L"idmultikey" },
 			{ Table::NUMERICTYPES, L"idnumerictypes" },
 			{ Table::NUMERICTYPES_TMP, L"idnumerictypes" },
-			{ Table::SELECTONLY, L"idselectonly" }
+			{ Table::SELECTONLY, L"idselectonly" },
+			{ Table::NOT_EXISTING, L"idnot_existing" }
 		};
 
 

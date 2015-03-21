@@ -108,7 +108,7 @@ namespace exodbc
 	{
 		// Open an auto-table without checking for privileges or existence
 		// This makes only sense if we've already determined the correct STableInfo structure
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		STableInfo tableInfo;
 		EXPECT_NO_THROW(tableInfo = m_db.FindOneTable(tableName, L"", L"", L""));
 
@@ -130,7 +130,7 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenAutoCheckExistence)
 	{
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table table(m_db, tableName, L"", L"", L"", AF_READ);
 		EXPECT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
 
@@ -138,7 +138,7 @@ namespace exodbc
 		{
 			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
-			std::wstring neName = TestTables::ConvertNameCase(L"notexistring", m_odbcInfo.m_namesCase);
+			std::wstring neName = TestTables::GetTableName(TestTables::Table::NOT_EXISTING, m_odbcInfo.m_namesCase);
 			exodbc::Table neTable(m_db, neName, L"", L"", L"", AF_READ);
 			EXPECT_THROW(neTable.Open(m_db, TOF_CHECK_EXISTANCE), Exception);
 		}
@@ -150,16 +150,16 @@ namespace exodbc
 		// \todo Test disabled, because its not working at all atm. See Ticket # 4
 		// Test to open read-only:
 		// MySQL fails totally with the privileges stuff
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table rTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(rTable.Open(m_db, TOF_CHECK_PRIVILEGES));
 
 		// Test a table that is read only: we can only open it read-only:
-		std::wstring so1Name = TestTables::ConvertNameCase(L"selectonly", m_odbcInfo.m_namesCase);
+		std::wstring so1Name = TestTables::GetTableName(TestTables::Table::SELECTONLY, m_odbcInfo.m_namesCase);
 		exodbc::Table so1Table(m_db, so1Name, L"", L"", L"", AF_READ);
 		EXPECT_NO_THROW(so1Table.Open(m_db, TOF_CHECK_PRIVILEGES));
 
-		std::wstring so2Name = TestTables::ConvertNameCase(L"selectonly", m_odbcInfo.m_namesCase);
+		std::wstring so2Name = TestTables::GetTableName(TestTables::Table::SELECTONLY, m_odbcInfo.m_namesCase);
 		exodbc::Table so2Table(m_db, so2Name, L"", L"", L"", AF_READ_WRITE);
 		// DB2 fails here, it still reports we have insert permissions. but doing an insert later fails
 
@@ -171,7 +171,7 @@ namespace exodbc
 	TEST_P(TableTest, Close)
 	{
 		// Create table
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 
 		// Close when not open must fail
@@ -199,7 +199,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenAndCloseAndOpenAndClose)
 	{
 		// Create a Table, open for reading
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
@@ -217,7 +217,7 @@ namespace exodbc
 	TEST_P(TableTest, SetAccessFlags)
 	{
 		// Create a Table, for reading only
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 
 		// Before opening it, change the mode, then open
@@ -243,7 +243,7 @@ namespace exodbc
 	// ----------------
 	TEST_P(TableTest, Select)
 	{
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
@@ -255,7 +255,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectNext)
 	{
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
@@ -275,7 +275,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectClose)
 	{
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 		
@@ -393,7 +393,7 @@ namespace exodbc
 	// ---------
 	TEST_P(TableTest, SelectAutoIntValues)
 	{
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
@@ -527,7 +527,7 @@ namespace exodbc
 	TEST_P(TableTest, SelectWCharIntValues)
 	{
 		// And some tables with auto-columns
-		std::wstring intTypesTableName = TestTables::ConvertNameCase(L"integertypes", m_odbcInfo.m_namesCase);
+		std::wstring intTypesTableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ);
 		iTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
 		ASSERT_NO_THROW(iTable.Open(m_db));
@@ -568,7 +568,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectAutoFloatValues)
 	{
-		wstring floatTypesTableName = TestTables::ConvertNameCase(L"floattypes", m_odbcInfo.m_namesCase);
+		wstring floatTypesTableName = TestTables::GetTableName(TestTables::Table::FLOATTYPES, m_odbcInfo.m_namesCase);
 		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(fTable.Open(m_db));
 
@@ -659,7 +659,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectWCharFloatValues)
 	{
-		wstring floatTypesTableName = TestTables::ConvertNameCase(L"floattypes", m_odbcInfo.m_namesCase);
+		wstring floatTypesTableName = TestTables::GetTableName(TestTables::Table::FLOATTYPES, m_odbcInfo.m_namesCase);
 		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ);
 		fTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
 		ASSERT_NO_THROW(fTable.Open(m_db));
@@ -698,7 +698,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectAutoWCharValues)
 	{
-		std::wstring charTypesTableName = TestTables::ConvertNameCase(L"chartypes", m_odbcInfo.m_namesCase);
+		std::wstring charTypesTableName = TestTables::GetTableName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(m_db, charTypesTableName, L"", L"", L"", AF_READ);
 		charTypesAutoTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		ASSERT_NO_THROW(charTypesAutoTable.Open(m_db));
@@ -813,7 +813,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectAutoCharValues)
 	{
-		std::wstring charTypesTableName = TestTables::ConvertNameCase(L"chartypes", m_odbcInfo.m_namesCase);
+		std::wstring charTypesTableName = TestTables::GetTableName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(m_db, charTypesTableName, L"", L"", L"", AF_READ);
 		charTypesAutoTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		ASSERT_NO_THROW(charTypesAutoTable.Open(m_db));
@@ -931,7 +931,7 @@ namespace exodbc
 		// For example, the value of the fraction field for a half-second is 500,000,000, for a thousandth of a second (one millisecond) is 1,000,000, 
 		// for a millionth of a second (one microsecond) is 1,000, and for a billionth of a second (one nanosecond) is 1.
 
-		std::wstring dateTypesTableName = TestTables::ConvertNameCase(L"datetypes", m_odbcInfo.m_namesCase);
+		std::wstring dateTypesTableName = TestTables::GetTableName(TestTables::Table::DATETYPES, m_odbcInfo.m_namesCase);
 		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(dTable.Open(m_db));
 
@@ -1067,7 +1067,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectWCharDateValues)
 	{
-		std::wstring dateTypesTableName = TestTables::ConvertNameCase(L"datetypes", m_odbcInfo.m_namesCase);
+		std::wstring dateTypesTableName = TestTables::GetTableName(TestTables::Table::DATETYPES, m_odbcInfo.m_namesCase);
 		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_READ);
 		dTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
 		ASSERT_NO_THROW(dTable.Open(m_db));
@@ -1103,7 +1103,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectAutoBlobValues)
 	{
-		std::wstring blobTypesTableName = TestTables::ConvertNameCase(L"blobtypes", m_odbcInfo.m_namesCase);
+		std::wstring blobTypesTableName = TestTables::GetTableName(TestTables::Table::BLOBTYPES, m_odbcInfo.m_namesCase);
 		Table bTable(m_db, blobTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(bTable.Open(m_db));
 
@@ -1238,7 +1238,7 @@ namespace exodbc
 
 	TEST_P(TableTest, IsNullAutoNumericValue)
 	{
-		std::wstring numericTypesTableName = TestTables::ConvertNameCase(L"numerictypes", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(nTable.Open(m_db));
 
@@ -1294,7 +1294,7 @@ namespace exodbc
 	TEST_P(TableTest, SelectAutoNumericValue)
 	{
 		// \note: There is a special Tests for NULL values, its complicated enough.
-		std::wstring numericTypesTableName = TestTables::ConvertNameCase(L"numerictypes", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(nTable.Open(m_db));
 
@@ -1448,7 +1448,7 @@ namespace exodbc
 
 	TEST_P(TableTest, IsNullManualNumericValue)
 	{
-		std::wstring numericTypesTableName = TestTables::ConvertNameCase(L"numerictypes", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(nTable.Open(m_db));
 
@@ -1505,7 +1505,7 @@ namespace exodbc
 	// -----------
 	TEST_P(TableTest, DeleteWhere)
 	{
-		std::wstring intTypesTableName = TestTables::ConvertNameCase(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring intTypesTableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
@@ -1543,7 +1543,7 @@ namespace exodbc
 
 	TEST_P(TableTest, DeleteWhereShouldReturnSQL_NO_DATA)
 	{
-		std::wstring intTypesTableName = TestTables::ConvertNameCase(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring intTypesTableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
@@ -1569,7 +1569,7 @@ namespace exodbc
 
 	TEST_P(TableTest, Delete)
 	{
-		std::wstring intTypesTableName = TestTables::ConvertNameCase(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring intTypesTableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
@@ -1605,7 +1605,7 @@ namespace exodbc
 	// -----------
 	TEST_P(TableTest, InsertIntTypes)
 	{
-		std::wstring intTypesTableName = TestTables::ConvertNameCase(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring intTypesTableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
@@ -1649,7 +1649,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertDateTypes)
 	{
-		std::wstring dateTypesTableName = TestTables::ConvertNameCase(L"datetypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring dateTypesTableName = TestTables::GetTableName(TestTables::Table::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(dTable.Open(m_db));
 		ColumnBuffer* pId = dTable.GetColumnBuffer(0);
@@ -1732,7 +1732,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertFloatTypes)
 	{
-		std::wstring floatTypesTableName = TestTables::ConvertNameCase(L"floattypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring floatTypesTableName = TestTables::GetTableName(TestTables::Table::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(fTable.Open(m_db));
 		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
@@ -1771,7 +1771,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes)
 	{
-		std::wstring numericTypesTmpTableName = TestTables::ConvertNameCase(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table nTable(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(nTable.Open(m_db));
 		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
@@ -1783,7 +1783,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Select a valid record from the non-tmp table
-		std::wstring numericTypesTableName = TestTables::ConvertNameCase(L"numerictypes", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nnTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(nnTable.Open(m_db));
 		SQL_NUMERIC_STRUCT numStr18_0, numStr18_10, numStr5_3;
@@ -1827,7 +1827,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_5_3)
 	{
-		std::wstring numericTypesTmpTableName = TestTables::ConvertNameCase(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
 		ASSERT_NO_THROW(t.Open(m_db));
@@ -1861,7 +1861,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_18_0)
 	{
-		std::wstring numericTypesTmpTableName = TestTables::ConvertNameCase(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
 		ASSERT_NO_THROW(t.Open(m_db));
@@ -1903,7 +1903,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_18_10)
 	{
-		std::wstring numericTypesTmpTableName = TestTables::ConvertNameCase(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
 		ASSERT_NO_THROW(t.Open(m_db));
@@ -1945,7 +1945,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_All)
 	{
-		std::wstring numericTypesTmpTableName = TestTables::ConvertNameCase(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
 		ASSERT_NO_THROW(t.Open(m_db));
@@ -2007,7 +2007,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertBlobTypes)
 	{
-		std::wstring blobTypesTmpTableName = TestTables::ConvertNameCase(L"blobtypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring blobTypesTmpTableName = TestTables::GetTableName(TestTables::Table::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table bTable(m_db, blobTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(bTable.Open(m_db));
 
@@ -2103,7 +2103,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertCharTypes)
 	{
-		std::wstring charTypesTmpTableName = TestTables::ConvertNameCase(L"chartypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring charTypesTmpTableName = TestTables::GetTableName(TestTables::Table::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		ASSERT_NO_THROW(cTable.Open(m_db));
@@ -2171,7 +2171,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertWCharTypes)
 	{
-		std::wstring charTypesTmpTableName = TestTables::ConvertNameCase(L"chartypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring charTypesTmpTableName = TestTables::GetTableName(TestTables::Table::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		ASSERT_NO_THROW(cTable.Open(m_db));
@@ -2242,7 +2242,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateIntTypes)
 	{
-		std::wstring intTypesTableName = TestTables::ConvertNameCase(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring intTypesTableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
@@ -2339,7 +2339,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateDateTypes)
 	{
-		std::wstring dateTypesTableName = TestTables::ConvertNameCase(L"datetypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring dateTypesTableName = TestTables::GetTableName(TestTables::Table::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(dTable.Open(m_db));
 		ColumnBuffer* pId = dTable.GetColumnBuffer(0);
@@ -2376,7 +2376,6 @@ namespace exodbc
 		date = InitDate(20, 9, 1985);
 		time = InitTime(16, 31, 49);
 		timestamp = InitTimestamp(16, 31, 49, 0, 20, 9, 1985);
-
 		*pId = (SQLINTEGER)101;
 		pDate->SetNull();
 		pTime->SetNull();
@@ -2409,7 +2408,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateNumericTypes)
 	{
-		std::wstring numericTypesTmpTableName = TestTables::ConvertNameCase(L"numerictypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring numericTypesTmpTableName = TestTables::GetTableName(TestTables::Table::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table nTable(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(nTable.Open(m_db));
 		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
@@ -2501,7 +2500,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateFloatTypes)
 	{
-		std::wstring floatTypesTableName = TestTables::ConvertNameCase(L"floattypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring floatTypesTableName = TestTables::GetTableName(TestTables::Table::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(fTable.Open(m_db));
 		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
@@ -2546,7 +2545,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateWCharTypes)
 	{
-		std::wstring charTypesTmpTableName = TestTables::ConvertNameCase(L"chartypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring charTypesTmpTableName = TestTables::GetTableName(TestTables::Table::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		ASSERT_NO_THROW(cTable.Open(m_db));
@@ -2611,7 +2610,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateCharTypes)
 	{
-		std::wstring charTypesTmpTableName = TestTables::ConvertNameCase(L"chartypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring charTypesTmpTableName = TestTables::GetTableName(TestTables::Table::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		ASSERT_NO_THROW(cTable.Open(m_db));
@@ -2676,7 +2675,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateBlobTypes)
 	{
-		std::wstring blobTypesTmpTableName = TestTables::ConvertNameCase(L"blobtypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring blobTypesTmpTableName = TestTables::GetTableName(TestTables::Table::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table bTable(m_db, blobTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(bTable.Open(m_db));
 
@@ -2761,7 +2760,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateWhere)
 	{
-		std::wstring intTypesTableName = TestTables::ConvertNameCase(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring intTypesTableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);

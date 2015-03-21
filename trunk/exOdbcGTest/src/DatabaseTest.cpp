@@ -249,7 +249,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, CommitTransaction)
 	{
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
@@ -315,7 +315,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, RollbackTransaction)
 	{
-		std::wstring tableName = TestTables::ConvertNameCase(L"integertypes_tmp", m_odbcInfo.m_namesCase);
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
@@ -456,7 +456,7 @@ namespace exodbc
 		
 		// Find the table-info
 		STableInfo iInfo;
-		wstring intTableName = TestTables::ConvertNameCase(L"IntegerTypes", m_odbcInfo.m_namesCase);
+		wstring intTableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		wstring idName = TestTables::ConvertNameCase(L"IdIntegerTypes", m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(iInfo = m_db.FindOneTable(intTableName, L"", L"", L""));
 
@@ -468,7 +468,7 @@ namespace exodbc
 		}
 
 		STableInfo mkInfo;
-		wstring multiKeyTableName = TestTables::ConvertNameCase(L"MultiKey", m_odbcInfo.m_namesCase);
+		wstring multiKeyTableName = TestTables::GetTableName(TestTables::Table::MULTIKEY, m_odbcInfo.m_namesCase);
 		wstring mkId1 = TestTables::ConvertNameCase(L"id1", m_odbcInfo.m_namesCase);
 		wstring mkId2 = TestTables::ConvertNameCase(L"id2", m_odbcInfo.m_namesCase);
 		wstring mkId3 = TestTables::ConvertNameCase(L"id3", m_odbcInfo.m_namesCase);

@@ -55,7 +55,8 @@ namespace exodbc
 			MULTIKEY,
 			NUMERICTYPES,
 			NUMERICTYPES_TMP,
-			SELECTONLY
+			SELECTONLY,
+			NOT_EXISTING
 		};
 
 		extern const std::map<TestTables::Table, std::wstring> TableNames;
