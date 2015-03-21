@@ -130,13 +130,13 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	for(size_t i = 0; status == 0 && i < dsns.size(); i++)
 	{
-		TestTables::NameCase nameCase = TestTables::NC_LOWER;
+		TestTables::NameCase nameCase = TestTables::NameCase::LOWER;
 		if (cases[i] == L"u")
-			nameCase = TestTables::NC_UPPER;
+			nameCase = TestTables::NameCase::UPPER;
 		else if (cases[i] != L"l")
 			wcout << L"Warning: Unknown case '" << cases[i] << L"' falling back to default of 'l' (lowercase)\n";
 
-		g_odbcInfos.push_back(SOdbcInfo(dsns[i], users[i], passes[i], cases[i] == L"l" ? TestTables::NC_LOWER : TestTables::NC_UPPER));
+		g_odbcInfos.push_back(SOdbcInfo(dsns[i], users[i], passes[i], cases[i] == L"l" ? TestTables::NameCase::LOWER : TestTables::NameCase::UPPER));
 	}
 	// Read an eventually set excel Dsn
 	if (extractParamValue(argc, argv, L"--excelDsn=", excelDsn))

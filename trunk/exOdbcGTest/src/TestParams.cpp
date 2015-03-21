@@ -36,7 +36,7 @@ namespace exodbc
 		wos << L"DSN: " << oi.m_dsn.c_str() 
 			<< L"; Username: " << oi.m_username.c_str()
 			<< L"; Password: " << oi.m_password.c_str()
-			<< L"; Names: " << (oi.m_namesCase == TestTables::NC_LOWER ? L"lowercase" : L"uppercase");
+			<< L"; Names: " << (oi.m_namesCase == TestTables::NameCase::LOWER ? L"lowercase" : L"uppercase");
 		std::string s;
 
 		// TODO: Resolve with ticket #44 #53
@@ -60,7 +60,7 @@ namespace exodbc
 		wos << L"DSN: " << oi.m_dsn.c_str()
 			<< L"; Username: " << oi.m_username.c_str()
 			<< L"; Password: " << oi.m_password.c_str()
-			<< L"; Names: " << (oi.m_namesCase == TestTables::NC_LOWER ? L"lowercase" : L"uppercase");
+			<< L"; Names: " << (oi.m_namesCase == TestTables::NameCase::LOWER ? L"lowercase" : L"uppercase");
 
 
 		return wos;
