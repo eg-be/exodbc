@@ -29,7 +29,7 @@ namespace exodbc
 	extern boost::shared_mutex g_dontDebugBreakMutex;
 	extern EXODBCAPI void SetDontDebugBreak(bool value);
 	extern EXODBCAPI bool GetDontDebugBreak();
-	extern void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg);
+	extern EXODBCAPI void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg);
 
 	struct DontDebugBreak
 	{
