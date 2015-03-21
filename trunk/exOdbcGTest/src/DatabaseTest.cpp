@@ -457,7 +457,7 @@ namespace exodbc
 		// Find the table-info
 		STableInfo iInfo;
 		wstring intTableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		wstring idName = TestTables::ConvertNameCase(L"IdIntegerTypes", m_odbcInfo.m_namesCase);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(iInfo = m_db.FindOneTable(intTableName, L"", L"", L""));
 
 		EXPECT_NO_THROW(pks = m_db.ReadTablePrimaryKeys(iInfo));
