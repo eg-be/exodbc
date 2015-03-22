@@ -124,7 +124,7 @@ namespace exodbc
 		void FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) throw();
 		void BuildErrorMsg(const std::wstring& sqlFunctionName, SQLRETURN ret) throw();
 
-		std::vector<SErrorInfo> m_errors;
+		SErrorInfoVector m_errors;
 		std::wstring m_errorMsg;
 	};
 

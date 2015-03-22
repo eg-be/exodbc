@@ -194,7 +194,7 @@ namespace exodbc
 	 *			This function will not throw if reading the errors from SQLGetDiagRec fails,
 	 *			it will just log a warning.
 	 */
-	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc);
+	extern EXODBCAPI SErrorInfoVector GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc);
 
 
 	/*!
@@ -202,7 +202,7 @@ namespace exodbc
 	*			you pass in at least one non-NULL handle.
 	* \see		GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
 	*/
-	extern EXODBCAPI std::vector<SErrorInfo> GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle);
+	extern EXODBCAPI SErrorInfoVector GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle);
 
 
 	/*!
@@ -470,8 +470,8 @@ namespace exodbc
 #define LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, logLevel) \
 	do { \
 		std::wstring msgStr(msg); \
-		std::vector<SErrorInfo> errs = GetAllErrors(hEnv, hDbc, hStmt, hDesc); \
-		std::vector<SErrorInfo>::const_iterator it; \
+		SErrorInfoVector errs = GetAllErrors(hEnv, hDbc, hStmt, hDesc); \
+		SErrorInfoVector::const_iterator it; \
 		std::wstringstream handles; \
 		if(hEnv) handles << L"Env=" << hEnv << L";"; \
 		if(hDbc) handles << L"Dbc=" << hDbc << L";"; \
