@@ -315,7 +315,7 @@ namespace exodbc
 	 * \brief	Gets one field of a record of the passed stmt-handle.
 	 *
 	 * \param	hStmt				  	The statement-handle.
-	 * \param	colOrParamNr		  	The col or parameter nr.
+	 * \param	colOrParamNr		  	The col or parameter nr. (1-indexed)
 	 * \param	targetType			  	Type of the target.
 	 * \param	pTargetValue			Pointer to the target buffer.
 	 * \param	bufferLen			  	Length of the buffer in Bytes (not strings!).
@@ -337,7 +337,7 @@ namespace exodbc
 	 * 			If the data is null or reading fails, value is set to an empty string.
 	 *
 	 * \param	hStmt		 	The statement.
-	 * \param	colNr		 	The col nr.
+	 * \param	colNr		 	The col nr. (1-indexed)
 	 * \param	maxNrOfChars 	The maximum nr of characters.
 	 * \param [in,out]	value	The value.
 	 *
