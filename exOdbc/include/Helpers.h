@@ -269,34 +269,6 @@ namespace exodbc
 
 
 	/*!
-	* \brief	Ensure that the passed Statement-handle is closed after this function returns.
-	* \details	The function expects that the passed Statement-handle is already closed. It will
-	*			try to close the statement again, and if it does not fail (which means the statement
-	*			was still open) the function will return false and log an error.
-	*			If it fails to close the statement (as the statement was already closed) it will return
-	*			true and log nothing.
-	*			Note: This function is probably only used in debug-assertions to detect erroneously
-	*			open statements.
-	*			Note: This function will only work correctly when working with an odbc 3.x driver
-	*			Note: This function does not work using MySQL ODBC Driver ?
-	* \param	hStmt		The statement handle.
-	* \param	dbms		The Database-Type connected to.
-	* \return	True if hStmt was already closed when the function was called.
-	*/
-	extern EXODBCAPI bool	EnsureStmtIsClosed(const SQLHANDLE& hStmt, DatabaseProduct dbms);
-
-
-	/*!
-	* \brief	Compares two SQL-States, returns true if they are equal.
-	* \details	This is a imple shorthand to a wcsncmp with a max of 5 chars
-	* \param	sqlState1	First SQL-State
-	* \param	sqlState2	Second SQL-State
-	* \return	True if the strings sqlState1 and sqlState2 are equal for the first 5 chars
-	*/
-	extern EXODBCAPI bool	CompareSqlState(const SQLWCHAR* sqlState1, const SQLWCHAR* sqlState2);
-
-
-	/*!
 	* \brief	A wrapper to SQLNumResultCols.
 	* \details	Counts how many columns are available on the result set of the
 	*			passed Statement handle. Fails if statement is in wrong state

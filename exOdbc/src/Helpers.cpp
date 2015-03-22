@@ -484,54 +484,6 @@ namespace exodbc
 	}
 
 
-	bool EnsureStmtIsClosed(const SQLHANDLE& hStmt, DatabaseProduct dbms)
-	{
-		exASSERT(hStmt);
-		SQLRETURN ret;
-		bool wasOpen = false;
-		// SQLCloseCursor returns SQLSTATE 24000 (Invalid cursor state) if no cursor is open. 
-		// TODO: Using the MySQL ODBC Driver this function never fails ?
-		ret = SQLCloseCursor(hStmt);
-		if (ret == SQL_SUCCESS && dbms != dbmsMY_SQL)
-		{
-			// The Cursor was open as closing worked fine
-			LOG_WARNING(L"Closing the Cursor worked fine, but we expected that it was already closed");
-			wasOpen = true;
-		}
-		else if (dbms != dbmsMY_SQL)
-		{
-			// We would expect SQLSTATE 24000
-			const SErrorInfoVector& errs = GetAllErrors(SQL_HANDLE_STMT, hStmt);
-			SErrorInfoVector::const_iterator it;
-			bool haveOtherErrs = false;
-			std::wstringstream ws;
-			ws << L"SQLCloseCursor returned a different error than the expected SQLSTATE 24000:\n";
-			for (it = errs.begin(); it != errs.end(); it++)
-			{
-				if ( ! CompareSqlState(it->SqlState, SqlState::INVALID_CURSOR_STATE))
-				{
-					// but we have something different
-					haveOtherErrs = true;
-					ws << *it << L"\n";
-				}
-			}
-			if (haveOtherErrs)
-			{
-				LOG_ERROR(ws.str());
-			}
-		}
-		return !wasOpen;
-	}
-
-
-	bool CompareSqlState(const SQLWCHAR* sqlState1, const SQLWCHAR* sqlState2)
-	{
-		exASSERT(sqlState1);
-		exASSERT(sqlState2);
-		return (wcsncmp(sqlState1, sqlState2, 5) == 0);
-	}
-
-
 	SQLSMALLINT GetResultColumnsCount(SQLHANDLE hStmt)
 	{
 		exASSERT(hStmt);
