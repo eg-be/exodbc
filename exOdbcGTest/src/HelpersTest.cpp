@@ -142,6 +142,43 @@ namespace exodbc
 	}
 
 
+	TEST_P(ParamHelpersTest, GetInfo)
+	{
+		// Simply test reading a string and an int value works - that means, does return some data
+		std::wstring serverName;
+
+		ASSERT_TRUE(m_db.HasConnectionHandle());
+		GetInfo(m_db.GetConnectionHandle(), SQL_SERVER_NAME, serverName);
+		EXPECT_FALSE(serverName.empty());
+
+		// and read some int value
+		// okay, it would be bad luck if one driver reports 1313
+		SQLUSMALLINT maxStmts = 1313;
+		SWORD cb = 0;
+		GetInfo(m_db.GetConnectionHandle(), SQL_MAX_CONCURRENT_ACTIVITIES, &maxStmts, sizeof(maxStmts), &cb);
+		EXPECT_NE(1313, maxStmts);
+		EXPECT_NE(0, cb);
+	}
+
+
+	TEST_P(ParamHelpersTest, GetData)
+	{
+
+	}
+
+
+	TEST_P(ParamHelpersTest, SetDescriptionField)
+	{
+
+	}
+
+
+	TEST_P(ParamHelpersTest, GetRowDescriptorHandle)
+	{
+
+	}
+
+
 	void StaticHelpersTest::SetUp()
 	{
 
