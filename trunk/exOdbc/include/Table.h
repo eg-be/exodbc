@@ -769,25 +769,6 @@ namespace exodbc
 		*/
 		void        Initialize();
 
-
-		/*!
-		* \brief	Allocates a new Statement-handle using the Database of this Table.
-		* \return	New Statement handle.
-		* \throw	Exception If allocating handle fails.
-		*/
-		SQLHSTMT		AllocateStatement(const Database& db) const;
-
-
-		/*!
-		* \brief	Frees the passed Statement handle.
-		* \details If the passed statement can be freed successfully, SQL_NULL_HSTMT is returned.
-		*			If the passed statement cannot be freed successfully because SQL_INVALID_HANDLE 
-		*			or SQL_ERROR is returned, an Exception is thrown.
-		* \return	SQL_NULL_HSTMT is statement was freed successfully.
-		* \throw	Exception If freeing statement fails.
-		*/
-		SQLHSTMT	FreeStatement(SQLHSTMT stmt);
-
 		
 		/*!
 		* \brief	Frees the statement handles allocated during AllocateStatements().
