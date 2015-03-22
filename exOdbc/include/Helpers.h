@@ -89,9 +89,10 @@ namespace exodbc
 	// Structs
 	// -------
 	/*!
-	* \class SErrorInfo
+	* \struct SErrorInfo
 	*
-	* \brief Store error-information from odbc
+	* \brief Store error-information from ODBC.
+	* \see		GetAllErrors()
 	*/
 	struct EXODBCAPI SErrorInfo
 	{
@@ -110,6 +111,11 @@ namespace exodbc
 
 		std::wstring ToString() const;
 	};
+
+	/*!
+	* \typedef SErrorInfoVector
+	* \brief	Vector of SErrorInfo structs.
+	*/
 	typedef std::vector<SErrorInfo> SErrorInfoVector;
 
 
@@ -241,7 +247,8 @@ namespace exodbc
 	};
 
 	/*!
-	* \typedef FreeStatementThrowFlags Should be a mask of FreeStatementThrowFlag.
+	* \typedef FreeStatementThrowFlags 
+	* \brief	Should be a mask of FreeStatementThrowFlag.
 	* \see	FreeStatementThrowFlag
 	*/
 	typedef unsigned int FreeStatementThrowFlags;
