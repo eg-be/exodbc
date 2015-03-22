@@ -123,7 +123,6 @@ namespace exodbc
 	extern std::string w2s(const std::wstring& w);
 
 
-
 	/*!
 	* \brief Ugly conversion of wide to small - use only if you know that you have only ASCII chars in s.
 	*
@@ -134,7 +133,6 @@ namespace exodbc
 	extern std::wstring s2w(const std::string& s);
 
 
-
 	/*!
 	* \brief Returns the string TRUE, FALSE or ????? for the values SQL_TRUE, SQL_FALSE or anything else.
 	*
@@ -142,6 +140,7 @@ namespace exodbc
 	* \return std::wstring TRUE, FALSE or ?????
 	*/
 	extern EXODBCAPI std::wstring SqlTrueFalse2s(SQLSMALLINT b);
+
 
 	/*!
 	* \brief Translates some often encountered SQLRETURN values to a string.
@@ -204,63 +203,6 @@ namespace exodbc
 	*/
 	extern EXODBCAPI SErrorInfoVector GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle);
 
-
-	/*!
-	 * \brief	Gets the last environment error, if one is available.
-	 *
-	 * \param	hEnv		The environment. If NULL, a warning is logged and Default SErrorInfo object returned.
-	 * \param [out]	totalErrors	The total number of errors available.
-	 *
-	 * \return	The last environment error, or the default SErrorInfo object if no error could be fetched.
-	 */
-	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors);
-
-	/*!
-	* \brief	Gets the last Dbc error, if one is available.
-	*
-	* \param	hDbc		The database handle. If NULL, a warning is logged and Default SErrorInfo object returned.
-	* \param [out]	totalErrors	The total number of errors available.
-	*
-	* \return	The last dbc error, or the default SErrorInfo object if no error could be fetched.
-	*/
-	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc, SQLSMALLINT& totalErrors);
-
-	/*!
-	* \brief	Gets the last statement error, if one is available.
-	*
-	* \param	hEnv		The statement. If NULL, a warning is logged and Default SErrorInfo object returned.
-	* \param [out]	totalErrors	The total number of errors available.
-	*
-	* \return	The last statement error, or the default SErrorInfo object if no error could be fetched.
-	*/
-	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt, SQLSMALLINT& totalErrors);
-
-	/*!
-	* \brief	Gets the last environment error, if one is available.
-	*
-	* \param	hEnv		The environment. If NULL, a warning is logged and Default SErrorInfo object returned.
-	*
-	* \return	The last environment error, or the default SErrorInfo object if no error could be fetched.
-	*/
-	extern EXODBCAPI SErrorInfo GetLastEnvError(SQLHANDLE hEnv);
-
-	/*!
-	* \brief	Gets the last Dbc error, if one is available.
-	*
-	* \param	hDbc		The database handle. If NULL, a warning is logged and Default SErrorInfo object returned.
-	*
-	* \return	The last dbc error, or the default SErrorInfo object if no error could be fetched.
-	*/
-	extern EXODBCAPI SErrorInfo GetLastDbcError(SQLHANDLE hDbc);
-
-	/*!
-	* \brief	Gets the last statement error, if one is available.
-	*
-	* \param	hEnv		The statement. If NULL, a warning is logged and Default SErrorInfo object returned.
-	*
-	* \return	The last statement error, or the default SErrorInfo object if no error could be fetched.
-	*/
-	extern EXODBCAPI SErrorInfo GetLastStmtError(SQLHANDLE hStmt);
 
 	enum CloseMode
 	{
