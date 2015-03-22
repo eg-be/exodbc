@@ -51,9 +51,51 @@ namespace exodbc
 	}
 
 
+	TEST_P(ParamHelpersTest, AllocateStatementHandle)
+	{
+		// We expect failure if we pass an invalid handle
+		SQLHDBC hNull = SQL_NULL_HDBC;
+		{
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(AllocateStatementHandle(hNull), AssertionException);
+		}
+
+		// But success on a valid handle
+		ASSERT_TRUE(m_db.HasConnectionHandle());
+		SQLHSTMT hStmt = SQL_NULL_HSTMT;
+		EXPECT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+
+		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
+	}
+
+
+	TEST_P(ParamHelpersTest, FreeStatementHandle)
+	{
+		// We expect failure if we pass an invalid handle and have the flag INVALID set
+		SQLHSTMT hNull = SQL_NULL_HSTMT;
+		{
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(FreeStatementHandle(hNull, FSTF_THROW_ON_SQL_INVALID_HANDLE), SqlResultException);
+		}
+
+		// But not if we pass only the error flag or the no-throw flag
+		EXPECT_NO_THROW(FreeStatementHandle(hNull, FSTF_THROW_ON_SQL_ERROR));
+		EXPECT_NO_THROW(FreeStatementHandle(hNull, FSTF_NO_THROW));
+
+		// Now take a valid handle, this should not throw
+		ASSERT_TRUE(m_db.HasConnectionHandle());
+		SQLHSTMT hStmt = SQL_NULL_HSTMT;
+		EXPECT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+
+		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
+	}
+
+
 	TEST_P(ParamHelpersTest, CloseStmtHandle)
 	{
-		SQLHANDLE hNull = SQL_NULL_HSTMT;
+		SQLHSTMT hNull = SQL_NULL_HSTMT;
 		{
 			// We assert if we pass a null handle
 			DontDebugBreak ddb;
@@ -63,7 +105,7 @@ namespace exodbc
 
 		// Allocate a valid statement handle
 		SQLHSTMT hStmt = SQL_NULL_HSTMT;
-		EXPECT_NO_THROW(hStmt = AllocateStatement(m_db.GetConnectionHandle()));
+		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
 
 		// This is not open yet, we shall fail to free it
 		{
@@ -81,7 +123,7 @@ namespace exodbc
 		// Open statement by doing some operation on it
 		std::wstring sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s") % TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase));
 		SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*) sqlstmt.c_str(), SQL_NTS);
-		ASSERT_TRUE(SQL_SUCCEEDED(ret));
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
 		// Closing it first time must work
 		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen));
@@ -94,6 +136,9 @@ namespace exodbc
 		DontDebugBreak ddb;
 		LogLevelFatal llf;
 		EXPECT_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen), SqlResultException);
+
+		// Close the statement
+		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
 	}
 
 
