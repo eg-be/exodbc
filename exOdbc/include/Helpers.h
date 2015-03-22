@@ -269,17 +269,6 @@ namespace exodbc
 
 
 	/*!
-	* \brief	A wrapper to SQLNumResultCols.
-	* \details	Counts how many columns are available on the result set of the
-	*			passed Statement handle. Fails if statement is in wrong state
-	* \param	hStmt		The statement handle.
-	* \see		http://msdn.microsoft.com/en-us/library/ms715393%28v=vs.85%29.aspx
-	* \return	True if hStmt was already closed when the function was called.
-	*/
-	extern EXODBCAPI SQLSMALLINT GetResultColumnsCount(SQLHANDLE hStmt);
-
-
-	/*!
 	* \brief	A wrapper to SQLGetInfo to read a String info.
 	* 
 	* \param	hDbc					The Database connection handle.

@@ -484,21 +484,6 @@ namespace exodbc
 	}
 
 
-	SQLSMALLINT GetResultColumnsCount(SQLHANDLE hStmt)
-	{
-		exASSERT(hStmt);
-
-		SQLSMALLINT count = 0;
-		SQLRETURN ret = SQLNumResultCols(hStmt, &count);
-		if (ret != SQL_SUCCESS)
-		{
-			LOG_ERROR_STMT(hStmt, ret, SQLNumResultCols);
-			count = -1;
-		}
-		return count;
-	}
-
-
 	void GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, std::wstring& sValue)
 	{
 		// Determine buffer length
