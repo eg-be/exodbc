@@ -381,11 +381,11 @@ namespace exodbc
 	//}
 
 
-	std::vector<SErrorInfo> GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
+	SErrorInfoVector GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
 	{
 		exASSERT(hEnv != SQL_NULL_HENV || hDbc != SQL_NULL_HDBC || hStmt != SQL_NULL_HSTMT || hDesc != SQL_NULL_HDESC);
 
-		std::vector<SErrorInfo> errors;
+		SErrorInfoVector errors;
 		SQLHANDLE handle = NULL;
 		SQLSMALLINT handleType = NULL;
 
@@ -445,7 +445,7 @@ namespace exodbc
 	}
 
 
-	std::vector<SErrorInfo> GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle)
+	SErrorInfoVector GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle)
 	{
 		switch (handleType)
 		{
@@ -460,13 +460,13 @@ namespace exodbc
 		default:
 			exASSERT_MSG(false, L"Unknown handleType");
 		}
-		return std::vector<SErrorInfo>();
+		return SErrorInfoVector();
 	}
 
 
 	SErrorInfo GetLastEnvError(SQLHANDLE hEnv, SQLSMALLINT& totalErrors)
 	{
-		std::vector<SErrorInfo> errs;
+		SErrorInfoVector errs;
 		if(hEnv)
 			errs = GetAllErrors(SQL_HANDLE_ENV, hEnv);
 		else
@@ -482,7 +482,7 @@ namespace exodbc
 
 	SErrorInfo GetLastDbcError(SQLHANDLE hDbc, SQLSMALLINT& totalErrors)
 	{
-		std::vector<SErrorInfo> errs;
+		SErrorInfoVector errs;
 		if(hDbc)
 			errs = GetAllErrors(NULL, hDbc);
 		else
@@ -498,7 +498,7 @@ namespace exodbc
 
 	SErrorInfo GetLastStmtError(SQLHANDLE hStmt, SQLSMALLINT& totalErrors)
 	{
-		std::vector<SErrorInfo> errs;
+		SErrorInfoVector errs;
 		if(hStmt)
 			errs = GetAllErrors(SQL_HANDLE_STMT, hStmt);
 		else
@@ -591,8 +591,8 @@ namespace exodbc
 		else if (dbms != dbmsMY_SQL)
 		{
 			// We would expect SQLSTATE 24000
-			const std::vector<SErrorInfo>& errs = GetAllErrors(SQL_HANDLE_STMT, hStmt);
-			std::vector<SErrorInfo>::const_iterator it;
+			const SErrorInfoVector& errs = GetAllErrors(SQL_HANDLE_STMT, hStmt);
+			SErrorInfoVector::const_iterator it;
 			bool haveOtherErrs = false;
 			std::wstringstream ws;
 			ws << L"SQLCloseCursor returned a different error than the expected SQLSTATE 24000:\n";

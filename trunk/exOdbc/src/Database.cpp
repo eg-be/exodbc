@@ -1837,7 +1837,7 @@ namespace exodbc
 //		* of the user's request, so that the calling code can then process the error message log.
 //		*/
 //	{
-//		std::vector<SErrorInfo> errs = GetAllErrors(aHenv, aHdbc, aHstmt);
+//		SErrorInfoVector errs = GetAllErrors(aHenv, aHdbc, aHstmt);
 //		for(size_t i = 0; i < errs.size(); i++)
 //		{
 //			LOG_ERROR((boost::wformat(L"Have ODBC Error #%d: %s") %i %errs[i]).str());
