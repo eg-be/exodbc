@@ -63,21 +63,7 @@ namespace exodbc
 	//	FreeDbcHandle(hDbc);
 	//}
 
-	//TEST_P(HelpersTest, FreeDbcHandle)
-	//{
-	//	Environment env(m_odbcInfo.m_odbcVersion);
-	//	ASSERT_TRUE(env.HaveHenv());
 
-	//	SQLHANDLE hDbc = AllocDbcHandle(env.GetHenv());
-	//	ASSERT_FALSE(SQL_NULL_HDBC == hDbc);
-
-	//	// freeing twice should not work
-	//	BOOST_LOG_TRIVIAL(warning) << L"This test is supposed to spit warnings";
-	//	SQLHANDLE hCopy = hDbc;
-	//	EXPECT_TRUE(FreeDbcHandle(hDbc));
-	//	
-	//	EXPECT_FALSE(FreeDbcHandle(hCopy));
-	//}
 	// Interfaces
 	// ----------
 
