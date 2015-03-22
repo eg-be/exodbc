@@ -464,12 +464,12 @@ namespace exodbc
 	}
 
 
-	void CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode)
+	void CloseStmtHandle(SQLHANDLE hStmt, StmtCloseMode mode)
 	{
 		exASSERT(hStmt);
 
 		SQLRETURN ret;
-		if (mode == IgnoreNotOpen)
+		if (mode == StmtCloseMode::IgnoreNotOpen)
 		{
 			//  calling SQLFreeStmt with the SQL_CLOSE option has no effect on the application if no cursor is open on the statement
 			ret = SQLFreeStmt(hStmt, SQL_CLOSE);
@@ -818,7 +818,7 @@ namespace exodbc
 	{
 		if (closeOnDestruction)
 		{
-			CloseStmtHandle(m_hStmt, IgnoreNotOpen);
+			CloseStmtHandle(m_hStmt, StmtCloseMode::IgnoreNotOpen);
 		}
 	}
 
@@ -827,7 +827,7 @@ namespace exodbc
 	{
 		try
 		{
-			CloseStmtHandle(m_hStmt, IgnoreNotOpen);
+			CloseStmtHandle(m_hStmt, StmtCloseMode::IgnoreNotOpen);
 		}
 		catch (Exception ex)
 		{

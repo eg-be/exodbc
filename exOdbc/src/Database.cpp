@@ -605,7 +605,7 @@ namespace exodbc
 
 		RETCODE retcode;
 
-		CloseStmtHandle(m_hstmtExecSql, IgnoreNotOpen);
+		CloseStmtHandle(m_hstmtExecSql, StmtCloseMode::IgnoreNotOpen);
 
 		retcode = SQLExecDirect(m_hstmtExecSql, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
 		if (retcode != SQL_SUCCESS)
@@ -1002,8 +1002,8 @@ namespace exodbc
 	{	
 		// We need to ensure cursors are closed:
 		// The internal statement should be closed, the exec-statement could be open
-		CloseStmtHandle(m_hstmt, IgnoreNotOpen);
-		CloseStmtHandle(m_hstmtExecSql, IgnoreNotOpen);
+		CloseStmtHandle(m_hstmt, StmtCloseMode::IgnoreNotOpen);
+		CloseStmtHandle(m_hstmtExecSql, StmtCloseMode::IgnoreNotOpen);
 
 		// If Autocommit is off, we need to Rollback any ongoing transaction
 		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
