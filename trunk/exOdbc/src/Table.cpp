@@ -563,7 +563,7 @@ namespace exodbc
 	
 	void Table::SelectClose()
 	{
-		CloseStmtHandle(m_hStmtSelect, IgnoreNotOpen);
+		CloseStmtHandle(m_hStmtSelect, StmtCloseMode::IgnoreNotOpen);
 		m_selectQueryOpen = false;
 	}
 

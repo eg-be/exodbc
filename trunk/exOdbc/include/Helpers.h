@@ -204,21 +204,61 @@ namespace exodbc
 	extern EXODBCAPI SErrorInfoVector GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle);
 
 
-	enum CloseMode
+	/*!
+	* \enum	StmtCloseMode
+	* \brief Hints for CloseStmtHandle() if it shall throw or not.
+	* \see	CloseStmtHandle()
+	*/
+	enum class StmtCloseMode
 	{
-		FailIfNotOpen,	//< Returns false if Cursor is not open. 
-		IgnoreNotOpen	//< Returns true also if cursor was not open
+		ThrowIfNotOpen,	///< Throw if trying to free a statement handle that is not open.
+		IgnoreNotOpen	///< Do not throw if trying to close an already closed statement handle.
 	};
-
 
 	/*!
 	* \brief	Close the cursor associated with the passed statement handle.
-	*
+	* \details	Depending on StmtCloseMode, this will call SQLFreeStatement or SQLCloseCursor.
+	*			Depending on StmtCloseMode, the function will throw if the cursor was not open
+	*			before this function was called.
 	* \param	hStmt		The statement handle.
 	* \param	mode		Determine whether the function should fail if the cursor is not open.
-	* \throw	Exception	Depending on CloseMode.
+	* \see		StmtCloseMode
+	* \throw	Exception	Depending on StmtCloseMode.
 	*/
-	extern EXODBCAPI void	CloseStmtHandle(const SQLHANDLE& hStmt, CloseMode mode);
+	extern EXODBCAPI void	CloseStmtHandle(SQLHANDLE hStmt, StmtCloseMode mode);
+
+
+	/*!
+	* \enum	FreeStatementThrowFlag
+	* \brief Hints for FreeStatementHandle() if it shall throw or not.
+	* \see FreeStatementHandle()
+	*/
+	enum FreeStatementThrowFlag
+	{
+		FSTF_NO_THROW = 0x0,	///< Do not throw if SQLFreeHandle fails.
+		FSTF_THROW_ON_SQL_ERROR = 0x01,	///< Throw if SQLFreeHandle return with SQL_ERROR.
+		FSTF_THROW_ON_SQL_INVALID_HANDLE = 0x02	//< Throw if SQLFreeHandle returns with SQL_INVALID_HANDLE.
+	};
+
+	/*!
+	* \typedef FreeStatementThrowFlags Should be a mask of FreeStatementThrowFlag.
+	* \see	FreeStatementThrowFlag
+	*/
+	typedef unsigned int FreeStatementThrowFlags;
+
+	/*!
+	* \brief	Free the statement handle passed, return SQL_NULL_HSTMT if the handle is invalid after this function returns
+	*			or the valid handle.
+	*
+	* \param	hStmt		The statement handle to free.
+	* \param	flags		Determine whether the function should throw an exception or not:
+	*						As SQLFreeHandle returns only SQL_SUCCESS, SQL_INVALID_HANDLE or SQL_ERROR, the flags indicate on which
+	*						return code the function shall throw or not.
+	* \return	SQL_NULL_HSTMT if the handle was freed successfully or was already invalid. Valid handle else.
+	* \throw	Exception	Depending on flags
+	* \see		FreeStatementThrowFlag
+	*/
+	extern EXODBCAPI SQLHSTMT FreeStatementHandle(SQLHSTMT hStmt, FreeStatementThrowFlags flags = FSTF_THROW_ON_SQL_ERROR | FSTF_THROW_ON_SQL_INVALID_HANDLE);
 
 
 	/*!
@@ -372,16 +412,6 @@ namespace exodbc
 
 
 	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNullNumeric();
-
-
-	enum FreeStatementThrowFlag
-	{
-		FSTF_NO_THROW = 0x0,
-		FSTF_THROW_ON_SQL_ERROR = 0x01,
-		FSTF_THROW_ON_SQL_INVALID_HANDLE = 0x02
-	};
-	typedef unsigned int FreeStatementThrowFlags;
-	extern EXODBCAPI SQLHSTMT FreeStatementHandle(SQLHSTMT hStmt, FreeStatementThrowFlags flags = FSTF_THROW_ON_SQL_ERROR | FSTF_THROW_ON_SQL_INVALID_HANDLE);
 
 
 	/*!
