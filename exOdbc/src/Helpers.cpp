@@ -705,6 +705,17 @@ namespace exodbc
 	}
 
 
+	SQLHSTMT AllocateStatement(SQLHDBC hDbc)
+	{
+		exASSERT(hDbc != SQL_NULL_HDBC);
+
+		SQLHSTMT stmt;
+		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, hDbc, &stmt);
+		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, hDbc);
+		return stmt;
+	}
+
+
 	SQLHSTMT FreeStatementHandle(SQLHSTMT hStmt, FreeStatementThrowFlags flags /* = FSTF_THROW_ON_SQL_ERROR | FSTF_THROW_ON_SQL_INVALID_HANDLE */)
 	{
 		// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.

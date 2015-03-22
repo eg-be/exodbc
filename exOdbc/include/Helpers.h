@@ -274,6 +274,16 @@ namespace exodbc
 
 
 	/*!
+	* \brief	A wrapper for SQLAllocHandle. Allocates a new statement handle using the given connection handle.
+	*
+	* \param	hDbc		The connection handle to allocate the statement handle from.
+	* \return	Newly allocates statement handle.
+	* \throw	Exception	If allocating fails, or hDbc is a SQL_NULL_HDBC.
+	*/
+	extern EXODBCAPI SQLHSTMT AllocateStatement(SQLHDBC hDbc);
+
+
+	/*!
 	* \brief	A wrapper to SQLGetInfo to read a String info.
 	* 
 	* \param	hDbc					The Database connection handle.

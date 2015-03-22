@@ -65,7 +65,7 @@ namespace exodbc
 		if (!HasStatements())
 		{
 			// Probably SetAccessFlags has already allocated statements, as flags have changed
-			AllocateStatement(db);
+			AllocateStatements(db);
 		}
 	}
 
@@ -88,7 +88,7 @@ namespace exodbc
 		if (!HasStatements())
 		{
 			// Probably SetAccessFlags has already allocated statements, as flags have changed
-			AllocateStatement(db);
+			AllocateStatements(db);
 		}
 	}
 
@@ -110,7 +110,7 @@ namespace exodbc
 		if (!HasStatements())
 		{
 			// Probably SetAccessFlags has already allocated statements, as flags have changed
-			AllocateStatement(db);
+			AllocateStatements(db);
 		}
 	}
 
@@ -133,7 +133,7 @@ namespace exodbc
 		if (!HasStatements())
 		{
 			// Probably SetAccessFlags has already allocated statements, as flags have changed
-			AllocateStatement(db);
+			AllocateStatements(db);
 		}
 	}
 
@@ -198,24 +198,24 @@ namespace exodbc
 		// Allocate handles needed
 		if (TestAccessFlag(AF_SELECT))
 		{
-			m_hStmtCount = AllocateStatement(db);
-			m_hStmtSelect = AllocateStatement(db);
+			m_hStmtCount = AllocateStatement(db.GetConnectionHandle());
+			m_hStmtSelect = AllocateStatement(db.GetConnectionHandle());
 		}
 
 		// Allocate handles needed for writing
 		if (TestAccessFlag(AF_INSERT))
 		{
-			m_hStmtInsert = AllocateStatement(db);
+			m_hStmtInsert = AllocateStatement(db.GetConnectionHandle());
 		}
 		if (TestAccessFlag(AF_UPDATE))
 		{
-			m_hStmtUpdate = AllocateStatement(db);
-			m_hStmtUpdateWhere = AllocateStatement(db);
+			m_hStmtUpdate = AllocateStatement(db.GetConnectionHandle());
+			m_hStmtUpdateWhere = AllocateStatement(db.GetConnectionHandle());
 		}
 		if (TestAccessFlag(AF_DELETE))
 		{
-			m_hStmtDelete = AllocateStatement(db);
-			m_hStmtDeleteWhere = AllocateStatement(db);
+			m_hStmtDelete = AllocateStatement(db.GetConnectionHandle());
+			m_hStmtDeleteWhere = AllocateStatement(db.GetConnectionHandle());
 		}
 	}
 
@@ -243,46 +243,6 @@ namespace exodbc
 	}
 
 
-	SQLHSTMT Table::AllocateStatement(const Database& db) const
-	{
-		exASSERT(db.IsOpen());
-		exASSERT(db.HasConnectionHandle());
-
-		// Allocate a statement handle for the database connection
-		SQLHSTMT stmt;
-		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, db.GetConnectionHandle(), &stmt);
-		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, db.GetConnectionHandle());
-		return stmt;
-	}
-
-
-	SQLHSTMT Table::FreeStatement(SQLHSTMT hStmt)
-	{
-		// Free statement handle
-		// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
-		SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_STMT, hStmt);
-		if (ret == SQL_ERROR)
-		{
-			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-			SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_STMT, hStmt, L"Freeing ODBC-Statement Handle failed with SQL_ERROR, handle is still valid.");
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		else if (ret == SQL_INVALID_HANDLE)
-		{
-			// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
-			hStmt = SQL_NULL_HENV;
-			SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Statement Handle failed with SQL_INVALID_HANDLE.");
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		// We have SUCCESS
-		hStmt = SQL_NULL_HENV;
-
-		return hStmt;
-	}
-
-
 	void Table::FreeStatements()
 	{
 		exASSERT(!IsOpen());
@@ -290,24 +250,24 @@ namespace exodbc
 		// Free allocated statements
 		if (TestAccessFlag(AF_SELECT))
 		{
-			m_hStmtCount = FreeStatement(m_hStmtCount);
-			m_hStmtSelect = FreeStatement(m_hStmtSelect);
+			m_hStmtCount = FreeStatementHandle(m_hStmtCount);
+			m_hStmtSelect = FreeStatementHandle(m_hStmtSelect);
 		}
 
 		// And then those needed for writing
 		if (TestAccessFlag(AF_INSERT))
 		{
-			m_hStmtInsert = FreeStatement(m_hStmtInsert);
+			m_hStmtInsert = FreeStatementHandle(m_hStmtInsert);
 		}
 		if (TestAccessFlag(AF_DELETE))
 		{
-			m_hStmtDelete = FreeStatement(m_hStmtDelete);
-			m_hStmtDeleteWhere = FreeStatement(m_hStmtDeleteWhere);
+			m_hStmtDelete = FreeStatementHandle(m_hStmtDelete);
+			m_hStmtDeleteWhere = FreeStatementHandle(m_hStmtDeleteWhere);
 		}
 		if (TestAccessFlag(AF_UPDATE))
 		{
-			m_hStmtUpdate = FreeStatement(m_hStmtUpdate);
-			m_hStmtUpdateWhere = FreeStatement(m_hStmtUpdateWhere);
+			m_hStmtUpdate = FreeStatementHandle(m_hStmtUpdate);
+			m_hStmtUpdateWhere = FreeStatementHandle(m_hStmtUpdateWhere);
 		}
 	}
 
