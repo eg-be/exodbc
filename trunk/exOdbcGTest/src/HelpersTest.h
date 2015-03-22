@@ -17,6 +17,8 @@
 
 // Other headers
 #include "gtest/gtest.h"
+#include "Environment.h"
+#include "Database.h"
 
 // System headers
 
@@ -32,24 +34,34 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class HelpersTest : public ::testing::TestWithParam<SOdbcInfo>
+	class ParamHelpersTest : public ::testing::TestWithParam<SOdbcInfo>
 	{
 
 	public:
-		static void SetUpTestCase() {};
-		static void TearDownTestCase() {};
+		//static void SetUpTestCase() {};
+		//static void TearDownTestCase() {};
 
 	protected:
 		virtual void SetUp();
 		virtual void TearDown();
 
 		SOdbcInfo m_odbcInfo;
+
+		Environment m_env;
+		Database m_db;
 	};
 
 	INSTANTIATE_TEST_CASE_P(
 		ParametrizedOdbc,
-		HelpersTest,
+		ParamHelpersTest,
 		::testing::ValuesIn(g_odbcInfos));
+
+	class StaticHelpersTest : public ::testing::Test {
+
+	protected:
+		virtual void SetUp();
+		virtual void TearDown();
+	};
 
 } // namespace exodbc
 #endif // HELPERSTEST_H
