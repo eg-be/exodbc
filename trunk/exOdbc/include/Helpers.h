@@ -31,6 +31,11 @@ namespace exodbc
 	extern EXODBCAPI bool GetDontDebugBreak();
 	extern EXODBCAPI void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg);
 
+	/*!
+	* \struct DontDebugBreak
+	* \brief On construction, sets a flag to not trap into __debugbreak(), on destruction removes it.
+	* \details	Handy if you have tests that are expected to trap into an Assertion.
+	*/
 	struct DontDebugBreak
 	{
 		DontDebugBreak()
@@ -342,11 +347,17 @@ namespace exodbc
 	*/
 	extern EXODBCAPI void		SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value);
 
+	/*!
+	* \enum		RowDescriptorType
+	* \brief	A wrapper for the values of SQLGetStmtAttr to fetch a descriptor handle.
+	* \see		GetRowDescriptorHandle
+	*/
 	enum RowDescriptorType
 	{
-		RDT_ROW = SQL_ATTR_APP_ROW_DESC,
-		RDT_PARAM = SQL_ATTR_APP_PARAM_DESC
+		RDT_ROW = SQL_ATTR_APP_ROW_DESC,	///< SQL_ATTR_APP_ROW_DESC
+		RDT_PARAM = SQL_ATTR_APP_PARAM_DESC	///< SQL_ATTR_APP_PARAM_DESC
 	};
+
 	/*!
 	* \brief	A wrapper to SQLGetStmtAttr
 	*
