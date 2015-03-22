@@ -740,17 +740,13 @@ namespace exodbc
 		else if (ret == SQL_INVALID_HANDLE)
 		{
 			// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
+			// We are unable to get any error information
 			hStmt = SQL_NULL_HSTMT;
-			if ((flags & FSTF_THROW_ON_SQL_ERROR) == FSTF_THROW_ON_SQL_ERROR)
+			if ((flags & FSTF_THROW_ON_SQL_INVALID_HANDLE) == FSTF_THROW_ON_SQL_INVALID_HANDLE)
 			{
 				SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Statement Handle failed with SQL_INVALID_HANDLE.");
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
-			}
-			SErrorInfoVector errs = GetAllErrors(SQL_HANDLE_STMT, hStmt);
-			for (SErrorInfoVector::const_iterator it = errs.begin(); it != errs.end(); ++it)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed in SQLFreeHandle with %s (%d): %s") % ret % SqlReturn2s(ret) % it->ToString()));
 			}
 			// handle is invalid
 			return SQL_NULL_HSTMT;
