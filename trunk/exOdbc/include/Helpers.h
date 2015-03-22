@@ -318,16 +318,13 @@ namespace exodbc
 	 * \param	colOrParamNr		  	The col or parameter nr. (1-indexed)
 	 * \param	targetType			  	Type of the target.
 	 * \param	pTargetValue			Pointer to the target buffer.
-	 * \param	bufferLen			  	Length of the buffer in Bytes (not strings!).
+	 * \param	bufferLen			  	Length of the buffer in Bytes (not chars!).
 	 * \param [in,out]	strLenOrIndPtr	Pointer to return the number of bytes read.
 	 * \param [in,out]	pIsNull		  	If pIsNull is not NULL, set to TRUE if the field is NULL. Ignored if pIsNull is NULL.
-	 * \param	nullTerminate		  	(Optional) true to null terminate. Can only be set if targetType is SQL_C_WCHAR or SQL_C_CHAR.
-	 * 									Will null-terminate at strLenOrIndPtr-value.
-	 * \todo: Test that this works
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
-	extern EXODBCAPI void		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate = false);
+	extern EXODBCAPI void		GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull);
 
 
 	/*!
