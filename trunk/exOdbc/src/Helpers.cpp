@@ -705,7 +705,7 @@ namespace exodbc
 	}
 
 
-	SQLHSTMT AllocateStatement(SQLHDBC hDbc)
+	SQLHSTMT AllocateStatementHandle(SQLHDBC hDbc)
 	{
 		exASSERT(hDbc != SQL_NULL_HDBC);
 

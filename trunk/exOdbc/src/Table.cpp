@@ -198,24 +198,24 @@ namespace exodbc
 		// Allocate handles needed
 		if (TestAccessFlag(AF_SELECT))
 		{
-			m_hStmtCount = AllocateStatement(db.GetConnectionHandle());
-			m_hStmtSelect = AllocateStatement(db.GetConnectionHandle());
+			m_hStmtCount = AllocateStatementHandle(db.GetConnectionHandle());
+			m_hStmtSelect = AllocateStatementHandle(db.GetConnectionHandle());
 		}
 
 		// Allocate handles needed for writing
 		if (TestAccessFlag(AF_INSERT))
 		{
-			m_hStmtInsert = AllocateStatement(db.GetConnectionHandle());
+			m_hStmtInsert = AllocateStatementHandle(db.GetConnectionHandle());
 		}
 		if (TestAccessFlag(AF_UPDATE))
 		{
-			m_hStmtUpdate = AllocateStatement(db.GetConnectionHandle());
-			m_hStmtUpdateWhere = AllocateStatement(db.GetConnectionHandle());
+			m_hStmtUpdate = AllocateStatementHandle(db.GetConnectionHandle());
+			m_hStmtUpdateWhere = AllocateStatementHandle(db.GetConnectionHandle());
 		}
 		if (TestAccessFlag(AF_DELETE))
 		{
-			m_hStmtDelete = AllocateStatement(db.GetConnectionHandle());
-			m_hStmtDeleteWhere = AllocateStatement(db.GetConnectionHandle());
+			m_hStmtDelete = AllocateStatementHandle(db.GetConnectionHandle());
+			m_hStmtDeleteWhere = AllocateStatementHandle(db.GetConnectionHandle());
 		}
 	}
 

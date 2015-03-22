@@ -280,7 +280,7 @@ namespace exodbc
 	* \return	Newly allocates statement handle.
 	* \throw	Exception	If allocating fails, or hDbc is a SQL_NULL_HDBC.
 	*/
-	extern EXODBCAPI SQLHSTMT AllocateStatement(SQLHDBC hDbc);
+	extern EXODBCAPI SQLHSTMT AllocateStatementHandle(SQLHDBC hDbc);
 
 
 	/*!
