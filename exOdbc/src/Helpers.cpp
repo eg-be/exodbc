@@ -519,6 +519,7 @@ namespace exodbc
 	void GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull)
 	{
 		exASSERT(hStmt != SQL_NULL_HSTMT);
+		exASSERT(strLenOrIndPtr != NULL);
 
 		bool isNull;
 		SQLRETURN ret = SQLGetData(hStmt, colOrParamNr, targetType, pTargetValue, bufferLen, strLenOrIndPtr);

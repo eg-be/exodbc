@@ -192,9 +192,32 @@ namespace exodbc
 
 		EXPECT_NO_THROW(GetData(hStmt, 2, 3, value, &isNull));
 		EXPECT_EQ(L"הצü", value);
+		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
 
+		// Read some int value
+		ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+		ret = SQLFetch(hStmt);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+		SQLINTEGER id = 0;
+		SQLLEN ind = 0;
+		EXPECT_NO_THROW(GetData(hStmt, 1, SQL_C_SLONG, &id, NULL, &ind, &isNull));
+		EXPECT_EQ(3, id);
+		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+
+		// And test at least one null value
+		ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+		ret = SQLFetch(hStmt);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+		value = L"";
+		EXPECT_NO_THROW(GetData(hStmt, 3, 20, value, &isNull));
+		EXPECT_TRUE(isNull);
+		EXPECT_EQ(L"", value);
+		
 		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
 		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
+
 	}
 
 
