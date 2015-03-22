@@ -163,7 +163,38 @@ namespace exodbc
 
 	TEST_P(ParamHelpersTest, GetData)
 	{
+		// Test by reading some char value
 
+		// Allocate a valid statement handle
+		SQLHSTMT hStmt = SQL_NULL_HSTMT;
+		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+
+		// Open statement by doing some operation on it
+		std::wstring sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % TestTables::GetTableName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase) % TestTables::GetIdColumnName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase));
+		SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));		
+		ret = SQLFetch(hStmt);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+
+		// Read some non-null string-data with enough chars
+		bool isNull = false;
+		std::wstring value;
+		EXPECT_NO_THROW(GetData(hStmt, 2, 20, value, &isNull));
+		EXPECT_FALSE(isNull);
+		EXPECT_EQ(L"הצüאיט", value);
+		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+
+		// Trim the read-value in GetData
+		ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+		ret = SQLFetch(hStmt);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+
+		EXPECT_NO_THROW(GetData(hStmt, 2, 3, value, &isNull));
+		EXPECT_EQ(L"הצü", value);
+
+		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
 	}
 
 

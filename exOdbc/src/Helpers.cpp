@@ -516,13 +516,9 @@ namespace exodbc
 	}
 
 
-	void GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull, bool nullTerminate /* = false */)
+	void GetData(SQLHSTMT hStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull)
 	{
 		exASSERT(hStmt != SQL_NULL_HSTMT);
-		if(nullTerminate)
-		{
-			exASSERT(targetType == SQL_C_CHAR || targetType == SQL_C_WCHAR);
-		}
 
 		bool isNull;
 		SQLRETURN ret = SQLGetData(hStmt, colOrParamNr, targetType, pTargetValue, bufferLen, strLenOrIndPtr);
@@ -532,25 +528,6 @@ namespace exodbc
 		if (pIsNull)
 		{
 			*pIsNull = isNull;
-		}
-
-		// a string that is null does not get terminated. just dont use it.
-		if(nullTerminate && !isNull)
-		{
-			exASSERT(*strLenOrIndPtr != SQL_NO_TOTAL);
-			if(targetType == SQL_C_CHAR)
-			{
-				char* pc = (char*) pTargetValue;
-				exASSERT(bufferLen >= *strLenOrIndPtr);
-				pc[*strLenOrIndPtr] = 0;
-			}
-			else
-			{
-				SQLWCHAR* pw = (SQLWCHAR*)pTargetValue;
-				int p = *strLenOrIndPtr / sizeof(SQLWCHAR);
-				exASSERT(bufferLen >= p);
-				pw[ p ] = 0;
-			}
 		}
 	}
 
@@ -563,7 +540,7 @@ namespace exodbc
 		SQLLEN cb;
 		bool isNull = false;
 
-		GetData(hStmt, colOrParamNr, SQL_C_WCHAR, buffer.get(), buffSize, &cb, &isNull, true);
+		GetData(hStmt, colOrParamNr, SQL_C_WCHAR, buffer.get(), buffSize, &cb, &isNull);
 
 		if(!isNull)
 		{
