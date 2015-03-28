@@ -183,7 +183,10 @@ namespace exodbc
 		EXPECT_THROW(nst.Open(m_db), NotSupportedException);
 
 		// But not if we pass the flag to skip
-		EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+		{
+			LogLevelFatal llf;
+			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
 
 		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
 		nst.Select();
@@ -196,14 +199,207 @@ namespace exodbc
 		EXPECT_EQ(1, id);
 		EXPECT_EQ(10, int1);
 		EXPECT_EQ(12, int2);
+	}
 
-		// And also doing inserts..
+
+	TEST_P(TableTest, SelectFromAutoWithUnsupportedColumn)
+	{
+		if (m_db.Dbms() == dbmsMY_SQL)
+		{
+			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
+			return;
+		}
+
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
+		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+
+		// we do not if we pass the flag to skip
+		{
+			LogLevelFatal llf;
+			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+
+		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
+		nst.Select();
+		EXPECT_TRUE(nst.SelectNext());
+		SQLINTEGER id, int1, int2;
+		EXPECT_NO_THROW(nst.GetColumnValue(0, id));
+		EXPECT_NO_THROW(nst.GetColumnValue(1, int1));
+		EXPECT_NO_THROW(nst.GetColumnValue(2, int2));
+		EXPECT_THROW(nst.GetColumnBuffer(3), IllegalArgumentException);
+		EXPECT_EQ(1, id);
+		EXPECT_EQ(10, int1);
+		EXPECT_EQ(12, int2);
+	}
+
+
+	TEST_P(TableTest, InsertIntoAutoWithUnsupportedColumn)
+	{
+		if (m_db.Dbms() == dbmsMY_SQL)
+		{
+			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
+			return;
+		}
+
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
+		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+
+		// we do not if we pass the flag to skip
+		{
+			LogLevelFatal llf;
+			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+
+		// Remove everything, ignoring if there was any data:
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+		ASSERT_NO_THROW(nst.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(m_db.CommitTrans());
+
+		// Insert some data
+		// note the shifted columnbuffer-indexes, see #123
 		ColumnBuffer* pId = nst.GetColumnBuffer(0);
 		ColumnBuffer* pInt1 = nst.GetColumnBuffer(1);
 		ColumnBuffer* pInt2 = nst.GetColumnBuffer(2);
+		
 		*pId = (SQLINTEGER)2;
 		*pInt1 = (SQLINTEGER)20;
 		*pInt2 = (SQLINTEGER)22;
+		EXPECT_NO_THROW(nst.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// We should now be able to select. As a test, use a different table object
+		exodbc::Table nst2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		{
+			LogLevelFatal llf;
+			EXPECT_NO_THROW(nst2.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+
+		nst2.Select();
+		EXPECT_TRUE(nst2.SelectNext());
+		SQLINTEGER id, int1, int2;
+		EXPECT_NO_THROW(nst2.GetColumnValue(0, id));
+		EXPECT_NO_THROW(nst2.GetColumnValue(1, int1));
+		EXPECT_NO_THROW(nst2.GetColumnValue(2, int2));
+		EXPECT_EQ(2, id);
+		EXPECT_EQ(20, int1);
+		EXPECT_EQ(22, int2);
+	}
+
+
+	TEST_P(TableTest, UpdateIntoAutoWithUnsupportedColumn)
+	{
+		if (m_db.Dbms() == dbmsMY_SQL)
+		{
+			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
+			return;
+		}
+
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
+		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+
+		// we do not if we pass the flag to skip
+		{
+			LogLevelFatal llf;
+			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+
+		// Remove everything, ignoring if there was any data:
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+		ASSERT_NO_THROW(nst.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(m_db.CommitTrans());
+
+		// Insert some data
+		// note the shifted columnbuffer-indexes, see #123
+		ColumnBuffer* pId = nst.GetColumnBuffer(0);
+		ColumnBuffer* pInt1 = nst.GetColumnBuffer(1);
+		ColumnBuffer* pInt2 = nst.GetColumnBuffer(2);
+
+		*pId = (SQLINTEGER)2;
+		*pInt1 = (SQLINTEGER)20;
+		*pInt2 = (SQLINTEGER)22;
+		EXPECT_NO_THROW(nst.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Now update it
+		*pInt1 = (SQLINTEGER)30;
+		*pInt2 = (SQLINTEGER)32;
+		EXPECT_NO_THROW(nst.Update());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// We should now be able to select. As a test, use a different table object
+		exodbc::Table nst2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		{
+			LogLevelFatal llf;
+			EXPECT_NO_THROW(nst2.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+
+		nst2.Select();
+		EXPECT_TRUE(nst2.SelectNext());
+		SQLINTEGER id, int1, int2;
+		EXPECT_NO_THROW(nst2.GetColumnValue(0, id));
+		EXPECT_NO_THROW(nst2.GetColumnValue(1, int1));
+		EXPECT_NO_THROW(nst2.GetColumnValue(2, int2));
+		EXPECT_EQ(2, id);
+		EXPECT_EQ(30, int1);
+		EXPECT_EQ(32, int2);
+	}
+
+
+	TEST_P(TableTest, DeleteFromAutoWithUnsupportedColumn)
+	{
+		if (m_db.Dbms() == dbmsMY_SQL)
+		{
+			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
+			return;
+		}
+
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
+		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+
+		// we do not if we pass the flag to skip
+		{
+			LogLevelFatal llf;
+			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+
+		// Remove everything, ignoring if there was any data:
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+		ASSERT_NO_THROW(nst.Delete(sqlstmt, false));
+		ASSERT_NO_THROW(m_db.CommitTrans());
+
+		// Insert some data
+		// note the shifted columnbuffer-indexes, see #123
+		ColumnBuffer* pId = nst.GetColumnBuffer(0);
+		ColumnBuffer* pInt1 = nst.GetColumnBuffer(1);
+		ColumnBuffer* pInt2 = nst.GetColumnBuffer(2);
+
+		*pId = (SQLINTEGER)2;
+		*pInt1 = (SQLINTEGER)20;
+		*pInt2 = (SQLINTEGER)22;
+		EXPECT_NO_THROW(nst.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Check its there
+		ASSERT_NO_THROW(nst.Select());
+		ASSERT_TRUE(nst.SelectNext());
+
+		// Now delete it
+		*pId = (SQLINTEGER)2;
+		EXPECT_NO_THROW(nst.Delete());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// We should now longer be able to select it. As a test, use a different table object
+		exodbc::Table nst2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		{
+			LogLevelFatal llf;
+			EXPECT_NO_THROW(nst2.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+
+		nst2.Select();
+		EXPECT_FALSE(nst2.SelectNext());
 	}
 
 
