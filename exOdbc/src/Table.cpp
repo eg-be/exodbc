@@ -394,6 +394,8 @@ namespace exodbc
 		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
 		// Build statement
+		// note: parem-number reflects here the number of the param in the created prepared statement, so we
+		// cannot use the values from the ColumnBuffer column index.
 		int paramNr = 1;
 		wstring deleteStmt = (boost::wformat(L"DELETE FROM %s WHERE ") %m_tableInfo.GetSqlName()).str();
 		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
@@ -408,7 +410,8 @@ namespace exodbc
 			}
 		}
 		boost::erase_last(deleteStmt, L" AND ");
-		exASSERT(paramNr > 0);
+		// ensure that we have something in our where clause
+		exASSERT(paramNr > 1);
 
 		// Prepare to delete
 		SQLRETURN ret = SQLPrepare(m_hStmtDelete, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
@@ -426,6 +429,8 @@ namespace exodbc
 		// Build statement..
 		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetSqlName()).str();
 		// .. first the values to update
+		// note: parem-number reflects here the number of the param in the created prepared statement, so we
+		// cannot use the values from the ColumnBuffer column index.
 		int paramNr = 1;
 		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
@@ -440,8 +445,10 @@ namespace exodbc
 			}
 		}
 		boost::erase_last(updateStmt, L",");
-		exASSERT(paramNr > 0);
+		// ensure that we have something to update
+		exASSERT(paramNr > 1);
 		updateStmt += L"WHERE ";
+		bool haveWhereParam = false;
 		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
 			ColumnBuffer* pBuffer = it->second;
@@ -452,9 +459,12 @@ namespace exodbc
 				pBuffer->BindParameter(m_hStmtUpdate, paramNr);
 				updateStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
 				paramNr++;
+				haveWhereParam = true;
 			}
 		}
 		boost::erase_last(updateStmt, L"AND ");
+		// and ensure that we have something as where
+		exASSERT(haveWhereParam);
 
 		// Prepare to update
 		SQLRETURN ret = SQLPrepare(m_hStmtUpdate, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
@@ -469,7 +479,9 @@ namespace exodbc
 		exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
 
 		// Build a statement with parameter-markers
-		SQLSMALLINT paramCount = 0;
+		// note: parem-number reflects here the number of the param in the created prepared statement, so we
+		// cannot use the values from the ColumnBuffer column index.
+		SQLSMALLINT paramNr = 1;
 		std::wstring insertStmt = L"INSERT INTO " + m_tableInfo.GetSqlName() + L" (";
 		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
 		while (it != m_columnBuffers.end())
@@ -478,22 +490,23 @@ namespace exodbc
 			// Bind parameter if it is marked an INSERTable
 			if (pBuffer->IsColumnFlagSet(CF_INSERT))
 			{
-				pBuffer->BindParameter(m_hStmtInsert, paramCount + 1);
+				pBuffer->BindParameter(m_hStmtInsert, paramNr);
 				// prepare statement
 				insertStmt += pBuffer->GetQueryName() + L", ";
-				++paramCount;
+				paramNr++;
 			}
 			++it;
 		}
+		// ensure that we have something to insert
+		exASSERT(paramNr > 1);
 		boost::erase_last(insertStmt, L", ");
+		// and set markers for the values
 		insertStmt += L") VALUES(";
-		for (int i = 1; i < paramCount; i++)
+		for (int i = 0; i < paramNr - 2; i++)
 		{
 			insertStmt += L"?, ";
 		}
 		insertStmt += L"?)";
-
-		exASSERT(paramCount > 0);
 
 		// Prepare to update
 		SQLRETURN ret = SQLPrepare(m_hStmtInsert, (SQLWCHAR*) insertStmt.c_str(), SQL_NTS);
@@ -509,7 +522,7 @@ namespace exodbc
 		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.find(columnIndex);
 		if (it == m_columnBuffers.end())
 		{
-			IllegalArgumentException ex(boost::str(boost::wformat(L"ColumnIndex %d is not a zero-based bound ColumnBuffer") % columnIndex));
+			IllegalArgumentException ex(boost::str(boost::wformat(L"ColumnIndex %d is not a zero-based bound or manually defined ColumnBuffer") % columnIndex));
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -691,6 +704,8 @@ namespace exodbc
 		// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set
 		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetSqlName()).str();
 		// .. first the values to update
+		// note: parem-number reflects here the number of the param in the created prepared statement, so we
+		// cannot use the values from the ColumnBuffer column index.
 		int paramNr = 1;
 		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{

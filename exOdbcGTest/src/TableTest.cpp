@@ -184,6 +184,18 @@ namespace exodbc
 
 		// But not if we pass the flag to skip
 		EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+
+		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
+		nst.Select();
+		EXPECT_TRUE(nst.SelectNext());
+		SQLINTEGER id, int1, int2;
+		EXPECT_NO_THROW(nst.GetColumnValue(0, id));
+		EXPECT_NO_THROW(nst.GetColumnValue(1, int1));
+		EXPECT_NO_THROW(nst.GetColumnValue(3, int2));
+		EXPECT_THROW(nst.GetColumnBuffer(2), IllegalArgumentException);
+
+		// And also doing inserts..
+
 	}
 
 
