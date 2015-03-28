@@ -312,19 +312,15 @@ namespace exodbc
 
 		// Insert some data
 		// note the shifted columnbuffer-indexes, see #123
-		ColumnBuffer* pId = nst.GetColumnBuffer(0);
-		ColumnBuffer* pInt1 = nst.GetColumnBuffer(1);
-		ColumnBuffer* pInt2 = nst.GetColumnBuffer(2);
-
-		*pId = (SQLINTEGER)2;
-		*pInt1 = (SQLINTEGER)20;
-		*pInt2 = (SQLINTEGER)22;
+		nst.SetColumnValue(0, (SQLINTEGER)2);
+		nst.SetColumnValue(1, (SQLINTEGER)20);
+		nst.SetColumnValue(2, (SQLINTEGER)22);
 		EXPECT_NO_THROW(nst.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now update it
-		*pInt1 = (SQLINTEGER)30;
-		*pInt2 = (SQLINTEGER)32;
+		nst.SetColumnValue(1, (SQLINTEGER)30);
+		nst.SetColumnValue(2, (SQLINTEGER)32);
 		EXPECT_NO_THROW(nst.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
