@@ -243,6 +243,9 @@ namespace exodbc
 		*  - TOF_SKIP_UNSUPPORTED_COLUMNS:
 		*			If set, ColumnBuffer that failed to be created with a NotSupportedException are simply
 		*			skipped. Default is to re-throw the NotSupportedException.
+		*			\note This has only an influence if ColumnBuffers are created automatically by determining
+		*			the buffer type from the column information read from the Database. If you have created
+		*			ColumnBuffers manually using SetColumn(), this flag is ignored.
 		*  - TOF_CHAR_TRIM_LEFT:
 		*			If set, values retrieved using GetColumnValue(SQLSMALLINT columnIndex, std::string& str)
 		*			or GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) are trimmed on the left
