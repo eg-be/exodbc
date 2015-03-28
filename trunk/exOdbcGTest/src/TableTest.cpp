@@ -168,15 +168,22 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DISABLED_OpenAutoWithUnsupportedColumn)
+	TEST_P(TableTest, OpenAutoWithUnsupportedColumn)
 	{
+		if (m_db.Dbms() == dbmsMY_SQL)
+		{
+			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
+			return;
+		}
+
 		std::wstring tableName = TestTables::GetTableName(TestTables::Table::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
 		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 
-		{
-			// Expect to fail if we open with default flags
-			EXPECT_THROW(nst.Open(m_db), NotSupportedException);
-		}
+		// Expect to fail if we open with default flags
+		EXPECT_THROW(nst.Open(m_db), NotSupportedException);
+
+		// But not if we pass the flag to skip
+		EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
 	}
 
 

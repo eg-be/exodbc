@@ -330,6 +330,7 @@ namespace exodbc
 				delete pColumnBuffer;
 			}
 			m_columnBuffers.clear();
+			m_numCols = 0;
 			throw;
 		}
 	}
