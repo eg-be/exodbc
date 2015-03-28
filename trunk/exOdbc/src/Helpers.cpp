@@ -573,7 +573,7 @@ namespace exodbc
 	}
 
 
-	SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second)
+	SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second) throw()
 	{
 		SQL_TIME_STRUCT time;
 		time.hour = hour;
@@ -584,7 +584,7 @@ namespace exodbc
 	}
 
 
-	SQL_DATE_STRUCT InitDate(SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year)
+	SQL_DATE_STRUCT InitDate(SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year) throw()
 	{
 		SQL_DATE_STRUCT date;
 		date.year = year;
@@ -595,7 +595,7 @@ namespace exodbc
 	}
 
 
-	SQL_TIMESTAMP_STRUCT InitTimestamp(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction, SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year)
+	SQL_TIMESTAMP_STRUCT InitTimestamp(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction, SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year) throw()
 	{
 		SQL_TIMESTAMP_STRUCT timestamp;
 		timestamp.hour = hour;
@@ -610,7 +610,7 @@ namespace exodbc
 	}
 
 
-	bool IsTimeEqual(const SQL_TIME_STRUCT& t1, const SQL_TIME_STRUCT& t2)
+	bool IsTimeEqual(const SQL_TIME_STRUCT& t1, const SQL_TIME_STRUCT& t2) throw()
 	{
 		return t1.hour == t2.hour
 			&& t1.minute == t2.minute
@@ -618,7 +618,7 @@ namespace exodbc
 	}
 
 
-	bool IsDateEqual(const SQL_DATE_STRUCT& d1, const SQL_DATE_STRUCT& d2)
+	bool IsDateEqual(const SQL_DATE_STRUCT& d1, const SQL_DATE_STRUCT& d2) throw()
 	{
 		return d1.day == d2.day
 			&& d1.month == d2.month
@@ -626,7 +626,7 @@ namespace exodbc
 	}
 
 
-	bool IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2)
+	bool IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2) throw()
 	{
 		return ts1.hour == ts2.hour
 			&& ts1.minute == ts2.minute
@@ -638,7 +638,7 @@ namespace exodbc
 	}
 
 
-	SQL_NUMERIC_STRUCT InitNumeric(SQLCHAR precision, SQLSCHAR scale, SQLCHAR sign, SQLCHAR val[SQL_MAX_NUMERIC_LEN])
+	SQL_NUMERIC_STRUCT InitNumeric(SQLCHAR precision, SQLSCHAR scale, SQLCHAR sign, SQLCHAR val[SQL_MAX_NUMERIC_LEN]) throw()
 	{
 		SQL_NUMERIC_STRUCT num;
 		num.precision = precision;
@@ -650,7 +650,7 @@ namespace exodbc
 	}
 
 
-	SQL_NUMERIC_STRUCT InitNullNumeric()
+	SQL_NUMERIC_STRUCT InitNullNumeric() throw()
 	{
 		SQL_NUMERIC_STRUCT num;
 		ZeroMemory(&num, sizeof(num));

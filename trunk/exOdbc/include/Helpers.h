@@ -376,28 +376,44 @@ namespace exodbc
 	extern EXODBCAPI SQLHDESC		GetRowDescriptorHandle(SQLHSTMT hStmt, RowDescriptorType type);
 
 
-	extern EXODBCAPI SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second);
+	/*!
+	* \brief	Return a SQL_TIME_STRUCT with the passed values set.
+	*/
+	extern EXODBCAPI SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second) throw();
 
 
-	extern EXODBCAPI SQL_DATE_STRUCT InitDate(SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year);
+	/*!
+	* \brief	Return a SQL_DATE_STRUCT with the passed values set.
+	*/
+	extern EXODBCAPI SQL_DATE_STRUCT InitDate(SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year) throw();
 
 
-	extern EXODBCAPI SQL_TIMESTAMP_STRUCT InitTimestamp(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction, SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year);
+	/*!
+	* \brief	Return a SQL_TIMESTAMP_STRUCT with the passed values set.
+	*/
+	extern EXODBCAPI SQL_TIMESTAMP_STRUCT InitTimestamp(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction, SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year) throw();
 
 
-	extern EXODBCAPI bool IsTimeEqual(const SQL_TIME_STRUCT& t1, const SQL_TIME_STRUCT& t2);
+	/*!
+	* \brief	Return a SQL_NUMERIC_STRUCT with the passed values set.
+	*/
+	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNumeric(SQLCHAR precision, SQLSCHAR scale, SQLCHAR sign, SQLCHAR val[SQL_MAX_NUMERIC_LEN]) throw();
+
+
+	/*!
+	* \brief	Return a SQL_NUMERIC_STRUCT where all fields are initialized to 0.
+	*/
+	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNullNumeric() throw();
+
+
+
+	extern EXODBCAPI bool IsTimeEqual(const SQL_TIME_STRUCT& t1, const SQL_TIME_STRUCT& t2) throw();
 
 	
-	extern EXODBCAPI bool IsDateEqual(const SQL_DATE_STRUCT& d1, const SQL_DATE_STRUCT& d2);
+	extern EXODBCAPI bool IsDateEqual(const SQL_DATE_STRUCT& d1, const SQL_DATE_STRUCT& d2) throw();
 
 
-	extern EXODBCAPI bool IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2);
-
-
-	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNumeric(SQLCHAR precision, SQLSCHAR scale, SQLCHAR sign, SQLCHAR val[SQL_MAX_NUMERIC_LEN]);
-
-
-	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNullNumeric();
+	extern EXODBCAPI bool IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2) throw();
 
 
 	/*!

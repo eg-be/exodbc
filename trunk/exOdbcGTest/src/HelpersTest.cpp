@@ -34,6 +34,9 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+
+	// ParamHelpersTest
+	// ================
 	void ParamHelpersTest::SetUp()
 	{
 		// Set up is called for every test
@@ -286,6 +289,9 @@ namespace exodbc
 	}
 
 
+	// StaticHelpersTest
+	// =================
+
 	void StaticHelpersTest::SetUp()
 	{
 
@@ -320,6 +326,59 @@ namespace exodbc
 		}
 		// and here we break again again
 		EXPECT_FALSE(GetDontDebugBreak());
+	}
+
+
+	TEST_F(StaticHelpersTest, InitTime)
+	{
+		SQL_TIME_STRUCT time = InitTime(13, 14, 15);
+		EXPECT_EQ(13, time.hour);
+		EXPECT_EQ(14, time.minute);
+		EXPECT_EQ(15, time.second);
+	}
+
+
+	TEST_F(StaticHelpersTest, InitDate)
+	{
+		SQL_DATE_STRUCT date = InitDate(26, 1, 1983);
+		EXPECT_EQ(26, date.day);
+		EXPECT_EQ(1, date.month);
+		EXPECT_EQ(1983, date.year);
+	}
+
+
+	TEST_F(StaticHelpersTest, InitTimestamp)
+	{
+		SQL_TIMESTAMP_STRUCT ts = InitTimestamp(13, 14, 15, 123456789, 26, 1, 1983);
+		EXPECT_EQ(13, ts.hour);
+		EXPECT_EQ(14, ts.minute);
+		EXPECT_EQ(15, ts.second);
+		EXPECT_EQ(123456789, ts.fraction);
+		EXPECT_EQ(26, ts.day);
+		EXPECT_EQ(1, ts.month);
+		EXPECT_EQ(1983, ts.year);
+	}
+
+
+	TEST_F(StaticHelpersTest, InitNumeric)
+	{
+		SQLCHAR val[SQL_MAX_NUMERIC_LEN];
+		FillMemory(val, SQL_MAX_NUMERIC_LEN, 1);
+		SQL_NUMERIC_STRUCT num = InitNumeric(18, 10, 1, val);
+		EXPECT_EQ(18, num.precision);
+		EXPECT_EQ(10, num.scale);
+		EXPECT_EQ((SQLCHAR)1, num.sign);
+		EXPECT_TRUE(memcmp(val, num.val, SQL_MAX_NUMERIC_LEN) == 0);
+	}
+
+
+	TEST_F(StaticHelpersTest, InitNullNumeric)
+	{
+		char nullMem[sizeof(SQL_NUMERIC_STRUCT)];
+		ZeroMemory(nullMem, sizeof(SQL_NUMERIC_STRUCT));
+
+		SQL_NUMERIC_STRUCT num = InitNullNumeric();
+		EXPECT_TRUE(memcmp(&num, &nullMem, sizeof(SQL_NUMERIC_STRUCT)) == 0);
 	}
 
 	// Interfaces
