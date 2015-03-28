@@ -246,6 +246,9 @@ namespace exodbc
 		*			\note This has only an influence if ColumnBuffers are created automatically by determining
 		*			the buffer type from the column information read from the Database. If you have created
 		*			ColumnBuffers manually using SetColumn(), this flag is ignored.
+		*			\note The indexes of the bound ColumnBuffers will shift if columns are skipped. If you
+		*			have a table col1, col2, col3 and col2 fails to bind, col3 will be indexed with 1.
+		*			See Ticket #12 and #123.
 		*  - TOF_CHAR_TRIM_LEFT:
 		*			If set, values retrieved using GetColumnValue(SQLSMALLINT columnIndex, std::string& str)
 		*			or GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) are trimmed on the left
