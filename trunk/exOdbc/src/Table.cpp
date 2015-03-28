@@ -296,13 +296,15 @@ namespace exodbc
 			{
 				columnFlags |= CF_INSERT;
 			}
+			int bufferIndex = 0;
 			for (int columnIndex = 0; columnIndex < (SQLSMALLINT)columns.size(); columnIndex++)
 			{
 				SColumnInfo colInfo = columns[columnIndex];
 				try
 				{
 					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, columnFlags);
-					m_columnBuffers[columnIndex] = pColBuff;
+					m_columnBuffers[bufferIndex] = pColBuff;
+					++bufferIndex;
 				}
 				catch (NotSupportedException nse)
 				{
