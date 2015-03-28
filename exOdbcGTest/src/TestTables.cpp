@@ -57,7 +57,8 @@ namespace exodbc
 			{ Table::NUMERICTYPES, L"numerictypes" },
 			{ Table::NUMERICTYPES_TMP, L"numerictypes_tmp" },
 			{ Table::SELECTONLY, L"selectonly" },
-			{ Table::NOT_EXISTING, L"not_existing" }
+			{ Table::NOT_EXISTING, L"not_existing" },
+			{ Table::NOT_SUPPORTED, L"not_supported" }
 		};
 
 
@@ -77,7 +78,8 @@ namespace exodbc
 			{ Table::NUMERICTYPES, L"idnumerictypes" },
 			{ Table::NUMERICTYPES_TMP, L"idnumerictypes" },
 			{ Table::SELECTONLY, L"idselectonly" },
-			{ Table::NOT_EXISTING, L"idnot_existing" }
+			{ Table::NOT_EXISTING, L"idnot_existing" },
+			{ Table::NOT_SUPPORTED, L"idnot_supported" }
 		};
 
 

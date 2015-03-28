@@ -213,12 +213,12 @@ namespace exodbc
 			m_datatypes = ReadDataTypesInfo();
 
 		}
-		catch (Exception ex)
+		catch (const Exception& ex)
 		{
 			// Free statements and rethrow. Do not allow to throw from freeing
 			m_hstmt = FreeStatementHandle(m_hstmt, FSTF_NO_THROW);
 			m_hstmtExecSql = FreeStatementHandle(m_hstmtExecSql, FSTF_NO_THROW);
-			throw ex;
+			throw;
 		}
 
 		// Completed Successfully
@@ -300,7 +300,7 @@ namespace exodbc
 		{
 			OpenImpl();
 		}
-		catch (Exception ex)
+		catch (const Exception& ex)
 		{
 			// Try to disconnect from the data source
 			ret = SQLDisconnect(m_hdbc);
@@ -315,7 +315,7 @@ namespace exodbc
 			}
 
 			// and rethrow what went wrong originally
-			throw ex;
+			throw;
 		}
 		
 		// Mark database as Open

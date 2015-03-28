@@ -148,6 +148,24 @@ namespace exodbc
 			{
 				Close();
 			}
+
+			// If the table was created manually, we need to delete the column buffers
+			// that were allocated during SetColumn.
+			// If auto was active, those columns were only created from a successfull Open() and
+			// were properly deleted during Close()  (which has happened, if Open() was successful)
+			// \note: We must free the buffers before deleting our statements - the buffers may still
+			// be bound to our statements.
+			if (m_manualColumns)
+			{
+				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+				{
+					ColumnBuffer* pBuffer = it->second;
+					delete pBuffer;
+				}
+				m_columnBuffers.clear();
+				m_numCols = 0;
+			}
+
 			if (HasStatements())
 			{
 				FreeStatements();
@@ -240,6 +258,80 @@ namespace exodbc
 			haveAll = (SQL_NULL_HSTMT != m_hStmtDelete) && (SQL_NULL_HSTMT != m_hStmtDeleteWhere);
 		}
 		return haveAll;
+	}
+
+
+	void Table::CreateAutoColumnBuffers(const Database& db, const STableInfo& tableInfo, bool skipUnsupportedColumns)
+	{
+		exASSERT(m_manualColumns == false);
+		exASSERT(m_columnBuffers.size() == 0);
+		exASSERT(m_numCols == 0);
+
+		// Nest try-catch to always free eventually allocated buffers
+		try
+		{
+			// Will throw if fails
+			std::vector<SColumnInfo> columns = db.ReadTableColumnInfo(tableInfo);
+			// Remember column sizes and create ColumnBuffers
+			m_numCols = columns.size();
+			if (m_numCols == 0)
+			{
+				Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetSqlName()).str());
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
+			}
+			// We need to know which ODBC version we are using, might throw
+			OdbcVersion odbcVersion = db.GetMaxSupportedOdbcVersion();
+			// And how to open this column
+			ColumnFlags columnFlags = CF_NONE;
+			if (TestAccessFlag(AF_SELECT))
+			{
+				columnFlags |= CF_SELECT;
+			}
+			if (TestAccessFlag(AF_UPDATE))
+			{
+				columnFlags |= CF_UPDATE;
+			}
+			if (TestAccessFlag(AF_INSERT))
+			{
+				columnFlags |= CF_INSERT;
+			}
+			for (int columnIndex = 0; columnIndex < (SQLSMALLINT)columns.size(); columnIndex++)
+			{
+				SColumnInfo colInfo = columns[columnIndex];
+				try
+				{
+					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, columnFlags);
+					m_columnBuffers[columnIndex] = pColBuff;
+				}
+				catch (NotSupportedException nse)
+				{
+					if (skipUnsupportedColumns)
+					{
+						// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
+						LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetSqlName() % nse.ToString()));
+						continue;
+					}
+					else
+					{
+						// rethrow
+						throw;
+					}
+				}
+			}
+
+		}
+		catch (Exception ex)
+		{
+			// Free allocated buffers and rethrow
+			for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+			{
+				ColumnBuffer* pColumnBuffer = it->second;
+				delete pColumnBuffer;
+			}
+			m_columnBuffers.clear();
+			throw;
+		}
 	}
 
 
@@ -813,55 +905,7 @@ namespace exodbc
 		// If we are asked to create our columns automatically, read the column information and create the buffers
 		if (!m_manualColumns)
 		{
-			// Will throw if fails
-			std::vector<SColumnInfo> columns = db.ReadTableColumnInfo(m_tableInfo);
-			// Remember column sizes and create ColumnBuffers
-			m_numCols = columns.size();
-			if (m_numCols == 0)
-			{
-				Exception ex((boost::wformat(L"No columns found for table '%s'") % m_tableInfo.GetSqlName()).str());
-				SET_EXCEPTION_SOURCE(ex);
-				throw ex;
-			}
-			// We need to know which ODBC version we are using, might throw
-			OdbcVersion odbcVersion = db.GetMaxSupportedOdbcVersion();
-			// And how to open this column
-			ColumnFlags columnFlags = CF_NONE;
-			if (TestAccessFlag(AF_SELECT))
-			{
-				columnFlags |= CF_SELECT;
-			}
-			if (TestAccessFlag(AF_UPDATE))
-			{
-				columnFlags |= CF_UPDATE;
-			}
-			if (TestAccessFlag(AF_INSERT))
-			{
-				columnFlags |= CF_INSERT;
-			}
-			for (int columnIndex = 0; columnIndex < (SQLSMALLINT) columns.size(); columnIndex++)
-			{
-				SColumnInfo colInfo = columns[columnIndex];
-				try
-				{
-					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, columnFlags);
-					m_columnBuffers[columnIndex] = pColBuff;
-				}
-				catch (NotSupportedException nse)
-				{
-					if ((openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS)
-					{
-						// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
-						LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetSqlName() % nse.ToString()));
-						continue;
-					}
-					else
-					{
-						// rethrow
-						throw nse;
-					}
-				}
-			}
+			CreateAutoColumnBuffers(db, m_tableInfo, (openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS);
 		}
 
 		// Prepare the FieldStatement to be used for selects
@@ -980,14 +1024,18 @@ namespace exodbc
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 		}
 
-		// Delete ColumnBuffers
-		ColumnBufferPtrMap::iterator it;
-		for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		// Delete ColumnBuffers if they were created automatically
+		if (!m_manualColumns)
 		{
-			ColumnBuffer* pBuffer = it->second;
-			delete pBuffer;
+			ColumnBufferPtrMap::iterator it;
+			for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+			{
+				ColumnBuffer* pBuffer = it->second;
+				delete pBuffer;
+			}
+			m_columnBuffers.clear();
+			m_numCols = 0;
 		}
-		m_columnBuffers.clear();
 
 		m_isOpen = false;
 	}

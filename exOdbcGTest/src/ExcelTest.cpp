@@ -124,7 +124,6 @@ namespace exodbc
 		ASSERT_NO_THROW(tTable.SetColumn(3, L"Text", tc, SQL_C_WCHAR, sizeof(id)));
 		ASSERT_NO_THROW(tTable.SetColumn(4, L"Mixed", mx, SQL_C_WCHAR, sizeof(id)));
 
-		// \todo: This leaks memory if we pass the default flags? if we pass flags TF_NONE it does not leak? whats wrong? -> See Ticket #110 for reason
 		// \todo: Do not check existence while opening, it would overwrite our manually set SpecialSqlQueryName -> See Ticket #111 
 		ASSERT_NO_THROW(tTable.Open(db, TOF_NONE));
 			
