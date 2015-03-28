@@ -231,8 +231,6 @@ namespace exodbc
 		std::wstring sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % TestTables::GetTableName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase) % TestTables::GetIdColumnName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase));
 		SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
-		//ret = SQLFetch(hStmt);
-		//EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
 		// Test getting descriptor-handle
 		SQLHDESC hDesc = SQL_NULL_HDESC;
@@ -255,7 +253,36 @@ namespace exodbc
 
 	TEST_P(ParamHelpersTest, SetDescriptionField)
 	{
+		// Test by setting the description of a numeric column
 
+		// Open a statement,
+		SQLHSTMT hStmt = SQL_NULL_HSTMT;
+		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+
+		// Open statement by doing some operation on it
+		std::wstring sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 5") % TestTables::GetTableName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase) % TestTables::GetIdColumnName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase));
+		SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+
+		// Except to fail when passing a null handle
+		{
+			LogLevelFatal llf;
+			DontDebugBreak ddb;
+			EXPECT_THROW(SetDescriptionField(SQL_NULL_HSTMT, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC), AssertionException);
+		}
+
+		SQLHANDLE hDesc = SQL_NULL_HDESC;
+		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RDT_PARAM));
+
+		SQL_NUMERIC_STRUCT num;
+		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC));
+		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_PRECISION, (SQLPOINTER)18));
+		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_SCALE, (SQLPOINTER)10));
+		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_DATA_PTR, (SQLPOINTER)&num));
+
+		// Close things
+		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
 	}
 
 
