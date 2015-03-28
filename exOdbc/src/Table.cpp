@@ -748,6 +748,13 @@ namespace exodbc
 	}
 
 
+	void Table::SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value)
+	{
+		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		*pBuff = value;
+	}
+
+
 	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);

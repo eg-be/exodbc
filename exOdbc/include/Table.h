@@ -583,6 +583,13 @@ namespace exodbc
 		void		Update(const std::wstring& where);
 
 
+		/*
+		* \brief	Set the value of the ColumnBuffer given by columnIndex.
+		* \throw	Excepton If ColumnBuffer not found, or setting the value fails.
+		*/
+		void		SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value);
+
+
 		/*!
 		* \brief	Access the current value of columnIndex as SQLSMALLINT.
 		* \details	Casts the value if casting is possible without loosing data.
