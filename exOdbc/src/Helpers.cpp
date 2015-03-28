@@ -490,6 +490,7 @@ namespace exodbc
 		exASSERT(hDbc != NULL);
 		SQLSMALLINT bufferSize = 0;
 		SQLRETURN ret = SQLGetInfo(hDbc, fInfoType, NULL, NULL, &bufferSize);
+		// \note: DB2 will here always return SQL_SUCCESS_WITH_INFO to report that data got truncated, although we didnt even feed in a buffer.
 		THROW_IFN_SUCCEEDED_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, hDbc, (boost::wformat(L"GetInfo for fInfoType %d failed") % fInfoType).str());
 
 		// According to the doc SQLGetInfo will always return byte-size. Therefore:
