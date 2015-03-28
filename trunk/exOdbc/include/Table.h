@@ -769,6 +769,22 @@ namespace exodbc
 		*/
 		void        Initialize();
 
+
+		/*!
+		* \brief	Creates the ColumnBuffers for the table.
+		* \detailed	Can only be called if m_manulColumns is set to false. Will query the Database about the
+		*			column of the table and allocate corresponding column buffers.
+		*			Creation of the buffer will fail if the SQL type of that column is not supported. If the flag
+		*			skipUnsupportedColumns is set to true, this column is simply ignored. Else the function fails.
+		*			If this function fails, all allocated buffers are deleted and m_columnBuffers is cleared.
+		*			On success, after this function returns m_columnBuffers contains the allocated Buffers to be used
+		*			with this table.
+		*			Note that in case columns have been skipped, the keys to the table might contain "gaps", say columns 2 failed
+		*			to bind, the keys will so something like 1, 3, 4, .. 
+		* \throw	Exception If m_manualColumns is set to true, or m_columnBuffers is not empty, or creation of ColumnBuffers fails.
+		*/
+		void		CreateAutoColumnBuffers(const Database& db, const STableInfo& tableInfo, bool skipUnsupportedColumns);
+
 		
 		/*!
 		* \brief	Frees the statement handles allocated during AllocateStatements().

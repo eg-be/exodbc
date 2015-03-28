@@ -168,6 +168,18 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, DISABLED_OpenAutoWithUnsupportedColumn)
+	{
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
+		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+
+		{
+			// Expect to fail if we open with default flags
+			EXPECT_THROW(nst.Open(m_db), NotSupportedException);
+		}
+	}
+
+
 	TEST_P(TableTest, Close)
 	{
 		// Create table

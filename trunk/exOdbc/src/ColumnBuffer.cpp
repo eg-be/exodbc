@@ -224,10 +224,10 @@ namespace exodbc
 				SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
 			}
 		}
-		catch (Exception ex)
+		catch (const Exception& ex)
 		{
 			delete pBp;
-			throw ex;
+			throw;
 		}
 		m_boundParameters.push_back(pBp);
 	}
