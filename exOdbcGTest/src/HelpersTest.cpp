@@ -256,7 +256,7 @@ namespace exodbc
 	}
 
 
-	TEST_F(StaticHelpersTest, TestDontDebugBreak)
+	TEST_F(StaticHelpersTest, DontDebugBreak)
 	{
 		// DebugBreak shall default to false (that means we will break)
 		EXPECT_FALSE(GetDontDebugBreak());
