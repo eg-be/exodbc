@@ -406,13 +406,21 @@ namespace exodbc
 	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNullNumeric() throw();
 
 
-
+	/*!
+	* \brief	Return true if all fields of the compared SQL_TIME_STRUCTs have the same value.
+	*/
 	extern EXODBCAPI bool IsTimeEqual(const SQL_TIME_STRUCT& t1, const SQL_TIME_STRUCT& t2) throw();
 
-	
+
+	/*!
+	* \brief	Return true if all fields of the compared SQL_DATE_STRUCTs have the same value.
+	*/
 	extern EXODBCAPI bool IsDateEqual(const SQL_DATE_STRUCT& d1, const SQL_DATE_STRUCT& d2) throw();
 
 
+	/*!
+	* \brief	Return true if all fields of the compared SQL_TIMESTAMP_STRUCTs have the same value.
+	*/
 	extern EXODBCAPI bool IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2) throw();
 
 
