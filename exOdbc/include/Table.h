@@ -238,8 +238,8 @@ namespace exodbc
 		*  - TOF_CHECK_EXISTANCE:
 		*			If set, the database will always be queried if a table matching the
 		*			passed definition during constructions actually exists in the database. Setting this
-		*			value to false makes only sense	if you've passed a STableInfo, as else the Table
-		*			is required to query the database anyway (and fail if not found).
+		*			value to false makes only sense	if you've passed a STableInfo during construction, 
+		*			as else the Table is required to query the database anyway (and fail if not found).
 		*  - TOF_SKIP_UNSUPPORTED_COLUMNS:
 		*			If set, ColumnBuffer that failed to be created with a NotSupportedException are simply
 		*			skipped. Default is to re-throw the NotSupportedException.
