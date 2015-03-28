@@ -221,13 +221,39 @@ namespace exodbc
 	}
 
 
-	TEST_P(ParamHelpersTest, SetDescriptionField)
+	TEST_P(ParamHelpersTest, GetRowDescriptorHandle)
 	{
+		// Open a statement, to test getting the row-descriptor
+		SQLHSTMT hStmt = SQL_NULL_HSTMT;
+		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
 
+		// Open statement by doing some operation on it
+		std::wstring sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % TestTables::GetTableName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase) % TestTables::GetIdColumnName(TestTables::Table::CHARTYPES, m_odbcInfo.m_namesCase));
+		SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+		//ret = SQLFetch(hStmt);
+		//EXPECT_TRUE(SQL_SUCCEEDED(ret));
+
+		// Test getting descriptor-handle
+		SQLHDESC hDesc = SQL_NULL_HDESC;
+		// We shall fail if we pass an invalid handle
+		{
+			LogLevelFatal llf;
+			DontDebugBreak ddb;
+			EXPECT_THROW(GetRowDescriptorHandle(SQL_NULL_HSTMT, RDT_ROW), AssertionException);
+		}
+
+		// but not by passing the valid statement
+		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RDT_ROW));
+		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RDT_PARAM));
+
+		// Close things
+		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
 	}
 
 
-	TEST_P(ParamHelpersTest, GetRowDescriptorHandle)
+	TEST_P(ParamHelpersTest, SetDescriptionField)
 	{
 
 	}
