@@ -35,14 +35,13 @@ namespace exodbc
 		, m_autoBindingMode(mode)
 		, m_bufferType(0)
 		, m_bufferSize(0)
-		, m_columnNr((SQLUSMALLINT) columnInfo.m_ordinalPosition)
+		, m_columnNr(0)
 		, m_odbcVersion(odbcVersion)
 		, m_decimalDigits(-1)
 		, m_columnSize(-1)
 		, m_hStmt(SQL_NULL_HSTMT)
 		, m_flags(flags)
 	{
-		exASSERT(m_columnNr > 0);
 		exASSERT(columnInfo.m_sqlDataType != 0);
 		exASSERT(m_flags & CF_SELECT);
 
@@ -86,13 +85,13 @@ namespace exodbc
 	}
 
 
-	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */, SQLSMALLINT sqlType /* = SQL_UNKNOWN_TYPE */)
+	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */, SQLSMALLINT sqlType /* = SQL_UNKNOWN_TYPE */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(true)
 		, m_autoBindingMode(AutoBindingMode::BIND_AS_REPORTED)
 		, m_bufferType(sqlCType)
 		, m_bufferSize(bufferSize)
-		, m_columnNr(ordinalPosition)
+		, m_columnNr(0)
 		, m_bufferPtr(bufferPtrVariant)
 		, m_queryName(queryName)
 		, m_odbcVersion(OV_UNKNOWN)
@@ -103,7 +102,6 @@ namespace exodbc
 		, m_flags(flags)
 	{
 		exASSERT(sqlCType != 0);
-		exASSERT(ordinalPosition > 0);
 		exASSERT(bufferSize > 0);
 		exASSERT(!m_queryName.empty());
 		exASSERT(m_flags & CF_SELECT);
@@ -271,14 +269,17 @@ namespace exodbc
 			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, m_hStmt);
 		}
 		m_hStmt = SQL_NULL_HSTMT;
+		m_columnNr = 0;
 	}
 
 
 
-	void ColumnBuffer::Bind(SQLHSTMT hStmt)
+	void ColumnBuffer::Bind(SQLHSTMT hStmt, SQLSMALLINT columnNr)
 	{
+		exASSERT(m_columnNr == 0);
 		exASSERT(m_haveBuffer);
 		exASSERT(m_hStmt == SQL_NULL_HSTMT);
+		exASSERT(columnNr >= 1);
 		exASSERT(hStmt != SQL_NULL_HSTMT);
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(m_bufferSize > 0);
@@ -317,21 +318,22 @@ namespace exodbc
 			exASSERT(m_decimalDigits >= 0);
 
 			SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RDT_ROW);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER) m_bufferType);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
+			SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER)m_bufferType);
+			SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)m_columnSize);
+			SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
+			SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
+			SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
+			SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
 		}
 		else
 		{
 			// Non numeric columns pass the tests fine by using just SQLBindCol
-			SQLRETURN ret = SQLBindCol(hStmt, m_columnNr, m_bufferType, (SQLPOINTER*)pBuffer, m_bufferSize, &m_cb);
+			SQLRETURN ret = SQLBindCol(hStmt, columnNr, m_bufferType, (SQLPOINTER*)pBuffer, m_bufferSize, &m_cb);
 			// Note: We check on purpose here only for SUCCESS, we do not tolerate loosing precision
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
 		}
 		m_hStmt = hStmt;
+		m_columnNr = columnNr;
 	}
 
 

@@ -883,7 +883,7 @@ namespace exodbc
 		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
 		exASSERT(flags & CF_SELECT);
 
-		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, columnIndex + 1, pBuffer, bufferSize, queryName, flags, columnSize, decimalDigits);
+		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, queryName, flags, columnSize, decimalDigits);
 		m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 
@@ -949,8 +949,9 @@ namespace exodbc
 		{
 			for (ColumnBufferPtrMap::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 			{
+				SQLUSMALLINT colIndex = it->first;
 				ColumnBuffer* pBuffer = it->second;
-				pBuffer->Bind(m_hStmtSelect);
+				pBuffer->Bind(m_hStmtSelect, colIndex + 1);
 			}
 		}
 

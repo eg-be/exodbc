@@ -144,7 +144,6 @@ namespace exodbc
 		*			from SQL Types to ODBC C Types to the driver, as long as the buffer-type exists in the
 		*			BufferPtrVariant. Bind() will fail if the driver does not support the given conversion.
 		* \param sqlCType			The ODBC C Type of the buffer (like SQL_C_WCHAR, SQL_C_SLONG, etc.). This value will be forwarded to the driver during SQLBindCol. 
-		* \param ordinalPosition	The ordinal position of the column in the table. Numbering starts at 1 (!)
 		* \param bufferPtrVarian	Pointer to allocated buffer for the given sqlCType. Must be a buffer that can be held by a exodbc::BufferPtrVariant .
 		* \param bufferSize			Size of the allocated buffer.
 		* \param queryName			Name of the column that corresponds to this buffer.
@@ -159,7 +158,7 @@ namespace exodbc
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, SQLUSMALLINT ordinalPosition, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1, SQLSMALLINT sqlType = SQL_UNKNOWN_TYPE);
+		ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1, SQLSMALLINT sqlType = SQL_UNKNOWN_TYPE);
 
 
 		~ColumnBuffer();
@@ -201,9 +200,11 @@ namespace exodbc
 		*			The driver might fail to bind the column to the type.
 		*			On success, sets m_bound to true.
 		* \param	hStmt ODBC Statement handle to bind this ColumnBuffer to.
+		* \param	columnNr Column number that must match the column number of the
+		*			statement to bind to. Must be >= 1 (1-indexed).
 		* \throw	Exception If binding fails.
 		*/
-		void Bind(SQLHSTMT hStmt);
+		void Bind(SQLHSTMT hStmt, SQLSMALLINT columnNr);
 
 
 		/*!
@@ -618,7 +619,7 @@ namespace exodbc
 		SQLINTEGER				m_columnSize;			///< Column Size, either read from SColumnInfo during construction or set manually. -1 indicates unknown.
 		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from SColumnInfo during construction or set manually. -1 indicates unkonwn.
 		std::wstring			m_queryName;			///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
-		SQLUSMALLINT			m_columnNr;				///< Either set on construction or read from SColumnInfo::m_ordinalPosition
+		SQLUSMALLINT			m_columnNr;				///< Column number used during Bind(). Set to 0 during construction.
 		SQLSMALLINT				m_sqlType;				///< The SQL Type of the Column, like SQL_SMALLINT. Either set on construction or read from SColumnInfo::m_sqlType.
 		bool					m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
 		bool					m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()

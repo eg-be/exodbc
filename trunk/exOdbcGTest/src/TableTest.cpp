@@ -193,9 +193,17 @@ namespace exodbc
 		EXPECT_NO_THROW(nst.GetColumnValue(1, int1));
 		EXPECT_NO_THROW(nst.GetColumnValue(3, int2));
 		EXPECT_THROW(nst.GetColumnBuffer(2), IllegalArgumentException);
+		EXPECT_EQ(1, id);
+		EXPECT_EQ(10, int1);
+		EXPECT_EQ(12, int2);
 
 		// And also doing inserts..
-
+		ColumnBuffer* pId = nst.GetColumnBuffer(0);
+		ColumnBuffer* pInt1 = nst.GetColumnBuffer(1);
+		ColumnBuffer* pInt2 = nst.GetColumnBuffer(3);
+		*pId = (SQLINTEGER)2;
+		*pInt1 = (SQLINTEGER)20;
+		*pInt2 = (SQLINTEGER)22;
 	}
 
 
