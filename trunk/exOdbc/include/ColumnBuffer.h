@@ -38,8 +38,8 @@ namespace exodbc
 
 	/*!
 	* \typedef BufferPtrVariant
-	* The Variant we use to store pointers to the actual buffer
-	* The following types can be stored:
+	* \brief The Variant we use to store pointers to the actual buffer
+	* \details The following types can be stored:
 	*  - SQLSMALLINT*
 	*  - SQLINTEGER*
 	*  - SQLBIGINT*
@@ -65,8 +65,8 @@ namespace exodbc
 
 	/*!
 	* \typedef BufferVariant
-	* A helper for setting / getting values. If you like it, work with a variant
-	* The following types can be stored:
+	* \brief A helper for setting / getting values. If you like it, work with a variant
+	* \details The following types can be stored:
 	*  - SQLSMALLINT
 	*  - SQLINTEGER
 	*  - SQLBIGINT

@@ -249,7 +249,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring STableInfo::GetSqlName(int flags /* = CATALOG | SCHEMA | TABLE */) const
+	std::wstring STableInfo::GetSqlName(int flags /* = QNF_CATALOG | QNF_SCHEMA | QNF_TABLE */) const
 	{
 		if (m_hasSpecialSqlQueryName)
 		{
@@ -259,15 +259,15 @@ namespace exodbc {
 		exASSERT(!m_tableName.empty());
 
 		std::wstringstream ws;
-		if (flags & CATALOG && HasCatalog())
+		if (flags & QNF_CATALOG && HasCatalog())
 		{
 			ws << m_catalogName << L"."; 
 		}
-		if (flags & SCHEMA && HasSchema())
+		if (flags & QNF_SCHEMA && HasSchema())
 		{
 			ws << m_schemaName << L".";
 		}
-		if (flags & TABLE)
+		if (flags & QNF_TABLE)
 		{
 			ws << m_tableName << L".";
 		}
@@ -278,25 +278,25 @@ namespace exodbc {
 	}
 
 
-	std::wstring SColumnInfo::GetSqlName(QueryNameFlags flags /* = TABLE | COLUMN */) const
+	std::wstring SColumnInfo::GetSqlName(QueryNameFlags flags /* = QNF_TABLE | QNF_COLUMN */) const
 	{
 		exASSERT(!m_tableName.empty());
 		exASSERT(!m_columnName.empty());
 
 		std::wstringstream ws;
-		if (flags & CATALOG && HasCatalog())
+		if (flags & QNF_CATALOG && HasCatalog())
 		{
 			ws << m_catalogName << L".";
 		}
-		if (flags & SCHEMA && HasSchema())
+		if (flags & QNF_SCHEMA && HasSchema())
 		{
 			ws << m_schemaName << L".";
 		}
-		if (flags & TABLE)
+		if (flags & QNF_TABLE)
 		{
 			ws << m_tableName << L".";
 		}
-		if (flags & COLUMN)
+		if (flags & QNF_COLUMN)
 		{
 			ws << m_columnName << L".";
 		}
@@ -308,24 +308,24 @@ namespace exodbc {
 
 
 
-	std::wstring STablePrimaryKeyInfo::GetSqlName(QueryNameFlags flags /* = TABLE | COLUMN */) const
+	std::wstring STablePrimaryKeyInfo::GetSqlName(QueryNameFlags flags /* = QNF_TABLE | QNF_COLUMN */) const
 	{
 		exASSERT(!m_tableName.empty());
 
 		std::wstringstream ws;
-		if (flags & CATALOG && !m_isCatalogNull)
+		if (flags & QNF_CATALOG && !m_isCatalogNull)
 		{
 			ws << m_catalogName << L".";
 		}
-		if (flags & SCHEMA && !m_isSchemaNull)
+		if (flags & QNF_SCHEMA && !m_isSchemaNull)
 		{
 			ws << m_schemaName << L".";
 		}
-		if (flags & TABLE)
+		if (flags & QNF_TABLE)
 		{
 			ws << m_tableName << L".";
 		}
-		if (flags & COLUMN)
+		if (flags & QNF_COLUMN)
 		{
 			ws << m_columnName << L".";
 		}

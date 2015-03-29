@@ -241,12 +241,12 @@ namespace exodbc
 		{
 			LogLevelFatal llf;
 			DontDebugBreak ddb;
-			EXPECT_THROW(GetRowDescriptorHandle(SQL_NULL_HSTMT, RDT_ROW), AssertionException);
+			EXPECT_THROW(GetRowDescriptorHandle(SQL_NULL_HSTMT, RowDescriptorType::ROW), AssertionException);
 		}
 
 		// but not by passing the valid statement
-		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RDT_ROW));
-		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RDT_PARAM));
+		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW));
+		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM));
 
 		// Close things
 		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
@@ -275,7 +275,7 @@ namespace exodbc
 		}
 
 		SQLHANDLE hDesc = SQL_NULL_HDESC;
-		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RDT_PARAM));
+		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM));
 
 		SQL_NUMERIC_STRUCT num;
 		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC));

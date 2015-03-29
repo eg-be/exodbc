@@ -356,16 +356,18 @@ namespace exodbc
 	*/
 	extern EXODBCAPI void		SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value);
 
+
 	/*!
 	* \enum		RowDescriptorType
 	* \brief	A wrapper for the values of SQLGetStmtAttr to fetch a descriptor handle.
 	* \see		GetRowDescriptorHandle
 	*/
-	enum RowDescriptorType
+	enum class RowDescriptorType
 	{
-		RDT_ROW = SQL_ATTR_APP_ROW_DESC,	///< SQL_ATTR_APP_ROW_DESC
-		RDT_PARAM = SQL_ATTR_APP_PARAM_DESC	///< SQL_ATTR_APP_PARAM_DESC
+		ROW = SQL_ATTR_APP_ROW_DESC,	///< SQL_ATTR_APP_ROW_DESC
+		PARAM = SQL_ATTR_APP_PARAM_DESC	///< SQL_ATTR_APP_PARAM_DESC
 	};
+
 
 	/*!
 	* \brief	A wrapper to SQLGetStmtAttr

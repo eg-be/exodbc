@@ -36,7 +36,7 @@
 namespace exodbc
 {
 	// Global Consts
-	// -------------
+	// =============
 
 	// Some defaults when binding to chars but no reasonable char-length can be determined.
 	const int DB_MAX_BIGINT_CHAR_LENGTH = 30;	///< If no reasonable char length can be determined from a columnInfo, this value is used for the size of the char-buffer (if converting bigints to char)
@@ -68,7 +68,7 @@ namespace exodbc
 
 
 	// Enums
-	// -----
+	// =====
 	/*!
 	* \enum	OdbcVersion
 	* \brief	Defines the ODBC-Version to be set.
@@ -156,11 +156,14 @@ namespace exodbc
 	* \see		http://msdn.microsoft.com/en-us/library/ms713558%28v=vs.85%29.aspx
 	* \see		Table::SelectColumnAttribute()
 	*/
-	enum ColumnAttribute
+	enum class ColumnAttribute
 	{
 		CA_PRECISION = SQL_DESC_PRECISION ///< A numeric value that for a numeric data type denotes the applicable precision, For data types SQL_TYPE_TIME, SQL_TYPE_TIMESTAMP, and all the interval data types that represent a time interval, its value is the applicable precision of the fractional seconds component. 
 	};
 
+
+	// Flags
+	// =====
 
 	/*!
 	* \enum QueryNameFlag
@@ -168,12 +171,17 @@ namespace exodbc
 	*/
 	enum QueryNameFlag
 	{
-		CATALOG = 0x1,	///< Include Catalog name in Query name.
-		SCHEMA = 0x2,	///< Include Schema name in Query name.
-		TABLE = 0x4,	///< Include Table name in Query name.
-		TYPE = 0x8,		///< Include Type name in Query name.
-		COLUMN = 0x10	///< Include Column name in Query name.
+		QNF_CATALOG = 0x1,	///< Include Catalog name in Query name.
+		QNF_SCHEMA = 0x2,	///< Include Schema name in Query name.
+		QNF_TABLE = 0x4,	///< Include Table name in Query name.
+		QNF_TYPE = 0x8,		///< Include Type name in Query name.
+		QNF_COLUMN = 0x10	///< Include Column name in Query name.
 	};
+
+	/*!
+	* \typedef QueryNameFlags
+	* \brief Flag holder for QueryNameFlag flags.
+	 */
 	typedef unsigned int QueryNameFlags;
 
 
@@ -183,7 +191,7 @@ namespace exodbc
 	*/
 	enum ColumnFlag
 	{
-		CF_NONE = 0x0,
+		CF_NONE = 0x0,		///< No flags.
 
 		CF_SELECT = 0x1,	///< Include Column in Selects.
 		CF_UPDATE = 0x2,	///< Include Column in Updates.
@@ -191,10 +199,15 @@ namespace exodbc
 		CF_NULLABLE = 0x8,	///< Column is null able.
 		CF_PRIMARY_KEY = 0x10,	///< Column is primary key.
 
-		CF_READ = CF_SELECT,
-		CF_WRITE = CF_UPDATE | CF_INSERT,
-		CF_READ_WRITE = CF_SELECT | CF_UPDATE | CF_INSERT
+		CF_READ = CF_SELECT,	///< CF_SELECT
+		CF_WRITE = CF_UPDATE | CF_INSERT,	///< CF_UPDATE | CF_INSERT
+		CF_READ_WRITE = CF_SELECT | CF_UPDATE | CF_INSERT	///< CF_SELECT | CF_UPDATE | CF_INSERT
 	};
+
+	/*!
+	* \typedef ColumnFlags
+	* \brief Flag holder for ColumnFlag flags.
+	*/
 	typedef unsigned int ColumnFlags;
 
 
@@ -211,10 +224,15 @@ namespace exodbc
 		AF_INSERT = 0x4,	///< Access for INSERTing.
 		AF_DELETE = 0x8,	///< Access for DELETing.
 
-		AF_READ = AF_SELECT,
-		AF_WRITE = AF_UPDATE | AF_INSERT | AF_DELETE,
-		AF_READ_WRITE = AF_READ | AF_WRITE
+		AF_READ = AF_SELECT,	///< AF_SELECT
+		AF_WRITE = AF_UPDATE | AF_INSERT | AF_DELETE,	///<AF_UPDATE | AF_INSERT | AF_DELETE
+		AF_READ_WRITE = AF_READ | AF_WRITE	///< AF_READ | AF_WRITE
 	};
+
+	/*!
+	* \typedef AccessFlags
+	* \brief Flag holder for AccessFlag flags.
+	*/
 	typedef unsigned int AccessFlags;
 
 
@@ -231,7 +249,13 @@ namespace exodbc
 		TOF_CHAR_TRIM_RIGHT = 0x8,	///< If set, string/wstring values accessed through this table are trimmed on the right before being returned as string/string
 		TOF_CHAR_TRIM_LEFT = 0x10	///< If set, string/wstring values accessed through this table are trimmed on the left before being returned as string/string
 	};
+
+	/*!
+	* \typedef TableOpenFlags
+	* \brief Flag holder for TableOpenFlag flags.
+	*/
 	typedef unsigned int TableOpenFlags;
+
 
 	// Structs
 	// -------
@@ -308,7 +332,7 @@ namespace exodbc
 	/*!
 	 * \struct	SSqlTypeInfo
 	 * \brief	Contains DataType informations read from the database uppon Open().
-	 * 			See http://msdn.microsoft.com/en-us/library/ms714632%28v=vs.85%29.aspx
+	 * \see http://msdn.microsoft.com/en-us/library/ms714632%28v=vs.85%29.aspx
 	 */
 	struct EXODBCAPI SSqlTypeInfo
 	{
@@ -353,9 +377,8 @@ namespace exodbc
 
 	/*!
 	 * \struct	SColumnInfo
-	 * \brief	Information about a column fetched using the catalog
-	 * 			function SQLColumns.
-	 * 			See: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
+	 * \brief	Information about a column fetched using the catalog function SQLColumns.
+	 * \see: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
 	 */
 	struct EXODBCAPI SColumnInfo
 	{
@@ -396,9 +419,10 @@ namespace exodbc
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
-		std::wstring		GetSqlName(QueryNameFlags = TABLE | COLUMN) const;
+		std::wstring		GetSqlName(QueryNameFlags = QNF_TABLE | QNF_COLUMN) const;
 
 	};
+
 
 	/*!
 	 * \struct	STableInfo
@@ -423,16 +447,16 @@ namespace exodbc
 		bool				HasSpecialSqlQueryName() const throw() { return m_hasSpecialSqlQueryName; };
 		void				SetSpecialSqlQueryName(const std::wstring& specialSqlQueryName) throw() { m_hasSpecialSqlQueryName = true; m_specialSqlQueryName = specialSqlQueryName; };
 
-		std::wstring		GetSqlName(int flags = CATALOG | SCHEMA | TABLE) const;
+		std::wstring		GetSqlName(int flags = QNF_CATALOG | QNF_SCHEMA | QNF_TABLE) const;
 
 	private:
 		bool				m_hasSpecialSqlQueryName;
 		std::wstring		m_specialSqlQueryName;
 	};
 
+
 	/*!
 	 * \struct	SDbCatalogInfo
-	 *
 	 * \brief	Description of the catalog of a database
 	 */
 	struct EXODBCAPI SDbCatalogInfo
@@ -442,9 +466,9 @@ namespace exodbc
 		std::set<std::wstring> m_schemas;
 	};
 
+
 	/*!
 	 * \struct	STablePrivilegesInfo
-	 *
 	 * \brief	TablePrivileges fetched using the catalog function SQLTablePrivilege
 	 */
 	struct EXODBCAPI STablePrivilegesInfo
@@ -462,6 +486,11 @@ namespace exodbc
 		bool			m_isGrantorNull;
 		bool			m_isGrantableNull;
 	};
+
+	/*!
+	* \typedef TablePrivilegesVector
+	* \brief std::vector of STablePrivilegesInfo objects.
+	*/
 	typedef std::vector<STablePrivilegesInfo> TablePrivilegesVector;
 
 
@@ -485,8 +514,13 @@ namespace exodbc
 		bool			m_isSchemaNull;			///< True if TABLE_SCHEM is Null.
 		bool			m_isPrimaryKeyNameNull;	///< True if PK_NAME is Null.
 
-		std::wstring GetSqlName(QueryNameFlags flags = TABLE | COLUMN) const;
+		std::wstring GetSqlName(QueryNameFlags flags = QNF_TABLE | QNF_COLUMN) const;
 	};
+
+	/*!
+	* \typedef TablePrimaryKeysVector
+	* \brief std::vector of STablePrimaryKeyInfo objects.
+	*/
 	typedef std::vector<STablePrimaryKeyInfo> TablePrimaryKeysVector;
 }
 
