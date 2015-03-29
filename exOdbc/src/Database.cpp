@@ -115,8 +115,8 @@ namespace exodbc
 		m_dbIsOpen = false;
 		m_dbOpenedWithConnectionString = false;
 
-		// transaction is not known until connected and set
-		m_commitMode = CM_UNKNOWN;
+		// commit is not known until connected and set
+		m_commitMode = CommitMode::UNKNOWN;
 	}
 
 
@@ -204,9 +204,9 @@ namespace exodbc
 			// \todo: Excel is unable to set a commit-mode. Maybe we would need Open flags too? See Ticket #108
 			// but excel is able to read it
 			m_commitMode = ReadCommitMode();
-			if (Dbms() != dbmsEXCEL && m_commitMode != CM_MANUAL_COMMIT)
+			if (Dbms() != dbmsEXCEL && m_commitMode != CommitMode::MANUAL)
 			{
-				SetCommitMode(CM_MANUAL_COMMIT);
+				SetCommitMode(CommitMode::MANUAL);
 			}
 
 			// Query the datatypes
@@ -560,7 +560,7 @@ namespace exodbc
 		}
 
 		// Rollback any ongoing Transaction if in Manual mode
-		if (GetCommitMode() == CM_MANUAL_COMMIT)
+		if (GetCommitMode() == CommitMode::MANUAL)
 		{
 			RollbackTrans();
 		}
@@ -926,7 +926,7 @@ namespace exodbc
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
 
-		CommitMode mode = CM_UNKNOWN;
+		CommitMode mode = CommitMode::UNKNOWN;
 
 		SQLUINTEGER modeValue;
 		SQLINTEGER cb;
@@ -934,9 +934,9 @@ namespace exodbc
 		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to read Attr SQL_ATTR_AUTOCOMMIT");
 
 		if(modeValue == SQL_AUTOCOMMIT_OFF)
-			mode = CM_MANUAL_COMMIT;
+			mode = CommitMode::MANUAL;
 		else if(modeValue == SQL_AUTOCOMMIT_ON)
-			mode = CM_AUTO_COMMIT;
+			mode = CommitMode::AUTO;
 
 		m_commitMode = mode;
 
@@ -977,14 +977,14 @@ namespace exodbc
 
 		// If Autocommit is off, we need to rollback any ongoing transaction
 		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
-		if (GetCommitMode() != CM_AUTO_COMMIT)
+		if (GetCommitMode() != CommitMode::AUTO)
 		{
 			RollbackTrans();
 		}
 
 		SQLRETURN ret;
 		std::wstring errStringMode;
-		if(mode == CM_MANUAL_COMMIT)
+		if (mode == CommitMode::MANUAL)
 		{
 			ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_OFF, NULL);
 			errStringMode = L"SQL_AUTOCOMMIT_OFF";
@@ -1009,7 +1009,7 @@ namespace exodbc
 
 		// If Autocommit is off, we need to Rollback any ongoing transaction
 		// Else at least MS SQL Server will complain that an ongoing transaction has been committed.
-		if (GetCommitMode() != CM_AUTO_COMMIT)
+		if (GetCommitMode() != CommitMode::AUTO)
 		{
 			RollbackTrans();
 		}
@@ -1022,15 +1022,15 @@ namespace exodbc
 			// Its confusing: MsSql Server 2014 seems to be unable to change the snapshot isolation if the commit mode is not set to autocommit
 			// If we do not set it to auto first, the next statement executed will complain that it was started under a different isolation mode than snapshot
 			bool wasManualCommit = false;
-			if (GetCommitMode() == CM_MANUAL_COMMIT)
+			if (GetCommitMode() == CommitMode::MANUAL)
 			{
 				wasManualCommit = true;
-				SetCommitMode(CM_AUTO_COMMIT);
+				SetCommitMode(CommitMode::AUTO);
 			}
 			ret = SQLSetConnectAttr(m_hdbc, (SQL_COPT_SS_TXN_ISOLATION), (SQLPOINTER)mode, NULL);
 			if (wasManualCommit)
 			{
-				SetCommitMode(CM_MANUAL_COMMIT);
+				SetCommitMode(CommitMode::MANUAL);
 			}
 		}
 		else
