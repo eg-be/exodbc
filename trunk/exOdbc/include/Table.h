@@ -585,7 +585,7 @@ namespace exodbc
 		void		Update(const std::wstring& where);
 
 
-		/*
+		/*!
 		* \brief	Set the value of the ColumnBuffer given by columnIndex.
 		* \throw	Exception If ColumnBuffer not found, or setting the value fails, for
 		*			example because it does not match the type of the buffer allocated.
@@ -593,23 +593,14 @@ namespace exodbc
 		void		SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value);
 
 
-		///*
-		//* \brief	Get the value of the ColumnBuffer given by columnIndex.
-		//* \details	Using this Getter, no conversion is done. 
-		//* \throw	Exception If ColumnBuffer not found, or getting the value fails.
-		//*/
-		//BufferVariant GetColumnValue(SQLSMALLINT columnIndex) const;
-		//operator SQLINTEGER() const { return 33; };
-
-		//SQLINTEGER operator = (SQLSMALLINT columnIndex) const { return 33;  };
-
-		//SQLINTEGER explicit operator[](SQLSMALLINT columnIndex) const { return 33; };
-
-		//BufferVariant operator[](SQLSMALLINT columnIndex) const { BufferVariant var((SQLINTEGER)13); return var; };
-		
-		//explicit SQLSMALLINT operator[](SQLSMALLINT columnIndex) const { return 14; };
-
-		BufferVariant GetColumnValue(SQLSMALLINT columnIndex) const;
+		/*!
+		* \brief	Get the value of the ColumnBuffer given by columnIndex as BufferVariant.
+		* \throw	Exception If ColumnBuffer not found, or the value held by the ColumnBuffer
+		*			cannot be returned as BufferVariant.
+		* \see		ColumnBuffer::GetValue()
+		* \see		BufferVariant
+		*/
+		BufferVariant GetVariantValue(SQLSMALLINT columnIndex) const;
 
 
 		/*!
