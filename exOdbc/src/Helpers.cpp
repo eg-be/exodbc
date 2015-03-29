@@ -567,7 +567,7 @@ namespace exodbc
 		exASSERT(hStmt != SQL_NULL_HSTMT);
 
 		SQLHDESC hDesc = SQL_NULL_HDESC;
-		SQLRETURN ret = SQLGetStmtAttr(hStmt, type, &hDesc, 0, NULL);
+		SQLRETURN ret = SQLGetStmtAttr(hStmt, (SQLINTEGER) type, &hDesc, 0, NULL);
 		THROW_IFN_SUCCEEDED(SQLGetStmtAttr, ret, SQL_HANDLE_STMT, hStmt);
 
 		return hDesc;
