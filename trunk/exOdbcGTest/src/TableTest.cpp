@@ -510,7 +510,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, AccessFlags)
+	TEST_P(TableTest, MissingAccessFlagsThrowOnWrite)
 	{
 		// Open a read-only table
 		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
