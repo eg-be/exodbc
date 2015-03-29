@@ -88,11 +88,11 @@ namespace exodbc
 	* \brief	Defines whether auto commit is on or off.
 	* 			see: http://msdn.microsoft.com/en-us/library/ms713600%28v=vs.85%29.aspx
 	*/
-	enum CommitMode
+	enum class CommitMode
 	{
-		CM_UNKNOWN = 50000,			///< Unknown Commit mode
-		CM_AUTO_COMMIT = SQL_AUTOCOMMIT,		///< Autocommit on
-		CM_MANUAL_COMMIT = SQL_AUTOCOMMIT_OFF	///< Autocommit off
+		UNKNOWN = 50000,			///< Unknown Commit mode
+		AUTO = SQL_AUTOCOMMIT,		///< Autocommit on
+		MANUAL = SQL_AUTOCOMMIT_OFF	///< Autocommit off
 	};
 
 

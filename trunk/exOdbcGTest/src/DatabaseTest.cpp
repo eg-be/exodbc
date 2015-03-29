@@ -167,7 +167,7 @@ namespace exodbc
 	TEST_P(DatabaseTest, ReadCommitMode)
 	{
 		// We default to manual commit
-		EXPECT_EQ(CM_MANUAL_COMMIT, m_db.ReadCommitMode());
+		EXPECT_EQ(CommitMode::MANUAL, m_db.ReadCommitMode());
 	}
 
 	TEST_P(DatabaseTest, SetCommitMode)
@@ -176,20 +176,20 @@ namespace exodbc
 		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		// We default to manual commit
-		EXPECT_EQ(CM_MANUAL_COMMIT, db.GetCommitMode());
-		EXPECT_EQ(CM_MANUAL_COMMIT, db.ReadCommitMode());
+		EXPECT_EQ(CommitMode::MANUAL, db.GetCommitMode());
+		EXPECT_EQ(CommitMode::MANUAL, db.ReadCommitMode());
 
 		// Switch to auto
-		EXPECT_NO_THROW(db.SetCommitMode(CM_AUTO_COMMIT));
+		EXPECT_NO_THROW(db.SetCommitMode(CommitMode::AUTO));
 		// internal member should already be updated
-		EXPECT_EQ(CM_AUTO_COMMIT, db.GetCommitMode());
-		EXPECT_EQ(CM_AUTO_COMMIT, db.ReadCommitMode());
+		EXPECT_EQ(CommitMode::AUTO, db.GetCommitMode());
+		EXPECT_EQ(CommitMode::AUTO, db.ReadCommitMode());
 
 		// and back to manual
-		EXPECT_NO_THROW(db.SetCommitMode(CM_MANUAL_COMMIT));
+		EXPECT_NO_THROW(db.SetCommitMode(CommitMode::MANUAL));
 		// internal member should already be updated
-		EXPECT_EQ(CM_MANUAL_COMMIT, db.GetCommitMode());
-		EXPECT_EQ(CM_MANUAL_COMMIT, db.ReadCommitMode());
+		EXPECT_EQ(CommitMode::MANUAL, db.GetCommitMode());
+		EXPECT_EQ(CommitMode::MANUAL, db.ReadCommitMode());
 	}
 
 
