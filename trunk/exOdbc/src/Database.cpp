@@ -109,7 +109,7 @@ namespace exodbc
 		m_envOdbcVersion = OdbcVersion::UNKNOWN;
 
 		// Dbms unknwon
-		m_dbmsType      = dbmsUNIDENTIFIED;
+		m_dbmsType = DatabaseProduct::UNKNOWN;
 
 		// Mark database as not Open as of yet
 		m_dbIsOpen = false;
@@ -204,7 +204,7 @@ namespace exodbc
 			// \todo: Excel is unable to set a commit-mode. Maybe we would need Open flags too? See Ticket #108
 			// but excel is able to read it
 			m_commitMode = ReadCommitMode();
-			if (Dbms() != dbmsEXCEL && m_commitMode != CommitMode::MANUAL)
+			if (Dbms() != DatabaseProduct::EXCEL && m_commitMode != CommitMode::MANUAL)
 			{
 				SetCommitMode(CommitMode::MANUAL);
 			}
@@ -1101,27 +1101,27 @@ namespace exodbc
 		// Should only need to do this once for each new database connection
 		// so return the value we already determined it to be to save time
 		// and lots of string comparisons
-		if (m_dbmsType != dbmsUNIDENTIFIED)
+		if (m_dbmsType != DatabaseProduct::UNKNOWN)
 			return(m_dbmsType);
 
 		if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
 		{
-			m_dbmsType = dbmsMS_SQL_SERVER;
+			m_dbmsType = DatabaseProduct::MS_SQL_SERVER;
 		}
 		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"MySQL"))
 		{
-			m_dbmsType = dbmsMY_SQL;
+			m_dbmsType = DatabaseProduct::MY_SQL;
 		}
 		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"DB2"))
 		{
-			m_dbmsType = dbmsDB2;
+			m_dbmsType = DatabaseProduct::DB2;
 		}
 		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"EXCEL"))
 		{
-			m_dbmsType = dbmsEXCEL;
+			m_dbmsType = DatabaseProduct::EXCEL;
 		}
 
-		if (m_dbmsType == dbmsUNIDENTIFIED)
+		if (m_dbmsType == DatabaseProduct::UNKNOWN)
 		{
 			LOG_WARNING((boost::wformat(L"Connect to unknown database: %s") % m_dbInf.m_dbmsName).str());
 		}

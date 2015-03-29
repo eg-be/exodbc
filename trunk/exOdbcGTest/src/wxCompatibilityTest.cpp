@@ -117,7 +117,7 @@ namespace exodbc
 		ASSERT_NO_THROW(table.Open(m_db, TOF_NONE));
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1");
-		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			// MS will complain about data loss
 			LogLevelError llErr;
@@ -132,7 +132,7 @@ namespace exodbc
 		EXPECT_EQ( 1983, table.m_date.year);
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1");
-		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			// MS will complain about data loss
 			LogLevelError llErr;
@@ -158,10 +158,10 @@ namespace exodbc
 		SQLUINTEGER fraction = 0;
 		switch(m_db.Dbms())
 		{
-		case dbmsDB2:
+		case DatabaseProduct::DB2:
 			fraction = 123456000;
 			break;
-		case dbmsMS_SQL_SERVER:
+		case DatabaseProduct::MS_SQL_SERVER:
 			fraction = 123000000;
 			break;
 		default:
@@ -333,7 +333,7 @@ namespace exodbc
 
 		// DB2 sends a ',', mysql/ms sends a '.' as delimeter
 		RecordProperty("Ticket", 35);
-		if(m_db.Dbms() == dbmsDB2)
+		if (m_db.Dbms() == DatabaseProduct::DB2)
 		{
 			table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4");
 			EXPECT_TRUE(table.SelectNext());
@@ -352,7 +352,7 @@ namespace exodbc
 			table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4");
 			EXPECT_TRUE(table.SelectNext());
 			// ms does not send first 0 ?
-			if(m_db.Dbms() == dbmsMS_SQL_SERVER)
+			if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 				EXPECT_EQ( std::wstring(L".0000000000"), std::wstring(table.m_wcdecimal_18_10));	
 			else
 				EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(table.m_wcdecimal_18_10));	
@@ -510,7 +510,7 @@ namespace exodbc
 		// IBM DB2 wants to escape ' using '', mysql wants \'
 		// MYSQL needs \\ for \ 
 		RecordProperty("Ticket", 36);
-		if (m_db.Dbms() == dbmsDB2 || m_db.Dbms() == dbmsMS_SQL_SERVER)
+		if (m_db.Dbms() == DatabaseProduct::DB2 || m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			sqlstmt = (boost::wformat(L"INSERT INTO exodbc.chartypes_tmp (idchartypes, tvarchar, tchar) VALUES (1, '%s', '%s')") % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % L" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
 		}
@@ -576,7 +576,7 @@ namespace exodbc
 		EXPECT_TRUE( table.SelectNext() );
 		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
-		if (m_db.Dbms() == dbmsDB2)
+		if (m_db.Dbms() == DatabaseProduct::DB2)
 			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 		else
 			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
@@ -589,7 +589,7 @@ namespace exodbc
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
 
-		if (m_db.Dbms() == dbmsDB2)
+		if (m_db.Dbms() == DatabaseProduct::DB2)
 			EXPECT_EQ( std::wstring(L"12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
 		else
 			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
@@ -603,11 +603,11 @@ namespace exodbc
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( std::wstring(L"0"), std::wstring(table.m_wcdecimal_18_0));
 
-		if (m_db.Dbms() == dbmsDB2)
+		if (m_db.Dbms() == DatabaseProduct::DB2)
 			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(table.m_wcdecimal_18_10));	
-		else if (m_db.Dbms() == dbmsMY_SQL)
+		else if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 			EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(table.m_wcdecimal_18_10));	
-		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		else if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 			EXPECT_EQ( std::wstring(L".0000000000"), std::wstring(table.m_wcdecimal_18_10));	
 		else
 			EXPECT_TRUE(false);

@@ -112,7 +112,7 @@ namespace exodbc
 
 		// This is not open yet, we shall fail to free it
 		{
-			if (m_db.Dbms() == dbmsMY_SQL)
+			if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 			{
 				LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
 			}
@@ -132,7 +132,7 @@ namespace exodbc
 		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen));
 
 		// Closing it a second time must fail
-		if (m_db.Dbms() == dbmsMY_SQL)
+		if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 		{
 			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
 		}
