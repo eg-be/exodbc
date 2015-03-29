@@ -954,20 +954,20 @@ namespace exodbc
 		switch (modeValue)
 		{
 		case SQL_TXN_READ_UNCOMMITTED:
-			return TI_READ_UNCOMMITTED;
+			return TransactionIsolationMode::READ_UNCOMMITTED;
 		case SQL_TXN_READ_COMMITTED:
-			return TI_READ_COMMITTED;
+			return TransactionIsolationMode::READ_COMMITTED;
 		case SQL_TXN_REPEATABLE_READ:
-			return TI_REPEATABLE_READ;
+			return TransactionIsolationMode::REPEATABLE_READ;
 		case SQL_TXN_SERIALIZABLE:
-			return TI_SERIALIZABLE;
+			return TransactionIsolationMode::SERIALIZABLE;
 #if HAVE_MSODBCSQL_H
 		case SQL_TXN_SS_SNAPSHOT:
-			return TI_SNAPSHOT;
+			return TransactionIsolationMode::SNAPSHOT;
 #endif
 		}
 
-		return TI_UNKNOWN;
+		return TransactionIsolationMode::UNKNOWN;
 	}
 
 	void Database::SetCommitMode(CommitMode mode)
@@ -1017,7 +1017,7 @@ namespace exodbc
 		SQLRETURN ret;
 		std::wstring errStringMode;
 #if HAVE_MSODBCSQL_H
-		if (mode == TI_SNAPSHOT)
+		if (mode == TransactionIsolationMode::SNAPSHOT)
 		{
 			// Its confusing: MsSql Server 2014 seems to be unable to change the snapshot isolation if the commit mode is not set to autocommit
 			// If we do not set it to auto first, the next statement executed will complain that it was started under a different isolation mode than snapshot
@@ -1038,7 +1038,7 @@ namespace exodbc
 		{
 			ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, NULL);
 		}
-		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, (boost::wformat(L"Cannot set SQL_ATTR_TXN_ISOLATION to %d") % mode).str());
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, (boost::wformat(L"Cannot set SQL_ATTR_TXN_ISOLATION to %d") % (int) mode).str());
 
 	}
 
