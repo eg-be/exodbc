@@ -108,7 +108,7 @@ namespace exodbc
 		// Environment ODBC-Version unknown
 		m_envOdbcVersion = OdbcVersion::UNKNOWN;
 
-		// Dbms unknwon
+		// GetDbms unknwon
 		m_dbmsType = DatabaseProduct::UNKNOWN;
 
 		// Mark database as not Open as of yet
@@ -194,8 +194,8 @@ namespace exodbc
 				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int) m_envOdbcVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer % (int) connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName % (int) connectionVersion).str());
 			}
 
-			// Try to detect the type - this will update our internal type on the first call
-			Dbms();
+			// Try to detect the type - this will update our internal type
+			DetectDbms();
 
 			// Set Connection Options
 			SetConnectionAttributes();
@@ -204,7 +204,7 @@ namespace exodbc
 			// \todo: Excel is unable to set a commit-mode. Maybe we would need Open flags too? See Ticket #108
 			// but excel is able to read it
 			m_commitMode = ReadCommitMode();
-			if (Dbms() != DatabaseProduct::EXCEL && m_commitMode != CommitMode::MANUAL)
+			if (GetDbms() != DatabaseProduct::EXCEL && m_commitMode != CommitMode::MANUAL)
 			{
 				SetCommitMode(CommitMode::MANUAL);
 			}
@@ -1096,14 +1096,8 @@ namespace exodbc
 	}
 
 
-	DatabaseProduct Database::Dbms()
+	void Database::DetectDbms()
 	{
-		// Should only need to do this once for each new database connection
-		// so return the value we already determined it to be to save time
-		// and lots of string comparisons
-		if (m_dbmsType != DatabaseProduct::UNKNOWN)
-			return(m_dbmsType);
-
 		if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
 		{
 			m_dbmsType = DatabaseProduct::MS_SQL_SERVER;
@@ -1123,10 +1117,8 @@ namespace exodbc
 
 		if (m_dbmsType == DatabaseProduct::UNKNOWN)
 		{
-			LOG_WARNING((boost::wformat(L"Connect to unknown database: %s") % m_dbInf.m_dbmsName).str());
+			LOG_WARNING((boost::wformat(L"Unknown database: %s") % m_dbInf.m_dbmsName).str());
 		}
-
-		return m_dbmsType;
 	}
 
 
@@ -1232,11 +1224,11 @@ namespace exodbc
 	//	std::wstring UserID = ConvertUserIDImpl(userID);
 
 	//	if (!UserID.empty() &&
-	//		Dbms() != dbmsMY_SQL &&
-	//		Dbms() != dbmsACCESS &&
-	//		Dbms() != dbmsFIREBIRD &&
-	//		Dbms() != dbmsINTERBASE &&
-	//		Dbms() != dbmsMS_SQL_SERVER)
+	//		GetDbms() != dbmsMY_SQL &&
+	//		GetDbms() != dbmsACCESS &&
+	//		GetDbms() != dbmsFIREBIRD &&
+	//		GetDbms() != dbmsINTERBASE &&
+	//		GetDbms() != dbmsMS_SQL_SERVER)
 	//	{
 	//		retcode = SQLColumns(m_hstmt,
 	//			NULL, 0,                                // All qualifiers
@@ -1321,10 +1313,10 @@ namespace exodbc
 	//{
 	//	std::wstring TableName;
 
-	//	if (Dbms() == dbmsACCESS)
+	//	if (GetDbms() == dbmsACCESS)
 	//		TableName = L"\"";
 	//	TableName += tableName;
-	//	if (Dbms() == dbmsACCESS)
+	//	if (GetDbms() == dbmsACCESS)
 	//		TableName += L"\"";
 
 	//	return TableName;
@@ -1335,10 +1327,10 @@ namespace exodbc
 	//{
 	//	std::wstring ColName;
 
-	//	if (Dbms() == dbmsACCESS)
+	//	if (GetDbms() == dbmsACCESS)
 	//		ColName = L"\"";
 	//	ColName += colName;
-	//	if (Dbms() == dbmsACCESS)
+	//	if (GetDbms() == dbmsACCESS)
 	//		ColName += L"\"";
 
 	//	return ColName;
@@ -1451,7 +1443,7 @@ namespace exodbc
 	//	}
 
 	//	// Set the modify or alter syntax depending on the type of database connected to
-	//	switch (Dbms())
+	//	switch (GetDbms())
 	//	{
 	//	case dbmsORACLE :
 	//		alterSlashModify = L"MODIFY";
@@ -1474,7 +1466,7 @@ namespace exodbc
 	//	}
 
 	//	// create the SQL statement
-	//	if ( Dbms() == dbmsMY_SQL )
+	//	if ( GetDbms() == dbmsMY_SQL )
 	//	{
 	//		sqlStmt = (boost::wformat(L"ALTER TABLE %s %s %s %s") % tableName % alterSlashModify % columnName % dataTypeName).str();
 	//	}
@@ -1485,7 +1477,7 @@ namespace exodbc
 
 	//	// For varchars only, append the size of the column
 	//	if (dataType == DB_DATA_TYPE_VARCHAR &&
-	//		(Dbms() != dbmsMY_SQL || dataTypeName != L"text"))
+	//		(GetDbms() != dbmsMY_SQL || dataTypeName != L"text"))
 	//	{
 	//		std::wstring s;
 	//		s = (boost::wformat(L"(%lu)") % columnLength).str();
@@ -1507,7 +1499,7 @@ namespace exodbc
 	//std::wstring Database::EscapeSqlChars(const std::wstring& valueOrig)
 	//{
 	//	std::wstring value(valueOrig);
-	//	switch (Dbms())
+	//	switch (GetDbms())
 	//	{
 	//	case dbmsACCESS:
 	//		// Access doesn't seem to care about backslashes, so only escape single quotes.
@@ -1615,14 +1607,14 @@ namespace exodbc
 //		UserID.empty();
 
 //	// dBase does not use user names, and some drivers fail if you try to pass one
-//	if ( Dbms() == dbmsDBASE
-//		|| Dbms() == dbmsXBASE_SEQUITER )
+//	if ( GetDbms() == dbmsDBASE
+//		|| GetDbms() == dbmsXBASE_SEQUITER )
 //		UserID.empty();
 
 //	// Some databases require user names to be specified in uppercase,
 //	// so force the name to uppercase
-//	if ((Dbms() == dbmsORACLE) ||
-//		(Dbms() == dbmsMAXDB))
+//	if ((GetDbms() == dbmsORACLE) ||
+//		(GetDbms() == dbmsMAXDB))
 //		boost::algorithm::to_upper(UserID);
 
 //	return UserID;
@@ -2174,7 +2166,7 @@ namespace exodbc
 //			if (wcscmp(sqlState, L"S0002"))  // "Base table not found"
 //			{
 //				// Check for product specific error codes
-//				if (!((Dbms() == dbmsSYBASE_ASA    && !wcscmp(sqlState, L"42000"))))  // 5.x (and lower?)
+//				if (!((GetDbms() == dbmsSYBASE_ASA    && !wcscmp(sqlState, L"42000"))))  // 5.x (and lower?)
 //				{
 //					DispNextError();
 //					DispAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, m_hstmt);
@@ -2516,9 +2508,9 @@ namespace exodbc
 //				TableName = tableName[tbl];
 //				// Oracle and Interbase table names are uppercase only, so force
 //				// the name to uppercase just in case programmer forgot to do this
-//				if ((Dbms() == dbmsORACLE) ||
-//					(Dbms() == dbmsFIREBIRD) ||
-//					(Dbms() == dbmsINTERBASE))
+//				if ((GetDbms() == dbmsORACLE) ||
+//					(GetDbms() == dbmsFIREBIRD) ||
+//					(GetDbms() == dbmsINTERBASE))
 //					boost::algorithm::to_upper(TableName);
 //
 //				SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2526,9 +2518,9 @@ namespace exodbc
 //				// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
 //				// use the call below that leaves out the user name
 //				if (!UserID.empty() &&
-//					Dbms() != dbmsMY_SQL &&
-//					Dbms() != dbmsACCESS &&
-//					Dbms() != dbmsMS_SQL_SERVER)
+//					GetDbms() != dbmsMY_SQL &&
+//					GetDbms() != dbmsACCESS &&
+//					GetDbms() != dbmsMS_SQL_SERVER)
 //				{
 //					retcode = SQLColumns(m_hstmt,
 //						NULL, 0,                                // All qualifiers
@@ -2671,9 +2663,9 @@ namespace exodbc
 //			TableName = tableName;
 //			// Oracle and Interbase table names are uppercase only, so force
 //			// the name to uppercase just in case programmer forgot to do this
-//			if ((Dbms() == dbmsORACLE) ||
-//				(Dbms() == dbmsFIREBIRD) ||
-//				(Dbms() == dbmsINTERBASE))
+//			if ((GetDbms() == dbmsORACLE) ||
+//				(GetDbms() == dbmsFIREBIRD) ||
+//				(GetDbms() == dbmsINTERBASE))
 //				boost::algorithm::to_upper(TableName);
 //
 //			SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2681,9 +2673,9 @@ namespace exodbc
 //			// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
 //			// use the call below that leaves out the user name
 //			if (!UserID.empty() &&
-//				Dbms() != dbmsMY_SQL &&
-//				Dbms() != dbmsACCESS &&
-//				Dbms() != dbmsMS_SQL_SERVER)
+//				GetDbms() != dbmsMY_SQL &&
+//				GetDbms() != dbmsACCESS &&
+//				GetDbms() != dbmsMS_SQL_SERVER)
 //			{
 //				retcode = SQLColumns(m_hstmt,
 //					NULL, 0,                                // All qualifiers
@@ -2739,7 +2731,7 @@ namespace exodbc
 //						colInf[colNo].m_fkTableName[0] = 0;  // Foreign key table name
 //
 //						// BJO 20000428 : Virtuoso returns type names with upper cases!
-//						if (Dbms() == dbmsVIRTUOSO)
+//						if (GetDbms() == dbmsVIRTUOSO)
 //						{
 //							std::wstring s = colInf[colNo].m_typeName;
 //							boost::algorithm::to_lower(s);
@@ -2927,9 +2919,9 @@ namespace exodbc
 //			TableName = tableName;
 //			// Oracle and Interbase table names are uppercase only, so force
 //			// the name to uppercase just in case programmer forgot to do this
-//			if ((Dbms() == dbmsORACLE) ||
-//				(Dbms() == dbmsFIREBIRD) ||
-//				(Dbms() == dbmsINTERBASE))
+//			if ((GetDbms() == dbmsORACLE) ||
+//				(GetDbms() == dbmsFIREBIRD) ||
+//				(GetDbms() == dbmsINTERBASE))
 //				TableName = TableName.Upper();
 //
 //			SQLFreeStmt(m_hstmt, SQL_CLOSE);
@@ -2937,9 +2929,9 @@ namespace exodbc
 //			// MySQL, SQLServer, and Access cannot accept a user name when looking up column names, so we
 //			// use the call below that leaves out the user name
 //			if (!UserID.empty() &&
-//				Dbms() != dbmsMY_SQL &&
-//				Dbms() != dbmsACCESS &&
-//				Dbms() != dbmsMS_SQL_SERVER)
+//				GetDbms() != dbmsMY_SQL &&
+//				GetDbms() != dbmsACCESS &&
+//				GetDbms() != dbmsMS_SQL_SERVER)
 //			{
 //				retcode = SQLColumns(m_hstmt,
 //					NULL, 0,                              // All qualifiers

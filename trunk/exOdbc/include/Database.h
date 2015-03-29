@@ -561,13 +561,19 @@ namespace exodbc
 		* \brief	Try to match the Database Name to a known DatabaseProduct value.
 		* \return	DatabaseProduct value or dbmsUNIDENTIFIED.
 		*/
-		DatabaseProduct       Dbms();
+		DatabaseProduct       GetDbms() const { return m_dbmsType; };
 
 
 		// Private stuff
 		// -------------
 	private:
 		
+		/*!
+		* \brief	Set the internal member m_dbmsType by examining m_dbInf.m_dbmsName
+		*/
+		void		DetectDbms();
+
+
 		/*!
 		* \brief	Queries SQLGetTypeInfo to populate a SSqlTypeInfo struct.
 		* \return	Types Filled with data types supported by the db
