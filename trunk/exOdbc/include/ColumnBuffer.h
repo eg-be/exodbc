@@ -36,7 +36,23 @@ namespace exodbc
 	// Typedefs
 	// --------
 
-	// The Variant we use to store pointers to the actual buffer
+	/*!
+	* \typedef BufferPtrVariant
+	* The Variant we use to store pointers to the actual buffer
+	* The following types can be stored:
+	*  - SQLSMALLINT*
+	*  - SQLINTEGER*
+	*  - SQLBIGINT*
+	*  - SQLCHAR*
+	*  - SQLWCHAR*
+	*  - SQLDOUBLE*
+	*  - SQL_DATE_STRUCT*
+	*  - SQL_TIME_STRUCT*
+	*  - SQL_TIME2_STRUCT* / SQL_TIME_STRUCT*
+	*  - SQL_TIMESTAMP_STRUCT*
+	*  - SQL_NUMERIC_STRUCT*
+	* 
+	*/
 	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, 
 		SQLCHAR*, SQLWCHAR*, 
 		SQLDOUBLE*,
@@ -47,7 +63,22 @@ namespace exodbc
 #endif
 	> BufferPtrVariant;
 
-	// When setting values, allow setting something that is not a pointer
+	/*!
+	* \typedef BufferVariant
+	* A helper for setting / getting values. If you like it, work with a variant
+	* The following types can be stored:
+	*  - SQLSMALLINT
+	*  - SQLINTEGER
+	*  - SQLBIGINT
+	*  - std::string
+	*  - std::wstring
+	*  - SQLDOUBLE
+	*  - SQL_DATE_STRUCT
+	*  - SQL_TIME_STRUCT
+	*  - SQL_TIME2_STRUCT / SQL_TIME_STRUCT
+	*  - SQL_TIMESTAMP_STRUCT
+	*  - SQL_NUMERIC_STRUCT
+	*/
 	typedef boost::variant<SQLSMALLINT, SQLINTEGER, SQLBIGINT,
 		std::string, std::wstring,
 		SQLDOUBLE,
@@ -369,6 +400,14 @@ namespace exodbc
 		* \throw	Exception If not a binary buffer, or on any other error.
 		*/
 		void SetBinaryValue(SQLCHAR* pBuff, SQLINTEGER bufferSize);
+
+
+		/*!
+		* \brief	Get the value as BufferVariant.
+		* \details	Return a BufferVariant with the value of this ColumnBuffer.
+		* \throw	Exception If internally held BufferPtrVariant cannot be converted to a BufferVariant.
+		*/
+		BufferVariant GetValue() const;
 
 
 		// Operators

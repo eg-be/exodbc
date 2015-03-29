@@ -705,6 +705,89 @@ namespace exodbc
 	}
 
 
+	BufferVariant ColumnBuffer::GetValue() const
+	{
+		BufferVariant var;
+
+		// Note that the BufferVariant set here does not allow to get binary values
+		try
+		{
+			if (SQL_C_SSHORT == m_bufferType)
+			{
+				SQLSMALLINT* pColVal = GetSmallIntPtr();
+				var = *pColVal;
+			}
+			else if (SQL_C_SLONG == m_bufferType)
+			{
+				SQLINTEGER* pColVal = GetIntPtr();
+				var = *pColVal;
+			}
+			else if (SQL_C_SBIGINT == m_bufferType)
+			{
+				SQLBIGINT* pColVal = GetBigIntPtr();
+				var = *pColVal;
+			}
+			else if (SQL_C_DOUBLE == m_bufferType)
+			{
+				SQLDOUBLE* pColVal = GetDoublePtr();
+				var = *pColVal;
+			}
+			else if (SQL_C_CHAR == m_bufferType)
+			{
+				SQLCHAR* pColVal = GetCharPtr();
+				std::string s((const char*)pColVal);
+				var = s;
+			}
+			else if (SQL_C_WCHAR == m_bufferType)
+			{
+				SQLWCHAR* pColVal = GetWCharPtr();
+				std::wstring w(pColVal);
+				var = w;
+			}
+			else if (SQL_C_TYPE_DATE == m_bufferType)
+			{
+				SQL_DATE_STRUCT* pColVal = GetDatePtr();
+				var = *pColVal;
+			}
+			else if (SQL_C_TYPE_TIME == m_bufferType)
+			{
+				SQL_TIME_STRUCT* pColVal = GetTimePtr();
+				var = *pColVal;
+			}
+			else if (SQL_C_TYPE_TIMESTAMP == m_bufferType)
+			{
+				SQL_TIMESTAMP_STRUCT* pColVal = GetTimestampPtr();
+				var = *pColVal;
+			}
+			else if (SQL_C_NUMERIC == m_bufferType)
+			{
+				SQL_NUMERIC_STRUCT* pColVal = GetNumericPtr();
+				var = *pColVal;
+			}
+#if HAVE_MSODBCSQL_H
+			else if (SQL_C_SS_TIME2 == m_bufferType)
+			{
+				SQL_SS_TIME2_STRUCT* pColVal = GetTime2Ptr();
+				var = *pColVal;
+			}
+#endif
+			else
+			{
+				NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, m_bufferType);
+				SET_EXCEPTION_SOURCE(nse);
+				throw nse;
+			}
+		}
+		catch (boost::bad_get ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
+		return var;
+	}
+
+
 	void ColumnBuffer::operator=(const BufferVariant& var)
 	{
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
