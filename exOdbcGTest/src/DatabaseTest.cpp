@@ -101,7 +101,7 @@ namespace exodbc
 		EXPECT_EQ(TransactionIsolationMode::SERIALIZABLE, tiMode);
 		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
-		if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 #if HAVE_MSODBCSQL_H
 			tiMode = TransactionIsolationMode::SNAPSHOT;
@@ -230,15 +230,15 @@ namespace exodbc
 		m_odbcInfo = GetParam();
 		if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"DB2"))
 		{
-			EXPECT_TRUE(m_db.Dbms() == DatabaseProduct::DB2);
+			EXPECT_TRUE(m_db.GetDbms() == DatabaseProduct::DB2);
 		}
 		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"MySql"))
 		{
-			EXPECT_TRUE(m_db.Dbms() == DatabaseProduct::MY_SQL);
+			EXPECT_TRUE(m_db.GetDbms() == DatabaseProduct::MY_SQL);
 		}
 		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"SqlServer"))
 		{
-			EXPECT_TRUE(m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER);
+			EXPECT_TRUE(m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER);
 		}
 		else
 		{
@@ -276,7 +276,7 @@ namespace exodbc
 			// I guess I got it now: If we change the Transaction-mode on the Connection-Handle, we need to get a new statement-handle afterwards or so:
 			// Or: If we set the transaction-mode in the database itself at the very beginning, before the statement-handle of the database is opened
 			// thing work fine, without the need to change the transaction-mode
-			if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
+			if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 			{
 #if HAVE_MSODBCSQL_H
 				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TransactionIsolationMode::SNAPSHOT));
@@ -340,7 +340,7 @@ namespace exodbc
 	{
 		std::vector<std::wstring> cats;
 		EXPECT_NO_THROW(cats = m_db.ReadCatalogs());
-		switch(m_db.Dbms())
+		switch(m_db.GetDbms())
 		{
 		case DatabaseProduct::DB2:
 			// DB2 does not support catalogs. it reports zero catalogs
@@ -359,7 +359,7 @@ namespace exodbc
 	{
 		std::vector<std::wstring> schemas;
 		EXPECT_NO_THROW(schemas = m_db.ReadSchemas());
-		switch(m_db.Dbms())
+		switch(m_db.GetDbms())
 		{
 		case DatabaseProduct::DB2:
 			// DB2 reports our test-db as a schema
@@ -399,7 +399,7 @@ namespace exodbc
 		std::wstring schemaName;
 		std::wstring catalogName;
 		std::wstring typeName;
-		switch(m_db.Dbms())
+		switch(m_db.GetDbms())
 		{
 		case DatabaseProduct::MY_SQL:
 			// We know that mySql uses catalogs, not schemas:
@@ -496,7 +496,7 @@ namespace exodbc
 		std::wstring schemaName;
 		std::wstring catalogName;
 		std::wstring typeName;
-		switch(m_db.Dbms())
+		switch(m_db.GetDbms())
 		{
 		case DatabaseProduct::MY_SQL:
 			// We know that mySql uses catalogs, not schemas:
@@ -538,7 +538,7 @@ namespace exodbc
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
-		switch(m_db.Dbms())
+		switch(m_db.GetDbms())
 		{
 		case DatabaseProduct::MY_SQL:
 			// We know that mySql uses catalogs, not schemas:
@@ -607,11 +607,11 @@ namespace exodbc
 		SDbCatalogInfo cat;
 		EXPECT_NO_THROW( cat = m_db.ReadCompleteCatalog());
 		// TODO: This is confusing. DB2 reports schemas, what is correct, but mysql reports catalogs?? wtf?
-		if (m_db.Dbms() == DatabaseProduct::DB2)
+		if (m_db.GetDbms() == DatabaseProduct::DB2)
 		{
 			EXPECT_TRUE(cat.m_schemas.find(L"EXODBC") != cat.m_schemas.end());
 		}
-		else if (m_db.Dbms() == DatabaseProduct::MY_SQL)
+		else if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
 		{
 			EXPECT_TRUE(cat.m_catalogs.find(L"exodbc") != cat.m_catalogs.end());
 		}
@@ -626,7 +626,7 @@ namespace exodbc
 		std::wstring catalogName = L"";
 		std::wstring typeName = L"";
 		int nrCols = 4;
-		switch(m_db.Dbms())
+		switch(m_db.GetDbms())
 		{
 		case DatabaseProduct::DB2:
 			// DB2 has schemas

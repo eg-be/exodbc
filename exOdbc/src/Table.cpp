@@ -959,6 +959,12 @@ namespace exodbc
 		// If we are asked to create our columns automatically, read the column information and create the buffers
 		if (!m_manualColumns)
 		{
+			// If this is an excel-db, we must search for a table named 'foo$', but query using '[foo$]'. See Ticket #111.
+			// so set the special query-name on the now available m_tableInfo - except it is already set
+			if (db.GetDbms() == DatabaseProduct::EXCEL && !m_tableInfo.HasSpecialSqlQueryName())
+			{
+				m_tableInfo.SetSpecialSqlQueryName(L"[" + m_tableInfo.m_tableName + L"]");
+			}
 			CreateAutoColumnBuffers(db, m_tableInfo, (openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS);
 		}
 
@@ -1736,7 +1742,7 @@ namespace exodbc
 	//    {
 	//        tStr = m_colDefs[i].m_colName;
 	//        // If joining tables, the base table column names must be qualified to avoid ambiguity
-	//        if ((appendFromClause || m_pDb->Dbms() == dbmsACCESS) && tStr.find(L'.') == std::wstring::npos)
+	//        if ((appendFromClause || m_pDb->GetDbms() == dbmsACCESS) && tStr.find(L'.') == std::wstring::npos)
 	//        {
 	//            pSqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
 	//            pSqlStmt += L".";
@@ -1751,7 +1757,7 @@ namespace exodbc
 	//    if (!distinct && CanUpdateByROWID())
 	//    {
 	//        // If joining tables, the base table column names must be qualified to avoid ambiguity
-	//        if (appendFromClause || m_pDb->Dbms() == dbmsACCESS)
+	//        if (appendFromClause || m_pDb->GetDbms() == dbmsACCESS)
 	//        {
 	//            pSqlStmt += L",";
 	//            pSqlStmt += m_pDb->SQLTableName(m_queryTableName.c_str());
@@ -1771,7 +1777,7 @@ namespace exodbc
 	//    // Each table in the from clause must specify HOLDLOCK or
 	//    // NOHOLDLOCK (the default).  Note: The "FOR UPDATE" clause
 	//    // is parsed but ignored in SYBASE Transact-SQL.
-	//    if (m_selectForUpdate && (m_pDb->Dbms() == dbmsSYBASE_ASA || m_pDb->Dbms() == dbmsSYBASE_ASE))
+	//    if (m_selectForUpdate && (m_pDb->GetDbms() == dbmsSYBASE_ASA || m_pDb->GetDbms() == dbmsSYBASE_ASE))
 	//        pSqlStmt += L" HOLDLOCK";
 	//
 	//    if (appendFromClause)
@@ -2125,7 +2131,7 @@ namespace exodbc
 	//        }
 	//        // For varchars, append the size of the string
 	//        if (m_colDefs[i].m_dbDataType == DB_DATA_TYPE_VARCHAR &&
-	//            (m_pDb->Dbms() != dbmsMY_SQL || m_pDb->GetTypeInfVarchar().TypeName != L"text"))// ||
+	//            (m_pDb->GetDbms() != dbmsMY_SQL || m_pDb->GetTypeInfVarchar().TypeName != L"text"))// ||
 	////            colDefs[i].DbDataType == DB_DATA_TYPE_BLOB)
 	//        {
 	//            std::wstring s;
@@ -2133,12 +2139,12 @@ namespace exodbc
 	//            sqlStmt += s;
 	//        }
 	//
-	//        if (m_pDb->Dbms() == dbmsDB2 ||
-	//            m_pDb->Dbms() == dbmsMY_SQL ||
-	//            m_pDb->Dbms() == dbmsSYBASE_ASE  ||
-	//            m_pDb->Dbms() == dbmsINTERBASE  ||
-	//            m_pDb->Dbms() == dbmsFIREBIRD  ||
-	//            m_pDb->Dbms() == dbmsMS_SQL_SERVER)
+	//        if (m_pDb->GetDbms() == dbmsDB2 ||
+	//            m_pDb->GetDbms() == dbmsMY_SQL ||
+	//            m_pDb->GetDbms() == dbmsSYBASE_ASE  ||
+	//            m_pDb->GetDbms() == dbmsINTERBASE  ||
+	//            m_pDb->GetDbms() == dbmsFIREBIRD  ||
+	//            m_pDb->GetDbms() == dbmsMS_SQL_SERVER)
 	//        {
 	//            if (m_colDefs[i].m_keyField)
 	//            {
@@ -2157,10 +2163,10 @@ namespace exodbc
 	//            break;
 	//        }
 	//    }
-	//    if ( j && (m_pDb->Dbms() != dbmsDBASE)
-	//        && (m_pDb->Dbms() != dbmsXBASE_SEQUITER) )  // Found a keyfield
+	//    if ( j && (m_pDb->GetDbms() != dbmsDBASE)
+	//        && (m_pDb->GetDbms() != dbmsXBASE_SEQUITER) )  // Found a keyfield
 	//    {
-	//        switch (m_pDb->Dbms())
+	//        switch (m_pDb->GetDbms())
 	//        {
 	//            case dbmsACCESS:
 	//            case dbmsINFORMIX:
@@ -2177,7 +2183,7 @@ namespace exodbc
 	//            {
 	//                sqlStmt += L",CONSTRAINT ";
 	//                //  DB2 is limited to 18 characters for index names
-	//                if (m_pDb->Dbms() == dbmsDB2)
+	//                if (m_pDb->GetDbms() == dbmsDB2)
 	//                {
 	//                    exASSERT_MSG(m_tableName.length() <= 13, "DB2 table/index names must be no longer than 13 characters in length.\n\nTruncating table name to 13 characters.");
 	//                    sqlStmt += m_pDb->SQLTableName(m_tableName.substr(0, 13).c_str());
@@ -2201,7 +2207,7 @@ namespace exodbc
 	//                    sqlStmt += L",";
 	//                sqlStmt += m_pDb->SQLColumnName(m_colDefs[i].m_colName);
 	//
-	//                if (m_pDb->Dbms() == dbmsMY_SQL &&
+	//                if (m_pDb->GetDbms() == dbmsMY_SQL &&
 	//                    m_colDefs[i].m_dbDataType ==  DB_DATA_TYPE_VARCHAR)
 	//                {
 	//                    std::wstring s;
@@ -2212,9 +2218,9 @@ namespace exodbc
 	//        }
 	//        sqlStmt += L")";
 	//
-	//        if (m_pDb->Dbms() == dbmsINFORMIX ||
-	//            m_pDb->Dbms() == dbmsSYBASE_ASA ||
-	//            m_pDb->Dbms() == dbmsSYBASE_ASE)
+	//        if (m_pDb->GetDbms() == dbmsINFORMIX ||
+	//            m_pDb->GetDbms() == dbmsSYBASE_ASA ||
+	//            m_pDb->GetDbms() == dbmsSYBASE_ASE)
 	//        {
 	//            sqlStmt += L" CONSTRAINT ";
 	//            sqlStmt += m_pDb->SQLTableName(m_tableName.c_str());
@@ -2280,10 +2286,10 @@ namespace exodbc
 	//            wcscmp(pDb->sqlState, L"S1000")*/)  // "Base table not found"
 	//        {
 	//            // Check for product specific error codes
-	//            if (!((m_pDb->Dbms() == dbmsSYBASE_ASA    && !wcscmp(m_pDb->sqlState, L"42000"))   ||  // 5.x (and lower?)
-	//                  (m_pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"37000"))   ||
-	//                  (m_pDb->Dbms() == dbmsPERVASIVE_SQL && !wcscmp(m_pDb->sqlState, L"S1000"))   ||  // Returns an S1000 then an S0002
-	//                  (m_pDb->Dbms() == dbmsPOSTGRES      && !wcscmp(m_pDb->sqlState, L"08S01"))))
+	//            if (!((m_pDb->GetDbms() == dbmsSYBASE_ASA    && !wcscmp(m_pDb->sqlState, L"42000"))   ||  // 5.x (and lower?)
+	//                  (m_pDb->GetDbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"37000"))   ||
+	//                  (m_pDb->GetDbms() == dbmsPERVASIVE_SQL && !wcscmp(m_pDb->sqlState, L"S1000"))   ||  // Returns an S1000 then an S0002
+	//                  (m_pDb->GetDbms() == dbmsPOSTGRES      && !wcscmp(m_pDb->sqlState, L"08S01"))))
 	//            {
 	//                m_pDb->DispNextError();
 	//                m_pDb->DispAllErrors(NULL, m_hdbc, m_hstmt);
@@ -2322,7 +2328,7 @@ namespace exodbc
 	//    //
 	//    // The following block of code will modify the column definition to make the column be
 	//    // defined with the "NOT NULL" qualifier.
-	//    if (m_pDb->Dbms() == dbmsMY_SQL)
+	//    if (m_pDb->GetDbms() == dbmsMY_SQL)
 	//    {
 	//        std::wstring sqlStmt;
 	//        int i;
@@ -2394,7 +2400,7 @@ namespace exodbc
 	////        sqlStmt += pIndexDefs[i].ColName;
 	//
 	//        // MySQL requires a key length on VARCHAR keys
-	//        if ( m_pDb->Dbms() == dbmsMY_SQL )
+	//        if ( m_pDb->GetDbms() == dbmsMY_SQL )
 	//        {
 	//            // Find the details on this column
 	//            int j;
@@ -2414,9 +2420,9 @@ namespace exodbc
 	//        }
 	//
 	//        // Postgres and SQL Server 7 do not support the ASC/DESC keywords for index columns
-	//        if (!((m_pDb->Dbms() == dbmsMS_SQL_SERVER) && (wcsncmp(m_pDb->m_dbInf.dbmsVer, L"07", 2)==0)) &&
-	//            !(m_pDb->Dbms() == dbmsFIREBIRD) &&
-	//            !(m_pDb->Dbms() == dbmsPOSTGRES))
+	//        if (!((m_pDb->GetDbms() == dbmsMS_SQL_SERVER) && (wcsncmp(m_pDb->m_dbInf.dbmsVer, L"07", 2)==0)) &&
+	//            !(m_pDb->GetDbms() == dbmsFIREBIRD) &&
+	//            !(m_pDb->GetDbms() == dbmsPOSTGRES))
 	//        {
 	//            if (pIndexDefs[i].Ascending)
 	//                sqlStmt += L" ASC";
@@ -2471,12 +2477,12 @@ namespace exodbc
 	//
 	//    std::wstring sqlStmt;
 	//
-	//    if (m_pDb->Dbms() == dbmsACCESS || m_pDb->Dbms() == dbmsMY_SQL ||
-	//        m_pDb->Dbms() == dbmsDBASE /*|| Paradox needs this syntax too when we add support*/)
+	//    if (m_pDb->GetDbms() == dbmsACCESS || m_pDb->GetDbms() == dbmsMY_SQL ||
+	//        m_pDb->GetDbms() == dbmsDBASE /*|| Paradox needs this syntax too when we add support*/)
 	//		sqlStmt = (boost::wformat(L"DROP INDEX %s ON %s") % m_pDb->SQLTableName(indexName.c_str()) % m_pDb->SQLTableName(m_tableName.c_str())).str();
-	//    else if ((m_pDb->Dbms() == dbmsMS_SQL_SERVER) ||
-	//             (m_pDb->Dbms() == dbmsSYBASE_ASE) ||
-	//             (m_pDb->Dbms() == dbmsXBASE_SEQUITER))
+	//    else if ((m_pDb->GetDbms() == dbmsMS_SQL_SERVER) ||
+	//             (m_pDb->GetDbms() == dbmsSYBASE_ASE) ||
+	//             (m_pDb->GetDbms() == dbmsXBASE_SEQUITER))
 	//		sqlStmt = (boost::wformat(L"DROP INDEX %s.%s") % m_pDb->SQLTableName(m_tableName.c_str()) % m_pDb->SQLTableName(indexName.c_str())).str();
 	//    else
 	//		sqlStmt = (boost::wformat(L"DROP INDEX %s") % m_pDb->SQLTableName(indexName.c_str())).str();
@@ -2494,15 +2500,15 @@ namespace exodbc
 	//        if (wcscmp(m_pDb->sqlState, L"S0012"))  // "Index not found"
 	//        {
 	//            // Check for product specific error codes
-	//            if (!((m_pDb->Dbms() == dbmsSYBASE_ASA    && !wcscmp(m_pDb->sqlState, L"42000")) ||  // v5.x (and lower?)
-	//                  (m_pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"37000")) ||
-	//                  (m_pDb->Dbms() == dbmsMS_SQL_SERVER && !wcscmp(m_pDb->sqlState, L"S1000")) ||
-	//                  (m_pDb->Dbms() == dbmsINTERBASE     && !wcscmp(m_pDb->sqlState, L"S1000")) ||
-	//                  (m_pDb->Dbms() == dbmsMAXDB         && !wcscmp(m_pDb->sqlState, L"S1000")) ||
-	//                  (m_pDb->Dbms() == dbmsFIREBIRD      && !wcscmp(m_pDb->sqlState, L"HY000")) ||
-	//                  (m_pDb->Dbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"S0002")) ||  // Base table not found
-	//                  (m_pDb->Dbms() == dbmsMY_SQL        && !wcscmp(m_pDb->sqlState, L"42S12")) ||  // tested by Christopher Ludwik Marino-Cebulski using v3.23.21beta
-	//                  (m_pDb->Dbms() == dbmsPOSTGRES      && !wcscmp(m_pDb->sqlState, L"08S01"))
+	//            if (!((m_pDb->GetDbms() == dbmsSYBASE_ASA    && !wcscmp(m_pDb->sqlState, L"42000")) ||  // v5.x (and lower?)
+	//                  (m_pDb->GetDbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"37000")) ||
+	//                  (m_pDb->GetDbms() == dbmsMS_SQL_SERVER && !wcscmp(m_pDb->sqlState, L"S1000")) ||
+	//                  (m_pDb->GetDbms() == dbmsINTERBASE     && !wcscmp(m_pDb->sqlState, L"S1000")) ||
+	//                  (m_pDb->GetDbms() == dbmsMAXDB         && !wcscmp(m_pDb->sqlState, L"S1000")) ||
+	//                  (m_pDb->GetDbms() == dbmsFIREBIRD      && !wcscmp(m_pDb->sqlState, L"HY000")) ||
+	//                  (m_pDb->GetDbms() == dbmsSYBASE_ASE    && !wcscmp(m_pDb->sqlState, L"S0002")) ||  // Base table not found
+	//                  (m_pDb->GetDbms() == dbmsMY_SQL        && !wcscmp(m_pDb->sqlState, L"42S12")) ||  // tested by Christopher Ludwik Marino-Cebulski using v3.23.21beta
+	//                  (m_pDb->GetDbms() == dbmsPOSTGRES      && !wcscmp(m_pDb->sqlState, L"08S01"))
 	//               ))
 	//            {
 	//                m_pDb->DispNextError();
@@ -2799,10 +2805,10 @@ namespace exodbc
 	//	//if (IsQueryOnly())
 	//	//    return false;
 
-	//	//if (m_pDb->Dbms() == dbmsMY_SQL)
+	//	//if (m_pDb->GetDbms() == dbmsMY_SQL)
 	//	//    return false;
 
-	//	//if (/*(m_pDb->Dbms() == dbmsORACLE) ||*/
+	//	//if (/*(m_pDb->GetDbms() == dbmsORACLE) ||*/
 	//	//    (m_pDb->m_dbInf.posStmts & SQL_PS_SELECT_FOR_UPDATE))
 	//	//    return true;
 	//	//else
@@ -2820,7 +2826,7 @@ namespace exodbc
 	//	 */
 	//	return false;
 	//	/*
-	//		if (pDb->Dbms() == dbmsORACLE)
+	//		if (pDb->GetDbms() == dbmsORACLE)
 	//		return true;
 	//		else
 	//		return false;
