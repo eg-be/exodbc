@@ -271,7 +271,7 @@ namespace exodbc
 		try
 		{
 			// Will throw if fails
-			std::vector<SColumnInfo> columns = db.ReadTableColumnInfo(tableInfo);
+			ColumnInfosVector columns = db.ReadTableColumnInfo(tableInfo);
 			// Remember column sizes and create ColumnBuffers
 			m_numCols = columns.size();
 			if (m_numCols == 0)

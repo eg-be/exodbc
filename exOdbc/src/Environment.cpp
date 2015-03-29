@@ -173,13 +173,13 @@ namespace exodbc
 	}
 
 
-	std::vector<SDataSource> Environment::ListDataSources(ListMode mode) const
+	DataSourcesVector Environment::ListDataSources(ListMode mode) const
 	{
 		SQLSMALLINT nameBufferLength, descBufferLength = 0;
 		SQLWCHAR nameBuffer[SQL_MAX_DSN_LENGTH + 1];
 
 		// empty result-vector
-		std::vector<SDataSource> dataSources;
+		DataSourcesVector dataSources;
 
 		SQLUSMALLINT direction = SQL_FETCH_FIRST;
 		if (mode == ListMode::System)

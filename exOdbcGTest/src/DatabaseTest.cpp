@@ -394,7 +394,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadTablePrivileges)
 	{
-		std::vector<STablePrivilegesInfo> privs;
+		TablePrivilegesVector privs;
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
@@ -430,7 +430,7 @@ namespace exodbc
 		bool canInsert = false;
 		bool canDelete = false;
 		bool canUpdate = false;
-		std::vector<STablePrivilegesInfo>::const_iterator it;
+		TablePrivilegesVector::const_iterator it;
 		for(it = privs.begin(); it != privs.end(); it++)
 		{
 			const STablePrivilegesInfo& priv = *it;
@@ -534,7 +534,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, FindTables)
 	{
-		std::vector<STableInfo> tables;
+		STableInfosVector tables;
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;

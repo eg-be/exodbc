@@ -154,7 +154,7 @@ namespace exodbc
 		 * \return	Found Data Source Names.
 		 * \throw	Exception
 		 */		
-		std::vector<SDataSource> ListDataSources(ListMode mode) const;
+		DataSourcesVector ListDataSources(ListMode mode) const;
 
 
 	private:
