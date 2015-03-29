@@ -143,7 +143,7 @@ namespace exodbc
 		OdbcVersion		ReadOdbcVersion() const;
 
 
-		enum ListMode { All, System, User };
+		enum class ListMode { All, System, User };
 
 		/*!
 		 * \brief		List data sources.

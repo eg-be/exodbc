@@ -413,7 +413,7 @@ namespace exodbc
 			break;
 		}
 		default:
-			NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, bufferType);
+			NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, bufferType);
 			SET_EXCEPTION_SOURCE(nse);
 			throw nse;
 		}
@@ -458,7 +458,7 @@ namespace exodbc
 		case SQL_C_NUMERIC:
 			return static_cast<void*>(boost::get<SQL_NUMERIC_STRUCT*>(m_bufferPtr));
 		default:
-			NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, m_bufferType);
+			NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, m_bufferType);
 			SET_EXCEPTION_SOURCE(nse);
 			throw nse;
 		}
@@ -520,7 +520,7 @@ namespace exodbc
 			return columnInfo.m_columnSize + 1;
 		}
 
-		NotSupportedException nse(NotSupportedException::NS_SQL_TYPE, columnInfo.m_sqlType);
+		NotSupportedException nse(NotSupportedException::Type::SQL_TYPE, columnInfo.m_sqlType);
 		SET_EXCEPTION_SOURCE(nse);
 		throw nse;
 
@@ -569,7 +569,7 @@ namespace exodbc
 			return sizeof(SQL_NUMERIC_STRUCT);
 		}
 
-		NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, m_bufferType);
+		NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, m_bufferType);
 		SET_EXCEPTION_SOURCE(nse);
 		throw nse;
 	}
@@ -650,7 +650,7 @@ namespace exodbc
 			return SQL_C_NUMERIC;
 		}
 
-		NotSupportedException nse(NotSupportedException::NS_SQL_TYPE, sqlType);
+		NotSupportedException nse(NotSupportedException::Type::SQL_TYPE, sqlType);
 		SET_EXCEPTION_SOURCE(nse);
 		throw nse;
 	}
@@ -774,7 +774,7 @@ namespace exodbc
 #endif
 			else
 			{
-				NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, m_bufferType);
+				NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, m_bufferType);
 				SET_EXCEPTION_SOURCE(nse);
 				throw nse;
 			}
@@ -876,7 +876,7 @@ namespace exodbc
 #endif
 			else
 			{
-				NotSupportedException nse(NotSupportedException::NS_SQL_C_TYPE, m_bufferType);
+				NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, m_bufferType);
 				SET_EXCEPTION_SOURCE(nse);
 				throw nse;
 			}

@@ -147,13 +147,13 @@ namespace exodbc
 		: public Exception
 	{
 	public:
-		enum NOT_SUPPORTED
+		enum class Type
 		{
-			NS_SQL_C_TYPE = 1,
-			NS_SQL_TYPE = 2
+			SQL_C_TYPE = 1,
+			SQL_TYPE = 2
 		};
 
-		NotSupportedException(NOT_SUPPORTED notSupported, SQLSMALLINT smallInt) throw()
+		NotSupportedException(Type notSupported, SQLSMALLINT smallInt) throw()
 			: Exception()
 			, m_notSupported(notSupported)
 			, m_smallInt(smallInt)
@@ -167,7 +167,7 @@ namespace exodbc
 		virtual std::wstring ToString() const throw();
 
 	private:
-		NOT_SUPPORTED m_notSupported;
+		Type m_notSupported;
 		SQLSMALLINT m_smallInt;
 	};
 
