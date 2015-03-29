@@ -884,6 +884,7 @@ namespace exodbc
 			if (!(SQL_C_CHAR == m_bufferType || SQL_C_WCHAR == m_bufferType))
 			{
 				// We are no longer null
+				// Note: For SQL_C_CHAR and SQL_C_WCHAR we set SQL_NTS when converting them.
 				m_cb = 0;
 			}
 
