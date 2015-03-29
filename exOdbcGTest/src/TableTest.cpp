@@ -470,6 +470,46 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, IsQueryOnly)
+	{
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
+		
+		EXPECT_TRUE(iTable.IsQueryOnly());
+
+		iTable.SetAccessFlag(m_db, AF_UPDATE);
+		EXPECT_FALSE(iTable.IsQueryOnly());
+		iTable.ClearAccessFlag(m_db, AF_UPDATE);
+		EXPECT_TRUE(iTable.IsQueryOnly());
+
+		iTable.SetAccessFlag(m_db, AF_INSERT);
+		EXPECT_FALSE(iTable.IsQueryOnly());
+		iTable.ClearAccessFlag(m_db, AF_INSERT);
+		EXPECT_TRUE(iTable.IsQueryOnly());
+
+		iTable.SetAccessFlag(m_db, AF_DELETE);
+		EXPECT_FALSE(iTable.IsQueryOnly());
+		iTable.ClearAccessFlag(m_db, AF_DELETE);
+		EXPECT_TRUE(iTable.IsQueryOnly());
+
+		// and one that is initially rw
+		exodbc::Table iTable2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		EXPECT_FALSE(iTable2.IsQueryOnly());
+		iTable2.ClearAccessFlag(m_db, AF_INSERT);
+		EXPECT_FALSE(iTable2.IsQueryOnly());
+
+		iTable2.ClearAccessFlag(m_db, AF_DELETE);
+		EXPECT_FALSE(iTable2.IsQueryOnly());
+
+		iTable2.ClearAccessFlag(m_db, AF_UPDATE);
+		EXPECT_TRUE(iTable2.IsQueryOnly());
+
+		// remove read, we are no longer query only
+		iTable2.ClearAccessFlag(m_db, AF_SELECT);
+		EXPECT_FALSE(iTable2.IsQueryOnly());
+	}
+
+
 	// Select / GetNext
 	// ----------------
 	TEST_P(TableTest, Select)
