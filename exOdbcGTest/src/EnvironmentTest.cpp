@@ -70,7 +70,7 @@ namespace exodbc
 		
 		// Now test that we fail to free if there is still a database around
 		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
-		ASSERT_NO_THROW(env.SetOdbcVersion(OV_3));
+		ASSERT_NO_THROW(env.SetOdbcVersion(OdbcVersion::V_3));
 		{
 			Database db(env);
 			EXPECT_THROW(env.FreeEnvironmentHandle(), SqlResultException);
@@ -92,18 +92,18 @@ namespace exodbc
 		ASSERT_NO_THROW(env_v3.AllocateEnvironmentHandle());
 		ASSERT_NO_THROW(env_v3_80.AllocateEnvironmentHandle());
 
-		EXPECT_NO_THROW(env_v2.SetOdbcVersion(OV_2));
-		EXPECT_NO_THROW(env_v3.SetOdbcVersion(OV_3));
-		EXPECT_NO_THROW(env_v3_80.SetOdbcVersion(OV_3_8));
+		EXPECT_NO_THROW(env_v2.SetOdbcVersion(OdbcVersion::V_2));
+		EXPECT_NO_THROW(env_v3.SetOdbcVersion(OdbcVersion::V_3));
+		EXPECT_NO_THROW(env_v3_80.SetOdbcVersion(OdbcVersion::V_3_8));
 
-		EXPECT_EQ(SQL_OV_ODBC2, env_v2.ReadOdbcVersion());
-		EXPECT_EQ(SQL_OV_ODBC3, env_v3.ReadOdbcVersion());
-		EXPECT_EQ(SQL_OV_ODBC3_80, env_v3_80.ReadOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC2, (int) env_v2.ReadOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC3, (int) env_v3.ReadOdbcVersion());
+		EXPECT_EQ(SQL_OV_ODBC3_80, (int) env_v3_80.ReadOdbcVersion());
 	}
 
 	TEST_P(EnvironmentTest, ListDataSources)
 	{
-		Environment env(OV_3);
+		Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(env.HasEnvironmentHandle());
 
 		vector<SDataSource> dataSources;

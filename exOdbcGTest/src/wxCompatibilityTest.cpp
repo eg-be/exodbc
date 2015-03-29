@@ -38,7 +38,7 @@ namespace exodbc
 
 		// Set up environment
 		m_env.AllocateEnvironmentHandle();
-		m_env.SetOdbcVersion(OV_3);
+		m_env.SetOdbcVersion(OdbcVersion::V_3);
 
 		// And the db
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));

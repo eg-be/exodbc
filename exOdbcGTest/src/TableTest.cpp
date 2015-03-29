@@ -51,7 +51,7 @@ namespace exodbc
 		m_env.AllocateEnvironmentHandle();
 		// Try to set to the ODBC v3 : We need that for the tests to run correct. 3.8 is not supported by all databases and we dont use specific stuff from it.
 		// except for the TIME2 things, sql server specific. those tests can create their own env.
-		m_env.SetOdbcVersion(OV_3);
+		m_env.SetOdbcVersion(OdbcVersion::V_3);
 
 		// And database
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));
@@ -1218,7 +1218,7 @@ namespace exodbc
 
 		// MS SQL Server has a new SQL_TIME2_STRUCT if ODBC version is >= 3.8
 #if HAVE_MSODBCSQL_H
-		Environment env38(OV_3_8);
+		Environment env38(OdbcVersion::V_3_8);
 		EXPECT_TRUE(env38.HasEnvironmentHandle());
 		Database db38(env38);
 		EXPECT_TRUE(db38.HasConnectionHandle());
@@ -1251,7 +1251,7 @@ namespace exodbc
 		if (db38.Dbms() == dbmsMS_SQL_SERVER)
 		{
 			// MS should also have fractions, configurable, here set to 7: 1234567 -> 123'456'700
-			EXPECT_TRUE(db38.GetMaxSupportedOdbcVersion() >= OV_3_8);
+			EXPECT_TRUE(db38.GetMaxSupportedOdbcVersion() >= OdbcVersion::V_3_8);
 			EXPECT_EQ(123456700, t2.fraction);
 		}
 		else

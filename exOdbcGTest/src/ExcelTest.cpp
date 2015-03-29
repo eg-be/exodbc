@@ -44,7 +44,7 @@ namespace exodbc
 
 		// Set up is called for every test
 		ASSERT_NO_THROW(m_env.AllocateEnvironmentHandle());
-		ASSERT_NO_THROW(m_env.SetOdbcVersion(OV_3));
+		ASSERT_NO_THROW(m_env.SetOdbcVersion(OdbcVersion::V_3));
 	}
 
 

@@ -71,32 +71,28 @@ namespace exodbc
 	// -----
 	/*!
 	* \enum	OdbcVersion
-	*
 	* \brief	Defines the ODBC-Version to be set.
 	* 			see: http://msdn.microsoft.com/en-us/library/ms709316%28v=vs.85%29.aspx
-	*
 	*/
-	enum OdbcVersion
+	enum class OdbcVersion
 	{
-		OV_UNKNOWN = 0, //< Unknown Version
-		OV_2 = 2UL,		//< Version 2.x
-		OV_3 = 3UL,		//< Version 3.x
-		OV_3_8 = 380UL	//< Version 3.8
+		UNKNOWN = 0,			///< Unknown Version
+		V_2 = SQL_OV_ODBC2,		///< Version 2.x
+		V_3 = SQL_OV_ODBC3,		///< Version 3.x
+		V_3_8 = SQL_OV_ODBC3_80	///< Version 3.8
 	};
 
 
 	/*!
 	* \enum	CommitMode
-	*
 	* \brief	Defines whether auto commit is on or off.
 	* 			see: http://msdn.microsoft.com/en-us/library/ms713600%28v=vs.85%29.aspx
-	*
 	*/
 	enum CommitMode
 	{
-		CM_UNKNOWN = 50000,			//< Unknown Commit mode
-		CM_AUTO_COMMIT = SQL_AUTOCOMMIT,		//< Autocommit on
-		CM_MANUAL_COMMIT = SQL_AUTOCOMMIT_OFF	//< Autocommit off
+		CM_UNKNOWN = 50000,			///< Unknown Commit mode
+		CM_AUTO_COMMIT = SQL_AUTOCOMMIT,		///< Autocommit on
+		CM_MANUAL_COMMIT = SQL_AUTOCOMMIT_OFF	///< Autocommit off
 	};
 
 
