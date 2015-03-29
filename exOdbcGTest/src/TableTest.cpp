@@ -1371,7 +1371,7 @@ namespace exodbc
 		// Fixed size bins
 		bTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_NO_THROW(bTable.GetBuffer(1, pBlob, size, length));
+		EXPECT_NO_THROW(pBlob = bTable.GetBinaryValue(1, size, length));
 		EXPECT_EQ(0, memcmp(empty, pBlob, length));
 		EXPECT_EQ(16, size);
 		EXPECT_EQ(sizeof(empty), length);
@@ -1379,7 +1379,7 @@ namespace exodbc
 
 		bTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_NO_THROW(bTable.GetBuffer(1, pBlob, size, length));
+		EXPECT_NO_THROW(pBlob = bTable.GetBinaryValue(1, size, length));
 		EXPECT_EQ(0, memcmp(ff, pBlob, length));
 		EXPECT_EQ(16, size);
 		EXPECT_EQ(sizeof(ff), length);
@@ -1387,7 +1387,7 @@ namespace exodbc
 
 		bTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_NO_THROW(bTable.GetBuffer(1, pBlob, size, length));
+		EXPECT_NO_THROW(pBlob = bTable.GetBinaryValue(1, size, length));
 		EXPECT_EQ(0, memcmp(abc, pBlob, length));
 		EXPECT_EQ(16, size);
 		EXPECT_EQ(sizeof(abc), length);
@@ -1396,7 +1396,7 @@ namespace exodbc
 		// Read Varbins
 		bTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_NO_THROW(bTable.GetBuffer(2, pBlob, size, length));
+		EXPECT_NO_THROW(pBlob = bTable.GetBinaryValue(2, size, length));
 		EXPECT_EQ(0, memcmp(abc, pBlob, length));
 		EXPECT_EQ(20, size);
 		EXPECT_EQ(sizeof(abc), length);
@@ -1404,7 +1404,7 @@ namespace exodbc
 
 		bTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_NO_THROW(bTable.GetBuffer(2, pBlob, size, length));
+		EXPECT_NO_THROW(pBlob = bTable.GetBinaryValue(2, size, length));
 		EXPECT_EQ(0, memcmp(abc_ff, pBlob, length));
 		EXPECT_EQ(20, size);
 		EXPECT_EQ(sizeof(abc_ff), length);
@@ -2910,10 +2910,6 @@ namespace exodbc
 		Table bTable(m_db, blobTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(bTable.Open(m_db));
 
-		ColumnBuffer* pId = bTable.GetColumnBuffer(0);
-		ColumnBuffer* pBlob = bTable.GetColumnBuffer(1);
-		ColumnBuffer* pVarBlob_20 = bTable.GetColumnBuffer(2);
-
 		// Remove everything, ignoring if there was any data:
 		wstring idName = TestTables::GetIdColumnName(TestTables::Table::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
@@ -2946,43 +2942,43 @@ namespace exodbc
 		};
 
 		// Insert some values
-		*pId = (SQLINTEGER)100;
-		pBlob->SetBinaryValue(abc, sizeof(empty));
-		pVarBlob_20->SetNull();
+		bTable.SetColumnValue(0, (SQLINTEGER)100);
+		bTable.SetBinaryValue(1, abc, sizeof(abc));
+		bTable.SetColumnNull(2);
 		bTable.Insert();
-		*pId = (SQLINTEGER)101;
-		pBlob->SetNull();
-		pVarBlob_20->SetBinaryValue(abc_ff, sizeof(abc_ff));
+		bTable.SetColumnValue(0, (SQLINTEGER)101);
+		bTable.SetColumnNull(1);
+		bTable.SetBinaryValue(2, abc_ff, sizeof(abc_ff));
 		bTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Update 
-		*pId = (SQLINTEGER)100;
-		pBlob->SetNull();
-		pVarBlob_20->SetBinaryValue(abc, sizeof(abc));
+		bTable.SetColumnValue(0, (SQLINTEGER)100);
+		bTable.SetColumnNull(1);
+		bTable.SetBinaryValue(2, abc, sizeof(abc));
 		EXPECT_NO_THROW(bTable.Update());
-		*pId = (SQLINTEGER)101;
-		pBlob->SetBinaryValue(empty, sizeof(empty));
-		pVarBlob_20->SetNull();
+		bTable.SetColumnValue(0, (SQLINTEGER)101);
+		bTable.SetBinaryValue(1, empty, sizeof(empty));
+		bTable.SetColumnNull(2);
 		EXPECT_NO_THROW(bTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Re-Fetch and compare
 		bTable.Select((boost::wformat(L"%s = 100") % idName).str());
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_TRUE(pBlob->IsNull());
-		EXPECT_FALSE(pVarBlob_20->IsNull());
+		EXPECT_TRUE(bTable.IsColumnNull(1));
+		EXPECT_FALSE(bTable.IsColumnNull(2));
 		const SQLCHAR* pBlobBuff = NULL;
 		SQLINTEGER size, length = 0;
-		EXPECT_NO_THROW(bTable.GetBuffer(2, pBlobBuff, size, length));
+		EXPECT_NO_THROW(pBlobBuff = bTable.GetBinaryValue(2, size, length));
 		EXPECT_EQ(0, memcmp(pBlobBuff, abc, sizeof(abc)));
 		EXPECT_EQ(20, size);
 		EXPECT_EQ(16, length);
 		bTable.Select((boost::wformat(L"%s = 101") % idName).str());
 		EXPECT_TRUE(bTable.SelectNext());
-		EXPECT_FALSE(pBlob->IsNull());
-		EXPECT_TRUE(pVarBlob_20->IsNull());
-		EXPECT_NO_THROW(bTable.GetBuffer(1, pBlobBuff, size, length));
+		EXPECT_FALSE(bTable.IsColumnNull(1));
+		EXPECT_TRUE(bTable.IsColumnNull(2));
+		EXPECT_NO_THROW(pBlobBuff = bTable.GetBinaryValue(1, size, length));
 		EXPECT_EQ(0, memcmp(pBlobBuff, empty, sizeof(empty)));
 		EXPECT_EQ(16, size);
 		EXPECT_EQ(16, length);
