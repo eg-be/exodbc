@@ -76,7 +76,7 @@ namespace exodbc
 		*			Marks object as initialized on success.
 		*			Note that this will not fail if tablePks is empty.
 		* \param	tablePks table primary keys
-		* \fails	If parsing fails.
+		* \throw	Exception If parsing fails.
 		*/
 		void Initialize(const TablePrimaryKeysVector& tablePks) { m_initialized = false; Parse(tablePks); m_initialized = true; };
 

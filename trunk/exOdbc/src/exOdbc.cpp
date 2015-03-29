@@ -1,5 +1,5 @@
 /*!
-* \file wxOdbc3.cpp
+* \file exOdbc.cpp
 * \author Elias Gerber <eg@zame.ch>
 * \date 23.07.2014
 * \brief Source file for the stuff from exOdbc.h

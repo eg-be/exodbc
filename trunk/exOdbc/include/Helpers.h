@@ -128,7 +128,7 @@ namespace exodbc
 	* \brief Ugly conversion of small to wide - use only if you know that you have only ASCII chars in w.
 	*
 	* \details Transforms from wide to small by simple taking the char-values.
-	* \param const std::wstring& w
+	* \param w String to transform
 	* \return std::string
 	*/
 	extern std::string w2s(const std::wstring& w);
@@ -138,7 +138,7 @@ namespace exodbc
 	* \brief Ugly conversion of wide to small - use only if you know that you have only ASCII chars in s.
 	*
 	* \details Transforms small wide to wide by simple taking the char-values.
-	* \param const std::string& s
+	* \param s String to transform
 	* \return std::wstring
 	*/
 	extern std::wstring s2w(const std::string& s);
@@ -147,7 +147,7 @@ namespace exodbc
 	/*!
 	* \brief Returns the string TRUE, FALSE or ????? for the values SQL_TRUE, SQL_FALSE or anything else.
 	*
-	* \param SQLSMALLINT b SQL_TRUE or SQL_FALSE
+	* \param b SQL_TRUE or SQL_FALSE
 	* \return std::wstring TRUE, FALSE or ?????
 	*/
 	extern EXODBCAPI std::wstring SqlTrueFalse2s(SQLSMALLINT b);
@@ -156,7 +156,7 @@ namespace exodbc
 	/*!
 	* \brief Translates some often encountered SQLRETURN values to a string.
 	*
-	* \param SQLRETURN ret Return code to translate.
+	* \param ret Return code to translate.
 	* \return std::wstring Translation or '???' if unknown.
 	*/
 	extern EXODBCAPI std::wstring SqlReturn2s(SQLRETURN ret);
@@ -165,7 +165,7 @@ namespace exodbc
 	/*!
 	* \brief Transform the SQL_types like SQL_CHAR, SQL_NUMERIC, etc. to some string.
 	*
-	* \param SQLSMALLINT sqlType
+	* \param sqlType SQL Type..
 	* \return std::wstring
 	*/
 	extern EXODBCAPI std::wstring SqlType2s(SQLSMALLINT sqlType);
@@ -174,7 +174,7 @@ namespace exodbc
 	/*!
 	* \brief Transform the SQL C-types like SQL_C_SLONG, SQL_C_WCHAR, etc. to some string, like "SQL_C_SLONG", etc.
 	*
-	* \param SQLSMALLINT sqlCType
+	* \param sqlCType Sql-C Type..
 	* \return std::wstring
 	*/
 	extern EXODBCAPI std::wstring SqLCType2s(SQLSMALLINT sqlCType);
@@ -184,7 +184,7 @@ namespace exodbc
 	* \brief	Transform the SQL C-types like SQL_C_SLONG, SQL_C_WCHAR, etc. to the corresponding string value of the ODBC C Type.
 	*			Like SQL_C_SLONG becomes "SQLINTEGER"
 	*
-	* \param SQLSMALLINT sqlCType
+	* \param sqlCType Sql-C Type.
 	* \return std::wstring
 	*/
 	extern EXODBCAPI std::wstring SqlCType2OdbcS(SQLSMALLINT sqlCType);
@@ -198,6 +198,7 @@ namespace exodbc
 	 * \param	hDbc 	(Optional) the dbc.
 	 * \param	hStmt	(Optional) the statement.
 	 * \param	hStmt	(Optional) the description.
+	 * \param	hDesc	(Optional) the descriptoin handle.
 	 *
 	 * \return	all errors.
 	 * \throw	AssertionException if not at least one of the handles is not a NULL handle.
@@ -337,6 +338,7 @@ namespace exodbc
 	 * \param	colNr		 	The col nr. (1-indexed)
 	 * \param	maxNrOfChars 	The maximum nr of characters.
 	 * \param [in,out]	value	The value.
+	 * \param	pIsNull			If it is a non-null pointer, its value will be set to True if the string to retrieve is NULL.
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
@@ -348,8 +350,8 @@ namespace exodbc
 	*
 	* \param	hDesc		 	The description handle to set an attribute for.
 	* \param	recordNumber	Column number to set the attribute for.
-	* \return	descriptionField Attribute to set.
-	* \return	value			Value to set.
+	* \param	descriptionField Attribute to set.
+	* \param	value			Value to set.
 	* \throw	Exception
 	*/
 	extern EXODBCAPI void		SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value);
@@ -369,7 +371,7 @@ namespace exodbc
 	* \brief	A wrapper to SQLGetStmtAttr
 	*
 	* \param	hStmt		 	The statement.
-	* \param	RowDescriptorType	Type of Description Handle to fetch from hStmt
+	* \param	type	Type of Description Handle to fetch from hStmt
 	* \return	Row Descriptor Handle
 	* \throw	Exception
 	*/

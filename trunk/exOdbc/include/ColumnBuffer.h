@@ -154,7 +154,8 @@ namespace exodbc
 		*			Note: The constructor will examine SColumnInfo::m_isNullable and set the corresponding
 		*			ColumnFlags, overriding an eventually set value in the passed flags.
 		* \param columnInfo	The Information about the column we bind.
-		* \param mode		How Character columns should be bound
+		* \param mode		How Character columns should be bound.
+		* \param odbcVersion ODBC Version to work with.
 		* \param flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
 		*
 		* \see	HaveBuffer()
@@ -175,7 +176,7 @@ namespace exodbc
 		*			from SQL Types to ODBC C Types to the driver, as long as the buffer-type exists in the
 		*			BufferPtrVariant. Bind() will fail if the driver does not support the given conversion.
 		* \param sqlCType			The ODBC C Type of the buffer (like SQL_C_WCHAR, SQL_C_SLONG, etc.). This value will be forwarded to the driver during SQLBindCol. 
-		* \param bufferPtrVarian	Pointer to allocated buffer for the given sqlCType. Must be a buffer that can be held by a exodbc::BufferPtrVariant .
+		* \param bufferPtrVariant	Pointer to allocated buffer for the given sqlCType. Must be a buffer that can be held by a exodbc::BufferPtrVariant .
 		* \param bufferSize			Size of the allocated buffer.
 		* \param queryName			Name of the column that corresponds to this buffer.
 		* \param	columnSize		The number of digits of a decimal value (including the fractional part).
@@ -488,7 +489,7 @@ namespace exodbc
 		* \throw	CastException If value cannot be casted to a SQLDOUBLE.
 		* \see		DoubleVisitor
 		*/
-		operator double() const;
+		operator SQLDOUBLE() const;
 
 
 		/*!
