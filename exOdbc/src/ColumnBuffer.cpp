@@ -224,6 +224,7 @@ namespace exodbc
 		}
 		catch (const Exception& ex)
 		{
+			HIDE_UNUSED(ex);
 			delete pBp;
 			throw;
 		}
@@ -681,7 +682,7 @@ namespace exodbc
 	}
 
 
-	void ColumnBuffer::SetBinaryValue(SQLCHAR* pBuff, SQLINTEGER bufferSize)
+	void ColumnBuffer::SetBinaryValue(const SQLCHAR* pBuff, SQLINTEGER bufferSize)
 	{
 		exASSERT(m_bufferType == SQL_C_BINARY);
 		exASSERT(m_haveBuffer);

@@ -400,7 +400,7 @@ namespace exodbc
 		*			the size of the buffer allocated by this ColumnBuffer.
 		* \throw	Exception If not a binary buffer, or on any other error.
 		*/
-		void SetBinaryValue(SQLCHAR* pBuff, SQLINTEGER bufferSize);
+		void SetBinaryValue(const SQLCHAR* pBuff, SQLINTEGER bufferSize);
 
 
 		/*!
