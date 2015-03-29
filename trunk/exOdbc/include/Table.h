@@ -608,6 +608,14 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Set a column to NULL. Fails if the column is not NULLable.
+		* \param	columnIndex Zero based ColumnBuffer index.
+		* \throw	Exception If ColumnBuffer not found.
+		*/
+		void		SetColumnNull(SQLSMALLINT columnIndex);
+
+
+		/*!
 		* \brief	Get the value of the ColumnBuffer given by columnIndex as BufferVariant.
 		* \param	columnIndex Zero based ColumnBuffer index.
 		* \throw	Exception If ColumnBuffer not found, or the value held by the ColumnBuffer
@@ -624,9 +632,10 @@ namespace exodbc
 		*			Every column, regardless of its type, can be retrieved.
 		* \param	columnIndex Zero based ColumnBuffer index.
 		* \param	bufferSize Will be filled with the size of the buffer returned.
+		* \param	lengthIndicator Will be filled with the length of the data in the buffer returned.
 		* \throw	Exception If ColumnBuffer not found, or if the Column is NULL.
 		*/
-		const SQLCHAR* GetBinaryValue(SQLSMALLINT columnIndex, SQLINTEGER& bufferSize) const;
+		const SQLCHAR* GetBinaryValue(SQLSMALLINT columnIndex, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const;
 
 
 
@@ -749,22 +758,18 @@ namespace exodbc
 		*			a column is NULL.
 		* \param	columnIndex Zero based index of a bound column.
 		* \return	True if current value of column is NULL.
+		* \throw	Exception If columnIndex is invalid.
 		*/
 		bool		IsColumnNull(SQLSMALLINT columnIndex) const;
 
 
 		/*!
-		* \brief	Access the buffer of a bound column.
-		* \details Points passed pointer to the buffer used to transfer data for the given column.
-		*			
+		* \brief	Check if a column can be set to NULL.
 		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] pBuffer Reference to point to column buffer.
-		* \param [in,out] bufferSize Reference to size of buffer, will be set on success to match
-		*			length of buffer pointed to by pBuffer.
-		* \param [in,out] lengthIndicator Will be set to the length Indicator value of the ColumnBuffer.
-		* throw	Exception If the column value is NULL, or columnIndex is inavlid
+		* \return	True if column given by columnIndex is NULLable.
+		* \throw	Exception If columnIndex is invalid.
 		*/
-		void		GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const;
+		bool		IsColumnNullable(SQLSMALLINT columnIndex) const;
 
 
 		/*!

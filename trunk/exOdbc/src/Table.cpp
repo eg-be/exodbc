@@ -762,6 +762,13 @@ namespace exodbc
 	}
 
 
+	void Table::SetColumnNull(SQLSMALLINT columnIndex)
+	{
+		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		pBuff->SetNull();
+	}
+
+
 	BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
 	{
 		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
@@ -770,12 +777,13 @@ namespace exodbc
 	}
 
 
-	const SQLCHAR* Table::GetBinaryValue(SQLSMALLINT columnIndex, SQLINTEGER& bufferSize) const
+	const SQLCHAR* Table::GetBinaryValue(SQLSMALLINT columnIndex, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const
 	{
 		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
 		exASSERT(!pBuff->IsNull());
 		const SQLCHAR* pBuffer = *pBuff;
 		bufferSize = pBuff->GetBufferSize();
+		lengthIndicator = pBuff->GetCb();
 		return pBuffer;
 	}
 
@@ -896,14 +904,10 @@ namespace exodbc
 	}
 
 
-	void Table::GetBuffer(SQLSMALLINT columnIndex, const SQLCHAR*& pBuffer, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const
+	bool Table::IsColumnNullable(SQLSMALLINT columnIndex) const
 	{
-		const ColumnBuffer* pColumnBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pColumnBuff->IsNull());
-
-		pBuffer = *pColumnBuff;
-		bufferSize = pColumnBuff->GetBufferSize();
-		lengthIndicator = pColumnBuff->GetCb();
+		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		return pBuff->IsNullable();
 	}
 
 
