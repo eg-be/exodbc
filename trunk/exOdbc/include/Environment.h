@@ -50,23 +50,6 @@ namespace exodbc
 	// Structs
 	// -------
 
-	/*!
-	* \class SDataSource
-	*
-	* \brief Contains information about one DataSource-Entry from the driver-manager
-	* 
-	* \see Environment::ListDataSources
-	*/
-	struct EXODBCAPI SDataSource
-	{
-		SDataSource() { Initialize(); };
-
-		void Initialize() { Dsn[0] = 0; };
-		SQLWCHAR Dsn[SQL_MAX_DSN_LENGTH  + 1];
-
-		std::wstring m_description;
-	};
-
 
 	// Classes
 	// -------

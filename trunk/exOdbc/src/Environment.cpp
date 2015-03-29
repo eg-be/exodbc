@@ -227,7 +227,7 @@ namespace exodbc
 		{
 			// Store dataSource
 			SDataSource ds;
-			wcscpy(ds.Dsn, nameBuffer);
+			ds.m_dsn = nameBuffer;
 			ds.m_description = descBuffer.get();
 			dataSources.push_back(ds);
 			ret = SQLDataSources(m_henv, SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);

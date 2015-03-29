@@ -254,6 +254,18 @@ namespace exodbc
 	// -------
 
 	/*!
+	* \struct SDataSource
+	* \brief Contains information about a DataSource-Entry from the driver-manager
+	* \see Environment::ListDataSources
+	*/
+	struct EXODBCAPI SDataSource
+	{
+		std::wstring m_dsn;			///< DSN name.
+		std::wstring m_description;	///< Description.
+	};
+
+
+	/*!
 	 * \class	SDbInfo
 	 *
 	 * \brief	The following structure contains database information gathered from the datasource
@@ -263,10 +275,7 @@ namespace exodbc
 	{
 		SDbInfo();
 
-		~SDbInfo()
-		{
-			int p = 3;
-		}
+		~SDbInfo() {};
 
 		// [Output] Pointer to a buffer in which to return the information. Depending on the InfoType requested, 
 		// the information returned will be one of the following: a null-terminated character string, an SQLUSMALLINT value, 
