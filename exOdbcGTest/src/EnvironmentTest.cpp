@@ -114,8 +114,7 @@ namespace exodbc
 		vector<SDataSource>::const_iterator it;
 		for(it = dataSources.begin(); it != dataSources.end(); it++)
 		{
-			wstring tmp = (*it).Dsn;
-			if(tmp == m_odbcInfo.m_dsn)
+			if(it->m_dsn == m_odbcInfo.m_dsn)
 			{
 				foundDataSource = true;
 				break;
