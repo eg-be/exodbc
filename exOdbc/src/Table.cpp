@@ -755,15 +755,11 @@ namespace exodbc
 	}
 
 
-	//BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
-	//{
-	//	ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-	//	//SQLSMALLINT i = *pBuff;
-	//	//BufferVariant var(i);
-	//	BufferVariant var = (BufferVariant) *pBuff;
-	//	//BufferVariant var = *pBuff;
-	//	return var;
-	//}
+	BufferVariant Table::GetVariantValue(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		return pBuff->GetValue();
+	}
 
 
 	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const

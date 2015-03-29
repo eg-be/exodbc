@@ -406,7 +406,10 @@ namespace exodbc
 		/*!
 		* \brief	Get the value as BufferVariant.
 		* \details	Return a BufferVariant with the value of this ColumnBuffer.
-		* \throw	Exception If internally held BufferPtrVariant cannot be converted to a BufferVariant.
+		*			No conversion is done, depending on the type of the internal buffer allocated
+		*			a corresponding value object is created in BufferVariant.
+		* \throw	Exception If the internal buffer cannot be assigned to a value held by BufferVariant.
+		*			This is the case mostly for binary data.
 		*/
 		BufferVariant GetValue() const;
 

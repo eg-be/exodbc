@@ -366,8 +366,6 @@ namespace exodbc
 		ASSERT_NO_THROW(nst.Delete(sqlstmt, false));
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
-//		SQLINTEGER testI = boost::get<SQLINTEGER>(nst[3]);
-
 		// Insert some data
 		// note the shifted columnbuffer-indexes, see #123
 		ColumnBuffer* pId = nst.GetColumnBuffer(0);
