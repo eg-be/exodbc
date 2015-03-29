@@ -164,7 +164,7 @@ namespace exodbc
 		* \todo	Untested leftover from wxWidgets.
 		 * \brief	Connect using a prepared connection-String.
 		 * 			Uses SQLDriverConnect without a window-handle to connect
-		 * \param	connectStr			 		The connect string.
+		 * \param	inConnectStr			 		The connect string.
 		 * \return	true if it succeeds, false if it fails.
 		 */
 		void         Open(const std::wstring& inConnectStr);

@@ -230,6 +230,7 @@ namespace exodbc
 		*			If columns have been defined manually using SetColumn(),
 		*			the buffers passed there are used to bind only those columns defined manually.
 		*
+		* \param	db The Database this table belongs to.
 		* \param	openFlags Set flags how to open the Table:
 		*  - TOF_CHECK_PRIVILEGES:  
 		*			If set, the database will be queried checking if the current user
@@ -474,6 +475,7 @@ namespace exodbc
 		* \brief	A wrapper to SQLColAttributes, to fetch attributes of the columns of an open result set.
 		* \details	Can only be called if a Select() is open. Only for numeric attributes.
 		* \param	columnIndex zero based index of the column available in the result set.
+		* \param	attr Value to set.
 		* \see		http://msdn.microsoft.com/en-us/library/ms713558%28v=vs.85%29.aspx
 		* \return	Attribute value.
 		* \throw	Exception
@@ -585,9 +587,29 @@ namespace exodbc
 
 		/*
 		* \brief	Set the value of the ColumnBuffer given by columnIndex.
-		* \throw	Excepton If ColumnBuffer not found, or setting the value fails.
+		* \throw	Exception If ColumnBuffer not found, or setting the value fails, for
+		*			example because it does not match the type of the buffer allocated.
 		*/
 		void		SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value);
+
+
+		///*
+		//* \brief	Get the value of the ColumnBuffer given by columnIndex.
+		//* \details	Using this Getter, no conversion is done. 
+		//* \throw	Exception If ColumnBuffer not found, or getting the value fails.
+		//*/
+		//BufferVariant GetColumnValue(SQLSMALLINT columnIndex) const;
+		//operator SQLINTEGER() const { return 33; };
+
+		//SQLINTEGER operator = (SQLSMALLINT columnIndex) const { return 33;  };
+
+		//SQLINTEGER explicit operator[](SQLSMALLINT columnIndex) const { return 33; };
+
+		//BufferVariant operator[](SQLSMALLINT columnIndex) const { BufferVariant var((SQLINTEGER)13); return var; };
+		
+		//explicit SQLSMALLINT operator[](SQLSMALLINT columnIndex) const { return 14; };
+
+		BufferVariant GetColumnValue(SQLSMALLINT columnIndex) const;
 
 
 		/*!
@@ -762,12 +784,12 @@ namespace exodbc
 		* \param	sqlCType SQL_C_TYPE of the buffer hold by pBuffer, like SQL_C_CHAR, SQL_C_SINTEGER, etc.
 		*			This information will be forwarded to the ODBC driver while binding the column.
 		*			The driver will try to convert the column-value to the given type.
-		* \param	column columnSize The number of digits of a decimal value (including the fractional part).
+		* \param	bufferSize The size of the buffer pointed to by pBuffer.
+		* \param	flags Define if a column shall be included in write-operations, is part of primary-key, etc.
+		* \param	columnSize The number of digits of a decimal value (including the fractional part).
 		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
 		* \param	decimalDigits The number of digits of the fractional part of a decimal value.
 		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
-		* \param	bufferSize The size of the buffer pointed to by pBuffer.
-		* \param	flags Define if a column shall be included in write-operations, is part of primary-key, etc.
 		*/
 		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlag flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
