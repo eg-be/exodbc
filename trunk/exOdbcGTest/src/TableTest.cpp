@@ -510,6 +510,29 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, AccessFlags)
+	{
+		// Open a read-only table
+		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
+
+		ASSERT_NO_THROW(iTable.Open(m_db));
+
+		// we should be able to set some silly value..
+		iTable.SetColumnValue(0, (SQLINTEGER)333);
+		// .. but not insert, delete or update it
+		{
+			LogLevelFatal llf;
+			DontDebugBreak ddb;
+			EXPECT_THROW(iTable.Insert(), AssertionException);
+			EXPECT_THROW(iTable.Delete(), AssertionException);
+			EXPECT_THROW(iTable.Update(), AssertionException);
+		}
+
+		// we test that writing works in all those cases where we open RW
+	}
+
+
 	// Select / GetNext
 	// ----------------
 	TEST_P(TableTest, Select)
