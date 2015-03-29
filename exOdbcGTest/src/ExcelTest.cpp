@@ -97,6 +97,56 @@ namespace exodbc
 	}
 
 
+	TEST_F(ExcelTest, SpecialQueryNameWorkaround)
+	{
+		// See Ticket #111
+		Database db;
+		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
+		Table tTable(db, L"TestTable$", L"", L"", L"", AF_READ);
+		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
+		ASSERT_NO_THROW(tTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
+		EXPECT_NO_THROW(tTable.Open(db, TOF_CHECK_EXISTANCE));
+
+		// Query
+		EXPECT_NO_THROW(tTable.Select());
+		EXPECT_TRUE(tTable.SelectNext());
+		std::wstring id, i, f, t;
+		EXPECT_NO_THROW(tTable.GetColumnValue(0, id));
+		EXPECT_NO_THROW(tTable.GetColumnValue(1, i));
+		EXPECT_NO_THROW(tTable.GetColumnValue(2, f));
+		EXPECT_NO_THROW(tTable.GetColumnValue(3, t));
+		
+		EXPECT_EQ(L"1.0", id);
+		EXPECT_EQ(L"101.0", i);
+		EXPECT_EQ(L"1.1111", f);
+		EXPECT_EQ(L"row1", t);
+
+		// It should also work if we specify the special-name before opening
+		STableInfo tableInfo;
+		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
+		// Update the special query name in there:
+		tableInfo.SetSpecialSqlQueryName(L"[TestTable$]");
+
+		Table tTable2(db, tableInfo, AF_READ);
+		ASSERT_NO_THROW(tTable2.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
+		EXPECT_NO_THROW(tTable2.Open(db, TOF_CHECK_EXISTANCE));
+
+		// Query
+		EXPECT_NO_THROW(tTable2.Select());
+		EXPECT_TRUE(tTable2.SelectNext());
+		EXPECT_NO_THROW(tTable2.GetColumnValue(0, id));
+		EXPECT_NO_THROW(tTable2.GetColumnValue(1, i));
+		EXPECT_NO_THROW(tTable2.GetColumnValue(2, f));
+		EXPECT_NO_THROW(tTable2.GetColumnValue(3, t));
+
+		EXPECT_EQ(L"1.0", id);
+		EXPECT_EQ(L"101.0", i);
+		EXPECT_EQ(L"1.1111", f);
+		EXPECT_EQ(L"row1", t);
+	}
+
+
 	TEST_F(ExcelTest, SelectManualWCharValues)
 	{
 		Database db;

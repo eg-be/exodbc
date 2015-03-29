@@ -947,12 +947,20 @@ namespace exodbc
 			searchedTable = true;
 		}
 
-		// If we are asked to check existence and have not just proved we exist, find table
+		// If we are asked to check existence and have not just proved we exist just find a table
+		// Search using the info from the now available m_tableInfo
 		if (((openFlags & TOF_CHECK_EXISTANCE) == TOF_CHECK_EXISTANCE) && !searchedTable)
 		{
 			// Will throw if not one is found
-			m_tableInfo = db.FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
-			m_haveTableInfo = true;
+			std::wstring catalogName = m_tableInfo.m_catalogName;
+			std::wstring typeName = m_tableInfo.m_tableType;
+			if (db.GetDbms() == DatabaseProduct::EXCEL)
+			{
+				// workaround for #111
+				catalogName = L"";
+				typeName = L"";
+			}
+			db.FindOneTable(m_tableInfo.m_tableName, m_tableInfo.m_schemaName, catalogName, typeName);
 			searchedTable = true;
 		}
 
