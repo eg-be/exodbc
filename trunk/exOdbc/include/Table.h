@@ -286,10 +286,11 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Get the OpenMode of this Table
-		* \return	True if this table was created using READ_ONLY
+		* \brief	Checks if we can only read from this table.
+		* \return	True if this table has the flag AF_READ set and, none of the flags
+		*			AF_UPDATE, AF_INSERT or AF_DELETE set.
 		*/
-		bool		IsQueryOnly() const throw()  { return TestAccessFlag(AF_READ) && !TestAccessFlag(AF_WRITE); }
+		bool		IsQueryOnly() const throw()  { return TestAccessFlag(AF_READ) && !(TestAccessFlag(AF_UPDATE) || TestAccessFlag(AF_INSERT) || TestAccessFlag(AF_DELETE)); };
 
 
 		/*!
