@@ -587,6 +587,8 @@ namespace exodbc
 
 		/*!
 		* \brief	Set the value of the ColumnBuffer given by columnIndex.
+		* \param	columnIndex Zero based ColumnBuffer index.
+		* \param	value Value to set.
 		* \throw	Exception If ColumnBuffer not found, or setting the value fails, for
 		*			example because it does not match the type of the buffer allocated.
 		*/
@@ -594,13 +596,38 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Set a binary value of the ColumnBuffer given by columnIndex.
+		* \details	This will fail if the corresponding ColumnBuffer is not bound as a
+		*			binary buffer.
+		* \param	columnIndex Zero based ColumnBuffer index.
+		* \param	buffer Binary value to set.
+		* \param	bufferSize length of buffer.
+		* \throw	Exception If ColumnBuffer not found, or setting the value fails.
+		*/
+		void		SetBinaryValue(SQLSMALLINT columnIndex, const SQLCHAR* buffer, SQLINTEGER bufferSize);
+
+
+		/*!
 		* \brief	Get the value of the ColumnBuffer given by columnIndex as BufferVariant.
+		* \param	columnIndex Zero based ColumnBuffer index.
 		* \throw	Exception If ColumnBuffer not found, or the value held by the ColumnBuffer
-		*			cannot be returned as BufferVariant.
+		*			cannot be returned as BufferVariant or if the Column is NULL.
 		* \see		ColumnBuffer::GetValue()
 		* \see		BufferVariant
 		*/
-		BufferVariant GetVariantValue(SQLSMALLINT columnIndex) const;
+		BufferVariant GetColumnValue(SQLSMALLINT columnIndex) const;
+
+
+		/*!
+		* \brief	Get the value of a binary ColumnBuffer given by columnIndex.
+		* \details	Returns a pointer to the buffer of the corresponding ColumnBuffer.
+		*			Every column, regardless of its type, can be retrieved.
+		* \param	columnIndex Zero based ColumnBuffer index.
+		* \param	bufferSize Will be filled with the size of the buffer returned.
+		* \throw	Exception If ColumnBuffer not found, or if the Column is NULL.
+		*/
+		const SQLCHAR* GetBinaryValue(SQLSMALLINT columnIndex, SQLINTEGER& bufferSize) const;
+
 
 
 		/*!
