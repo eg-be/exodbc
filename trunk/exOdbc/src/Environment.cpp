@@ -135,20 +135,20 @@ namespace exodbc
 		SQLRETURN ret;
 		switch(version)
 		{
-		case OV_2:
+		case OdbcVersion::V_2:
 			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC2, NULL);
 			break;
-		case OV_3:
+		case OdbcVersion::V_3:
 			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
 			break;
-		case OV_3_8:
+		case OdbcVersion::V_3_8:
 			ret = SQLSetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
 			break;
 		default:
-			THROW_WITH_SOURCE(IllegalArgumentException, (boost::wformat(L"Unknown ODBC Version value: %d") % version).str());
+			THROW_WITH_SOURCE(IllegalArgumentException, (boost::wformat(L"Unknown ODBC Version value: %d") % (int) version).str());
 		}
 
-		THROW_IFN_SUCCEEDED_MSG(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_henv, (boost::wformat(L"Failed to set SQL_ATTR_ODBC_VERSION to value %d") % version).str());
+		THROW_IFN_SUCCEEDED_MSG(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_henv, (boost::wformat(L"Failed to set SQL_ATTR_ODBC_VERSION to value %d") % (int) version).str());
 	}
 
 
@@ -162,14 +162,14 @@ namespace exodbc
 		switch(value)
 		{
 		case SQL_OV_ODBC2:
-			return OV_2;
+			return OdbcVersion::V_2;
 		case SQL_OV_ODBC3:
-			return OV_3;
+			return OdbcVersion::V_3;
 		case SQL_OV_ODBC3_80:
-			return OV_3_8;
+			return OdbcVersion::V_3_8;
 		}
 
-		return OV_UNKNOWN;
+		return OdbcVersion::UNKNOWN;
 	}
 
 

@@ -42,7 +42,7 @@ namespace exodbc
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
 		ASSERT_NO_THROW(m_env.AllocateEnvironmentHandle());
-		ASSERT_NO_THROW(m_env.SetOdbcVersion(OV_3));
+		ASSERT_NO_THROW(m_env.SetOdbcVersion(OdbcVersion::V_3));
 
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));

@@ -106,7 +106,7 @@ namespace exodbc
 		m_hstmtExecSql = SQL_NULL_HSTMT;
 
 		// Environment ODBC-Version unknown
-		m_envOdbcVersion = OV_UNKNOWN;
+		m_envOdbcVersion = OdbcVersion::UNKNOWN;
 
 		// Dbms unknwon
 		m_dbmsType      = dbmsUNIDENTIFIED;
@@ -191,7 +191,7 @@ namespace exodbc
 			if (m_envOdbcVersion > connectionVersion)
 			{
 				// \todo: Probably we should throw here and fail totally
-				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % m_envOdbcVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer %connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName %connectionVersion).str());
+				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int) m_envOdbcVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer % (int) connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName % (int) connectionVersion).str());
 			}
 
 			// Try to detect the type - this will update our internal type on the first call
@@ -1054,7 +1054,7 @@ namespace exodbc
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
 		exASSERT( ! m_dbInf.m_odbcVer.empty());
 
-		OdbcVersion ov = OV_UNKNOWN;
+		OdbcVersion ov = OdbcVersion::UNKNOWN;
 		std::vector<std::wstring> versions;
 		boost::split(versions, m_dbInf.m_odbcVer, boost::is_any_of(L"."));
 		if (versions.size() == 2)
@@ -1065,15 +1065,15 @@ namespace exodbc
 				short minor = boost::lexical_cast<short>(versions[1]);
 				if (major >= 3 && minor >= 80)
 				{
-					ov = OV_3_8;
+					ov = OdbcVersion::V_3_8;
 				}
 				else if (major >= 3)
 				{
-					ov = OV_3;
+					ov = OdbcVersion::V_3;
 				}
 				else if (major >= 2)
 				{
-					ov = OV_2;
+					ov = OdbcVersion::V_2;
 				}
 			}
 			catch (boost::bad_lexical_cast e)

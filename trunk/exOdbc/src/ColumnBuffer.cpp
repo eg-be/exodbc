@@ -94,7 +94,7 @@ namespace exodbc
 		, m_columnNr(0)
 		, m_bufferPtr(bufferPtrVariant)
 		, m_queryName(queryName)
-		, m_odbcVersion(OV_UNKNOWN)
+		, m_odbcVersion(OdbcVersion::UNKNOWN)
 		, m_decimalDigits(decimalDigits)
 		, m_columnSize(columnSize)
 		, m_hStmt(SQL_NULL_HSTMT)
@@ -632,7 +632,7 @@ namespace exodbc
 			return SQL_C_TYPE_TIMESTAMP;
 #if HAVE_MSODBCSQL_H
 		case SQL_SS_TIME2:
-			if (m_odbcVersion >= OV_3_8)
+			if (m_odbcVersion >= OdbcVersion::V_3_8)
 			{
 				return SQL_C_SS_TIME2;
 			}

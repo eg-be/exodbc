@@ -47,7 +47,7 @@ namespace exodbc
 		m_odbcInfo = GetParam();
 //		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 		m_env.AllocateEnvironmentHandle();
-		m_env.SetOdbcVersion(OV_3);
+		m_env.SetOdbcVersion(OdbcVersion::V_3);
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
@@ -129,7 +129,7 @@ namespace exodbc
 	TEST_P(DatabaseTest, Open)
 	{		
 		// Open an existing db by passing the Env to the ctor
-		Environment env(OV_3);
+		Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(env.HasEnvironmentHandle());
 		Database db(env);
 		EXPECT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
