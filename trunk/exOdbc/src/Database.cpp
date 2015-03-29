@@ -462,7 +462,7 @@ namespace exodbc
 	STableInfo Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
 	{
 		// Query the tables that match
-		std::vector<STableInfo> tables = FindTables(tableName, schemaName, catalogName, tableType);
+		STableInfosVector tables = FindTables(tableName, schemaName, catalogName, tableType);
 
 		if(tables.size() == 0)
 		{
@@ -482,12 +482,12 @@ namespace exodbc
 	}
 
 
-	std::vector<SSqlTypeInfo> Database::ReadDataTypesInfo()
+	SqlTypeInfosVector Database::ReadDataTypesInfo()
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
 		exASSERT(m_hstmt != SQL_NULL_HSTMT);
 
-		std::vector<SSqlTypeInfo> types;
+		SqlTypeInfosVector types;
 
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_hstmt, true, true);
@@ -622,14 +622,14 @@ namespace exodbc
 	}
 
 
-	std::vector<STableInfo> Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
+	STableInfosVector Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
 	{
 		exASSERT(IsOpen());
 
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_hstmt, true, true);
 
-		std::vector<STableInfo> tables;
+		STableInfosVector tables;
 
 		std::unique_ptr<SQLWCHAR[]> buffCatalog(new SQLWCHAR[m_dbInf.GetMaxCatalogNameLen()]);
 		std::unique_ptr<SQLWCHAR[]> buffSchema(new SQLWCHAR[m_dbInf.GetMaxSchemaNameLen()]);
@@ -817,7 +817,7 @@ namespace exodbc
 	}
 
 
-	std::vector<SColumnInfo> Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
+	ColumnInfosVector Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
 	{
 		exASSERT(IsOpen());
 
@@ -829,7 +829,7 @@ namespace exodbc
 	}
 
 
-	std::vector<SColumnInfo> Database::ReadTableColumnInfo(const STableInfo& table) const
+	ColumnInfosVector Database::ReadTableColumnInfo(const STableInfo& table) const
 	{
 		exASSERT(IsOpen());
 
@@ -837,7 +837,7 @@ namespace exodbc
 		StatementCloser stmtCloser(m_hstmt, true, true);
 
 		// Clear result
-		std::vector<SColumnInfo> columns;
+		ColumnInfosVector columns;
 
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
@@ -908,7 +908,7 @@ namespace exodbc
 
 		dbInf.m_tables = FindTables(L"", L"", L"", L"");
 
-		std::vector<STableInfo>::const_iterator it;
+		STableInfosVector::const_iterator it;
 		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
 		{
 			const STableInfo& table = *it;

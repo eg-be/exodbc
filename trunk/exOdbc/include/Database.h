@@ -339,7 +339,7 @@ namespace exodbc
 		 * \return		Columns of passed table.
 		 * \throw Exception If reading ColumnInfo fails.
 		 */
-		std::vector<SColumnInfo>	ReadTableColumnInfo(const STableInfo& table) const;
+		ColumnInfosVector	ReadTableColumnInfo(const STableInfo& table) const;
 
 
 		/*!
@@ -352,7 +352,7 @@ namespace exodbc
 		 * \return		Columns of passed table.
 		 * \throw Exception If reading ColumnInfo fails or not exactly one table matches.
 		 */
-		std::vector<SColumnInfo>	ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
+		ColumnInfosVector	ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
 
 
 		/*!
@@ -368,7 +368,7 @@ namespace exodbc
 		 * \return	The tables found that match the search-criteria.
 		 * \throw Exception			If querying the database fails.
 		 */
-		std::vector<STableInfo>		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
+		STableInfosVector		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
 
 
 		/*!
@@ -573,7 +573,7 @@ namespace exodbc
 		* \return	Types Filled with data types supported by the db
 		* \throw	Exception If the internal statement handle is not allocated, or reading fails.
 		*/
-		std::vector<SSqlTypeInfo> ReadDataTypesInfo();
+		SqlTypeInfosVector ReadDataTypesInfo();
 
 		
 		/*!
@@ -633,7 +633,7 @@ namespace exodbc
 		// -------
 		SDbInfo				m_dbInf;
 
-		std::vector<SSqlTypeInfo> m_datatypes;	///< Queried from DB during Open
+		SqlTypeInfosVector m_datatypes;	///< Queried from DB during Open
 		bool				m_dbIsOpen;			///< Set to true after SQLConnect was successful
 		bool				m_dbOpenedWithConnectionString;  ///< Was the database connection Opened with a connection string
 		std::wstring		m_dsn;             ///< Data source name

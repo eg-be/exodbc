@@ -68,11 +68,11 @@ namespace exodbc
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
 		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
-		std::vector<STableInfo> tables;
+		STableInfosVector tables;
 		ASSERT_NO_THROW(tables = db.FindTables(L"", L"", L"", L""));
 		// Must contain our sheet 'TestTable$'
 		bool foundTestTableSheet = false;
-		std::vector<STableInfo>::const_iterator it;
+		STableInfosVector::const_iterator it;
 		for (it = tables.begin(); it != tables.end(); it++)
 		{
 			if (it->m_tableName == L"TestTable$")

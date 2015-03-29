@@ -270,6 +270,12 @@ namespace exodbc
 		std::wstring m_dsn;			///< DSN name.
 		std::wstring m_description;	///< Description.
 	};
+	
+	/*!
+	* \typedef DataSourcesVector
+	* \brief std::vector of SDataSource objects.
+	*/
+	typedef std::vector<SDataSource> DataSourcesVector;
 
 
 	/*!
@@ -374,6 +380,12 @@ namespace exodbc
 		std::wstring ToStr() const;
 	};
 
+	/*!
+	* \typedef SqlTypeInfosVector
+	* \brief std::vector of SSqlTypeInfo objects.
+	*/
+	typedef std::vector<SSqlTypeInfo> SqlTypeInfosVector;
+
 
 	/*!
 	 * \struct	SColumnInfo
@@ -420,8 +432,13 @@ namespace exodbc
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
 		std::wstring		GetSqlName(QueryNameFlags = QNF_TABLE | QNF_COLUMN) const;
-
 	};
+	
+	/*!
+	* \typedef ColumnInfosVector
+	* \brief std::vector of SColumnInfo objects.
+	*/
+	typedef std::vector<SColumnInfo> ColumnInfosVector;
 
 
 	/*!
@@ -453,6 +470,12 @@ namespace exodbc
 		bool				m_hasSpecialSqlQueryName;
 		std::wstring		m_specialSqlQueryName;
 	};
+	
+	/*!
+	* \typedef STableInfosVector
+	* \brief std::vector of STableInfo objects.
+	*/
+	typedef std::vector<STableInfo> STableInfosVector;
 
 
 	/*!
@@ -461,7 +484,7 @@ namespace exodbc
 	 */
 	struct EXODBCAPI SDbCatalogInfo
 	{
-		std::vector<STableInfo> m_tables;
+		STableInfosVector m_tables;
 		std::set<std::wstring> m_catalogs;
 		std::set<std::wstring> m_schemas;
 	};
