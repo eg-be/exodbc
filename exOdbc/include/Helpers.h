@@ -450,6 +450,8 @@ namespace exodbc
 	};
 }
 
+// LOG Helpers
+// ===========
 
 #define LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, logLevel) \
 	do { \
@@ -619,5 +621,11 @@ namespace exodbc
 	} while(0)
 
 
+// Compiler Helpers
+// ================
+#define HIDE_UNUSED(object) \
+	do { \
+		(void)object; \
+	} while(0)
 
 #endif // HELPERS_H
