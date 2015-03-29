@@ -215,6 +215,7 @@ namespace exodbc
 		}
 		catch (const Exception& ex)
 		{
+			HIDE_UNUSED(ex);
 			// Free statements and rethrow. Do not allow to throw from freeing
 			m_hstmt = FreeStatementHandle(m_hstmt, FSTF_NO_THROW);
 			m_hstmtExecSql = FreeStatementHandle(m_hstmtExecSql, FSTF_NO_THROW);
@@ -302,6 +303,7 @@ namespace exodbc
 		}
 		catch (const Exception& ex)
 		{
+			HIDE_UNUSED(ex);
 			// Try to disconnect from the data source
 			ret = SQLDisconnect(m_hdbc);
 			if ( ! SQL_SUCCEEDED(ret))

@@ -755,10 +755,28 @@ namespace exodbc
 	}
 
 
-	BufferVariant Table::GetVariantValue(SQLSMALLINT columnIndex) const
+	void Table::SetBinaryValue(SQLSMALLINT columnIndex, const SQLCHAR* buffer, SQLINTEGER bufferSize)
 	{
 		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		pBuff->SetBinaryValue(buffer, bufferSize);
+	}
+
+
+	BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		exASSERT(!pBuff->IsNull());
 		return pBuff->GetValue();
+	}
+
+
+	const SQLCHAR* Table::GetBinaryValue(SQLSMALLINT columnIndex, SQLINTEGER& bufferSize) const
+	{
+		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		exASSERT(!pBuff->IsNull());
+		const SQLCHAR* pBuffer = *pBuff;
+		bufferSize = pBuff->GetBufferSize();
+		return pBuffer;
 	}
 
 
