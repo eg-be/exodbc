@@ -101,7 +101,7 @@ namespace exodbc
 		EXPECT_EQ(TransactionIsolationMode::SERIALIZABLE, tiMode);
 		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
-		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 #if HAVE_MSODBCSQL_H
 			tiMode = TransactionIsolationMode::SNAPSHOT;
@@ -230,15 +230,15 @@ namespace exodbc
 		m_odbcInfo = GetParam();
 		if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"DB2"))
 		{
-			EXPECT_TRUE(m_db.Dbms() == dbmsDB2);
+			EXPECT_TRUE(m_db.Dbms() == DatabaseProduct::DB2);
 		}
 		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"MySql"))
 		{
-			EXPECT_TRUE(m_db.Dbms() == dbmsMY_SQL);
+			EXPECT_TRUE(m_db.Dbms() == DatabaseProduct::MY_SQL);
 		}
 		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"SqlServer"))
 		{
-			EXPECT_TRUE(m_db.Dbms() == dbmsMS_SQL_SERVER);
+			EXPECT_TRUE(m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER);
 		}
 		else
 		{
@@ -276,7 +276,7 @@ namespace exodbc
 			// I guess I got it now: If we change the Transaction-mode on the Connection-Handle, we need to get a new statement-handle afterwards or so:
 			// Or: If we set the transaction-mode in the database itself at the very beginning, before the statement-handle of the database is opened
 			// thing work fine, without the need to change the transaction-mode
-			if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+			if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 			{
 #if HAVE_MSODBCSQL_H
 				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TransactionIsolationMode::SNAPSHOT));
@@ -342,13 +342,13 @@ namespace exodbc
 		EXPECT_NO_THROW(cats = m_db.ReadCatalogs());
 		switch(m_db.Dbms())
 		{
-		case dbmsDB2:
+		case DatabaseProduct::DB2:
 			// DB2 does not support catalogs. it reports zero catalogs
 			EXPECT_EQ(0, cats.size());
 			break;
 
-		case dbmsMS_SQL_SERVER:
-		case dbmsMY_SQL:
+		case DatabaseProduct::MS_SQL_SERVER:
+		case DatabaseProduct::MY_SQL:
 			// Those report our test-db as a catalog
 			EXPECT_TRUE(std::find(cats.begin(), cats.end(), L"exodbc") != cats.end());
 			break;
@@ -361,17 +361,17 @@ namespace exodbc
 		EXPECT_NO_THROW(schemas = m_db.ReadSchemas());
 		switch(m_db.Dbms())
 		{
-		case dbmsDB2:
+		case DatabaseProduct::DB2:
 			// DB2 reports our test-db as a schema
 			EXPECT_TRUE(schemas.size() > 0);
 			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"EXODBC") != schemas.end());
 			break;
-		case dbmsMY_SQL:
+		case DatabaseProduct::MY_SQL:
 			// Mysql reports one schema with an empty name
 			EXPECT_TRUE(schemas.size() == 1);
 			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"") != schemas.end());
 			break;
-		case dbmsMS_SQL_SERVER:
+		case DatabaseProduct::MS_SQL_SERVER:
 			// ms sql server reported at least 3 schemas:
 			EXPECT_TRUE(schemas.size() >= 3);
 			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), L"exodbc") != schemas.end());
@@ -401,7 +401,7 @@ namespace exodbc
 		std::wstring typeName;
 		switch(m_db.Dbms())
 		{
-		case dbmsMY_SQL:
+		case DatabaseProduct::MY_SQL:
 			// We know that mySql uses catalogs, not schemas:
 			tableName = L"integertypes";
 			schemaName = L"";
@@ -409,14 +409,14 @@ namespace exodbc
 			typeName = L"";
 			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #76");
 			break;
-		case dbmsDB2:
+		case DatabaseProduct::DB2:
 			// We know that DB2 uses schemas:
 			tableName = L"INTEGERTYPES";
 			schemaName = L"EXODBC";
 			catalogName = L"";
 			typeName = L"";
 			break;
-		case dbmsMS_SQL_SERVER:
+		case DatabaseProduct::MS_SQL_SERVER:
 			// And ms uses catalogs, which map to dbs and schemaName
 			tableName = L"integertypes";
 			schemaName = L"exodbc";
@@ -498,21 +498,21 @@ namespace exodbc
 		std::wstring typeName;
 		switch(m_db.Dbms())
 		{
-		case dbmsMY_SQL:
+		case DatabaseProduct::MY_SQL:
 			// We know that mySql uses catalogs, not schemas:
 			tableName = L"numerictypes";
 			schemaName = L"";
 			catalogName = L"exodbc";
 			typeName = L"";
 			break;
-		case dbmsDB2:
+		case DatabaseProduct::DB2:
 			// We know that DB2 uses schemas:
 			tableName = L"NUMERICTYPES";
 			schemaName = L"EXODBC";
 			catalogName = L"";
 			typeName = L"";
 			break;
-		case dbmsMS_SQL_SERVER:
+		case DatabaseProduct::MS_SQL_SERVER:
 			// And ms uses catalogs, which map to dbs and schemaName
 			tableName = L"numerictypes";
 			schemaName = L"exodbc";
@@ -540,19 +540,19 @@ namespace exodbc
 		std::wstring catalogName;
 		switch(m_db.Dbms())
 		{
-		case dbmsMY_SQL:
+		case DatabaseProduct::MY_SQL:
 			// We know that mySql uses catalogs, not schemas:
 			tableName = L"integertypes";
 			schemaName = L"";
 			catalogName = L"exodbc";
 			break;
-		case dbmsDB2:
+		case DatabaseProduct::DB2:
 			// We know that DB2 uses schemas (and uppercase):
 			tableName = L"INTEGERTYPES";
 			schemaName = L"EXODBC";
 			catalogName = L"";
 			break;
-		case dbmsMS_SQL_SERVER:
+		case DatabaseProduct::MS_SQL_SERVER:
 			// And ms uses catalogs, which map to dbs and schemaName
 			tableName = L"integertypes";
 			schemaName = L"exodbc";
@@ -607,11 +607,11 @@ namespace exodbc
 		SDbCatalogInfo cat;
 		EXPECT_NO_THROW( cat = m_db.ReadCompleteCatalog());
 		// TODO: This is confusing. DB2 reports schemas, what is correct, but mysql reports catalogs?? wtf?
-		if(m_db.Dbms() == dbmsDB2)
+		if (m_db.Dbms() == DatabaseProduct::DB2)
 		{
 			EXPECT_TRUE(cat.m_schemas.find(L"EXODBC") != cat.m_schemas.end());
 		}
-		else if(m_db.Dbms() == dbmsMY_SQL)
+		else if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 		{
 			EXPECT_TRUE(cat.m_catalogs.find(L"exodbc") != cat.m_catalogs.end());
 		}
@@ -628,17 +628,17 @@ namespace exodbc
 		int nrCols = 4;
 		switch(m_db.Dbms())
 		{
-		case dbmsDB2:
+		case DatabaseProduct::DB2:
 			// DB2 has schemas
 			tableName = L"INTEGERTYPES";
 			schemaName = L"EXODBC";
 			break;
-		case dbmsMY_SQL:
+		case DatabaseProduct::MY_SQL:
 			// mysql has catalogs
 			tableName = L"integertypes";
 			catalogName = L"exodbc";
 			break;
-		case dbmsMS_SQL_SERVER:
+		case DatabaseProduct::MS_SQL_SERVER:
 			// ms has catalogs and schemas
 			tableName = L"integertypes";
 			catalogName = L"exodbc";

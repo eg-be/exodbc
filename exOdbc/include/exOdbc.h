@@ -140,26 +140,13 @@ namespace exodbc
 	* \brief	Known databases, identified by their product name while connecting the Database.
 	* \details	For the database products listed here, some tests should exists.
 	*/
-	enum DatabaseProduct
+	enum class DatabaseProduct
 	{
-		dbmsUNIDENTIFIED,	///< Unknown DB
-		//dbmsORACLE,
-		//dbmsSYBASE_ASA,        // Adaptive Server Anywhere
-		//dbmsSYBASE_ASE,        // Adaptive Server Enterprise
-		dbmsMS_SQL_SERVER,	///< Microsoft SQL Server
-		dbmsMY_SQL,			///< MySQL
-		//dbmsPOSTGRES,
-		//dbmsACCESS,
-		//dbmsDBASE,
-		//dbmsINFORMIX,
-		//dbmsVIRTUOSO,
-		dbmsDB2,			///< IBM DB2
-		dbmsEXCEL,			///< Microsoft Excel
-		//dbmsINTERBASE,
-		//dbmsPERVASIVE_SQL,
-		//dbmsXBASE_SEQUITER,
-		//dbmsFIREBIRD,
-		//dbmsMAXDB,
+		UNKNOWN,		///< Unknown DB
+		MS_SQL_SERVER,	///< Microsoft SQL Server
+		MY_SQL,			///< MySQL
+		DB2,			///< IBM DB2
+		EXCEL,			///< Microsoft Excel
 	};
 
 

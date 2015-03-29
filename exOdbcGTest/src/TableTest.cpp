@@ -170,7 +170,7 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenAutoWithUnsupportedColumn)
 	{
-		if (m_db.Dbms() == dbmsMY_SQL)
+		if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 		{
 			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
 			return;
@@ -204,7 +204,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectFromAutoWithUnsupportedColumn)
 	{
-		if (m_db.Dbms() == dbmsMY_SQL)
+		if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 		{
 			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
 			return;
@@ -235,7 +235,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertIntoAutoWithUnsupportedColumn)
 	{
-		if (m_db.Dbms() == dbmsMY_SQL)
+		if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 		{
 			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
 			return;
@@ -289,7 +289,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateIntoAutoWithUnsupportedColumn)
 	{
-		if (m_db.Dbms() == dbmsMY_SQL)
+		if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 		{
 			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
 			return;
@@ -345,7 +345,7 @@ namespace exodbc
 
 	TEST_P(TableTest, DeleteFromAutoWithUnsupportedColumn)
 	{
-		if (m_db.Dbms() == dbmsMY_SQL)
+		if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 		{
 			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
 			return;
@@ -563,7 +563,7 @@ namespace exodbc
 		// Now delete the second record: We cannot do that if we do not have support for What are Multiple Active Statements (MAS)?
 		// MS SQL Server does not have this enabled by default
 		// See Ticket # 63 and # 75
-		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			LOG_WARNING(L"This test is known to fail with Microsoft SQL Server 2014 (and probably others too), see Ticket #75");
 		}
@@ -601,14 +601,14 @@ namespace exodbc
 		// \todo: Check some really big table, with billions of rows
 		SQLUBIGINT some;
 		std::wstring whereStmt = L"tdouble > 0";
-		if (m_db.Dbms() == dbmsDB2)
+		if (m_db.Dbms() == DatabaseProduct::DB2)
 		{
 			whereStmt = L"TDOUBLE > 0";
 		}
 		EXPECT_NO_THROW(some = table.Count(whereStmt));
 		EXPECT_EQ(1, some);
 		whereStmt = L"tdouble > 0 OR tfloat > 0";
-		if (m_db.Dbms() == dbmsDB2)
+		if (m_db.Dbms() == DatabaseProduct::DB2)
 		{
 			whereStmt = L"TDOUBLE > 0 OR TFLOAT > 0";
 		}
@@ -1202,11 +1202,11 @@ namespace exodbc
 		EXPECT_TRUE(dTable.SelectNext());
 		EXPECT_NO_THROW(dTable.GetColumnValue(3, timestamp));
 		// In IBM DB2 we have 6 digits for the fractions of a timestamp 123456 turns into 123'456'000
-		if (m_db.Dbms() == dbmsDB2)
+		if (m_db.Dbms() == DatabaseProduct::DB2)
 		{
 			EXPECT_EQ(123456000, timestamp.fraction);
 		}
-		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		else if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			// ms has 3 digits 123 turns into 123'000'000
 			EXPECT_EQ(123000000, timestamp.fraction);
@@ -1222,7 +1222,7 @@ namespace exodbc
 		EXPECT_TRUE(env38.HasEnvironmentHandle());
 		Database db38(env38);
 		EXPECT_TRUE(db38.HasConnectionHandle());
-		if (m_db.Dbms() == dbmsMY_SQL)
+		if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 		{
 			// My SQL does not support 3.8, the database will warn about a version-mismatch and fall back to 3.0. we know about that.
 			// \todo: Open a ticket
@@ -1248,7 +1248,7 @@ namespace exodbc
 		EXPECT_EQ(13, t2.hour);
 		EXPECT_EQ(55, t2.minute);
 		EXPECT_EQ(56, t2.second);
-		if (db38.Dbms() == dbmsMS_SQL_SERVER)
+		if (db38.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			// MS should also have fractions, configurable, here set to 7: 1234567 -> 123'456'700
 			EXPECT_TRUE(db38.GetMaxSupportedOdbcVersion() >= OdbcVersion::V_3_8);
@@ -1313,12 +1313,12 @@ namespace exodbc
 		EXPECT_NO_THROW(dTable.GetColumnValue(2, sTime));
 		EXPECT_NO_THROW(dTable.GetColumnValue(3, sTimestamp));
 
-		if (m_db.Dbms() == dbmsDB2)
+		if (m_db.Dbms() == DatabaseProduct::DB2)
 		{
 			EXPECT_EQ(L"13:55:56", sTime);
 			EXPECT_EQ(L"1983-01-26 13:55:56.000000", sTimestamp);
 		}
-		else if (m_db.Dbms() == dbmsMS_SQL_SERVER)
+		else if (m_db.Dbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			EXPECT_EQ(L"13:55:56.1234567", sTime);
 			EXPECT_EQ(L"1983-01-26 13:55:56.000", sTimestamp);
@@ -1782,7 +1782,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Try to delete eventually available leftovers, ignore if none exists
-		if (m_db.Dbms() == dbmsMY_SQL)
+		if (m_db.Dbms() == DatabaseProduct::MY_SQL)
 		{
 			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #77");
 		}
@@ -1911,7 +1911,7 @@ namespace exodbc
 		timestamp.hour = 13;
 		timestamp.minute = 55;
 		timestamp.second = 03;
-		if (m_db.Dbms() != dbmsMY_SQL)
+		if (m_db.Dbms() != DatabaseProduct::MY_SQL)
 		{
 			timestamp.fraction = 123000000;
 		}
