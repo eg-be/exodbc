@@ -417,17 +417,17 @@ namespace exodbc
 
 		switch(mode)
 		{
-		case AllCatalogs:
+		case ReadCatalogInfoMode::AllCatalogs:
 			catalogName = SQL_ALL_CATALOGS;
 			colNr = 1;
 			charLen = m_dbInf.GetMaxCatalogNameLen();
 			break;
-		case AllSchemas:
+		case ReadCatalogInfoMode::AllSchemas:
 			schemaName = SQL_ALL_SCHEMAS;
 			colNr = 2;
 			charLen = m_dbInf.GetMaxSchemaNameLen();
 			break;
-		case AllTableTypes:
+		case ReadCatalogInfoMode::AllTableTypes:
 			tableTypeName = SQL_ALL_TABLE_TYPES;
 			colNr = 4;
 			charLen = m_dbInf.GetMaxTableTypeNameLen();
@@ -612,7 +612,7 @@ namespace exodbc
 		retcode = SQLExecDirect(m_hstmtExecSql, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
 		if (retcode != SQL_SUCCESS)
 		{
-			if (!(mode == NotFailOnNoData && retcode == SQL_NO_DATA))
+			if (!(mode == ExecFailMode::NotFailOnNoData && retcode == SQL_NO_DATA))
 			{
 				SqlResultException ex(L"SQLExecDirect", retcode, (boost::wformat(L"Failed to execute Stmt '%s'") % sqlStmt).str());
 				SET_EXCEPTION_SOURCE(ex);

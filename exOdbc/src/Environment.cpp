@@ -182,9 +182,9 @@ namespace exodbc
 		std::vector<SDataSource> dataSources;
 
 		SQLUSMALLINT direction = SQL_FETCH_FIRST;
-		if(mode == System)
+		if (mode == ListMode::System)
 			direction = SQL_FETCH_FIRST_SYSTEM;
-		else if(mode == User)
+		else if (mode == ListMode::User)
 			direction = SQL_FETCH_FIRST_USER;
 
 		// We need two passed, I dont know the max length of the description

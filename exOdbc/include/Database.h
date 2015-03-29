@@ -203,7 +203,7 @@ namespace exodbc
 		void         Close();
 
 
-		enum ExecFailMode 
+		enum class ExecFailMode 
 		{ 
 			FailOnNoData,		///< Return False is ExecSql returns SQL_NO_DATA
 			NotFailOnNoData		///< Return True if ExecSql returns SLQ_NO_DATA
@@ -216,7 +216,7 @@ namespace exodbc
 		 * 					clause and no records are deleted.
 		 * \throw	Exception If executing SQL failed, or depending on mode if no records are affected.
 		 */
-		void         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = NotFailOnNoData);
+		void         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = ExecFailMode::NotFailOnNoData);
 
 
 		/*!
@@ -251,7 +251,7 @@ namespace exodbc
 		 * \return	Catalog names found.
 		 * \throw	Exception If reading catalogs fails.
 		 */
-		std::vector<std::wstring>	ReadCatalogs()		{ return ReadCatalogInfo(AllCatalogs); };
+		std::vector<std::wstring>	ReadCatalogs()		{ return ReadCatalogInfo(ReadCatalogInfoMode::AllCatalogs); };
 
 
 		/*!
@@ -260,7 +260,7 @@ namespace exodbc
 		 * \return	Schema names found.
 		 * \throw	Exception if reading schemas fails.
 		 */
-		std::vector<std::wstring>	ReadSchemas()			{ return ReadCatalogInfo(AllSchemas); };
+		std::vector<std::wstring>	ReadSchemas()			{ return ReadCatalogInfo(ReadCatalogInfoMode::AllSchemas); };
 
 
 		/*!
@@ -269,7 +269,7 @@ namespace exodbc
 		 * \return	Table type names found.
 		 * \throw	Exception If reading table types fails.
 		 */
-		std::vector<std::wstring>	ReadTableTypes()	{ return ReadCatalogInfo(AllTableTypes); };
+		std::vector<std::wstring>	ReadTableTypes()	{ return ReadCatalogInfo(ReadCatalogInfoMode::AllTableTypes); };
 
 
 		/*!
@@ -614,7 +614,7 @@ namespace exodbc
 		void             OpenImpl();
 
 		
-		enum ReadCatalogInfoMode
+		enum class ReadCatalogInfoMode
 		{
 			AllCatalogs,	///< Query all catalog names.
 			AllSchemas,		///< Query all schema names.

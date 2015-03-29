@@ -202,10 +202,10 @@ namespace exodbc
 		ws << L"Not Supported ";
 		switch (m_notSupported)
 		{
-		case NS_SQL_C_TYPE:
+		case Type::SQL_C_TYPE:
 			ws << L"SQL C Type " << SqLCType2s(m_smallInt) << L" (" << m_smallInt << L")";
 			break;
-		case NS_SQL_TYPE:
+		case Type::SQL_TYPE:
 			ws << L"SQL Type" << SqlType2s(m_smallInt) << L" (" << m_smallInt << L")";
 			break;
 		}

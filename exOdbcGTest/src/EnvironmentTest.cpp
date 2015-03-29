@@ -107,7 +107,7 @@ namespace exodbc
 		ASSERT_TRUE(env.HasEnvironmentHandle());
 
 		vector<SDataSource> dataSources;
-		ASSERT_NO_THROW(dataSources = env.ListDataSources(Environment::All));
+		ASSERT_NO_THROW(dataSources = env.ListDataSources(Environment::ListMode::All));
 
 		// Expect that we find our DataSource in the list
 		bool foundDataSource = false;
