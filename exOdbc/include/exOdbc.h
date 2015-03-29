@@ -102,15 +102,15 @@ namespace exodbc
 	* \brief	Defines the Transaction Isolation Mode
 	*			see: http://msdn.microsoft.com/en-us/library/ms709374%28v=vs.85%29.aspx
 	*/
-	enum TransactionIsolationMode
+	enum class TransactionIsolationMode
 	{
-		TI_UNKNOWN = 50000,
-		TI_READ_UNCOMMITTED = SQL_TXN_READ_UNCOMMITTED,
-		TI_READ_COMMITTED = SQL_TXN_READ_COMMITTED,
-		TI_REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,
-		TI_SERIALIZABLE = SQL_TXN_SERIALIZABLE
+		UNKNOWN = 50000,								///< Unknown Transaction Isolation LEvel
+		READ_UNCOMMITTED = SQL_TXN_READ_UNCOMMITTED,	///< Read Uncommitted
+		READ_COMMITTED = SQL_TXN_READ_COMMITTED,		///< Read Committed
+		REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,		///< Repeatable Read
+		SERIALIZABLE = SQL_TXN_SERIALIZABLE				///< Serializable
 #if HAVE_MSODBCSQL_H
-		, TI_SNAPSHOT = SQL_TXN_SS_SNAPSHOT
+		, SNAPSHOT = SQL_TXN_SS_SNAPSHOT				///< Snapshot, only for MS SQL Server, and only if HAVE_MSODBCSQL_H is defined
 #endif
 	};
 
@@ -135,11 +135,11 @@ namespace exodbc
 	};
 
 
-	// Known Databases
-	// ---------------
-	// These are the databases currently tested and working with these classes
-	// See the comments in wxDb::Dbms() for exceptions/issues with
-	// each of these database engines
+	/*!
+	* \enum		DatabaseProduct
+	* \brief	Known databases, identified by their product name while connecting the Database.
+	* \details	For the database products listed here, some tests should exists.
+	*/
 	enum DatabaseProduct
 	{
 		dbmsUNIDENTIFIED,	///< Unknown DB

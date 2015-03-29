@@ -72,42 +72,42 @@ namespace exodbc
 	TEST_P(DatabaseTest, ReadTransactionIsolationMode)
 	{
 		TransactionIsolationMode tiMode = m_db.ReadTransactionIsolationMode();
-		EXPECT_NE(TI_UNKNOWN, tiMode);
+		EXPECT_NE(TransactionIsolationMode::UNKNOWN, tiMode);
 	}
 
 	TEST_P(DatabaseTest, SetTransactionIsolationMode)
 	{
-		TransactionIsolationMode tiMode = TI_READ_COMMITTED;
+		TransactionIsolationMode tiMode = TransactionIsolationMode::READ_COMMITTED;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
-		EXPECT_EQ(TI_READ_COMMITTED, tiMode);
+		EXPECT_EQ(TransactionIsolationMode::READ_COMMITTED, tiMode);
 		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
-		tiMode = TI_READ_UNCOMMITTED;
+		tiMode = TransactionIsolationMode::READ_UNCOMMITTED;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
-		EXPECT_EQ(TI_READ_UNCOMMITTED, tiMode);
+		EXPECT_EQ(TransactionIsolationMode::READ_UNCOMMITTED, tiMode);
 		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
-		tiMode = TI_REPEATABLE_READ;
+		tiMode = TransactionIsolationMode::REPEATABLE_READ;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
-		EXPECT_EQ(TI_REPEATABLE_READ, tiMode);
+		EXPECT_EQ(TransactionIsolationMode::REPEATABLE_READ, tiMode);
 		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
-		tiMode = TI_SERIALIZABLE;
+		tiMode = TransactionIsolationMode::SERIALIZABLE;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
-		EXPECT_EQ(TI_SERIALIZABLE, tiMode);
+		EXPECT_EQ(TransactionIsolationMode::SERIALIZABLE, tiMode);
 		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		if (m_db.Dbms() == dbmsMS_SQL_SERVER)
 		{
 #if HAVE_MSODBCSQL_H
-			tiMode = TI_SNAPSHOT;
+			tiMode = TransactionIsolationMode::SNAPSHOT;
 			EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 			tiMode = m_db.ReadTransactionIsolationMode();
-			EXPECT_EQ(TI_SNAPSHOT, tiMode);
+			EXPECT_EQ(TransactionIsolationMode::SNAPSHOT, tiMode);
 			EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 #else
 			LOG_WARNING(L"Skipping test because testing against Ms Sql Server but msodbcsql.h is missing");
@@ -118,11 +118,11 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, CanSetTransactionIsolationMode)
 	{
-		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TI_READ_COMMITTED));
-		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TI_READ_UNCOMMITTED));
-		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TI_REPEATABLE_READ));
-		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TI_SERIALIZABLE));
-		EXPECT_FALSE(m_db.CanSetTransactionIsolationMode(TI_UNKNOWN));
+		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::READ_COMMITTED));
+		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::READ_UNCOMMITTED));
+		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::REPEATABLE_READ));
+		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::SERIALIZABLE));
+		EXPECT_FALSE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::UNKNOWN));
 	}
 
 
@@ -279,7 +279,7 @@ namespace exodbc
 			if (m_db.Dbms() == dbmsMS_SQL_SERVER)
 			{
 #if HAVE_MSODBCSQL_H
-				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TI_SNAPSHOT));
+				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TransactionIsolationMode::SNAPSHOT));
 				exodbc::Table iTable2(db2, tableName, L"", L"", L"", AF_READ);
 				ASSERT_NO_THROW(iTable2.Open(db2));
 				iTable2.Select();
@@ -291,7 +291,7 @@ namespace exodbc
 			}
 			else
 			{
-				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TI_READ_COMMITTED));
+				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TransactionIsolationMode::READ_COMMITTED));
 				exodbc::Table iTable2(db2, tableName, L"", L"", L"", AF_READ);
 				ASSERT_NO_THROW(iTable2.Open(db2));
 				iTable2.Select();
