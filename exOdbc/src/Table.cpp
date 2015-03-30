@@ -376,13 +376,14 @@ namespace exodbc
 		while (it != m_columnBuffers.end())
 		{
 			ColumnBuffer* pBuffer = it->second;
-			fields += pBuffer->GetQueryName();
-			++it;
-			if (it != m_columnBuffers.end())
+			if (pBuffer->IsColumnFlagSet(CF_SELECT))
 			{
+				fields += pBuffer->GetQueryName();
 				fields += L", ";
+				++it;
 			}
 		}
+		boost::algorithm::erase_last(fields, L", ");
 
 		return fields;
 	}
@@ -999,11 +1000,18 @@ namespace exodbc
 		// the Table object and the ODBC record for Select()
 		if (TestAccessFlag(AF_SELECT))
 		{
+			SQLSMALLINT boundColumnNumber = 1;
 			for (ColumnBufferPtrMap::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 			{
-				SQLUSMALLINT colIndex = it->first;
+				// Only bind those marked for select - no danger if primary keys are not bound, it is checked later
+				// if the table is opened for writing that all pks are bound
 				ColumnBuffer* pBuffer = it->second;
-				pBuffer->Bind(m_hStmtSelect, colIndex + 1);
+				if (pBuffer->IsColumnFlagSet(CF_SELECT))
+				{
+					SQLUSMALLINT colIndex = it->first;
+					pBuffer->Bind(m_hStmtSelect, boundColumnNumber);
+					++boundColumnNumber;
+				}
 			}
 		}
 

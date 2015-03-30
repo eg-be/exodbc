@@ -426,8 +426,7 @@ namespace exodbc
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_TRUE( table.IsColumnNull(1) );
 	}
-
-
+	
 
 	TEST_P(wxCompatibilityTest, SelectIncompleteTable)
 	{
@@ -463,36 +462,29 @@ namespace exodbc
 		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(table.m_col4)));
 		EXPECT_FALSE(table.SelectNext());
 
-		// Now test by reading the incomplete table using '*': It works as we've still used the indexes "as in the db" when we've bound the columns
+		// We fail to read with the star, because it will select columns id (1), c2(2), c3(3) and c4(4), but we have bound  
+		// the select statement to a query with 3 params only, with column numbers 1 (id), 2(c2), 3(which we expect to be c4, but is here c3)
+		// This is like that since Ticket #114 has been fixed (was before: Now test by reading the incomplete table using '*': 
+		//									It works as we've still used the indexes "as in the db" when we've bound the columns)
 		incTable.m_col2[0] = 0;
 		incTable.m_col4[0] = 0;
 		incTable.SelectBySqlStmt(L"SELECT * FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(incTable.SelectNext());
+		EXPECT_EQ(1, incTable.m_idCharTable);
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(incTable.m_col2)));
-		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(incTable.m_col4)));
+		EXPECT_NE(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(incTable.m_col4)));
+		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(incTable.m_col4)));
 		EXPECT_FALSE(incTable.SelectNext());
 
-		// It does not work if you do not use the '*' to select, see ticket #15
-		// because the returned recordset only has indexes	0 (id), 1 (col2), 2 (col4) 
-		// but we've bound									0 (id), 1 (col2), 3 (col4)
-		// so 0 (id), 1 (col2) match, but index 3 is not populated
+		// It does work if we pass the column names
 		RecordProperty("Ticket", 15);
 		incTable.m_col2[0] = 0;
 		incTable.m_col4[0] = 0;
 		incTable.SelectBySqlStmt(L"SELECT idchartable, col2, col4 FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(incTable.SelectNext());
+		EXPECT_EQ(1, incTable.m_idCharTable);
 		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(wstring(incTable.m_col2)));
-		EXPECT_NE(std::wstring(L"r1_c4"), boost::trim_right_copy(wstring(incTable.m_col4)));
-		EXPECT_FALSE(incTable.SelectNext());
-
-		// .. But reading using '*' or 'all fields' really works.. -> because we are bound to indexes and like that the indexes match again
-		// the recordset returned
-		incTable.m_col2[0] = 0;
-		incTable.m_col4[0] = 0;
-		incTable.SelectBySqlStmt(L"SELECT  idchartable, col2, col3, col4 FROM exodbc.chartable WHERE idchartable = 1");
-		EXPECT_TRUE(incTable.SelectNext());
-		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(incTable.m_col2)));
-		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(incTable.m_col4)));
+		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(wstring(incTable.m_col4)));
 		EXPECT_FALSE(incTable.SelectNext());
 	}
 
