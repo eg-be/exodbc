@@ -177,23 +177,32 @@ namespace exodbc
 		SQLBIGINT bi = 0;
 		int type = SQL_C_SLONG;
 		// \todo
-		//iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT);
-		//iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
-		//iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
-		//iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
+		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
 
-		//// Open and remove all data from the table
-		//iTable.Open(m_db);
-		//ASSERT_NO_THROW(TestTables::ClearTestTable(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db));
+		// Open and remove all data from the table
+		iTable.Open(m_db);
+		ASSERT_NO_THROW(TestTables::ClearTestTable(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db));
 
-		//// Insert a value by using our primary key
-		//iTable.SetColumnValue(0, (SQLINTEGER)11);
-		//iTable.SetColumnValue(1, (SQLSMALLINT)202);
-		//iTable.SetColumnValue(2, (SQLINTEGER)303);
-		//iTable.SetColumnValue(3, (SQLBIGINT)-404);
-		//EXPECT_NO_THROW(iTable.Insert());
+		// Insert a value by using our primary key - columnIndex 2 will not get inserted but the default NULL value will be set by the db
+		iTable.SetColumnValue(0, (SQLINTEGER)11);
+		iTable.SetColumnValue(1, (SQLSMALLINT)202);
+		iTable.SetColumnValue(2, (SQLINTEGER)303);
+		iTable.SetColumnValue(3, (SQLBIGINT)-404);
+		EXPECT_NO_THROW(iTable.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 
-
+		// Read back from another table
+		Table iTable2(m_db, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
+		iTable2.Open(m_db);
+		iTable2.Select();
+		ASSERT_TRUE(iTable2.SelectNext());
+		EXPECT_EQ(11, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
+		EXPECT_EQ(202, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
+		EXPECT_EQ(-404, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
+		EXPECT_TRUE(iTable2.IsColumnNull(2));
 	}
 	
 
