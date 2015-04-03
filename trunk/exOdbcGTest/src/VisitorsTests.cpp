@@ -342,6 +342,15 @@ namespace exodbc
 		EXPECT_EQ(123000000, ts1.fraction);
 	}
 
+
+	TEST_F(NumericVisitorTest, FromNumeric)
+	{
+		SQLCHAR nVal[16];
+		SQL_NUMERIC_STRUCT numRef = InitNumeric(18, 10, 1, nVal);
+		SQL_NUMERIC_STRUCT n = boost::apply_visitor(NumericVisitor(), BufferPtrVariant((SQL_NUMERIC_STRUCT*)&numRef));
+		EXPECT_EQ(0, memcmp(&numRef, &n, sizeof(SQL_NUMERIC_STRUCT)));
+	}
+
 	// Interfaces
 	// ----------
 
