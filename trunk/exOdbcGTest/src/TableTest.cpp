@@ -259,7 +259,6 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenManualPrimaryKeys)
 	{
-		// \todo
 		// Open a table by defining primary keys manually
 		// Open a table manually but do not set the Select flag for all columns
 		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
@@ -267,14 +266,37 @@ namespace exodbc
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
 		SQLBIGINT bi = 0;
-		int type = SQL_C_SLONG;
-		// \todo
 		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT |  CF_INSERT | CF_PRIMARY_KEY);
 		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
 		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
 		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
 
+		// Opening must work
+		EXPECT_NO_THROW(iTable.Open(m_db, TOF_DO_NOT_QUERY_PRIMARY_KEYS));
 
+		// But opening if primary keys are not defined must fail
+		Table iTable2(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
+		SQLINTEGER id2 = 0;
+		SQLSMALLINT si2 = 0;
+		SQLINTEGER i2 = 0;
+		SQLBIGINT bi2 = 0;
+		iTable2.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id2, SQL_C_SLONG, sizeof(id2), CF_SELECT | CF_INSERT);
+		iTable2.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si2, SQL_C_SSHORT, sizeof(si2), CF_SELECT | CF_INSERT);
+		iTable2.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i2, SQL_C_SLONG, sizeof(i2), CF_SELECT | CF_INSERT);
+		iTable2.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi2, SQL_C_SBIGINT, sizeof(bi2), CF_SELECT | CF_INSERT);
+		EXPECT_THROW(iTable2.Open(m_db, TOF_DO_NOT_QUERY_PRIMARY_KEYS), Exception);
+
+		// But if we open for select only, we do not care about the primary keys
+		Table iTable3(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
+		SQLINTEGER id3 = 0;
+		SQLSMALLINT si3 = 0;
+		SQLINTEGER i3 = 0;
+		SQLBIGINT bi3 = 0;
+		iTable3.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id3, SQL_C_SLONG, sizeof(id3), CF_SELECT);
+		iTable3.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si3, SQL_C_SSHORT, sizeof(si3), CF_SELECT);
+		iTable3.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i3, SQL_C_SLONG, sizeof(i3), CF_SELECT);
+		iTable3.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi3, SQL_C_SBIGINT, sizeof(bi3), CF_SELECT);
+		EXPECT_NO_THROW(iTable3.Open(m_db, TOF_DO_NOT_QUERY_PRIMARY_KEYS));
 	}
 
 
