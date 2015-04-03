@@ -146,9 +146,9 @@ namespace exodbc
 		wstring s1 = boost::apply_visitor(WStringVisitor(), BufferPtrVariant((SQL_TIMESTAMP_STRUCT*)&t0));
 		EXPECT_EQ(L"1983-01-26T13:55:56.123000000", s1);
 
-		SQL_TIMESTAMP_STRUCT t1 = InitTimestamp(13, 55, 56, 10000000, 26, 01, 1983);
+		SQL_TIMESTAMP_STRUCT t1 = InitTimestamp(13, 55, 03, 10000000, 26, 01, 1983);
 		wstring s2 = boost::apply_visitor(WStringVisitor(), BufferPtrVariant((SQL_TIMESTAMP_STRUCT*)&t1));
-		EXPECT_EQ(L"1983-01-26T13:55:56.010000000", s2);
+		EXPECT_EQ(L"1983-01-26T13:55:03.010000000", s2);
 	}
 
 
@@ -158,6 +158,20 @@ namespace exodbc
 		wstring s1 = boost::apply_visitor(WStringVisitor(), BufferPtrVariant((SQL_TIME_STRUCT*)&t0));
 		EXPECT_EQ(L"13:05:01", s1);
 	}
+
+
+#if HAVE_MSODBCSQL_H
+	TEST_F(WStringVisitorTest, FromTime2)
+	{
+		SQL_SS_TIME2_STRUCT t2 = InitTime2(13, 05, 1, 123456000);
+		wstring s1 = boost::apply_visitor(WStringVisitor(), BufferPtrVariant((SQL_SS_TIME2_STRUCT*)&t2));
+		EXPECT_EQ(L"13:05:01.123456000", s1);
+
+		SQL_SS_TIME2_STRUCT t22 = InitTime2(13, 05, 1, 10000000);
+		wstring s22 = boost::apply_visitor(WStringVisitor(), BufferPtrVariant((SQL_SS_TIME2_STRUCT*)&t22));
+		EXPECT_EQ(L"13:05:01.010000000", s22);
+	}
+#endif
 
 
 	TEST_F(WStringVisitorTest, FromDate)
@@ -240,9 +254,9 @@ namespace exodbc
 		string s1 = boost::apply_visitor(StringVisitor(), BufferPtrVariant((SQL_TIMESTAMP_STRUCT*)&t0));
 		EXPECT_EQ("1983-01-26T13:55:56.123000000", s1);
 
-		SQL_TIMESTAMP_STRUCT t1 = InitTimestamp(13, 55, 56, 10000000, 26, 01, 1983);
+		SQL_TIMESTAMP_STRUCT t1 = InitTimestamp(13, 55, 7, 10000000, 26, 01, 1983);
 		string s2 = boost::apply_visitor(StringVisitor(), BufferPtrVariant((SQL_TIMESTAMP_STRUCT*)&t1));
-		EXPECT_EQ("1983-01-26T13:55:56.010000000", s2);
+		EXPECT_EQ("1983-01-26T13:55:07.010000000", s2);
 	}
 
 
@@ -252,6 +266,20 @@ namespace exodbc
 		string s1 = boost::apply_visitor(StringVisitor(), BufferPtrVariant((SQL_TIME_STRUCT*)&t0));
 		EXPECT_EQ("13:05:01", s1);
 	}
+
+
+#if HAVE_MSODBCSQL_H
+	TEST_F(StringVisitorTest, FromTime2)
+	{
+		SQL_SS_TIME2_STRUCT t2 = InitTime2(13, 05, 1, 123456000);
+		string s1 = boost::apply_visitor(StringVisitor(), BufferPtrVariant((SQL_SS_TIME2_STRUCT*)&t2));
+		EXPECT_EQ("13:05:01.123456000", s1);
+
+		SQL_SS_TIME2_STRUCT t22 = InitTime2(13, 05, 1, 10000000);
+		string s22 = boost::apply_visitor(StringVisitor(), BufferPtrVariant((SQL_SS_TIME2_STRUCT*)&t22));
+		EXPECT_EQ("13:05:01.010000000", s22);
+	}
+#endif
 
 
 	TEST_F(StringVisitorTest, FromDate)
@@ -329,6 +357,22 @@ namespace exodbc
 	}
 
 
+#if HAVE_MSODBCSQL_H
+	TEST_F(TimestampVisitorTest, FromTime2)
+	{
+		SQL_SS_TIME2_STRUCT t0 = InitTime2(13, 05, 1, 123456000);
+		SQL_TIMESTAMP_STRUCT ts1 = boost::apply_visitor(TimestampVisitor(), BufferPtrVariant((SQL_SS_TIME2_STRUCT*)&t0));
+		EXPECT_EQ(0, ts1.day);
+		EXPECT_EQ(0, ts1.month);
+		EXPECT_EQ(0, ts1.year);
+		EXPECT_EQ(13, ts1.hour);
+		EXPECT_EQ(5, ts1.minute);
+		EXPECT_EQ(1, ts1.second);
+		EXPECT_EQ(123456000, ts1.fraction);
+	}
+#endif
+
+
 	TEST_F(TimestampVisitorTest, FromTimestamp)
 	{
 		SQL_TIMESTAMP_STRUCT t0 = InitTimestamp(13, 55, 56, 123000000, 26, 01, 1983);
@@ -349,6 +393,55 @@ namespace exodbc
 		SQL_NUMERIC_STRUCT numRef = InitNumeric(18, 10, 1, nVal);
 		SQL_NUMERIC_STRUCT n = boost::apply_visitor(NumericVisitor(), BufferPtrVariant((SQL_NUMERIC_STRUCT*)&numRef));
 		EXPECT_EQ(0, memcmp(&numRef, &n, sizeof(SQL_NUMERIC_STRUCT)));
+	}
+
+
+	TEST_F(CharPtrVisitorTest, FromAny)
+	{
+		const SQLCHAR* bMin = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQLBIGINT*)&BIG_INT_MIN));
+		EXPECT_EQ(0, memcmp(bMin, &BIG_INT_MIN, sizeof(SQLBIGINT)));
+
+		const SQLCHAR* iMin = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQLINTEGER*)&I_MIN));
+		EXPECT_EQ(0, memcmp(iMin, &I_MIN, sizeof(SQLINTEGER)));
+
+		const SQLCHAR* sMin = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQLSMALLINT*)&SMALL_INT_MIN));
+		EXPECT_EQ(0, memcmp(sMin, &SMALL_INT_MIN, sizeof(SQLSMALLINT)));
+
+		std::string s("Hello world");
+		const SQLCHAR* schar = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQLCHAR*)s.c_str()));
+		EXPECT_EQ(0, memcmp(schar, s.c_str(), s.length() + 1));
+
+		std::wstring ws(L"Hello world");
+		const SQLCHAR* swchar = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQLWCHAR*)ws.c_str()));
+		EXPECT_EQ(0, memcmp(swchar, ws.c_str(), (ws.length() + 1) * sizeof(SQLWCHAR)));
+
+		double dRef = 3.14159265359;
+		const SQLCHAR* d = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQLDOUBLE*)&dRef));
+		EXPECT_EQ(0, memcmp(&dRef, d, sizeof(SQLDOUBLE)));
+
+		SQL_TIMESTAMP_STRUCT tsRef = InitTimestamp(13, 55, 56, 123000000, 26, 01, 1983);
+		const SQLCHAR* ts = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQL_TIMESTAMP_STRUCT*)&tsRef));
+		EXPECT_EQ(0, memcmp(&tsRef, ts, sizeof(SQL_TIMESTAMP_STRUCT)));
+
+		SQL_TIME_STRUCT tRef = InitTime(13, 05, 1);
+		const SQLCHAR* t = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQL_TIME_STRUCT*)&tRef));
+		EXPECT_EQ(0, memcmp(&tRef, t, sizeof(SQL_TIME_STRUCT)));
+
+		SQL_DATE_STRUCT dateRef = InitDate(26, 01, 1983);
+		const SQLCHAR* date = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQL_DATE_STRUCT*)&dateRef));
+		EXPECT_EQ(0, memcmp(&dateRef, date, sizeof(SQL_DATE_STRUCT)));
+
+		SQLCHAR nVal[16];
+		SQL_NUMERIC_STRUCT numRef = InitNumeric(18, 10, 1, nVal);
+		const SQLCHAR* n = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQL_NUMERIC_STRUCT*)&numRef));
+		EXPECT_EQ(0, memcmp(&numRef, n, sizeof(SQL_NUMERIC_STRUCT)));
+
+#if HAVE_MSODBCSQL_H
+		SQL_SS_TIME2_STRUCT t2Ref = InitTime2(13, 05, 1, 123456000);
+		const SQLCHAR* t2 = boost::apply_visitor(CharPtrVisitor(), BufferPtrVariant((SQL_SS_TIME2_STRUCT*)&t2Ref));
+		EXPECT_EQ(0, memcmp(&t2Ref, t2, sizeof(SQL_SS_TIME2_STRUCT)));
+#endif
+
 	}
 
 	// Interfaces

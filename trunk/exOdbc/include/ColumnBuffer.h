@@ -748,10 +748,10 @@ namespace exodbc
 		std::wstring operator()(SQLDOUBLE* pDouble) const { return boost::lexical_cast<std::wstring>(*pDouble); };
 		std::wstring operator()(SQL_DATE_STRUCT* pDate) const { return boost::str(boost::wformat(L"%04d-%02d-%02d") % pDate->year % pDate->month %pDate->day); };
 		std::wstring operator()(SQL_TIME_STRUCT* pTime) const { return boost::str(boost::wformat(L"%02d:%02d:%02d") % pTime->hour % pTime->minute %pTime->second); };
-		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return boost::str(boost::wformat(L"%04d-%02d-%02dT%02d:%02d:%02.9f") % pTimestamp->year %pTimestamp->month %pTimestamp->day %pTimestamp->hour %pTimestamp->minute % ((SQLDOUBLE)pTimestamp->second + ((SQLDOUBLE)pTimestamp->fraction / (SQLDOUBLE)1000000000.0))); };
+		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return boost::str(boost::wformat(L"%04d-%02d-%02dT%02d:%02d:%012.9f") % pTimestamp->year %pTimestamp->month %pTimestamp->day %pTimestamp->hour %pTimestamp->minute % ((SQLDOUBLE)pTimestamp->second + ((SQLDOUBLE)pTimestamp->fraction / (SQLDOUBLE)1000000000.0))); };
 		std::wstring operator()(SQL_NUMERIC_STRUCT* pNumeric) const { throw CastException(SQL_C_NUMERIC, SQL_C_WCHAR); };
 #if HAVE_MSODBCSQL_H
-		std::wstring operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_WCHAR); };
+		std::wstring operator()(SQL_SS_TIME2_STRUCT* pTime2) const { return boost::str(boost::wformat(L"%02d:%02d:%012.9f") % pTime2->hour % pTime2->minute % ((SQLDOUBLE)pTime2->second + ((SQLDOUBLE)pTime2->fraction / (SQLDOUBLE)1000000000.0))); };
 #endif
 	};	// class WStringVisitor
 
@@ -771,7 +771,7 @@ namespace exodbc
 	* - SQLDATE* Returns a date in the format YYYY-MM-DD
 	* - SQLTIME_STRUCT* Returns a time in the format hh:mm:ss
 	* - SQL_TIMESTAMP_STRUCT* Returns a timestamp in the format YYYY-MM-DDThh:mm:ss.fffffffff
-	* - 
+	* - SQL_SS_TIME2_STRUCT* Returns a time in the format hh:mm:ss.fffffffff Only available if HAVE_MSODBCSQL_His defined.
 	* \todo NUMERIC_STRUCT*
 	*/
 	class EXODBCAPI StringVisitor
@@ -786,10 +786,10 @@ namespace exodbc
 		std::string operator()(SQLDOUBLE* pDouble) const { return boost::lexical_cast<std::string>(*pDouble); };
 		std::string operator()(SQL_DATE_STRUCT* pDate) const { return boost::str(boost::format("%04d-%02d-%02d") % pDate->year % pDate->month %pDate->day); };
 		std::string operator()(SQL_TIME_STRUCT* pTime) const { return boost::str(boost::format("%02d:%02d:%02d") % pTime->hour % pTime->minute %pTime->second); };
-		std::string operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return boost::str(boost::format("%04d-%02d-%02dT%02d:%02d:%02.9f") % pTimestamp->year %pTimestamp->month %pTimestamp->day %pTimestamp->hour %pTimestamp->minute % ((SQLDOUBLE)pTimestamp->second + ((SQLDOUBLE)pTimestamp->fraction / (SQLDOUBLE)1000000000.0))); };
+		std::string operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return boost::str(boost::format("%04d-%02d-%02dT%02d:%02d:%012.9f") % pTimestamp->year %pTimestamp->month %pTimestamp->day %pTimestamp->hour %pTimestamp->minute % ((SQLDOUBLE)pTimestamp->second + ((SQLDOUBLE)pTimestamp->fraction / (SQLDOUBLE)1000000000.0))); };
 		std::string operator()(SQL_NUMERIC_STRUCT* pNumeric) const { throw CastException(SQL_C_NUMERIC, SQL_C_CHAR); };
 #if HAVE_MSODBCSQL_H
-		std::string operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_CHAR); };
+		std::string operator()(SQL_SS_TIME2_STRUCT* pTime2) const { return boost::str(boost::format("%02d:%02d:%012.9f") % pTime2->hour % pTime2->minute % ((SQLDOUBLE)pTime2->second + ((SQLDOUBLE)pTime2->fraction / (SQLDOUBLE)1000000000.0))); };
 #endif
 	};	// class StringVisitor
 

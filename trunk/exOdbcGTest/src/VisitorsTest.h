@@ -104,6 +104,14 @@ namespace exodbc
 		virtual void SetUp() {};
 		virtual void TearDown() {};
 	};
+
+
+	class CharPtrVisitorTest : public ::testing::Test
+	{
+	protected:
+		virtual void SetUp() {};
+		virtual void TearDown() {};
+	};
 } // namespace exodbc
 
 #endif // EXCELTEST_H
