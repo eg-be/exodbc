@@ -104,7 +104,6 @@ namespace exodbc
 		exASSERT(sqlCType != 0);
 		exASSERT(bufferSize > 0);
 		exASSERT(!m_queryName.empty());
-		exASSERT(m_flags & CF_SELECT);
 	}
 
 	// Destructor
@@ -284,6 +283,7 @@ namespace exodbc
 		exASSERT(hStmt != SQL_NULL_HSTMT);
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(m_bufferSize > 0);
+		exASSERT(m_flags & CF_SELECT);
 
 		void* pBuffer = NULL;
 		try
