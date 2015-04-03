@@ -922,8 +922,8 @@ namespace exodbc
 		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
 		exASSERT(flags & CF_SELECT);
 
-		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, queryName, flags, columnSize, decimalDigits);
-		m_columnBuffers[columnIndex] = pColumnBuffer;
+ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, queryName, flags, columnSize, decimalDigits);
+m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 
 
@@ -984,7 +984,7 @@ namespace exodbc
 		{
 			m_tablePrivileges.Initialize(db, m_tableInfo);
 			// We always need to be able to select, but the rest only if we want to write
-			if ( (TestAccessFlag(AF_SELECT) && !m_tablePrivileges.IsSet(TP_SELECT)) 
+			if ((TestAccessFlag(AF_SELECT) && !m_tablePrivileges.IsSet(TP_SELECT))
 				|| (TestAccessFlag(AF_UPDATE) && !m_tablePrivileges.IsSet(TP_UPDATE))
 				|| (TestAccessFlag(AF_INSERT) && !m_tablePrivileges.IsSet(TP_INSERT))
 				|| (TestAccessFlag(AF_DELETE) && !m_tablePrivileges.IsSet(TP_DELETE))
@@ -1019,7 +1019,15 @@ namespace exodbc
 		if (!IsQueryOnly())
 		{
 			// We need the primary keys
-			m_tablePrimaryKeys.Initialize(db, m_tableInfo);
+			// Do not query them from the db is corresponding flag is set
+			if (openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS)
+			{
+				m_tablePrimaryKeys.Initialize(m_tableInfo, m_columnBuffers);
+			}
+			else
+			{ 
+				m_tablePrimaryKeys.Initialize(db, m_tableInfo);
+			}
 
 			// And we need to have a primary key
 			if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
@@ -1038,6 +1046,8 @@ namespace exodbc
 			}
 
 			// Set the primary key flags on the bound Columns
+			// but only if corresponding flag is not set
+			if (!(openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS))
 			if (!m_tablePrimaryKeys.SetPrimaryKeyFlag(m_columnBuffers))
 			{
 				Exception ex((boost::wformat(L"Failed to mark Bound Columns as primary keys for table '%s'") % m_tableInfo.GetSqlName()).str());

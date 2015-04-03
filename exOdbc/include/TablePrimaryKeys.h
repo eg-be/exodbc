@@ -82,6 +82,19 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Initialize object from passed data. Marks as uninitialized first.
+		*			Marks object as initialized on success.
+		*			An entry is created for every ColumnBuffer that has the flag CF_PRIMARY_KEY set.
+		*			The ColunmnBuffers query name is used as column-name, but only the part after the last '.'.
+		*			The pure table-name from the passed STableInfo is used as tablename for the entries created.
+		*			Note that this will not fail if columnBuffers is empty or has no columns marked as primary keys.
+		* \param	tablePks table primary keys
+		* \throw	Exception If parsing fails.
+		*/
+		void Initialize(const STableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers) { m_initialized = false; Parse(tableInfo, columnBuffers); m_initialized = true; };
+
+
+		/*!
 		* \brief	Returns true if Primary Keys have been parsed and can be queried.
 		*/
 		bool IsInitialized() const { return m_initialized; };
@@ -103,10 +116,19 @@ namespace exodbc
 
 	private:
 		/*!
-		* \brief	Parses.
+		* \brief	Parses - will just fill the map and vector of primary keys with the passed values.
 		* \throw	Exception
 		*/
 		void Parse(const TablePrimaryKeysVector& tablePks);
+
+		/*!
+		* \brief	Fills the map and vector of primary keys using the passed ColumnBufferPtrMap.
+		* \details	An entry is created for every ColumnBuffer that has the flag CF_PRIMARY_KEY set.
+		*			The ColunmnBuffers query name is used as column-name, but only the part after the last '.'.
+		*			The pure table-name from the passed STableInfo is used as tablename for the entries created.
+		* \throw	Exception
+		*/
+		void TablePrimaryKeys::Parse(const STableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers);
 
 		bool m_initialized;
 
