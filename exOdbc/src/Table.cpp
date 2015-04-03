@@ -380,8 +380,8 @@ namespace exodbc
 			{
 				fields += pBuffer->GetQueryName();
 				fields += L", ";
-				++it;
 			}
+			++it;
 		}
 		boost::algorithm::erase_last(fields, L", ");
 
@@ -920,7 +920,6 @@ namespace exodbc
 		exASSERT( ! queryName.empty());
 		exASSERT(bufferSize > 0);
 		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
-		exASSERT(flags & CF_SELECT);
 
 		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, queryName, flags, columnSize, decimalDigits);
 		m_columnBuffers[columnIndex] = pColumnBuffer;
