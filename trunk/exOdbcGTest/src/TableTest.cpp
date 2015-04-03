@@ -104,9 +104,45 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenManualCheckColumnFlagsMatchAccessFlags)
+	TEST_P(TableTest, OpenManualCheckColumnFlagSelect)
 	{
+		// Open a table manually but do not set the Select flag for all columns
+		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), &id, SQL_C_SLONG, sizeof(id), CF_SELECT);
+		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), &si, SQL_C_SSHORT, sizeof(si), CF_SELECT);
+		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), &i, SQL_C_SLONG, sizeof(i), CF_NONE);
+		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
 
+		EXPECT_NO_THROW(iTable.Open(m_db));
+		// We expect all columnBuffers to be bound, except nr 2
+		ColumnBuffer* pBuffId = iTable.GetColumnBuffer(0);
+		ColumnBuffer* pBuffsi = iTable.GetColumnBuffer(1);
+		ColumnBuffer* pBuffi = iTable.GetColumnBuffer(2);
+		ColumnBuffer* pBuffbi = iTable.GetColumnBuffer(3);
+		EXPECT_TRUE(pBuffId->IsBound());
+		EXPECT_TRUE(pBuffsi->IsBound());
+		EXPECT_FALSE(pBuffi->IsBound());
+		EXPECT_TRUE(pBuffbi->IsBound());
+
+		// And we should be able to select a row
+		wstring sqlstmt = boost::str(boost::wformat(L"%s = 7") % TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase));
+		iTable.Select(sqlstmt);
+		EXPECT_TRUE(iTable.SelectNext());
+		// and have all values
+		EXPECT_EQ(7, id);
+		EXPECT_EQ(-13, si);
+		EXPECT_EQ(0, i);
+		EXPECT_EQ(10502, bi);
+		{
+			LogLevelFatal llf;
+			DontDebugBreak ddb;
+			// except the not bound column, we are unable to get its value, but its buffer has not changed
+			EXPECT_THROW(boost::get<SQLINTEGER>(iTable.GetColumnValue(2)), AssertionException);
+		}
 	}
 
 
