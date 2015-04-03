@@ -976,10 +976,37 @@ m_columnBuffers[columnIndex] = pColumnBuffer;
 			}
 			CreateAutoColumnBuffers(db, m_tableInfo, (openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS);
 		}
+		else
+		{
+			// Check that the manually defined columns do not violate our access-flags
+			for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+			{
+				ColumnBuffer* pBuffer = it->second;
+				if (pBuffer->IsColumnFlagSet(CF_SELECT) && !TestAccessFlag(AF_SELECT))
+				{
+					Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
+					SET_EXCEPTION_SOURCE(ex);
+					throw ex;
+				}
+				if (pBuffer->IsColumnFlagSet(CF_INSERT) && !TestAccessFlag(AF_INSERT))
+				{
+					Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
+					SET_EXCEPTION_SOURCE(ex);
+					throw ex;
+				}
+				if(pBuffer->IsColumnFlagSet(CF_UPDATE) && !TestAccessFlag(AF_UPDATE))
+				{
+					Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
+					SET_EXCEPTION_SOURCE(ex);
+					throw ex;
+				}
+			}
+		}
 
 		// Prepare the FieldStatement to be used for selects
 		m_fieldsStatement = BuildFieldsStatement();
 
+		// Optionally check privileges
 		if ((openFlags & TOF_CHECK_PRIVILEGES) == TOF_CHECK_PRIVILEGES)
 		{
 			m_tablePrivileges.Initialize(db, m_tableInfo);
@@ -1022,6 +1049,7 @@ m_columnBuffers[columnIndex] = pColumnBuffer;
 			// Do not query them from the db is corresponding flag is set
 			if (openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS)
 			{
+				exASSERT(false);
 				m_tablePrimaryKeys.Initialize(m_tableInfo, m_columnBuffers);
 			}
 			else
