@@ -338,6 +338,18 @@ namespace exodbc
 	}
 
 
+#if HAVE_MSODBCSQL_H
+	TEST_F(StaticHelpersTest, InitTime2)
+	{
+		SQL_SS_TIME2_STRUCT time2 = InitTime2(13, 01, 17, 123456000);
+		EXPECT_EQ(13, time2.hour);
+		EXPECT_EQ(1, time2.minute);
+		EXPECT_EQ(17, time2.second);
+		EXPECT_EQ(123456000, time2.fraction);
+	}
+#endif
+
+
 	TEST_F(StaticHelpersTest, InitDate)
 	{
 		SQL_DATE_STRUCT date = InitDate(26, 1, 1983);
