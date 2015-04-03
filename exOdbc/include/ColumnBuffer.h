@@ -836,6 +836,7 @@ namespace exodbc
 	* - SQLDATE* (time is set to 00:00:00)
 	* - SQLTIME* (date is set to 00.00.0000)
 	* - SQLTIMESTAMP*
+	* - SQL_SS_TIME2_STRUCT* (date is set to 00.00.0000). Only available if HAVE_MSODBCSQL_H is defined.
 	*
 	*/
 	class EXODBCAPI TimestampVisitor
