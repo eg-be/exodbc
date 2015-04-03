@@ -1279,6 +1279,15 @@ namespace exodbc
 			EXPECT_EQ(0, timestamp.fraction);
 		}
 
+		dTable.Select((boost::wformat(L"%s = 4") % idName).str());
+		EXPECT_TRUE(dTable.SelectNext());
+		EXPECT_NO_THROW(dTable.GetColumnValue(3, timestamp));
+		if (m_db.GetDbms() != DatabaseProduct::MY_SQL)
+		{
+			EXPECT_EQ(10000000, timestamp.fraction);
+		}
+
+
 		// MS SQL Server has a new SQL_TIME2_STRUCT if ODBC version is >= 3.8
 #if HAVE_MSODBCSQL_H
 		Environment env38(OdbcVersion::V_3_8);

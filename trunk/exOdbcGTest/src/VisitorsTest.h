@@ -29,40 +29,61 @@
 // -------
 namespace exodbc
 {
+	namespace VisitorsTest
+	{
+		const SQLBIGINT BIG_INT_NULL = 0;
+		const SQLBIGINT BIG_INT_MAX = 9223372036854775807;
+		const SQLBIGINT BIG_INT_MIN = (-9223372036854775807 - 1);
 
-	class BigIntVisitorTest : public ::testing::Test {
+		const SQLINTEGER I_NULL = 0;
+		const SQLINTEGER I_MAX = 2147483647;
+		const SQLINTEGER I_MIN = (-2147483647 - 1);
+
+		const SQLSMALLINT SMALL_INT_NULL = 0;
+		const SQLSMALLINT SMALL_INT_MAX = 32767;
+		const SQLSMALLINT SMALL_INT_MIN = (-32767 - 1);
+
+		BufferPtrVariant pBigIntNull = (SQLBIGINT*)&BIG_INT_NULL;
+		BufferPtrVariant pBigIntMin = (SQLBIGINT*)&BIG_INT_MIN;
+		BufferPtrVariant pBigIntMax = (SQLBIGINT*)&BIG_INT_MAX;
+
+		BufferPtrVariant pIntNull = (SQLINTEGER*)&I_NULL;
+		BufferPtrVariant pIntMin = (SQLINTEGER*)&I_MIN;
+		BufferPtrVariant pIntMax = (SQLINTEGER*)&I_MAX;
+
+		BufferPtrVariant pSmallIntNull = (SQLSMALLINT*)&SMALL_INT_NULL;
+		BufferPtrVariant pSmallIntMin = (SQLSMALLINT*)&SMALL_INT_MIN;
+		BufferPtrVariant pSmallIntMax = (SQLSMALLINT*)&SMALL_INT_MAX;
+	};
+
+
+	class BigIntVisitorTest : public ::testing::Test 
+	{
 
 	protected:
-		virtual void SetUp();
+		virtual void SetUp() {};
 
-		virtual void TearDown();
-
-		SQLBIGINT m_bINull = 0;
-		SQLBIGINT m_bIMax = 9223372036854775807;
-		SQLBIGINT m_bIMin = (-9223372036854775807 -1);
-		
-		SQLINTEGER m_iNull = 0;
-		SQLINTEGER m_iMax = 2147483647;
-		SQLINTEGER m_iMin = (-2147483647 -1);
-
-		SQLSMALLINT m_sINull = 0;
-		SQLSMALLINT m_sIMax = 32767;
-		SQLSMALLINT m_sIMin = (-32767 -1);
-
-		BufferPtrVariant m_pbINull;
-		BufferPtrVariant m_pbIMax;
-		BufferPtrVariant m_pbIMin;
-
-		BufferPtrVariant m_piNull;
-		BufferPtrVariant m_piMax;
-		BufferPtrVariant m_piMin;
-
-		BufferPtrVariant m_psINull;
-		BufferPtrVariant m_psIMax;
-		BufferPtrVariant m_psIMin;
-
-
+		virtual void TearDown() {};
 	};
+
+
+	class WStringVisitorTest : public ::testing::Test
+	{
+	protected:
+		virtual void SetUp() {};
+
+		virtual void TearDown() {};
+	};
+
+
+	class StringVisitorTest : public ::testing::Test
+	{
+	protected:
+		virtual void SetUp() {};
+
+		virtual void TearDown() {};
+	};
+
 } // namespace exodbc
 
 #endif // EXCELTEST_H
