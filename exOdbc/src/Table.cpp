@@ -1069,7 +1069,6 @@ namespace exodbc
 			// Do not query them from the db is corresponding flag is set
 			if (openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS)
 			{
-				exASSERT(false);
 				m_tablePrimaryKeys.Initialize(m_tableInfo, m_columnBuffers);
 			}
 			else
