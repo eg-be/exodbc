@@ -57,12 +57,11 @@ namespace exodbc
 	};
 
 
-	class BigIntVisitorTest : public ::testing::Test 
+	class BigIntVisitorTest : public ::testing::Test
 	{
 
 	protected:
 		virtual void SetUp() {};
-
 		virtual void TearDown() {};
 	};
 
@@ -71,7 +70,6 @@ namespace exodbc
 	{
 	protected:
 		virtual void SetUp() {};
-
 		virtual void TearDown() {};
 	};
 
@@ -80,7 +78,14 @@ namespace exodbc
 	{
 	protected:
 		virtual void SetUp() {};
+		virtual void TearDown() {};
+	};
 
+
+	class DoubleVisitorTest : public ::testing::Test
+	{
+	protected:
+		virtual void SetUp() {};
 		virtual void TearDown() {};
 	};
 

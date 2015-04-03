@@ -261,6 +261,46 @@ namespace exodbc
 		EXPECT_EQ("1983-01-26", s1);
 	}
 
+
+	TEST_F(DoubleVisitorTest, FromSmallInt)
+	{
+		SQLDOUBLE d0 = boost::apply_visitor(DoubleVisitor(), pSmallIntNull);
+		SQLDOUBLE dMin = boost::apply_visitor(DoubleVisitor(), pSmallIntMin);
+		SQLDOUBLE dMax = boost::apply_visitor(DoubleVisitor(), pSmallIntMax);
+
+		EXPECT_EQ((SQLDOUBLE)SMALL_INT_NULL, d0);
+		EXPECT_EQ((SQLDOUBLE)SMALL_INT_MIN, dMin);
+		EXPECT_EQ((SQLDOUBLE)SMALL_INT_MAX, dMax);
+	}
+
+
+	TEST_F(DoubleVisitorTest, FromInt)
+	{
+		SQLDOUBLE d0 = boost::apply_visitor(DoubleVisitor(), pIntNull);
+		SQLDOUBLE dMin = boost::apply_visitor(DoubleVisitor(), pIntMin);
+		SQLDOUBLE dMax = boost::apply_visitor(DoubleVisitor(), pIntMax);
+
+		EXPECT_EQ((SQLDOUBLE)I_NULL, d0);
+		EXPECT_EQ((SQLDOUBLE)INT_MIN, dMin);
+		EXPECT_EQ((SQLDOUBLE)INT_MAX, dMax);
+	}
+
+
+	TEST_F(DoubleVisitorTest, FromDouble)
+	{
+		SQLDOUBLE dNull = 0.0;
+		SQLDOUBLE dPosRef = 3.14159265359;
+		SQLDOUBLE dNegRef = -3.14159265359;
+		SQLDOUBLE d0 = boost::apply_visitor(DoubleVisitor(), BufferPtrVariant((SQLDOUBLE*)&dNull));
+		SQLDOUBLE dPos = boost::apply_visitor(DoubleVisitor(), BufferPtrVariant((SQLDOUBLE*)&dPosRef));
+		SQLDOUBLE dNeg = boost::apply_visitor(DoubleVisitor(), BufferPtrVariant((SQLDOUBLE*)&dNegRef));
+
+		EXPECT_EQ(dNull, d0);
+		EXPECT_EQ(dPosRef, dPos);
+		EXPECT_EQ(dNegRef, dNeg);
+	}
+
+
 	// Interfaces
 	// ----------
 
