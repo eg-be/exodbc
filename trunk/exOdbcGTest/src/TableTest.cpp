@@ -875,7 +875,7 @@ namespace exodbc
 		EXPECT_EQ(0.0, val);
 		// Read as str
 		EXPECT_NO_THROW(fTable.GetColumnValue(2, str));
-		EXPECT_EQ(L"0.000000", str);
+		EXPECT_EQ(L"0", str);
 
 		fTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
@@ -883,7 +883,7 @@ namespace exodbc
 		EXPECT_EQ(3.141, val);
 		// Read as str
 		EXPECT_NO_THROW(fTable.GetColumnValue(2, str));
-		EXPECT_EQ(L"3.141000", str);
+		EXPECT_EQ(L"3.141", str);
 
 		fTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
@@ -891,7 +891,7 @@ namespace exodbc
 		EXPECT_EQ(-3.141, val);
 		// Read as str
 		EXPECT_NO_THROW(fTable.GetColumnValue(2, str));
-		EXPECT_EQ(L"-3.141000", str);
+		EXPECT_EQ(L"-3.141", str);
 
 		fTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
@@ -899,7 +899,7 @@ namespace exodbc
 		EXPECT_EQ(0.0, val);
 		// Read as str
 		EXPECT_NO_THROW(fTable.GetColumnValue(1, str));
-		EXPECT_EQ(L"0.000000", str);
+		EXPECT_EQ(L"0", str);
 
 		fTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
@@ -907,7 +907,7 @@ namespace exodbc
 		EXPECT_EQ(3.141592, val);
 		// Read as str
 		EXPECT_NO_THROW(fTable.GetColumnValue(1, str));
-		EXPECT_EQ(L"3.141592", str);
+		EXPECT_EQ(L"3.1415920000000002", str);
 
 		fTable.Select((boost::wformat(L"%s = 6") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
@@ -915,7 +915,7 @@ namespace exodbc
 		EXPECT_EQ(-3.141592, val);
 		// Read as str
 		EXPECT_NO_THROW(fTable.GetColumnValue(1, str));
-		EXPECT_EQ(L"-3.141592", str);
+		EXPECT_EQ(L"-3.1415920000000002", str);
 	}
 
 
