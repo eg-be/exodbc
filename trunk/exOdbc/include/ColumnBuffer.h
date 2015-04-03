@@ -18,6 +18,7 @@
 
 // Other headers
 #include "boost/variant.hpp"
+#include "boost/lexical_cast.hpp"
 
 // System headers
 #include <windows.h>
@@ -728,8 +729,11 @@ namespace exodbc
 	* - SQLINTEGER* (Note: This will just format using %ld)
 	* - SQLBIGINT* (Note: This will just format using %lld)
 	* - SQLCHAR*
-	* - SQLDOUBLE* (Note: This will just format using %f)
-	* \todo DATE_STRUCT*, TIME_STRUCT*, TIMESTAMP_STRUCT*, NUMERIC_STRUCT*
+	* - SQLDOUBLE* (Note: This will just format using boost::lexical_cast<std::wstring>)
+	* - SQLDATE* Returns a date in the format YYYY-MM-DD
+	* - SQLTIME_STRUCT* Returns a time in the format hh:mm:ss
+	* - SQL_TIMESTAMP_STRUCT* Returns a timestamp in the format YYYY-MM-DDThh:mm:ss.fffffffff
+	* \todo NUMERIC_STRUCT*
 	*
 	*/
 	class WStringVisitor
@@ -741,10 +745,10 @@ namespace exodbc
 		std::wstring operator()(SQLBIGINT* bigInt) const { return (boost::wformat(L"%lld") % *bigInt).str(); };
 		std::wstring operator()(SQLCHAR* pChar) const{ throw CastException(SQL_C_CHAR, SQL_C_WCHAR); };
 		std::wstring operator()(SQLWCHAR* pWChar) const { return pWChar; };
-		std::wstring operator()(SQLDOUBLE* pDouble) const { return (boost::wformat(L"%f") % *pDouble).str(); };
-		std::wstring operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_WCHAR); };
-		std::wstring operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_WCHAR); };
-		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_WCHAR); };
+		std::wstring operator()(SQLDOUBLE* pDouble) const { return boost::lexical_cast<std::wstring>(*pDouble); };
+		std::wstring operator()(SQL_DATE_STRUCT* pDate) const { return boost::str(boost::wformat(L"%04d-%02d-%02d") % pDate->year % pDate->month %pDate->day); };
+		std::wstring operator()(SQL_TIME_STRUCT* pTime) const { return boost::str(boost::wformat(L"%02d:%02d:%02d") % pTime->hour % pTime->minute %pTime->second); };
+		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return boost::str(boost::wformat(L"%04d-%02d-%02dT%02d:%02d:%02.9f") % pTimestamp->year %pTimestamp->month %pTimestamp->day %pTimestamp->hour %pTimestamp->minute % ((SQLDOUBLE)pTimestamp->second + ((SQLDOUBLE)pTimestamp->fraction / (SQLDOUBLE)1000000000.0))); };
 		std::wstring operator()(SQL_NUMERIC_STRUCT* pNumeric) const { throw CastException(SQL_C_NUMERIC, SQL_C_WCHAR); };
 #if HAVE_MSODBCSQL_H
 		std::wstring operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_WCHAR); };
@@ -764,6 +768,10 @@ namespace exodbc
 	* - SQLBIGINT* (Note: This will just format using %lld)
 	* - SQLCHAR*
 	* - SQLDOUBLE* (Note: This will just format using %f)
+	* - SQLDATE* Returns a date in the format YYYY-MM-DD
+	* - SQLTIME_STRUCT* Returns a time in the format hh:mm:ss
+	* - SQL_TIMESTAMP_STRUCT* Returns a timestamp in the format YYYY-MM-DDThh:mm:ss.fffffffff
+	* - 
 	* \todo DATE_STRUCT*, TIME_STRUCT*, TIMESTAMP_STRUCT*, NUMERIC_STRUCT*
 	*/
 	class StringVisitor
