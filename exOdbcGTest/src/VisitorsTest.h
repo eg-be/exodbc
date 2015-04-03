@@ -97,6 +97,13 @@ namespace exodbc
 		virtual void TearDown() {};
 	};
 
+
+	class NumericVisitorTest : public ::testing::Test
+	{
+	protected:
+		virtual void SetUp() {};
+		virtual void TearDown() {};
+	};
 } // namespace exodbc
 
 #endif // EXCELTEST_H
