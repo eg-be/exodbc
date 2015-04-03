@@ -204,6 +204,57 @@ namespace exodbc
 		EXPECT_EQ(-404, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
 		EXPECT_TRUE(iTable2.IsColumnNull(2));
 	}
+
+
+	TEST_P(TableTest, OpenManualCheckColumnFlagUpdate)
+	{
+		// Open a table manually but do not set the Select flag for all columns
+		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_UPDATE | AF_DELETE | AF_INSERT);
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		int type = SQL_C_SLONG;
+		// \todo
+		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | AF_UPDATE | AF_INSERT);
+		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | AF_UPDATE | AF_INSERT);
+		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | AF_INSERT);
+		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | AF_UPDATE | AF_INSERT);
+
+		// Open and remove all data from the table
+		iTable.Open(m_db);
+		ASSERT_NO_THROW(TestTables::ClearTestTable(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db));
+
+		// Insert some value to update later
+		iTable.SetColumnValue(0, (SQLINTEGER)11);
+		iTable.SetColumnValue(1, (SQLSMALLINT)202);
+		iTable.SetColumnValue(2, (SQLINTEGER)303);
+		iTable.SetColumnValue(3, (SQLBIGINT)-404);
+		EXPECT_NO_THROW(iTable.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Select to update
+		iTable.Select();
+		ASSERT_TRUE(iTable.SelectNext());
+
+		// Update - note column 2 will not get updated, flag not set
+		// iTable.SetColumnValue(0, (SQLINTEGER) 11); //pk
+		iTable.SetColumnValue(1, (SQLSMALLINT) 880);
+		iTable.SetColumnValue(2, (SQLINTEGER) 990);
+		iTable.SetColumnValue(3, (SQLBIGINT) 1001);
+		EXPECT_NO_THROW(iTable.Update());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Read back from another table - column 2 still has the originally inserted value
+		Table iTable2(m_db, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
+		iTable2.Open(m_db);
+		iTable2.Select();
+		ASSERT_TRUE(iTable2.SelectNext());
+		EXPECT_EQ(11, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
+		EXPECT_EQ(880, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
+		EXPECT_EQ(303, boost::get<SQLINTEGER>(iTable2.GetColumnValue(2)));
+		EXPECT_EQ(1001, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
+	}
 	
 
 	TEST_P(TableTest, FailOpenReadWriteIfNotAllPrimaryKeysAreBound)
