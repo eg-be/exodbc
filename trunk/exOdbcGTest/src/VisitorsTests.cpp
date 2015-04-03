@@ -301,6 +301,47 @@ namespace exodbc
 	}
 
 
+	TEST_F(TimestampVisitorTest, FromDate)
+	{
+		SQL_DATE_STRUCT d0 = InitDate(26, 01, 1983);
+		SQL_TIMESTAMP_STRUCT ts1 = boost::apply_visitor(TimestampVisitor(), BufferPtrVariant((SQL_DATE_STRUCT*)&d0));
+		EXPECT_EQ(26, ts1.day);
+		EXPECT_EQ(1, ts1.month);
+		EXPECT_EQ(1983, ts1.year);
+		EXPECT_EQ(0, ts1.hour);
+		EXPECT_EQ(0, ts1.minute);
+		EXPECT_EQ(0, ts1.second);
+		EXPECT_EQ(0, ts1.fraction);
+	}
+
+
+	TEST_F(TimestampVisitorTest, FromTime)
+	{
+		SQL_TIME_STRUCT t0 = InitTime(13, 05, 1);
+		SQL_TIMESTAMP_STRUCT ts1 = boost::apply_visitor(TimestampVisitor(), BufferPtrVariant((SQL_TIME_STRUCT*)&t0));
+		EXPECT_EQ(0, ts1.day);
+		EXPECT_EQ(0, ts1.month);
+		EXPECT_EQ(0, ts1.year);
+		EXPECT_EQ(13, ts1.hour);
+		EXPECT_EQ(5, ts1.minute);
+		EXPECT_EQ(1, ts1.second);
+		EXPECT_EQ(0, ts1.fraction);
+	}
+
+
+	TEST_F(TimestampVisitorTest, FromTimestamp)
+	{
+		SQL_TIMESTAMP_STRUCT t0 = InitTimestamp(13, 55, 56, 123000000, 26, 01, 1983);
+		SQL_TIMESTAMP_STRUCT ts1 = boost::apply_visitor(TimestampVisitor(), BufferPtrVariant((SQL_TIMESTAMP_STRUCT*)&t0));
+		EXPECT_EQ(26, ts1.day);
+		EXPECT_EQ(1, ts1.month);
+		EXPECT_EQ(1983, ts1.year);
+		EXPECT_EQ(13, ts1.hour);
+		EXPECT_EQ(55, ts1.minute);
+		EXPECT_EQ(56, ts1.second);
+		EXPECT_EQ(123000000, ts1.fraction);
+	}
+
 	// Interfaces
 	// ----------
 
