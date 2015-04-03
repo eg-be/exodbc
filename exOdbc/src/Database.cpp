@@ -614,7 +614,7 @@ namespace exodbc
 		{
 			if (!(mode == ExecFailMode::NotFailOnNoData && retcode == SQL_NO_DATA))
 			{
-				SqlResultException ex(L"SQLExecDirect", retcode, (boost::wformat(L"Failed to execute Stmt '%s'") % sqlStmt).str());
+				SqlResultException ex(L"SQLExecDirect", retcode, SQL_HANDLE_STMT, m_hstmtExecSql, (boost::wformat(L"Failed to execute Stmt '%s'") % sqlStmt).str());
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
