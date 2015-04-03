@@ -698,7 +698,7 @@ namespace exodbc
 	* 
 	* \todo SQL_NUMERIC_STRUCT* if it fits into the bigint
 	*/
-	class BigintVisitor
+	class EXODBCAPI BigintVisitor
 		: public boost::static_visitor < SQLBIGINT >
 	{
 	public:		
@@ -736,7 +736,7 @@ namespace exodbc
 	* \todo NUMERIC_STRUCT*
 	*
 	*/
-	class WStringVisitor
+	class EXODBCAPI WStringVisitor
 		: public boost::static_visitor < std::wstring >
 	{
 	public:
@@ -774,7 +774,7 @@ namespace exodbc
 	* - 
 	* \todo NUMERIC_STRUCT*
 	*/
-	class StringVisitor
+	class EXODBCAPI StringVisitor
 		: public boost::static_visitor < std::string >
 	{
 	public:
@@ -806,7 +806,7 @@ namespace exodbc
 	* - SQLDOUBLE*
 	* \todo: SQL_NUMERIC_STRUCT*
 	*/
-	class DoubleVisitor
+	class EXODBCAPI DoubleVisitor
 		: public boost::static_visitor < SQLDOUBLE >
 	{
 	public:
@@ -838,7 +838,7 @@ namespace exodbc
 	* - SQLTIMESTAMP*
 	*
 	*/
-	class TimestampVisitor
+	class EXODBCAPI TimestampVisitor
 		: public boost::static_visitor < SQL_TIMESTAMP_STRUCT >
 	{
 	public:
@@ -871,7 +871,7 @@ namespace exodbc
 	* - SQL_NUMERIC_STRUCT*
 	* \todo SMALLINT, INTEGER, BIGINT
 	*/
-	class NumericVisitor
+	class EXODBCAPI NumericVisitor
 		: public boost::static_visitor < SQL_NUMERIC_STRUCT >
 	{
 	public:
@@ -903,7 +903,7 @@ namespace exodbc
 	* which works for every datatype.
 	*
 	*/
-	class CharPtrVisitor
+	class EXODBCAPI CharPtrVisitor
 		: public boost::static_visitor < const SQLCHAR* >
 	{
 	public:
