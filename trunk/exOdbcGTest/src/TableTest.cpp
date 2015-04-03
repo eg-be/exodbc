@@ -216,10 +216,10 @@ namespace exodbc
 		SQLBIGINT bi = 0;
 		int type = SQL_C_SLONG;
 		// \todo
-		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | AF_UPDATE | AF_INSERT);
-		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | AF_UPDATE | AF_INSERT);
-		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | AF_INSERT);
-		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | AF_UPDATE | AF_INSERT);
+		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_UPDATE | CF_INSERT);
+		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_UPDATE | CF_INSERT);
+		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_UPDATE | CF_INSERT);
 
 		// Open and remove all data from the table
 		iTable.Open(m_db);
@@ -257,9 +257,24 @@ namespace exodbc
 	}
 	
 
-	TEST_P(TableTest, FailOpenReadWriteIfNotAllPrimaryKeysAreBound)
+	TEST_P(TableTest, OpenManualPrimaryKeys)
 	{
 		// \todo
+		// Open a table by defining primary keys manually
+		// Open a table manually but do not set the Select flag for all columns
+		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		int type = SQL_C_SLONG;
+		// \todo
+		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT |  CF_INSERT | CF_PRIMARY_KEY);
+		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+
+
 	}
 
 
