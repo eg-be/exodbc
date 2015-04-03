@@ -104,6 +104,12 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, OpenManualCheckColumnFlagsMatchAccessFlags)
+	{
+
+	}
+
+
 	TEST_P(TableTest, OpenAutoWithoutCheck)
 	{
 		// Open an auto-table without checking for privileges or existence

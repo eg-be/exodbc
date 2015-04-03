@@ -922,8 +922,8 @@ namespace exodbc
 		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
 		exASSERT(flags & CF_SELECT);
 
-ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, queryName, flags, columnSize, decimalDigits);
-m_columnBuffers[columnIndex] = pColumnBuffer;
+		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, queryName, flags, columnSize, decimalDigits);
+		m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 
 

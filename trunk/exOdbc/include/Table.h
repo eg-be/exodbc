@@ -258,6 +258,11 @@ namespace exodbc
 		*			If set, values retrieved using GetColumnValue(SQLSMALLINT columnIndex, std::string& str)
 		*			or GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) are trimmed on the right
 		*			before being set on str.
+		*  - TOF_DO_NOT_QUERY_PRIMARY_KEYS:
+		*			If a table is not opened read-only during Open() the primary keys get queried.
+		*			If this flag is set, the primary keys are not queried, but defined ColumnBuffers 
+		*			(probably defined using SetColumn() ) are checked for the flag CF_PRIMARY_KEY to build
+		*			the internal PrimaryKeys structure.
 		* \see		IsOpen()
 		* \see		Close()
 		* \see		SetColumn()
