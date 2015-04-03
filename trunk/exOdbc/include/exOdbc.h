@@ -247,7 +247,8 @@ namespace exodbc
 		TOF_CHECK_PRIVILEGES = 0x2,	///< Check that we have sufficient privileges to open the table for the given AccessFlags
 		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	///< If AutoBinding is active, skip binding of columns that are not supported. Default is to fail on unsupported columns.
 		TOF_CHAR_TRIM_RIGHT = 0x8,	///< If set, string/wstring values accessed through this table are trimmed on the right before being returned as string/string
-		TOF_CHAR_TRIM_LEFT = 0x10	///< If set, string/wstring values accessed through this table are trimmed on the left before being returned as string/string
+		TOF_CHAR_TRIM_LEFT = 0x10,	///< If set, string/wstring values accessed through this table are trimmed on the left before being returned as string/string
+		TOF_DO_NOT_QUERY_PRIMARY_KEYS = 0x20 ///< If set, primary keys are not queried from the Database but it is assumed that you have set them using SetColumn().
 	};
 
 	/*!
@@ -523,7 +524,12 @@ namespace exodbc
 	*/
 	struct EXODBCAPI STablePrimaryKeyInfo
 	{
-		STablePrimaryKeyInfo() : m_keySequence(0), m_isPrimaryKeyNameNull(true) {};
+		STablePrimaryKeyInfo() 
+			: m_keySequence(0)
+			, m_isPrimaryKeyNameNull(true) 
+			, m_isCatalogNull(true)
+			, m_isSchemaNull(true)
+		{};
 
 		std::wstring	m_catalogName;	///< TABLE_CAT [Nullable]. Primary key table catalog name.
 		std::wstring	m_schemaName;	///< TABLE_SCHEM [Nullable]. Primary key table schema name.

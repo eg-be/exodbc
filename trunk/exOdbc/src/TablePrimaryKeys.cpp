@@ -66,9 +66,43 @@ namespace exodbc
 		// Very simple so far
 		// \todo: Ensure we have unique values for m_keySequence
 		m_pksVector = tablePks;
-		for (TablePrimaryKeysVector::const_iterator it = tablePks.begin(); it != tablePks.end(); it++)
+		for (TablePrimaryKeysVector::const_iterator it = tablePks.begin(); it != tablePks.end(); ++it)
 		{
 			m_pksMap[it->GetSqlName()] = *it;
+		}
+	}
+
+
+	void TablePrimaryKeys::Parse(const STableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers)
+	{
+		m_pksMap.clear();
+		m_pksVector.clear();
+
+		// We read the info from the column-buffers. Use only the query-name of the columnbuffers.
+		SQLSMALLINT keySequence = 1;
+		for (ColumnBufferPtrMap::const_iterator it = columnBuffers.begin(); it != columnBuffers.end(); ++it)
+		{
+			ColumnBuffer* pBuffer = it->second;
+			if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
+			{
+				std::wstring columnName = pBuffer->GetQueryName();
+				// keep only the last part and assume its the column-name only
+				size_t lastDot = columnName.find_last_of(L".");
+				if (lastDot != std::wstring::npos)
+				{
+					columnName = columnName.substr(lastDot + 1);
+				}
+				STablePrimaryKeyInfo keyInfo;
+				// use only the pure table-name and the query-name from the column-buffer
+				keyInfo.m_tableName = tableInfo.GetSqlName(QNF_TABLE);
+				keyInfo.m_columnName = columnName;
+				keyInfo.m_keySequence = keySequence;
+
+				m_pksVector.push_back(keyInfo);
+				m_pksMap[keyInfo.GetSqlName()] = keyInfo;
+
+				++keySequence;
+			}
 		}
 	}
 
