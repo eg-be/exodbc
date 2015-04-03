@@ -41,6 +41,7 @@ namespace exodbc
 		, m_columnSize(-1)
 		, m_hStmt(SQL_NULL_HSTMT)
 		, m_flags(flags)
+		, m_cb(SQL_NULL_DATA)
 	{
 		exASSERT(columnInfo.m_sqlDataType != 0);
 		exASSERT(m_flags & CF_SELECT);
@@ -85,7 +86,7 @@ namespace exodbc
 	}
 
 
-	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */, SQLSMALLINT sqlType /* = SQL_UNKNOWN_TYPE */)
+	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, SQLSMALLINT sqlType, const std::wstring& queryName, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(true)
 		, m_autoBindingMode(AutoBindingMode::BIND_AS_REPORTED)
@@ -100,6 +101,7 @@ namespace exodbc
 		, m_hStmt(SQL_NULL_HSTMT)
 		, m_sqlType(sqlType)
 		, m_flags(flags)
+		, m_cb(0)
 	{
 		exASSERT(sqlCType != 0);
 		exASSERT(bufferSize > 0);

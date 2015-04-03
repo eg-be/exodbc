@@ -70,7 +70,7 @@ namespace exodbc
 
 	// Open / Close
 	// ------------
-	TEST_P(TableTest, OpenManualWithoutCheck)
+	TEST_P(TableTest, OpenManualReadOnlyWithoutCheck)
 	{
 		// Open an existing table without checking for privileges or existence
 		MIntTypesTable table(m_db, m_odbcInfo.m_namesCase);
@@ -84,7 +84,23 @@ namespace exodbc
 		SQLINTEGER idNotExisting = 0;
 		neTable.SetColumn(0, L"idNotExistring", &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting));
 		EXPECT_NO_THROW(neTable.Open(m_db, TOF_NONE));
-		// TODO: So we can prove in the test that we will fail doing a SELECT later
+		// \todo So we can prove in the test that we will fail doing a SELECT later
+	}
+
+
+	TEST_P(TableTest, OpenManualWritableWithoutCheck)
+	{
+		// Open an existing table without checking for privileges or existence
+		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ_WRITE);
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		int type = SQL_C_SLONG;
+		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
+		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
 	}
 
 
@@ -106,6 +122,11 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenManualCheckColumnFlagSelect)
 	{
+		bool c1 = CF_SELECT & CF_INSERT;
+		bool c2 = CF_SELECT & CF_INSERT;
+		bool b = (!(0 == SQL_UNKNOWN_TYPE) && ((CF_SELECT & CF_INSERT) || (CF_SELECT & CF_UPDATE)));
+		bool b2 = (!(0 == SQL_UNKNOWN_TYPE) && (c1 || c2));
+
 		// Open a table manually but do not set the Select flag for all columns
 		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
 		SQLINTEGER id = 0;
@@ -117,7 +138,7 @@ namespace exodbc
 		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), &i, SQL_C_SLONG, sizeof(i), CF_NONE);
 		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
 
-		EXPECT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open(m_db));
 		// We expect all columnBuffers to be bound, except nr 2
 		ColumnBuffer* pBuffId = iTable.GetColumnBuffer(0);
 		ColumnBuffer* pBuffsi = iTable.GetColumnBuffer(1);
@@ -143,6 +164,42 @@ namespace exodbc
 			// except the not bound column, we are unable to get its value, but its buffer has not changed
 			EXPECT_THROW(boost::get<SQLINTEGER>(iTable.GetColumnValue(2)), AssertionException);
 		}
+	}
+
+
+	TEST_P(TableTest, OpenManualCheckColumnFlagInsert)
+	{
+		// Open a table manually but do not set the Select flag for all columns
+		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT | AF_DELETE);
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		int type = SQL_C_SLONG;
+		// \todo
+		//iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT);
+		//iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
+		//iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
+		//iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+
+		//// Open and remove all data from the table
+		//iTable.Open(m_db);
+		//ASSERT_NO_THROW(TestTables::ClearTestTable(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db));
+
+		//// Insert a value by using our primary key
+		//iTable.SetColumnValue(0, (SQLINTEGER)11);
+		//iTable.SetColumnValue(1, (SQLSMALLINT)202);
+		//iTable.SetColumnValue(2, (SQLINTEGER)303);
+		//iTable.SetColumnValue(3, (SQLBIGINT)-404);
+		//EXPECT_NO_THROW(iTable.Insert());
+
+
+	}
+	
+
+	TEST_P(TableTest, FailOpenReadWriteIfNotAllPrimaryKeysAreBound)
+	{
+		// \todo
 	}
 
 
@@ -595,8 +652,9 @@ namespace exodbc
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		// We expect 6 Records
+		// We expect 7 Records
 		iTable.Select(L"");
+		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_TRUE(iTable.SelectNext());
@@ -1989,6 +2047,54 @@ namespace exodbc
 		EXPECT_EQ(102, (SQLSMALLINT)*pSmallInt2);
 		EXPECT_EQ(103, (SQLINTEGER)*pInt2);
 		EXPECT_EQ(104, (SQLBIGINT)*pBigInt2);
+	}
+
+
+	// just do only one test to insert the manual types, its all the same, except that opening is a little bit different
+	TEST_P(TableTest, InsertManualIntTypes)
+	{
+		// Open an existing table without checking for privileges or existence
+		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		int type = SQL_C_SLONG;
+		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+
+		iTable.Open(m_db);
+		TestTables::ClearTestTable(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db);
+		wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+
+		// Remove everything, ignoring if there was any data:
+		iTable.Delete(sqlstmt, false);
+		m_db.CommitTrans();
+
+		// Set some silly values to insert
+		// note: no need to set to not-null, the buffers are created with null set to false
+		id = 101;
+		si = 102;
+		i = 103;
+		bi = 104;
+
+		EXPECT_NO_THROW(iTable.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Open another table and read the values from there
+		Table iTable2(m_db, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
+		iTable2.Open(m_db);
+		iTable2.Select();
+		ASSERT_TRUE(iTable2.SelectNext());
+
+		EXPECT_EQ(101, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
+		EXPECT_EQ(102, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
+		EXPECT_EQ(103, boost::get<SQLINTEGER>(iTable2.GetColumnValue(2)));
+		EXPECT_EQ(104, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
+
 	}
 
 

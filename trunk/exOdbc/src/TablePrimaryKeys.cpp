@@ -61,21 +61,30 @@ namespace exodbc
 
 	void TablePrimaryKeys::Parse(const TablePrimaryKeysVector& tablePks)
 	{
-		m_pksMap.clear();
-
 		// Very simple so far
 		// \todo: Ensure we have unique values for m_keySequence
 		m_pksVector = tablePks;
-		for (TablePrimaryKeysVector::const_iterator it = tablePks.begin(); it != tablePks.end(); ++it)
+	}
+
+
+	bool TablePrimaryKeys::WeakCompare(std::wstring name1, std::wstring name2) const
+	{
+		size_t d1 = name1.find_last_of(L".");
+		size_t d2 = name2.find_last_of(L".");
+		if (d1 != wstring::npos)
 		{
-			m_pksMap[it->GetSqlName()] = *it;
+			name1 = name1.substr(d1 + 1);
 		}
+		if (d2 != wstring::npos)
+		{
+			name2 = name2.substr(d2 + 1);
+		}
+		return name1 == name2;
 	}
 
 
 	void TablePrimaryKeys::Parse(const STableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers)
 	{
-		m_pksMap.clear();
 		m_pksVector.clear();
 
 		// We read the info from the column-buffers. Use only the query-name of the columnbuffers.
@@ -99,7 +108,6 @@ namespace exodbc
 				keyInfo.m_keySequence = keySequence;
 
 				m_pksVector.push_back(keyInfo);
-				m_pksMap[keyInfo.GetSqlName()] = keyInfo;
 
 				++keySequence;
 			}
@@ -111,9 +119,15 @@ namespace exodbc
 	{
 		exASSERT(m_initialized);
 
-		PrimaryKeysMap::const_iterator it = m_pksMap.find(queryName);
-
-		return it != m_pksMap.end();
+		for (TablePrimaryKeysVector::const_iterator it = m_pksVector.begin(); it != m_pksVector.end(); ++it)
+		{
+			const wstring& keyName = it->GetSqlName();
+			if (WeakCompare(queryName, keyName))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 
@@ -131,7 +145,7 @@ namespace exodbc
 			for (itBuffs = columnBuffers.begin(); itBuffs != columnBuffers.end() && !bound; itBuffs++)
 			{
 				const ColumnBuffer* pBuff = itBuffs->second;
-				if (pBuff->GetQueryName() == pkQueryName && pBuff->IsBound())
+				if (WeakCompare(pBuff->GetQueryName(), pkQueryName) && pBuff->IsBound())
 				{
 					bound = true;
 				}
@@ -147,30 +161,49 @@ namespace exodbc
 	}
 
 
-	bool TablePrimaryKeys::SetPrimaryKeyFlag(const ColumnBufferPtrMap& columnBuffers) const
+	bool TablePrimaryKeys::AreAllPrimaryKeysInMap(const ColumnBufferPtrMap& columnBuffers) const
 	{
 		exASSERT(m_initialized);
-		// \todo: Check that in Parse. Remember if we've setted all primary-keys, we just assume the query name is unique
-		set<wstring> keys;
-		for (TablePrimaryKeysVector::const_iterator it = m_pksVector.begin(); it != m_pksVector.end(); ++it)
+
+		bool allBound = true;
+		TablePrimaryKeysVector::const_iterator it;
+		for (it = m_pksVector.begin(); it != m_pksVector.end(); it++)
 		{
-			keys.insert(it->GetSqlName());
+			wstring pkQueryName = it->GetSqlName();
+			bool bound = false;
+			ColumnBufferPtrMap::const_iterator itBuffs;
+			for (itBuffs = columnBuffers.begin(); itBuffs != columnBuffers.end() && !bound; itBuffs++)
+			{
+				const ColumnBuffer* pBuff = itBuffs->second;
+				if (WeakCompare(pBuff->GetQueryName(), pkQueryName) && pBuff->IsBound())
+				{
+					bound = true;
+				}
+			}
+			if (!bound)
+			{
+				allBound = false;
+				break;
+			}
 		}
 
+		return allBound;
+	}
+
+
+	void TablePrimaryKeys::SetPrimaryKeyFlags(const ColumnBufferPtrMap& columnBuffers) const
+	{
+		exASSERT(m_initialized);
+
 		ColumnBufferPtrMap::const_iterator itBuffs;
-		for (itBuffs = columnBuffers.begin(); itBuffs != columnBuffers.end() && !keys.empty(); ++itBuffs)
+		for (itBuffs = columnBuffers.begin(); itBuffs != columnBuffers.end(); ++itBuffs)
 		{
 			const wstring& queryName = itBuffs->second->GetQueryName();
 			if (IsPrimaryKey(queryName))
 			{
 				itBuffs->second->SetPrimaryKey(true);
-				set<wstring>::iterator itK = keys.find(queryName);
-				exASSERT(itK != keys.end());
-				keys.erase(itK);
 			}
 		}
-
-		return keys.empty();
 	}
 
 

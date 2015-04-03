@@ -154,6 +154,7 @@ namespace exodbc
 		* \details	The constructor will try to allocate a corresponding buffer.
 		*			Note: The constructor will examine SColumnInfo::m_isNullable and set the corresponding
 		*			ColumnFlags, overriding an eventually set value in the passed flags.
+		*			The ColumnBuffer will be set to SQL_NULL_DATA.
 		* \param columnInfo	The Information about the column we bind.
 		* \param mode		How Character columns should be bound.
 		* \param odbcVersion ODBC Version to work with.
@@ -176,9 +177,13 @@ namespace exodbc
 		*			Note that using this constructor you can pass almost any combination of conversions 
 		*			from SQL Types to ODBC C Types to the driver, as long as the buffer-type exists in the
 		*			BufferPtrVariant. Bind() will fail if the driver does not support the given conversion.
-		* \param sqlCType			The ODBC C Type of the buffer (like SQL_C_WCHAR, SQL_C_SLONG, etc.). This value will be forwarded to the driver during SQLBindCol. 
+		*			The SQL_NULL_DATA flag will not be set if you create a ColumnBuffer using this constructor
+		*			as there already is a buffer available containing some data.
+		* \param sqlCType			The ODBC C Type of the buffer (like SQL_C_WCHAR, SQL_C_SLONG, etc.). This value will be forwarded to the driver during binding for select.
 		* \param bufferPtrVariant	Pointer to allocated buffer for the given sqlCType. Must be a buffer that can be held by a exodbc::BufferPtrVariant .
 		* \param bufferSize			Size of the allocated buffer.
+		* \param sqlType			The SQL Type of the buffer (like SQL_VARCHAR, SQL_INTEGER, etc.). This value will be forwarded to the driver during Binding parameters.
+		*							If this ColumnBuffer is never bound as a parameter it is save to set this to SQL_UNKNOWN.
 		* \param queryName			Name of the column that corresponds to this buffer.
 		* \param	columnSize		The number of digits of a decimal value (including the fractional part).
 		*							This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
@@ -191,7 +196,7 @@ namespace exodbc
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, const std::wstring& queryName, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1, SQLSMALLINT sqlType = SQL_UNKNOWN_TYPE);
+		ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, SQLSMALLINT sqlType, const std::wstring& queryName, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 
 		~ColumnBuffer();

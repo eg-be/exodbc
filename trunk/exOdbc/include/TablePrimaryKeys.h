@@ -100,13 +100,32 @@ namespace exodbc
 		bool IsInitialized() const { return m_initialized; };
 
 
+		/*!
+		* \brief	Compare if the last part of the passed queryName and matches one of the key names.
+		* \details	Uses the WeakCompare()
+		*/
 		bool IsPrimaryKey(const std::wstring queryName) const;
 
 
+		/*!
+		* \brief	Returns true if for every PrimaryKey there is a matching columnBuffer that is Bound.
+		* \details	Uses the WeakCompare() to determine the matching ColumnBuffer.
+		*/
 		bool AreAllPrimaryKeysBound(const ColumnBufferPtrMap& columnBuffers) const;
 
 
-		bool SetPrimaryKeyFlag(const ColumnBufferPtrMap& columnBuffers) const;
+		/*!
+		* \brief	Returns true if for every PrimaryKey there is a matching columnBuffer.
+		* \details	Uses the WeakCompare() to determine the matching ColumnBuffer.
+		*/
+		bool AreAllPrimaryKeysInMap(const ColumnBufferPtrMap& columnBuffers) const;
+
+
+		/*!
+		* \brief	Seths the CF_PRIMARY_KEY flag on every ColumnBuffer that machtes one of the PrimaryKeys.
+		* \details	Uses the WeakCompare() to determine the matching ColumnBuffer.
+		*/
+		void SetPrimaryKeyFlags(const ColumnBufferPtrMap& columnBuffers) const;
 
 
 		size_t GetPrimaryKeysCount() const { exASSERT(m_initialized); return m_pksVector.size(); };
@@ -128,12 +147,17 @@ namespace exodbc
 		*			The pure table-name from the passed STableInfo is used as tablename for the entries created.
 		* \throw	Exception
 		*/
-		void TablePrimaryKeys::Parse(const STableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers);
+		void Parse(const STableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers);
+
+
+		/*!
+		* \brief	Tokenizes the two passed strings using '.' as tokenizer. Compares only the last two
+		*			tokens found for equality.
+		*/
+		bool WeakCompare(std::wstring name1, std::wstring name2) const;
 
 		bool m_initialized;
 
-		typedef std::map<std::wstring, STablePrimaryKeyInfo> PrimaryKeysMap;
-		PrimaryKeysMap m_pksMap;
 		TablePrimaryKeysVector m_pksVector;
 	};
 
