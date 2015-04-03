@@ -414,7 +414,12 @@ namespace exodbc
 		}
 		boost::erase_last(deleteStmt, L" AND ");
 		// ensure that we have something in our where clause
-		exASSERT(paramNr > 1);
+		if (paramNr <= 1)
+		{
+			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to prepare a DELETE statement (probably because flag AF_DELETE is set), but no ColumnBuffers were bound as PrimaryKeys to build a WHERE clause") % m_tableInfo.GetSqlName()));
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
 
 		// Prepare to delete
 		SQLRETURN ret = SQLPrepare(m_hStmtDelete, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
@@ -449,7 +454,12 @@ namespace exodbc
 		}
 		boost::erase_last(updateStmt, L",");
 		// ensure that we have something to update
-		exASSERT(paramNr > 1);
+		if (paramNr <= 1)
+		{	
+			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind update parameters (probably because flag AF_UPDATE is set), but no ColumnBuffers were bound for UPDATing") % m_tableInfo.GetSqlName()));
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
 		updateStmt += L"WHERE ";
 		bool haveWhereParam = false;
 		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
@@ -501,7 +511,12 @@ namespace exodbc
 			++it;
 		}
 		// ensure that we have something to insert
-		exASSERT(paramNr > 1);
+		if (paramNr <= 1)
+		{
+			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind insert parameters (probably because flag AF_INSERT is set), but no ColumnBuffers were bound for INSERTing") % m_tableInfo.GetSqlName()));
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
 		boost::erase_last(insertStmt, L", ");
 		// and set markers for the values
 		insertStmt += L") VALUES(";
@@ -912,7 +927,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlag flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 	{
 		exASSERT(m_manualColumns);
 		exASSERT(columnIndex >= 0);
@@ -920,9 +935,15 @@ namespace exodbc
 		exASSERT( ! queryName.empty());
 		exASSERT(bufferSize > 0);
 		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
-
-		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, queryName, flags, columnSize, decimalDigits);
+		exASSERT( ! ( (sqlType == SQL_UNKNOWN_TYPE) && ((flags & CF_INSERT) || (flags & CF_UPDATE)) ) );
+		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, sqlType, queryName, flags, columnSize, decimalDigits);
 		m_columnBuffers[columnIndex] = pColumnBuffer;
+	}
+
+
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	{
+		SetColumn(columnIndex, queryName, SQL_UNKNOWN_TYPE, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
 	}
 
 
@@ -1064,6 +1085,14 @@ namespace exodbc
 				throw ex;
 			}
 
+			// And a Buffer for every primary key
+			if (!m_tablePrimaryKeys.AreAllPrimaryKeysInMap(m_columnBuffers))
+			{
+				Exception ex((boost::wformat(L"Not all primary Keys of table '%s' have a corresponding ColumnBuffer") % m_tableInfo.GetSqlName()).str());
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
+			}
+
 			// Test that all primary keys are bound
 			if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
 			{
@@ -1073,13 +1102,10 @@ namespace exodbc
 			}
 
 			// Set the primary key flags on the bound Columns
-			// but only if corresponding flag is not set
+			// but only if corresponding flag is not set - else we have initialized the primary keys from the ColumnBuffers - makes no sense
 			if (!(openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS))
-			if (!m_tablePrimaryKeys.SetPrimaryKeyFlag(m_columnBuffers))
 			{
-				Exception ex((boost::wformat(L"Failed to mark Bound Columns as primary keys for table '%s'") % m_tableInfo.GetSqlName()).str());
-				SET_EXCEPTION_SOURCE(ex);
-				throw ex;
+				m_tablePrimaryKeys.SetPrimaryKeyFlags(m_columnBuffers);
 			}
 
 			// Build prepared statements, bind parameters.
