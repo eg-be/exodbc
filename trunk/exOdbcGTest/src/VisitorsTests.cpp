@@ -179,6 +179,12 @@ namespace exodbc
 		SQL_DATE_STRUCT d0 = InitDate(26, 01, 1983);
 		wstring s1 = boost::apply_visitor(WStringVisitor(), BufferPtrVariant((SQL_DATE_STRUCT*)&d0));
 		EXPECT_EQ(L"1983-01-26", s1);
+
+		TableOpenFlags fs = 4;
+		if (fs & TOF_DO_NOT_QUERY_PRIMARY_KEYS)
+		{
+			int p = 3;
+		}
 	}
 
 
