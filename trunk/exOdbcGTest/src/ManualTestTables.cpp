@@ -43,7 +43,7 @@ namespace exodbc
 		m_bigInt = 0;
 
 		SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", namesCase), &m_idIntegerTypes, SQL_C_SLONG, sizeof(m_idIntegerTypes));
-		SetColumn(1, TestTables::ConvertNameCase(L"tsdmallint", namesCase), &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt));
+		SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", namesCase), &m_smallInt, SQL_C_SSHORT, sizeof(m_smallInt));
 		SetColumn(2, TestTables::ConvertNameCase(L"tint", namesCase), &m_int, SQL_C_SLONG, sizeof(m_int));
 		SetColumn(3, TestTables::ConvertNameCase(L"tbigint", namesCase), &m_bigInt, SQL_C_SBIGINT, sizeof(m_bigInt));
 	}
