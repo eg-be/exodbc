@@ -192,6 +192,7 @@
     <ClInclude Include="src\HelpersTest.h" />
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\targetver.h" />
+    <ClInclude Include="src\TestDbCreator.h" />
     <ClInclude Include="src\TestParams.h" />
     <ClInclude Include="src\TestTables.h" />
     <ClInclude Include="src\VisitorsTest.h" />
@@ -211,6 +212,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_v100|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_v120|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\TestDbCreator.cpp" />
     <ClCompile Include="src\TestParams.cpp" />
     <ClCompile Include="src\TestTables.cpp" />
     <ClCompile Include="src\VisitorsTests.cpp" />
