@@ -400,7 +400,6 @@ namespace exodbc
 	std::vector<std::wstring> Database::ReadCatalogInfo(ReadCatalogInfoMode mode)
 	{
 		exASSERT(IsOpen());
-
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_hstmt, true, true);
 

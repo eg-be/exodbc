@@ -258,9 +258,10 @@ namespace exodbc
 		 * \brief	Reads all schemas that are defined in the DB. This calls SQLTbles with
 		 * 			SQL_ALL_SCHEMAS as schema-name.
 		 * \return	Schema names found.
-		 * \throw	Exception if reading schemas fails.
+		 * \throw	Exception if reading schemas fails or if the Database is an Access database (Access fails with 
+		 *			SQLSTATE HYC00; Native Error: 106; [Microsoft][ODBC Microsoft Access Driver]Optional feature not implemented )
 		 */
-		std::vector<std::wstring>	ReadSchemas()			{ return ReadCatalogInfo(ReadCatalogInfoMode::AllSchemas); };
+		std::vector<std::wstring>	ReadSchemas()			{ exASSERT(GetDbms() != DatabaseProduct::ACCESS);  return ReadCatalogInfo(ReadCatalogInfoMode::AllSchemas); };
 
 
 		/*!
