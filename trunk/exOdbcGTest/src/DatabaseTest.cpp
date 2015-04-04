@@ -81,25 +81,27 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TransactionIsolationMode::READ_COMMITTED, tiMode);
-		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
+
+		// The rest is not supported by access
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			return;
+		}
 
 		tiMode = TransactionIsolationMode::READ_UNCOMMITTED;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TransactionIsolationMode::READ_UNCOMMITTED, tiMode);
-		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TransactionIsolationMode::REPEATABLE_READ;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TransactionIsolationMode::REPEATABLE_READ, tiMode);
-		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		tiMode = TransactionIsolationMode::SERIALIZABLE;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 		tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_EQ(TransactionIsolationMode::SERIALIZABLE, tiMode);
-		EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 
 		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
@@ -108,7 +110,6 @@ namespace exodbc
 			EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
 			tiMode = m_db.ReadTransactionIsolationMode();
 			EXPECT_EQ(TransactionIsolationMode::SNAPSHOT, tiMode);
-			EXPECT_NO_THROW(m_db.ExecSql(L"SELECT * FROM exodbc.integertypes"));
 #else
 			LOG_WARNING(L"Skipping test because testing against Ms Sql Server but msodbcsql.h is missing");
 			EXPECT_TRUE(false);
@@ -116,12 +117,17 @@ namespace exodbc
 		}
 	}
 
+
 	TEST_P(DatabaseTest, CanSetTransactionIsolationMode)
 	{
 		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::READ_COMMITTED));
-		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::READ_UNCOMMITTED));
-		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::REPEATABLE_READ));
-		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::SERIALIZABLE));
+		// Those are not supported by Access, for the rest we expect support
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::READ_UNCOMMITTED));
+			EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::REPEATABLE_READ));
+			EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::SERIALIZABLE));
+		}
 		EXPECT_FALSE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::UNKNOWN));
 	}
 
@@ -239,6 +245,10 @@ namespace exodbc
 		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"SqlServer"))
 		{
 			EXPECT_TRUE(m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER);
+		}
+		else if (boost::algorithm::find_first(m_odbcInfo.m_dsn, L"Access"))
+		{
+			EXPECT_TRUE(m_db.GetDbms() == DatabaseProduct::ACCESS);
 		}
 		else
 		{

@@ -131,7 +131,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			user = users[i];
 		if (passes.size() > i)
 			pass = passes[i];
-
+		 
 		TestTables::NameCase nameCase = TestTables::NameCase::LOWER;
 		if (cases.size() > i && cases[i] == L"u")
 			nameCase = TestTables::NameCase::UPPER;
