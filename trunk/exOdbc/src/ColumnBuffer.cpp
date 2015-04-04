@@ -86,7 +86,7 @@ namespace exodbc
 	}
 
 
-	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, SQLSMALLINT sqlType, const std::wstring& queryName, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, SQLSMALLINT sqlType, const std::wstring& queryName, OdbcVersion odbcVersion, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(true)
 		, m_autoBindingMode(AutoBindingMode::BIND_AS_REPORTED)
@@ -95,7 +95,7 @@ namespace exodbc
 		, m_columnNr(0)
 		, m_bufferPtr(bufferPtrVariant)
 		, m_queryName(queryName)
-		, m_odbcVersion(OdbcVersion::UNKNOWN)
+		, m_odbcVersion(odbcVersion)
 		, m_decimalDigits(decimalDigits)
 		, m_columnSize(columnSize)
 		, m_hStmt(SQL_NULL_HSTMT)

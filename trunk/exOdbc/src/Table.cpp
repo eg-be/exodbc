@@ -936,7 +936,8 @@ namespace exodbc
 		exASSERT(bufferSize > 0);
 		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
 		exASSERT( ! ( (sqlType == SQL_UNKNOWN_TYPE) && ((flags & CF_INSERT) || (flags & CF_UPDATE)) ) );
-		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, sqlType, queryName, flags, columnSize, decimalDigits);
+		// \see #129 and #133. Once the db is back, we can determine the version from there (or via environment)
+		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, sqlType, queryName, OdbcVersion::UNKNOWN, flags, columnSize, decimalDigits);
 		m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 
