@@ -13,7 +13,12 @@
 #include "TestDbCreator.h"
 
 // Same component headers
+
 // Other headers
+#include <sstream>
+#include <fstream>
+#include <codecvt>
+#include <locale>
 
 // Debug
 #include "DebugNew.h"
@@ -22,6 +27,9 @@
 // -------------
 
 using namespace  std;
+namespace fs = boost::filesystem;
+namespace ba = boost::algorithm;
+
 namespace exodbc
 {
 	// Construction
@@ -46,226 +54,134 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void TestDbCreator::CreateChartable(bool dropIfExists)
+	void TestDbCreator::SetScriptDirectory(const boost::filesystem::wpath& path)
 	{
-		exASSERT(m_db.IsOpen());
-
-		wstring tableName;
-		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
-		{
-			tableName = L"chartable";
-		}
-		else
-		{
-			tableName = L"exodbc.chartable";
-		}
-		if (dropIfExists)
-		{
-			DropIfExists(tableName);
-		}
-
-		wstring create;
-		create = boost::str(boost::wformat(L"CREATE TABLE %s ( idchartable INTEGER NOT NULL, col2 CHAR(128), col3 CHAR(128), col4 CHAR(128), PRIMARY KEY ( idchartable ) );") % tableName);
-		m_db.ExecSql(create);
-
-		wstring insert;
-		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartable, col2, col3, col4) VALUES ( 1, 'r1_c2', 'r1_c3', 'r1_c4')") % tableName);
-		m_db.ExecSql(insert);
-
-		m_db.CommitTrans();
+		m_scriptDirectoryPath = path;
 	}
 
 
-	void TestDbCreator::CreateChartypes(bool dropIfExists)
+	boost::filesystem::wpath TestDbCreator::GetScriptDirectory() const
 	{
-		exASSERT(m_db.IsOpen());
-
-		set<wstring> createTableNames;
-		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+		if (m_scriptDirectoryPath.empty())
 		{
-			createTableNames = set<wstring>({ L"chartypes_tmp", L"chartypes" });
+			IllegalArgumentException ex(L"No ScriptDirectory set.");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
-		else
-		{
-			createTableNames = set<wstring>({ L"exodbc.chartypes_tmp", L"exodbc.chartypes" });
-		}
-		for (set<wstring>::const_iterator it = createTableNames.begin(); it != createTableNames.end(); ++it)
-		{
-			if (dropIfExists)
-			{
-				DropIfExists(*it);
-			}
-
-			wstring create;
-			if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-			{
-				// Use the NVARCHAR types for sql server
-				create = boost::str(boost::wformat(L"CREATE TABLE %s ( idchartypes INTEGER NOT NULL, tvarchar NVARCHAR(128), tchar NCHAR(128), tvarchar_10 NVARCHAR(10), tchar_10 NCHAR(10), PRIMARY KEY ( idchartypes ) );") % *it);
-			}
-			else
-			{
-				create = boost::str(boost::wformat(L"CREATE TABLE %s ( idchartypes INTEGER NOT NULL, tvarchar VARCHAR(128), tchar CHAR(128), tvarchar_10 VARCHAR(10), tchar_10 CHAR(10), PRIMARY KEY ( idchartypes ) );") % *it);
-			}
-			m_db.ExecSql(create);
-		}
-
-		// insert data
-		wstring tableName;
-		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
-		{
-			tableName = L"chartypes";
-		}
-		else
-		{
-			tableName = L"exodbc.chartypes";
-		}
-		wstring abc = L" !\"#$%&''()*+, -. / 0123456789:; <= > ? @ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\] ^ _`abcdefghijklmnopqrstuvwxyz{|}~";
-		wstring insert;
-		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 1, '%s', NULL, NULL, NULL)") % tableName % abc);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 2, NULL, '%s', NULL, NULL)") % tableName % abc);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 3, 'הצüאיט', NULL, NULL, NULL)") % tableName );
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 4, NULL, 'הצüאיט', NULL, NULL)") % tableName);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 5, NULL, NULL, 'abc', 'abc')") % tableName);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 6, NULL, NULL, 'abcde12345', 'abcde12345')") % tableName);
-		m_db.ExecSql(insert);
-
-		m_db.CommitTrans();
+		return m_scriptDirectoryPath;
 	}
 
 
-	void TestDbCreator::CreateBlobtypes(bool dropIfExists)
+	void TestDbCreator::RunAllScripts()
 	{
-		exASSERT(m_db.IsOpen());
 
-		set<wstring> createTableNames;
-		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+		fs::wpath scriptDir = GetScriptDirectory();
+		fs::directory_iterator end_itr;
+		for (fs::directory_iterator itr(scriptDir);	itr != end_itr;	++itr)
 		{
-			createTableNames = set<wstring>({ L"blobtypes_tmp", L"blobtypes" });
-		}
-		else
-		{
-			createTableNames = set<wstring>({ L"exodbc.blobtypes_tmp", L"exodbc.blobtypes" });
-		}
-		for (set<wstring>::const_iterator it = createTableNames.begin(); it != createTableNames.end(); ++it)
-		{
-			if (dropIfExists)
+			fs::wpath filePath = *itr;
+			wstring ext = filePath.extension().native();
+			ba::to_lower(ext);
+			if (ext == L".sql")
 			{
-				DropIfExists(*it);
+				LOG_INFO(boost::str(boost::wformat(L"Running script '%s'") % filePath.native()));
+				RunScript(filePath);
 			}
-			
-			wstring create;
-			if (m_db.GetDbms() == DatabaseProduct::DB2)
-			{
-				create = boost::str(boost::wformat(L"CREATE TABLE %s ( IDBLOBTYPES INTEGER NOT NULL, TBLOB CHAR(16) FOR BIT DATA, TVARBLOB_20 VARCHAR(20) FOR BIT DATA,PRIMARY KEY ( IDBLOBTYPES ) );") % *it);
-			}
-			else
-			{
-				create = boost::str(boost::wformat(L"CREATE TABLE %s ( "
-					L"idblobtypes int NOT NULL,"
-					L"tblob binary (16) NULL,"
-					L"tvarblob_20 varbinary (20) NULL,"
-					L"PRIMARY KEY(idblobtypes))") % *it);
-			}
-				
-			m_db.ExecSql(create);
 		}
+	}
 
-		// Insert our test-data
-		wstring insertTableName = L"exodbc.blobtypes";
-		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
-		{
-			insertTableName = L"blobtypes";
-		}
 
-		wstring insert;
-		if (m_db.GetDbms() == DatabaseProduct::DB2)
+	void TestDbCreator::RunScript(const boost::filesystem::wpath& scriptPath)
+	{
+		// Load the passed script
+		vector<wstring> lines = LoadScriptFile(scriptPath);
+		// Run as one long statement
+		std::wstring stmt;
+		for (vector<wstring>::const_iterator it = lines.begin(); it != lines.end(); ++it)
 		{
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(1, x'00000000000000000000000000000000', NULL)") % insertTableName);
-			m_db.ExecSql(insert);
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(2, x'ffffffffffffffffffffffffffffffff', NULL)") % insertTableName);
-			m_db.ExecSql(insert);
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(3, x'abcdeff01234567890abcdef01234567', NULL)") % insertTableName);
-			m_db.ExecSql(insert);
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(4, NULL, x'abcdeff01234567890abcdef01234567')") % insertTableName);
-			m_db.ExecSql(insert);
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(5, NULL, x'abcdeff01234567890abcdef01234567ffffffff')") % insertTableName);
-			m_db.ExecSql(insert);
+			namespace ba = boost::algorithm;
+			wstring line = *it;
+			stmt += line;
+			bool execute = !stmt.empty() && (line.empty() || ba::ends_with(ba::trim_copy(stmt), L";"));
+			if (execute)
+			{
+				m_db.ExecSql(stmt);
+				stmt = L"";
+			}
 		}
-		else
+		if (!stmt.empty())
 		{
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(1, 0x00000000000000000000000000000000, NULL)") % insertTableName);
-			m_db.ExecSql(insert);
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(2, 0xffffffffffffffffffffffffffffffff, NULL)") % insertTableName);
-			m_db.ExecSql(insert);
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(3, 0xabcdeff01234567890abcdef01234567, NULL)") % insertTableName);
-			m_db.ExecSql(insert);
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(4, NULL, 0xabcdeff01234567890abcdef01234567)") % insertTableName);
-			m_db.ExecSql(insert);
-			insert = boost::str(boost::wformat(L"INSERT INTO %s (IDBLOBTYPES, TBLOB, TVARBLOB_20) VALUES(5, NULL, 0xabcdeff01234567890abcdef01234567ffffffff)") % insertTableName);
-			m_db.ExecSql(insert);
+			m_db.ExecSql(stmt);
 		}
 		m_db.CommitTrans();
 	}
 
 
-	void TestDbCreator::CreateIntegertypes(bool dropIfExists)
+	void TestDbCreator::RunScript(const std::wstring& scriptName)
 	{
-		exASSERT(m_db.IsOpen());
-
-		set<wstring> createTableNames;
-		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+		// Load the passed script
+		vector<wstring> lines = LoadScriptFile(scriptName);
+		// Run as one long statement
+		std::wstring stmt;
+		for (vector<wstring>::const_iterator it = lines.begin(); it != lines.end(); ++it)
 		{
-			createTableNames = set<wstring>({ L"integertypes_tmp", L"integertypes" });
-		}
-		else
-		{
-			createTableNames = set<wstring>({ L"exodbc.integertypes_tmp", L"exodbc.integertypes" });
-		}
-		for (set<wstring>::const_iterator it = createTableNames.begin(); it != createTableNames.end(); ++it)
-		{
-			if (dropIfExists)
+			namespace ba = boost::algorithm;
+			wstring line = *it;
+			stmt += line;
+			bool execute = !stmt.empty() && (line.empty() || ba::ends_with(ba::trim_copy(stmt), L";"));
+			if (execute)
 			{
-				DropIfExists(*it);
+				m_db.ExecSql(stmt);
+				stmt = L"";
 			}
-
-			wstring create = boost::str(boost::wformat(L"CREATE TABLE %s("
-				L"idintegertypes int NOT NULL,"
-				L"tsmallint smallint NULL,"
-				L"tint int NULL,"
-				L"tbigint bigint NULL,"
-				L"PRIMARY KEY(idintegertypes))") % *it);
-
-			m_db.ExecSql(create);
 		}
-
-		// Insert our test-data
-		wstring insertTableName = L"exodbc.integertypes";
-		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+		if (!stmt.empty())
 		{
-			insertTableName = L"integertypes";
+			m_db.ExecSql(stmt);
 		}
-		wstring insert;
-		insert = boost::str(boost::wformat(L"INSERT INTO %s(idintegertypes, tsmallint, tint, tbigint) VALUES(1, -32768, NULL, NULL)") % insertTableName);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s(idintegertypes, tsmallint, tint, tbigint) VALUES(2, 32767, NULL, NULL);") % insertTableName);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s(idintegertypes, tsmallint, tint, tbigint) VALUES(3, NULL, -2147483648, NULL);") % insertTableName);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s(idintegertypes, tsmallint, tint, tbigint) VALUES(4, NULL, 2147483647, NULL);") % insertTableName);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s(idintegertypes, tsmallint, tint, tbigint) VALUES(5, NULL, NULL, -9223372036854775808);") % insertTableName);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s(idintegertypes, tsmallint, tint, tbigint) VALUES(6, NULL, NULL, 9223372036854775807);") % insertTableName);
-		m_db.ExecSql(insert);
-		insert = boost::str(boost::wformat(L"INSERT INTO %s(idintegertypes, tsmallint, tint, tbigint) VALUES(7, -13, 26, 10502)") % insertTableName);
-		m_db.ExecSql(insert);
-
 		m_db.CommitTrans();
+	}
+
+
+	vector<wstring> TestDbCreator::LoadScriptFile(const boost::filesystem::wpath& path) const
+	{
+		vector<wstring> lines;
+
+		wifstream wfile(path.native());
+#pragma push_macro("new")
+#ifdef new
+#undef new
+#endif
+		wfile.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+#pragma pop_macro("new")
+		if (!wfile.is_open())
+		{
+			THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"Failed to open file '%s'") % path.native()));
+		}
+		wstring line;
+		while (getline(wfile, line))
+		{
+			lines.push_back(line);
+		}
+		if (wfile.bad())
+		{
+			THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"Failed to read from file '%s'") % path.native()));
+		}
+
+		return lines;
+	}
+	
+
+	void TestDbCreator::ExecSqlIgnoreFail(const std::wstring sqlstmt)
+	{
+		try
+		{
+			m_db.ExecSql(sqlstmt);
+		}
+		catch (const Exception& ex)
+		{
+			LOG_WARNING(boost::str(boost::wformat(L"Failed to Execute Statement: %s") % ex.ToString()));
+		}
 	}
 
 

@@ -19,8 +19,10 @@
 #include "Environment.h"
 #include "Database.h"
 #include "gtest/gtest.h"
+#include "boost/filesystem.hpp"
 
 // System headers
+#include <map>
 
 // Forward declarations
 // --------------------
@@ -39,14 +41,24 @@ namespace exodbc
 		TestDbCreator(const SOdbcInfo& odbcInfo);
 		~TestDbCreator();
 
-		void CreateIntegertypes(bool dropIfExists);
-		void CreateBlobtypes(bool dropIfExists);
-		void CreateChartable(bool dropIfExists);
-		void CreateChartypes(bool dropIfExists);
+		void RunAllScripts();
+		void RunScript(const std::wstring& scriptName);
+		void RunScript(const boost::filesystem::wpath& scriptPath);
+
+		void SetScriptDirectory(const boost::filesystem::wpath& path);
+		boost::filesystem::wpath GetScriptDirectory() const;
+
+		DatabaseProduct GetDbms() const { return m_db.GetDbms(); };
 
 	private:
 
+		std::vector<std::wstring> LoadScriptFile(const boost::filesystem::wpath& path) const;
+
+		void ExecSqlIgnoreFail(const std::wstring sqlstmt);
+
 		void DropIfExists(const std::wstring& tableName);
+
+		boost::filesystem::wpath m_scriptDirectoryPath;
 
 		SOdbcInfo m_odbcInfo;
 		Environment m_env;

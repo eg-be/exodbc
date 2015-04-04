@@ -130,6 +130,9 @@
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir)\sql $(TargetDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_v100|Win32'">
     <ClCompile>
@@ -225,6 +228,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="exOdbcGTest.rc2" />
+    <None Include="CopyCreateScripts.bat" />
     <None Include="Version.h.template" />
   </ItemGroup>
   <ItemGroup>

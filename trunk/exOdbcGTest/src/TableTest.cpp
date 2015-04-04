@@ -1445,7 +1445,7 @@ namespace exodbc
 		EXPECT_EQ(26, date.day);
 		EXPECT_EQ(1, date.month);
 		EXPECT_EQ(1983, date.year);
-
+		
 		EXPECT_EQ(13, time.hour);
 		EXPECT_EQ(55, time.minute);
 		EXPECT_EQ(56, time.second);

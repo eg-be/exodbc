@@ -19,6 +19,7 @@
 #include "boost/log/trivial.hpp"
 #include "boost/log/core.hpp"
 #include "boost/log/expressions.hpp"
+#include "boost/filesystem.hpp"
 
 // Debug
 #include "DebugNew.h"
@@ -155,15 +156,24 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			try
 			{
+				namespace fs = boost::filesystem;
+				// Prepare Db-creator
 				TestDbCreator creator(*it);
-				LOG_INFO(L"Creating Integertypes tables");
-				creator.CreateIntegertypes(true);
-				LOG_INFO(L"Creating Integertypes tables");
-				creator.CreateBlobtypes(true);
-				LOG_INFO(L"Creating Chartable");
-				creator.CreateChartable(true);
-				LOG_INFO(L"Creating Chartypes tables");
-				creator.CreateChartypes(true);
+				// The base-path is relative to our app-path
+				TCHAR moduleFile[MAX_PATH];
+				if (::GetModuleFileName(NULL, moduleFile, MAX_PATH) == 0)
+				{
+					THROW_WITH_SOURCE(Exception, L"Failed in GetModuleFileName");
+				}
+				fs::wpath exePath(moduleFile);
+				fs::wpath exeDir = exePath.parent_path();
+				fs::wpath scriptDir = exeDir / L"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
+				if (!fs::is_directory(scriptDir))
+				{
+					THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"ScriptDirectory '%s' is not a directory") % scriptDir.native()));
+				}
+				creator.SetScriptDirectory(scriptDir);
+				creator.RunAllScripts();
 			}
 			catch (const Exception& ex)
 			{
