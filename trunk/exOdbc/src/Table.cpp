@@ -150,21 +150,17 @@ namespace exodbc
 			}
 
 			// If the table was created manually, we need to delete the column buffers
-			// that were allocated during SetColumn.
-			// If auto was active, those columns were only created from a successfull Open() and
-			// were properly deleted during Close()  (which has happened, if Open() was successful)
+			// that were allocated during SetColumn, and if opening has failed we need to delete
+			// those allocated from open.
 			// \note: We must free the buffers before deleting our statements - the buffers may still
 			// be bound to our statements.
-			if (m_manualColumns)
+			for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
 			{
-				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
-				{
-					ColumnBuffer* pBuffer = it->second;
-					delete pBuffer;
-				}
-				m_columnBuffers.clear();
-				m_numCols = 0;
+				ColumnBuffer* pBuffer = it->second;
+				delete pBuffer;
 			}
+			m_columnBuffers.clear();
+			m_numCols = 0;
 
 			if (HasStatements())
 			{
