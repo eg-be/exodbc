@@ -150,22 +150,26 @@ namespace exodbc
 			}
 
 			// If the table was created manually, we need to delete the column buffers
-			// that were allocated during SetColumn, and if opening has failed we need to delete
-			// those allocated from open.
+			// that were allocated during SetColumn.
+			// If columns were created automatically, they were deleted from Open() in case of failure.
 			// \note: We must free the buffers before deleting our statements - the buffers may still
 			// be bound to our statements.
-			for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+			if (m_manualColumns)
 			{
-				ColumnBuffer* pBuffer = it->second;
-				delete pBuffer;
+				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+				{
+					ColumnBuffer* pBuffer = it->second;
+					delete pBuffer;
+				}
+				m_columnBuffers.clear();
+				m_numCols = 0;
 			}
-			m_columnBuffers.clear();
-			m_numCols = 0;
-
 			if (HasStatements())
 			{
 				FreeStatements();
 			}
+			exASSERT(m_numCols == 0);
+			exASSERT(m_columnBuffers.size() == 0);
 		}
 		catch (Exception ex)
 		{
@@ -950,177 +954,199 @@ namespace exodbc
 		exASSERT(HasStatements());
 		// \note: We do not force a user to define columns.
 
-		std::wstring sqlStmt;
-		std::wstring s;
-		s.empty();
-
-		// If we do not already have a STableInfo for our table, we absolutely must find one
-		bool searchedTable = false;
-		if (!m_haveTableInfo)
+		// Nest try/catch the free the buffers created in here if we fail somewhere
+		try
 		{
-			// Finding will throw if not exactly one is found
-			m_tableInfo = db.FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
-			m_haveTableInfo = true;
-			searchedTable = true;
-		}
 
-		// If we are asked to check existence and have not just proved we exist just find a table
-		// Search using the info from the now available m_tableInfo
-		if (((openFlags & TOF_CHECK_EXISTANCE) == TOF_CHECK_EXISTANCE) && !searchedTable)
-		{
-			// Will throw if not one is found
-			std::wstring catalogName = m_tableInfo.m_catalogName;
-			std::wstring typeName = m_tableInfo.m_tableType;
-			if (db.GetDbms() == DatabaseProduct::EXCEL)
+			std::wstring sqlStmt;
+			std::wstring s;
+			s.empty();
+
+			// If we do not already have a STableInfo for our table, we absolutely must find one
+			bool searchedTable = false;
+			if (!m_haveTableInfo)
 			{
-				// workaround for #111
-				catalogName = L"";
-				typeName = L"";
+				// Finding will throw if not exactly one is found
+				m_tableInfo = db.FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
+				m_haveTableInfo = true;
+				searchedTable = true;
 			}
-			db.FindOneTable(m_tableInfo.m_tableName, m_tableInfo.m_schemaName, catalogName, typeName);
-			searchedTable = true;
-		}
 
-		// If we are asked to create our columns automatically, read the column information and create the buffers
-		if (!m_manualColumns)
-		{
-			// If this is an excel-db, we must search for a table named 'foo$', but query using '[foo$]'. See Ticket #111.
-			// so set the special query-name on the now available m_tableInfo - except it is already set
-			if (db.GetDbms() == DatabaseProduct::EXCEL && !m_tableInfo.HasSpecialSqlQueryName())
+			// If we are asked to check existence and have not just proved we exist just find a table
+			// Search using the info from the now available m_tableInfo
+			if (((openFlags & TOF_CHECK_EXISTANCE) == TOF_CHECK_EXISTANCE) && !searchedTable)
 			{
-				m_tableInfo.SetSpecialSqlQueryName(L"[" + m_tableInfo.m_tableName + L"]");
-			}
-			CreateAutoColumnBuffers(db, m_tableInfo, (openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS);
-		}
-		else
-		{
-			// Check that the manually defined columns do not violate our access-flags
-			for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
-			{
-				ColumnBuffer* pBuffer = it->second;
-				if (pBuffer->IsColumnFlagSet(CF_SELECT) && !TestAccessFlag(AF_SELECT))
+				// Will throw if not one is found
+				std::wstring catalogName = m_tableInfo.m_catalogName;
+				std::wstring typeName = m_tableInfo.m_tableType;
+				if (db.GetDbms() == DatabaseProduct::EXCEL)
 				{
-					Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
-					SET_EXCEPTION_SOURCE(ex);
-					throw ex;
+					// workaround for #111
+					catalogName = L"";
+					typeName = L"";
 				}
-				if (pBuffer->IsColumnFlagSet(CF_INSERT) && !TestAccessFlag(AF_INSERT))
-				{
-					Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
-					SET_EXCEPTION_SOURCE(ex);
-					throw ex;
-				}
-				if(pBuffer->IsColumnFlagSet(CF_UPDATE) && !TestAccessFlag(AF_UPDATE))
-				{
-					Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
-					SET_EXCEPTION_SOURCE(ex);
-					throw ex;
-				}
+				db.FindOneTable(m_tableInfo.m_tableName, m_tableInfo.m_schemaName, catalogName, typeName);
+				searchedTable = true;
 			}
-		}
 
-		// Prepare the FieldStatement to be used for selects
-		m_fieldsStatement = BuildFieldsStatement();
-
-		// Optionally check privileges
-		if ((openFlags & TOF_CHECK_PRIVILEGES) == TOF_CHECK_PRIVILEGES)
-		{
-			m_tablePrivileges.Initialize(db, m_tableInfo);
-			// We always need to be able to select, but the rest only if we want to write
-			if ((TestAccessFlag(AF_SELECT) && !m_tablePrivileges.IsSet(TP_SELECT))
-				|| (TestAccessFlag(AF_UPDATE) && !m_tablePrivileges.IsSet(TP_UPDATE))
-				|| (TestAccessFlag(AF_INSERT) && !m_tablePrivileges.IsSet(TP_INSERT))
-				|| (TestAccessFlag(AF_DELETE) && !m_tablePrivileges.IsSet(TP_DELETE))
-				)
+			// If we are asked to create our columns automatically, read the column information and create the buffers
+			if (!m_manualColumns)
 			{
-				Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s'") % m_tableInfo.GetSqlName()).str());
-				SET_EXCEPTION_SOURCE(ex);
-				throw ex;
-			}
-		}
-
-		// Bind the member variables for field exchange between
-		// the Table object and the ODBC record for Select()
-		if (TestAccessFlag(AF_SELECT))
-		{
-			SQLSMALLINT boundColumnNumber = 1;
-			for (ColumnBufferPtrMap::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-			{
-				// Only bind those marked for select - no danger if primary keys are not bound, it is checked later
-				// if the table is opened for writing that all pks are bound
-				ColumnBuffer* pBuffer = it->second;
-				if (pBuffer->IsColumnFlagSet(CF_SELECT))
+				// If this is an excel-db, we must search for a table named 'foo$', but query using '[foo$]'. See Ticket #111.
+				// so set the special query-name on the now available m_tableInfo - except it is already set
+				if (db.GetDbms() == DatabaseProduct::EXCEL && !m_tableInfo.HasSpecialSqlQueryName())
 				{
-					SQLUSMALLINT colIndex = it->first;
-					pBuffer->Bind(m_hStmtSelect, boundColumnNumber);
-					++boundColumnNumber;
+					m_tableInfo.SetSpecialSqlQueryName(L"[" + m_tableInfo.m_tableName + L"]");
 				}
-			}
-		}
-
-		// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
-		if (!IsQueryOnly())
-		{
-			// We need the primary keys
-			// Do not query them from the db is corresponding flag is set
-			if (openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS)
-			{
-				m_tablePrimaryKeys.Initialize(m_tableInfo, m_columnBuffers);
+				CreateAutoColumnBuffers(db, m_tableInfo, (openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS);
 			}
 			else
-			{ 
-				m_tablePrimaryKeys.Initialize(db, m_tableInfo);
+			{
+				// Check that the manually defined columns do not violate our access-flags
+				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+				{
+					ColumnBuffer* pBuffer = it->second;
+					if (pBuffer->IsColumnFlagSet(CF_SELECT) && !TestAccessFlag(AF_SELECT))
+					{
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
+						SET_EXCEPTION_SOURCE(ex);
+						throw ex;
+					}
+					if (pBuffer->IsColumnFlagSet(CF_INSERT) && !TestAccessFlag(AF_INSERT))
+					{
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
+						SET_EXCEPTION_SOURCE(ex);
+						throw ex;
+					}
+					if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !TestAccessFlag(AF_UPDATE))
+					{
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
+						SET_EXCEPTION_SOURCE(ex);
+						throw ex;
+					}
+				}
 			}
 
-			// And we need to have a primary key
-			if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
+			// Prepare the FieldStatement to be used for selects
+			m_fieldsStatement = BuildFieldsStatement();
+
+			// Optionally check privileges
+			if ((openFlags & TOF_CHECK_PRIVILEGES) == TOF_CHECK_PRIVILEGES)
 			{
-				Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
-				SET_EXCEPTION_SOURCE(ex);
-				throw ex;
+				m_tablePrivileges.Initialize(db, m_tableInfo);
+				// We always need to be able to select, but the rest only if we want to write
+				if ((TestAccessFlag(AF_SELECT) && !m_tablePrivileges.IsSet(TP_SELECT))
+					|| (TestAccessFlag(AF_UPDATE) && !m_tablePrivileges.IsSet(TP_UPDATE))
+					|| (TestAccessFlag(AF_INSERT) && !m_tablePrivileges.IsSet(TP_INSERT))
+					|| (TestAccessFlag(AF_DELETE) && !m_tablePrivileges.IsSet(TP_DELETE))
+					)
+				{
+					Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s'") % m_tableInfo.GetSqlName()).str());
+					SET_EXCEPTION_SOURCE(ex);
+					throw ex;
+				}
 			}
 
-			// And a Buffer for every primary key
-			if (!m_tablePrimaryKeys.AreAllPrimaryKeysInMap(m_columnBuffers))
+			// Bind the member variables for field exchange between
+			// the Table object and the ODBC record for Select()
+			if (TestAccessFlag(AF_SELECT))
 			{
-				Exception ex((boost::wformat(L"Not all primary Keys of table '%s' have a corresponding ColumnBuffer") % m_tableInfo.GetSqlName()).str());
-				SET_EXCEPTION_SOURCE(ex);
-				throw ex;
+				SQLSMALLINT boundColumnNumber = 1;
+				for (ColumnBufferPtrMap::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+				{
+					// Only bind those marked for select - no danger if primary keys are not bound, it is checked later
+					// if the table is opened for writing that all pks are bound
+					ColumnBuffer* pBuffer = it->second;
+					if (pBuffer->IsColumnFlagSet(CF_SELECT))
+					{
+						SQLUSMALLINT colIndex = it->first;
+						pBuffer->Bind(m_hStmtSelect, boundColumnNumber);
+						++boundColumnNumber;
+					}
+				}
 			}
 
-			// Test that all primary keys are bound
-			if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
+			// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
+			if (!IsQueryOnly())
 			{
-				Exception ex((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
-				SET_EXCEPTION_SOURCE(ex);
-				throw ex;
+				// We need the primary keys
+				// Do not query them from the db is corresponding flag is set
+				if (openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS)
+				{
+					m_tablePrimaryKeys.Initialize(m_tableInfo, m_columnBuffers);
+				}
+				else
+				{
+					m_tablePrimaryKeys.Initialize(db, m_tableInfo);
+				}
+
+				// And we need to have a primary key
+				if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
+				{
+					Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
+					SET_EXCEPTION_SOURCE(ex);
+					throw ex;
+				}
+
+				// And a Buffer for every primary key
+				if (!m_tablePrimaryKeys.AreAllPrimaryKeysInMap(m_columnBuffers))
+				{
+					Exception ex((boost::wformat(L"Not all primary Keys of table '%s' have a corresponding ColumnBuffer") % m_tableInfo.GetSqlName()).str());
+					SET_EXCEPTION_SOURCE(ex);
+					throw ex;
+				}
+
+				// Test that all primary keys are bound
+				if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
+				{
+					Exception ex((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
+					SET_EXCEPTION_SOURCE(ex);
+					throw ex;
+				}
+
+				// Set the primary key flags on the bound Columns
+				// but only if corresponding flag is not set - else we have initialized the primary keys from the ColumnBuffers - makes no sense
+				if (!(openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS))
+				{
+					m_tablePrimaryKeys.SetPrimaryKeyFlags(m_columnBuffers);
+				}
+
+				// Build prepared statements, bind parameters.
+				if (TestAccessFlag(AF_INSERT))
+				{
+					BindInsertParameters();
+				}
+				if (TestAccessFlag(AF_DELETE))
+				{
+					BindDeleteParameters();
+				}
+				if (TestAccessFlag(AF_UPDATE))
+				{
+					BindUpdateParameters();
+				}
 			}
 
-			// Set the primary key flags on the bound Columns
-			// but only if corresponding flag is not set - else we have initialized the primary keys from the ColumnBuffers - makes no sense
-			if (!(openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS))
-			{
-				m_tablePrimaryKeys.SetPrimaryKeyFlags(m_columnBuffers);
-			}
-
-			// Build prepared statements, bind parameters.
-			if (TestAccessFlag(AF_INSERT))
-			{
-				BindInsertParameters();
-			}
-			if (TestAccessFlag(AF_DELETE))
-			{
-				BindDeleteParameters();
-			}
-			if (TestAccessFlag(AF_UPDATE))
-			{
-				BindUpdateParameters();
-			}
+			// Completed successfully
+			m_openFlags = openFlags;
+			m_isOpen = true;
 		}
-
-		// Completed successfully
-		m_openFlags = openFlags;
-		m_isOpen = true;
+		catch (const Exception& ex)
+		{
+			// delete the ColumnBuffers if we have allocated them during this process (if not manual)
+			HIDE_UNUSED(ex);
+			if (!m_manualColumns)
+			{
+				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+				{
+					ColumnBuffer* pBuffer = it->second;
+					delete pBuffer;
+				}
+				m_columnBuffers.clear();
+				m_numCols = 0;
+			}
+			// and rethrow
+			throw;
+		}
 	}
 
 

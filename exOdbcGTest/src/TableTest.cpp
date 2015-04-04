@@ -358,6 +358,30 @@ namespace exodbc
 		exodbc::Table rTable2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 		EXPECT_NO_THROW(rTable2.Open(m_db, TOF_CHECK_PRIVILEGES));
 
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			// We only have a Read-only user for ms sql server
+			Database db(m_env);
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"exOdbcReadOnly", L"exodbcReadOnly"));
+
+			// Test to open a table read-only
+			// Note that here in ms server we have given the user no rights except the select for this table
+			// If you add him to some role, things will get messed up: No privs are reported, but the user can
+			// still access the table for selecting
+			exodbc::Table table2(db, tableName, L"", L"", L"", AF_READ);
+			EXPECT_NO_THROW(table2.Open(db, TOF_CHECK_PRIVILEGES));
+
+			// We expect to fail if trying to open for writing
+			table2.Close();
+			table2.SetAccessFlags(db, AF_READ_WRITE);
+			EXPECT_THROW(table2.Open(db, TOF_CHECK_PRIVILEGES), Exception);
+
+			// But we do not fail if we do not check the privs
+			EXPECT_NO_THROW(table2.Open(db), Exception);
+
+			// Try to open one we do not even have the rights for
+		}
+
 		//// Test a table that is read only: we can only open it read-only:
 		//std::wstring so1Name = TestTables::GetTableName(TestTables::Table::SELECTONLY, m_odbcInfo.m_namesCase);
 		//exodbc::Table so1Table(m_db, so1Name, L"", L"", L"", AF_READ);
