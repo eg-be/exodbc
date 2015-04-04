@@ -73,7 +73,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		// Not enough args
 		wcerr << L"Not enough arguments!\n";
-		wcerr << L"Usage: wxOdbc3GoogleTest --dsn=dsn1,dsn2,..,dsnN --user=user1,user2,..,userN --pass=pass1,pass2,..,passN [--case=u|l,u|l,...,u|l] [--logLevel=0-5] [--excelDsn=excelDSNName] [--createDb=1]\n";
+		wcerr << L"Usage: wxOdbc3GoogleTest --dsn=dsn1,dsn2,..,dsnN [--user=user1,user2,..,userN] [--pass=pass1,pass2,..,passN] [--case=u|l,u|l,...,u|l] [--logLevel=0-5] [--excelDsn=excelDSNName] [--createDb=1]\n";
+		wcerr << L"\n";
 		wcerr << L" logLevel: 0: trace; 1: debug; 2: info; 3: warning; 4: error; 5: fatal\n";
 		wcerr << L"           Default is warning (3)\n";
 		wcerr << L" case: Defines the case of the table- and column-names to be used during the tests. If not given\n";
@@ -90,16 +91,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		wcerr << L"Missing argument --dsn=\n";
 		status = 11;
 	}
-	if(!extractParamValue(argc, argv, L"--user=", user))
-	{
-		wcerr << L"Missing argument --user=\n";
-		status = 11;
-	}
-	if(!extractParamValue(argc, argv, L"--pass=", pass))
-	{
-		wcerr << L"Missing argument --pass=\n";
-		status = 11;
-	}
+	extractParamValue(argc, argv, L"--user=", user);
+	extractParamValue(argc, argv, L"--pass=", pass);
 	int logLevel = 3;
 	if (extractParamValue(argc, argv, L"--logLevel=", logLevelS))
 	{
@@ -121,8 +114,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	if(! (dsns.size() == users.size() && dsns.size() == passes.size() && ( !haveCase || dsns.size() == cases.size()) ))
 	{
-		std::wcerr << L"Not equal number of dsn, user and password (and maybe case)\n";
-		status = 12;
+		std::wcout << L"Warning: Not equal number of dsn, user and password (and maybe case)\n";
 	}
 	// default to lowerCase with cases
 	if (!haveCase)
@@ -134,13 +126,19 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	for(size_t i = 0; status == 0 && i < dsns.size(); i++)
 	{
+		wstring user, pass, casev;
+		if (users.size() > i)
+			user = users[i];
+		if (passes.size() > i)
+			pass = passes[i];
+
 		TestTables::NameCase nameCase = TestTables::NameCase::LOWER;
-		if (cases[i] == L"u")
+		if (cases.size() > i && cases[i] == L"u")
 			nameCase = TestTables::NameCase::UPPER;
-		else if (cases[i] != L"l")
+		else if (cases.size() > i && cases[i] != L"l")
 			wcout << L"Warning: Unknown case '" << cases[i] << L"' falling back to default of 'l' (lowercase)\n";
 
-		g_odbcInfos.push_back(SOdbcInfo(dsns[i], users[i], passes[i], cases[i] == L"l" ? TestTables::NameCase::LOWER : TestTables::NameCase::UPPER));
+		g_odbcInfos.push_back(SOdbcInfo(dsns[i], user, pass, nameCase));
 	}
 	// Read an eventually set excel Dsn
 	if (extractParamValue(argc, argv, L"--excelDsn=", excelDsn))
