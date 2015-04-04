@@ -1,6 +1,6 @@
 /*!
 * \file Helpers.cpp
-* \author Elias Gerber <eg@zame.ch>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 23.07.2014
 * \brief Source file for the Helpers
 * \copyright wxWindows Library Licence, Version 3.1

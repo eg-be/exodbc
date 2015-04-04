@@ -1,6 +1,6 @@
 /*!
 * \file Environment.cpp
-* \author Elias Gerber <eg@zame.ch>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 25.07.2014
 * \brief Source file for the Environment class and its helpers.
 * \copyright wxWindows Library Licence, Version 3.1

@@ -1,6 +1,6 @@
 /*!
 * \file Helpers.h
-* \author Elias Gerber <egerber@gmx.net>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 23.07.2014
 * \brief Header file for generic Helpers, mostly about error-handling and assertions.
 * \copyright wxWindows Library Licence, Version 3.1

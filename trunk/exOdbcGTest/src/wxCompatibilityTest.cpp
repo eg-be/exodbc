@@ -1,6 +1,6 @@
 /*!
 * \file wxCompatibilityTest.cpp
-* \author Elias Gerber <egerber@gmx.net>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 31.08.2014
 * \copyright wxWindows Library Licence, Version 3.1
 * 

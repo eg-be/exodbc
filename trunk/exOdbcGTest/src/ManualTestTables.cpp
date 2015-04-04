@@ -1,6 +1,6 @@
 /*!
 * \file ManualTestTables.cpp
-* \author Elias Gerber <eg@zame.ch>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 26.12.2014
 * \copyright wxWindows Library Licence, Version 3.1
 *

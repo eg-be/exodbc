@@ -1,6 +1,6 @@
 /*!
 * \file ColumnBuffer.h
-* \author Elias Gerber <eg@zame.ch>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 23.11.2014
 * \brief Header file for the ColumnBuffer class and its helpers.
 * \copyright wxWindows Library Licence, Version 3.1
