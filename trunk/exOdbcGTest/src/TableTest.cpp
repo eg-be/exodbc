@@ -66,7 +66,7 @@ namespace exodbc
 			EXPECT_NO_THROW(m_db.Close());
 		}
 	}
-
+	
 
 	// Open / Close
 	// ------------

@@ -49,16 +49,16 @@ namespace exodbc
 	// -----------
 	TestDbCreator::~TestDbCreator()
 	{
-
+		
 	}
-
+	
 	// Implementation
 	// --------------
 	void TestDbCreator::SetScriptDirectory(const boost::filesystem::wpath& path)
 	{
 		m_scriptDirectoryPath = path;
 	}
-
+	
 
 	boost::filesystem::wpath TestDbCreator::GetScriptDirectory() const
 	{
@@ -112,14 +112,29 @@ namespace exodbc
 					ba::erase_last(stmt, L"GO");
 				}
 				// might have become empty if GO was on a single line or so
-				if (!stmt.empty())
+				if (!ba::trim_copy(stmt).empty())
 				{
-					m_db.ExecSql(stmt);
+					try
+					{
+						m_db.ExecSql(stmt);
+					}
+					catch (const Exception& ex)
+					{
+						// exec failed - guess if this was the drop statement
+						if (ba::contains(ba::to_lower_copy(stmt), L"drop table"))
+						{
+							LOG_WARNING(boost::str(boost::wformat(L"Execution of a statement failed, but it was probably a DROP statement: %s") % ex.ToString()));
+						}
+						else
+						{
+							throw;
+						}
+					}
 					stmt = L"";
 				}
 			}
 		}
-		if (!stmt.empty())
+		if (!ba::trim_copy(stmt).empty())
 		{
 			m_db.ExecSql(stmt);
 		}
