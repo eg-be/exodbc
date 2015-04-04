@@ -243,31 +243,62 @@ namespace exodbc {
 	STableInfo::STableInfo()
 		: m_isCatalogNull(false)
 		, m_isSchemaNull(false)
-		, m_hasSpecialSqlQueryName(false)
+		, m_queryNameHint(TableQueryNameHint::ALL)
 	{
 
 	}
 
 
-	std::wstring STableInfo::GetSqlName(int flags /* = QNF_CATALOG | QNF_SCHEMA | QNF_TABLE */) const
+	std::wstring STableInfo::GetPureTableName() const
 	{
-		if (m_hasSpecialSqlQueryName)
-		{
-			return m_specialSqlQueryName;
-		}
+		exASSERT(!m_tableName.empty());
+		return m_tableName;
+	}
 
+
+	std::wstring STableInfo::GetSqlName() const
+	{
 		exASSERT(!m_tableName.empty());
 
-		std::wstringstream ws;
-		if (flags & QNF_CATALOG && HasCatalog())
+		bool includeCat = true;
+		bool includeSchem = true;
+		bool includeName = true;
+		switch (m_queryNameHint)
 		{
-			ws << m_catalogName << L"."; 
+		case TableQueryNameHint::ALL:
+			includeCat = true;
+			includeSchem = true;
+			includeName = true;
+			break;
+		case TableQueryNameHint::CATALOG_TABLE:
+			includeCat = true;
+			includeSchem = false;
+			includeName = true;
+			break;
+		case TableQueryNameHint::SCHEMA_TABLE:
+			includeCat = false;
+			includeSchem = true;
+			includeName = true;
+			break;
+		case TableQueryNameHint::TABLE_ONLY:
+			includeCat = false;
+			includeSchem = false;
+			includeName = true;
+			break;
+		case TableQueryNameHint::EXCEL:
+			return L"[" + m_tableName + L"]";
 		}
-		if (flags & QNF_SCHEMA && HasSchema())
+
+		std::wstringstream ws;
+		if (includeCat && HasCatalog())
+		{
+			ws << m_catalogName << L".";
+		}
+		if (includeSchem && HasSchema())
 		{
 			ws << m_schemaName << L".";
 		}
-		if (flags & QNF_TABLE)
+		if (includeName)
 		{
 			ws << m_tableName << L".";
 		}

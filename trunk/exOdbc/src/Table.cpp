@@ -989,15 +989,22 @@ namespace exodbc
 				searchedTable = true;
 			}
 
+			// Set the hints for the Table-Query name depending on the Database
+			// If this is an excel-db, we must search for a table named 'foo$', but query using '[foo$]'. See Ticket #111. Set the corresponding hint on the tableInfo-object
+			// maybe excel also has the full path
+			if (db.GetDbms() == DatabaseProduct::EXCEL)
+			{
+				m_tableInfo.SetSqlNameHint(TableQueryNameHint::EXCEL);
+			}
+			if (db.GetDbms() == DatabaseProduct::ACCESS)
+			{
+				m_tableInfo.SetSqlNameHint(TableQueryNameHint::TABLE_ONLY);
+			}
+
+
 			// If we are asked to create our columns automatically, read the column information and create the buffers
 			if (!m_manualColumns)
 			{
-				// If this is an excel-db, we must search for a table named 'foo$', but query using '[foo$]'. See Ticket #111.
-				// so set the special query-name on the now available m_tableInfo - except it is already set
-				if (db.GetDbms() == DatabaseProduct::EXCEL && !m_tableInfo.HasSpecialSqlQueryName())
-				{
-					m_tableInfo.SetSpecialSqlQueryName(L"[" + m_tableInfo.m_tableName + L"]");
-				}
 				CreateAutoColumnBuffers(db, m_tableInfo, (openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS);
 			}
 			else

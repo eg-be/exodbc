@@ -103,7 +103,7 @@ namespace exodbc
 				}
 				STablePrimaryKeyInfo keyInfo;
 				// use only the pure table-name and the query-name from the column-buffer
-				keyInfo.m_tableName = tableInfo.GetSqlName(QNF_TABLE);
+				keyInfo.m_tableName = tableInfo.GetPureTableName();
 				keyInfo.m_columnName = columnName;
 				keyInfo.m_keySequence = keySequence;
 

@@ -31,7 +31,8 @@
 namespace exodbc
 {
 
-	class ExcelTest : public ::testing::Test {
+	class ExcelTest : public ::testing::Test 
+	{
 	
 	protected:
 		virtual void SetUp();
@@ -40,6 +41,17 @@ namespace exodbc
 
 		Environment m_env;
 
+	};
+
+
+	class AccessTest : public ::testing::Test
+	{
+	protected:
+		virtual void SetUp();
+
+		virtual void TearDown();
+
+		Environment m_env;
 	};
 } // namespace exodbc
 

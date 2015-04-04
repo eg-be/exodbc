@@ -99,7 +99,7 @@ namespace exodbc
 
 	TEST_F(ExcelTest, SpecialQueryNameWorkaround)
 	{
-		// See Ticket #111
+		// See Ticket #111 - this is fixed and no workarounds are needed
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
 		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
@@ -122,11 +122,9 @@ namespace exodbc
 		EXPECT_EQ(L"1.1111", f);
 		EXPECT_EQ(L"row1", t);
 
-		// It should also work if we specify the special-name before opening
+		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		STableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
-		// Update the special query name in there:
-		tableInfo.SetSpecialSqlQueryName(L"[TestTable$]");
 
 		Table tTable2(db, tableInfo, AF_READ);
 		ASSERT_NO_THROW(tTable2.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
@@ -152,15 +150,10 @@ namespace exodbc
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
 		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
-		// Create Table: Create it manually, because we need a special Query-statement:
-		// Excel reports the Tablename when searching as 'TestTable$', but in sql-queries
-		// it needs '[TestTable$]'. We provide a very primitive implementation in the
-		// STableInfo to do so.
 		// Find the correct table:
 		STableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
-		// Update the special query name in there:
-		tableInfo.SetSpecialSqlQueryName(L"[TestTable$]");
+		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		// And create the manual table:
 		Table tTable(db, 5, tableInfo, AF_READ);
 		SQLWCHAR id[512];
@@ -203,15 +196,9 @@ namespace exodbc
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
 		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
-		// Create Table: Create it manually, because we need a special Query-statement:
-		// Excel reports the Tablename when searching as 'TestTable$', but in sql-queries
-		// it needs '[TestTable$]'. We provide a very primitive implementation in the
-		// STableInfo to do so.
 		// Find the correct table:
 		STableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
-		// Update the special query name in there:
-		tableInfo.SetSpecialSqlQueryName(L"[TestTable$]");
 		// And create the auto table:
 		Table tTable(db, tableInfo, AF_READ);
 		ASSERT_NO_THROW(tTable.Open(db, TOF_NONE));
@@ -243,7 +230,44 @@ namespace exodbc
 		}
 
 		EXPECT_NO_THROW(tTable.Select(L""));
+	}
 
+
+	void AccessTest::SetUp()
+	{
+		// Ensure an Excel-DSN is set on the command line
+		ASSERT_TRUE(!g_excelDsn.empty());
+
+		// Set up is called for every test
+		ASSERT_NO_THROW(m_env.AllocateEnvironmentHandle());
+		ASSERT_NO_THROW(m_env.SetOdbcVersion(OdbcVersion::V_3));
+	}
+
+
+	void AccessTest::TearDown()
+	{
+
+	}
+
+
+	TEST_F(AccessTest, Foo)
+	{
+		Database db(m_env);
+		db.Open(L"AccessTest", L"", L"");
+
+		STableInfosVector tables = db.FindTables(L"", L"", L"", L"");
+		Table acc(db, L"tblDKS", L"", L"", L"", AF_READ);
+		acc.Open(db);
+		
+		acc.Select();
+		EXPECT_TRUE(acc.SelectNext());
+		SQLINTEGER i1 = boost::get<SQLINTEGER>(acc.GetColumnValue(0));
+		wstring c1 = boost::get<wstring>(acc.GetColumnValue(1));
+		wstring c2 = boost::get<wstring>(acc.GetColumnValue(2));
+		wstring c3 = boost::get<wstring>(acc.GetColumnValue(3));
+		wstring c4 = boost::get<wstring>(acc.GetColumnValue(4));
+		wstring c5 = boost::get<wstring>(acc.GetColumnValue(5));
+		int p = 3;
 	}
 
 	// Interfaces

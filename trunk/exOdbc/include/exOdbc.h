@@ -147,6 +147,7 @@ namespace exodbc
 		MY_SQL,			///< MySQL
 		DB2,			///< IBM DB2
 		EXCEL,			///< Microsoft Excel
+		ACCESS,			///< Microsoft Access
 	};
 
 
@@ -159,6 +160,20 @@ namespace exodbc
 	enum class ColumnAttribute
 	{
 		CA_PRECISION = SQL_DESC_PRECISION ///< A numeric value that for a numeric data type denotes the applicable precision, For data types SQL_TYPE_TIME, SQL_TYPE_TIMESTAMP, and all the interval data types that represent a time interval, its value is the applicable precision of the fractional seconds component. 
+	};
+
+
+	/*!
+	* \enum		TableQueryNameHint
+	* \brief	A helper to specify how to build the name of the table to be used in a SQL query.
+	*/
+	enum class TableQueryNameHint
+	{
+		ALL,			///< Use Catalog, Schema and TableName, resulting in 'CatalogName.SchemaName.TableName'
+		TABLE_ONLY,		///< Use only TableName
+		CATALOG_TABLE,	///< Use Catalog and TableName, resulting in 'CatalogName.TableName'
+		SCHEMA_TABLE,	///< Use Schema and TableName, resulting in 'SchemaName.TableName'
+		EXCEL			///< For Excel use only the TableName$ and wrap it inside [], so it becomes '[TableName$]'. \note: The '$' is not added automatically.
 	};
 
 
@@ -462,14 +477,12 @@ namespace exodbc
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
-		bool				HasSpecialSqlQueryName() const throw() { return m_hasSpecialSqlQueryName; };
-		void				SetSpecialSqlQueryName(const std::wstring& specialSqlQueryName) throw() { m_hasSpecialSqlQueryName = true; m_specialSqlQueryName = specialSqlQueryName; };
-
-		std::wstring		GetSqlName(int flags = QNF_CATALOG | QNF_SCHEMA | QNF_TABLE) const;
+		void				SetSqlNameHint(TableQueryNameHint hint) { m_queryNameHint = hint; };
+		std::wstring		GetSqlName() const;
+		std::wstring		GetPureTableName() const;
 
 	private:
-		bool				m_hasSpecialSqlQueryName;
-		std::wstring		m_specialSqlQueryName;
+		TableQueryNameHint	m_queryNameHint;
 	};
 	
 	/*!

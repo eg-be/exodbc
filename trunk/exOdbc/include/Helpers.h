@@ -199,6 +199,7 @@ namespace exodbc
 	*  MY_SQL					| MySql
 	*  DB2						| DB2
 	*  EXCEL					| Excel
+	*  ACCESS					| Access
 	*
 	* \param dbms
 	* \return std::wstring

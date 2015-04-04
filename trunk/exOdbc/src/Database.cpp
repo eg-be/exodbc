@@ -1114,6 +1114,10 @@ namespace exodbc
 		{
 			m_dbmsType = DatabaseProduct::EXCEL;
 		}
+		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"ACCESS"))
+		{
+			m_dbmsType = DatabaseProduct::ACCESS;
+		}
 
 		if (m_dbmsType == DatabaseProduct::UNKNOWN)
 		{
