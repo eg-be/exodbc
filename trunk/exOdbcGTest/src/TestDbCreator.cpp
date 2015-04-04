@@ -76,6 +76,68 @@ namespace exodbc
 	}
 
 
+	void TestDbCreator::CreateChartypes(bool dropIfExists)
+	{
+		exASSERT(m_db.IsOpen());
+
+		set<wstring> createTableNames;
+		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+		{
+			createTableNames = set<wstring>({ L"chartypes_tmp", L"chartypes" });
+		}
+		else
+		{
+			createTableNames = set<wstring>({ L"exodbc.chartypes_tmp", L"exodbc.chartypes" });
+		}
+		for (set<wstring>::const_iterator it = createTableNames.begin(); it != createTableNames.end(); ++it)
+		{
+			if (dropIfExists)
+			{
+				DropIfExists(*it);
+			}
+
+			wstring create;
+			if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+			{
+				// Use the NVARCHAR types for sql server
+				create = boost::str(boost::wformat(L"CREATE TABLE %s ( idchartypes INTEGER NOT NULL, tvarchar NVARCHAR(128), tchar NCHAR(128), tvarchar_10 NVARCHAR(10), tchar_10 NCHAR(10), PRIMARY KEY ( idchartypes ) );") % *it);
+			}
+			else
+			{
+				create = boost::str(boost::wformat(L"CREATE TABLE %s ( idchartypes INTEGER NOT NULL, tvarchar VARCHAR(128), tchar CHAR(128), tvarchar_10 VARCHAR(10), tchar_10 CHAR(10), PRIMARY KEY ( idchartypes ) );") % *it);
+			}
+			m_db.ExecSql(create);
+		}
+
+		// insert data
+		wstring tableName;
+		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+		{
+			tableName = L"chartypes";
+		}
+		else
+		{
+			tableName = L"exodbc.chartypes";
+		}
+		wstring abc = L" !\"#$%&''()*+, -. / 0123456789:; <= > ? @ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\] ^ _`abcdefghijklmnopqrstuvwxyz{|}~";
+		wstring insert;
+		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 1, '%s', NULL, NULL, NULL)") % tableName % abc);
+		m_db.ExecSql(insert);
+		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 2, NULL, '%s', NULL, NULL)") % tableName % abc);
+		m_db.ExecSql(insert);
+		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 3, 'הצüאיט', NULL, NULL, NULL)") % tableName );
+		m_db.ExecSql(insert);
+		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 4, NULL, 'הצüאיט', NULL, NULL)") % tableName);
+		m_db.ExecSql(insert);
+		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 5, NULL, NULL, 'abc', 'abc')") % tableName);
+		m_db.ExecSql(insert);
+		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartypes, tvarchar, tchar, tvarchar_10, tchar_10) VALUES ( 6, NULL, NULL, 'abcde12345', 'abcde12345')") % tableName);
+		m_db.ExecSql(insert);
+
+		m_db.CommitTrans();
+	}
+
+
 	void TestDbCreator::CreateBlobtypes(bool dropIfExists)
 	{
 		exASSERT(m_db.IsOpen());

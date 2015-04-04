@@ -41,8 +41,9 @@ namespace exodbc
 
 		void CreateIntegertypes(bool dropIfExists);
 		void CreateBlobtypes(bool dropIfExists);
-		void CreateChartable(bool dropIfExists)
-			;
+		void CreateChartable(bool dropIfExists);
+		void CreateChartypes(bool dropIfExists);
+
 	private:
 
 		void DropIfExists(const std::wstring& tableName);
