@@ -379,23 +379,12 @@ namespace exodbc
 			return L"MySql";
 		case DatabaseProduct::EXCEL:
 			return L"Excel";
+		case DatabaseProduct::ACCESS:
+			return L"Access";
 		default:
 			return L"UnknownDbms";
 		}
 	}
-
-	//std::wstring OpenMode2s(Table::OpenMode openMode)
-	//{
-	//	switch (openMode)
-	//	{
-	//	case Table::READ_ONLY:
-	//		return L"READ_ONLY";
-	//	case Table::READ_WRITE:
-	//		return L"READ_WRITE";
-	//	default:
-	//		return L"???";
-	//	}
-	//}
 
 
 	SErrorInfoVector GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
