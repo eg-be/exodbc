@@ -101,12 +101,22 @@ namespace exodbc
 		{
 			namespace ba = boost::algorithm;
 			wstring line = *it;
-			stmt += line;
-			bool execute = !stmt.empty() && (line.empty() || ba::ends_with(ba::trim_copy(stmt), L";"));
+			stmt += (line + L" ");
+			// execute on ';' or on 'GO' or on empty line
+			bool execute = (line.empty() || ba::ends_with(ba::trim_copy(stmt), L";") || ba::ends_with(ba::trim_copy(stmt), L"GO"));
 			if (execute)
 			{
-				m_db.ExecSql(stmt);
-				stmt = L"";
+				// remove 'GO'
+				if (ba::trim_copy(line) == L"GO")
+				{
+					ba::erase_last(stmt, L"GO");
+				}
+				// might have become empty if GO was on a single line or so
+				if (!stmt.empty())
+				{
+					m_db.ExecSql(stmt);
+					stmt = L"";
+				}
 			}
 		}
 		if (!stmt.empty())
