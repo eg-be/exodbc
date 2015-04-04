@@ -39,9 +39,7 @@ namespace exodbc
 			<< L"; Names: " << (oi.m_namesCase == TestTables::NameCase::LOWER ? L"lowercase" : L"uppercase");
 		std::string s;
 
-		// TODO: Resolve with ticket #44 #53
-		//	eli::w2mbNoThrow(wos.str(), s);
-		// hack around
+		// \todo Resolve with ticket #44 #53 - ugly conversion (but okay here, we know its only ascii)
 		std::wstring ws = wos.str();
 		std::stringstream ss;
 		for(size_t i = 0; i < ws.length(); i++)
@@ -50,7 +48,6 @@ namespace exodbc
 			ss << c;
 		}
 		s = ss.str();
-		// end hack
 
 		return os << s.c_str();
 	}
