@@ -183,6 +183,9 @@
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir)\sql $(TargetDir)</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
