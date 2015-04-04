@@ -579,6 +579,11 @@ namespace exodbc
 			tableName = L"integertypes";
 			schemaName = L"exodbc";
 			catalogName = L"exodbc";
+			break;
+		case DatabaseProduct::ACCESS:
+			// only tablenames
+			tableName = L"integertypes";
+			break;
 		}
 		// Find one table by using only the table-name as search param
 		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"", L"", L""));
@@ -588,8 +593,12 @@ namespace exodbc
 		EXPECT_EQ(1, tables.size());
 		// In all cases, we should not find anything if we use a schema or a catalog that does not exist
 		// \todo: Create Ticket (Info): Note: When using MySQL-Odbc driver, if 'do not use INFORMATION_SCHEMA' is set, this will fail due to an access denied for database "wrongCatalog"
-		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"WrongSchema", L"", L""));
-		EXPECT_EQ(0, tables.size());
+		// Access has no support for schemas
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"WrongSchema", L"", L""));
+			EXPECT_EQ(0, tables.size());
+		}
 		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"", L"WrongCatalog", L""));
 		EXPECT_EQ(0, tables.size());
 		// Also, we have a table, not a view
@@ -598,14 +607,25 @@ namespace exodbc
 		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"", L"", L"TABLE"));
 		EXPECT_EQ(1, tables.size());
 		// What about search-patterns? Note: Not use for table-type
-		// \todo: They just dont work with MySql 3.51 ?
-		EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"%", L"%", L""));
+		// search patterns are not supported for schemas by Access:
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"", L"%", L""));
+		}
+		else
+		{
+			EXPECT_NO_THROW(tables = m_db.FindTables(tableName, L"%", L"%", L""));
+		}
 		EXPECT_EQ(1, tables.size());
 		if(tables.size() > 0)
 		{
 			EXPECT_EQ(tableName, tables[0].m_tableName);
 			EXPECT_EQ(schemaName, tables[0].m_schemaName);
-			EXPECT_EQ(catalogName, tables[0].m_catalogName);
+			if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+			{
+				// still no support for catalogs on Access
+				EXPECT_EQ(catalogName, tables[0].m_catalogName);
+			}
 		}
 		std::wstring schemaPattern = schemaName;
 		if(schemaName.length() > 0)
@@ -619,7 +639,11 @@ namespace exodbc
 		{
 			EXPECT_EQ(tableName, tables[0].m_tableName);
 			EXPECT_EQ(schemaName, tables[0].m_schemaName);
-			EXPECT_EQ(catalogName, tables[0].m_catalogName);
+			if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+			{
+				// still no support for catalogs on Access
+				EXPECT_EQ(catalogName, tables[0].m_catalogName);
+			}
 		}
 	}
 
