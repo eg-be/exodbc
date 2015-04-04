@@ -341,26 +341,34 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DISABLED_OpenAutoCheckPrivs)
+	TEST_P(TableTest, OpenAutoCheckPrivs)
 	{
-		// \todo Test disabled, because its not working at all atm. See Ticket # 4
-		// Test to open read-only:
-		// MySQL fails totally with the privileges stuff
+		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+		{
+			// Not working on MySQL, see Ticket # 4 and #76
+			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #4 and #76");
+		}
+
+		// Test to open read-only a table we know we have all rights:
 		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table rTable(m_db, tableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(rTable.Open(m_db, TOF_CHECK_PRIVILEGES));
+		EXPECT_NO_THROW(rTable.Open(m_db, TOF_CHECK_PRIVILEGES));
 
-		// Test a table that is read only: we can only open it read-only:
-		std::wstring so1Name = TestTables::GetTableName(TestTables::Table::SELECTONLY, m_odbcInfo.m_namesCase);
-		exodbc::Table so1Table(m_db, so1Name, L"", L"", L"", AF_READ);
-		EXPECT_NO_THROW(so1Table.Open(m_db, TOF_CHECK_PRIVILEGES));
+		// Test to open read-write a table we know we have all rights:
+		exodbc::Table rTable2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		EXPECT_NO_THROW(rTable2.Open(m_db, TOF_CHECK_PRIVILEGES));
 
-		std::wstring so2Name = TestTables::GetTableName(TestTables::Table::SELECTONLY, m_odbcInfo.m_namesCase);
-		exodbc::Table so2Table(m_db, so2Name, L"", L"", L"", AF_READ_WRITE);
-		// DB2 fails here, it still reports we have insert permissions. but doing an insert later fails
+		//// Test a table that is read only: we can only open it read-only:
+		//std::wstring so1Name = TestTables::GetTableName(TestTables::Table::SELECTONLY, m_odbcInfo.m_namesCase);
+		//exodbc::Table so1Table(m_db, so1Name, L"", L"", L"", AF_READ);
+		//EXPECT_NO_THROW(so1Table.Open(m_db, TOF_CHECK_PRIVILEGES));
 
-		EXPECT_THROW(so2Table.Open(m_db, TOF_CHECK_PRIVILEGES), Exception);
-		EXPECT_THROW(m_db.ExecSql(L"insert into exodbc.dbo.selectonly (idselectonly) values (3)"), SqlResultException);
+		//std::wstring so2Name = TestTables::GetTableName(TestTables::Table::SELECTONLY, m_odbcInfo.m_namesCase);
+		//exodbc::Table so2Table(m_db, so2Name, L"", L"", L"", AF_READ_WRITE);
+		//// DB2 fails here, it still reports we have insert permissions. but doing an insert later fails
+
+		//EXPECT_THROW(so2Table.Open(m_db, TOF_CHECK_PRIVILEGES), Exception);
+		//EXPECT_THROW(m_db.ExecSql(L"insert into exodbc.dbo.selectonly (idselectonly) values (3)"), SqlResultException);
 	}
 
 
