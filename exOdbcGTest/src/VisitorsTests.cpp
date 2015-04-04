@@ -1,6 +1,6 @@
 /*!
 * \file VisitorsTests.cpp
-* \author Elias Gerber <egerber@gmx.net>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 31.03.2015
 * \copyright wxWindows Library Licence, Version 3.1
 *

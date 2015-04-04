@@ -1,6 +1,6 @@
 /*!
 * \file ExcelTest.cpp
-* \author Elias Gerber <egerber@gmx.net>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 15.03.2015
 * \copyright wxWindows Library Licence, Version 3.1
 *

@@ -1,6 +1,6 @@
 /*!
 * \file DebugNew.h
-* \author Elias Gerber <eg@zame.ch>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 21.09.2014
 * \copyright wxWindows Library Licence, Version 3.1
 *

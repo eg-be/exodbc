@@ -1,6 +1,6 @@
 /*!
 * \file stdafx.h
-* \author Elias Gerber <eg@zame.ch>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 23.07.2014
 * \brief Goes into precompiled header.
 * \copyright wxWindows Library Licence, Version 3.1

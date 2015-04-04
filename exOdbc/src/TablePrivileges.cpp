@@ -1,6 +1,6 @@
 /*!
 * \file TablePrivileges.cpp
-* \author Elias Gerber <eg@zame.ch>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 31.12.2014
 * \brief Source file for the TablePrivileges class.
 * \copyright wxWindows Library Licence, Version 3.1

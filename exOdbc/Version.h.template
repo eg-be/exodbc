@@ -1,6 +1,6 @@
 /*!
  * \file Version.h
- * \author Elias Gerber <eg@zame.ch>
+ * \author Elias Gerber <eg@elisium.ch>
  * \date 28.12.2013
  * \brief File to generate Version.h from Version.hm.template using the UpdateVersion.ps1 script.
  */ 

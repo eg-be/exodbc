@@ -1,6 +1,6 @@
 /*!
 * \file TestDbCreator.h
-* \author Elias Gerber <egerber@gmx.net>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 04.04.2015
 * \copyright wxWindows Library Licence, Version 3.1
 *

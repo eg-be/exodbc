@@ -1,6 +1,6 @@
 /*!
  * \file DbTableTest.h
- * \author Elias Gerber <egerber@gmx.net>
+ * \author Elias Gerber <eg@elisium.ch>
  * \date 22.07.2014
  * \copyright wxWindows Library Licence, Version 3.1
  * 

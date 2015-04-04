@@ -1,6 +1,6 @@
 /*!
 * \file TablePrimaryKeys.cpp
-* \author Elias Gerber <eg@zame.ch>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 02.01.2015
 * \brief Source file for the TablePrimaryKeys class.
 * \copyright wxWindows Library Licence, Version 3.1

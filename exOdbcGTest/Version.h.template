@@ -1,6 +1,6 @@
 /*!
  * \file Version.h
- * \author Elias Gerber <egerber@gmx.net>
+ * \author Elias Gerber <eg@elisium.ch>
  * \date 28.12.2013
  * 
  * File to generate Version.h from using the UpdateVersion.ps1 script.

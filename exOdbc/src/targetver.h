@@ -1,6 +1,6 @@
 /*!
 * \file targetver.h
-* \author Elias Gerber <eg@zame.ch>
+* \author Elias Gerber <eg@elisium.ch>
 * \date 23.07.2014
 * \brief Define windows platform.
 * \copyright wxWindows Library Licence, Version 3.1
