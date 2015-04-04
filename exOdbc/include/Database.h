@@ -411,7 +411,13 @@ namespace exodbc
 		 * \see		SetCommitMode()
 		 * \return	The transaction mode.
 		 */
-		CommitMode GetCommitMode() { return m_commitMode; };
+		CommitMode GetCommitMode() const { return m_commitMode; };
+
+
+		/*!
+		* \brief	Returns true if the database attribute SQL_TXN_CAPABLE is not set to SQL_TC_NONE
+		*/
+		bool		GetSupportsTransactions() const { return m_dbInf.m_txnCapable != SQL_TC_NONE; };
 
 		
 		/*!
@@ -437,7 +443,7 @@ namespace exodbc
 		* \param	mode	The mode to test
 		* \return	true if mode supported by database.
 		*/
-		bool		CanSetTransactionIsolationMode(TransactionIsolationMode mode);
+		bool		CanSetTransactionIsolationMode(TransactionIsolationMode mode) const;
 	
 	
 		/*!
