@@ -107,6 +107,7 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="Version.h.template" />
+    <None Include="CopyCreateScripts.bat" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="exOdbcGTest.rc">
