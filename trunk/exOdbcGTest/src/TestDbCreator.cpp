@@ -46,6 +46,36 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	void TestDbCreator::CreateChartable(bool dropIfExists)
+	{
+		exASSERT(m_db.IsOpen());
+
+		wstring tableName;
+		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+		{
+			tableName = L"chartable";
+		}
+		else
+		{
+			tableName = L"exodbc.chartable";
+		}
+		if (dropIfExists)
+		{
+			DropIfExists(tableName);
+		}
+
+		wstring create;
+		create = boost::str(boost::wformat(L"CREATE TABLE %s ( idchartable INTEGER NOT NULL, col2 CHAR(128), col3 CHAR(128), col4 CHAR(128), PRIMARY KEY ( idchartable ) );") % tableName);
+		m_db.ExecSql(create);
+
+		wstring insert;
+		insert = boost::str(boost::wformat(L"INSERT INTO %s ( idchartable, col2, col3, col4) VALUES ( 1, 'r1_c2', 'r1_c3', 'r1_c4')") % tableName);
+		m_db.ExecSql(insert);
+
+		m_db.CommitTrans();
+	}
+
+
 	void TestDbCreator::CreateBlobtypes(bool dropIfExists)
 	{
 		exASSERT(m_db.IsOpen());
