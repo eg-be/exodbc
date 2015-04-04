@@ -610,7 +610,7 @@ namespace exodbc
 		CloseStmtHandle(m_hstmtExecSql, StmtCloseMode::IgnoreNotOpen);
 
 		retcode = SQLExecDirect(m_hstmtExecSql, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
-		if (retcode != SQL_SUCCESS)
+		if ( ! SQL_SUCCEEDED(retcode))
 		{
 			if (!(mode == ExecFailMode::NotFailOnNoData && retcode == SQL_NO_DATA))
 			{
