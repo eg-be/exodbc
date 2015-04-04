@@ -367,6 +367,23 @@ namespace exodbc
 	}
 
 
+	std::wstring DatabaseProcudt2s(DatabaseProduct dbms)
+	{
+		switch (dbms)
+		{
+		case DatabaseProduct::DB2:
+			return L"DB2";
+		case DatabaseProduct::MS_SQL_SERVER:
+			return L"SqlServer";
+		case DatabaseProduct::MY_SQL:
+			return L"MySql";
+		case DatabaseProduct::EXCEL:
+			return L"Excel";
+		default:
+			return L"UnknownDbms";
+		}
+	}
+
 	//std::wstring OpenMode2s(Table::OpenMode openMode)
 	//{
 	//	switch (openMode)

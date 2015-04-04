@@ -191,6 +191,22 @@ namespace exodbc
 
 
 	/*!
+	* \brief	Transform a DatabaseProduct id to a name:
+	* \details
+	*  DatabaseProduct			| Value
+	*  -------------------------|------------
+	*  MS_SQL_SERVER			| SqlServer
+	*  MY_SQL					| MySql
+	*  DB2						| DB2
+	*  EXCEL					| Excel
+	*
+	* \param dbms
+	* \return std::wstring
+	*/
+	extern EXODBCAPI std::wstring DatabaseProcudt2s(DatabaseProduct dbms);
+
+
+	/*!
 	 * \brief	Gets all errors for all passed handles. Should never throw as long
 	 *			you pass in at least one non-NULL handle.
 	 *
