@@ -349,8 +349,8 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadCatalogs)
 	{
-		std::vector<std::wstring> cats;
-		EXPECT_NO_THROW(cats = m_db.ReadCatalogs());
+ 		std::vector<std::wstring> cats;
+		ASSERT_NO_THROW(cats = m_db.ReadCatalogs());
 		switch(m_db.GetDbms())
 		{
 		case DatabaseProduct::DB2:
@@ -363,11 +363,22 @@ namespace exodbc
 			// Those report our test-db as a catalog
 			EXPECT_TRUE(std::find(cats.begin(), cats.end(), L"exodbc") != cats.end());
 			break;
+		case DatabaseProduct::ACCESS:
+			// Returns the file-path as catalog, must be our file named 'exodbc' (note: .mdb is not in the path)
+			EXPECT_EQ(1, cats.size());
+			EXPECT_TRUE(boost::algorithm::ends_with(cats[0], L"exodbc"));
+			break;
 		}
 	}
 
 	TEST_P(DatabaseTest, ReadSchemas)
 	{
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// not supported by Access
+			return;
+		}
+
 		std::vector<std::wstring> schemas;
 		EXPECT_NO_THROW(schemas = m_db.ReadSchemas());
 		switch(m_db.GetDbms())
