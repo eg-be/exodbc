@@ -725,6 +725,9 @@ namespace exodbc
 	TablePrimaryKeysVector Database::ReadTablePrimaryKeys(const STableInfo& table) const
 	{
 		exASSERT(IsOpen());
+		// Access returns 'SQLSTATE IM001; Native Error: 0; [Microsoft][ODBC Driver Manager] Driver does not support this function' for SQLPrimaryKeys
+		exASSERT(GetDbms() != DatabaseProduct::ACCESS);
+
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_hstmt, true, true);
 
