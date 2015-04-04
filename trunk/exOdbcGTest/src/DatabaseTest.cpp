@@ -416,6 +416,13 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadTablePrivileges)
 	{
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Skip this test for Access, it returns 
+			// SQLSTATE IM001; Native Error : 0; [Microsoft][ODBC Driver Manager] Driver does not support this function
+			return;
+		}
+
 		TablePrivilegesVector privs;
 		std::wstring tableName;
 		std::wstring schemaName;
@@ -445,6 +452,9 @@ namespace exodbc
 			catalogName = L"exodbc";
 			typeName = L"";
 			break;
+		case DatabaseProduct::ACCESS:
+			// access only tablenames
+			tableName = L"integertypes";
 		}
 		// \todo: This is simply not working with MySQL, see Ticket #76
 		EXPECT_NO_THROW(privs = m_db.ReadTablePrivileges(tableName, schemaName, catalogName, typeName));
@@ -474,6 +484,12 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadTablePrimaryKeysInfo)
 	{
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Not supported by access
+			return;
+		}
+
 		TablePrimaryKeysVector pks;
 		
 		// Find the table-info
@@ -540,17 +556,29 @@ namespace exodbc
 			schemaName = L"exodbc";
 			catalogName = L"exodbc";
 			typeName = L"";
+			break;
+		case DatabaseProduct::ACCESS:
+			tableName = L"integertypes";
+			break;
 		}
 		EXPECT_NO_THROW(cols = m_db.ReadTableColumnInfo(tableName, schemaName, catalogName, typeName));
-		// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
-		ASSERT_TRUE(cols.size() == 4);
-		SColumnInfo col = cols[2];
-		EXPECT_FALSE(col.m_isNumPrecRadixNull);
-		EXPECT_FALSE(col.m_isColumnSizeNull);
-		EXPECT_FALSE(col.m_isDecimalDigitsNull);
-		EXPECT_EQ(10, col.m_numPrecRadix);
-		EXPECT_EQ(18, col.m_columnSize);
-		EXPECT_EQ(10, col.m_decimalDigits);
+		// Note: Access reads a different table
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			EXPECT_EQ(4, cols.size());
+		}
+		else
+		{
+			// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
+			ASSERT_TRUE(cols.size() == 4);
+			SColumnInfo col = cols[2];
+			EXPECT_FALSE(col.m_isNumPrecRadixNull);
+			EXPECT_FALSE(col.m_isColumnSizeNull);
+			EXPECT_FALSE(col.m_isDecimalDigitsNull);
+			EXPECT_EQ(10, col.m_numPrecRadix);
+			EXPECT_EQ(18, col.m_columnSize);
+			EXPECT_EQ(10, col.m_decimalDigits);
+		}
 	}
 
 
@@ -689,6 +717,10 @@ namespace exodbc
 			tableName = L"integertypes";
 			catalogName = L"exodbc";
 			schemaName = L"exodbc";
+			break;
+		case DatabaseProduct::ACCESS:
+			// access only tablenames
+			tableName = L"integertypes";
 			break;
 		}
 		EXPECT_EQ(nrCols, m_db.ReadColumnCount(tableName, schemaName, catalogName, typeName));
