@@ -28,3 +28,6 @@ INSERT [exodbc].[integertypes] ([idintegertypes], [tsmallint], [tint], [tbigint]
 INSERT [exodbc].[integertypes] ([idintegertypes], [tsmallint], [tint], [tbigint]) VALUES (5, NULL, NULL, -9223372036854775808)
 INSERT [exodbc].[integertypes] ([idintegertypes], [tsmallint], [tint], [tbigint]) VALUES (6, NULL, NULL, 9223372036854775807)
 INSERT [exodbc].[integertypes] ([idintegertypes], [tsmallint], [tint], [tbigint]) VALUES (7, -13, 26, 10502)
+GO
+
+GRANT SELECT ON [exodbc].[integertypes] TO [exodbcReadOnly]
