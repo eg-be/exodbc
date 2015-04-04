@@ -185,6 +185,7 @@ namespace exodbc
 		* \param sqlType			The SQL Type of the buffer (like SQL_VARCHAR, SQL_INTEGER, etc.). This value will be forwarded to the driver during Binding parameters.
 		*							If this ColumnBuffer is never bound as a parameter it is save to set this to SQL_UNKNOWN.
 		* \param queryName			Name of the column that corresponds to this buffer.
+		* \param odbcVersion		ODBC-Version supported.
 		* \param	columnSize		The number of digits of a decimal value (including the fractional part).
 		*							This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
 		* \param	decimalDigits	The number of digits of the fractional part of a decimal value.
@@ -196,7 +197,7 @@ namespace exodbc
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, SQLSMALLINT sqlType, const std::wstring& queryName, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+		ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, SQLSMALLINT sqlType, const std::wstring& queryName, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 
 		~ColumnBuffer();
