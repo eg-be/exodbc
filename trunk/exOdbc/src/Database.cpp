@@ -200,11 +200,9 @@ namespace exodbc
 			// Set Connection Options
 			SetConnectionAttributes();
 
-			// Default to manual commit
-			// \todo: Excel is unable to set a commit-mode. Maybe we would need Open flags too? See Ticket #108
-			// but excel is able to read it
+			// Default to manual commit, if the Database is able to set a commit mode. Anyway read the currently active mode, we need to know that
 			m_commitMode = ReadCommitMode();
-			if (GetDbms() != DatabaseProduct::EXCEL && m_commitMode != CommitMode::MANUAL)
+			if (GetSupportsTransactions() && m_commitMode != CommitMode::MANUAL)
 			{
 				SetCommitMode(CommitMode::MANUAL);
 			}
@@ -1043,7 +1041,7 @@ namespace exodbc
 	}
 
 	
-	bool Database::CanSetTransactionIsolationMode(TransactionIsolationMode mode)
+	bool Database::CanSetTransactionIsolationMode(TransactionIsolationMode mode) const
 	{
 		return (m_dbInf.m_txnIsolationOptions & (SQLUINTEGER) mode) != 0;
 	}
