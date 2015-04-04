@@ -162,6 +162,8 @@ int _tmain(int argc, _TCHAR* argv[])
 				creator.CreateBlobtypes(true);
 				LOG_INFO(L"Creating Chartable");
 				creator.CreateChartable(true);
+				LOG_INFO(L"Creating Chartypes tables");
+				creator.CreateChartypes(true);
 			}
 			catch (const Exception& ex)
 			{
