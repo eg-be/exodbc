@@ -343,10 +343,11 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenAutoCheckPrivs)
 	{
+		// See #134
 		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
 		{
-			// Not working on MySQL, see Ticket # 4 and #76
-			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #4 and #76");
+			// Not working on MySQL, see Ticket #134 and #76
+			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #134 and #76");
 		}
 
 		// Test to open read-only a table we know we have all rights:
@@ -377,22 +378,13 @@ namespace exodbc
 			EXPECT_THROW(table2.Open(db, TOF_CHECK_PRIVILEGES), Exception);
 
 			// But we do not fail if we do not check the privs
-			EXPECT_NO_THROW(table2.Open(db), Exception);
+			EXPECT_NO_THROW(table2.Open(db));
 
 			// Try to open one we do not even have the rights for
+			std::wstring table3Name = TestTables::GetTableName(TestTables::Table::NUMERICTYPES, m_odbcInfo.m_namesCase);
+			Table table3(db, table3Name, L"", L"", L"", AF_READ);
+			EXPECT_THROW(table3.Open(db), Exception);
 		}
-
-		//// Test a table that is read only: we can only open it read-only:
-		//std::wstring so1Name = TestTables::GetTableName(TestTables::Table::SELECTONLY, m_odbcInfo.m_namesCase);
-		//exodbc::Table so1Table(m_db, so1Name, L"", L"", L"", AF_READ);
-		//EXPECT_NO_THROW(so1Table.Open(m_db, TOF_CHECK_PRIVILEGES));
-
-		//std::wstring so2Name = TestTables::GetTableName(TestTables::Table::SELECTONLY, m_odbcInfo.m_namesCase);
-		//exodbc::Table so2Table(m_db, so2Name, L"", L"", L"", AF_READ_WRITE);
-		//// DB2 fails here, it still reports we have insert permissions. but doing an insert later fails
-
-		//EXPECT_THROW(so2Table.Open(m_db, TOF_CHECK_PRIVILEGES), Exception);
-		//EXPECT_THROW(m_db.ExecSql(L"insert into exodbc.dbo.selectonly (idselectonly) values (3)"), SqlResultException);
 	}
 
 
