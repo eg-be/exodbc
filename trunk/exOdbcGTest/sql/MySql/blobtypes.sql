@@ -1,4 +1,4 @@
-﻿DROP TABLE IF EXISTS `blobtypes`;
+DROP TABLE IF EXISTS `blobtypes`;
 
 CREATE TABLE `blobtypes` (
   `idblobtypes` int(11) NOT NULL,
