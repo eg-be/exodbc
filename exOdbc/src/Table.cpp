@@ -1075,7 +1075,8 @@ namespace exodbc
 			}
 
 			// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
-			if (!IsQueryOnly())
+			// Insert does not require primary keys, but update and delete does
+			if (TestAccessFlag(AF_UPDATE) || TestAccessFlag(AF_DELETE))
 			{
 				// We need the primary keys
 				// Do not query them from the db is corresponding flag is set
@@ -1119,11 +1120,6 @@ namespace exodbc
 					m_tablePrimaryKeys.SetPrimaryKeyFlags(m_columnBuffers);
 				}
 
-				// Build prepared statements, bind parameters.
-				if (TestAccessFlag(AF_INSERT))
-				{
-					BindInsertParameters();
-				}
 				if (TestAccessFlag(AF_DELETE))
 				{
 					BindDeleteParameters();
@@ -1132,6 +1128,11 @@ namespace exodbc
 				{
 					BindUpdateParameters();
 				}
+			}
+
+			if (TestAccessFlag(AF_INSERT))
+			{
+				BindInsertParameters();
 			}
 
 			// Completed successfully
