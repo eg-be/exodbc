@@ -40,12 +40,19 @@ using namespace std;
 
 namespace exodbc
 {
+	TestSkipper DatabaseTest::s_testSkipper;
+
+	void DatabaseTest::SetUpTestCase()
+	{
+		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "ReadSchemas");
+		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "ReadTablePrivileges"); 
+		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "ReadTablePrimaryKeysInfo");
+	}
 
 	void DatabaseTest::SetUp()
 	{
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
-//		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 		m_env.AllocateEnvironmentHandle();
 		m_env.SetOdbcVersion(OdbcVersion::V_3);
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));
@@ -373,11 +380,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadSchemas)
 	{
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			// not supported by Access
-			return;
-		}
+		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::vector<std::wstring> schemas;
 		EXPECT_NO_THROW(schemas = m_db.ReadSchemas());
@@ -416,12 +419,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadTablePrivileges)
 	{
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			// Skip this test for Access, it returns 
-			// SQLSTATE IM001; Native Error : 0; [Microsoft][ODBC Driver Manager] Driver does not support this function
-			return;
-		}
+		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		TablePrivilegesVector privs;
 		std::wstring tableName;
@@ -484,11 +482,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadTablePrimaryKeysInfo)
 	{
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			// Not supported by access
-			return;
-		}
+		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		TablePrimaryKeysVector pks;
 		

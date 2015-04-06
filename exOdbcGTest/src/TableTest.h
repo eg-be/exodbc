@@ -44,15 +44,15 @@ namespace exodbc
 		static void SetUpTestCase();
 		static void TearDownTestCase() {};
 
-		static TestSkipper s_testSkipper;
-
 	protected:
-		exodbc::Environment m_env;
-		exodbc::Database m_db;
-
-		SOdbcInfo m_odbcInfo;
 		virtual void SetUp();
 		virtual void TearDown();
+
+		exodbc::Environment m_env;
+		exodbc::Database m_db;
+		SOdbcInfo m_odbcInfo;
+
+		static TestSkipper s_testSkipper;
 	};
 
 	INSTANTIATE_TEST_CASE_P(
