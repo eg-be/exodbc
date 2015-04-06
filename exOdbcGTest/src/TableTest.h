@@ -14,6 +14,7 @@
 // Same component headers
 #include "exOdbcGTest.h"
 #include "TestParams.h"
+#include "TestSkipper.h"
 
 // Other headers
 #include "gtest/gtest.h"
@@ -40,8 +41,10 @@ namespace exodbc
 	class TableTest : public ::testing::TestWithParam<SOdbcInfo>
 	{
 	public:
-		static void SetUpTestCase() {};
+		static void SetUpTestCase();
 		static void TearDownTestCase() {};
+
+		static TestSkipper s_testSkipper;
 
 	protected:
 		exodbc::Environment m_env;
