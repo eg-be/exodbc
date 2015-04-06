@@ -33,11 +33,15 @@
 namespace exodbc
 {
 	typedef std::set<std::string> TestNamesSet;
+	typedef std::set<DatabaseProduct> DatabasesSet;
 	typedef std::map<DatabaseProduct, TestNamesSet> DatabaseTestsMap;
 
 	class TestSkipper
 	{
 	public:
+		void AddDatabase(DatabaseProduct db);
+		bool ContainsDb(DatabaseProduct db) const;
+
 		void AddTest(DatabaseProduct db, const std::string& testName);
 		bool ContainsTest(DatabaseProduct db, const std::string& testName) const;
 		bool ContainsTest(DatabaseProduct db, const testing::TestInfo* const pTestInfo) const;
@@ -45,11 +49,15 @@ namespace exodbc
 
 	private:
 		DatabaseTestsMap m_testsByDb;
+		DatabasesSet m_dbs;
 	};
 
 
 #define MAYBE_SKIPP_TEST(testSkipper, db) \
-	{ \
+		{ \
+		if (testSkipper.ContainsDb(db.GetDbms())) { \
+			return; \
+		} \
 		if (testSkipper.ContainsTest(db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())) \
 		{ \
 			LOG_WARNING(testSkipper.FormatSkipMessage(m_db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())); \
