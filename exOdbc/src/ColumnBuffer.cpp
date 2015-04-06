@@ -211,7 +211,8 @@ namespace exodbc
 		{
 			SQLRETURN ret;
 			ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, m_columnSize >= 0 ? m_columnSize : 0, m_decimalDigits >= 0 ? m_decimalDigits : 0, pBuffer, m_bufferSize, &(m_cb));
-			THROW_IFN_SUCCEEDED(SQLBindParameter, ret, SQL_HANDLE_STMT, pBp->m_hStmt);
+			THROW_IFN_SUCCEEDED_MSG(SQLBindParameter, ret, SQL_HANDLE_STMT, pBp->m_hStmt,
+				boost::str(boost::wformat(L"Failed to BindParmater nr %d from ColumnBuffer with QueryName '%s'; Buffer Type: %s (%d), SQL Type: %s (%d)") %pBp->m_parameterNumber %GetQueryName() %SqLCType2s(m_bufferType) %m_bufferType %SqlType2s(m_sqlType) %m_sqlType));
 
 			// Do some additional steps for numeric types
 			if (SQL_C_NUMERIC == m_bufferType)
