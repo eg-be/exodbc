@@ -42,6 +42,14 @@ using namespace std;
 
 namespace exodbc
 {
+	TestSkipper TableTest::s_testSkipper;
+
+	void TableTest::SetUpTestCase()
+	{
+		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "OpenAutoCheckPrivs");
+		s_testSkipper.AddTest(DatabaseProduct::MY_SQL, "OpenAutoCheckPrivs");
+	}
+
 
 	void TableTest::SetUp()
 	{
@@ -56,6 +64,12 @@ namespace exodbc
 		// And database
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+
+		// Test if we shall Skip this test
+		if (s_testSkipper.ContainsTest(m_db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info()))
+		{
+			LOG_WARNING(s_testSkipper.FormatSkipMessage(m_db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info()));
+		}
 	}
 
 
@@ -122,11 +136,6 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenManualCheckColumnFlagSelect)
 	{
-		bool c1 = CF_SELECT & CF_INSERT;
-		bool c2 = CF_SELECT & CF_INSERT;
-		bool b = (!(0 == SQL_UNKNOWN_TYPE) && ((CF_SELECT & CF_INSERT) || (CF_SELECT & CF_UPDATE)));
-		bool b2 = (!(0 == SQL_UNKNOWN_TYPE) && (c1 || c2));
-
 		// Open a table manually but do not set the Select flag for all columns
 		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
 		SQLINTEGER id = 0;
@@ -403,6 +412,11 @@ namespace exodbc
 			// Not working on MySQL, see Ticket #134 and #76
 			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #134 and #76");
 		}
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// The function SQLTablePrivileges is not supported by access: 'SQLSTATE IM001; Native Error : 0; [Microsoft][ODBC Driver Manager] Driver does not support this function'
+			return;
+		}
 
 		// Test to open read-only a table we know we have all rights:
 		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -444,9 +458,9 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenAutoWithUnsupportedColumn)
 	{
-		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+		if (m_db.GetDbms() == DatabaseProduct::MY_SQL || m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
-			// \note Not working for mysql so far because we have no unsupported column - altough we fail on geometry columns, see #121
+			// \note Not working for mysql so far because we have no unsupported column - although we fail on geometry columns, see #121
 			return;
 		}
 

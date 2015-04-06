@@ -200,6 +200,7 @@
     <ClInclude Include="src\targetver.h" />
     <ClInclude Include="src\TestDbCreator.h" />
     <ClInclude Include="src\TestParams.h" />
+    <ClInclude Include="src\TestSkipper.h" />
     <ClInclude Include="src\TestTables.h" />
     <ClInclude Include="src\VisitorsTest.h" />
     <ClInclude Include="src\wxCompatibilityTest.h" />
@@ -220,6 +221,7 @@
     </ClCompile>
     <ClCompile Include="src\TestDbCreator.cpp" />
     <ClCompile Include="src\TestParams.cpp" />
+    <ClCompile Include="src\TestSkipper.cpp" />
     <ClCompile Include="src\TestTables.cpp" />
     <ClCompile Include="src\VisitorsTests.cpp" />
     <ClCompile Include="src\wxCompatibilityTest.cpp" />

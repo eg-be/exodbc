@@ -774,6 +774,7 @@ namespace exodbc
 	TablePrivilegesVector Database::ReadTablePrivileges(const STableInfo& table) const
 	{
 		exASSERT(IsOpen());
+		exASSERT_MSG(GetDbms() != DatabaseProduct::ACCESS, L"Access reports 'SQLSTATE IM001; Driver does not support this function' for SQLTablePrivileges");
 
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_hstmt, true, true);
