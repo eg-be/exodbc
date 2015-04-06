@@ -905,9 +905,17 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Select(sqlstmt));
 		ASSERT_TRUE(iTable.SelectNext());
 		ASSERT_EQ(101, (SQLINTEGER)*pId);
-		ASSERT_EQ(1, (SQLSMALLINT)*pSmallInt);
 		ASSERT_EQ(10, (SQLINTEGER)*pInt);
-		ASSERT_EQ(100, (SQLBIGINT)*pBigInt);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			ASSERT_EQ(1, (SQLINTEGER)*pSmallInt);
+			ASSERT_EQ(100, (SQLINTEGER)*pBigInt);
+		}
+		else
+		{
+			ASSERT_EQ(1, (SQLSMALLINT)*pSmallInt);
+			ASSERT_EQ(100, (SQLBIGINT)*pBigInt);
+		}
 		//ASSERT_TRUE(iTable.SelectClose());
 
 		// Now delete the second record: We cannot do that if we do not have support for What are Multiple Active Statements (MAS)?
@@ -924,9 +932,17 @@ namespace exodbc
 		// If MAS is enabled, we should be able to still see the result of the just deleted record, even if the result was committed inbetween
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_EQ(102, (SQLINTEGER)*pId);
-		EXPECT_EQ(2, (SQLSMALLINT)*pSmallInt);
 		EXPECT_EQ(20, (SQLINTEGER)*pInt);
-		EXPECT_EQ(200, (SQLBIGINT)*pBigInt);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			EXPECT_EQ(2, (SQLINTEGER)*pSmallInt);
+			EXPECT_EQ(200, (SQLINTEGER)*pBigInt);
+		}
+		else
+		{
+			EXPECT_EQ(2, (SQLSMALLINT)*pSmallInt);
+			EXPECT_EQ(200, (SQLBIGINT)*pBigInt);
+		}
 
 		// But if we try to select it again now, we will find only one result
 		iTable.SelectClose();
