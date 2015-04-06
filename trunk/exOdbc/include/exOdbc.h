@@ -177,6 +177,17 @@ namespace exodbc
 	};
 
 
+	/*!
+	* \enum		ColumnQueryNameHint
+	* \brief	A helper to specify how to build the name of the column to be used in a SQL query.
+	*/
+	enum class ColumnQueryNameHint
+	{
+		TABLE_COLUMN,	///< Use TableName and ColumnName, resulting in 'TableName.ColumnName'
+		COLUMN			///< Use only the ColumnName, resulting in 'ColumnName'
+	};
+
+
 	// Flags
 	// =====
 
@@ -447,7 +458,12 @@ namespace exodbc
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
-		std::wstring		GetSqlName(QueryNameFlags = QNF_TABLE | QNF_COLUMN) const;
+		void		SetSqlNameHint(ColumnQueryNameHint hint) { m_queryNameHint = hint; };
+		std::wstring		GetSqlName() const;
+		std::wstring GetPureColumnName() const;
+
+	private:
+		ColumnQueryNameHint m_queryNameHint;
 	};
 	
 	/*!

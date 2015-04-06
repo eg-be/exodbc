@@ -712,6 +712,11 @@ namespace exodbc
 
 		// Before opening it, change the mode, then open
 		ASSERT_NO_THROW(iTable.SetAccessFlags(m_db, AF_READ_WRITE));
+		// Do not forget to set the primary keys if this is an Access database
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
 		// We cannot change the mode if the table is open
@@ -851,6 +856,11 @@ namespace exodbc
 		wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		// Do not forget to set the primary keys if this is an Access database
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(iTable.Open(m_db));
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
 		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
@@ -862,14 +872,31 @@ namespace exodbc
 
 		// Set some silly values to insert
 		*pId = (SQLINTEGER)101;
-		*pSmallInt = (SQLSMALLINT)1;
 		*pInt = (SQLINTEGER)10;
-		*pBigInt = (SQLBIGINT)100;
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// no bigint and short on access
+			*pSmallInt = (SQLINTEGER)1;
+			*pBigInt = (SQLINTEGER)100;
+		}
+		else
+		{
+			*pSmallInt = (SQLSMALLINT)1;
+			*pBigInt = (SQLBIGINT)100;
+		}
 		iTable.Insert();
 		*pId = (SQLINTEGER)102;
-		*pSmallInt = (SQLSMALLINT)2;
 		*pInt = (SQLINTEGER)20;
-		*pBigInt = (SQLBIGINT)200;
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			*pSmallInt = (SQLINTEGER)2;
+			*pBigInt = (SQLINTEGER)200;
+		}
+		else
+		{
+			*pSmallInt = (SQLSMALLINT)2;
+			*pBigInt = (SQLBIGINT)200;
+		}
 		iTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
