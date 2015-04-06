@@ -238,6 +238,7 @@ namespace exodbc {
 		, m_isDatetimeSubNull(false)
 		, m_isCharOctetLengthNull(false)
 		, m_isIsNullableNull(false)
+		, m_queryNameHint(ColumnQueryNameHint::COLUMN)
 	{ }
 
 	STableInfo::STableInfo()
@@ -309,25 +310,30 @@ namespace exodbc {
 	}
 
 
-	std::wstring SColumnInfo::GetSqlName(QueryNameFlags flags /* = QNF_TABLE | QNF_COLUMN */) const
+	std::wstring SColumnInfo::GetSqlName() const
 	{
-		exASSERT(!m_tableName.empty());
 		exASSERT(!m_columnName.empty());
 
+		bool includeTableName = false;
+		bool includeColumnName = true;
+
+		switch (m_queryNameHint)
+		{
+		case ColumnQueryNameHint::COLUMN:
+			includeTableName = false;
+			includeColumnName = true;
+		case ColumnQueryNameHint::TABLE_COLUMN:
+			includeTableName = true;
+			includeColumnName = true;
+		}
 		std::wstringstream ws;
-		if (flags & QNF_CATALOG && HasCatalog())
+
+		if (includeTableName)
 		{
-			ws << m_catalogName << L".";
-		}
-		if (flags & QNF_SCHEMA && HasSchema())
-		{
-			ws << m_schemaName << L".";
-		}
-		if (flags & QNF_TABLE)
-		{
+			exASSERT(!m_tableName.empty());
 			ws << m_tableName << L".";
 		}
-		if (flags & QNF_COLUMN)
+		if (includeColumnName)
 		{
 			ws << m_columnName << L".";
 		}

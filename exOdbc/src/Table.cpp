@@ -1069,6 +1069,25 @@ namespace exodbc
 				}
 			}
 
+			// Maybe the primary keys have been set manually?
+			if (m_primaryKeyColumnIndexes.size() > 0)
+			{
+				for (std::set<SQLUSMALLINT>::const_iterator it = m_primaryKeyColumnIndexes.begin(); it != m_primaryKeyColumnIndexes.end(); ++it)
+				{
+					// Get corresponding Buffer and set the flag CF_PRIMARY_KEY
+					ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.find(*it);
+					if (itBuffs == m_columnBuffers.end())
+					{
+						Exception ex(boost::str(boost::wformat(L"No ColumnBuffer was found for a manually defined primary key column index (index = %d)") % *it));
+						SET_EXCEPTION_SOURCE(ex);
+						throw ex;
+					}
+					itBuffs->second->SetColumnFlag(CF_PRIMARY_KEY);
+				}
+				// And implicitly activate the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS
+				openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
+			}
+
 			// Bind the member variables for field exchange between
 			// the Table object and the ODBC record for Select()
 			if (TestAccessFlag(AF_SELECT))
@@ -1093,24 +1112,6 @@ namespace exodbc
 			if (TestAccessFlag(AF_UPDATE) || TestAccessFlag(AF_DELETE))
 			{
 				// We need the primary keys
-				// Maybe they have been set manually?
-				if (m_primaryKeyColumnIndexes.size() > 0)
-				{
-					for (std::set<SQLUSMALLINT>::const_iterator it = m_primaryKeyColumnIndexes.begin(); it != m_primaryKeyColumnIndexes.end(); ++it)
-					{
-						// Get corresponding Buffer and set the flag CF_PRIMARY_KEY
-						ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.find(*it);
-						if (itBuffs == m_columnBuffers.end())
-						{
-							Exception ex(boost::str(boost::wformat(L"No ColumnBuffer was found for a manually defined primary key column index (index = %d)") % *it));
-							SET_EXCEPTION_SOURCE(ex);
-							throw ex;
-						}
-						itBuffs->second->SetColumnFlag(CF_PRIMARY_KEY);
-					}
-					// And implicitly activate the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS
-					openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
-				}
 				// Do not query them from the db is corresponding flag is set
 				if (openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS)
 				{
