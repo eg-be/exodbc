@@ -471,8 +471,8 @@ namespace exodbc
 		SQLINTEGER id, int1, int2;
 		EXPECT_NO_THROW(nst.GetColumnValue(0, id));
 		EXPECT_NO_THROW(nst.GetColumnValue(1, int1));
-		EXPECT_NO_THROW(nst.GetColumnValue(2, int2));
-		EXPECT_THROW(nst.GetColumnBuffer(3), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumnBuffer(2), IllegalArgumentException);
+		EXPECT_NO_THROW(nst.GetColumnValue(3, int2));
 		EXPECT_EQ(1, id);
 		EXPECT_EQ(10, int1);
 		EXPECT_EQ(12, int2);
@@ -498,8 +498,8 @@ namespace exodbc
 		SQLINTEGER id, int1, int2;
 		EXPECT_NO_THROW(nst.GetColumnValue(0, id));
 		EXPECT_NO_THROW(nst.GetColumnValue(1, int1));
-		EXPECT_NO_THROW(nst.GetColumnValue(2, int2));
-		EXPECT_THROW(nst.GetColumnBuffer(3), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumnBuffer(2), IllegalArgumentException);
+		EXPECT_NO_THROW(nst.GetColumnValue(3, int2));
 		EXPECT_EQ(1, id);
 		EXPECT_EQ(10, int1);
 		EXPECT_EQ(12, int2);
@@ -526,10 +526,10 @@ namespace exodbc
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some data
-		// note the shifted columnbuffer-indexes, see #123
 		ColumnBuffer* pId = nst.GetColumnBuffer(0);
 		ColumnBuffer* pInt1 = nst.GetColumnBuffer(1);
-		ColumnBuffer* pInt2 = nst.GetColumnBuffer(2);
+		EXPECT_THROW(nst.GetColumnBuffer(2), IllegalArgumentException);
+		ColumnBuffer* pInt2 = nst.GetColumnBuffer(3);
 		
 		*pId = (SQLINTEGER)2;
 		*pInt1 = (SQLINTEGER)20;
@@ -549,7 +549,7 @@ namespace exodbc
 		SQLINTEGER id, int1, int2;
 		EXPECT_NO_THROW(nst2.GetColumnValue(0, id));
 		EXPECT_NO_THROW(nst2.GetColumnValue(1, int1));
-		EXPECT_NO_THROW(nst2.GetColumnValue(2, int2));
+		EXPECT_NO_THROW(nst2.GetColumnValue(3, int2));
 		EXPECT_EQ(2, id);
 		EXPECT_EQ(20, int1);
 		EXPECT_EQ(22, int2);
@@ -576,16 +576,15 @@ namespace exodbc
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some data
-		// note the shifted columnbuffer-indexes, see #123
 		nst.SetColumnValue(0, (SQLINTEGER)2);
 		nst.SetColumnValue(1, (SQLINTEGER)20);
-		nst.SetColumnValue(2, (SQLINTEGER)22);
+		nst.SetColumnValue(3, (SQLINTEGER)22);
 		EXPECT_NO_THROW(nst.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Now update it
 		nst.SetColumnValue(1, (SQLINTEGER)30);
-		nst.SetColumnValue(2, (SQLINTEGER)32);
+		nst.SetColumnValue(3, (SQLINTEGER)32);
 		EXPECT_NO_THROW(nst.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -601,7 +600,7 @@ namespace exodbc
 		SQLINTEGER id, int1, int2;
 		EXPECT_NO_THROW(nst2.GetColumnValue(0, id));
 		EXPECT_NO_THROW(nst2.GetColumnValue(1, int1));
-		EXPECT_NO_THROW(nst2.GetColumnValue(2, int2));
+		EXPECT_NO_THROW(nst2.GetColumnValue(3, int2));
 		EXPECT_EQ(2, id);
 		EXPECT_EQ(30, int1);
 		EXPECT_EQ(32, int2);
@@ -628,10 +627,9 @@ namespace exodbc
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some data
-		// note the shifted columnbuffer-indexes, see #123
 		ColumnBuffer* pId = nst.GetColumnBuffer(0);
 		ColumnBuffer* pInt1 = nst.GetColumnBuffer(1);
-		ColumnBuffer* pInt2 = nst.GetColumnBuffer(2);
+		ColumnBuffer* pInt2 = nst.GetColumnBuffer(3);
 
 		*pId = (SQLINTEGER)2;
 		*pInt1 = (SQLINTEGER)20;

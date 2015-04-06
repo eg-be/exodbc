@@ -247,9 +247,9 @@ namespace exodbc
 		*			\note This has only an influence if ColumnBuffers are created automatically by determining
 		*			the buffer type from the column information read from the Database. If you have created
 		*			ColumnBuffers manually using SetColumn(), this flag is ignored.
-		*			\note The indexes of the bound ColumnBuffers will shift if columns are skipped. If you
-		*			have a table col1, col2, col3 and col2 fails to bind, col3 will be indexed with 1.
-		*			See Ticket #12 and #123.
+		*			\note The indexes of the bound ColumnBuffers will still match the indexes of the actual table,
+		*			but some ColumnBuffers will not be created. This will lead to an  IllegalArgumentException if
+		*			you try to access them using any of the functions that take a columnIndex as argument.
 		*  - TOF_CHAR_TRIM_LEFT:
 		*			If set, values retrieved using GetColumnValue(SQLSMALLINT columnIndex, std::string& str)
 		*			or GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) are trimmed on the left
@@ -263,9 +263,11 @@ namespace exodbc
 		*			If this flag is set, the primary keys are not queried, but defined ColumnBuffers 
 		*			(probably defined using SetColumn() ) are checked for the flag CF_PRIMARY_KEY to build
 		*			the internal PrimaryKeys structure.
-		*			This flag is set automatically whenever Open() ing a Table from a Microsoft Access Database,
+		*			\note This flag is set automatically whenever Open() ing a Table from a Microsoft Access Database,
 		*			as the Access Driver I used for testing (ODBCJT32.DLL, v6.01.7601.17632, 
 		*			'Microsoft Access Driver (*.mdb')') does not support the SQLPrimaryKeys() method.
+		*			\note This flag is sometimes active implicitly, for example if you have manually defined 
+		*			primary key columns using SetColumnPrimaryKeyIndexes().
 		* \see		IsOpen()
 		* \see		Close()
 		* \see		SetColumn()
@@ -855,6 +857,24 @@ namespace exodbc
 		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 
+		/*!
+		* \brief	Manually set the column indexes of primary key columns.
+		* \details	If a table is Open()ed for AF_UPDATE or AF_DELETE, the primary keys must be known.
+		*			Some databases are unable to return them using SQLPrimaryKeys (Access for example),
+		*			so this method provides is provided to set them manually.
+		*			If you call this method, the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is implicitly active
+		*			during Open().
+		*			After ColumnBuffers have been created, the flag CF_PRIMARY_KEY is set on the ColumnBuffers 
+		*			that match the passed columnIndexes.
+		*			Must be called before the Database is Open()ed.
+		* \param	columnIndexes ColumnIndexes that are primary Key. ColumnIndexes is 0-indexed and must match
+		*			the columnIndex from the actual Database table.
+		*			
+		* \throw	Exception If already Open().
+		*/
+		void		SetColumnPrimaryKeyIndexes(const std::set<SQLUSMALLINT>& columnIndexes);
+
+
 		// Private stuff
 		// -------------
 	private:
@@ -944,6 +964,7 @@ namespace exodbc
 		TablePrimaryKeys	m_tablePrimaryKeys;		///< Table Primary Keys read during Open if table was opened READ_WRITE.
 
 		// Column information
+		std::set<SQLUSMALLINT> m_primaryKeyColumnIndexes; ///< If this set contains values during Open(), the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is activated implicitly. The ColumnBuffers marked in this set will be used as primary key columns.
 		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
 		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
