@@ -176,11 +176,18 @@ namespace exodbc
 		SQLINTEGER i = 0;
 		SQLBIGINT bi = 0;
 		int type = SQL_C_SLONG;
-		// \todo
-		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT);
+
+		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
 		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
 		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
-		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		}
+		else
+		{
+			iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		}
 
 		// Open and remove all data from the table
 		iTable.Open(m_db);
@@ -195,13 +202,24 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Read back from another table
+		// note that when opening an Access Table Access automatically, the second column will not get bound to a SMALLINT, as
+		// Access reports it as SQL_INTEGER (Db-Type) which corresponds to C-Type of SQL_C_SLONG.
+		// The other databases report it as SQL_SMALLINT which we bind to SQL_C_SSHORT
 		Table iTable2(m_db, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
 		iTable2.Open(m_db);
 		iTable2.Select();
 		ASSERT_TRUE(iTable2.SelectNext());
 		EXPECT_EQ(11, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
-		EXPECT_EQ(202, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
-		EXPECT_EQ(-404, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			EXPECT_EQ(202, boost::get<SQLINTEGER>(iTable2.GetColumnValue(1)));
+			EXPECT_EQ(-404, boost::get<SQLINTEGER>(iTable2.GetColumnValue(3)));
+		}
+		else
+		{
+			EXPECT_EQ(202, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
+			EXPECT_EQ(-404, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
+		}
 		EXPECT_TRUE(iTable2.IsColumnNull(2));
 	}
 
@@ -215,11 +233,18 @@ namespace exodbc
 		SQLINTEGER i = 0;
 		SQLBIGINT bi = 0;
 		int type = SQL_C_SLONG;
-		// \todo
-		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_UPDATE | CF_INSERT);
+
+		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_UPDATE | CF_INSERT | CF_PRIMARY_KEY);
 		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_UPDATE | CF_INSERT);
 		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
-		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_UPDATE | CF_INSERT);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT | CF_UPDATE);
+		}
+		else
+		{
+			iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT | CF_UPDATE);
+		}
 
 		// Open and remove all data from the table
 		iTable.Open(m_db);
@@ -251,9 +276,17 @@ namespace exodbc
 		iTable2.Select();
 		ASSERT_TRUE(iTable2.SelectNext());
 		EXPECT_EQ(11, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
-		EXPECT_EQ(880, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			EXPECT_EQ(880, boost::get<SQLINTEGER>(iTable2.GetColumnValue(1)));
+			EXPECT_EQ(1001, boost::get<SQLINTEGER>(iTable2.GetColumnValue(3)));
+		}
+		else
+		{
+			EXPECT_EQ(880, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
+			EXPECT_EQ(1001, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
+		}
 		EXPECT_EQ(303, boost::get<SQLINTEGER>(iTable2.GetColumnValue(2)));
-		EXPECT_EQ(1001, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
 	}
 	
 
@@ -269,7 +302,14 @@ namespace exodbc
 		iTable.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT |  CF_INSERT | CF_PRIMARY_KEY);
 		iTable.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
 		iTable.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
-		iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		}
+		else
+		{
+			iTable.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		}
 
 		// Opening must work
 		EXPECT_NO_THROW(iTable.Open(m_db, TOF_DO_NOT_QUERY_PRIMARY_KEYS));
@@ -283,7 +323,14 @@ namespace exodbc
 		iTable2.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id2, SQL_C_SLONG, sizeof(id2), CF_SELECT | CF_INSERT);
 		iTable2.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si2, SQL_C_SSHORT, sizeof(si2), CF_SELECT | CF_INSERT);
 		iTable2.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i2, SQL_C_SLONG, sizeof(i2), CF_SELECT | CF_INSERT);
-		iTable2.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi2, SQL_C_SBIGINT, sizeof(bi2), CF_SELECT | CF_INSERT);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable2.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		}
+		else
+		{
+			iTable2.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		}
 		EXPECT_THROW(iTable2.Open(m_db, TOF_DO_NOT_QUERY_PRIMARY_KEYS), Exception);
 
 		// But if we open for select only, we do not care about the primary keys
@@ -295,7 +342,14 @@ namespace exodbc
 		iTable3.SetColumn(0, TestTables::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id3, SQL_C_SLONG, sizeof(id3), CF_SELECT);
 		iTable3.SetColumn(1, TestTables::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si3, SQL_C_SSHORT, sizeof(si3), CF_SELECT);
 		iTable3.SetColumn(2, TestTables::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i3, SQL_C_SLONG, sizeof(i3), CF_SELECT);
-		iTable3.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi3, SQL_C_SBIGINT, sizeof(bi3), CF_SELECT);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable3.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
+		}
+		else
+		{
+			iTable3.SetColumn(3, TestTables::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
+		}
 		EXPECT_NO_THROW(iTable3.Open(m_db, TOF_DO_NOT_QUERY_PRIMARY_KEYS));
 	}
 
