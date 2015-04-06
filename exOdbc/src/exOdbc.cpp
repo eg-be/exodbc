@@ -322,9 +322,11 @@ namespace exodbc {
 		case ColumnQueryNameHint::COLUMN:
 			includeTableName = false;
 			includeColumnName = true;
+			break;
 		case ColumnQueryNameHint::TABLE_COLUMN:
 			includeTableName = true;
 			includeColumnName = true;
+			break;
 		}
 		std::wstringstream ws;
 
