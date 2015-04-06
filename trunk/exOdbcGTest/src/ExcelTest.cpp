@@ -249,27 +249,6 @@ namespace exodbc
 
 	}
 
-
-	TEST_F(AccessTest, Foo)
-	{
-		Database db(m_env);
-		db.Open(L"AccessTest", L"", L"");
-
-		STableInfosVector tables = db.FindTables(L"", L"", L"", L"");
-		Table acc(db, L"tblDKS", L"", L"", L"", AF_READ);
-		acc.Open(db);
-		
-		acc.Select();
-		EXPECT_TRUE(acc.SelectNext());
-		SQLINTEGER i1 = boost::get<SQLINTEGER>(acc.GetColumnValue(0));
-		wstring c1 = boost::get<wstring>(acc.GetColumnValue(1));
-		wstring c2 = boost::get<wstring>(acc.GetColumnValue(2));
-		wstring c3 = boost::get<wstring>(acc.GetColumnValue(3));
-		wstring c4 = boost::get<wstring>(acc.GetColumnValue(4));
-		wstring c5 = boost::get<wstring>(acc.GetColumnValue(5));
-		int p = 3;
-	}
-
 	// Interfaces
 	// ----------
 

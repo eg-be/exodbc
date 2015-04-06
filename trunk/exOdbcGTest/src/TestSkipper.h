@@ -47,6 +47,16 @@ namespace exodbc
 		DatabaseTestsMap m_testsByDb;
 	};
 
+
+#define MAYBE_SKIPP_TEST(testSkipper, db) \
+	{ \
+		if (testSkipper.ContainsTest(db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())) \
+		{ \
+			LOG_WARNING(testSkipper.FormatSkipMessage(m_db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())); \
+			return; \
+		} \
+	} while (0)
+
 } // namespace exodbc
 
 #endif // TESTSKIPPER_H
