@@ -16,6 +16,7 @@
 // Same component headers
 #include "exOdbcGTest.h"
 #include "TestParams.h"
+#include "TestSkipper.h"
 
 // Other headers
 #include "gtest/gtest.h"
@@ -38,16 +39,18 @@ namespace exodbc
 	class wxCompatibilityTest : public ::testing::TestWithParam<SOdbcInfo>
 	{
 	public:
-		static void SetUpTestCase() {};
+		static void SetUpTestCase();
 		static void TearDownTestCase() {};
 
 	protected:
+		virtual void SetUp();
+		virtual void TearDown();
+
 		SOdbcInfo m_odbcInfo;
 		exodbc::Environment	m_env;
 		exodbc::Database	m_db;
 
-		virtual void SetUp();
-		virtual void TearDown();
+		static TestSkipper s_testSkipper;
 	};
 
 	INSTANTIATE_TEST_CASE_P(

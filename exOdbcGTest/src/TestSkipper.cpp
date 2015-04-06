@@ -33,6 +33,12 @@ using namespace std;
 
 namespace exodbc
 {
+	void TestSkipper::AddDatabase(DatabaseProduct db)
+	{
+		m_dbs.insert(db);
+	}
+
+
 	void TestSkipper::AddTest(DatabaseProduct db, const std::string& testName)
 	{
 		// If we already have a set use that, else create a new one
@@ -46,6 +52,12 @@ namespace exodbc
 			TestNamesSet tests = { testName };
 			m_testsByDb[db] = tests;
 		}
+	}
+
+
+	bool TestSkipper::ContainsDb(DatabaseProduct db) const
+	{
+		return m_dbs.find(db) != m_dbs.end();
 	}
 
 

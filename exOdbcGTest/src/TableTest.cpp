@@ -2389,6 +2389,10 @@ namespace exodbc
 	{
 		std::wstring floatTypesTableName = TestTables::GetTableName(TestTables::Table::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			fTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(fTable.Open(m_db));
 		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
 		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
@@ -2409,7 +2413,7 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
-		Table fTable2(m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table fTable2(m_db, floatTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(fTable2.Open(m_db));
 		ColumnBuffer* pId2 = fTable2.GetColumnBuffer(0);
 		ColumnBuffer* pDouble2 = fTable2.GetColumnBuffer(1);
@@ -3157,6 +3161,10 @@ namespace exodbc
 	{
 		std::wstring floatTypesTableName = TestTables::GetTableName(TestTables::Table::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			fTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(fTable.Open(m_db));
 		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
 		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
