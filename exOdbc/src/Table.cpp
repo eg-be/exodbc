@@ -955,6 +955,12 @@ namespace exodbc
 		exASSERT(HasStatements());
 		// \note: We do not force a user to define columns.
 
+		// Set TOF_DO_NOT_QUERY_PRIMARY_KEYS this flag for Access, Access does not support SQLPrimaryKeys
+		if (db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
+		}
+
 		// Nest try/catch the free the buffers created in here if we fail somewhere
 		try
 		{

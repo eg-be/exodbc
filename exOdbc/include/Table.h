@@ -263,6 +263,9 @@ namespace exodbc
 		*			If this flag is set, the primary keys are not queried, but defined ColumnBuffers 
 		*			(probably defined using SetColumn() ) are checked for the flag CF_PRIMARY_KEY to build
 		*			the internal PrimaryKeys structure.
+		*			This flag is set automatically whenever Open() ing a Table from a Microsoft Access Database,
+		*			as the Access Driver I used for testing (ODBCJT32.DLL, v6.01.7601.17632, 
+		*			'Microsoft Access Driver (*.mdb')') does not support the SQLPrimaryKeys() method.
 		* \see		IsOpen()
 		* \see		Close()
 		* \see		SetColumn()
