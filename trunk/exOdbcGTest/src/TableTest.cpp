@@ -921,6 +921,7 @@ namespace exodbc
 		// Now delete the second record: We cannot do that if we do not have support for What are Multiple Active Statements (MAS)?
 		// MS SQL Server does not have this enabled by default
 		// See Ticket # 63 and # 75
+		// Also Access is not working here - we get a function sequence error
 		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			LOG_WARNING(L"This test is known to fail with Microsoft SQL Server 2014 (and probably others too), see Ticket #75");
