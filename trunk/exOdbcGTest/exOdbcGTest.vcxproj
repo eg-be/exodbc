@@ -125,7 +125,7 @@
       <AdditionalDependencies>gtest-mdd_v120.lib;exOdbc_v120.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -178,7 +178,7 @@
       <AdditionalDependencies>gtest-md_v120.lib;exOdbc_v120.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
