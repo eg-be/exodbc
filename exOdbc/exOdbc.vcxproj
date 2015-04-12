@@ -177,7 +177,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -225,7 +225,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating Versioninfo</Message>
