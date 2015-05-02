@@ -73,15 +73,19 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		// Not enough args
 		wcerr << L"Not enough arguments!\n";
-		wcerr << L"Usage: wxOdbc3GoogleTest --dsn=dsn1,dsn2,..,dsnN [--user=user1,user2,..,userN] [--pass=pass1,pass2,..,passN] [--case=u|l,u|l,...,u|l] [--logLevel=0-5] [--excelDsn=excelDSNName] [--createDb=1]\n";
+		wcerr << L"Usage: exOdbcGTest --dsn=dsn1,dsn2,..,dsnN [--user=user1,user2,..,userN] [--pass=pass1,pass2,..,passN] [--case=u|l,u|l,...,u|l] [--logLevel=0-5] [--excelDsn=excelDSNName] [--createDb=1]\n";
 		wcerr << L"\n";
 		wcerr << L" logLevel: 0: trace; 1: debug; 2: info; 3: warning; 4: error; 5: fatal\n";
 		wcerr << L"           Default is warning (3)\n";
-		wcerr << L" case: Defines the case of the table- and column-names to be used during the tests. If not given\n";
-		wcerr << L"       lowercase-letters are used. If parameter is used, it must be set for every dsn entry\n";
-		wcerr << L"             l: lower: All table- and column-names for the test tables will be in lowercase-letters (default)\n";
-		wcerr << L"             u: upper: All table- and column-names for the test tables will be in UPPERCASE-letters\n";
-		wcerr << L" createDb: If set to 1, the App tries to re-create the test-database before running any tests\n";
+		wcerr << L" case:     Defines the case of the table- and column-names to be used during the";
+		wcerr << L"           tests. If not specified lowercase-letters are used. If parameter is";
+		wcerr << L"           used, it must be set for every dsn entry\n";
+		wcerr << L"           l: lower: All table- and column-names for the test tables will be in";
+		wcerr << L"              lowercase letters(default)\n";
+		wcerr << L"           u: upper: All table- and column-names for the test tables will be in";
+		wcerr << L"              UPPERCASE letters\n";
+		wcerr << L" createDb: If set to 1, the App tries to re-create the test-database before";
+		wcerr << L"           running any tests\n";
 		status = 10;
 	}
 	std::wstring dsn, user, pass, logLevelS, caseS, excelDsn, createDb;
