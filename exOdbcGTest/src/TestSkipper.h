@@ -56,6 +56,7 @@ namespace exodbc
 #define MAYBE_SKIPP_TEST(testSkipper, db) \
 		{ \
 		if (testSkipper.ContainsDb(db.GetDbms())) { \
+			LOG_WARNING(testSkipper.FormatSkipMessage(m_db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())); \
 			return; \
 		} \
 		if (testSkipper.ContainsTest(db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())) \
