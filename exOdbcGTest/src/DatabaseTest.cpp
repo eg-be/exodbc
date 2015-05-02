@@ -271,6 +271,7 @@ namespace exodbc
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
+		// \todo fails atm with db2, see #140
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM integertypes_tmp WHERE idintegertypes >= 0";
 		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
