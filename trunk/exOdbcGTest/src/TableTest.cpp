@@ -424,7 +424,7 @@ namespace exodbc
 		{
 			// We only have a Read-only user for ms sql server
 			Database db(m_env);
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"exOdbcReadOnly", L"exodbcReadOnly"));
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"exReadOnly", L"exReadOnly"));
 
 			// Test to open a table read-only
 			// Note that here in ms server we have given the user no rights except the select for this table
