@@ -190,7 +190,12 @@ namespace exodbc
 		/*!
 		* \brief	Prevent copies until we implement a copy constructor who takes care of the handle(s).
 		*/
-		Table(const Table& other) :m_manualColumns(false) {};
+		Table(const Table& other) :m_manualColumns(false) { THROW_NOT_IMPLEMENTED();  };
+		
+		/*!
+		* \brief	Prevent default constructor until we implement initialization chain and test it.
+		*/
+		Table() : m_manualColumns(false) { THROW_NOT_IMPLEMENTED();  };
 
 	public:
 		virtual ~Table();
