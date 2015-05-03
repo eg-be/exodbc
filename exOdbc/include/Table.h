@@ -517,7 +517,7 @@ namespace exodbc
 		* \see		Database::CommitTrans()
 		* \throw	Exception on failure.
 		*/
-		void		Insert();
+		void		Insert() const;
 
 
 		/*!
@@ -608,7 +608,7 @@ namespace exodbc
 		* \throw	Exception If ColumnBuffer not found, or setting the value fails, for
 		*			example because it does not match the type of the buffer allocated.
 		*/
-		void		SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value);
+		void		SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value) const;
 
 
 		/*!

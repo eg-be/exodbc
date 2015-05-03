@@ -666,7 +666,7 @@ namespace exodbc
 	}
 
 
-	void Table::Insert()
+	void Table::Insert() const
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(AF_INSERT));
@@ -778,7 +778,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value)
+	void Table::SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value) const
 	{
 		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
 		*pBuff = value;
