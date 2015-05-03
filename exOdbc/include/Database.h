@@ -224,7 +224,7 @@ namespace exodbc
 		 * \return	true if it succeeds, false if it fails.
 		 * \throw	Exception if no connection handle is allocated or SQLEndTran fails.
 		 */
-		void         CommitTrans();
+		void         CommitTrans() const;
 
 
 		/*!
@@ -232,7 +232,7 @@ namespace exodbc
 		 * \return	true if it succeeds, false if it fails.
 		 * \throw	Exception if no connection handle is allocated or SQLEndTran fails.
 		 */
-		void         RollbackTrans();
+		void         RollbackTrans() const;
 
 
 		/**

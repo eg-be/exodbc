@@ -552,7 +552,7 @@ namespace exodbc
 		* \throw	Exception on failure, or depending on failOnNoData, a SqlResultException if the
 		*			call to SQLExecute fails with SQL_NO_DATA.
 		*/
-		void		Delete(const std::wstring& where, bool failOnNoData = true);
+		void		Delete(const std::wstring& where, bool failOnNoData = true) const;
 
 
 		/*!
@@ -791,6 +791,13 @@ namespace exodbc
 		* \throw	Exception
 		*/
 		ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
+
+
+		/*!
+		* \brief	Return a set of columnIndexes for the ColumnBuffers of this Table.
+		* \details	Returns the Keyset of the internal ColumnBufferMap
+		*/
+		std::set<SQLSMALLINT> GetColumnBufferIndexes() const throw();
 
 
 		/*!
