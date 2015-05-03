@@ -550,6 +550,19 @@ namespace exodbc
 	}
 
 
+	std::set<SQLSMALLINT> Table::GetColumnBufferIndexes() const throw()
+	{
+		std::set<SQLSMALLINT> columnIndexes;
+		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
+		while (it != m_columnBuffers.end())
+		{
+			columnIndexes.insert(it->first);
+			++it;
+		}
+		return columnIndexes;
+	}
+
+
 	STableInfo Table::GetTableInfo() const
 	{
 		exASSERT(m_haveTableInfo);
@@ -682,7 +695,7 @@ namespace exodbc
 	}
 
 
-	void Table::Delete(const std::wstring& where, bool failOnNoData /* = true */)
+	void Table::Delete(const std::wstring& where, bool failOnNoData /* = true */) const
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(AF_DELETE));

@@ -577,7 +577,7 @@ namespace exodbc
 	}
 
 
-	void Database::CommitTrans()
+	void Database::CommitTrans() const
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
@@ -588,7 +588,7 @@ namespace exodbc
 	}
 
 
-	void Database::RollbackTrans()
+	void Database::RollbackTrans() const
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
