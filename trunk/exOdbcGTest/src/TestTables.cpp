@@ -123,7 +123,7 @@ namespace exodbc
 				exodbc::Table intTable(db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
 				intTable.Open(db);
 				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
-				intTable.Delete(where);
+				intTable.Delete(where, false);
 				db.CommitTrans();
 			}
 			catch (exodbc::Exception& ex)
