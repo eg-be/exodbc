@@ -67,7 +67,7 @@ namespace exodbc
 	{
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
-		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
+		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		STableInfosVector tables;
 		ASSERT_NO_THROW(tables = db.FindTables(L"", L"", L"", L""));
 		// Must contain our sheet 'TestTable$'
@@ -88,7 +88,7 @@ namespace exodbc
 	{
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
-		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
+		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		// Create Table
 		Table tTable(db, L"TestTable$", L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(tTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
@@ -102,7 +102,7 @@ namespace exodbc
 		// See Ticket #111 - this is fixed and no workarounds are needed
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
-		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
+		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		Table tTable(db, L"TestTable$", L"", L"", L"", AF_READ);
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
 		ASSERT_NO_THROW(tTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
@@ -149,7 +149,7 @@ namespace exodbc
 	{
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
-		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
+		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		// Find the correct table:
 		STableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
@@ -195,7 +195,7 @@ namespace exodbc
 	{
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
-		ASSERT_NO_THROW(db.Open(L"exodbc_xls", L"", L""));
+		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		// Find the correct table:
 		STableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
