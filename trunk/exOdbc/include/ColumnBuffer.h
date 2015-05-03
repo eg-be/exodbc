@@ -371,7 +371,7 @@ namespace exodbc
 		/*!
 		* \brief	Read the PrimaryKey flag.
 		*/
-		bool IsPrimaryKey() const throw() { return (m_flags & CF_PRIMARY_KEY) == CF_PRIMARY_KEY; };
+		bool IsPrimaryKey() const throw() { return IsColumnFlagSet(CF_PRIMARY_KEY); };
 
 
 		/*!
