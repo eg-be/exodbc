@@ -165,22 +165,42 @@ namespace exodbc
 			{
 				exASSERT_MSG(insertableTable.TestAccessFlag(AF_INSERT), boost::str(boost::wformat(L"Failed to insert row into test table '%s', AccessFlag AF_INSERT is not set on the passed table.") % insertableTable.GetTableInfo().GetSqlName()));
 				// Set values on columns
+
+				// id is never null
 				insertableTable.SetColumnValue(0, id);
 
-				if (smallInt != NULL_INT_VALUE)
-					insertableTable.SetColumnValue(1, smallInt);
-				else
-					insertableTable.SetColumnNull(1);
-
+				// and int works everywhere
 				if (i != NULL_INT_VALUE)
 					insertableTable.SetColumnValue(2, i);
 				else
 					insertableTable.SetColumnNull(2);
 
-				if (bigInt != NULL_INT_VALUE)
-					insertableTable.SetColumnValue(3, bigInt);
+				// note: access has only integers, try to convert the values
+				if (smallInt == NULL_INT_VALUE)
+				{
+					insertableTable.SetColumnNull(1);
+				}
+				else if (db.GetDbms() == DatabaseProduct::ACCESS)
+				{
+					insertableTable.SetColumnValue(1, (SQLINTEGER)smallInt);
+				}
 				else
+				{
+					insertableTable.SetColumnValue(1, smallInt);
+				}
+
+				if (bigInt == NULL_INT_VALUE)
+				{
 					insertableTable.SetColumnNull(3);
+				}
+				else if (db.GetDbms() == DatabaseProduct::ACCESS)
+				{
+					insertableTable.SetColumnValue(3, (SQLINTEGER)bigInt);
+				}
+				else
+				{
+					insertableTable.SetColumnValue(3, bigInt);
+				}
 
 				insertableTable.Insert();
 				if (commit)
