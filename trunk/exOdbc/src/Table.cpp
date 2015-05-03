@@ -689,7 +689,7 @@ namespace exodbc
 	void Table::Delete(bool failOnNoData /* = true */)
 	{
 		exASSERT(IsOpen());
-		exASSERT(TestAccessFlag(AF_DELETE));
+		exASSERT(TestAccessFlag(AF_DELETE_PK));
 		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
 		SQLRETURN ret = SQLExecute(m_hStmtDelete);
 		if (failOnNoData && ret == SQL_NO_DATA)
@@ -708,7 +708,7 @@ namespace exodbc
 	void Table::Delete(const std::wstring& where, bool failOnNoData /* = true */) const
 	{
 		exASSERT(IsOpen());
-		exASSERT(TestAccessFlag(AF_DELETE));
+		exASSERT(TestAccessFlag(AF_DELETE_WHERE));
 		exASSERT(m_hStmtDeleteWhere != SQL_NULL_HSTMT);
 		exASSERT(!where.empty());
 
@@ -730,7 +730,7 @@ namespace exodbc
 	void Table::Update()
 	{
 		exASSERT(IsOpen());
-		exASSERT(TestAccessFlag(AF_UPDATE));
+		exASSERT(TestAccessFlag(AF_UPDATE_PK));
 		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
 		SQLRETURN ret = SQLExecute(m_hStmtUpdate);
 		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
@@ -740,7 +740,7 @@ namespace exodbc
 	void Table::Update(const std::wstring& where)
 	{
 		exASSERT(IsOpen());
-		exASSERT(TestAccessFlag(AF_UPDATE));
+		exASSERT(TestAccessFlag(AF_UPDATE_WHERE));
 		exASSERT(m_hStmtUpdateWhere != SQL_NULL_HSTMT);
 		exASSERT(!where.empty());
 		// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set

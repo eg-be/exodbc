@@ -271,7 +271,7 @@ namespace exodbc
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		ASSERT_NO_THROW(TestTables::ClearTestTable(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, m_db));
+		ASSERT_NO_THROW(TestTables::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
 		ASSERT_NO_THROW(TestTables::InsertIntTypes(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, TestTables::NULL_INT_VALUE, false));
 
 		// Note: If we try to read now from a different database, we do not see the inserted recorded until it is committed
@@ -329,11 +329,7 @@ namespace exodbc
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		//std::wstring sqlstmt;
-		//sqlstmt = L"DELETE FROM integertypes_tmp WHERE idintegertypes >= 0";
-		//EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
-		//EXPECT_NO_THROW(m_db.CommitTrans());
-		ASSERT_NO_THROW(TestTables::ClearTestTable(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, m_db));
+		ASSERT_NO_THROW(TestTables::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
 
 		// No records now
 		iTable.Select();

@@ -72,8 +72,8 @@ namespace exodbc
 		// exodbc::Table GetEmptyTestTable(TestTables::Table table, TestTables::NameCase nameCase, exodbc::Database& db);
 
 		void ClearTestTable(TestTables::Table table, TestTables::NameCase nameCase, exodbc::Table& testTable, exodbc::Database& db);
-		void ClearTestTable(const exodbc::Table& deletableTable, const exodbc::Database& db);
-		void ClearTestTable(TestTables::Table table, TestTables::NameCase nameCase, const exodbc::Database& db);
+
+		void ClearIntTable(const exodbc::Database& db, TestTables::NameCase nameCase);
 
 		static const SQLBIGINT NULL_INT_VALUE = -13141315;
 		void InsertIntTypes(TestTables::NameCase nameCase, const exodbc::Database& db, SQLINTEGER id, SQLSMALLINT smallInt, SQLINTEGER i, SQLBIGINT bigInt, bool commit = true);
