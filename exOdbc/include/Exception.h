@@ -226,6 +226,19 @@ namespace exodbc
 		const SQLSMALLINT m_cDestType;		///< ODBC C Type used as destination value for the cast.
 	};	// class CastException
 
+
+	class EXODBCAPI NotImplementedException
+		: public Exception
+	{
+	public:
+		NotImplementedException()
+			: Exception(L"Functionality not implemented")
+		{};
+
+		virtual ~NotImplementedException() {};
+
+		virtual std::wstring GetName() const throw() { return L"exodbc::NotImplementedException"; };
+	};
 }
 
 
