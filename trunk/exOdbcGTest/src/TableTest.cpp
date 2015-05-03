@@ -989,11 +989,103 @@ namespace exodbc
 
 	// GetValues
 	// ---------
+	::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, SQLINTEGER expId, SQLSMALLINT expSmallInt, SQLINTEGER expInt, SQLBIGINT expBigInt)
+	{
+		try
+		{
+			SQLINTEGER id = boost::get<SQLINTEGER>(iTable.GetColumnValue(0));
+			bool siNull = iTable.IsColumnNull(1);
+			bool iNull = iTable.IsColumnNull(2);
+			bool biNull = iTable.IsColumnNull(3);
+			SQLSMALLINT si;
+			SQLINTEGER i;
+			SQLBIGINT bi;
+			if (!siNull)
+			{
+				if (db.GetDbms() == DatabaseProduct::ACCESS)
+					si = (SQLSMALLINT) boost::get<SQLINTEGER>(iTable.GetColumnValue(1));
+				else
+					si = boost::get<SQLSMALLINT>(iTable.GetColumnValue(1));
+			}
+			else
+			{
+				si = TestTables::NULL_INT_VALUE;
+			}
+
+			if (!iNull)
+			{
+				i = boost::get<SQLINTEGER>(iTable.GetColumnValue(2));
+			}
+			else
+			{
+				i = TestTables::NULL_INT_VALUE;
+			}
+
+			if (!biNull)
+			{
+				if (db.GetDbms() == DatabaseProduct::ACCESS)
+					bi = boost::get<SQLINTEGER>(iTable.GetColumnValue(3));
+				else
+					bi = boost::get<SQLBIGINT>(iTable.GetColumnValue(3));
+			}
+			else
+			{
+				bi = TestTables::NULL_INT_VALUE;
+			}
+
+			::testing::AssertionResult failure = ::testing::AssertionFailure();
+			bool failed = false;
+
+			if (id != expId)
+			{
+				failed = true;
+			}
+			if (si != expSmallInt)
+			{
+				failed = true;
+			}
+			if (i != expInt)
+			{
+				failed = true;
+			}
+			if (bi != expBigInt)
+			{
+				failed = true;
+			}
+			if (failed)
+			{
+				std::string top = boost::str(boost::format("Records are not equal:"));
+				std::string hed = boost::str(boost::format("          | %18s | %18s | %18s | %18s") % "idintegertypes" %"tsmalint" %"tint" %"tbigint");
+				std::string exp = boost::str(boost::format("expected: | %18d | %18d | %18d | %18d") % expId % expSmallInt % expInt % expBigInt);
+				std::string dat = boost::str(boost::format("  values: | %18d | %18d | %18d | %18d") % id % si % i % bi);
+				failure << top << std::endl << hed << std::endl << exp << std::endl << dat << std::endl;
+				return failure;
+			}
+		}
+		catch (Exception& ex)
+		{
+			return ::testing::AssertionFailure() << "ERROR comparing column values: " << ex.what();
+		}
+
+		return ::testing::AssertionSuccess();
+	}
+
+
 	TEST_P(TableTest, SelectAutoIntValues)
 	{
+		namespace tt = TestTables;
 		std::wstring tableName = TestTables::GetTableName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
+
+		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
+		EXPECT_TRUE(iTable.SelectNext());
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			EXPECT_EQ((SQLINTEGER)-32768, boost::get<SQLINTEGER>(iTable.GetColumnValue(1)));
+			EXPECT_TRUE(IsIntRecordEqual(m_db, iTable, 61, -3278, 7, 676));
+		}
 
 		// Test values
 		SQLSMALLINT s = 0;
@@ -1002,7 +1094,7 @@ namespace exodbc
 		std::wstring str;
 
 		// We expect 6 Records
-		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
+//		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		// The first column has a smallint set, we can read that as any int value -32768
 		SQLBIGINT colVal = -32768;
