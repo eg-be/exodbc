@@ -181,7 +181,7 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenManualCheckColumnFlagInsert)
 	{
-		// Open a table manually but do not set the Select flag for all columns
+		// Open a table manually but do not set the Insert flag for all columns
 		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT | AF_DELETE);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
@@ -238,7 +238,7 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenManualCheckColumnFlagUpdate)
 	{
-		// Open a table manually but do not set the Select flag for all columns
+		// Open a table manually but do not set the Update flag for all columns
 		Table iTable(m_db, 4, TestTables::GetTableName(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_UPDATE | AF_DELETE | AF_INSERT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
