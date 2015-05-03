@@ -792,7 +792,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumnNull(SQLSMALLINT columnIndex)
+	void Table::SetColumnNull(SQLSMALLINT columnIndex) const
 	{
 		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
 		pBuff->SetNull();
