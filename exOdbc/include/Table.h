@@ -214,11 +214,11 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Test if the required statements (depending on OpenMode) are allocated.
+		* \brief	Test if the required statements (depending on OpenFlags) are allocated.
 		* \return	True if all statements are allocated
 		* \see		AllocateStatements()
 		*/
-		bool HasStatements() const throw();
+		bool HasAllStatements() const throw();
 
 
 		/*!
@@ -302,10 +302,10 @@ namespace exodbc
 
 		/*!
 		* \brief	Checks if we can only read from this table.
-		* \return	True if this table has the flag AF_READ set and, none of the flags
-		*			AF_UPDATE, AF_INSERT or AF_DELETE set.
+		* \return	True if this table has the flag AF_READ set and none of the flags
+		*			AF_UPDATE_PK, AF_UPDATE_WHERE, AF_INSERT, AF_DELETE_PK or AF_DELETE_WHERE are set.
 		*/
-		bool		IsQueryOnly() const throw()  { return TestAccessFlag(AF_READ) && !(TestAccessFlag(AF_UPDATE) || TestAccessFlag(AF_INSERT) || TestAccessFlag(AF_DELETE)); };
+		bool		IsQueryOnly() const throw();
 
 
 		/*!
@@ -915,8 +915,9 @@ namespace exodbc
 
 		
 		/*!
-		* \brief	Frees the statement handles allocated during AllocateStatements().
-		* \throw	SqlResultException if freeing one of the handles fail.
+		* \brief	Frees all handles that are not set to null. Freed handles are set to NULL.
+		* \throw	SqlResultException if freeing one of the handles fail. No other handles
+		*			will be freed after one handle fails to free.
 		*/
 		void		FreeStatements();
 
