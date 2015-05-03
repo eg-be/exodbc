@@ -628,7 +628,7 @@ namespace exodbc
 		* \param	columnIndex Zero based ColumnBuffer index.
 		* \throw	Exception If ColumnBuffer not found.
 		*/
-		void		SetColumnNull(SQLSMALLINT columnIndex);
+		void		SetColumnNull(SQLSMALLINT columnIndex) const;
 
 
 		/*!
