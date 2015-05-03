@@ -56,17 +56,14 @@ namespace exodbc
 		, m_initialCatalogName(catalogName)
 		, m_initialTypeName(tableType)
 		, m_haveTableInfo(false)
+		, m_accessFlags(AF_NONE)
 	{
 		exASSERT(db.IsOpen());
+		
 		Initialize();
-
 		SetAccessFlags(db, afs);
-
-		if (!HasStatements())
-		{
-			// Probably SetAccessFlags has already allocated statements, as flags have changed
-			AllocateStatements(db);
-		}
+		// statements should now be allocated
+		exASSERT(HasAllStatements());
 	}
 
 
@@ -79,17 +76,14 @@ namespace exodbc
 		, m_initialTypeName(L"")
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
+		, m_accessFlags(AF_NONE)
 	{
 		exASSERT(db.IsOpen());
+		
 		Initialize();
-
 		SetAccessFlags(db, afs);
-
-		if (!HasStatements())
-		{
-			// Probably SetAccessFlags has already allocated statements, as flags have changed
-			AllocateStatements(db);
-		}
+		// statements should now be allocated
+		exASSERT(HasAllStatements());
 	}
 
 
@@ -101,17 +95,14 @@ namespace exodbc
 		, m_initialCatalogName(catalogName)
 		, m_initialTypeName(tableType)
 		, m_haveTableInfo(false)
+		, m_accessFlags(AF_NONE)
 	{
 		exASSERT(db.IsOpen());
+
 		Initialize();
-
 		SetAccessFlags(db, afs);
-
-		if (!HasStatements())
-		{
-			// Probably SetAccessFlags has already allocated statements, as flags have changed
-			AllocateStatements(db);
-		}
+		// statements should now be allocated
+		exASSERT(HasAllStatements());
 	}
 
 
@@ -124,17 +115,14 @@ namespace exodbc
 		, m_initialTypeName(L"")
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
+		, m_accessFlags(AF_NONE)
 	{
 		exASSERT(db.IsOpen());
+		
 		Initialize();
-
 		SetAccessFlags(db, afs);
-
-		if (!HasStatements())
-		{
-			// Probably SetAccessFlags has already allocated statements, as flags have changed
-			AllocateStatements(db);
-		}
+		// statements should now be allocated
+		exASSERT(HasAllStatements());
 	}
 
 
@@ -164,10 +152,8 @@ namespace exodbc
 				m_columnBuffers.clear();
 				m_numCols = 0;
 			}
-			if (HasStatements())
-			{
-				FreeStatements();
-			}
+
+			FreeStatements();
 			exASSERT(m_numCols == 0);
 			exASSERT(m_columnBuffers.size() == 0);
 		}
@@ -225,37 +211,52 @@ namespace exodbc
 		{
 			m_hStmtInsert = AllocateStatementHandle(db.GetConnectionHandle());
 		}
-		if (TestAccessFlag(AF_UPDATE))
+		if (TestAccessFlag(AF_UPDATE_PK))
 		{
 			m_hStmtUpdate = AllocateStatementHandle(db.GetConnectionHandle());
+		}
+		if (TestAccessFlag(AF_UPDATE_WHERE))
+		{
 			m_hStmtUpdateWhere = AllocateStatementHandle(db.GetConnectionHandle());
 		}
-		if (TestAccessFlag(AF_DELETE))
+
+		if (TestAccessFlag(AF_DELETE_PK))
 		{
 			m_hStmtDelete = AllocateStatementHandle(db.GetConnectionHandle());
+		}
+		if (TestAccessFlag(AF_DELETE_WHERE))
+		{
 			m_hStmtDeleteWhere = AllocateStatementHandle(db.GetConnectionHandle());
 		}
 	}
 
 
-	bool Table::HasStatements() const throw()
+	bool Table::HasAllStatements() const throw()
 	{
 		bool haveAll = true;
-		if (haveAll && TestAccessFlag(AF_READ))
+		if (haveAll && TestAccessFlag(AF_SELECT))
 		{
 			haveAll = (SQL_NULL_HSTMT != m_hStmtSelect) && (SQL_NULL_HSTMT != m_hStmtCount);
 		}
-		if (haveAll && TestAccessFlag(AF_UPDATE))
+		if (haveAll && TestAccessFlag(AF_UPDATE_PK))
 		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtUpdate) && (SQL_NULL_HSTMT != m_hStmtUpdateWhere);
+			haveAll = (SQL_NULL_HSTMT != m_hStmtUpdate);
+		}
+		if (haveAll && TestAccessFlag(AF_UPDATE_WHERE))
+		{
+			haveAll = (SQL_NULL_HSTMT != m_hStmtUpdateWhere);
 		}
 		if (haveAll && TestAccessFlag(AF_INSERT))
 		{
 			haveAll = (SQL_NULL_HSTMT != m_hStmtInsert);
 		}
-		if (haveAll && TestAccessFlag(AF_DELETE))
+		if (haveAll && TestAccessFlag(AF_DELETE_PK))
 		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtDelete) && (SQL_NULL_HSTMT != m_hStmtDeleteWhere);
+			haveAll = (SQL_NULL_HSTMT != m_hStmtDelete);
+		}
+		if (haveAll && TestAccessFlag(AF_DELETE_WHERE))
+		{
+			haveAll = (SQL_NULL_HSTMT != m_hStmtDeleteWhere);
 		}
 		return haveAll;
 	}
@@ -344,25 +345,34 @@ namespace exodbc
 		exASSERT(!IsOpen());
 
 		// Free allocated statements
-		if (TestAccessFlag(AF_SELECT))
+		if (m_hStmtCount != SQL_NULL_HSTMT)
 		{
 			m_hStmtCount = FreeStatementHandle(m_hStmtCount);
+		}
+		if (m_hStmtSelect != SQL_NULL_HSTMT)
+		{
 			m_hStmtSelect = FreeStatementHandle(m_hStmtSelect);
 		}
 
 		// And then those needed for writing
-		if (TestAccessFlag(AF_INSERT))
+		if (m_hStmtInsert != SQL_NULL_HSTMT)
 		{
 			m_hStmtInsert = FreeStatementHandle(m_hStmtInsert);
 		}
-		if (TestAccessFlag(AF_DELETE))
+		if (m_hStmtDelete != SQL_NULL_HSTMT)
 		{
 			m_hStmtDelete = FreeStatementHandle(m_hStmtDelete);
+		}
+		if (m_hStmtDeleteWhere != SQL_NULL_HSTMT)
+		{
 			m_hStmtDeleteWhere = FreeStatementHandle(m_hStmtDeleteWhere);
 		}
-		if (TestAccessFlag(AF_UPDATE))
+		if (m_hStmtUpdate != SQL_NULL_HSTMT)
 		{
 			m_hStmtUpdate = FreeStatementHandle(m_hStmtUpdate);
+		}
+		if (m_hStmtUpdateWhere != SQL_NULL_HSTMT)
+		{
 			m_hStmtUpdateWhere = FreeStatementHandle(m_hStmtUpdateWhere);
 		}
 	}
@@ -973,7 +983,7 @@ namespace exodbc
 	{
 		exASSERT(db.IsOpen());
 		exASSERT(!IsOpen());
-		exASSERT(HasStatements());
+		exASSERT(HasAllStatements());
 		// \note: We do not force a user to define columns.
 
 		// Set TOF_DO_NOT_QUERY_PRIMARY_KEYS this flag for Access, Access does not support SQLPrimaryKeys
@@ -1071,9 +1081,11 @@ namespace exodbc
 				m_tablePrivileges.Initialize(db, m_tableInfo);
 				// We always need to be able to select, but the rest only if we want to write
 				if ((TestAccessFlag(AF_SELECT) && !m_tablePrivileges.IsSet(TP_SELECT))
-					|| (TestAccessFlag(AF_UPDATE) && !m_tablePrivileges.IsSet(TP_UPDATE))
+					|| (TestAccessFlag(AF_UPDATE_PK) && !m_tablePrivileges.IsSet(TP_UPDATE))
+					|| (TestAccessFlag(AF_UPDATE_WHERE) && !m_tablePrivileges.IsSet(TP_UPDATE))
 					|| (TestAccessFlag(AF_INSERT) && !m_tablePrivileges.IsSet(TP_INSERT))
-					|| (TestAccessFlag(AF_DELETE) && !m_tablePrivileges.IsSet(TP_DELETE))
+					|| (TestAccessFlag(AF_DELETE_PK) && !m_tablePrivileges.IsSet(TP_DELETE))
+					|| (TestAccessFlag(AF_DELETE_WHERE) && !m_tablePrivileges.IsSet(TP_DELETE))
 					)
 				{
 					Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s'") % m_tableInfo.GetSqlName()).str());
@@ -1120,9 +1132,9 @@ namespace exodbc
 				}
 			}
 
-			// Create additional INSERT, UPDATE and DELETE statement-handles, and bind the params
-			// Insert does not require primary keys, but update and delete does
-			if (TestAccessFlag(AF_UPDATE) || TestAccessFlag(AF_DELETE))
+			// Create additional UPDATE and DELETE statement-handles to be used with the pk-columns
+			// and bind the params. PKs are required.
+			if (TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK))
 			{
 				// We need the primary keys
 				// Do not query them from the db is corresponding flag is set
@@ -1136,7 +1148,7 @@ namespace exodbc
 				}
 
 				// And we need to have a primary key
-				if (m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
+				if ( (TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK)) && m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
 				{
 					Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
 					SET_EXCEPTION_SOURCE(ex);
@@ -1166,16 +1178,17 @@ namespace exodbc
 					m_tablePrimaryKeys.SetPrimaryKeyFlags(m_columnBuffers);
 				}
 
-				if (TestAccessFlag(AF_DELETE))
+				if (TestAccessFlag(AF_DELETE_PK))
 				{
 					BindDeleteParameters();
 				}
-				if (TestAccessFlag(AF_UPDATE))
+				if (TestAccessFlag(AF_UPDATE_PK))
 				{
 					BindUpdateParameters();
 				}
 			}
 
+			// Bind INSERT params
 			if (TestAccessFlag(AF_INSERT))
 			{
 				BindInsertParameters();
@@ -1298,16 +1311,10 @@ namespace exodbc
 			return;
 		}
 
-		bool statementsWereAllocated = HasStatements();
-		if (statementsWereAllocated)
-		{
-			FreeStatements();
-		}
+		// Free statements, then re-allocate all
+		FreeStatements();
 		m_accessFlags = acs;
-		if (statementsWereAllocated)
-		{
-			AllocateStatements(db);
-		}
+		AllocateStatements(db);
 	}
 
 
@@ -1334,6 +1341,19 @@ namespace exodbc
 		{
 			m_openFlags &= ~TOF_CHAR_TRIM_RIGHT;
 		}
+	}
+
+
+	/*!
+	* \brief	Checks if we can only read from this table.
+	* \return	True if this table has the flag AF_READ set and none of the flags
+	*			AF_UPDATE_PK, AF_UPDATE_WHERE, AF_INSERT, AF_DELETE_PK or AF_DELETE_WHERE are set.
+	*/
+	bool Table::IsQueryOnly() const throw()  {
+		return TestAccessFlag(AF_READ) &&
+				! ( TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_UPDATE_WHERE)
+					|| TestAccessFlag(AF_INSERT)
+					|| TestAccessFlag(AF_DELETE_PK) || TestAccessFlag(AF_DELETE_PK));
 	}
 
 
