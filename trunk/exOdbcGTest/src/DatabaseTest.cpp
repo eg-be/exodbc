@@ -271,17 +271,8 @@ namespace exodbc
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		// \todo fails atm with db2, see #140
-		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM integertypes_tmp WHERE idintegertypes >= 0";
-		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
-		EXPECT_NO_THROW( m_db.CommitTrans() );
-
-		iTable.Select();
-		EXPECT_FALSE( iTable.SelectNext());
-
-		sqlstmt = L"INSERT INTO integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, NULL)";
-		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
+		ASSERT_NO_THROW(TestTables::ClearTestTable(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, m_db));
+		ASSERT_NO_THROW(TestTables::InsertIntTypes(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, TestTables::NULL_INT_VALUE, false));
 
 		// Note: If we try to read now from a different database, we do not see the inserted recorded until it is committed
 		// BUT: Microsoft SQL Server will just block the second database while a transaction is open
@@ -338,16 +329,22 @@ namespace exodbc
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		std::wstring sqlstmt;
-		sqlstmt = L"DELETE FROM integertypes_tmp WHERE idintegertypes >= 0";
-		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
-		EXPECT_NO_THROW(m_db.CommitTrans());
+		//std::wstring sqlstmt;
+		//sqlstmt = L"DELETE FROM integertypes_tmp WHERE idintegertypes >= 0";
+		//EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
+		//EXPECT_NO_THROW(m_db.CommitTrans());
+		ASSERT_NO_THROW(TestTables::ClearTestTable(TestTables::Table::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, m_db));
 
+		// No records now
 		iTable.Select();
 		EXPECT_FALSE( iTable.SelectNext());
 
-		sqlstmt = L"INSERT INTO integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (1, -32768, -2147483648, NULL)";
-		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
+		// Insert one
+		ASSERT_NO_THROW(TestTables::InsertIntTypes(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, TestTables::NULL_INT_VALUE, false));
+		// We have a record now
+		iTable.Select();
+		EXPECT_TRUE( iTable.SelectNext() );
+
 		// We rollback and expect no record
 		EXPECT_NO_THROW(m_db.RollbackTrans());
 		iTable.Select();
