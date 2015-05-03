@@ -112,76 +112,23 @@ namespace exodbc
 		}
 
 
-		void ClearTestTable(TestTables::Table table, TestTables::NameCase nameCase, const exodbc::Database& db)
+		void ClearIntTable(const exodbc::Database& db, TestTables::NameCase nameCase)
 		{
-			// Create a deletable table
-			std::wstring tableName = GetTableName(table, nameCase);
-			exodbc::Table* pDeletableTable = NULL;
+			std::wstring tableName;
 			try
 			{
-				pDeletableTable = new exodbc::Table(db, tableName, L"", L"", L"", AF_DELETE | AF_SELECT);
-				pDeletableTable->Open(db);
-				ClearTestTable(*pDeletableTable, db);
-				pDeletableTable->Close();
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed clearing table '%s': %s") % tableName %ex.ToString()));
-				delete pDeletableTable;
-				throw;
-			}
-
-			// delete and forget
-			delete pDeletableTable;
-		}
-
-
-		void ClearTestTable(const exodbc::Table& deletableTable, const exodbc::Database& db)
-		{
-			bool rollback = false;
-			try
-			{
-				exASSERT_MSG(deletableTable.TestAccessFlag(AF_DELETE), boost::str(boost::wformat(L"Failed to Clear test table '%s', AccessFlag AF_DELETE is not set on the passed table.") % deletableTable.GetTableInfo().GetSqlName()));
-				// Determine primary key columns to build some where clause - for test columns we know the id-columns are all numeric
-				std::wstringstream ws;
-				int primaryKeysCount = 0;
-				std::set<SQLSMALLINT> colIndexes = deletableTable.GetColumnBufferIndexes();
-				std::set<SQLSMALLINT>::const_iterator it = colIndexes.begin();
-				while (it != colIndexes.end())
-				{
-					ColumnBuffer* pBuff = deletableTable.GetColumnBuffer(*it);
-					if (pBuff->IsPrimaryKey())
-					{
-						if (primaryKeysCount > 0)
-						{
-							ws << L" AND";
-						}
-						ws << pBuff->GetQueryName() << L" >= 0 OR " << pBuff->GetQueryName() << L" < 0";
-						primaryKeysCount++;
-					}
-					++it;
-				}
-				exASSERT_MSG(primaryKeysCount > 0, boost::str(boost::wformat(L"Failed to Clear test table '%s', no ColumnBuffers have the Primary Key flag set.") % deletableTable.GetTableInfo().GetSqlName()));
-				deletableTable.Delete(ws.str(), false);
-				rollback = true;
+				// Create a deletable table and delete on it
+				tableName = GetTableName(TestTables::Table::INTEGERTYPES_TMP, nameCase);
+				std::wstring idColName = GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, nameCase);
+				exodbc::Table intTable(db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
+				intTable.Open(db);
+				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
+				intTable.Delete(where);
 				db.CommitTrans();
 			}
 			catch (exodbc::Exception& ex)
 			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to Clear test table '%s': %s") % deletableTable.GetTableInfo().GetSqlName() % ex.ToString()));
-				if (rollback)
-				{
-					try
-					{
-						LOG_DEBUG(L"Trying to Rollback..");
-						db.RollbackTrans();
-						LOG_DEBUG(L"Rollback successfull.");
-					}
-					catch (exodbc::Exception& ex)
-					{
-						LOG_ERROR(boost::str(boost::wformat(L"Rollback failed: %s") % ex.ToString()));
-					}
-				}
+				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
 				throw;
 			}
 		}
