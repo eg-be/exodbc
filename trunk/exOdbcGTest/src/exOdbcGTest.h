@@ -36,7 +36,6 @@ namespace exodbc
 	extern boost::log::trivial::severity_level g_logSeverity;
 	
 
-
 	// Structs
 	// -------
 
@@ -73,6 +72,8 @@ namespace exodbc
 	private:
 		boost::log::trivial::severity_level m_originalLevel;
 	};
+
+
 
 } // namespace exodbc
 

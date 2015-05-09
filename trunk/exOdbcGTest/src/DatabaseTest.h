@@ -50,7 +50,7 @@ namespace exodbc
 		static TestSkipper s_testSkipper;
 	};
 
-	static std::vector<SOdbcInfo> test;
+//	static std::vector<SOdbcInfo> test;
 
 	INSTANTIATE_TEST_CASE_P(
 		ParametrizedOdbc,
