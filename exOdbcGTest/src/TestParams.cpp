@@ -36,7 +36,7 @@ namespace exodbc
 		wos << L"DSN: " << oi.m_dsn.c_str() 
 			<< L"; Username: " << oi.m_username.c_str()
 			<< L"; Password: " << oi.m_password.c_str()
-			<< L"; Names: " << (oi.m_namesCase == TestTables::NameCase::LOWER ? L"lowercase" : L"uppercase");
+			<< L"; Names: " << (oi.m_namesCase == test::Case::LOWER ? L"lowercase" : L"uppercase");
 		std::string s;
 
 		// \todo Resolve with ticket #44 #53 - ugly conversion (but okay here, we know its only ascii)
@@ -57,7 +57,7 @@ namespace exodbc
 		wos << L"DSN: " << oi.m_dsn.c_str()
 			<< L"; Username: " << oi.m_username.c_str()
 			<< L"; Password: " << oi.m_password.c_str()
-			<< L"; Names: " << (oi.m_namesCase == TestTables::NameCase::LOWER ? L"lowercase" : L"uppercase");
+			<< L"; Names: " << (oi.m_namesCase == test::Case::LOWER ? L"lowercase" : L"uppercase");
 
 
 		return wos;

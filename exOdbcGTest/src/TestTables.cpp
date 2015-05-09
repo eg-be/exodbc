@@ -33,75 +33,75 @@
 // --------------
 namespace exodbc
 {
-	namespace TestTables
+	namespace test
 	{
-		std::wstring ConvertNameCase(const std::wstring& columnOrTableName, NameCase nameCase)
+		std::wstring ConvertNameCase(const std::wstring& columnOrTableName, Case nameCase)
 		{
-			return (nameCase == NameCase::UPPER ? boost::algorithm::to_upper_copy(columnOrTableName) : boost::algorithm::to_lower_copy(columnOrTableName));
+			return (nameCase == Case::UPPER ? boost::algorithm::to_upper_copy(columnOrTableName) : boost::algorithm::to_lower_copy(columnOrTableName));
 		}
 
 
-		const std::map<TestTables::Table, std::wstring> TableNames = {
-			{ Table::BLOBTYPES, L"blobtypes" },
-			{ Table::BLOBTYPES_TMP, L"blobtypes_tmp" },
-			{ Table::CHARTABLE, L"chartable" },
-			{ Table::CHARTYPES, L"chartypes" },
-			{ Table::CHARTYPES_TMP, L"chartypes_tmp" },
-			{ Table::DATETYPES, L"datetypes" },
-			{ Table::DATETYPES_TMP, L"datetypes_tmp" },
-			{ Table::FLOATTYPES, L"floattypes" },
-			{ Table::FLOATTYPES_TMP, L"floattypes_tmp" },
-			{ Table::INTEGERTYPES, L"integertypes" },
-			{ Table::INTEGERTYPES_TMP, L"integertypes_tmp" },
-			{ Table::MULTIKEY, L"multikey" },
-			{ Table::NUMERICTYPES, L"numerictypes" },
-			{ Table::NUMERICTYPES_TMP, L"numerictypes_tmp" },
-			{ Table::SELECTONLY, L"selectonly" },
-			{ Table::NOT_EXISTING, L"not_existing" },
-			{ Table::NOT_SUPPORTED, L"not_supported" },
-			{ Table::NOT_SUPPORTED_TMP, L"not_supported_tmp" }
+		const std::map<test::TableId, std::wstring> TableNames = {
+			{ TableId::BLOBTYPES, L"blobtypes" },
+			{ TableId::BLOBTYPES_TMP, L"blobtypes_tmp" },
+			{ TableId::CHARTABLE, L"chartable" },
+			{ TableId::CHARTYPES, L"chartypes" },
+			{ TableId::CHARTYPES_TMP, L"chartypes_tmp" },
+			{ TableId::DATETYPES, L"datetypes" },
+			{ TableId::DATETYPES_TMP, L"datetypes_tmp" },
+			{ TableId::FLOATTYPES, L"floattypes" },
+			{ TableId::FLOATTYPES_TMP, L"floattypes_tmp" },
+			{ TableId::INTEGERTYPES, L"integertypes" },
+			{ TableId::INTEGERTYPES_TMP, L"integertypes_tmp" },
+			{ TableId::MULTIKEY, L"multikey" },
+			{ TableId::NUMERICTYPES, L"numerictypes" },
+			{ TableId::NUMERICTYPES_TMP, L"numerictypes_tmp" },
+			{ TableId::SELECTONLY, L"selectonly" },
+			{ TableId::NOT_EXISTING, L"not_existing" },
+			{ TableId::NOT_SUPPORTED, L"not_supported" },
+			{ TableId::NOT_SUPPORTED_TMP, L"not_supported_tmp" }
 		};
 
 
-		const std::map<TestTables::Table, std::wstring> IdColumnNames = {
-			{ Table::BLOBTYPES, L"idblobtypes" },
-			{ Table::BLOBTYPES_TMP, L"idblobtypes" },
-			{ Table::CHARTABLE, L"idchartable" },
-			{ Table::CHARTYPES, L"idchartypes" },
-			{ Table::CHARTYPES_TMP, L"idchartypes" },
-			{ Table::DATETYPES, L"iddatetypes" },
-			{ Table::DATETYPES_TMP, L"iddatetypes" },
-			{ Table::FLOATTYPES, L"idfloattypes" },
-			{ Table::FLOATTYPES_TMP, L"idfloattypes" },
-			{ Table::INTEGERTYPES, L"idintegertypes" },
-			{ Table::INTEGERTYPES_TMP, L"idintegertypes" },
-			{ Table::MULTIKEY, L"idmultikey" },
-			{ Table::NUMERICTYPES, L"idnumerictypes" },
-			{ Table::NUMERICTYPES_TMP, L"idnumerictypes" },
-			{ Table::SELECTONLY, L"idselectonly" },
-			{ Table::NOT_EXISTING, L"idnot_existing" },
-			{ Table::NOT_SUPPORTED, L"idnot_supported" },
-			{ Table::NOT_SUPPORTED_TMP, L"idnot_supported" }
+		const std::map<test::TableId, std::wstring> IdColumnNames = {
+			{ TableId::BLOBTYPES, L"idblobtypes" },
+			{ TableId::BLOBTYPES_TMP, L"idblobtypes" },
+			{ TableId::CHARTABLE, L"idchartable" },
+			{ TableId::CHARTYPES, L"idchartypes" },
+			{ TableId::CHARTYPES_TMP, L"idchartypes" },
+			{ TableId::DATETYPES, L"iddatetypes" },
+			{ TableId::DATETYPES_TMP, L"iddatetypes" },
+			{ TableId::FLOATTYPES, L"idfloattypes" },
+			{ TableId::FLOATTYPES_TMP, L"idfloattypes" },
+			{ TableId::INTEGERTYPES, L"idintegertypes" },
+			{ TableId::INTEGERTYPES_TMP, L"idintegertypes" },
+			{ TableId::MULTIKEY, L"idmultikey" },
+			{ TableId::NUMERICTYPES, L"idnumerictypes" },
+			{ TableId::NUMERICTYPES_TMP, L"idnumerictypes" },
+			{ TableId::SELECTONLY, L"idselectonly" },
+			{ TableId::NOT_EXISTING, L"idnot_existing" },
+			{ TableId::NOT_SUPPORTED, L"idnot_supported" },
+			{ TableId::NOT_SUPPORTED_TMP, L"idnot_supported" }
 		};
 
 
-		std::wstring GetTableName(TestTables::Table table, TestTables::NameCase nameCase)
+		std::wstring GetTableName(test::TableId table, test::Case nameCase)
 		{
-			std::map<TestTables::Table, std::wstring>::const_iterator it = TableNames.find(table);
+			std::map<test::TableId, std::wstring>::const_iterator it = TableNames.find(table);
 			exASSERT(it != TableNames.end());
 			return ConvertNameCase(it->second, nameCase);
 		}
 
 
-		std::wstring GetIdColumnName(TestTables::Table table, TestTables::NameCase nameCase)
+		std::wstring GetIdColumnName(test::TableId table, test::Case nameCase)
 		{
-			std::map<TestTables::Table, std::wstring>::const_iterator it = IdColumnNames.find(table);
+			std::map<test::TableId, std::wstring>::const_iterator it = IdColumnNames.find(table);
 			exASSERT(it != IdColumnNames.end());
 			return ConvertNameCase(it->second, nameCase);
 		}
 
 
-		void ClearTestTable(TestTables::Table table, TestTables::NameCase nameCase, exodbc::Table& testTable, exodbc::Database& db)
+		void ClearTestTable(test::TableId table, test::Case nameCase, exodbc::Table& testTable, exodbc::Database& db)
 		{
 			std::wstring idName = GetIdColumnName(table, nameCase);
 			std::wstring sqlstmt = (boost::wformat(L"%s >= 0 OR %s < 0") % idName % idName).str();
@@ -112,14 +112,118 @@ namespace exodbc
 		}
 
 
-		void ClearIntTable(const exodbc::Database& db, TestTables::NameCase nameCase)
+		::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt)
+		{
+			try
+			{
+				ValueIndicator idInd = ValueIndicator::NO_INDICATOR;
+				ValueIndicator smallIntInd = ValueIndicator::NO_INDICATOR;
+				ValueIndicator intInd = ValueIndicator::NO_INDICATOR;
+				ValueIndicator bigIntInd = ValueIndicator::NO_INDICATOR;
+				if (expId.which() == 0)
+				{
+					idInd = boost::get<ValueIndicator>(expId);
+				}
+				if (expSmallInt.which() == 0)
+				{
+					smallIntInd = boost::get<ValueIndicator>(expSmallInt);
+				}
+				if (expInt.which() == 0)
+				{
+					expInt = boost::get<ValueIndicator>(expInt);
+				}
+				if (expBigInt.which() == 0)
+				{
+					expBigInt = boost::get < ValueIndicator>(expBigInt);
+				}
+
+			//	SQLINTEGER id = boost::get<SQLINTEGER>(iTable.GetColumnValue(0));
+			//	bool siNull = iTable.IsColumnNull(1);
+			//	bool iNull = iTable.IsColumnNull(2);
+			//	bool biNull = iTable.IsColumnNull(3);
+			//	SQLSMALLINT si;
+			//	SQLINTEGER i;
+			//	SQLBIGINT bi;
+			//	if (!siNull)
+			//	{
+			//		if (db.GetDbms() == DatabaseProduct::ACCESS)
+			//			si = (SQLSMALLINT)boost::get<SQLINTEGER>(iTable.GetColumnValue(1));
+			//		else
+			//			si = boost::get<SQLSMALLINT>(iTable.GetColumnValue(1));
+			//	}
+			//	else
+			//	{
+			//		si = test::NULL_INT_VALUE;
+			//	}
+
+			//	if (!iNull)
+			//	{
+			//		i = boost::get<SQLINTEGER>(iTable.GetColumnValue(2));
+			//	}
+			//	else
+			//	{
+			//		i = test::NULL_INT_VALUE;
+			//	}
+
+			//	if (!biNull)
+			//	{
+			//		if (db.GetDbms() == DatabaseProduct::ACCESS)
+			//			bi = boost::get<SQLINTEGER>(iTable.GetColumnValue(3));
+			//		else
+			//			bi = boost::get<SQLBIGINT>(iTable.GetColumnValue(3));
+			//	}
+			//	else
+			//	{
+			//		bi = test::NULL_INT_VALUE;
+			//	}
+
+			//	::testing::AssertionResult failure = ::testing::AssertionFailure();
+			//	bool failed = false;
+
+			//	if (id != expId)
+			//	{
+			//		failed = true;
+			//	}
+			//	if (si != expSmallInt)
+			//	{
+			//		failed = true;
+			//	}
+			//	if (i != expInt)
+			//	{
+			//		failed = true;
+			//	}
+			//	if (bi != expBigInt)
+			//	{
+			//		failed = true;
+			//	}
+			//	if (failed)
+			//	{
+			//		std::string top = boost::str(boost::format("Records are not equal:"));
+			//		std::string hed = boost::str(boost::format("          | %18s | %18s | %18s | %18s") % "idintegertypes" %"tsmalint" %"tint" %"tbigint");
+			//		std::string exp = boost::str(boost::format("expected: | %18d | %18d | %18d | %18d") % expId % expSmallInt % expInt % expBigInt);
+			//		std::string dat = boost::str(boost::format("  values: | %18d | %18d | %18d | %18d") % id % si % i % bi);
+			//		failure << top << std::endl << hed << std::endl << exp << std::endl << dat << std::endl;
+			//		return failure;
+			//	}
+			}
+			catch (Exception& ex)
+			{
+				return ::testing::AssertionFailure() << "ERROR comparing column values: " << ex.what();
+			}
+
+			return ::testing::AssertionSuccess();
+
+		}
+
+
+		void ClearIntTable(const exodbc::Database& db, test::Case nameCase)
 		{
 			std::wstring tableName;
 			try
 			{
 				// Create a deletable table and delete on it
-				tableName = GetTableName(TestTables::Table::INTEGERTYPES_TMP, nameCase);
-				std::wstring idColName = GetIdColumnName(TestTables::Table::INTEGERTYPES_TMP, nameCase);
+				tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
+				std::wstring idColName = GetIdColumnName(test::TableId::INTEGERTYPES_TMP, nameCase);
 				exodbc::Table intTable(db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
 				intTable.Open(db);
 				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
@@ -134,10 +238,10 @@ namespace exodbc
 		}
 
 
-		void InsertIntTypes(TestTables::NameCase nameCase, const exodbc::Database& db, SQLINTEGER id, SQLSMALLINT smallInt, SQLINTEGER i, SQLBIGINT bigInt, bool commit /* = true */ )
+		void InsertIntTypes(test::Case nameCase, const exodbc::Database& db, SQLINTEGER id, SQLSMALLINT smallInt, SQLINTEGER i, SQLBIGINT bigInt, bool commit /* = true */ )
 		{
 			// Create a insertable table
-			std::wstring tableName = GetTableName(TestTables::Table::INTEGERTYPES_TMP, nameCase);
+			std::wstring tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
 			exodbc::Table* pInsertableTable = NULL;
 			try
 			{

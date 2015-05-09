@@ -34,7 +34,7 @@ namespace exodbc
 		SOdbcInfo()
 		{ }
 
-		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, TestTables::NameCase namesCase = TestTables::NameCase::LOWER) 
+		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, test::Case namesCase = test::Case::LOWER) 
 			: m_dsn(dsn)
 			, m_username(username)
 			, m_password(password)
@@ -43,7 +43,7 @@ namespace exodbc
 		std::wstring m_dsn;
 		std::wstring m_username;
 		std::wstring m_password;
-		TestTables::NameCase m_namesCase;
+		test::Case m_namesCase;
 	};
 
 	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi);

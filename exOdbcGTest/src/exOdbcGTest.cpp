@@ -136,9 +136,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		if (passes.size() > i)
 			pass = passes[i];
 		 
-		TestTables::NameCase nameCase = TestTables::NameCase::LOWER;
+		test::Case nameCase = test::Case::LOWER;
 		if (cases.size() > i && cases[i] == L"u")
-			nameCase = TestTables::NameCase::UPPER;
+			nameCase = test::Case::UPPER;
 		else if (cases.size() > i && cases[i] != L"l")
 			wcout << L"Warning: Unknown case '" << cases[i] << L"' falling back to default of 'l' (lowercase)\n";
 
