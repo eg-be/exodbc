@@ -809,6 +809,20 @@ namespace exodbc
 	}
 
 
+	SQLSMALLINT Table::GetSmallInt(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		if (pBuff->IsNull())
+		{
+			NullValueException ex(pBuff->GetQueryName());
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+		SQLSMALLINT smallInt = *pBuff;
+		return smallInt;
+	}
+
+
 	BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
 	{
 		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);

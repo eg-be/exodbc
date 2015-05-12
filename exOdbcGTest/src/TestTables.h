@@ -61,6 +61,7 @@ namespace exodbc
 			NOT_SUPPORTED_TMP
 		};
 
+
 		enum class ValueIndicator
 		{
 			NO_INDICATOR,

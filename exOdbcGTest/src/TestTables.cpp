@@ -116,6 +116,9 @@ namespace exodbc
 		{
 			try
 			{
+				::testing::AssertionResult failure = ::testing::AssertionFailure();
+				bool failed = false;
+
 				ValueIndicator idInd = ValueIndicator::NO_INDICATOR;
 				ValueIndicator smallIntInd = ValueIndicator::NO_INDICATOR;
 				ValueIndicator intInd = ValueIndicator::NO_INDICATOR;
@@ -136,6 +139,35 @@ namespace exodbc
 				{
 					expBigInt = boost::get < ValueIndicator>(expBigInt);
 				}
+
+				struct FCompareNull
+				{
+					bool operator()(ValueIndicator indicator, BufferVariant value)
+					{
+						return false;
+					}
+				};
+				FCompareNull fNull;
+
+				if (idInd == ValueIndicator::IS_NULL)
+				{
+					if (!iTable.IsColumnNull(0))
+					{
+						failure << "IdIntegertypes is not NULL" << std::endl;
+						failed = true;
+					}
+				}
+				else if (idInd == ValueIndicator::NO_INDICATOR)
+				{
+					SQLSMALLINT id = iTable.GetSmallInt(0);
+					SQLSMALLINT expVal = boost::get<SQLSMALLINT>(expId);
+					if (id != expVal)
+					{
+						failed = true;
+						failure << "IdIntegertypes expected " << expVal << " but have " << id << std::endl;
+					}
+				}
+
 
 			//	SQLINTEGER id = boost::get<SQLINTEGER>(iTable.GetColumnValue(0));
 			//	bool siNull = iTable.IsColumnNull(1);

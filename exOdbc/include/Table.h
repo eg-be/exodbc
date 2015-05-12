@@ -631,6 +631,11 @@ namespace exodbc
 		void		SetColumnNull(SQLSMALLINT columnIndex) const;
 
 
+		SQLSMALLINT GetSmallInt(SQLSMALLINT columnIndex) const;
+		SQLINTEGER	GetInt(SQLSMALLINT columnIndex) const;
+		SQLBIGINT	GetBigInt(SQLSMALLINT columnIndex) const;
+
+
 		/*!
 		* \brief	Get the value of the ColumnBuffer given by columnIndex as BufferVariant.
 		* \param	columnIndex Zero based ColumnBuffer index.
