@@ -227,6 +227,30 @@ namespace exodbc
 	};	// class CastException
 
 
+	class EXODBCAPI NullValueException
+		: public Exception
+	{
+	public:
+		NullValueException(std::wstring columnName)
+			: Exception()
+		{
+			m_what = w2s(ToString());
+		}
+
+		virtual ~NullValueException() {};
+
+		virtual std::wstring GetName() const throw() { return L"exodbc::NullValueException"; };
+		virtual std::wstring ToString() const throw();
+
+		virtual const char* what() const throw() { return m_what.c_str(); };
+
+	private:
+		std::wstring m_tableName;
+		std::wstring m_columnName;
+		SQLSMALLINT m_columnIndex;
+	};
+
+
 	class EXODBCAPI NotImplementedException
 		: public Exception
 	{

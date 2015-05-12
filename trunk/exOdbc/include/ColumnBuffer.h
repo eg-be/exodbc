@@ -64,10 +64,23 @@ namespace exodbc
 #endif
 	> BufferPtrVariant;
 
+
+	/*!
+	* \class NullValue
+	* \brief A pseudo value to store in the BufferVariant to indicate a NULL value.
+	*/
+	enum class NullValue
+	{
+		IS_NULL = 1
+	};
+
+
 	/*!
 	* \typedef BufferVariant
 	* \brief A helper for setting / getting values. If you like it, work with a variant
 	* \details The following types can be stored:
+	*  - NullValue A boost::variant will always hold a valid, as this is the first entry in the
+	*              variant, every boost::variant will be default to a NULL value.
 	*  - SQLSMALLINT
 	*  - SQLINTEGER
 	*  - SQLBIGINT
@@ -80,7 +93,7 @@ namespace exodbc
 	*  - SQL_TIMESTAMP_STRUCT
 	*  - SQL_NUMERIC_STRUCT
 	*/
-	typedef boost::variant<SQLSMALLINT, SQLINTEGER, SQLBIGINT,
+	typedef boost::variant<NullValue, SQLSMALLINT, SQLINTEGER, SQLBIGINT,
 		std::string, std::wstring,
 		SQLDOUBLE,
 		SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT,

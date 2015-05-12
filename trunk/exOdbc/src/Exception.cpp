@@ -149,7 +149,7 @@ namespace exodbc
 		{
 			m_errors = GetAllErrors(handleType, handle);
 		}
-		catch (Exception e)
+		catch (const Exception& e)
 		{
 			// Append a faked Error-Info
 			SErrorInfo errInfo;
@@ -171,8 +171,9 @@ namespace exodbc
 			ws << SqlReturn2s(ret) << L"(" << ret << L") with " << m_errors.size() << " ODBC-Error(s):";
 			m_errorMsg = ws.str();
 		}
-		catch (Exception e)
+		catch (const Exception& e)
 		{
+			HIDE_UNUSED(e);
 			m_errorMsg = L"Failed to BuildErrorMsg";
 		}
 	}
@@ -230,6 +231,15 @@ namespace exodbc
 		ws << Exception::ToString();
 		ws << L"Cannot cast from ODBC C Type " << SqLCType2s(m_cSourceType) << L"(" << m_cSourceType << L") ";
 		ws << L"to ODBC C Type " << SqLCType2s(m_cDestType) << L"(" << m_cDestType << L")";
+		return ws.str();
+	}
+
+
+	std::wstring NullValueException::ToString() const throw()
+	{
+		std::wstringstream ws;
+		ws << Exception::ToString();
+		ws << L"Cannot fetch value of column '" << m_columnName << L"', the value is NULL.";
 		return ws.str();
 	}
 
