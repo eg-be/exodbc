@@ -713,6 +713,12 @@ namespace exodbc
 	{
 		BufferVariant var;
 
+		if (IsNull())
+		{
+			var = NullValue::IS_NULL;
+			return var;
+		}
+
 		// Note that the BufferVariant set here does not allow to get binary values
 		try
 		{

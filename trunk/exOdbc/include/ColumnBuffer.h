@@ -430,6 +430,8 @@ namespace exodbc
 		*			a corresponding value object is created in BufferVariant.
 		* \throw	Exception If the internal buffer cannot be assigned to a value held by BufferVariant.
 		*			This is the case mostly for binary data.
+		*			Note that it will not throw if the value is a NULL value, the BufferVariant will hold
+		*			the NullValue then.
 		*/
 		BufferVariant GetValue() const;
 
