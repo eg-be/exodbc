@@ -826,7 +826,6 @@ namespace exodbc
 	BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
 	{
 		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
 		return pBuff->GetValue();
 	}
 
