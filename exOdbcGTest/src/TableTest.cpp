@@ -1185,15 +1185,19 @@ namespace exodbc
 		EXPECT_NO_THROW(iTable.GetColumnValue(2, i));
 		EXPECT_EQ(L"2147483647", i);
 
-		iTable.Select((boost::wformat(L"%s = 5") % idName).str());
-		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_NO_THROW(iTable.GetColumnValue(3, bigInt));
-		EXPECT_EQ(L"-9223372036854775808", bigInt);
+		// No bigints on access
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			iTable.Select((boost::wformat(L"%s = 5") % idName).str());
+			EXPECT_TRUE(iTable.SelectNext());
+			EXPECT_NO_THROW(iTable.GetColumnValue(3, bigInt));
+			EXPECT_EQ(L"-9223372036854775808", bigInt);
 
-		iTable.Select((boost::wformat(L"%s = 6") % idName).str());
-		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_NO_THROW(iTable.GetColumnValue(3, bigInt));
-		EXPECT_EQ(L"9223372036854775807", bigInt);
+			iTable.Select((boost::wformat(L"%s = 6") % idName).str());
+			EXPECT_TRUE(iTable.SelectNext());
+			EXPECT_NO_THROW(iTable.GetColumnValue(3, bigInt));
+			EXPECT_EQ(L"9223372036854775807", bigInt);
+		}
 	}
 
 
