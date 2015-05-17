@@ -881,12 +881,12 @@ namespace exodbc
 		* \brief	Manually set the column indexes of primary key columns.
 		* \details	If a table is Open()ed for AF_UPDATE or AF_DELETE, the primary keys must be known.
 		*			Some databases are unable to return them using SQLPrimaryKeys (Access for example),
-		*			so this method provides is provided to set them manually.
+		*			so this method is provided to set primary keys indexes manually.
 		*			If you call this method, the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is implicitly active
 		*			during Open().
 		*			After ColumnBuffers have been created, the flag CF_PRIMARY_KEY is set on the ColumnBuffers 
 		*			that match the passed columnIndexes.
-		*			Must be called before the Database is Open()ed.
+		*			Must be called before the Table is Open()ed.
 		* \param	columnIndexes ColumnIndexes that are primary Key. ColumnIndexes is 0-indexed and must match
 		*			the columnIndex from the actual Database table.
 		*			
