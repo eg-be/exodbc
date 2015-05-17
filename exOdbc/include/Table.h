@@ -635,6 +635,7 @@ namespace exodbc
 		SQLINTEGER	GetInt(SQLSMALLINT columnIndex) const;
 		SQLBIGINT	GetBigInt(SQLSMALLINT columnIndex) const;
 
+		std::string GetString(SQLSMALLINT columnIndex) const;
 
 		/*!
 		* \brief	Get the value of the ColumnBuffer given by columnIndex as BufferVariant.
