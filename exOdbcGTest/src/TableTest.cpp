@@ -1121,6 +1121,9 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
 		// Just check that the buffers are correct
+		// do not check using the IsIntRecordEqual: Here we bind the smallint column to a SQLSMALLINT with Access, 
+		// this works as the driver can convert it. But in auto we bind as the reported SQLINTEGER type, and our
+		// test-helpers have some problems as they assume its reported as SQLINTEGER..
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
@@ -1138,13 +1141,17 @@ namespace exodbc
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_EQ(2147483647, iTable.m_int);
 
-		iTable.Select((boost::wformat(L"%s = 5") % idName).str());
-		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ((-9223372036854775807 - 1), iTable.m_bigInt);
+		// note that Access has no BigInt and those values are set to NULL
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			iTable.Select((boost::wformat(L"%s = 5") % idName).str());
+			EXPECT_TRUE(iTable.SelectNext());
+			EXPECT_EQ((-9223372036854775807 - 1), iTable.m_bigInt);
 
-		iTable.Select((boost::wformat(L"%s = 6") % idName).str());
-		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(9223372036854775807, iTable.m_bigInt);
+			iTable.Select((boost::wformat(L"%s = 6") % idName).str());
+			EXPECT_TRUE(iTable.SelectNext());
+			EXPECT_EQ(9223372036854775807, iTable.m_bigInt);
+		}
 	}
 
 
