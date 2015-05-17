@@ -640,7 +640,9 @@ namespace exodbc
 		* \brief	Get the value of the ColumnBuffer given by columnIndex as BufferVariant.
 		* \param	columnIndex Zero based ColumnBuffer index.
 		* \throw	Exception If ColumnBuffer not found, or the value held by the ColumnBuffer
-		*			cannot be returned as BufferVariant or if the Column is NULL.
+		*			cannot be returned as BufferVariant.
+		*			Note that it will not throw if the value is a NULL value, the BufferVariant will hold
+		*			the NullValue::IS_NULL indicator then.
 		* \see		ColumnBuffer::GetValue()
 		* \see		BufferVariant
 		*/
