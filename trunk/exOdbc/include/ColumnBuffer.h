@@ -489,7 +489,9 @@ namespace exodbc
 
 		/*!
 		* \brief	Cast the current value to a std::wstring if possible.
-		* \details	Fails if not bound.
+		* \details	If the column is NULL, the string 'NULL' (without ') is
+		*			returned, else a WStringVisitor is applied.
+		*			Fails if not bound.
 		* \return	Current value as std::wstring.
 		* \throw	CastException If value cannot be casted to a std::wstring.
 		* \see		WStringVisitor
@@ -499,7 +501,9 @@ namespace exodbc
 		
 		/*!
 		* \brief	Cast the current value to a std::wstring if possible.
-		* \details	Fails if not bound.
+		* \details	If the column is NULL, the string 'NULL' (without ') is
+		*			returned, else a StringVisitor is applied.
+		*			Fails if not bound.
 		* \return	Current value as std::wstring.
 		* \throw	CastException If value cannot be casted to a std::string.
 		* \see		StringVisitor
