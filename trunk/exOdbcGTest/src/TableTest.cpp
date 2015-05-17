@@ -2250,7 +2250,7 @@ namespace exodbc
 	TEST_P(TableTest, InsertIntTypes)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
 		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
@@ -2258,23 +2258,31 @@ namespace exodbc
 		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
 
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		ASSERT_NO_THROW(test::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
 
 		// Set some silly values to insert
 		*pId = (SQLINTEGER)101;
-		*pSmallInt = (SQLSMALLINT)102;
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			*pSmallInt = (SQLSMALLINT)102;
+		}
+		else
+		{
+			*pSmallInt = (SQLINTEGER)102;
+		}
 		*pInt = (SQLINTEGER)103;
-		*pBigInt = (SQLBIGINT)104;
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			*pBigInt = (SQLBIGINT)104;
+		}
 
 		EXPECT_NO_THROW(iTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
-		Table iTable2(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table iTable2(m_db, intTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable2.Open(m_db));
 		ColumnBuffer* pId2 = iTable2.GetColumnBuffer(0);
 		ColumnBuffer* pSmallInt2 = iTable2.GetColumnBuffer(1);
@@ -2283,11 +2291,7 @@ namespace exodbc
 
 		iTable2.Select();
 		EXPECT_TRUE(iTable2.SelectNext());
-
-		EXPECT_EQ(101, (SQLINTEGER)*pId2);
-		EXPECT_EQ(102, (SQLSMALLINT)*pSmallInt2);
-		EXPECT_EQ(103, (SQLINTEGER)*pInt2);
-		EXPECT_EQ(104, (SQLBIGINT)*pBigInt2);
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 101, 102, 103, 104));
 	}
 
 
