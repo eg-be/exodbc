@@ -112,6 +112,182 @@ namespace exodbc
 		}
 
 
+		struct FCompareSmallInt
+		{
+			::testing::AssertionResult& m_result;
+			const Database& m_db;
+
+			bool operator()(SmallInt expected, BufferVariant value)
+			{
+				ValueIndicator indicator = ValueIndicator::NO_INDICATOR;
+				if (expected.which() == 0)
+				{
+					indicator = boost::get<ValueIndicator>(expected);
+				}
+
+				if (indicator == ValueIndicator::IGNORE_VAL)
+				{
+					return true;
+				}
+
+				if (indicator == ValueIndicator::IS_NULL && value.which() != 0)
+				{
+					SQLSMALLINT si;
+					if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+					{
+						// Access has no smallint
+						si = (SQLSMALLINT)boost::get<SQLINTEGER>(value);
+					}
+					else
+					{
+						si = boost::get<SQLSMALLINT>(value);
+					}
+					m_result << "Expected NULL, but the value (SmallInt: " << si << ") is not." << std::endl;
+					return false;
+				}
+
+				if (indicator == ValueIndicator::NO_INDICATOR)
+				{
+					SQLSMALLINT expSi = boost::get<SQLSMALLINT>(expected);
+					if (value.which() == 0)
+					{
+						m_result << "Expected " << expSi << ", but the value (SmallInt) is NULL" << std::endl;
+						return false;
+					}
+
+					SQLSMALLINT si;
+					if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+					{
+						// Access has no smallint
+						si = (SQLSMALLINT)boost::get<SQLINTEGER>(value);
+					}
+					else
+					{
+						si = boost::get<SQLSMALLINT>(value);
+					}
+					if (si != expSi)
+					{
+						m_result << "Expected " << expSi << ", but the value (SmallInt: " << si << ") is not." << std::endl;
+						return false;
+					}
+				}
+
+				return true;
+			}
+		};
+
+
+		struct FCompareInt
+		{
+			::testing::AssertionResult& m_result;
+			const exodbc::Database& m_db;
+
+			bool operator()(Int expected, BufferVariant value)
+			{
+				ValueIndicator indicator = ValueIndicator::NO_INDICATOR;
+				if (expected.which() == 0)
+				{
+					indicator = boost::get<ValueIndicator>(expected);
+				}
+
+				if (indicator == ValueIndicator::IGNORE_VAL)
+				{
+					return true;
+				}
+
+				if (indicator == ValueIndicator::IS_NULL && value.which() != 0)
+				{
+					SQLINTEGER i = boost::get<SQLINTEGER>(value);
+					m_result << "Expected NULL, but the value (Int: " << i << ") is not." << std::endl;
+					return false;
+				}
+
+				if (indicator == ValueIndicator::NO_INDICATOR)
+				{
+					SQLINTEGER expI = boost::get<SQLINTEGER>(expected);
+					if (value.which() == 0)
+					{
+						m_result << "Expected " << expI << ", but the value (Int) is NULL" << std::endl;
+						return false;
+					}
+					SQLINTEGER i = boost::get<SQLINTEGER>(value);
+					if (i != expI)
+					{
+						m_result << "Expected " << expI << ", but the value (Int: " << i << ") is not." << std::endl;
+						return false;
+					}
+				}
+
+				return true;
+			}
+		};
+
+
+		struct FCompareBigInt
+		{
+			::testing::AssertionResult& m_result;
+			const Database& m_db;
+
+			bool operator()(BigInt expected, BufferVariant value)
+			{
+				ValueIndicator indicator = ValueIndicator::NO_INDICATOR;
+				if (expected.which() == 0)
+				{
+					indicator = boost::get<ValueIndicator>(expected);
+				}
+
+				if (indicator == ValueIndicator::IGNORE_VAL)
+				{
+					return true;
+				}
+
+				if (indicator == ValueIndicator::IS_NULL && value.which() != 0)
+				{
+					SQLBIGINT bi;
+					if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+					{
+						// Access has no SQLBIGINT
+						bi = (SQLBIGINT)boost::get<SQLINTEGER>(value);
+					}
+					else
+					{
+						bi = boost::get<SQLBIGINT>(value);
+					}
+					m_result << "Expected NULL, but the value (BigInt: " << bi << ") is not." << std::endl;
+					return false;
+				}
+
+				if (indicator == ValueIndicator::NO_INDICATOR)
+				{
+					SQLBIGINT expBi = boost::get<SQLBIGINT>(expected);
+					if (value.which() == 0)
+					{
+						m_result << "Expected " << expBi << ", but the value (Bigint) is NULL" << std::endl;
+						return false;
+					}
+
+					SQLBIGINT bi;
+					if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+					{
+						// Access has no SQLBIGINT
+						bi = (SQLBIGINT)boost::get<SQLINTEGER>(value);
+					}
+					else
+					{
+						bi = boost::get<SQLBIGINT>(value);
+					}
+					if (bi != expBi)
+					{
+						m_result << "Expected " << expBi << ", but the value (Bigint: " << bi << ") is not." << std::endl;
+						return false;
+					}
+				}
+
+				return true;
+			}
+		};
+
+
 		::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt)
 		{
 			try
@@ -119,128 +295,42 @@ namespace exodbc
 				::testing::AssertionResult failure = ::testing::AssertionFailure();
 				bool failed = false;
 
-				ValueIndicator idInd = ValueIndicator::NO_INDICATOR;
-				ValueIndicator smallIntInd = ValueIndicator::NO_INDICATOR;
-				ValueIndicator intInd = ValueIndicator::NO_INDICATOR;
-				ValueIndicator bigIntInd = ValueIndicator::NO_INDICATOR;
-				if (expId.which() == 0)
+				BufferVariant id = iTable.GetColumnValue(0);
+				BufferVariant tsmallInt = iTable.GetColumnValue(1);
+				BufferVariant tint = iTable.GetColumnValue(2);
+				BufferVariant tbigInt = iTable.GetColumnValue(3);
+
+				FCompareInt intComperator = { failure, db };
+				FCompareSmallInt smallIntComperator = { failure, db };
+				FCompareBigInt bigIntComperator = { failure, db };
+
+				if ( ! (
+						intComperator(expId, id) 
+					&&	smallIntComperator(expSmallInt, tsmallInt) 
+					&&	intComperator(expInt, tint)
+					&&	bigIntComperator(expBigInt, tbigInt)
+					))
 				{
-					idInd = boost::get<ValueIndicator>(expId);
-				}
-				if (expSmallInt.which() == 0)
-				{
-					smallIntInd = boost::get<ValueIndicator>(expSmallInt);
-				}
-				if (expInt.which() == 0)
-				{
-					expInt = boost::get<ValueIndicator>(expInt);
-				}
-				if (expBigInt.which() == 0)
-				{
-					expBigInt = boost::get < ValueIndicator>(expBigInt);
+					failed = true;
 				}
 
-				struct FCompareNull
+				if (failed)
 				{
-					bool operator()(ValueIndicator indicator, BufferVariant value)
-					{
-						return false;
-					}
-				};
-				FCompareNull fNull;
-
-				if (idInd == ValueIndicator::IS_NULL)
-				{
-					if (!iTable.IsColumnNull(0))
-					{
-						failure << "IdIntegertypes is not NULL" << std::endl;
-						failed = true;
-					}
-				}
-				else if (idInd == ValueIndicator::NO_INDICATOR)
-				{
-					SQLSMALLINT id = iTable.GetSmallInt(0);
-					SQLSMALLINT expVal = boost::get<SQLSMALLINT>(expId);
-					if (id != expVal)
-					{
-						failed = true;
-						failure << "IdIntegertypes expected " << expVal << " but have " << id << std::endl;
-					}
-				}
-
-
-			//	SQLINTEGER id = boost::get<SQLINTEGER>(iTable.GetColumnValue(0));
-			//	bool siNull = iTable.IsColumnNull(1);
-			//	bool iNull = iTable.IsColumnNull(2);
-			//	bool biNull = iTable.IsColumnNull(3);
-			//	SQLSMALLINT si;
-			//	SQLINTEGER i;
-			//	SQLBIGINT bi;
-			//	if (!siNull)
-			//	{
-			//		if (db.GetDbms() == DatabaseProduct::ACCESS)
-			//			si = (SQLSMALLINT)boost::get<SQLINTEGER>(iTable.GetColumnValue(1));
-			//		else
-			//			si = boost::get<SQLSMALLINT>(iTable.GetColumnValue(1));
-			//	}
-			//	else
-			//	{
-			//		si = test::NULL_INT_VALUE;
-			//	}
-
-			//	if (!iNull)
-			//	{
-			//		i = boost::get<SQLINTEGER>(iTable.GetColumnValue(2));
-			//	}
-			//	else
-			//	{
-			//		i = test::NULL_INT_VALUE;
-			//	}
-
-			//	if (!biNull)
-			//	{
-			//		if (db.GetDbms() == DatabaseProduct::ACCESS)
-			//			bi = boost::get<SQLINTEGER>(iTable.GetColumnValue(3));
-			//		else
-			//			bi = boost::get<SQLBIGINT>(iTable.GetColumnValue(3));
-			//	}
-			//	else
-			//	{
-			//		bi = test::NULL_INT_VALUE;
-			//	}
-
-			//	::testing::AssertionResult failure = ::testing::AssertionFailure();
-			//	bool failed = false;
-
-			//	if (id != expId)
-			//	{
-			//		failed = true;
-			//	}
-			//	if (si != expSmallInt)
-			//	{
-			//		failed = true;
-			//	}
-			//	if (i != expInt)
-			//	{
-			//		failed = true;
-			//	}
-			//	if (bi != expBigInt)
-			//	{
-			//		failed = true;
-			//	}
-			//	if (failed)
-			//	{
-			//		std::string top = boost::str(boost::format("Records are not equal:"));
+					std::string top = boost::str(boost::format("Records are not equal:"));
 			//		std::string hed = boost::str(boost::format("          | %18s | %18s | %18s | %18s") % "idintegertypes" %"tsmalint" %"tint" %"tbigint");
 			//		std::string exp = boost::str(boost::format("expected: | %18d | %18d | %18d | %18d") % expId % expSmallInt % expInt % expBigInt);
 			//		std::string dat = boost::str(boost::format("  values: | %18d | %18d | %18d | %18d") % id % si % i % bi);
 			//		failure << top << std::endl << hed << std::endl << exp << std::endl << dat << std::endl;
-			//		return failure;
-			//	}
+					return failure;
+				}
+			}
+			catch (boost::bad_get& ex)
+			{
+				return ::testing::AssertionFailure() << "ERROR: boost::bad_get thrown while comparing column values: " << ex.what();
 			}
 			catch (Exception& ex)
 			{
-				return ::testing::AssertionFailure() << "ERROR comparing column values: " << ex.what();
+				return ::testing::AssertionFailure() << "ERROR: exodbc::Exception thrown while comparing column values: " << ex.what();
 			}
 
 			return ::testing::AssertionSuccess();
