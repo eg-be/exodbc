@@ -957,6 +957,11 @@ namespace exodbc
 		exASSERT(m_haveBuffer);
 		exASSERT(IsBound());
 
+		if (IsNull())
+		{
+			return L"NULL";
+		}
+
 		return boost::apply_visitor(WStringVisitor(), m_bufferPtr);
 	}
 
@@ -965,6 +970,11 @@ namespace exodbc
 	{
 		exASSERT(m_haveBuffer);
 		exASSERT(IsBound());
+
+		if (IsNull())
+		{
+			return "NULL";
+		}
 
 		return boost::apply_visitor(StringVisitor(), m_bufferPtr);
 	}
