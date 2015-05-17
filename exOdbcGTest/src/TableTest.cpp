@@ -1079,104 +1079,38 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
-		EXPECT_TRUE(iTable.SelectNext());
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			EXPECT_EQ((SQLINTEGER)-32768, boost::get<SQLINTEGER>(iTable.GetColumnValue(1)));
-			EXPECT_TRUE(IsIntRecordEqual(m_db, iTable, 61, -3278, 7, 676));
-		}
 
-		// Test values
-		SQLSMALLINT s = 0;
-		SQLINTEGER i = 0;
-		SQLBIGINT b = 0;
-		std::wstring str;
-
-		// We expect 6 Records
-//		std::wstring idName = TestTables::GetIdColumnName(TestTables::Table::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		// The first column has a smallint set, we can read that as any int value -32768
-		SQLBIGINT colVal = -32768;
+		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, s));
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, i));
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, b));
-		EXPECT_EQ(colVal, s);
-		EXPECT_EQ(colVal, i);
-		EXPECT_EQ(colVal, b);
-		// Read as str
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, str));
-		EXPECT_EQ(L"-32768", str);
-		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 1, -32768, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
 		iTable.SelectClose();
 
 		iTable.Select((boost::wformat(L"%s = 2") % idName).str());
-		colVal = 32767;
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, s));
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, i));
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, b));
-		EXPECT_EQ(colVal, s);
-		EXPECT_EQ(colVal, i);
-		EXPECT_EQ(colVal, b);
-		// Read as str
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, str));
-		EXPECT_EQ(L"32767", str);
-		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
 		iTable.SelectClose();
 
-		iTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		// The 2nd column has a int set, we can read that as int or bigint value -2147483648
-		colVal = INT_MIN;
+		iTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_THROW(iTable.GetColumnValue(2, s), CastException);
-		EXPECT_NO_THROW(iTable.GetColumnValue(2, i));
-		EXPECT_NO_THROW(iTable.GetColumnValue(2, b));
-		EXPECT_EQ(colVal, i);
-		EXPECT_EQ(colVal, b);
-		// Read as str
-		EXPECT_NO_THROW(iTable.GetColumnValue(2, str));
-		EXPECT_EQ(L"-2147483648", str);
-		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 3, test::ValueIndicator::IS_NULL, (-2147483647 - 1), test::ValueIndicator::IS_NULL));
 		iTable.SelectClose();
 
 		iTable.Select((boost::wformat(L"%s = 4") % idName).str());
-		colVal = 2147483647;
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_THROW(iTable.GetColumnValue(2, s), CastException);
-		EXPECT_NO_THROW(iTable.GetColumnValue(2, i));
-		EXPECT_NO_THROW(iTable.GetColumnValue(2, b));
-		EXPECT_EQ(colVal, i);
-		EXPECT_EQ(colVal, b);
-		EXPECT_NO_THROW(iTable.GetColumnValue(2, str));
-		EXPECT_EQ(L"2147483647", str);
-		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 4, test::ValueIndicator::IS_NULL, 2147483647, test::ValueIndicator::IS_NULL));
 		iTable.SelectClose();
 
-		iTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		// The 3rd column has a bigint set, we can read that as bigint value -9223372036854775808
-		colVal = (-9223372036854775807 - 1);
+		iTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_THROW(iTable.GetColumnValue(3, s), CastException);
-		EXPECT_THROW(iTable.GetColumnValue(3, i), CastException);
-		EXPECT_NO_THROW(iTable.GetColumnValue(3, b));
-		EXPECT_EQ(colVal, b);
-		EXPECT_NO_THROW(iTable.GetColumnValue(3, str));
-		EXPECT_EQ(L"-9223372036854775808", str);
-		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 5, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, (-9223372036854775807 - 1)));
 		iTable.SelectClose();
 
 		iTable.Select((boost::wformat(L"%s = 6") % idName).str());
-		colVal = 9223372036854775807;
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_THROW(iTable.GetColumnValue(3, s), CastException);
-		EXPECT_THROW(iTable.GetColumnValue(3, i), CastException);
-		EXPECT_NO_THROW(iTable.GetColumnValue(3, b));
-		EXPECT_EQ(colVal, b);
-		EXPECT_NO_THROW(iTable.GetColumnValue(3, str));
-		EXPECT_EQ(L"9223372036854775807", str);
-		EXPECT_FALSE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 6, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, 9223372036854775807));
 		iTable.SelectClose();
 	}
 
