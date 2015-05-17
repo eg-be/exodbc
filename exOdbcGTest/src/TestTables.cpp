@@ -177,6 +177,119 @@ namespace exodbc
 		};
 
 
+		template <typename TExp, typename TBuffer>
+		struct FComperator 
+		{
+			::testing::AssertionResult& m_result;
+			const Database& m_db;
+
+			bool operator()(TExp expected, BufferVariant value)
+			{
+				ValueIndicator indicator = ValueIndicator::NO_INDICATOR;
+				if (expected.which() == 0)
+				{
+					indicator = boost::get<ValueIndicator>(expected);
+				}
+
+				if (indicator == ValueIndicator::IGNORE_VAL)
+				{
+					return true;
+				}
+
+				if (indicator == ValueIndicator::IS_NULL && value.which() != 0)
+				{
+					m_result << "Expected NULL, but the value is not." << std::endl;
+					return false;
+				}
+
+				if (indicator == ValueIndicator::NO_INDICATOR)
+				{
+					TBuffer expI = boost::get<TBuffer>(expected);
+					if (value.which() == 0)
+					{
+						m_result << "Expected " << expI << ", but the value is NULL" << std::endl;
+						return false;
+					}
+					TBuffer i = boost::get<TBuffer>(value);
+					if (i != expI)
+					{
+						m_result << "Expected " << expI << ", but the value (" << i << ") is not." << std::endl;
+						return false;
+					}
+				}
+
+				return true;
+			}
+		};
+
+
+		template <typename TExp, typename TBuffer>
+		struct FComperator
+		{
+			::testing::AssertionResult& m_result;
+			const Database& m_db;
+
+			bool operator()(TExp expected, BufferVariant value)
+			{
+				ValueIndicator indicator = ValueIndicator::NO_INDICATOR;
+				if (expected.which() == 0)
+				{
+					indicator = boost::get<ValueIndicator>(expected);
+				}
+
+				if (indicator == ValueIndicator::IGNORE_VAL)
+				{
+					return true;
+				}
+
+				if (indicator == ValueIndicator::IS_NULL && value.which() != 0)
+				{
+					m_result << "Expected NULL, but the value is not." << std::endl;
+					return false;
+				}
+
+				if (indicator == ValueIndicator::NO_INDICATOR)
+				{
+					TBuffer expI = boost::get<TBuffer>(expected);
+					if (value.which() == 0)
+					{
+						m_result << "Expected " << expI << ", but the value is NULL" << std::endl;
+						return false;
+					}
+					TBuffer i = boost::get<TBuffer>(value);
+					if (i != expI)
+					{
+						m_result << "Expected " << expI << ", but the value (" << i << ") is not." << std::endl;
+						return false;
+					}
+				}
+
+				return true;
+			}
+		};
+
+
+		template <typename TExp>
+		struct FComperator < TExp, SQLSMALLINT >
+		{
+			::testing::AssertionResult& m_result;
+			const Database& m_db;
+
+			bool operator()(TExp expected, BufferVariant value)
+			{
+				if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+				{
+					// Access has no SQLSMALLINT, but we can read that as SQLINTEGER
+				}
+				else
+				{
+					FComperator<TExp, SQLSMALLINT> fc = { m_result, m_db };
+				}
+				return false;
+			}
+		};
+
+
 		struct FCompareInt
 		{
 			::testing::AssertionResult& m_result;
@@ -300,7 +413,15 @@ namespace exodbc
 				BufferVariant tint = iTable.GetColumnValue(2);
 				BufferVariant tbigInt = iTable.GetColumnValue(3);
 
-				FCompareInt intComperator = { failure, db };
+				//if (db.GetDbms() == DatabaseProduct::ACCESS)
+				//{
+				//	FComperator<Int, SQLINTEGER> idComp;
+				//	FComperator<Int, 
+				//}
+
+//				FCompareInt intComperator = { failure, db };
+				FComperator<Int, SQLINTEGER> intComperator = { failure, db };
+				FComperator<Int, SQLSMALLINT> s = { failure, db };
 				FCompareSmallInt smallIntComperator = { failure, db };
 				FCompareBigInt bigIntComperator = { failure, db };
 
