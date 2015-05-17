@@ -823,6 +823,14 @@ namespace exodbc
 	}
 
 
+	std::string Table::GetString(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		std::string s = *pBuff;
+		return s;
+	}
+
+
 	BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
 	{
 		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
