@@ -2299,25 +2299,30 @@ namespace exodbc
 	TEST_P(TableTest, InsertManualIntTypes)
 	{
 		// Open an existing table without checking for privileges or existence
-		Table iTable(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
+		Table iTable(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
 		SQLBIGINT bi = 0;
+		SQLINTEGER biAccess = 0;
 		int type = SQL_C_SLONG;
 		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT);
 		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
 		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
-		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			// access has no bigint, col is int in test-db
+			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		}
+		else
+		{
+			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &biAccess, SQL_C_SLONG, sizeof(bi), CF_SELECT | CF_INSERT | CF_NULLABLE);
+		}
 
 		iTable.Open(m_db);
-		test::ClearTestTable(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db);
-		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-
+		
 		// Remove everything, ignoring if there was any data:
-		iTable.Delete(sqlstmt, false);
-		m_db.CommitTrans();
+		ASSERT_NO_THROW(test::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
 
 		// Set some silly values to insert
 		// note: no need to set to not-null, the buffers are created with null set to false
@@ -2325,6 +2330,12 @@ namespace exodbc
 		si = 102;
 		i = 103;
 		bi = 104;
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// hm, maybe it was stupid that the IsIntRecordEqual method will automatically ignore this column in case of access...
+			// its confusing now: Here we set it to null, but then we test for 104... also in case of access... mmh
+			iTable.SetColumnNull(3);
+		}
 
 		EXPECT_NO_THROW(iTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
@@ -2335,11 +2346,7 @@ namespace exodbc
 		iTable2.Select();
 		ASSERT_TRUE(iTable2.SelectNext());
 
-		EXPECT_EQ(101, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
-		EXPECT_EQ(102, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
-		EXPECT_EQ(103, boost::get<SQLINTEGER>(iTable2.GetColumnValue(2)));
-		EXPECT_EQ(104, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
-
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable2, 101, 102, 103, 104));
 	}
 
 
