@@ -2942,97 +2942,127 @@ namespace exodbc
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Manually set the PKs on access
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(iTable.Open(m_db));
 		
-		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
-		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
-		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
-		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
+		//ColumnBuffer* pId = iTable.GetColumnBuffer(0);
+		//ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
+		//ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
+		//ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
 
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		ASSERT_NO_THROW(test::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
 
 		// Insert some values
 		for (int i = 1; i < 10; i++)
 		{
-			*pId = (SQLINTEGER)i;
-			*pSmallInt = (SQLSMALLINT)i;
-			*pInt = (SQLINTEGER)i;
-			*pBigInt = (SQLBIGINT)i;
+			iTable.SetColumnValue(0, (SQLINTEGER)i);
+			iTable.SetColumnValue(2, (SQLINTEGER)i);
+			if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+			{
+				iTable.SetColumnValue(1, (SQLINTEGER) i);
+				iTable.SetColumnNull(3);
+			}
+			else
+			{
+				iTable.SetColumnValue(1, (SQLSMALLINT)i);
+				iTable.SetColumnValue(3, (SQLBIGINT)i);
+			}
 			ASSERT_NO_THROW(iTable.Insert());
 		}
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
-		// Update single rows by using key-values
-		*pId = (SQLINTEGER)3;
-		*pSmallInt = (SQLSMALLINT) 101;
-		*pInt = (SQLINTEGER) 102;
-		*pBigInt = (SQLBIGINT) 103;
+		// Update single rows using key-values
+		iTable.SetColumnValue(0, (SQLINTEGER)3);
+		iTable.SetColumnValue(2, (SQLINTEGER)102);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnValue(1, (SQLINTEGER)101);
+			iTable.SetColumnNull(3);
+		}
+		else
+		{
+			iTable.SetColumnValue(1, (SQLSMALLINT)101);
+			iTable.SetColumnValue(3, (SQLBIGINT)103);
+		}
 		EXPECT_NO_THROW(iTable.Update());
-		
-		*pId = (SQLINTEGER)5;
-		*pSmallInt = (SQLSMALLINT)1001;
-		*pInt = (SQLINTEGER)1002;
-		*pBigInt = (SQLBIGINT)1003;
+
+		iTable.SetColumnValue(0, (SQLINTEGER)5);
+		iTable.SetColumnValue(2, (SQLINTEGER)1002);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnValue(1, (SQLINTEGER)1001);
+			iTable.SetColumnNull(3);
+		}
+		else
+		{
+			iTable.SetColumnValue(1, (SQLSMALLINT)1001);
+			iTable.SetColumnValue(3, (SQLBIGINT)1003);
+		}
 		EXPECT_NO_THROW(iTable.Update());
 
 		// And set some values to null
-		*pId = (SQLINTEGER)7;
-		pSmallInt->SetNull();
-		*pInt = (SQLINTEGER)99;
-		*pBigInt = (SQLBIGINT)99;
+		iTable.SetColumnValue(0, (SQLINTEGER)7);
+		iTable.SetColumnNull(1);
+		iTable.SetColumnValue(2, (SQLINTEGER)99);
+		iTable.SetColumnNull(3);
 		EXPECT_NO_THROW(iTable.Update());
-		*pId = (SQLINTEGER)8;
-		*pSmallInt = (SQLSMALLINT)99;
-		pInt->SetNull();
-		*pBigInt = (SQLBIGINT)99;
-		EXPECT_NO_THROW(iTable.Update());
-		*pId = (SQLINTEGER)9;
-		*pSmallInt = (SQLSMALLINT) 99;
-		*pInt = (SQLINTEGER)99;
-		pBigInt->SetNull();
+
+		// And set all to null
+		iTable.SetColumnValue(0, (SQLINTEGER)9);
+		iTable.SetColumnNull(1);
+		iTable.SetColumnNull(2);
+		iTable.SetColumnNull(3);
 		EXPECT_NO_THROW(iTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Read back the just updated values
 		iTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(3, (SQLINTEGER)*pId);
-		EXPECT_EQ(101, (SQLSMALLINT)*pSmallInt);
-		EXPECT_EQ(102, (SQLINTEGER)*pInt);
-		EXPECT_EQ(103, (SQLBIGINT)*pBigInt);
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 3, 101, 102, 103));
+		//EXPECT_EQ(3, (SQLINTEGER)*pId);
+		//EXPECT_EQ(101, (SQLSMALLINT)*pSmallInt);
+		//EXPECT_EQ(102, (SQLINTEGER)*pInt);
+		//EXPECT_EQ(103, (SQLBIGINT)*pBigInt);
 
 		iTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(5, (SQLINTEGER)*pId);
-		EXPECT_EQ(1001, (SQLSMALLINT)*pSmallInt);
-		EXPECT_EQ(1002, (SQLINTEGER)*pInt);
-		EXPECT_EQ(1003, (SQLBIGINT)*pBigInt);
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 5, 1001, 1002, 1003));
+
+		//EXPECT_EQ(5, (SQLINTEGER)*pId);
+		//EXPECT_EQ(1001, (SQLSMALLINT)*pSmallInt);
+		//EXPECT_EQ(1002, (SQLINTEGER)*pInt);
+		//EXPECT_EQ(1003, (SQLBIGINT)*pBigInt);
 
 		iTable.Select((boost::wformat(L"%s = 7") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(7, (SQLINTEGER)*pId);
-		EXPECT_TRUE(pSmallInt->IsNull());
-		EXPECT_EQ(99, (SQLINTEGER)*pInt);
-		EXPECT_EQ(99, (SQLBIGINT)*pBigInt);
-
-		iTable.Select((boost::wformat(L"%s = 8") % idName).str());
-		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(8, (SQLINTEGER)*pId);
-		EXPECT_EQ(99, (SQLSMALLINT)*pSmallInt);
-		EXPECT_TRUE(pInt->IsNull());
-		EXPECT_EQ(99, (SQLBIGINT)*pBigInt);
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 7, test::ValueIndicator::IS_NULL, 99, test::ValueIndicator::IS_NULL));
+		//EXPECT_EQ(7, (SQLINTEGER)*pId);
+		//EXPECT_TRUE(pSmallInt->IsNull());
+		//EXPECT_EQ(99, (SQLINTEGER)*pInt);
+		//EXPECT_EQ(99, (SQLBIGINT)*pBigInt);
 
 		iTable.Select((boost::wformat(L"%s = 9") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(9, (SQLINTEGER)*pId);
-		EXPECT_EQ(99, (SQLSMALLINT)*pSmallInt);
-		EXPECT_EQ(99, (SQLINTEGER)*pInt);
-		EXPECT_TRUE(pBigInt->IsNull());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 9, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
+
+		//EXPECT_EQ(8, (SQLINTEGER)*pId);
+		//EXPECT_EQ(99, (SQLSMALLINT)*pSmallInt);
+		//EXPECT_TRUE(pInt->IsNull());
+		//EXPECT_EQ(99, (SQLBIGINT)*pBigInt);
+
+		//iTable.Select((boost::wformat(L"%s = 9") % idName).str());
+		//EXPECT_TRUE(iTable.SelectNext());
+		//EXPECT_EQ(9, (SQLINTEGER)*pId);
+		//EXPECT_EQ(99, (SQLSMALLINT)*pSmallInt);
+		//EXPECT_EQ(99, (SQLINTEGER)*pInt);
+		//EXPECT_TRUE(pBigInt->IsNull());
 	}
 
 
