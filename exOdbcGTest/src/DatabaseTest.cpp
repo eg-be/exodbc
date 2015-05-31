@@ -271,8 +271,8 @@ namespace exodbc
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		ASSERT_NO_THROW(test::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
-		ASSERT_NO_THROW(test::InsertIntTypes(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, test::NULL_INT_VALUE, false));
+		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
+		ASSERT_NO_THROW(test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, test::ValueIndicator::IS_NULL, false));
 
 		// Note: If we try to read now from a different database, we do not see the inserted recorded until it is committed
 		// BUT: Microsoft SQL Server will just block the second database while a transaction is open
@@ -329,14 +329,14 @@ namespace exodbc
 		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		ASSERT_NO_THROW(test::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
+		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
 
 		// No records now
 		iTable.Select();
 		EXPECT_FALSE( iTable.SelectNext());
 
 		// Insert one
-		ASSERT_NO_THROW(test::InsertIntTypes(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, test::NULL_INT_VALUE, false));
+		ASSERT_NO_THROW(test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, test::ValueIndicator::IS_NULL, false));
 		// We have a record now
 		iTable.Select();
 		EXPECT_TRUE( iTable.SelectNext() );

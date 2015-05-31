@@ -246,7 +246,80 @@ namespace exodbc
 		}
 
 
-		void ClearIntTable(const exodbc::Database& db, test::Case nameCase)
+		void InsertIntTypesTmp(test::Case nameCase, const exodbc::Database& db, Int id, SmallInt tSmallInt, Int tInt, BigInt tBigInt, bool commitTrans /* = true */)
+		{
+			std::wstring tableName;
+			try
+			{
+				// Note: We only allow the indicator to be set to NULL
+				ValueIndicator idInd = GetValueIndicator(id);
+				ValueIndicator smallIntInd = GetValueIndicator(tSmallInt);
+				ValueIndicator intInd = GetValueIndicator(tInt);
+				ValueIndicator bigIntInd = GetValueIndicator(tBigInt);
+				exASSERT(idInd == ValueIndicator::NO_INDICATOR || idInd == ValueIndicator::IS_NULL);
+				exASSERT(smallIntInd == ValueIndicator::NO_INDICATOR || smallIntInd == ValueIndicator::IS_NULL);
+				exASSERT(intInd == ValueIndicator::NO_INDICATOR || intInd == ValueIndicator::IS_NULL);
+				exASSERT(bigIntInd == ValueIndicator::NO_INDICATOR || bigIntInd == ValueIndicator::IS_NULL);
+
+				// Get an insertable IntTypesTmp Table
+				tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
+				std::wstring idColName = GetIdColumnName(test::TableId::INTEGERTYPES_TMP, nameCase);
+				exodbc::Table intTable(db, tableName, L"", L"", L"", AF_SELECT | AF_INSERT);
+				intTable.Open(db);
+
+				// Insert given values
+				// Note: BufferVariant defaults to NULL value
+				BufferVariant idVal;
+				BufferVariant tSmallIntVal;
+				BufferVariant tIntVal;
+				BufferVariant tBigIntVal;
+				if (idInd != ValueIndicator::IS_NULL)
+				{
+					idVal = boost::get<SQLINTEGER>(id);
+				}
+				if (smallIntInd != ValueIndicator::IS_NULL)
+				{
+					if (db.GetDbms() == DatabaseProduct::ACCESS)
+					{
+						tSmallIntVal = (SQLINTEGER) boost::get<SQLSMALLINT>(tSmallInt);
+					}
+					else
+					{
+						tSmallIntVal = boost::get<SQLSMALLINT>(tSmallInt);
+					}
+				}
+				if (intInd != ValueIndicator::IS_NULL)
+				{
+					tIntVal = boost::get<SQLINTEGER>(tInt);
+				}
+				if (bigIntInd != ValueIndicator::IS_NULL)
+				{
+					// on access, we stay on the null value
+					if (db.GetDbms() != DatabaseProduct::ACCESS)
+					{
+						tBigIntVal = boost::get<SQLBIGINT>(tBigInt);
+					}
+				}
+				intTable.SetColumnValue(0, idVal);
+				intTable.SetColumnValue(1, tSmallIntVal);
+				intTable.SetColumnValue(2, tIntVal);
+				intTable.SetColumnValue(3, tBigIntVal);
+				intTable.Insert();
+				if (commitTrans)
+				{
+					db.CommitTrans();
+				}
+			}
+			catch (exodbc::Exception& ex)
+			{
+				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
+				throw;
+			}
+
+		}
+
+
+		void ClearIntTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
 		{
 			std::wstring tableName;
 			try
@@ -263,102 +336,6 @@ namespace exodbc
 			catch (exodbc::Exception& ex)
 			{
 				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
-				throw;
-			}
-		}
-
-
-		void InsertIntTypes(test::Case nameCase, const exodbc::Database& db, SQLINTEGER id, SQLSMALLINT smallInt, SQLINTEGER i, SQLBIGINT bigInt, bool commit /* = true */ )
-		{
-			// Create a insertable table
-			std::wstring tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
-			exodbc::Table* pInsertableTable = NULL;
-			try
-			{
-				pInsertableTable = new exodbc::Table(db, tableName, L"", L"", L"", AF_INSERT | AF_SELECT);
-				pInsertableTable->Open(db);
-				InsertIntTypes(*pInsertableTable, db, id, smallInt, i, bigInt, commit);
-				pInsertableTable->Close();
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed inserting row into test table '%s': %s") % tableName %ex.ToString()));
-				delete pInsertableTable;
-				throw;
-			}
-
-			// delete and forget
-			delete pInsertableTable;
-		}
-
-
-		void InsertIntTypes(const exodbc::Table& insertableTable, const exodbc::Database& db, SQLINTEGER id, SQLSMALLINT smallInt, SQLINTEGER i, SQLBIGINT bigInt, bool commit /* = true */)
-		{
-			bool rollback = false;
-			try
-			{
-				exASSERT_MSG(insertableTable.TestAccessFlag(AF_INSERT), boost::str(boost::wformat(L"Failed to insert row into test table '%s', AccessFlag AF_INSERT is not set on the passed table.") % insertableTable.GetTableInfo().GetSqlName()));
-				// Set values on columns
-
-				// id is never null
-				insertableTable.SetColumnValue(0, id);
-
-				// and int works everywhere
-				if (i != NULL_INT_VALUE)
-					insertableTable.SetColumnValue(2, i);
-				else
-					insertableTable.SetColumnNull(2);
-
-				// note: access has only integers, try to convert the values
-				if (smallInt == NULL_INT_VALUE)
-				{
-					insertableTable.SetColumnNull(1);
-				}
-				else if (db.GetDbms() == DatabaseProduct::ACCESS)
-				{
-					insertableTable.SetColumnValue(1, (SQLINTEGER)smallInt);
-				}
-				else
-				{
-					insertableTable.SetColumnValue(1, smallInt);
-				}
-
-				if (bigInt == NULL_INT_VALUE)
-				{
-					insertableTable.SetColumnNull(3);
-				}
-				else if (db.GetDbms() == DatabaseProduct::ACCESS)
-				{
-					insertableTable.SetColumnValue(3, (SQLINTEGER)bigInt);
-				}
-				else
-				{
-					insertableTable.SetColumnValue(3, bigInt);
-				}
-
-				insertableTable.Insert();
-				if (commit)
-				{
-					rollback = true;
-					db.CommitTrans();
-				}
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to insert row into test table '%s': %s") % insertableTable.GetTableInfo().GetSqlName() % ex.ToString()));
-				if (rollback)
-				{
-					try
-					{
-						LOG_DEBUG(L"Trying to Rollback..");
-						db.RollbackTrans();
-						LOG_DEBUG(L"Rollback successfull.");
-					}
-					catch (exodbc::Exception& ex)
-					{
-						LOG_ERROR(boost::str(boost::wformat(L"Rollback failed: %s") % ex.ToString()));
-					}
-				}
 				throw;
 			}
 		}

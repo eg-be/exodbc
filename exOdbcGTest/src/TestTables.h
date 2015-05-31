@@ -82,6 +82,13 @@ namespace exodbc
 		*/
 		::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt);
 
+		/*!
+		* \brief	Insert an Integer value
+		* \details	If the passed db is of DatabaseType::ACCESS, the BigInt column is set to NULL. The smallInt column is inserted as SQLINTEGER.
+		* \throw	Exception
+		*/
+		void InsertIntTypesTmp(test::Case nameCase, const exodbc::Database& db, Int id, SmallInt tSmallInt, Int tInt, BigInt tBigInt, bool commitTrans = true);
+
 		extern const std::map<test::TableId, std::wstring> TableNames;
 		extern const std::map<test::TableId, std::wstring> IdColumnNames;
 
@@ -94,15 +101,7 @@ namespace exodbc
 
 		void ClearTestTable(test::TableId table, test::Case nameCase, exodbc::Table& testTable, exodbc::Database& db);
 
-		void ClearIntTable(const exodbc::Database& db, test::Case nameCase);
-
-		static const SQLSMALLINT NULL_INT_VALUE = -666;
-
-		// \todo: Replace by some methods that use the typedef of SmallInt, Int, etc.
-		// \deprecated
-		void InsertIntTypes(test::Case nameCase, const exodbc::Database& db, SQLINTEGER id, SQLSMALLINT smallInt, SQLINTEGER i, SQLBIGINT bigInt, bool commit = true);
-		// \deprecated
-		void InsertIntTypes(const exodbc::Table& insertableTable, const exodbc::Database& db, SQLINTEGER id, SQLSMALLINT smallInt, SQLINTEGER i, SQLBIGINT bigInt, bool commit = true);
+		void ClearIntTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
 	}
 
 
