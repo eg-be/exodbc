@@ -2284,10 +2284,6 @@ namespace exodbc
 		// Open another table and read the values from there
 		Table iTable2(m_db, intTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable2.Open(m_db));
-		ColumnBuffer* pId2 = iTable2.GetColumnBuffer(0);
-		ColumnBuffer* pSmallInt2 = iTable2.GetColumnBuffer(1);
-		ColumnBuffer* pInt2 = iTable2.GetColumnBuffer(2);
-		ColumnBuffer* pBigInt2 = iTable2.GetColumnBuffer(3);
 
 		iTable2.Select();
 		EXPECT_TRUE(iTable2.SelectNext());
@@ -2947,6 +2943,7 @@ namespace exodbc
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(iTable.Open(m_db));
+		
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
 		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
 		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
