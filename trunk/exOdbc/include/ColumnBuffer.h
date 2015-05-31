@@ -66,7 +66,7 @@ namespace exodbc
 
 
 	/*!
-	* \class NullValue
+	* \enum class NullValue
 	* \brief A pseudo value to store in the BufferVariant to indicate a NULL value.
 	*/
 	enum class NullValue
