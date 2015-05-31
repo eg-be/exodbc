@@ -31,6 +31,7 @@ namespace exodbc
 {
 	namespace test
 	{
+
 		enum class Case
 		{
 			UPPER,	///< Tables will be created using all UPPERCASE letters for table- and column-names
@@ -64,15 +65,21 @@ namespace exodbc
 
 		enum class ValueIndicator
 		{
-			NO_INDICATOR,
-			IS_NULL,
-			IGNORE_VAL
+			NO_INDICATOR,	///< Compare the value normally - it must be equal
+			IS_NULL,		///< Expet the value to be NULL
+			IGNORE_VAL		///< Ignore this value while comparing
 		};
 
 		typedef boost::variant<ValueIndicator, SQLSMALLINT> SmallInt;
 		typedef boost::variant<ValueIndicator, SQLINTEGER > Int;
 		typedef boost::variant<ValueIndicator, SQLBIGINT> BigInt;
 
+		/*!
+		* \brief	Test if the currently Select() ed record of the passed Table matches the passed expected values.
+		* \details	If the passed db is of DatabaseType::ACCESS, the BigInt column is ignored and the SmallInt column
+		*			is compared using SQLINTEGER (as access has no SQLSMALLINT, nor SQLBIGINT).
+		* \return	AssertionSuccess or AssertionFailure.
+		*/
 		::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt);
 
 		extern const std::map<test::TableId, std::wstring> TableNames;

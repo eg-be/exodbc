@@ -2311,11 +2311,11 @@ namespace exodbc
 		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
 		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
 		{
-			// access has no bigint, col is int in test-db
 			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
 		}
 		else
 		{
+			// access has no bigint, col is int in test-db
 			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &biAccess, SQL_C_SLONG, sizeof(bi), CF_SELECT | CF_INSERT | CF_NULLABLE);
 		}
 
@@ -2330,12 +2330,7 @@ namespace exodbc
 		si = 102;
 		i = 103;
 		bi = 104;
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			// hm, maybe it was stupid that the IsIntRecordEqual method will automatically ignore this column in case of access...
-			// its confusing now: Here we set it to null, but then we test for 104... also in case of access... mmh
-			iTable.SetColumnNull(3);
-		}
+		biAccess = 104;
 
 		EXPECT_NO_THROW(iTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
