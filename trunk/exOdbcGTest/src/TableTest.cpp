@@ -989,88 +989,6 @@ namespace exodbc
 
 	// GetValues
 	// ---------
-	::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, SQLINTEGER expId, SQLSMALLINT expSmallInt, SQLINTEGER expInt, SQLBIGINT expBigInt)
-	{
-		try
-		{
-			SQLINTEGER id = boost::get<SQLINTEGER>(iTable.GetColumnValue(0));
-			bool siNull = iTable.IsColumnNull(1);
-			bool iNull = iTable.IsColumnNull(2);
-			bool biNull = iTable.IsColumnNull(3);
-			SQLSMALLINT si;
-			SQLINTEGER i;
-			SQLBIGINT bi;
-			if (!siNull)
-			{
-				if (db.GetDbms() == DatabaseProduct::ACCESS)
-					si = (SQLSMALLINT) boost::get<SQLINTEGER>(iTable.GetColumnValue(1));
-				else
-					si = boost::get<SQLSMALLINT>(iTable.GetColumnValue(1));
-			}
-			else
-			{
-				si = test::NULL_INT_VALUE;
-			}
-
-			if (!iNull)
-			{
-				i = boost::get<SQLINTEGER>(iTable.GetColumnValue(2));
-			}
-			else
-			{
-				i = test::NULL_INT_VALUE;
-			}
-
-			if (!biNull)
-			{
-				if (db.GetDbms() == DatabaseProduct::ACCESS)
-					bi = boost::get<SQLINTEGER>(iTable.GetColumnValue(3));
-				else
-					bi = boost::get<SQLBIGINT>(iTable.GetColumnValue(3));
-			}
-			else
-			{
-				bi = test::NULL_INT_VALUE;
-			}
-
-			::testing::AssertionResult failure = ::testing::AssertionFailure();
-			bool failed = false;
-
-			if (id != expId)
-			{
-				failed = true;
-			}
-			if (si != expSmallInt)
-			{
-				failed = true;
-			}
-			if (i != expInt)
-			{
-				failed = true;
-			}
-			if (bi != expBigInt)
-			{
-				failed = true;
-			}
-			if (failed)
-			{
-				std::string top = boost::str(boost::format("Records are not equal:"));
-				std::string hed = boost::str(boost::format("          | %18s | %18s | %18s | %18s") % "idintegertypes" %"tsmalint" %"tint" %"tbigint");
-				std::string exp = boost::str(boost::format("expected: | %18d | %18d | %18d | %18d") % expId % expSmallInt % expInt % expBigInt);
-				std::string dat = boost::str(boost::format("  values: | %18d | %18d | %18d | %18d") % id % si % i % bi);
-				failure << top << std::endl << hed << std::endl << exp << std::endl << dat << std::endl;
-				return failure;
-			}
-		}
-		catch (Exception& ex)
-		{
-			return ::testing::AssertionFailure() << "ERROR comparing column values: " << ex.what();
-		}
-
-		return ::testing::AssertionSuccess();
-	}
-
-
 	TEST_P(TableTest, SelectAutoIntValues)
 	{
 		namespace tt = test;
@@ -2260,7 +2178,7 @@ namespace exodbc
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(test::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
+		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
 
 		// Set some silly values to insert
 		*pId = (SQLINTEGER)101;
@@ -2318,7 +2236,7 @@ namespace exodbc
 		iTable.Open(m_db);
 		
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(test::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
+		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
 
 		// Set some silly values to insert
 		// note: no need to set to not-null, the buffers are created with null set to false
@@ -2949,32 +2867,15 @@ namespace exodbc
 		}
 		ASSERT_NO_THROW(iTable.Open(m_db));
 		
-		//ColumnBuffer* pId = iTable.GetColumnBuffer(0);
-		//ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
-		//ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
-		//ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
-
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(test::ClearIntTable(m_db, m_odbcInfo.m_namesCase));
+		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
 
 		// Insert some values
 		for (int i = 1; i < 10; i++)
 		{
-			iTable.SetColumnValue(0, (SQLINTEGER)i);
-			iTable.SetColumnValue(2, (SQLINTEGER)i);
-			if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-			{
-				iTable.SetColumnValue(1, (SQLINTEGER) i);
-				iTable.SetColumnNull(3);
-			}
-			else
-			{
-				iTable.SetColumnValue(1, (SQLSMALLINT)i);
-				iTable.SetColumnValue(3, (SQLBIGINT)i);
-			}
-			ASSERT_NO_THROW(iTable.Insert());
+			test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, i, i, i, i);
 		}
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
@@ -3026,43 +2927,18 @@ namespace exodbc
 		iTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 3, 101, 102, 103));
-		//EXPECT_EQ(3, (SQLINTEGER)*pId);
-		//EXPECT_EQ(101, (SQLSMALLINT)*pSmallInt);
-		//EXPECT_EQ(102, (SQLINTEGER)*pInt);
-		//EXPECT_EQ(103, (SQLBIGINT)*pBigInt);
 
 		iTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 5, 1001, 1002, 1003));
 
-		//EXPECT_EQ(5, (SQLINTEGER)*pId);
-		//EXPECT_EQ(1001, (SQLSMALLINT)*pSmallInt);
-		//EXPECT_EQ(1002, (SQLINTEGER)*pInt);
-		//EXPECT_EQ(1003, (SQLBIGINT)*pBigInt);
-
 		iTable.Select((boost::wformat(L"%s = 7") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 7, test::ValueIndicator::IS_NULL, 99, test::ValueIndicator::IS_NULL));
-		//EXPECT_EQ(7, (SQLINTEGER)*pId);
-		//EXPECT_TRUE(pSmallInt->IsNull());
-		//EXPECT_EQ(99, (SQLINTEGER)*pInt);
-		//EXPECT_EQ(99, (SQLBIGINT)*pBigInt);
 
 		iTable.Select((boost::wformat(L"%s = 9") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 9, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
-
-		//EXPECT_EQ(8, (SQLINTEGER)*pId);
-		//EXPECT_EQ(99, (SQLSMALLINT)*pSmallInt);
-		//EXPECT_TRUE(pInt->IsNull());
-		//EXPECT_EQ(99, (SQLBIGINT)*pBigInt);
-
-		//iTable.Select((boost::wformat(L"%s = 9") % idName).str());
-		//EXPECT_TRUE(iTable.SelectNext());
-		//EXPECT_EQ(9, (SQLINTEGER)*pId);
-		//EXPECT_EQ(99, (SQLSMALLINT)*pSmallInt);
-		//EXPECT_EQ(99, (SQLINTEGER)*pInt);
-		//EXPECT_TRUE(pBigInt->IsNull());
 	}
 
 
