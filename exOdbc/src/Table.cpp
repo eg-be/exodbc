@@ -929,30 +929,6 @@ namespace exodbc
 	}
 
 
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		smallInt = *pBuff;
-	}
-
-
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLINTEGER& i) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		i = *pBuff;
-	}
-
-
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLBIGINT& bigInt) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		bigInt = *pBuff;
-	}
-
-	
 	void Table::GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
