@@ -66,7 +66,7 @@ namespace exodbc
 		enum class ValueIndicator
 		{
 			NO_INDICATOR,	///< Compare the value normally - it must be equal
-			IS_NULL,		///< Expet the value to be NULL
+			IS_NULL,		///< Expect the value to be NULL
 			IGNORE_VAL		///< Ignore this value while comparing
 		};
 
@@ -98,8 +98,10 @@ namespace exodbc
 
 		static const SQLSMALLINT NULL_INT_VALUE = -666;
 
-
+		// \todo: Replace by some methods that use the typedef of SmallInt, Int, etc.
+		// \deprecated
 		void InsertIntTypes(test::Case nameCase, const exodbc::Database& db, SQLINTEGER id, SQLSMALLINT smallInt, SQLINTEGER i, SQLBIGINT bigInt, bool commit = true);
+		// \deprecated
 		void InsertIntTypes(const exodbc::Table& insertableTable, const exodbc::Database& db, SQLINTEGER id, SQLSMALLINT smallInt, SQLINTEGER i, SQLBIGINT bigInt, bool commit = true);
 	}
 
