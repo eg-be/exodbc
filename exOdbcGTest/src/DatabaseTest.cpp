@@ -677,7 +677,7 @@ namespace exodbc
 		{
 			EXPECT_TRUE(cat.m_catalogs.find(L"exodbc") != cat.m_catalogs.end());
 		}
-		EXPECT_TRUE(cat.m_tables.size() >= 12);
+		EXPECT_GE((SQLINTEGER) cat.m_tables.size(), 12);
 	}
 
 
