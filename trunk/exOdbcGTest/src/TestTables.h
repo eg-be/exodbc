@@ -102,6 +102,7 @@ namespace exodbc
 		void ClearTestTable(test::TableId table, test::Case nameCase, exodbc::Table& testTable, exodbc::Database& db);
 
 		void ClearIntTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
+		void ClearDateTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
 	}
 
 

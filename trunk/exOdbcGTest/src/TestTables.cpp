@@ -341,6 +341,28 @@ namespace exodbc
 		}
 
 
+		void ClearDateTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
+		{
+			std::wstring tableName;
+			try
+			{
+				// Create a deletable table and delete on it
+				tableName = GetTableName(test::TableId::DATETYPES_TMP, nameCase);
+				std::wstring idColName = GetIdColumnName(test::TableId::DATETYPES_TMP, nameCase);
+				exodbc::Table dTable(db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
+				dTable.Open(db);
+				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
+				dTable.Delete(where, false);
+				db.CommitTrans();
+			}
+			catch (exodbc::Exception& ex)
+			{
+				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
+				throw;
+			}
+		}
+
+
 		// \todo: See ticket #82
 		//exodbc::Table GetEmptyTestTable(TestTables::Table table, TestTables::NameCase nameCase, exodbc::Database& db)
 		//{
