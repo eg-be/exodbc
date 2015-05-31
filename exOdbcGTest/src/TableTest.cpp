@@ -1518,7 +1518,7 @@ namespace exodbc
 		EXPECT_EQ(13, timestamp.hour);
 		EXPECT_EQ(55, timestamp.minute);
 		EXPECT_EQ(56, timestamp.second);
-
+		
 		// Test some digits stuff
 		dTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(dTable.SelectNext());
@@ -1541,7 +1541,7 @@ namespace exodbc
 		dTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(dTable.SelectNext());
 		EXPECT_NO_THROW(dTable.GetColumnValue(3, timestamp));
-		if (m_db.GetDbms() != DatabaseProduct::MY_SQL)
+		if ( ! (m_db.GetDbms() == DatabaseProduct::MY_SQL || m_db.GetDbms() == DatabaseProduct::ACCESS))
 		{
 			EXPECT_EQ(10000000, timestamp.fraction);
 		}
@@ -1639,7 +1639,10 @@ namespace exodbc
 		dTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(dTable.SelectNext());
 		EXPECT_NO_THROW(dTable.GetColumnValue(1, sDate));
-		EXPECT_EQ(L"1983-01-26", sDate);
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			EXPECT_EQ(L"1983-01-26", sDate);
+		}
 
 		EXPECT_NO_THROW(dTable.GetColumnValue(2, sTime));
 		EXPECT_NO_THROW(dTable.GetColumnValue(3, sTimestamp));
@@ -1656,7 +1659,10 @@ namespace exodbc
 		}
 		else
 		{
-			EXPECT_EQ(L"13:55:56", sTime);
+			if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+			{
+				EXPECT_EQ(L"13:55:56", sTime);
+			}
 			EXPECT_EQ(L"1983-01-26 13:55:56", sTimestamp);
 		}
 
