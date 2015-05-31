@@ -1096,22 +1096,22 @@ namespace exodbc
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, smallInt));
+		EXPECT_NO_THROW(smallInt = iTable.GetWString(1));
 		EXPECT_EQ(L"-32768", smallInt);
 
 		iTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_NO_THROW(iTable.GetColumnValue(1, smallInt));
+		EXPECT_NO_THROW(smallInt = iTable.GetWString(1));
 		EXPECT_EQ(L"32767", smallInt);
 
 		iTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_NO_THROW(iTable.GetColumnValue(2, i));
+		EXPECT_NO_THROW(i = iTable.GetWString(2));
 		EXPECT_EQ(L"-2147483648", i);
 
 		iTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_NO_THROW(iTable.GetColumnValue(2, i));
+		EXPECT_NO_THROW(i = iTable.GetWString(2));
 		EXPECT_EQ(L"2147483647", i);
 
 		// No bigints on access
@@ -1119,12 +1119,12 @@ namespace exodbc
 		{
 			iTable.Select((boost::wformat(L"%s = 5") % idName).str());
 			EXPECT_TRUE(iTable.SelectNext());
-			EXPECT_NO_THROW(iTable.GetColumnValue(3, bigInt));
+			EXPECT_NO_THROW(bigInt = iTable.GetWString(3));
 			EXPECT_EQ(L"-9223372036854775808", bigInt);
 
 			iTable.Select((boost::wformat(L"%s = 6") % idName).str());
 			EXPECT_TRUE(iTable.SelectNext());
-			EXPECT_NO_THROW(iTable.GetColumnValue(3, bigInt));
+			EXPECT_NO_THROW(bigInt = iTable.GetWString(3));
 			EXPECT_EQ(L"9223372036854775807", bigInt);
 		}
 	}
@@ -1141,50 +1141,50 @@ namespace exodbc
 		std::wstring idName = test::GetIdColumnName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
 		fTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(2, val));
+		EXPECT_NO_THROW(val = fTable.GetDouble(2));
 		EXPECT_EQ(0.0, val);
 		// Read as str
-		EXPECT_NO_THROW(fTable.GetColumnValue(2, str));
+		EXPECT_NO_THROW(str = fTable.GetWString(2));
 		EXPECT_EQ(L"0", str);
 
 		fTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(2, val));
+		EXPECT_NO_THROW(val = fTable.GetDouble(2));
 		EXPECT_EQ(3.141, val);
 		// Read as str
-		EXPECT_NO_THROW(fTable.GetColumnValue(2, str));
+		EXPECT_NO_THROW(str = fTable.GetWString(2));
 		EXPECT_EQ(L"3.141", str);
 
 		fTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(2, val));
+		EXPECT_NO_THROW(val = fTable.GetDouble(2));
 		EXPECT_EQ(-3.141, val);
 		// Read as str
-		EXPECT_NO_THROW(fTable.GetColumnValue(2, str));
+		EXPECT_NO_THROW(str = fTable.GetWString(2));
 		EXPECT_EQ(L"-3.141", str);
 
 		fTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(1, val));
+		EXPECT_NO_THROW(val = fTable.GetDouble(1));
 		EXPECT_EQ(0.0, val);
 		// Read as str
-		EXPECT_NO_THROW(fTable.GetColumnValue(1, str));
+		EXPECT_NO_THROW(str = fTable.GetWString(1));
 		EXPECT_EQ(L"0", str);
 
 		fTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(1, val));
+		EXPECT_NO_THROW(val = fTable.GetDouble(1));
 		EXPECT_EQ(3.141592, val);
 		// Read as str
-		EXPECT_NO_THROW(fTable.GetColumnValue(1, str));
+		EXPECT_NO_THROW(str = fTable.GetWString(1));
 		EXPECT_EQ(L"3.1415920000000002", str);
 
 		fTable.Select((boost::wformat(L"%s = 6") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(1, val));
+		EXPECT_NO_THROW(val = fTable.GetDouble(1));
 		EXPECT_EQ(-3.141592, val);
 		// Read as str
-		EXPECT_NO_THROW(fTable.GetColumnValue(1, str));
+		EXPECT_NO_THROW(str = fTable.GetWString(1));
 		EXPECT_EQ(L"-3.1415920000000002", str);
 	}
 
@@ -1232,31 +1232,30 @@ namespace exodbc
 		wstring idName = test::GetIdColumnName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
 		fTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(2, sVal));
+		EXPECT_NO_THROW(sVal = fTable.GetWString(2));
 		//EXPECT_EQ(0.0, sVal);
 		
 		// TODO: Find a way to compare without having to diff for every db-type
 
 		fTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(2, sVal));
+		EXPECT_NO_THROW(sVal = fTable.GetWString(2));
 
 		fTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(2, sVal));
+		EXPECT_NO_THROW(sVal = fTable.GetWString(2));
 
 		fTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(1, sVal));
+		EXPECT_NO_THROW(sVal = fTable.GetWString(1));
 		
 		fTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(1, sVal));
+		EXPECT_NO_THROW(sVal = fTable.GetWString(1));
 
 		fTable.Select((boost::wformat(L"%s = 6") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_NO_THROW(fTable.GetColumnValue(1, sVal));
-
+		EXPECT_NO_THROW(sVal = fTable.GetWString(1));
 	}
 
 

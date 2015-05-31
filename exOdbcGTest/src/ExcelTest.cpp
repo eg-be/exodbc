@@ -112,10 +112,10 @@ namespace exodbc
 		EXPECT_NO_THROW(tTable.Select());
 		EXPECT_TRUE(tTable.SelectNext());
 		std::wstring id, i, f, t;
-		EXPECT_NO_THROW(tTable.GetColumnValue(0, id));
-		EXPECT_NO_THROW(tTable.GetColumnValue(1, i));
-		EXPECT_NO_THROW(tTable.GetColumnValue(2, f));
-		EXPECT_NO_THROW(tTable.GetColumnValue(3, t));
+		EXPECT_NO_THROW(id = tTable.GetWString(0));
+		EXPECT_NO_THROW(i = tTable.GetWString(1));
+		EXPECT_NO_THROW(f = tTable.GetWString(2));
+		EXPECT_NO_THROW(t = tTable.GetWString(3));
 		
 		EXPECT_EQ(L"1.0", id);
 		EXPECT_EQ(L"101.0", i);
@@ -133,10 +133,10 @@ namespace exodbc
 		// Query
 		EXPECT_NO_THROW(tTable2.Select());
 		EXPECT_TRUE(tTable2.SelectNext());
-		EXPECT_NO_THROW(tTable2.GetColumnValue(0, id));
-		EXPECT_NO_THROW(tTable2.GetColumnValue(1, i));
-		EXPECT_NO_THROW(tTable2.GetColumnValue(2, f));
-		EXPECT_NO_THROW(tTable2.GetColumnValue(3, t));
+		EXPECT_NO_THROW(id = tTable.GetWString(0));
+		EXPECT_NO_THROW(i = tTable.GetWString(1));
+		EXPECT_NO_THROW(f = tTable.GetWString(2));
+		EXPECT_NO_THROW(t = tTable.GetWString(3));
 
 		EXPECT_EQ(L"1.0", id);
 		EXPECT_EQ(L"101.0", i);
@@ -210,22 +210,22 @@ namespace exodbc
 		while (tTable.SelectNext())
 		{
 			rowCount++;
-			EXPECT_NO_THROW(tTable.GetColumnValue(0, id));
-			EXPECT_NO_THROW(tTable.GetColumnValue(1, ic));
-			EXPECT_NO_THROW(tTable.GetColumnValue(2, fc));
-			EXPECT_NO_THROW(tTable.GetColumnValue(3, tc));
+			EXPECT_NO_THROW(id = tTable.GetWString(0));
+			EXPECT_NO_THROW(ic = tTable.GetWString(1));
+			EXPECT_NO_THROW(fc = tTable.GetWString(2));
+			EXPECT_NO_THROW(tc = tTable.GetWString(3));
 			if ((rowCount >= 4 && rowCount <= 5) || (rowCount >= 11 && rowCount <= 14))
 			{
 				// \todo: Excel fails on mixed types, see Ticket #109
 				EXPECT_TRUE(tTable.IsColumnNull(4));
 				LogLevelFatal llf;
 				DontDebugBreak ddb;
-				EXPECT_THROW(tTable.GetColumnValue(4, mx), AssertionException);
+				EXPECT_THROW(mx = tTable.GetWString(4), AssertionException);
 			}
 			else
 			{
 				EXPECT_FALSE(tTable.IsColumnNull(4));
-				EXPECT_NO_THROW(tTable.GetColumnValue(4, mx));
+				EXPECT_NO_THROW(mx = tTable.GetWString(4));
 			}
 		}
 
