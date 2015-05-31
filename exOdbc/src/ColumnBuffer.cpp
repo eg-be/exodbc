@@ -803,6 +803,12 @@ namespace exodbc
 		exASSERT(m_bufferType != SQL_UNKNOWN_TYPE);
 		exASSERT(m_haveBuffer);
 
+		if (var.which() == 0)
+		{
+			// set to null
+			SetNull();
+			return;
+		}
 
 		// Note that the BufferVariant set here does not allow to set binary values
 		try

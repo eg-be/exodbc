@@ -443,6 +443,7 @@ namespace exodbc
 		* \details	Copies the value of the passed BufferVariant into this Buffer.
 		*			This does not work for BinaryData - we need to know the length of the data.
 		*			The following types work:
+		*			- NullValue::IS_NULL
 		*			- SQLSMALLINT
 		*			- SQLINTEGER
 		*			- SQLBIGINT
