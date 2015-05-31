@@ -2268,29 +2268,27 @@ namespace exodbc
 	TEST_P(TableTest, InsertDateTypes)
 	{
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
-		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		ASSERT_NO_THROW(dTable.Open(m_db));
-		ColumnBuffer* pId = dTable.GetColumnBuffer(0);
-		ColumnBuffer* pDate = dTable.GetColumnBuffer(1);
-		ColumnBuffer* pTime = dTable.GetColumnBuffer(2);
-		ColumnBuffer* pTimestamp = dTable.GetColumnBuffer(3);
-
-		wstring idName = test::GetIdColumnName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
+		//ColumnBuffer* pId = dTable.GetColumnBuffer(0);
+		//ColumnBuffer* pDate = dTable.GetColumnBuffer(1);
+		//ColumnBuffer* pTime = dTable.GetColumnBuffer(2);
+		//ColumnBuffer* pTimestamp = dTable.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(dTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearDateTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Set some silly values
 		SQL_DATE_STRUCT date;
 		date.day = 26;
 		date.year = 1983;
 		date.month = 1;
+		
 		SQL_TIME_STRUCT time;
 		time.hour = 13;
 		time.minute = 55;
 		time.second = 03;
+		
 		SQL_TIMESTAMP_STRUCT timestamp;
 		timestamp.day = 26;
 		timestamp.year = 1983;
@@ -2298,7 +2296,7 @@ namespace exodbc
 		timestamp.hour = 13;
 		timestamp.minute = 55;
 		timestamp.second = 03;
-		if (m_db.GetDbms() != DatabaseProduct::MY_SQL)
+		if ( ! (m_db.GetDbms() == DatabaseProduct::MY_SQL || m_db.GetDbms() == DatabaseProduct::ACCESS))
 		{
 			timestamp.fraction = 123000000;
 		}
@@ -2307,35 +2305,51 @@ namespace exodbc
 			timestamp.fraction = 0;
 		}
 
-		*pId = (SQLINTEGER)101;
-		*pDate = date;
-		*pTime = time;
-		*pTimestamp = timestamp;
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Access has only timestamps ??
+			dTable.SetColumnValue(0, (SQLINTEGER)101);
+			dTable.SetColumnValue(1, timestamp);
+			dTable.SetColumnValue(2, timestamp);
+			dTable.SetColumnValue(3, timestamp);
+		}
+		else
+		{
+			dTable.SetColumnValue(0, (SQLINTEGER)101);
+			dTable.SetColumnValue(1, date);
+			dTable.SetColumnValue(2, time);
+			dTable.SetColumnValue(3, timestamp);
+		}
+
 		EXPECT_NO_THROW(dTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
-		Table dTable2(m_db, dateTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table dTable2(m_db, dateTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(dTable2.Open(m_db));
-		ColumnBuffer* pId2 = dTable2.GetColumnBuffer(0);
-		ColumnBuffer* pDate2 = dTable2.GetColumnBuffer(1);
-		ColumnBuffer* pTime2 = dTable2.GetColumnBuffer(2);
-		ColumnBuffer* pTimestamp2 = dTable2.GetColumnBuffer(3);
 
 		dTable2.Select();
 		EXPECT_TRUE(dTable2.SelectNext());
-		SQL_DATE_STRUCT date2 = *pDate2;
-		SQL_TIME_STRUCT time2 = *pTime2;
-		SQL_TIMESTAMP_STRUCT timestamp2 = *pTimestamp2;
 
-		EXPECT_EQ(101, (SQLINTEGER)*pId2);
-		EXPECT_EQ(date.year, date2.year);
-		EXPECT_EQ(date.month, date2.month);
-		EXPECT_EQ(date.day, date2.day);
+		SQL_DATE_STRUCT date2;
+		SQL_TIME_STRUCT time2;
+		SQL_TIMESTAMP_STRUCT timestamp2 = dTable.GetTimeStamp(3);
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			date2 = dTable.GetDate(1);
+			time2 = dTable.GetTime(2);
+		}
 
-		EXPECT_EQ(time.hour, time2.hour);
-		EXPECT_EQ(time.minute, time2.minute);
-		EXPECT_EQ(time.second, time2.second);
+		EXPECT_EQ(101, dTable2.GetInt(0));
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			EXPECT_EQ(date.year, date2.year);
+			EXPECT_EQ(date.month, date2.month);
+			EXPECT_EQ(date.day, date2.day);
+			EXPECT_EQ(time.hour, time2.hour);
+			EXPECT_EQ(time.minute, time2.minute);
+			EXPECT_EQ(time.second, time2.second);
+		}
 
 		EXPECT_EQ(timestamp.year, timestamp2.year);
 		EXPECT_EQ(timestamp.month, timestamp2.month);
