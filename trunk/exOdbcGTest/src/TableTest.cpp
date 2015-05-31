@@ -933,9 +933,9 @@ namespace exodbc
 		// MS SQL Server does not have this enabled by default
 		// See Ticket # 63 and # 75
 		// Also Access is not working here - we get a function sequence error
-		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER || m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
-			LOG_WARNING(L"This test is known to fail with Microsoft SQL Server 2014 (and probably others too), see Ticket #75");
+			LOG_WARNING(L"This test is known to fail with Microsoft SQL Server 2014 and Microsoft Access (and probably others too), see Ticket #75");
 		}
 		sqlstmt = (boost::wformat(L"%s = 102") % idName).str();
 		ASSERT_NO_THROW(iTable.Delete(sqlstmt));
