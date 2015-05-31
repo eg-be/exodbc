@@ -217,7 +217,10 @@ namespace exodbc
 
 	std::wstring WrapperException::ToString() const throw()
 	{
-		return ToString(m_ex);
+		// return ToString(m_ex);
+		// note: We do not call ToString() here - our internal copy has lost the exception type. see ticket #144
+		// we simply return the string we've built upon construction
+		return s2w(m_what);
 	}
 
 
