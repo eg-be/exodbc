@@ -635,6 +635,10 @@ namespace exodbc
 		SQLINTEGER	GetInt(SQLSMALLINT columnIndex) const;
 		SQLBIGINT	GetBigInt(SQLSMALLINT columnIndex) const;
 
+		SQL_DATE_STRUCT GetDate(SQLSMALLINT columnIndex) const;
+		SQL_TIME_STRUCT GetTime(SQLSMALLINT columnIndex) const;
+		SQL_TIMESTAMP_STRUCT GetTimeStamp(SQLSMALLINT columnIndex) const;
+
 		std::string GetString(SQLSMALLINT columnIndex) const;
 
 		/*!
