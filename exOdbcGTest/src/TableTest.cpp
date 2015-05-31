@@ -2146,29 +2146,24 @@ namespace exodbc
 	TEST_P(TableTest, Delete)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_DELETE_PK);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Insert a row that we want to delete
-		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
-		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
-		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
-		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
-		pSmallInt->SetNull();
-		pInt->SetNull();
-		pBigInt->SetNull();
-		*pId = (SQLINTEGER)99;
-		iTable.Insert();
-		EXPECT_NO_THROW(m_db.CommitTrans());
+		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, 99, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL);
 
-		// Now lets delete that row. our pId is still set to the key-value 99
+		// Now lets delete that row by pointing the primary key column to it
+		iTable.SetColumnValue(0, (SQLINTEGER) 99);
 		EXPECT_NO_THROW(iTable.Delete());
 
 		// And fetching shall return no results at all
@@ -3004,8 +2999,8 @@ namespace exodbc
 		}
 		else
 		{
-			dTable.SetColumnValue(2, date);
-			dTable.SetColumnValue(3, time);
+			dTable.SetColumnValue(1, date);
+			dTable.SetColumnValue(2, time);
 		}
 		dTable.Insert();
 		// and a null row
@@ -3036,8 +3031,8 @@ namespace exodbc
 		}
 		else
 		{
-			dTable.SetColumnValue(2, date);
-			dTable.SetColumnValue(3, time);
+			dTable.SetColumnValue(1, date);
+			dTable.SetColumnValue(2, time);
 		}
 		EXPECT_NO_THROW(dTable.Update());
 		ASSERT_NO_THROW(m_db.CommitTrans());
