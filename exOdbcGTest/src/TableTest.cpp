@@ -2093,30 +2093,19 @@ namespace exodbc
 	TEST_P(TableTest, DeleteWhere)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE | AF_INSERT);
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Note: We could also do this in one transaction.
-		// \todo: Write a separate transaction test about this, to check transaction-visiblity
+		// \todo: Write a separate transaction test about this, to check transaction-visibility
 		// Try to delete eventually available leftovers, ignore if none exists
-		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Now lets insert some data:
-		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
-		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
-		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
-		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
-
-		*pId = (SQLINTEGER)103;
-		pSmallInt->SetNull();
-		pInt->SetNull();
-		pBigInt->SetNull();
-		iTable.Insert();
-		EXPECT_NO_THROW(m_db.CommitTrans());
+		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, 103, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL);
 
 		// Now we must have something to delete
 		EXPECT_NO_THROW(iTable.Delete(sqlstmt, true));
