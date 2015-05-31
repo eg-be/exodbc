@@ -756,37 +756,6 @@ namespace exodbc
 		const SQLCHAR* GetBinaryValue(SQLSMALLINT columnIndex, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const;
 
 
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQLSMALLINT.
-		* \details	Casts the value if casting is possible without loosing data.
-		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] smallInt Reference to variable to copy value to.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		void		GetColumnValue(SQLSMALLINT columnIndex, SQLSMALLINT& smallInt) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQLINTEGER.
-		* \details	Casts the value if casting is possible without loosing data.
-		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] i Reference to variable to copy value to.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		void		GetColumnValue(SQLSMALLINT columnIndex, SQLINTEGER& i) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQLBIGINT.
-		* \details	Casts the value if casting is possible without loosing data.
-		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] bigInt Reference to variable to copy value to.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		void		GetColumnValue(SQLSMALLINT columnIndex, SQLBIGINT& bigInt) const;
-
-
 		/*!
 		* \brief	Access the current value of columnIndex as std::wstring.
 		* \details	Casts the value if casting is possible without loosing data.
