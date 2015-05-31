@@ -2966,34 +2966,41 @@ namespace exodbc
 	{
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			dTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(dTable.Open(m_db));
-		ColumnBuffer* pId = dTable.GetColumnBuffer(0);
-		ColumnBuffer* pDate = dTable.GetColumnBuffer(1);
-		ColumnBuffer* pTime = dTable.GetColumnBuffer(2);
-		ColumnBuffer* pTimestamp = dTable.GetColumnBuffer(3);
 
 		wstring idName = test::GetIdColumnName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(dTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearDateTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Insert some values
 		SQL_TIME_STRUCT time = InitTime(13, 55, 56);
 		SQL_DATE_STRUCT date = InitDate(26, 1, 2983);
 		SQL_TIMESTAMP_STRUCT timestamp = InitTimestamp(13, 55, 56, 0, 26, 01, 1983);
 
-		*pId = (SQLINTEGER)101;
-		*pDate = date;
-		*pTime = time;
-		*pTimestamp = timestamp;
+		dTable.SetColumnValue(0, (SQLINTEGER)101);
+		dTable.SetColumnValue(3, timestamp);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			dTable.SetColumnNull(1);
+			dTable.SetColumnNull(2);
+		}
+		else
+		{
+			dTable.SetColumnValue(2, date);
+			dTable.SetColumnValue(3, time);
+		}
 		dTable.Insert();
-		*pId = (SQLINTEGER)102;
-		pDate->SetNull();
-		pTime->SetNull();
-		pTimestamp->SetNull();
-		dTable.Insert();
+		// and a null row
+		dTable.SetColumnValue(0, (SQLINTEGER)102);
+		dTable.SetColumnNull(1);
+		dTable.SetColumnNull(2);
+		dTable.SetColumnNull(3);
+		ASSERT_NO_THROW(dTable.Insert());
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now update the values
@@ -3001,33 +3008,45 @@ namespace exodbc
 		date = InitDate(20, 9, 1985);
 		time = InitTime(16, 31, 49);
 		timestamp = InitTimestamp(16, 31, 49, 0, 20, 9, 1985);
-		*pId = (SQLINTEGER)101;
-		pDate->SetNull();
-		pTime->SetNull();
-		pTimestamp->SetNull();
+		dTable.SetColumnValue(0, (SQLINTEGER)101);
+		dTable.SetColumnNull(1);
+		dTable.SetColumnNull(2);
+		dTable.SetColumnNull(3);
 		EXPECT_NO_THROW(dTable.Update());
-		*pId = (SQLINTEGER)102;
-		*pDate = date;
-		*pTime = time;
-		*pTimestamp = timestamp;
+
+		dTable.SetColumnValue(0, (SQLINTEGER)102);
+		dTable.SetColumnValue(3, timestamp);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			dTable.SetColumnNull(1);
+			dTable.SetColumnNull(2);
+		}
+		else
+		{
+			dTable.SetColumnValue(2, date);
+			dTable.SetColumnValue(3, time);
+		}
 		EXPECT_NO_THROW(dTable.Update());
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// And read back
 		dTable.Select((boost::wformat(L"%s = 101") % idName).str());
 		EXPECT_TRUE(dTable.SelectNext());
-		EXPECT_TRUE(pDate->IsNull());
-		EXPECT_TRUE(pTime->IsNull());
-		EXPECT_TRUE(pTimestamp->IsNull());
+		EXPECT_TRUE(dTable.IsColumnNull(1));
+		EXPECT_TRUE(dTable.IsColumnNull(2));
+		EXPECT_TRUE(dTable.IsColumnNull(3));
 
 		dTable.Select((boost::wformat(L"%s = 102") % idName).str());
 		EXPECT_TRUE(dTable.SelectNext());
-		EXPECT_FALSE(pDate->IsNull());
-		EXPECT_FALSE(pTime->IsNull());
-		EXPECT_FALSE(pTimestamp->IsNull());
-		EXPECT_TRUE(IsDateEqual(date, *pDate));
-		EXPECT_TRUE(IsTimeEqual(time, *pTime));
-		EXPECT_TRUE(IsTimestampEqual(timestamp, *pTimestamp));
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			EXPECT_FALSE(dTable.IsColumnNull(1));
+			EXPECT_FALSE(dTable.IsColumnNull(2));
+			EXPECT_TRUE(IsDateEqual(date, dTable.GetDate(1)));
+			EXPECT_TRUE(IsTimeEqual(time, dTable.GetTime(2)));
+		}
+		EXPECT_FALSE(dTable.IsColumnNull(3));
+		EXPECT_TRUE(IsTimestampEqual(timestamp, dTable.GetTimeStamp(3)));
 	}
 
 
