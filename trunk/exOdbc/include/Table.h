@@ -606,7 +606,8 @@ namespace exodbc
 		* \param	columnIndex Zero based ColumnBuffer index.
 		* \param	value Value to set.
 		* \throw	Exception If ColumnBuffer not found, or setting the value fails, for
-		*			example because it does not match the type of the buffer allocated.
+		*			example because it does not match the type of the buffer allocated, or
+		*			the value is NULL but the column not NULLABLE, etc.
 		*/
 		void		SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value) const;
 
