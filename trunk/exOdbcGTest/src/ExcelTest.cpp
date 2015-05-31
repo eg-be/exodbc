@@ -233,22 +233,6 @@ namespace exodbc
 	}
 
 
-	void AccessTest::SetUp()
-	{
-		// Ensure an Excel-DSN is set on the command line
-		ASSERT_TRUE(!g_excelDsn.empty());
-
-		// Set up is called for every test
-		ASSERT_NO_THROW(m_env.AllocateEnvironmentHandle());
-		ASSERT_NO_THROW(m_env.SetOdbcVersion(OdbcVersion::V_3));
-	}
-
-
-	void AccessTest::TearDown()
-	{
-
-	}
-
 	// Interfaces
 	// ----------
 
