@@ -305,11 +305,11 @@ namespace exodbc
 		std::wstring sqlstmt;
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 5") % test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase));
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
 		}
 		else
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 5") % test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase));
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
 		}
 		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
 		{
@@ -328,11 +328,14 @@ namespace exodbc
 		SQLHANDLE hDesc = SQL_NULL_HDESC;
 		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM));
 
-		SQL_NUMERIC_STRUCT num;
-		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC));
-		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_PRECISION, (SQLPOINTER)18));
-		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_SCALE, (SQLPOINTER)10));
-		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_DATA_PTR, (SQLPOINTER)&num));
+		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		{
+			SQL_NUMERIC_STRUCT num;
+			EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC));
+			EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_PRECISION, (SQLPOINTER)18));
+			EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_SCALE, (SQLPOINTER)10));
+			EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_DATA_PTR, (SQLPOINTER)&num));
+		}
 
 		// Close things
 		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
