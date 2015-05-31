@@ -1679,7 +1679,7 @@ namespace exodbc
 
 	}
 
-
+	
 	TEST_P(TableTest, SelectAutoBlobValues)
 	{
 		std::wstring blobTypesTableName = test::GetTableName(test::TableId::BLOBTYPES, m_odbcInfo.m_namesCase);
@@ -2669,11 +2669,11 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
 
-
+	
 	TEST_P(TableTest, InsertBlobTypes)
 	{
 		std::wstring blobTypesTmpTableName = test::GetTableName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table bTable(m_db, blobTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table bTable(m_db, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		ASSERT_NO_THROW(bTable.Open(m_db));
 
 		ColumnBuffer* pId = bTable.GetColumnBuffer(0);
@@ -2681,10 +2681,9 @@ namespace exodbc
 		ColumnBuffer* pVarBlob_20 = bTable.GetColumnBuffer(2);
 
 		// Remove everything, ignoring if there was any data:
+		test::ClearBlobTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		ASSERT_NO_THROW(bTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		wstring sqlstmt;
 
 		SQLCHAR empty[] = { 0, 0, 0, 0,
 			0, 0, 0, 0,
@@ -3074,7 +3073,7 @@ namespace exodbc
 		EXPECT_TRUE(IsTimestampEqual(timestamp, dTable.GetTimeStamp(3)));
 	}
 
-
+	
 	TEST_P(TableTest, UpdateNumericTypes)
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
@@ -3355,14 +3354,17 @@ namespace exodbc
 	TEST_P(TableTest, UpdateBlobTypes)
 	{
 		std::wstring blobTypesTmpTableName = test::GetTableName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table bTable(m_db, blobTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table bTable(m_db, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			bTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(bTable.Open(m_db));
 
 		// Remove everything, ignoring if there was any data:
 		wstring idName = test::GetIdColumnName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		ASSERT_NO_THROW(bTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		wstring sqlstmt;
+		test::ClearBlobTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		SQLCHAR empty[] = { 0, 0, 0, 0,
 			0, 0, 0, 0,
