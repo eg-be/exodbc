@@ -3426,54 +3426,53 @@ namespace exodbc
 	TEST_P(TableTest, UpdateWhere)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(iTable.Open(m_db));
-		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
-		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
-		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
-		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
 
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Insert some values
 		for (int i = 1; i < 10; i++)
 		{
-			*pId = (SQLINTEGER)i;
-			*pSmallInt = (SQLSMALLINT)i;
-			*pInt = (SQLINTEGER)i;
-			*pBigInt = (SQLBIGINT)i;
-			ASSERT_NO_THROW(iTable.Insert());
+			test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, i, i, i, i);
 		}
-		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Now update using our WHERE statement. This allows us to update also key rows. Shift all values *(1000)
 		int shift = 1000;
 		for (int i = 1; i < 10; i++)
 		{
-			*pId = (SQLINTEGER) (i * shift);
-			*pSmallInt = (SQLSMALLINT)(i * shift);
-			*pInt = (SQLINTEGER)(i * shift);
-			*pBigInt = (SQLBIGINT)(i * shift);
-			sqlstmt = (boost::wformat(L"%s = %d") % idName %i).str();
+			iTable.SetColumnValue(0, (SQLINTEGER)i * shift);
+			iTable.SetColumnValue(2, (SQLINTEGER)(i * shift));
+			if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+			{
+				iTable.SetColumnValue(1, (SQLINTEGER)(i * shift));
+				iTable.SetColumnNull(3);
+			}
+			else
+			{
+				iTable.SetColumnValue(1, (SQLSMALLINT)(i * shift));
+				iTable.SetColumnValue(3, (SQLBIGINT)(i * shift));
+			}
+
+			wstring sqlstmt = (boost::wformat(L"%s = %d") % idName %i).str();
 			EXPECT_NO_THROW(iTable.Update(sqlstmt));
 		}
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// And select them and compare
-		sqlstmt = (boost::wformat(L"%s > 0 ORDER BY %s") % idName %idName).str();
+		wstring sqlstmt = (boost::wformat(L"%s > 0 ORDER BY %s") % idName %idName).str();
 		iTable.Select(sqlstmt);
 		for (int i = 1; i < 10; i++)
 		{
 			EXPECT_TRUE(iTable.SelectNext());
-			EXPECT_EQ((i * shift), (SQLINTEGER)*pId);
-			EXPECT_EQ((i * shift), (SQLSMALLINT)*pSmallInt);
-			EXPECT_EQ((i * shift), (SQLINTEGER)*pInt);
-			EXPECT_EQ((i * shift), (SQLBIGINT)*pBigInt);
+			EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, i * shift, i * shift, i * shift, i * shift));
 		}
 		EXPECT_FALSE(iTable.SelectNext());
 	}
