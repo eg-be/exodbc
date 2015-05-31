@@ -883,6 +883,16 @@ namespace exodbc
 	{
 		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
 		std::string s = *pBuff;
+
+		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
+		{
+			boost::trim_left(s);
+		}
+		if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
+		{
+			boost::trim_right(s);
+		}
+
 		return s;
 	}
 
@@ -891,6 +901,16 @@ namespace exodbc
 	{
 		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
 		std::wstring ws = *pBuff;
+
+		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
+		{
+			boost::trim_left(ws);
+		}
+		if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
+		{
+			boost::trim_right(ws);
+		}
+
 		return ws;
 	}
 
@@ -929,39 +949,39 @@ namespace exodbc
 	}
 
 
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		str = *pBuff;
+	//void Table::GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) const
+	//{
+	//	const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+	//	exASSERT(!pBuff->IsNull());
+	//	str = *pBuff;
 
-		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
-		{
-			boost::trim_left(str);
-		}
-		if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
-		{
-			boost::trim_right(str);
-		}
-	}
+	//	if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
+	//	{
+	//		boost::trim_left(str);
+	//	}
+	//	if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
+	//	{
+	//		boost::trim_right(str);
+	//	}
+	//}
 
 
-	void Table::GetColumnValue(SQLSMALLINT columnNumber, std::string& str) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
-		exASSERT(!pBuff->IsNull());
+	//void Table::GetColumnValue(SQLSMALLINT columnNumber, std::string& str) const
+	//{
+	//	const ColumnBuffer* pBuff = GetColumnBuffer(columnNumber);
+	//	exASSERT(!pBuff->IsNull());
 
-		str = *pBuff;
+	//	str = *pBuff;
 
-		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
-		{
-			boost::trim_left(str);
-		}
-		if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
-		{
-			boost::trim_right(str);
-		}
-	}
+	//	if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
+	//	{
+	//		boost::trim_left(str);
+	//	}
+	//	if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
+	//	{
+	//		boost::trim_right(str);
+	//	}
+	//}
 
 
 	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const
