@@ -186,8 +186,8 @@ namespace exodbc
 
 				if (db.GetDbms() == DatabaseProduct::ACCESS)
 				{
-					// Access has no BigInt, we expect those values to be NULL
-					expBigInt = ValueIndicator::IS_NULL;
+					// Access has no BigInt, we simply ignore that column
+					expBigInt = ValueIndicator::IGNORE_VAL;
 					// Also Access has no Smallints. we still have those values in our tests, but we stored them as INT
 					FComperator<SmallInt, SQLSMALLINT, SQLINTEGER> tSmallIntComperator = { failure, db };
 					if (!tSmallIntComperator(expSmallInt, tsmallInt))
