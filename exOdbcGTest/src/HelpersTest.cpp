@@ -124,7 +124,15 @@ namespace exodbc
 		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
 
 		// Open statement by doing some operation on it
-		std::wstring sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+		std::wstring sqlstmt;
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+		}
+		else
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+		}
 		// convert schema name to upper if needed
 		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
 		{
@@ -179,7 +187,15 @@ namespace exodbc
 		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
 
 		// Open statement by doing some operation on it
-		std::wstring sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+		std::wstring sqlstmt;
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+		}
+		else
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+		}
 		// convert schema name to upper if needed
 		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
 		{
@@ -242,7 +258,15 @@ namespace exodbc
 		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
 
 		// Open statement by doing some operation on it
-		std::wstring sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+		std::wstring sqlstmt;
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+		}
+		else
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+		}
 		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
 		{
 			boost::algorithm::to_upper(sqlstmt);
@@ -278,7 +302,15 @@ namespace exodbc
 		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
 
 		// Open statement by doing some operation on it
-		std::wstring sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 5") % test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase));
+		std::wstring sqlstmt;
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 5") % test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase));
+		}
+		else
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 5") % test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase));
+		}
 		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
 		{
 			boost::algorithm::to_upper(sqlstmt);
