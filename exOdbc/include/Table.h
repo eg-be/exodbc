@@ -632,15 +632,104 @@ namespace exodbc
 		void		SetColumnNull(SQLSMALLINT columnIndex) const;
 
 
+		/*!
+		* \brief	Access the current value of columnIndex as SQLSMALLINT.
+		* \details	Casts the value if casting is possible without loosing data 
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
 		SQLSMALLINT GetSmallInt(SQLSMALLINT columnIndex) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQLINTEGER.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
 		SQLINTEGER	GetInt(SQLSMALLINT columnIndex) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQLBIGINT.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
 		SQLBIGINT	GetBigInt(SQLSMALLINT columnIndex) const;
 
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_DATE_STRUCT.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
 		SQL_DATE_STRUCT GetDate(SQLSMALLINT columnIndex) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_TIME_STRUCT.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
 		SQL_TIME_STRUCT GetTime(SQLSMALLINT columnIndex) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_TIMESTAMP_STRUCT.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
 		SQL_TIMESTAMP_STRUCT GetTimeStamp(SQLSMALLINT columnIndex) const;
 
+#if HAVE_MSODBCSQL_H
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_SS_TIME2_STRUCT.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
+		SQL_SS_TIME2_STRUCT GetTime2(SQLSMALLINT columnIndex) const;
+#endif
+
+		/*!
+		* \brief	Access the current value of columnIndex as std::string.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
 		std::string GetString(SQLSMALLINT columnIndex) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as std::wstring.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
+		std::wstring GetWString(SQLSMALLINT columnIndex) const;
+		
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQLDOUBLE.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
+		SQLDOUBLE GetDouble(SQLSMALLINT columnIndex) const;
+
+
+		/*!
+		* \brief	Access the current value of columnIndex as SQL_NUMERIC_STRUCT.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
+		SQL_NUMERIC_STRUCT GetNumeric(SQLSMALLINT columnIndex) const;
+
 
 		/*!
 		* \brief	Get the value of the ColumnBuffer given by columnIndex as BufferVariant.
@@ -802,11 +891,11 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Return a defined ColumnBuffer or NULL.
+		* \brief	Return a defined ColumnBuffer.
 		* \details	Searches the internal map of ColumnBuffers for a ColumnBuffer with
 		*			the given columnIndex (zero based).
 		* \return	ColumnBuffer.
-		* \throw	Exception
+		* \throw	Exception If no ColumnBuffer with the passed columnIndex is found.
 		*/
 		ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
 
@@ -966,6 +1055,17 @@ namespace exodbc
 		*			or this Table has no bound primary key columns.
 		*/
 		void		BindUpdateParameters();
+
+
+		/*!
+		* \brief	Return a defined ColumnBuffer that is not NULL.
+		* \details	Searches the internal map of ColumnBuffers for a ColumnBuffer with
+		*			the given columnIndex (zero based).
+		* \return	ColumnBuffer.
+		* \throw	Exception If no columnBuffer found, or if the ColumnBuffer is Null.
+		* \throw	NullValueException if the value is NULL.
+		*/
+		ColumnBuffer* GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const;
 
 
 		// ODBC Handles

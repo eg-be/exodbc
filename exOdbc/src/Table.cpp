@@ -560,6 +560,19 @@ namespace exodbc
 	}
 
 
+	ColumnBuffer* Table::GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuffer = GetColumnBuffer(columnIndex);
+		if (pBuffer->IsNull())
+		{
+			NullValueException ex(pBuffer->GetQueryName());
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+		return pBuffer;
+	}
+
+
 	std::set<SQLSMALLINT> Table::GetColumnBufferIndexes() const throw()
 	{
 		std::set<SQLSMALLINT> columnIndexes;
@@ -811,13 +824,7 @@ namespace exodbc
 
 	SQLSMALLINT Table::GetSmallInt(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (pBuff->IsNull())
-		{
-			NullValueException ex(pBuff->GetQueryName());
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
 		SQLSMALLINT smallInt = *pBuff;
 		return smallInt;
 	}
@@ -825,13 +832,7 @@ namespace exodbc
 
 	SQLINTEGER Table::GetInt(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (pBuff->IsNull())
-		{
-			NullValueException ex(pBuff->GetQueryName());
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
 		SQLINTEGER i = *pBuff;
 		return i;
 	}
@@ -839,13 +840,7 @@ namespace exodbc
 
 	SQLBIGINT Table::GetBigInt(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (pBuff->IsNull())
-		{
-			NullValueException ex(pBuff->GetQueryName());
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
 		SQLBIGINT bigInt = *pBuff;
 		return bigInt;
 	}
@@ -853,13 +848,7 @@ namespace exodbc
 
 	SQL_DATE_STRUCT Table::GetDate(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (pBuff->IsNull())
-		{
-			NullValueException ex(pBuff->GetQueryName());
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
 		SQL_DATE_STRUCT date = *pBuff;
 		return date;
 	}
@@ -867,27 +856,24 @@ namespace exodbc
 
 	SQL_TIME_STRUCT Table::GetTime(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (pBuff->IsNull())
-		{
-			NullValueException ex(pBuff->GetQueryName());
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
 		SQL_TIME_STRUCT time = *pBuff;
 		return time;
 	}
 
+#if HAVE_MSODBCSQL_H
+	SQL_SS_TIME2_STRUCT Table::GetTime2(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
+		SQL_SS_TIME2_STRUCT time2 = *pBuff;
+		return time2;
+	}
+#endif
+
 
 	SQL_TIMESTAMP_STRUCT Table::GetTimeStamp(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		if (pBuff->IsNull())
-		{
-			NullValueException ex(pBuff->GetQueryName());
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
 		SQL_TIMESTAMP_STRUCT timestamp = *pBuff;
 		return timestamp;
 	}
@@ -895,9 +881,33 @@ namespace exodbc
 
 	std::string Table::GetString(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
 		std::string s = *pBuff;
 		return s;
+	}
+
+
+	std::wstring Table::GetWString(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
+		std::wstring ws = *pBuff;
+		return ws;
+	}
+
+
+	SQLDOUBLE Table::GetDouble(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
+		SQLDOUBLE d = *pBuff;
+		return d;
+	}
+
+
+	SQL_NUMERIC_STRUCT Table::GetNumeric(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
+		SQL_NUMERIC_STRUCT num = *pBuff;
+		return num;
 	}
 
 
