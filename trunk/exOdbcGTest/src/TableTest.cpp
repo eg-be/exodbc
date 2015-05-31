@@ -1363,7 +1363,7 @@ namespace exodbc
 
 	}
 
-
+	
 	TEST_P(TableTest, SelectAutoCharValues)
 	{
 		std::wstring charTypesTableName = test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase);
@@ -1387,7 +1387,7 @@ namespace exodbc
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
 		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(2, str));
 		EXPECT_EQ(std::string(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), str);
-
+		
 		EXPECT_FALSE(charTypesAutoTable.SelectNext());
 		charTypesAutoTable.SelectClose();
 
@@ -1475,7 +1475,7 @@ namespace exodbc
 		EXPECT_EQ(std::string("abcde12345"), trim_right_copy(str));
 		cTable.SelectClose();
 	}
-
+	
 
 	TEST_P(TableTest, SelectAutoDateValues)
 	{
@@ -2740,7 +2740,7 @@ namespace exodbc
 	TEST_P(TableTest, InsertCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		ASSERT_NO_THROW(cTable.Open(m_db));
 
@@ -2751,10 +2751,8 @@ namespace exodbc
 		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
 
 		// Remove everything, ignoring if there was any data:
+		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
 		std::string s = "Hello World!";
@@ -2778,7 +2776,7 @@ namespace exodbc
 
 		// Read them back from another table
 		s = "Hello World!";
-		Table t2(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table t2(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ);
 		t2.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		ASSERT_NO_THROW(t2.Open(m_db));
 		t2.SetCharTrimRight(true);
@@ -2808,7 +2806,7 @@ namespace exodbc
 	TEST_P(TableTest, InsertWCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		ASSERT_NO_THROW(cTable.Open(m_db));
 
@@ -2819,10 +2817,8 @@ namespace exodbc
 		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
 
 		// Remove everything, ignoring if there was any data:
+		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
 		std::wstring s = L"Hello World!";
@@ -2846,7 +2842,7 @@ namespace exodbc
 
 		// Read them back from another table
 		s = L"Hello World!";
-		Table t2(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table t2(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ);
 		t2.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		ASSERT_NO_THROW(t2.Open(m_db));
 		t2.SetCharTrimRight(true);
@@ -3194,7 +3190,11 @@ namespace exodbc
 	TEST_P(TableTest, UpdateWCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_UPDATE | AF_INSERT);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			cTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		ASSERT_NO_THROW(cTable.Open(m_db));
 		cTable.SetCharTrimRight(true);
@@ -3204,12 +3204,10 @@ namespace exodbc
 		ColumnBuffer* pChar = cTable.GetColumnBuffer(2);
 		ColumnBuffer* pVarchar_10 = cTable.GetColumnBuffer(3);
 		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
-
+		
 		// Remove everything, ignoring if there was any data:
+		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
 		// \todo: Note, in IBM DB2 special chars seem to occupy more space (two bytes`?). We cannot have more than 5 special chars if the size of the field is 10..
@@ -3259,7 +3257,11 @@ namespace exodbc
 	TEST_P(TableTest, UpdateCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			cTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		ASSERT_NO_THROW(cTable.Open(m_db));
 		cTable.SetCharTrimRight(true);
@@ -3271,10 +3273,8 @@ namespace exodbc
 		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
 
 		// Remove everything, ignoring if there was any data:
+		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		ASSERT_NO_THROW(cTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some values:
 		// \todo: Note, in IBM DB2 special chars seem to occupy more space (two bytes`?). We cannot have more than 5 special chars if the size of the field is 10..
