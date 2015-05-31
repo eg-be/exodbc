@@ -44,15 +44,6 @@ namespace exodbc
 	};
 
 
-	class AccessTest : public ::testing::Test
-	{
-	protected:
-		virtual void SetUp();
-
-		virtual void TearDown();
-
-		Environment m_env;
-	};
 } // namespace exodbc
 
 #endif // EXCELTEST_H
