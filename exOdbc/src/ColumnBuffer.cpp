@@ -898,7 +898,7 @@ namespace exodbc
 			}
 
 		}
-		catch (boost::bad_get ex)
+		catch (const boost::bad_get& ex)
 		{
 			WrapperException we(ex);
 			SET_EXCEPTION_SOURCE(we);
