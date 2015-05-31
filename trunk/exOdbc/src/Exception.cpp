@@ -217,9 +217,15 @@ namespace exodbc
 
 	std::wstring WrapperException::ToString() const throw()
 	{
+		return ToString(m_ex);
+	}
+
+
+	std::wstring WrapperException::ToString(const std::exception& ex) const throw()
+	{
 		std::wstringstream ws;
 		ws << Exception::ToString();
-		std::string w(m_ex.what());
+		std::string w(ex.what());
 		ws << s2w(w);
 		return ws.str();
 	}
