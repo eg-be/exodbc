@@ -180,13 +180,15 @@ namespace exodbc
 			: Exception()
 			, m_ex(ex)
 		{
-			m_what = w2s(ToString());
+			m_what = w2s(ToString(ex));
 		};
 
 		virtual ~WrapperException() {};
 
 		virtual std::wstring GetName() const throw() { return L"exodbc::WrapperException"; };
 		virtual std::wstring ToString() const throw();
+
+		std::wstring ToString(const std::exception& ex) const throw();
 
 	private:
 		std::exception m_ex;
