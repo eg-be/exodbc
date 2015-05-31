@@ -403,7 +403,7 @@ namespace exodbc
 	void Table::BindDeleteParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
-		exASSERT(TestAccessFlag(AF_DELETE));
+		exASSERT(TestAccessFlag(AF_DELETE_PK));
 		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
 		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
@@ -427,7 +427,7 @@ namespace exodbc
 		// ensure that we have something in our where clause
 		if (paramNr <= 1)
 		{
-			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to prepare a DELETE statement (probably because flag AF_DELETE is set), but no ColumnBuffers were bound as PrimaryKeys to build a WHERE clause") % m_tableInfo.GetSqlName()));
+			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to prepare a DELETE statement (probably because flag AF_DELETE_PK is set), but no ColumnBuffers were bound as PrimaryKeys to build a WHERE clause") % m_tableInfo.GetSqlName()));
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -441,7 +441,7 @@ namespace exodbc
 	void Table::BindUpdateParameters()
 	{
 		exASSERT(m_columnBuffers.size() > 0);
-		exASSERT(TestAccessFlag(AF_UPDATE));
+		exASSERT(TestAccessFlag(AF_UPDATE_PK));
 		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
 		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
@@ -467,7 +467,7 @@ namespace exodbc
 		// ensure that we have something to update
 		if (paramNr <= 1)
 		{	
-			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind update parameters (probably because flag AF_UPDATE is set), but no ColumnBuffers were bound for UPDATing") % m_tableInfo.GetSqlName()));
+			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind update parameters (probably because flag AF_UPDATE_PK is set), but no ColumnBuffers were bound for UPDATing") % m_tableInfo.GetSqlName()));
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
