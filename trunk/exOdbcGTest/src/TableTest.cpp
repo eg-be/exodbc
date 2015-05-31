@@ -2120,20 +2120,24 @@ namespace exodbc
 	TEST_P(TableTest, DeleteWhereShouldReturnSQL_NO_DATA)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
 		ASSERT_NO_THROW(iTable.Open(m_db));
 
-		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-
-		// Try to delete eventually available leftovers, ignore if none exists
 		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
 		{
 			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #77");
 		}
-		ASSERT_NO_THROW(iTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+
+		// Remove everything, ignoring if there was any data:
+		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
+
 		// We can be sure now that nothing exists, and we will fail if we try to delete
+		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
+		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 		EXPECT_THROW(iTable.Delete(sqlstmt, true), SqlResultException);
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
