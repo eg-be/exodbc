@@ -220,7 +220,7 @@ namespace exodbc
 				EXPECT_TRUE(tTable.IsColumnNull(4));
 				LogLevelFatal llf;
 				DontDebugBreak ddb;
-				EXPECT_THROW(mx = tTable.GetWString(4), AssertionException);
+				EXPECT_THROW(mx = tTable.GetWString(4), NullValueException);
 			}
 			else
 			{
