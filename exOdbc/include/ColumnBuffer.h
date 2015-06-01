@@ -71,7 +71,7 @@ namespace exodbc
 	*/
 	enum class NullValue
 	{
-		IS_NULL = 1
+		IS_NULL = 1	///< Indicates that the value is NULL.
 	};
 
 
@@ -80,7 +80,7 @@ namespace exodbc
 	* \brief A helper for setting / getting values. If you like it, work with a variant
 	* \details The following types can be stored:
 	*  - NullValue A boost::variant will always hold a valid, as this is the first entry in the
-	*              variant, every boost::variant will be default to a NULL value.
+	*              variant, every BufferVariant will default to a NULL value.
 	*  - SQLSMALLINT
 	*  - SQLINTEGER
 	*  - SQLBIGINT
