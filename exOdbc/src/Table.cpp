@@ -949,14 +949,6 @@ namespace exodbc
 	}
 
 
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_NUMERIC_STRUCT& numeric) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		numeric = *pBuff;
-	}
-
-
 	bool Table::IsColumnNull(SQLSMALLINT columnIndex) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);		

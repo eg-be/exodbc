@@ -757,16 +757,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Access the current value of columnIndex as SQL_NUMERIC_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data.
-		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] numeric Reference to variable to copy value to.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_NUMERIC_STRUCT& numeric) const;
-
-
-		/*!
 		* \brief	Check if the current value of a column is NULL.
 		* \details	Queries the length-indicator field of the ColumnBuffer to determine if
 		*			a column is NULL.

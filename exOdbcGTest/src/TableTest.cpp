@@ -1890,7 +1890,7 @@ namespace exodbc
 
 		nTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_NO_THROW(nTable.GetColumnValue(1, numStr));
+		EXPECT_NO_THROW(numStr = nTable.GetNumeric(1));
 		EXPECT_EQ(18, numStr.precision);
 		EXPECT_EQ(0, numStr.scale);
 		EXPECT_EQ(1, numStr.sign);
@@ -1900,7 +1900,7 @@ namespace exodbc
 
 		nTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_NO_THROW(nTable.GetColumnValue(1, numStr));
+		EXPECT_NO_THROW(numStr = nTable.GetNumeric(1));
 		EXPECT_EQ(18, numStr.precision);
 		EXPECT_EQ(0, numStr.scale);
 		EXPECT_EQ(1, numStr.sign);
@@ -1908,7 +1908,7 @@ namespace exodbc
 		p = (SQLBIGINT*)&numStr.val;
 		EXPECT_EQ(ex, *p);
 		// Col 3 has a value here too.
-		EXPECT_NO_THROW(nTable.GetColumnValue(3, numStr));
+		EXPECT_NO_THROW(numStr = nTable.GetNumeric(3));
 		EXPECT_EQ(5, numStr.precision);
 		EXPECT_EQ(3, numStr.scale);
 		EXPECT_EQ(1, numStr.sign);
@@ -1918,7 +1918,7 @@ namespace exodbc
 
 		nTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_NO_THROW(nTable.GetColumnValue(1, numStr));
+		EXPECT_NO_THROW(numStr = nTable.GetNumeric(1));
 		EXPECT_EQ(18, numStr.precision);
 		EXPECT_EQ(0, numStr.scale);
 		EXPECT_EQ(0, numStr.sign);
@@ -1928,7 +1928,7 @@ namespace exodbc
 
 		nTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_NO_THROW(nTable.GetColumnValue(2, numStr));
+		EXPECT_NO_THROW(numStr = nTable.GetNumeric(2));
 		EXPECT_EQ(18, numStr.precision);
 		EXPECT_EQ(10, numStr.scale);
 		EXPECT_EQ(1, numStr.sign);
@@ -1938,7 +1938,7 @@ namespace exodbc
 
 		nTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_NO_THROW(nTable.GetColumnValue(2, numStr));
+		EXPECT_NO_THROW(numStr = nTable.GetNumeric(2));
 		EXPECT_EQ(18, numStr.precision);
 		EXPECT_EQ(10, numStr.scale);
 		EXPECT_EQ(1, numStr.sign);
@@ -1948,7 +1948,7 @@ namespace exodbc
 
 		nTable.Select((boost::wformat(L"%s = 6") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_NO_THROW(nTable.GetColumnValue(2, numStr));
+		EXPECT_NO_THROW(numStr = nTable.GetNumeric(2));
 		EXPECT_EQ(18, numStr.precision);
 		EXPECT_EQ(10, numStr.scale);
 		EXPECT_EQ(0, numStr.sign);
@@ -2433,11 +2433,11 @@ namespace exodbc
 		SQL_NUMERIC_STRUCT numStr18_0, numStr18_10, numStr5_3;
 		nnTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(nnTable.SelectNext());
-		EXPECT_NO_THROW(nnTable.GetColumnValue(1, numStr18_0));
-		EXPECT_NO_THROW(nnTable.GetColumnValue(3, numStr5_3));
+		EXPECT_NO_THROW(numStr18_0 = nnTable.GetNumeric(1));
+		EXPECT_NO_THROW(numStr5_3 = nnTable.GetNumeric(3));
 		nnTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(nnTable.SelectNext());
-		EXPECT_NO_THROW(nnTable.GetColumnValue(2, numStr18_10));
+		EXPECT_NO_THROW(numStr18_10 = nnTable.GetNumeric(2));
 		nnTable.SelectClose();
 
 		// Remove everything, ignoring if there was any data:
@@ -2459,9 +2459,9 @@ namespace exodbc
 		sqlstmt = (boost::wformat(L"%s = %d") % idName % (SQLINTEGER)*pId).str();
 		nntTable.Select(sqlstmt);
 		EXPECT_TRUE(nntTable.SelectNext());
-		EXPECT_NO_THROW(nntTable.GetColumnValue(1, numStr18_0t));
-		EXPECT_NO_THROW(nntTable.GetColumnValue(2, numStr18_10t));
-		EXPECT_NO_THROW(nntTable.GetColumnValue(3, numStr5_3t));
+		EXPECT_NO_THROW(numStr18_0t = nntTable.GetNumeric(1));
+		EXPECT_NO_THROW(numStr18_10t = nntTable.GetNumeric(2));
+		EXPECT_NO_THROW(numStr5_3t = nntTable.GetNumeric(3));
 		nntTable.SelectClose();
 		EXPECT_EQ(0, memcmp(&numStr18_0, &numStr18_0t, sizeof(numStr18_0)));
 		EXPECT_EQ(0, memcmp(&numStr18_10, &numStr18_10t, sizeof(numStr18_10)));
