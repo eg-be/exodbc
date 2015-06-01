@@ -949,14 +949,6 @@ namespace exodbc
 	}
 
 
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		d = *pBuff;
-	}
-
-
 	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);

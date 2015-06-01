@@ -757,16 +757,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Access the current value of columnIndex as SQLDOUBLE.
-		* \details	Casts the value if casting is possible without loosing data.
-		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] d Reference to variable to copy value to.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		void		GetColumnValue(SQLSMALLINT columnIndex, SQLDOUBLE& d) const;
-
-
-		/*!
 		* \brief	Access the current value of columnIndex as SQL_DATE_STRUCT.
 		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
