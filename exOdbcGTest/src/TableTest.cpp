@@ -1274,14 +1274,14 @@ namespace exodbc
 		std::wstring idName = test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase);
 		charTypesAutoTable.Select((boost::wformat(L"%d = 1") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(1, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetWString(1));
 		EXPECT_EQ(std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), str);
 		EXPECT_FALSE(charTypesAutoTable.SelectNext());
 		charTypesAutoTable.SelectClose();
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 2") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(2, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetWString(2));
 		EXPECT_EQ(std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), str);
 
 		EXPECT_FALSE(charTypesAutoTable.SelectNext());
@@ -1289,7 +1289,7 @@ namespace exodbc
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 3") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(1, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetWString(1));
 		EXPECT_EQ(std::wstring(L"הצüאיט"), str);
 
 		EXPECT_FALSE(charTypesAutoTable.SelectNext());
@@ -1297,21 +1297,21 @@ namespace exodbc
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 4") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(2, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetWString(2));
 		EXPECT_EQ(std::wstring(L"הצüאיט"), str);
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 5") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(3, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetWString(3));
 		EXPECT_EQ(std::wstring(L"abc"), str);
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(4, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetWString(4));
 		EXPECT_EQ(std::wstring(L"abc"), str);
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 6") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(3, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetWString(3));
 		EXPECT_EQ(std::wstring(L"abcde12345"), str);
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(4, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetWString(4));
 		EXPECT_EQ(std::wstring(L"abcde12345"), str);
 
 		charTypesAutoTable.SelectClose();
@@ -1388,14 +1388,14 @@ namespace exodbc
 		std::wstring idName = test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase);
 		charTypesAutoTable.Select((boost::wformat(L"%d = 1") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(1, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetString(1));
 		EXPECT_EQ(std::string(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), str);
 		EXPECT_FALSE(charTypesAutoTable.SelectNext());
 		charTypesAutoTable.SelectClose();
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 2") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(2, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetString(2));
 		EXPECT_EQ(std::string(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), str);
 		
 		EXPECT_FALSE(charTypesAutoTable.SelectNext());
@@ -1403,7 +1403,7 @@ namespace exodbc
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 3") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(1, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetString(1));
 		EXPECT_EQ(std::string("הצüאיט"), str);
 
 		EXPECT_FALSE(charTypesAutoTable.SelectNext());
@@ -1411,21 +1411,21 @@ namespace exodbc
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 4") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(2, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetString(2));
 		EXPECT_EQ(std::string("הצüאיט"), str);
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 5") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(3, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetString(3));
 		EXPECT_EQ(std::string("abc"), str);
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(4, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetString(4));
 		EXPECT_EQ(std::string("abc"), str);
 
 		charTypesAutoTable.Select((boost::wformat(L"%d = 6") % idName).str());
 		EXPECT_TRUE(charTypesAutoTable.SelectNext());
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(3, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetString(3));
 		EXPECT_EQ(std::string("abcde12345"), str);
-		EXPECT_NO_THROW(charTypesAutoTable.GetColumnValue(4, str));
+		EXPECT_NO_THROW(str = charTypesAutoTable.GetString(4));
 		EXPECT_EQ(std::string("abcde12345"), str);
 
 		charTypesAutoTable.SelectClose();
@@ -1648,14 +1648,14 @@ namespace exodbc
 		wstring idName = test::GetIdColumnName(test::TableId::DATETYPES, m_odbcInfo.m_namesCase);
 		dTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(dTable.SelectNext());
-		EXPECT_NO_THROW(dTable.GetColumnValue(1, sDate));
+		EXPECT_NO_THROW(sDate = dTable.GetWString(1));
 		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
 		{
 			EXPECT_EQ(L"1983-01-26", sDate);
 		}
 
-		EXPECT_NO_THROW(dTable.GetColumnValue(2, sTime));
-		EXPECT_NO_THROW(dTable.GetColumnValue(3, sTimestamp));
+		EXPECT_NO_THROW(sTime = dTable.GetWString(2));
+		EXPECT_NO_THROW(sTimestamp = dTable.GetWString(3));
 
 		if (m_db.GetDbms() == DatabaseProduct::DB2)
 		{
@@ -2799,8 +2799,8 @@ namespace exodbc
 		std::string varchar2, char2;
 		t2.Select((boost::wformat(L"%s = 100") % idName).str());
 		EXPECT_TRUE(t2.SelectNext());
-		EXPECT_NO_THROW(t2.GetColumnValue(1, varchar2));
-		EXPECT_NO_THROW(t2.GetColumnValue(2, char2));
+		EXPECT_NO_THROW(varchar2 = t2.GetString(1));
+		EXPECT_NO_THROW(char2 = t2.GetString(2));
 		EXPECT_TRUE(t2.IsColumnNull(3));
 		EXPECT_TRUE(t2.IsColumnNull(4));
 		EXPECT_EQ(s, varchar2);
@@ -2811,8 +2811,8 @@ namespace exodbc
 		EXPECT_TRUE(t2.SelectNext());
 		EXPECT_TRUE(t2.IsColumnNull(1));
 		EXPECT_TRUE(t2.IsColumnNull(2));
-		EXPECT_NO_THROW(t2.GetColumnValue(3, varchar2));
-		EXPECT_NO_THROW(t2.GetColumnValue(4, char2));
+		EXPECT_NO_THROW(varchar2 = t2.GetString(3));
+		EXPECT_NO_THROW(char2 = t2.GetString(4));
 		EXPECT_EQ(s, varchar2);
 		EXPECT_EQ(s, char2);
 	}
@@ -2865,8 +2865,8 @@ namespace exodbc
 		std::wstring varchar2, char2;
 		t2.Select((boost::wformat(L"%s = 100") % idName).str());
 		EXPECT_TRUE(t2.SelectNext());
-		EXPECT_NO_THROW(t2.GetColumnValue(1, varchar2));
-		EXPECT_NO_THROW(t2.GetColumnValue(2, char2));
+		EXPECT_NO_THROW(varchar2 = t2.GetWString(1));
+		EXPECT_NO_THROW(char2 = t2.GetWString(2));
 		EXPECT_TRUE(t2.IsColumnNull(3));
 		EXPECT_TRUE(t2.IsColumnNull(4));
 		EXPECT_EQ(s, varchar2);
@@ -2877,8 +2877,8 @@ namespace exodbc
 		EXPECT_TRUE(t2.SelectNext());
 		EXPECT_TRUE(t2.IsColumnNull(1));
 		EXPECT_TRUE(t2.IsColumnNull(2));
-		EXPECT_NO_THROW(t2.GetColumnValue(3, varchar2));
-		EXPECT_NO_THROW(t2.GetColumnValue(4, char2));
+		EXPECT_NO_THROW(varchar2 = t2.GetWString(3));
+		EXPECT_NO_THROW(char2 = t2.GetWString(4));
 		EXPECT_EQ(s, varchar2);
 		EXPECT_EQ(s, char2);
 	}
@@ -3249,24 +3249,24 @@ namespace exodbc
 		cTable.Select((boost::wformat(L"%s = 100") % idName).str());
 		EXPECT_TRUE(cTable.SelectNext());
 		std::wstring s2;
-		EXPECT_NO_THROW(cTable.GetColumnValue(1, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetWString(1));
 		EXPECT_EQ(s100, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(2, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetWString(2));
 		EXPECT_EQ(s100, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(3, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetWString(3));
 		EXPECT_EQ(s100, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(4, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetWString(4));
 		EXPECT_EQ(s100, s2);
 
 		cTable.Select((boost::wformat(L"%s = 101") % idName).str());
 		EXPECT_TRUE(cTable.SelectNext());
-		EXPECT_NO_THROW(cTable.GetColumnValue(1, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetWString(1));
 		EXPECT_EQ(s101, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(2, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetWString(2));
 		EXPECT_EQ(s101, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(3, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetWString(3));
 		EXPECT_EQ(s101, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(4, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetWString(4));
 		EXPECT_EQ(s101, s2);
 	}
 
@@ -3316,24 +3316,24 @@ namespace exodbc
 		cTable.Select((boost::wformat(L"%s = 100") % idName).str());
 		EXPECT_TRUE(cTable.SelectNext());
 		std::string s2;
-		EXPECT_NO_THROW(cTable.GetColumnValue(1, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetString(1));
 		EXPECT_EQ(s100, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(2, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetString(2));
 		EXPECT_EQ(s100, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(3, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetString(3));
 		EXPECT_EQ(s100, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(4, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetString(4));
 		EXPECT_EQ(s100, s2);
 
 		cTable.Select((boost::wformat(L"%s = 101") % idName).str());
 		EXPECT_TRUE(cTable.SelectNext());
-		EXPECT_NO_THROW(cTable.GetColumnValue(1, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetString(1));
 		EXPECT_EQ(s101, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(2, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetString(2));
 		EXPECT_EQ(s101, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(3, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetString(3));
 		EXPECT_EQ(s101, s2);
-		EXPECT_NO_THROW(cTable.GetColumnValue(4, s2));
+		EXPECT_NO_THROW(s2 = cTable.GetString(4));
 		EXPECT_EQ(s101, s2);
 	}
 
