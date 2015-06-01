@@ -949,40 +949,6 @@ namespace exodbc
 	}
 
 
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		date = *pBuff;
-	}
-
-
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& time) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		time = *pBuff;
-	}
-
-
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& timestamp) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		timestamp = *pBuff;
-	}
-
-
-#if HAVE_MSODBCSQL_H
-	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const
-	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		time2 = *pBuff;
-	}
-#endif
-
-
 	void Table::GetColumnValue(SQLSMALLINT columnIndex, SQL_NUMERIC_STRUCT& numeric) const
 	{
 		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);

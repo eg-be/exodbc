@@ -757,49 +757,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Access the current value of columnIndex as SQL_DATE_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data.
-		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] date Reference to variable to copy value to.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_DATE_STRUCT& date) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_TIME_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data.
-		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] time Reference to variable to copy value to.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIME_STRUCT& time) const;
-		
-		
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_TIMESTAMP_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data.
-		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] timestamp Reference to variable to copy value to.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_TIMESTAMP_STRUCT& timestamp) const;
-
-
-#if HAVE_MSODBCSQL_H
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_SS_TIME2_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data.
-		*			This function is only available if HAVE_MSODBCSQL_H is defined to 1
-		* \param	columnIndex Zero based index of a bound column.
-		* \param [in,out] time2 Reference to variable to copy value to.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		void		GetColumnValue(SQLSMALLINT columnIndex, SQL_SS_TIME2_STRUCT& time2) const;
-#endif
-
-
-		/*!
 		* \brief	Access the current value of columnIndex as SQL_NUMERIC_STRUCT.
 		* \details	Casts the value if casting is possible without loosing data.
 		* \param	columnIndex Zero based index of a bound column.
