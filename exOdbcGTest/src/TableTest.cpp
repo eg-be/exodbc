@@ -1510,9 +1510,9 @@ namespace exodbc
 			LogLevelError llE;
 			EXPECT_TRUE(dTable.SelectNext());
 		}
-		EXPECT_NO_THROW(dTable.GetColumnValue(1, date));
-		EXPECT_NO_THROW(dTable.GetColumnValue(2, time));
-		EXPECT_NO_THROW(dTable.GetColumnValue(3, timestamp));
+		EXPECT_NO_THROW(date = dTable.GetDate(1));
+		EXPECT_NO_THROW(time = dTable.GetTime(2));
+		EXPECT_NO_THROW(timestamp = dTable.GetTimeStamp(3));
 
 		EXPECT_EQ(26, date.day);
 		EXPECT_EQ(1, date.month);
@@ -1532,7 +1532,7 @@ namespace exodbc
 		// Test some digits stuff
 		dTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(dTable.SelectNext());
-		EXPECT_NO_THROW(dTable.GetColumnValue(3, timestamp));
+		EXPECT_NO_THROW(timestamp = dTable.GetTimeStamp(3));
 		// In IBM DB2 we have 6 digits for the fractions of a timestamp 123456 turns into 123'456'000
 		if (m_db.GetDbms() == DatabaseProduct::DB2)
 		{
@@ -1550,7 +1550,7 @@ namespace exodbc
 
 		dTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(dTable.SelectNext());
-		EXPECT_NO_THROW(dTable.GetColumnValue(3, timestamp));
+		EXPECT_NO_THROW(timestamp = dTable.GetTimeStamp(3));
 		if ( ! (m_db.GetDbms() == DatabaseProduct::MY_SQL || m_db.GetDbms() == DatabaseProduct::ACCESS))
 		{
 			EXPECT_EQ(10000000, timestamp.fraction);
@@ -1578,14 +1578,14 @@ namespace exodbc
 		ASSERT_NO_THROW(dTable38.Open(db38));
 		dTable38.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(dTable38.SelectNext());
-		EXPECT_NO_THROW(dTable38.GetColumnValue(2, time));
+		EXPECT_NO_THROW(time = dTable38.GetTime(2));
 		EXPECT_EQ(13, time.hour);
 		EXPECT_EQ(55, time.minute);
 		EXPECT_EQ(56, time.second);
 
 		// We should be able to read the value as TIME2 struct
 		SQL_SS_TIME2_STRUCT t2;
-		EXPECT_NO_THROW(dTable38.GetColumnValue(2, t2));
+		EXPECT_NO_THROW(t2 = dTable38.GetTime2(2));
 		EXPECT_EQ(13, t2.hour);
 		EXPECT_EQ(55, t2.minute);
 		EXPECT_EQ(56, t2.second);
