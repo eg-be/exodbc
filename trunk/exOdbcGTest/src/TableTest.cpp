@@ -157,9 +157,9 @@ namespace exodbc
 		SQLINTEGER i = 0;
 		SQLBIGINT bi = 0;
 		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), &id, SQL_C_SLONG, sizeof(id), CF_SELECT);
-		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), &si, SQL_C_SSHORT, sizeof(si), CF_SELECT);
-		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), &i, SQL_C_SLONG, sizeof(i), CF_NONE);
-		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
+		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_NULLABLE);
+		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), &i, SQL_C_SLONG, sizeof(i), CF_NONE | CF_NULLABLE);
+		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_NULLABLE);
 
 		ASSERT_NO_THROW(iTable.Open(m_db));
 		// We expect all columnBuffers to be bound, except nr 2
