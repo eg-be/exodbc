@@ -713,7 +713,7 @@ namespace exodbc
 	{
 		BufferVariant var;
 
-		if (IsNull())
+		if (IsNullable() && IsNull())
 		{
 			var = NullValue::IS_NULL;
 			return var;

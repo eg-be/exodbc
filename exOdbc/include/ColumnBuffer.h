@@ -428,10 +428,10 @@ namespace exodbc
 		* \details	Return a BufferVariant with the value of this ColumnBuffer.
 		*			No conversion is done, depending on the type of the internal buffer allocated
 		*			a corresponding value object is created in BufferVariant.
+		*			If the column has the ColumnFlag::CF_NULLABLE set, and the value is NULL,
+		*			NullValue::IS_NULL is returned.
 		* \throw	Exception If the internal buffer cannot be assigned to a value held by BufferVariant.
 		*			This is the case mostly for binary data.
-		*			Note that it will not throw if the value is a NULL value, the BufferVariant will hold
-		*			the NullValue::IS_NULL indicator then.
 		*/
 		BufferVariant GetValue() const;
 
