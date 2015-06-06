@@ -49,7 +49,7 @@ namespace exodbc
 		m_env.SetOdbcVersion(OdbcVersion::V_3);
 
 		// And the db
-		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 	

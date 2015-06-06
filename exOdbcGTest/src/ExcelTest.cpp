@@ -57,7 +57,7 @@ namespace exodbc
 	TEST_F(ExcelTest, OpenDatabase)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
 		// We cannot set Commit-mode on excel
 		EXPECT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 	}
@@ -66,7 +66,7 @@ namespace exodbc
 	TEST_F(ExcelTest, FindTables)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
 		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		STableInfosVector tables;
 		ASSERT_NO_THROW(tables = db.FindTables(L"", L"", L"", L""));
@@ -87,7 +87,7 @@ namespace exodbc
 	TEST_F(ExcelTest, OpenAutoTableAsWChar)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
 		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		// Create Table
 		Table tTable(&db, L"TestTable$", L"", L"", L"", AF_READ);
@@ -101,7 +101,7 @@ namespace exodbc
 	{
 		// See Ticket #111 - this is fixed and no workarounds are needed
 		Database db;
-		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
 		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		Table tTable(&db, L"TestTable$", L"", L"", L"", AF_READ);
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
@@ -148,7 +148,7 @@ namespace exodbc
 	TEST_F(ExcelTest, SelectManualWCharValues)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
 		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		// Find the correct table:
 		STableInfo tableInfo;
@@ -194,7 +194,7 @@ namespace exodbc
 	TEST_F(ExcelTest, SelectAutoWCharValues)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
 		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
 		// Find the correct table:
 		STableInfo tableInfo;
