@@ -55,7 +55,7 @@ namespace exodbc
 		m_odbcInfo = GetParam();
 		m_env.AllocateEnvironmentHandle();
 		m_env.SetOdbcVersion(OdbcVersion::V_3);
-		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
@@ -70,7 +70,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, SetConnectionAttributes)
 	{
-		Database db(m_env);
+		Database db(&m_env);
 
 		EXPECT_NO_THROW(db.SetConnectionAttributes());
 	}
@@ -145,19 +145,19 @@ namespace exodbc
 		// Open an existing db by passing the Env to the ctor
 		Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(env.HasEnvironmentHandle());
-		Database db(env);
+		Database db(&env);
 		EXPECT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		EXPECT_NO_THROW(db.Close());
 
 		// Open an existing db using the default c'tor and setting params on db
 		Database db2;
-		ASSERT_NO_THROW(db2.AllocateConnectionHandle(env));
+		ASSERT_NO_THROW(db2.AllocateConnectionHandle(&env));
 		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		EXPECT_NO_THROW(db2.Close());
 
 		// Try to open with a different password / user, expect to fail when opening the db.
 		{
-			Database failDb(m_env);
+			Database failDb(&m_env);
 			EXPECT_THROW(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"), SqlResultException);
 		}
 	}
@@ -167,7 +167,7 @@ namespace exodbc
 	TEST_P(DatabaseTest, Close)
 	{
 		// Try to close a db that really is open
-		Database db1(m_env);
+		Database db1(&m_env);
 		ASSERT_NO_THROW(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		EXPECT_NO_THROW(db1.Close());
@@ -186,7 +186,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, SetCommitMode)
 	{
-		Database db(m_env);
+		Database db(&m_env);
 		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		// We default to manual commit
@@ -209,7 +209,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadDataTypesInfo)
 	{
-		Database db(m_env);
+		Database db(&m_env);
 
 		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
@@ -278,7 +278,7 @@ namespace exodbc
 		// BUT: Microsoft SQL Server will just block the second database while a transaction is open
 		// We need to examine that behavior, it must be some option. -> Yes, it is the SNAPSHOT Transaction isolation
 		{
-			Database db2(m_env);
+			Database db2(&m_env);
 			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 			// This is extremely confusing: Why do we need to switch to AUTO_COMMIT to set the transaction mode to SNAPSHOT?
 			// Note: Setting the transaction mode works always, but doing a query afterwards only if it was set during an auto-commit-mode ?? 
@@ -312,7 +312,7 @@ namespace exodbc
 		// Once we commit we have one record, also in a different database
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
-		Database db2(m_env);
+		Database db2(&m_env);
 		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		{
 			exodbc::Table iTable2(&m_db, tableName, L"", L"", L"", AF_READ);

@@ -74,7 +74,7 @@ namespace exodbc
 		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
 		ASSERT_NO_THROW(env.SetOdbcVersion(OdbcVersion::V_3));
 		{
-			Database db(env);
+			Database db(&env);
 			EXPECT_THROW(env.FreeEnvironmentHandle(), SqlResultException);
 		}
 

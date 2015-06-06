@@ -82,7 +82,7 @@ namespace exodbc
 		m_env.SetOdbcVersion(OdbcVersion::V_3);
 
 		// And database
-		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(m_env));
+		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
 		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 	}
 
@@ -434,7 +434,7 @@ namespace exodbc
 		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			// We only have a Read-only user for ms sql server
-			Database db(m_env);
+			Database db(&m_env);
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"exReadOnly", L"exReadOnly"));
 
 			// Test to open a table read-only
@@ -1561,7 +1561,7 @@ namespace exodbc
 #if HAVE_MSODBCSQL_H
 		Environment env38(OdbcVersion::V_3_8);
 		EXPECT_TRUE(env38.HasEnvironmentHandle());
-		Database db38(env38);
+		Database db38(&env38);
 		EXPECT_TRUE(db38.HasConnectionHandle());
 		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
 		{

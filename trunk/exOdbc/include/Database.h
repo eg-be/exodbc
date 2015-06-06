@@ -125,12 +125,12 @@ namespace exodbc
 		*			Environment.
 		* \details	The Database will try to create a new Db-Connection handle during construction.
 		*			The handle will be freed by the Database on destruction.
-		* \param	env		The Environment to use to create this database and its connection.
+		* \param	pEnv		The Environment to use to create this database and its connection.
 		*						Do not free the Environment before you free the Database.
 		* \throw	Exception If handles cannot be allocated, or passed Environment does not have an
 		*			Environment handle to be used.
 		*/
-		Database(const Environment& env);
+		Database(const Environment* pEnv);
 		
 	private:
 		/*!
@@ -146,17 +146,18 @@ namespace exodbc
 		* \brief	Tries to allocate a new DBC-Handle from the passed Environment and stores that
 		*			DBC-Handle for later use internally. Will be freed on destruction.
 		*			Reads the ODBC Version from the Environment and remembers it internally.
+		*			Remembers the Environment.
 		* \details	The Database will try to create a new Db-Connection using the Environment-handle
 		*			from the passed Environment. This newly created Connection-Handle is stored 
 		*			for later use. 
 		*			The DBC-handle will be freed by the Database on destruction.
-		*			Can only be called if no handle is allocated yet
-		* \param	env		The Environment to use to create this connection-handle.
+		*			Can only be called if no handle is allocated yet.
+		* \param	pEnv		The Environment to use to create this connection-handle.
 		*						Do not free the Environment before you free the Database.
 		* \throw	Exception If a handle is already allocated, allocating fails or reading the ODBC-
 		*			version from the Environment fails.
 		*/
-		void		AllocateConnectionHandle(const Environment& env);
+		void		AllocateConnectionHandle(const Environment* pEnv);
 
 
 		/*!
@@ -644,6 +645,7 @@ namespace exodbc
 
 		// Members
 		// -------
+		const Environment*	m_pEnv;		///< Environment of this Databaes
 		SDbInfo				m_dbInf;
 
 		SqlTypeInfosVector m_datatypes;	///< Queried from DB during Open
