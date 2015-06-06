@@ -268,8 +268,8 @@ namespace exodbc
 	TEST_P(DatabaseTest, CommitTransaction)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
 
 		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
 		ASSERT_NO_THROW(test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, test::ValueIndicator::IS_NULL, false));
@@ -290,8 +290,8 @@ namespace exodbc
 			{
 #if HAVE_MSODBCSQL_H
 				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TransactionIsolationMode::SNAPSHOT));
-				exodbc::Table iTable2(db2, tableName, L"", L"", L"", AF_READ);
-				ASSERT_NO_THROW(iTable2.Open(db2));
+				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", AF_READ);
+				ASSERT_NO_THROW(iTable2.Open());
 				iTable2.Select();
 				EXPECT_FALSE(iTable2.SelectNext());
 #else
@@ -302,8 +302,8 @@ namespace exodbc
 			else
 			{
 				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TransactionIsolationMode::READ_COMMITTED));
-				exodbc::Table iTable2(db2, tableName, L"", L"", L"", AF_READ);
-				ASSERT_NO_THROW(iTable2.Open(db2));
+				exodbc::Table iTable2(&db2, tableName, L"", L"", L"", AF_READ);
+				ASSERT_NO_THROW(iTable2.Open());
 				iTable2.Select();
 				EXPECT_FALSE(iTable2.SelectNext());
 			}
@@ -315,8 +315,8 @@ namespace exodbc
 		Database db2(m_env);
 		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		{
-			exodbc::Table iTable2(m_db, tableName, L"", L"", L"", AF_READ);
-			ASSERT_NO_THROW(iTable2.Open(m_db));
+			exodbc::Table iTable2(&m_db, tableName, L"", L"", L"", AF_READ);
+			ASSERT_NO_THROW(iTable2.Open());
 			iTable2.Select();
 			EXPECT_TRUE(iTable2.SelectNext());
 		}
@@ -326,8 +326,8 @@ namespace exodbc
 	TEST_P(DatabaseTest, RollbackTransaction)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
 
 		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
 

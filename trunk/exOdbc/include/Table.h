@@ -32,7 +32,6 @@
 
 // Same component headers
 #include "exOdbc.h"
-#include "Database.h"
 #include "ColumnBuffer.h"
 #include "TablePrivileges.h"
 #include "TablePrimaryKeys.h"
@@ -46,6 +45,7 @@
 // --------------------
 namespace exodbc
 {
+	class Database;
 	class ColumnBuffer;
 }
 
@@ -103,7 +103,7 @@ namespace exodbc
 		*			This is handy if you've located the detailed table-information already from the Database
 		*			using its Database::FindTables() function and want to avoid that is operation is
 		*			executed again during Open().
-		* \param	db		The Database this Table belongs to. Do not free the Database before
+		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	tableInfo Definition of the table.
 		* \param	afs Define if the table shall be opened read-only or not, determines how many statements are allocated
@@ -111,7 +111,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database& db, const STableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
+		Table(const Database* pDb, const STableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
 
 
 		/*!
@@ -123,7 +123,7 @@ namespace exodbc
 		*			If any of the values is an empty string it is ignored when searching for the table
 		*			in the database.
 		*
-		* \param	db		The Database this Table belongs to. Do not free the Database before
+		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	tableName	Table name
 		* \param	schemaName	Schema name
@@ -134,7 +134,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database& db, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", AccessFlags afs = AF_READ_WRITE);
+		Table(const Database* pDb, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", AccessFlags afs = AF_READ_WRITE);
 
 
 		/*!
@@ -144,7 +144,7 @@ namespace exodbc
 		*			If any of the values is an empty string it is ignored when searching for the table
 		*			in the database.
 		*
-		* \param	db		The Database this Table belongs to. Do not free the Database before
+		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	numColumns The number of columns of the Table. Note: This must not be equal
 		*			with the number of Columns you define later (but it must be larger or equal).
@@ -159,7 +159,7 @@ namespace exodbc
 		* \see		SetColumn()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database& db, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", AccessFlags afs = AF_READ_WRITE);
+		Table(const Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", AccessFlags afs = AF_READ_WRITE);
 
 
 		/*!
@@ -171,7 +171,7 @@ namespace exodbc
 		*			using its Database::FindTables() function and want to avoid that is operation is
 		*			executed again during Open().
 		*
-		* \param	db		The Database this Table belongs to. Do not free the Database before
+		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
 		* \param	numColumns The number of columns of the Table. Note: This must not be equal
 		*			with the number of Columns you define later (but it must be larger or equal).
@@ -183,7 +183,7 @@ namespace exodbc
 		* \see		SetColumn()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database& db, SQLSMALLINT numColumns, const STableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
+		Table(const Database* pDb, SQLSMALLINT numColumns, const STableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
 
 	private:
 
@@ -199,18 +199,6 @@ namespace exodbc
 
 	public:
 		virtual ~Table();
-
-
-		/*!
-		* \brief	Allocate the statement handles required by this Table.
-		* \details Allocates the statements using the connection handle from the passed Database.
-		*			Do not free the Database before freeing this Table.
-		* \param	db Database this Table belongs to.
-		* \see		HasStatements()
-		*
-		* \throw	Exception If any of the handles to be allocated is not null currently.
-		*/
-		void AllocateStatements(const Database& db);
 
 
 		/*!
@@ -235,7 +223,6 @@ namespace exodbc
 		*			If columns have been defined manually using SetColumn(),
 		*			the buffers passed there are used to bind only those columns defined manually.
 		*
-		* \param	db The Database this table belongs to.
 		* \param	openFlags Set flags how to open the Table:
 		*  - TOF_CHECK_PRIVILEGES:  
 		*			If set, the database will be queried checking if the current user
@@ -278,7 +265,7 @@ namespace exodbc
 		* \see		SetColumn()
 		* \throw	Exception If already open, table is not found, columns fail to bind..
 		*/
-		void		Open(const Database& db, TableOpenFlags openFlags = TOF_CHECK_EXISTANCE);
+		void		Open(TableOpenFlags openFlags = TOF_CHECK_EXISTANCE);
 
 
 		/*!
@@ -338,7 +325,7 @@ namespace exodbc
 		*			required for the current AccessFlags set.
 		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
 		*/
-		void		SetAccessFlag(const Database& db, AccessFlag ac);
+		void		SetAccessFlag(AccessFlag ac);
 
 
 		/*!
@@ -351,7 +338,7 @@ namespace exodbc
 		*			required for the current AccessFlags set.
 		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
 		*/
-		void		ClearAccessFlag(const Database& db, AccessFlag ac);
+		void		ClearAccessFlag(AccessFlag ac);
 
 
 		/*!
@@ -365,7 +352,7 @@ namespace exodbc
 		*			required for the current AccessFlags set.
 		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
 		*/
-		void		SetAccessFlags(const Database& db, AccessFlags acs);
+		void		SetAccessFlags(AccessFlags acs);
 
 
 		/*!
@@ -788,7 +775,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Return a set of columnIndexes for the ColumnBuffers of this Table.
-		* \details	Returns the Keyset of the internal ColumnBufferMap
+		* \details	Returns the keyset of the internal ColumnBufferMap
 		*/
 		std::set<SQLSMALLINT> GetColumnBufferIndexes() const throw();
 
@@ -887,6 +874,17 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Allocate the statement handles required by this Table.
+		* \details  Allocates the statements using the connection handle from the Database
+		*			passed in Constructor.
+		* \see		HasStatements()
+		*
+		* \throw	Exception If any of the handles to be allocated is not null currently.
+		*/
+		void AllocateStatements();
+
+
+		/*!
 		* \brief	Creates the ColumnBuffers for the table.
 		* \detailed	Can only be called if m_manulColumns is set to false. Will query the Database about the
 		*			column of the table and allocate corresponding column buffers.
@@ -899,7 +897,7 @@ namespace exodbc
 		*			to bind, the keys will so something like 1, 3, 4, .. 
 		* \throw	Exception If m_manualColumns is set to true, or m_columnBuffers is not empty, or creation of ColumnBuffers fails.
 		*/
-		void		CreateAutoColumnBuffers(const Database& db, const STableInfo& tableInfo, bool skipUnsupportedColumns);
+		void		CreateAutoColumnBuffers(const STableInfo& tableInfo, bool skipUnsupportedColumns);
 
 		
 		/*!
@@ -953,6 +951,7 @@ namespace exodbc
 		*/
 		ColumnBuffer* GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const;
 
+		const Database* m_pDb;	///< Database this table belongs to.
 
 		// ODBC Handles
 		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.

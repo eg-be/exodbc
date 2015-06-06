@@ -34,6 +34,7 @@
 // Same component headers
 #include "Helpers.h"
 #include "ColumnBuffer.h"
+#include "Database.h"
 #include "Environment.h"
 #include "Exception.h"
 
@@ -48,7 +49,7 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	Table::Table(const Database& db, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
+	Table::Table(const Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(numColumns)
 		, m_manualColumns(true)
 		, m_initialTableName(tableName)
@@ -57,17 +58,18 @@ namespace exodbc
 		, m_initialTypeName(tableType)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
+		, m_pDb(pDb)
 	{
-		exASSERT(db.IsOpen());
+		exASSERT(m_pDb->IsOpen());
 		
 		Initialize();
-		SetAccessFlags(db, afs);
+		SetAccessFlags(afs);
 		// statements should now be allocated
 		exASSERT(HasAllStatements());
 	}
 
 
-	Table::Table(const Database& db, SQLSMALLINT numColumns, const STableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
+	Table::Table(const Database* pDb, SQLSMALLINT numColumns, const STableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(numColumns)
 		, m_manualColumns(true)
 		, m_initialTableName(L"")
@@ -77,17 +79,18 @@ namespace exodbc
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
 		, m_accessFlags(AF_NONE)
+		, m_pDb(pDb)
 	{
-		exASSERT(db.IsOpen());
+		exASSERT(m_pDb->IsOpen());
 		
 		Initialize();
-		SetAccessFlags(db, afs);
+		SetAccessFlags(afs);
 		// statements should now be allocated
 		exASSERT(HasAllStatements());
 	}
 
 
-	Table::Table(const Database& db, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
+	Table::Table(const Database* pDb, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
 		, m_initialTableName(tableName)
@@ -96,17 +99,18 @@ namespace exodbc
 		, m_initialTypeName(tableType)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
+		, m_pDb(pDb)
 	{
-		exASSERT(db.IsOpen());
+		exASSERT(m_pDb->IsOpen());
 
 		Initialize();
-		SetAccessFlags(db, afs);
+		SetAccessFlags(afs);
 		// statements should now be allocated
 		exASSERT(HasAllStatements());
 	}
 
 
-	Table::Table(const Database& db, const STableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
+	Table::Table(const Database* pDb, const STableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
 		, m_initialTableName(L"")
@@ -116,11 +120,12 @@ namespace exodbc
 		, m_haveTableInfo(true)
 		, m_tableInfo(tableInfo)
 		, m_accessFlags(AF_NONE)
+		, m_pDb(pDb)
 	{
-		exASSERT(db.IsOpen());
+		exASSERT(m_pDb->IsOpen());
 		
 		Initialize();
-		SetAccessFlags(db, afs);
+		SetAccessFlags(afs);
 		// statements should now be allocated
 		exASSERT(HasAllStatements());
 	}
@@ -187,10 +192,10 @@ namespace exodbc
 	}
 
 
-	void Table::AllocateStatements(const Database& db)
+	void Table::AllocateStatements()
 	{
 		exASSERT(!IsOpen());
-		exASSERT(db.IsOpen());
+		exASSERT(m_pDb->IsOpen());
 
 		exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
 		exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
@@ -199,34 +204,36 @@ namespace exodbc
 		exASSERT(SQL_NULL_HSTMT == m_hStmtDeleteWhere);
 		exASSERT(SQL_NULL_HSTMT == m_hStmtUpdateWhere);
 
+		SQLHDBC hdbc = m_pDb->GetConnectionHandle();
+
 		// Allocate handles needed
 		if (TestAccessFlag(AF_SELECT))
 		{
-			m_hStmtCount = AllocateStatementHandle(db.GetConnectionHandle());
-			m_hStmtSelect = AllocateStatementHandle(db.GetConnectionHandle());
+			m_hStmtCount = AllocateStatementHandle(hdbc);
+			m_hStmtSelect = AllocateStatementHandle(hdbc);
 		}
 
 		// Allocate handles needed for writing
 		if (TestAccessFlag(AF_INSERT))
 		{
-			m_hStmtInsert = AllocateStatementHandle(db.GetConnectionHandle());
+			m_hStmtInsert = AllocateStatementHandle(hdbc);
 		}
 		if (TestAccessFlag(AF_UPDATE_PK))
 		{
-			m_hStmtUpdate = AllocateStatementHandle(db.GetConnectionHandle());
+			m_hStmtUpdate = AllocateStatementHandle(hdbc);
 		}
 		if (TestAccessFlag(AF_UPDATE_WHERE))
 		{
-			m_hStmtUpdateWhere = AllocateStatementHandle(db.GetConnectionHandle());
+			m_hStmtUpdateWhere = AllocateStatementHandle(hdbc);
 		}
 
 		if (TestAccessFlag(AF_DELETE_PK))
 		{
-			m_hStmtDelete = AllocateStatementHandle(db.GetConnectionHandle());
+			m_hStmtDelete = AllocateStatementHandle(hdbc);
 		}
 		if (TestAccessFlag(AF_DELETE_WHERE))
 		{
-			m_hStmtDeleteWhere = AllocateStatementHandle(db.GetConnectionHandle());
+			m_hStmtDeleteWhere = AllocateStatementHandle(hdbc);
 		}
 	}
 
@@ -262,17 +269,18 @@ namespace exodbc
 	}
 
 
-	void Table::CreateAutoColumnBuffers(const Database& db, const STableInfo& tableInfo, bool skipUnsupportedColumns)
+	void Table::CreateAutoColumnBuffers(const STableInfo& tableInfo, bool skipUnsupportedColumns)
 	{
 		exASSERT(m_manualColumns == false);
 		exASSERT(m_columnBuffers.size() == 0);
 		exASSERT(m_numCols == 0);
+		exASSERT(m_pDb->IsOpen());
 
 		// Nest try-catch to always free eventually allocated buffers
 		try
 		{
 			// Will throw if fails
-			ColumnInfosVector columns = db.ReadTableColumnInfo(tableInfo);
+			ColumnInfosVector columns = m_pDb->ReadTableColumnInfo(tableInfo);
 			// Remember column sizes and create ColumnBuffers
 			m_numCols = columns.size();
 			if (m_numCols == 0)
@@ -282,7 +290,7 @@ namespace exodbc
 				throw ex;
 			}
 			// We need to know which ODBC version we are using, might throw
-			OdbcVersion odbcVersion = db.GetMaxSupportedOdbcVersion();
+			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
 			// And how to open this column
 			ColumnFlags columnFlags = CF_NONE;
 			if (TestAccessFlag(AF_SELECT))
@@ -991,15 +999,15 @@ namespace exodbc
 	}
 
 
-	void Table::Open(const Database& db, TableOpenFlags openFlags /* = TOF_CHECK_EXISTANCE */)
+	void Table::Open(TableOpenFlags openFlags /* = TOF_CHECK_EXISTANCE */)
 	{
-		exASSERT(db.IsOpen());
+		exASSERT(m_pDb->IsOpen());
 		exASSERT(!IsOpen());
 		exASSERT(HasAllStatements());
 		// \note: We do not force a user to define columns.
 
 		// Set TOF_DO_NOT_QUERY_PRIMARY_KEYS this flag for Access, Access does not support SQLPrimaryKeys
-		if (db.GetDbms() == DatabaseProduct::ACCESS)
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
 			openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
 		}
@@ -1017,7 +1025,7 @@ namespace exodbc
 			if (!m_haveTableInfo)
 			{
 				// Finding will throw if not exactly one is found
-				m_tableInfo = db.FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
+				m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
 				m_haveTableInfo = true;
 				searchedTable = true;
 			}
@@ -1029,24 +1037,24 @@ namespace exodbc
 				// Will throw if not one is found
 				std::wstring catalogName = m_tableInfo.m_catalogName;
 				std::wstring typeName = m_tableInfo.m_tableType;
-				if (db.GetDbms() == DatabaseProduct::EXCEL)
+				if (m_pDb->GetDbms() == DatabaseProduct::EXCEL)
 				{
 					// workaround for #111
 					catalogName = L"";
 					typeName = L"";
 				}
-				db.FindOneTable(m_tableInfo.m_tableName, m_tableInfo.m_schemaName, catalogName, typeName);
+				m_pDb->FindOneTable(m_tableInfo.m_tableName, m_tableInfo.m_schemaName, catalogName, typeName);
 				searchedTable = true;
 			}
 
 			// Set the hints for the Table-Query name depending on the Database
 			// If this is an excel-db, we must search for a table named 'foo$', but query using '[foo$]'. See Ticket #111. Set the corresponding hint on the tableInfo-object
 			// maybe excel also has the full path
-			if (db.GetDbms() == DatabaseProduct::EXCEL)
+			if (m_pDb->GetDbms() == DatabaseProduct::EXCEL)
 			{
 				m_tableInfo.SetSqlNameHint(TableQueryNameHint::EXCEL);
 			}
-			if (db.GetDbms() == DatabaseProduct::ACCESS)
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
 				m_tableInfo.SetSqlNameHint(TableQueryNameHint::TABLE_ONLY);
 			}
@@ -1055,7 +1063,7 @@ namespace exodbc
 			// If we are asked to create our columns automatically, read the column information and create the buffers
 			if (!m_manualColumns)
 			{
-				CreateAutoColumnBuffers(db, m_tableInfo, (openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS);
+				CreateAutoColumnBuffers(m_tableInfo, (openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS);
 			}
 			else
 			{
@@ -1090,7 +1098,7 @@ namespace exodbc
 			// Optionally check privileges
 			if ((openFlags & TOF_CHECK_PRIVILEGES) == TOF_CHECK_PRIVILEGES)
 			{
-				m_tablePrivileges.Initialize(db, m_tableInfo);
+				m_tablePrivileges.Initialize(m_pDb, m_tableInfo);
 				// We always need to be able to select, but the rest only if we want to write
 				if ((TestAccessFlag(AF_SELECT) && !m_tablePrivileges.IsSet(TP_SELECT))
 					|| (TestAccessFlag(AF_UPDATE_PK) && !m_tablePrivileges.IsSet(TP_UPDATE))
@@ -1156,7 +1164,7 @@ namespace exodbc
 				}
 				else
 				{
-					m_tablePrimaryKeys.Initialize(db, m_tableInfo);
+					m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo);
 				}
 
 				// And we need to have a primary key
@@ -1282,7 +1290,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetAccessFlag(const Database& db, AccessFlag ac)
+	void Table::SetAccessFlag(AccessFlag ac)
 	{
 		exASSERT(!IsOpen());
 
@@ -1293,11 +1301,11 @@ namespace exodbc
 		}
 
 		AccessFlags newFlags = ( m_accessFlags | ac );
-		SetAccessFlags(db, newFlags);
+		SetAccessFlags(newFlags);
 	}
 
 
-	void Table::ClearAccessFlag(const Database& db, AccessFlag ac)
+	void Table::ClearAccessFlag(AccessFlag ac)
 	{
 		exASSERT(!IsOpen());
 
@@ -1308,14 +1316,14 @@ namespace exodbc
 		}
 
 		AccessFlags newFlags = ( m_accessFlags & ~ac );
-		SetAccessFlags(db, newFlags);
+		SetAccessFlags(newFlags);
 	}
 
 
-	void Table::SetAccessFlags(const Database& db, AccessFlags acs)
+	void Table::SetAccessFlags(AccessFlags acs)
 	{
 		exASSERT(!IsOpen());
-		exASSERT(db.IsOpen());
+		exASSERT(m_pDb->IsOpen());
 
 		if (m_accessFlags == acs)
 		{
@@ -1326,7 +1334,7 @@ namespace exodbc
 		// Free statements, then re-allocate all
 		FreeStatements();
 		m_accessFlags = acs;
-		AllocateStatements(db);
+		AllocateStatements();
 	}
 
 

@@ -34,8 +34,8 @@ namespace exodbc
 {
 	// IntTypesTable
 	// ---------------
-	MIntTypesTable::MIntTypesTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"IntegerTypes" */)
-		: Table(db, 4, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
+	MIntTypesTable::MIntTypesTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"IntegerTypes" */)
+		: Table(pDb, 4, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
 	{
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
@@ -51,8 +51,8 @@ namespace exodbc
 
 	// FloatTypesTable
 	// ---------------
-	MFloatTypesTable::MFloatTypesTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"FloatTypes" */)
-		: Table(db, 3, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
+	MFloatTypesTable::MFloatTypesTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"FloatTypes" */)
+		: Table(pDb, 3, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
 	{
 		m_idFloatTypes = 0;
 		m_double = 0;
@@ -69,8 +69,8 @@ namespace exodbc
 
 	// CharTypesTable
 	// --------------
-	MCharTypesTable::MCharTypesTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
-		: Table(db, 5, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
+	MCharTypesTable::MCharTypesTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
+		: Table(pDb, 5, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
@@ -89,8 +89,8 @@ namespace exodbc
 
 	// WCharTypesTable
 	// --------------
-	MWCharTypesTable::MWCharTypesTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
-		: Table(db, 5, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
+	MWCharTypesTable::MWCharTypesTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
+		: Table(pDb, 5, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
@@ -108,8 +108,8 @@ namespace exodbc
 
 	// DateTypesTable
 	// ---------------
-	MDateTypesTable::MDateTypesTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"DateTypes" */)
-		: Table(db, 4, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
+	MDateTypesTable::MDateTypesTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"DateTypes" */)
+		: Table(pDb, 4, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
 	{
 		m_idDateTypes = 0;
 		ZeroMemory(&m_date, sizeof(m_date));
@@ -126,8 +126,8 @@ namespace exodbc
 
 	// BlobTypesTable
 	// --------------
-	MBlobTypesTable::MBlobTypesTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"BlobTypes" */)
-		: Table(db, 3, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
+	MBlobTypesTable::MBlobTypesTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"BlobTypes" */)
+		: Table(pDb, 3, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
 	{
 		ZeroMemory(m_blob, sizeof(m_blob));
 		ZeroMemory(m_varblob_20, sizeof(m_varblob_20));
@@ -140,8 +140,8 @@ namespace exodbc
 
 	// MNumericTypesTable
 	// -----------------
-	MNumericTypesTable::MNumericTypesTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
-		: Table(db, 4, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
+	MNumericTypesTable::MNumericTypesTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
+		: Table(pDb, 4, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
 	{
 		m_idNumericTypes = 0;
 
@@ -158,8 +158,8 @@ namespace exodbc
 
 	// MNumericTypesAsCharTable
 	// -----------------
-	MNumericTypesAsCharTable::MNumericTypesAsCharTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
-		: Table(db, 4, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
+	MNumericTypesAsCharTable::MNumericTypesAsCharTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
+		: Table(pDb, 4, test::ConvertNameCase(name, namesCase), L"", L"", L"", AF_READ)
 	{
 		m_idNumericTypes = 0;
 		m_wcdecimal_18_0[0] = 0;
@@ -175,8 +175,8 @@ namespace exodbc
 
 	// CharTable
 	// ---------
-	MCharTable::MCharTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */)
-		: Table(db, 4, test::ConvertNameCase(L"chartable", namesCase), L"", L"", L"", AF_READ)
+	MCharTable::MCharTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */)
+		: Table(pDb, 4, test::ConvertNameCase(L"chartable", namesCase), L"", L"", L"", AF_READ)
 	{
 		m_idCharTable = 0;
 		m_col2[0] = 0;
@@ -192,8 +192,8 @@ namespace exodbc
 
 	// IncompleteCharTable
 	// -------------------
-	MIncompleteCharTable::MIncompleteCharTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */)
-		: Table(db, 4, test::ConvertNameCase(L"chartable", namesCase), L"", L"", L"", AF_READ)
+	MIncompleteCharTable::MIncompleteCharTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */)
+		: Table(pDb, 4, test::ConvertNameCase(L"chartable", namesCase), L"", L"", L"", AF_READ)
 	{
 		m_idCharTable = 0;
 		m_col2[0] = 0;
@@ -209,8 +209,8 @@ namespace exodbc
 
 	// NotExistingTable
 	// ----------------
-	MNotExistingTable::MNotExistingTable(const Database& db, test::Case namesCase /* = TestTables::NC_LOWER */)
-		: Table(db, 1, test::ConvertNameCase(L"notexisting", namesCase))
+	MNotExistingTable::MNotExistingTable(const Database* pDb, test::Case namesCase /* = TestTables::NC_LOWER */)
+		: Table(pDb, 1, test::ConvertNameCase(L"notexisting", namesCase))
 	{
 		m_idNotExisting = 0;
 

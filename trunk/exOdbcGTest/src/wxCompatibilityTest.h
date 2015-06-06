@@ -21,6 +21,7 @@
 // Other headers
 #include "gtest/gtest.h"
 #include "Environment.h"
+#include "Database.h"
 
 // System headers
 
