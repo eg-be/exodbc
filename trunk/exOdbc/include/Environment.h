@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-
+// \todo: remove once ticket #87 is done.
 #ifndef MAXNAME
 #define MAXNAME         31
 #endif
