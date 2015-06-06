@@ -69,23 +69,23 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MCharTypesTable charTypesTable(m_db, m_odbcInfo.m_namesCase);
-		EXPECT_NO_THROW(charTypesTable.Open(m_db, TOF_CHECK_EXISTANCE));
+		MCharTypesTable charTypesTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_NO_THROW(charTypesTable.Open(TOF_CHECK_EXISTANCE));
 
-		MIntTypesTable intTypesTable(m_db, m_odbcInfo.m_namesCase);
-		EXPECT_NO_THROW(intTypesTable.Open(m_db, TOF_CHECK_EXISTANCE));
+		MIntTypesTable intTypesTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_NO_THROW(intTypesTable.Open(TOF_CHECK_EXISTANCE));
 
-		MDateTypesTable dateTypesTable(m_db, m_odbcInfo.m_namesCase);
-		EXPECT_NO_THROW(dateTypesTable.Open(m_db, TOF_CHECK_EXISTANCE));
+		MDateTypesTable dateTypesTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_NO_THROW(dateTypesTable.Open(TOF_CHECK_EXISTANCE));
 
-		MFloatTypesTable floatTypesTable(m_db, m_odbcInfo.m_namesCase);
-		EXPECT_NO_THROW(floatTypesTable.Open(m_db, TOF_CHECK_EXISTANCE));
+		MFloatTypesTable floatTypesTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_NO_THROW(floatTypesTable.Open(TOF_CHECK_EXISTANCE));
 
 //		MNumericTypesTable numericTypesTable(m_pDb, NumericTypesTable::ReadAsChar, m_odbcInfo.m_namesCase);
 //		EXPECT_TRUE(numericTypesTable.Open(false, false));
 
-		MBlobTypesTable blobTypesTable(m_db, m_odbcInfo.m_namesCase);
-		EXPECT_NO_THROW(blobTypesTable.Open(m_db, TOF_CHECK_EXISTANCE));
+		MBlobTypesTable blobTypesTable(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_NO_THROW(blobTypesTable.Open(TOF_CHECK_EXISTANCE));
 	}
 
 
@@ -94,8 +94,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MCharTypesTable table(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MCharTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		// Expect 6 entries
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.chartypes");
@@ -126,8 +126,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MDateTypesTable table(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MDateTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1");
 		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
@@ -204,8 +204,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MIntTypesTable table(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 1");
 		EXPECT_TRUE( table.SelectNext() );
@@ -254,8 +254,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MWCharTypesTable table(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MWCharTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		// Note: We trim the values read from the db on the right side, as for example db2 pads with ' ' by default
 
@@ -293,8 +293,8 @@ namespace exodbc
 	{		
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MFloatTypesTable table(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1");
 		EXPECT_TRUE(table.SelectNext());
@@ -337,8 +337,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MNumericTypesAsCharTable table(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MNumericTypesAsCharTable table(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1");
 		EXPECT_TRUE(table.SelectNext());
@@ -405,8 +405,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MBlobTypesTable table(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MBlobTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.blobtypes WHERE idblobtypes = 1");
 		EXPECT_TRUE(table.SelectNext());
@@ -455,10 +455,10 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MCharTable table(m_db, m_odbcInfo.m_namesCase);
-		MIncompleteCharTable incTable(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
-		ASSERT_NO_THROW(incTable.Open(m_db, TOF_CHECK_EXISTANCE));
+		MCharTable table(&m_db, m_odbcInfo.m_namesCase);
+		MIncompleteCharTable incTable(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
+		ASSERT_NO_THROW(incTable.Open(TOF_CHECK_EXISTANCE));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.chartable WHERE idchartable >= 0";
@@ -518,8 +518,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MWCharTypesTable table(m_db, m_odbcInfo.m_namesCase, L"CharTypes_tmp");
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MWCharTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"CharTypes_tmp");
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		std::wstring sqlstmt = L"DELETE FROM exodbc.chartypes_tmp WHERE idchartypes >= 0";
 		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
@@ -553,8 +553,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MFloatTypesTable table(m_db, m_odbcInfo.m_namesCase, L"FloatTypes_tmp");
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"FloatTypes_tmp");
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		std::wstring sqlstmt = L"DELETE FROM exodbc.floattypes_tmp WHERE idfloattypes >= 0";
 		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
@@ -583,8 +583,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MNumericTypesAsCharTable table(m_db, m_odbcInfo.m_namesCase, L"NumericTypes_tmp");
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MNumericTypesAsCharTable table(&m_db, m_odbcInfo.m_namesCase, L"NumericTypes_tmp");
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.numerictypes_tmp WHERE idnumerictypes >= 0";
@@ -641,8 +641,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MIntTypesTable table(m_db, m_odbcInfo.m_namesCase, L"IntegerTypes_tmp");
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"IntegerTypes_tmp");
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.integertypes_tmp WHERE idintegertypes >= 0";
@@ -680,8 +680,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MDateTypesTable table(m_db, m_odbcInfo.m_namesCase, L"DateTypes_tmp");
-		ASSERT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MDateTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"DateTypes_tmp");
+		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.datetypes_tmp WHERE iddatetypes >= 0";

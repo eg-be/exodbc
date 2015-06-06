@@ -16,6 +16,7 @@
 #include "gtest/gtest.h"
 
 // Other headers
+#include "Database.h"
 
 // Debug
 #include "DebugNew.h"
@@ -264,8 +265,8 @@ namespace exodbc
 				// Get an insertable IntTypesTmp Table
 				tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
 				std::wstring idColName = GetIdColumnName(test::TableId::INTEGERTYPES_TMP, nameCase);
-				exodbc::Table intTable(db, tableName, L"", L"", L"", AF_SELECT | AF_INSERT);
-				intTable.Open(db);
+				exodbc::Table intTable(&db, tableName, L"", L"", L"", AF_SELECT | AF_INSERT);
+				intTable.Open();
 
 				// Insert given values
 				// Note: BufferVariant defaults to NULL value
@@ -327,8 +328,8 @@ namespace exodbc
 				// Create a deletable table and delete on it
 				tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
 				std::wstring idColName = GetIdColumnName(test::TableId::INTEGERTYPES_TMP, nameCase);
-				exodbc::Table intTable(db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
-				intTable.Open(db);
+				exodbc::Table intTable(&db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
+				intTable.Open();
 				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
 				intTable.Delete(where, false);
 				db.CommitTrans();
@@ -349,8 +350,8 @@ namespace exodbc
 				// Create a deletable table and delete on it
 				tableName = GetTableName(test::TableId::DATETYPES_TMP, nameCase);
 				std::wstring idColName = GetIdColumnName(test::TableId::DATETYPES_TMP, nameCase);
-				exodbc::Table dTable(db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
-				dTable.Open(db);
+				exodbc::Table dTable(&db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
+				dTable.Open();
 				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
 				dTable.Delete(where, false);
 				db.CommitTrans();
@@ -371,8 +372,8 @@ namespace exodbc
 				// Create a deletable table and delete on it
 				tableName = GetTableName(test::TableId::CHARTYPES_TMP, nameCase);
 				std::wstring idColName = GetIdColumnName(test::TableId::CHARTYPES_TMP, nameCase);
-				exodbc::Table dTable(db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
-				dTable.Open(db);
+				exodbc::Table dTable(&db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
+				dTable.Open();
 				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
 				dTable.Delete(where, false);
 				db.CommitTrans();
@@ -393,8 +394,8 @@ namespace exodbc
 				// Create a deletable table and delete on it
 				tableName = GetTableName(test::TableId::NUMERICTYPES_TMP, nameCase);
 				std::wstring idColName = GetIdColumnName(test::TableId::NUMERICTYPES_TMP, nameCase);
-				exodbc::Table dTable(db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
-				dTable.Open(db);
+				exodbc::Table dTable(&db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
+				dTable.Open();
 				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
 				dTable.Delete(where, false);
 				db.CommitTrans();
@@ -415,8 +416,8 @@ namespace exodbc
 				// Create a deletable table and delete on it
 				tableName = GetTableName(test::TableId::BLOBTYPES_TMP, nameCase);
 				std::wstring idColName = GetIdColumnName(test::TableId::BLOBTYPES_TMP, nameCase);
-				exodbc::Table dTable(db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
-				dTable.Open(db);
+				exodbc::Table dTable(&db, tableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
+				dTable.Open();
 				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
 				dTable.Delete(where, false);
 				db.CommitTrans();

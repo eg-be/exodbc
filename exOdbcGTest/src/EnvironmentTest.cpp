@@ -15,7 +15,9 @@
 // Same component headers
 // Other headers
 #include "Environment.h"
+#include "Database.h"
 #include "Exception.h"
+
 // Debug
 #include "DebugNew.h"
 

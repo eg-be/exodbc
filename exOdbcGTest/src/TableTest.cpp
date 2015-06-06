@@ -101,17 +101,17 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualReadOnlyWithoutCheck)
 	{
 		// Open an existing table without checking for privileges or existence
-		MIntTypesTable table(m_db, m_odbcInfo.m_namesCase);
-		EXPECT_NO_THROW(table.Open(m_db, TOF_NONE));
+		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_NO_THROW(table.Open(TOF_NONE));
 
 		// If we pass in the STableInfo directly we should also be able to "open"
 		// a totally non-sense table:
 		STableInfo neTableInfo;
 		neTableInfo.m_tableName = L"NotExisting";
-		Table neTable(m_db, 2, neTableInfo, AF_READ);
+		Table neTable(&m_db, 2, neTableInfo, AF_READ);
 		SQLINTEGER idNotExisting = 0;
 		neTable.SetColumn(0, L"idNotExistring", &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting));
-		EXPECT_NO_THROW(neTable.Open(m_db, TOF_NONE));
+		EXPECT_NO_THROW(neTable.Open(TOF_NONE));
 		// \todo So we can prove in the test that we will fail doing a SELECT later
 	}
 
@@ -119,7 +119,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualWritableWithoutCheck)
 	{
 		// Open an existing table without checking for privileges or existence
-		Table iTable(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ_WRITE);
+		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ_WRITE);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -135,15 +135,15 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualCheckExistence)
 	{
 		// Open a table with checking for existence
-		MIntTypesTable table(m_db, m_odbcInfo.m_namesCase);
-		EXPECT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		EXPECT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		// Open a non-existing table
 		{
 			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
-			MNotExistingTable neTable(m_db, m_odbcInfo.m_namesCase);
-			EXPECT_THROW(neTable.Open(m_db, TOF_CHECK_EXISTANCE), exodbc::Exception);
+			MNotExistingTable neTable(&m_db, m_odbcInfo.m_namesCase);
+			EXPECT_THROW(neTable.Open(TOF_CHECK_EXISTANCE), exodbc::Exception);
 		}
 	}
 
@@ -151,7 +151,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualCheckColumnFlagSelect)
 	{
 		// Open a table manually but do not set the Select flag for all columns
-		Table iTable(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
+		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -161,7 +161,7 @@ namespace exodbc
 		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), &i, SQL_C_SLONG, sizeof(i), CF_NONE | CF_NULLABLE);
 		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_NULLABLE);
 
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 		// We expect all columnBuffers to be bound, except nr 2
 		ColumnBuffer* pBuffId = iTable.GetColumnBuffer(0);
 		ColumnBuffer* pBuffsi = iTable.GetColumnBuffer(1);
@@ -193,7 +193,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualCheckColumnFlagInsert)
 	{
 		// Open a table manually but do not set the Insert flag for all columns
-		Table iTable(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT | AF_DELETE);
+		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT | AF_DELETE);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -213,7 +213,7 @@ namespace exodbc
 		}
 
 		// Open and remove all data from the table
-		iTable.Open(m_db);
+		iTable.Open();
 		ASSERT_NO_THROW(test::ClearTestTable(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db));
 
 		// Insert a value by using our primary key - columnIndex 2 will not get inserted but the default NULL value will be set by the db
@@ -228,8 +228,8 @@ namespace exodbc
 		// note that when opening an Access Table Access automatically, the second column will not get bound to a SMALLINT, as
 		// Access reports it as SQL_INTEGER (Db-Type) which corresponds to C-Type of SQL_C_SLONG.
 		// The other databases report it as SQL_SMALLINT which we bind to SQL_C_SSHORT
-		Table iTable2(m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
-		iTable2.Open(m_db);
+		Table iTable2(&m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
+		iTable2.Open();
 		iTable2.Select();
 		ASSERT_TRUE(iTable2.SelectNext());
 		EXPECT_EQ(11, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
@@ -250,7 +250,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualCheckColumnFlagUpdate)
 	{
 		// Open a table manually but do not set the Update flag for all columns
-		Table iTable(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_UPDATE | AF_DELETE | AF_INSERT);
+		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_UPDATE | AF_DELETE | AF_INSERT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -270,7 +270,7 @@ namespace exodbc
 		}
 
 		// Open and remove all data from the table
-		iTable.Open(m_db);
+		iTable.Open();
 		ASSERT_NO_THROW(test::ClearTestTable(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db));
 
 		// Insert some value to update later
@@ -294,8 +294,8 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Read back from another table - column 2 still has the originally inserted value
-		Table iTable2(m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
-		iTable2.Open(m_db);
+		Table iTable2(&m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
+		iTable2.Open();
 		iTable2.Select();
 		ASSERT_TRUE(iTable2.SelectNext());
 		EXPECT_EQ(11, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
@@ -317,7 +317,7 @@ namespace exodbc
 	{
 		// Open a table by defining primary keys manually
 		// Open a table manually but do not set the Select flag for all columns
-		Table iTable(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
+		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -335,10 +335,10 @@ namespace exodbc
 		}
 
 		// Opening must work
-		EXPECT_NO_THROW(iTable.Open(m_db, TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+		EXPECT_NO_THROW(iTable.Open(TOF_DO_NOT_QUERY_PRIMARY_KEYS));
 
 		// But opening if primary keys are not defined must fail
-		Table iTable2(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
+		Table iTable2(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
 		SQLINTEGER id2 = 0;
 		SQLSMALLINT si2 = 0;
 		SQLINTEGER i2 = 0;
@@ -354,10 +354,10 @@ namespace exodbc
 		{
 			iTable2.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
 		}
-		EXPECT_THROW(iTable2.Open(m_db, TOF_DO_NOT_QUERY_PRIMARY_KEYS), Exception);
+		EXPECT_THROW(iTable2.Open(TOF_DO_NOT_QUERY_PRIMARY_KEYS), Exception);
 
 		// But if we open for select only, we do not care about the primary keys
-		Table iTable3(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
+		Table iTable3(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
 		SQLINTEGER id3 = 0;
 		SQLSMALLINT si3 = 0;
 		SQLINTEGER i3 = 0;
@@ -373,7 +373,7 @@ namespace exodbc
 		{
 			iTable3.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
 		}
-		EXPECT_NO_THROW(iTable3.Open(m_db, TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+		EXPECT_NO_THROW(iTable3.Open(TOF_DO_NOT_QUERY_PRIMARY_KEYS));
 	}
 
 
@@ -385,8 +385,8 @@ namespace exodbc
 		STableInfo tableInfo;
 		EXPECT_NO_THROW(tableInfo = m_db.FindOneTable(tableName, L"", L"", L""));
 
-		exodbc::Table table(m_db, tableInfo, AF_READ);
-		EXPECT_NO_THROW(table.Open(m_db, TOF_NONE));
+		exodbc::Table table(&m_db, tableInfo, AF_READ);
+		EXPECT_NO_THROW(table.Open(TOF_NONE));
 
 		// If we try to open an auto-table this will never work if you've passed invalid information:
 		// As soon as the columns are searched, we expect to fail
@@ -395,8 +395,8 @@ namespace exodbc
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
 			STableInfo neTableInfo;
 			neTableInfo.m_tableName = L"NotExisting";
-			Table neTable(m_db, neTableInfo, AF_READ);
-			EXPECT_THROW(neTable.Open(m_db, TOF_NONE), Exception);
+			Table neTable(&m_db, neTableInfo, AF_READ);
+			EXPECT_THROW(neTable.Open(TOF_NONE), Exception);
 		}
 	}
 
@@ -404,16 +404,16 @@ namespace exodbc
 	TEST_P(TableTest, OpenAutoCheckExistence)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		exodbc::Table table(m_db, tableName, L"", L"", L"", AF_READ);
-		EXPECT_NO_THROW(table.Open(m_db, TOF_CHECK_EXISTANCE));
+		exodbc::Table table(&m_db, tableName, L"", L"", L"", AF_READ);
+		EXPECT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
 		// Open a non-existing table
 		{
 			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
 			std::wstring neName = test::GetTableName(test::TableId::NOT_EXISTING, m_odbcInfo.m_namesCase);
-			exodbc::Table neTable(m_db, neName, L"", L"", L"", AF_READ);
-			EXPECT_THROW(neTable.Open(m_db, TOF_CHECK_EXISTANCE), Exception);
+			exodbc::Table neTable(&m_db, neName, L"", L"", L"", AF_READ);
+			EXPECT_THROW(neTable.Open(TOF_CHECK_EXISTANCE), Exception);
 		}
 	}
 
@@ -424,12 +424,12 @@ namespace exodbc
 
 		// Test to open read-only a table we know we have all rights:
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		exodbc::Table rTable(m_db, tableName, L"", L"", L"", AF_READ);
-		EXPECT_NO_THROW(rTable.Open(m_db, TOF_CHECK_PRIVILEGES));
+		exodbc::Table rTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		EXPECT_NO_THROW(rTable.Open(TOF_CHECK_PRIVILEGES));
 
 		// Test to open read-write a table we know we have all rights:
-		exodbc::Table rTable2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
-		EXPECT_NO_THROW(rTable2.Open(m_db, TOF_CHECK_PRIVILEGES));
+		exodbc::Table rTable2(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		EXPECT_NO_THROW(rTable2.Open(TOF_CHECK_PRIVILEGES));
 
 		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
@@ -441,21 +441,21 @@ namespace exodbc
 			// Note that here in ms server we have given the user no rights except the select for this table
 			// If you add him to some role, things will get messed up: No privs are reported, but the user can
 			// still access the table for selecting
-			exodbc::Table table2(db, tableName, L"", L"", L"", AF_READ);
-			EXPECT_NO_THROW(table2.Open(db, TOF_CHECK_PRIVILEGES));
+			exodbc::Table table2(&db, tableName, L"", L"", L"", AF_READ);
+			EXPECT_NO_THROW(table2.Open(TOF_CHECK_PRIVILEGES));
 
 			// We expect to fail if trying to open for writing
 			table2.Close();
-			table2.SetAccessFlags(db, AF_READ_WRITE);
-			EXPECT_THROW(table2.Open(db, TOF_CHECK_PRIVILEGES), Exception);
+			table2.SetAccessFlags(AF_READ_WRITE);
+			EXPECT_THROW(table2.Open(TOF_CHECK_PRIVILEGES), Exception);
 
 			// But we do not fail if we do not check the privs
-			EXPECT_NO_THROW(table2.Open(db));
+			EXPECT_NO_THROW(table2.Open());
 
 			// Try to open one we do not even have the rights for
 			std::wstring table3Name = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
-			Table table3(db, table3Name, L"", L"", L"", AF_READ);
-			EXPECT_THROW(table3.Open(db), Exception);
+			Table table3(&db, table3Name, L"", L"", L"", AF_READ);
+			EXPECT_THROW(table3.Open(), Exception);
 		}
 	}
 
@@ -465,15 +465,15 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
-		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 
 		// Expect to fail if we open with default flags
-		EXPECT_THROW(nst.Open(m_db), NotSupportedException);
+		EXPECT_THROW(nst.Open(), NotSupportedException);
 
 		// But not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
@@ -495,12 +495,12 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
-		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 
 		// we do not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
@@ -522,12 +522,12 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
-		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 
 		// we do not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// Remove everything, ignoring if there was any data:
@@ -549,10 +549,10 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// We should now be able to select. As a test, use a different table object
-		exodbc::Table nst2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		exodbc::Table nst2(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst2.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst2.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		nst2.Select();
@@ -572,12 +572,12 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
-		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 
 		// we do not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// Remove everything, ignoring if there was any data:
@@ -600,10 +600,10 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// We should now be able to select. As a test, use a different table object
-		exodbc::Table nst2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		exodbc::Table nst2(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst2.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst2.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		nst2.Select();
@@ -623,12 +623,12 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
-		exodbc::Table nst(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 
 		// we do not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// Remove everything, ignoring if there was any data:
@@ -658,10 +658,10 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// We should now longer be able to select it. As a test, use a different table object
-		exodbc::Table nst2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		exodbc::Table nst2(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst2.Open(m_db, TOF_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst2.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		nst2.Select();
@@ -673,7 +673,7 @@ namespace exodbc
 	{
 		// Create table
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
 
 		// Close when not open must fail
 		{
@@ -683,7 +683,7 @@ namespace exodbc
 		}
 
 		// Open a Table read-only
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 
 		// Close must work
 		EXPECT_NO_THROW(iTable.Close());
@@ -701,14 +701,14 @@ namespace exodbc
 	{
 		// Create a Table, open for reading
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
 
 		// Close Table
 		EXPECT_NO_THROW(iTable.Close());
 
 		// Open again for reading
-		EXPECT_NO_THROW(iTable.Open(m_db));
+		EXPECT_NO_THROW(iTable.Open());
 
 		// And close again
 		EXPECT_NO_THROW(iTable.Close());
@@ -719,68 +719,68 @@ namespace exodbc
 	{
 		// Create a Table, for reading only
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
 
 		// Before opening it, change the mode, then open
-		ASSERT_NO_THROW(iTable.SetAccessFlags(m_db, AF_READ_WRITE));
+		ASSERT_NO_THROW(iTable.SetAccessFlags(AF_READ_WRITE));
 		// Do not forget to set the primary keys if this is an Access database
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			iTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 
 		// We cannot change the mode if the table is open
 		{
 			DontDebugBreak ddb;
 			LogLevelFatal llf;
-			EXPECT_THROW(iTable.SetAccessFlags(m_db, AF_READ), AssertionException);
+			EXPECT_THROW(iTable.SetAccessFlags(AF_READ), AssertionException);
 		}
 
 		// But when we close first we can
 		EXPECT_NO_THROW(iTable.Close());
-		EXPECT_NO_THROW(iTable.SetAccessFlags(m_db, AF_READ));
+		EXPECT_NO_THROW(iTable.SetAccessFlags(AF_READ));
 		// And we can open it again
-		EXPECT_NO_THROW(iTable.Open(m_db));
+		EXPECT_NO_THROW(iTable.Open());
 	}
 
 
 	TEST_P(TableTest, IsQueryOnly)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
 		
 		EXPECT_TRUE(iTable.IsQueryOnly());
 
-		iTable.SetAccessFlag(m_db, AF_UPDATE);
+		iTable.SetAccessFlag(AF_UPDATE);
 		EXPECT_FALSE(iTable.IsQueryOnly());
-		iTable.ClearAccessFlag(m_db, AF_UPDATE);
+		iTable.ClearAccessFlag(AF_UPDATE);
 		EXPECT_TRUE(iTable.IsQueryOnly());
 
-		iTable.SetAccessFlag(m_db, AF_INSERT);
+		iTable.SetAccessFlag(AF_INSERT);
 		EXPECT_FALSE(iTable.IsQueryOnly());
-		iTable.ClearAccessFlag(m_db, AF_INSERT);
+		iTable.ClearAccessFlag(AF_INSERT);
 		EXPECT_TRUE(iTable.IsQueryOnly());
 
-		iTable.SetAccessFlag(m_db, AF_DELETE);
+		iTable.SetAccessFlag(AF_DELETE);
 		EXPECT_FALSE(iTable.IsQueryOnly());
-		iTable.ClearAccessFlag(m_db, AF_DELETE);
+		iTable.ClearAccessFlag(AF_DELETE);
 		EXPECT_TRUE(iTable.IsQueryOnly());
 
 		// and one that is initially rw
-		exodbc::Table iTable2(m_db, tableName, L"", L"", L"", AF_READ_WRITE);
+		exodbc::Table iTable2(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 		EXPECT_FALSE(iTable2.IsQueryOnly());
-		iTable2.ClearAccessFlag(m_db, AF_INSERT);
-		EXPECT_FALSE(iTable2.IsQueryOnly());
-
-		iTable2.ClearAccessFlag(m_db, AF_DELETE);
+		iTable2.ClearAccessFlag(AF_INSERT);
 		EXPECT_FALSE(iTable2.IsQueryOnly());
 
-		iTable2.ClearAccessFlag(m_db, AF_UPDATE);
+		iTable2.ClearAccessFlag(AF_DELETE);
+		EXPECT_FALSE(iTable2.IsQueryOnly());
+
+		iTable2.ClearAccessFlag(AF_UPDATE);
 		EXPECT_TRUE(iTable2.IsQueryOnly());
 
 		// remove read, we are no longer query only
-		iTable2.ClearAccessFlag(m_db, AF_SELECT);
+		iTable2.ClearAccessFlag(AF_SELECT);
 		EXPECT_FALSE(iTable2.IsQueryOnly());
 	}
 
@@ -789,9 +789,9 @@ namespace exodbc
 	{
 		// Open a read-only table
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
 
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 
 		// we should be able to set some silly value..
 		iTable.SetColumnValue(0, (SQLINTEGER)333);
@@ -813,8 +813,8 @@ namespace exodbc
 	TEST_P(TableTest, Select)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
 
 		EXPECT_NO_THROW(iTable.Select(L""));
 
@@ -825,8 +825,8 @@ namespace exodbc
 	TEST_P(TableTest, SelectNext)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
 
 		// We expect 7 Records
 		iTable.Select(L"");
@@ -846,8 +846,8 @@ namespace exodbc
 	TEST_P(TableTest, SelectClose)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
 		
 		// Do something that opens a transaction
 		iTable.Select(L"");
@@ -866,13 +866,13 @@ namespace exodbc
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		// Do not forget to set the primary keys if this is an Access database
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			iTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
 		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
 		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
@@ -969,8 +969,8 @@ namespace exodbc
 	// -----
 	TEST_P(TableTest, Count)
 	{
-		MFloatTypesTable table(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(m_db));
+		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(table.Open());
 
 		SQLUBIGINT all;
 		EXPECT_NO_THROW(all = table.Count(L""));
@@ -1004,8 +1004,8 @@ namespace exodbc
 	{
 		namespace tt = test;
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		exodbc::Table iTable(m_db, tableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
 
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 
@@ -1046,8 +1046,8 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectManualIntValues)
 	{
-		MIntTypesTable iTable(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		MIntTypesTable iTable(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(iTable.Open());
 
 		// Just check that the buffers are correct
 		// do not check using the IsIntRecordEqual: Here we bind the smallint column to a SQLSMALLINT with Access, 
@@ -1088,9 +1088,9 @@ namespace exodbc
 	{
 		// And some tables with auto-columns
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_READ);
 		iTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 
 		std::wstring id, smallInt, i, bigInt;
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -1133,8 +1133,8 @@ namespace exodbc
 	TEST_P(TableTest, SelectAutoFloatValues)
 	{
 		wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
-		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(fTable.Open(m_db));
+		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(fTable.Open());
 
 		SQLDOUBLE val;
 		wstring str;
@@ -1191,8 +1191,8 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectManualFloatValues)
 	{
-		MFloatTypesTable fTable(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(fTable.Open(m_db));
+		MFloatTypesTable fTable(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(fTable.Open());
 
 		std::wstring idName = test::GetIdColumnName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
 		fTable.Select((boost::wformat(L"%s = 1") % idName).str());
@@ -1224,9 +1224,9 @@ namespace exodbc
 	TEST_P(TableTest, SelectWCharFloatValues)
 	{
 		wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
-		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ);
+		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", AF_READ);
 		fTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
-		ASSERT_NO_THROW(fTable.Open(m_db));
+		ASSERT_NO_THROW(fTable.Open());
 
 		wstring sVal;
 		wstring idName = test::GetIdColumnName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
@@ -1262,9 +1262,9 @@ namespace exodbc
 	TEST_P(TableTest, SelectAutoWCharValues)
 	{
 		std::wstring charTypesTableName = test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase);
-		Table charTypesAutoTable(m_db, charTypesTableName, L"", L"", L"", AF_READ);
+		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", AF_READ);
 		charTypesAutoTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
-		ASSERT_NO_THROW(charTypesAutoTable.Open(m_db));
+		ASSERT_NO_THROW(charTypesAutoTable.Open());
 		// We want to trim on the right side for DB2 and sql server
 		charTypesAutoTable.SetCharTrimRight(true);
 
@@ -1320,8 +1320,8 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectManualWCharValues)
 	{
-		MWCharTypesTable wTable(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(wTable.Open(m_db));
+		MWCharTypesTable wTable(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(wTable.Open());
 
 		// Just test the values in the buffer - trimming has no effect here
 		using namespace boost::algorithm;
@@ -1377,9 +1377,9 @@ namespace exodbc
 	TEST_P(TableTest, SelectAutoCharValues)
 	{
 		std::wstring charTypesTableName = test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase);
-		Table charTypesAutoTable(m_db, charTypesTableName, L"", L"", L"", AF_READ);
+		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", AF_READ);
 		charTypesAutoTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
-		ASSERT_NO_THROW(charTypesAutoTable.Open(m_db));
+		ASSERT_NO_THROW(charTypesAutoTable.Open());
 		// We want to trim on the right side for DB2 and also sql server
 		charTypesAutoTable.SetCharTrimRight(true);
 
@@ -1434,8 +1434,8 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectManualCharValues)
 	{
-		MCharTypesTable cTable(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(cTable.Open(m_db));
+		MCharTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(cTable.Open());
 
 		// Just test the values in the buffer - trimming has no effect here
 		using namespace boost::algorithm;
@@ -1495,8 +1495,8 @@ namespace exodbc
 		// for a millionth of a second (one microsecond) is 1,000, and for a billionth of a second (one nanosecond) is 1.
 
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES, m_odbcInfo.m_namesCase);
-		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(dTable.Open(m_db));
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(dTable.Open());
 
 		using namespace boost::algorithm;
 		std::wstring str;
@@ -1574,8 +1574,8 @@ namespace exodbc
 		{
 			EXPECT_NO_THROW(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		}
-		Table dTable38(db38, dateTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(dTable38.Open(db38));
+		Table dTable38(&db38, dateTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(dTable38.Open());
 		dTable38.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(dTable38.SelectNext());
 		EXPECT_NO_THROW(time = dTable38.GetTime(2));
@@ -1607,8 +1607,8 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectManualDateValues)
 	{
-		MDateTypesTable cTable(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(cTable.Open(m_db));
+		MDateTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(cTable.Open());
 
 		// Just test the values in the buffer - trimming has no effect here
 		using namespace boost::algorithm;
@@ -1640,9 +1640,9 @@ namespace exodbc
 	TEST_P(TableTest, SelectWCharDateValues)
 	{
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES, m_odbcInfo.m_namesCase);
-		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_READ);
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", AF_READ);
 		dTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
-		ASSERT_NO_THROW(dTable.Open(m_db));
+		ASSERT_NO_THROW(dTable.Open());
 
 		wstring sDate, sTime, sTimestamp;
 		wstring idName = test::GetIdColumnName(test::TableId::DATETYPES, m_odbcInfo.m_namesCase);
@@ -1682,8 +1682,8 @@ namespace exodbc
 	TEST_P(TableTest, SelectAutoBlobValues)
 	{
 		std::wstring blobTypesTableName = test::GetTableName(test::TableId::BLOBTYPES, m_odbcInfo.m_namesCase);
-		Table bTable(m_db, blobTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(bTable.Open(m_db));
+		Table bTable(&m_db, blobTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(bTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::BLOBTYPES, m_odbcInfo.m_namesCase);
 
@@ -1761,8 +1761,8 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectManualBlobValues)
 	{
-		MBlobTypesTable bTable(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(bTable.Open(m_db));
+		MBlobTypesTable bTable(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(bTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::BLOBTYPES, m_odbcInfo.m_namesCase);
 
@@ -1819,8 +1819,8 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
-		Table nTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(nTable.Open(m_db));
+		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(nTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		const ColumnBuffer* pColId = nTable.GetColumnBuffer(0);
@@ -1877,8 +1877,8 @@ namespace exodbc
 
 		// \note: There is a special Tests for NULL values, its complicated enough.
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
-		Table nTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(nTable.Open(m_db));
+		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(nTable.Open());
 		
 		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		SQL_NUMERIC_STRUCT numStr;
@@ -1962,8 +1962,8 @@ namespace exodbc
 	{
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
-		MNumericTypesTable nTable(m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(nTable.Open(m_db));
+		MNumericTypesTable nTable(&m_db, m_odbcInfo.m_namesCase);
+		ASSERT_NO_THROW(nTable.Open());
 
 		SQLBIGINT ex;
 		SQLBIGINT* p;
@@ -2035,8 +2035,8 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
-		Table nTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(nTable.Open(m_db));
+		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(nTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		const ColumnBuffer* pColId = nTable.GetColumnBuffer(0);
@@ -2092,8 +2092,8 @@ namespace exodbc
 	TEST_P(TableTest, DeleteWhere)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE | AF_INSERT);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE | AF_INSERT);
+		ASSERT_NO_THROW(iTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
@@ -2119,12 +2119,12 @@ namespace exodbc
 	TEST_P(TableTest, DeleteWhereShouldReturnSQL_NO_DATA)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_DELETE_WHERE);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			iTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 
 		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
 		{
@@ -2149,12 +2149,12 @@ namespace exodbc
 	TEST_P(TableTest, Delete)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_DELETE_PK);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_DELETE_PK);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			iTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
@@ -2180,8 +2180,8 @@ namespace exodbc
 	TEST_P(TableTest, InsertIntTypes)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
+		ASSERT_NO_THROW(iTable.Open());
 		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
 		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
 		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
@@ -2212,8 +2212,8 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
-		Table iTable2(m_db, intTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(iTable2.Open(m_db));
+		Table iTable2(&m_db, intTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable2.Open());
 
 		iTable2.Select();
 		EXPECT_TRUE(iTable2.SelectNext());
@@ -2225,7 +2225,7 @@ namespace exodbc
 	TEST_P(TableTest, InsertManualIntTypes)
 	{
 		// Open an existing table without checking for privileges or existence
-		Table iTable(m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT);
+		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -2245,7 +2245,7 @@ namespace exodbc
 			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &biAccess, SQL_C_SLONG, sizeof(bi), CF_SELECT | CF_INSERT | CF_NULLABLE);
 		}
 
-		iTable.Open(m_db);
+		iTable.Open();
 		
 		// Remove everything, ignoring if there was any data:
 		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
@@ -2262,8 +2262,8 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
-		Table iTable2(m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
-		iTable2.Open(m_db);
+		Table iTable2(&m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
+		iTable2.Open();
 		iTable2.Select();
 		ASSERT_TRUE(iTable2.SelectNext());
 
@@ -2274,8 +2274,8 @@ namespace exodbc
 	TEST_P(TableTest, InsertDateTypes)
 	{
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
-		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
-		ASSERT_NO_THROW(dTable.Open(m_db));
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
+		ASSERT_NO_THROW(dTable.Open());
 		//ColumnBuffer* pId = dTable.GetColumnBuffer(0);
 		//ColumnBuffer* pDate = dTable.GetColumnBuffer(1);
 		//ColumnBuffer* pTime = dTable.GetColumnBuffer(2);
@@ -2331,8 +2331,8 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
-		Table dTable2(m_db, dateTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(dTable2.Open(m_db));
+		Table dTable2(&m_db, dateTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(dTable2.Open());
 
 		dTable2.Select();
 		EXPECT_TRUE(dTable2.SelectNext());
@@ -2371,12 +2371,12 @@ namespace exodbc
 	TEST_P(TableTest, InsertFloatTypes)
 	{
 		std::wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			fTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(fTable.Open(m_db));
+		ASSERT_NO_THROW(fTable.Open());
 		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
 		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
 		ColumnBuffer* pFloat = fTable.GetColumnBuffer(2);
@@ -2396,8 +2396,8 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
-		Table fTable2(m_db, floatTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(fTable2.Open(m_db));
+		Table fTable2(&m_db, floatTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(fTable2.Open());
 		ColumnBuffer* pId2 = fTable2.GetColumnBuffer(0);
 		ColumnBuffer* pDouble2 = fTable2.GetColumnBuffer(1);
 		ColumnBuffer* pFloat2 = fTable2.GetColumnBuffer(2);
@@ -2416,8 +2416,8 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table nTable(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
-		ASSERT_NO_THROW(nTable.Open(m_db));
+		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		ASSERT_NO_THROW(nTable.Open());
 		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
 		ColumnBuffer* pNumeric_18_0 = nTable.GetColumnBuffer(1);
 		ColumnBuffer* pNumeric_18_10 = nTable.GetColumnBuffer(2);
@@ -2428,8 +2428,8 @@ namespace exodbc
 
 		// Select a valid record from the non-tmp table
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
-		Table nnTable(m_db, numericTypesTableName, L"", L"", L"", AF_READ_WRITE);
-		ASSERT_NO_THROW(nnTable.Open(m_db));
+		Table nnTable(&m_db, numericTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		ASSERT_NO_THROW(nnTable.Open());
 		SQL_NUMERIC_STRUCT numStr18_0, numStr18_10, numStr5_3;
 		nnTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(nnTable.SelectNext());
@@ -2454,8 +2454,8 @@ namespace exodbc
 
 		// And read them again from another table and compare them
 		SQL_NUMERIC_STRUCT numStr18_0t, numStr18_10t, numStr5_3t;
-		Table nntTable(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
-		ASSERT_NO_THROW(nntTable.Open(m_db));
+		Table nntTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		ASSERT_NO_THROW(nntTable.Open());
 		sqlstmt = (boost::wformat(L"%s = %d") % idName % (SQLINTEGER)*pId).str();
 		nntTable.Select(sqlstmt);
 		EXPECT_TRUE(nntTable.SelectNext());
@@ -2474,9 +2474,9 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table t(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
-		ASSERT_NO_THROW(t.Open(m_db));
+		ASSERT_NO_THROW(t.Open());
 		ColumnBuffer* pId = t.GetColumnBuffer(0);
 		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
 		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
@@ -2510,9 +2510,9 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table t(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
-		ASSERT_NO_THROW(t.Open(m_db));
+		ASSERT_NO_THROW(t.Open());
 		ColumnBuffer* pId = t.GetColumnBuffer(0);
 		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
 		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
@@ -2554,9 +2554,9 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table t(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
-		ASSERT_NO_THROW(t.Open(m_db));
+		ASSERT_NO_THROW(t.Open());
 		ColumnBuffer* pId = t.GetColumnBuffer(0);
 		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
 		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
@@ -2598,9 +2598,9 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table t(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
-		ASSERT_NO_THROW(t.Open(m_db));
+		ASSERT_NO_THROW(t.Open());
 		ColumnBuffer* pId = t.GetColumnBuffer(0);
 		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
 		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
@@ -2660,8 +2660,8 @@ namespace exodbc
 	TEST_P(TableTest, InsertBlobTypes)
 	{
 		std::wstring blobTypesTmpTableName = test::GetTableName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table bTable(m_db, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
-		ASSERT_NO_THROW(bTable.Open(m_db));
+		Table bTable(&m_db, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
+		ASSERT_NO_THROW(bTable.Open());
 
 		ColumnBuffer* pId = bTable.GetColumnBuffer(0);
 		ColumnBuffer* pBlob = bTable.GetColumnBuffer(1);
@@ -2755,9 +2755,9 @@ namespace exodbc
 	TEST_P(TableTest, InsertCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
+		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
-		ASSERT_NO_THROW(cTable.Open(m_db));
+		ASSERT_NO_THROW(cTable.Open());
 
 		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
 		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
@@ -2791,9 +2791,9 @@ namespace exodbc
 
 		// Read them back from another table
 		s = "Hello World!";
-		Table t2(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ);
+		Table t2(&m_db, charTypesTmpTableName, L"", L"", L"", AF_READ);
 		t2.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
-		ASSERT_NO_THROW(t2.Open(m_db));
+		ASSERT_NO_THROW(t2.Open());
 		t2.SetCharTrimRight(true);
 
 		std::string varchar2, char2;
@@ -2821,9 +2821,9 @@ namespace exodbc
 	TEST_P(TableTest, InsertWCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
+		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
-		ASSERT_NO_THROW(cTable.Open(m_db));
+		ASSERT_NO_THROW(cTable.Open());
 
 		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
 		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
@@ -2857,9 +2857,9 @@ namespace exodbc
 
 		// Read them back from another table
 		s = L"Hello World!";
-		Table t2(m_db, charTypesTmpTableName, L"", L"", L"", AF_READ);
+		Table t2(&m_db, charTypesTmpTableName, L"", L"", L"", AF_READ);
 		t2.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
-		ASSERT_NO_THROW(t2.Open(m_db));
+		ASSERT_NO_THROW(t2.Open());
 		t2.SetCharTrimRight(true);
 
 		std::wstring varchar2, char2;
@@ -2890,13 +2890,13 @@ namespace exodbc
 	TEST_P(TableTest, UpdateIntTypes)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			// Manually set the PKs on access
 			iTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 		
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -2976,12 +2976,12 @@ namespace exodbc
 	TEST_P(TableTest, UpdateDateTypes)
 	{
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
-		Table dTable(m_db, dateTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			dTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(dTable.Open(m_db));
+		ASSERT_NO_THROW(dTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -3066,8 +3066,8 @@ namespace exodbc
 		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table nTable(m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
-		ASSERT_NO_THROW(nTable.Open(m_db));
+		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		ASSERT_NO_THROW(nTable.Open());
 		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
 		ColumnBuffer* pNumeric_18_0 = nTable.GetColumnBuffer(1);
 		ColumnBuffer* pNumeric_18_10 = nTable.GetColumnBuffer(2);
@@ -3158,12 +3158,12 @@ namespace exodbc
 	TEST_P(TableTest, UpdateFloatTypes)
 	{
 		std::wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table fTable(m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			fTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(fTable.Open(m_db));
+		ASSERT_NO_THROW(fTable.Open());
 		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
 		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
 		ColumnBuffer* pFloat = fTable.GetColumnBuffer(2);
@@ -3189,8 +3189,8 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
-		Table fTable2(m_db, floatTypesTableName, L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(fTable2.Open(m_db));
+		Table fTable2(&m_db, floatTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(fTable2.Open());
 		ColumnBuffer* pId2 = fTable2.GetColumnBuffer(0);
 		ColumnBuffer* pDouble2 = fTable2.GetColumnBuffer(1);
 		ColumnBuffer* pFloat2 = fTable2.GetColumnBuffer(2);
@@ -3207,13 +3207,13 @@ namespace exodbc
 	TEST_P(TableTest, UpdateWCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_UPDATE | AF_INSERT);
+		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_UPDATE | AF_INSERT);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			cTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
-		ASSERT_NO_THROW(cTable.Open(m_db));
+		ASSERT_NO_THROW(cTable.Open());
 		cTable.SetCharTrimRight(true);
 
 		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
@@ -3274,13 +3274,13 @@ namespace exodbc
 	TEST_P(TableTest, UpdateCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table cTable(m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
+		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			cTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
-		ASSERT_NO_THROW(cTable.Open(m_db));
+		ASSERT_NO_THROW(cTable.Open());
 		cTable.SetCharTrimRight(true);
 
 		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
@@ -3341,12 +3341,12 @@ namespace exodbc
 	TEST_P(TableTest, UpdateBlobTypes)
 	{
 		std::wstring blobTypesTmpTableName = test::GetTableName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table bTable(m_db, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
+		Table bTable(&m_db, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			bTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(bTable.Open(m_db));
+		ASSERT_NO_THROW(bTable.Open());
 
 		// Remove everything, ignoring if there was any data:
 		wstring idName = test::GetIdColumnName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
@@ -3425,12 +3425,12 @@ namespace exodbc
 	TEST_P(TableTest, UpdateWhere)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			iTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
-		ASSERT_NO_THROW(iTable.Open(m_db));
+		ASSERT_NO_THROW(iTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 
