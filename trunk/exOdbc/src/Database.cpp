@@ -234,43 +234,65 @@ namespace exodbc
 
 	void Database::Open(const std::wstring& inConnectStr)
 	{
-		exASSERT(inConnectStr.length() > 0);
 		Open(inConnectStr, NULL);
 	}
 
 
 	void Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd)
 	{
+		exASSERT(!IsOpen());
+		exASSERT(!inConnectStr.empty());
+
 		m_dsn = L"";
 		m_uid = L"";
 		m_authStr = L"";
+		m_inConnectionStr = inConnectStr;
 
-		SQLRETURN retcode;
-
-		// TODO: See notes about forwardCursor in Open Method with dsn, user, pass 
-		
 		// Connect to the data source
 		SQLWCHAR outConnectBuffer[SQL_MAX_CONNECTSTR_LEN + 1];  // MS recommends at least 1k buffer
 		SQLSMALLINT outConnectBufferLen;
 
-		m_inConnectionStr = inConnectStr;
-
 		// Note: 
 		// StringLength1: [Input] Length of *InConnectionString, in characters if the string is Unicode, or bytes if string is ANSI or DBCS.
 		// BufferLength: [Input] Length of the *OutConnectionString buffer, in characters.
-		retcode = SQLDriverConnect(m_hdbc, parentWnd, 
+		SQLRETURN ret = SQLDriverConnect(m_hdbc, parentWnd, 
 			(SQLWCHAR*) m_inConnectionStr.c_str(),
 			m_inConnectionStr.length(), 
 			(SQLWCHAR*) outConnectBuffer, 
-			SQL_MAX_CONNECTSTR_LEN, &outConnectBufferLen, SQL_DRIVER_COMPLETE);
-
-		THROW_IFN_SUCCEEDED(SQLDriverConnect, retcode, SQL_HANDLE_DBC, m_hdbc);
+			SQL_MAX_CONNECTSTR_LEN, &outConnectBufferLen, parentWnd == NULL ? SQL_DRIVER_NOPROMPT : SQL_DRIVER_COMPLETE);
+		THROW_IFN_SUCCEEDED(SQLDriverConnect, ret, SQL_HANDLE_DBC, m_hdbc);
 
 		outConnectBuffer[outConnectBufferLen] = 0;
 		m_outConnectionStr = outConnectBuffer;
 		m_dbOpenedWithConnectionString = true;
 
-		OpenImpl();
+		// Do all the common stuff about opening
+		// If we fail, disconnect
+		try
+		{
+			OpenImpl();
+		}
+		catch (const Exception& ex)
+		{
+			HIDE_UNUSED(ex);
+			// Try to disconnect from the data source
+			ret = SQLDisconnect(m_hdbc);
+			if (!SQL_SUCCEEDED(ret))
+			{
+				SErrorInfoVector errs = GetAllErrors(SQL_HANDLE_DBC, m_hdbc);
+				SErrorInfoVector::const_iterator it;
+				for (it = errs.begin(); it != errs.end(); ++it)
+				{
+					LOG_ERROR(boost::str(boost::wformat(L"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
+				}
+			}
+
+			// and rethrow what went wrong originally
+			throw;
+		}
+
+		// Mark database as Open
+		m_dbIsOpen = true;
 	}
 
 
@@ -279,8 +301,6 @@ namespace exodbc
 		exASSERT(!IsOpen());
 		exASSERT(!dsn.empty());
 		exASSERT(HasConnectionHandle());
-		exASSERT(m_hstmt == SQL_NULL_HSTMT);
-		exASSERT(m_hstmtExecSql == SQL_NULL_HSTMT);
 
 		m_dsn        = dsn;
 		m_uid        = uid;

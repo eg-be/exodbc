@@ -34,15 +34,23 @@ namespace exodbc
 		SOdbcInfo()
 		{ }
 
-		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, test::Case namesCase = test::Case::LOWER) 
+		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, test::Case namesCase = test::Case::LOWER)
 			: m_dsn(dsn)
 			, m_username(username)
 			, m_password(password)
 			, m_namesCase(namesCase)
 		{};
+
+		SOdbcInfo(const std::wstring& connectionString, test::Case namesCase)
+			: m_connectionString(connectionString)
+		{};
+
+		bool HasConnectionString() const { return m_connectionString.length() > 0; }
+
 		std::wstring m_dsn;
 		std::wstring m_username;
 		std::wstring m_password;
+		std::wstring m_connectionString;
 		test::Case m_namesCase;
 	};
 
