@@ -151,8 +151,8 @@
     <None Include="CopyCreateScripts.bat" />
     <None Include="RunTests.ps1" />
     <None Include="RunTests_DB2.ps1" />
+    <None Include="RunTests_MySql.ps1" />
     <None Include="RunTests_SqlServer.ps1" />
-    <None Include="Script.ps1" />
     <None Include="Version.h.template" />
   </ItemGroup>
   <ItemGroup>
