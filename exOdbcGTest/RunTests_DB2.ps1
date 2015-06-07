@@ -18,7 +18,7 @@ Write-Output "Running DSN tests using: " $Target
 $filter="*-Excel*"
 Write-Output "Filter: " $filter
 
-$Args="--gtest_filter=$filter DSN=$Dsn;$Uuid;$Pass $LogLevel"
+$Args="--gtest_filter=$filter DSN=$Dsn;$Uid;$Pass $LogLevel"
 Write-Output "Full Arguments: " $Args
 
 $processDsn = Start-Process $Target $Args -NoNewWindow -Wait -PassThru
