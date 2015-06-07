@@ -179,40 +179,6 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, DISABLED_OpenUsingConnectionString)
-	{
-		// Test some known connection-strings
-		Database db(&m_env);
-
-
-		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-
-		if (db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-		{
-			wstring sqlServer = L"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;";
-		}
-//		//wstring sqlServer = L"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;";
-//		//wstring db2 = L"Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;";
-//		//wstring mysql = L"Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;";
-//		//wstring access = L"Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\\exOdbc\\exOdbcGTest\\access\\exodbc.mdb;Uid=Admin;Pwd=;";
-//		//wstring excel = L"Driver={Microsoft Excel Driver (*.xls)};DBQ = E:\\exOdbc\\exOdbcGTest\\excel\\excelTest.xsl;ReadOnly=1;";
-//		Database db(&m_env);
-//		try
-//		{
-////			db.Open(sqlServer);
-////			db.Open(db2);
-////			db.Open(mysql);
-////			db.Open(access);
-//			db.Open(excel);
-//		}
-//		catch (Exception& ex)
-//		{
-//			int p = 3;
-//		}
-		int p = 3;
-	}
-
-
 	// TODO: Test Close. Close should return a value if succeeded
 	TEST_P(DatabaseTest, Close)
 	{
