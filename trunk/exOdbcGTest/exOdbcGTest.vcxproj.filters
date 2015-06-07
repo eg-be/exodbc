@@ -114,6 +114,7 @@
     </None>
     <None Include="Version.h.template" />
     <None Include="CopyCreateScripts.bat" />
+    <None Include="RunTests_DB2.ps1" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="exOdbcGTest.rc">
