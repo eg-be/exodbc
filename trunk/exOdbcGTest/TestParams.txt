@@ -1,4 +1,3 @@
---dsn=exOdbc_MySql_5.2,exOdbc_DB2_10.05,exOdbc_SqlServer_2014 --user=exodbc,exodbc,exodbc --pass=testexodbc,testexodbc,testexodbc
---gtest_filter=*TableTest* --dsn=exOdbc_MySql_5.2,exOdbc_DB2_10.05,exOdbc_SqlServer_2014 --user=exodbc,exodbc,exodbc --pass=testexodbc,testexodbc,testexodbc
+--gtest_filter=* --logLevelW --createDb=1 --excelDsn=exExcel dsn=exMySql;ex;extest dsn=exSqlServer;ex;extest DSN=exDB2;db2ex;extest dsn=exAccess;;
 
---gtest_filter=* --case=l,u,l --logLevel=3 --dsn=exOdbc_MySql_5.2,exOdbc_DB2_10.05,exOdbc_SqlServer_2014 --user=exodbc,exodbc,exodbc --pass=testexodbc,testexodbc,testexodbc
+--gtest_filter=* --logLevelW --createDb=1 --excelDsn=exExcel "cs=Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;" "cs=Driver={SQL Server Native Client 11.0};Server=192.168.56.20\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;" "CS=Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;" "cs=Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\exOdbc\exOdbcGTest\access\exodbc.mdb;Uid=Admin;Pwd=;"

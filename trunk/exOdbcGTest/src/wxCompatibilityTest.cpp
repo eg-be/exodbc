@@ -42,7 +42,6 @@ namespace exodbc
 	{
 		// Run for every test
 		m_odbcInfo = GetParam();
-//		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
 
 		// Set up environment
 		m_env.AllocateEnvironmentHandle();
@@ -50,7 +49,14 @@ namespace exodbc
 
 		// And the db
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
-		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 	}
 	
 	//Destructor

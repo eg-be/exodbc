@@ -83,7 +83,14 @@ namespace exodbc
 
 		// And database
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
-		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 	}
 
 
@@ -435,7 +442,14 @@ namespace exodbc
 		{
 			// We only have a Read-only user for ms sql server
 			Database db(&m_env);
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"exReadOnly", L"exReadOnly"));
+			if (m_odbcInfo.HasConnectionString())
+			{
+				return;
+			}
+			else
+			{
+				ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"exReadOnly", L"exReadOnly"));
+			}
 
 			// Test to open a table read-only
 			// Note that here in ms server we have given the user no rights except the select for this table
@@ -1568,11 +1582,25 @@ namespace exodbc
 			// My SQL does not support 3.8, the database will warn about a version-mismatch and fall back to 3.0. we know about that.
 			// \todo: Open a ticket
 			LogLevelError llE;
-			EXPECT_NO_THROW(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			if (m_odbcInfo.HasConnectionString())
+			{
+				EXPECT_NO_THROW(db38.Open(m_odbcInfo.m_connectionString));
+			}
+			else
+			{
+				EXPECT_NO_THROW(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			}
 		}
 		else
 		{
-			EXPECT_NO_THROW(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			if (m_odbcInfo.HasConnectionString())
+			{
+				EXPECT_NO_THROW(db38.Open(m_odbcInfo.m_connectionString));
+			}
+			else
+			{
+				EXPECT_NO_THROW(db38.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			}
 		}
 		Table dTable38(&db38, dateTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(dTable38.Open());

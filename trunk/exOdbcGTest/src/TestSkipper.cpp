@@ -39,6 +39,12 @@ namespace exodbc
 	}
 
 
+	void TestSkipper::AddTest(const std::string& testName)
+	{
+		m_testsByName.insert(testName);
+	}
+
+
 	void TestSkipper::AddTest(DatabaseProduct db, const std::string& testName)
 	{
 		// If we already have a set use that, else create a new one
@@ -58,6 +64,29 @@ namespace exodbc
 	bool TestSkipper::ContainsDb(DatabaseProduct db) const
 	{
 		return m_dbs.find(db) != m_dbs.end();
+	}
+
+
+	bool TestSkipper::ContainsTest(const testing::TestInfo* const pTestInfo) const
+	{
+		return ContainsTest(pTestInfo->name());
+	}
+
+
+	bool TestSkipper::ContainsTest(const std::string& testName) const
+	{
+		string searchName = testName;
+		// Remove last occurrence of '/0', '/1' etc. in TestName
+		size_t slashPos = searchName.find_last_of("/");
+		if (slashPos != string::npos)
+		{
+			searchName = testName.substr(0, slashPos);
+		}
+		if (m_testsByName.find(searchName) == m_testsByName.end())
+		{
+			return false;
+		}
+		return true;
 	}
 
 

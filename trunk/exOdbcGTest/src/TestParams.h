@@ -43,6 +43,7 @@ namespace exodbc
 
 		SOdbcInfo(const std::wstring& connectionString, test::Case namesCase)
 			: m_connectionString(connectionString)
+			, m_namesCase(namesCase)
 		{};
 
 		bool HasConnectionString() const { return m_connectionString.length() > 0; }

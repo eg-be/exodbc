@@ -23,7 +23,7 @@
 
 namespace exodbc
 {
-
+	TestSkipper EnvironmentTest::s_testSkipper;
 
 	// Static consts
 	// -------------
@@ -42,7 +42,10 @@ namespace exodbc
 	void EnvironmentTest::SetUp()
 	{
 		m_odbcInfo = GetParam();
-//		RecordProperty("DSN", eli::w2mb(m_odbcInfo.m_dsn));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			s_testSkipper.AddTest("ListDataSources");
+		}
 	}
 
 	void EnvironmentTest::TearDown()
@@ -103,8 +106,11 @@ namespace exodbc
 		EXPECT_EQ(SQL_OV_ODBC3_80, (int) env_v3_80.ReadOdbcVersion());
 	}
 
+
 	TEST_P(EnvironmentTest, ListDataSources)
 	{
+		MAYBE_SKIPP_TEST2(s_testSkipper);
+
 		Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(env.HasEnvironmentHandle());
 
