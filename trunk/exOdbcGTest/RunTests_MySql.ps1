@@ -10,8 +10,8 @@ param(
 	[string]$Pass="extest",
 	[string]$ConnectionString="Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;",
 	[string]$LogLevel="--logLevelW",
-	[string]$filterDsn="*-Excel*:*TableTest.OpenAutoCheckPrivs*:*TableTest.*UnsupportedColumn*:*TableTest.OpenAutoCheckPrivs*",
-	[string]$filterCs="*-Excel*:*DetectDbms*:*ListDataSources*:*TableTest.OpenAutoCheckPrivs*:*TableTest.*UnsupportedColumn*:*TableTest.OpenAutoCheckPrivs*",
+	[string]$filterDsn="*-*Excel*:*TableTest.OpenAutoCheckPrivs*:*TableTest.*UnsupportedColumn*:*TableTest.OpenAutoCheckPrivs*",
+	[string]$filterCs="*-*Excel*:*DetectDbms*:*ListDataSources*:*TableTest.OpenAutoCheckPrivs*:*TableTest.*UnsupportedColumn*:*TableTest.OpenAutoCheckPrivs*",
 	[string]$case="l"
 )
 

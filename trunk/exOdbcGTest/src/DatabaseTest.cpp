@@ -40,13 +40,8 @@ using namespace std;
 
 namespace exodbc
 {
-	TestSkipper DatabaseTest::s_testSkipper;
-
 	void DatabaseTest::SetUpTestCase()
 	{
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "ReadSchemas");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "ReadTablePrivileges"); 
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "ReadTablePrimaryKeysInfo");
 	}
 
 	void DatabaseTest::SetUp()
@@ -58,7 +53,6 @@ namespace exodbc
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
 		if (m_odbcInfo.HasConnectionString())
 		{
-			s_testSkipper.AddTest("DetectDbms");
 			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));
 		}
 		else
@@ -318,7 +312,6 @@ namespace exodbc
 	{
 		// We just know how we name the different odbc-sources
 		// TODO: This is not nice, but is there any other reliable way? Add to doc somewhere
-		MAYBE_SKIPP_TEST2(s_testSkipper);
 
 		if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"DB2"))
 		{
@@ -466,8 +459,6 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadSchemas)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
-
 		std::vector<std::wstring> schemas;
 		EXPECT_NO_THROW(schemas = m_db.ReadSchemas());
 		switch(m_db.GetDbms())
@@ -505,8 +496,6 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadTablePrivileges)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
-
 		TablePrivilegesVector privs;
 		std::wstring tableName;
 		std::wstring schemaName;
@@ -568,8 +557,6 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadTablePrimaryKeysInfo)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
-
 		TablePrimaryKeysVector pks;
 		
 		// Find the table-info

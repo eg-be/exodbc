@@ -60,9 +60,6 @@
     <ClInclude Include="src\TestDbCreator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\TestSkipper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\HelpersTest.cpp">
@@ -102,9 +99,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\TestDbCreator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\TestSkipper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
