@@ -42,32 +42,9 @@ using namespace std;
 
 namespace exodbc
 {
-	TestSkipper TableTest::s_testSkipper;
-
 	void TableTest::SetUpTestCase()
 	{
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "OpenAutoCheckPrivs"); 
-		s_testSkipper.AddTest(DatabaseProduct::MY_SQL, "OpenAutoCheckPrivs"); 
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "OpenAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::MY_SQL, "OpenAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "SelectFromAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::MY_SQL, "SelectFromAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "InsertIntoAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::MY_SQL, "InsertIntoAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "UpdateIntoAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::MY_SQL, "UpdateIntoAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "DeleteFromAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::MY_SQL, "DeleteFromAutoWithUnsupportedColumn");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "InsertNumericTypes");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "InsertNumericTypes_18_0");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "InsertNumericTypes_18_10");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "InsertNumericTypes_5_3");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "InsertNumericTypes_All");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "IsNullAutoNumericValue");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "IsNullManualNumericValue");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "SelectAutoNumericValue");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "SelectManualNumericValue");
-		s_testSkipper.AddTest(DatabaseProduct::ACCESS, "UpdateNumericTypes");
+
 	}
 
 
@@ -427,7 +404,7 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenAutoCheckPrivs)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		// Test to open read-only a table we know we have all rights:
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -476,7 +453,7 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenAutoWithUnsupportedColumn)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
 		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
@@ -506,7 +483,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectFromAutoWithUnsupportedColumn)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
 		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
@@ -533,7 +510,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertIntoAutoWithUnsupportedColumn)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
 		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
@@ -583,7 +560,7 @@ namespace exodbc
 
 	TEST_P(TableTest, UpdateIntoAutoWithUnsupportedColumn)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
 		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
@@ -634,7 +611,7 @@ namespace exodbc
 
 	TEST_P(TableTest, DeleteFromAutoWithUnsupportedColumn)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
 		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
@@ -1844,7 +1821,7 @@ namespace exodbc
 
 	TEST_P(TableTest, IsNullAutoNumericValue)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", AF_READ);
@@ -1901,7 +1878,7 @@ namespace exodbc
 	
 	TEST_P(TableTest, SelectAutoNumericValue)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		// \note: There is a special Tests for NULL values, its complicated enough.
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
@@ -1988,7 +1965,7 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectManualNumericValue)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MNumericTypesTable nTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(nTable.Open());
@@ -2060,7 +2037,7 @@ namespace exodbc
 
 	TEST_P(TableTest, IsNullManualNumericValue)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", AF_READ);
@@ -2441,7 +2418,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
@@ -2499,7 +2476,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_5_3)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
@@ -2535,7 +2512,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_18_0)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
@@ -2579,7 +2556,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_18_10)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
@@ -2623,7 +2600,7 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_All)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
@@ -3091,7 +3068,7 @@ namespace exodbc
 	
 	TEST_P(TableTest, UpdateNumericTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);

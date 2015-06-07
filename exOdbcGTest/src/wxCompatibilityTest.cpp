@@ -30,11 +30,8 @@ namespace exodbc
 	
 	//Construction
 	// -------------
-	TestSkipper wxCompatibilityTest::s_testSkipper;
-
 	void wxCompatibilityTest::SetUpTestCase()
 	{
-		s_testSkipper.AddDatabase(DatabaseProduct::ACCESS);
 	}
 
 
@@ -73,7 +70,7 @@ namespace exodbc
 	// Test opening the tables we use in the later tests
 	TEST_P(wxCompatibilityTest, OpenTableCheckExistance)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MCharTypesTable charTypesTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_NO_THROW(charTypesTable.Open(TOF_CHECK_EXISTANCE));
@@ -98,7 +95,7 @@ namespace exodbc
 	// Test basic GetNext
 	TEST_P(wxCompatibilityTest, GetNextTest)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MCharTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -130,7 +127,7 @@ namespace exodbc
 	// Test reading datatypes
 	TEST_P(wxCompatibilityTest, SelectDateTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MDateTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -208,7 +205,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectIntTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -258,7 +255,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectWCharTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MWCharTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -297,7 +294,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectFloatTypes)
 	{		
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -341,7 +338,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectNumericTypesAsChar)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MNumericTypesAsCharTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -409,7 +406,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectBlobTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MBlobTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -459,7 +456,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectIncompleteTable)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MCharTable table(&m_db, m_odbcInfo.m_namesCase);
 		MIncompleteCharTable incTable(&m_db, m_odbcInfo.m_namesCase);
@@ -522,7 +519,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSql_InsertCharTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MWCharTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"CharTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -557,7 +554,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertFloatTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"FloatTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -587,7 +584,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertNumericTypesAsChar)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MNumericTypesAsCharTable table(&m_db, m_odbcInfo.m_namesCase, L"NumericTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -645,7 +642,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertIntTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"IntegerTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -684,7 +681,7 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertDateTypes)
 	{
-		MAYBE_SKIPP_TEST(s_testSkipper, m_db);
+
 
 		MDateTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"DateTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));

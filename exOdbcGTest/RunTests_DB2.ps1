@@ -10,8 +10,8 @@ param(
 	[string]$Pass="extest",
 	[string]$ConnectionString="Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;",
 	[string]$LogLevel="--logLevelW",
-	[string]$filterDsn="*-Excel*",
-	[string]$filterCs="*-Excel*:*DetectDbms*:*ListDataSources*",
+	[string]$filterDsn="*-*Excel*",
+	[string]$filterCs="*-*Excel*:*DetectDbms*:*ListDataSources*",
 	[string]$case="u"
 )
 

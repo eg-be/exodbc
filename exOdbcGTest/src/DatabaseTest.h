@@ -14,7 +14,6 @@
 // Same component headers
 #include "exOdbcGTest.h"
 #include "TestParams.h"
-#include "TestSkipper.h"
 
 // Other headers
 #include "gtest/gtest.h"
@@ -46,8 +45,6 @@ namespace exodbc
 		exodbc::Environment m_env;
 		exodbc::Database	m_db;
 		SOdbcInfo m_odbcInfo;
-
-		static TestSkipper s_testSkipper;
 	};
 
 //	static std::vector<SOdbcInfo> test;
