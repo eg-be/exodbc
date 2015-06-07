@@ -181,6 +181,10 @@ int _tmain(int argc, _TCHAR* argv[])
 			{
 				LOG_WARNING(boost::str(boost::wformat(L"Ignoring Dsn entry '%s' because it does not match the form 'dsn;user;pass'") % arg));
 			}
+			else if (tokens[0].empty())
+			{
+				LOG_WARNING(boost::str(boost::wformat(L"Ignoring Dsn entry '%s' because DSN is empty.") % arg));
+			}
 			else
 			{
 				test::Case nameCase = upperDsn.length() > 0 ? test::Case::UPPER : test::Case::LOWER;
@@ -194,6 +198,11 @@ int _tmain(int argc, _TCHAR* argv[])
 			SOdbcInfo csEntry(upperCs.length() > 0 ? upperCs : lowerCs, nameCase);
 			g_odbcInfos.push_back(csEntry);
 		}
+	}
+
+	if (g_odbcInfos.size() == 0)
+	{
+		LOG_WARNING(L"Have no valid DSN or ConnectionString");
 	}
 
 	// Set a filter for the logging
