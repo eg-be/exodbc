@@ -8,48 +8,25 @@ param(
 	[string]$Dsn="exDB2",
 	[string]$Uid="db2ex",
 	[string]$Pass="extest",
+	[string]$ConnectionString="Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;",
 	[string]$LogLevel="--logLevelW",
-	[string]$ConnectionString="Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;"
+	[string]$filterDsn="*-Excel*",
+	[string]$filterCs="*-Excel*:*DetectDbms*:*ListDataSources*",
+	[string]$case="u"
 )
 
-# first run using DSN
-Write-Output "Running DSN tests using: " $Target
+$ScriptPath = Split-Path $MyInvocation.InvocationName
+$args = @()
+$args += ("-Target", $Target)
+$args += ("-Dsn", $Dsn)
+$args += ("-Uid", $Uid)
+$args += ("-Pass", $Pass)
+$args += ("-ConnectionString", """$ConnectionString""")
+$args += ("-LogLevel", $LogLevel)
+$args += ("-filterDsn", $filterDsn)
+$args += ("-filterCs", $filterCs)
+$args += ("-case", $case)
 
-$filter="*-Excel*"
-Write-Output "Filter: " $filter
-
-$Args="--gtest_filter=$filter DSN=$Dsn;$Uid;$Pass $LogLevel"
-Write-Output "Full Arguments: " $Args
-
-$processDsn = Start-Process $Target $Args -NoNewWindow -Wait -PassThru
-Write-Host "Exit Code: " $processDsn.ExitCode
-
-# and then using connection string
-$filter="*-Excel*:*DetectDbms*:*ListDataSources*"
-$Args="--gtest_filter=$filter ""CS=$ConnectionString"" $logLevel"
-Write-Output "Full Arguments: " $Args
-
-$processCs = Start-Process $Target $Args -NoNewWindow -Wait -PassThru
-Write-Host "Exit Code: " $processCs.ExitCode
-
-# write overall results
-$dsnOk = ""
-$csOk = ""
-
-If ($processCs.ExitCode -eq 0) {
-	$csOk = "OK"
-}
-else
-{
-	$csOk = "FAILED"
-}
-Write-Host "ConnectionString Tests: " $csOk
-
-If ($processDsn.ExitCode -eq 0) {
-	$dsnOk = "OK"
-}
-else
-{
-	$dsnOk = "FAILED"
-}
-Write-Host "DNS Tests:              " $dsnOk
+$cmd = "$ScriptPath\RunTests.ps1"
+Write-Host $cmd
+Invoke-Expression "$cmd $args"
