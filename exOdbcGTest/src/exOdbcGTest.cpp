@@ -252,8 +252,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		return status;
 
 	int result = RUN_ALL_TESTS();
-	std::wcerr << L"Any key to exit";
-	::getchar();
 	
 	return result;
 }
