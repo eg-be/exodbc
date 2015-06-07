@@ -28,7 +28,6 @@
 // -------
 namespace exodbc
 {
-	std::wstring g_excelDsn = L"";
 	std::vector<SOdbcInfo> g_odbcInfos = std::vector<SOdbcInfo>();
 	boost::log::trivial::severity_level g_logSeverity = boost::log::trivial::error;
 }
@@ -96,8 +95,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		wcerr << L"--createDb       Runs the script to create the test databases.\n";
 		wcerr << L"--logLevelN      Set the logLevel to N, where N must be a single Letter:\n";
 		wcerr << L"                 (T)race, (D)ebug, (I)nfo, (W)arning, (E)rror, (F)atal\n";
-		wcerr << L"--excelDsn=dsn   If set, dsn should be a system-dsn pointing to an Excel\n";
-		wcerr << L"                 database. Runs some very limited tests against Excel then.\n";
 		wcerr << L"\n";
 		wcerr << L"Examples:\n";
 		wcerr << L" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass\n";
@@ -210,14 +207,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		(
 		boost::log::trivial::severity >= boost::ref(g_logSeverity)
 		);
-
-	// Read an eventually set excel Dsn
-	std::wstring excelDsn;
-	if (extractParamValue(argc, argv, L"--excelDsn=", excelDsn))
-	{
-		::boost::algorithm::trim(excelDsn);
-		g_excelDsn = excelDsn;
-	}
 
 	// Check if we need to re-create the dbs
 	if (doCreateDb)

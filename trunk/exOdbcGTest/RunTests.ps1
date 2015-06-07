@@ -16,7 +16,8 @@ param(
 )
 
 # first run using DSN
-Write-Output "Running tests: " $Target
+Write-Output "Running tests using: $Target"
+Write-Output ""
 
 $ArgsDsn = ""
 if($case -eq "l") {
@@ -26,10 +27,13 @@ else
 {
 	$ArgsDsn="--gtest_filter=$filterDsn DSN=$Dsn;$Uid;$Pass $LogLevel"
 }
-Write-Output "DSN-Test: Full Arguments: " $ArgsDsn
+Write-Output "DSN-Test: Full Arguments: $ArgsDsn"
+Write-Output "========================"
+Write-Output ""
 
 $processDsn = Start-Process $Target $ArgsDsn -NoNewWindow -Wait -PassThru
-Write-Host "Exit Code DSN-Test: " $processDsn.ExitCode
+Write-Output "Exit Code DSN-Test: " $processDsn.ExitCode
+Write-Output ""
 
 # and then using connection string
 $ArgsCs = ""
@@ -40,10 +44,12 @@ else
 {
 	$ArgsCs="--gtest_filter=$filterCs ""CS=$ConnectionString"" $logLevel"
 }
-Write-Output "ConnectionString-Test: Full Arguments: " $ArgsCs
+Write-Output "ConnectionString-Test: Full Arguments: $ArgsCs"
+Write-Output "======================================"
+Write-Output ""
 
 $processCs = Start-Process $Target $ArgsCs -NoNewWindow -Wait -PassThru
-Write-Host "Exit Code ConnectionString-Test: " $processCs.ExitCode
+Write-Output "Exit Code ConnectionString-Test: " $processCs.ExitCode
 
 # write overall results
 Write-Host ""
@@ -55,7 +61,7 @@ else
 {
 	$dsnOk = "FAILED"
 }
-Write-Host "DNS Tests:              " $dsnOk "  Using args: " $ArgsDsn
+Write-Output "DNS Tests:               $dsnOk   Using args:  $ArgsDsn"
 
 $csOk = ""
 If ($processCs.ExitCode -eq 0) {
@@ -65,4 +71,4 @@ else
 {
 	$csOk = "FAILED"
 }
-Write-Host "ConnectionString Tests: " $csOk "  Using args: " $ArgsCs
+Write-Output "ConnectionString Tests:  $csOk   Using args:  $ArgsCs"

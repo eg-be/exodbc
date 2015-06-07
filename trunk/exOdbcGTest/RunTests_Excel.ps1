@@ -6,7 +6,7 @@ param(
 	[Parameter(Mandatory=$true)]
 	[string]$Target,
 	[string]$Dsn="exExcel",
-	[string]$ConnectionString="",
+	[string]$ConnectionString="Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=E:\exOdbc\exOdbcGTest\excel\excelTest.xls;",
 	[string]$LogLevel="--logLevelW",
 	[string]$filterDsn="*Excel*-*DatabaseTest*:*TableTest*",
 	[string]$filterCs="*Excel*-*DatabaseTest*:*TableTest*",

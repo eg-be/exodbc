@@ -39,8 +39,7 @@ namespace exodbc
 
 	void ExcelTest::SetUp()
 	{
-		// Ensure an Excel-DSN is set on the command line
-		ASSERT_TRUE( ! g_excelDsn.empty());
+		m_odbcInfo = GetParam();
 
 		// Set up is called for every test
 		ASSERT_NO_THROW(m_env.AllocateEnvironmentHandle());
@@ -54,20 +53,34 @@ namespace exodbc
 	}
 
 
-	TEST_F(ExcelTest, OpenDatabase)
+	TEST_P(ExcelTest, OpenDatabase)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
 		// We cannot set Commit-mode on excel
-		EXPECT_NO_THROW(db.Open(g_excelDsn, L"", L""));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			EXPECT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			EXPECT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
+		}
 	}
 
 
-	TEST_F(ExcelTest, FindTables)
+	TEST_P(ExcelTest, FindTables)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
-		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
+		}
 		STableInfosVector tables;
 		ASSERT_NO_THROW(tables = db.FindTables(L"", L"", L"", L""));
 		// Must contain our sheet 'TestTable$'
@@ -84,11 +97,18 @@ namespace exodbc
 	}
 
 
-	TEST_F(ExcelTest, OpenAutoTableAsWChar)
+	TEST_P(ExcelTest, OpenAutoTableAsWChar)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
-		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
+		}
 		// Create Table
 		Table tTable(&db, L"TestTable$", L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(tTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
@@ -97,12 +117,19 @@ namespace exodbc
 	}
 
 
-	TEST_F(ExcelTest, SpecialQueryNameWorkaround)
+	TEST_P(ExcelTest, SpecialQueryNameWorkaround)
 	{
 		// See Ticket #111 - this is fixed and no workarounds are needed
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
-		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
+		}
 		Table tTable(&db, L"TestTable$", L"", L"", L"", AF_READ);
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
 		ASSERT_NO_THROW(tTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
@@ -145,11 +172,18 @@ namespace exodbc
 	}
 
 
-	TEST_F(ExcelTest, SelectManualWCharValues)
+	TEST_P(ExcelTest, SelectManualWCharValues)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
-		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
+		}
 		// Find the correct table:
 		STableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
@@ -191,11 +225,18 @@ namespace exodbc
 	}
 
 
-	TEST_F(ExcelTest, SelectAutoWCharValues)
+	TEST_P(ExcelTest, SelectAutoWCharValues)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.AllocateConnectionHandle(&m_env));
-		ASSERT_NO_THROW(db.Open(g_excelDsn, L"", L""));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
+		}
 		// Find the correct table:
 		STableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));

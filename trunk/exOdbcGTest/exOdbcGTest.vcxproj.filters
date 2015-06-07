@@ -119,6 +119,7 @@
     <None Include="RunTests.ps1" />
     <None Include="RunTests_MySql.ps1" />
     <None Include="RunTests_Access.ps1" />
+    <None Include="RunTests_Excel.ps1" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="exOdbcGTest.rc">

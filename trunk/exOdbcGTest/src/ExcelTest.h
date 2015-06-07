@@ -31,7 +31,7 @@
 namespace exodbc
 {
 
-	class ExcelTest : public ::testing::Test 
+	class ExcelTest : public ::testing::TestWithParam<SOdbcInfo>
 	{
 	
 	protected:
@@ -40,9 +40,13 @@ namespace exodbc
 		virtual void TearDown();
 
 		Environment m_env;
-
+		SOdbcInfo m_odbcInfo;
 	};
 
+	INSTANTIATE_TEST_CASE_P(
+		ParametrizedOdbc,
+		ExcelTest,
+		::testing::ValuesIn(g_odbcInfos));
 
 } // namespace exodbc
 
