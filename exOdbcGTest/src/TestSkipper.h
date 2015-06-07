@@ -42,26 +42,41 @@ namespace exodbc
 		void AddDatabase(DatabaseProduct db);
 		bool ContainsDb(DatabaseProduct db) const;
 
+		void AddTest(const std::string& testName);
 		void AddTest(DatabaseProduct db, const std::string& testName);
+		bool ContainsTest(const testing::TestInfo* const pTestInfo) const;
+		bool ContainsTest(const std::string& testName) const;
 		bool ContainsTest(DatabaseProduct db, const std::string& testName) const;
 		bool ContainsTest(DatabaseProduct db, const testing::TestInfo* const pTestInfo) const;
 		std::wstring FormatSkipMessage(DatabaseProduct db, const testing::TestInfo* const pTestInfo) const;
 
 	private:
+		TestNamesSet m_testsByName;
 		DatabaseTestsMap m_testsByDb;
 		DatabasesSet m_dbs;
 	};
 
+#define MAYBE_SKIPP_TEST2(testSkipper) \
+	{ \
+		if (testSkipper.ContainsTest(::testing::UnitTest::GetInstance()->current_test_info())) { \
+			LOG_WARNING(testSkipper.FormatSkipMessage(DatabaseProduct::UNKNOWN, ::testing::UnitTest::GetInstance()->current_test_info())); \
+			return; \
+		} \
+	} while(0)
 
 #define MAYBE_SKIPP_TEST(testSkipper, db) \
 		{ \
 		if (testSkipper.ContainsDb(db.GetDbms())) { \
-			LOG_WARNING(testSkipper.FormatSkipMessage(m_db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())); \
+			LOG_WARNING(testSkipper.FormatSkipMessage(db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())); \
+			return; \
+		} \
+		if (testSkipper.ContainsTest(::testing::UnitTest::GetInstance()->current_test_info())) { \
+			LOG_WARNING(testSkipper.FormatSkipMessage(db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())); \
 			return; \
 		} \
 		if (testSkipper.ContainsTest(db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())) \
 		{ \
-			LOG_WARNING(testSkipper.FormatSkipMessage(m_db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())); \
+			LOG_WARNING(testSkipper.FormatSkipMessage(db.GetDbms(), ::testing::UnitTest::GetInstance()->current_test_info())); \
 			return; \
 		} \
 	} while (0)

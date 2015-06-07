@@ -42,7 +42,14 @@ namespace exodbc
 		m_env.SetOdbcVersion(OdbcVersion::V_3);
 		// Create and open Database
 		m_db.AllocateConnectionHandle(&m_env);
-		m_db.Open(odbcInfo.m_dsn, odbcInfo.m_username, odbcInfo.m_password);
+		if (odbcInfo.HasConnectionString())
+		{
+			m_db.Open(odbcInfo.m_connectionString);
+		}
+		else
+		{
+			m_db.Open(odbcInfo.m_dsn, odbcInfo.m_username, odbcInfo.m_password);
+		}
 	}
 
 	// Destructor

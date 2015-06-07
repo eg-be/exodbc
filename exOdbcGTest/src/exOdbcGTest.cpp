@@ -33,6 +33,8 @@ namespace exodbc
 	boost::log::trivial::severity_level g_logSeverity = boost::log::trivial::error;
 }
 
+namespace ba = boost::algorithm;
+
 // Static consts
 // -------------
 
@@ -72,79 +74,136 @@ int _tmain(int argc, _TCHAR* argv[])
 	if(argc < 2)
 	{
 		// Not enough args
-		wcerr << L"Not enough arguments!\n";
-		wcerr << L"Usage: exOdbcGTest --dsn=dsn1,dsn2,..,dsnN [--user=user1,user2,..,userN] [--pass=pass1,pass2,..,passN] [--case=u|l,u|l,...,u|l] [--logLevel=0-5] [--excelDsn=excelDSNName] [--createDb=1]\n";
+		wcerr << L"Usage: exOdbcGTest [OPTION]... DATABASE... \n";
+		wcerr << L"Run unit-tests against DATABASE.\n";
 		wcerr << L"\n";
-		wcerr << L" logLevel: 0: trace; 1: debug; 2: info; 3: warning; 4: error; 5: fatal\n";
-		wcerr << L"           Default is warning (3)\n";
-		wcerr << L" case:     Defines the case of the table- and column-names to be used during the";
-		wcerr << L"           tests. If not specified lowercase-letters are used. If parameter is";
-		wcerr << L"           used, it must be set for every dsn entry\n";
-		wcerr << L"           l: lower: All table- and column-names for the test tables will be in";
-		wcerr << L"              lowercase letters(default)\n";
-		wcerr << L"           u: upper: All table- and column-names for the test tables will be in";
-		wcerr << L"              UPPERCASE letters\n";
-		wcerr << L" createDb: If set to 1, the App tries to re-create the test-database before";
-		wcerr << L"           running any tests\n";
+		wcerr << L"DATABASE must specify how to connect to the database and which case the test\n";
+		wcerr << L"tables use. You can either supply a connection-string or a DSN-entry (which also\n";
+		wcerr << L"requires username and password).\n";
+		wcerr << L" To connect using a configured DSN entry use:\n";
+		wcerr << L"\n";
+		wcerr << L"  DSN=dsn;user;pass (to connect to a database with UPPER-case names)\n";
+		wcerr << L"  dsn=dsn;user;pass (to connect to a database with lower-case names)\n";
+		wcerr << L"\n";
+		wcerr << L" or to connect using a connection-string use:\n";
+		wcerr << L"\n";
+		wcerr << L"  CS=connectionString (to connect to a database with UPPER-case names)\n";
+		wcerr << L"  cs=connectionString (to connect to a database with lower-case names)\n";
+		wcerr << L"\n";
+		wcerr << L"Note that you must frame the 'cs=connectionString' with \" if your connection\n"; 
+		wcerr << L"string contains white spaces.\n";
+		wcerr << L"\n";
+		wcerr << L"--createDb       Runs the script to create the test databases.\n";
+		wcerr << L"--logLevelN      Set the logLevel to N, where N must be a single Letter:\n";
+		wcerr << L"                 (T)race, (D)ebug, (I)nfo, (W)arning, (E)rror, (F)atal\n";
+		wcerr << L"--excelDsn=dsn   If set, dsn should be a system-dsn pointing to an Excel\n";
+		wcerr << L"                 database. Runs some very limited tests against Excel then.\n";
+		wcerr << L"\n";
+		wcerr << L"Examples:\n";
+		wcerr << L" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass\n";
+		wcerr << L"  to run the tests against a configured DSN entry named 'db2', using uppercase\n";
+		wcerr << L"  names and log level Waring. Before the tests are run, the scripts to create\n";
+		wcerr << L"  the test database are run.\n";
+		wcerr << L" exodbcGTest dsn=ms;uid;pass DSN=db2;uid;pass dsn=mysql;uid;pass\n";
+		wcerr << L"  to run the tests against three configured DSN entries, using twice lowercase\n";
+		wcerr << L"  and once uppercase.\n";
+		wcerr << L" exodbcGTest CS=\"Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;\"\n";
+		wcerr << L"  to run the tests using a connection string, against a DB which uses uppercase.\n";
+
 		status = 10;
 	}
-	std::wstring dsn, user, pass, logLevelS, caseS, excelDsn, createDb;
-	bool haveCase = false;
-	if(!extractParamValue(argc, argv, L"--dsn=", dsn))
-	{
-		wcerr << L"Missing argument --dsn=\n";
-		status = 11;
-	}
-	extractParamValue(argc, argv, L"--user=", user);
-	extractParamValue(argc, argv, L"--pass=", pass);
-	int logLevel = 3;
-	if (extractParamValue(argc, argv, L"--logLevel=", logLevelS))
-	{
-		std::wistringstream convert(logLevelS);
-		if (!(convert >> logLevel) || logLevel < 0 || logLevel > 5)
-		{
-			wcout << L"Warning: LogLevel is not a value in the range 0-5. Falling back to default 'warning' (3)\n";
-			logLevel = 3;
-		}
-	}
-	haveCase = extractParamValue(argc, argv, L"--case=", caseS);
-	vector<wstring> dsns, users, passes, cases;
-	boost::split(dsns, dsn, boost::is_any_of(L","));
-	boost::split(users, user, boost::is_any_of(L","));
-	boost::split(passes, pass, boost::is_any_of(L","));
-	if (haveCase)
-	{
-		boost::split(cases, caseS, boost::is_any_of(L","));
-	}
-	if(! (dsns.size() == users.size() && dsns.size() == passes.size() && ( !haveCase || dsns.size() == cases.size()) ))
-	{
-		std::wcout << L"Warning: Not equal number of dsn, user and password (and maybe case)\n";
-	}
-	// default to lowerCase with cases
-	if (!haveCase)
-	{
-		for (size_t i = 0; i < dsns.size(); i++)
-		{
-			cases.push_back(L"l");
-		}
-	}
-	for(size_t i = 0; status == 0 && i < dsns.size(); i++)
-	{
-		wstring user, pass, casev;
-		if (users.size() > i)
-			user = users[i];
-		if (passes.size() > i)
-			pass = passes[i];
-		 
-		test::Case nameCase = test::Case::LOWER;
-		if (cases.size() > i && cases[i] == L"u")
-			nameCase = test::Case::UPPER;
-		else if (cases.size() > i && cases[i] != L"l")
-			wcout << L"Warning: Unknown case '" << cases[i] << L"' falling back to default of 'l' (lowercase)\n";
 
-		g_odbcInfos.push_back(SOdbcInfo(dsns[i], user, pass, nameCase));
+	// Set defaults
+	bool doCreateDb = false;
+	g_logSeverity = boost::log::trivial::info;
+
+	// Iterate given options
+	for (int i = 1; i < argc; i++)
+	{
+		std::wstring logLevel = L"--logLevel";
+		std::wstring createDb = L"--createDb";
+		std::wstring dsn = L"dsn=";
+		std::wstring DSN = L"DSN=";
+		std::wstring cs = L"cs=";
+		std::wstring CS = L"CS=";
+		std::wstring arg(argv[i]);
+		std::wstring upperDsn, lowerDsn, upperCs, lowerCs;
+		if (ba::starts_with(arg, logLevel) && arg.length() > logLevel.length())
+		{
+			switch (arg[logLevel.length()])
+			{
+			case 'T':
+				g_logSeverity = boost::log::trivial::trace;
+				break;
+			case 'D':
+				g_logSeverity = boost::log::trivial::debug;
+				break;
+			case 'I':
+				g_logSeverity = boost::log::trivial::info;
+				break;
+			case 'W':
+				g_logSeverity = boost::log::trivial::warning;
+				break;
+			case 'E':
+				g_logSeverity = boost::log::trivial::error;
+				break;
+			case 'F':
+				g_logSeverity = boost::log::trivial::fatal;
+				break;
+			}
+		}
+		else if (arg == createDb)
+		{
+			doCreateDb = true;
+		}
+		else if (ba::starts_with(arg, DSN) && arg.length() > DSN.length())
+		{
+			upperDsn = arg.substr(DSN.length());
+		}
+		else if (ba::starts_with(arg, dsn) && arg.length() > dsn.length())
+		{
+			lowerDsn = arg.substr(dsn.length());
+		}
+		else if (ba::starts_with(arg, CS) && arg.length() > CS.length())
+		{
+			upperCs = arg.substr(CS.length());
+		}
+		else if (ba::starts_with(arg, cs) && arg.length() > cs.length())
+		{
+			lowerCs = arg.substr(cs.length());
+		}
+		if (upperDsn.length() > 0 || lowerDsn.length() > 0)
+		{
+			std::wstring dsn = upperDsn.length() > 0 ? upperDsn : lowerDsn;
+			std::vector<std::wstring> tokens;
+			boost::split(tokens, dsn, boost::is_any_of(L";"));
+			if (tokens.size() != 3)
+			{
+				LOG_WARNING(boost::str(boost::wformat(L"Ignoring Dsn entry '%s' because it does not match the form 'dsn;user;pass'") % arg));
+			}
+			else
+			{
+				test::Case nameCase = upperDsn.length() > 0 ? test::Case::UPPER : test::Case::LOWER;
+				SOdbcInfo dsnEntry(tokens[0], tokens[1], tokens[2], nameCase);
+				g_odbcInfos.push_back(dsnEntry);
+			}
+		}
+		if (upperCs.length() > 0 || lowerCs.length() > 0)
+		{
+			test::Case nameCase = upperCs.length() > 0 ? test::Case::UPPER : test::Case::LOWER;
+			SOdbcInfo csEntry(upperCs.length() > 0 ? upperCs : lowerCs, nameCase);
+			g_odbcInfos.push_back(csEntry);
+		}
 	}
+
+	// Set a filter for the logging
+	boost::log::core::get()->set_filter
+		(
+		boost::log::trivial::severity >= boost::ref(g_logSeverity)
+		);
+
 	// Read an eventually set excel Dsn
+	std::wstring excelDsn;
 	if (extractParamValue(argc, argv, L"--excelDsn=", excelDsn))
 	{
 		::boost::algorithm::trim(excelDsn);
@@ -152,7 +211,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	// Check if we need to re-create the dbs
-	if (extractParamValue(argc, argv, L"--createDb=", createDb) && createDb == L"1")
+	if (doCreateDb)
 	{
 		for (std::vector<SOdbcInfo>::const_iterator it = g_odbcInfos.begin(); it != g_odbcInfos.end(); ++it)
 		{
@@ -191,14 +250,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	if(status != 0)
 		return status;
-	
-	// Set a filter for the logging
-	// Also update the global value
-	g_logSeverity = (boost::log::trivial::severity_level) logLevel;
-	boost::log::core::get()->set_filter
-		(
-		boost::log::trivial::severity >= boost::ref(g_logSeverity)
-		);
 
 	int result = RUN_ALL_TESTS();
 	std::wcerr << L"Any key to exit";

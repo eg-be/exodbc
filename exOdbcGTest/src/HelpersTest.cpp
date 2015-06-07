@@ -45,7 +45,14 @@ namespace exodbc
 		ASSERT_NO_THROW(m_env.SetOdbcVersion(OdbcVersion::V_3));
 
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
-		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 	}
 
 	void ParamHelpersTest::TearDown()

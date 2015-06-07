@@ -56,7 +56,15 @@ namespace exodbc
 		m_env.AllocateEnvironmentHandle();
 		m_env.SetOdbcVersion(OdbcVersion::V_3);
 		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
-		ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			s_testSkipper.AddTest("DetectDbms");
+			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 	}
 
 	void DatabaseTest::TearDown()
@@ -146,13 +154,27 @@ namespace exodbc
 		Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(env.HasEnvironmentHandle());
 		Database db(&env);
-		EXPECT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			EXPECT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			EXPECT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 		EXPECT_NO_THROW(db.Close());
 
 		// Open an existing db using the default c'tor and setting params on db
 		Database db2;
 		ASSERT_NO_THROW(db2.AllocateConnectionHandle(&env));
-		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 		EXPECT_NO_THROW(db2.Close());
 
 		// Try to open with a different password / user, expect to fail when opening the db.
@@ -163,10 +185,12 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, OpenUsingConnectionString)
+	TEST_P(DatabaseTest, DISABLED_OpenUsingConnectionString)
 	{
 		// Test some known connection-strings
 		Database db(&m_env);
+
+
 		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 
 		if (db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
@@ -200,7 +224,14 @@ namespace exodbc
 	{
 		// Try to close a db that really is open
 		Database db1(&m_env);
-		ASSERT_NO_THROW(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db1.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 
 		EXPECT_NO_THROW(db1.Close());
 
@@ -219,7 +250,14 @@ namespace exodbc
 	TEST_P(DatabaseTest, SetCommitMode)
 	{
 		Database db(&m_env);
-		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 
 		// We default to manual commit
 		EXPECT_EQ(CommitMode::MANUAL, db.GetCommitMode());
@@ -243,14 +281,21 @@ namespace exodbc
 	{
 		Database db(&m_env);
 
-		ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 
 		std::vector<SSqlTypeInfo> types;
 		ASSERT_NO_THROW(types = db.ReadDataTypesInfo());
 		EXPECT_TRUE(types.size() > 0);
 
 		std::wstringstream ws;
-		ws << L"TypeInfo of database with DSN '" << m_odbcInfo.m_dsn << L"', total " << types.size() << L" types reported:" << std::endl;
+		ws << L"TypeInfo of database with DSN '" << (m_odbcInfo.HasConnectionString() ? m_odbcInfo.m_connectionString : m_odbcInfo.m_dsn) << L"', total " << types.size() << L" types reported:" << std::endl;
 		bool first = true;
 		std::vector<SSqlTypeInfo>::const_iterator it = types.begin();
 		while(it != types.end())
@@ -273,7 +318,8 @@ namespace exodbc
 	{
 		// We just know how we name the different odbc-sources
 		// TODO: This is not nice, but is there any other reliable way? Add to doc somewhere
-		m_odbcInfo = GetParam();
+		MAYBE_SKIPP_TEST2(s_testSkipper);
+
 		if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"DB2"))
 		{
 			EXPECT_TRUE(m_db.GetDbms() == DatabaseProduct::DB2);
@@ -311,7 +357,14 @@ namespace exodbc
 		// We need to examine that behavior, it must be some option. -> Yes, it is the SNAPSHOT Transaction isolation
 		{
 			Database db2(&m_env);
-			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			if (m_odbcInfo.HasConnectionString())
+			{
+				EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_connectionString));
+			}
+			else
+			{
+				EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			}
 			// This is extremely confusing: Why do we need to switch to AUTO_COMMIT to set the transaction mode to SNAPSHOT?
 			// Note: Setting the transaction mode works always, but doing a query afterwards only if it was set during an auto-commit-mode ?? 
 			// TODO: WTF???
@@ -345,7 +398,14 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		Database db2(&m_env);
-		EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
 		{
 			exodbc::Table iTable2(&m_db, tableName, L"", L"", L"", AF_READ);
 			ASSERT_NO_THROW(iTable2.Open());
