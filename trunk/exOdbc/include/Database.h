@@ -161,19 +161,15 @@ namespace exodbc
 
 
 		/*!
-		* \deprecated
-		* \todo	Untested leftover from wxWidgets.
 		 * \brief	Connect using a prepared connection-String.
 		 * 			Uses SQLDriverConnect without a window-handle to connect
 		 * \param	inConnectStr			 		The connect string.
-		 * \return	true if it succeeds, false if it fails.
+		 * \throw	Exception If Opening the Connection fails, or no Database handle is allocated.
 		 */
 		void         Open(const std::wstring& inConnectStr);
 
 
 		/*!
-		 * \deprecated
-		 * \todo	Untested leftover from wxWidgets.
 		 * \brief	This version of Open will display the odbc source selection dialog, using SQLDriverConnect. Cast a
 		 * 			wxWindow::GetHandle() to SQLHWND to use.
 		 * \param	inConnectStr			 	The in connect string.
