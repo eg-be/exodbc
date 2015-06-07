@@ -33,10 +33,17 @@ namespace exodbc
 {
 	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi) {
 		std::wstringstream wos;
-		wos << L"DSN: " << oi.m_dsn.c_str() 
-			<< L"; Username: " << oi.m_username.c_str()
-			<< L"; Password: " << oi.m_password.c_str()
-			<< L"; Names: " << (oi.m_namesCase == test::Case::LOWER ? L"lowercase" : L"uppercase");
+		if (oi.HasConnectionString())
+		{
+			wos << L"Connection String: " << oi.m_connectionString;
+		}
+		else
+		{
+			wos << L"DSN: " << oi.m_dsn
+				<< L"; Username: " << oi.m_username
+				<< L"; Password: " << oi.m_password;
+		}
+		wos << L"; Names: " << (oi.m_namesCase == test::Case::LOWER ? L"lowercase" : L"uppercase");
 		std::string s;
 
 		// \todo Resolve with ticket #44 #53 - ugly conversion (but okay here, we know its only ascii)
@@ -54,12 +61,17 @@ namespace exodbc
 
 
 	::std::wostream& operator<<(::std::wostream& wos, const SOdbcInfo& oi) {
-		wos << L"DSN: " << oi.m_dsn.c_str()
-			<< L"; Username: " << oi.m_username.c_str()
-			<< L"; Password: " << oi.m_password.c_str()
-			<< L"; Names: " << (oi.m_namesCase == test::Case::LOWER ? L"lowercase" : L"uppercase");
-
-
+		if (oi.HasConnectionString())
+		{
+			wos << L"Connection String: " << oi.m_connectionString;
+		}
+		else
+		{
+			wos << L"DSN: " << oi.m_dsn
+				<< L"; Username: " << oi.m_username
+				<< L"; Password: " << oi.m_password;
+		}
+		wos << L"; Names: " << (oi.m_namesCase == test::Case::LOWER ? L"lowercase" : L"uppercase");
 		return wos;
 	}
 
