@@ -42,14 +42,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_v120|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IntDir>$(Configuration)\GoogleTest\</IntDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <OutDir>$(SolutionDir)\Bin\$(Platform)\$(Configuration)\</OutDir>
     <TargetName>$(ProjectName)_$(PlatformToolset)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_v120|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)\Bin\$(Platform)\$(Configuration)\</OutDir>
-    <IntDir>$(Configuration)\GoogleTest\</IntDir>
+    <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <TargetName>$(ProjectName)_$(PlatformToolset)</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_v120|Win32'">
