@@ -957,7 +957,7 @@ namespace exodbc
 
 		CommitMode mode = CommitMode::UNKNOWN;
 
-		SQLUINTEGER modeValue;
+		SQLULEN modeValue = 0;
 		SQLINTEGER cb;
 		SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_ATTR_AUTOCOMMIT, &modeValue, sizeof(modeValue), &cb);
 		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to read Attr SQL_ATTR_AUTOCOMMIT");
@@ -975,7 +975,7 @@ namespace exodbc
 
 	TransactionIsolationMode Database::ReadTransactionIsolationMode()
 	{
-		SQLUINTEGER modeValue;
+		SQLULEN modeValue = 0;
 		SQLINTEGER cb;
 		SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_ATTR_TXN_ISOLATION, &modeValue, sizeof(modeValue), &cb);
 		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to read Attr SQL_ATTR_TXN_ISOLATION");
