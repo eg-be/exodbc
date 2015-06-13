@@ -242,7 +242,7 @@ namespace exodbc
 	{
 		exASSERT(!IsOpen());
 		exASSERT(!inConnectStr.empty());
-
+		exASSERT(inConnectStr.length() < SHRT_MAX);
 		m_dsn = L"";
 		m_uid = L"";
 		m_authStr = L"";
@@ -257,7 +257,7 @@ namespace exodbc
 		// BufferLength: [Input] Length of the *OutConnectionString buffer, in characters.
 		SQLRETURN ret = SQLDriverConnect(m_hdbc, parentWnd, 
 			(SQLWCHAR*) m_inConnectionStr.c_str(),
-			m_inConnectionStr.length(), 
+			(SQLSMALLINT) m_inConnectionStr.length(), 
 			(SQLWCHAR*) outConnectBuffer, 
 			SQL_MAX_CONNECTSTR_LEN, &outConnectBufferLen, parentWnd == NULL ? SQL_DRIVER_NOPROMPT : SQL_DRIVER_COMPLETE);
 		THROW_IFN_SUCCEEDED(SQLDriverConnect, ret, SQL_HANDLE_DBC, m_hdbc);

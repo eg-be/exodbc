@@ -235,7 +235,7 @@ namespace exodbc
 		* \see		HasBuffer()
 		* \return	Buffer-size
 		*/
-		SQLINTEGER GetBufferSize() const { exASSERT(HasBuffer());  return m_bufferSize; };
+		SQLLEN GetBufferSize() const { exASSERT(HasBuffer());  return m_bufferSize; };
 
 
 		/*!
@@ -646,11 +646,12 @@ namespace exodbc
 		* \details Allocates corresponding buffer. 
 		*			Sets m_allocatedBuffer to true on success.
 		* \param	bufferType An SQL_C_TYPE like SQL_C_SSHORT to describe the type to allocate
-		* \param	bufferSize Used for types that are not as simple as a SQLSMALLINT, for example SQLWCHAR*
+		* \param	bufferSize Used for types that are not as simple as a SQLSMALLINT, for example binary buffer. For SQLCHAR[] and SQLWCHAR it is 
+		*			the number of characters.
 		* \throw	NotSupportedException If the bufferType is unknown.
 		* \throw	bad_alloc if allocating memory fails.
 		*/
-		void AllocateBuffer(SQLSMALLINT bufferType, SQLINTEGER bufferSize);
+		void AllocateBuffer(SQLSMALLINT bufferType, SQLLEN bufferSize);
 
 
 		/*!
@@ -694,7 +695,7 @@ namespace exodbc
 		bool					m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
 		bool					m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
 		SQLSMALLINT				m_bufferType;			///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
-		SQLINTEGER				m_bufferSize;			///< Size of an allocated or set from constructor buffer.
+		SQLLEN					m_bufferSize;			///< Size of an allocated or set from constructor buffer.
 		SQLHSTMT				m_hStmt;				///< Set to the statement handle this ColumnBuffer was bound to, initialized to SQL_NULL_HSTMT
 		BoundParameterPtrsVector	m_boundParameters;	
 
