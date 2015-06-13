@@ -1718,7 +1718,7 @@ namespace exodbc
 		};
 
 		const SQLCHAR* pBlob = NULL;
-		SQLINTEGER size, length = 0;
+		SQLLEN size, length = 0;
 
 		// Fixed size bins
 		bTable.Select((boost::wformat(L"%s = 1") % idName).str());
@@ -3411,7 +3411,7 @@ namespace exodbc
 		EXPECT_TRUE(bTable.IsColumnNull(1));
 		EXPECT_FALSE(bTable.IsColumnNull(2));
 		const SQLCHAR* pBlobBuff = NULL;
-		SQLINTEGER size, length = 0;
+		SQLLEN size, length = 0;
 		EXPECT_NO_THROW(pBlobBuff = bTable.GetBinaryValue(2, size, length));
 		EXPECT_EQ(0, memcmp(pBlobBuff, abc, sizeof(abc)));
 		EXPECT_EQ(20, size);

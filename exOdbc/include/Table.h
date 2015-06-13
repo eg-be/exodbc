@@ -483,7 +483,7 @@ namespace exodbc
 		* \return	Attribute value.
 		* \throw	Exception
 		*/
-		SQLINTEGER	SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr);
+		SQLLEN		SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr);
 
 
 		/*!
@@ -740,7 +740,7 @@ namespace exodbc
 		* \param	lengthIndicator Will be filled with the length of the data in the buffer returned.
 		* \throw	Exception If ColumnBuffer not found, or if the Column is NULL.
 		*/
-		const SQLCHAR* GetBinaryValue(SQLSMALLINT columnIndex, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const;
+		const SQLCHAR* GetBinaryValue(SQLSMALLINT columnIndex, SQLLEN& bufferSize, SQLLEN& lengthIndicator) const;
 
 
 		/*!

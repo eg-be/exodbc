@@ -341,7 +341,7 @@ namespace exodbc
 	}
 
 
-	void ColumnBuffer::AllocateBuffer(SQLSMALLINT bufferType, SQLINTEGER bufferSize)
+	void ColumnBuffer::AllocateBuffer(SQLSMALLINT bufferType, SQLLEN bufferSize)
 	{
 		exASSERT(!m_allocatedBuffer);
 		exASSERT(!IsBound());
@@ -838,7 +838,7 @@ namespace exodbc
 				SQLCHAR* pColVal = GetCharPtr();
 				std::string s = boost::get<std::string>(var);
 				// Check that string fits into buffer (Note: We need +1 char for null-terminating)
-				exASSERT((SQLINTEGER)s.length() < m_bufferSize);
+				exASSERT((SQLLEN)s.length() < m_bufferSize);
 				// Erase buffer:
 				ZeroMemory(pColVal, m_bufferSize);
 				// Copy into buffer
@@ -853,7 +853,7 @@ namespace exodbc
 				std::wstring s = boost::get<std::wstring>(var);
 				// Check that string fits into buffer (Note: We need +1 char for null-terminating)
 				// \todo: Is this correct? comparing length against bufferSize?? Probably not.
-				exASSERT((SQLINTEGER)s.length() < m_bufferSize);
+				exASSERT((SQLLEN)s.length() < m_bufferSize);
 				// Erase buffer:
 				ZeroMemory(pColVal, m_bufferSize);
 				// Copy into buffer

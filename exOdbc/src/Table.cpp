@@ -282,7 +282,8 @@ namespace exodbc
 			// Will throw if fails
 			ColumnInfosVector columns = m_pDb->ReadTableColumnInfo(tableInfo);
 			// Remember column sizes and create ColumnBuffers
-			m_numCols = columns.size();
+			exASSERT(columns.size() <= SHRT_MAX);
+			m_numCols = (SQLSMALLINT) columns.size();
 			if (m_numCols == 0)
 			{
 				Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetSqlName()).str());
@@ -626,7 +627,7 @@ namespace exodbc
 		THROW_IFN_SUCCEEDED(SQLFetch, ret, SQL_HANDLE_STMT, m_hStmtCount);
 
 		bool isNull = false;
-		SQLINTEGER cb = 0;
+		SQLLEN cb = 0;
 		GetData(m_hStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
 		if (isNull)
 		{
@@ -734,7 +735,8 @@ namespace exodbc
 		exASSERT(!where.empty());
 
 		wstring sqlstmt = (boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetSqlName() % where).str();
-		SQLRETURN ret = SQLExecDirect(m_hStmtDeleteWhere, (SQLWCHAR*)sqlstmt.c_str(), sqlstmt.length());
+		exASSERT(sqlstmt.length() < INT_MAX);
+		SQLRETURN ret = SQLExecDirect(m_hStmtDeleteWhere, (SQLWCHAR*)sqlstmt.c_str(), (SQLINTEGER) sqlstmt.length());
 		if (failOnNoData && ret == SQL_NO_DATA)
 		{
 			SqlResultException ex(L"SQLExecute", ret, boost::str(boost::wformat(L"Did not expect a SQL_NO_DATA while executing the delete-query '%s'") %sqlstmt));
@@ -799,10 +801,10 @@ namespace exodbc
 	}
 
 
-	SQLINTEGER Table::SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr)
+	SQLLEN Table::SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr)
 	{
 		exASSERT(IsSelectOpen());
-		SQLINTEGER value = 0;
+		SQLLEN value = 0;
 		SQLRETURN ret = SQLColAttribute(m_hStmtSelect, columnIndex + 1, (SQLUSMALLINT)attr, NULL, NULL, NULL, &value);
 		THROW_IFN_SUCCEEDED(SQLColAttribute, ret, SQL_HANDLE_STMT, m_hStmtSelect);
 		return value;
@@ -946,7 +948,7 @@ namespace exodbc
 	}
 
 
-	const SQLCHAR* Table::GetBinaryValue(SQLSMALLINT columnIndex, SQLINTEGER& bufferSize, SQLINTEGER& lengthIndicator) const
+	const SQLCHAR* Table::GetBinaryValue(SQLSMALLINT columnIndex, SQLLEN& bufferSize, SQLLEN& lengthIndicator) const
 	{
 		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
 		exASSERT(!pBuff->IsNull());
