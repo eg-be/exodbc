@@ -53,6 +53,7 @@ Write-Output "Exit Code ConnectionString-Test: " $processCs.ExitCode
 
 # write overall results
 Write-Host ""
+Write-Host "Target: $Target"
 $dsnOk = ""
 If ($processDsn.ExitCode -eq 0) {
 	$dsnOk = "OK"
