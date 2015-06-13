@@ -72,3 +72,20 @@ else
 	$csOk = "FAILED"
 }
 Write-Output "ConnectionString Tests:  $csOk   Using args:  $ArgsCs"
+
+if ($processDsn.ExitCode -eq 0 -and $processCs.ExitCode -eq 0)
+{
+	exit 0;
+}
+elseif($processDsn.ExitCode -eq 0 -and $processCs.ExitCode -ne 0)
+{
+	exit 100;
+}
+elseif($processDsn.ExitCode -ne 0 -and $processCs.ExitCode -eq 0)
+{
+	exit 10;
+}
+else
+{
+	exit 110;
+}
