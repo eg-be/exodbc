@@ -72,6 +72,66 @@ namespace exodbc
 
 
 	/*!
+	* \class	ColumnInfo
+	* \brief	Information about a column fetched using the catalog function SQLColumns.
+	* \see: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
+	*/
+	class EXODBCAPI ColumnInfo
+	{
+	public:
+		ColumnInfo();
+
+		std::wstring	m_catalogName;		///< [NULLABLE] Catalog name
+		std::wstring	m_schemaName;		///< [NULLABLE] Schema name
+		std::wstring	m_tableName;		///< Table name
+		std::wstring	m_columnName;		///< Column Name. Empty for columns without a name
+		SQLSMALLINT		m_sqlType;			///< SQL data type
+		std::wstring	m_typeName;			///< Data source-dependent type name
+		SQLINTEGER		m_columnSize;		///< [NULLABLE] for char-columns the max length in characters; numeric total nr of digits or total number of bits, see numPrecRadix.
+		SQLINTEGER		m_bufferSize;		///< [NULLABLE] Length of bits needed for SQLGetDat, SQLFetch if used with SQL_C_DEFAULT.
+		SQLSMALLINT		m_decimalDigits;	///< [NULLABLE] Total number of significant digits right of decimal. For time-stuff: number of digits in fractional part, ..
+		SQLSMALLINT		m_numPrecRadix;		///< [NULLABLE] See msdn, defines nr. of decimal digits.
+		SQLSMALLINT		m_nullable;			///< SQL_NO_NULLS, SQL_NULLABLE or SQL_NULLABLE_UNKNOWN
+		std::wstring	m_remarks;			///< [NULLABLE] Description
+		std::wstring	m_defaultValue;		///< [NULLABLE] Default value
+		SQLSMALLINT		m_sqlDataType;		///< [ODBC 3.0] Sql Data Type
+		SQLSMALLINT		m_sqlDatetimeSub;	///< [ODBC 3.0, NULLABLE] The subtype code for datetime and interval data types
+		SQLINTEGER		m_charOctetLength;	///< [ODBC 3.0, NULLABLE] The maximum length in bytes of a character or binary data type column. 
+		SQLINTEGER		m_ordinalPosition;	///< [ODBC 3.0] The ordinal position of the column in the table. The first column in the table is number 1.
+		std::wstring	m_isNullable;		///< [ODBC 3.0] NO, YES or zero-length string if unknown
+
+		bool			m_isCatalogNull;			///< See ColumnInfo::m_catalogName
+		bool			m_isSchemaNull;				///< See ColumnInfo::m_schemaName
+		bool			m_isColumnSizeNull;			///< See ColumnInfo::m_columnSize
+		bool			m_isBufferSizeNull;			///< See ColumnInfo::m_bufferSize
+		bool			m_isDecimalDigitsNull;		///< See ColumnInfo::m_decimalDigits
+		bool			m_isNumPrecRadixNull;		///< See ColumnInfo::m_numPrecRadix
+		bool			m_isRemarksNull;			///< See ColumnInfo::m_remarks
+		bool			m_isDefaultValueNull;		///< See ColumnInfo::m_defaultValue
+		bool			m_isDatetimeSubNull;		///< See ColumnInfo::m_sqlDatetimeSub
+		bool			m_isCharOctetLengthNull;	///< See ColumnInfo::m_charOctetLength
+		bool			m_isIsNullableNull;			///< See ColumnInfo::isNullable
+
+		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
+		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
+
+		//		void		SetSqlNameHint(ColumnQueryNameHint hint) { m_queryNameHint = hint; };
+		std::wstring		GetSqlName() const;
+		std::wstring GetPureColumnName() const;
+
+	private:
+		//		ColumnQueryNameHint m_queryNameHint;
+	};
+
+	/*!
+	* \typedef ColumnInfosVector
+	* \brief std::vector of ColumnInfo objects.
+	*/
+	typedef std::vector<ColumnInfo> ColumnInfosVector;
+
+
+
+	/*!
 	* \struct SDataSource
 	* \brief Contains information about a DataSource-Entry from the driver-manager
 	* \see Environment::ListDataSources
@@ -196,65 +256,6 @@ namespace exodbc
 	* \brief std::vector of SSqlTypeInfo objects.
 	*/
 	typedef std::vector<SSqlTypeInfo> SqlTypeInfosVector;
-
-
-	/*!
-	* \struct	SColumnInfo
-	* \brief	Information about a column fetched using the catalog function SQLColumns.
-	* \see: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
-	*/
-	struct EXODBCAPI SColumnInfo
-	{
-	public:
-		SColumnInfo();
-
-		std::wstring	m_catalogName;		///< [NULLABLE] Catalog name
-		std::wstring	m_schemaName;		///< [NULLABLE] Schema name
-		std::wstring	m_tableName;		///< Table name
-		std::wstring	m_columnName;		///< Column Name. Empty for columns without a name
-		SQLSMALLINT		m_sqlType;			///< SQL data type
-		std::wstring	m_typeName;			///< Data source-dependent type name
-		SQLINTEGER		m_columnSize;		///< [NULLABLE] for char-columns the max length in characters; numeric total nr of digits or total number of bits, see numPrecRadix.
-		SQLINTEGER		m_bufferSize;		///< [NULLABLE] Length of bits needed for SQLGetDat, SQLFetch if used with SQL_C_DEFAULT.
-		SQLSMALLINT		m_decimalDigits;	///< [NULLABLE] Total number of significant digits right of decimal. For time-stuff: number of digits in fractional part, ..
-		SQLSMALLINT		m_numPrecRadix;		///< [NULLABLE] See msdn, defines nr. of decimal digits.
-		SQLSMALLINT		m_nullable;			///< SQL_NO_NULLS, SQL_NULLABLE or SQL_NULLABLE_UNKNOWN
-		std::wstring	m_remarks;			///< [NULLABLE] Description
-		std::wstring	m_defaultValue;		///< [NULLABLE] Default value
-		SQLSMALLINT		m_sqlDataType;		///< [ODBC 3.0] Sql Data Type
-		SQLSMALLINT		m_sqlDatetimeSub;	///< [ODBC 3.0, NULLABLE] The subtype code for datetime and interval data types
-		SQLINTEGER		m_charOctetLength;	///< [ODBC 3.0, NULLABLE] The maximum length in bytes of a character or binary data type column. 
-		SQLINTEGER		m_ordinalPosition;	///< [ODBC 3.0] The ordinal position of the column in the table. The first column in the table is number 1.
-		std::wstring	m_isNullable;		///< [ODBC 3.0] NO, YES or zero-length string if unknown
-
-		bool			m_isCatalogNull;			///< See SColumnInfo::m_catalogName
-		bool			m_isSchemaNull;				///< See SColumnInfo::m_schemaName
-		bool			m_isColumnSizeNull;			///< See SColumnInfo::m_columnSize
-		bool			m_isBufferSizeNull;			///< See SColumnInfo::m_bufferSize
-		bool			m_isDecimalDigitsNull;		///< See SColumnInfo::m_decimalDigits
-		bool			m_isNumPrecRadixNull;		///< See SColumnInfo::m_numPrecRadix
-		bool			m_isRemarksNull;			///< See SColumnInfo::m_remarks
-		bool			m_isDefaultValueNull;		///< See SColumnInfo::m_defaultValue
-		bool			m_isDatetimeSubNull;		///< See SColumnInfo::m_sqlDatetimeSub
-		bool			m_isCharOctetLengthNull;	///< See SColumnInfo::m_charOctetLength
-		bool			m_isIsNullableNull;			///< See SColumnInfo::isNullable
-
-		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
-		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
-
-		//		void		SetSqlNameHint(ColumnQueryNameHint hint) { m_queryNameHint = hint; };
-		std::wstring		GetSqlName() const;
-		std::wstring GetPureColumnName() const;
-
-	private:
-		//		ColumnQueryNameHint m_queryNameHint;
-	};
-
-	/*!
-	* \typedef ColumnInfosVector
-	* \brief std::vector of SColumnInfo objects.
-	*/
-	typedef std::vector<SColumnInfo> ColumnInfosVector;
 
 
 	/*!

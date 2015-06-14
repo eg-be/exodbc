@@ -929,7 +929,7 @@ namespace exodbc
 			// Fetch data from columns
 
 			SQLLEN cb;
-			SColumnInfo colInfo;
+			ColumnInfo colInfo;
 			GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
 			GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
 			GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);

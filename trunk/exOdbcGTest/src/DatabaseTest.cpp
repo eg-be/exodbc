@@ -562,7 +562,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, ReadTableColumnInfo)
 	{
-		std::vector<SColumnInfo> cols;
+		std::vector<ColumnInfo> cols;
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
@@ -604,7 +604,7 @@ namespace exodbc
 		{
 			// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
 			ASSERT_TRUE(cols.size() == 4);
-			SColumnInfo col = cols[2];
+			ColumnInfo col = cols[2];
 			EXPECT_FALSE(col.m_isNumPrecRadixNull);
 			EXPECT_FALSE(col.m_isColumnSizeNull);
 			EXPECT_FALSE(col.m_isDecimalDigitsNull);

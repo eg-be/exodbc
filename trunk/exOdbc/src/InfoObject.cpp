@@ -285,7 +285,7 @@ namespace exodbc
 		m_intervalPrecisionIsNull = false;
 	}
 
-	SColumnInfo::SColumnInfo()
+	ColumnInfo::ColumnInfo()
 		: m_sqlType(SQL_UNKNOWN_TYPE)
 		, m_columnSize(0)
 		, m_bufferSize(0)
@@ -379,7 +379,7 @@ namespace exodbc
 	//}
 
 
-	std::wstring SColumnInfo::GetSqlName() const
+	std::wstring ColumnInfo::GetSqlName() const
 	{
 		exASSERT(!m_columnName.empty());
 
