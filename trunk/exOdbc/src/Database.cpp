@@ -109,9 +109,6 @@ namespace exodbc
 		m_hstmt = SQL_NULL_HSTMT;
 		m_hstmtExecSql = SQL_NULL_HSTMT;
 
-		// Environment ODBC-Version unknown
-		m_envOdbcVersion = OdbcVersion::UNKNOWN;
-
 		// GetDbms unknwon
 		m_dbmsType = DatabaseProduct::UNKNOWN;
 
@@ -164,9 +161,6 @@ namespace exodbc
 		// Allocate the DBC-Handle
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, m_pEnv->GetEnvironmentHandle(), &m_hdbc);
 		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_ENV, m_pEnv->GetEnvironmentHandle());
-
-		// Read the environment odbc-version
-		m_envOdbcVersion = m_pEnv->ReadOdbcVersion();
 	}
 
 
@@ -196,11 +190,13 @@ namespace exodbc
 			m_dbInf = ReadDbInfo();
 
 			// Check that our ODBC-Version matches
+			// We do not fail, what counts for us is the version of the
+			// environment.
 			OdbcVersion connectionVersion = GetDriverOdbcVersion();
-			if (m_envOdbcVersion > connectionVersion)
+			OdbcVersion envVersion = m_pEnv->GetOdbcVersion();
+			if (envVersion > connectionVersion)
 			{
-				// \todo: Probably we should throw here and fail totally
-				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int) m_envOdbcVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer % (int) connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName % (int) connectionVersion).str());
+				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int) envVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer % (int) connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName % (int) connectionVersion).str());
 			}
 
 			// Try to detect the type - this will update our internal type
@@ -1166,9 +1162,9 @@ namespace exodbc
 	OdbcVersion Database::GetMaxSupportedOdbcVersion() const
 	{
 		OdbcVersion driverVersion = GetDriverOdbcVersion();
-		if (driverVersion >= m_envOdbcVersion)
+		if (driverVersion >= m_pEnv->GetOdbcVersion())
 		{
-			return m_envOdbcVersion;
+			return m_pEnv->GetOdbcVersion();
 		}
 		return driverVersion;
 	}

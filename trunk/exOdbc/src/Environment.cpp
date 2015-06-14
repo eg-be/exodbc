@@ -76,6 +76,7 @@ namespace exodbc
 		exASSERT(!HasEnvironmentHandle());
 		
 		m_henv = SQL_NULL_HENV;
+		m_odbcVersion = OdbcVersion::UNKNOWN;
 	}
 
 
@@ -149,6 +150,8 @@ namespace exodbc
 		}
 
 		THROW_IFN_SUCCEEDED_MSG(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_henv, (boost::wformat(L"Failed to set SQL_ATTR_ODBC_VERSION to value %d") % (int) version).str());
+
+		ReadOdbcVersion();
 	}
 
 
@@ -162,14 +165,33 @@ namespace exodbc
 		switch(value)
 		{
 		case SQL_OV_ODBC2:
-			return OdbcVersion::V_2;
+		{
+			m_odbcVersion = OdbcVersion::V_2;
+			break;
+		}
 		case SQL_OV_ODBC3:
-			return OdbcVersion::V_3;
+		{
+			m_odbcVersion = OdbcVersion::V_3;
+			break;
+		}
 		case SQL_OV_ODBC3_80:
-			return OdbcVersion::V_3_8;
+		{
+			m_odbcVersion = OdbcVersion::V_3_8;
+			break;
+		}
 		}
 
-		return OdbcVersion::UNKNOWN;
+		return m_odbcVersion;
+	}
+
+
+	OdbcVersion Environment::GetOdbcVersion() const
+	{
+		if (m_odbcVersion == OdbcVersion::UNKNOWN)
+		{
+			ReadOdbcVersion();
+		}
+		return m_odbcVersion;
 	}
 
 
