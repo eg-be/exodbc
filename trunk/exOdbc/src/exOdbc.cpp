@@ -238,7 +238,7 @@ namespace exodbc {
 		, m_isDatetimeSubNull(false)
 		, m_isCharOctetLengthNull(false)
 		, m_isIsNullableNull(false)
-		, m_queryNameHint(ColumnQueryNameHint::COLUMN)
+//		, m_queryNameHint(ColumnQueryNameHint::COLUMN)
 	{ }
 
 	STableInfo::STableInfo()
@@ -317,17 +317,17 @@ namespace exodbc {
 		bool includeTableName = false;
 		bool includeColumnName = true;
 
-		switch (m_queryNameHint)
-		{
-		case ColumnQueryNameHint::COLUMN:
+		//switch (m_queryNameHint)
+		//{
+		//case ColumnQueryNameHint::COLUMN:
 			includeTableName = false;
 			includeColumnName = true;
-			break;
-		case ColumnQueryNameHint::TABLE_COLUMN:
-			includeTableName = true;
-			includeColumnName = true;
-			break;
-		}
+		//	break;
+		//case ColumnQueryNameHint::TABLE_COLUMN:
+		//	includeTableName = true;
+		//	includeColumnName = true;
+		//	break;
+		//}
 		std::wstringstream ws;
 
 		if (includeTableName)
