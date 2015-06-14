@@ -569,6 +569,12 @@ namespace exodbc
 		DatabaseProduct       GetDbms() const { return m_dbmsType; };
 
 
+		/*!
+		* \brief	Get the Environment this Database was created from.
+		* \return	Environment if set.
+		*/
+		const Environment*	GetEnvironment() const { return m_pEnv; };
+
 #ifdef HAVE_MSODBCSQL_H
 		/*!
 		* \brief	Set the property SQL_MAX_CONCURRENT_ACTIVITIES.
@@ -679,7 +685,7 @@ namespace exodbc
 		std::wstring		m_inConnectionStr; ///< Connection string used to connect to the database
 		std::wstring		m_outConnectionStr;///< Connection string returned by the database when a connection is successfully OpenImpled
 		DatabaseProduct		m_dbmsType;        ///< Type of datasource - i.e. Oracle, dBase, SQLServer, etc
-		OdbcVersion			m_envOdbcVersion;	///< ODBC-Version read from the environment while allocating the HDBC handle.
+//		OdbcVersion			m_envOdbcVersion;	///< ODBC-Version read from the environment while allocating the HDBC handle.
 
 		// ODBC handles created by the Database
 		SQLHDBC  m_hdbc;			///< ODBC DB Connection handle

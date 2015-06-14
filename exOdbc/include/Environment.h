@@ -121,13 +121,14 @@ namespace exodbc
 
 		/*!
 		* \brief	Returns the Environment handle.
-		* \throw	Exeption if no Henv is allocated.
+		* \throw	Exception if no Henv is allocated.
 		*/
 		SQLHENV			GetEnvironmentHandle() const		{ exASSERT(HasEnvironmentHandle());  return m_henv; };
 
 		
 		/*!
-		 * \brief	Sets ODBC version.
+		 * \brief	Sets ODBC version. Updates internally cached value by calling
+		 *			ReadOdbcVersion() if setting seemed to be successfull.
 		 *
 		 * \param	version	The version.
 		 * \throw	Exception if no Henv is allocated, or setting the version fails.
@@ -136,12 +137,24 @@ namespace exodbc
 
 
 		/*!
-		 * \brief	Reads the ODBC version from the environment.
+		 * \brief	Reads the ODBC version from the environment and updates internally
+		 *			cached value.
 		 *
 		 * \return	The ODBC version or OV_UNKNOWN if read version is unknown.
 		 * \throw	Exception If no Henv is allocated, or reading the version fails.
 		 */
 		OdbcVersion		ReadOdbcVersion() const;
+
+
+		/*!
+		* \brief	Gets the cached ODBC version if the cached version is not OV_UNKNWON.
+		*			If cached version is OV_UNKOWN, tries to read using ReadOdbcVersion()
+		*			and caches the read value and returns that.
+		*
+		* \return	The ODBC version or OV_UNKNOWN if read version is unknown.
+		* \throw	Exception If no Henv is allocated, or reading the version fails.
+		*/
+		OdbcVersion		GetOdbcVersion() const;
 
 
 		enum class ListMode { All, System, User };
@@ -176,7 +189,11 @@ namespace exodbc
 		*/
 		void			FreeEnvironmentHandle();
 
-		SQLHENV m_henv;
+		// Members
+		// -------
+		SQLHENV m_henv;	///< Environment handle
+		mutable OdbcVersion m_odbcVersion; ///< Cached ODBC version
+
 	};  // class Environment
 }
 
