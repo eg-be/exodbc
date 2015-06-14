@@ -38,8 +38,8 @@
 */
 
 #pragma once
-#ifndef DB_H
-#define DB_H
+#ifndef DATABASE_H
+#define DATABASE_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -851,5 +851,5 @@ namespace exodbc
 
 }	// namespace exodbc
 
-#endif // DB_H
+#endif // DATABASE_H
 
