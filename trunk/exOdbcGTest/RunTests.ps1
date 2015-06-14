@@ -32,7 +32,6 @@ Write-Output "========================"
 Write-Output ""
 
 $processDsn = Start-Process $Target $ArgsDsn -NoNewWindow -Wait -PassThru
-Write-Output "Exit Code DSN-Test: " $processDsn.ExitCode
 Write-Output ""
 
 # and then using connection string
@@ -49,11 +48,14 @@ Write-Output "======================================"
 Write-Output ""
 
 $processCs = Start-Process $Target $ArgsCs -NoNewWindow -Wait -PassThru
-Write-Output "Exit Code ConnectionString-Test: " $processCs.ExitCode
+Write-Output ""
+
+Write-Output "(DSN) Target: $Target returned with: " $processDsn.ExitCode
+Write-Output "(CS)  Target: $Target returned with: " $processCs.ExitCode
 
 # write overall results
-Write-Host ""
-Write-Host "Target: $Target"
+Write-Output ""
+$dsnExit = $processDsn.ExitCode | Out-String
 $dsnOk = ""
 If ($processDsn.ExitCode -eq 0) {
 	$dsnOk = "OK"
@@ -64,6 +66,7 @@ else
 }
 Write-Output "DNS Tests:               $dsnOk   Using args:  $ArgsDsn"
 
+$csExit = $processCs.ExitCode | Out-String
 $csOk = ""
 If ($processCs.ExitCode -eq 0) {
 	$csOk = "OK"
