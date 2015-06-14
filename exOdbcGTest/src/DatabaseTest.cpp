@@ -680,12 +680,12 @@ namespace exodbc
 		EXPECT_EQ(1, tables.size());
 		if(tables.size() > 0)
 		{
-			EXPECT_EQ(tableName, tables[0].m_tableName);
-			EXPECT_EQ(schemaName, tables[0].m_schemaName);
+			EXPECT_EQ(tableName, tables[0].GetPureName());
+			EXPECT_EQ(schemaName, tables[0].GetSchema());
 			if (m_db.GetDbms() != DatabaseProduct::ACCESS)
 			{
 				// still no support for catalogs on Access
-				EXPECT_EQ(catalogName, tables[0].m_catalogName);
+				EXPECT_EQ(catalogName, tables[0].GetCatalog());
 			}
 		}
 		std::wstring schemaPattern = schemaName;
@@ -698,12 +698,12 @@ namespace exodbc
 		EXPECT_EQ(1, tables.size());
 		if(tables.size() > 0)
 		{
-			EXPECT_EQ(tableName, tables[0].m_tableName);
-			EXPECT_EQ(schemaName, tables[0].m_schemaName);
+			EXPECT_EQ(tableName, tables[0].GetPureName());
+			EXPECT_EQ(schemaName, tables[0].GetSchema());
 			if (m_db.GetDbms() != DatabaseProduct::ACCESS)
 			{
 				// still no support for catalogs on Access
-				EXPECT_EQ(catalogName, tables[0].m_catalogName);
+				EXPECT_EQ(catalogName, tables[0].GetCatalog());
 			}
 		}
 	}

@@ -13,6 +13,7 @@
 
 // Same component headers
 #include "exOdbc.h"
+#include "ObjectName.h"
 
 // Other headers
 
@@ -25,29 +26,33 @@
 
 namespace exodbc
 {
-
-	/*!
-	* \enum		TableQueryNameHint
-	* \brief	A helper to specify how to build the name of the table to be used in a SQL query.
-	*/
-	enum class TableQueryNameHint
-	{
-		ALL,			///< Use Catalog, Schema and TableName, resulting in 'CatalogName.SchemaName.TableName'
-		TABLE_ONLY,		///< Use only TableName
-		CATALOG_TABLE,	///< Use Catalog and TableName, resulting in 'CatalogName.TableName'
-		SCHEMA_TABLE,	///< Use Schema and TableName, resulting in 'SchemaName.TableName'
-		EXCEL			///< For Excel use only the TableName$ and wrap it inside [], so it becomes '[TableName$]'. \note: The '$' is not added automatically.
-	};
-
 	/*!
 	* \class TableInfo
 	*
 	* \brief Information about a Table
+	*
+	* \details Holds information about a table found using one of the catalog functions.
 	*/
 	class EXODBCAPI TableInfo
+		: public ObjectName
 	{
 	public:
 		TableInfo();
+		TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
+		TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
+
+		virtual std::wstring GetQueryName() const;
+		virtual std::wstring GetPureName() const;
+
+		std::wstring		GetType() const { return m_tableType; };
+		std::wstring		GetCatalog() const { return m_catalogName;};
+		std::wstring		GetSchema() const {	return m_schemaName; };
+
+		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
+		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
+
+	private:
+		DatabaseProduct		m_dbms;
 
 		std::wstring		m_tableName;		///< Name
 		std::wstring		m_tableType;        ///< "TABLE" or "SYSTEM TABLE" etc.
@@ -57,15 +62,6 @@ namespace exodbc
 		bool				m_isCatalogNull;	///< True if m_catalogName is null.
 		bool				m_isSchemaNull;		///< True if m_schemaName is null.
 
-		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
-		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
-
-		void				SetSqlNameHint(TableQueryNameHint hint) { m_queryNameHint = hint; };
-		std::wstring		GetSqlName() const;
-		std::wstring		GetPureTableName() const;
-
-	private:
-		TableQueryNameHint	m_queryNameHint;
 	};
 
 	/*!
