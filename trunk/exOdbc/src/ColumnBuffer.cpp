@@ -28,52 +28,6 @@ using namespace std;
 
 namespace exodbc
 {
-	SQLSMALLINT ColumnBuffer::GetSqlCType(const BufferPtrVariant& pBuffer, OdbcVersion version)
-	{
-		switch (pBuffer.which())
-		{
-		case 0:
-			return SQL_C_SSHORT;
-		case 1:
-			return SQL_C_SLONG;
-		case 2:
-			return SQL_C_SBIGINT;
-		case 3:
-			return SQL_C_CHAR;
-		case 4:
-			return SQL_C_WCHAR;
-		case 5:
-			return SQL_C_DOUBLE;
-		case 6:
-			if (version > OdbcVersion::V_2)
-				return SQL_C_TYPE_DATE;
-			else
-				return SQL_C_DATE;
-		case 7:
-			if (version > OdbcVersion::V_2)
-				return SQL_TYPE_TIME;
-			else
-				return SQL_C_TIME;
-		case 8:
-			if (version > OdbcVersion::V_2)
-				return SQL_C_TYPE_TIMESTAMP;
-			else
-				return SQL_C_TIMESTAMP;
-		case 9:
-			return SQL_C_NUMERIC;
-#ifdef HAVE_MSODBCSQL_H
-		case 10:
-			return SQL_C_SS_TIME2;
-#endif
-		}
-
-		// Should never arrive down here
-		exASSERT_MSG(false, L"Unknown Pointer-type in the BufferPtrVariant!");
-
-		return SQL_UNKNOWN_TYPE;
-	}
-
-
 	// Construction
 	// ------------
 	ColumnBuffer::ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags /* = CF_SELECT */)

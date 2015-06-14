@@ -160,9 +160,6 @@ namespace exodbc
 	class EXODBCAPI ColumnBuffer
 	{
 	public:
-
-		static SQLSMALLINT GetSqlCType(const BufferPtrVariant& pBuffer, OdbcVersion version);
-
 		/*!
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
 		*			using the data type information from the passed ColumnInfo.
