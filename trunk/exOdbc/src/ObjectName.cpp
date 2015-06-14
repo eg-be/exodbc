@@ -30,7 +30,7 @@ namespace exodbc
 
 	// Interfaces
 	// ----------
-	TableName::TableName(const STableInfo& tableInfo, DatabaseProduct dbms /* = DatabaseProduct::UNKNOWN */)
+	TableName::TableName(const TableInfo& tableInfo, DatabaseProduct dbms /* = DatabaseProduct::UNKNOWN */)
 		: m_dbms(dbms)
 		, m_tableInfo(tableInfo)
 	{ }

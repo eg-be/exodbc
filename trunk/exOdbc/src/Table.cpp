@@ -69,7 +69,7 @@ namespace exodbc
 	}
 
 
-	Table::Table(const Database* pDb, SQLSMALLINT numColumns, const STableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
+	Table::Table(const Database* pDb, SQLSMALLINT numColumns, const TableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(numColumns)
 		, m_manualColumns(true)
 		, m_initialTableName(L"")
@@ -110,7 +110,7 @@ namespace exodbc
 	}
 
 
-	Table::Table(const Database* pDb, const STableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
+	Table::Table(const Database* pDb, const TableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
 		, m_initialTableName(L"")
@@ -269,7 +269,7 @@ namespace exodbc
 	}
 
 
-	void Table::CreateAutoColumnBuffers(const STableInfo& tableInfo, bool skipUnsupportedColumns)
+	void Table::CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns)
 	{
 		exASSERT(m_manualColumns == false);
 		exASSERT(m_columnBuffers.size() == 0);
@@ -595,7 +595,7 @@ namespace exodbc
 	}
 
 
-	STableInfo Table::GetTableInfo() const
+	TableInfo Table::GetTableInfo() const
 	{
 		exASSERT(m_haveTableInfo);
 		return m_tableInfo;
@@ -1022,7 +1022,7 @@ namespace exodbc
 			std::wstring s;
 			s.empty();
 
-			// If we do not already have a STableInfo for our table, we absolutely must find one
+			// If we do not already have a TableInfo for our table, we absolutely must find one
 			bool searchedTable = false;
 			if (!m_haveTableInfo)
 			{

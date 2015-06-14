@@ -24,6 +24,7 @@
     <ClInclude Include="include\DebugNew.h" />
     <ClInclude Include="include\Environment.h" />
     <ClInclude Include="include\Exception.h" />
+    <ClInclude Include="include\InfoObject.h" />
     <ClInclude Include="include\ObjectName.h" />
     <ClInclude Include="include\Table.h" />
     <ClInclude Include="include\Helpers.h" />
@@ -45,6 +46,7 @@
     </ClCompile>
     <ClCompile Include="src\Exception.cpp" />
     <ClCompile Include="src\Helpers.cpp" />
+    <ClCompile Include="src\InfoObject.cpp" />
     <ClCompile Include="src\ObjectName.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v120|Win32'">Create</PrecompiledHeader>

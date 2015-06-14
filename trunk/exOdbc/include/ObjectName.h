@@ -61,13 +61,13 @@ namespace exodbc
 	{
 	public:
 		TableName() {};
-		TableName(const STableInfo& tableInfo, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
+		TableName(const TableInfo& tableInfo, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
 
 		virtual std::wstring GetQueryName() const;
 		virtual std::wstring GetPureName() const;
 
 	private:
-		STableInfo m_tableInfo;
+		TableInfo m_tableInfo;
 		DatabaseProduct m_dbms;
 	};
 

@@ -524,10 +524,10 @@ namespace exodbc
 	}
 
 
-	STableInfo Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
+	TableInfo Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
 	{
 		// Query the tables that match
-		STableInfosVector tables = FindTables(tableName, schemaName, catalogName, tableType);
+		TableInfosVector tables = FindTables(tableName, schemaName, catalogName, tableType);
 
 		if(tables.size() == 0)
 		{
@@ -542,7 +542,7 @@ namespace exodbc
 			throw ex;
 		}
 
-		STableInfo table = tables[0];
+		TableInfo table = tables[0];
 		return table;
 	}
 
@@ -687,14 +687,14 @@ namespace exodbc
 	}
 
 
-	STableInfosVector Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
+	TableInfosVector Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
 	{
 		exASSERT(IsOpen());
 
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_hstmt, true, true);
 
-		STableInfosVector tables;
+		TableInfosVector tables;
 
 		std::unique_ptr<SQLWCHAR[]> buffCatalog(new SQLWCHAR[m_dbInf.GetMaxCatalogNameLen()]);
 		std::unique_ptr<SQLWCHAR[]> buffSchema(new SQLWCHAR[m_dbInf.GetMaxSchemaNameLen()]);
@@ -718,7 +718,7 @@ namespace exodbc
 
 		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
-			STableInfo table;
+			TableInfo table;
 			SQLLEN cb;
 			GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog.get(), m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isCatalogNull);
 			GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema.get(), m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isSchemaNull);
@@ -745,7 +745,7 @@ namespace exodbc
 	}
 
 
-	int Database::ReadColumnCount(const STableInfo& table)
+	int Database::ReadColumnCount(const TableInfo& table)
 	{
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_hstmt, true, true);
@@ -782,14 +782,14 @@ namespace exodbc
 	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType)
 	{
 		// Find one matching table
-		STableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
+		TableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
 
 		// Forward the call		
 		return ReadColumnCount(table);
 	}
 
 
-	TablePrimaryKeysVector Database::ReadTablePrimaryKeys(const STableInfo& table) const
+	TablePrimaryKeysVector Database::ReadTablePrimaryKeys(const TableInfo& table) const
 	{
 		exASSERT(IsOpen());
 		// Access returns 'SQLSTATE IM001; Native Error: 0; [Microsoft][ODBC Driver Manager] Driver does not support this function' for SQLPrimaryKeys
@@ -831,14 +831,14 @@ namespace exodbc
 		exASSERT(IsOpen());
 
 		// Find one matching table
-		STableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
+		TableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
 
 		// Forward the call		
 		return ReadTablePrivileges(table);
 	}
 
 
-	TablePrivilegesVector Database::ReadTablePrivileges(const STableInfo& table) const
+	TablePrivilegesVector Database::ReadTablePrivileges(const TableInfo& table) const
 	{
 		exASSERT(IsOpen());
 		exASSERT_MSG(GetDbms() != DatabaseProduct::ACCESS, L"Access reports 'SQLSTATE IM001; Driver does not support this function' for SQLTablePrivileges");
@@ -891,14 +891,14 @@ namespace exodbc
 		exASSERT(IsOpen());
 
 		// Find one matching table
-		STableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
+		TableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
 
 		// Forward the call		
 		return ReadTableColumnInfo(table);
 	}
 
 
-	ColumnInfosVector Database::ReadTableColumnInfo(const STableInfo& table) const
+	ColumnInfosVector Database::ReadTableColumnInfo(const TableInfo& table) const
 	{
 		exASSERT(IsOpen());
 
@@ -977,10 +977,10 @@ namespace exodbc
 
 		dbInf.m_tables = FindTables(L"", L"", L"", L"");
 
-		STableInfosVector::const_iterator it;
+		TableInfosVector::const_iterator it;
 		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
 		{
-			const STableInfo& table = *it;
+			const TableInfo& table = *it;
 			if(!table.m_isCatalogNull)
 				dbInf.m_catalogs.insert(table.m_catalogName);
 			if(!table.m_isSchemaNull)

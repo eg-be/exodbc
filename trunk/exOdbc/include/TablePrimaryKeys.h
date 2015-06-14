@@ -57,7 +57,7 @@ namespace exodbc
 		* \see		IsInitialized()
 		* \throw	Exception If querying primary keys fails.
 		*/
-		TablePrimaryKeys(const Database* pDb, const STableInfo& tableInfo);
+		TablePrimaryKeys(const Database* pDb, const TableInfo& tableInfo);
 
 
 		~TablePrimaryKeys() {};
@@ -68,7 +68,7 @@ namespace exodbc
 		*			Marks object as initialized on success.
 		* \throw	If querying fails or parsing fails.
 		*/
-		void Initialize(const Database* pDb, const STableInfo& tableInfo);
+		void Initialize(const Database* pDb, const TableInfo& tableInfo);
 
 
 		/*!
@@ -86,12 +86,12 @@ namespace exodbc
 		*			Marks object as initialized on success.
 		*			An entry is created for every ColumnBuffer that has the flag CF_PRIMARY_KEY set.
 		*			The ColunmnBuffers query name is used as column-name, but only the part after the last '.'.
-		*			The pure table-name from the passed STableInfo is used as tablename for the entries created.
+		*			The pure table-name from the passed TableInfo is used as tablename for the entries created.
 		*			Note that this will not fail if columnBuffers is empty or has no columns marked as primary keys.
 		* \param	tablePks table primary keys
 		* \throw	Exception If parsing fails.
 		*/
-		void Initialize(const STableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers) { m_initialized = false; Parse(tableInfo, columnBuffers); m_initialized = true; };
+		void Initialize(const TableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers) { m_initialized = false; Parse(tableInfo, columnBuffers); m_initialized = true; };
 
 
 		/*!
@@ -144,10 +144,10 @@ namespace exodbc
 		* \brief	Fills the map and vector of primary keys using the passed ColumnBufferPtrMap.
 		* \details	An entry is created for every ColumnBuffer that has the flag CF_PRIMARY_KEY set.
 		*			The ColunmnBuffers query name is used as column-name, but only the part after the last '.'.
-		*			The pure table-name from the passed STableInfo is used as tablename for the entries created.
+		*			The pure table-name from the passed TableInfo is used as tablename for the entries created.
 		* \throw	Exception
 		*/
-		void Parse(const STableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers);
+		void Parse(const TableInfo& tableInfo, const ColumnBufferPtrMap& columnBuffers);
 
 
 		/*!

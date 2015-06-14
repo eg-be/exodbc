@@ -58,6 +58,9 @@
     <ClInclude Include="include\ObjectName.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\InfoObject.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -94,6 +97,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ObjectName.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InfoObject.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

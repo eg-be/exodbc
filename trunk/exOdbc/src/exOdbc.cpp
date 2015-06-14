@@ -241,73 +241,73 @@ namespace exodbc {
 //		, m_queryNameHint(ColumnQueryNameHint::COLUMN)
 	{ }
 
-	STableInfo::STableInfo()
-		: m_isCatalogNull(false)
-		, m_isSchemaNull(false)
-		, m_queryNameHint(TableQueryNameHint::ALL)
-	{
+	//STableInfo::STableInfo()
+	//	: m_isCatalogNull(false)
+	//	, m_isSchemaNull(false)
+	//	, m_queryNameHint(TableQueryNameHint::ALL)
+	//{
 
-	}
-
-
-	std::wstring STableInfo::GetPureTableName() const
-	{
-		exASSERT(!m_tableName.empty());
-		return m_tableName;
-	}
+	//}
 
 
-	std::wstring STableInfo::GetSqlName() const
-	{
-		exASSERT(!m_tableName.empty());
+	//std::wstring STableInfo::GetPureTableName() const
+	//{
+	//	exASSERT(!m_tableName.empty());
+	//	return m_tableName;
+	//}
 
-		bool includeCat = true;
-		bool includeSchem = true;
-		bool includeName = true;
-		switch (m_queryNameHint)
-		{
-		case TableQueryNameHint::ALL:
-			includeCat = true;
-			includeSchem = true;
-			includeName = true;
-			break;
-		case TableQueryNameHint::CATALOG_TABLE:
-			includeCat = true;
-			includeSchem = false;
-			includeName = true;
-			break;
-		case TableQueryNameHint::SCHEMA_TABLE:
-			includeCat = false;
-			includeSchem = true;
-			includeName = true;
-			break;
-		case TableQueryNameHint::TABLE_ONLY:
-			includeCat = false;
-			includeSchem = false;
-			includeName = true;
-			break;
-		case TableQueryNameHint::EXCEL:
-			return L"[" + m_tableName + L"]";
-		}
 
-		std::wstringstream ws;
-		if (includeCat && HasCatalog())
-		{
-			ws << m_catalogName << L".";
-		}
-		if (includeSchem && HasSchema())
-		{
-			ws << m_schemaName << L".";
-		}
-		if (includeName)
-		{
-			ws << m_tableName << L".";
-		}
+	//std::wstring STableInfo::GetSqlName() const
+	//{
+	//	exASSERT(!m_tableName.empty());
 
-		std::wstring str = ws.str();
-		boost::erase_last(str, L".");
-		return str;
-	}
+	//	bool includeCat = true;
+	//	bool includeSchem = true;
+	//	bool includeName = true;
+	//	switch (m_queryNameHint)
+	//	{
+	//	case TableQueryNameHint::ALL:
+	//		includeCat = true;
+	//		includeSchem = true;
+	//		includeName = true;
+	//		break;
+	//	case TableQueryNameHint::CATALOG_TABLE:
+	//		includeCat = true;
+	//		includeSchem = false;
+	//		includeName = true;
+	//		break;
+	//	case TableQueryNameHint::SCHEMA_TABLE:
+	//		includeCat = false;
+	//		includeSchem = true;
+	//		includeName = true;
+	//		break;
+	//	case TableQueryNameHint::TABLE_ONLY:
+	//		includeCat = false;
+	//		includeSchem = false;
+	//		includeName = true;
+	//		break;
+	//	case TableQueryNameHint::EXCEL:
+	//		return L"[" + m_tableName + L"]";
+	//	}
+
+	//	std::wstringstream ws;
+	//	if (includeCat && HasCatalog())
+	//	{
+	//		ws << m_catalogName << L".";
+	//	}
+	//	if (includeSchem && HasSchema())
+	//	{
+	//		ws << m_schemaName << L".";
+	//	}
+	//	if (includeName)
+	//	{
+	//		ws << m_tableName << L".";
+	//	}
+
+	//	std::wstring str = ws.str();
+	//	boost::erase_last(str, L".");
+	//	return str;
+	//}
 
 
 	std::wstring SColumnInfo::GetSqlName() const

@@ -31,7 +31,7 @@ namespace exodbc
 	}
 
 
-	TablePrivileges::TablePrivileges(const Database* pDb, const STableInfo& tableInfo)
+	TablePrivileges::TablePrivileges(const Database* pDb, const TableInfo& tableInfo)
 		: m_initialized(false)
 	{
 		Initialize(pDb, tableInfo);
@@ -44,7 +44,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void TablePrivileges::Initialize(const Database* pDb, const STableInfo& tableInfo)
+	void TablePrivileges::Initialize(const Database* pDb, const TableInfo& tableInfo)
 	{
 		exASSERT(pDb->IsOpen());
 
