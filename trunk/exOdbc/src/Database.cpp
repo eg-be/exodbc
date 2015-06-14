@@ -52,6 +52,8 @@
 // Debug
 #include "DebugNew.h"
 
+using namespace std;
+
 namespace exodbc
 {
 	// Construction
@@ -922,6 +924,11 @@ namespace exodbc
 		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_hstmt);
 
 		// Iterate rows
+		std::wstring catalogName, schemaName, tableName, columnName, typeName, remarks, defaultValue, isNullable;
+		SQLSMALLINT sqlType, decimalDigits, numPrecRadix, nullable, sqlDataType, sqlDatetimeSub;
+		SQLINTEGER columnSize, bufferSize, charOctetLength, ordinalPosition;
+		bool isCatalogNull, isSchemaNull, isColumnSizeNull, isBufferSizeNull, isDecimalDigitsNull, isNumPrecRadixNull, isRemarksNull, isDefaultValueNull, isSqlDatetimeSubNull, isCharOctetLengthNull, isIsNullableNull;
+
 		// Ensure ordinal-position is increasing constantly by one, starting at one
 		SQLINTEGER m_lastIndex = 0;
 		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
@@ -929,33 +936,36 @@ namespace exodbc
 			// Fetch data from columns
 
 			SQLLEN cb;
-			ColumnInfo colInfo;
-			GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), colInfo.m_catalogName, &colInfo.m_isCatalogNull);
-			GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), colInfo.m_schemaName, &colInfo.m_isSchemaNull);
-			GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), colInfo.m_tableName);
-			GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), colInfo.m_columnName);
-			GetData(m_hstmt, 5, SQL_C_SSHORT, &colInfo.m_sqlType, sizeof(colInfo.m_sqlType), &cb, NULL);
-			GetData(m_hstmt, 6, DB_MAX_TYPE_NAME_LEN, colInfo.m_typeName);
-			GetData(m_hstmt, 7, SQL_C_SLONG, &colInfo.m_columnSize, sizeof(colInfo.m_columnSize), &cb, &colInfo.m_isColumnSizeNull);
-			GetData(m_hstmt, 8, SQL_C_SLONG, &colInfo.m_bufferSize, sizeof(colInfo.m_bufferSize), &cb, &colInfo.m_isBufferSizeNull);
-			GetData(m_hstmt, 9, SQL_C_SSHORT, &colInfo.m_decimalDigits, sizeof(colInfo.m_decimalDigits), &cb, &colInfo.m_isDecimalDigitsNull);
-			GetData(m_hstmt, 10, SQL_C_SSHORT, &colInfo.m_numPrecRadix, sizeof(colInfo.m_numPrecRadix), &cb, &colInfo.m_isNumPrecRadixNull);
-			GetData(m_hstmt, 11, SQL_C_SSHORT, &colInfo.m_nullable, sizeof(colInfo.m_nullable), &cb, NULL);
-			GetData(m_hstmt, 12, DB_MAX_COLUMN_REMARKS_LEN, colInfo.m_remarks, &colInfo.m_isRemarksNull);
-			GetData(m_hstmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, colInfo.m_defaultValue, &colInfo.m_isDefaultValueNull);
-			GetData(m_hstmt, 14, SQL_C_SSHORT, &colInfo.m_sqlDataType, sizeof(colInfo.m_sqlDataType), &cb, NULL);
-			GetData(m_hstmt, 15, SQL_C_SSHORT, &colInfo.m_sqlDatetimeSub, sizeof(colInfo.m_sqlDatetimeSub), &cb, &colInfo.m_isDatetimeSubNull);
-			GetData(m_hstmt, 16, SQL_C_SLONG, &colInfo.m_charOctetLength, sizeof(colInfo.m_charOctetLength), &cb, &colInfo.m_isCharOctetLengthNull);
-			GetData(m_hstmt, 17, SQL_C_SLONG, &colInfo.m_ordinalPosition, sizeof(colInfo.m_ordinalPosition), &cb, NULL);
-			GetData(m_hstmt, 18, DB_MAX_YES_NO_LEN, colInfo.m_isNullable, &colInfo.m_isIsNullableNull);
+			GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
+			GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
+			GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), tableName);
+			GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), columnName);
+			GetData(m_hstmt, 5, SQL_C_SSHORT, &sqlType, sizeof(sqlType), &cb, NULL);
+			GetData(m_hstmt, 6, DB_MAX_TYPE_NAME_LEN, typeName);
+			GetData(m_hstmt, 7, SQL_C_SLONG, &columnSize, sizeof(columnSize), &cb, &isColumnSizeNull);
+			GetData(m_hstmt, 8, SQL_C_SLONG, &bufferSize, sizeof(bufferSize), &cb, &isBufferSizeNull);
+			GetData(m_hstmt, 9, SQL_C_SSHORT, &decimalDigits, sizeof(decimalDigits), &cb, &isDecimalDigitsNull);
+			GetData(m_hstmt, 10, SQL_C_SSHORT, &numPrecRadix, sizeof(numPrecRadix), &cb, &isNumPrecRadixNull);
+			GetData(m_hstmt, 11, SQL_C_SSHORT, &nullable, sizeof(nullable), &cb, NULL);
+			GetData(m_hstmt, 12, DB_MAX_COLUMN_REMARKS_LEN, remarks, &isRemarksNull);
+			GetData(m_hstmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, defaultValue, &isDefaultValueNull);
+			GetData(m_hstmt, 14, SQL_C_SSHORT, &sqlDataType, sizeof(sqlDataType), &cb, NULL);
+			GetData(m_hstmt, 15, SQL_C_SSHORT, &sqlDatetimeSub, sizeof(sqlDatetimeSub), &cb, &isSqlDatetimeSubNull);
+			GetData(m_hstmt, 16, SQL_C_SLONG, &charOctetLength, sizeof(charOctetLength), &cb, &isCharOctetLengthNull);
+			GetData(m_hstmt, 17, SQL_C_SLONG, &ordinalPosition, sizeof(ordinalPosition), &cb, NULL);
+			GetData(m_hstmt, 18, DB_MAX_YES_NO_LEN, isNullable, &isIsNullableNull);
 
-			if (++m_lastIndex != colInfo.m_ordinalPosition)
+			if (++m_lastIndex != ordinalPosition)
 			{
 				Exception ex(L"Columns are not ordered strictly by ordinal position");
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
 
+			ColumnInfo colInfo(catalogName, schemaName, tableName, columnName, sqlType, typeName, columnSize, bufferSize,
+				decimalDigits, numPrecRadix, nullable, remarks, defaultValue, sqlDataType, sqlDatetimeSub, charOctetLength, ordinalPosition, isNullable,
+				isCatalogNull, isSchemaNull, isColumnSizeNull, isBufferSizeNull, isDecimalDigitsNull, isNumPrecRadixNull, isRemarksNull, isDefaultValueNull,
+				isSqlDatetimeSubNull, isIsNullableNull);
 			columns.push_back(colInfo);
 		}
 		THROW_IFN_NO_DATA(SQLFetch, ret);
