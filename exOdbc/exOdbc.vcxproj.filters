@@ -52,6 +52,9 @@
     <ClInclude Include="include\Exception.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Visitors.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -82,6 +85,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Exception.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Visitors.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

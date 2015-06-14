@@ -14,6 +14,7 @@
 
 // Same component headers
 // Other headers
+#include "Visitors.h"
 
 // Debug
 #include "DebugNew.h"

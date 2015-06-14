@@ -35,6 +35,7 @@
 #include "ColumnBuffer.h"
 #include "TablePrivileges.h"
 #include "TablePrimaryKeys.h"
+#include "Exception.h"
 
 // Other headers
 #include "boost/any.hpp"

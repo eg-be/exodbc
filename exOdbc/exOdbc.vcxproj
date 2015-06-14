@@ -29,6 +29,7 @@
     <ClInclude Include="include\exOdbc.h" />
     <ClInclude Include="include\TablePrimaryKeys.h" />
     <ClInclude Include="include\TablePrivileges.h" />
+    <ClInclude Include="include\Visitors.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\targetver.h" />
@@ -67,6 +68,7 @@
     </ClCompile>
     <ClCompile Include="src\TablePrimaryKeys.cpp" />
     <ClCompile Include="src\TablePrivileges.cpp" />
+    <ClCompile Include="src\Visitors.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Version.h.template" />
