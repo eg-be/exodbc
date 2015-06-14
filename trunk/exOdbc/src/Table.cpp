@@ -321,7 +321,7 @@ namespace exodbc
 					if (skipUnsupportedColumns)
 					{
 						// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
-						LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetSqlName() % nse.ToString()));
+						LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetQueryName() % nse.ToString()));
 						++bufferIndex;
 						continue;
 					}

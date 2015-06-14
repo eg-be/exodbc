@@ -26,9 +26,12 @@ using namespace std;
 
 namespace exodbc
 {
+	// Class TableInfo
+	// ===============
+
 	TableInfo::TableInfo()
-		: m_isCatalogNull(true)
-		, m_isSchemaNull(true)
+		: m_isCatalogNull(false)
+		, m_isSchemaNull(false)
 		, m_dbms(DatabaseProduct::UNKNOWN)
 	{ }
 
@@ -96,6 +99,52 @@ namespace exodbc
 
 		return m_tableName;
 	}
+
+
+	// Class ColumnInfo
+	// ================
+
+	ColumnInfo::ColumnInfo()
+		: m_sqlType(SQL_UNKNOWN_TYPE)
+		, m_columnSize(0)
+		, m_bufferSize(0)
+		, m_decimalDigits(0)
+		, m_numPrecRadix(0)
+		, m_nullable(SQL_NULLABLE_UNKNOWN)
+		, m_sqlDataType(SQL_UNKNOWN_TYPE)
+		, m_sqlDatetimeSub(0)
+		, m_charOctetLength(0)
+		, m_ordinalPosition(0)
+		, m_isCatalogNull(false)
+		, m_isSchemaNull(false)
+		, m_isColumnSizeNull(false)
+		, m_isBufferSizeNull(false)
+		, m_isDecimalDigitsNull(false)
+		, m_isNumPrecRadixNull(false)
+		, m_isRemarksNull(false)
+		, m_isDefaultValueNull(false)
+		, m_isDatetimeSubNull(false)
+		, m_isCharOctetLengthNull(false)
+		, m_isIsNullableNull(false)
+		//		, m_queryNameHint(ColumnQueryNameHint::COLUMN)
+	{ }
+
+
+	std::wstring ColumnInfo::GetQueryName() const
+	{
+		exASSERT( ! m_columnName.empty() );
+
+		return m_columnName;
+	}
+
+
+	std::wstring ColumnInfo::GetPureName() const
+	{
+		exASSERT(!m_columnName.empty());
+
+		return m_columnName;
+	}
+
 
 
 	SDbInfo::SDbInfo()
@@ -285,30 +334,6 @@ namespace exodbc
 		m_intervalPrecisionIsNull = false;
 	}
 
-	ColumnInfo::ColumnInfo()
-		: m_sqlType(SQL_UNKNOWN_TYPE)
-		, m_columnSize(0)
-		, m_bufferSize(0)
-		, m_decimalDigits(0)
-		, m_numPrecRadix(0)
-		, m_nullable(SQL_NULLABLE_UNKNOWN)
-		, m_sqlDataType(SQL_UNKNOWN_TYPE)
-		, m_sqlDatetimeSub(0)
-		, m_charOctetLength(0)
-		, m_ordinalPosition(0)
-		, m_isCatalogNull(false)
-		, m_isSchemaNull(false)
-		, m_isColumnSizeNull(false)
-		, m_isBufferSizeNull(false)
-		, m_isDecimalDigitsNull(false)
-		, m_isNumPrecRadixNull(false)
-		, m_isRemarksNull(false)
-		, m_isDefaultValueNull(false)
-		, m_isDatetimeSubNull(false)
-		, m_isCharOctetLengthNull(false)
-		, m_isIsNullableNull(false)
-		//		, m_queryNameHint(ColumnQueryNameHint::COLUMN)
-	{ }
 
 	//STableInfo::STableInfo()
 	//	: m_isCatalogNull(false)
@@ -379,40 +404,40 @@ namespace exodbc
 	//}
 
 
-	std::wstring ColumnInfo::GetSqlName() const
-	{
-		exASSERT(!m_columnName.empty());
+	//std::wstring ColumnInfo::GetSqlName() const
+	//{
+	//	exASSERT(!m_columnName.empty());
 
-		//bool includeTableName = false;
-		//bool includeColumnName = true;
+	//	//bool includeTableName = false;
+	//	//bool includeColumnName = true;
 
-		////switch (m_queryNameHint)
-		////{
-		////case ColumnQueryNameHint::COLUMN:
-		//includeTableName = false;
-		//includeColumnName = true;
-		//	break;
-		//case ColumnQueryNameHint::TABLE_COLUMN:
-		//	includeTableName = true;
-		//	includeColumnName = true;
-		//	break;
-		//}
-		//std::wstringstream ws;
+	//	////switch (m_queryNameHint)
+	//	////{
+	//	////case ColumnQueryNameHint::COLUMN:
+	//	//includeTableName = false;
+	//	//includeColumnName = true;
+	//	//	break;
+	//	//case ColumnQueryNameHint::TABLE_COLUMN:
+	//	//	includeTableName = true;
+	//	//	includeColumnName = true;
+	//	//	break;
+	//	//}
+	//	//std::wstringstream ws;
 
-		//if (includeTableName)
-		//{
-		//	exASSERT(!m_tableName.empty());
-		//	ws << m_tableName << L".";
-		//}
-		//if (includeColumnName)
-		//{
-		//ws << m_columnName << L".";
-		//}
+	//	//if (includeTableName)
+	//	//{
+	//	//	exASSERT(!m_tableName.empty());
+	//	//	ws << m_tableName << L".";
+	//	//}
+	//	//if (includeColumnName)
+	//	//{
+	//	//ws << m_columnName << L".";
+	//	//}
 
-		//std::wstring str = ws.str();
-		//boost::erase_last(str, L".");
-		return m_columnName;
-	}
+	//	//std::wstring str = ws.str();
+	//	//boost::erase_last(str, L".");
+	//	return m_columnName;
+	//}
 
 
 

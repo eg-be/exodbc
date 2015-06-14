@@ -48,7 +48,7 @@ namespace exodbc
 		exASSERT(m_flags & CF_SELECT);
 
 		// Remember some values from ColumnInfo
-		m_queryName = columnInfo.GetSqlName();
+		m_queryName = columnInfo.GetQueryName();
 		if (!columnInfo.m_isColumnSizeNull)
 		{
 			m_columnSize = columnInfo.m_columnSize;

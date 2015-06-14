@@ -77,9 +77,16 @@ namespace exodbc
 	* \see: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
 	*/
 	class EXODBCAPI ColumnInfo
+		: public ObjectName
 	{
 	public:
 		ColumnInfo();
+
+		virtual std::wstring GetQueryName() const;
+		virtual std::wstring GetPureName() const;
+
+		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
+		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
 		std::wstring	m_catalogName;		///< [NULLABLE] Catalog name
 		std::wstring	m_schemaName;		///< [NULLABLE] Schema name
@@ -112,12 +119,9 @@ namespace exodbc
 		bool			m_isCharOctetLengthNull;	///< See ColumnInfo::m_charOctetLength
 		bool			m_isIsNullableNull;			///< See ColumnInfo::isNullable
 
-		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
-		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
-
 		//		void		SetSqlNameHint(ColumnQueryNameHint hint) { m_queryNameHint = hint; };
-		std::wstring		GetSqlName() const;
-		std::wstring GetPureColumnName() const;
+		//std::wstring		GetSqlName() const;
+		//std::wstring GetPureColumnName() const;
 
 	private:
 		//		ColumnQueryNameHint m_queryNameHint;
