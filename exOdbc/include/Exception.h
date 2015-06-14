@@ -9,7 +9,7 @@
 
 #pragma once
 #ifndef Exception_H
-#define Exception_H
+#define EXCEPTION_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -268,4 +268,4 @@ namespace exodbc
 }
 
 
-#endif // Exception
+#endif // EXCEPTION_H

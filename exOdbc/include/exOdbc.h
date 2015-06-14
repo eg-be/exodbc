@@ -7,8 +7,8 @@
 */ 
 
 #pragma once
-#ifndef WXODBC3_H
-#define WXODBC3_H
+#ifndef EXODBC_H
+#define EXODBC_H
 
 // Defines to dll-import/export
 // ----------------------------

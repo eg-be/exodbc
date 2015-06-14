@@ -8,8 +8,8 @@
 */
 
 #pragma once
-#ifndef ColumnBuffer_H
-#define ColumnBuffer_H
+#ifndef COLUMNBUFFER_H
+#define COLUMNBUFFER_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -953,4 +953,4 @@ namespace exodbc
 }
 
 
-#endif // ColumnBuffer_H
+#endif // COLUMNBUFFER_H

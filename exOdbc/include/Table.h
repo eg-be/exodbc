@@ -27,8 +27,8 @@
 */
 
 #pragma once
-#ifndef DBTABLE_H
-#define DBTABLE_H
+#ifndef TABLE_H
+#define TABLE_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -1203,4 +1203,4 @@ namespace exodbc
 
 }	// namespace exodbc
 
-#endif // DBTABLE_H
+#endif // TABLE_H

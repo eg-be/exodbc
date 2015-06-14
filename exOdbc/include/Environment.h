@@ -10,8 +10,8 @@
 */ 
 
 #pragma once
-#ifndef Environment_H
-#define Environment_H
+#ifndef ENVIRONMENT_H
+#define ENVIRONMENT_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -180,4 +180,4 @@ namespace exodbc
 }
 
 
-#endif // Environment_H
+#endif // ENVIRONMENT_H
