@@ -37,15 +37,6 @@ namespace exodbc
 	//	EXCEL			///< For Excel use only the TableName$ and wrap it inside [], so it becomes '[TableName$]'. \note: The '$' is not added automatically.
 	//};
 
-	///*!
-	//* \enum		ColumnQueryNameHint
-	//* \brief	A helper to specify how to build the name of the column to be used in a SQL query.
-	//*/
-	//enum class ColumnQueryNameHint
-	//{
-	//	TABLE_COLUMN,	///< Use TableName and ColumnName, resulting in 'TableName.ColumnName'
-	//	COLUMN			///< Use only the ColumnName, resulting in 'ColumnName'
-	//};
 
 	/*!
 	* \class ObjectName
@@ -60,6 +51,25 @@ namespace exodbc
 
 
 	/*!
+	* \class TableName
+	*
+	* \brief Name of a Table.
+	*/
+	class TableName
+		: public ObjectName
+	{
+	public:
+		TableName(const STableInfo& tableInfo, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
+
+		virtual std::wstring GetQueryName() const;
+
+	private:
+		STableInfo m_tableInfo;
+		DatabaseProduct m_dbms;
+	};
+
+
+	/*!
 	* \class ColumnName
 	*
 	* \brief Name of a column.
@@ -69,16 +79,15 @@ namespace exodbc
 	{
 	public:
 
-		enum class QueryNameType
-		{
-			TABLE_COLUMN = 0,
-			COLUM = 1
-		};
-
 		ColumnName(const std::wstring& queryName);
 		ColumnName(const SColumnInfo& columnInfo);
 
 		virtual std::wstring GetQueryName() const;
+
+	private:
+		bool m_haveColumnInfo;
+		SColumnInfo m_columnInfo;
+		std::wstring m_queryName;
 	};
 }
 
