@@ -38,6 +38,8 @@ namespace exodbc
 
 	std::wstring TableName::GetQueryName() const
 	{
+		exASSERT( ! m_tableInfo.m_tableName.empty());
+
 		switch (m_dbms)
 		{
 		case DatabaseProduct::ACCESS:
@@ -67,6 +69,19 @@ namespace exodbc
 	}
 
 
+	std::wstring TableName::GetPureName() const
+	{
+		exASSERT(!m_tableInfo.m_tableName.empty());
+
+		return m_tableInfo.m_tableName;
+	}
+
+
+	ColumnName::ColumnName()
+		: m_haveColumnInfo(false)
+	{ }
+
+
 	ColumnName::ColumnName(const SColumnInfo& columnInfo)
 		: m_columnInfo(columnInfo)
 		, m_haveColumnInfo(true)
@@ -81,6 +96,8 @@ namespace exodbc
 
 	std::wstring ColumnName::GetQueryName() const
 	{
+		exASSERT(m_haveColumnInfo || !m_queryName.empty());
+
 		if (m_haveColumnInfo)
 		{
 			return m_columnInfo.m_columnName;
@@ -88,6 +105,27 @@ namespace exodbc
 		else
 		{
 			return m_queryName;
+		}
+	}
+
+
+	std::wstring ColumnName::GetPureName() const
+	{
+		exASSERT(m_haveColumnInfo || !m_queryName.empty());
+
+		if (m_haveColumnInfo)
+		{
+			return m_columnInfo.m_columnName;
+		}
+		else
+		{
+			wstring columnName = m_queryName;
+			size_t lastDot = columnName.find_last_of(L".");
+			if (lastDot != std::wstring::npos)
+			{
+				columnName = columnName.substr(lastDot + 1);
+			}
+			return columnName;
 		}
 	}
 }

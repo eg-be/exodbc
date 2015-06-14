@@ -47,6 +47,7 @@ namespace exodbc
 	{
 	public:
 		virtual std::wstring GetQueryName() const = 0;
+		virtual std::wstring GetPureName() const = 0;
 	};
 
 
@@ -59,9 +60,11 @@ namespace exodbc
 		: public ObjectName
 	{
 	public:
+		TableName() {};
 		TableName(const STableInfo& tableInfo, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
 
 		virtual std::wstring GetQueryName() const;
+		virtual std::wstring GetPureName() const;
 
 	private:
 		STableInfo m_tableInfo;
@@ -78,11 +81,12 @@ namespace exodbc
 		: public ObjectName
 	{
 	public:
-
+		ColumnName();
 		ColumnName(const std::wstring& queryName);
 		ColumnName(const SColumnInfo& columnInfo);
 
 		virtual std::wstring GetQueryName() const;
+		virtual std::wstring GetPureName() const;
 
 	private:
 		bool m_haveColumnInfo;
