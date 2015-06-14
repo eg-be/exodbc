@@ -175,6 +175,46 @@ namespace exodbc
 	typedef std::vector<ColumnInfo> ColumnInfosVector;
 
 
+	/*!
+	* \class	TablePrimaryKeyInfo
+	* \brief	Primary Keys of a table as fetched using SQLPrimaryKeys
+	*/
+	class EXODBCAPI TablePrimaryKeyInfo
+		: public ObjectName
+	{
+	public:
+		TablePrimaryKeyInfo()
+			: m_keySequence(0)
+			, m_isPrimaryKeyNameNull(true)
+			, m_isCatalogNull(true)
+			, m_isSchemaNull(true)
+		{};
+
+		virtual std::wstring GetQueryName() const;
+		virtual std::wstring GetPureName() const;
+
+		std::wstring	m_catalogName;	///< TABLE_CAT [Nullable]. Primary key table catalog name.
+		std::wstring	m_schemaName;	///< TABLE_SCHEM [Nullable]. Primary key table schema name.
+		std::wstring	m_tableName;	///< TABLE_NAME. Primary key table name.
+		std::wstring	m_columnName;	///< COLUMN_NAME. Primary key column name.
+
+		SQLSMALLINT		m_keySequence;	///< KEY_SEQ. Column sequence number in key (starting with 1).
+		std::wstring	m_primaryKeyName;	///< PK_NAME [Nullable]. Column sequence number in key (starting with 1).
+
+		bool			m_isCatalogNull;		///< True if TABLE_CAT is Null.
+		bool			m_isSchemaNull;			///< True if TABLE_SCHEM is Null.
+		bool			m_isPrimaryKeyNameNull;	///< True if PK_NAME is Null.
+
+//		std::wstring GetSqlName(QueryNameFlags flags = QNF_TABLE | QNF_COLUMN) const;
+	};
+
+
+	/*!
+	* \typedef TablePrimaryKeysVector
+	* \brief std::vector of TablePrimaryKeyInfo objects.
+	*/
+	typedef std::vector<TablePrimaryKeyInfo> TablePrimaryKeysVector;
+
 
 	/*!
 	* \struct SDataSource
@@ -340,43 +380,6 @@ namespace exodbc
 	* \brief std::vector of STablePrivilegesInfo objects.
 	*/
 	typedef std::vector<STablePrivilegesInfo> TablePrivilegesVector;
-
-
-	/*!
-	* \struct	STablePrimaryKeyInfo
-	* \brief	Primary Keys of a table as fetched using SQLPrimaryKeys
-	*/
-	struct EXODBCAPI STablePrimaryKeyInfo
-	{
-		STablePrimaryKeyInfo()
-			: m_keySequence(0)
-			, m_isPrimaryKeyNameNull(true)
-			, m_isCatalogNull(true)
-			, m_isSchemaNull(true)
-		{};
-
-		std::wstring	m_catalogName;	///< TABLE_CAT [Nullable]. Primary key table catalog name.
-		std::wstring	m_schemaName;	///< TABLE_SCHEM [Nullable]. Primary key table schema name.
-		std::wstring	m_tableName;	///< TABLE_NAME. Primary key table name.
-		std::wstring	m_columnName;	///< COLUMN_NAME. Primary key column name.
-
-		SQLSMALLINT		m_keySequence;	///< KEY_SEQ. Column sequence number in key (starting with 1).
-		std::wstring	m_primaryKeyName;	///< PK_NAME [Nullable]. Column sequence number in key (starting with 1).
-
-		bool			m_isCatalogNull;		///< True if TABLE_CAT is Null.
-		bool			m_isSchemaNull;			///< True if TABLE_SCHEM is Null.
-		bool			m_isPrimaryKeyNameNull;	///< True if PK_NAME is Null.
-
-		std::wstring GetSqlName(QueryNameFlags flags = QNF_TABLE | QNF_COLUMN) const;
-	};
-
-	/*!
-	* \typedef TablePrimaryKeysVector
-	* \brief std::vector of STablePrimaryKeyInfo objects.
-	*/
-	typedef std::vector<STablePrimaryKeyInfo> TablePrimaryKeysVector;
-
-
 }
 
 #endif // INFOOBJECT_H
