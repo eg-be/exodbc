@@ -101,7 +101,7 @@ namespace exodbc
 				{
 					columnName = columnName.substr(lastDot + 1);
 				}
-				STablePrimaryKeyInfo keyInfo;
+				TablePrimaryKeyInfo keyInfo;
 				// use only the pure table-name and the query-name from the column-buffer
 				keyInfo.m_tableName = tableInfo.GetPureName();
 				keyInfo.m_columnName = columnName;
@@ -121,7 +121,7 @@ namespace exodbc
 
 		for (TablePrimaryKeysVector::const_iterator it = m_pksVector.begin(); it != m_pksVector.end(); ++it)
 		{
-			const wstring& keyName = it->GetSqlName();
+			const wstring& keyName = it->GetQueryName();
 			if (WeakCompare(queryName, keyName))
 			{
 				return true;
@@ -139,7 +139,7 @@ namespace exodbc
 		TablePrimaryKeysVector::const_iterator it;
 		for (it = m_pksVector.begin(); it != m_pksVector.end(); it++)
 		{
-			wstring pkQueryName = it->GetSqlName();
+			wstring pkQueryName = it->GetQueryName();
 			bool bound = false;
 			ColumnBufferPtrMap::const_iterator itBuffs;
 			for (itBuffs = columnBuffers.begin(); itBuffs != columnBuffers.end() && !bound; itBuffs++)
@@ -169,7 +169,7 @@ namespace exodbc
 		TablePrimaryKeysVector::const_iterator it;
 		for (it = m_pksVector.begin(); it != m_pksVector.end(); it++)
 		{
-			wstring pkQueryName = it->GetSqlName();
+			wstring pkQueryName = it->GetQueryName();
 			bool bound = false;
 			ColumnBufferPtrMap::const_iterator itBuffs;
 			for (itBuffs = columnBuffers.begin(); itBuffs != columnBuffers.end() && !bound; itBuffs++)

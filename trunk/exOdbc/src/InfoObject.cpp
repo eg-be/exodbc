@@ -183,6 +183,21 @@ namespace exodbc
 	}
 
 
+	std::wstring TablePrimaryKeyInfo::GetQueryName() const
+	{
+		exASSERT(!m_columnName.empty());
+		exASSERT(!m_tableName.empty());
+
+		return m_tableName + L"." + m_columnName;
+	}
+
+
+	std::wstring TablePrimaryKeyInfo::GetPureName() const
+	{
+		exASSERT(!m_columnName.empty());
+		return m_columnName;
+	}
+
 
 	SDbInfo::SDbInfo()
 	{
@@ -478,32 +493,32 @@ namespace exodbc
 
 
 
-	std::wstring STablePrimaryKeyInfo::GetSqlName(QueryNameFlags flags /* = QNF_TABLE | QNF_COLUMN */) const
-	{
-		exASSERT(!m_tableName.empty());
+	//std::wstring TablePrimaryKeyInfo::GetSqlName(QueryNameFlags flags /* = QNF_TABLE | QNF_COLUMN */) const
+	//{
+	//	exASSERT(!m_tableName.empty());
 
-		std::wstringstream ws;
-		if (flags & QNF_CATALOG && !m_isCatalogNull)
-		{
-			ws << m_catalogName << L".";
-		}
-		if (flags & QNF_SCHEMA && !m_isSchemaNull)
-		{
-			ws << m_schemaName << L".";
-		}
-		if (flags & QNF_TABLE)
-		{
-			ws << m_tableName << L".";
-		}
-		if (flags & QNF_COLUMN)
-		{
-			ws << m_columnName << L".";
-		}
+	//	std::wstringstream ws;
+	//	if (flags & QNF_CATALOG && !m_isCatalogNull)
+	//	{
+	//		ws << m_catalogName << L".";
+	//	}
+	//	if (flags & QNF_SCHEMA && !m_isSchemaNull)
+	//	{
+	//		ws << m_schemaName << L".";
+	//	}
+	//	if (flags & QNF_TABLE)
+	//	{
+	//		ws << m_tableName << L".";
+	//	}
+	//	if (flags & QNF_COLUMN)
+	//	{
+	//		ws << m_columnName << L".";
+	//	}
 
-		std::wstring str = ws.str();
-		boost::erase_last(str, L".");
-		return str;
-	}
+	//	std::wstring str = ws.str();
+	//	boost::erase_last(str, L".");
+	//	return str;
+	//}
 
 
 

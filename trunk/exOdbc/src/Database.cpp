@@ -805,7 +805,7 @@ namespace exodbc
 		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
 			SQLLEN cb;
-			STablePrimaryKeyInfo pk;
+			TablePrimaryKeyInfo pk;
 			GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), pk.m_catalogName, &pk.m_isCatalogNull);
 			GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), pk.m_schemaName, &pk.m_isSchemaNull);
 			GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), pk.m_tableName);
