@@ -350,6 +350,46 @@ namespace exodbc
 	}
 
 
+	bool Database::IsMarsEnabled()
+	{
+		exASSERT(IsOpen());
+
+		// Use the information from the db-inf, except for ms,
+		// if we have the additional info from HAVE_MSODBCSQL_H
+#ifdef HAVE_MSODBCSQL_H
+		if (GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			SQLULEN value = 0;
+			SQLINTEGER cb = 0;
+			SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_COPT_SS_MARS_ENABLED, &value, sizeof(value), &cb);
+			THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Cannot read option SQL_COPT_SS_MARS_ENABLED.");
+			return value == SQL_MARS_ENABLED_YES;
+		}
+#endif
+		return m_dbInf.m_maxActiveStmts == 0 || m_dbInf.m_maxActiveStmts > 1;
+	}
+
+
+#ifdef HAVE_MSODBCSQL_H
+	void Database::SetMarsEnabled(bool enableMars)
+	{
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+		exASSERT(!IsOpen());
+		SQLRETURN ret = 0;
+		if (enableMars)
+		{
+			ret = SQLSetConnectAttr(m_hdbc, SQL_COPT_SS_MARS_ENABLED, (SQLPOINTER)SQL_MARS_ENABLED_YES, SQL_IS_UINTEGER);
+		}
+		else
+		{
+			ret = SQLSetConnectAttr(m_hdbc, SQL_COPT_SS_MARS_ENABLED, (SQLPOINTER)SQL_MARS_ENABLED_NO, SQL_IS_UINTEGER);
+		}
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Cannot set option SQL_COPT_SS_MARS_ENABLED.");
+	}
+#endif
+
+
+
 	void Database::SetConnectionAttributes()
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
@@ -385,7 +425,7 @@ namespace exodbc
 		GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.m_dbmsName);
 		GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.m_dbmsVer);
 		GetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, &dbInf.m_maxConnections, sizeof(dbInf.m_maxConnections), &cb);
-		GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.m_maxStmts, sizeof(dbInf.m_maxStmts), &cb);
+		GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.m_maxActiveStmts, sizeof(dbInf.m_maxActiveStmts), &cb);
 		GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.m_driverName);
 		GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.m_odbcVer);
 		GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.m_drvMgrOdbcVer);
