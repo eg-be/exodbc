@@ -969,7 +969,7 @@ namespace exodbc
 		// Table Information
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		TableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
-		TableName			m_tableName;			///< TableName constructed from the TableInfo read upon Open()
+//		TableName			m_tableName;			///< TableName constructed from the TableInfo read upon Open()
 		AutoBindingMode		m_autoBindingMode;		///< Store the auto-binding of this table. TODO: Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
 		TableOpenFlags		m_openFlags;			///< Flags used to open the table in the call to Open().
