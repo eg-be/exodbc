@@ -14,6 +14,7 @@
 
 // Same component headers
 #include "Exception.h"
+#include "Visitors.h"
 
 // Other headers
 
@@ -1161,51 +1162,6 @@ namespace exodbc
 		// Could throw boost::bad_get
 		return boost::get<SQL_NUMERIC_STRUCT*>(m_bufferPtr);
 	}
-
-
-	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_TIME_STRUCT* pTime) const
-	{
-		SQL_TIMESTAMP_STRUCT timestamp; 
-		ZeroMemory(&timestamp, sizeof(timestamp));
-		timestamp.hour = pTime->hour; 
-		timestamp.minute = pTime->minute;
-		timestamp.second = pTime->second;
-		return timestamp;
-	}
-
-
-	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_DATE_STRUCT* pDate) const 
-	{ 
-		SQL_TIMESTAMP_STRUCT timestamp; 
-		ZeroMemory(&timestamp, sizeof(timestamp)); 
-		timestamp.day = pDate->day; 
-		timestamp.month = pDate->month;
-		timestamp.year = pDate->year;
-		return timestamp; 
-	};
-
-
-	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const
-	{
-		SQL_TIMESTAMP_STRUCT timestamp = *pTimestamp;
-		return timestamp;
-	}
-
-
-#if HAVE_MSODBCSQL_H
-	SQL_TIMESTAMP_STRUCT TimestampVisitor::operator()(SQL_SS_TIME2_STRUCT* pTime) const 
-	{ 
-		SQL_TIMESTAMP_STRUCT timestamp; 
-		ZeroMemory(&timestamp, sizeof(timestamp)); 
-		timestamp.hour = pTime->hour; 
-		timestamp.minute = pTime->minute; 
-		timestamp.second = pTime->second; 
-		timestamp.fraction = pTime->fraction;
-		//ColumnBuffer::TrimValue(m_decimalDigits, timestamp.fraction);
-		return timestamp; 
-	};
-#endif
-
 
 	// Interfaces
 	// ----------
