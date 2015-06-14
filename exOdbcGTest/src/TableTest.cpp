@@ -88,9 +88,9 @@ namespace exodbc
 		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_NO_THROW(table.Open(TOF_NONE));
 
-		// If we pass in the STableInfo directly we should also be able to "open"
+		// If we pass in the TableInfo directly we should also be able to "open"
 		// a totally non-sense table:
-		STableInfo neTableInfo;
+		TableInfo neTableInfo;
 		neTableInfo.m_tableName = L"NotExisting";
 		Table neTable(&m_db, 2, neTableInfo, AF_READ);
 		SQLINTEGER idNotExisting = 0;
@@ -364,9 +364,9 @@ namespace exodbc
 	TEST_P(TableTest, OpenAutoWithoutCheck)
 	{
 		// Open an auto-table without checking for privileges or existence
-		// This makes only sense if we've already determined the correct STableInfo structure
+		// This makes only sense if we've already determined the correct TableInfo structure
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		STableInfo tableInfo;
+		TableInfo tableInfo;
 		EXPECT_NO_THROW(tableInfo = m_db.FindOneTable(tableName, L"", L"", L""));
 
 		exodbc::Table table(&m_db, tableInfo, AF_READ);
@@ -377,7 +377,7 @@ namespace exodbc
 		{
 			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
-			STableInfo neTableInfo;
+			TableInfo neTableInfo;
 			neTableInfo.m_tableName = L"NotExisting";
 			Table neTable(&m_db, neTableInfo, AF_READ);
 			EXPECT_THROW(neTable.Open(TOF_NONE), Exception);

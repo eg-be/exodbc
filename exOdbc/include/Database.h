@@ -276,12 +276,12 @@ namespace exodbc
 		 * 			FindTable or similar).
 		 * 			Note: No checks are done to ensure the passed table matches only one table
 		 * 			of the database. You might get confusing results if you have for example
-		 * 			search-patterns set as table name in the passed STableInfo table.
+		 * 			search-patterns set as table name in the passed TableInfo table.
 		 * \param	table	The table.
 		 * \return	The column count.
 		 * \throw	Exception If counting columns fails.
 		 */
-		int			ReadColumnCount(const STableInfo& table);
+		int			ReadColumnCount(const TableInfo& table);
 
 
 		/*!
@@ -305,7 +305,7 @@ namespace exodbc
 		 * \return	Privileges	matching passed table.
 		 * \throw	Exception	If reading privileges fails.
 		 */
-		TablePrivilegesVector	ReadTablePrivileges(const STableInfo& table) const;
+		TablePrivilegesVector	ReadTablePrivileges(const TableInfo& table) const;
 
 
 		/*!
@@ -327,7 +327,7 @@ namespace exodbc
 		* \return	The primary Keys found.
 		* \throw	If reading primary keys fails.
 		*/
-		TablePrimaryKeysVector		ReadTablePrimaryKeys(const STableInfo& table) const;
+		TablePrimaryKeysVector		ReadTablePrimaryKeys(const TableInfo& table) const;
 
 
 		/*!
@@ -337,7 +337,7 @@ namespace exodbc
 		 * \return		Columns of passed table.
 		 * \throw Exception If reading ColumnInfo fails.
 		 */
-		ColumnInfosVector	ReadTableColumnInfo(const STableInfo& table) const;
+		ColumnInfosVector	ReadTableColumnInfo(const TableInfo& table) const;
 
 
 		/*!
@@ -366,7 +366,7 @@ namespace exodbc
 		 * \return	The tables found that match the search-criteria.
 		 * \throw Exception			If querying the database fails.
 		 */
-		STableInfosVector		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
+		TableInfosVector		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
 
 
 		/*!
@@ -378,7 +378,7 @@ namespace exodbc
 		* \return	The table info of exactly one table that matches the passed search-criterias name, schema and catalog. Throws otherwise
 		* \throw	If not exactly one table can be found
 		*/
-		STableInfo		FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
+		TableInfo		FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
 
 
 		/*!

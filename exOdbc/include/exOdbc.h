@@ -23,6 +23,8 @@
 /* class 'foo' needs to have dll-interface to be used by clients of class 'bar'" */
 #pragma warning(disable:4251)
 
+#include "InfoObject.h"
+
 #include <windows.h>
 
 #include <sql.h>
@@ -160,20 +162,6 @@ namespace exodbc
 	enum class ColumnAttribute
 	{
 		CA_PRECISION = SQL_DESC_PRECISION ///< A numeric value that for a numeric data type denotes the applicable precision, For data types SQL_TYPE_TIME, SQL_TYPE_TIMESTAMP, and all the interval data types that represent a time interval, its value is the applicable precision of the fractional seconds component. 
-	};
-
-
-	/*!
-	* \enum		TableQueryNameHint
-	* \brief	A helper to specify how to build the name of the table to be used in a SQL query.
-	*/
-	enum class TableQueryNameHint
-	{
-		ALL,			///< Use Catalog, Schema and TableName, resulting in 'CatalogName.SchemaName.TableName'
-		TABLE_ONLY,		///< Use only TableName
-		CATALOG_TABLE,	///< Use Catalog and TableName, resulting in 'CatalogName.TableName'
-		SCHEMA_TABLE,	///< Use Schema and TableName, resulting in 'SchemaName.TableName'
-		EXCEL			///< For Excel use only the TableName$ and wrap it inside [], so it becomes '[TableName$]'. \note: The '$' is not added automatically.
 	};
 
 
@@ -480,39 +468,39 @@ namespace exodbc
 	typedef std::vector<SColumnInfo> ColumnInfosVector;
 
 
-	/*!
-	 * \struct	STableInfo
-	 * \brief	Description of a table fetched using the catalog function SQLTables
-	 */
-	struct EXODBCAPI STableInfo
-	{
-	public:
-		STableInfo();
+	///*!
+	// * \struct	STableInfo
+	// * \brief	Description of a table fetched using the catalog function SQLTables
+	// */
+	//struct EXODBCAPI STableInfo
+	//{
+	//public:
+	//	STableInfo();
 
-		std::wstring		m_tableName;		///< Name
-		std::wstring		m_tableType;        ///< "TABLE" or "SYSTEM TABLE" etc.
-		std::wstring		m_tableRemarks;		///< Remarks
-		std::wstring		m_catalogName;		///< catalog
-		std::wstring		m_schemaName;		///< schema
-		bool				m_isCatalogNull;	///< True if m_catalogName is null.
-		bool				m_isSchemaNull;		///< True if m_schemaName is null.
+	//	std::wstring		m_tableName;		///< Name
+	//	std::wstring		m_tableType;        ///< "TABLE" or "SYSTEM TABLE" etc.
+	//	std::wstring		m_tableRemarks;		///< Remarks
+	//	std::wstring		m_catalogName;		///< catalog
+	//	std::wstring		m_schemaName;		///< schema
+	//	bool				m_isCatalogNull;	///< True if m_catalogName is null.
+	//	bool				m_isSchemaNull;		///< True if m_schemaName is null.
 
-		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
-		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
+	//	bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
+	//	bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
-		void				SetSqlNameHint(TableQueryNameHint hint) { m_queryNameHint = hint; };
-		std::wstring		GetSqlName() const;
-		std::wstring		GetPureTableName() const;
+	//	void				SetSqlNameHint(TableQueryNameHint hint) { m_queryNameHint = hint; };
+	//	std::wstring		GetSqlName() const;
+	//	std::wstring		GetPureTableName() const;
 
-	private:
-		TableQueryNameHint	m_queryNameHint;
-	};
+	//private:
+	//	TableQueryNameHint	m_queryNameHint;
+	//};
 	
-	/*!
-	* \typedef STableInfosVector
-	* \brief std::vector of STableInfo objects.
-	*/
-	typedef std::vector<STableInfo> STableInfosVector;
+	///*!
+	//* \typedef TableInfosVector
+	//* \brief std::vector of STableInfo objects.
+	//*/
+	//typedef std::vector<STableInfo> TableInfosVector;
 
 
 	/*!
@@ -521,7 +509,7 @@ namespace exodbc
 	 */
 	struct EXODBCAPI SDbCatalogInfo
 	{
-		STableInfosVector m_tables;
+		TableInfosVector m_tables;
 		std::set<std::wstring> m_catalogs;
 		std::set<std::wstring> m_schemas;
 	};

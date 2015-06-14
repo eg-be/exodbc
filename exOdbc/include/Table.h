@@ -84,7 +84,7 @@ namespace exodbc
 	* Note if a name is something like columnIndex it will refer to the zero based index.
 	*
 	* The database will always be queried for a table matching the given values in the
-	* constructor, except one of the constructors where a STableInfo structure
+	* constructor, except one of the constructors where a TableInfo structure
 	* is passed was used.
 	*
 	* A table must be opened after construction by calling Open().
@@ -100,7 +100,7 @@ namespace exodbc
 		* \brief	Create a new Table-instance from the Database pDb using the table definition
 		*			from tableInfo. The table will read its column-definitions from the database
 		*			automatically during Open() and bind all columns.
-		* \details	Note that when this constructor is used, the internal STableInfo object is not
+		* \details	Note that when this constructor is used, the internal TableInfo object is not
 		*			queried from the database, but the passed tableInfo is used for all later operations.
 		*			This is handy if you've located the detailed table-information already from the Database
 		*			using its Database::FindTables() function and want to avoid that is operation is
@@ -113,7 +113,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database* pDb, const STableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
+		Table(const Database* pDb, const TableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
 
 
 		/*!
@@ -167,7 +167,7 @@ namespace exodbc
 		/*!
 		* \brief	Create a new Table-instance on which you will later set the ColumnInfo manually.
 		*			During Open() only those columns you have set using SetColumn() will be bound.
-		* \details Note that when this constructor is used, the internal STableInfo object is not
+		* \details Note that when this constructor is used, the internal TableInfo object is not
 		*			queried from the database, but the passed tableInfo is used for all later operations.
 		*			This is handy if you've located the detailed table-information already from the Database
 		*			using its Database::FindTables() function and want to avoid that is operation is
@@ -185,7 +185,7 @@ namespace exodbc
 		* \see		SetColumn()
 		* \throw	Exception If allocating statements fail.
 		*/
-		Table(const Database* pDb, SQLSMALLINT numColumns, const STableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
+		Table(const Database* pDb, SQLSMALLINT numColumns, const TableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
 
 	private:
 
@@ -214,7 +214,7 @@ namespace exodbc
 		/*!
 		* \brief	Opens the Table and either binds the already defined columns or queries the database
 		*			about the columns of this table.
-		* \details If no STableInfo object has been passed during construction the database is first
+		* \details If no TableInfo object has been passed during construction the database is first
 		*			queried for a table matching the parameters passed. If not exactly one such table is
 		*			found Open will fail.
 		*
@@ -233,7 +233,7 @@ namespace exodbc
 		*  - TOF_CHECK_EXISTANCE:
 		*			If set, the database will always be queried if a table matching the
 		*			passed definition during constructions actually exists in the database. Setting this
-		*			value to false makes only sense	if you've passed a STableInfo during construction, 
+		*			value to false makes only sense	if you've passed a TableInfo during construction, 
 		*			as else the Table is required to query the database anyway (and fail if not found).
 		*  - TOF_SKIP_UNSUPPORTED_COLUMNS:
 		*			If set, ColumnBuffer that failed to be created with a NotSupportedException are simply
@@ -273,7 +273,7 @@ namespace exodbc
 		/*!
 		* \brief	Close the table.
 		* \details	Unbinds and deletes all ColumnBuffers bound to this table. The information about
-		*			this table in the STableInfo queried during Open() is kept for future use.
+		*			this table in the TableInfo queried during Open() is kept for future use.
 		* \see		Open()
 		* \throw	Exception If not Open or unbinding fails.
 		*/
@@ -393,22 +393,22 @@ namespace exodbc
 
 		/*!
 		* \brief	Check if the Table-Information is set on this Table.
-		* \details	Returns true if the internal member of the STableInfo contains a value either
+		* \details	Returns true if the internal member of the TableInfo contains a value either
 		*			set during Construction or fetched from the Database during Open().
 		* \see		GetTableInfo()
-		* \return	Returns true if this table has a STableInfo set that can be fetched using GetTableInfo()
+		* \return	Returns true if this table has a TableInfo set that can be fetched using GetTableInfo()
 		*/
 		bool		HaveTableInfo() const throw() { return m_haveTableInfo; }
 
 
 		/*!
 		* \brief	Return the Table information of this Table.
-		* \details	Returns the STableInfo of this table, if one has been set either during construction
+		* \details	Returns the TableInfo of this table, if one has been set either during construction
 		*			or one was read during Open().
 		* \see		HaveTableInfo()
 		* \throw	Exception if no table info is available.
 		*/
-		STableInfo	GetTableInfo() const;
+		TableInfo	GetTableInfo() const;
 
 
 		/*!
@@ -899,7 +899,7 @@ namespace exodbc
 		*			to bind, the keys will so something like 1, 3, 4, .. 
 		* \throw	Exception If m_manualColumns is set to true, or m_columnBuffers is not empty, or creation of ColumnBuffers fails.
 		*/
-		void		CreateAutoColumnBuffers(const STableInfo& tableInfo, bool skipUnsupportedColumns);
+		void		CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns);
 
 		
 		/*!
@@ -968,8 +968,8 @@ namespace exodbc
 
 		// Table Information
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
-		STableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
-		TableName			m_tableName;			///< TableName constructed from the STableInfo read upon Open()
+		TableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
+		TableName			m_tableName;			///< TableName constructed from the TableInfo read upon Open()
 		AutoBindingMode		m_autoBindingMode;		///< Store the auto-binding of this table. TODO: Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
 		TableOpenFlags		m_openFlags;			///< Flags used to open the table in the call to Open().
@@ -984,7 +984,7 @@ namespace exodbc
 		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
 		SQLSMALLINT			m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database
 
-		// Table information set during construction, that was used to find the matching STableInfo if none was passed
+		// Table information set during construction, that was used to find the matching TableInfo if none was passed
 		// Note: We make them public, as they are all const
 	public:
 		const std::wstring  m_initialTableName;		///< Table name set on construction

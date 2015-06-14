@@ -81,11 +81,11 @@ namespace exodbc
 		{
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
 		}
-		STableInfosVector tables;
+		TableInfosVector tables;
 		ASSERT_NO_THROW(tables = db.FindTables(L"", L"", L"", L""));
 		// Must contain our sheet 'TestTable$'
 		bool foundTestTableSheet = false;
-		STableInfosVector::const_iterator it;
+		TableInfosVector::const_iterator it;
 		for (it = tables.begin(); it != tables.end(); it++)
 		{
 			if (it->m_tableName == L"TestTable$")
@@ -150,7 +150,7 @@ namespace exodbc
 		EXPECT_EQ(L"row1", t);
 
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
-		STableInfo tableInfo;
+		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
 
 		Table tTable2(&db, tableInfo, AF_READ);
@@ -185,7 +185,7 @@ namespace exodbc
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
 		}
 		// Find the correct table:
-		STableInfo tableInfo;
+		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		// And create the manual table:
@@ -238,7 +238,7 @@ namespace exodbc
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
 		}
 		// Find the correct table:
-		STableInfo tableInfo;
+		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
 		// And create the auto table:
 		Table tTable(&db, tableInfo, AF_READ);

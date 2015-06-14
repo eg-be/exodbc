@@ -526,7 +526,7 @@ namespace exodbc
 		TablePrimaryKeysVector pks;
 		
 		// Find the table-info
-		STableInfo iInfo;
+		TableInfo iInfo;
 		wstring intTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(iInfo = m_db.FindOneTable(intTableName, L"", L"", L""));
@@ -538,7 +538,7 @@ namespace exodbc
 			EXPECT_EQ(idName, pks[0].m_columnName);
 		}
 
-		STableInfo mkInfo;
+		TableInfo mkInfo;
 		wstring multiKeyTableName = test::GetTableName(test::TableId::MULTIKEY, m_odbcInfo.m_namesCase);
 		wstring mkId1 = test::ConvertNameCase(L"id1", m_odbcInfo.m_namesCase);
 		wstring mkId2 = test::ConvertNameCase(L"id2", m_odbcInfo.m_namesCase);
@@ -617,7 +617,7 @@ namespace exodbc
 
 	TEST_P(DatabaseTest, FindTables)
 	{
-		STableInfosVector tables;
+		TableInfosVector tables;
 		std::wstring tableName;
 		std::wstring schemaName;
 		std::wstring catalogName;
