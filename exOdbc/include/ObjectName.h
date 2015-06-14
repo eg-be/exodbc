@@ -51,48 +51,48 @@ namespace exodbc
 	};
 
 
-	/*!
-	* \class TableName
-	*
-	* \brief Name of a Table.
-	*/
-	class TableName
-		: public ObjectName
-	{
-	public:
-		TableName() {};
-		TableName(const TableInfo& tableInfo, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
+	///*!
+	//* \class TableName
+	//*
+	//* \brief Name of a Table.
+	//*/
+	//class TableName
+	//	: public ObjectName
+	//{
+	//public:
+	//	TableName() {};
+	//	TableName(const TableInfo& tableInfo, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
 
-		virtual std::wstring GetQueryName() const;
-		virtual std::wstring GetPureName() const;
+	//	virtual std::wstring GetQueryName() const;
+	//	virtual std::wstring GetPureName() const;
 
-	private:
-		TableInfo m_tableInfo;
-		DatabaseProduct m_dbms;
-	};
+	//private:
+	//	TableInfo m_tableInfo;
+	//	DatabaseProduct m_dbms;
+	//};
 
 
-	/*!
-	* \class ColumnName
-	*
-	* \brief Name of a column.
-	*/
-	class ColumnName
-		: public ObjectName
-	{
-	public:
-		ColumnName();
-		ColumnName(const std::wstring& queryName);
-		ColumnName(const SColumnInfo& columnInfo);
+	///*!
+	//* \class ColumnName
+	//*
+	//* \brief Name of a column.
+	//*/
+	//class ColumnName
+	//	: public ObjectName
+	//{
+	//public:
+	//	ColumnName();
+	//	ColumnName(const std::wstring& queryName);
+	//	ColumnName(const SColumnInfo& columnInfo);
 
-		virtual std::wstring GetQueryName() const;
-		virtual std::wstring GetPureName() const;
+	//	virtual std::wstring GetQueryName() const;
+	//	virtual std::wstring GetPureName() const;
 
-	private:
-		bool m_haveColumnInfo;
-		SColumnInfo m_columnInfo;
-		std::wstring m_queryName;
-	};
+	//private:
+	//	bool m_haveColumnInfo;
+	//	SColumnInfo m_columnInfo;
+	//	std::wstring m_queryName;
+	//};
 }
 
 #endif // OBJECTNAME_H

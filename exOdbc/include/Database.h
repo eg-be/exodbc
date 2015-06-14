@@ -44,6 +44,7 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Helpers.h"
+#include "InfoObject.h"
 
 // Other headers
 #if EXODBC_TEST

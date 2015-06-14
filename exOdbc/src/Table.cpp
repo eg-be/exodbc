@@ -1028,8 +1028,8 @@ namespace exodbc
 			{
 				// Finding will throw if not exactly one is found
 				m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
-				TableName tableName(m_tableInfo);
-				m_tableName = tableName;
+//				TableName tableName(m_tableInfo);
+//				m_tableName = tableName;
 				m_haveTableInfo = true;
 				searchedTable = true;
 			}
