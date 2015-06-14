@@ -286,7 +286,7 @@ namespace exodbc
 			m_numCols = (SQLSMALLINT) columns.size();
 			if (m_numCols == 0)
 			{
-				Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetSqlName()).str());
+				Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetQueryName()).str());
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -420,7 +420,7 @@ namespace exodbc
 		// note: parem-number reflects here the number of the param in the created prepared statement, so we
 		// cannot use the values from the ColumnBuffer column index.
 		int paramNr = 1;
-		wstring deleteStmt = (boost::wformat(L"DELETE FROM %s WHERE ") %m_tableInfo.GetSqlName()).str();
+		wstring deleteStmt = (boost::wformat(L"DELETE FROM %s WHERE ") % m_tableInfo.GetQueryName()).str();
 		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 		{
 			ColumnBuffer* pBuffer = it->second;
@@ -436,7 +436,7 @@ namespace exodbc
 		// ensure that we have something in our where clause
 		if (paramNr <= 1)
 		{
-			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to prepare a DELETE statement (probably because flag AF_DELETE_PK is set), but no ColumnBuffers were bound as PrimaryKeys to build a WHERE clause") % m_tableInfo.GetSqlName()));
+			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to prepare a DELETE statement (probably because flag AF_DELETE_PK is set), but no ColumnBuffers were bound as PrimaryKeys to build a WHERE clause") % m_tableInfo.GetQueryName()));
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -455,7 +455,7 @@ namespace exodbc
 		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
 		// Build statement..
-		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetSqlName()).str();
+		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
 		// .. first the values to update
 		// note: parem-number reflects here the number of the param in the created prepared statement, so we
 		// cannot use the values from the ColumnBuffer column index.
@@ -476,7 +476,7 @@ namespace exodbc
 		// ensure that we have something to update
 		if (paramNr <= 1)
 		{	
-			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind update parameters (probably because flag AF_UPDATE_PK is set), but no ColumnBuffers were bound for UPDATing") % m_tableInfo.GetSqlName()));
+			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind update parameters (probably because flag AF_UPDATE_PK is set), but no ColumnBuffers were bound for UPDATing") % m_tableInfo.GetQueryName()));
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -515,7 +515,7 @@ namespace exodbc
 		// note: parem-number reflects here the number of the param in the created prepared statement, so we
 		// cannot use the values from the ColumnBuffer column index.
 		SQLSMALLINT paramNr = 1;
-		std::wstring insertStmt = L"INSERT INTO " + m_tableInfo.GetSqlName() + L" (";
+		std::wstring insertStmt = L"INSERT INTO " + m_tableInfo.GetQueryName() + L" (";
 		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
 		while (it != m_columnBuffers.end())
 		{
@@ -533,7 +533,7 @@ namespace exodbc
 		// ensure that we have something to insert
 		if (paramNr <= 1)
 		{
-			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind insert parameters (probably because flag AF_INSERT is set), but no ColumnBuffers were bound for INSERTing") % m_tableInfo.GetSqlName()));
+			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind insert parameters (probably because flag AF_INSERT is set), but no ColumnBuffers were bound for INSERTing") % m_tableInfo.GetQueryName()));
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -613,11 +613,11 @@ namespace exodbc
 		std::wstring sqlstmt;
 		if ( ! whereStatement.empty())
 		{
-			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") % m_tableInfo.GetSqlName() % whereStatement).str();
+			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereStatement).str();
 		}
 		else
 		{
-			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetSqlName()).str();
+			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
 		}
 
 		SQLRETURN ret = SQLExecDirect(m_hStmtCount, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
@@ -647,11 +647,11 @@ namespace exodbc
 		std::wstring sqlstmt;
 		if (!whereStatement.empty())
 		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s WHERE %s") % m_fieldsStatement % m_tableInfo.GetSqlName() % whereStatement).str();
+			sqlstmt = (boost::wformat(L"SELECT %s FROM %s WHERE %s") % m_fieldsStatement % m_tableInfo.GetQueryName() % whereStatement).str();
 		}
 		else
 		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % m_fieldsStatement % m_tableInfo.GetSqlName()).str();
+			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % m_fieldsStatement % m_tableInfo.GetQueryName()).str();
 		}
 		SelectBySqlStmt(sqlstmt);
 	}
@@ -734,7 +734,7 @@ namespace exodbc
 		exASSERT(m_hStmtDeleteWhere != SQL_NULL_HSTMT);
 		exASSERT(!where.empty());
 
-		wstring sqlstmt = (boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetSqlName() % where).str();
+		wstring sqlstmt = (boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % where).str();
 		exASSERT(sqlstmt.length() < INT_MAX);
 		SQLRETURN ret = SQLExecDirect(m_hStmtDeleteWhere, (SQLWCHAR*)sqlstmt.c_str(), (SQLINTEGER) sqlstmt.length());
 		if (failOnNoData && ret == SQL_NO_DATA)
@@ -767,7 +767,7 @@ namespace exodbc
 		exASSERT(m_hStmtUpdateWhere != SQL_NULL_HSTMT);
 		exASSERT(!where.empty());
 		// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set
-		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetSqlName()).str();
+		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
 		// .. first the values to update
 		// note: parem-number reflects here the number of the param in the created prepared statement, so we
 		// cannot use the values from the ColumnBuffer column index.
@@ -1039,29 +1039,29 @@ namespace exodbc
 			if (((openFlags & TOF_CHECK_EXISTANCE) == TOF_CHECK_EXISTANCE) && !searchedTable)
 			{
 				// Will throw if not one is found
-				std::wstring catalogName = m_tableInfo.m_catalogName;
-				std::wstring typeName = m_tableInfo.m_tableType;
+				std::wstring catalogName = m_tableInfo.GetCatalog();
+				std::wstring typeName = m_tableInfo.GetType();
 				if (m_pDb->GetDbms() == DatabaseProduct::EXCEL)
 				{
 					// workaround for #111
 					catalogName = L"";
 					typeName = L"";
 				}
-				m_pDb->FindOneTable(m_tableInfo.m_tableName, m_tableInfo.m_schemaName, catalogName, typeName);
+				m_pDb->FindOneTable(m_tableInfo.GetPureName(), m_tableInfo.GetSchema(), catalogName, typeName);
 				searchedTable = true;
 			}
 
 			// Set the hints for the Table-Query name depending on the Database
 			// If this is an excel-db, we must search for a table named 'foo$', but query using '[foo$]'. See Ticket #111. Set the corresponding hint on the tableInfo-object
 			// maybe excel also has the full path
-			if (m_pDb->GetDbms() == DatabaseProduct::EXCEL)
-			{
-				m_tableInfo.SetSqlNameHint(TableQueryNameHint::EXCEL);
-			}
-			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
-			{
-				m_tableInfo.SetSqlNameHint(TableQueryNameHint::TABLE_ONLY);
-			}
+			//if (m_pDb->GetDbms() == DatabaseProduct::EXCEL)
+			//{
+			//	m_tableInfo.SetSqlNameHint(TableQueryNameHint::EXCEL);
+			//}
+			//if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			//{
+			//	m_tableInfo.SetSqlNameHint(TableQueryNameHint::TABLE_ONLY);
+			//}
 
 
 			// If we are asked to create our columns automatically, read the column information and create the buffers
@@ -1077,19 +1077,19 @@ namespace exodbc
 					ColumnBuffer* pBuffer = it->second;
 					if (pBuffer->IsColumnFlagSet(CF_SELECT) && !TestAccessFlag(AF_SELECT))
 					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
 					if (pBuffer->IsColumnFlagSet(CF_INSERT) && !TestAccessFlag(AF_INSERT))
 					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
 					if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !TestAccessFlag(AF_UPDATE))
 					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetSqlName()));
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
@@ -1112,7 +1112,7 @@ namespace exodbc
 					|| (TestAccessFlag(AF_DELETE_WHERE) && !m_tablePrivileges.IsSet(TP_DELETE))
 					)
 				{
-					Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s'") % m_tableInfo.GetSqlName()).str());
+					Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s'") % m_tableInfo.GetQueryName()).str());
 					SET_EXCEPTION_SOURCE(ex);
 					throw ex;
 				}
@@ -1174,7 +1174,7 @@ namespace exodbc
 				// And we need to have a primary key
 				if ( (TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK)) && m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
 				{
-					Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetSqlName()).str());
+					Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetQueryName()).str());
 					SET_EXCEPTION_SOURCE(ex);
 					throw ex;
 				}
@@ -1182,7 +1182,7 @@ namespace exodbc
 				// And a Buffer for every primary key
 				if (!m_tablePrimaryKeys.AreAllPrimaryKeysInMap(m_columnBuffers))
 				{
-					Exception ex((boost::wformat(L"Not all primary Keys of table '%s' have a corresponding ColumnBuffer") % m_tableInfo.GetSqlName()).str());
+					Exception ex((boost::wformat(L"Not all primary Keys of table '%s' have a corresponding ColumnBuffer") % m_tableInfo.GetQueryName()).str());
 					SET_EXCEPTION_SOURCE(ex);
 					throw ex;
 				}
@@ -1190,7 +1190,7 @@ namespace exodbc
 				// Test that all primary keys are bound
 				if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
 				{
-					Exception ex((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetSqlName()).str());
+					Exception ex((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetQueryName()).str());
 					SET_EXCEPTION_SOURCE(ex);
 					throw ex;
 				}

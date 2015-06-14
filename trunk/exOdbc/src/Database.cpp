@@ -701,6 +701,8 @@ namespace exodbc
 		std::unique_ptr<SQLWCHAR[]> buffTableName(new SQLWCHAR[m_dbInf.GetMaxTableNameLen()]);
 		std::unique_ptr<SQLWCHAR[]> buffTableType(new SQLWCHAR[DB_MAX_TABLE_TYPE_LEN]);
 		std::unique_ptr<SQLWCHAR[]> buffTableRemarks(new SQLWCHAR[DB_MAX_TABLE_REMARKS_LEN]);
+		bool isCatalogNull = false;
+		bool isSchemaNull = false;
 
 		// Query db
 		SQLRETURN ret = SQLTables(m_hstmt,
@@ -710,33 +712,22 @@ namespace exodbc
 			tableType.empty() ? NULL : (SQLWCHAR*) tableType.c_str(), tableType.empty() ? NULL : SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_hstmt);
 
-		buffCatalog[0] = 0;
-		buffSchema[0] = 0;
-		buffTableName[0] = 0;
-		buffTableType[0] = 0;
-		buffTableRemarks[0] = 0;
-
 		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
-			TableInfo table;
+			buffCatalog[0] = 0;
+			buffSchema[0] = 0;
+			buffTableName[0] = 0;
+			buffTableType[0] = 0;
+			buffTableRemarks[0] = 0;
+
 			SQLLEN cb;
-			GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog.get(), m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isCatalogNull);
-			GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema.get(), m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &table.m_isSchemaNull);
+			GetData(m_hstmt, 1, SQL_C_WCHAR, buffCatalog.get(), m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &isCatalogNull);
+			GetData(m_hstmt, 2, SQL_C_WCHAR, buffSchema.get(), m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &isSchemaNull);
 			GetData(m_hstmt, 3, SQL_C_WCHAR, buffTableName.get(), m_dbInf.GetMaxTableNameLen() * sizeof(SQLWCHAR), &cb, NULL);
 			GetData(m_hstmt, 4, SQL_C_WCHAR, buffTableType.get(), DB_MAX_TABLE_TYPE_LEN * sizeof(SQLWCHAR), &cb, NULL);
 			GetData(m_hstmt, 5, SQL_C_WCHAR, buffTableRemarks.get(), DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLWCHAR), &cb, NULL);
 
-			if (!table.m_isCatalogNull)
-			{
-				table.m_catalogName = buffCatalog.get();
-			}
-			if (!table.m_isSchemaNull)
-			{
-				table.m_schemaName = buffSchema.get();
-			}
-			table.m_tableName = buffTableName.get();
-			table.m_tableType = buffTableType.get();
-			table.m_tableRemarks = buffTableRemarks.get();
+			TableInfo table(buffTableName.get(), buffTableType.get(), buffTableRemarks.get(), buffCatalog.get(), buffSchema.get(), isCatalogNull, isSchemaNull, GetDbms());
 			tables.push_back(table);
 		}
 		THROW_IFN_NO_DATA(SQLFetch, ret);
@@ -754,16 +745,18 @@ namespace exodbc
 		// The catalog name is an ordinary argument. if we do not have one in the
 		// DbCatalogTable, we set it to an empty string
 		std::wstring catalogQueryName = L"";
-		if(!table.m_isCatalogNull)
-			catalogQueryName = table.m_catalogName;
+		if (table.HasCatalog())
+		{
+			catalogQueryName = table.GetCatalog();
+		}
 
 		// Query columns, note:
 		// we always have a tablename, but only sometimes a schema
 		int colCount = 0;
 		SQLRETURN ret = SQLColumns(m_hstmt,
 				(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,	// catalog
-				table.m_isSchemaNull ? NULL : (SQLWCHAR*) table.m_schemaName.c_str(), table.m_isSchemaNull ? NULL : SQL_NTS,	// schema
-				(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS,		// tablename
+				table.HasSchema() ? (SQLWCHAR*) table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : NULL,	// schema
+				(SQLWCHAR*) table.GetPureName().c_str(), SQL_NTS,		// tablename
 				NULL, 0);						// All columns
 
 		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_hstmt);
@@ -801,9 +794,9 @@ namespace exodbc
 		TablePrimaryKeysVector primaryKeys;
 
 		SQLRETURN ret = SQLPrimaryKeys(m_hstmt, 
-			table.m_catalogName.empty() ? NULL : (SQLWCHAR*)table.m_catalogName.c_str(), table.m_catalogName.empty() ? 0 : SQL_NTS,
-			table.m_schemaName.empty() ? NULL : (SQLWCHAR*)table.m_schemaName.c_str(), table.m_schemaName.empty() ? 0 : SQL_NTS,
-			(SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS);
+			table.HasCatalog() ? (SQLWCHAR*)table.GetCatalog().c_str() : NULL, table.HasCatalog() ? SQL_NTS : NULL,
+			table.HasSchema() ? (SQLWCHAR*)table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : NULL,
+			(SQLWCHAR*)table.GetPureName().c_str(), SQL_NTS);
 
 		THROW_IFN_SUCCEEDED(SQLPrimaryKeys, ret, SQL_HANDLE_STMT, m_hstmt);
 
@@ -852,17 +845,17 @@ namespace exodbc
 		// The catalog name is an ordinary argument. if we do not have one in the
 		// DbCatalogTable, we set it to an empty string
 		std::wstring catalogQueryName = L"";
-		if (!table.m_isCatalogNull)
+		if (table.HasCatalog())
 		{
-			catalogQueryName = table.m_catalogName;
+			catalogQueryName = table.GetCatalog();
 		}
 
 		// Query privs
 		// we always have a tablename, but only sometimes a schema
 		SQLRETURN ret = SQLTablePrivileges(m_hstmt,
 			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,
-			table.m_isSchemaNull ? NULL : (SQLWCHAR*) table.m_schemaName.c_str(), table.m_isSchemaNull ? NULL : SQL_NTS,
-			(SQLWCHAR*) table.m_tableName.c_str(), SQL_NTS);
+			table.HasSchema() ? (SQLWCHAR*) table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : NULL,
+			(SQLWCHAR*) table.GetPureName().c_str(), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTablePrivileges, ret, SQL_HANDLE_STMT, m_hstmt);
 
 		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
@@ -912,9 +905,9 @@ namespace exodbc
 		// The catalog name is an ordinary argument. if we do not have one in the
 		// DbCatalogTable, we set it to an empty string
 		std::wstring catalogQueryName = L"";
-		if (!table.m_isCatalogNull)
+		if (table.HasCatalog())
 		{
-			catalogQueryName = table.m_catalogName;
+			catalogQueryName = table.GetCatalog();
 		}
 
 		// Query columns
@@ -922,8 +915,8 @@ namespace exodbc
 		int colCount = 0;
 		SQLRETURN ret = SQLColumns(m_hstmt,
 			(SQLWCHAR*)catalogQueryName.c_str(), SQL_NTS,	// catalog
-			table.m_isSchemaNull ? NULL : (SQLWCHAR*)table.m_schemaName.c_str(), table.m_isSchemaNull ? NULL : SQL_NTS,	// schema
-			(SQLWCHAR*)table.m_tableName.c_str(), SQL_NTS,		// tablename
+			table.HasSchema() ? (SQLWCHAR*)table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : NULL,	// schema
+			(SQLWCHAR*)table.GetPureName().c_str(), SQL_NTS,		// tablename
 			NULL, 0);						// All columns
 
 		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_hstmt);
@@ -981,10 +974,14 @@ namespace exodbc
 		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
 		{
 			const TableInfo& table = *it;
-			if(!table.m_isCatalogNull)
-				dbInf.m_catalogs.insert(table.m_catalogName);
-			if(!table.m_isSchemaNull)
-				dbInf.m_schemas.insert(table.m_schemaName);
+			if (table.HasCatalog())
+			{
+				dbInf.m_catalogs.insert(table.GetCatalog());
+			}
+			if (table.HasSchema())
+			{
+				dbInf.m_schemas.insert(table.GetSchema());
+			}
 		}
 		return dbInf;
 	}

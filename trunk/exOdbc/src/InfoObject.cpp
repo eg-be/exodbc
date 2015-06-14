@@ -27,71 +27,74 @@ using namespace std;
 namespace exodbc
 {
 	TableInfo::TableInfo()
-		: m_isCatalogNull(false)
-		, m_isSchemaNull(false)
-		, m_queryNameHint(TableQueryNameHint::ALL)
+		: m_isCatalogNull(true)
+		, m_isSchemaNull(true)
+		, m_dbms(DatabaseProduct::UNKNOWN)
+	{ }
+
+
+	TableInfo::TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, DatabaseProduct dbms /* = DatabaseProduct::UNKNOWN */)
+		: m_tableName(tableName)
+		, m_tableType(tableType)
+		, m_tableRemarks(tableRemarks)
+		, m_catalogName(catalogName)
+		, m_schemaName(schemaName)
+		, m_dbms(dbms)
+		, m_isCatalogNull(catalogName.empty())
+		, m_isSchemaNull(schemaName.empty())
+	{}
+
+
+	TableInfo::TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms /* = DatabaseProduct::UNKNOWN */)
+		: m_tableName(tableName)
+		, m_tableType(tableType)
+		, m_tableRemarks(tableRemarks)
+		, m_catalogName(catalogName)
+		, m_schemaName(schemaName)
+		, m_dbms(dbms)
+		, m_isCatalogNull(isCatalogNull)
+		, m_isSchemaNull(isSchemaNull)
+	{}
+
+
+	std::wstring TableInfo::GetQueryName() const
 	{
+		exASSERT( ! m_tableName.empty());
 
-	}
-
-
-	std::wstring TableInfo::GetPureTableName() const
-	{
-		exASSERT(!m_tableName.empty());
-		return m_tableName;
-	}
-
-
-	std::wstring TableInfo::GetSqlName() const
-	{
-		exASSERT(!m_tableName.empty());
-
-		bool includeCat = true;
-		bool includeSchem = true;
-		bool includeName = true;
-		switch (m_queryNameHint)
+		switch (m_dbms)
 		{
-		case TableQueryNameHint::ALL:
-			includeCat = true;
-			includeSchem = true;
-			includeName = true;
+		case DatabaseProduct::ACCESS:
+			// For access, return only the pure table name.
+			return m_tableName;
 			break;
-		case TableQueryNameHint::CATALOG_TABLE:
-			includeCat = true;
-			includeSchem = false;
-			includeName = true;
-			break;
-		case TableQueryNameHint::SCHEMA_TABLE:
-			includeCat = false;
-			includeSchem = true;
-			includeName = true;
-			break;
-		case TableQueryNameHint::TABLE_ONLY:
-			includeCat = false;
-			includeSchem = false;
-			includeName = true;
-			break;
-		case TableQueryNameHint::EXCEL:
+		case DatabaseProduct::EXCEL:
+			// For excel, add '[' and ']' around the pure table name.
 			return L"[" + m_tableName + L"]";
+			break;
 		}
 
+		// As default, include everything we have
 		std::wstringstream ws;
-		if (includeCat && HasCatalog())
+		if (HasCatalog())
 		{
 			ws << m_catalogName << L".";
 		}
-		if (includeSchem && HasSchema())
+		if (HasSchema())
 		{
 			ws << m_schemaName << L".";
 		}
-		if (includeName)
-		{
-			ws << m_tableName << L".";
-		}
+		ws << m_tableName;
 
 		std::wstring str = ws.str();
-		boost::erase_last(str, L".");
 		return str;
+	}
+
+
+	std::wstring TableInfo::GetPureName() const
+	{
+		exASSERT(! m_tableName.empty());
+
+		return m_tableName;
 	}
 
 

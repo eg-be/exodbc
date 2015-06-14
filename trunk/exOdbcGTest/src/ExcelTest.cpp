@@ -88,7 +88,7 @@ namespace exodbc
 		TableInfosVector::const_iterator it;
 		for (it = tables.begin(); it != tables.end(); it++)
 		{
-			if (it->m_tableName == L"TestTable$")
+			if (it->GetPureName() == L"TestTable$")
 			{
 				foundTestTableSheet = true;
 			}

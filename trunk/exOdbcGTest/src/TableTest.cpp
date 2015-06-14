@@ -90,8 +90,7 @@ namespace exodbc
 
 		// If we pass in the TableInfo directly we should also be able to "open"
 		// a totally non-sense table:
-		TableInfo neTableInfo;
-		neTableInfo.m_tableName = L"NotExisting";
+		TableInfo neTableInfo(L"NotExisting", L"", L"", L"", L"");
 		Table neTable(&m_db, 2, neTableInfo, AF_READ);
 		SQLINTEGER idNotExisting = 0;
 		neTable.SetColumn(0, L"idNotExistring", &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting));
@@ -377,8 +376,7 @@ namespace exodbc
 		{
 			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
-			TableInfo neTableInfo;
-			neTableInfo.m_tableName = L"NotExisting";
+			TableInfo neTableInfo(L"NotExisting", L"", L"", L"", L"");
 			Table neTable(&m_db, neTableInfo, AF_READ);
 			EXPECT_THROW(neTable.Open(TOF_NONE), Exception);
 		}

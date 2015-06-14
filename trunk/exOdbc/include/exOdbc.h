@@ -467,41 +467,6 @@ namespace exodbc
 //
 
 	///*!
-	// * \struct	STableInfo
-	// * \brief	Description of a table fetched using the catalog function SQLTables
-	// */
-	//struct EXODBCAPI STableInfo
-	//{
-	//public:
-	//	STableInfo();
-
-	//	std::wstring		m_tableName;		///< Name
-	//	std::wstring		m_tableType;        ///< "TABLE" or "SYSTEM TABLE" etc.
-	//	std::wstring		m_tableRemarks;		///< Remarks
-	//	std::wstring		m_catalogName;		///< catalog
-	//	std::wstring		m_schemaName;		///< schema
-	//	bool				m_isCatalogNull;	///< True if m_catalogName is null.
-	//	bool				m_isSchemaNull;		///< True if m_schemaName is null.
-
-	//	bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
-	//	bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
-
-	//	void				SetSqlNameHint(TableQueryNameHint hint) { m_queryNameHint = hint; };
-	//	std::wstring		GetSqlName() const;
-	//	std::wstring		GetPureTableName() const;
-
-	//private:
-	//	TableQueryNameHint	m_queryNameHint;
-	//};
-	
-	///*!
-	//* \typedef TableInfosVector
-	//* \brief std::vector of STableInfo objects.
-	//*/
-	//typedef std::vector<STableInfo> TableInfosVector;
-
-
-	///*!
 	// * \struct	SDbCatalogInfo
 	// * \brief	Description of the catalog of a database
 	// */
