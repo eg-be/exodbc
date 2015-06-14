@@ -101,12 +101,8 @@ namespace exodbc
 				{
 					columnName = columnName.substr(lastDot + 1);
 				}
-				TablePrimaryKeyInfo keyInfo;
 				// use only the pure table-name and the query-name from the column-buffer
-				keyInfo.m_tableName = tableInfo.GetPureName();
-				keyInfo.m_columnName = columnName;
-				keyInfo.m_keySequence = keySequence;
-
+				TablePrimaryKeyInfo keyInfo(tableInfo.GetPureName(), columnName, keySequence);
 				m_pksVector.push_back(keyInfo);
 
 				++keySequence;

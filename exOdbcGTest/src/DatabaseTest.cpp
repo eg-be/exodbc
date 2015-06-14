@@ -535,7 +535,7 @@ namespace exodbc
 		EXPECT_EQ(1, pks.size());
 		if (pks.size() == 1)
 		{
-			EXPECT_EQ(idName, pks[0].m_columnName);
+			EXPECT_EQ(idName, pks[0].GetColumnName());
 		}
 
 		TableInfo mkInfo;
@@ -549,12 +549,12 @@ namespace exodbc
 		EXPECT_EQ(3, pks.size());
 		if (pks.size() == 3)
 		{
-			EXPECT_EQ(mkId1, pks[0].m_columnName);
-			EXPECT_EQ(1, pks[0].m_keySequence);
-			EXPECT_EQ(mkId2, pks[1].m_columnName);
-			EXPECT_EQ(2, pks[1].m_keySequence);
-			EXPECT_EQ(mkId3, pks[2].m_columnName);
-			EXPECT_EQ(3, pks[2].m_keySequence);
+			EXPECT_EQ(mkId1, pks[0].GetColumnName());
+			EXPECT_EQ(1, pks[0].GetKeySequence());
+			EXPECT_EQ(mkId2, pks[1].GetColumnName());
+			EXPECT_EQ(2, pks[1].GetKeySequence());
+			EXPECT_EQ(mkId3, pks[2].GetColumnName());
+			EXPECT_EQ(3, pks[2].GetKeySequence());
 		}
 
 	}
