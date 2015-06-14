@@ -45,6 +45,7 @@
     </ClCompile>
     <ClCompile Include="src\Exception.cpp" />
     <ClCompile Include="src\Helpers.cpp" />
+    <ClCompile Include="src\ObjectName.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v120|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v120|x64'">Create</PrecompiledHeader>

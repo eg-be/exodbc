@@ -93,6 +93,9 @@
     <ClCompile Include="src\Visitors.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ObjectName.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Version.h.template" />
