@@ -32,7 +32,7 @@ namespace exodbc {
 	SDbInfo::SDbInfo()
 	{
 		m_maxConnections = 0;
-		m_maxStmts = 0;
+		m_maxActiveStmts = 0;
 		m_cliConfLvl = 0;
 		m_cursorCommitBehavior = 0;
 		m_cursorRollbackBehavior = 0;

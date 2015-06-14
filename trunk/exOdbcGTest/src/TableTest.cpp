@@ -850,109 +850,53 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectHasMASEnabled)
 	{
-		// Test what happens if we Select from a table 2 records, then select the first record,
-		// then delete the second record
-		// and then try to select the second record using the still open select.
+		// Test if we can have multiple active statements.
+		// For MS SQL Server, this is disabled by default and must be activated manually
+		// It must be activated before opening the database
+
+		// Use our already open database to determine the server type
+		Database db(&m_env);
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			// It is disabled by default on MS and must be enabled before opening the db:
+			EXPECT_FALSE(m_db.IsMarsEnabled());
+			ASSERT_NO_THROW(db.SetMarsEnabled(true));
+		}
+
+		if (m_odbcInfo.HasConnectionString())
+		{
+			db.Open(m_odbcInfo.m_connectionString);
+		}
+		else
+		{
+			db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+		}
+		EXPECT_TRUE(db.IsMarsEnabled());
 
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-
-		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
-		// Do not forget to set the primary keys if this is an Access database
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			iTable.SetColumnPrimaryKeyIndexes({ 0 });
-		}
-		ASSERT_NO_THROW(iTable.Open());
-		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
-		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
-		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
-		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
 
 		// Clear Table
-		ASSERT_NO_THROW(test::ClearTestTable(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db));
+		test::ClearIntTypesTmpTable(db, m_odbcInfo.m_namesCase);
 
-		// Set some silly values to insert
-		*pId = (SQLINTEGER)101;
-		*pInt = (SQLINTEGER)10;
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			// no bigint and short on access
-			*pSmallInt = (SQLINTEGER)1;
-			*pBigInt = (SQLINTEGER)100;
-		}
-		else
-		{
-			*pSmallInt = (SQLSMALLINT)1;
-			*pBigInt = (SQLBIGINT)100;
-		}
-		iTable.Insert();
-		*pId = (SQLINTEGER)102;
-		*pInt = (SQLINTEGER)20;
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			*pSmallInt = (SQLINTEGER)2;
-			*pBigInt = (SQLINTEGER)200;
-		}
-		else
-		{
-			*pSmallInt = (SQLSMALLINT)2;
-			*pBigInt = (SQLBIGINT)200;
-		}
-		iTable.Insert();
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		// Insert some values
+		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, db, 1, 10, 100, 1000);
+		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, db, 2, 20, 200, 2000);
+		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, db, 3, 30, 300, 3000);
 
-		// Now select those two records
-		wstring sqlstmt = (boost::wformat(L"%s = 101 OR %s = 102 ORDER BY %s") % idName %idName %idName).str();
-		ASSERT_NO_THROW(iTable.Select(sqlstmt));
+		// Open one statement, select first record, but more records would be available
+		Table iTable(&db, intTypesTableName, L"", L"", L"", AF_READ);
+		iTable.Open();
+		ASSERT_NO_THROW(iTable.Select());
 		ASSERT_TRUE(iTable.SelectNext());
-		ASSERT_EQ(101, (SQLINTEGER)*pId);
-		ASSERT_EQ(10, (SQLINTEGER)*pInt);
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			ASSERT_EQ(1, (SQLINTEGER)*pSmallInt);
-			ASSERT_EQ(100, (SQLINTEGER)*pBigInt);
-		}
-		else
-		{
-			ASSERT_EQ(1, (SQLSMALLINT)*pSmallInt);
-			ASSERT_EQ(100, (SQLBIGINT)*pBigInt);
-		}
-		//ASSERT_TRUE(iTable.SelectClose());
 
-		// Now delete the second record: We cannot do that if we do not have support for What are Multiple Active Statements (MAS)?
-		// MS SQL Server does not have this enabled by default
-		// See Ticket # 63 and # 75
-		// Also Access is not working here - we get a function sequence error
-		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER || m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			LOG_WARNING(L"This test is known to fail with Microsoft SQL Server 2014 and Microsoft Access (and probably others too), see Ticket #75");
-		}
-		sqlstmt = (boost::wformat(L"%s = 102") % idName).str();
-		ASSERT_NO_THROW(iTable.Delete(sqlstmt));
-		EXPECT_NO_THROW(m_db.CommitTrans());
-
-		// If MAS is enabled, we should be able to still see the result of the just deleted record, even if the result was committed inbetween
-		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(102, (SQLINTEGER)*pId);
-		EXPECT_EQ(20, (SQLINTEGER)*pInt);
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			EXPECT_EQ(2, (SQLINTEGER)*pSmallInt);
-			EXPECT_EQ(200, (SQLINTEGER)*pBigInt);
-		}
-		else
-		{
-			EXPECT_EQ(2, (SQLSMALLINT)*pSmallInt);
-			EXPECT_EQ(200, (SQLBIGINT)*pBigInt);
-		}
-
-		// But if we try to select it again now, we will find only one result
-		iTable.SelectClose();
-		sqlstmt = (boost::wformat(L"%s = 101 OR %s = 102 ORDER BY %s") % idName %idName %idName).str();
-		iTable.Select(sqlstmt);
-		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_FALSE(iTable.SelectNext());
+		// Open another statement, where we also select some record. If MARS is not enabled, we would have 
+		// to close the other result-set first: MS Sql Server fails with a "busy for other result" during Open(),
+		// when it queries the Database to find the table.
+		// While Access just fails on the SelectNext()
+		Table iTable2(&db, intTypesTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable2.Open());
+		EXPECT_NO_THROW(iTable2.Select());
+		EXPECT_TRUE(iTable2.SelectNext());
 	}
 
 

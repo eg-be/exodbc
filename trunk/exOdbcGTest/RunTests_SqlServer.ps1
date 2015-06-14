@@ -8,7 +8,7 @@ param(
 	[string]$Dsn="exSqlServer",
 	[string]$Uid="ex",
 	[string]$Pass="extest",
-	[string]$ConnectionString="Driver={SQL Server Native Client 11.0};Server=192.168.56.20\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;MultipleActiveResultSets=True;",
+	[string]$ConnectionString="Driver={SQL Server Native Client 11.0};Server=192.168.56.20\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;",
 	[string]$LogLevel="--logLevelW",
 	[string]$filterDsn="*-*Excel*",
 	[string]$filterCs="*-*Excel*:*DetectDbms*:*ListDataSources*",
