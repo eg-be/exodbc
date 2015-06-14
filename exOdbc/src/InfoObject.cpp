@@ -383,35 +383,35 @@ namespace exodbc
 	{
 		exASSERT(!m_columnName.empty());
 
-		bool includeTableName = false;
-		bool includeColumnName = true;
+		//bool includeTableName = false;
+		//bool includeColumnName = true;
 
-		//switch (m_queryNameHint)
-		//{
-		//case ColumnQueryNameHint::COLUMN:
-		includeTableName = false;
-		includeColumnName = true;
+		////switch (m_queryNameHint)
+		////{
+		////case ColumnQueryNameHint::COLUMN:
+		//includeTableName = false;
+		//includeColumnName = true;
 		//	break;
 		//case ColumnQueryNameHint::TABLE_COLUMN:
 		//	includeTableName = true;
 		//	includeColumnName = true;
 		//	break;
 		//}
-		std::wstringstream ws;
+		//std::wstringstream ws;
 
-		if (includeTableName)
-		{
-			exASSERT(!m_tableName.empty());
-			ws << m_tableName << L".";
-		}
-		if (includeColumnName)
-		{
-			ws << m_columnName << L".";
-		}
+		//if (includeTableName)
+		//{
+		//	exASSERT(!m_tableName.empty());
+		//	ws << m_tableName << L".";
+		//}
+		//if (includeColumnName)
+		//{
+		//ws << m_columnName << L".";
+		//}
 
-		std::wstring str = ws.str();
-		boost::erase_last(str, L".");
-		return str;
+		//std::wstring str = ws.str();
+		//boost::erase_last(str, L".");
+		return m_columnName;
 	}
 
 
