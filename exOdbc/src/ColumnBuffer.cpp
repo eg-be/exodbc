@@ -44,23 +44,23 @@ namespace exodbc
 		, m_flags(flags)
 		, m_cb(SQL_NULL_DATA)
 	{
-		exASSERT(columnInfo.m_sqlDataType != 0);
+		exASSERT(columnInfo.GetSqlDataType() != 0);
 		exASSERT(m_flags & CF_SELECT);
 
 		// Remember some values from ColumnInfo
 		m_queryName = columnInfo.GetQueryName();
-		if (!columnInfo.m_isColumnSizeNull)
+		if (!columnInfo.IsColumnSizeNull())
 		{
-			m_columnSize = columnInfo.m_columnSize;
+			m_columnSize = columnInfo.GetColumnSize();
 		}
-		if (!columnInfo.m_isDecimalDigitsNull)
+		if (!columnInfo.IsDecimalDigitsNull())
 		{
-			m_decimalDigits = columnInfo.m_decimalDigits;
+			m_decimalDigits = columnInfo.GetDecimalDigits();
 		}
-		m_sqlType = columnInfo.m_sqlType;
+		m_sqlType = columnInfo.GetSqlType();
 
 		// Update our flags with the NULLABLE flag of the passed ColumnInfo.
-		if (columnInfo.m_isNullable == L"YES")
+		if (columnInfo.GetIsNullable() == L"YES")
 		{
 			SetColumnFlag(CF_NULLABLE);
 		}
@@ -472,27 +472,27 @@ namespace exodbc
 
 	SQLINTEGER ColumnBuffer::DetermineCharSize(const ColumnInfo& columnInfo) const
 	{
-		exASSERT(columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
+		exASSERT(columnInfo.GetSqlType() != SQL_UNKNOWN_TYPE);
 
-		switch (columnInfo.m_sqlType)
+		switch (columnInfo.GetSqlType())
 		{
 		case SQL_SMALLINT:
 		case SQL_INTEGER:
 		case SQL_BIGINT:
-			if (columnInfo.m_isColumnSizeNull || columnInfo.m_isNumPrecRadixNull || columnInfo.m_numPrecRadix != 10)
+			if (columnInfo.IsColumnSizeNull() || columnInfo.IsNumPrecRadixNull() || columnInfo.GetNumPrecRadix() != 10)
 			{
 				// just return some silly default value
 				return DB_MAX_BIGINT_CHAR_LENGTH + 1;
 			}
-			if (!columnInfo.m_isDecimalDigitsNull && columnInfo.m_decimalDigits > 0)
+			if (!columnInfo.IsDecimalDigitsNull() && columnInfo.GetDecimalDigits() > 0)
 			{
 				// +3: 1 for '.' and one for trailing zero and one for a '-'
-				return columnInfo.m_columnSize + 3; 
+				return columnInfo.GetColumnSize() + 3; 
 			}
 			else
 			{
 				// +2: one for trailing zero and one for '-'
-				return columnInfo.m_columnSize + 2;
+				return columnInfo.GetColumnSize() + 2;
 			}
 		case SQL_CHAR:
 		case SQL_WCHAR:
@@ -500,14 +500,14 @@ namespace exodbc
 		case SQL_WVARCHAR:
 			// TODO: We could also calculate using the char_octet_length. Maybe this would be cleaner - some dbs
 			// report higher values there than we calculate (like sizeof(SQLWCHAR) would be 3)
-			return columnInfo.m_columnSize + 1;
+			return columnInfo.GetColumnSize() + 1;
 		case SQL_DOUBLE:
 		case SQL_FLOAT:
 		case SQL_REAL:
-			if (!columnInfo.m_isNumPrecRadixNull && columnInfo.m_numPrecRadix == 10)
+			if (!columnInfo.IsNumPrecRadixNull() && columnInfo.GetNumPrecRadix() == 10)
 			{
 				// +3: 1 for '.' and one for trailing zero and one for a '-'
-				return columnInfo.m_columnSize + 3;
+				return columnInfo.GetColumnSize() + 3;
 			}
 			else
 			{
@@ -520,11 +520,11 @@ namespace exodbc
 #if HAVE_MSODBCSQL_H
 		case SQL_SS_TIME2:
 #endif
-			exASSERT(!columnInfo.m_isColumnSizeNull);
-			return columnInfo.m_columnSize + 1;
+			exASSERT(!columnInfo.IsColumnSizeNull());
+			return columnInfo.GetColumnSize() + 1;
 		}
 
-		NotSupportedException nse(NotSupportedException::Type::SQL_TYPE, columnInfo.m_sqlType);
+		NotSupportedException nse(NotSupportedException::Type::SQL_TYPE, columnInfo.GetSqlType());
 		SET_EXCEPTION_SOURCE(nse);
 		throw nse;
 
@@ -534,7 +534,7 @@ namespace exodbc
 	SQLINTEGER ColumnBuffer::DetermineBufferSize(const ColumnInfo& columnInfo) const
 	{
 		exASSERT(m_bufferType != 0);
-		exASSERT(columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);
+		exASSERT(columnInfo.GetSqlDataType() != SQL_UNKNOWN_TYPE);
 
 		// if the determined buffer type is a simple type its just sizeof
 		switch (m_bufferType)
@@ -567,8 +567,8 @@ namespace exodbc
 			break;
 #endif
 		case SQL_C_BINARY:
-			exASSERT(!columnInfo.m_isColumnSizeNull);
-			return columnInfo.m_columnSize * sizeof(SQLCHAR);
+			exASSERT(!columnInfo.IsColumnSizeNull());
+			return columnInfo.GetColumnSize() * sizeof(SQLCHAR);
 		case SQL_C_NUMERIC:
 			return sizeof(SQL_NUMERIC_STRUCT);
 		}

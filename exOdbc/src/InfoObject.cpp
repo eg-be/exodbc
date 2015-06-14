@@ -123,12 +123,49 @@ namespace exodbc
 		, m_isNumPrecRadixNull(false)
 		, m_isRemarksNull(false)
 		, m_isDefaultValueNull(false)
-		, m_isDatetimeSubNull(false)
+		, m_isSqlDatetimeSubNull(false)
 		, m_isCharOctetLengthNull(false)
 		, m_isIsNullableNull(false)
 		//		, m_queryNameHint(ColumnQueryNameHint::COLUMN)
 	{ }
 
+
+	ColumnInfo::ColumnInfo(const std::wstring& catalogName, const std::wstring& schemaName, const std::wstring& tableName, const std::wstring& columnName, SQLSMALLINT sqlType, 
+		const std::wstring& typeName, SQLINTEGER columnSize, SQLINTEGER bufferSize, SQLSMALLINT decimalDigits, SQLSMALLINT numPrecRadix, SQLSMALLINT nullable, 
+		const std::wstring& remarks, const std::wstring& defaultValue, SQLSMALLINT sqlDataType, SQLSMALLINT sqlDatetimeSub, SQLINTEGER charOctetLength, SQLINTEGER ordinalPosition, 
+		const std::wstring& isNullable, bool isCatalogNull, bool isSchemaNull, bool isColumnSizeNull, bool isBufferSizeNull, bool isDecimalDigitsNull, bool isNumPrecRadixNull, 
+		bool isRemarksNull, bool isDefaultValueNull, bool isSqlDatetimeSubNull, bool isIsNullableNull)
+		: m_catalogName(catalogName)
+		, m_schemaName(schemaName)
+		, m_tableName(tableName)
+		, m_columnName(columnName)
+		, m_sqlType(sqlType)
+		, m_typeName(typeName)
+		, m_columnSize(columnSize)
+		, m_bufferSize(bufferSize)
+		, m_decimalDigits(decimalDigits)
+		, m_numPrecRadix(numPrecRadix)
+		, m_nullable(nullable)
+		, m_remarks(remarks)
+		, m_defaultValue(defaultValue)
+		, m_sqlDataType(sqlDataType)
+		, m_sqlDatetimeSub(sqlDatetimeSub)
+		, m_charOctetLength(charOctetLength)
+		, m_ordinalPosition(ordinalPosition)
+		, m_isNullable(isNullable)
+		, m_isCatalogNull(isCatalogNull)
+		, m_isSchemaNull(isSchemaNull)
+		, m_isColumnSizeNull(isColumnSizeNull)
+		, m_isBufferSizeNull(isBufferSizeNull)
+		, m_isDecimalDigitsNull(isDecimalDigitsNull)
+		, m_isNumPrecRadixNull(isNumPrecRadixNull)
+		, m_isRemarksNull(isRemarksNull)
+		, m_isDefaultValueNull(isDefaultValueNull)
+		, m_isSqlDatetimeSubNull(isSqlDatetimeSubNull)
+		, m_isIsNullableNull(isIsNullableNull)
+	{
+
+	}
 
 	std::wstring ColumnInfo::GetQueryName() const
 	{

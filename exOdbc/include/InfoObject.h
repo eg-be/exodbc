@@ -75,18 +75,59 @@ namespace exodbc
 	* \class	ColumnInfo
 	* \brief	Information about a column fetched using the catalog function SQLColumns.
 	* \see: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
+	*
+	* \todo another variant for the manually constructed columns? Then use that in the ColumnBuffer constructor.
 	*/
 	class EXODBCAPI ColumnInfo
 		: public ObjectName
 	{
 	public:
 		ColumnInfo();
+		ColumnInfo(const std::wstring& catalogName, const std::wstring& schemaName, const std::wstring& tableName, const std::wstring& columnName,
+			SQLSMALLINT sqlType, const std::wstring& typeName, SQLINTEGER columnSize, SQLINTEGER bufferSize, SQLSMALLINT decimalDigits, SQLSMALLINT numPrecRadix,
+			SQLSMALLINT nullable, const std::wstring& remarks, const std::wstring& defaultValue, SQLSMALLINT sqlDataType, SQLSMALLINT sqlDatetimeSub,
+			SQLINTEGER charOctetLength, SQLINTEGER ordinalPosition, const std::wstring& isNullable, bool isCatalogNull, bool isSchemaNull, bool isColumnSizeNull,
+			bool isBufferSizeNull, bool isDecimalDigitsNull, bool isNumPrecRadixNull, bool isRemarksNull, bool isDefaultValueNull, bool isSqlDatetimeSubNull,
+			bool isIsNullableNull);
 
 		virtual std::wstring GetQueryName() const;
 		virtual std::wstring GetPureName() const;
 
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
+
+		std::wstring	GetCatalogName() const { exASSERT(!IsCatalogNull());  return m_catalogName; };
+		std::wstring	GetSchemaName() const { exASSERT(!IsSchemaNull()); return m_schemaName; };
+		std::wstring	GetTableName() const { return m_tableName; };
+		std::wstring	GetColumnName() const { return m_columnName; };
+		SQLSMALLINT		GetSqlType() const { return m_sqlType; };
+		std::wstring	GetTypeName() const { return m_typeName; };
+		SQLINTEGER		GetColumnSize() const { exASSERT(!IsColumnSizeNull()); return m_columnSize; };
+		SQLINTEGER		GetBufferSize() const { exASSERT(!IsBufferSizeNull()); return m_bufferSize; };
+		SQLSMALLINT		GetDecimalDigits() const { exASSERT(!IsDecimalDigitsNull()); return m_decimalDigits; };
+		SQLSMALLINT		GetNumPrecRadix() const { exASSERT(!IsNumPrecRadixNull()); return m_numPrecRadix; };
+		SQLSMALLINT		GetNullable() const { return m_nullable; };
+		std::wstring	GetRemarks() const { exASSERT(!IsRemarksNull()); return m_remarks; };
+		std::wstring	GetDefaultValue() const { exASSERT(!IsDefaultValueNull()); return m_defaultValue; };
+		SQLSMALLINT		GetSqlDataType() const { return m_sqlDataType; };
+		SQLSMALLINT		GetSqlDatetimeSub() const { exASSERT(!IsSqlDatetimeSubNull()); return m_sqlDatetimeSub; };
+		SQLINTEGER		GetCharOctetLength() const { exASSERT(!IsCharOctetLengthNull()); return m_charOctetLength; };
+		SQLINTEGER		GetOrdinalPosition() const { return m_ordinalPosition; };
+		std::wstring	GetIsNullable() const { return m_isNullable; };
+
+		bool			IsCatalogNull() const { return m_isCatalogNull; };
+		bool			IsSchemaNull() const { return m_isSchemaNull; };
+		bool			IsColumnSizeNull() const { return m_isColumnSizeNull; };
+		bool			IsBufferSizeNull() const { return m_isBufferSizeNull; };
+		bool			IsDecimalDigitsNull() const { return m_isDecimalDigitsNull; };
+		bool			IsNumPrecRadixNull() const { return m_isNumPrecRadixNull; };
+		bool			IsRemarksNull() const { return m_isRemarksNull; };
+		bool			IsDefaultValueNull() const { return m_isDefaultValueNull; };
+		bool			IsSqlDatetimeSubNull() const { return m_isSqlDatetimeSubNull; };
+		bool			IsCharOctetLengthNull() const { return m_isCharOctetLengthNull; };
+		bool			IsIsNullableNull() const { return m_isIsNullableNull; };
+		
+	private:
 
 		std::wstring	m_catalogName;		///< [NULLABLE] Catalog name
 		std::wstring	m_schemaName;		///< [NULLABLE] Schema name
@@ -115,7 +156,7 @@ namespace exodbc
 		bool			m_isNumPrecRadixNull;		///< See ColumnInfo::m_numPrecRadix
 		bool			m_isRemarksNull;			///< See ColumnInfo::m_remarks
 		bool			m_isDefaultValueNull;		///< See ColumnInfo::m_defaultValue
-		bool			m_isDatetimeSubNull;		///< See ColumnInfo::m_sqlDatetimeSub
+		bool			m_isSqlDatetimeSubNull;		///< See ColumnInfo::m_sqlDatetimeSub
 		bool			m_isCharOctetLengthNull;	///< See ColumnInfo::m_charOctetLength
 		bool			m_isIsNullableNull;			///< See ColumnInfo::isNullable
 

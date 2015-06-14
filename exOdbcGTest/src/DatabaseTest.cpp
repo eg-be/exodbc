@@ -605,12 +605,12 @@ namespace exodbc
 			// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
 			ASSERT_TRUE(cols.size() == 4);
 			ColumnInfo col = cols[2];
-			EXPECT_FALSE(col.m_isNumPrecRadixNull);
-			EXPECT_FALSE(col.m_isColumnSizeNull);
-			EXPECT_FALSE(col.m_isDecimalDigitsNull);
-			EXPECT_EQ(10, col.m_numPrecRadix);
-			EXPECT_EQ(18, col.m_columnSize);
-			EXPECT_EQ(10, col.m_decimalDigits);
+			EXPECT_FALSE(col.IsNumPrecRadixNull());
+			EXPECT_FALSE(col.IsColumnSizeNull());
+			EXPECT_FALSE(col.IsDecimalDigitsNull());
+			EXPECT_EQ(10, col.GetNumPrecRadix());
+			EXPECT_EQ(18, col.GetColumnSize());
+			EXPECT_EQ(10, col.GetDecimalDigits());
 		}
 	}
 
