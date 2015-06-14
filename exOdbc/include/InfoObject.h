@@ -72,6 +72,28 @@ namespace exodbc
 
 
 	/*!
+	* \class	ManualColumnInfo
+	* \brief	Information about a column defined manually and buffer allocated manually.
+	*			We do not store anything that is related to the manually allocated buffer
+	*			in here, we would not know when this gets deleted.
+	*/
+	class EXODBCAPI ManualColumnInfo
+		: public ObjectName
+	{
+	public:
+		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName)
+			: m_sqlType(sqlType)
+			, m_queryName(queryName)
+		{};
+
+	private:
+		SQLSMALLINT m_sqlType;
+		std::wstring m_queryName;
+
+	};
+
+
+	/*!
 	* \class	ColumnInfo
 	* \brief	Information about a column fetched using the catalog function SQLColumns.
 	* \see: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
