@@ -183,16 +183,28 @@ namespace exodbc
 		: public ObjectName
 	{
 	public:
-		TablePrimaryKeyInfo()
-			: m_keySequence(0)
-			, m_isPrimaryKeyNameNull(true)
-			, m_isCatalogNull(true)
-			, m_isSchemaNull(true)
-		{};
+		TablePrimaryKeyInfo();
+		TablePrimaryKeyInfo(const std::wstring& tableName, const std::wstring& columnName, SQLSMALLINT keySequence);
+		TablePrimaryKeyInfo(const std::wstring& catalogName, const std::wstring& schemaName, const std::wstring& tableName, const std::wstring& columnName,
+			SQLSMALLINT keySequence, const std::wstring& keyName, bool isCatalogNull, bool isSchemaNull, bool isPrimaryKeyNameNull);
 
 		virtual std::wstring GetQueryName() const;
 		virtual std::wstring GetPureName() const;
 
+		std::wstring GetCatalogName() const { exASSERT(!IsCatalogNull()); return m_catalogName; };
+		std::wstring GetSchemaName() const { exASSERT(!IsSchemaNull()); return m_schemaName; };
+		std::wstring GetTableName() const { return m_tableName; };
+		std::wstring GetColumnName() const { return m_columnName; };
+
+		SQLSMALLINT GetKeySequence() const { return m_keySequence; };
+
+		std::wstring GetKeyName() const { exASSERT(!IsKeyNameNull()); return m_primaryKeyName; };
+
+		bool IsCatalogNull() const { return m_isCatalogNull; };
+		bool IsSchemaNull() const { return m_isSchemaNull; };
+		bool IsKeyNameNull() const { return m_isPrimaryKeyNameNull; };
+
+	private:
 		std::wstring	m_catalogName;	///< TABLE_CAT [Nullable]. Primary key table catalog name.
 		std::wstring	m_schemaName;	///< TABLE_SCHEM [Nullable]. Primary key table schema name.
 		std::wstring	m_tableName;	///< TABLE_NAME. Primary key table name.
@@ -204,8 +216,6 @@ namespace exodbc
 		bool			m_isCatalogNull;		///< True if TABLE_CAT is Null.
 		bool			m_isSchemaNull;			///< True if TABLE_SCHEM is Null.
 		bool			m_isPrimaryKeyNameNull;	///< True if PK_NAME is Null.
-
-//		std::wstring GetSqlName(QueryNameFlags flags = QNF_TABLE | QNF_COLUMN) const;
 	};
 
 

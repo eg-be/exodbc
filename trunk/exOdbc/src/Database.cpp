@@ -805,14 +805,16 @@ namespace exodbc
 		while ((ret = SQLFetch(m_hstmt)) == SQL_SUCCESS)
 		{
 			SQLLEN cb;
-			TablePrimaryKeyInfo pk;
-			GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), pk.m_catalogName, &pk.m_isCatalogNull);
-			GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), pk.m_schemaName, &pk.m_isSchemaNull);
-			GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), pk.m_tableName);
-			GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), pk.m_columnName);
-			GetData(m_hstmt, 5, SQL_C_SHORT, &pk.m_keySequence, sizeof(pk.m_keySequence), &cb, NULL);
-			GetData(m_hstmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, pk.m_primaryKeyName, &pk.m_isPrimaryKeyNameNull);
-
+			std::wstring catalogName, schemaName, tableName, columnName, keyName;
+			bool isCatalogNull, isSchemaNull, isKeyNameNull;
+			SQLSMALLINT keySequence;
+			GetData(m_hstmt, 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
+			GetData(m_hstmt, 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
+			GetData(m_hstmt, 3, m_dbInf.GetMaxTableNameLen(), tableName);
+			GetData(m_hstmt, 4, m_dbInf.GetMaxColumnNameLen(), columnName);
+			GetData(m_hstmt, 5, SQL_C_SHORT, &keySequence, sizeof(keySequence), &cb, NULL);
+			GetData(m_hstmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, keyName, &isKeyNameNull);
+			TablePrimaryKeyInfo pk(catalogName, schemaName, tableName, columnName, keySequence, keyName, isCatalogNull, isSchemaNull, isKeyNameNull);
 			primaryKeys.push_back(pk);
 		}
 		THROW_IFN_NO_DATA(SQLFetch, ret);
