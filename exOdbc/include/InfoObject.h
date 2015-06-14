@@ -159,13 +159,6 @@ namespace exodbc
 		bool			m_isSqlDatetimeSubNull;		///< See ColumnInfo::m_sqlDatetimeSub
 		bool			m_isCharOctetLengthNull;	///< See ColumnInfo::m_charOctetLength
 		bool			m_isIsNullableNull;			///< See ColumnInfo::isNullable
-
-		//		void		SetSqlNameHint(ColumnQueryNameHint hint) { m_queryNameHint = hint; };
-		//std::wstring		GetSqlName() const;
-		//std::wstring GetPureColumnName() const;
-
-	private:
-		//		ColumnQueryNameHint m_queryNameHint;
 	};
 
 	/*!
@@ -217,7 +210,6 @@ namespace exodbc
 		bool			m_isSchemaNull;			///< True if TABLE_SCHEM is Null.
 		bool			m_isPrimaryKeyNameNull;	///< True if PK_NAME is Null.
 	};
-
 
 	/*!
 	* \typedef TablePrimaryKeysVector

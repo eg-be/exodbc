@@ -126,7 +126,6 @@ namespace exodbc
 		, m_isSqlDatetimeSubNull(false)
 		, m_isCharOctetLengthNull(false)
 		, m_isIsNullableNull(false)
-		//		, m_queryNameHint(ColumnQueryNameHint::COLUMN)
 	{ }
 
 
