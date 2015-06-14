@@ -309,7 +309,7 @@ namespace exodbc
 			int bufferIndex = 0;
 			for (int columnIndex = 0; columnIndex < (SQLSMALLINT)columns.size(); columnIndex++)
 			{
-				SColumnInfo colInfo = columns[columnIndex];
+				ColumnInfo colInfo = columns[columnIndex];
 				try
 				{
 					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, columnFlags);

@@ -30,7 +30,7 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	ColumnBuffer::ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags /* = CF_SELECT */)
+	ColumnBuffer::ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags /* = CF_SELECT */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(false)
 		, m_autoBindingMode(mode)
@@ -47,7 +47,7 @@ namespace exodbc
 		exASSERT(columnInfo.m_sqlDataType != 0);
 		exASSERT(m_flags & CF_SELECT);
 
-		// Remember some values from SColumnInfo
+		// Remember some values from ColumnInfo
 		m_queryName = columnInfo.GetSqlName();
 		if (!columnInfo.m_isColumnSizeNull)
 		{
@@ -470,7 +470,7 @@ namespace exodbc
 	}
 
 
-	SQLINTEGER ColumnBuffer::DetermineCharSize(const SColumnInfo& columnInfo) const
+	SQLINTEGER ColumnBuffer::DetermineCharSize(const ColumnInfo& columnInfo) const
 	{
 		exASSERT(columnInfo.m_sqlType != SQL_UNKNOWN_TYPE);
 
@@ -531,7 +531,7 @@ namespace exodbc
 	}
 
 
-	SQLINTEGER ColumnBuffer::DetermineBufferSize(const SColumnInfo& columnInfo) const
+	SQLINTEGER ColumnBuffer::DetermineBufferSize(const ColumnInfo& columnInfo) const
 	{
 		exASSERT(m_bufferType != 0);
 		exASSERT(columnInfo.m_sqlDataType != SQL_UNKNOWN_TYPE);

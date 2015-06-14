@@ -115,14 +115,14 @@ namespace exodbc
 	* \brief Provides the buffer to transfer data from a column of a record.
 	*
 	* A ColumnBuffer can allocate a corresponding buffer-type automatically
-	* by reading the SQL-type info from the passed SColumnInfo, or use a
+	* by reading the SQL-type info from the passed ColumnInfo, or use a
 	* buffer provided during construction. In that case you must also pass the
 	* ODBC C-Type of the buffer and the query name of the corresponding column.
 	*
 	* There is an option to try to let the ODBC-driver to convert everything
 	* to a (w)string, see AutoBindingMode.
 	*
-	* If the buffer-information is read from the passed SColumnInfo, the ColumnBuffer will
+	* If the buffer-information is read from the passed ColumnInfo, the ColumnBuffer will
 	* allocate a buffer type depending on the value of the SqlDataType. The following is
 	* a list of all supported SQL-Types and the buffer-type created:
 	*
@@ -162,9 +162,9 @@ namespace exodbc
 	public:
 		/*!
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
-		*			using the data type information from the passed SColumnInfo.
+		*			using the data type information from the passed ColumnInfo.
 		* \details	The constructor will try to allocate a corresponding buffer.
-		*			Note: The constructor will examine SColumnInfo::m_isNullable and set the corresponding
+		*			Note: The constructor will examine ColumnInfo::m_isNullable and set the corresponding
 		*			ColumnFlags, overriding an eventually set value in the passed flags.
 		*			The ColumnBuffer will be set to SQL_NULL_DATA.
 		* \param columnInfo	The Information about the column we bind.
@@ -176,7 +176,7 @@ namespace exodbc
 		* \see	Bind()
 		* \throw Exception If creating a corresponding buffer fails.
 		*/
-		ColumnBuffer(const SColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT);
+		ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT);
 
 
 		/*!
@@ -600,22 +600,22 @@ namespace exodbc
 		* \return	Size of buffer for type given by m_bufferType.
 		* \throw	NotSupportedException If m_bufferType has not supported value.
 		*/
-		SQLINTEGER DetermineBufferSize(const SColumnInfo& columnInfo) const;
+		SQLINTEGER DetermineBufferSize(const ColumnInfo& columnInfo) const;
 
 
 		/*!
 		* \brief	Tries to determine the size needed in chars if this ColumnBuffer is bound to a
-		*			char-type plus the terminating 0 char. Uses the passed SColumnInfo.
+		*			char-type plus the terminating 0 char. Uses the passed ColumnInfo.
 		* \details Evaluates NUM_PREC_RADIX, COLUMN_SIZE and DECIMAL_DIGITS to determine the number
 		*			of chars needed to store numeric-types.
 		*			For date time types it uses ColumnSize.
 		*			For char-sizes it is the column-size.
 		*			For every type +1 is added for the terminating 0 char.
 		* \see		http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
-		* \return	Needed buffer size according to SQL type from SColumnInfo.
-		* \throw	NotSupportedException if the SQL Type from SColumnInfo is not supported.
+		* \return	Needed buffer size according to SQL type from ColumnInfo.
+		* \throw	NotSupportedException if the SQL Type from ColumnInfo is not supported.
 		*/
-		SQLINTEGER DetermineCharSize(const SColumnInfo& columnInfo) const;
+		SQLINTEGER DetermineCharSize(const ColumnInfo& columnInfo) const;
 
 
 		/*!
@@ -623,7 +623,7 @@ namespace exodbc
 		* \details This is used internally if no buffer-size and buffer is given and the buffer must
 		*			thus be allocated automatically.
 		*			See ColumnBuffer description for what SQL type is mapped to what buffer.
-		* \return	Needed buffer size according to SQL type form SColumnInfo
+		* \return	Needed buffer size according to SQL type form ColumnInfo
 		* \throw	NotSupportedException If SQL Type is not implemented.
 		*/
 		SQLSMALLINT DetermineBufferType(SQLSMALLINT sqlType) const;
@@ -631,7 +631,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Get the allocated buffer as a void*.
-		* \details Determines the type using the SColumnInfo and gets the pointer from the variant.
+		* \details Determines the type using the ColumnInfo and gets the pointer from the variant.
 		*			Fails if no buffer is allocated.
 		* \return	void* to the current buffer.
 		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
@@ -686,11 +686,11 @@ namespace exodbc
 		SQL_NUMERIC_STRUCT*		GetNumericPtr() const;
 
 		ColumnFlags				m_flags;				///< Flags, set during construction.
-		SQLINTEGER				m_columnSize;			///< Column Size, either read from SColumnInfo during construction or set manually. -1 indicates unknown.
-		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from SColumnInfo during construction or set manually. -1 indicates unkonwn.
+		SQLINTEGER				m_columnSize;			///< Column Size, either read from ColumnInfo during construction or set manually. -1 indicates unknown.
+		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from ColumnInfo during construction or set manually. -1 indicates unkonwn.
 		std::wstring			m_queryName;			///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
 		SQLUSMALLINT			m_columnNr;				///< Column number used during Bind(). Set to 0 during construction.
-		SQLSMALLINT				m_sqlType;				///< The SQL Type of the Column, like SQL_SMALLINT. Either set on construction or read from SColumnInfo::m_sqlType.
+		SQLSMALLINT				m_sqlType;				///< The SQL Type of the Column, like SQL_SMALLINT. Either set on construction or read from ColumnInfo::m_sqlType.
 		bool					m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
 		bool					m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
 		SQLSMALLINT				m_bufferType;			///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
