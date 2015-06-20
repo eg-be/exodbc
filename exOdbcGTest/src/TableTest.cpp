@@ -3420,6 +3420,19 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, GetColumnBufferIndex)
+	{
+		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT);
+		ASSERT_NO_THROW(iTable.Open());
+
+		EXPECT_EQ(0, iTable.GetColumnBufferIndex(L"idintegertypes", false));
+		EXPECT_EQ(1, iTable.GetColumnBufferIndex(L"tsmallint", false));
+		EXPECT_EQ(2, iTable.GetColumnBufferIndex(L"tint", false));
+		EXPECT_EQ(3, iTable.GetColumnBufferIndex(L"tbigint", false));
+	}
+
+
 // Interfaces
 // ----------
 

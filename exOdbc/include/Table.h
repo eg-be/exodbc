@@ -782,6 +782,15 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Searches the internal map of ColumnBuffers for a Buffer matching the
+		*			passed QueryName.
+		* \param	caseSensitive 
+		* \throw	NotFoundException If no such ColumnBuffer is found.
+		*/
+		SQLSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
+
+
+		/*!
 		* \brief	Returns the number of columns this table has.
 		* \details	If columns were set manually on the table, this is the value that has been 
 		*			passed as the total number of columns of the table. It must not be equal
