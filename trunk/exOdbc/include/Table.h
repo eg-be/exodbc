@@ -236,15 +236,18 @@ namespace exodbc
 		*			as else the Table is required to query the database anyway (and fails if not found).
 		*  - TOF_SKIP_UNSUPPORTED_COLUMNS:
 		*			If set, Columns for which no ColumnBuffer can be created are skipped. If not set an
-		*			Exception is thrown in that case.\n
+		*			Exception is thrown if creation of a ColumnBuffer fails (default).\n
 		*			If Columns are created automatically, the Database might report a SQL type that is not
-		*			supported. Set this flag to simply skip such columns.\n
+		*			implemented (No mapping of SQL-Type o SQL-C-Type). Set this flag to simply skip such columns.\n
 		*			If Columns have been set manually, Columns might have been defined using a SQL Type that
-		*			is not reported as supported from the Database. Set this flag to siimply skip such
-		*			columns.\n
-		*			The indexes of the bound ColumnBuffers will still match the indexes of the actual table,
-		*			but some ColumnBuffers will not be created. This will lead to an  IllegalArgumentException if
-		*			you try to access them using any of the functions that take a columnIndex as argument.
+		*			is not reported as supported from the Database. Set this flag to simply skip such
+		*			columns. See also TOF_IGNORE_DB_TYPE_INFOS.\n
+		*			If ColumnBuffers are skipped, the indexes of the bound ColumnBuffers will still match the 
+		*			indexes of the actual table, but there are gaps in the key-sequence of the ColumnBuffer map.
+		*  - TOF_IGNORE_DB_TYPE_INFOS:
+		*			If set, the SQL Types of manually defined columns are not validated against the supported
+		*			types reported by the Database. If this flag is set, the flag TOF_SKIP_UNSUPPORTED_COLUMNS
+		*			does nothing for manually defined columns.
 		*  - TOF_CHAR_TRIM_LEFT:
 		*			If set, values retrieved using GetStringValue(SQLSMALLINT columnIndex)
 		*			or GetWStringValue(SQLSMALLINT columnIndex) are trimmed on the left

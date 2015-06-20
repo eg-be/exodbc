@@ -232,11 +232,12 @@ namespace exodbc
 	{
 		TOF_NONE = 0x0,				///< No special flags are set.
 		TOF_CHECK_EXISTANCE = 0x1,	///< Always check that a table identified by the STableInfo exists.
-		TOF_CHECK_PRIVILEGES = 0x2,	///< Check that we have sufficient privileges to open the table for the given AccessFlags
-		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	///< If AutoBinding is active, skip creation of ColumnBuffers for Columns with an unsupported SQL Type. Default is to fail on unsupported columns.
-		TOF_CHAR_TRIM_RIGHT = 0x8,	///< If set, string/wstring values accessed through this table are trimmed on the right before being returned as string/string
-		TOF_CHAR_TRIM_LEFT = 0x10,	///< If set, string/wstring values accessed through this table are trimmed on the left before being returned as string/string
-		TOF_DO_NOT_QUERY_PRIMARY_KEYS = 0x20, ///< If set, primary keys are not queried from the Database but it is assumed that you have set them using SetColumn().
+		TOF_CHECK_PRIVILEGES = 0x2,	///< Check that we have sufficient privileges to open the table for the given AccessFlags.
+		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	///< Skip unsupported Columns.
+		TOF_CHAR_TRIM_RIGHT = 0x8,	///< If set, string/wstring values accessed through this table are trimmed on the right before being returned as string/string.
+		TOF_CHAR_TRIM_LEFT = 0x10,	///< If set, string/wstring values accessed through this table are trimmed on the left before being returned as string/string.
+		TOF_DO_NOT_QUERY_PRIMARY_KEYS = 0x20, ///< If set, primary keys are not queried from the Database during Open().
+		TOF_IGNORE_DB_TYPE_INFOS = 0x40 ///< If set, the SQL Type info from the Databas is not used to valide the given Columns SQL Data type.
 	};
 
 	/*!
