@@ -91,7 +91,7 @@ namespace exodbc
 				FreeConnectionHandle();
 			}
 		}
-		catch (Exception ex)
+		catch (Exception& ex)
 		{
 			LOG_ERROR(ex.ToString());
 		}
@@ -1150,8 +1150,9 @@ namespace exodbc
 					ov = OdbcVersion::V_2;
 				}
 			}
-			catch (boost::bad_lexical_cast e)
+			catch (boost::bad_lexical_cast& e)
 			{
+				HIDE_UNUSED(e);
 				THROW_WITH_SOURCE(Exception, (boost::wformat(L"Failed to determine odbc version from string '%s'") % m_dbInf.m_odbcVer).str());
 			}
 		}

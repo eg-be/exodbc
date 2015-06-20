@@ -76,45 +76,6 @@ namespace exodbc
 	}
 
 
-	//std::string Exception::ToUtf8Str(const std::wstring& s) const throw()
-	//{
-	//	try
-	//	{
-	//		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	//		std::string narrow = converter.to_bytes(m_msg);
-	//		return narrow.c_str();
-	//	}
-	//	catch (std::exception e)
-	//	{
-	//		return e.what();
-	//	}
-	//}
-
-
-	//std::wstring Exception::ToUtf16Str(const std::string& s) const throw()
-	//{
-	//	try
-	//	{
-	//		std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	//		std::wstring wide = converter.from_bytes(s);
-	//		return wide;
-	//	}
-	//	catch (std::exception e)
-	//	{
-	//		try
-	//		{
-	//			std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-	//			std::wstring wide = converter.from_bytes(e.what());
-	//			return wide;
-	//		}
-	//		catch (std::exception e)
-	//		{
-	//			return L"Failed to Convert Exception-Message to wide-string";
-	//		}
-	//	}
-	//}
-
-
 	std::wstring AssertionException::ToString() const throw()
 	{
 		std::wstringstream ws;

@@ -62,7 +62,7 @@ namespace exodbc
 				FreeEnvironmentHandle();
 			}
 		}
-		catch (Exception ex)
+		catch (Exception& ex)
 		{
 			LOG_ERROR(ex.ToString());
 		}

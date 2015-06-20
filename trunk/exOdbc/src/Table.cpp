@@ -162,7 +162,7 @@ namespace exodbc
 			exASSERT(m_numCols == 0);
 			exASSERT(m_columnBuffers.size() == 0);
 		}
-		catch (Exception ex)
+		catch (Exception& ex)
 		{
 			LOG_ERROR(ex.ToString());
 		}
@@ -316,7 +316,7 @@ namespace exodbc
 					m_columnBuffers[bufferIndex] = pColBuff;
 					++bufferIndex;
 				}
-				catch (NotSupportedException nse)
+				catch (NotSupportedException& nse)
 				{
 					if (skipUnsupportedColumns)
 					{
@@ -334,8 +334,9 @@ namespace exodbc
 			}
 
 		}
-		catch (Exception ex)
+		catch (Exception& ex)
 		{
+			HIDE_UNUSED(ex);
 			// Free allocated buffers and rethrow
 			for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
 			{
