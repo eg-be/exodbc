@@ -414,7 +414,6 @@ namespace exodbc
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(TestAccessFlag(AF_DELETE_PK));
 		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
-		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
 		// Build statement
 		// note: parem-number reflects here the number of the param in the created prepared statement, so we
@@ -452,7 +451,6 @@ namespace exodbc
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(TestAccessFlag(AF_UPDATE_PK));
 		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
-		exASSERT(m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers));
 
 		// Build statement..
 		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
@@ -1139,14 +1137,23 @@ namespace exodbc
 						const TablePrimaryKeyInfo& keyInfo = *itKeys;
 						const ObjectName* pKeyName = dynamic_cast<const ObjectName*>(&keyInfo);
 						// Find corresponding ColumnBuffer
+						bool settedFlagOnBuffer = false;
 						for (ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.begin(); itBuffs != m_columnBuffers.end(); ++itBuffs)
 						{
-							const ColumnBuffer* pBuffer = itBuffs->second;
+							ColumnBuffer* pBuffer = itBuffs->second;
 							const ObjectName* pBuffName = pBuffer->GetName();
 							if (*pKeyName == *pBuffName)
 							{
-								int p = 3;
+								pBuffer->SetColumnFlag(CF_PRIMARY_KEY);
+								settedFlagOnBuffer = true;
+								break;
 							}
+						}
+						if (!settedFlagOnBuffer)
+						{
+							Exception ex((boost::wformat(L"Not all primary Keys of table '%s' have a corresponding ColumnBuffer. No ColumnBuffer found for PrimaryKey '%s'") % m_tableInfo.GetQueryName() % keyInfo.GetQueryName()).str());
+							SET_EXCEPTION_SOURCE(ex);
+							throw ex;
 						}
 					}
 				}
@@ -1175,55 +1182,37 @@ namespace exodbc
 			// and bind the params. PKs are required.
 			if (TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK))
 			{
-				// We need the primary keys
-				// Do not query them from the db is corresponding flag is set
-				if (TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
+				// Need to have at least one primary key, and all primary key buffers must be bound
+				int primaryKeyCount = 0;
+				for (ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.begin(); itBuffs != m_columnBuffers.end(); ++itBuffs)
 				{
-					m_tablePrimaryKeys.Initialize(m_tableInfo, m_columnBuffers);
+					const ColumnBuffer* pBuffer = itBuffs->second;
+					if (pBuffer->IsPrimaryKey())
+					{
+						primaryKeyCount++;
+						if ( ! pBuffer->IsBound())
+						{
+							Exception ex((boost::wformat(L"PrimaryKey ColumnBuffer '%s' of Table '%s' is not Bound().") %pBuffer->GetQueryNameNoThrow() % m_tableInfo.GetQueryName()).str());
+							SET_EXCEPTION_SOURCE(ex);
+							throw ex;
+						}
+					}
 				}
-				else
-				{
-					m_tablePrimaryKeys.Initialize(m_pDb, m_tableInfo);
-				}
-
-				// And we need to have a primary key
-				if ( (TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK)) && m_tablePrimaryKeys.GetPrimaryKeysCount() == 0)
+				if (primaryKeyCount == 0)
 				{
 					Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetQueryName()).str());
 					SET_EXCEPTION_SOURCE(ex);
 					throw ex;
 				}
 
-				// And a Buffer for every primary key
-				if (!m_tablePrimaryKeys.AreAllPrimaryKeysInMap(m_columnBuffers))
+				if (TestAccessFlag(AF_UPDATE_PK))
 				{
-					Exception ex((boost::wformat(L"Not all primary Keys of table '%s' have a corresponding ColumnBuffer") % m_tableInfo.GetQueryName()).str());
-					SET_EXCEPTION_SOURCE(ex);
-					throw ex;
-				}
-
-				// Test that all primary keys are bound
-				if (!m_tablePrimaryKeys.AreAllPrimaryKeysBound(m_columnBuffers))
-				{
-					Exception ex((boost::wformat(L"Not all primary Keys of table '%s' are bound") % m_tableInfo.GetQueryName()).str());
-					SET_EXCEPTION_SOURCE(ex);
-					throw ex;
-				}
-
-				// Set the primary key flags on the bound Columns
-				// but only if corresponding flag is not set - else we have initialized the primary keys from the ColumnBuffers - makes no sense
-				if (!TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
-				{
-					m_tablePrimaryKeys.SetPrimaryKeyFlags(m_columnBuffers);
+					BindUpdateParameters();
 				}
 
 				if (TestAccessFlag(AF_DELETE_PK))
 				{
 					BindDeleteParameters();
-				}
-				if (TestAccessFlag(AF_UPDATE_PK))
-				{
-					BindUpdateParameters();
 				}
 			}
 
