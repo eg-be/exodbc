@@ -225,7 +225,7 @@ namespace exodbc
 		*			the buffers passed there are used to bind only those columns defined manually.
 		*
 		* \param	openFlags Set flags how to open the Table:
-		*  - TOF_CHECK_PRIVILEGES:  
+		*  - TableOpenFlag::TOF_CHECK_PRIVILEGES:  
 		*			If set, the database will be queried checking if the current user
 		*			is allowed to do the required operations like Select, Update, Insert or Delete,
 		*			depending on the AccessFlags value passed during construction or set later.
