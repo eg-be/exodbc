@@ -23,6 +23,8 @@
 
 namespace exodbc
 {
+	class ObjectName;
+
 	// Typedefs
 	// --------
 
@@ -83,6 +85,9 @@ namespace exodbc
 	class EXODBCAPI AssertionException
 		: public Exception
 	{
+	private:
+		AssertionException() : Exception() {};
+
 	public:
 		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition) throw()
 			: Exception()
@@ -117,6 +122,9 @@ namespace exodbc
 	class EXODBCAPI SqlResultException
 		: public Exception
 	{
+	private:
+		SqlResultException() : Exception() {};
+
 	public:
 		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg = L"") throw();
 		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg = L"") throw();
@@ -142,6 +150,9 @@ namespace exodbc
 	class EXODBCAPI IllegalArgumentException
 		: public Exception
 	{
+	private:
+		IllegalArgumentException() : Exception() {};
+
 	public:
 		IllegalArgumentException(const std::wstring msg) throw()
 			: Exception(msg)
@@ -160,6 +171,9 @@ namespace exodbc
 	class EXODBCAPI NotSupportedException
 		: public Exception
 	{
+	private:
+		NotSupportedException() : Exception() {};
+
 	public:
 		enum class Type
 		{
@@ -193,6 +207,9 @@ namespace exodbc
 	class EXODBCAPI WrapperException
 		: public Exception
 	{
+	private:
+		WrapperException() : Exception() {};
+
 	public:
 		WrapperException(const std::exception& ex) throw()
 			: Exception()
@@ -222,6 +239,13 @@ namespace exodbc
 	class EXODBCAPI CastException
 		: public Exception
 	{
+	private:
+		CastException()
+			: Exception()
+			, m_cSourceType(SQL_UNKNOWN_TYPE)
+			, m_cDestType(SQL_UNKNOWN_TYPE)
+		{};
+
 	public:
 		CastException(SQLSMALLINT cSourceType, SQLSMALLINT cDestType)
 			: Exception()
@@ -253,6 +277,9 @@ namespace exodbc
 	class EXODBCAPI NullValueException
 		: public Exception
 	{
+	private:
+		NullValueException() : Exception() {};
+
 	public:
 		NullValueException(std::wstring columnName)
 			: Exception()
@@ -289,6 +316,28 @@ namespace exodbc
 		virtual ~NotImplementedException() {};
 
 		virtual std::wstring GetName() const throw() { return L"exodbc::NotImplementedException"; };
+	};
+
+
+	/*!
+	* \class NotFoundException
+	* \brief Thrown on not found stuff.
+	*/
+	class EXODBCAPI NotFoundException
+		: public Exception
+	{
+	private:
+		NotFoundException() : Exception() {};
+
+	public:
+		NotFoundException(const std::wstring& msg)
+			: Exception(msg)
+		{};
+
+	public:
+		virtual ~NotFoundException() {};
+
+		virtual std::wstring GetName() const throw() { return L"exodbc::NotFoundException"; };
 	};
 }
 
