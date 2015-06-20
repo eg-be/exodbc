@@ -600,6 +600,16 @@ namespace exodbc
 		bool IsMarsEnabled();
 
 
+		/*!
+		* \brief	Test if the passed SQL Type has been reported as supported
+		*			by the Database.
+		* \return	Searches the DataTypes info and compares against SqlType (ODBC 2.0)
+		*			and SqlDataType (ODBC 3.0)
+		* \throw	Exception If not Open().
+		*/
+		bool IsSqlTypeSupported(SQLSMALLINT sqlType) const;
+
+
 		// Private stuff
 		// -------------
 	private:
@@ -685,7 +695,6 @@ namespace exodbc
 		std::wstring		m_inConnectionStr; ///< Connection string used to connect to the database
 		std::wstring		m_outConnectionStr;///< Connection string returned by the database when a connection is successfully OpenImpled
 		DatabaseProduct		m_dbmsType;        ///< Type of datasource - i.e. Oracle, dBase, SQLServer, etc
-//		OdbcVersion			m_envOdbcVersion;	///< ODBC-Version read from the environment while allocating the HDBC handle.
 
 		// ODBC handles created by the Database
 		SQLHDBC  m_hdbc;			///< ODBC DB Connection handle

@@ -387,6 +387,21 @@ namespace exodbc
 #endif
 
 
+	bool Database::IsSqlTypeSupported(SQLSMALLINT sqlType) const
+	{
+		exASSERT(IsOpen());
+		SqlTypeInfosVector::const_iterator it = m_datatypes.begin();
+		while (it != m_datatypes.end())
+		{
+			if (it->m_sqlDataType == sqlType || it->m_sqlType == sqlType)
+			{
+				return true;
+			}
+			++it;
+		}
+		return false;
+	}
+
 
 	void Database::SetConnectionAttributes()
 	{
