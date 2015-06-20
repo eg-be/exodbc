@@ -3372,7 +3372,7 @@ namespace exodbc
 	TEST_P(TableTest, UpdateWhere)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_WHERE);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			iTable.SetColumnPrimaryKeyIndexes({ 0 });
