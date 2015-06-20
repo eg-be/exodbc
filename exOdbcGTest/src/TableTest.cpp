@@ -451,8 +451,6 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenAutoWithUnsupportedColumn)
 	{
-
-
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
 		exodbc::Table nst(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 
@@ -471,6 +469,7 @@ namespace exodbc
 		SQLINTEGER id, int1, int2;
 		EXPECT_NO_THROW(id = nst.GetInt(0));
 		EXPECT_NO_THROW(int1 = nst.GetInt(1));
+		EXPECT_FALSE(nst.ColumnBufferExists(2));
 		EXPECT_THROW(nst.GetColumnBuffer(2), IllegalArgumentException);
 		EXPECT_NO_THROW(int2 = nst.GetInt(3));
 		EXPECT_EQ(1, id);
