@@ -298,7 +298,7 @@ namespace exodbc
 			{
 				columnFlags |= CF_SELECT;
 			}
-			if (TestAccessFlag(AF_UPDATE))
+			if (TestAccessFlag(AF_UPDATE_WHERE) || TestAccessFlag(AF_UPDATE_PK))
 			{
 				columnFlags |= CF_UPDATE;
 			}
