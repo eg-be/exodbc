@@ -366,7 +366,6 @@ namespace exodbc
 		const ObjectName* GetName() const { exASSERT(m_pName); return m_pName; };
 
 
-	private:
 		/*!
 		* \brief	Get the query name for this ColumnBuffer.
 		* \return	The query name of the column matching this ColumnBuffer, or ??? in case of failure.
@@ -374,7 +373,6 @@ namespace exodbc
 		std::wstring GetQueryNameNoThrow() const throw();
 
 
-	public:
 		/*!
 		* \brief	Set how Chars should be bound.
 		* \details	Fails if already bound.
@@ -718,7 +716,6 @@ namespace exodbc
 		ColumnFlags				m_flags;				///< Flags, set during construction.
 		SQLINTEGER				m_columnSize;			///< Column Size, either read from ColumnInfo during construction or set manually. -1 indicates unknown.
 		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from ColumnInfo during construction or set manually. -1 indicates unkonwn.
-//		std::wstring			m_queryName;			///< Name to use to query this Column. Either passed during construction, or read from m_columnInfo during construction.
 		ObjectName*				m_pName;				///< The name of this object. Created during construction, freed on deletion.
 		SQLUSMALLINT			m_columnNr;				///< Column number used during Bind(). Set to 0 during construction.
 		SQLSMALLINT				m_sqlType;				///< The SQL Type of the Column, like SQL_SMALLINT. Either set on construction or read from ColumnInfo::m_sqlType.

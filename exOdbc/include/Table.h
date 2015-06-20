@@ -34,7 +34,6 @@
 #include "exOdbc.h"
 #include "ColumnBuffer.h"
 #include "TablePrivileges.h"
-#include "TablePrimaryKeys.h"
 #include "Exception.h"
 #include "ObjectName.h"
 
@@ -974,7 +973,6 @@ namespace exodbc
 		TableOpenFlags		m_openFlags;			///< Flags used to open the table in the call to Open().
 		AccessFlags			m_accessFlags;			///< Bitmask for the AccessFlag flags.
 		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
-		TablePrimaryKeys	m_tablePrimaryKeys;		///< Table Primary Keys read during Open if table was opened READ_WRITE.
 
 		// Column information
 		std::set<SQLUSMALLINT> m_primaryKeyColumnIndexes;	///< If this set contains values during Open(), the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is activated implicitly. 
