@@ -969,7 +969,6 @@ namespace exodbc
 		// Table Information
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		TableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
-//		TableName			m_tableName;			///< TableName constructed from the TableInfo read upon Open()
 		AutoBindingMode		m_autoBindingMode;		///< Store the auto-binding of this table. TODO: Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
 		TableOpenFlags		m_openFlags;			///< Flags used to open the table in the call to Open().
@@ -978,7 +977,10 @@ namespace exodbc
 		TablePrimaryKeys	m_tablePrimaryKeys;		///< Table Primary Keys read during Open if table was opened READ_WRITE.
 
 		// Column information
-		std::set<SQLUSMALLINT> m_primaryKeyColumnIndexes; ///< If this set contains values during Open(), the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is activated implicitly. The ColumnBuffers marked in this set will be used as primary key columns.
+		std::set<SQLUSMALLINT> m_primaryKeyColumnIndexes;	///< If this set contains values during Open(), the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is activated implicitly. 
+															///< The ColumnBuffers marked in this set will be used as primary key columns.
+															///< Used if columns are not defined manually but queried, but the Database does not support SQLPrimaryKeys.
+
 		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
 		const bool			m_manualColumns;		///< If true the table was created by passing the number of columns that will be defined later manually
