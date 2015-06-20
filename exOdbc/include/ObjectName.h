@@ -36,6 +36,8 @@ namespace exodbc
 
 		virtual std::wstring GetQueryName() const = 0;
 		virtual std::wstring GetPureName() const = 0;
+
+		bool operator==(const ObjectName& other) const;
 	};
 }
 

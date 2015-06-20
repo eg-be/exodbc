@@ -48,45 +48,70 @@ namespace exodbc
 		exASSERT(columnInfo.GetSqlDataType() != 0);
 		exASSERT(m_flags & CF_SELECT);
 
-		// Create ObjectName from ColumnInfo
-		m_pName = new ColumnInfo(columnInfo);
-
-		// Remember some values from ColumnInfo
-		if (!columnInfo.IsColumnSizeNull())
-		{
-			m_columnSize = columnInfo.GetColumnSize();
-		}
-		if (!columnInfo.IsDecimalDigitsNull())
-		{
-			m_decimalDigits = columnInfo.GetDecimalDigits();
-		}
-		m_sqlType = columnInfo.GetSqlType();
-
-		// Update our flags with the NULLABLE flag of the passed ColumnInfo.
-		if (columnInfo.GetIsNullable() == L"YES")
-		{
-			SetColumnFlag(CF_NULLABLE);
-		}
-		else
-		{
-			ClearColumnFlag(CF_NULLABLE);
-		}
-
-		// Create buffer
-		m_bufferType = DetermineBufferType(m_sqlType);
-		m_bufferSize = DetermineBufferSize(columnInfo);
-
 		try
 		{
-			AllocateBuffer(m_bufferType, m_bufferSize);
+			// Create ObjectName from ColumnInfo
+			m_pName = new ColumnInfo(columnInfo);
+
+			// Remember some values from ColumnInfo
+			if (!columnInfo.IsColumnSizeNull())
+			{
+				m_columnSize = columnInfo.GetColumnSize();
+			}
+			if (!columnInfo.IsDecimalDigitsNull())
+			{
+				m_decimalDigits = columnInfo.GetDecimalDigits();
+			}
+			m_sqlType = columnInfo.GetSqlType();
+
+			// Update our flags with the NULLABLE flag of the passed ColumnInfo.
+			if (columnInfo.GetIsNullable() == L"YES")
+			{
+				SetColumnFlag(CF_NULLABLE);
+			}
+			else
+			{
+				ClearColumnFlag(CF_NULLABLE);
+			}
+
+			// Create buffer
+			m_bufferType = DetermineBufferType(m_sqlType);
+			m_bufferSize = DetermineBufferSize(columnInfo);
+
+			try
+			{
+				AllocateBuffer(m_bufferType, m_bufferSize);
+			}
+			catch (std::bad_alloc ex)
+			{
+				WrapperException we(ex);
+				SET_EXCEPTION_SOURCE(we);
+				throw we;
+			}
+			m_haveBuffer = m_allocatedBuffer;
 		}
-		catch (std::bad_alloc ex)
+		catch (Exception& ex)
 		{
-			WrapperException we(ex);
-			SET_EXCEPTION_SOURCE(we);
-			throw we;
+			// Cleanup stuff allocated, destructor is not called if failed in constructor
+			HIDE_UNUSED(ex);
+			if (m_allocatedBuffer)
+			{
+				try
+				{
+					FreeBuffer();
+				}
+				catch (Exception& ex)
+				{
+					LOG_ERROR(boost::str(boost::wformat(L"Failed to Free buffer of Column %s: %s") % GetQueryNameNoThrow() % ex.ToString()));
+				}
+			}
+			if (m_pName)
+			{
+				delete m_pName;
+			}
+			// rethrow
+			throw;
 		}
-		m_haveBuffer = m_allocatedBuffer;
 	}
 
 
@@ -152,55 +177,11 @@ namespace exodbc
 		{
 			try
 			{
-				switch (m_bufferType)
-				{
-				case SQL_C_SSHORT:
-					delete GetSmallIntPtr();
-					break;
-				case SQL_C_SLONG:
-					delete GetIntPtr();
-					break;
-				case SQL_C_SBIGINT:
-					delete GetBigIntPtr();
-					break;
-				case SQL_C_CHAR:
-				case SQL_C_BINARY:
-					delete[] GetCharPtr();
-					break;
-				case SQL_C_WCHAR:
-					delete[] GetWCharPtr();
-					break;
-				case SQL_C_DOUBLE:
-					delete GetDoublePtr();
-					break;
-				case SQL_C_TYPE_DATE:
-				case SQL_C_DATE:
-					delete GetDatePtr();
-					break;
-				case SQL_C_TYPE_TIME:
-				case SQL_C_TIME:
-					delete GetTimePtr();
-					break;
-				case SQL_C_TYPE_TIMESTAMP:
-				case SQL_C_TIMESTAMP:
-					delete GetTimestampPtr();
-					break;
-#if HAVE_MSODBCSQL_H
-				case SQL_C_SS_TIME2:
-					delete GetTime2Ptr();
-					break;
-#endif
-				case SQL_C_NUMERIC:
-					delete GetNumericPtr();
-					break;
-				default:
-					exASSERT(false);
-				}
+				FreeBuffer();
 			}
-			catch (const boost::bad_get& ex)
+			catch (const Exception& ex)
 			{
-				WrapperException we(ex);
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to free Buffer of Column '%s': %s") % GetQueryNameNoThrow() % we.ToString()));
+				LOG_ERROR(boost::str(boost::wformat(L"Failed to free Buffer of Column '%s': %s") % GetQueryNameNoThrow() % ex.ToString()));
 			}
 		}
 
@@ -449,6 +430,68 @@ namespace exodbc
 		}
 
 		m_allocatedBuffer = true;
+	}
+
+
+	void ColumnBuffer::FreeBuffer()
+	{
+		exASSERT(m_allocatedBuffer);
+
+		try
+		{
+			switch (m_bufferType)
+			{
+			case SQL_C_SSHORT:
+				delete GetSmallIntPtr();
+				break;
+			case SQL_C_SLONG:
+				delete GetIntPtr();
+				break;
+			case SQL_C_SBIGINT:
+				delete GetBigIntPtr();
+				break;
+			case SQL_C_CHAR:
+			case SQL_C_BINARY:
+				delete[] GetCharPtr();
+				break;
+			case SQL_C_WCHAR:
+				delete[] GetWCharPtr();
+				break;
+			case SQL_C_DOUBLE:
+				delete GetDoublePtr();
+				break;
+			case SQL_C_TYPE_DATE:
+			case SQL_C_DATE:
+				delete GetDatePtr();
+				break;
+			case SQL_C_TYPE_TIME:
+			case SQL_C_TIME:
+				delete GetTimePtr();
+				break;
+			case SQL_C_TYPE_TIMESTAMP:
+			case SQL_C_TIMESTAMP:
+				delete GetTimestampPtr();
+				break;
+#if HAVE_MSODBCSQL_H
+			case SQL_C_SS_TIME2:
+				delete GetTime2Ptr();
+				break;
+#endif
+			case SQL_C_NUMERIC:
+				delete GetNumericPtr();
+				break;
+			default:
+				NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, m_bufferType);
+				SET_EXCEPTION_SOURCE(nse);
+				throw nse;
+			}
+		}
+		catch (const boost::bad_get& ex)
+		{
+			WrapperException we(ex);
+			throw we;
+		}
+		m_allocatedBuffer = false;
 	}
 
 
