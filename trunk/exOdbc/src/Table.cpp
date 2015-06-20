@@ -1010,10 +1010,13 @@ namespace exodbc
 		exASSERT(HasAllStatements());
 		// \note: We do not force a user to define columns.
 
+		// Init open flags
+		m_openFlags = openFlags;
+
 		// Set TOF_DO_NOT_QUERY_PRIMARY_KEYS this flag for Access, Access does not support SQLPrimaryKeys
 		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
+			m_openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
 		}
 
 		// Nest try/catch the free the buffers created in here if we fail somewhere
@@ -1038,7 +1041,7 @@ namespace exodbc
 
 			// If we are asked to check existence and have not just proved we exist just find a table
 			// Search using the info from the now available m_tableInfo
-			if (((openFlags & TOF_CHECK_EXISTANCE) == TOF_CHECK_EXISTANCE) && !searchedTable)
+			if (TestOpenFlag(TOF_CHECK_EXISTANCE) && !searchedTable)
 			{
 				// Will throw if not one is found
 				std::wstring catalogName = m_tableInfo.GetCatalog();
@@ -1069,7 +1072,7 @@ namespace exodbc
 			// If we are asked to create our columns automatically, read the column information and create the buffers
 			if (!m_manualColumns)
 			{
-				CreateAutoColumnBuffers(m_tableInfo, (openFlags & TOF_SKIP_UNSUPPORTED_COLUMNS) == TOF_SKIP_UNSUPPORTED_COLUMNS);
+				CreateAutoColumnBuffers(m_tableInfo, TestOpenFlag(TOF_SKIP_UNSUPPORTED_COLUMNS));
 			}
 			else
 			{
@@ -1089,7 +1092,7 @@ namespace exodbc
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
-					if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !TestAccessFlag(AF_UPDATE))
+					if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !(TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_UPDATE_WHERE)))
 					{
 						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
@@ -1102,7 +1105,7 @@ namespace exodbc
 			m_fieldsStatement = BuildFieldsStatement();
 
 			// Optionally check privileges
-			if ((openFlags & TOF_CHECK_PRIVILEGES) == TOF_CHECK_PRIVILEGES)
+			if (TestOpenFlag(TOF_CHECK_PRIVILEGES))
 			{
 				m_tablePrivileges.Initialize(m_pDb, m_tableInfo);
 				// We always need to be able to select, but the rest only if we want to write
@@ -1120,9 +1123,12 @@ namespace exodbc
 				}
 			}
 
-			// Maybe the primary keys have been set manually?
+			// Maybe the primary keys have been set manually? Then just forward them to the ColumnBuffers
 			if (m_primaryKeyColumnIndexes.size() > 0)
 			{
+				// And implicitly activate the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS
+				m_openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
+
 				for (std::set<SQLUSMALLINT>::const_iterator it = m_primaryKeyColumnIndexes.begin(); it != m_primaryKeyColumnIndexes.end(); ++it)
 				{
 					// Get corresponding Buffer and set the flag CF_PRIMARY_KEY
@@ -1135,8 +1141,27 @@ namespace exodbc
 					}
 					itBuffs->second->SetColumnFlag(CF_PRIMARY_KEY);
 				}
-				// And implicitly activate the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS
-				openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
+			}
+			else
+			{
+				// If we need the primary keys and are allowed to query them, try to fetch them from the database
+				if ((TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK)) && !TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
+				{
+					//TablePrimaryKeysVector primaryKeys = m_pDb->ReadTablePrimaryKeys(m_tableInfo);
+					//// Match them against the ColumnBuffers
+					//for (TablePrimaryKeysVector::const_iterator itKeys = primaryKeys.begin(); itKeys != primaryKeys.end(); ++itKeys)
+					//{
+					//	const TablePrimaryKeyInfo& keyInfo = *itKeys;
+					//	const ObjectName* pKeyName = dynamic_cast<const ObjectName*>(&keyInfo);
+					//	// Find corresponding ColumnBuffer
+					//	for (ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.begin(); itBuffs != m_columnBuffers.end(); ++itBuffs)
+					//	{
+					//		const ColumnBuffer* pBuffer = itBuffs->second;
+					//		const ObjectName* pBuffName = dynamic_cast<const ObjectName*>(pBuffer->GetName());
+					//		int p = 3;
+					//	}
+					//}
+				}
 			}
 
 			// Bind the member variables for field exchange between
@@ -1164,7 +1189,7 @@ namespace exodbc
 			{
 				// We need the primary keys
 				// Do not query them from the db is corresponding flag is set
-				if (openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS)
+				if (TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
 				{
 					m_tablePrimaryKeys.Initialize(m_tableInfo, m_columnBuffers);
 				}
@@ -1199,7 +1224,7 @@ namespace exodbc
 
 				// Set the primary key flags on the bound Columns
 				// but only if corresponding flag is not set - else we have initialized the primary keys from the ColumnBuffers - makes no sense
-				if (!(openFlags & TOF_DO_NOT_QUERY_PRIMARY_KEYS))
+				if (!TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
 				{
 					m_tablePrimaryKeys.SetPrimaryKeyFlags(m_columnBuffers);
 				}
@@ -1221,7 +1246,6 @@ namespace exodbc
 			}
 
 			// Completed successfully
-			m_openFlags = openFlags;
 			m_isOpen = true;
 		}
 		catch (const Exception& ex)
@@ -1262,19 +1286,23 @@ namespace exodbc
 			ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert);
 		}
-		if (TestAccessFlag(AF_DELETE))
+		if (TestAccessFlag(AF_DELETE_PK))
 		{
 			ret = SQLFreeStmt(m_hStmtDelete, SQL_RESET_PARAMS);
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDelete);
-
+		}
+		if (TestAccessFlag(AF_DELETE_WHERE))
+		{
 			ret = SQLFreeStmt(m_hStmtDeleteWhere, SQL_RESET_PARAMS);
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
 		}
-		if (TestAccessFlag(AF_UPDATE))
+		if (TestAccessFlag(AF_UPDATE_PK))
 		{
 			ret = SQLFreeStmt(m_hStmtUpdate, SQL_RESET_PARAMS);
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
-
+		}
+		if (TestAccessFlag(AF_UPDATE_WHERE))
+		{
 			ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_RESET_PARAMS);
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 		}
@@ -1342,6 +1370,27 @@ namespace exodbc
 		m_accessFlags = acs;
 		AllocateStatements();
 	}
+
+
+	bool Table::TestAccessFlag(AccessFlag af) const throw()
+	{
+		if (m_accessFlags & af)
+		{
+			return true;
+		}
+		return false;
+	}
+
+
+	bool Table::TestOpenFlag(TableOpenFlag of) const throw()
+	{
+		if (m_openFlags & of)
+		{
+			return true;
+		}
+		return false;
+	}
+
 
 
 	void Table::SetCharTrimLeft(bool trimLeft) throw()

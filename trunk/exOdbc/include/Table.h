@@ -360,7 +360,7 @@ namespace exodbc
 		/*!
 		* \brief	Test if an AccessFlag is set.
 		*/
-		bool		TestAccessFlag(AccessFlag ac) const throw() { return (m_accessFlags & ac) == ac; };
+		bool		TestAccessFlag(AccessFlag ac) const throw();
 
 
 		/*!
@@ -372,7 +372,7 @@ namespace exodbc
 		/*!
 		* \brief	Test if a TableOpenFlag is set.
 		*/
-		bool		TestOpenFlag(TableOpenFlag flag) const throw() { return (m_openFlags & flag) == flag;  };
+		bool		TestOpenFlag(TableOpenFlag flag) const throw();
 
 
 		/*!
