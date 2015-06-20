@@ -28,4 +28,15 @@ namespace exodbc
 {
 	ObjectName::~ObjectName()
 	{ }
+
+
+	bool ObjectName::operator==(const ObjectName& other) const
+	{
+		// If the query name matches, they are equal
+		if (other.GetQueryName() == GetQueryName())
+		{
+			return true;
+		}
+		return false;
+	}
 }

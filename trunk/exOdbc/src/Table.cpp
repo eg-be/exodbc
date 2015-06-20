@@ -1129,24 +1129,27 @@ namespace exodbc
 			}
 			else
 			{
-				// If we need the primary keys and are allowed to query them, try to fetch them from the database
-				if ((TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK)) && !TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
-				{
-					//TablePrimaryKeysVector primaryKeys = m_pDb->ReadTablePrimaryKeys(m_tableInfo);
-					//// Match them against the ColumnBuffers
-					//for (TablePrimaryKeysVector::const_iterator itKeys = primaryKeys.begin(); itKeys != primaryKeys.end(); ++itKeys)
-					//{
-					//	const TablePrimaryKeyInfo& keyInfo = *itKeys;
-					//	const ObjectName* pKeyName = dynamic_cast<const ObjectName*>(&keyInfo);
-					//	// Find corresponding ColumnBuffer
-					//	for (ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.begin(); itBuffs != m_columnBuffers.end(); ++itBuffs)
-					//	{
-					//		const ColumnBuffer* pBuffer = itBuffs->second;
-					//		const ObjectName* pBuffName = dynamic_cast<const ObjectName*>(pBuffer->GetName());
-					//		int p = 3;
-					//	}
-					//}
-				}
+				//// If we need the primary keys and are allowed to query them, try to fetch them from the database
+				//if ((TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK)) && !TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
+				//{
+				//	TablePrimaryKeysVector primaryKeys = m_pDb->ReadTablePrimaryKeys(m_tableInfo);
+				//	// Match them against the ColumnBuffers
+				//	for (TablePrimaryKeysVector::const_iterator itKeys = primaryKeys.begin(); itKeys != primaryKeys.end(); ++itKeys)
+				//	{
+				//		const TablePrimaryKeyInfo& keyInfo = *itKeys;
+				//		const ObjectName* pKeyName = dynamic_cast<const ObjectName*>(&keyInfo);
+				//		// Find corresponding ColumnBuffer
+				//		for (ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.begin(); itBuffs != m_columnBuffers.end(); ++itBuffs)
+				//		{
+				//			const ColumnBuffer* pBuffer = itBuffs->second;
+				//			const ObjectName* pBuffName = pBuffer->GetName();
+				//			//if (*pKeyName == *pBuffName)
+				//			//{
+				//			//	int p = 3;
+				//			//}
+				//		}
+				//	}
+				//}
 			}
 
 			// Bind the member variables for field exchange between

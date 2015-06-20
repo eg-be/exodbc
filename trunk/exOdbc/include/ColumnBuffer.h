@@ -357,7 +357,6 @@ namespace exodbc
 		std::wstring GetQueryName() const;
 
 		
-
 		/*!
 		* \brief	Get the Object Name of this ColumnBuffer.
 		* \return	ObjectName created during construction, pointer is valid until this
@@ -673,6 +672,15 @@ namespace exodbc
 		* \throw	bad_alloc if allocating memory fails.
 		*/
 		void AllocateBuffer(SQLSMALLINT bufferType, SQLLEN bufferSize);
+
+
+		/*!
+		* \brief	Frees the Buffer in the variant.
+		* \details	Set m_allocatedBuffer to false on success.
+		* \throw	NotSupportedException If the bufferType is unknown.
+		* \throw	WrapperException if boost::get fails
+		*/
+		void FreeBuffer();
 
 
 		/*!
