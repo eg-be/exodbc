@@ -213,20 +213,16 @@ namespace exodbc
 	public:
 		WrapperException(const std::exception& ex) throw()
 			: Exception()
-			, m_ex(ex)
+			, m_innerExceptionMsg(ex.what())
 		{
-			m_what = w2s(ToString(ex));
+			m_what = w2s(ToString());
 		};
-
-		virtual ~WrapperException() {};
 
 		virtual std::wstring GetName() const throw() { return L"exodbc::WrapperException"; };
 		virtual std::wstring ToString() const throw();
 
-		std::wstring ToString(const std::exception& ex) const throw();
-
 	private:
-		std::exception m_ex;
+		std::string m_innerExceptionMsg;
 	};
 
 

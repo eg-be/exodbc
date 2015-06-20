@@ -82,7 +82,7 @@ namespace exodbc
 			{
 				AllocateBuffer(m_bufferType, m_bufferSize);
 			}
-			catch (std::bad_alloc& ex)
+			catch (const std::bad_alloc& ex)
 			{
 				WrapperException we(ex);
 				SET_EXCEPTION_SOURCE(we);
@@ -208,7 +208,7 @@ namespace exodbc
 		{
 			pBuffer = GetBuffer();
 		}
-		catch (boost::bad_get& ex)
+		catch (const boost::bad_get& ex)
 		{
 			WrapperException we(ex);
 			SET_EXCEPTION_SOURCE(we);
@@ -301,7 +301,7 @@ namespace exodbc
 		{
 			pBuffer = GetBuffer();
 		}
-		catch (boost::bad_get& ex)
+		catch (const boost::bad_get& ex)
 		{
 			WrapperException we(ex);
 			SET_EXCEPTION_SOURCE(we);
@@ -792,7 +792,7 @@ namespace exodbc
 			memcpy(pColVal, pBuff, bufferSize);
 			m_cb = bufferSize;
 		}
-		catch (boost::bad_get& bg)
+		catch (const boost::bad_get& bg)
 		{
 			WrapperException we(bg);
 			SET_EXCEPTION_SOURCE(we);
@@ -997,7 +997,7 @@ namespace exodbc
 
 		}
 		catch (const boost::bad_get& ex)
-		{
+		{	
 			WrapperException we(ex);
 			SET_EXCEPTION_SOURCE(we);
 			throw we;
