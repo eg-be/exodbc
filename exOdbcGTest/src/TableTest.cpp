@@ -99,7 +99,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenManualWritableWithoutCheck)
+	TEST_P(TableTest, OpenManualWritableWithoutCheckPrivOrExist)
 	{
 		// Open an existing table without checking for privileges or existence
 		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ_WRITE);
@@ -107,11 +107,21 @@ namespace exodbc
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
 		SQLBIGINT bi = 0;
+		SQLINTEGER bii = 0;
 		int type = SQL_C_SLONG;
-		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT);
-		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
+		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
+		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT | CF_UPDATE);
 		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
-		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// access has no bigint
+			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bii, SQL_C_SLONG, sizeof(bii), CF_SELECT | CF_INSERT);
+		}
+		else
+		{
+			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
+		}
+		EXPECT_NO_THROW(iTable.Open(TOF_NONE));
 	}
 
 
@@ -525,14 +535,10 @@ namespace exodbc
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some data
-		ColumnBuffer* pId = nst.GetColumnBuffer(0);
-		ColumnBuffer* pInt1 = nst.GetColumnBuffer(1);
-		EXPECT_THROW(nst.GetColumnBuffer(2), IllegalArgumentException);
-		ColumnBuffer* pInt2 = nst.GetColumnBuffer(3);
-		
-		*pId = (SQLINTEGER)2;
-		*pInt1 = (SQLINTEGER)20;
-		*pInt2 = (SQLINTEGER)22;
+		EXPECT_FALSE(nst.ColumnBufferExists(2));
+		nst.SetColumnValue(0, (SQLINTEGER)2);
+		nst.SetColumnValue(1, (SQLINTEGER)20);
+		nst.SetColumnValue(3, (SQLINTEGER)22);
 		EXPECT_NO_THROW(nst.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -626,13 +632,9 @@ namespace exodbc
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert some data
-		ColumnBuffer* pId = nst.GetColumnBuffer(0);
-		ColumnBuffer* pInt1 = nst.GetColumnBuffer(1);
-		ColumnBuffer* pInt2 = nst.GetColumnBuffer(3);
-
-		*pId = (SQLINTEGER)2;
-		*pInt1 = (SQLINTEGER)20;
-		*pInt2 = (SQLINTEGER)22;
+		nst.SetColumnValue(0, (SQLINTEGER)2);
+		nst.SetColumnValue(1, (SQLINTEGER)20);
+		nst.SetColumnValue(3, (SQLINTEGER)22);
 		EXPECT_NO_THROW(nst.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -641,7 +643,7 @@ namespace exodbc
 		ASSERT_TRUE(nst.SelectNext());
 
 		// Now delete it
-		*pId = (SQLINTEGER)2;
+		nst.SetColumnValue(0, (SQLINTEGER)2);
 		EXPECT_NO_THROW(nst.Delete());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -1762,8 +1764,6 @@ namespace exodbc
 
 	TEST_P(TableTest, IsNullAutoNumericValue)
 	{
-
-
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(nTable.Open());

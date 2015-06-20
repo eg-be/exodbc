@@ -63,6 +63,13 @@ namespace exodbc
 		};
 
 
+		extern const std::map<test::TableId, std::wstring> TableNames;
+		extern const std::map<test::TableId, std::wstring> IdColumnNames;
+
+		std::wstring GetTableName(test::TableId table, test::Case nameCase);
+		std::wstring GetIdColumnName(test::TableId table, test::Case nameCase);
+
+
 		enum class ValueIndicator
 		{
 			NO_INDICATOR,	///< Compare the value normally - it must be equal
@@ -88,13 +95,6 @@ namespace exodbc
 		* \throw	Exception
 		*/
 		void InsertIntTypesTmp(test::Case nameCase, const exodbc::Database& db, Int id, SmallInt tSmallInt, Int tInt, BigInt tBigInt, bool commitTrans = true);
-
-		extern const std::map<test::TableId, std::wstring> TableNames;
-		extern const std::map<test::TableId, std::wstring> IdColumnNames;
-
-		std::wstring GetTableName(test::TableId table, test::Case nameCase);
-
-		std::wstring GetIdColumnName(test::TableId table, test::Case nameCase);
 		
 		// \todo: See ticket #82
 		// exodbc::Table GetEmptyTestTable(TestTables::Table table, TestTables::NameCase nameCase, exodbc::Database& db);
