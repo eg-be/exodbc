@@ -775,7 +775,7 @@ namespace exodbc
 		{
 			CloseStmtHandle(m_hStmt, StmtCloseMode::IgnoreNotOpen);
 		}
-		catch (Exception ex)
+		catch (Exception& ex)
 		{
 			// Should never happen?
 			// \todo Ticket #100
