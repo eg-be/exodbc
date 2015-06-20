@@ -254,10 +254,7 @@ namespace exodbc
 
 	std::wstring TablePrimaryKeyInfo::GetQueryName() const
 	{
-		exASSERT(!m_columnName.empty());
-		exASSERT(!m_tableName.empty());
-
-		return m_tableName + L"." + m_columnName;
+		return GetPureName();
 	}
 
 
