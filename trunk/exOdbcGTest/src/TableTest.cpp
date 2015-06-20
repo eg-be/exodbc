@@ -1602,24 +1602,6 @@ namespace exodbc
 			EXPECT_EQ(L"1983-01-26", sDate);
 		}
 
-		try
-		{
-			dTable.SetColumnValue(2, (SQLINTEGER)100);
-		}
-		catch (const Exception& ex)
-		{
-			std::wstring ws = ex.ToString();
-			//const WrapperException* pWe = dynamic_cast<const WrapperException*>(&ex);
-			//if (pWe)
-			//{
-			//	const std::exception* const pE = pWe->GetException();
-			//	const boost::bad_get* const pB = dynamic_cast<const boost::bad_get* const>(pE);
-			//	int p = 3;
-
-			//}
-			int p = 3;
-		}
-
 		EXPECT_NO_THROW(sTime = dTable.GetWString(2));
 		EXPECT_NO_THROW(sTimestamp = dTable.GetWString(3));
 
