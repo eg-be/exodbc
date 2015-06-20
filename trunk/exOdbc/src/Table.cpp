@@ -594,6 +594,35 @@ namespace exodbc
 	}
 
 
+	SQLSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive /* = true */) const
+	{
+		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
+		while (it != m_columnBuffers.end())
+		{
+			const ColumnBuffer* pBuffer = it->second;
+			if (caseSensitive)
+			{		
+				if (pBuffer->GetQueryName() == columnQueryName)
+				{
+					return it->first;
+				}
+			}
+			else
+			{
+				if (boost::iequals(pBuffer->GetQueryName(), columnQueryName))
+				{
+					return it->first;
+				}
+			}
+			++it;
+		}
+
+		NotFoundException nfe(boost::str(boost::wformat(L"No ColumnBuffer found with QueryName '%s'") % columnQueryName));
+		SET_EXCEPTION_SOURCE(nfe);
+		throw nfe;
+	}
+
+
 	TableInfo Table::GetTableInfo() const
 	{
 		exASSERT(m_haveTableInfo);
