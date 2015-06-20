@@ -2941,28 +2941,24 @@ namespace exodbc
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 		ASSERT_NO_THROW(nTable.Open());
-		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
-		ColumnBuffer* pNumeric_18_0 = nTable.GetColumnBuffer(1);
-		ColumnBuffer* pNumeric_18_10 = nTable.GetColumnBuffer(2);
-		ColumnBuffer* pNumeric_5_3 = nTable.GetColumnBuffer(3);
 
 		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
 		test::ClearNumericTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Insert some boring 0 entries
 		SQL_NUMERIC_STRUCT num = InitNullNumeric();
-		*pId = (SQLINTEGER)100;
-		*pNumeric_18_0 = num;
-		*pNumeric_18_10 = num;
-		*pNumeric_5_3 = num;
+		nTable.SetColumnValue(0, (SQLINTEGER)100);
+		nTable.SetColumnValue(1, num);
+		nTable.SetColumnValue(2, num);
+		nTable.SetColumnValue(3, num);
+
 		nTable.Insert();
-		*pId = (SQLINTEGER)101;
-		pNumeric_18_0->SetNull();
-		pNumeric_18_10->SetNull();
-		pNumeric_5_3->SetNull();
+		nTable.SetColumnValue(0, (SQLINTEGER)101);
+		nTable.SetColumnNull(1);
+		nTable.SetColumnNull(2);
+		nTable.SetColumnNull(3);
 		nTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
@@ -2995,16 +2991,16 @@ namespace exodbc
 		num5_3.val[0] = 57;
 		num5_3.val[1] = 48;
 
-		*pId = (SQLINTEGER)101;
-		*pNumeric_18_0 = num18_0;
-		*pNumeric_18_10 = num18_10;
-		*pNumeric_5_3 = num5_3;
+		nTable.SetColumnValue(0, (SQLINTEGER)101);
+		nTable.SetColumnValue(1, num18_0);
+		nTable.SetColumnValue(2, num18_10);
+		nTable.SetColumnValue(3, num5_3);
 		EXPECT_NO_THROW(nTable.Update());
 
-		*pId = (SQLINTEGER)100;
-		pNumeric_18_0->SetNull();
-		pNumeric_18_10->SetNull();
-		pNumeric_5_3->SetNull();
+		nTable.SetColumnValue(0, (SQLINTEGER)100);
+		nTable.SetColumnNull(1);
+		nTable.SetColumnNull(2);
+		nTable.SetColumnNull(3);
 		EXPECT_NO_THROW(nTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -3012,18 +3008,19 @@ namespace exodbc
 		nTable.Select((boost::wformat(L"%s = 101") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
 		SQL_NUMERIC_STRUCT n18_0, n18_10, n5_3;
-		n18_0 = *pNumeric_18_0;
-		n18_10 = *pNumeric_18_10;
-		n5_3 = *pNumeric_5_3;
+		n18_0 = nTable.GetNumeric(1);
+		n18_10 = nTable.GetNumeric(2);
+		n5_3 = nTable.GetNumeric(3);
+
 		EXPECT_EQ(0, memcmp(&num18_0, &n18_0, sizeof(n18_0)));
 		EXPECT_EQ(0, memcmp(&num18_10, &n18_10, sizeof(n18_10)));
 		EXPECT_EQ(0, memcmp(&num5_3, &n5_3, sizeof(n5_3)));
 
 		nTable.Select((boost::wformat(L"%s = 100") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_TRUE(pNumeric_18_0->IsNull());
-		EXPECT_TRUE(pNumeric_18_10->IsNull());
-		EXPECT_TRUE(pNumeric_5_3->IsNull());
+		EXPECT_TRUE(nTable.IsColumnNull(1));
+		EXPECT_TRUE(nTable.IsColumnNull(2));
+		EXPECT_TRUE(nTable.IsColumnNull(3));
 	}
 
 
@@ -3036,42 +3033,33 @@ namespace exodbc
 			fTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
 		ASSERT_NO_THROW(fTable.Open());
-		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
-		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
-		ColumnBuffer* pFloat = fTable.GetColumnBuffer(2);
-
-		wstring idName = test::GetIdColumnName(test::TableId::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
 		test::ClearFloatTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Insert some values
-		*pId = (SQLINTEGER)101;
-		*pDouble = 3.14159265359;
-		*pFloat = -3.14159;
+		fTable.SetColumnValue(0, (SQLINTEGER)101);
+		fTable.SetColumnValue(1, (SQLDOUBLE)3.14159265359);
+		fTable.SetColumnValue(2, (SQLDOUBLE)-3.14159);
 		fTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// And update them using the key fields
-		*pDouble = -6.2343354;
-		*pFloat = 989.213;
+		fTable.SetColumnValue(1, (SQLDOUBLE)-6.2343354);
+		fTable.SetColumnValue(2, (SQLDOUBLE)989.213);
 		EXPECT_NO_THROW(fTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
 		Table fTable2(&m_db, floatTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(fTable2.Open());
-		ColumnBuffer* pId2 = fTable2.GetColumnBuffer(0);
-		ColumnBuffer* pDouble2 = fTable2.GetColumnBuffer(1);
-		ColumnBuffer* pFloat2 = fTable2.GetColumnBuffer(2);
 
 		fTable2.Select();
 		EXPECT_TRUE(fTable2.SelectNext());
 
-		EXPECT_EQ(101, (SQLINTEGER)*pId2);
-		EXPECT_EQ((SQLDOUBLE)*pDouble, (SQLDOUBLE)*pDouble2);
-		EXPECT_EQ((SQLDOUBLE)*pFloat, (SQLDOUBLE)*pFloat2);
+		EXPECT_EQ(101, fTable2.GetInt(0));
+		EXPECT_EQ(-6.2343354, fTable2.GetDouble(1));
+		EXPECT_EQ(989.213, fTable2.GetDouble(2));
 	}
 
 
