@@ -2454,23 +2454,13 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_18_10)
 	{
-
-
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
 		ASSERT_NO_THROW(t.Open());
-		ColumnBuffer* pId = t.GetColumnBuffer(0);
-		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
-		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
-		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-
-		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearNumericTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		SQL_NUMERIC_STRUCT numStr;
 		ZeroMemory(&numStr, sizeof(numStr));
@@ -2487,10 +2477,10 @@ namespace exodbc
 		numStr.scale = 10;
 		numStr.sign = 1;
 
-		pNumeric_18_0->SetNull();
-		*pNumeric_18_10 = numStr;
-		pNumeric_5_3->SetNull();
-		*pId = (SQLINTEGER)300;
+		t.SetColumnValue(0, (SQLINTEGER)300);
+		t.SetColumnNull(1);
+		t.SetColumnValue(2, numStr);
+		t.SetColumnNull(3);
 		EXPECT_NO_THROW(t.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
@@ -2498,22 +2488,13 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_All)
 	{
-
-
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
 		ASSERT_NO_THROW(t.Open());
-		ColumnBuffer* pId = t.GetColumnBuffer(0);
-		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
-		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
-		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearNumericTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		SQL_NUMERIC_STRUCT numStr18_0;
 		ZeroMemory(&numStr18_0, sizeof(numStr18_0));
@@ -2551,10 +2532,10 @@ namespace exodbc
 		numStr5_3.scale = 3;
 		numStr5_3.sign = 1;
 
-		*pId = (SQLINTEGER)300;
-		*pNumeric_18_0 = numStr18_0;
-		*pNumeric_18_10 = numStr18_10;
-		*pNumeric_5_3 = numStr5_3;
+		t.SetColumnValue(0, (SQLINTEGER)300);
+		t.SetColumnValue(1, numStr18_0);
+		t.SetColumnValue(2, numStr18_10);
+		t.SetColumnValue(3, numStr5_3);
 		EXPECT_NO_THROW(t.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
@@ -2565,10 +2546,6 @@ namespace exodbc
 		std::wstring blobTypesTmpTableName = test::GetTableName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table bTable(&m_db, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		ASSERT_NO_THROW(bTable.Open());
-
-		ColumnBuffer* pId = bTable.GetColumnBuffer(0);
-		ColumnBuffer* pBlob = bTable.GetColumnBuffer(1);
-		ColumnBuffer* pVarBlob_20 = bTable.GetColumnBuffer(2);
 
 		// Remove everything, ignoring if there was any data:
 		test::ClearBlobTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
@@ -2601,22 +2578,25 @@ namespace exodbc
 		};
 
 		// Insert some values
-		*pId = (SQLINTEGER)100;
-		pBlob->SetBinaryValue(empty, sizeof(empty));
-		pVarBlob_20->SetNull();
+		bTable.SetColumnValue(0, (SQLINTEGER)100);
+		bTable.SetBinaryValue(1, empty, sizeof(empty));
+		bTable.SetColumnNull(2);
 		EXPECT_NO_THROW(bTable.Insert());
-		*pId = (SQLINTEGER)101;
-		pBlob->SetBinaryValue(ff, sizeof(ff));
+		bTable.SetColumnValue(0, (SQLINTEGER)101);
+		bTable.SetBinaryValue(1, ff, sizeof(ff));
+		bTable.SetColumnNull(2);
 		EXPECT_NO_THROW(bTable.Insert());
-		*pId = (SQLINTEGER)102;
-		pBlob->SetBinaryValue(abc, sizeof(abc));
+		bTable.SetColumnValue(0, (SQLINTEGER)102);
+		bTable.SetBinaryValue(1, abc, sizeof(abc));
+		bTable.SetColumnNull(2);
 		EXPECT_NO_THROW(bTable.Insert());
-		*pId = (SQLINTEGER)103;
-		pBlob->SetNull();
-		pVarBlob_20->SetBinaryValue(abc, sizeof(abc));
+		bTable.SetColumnValue(0, (SQLINTEGER)103);
+		bTable.SetColumnNull(1);
+		bTable.SetBinaryValue(2, abc, sizeof(abc));
 		EXPECT_NO_THROW(bTable.Insert());
-		*pId = (SQLINTEGER)104;
-		pVarBlob_20->SetBinaryValue(abc_ff, sizeof(abc_ff));
+		bTable.SetColumnValue(0, (SQLINTEGER)104);
+		bTable.SetColumnNull(1);
+		bTable.SetBinaryValue(2, abc_ff, sizeof(abc_ff));
 		EXPECT_NO_THROW(bTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -2624,34 +2604,36 @@ namespace exodbc
 		sqlstmt = (boost::wformat(L"%s = 100") % idName).str();
 		bTable.Select(sqlstmt);
 		EXPECT_TRUE(bTable.SelectNext());
-		const SQLCHAR* pEmpty = *pBlob;
+		SQLINTEGER bufferSize = 0;
+		SQLINTEGER cb = 0;
+		const SQLCHAR* pEmpty = bTable.GetBinaryValue(1, bufferSize, cb);
 		EXPECT_EQ(0, memcmp(empty, pEmpty, sizeof(empty)));
 
 		sqlstmt = (boost::wformat(L"%s = 101") % idName).str();
 		bTable.Select(sqlstmt);
 		EXPECT_TRUE(bTable.SelectNext());
-		const SQLCHAR* pFf = *pBlob;
+		const SQLCHAR* pFf = bTable.GetBinaryValue(1, bufferSize, cb);
 		EXPECT_EQ(0, memcmp(ff, pFf, sizeof(ff)));
 
 		sqlstmt = (boost::wformat(L"%s = 102") % idName).str();
 		bTable.Select(sqlstmt);
 		EXPECT_TRUE(bTable.SelectNext());
-		const SQLCHAR* pAbc = *pBlob;
+		const SQLCHAR* pAbc = bTable.GetBinaryValue(1, bufferSize, cb);
 		EXPECT_EQ(0, memcmp(abc, pAbc, sizeof(abc)));
 
 		sqlstmt = (boost::wformat(L"%s = 103") % idName).str();
 		bTable.Select(sqlstmt);
 		EXPECT_TRUE(bTable.SelectNext());
-		pAbc = *pVarBlob_20;
+		pAbc = bTable.GetBinaryValue(2, bufferSize, cb);
 		EXPECT_EQ(0, memcmp(abc, pAbc, sizeof(abc)));
-		EXPECT_EQ(sizeof(abc), pVarBlob_20->GetCb());
+		EXPECT_EQ(sizeof(abc), cb);
 
 		sqlstmt = (boost::wformat(L"%s = 104") % idName).str();
 		bTable.Select(sqlstmt);
 		EXPECT_TRUE(bTable.SelectNext());
-		const SQLCHAR* pAbc_ff = *pVarBlob_20;
+		const SQLCHAR* pAbc_ff = bTable.GetBinaryValue(2, bufferSize, cb);
 		EXPECT_EQ(0, memcmp(abc_ff, pAbc_ff, sizeof(abc_ff)));
-		EXPECT_EQ(sizeof(abc_ff), pVarBlob_20->GetCb());
+		EXPECT_EQ(sizeof(abc_ff), cb);
 	}
 
 
@@ -2662,33 +2644,29 @@ namespace exodbc
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
 		ASSERT_NO_THROW(cTable.Open());
 
-		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
-		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
-		ColumnBuffer* pChar = cTable.GetColumnBuffer(2);
-		ColumnBuffer* pVarchar_10 = cTable.GetColumnBuffer(3);
-		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
-
 		// Remove everything, ignoring if there was any data:
 		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 
 		// Insert some values:
 		std::string s = "Hello World!";
-		*pId = (SQLINTEGER)100;
-		*pVarchar = s;
-		*pChar = s;
-		pVarchar_10->SetNull();
-		pChar_10->SetNull();
+		cTable.SetColumnValue(0, (SQLINTEGER)100);
+		cTable.SetColumnValue(1, s);
+		cTable.SetColumnValue(2, s);
+		cTable.SetColumnNull(3);
+		cTable.SetColumnNull(4);
+
 		EXPECT_NO_THROW(cTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Insert one value that uses all space
 		s = "abcde12345";
-		*pId = (SQLINTEGER)101;
-		pVarchar->SetNull();
-		pChar->SetNull();
-		*pVarchar_10 = s;
-		*pChar_10 = s;
+		cTable.SetColumnValue(0, (SQLINTEGER)101);
+		cTable.SetColumnNull(1);
+		cTable.SetColumnNull(2);
+		cTable.SetColumnValue(3, s);
+		cTable.SetColumnValue(4, s);
+
 		EXPECT_NO_THROW(cTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -2728,33 +2706,27 @@ namespace exodbc
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		ASSERT_NO_THROW(cTable.Open());
 
-		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
-		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
-		ColumnBuffer* pChar = cTable.GetColumnBuffer(2);
-		ColumnBuffer* pVarchar_10 = cTable.GetColumnBuffer(3);
-		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
-
 		// Remove everything, ignoring if there was any data:
 		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 
 		// Insert some values:
 		std::wstring s = L"Hello World!";
-		*pId = (SQLINTEGER)100;
-		*pVarchar = s;
-		*pChar = s;
-		pVarchar_10->SetNull();
-		pChar_10->SetNull();
+		cTable.SetColumnValue(0, (SQLINTEGER)100);
+		cTable.SetColumnValue(1, s);
+		cTable.SetColumnValue(2, s);
+		cTable.SetColumnNull(3);
+		cTable.SetColumnNull(4);
 		EXPECT_NO_THROW(cTable.Insert());
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// Insert one value that uses all space
 		s = L"abcde12345";
-		*pId = (SQLINTEGER)101;
-		pVarchar->SetNull();
-		pChar->SetNull();
-		*pVarchar_10 = s;
-		*pChar_10 = s;
+		cTable.SetColumnValue(0, (SQLINTEGER)101);
+		cTable.SetColumnNull(1);
+		cTable.SetColumnNull(2);
+		cTable.SetColumnValue(3, s);
+		cTable.SetColumnValue(4, s);
 		EXPECT_NO_THROW(cTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
