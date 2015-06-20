@@ -24,75 +24,19 @@
 
 namespace exodbc
 {
-	///*!
-	//* \enum		TableQueryNameHint
-	//* \brief	A helper to specify how to build the name of the table to be used in a SQL query.
-	//*/
-	//enum class TableQueryNameHint
-	//{
-	//	ALL,			///< Use Catalog, Schema and TableName, resulting in 'CatalogName.SchemaName.TableName'
-	//	TABLE_ONLY,		///< Use only TableName
-	//	CATALOG_TABLE,	///< Use Catalog and TableName, resulting in 'CatalogName.TableName'
-	//	SCHEMA_TABLE,	///< Use Schema and TableName, resulting in 'SchemaName.TableName'
-	//	EXCEL			///< For Excel use only the TableName$ and wrap it inside [], so it becomes '[TableName$]'. \note: The '$' is not added automatically.
-	//};
-
-
 	/*!
 	* \class ObjectName
 	*
 	* \brief Name of an Object.
 	*/
-	class ObjectName
+	class EXODBCAPI ObjectName
 	{
 	public:
+		virtual ~ObjectName();
+
 		virtual std::wstring GetQueryName() const = 0;
 		virtual std::wstring GetPureName() const = 0;
 	};
-
-
-	///*!
-	//* \class TableName
-	//*
-	//* \brief Name of a Table.
-	//*/
-	//class TableName
-	//	: public ObjectName
-	//{
-	//public:
-	//	TableName() {};
-	//	TableName(const TableInfo& tableInfo, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
-
-	//	virtual std::wstring GetQueryName() const;
-	//	virtual std::wstring GetPureName() const;
-
-	//private:
-	//	TableInfo m_tableInfo;
-	//	DatabaseProduct m_dbms;
-	//};
-
-
-	///*!
-	//* \class ColumnName
-	//*
-	//* \brief Name of a column.
-	//*/
-	//class ColumnName
-	//	: public ObjectName
-	//{
-	//public:
-	//	ColumnName();
-	//	ColumnName(const std::wstring& queryName);
-	//	ColumnName(const SColumnInfo& columnInfo);
-
-	//	virtual std::wstring GetQueryName() const;
-	//	virtual std::wstring GetPureName() const;
-
-	//private:
-	//	bool m_haveColumnInfo;
-	//	SColumnInfo m_columnInfo;
-	//	std::wstring m_queryName;
-	//};
 }
 
 #endif // OBJECTNAME_H

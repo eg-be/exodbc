@@ -41,8 +41,8 @@ namespace exodbc
 		TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
 		TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
 
-		virtual std::wstring GetQueryName() const;
-		virtual std::wstring GetPureName() const;
+		virtual std::wstring GetQueryName() const override;
+		virtual std::wstring GetPureName() const override;
 
 		std::wstring		GetType() const { return m_tableType; };
 		std::wstring		GetCatalog() const { return m_catalogName;};
@@ -81,15 +81,17 @@ namespace exodbc
 		: public ObjectName
 	{
 	public:
-		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName)
-			: m_sqlType(sqlType)
-			, m_queryName(queryName)
-		{};
+		ManualColumnInfo();
+		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize = -1, SQLINTEGER decimalDigits = -1);
+
+		virtual std::wstring GetQueryName() const override;
+		virtual std::wstring GetPureName() const override;
 
 	private:
 		SQLSMALLINT m_sqlType;
 		std::wstring m_queryName;
-
+		SQLINTEGER m_columnSize;
+		SQLINTEGER m_decimalDigits;
 	};
 
 
@@ -112,8 +114,8 @@ namespace exodbc
 			bool isBufferSizeNull, bool isDecimalDigitsNull, bool isNumPrecRadixNull, bool isRemarksNull, bool isDefaultValueNull, bool isSqlDatetimeSubNull,
 			bool isIsNullableNull);
 
-		virtual std::wstring GetQueryName() const;
-		virtual std::wstring GetPureName() const;
+		virtual std::wstring GetQueryName() const override;
+		virtual std::wstring GetPureName() const override;
 
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
@@ -203,8 +205,8 @@ namespace exodbc
 		TablePrimaryKeyInfo(const std::wstring& catalogName, const std::wstring& schemaName, const std::wstring& tableName, const std::wstring& columnName,
 			SQLSMALLINT keySequence, const std::wstring& keyName, bool isCatalogNull, bool isSchemaNull, bool isPrimaryKeyNameNull);
 
-		virtual std::wstring GetQueryName() const;
-		virtual std::wstring GetPureName() const;
+		virtual std::wstring GetQueryName() const override;
+		virtual std::wstring GetPureName() const override;
 
 		std::wstring GetCatalogName() const { exASSERT(!IsCatalogNull()); return m_catalogName; };
 		std::wstring GetSchemaName() const { exASSERT(!IsSchemaNull()); return m_schemaName; };

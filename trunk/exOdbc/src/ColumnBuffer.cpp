@@ -43,12 +43,15 @@ namespace exodbc
 		, m_hStmt(SQL_NULL_HSTMT)
 		, m_flags(flags)
 		, m_cb(SQL_NULL_DATA)
+		, m_pName(NULL)
 	{
 		exASSERT(columnInfo.GetSqlDataType() != 0);
 		exASSERT(m_flags & CF_SELECT);
 
+		// Create ObjectName from ColumnInfo
+		m_pName = new ColumnInfo(columnInfo);
+
 		// Remember some values from ColumnInfo
-		m_queryName = columnInfo.GetQueryName();
 		if (!columnInfo.IsColumnSizeNull())
 		{
 			m_columnSize = columnInfo.GetColumnSize();
@@ -95,7 +98,6 @@ namespace exodbc
 		, m_bufferSize(bufferSize)
 		, m_columnNr(0)
 		, m_bufferPtr(bufferPtrVariant)
-		, m_queryName(queryName)
 		, m_odbcVersion(odbcVersion)
 		, m_decimalDigits(decimalDigits)
 		, m_columnSize(columnSize)
@@ -103,10 +105,13 @@ namespace exodbc
 		, m_sqlType(sqlType)
 		, m_flags(flags)
 		, m_cb(0)
+		, m_pName(NULL)
 	{
 		exASSERT(sqlCType != 0);
 		exASSERT(bufferSize > 0);
-		exASSERT(!m_queryName.empty());
+
+		// Create ObjectName from manual definition
+		m_pName = new ManualColumnInfo(sqlType, queryName, columnSize, decimalDigits);
 	}
 
 	// Destructor
@@ -116,18 +121,32 @@ namespace exodbc
 		// Unbind column
 		if (IsBound())
 		{
-			Unbind(m_hStmt);
+			try
+			{
+				Unbind(m_hStmt);
+			}
+			catch (const Exception& ex)
+			{
+				LOG_ERROR(boost::str(boost::wformat(L"Failed to Unbind m_hStmt of Column '%s': %s") % GetQueryNameNoThrow() % ex.ToString()));
+			}
 		}
 
 		// Unbind all parameters
 		for (BoundParameterPtrsVector::const_iterator it = m_boundParameters.begin(); it != m_boundParameters.end(); it++)
 		{
 			BoundParameter* pParam = *it;
-			UnbindParameter(pParam->m_hStmt, pParam->m_parameterNumber);
+			try
+			{
+				UnbindParameter(pParam->m_hStmt, pParam->m_parameterNumber);
+			}
+			catch (const Exception& ex)
+			{
+				LOG_ERROR(boost::str(boost::wformat(L"Failed to Free Parameter %d of Column '%s': %s") % pParam->m_parameterNumber % GetQueryNameNoThrow() % ex.ToString()));
+			}
 			delete pParam;
 		}
 		m_boundParameters.clear();
-		
+
 		// Free buffer
 		if (m_allocatedBuffer)
 		{
@@ -178,10 +197,17 @@ namespace exodbc
 					exASSERT(false);
 				}
 			}
-			catch (boost::bad_get ex)
+			catch (const boost::bad_get& ex)
 			{
-				LOG_ERROR(ex.what());
+				WrapperException we(ex);
+				LOG_ERROR(boost::str(boost::wformat(L"Failed to free Buffer of Column '%s': %s") % GetQueryNameNoThrow() % we.ToString()));
 			}
+		}
+
+		// delete ObjectName
+		if (m_pName)
+		{
+			delete m_pName;
 		}
 	}
 
@@ -213,7 +239,7 @@ namespace exodbc
 			SQLRETURN ret;
 			ret = SQLBindParameter(pBp->m_hStmt, pBp->m_parameterNumber, SQL_PARAM_INPUT, m_bufferType, m_sqlType, m_columnSize >= 0 ? m_columnSize : 0, m_decimalDigits >= 0 ? m_decimalDigits : 0, pBuffer, m_bufferSize, &(m_cb));
 			THROW_IFN_SUCCEEDED_MSG(SQLBindParameter, ret, SQL_HANDLE_STMT, pBp->m_hStmt,
-				boost::str(boost::wformat(L"Failed to BindParmater nr %d from ColumnBuffer with QueryName '%s'; Buffer Type: %s (%d), SQL Type: %s (%d)") %pBp->m_parameterNumber %GetQueryName() %SqLCType2s(m_bufferType) %m_bufferType %SqlType2s(m_sqlType) %m_sqlType));
+				boost::str(boost::wformat(L"Failed to BindParmater nr %d from ColumnBuffer with QueryName '%s'; Buffer Type: %s (%d), SQL Type: %s (%d)") % pBp->m_parameterNumber %GetQueryNameNoThrow() % SqLCType2s(m_bufferType) % m_bufferType %SqlType2s(m_sqlType) % m_sqlType));
 
 			// Do some additional steps for numeric types
 			if (SQL_C_NUMERIC == m_bufferType)
@@ -262,10 +288,10 @@ namespace exodbc
 		if (m_bufferType == SQL_C_NUMERIC)
 		{
 			SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER) m_bufferType);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER) NULL);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER) NULL);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER) NULL);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER)m_bufferType);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)NULL);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)NULL);
+			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)NULL);
 		}
 		else
 		{
@@ -487,7 +513,7 @@ namespace exodbc
 			if (!columnInfo.IsDecimalDigitsNull() && columnInfo.GetDecimalDigits() > 0)
 			{
 				// +3: 1 for '.' and one for trailing zero and one for a '-'
-				return columnInfo.GetColumnSize() + 3; 
+				return columnInfo.GetColumnSize() + 3;
 			}
 			else
 			{
@@ -662,11 +688,33 @@ namespace exodbc
 
 	void ColumnBuffer::SetNull()
 	{
-		exASSERT(HasBuffer()); 
-		exASSERT(IsBound()); 
+		exASSERT(HasBuffer());
+		exASSERT(IsBound());
 		exASSERT(IsNullable());
 
 		m_cb = SQL_NULL_DATA;
+	}
+
+
+	std::wstring ColumnBuffer::GetQueryName() const
+	{
+		exASSERT(m_pName);
+
+		return m_pName->GetQueryName();
+	}
+
+
+	std::wstring ColumnBuffer::GetQueryNameNoThrow() const throw()
+	{
+		try
+		{
+			return GetQueryName();
+		}
+		catch (const Exception& ex)
+		{
+			LOG_ERROR(boost::str(boost::wformat(L"Failed to query Query-Name: %s") % ex.ToString()));
+			return L"???";
+		}
 	}
 
 
