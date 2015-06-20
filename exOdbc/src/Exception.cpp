@@ -57,6 +57,7 @@ namespace exodbc
 	{
 		std::wstringstream ws;
 		ws << GetName();
+		ws << L"[";
 		if (m_line > 0)
 		{
 			// keep only filename
@@ -66,8 +67,9 @@ namespace exodbc
 			{
 				fname = m_file.substr(pos + 1);
 			}
-			ws << L"[" << fname << L"(" << m_line << L")@" << m_functionname << L"]";
+			ws << fname << L"(" << m_line << L")@" << m_functionname;
 		}
+		ws << L"]";
 		if (!m_msg.empty())
 		{
 			ws << L": " << m_msg;
@@ -93,6 +95,7 @@ namespace exodbc
 		BuildErrorMsg(sqlFunctionName, ret);
 		m_what = w2s(ToString());
 	}
+
 
 	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg /* = L"" */) throw()
 		: Exception(msg)
@@ -175,22 +178,11 @@ namespace exodbc
 	}
 
 
-
-	std::wstring WrapperException::ToString() const throw()
-	{
-		// return ToString(m_ex);
-		// note: We do not call ToString() here - our internal copy has lost the exception type. see ticket #144
-		// we simply return the string we've built upon construction
-		return s2w(m_what);
-	}
-
-
-	std::wstring WrapperException::ToString(const std::exception& ex) const throw()
+	std::wstring WrapperException::ToString() const
 	{
 		std::wstringstream ws;
 		ws << Exception::ToString();
-		std::string w(ex.what());
-		ws << s2w(w);
+		ws << s2w(m_innerExceptionMsg);
 		return ws.str();
 	}
 
