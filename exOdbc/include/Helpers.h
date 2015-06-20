@@ -592,6 +592,15 @@ namespace exodbc
 	} while(0)
 
 // Helpers to throw if not successfully
+#define THROW_IFN_SUCCEEDED_SILENT_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
+	do { \
+		if(!SQL_SUCCEEDED(sqlReturn)) { \
+			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
+			SET_EXCEPTION_SOURCE(ex); \
+			throw ex; \
+		} \
+	} while(0)
+
 #define THROW_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
 	do { \
 		if(!SQL_SUCCEEDED(sqlReturn)) { \
