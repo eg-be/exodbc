@@ -2134,32 +2134,23 @@ namespace exodbc
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		ASSERT_NO_THROW(iTable.Open());
-		ColumnBuffer* pId = iTable.GetColumnBuffer(0);
-		ColumnBuffer* pSmallInt = iTable.GetColumnBuffer(1);
-		ColumnBuffer* pInt = iTable.GetColumnBuffer(2);
-		ColumnBuffer* pBigInt = iTable.GetColumnBuffer(3);
-
-		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 
 		// Remove everything, ignoring if there was any data:
 		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
 
 		// Set some silly values to insert
-		*pId = (SQLINTEGER)101;
-		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		iTable.SetColumnValue(0, (SQLINTEGER)101);
+		iTable.SetColumnValue(2, (SQLINTEGER)103);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
-			*pSmallInt = (SQLSMALLINT)102;
+			iTable.SetColumnValue(1, (SQLINTEGER)102);
+			iTable.SetColumnNull(3);
 		}
 		else
 		{
-			*pSmallInt = (SQLINTEGER)102;
+			iTable.SetColumnValue(1, (SQLSMALLINT)102);
+			iTable.SetColumnValue(3, (SQLBIGINT)104);
 		}
-		*pInt = (SQLINTEGER)103;
-		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
-		{
-			*pBigInt = (SQLBIGINT)104;
-		}
-
 		EXPECT_NO_THROW(iTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -2228,10 +2219,6 @@ namespace exodbc
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		ASSERT_NO_THROW(dTable.Open());
-		//ColumnBuffer* pId = dTable.GetColumnBuffer(0);
-		//ColumnBuffer* pDate = dTable.GetColumnBuffer(1);
-		//ColumnBuffer* pTime = dTable.GetColumnBuffer(2);
-		//ColumnBuffer* pTimestamp = dTable.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
 		test::ClearDateTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
@@ -2329,54 +2316,37 @@ namespace exodbc
 			fTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
 		ASSERT_NO_THROW(fTable.Open());
-		ColumnBuffer* pId = fTable.GetColumnBuffer(0);
-		ColumnBuffer* pDouble = fTable.GetColumnBuffer(1);
-		ColumnBuffer* pFloat = fTable.GetColumnBuffer(2);
-
-		wstring idName = test::GetIdColumnName(test::TableId::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(fTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearFloatTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Insert some values
-		*pId = (SQLINTEGER)101;
-		*pDouble = 3.14159265359;
-		*pFloat = -3.14159;
+		fTable.SetColumnValue(0, (SQLINTEGER)101);
+		fTable.SetColumnValue(1, (SQLDOUBLE)3.14159265359);
+		fTable.SetColumnValue(2, (SQLDOUBLE)-3.14159);
 		EXPECT_NO_THROW(fTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
 		// Open another table and read the values from there
 		Table fTable2(&m_db, floatTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(fTable2.Open());
-		ColumnBuffer* pId2 = fTable2.GetColumnBuffer(0);
-		ColumnBuffer* pDouble2 = fTable2.GetColumnBuffer(1);
-		ColumnBuffer* pFloat2 = fTable2.GetColumnBuffer(2);
 
 		fTable2.Select();
 		EXPECT_TRUE(fTable2.SelectNext());
 
-		EXPECT_EQ(101, (SQLINTEGER)*pId2);
-		EXPECT_EQ((SQLDOUBLE)*pDouble, (SQLDOUBLE)*pDouble2);
-		EXPECT_EQ((SQLDOUBLE)*pFloat, (SQLDOUBLE)*pFloat2);
+		EXPECT_EQ(101, fTable2.GetInt(0));
+		EXPECT_EQ((SQLDOUBLE)3.14159265359, fTable2.GetDouble(1));
+		EXPECT_EQ((SQLDOUBLE)-3.14159, fTable2.GetDouble(2));
 	}
 
 
 	TEST_P(TableTest, InsertNumericTypes)
 	{
-
-
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(nTable.Open());
-		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
-		ColumnBuffer* pNumeric_18_0 = nTable.GetColumnBuffer(1);
-		ColumnBuffer* pNumeric_18_10 = nTable.GetColumnBuffer(2);
-		ColumnBuffer* pNumeric_5_3 = nTable.GetColumnBuffer(3);
 
 		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Select a valid record from the non-tmp table
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
@@ -2392,15 +2362,14 @@ namespace exodbc
 		EXPECT_NO_THROW(numStr18_10 = nnTable.GetNumeric(2));
 		nnTable.SelectClose();
 
-		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(nTable.Delete(sqlstmt, false));
-		EXPECT_NO_THROW(m_db.CommitTrans());
+		// Remove everything from the tmp-table
+		test::ClearNumericTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
-		// Insert the just read values
-		*pId = (SQLINTEGER)101;
-		*pNumeric_18_0 = numStr18_0;
-		*pNumeric_18_10 = numStr18_10;
-		*pNumeric_5_3 = numStr5_3;
+		// Insert the just read value into the tmp-table
+		nTable.SetColumnValue(0, (SQLINTEGER)101);
+		nTable.SetColumnValue(1, numStr18_0);
+		nTable.SetColumnValue(2, numStr18_10);
+		nTable.SetColumnValue(3, numStr5_3);
 		EXPECT_NO_THROW(nTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -2408,8 +2377,7 @@ namespace exodbc
 		SQL_NUMERIC_STRUCT numStr18_0t, numStr18_10t, numStr5_3t;
 		Table nntTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 		ASSERT_NO_THROW(nntTable.Open());
-		sqlstmt = (boost::wformat(L"%s = %d") % idName % (SQLINTEGER)*pId).str();
-		nntTable.Select(sqlstmt);
+		nntTable.Select();
 		EXPECT_TRUE(nntTable.SelectNext());
 		EXPECT_NO_THROW(numStr18_0t = nntTable.GetNumeric(1));
 		EXPECT_NO_THROW(numStr18_10t = nntTable.GetNumeric(2));
@@ -2423,22 +2391,13 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_5_3)
 	{
-
-
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
 		ASSERT_NO_THROW(t.Open());
-		ColumnBuffer* pId = t.GetColumnBuffer(0);
-		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
-		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
-		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") %idName).str();
-		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearNumericTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		SQL_NUMERIC_STRUCT numStr;
 		ZeroMemory(&numStr, sizeof(numStr));
@@ -2448,10 +2407,11 @@ namespace exodbc
 		numStr.scale = 3;
 		numStr.sign = 1;
 
-		pNumeric_18_0->SetNull();
-		pNumeric_18_10->SetNull();
-		*pNumeric_5_3 = numStr;
-		*pId = (SQLINTEGER)300;
+		t.SetColumnValue(0, (SQLINTEGER)300);
+		t.SetColumnNull(1);
+		t.SetColumnNull(2);
+		t.SetColumnValue(3, numStr);
+
 		EXPECT_NO_THROW(t.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
@@ -2459,23 +2419,13 @@ namespace exodbc
 
 	TEST_P(TableTest, InsertNumericTypes_18_0)
 	{
-
-
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
 
 		ASSERT_NO_THROW(t.Open());
-		ColumnBuffer* pId = t.GetColumnBuffer(0);
-		ColumnBuffer* pNumeric_18_0 = t.GetColumnBuffer(1);
-		ColumnBuffer* pNumeric_18_10 = t.GetColumnBuffer(2);
-		ColumnBuffer* pNumeric_5_3 = t.GetColumnBuffer(3);
 
 		// Remove everything, ignoring if there was any data:
-		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-
-		ASSERT_NO_THROW(t.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearNumericTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		SQL_NUMERIC_STRUCT numStr;
 		ZeroMemory(&numStr, sizeof(numStr));
@@ -2492,10 +2442,11 @@ namespace exodbc
 		numStr.scale = 0;
 		numStr.sign = 1;
 
-		*pNumeric_18_0 = numStr;
-		pNumeric_18_10->SetNull();
-		pNumeric_5_3->SetNull();
-		*pId = (SQLINTEGER)300;
+		t.SetColumnValue(0, (SQLINTEGER)300);
+		t.SetColumnValue(1, numStr);
+		t.SetColumnNull(2);
+		t.SetColumnNull(3);
+
 		EXPECT_NO_THROW(t.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 	}
