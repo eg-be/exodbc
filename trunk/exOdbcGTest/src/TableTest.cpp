@@ -2837,7 +2837,7 @@ namespace exodbc
 	TEST_P(TableTest, UpdateIntTypes)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			// Manually set the PKs on access
@@ -2923,7 +2923,7 @@ namespace exodbc
 	TEST_P(TableTest, UpdateDateTypes)
 	{
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
-		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			dTable.SetColumnPrimaryKeyIndexes({ 0 });
@@ -3010,10 +3010,8 @@ namespace exodbc
 	
 	TEST_P(TableTest, UpdateNumericTypes)
 	{
-
-
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ_WRITE);
+		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 		ASSERT_NO_THROW(nTable.Open());
 		ColumnBuffer* pId = nTable.GetColumnBuffer(0);
 		ColumnBuffer* pNumeric_18_0 = nTable.GetColumnBuffer(1);
@@ -3024,8 +3022,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(nTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearNumericTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Insert some boring 0 entries
 		SQL_NUMERIC_STRUCT num = InitNullNumeric();
@@ -3105,7 +3102,7 @@ namespace exodbc
 	TEST_P(TableTest, UpdateFloatTypes)
 	{
 		std::wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", AF_READ_WRITE);
+		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			fTable.SetColumnPrimaryKeyIndexes({ 0 });
@@ -3119,8 +3116,7 @@ namespace exodbc
 		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
 
 		// Remove everything, ignoring if there was any data:
-		ASSERT_NO_THROW(fTable.Delete(sqlstmt, false));
-		ASSERT_NO_THROW(m_db.CommitTrans());
+		test::ClearFloatTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
 		// Insert some values
 		*pId = (SQLINTEGER)101;
@@ -3154,7 +3150,7 @@ namespace exodbc
 	TEST_P(TableTest, UpdateWCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
-		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_UPDATE | AF_INSERT);
+		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_UPDATE_PK | AF_INSERT);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			cTable.SetColumnPrimaryKeyIndexes({ 0 });
