@@ -551,6 +551,13 @@ namespace exodbc
 	}
 
 
+	bool Table::ColumnBufferExists(SQLSMALLINT columnIndex) const throw()
+	{
+		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.find(columnIndex);
+		return it != m_columnBuffers.end();
+	}
+
+
 	ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnIndex) const
 	{
 		exASSERT(IsOpen());

@@ -765,6 +765,13 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Check if a ColumnBuffer exists at the given columnIndex.
+		* \return	True if a ColumnBuffer can be accessed using passed columnIndex.
+		*/
+		bool		ColumnBufferExists(SQLSMALLINT columnIndex) const throw();
+
+
+		/*!
 		* \brief	Return a defined ColumnBuffer.
 		* \details	Searches the internal map of ColumnBuffers for a ColumnBuffer with
 		*			the given columnIndex (zero based).
