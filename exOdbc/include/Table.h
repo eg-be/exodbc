@@ -237,10 +237,10 @@ namespace exodbc
 		*  - TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS:
 		*			If set, ColumnBuffer that failed to be created with a NotSupportedException are simply
 		*			skipped. Default is to re-throw the NotSupportedException.
-		*			\note This has only an influence if ColumnBuffers are created automatically by determining
+		*			This has only an influence if ColumnBuffers are created automatically by determining
 		*			the buffer type from the column information read from the Database. If you have created
 		*			ColumnBuffers manually using SetColumn(), this flag is ignored.
-		*			\note The indexes of the bound ColumnBuffers will still match the indexes of the actual table,
+		*			The indexes of the bound ColumnBuffers will still match the indexes of the actual table,
 		*			but some ColumnBuffers will not be created. This will lead to an  IllegalArgumentException if
 		*			you try to access them using any of the functions that take a columnIndex as argument.
 		*  - TOF_CHAR_TRIM_LEFT:
@@ -257,10 +257,10 @@ namespace exodbc
 		*			this flag is set, or the column indexes of the Table have been passed prior to Open()
 		*			using SetColumnPrimaryKeyIndexes().
 		*			If this flag is set, the primary keys are not queried.
-		*			\note This flag is set automatically whenever Open() ing a Table from a Microsoft Access Database,
+		*			This flag is set automatically whenever Open() ing a Table from a Microsoft Access Database,
 		*			as the Access Driver I used for testing (ODBCJT32.DLL, v6.01.7601.17632, 
 		*			'Microsoft Access Driver (*.mdb')') does not support the SQLPrimaryKeys() method.
-		*			\note This flag is sometimes active implicitly, for example if you have manually defined 
+		*			This flag is sometimes active implicitly, for example if you have manually defined 
 		*			primary key columns using SetColumnPrimaryKeyIndexes().
 		* \see		IsOpen()
 		* \see		Close()
