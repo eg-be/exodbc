@@ -1769,51 +1769,54 @@ namespace exodbc
 		ASSERT_NO_THROW(nTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
-		const ColumnBuffer* pColId = nTable.GetColumnBuffer(0);
-		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
-		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
-		const ColumnBuffer* pColBuff5_3 = nTable.GetColumnBuffer(3);
+		
+		// col indexes:
+		SQLSMALLINT iid = 0;
+		SQLSMALLINT i18_00 = 1;
+		SQLSMALLINT i18_10 = 2;
+		SQLSMALLINT i5_3 = 3;
+
 		nTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_FALSE(pColBuff18_00->IsNull());
-		EXPECT_TRUE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_00));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_FALSE(pColBuff18_00->IsNull());
-		EXPECT_TRUE(pColBuff18_10->IsNull());
-		EXPECT_FALSE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_00));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_10));
+		EXPECT_FALSE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_FALSE(pColBuff18_00->IsNull());
-		EXPECT_TRUE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_00));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_TRUE(pColBuff18_00->IsNull());
-		EXPECT_FALSE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_00));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_TRUE(pColBuff18_00->IsNull());
-		EXPECT_FALSE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_00));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 6") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_TRUE(pColBuff18_00->IsNull());
-		EXPECT_FALSE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_00));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 	}
 	
 	
@@ -1828,9 +1831,9 @@ namespace exodbc
 		
 		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		SQL_NUMERIC_STRUCT numStr;
-		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
-		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
-		const ColumnBuffer* pColBuff5_3 = nTable.GetColumnBuffer(3);
+		//const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
+		//const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
+		//const ColumnBuffer* pColBuff5_3 = nTable.GetColumnBuffer(3);
 		SQLBIGINT ex;
 		SQLBIGINT* p;
 
@@ -1985,51 +1988,54 @@ namespace exodbc
 		ASSERT_NO_THROW(nTable.Open());
 
 		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
-		const ColumnBuffer* pColId = nTable.GetColumnBuffer(0);
-		const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
-		const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
-		const ColumnBuffer* pColBuff5_3 = nTable.GetColumnBuffer(3);
+		
+		// col indexes
+		SQLSMALLINT iid = 0;
+		SQLSMALLINT i18_00 = 1;
+		SQLSMALLINT i18_10 = 2;
+		SQLSMALLINT i5_3 = 3;
+
 		nTable.Select((boost::wformat(L"%s = 1") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_FALSE(pColBuff18_00->IsNull());
-		EXPECT_TRUE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_00));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_FALSE(pColBuff18_00->IsNull());
-		EXPECT_TRUE(pColBuff18_10->IsNull());
-		EXPECT_FALSE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_00));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_10));
+		EXPECT_FALSE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_FALSE(pColBuff18_00->IsNull());
-		EXPECT_TRUE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_00));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_TRUE(pColBuff18_00->IsNull());
-		EXPECT_FALSE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_00));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_TRUE(pColBuff18_00->IsNull());
-		EXPECT_FALSE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_00));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 
 		nTable.Select((boost::wformat(L"%s = 6") % idName).str());
 		EXPECT_TRUE(nTable.SelectNext());
-		EXPECT_FALSE(pColId->IsNull());
-		EXPECT_TRUE(pColBuff18_00->IsNull());
-		EXPECT_FALSE(pColBuff18_10->IsNull());
-		EXPECT_TRUE(pColBuff5_3->IsNull());
+		EXPECT_FALSE(nTable.IsColumnNull(iid));
+		EXPECT_TRUE(nTable.IsColumnNull(i18_00));
+		EXPECT_FALSE(nTable.IsColumnNull(i18_10));
+		EXPECT_TRUE(nTable.IsColumnNull(i5_3));
 	}
 
 
