@@ -231,10 +231,10 @@ namespace exodbc
 		*			depending on the AccessFlags value passed during construction or set later.
 		*  - TOF_CHECK_EXISTANCE:
 		*			If set, the database will always be queried if a table matching the
-		*			passed definition during constructions actually exists in the database. Setting this
-		*			value to false makes only sense	if you've passed a TableInfo during construction, 
-		*			as else the Table is required to query the database anyway (and fail if not found).
-		*  - TOF_SKIP_UNSUPPORTED_COLUMNS:
+		*			passed definition during constructions actually exists in the database. Unsetting this
+		*			flag makes only sense if you've passed a TableInfo during construction, 
+		*			as else the Table is required to query the database anyway (and fails if not found).
+		*  - TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS:
 		*			If set, ColumnBuffer that failed to be created with a NotSupportedException are simply
 		*			skipped. Default is to re-throw the NotSupportedException.
 		*			\note This has only an influence if ColumnBuffers are created automatically by determining
@@ -244,18 +244,19 @@ namespace exodbc
 		*			but some ColumnBuffers will not be created. This will lead to an  IllegalArgumentException if
 		*			you try to access them using any of the functions that take a columnIndex as argument.
 		*  - TOF_CHAR_TRIM_LEFT:
-		*			If set, values retrieved using GetColumnValue(SQLSMALLINT columnIndex, std::string& str)
-		*			or GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) are trimmed on the left
+		*			If set, values retrieved using GetStringValue(SQLSMALLINT columnIndex)
+		*			or GetWStringValue(SQLSMALLINT columnIndex) are trimmed on the left
 		*			before being set on str.
 		*  - TOF_CHAR_TRIM_RIGHT:
-		*			If set, values retrieved using GetColumnValue(SQLSMALLINT columnIndex, std::string& str)
-		*			or GetColumnValue(SQLSMALLINT columnIndex, std::wstring& str) are trimmed on the right
+		*			If set, values retrieved using GetStringValue(SQLSMALLINT columnIndex)
+		*			or GetWStringValue(SQLSMALLINT columnIndex) are trimmed on the right
 		*			before being set on str.
 		*  - TOF_DO_NOT_QUERY_PRIMARY_KEYS:
-		*			If a table is not opened read-only during Open() the primary keys get queried.
-		*			If this flag is set, the primary keys are not queried, but defined ColumnBuffers 
-		*			(probably defined using SetColumn() ) are checked for the flag CF_PRIMARY_KEY to build
-		*			the internal PrimaryKeys structure.
+		*			If a table is opened with the AccessFlag::AF_UPDATE_PK or AccessFlag::AF_DELETE_PK set,
+		*			Primary keys are required. They are queried from the Database during Open(), unless
+		*			this flag is set, or the column indexes of the Table have been passed prior to Open()
+		*			using SetColumnPrimaryKeyIndexes().
+		*			If this flag is set, the primary keys are not queried.
 		*			\note This flag is set automatically whenever Open() ing a Table from a Microsoft Access Database,
 		*			as the Access Driver I used for testing (ODBCJT32.DLL, v6.01.7601.17632, 
 		*			'Microsoft Access Driver (*.mdb')') does not support the SQLPrimaryKeys() method.
