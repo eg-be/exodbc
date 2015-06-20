@@ -356,6 +356,16 @@ namespace exodbc
 		*/
 		std::wstring GetQueryName() const;
 
+		
+
+		/*!
+		* \brief	Get the Object Name of this ColumnBuffer.
+		* \return	ObjectName created during construction, pointer is valid until this
+		*			ColumnBuffer is destroyed.
+		* \throw	Exception
+		*/
+		const ObjectName* GetName() const { exASSERT(m_pName); return m_pName; };
+
 
 	private:
 		/*!
