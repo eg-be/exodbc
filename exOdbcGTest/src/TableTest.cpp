@@ -1822,8 +1822,6 @@ namespace exodbc
 	
 	TEST_P(TableTest, SelectAutoNumericValue)
 	{
-
-
 		// \note: There is a special Tests for NULL values, its complicated enough.
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", AF_READ);
@@ -1831,9 +1829,6 @@ namespace exodbc
 		
 		wstring idName = test::GetIdColumnName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		SQL_NUMERIC_STRUCT numStr;
-		//const ColumnBuffer* pColBuff18_00 = nTable.GetColumnBuffer(1);
-		//const ColumnBuffer* pColBuff18_10 = nTable.GetColumnBuffer(2);
-		//const ColumnBuffer* pColBuff5_3 = nTable.GetColumnBuffer(3);
 		SQLBIGINT ex;
 		SQLBIGINT* p;
 
@@ -1909,8 +1904,6 @@ namespace exodbc
 
 	TEST_P(TableTest, SelectManualNumericValue)
 	{
-
-
 		MNumericTypesTable nTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(nTable.Open());
 
@@ -1981,8 +1974,6 @@ namespace exodbc
 
 	TEST_P(TableTest, IsNullManualNumericValue)
 	{
-
-
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, numericTypesTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(nTable.Open());
@@ -3074,12 +3065,6 @@ namespace exodbc
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
 		ASSERT_NO_THROW(cTable.Open());
 		cTable.SetCharTrimRight(true);
-
-		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
-		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
-		ColumnBuffer* pChar = cTable.GetColumnBuffer(2);
-		ColumnBuffer* pVarchar_10 = cTable.GetColumnBuffer(3);
-		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
 		
 		// Remove everything, ignoring if there was any data:
 		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
@@ -3089,18 +3074,20 @@ namespace exodbc
 		// \todo: Note, in IBM DB2 special chars seem to occupy more space (two bytes`?). We cannot have more than 5 special chars if the size of the field is 10..
 		// but this might be because we bind a char to wchar or so.. hm..
 		std::wstring s100 = L"дцаий";
-		*pId = (SQLINTEGER)100;
-		*pVarchar = s100;
-		*pChar = s100;
-		*pVarchar_10 = s100;
-		*pChar_10 = s100;
+		cTable.SetColumnValue(0, (SQLINTEGER)100);
+		cTable.SetColumnValue(1, s100);
+		cTable.SetColumnValue(2, s100);
+		cTable.SetColumnValue(3, s100);
+		cTable.SetColumnValue(4, s100);
+
 		cTable.Insert();
 		std::wstring s101 = L"abcde12345";
-		*pId = (SQLINTEGER)101;
-		*pVarchar = s101;
-		*pChar = s101;
-		*pVarchar_10 = s101;
-		*pChar_10 = s101;
+		cTable.SetColumnValue(0, (SQLINTEGER)101);
+		cTable.SetColumnValue(1, s101);
+		cTable.SetColumnValue(2, s101);
+		cTable.SetColumnValue(3, s101);
+		cTable.SetColumnValue(4, s101);
+
 		cTable.Insert();
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -3142,12 +3129,6 @@ namespace exodbc
 		ASSERT_NO_THROW(cTable.Open());
 		cTable.SetCharTrimRight(true);
 
-		ColumnBuffer* pId = cTable.GetColumnBuffer(0);
-		ColumnBuffer* pVarchar = cTable.GetColumnBuffer(1);
-		ColumnBuffer* pChar = cTable.GetColumnBuffer(2);
-		ColumnBuffer* pVarchar_10 = cTable.GetColumnBuffer(3);
-		ColumnBuffer* pChar_10 = cTable.GetColumnBuffer(4);
-
 		// Remove everything, ignoring if there was any data:
 		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 		wstring idName = test::GetIdColumnName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
@@ -3156,18 +3137,18 @@ namespace exodbc
 		// \todo: Note, in IBM DB2 special chars seem to occupy more space (two bytes`?). We cannot have more than 5 special chars if the size of the field is 10..
 		// but this might be because we bind a char to wchar or so.. hm..
 		std::string s100 = "abcd";
-		*pId = (SQLINTEGER)100;
-		*pVarchar = s100;
-		*pChar = s100;
-		*pVarchar_10 = s100;
-		*pChar_10 = s100;
+		cTable.SetColumnValue(0, (SQLINTEGER)100);
+		cTable.SetColumnValue(1, s100);
+		cTable.SetColumnValue(2, s100);
+		cTable.SetColumnValue(3, s100);
+		cTable.SetColumnValue(4, s100);
 		cTable.Insert();
 		std::string s101 = "abcde12345";
-		*pId = (SQLINTEGER)101;
-		*pVarchar = s101;
-		*pChar = s101;
-		*pVarchar_10 = s101;
-		*pChar_10 = s101;
+		cTable.SetColumnValue(0, (SQLINTEGER)101);
+		cTable.SetColumnValue(1, s101);
+		cTable.SetColumnValue(2, s101);
+		cTable.SetColumnValue(3, s101);
+		cTable.SetColumnValue(4, s101);
 		cTable.Insert();
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
