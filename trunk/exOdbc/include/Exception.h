@@ -36,9 +36,7 @@ namespace exodbc
 
 	/*!
 	* \class Exception
-	*
 	* \brief Base class of all exceptions thrown.
-	*
 	*/
 	class EXODBCAPI Exception
 		: public std::runtime_error
@@ -78,6 +76,10 @@ namespace exodbc
 
 #pragma warning(disable:4251)
 
+	/*!
+	* \class AssertionException
+	* \brief Thrown if trapped on assertion.
+	*/
 	class EXODBCAPI AssertionException
 		: public Exception
 	{
@@ -108,6 +110,10 @@ namespace exodbc
 	};
 
 
+	/*!
+	* \class SqlResultException
+	* \brief Thrown if a SQLFunction does not return successfully.
+	*/
 	class EXODBCAPI SqlResultException
 		: public Exception
 	{
@@ -129,6 +135,10 @@ namespace exodbc
 	};
 
 
+	/*!
+	* \class IllegalArgumentException
+	* \brief Thrown on illegal arguments.
+	*/
 	class EXODBCAPI IllegalArgumentException
 		: public Exception
 	{
@@ -143,6 +153,10 @@ namespace exodbc
 	};
 
 
+	/*!
+	* \class NotSupportedException
+	* \brief Thrown on not supported cominbations of data types, etc.
+	*/
 	class EXODBCAPI NotSupportedException
 		: public Exception
 	{
@@ -172,6 +186,10 @@ namespace exodbc
 	};
 
 
+	/*!
+	* \class WrapperException
+	* \brief Wrapper around a std::exception
+	*/
 	class EXODBCAPI WrapperException
 		: public Exception
 	{
@@ -197,7 +215,6 @@ namespace exodbc
 
 	/*!
 	* \class CastException
-	*
 	* \brief Thrown if a Visitor cannot cast a value.
 	*
 	* Contains information about the source-type and the cast-target-type.
@@ -229,6 +246,10 @@ namespace exodbc
 	};	// class CastException
 
 
+	/*!
+	* \class NullValueException
+	* \brief Thrown if trying to access a value that is NULL.
+	*/
 	class EXODBCAPI NullValueException
 		: public Exception
 	{
@@ -253,6 +274,10 @@ namespace exodbc
 	};
 
 
+	/*!
+	* \class NotImplementedException
+	* \brief Thrown on not implemented stuff.
+	*/
 	class EXODBCAPI NotImplementedException
 		: public Exception
 	{
