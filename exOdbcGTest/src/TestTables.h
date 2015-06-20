@@ -106,6 +106,7 @@ namespace exodbc
 		void ClearCharTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
 		void ClearNumericTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
 		void ClearBlobTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
+		void ClearFloatTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
 
 	}
 
