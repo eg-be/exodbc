@@ -1033,8 +1033,6 @@ namespace exodbc
 			{
 				// Finding will throw if not exactly one is found
 				m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
-//				TableName tableName(m_tableInfo);
-//				m_tableName = tableName;
 				m_haveTableInfo = true;
 				searchedTable = true;
 			}
@@ -1055,19 +1053,6 @@ namespace exodbc
 				m_pDb->FindOneTable(m_tableInfo.GetPureName(), m_tableInfo.GetSchema(), catalogName, typeName);
 				searchedTable = true;
 			}
-
-			// Set the hints for the Table-Query name depending on the Database
-			// If this is an excel-db, we must search for a table named 'foo$', but query using '[foo$]'. See Ticket #111. Set the corresponding hint on the tableInfo-object
-			// maybe excel also has the full path
-			//if (m_pDb->GetDbms() == DatabaseProduct::EXCEL)
-			//{
-			//	m_tableInfo.SetSqlNameHint(TableQueryNameHint::EXCEL);
-			//}
-			//if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
-			//{
-			//	m_tableInfo.SetSqlNameHint(TableQueryNameHint::TABLE_ONLY);
-			//}
-
 
 			// If we are asked to create our columns automatically, read the column information and create the buffers
 			if (!m_manualColumns)
