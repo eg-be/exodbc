@@ -247,6 +247,13 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Returns SQL type of this ColumnBuffer.
+		* \return	SQL type.
+		*/
+		SQLSMALLINT GetSqlType() const throw() { return m_sqlType; };
+
+
+		/*!
 		* \brief	Tries to bind the buffer to the column using SQLBindCol
 		*			for non-numeric types, or SQLSetDescField for numeric types.
 		* \details	Fails if no buffer is allocated or if already bound.

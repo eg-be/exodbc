@@ -1092,31 +1092,57 @@ namespace exodbc
 			// If we are asked to create our columns automatically, read the column information and create the buffers
 			if (!m_manualColumns)
 			{
-				CreateAutoColumnBuffers(m_tableInfo, TestOpenFlag(TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS));
+				CreateAutoColumnBuffers(m_tableInfo, TestOpenFlag(TOF_SKIP_UNSUPPORTED_COLUMNS));
 			}
 			else
 			{
 				// Check that the manually defined columns do not violate our access-flags
-				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+				// and check that manually defined types are supported by the database
+				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); )
 				{
 					ColumnBuffer* pBuffer = it->second;
 					if (pBuffer->IsColumnFlagSet(CF_SELECT) && !TestAccessFlag(AF_SELECT))
 					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetQueryName()));
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
 					if (pBuffer->IsColumnFlagSet(CF_INSERT) && !TestAccessFlag(AF_INSERT))
 					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetQueryName()));
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
 					if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !(TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_UPDATE_WHERE)))
 					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryName() % it->first %m_tableInfo.GetQueryName()));
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
+					}
+					// type-check
+					bool remove = false;
+					SQLSMALLINT sqlType = pBuffer->GetSqlType();
+					if ( sqlType != SQL_UNKNOWN_TYPE && ! m_pDb->IsSqlTypeSupported(sqlType))
+					{
+						if (TestOpenFlag(TOF_SKIP_UNSUPPORTED_COLUMNS))
+						{
+							LOG_WARNING(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % pBuffer->GetQueryNameNoThrow() % it->first % SqlType2s(sqlType) % sqlType));
+							remove = true;
+						}
+						else
+						{
+							Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % pBuffer->GetQueryNameNoThrow() % it->first % SqlType2s(sqlType) % sqlType));
+							SET_EXCEPTION_SOURCE(ex);
+							throw ex;
+						}
+					}
+					if (remove)
+					{
+						m_columnBuffers.erase(it++);
+					}
+					else
+					{
+						++it;
 					}
 				}
 			}

@@ -225,7 +225,7 @@ namespace exodbc
 		*			the buffers passed there are used to bind only those columns defined manually.
 		*
 		* \param	openFlags Set flags how to open the Table:
-		*  - exodbc::TableOpenFlag::TOF_CHECK_PRIVILEGES  
+		*  - TOF_CHECK_PRIVILEGES  
 		*			If set, the database will be queried checking if the current user
 		*			is allowed to do the required operations like Select, Update, Insert or Delete,
 		*			depending on the AccessFlags value passed during construction or set later.
@@ -234,12 +234,14 @@ namespace exodbc
 		*			passed definition during constructions actually exists in the database. Unsetting this
 		*			flag makes only sense if you've passed a TableInfo during construction, 
 		*			as else the Table is required to query the database anyway (and fails if not found).
-		*  - TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS:
-		*			If set, ColumnBuffer that failed to be created with a NotSupportedException are simply
-		*			skipped. Default is to re-throw the NotSupportedException.
-		*			This has only an influence if ColumnBuffers are created automatically by determining
-		*			the buffer type from the column information read from the Database. If you have created
-		*			ColumnBuffers manually using SetColumn(), this flag is ignored.
+		*  - TOF_SKIP_UNSUPPORTED_COLUMNS:
+		*			If set, Columns for which no ColumnBuffer can be created are skipped. If not set an
+		*			Exception is thrown in that case.\n
+		*			If Columns are created automatically, the Database might report a SQL type that is not
+		*			supported. Set this flag to simply skip such columns.\n
+		*			If Columns have been set manually, Columns might have been defined using a SQL Type that
+		*			is not reported as supported from the Database. Set this flag to siimply skip such
+		*			columns.\n
 		*			The indexes of the bound ColumnBuffers will still match the indexes of the actual table,
 		*			but some ColumnBuffers will not be created. This will lead to an  IllegalArgumentException if
 		*			you try to access them using any of the functions that take a columnIndex as argument.
@@ -255,8 +257,8 @@ namespace exodbc
 		*			If a table is opened with the AccessFlag::AF_UPDATE_PK or AccessFlag::AF_DELETE_PK set,
 		*			Primary keys are required. They are queried from the Database during Open(), unless
 		*			this flag is set, or the column indexes of the Table have been passed prior to Open()
-		*			using SetColumnPrimaryKeyIndexes().
-		*			If this flag is set, the primary keys are not queried.
+		*			using SetColumnPrimaryKeyIndexes().\n
+		*			If this flag is set, the primary keys are not queried.\n
 		*			This flag is set automatically whenever Open() ing a Table from a Microsoft Access Database,
 		*			as the Access Driver I used for testing (ODBCJT32.DLL, v6.01.7601.17632, 
 		*			'Microsoft Access Driver (*.mdb')') does not support the SQLPrimaryKeys() method.
