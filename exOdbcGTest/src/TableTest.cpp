@@ -459,6 +459,40 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, OpenManualWithUnsupportedColumn)
+	{
+		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		int type = SQL_C_SLONG;
+		
+		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+
+		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT);
+		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT);
+		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
+		// Set some silly type 30666 for the last column
+		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), 30666, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
+		// Expect to fail if Opening without flag
+		EXPECT_THROW(iTable.Open(), Exception);
+		// But not if we skip
+		{
+			LogLevelError lle;
+			EXPECT_NO_THROW(iTable.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+		// We should be able to select now
+		EXPECT_NO_THROW(iTable.Select(boost::str(boost::wformat(L"%s = 4") %idName)));
+		EXPECT_TRUE(iTable.SelectNext());
+		// just the last row doesnt exist
+		EXPECT_EQ(4, iTable.GetInt(0));
+		EXPECT_TRUE(iTable.IsColumnNull(1));
+		EXPECT_EQ(2147483647, iTable.GetInt(2));
+		EXPECT_FALSE(iTable.ColumnBufferExists(3));
+	}
+
+
 	TEST_P(TableTest, OpenAutoWithUnsupportedColumn)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED, m_odbcInfo.m_namesCase);

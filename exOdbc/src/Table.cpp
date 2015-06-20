@@ -1122,7 +1122,7 @@ namespace exodbc
 					// type-check
 					bool remove = false;
 					SQLSMALLINT sqlType = pBuffer->GetSqlType();
-					if ( sqlType != SQL_UNKNOWN_TYPE && ! m_pDb->IsSqlTypeSupported(sqlType))
+					if (!TestOpenFlag(TOF_IGNORE_DB_TYPE_INFOS) && sqlType != SQL_UNKNOWN_TYPE && !m_pDb->IsSqlTypeSupported(sqlType))
 					{
 						if (TestOpenFlag(TOF_SKIP_UNSUPPORTED_COLUMNS))
 						{
@@ -1138,6 +1138,7 @@ namespace exodbc
 					}
 					if (remove)
 					{
+						delete pBuffer;
 						m_columnBuffers.erase(it++);
 					}
 					else
