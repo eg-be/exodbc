@@ -205,9 +205,8 @@ namespace exodbc
 
 	std::wstring ColumnInfo::GetQueryName() const
 	{
-		exASSERT( ! m_columnName.empty() );
-
-		return m_columnName;
+		// When querying, we use only the Column-name
+		return GetPureName();
 	}
 
 
