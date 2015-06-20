@@ -470,7 +470,7 @@ namespace exodbc
 		// But not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
@@ -498,7 +498,7 @@ namespace exodbc
 		// we do not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
@@ -525,7 +525,7 @@ namespace exodbc
 		// we do not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// Remove everything, ignoring if there was any data:
@@ -546,7 +546,7 @@ namespace exodbc
 		exodbc::Table nst2(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst2.Open(TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst2.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		nst2.Select();
@@ -571,7 +571,7 @@ namespace exodbc
 		// we do not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// Remove everything, ignoring if there was any data:
@@ -597,7 +597,7 @@ namespace exodbc
 		exodbc::Table nst2(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst2.Open(TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst2.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		nst2.Select();
@@ -622,7 +622,7 @@ namespace exodbc
 		// we do not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// Remove everything, ignoring if there was any data:
@@ -651,7 +651,7 @@ namespace exodbc
 		exodbc::Table nst2(&m_db, tableName, L"", L"", L"", AF_READ_WRITE);
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst2.Open(TOF_AUTO_SKIP_UNSUPPORTED_COLUMNS));
+			EXPECT_NO_THROW(nst2.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		nst2.Select();

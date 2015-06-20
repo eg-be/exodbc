@@ -227,7 +227,11 @@ namespace exodbc
 		ret = SQLFetch(hStmt);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
-		EXPECT_NO_THROW(GetData(hStmt, 2, 3, value, &isNull));
+		{
+			// note that this will info about data truncation
+			LogLevelWarning llw;
+			EXPECT_NO_THROW(GetData(hStmt, 2, 3, value, &isNull));
+		}
 		EXPECT_EQ(L"הצü", value);
 		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
 

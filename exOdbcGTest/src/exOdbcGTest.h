@@ -39,22 +39,21 @@ namespace exodbc
 
 	// Classes
 	// -------
-	struct LogLevelError
+
+	/*
+	trace,
+	debug,
+	info,
+	warning,
+	error,
+	fatal
+	*/
+
+	struct LogLevelTrace
 	{
-	public:
-		LogLevelError() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::error; };
+		LogLevelTrace() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::trace; };
 
-		~LogLevelError() { g_logSeverity = m_originalLevel; };
-	
-	private:
-		boost::log::trivial::severity_level m_originalLevel;
-	};
-
-	struct LogLevelFatal
-	{
-		LogLevelFatal() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::fatal; };
-
-		~LogLevelFatal() { g_logSeverity = m_originalLevel; };
+		~LogLevelTrace() { g_logSeverity = m_originalLevel; };
 
 	private:
 		boost::log::trivial::severity_level m_originalLevel;
@@ -72,6 +71,49 @@ namespace exodbc
 	};
 
 
+	struct LogLevelInfo
+	{
+		LogLevelInfo() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::info; };
+
+		~LogLevelInfo() { g_logSeverity = m_originalLevel; };
+
+	private:
+		boost::log::trivial::severity_level m_originalLevel;
+	};
+
+
+	struct LogLevelWarning
+	{
+		LogLevelWarning() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::warning; };
+
+		~LogLevelWarning() { g_logSeverity = m_originalLevel; };
+
+	private:
+		boost::log::trivial::severity_level m_originalLevel;
+	};
+
+
+	struct LogLevelError
+	{
+	public:
+		LogLevelError() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::error; };
+
+		~LogLevelError() { g_logSeverity = m_originalLevel; };
+	
+	private:
+		boost::log::trivial::severity_level m_originalLevel;
+	};
+
+
+	struct LogLevelFatal
+	{
+		LogLevelFatal() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::fatal; };
+
+		~LogLevelFatal() { g_logSeverity = m_originalLevel; };
+
+	private:
+		boost::log::trivial::severity_level m_originalLevel;
+	};
 
 } // namespace exodbc
 
