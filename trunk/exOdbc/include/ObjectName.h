@@ -27,16 +27,30 @@ namespace exodbc
 	/*!
 	* \class ObjectName
 	*
-	* \brief Name of an Object.
+	* \brief Name of a Database Object like a Table, Column, etc.
 	*/
 	class EXODBCAPI ObjectName
 	{
 	public:
 		virtual ~ObjectName();
 
+		/*!
+		* \brief Get the name of the Object to be used in Queries.
+		*/
 		virtual std::wstring GetQueryName() const = 0;
+		
+		
+		/*!
+		* \brief Get the pure name of the Object. Like only the
+		*		 table name for a table (without schema or catalog), etc.
+		*/
 		virtual std::wstring GetPureName() const = 0;
 
+
+		/*!
+		* \brief Compare two ObjectName for equality. Default implementation
+		*		 will compare using GetQueryName().
+		*/
 		bool operator==(const ObjectName& other) const;
 	};
 }

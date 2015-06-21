@@ -120,7 +120,7 @@ namespace exodbc
 	}
 
 
-	std::wstring ManualColumnInfo::GetQueryName() const
+	std::wstring ManualColumnInfo::GetQueryName() const throw()
 	{
 		return m_queryName;
 	}
@@ -218,20 +218,18 @@ namespace exodbc
 		, m_isSqlDatetimeSubNull(isSqlDatetimeSubNull)
 		, m_isIsNullableNull(isIsNullableNull)
 	{
-
+		exASSERT(!m_columnName.empty());
 	}
 
-	std::wstring ColumnInfo::GetQueryName() const
+	std::wstring ColumnInfo::GetQueryName() const throw()
 	{
 		// When querying, we use only the Column-name
 		return GetPureName();
 	}
 
 
-	std::wstring ColumnInfo::GetPureName() const
+	std::wstring ColumnInfo::GetPureName() const throw()
 	{
-		exASSERT(!m_columnName.empty());
-
 		return m_columnName;
 	}
 
