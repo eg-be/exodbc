@@ -188,6 +188,13 @@ namespace exodbc
 		{
 			m_what = w2s(ToString());
 		};
+		NotSupportedException(Type notSupported, SQLSMALLINT smallInt, const std::wstring& msg) throw()
+			: Exception(msg)
+			, m_notSupported(notSupported)
+			, m_smallInt(smallInt)
+		{
+			m_what = w2s(ToString());
+		};
 
 		virtual ~NotSupportedException() {};
 

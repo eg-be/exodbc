@@ -37,6 +37,7 @@
 #include "Database.h"
 #include "Environment.h"
 #include "Exception.h"
+#include "Sql2BufferTypeMap.h"
 
 // Other headers
 
@@ -312,7 +313,8 @@ namespace exodbc
 				ColumnInfo colInfo = columns[columnIndex];
 				try
 				{
-					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, columnFlags);
+					DefaultSql2BufferMap defaultSql2BufferMap(odbcVersion);
+					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, defaultSql2BufferMap, columnFlags);
 					m_columnBuffers[bufferIndex] = pColBuff;
 					++bufferIndex;
 				}

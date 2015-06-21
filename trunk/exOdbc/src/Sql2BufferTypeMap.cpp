@@ -68,9 +68,9 @@ namespace exodbc
 			return GetDefault();
 		}
 
-		NotFoundException nfe(boost::str(boost::wformat(L"SQL Type %s (%d) is not Registered in Sql2BufferTypeMap") % SqlType2s(sqlType) %sqlType));
-		SET_EXCEPTION_SOURCE(nfe);
-		throw nfe;
+		NotSupportedException nse(NotSupportedException::Type::SQL_TYPE, sqlType, L"SQL Type is not registered in Sql2BufferTypeMap and no default Type is set: ");
+		SET_EXCEPTION_SOURCE(nse);
+		throw nse;
 	}
 
 
@@ -94,7 +94,7 @@ namespace exodbc
 	}
 
 
-	DefaultSql2BufferMap::DefaultSql2BufferMap()
+	DefaultSql2BufferMap::DefaultSql2BufferMap(OdbcVersion odbcVersion)
 	{
 		RegisterType(SQL_SMALLINT, SQL_C_SSHORT);
 		RegisterType(SQL_INTEGER, SQL_C_SLONG);
@@ -106,36 +106,37 @@ namespace exodbc
 		RegisterType(SQL_DOUBLE, SQL_C_DOUBLE);
 		RegisterType(SQL_FLOAT, SQL_C_DOUBLE);
 		RegisterType(SQL_REAL, SQL_C_DOUBLE);
-		RegisterType(SQL_DATE, SQL_C_TYPE_DATE);
-		RegisterType(SQL_TIME, SQL_C_TYPE_TIME);
+		if (odbcVersion >= OdbcVersion::V_3)
+		{
+			RegisterType(SQL_DATE, SQL_C_TYPE_DATE);
+			RegisterType(SQL_TIME, SQL_C_TYPE_TIME);
+			RegisterType(SQL_TIMESTAMP, SQL_C_TYPE_TIMESTAMP);
+		}
+		else
+		{
+			RegisterType(SQL_DATE, SQL_C_DATE);
+			RegisterType(SQL_TIME, SQL_C_TIME);
+			RegisterType(SQL_TIMESTAMP, SQL_C_TIMESTAMP);
+		}
 #ifdef HAVE_MSODBCSQL_H
-		RegisterType(SQL_SS_TIME2, SQL_C_SS_TIME2);
+		if (odbcVersion >= OdbcVersion::V_3_8)
+		{
+			RegisterType(SQL_SS_TIME2, SQL_C_SS_TIME2);
+		}
+		else if (odbcVersion >= OdbcVersion::V_3)
+		{
+			RegisterType(SQL_SS_TIME2, SQL_C_TYPE_TIME);
+		}
+		else
+		{
+			RegisterType(SQL_SS_TIME2, SQL_C_TIME);
+		}
 #endif
-		RegisterType(SQL_TIMESTAMP, SQL_C_TYPE_TIMESTAMP);
+
 		RegisterType(SQL_BINARY, SQL_C_BINARY);
 		RegisterType(SQL_VARBINARY, SQL_C_BINARY);
 		RegisterType(SQL_LONGVARBINARY, SQL_C_BINARY);
 		RegisterType(SQL_NUMERIC, SQL_C_NUMERIC);
 		RegisterType(SQL_DECIMAL, SQL_C_NUMERIC);
-
-			/*
-			* SQL_SMALLINT				| SQLSMALLINT*
-			* SQL_INTEGER				| SQLINTEGER*
-			* SQL_BIGINT				| SQLBIGINT*
-			* SQL_CHAR / SQL_VARCHAR	| SQLCHAR* [1]
-			* SQL_WCHAR / SQL_WVARCHAR	| SQLWCHAR* [1]
-			* SQL_DOUBLE				| SQLDOUBLE*
-			* SQL_FLOAT					| SQLDOUBLE*
-			* SQL_REAL					| SQLDOUBLE*
-			* SQL_DATE					| SQL_DATE_STRUCT*
-			* SQL_TIME					| SQL_TIME_STRUCT*
-			* SQL_TIME2					| SQL_TIME2_STRUCT* / SQL_TIME_STRUCT* [2]
-			* SQL_TIMESTAMP				| SQL_TIMESTAMP_STRUCT*
-			* SQL_BINARY				| SQL_CHAR*
-			* SQL_VARBINARY				| SQL_CHAR*
-			* SQL_LONGVARBINARY			| SQL_CHAR*
-			* SQL_NUMERIC				| SQL_NUMERIC_STRUCT*
-			* SQL_DECIMAL				| SQL_NUMERIC_STRUCT*
-			*/
 	}
 }
