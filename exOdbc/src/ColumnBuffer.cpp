@@ -30,10 +30,9 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	ColumnBuffer::ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ConstSql2BufferTypeMapPtr pSql2BufferTypeMap, ColumnFlags flags /* = CF_SELECT */)
+	ColumnBuffer::ColumnBuffer(const ColumnInfo& columnInfo, OdbcVersion odbcVersion, ConstSql2BufferTypeMapPtr pSql2BufferTypeMap, ColumnFlags flags /* = CF_SELECT */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(false)
-		, m_autoBindingMode(mode)
 		, m_bufferType(0)
 		, m_bufferSize(0)
 		, m_columnNr(0)
@@ -75,21 +74,7 @@ namespace exodbc
 			}
 
 			// Create buffer
-			SQLSMALLINT type = 0;
-//			try
-//			{
-				type = pSql2BufferTypeMap->GetBufferType(m_sqlType);
-			//}
-			//catch (const Exception& ex)
-			//{
-			//	int p = 9;
-			//}
-			m_bufferType = DetermineBufferType(m_sqlType);
-			if (m_bufferType != type)
-			{
-				int p = 3;
-				exASSERT(false);
-			}
+			m_bufferType = pSql2BufferTypeMap->GetBufferType(m_sqlType);
 			m_bufferSize = DetermineBufferSize(columnInfo);
 
 			try
@@ -132,7 +117,6 @@ namespace exodbc
 	ColumnBuffer::ColumnBuffer(const ManualColumnInfo& columnInfo, SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, OdbcVersion odbcVersion, ColumnFlags flags /* = CF_SELECT */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(true)
-		, m_autoBindingMode(AutoBindingMode::BIND_AS_REPORTED)
 		, m_bufferType(sqlCType)
 		, m_bufferSize(bufferSize)
 		, m_columnNr(0)
@@ -658,87 +642,6 @@ namespace exodbc
 		}
 
 		NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, m_bufferType);
-		SET_EXCEPTION_SOURCE(nse);
-		throw nse;
-	}
-
-
-	SQLSMALLINT ColumnBuffer::DetermineBufferType(SQLSMALLINT sqlType) const
-	{
-		exASSERT(sqlType != SQL_UNKNOWN_TYPE);
-
-		if (m_autoBindingMode == AutoBindingMode::BIND_ALL_AS_CHAR)
-		{
-			return SQL_C_CHAR;
-		}
-		else if (m_autoBindingMode == AutoBindingMode::BIND_ALL_AS_WCHAR)
-		{
-			return SQL_C_WCHAR;
-		}
-
-		switch (sqlType)
-		{
-		case SQL_SMALLINT:
-			return SQL_C_SSHORT;
-		case SQL_INTEGER:
-			return SQL_C_SLONG;
-		case SQL_BIGINT:
-			return SQL_C_SBIGINT;
-		case SQL_CHAR:
-		case SQL_VARCHAR:
-			if (m_autoBindingMode == AutoBindingMode::BIND_WCHAR_AS_CHAR || m_autoBindingMode == AutoBindingMode::BIND_AS_REPORTED)
-			{
-				return SQL_C_CHAR;
-			}
-			else
-			{
-				return SQL_C_WCHAR;
-			}
-		case SQL_WCHAR:
-		case SQL_WVARCHAR:
-			if (m_autoBindingMode == AutoBindingMode::BIND_CHAR_AS_WCHAR || m_autoBindingMode == AutoBindingMode::BIND_AS_REPORTED)
-			{
-				return SQL_C_WCHAR;
-			}
-			else
-			{
-				return SQL_C_CHAR;
-			}
-		case SQL_DOUBLE:
-		case SQL_FLOAT:
-		case SQL_REAL:
-			return SQL_C_DOUBLE;
-			// not valid without TYPE ?? http://msdn.microsoft.com/en-us/library/ms710150%28v=vs.85%29.aspx
-		case SQL_DATE:
-		case SQL_TYPE_DATE:
-			return SQL_C_TYPE_DATE;
-		case SQL_TIME:
-		case SQL_TYPE_TIME:
-			return SQL_C_TYPE_TIME;
-		case SQL_TIMESTAMP:
-		case SQL_TYPE_TIMESTAMP:
-			return SQL_C_TYPE_TIMESTAMP;
-#if HAVE_MSODBCSQL_H
-		case SQL_SS_TIME2:
-			if (m_odbcVersion >= OdbcVersion::V_3_8)
-			{
-				return SQL_C_SS_TIME2;
-			}
-			else
-			{
-				return SQL_C_TYPE_TIME;
-			}
-#endif
-		case SQL_BINARY:
-		case SQL_VARBINARY:
-		case SQL_LONGVARBINARY:
-			return SQL_C_BINARY;
-		case SQL_NUMERIC:
-		case SQL_DECIMAL:
-			return SQL_C_NUMERIC;
-		}
-
-		NotSupportedException nse(NotSupportedException::Type::SQL_TYPE, sqlType);
 		SET_EXCEPTION_SOURCE(nse);
 		throw nse;
 	}

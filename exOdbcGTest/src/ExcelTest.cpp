@@ -111,7 +111,6 @@ namespace exodbc
 		}
 		// Create Table
 		Table tTable(&db, L"TestTable$", L"", L"", L"", AF_READ);
-		ASSERT_NO_THROW(tTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open());
 		// Opening works, but selecting does not
@@ -133,7 +132,6 @@ namespace exodbc
 		}
 		Table tTable(&db, L"TestTable$", L"", L"", L"", AF_READ);
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
-		ASSERT_NO_THROW(tTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open(TOF_CHECK_EXISTANCE));
 
@@ -156,7 +154,6 @@ namespace exodbc
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
 
 		Table tTable2(&db, tableInfo, AF_READ);
-		ASSERT_NO_THROW(tTable2.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR));
 		tTable2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable2.Open(TOF_CHECK_EXISTANCE));
 

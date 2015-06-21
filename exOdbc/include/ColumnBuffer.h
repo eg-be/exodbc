@@ -115,61 +115,29 @@ namespace exodbc
 	*
 	* \brief Provides the buffer to transfer data from a column of a record.
 	*
-	* A ColumnBuffer can allocate a corresponding buffer-type automatically
-	* by reading the SQL-type info from the passed ColumnInfo, or use a
-	* buffer provided during construction. In that case you must also pass the
-	* ODBC C-Type of the buffer and the query name of the corresponding column.
+	* If a ColumnBuffer is constructed by passing a ColumnInfo and a 
+	* Sql2BufferTypeMap, the ColumnBuffer will query the passed Sql2BufferTypeMap
+	* about the SQL C Type of the buffer to create. If the Sql2BufferTypeMap
+	* returns a SQL C Type, a corresponding Buffer to transfer data is created.
+	* This buffer will be managed by the ColumnBuffer.
+	* 
+	* If a ColumnBuffer is called by passing a ManualColumnInfo, an allocated
+	* buffer must be passed. The passed buffer will be used to transfer data.
+	* Do not free the buffer before the ColumnBuffer is destroyed.
 	*
-	* There is an option to try to let the ODBC-driver to convert everything
-	* to a (w)string, see AutoBindingMode.
-	*
-	* If the buffer-information is read from the passed ColumnInfo, the ColumnBuffer will
-	* allocate a buffer type depending on the value of the SqlDataType. The following is
-	* a list of all supported SQL-Types and the buffer-type created:
-	*
-	* SQL-Type					| Buffer-Type
-	* --------------------------|------------
-	* SQL_SMALLINT				| SQLSMALLINT*
-	* SQL_INTEGER				| SQLINTEGER*
-	* SQL_BIGINT				| SQLBIGINT*
-	* SQL_CHAR / SQL_VARCHAR	| SQLCHAR* [1]
-	* SQL_WCHAR / SQL_WVARCHAR	| SQLWCHAR* [1]
-	* SQL_DOUBLE				| SQLDOUBLE*
-	* SQL_FLOAT					| SQLDOUBLE*
-	* SQL_REAL					| SQLDOUBLE*
-	* SQL_DATE					| SQL_DATE_STRUCT*
-	* SQL_TIME					| SQL_TIME_STRUCT*
-	* SQL_TIME2					| SQL_TIME2_STRUCT* / SQL_TIME_STRUCT* [2]
-	* SQL_TIMESTAMP				| SQL_TIMESTAMP_STRUCT*
-	* SQL_BINARY				| SQL_CHAR*
-	* SQL_VARBINARY				| SQL_CHAR*
-	* SQL_LONGVARBINARY			| SQL_CHAR*
-	* SQL_NUMERIC				| SQL_NUMERIC_STRUCT*
-	* SQL_DECIMAL				| SQL_NUMERIC_STRUCT*
-	*
-	* [1] There are options about wide-chars: You can either enforce that a column
-	* reported as CHAR / VARCHAR from the driver (or by you) is still bound to
-	* a SQLWCHAR* buffer and the other way round, using the AutoBindingMode
-	* value.
-	*
-	* [2] The SQL_TIME2 is a Microsoft SQL Server specific extension. It is only available
-	* if HAVE_MSODBCSQL_H is defined to 1. If HAVE_MSODBCSQL_H
-	* is not set to 1, the SQL-Type SQL_TIME2 is not supported. If HAVE_MSODBC_SQL_H is defined to 1 and
-	* the ODBC version is >= 3.8, SQL_TIME2 is mapped to a SQL_TIME2_STRUCT, else it is mapped
-	* to an SQL_TIME_STRUCT.
 	*/
 	class EXODBCAPI ColumnBuffer
 	{
 	public:
 		/*!
 		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
-		*			using the data type information from the passed ColumnInfo.
+		*			using the data type information from the passed ColumnInfo and the passed Sql2BufferTypeMap.
 		* \details	The constructor will try to allocate a corresponding buffer.
 		*			Note: The constructor will examine ColumnInfo::m_isNullable and set the corresponding
 		*			ColumnFlags, overriding an eventually set value in the passed flags.
-		*			The ColumnBuffer will be set to SQL_NULL_DATA.
+		*			The ColumnBuffer will be set to SQL_NULL_DATA (even if the Column is not Nullable), so
+		*			set or fetch some valid data into the ColumnBuffer soon.
 		* \param columnInfo	The Information about the column we bind.
-		* \param mode		How Character columns should be bound.
 		* \param odbcVersion ODBC Version to work with.
 		* \param pSql2BufferTypeMap The Sql2BufferTypeMap to be used to determine the BufferType (SQL C Type) during Construction.
 		* \param flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
@@ -178,7 +146,7 @@ namespace exodbc
 		* \see	Bind()
 		* \throw Exception If creating a corresponding buffer fails.
 		*/
-		ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ConstSql2BufferTypeMapPtr pSql2BufferTypeMap, ColumnFlags flags = CF_SELECT);
+		ColumnBuffer(const ColumnInfo& columnInfo, OdbcVersion odbcVersion, ConstSql2BufferTypeMapPtr pSql2BufferTypeMap, ColumnFlags flags = CF_SELECT);
 
 
 		/*!
@@ -197,11 +165,8 @@ namespace exodbc
 		* \param sqlCType			The ODBC C Type of the buffer (like SQL_C_WCHAR, SQL_C_SLONG, etc.). This value will be forwarded to the driver during binding for select.
 		* \param bufferPtrVariant	Pointer to allocated buffer for the given sqlCType. Must be a buffer that can be held by a exodbc::BufferPtrVariant .
 		* \param bufferSize			Size of the allocated buffer.
-		* \param sqlType			The SQL Type of the buffer (like SQL_VARCHAR, SQL_INTEGER, etc.). This value will be forwarded to the driver during Binding parameters.
-		*							If this ColumnBuffer is never bound as a parameter it is save to set this to SQL_UNKNOWN.
-		* \param queryName			Name of the column that corresponds to this buffer.
 		* \param odbcVersion		ODBC-Version supported.
-		* \param	flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
+		* \param	flags			Define if a column shall be included in write-operations, is part of primary-key, etc.
 		* 
 		* \see	HaveBuffer()
 		* \see	Bind()
@@ -373,23 +338,6 @@ namespace exodbc
 		* \return	The query name of the column matching this ColumnBuffer, or ??? in case of failure.
 		*/
 		std::wstring GetQueryNameNoThrow() const throw();
-
-
-		/*!
-		* \brief	Set how Chars should be bound.
-		* \details	Fails if already bound.
-		* \param	mode Mode to set.
-		* \see		AutoBindingMode
-		* \throw	Exception If already bound.
-		*/
-		void SetAutoBindingMode(AutoBindingMode mode) { exASSERT(!IsBound()); m_autoBindingMode = mode; }
-
-
-		/*!
-		* \brief	Get the currently set AutoBindingMode.
-		* \return	AutoBindingMode set.
-		*/
-		AutoBindingMode GetAutoBindingMode() const throw() { return m_autoBindingMode; };
 
 
 		/*!
@@ -640,17 +588,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Determine the buffer type for the given SQL type .
-		* \details This is used internally if no buffer-size and buffer is given and the buffer must
-		*			thus be allocated automatically.
-		*			See ColumnBuffer description for what SQL type is mapped to what buffer.
-		* \return	Needed buffer size according to SQL type form ColumnInfo
-		* \throw	NotSupportedException If SQL Type is not implemented.
-		*/
-		SQLSMALLINT DetermineBufferType(SQLSMALLINT sqlType) const;
-
-
-		/*!
 		* \brief	Get the allocated buffer as a void*.
 		* \details Determines the type using the ColumnInfo and gets the pointer from the variant.
 		*			Fails if no buffer is allocated.
@@ -718,7 +655,6 @@ namespace exodbc
 		ColumnFlags				m_flags;				///< Flags, set during construction.
 		SQLINTEGER				m_columnSize;			///< Column Size, either read from ColumnInfo during construction or set manually. -1 indicates unknown.
 		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from ColumnInfo during construction or set manually. -1 indicates unkonwn.
-		Sql2BufferTypeMap*		m_pSql2BufferTypeMap;	///< Defines the Mapping of SQL Types to SQL C Types.
 		ObjectName*				m_pName;				///< The name of this object. Created during construction, freed on deletion.
 		SQLUSMALLINT			m_columnNr;				///< Column number used during Bind(). Set to 0 during construction.
 		SQLSMALLINT				m_sqlType;				///< The SQL Type of the Column, like SQL_SMALLINT. Either set on construction or read from ColumnInfo::m_sqlType.
@@ -730,7 +666,6 @@ namespace exodbc
 		BoundParameterPtrsVector	m_boundParameters;	
 
 		OdbcVersion m_odbcVersion;	///< OdbcVersion passed when creating this ColumnBuffer.
-		AutoBindingMode m_autoBindingMode;	///< Determine if chars shall be bound as wchars, etc. Cannot be changed after bound.
 
 		BufferPtrVariant m_bufferPtr;	///< Variant that holds the pointer to the actual buffer
 
