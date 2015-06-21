@@ -171,14 +171,14 @@ namespace exodbc
 		* \param columnInfo	The Information about the column we bind.
 		* \param mode		How Character columns should be bound.
 		* \param odbcVersion ODBC Version to work with.
-		* \param sql2BufferTypeMap The Sql2BufferTypeMap to be used to determine the BufferType (SQL C Type) during Construction.
+		* \param pSql2BufferTypeMap The Sql2BufferTypeMap to be used to determine the BufferType (SQL C Type) during Construction.
 		* \param flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
 		*
 		* \see	HaveBuffer()
 		* \see	Bind()
 		* \throw Exception If creating a corresponding buffer fails.
 		*/
-		ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, const Sql2BufferTypeMap& sql2BufferTypeMap, ColumnFlags flags = CF_SELECT);
+		ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ConstSql2BufferTypeMapPtr pSql2BufferTypeMap, ColumnFlags flags = CF_SELECT);
 
 
 		/*!

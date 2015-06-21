@@ -1058,6 +1058,7 @@ namespace exodbc
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, intTypesTableName, L"", L"", L"", AF_READ);
 		iTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
+		iTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		ASSERT_NO_THROW(iTable.Open());
 
 		std::wstring id, smallInt, i, bigInt;
@@ -1194,6 +1195,7 @@ namespace exodbc
 		wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
 		Table fTable(&m_db, floatTypesTableName, L"", L"", L"", AF_READ);
 		fTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
+		fTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		ASSERT_NO_THROW(fTable.Open());
 
 		wstring sVal;
@@ -1232,6 +1234,7 @@ namespace exodbc
 		std::wstring charTypesTableName = test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", AF_READ);
 		charTypesAutoTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
+		charTypesAutoTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new CharAsWCharSql2BufferMap(m_db.GetMaxSupportedOdbcVersion())));
 		ASSERT_NO_THROW(charTypesAutoTable.Open());
 		// We want to trim on the right side for DB2 and sql server
 		charTypesAutoTable.SetCharTrimRight(true);
@@ -1347,6 +1350,7 @@ namespace exodbc
 		std::wstring charTypesTableName = test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, charTypesTableName, L"", L"", L"", AF_READ);
 		charTypesAutoTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
+		charTypesAutoTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharAsCharSql2BufferMap(m_db.GetMaxSupportedOdbcVersion())));
 		ASSERT_NO_THROW(charTypesAutoTable.Open());
 		// We want to trim on the right side for DB2 and also sql server
 		charTypesAutoTable.SetCharTrimRight(true);
@@ -1624,6 +1628,7 @@ namespace exodbc
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES, m_odbcInfo.m_namesCase);
 		Table dTable(&m_db, dateTypesTableName, L"", L"", L"", AF_READ);
 		dTable.SetAutoBindingMode(AutoBindingMode::BIND_ALL_AS_WCHAR);
+		dTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		ASSERT_NO_THROW(dTable.Open());
 
 		wstring sDate, sTime, sTimestamp;
@@ -2667,6 +2672,7 @@ namespace exodbc
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
+		cTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharAsCharSql2BufferMap(m_db.GetMaxSupportedOdbcVersion())));
 		ASSERT_NO_THROW(cTable.Open());
 
 		// Remove everything, ignoring if there was any data:
@@ -2699,6 +2705,7 @@ namespace exodbc
 		s = "Hello World!";
 		Table t2(&m_db, charTypesTmpTableName, L"", L"", L"", AF_READ);
 		t2.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
+		t2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharAsCharSql2BufferMap(m_db.GetMaxSupportedOdbcVersion())));
 		ASSERT_NO_THROW(t2.Open());
 		t2.SetCharTrimRight(true);
 
@@ -2729,6 +2736,7 @@ namespace exodbc
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(&m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT);
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
+		cTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new CharAsWCharSql2BufferMap(m_db.GetMaxSupportedOdbcVersion())));
 		ASSERT_NO_THROW(cTable.Open());
 
 		// Remove everything, ignoring if there was any data:
@@ -2759,6 +2767,7 @@ namespace exodbc
 		s = L"Hello World!";
 		Table t2(&m_db, charTypesTmpTableName, L"", L"", L"", AF_READ);
 		t2.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
+		t2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new CharAsWCharSql2BufferMap(m_db.GetMaxSupportedOdbcVersion())));
 		ASSERT_NO_THROW(t2.Open());
 		t2.SetCharTrimRight(true);
 
@@ -3097,6 +3106,7 @@ namespace exodbc
 			cTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_CHAR_AS_WCHAR);
+		cTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new CharAsWCharSql2BufferMap(m_db.GetMaxSupportedOdbcVersion())));
 		ASSERT_NO_THROW(cTable.Open());
 		cTable.SetCharTrimRight(true);
 		
@@ -3160,6 +3170,7 @@ namespace exodbc
 			cTable.SetColumnPrimaryKeyIndexes({ 0 });
 		}
 		cTable.SetAutoBindingMode(AutoBindingMode::BIND_WCHAR_AS_CHAR);
+		cTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharAsCharSql2BufferMap(m_db.GetMaxSupportedOdbcVersion())));
 		ASSERT_NO_THROW(cTable.Open());
 		cTable.SetCharTrimRight(true);
 

@@ -62,7 +62,7 @@ namespace exodbc
 		, m_pDb(pDb)
 	{
 		exASSERT(m_pDb->IsOpen());
-		
+
 		Initialize();
 		SetAccessFlags(afs);
 		// statements should now be allocated
@@ -105,6 +105,7 @@ namespace exodbc
 		exASSERT(m_pDb->IsOpen());
 
 		Initialize();
+		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
 		SetAccessFlags(afs);
 		// statements should now be allocated
 		exASSERT(HasAllStatements());
@@ -126,6 +127,7 @@ namespace exodbc
 		exASSERT(m_pDb->IsOpen());
 		
 		Initialize();
+		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
 		SetAccessFlags(afs);
 		// statements should now be allocated
 		exASSERT(HasAllStatements());
@@ -176,6 +178,8 @@ namespace exodbc
 	{
 		// Initializing member variables
 		// Note: m_haveTableInfo must have been set before this function is called - it is not modified by this Initialize
+
+		m_pSql2BufferTypeMap = Sql2BufferTypeMapPtr(NULL);
 		m_isOpen = false;
 
 		m_hStmtCount = SQL_NULL_HSTMT;
@@ -313,8 +317,7 @@ namespace exodbc
 				ColumnInfo colInfo = columns[columnIndex];
 				try
 				{
-					DefaultSql2BufferMap defaultSql2BufferMap(odbcVersion);
-					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, defaultSql2BufferMap, columnFlags);
+					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, m_pSql2BufferTypeMap, columnFlags);
 					m_columnBuffers[bufferIndex] = pColBuff;
 					++bufferIndex;
 				}
@@ -1038,6 +1041,21 @@ namespace exodbc
 	{
 		exASSERT(!IsOpen());
 		m_primaryKeyColumnIndexes = columnIndexes;
+	}
+
+
+	void Table::SetSql2BufferTypeMap(Sql2BufferTypeMapPtr pSql2BufferTypeMap)
+	{
+		exASSERT(!IsOpen());
+		exASSERT(pSql2BufferTypeMap);
+		m_pSql2BufferTypeMap = pSql2BufferTypeMap;
+	}
+
+
+	const Sql2BufferTypeMapPtr Table::GetSql2BufferTypeMap() const
+	{
+		exASSERT(m_pSql2BufferTypeMap);
+		return m_pSql2BufferTypeMap;
 	}
 
 

@@ -103,6 +103,7 @@ namespace exodbc
 	void Database::Initialize()
 	{
 		m_pEnv = NULL;
+		m_pSql2BufferTypeMap = Sql2BufferTypeMapPtr(NULL);
 
 		// Handles created by this db
 		m_hdbc = SQL_NULL_HDBC;
@@ -194,9 +195,14 @@ namespace exodbc
 			// environment.
 			OdbcVersion connectionVersion = GetDriverOdbcVersion();
 			OdbcVersion envVersion = m_pEnv->GetOdbcVersion();
+			OdbcVersion maxSupportedVersion = GetMaxSupportedOdbcVersion();
 			if (envVersion > connectionVersion)
 			{
 				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int) envVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer % (int) connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName % (int) connectionVersion).str());
+			}
+			if (!m_pSql2BufferTypeMap)
+			{
+				m_pSql2BufferTypeMap = Sql2BufferTypeMapPtr(new DefaultSql2BufferMap(maxSupportedVersion));
 			}
 
 			// Try to detect the type - this will update our internal type
@@ -400,6 +406,19 @@ namespace exodbc
 			++it;
 		}
 		return false;
+	}
+
+
+	void Database::SetSql2BufferTypeMap(Sql2BufferTypeMapPtr pSql2BufferTypeMap) throw()
+	{
+		m_pSql2BufferTypeMap = pSql2BufferTypeMap;
+	}
+
+
+	Sql2BufferTypeMapPtr Database::GetSql2BufferTypeMap() const
+	{
+		exASSERT(m_pSql2BufferTypeMap);
+		return m_pSql2BufferTypeMap;
 	}
 
 

@@ -101,19 +101,26 @@ namespace exodbc
 		RegisterType(SQL_BIGINT, SQL_C_SBIGINT);
 		RegisterType(SQL_CHAR, SQL_C_CHAR);
 		RegisterType(SQL_VARCHAR, SQL_C_CHAR);
-		RegisterType(SQL_WCHAR, SQL_C_CHAR);
-		RegisterType(SQL_WVARCHAR, SQL_C_CHAR);
+		RegisterType(SQL_WCHAR, SQL_C_WCHAR);
+		RegisterType(SQL_WVARCHAR, SQL_C_WCHAR);
 		RegisterType(SQL_DOUBLE, SQL_C_DOUBLE);
 		RegisterType(SQL_FLOAT, SQL_C_DOUBLE);
 		RegisterType(SQL_REAL, SQL_C_DOUBLE);
 		if (odbcVersion >= OdbcVersion::V_3)
 		{
+			// Register the Odbc Version 3.x Types only if the version is >= 3.x
+			RegisterType(SQL_TYPE_DATE, SQL_C_TYPE_DATE);
+			RegisterType(SQL_TYPE_TIME, SQL_C_TYPE_TIME);
+			RegisterType(SQL_TYPE_TIMESTAMP, SQL_C_TYPE_TIMESTAMP);
+			// But always register the old 2.x types. Some DBs still report them when working with 3.x
+			// But map them to the new 3.x types if we have >= 3.x
 			RegisterType(SQL_DATE, SQL_C_TYPE_DATE);
 			RegisterType(SQL_TIME, SQL_C_TYPE_TIME);
 			RegisterType(SQL_TIMESTAMP, SQL_C_TYPE_TIMESTAMP);
 		}
 		else
 		{
+			// register old 2.x types and map them to the old types
 			RegisterType(SQL_DATE, SQL_C_DATE);
 			RegisterType(SQL_TIME, SQL_C_TIME);
 			RegisterType(SQL_TIMESTAMP, SQL_C_TIMESTAMP);
@@ -138,5 +145,33 @@ namespace exodbc
 		RegisterType(SQL_LONGVARBINARY, SQL_C_BINARY);
 		RegisterType(SQL_NUMERIC, SQL_C_NUMERIC);
 		RegisterType(SQL_DECIMAL, SQL_C_NUMERIC);
+	}
+
+
+	WCharSql2BufferMap::WCharSql2BufferMap()
+	{
+		SetDefault(SQL_C_WCHAR);
+	}
+
+
+	CharSql2BufferMap::CharSql2BufferMap()
+	{
+		SetDefault(SQL_C_CHAR);
+	}
+
+
+	CharAsWCharSql2BufferMap::CharAsWCharSql2BufferMap(OdbcVersion odbcVersion)
+		: DefaultSql2BufferMap(odbcVersion)
+	{
+		RegisterType(SQL_CHAR, SQL_C_WCHAR);
+		RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
+	}
+
+
+	WCharAsCharSql2BufferMap::WCharAsCharSql2BufferMap(OdbcVersion odbcVersion)
+		: DefaultSql2BufferMap(odbcVersion)
+	{
+		RegisterType(SQL_WCHAR, SQL_C_CHAR);
+		RegisterType(SQL_WVARCHAR, SQL_C_CHAR);
 	}
 }

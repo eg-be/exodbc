@@ -36,6 +36,7 @@
 #include "TablePrivileges.h"
 #include "Exception.h"
 #include "ObjectName.h"
+#include "Sql2BufferTypeMap.h"
 
 // Other headers
 #include "boost/any.hpp"
@@ -47,7 +48,6 @@
 namespace exodbc
 {
 	class Database;
-	class ColumnBuffer;
 }
 
 namespace exodbc
@@ -189,9 +189,9 @@ namespace exodbc
 	private:
 
 		/*!
-		* \brief	Prevent copies until we implement a copy constructor who takes care of the handle(s).
+		* \brief	Prevent copies until we implement a copy constructor that takes care of the handle(s).
 		*/
-		Table(const Table& other) :m_manualColumns(false) { THROW_NOT_IMPLEMENTED();  };
+		Table(const Table& other) :m_manualColumns(false), m_pDb(NULL), m_pSql2BufferTypeMap(NULL) { THROW_NOT_IMPLEMENTED();  };
 		
 		/*!
 		* \brief	Prevent default constructor until we implement initialization chain and test it.
@@ -884,6 +884,23 @@ namespace exodbc
 		*/
 		void		SetColumnPrimaryKeyIndexes(const std::set<SQLUSMALLINT>& columnIndexes);
 
+		
+		/*!
+		* \brief	Set a Sql2BufferTypeMap. Must be set before Open() is called. Object must not be
+		*			deleted before Table is deleted.
+		* \param pSql2BufferTypeMap	Sql2BufferTypeMap to set.
+		* \throw Exception If IsOpen() returns true.
+		*/
+		void		SetSql2BufferTypeMap(Sql2BufferTypeMapPtr pSql2BufferTypeMap);
+
+
+		/*!
+		* \brief	Get the Sql2BufferTypeMap set on this Table.
+		* \return	const Sql2BufferTypeMap*
+		* \throw	Exception If no Sql2BufferTypeMap is set on this Table.
+		*/
+		const Sql2BufferTypeMapPtr GetSql2BufferTypeMap() const;
+
 
 		// Private stuff
 		// -------------
@@ -974,7 +991,8 @@ namespace exodbc
 		*/
 		ColumnBuffer* GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const;
 
-		const Database* m_pDb;	///< Database this table belongs to.
+		const Database*				m_pDb;	///< Database this table belongs to.
+		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
 		// ODBC Handles
 		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
