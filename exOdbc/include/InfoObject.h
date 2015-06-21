@@ -402,6 +402,13 @@ namespace exodbc
 			DefaultTxnIsolation = SQL_DEFAULT_TXN_ISOLATION,
 			TxnIsolationOption = SQL_TXN_ISOLATION_OPTION,
 			ScrollOptions = SQL_SCROLL_OPTIONS,
+			CursorSensitity = SQL_CURSOR_SENSITIVITY,
+			DynamicCursorAttributes1 = SQL_DYNAMIC_CURSOR_ATTRIBUTES1,
+			ForwardOnlyCursorAttributes1 = SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1,
+			KeysetCursorAttributes1 = SQL_KEYSET_CURSOR_ATTRIBUTES1,
+			StaticCursorAttributes1 = SQL_STATIC_CURSOR_ATTRIBUTES1,
+			KeysetCursorAttributes2 = SQL_KEYSET_CURSOR_ATTRIBUTES2,
+			StaticCursorAttributes2 = SQL_STATIC_CURSOR_ATTRIBUTES2,
 		};
 
 		enum class IntProperty
@@ -438,6 +445,13 @@ namespace exodbc
 		bool		GetSupportsTransactions() const;
 
 
+		/*!
+		* \brief	Returns true if bit SQL_SO_FORWARD_ONLY is set in ScrollOptions (SQL_SCROLL_OPTIONS).
+		* \throw	If SQL_SO_FORWARD_ONLY is set in ScrollOptions.
+		*/
+		bool		GetForwardOnlyCursors() const;
+
+
 		std::wstring GetDriverOdbcVersion() const;
 		std::wstring GetDriverName() const;
 		std::wstring GetDriverVersion() const;
@@ -449,6 +463,8 @@ namespace exodbc
 		SQLUSMALLINT GetMaxTableNameLen() const;
 		SQLUSMALLINT GetMaxColumnNameLen() const;
 		SQLUSMALLINT GetMaxTableTypeNameLen() const { return DB_MAX_TABLE_TYPE_LEN; };
+
+		std::wstring ToString() const;
 
 	private:
 		typedef std::map<WStringProperty, std::wstring> WStringMap;

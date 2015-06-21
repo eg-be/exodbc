@@ -428,6 +428,21 @@ namespace exodbc
 			return L"SQL_TXN_ISOLATION_OPTION";
 		case UIntProperty::ScrollOptions:
 			return L"SQL_SCROLL_OPTIONS";
+		case UIntProperty::CursorSensitity:
+			return L"SQL_CURSOR_SENSITIVITY";
+		case UIntProperty::DynamicCursorAttributes1:
+			return L"SQL_DYNAMIC_CURSOR_ATTRIBUTES1";
+		case UIntProperty::ForwardOnlyCursorAttributes1:
+			return L"SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1";
+		case UIntProperty::KeysetCursorAttributes1:
+			return L"SQL_KEYSET_CURSOR_ATTRIBUTES1";
+		case UIntProperty::StaticCursorAttributes1:
+			return L"SQL_STATIC_CURSOR_ATTRIBUTES1";
+		case UIntProperty::KeysetCursorAttributes2:
+			return L"SQL_KEYSET_CURSOR_ATTRIBUTES2";
+		case UIntProperty::StaticCursorAttributes2:
+			return L"SQL_STATIC_CURSOR_ATTRIBUTES2";
+
 		default:
 			return L"???";
 		}
@@ -507,6 +522,13 @@ namespace exodbc
 	}
 
 
+	bool DatabaseInfo::GetForwardOnlyCursors() const
+	{
+		SQLUINTEGER value = GetUIntProperty(UIntProperty::ScrollOptions);
+		return value & SQL_SO_FORWARD_ONLY;
+	}
+
+
 	std::wstring DatabaseInfo::GetDriverName() const
 	{
 		return GetWStringProperty(WStringProperty::DriverName);
@@ -528,6 +550,38 @@ namespace exodbc
 	std::wstring DatabaseInfo::GetDbmsName() const
 	{
 		return GetWStringProperty(WStringProperty::DbmsName);
+	}
+
+
+	std::wstring DatabaseInfo::ToString() const
+	{
+		std::wstringstream ws;
+		ws << std::endl;
+		ws << L"***** DATA SOURCE INFORMATION *****" << std::endl;
+		for (WStringMap::const_iterator it = m_wstringMap.begin(); it != m_wstringMap.end(); ++it)
+		{
+			wstring tmp = boost::str(boost::wformat(L"%-38s : '%s'") % GetPropertyName(it->first) % it->second);
+			ws << tmp << std::endl;
+		}
+		ws << std::endl;
+		for (USmallIntMap::const_iterator it = m_uSmallIntMap.begin(); it != m_uSmallIntMap.end(); ++it)
+		{
+			wstring tmp = boost::str(boost::wformat(L"%-38s : %#8x (%8d)") % GetPropertyName(it->first) % it->second % it->second);
+			ws << tmp << std::endl;
+		}
+		ws << std::endl;
+		for (UIntMap::const_iterator it = m_uIntMap.begin(); it != m_uIntMap.end(); ++it)
+		{
+			wstring tmp = boost::str(boost::wformat(L"%-38s : %#8x (%8d)") % GetPropertyName(it->first) % it->second % it->second);
+			ws << tmp << std::endl;
+		}
+		ws << std::endl;
+		for (IntMap::const_iterator it = m_intMap.begin(); it != m_intMap.end(); ++it)
+		{
+			wstring tmp = boost::str(boost::wformat(L"%-38s : %8d") % GetPropertyName(it->first) % it->second);
+			ws << tmp << std::endl;
+		}
+		return ws.str();
 	}
 
 	//std::wstring DatabaseInfo::ToStr() const

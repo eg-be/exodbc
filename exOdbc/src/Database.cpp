@@ -477,6 +477,13 @@ namespace exodbc
 		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::DefaultTxnIsolation);
 		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::ScrollOptions);
 		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::TxnIsolationOption);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::CursorSensitity);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::DynamicCursorAttributes1);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::ForwardOnlyCursorAttributes1);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::KeysetCursorAttributes1);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::StaticCursorAttributes1);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::KeysetCursorAttributes2);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::StaticCursorAttributes2);
 
 		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::IntProperty::PositionedStatements);
 		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::IntProperty::PosOperations);
