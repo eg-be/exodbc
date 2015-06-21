@@ -110,7 +110,7 @@ namespace exodbc
 	{}
 
 
-	ManualColumnInfo::ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize /* = -1 */, SQLINTEGER decimalDigits /* = -1 */)
+	ManualColumnInfo::ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 		: m_sqlType(sqlType)
 		, m_queryName(queryName)
 		, m_columnSize(columnSize)
@@ -135,6 +135,24 @@ namespace exodbc
 			return m_queryName.substr(lastDot + 1);
 		}
 		return m_queryName;
+	}
+
+
+	SQLINTEGER ManualColumnInfo::GetColumnSize() const throw()
+	{
+		return m_columnSize;
+	}
+
+
+	SQLSMALLINT ManualColumnInfo::GetDecimalDigits() const throw()
+	{
+		return m_decimalDigits;
+	}
+
+
+	SQLSMALLINT ManualColumnInfo::GetSqlType() const throw()
+	{
+		return m_sqlType;
 	}
 
 

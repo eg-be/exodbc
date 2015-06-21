@@ -33,7 +33,7 @@
 
 namespace exodbc
 {
-	class ObjectName;
+	class Sql2BufferTypeMap;
 
 	// Typedefs
 	// --------
@@ -211,7 +211,7 @@ namespace exodbc
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, SQLSMALLINT sqlType, const std::wstring& queryName, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+		ColumnBuffer(const ManualColumnInfo& columnInfo, SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT);
 
 
 		~ColumnBuffer();
@@ -723,6 +723,7 @@ namespace exodbc
 		ColumnFlags				m_flags;				///< Flags, set during construction.
 		SQLINTEGER				m_columnSize;			///< Column Size, either read from ColumnInfo during construction or set manually. -1 indicates unknown.
 		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from ColumnInfo during construction or set manually. -1 indicates unkonwn.
+		Sql2BufferTypeMap*		m_pSql2BufferTypeMap;	///< Defines the Mapping of SQL Types to SQL C Types.
 		ObjectName*				m_pName;				///< The name of this object. Created during construction, freed on deletion.
 		SQLUSMALLINT			m_columnNr;				///< Column number used during Bind(). Set to 0 during construction.
 		SQLSMALLINT				m_sqlType;				///< The SQL Type of the Column, like SQL_SMALLINT. Either set on construction or read from ColumnInfo::m_sqlType.

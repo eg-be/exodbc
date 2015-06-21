@@ -35,7 +35,7 @@ namespace exodbc
 	*/
 	class EXODBCAPI TableInfo
 		: public ObjectName
-	{
+	{	
 	public:
 		TableInfo();
 		TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
@@ -80,18 +80,24 @@ namespace exodbc
 	class EXODBCAPI ManualColumnInfo
 		: public ObjectName
 	{
-	public:
+	private:
 		ManualColumnInfo();
-		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize = -1, SQLINTEGER decimalDigits = -1);
+
+	public:
+		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 		virtual std::wstring GetQueryName() const override;
 		virtual std::wstring GetPureName() const override;
+
+		SQLINTEGER GetColumnSize() const throw();
+		SQLSMALLINT GetDecimalDigits() const throw();
+		SQLSMALLINT GetSqlType() const throw();
 
 	private:
 		SQLSMALLINT m_sqlType;
 		std::wstring m_queryName;
 		SQLINTEGER m_columnSize;
-		SQLINTEGER m_decimalDigits;
+		SQLSMALLINT m_decimalDigits;
 	};
 
 
@@ -105,8 +111,10 @@ namespace exodbc
 	class EXODBCAPI ColumnInfo
 		: public ObjectName
 	{
-	public:
+	private:
 		ColumnInfo();
+
+	public:
 		ColumnInfo(const std::wstring& catalogName, const std::wstring& schemaName, const std::wstring& tableName, const std::wstring& columnName,
 			SQLSMALLINT sqlType, const std::wstring& typeName, SQLINTEGER columnSize, SQLINTEGER bufferSize, SQLSMALLINT decimalDigits, SQLSMALLINT numPrecRadix,
 			SQLSMALLINT nullable, const std::wstring& remarks, const std::wstring& defaultValue, SQLSMALLINT sqlDataType, SQLSMALLINT sqlDatetimeSub,

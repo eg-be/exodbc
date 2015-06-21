@@ -26,7 +26,7 @@
     <ClInclude Include="include\Exception.h" />
     <ClInclude Include="include\InfoObject.h" />
     <ClInclude Include="include\ObjectName.h" />
-    <ClInclude Include="include\Sql2BufferMap.h" />
+    <ClInclude Include="include\Sql2BufferTypeMap.h" />
     <ClInclude Include="include\Table.h" />
     <ClInclude Include="include\Helpers.h" />
     <ClInclude Include="include\exOdbc.h" />
@@ -48,7 +48,7 @@
     <ClCompile Include="src\Helpers.cpp" />
     <ClCompile Include="src\InfoObject.cpp" />
     <ClCompile Include="src\ObjectName.cpp" />
-    <ClCompile Include="src\Sql2BufferMap.cpp" />
+    <ClCompile Include="src\Sql2BufferTypeMap.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v120|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v120|x64'">Create</PrecompiledHeader>

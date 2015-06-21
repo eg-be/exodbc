@@ -115,7 +115,7 @@ namespace exodbc
 	}
 
 
-	ColumnBuffer::ColumnBuffer(SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, SQLSMALLINT sqlType, const std::wstring& queryName, OdbcVersion odbcVersion, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	ColumnBuffer::ColumnBuffer(const ManualColumnInfo& columnInfo, SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, OdbcVersion odbcVersion, ColumnFlags flags /* = CF_SELECT */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(true)
 		, m_autoBindingMode(AutoBindingMode::BIND_AS_REPORTED)
@@ -124,10 +124,10 @@ namespace exodbc
 		, m_columnNr(0)
 		, m_bufferPtr(bufferPtrVariant)
 		, m_odbcVersion(odbcVersion)
-		, m_decimalDigits(decimalDigits)
-		, m_columnSize(columnSize)
+		, m_decimalDigits(columnInfo.GetDecimalDigits())
+		, m_columnSize(columnInfo.GetColumnSize())
 		, m_hStmt(SQL_NULL_HSTMT)
-		, m_sqlType(sqlType)
+		, m_sqlType(columnInfo.GetSqlType())
 		, m_flags(flags)
 		, m_cb(0)
 		, m_pName(NULL)
@@ -136,8 +136,9 @@ namespace exodbc
 		exASSERT(bufferSize > 0);
 
 		// Create ObjectName from manual definition
-		m_pName = new ManualColumnInfo(sqlType, queryName, columnSize, decimalDigits);
+		m_pName = new ManualColumnInfo(columnInfo);
 	}
+
 
 	// Destructor
 	// -----------
