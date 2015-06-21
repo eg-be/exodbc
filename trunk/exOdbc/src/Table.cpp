@@ -410,12 +410,12 @@ namespace exodbc
 	}
 
 
-	bool Table::SelectFetchScroll(SQLSMALLINT fetchOrientation)
+	bool Table::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
 	{
 		exASSERT(!TestOpenFlag(TOF_FORWARD_ONLY_CURSORS));
 		exASSERT(IsSelectOpen());
 
-		SQLRETURN ret = SQLFetchScroll(m_hStmtSelect, fetchOrientation, NULL);
+		SQLRETURN ret = SQLFetchScroll(m_hStmtSelect, fetchOrientation, fetchOffset);
 		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
 		{
 			wstring msg = boost::str(boost::wformat(L"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
@@ -755,19 +755,31 @@ namespace exodbc
 
 	bool Table::SelectPrev()
 	{
-		return SelectFetchScroll(SQL_FETCH_PREV);
+		return SelectFetchScroll(SQL_FETCH_PREV, NULL);
 	}
 
 
 	bool Table::SelectFirst()
 	{
-		return SelectFetchScroll(SQL_FETCH_FIRST);
+		return SelectFetchScroll(SQL_FETCH_FIRST, NULL);
 	}
 
 
 	bool Table::SelectLast()
 	{
-		return SelectFetchScroll(SQL_FETCH_LAST);
+		return SelectFetchScroll(SQL_FETCH_LAST, NULL);
+	}
+
+
+	bool Table::SelectAbsolute(SQLLEN position)
+	{
+		return SelectFetchScroll(SQL_FETCH_ABSOLUTE, position);
+	}
+
+
+	bool Table::SelectRelative(SQLLEN offset)
+	{
+		return SelectFetchScroll(SQL_FETCH_RELATIVE, offset);
 	}
 
 

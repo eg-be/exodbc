@@ -481,6 +481,24 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Fetches the record at absolute position fromt the current active Select() recordset.
+		* \see		Select()
+		* \return	True if record at position has been fetched, false if no record available.
+		* \throw	Exception If no SelectQuery is open, or if TOF_FORWARD_ONLY_CURSORS is set.
+		*/
+		bool		SelectAbsolute(SQLLEN position);
+
+
+		/*!
+		* \brief	Fetches the record at relative position to the currently selected record.
+		* \see		Select()
+		* \return	True if record at relative position has been fetched, false if no record available.
+		* \throw	Exception If no SelectQuery is open, or if TOF_FORWARD_ONLY_CURSORS is set.
+		*/
+		bool		SelectRelative(SQLLEN offset);
+
+
+		/*!
 		* \brief	Closes an eventually open Select-Query.
 		* \details	This function does not fail if no select statement was open.
 		* \see		Select()
@@ -968,7 +986,7 @@ namespace exodbc
 		* \throw	Exception if TOF_FORWARD_ONLY_CURSORS is set, or no Select-Statement is open,
 		*			or if SQLFetchScroll does not return with SQL_SUCCEEDED or SQL_NO_DATA.
 		*/
-		bool		SelectFetchScroll(SQLSMALLINT fetchOrientation);
+		bool		SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset);
 
 
 		/*!
