@@ -421,7 +421,7 @@ namespace exodbc
 		*			If a select statement is open, the statement is closed first.
 		* \param	whereStatement Do not include 'WHERE' in the passed where clause
 		* \see		SelectNext()
-		* \see		SelectClose();
+		* \see		SelectClose()
 		* \throw	Exception If failed.
 		*/
 		void		Select(const std::wstring& whereStatement = L"");
@@ -448,7 +448,7 @@ namespace exodbc
 		* \brief	Fetches the next record fromt the current active Select() recordset.
 		* \details	If successful, the ColumnBuffer(s) bound to this table will contain 
 		*			the field-values of the currently selected record.
-		* \see		SelectNext()
+		* \seee		Select()
 		* \return	True if next record has been fetched, false if no more records exist.
 		* \throw	Exception If no SelectQuery is open.
 		*/
@@ -459,7 +459,7 @@ namespace exodbc
 		* \brief	Fetches the first record fromt the current active Select() recordset.
 		* \details	If successful, the ColumnBuffer(s) bound to this table will contain
 		*			the field-values of the first selected record.
-		* \see		SelectNext()
+		* \see		Select()
 		* \return	True if first record has been fetched, false if no record available.
 		* \throw	Exception If no SelectQuery is open, or if TOF_FORWARD_ONLY_CURSORS is set.
 		*/
