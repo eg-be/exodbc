@@ -1020,7 +1020,8 @@ namespace exodbc
 		// Read OdbcVersion from Environment
 		const Environment* pEnv = m_pDb->GetEnvironment();
 		exASSERT(pEnv != NULL);
-		ColumnBuffer* pColumnBuffer = new ColumnBuffer(sqlCType, pBuffer, bufferSize, sqlType, queryName, pEnv->GetOdbcVersion(), flags, columnSize, decimalDigits);
+		ManualColumnInfo colInfo(sqlType, queryName, columnSize, decimalDigits);
+		ColumnBuffer* pColumnBuffer = new ColumnBuffer(colInfo, sqlCType, pBuffer, bufferSize, pEnv->GetOdbcVersion(), flags);
 		m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 

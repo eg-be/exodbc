@@ -1,5 +1,5 @@
 /*!
-* \file Sql2BufferMap.cpp
+* \file Sql2BufferTypeMap.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 21.06.2015
 * \brief Source file for name objects.
@@ -10,7 +10,7 @@
 #include "stdafx.h"
 
 // Own header
-#include "Sql2BufferMap.h"
+#include "Sql2BufferTypeMap.h"
 
 // Same component headers
 #include "Exception.h"
@@ -27,14 +27,19 @@ using namespace std;
 
 namespace exodbc
 {
+	Sql2BufferTypeMap::Sql2BufferTypeMap()
+		: m_hasDefault(false)
+		, m_defaultBufferType(0)
+	{}
 
-	void Sql2BufferMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType)
+
+	void Sql2BufferTypeMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType)
 	{
 		m_typeMap[sqlType] = sqlCType;
 	}
 
 
-	void Sql2BufferMap::ClearType(SQLSMALLINT sqlType)
+	void Sql2BufferTypeMap::ClearType(SQLSMALLINT sqlType)
 	{
 		TypeMap::const_iterator it = m_typeMap.find(sqlType);
 		if (it != m_typeMap.end())
@@ -44,13 +49,13 @@ namespace exodbc
 	}
 
 
-	bool Sql2BufferMap::ContainsType(SQLSMALLINT sqlType) const
+	bool Sql2BufferTypeMap::ContainsType(SQLSMALLINT sqlType) const
 	{
 		return m_typeMap.find(sqlType) != m_typeMap.end();
 	}
 
 
-	SQLSMALLINT Sql2BufferMap::GetBufferType(SQLSMALLINT sqlType) const
+	SQLSMALLINT Sql2BufferTypeMap::GetBufferType(SQLSMALLINT sqlType) const
 	{
 		TypeMap::const_iterator it = m_typeMap.find(sqlType);
 		if (it != m_typeMap.end())
@@ -58,9 +63,29 @@ namespace exodbc
 			return it->second;
 		}
 
-		NotFoundException nfe(boost::str(boost::wformat(L"SQL Type %s (%d) is not Registered in Sql2BufferMap") % SqlType2s(sqlType) %sqlType));
+		NotFoundException nfe(boost::str(boost::wformat(L"SQL Type %s (%d) is not Registered in Sql2BufferTypeMap") % SqlType2s(sqlType) %sqlType));
 		SET_EXCEPTION_SOURCE(nfe);
 		throw nfe;
+	}
+
+
+	bool Sql2BufferTypeMap::HasDefault() const throw()
+	{
+		return m_hasDefault;
+	}
+
+
+	void Sql2BufferTypeMap::SetDefault(SQLSMALLINT defaultBufferType) throw()
+	{
+		m_hasDefault = true;
+		m_defaultBufferType = defaultBufferType;
+	}
+
+
+	SQLSMALLINT Sql2BufferTypeMap::GetDefault() const
+	{
+		exASSERT(HasDefault());
+		return m_defaultBufferType;
 	}
 
 
@@ -71,6 +96,22 @@ namespace exodbc
 		RegisterType(SQL_BIGINT, SQL_C_SBIGINT);
 		RegisterType(SQL_CHAR, SQL_C_CHAR);
 		RegisterType(SQL_VARCHAR, SQL_C_CHAR);
+		RegisterType(SQL_WCHAR, SQL_C_CHAR);
+		RegisterType(SQL_WVARCHAR, SQL_C_CHAR);
+		RegisterType(SQL_DOUBLE, SQL_C_DOUBLE);
+		RegisterType(SQL_FLOAT, SQL_C_DOUBLE);
+		RegisterType(SQL_REAL, SQL_C_DOUBLE);
+		RegisterType(SQL_DATE, SQL_C_TYPE_DATE);
+		RegisterType(SQL_TIME, SQL_C_TYPE_TIME);
+#ifdef HAVE_MSODBCSQL_H
+		RegisterType(SQL_SS_TIME2, SQL_C_SS_TIME2);
+#endif
+		RegisterType(SQL_TIMESTAMP, SQL_C_TYPE_TIMESTAMP);
+		RegisterType(SQL_BINARY, SQL_C_BINARY);
+		RegisterType(SQL_VARBINARY, SQL_C_BINARY);
+		RegisterType(SQL_LONGVARBINARY, SQL_C_BINARY);
+		RegisterType(SQL_NUMERIC, SQL_C_NUMERIC);
+		RegisterType(SQL_DECIMAL, SQL_C_NUMERIC);
 
 			/*
 			* SQL_SMALLINT				| SQLSMALLINT*

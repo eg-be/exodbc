@@ -58,7 +58,7 @@
     <ClInclude Include="include\InfoObject.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\Sql2BufferMap.h">
+    <ClInclude Include="include\Sql2BufferTypeMap.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -99,7 +99,7 @@
     <ClCompile Include="src\InfoObject.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Sql2BufferMap.cpp">
+    <ClCompile Include="src\Sql2BufferTypeMap.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
