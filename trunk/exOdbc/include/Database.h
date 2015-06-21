@@ -45,6 +45,7 @@
 #include "exOdbc.h"
 #include "Helpers.h"
 #include "InfoObject.h"
+#include "Sql2BufferTypeMap.h"
 
 // Other headers
 #if EXODBC_TEST
@@ -116,6 +117,7 @@ namespace exodbc
 		* \brief	Default Constructor. You will need to manually allocate the DBC-Handle.
 		* \details	Default Constructor. You will need to call AllocateConnectionHandle() 
 		*			afterwards to allocate the Database-handle.
+		*			Creates a new DefaultSql2BufferTypeMap to be used with this Database.
 		* \see		AllocateConnectionHandle()
 		*/
 		Database() throw();
@@ -610,6 +612,21 @@ namespace exodbc
 		bool IsSqlTypeSupported(SQLSMALLINT sqlType) const;
 
 
+		/*!
+		* \brief	Set a Sql2BufferTypeMap to be used by this Database from now on.
+		* \param pSql2BufferTypeMap	Sql2BufferTypeMap to set.
+		*/
+		void		SetSql2BufferTypeMap(Sql2BufferTypeMapPtr pSql2BufferTypeMap) throw();
+
+
+		/*!
+		* \brief	Get the Sql2BufferTypeMap set on this Database.
+		* \return	const Sql2BufferTypeMap*
+		* \throw	Exception If no Sql2BufferTypeMap is set on this Database.
+		*/
+		Sql2BufferTypeMapPtr GetSql2BufferTypeMap() const;
+
+
 		// Private stuff
 		// -------------
 	private:
@@ -685,6 +702,7 @@ namespace exodbc
 		// -------
 		const Environment*	m_pEnv;		///< Environment of this Databaes
 		SDbInfo				m_dbInf;
+		Sql2BufferTypeMapPtr	m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used from this Database. If none is set during OpenImp() a DefaultSql2BufferTypeMap is created.
 
 		SqlTypeInfosVector m_datatypes;	///< Queried from DB during Open
 		bool				m_dbIsOpen;			///< Set to true after SQLConnect was successful

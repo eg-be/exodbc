@@ -15,6 +15,8 @@
 #include "exOdbc.h"
 
 // Other headers
+#include "boost/smart_ptr.hpp"
+
 // System headers
 #include <map>
 
@@ -101,7 +103,8 @@ namespace exodbc
 		typedef std::map<SQLSMALLINT, SQLSMALLINT> TypeMap;
 		TypeMap m_typeMap;
 	};
-
+	typedef boost::shared_ptr<Sql2BufferTypeMap> Sql2BufferTypeMapPtr;
+	typedef boost::shared_ptr<const Sql2BufferTypeMap> ConstSql2BufferTypeMapPtr;
 	
 	/*!
 	 * \class DefaultSql2BufferMap
@@ -129,7 +132,9 @@ namespace exodbc
 	 * SQL_NUMERIC				| SQL_C_NUMERIC
 	 * SQL_DECIMAL				| SQL_C_NUMERIC
 	 *
-	 * [1] If the ODBC-Version is <= 2.x, the SQL_C_DATE, SQL_C_TIME and SQL_C_TIMESTAMP types are used.
+	 * [1] If the ODBC-Version is <= 2.x, only the SQL_C_DATE, SQL_C_TIME and SQL_C_TIMESTAMP types are used.
+	 *	   If the ODBC-Version is >= 3.x, the old (like SQL_C_DATE) and the new (like SQL_C_TYPE_DATE) types
+	 *	   are mapped to the new ODBC 3.x types.
 	 * 
 	 * [2] The SQL_TIME2 is a Microsoft SQL Server specific extension. It is only available
 	 * if HAVE_MSODBCSQL_H is defined to 1. If HAVE_MSODBCSQL_H
@@ -141,7 +146,87 @@ namespace exodbc
 		: public Sql2BufferTypeMap
 	{
 	public:
+		/*!
+		* \brief		Create new Default Mapping.
+		* \param odbcVersion Depending on OdbcVersion passed different bindings are registered, see DefaultSql2BufferMap.
+		*/
 		DefaultSql2BufferMap(OdbcVersion odbcVersion);
+	};
+
+
+	/*!
+	* \class WCharSql2BufferMap
+	*
+	* \brief Registers no types but sets a Default to SQL_C_WCHAR.
+	* \details All SQL Types will try to bind to a SQL_C_WCHAR.
+	*
+	*/
+	class EXODBCAPI WCharSql2BufferMap
+		: public Sql2BufferTypeMap
+	{
+	public:
+
+		/*!
+		* \brief Create new WCharSql2BufferMap.
+		*/
+		WCharSql2BufferMap();
+	};
+
+
+	/*!
+	* \class CharSql2BufferMap
+	*
+	* \brief Registers no types but sets a Default to SQL_C_CHAR.
+	* \details All SQL Types will try to bind to a SQL_C_CHAR.
+	*
+	*/
+	class EXODBCAPI CharSql2BufferMap
+		: public Sql2BufferTypeMap
+	{
+	public:
+
+		/*!
+		* \brief Create new CharSql2BufferMap.
+		*/
+		CharSql2BufferMap();
+	};
+
+
+	/*!
+	* \class CharAsWCharSql2BufferMap
+	*
+	* \brief Extends the DefaultSql2BufferMap and binds CHAR fields as SQL_C_WCHAR too.
+	* \details As DefaultSql2BufferMap, except SQL_CHAR and SQL_VARCHAR are bound to SQL_C_WCHAR.
+	*
+	*/
+	class EXODBCAPI CharAsWCharSql2BufferMap
+		: public DefaultSql2BufferMap
+	{
+	public:
+		
+		/*!
+		* \brief Create new CharAsWCharSql2BufferMap.
+		*/
+		CharAsWCharSql2BufferMap(OdbcVersion ocbcVersion);
+	};
+
+
+	/*!
+	* \class WCharAsCharSql2BufferMap
+	*
+	* \brief Extends the DefaultSql2BufferMap and binds WCHAR fields as SQL_C_CHAR too.
+	* \details As DefaultSql2BufferMap, except SQL_WCHAR and SQL_WVARCHAR are bound to SQL_C_CHAR.
+	*
+	*/
+	class EXODBCAPI WCharAsCharSql2BufferMap
+		: public DefaultSql2BufferMap
+	{
+	public:
+
+		/*!
+		* \brief Create new WCharAsCharSql2BufferMap.
+		*/
+		WCharAsCharSql2BufferMap(OdbcVersion ocbcVersion);
 	};
 }
 
