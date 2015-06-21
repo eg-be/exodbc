@@ -70,6 +70,27 @@ namespace exodbc
 	}
 
 
+	TEST_P(DatabaseTest, PrintDatabaseInfo)
+	{
+		Database db(&m_env);
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
+		{
+			LogLevelInfo lli;
+			LOG_INFO(L"Will print Database Information now");
+			LOG_INFO(L"===================================");
+			LOG_INFO(db.GetDbInfo().ToString());
+			LOG_INFO(L"===================================");
+		}
+	}
+
+
 	TEST_P(DatabaseTest, SetConnectionAttributes)
 	{
 		Database db(&m_env);
