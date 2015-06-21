@@ -911,7 +911,10 @@ namespace exodbc
 		// We expect some Records
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
 		ASSERT_NO_THROW(iTable.Select(sqlWhere));
-		EXPECT_TRUE(iTable.SelectRelative(2));
+		// Note: For MySQL to be able to select relative, a record must be selected first. Else, SelectRelative will choose wrong offset
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
+		EXPECT_TRUE(iTable.SelectRelative(1));
 		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 3, test::ValueIndicator::IS_NULL, (-2147483647 - 1), test::ValueIndicator::IS_NULL));
 		// Move by one forward
 		EXPECT_TRUE(iTable.SelectRelative(1));
