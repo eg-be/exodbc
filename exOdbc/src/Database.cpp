@@ -429,7 +429,7 @@ namespace exodbc
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
 
 		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, NULL);
-		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Cannot set ATTR_TRACE to OPT_TRACE_OFF");
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Cannot set SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
 
 		// Note: This is unsupported SQL_ATTR_METADATA_ID by most drivers. It should default to OFF
 		//ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_METADATA_ID, (SQLPOINTER) SQL_TRUE, NULL);

@@ -273,6 +273,24 @@ namespace exodbc
 	}
 
 
+	void Table::SetCursorOptions(bool forwardOnlyCursors)
+	{
+		exASSERT(m_hStmtSelect != SQL_NULL_HSTMT);
+
+		SQLRETURN ret = 0;
+		if (forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
+		{
+			ret = SQLSetStmtAttr(m_hStmtSelect, SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_NONSCROLLABLE, NULL);
+			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_hStmtSelect, L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
+		}
+		else
+		{
+			ret = SQLSetStmtAttr(m_hStmtSelect, SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_SCROLLABLE, NULL);
+			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_hStmtSelect, L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
+		}
+	}
+
+
 	void Table::CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns)
 	{
 		exASSERT(m_manualColumns == false);
@@ -1077,10 +1095,16 @@ namespace exodbc
 		// Nest try/catch the free the buffers created in here if we fail somewhere
 		try
 		{
-
-			std::wstring sqlStmt;
-			std::wstring s;
-			s.empty();
+			// Try to set Cursor-Options
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::EXCEL)
+			{
+				// Do not try to set on Access or Excel, they reports 'Optional feature not implemented '
+				m_openFlags |= TOF_FORWARD_ONLY_CURSORS;
+			}
+			else
+			{
+				SetCursorOptions(TestOpenFlag(TOF_FORWARD_ONLY_CURSORS));
+			}
 
 			// If we do not already have a TableInfo for our table, we absolutely must find one
 			bool searchedTable = false;

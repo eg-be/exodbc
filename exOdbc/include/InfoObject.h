@@ -446,8 +446,8 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Returns true if bit SQL_SO_FORWARD_ONLY is set in ScrollOptions (SQL_SCROLL_OPTIONS).
-		* \throw	If SQL_SO_FORWARD_ONLY is set in ScrollOptions.
+		* \brief	Returns true if bit SQL_SO_FORWARD_ONLY is not the only bit set in ScrollOptions (SQL_SCROLL_OPTIONS).
+		* \throw	If SQL_SO_FORWARD_ONLY is only bit set in ScrollOptions.
 		*/
 		bool		GetForwardOnlyCursors() const;
 
