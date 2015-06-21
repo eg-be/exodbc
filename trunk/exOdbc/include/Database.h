@@ -414,12 +414,6 @@ namespace exodbc
 		 */
 		CommitMode GetCommitMode() const { return m_commitMode; };
 
-
-		/*!
-		* \brief	Returns true if the database attribute SQL_TXN_CAPABLE is not set to SQL_TC_NONE
-		*/
-		bool		GetSupportsTransactions() const { return m_dbInf.m_txnCapable != SQL_TC_NONE; };
-
 		
 		/*!
 		* \brief	Queries the database for the attribute SQL_TXN_ISOLATION.
@@ -450,7 +444,7 @@ namespace exodbc
 		/*!
 		* \brief	Read the ODBC version supported by the driver.
 		* \details	Fails if not connected. Does not read the version from the environment
-		*			but from the SDbInfo populated during connecting to the database.
+		*			but from the DatabaseInfo populated during connecting to the database.
 		* \return	ODBC version or OV_UNKNOWN.
 		* \throw	Exception If parsing the version returned from the driver fails, or the version
 		*			from the driver has not yet been read (is read during Open()).
@@ -465,13 +459,6 @@ namespace exodbc
 		* \throw	Exception 
 		*/
 		OdbcVersion GetMaxSupportedOdbcVersion() const;
-
-
-		/*!
-		* \brief	Get Database name as reported by driver during Open().
-		* \return	Database name as reported by driver during Open().
-		*/
-		const std::wstring&	GetDatabaseName() const  { return m_dbInf.m_dbmsName; }
 
 
 		/*!
@@ -554,14 +541,14 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Get the SDbInfo if it is available.
+		* \brief	Get the DatabaseInfo if it is available.
 		* \details	During Open() the database is queried about information about itself,
-		*			if successful this information is stored in an SDbInfo internally.
-		*			SDbInfo is empty until Open() was successful.
-		* \return	SDbInfo with information corresponding to the database connected.
-		* \throw	Exception If database is not open yet and therefore SDbInfo is unknown.
+		*			if successful this information is stored in an DatabaseInfo internally.
+		*			DatabaseInfo is empty until Open() was successful.
+		* \return	DatabaseInfo with information corresponding to the database connected.
+		* \throw	Exception If database is not open yet and therefore DatabaseInfo is unknown.
 		*/
-		SDbInfo GetDbInfo()	const				{ exASSERT(IsOpen());  return m_dbInf; }
+		DatabaseInfo GetDbInfo()	const				{ exASSERT(IsOpen());  return m_dbInf; }
 
 
 		/*!
@@ -661,10 +648,10 @@ namespace exodbc
 
 		/*!
 		* \brief	Query the Database using SQLGetInfo.
-		* \return	SDbInfo populated with values.
+		* \return	DatabaseInfo populated with values.
 		* \throw	Exception If reading Database info fails or no connection handle is allocated.
 		*/
-		SDbInfo			ReadDbInfo();
+		DatabaseInfo			ReadDbInfo();
 		
 		
 		/*!
@@ -701,7 +688,7 @@ namespace exodbc
 		// Members
 		// -------
 		const Environment*	m_pEnv;		///< Environment of this Databaes
-		SDbInfo				m_dbInf;
+		DatabaseInfo			m_dbInf;
 		Sql2BufferTypeMapPtr	m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used from this Database. If none is set during OpenImp() a DefaultSql2BufferTypeMap is created.
 
 		SqlTypeInfosVector m_datatypes;	///< Queried from DB during Open

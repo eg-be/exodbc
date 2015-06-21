@@ -349,59 +349,117 @@ namespace exodbc
 
 
 	/*!
-	* \struct	SDbInfo
-	* \brief	The following structure contains database information gathered from the datasource
-	* 			when the datasource is first Opened.
+	* \class	DatabaseInfo
+	* \brief	The following structure contains database information gathered from the Database
+	* 			when the Database is first Opened.
 	*/
-	struct EXODBCAPI SDbInfo
+	class EXODBCAPI DatabaseInfo
 	{
-		SDbInfo();
+	public:
+		DatabaseInfo();
 
-		~SDbInfo() {};
+		enum class WStringProperty
+		{
+			ServerName = SQL_SERVER_NAME,
+			DatabaseName = SQL_DATABASE_NAME,
 
-		// [Output] Pointer to a buffer in which to return the information. Depending on the InfoType requested, 
-		// the information returned will be one of the following: a null-terminated character string, an SQLUSMALLINT value, 
-		// an SQLUINTEGER bitmask, an SQLUINTEGER flag, a SQLUINTEGER binary value, or a SQLULEN value.
-		// See: http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
+			DbmsName = SQL_DBMS_NAME,
+			DbmsVersion = SQL_DBMS_VER,
 
-		std::wstring	m_dbmsName;						///< Name of the dbms product
-		std::wstring	m_dbmsVer;						///< Version # of the dbms product
-		std::wstring	m_driverName;					///< Driver name
-		std::wstring	m_odbcVer;						///< ODBC version of the driver
-		std::wstring	m_drvMgrOdbcVer;				///< ODBC version of the driver manager
-		std::wstring	m_driverVer;					///< Driver version
-		std::wstring	m_serverName;					///< Server Name, typically a connect string
-		std::wstring	m_databaseName;					///< Database filename
-		std::wstring	m_outerJoins;					///< Indicates whether the data source supports outer joins
-		std::wstring	m_procedureSupport;				///< Indicates whether the data source supports stored procedures
-		std::wstring	m_accessibleTables;				///< Indicates whether the data source only reports accessible tables in SQLTables.
-		SQLUSMALLINT	m_maxConnections;				///< Maximum # of connections the data source supports
-		SQLUSMALLINT	m_maxActiveStmts;				///< SQL_MAX_CONCURRENT_ACTIVITIES Maximum # of concurent active SQLHSTMTs per SQLHDBC.
-		SQLUSMALLINT	m_cliConfLvl;					///< Indicates whether the data source is SAG compliant
-		SQLUSMALLINT	m_cursorCommitBehavior;			///< Indicates how cursors are affected by a db commit
-		SQLUSMALLINT	m_cursorRollbackBehavior;		///< Indicates how cursors are affected by a db rollback
-		SQLUSMALLINT	m_supportNotNullClause;			///< Indicates if data source supports NOT NULL clause
-		std::wstring	m_supportIEF;					///< Integrity Enhancement Facility (Referential Integrity)
-		SQLUINTEGER		m_txnIsolation;					///< Default transaction isolation level supported by the driver
-		SQLUINTEGER		m_txnIsolationOptions;			///< Transaction isolation level options available
-		SQLINTEGER		m_posOperations;				///< Position operations supported in SQLSetPos
-		SQLINTEGER		m_posStmts;						///< An SQLINTEGER bitmask enumerating the supported positioned SQL statements.
-		SQLUINTEGER		m_scrollOptions;				///< Scroll Options supported for scrollable cursors
-		SQLUSMALLINT	m_txnCapable;					///< Indicates if the data source supports transactions
-		// TODO: Connection attribute
-		//			UDWORD loginTimeout;                ///< Number seconds to wait for a login request
-		SQLUSMALLINT	m_maxCatalogNameLen;			///< Max length of a catalog name. Can be 0 if no limit, or limit is unknown
-		SQLUSMALLINT	m_maxSchemaNameLen;				///< Max length of a schema name. Can be 0 if no limit, or limit is unknown
-		SQLUSMALLINT	m_maxTableNameLen;				///< Max length of a table name. Can be 0 if no limit, or limit is unknown
-		SQLUSMALLINT	m_maxColumnNameLen;				///< Max length of a column name. Can be 0 if no limit, or limit is unknown
-		std::wstring	m_searchPatternEscape;			///< SQL_SEARCH_PATTERN_ESCAPE: How to escape string-search patterns in pattern-value arguments in catalog functions
-		std::wstring ToStr() const;
+			DriverName = SQL_DRIVER_NAME,
+			DriverOdbcVersion = SQL_DRIVER_ODBC_VER,
+			DriverVersion = SQL_DRIVER_VER,
+
+			OdbcSupportIEF = SQL_ODBC_SQL_OPT_IEF,
+			OdbcVersion = SQL_ODBC_VER,
+
+			OuterJoins = SQL_OUTER_JOINS,
+			ProcedureSupport = SQL_PROCEDURES,
+			AccessibleTables = SQL_ACCESSIBLE_TABLES,
+			SearchPatternEscape = SQL_SEARCH_PATTERN_ESCAPE,
+		};
+
+		enum class USmallIntProperty
+		{
+			MaxConnections = SQL_MAX_DRIVER_CONNECTIONS,
+			MaxConcurrentActivs = SQL_MAX_CONCURRENT_ACTIVITIES,
+
+			OdbcSagCliConformance = SQL_ODBC_SAG_CLI_CONFORMANCE,
+
+			CursorCommitBehavior = SQL_CURSOR_COMMIT_BEHAVIOR,
+			CursorRollbackBehavior = SQL_CURSOR_ROLLBACK_BEHAVIOR,
+			NonNullableColumns = SQL_NON_NULLABLE_COLUMNS,
+			TxnCapable = SQL_TXN_CAPABLE,
+
+			MaxCatalogNameLen = SQL_MAX_CATALOG_NAME_LEN,
+			MaxSchemaNameLen = SQL_MAX_SCHEMA_NAME_LEN,
+			MaxTableNameLen = SQL_MAX_TABLE_NAME_LEN,
+			MaxColumnNameLen = SQL_MAX_COLUMN_NAME_LEN,
+		};
+
+		enum class UIntProperty
+		{
+			DefaultTxnIsolation = SQL_DEFAULT_TXN_ISOLATION,
+			TxnIsolationOption = SQL_TXN_ISOLATION_OPTION,
+			ScrollOptions = SQL_SCROLL_OPTIONS,
+		};
+
+		enum class IntProperty
+		{
+			PosOperations = SQL_POS_OPERATIONS,
+			PositionedStatements = SQL_POSITIONED_STATEMENTS,
+		};
+
+		std::wstring GetPropertyName(WStringProperty prop) const;
+		std::wstring GetPropertyName(USmallIntProperty prop) const;
+		std::wstring GetPropertyName(UIntProperty prop) const;
+		std::wstring GetPropertyName(IntProperty prop) const;
+
+		void SetProperty(WStringProperty prop, const std::wstring& value);
+		void SetProperty(USmallIntProperty prop, SQLUSMALLINT value);
+		void SetProperty(UIntProperty prop, SQLUINTEGER value);
+		void SetProperty(IntProperty prop, SQLINTEGER value);
+
+		void ReadAndStoryProperty(SQLHDBC hDbc, WStringProperty prop);
+		void ReadAndStoryProperty(SQLHDBC hDbc, USmallIntProperty prop);
+		void ReadAndStoryProperty(SQLHDBC hDbc, UIntProperty prop);
+		void ReadAndStoryProperty(SQLHDBC hDbc, IntProperty prop);
+
+		std::wstring GetWStringProperty(WStringProperty prop) const;
+		SQLUSMALLINT GetUSmallIntProperty(USmallIntProperty prop) const;
+		SQLUINTEGER GetUIntProperty(UIntProperty prop) const;
+		SQLINTEGER GetIntProperty(IntProperty prop) const;
+
+
+		/*!
+		* \brief	Returns true if TxnCapable (SQL_TXN_CAPABLE) is not set to SQL_TC_NONE.
+		* \throw	If Property TxnCapable is not set to SQL_TC_NONE.
+		*/
+		bool		GetSupportsTransactions() const;
+
+
+		std::wstring GetDriverOdbcVersion() const;
+		std::wstring GetDriverName() const;
+		std::wstring GetDriverVersion() const;
+
+		std::wstring GetDbmsName() const;
 
 		SQLUSMALLINT GetMaxCatalogNameLen() const;
 		SQLUSMALLINT GetMaxSchemaNameLen() const;
 		SQLUSMALLINT GetMaxTableNameLen() const;
 		SQLUSMALLINT GetMaxColumnNameLen() const;
 		SQLUSMALLINT GetMaxTableTypeNameLen() const { return DB_MAX_TABLE_TYPE_LEN; };
+
+	private:
+		typedef std::map<WStringProperty, std::wstring> WStringMap;
+		typedef std::map<USmallIntProperty, SQLUSMALLINT> USmallIntMap;
+		typedef std::map<UIntProperty, SQLUINTEGER> UIntMap;
+		typedef std::map<IntProperty, SQLINTEGER> IntMap;
+
+		WStringMap m_wstringMap;
+		USmallIntMap m_uSmallIntMap;
+		UIntMap m_uIntMap;
+		IntMap m_intMap;
 	};
 
 
