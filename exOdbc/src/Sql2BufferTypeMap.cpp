@@ -27,19 +27,19 @@ using namespace std;
 
 namespace exodbc
 {
-	Sql2BufferTypeMap::Sql2BufferTypeMap()
+	Sql2BufferTypeMap::Sql2BufferTypeMap() throw()
 		: m_hasDefault(false)
 		, m_defaultBufferType(0)
 	{}
 
 
-	void Sql2BufferTypeMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType)
+	void Sql2BufferTypeMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType) throw()
 	{
 		m_typeMap[sqlType] = sqlCType;
 	}
 
 
-	void Sql2BufferTypeMap::ClearType(SQLSMALLINT sqlType)
+	void Sql2BufferTypeMap::ClearType(SQLSMALLINT sqlType) throw()
 	{
 		TypeMap::const_iterator it = m_typeMap.find(sqlType);
 		if (it != m_typeMap.end())
@@ -61,6 +61,11 @@ namespace exodbc
 		if (it != m_typeMap.end())
 		{
 			return it->second;
+		}
+
+		if (HasDefault())
+		{
+			return GetDefault();
 		}
 
 		NotFoundException nfe(boost::str(boost::wformat(L"SQL Type %s (%d) is not Registered in Sql2BufferTypeMap") % SqlType2s(sqlType) %sqlType));

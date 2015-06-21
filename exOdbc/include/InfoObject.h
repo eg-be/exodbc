@@ -84,13 +84,52 @@ namespace exodbc
 		ManualColumnInfo();
 
 	public:
+
+		/*!
+		* \brief Create new ManualColumnInfo
+		* \param sqlType		The SQL Type of the Column.
+		* \param queryName		Name to be used when querying this Column. 
+		* \param columnSize		The number of digits of a decimal value (including the fractional part).
+		* \param decimalDigits	The number of digits of the fractional part of a decimal value.
+		* \throw Exception		If queryName is empty.
+		*/
 		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
-		virtual std::wstring GetQueryName() const override;
+		/*!
+		* \brief Return the Query Name for this ManualColumnInfo
+		* \return std::wstring The QueryName passed upporn construction.
+		*/
+		virtual std::wstring GetQueryName() const throw() override;
+		
+		
+		/*!
+		* \brief	Return the right-most part of the Query Name.
+		* \details	Searches for the last occurance of '.' in the query name and returns the
+		*			part after the last '.'
+		* \return std::wstring Pure Name.
+		* \throw Exception If Part after last '.' is empty.
+		*/
 		virtual std::wstring GetPureName() const override;
 
+
+		/*!
+		* \brief Get the ColumnSize set on Construction.
+		* \return SQLINTEGER
+		*/
 		SQLINTEGER GetColumnSize() const throw();
+
+
+		/*!
+		* \brief Get the DecimalDigits set on Construction.
+		* \return SQLSMALLINT
+		*/
 		SQLSMALLINT GetDecimalDigits() const throw();
+
+
+		/*!
+		* \brief Get the SQL Type set on Construction.
+		* \return SQLSMALLINT
+		*/
 		SQLSMALLINT GetSqlType() const throw();
 
 	private:
@@ -106,7 +145,6 @@ namespace exodbc
 	* \brief	Information about a column fetched using the catalog function SQLColumns.
 	* \see: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
 	*
-	* \todo another variant for the manually constructed columns? Then use that in the ColumnBuffer constructor.
 	*/
 	class EXODBCAPI ColumnInfo
 		: public ObjectName
@@ -115,6 +153,39 @@ namespace exodbc
 		ColumnInfo();
 
 	public:
+		/*!
+		* \brief	Create new ColumnInfo.
+		* \details
+		* \param catalogName
+		* \param schemaName
+		* \param tableName
+		* \param columnName
+		* \param sqlType
+		* \param typeName
+		* \param columnSize
+		* \param bufferSize
+		* \param decimalDigits
+		* \param numPrecRadix
+		* \param nullable
+		* \param remarks
+		* \param defaultValue
+		* \param sqlDataType
+		* \param sqlDatetimeSub
+		* \param charOctetLength
+		* \param ordinalPosition
+		* \param isNullable
+		* \param isCatalogNull
+		* \param isSchemaNull
+		* \param isColumnSizeNull
+		* \param isBufferSizeNull
+		* \param isDecimalDigitsNull
+		* \param isNumPrecRadixNull
+		* \param isRemarksNull
+		* \param isDefaultValueNull
+		* \param isSqlDatetimeSubNull
+		* \param isIsNullableNull
+		* \throw Exception If columnName is empty.
+		*/
 		ColumnInfo(const std::wstring& catalogName, const std::wstring& schemaName, const std::wstring& tableName, const std::wstring& columnName,
 			SQLSMALLINT sqlType, const std::wstring& typeName, SQLINTEGER columnSize, SQLINTEGER bufferSize, SQLSMALLINT decimalDigits, SQLSMALLINT numPrecRadix,
 			SQLSMALLINT nullable, const std::wstring& remarks, const std::wstring& defaultValue, SQLSMALLINT sqlDataType, SQLSMALLINT sqlDatetimeSub,
@@ -122,8 +193,17 @@ namespace exodbc
 			bool isBufferSizeNull, bool isDecimalDigitsNull, bool isNumPrecRadixNull, bool isRemarksNull, bool isDefaultValueNull, bool isSqlDatetimeSubNull,
 			bool isIsNullableNull);
 
-		virtual std::wstring GetQueryName() const override;
-		virtual std::wstring GetPureName() const override;
+		/*!
+		* \brief	Returns only the ColumnName.
+		*/
+		virtual std::wstring GetQueryName() const throw() override;
+
+
+		/*!
+		* \brief	Returns the pure name, which is the columnName.
+		* \return std::wstring
+		*/
+		virtual std::wstring GetPureName() const throw() override;
 
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
