@@ -8,8 +8,8 @@ param(
 	[string]$Dsn="exAccess",
 	[string]$ConnectionString="Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\exOdbc\exOdbcGTest\access\exodbc.mdb;Uid=Admin;Pwd=;",
 	[string]$LogLevel="--logLevelW",
-	[string]$filterDsn="*-*Excel*:*TableTest.OpenAutoCheckPrivs*:*TableTest.*UnsupportedColumn*:*TableTest.*Numeric*:*DatabaseTest.ReadSchemas*:*DatabaseTest.ReadTablePrivileges*:*DatabaseTest.ReadTablePrimaryKeysInfo*:*wxCompatibilityTest*",
-	[string]$filterCs="*-*Excel*:*DetectDbms*:*ListDataSources*:*TableTest.OpenAutoCheckPrivs*:*TableTest.*UnsupportedColumn*:*TableTest.*Numeric*:*DatabaseTest.ReadSchemas*:*DatabaseTest.ReadTablePrivileges*:*DatabaseTest.ReadTablePrimaryKeysInfo*:*wxCompatibilityTest*",
+	[string]$filterDsn="*-*Excel*:*TableTest.OpenAutoCheckPrivs*:*TableTest.*UnsupportedColumn*:*TableTest.*Numeric*:*TableTest.*SelectFirst*:*DatabaseTest.ReadSchemas*:*DatabaseTest.ReadTablePrivileges*:*DatabaseTest.ReadTablePrimaryKeysInfo*:*wxCompatibilityTest*",
+	[string]$filterCs="*-*Excel*:*DetectDbms*:*ListDataSources*:*TableTest.OpenAutoCheckPrivs*:*TableTest.*UnsupportedColumn*:*TableTest.*Numeric*:*TableTest.*SelectFirst*:*DatabaseTest.ReadSchemas*:*DatabaseTest.ReadTablePrivileges*:*DatabaseTest.ReadTablePrimaryKeysInfo*:*wxCompatibilityTest*",
 	[string]$case="l"
 )
 

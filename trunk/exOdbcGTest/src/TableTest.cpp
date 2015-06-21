@@ -846,6 +846,26 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, SelectFirst)
+	{
+		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
+		// We expect 7 Records
+		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
+		ASSERT_NO_THROW(iTable.Select(sqlWhere));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 4, test::ValueIndicator::IS_NULL, 2147483647, test::ValueIndicator::IS_NULL));
+
+		// now Select the first again
+		EXPECT_TRUE(iTable.SelectFirst());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
+	}
+
+
 	TEST_P(TableTest, SelectNext)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);

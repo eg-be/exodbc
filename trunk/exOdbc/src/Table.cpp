@@ -730,6 +730,27 @@ namespace exodbc
 	}
 
 
+	bool Table::SelectFirst()
+	{
+		exASSERT( ! TestOpenFlag(TOF_FORWARD_ONLY_CURSORS));
+		exASSERT(IsSelectOpen());
+
+		SQLRETURN ret = SQLFetchScroll(m_hStmtSelect, SQL_FETCH_FIRST, NULL);
+		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
+		{
+			SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_hStmtSelect);
+			SET_EXCEPTION_SOURCE(sre);
+			throw sre;
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
+		}
+
+		return SQL_SUCCEEDED(ret);
+	}
+
+
 	bool Table::SelectNext()
 	{
 		exASSERT(IsSelectOpen());
