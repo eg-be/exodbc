@@ -852,7 +852,7 @@ namespace exodbc
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable.Open());
-		// We expect 7 Records
+		// We expect some Records
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
 		ASSERT_NO_THROW(iTable.Select(sqlWhere));
 		EXPECT_TRUE(iTable.SelectNext());
@@ -863,6 +863,49 @@ namespace exodbc
 		// now Select the first again
 		EXPECT_TRUE(iTable.SelectFirst());
 		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
+	}
+
+
+	TEST_P(TableTest, SelectLast)
+	{
+		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
+		// We expect some Records
+		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
+		ASSERT_NO_THROW(iTable.Select(sqlWhere));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 4, test::ValueIndicator::IS_NULL, 2147483647, test::ValueIndicator::IS_NULL));
+
+		// now Select the last record
+		EXPECT_TRUE(iTable.SelectLast());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 7, -13, 26, 10502));
+	}
+
+
+	TEST_P(TableTest, SelectPrev)
+	{
+		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		exodbc::Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable.Open());
+		
+		// We expect some Records
+		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
+		ASSERT_NO_THROW(iTable.Select(sqlWhere));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 3, test::ValueIndicator::IS_NULL, (-2147483647 - 1), test::ValueIndicator::IS_NULL));
+
+		// now Select the prev record - we have the first again
+		EXPECT_TRUE(iTable.SelectPrev());
+		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
+		// no more prev records available:
+		EXPECT_FALSE(iTable.SelectPrev());
 	}
 
 

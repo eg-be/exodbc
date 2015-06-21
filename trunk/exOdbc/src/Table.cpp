@@ -410,6 +410,29 @@ namespace exodbc
 	}
 
 
+	bool Table::SelectFetchScroll(SQLSMALLINT fetchOrientation)
+	{
+		exASSERT(!TestOpenFlag(TOF_FORWARD_ONLY_CURSORS));
+		exASSERT(IsSelectOpen());
+
+		SQLRETURN ret = SQLFetchScroll(m_hStmtSelect, fetchOrientation, NULL);
+		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
+		{
+			wstring msg = boost::str(boost::wformat(L"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
+			SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_hStmtSelect, msg);
+			SET_EXCEPTION_SOURCE(sre);
+			throw sre;
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
+		}
+
+		return SQL_SUCCEEDED(ret);
+	}
+
+
+
 	std::wstring Table::BuildFieldsStatement() const
 	{
 		exASSERT(m_columnBuffers.size() > 0);
@@ -730,24 +753,21 @@ namespace exodbc
 	}
 
 
+	bool Table::SelectPrev()
+	{
+		return SelectFetchScroll(SQL_FETCH_PREV);
+	}
+
+
 	bool Table::SelectFirst()
 	{
-		exASSERT( ! TestOpenFlag(TOF_FORWARD_ONLY_CURSORS));
-		exASSERT(IsSelectOpen());
+		return SelectFetchScroll(SQL_FETCH_FIRST);
+	}
 
-		SQLRETURN ret = SQLFetchScroll(m_hStmtSelect, SQL_FETCH_FIRST, NULL);
-		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
-		{
-			SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_hStmtSelect);
-			SET_EXCEPTION_SOURCE(sre);
-			throw sre;
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
-		}
 
-		return SQL_SUCCEEDED(ret);
+	bool Table::SelectLast()
+	{
+		return SelectFetchScroll(SQL_FETCH_LAST);
 	}
 
 

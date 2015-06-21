@@ -446,8 +446,6 @@ namespace exodbc
 
 		/*!
 		* \brief	Fetches the next record fromt the current active Select() recordset.
-		* \details	If successful, the ColumnBuffer(s) bound to this table will contain 
-		*			the field-values of the currently selected record.
 		* \seee		Select()
 		* \return	True if next record has been fetched, false if no more records exist.
 		* \throw	Exception If no SelectQuery is open.
@@ -456,14 +454,30 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Fetches the previous record fromt the current active Select() recordset.
+		* \seee		Select()
+		* \return	True if previous record has been fetched, false if no more records exist.
+		* \throw	Exception If no SelectQuery is open, or if TOF_FORWARD_ONLY_CURSORS is set.
+		*/
+		bool		SelectPrev();
+
+
+		/*!
 		* \brief	Fetches the first record fromt the current active Select() recordset.
-		* \details	If successful, the ColumnBuffer(s) bound to this table will contain
-		*			the field-values of the first selected record.
 		* \see		Select()
 		* \return	True if first record has been fetched, false if no record available.
 		* \throw	Exception If no SelectQuery is open, or if TOF_FORWARD_ONLY_CURSORS is set.
 		*/
 		bool		SelectFirst();
+
+
+		/*!
+		* \brief	Fetches the last record fromt the current active Select() recordset.
+		* \see		Select()
+		* \return	True if last record has been fetched, false if no record available.
+		* \throw	Exception If no SelectQuery is open, or if TOF_FORWARD_ONLY_CURSORS is set.
+		*/
+		bool		SelectLast();
 
 
 		/*!
@@ -918,7 +932,6 @@ namespace exodbc
 		void AllocateStatements();
 
 
-
 		/*!
 		* \brief	Set Options on Statement handles related to Cursor things.
 		* \throw Exception
@@ -948,6 +961,14 @@ namespace exodbc
 		*			will be freed after one handle fails to free.
 		*/
 		void		FreeStatements();
+
+
+		/*!
+		* \brief	Wrapper to SQLFetchScroll
+		* \throw	Exception if TOF_FORWARD_ONLY_CURSORS is set, or no Select-Statement is open,
+		*			or if SQLFetchScroll does not return with SQL_SUCCEEDED or SQL_NO_DATA.
+		*/
+		bool		SelectFetchScroll(SQLSMALLINT fetchOrientation);
 
 
 		/*!
