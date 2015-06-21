@@ -525,7 +525,8 @@ namespace exodbc
 	bool DatabaseInfo::GetForwardOnlyCursors() const
 	{
 		SQLUINTEGER value = GetUIntProperty(UIntProperty::ScrollOptions);
-		return value & SQL_SO_FORWARD_ONLY;
+		value &= ~SQL_SO_FORWARD_ONLY;
+		return value == 0;
 	}
 
 

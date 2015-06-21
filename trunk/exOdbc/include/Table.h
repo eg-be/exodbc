@@ -267,6 +267,9 @@ namespace exodbc
 		*			'Microsoft Access Driver (*.mdb')') does not support the SQLPrimaryKeys() method.
 		*			This flag is sometimes active implicitly, for example if you have manually defined 
 		*			primary key columns using SetColumnPrimaryKeyIndexes().
+		*  - TOF_FORWARD_ONLY_CURSORS:
+		*			If the Database supports Scrollable Cursors, the Table will try to use Scrollable Cursors
+		*			on the Query Statements. If this flag is set, the Table will always use forward-only Cursors.
 		* \see		IsOpen()
 		* \see		Close()
 		* \see		SetColumn()
@@ -902,6 +905,14 @@ namespace exodbc
 		* \throw	Exception If any of the handles to be allocated is not null currently.
 		*/
 		void AllocateStatements();
+
+
+
+		/*!
+		* \brief	Set Options on Statement handles related to Cursor things.
+		* \throw Exception
+		*/
+		void SetCursorOptions(bool forwardOnlyCursors);
 
 
 		/*!
