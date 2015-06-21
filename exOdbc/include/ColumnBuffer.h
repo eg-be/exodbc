@@ -15,6 +15,7 @@
 #include "exOdbc.h"
 #include "Helpers.h"
 #include "InfoObject.h"
+#include "Sql2BufferTypeMap.h"
 
 // Other headers
 #include "boost/variant.hpp"
@@ -33,8 +34,6 @@
 
 namespace exodbc
 {
-	class Sql2BufferTypeMap;
-
 	// Typedefs
 	// --------
 
@@ -172,13 +171,14 @@ namespace exodbc
 		* \param columnInfo	The Information about the column we bind.
 		* \param mode		How Character columns should be bound.
 		* \param odbcVersion ODBC Version to work with.
+		* \param sql2BufferTypeMap The Sql2BufferTypeMap to be used to determine the BufferType (SQL C Type) during Construction.
 		* \param flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
 		*
 		* \see	HaveBuffer()
 		* \see	Bind()
 		* \throw Exception If creating a corresponding buffer fails.
 		*/
-		ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT);
+		ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, const Sql2BufferTypeMap& sql2BufferTypeMap, ColumnFlags flags = CF_SELECT);
 
 
 		/*!
@@ -193,6 +193,7 @@ namespace exodbc
 		*			BufferPtrVariant. Bind() will fail if the driver does not support the given conversion.
 		*			The SQL_NULL_DATA flag will not be set if you create a ColumnBuffer using this constructor
 		*			as there already is a buffer available containing some data.
+		* \param columnInfo			The ManualColumnInfo for this Column.
 		* \param sqlCType			The ODBC C Type of the buffer (like SQL_C_WCHAR, SQL_C_SLONG, etc.). This value will be forwarded to the driver during binding for select.
 		* \param bufferPtrVariant	Pointer to allocated buffer for the given sqlCType. Must be a buffer that can be held by a exodbc::BufferPtrVariant .
 		* \param bufferSize			Size of the allocated buffer.
@@ -200,13 +201,7 @@ namespace exodbc
 		*							If this ColumnBuffer is never bound as a parameter it is save to set this to SQL_UNKNOWN.
 		* \param queryName			Name of the column that corresponds to this buffer.
 		* \param odbcVersion		ODBC-Version supported.
-		* \param	columnSize		The number of digits of a decimal value (including the fractional part).
-		*							This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
-		* \param	decimalDigits	The number of digits of the fractional part of a decimal value.
-		*							This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
-		* \param	sqlType			The SQL Type of the column. This is only used if Parameter Markers are bound to this buffer, see BindParameter().
 		* \param	flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
-		*
 		* 
 		* \see	HaveBuffer()
 		* \see	Bind()
@@ -729,7 +724,7 @@ namespace exodbc
 		SQLSMALLINT				m_sqlType;				///< The SQL Type of the Column, like SQL_SMALLINT. Either set on construction or read from ColumnInfo::m_sqlType.
 		bool					m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
 		bool					m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
-		SQLSMALLINT				m_bufferType;			///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from ctor or during AllocateBuffer()
+		SQLSMALLINT				m_bufferType;			///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from Ctor.
 		SQLLEN					m_bufferSize;			///< Size of an allocated or set from constructor buffer.
 		SQLHSTMT				m_hStmt;				///< Set to the statement handle this ColumnBuffer was bound to, initialized to SQL_NULL_HSTMT
 		BoundParameterPtrsVector	m_boundParameters;	

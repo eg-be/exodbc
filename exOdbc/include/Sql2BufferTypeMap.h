@@ -68,7 +68,7 @@ namespace exodbc
 		*			Default Type is returned. Else throws.
 		* \param sqlType		The SQL Type to get the SQL C Type for.
 		* \return SQLSMALLINT	The SQL C Type to use for the given SQL Type.
-		* \throw Exception		If SQL Type is not registered and no Default Type is set.
+		* \throw NotSupportedException		If SQL Type is not registered and no Default Type is set.
 		*/
 		virtual SQLSMALLINT GetBufferType(SQLSMALLINT sqlType) const;
 		
@@ -103,11 +103,45 @@ namespace exodbc
 	};
 
 	
+	/*!
+	 * \class DefaultSql2BufferMap
+	 *
+	 * \brief The Default used Sql2BufferMap. Does not set a Default Binding.
+	 * \details The following Bindings are registered upon construction:
+	 *
+	 * SQL-Type					| Buffer-Type
+	 * --------------------------|------------
+	 * SQL_SMALLINT				| SQL_C_SSHORT
+	 * SQL_INTEGER				| SQL_C_SLONG
+	 * SQL_BIGINT				| SQL_C_SBIGINT
+	 * SQL_CHAR / SQL_VARCHAR	| SQL_C_CHAR
+	 * SQL_WCHAR / SQL_WVARCHAR	| SQL_C_WCHAR
+	 * SQL_DOUBLE				| SQL_C_DOBULE
+	 * SQL_FLOAT				| SQL_C_DOBULE
+	 * SQL_REAL					| SQL_C_DOUBLE
+	 * SQL_DATE					| SQL_C_TYPE_DATE / SQL_C_DATE [1]
+	 * SQL_TIME					| SQL_C_TYPE_TIME / SQL_C_TIME [1]
+	 * SQL_SS_TIME2				| SQL_C_SS_TIME2 / SQL_C_TIME [1] [2]
+	 * SQL_TIMESTAMP			| SQL_C_TYPE_TIMESTAMP / SQL_C_TIMESTAMP [1]
+	 * SQL_BINARY				| SQL_C_BINARY
+	 * SQL_VARBINARY			| SQL_C_BINARY
+	 * SQL_LONGVARBINARY		| SQL_C_BINARY
+	 * SQL_NUMERIC				| SQL_C_NUMERIC
+	 * SQL_DECIMAL				| SQL_C_NUMERIC
+	 *
+	 * [1] If the ODBC-Version is <= 2.x, the SQL_C_DATE, SQL_C_TIME and SQL_C_TIMESTAMP types are used.
+	 * 
+	 * [2] The SQL_TIME2 is a Microsoft SQL Server specific extension. It is only available
+	 * if HAVE_MSODBCSQL_H is defined to 1. If HAVE_MSODBCSQL_H
+	 * is not set to 1, the SQL-Type SQL_TIME2 is not supported. If HAVE_MSODBC_SQL_H is defined to 1 and
+	 * the ODBC version is >= 3.8, SQL_SS_TIME2 is mapped to a SQL_C_SS_TIME2, else it is mapped
+	 * to an SQL_C_TYPE_TIME.
+	 */
 	class EXODBCAPI DefaultSql2BufferMap
 		: public Sql2BufferTypeMap
 	{
 	public:
-		DefaultSql2BufferMap();
+		DefaultSql2BufferMap(OdbcVersion odbcVersion);
 	};
 }
 

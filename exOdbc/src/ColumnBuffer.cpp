@@ -30,7 +30,7 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	ColumnBuffer::ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, ColumnFlags flags /* = CF_SELECT */)
+	ColumnBuffer::ColumnBuffer(const ColumnInfo& columnInfo, AutoBindingMode mode, OdbcVersion odbcVersion, const Sql2BufferTypeMap& sql2BufferTypeMap, ColumnFlags flags /* = CF_SELECT */)
 		: m_allocatedBuffer(false)
 		, m_haveBuffer(false)
 		, m_autoBindingMode(mode)
@@ -75,7 +75,21 @@ namespace exodbc
 			}
 
 			// Create buffer
+			SQLSMALLINT type = 0;
+//			try
+//			{
+				type = sql2BufferTypeMap.GetBufferType(m_sqlType);
+			//}
+			//catch (const Exception& ex)
+			//{
+			//	int p = 9;
+			//}
 			m_bufferType = DetermineBufferType(m_sqlType);
+			if (m_bufferType != type)
+			{
+				int p = 3;
+				exASSERT(false);
+			}
 			m_bufferSize = DetermineBufferSize(columnInfo);
 
 			try
