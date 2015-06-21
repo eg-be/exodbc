@@ -13,6 +13,7 @@
 #include "InfoObject.h"
 
 // Same component headers
+#include "Exception.h"
 
 // Other headers
 
@@ -281,162 +282,417 @@ namespace exodbc
 	}
 
 
-	SDbInfo::SDbInfo()
+	DatabaseInfo::DatabaseInfo()
 	{
-		m_maxConnections = 0;
-		m_maxActiveStmts = 0;
-		m_cliConfLvl = 0;
-		m_cursorCommitBehavior = 0;
-		m_cursorRollbackBehavior = 0;
-		m_supportNotNullClause = 0;
-		m_txnIsolation = 0;
-		m_txnIsolationOptions = 0;
-		m_posOperations = 0;
-		m_posStmts = 0;
-		m_scrollOptions = 0;
-		m_txnCapable = 0;
-		m_maxCatalogNameLen = 0;
-		m_maxSchemaNameLen = 0;
-		m_maxTableNameLen = 0;
 	}
 
-	std::wstring SDbInfo::ToStr() const
+
+	void DatabaseInfo::SetProperty(WStringProperty prop, const std::wstring& value)
 	{
-		std::wstringstream ws;
-		ws << L"***** DATA SOURCE INFORMATION *****" << std::endl;
-		ws << L" SERVER Name: " << m_serverName << std::endl;
-		ws << L"  DBMS Name: " << m_dbmsName << L"; DBMS Version: " << m_dbmsVer << std::endl;
-		ws << L"  ODBC Version: " << m_odbcVer << L"; Driver Version: " << m_driverVer << std::endl;
-
-		ws << L"  SAG CLI Conf. Level: ";
-		switch (m_cliConfLvl)
-		{
-		case SQL_OSCC_NOT_COMPLIANT:    ws << L"Not Compliant";    break;
-		case SQL_OSCC_COMPLIANT:        ws << L"Compliant";        break;
-		}
-		ws << std::endl;
-
-		ws << L"  Max. Connections: " << m_maxConnections << std::endl;
-		ws << L"  Outer Joins: " << m_outerJoins << std::endl;
-		ws << L"  Support for Procedures: " << m_procedureSupport << std::endl;
-		ws << L"  All tables accessible : " << m_accessibleTables << std::endl;
-		ws << L"  Cursor COMMIT Behavior: ";
-		switch (m_cursorCommitBehavior)
-		{
-		case SQL_CB_DELETE:        ws << L"Delete cursors";      break;
-		case SQL_CB_CLOSE:         ws << L"Close cursors";       break;
-		case SQL_CB_PRESERVE:      ws << L"Preserve cursors";    break;
-		}
-		ws << std::endl;
-
-		ws << L"  Cursor ROLLBACK Behavior: ";
-		switch (m_cursorRollbackBehavior)
-		{
-		case SQL_CB_DELETE:      ws << L"Delete cursors";      break;
-		case SQL_CB_CLOSE:       ws << L"Close cursors";       break;
-		case SQL_CB_PRESERVE:    ws << L"Preserve cursors";    break;
-		}
-		ws << std::endl;
-
-		ws << L"  Support NOT NULL clause: ";
-		switch (m_supportNotNullClause)
-		{
-		case SQL_NNC_NULL:        ws << L"No";        break;
-		case SQL_NNC_NON_NULL:    ws << L"Yes";       break;
-		}
-		ws << std::endl;
-
-		ws << L"  Support IEF (Ref. Integrity): " << m_supportIEF << std::endl;
-
-		ws << L"  Default Transaction Isolation: ";
-		switch (m_txnIsolation)
-		{
-		case SQL_TXN_READ_UNCOMMITTED:  ws << L"Read Uncommitted";    break;
-		case SQL_TXN_READ_COMMITTED:    ws << L"Read Committed";      break;
-		case SQL_TXN_REPEATABLE_READ:   ws << L"Repeatable Read";     break;
-		case SQL_TXN_SERIALIZABLE:      ws << L"Serializable";        break;
-		}
-		ws << std::endl;
-
-		ws << L"  Transaction Isolation Options: ";
-		if (m_txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
-			ws << L"Read Uncommitted, ";
-		if (m_txnIsolationOptions & SQL_TXN_READ_COMMITTED)
-			ws << L"Read Committed, ";
-		if (m_txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
-			ws << L"Repeatable Read, ";
-		if (m_txnIsolationOptions & SQL_TXN_SERIALIZABLE)
-			ws << L"Serializable, ";
-		ws << std::endl;
-
-		ws << L"  Position Operations Supported (SQLSetPos): ";
-		if (m_posOperations & SQL_POS_POSITION)
-			ws << L"Position, ";
-		if (m_posOperations & SQL_POS_REFRESH)
-			ws << L"Refresh, ";
-		if (m_posOperations & SQL_POS_UPDATE)
-			ws << L"Upd, ";
-		if (m_posOperations & SQL_POS_DELETE)
-			ws << L"Del, ";
-		if (m_posOperations & SQL_POS_ADD)
-			ws << L"Add";
-		ws << std::endl;
-
-		ws << L"  Positioned Statements Supported: ";
-		if (m_posStmts & SQL_PS_POSITIONED_DELETE)
-			ws << L"Pos delete, ";
-		if (m_posStmts & SQL_PS_POSITIONED_UPDATE)
-			ws << L"Pos update, ";
-		if (m_posStmts & SQL_PS_SELECT_FOR_UPDATE)
-			ws << L"Select for update";
-		ws << std::endl;
-
-		ws << L"  Scroll Options: ";
-		if (m_scrollOptions & SQL_SO_FORWARD_ONLY)
-			ws << L"Fwd Only, ";
-		if (m_scrollOptions & SQL_SO_STATIC)
-			ws << L"Static, ";
-		if (m_scrollOptions & SQL_SO_KEYSET_DRIVEN)
-			ws << L"Keyset Driven, ";
-		if (m_scrollOptions & SQL_SO_DYNAMIC)
-			ws << L"Dynamic, ";
-		if (m_scrollOptions & SQL_SO_MIXED)
-			ws << L"Mixed";
-		ws << std::endl;
-
-		ws << L"  Transaction Capable?: ";
-		switch (m_txnCapable)
-		{
-		case SQL_TC_NONE:          ws << L"No";            break;
-		case SQL_TC_DML:           ws << L"DML Only";      break;
-		case SQL_TC_DDL_COMMIT:    ws << L"DDL Commit";    break;
-		case SQL_TC_DDL_IGNORE:    ws << L"DDL Ignore";    break;
-		case SQL_TC_ALL:           ws << L"DDL & DML";     break;
-		}
-		ws << std::endl;
-
-		return ws.str();
+		m_wstringMap[prop] = value;
 	}
 
-	SQLUSMALLINT SDbInfo::GetMaxCatalogNameLen() const
+
+	void DatabaseInfo::SetProperty(USmallIntProperty prop, SQLUSMALLINT value)
 	{
-		return m_maxCatalogNameLen != 0 ? m_maxCatalogNameLen : DB_MAX_CATALOG_NAME_LEN_DEFAULT;
+		m_uSmallIntMap[prop] = value;
 	}
 
-	SQLUSMALLINT SDbInfo::GetMaxSchemaNameLen() const
+
+	void DatabaseInfo::SetProperty(UIntProperty prop, SQLUINTEGER value)
 	{
-		return m_maxSchemaNameLen != 0 ? m_maxSchemaNameLen : DB_MAX_SCHEMA_NAME_LEN_DEFAULT;
+		m_uIntMap[prop] = value;
 	}
 
-	SQLUSMALLINT SDbInfo::GetMaxTableNameLen() const
+
+	void DatabaseInfo::SetProperty(IntProperty prop, SQLINTEGER value)
 	{
-		return m_maxTableNameLen != 0 ? m_maxTableNameLen : DB_MAX_TABLE_NAME_LEN_DEFAULT;
+		m_intMap[prop] = value;
 	}
 
-	SQLUSMALLINT SDbInfo::GetMaxColumnNameLen() const
+
+	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, WStringProperty prop)
 	{
-		return m_maxColumnNameLen != 0 ? m_maxColumnNameLen : DB_MAX_COLUMN_NAME_LEN_DEFAULT;
+		exASSERT(hDbc != SQL_NULL_HDBC);
+		std::wstring value;
+		GetInfo(hDbc, (SQLUSMALLINT)prop, value);
+		SetProperty(prop, value);
 	}
+
+
+	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, USmallIntProperty prop)
+	{
+		exASSERT(hDbc != SQL_NULL_HDBC);
+		SQLUSMALLINT value;
+		SQLSMALLINT cb;
+		GetInfo(hDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+		SetProperty(prop, value);
+	}
+
+
+	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, UIntProperty prop)
+	{
+		exASSERT(hDbc != SQL_NULL_HDBC);
+		SQLUINTEGER value;
+		SQLSMALLINT cb;
+		GetInfo(hDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+		SetProperty(prop, value);
+	}
+
+
+	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, IntProperty prop)
+	{
+		exASSERT(hDbc != SQL_NULL_HDBC);
+		SQLINTEGER value;
+		SQLSMALLINT cb;
+		GetInfo(hDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+		SetProperty(prop, value);
+	}
+
+
+	std::wstring DatabaseInfo::GetPropertyName(WStringProperty prop) const
+	{
+		switch (prop)
+		{
+		case WStringProperty::ServerName:
+			return L"SQL_SERVER_NAME";
+		case WStringProperty::DatabaseName:
+			return L"SQL_DATABASE_NAME";
+		case WStringProperty::DbmsName:
+			return L"SQL_DBMS_NAME";
+		case WStringProperty::DbmsVersion:
+			return L"SQL_DBMS_VER";
+		case WStringProperty::DriverName:
+			return L"SQL_DRIVER_NAME";
+		case WStringProperty::DriverOdbcVersion:
+			return L"SQL_DRIVER_ODBC_VER";
+		case WStringProperty::DriverVersion:
+			return L"SQL_DRIVER_VER";
+		case WStringProperty::OdbcSupportIEF:
+			return L"SQL_ODBC_SQL_OPT_IEF";
+		case WStringProperty::OdbcVersion:
+			return L"SQL_ODBC_VER";
+		case WStringProperty::OuterJoins:
+			return L"SQL_OUTER_JOINS";
+		case WStringProperty::ProcedureSupport:
+			return L"SQL_PROCEDURES";
+		case WStringProperty::AccessibleTables:
+			return L"SQL_ACCESSIBLE_TABLES";
+		case WStringProperty::SearchPatternEscape:
+			return L"SQL_SEARCH_PATTERN_ESCAPE";
+		default:
+			return L"???";
+		}
+	}
+
+
+	std::wstring DatabaseInfo::GetPropertyName(USmallIntProperty prop) const
+	{
+		switch (prop)
+		{
+		case USmallIntProperty::MaxConnections:
+			return L"SQL_MAX_DRIVER_CONNECTIONS";
+		case USmallIntProperty::MaxConcurrentActivs:
+			return L"SQL_MAX_CONCURRENT_ACTIVITIES";
+		case USmallIntProperty::OdbcSagCliConformance:
+			return L"SQL_ODBC_SAG_CLI_CONFORMANCE";
+		case USmallIntProperty::CursorCommitBehavior:
+			return L"SQL_CURSOR_COMMIT_BEHAVIOR";
+		case USmallIntProperty::CursorRollbackBehavior:
+			return L"SQL_CURSOR_ROLLBACK_BEHAVIOR";
+		case USmallIntProperty::NonNullableColumns:
+			return L"SQL_NON_NULLABLE_COLUMNS";
+		case USmallIntProperty::TxnCapable:
+			return L"SQL_TXN_CAPABLE";
+		case USmallIntProperty::MaxCatalogNameLen:
+			return L"SQL_MAX_CATALOG_NAME_LEN";
+		case USmallIntProperty::MaxSchemaNameLen:
+			return L"SQL_MAX_SCHEMA_NAME_LEN";
+		case USmallIntProperty::MaxTableNameLen:
+			return L"SQL_MAX_TABLE_NAME_LEN";
+		case USmallIntProperty::MaxColumnNameLen:
+			return L"SQL_MAX_COLUMN_NAME_LEN";
+		default:
+			return L"???";
+		}
+	}
+
+
+	std::wstring DatabaseInfo::GetPropertyName(UIntProperty prop) const
+	{
+		switch (prop)
+		{
+		case UIntProperty::DefaultTxnIsolation:
+			return L"SQL_DEFAULT_TXN_ISOLATION";
+		case UIntProperty::TxnIsolationOption:
+			return L"SQL_TXN_ISOLATION_OPTION";
+		case UIntProperty::ScrollOptions:
+			return L"SQL_SCROLL_OPTIONS";
+		default:
+			return L"???";
+		}
+	}
+
+
+	std::wstring DatabaseInfo::GetPropertyName(IntProperty prop) const
+	{
+		switch (prop)
+		{
+		case IntProperty::PosOperations:
+			return L"SQL_POS_OPERATIONS";
+		case IntProperty::PositionedStatements:
+			return L"SQL_POSITIONED_STATEMENTS";
+		default:
+			return L"???";
+		}
+	}
+
+
+	std::wstring DatabaseInfo::GetWStringProperty(WStringProperty prop) const
+	{
+		WStringMap::const_iterator it = m_wstringMap.find(prop);
+		if (it == m_wstringMap.end())
+		{
+			NotFoundException nfe(boost::str(boost::wformat(L"WString Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
+			SET_EXCEPTION_SOURCE(nfe);
+			throw nfe;
+		}
+		return it->second;
+	}
+
+
+	SQLUSMALLINT DatabaseInfo::GetUSmallIntProperty(USmallIntProperty prop) const
+	{
+		USmallIntMap::const_iterator it = m_uSmallIntMap.find(prop);
+		if (it == m_uSmallIntMap.end())
+		{
+			NotFoundException nfe(boost::str(boost::wformat(L"USmallInt Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
+			SET_EXCEPTION_SOURCE(nfe);
+			throw nfe;
+		}
+		return it->second;
+	}
+
+
+	SQLUINTEGER DatabaseInfo::GetUIntProperty(UIntProperty prop) const
+	{
+		UIntMap::const_iterator it = m_uIntMap.find(prop);
+		if (it == m_uIntMap.end())
+		{
+			NotFoundException nfe(boost::str(boost::wformat(L"UInt Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
+			SET_EXCEPTION_SOURCE(nfe);
+			throw nfe;
+		}
+		return it->second;
+	}
+
+
+	SQLINTEGER DatabaseInfo::GetIntProperty(IntProperty prop) const
+	{
+		IntMap::const_iterator it = m_intMap.find(prop);
+		if (it == m_intMap.end())
+		{
+			NotFoundException nfe(boost::str(boost::wformat(L"Int Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
+			SET_EXCEPTION_SOURCE(nfe);
+			throw nfe;
+		}
+		return it->second;
+	}
+
+
+	bool DatabaseInfo::GetSupportsTransactions() const
+	{
+		SQLUSMALLINT value = GetUSmallIntProperty(USmallIntProperty::TxnCapable);
+		return value != SQL_TC_NONE;
+	}
+
+
+	std::wstring DatabaseInfo::GetDriverName() const
+	{
+		return GetWStringProperty(WStringProperty::DriverName);
+	}
+
+
+	std::wstring DatabaseInfo::GetDriverOdbcVersion() const
+	{
+		return GetWStringProperty(WStringProperty::DriverOdbcVersion);
+	}
+
+
+	std::wstring DatabaseInfo::GetDriverVersion() const
+	{
+		return GetWStringProperty(WStringProperty::DriverVersion);
+	}
+
+
+	std::wstring DatabaseInfo::GetDbmsName() const
+	{
+		return GetWStringProperty(WStringProperty::DbmsName);
+	}
+
+	//std::wstring DatabaseInfo::ToStr() const
+	//{
+	//	std::wstringstream ws;
+	//	ws << L"***** DATA SOURCE INFORMATION *****" << std::endl;
+	//	ws << L" SERVER Name: " << m_serverName << std::endl;
+	//	ws << L"  DBMS Name: " << m_dbmsName << L"; DBMS Version: " << m_dbmsVer << std::endl;
+	//	ws << L"  ODBC Version: " << m_odbcVer << L"; Driver Version: " << m_driverVer << std::endl;
+
+	//	ws << L"  SAG CLI Conf. Level: ";
+	//	switch (m_cliConfLvl)
+	//	{
+	//	case SQL_OSCC_NOT_COMPLIANT:    ws << L"Not Compliant";    break;
+	//	case SQL_OSCC_COMPLIANT:        ws << L"Compliant";        break;
+	//	}
+	//	ws << std::endl;
+
+	//	ws << L"  Max. Connections: " << m_maxConnections << std::endl;
+	//	ws << L"  Outer Joins: " << m_outerJoins << std::endl;
+	//	ws << L"  Support for Procedures: " << m_procedureSupport << std::endl;
+	//	ws << L"  All tables accessible : " << m_accessibleTables << std::endl;
+	//	ws << L"  Cursor COMMIT Behavior: ";
+	//	switch (m_cursorCommitBehavior)
+	//	{
+	//	case SQL_CB_DELETE:        ws << L"Delete cursors";      break;
+	//	case SQL_CB_CLOSE:         ws << L"Close cursors";       break;
+	//	case SQL_CB_PRESERVE:      ws << L"Preserve cursors";    break;
+	//	}
+	//	ws << std::endl;
+
+	//	ws << L"  Cursor ROLLBACK Behavior: ";
+	//	switch (m_cursorRollbackBehavior)
+	//	{
+	//	case SQL_CB_DELETE:      ws << L"Delete cursors";      break;
+	//	case SQL_CB_CLOSE:       ws << L"Close cursors";       break;
+	//	case SQL_CB_PRESERVE:    ws << L"Preserve cursors";    break;
+	//	}
+	//	ws << std::endl;
+
+	//	ws << L"  Support NOT NULL clause: ";
+	//	switch (m_supportNotNullClause)
+	//	{
+	//	case SQL_NNC_NULL:        ws << L"No";        break;
+	//	case SQL_NNC_NON_NULL:    ws << L"Yes";       break;
+	//	}
+	//	ws << std::endl;
+
+	//	ws << L"  Support IEF (Ref. Integrity): " << m_supportIEF << std::endl;
+
+	//	ws << L"  Default Transaction Isolation: ";
+	//	switch (m_txnIsolation)
+	//	{
+	//	case SQL_TXN_READ_UNCOMMITTED:  ws << L"Read Uncommitted";    break;
+	//	case SQL_TXN_READ_COMMITTED:    ws << L"Read Committed";      break;
+	//	case SQL_TXN_REPEATABLE_READ:   ws << L"Repeatable Read";     break;
+	//	case SQL_TXN_SERIALIZABLE:      ws << L"Serializable";        break;
+	//	}
+	//	ws << std::endl;
+
+	//	ws << L"  Transaction Isolation Options: ";
+	//	if (m_txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
+	//		ws << L"Read Uncommitted, ";
+	//	if (m_txnIsolationOptions & SQL_TXN_READ_COMMITTED)
+	//		ws << L"Read Committed, ";
+	//	if (m_txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
+	//		ws << L"Repeatable Read, ";
+	//	if (m_txnIsolationOptions & SQL_TXN_SERIALIZABLE)
+	//		ws << L"Serializable, ";
+	//	ws << std::endl;
+
+	//	ws << L"  Position Operations Supported (SQLSetPos): ";
+	//	if (m_posOperations & SQL_POS_POSITION)
+	//		ws << L"Position, ";
+	//	if (m_posOperations & SQL_POS_REFRESH)
+	//		ws << L"Refresh, ";
+	//	if (m_posOperations & SQL_POS_UPDATE)
+	//		ws << L"Upd, ";
+	//	if (m_posOperations & SQL_POS_DELETE)
+	//		ws << L"Del, ";
+	//	if (m_posOperations & SQL_POS_ADD)
+	//		ws << L"Add";
+	//	ws << std::endl;
+
+	//	ws << L"  Positioned Statements Supported: ";
+	//	if (m_posStmts & SQL_PS_POSITIONED_DELETE)
+	//		ws << L"Pos delete, ";
+	//	if (m_posStmts & SQL_PS_POSITIONED_UPDATE)
+	//		ws << L"Pos update, ";
+	//	if (m_posStmts & SQL_PS_SELECT_FOR_UPDATE)
+	//		ws << L"Select for update";
+	//	ws << std::endl;
+
+	//	ws << L"  Scroll Options: ";
+	//	if (m_scrollOptions & SQL_SO_FORWARD_ONLY)
+	//		ws << L"Fwd Only, ";
+	//	if (m_scrollOptions & SQL_SO_STATIC)
+	//		ws << L"Static, ";
+	//	if (m_scrollOptions & SQL_SO_KEYSET_DRIVEN)
+	//		ws << L"Keyset Driven, ";
+	//	if (m_scrollOptions & SQL_SO_DYNAMIC)
+	//		ws << L"Dynamic, ";
+	//	if (m_scrollOptions & SQL_SO_MIXED)
+	//		ws << L"Mixed";
+	//	ws << std::endl;
+
+	//	ws << L"  Transaction Capable?: ";
+	//	switch (m_txnCapable)
+	//	{
+	//	case SQL_TC_NONE:          ws << L"No";            break;
+	//	case SQL_TC_DML:           ws << L"DML Only";      break;
+	//	case SQL_TC_DDL_COMMIT:    ws << L"DDL Commit";    break;
+	//	case SQL_TC_DDL_IGNORE:    ws << L"DDL Ignore";    break;
+	//	case SQL_TC_ALL:           ws << L"DDL & DML";     break;
+	//	}
+	//	ws << std::endl;
+
+	//	return ws.str();
+	//}
+
+
+	SQLUSMALLINT DatabaseInfo::GetMaxCatalogNameLen() const
+	{
+		SQLUSMALLINT value = GetUSmallIntProperty(USmallIntProperty::MaxCatalogNameLen);
+		if (value > 0)
+		{
+			return value;
+		}
+
+		return DB_MAX_CATALOG_NAME_LEN_DEFAULT;
+	}
+
+
+	SQLUSMALLINT DatabaseInfo::GetMaxSchemaNameLen() const
+	{
+		SQLUSMALLINT value = GetUSmallIntProperty(USmallIntProperty::MaxSchemaNameLen);
+		if (value > 0)
+		{
+			return value;
+		}
+		return DB_MAX_SCHEMA_NAME_LEN_DEFAULT;
+	}
+
+
+	SQLUSMALLINT DatabaseInfo::GetMaxTableNameLen() const
+	{
+		SQLUSMALLINT value = GetUSmallIntProperty(USmallIntProperty::MaxTableNameLen);
+		if (value > 0)
+		{
+			return value;
+		}
+		return DB_MAX_TABLE_NAME_LEN_DEFAULT;
+	}
+
+
+	SQLUSMALLINT DatabaseInfo::GetMaxColumnNameLen() const
+	{
+		SQLUSMALLINT value = GetUSmallIntProperty(USmallIntProperty::MaxColumnNameLen);
+		if (value > 0)
+		{
+			return value;
+		}
+		return DB_MAX_COLUMN_NAME_LEN_DEFAULT;
+	}
+
 
 	SSqlTypeInfo::SSqlTypeInfo()
 	{

@@ -198,7 +198,7 @@ namespace exodbc
 			OdbcVersion maxSupportedVersion = GetMaxSupportedOdbcVersion();
 			if (envVersion > connectionVersion)
 			{
-				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int) envVersion %m_dbInf.m_driverName %m_dbInf.m_driverVer % (int) connectionVersion %m_dbInf.m_odbcVer %m_dbInf.m_databaseName % (int) connectionVersion).str());
+				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int)envVersion %m_dbInf.GetDriverName() %m_dbInf.GetDriverVersion() % (int)connectionVersion %m_dbInf.GetDriverOdbcVersion() %m_dbInf.GetDbmsName() % (int)connectionVersion).str());
 			}
 			if (!m_pSql2BufferTypeMap)
 			{
@@ -213,7 +213,7 @@ namespace exodbc
 
 			// Default to manual commit, if the Database is able to set a commit mode. Anyway read the currently active mode, we need to know that
 			m_commitMode = ReadCommitMode();
-			if (GetSupportsTransactions() && m_commitMode != CommitMode::MANUAL)
+			if (m_dbInf.GetSupportsTransactions() && m_commitMode != CommitMode::MANUAL)
 			{
 				SetCommitMode(CommitMode::MANUAL);
 			}
@@ -232,7 +232,7 @@ namespace exodbc
 		}
 
 		// Completed Successfully
-		LOG_DEBUG((boost::wformat(L"Opened connection to database %s") %m_dbInf.m_dbmsName).str());
+		LOG_DEBUG((boost::wformat(L"Opened connection to database %s") %m_dbInf.GetDbmsName()).str());
 	}
 
 
@@ -370,7 +370,8 @@ namespace exodbc
 			return value == SQL_MARS_ENABLED_YES;
 		}
 #endif
-		return m_dbInf.m_maxActiveStmts == 0 || m_dbInf.m_maxActiveStmts > 1;
+		SQLINTEGER maxActiveStatements = m_dbInf.GetUSmallIntProperty(DatabaseInfo::USmallIntProperty::MaxConcurrentActivs);
+		return maxActiveStatements == 0 || maxActiveStatements > 1;
 	}
 
 
@@ -440,57 +441,45 @@ namespace exodbc
 	}
 
 
-	SDbInfo Database::ReadDbInfo()
+	DatabaseInfo Database::ReadDbInfo()
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
 		exASSERT(m_hdbc != SQL_NULL_HDBC);
-
-		SDbInfo dbInf;
-		SWORD cb;
-
-		// SQLGetInfo gets null-terminated by the driver. It needs buffer-lengths (not char-lengts), even in unicode
-		// see http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
-		// so it works with sizeof and statically declared arrays
 		
-		GetInfo(m_hdbc, SQL_SERVER_NAME, dbInf.m_serverName);
-		GetInfo(m_hdbc, SQL_DATABASE_NAME, dbInf.m_databaseName);
-		GetInfo(m_hdbc, SQL_DBMS_NAME, dbInf.m_dbmsName);
-		GetInfo(m_hdbc, SQL_DBMS_VER, dbInf.m_dbmsVer);
-		GetInfo(m_hdbc, SQL_MAX_DRIVER_CONNECTIONS, &dbInf.m_maxConnections, sizeof(dbInf.m_maxConnections), &cb);
-		GetInfo(m_hdbc, SQL_MAX_CONCURRENT_ACTIVITIES, &dbInf.m_maxActiveStmts, sizeof(dbInf.m_maxActiveStmts), &cb);
-		GetInfo(m_hdbc, SQL_DRIVER_NAME, dbInf.m_driverName);
-		GetInfo(m_hdbc, SQL_DRIVER_ODBC_VER, dbInf.m_odbcVer);
-		GetInfo(m_hdbc, SQL_ODBC_VER, dbInf.m_drvMgrOdbcVer);
-		GetInfo(m_hdbc, SQL_DRIVER_VER, dbInf.m_driverVer);
-		GetInfo(m_hdbc, SQL_ODBC_SAG_CLI_CONFORMANCE, &dbInf.m_cliConfLvl, sizeof(dbInf.m_cliConfLvl), &cb);
-		GetInfo(m_hdbc, SQL_OUTER_JOINS, dbInf.m_outerJoins);
-		GetInfo(m_hdbc, SQL_PROCEDURES, dbInf.m_procedureSupport);
-		GetInfo(m_hdbc, SQL_ACCESSIBLE_TABLES, dbInf.m_accessibleTables);
-		GetInfo(m_hdbc, SQL_CURSOR_COMMIT_BEHAVIOR, &dbInf.m_cursorCommitBehavior, sizeof(dbInf.m_cursorCommitBehavior), &cb);
-		GetInfo(m_hdbc, SQL_CURSOR_ROLLBACK_BEHAVIOR, &dbInf.m_cursorRollbackBehavior, sizeof(dbInf.m_cursorRollbackBehavior), &cb);
-		GetInfo(m_hdbc, SQL_NON_NULLABLE_COLUMNS, &dbInf.m_supportNotNullClause, sizeof(dbInf.m_supportNotNullClause), &cb);
-		GetInfo(m_hdbc, SQL_ODBC_SQL_OPT_IEF, dbInf.m_supportIEF);
-		GetInfo(m_hdbc, SQL_DEFAULT_TXN_ISOLATION, &dbInf.m_txnIsolation, sizeof(dbInf.m_txnIsolation), &cb);
-		GetInfo(m_hdbc, SQL_TXN_ISOLATION_OPTION, &dbInf.m_txnIsolationOptions, sizeof(dbInf.m_txnIsolationOptions), &cb);
-		GetInfo(m_hdbc, SQL_POS_OPERATIONS, &dbInf.m_posOperations, sizeof(dbInf.m_posOperations), &cb);
-		GetInfo(m_hdbc, SQL_POSITIONED_STATEMENTS, &dbInf.m_posStmts, sizeof(dbInf.m_posStmts), &cb);
-		GetInfo(m_hdbc, SQL_SCROLL_OPTIONS, &dbInf.m_scrollOptions, sizeof(dbInf.m_scrollOptions), &cb);
-		GetInfo(m_hdbc, SQL_TXN_CAPABLE, &dbInf.m_txnCapable, sizeof(dbInf.m_txnCapable), &cb);
-		GetInfo(m_hdbc, SQL_SEARCH_PATTERN_ESCAPE, dbInf.m_searchPatternEscape);
+		DatabaseInfo dbInf;
 
-		// TODO: SQL_LOGIN_TIMEOUT is a Connection-Attribute
-		//retcode = SQLGetInfo(m_hdbc, SQL_LOGIN_TIMEOUT, (UCHAR*) &dbInf.loginTimeout, sizeof(dbInf.loginTimeout), &cb);
-		//if (retcode != SQL_SUCCESS && retcode != SQL_SUCCESS_WITH_INFO )
-		//{
-		//	DispAllErrors(SQL_NULL_HENV, m_hdbc);
-		//	if (failOnDataTypeUnsupported)
-		//		return false;
-		//}
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::AccessibleTables);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::DatabaseName);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::DbmsName);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::DbmsVersion);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::DriverName);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::DriverOdbcVersion);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::DriverVersion);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::OdbcSupportIEF);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::OdbcVersion);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::OuterJoins);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::ProcedureSupport);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::SearchPatternEscape);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::WStringProperty::ServerName);
 
-		GetInfo(m_hdbc, SQL_MAX_CATALOG_NAME_LEN, &dbInf.m_maxCatalogNameLen, sizeof(dbInf.m_maxCatalogNameLen), &cb);
-		GetInfo(m_hdbc,  SQL_MAX_SCHEMA_NAME_LEN, &dbInf.m_maxSchemaNameLen, sizeof(dbInf.m_maxSchemaNameLen), &cb);
-		GetInfo(m_hdbc, SQL_MAX_TABLE_NAME_LEN, &dbInf.m_maxTableNameLen, sizeof(dbInf.m_maxTableNameLen), &cb);
-		GetInfo(m_hdbc, SQL_MAX_COLUMN_NAME_LEN, &dbInf.m_maxColumnNameLen, sizeof(dbInf.m_maxColumnNameLen), &cb);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::CursorCommitBehavior);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::CursorRollbackBehavior);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::MaxCatalogNameLen);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::MaxColumnNameLen);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::MaxConcurrentActivs);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::MaxConnections);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::MaxSchemaNameLen);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::MaxTableNameLen);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::NonNullableColumns);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::OdbcSagCliConformance);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::USmallIntProperty::TxnCapable);
+
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::DefaultTxnIsolation);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::ScrollOptions);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::UIntProperty::TxnIsolationOption);
+
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::IntProperty::PositionedStatements);
+		dbInf.ReadAndStoryProperty(m_hdbc, DatabaseInfo::IntProperty::PosOperations);
 
 		return dbInf;
 	}
@@ -671,7 +660,7 @@ namespace exodbc
 		SQLRETURN ret = SQLDisconnect(m_hdbc);
 		THROW_IFN_SUCCEEDED(SQLDisconnect, ret, SQL_HANDLE_DBC, m_hdbc);
 
-		LOG_DEBUG((boost::wformat(L"Closed connection to database %s") %m_dbInf.m_dbmsName).str());
+		LOG_DEBUG((boost::wformat(L"Closed connection to database %s") %m_dbInf.GetDbmsName()).str());
 		m_dbIsOpen = false;
 	}
 
@@ -1153,18 +1142,20 @@ namespace exodbc
 	
 	bool Database::CanSetTransactionIsolationMode(TransactionIsolationMode mode) const
 	{
-		return (m_dbInf.m_txnIsolationOptions & (SQLUINTEGER) mode) != 0;
+		SQLUINTEGER txnIsolationOpts = m_dbInf.GetUIntProperty(DatabaseInfo::UIntProperty::TxnIsolationOption);
+		return (txnIsolationOpts & (SQLUINTEGER)mode) != 0;
 	}
 
 
 	OdbcVersion Database::GetDriverOdbcVersion() const
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
-		exASSERT( ! m_dbInf.m_odbcVer.empty());
+		std::wstring driverOdbcVersion = m_dbInf.GetWStringProperty(DatabaseInfo::WStringProperty::DriverOdbcVersion);
+		exASSERT( ! driverOdbcVersion.empty());
 
 		OdbcVersion ov = OdbcVersion::UNKNOWN;
 		std::vector<std::wstring> versions;
-		boost::split(versions, m_dbInf.m_odbcVer, boost::is_any_of(L"."));
+		boost::split(versions, driverOdbcVersion, boost::is_any_of(L"."));
 		if (versions.size() == 2)
 		{
 			try
@@ -1187,7 +1178,7 @@ namespace exodbc
 			catch (boost::bad_lexical_cast& e)
 			{
 				HIDE_UNUSED(e);
-				THROW_WITH_SOURCE(Exception, (boost::wformat(L"Failed to determine odbc version from string '%s'") % m_dbInf.m_odbcVer).str());
+				THROW_WITH_SOURCE(Exception, (boost::wformat(L"Failed to determine odbc version from string '%s'") % driverOdbcVersion).str());
 			}
 		}
 		return ov;
@@ -1207,30 +1198,31 @@ namespace exodbc
 
 	void Database::DetectDbms()
 	{
-		if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"Microsoft SQL Server"))
+		std::wstring name = m_dbInf.GetDbmsName();
+		if (boost::algorithm::contains(name, L"Microsoft SQL Server"))
 		{
 			m_dbmsType = DatabaseProduct::MS_SQL_SERVER;
 		}
-		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"MySQL"))
+		else if (boost::algorithm::contains(name, L"MySQL"))
 		{
 			m_dbmsType = DatabaseProduct::MY_SQL;
 		}
-		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"DB2"))
+		else if (boost::algorithm::contains(name, L"DB2"))
 		{
 			m_dbmsType = DatabaseProduct::DB2;
 		}
-		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"EXCEL"))
+		else if (boost::algorithm::contains(name, L"EXCEL"))
 		{
 			m_dbmsType = DatabaseProduct::EXCEL;
 		}
-		else if (boost::algorithm::contains(m_dbInf.m_dbmsName, L"ACCESS"))
+		else if (boost::algorithm::contains(name, L"ACCESS"))
 		{
 			m_dbmsType = DatabaseProduct::ACCESS;
 		}
 
 		if (m_dbmsType == DatabaseProduct::UNKNOWN)
 		{
-			LOG_WARNING((boost::wformat(L"Unknown database: %s") % m_dbInf.m_dbmsName).str());
+			LOG_WARNING((boost::wformat(L"Unknown database: %s") % m_dbInf.GetDbmsName()).str());
 		}
 	}
 
