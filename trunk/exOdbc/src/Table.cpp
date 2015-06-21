@@ -737,7 +737,9 @@ namespace exodbc
 		SQLRETURN ret = SQLFetch(m_hStmtSelect);
 		if ( ! (SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
 		{
-			LOG_ERROR_STMT(m_hStmtSelect, ret, SQLFetch);
+			SqlResultException sre(L"SQLFetch", ret, SQL_HANDLE_STMT, m_hStmtSelect);
+			SET_EXCEPTION_SOURCE(sre);
+			throw sre;
 		}
 		if (ret == SQL_SUCCESS_WITH_INFO)
 		{
