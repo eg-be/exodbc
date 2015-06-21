@@ -116,26 +116,6 @@ namespace exodbc
 
 
 	/*!
-	* \enum		AutoBindingMode
-	* \brief	Provide additional information to what types to bind columns.
-	* \details Usually when a table binds a column it will query the database about the SQL-Type and create the
-	*			corresponding buffer-type. Using this option you can specify that columns reported as SQL_CHAR
-	*			will be bound to a SQLWCHAR* buffer, or the other way round, or that everything is bound to a
-	*			SQLCHAR* / SQLWCHAR*.
-	*			This comes in handy as drivers are usually quite good about converting wide-stuff to non-wide stuff,
-	*			but doing that in the code is just a pain.
-	*/
-	enum class AutoBindingMode
-	{
-		BIND_AS_REPORTED,	///< Use the type reported by the DB for the buffer (default)
-		BIND_WCHAR_AS_CHAR,		///< Bind also SQL_WCHAR and SQL_WVARCHAR columns to a SQLCHAR* buffer
-		BIND_CHAR_AS_WCHAR,		///< Bind also SQL_CHAR and SQL_VARCHAR columns to a SQLWCHAR* buffer
-		BIND_ALL_AS_CHAR,		///< Bind all columns as SQLCHAR, ignoring their type
-		BIND_ALL_AS_WCHAR		///< Bind all columns as SQLWCHAR* ignoring their type
-	};
-
-
-	/*!
 	* \enum		DatabaseProduct
 	* \brief	Known databases, identified by their product name while connecting the Database.
 	* \details	For the database products listed here, some tests should exists.

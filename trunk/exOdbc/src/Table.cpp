@@ -191,7 +191,6 @@ namespace exodbc
 		m_hStmtUpdateWhere = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
 		m_fieldsStatement = L"";
-		m_autoBindingMode = AutoBindingMode::BIND_AS_REPORTED;
 		m_openFlags = TOF_NONE;
 		m_accessFlags = AF_NONE;
 	}
@@ -317,7 +316,7 @@ namespace exodbc
 				ColumnInfo colInfo = columns[columnIndex];
 				try
 				{
-					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, m_autoBindingMode, odbcVersion, m_pSql2BufferTypeMap, columnFlags);
+					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, odbcVersion, m_pSql2BufferTypeMap, columnFlags);
 					m_columnBuffers[bufferIndex] = pColBuff;
 					++bufferIndex;
 				}
@@ -1493,12 +1492,6 @@ namespace exodbc
 					|| TestAccessFlag(AF_DELETE_PK) || TestAccessFlag(AF_DELETE_PK));
 	}
 
-
-	void Table::SetAutoBindingMode(AutoBindingMode mode)
-	{
-		exASSERT(!IsOpen());
-		m_autoBindingMode = mode;
-	}
 
 	// OLD STUF DOWN HERE
 	// ==================

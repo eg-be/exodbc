@@ -76,7 +76,7 @@ namespace exodbc
 	* this table points to. Calling methods like Update(), Delete() or Insert() will
 	* modify the table in the database using the current values.
 	*
-	* A table that queries the database about its columns will always bind all columns.
+	* A table that queries the database about its columns will always try to bind all columns.
 	* A table where columns are defined manually will only bind those columns defined.
 	* This is handy if you have a large table and are only interested in the values of
 	* a few columns.
@@ -300,26 +300,6 @@ namespace exodbc
 		*			AF_UPDATE_PK, AF_UPDATE_WHERE, AF_INSERT, AF_DELETE_PK or AF_DELETE_WHERE are set.
 		*/
 		bool		IsQueryOnly() const throw();
-
-
-		/*!
-		* \brief	Set the AutoBindingMode. Must be called before Open().
-		* \details	This will set the AutoBindingMode globally for this table.
-		*			It can still be overridden for specific columns by defining
-		*			it for that column.
-		* \return	AutoBindingMode
-		* \see		GetAutoBindingMode()
-		* \throw	Exception If already open.
-		*/
-		void		SetAutoBindingMode(AutoBindingMode mode);
-
-
-		/*!
-		* \brief	Get the AutoBindingMode of this table.
-		* \return	AutoBindingMode
-		* \see		SetAutoBindingMode()
-		*/
-		AutoBindingMode	GetAutoBindingMode() const throw() { return m_autoBindingMode; };
 
 
 		/*!
@@ -1008,7 +988,6 @@ namespace exodbc
 		// Table Information
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		TableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
-		AutoBindingMode		m_autoBindingMode;		///< Store the auto-binding of this table. TODO: Can still be overridden by specifying it on a column
 		bool				m_isOpen;				///< Set to true after Open has been called
 		TableOpenFlags		m_openFlags;			///< Flags used to open the table in the call to Open().
 		AccessFlags			m_accessFlags;			///< Bitmask for the AccessFlag flags.
