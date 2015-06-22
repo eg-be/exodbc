@@ -494,6 +494,11 @@ namespace exodbc
 		* \see		Select()
 		* \return	True if record at relative position has been fetched, false if no record available.
 		* \throw	Exception If no SelectQuery is open, or if TOF_FORWARD_ONLY_CURSORS is set.
+		* \note		MySql seems to get confused if no record is selected before doing the first SelectRelative():
+		*			If just a statement is executed, I would expect the cursor to be positioned before the 
+		*			first row. So a SelectRelative(3) should select the 3rd record. But on MySql a SelectRelative(3)
+		*			selects the 4th record. If you a SelectNext() first and then a SelectRelative(2), the 
+		*			second 3rd record is selected correctly.
 		*/
 		bool		SelectRelative(SQLLEN offset);
 
