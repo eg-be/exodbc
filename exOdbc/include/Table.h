@@ -497,8 +497,8 @@ namespace exodbc
 		* \note		MySql seems to get confused if no record is selected before doing the first SelectRelative():
 		*			If just a statement is executed, I would expect the cursor to be positioned before the 
 		*			first row. So a SelectRelative(3) should select the 3rd record. But on MySql a SelectRelative(3)
-		*			selects the 4th record. If you a SelectNext() first and then a SelectRelative(2), the 
-		*			second 3rd record is selected correctly.
+		*			selects the 4th record. If you do a SelectNext() first and then a SelectRelative(2), the 
+		*			3rd record is selected correctly.
 		*/
 		bool		SelectRelative(SQLLEN offset);
 
