@@ -185,8 +185,8 @@ namespace exodbc
 		m_hStmtCount = SQL_NULL_HSTMT;
 		m_hStmtSelect = SQL_NULL_HSTMT;
 		m_hStmtInsert = SQL_NULL_HSTMT;
-		m_hStmtUpdate = SQL_NULL_HSTMT;
-		m_hStmtDelete = SQL_NULL_HSTMT;
+		m_hStmtUpdatePk = SQL_NULL_HSTMT;
+		m_hStmtDeletePk = SQL_NULL_HSTMT;
 		m_hStmtDeleteWhere = SQL_NULL_HSTMT;
 		m_hStmtUpdateWhere = SQL_NULL_HSTMT;
 		m_selectQueryOpen = false;
@@ -204,7 +204,7 @@ namespace exodbc
 		exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
 		exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
 		exASSERT(SQL_NULL_HSTMT == m_hStmtInsert);
-		exASSERT(SQL_NULL_HSTMT == m_hStmtUpdate);
+		exASSERT(SQL_NULL_HSTMT == m_hStmtUpdatePk);
 		exASSERT(SQL_NULL_HSTMT == m_hStmtDeleteWhere);
 		exASSERT(SQL_NULL_HSTMT == m_hStmtUpdateWhere);
 
@@ -224,7 +224,7 @@ namespace exodbc
 		}
 		if (TestAccessFlag(AF_UPDATE_PK))
 		{
-			m_hStmtUpdate = AllocateStatementHandle(hdbc);
+			m_hStmtUpdatePk = AllocateStatementHandle(hdbc);
 		}
 		if (TestAccessFlag(AF_UPDATE_WHERE))
 		{
@@ -233,7 +233,7 @@ namespace exodbc
 
 		if (TestAccessFlag(AF_DELETE_PK))
 		{
-			m_hStmtDelete = AllocateStatementHandle(hdbc);
+			m_hStmtDeletePk = AllocateStatementHandle(hdbc);
 		}
 		if (TestAccessFlag(AF_DELETE_WHERE))
 		{
@@ -251,7 +251,7 @@ namespace exodbc
 		}
 		if (haveAll && TestAccessFlag(AF_UPDATE_PK))
 		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtUpdate);
+			haveAll = (SQL_NULL_HSTMT != m_hStmtUpdatePk);
 		}
 		if (haveAll && TestAccessFlag(AF_UPDATE_WHERE))
 		{
@@ -263,7 +263,7 @@ namespace exodbc
 		}
 		if (haveAll && TestAccessFlag(AF_DELETE_PK))
 		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtDelete);
+			haveAll = (SQL_NULL_HSTMT != m_hStmtDeletePk);
 		}
 		if (haveAll && TestAccessFlag(AF_DELETE_WHERE))
 		{
@@ -391,17 +391,17 @@ namespace exodbc
 		{
 			m_hStmtInsert = FreeStatementHandle(m_hStmtInsert);
 		}
-		if (m_hStmtDelete != SQL_NULL_HSTMT)
+		if (m_hStmtDeletePk != SQL_NULL_HSTMT)
 		{
-			m_hStmtDelete = FreeStatementHandle(m_hStmtDelete);
+			m_hStmtDeletePk = FreeStatementHandle(m_hStmtDeletePk);
 		}
 		if (m_hStmtDeleteWhere != SQL_NULL_HSTMT)
 		{
 			m_hStmtDeleteWhere = FreeStatementHandle(m_hStmtDeleteWhere);
 		}
-		if (m_hStmtUpdate != SQL_NULL_HSTMT)
+		if (m_hStmtUpdatePk != SQL_NULL_HSTMT)
 		{
-			m_hStmtUpdate = FreeStatementHandle(m_hStmtUpdate);
+			m_hStmtUpdatePk = FreeStatementHandle(m_hStmtUpdatePk);
 		}
 		if (m_hStmtUpdateWhere != SQL_NULL_HSTMT)
 		{
@@ -459,7 +459,7 @@ namespace exodbc
 	{
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(TestAccessFlag(AF_DELETE_PK));
-		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
+		exASSERT(m_hStmtDeletePk != SQL_NULL_HSTMT);
 
 		// Build statement
 		// note: parem-number reflects here the number of the param in the created prepared statement, so we
@@ -472,7 +472,7 @@ namespace exodbc
 			if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
 			{
 				// Bind this parameter as primary key and include it in the statement
-				pBuffer->BindParameter(m_hStmtDelete, paramNr);
+				pBuffer->BindParameter(m_hStmtDeletePk, paramNr);
 				deleteStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
 				paramNr++;
 			}
@@ -487,8 +487,8 @@ namespace exodbc
 		}
 
 		// Prepare to delete
-		SQLRETURN ret = SQLPrepare(m_hStmtDelete, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtDelete);
+		SQLRETURN ret = SQLPrepare(m_hStmtDeletePk, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
+		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
 	}
 
 
@@ -496,7 +496,7 @@ namespace exodbc
 	{
 		exASSERT(m_columnBuffers.size() > 0);
 		exASSERT(TestAccessFlag(AF_UPDATE_PK));
-		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
+		exASSERT(m_hStmtUpdatePk != SQL_NULL_HSTMT);
 
 		// Build statement..
 		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
@@ -511,7 +511,7 @@ namespace exodbc
 			{
 				// Bind this parameter as update parameter and include it in the statement
 				// The update params come first, so the numbering works
-				pBuffer->BindParameter(m_hStmtUpdate, paramNr);
+				pBuffer->BindParameter(m_hStmtUpdatePk, paramNr);
 				updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
 				paramNr++;
 			}
@@ -533,7 +533,7 @@ namespace exodbc
 			{
 				// Bind this parameter as primary key and include it in the where part of the statement
 				// The update params come first, so the numbering works
-				pBuffer->BindParameter(m_hStmtUpdate, paramNr);
+				pBuffer->BindParameter(m_hStmtUpdatePk, paramNr);
 				updateStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
 				paramNr++;
 				haveWhereParam = true;
@@ -544,8 +544,8 @@ namespace exodbc
 		exASSERT(haveWhereParam);
 
 		// Prepare to update
-		SQLRETURN ret = SQLPrepare(m_hStmtUpdate, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
+		SQLRETURN ret = SQLPrepare(m_hStmtUpdatePk, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
+		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
 	}
 
 
@@ -824,8 +824,8 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(AF_DELETE_PK));
-		exASSERT(m_hStmtDelete != SQL_NULL_HSTMT);
-		SQLRETURN ret = SQLExecute(m_hStmtDelete);
+		exASSERT(m_hStmtDeletePk != SQL_NULL_HSTMT);
+		SQLRETURN ret = SQLExecute(m_hStmtDeletePk);
 		if (failOnNoData && ret == SQL_NO_DATA)
 		{
 			SqlResultException ex(L"SQLExecute", ret, L"Did not expect a SQL_NO_DATA while executing a delete-query");
@@ -834,7 +834,7 @@ namespace exodbc
 		}
 		if (!(!failOnNoData && ret == SQL_NO_DATA))
 		{
-			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDelete);
+			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
 		}
 	}
 
@@ -866,9 +866,9 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(AF_UPDATE_PK));
-		exASSERT(m_hStmtUpdate != SQL_NULL_HSTMT);
-		SQLRETURN ret = SQLExecute(m_hStmtUpdate);
-		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
+		exASSERT(m_hStmtUpdatePk != SQL_NULL_HSTMT);
+		SQLRETURN ret = SQLExecute(m_hStmtUpdatePk);
+		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
 	}
 
 
@@ -878,38 +878,51 @@ namespace exodbc
 		exASSERT(TestAccessFlag(AF_UPDATE_WHERE));
 		exASSERT(m_hStmtUpdateWhere != SQL_NULL_HSTMT);
 		exASSERT(!where.empty());
-		// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set
-		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
-		// .. first the values to update
-		// note: parem-number reflects here the number of the param in the created prepared statement, so we
-		// cannot use the values from the ColumnBuffer column index.
-		int paramNr = 1;
-		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+
+		try
 		{
-			ColumnBuffer* pBuffer = it->second;
-			if (pBuffer->IsColumnFlagSet(CF_UPDATE))
+			// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set
+			wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
+			// .. first the values to update
+			// note: parem-number reflects here the number of the param in the created prepared statement, so we
+			// cannot use the values from the ColumnBuffer column index.
+			int paramNr = 1;
+			for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
 			{
-				// Bind this parameter as update parameter and include it in the statement
-				pBuffer->BindParameter(m_hStmtUpdateWhere, paramNr);
-				updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
-				paramNr++;
+				ColumnBuffer* pBuffer = it->second;
+				if (pBuffer->IsColumnFlagSet(CF_UPDATE))
+				{
+					// Bind this parameter as update parameter and include it in the statement
+					pBuffer->BindParameter(m_hStmtUpdateWhere, paramNr);
+					updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
+					paramNr++;
+				}
 			}
+			boost::erase_last(updateStmt, L",");
+			exASSERT_MSG(paramNr > 1, L"No columns are bound that have the flag CF_UPDATE set");
+			updateStmt += (L"WHERE " + where);
+
+			// Prepare to update
+			SQLRETURN ret = SQLPrepare(m_hStmtUpdateWhere, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
+			THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
+
+			// And Execute
+			ret = SQLExecute(m_hStmtUpdateWhere);
+			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
+
+			// Always unbind all parameters at the end
+			ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 		}
-		boost::erase_last(updateStmt, L",");
-		exASSERT_MSG(paramNr > 1, L"No columns are bound that have the flag CF_UPDATE set");
-		updateStmt += (L"WHERE " + where);
+		catch (const Exception& ex)
+		{
+			// Always unbind all parameters at the end
+			SQLRETURN ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
+			WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere, boost::str(boost::wformat(L"Failed to unbind UpdateWhere-handle during cleanup of exception '%s") % ex.ToString()));
+			// rethrow
+			throw;
+		}
 
-		// Prepare to update
-		SQLRETURN ret = SQLPrepare(m_hStmtUpdateWhere, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
-
-		// And Execute
-		ret = SQLExecute(m_hStmtUpdateWhere);
-		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
-
-		// Always unbind all parameters at the end
-		ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
-		THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 	}
 
 
@@ -1133,6 +1146,7 @@ namespace exodbc
 
 	void Table::Open(TableOpenFlags openFlags /* = TOF_CHECK_EXISTANCE */)
 	{
+		exASSERT(m_pDb);
 		exASSERT(m_pDb->IsOpen());
 		exASSERT(!IsOpen());
 		exASSERT(HasAllStatements());
@@ -1148,12 +1162,17 @@ namespace exodbc
 		}
 
 		// Nest try/catch the free the buffers created in here if we fail somewhere
+		// and to unbind all handles that were bound
+		bool boundSelect = false;
+		bool boundUpdatePk = false;
+		bool boundDeletePk = false;
+		bool boundInsert = false;
 		try
 		{
 			// Try to set Cursor-Options
+			// Do not try to set on Access or Excel, they report 'Optional feature not implemented' (even if trying to set forward-only)
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::EXCEL)
 			{
-				// Do not try to set on Access or Excel, they reports 'Optional feature not implemented '
 				m_openFlags |= TOF_FORWARD_ONLY_CURSORS;
 			}
 			else
@@ -1339,6 +1358,7 @@ namespace exodbc
 						++boundColumnNumber;
 					}
 				}
+				boundSelect = true;
 			}
 
 			// Create additional UPDATE and DELETE statement-handles to be used with the pk-columns
@@ -1371,11 +1391,13 @@ namespace exodbc
 				if (TestAccessFlag(AF_UPDATE_PK))
 				{
 					BindUpdateParameters();
+					boundUpdatePk = true;
 				}
 
 				if (TestAccessFlag(AF_DELETE_PK))
 				{
 					BindDeleteParameters();
+					boundDeletePk = true;
 				}
 			}
 
@@ -1383,6 +1405,7 @@ namespace exodbc
 			if (TestAccessFlag(AF_INSERT))
 			{
 				BindInsertParameters();
+				boundInsert = true;
 			}
 
 			// Completed successfully
@@ -1390,8 +1413,29 @@ namespace exodbc
 		}
 		catch (const Exception& ex)
 		{
+			// Unbind all Buffers
+			if (boundSelect)
+			{
+				SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
+				WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect, boost::str(boost::wformat(L"Failed to unbind from Select-handle during cleanup of Exception '%s': %s") % ex.ToString()));
+			}
+			if (boundDeletePk)
+			{
+				SQLRETURN ret = SQLFreeStmt(m_hStmtDeletePk, SQL_RESET_PARAMS);
+				WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeletePk, boost::str(boost::wformat(L"Failed to unbind from DeletePk-handle during cleanup of Exception '%s': %s") % ex.ToString()));
+			}
+			if (boundUpdatePk)
+			{
+				SQLRETURN ret = SQLFreeStmt(m_hStmtUpdatePk, SQL_RESET_PARAMS);
+				WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk, boost::str(boost::wformat(L"Failed to unbind from UpdatePk-handle during cleanup of Exception '%s': %s") % ex.ToString()));
+			}
+			if (boundInsert)
+			{
+				SQLRETURN ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
+				WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert, boost::str(boost::wformat(L"Failed to unbind from Insert-handle during cleanup of Exception '%s': %s") % ex.ToString()));
+			}
+
 			// delete the ColumnBuffers if we have allocated them during this process (if not manual)
-			HIDE_UNUSED(ex);
 			if (!m_manualColumns)
 			{
 				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
@@ -1428,8 +1472,8 @@ namespace exodbc
 		}
 		if (TestAccessFlag(AF_DELETE_PK))
 		{
-			ret = SQLFreeStmt(m_hStmtDelete, SQL_RESET_PARAMS);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDelete);
+			ret = SQLFreeStmt(m_hStmtDeletePk, SQL_RESET_PARAMS);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
 		}
 		if (TestAccessFlag(AF_DELETE_WHERE))
 		{
@@ -1438,8 +1482,8 @@ namespace exodbc
 		}
 		if (TestAccessFlag(AF_UPDATE_PK))
 		{
-			ret = SQLFreeStmt(m_hStmtUpdate, SQL_RESET_PARAMS);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdate);
+			ret = SQLFreeStmt(m_hStmtUpdatePk, SQL_RESET_PARAMS);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
 		}
 		if (TestAccessFlag(AF_UPDATE_WHERE))
 		{
