@@ -564,6 +564,35 @@ namespace exodbc
 		*/
 		const Environment*	GetEnvironment() const { return m_pEnv; };
 
+
+		/*!
+		* \brief	Set Attribute SQL_ATTR_TRACEFILE to passed path.
+		* \throw	Exception
+		*/
+		void SetTracefile(const std::wstring path);
+
+
+		/*!
+		* \brief	Get Attribute SQL_ATTR_TRACEFILE.
+		* \throw	Exception
+		*/
+		std::wstring GetTracefile() const;
+
+
+		/*!
+		* \brief	Set Attribute SQL_ATTR_TRACE.
+		* \throw	Exception
+		*/
+		void SetTrace(bool enable);
+
+
+		/*!
+		* \brief	Get Attribute SQL_ATTR_TRACE.
+		* \throw	Exception
+		*/
+		bool GetTrace() const;
+
+
 #ifdef HAVE_MSODBCSQL_H
 		/*!
 		* \brief	Set the property SQL_MAX_CONCURRENT_ACTIVITIES.

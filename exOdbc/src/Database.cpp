@@ -354,6 +354,63 @@ namespace exodbc
 	}
 
 
+	void Database::SetTracefile(const std::wstring path)
+	{
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+
+		// note, from ms-doc: 
+		// Character strings pointed to by the ValuePtr argument of SQLSetConnectAttr have a length of StringLength bytes.
+		SQLINTEGER cb = 0;
+		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACEFILE, (SQLPOINTER)path.c_str(), (path.length()) * sizeof(SQLWCHAR));
+		THROW_IFN_SUCCEEDED(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc);
+	}
+
+
+	std::wstring Database::GetTracefile() const
+	{
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+
+		// Assume some max length, querying the driver about length did not really work
+		SQLINTEGER cb = 0;
+		size_t charBuffSize = MAX_PATH + 1;
+		size_t byteBuffSize = sizeof(SQLWCHAR) * charBuffSize;
+		std::unique_ptr<SQLWCHAR[]> buffer(new SQLWCHAR[charBuffSize]);
+		memset(buffer.get(), 0, byteBuffSize);
+		SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_ATTR_TRACEFILE, (SQLPOINTER)buffer.get(), byteBuffSize, &cb);
+		THROW_IFN_SUCCEEDED(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc);
+		return buffer.get();
+	}
+
+
+	void Database::SetTrace(bool enable)
+	{
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+
+		if (enable)
+		{
+			SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_ON, NULL);
+			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_ON");
+		}
+		else
+		{
+			SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_OFF, NULL);
+			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
+		}
+	}
+
+
+	bool Database::GetTrace() const
+	{
+		exASSERT(m_hdbc != SQL_NULL_HDBC);
+
+		SQLUINTEGER value = 0;
+		SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_ATTR_TRACE, &value, NULL, NULL);
+		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc, L"Failed to read Attribute SQL_ATTR_TRACE");
+
+		return value == SQL_OPT_TRACE_ON;
+	}
+
+
 	bool Database::IsMarsEnabled()
 	{
 		exASSERT(IsOpen());

@@ -163,6 +163,89 @@ namespace exodbc
 	}
 
 
+	TEST_P(DatabaseTest, GetTracefile)
+	{
+		wstring tracefile;
+		EXPECT_NO_THROW(tracefile = m_db.GetTracefile());
+		LOG_INFO(boost::str(boost::wformat(L"Tracefile is: '%s'") % tracefile));
+	}
+
+
+	TEST_P(DatabaseTest, SetTracefile)
+	{
+		TCHAR tmpDir[MAX_PATH + 1];
+		DWORD ret = GetTempPath(MAX_PATH + 1, tmpDir);
+		ASSERT_TRUE(ret > 0);
+		wstring tracefile(&tmpDir[0]);
+		wstring filename = boost::str(boost::wformat(L"trace_%s.log") % DatabaseProcudt2s(m_db.GetDbms()));
+		tracefile += filename;
+
+		EXPECT_NO_THROW(m_db.SetTracefile(tracefile));
+	}
+
+
+	TEST_P(DatabaseTest, SetTrace)
+	{
+		Database db(&m_env);
+		EXPECT_NO_THROW(db.SetTrace(true));
+
+		// and disable again
+		EXPECT_NO_THROW(db.SetTrace(false));
+	}
+
+
+	TEST_P(DatabaseTest, GetTrace)
+	{
+		Database db(&m_env);
+		ASSERT_NO_THROW(db.SetTrace(true));
+		EXPECT_TRUE(db.GetTrace());
+		ASSERT_NO_THROW(db.SetTrace(false));
+		EXPECT_FALSE(db.GetTrace());
+	}
+
+
+	TEST_P(DatabaseTest, DoSomeTrace)
+	{
+		// Set tracefile first, do that on a db not open yet
+		TCHAR tmpDir[MAX_PATH + 1];
+		DWORD ret = GetTempPath(MAX_PATH + 1, tmpDir);
+		ASSERT_TRUE(ret > 0);
+		wstring tracefile(&tmpDir[0]);
+		wstring filename = boost::str(boost::wformat(L"trace_%s_DoSomeTrace.log") % DatabaseProcudt2s(m_db.GetDbms()));
+		tracefile += filename;
+
+		Database db(&m_env);
+		ASSERT_NO_THROW(db.SetTracefile(tracefile));
+		EXPECT_NO_THROW(db.SetTrace(true));
+
+		// Open db, and open a table, do some query on the table
+		if (m_odbcInfo.HasConnectionString())
+		{
+			db.Open(m_odbcInfo.m_connectionString);
+		}
+		else
+		{
+			db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+		}
+
+		test::ClearIntTypesTmpTable(db, m_odbcInfo.m_namesCase);
+		Table iTable(&db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ_WRITE);
+		if (db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
+		iTable.Open();
+		iTable.SetColumnValue(0, (SQLINTEGER) 100);
+		iTable.SetColumnNull(1);
+		iTable.SetColumnValue(2, (SQLINTEGER) 113);
+		iTable.SetColumnNull(3);
+		iTable.Insert();
+		
+		iTable.SetColumnValue(2, (SQLINTEGER) 223);
+		iTable.Update();
+	}
+
+
 	TEST_P(DatabaseTest, Open)
 	{		
 		// Open an existing db by passing the Env to the ctor
