@@ -309,7 +309,6 @@ namespace exodbc
 		* \brief	Set an AccessFlag. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
 		* \details	If the flag passed is already set, this function will do nothing.
-		*			
 		*			If a change is detected, and the statements were already allocated,
 		*			the function will free all statements and re-allocate the statements
 		*			required for the current AccessFlags set.
@@ -322,7 +321,6 @@ namespace exodbc
 		* \brief	Clear an AccessFlag. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
 		* \details	If the flag passed is already cleared, this function will do nothing.
-		*
 		*			If a change is detected, and the statements were already allocated,
 		*			the function will free all statements and re-allocate the statements
 		*			required for the current AccessFlags set.
@@ -1044,8 +1042,8 @@ namespace exodbc
 		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
 		SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
 		SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
-		SQLHSTMT		m_hStmtDelete;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
-		SQLHSTMT		m_hStmtUpdate;	///< Statement-handle used to do UPDATEs. Primary key columns are bound, a prepared statement using column-markers is created.
+		SQLHSTMT		m_hStmtDeletePk;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
+		SQLHSTMT		m_hStmtUpdatePk;	///< Statement-handle used to do UPDATEs. Primary key columns are bound, a prepared statement using column-markers is created.
 		SQLHSTMT		m_hStmtDeleteWhere;	///< Statement-handle to do DELETEs using a passed WHERE clause.
 		SQLHSTMT		m_hStmtUpdateWhere;	///< Statement-handle to do UPDATEs using a passed WHERE clause.
 
