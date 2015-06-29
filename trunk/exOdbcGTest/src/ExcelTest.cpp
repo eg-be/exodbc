@@ -195,11 +195,11 @@ namespace exodbc
 		SQLWCHAR fc[512];
 		SQLWCHAR tc[512];
 		SQLWCHAR mx[512];
-		ASSERT_NO_THROW(tTable.SetColumn(0, L"ID", id, SQL_C_WCHAR, sizeof(id)));
-		ASSERT_NO_THROW(tTable.SetColumn(1, L"Int", ic, SQL_C_WCHAR, sizeof(id)));
-		ASSERT_NO_THROW(tTable.SetColumn(2, L"Float", fc, SQL_C_WCHAR, sizeof(id)));
-		ASSERT_NO_THROW(tTable.SetColumn(3, L"Text", tc, SQL_C_WCHAR, sizeof(id)));
-		ASSERT_NO_THROW(tTable.SetColumn(4, L"Mixed", mx, SQL_C_WCHAR, sizeof(id)));
+		ASSERT_NO_THROW(tTable.SetColumn(0, L"ID", SQL_VARCHAR, id, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
+		ASSERT_NO_THROW(tTable.SetColumn(1, L"Int", SQL_VARCHAR, ic, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
+		ASSERT_NO_THROW(tTable.SetColumn(2, L"Float", SQL_VARCHAR, fc, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
+		ASSERT_NO_THROW(tTable.SetColumn(3, L"Text", SQL_VARCHAR, tc, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
+		ASSERT_NO_THROW(tTable.SetColumn(4, L"Mixed", SQL_VARCHAR, mx, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
 
 		// \todo: Do not check existence while opening, it would overwrite our manually set SpecialSqlQueryName -> See Ticket #111 
 		ASSERT_NO_THROW(tTable.Open(TOF_NONE));

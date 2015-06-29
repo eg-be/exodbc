@@ -93,7 +93,7 @@ namespace exodbc
 		TableInfo neTableInfo(L"NotExisting", L"", L"", L"", L"");
 		Table neTable(&m_db, 2, neTableInfo, AF_READ);
 		SQLINTEGER idNotExisting = 0;
-		neTable.SetColumn(0, L"idNotExistring", &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting));
+		neTable.SetColumn(0, L"idNotExistring", SQL_INTEGER, &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting), CF_SELECT);
 		EXPECT_NO_THROW(neTable.Open(TOF_NONE));
 		// \todo So we can prove in the test that we will fail doing a SELECT later
 	}
@@ -149,10 +149,10 @@ namespace exodbc
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
 		SQLBIGINT bi = 0;
-		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), &id, SQL_C_SLONG, sizeof(id), CF_SELECT);
-		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_NULLABLE);
-		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), &i, SQL_C_SLONG, sizeof(i), CF_NONE | CF_NULLABLE);
-		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_NULLABLE);
+		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT);
+		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_NULLABLE);
+		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_NONE | CF_NULLABLE);
+		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_NULLABLE);
 
 		ASSERT_NO_THROW(iTable.Open());
 		// We expect all columnBuffers to be bound, except nr 2
@@ -2891,6 +2891,28 @@ namespace exodbc
 
 	// Update rows
 	// -----------
+	TEST_P(TableTest, UpdateManualTable)
+	{
+		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
+		Table charTable(&m_db, 5, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+		// Set Columns
+		SQLINTEGER id;
+		SQLWCHAR varchar[128 + 1];
+		SQLWCHAR char_128[128 + 1];
+		SQLWCHAR varchar_10[10 + 1];
+		SQLWCHAR char_10[10 + 1];
+
+		charTable.SetColumn(0, test::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
+		charTable.SetColumn(1, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), SQL_VARCHAR, varchar, SQL_C_WCHAR, sizeof(varchar), CF_SELECT | CF_INSERT);
+		//charTable.SetColumn(2, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
+		//charTable.SetColumn(3, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
+
+		// access does not report VARCHAR with sqlType 12, but with.. ? ..
+
+		ASSERT_NO_THROW(charTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+		int p = 3;
+	}
+
 
 	TEST_P(TableTest, UpdateIntTypes)
 	{
