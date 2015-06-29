@@ -1098,7 +1098,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 	{
 		exASSERT(m_manualColumns);
 		exASSERT(columnIndex >= 0);
@@ -1113,12 +1113,6 @@ namespace exodbc
 		ManualColumnInfo colInfo(sqlType, queryName, columnSize, decimalDigits);
 		ColumnBuffer* pColumnBuffer = new ColumnBuffer(colInfo, sqlCType, pBuffer, bufferSize, pEnv->GetOdbcVersion(), flags);
 		m_columnBuffers[columnIndex] = pColumnBuffer;
-	}
-
-
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags /* = CF_SELECT */, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
-	{
-		SetColumn(columnIndex, queryName, SQL_UNKNOWN_TYPE, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
 	}
 
 

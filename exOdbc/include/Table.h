@@ -846,32 +846,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Define a column for SELECTing only manually. The column is bound during Open().
-		* \details	Pass a buffer and a description of the buffer that shall be bound to a
-		*			table column once Open() is called.
-		*			Note that this function can only be used for columns that do not have the 
-		*			ColumnFlags CF_UPDATE or CF_INSERT set. If one of those is set, call the
-		*			overloaded method that takes as argument the SQL type.
-		* \param	columnIndex Zero based index of a bound column.
-		* \param	queryName Name of the column matching columnIndex. This name will be used
-		*			for queries.
-		* \param	pBuffer BufferPtrVariant that contains an allocated buffer of the type given
-		*			by sqlCType.
-		* \param	sqlCType SQL_C_TYPE of the buffer hold by pBuffer, like SQL_C_CHAR, SQL_C_SINTEGER, etc.
-		*			This information will be forwarded to the ODBC driver while binding the column.
-		*			The driver will try to convert the column-value to the given type.
-		* \param	bufferSize The size of the buffer pointed to by pBuffer.
-		* \param	flags Define if a column primary-key, nullable, etc.
-		* \param	columnSize The number of digits of a decimal value (including the fractional part).
-		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
-		* \param	decimalDigits The number of digits of the fractional part of a decimal value.
-		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
-		* \throw	Exception If CF_INSERT or CF_UPDATE is set as ColumnFlags.
-		*/
-		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
-
-
-		/*!
 		* \brief	Define a column manually. The column is bound during Open().
 		* \details	Pass a buffer and a description of the buffer that shall be bound to a
 		*			table column once Open() is called.
@@ -893,7 +867,7 @@ namespace exodbc
 		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
 		* \throw	Exception If CF_INSERT or CF_UPDATE is set as ColumnFlags.
 		*/
-		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags = CF_SELECT, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 
 		/*!
