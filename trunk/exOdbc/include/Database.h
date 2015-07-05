@@ -643,6 +643,14 @@ namespace exodbc
 		Sql2BufferTypeMapPtr GetSql2BufferTypeMap() const;
 
 
+		/*!
+		* \brief	Get the SqlTypeInfo queried during open..
+		* \return	SqlTypeInfosVector
+		* \throw	Exception If not Open().
+		*/
+		SqlTypeInfosVector GetTypeInfos() const;
+
+
 		// Private stuff
 		// -------------
 	private:

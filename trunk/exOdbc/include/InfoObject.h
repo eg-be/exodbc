@@ -522,6 +522,8 @@ namespace exodbc
 
 		std::wstring ToOneLineStr(bool withHeaderLines = false, bool withEndLine = false) const;
 		std::wstring ToStr() const;
+
+		bool operator<(const SSqlTypeInfo& other) const;
 	};
 
 	/*!

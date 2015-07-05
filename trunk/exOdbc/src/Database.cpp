@@ -480,6 +480,13 @@ namespace exodbc
 	}
 
 
+	SqlTypeInfosVector Database::GetTypeInfos() const
+	{
+		exASSERT(IsOpen());
+		return m_datatypes;
+	}
+
+
 	void Database::SetConnectionAttributes()
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
