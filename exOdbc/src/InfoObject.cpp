@@ -1040,6 +1040,12 @@ namespace exodbc
 	}
 
 
+	bool SSqlTypeInfo::operator<(const SSqlTypeInfo& other) const
+	{
+		return m_sqlDataType < other.m_sqlDataType;
+	}
+
+
 	// Interfaces
 	// ----------
 }

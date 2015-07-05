@@ -91,6 +91,38 @@ namespace exodbc
 	}
 
 
+	TEST_P(DatabaseTest, PrintDatabaseTypeInfo)
+	{
+		Database db(&m_env);
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
+		{
+			LogLevelInfo lli;
+			LOG_INFO(L"Will print Database Type Information now");
+			LOG_INFO(L"===================================");
+			std::wstringstream ws;
+			ws << std::endl;
+			SqlTypeInfosVector types = db.GetTypeInfos();
+			std::set<SSqlTypeInfo> typesSet(types.begin(), types.end());
+			bool first = true;
+			for (std::set<SSqlTypeInfo>::const_iterator it = typesSet.begin(); it != typesSet.end(); ++it)
+			{
+				ws << it->ToOneLineStr(first) << std::endl;
+				if (first)
+					first = false;
+			}
+			LOG_INFO(ws.str());
+			LOG_INFO(L"===================================");
+		}
+	}
+
+
 	TEST_P(DatabaseTest, SetConnectionAttributes)
 	{
 		Database db(&m_env);
