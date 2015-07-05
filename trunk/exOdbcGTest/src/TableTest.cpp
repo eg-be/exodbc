@@ -1042,7 +1042,7 @@ namespace exodbc
 	// -----
 	TEST_P(TableTest, Count)
 	{
-		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
+		Table table(&m_db, test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(table.Open());
 
 		SQLUBIGINT all;
