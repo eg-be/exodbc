@@ -104,9 +104,9 @@ namespace exodbc
 		}
 		{
 			LogLevelInfo lli;
-			LOG_INFO(L"Will print Database Type Information now");
-			LOG_INFO(L"===================================");
 			std::wstringstream ws;
+			ws << L"Will print Database Type Information now" << std::endl;
+			ws << L"===================================" << std::endl;
 			ws << std::endl;
 			SqlTypeInfosVector types = db.GetTypeInfos();
 			std::set<SSqlTypeInfo> typesSet(types.begin(), types.end());
@@ -117,8 +117,8 @@ namespace exodbc
 				if (first)
 					first = false;
 			}
+			ws << L"===================================";
 			LOG_INFO(ws.str());
-			LOG_INFO(L"===================================");
 		}
 	}
 
