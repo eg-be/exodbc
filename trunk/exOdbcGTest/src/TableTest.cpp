@@ -2903,9 +2903,19 @@ namespace exodbc
 		SQLWCHAR char_10[10 + 1];
 
 		charTable.SetColumn(0, test::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
-		charTable.SetColumn(1, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), SQL_VARCHAR, varchar, SQL_C_WCHAR, sizeof(varchar), CF_SELECT | CF_INSERT);
-		//charTable.SetColumn(2, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
-		//charTable.SetColumn(3, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Access does not report SQL_VARCHAR as a supported type, but it seems to work with SQL_WVARCHAR. Access also absolutely needs a columnSize if we wish to insert.
+			charTable.SetColumn(1, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), SQL_WVARCHAR, varchar, SQL_C_WCHAR, sizeof(varchar), CF_SELECT | CF_INSERT | CF_UPDATE, 128, 0);
+			//charTable.SetColumn(2, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
+			//charTable.SetColumn(3, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
+		}
+		else
+		{
+			charTable.SetColumn(1, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), SQL_VARCHAR, varchar, SQL_C_WCHAR, sizeof(varchar), CF_SELECT | CF_INSERT | CF_UPDATE);
+			//charTable.SetColumn(2, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
+			//charTable.SetColumn(3, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
+		}
 
 		// access does not report VARCHAR with sqlType 12, but with.. ? ..
 

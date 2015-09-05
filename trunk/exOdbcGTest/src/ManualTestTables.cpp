@@ -63,7 +63,15 @@ namespace exodbc
 		// TODO: Test it for db-2 specific test (REAL-type? what did I mean?). But do that once we can determine the db-type from the wxDb object itself 
 		SetColumn(0, test::ConvertNameCase(L"idfloattypes", namesCase), SQL_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
 		SetColumn(1, test::ConvertNameCase(L"tdouble", namesCase), SQL_DOUBLE, &m_double, SQL_C_DOUBLE, sizeof(m_double), ColumnFlag::CF_SELECT);
-		SetColumn(2, test::ConvertNameCase(L"tfloat", namesCase), SQL_FLOAT, &m_float, SQL_C_DOUBLE, sizeof(m_float), ColumnFlag::CF_SELECT);
+		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Access does not repport SQL_FLOAT as a supported DB-type, but the typedefs for SQLDOBULE and SQLFLOAT resolve both to double, so we can cheat
+			SetColumn(2, test::ConvertNameCase(L"tfloat", namesCase), SQL_DOUBLE, &m_float, SQL_C_DOUBLE, sizeof(m_float), ColumnFlag::CF_SELECT);
+		}
+		else
+		{
+			SetColumn(2, test::ConvertNameCase(L"tfloat", namesCase), SQL_FLOAT, &m_float, SQL_C_FLOAT, sizeof(m_float), ColumnFlag::CF_SELECT);
+		}
 	}
 
 
@@ -79,11 +87,21 @@ namespace exodbc
 		m_char_10[0] = 0;
 
 		SetColumn(0, test::ConvertNameCase(L"idchartypes", namesCase), SQL_INTEGER, &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
-		SetColumn(1, test::ConvertNameCase(L"tvarchar", namesCase), SQL_VARCHAR, m_varchar, SQL_C_CHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
-		SetColumn(2, test::ConvertNameCase(L"tchar", namesCase), SQL_VARCHAR, m_char, SQL_C_CHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
-		SetColumn(3, test::ConvertNameCase(L"tvarchar_10", namesCase), SQL_VARCHAR, m_varchar_10, SQL_C_CHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
-		SetColumn(4, test::ConvertNameCase(L"tchar_10", namesCase), SQL_VARCHAR, m_char_10, SQL_C_CHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
-
+		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Access does not report SQL_VARCHAR as a supported type, it will report the WVARCHAR, lets try converting that to SQL_C_CHAR
+			SetColumn(1, test::ConvertNameCase(L"tvarchar", namesCase), SQL_WVARCHAR, m_varchar, SQL_C_CHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
+			SetColumn(2, test::ConvertNameCase(L"tchar", namesCase), SQL_WVARCHAR, m_char, SQL_C_CHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
+			SetColumn(3, test::ConvertNameCase(L"tvarchar_10", namesCase), SQL_WVARCHAR, m_varchar_10, SQL_C_CHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
+			SetColumn(4, test::ConvertNameCase(L"tchar_10", namesCase), SQL_WVARCHAR, m_char_10, SQL_C_CHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
+		}
+		else
+		{
+			SetColumn(1, test::ConvertNameCase(L"tvarchar", namesCase), SQL_VARCHAR, m_varchar, SQL_C_CHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
+			SetColumn(2, test::ConvertNameCase(L"tchar", namesCase), SQL_VARCHAR, m_char, SQL_C_CHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
+			SetColumn(3, test::ConvertNameCase(L"tvarchar_10", namesCase), SQL_VARCHAR, m_varchar_10, SQL_C_CHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
+			SetColumn(4, test::ConvertNameCase(L"tchar_10", namesCase), SQL_VARCHAR, m_char_10, SQL_C_CHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
+		}
 	}
 
 
@@ -99,10 +117,21 @@ namespace exodbc
 		m_char_10[0] = 0;
 
 		SetColumn(0, test::ConvertNameCase(L"idchartypes", namesCase), SQL_INTEGER, &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
-		SetColumn(1, test::ConvertNameCase(L"tvarchar", namesCase), SQL_VARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
-		SetColumn(2, test::ConvertNameCase(L"tchar", namesCase), SQL_VARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
-		SetColumn(3, test::ConvertNameCase(L"tvarchar_10", namesCase), SQL_VARCHAR, m_varchar_10, SQL_C_WCHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
-		SetColumn(4, test::ConvertNameCase(L"tchar_10", namesCase), SQL_VARCHAR, m_char_10, SQL_C_WCHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
+		//if (pDb->GetDbms() == DatabaseProduct::ACCESS)
+		//{
+			// Access does not report SQL_VARCHAR as a supported type, use the unknown type for access
+			SetColumn(1, test::ConvertNameCase(L"tvarchar", namesCase), SQL_WVARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
+			SetColumn(2, test::ConvertNameCase(L"tchar", namesCase), SQL_WVARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
+			SetColumn(3, test::ConvertNameCase(L"tvarchar_10", namesCase), SQL_WVARCHAR, m_varchar_10, SQL_C_WCHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
+			SetColumn(4, test::ConvertNameCase(L"tchar_10", namesCase), SQL_WVARCHAR, m_char_10, SQL_C_WCHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
+		//}
+		//else
+		//{
+		//	SetColumn(1, test::ConvertNameCase(L"tvarchar", namesCase), SQL_VARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
+		//	SetColumn(2, test::ConvertNameCase(L"tchar", namesCase), SQL_VARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
+		//	SetColumn(3, test::ConvertNameCase(L"tvarchar_10", namesCase), SQL_VARCHAR, m_varchar_10, SQL_C_WCHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
+		//	SetColumn(4, test::ConvertNameCase(L"tchar_10", namesCase), SQL_VARCHAR, m_char_10, SQL_C_WCHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
+		//}
 	}
 
 
@@ -118,9 +147,19 @@ namespace exodbc
 
 		// Note: We are odbc 3, therefore use the new c-type (with type: SQL_C_TYPE_DATE instead of SQL_C_DATE).
 		SetColumn(0, test::ConvertNameCase(L"iddatetypes", namesCase), SQL_INTEGER, &m_idDateTypes, SQL_C_SLONG, sizeof(m_idDateTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
-		SetColumn(1, test::ConvertNameCase(L"tdate", namesCase), SQL_DATE, &m_date, SQL_C_TYPE_DATE, sizeof(m_date), ColumnFlag::CF_SELECT);
-		SetColumn(2, test::ConvertNameCase(L"ttime", namesCase), SQL_TIME, &m_time, SQL_C_TYPE_TIME, sizeof(m_time), ColumnFlag::CF_SELECT);
-		SetColumn(3, test::ConvertNameCase(L"ttimestamp", namesCase), SQL_TIMESTAMP, &m_timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(m_timestamp), ColumnFlag::CF_SELECT);
+		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Access does not report SQL_DATE, SQL_TIME or SQL_TIMESTAMP as a reported type.
+			SetColumn(1, test::ConvertNameCase(L"tdate", namesCase), SQL_UNKNOWN_TYPE, &m_date, SQL_C_TYPE_DATE, sizeof(m_date), ColumnFlag::CF_SELECT);
+			SetColumn(2, test::ConvertNameCase(L"ttime", namesCase), SQL_UNKNOWN_TYPE, &m_time, SQL_C_TYPE_TIME, sizeof(m_time), ColumnFlag::CF_SELECT);
+			SetColumn(3, test::ConvertNameCase(L"ttimestamp", namesCase), SQL_UNKNOWN_TYPE, &m_timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(m_timestamp), ColumnFlag::CF_SELECT);
+		}
+		else
+		{
+			SetColumn(1, test::ConvertNameCase(L"tdate", namesCase), SQL_DATE, &m_date, SQL_C_TYPE_DATE, sizeof(m_date), ColumnFlag::CF_SELECT);
+			SetColumn(2, test::ConvertNameCase(L"ttime", namesCase), SQL_TIME, &m_time, SQL_C_TYPE_TIME, sizeof(m_time), ColumnFlag::CF_SELECT);
+			SetColumn(3, test::ConvertNameCase(L"ttimestamp", namesCase), SQL_TIMESTAMP, &m_timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(m_timestamp), ColumnFlag::CF_SELECT);
+		}
 	}
 
 
