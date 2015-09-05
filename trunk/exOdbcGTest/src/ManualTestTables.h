@@ -57,9 +57,12 @@ namespace exodbc
 		MFloatTypesTable(const Database* pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"FloatTypes");
 		virtual ~MFloatTypesTable() {};
 
+		// Note: SQLFLOAT is typedefed to SQLDOUBLE (!!). Use SQLREAL for explicit FLOAT!
+
 		SQLINTEGER				m_idFloatTypes;
 		SQLDOUBLE				m_double;
-		SQLFLOAT				m_float;
+		SQLREAL					m_doubleAsFloat;
+		SQLREAL					m_float;
 	};
 
 

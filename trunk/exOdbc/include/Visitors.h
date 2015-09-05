@@ -49,6 +49,7 @@ namespace exodbc
 		SQLBIGINT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_SBIGINT); };
+		SQLBIGINT operator()(SQLREAL* pReal) const { throw CastException(SQL_C_FLOAT, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_SBIGINT); };
 		SQLBIGINT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_SBIGINT); };
@@ -87,6 +88,7 @@ namespace exodbc
 		std::wstring operator()(SQLCHAR* pChar) const{ throw CastException(SQL_C_CHAR, SQL_C_WCHAR); };
 		std::wstring operator()(SQLWCHAR* pWChar) const { return pWChar; };
 		std::wstring operator()(SQLDOUBLE* pDouble) const { return boost::lexical_cast<std::wstring>(*pDouble); };
+		std::wstring operator()(SQLREAL* pReal) const { return boost::lexical_cast<std::wstring>(*pReal); };
 		std::wstring operator()(SQL_DATE_STRUCT* pDate) const { return boost::str(boost::wformat(L"%04d-%02d-%02d") % pDate->year % pDate->month %pDate->day); };
 		std::wstring operator()(SQL_TIME_STRUCT* pTime) const { return boost::str(boost::wformat(L"%02d:%02d:%02d") % pTime->hour % pTime->minute %pTime->second); };
 		std::wstring operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return boost::str(boost::wformat(L"%04d-%02d-%02dT%02d:%02d:%012.9f") % pTimestamp->year %pTimestamp->month %pTimestamp->day %pTimestamp->hour %pTimestamp->minute % ((SQLDOUBLE)pTimestamp->second + ((SQLDOUBLE)pTimestamp->fraction / (SQLDOUBLE)1000000000.0))); };
@@ -125,6 +127,7 @@ namespace exodbc
 		std::string operator()(SQLCHAR* pChar) const { return (char*)pChar; };
 		std::string operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_CHAR); };
 		std::string operator()(SQLDOUBLE* pDouble) const { return boost::lexical_cast<std::string>(*pDouble); };
+		std::string operator()(SQLREAL* pReal) const { return boost::lexical_cast<std::string>(*pReal); };
 		std::string operator()(SQL_DATE_STRUCT* pDate) const { return boost::str(boost::format("%04d-%02d-%02d") % pDate->year % pDate->month %pDate->day); };
 		std::string operator()(SQL_TIME_STRUCT* pTime) const { return boost::str(boost::format("%02d:%02d:%02d") % pTime->hour % pTime->minute %pTime->second); };
 		std::string operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return boost::str(boost::format("%04d-%02d-%02dT%02d:%02d:%012.9f") % pTimestamp->year %pTimestamp->month %pTimestamp->day %pTimestamp->hour %pTimestamp->minute % ((SQLDOUBLE)pTimestamp->second + ((SQLDOUBLE)pTimestamp->fraction / (SQLDOUBLE)1000000000.0))); };
@@ -157,6 +160,7 @@ namespace exodbc
 		SQLDOUBLE operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQLDOUBLE* pDouble) const { return *pDouble; };
+		SQLDOUBLE operator()(SQLREAL* pReal) const { return (SQLDOUBLE)(*pReal); };
 		SQLDOUBLE operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_DOUBLE); };
 		SQLDOUBLE operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_DOUBLE); };
@@ -191,6 +195,7 @@ namespace exodbc
 		SQL_TIMESTAMP_STRUCT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_TYPE_TIMESTAMP); };
 		SQL_TIMESTAMP_STRUCT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_TYPE_TIMESTAMP); };
 		SQL_TIMESTAMP_STRUCT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_TYPE_TIMESTAMP); };
+		SQL_TIMESTAMP_STRUCT operator()(SQLREAL* pReal) const { throw CastException(SQL_C_FLOAT, SQL_C_TYPE_TIMESTAMP); };
 		SQL_TIMESTAMP_STRUCT operator()(SQL_DATE_STRUCT* pDate) const;
 		SQL_TIMESTAMP_STRUCT operator()(SQL_TIME_STRUCT* pTime) const;
 		SQL_TIMESTAMP_STRUCT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const;
@@ -224,6 +229,7 @@ namespace exodbc
 		SQL_NUMERIC_STRUCT operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_NUMERIC); };
 		SQL_NUMERIC_STRUCT operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_NUMERIC); };
 		SQL_NUMERIC_STRUCT operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_NUMERIC); };
+		SQL_NUMERIC_STRUCT operator()(SQLREAL* pReal) const { throw CastException(SQL_C_FLOAT, SQL_C_NUMERIC); }
 		SQL_NUMERIC_STRUCT operator()(SQL_DATE_STRUCT* pDate) const { throw CastException(SQL_TYPE_DATE, SQL_C_NUMERIC); };
 		SQL_NUMERIC_STRUCT operator()(SQL_TIME_STRUCT* pTime) const { throw CastException(SQL_TYPE_TIME, SQL_C_NUMERIC); };
 		SQL_NUMERIC_STRUCT operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_TYPE_TIMESTAMP, SQL_C_NUMERIC); };
@@ -256,6 +262,7 @@ namespace exodbc
 		const SQLCHAR* operator()(SQLCHAR* pChar) const { return (const SQLCHAR*)(pChar); };
 		const SQLCHAR* operator()(SQLWCHAR* pWChar) const { return (const SQLCHAR*)(pWChar); };
 		const SQLCHAR* operator()(SQLDOUBLE* pDouble) const { return (const SQLCHAR*)(pDouble); };
+		const SQLCHAR* operator()(SQLREAL* pReal) const { return (const SQLCHAR*)(pReal); };
 		const SQLCHAR* operator()(SQL_DATE_STRUCT* pDate) const { return (const SQLCHAR*)(pDate); };
 		const SQLCHAR* operator()(SQL_TIME_STRUCT* pTime) const { return (const SQLCHAR*)(pTime); };
 		const SQLCHAR* operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { return (const SQLCHAR*)(pTimestamp); };

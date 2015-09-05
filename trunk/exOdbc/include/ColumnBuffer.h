@@ -47,6 +47,7 @@ namespace exodbc
 	*  - SQLCHAR*
 	*  - SQLWCHAR*
 	*  - SQLDOUBLE*
+	*  - SQLREAL*
 	*  - SQL_DATE_STRUCT*
 	*  - SQL_TIME_STRUCT*
 	*  - SQL_TIME2_STRUCT* / SQL_TIME_STRUCT*
@@ -56,7 +57,7 @@ namespace exodbc
 	*/
 	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, 
 		SQLCHAR*, SQLWCHAR*, 
-		SQLDOUBLE*,
+		SQLDOUBLE*, SQLREAL*,
 		SQL_DATE_STRUCT*, SQL_TIME_STRUCT*, SQL_TIMESTAMP_STRUCT*,
 		SQL_NUMERIC_STRUCT*
 #if HAVE_MSODBCSQL_H
@@ -644,6 +645,7 @@ namespace exodbc
 		SQLCHAR*				GetCharPtr() const;
 		SQLWCHAR*				GetWCharPtr() const;
 		SQLDOUBLE*				GetDoublePtr() const;
+		SQLREAL*				GetRealPtr() const;
 		SQL_DATE_STRUCT*		GetDatePtr() const;
 		SQL_TIME_STRUCT*		GetTimePtr() const;
 		SQL_TIMESTAMP_STRUCT*	GetTimestampPtr() const;
