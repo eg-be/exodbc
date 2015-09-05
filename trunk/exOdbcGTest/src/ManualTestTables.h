@@ -112,6 +112,7 @@ namespace exodbc
 		SQLINTEGER				m_idDateTypes;
 		SQL_DATE_STRUCT			m_date;
 		SQL_TIME_STRUCT			m_time;
+		SQL_SS_TIME2_STRUCT		m_time2;
 		SQL_TIMESTAMP_STRUCT	m_timestamp;
 	};
 
