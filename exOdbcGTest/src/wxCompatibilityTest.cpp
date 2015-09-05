@@ -70,8 +70,6 @@ namespace exodbc
 	// Test opening the tables we use in the later tests
 	TEST_P(wxCompatibilityTest, OpenTableCheckExistance)
 	{
-
-
 		MCharTypesTable charTypesTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_NO_THROW(charTypesTable.Open(TOF_CHECK_EXISTANCE));
 
@@ -79,11 +77,21 @@ namespace exodbc
 		EXPECT_NO_THROW(intTypesTable.Open(TOF_CHECK_EXISTANCE));
 
 		MDateTypesTable dateTypesTable(&m_db, m_odbcInfo.m_namesCase);
-		EXPECT_NO_THROW(dateTypesTable.Open(TOF_CHECK_EXISTANCE));
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			// Note: Sql Server does not report time as supported datatype, but rather time2.
+			// but if we wish to use that, we would need odbc 3.8
+			EXPECT_NO_THROW(dateTypesTable.Open(TOF_CHECK_EXISTANCE | TOF_IGNORE_DB_TYPE_INFOS));
+		}
+		else
+		{
+			EXPECT_NO_THROW(dateTypesTable.Open(TOF_CHECK_EXISTANCE));
+		}
 
 		MFloatTypesTable floatTypesTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_NO_THROW(floatTypesTable.Open(TOF_CHECK_EXISTANCE));
-
+		
+		// we do not have a numeric table on all test-sources
 //		MNumericTypesTable numericTypesTable(m_pDb, NumericTypesTable::ReadAsChar, m_odbcInfo.m_namesCase);
 //		EXPECT_TRUE(numericTypesTable.Open(false, false));
 
@@ -95,8 +103,6 @@ namespace exodbc
 	// Test basic GetNext
 	TEST_P(wxCompatibilityTest, GetNextTest)
 	{
-
-
 		MCharTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -127,10 +133,15 @@ namespace exodbc
 	// Test reading datatypes
 	TEST_P(wxCompatibilityTest, SelectDateTypes)
 	{
-
-
 		MDateTypesTable table(&m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE | TOF_IGNORE_DB_TYPE_INFOS));
+		}
+		else
+		{
+			ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
+		}
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.datetypes WHERE iddatetypes = 1");
 		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
@@ -205,8 +216,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectIntTypes)
 	{
-
-
 		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -255,8 +264,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectWCharTypes)
 	{
-
-
 		MWCharTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -294,8 +301,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectFloatTypes)
 	{		
-
-
 		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -338,8 +343,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectNumericTypesAsChar)
 	{
-
-
 		MNumericTypesAsCharTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -406,8 +409,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectBlobTypes)
 	{
-
-
 		MBlobTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -456,8 +457,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, SelectIncompleteTable)
 	{
-
-
 		MCharTable table(&m_db, m_odbcInfo.m_namesCase);
 		MIncompleteCharTable incTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -519,8 +518,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSql_InsertCharTypes)
 	{
-
-
 		MWCharTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"CharTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -554,8 +551,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertFloatTypes)
 	{
-
-
 		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"FloatTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -584,8 +579,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertNumericTypesAsChar)
 	{
-
-
 		MNumericTypesAsCharTable table(&m_db, m_odbcInfo.m_namesCase, L"NumericTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -642,8 +635,6 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertIntTypes)
 	{
-
-
 		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"IntegerTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
 
@@ -681,10 +672,15 @@ namespace exodbc
 
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertDateTypes)
 	{
-
-
 		MDateTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"DateTypes_tmp");
-		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE | TOF_IGNORE_DB_TYPE_INFOS));
+		}
+		else
+		{
+			ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
+		}
 
 		std::wstring sqlstmt;
 		sqlstmt = L"DELETE FROM exodbc.datetypes_tmp WHERE iddatetypes >= 0";
