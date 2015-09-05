@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "IndicatorTest", "IndicatorT
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "InsertNumTest", "InsertNumTest\InsertNumTest.vcxproj", "{BE4B8147-E32F-4D63-BCDF-91AEC9D765CB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SelectFloatTest", "SelectFloatTest\SelectFloatTest.vcxproj", "{285E4BF0-FF99-45E5-B305-2E81CF451E1F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -21,6 +23,10 @@ Global
 		{BE4B8147-E32F-4D63-BCDF-91AEC9D765CB}.Debug|Win32.Build.0 = Debug|Win32
 		{BE4B8147-E32F-4D63-BCDF-91AEC9D765CB}.Release|Win32.ActiveCfg = Release|Win32
 		{BE4B8147-E32F-4D63-BCDF-91AEC9D765CB}.Release|Win32.Build.0 = Release|Win32
+		{285E4BF0-FF99-45E5-B305-2E81CF451E1F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{285E4BF0-FF99-45E5-B305-2E81CF451E1F}.Debug|Win32.Build.0 = Debug|Win32
+		{285E4BF0-FF99-45E5-B305-2E81CF451E1F}.Release|Win32.ActiveCfg = Release|Win32
+		{285E4BF0-FF99-45E5-B305-2E81CF451E1F}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
