@@ -2464,7 +2464,16 @@ namespace exodbc
 		// Insert some values
 		fTable.SetColumnValue(0, (SQLINTEGER)101);
 		fTable.SetColumnValue(1, (SQLDOUBLE)3.14159265359);
-		fTable.SetColumnValue(2, (SQLREAL)-3.14159);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS || m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			// Access binds as double
+			// also ms sql server, it seems to report SQLFLOAT which we map to SQL_C_FLOAT, which is a DOUBLE
+			fTable.SetColumnValue(2, (SQLDOUBLE)-3.14159);
+		}
+		else
+		{
+			fTable.SetColumnValue(2, (SQLREAL)-3.14159);
+		}
 		EXPECT_NO_THROW(fTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -2478,8 +2487,16 @@ namespace exodbc
 		EXPECT_EQ(101, fTable2.GetInt(0));
 		SQLDOUBLE doubleVal = fTable2.GetDouble(1);
 		EXPECT_EQ((SQLBIGINT)(1e11 * 3.14159265359), (SQLBIGINT)(1e11 * doubleVal));
-		SQLREAL realVal = fTable2.GetReal(2);
-		EXPECT_EQ((int)(1e5 * -3.14159), (int)(1e5 * realVal));
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS || m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			SQLDOUBLE realVal = fTable2.GetDouble(2);
+			EXPECT_EQ((int)(1e5 * -3.14159), (int)(1e5 * realVal));
+		}
+		else
+		{
+			SQLREAL realVal = fTable2.GetReal(2);
+			EXPECT_EQ((int)(1e5 * -3.14159), (int)(1e5 * realVal));
+		}
 	}
 
 
@@ -3215,13 +3232,29 @@ namespace exodbc
 		// Insert some values
 		fTable.SetColumnValue(0, (SQLINTEGER)101);
 		fTable.SetColumnValue(1, (SQLDOUBLE)3.14159265359);
-		fTable.SetColumnValue(2, (SQLREAL)-3.14159);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS || m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			// Access binds as double
+			// also ms sql server, it seems to report SQLFLOAT which we map to SQL_C_FLOAT, which is a DOUBLE
+			fTable.SetColumnValue(2, (SQLDOUBLE)-3.14159);
+		}
+		else
+		{
+			fTable.SetColumnValue(2, (SQLREAL)-3.14159);
+		}
 		fTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// And update them using the key fields
 		fTable.SetColumnValue(1, (SQLDOUBLE)-6.2343354);
-		fTable.SetColumnValue(2, (SQLREAL)989.213);
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS || m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			fTable.SetColumnValue(2, (SQLDOUBLE)989.213);
+		}
+		else
+		{
+			fTable.SetColumnValue(2, (SQLREAL)989.213);
+		}
 		EXPECT_NO_THROW(fTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -3234,7 +3267,14 @@ namespace exodbc
 
 		EXPECT_EQ(101, fTable2.GetInt(0));
 		EXPECT_EQ((int)(1e7 * -6.2343354), (int)(1e7 * fTable2.GetDouble(1)));
-		EXPECT_EQ((int)(1e3 * 989.213), (int)(1e3 * fTable2.GetReal(2)));
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS || m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ((int)(1e3 * 989.213), (int)(1e3 * fTable2.GetDouble(2)));
+		}
+		else
+		{
+			EXPECT_EQ((int)(1e3 * 989.213), (int)(1e3 * fTable2.GetReal(2)));
+		}
 	}
 
 
