@@ -147,6 +147,7 @@ namespace exodbc
 	*
 	* - SQLSMALLINT*
 	* - SQLINTEGER*
+	* - SQLREAL*
 	* - SQLDOUBLE*
 	* \todo: SQL_NUMERIC_STRUCT*
 	*/
@@ -169,6 +170,38 @@ namespace exodbc
 		SQLDOUBLE operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_DOUBLE); };
 #endif
 	};	// class DoubleVisitor
+
+
+	/*!
+	* \class RealVisitor
+	*
+	* \brief Visitor to cast current value to a SQLREAL.
+	*
+	* This Visitor can cast the following sources to a SQLREAL :
+	*
+	* - SQLSMALLINT*
+	* - SQLREAL*
+	* \todo: SQL_NUMERIC_STRUCT*
+	*/
+	class EXODBCAPI RealVisitor
+		: public boost::static_visitor < SQLDOUBLE >
+	{
+	public:
+		SQLREAL operator()(SQLSMALLINT* smallInt) const { return *smallInt; };
+		SQLREAL operator()(SQLINTEGER* i) const { throw CastException(SQL_C_SLONG, SQL_C_FLOAT); };
+		SQLREAL operator()(SQLBIGINT* bigInt) const { throw CastException(SQL_C_SBIGINT, SQL_C_FLOAT); };
+		SQLREAL operator()(SQLCHAR* pChar) const { throw CastException(SQL_C_CHAR, SQL_C_FLOAT); };
+		SQLREAL operator()(SQLWCHAR* pWChar) const { throw CastException(SQL_C_WCHAR, SQL_C_FLOAT); };
+		SQLREAL operator()(SQLDOUBLE* pDouble) const { throw CastException(SQL_C_DOUBLE, SQL_C_FLOAT); };
+		SQLREAL operator()(SQLREAL* pReal) const { return *pReal; };
+		SQLREAL operator()(SQL_DATE_STRUCT* pTime) const { throw CastException(SQL_C_TYPE_DATE, SQL_C_FLOAT); };
+		SQLREAL operator()(SQL_TIME_STRUCT* pDate) const { throw CastException(SQL_C_TYPE_TIME, SQL_C_FLOAT); };
+		SQLREAL operator()(SQL_TIMESTAMP_STRUCT* pTimestamp) const { throw CastException(SQL_C_TYPE_TIMESTAMP, SQL_C_FLOAT); };
+		SQLREAL operator()(SQL_NUMERIC_STRUCT* pNumeric) const { throw CastException(SQL_C_NUMERIC, SQL_C_FLOAT); };
+#if HAVE_MSODBCSQL_H
+		SQLREAL operator()(SQL_SS_TIME2_STRUCT* pTime) const { throw CastException(SQL_C_SS_TIME2, SQL_C_FLOAT); };
+#endif
+	};	// class RealVisitor
 
 
 	/*!

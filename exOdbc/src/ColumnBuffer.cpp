@@ -853,6 +853,11 @@ namespace exodbc
 				SQLDOUBLE* pColVal = GetDoublePtr();
 				*pColVal = boost::get<SQLDOUBLE>(var);
 			}
+			else if (SQL_C_FLOAT == m_bufferType)
+			{
+				SQLREAL* pColVal = GetRealPtr();
+				*pColVal = boost::get<SQLREAL>(var);
+			}
 			else if (SQL_C_CHAR == m_bufferType)
 			{
 				SQLCHAR* pColVal = GetCharPtr();
@@ -1012,6 +1017,15 @@ namespace exodbc
 		exASSERT(IsBound());
 
 		return boost::apply_visitor(DoubleVisitor(), m_bufferPtr);
+	}
+
+
+	ColumnBuffer::operator SQLREAL() const
+	{
+		exASSERT(m_haveBuffer);
+		exASSERT(IsBound());
+
+		return boost::apply_visitor(RealVisitor(), m_bufferPtr);
 	}
 
 

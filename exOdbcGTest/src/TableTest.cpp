@@ -1216,49 +1216,31 @@ namespace exodbc
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_NO_THROW(val = fTable.GetDouble(2));
 		EXPECT_EQ(0.0, val);
-		// Read as str
-		EXPECT_NO_THROW(str = fTable.GetWString(2));
-		EXPECT_EQ(L"0", str);
 
 		fTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_NO_THROW(val = fTable.GetDouble(2));
-		EXPECT_EQ(3.141, val);
-		// Read as str
-		EXPECT_NO_THROW(str = fTable.GetWString(2));
-		EXPECT_EQ(L"3.141", str);
+		EXPECT_EQ((int)(1e3 * 3.141), (int)(1e3 * val));
 
 		fTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_NO_THROW(val = fTable.GetDouble(2));
-		EXPECT_EQ(-3.141, val);
-		// Read as str
-		EXPECT_NO_THROW(str = fTable.GetWString(2));
-		EXPECT_EQ(L"-3.141", str);
+		EXPECT_EQ((int)(1e3 * -3.141), (int)(1e3 * val));
 
 		fTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_NO_THROW(val = fTable.GetDouble(1));
 		EXPECT_EQ(0.0, val);
-		// Read as str
-		EXPECT_NO_THROW(str = fTable.GetWString(1));
-		EXPECT_EQ(L"0", str);
 
 		fTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_NO_THROW(val = fTable.GetDouble(1));
-		EXPECT_EQ(3.141592, val);
-		// Read as str
-		EXPECT_NO_THROW(str = fTable.GetWString(1));
-		EXPECT_EQ(L"3.1415920000000002", str);
+		EXPECT_EQ((int)(1e6 * 3.141592), (int)(1e6 * val));
 
 		fTable.Select((boost::wformat(L"%s = 6") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
 		EXPECT_NO_THROW(val = fTable.GetDouble(1));
-		EXPECT_EQ(-3.141592, val);
-		// Read as str
-		EXPECT_NO_THROW(str = fTable.GetWString(1));
-		EXPECT_EQ(L"-3.1415920000000002", str);
+		EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * val));
 	}
 
 
@@ -2482,7 +2464,7 @@ namespace exodbc
 		// Insert some values
 		fTable.SetColumnValue(0, (SQLINTEGER)101);
 		fTable.SetColumnValue(1, (SQLDOUBLE)3.14159265359);
-		fTable.SetColumnValue(2, (SQLDOUBLE)-3.14159);
+		fTable.SetColumnValue(2, (SQLREAL)-3.14159);
 		EXPECT_NO_THROW(fTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -2494,8 +2476,10 @@ namespace exodbc
 		EXPECT_TRUE(fTable2.SelectNext());
 
 		EXPECT_EQ(101, fTable2.GetInt(0));
-		EXPECT_EQ((SQLDOUBLE)3.14159265359, fTable2.GetDouble(1));
-		EXPECT_EQ((SQLDOUBLE)-3.14159, fTable2.GetDouble(2));
+		SQLDOUBLE doubleVal = fTable2.GetDouble(1);
+		EXPECT_EQ((SQLBIGINT)(1e11 * 3.14159265359), (SQLBIGINT)(1e11 * doubleVal));
+		SQLREAL realVal = fTable2.GetReal(2);
+		EXPECT_EQ((int)(1e5 * -3.14159), (int)(1e5 * realVal));
 	}
 
 
@@ -3231,13 +3215,13 @@ namespace exodbc
 		// Insert some values
 		fTable.SetColumnValue(0, (SQLINTEGER)101);
 		fTable.SetColumnValue(1, (SQLDOUBLE)3.14159265359);
-		fTable.SetColumnValue(2, (SQLDOUBLE)-3.14159);
+		fTable.SetColumnValue(2, (SQLREAL)-3.14159);
 		fTable.Insert();
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
 		// And update them using the key fields
 		fTable.SetColumnValue(1, (SQLDOUBLE)-6.2343354);
-		fTable.SetColumnValue(2, (SQLDOUBLE)989.213);
+		fTable.SetColumnValue(2, (SQLREAL)989.213);
 		EXPECT_NO_THROW(fTable.Update());
 		EXPECT_NO_THROW(m_db.CommitTrans());
 
@@ -3249,8 +3233,8 @@ namespace exodbc
 		EXPECT_TRUE(fTable2.SelectNext());
 
 		EXPECT_EQ(101, fTable2.GetInt(0));
-		EXPECT_EQ(-6.2343354, fTable2.GetDouble(1));
-		EXPECT_EQ(989.213, fTable2.GetDouble(2));
+		EXPECT_EQ((int)(1e7 * -6.2343354), (int)(1e7 * fTable2.GetDouble(1)));
+		EXPECT_EQ((int)(1e3 * 989.213), (int)(1e3 * fTable2.GetDouble(2)));
 	}
 
 

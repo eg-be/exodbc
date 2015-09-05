@@ -297,6 +297,8 @@ namespace exodbc
 	}
 
 
+	// DoubleVisitor
+	// -------------
 	TEST_F(DoubleVisitorTest, FromSmallInt)
 	{
 		SQLDOUBLE d0 = boost::apply_visitor(DoubleVisitor(), pSmallIntNull);
@@ -336,6 +338,38 @@ namespace exodbc
 	}
 
 
+	// RealVisitor
+	// -----------
+	TEST_F(RealVisitorTest, FromSmallInt)
+	{
+		SQLREAL r0 = boost::apply_visitor(RealVisitor(), pSmallIntNull);
+		SQLREAL rMin = boost::apply_visitor(RealVisitor(), pSmallIntMin);
+		SQLREAL rMax = boost::apply_visitor(RealVisitor(), pSmallIntMax);
+
+		EXPECT_EQ((SQLREAL)SMALL_INT_NULL, r0);
+		EXPECT_EQ((SQLREAL)SMALL_INT_MIN, rMin);
+		EXPECT_EQ((SQLREAL)SMALL_INT_MAX, rMax);
+	}
+
+
+	TEST_F(RealVisitorTest, FromReal)
+	{
+		SQLREAL rNull = 0.0;
+		SQLREAL rPosRef = 3.1415f;
+		SQLREAL rNegRef = -3.1415f;
+		SQLREAL r0 = boost::apply_visitor(RealVisitor(), BufferPtrVariant((SQLREAL*)&rNull));
+		SQLREAL rPos = boost::apply_visitor(RealVisitor(), BufferPtrVariant((SQLREAL*)&rPosRef));
+		SQLREAL rNeg = boost::apply_visitor(RealVisitor(), BufferPtrVariant((SQLREAL*)&rNegRef));
+
+		EXPECT_EQ(rNull, r0);
+		EXPECT_EQ(rPosRef, rPos);
+		EXPECT_EQ(rNegRef, rNeg);
+	}
+
+
+
+	// TimestampVisitor
+	// ----------------
 	TEST_F(TimestampVisitorTest, FromDate)
 	{
 		SQL_DATE_STRUCT d0 = InitDate(26, 01, 1983);
@@ -394,6 +428,8 @@ namespace exodbc
 	}
 
 
+	// NumericVisitor
+	// --------------
 	TEST_F(NumericVisitorTest, FromNumeric)
 	{
 		SQLCHAR nVal[16];

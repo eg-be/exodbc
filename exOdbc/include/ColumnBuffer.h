@@ -96,7 +96,7 @@ namespace exodbc
 	*/
 	typedef boost::variant<NullValue, SQLSMALLINT, SQLINTEGER, SQLBIGINT,
 		std::string, std::wstring,
-		SQLDOUBLE,
+		SQLDOUBLE, SQLREAL,
 		SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT,
 		SQL_NUMERIC_STRUCT
 #if HAVE_MSODBCSQL_H
@@ -489,6 +489,16 @@ namespace exodbc
 		* \see		DoubleVisitor
 		*/
 		operator SQLDOUBLE() const;
+
+		
+		/*!
+		* \brief	Cast the current value to a SQLREAL if possible.
+		* \details	Fails if not bound.
+		* \return	Current value as SQLREAL.
+		* \throw	CastException If value cannot be casted to a SQLREAL.
+		* \see		RealVisitor
+		*/
+		operator SQLREAL() const;
 
 
 		/*!

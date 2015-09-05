@@ -1058,6 +1058,14 @@ namespace exodbc
 	}
 
 
+	SQLREAL Table::GetReal(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
+		SQLREAL r = *pBuff;
+		return r;
+	}
+
+
 	SQL_NUMERIC_STRUCT Table::GetNumeric(SQLSMALLINT columnIndex) const
 	{
 		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);

@@ -744,6 +744,15 @@ namespace exodbc
 		*/
 		SQLDOUBLE GetDouble(SQLSMALLINT columnIndex) const;
 
+		
+		/*!
+		* \brief	Access the current value of columnIndex as SQLREAL.
+		* \details	Casts the value if casting is possible without loosing data
+		* \param	columnIndex Zero based index of a bound column.
+		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
+		*/
+		SQLREAL GetReal(SQLSMALLINT columnIndex) const;
+
 
 		/*!
 		* \brief	Access the current value of columnIndex as SQL_NUMERIC_STRUCT.
