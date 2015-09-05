@@ -298,7 +298,6 @@ namespace exodbc
 	}
 
 
-
 	TEST_P(wxCompatibilityTest, SelectFloatTypes)
 	{		
 		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
@@ -310,11 +309,11 @@ namespace exodbc
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 2");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( 3.141, table.m_float);
+		EXPECT_EQ( (int)(1e3 * 3.141), (int)(1e3 * table.m_float));
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 3");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( -3.141, table.m_float);
+		EXPECT_EQ( (int)(1e3 * -3.141), (int)(1e3 * table.m_float));
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4");
 		EXPECT_TRUE(table.SelectNext());
@@ -322,11 +321,25 @@ namespace exodbc
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 5");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( 3.141592, table.m_double);
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ((int)(1e6 * 3.141592), (int)(1e6 * table.m_doubleAsFloat));
+		}
+		else
+		{
+			EXPECT_EQ((int)(1e6 * 3.141592), (int)(1e6 * table.m_double));
+		}
 
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 6");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( -3.141592, table.m_double);
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * table.m_doubleAsFloat));
+		}
+		else
+		{
+			EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * table.m_double));
+		}
 
 		// Test for NULL
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 1");
@@ -552,7 +565,14 @@ namespace exodbc
 	TEST_P(wxCompatibilityTest, ExecSQL_InsertFloatTypes)
 	{
 		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"FloatTypes_tmp");
-		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE | TOF_IGNORE_DB_TYPE_INFOS));
+		}
+		else
+		{
+			ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
+		}
 
 		std::wstring sqlstmt = L"DELETE FROM exodbc.floattypes_tmp WHERE idfloattypes >= 0";
 		EXPECT_NO_THROW(m_db.ExecSql(sqlstmt));
@@ -563,8 +583,15 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes = 1");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( -3.141592, table.m_double);
-		EXPECT_EQ( -3.141, table.m_float);
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * table.m_doubleAsFloat));
+		}
+		else
+		{
+			EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * table.m_double));
+		}
+		EXPECT_EQ( (int)(1e3 * -3.141), (int)(1e3 * table.m_float));
 		EXPECT_FALSE(table.SelectNext());
 
 		sqlstmt = L"INSERT INTO exodbc.floattypes_tmp (idfloattypes, tdouble, tfloat) VALUES (2, 3.141592, 3.141)";
@@ -572,8 +599,15 @@ namespace exodbc
 		EXPECT_NO_THROW(m_db.CommitTrans());
 		table.SelectBySqlStmt(L"SELECT * FROM exodbc.floattypes_tmp WHERE idfloattypes = 2");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( 3.141592, table.m_double);
-		EXPECT_EQ( 3.141, table.m_float);
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ((int)(1e6 * 3.141592), (int)(1e6 * table.m_doubleAsFloat));
+		}
+		else
+		{
+			EXPECT_EQ((int)(1e6 * 3.141592), (int)(1e6 * table.m_double));
+		}
+		EXPECT_EQ( (int)(1e3 * 3.141), (int)(1e3 * table.m_float));
 		EXPECT_FALSE(table.SelectNext());
 	}
 
