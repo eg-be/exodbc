@@ -2921,9 +2921,61 @@ namespace exodbc
 
 	// Update rows
 	// -----------
-	TEST_P(TableTest, UpdateManualTable)
+	TEST_P(TableTest, UpdateManualIntTable)
+	{
+		std::wstring intTypesTmpTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
+
+		// Clear the tmp-table
+		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
+
+		Table iTable(&m_db, 5, intTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+		// Set Columns
+		SQLINTEGER id;
+		SQLSMALLINT tSmallint;
+		SQLINTEGER tInt;
+		SQLBIGINT tBigint;
+
+		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
+		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tSmallint, SQL_C_SSHORT, sizeof(tSmallint), CF_SELECT | CF_INSERT | CF_UPDATE);
+		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tInt, SQL_C_SLONG, sizeof(tInt), CF_SELECT | CF_INSERT | CF_UPDATE);
+		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tBigint, SQL_C_SBIGINT, sizeof(tBigint), CF_SELECT | CF_INSERT | CF_UPDATE);
+
+		ASSERT_NO_THROW(iTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+
+		// Insert some values
+		id = 199;
+		tSmallint = -13;
+		tInt = 83912;
+		tBigint = -1516;
+		ASSERT_NO_THROW(iTable.Insert());
+		ASSERT_NO_THROW(m_db.CommitTrans());
+
+		// Now update those values
+		tSmallint = 13;
+		tInt = -93912;
+		tBigint = 1516;
+		EXPECT_NO_THROW(iTable.Update());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// and read them back - note, we read back all as bigints on purpose, to avoid making a diff (access no smallint, etc.)
+		Table iTable2(&m_db, intTypesTmpTableName, L"", L"", L"", AF_READ);
+		ASSERT_NO_THROW(iTable2.Open());
+		EXPECT_NO_THROW(iTable2.Select());
+		EXPECT_TRUE(iTable2.SelectNext());
+		EXPECT_EQ(id, iTable2.GetInt(0));
+		EXPECT_EQ((SQLBIGINT)tSmallint, iTable2.GetBigInt(1));
+		EXPECT_EQ((SQLBIGINT)tInt, iTable2.GetBigInt(2));
+		EXPECT_EQ(tBigint, iTable2.GetBigInt(3));
+	}
+
+
+	TEST_P(TableTest, UpdateManualCharTable)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
+
+		// Clear the tmp-table
+		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
+
 		Table charTable(&m_db, 5, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 		// Set Columns
 		SQLINTEGER id;
@@ -2932,24 +2984,36 @@ namespace exodbc
 		SQLWCHAR varchar_10[10 + 1];
 		SQLWCHAR char_10[10 + 1];
 
+		SQLWCHAR* p1 = varchar_10;
+		size_t addr = (size_t) varchar_10;
+
 		charTable.SetColumn(0, test::ConvertNameCase(L"idchartypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
 		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
 		{
 			// Access does not report SQL_VARCHAR as a supported type, but it seems to work with SQL_WVARCHAR. Access also absolutely needs a columnSize if we wish to insert.
 			charTable.SetColumn(1, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), SQL_WVARCHAR, varchar, SQL_C_WCHAR, sizeof(varchar), CF_SELECT | CF_INSERT | CF_UPDATE, 128, 0);
-			//charTable.SetColumn(2, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
-			//charTable.SetColumn(3, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
+			charTable.SetColumn(2, test::ConvertNameCase(L"tchar", m_odbcInfo.m_namesCase), SQL_WVARCHAR, char_128, SQL_C_WCHAR, sizeof(char_128), CF_SELECT | CF_INSERT | CF_UPDATE, 128, 0);
+			charTable.SetColumn(3, test::ConvertNameCase(L"tvarchar_10", m_odbcInfo.m_namesCase), SQL_WVARCHAR, varchar_10, SQL_C_WCHAR, sizeof(varchar_10), CF_SELECT | CF_INSERT | CF_UPDATE, 10, 0);
+			charTable.SetColumn(4, test::ConvertNameCase(L"tchar_10", m_odbcInfo.m_namesCase), SQL_WVARCHAR, char_10, SQL_C_WCHAR, sizeof(char_10), CF_SELECT | CF_INSERT | CF_UPDATE, 10, 0);
 		}
 		else
 		{
-			charTable.SetColumn(1, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), SQL_VARCHAR, varchar, SQL_C_WCHAR, sizeof(varchar), CF_SELECT | CF_INSERT | CF_UPDATE);
-			//charTable.SetColumn(2, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
-			//charTable.SetColumn(3, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), varchar, SQL_C_WCHAR, sizeof(id), CF_SELECT | CF_INSERT);
+			charTable.SetColumn(1, test::ConvertNameCase(L"tvarchar", m_odbcInfo.m_namesCase), SQL_VARCHAR, varchar, SQL_C_WCHAR, sizeof(varchar), CF_SELECT | CF_INSERT | CF_UPDATE, 128, 0);
+			charTable.SetColumn(2, test::ConvertNameCase(L"tchar", m_odbcInfo.m_namesCase), SQL_VARCHAR, char_128, SQL_C_WCHAR, sizeof(char_128), CF_SELECT | CF_INSERT | CF_UPDATE, 128, 0);
+			charTable.SetColumn(3, test::ConvertNameCase(L"tvarchar_10", m_odbcInfo.m_namesCase), SQL_VARCHAR, varchar_10, SQL_C_WCHAR, sizeof(varchar_10), CF_SELECT | CF_INSERT | CF_UPDATE, 10, 0);
+			charTable.SetColumn(4, test::ConvertNameCase(L"tchar_10", m_odbcInfo.m_namesCase), SQL_VARCHAR, char_10, SQL_C_WCHAR, sizeof(char_10), CF_SELECT | CF_INSERT | CF_UPDATE, 10, 0);
 		}
 
-		// access does not report VARCHAR with sqlType 12, but with.. ? ..
-
 		ASSERT_NO_THROW(charTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+		
+		// Insert some values
+		wcsncpy(varchar, L"Hello World", 128);
+		wcsncpy(char_128, L"Hello World", 128);
+		wcsncpy(varchar_10, L"HelloWorld", 11);
+		wcsncpy(char_10, L"HelloWorld", 11);
+		id = 199;
+		EXPECT_NO_THROW(charTable.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
 		int p = 3;
 	}
 
