@@ -3234,7 +3234,7 @@ namespace exodbc
 
 		EXPECT_EQ(101, fTable2.GetInt(0));
 		EXPECT_EQ((int)(1e7 * -6.2343354), (int)(1e7 * fTable2.GetDouble(1)));
-		EXPECT_EQ((int)(1e3 * 989.213), (int)(1e3 * fTable2.GetDouble(2)));
+		EXPECT_EQ((int)(1e3 * 989.213), (int)(1e3 * fTable2.GetReal(2)));
 	}
 
 
