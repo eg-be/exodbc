@@ -1716,8 +1716,16 @@ namespace exodbc
 	TEST_P(TableTest, SelectManualDateValues)
 	{
 		MDateTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
-		ASSERT_NO_THROW(cTable.Open());
-
+		// MS SQL Server does not report time as supported, but their extension TIME2 - but this will work only if odbc-version is >= 3.8
+		// So, if we have a sql-server, we must ignore the supported-db-types
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			ASSERT_NO_THROW(cTable.Open(TOF_IGNORE_DB_TYPE_INFOS));
+		}
+		else
+		{
+			ASSERT_NO_THROW(cTable.Open());
+		}
 		// Just test the values in the buffer - trimming has no effect here
 		using namespace boost::algorithm;
 		std::string str;

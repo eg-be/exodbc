@@ -128,9 +128,9 @@ namespace exodbc
 		m_char_10[0] = 0;
 
 		SetColumn(0, test::ConvertNameCase(L"idchartypes", namesCase), SQL_INTEGER, &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
-		if (pDb->GetDbms() == DatabaseProduct::MY_SQL)
+		if (pDb->GetDbms() == DatabaseProduct::MY_SQL || pDb->GetDbms() == DatabaseProduct::DB2)
 		{
-			// MySql does not report SQL_WVARCHAR as a supported type, use the SQL_VARCHAR type as database-type
+			// MySql and DB2 do not report SQL_WVARCHAR as a supported type, use the SQL_VARCHAR type as database-type
 			SetColumn(1, test::ConvertNameCase(L"tvarchar", namesCase), SQL_VARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
 			SetColumn(2, test::ConvertNameCase(L"tchar", namesCase), SQL_VARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
 			SetColumn(3, test::ConvertNameCase(L"tvarchar_10", namesCase), SQL_VARCHAR, m_varchar_10, SQL_C_WCHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
@@ -154,6 +154,7 @@ namespace exodbc
 		m_idDateTypes = 0;
 		ZeroMemory(&m_date, sizeof(m_date));
 		ZeroMemory(&m_time, sizeof(m_time));
+		ZeroMemory(&m_time2, sizeof(m_time2));
 		ZeroMemory(&m_timestamp, sizeof(m_timestamp));
 
 		// Note: We are odbc 3, therefore use the new c-type (with type: SQL_C_TYPE_DATE instead of SQL_C_DATE).
@@ -167,9 +168,9 @@ namespace exodbc
 		}
 		else
 		{
-			SetColumn(1, test::ConvertNameCase(L"tdate", namesCase), SQL_DATE, &m_date, SQL_C_TYPE_DATE, sizeof(m_date), ColumnFlag::CF_SELECT);
-			SetColumn(2, test::ConvertNameCase(L"ttime", namesCase), SQL_TIME, &m_time, SQL_C_TYPE_TIME, sizeof(m_time), ColumnFlag::CF_SELECT);
-			SetColumn(3, test::ConvertNameCase(L"ttimestamp", namesCase), SQL_TIMESTAMP, &m_timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(m_timestamp), ColumnFlag::CF_SELECT);
+			SetColumn(1, test::ConvertNameCase(L"tdate", namesCase), SQL_TYPE_DATE, &m_date, SQL_C_TYPE_DATE, sizeof(m_date), ColumnFlag::CF_SELECT);
+			SetColumn(2, test::ConvertNameCase(L"ttime", namesCase), SQL_TYPE_TIME, &m_time, SQL_C_TYPE_TIME, sizeof(m_time), ColumnFlag::CF_SELECT);
+			SetColumn(3, test::ConvertNameCase(L"ttimestamp", namesCase), SQL_TYPE_TIMESTAMP, &m_timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(m_timestamp), ColumnFlag::CF_SELECT);
 		}
 	}
 
