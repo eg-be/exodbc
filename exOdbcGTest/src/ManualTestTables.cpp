@@ -56,17 +56,28 @@ namespace exodbc
 	{
 		m_idFloatTypes = 0;
 		m_double = 0;
+		m_doubleAsFloat = 0;
 		m_float = 0;
 
 		// Note: When binding a column of type FLOAT (database-type), you still need to use SQL_C_DOUBLE
 		// SQL_C_FLOAT is for REAL (database-type), which I will not test here, mysql doesnt know about it ? but still reports float as real?
 		// TODO: Test it for db-2 specific test (REAL-type? what did I mean?). But do that once we can determine the db-type from the wxDb object itself 
 		SetColumn(0, test::ConvertNameCase(L"idfloattypes", namesCase), SQL_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
-		SetColumn(1, test::ConvertNameCase(L"tdouble", namesCase), SQL_DOUBLE, &m_double, SQL_C_DOUBLE, sizeof(m_double), ColumnFlag::CF_SELECT);
+
+		if (pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			// Sql Server has no double, its all float
+			SetColumn(1, test::ConvertNameCase(L"tdouble", namesCase), SQL_FLOAT, &m_doubleAsFloat, SQL_C_FLOAT, sizeof(m_doubleAsFloat), ColumnFlag::CF_SELECT);
+		}
+		else
+		{
+			SetColumn(1, test::ConvertNameCase(L"tdouble", namesCase), SQL_DOUBLE, &m_double, SQL_C_DOUBLE, sizeof(m_double), ColumnFlag::CF_SELECT);
+		}
+
 		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			// Access does not repport SQL_FLOAT as a supported DB-type, but the typedefs for SQLDOBULE and SQLFLOAT resolve both to double, so we can cheat
-			SetColumn(2, test::ConvertNameCase(L"tfloat", namesCase), SQL_DOUBLE, &m_float, SQL_C_DOUBLE, sizeof(m_float), ColumnFlag::CF_SELECT);
+			// Access reports SQL_REAL as a supported DB-type
+			SetColumn(2, test::ConvertNameCase(L"tfloat", namesCase), SQL_REAL, &m_float, SQL_C_FLOAT, sizeof(m_float), ColumnFlag::CF_SELECT);
 		}
 		else
 		{

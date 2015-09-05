@@ -1274,23 +1274,44 @@ namespace exodbc
 
 		fTable.Select((boost::wformat(L"%s = 2") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_EQ(3.141, fTable.m_float);
+		EXPECT_EQ((int)(1e3 * 3.141), (int)(1e3 * fTable.m_float));
 
 		fTable.Select((boost::wformat(L"%s = 3") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_EQ(-3.141, fTable.m_float);
+		EXPECT_EQ((int)(1e3 * -3.141), (int)(1e3 * fTable.m_float));
 
 		fTable.Select((boost::wformat(L"%s = 4") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_EQ(0.0, fTable.m_double);
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ(0.0, fTable.m_doubleAsFloat);
+		}
+		else
+		{
+			EXPECT_EQ(0.0, fTable.m_double);
+		}
 
 		fTable.Select((boost::wformat(L"%s = 5") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_EQ(3.141592, fTable.m_double);
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ(int(1e6 * 3.141592), int(1e6 * fTable.m_doubleAsFloat));
+		}
+		else
+		{
+			EXPECT_EQ((int)(1e6 * 3.141592), int(1e6 * fTable.m_double));
+		}
 
 		fTable.Select((boost::wformat(L"%s = 6") % idName).str());
 		EXPECT_TRUE(fTable.SelectNext());
-		EXPECT_EQ(-3.141592, fTable.m_double);
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * fTable.m_doubleAsFloat));
+		}
+		else
+		{
+			EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * fTable.m_double));
+		}
 	}
 
 

@@ -385,6 +385,9 @@ namespace exodbc
 		case SQL_C_DOUBLE:
 			m_bufferPtr = new SQLDOUBLE(0.0);
 			break;
+		case SQL_C_FLOAT:
+			m_bufferPtr = new SQLREAL(0.0);
+			break;
 		case SQL_C_TYPE_DATE:
 		{
 			SQL_DATE_STRUCT* pBuff = new SQL_DATE_STRUCT;
@@ -459,6 +462,9 @@ namespace exodbc
 			case SQL_C_DOUBLE:
 				delete GetDoublePtr();
 				break;
+			case SQL_C_FLOAT:
+				delete GetRealPtr();
+				break;
 			case SQL_C_TYPE_DATE:
 			case SQL_C_DATE:
 				delete GetDatePtr();
@@ -514,6 +520,8 @@ namespace exodbc
 			return static_cast<void*>(boost::get<SQLWCHAR*>(m_bufferPtr));
 		case SQL_C_DOUBLE:
 			return static_cast<void*>(boost::get<SQLDOUBLE*>(m_bufferPtr));
+		case SQL_C_FLOAT:
+			return static_cast<void*>(boost::get<SQLREAL*>(m_bufferPtr));
 		case SQL_C_TYPE_DATE:
 		case SQL_C_DATE:
 			return static_cast<void*>(boost::get<SQL_DATE_STRUCT*>(m_bufferPtr));
@@ -619,6 +627,8 @@ namespace exodbc
 			return DetermineCharSize(columnInfo) * sizeof(SQLWCHAR);
 		case SQL_C_DOUBLE:
 			return sizeof(SQLDOUBLE);
+		case SQL_C_FLOAT:
+			return sizeof(SQLREAL);
 		case SQL_C_TYPE_DATE:
 		case SQL_C_DATE:
 			return sizeof(SQL_DATE_STRUCT);
@@ -1124,6 +1134,14 @@ namespace exodbc
 
 		// Could throw boost::bad_get
 		return boost::get<SQLDOUBLE*>(m_bufferPtr);
+	}
+
+	SQLREAL* ColumnBuffer::GetRealPtr() const
+	{
+		exASSERT(m_haveBuffer);
+
+		// Could throw boost::bad_get
+		return boost::get<SQLREAL*>(m_bufferPtr);
 	}
 
 	SQL_DATE_STRUCT* ColumnBuffer::GetDatePtr() const
