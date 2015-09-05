@@ -90,6 +90,14 @@ namespace exodbc
 	};
 
 
+	class RealVisitorTest : public ::testing::Test
+	{
+	protected:
+		virtual void SetUp() {};
+		virtual void TearDown() {};
+	};
+
+
 	class TimestampVisitorTest : public ::testing::Test
 	{
 	protected:

@@ -105,7 +105,7 @@ namespace exodbc
 		RegisterType(SQL_WVARCHAR, SQL_C_WCHAR);
 		RegisterType(SQL_DOUBLE, SQL_C_DOUBLE);
 		RegisterType(SQL_FLOAT, SQL_C_DOUBLE);
-		RegisterType(SQL_REAL, SQL_C_DOUBLE);
+		RegisterType(SQL_REAL, SQL_C_FLOAT);
 		if (odbcVersion >= OdbcVersion::V_3)
 		{
 			// Register the Odbc Version 3.x Types only if the version is >= 3.x
