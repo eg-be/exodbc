@@ -3118,6 +3118,135 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, InsertAndUpdateManualDateTypes)
+	{
+		std::wstring dateTypesTmpTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
+
+		// Clear the tmp-table
+		test::ClearDateTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
+
+		Table dTable(&m_db, 5, dateTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+
+		// Set Columns
+		SQLINTEGER id = 0;
+		SQL_DATE_STRUCT date;
+		SQL_TIME_STRUCT time;
+		SQL_TIMESTAMP_STRUCT timestamp;
+
+		dTable.SetColumn(0, test::ConvertNameCase(L"iddatetypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
+		dTable.SetColumn(1, test::ConvertNameCase(L"tdate", m_odbcInfo.m_namesCase), SQL_TYPE_DATE, &date, SQL_C_TYPE_DATE, sizeof(date), CF_SELECT | CF_INSERT | CF_UPDATE);
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			// ms does not report SQL_TYPE_TIME as a supported time, they have their own thing
+			dTable.SetColumn(2, test::ConvertNameCase(L"ttime", m_odbcInfo.m_namesCase), SQL_SS_TIME2, &time, SQL_C_TYPE_TIME, sizeof(time), CF_SELECT | CF_INSERT | CF_UPDATE);
+		}
+		else
+		{
+			dTable.SetColumn(2, test::ConvertNameCase(L"ttime", m_odbcInfo.m_namesCase), SQL_TYPE_TIME, &time, SQL_C_TYPE_TIME, sizeof(time), CF_SELECT | CF_INSERT | CF_UPDATE);
+		}
+		dTable.SetColumn(3, test::ConvertNameCase(L"ttimestamp", m_odbcInfo.m_namesCase), SQL_TYPE_TIMESTAMP, &timestamp, SQL_C_TYPE_TIMESTAMP, sizeof(timestamp), CF_SELECT | CF_INSERT | CF_UPDATE);
+
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Access does not report any of the types as a supported type, but if we just ignore what it reports, things (seem to) work fine.
+			ASSERT_NO_THROW(dTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS | TOF_IGNORE_DB_TYPE_INFOS));
+		}
+		else
+		{
+			ASSERT_NO_THROW(dTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+		}
+
+		// Insert some data
+		id = 199;
+		date.day = 26;
+		date.month = 1;
+		date.year = 1983;
+
+		time.hour = 13;
+		time.minute = 14;
+		time.second = 15;
+
+		timestamp.day = 26;
+		timestamp.month = 1;
+		timestamp.year = 1983;
+		timestamp.hour = 13;
+		timestamp.minute = 14;
+		timestamp.second = 15;
+		timestamp.fraction = 0;
+
+		EXPECT_NO_THROW(dTable.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Read back
+		Table dTable2(&m_db, dateTypesTmpTableName, L"", L"", L"", AF_READ);
+		EXPECT_NO_THROW(dTable2.Open());
+		EXPECT_NO_THROW(dTable2.Select());
+		EXPECT_TRUE(dTable2.SelectNext());
+		DATE_STRUCT date2 = dTable2.GetDate(1);
+		TIME_STRUCT time2 = dTable2.GetTime(2);
+		TIMESTAMP_STRUCT timestamp2 = dTable2.GetTimeStamp(3);
+
+		EXPECT_EQ(date.day, date2.day);
+		EXPECT_EQ(date.month, date2.month);
+		EXPECT_EQ(date.year, date2.year);
+
+		EXPECT_EQ(time.hour, time2.hour);
+		EXPECT_EQ(time.minute, time2.minute);
+		EXPECT_EQ(time.second, time2.second);
+
+		EXPECT_EQ(timestamp.day, timestamp2.day);
+		EXPECT_EQ(timestamp.month, timestamp2.month);
+		EXPECT_EQ(timestamp.year, timestamp2.year);
+		EXPECT_EQ(timestamp.hour, timestamp2.hour);
+		EXPECT_EQ(timestamp.minute, timestamp2.minute);
+		EXPECT_EQ(timestamp.second, timestamp2.second);
+		EXPECT_EQ(timestamp.fraction, timestamp2.fraction);
+
+		// Update values
+		date.day = 9;
+		date.month = 2;
+		date.year = 1982;
+
+		time.hour = 3;
+		time.minute = 4;
+		time.second = 5;
+
+		timestamp.day = 9;
+		timestamp.month = 2;
+		timestamp.year = 1982;
+		timestamp.hour = 3;
+		timestamp.minute = 4;
+		timestamp.second = 5;
+		timestamp.fraction = 0;
+
+		EXPECT_NO_THROW(dTable.Update());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// and read back
+		EXPECT_NO_THROW(dTable2.Select());
+		EXPECT_TRUE(dTable2.SelectNext());
+		date2 = dTable2.GetDate(1);
+		time2 = dTable2.GetTime(2);
+		timestamp2 = dTable2.GetTimeStamp(3);
+
+		EXPECT_EQ(date.day, date2.day);
+		EXPECT_EQ(date.month, date2.month);
+		EXPECT_EQ(date.year, date2.year);
+
+		EXPECT_EQ(time.hour, time2.hour);
+		EXPECT_EQ(time.minute, time2.minute);
+		EXPECT_EQ(time.second, time2.second);
+
+		EXPECT_EQ(timestamp.day, timestamp2.day);
+		EXPECT_EQ(timestamp.month, timestamp2.month);
+		EXPECT_EQ(timestamp.year, timestamp2.year);
+		EXPECT_EQ(timestamp.hour, timestamp2.hour);
+		EXPECT_EQ(timestamp.minute, timestamp2.minute);
+		EXPECT_EQ(timestamp.second, timestamp2.second);
+		EXPECT_EQ(timestamp.fraction, timestamp2.fraction);
+	}
+
+
 	// Update rows
 	// -----------
 	TEST_P(TableTest, UpdateIntTypes)
