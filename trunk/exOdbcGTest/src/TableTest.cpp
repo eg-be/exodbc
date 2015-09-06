@@ -2919,7 +2919,7 @@ namespace exodbc
 	}
 
 
-	// Update rows
+	// Manual Table Inserts and Update rows
 	// -----------
 	TEST_P(TableTest, InsertAndUpdateManualIntTable)
 	{
@@ -3060,6 +3060,66 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, InsertAndUpdateManualFloatTypes)
+	{
+		std::wstring floatTypesTmpTableName = test::GetTableName(test::TableId::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
+
+		// Clear the tmp-table
+		test::ClearFloatTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
+
+		Table fTable(&m_db, 5, floatTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+		
+		// Set Columns
+		SQLINTEGER id = 0;
+		SQLDOUBLE tDouble = 0.0;
+		SQLREAL tReal = 0.0f;
+		
+		fTable.SetColumn(0, test::ConvertNameCase(L"idfloattypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
+		// MS Sql Server does not report SQL_DOUBLE as a supported datatype, it is defined in the db as Float too.
+		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			fTable.SetColumn(1, test::ConvertNameCase(L"tdouble", m_odbcInfo.m_namesCase), SQL_REAL, &tDouble, SQL_C_DOUBLE, sizeof(tDouble), CF_SELECT | CF_INSERT | CF_UPDATE);
+		}
+		else
+		{
+			fTable.SetColumn(1, test::ConvertNameCase(L"tdouble", m_odbcInfo.m_namesCase), SQL_DOUBLE, &tDouble, SQL_C_DOUBLE, sizeof(tDouble), CF_SELECT | CF_INSERT | CF_UPDATE);
+		}
+		fTable.SetColumn(2, test::ConvertNameCase(L"tfloat", m_odbcInfo.m_namesCase), SQL_REAL, &tReal, SQL_C_FLOAT, sizeof(tReal), CF_SELECT | CF_INSERT | CF_UPDATE);
+
+		ASSERT_NO_THROW(fTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+
+		// Insert some data
+		id = 199;
+		tDouble = 3.141592;
+		tReal = 3.141f;
+		EXPECT_NO_THROW(fTable.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Read back - read it back as Double, that will hold a real without data loss, and 
+		// some dbs like sql server report the database-type in a way we map it to a double, not a real.
+		Table fTable2(&m_db, floatTypesTmpTableName, L"", L"", L"", AF_READ);
+		EXPECT_NO_THROW(fTable2.Open());
+		EXPECT_NO_THROW(fTable2.Select());
+		EXPECT_TRUE(fTable2.SelectNext());
+		EXPECT_EQ((int)(1e6 * 3.141592), (int)(1e6 * fTable2.GetDouble(1)));
+		EXPECT_EQ((int)(1e3 * 3.141), (int)(1e3 * fTable2.GetDouble(2)));
+
+		// Update the row
+		tDouble = -3.141592;
+		tReal = -3.141f;
+		EXPECT_NO_THROW(fTable.Update());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Read back
+		EXPECT_NO_THROW(fTable2.Select());
+		EXPECT_TRUE(fTable2.SelectNext());
+		EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * fTable2.GetDouble(1)));
+		EXPECT_EQ((int)(1e3 * -3.141), (int)(1e3 * fTable2.GetDouble(2)));
+	}
+
+
+	// Update rows
+	// -----------
 	TEST_P(TableTest, UpdateIntTypes)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
