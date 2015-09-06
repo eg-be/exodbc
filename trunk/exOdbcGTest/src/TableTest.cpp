@@ -3247,6 +3247,70 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, InsertAndUpdateManualNumericTypes)
+	{
+		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
+
+		// Clear the tmp-table
+		test::ClearNumericTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
+
+		Table nTable(&m_db, 5, numericTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+
+		// Set Columns
+		SQLINTEGER id = 0;
+		SQL_NUMERIC_STRUCT tdecimal_18_0;
+		SQL_NUMERIC_STRUCT tdecimal_18_10;
+		SQL_NUMERIC_STRUCT tdecimal_5_3;
+
+		nTable.SetColumn(0, test::ConvertNameCase(L"idnumerictypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
+		nTable.SetColumn(1, test::ConvertNameCase(L"tdecimal_18_0", m_odbcInfo.m_namesCase), SQL_NUMERIC, &tdecimal_18_0, SQL_C_NUMERIC, sizeof(tdecimal_18_0), CF_SELECT | CF_INSERT | CF_UPDATE | CF_NULLABLE, 18, 0);
+		nTable.SetColumn(2, test::ConvertNameCase(L"tdecimal_18_10", m_odbcInfo.m_namesCase), SQL_NUMERIC, &tdecimal_18_10, SQL_C_NUMERIC, sizeof(tdecimal_18_10), CF_SELECT | CF_INSERT | CF_UPDATE, 18, 10);
+		nTable.SetColumn(3, test::ConvertNameCase(L"tdecimal_5_3", m_odbcInfo.m_namesCase), SQL_NUMERIC, &tdecimal_5_3, SQL_C_NUMERIC, sizeof(tdecimal_5_3), CF_SELECT | CF_INSERT | CF_UPDATE | CF_NULLABLE, 5, 3);
+
+		ASSERT_NO_THROW(nTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+
+		// Insert some value by populating the struct of the column 18_10
+		ZeroMemory(&tdecimal_18_10, sizeof(tdecimal_18_10));
+		tdecimal_18_10.val[0] = 78;
+		tdecimal_18_10.val[1] = 243;
+		tdecimal_18_10.val[2] = 48;
+		tdecimal_18_10.val[3] = 166;
+		tdecimal_18_10.val[4] = 75;
+		tdecimal_18_10.val[5] = 155;
+		tdecimal_18_10.val[6] = 182;
+		tdecimal_18_10.val[7] = 1;
+
+		tdecimal_18_10.precision = 18;
+		tdecimal_18_10.scale = 10;
+		tdecimal_18_10.sign = 1; // insert positive
+
+		id = 199;
+		nTable.SetColumnNull(1);
+		nTable.SetColumnNull(3);
+		EXPECT_NO_THROW(nTable.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// And read back
+		Table nTable2(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_READ);
+		EXPECT_NO_THROW(nTable2.Open());
+		EXPECT_NO_THROW(nTable2.Select());
+		EXPECT_TRUE(nTable2.SelectNext());
+		SQL_NUMERIC_STRUCT numStr2 = nTable2.GetNumeric(2);
+		EXPECT_EQ(0, memcmp(&tdecimal_18_10, &numStr2, sizeof(numStr2)));
+
+		// Update value, just change sign
+		tdecimal_18_10.sign = 0;
+		EXPECT_NO_THROW(nTable.Update());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Read back
+		EXPECT_NO_THROW(nTable2.Select());
+		EXPECT_TRUE(nTable2.SelectNext());
+		numStr2 = nTable2.GetNumeric(2);
+		EXPECT_EQ(0, memcmp(&tdecimal_18_10, &numStr2, sizeof(numStr2)));
+	}
+
+
 	// Update rows
 	// -----------
 	TEST_P(TableTest, UpdateIntTypes)
