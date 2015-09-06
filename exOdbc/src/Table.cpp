@@ -1605,6 +1605,13 @@ namespace exodbc
 	}
 
 
+	void Table::SetNTS(SQLSMALLINT columnIndex) const
+	{
+		ColumnBuffer* pBuffer = GetColumnBuffer(columnIndex);
+		pBuffer->SetCb(SQL_NTS);
+	}
+
+
 	/*!
 	* \brief	Checks if we can only read from this table.
 	* \return	True if this table has the flag AF_READ set and none of the flags

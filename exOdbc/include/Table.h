@@ -378,6 +378,13 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Sets the SQL_NTS value on the length-indicator of the ColumnBuffer
+		*			at columnIndex.
+		*/
+		void		SetNTS(SQLSMALLINT columnIndex) const;
+
+
+		/*!
 		* \brief	Check if the Table-Information is set on this Table.
 		* \details	Returns true if the internal member of the TableInfo contains a value either
 		*			set during Construction or fetched from the Database during Open().
