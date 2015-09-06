@@ -3022,10 +3022,10 @@ namespace exodbc
 		wcsncpy(varchar_10, s2.c_str(), 11);
 		wcsncpy(char_10, s2.c_str(), 11);
 		id = 199;
-		charTable.SetNTS(1);
-		charTable.SetNTS(2);
-		charTable.SetNTS(3);
-		charTable.SetNTS(4);
+		charTable.SetColumnNTS(1);
+		charTable.SetColumnNTS(2);
+		charTable.SetColumnNTS(3);
+		charTable.SetColumnNTS(4);
 
 		EXPECT_NO_THROW(charTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
