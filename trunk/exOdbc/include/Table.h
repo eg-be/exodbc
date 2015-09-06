@@ -381,7 +381,7 @@ namespace exodbc
 		* \brief	Sets the SQL_NTS value on the length-indicator of the ColumnBuffer
 		*			at columnIndex.
 		*/
-		void		SetNTS(SQLSMALLINT columnIndex) const;
+		void		SetColumnNTS(SQLSMALLINT columnIndex) const;
 
 
 		/*!
