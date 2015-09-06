@@ -274,12 +274,21 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Access the length indicator passed to SQLBindCol.
+		* \brief	Access the length indicator passed to SQLBindCol / SQLBindParameter
 		* \details	Fails if no buffer is allocated or not bound.
 		* \return	Length indicator bound to column.
 		* \throw	Exception
 		*/
 		SQLLEN GetCb() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return  m_cb; };
+
+
+		/*!
+		* \brief	Set the value of the length indicator passed to SQLBindCol / SQLBIndParameter
+		* \details	This is needed in case you directly work with a buffer that for example
+		*			contains string-data, and you want to set the length indicator to SLQ_NTS,
+		*			or the length of the data to be inserted, etc.
+		*/
+		void SetCb(SQLLEN cb) throw() {	m_cb = cb; };
 
 
 		/*!

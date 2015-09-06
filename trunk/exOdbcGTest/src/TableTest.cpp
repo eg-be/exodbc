@@ -2921,7 +2921,7 @@ namespace exodbc
 
 	// Update rows
 	// -----------
-	TEST_P(TableTest, UpdateManualIntTable)
+	TEST_P(TableTest, InsertAndUpdateManualIntTable)
 	{
 		std::wstring intTypesTmpTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -2950,13 +2950,6 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Insert());
 		ASSERT_NO_THROW(m_db.CommitTrans());
 
-		// Now update those values
-		tSmallint = 13;
-		tInt = -93912;
-		tBigint = 1516;
-		EXPECT_NO_THROW(iTable.Update());
-		EXPECT_NO_THROW(m_db.CommitTrans());
-
 		// and read them back - note, we read back all as bigints on purpose, to avoid making a diff (access no smallint, etc.)
 		Table iTable2(&m_db, intTypesTmpTableName, L"", L"", L"", AF_READ);
 		ASSERT_NO_THROW(iTable2.Open());
@@ -2966,10 +2959,25 @@ namespace exodbc
 		EXPECT_EQ((SQLBIGINT)tSmallint, iTable2.GetBigInt(1));
 		EXPECT_EQ((SQLBIGINT)tInt, iTable2.GetBigInt(2));
 		EXPECT_EQ(tBigint, iTable2.GetBigInt(3));
+
+		// Now update those values
+		tSmallint = 13;
+		tInt = -93912;
+		tBigint = 1516;
+		EXPECT_NO_THROW(iTable.Update());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// and read them back - note, we read back all as bigints on purpose, to avoid making a diff (access no smallint, etc.)
+		EXPECT_NO_THROW(iTable2.Select());
+		EXPECT_TRUE(iTable2.SelectNext());
+		EXPECT_EQ(id, iTable2.GetInt(0));
+		EXPECT_EQ((SQLBIGINT)tSmallint, iTable2.GetBigInt(1));
+		EXPECT_EQ((SQLBIGINT)tInt, iTable2.GetBigInt(2));
+		EXPECT_EQ(tBigint, iTable2.GetBigInt(3));
 	}
 
 
-	TEST_P(TableTest, UpdateManualCharTable)
+	TEST_P(TableTest, InsertAndUpdateManualCharTable)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -3007,14 +3015,48 @@ namespace exodbc
 		ASSERT_NO_THROW(charTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
 		
 		// Insert some values
-		wcsncpy(varchar, L"Hello World", 128);
-		wcsncpy(char_128, L"Hello World", 128);
-		wcsncpy(varchar_10, L"HelloWorld", 11);
-		wcsncpy(char_10, L"HelloWorld", 11);
+		wstring s1 = L"Hello World";
+		wstring s2 = L"HelloWorld";
+		wcsncpy(varchar, s1.c_str(), 129);
+		wcsncpy(char_128, s1.c_str(), 129);
+		wcsncpy(varchar_10, s2.c_str(), 11);
+		wcsncpy(char_10, s2.c_str(), 11);
 		id = 199;
+		charTable.SetNTS(1);
+		charTable.SetNTS(2);
+		charTable.SetNTS(3);
+		charTable.SetNTS(4);
+
 		EXPECT_NO_THROW(charTable.Insert());
 		EXPECT_NO_THROW(m_db.CommitTrans());
-		int p = 3;
+
+		// And read them back
+		Table charTable2(&m_db, charTypesTmpTableName, L"", L"", L"", AF_READ);
+		charTable2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
+		EXPECT_NO_THROW(charTable2.Open(TOF_CHAR_TRIM_LEFT | TOF_CHAR_TRIM_RIGHT));
+		EXPECT_NO_THROW(charTable2.Select());
+		EXPECT_TRUE(charTable2.SelectNext());
+		EXPECT_EQ(s1, charTable2.GetWString(1));
+		EXPECT_EQ(s1, charTable2.GetWString(2));
+		EXPECT_EQ(s2, charTable2.GetWString(3));
+		EXPECT_EQ(s2, charTable2.GetWString(4));
+
+		// Update some values
+		wstring s3 = L"Hello Moon";
+		wcsncpy(varchar, s3.c_str(), 129);
+		wcsncpy(char_128, s3.c_str(), 129);
+		wcsncpy(varchar_10, s3.c_str(), 11);
+		wcsncpy(char_10, s3.c_str(), 11);
+		EXPECT_NO_THROW(charTable.Update());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// and read back
+		EXPECT_NO_THROW(charTable2.Select());
+		EXPECT_TRUE(charTable2.SelectNext());
+		EXPECT_EQ(s3, charTable2.GetWString(1));
+		EXPECT_EQ(s3, charTable2.GetWString(2));
+		EXPECT_EQ(s3, charTable2.GetWString(3));
+		EXPECT_EQ(s3, charTable2.GetWString(4));
 	}
 
 
