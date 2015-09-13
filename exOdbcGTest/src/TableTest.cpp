@@ -3311,6 +3311,64 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, InsertAndUpdateManualBlobTypes)
+	{
+		std::wstring blobTypesTmpTableName = test::GetTableName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
+
+		// Clear the tmp-table
+		test::ClearBlobTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
+
+		Table bTable(&m_db, 5, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+
+		// Set Columns
+		SQLINTEGER id = 0;
+		SQLCHAR blob[16];
+		SQLCHAR varblob_20[20];
+
+		bTable.SetColumn(0, test::ConvertNameCase(L"idblobtypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
+		bTable.SetColumn(1, test::ConvertNameCase(L"tblob", m_odbcInfo.m_namesCase), SQL_BINARY, blob, SQL_C_BINARY, sizeof(blob), CF_SELECT | CF_INSERT | CF_UPDATE, 16);
+		bTable.SetColumn(2, test::ConvertNameCase(L"tvarblob_20", m_odbcInfo.m_namesCase), SQL_VARBINARY, varblob_20, SQL_C_BINARY, sizeof(varblob_20), CF_SELECT | CF_INSERT | CF_UPDATE, 20);
+
+		ASSERT_NO_THROW(bTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+
+		// Insert values, insert into the varblob only 16 bytes
+		SQLCHAR abc[] = { 0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67
+		};
+
+		id = 199;
+		memcpy(blob, abc, sizeof(abc));
+		memcpy(varblob_20, abc, sizeof(abc));
+		
+		// Set the length indicator
+		bTable.SetColumnLengthIndicator(1, 16);
+		bTable.SetColumnLengthIndicator(2, 16);
+		EXPECT_NO_THROW(bTable.Insert());
+		EXPECT_NO_THROW(m_db.CommitTrans());
+
+		// Read back values
+		Table bTable2(&m_db, blobTypesTmpTableName, L"", L"", L"", AF_READ);
+		EXPECT_NO_THROW(bTable2.Open());
+		EXPECT_NO_THROW(bTable2.Select());
+		EXPECT_NO_THROW(bTable2.SelectNext());
+
+		SQLLEN cb = 0;
+		SQLLEN buffSize = 0;
+		const SQLCHAR* pBuff = NULL;
+		pBuff = bTable2.GetBinaryValue(1, buffSize, cb);
+		EXPECT_EQ(sizeof(blob), buffSize);
+		EXPECT_EQ(sizeof(abc), cb);
+		EXPECT_EQ(0, memcmp(abc, blob, sizeof(abc)));
+
+		pBuff = bTable2.GetBinaryValue(2, buffSize, cb);
+		EXPECT_EQ(sizeof(varblob_20), buffSize);
+		EXPECT_EQ(sizeof(abc), cb);
+		EXPECT_EQ(0, memcmp(abc, varblob_20, sizeof(abc)));
+	}
+
+
 	// Update rows
 	// -----------
 	TEST_P(TableTest, UpdateIntTypes)
