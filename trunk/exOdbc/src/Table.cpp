@@ -1612,6 +1612,13 @@ namespace exodbc
 	}
 
 
+	void Table::SetColumnLengthIndicator(SQLSMALLINT columnIndex, SQLLEN cb) const
+	{
+		ColumnBuffer* pBuffer = GetColumnBuffer(columnIndex);
+		pBuffer->SetCb(cb);
+	}
+
+
 	/*!
 	* \brief	Checks if we can only read from this table.
 	* \return	True if this table has the flag AF_READ set and none of the flags
