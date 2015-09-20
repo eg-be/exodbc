@@ -1038,6 +1038,50 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, SelectMoreColumnsThanBound)
+	{
+		// What happens if we query more columns than actually bound?
+		// See ticket #65
+		wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		wstring schemaOrCatalogName = test::ConvertNameCase(L"exodbc", m_odbcInfo.m_namesCase);
+		wstring idColName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, 4, tableName, L"", L"", L"", AF_READ);
+		// We do not bind the bigint-column
+		SQLINTEGER id = 0;
+		SQLSMALLINT tSmallInt = 0;
+		SQLINTEGER tInt = 0;
+		SQLBIGINT tBigInt = 0;
+		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_PRIMARY_KEY | CF_SELECT);
+		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tSmallInt, SQL_C_SSHORT, sizeof(tSmallInt), CF_SELECT);
+		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tInt, SQL_C_SLONG, sizeof(tInt), CF_SELECT);
+		//iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &tBigInt, SQL_C_SBIGINT, sizeof(tBigInt), CF_SELECT);
+
+		ASSERT_NO_THROW(iTable.Open());
+		wstring sqlstmt;
+		wstringstream ws;
+		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// access has no schema / catalog name
+			ws << L"SELECT * FROM " << tableName << L" WHERE " << idColName << L" = 7";
+		}
+		else
+		{
+			ws << L"SELECT * FROM " << schemaOrCatalogName << L"." << tableName << L" WHERE " << idColName << L" = 7";
+		}
+		ASSERT_NO_THROW(iTable.SelectBySqlStmt(ws.str()));
+		ASSERT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(7, id);
+		EXPECT_EQ(-13, tSmallInt);
+		EXPECT_EQ(26, tInt);
+		EXPECT_EQ(0, tBigInt);
+		
+		// Now execute some query on the database
+		EXPECT_NO_THROW(m_db.ExecSql(ws.str()));
+
+		// .. works as expected.. what whas the issue with #65 ?
+	}
+
+
 	// Count
 	// -----
 	TEST_P(TableTest, Count)
