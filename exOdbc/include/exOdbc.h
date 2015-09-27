@@ -38,6 +38,8 @@ namespace exodbc
 	// Global Consts
 	// =============
 
+	const int DB_MAX_CONNECTSTR_LEN = 1024;	///< SQLDriverConnects returns an output-connection string, assume this is the max-length of this string returned. MS recommends at least 1024 characters.
+
 	// Some defaults when binding to chars but no reasonable char-length can be determined.
 	const int DB_MAX_BIGINT_CHAR_LENGTH = 30;	///< If no reasonable char length can be determined from a columnInfo, this value is used for the size of the char-buffer (if converting bigints to char)
 	const int DB_MAX_DOUBLE_CHAR_LENGTH = 30;	///< If no reasonable char length can be determined from a columnInfo, this value is used for the size of the char-buffer (if converting doubles to char)
@@ -46,8 +48,6 @@ namespace exodbc
 	// if the corresponding value cannot be determined when querying the database about itself.
 	const int DB_MAX_TYPE_NAME_LEN				= 40;
 	const int DB_MAX_LOCAL_TYPE_NAME_LEN		= 256;
-//	const int DB_MAX_STATEMENT_LEN			= 4096;
-//	const int DB_MAX_WHERE_CLAUSE_LEN		= 2048;
 	const int DB_MAX_TABLE_NAME_LEN_DEFAULT			= 128;	///< This value is sometimes also available from SDbInfo::maxTableNameLen
 	const int DB_MAX_SCHEMA_NAME_LEN_DEFAULT		= 128;	///< This value is sometimes also available from SDbInfo::maxSchemaNameLen
 	const int DB_MAX_CATALOG_NAME_LEN_DEFAULT		= 128;	///< This value is sometimes also available from SDbInfo::maxCatalogNameLen

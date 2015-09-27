@@ -298,7 +298,10 @@ namespace exodbc
 		ASSERT_NO_THROW(db2.Init(&env));
 		if (m_odbcInfo.HasConnectionString())
 		{
-			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_connectionString));
+			// also test that the returned connection-string is not empty
+			wstring outConnStr;
+			EXPECT_NO_THROW(outConnStr = db2.Open(m_odbcInfo.m_connectionString));
+			EXPECT_FALSE(outConnStr.empty());
 		}
 		else
 		{

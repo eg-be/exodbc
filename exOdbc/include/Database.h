@@ -155,32 +155,32 @@ namespace exodbc
 
 		/*!
 		 * \brief	Connect using a prepared connection-String.
-		 * 			Uses SQLDriverConnect without a window-handle to connect
-		 * \param	inConnectStr			 		The connect string.
+		 * \param	inConnectStr	The connect string.
+		 * \return	The output-connection string returned by SQLDriverConnect().
 		 * \throw	Exception If Opening the Connection fails, or no Database handle is allocated.
 		 */
-		void         Open(const std::wstring& inConnectStr);
+		std::wstring	Open(const std::wstring& inConnectStr);
 
 
 		/*!
-		 * \brief	This version of Open will display the odbc source selection dialog, using SQLDriverConnect. Cast a
-		 * 			wxWindow::GetHandle() to SQLHWND to use.
-		 * \param	inConnectStr			 	The in connect string.
-		 * \param	parentWnd				 	The parent window.
-		 * \return	true if it succeeds, false if it fails.
+		 * \brief	If the passed parentWnd is not NULL but the handle of a parent window,
+		 *			the dialog to create a connection string is shown.
+		 * \param	inConnectStr	The in connect string.
+		 * \param	parentWnd		The parent window.
+		 * \return	The output-connection string returned by SQLDriverConnect().
+		 * \throw	Exception If opening fails.
 		 */
-		void         Open(const std::wstring& inConnectStr, SQLHWND parentWnd);
+		std::wstring	Open(const std::wstring& inConnectStr, SQLHWND parentWnd);
 
 
 		/*!
 		 * \brief	Opens the connection using SQLConnect with the passed parameters.
-		 * \param	Dsn						 	The dsn.
-		 * \param	Uid						 	The UID.
-		 * \param	AuthStr					 	The authentication string.
-		 * \return	true if it succeeds, false if it fails.
+		 * \param	dsn		The dsn.
+		 * \param	uid		The UID.
+		 * \param	authStr	The authentication string (password).
 		 * \throw	Exception If Opening the Connection fails, or no Database handle is allocated.
 		 */
-		void         Open(const std::wstring& Dsn, const std::wstring& Uid, const std::wstring& AuthStr);
+		void         Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr);
 
 
 		/*!
