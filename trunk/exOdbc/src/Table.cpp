@@ -50,16 +50,12 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	Table::Table(const Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
-		: m_numCols(numColumns)
-		, m_manualColumns(true)
-		, m_initialTableName(tableName)
-		, m_initialSchemaName(schemaName)
-		, m_initialCatalogName(catalogName)
-		, m_initialTypeName(tableType)
+	Table::Table()
+		: m_numCols(0)
+		, m_manualColumns(false)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
-		, m_pDb(pDb)
+		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_hStmtCount(SQL_NULL_HSTMT)
@@ -70,28 +66,38 @@ namespace exodbc
 		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
-		, m_fieldsStatement(L"")
+		, m_openFlags(TOF_NONE)
+	{ }
+
+
+	Table::Table(const Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
+		: m_numCols(0)
+		, m_manualColumns(false)
+		, m_haveTableInfo(false)
+		, m_accessFlags(AF_NONE)
+		, m_pDb(NULL)
+		, m_pSql2BufferTypeMap(NULL)
+		, m_isOpen(false)
+		, m_hStmtCount(SQL_NULL_HSTMT)
+		, m_hStmtSelect(SQL_NULL_HSTMT)
+		, m_hStmtInsert(SQL_NULL_HSTMT)
+		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		, m_selectQueryOpen(false)
 		, m_openFlags(TOF_NONE)
 	{
-		exASSERT(m_pDb->IsOpen());
-
-		SetAccessFlags(afs);
-		// statements should now be allocated
-		exASSERT(HasAllStatements());
+		Init(pDb, numColumns, afs, tableName, schemaName, catalogName, tableType);
 	}
 
 
 	Table::Table(const Database* pDb, SQLSMALLINT numColumns, const TableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
-		: m_numCols(numColumns)
-		, m_manualColumns(true)
-		, m_initialTableName(L"")
-		, m_initialSchemaName(L"")
-		, m_initialCatalogName(L"")
-		, m_initialTypeName(L"")
-		, m_haveTableInfo(true)
-		, m_tableInfo(tableInfo)
+		: m_numCols(0)
+		, m_manualColumns(false)
+		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
-		, m_pDb(pDb)
+		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_hStmtCount(SQL_NULL_HSTMT)
@@ -102,27 +108,18 @@ namespace exodbc
 		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
-		, m_fieldsStatement(L"")
 		, m_openFlags(TOF_NONE)
 	{
-		exASSERT(m_pDb->IsOpen());
-		
-		SetAccessFlags(afs);
-		// statements should now be allocated
-		exASSERT(HasAllStatements());
+		Init(pDb, numColumns, afs, tableInfo);
 	}
 
 
 	Table::Table(const Database* pDb, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
-		, m_initialTableName(tableName)
-		, m_initialSchemaName(schemaName)
-		, m_initialCatalogName(catalogName)
-		, m_initialTypeName(tableType)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
-		, m_pDb(pDb)
+		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_hStmtCount(SQL_NULL_HSTMT)
@@ -133,29 +130,18 @@ namespace exodbc
 		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
-		, m_fieldsStatement(L"")
 		, m_openFlags(TOF_NONE)
 	{
-		exASSERT(m_pDb->IsOpen());
-
-		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
-		SetAccessFlags(afs);
-		// statements should now be allocated
-		exASSERT(HasAllStatements());
+		Init(pDb, afs, tableName, schemaName, catalogName, tableType);
 	}
 
 
 	Table::Table(const Database* pDb, const TableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
 		: m_numCols(0)
 		, m_manualColumns(false)
-		, m_initialTableName(L"")
-		, m_initialSchemaName(L"")
-		, m_initialCatalogName(L"")
-		, m_initialTypeName(L"")
-		, m_haveTableInfo(true)
-		, m_tableInfo(tableInfo)
+		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
-		, m_pDb(pDb)
+		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_hStmtCount(SQL_NULL_HSTMT)
@@ -166,15 +152,9 @@ namespace exodbc
 		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
-		, m_fieldsStatement(L"")
 		, m_openFlags(TOF_NONE)
 	{
-		exASSERT(m_pDb->IsOpen());
-		
-		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
-		SetAccessFlags(afs);
-		// statements should now be allocated
-		exASSERT(HasAllStatements());
+		Init(pDb, afs, tableInfo);
 	}
 
 
@@ -218,6 +198,120 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	void Table::Init(const Database* pDb, AccessFlags afs, const TableInfo& tableInfo)
+	{
+		exASSERT(pDb);
+		exASSERT(pDb->IsOpen());
+		
+		// Remember properties passed
+		exASSERT(m_pDb == NULL);
+		m_pDb = pDb;
+
+		// Not created manually
+		m_numCols = 0;
+		m_manualColumns = false;
+
+		// tableinfo passed
+		m_haveTableInfo = true;
+		m_tableInfo = tableInfo;
+
+		// remember buffertype map, and allocate statements (by setting access flags)
+		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
+		SetAccessFlags(afs);
+
+		// statements should now be allocated
+		exASSERT(HasAllStatements());
+	}
+
+
+	void Table::Init(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
+	{
+		exASSERT(pDb);
+		exASSERT(pDb->IsOpen());
+
+		// Remember properties passed
+		exASSERT(m_pDb == NULL);
+		m_pDb = pDb;
+
+		// Not created manually
+		m_numCols = 0;
+		m_manualColumns = false;
+
+		// no tableinfo passed
+		m_haveTableInfo = false;
+
+		// but table search params
+		m_initialTableName = tableName;
+		m_initialSchemaName = schemaName;
+		m_initialCatalogName = catalogName;
+		m_initialTypeName = tableType;
+
+		// remember buffertype map, and allocate statements (by setting access flags)
+		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
+		SetAccessFlags(afs);
+
+		// statements should now be allocated
+		exASSERT(HasAllStatements());
+	}
+
+
+	void Table::Init(const Database* pDb, SQLSMALLINT numColumns, AccessFlags afs, const TableInfo& tableInfo)
+	{
+		exASSERT(pDb);
+		exASSERT(pDb->IsOpen());
+
+		// Remember properties passed
+		exASSERT(m_pDb == NULL);
+		m_pDb = pDb;
+
+		// Created manually
+		m_numCols = numColumns;
+		m_manualColumns = true;
+
+		// tableinfo passed
+		m_haveTableInfo = true;
+		m_tableInfo = tableInfo;
+
+		// no need to remember the buffertype-map,
+		// lets allocate statements (by setting access flags)
+		SetAccessFlags(afs);
+
+		// statements should now be allocated
+		exASSERT(HasAllStatements());
+	}
+
+
+	void Table::Init(const Database* pDb, SQLSMALLINT numColumns, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
+	{
+		exASSERT(pDb);
+		exASSERT(pDb->IsOpen());
+
+		// Remember properties passed
+		exASSERT(m_pDb == NULL);
+		m_pDb = pDb;
+
+		// Created manually
+		m_numCols = numColumns;
+		m_manualColumns = true;
+
+		// no tableinfo passed
+		m_haveTableInfo = false;
+
+		// but table search params
+		m_initialTableName = tableName;
+		m_initialSchemaName = schemaName;
+		m_initialCatalogName = catalogName;
+		m_initialTypeName = tableType;
+
+		// no need to remember the buffertype-map,
+		// lets allocate statements (by setting access flags)
+		SetAccessFlags(afs);
+
+		// statements should now be allocated
+		exASSERT(HasAllStatements());
+	}
+
+
 	void Table::AllocateStatements()
 	{
 		exASSERT(!IsOpen());

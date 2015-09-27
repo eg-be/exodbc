@@ -124,6 +124,37 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, OpenAutoDefaultCtr)
+	{
+		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		exodbc::Table table;
+		EXPECT_NO_THROW(table.Init(&m_db, AF_READ, tableName, L"", L"", L""));
+		EXPECT_NO_THROW(table.Open());
+	}
+
+
+	TEST_P(TableTest, OpenManualDefaultCtr)
+	{
+		// Open an existing manual table for reading
+		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+
+		Table iTable;
+		iTable.Init(&m_db, 4, AF_READ, intTypesTableName, L"", L"", L"");
+		// Set Columns
+		SQLINTEGER id;
+		SQLSMALLINT tSmallint;
+		SQLINTEGER tInt;
+		SQLBIGINT tBigint;
+
+		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_PRIMARY_KEY);
+		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tSmallint, SQL_C_SSHORT, sizeof(tSmallint), CF_SELECT);
+		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tInt, SQL_C_SLONG, sizeof(tInt), CF_SELECT);
+		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tBigint, SQL_C_SBIGINT, sizeof(tBigint), CF_SELECT);
+		
+		EXPECT_NO_THROW(iTable.Open());
+	}
+
+
 	TEST_P(TableTest, OpenManualCheckExistence)
 	{
 		// Open a table with checking for existence
@@ -411,8 +442,6 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenAutoCheckPrivs)
 	{
-
-
 		// Test to open read-only a table we know we have all rights:
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table rTable(&m_db, tableName, L"", L"", L"", AF_READ);
