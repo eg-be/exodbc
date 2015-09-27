@@ -107,18 +107,17 @@ namespace exodbc
 	{
 		// Test helpers:
 #if EXODBC_TEST
-		friend class DatabaseTest;
 		FRIEND_TEST(DatabaseTest, ReadDataTypesInfo); 
 		FRIEND_TEST(DatabaseTest, SetConnectionAttributes);
 		FRIEND_TEST(DatabaseTest, ReadDbInfo);
 #endif
 	public:
 		/*!
-		* \brief	Default Constructor. You will need to manually allocate the DBC-Handle.
-		* \details	Default Constructor. You will need to call AllocateConnectionHandle() 
+		* \brief	Default Constructor. You will need to manually call Init() later.
+		* \details	Default Constructor. You will need to call Init() 
 		*			afterwards to allocate the Database-handle.
 		*			Creates a new DefaultSql2BufferTypeMap to be used with this Database.
-		* \see		AllocateConnectionHandle()
+		* \see		Init()
 		*/
 		Database() throw();
 
@@ -146,21 +145,12 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Tries to allocate a new DBC-Handle from the passed Environment and stores that
-		*			DBC-Handle for later use internally. Will be freed on destruction.
-		*			Reads the ODBC Version from the Environment and remembers it internally.
-		*			Remembers the Environment.
-		* \details	The Database will try to create a new Db-Connection using the Environment-handle
-		*			from the passed Environment. This newly created Connection-Handle is stored 
-		*			for later use. 
-		*			The DBC-handle will be freed by the Database on destruction.
-		*			Can only be called if no handle is allocated yet.
-		* \param	pEnv		The Environment to use to create this connection-handle.
-		*						Do not free the Environment before you free the Database.
-		* \throw	Exception If a handle is already allocated, allocating fails or reading the ODBC-
-		*			version from the Environment fails.
+		* \brief	Must be called if Database has been created using Default Constructor.
+		* \details	Can only be called once. Allocates the Connection handle from the passed
+		*			Environment. Do not free the passed Environment before you free the database.
+		* \throw	Exception
 		*/
-		void		AllocateConnectionHandle(const Environment* pEnv);
+		void Init(const Environment* pEnv);
 
 
 		/*!
@@ -668,11 +658,14 @@ namespace exodbc
 		*/
 		SqlTypeInfosVector ReadDataTypesInfo();
 
-		
+
 		/*!
-		* \brief	Initialize all members to NULL / UNKNOWN.
+		* \brief	Tries to allocate a new DBC-Handle from the internally stored Environment. 
+		*			Handle will be freed on destruction.
+		* \details	Can only be called if no connection-handle is allocated yet.
+		* \throw	Exception If a handle is already allocated or allocating fails,
 		*/
-		void			Initialize();
+		void		AllocateConnectionHandle();
 
 
 		/*!

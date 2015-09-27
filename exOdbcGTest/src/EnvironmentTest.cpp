@@ -48,7 +48,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(EnvironmentTest, AllocateHenv)
+	TEST_P(EnvironmentTest, AllocateEnvironmentHandle)
 	{
 		Environment env;
 		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
@@ -87,13 +87,9 @@ namespace exodbc
 		Environment env_v3;
 		Environment env_v3_80;
 
-		ASSERT_NO_THROW(env_v2.AllocateEnvironmentHandle());
-		ASSERT_NO_THROW(env_v3.AllocateEnvironmentHandle());
-		ASSERT_NO_THROW(env_v3_80.AllocateEnvironmentHandle());
-
-		EXPECT_NO_THROW(env_v2.SetOdbcVersion(OdbcVersion::V_2));
-		EXPECT_NO_THROW(env_v3.SetOdbcVersion(OdbcVersion::V_3));
-		EXPECT_NO_THROW(env_v3_80.SetOdbcVersion(OdbcVersion::V_3_8));
+		EXPECT_NO_THROW(env_v2.Init(OdbcVersion::V_2));
+		EXPECT_NO_THROW(env_v3.Init(OdbcVersion::V_3));
+		EXPECT_NO_THROW(env_v3_80.Init(OdbcVersion::V_3_8));
 
 		EXPECT_EQ(SQL_OV_ODBC2, (int) env_v2.ReadOdbcVersion());
 		EXPECT_EQ(SQL_OV_ODBC3, (int) env_v3.ReadOdbcVersion());

@@ -38,10 +38,10 @@ namespace exodbc
 		: m_odbcInfo(odbcInfo)
 	{
 		// prepare env
-		m_env.AllocateEnvironmentHandle();
-		m_env.SetOdbcVersion(OdbcVersion::V_3);
+		m_env.Init(OdbcVersion::V_3);
+
 		// Create and open Database
-		m_db.AllocateConnectionHandle(&m_env);
+		m_db.Init(&m_env);
 		if (odbcInfo.HasConnectionString())
 		{
 			m_db.Open(odbcInfo.m_connectionString);

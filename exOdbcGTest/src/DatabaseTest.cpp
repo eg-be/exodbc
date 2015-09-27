@@ -48,9 +48,8 @@ namespace exodbc
 	{
 		// Set up is called for every test
 		m_odbcInfo = GetParam();
-		m_env.AllocateEnvironmentHandle();
-		m_env.SetOdbcVersion(OdbcVersion::V_3);
-		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
+		m_env.Init(OdbcVersion::V_3);
+		ASSERT_NO_THROW(m_db.Init(&m_env));
 		if (m_odbcInfo.HasConnectionString())
 		{
 			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));
@@ -296,7 +295,7 @@ namespace exodbc
 
 		// Open an existing db using the default c'tor and setting params on db
 		Database db2;
-		ASSERT_NO_THROW(db2.AllocateConnectionHandle(&env));
+		ASSERT_NO_THROW(db2.Init(&env));
 		if (m_odbcInfo.HasConnectionString())
 		{
 			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_connectionString));
@@ -310,7 +309,7 @@ namespace exodbc
 		// Try to open with a different password / user, expect to fail when opening the db.
 		{
 			Database failDb(&m_env);
-			EXPECT_THROW(failDb.Open(L"ThisDNSDoesNotExist", L"NorTheUser", L"WithThisPassword"), SqlResultException);
+			EXPECT_THROW(failDb.Open(L"ThisDSNDoesNotExist", L"NorTheUser", L"WithThisPassword"), SqlResultException);
 		}
 	}
 

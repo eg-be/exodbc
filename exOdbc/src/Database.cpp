@@ -59,19 +59,32 @@ namespace exodbc
 	// Construction
 	// ------------
 	Database::Database()
+		: m_pEnv(NULL)
+		, m_pSql2BufferTypeMap(NULL)
+		, m_hdbc(SQL_NULL_HDBC)
+		, m_hstmt(SQL_NULL_HSTMT)
+		, m_hstmtExecSql(SQL_NULL_HSTMT)
+		, m_dbmsType(DatabaseProduct::UNKNOWN)
+		, m_dbIsOpen(false)
+		, m_dbOpenedWithConnectionString(false)
+		, m_commitMode(CommitMode::UNKNOWN)
 	{
-		// Note: Init will set members to NULL
-		Initialize();
 	}
 
 
 	Database::Database(const Environment* pEnv)
+		: m_pEnv(NULL)
+		, m_pSql2BufferTypeMap(NULL)
+		, m_hdbc(SQL_NULL_HDBC)
+		, m_hstmt(SQL_NULL_HSTMT)
+		, m_hstmtExecSql(SQL_NULL_HSTMT)
+		, m_dbmsType(DatabaseProduct::UNKNOWN)
+		, m_dbIsOpen(false)
+		, m_dbOpenedWithConnectionString(false)
+		, m_commitMode(CommitMode::UNKNOWN)
 	{
-		// Note: Init will set members to NULL
-		Initialize();
-
 		// Allocate the DBC-Handle and set the member m_pEnv
-		AllocateConnectionHandle(pEnv);
+		Init(pEnv);
 	}
 
 
@@ -100,25 +113,16 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void Database::Initialize()
+	void Database::Init(const Environment* pEnv)
 	{
-		m_pEnv = NULL;
-		m_pSql2BufferTypeMap = Sql2BufferTypeMapPtr(NULL);
+		exASSERT(pEnv != NULL);
 
-		// Handles created by this db
-		m_hdbc = SQL_NULL_HDBC;
-		m_hstmt = SQL_NULL_HSTMT;
-		m_hstmtExecSql = SQL_NULL_HSTMT;
+		// remember the environment
+		exASSERT(m_pEnv == NULL);
+		m_pEnv = pEnv;
 
-		// GetDbms unknwon
-		m_dbmsType = DatabaseProduct::UNKNOWN;
-
-		// Mark database as not Open as of yet
-		m_dbIsOpen = false;
-		m_dbOpenedWithConnectionString = false;
-
-		// commit is not known until connected and set
-		m_commitMode = CommitMode::UNKNOWN;
+		// And allocate connection handle
+		AllocateConnectionHandle();
 	}
 
 
@@ -149,17 +153,13 @@ namespace exodbc
 	}
 
 
-	void Database::AllocateConnectionHandle(const Environment* pEnv)
+	void Database::AllocateConnectionHandle()
 	{
 		exASSERT(!HasConnectionHandle());
-		exASSERT(pEnv != NULL);
-		exASSERT(pEnv->HasEnvironmentHandle());
+		exASSERT(m_pEnv != NULL);
+		exASSERT(m_pEnv->HasEnvironmentHandle());
 
-		// remember the environment
-		exASSERT(m_pEnv == NULL);
-		m_pEnv = pEnv;
-
-		// Allocate the DBC-Handle
+		// Allocate the DBC-Handle from our environment
 		SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, m_pEnv->GetEnvironmentHandle(), &m_hdbc);
 		THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_ENV, m_pEnv->GetEnvironmentHandle());
 	}

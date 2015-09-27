@@ -41,11 +41,10 @@ namespace exodbc
 		m_odbcInfo = GetParam();
 
 		// Set up environment
-		m_env.AllocateEnvironmentHandle();
-		m_env.SetOdbcVersion(OdbcVersion::V_3);
+		m_env.Init(OdbcVersion::V_3);
 
 		// And the db
-		ASSERT_NO_THROW(m_db.AllocateConnectionHandle(&m_env));
+		ASSERT_NO_THROW(m_db.Init(&m_env));
 		if (m_odbcInfo.HasConnectionString())
 		{
 			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));

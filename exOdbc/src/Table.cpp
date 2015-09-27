@@ -60,10 +60,21 @@ namespace exodbc
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
 		, m_pDb(pDb)
+		, m_pSql2BufferTypeMap(NULL)
+		, m_isOpen(false)
+		, m_hStmtCount(SQL_NULL_HSTMT)
+		, m_hStmtSelect(SQL_NULL_HSTMT)
+		, m_hStmtInsert(SQL_NULL_HSTMT)
+		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		, m_selectQueryOpen(false)
+		, m_fieldsStatement(L"")
+		, m_openFlags(TOF_NONE)
 	{
 		exASSERT(m_pDb->IsOpen());
 
-		Initialize();
 		SetAccessFlags(afs);
 		// statements should now be allocated
 		exASSERT(HasAllStatements());
@@ -81,10 +92,21 @@ namespace exodbc
 		, m_tableInfo(tableInfo)
 		, m_accessFlags(AF_NONE)
 		, m_pDb(pDb)
+		, m_pSql2BufferTypeMap(NULL)
+		, m_isOpen(false)
+		, m_hStmtCount(SQL_NULL_HSTMT)
+		, m_hStmtSelect(SQL_NULL_HSTMT)
+		, m_hStmtInsert(SQL_NULL_HSTMT)
+		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		, m_selectQueryOpen(false)
+		, m_fieldsStatement(L"")
+		, m_openFlags(TOF_NONE)
 	{
 		exASSERT(m_pDb->IsOpen());
 		
-		Initialize();
 		SetAccessFlags(afs);
 		// statements should now be allocated
 		exASSERT(HasAllStatements());
@@ -101,10 +123,21 @@ namespace exodbc
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
 		, m_pDb(pDb)
+		, m_pSql2BufferTypeMap(NULL)
+		, m_isOpen(false)
+		, m_hStmtCount(SQL_NULL_HSTMT)
+		, m_hStmtSelect(SQL_NULL_HSTMT)
+		, m_hStmtInsert(SQL_NULL_HSTMT)
+		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		, m_selectQueryOpen(false)
+		, m_fieldsStatement(L"")
+		, m_openFlags(TOF_NONE)
 	{
 		exASSERT(m_pDb->IsOpen());
 
-		Initialize();
 		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
 		SetAccessFlags(afs);
 		// statements should now be allocated
@@ -123,10 +156,21 @@ namespace exodbc
 		, m_tableInfo(tableInfo)
 		, m_accessFlags(AF_NONE)
 		, m_pDb(pDb)
+		, m_pSql2BufferTypeMap(NULL)
+		, m_isOpen(false)
+		, m_hStmtCount(SQL_NULL_HSTMT)
+		, m_hStmtSelect(SQL_NULL_HSTMT)
+		, m_hStmtInsert(SQL_NULL_HSTMT)
+		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		, m_selectQueryOpen(false)
+		, m_fieldsStatement(L"")
+		, m_openFlags(TOF_NONE)
 	{
 		exASSERT(m_pDb->IsOpen());
 		
-		Initialize();
 		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
 		SetAccessFlags(afs);
 		// statements should now be allocated
@@ -174,28 +218,6 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void Table::Initialize()
-	{
-		// Initializing member variables
-		// Note: m_haveTableInfo must have been set before this function is called - it is not modified by this Initialize
-
-		m_pSql2BufferTypeMap = Sql2BufferTypeMapPtr(NULL);
-		m_isOpen = false;
-
-		m_hStmtCount = SQL_NULL_HSTMT;
-		m_hStmtSelect = SQL_NULL_HSTMT;
-		m_hStmtInsert = SQL_NULL_HSTMT;
-		m_hStmtUpdatePk = SQL_NULL_HSTMT;
-		m_hStmtDeletePk = SQL_NULL_HSTMT;
-		m_hStmtDeleteWhere = SQL_NULL_HSTMT;
-		m_hStmtUpdateWhere = SQL_NULL_HSTMT;
-		m_selectQueryOpen = false;
-		m_fieldsStatement = L"";
-		m_openFlags = TOF_NONE;
-		m_accessFlags = AF_NONE;
-	}
-
-
 	void Table::AllocateStatements()
 	{
 		exASSERT(!IsOpen());

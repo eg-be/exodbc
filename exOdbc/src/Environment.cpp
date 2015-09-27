@@ -16,7 +16,6 @@
 #include "Exception.h"
 
 // Other headers
-
 // Debug
 #include "DebugNew.h"
 
@@ -27,27 +26,25 @@ using namespace std;
 
 namespace exodbc
 {
-
-
 	// Construction
 	// ------------
 	
 	Environment::Environment()
 		: m_henv(SQL_NULL_HENV)
+		, m_odbcVersion(OdbcVersion::UNKNOWN)
 	{
-		// Note: Init will set members to NULL, but asserts if m_henv is set
-		Initialize();
 	}
 	
 	
 	Environment::Environment(OdbcVersion odbcVersion)
 		: m_henv(SQL_NULL_HENV)
+		, m_odbcVersion(OdbcVersion::UNKNOWN)
 	{
-		// Note: Init will set members to NULL, but asserts if m_henv is set
-		Initialize();
-		AllocateEnvironmentHandle();
-		SetOdbcVersion(odbcVersion);
-	} 
+		// Note: Init will call SetOdbcVersion, this will read
+		// back the version reported by the driver - so it is
+		// okay to set it to UNKNOWN in the constructor.
+		Init(odbcVersion);
+	}
 
 
 	// Destructor
@@ -71,12 +68,12 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void Environment::Initialize()
+	void Environment::Init(OdbcVersion odbcVersion)
 	{
-		exASSERT(!HasEnvironmentHandle());
-		
-		m_henv = SQL_NULL_HENV;
-		m_odbcVersion = OdbcVersion::UNKNOWN;
+		exASSERT(odbcVersion != OdbcVersion::UNKNOWN);
+
+		AllocateEnvironmentHandle();
+		SetOdbcVersion(odbcVersion);
 	}
 
 
