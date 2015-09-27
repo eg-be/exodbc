@@ -69,8 +69,8 @@ namespace exodbc
 	{
 	// Test helpers:
 #if EXODBC_TEST
-		friend class EnvironmentTest;
 		FRIEND_TEST(EnvironmentTest, FreeEnvironmentHandle);
+		FRIEND_TEST(EnvironmentTest, AllocateEnvironmentHandle);
 #endif
 
 	private:
@@ -80,10 +80,8 @@ namespace exodbc
 	public:
 		/*!
 		 * \brief	Default constructor.
-		 * 			You must manually call AllocateHandle() and SetOdbcVersion() after 
-		 * 			creating the object.
-		 * \see		AllocateEnvironmentHandle()
-		 * \see		SetOdbcVersion()
+		 * 			You must manually call Init() after creating the object.
+		 * \see		Init()
 		 */
 		Environment() throw();
 
@@ -106,11 +104,13 @@ namespace exodbc
 
 
 		/*!
-		 * \brief	Tries to allocate a new environment handle to be used by this Environment.
-		 * 			Cannot be called if a Henv is allocated.
-		 *	\throw	Exception If Henv is already allocated or Allocating fails.
-		 */
-		void			AllocateEnvironmentHandle();
+		* \brief	Must be called if Environment has been created using Default Constructor.
+		* \details	Can only be called once. Allocates the Environment handle and sets the
+		*			passed OdbcVersion.
+		* \param	odbcVersion The ODBC Version to set on this Environment.
+		* \throw	Exception
+		*/
+		void Init(OdbcVersion odbcVersion);
 
 
 		/*!
@@ -171,15 +171,13 @@ namespace exodbc
 		DataSourcesVector ListDataSources(ListMode mode) const;
 
 
-	private:
+	private:		
 		/*!
-		* \brief	Initializes this object.
-		* 			Set all members to 0.
+		* \brief	Tries to allocate a new environment handle to be used by this Environment.
 		* 			Cannot be called if a Henv is allocated.
-		*
-		* \throw	Exception If Henv is already allocated.
+		*	\throw	Exception If Henv is already allocated or Allocating fails.
 		*/
-		void			Initialize();
+		void			AllocateEnvironmentHandle();
 
 
 		/*!

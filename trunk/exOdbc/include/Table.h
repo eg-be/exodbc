@@ -931,14 +931,6 @@ namespace exodbc
 		// Private stuff
 		// -------------
 	private:
-
-		/*!
-		* \brief	Initializes the member-vars to null or defaults.
-		* \throw	Exception
-		*/
-		void        Initialize();
-
-
 		/*!
 		* \brief	Allocate the statement handles required by this Table.
 		* \details  Allocates the statements using the connection handle from the Database
