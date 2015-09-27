@@ -236,24 +236,23 @@ namespace exodbc
 	}
 
 
-	void Database::Open(const std::wstring& inConnectStr)
+	std::wstring Database::Open(const std::wstring& inConnectStr)
 	{
-		Open(inConnectStr, NULL);
+		return Open(inConnectStr, NULL);
 	}
 
 
-	void Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd)
+	std::wstring Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd)
 	{
 		exASSERT(!IsOpen());
 		exASSERT(!inConnectStr.empty());
-		exASSERT(inConnectStr.length() < SHRT_MAX);
 		m_dsn = L"";
 		m_uid = L"";
 		m_authStr = L"";
 		m_inConnectionStr = inConnectStr;
 
 		// Connect to the data source
-		SQLWCHAR outConnectBuffer[SQL_MAX_CONNECTSTR_LEN + 1];  // MS recommends at least 1k buffer
+		SQLWCHAR outConnectBuffer[DB_MAX_CONNECTSTR_LEN + 1];
 		SQLSMALLINT outConnectBufferLen;
 
 		// Note: 
@@ -263,7 +262,7 @@ namespace exodbc
 			(SQLWCHAR*) m_inConnectionStr.c_str(),
 			(SQLSMALLINT) m_inConnectionStr.length(), 
 			(SQLWCHAR*) outConnectBuffer, 
-			SQL_MAX_CONNECTSTR_LEN, &outConnectBufferLen, parentWnd == NULL ? SQL_DRIVER_NOPROMPT : SQL_DRIVER_COMPLETE);
+			DB_MAX_CONNECTSTR_LEN, &outConnectBufferLen, parentWnd == NULL ? SQL_DRIVER_NOPROMPT : SQL_DRIVER_COMPLETE);
 		THROW_IFN_SUCCEEDED(SQLDriverConnect, ret, SQL_HANDLE_DBC, m_hdbc);
 
 		outConnectBuffer[outConnectBufferLen] = 0;
@@ -297,6 +296,7 @@ namespace exodbc
 
 		// Mark database as Open
 		m_dbIsOpen = true;
+		return m_outConnectionStr;
 	}
 
 

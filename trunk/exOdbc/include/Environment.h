@@ -4,9 +4,6 @@
  * \date 25.07.2014
  * \brief Header file for the Environment class and its helpers.
  * \copyright wxWindows Library Licence, Version 3.1
- * 
- * The Environment class corresponds to the wxDbConnectInf class
- * from wxWidgets 2.8.
 */ 
 
 #pragma once
@@ -20,28 +17,9 @@
 
 // Other headers
 // System headers
-#include <windows.h>
-#include <sql.h>
-#include <sqlext.h>
 #include <string>
 #include <vector>
 
-// \todo: remove once ticket #87 is done.
-#ifndef MAXNAME
-#define MAXNAME         31
-#endif
-
-#ifndef SQL_MAX_AUTHSTR_LEN
-// There does not seem to be a standard for this, so I am
-// defaulting to the value that MS uses
-#define SQL_MAX_AUTHSTR_LEN MAXNAME
-#endif
-
-#ifndef SQL_MAX_CONNECTSTR_LEN
-// There does not seem to be a standard for this, so I am
-// defaulting to the value that MS recommends
-#define SQL_MAX_CONNECTSTR_LEN 1024
-#endif
 
 // Forward declarations
 // --------------------
