@@ -51,10 +51,6 @@ namespace exodbc
 		FRIEND_TEST(EnvironmentTest, AllocateEnvironmentHandle);
 #endif
 
-	private:
-		// Prevent copies. We would mess up the env-handle.
-		Environment(const Environment& other) { exASSERT_MSG(false, L"Copy Constructor not Implemented"); };
-
 	public:
 		/*!
 		 * \brief	Default constructor.
@@ -74,6 +70,16 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Copy Constructor.
+		* \details	If the passed Environment has a valid ODBC-Version set, the environment
+		*			will be created with the same version.
+		* \param	odbcVersion	The ODBC version.
+		* \throw	Exception If AllocateEnvironmentHandle() or SetOdbcVersion() fails.
+		*/
+		Environment(const Environment& other);
+
+
+		/*!
 		 * \brief		Destructor. Tries to free the env-handle, if one is allocated.
 		 * \details	If freeing the handle fails an error is logged, but no Exception
 		 *				is being thrown. You will leak handles in this case.
@@ -86,6 +92,7 @@ namespace exodbc
 		* \details	Can only be called once. Allocates the Environment handle and sets the
 		*			passed OdbcVersion.
 		* \param	odbcVersion The ODBC Version to set on this Environment.
+		* \see		HasEnvironmentHandle()
 		* \throw	Exception
 		*/
 		void Init(OdbcVersion odbcVersion);
@@ -93,6 +100,8 @@ namespace exodbc
 
 		/*!
 		 * \brief	Returns true is a Henv is allocated.
+		 * \details	The environment handle is allocated if the object was created using one
+		 *			of the non default constructors, or Init() has been called.
 		 */
 		bool			HasEnvironmentHandle() const	{ return m_henv != SQL_NULL_HENV; };
 
@@ -117,7 +126,7 @@ namespace exodbc
 		/*!
 		 * \brief	Reads the ODBC version from the environment and updates internally
 		 *			cached value.
-		 *
+		 * 
 		 * \return	The ODBC version or OV_UNKNOWN if read version is unknown.
 		 * \throw	Exception If no Henv is allocated, or reading the version fails.
 		 */
@@ -126,11 +135,11 @@ namespace exodbc
 
 		/*!
 		* \brief	Gets the cached ODBC version if the cached version is not OV_UNKNWON.
-		*			If cached version is OV_UNKOWN, tries to read using ReadOdbcVersion()
-		*			and caches the read value and returns that.
+		*			If cached version is OV_UNKOWN and the environment handle is allocated,
+		*			it will try to read the odbc version using ReadOdbcVersion().
 		*
-		* \return	The ODBC version or OV_UNKNOWN if read version is unknown.
-		* \throw	Exception If no Henv is allocated, or reading the version fails.
+		* \return	The ODBC version or OV_UNKNOWN if the handle is not allocated yet.
+		* \throw	Exception If reading the version fails.
 		*/
 		OdbcVersion		GetOdbcVersion() const;
 

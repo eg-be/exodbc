@@ -47,6 +47,18 @@ namespace exodbc
 	}
 
 
+	Environment::Environment(const Environment& other)
+		: m_henv(SQL_NULL_HENV)
+		, m_odbcVersion(OdbcVersion::UNKNOWN)
+	{
+		OdbcVersion odbcVersion = other.GetOdbcVersion();
+		if (odbcVersion != OdbcVersion::UNKNOWN)
+		{
+			Init(odbcVersion);
+		}
+	}
+
+
 	// Destructor
 	// -----------
 	Environment::~Environment()
@@ -154,6 +166,8 @@ namespace exodbc
 
 	OdbcVersion Environment::ReadOdbcVersion() const
 	{
+		exASSERT(m_henv != SQL_NULL_HENV);
+
 		unsigned long value = 0;
 		SQLRETURN ret = SQLGetEnvAttr(m_henv, SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
 
@@ -184,7 +198,7 @@ namespace exodbc
 
 	OdbcVersion Environment::GetOdbcVersion() const
 	{
-		if (m_odbcVersion == OdbcVersion::UNKNOWN)
+		if (m_odbcVersion == OdbcVersion::UNKNOWN && m_henv != SQL_NULL_HENV)
 		{
 			ReadOdbcVersion();
 		}
