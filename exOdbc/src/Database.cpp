@@ -88,6 +88,24 @@ namespace exodbc
 	}
 
 
+	Database::Database(const Database& other)
+		: m_pEnv(NULL)
+		, m_pSql2BufferTypeMap(NULL)
+		, m_hdbc(SQL_NULL_HDBC)
+		, m_hstmt(SQL_NULL_HSTMT)
+		, m_hstmtExecSql(SQL_NULL_HSTMT)
+		, m_dbmsType(DatabaseProduct::UNKNOWN)
+		, m_dbIsOpen(false)
+		, m_dbOpenedWithConnectionString(false)
+		, m_commitMode(CommitMode::UNKNOWN)
+	{
+		if (other.GetEnvironment() != NULL)
+		{
+			Init(other.GetEnvironment());
+		}
+	}
+
+
 	// Destructor
 	// -----------
 	Database::~Database()
