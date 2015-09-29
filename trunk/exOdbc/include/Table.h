@@ -342,6 +342,14 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Checks if this table is a table with manually defined columns.
+		* \return	True if this table was constructed using a Constructor for a table
+		*			with manual columns.
+		*/
+		bool		IsManualColumns() const throw() { return m_manualColumns; };
+
+
+		/*!
 		* \brief	Set an AccessFlag. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
 		* \details	If the flag passed is already set, this function will do nothing.
