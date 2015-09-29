@@ -15,8 +15,6 @@
 #include "exOdbc.h"
 
 // Other headers
-#include "boost/smart_ptr.hpp"
-
 // System headers
 #include <map>
 
@@ -103,8 +101,8 @@ namespace exodbc
 		typedef std::map<SQLSMALLINT, SQLSMALLINT> TypeMap;
 		TypeMap m_typeMap;
 	};
-	typedef boost::shared_ptr<Sql2BufferTypeMap> Sql2BufferTypeMapPtr;
-	typedef boost::shared_ptr<const Sql2BufferTypeMap> ConstSql2BufferTypeMapPtr;
+	typedef std::shared_ptr<Sql2BufferTypeMap> Sql2BufferTypeMapPtr;
+	typedef std::shared_ptr<const Sql2BufferTypeMap> ConstSql2BufferTypeMapPtr;
 	
 	/*!
 	 * \class DefaultSql2BufferMap
