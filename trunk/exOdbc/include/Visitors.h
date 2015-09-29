@@ -184,7 +184,7 @@ namespace exodbc
 	* \todo: SQL_NUMERIC_STRUCT*
 	*/
 	class EXODBCAPI RealVisitor
-		: public boost::static_visitor < SQLDOUBLE >
+		: public boost::static_visitor < SQLREAL >
 	{
 	public:
 		SQLREAL operator()(SQLSMALLINT* smallInt) const { return *smallInt; };
