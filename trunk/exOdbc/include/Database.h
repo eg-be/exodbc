@@ -133,14 +133,15 @@ namespace exodbc
 		*			Environment handle to be used.
 		*/
 		Database(const Environment* pEnv);
-		
-	private:
-		/*!
-		* \brief	Prevent copies until we implement a copy constructor who takes care of the handle(s).
-		*/
-		Database(const Database& other) {};
 
-	public:
+		
+		/*!
+		* \brief	Copy constructor. Creates a new Database that is dependent on the same
+		*			Environment as this Database.
+		*/
+		Database(const Database& other);
+
+
 		~Database();
 
 

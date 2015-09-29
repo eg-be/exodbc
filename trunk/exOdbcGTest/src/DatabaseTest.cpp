@@ -69,6 +69,25 @@ namespace exodbc
 	}
 
 
+	TEST_P(DatabaseTest, CopyConstructor)
+	{
+		Database db1(&m_env);
+		Database c1(db1);
+
+		EXPECT_TRUE(c1.HasConnectionHandle());
+		{
+			DontDebugBreak ddb;
+			LogLevelError lle;
+			EXPECT_THROW(c1.Init(&m_env), AssertionException);
+		}
+
+		Database db2;
+		Database c2(db2);
+		EXPECT_FALSE(c2.HasConnectionHandle());
+		EXPECT_NO_THROW(c2.Init(&m_env));
+	}
+
+
 	TEST_P(DatabaseTest, PrintDatabaseInfo)
 	{
 		Database db(&m_env);
