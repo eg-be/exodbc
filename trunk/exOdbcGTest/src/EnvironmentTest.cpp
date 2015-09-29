@@ -80,6 +80,25 @@ namespace exodbc
 	}
 
 
+	TEST_P(EnvironmentTest, CopyConstructor)
+	{
+		Environment env(OdbcVersion::V_3);
+		ASSERT_TRUE(env.HasEnvironmentHandle());
+		ASSERT_EQ(OdbcVersion::V_3, env.GetOdbcVersion());
+		ASSERT_TRUE(env.GetEnvironmentHandle() != SQL_NULL_HENV);
+
+		Environment copy(env);
+		EXPECT_TRUE(copy.HasEnvironmentHandle());
+		EXPECT_EQ(OdbcVersion::V_3, copy.GetOdbcVersion());
+		EXPECT_NE(env.GetEnvironmentHandle(), copy.GetEnvironmentHandle());
+
+		Environment e2;
+		Environment c2(e2);
+		EXPECT_FALSE(c2.HasEnvironmentHandle());
+		EXPECT_EQ(OdbcVersion::UNKNOWN, c2.GetOdbcVersion());
+	}
+
+
 	TEST_P(EnvironmentTest, SetOdbcVersion)
 	{
 		// Test with setting it explict
