@@ -3,7 +3,7 @@
 * \author Elias Gerber <eg@elisium.ch>
 * \date 14.06.2015
 * \brief Source file for info objects.
-* \copyright wxWindows Library Licence, Version 3.1
+* \copyright GNU Lesser General Public License Version 3
 *
 */
 

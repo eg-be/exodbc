@@ -3,7 +3,7 @@
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.07.2014
 * \brief Goes into precompiled header.
-* \copyright wxWindows Library Licence, Version 3.1
+* \copyright GNU Lesser General Public License Version 3
 *
 * Include file for standard system include files,
 * or project specific include files that are used frequently, but

@@ -2,7 +2,7 @@
 * \file DebugNew.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 21.09.2014
-* \copyright wxWindows Library Licence, Version 3.1
+* \copyright GNU Lesser General Public License Version 3
 *
 * Defines new to something else, so we can track memory leak.
 * See: http://msdn.microsoft.com/en-us/library/974tc9t1.aspx

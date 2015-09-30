@@ -2,7 +2,7 @@
 * \file EnvironmentTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 27.07.2014
-* \copyright wxWindows Library Licence, Version 3.1
+* \copyright GNU Lesser General Public License Version 3
 * 
 * [Brief Header-file description]
 */ 
