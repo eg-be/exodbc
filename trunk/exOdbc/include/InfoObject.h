@@ -51,6 +51,9 @@ namespace exodbc
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
+		bool operator==(const TableInfo& other) const throw();
+		bool operator!=(const TableInfo& other) const throw();
+
 	private:
 		DatabaseProduct		m_dbms;
 
@@ -61,7 +64,6 @@ namespace exodbc
 		std::wstring		m_schemaName;		///< schema
 		bool				m_isCatalogNull;	///< True if m_catalogName is null.
 		bool				m_isSchemaNull;		///< True if m_schemaName is null.
-
 	};
 
 	/*!

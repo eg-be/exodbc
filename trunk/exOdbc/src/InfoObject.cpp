@@ -102,6 +102,22 @@ namespace exodbc
 	}
 
 
+	bool TableInfo::operator==(const TableInfo& other) const throw()
+	{
+		return m_tableName == other.m_tableName
+			&& m_schemaName == other.m_schemaName
+			&& m_catalogName == other.m_catalogName
+			&& m_tableType == other.m_tableType
+			&& m_tableRemarks == other.m_tableRemarks;
+	}
+
+
+	bool TableInfo::operator!=(const TableInfo& other) const throw()
+	{
+		return !(*this == other);
+	}
+
+
 	// Class ManualColumnInfo
 	// ======================
 	ManualColumnInfo::ManualColumnInfo()

@@ -93,6 +93,10 @@ namespace exodbc
 	*/
 	class EXODBCAPI Table
 	{
+#if EXODBC_TEST
+		FRIEND_TEST(TableTest, CopyCtr);
+#endif
+
 	public:
 
 		/*!
@@ -118,13 +122,17 @@ namespace exodbc
 		*/
 		Table(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
 
-	private:
 
 		/*!
-		* \brief	Prevent copies until we implement a copy constructor that takes care of the handle(s).
+		* \brief	Copy Constructor. Creates a new Table with the same AccessFlags 
+		*			as other, depending on the same Database as other.
+		* \details	If other already has a TableInfo object the TableInfo-object of other
+		*			is copied into this Table and the flag m_haveTableInfo is set to true.
+		*			Eventually set table search-names are copied from other.
 		*/
-		Table(const Table& other) :m_manualColumns(false), m_pDb(NULL), m_pSql2BufferTypeMap(NULL) { THROW_NOT_IMPLEMENTED();  };
+		Table(const Table& other);
 		
+
 	public:
 		virtual ~Table();
 
@@ -357,14 +365,14 @@ namespace exodbc
 		* \see		GetTableInfo()
 		* \return	Returns true if this table has a TableInfo set that can be fetched using GetTableInfo()
 		*/
-		bool		HaveTableInfo() const throw() { return m_haveTableInfo; }
+		bool		HasTableInfo() const throw() { return m_haveTableInfo; }
 
 
 		/*!
 		* \brief	Return the Table information of this Table.
 		* \details	Returns the TableInfo of this table, if one has been set either during construction
 		*			or one was read during Open().
-		* \see		HaveTableInfo()
+		* \see		HasTableInfo()
 		* \throw	Exception if no table info is available.
 		*/
 		TableInfo	GetTableInfo() const;
@@ -1016,8 +1024,6 @@ namespace exodbc
 		bool				m_manualColumns;		///< If true the table was initialized by passing the number of columns that will be defined later manually
 
 		// Table information set during construction, that was used to find the matching TableInfo if none was passed
-		// Note: We make them public, as they are all const
-	public:
 		std::wstring  m_initialTableName;		///< Table name set on initialization
 		std::wstring	m_initialSchemaName;	///< Schema name set on initialization
 		std::wstring	m_initialCatalogName;	///< Catalog name set on initialization
