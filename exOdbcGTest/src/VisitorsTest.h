@@ -2,7 +2,7 @@
 * \file VisitorsTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.03.2015
-* \copyright wxWindows Library Licence, Version 3.1
+* \copyright GNU Lesser General Public License Version 3
 *
 * [Brief Header-file description]
 */

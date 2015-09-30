@@ -2,7 +2,7 @@
 * \file ManualTestTables.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 26.12.2014
-* \copyright wxWindows Library Licence, Version 3.1
+* \copyright GNU Lesser General Public License Version 3
 *
 * Declares classes derived from exodbc::Table that define their columns manually.
 */

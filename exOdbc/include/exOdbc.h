@@ -3,7 +3,7 @@
  * \author Elias Gerber <eg@elisium.ch>
  * \date 09.02.2014
  * \brief Header file to set up dll import/exports, consts, structs used often, etc.
- * \copyright wxWindows Library Licence, Version 3.1
+ * \copyright GNU Lesser General Public License Version 3
 */ 
 
 #pragma once
@@ -19,8 +19,8 @@
 	#define EXODBCAPI __declspec(dllimport)
 #endif
 
-/* There are too many false positives for this one, particularly when using templates like wxVector<T> */
-/* class 'foo' needs to have dll-interface to be used by clients of class 'bar'" */
+// class 'foo' needs to have dll-interface to be used by clients of class 'bar'"
+// see Ticket #94
 #pragma warning(disable:4251)
 
 #include <windows.h>

@@ -3,7 +3,7 @@
 * \author Elias Gerber <eg@elisium.ch>
 * \date 25.07.2014
 * \brief Source file for the Database class and its helpers.
-* \copyright wxWindows Library Licence, Version 3.1
+* \copyright GNU Lesser General Public License Version 3
 *
 * Source file for the Database class and its helpers.
 */
