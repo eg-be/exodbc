@@ -111,6 +111,40 @@ namespace exodbc
 	}
 
 
+	Table::Table(const Table& other)
+		: m_manualColumns(false)
+		, m_haveTableInfo(false)
+		, m_accessFlags(AF_NONE)
+		, m_pDb(NULL)
+		, m_pSql2BufferTypeMap(NULL)
+		, m_isOpen(false)
+		, m_hStmtCount(SQL_NULL_HSTMT)
+		, m_hStmtSelect(SQL_NULL_HSTMT)
+		, m_hStmtInsert(SQL_NULL_HSTMT)
+		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		, m_selectQueryOpen(false)
+		, m_openFlags(TOF_NONE)
+	{
+		// note: This constructor will always copy the search-names. Maybe they were set on other,
+		// and then the TableInfo was searched. Do not loose the information about the search-names.
+		if (other.HasTableInfo())
+		{
+			Init(other.m_pDb, other.GetAccessFlags(), other.GetTableInfo());
+			m_initialTableName = other.m_initialTableName;
+			m_initialSchemaName = other.m_initialSchemaName;
+			m_initialCatalogName = other.m_initialCatalogName;
+			m_initialTypeName = other.m_initialTypeName;
+		}
+		else
+		{
+			Init(other.m_pDb, other.GetAccessFlags(), other.m_initialTableName, other.m_initialSchemaName, other.m_initialCatalogName, other.m_initialTypeName);
+		}
+	}
+
+
 	// Destructor
 	// -----------
 	Table::~Table()

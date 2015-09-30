@@ -155,6 +155,36 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, CopyCtr)
+	{
+		// Create a table
+		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		exodbc::Table t1(&m_db, AF_READ, tableName);
+
+		// Create a copy of that table
+		Table c1(t1);
+		EXPECT_EQ(t1.m_initialTableName, c1.m_initialTableName);
+		EXPECT_EQ(t1.m_initialSchemaName, c1.m_initialSchemaName);
+		EXPECT_EQ(t1.m_initialCatalogName, c1.m_initialCatalogName);
+		EXPECT_EQ(t1.m_initialTypeName, c1.m_initialTypeName);
+		EXPECT_EQ(t1.GetAccessFlags(), c1.GetAccessFlags());
+
+		// If we open the table..
+		EXPECT_NO_THROW(c1.Open());
+
+		// and create another copy from it..
+		Table c2(c1);
+		EXPECT_EQ(t1.m_initialTableName, c1.m_initialTableName);
+		EXPECT_EQ(t1.m_initialSchemaName, c1.m_initialSchemaName);
+		EXPECT_EQ(t1.m_initialCatalogName, c1.m_initialCatalogName);
+		EXPECT_EQ(t1.m_initialTypeName, c1.m_initialTypeName);
+		EXPECT_EQ(t1.GetAccessFlags(), c1.GetAccessFlags());
+		// .. we should already have the table info on the copy
+		EXPECT_TRUE(c2.HasTableInfo());
+		EXPECT_EQ(c1.GetTableInfo(), c2.GetTableInfo());
+	}
+
+
 	TEST_P(TableTest, OpenManualCheckExistence)
 	{
 		// Open a table with checking for existence
