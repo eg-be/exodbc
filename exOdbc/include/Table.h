@@ -108,7 +108,7 @@ namespace exodbc
 		* \see		Init(const Database*, AccessFlags, const TableInfo&)
 		* \throw	Exception
 		*/
-		Table(const Database* pDb, const TableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
+		Table(const Database* pDb, AccessFlags afs, const TableInfo& tableInfo);
 
 
 		/*!
@@ -116,7 +116,7 @@ namespace exodbc
 		* \see		Init(const Database* pDb, AccessFlags, const std::wstring&, const std::wstring&, const std::wstring&, const std::wstring&)
 		* \throw	Exception
 		*/
-		Table(const Database* pDb, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", AccessFlags afs = AF_READ_WRITE);
+		Table(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
 
 	private:
 
