@@ -51,8 +51,7 @@ namespace exodbc
 	// Construction
 	// ------------
 	Table::Table()
-		: m_numCols(0)
-		, m_manualColumns(false)
+		: m_manualColumns(false)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
@@ -70,53 +69,8 @@ namespace exodbc
 	{ }
 
 
-	Table::Table(const Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
-		: m_numCols(0)
-		, m_manualColumns(false)
-		, m_haveTableInfo(false)
-		, m_accessFlags(AF_NONE)
-		, m_pDb(NULL)
-		, m_pSql2BufferTypeMap(NULL)
-		, m_isOpen(false)
-		, m_hStmtCount(SQL_NULL_HSTMT)
-		, m_hStmtSelect(SQL_NULL_HSTMT)
-		, m_hStmtInsert(SQL_NULL_HSTMT)
-		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		, m_selectQueryOpen(false)
-		, m_openFlags(TOF_NONE)
-	{
-		Init(pDb, numColumns, afs, tableName, schemaName, catalogName, tableType);
-	}
-
-
-	Table::Table(const Database* pDb, SQLSMALLINT numColumns, const TableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
-		: m_numCols(0)
-		, m_manualColumns(false)
-		, m_haveTableInfo(false)
-		, m_accessFlags(AF_NONE)
-		, m_pDb(NULL)
-		, m_pSql2BufferTypeMap(NULL)
-		, m_isOpen(false)
-		, m_hStmtCount(SQL_NULL_HSTMT)
-		, m_hStmtSelect(SQL_NULL_HSTMT)
-		, m_hStmtInsert(SQL_NULL_HSTMT)
-		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		, m_selectQueryOpen(false)
-		, m_openFlags(TOF_NONE)
-	{
-		Init(pDb, numColumns, afs, tableInfo);
-	}
-
-
 	Table::Table(const Database* pDb, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
-		: m_numCols(0)
-		, m_manualColumns(false)
+		: m_manualColumns(false)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
@@ -137,8 +91,7 @@ namespace exodbc
 
 
 	Table::Table(const Database* pDb, const TableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
-		: m_numCols(0)
-		, m_manualColumns(false)
+		: m_manualColumns(false)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
@@ -182,11 +135,9 @@ namespace exodbc
 					delete pBuffer;
 				}
 				m_columnBuffers.clear();
-				m_numCols = 0;
 			}
 
 			FreeStatements();
-			exASSERT(m_numCols == 0);
 			exASSERT(m_columnBuffers.size() == 0);
 		}
 		catch (Exception& ex)
@@ -206,10 +157,6 @@ namespace exodbc
 		// Remember properties passed
 		exASSERT(m_pDb == NULL);
 		m_pDb = pDb;
-
-		// Not created manually
-		m_numCols = 0;
-		m_manualColumns = false;
 
 		// tableinfo passed
 		m_haveTableInfo = true;
@@ -233,10 +180,6 @@ namespace exodbc
 		exASSERT(m_pDb == NULL);
 		m_pDb = pDb;
 
-		// Not created manually
-		m_numCols = 0;
-		m_manualColumns = false;
-
 		// no tableinfo passed
 		m_haveTableInfo = false;
 
@@ -248,63 +191,6 @@ namespace exodbc
 
 		// remember buffertype map, and allocate statements (by setting access flags)
 		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
-		SetAccessFlags(afs);
-
-		// statements should now be allocated
-		exASSERT(HasAllStatements());
-	}
-
-
-	void Table::Init(const Database* pDb, SQLSMALLINT numColumns, AccessFlags afs, const TableInfo& tableInfo)
-	{
-		exASSERT(pDb);
-		exASSERT(pDb->IsOpen());
-
-		// Remember properties passed
-		exASSERT(m_pDb == NULL);
-		m_pDb = pDb;
-
-		// Created manually
-		m_numCols = numColumns;
-		m_manualColumns = true;
-
-		// tableinfo passed
-		m_haveTableInfo = true;
-		m_tableInfo = tableInfo;
-
-		// no need to remember the buffertype-map,
-		// lets allocate statements (by setting access flags)
-		SetAccessFlags(afs);
-
-		// statements should now be allocated
-		exASSERT(HasAllStatements());
-	}
-
-
-	void Table::Init(const Database* pDb, SQLSMALLINT numColumns, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
-	{
-		exASSERT(pDb);
-		exASSERT(pDb->IsOpen());
-
-		// Remember properties passed
-		exASSERT(m_pDb == NULL);
-		m_pDb = pDb;
-
-		// Created manually
-		m_numCols = numColumns;
-		m_manualColumns = true;
-
-		// no tableinfo passed
-		m_haveTableInfo = false;
-
-		// but table search params
-		m_initialTableName = tableName;
-		m_initialSchemaName = schemaName;
-		m_initialCatalogName = catalogName;
-		m_initialTypeName = tableType;
-
-		// no need to remember the buffertype-map,
-		// lets allocate statements (by setting access flags)
 		SetAccessFlags(afs);
 
 		// statements should now be allocated
@@ -411,7 +297,6 @@ namespace exodbc
 	{
 		exASSERT(m_manualColumns == false);
 		exASSERT(m_columnBuffers.size() == 0);
-		exASSERT(m_numCols == 0);
 		exASSERT(m_pDb->IsOpen());
 
 		// Nest try-catch to always free eventually allocated buffers
@@ -421,8 +306,8 @@ namespace exodbc
 			ColumnInfosVector columns = m_pDb->ReadTableColumnInfo(tableInfo);
 			// Remember column sizes and create ColumnBuffers
 			exASSERT(columns.size() <= SHRT_MAX);
-			m_numCols = (SQLSMALLINT) columns.size();
-			if (m_numCols == 0)
+			SQLSMALLINT numCols = (SQLSMALLINT) columns.size();
+			if (numCols == 0)
 			{
 				Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetQueryName()).str());
 				SET_EXCEPTION_SOURCE(ex);
@@ -482,7 +367,6 @@ namespace exodbc
 				delete pColumnBuffer;
 			}
 			m_columnBuffers.clear();
-			m_numCols = 0;
 			throw;
 		}
 	}
@@ -722,7 +606,6 @@ namespace exodbc
 	ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnIndex) const
 	{
 		exASSERT(IsOpen());
-		exASSERT(columnIndex < m_numCols);
 
 		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.find(columnIndex);
 		if (it == m_columnBuffers.end())
@@ -1224,13 +1107,14 @@ namespace exodbc
 
 	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 	{
-		exASSERT(m_manualColumns);
 		exASSERT(columnIndex >= 0);
-		exASSERT(columnIndex < m_numCols);
 		exASSERT( ! queryName.empty());
 		exASSERT(bufferSize > 0);
 		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
 		exASSERT( ! ( (sqlType == SQL_UNKNOWN_TYPE) && ((flags & CF_INSERT) || (flags & CF_UPDATE)) ) );
+		exASSERT(!IsOpen());
+		// Flag that columns are created manually
+		m_manualColumns = true;
 		// Read OdbcVersion from Environment
 		const Environment* pEnv = m_pDb->GetEnvironment();
 		exASSERT(pEnv != NULL);
@@ -1562,7 +1446,6 @@ namespace exodbc
 					delete pBuffer;
 				}
 				m_columnBuffers.clear();
-				m_numCols = 0;
 			}
 			// and rethrow
 			throw;
@@ -1619,7 +1502,6 @@ namespace exodbc
 				delete pBuffer;
 			}
 			m_columnBuffers.clear();
-			m_numCols = 0;
 		}
 
 		m_isOpen = false;

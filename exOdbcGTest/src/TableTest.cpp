@@ -90,7 +90,7 @@ namespace exodbc
 		// If we pass in the TableInfo directly we should also be able to "open"
 		// a totally non-sense table:
 		TableInfo neTableInfo(L"NotExisting", L"", L"", L"", L"");
-		Table neTable(&m_db, 2, neTableInfo, AF_READ);
+		Table neTable(&m_db, neTableInfo, AF_READ);
 		SQLINTEGER idNotExisting = 0;
 		neTable.SetColumn(0, L"idNotExistring", SQL_INTEGER, &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting), CF_SELECT);
 		EXPECT_NO_THROW(neTable.Open(TOF_NONE));
@@ -101,7 +101,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualWritableWithoutCheckPrivOrExist)
 	{
 		// Open an existing table without checking for privileges or existence
-		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ_WRITE);
+		Table iTable(&m_db, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ_WRITE);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -139,7 +139,7 @@ namespace exodbc
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 
 		Table iTable;
-		iTable.Init(&m_db, 4, AF_READ, intTypesTableName, L"", L"", L"");
+		iTable.Init(&m_db, AF_READ, intTypesTableName, L"", L"", L"");
 		// Set Columns
 		SQLINTEGER id;
 		SQLSMALLINT tSmallint;
@@ -174,7 +174,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualCheckColumnFlagSelect)
 	{
 		// Open a table manually but do not set the Select flag for all columns
-		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
+		Table iTable(&m_db, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -216,7 +216,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualCheckColumnFlagInsert)
 	{
 		// Open a table manually but do not set the Insert flag for all columns
-		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT | AF_DELETE);
+		Table iTable(&m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT | AF_DELETE);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -273,7 +273,7 @@ namespace exodbc
 	TEST_P(TableTest, OpenManualCheckColumnFlagUpdate)
 	{
 		// Open a table manually but do not set the Update flag for all columns
-		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_UPDATE | AF_DELETE | AF_INSERT);
+		Table iTable(&m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_UPDATE | AF_DELETE | AF_INSERT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -340,7 +340,7 @@ namespace exodbc
 	{
 		// Open a table by defining primary keys manually
 		// Open a table manually but do not set the Select flag for all columns
-		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
+		Table iTable(&m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -361,7 +361,7 @@ namespace exodbc
 		EXPECT_NO_THROW(iTable.Open(TOF_DO_NOT_QUERY_PRIMARY_KEYS));
 
 		// But opening if primary keys are not defined must fail
-		Table iTable2(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
+		Table iTable2(&m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_DELETE | AF_INSERT);
 		SQLINTEGER id2 = 0;
 		SQLSMALLINT si2 = 0;
 		SQLINTEGER i2 = 0;
@@ -380,7 +380,7 @@ namespace exodbc
 		EXPECT_THROW(iTable2.Open(TOF_DO_NOT_QUERY_PRIMARY_KEYS), Exception);
 
 		// But if we open for select only, we do not care about the primary keys
-		Table iTable3(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
+		Table iTable3(&m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_READ);
 		SQLINTEGER id3 = 0;
 		SQLSMALLINT si3 = 0;
 		SQLINTEGER i3 = 0;
@@ -489,7 +489,7 @@ namespace exodbc
 
 	TEST_P(TableTest, OpenManualWithUnsupportedColumn)
 	{
-		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
+		Table iTable(&m_db, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -1073,7 +1073,7 @@ namespace exodbc
 		wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		wstring schemaOrCatalogName = test::ConvertNameCase(L"exodbc", m_odbcInfo.m_namesCase);
 		wstring idColName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		Table iTable(&m_db, 4, tableName, L"", L"", L"", AF_READ);
+		Table iTable(&m_db, tableName, L"", L"", L"", AF_READ);
 		// We do not bind the bigint-column
 		SQLINTEGER id = 0;
 		SQLSMALLINT tSmallInt = 0;
@@ -2381,7 +2381,7 @@ namespace exodbc
 	TEST_P(TableTest, InsertManualIntTypes)
 	{
 		// Open an existing table without checking for privileges or existence
-		Table iTable(&m_db, 4, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT);
+		Table iTable(&m_db, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"", AF_SELECT | AF_INSERT);
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -3000,7 +3000,7 @@ namespace exodbc
 		// Clear the tmp-table
 		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
-		Table iTable(&m_db, 5, intTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+		Table iTable(&m_db, intTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 		// Set Columns
 		SQLINTEGER id;
 		SQLSMALLINT tSmallint;
@@ -3056,7 +3056,7 @@ namespace exodbc
 		// Clear the tmp-table
 		test::ClearCharTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
-		Table charTable(&m_db, 5, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+		Table charTable(&m_db, charTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 		// Set Columns
 		SQLINTEGER id;
 		SQLWCHAR varchar[128 + 1];
@@ -3139,7 +3139,7 @@ namespace exodbc
 		// Clear the tmp-table
 		test::ClearFloatTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
-		Table fTable(&m_db, 5, floatTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+		Table fTable(&m_db, floatTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 		
 		// Set Columns
 		SQLINTEGER id = 0;
@@ -3197,7 +3197,7 @@ namespace exodbc
 		// Clear the tmp-table
 		test::ClearDateTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
-		Table dTable(&m_db, 5, dateTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+		Table dTable(&m_db, dateTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 
 		// Set Columns
 		SQLINTEGER id = 0;
@@ -3326,7 +3326,7 @@ namespace exodbc
 		// Clear the tmp-table
 		test::ClearNumericTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
-		Table nTable(&m_db, 5, numericTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+		Table nTable(&m_db, numericTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 
 		// Set Columns
 		SQLINTEGER id = 0;
@@ -3390,7 +3390,7 @@ namespace exodbc
 		// Clear the tmp-table
 		test::ClearBlobTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
 
-		Table bTable(&m_db, 5, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
+		Table bTable(&m_db, blobTypesTmpTableName, L"", L"", L"", AF_SELECT | AF_INSERT | AF_UPDATE_PK);
 
 		// Set Columns
 		SQLINTEGER id = 0;

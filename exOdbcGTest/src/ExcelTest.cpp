@@ -188,7 +188,7 @@ namespace exodbc
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		// And create the manual table:
-		Table tTable(&db, 5, tableInfo, AF_READ);
+		Table tTable(&db, tableInfo, AF_READ);
 		SQLWCHAR id[512];
 		SQLWCHAR ic[512];
 		SQLWCHAR fc[512];
