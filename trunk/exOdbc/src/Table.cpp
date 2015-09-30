@@ -69,7 +69,7 @@ namespace exodbc
 	{ }
 
 
-	Table::Table(const Database* pDb, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */, AccessFlags afs /* = AF_READ_WRITE */)
+	Table::Table(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
 		: m_manualColumns(false)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
@@ -90,7 +90,7 @@ namespace exodbc
 	}
 
 
-	Table::Table(const Database* pDb, const TableInfo& tableInfo, AccessFlags afs /* = AF_READ_WRITE */)
+	Table::Table(const Database* pDb, AccessFlags afs, const TableInfo& tableInfo)
 		: m_manualColumns(false)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)

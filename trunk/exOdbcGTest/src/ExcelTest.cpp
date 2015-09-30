@@ -109,7 +109,7 @@ namespace exodbc
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
 		}
 		// Create Table
-		Table tTable(&db, L"TestTable$", L"", L"", L"", AF_READ);
+		Table tTable(&db, AF_READ, L"TestTable$", L"", L"", L"");
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open());
 		// Opening works, but selecting does not
@@ -129,7 +129,7 @@ namespace exodbc
 		{
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
 		}
-		Table tTable(&db, L"TestTable$", L"", L"", L"", AF_READ);
+		Table tTable(&db, AF_READ, L"TestTable$", L"", L"", L"");
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open(TOF_CHECK_EXISTANCE));
@@ -152,7 +152,7 @@ namespace exodbc
 		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
 
-		Table tTable2(&db, tableInfo, AF_READ);
+		Table tTable2(&db, AF_READ, tableInfo);
 		tTable2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable2.Open(TOF_CHECK_EXISTANCE));
 
@@ -188,7 +188,7 @@ namespace exodbc
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		// And create the manual table:
-		Table tTable(&db, tableInfo, AF_READ);
+		Table tTable(&db, AF_READ, tableInfo);
 		SQLWCHAR id[512];
 		SQLWCHAR ic[512];
 		SQLWCHAR fc[512];
@@ -240,7 +240,7 @@ namespace exodbc
 		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
 		// And create the auto table:
-		Table tTable(&db, tableInfo, AF_READ);
+		Table tTable(&db, AF_READ, tableInfo);
 		ASSERT_NO_THROW(tTable.Open(TOF_NONE));
 
 		// Select all Rows
