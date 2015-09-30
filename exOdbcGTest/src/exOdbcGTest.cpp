@@ -1,5 +1,5 @@
 /*!
- * \file wxOdbc3GoogleTest.cpp
+ * \file exOdbc3GoogleTest.cpp
  * \author Elias Gerber <eg@elisium.ch>
  * \date 22.07.2014
  * \copyright GNU Lesser General Public License Version 3

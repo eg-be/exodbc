@@ -61,7 +61,6 @@ namespace exodbc
 
 		// Note: When binding a column of type FLOAT (database-type), you still need to use SQL_C_DOUBLE
 		// SQL_C_FLOAT is for REAL (database-type), which I will not test here, mysql doesnt know about it ? but still reports float as real?
-		// TODO: Test it for db-2 specific test (REAL-type? what did I mean?). But do that once we can determine the db-type from the wxDb object itself 
 		SetColumn(0, test::ConvertNameCase(L"idfloattypes", namesCase), SQL_INTEGER, &m_idFloatTypes, SQL_C_SLONG, sizeof(m_idFloatTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
 
 		if (pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
