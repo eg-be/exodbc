@@ -67,11 +67,15 @@ namespace exodbc
 	* \brief Represent a Table from a Database. Every Table needs a Database.
 	*
 	* This class will allocate the Statements-Handles that are required
-	* to query and modify the table.
-	* Depending on which constructor is used, a table will query the database
-	* about its column-definitions later automatically, or the column-definitions
-	* must be set manually using SetColumn().
-	* During Open() the table will "bind" a buffer to every defined column.
+	* to query and modify the table. Which statements handles are allocated depends
+	* on the AccessFlags set.
+	*
+	* After creating the Table you can manually define which columns are bound
+	* for data-exchange using SetColumn().
+	*
+	* If no Columns have been bound manually when Open() is called, the Table will
+	* query the Database about the Columns and bind all Columns of the Table.
+	*
 	* Columns bound to the table will be updated with the values of the current record
 	* this table points to. Calling methods like Update(), Delete() or Insert() will
 	* modify the table in the database using the current values.
@@ -82,14 +86,10 @@ namespace exodbc
 	* a few columns.
 	* Note if a name is something like columnIndex it will refer to the zero based index.
 	*
-	* The database will always be queried for a table matching the given values in the
-	* constructor, except one of the constructors where a TableInfo structure
-	* is passed was used.
-	*
 	* A table must be opened after construction by calling Open().
 	*
-	* All statements will be freed on destruction of the Table. You should not
-	* Destroy the database before the Table is destroyed.
+	* All statements will be freed on destruction of the Table. You must not
+	* Destroy the Database before the Table is destroyed.
 	*/
 	class EXODBCAPI Table
 	{
@@ -104,7 +104,7 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Create new table where columns are queried automatically.
+		* \brief	Create new table using the passed TableInfo.
 		* \see		Init(const Database*, AccessFlags, const TableInfo&)
 		* \throw	Exception
 		*/
@@ -112,27 +112,11 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Create a new Table where columns are queried automatically.
+		* \brief	Create a new Table using the passed search-names.
 		* \see		Init(const Database* pDb, AccessFlags, const std::wstring&, const std::wstring&, const std::wstring&, const std::wstring&)
 		* \throw	Exception
 		*/
 		Table(const Database* pDb, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", AccessFlags afs = AF_READ_WRITE);
-
-
-		/*!
-		* \brief	Create a new Table where columns are defined manually.
-		* \see		Init(const Database*, SQLSMALLINT, AccessFlags, const std::wstring&, const std::wstring&, const std::wstring&, const std::wstring&)
-		* \throw	Exception
-		*/
-		Table(const Database* pDb, SQLSMALLINT numColumns, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"", AccessFlags afs = AF_READ_WRITE);
-
-
-		/*!
-		* \brief	Create a new Table where columns are defined manually.
-		* \see		Init(const Database*, SQLSMALLINT, AccessFlags, const TableInfo&)
-		* \throw	Exception
-		*/
-		Table(const Database* pDb, SQLSMALLINT numColumns, const TableInfo& tableInfo, AccessFlags afs = AF_READ_WRITE);
 
 	private:
 
@@ -146,12 +130,10 @@ namespace exodbc
 
 		/*!
 		* \brief	Initializes the Table with the TableInfo and AccessFlags passed.
-		*			The table will read its column-definitions from the database
-		*			automatically during Open() and bind all columns.
 		* \details	Note that when this initialization is used, the internal TableInfo object is not
 		*			queried from the database, but the passed tableInfo is used for all later operations.
 		*			This is handy if you've located the detailed table-information already from the Database
-		*			using its Database::FindTables() function and want to avoid that is operation is
+		*			using its Database::FindTables() function and want to avoid that this operation is
 		*			executed again during Open().
 		* \param	pDb		The Database this Table belongs to. Do not free the Database before
 		*					you've freed the Table.
@@ -167,8 +149,6 @@ namespace exodbc
 		/*!
 		* \brief	Initializes the Table with the names to search for during Open() and the
 		*			AccessFlags.
-		*			The table will read its column-definitions from the database
-		*			automatically during Open() and bind all columns.
 		* \details During Open() the database will be queried for a table matching the given values.
 		*			If any of the values is an empty string it is ignored when searching for the table
 		*			in the database.
@@ -185,58 +165,7 @@ namespace exodbc
 		* \throw	Exception If allocating statements fail.
 		*/
 		void Init(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
-		
-		
-		/*!
-		* \brief	Initializes the Table with the TableInfo and AccessFlags passed. You must
-		*			manually set the columns later using SetColumn().
-		*			During Open() only those columns you have set using SetColumn() will be bound.
-		* \details Note that when this constructor is used, the internal TableInfo object is not
-		*			queried from the database, but the passed tableInfo is used for all later operations.
-		*			This is handy if you've located the detailed table-information already from the Database
-		*			using its Database::FindTables() function and want to avoid that is operation is
-		*			executed again during Open().
-		*
-		* \param	pDb		The Database this Table belongs to. Do not free the Database before
-		*					you've freed the Table.
-		* \param	numColumns The number of columns of the Table. Note: This must not be equal
-		*			with the number of Columns you define later (but it must be larger or equal).
-		*			It should be the number of columns the Table really has in the database.
-		* \param	tableInfo Definition of the table.
-		* \param	afs Define if the table shall be opened read-only or not, determines how many statements are allocated
-		*
-		* \see		Open()
-		* \see		SetColumn()
-		* \throw	Exception If allocating statements fail.
-		*/
-		void Init(const Database* pDb, SQLSMALLINT numColumns, AccessFlags afs, const TableInfo& tableInfo);
-		
-		
-		/*!
-		* \brief	Initializes the Table with the names to search for during Open() and the
-		*			AccessFlags.  You must	manually set the columns later using SetColumn().
-		*			During Open() only those columns you have set using SetColumn() will be bound.
-		* \details During Open() the database will be queried for a table matching the given values.
-		*			If any of the values is an empty string it is ignored when searching for the table
-		*			in the database.
-		*
-		* \param	pDb		The Database this Table belongs to. Do not free the Database before
-		*					you've freed the Table.
-		* \param	numColumns The number of columns of the Table. Note: This must not be equal
-		*			with the number of Columns you define later (but it must be larger or equal).
-		*			It should be the number of columns the Table really has in the database.
-		* \param	tableName Table name
-		* \param	schemaName	Schema name
-		* \param	catalogName	Catalog name
-		* \param	tableType	Table type
-		* \param	afs Define if the table shall be opened read-only or not, determines how many statements are allocated
-		*
-		* \see		Open()
-		* \see		SetColumn()
-		* \throw	Exception If allocating statements fail.
-		*/
-		void Init(const Database* pDb, SQLSMALLINT numColumns, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
-
+			
 
 		/*!
 		* \brief	Test if the required statements (depending on OpenFlags) are allocated.
@@ -900,19 +829,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Returns the number of columns this table has.
-		* \details	If columns were set manually on the table, this is the value that has been 
-		*			passed as the total number of columns of the table. It must not be equal
-		*			with the number of columns bound.
-		*			If columns were created automatically, this is the total of columns reported
-		*			by the database for this table and should be equal with the number of
-		*			columns bound.
-		* \return	Numbers of column this table has.
-		*/
-		SQLSMALLINT	GetNumberOfColumns() const { return m_numCols; };
-
-
-		/*!
 		* \brief	Define a column manually. The column is bound during Open().
 		* \details	Pass a buffer and a description of the buffer that shall be bound to a
 		*			table column once Open() is called.
@@ -1098,7 +1014,6 @@ namespace exodbc
 		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
 		bool				m_manualColumns;		///< If true the table was initialized by passing the number of columns that will be defined later manually
-		SQLSMALLINT			m_numCols;				//< # of columns in the table. Either set from user during constructor, or read from the database
 
 		// Table information set during construction, that was used to find the matching TableInfo if none was passed
 		// Note: We make them public, as they are all const
