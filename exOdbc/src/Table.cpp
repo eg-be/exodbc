@@ -6,24 +6,6 @@
 * \copyright wxWindows Library Licence, Version 3.1
 *
 * Header file for the Table class and its helpers.
-* This file was originally wx/dbtable.cpp from wxWidgets 2.8.
-* Most of the code has been rewritten, a lot of functionality
-* not needed and not tested so far has been droped.
-*
-* For completion, here follows the old wxWidgets header:
-*
-* ///////////////////////////////////////////////////////////////////////////////<br>
-* // Name:        src/common/dbtable.cpp<br>
-* // Purpose:     Implementation of the wxDbTable class.<br>
-* // Author:      Doug Card<br>
-* // Modified by: George Tasker<br>
-* //              Bart Jourquin<br>
-* //              Mark Johnson<br>
-* // Created:     9.96<br>
-* // RCS-ID:      $Id: dbtable.cpp 48685 2007-09-14 19:02:28Z VZ $<br>
-* // Copyright:   (c) 1996 Remstar International, Inc.<br>
-* // Licence:     wxWindows licence<br>
-* ///////////////////////////////////////////////////////////////////////////////<br>
 */
 
 #include "stdafx.h"
