@@ -72,7 +72,7 @@ namespace exodbc
 		/*!
 		* \brief	Allocate a buffer for the column with passed column size.
 		* \param	columnSize	The column size value for the column.
-		* \param	bufferSize This in-out param is populated with the size (in byte)
+		* \param	bufferSize This in-out param is populated with the size (in bytes)
 		*			of the buffer allocated.
 		* \return	Pointer to the buffer allocated.
 		*/
@@ -87,6 +87,6 @@ namespace exodbc
 		virtual void FreeBuffer(SQLPOINTER pBuffer) const;
 	}
 
-} // namesapce exodbc
+} // namespace exodbc
 
 #endif // EXTENDED_TYPE_H
