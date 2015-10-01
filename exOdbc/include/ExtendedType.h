@@ -1,0 +1,92 @@
+/*!
+* \file ExtendedType.h
+* \author Elias Gerber <eg@elisium.ch>
+* \date 01.10.2015
+* \brief Header file for the ExtendedType interface.
+* \copyright GNU Lesser General Public License Version 3
+*/
+
+#pragma once
+#ifndef EXTENDED_TYPE_H
+#define EXTENDED_TYPE_H
+
+// Same component headers
+#include "exOdbc.h"
+
+// Other headers
+// System headers
+#include <set>
+
+// Forward declarations
+// --------------------
+
+namespace exodbc
+{
+	// Consts
+	// ------
+
+	// Structs
+	// -------
+
+	// Classes
+	// -------
+	
+	/*!
+	* \class TablePrivileges
+	*
+	* \brief Defines an interface to be implemented by extended types, so
+	*		they can be used by the ColumnBuffer.
+	*
+	*/
+	class EXODBCAPI ExtendedType
+	{
+	public:
+
+		/*!
+		* \brief	Get the SQL Types that are supported by this ExtendedType.
+		*/
+		virtual std::set<SQLSMALLINT> GetSupportedSqlTypes() const;
+
+
+		/*!
+		* \brief	Test if passed SQL Type is supported by this ExtendedType.
+		* \details	If this function returns true for the passed SQL Type, this
+		*			SQL Type must also be included in the set retrived by
+		*			GetSupportedSqlTypes().
+		* \param sqlType	The SQL Type.
+		* \return	True if passed SQL Type is supported.
+		*/
+		virtual bool IsSqlTypeSupported(SQLSMALLINT sqlType) const;
+
+
+		/*!
+		* \brief	Get the SQL C Type for a SQL Type supported by this ExtendedType.
+		* \param sqlType	The SQL Type.
+		* \return	The SQL C Type the passed SQL Type is mapped to.
+		* \throw	NotSupportedException If the passed SQL Type is not supported by
+		*			this ExtendedType.
+		*/
+		virtual SQLSMALLINT GetSqlCType(SQLSMALLINT sqlType) const;
+
+
+		/*!
+		* \brief	Allocate a buffer for the column with passed column size.
+		* \param	columnSize	The column size value for the column.
+		* \param	bufferSize This in-out param is populated with the size (in byte)
+		*			of the buffer allocated.
+		* \return	Pointer to the buffer allocated.
+		*/
+		virtual SQLPOINTER AllocateBuffer(SQLINTEGER columnSize, SQLLEN& bufferSize) const;
+
+
+		/*!
+		* \brief	Free the passed buffer (which must have been created by this ExtendedType).
+		* \param	pBuffer Pointer to the buffer to be freed.
+		* \throw	Exception If passed pBuffer was not allocated by this ExtendedType.
+		*/
+		virtual void FreeBuffer(SQLPOINTER pBuffer) const;
+	}
+
+} // namesapce exodbc
+
+#endif // EXTENDED_TYPE_H
