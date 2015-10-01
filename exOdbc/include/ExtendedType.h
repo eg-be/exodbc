@@ -85,7 +85,7 @@ namespace exodbc
 		* \throw	Exception If passed pBuffer was not allocated by this ExtendedType.
 		*/
 		virtual void FreeBuffer(SQLPOINTER pBuffer) const = 0;
-	}
+	};
 
 } // namespace exodbc
 
