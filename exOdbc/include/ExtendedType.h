@@ -32,7 +32,7 @@ namespace exodbc
 	// -------
 	
 	/*!
-	* \class TablePrivileges
+	* \class ExtendedTypes
 	*
 	* \brief Defines an interface to be implemented by extended types, so
 	*		they can be used by the ColumnBuffer.
@@ -45,7 +45,7 @@ namespace exodbc
 		/*!
 		* \brief	Get the SQL Types that are supported by this ExtendedType.
 		*/
-		virtual std::set<SQLSMALLINT> GetSupportedSqlTypes() const;
+		virtual std::set<SQLSMALLINT> GetSupportedSqlTypes() const = 0;
 
 
 		/*!
@@ -56,7 +56,7 @@ namespace exodbc
 		* \param sqlType	The SQL Type.
 		* \return	True if passed SQL Type is supported.
 		*/
-		virtual bool IsSqlTypeSupported(SQLSMALLINT sqlType) const;
+		virtual bool IsSqlTypeSupported(SQLSMALLINT sqlType) const = 0;
 
 
 		/*!
@@ -66,7 +66,7 @@ namespace exodbc
 		* \throw	NotSupportedException If the passed SQL Type is not supported by
 		*			this ExtendedType.
 		*/
-		virtual SQLSMALLINT GetSqlCType(SQLSMALLINT sqlType) const;
+		virtual SQLSMALLINT GetSqlCType(SQLSMALLINT sqlType) const = 0;
 
 
 		/*!
@@ -76,7 +76,7 @@ namespace exodbc
 		*			of the buffer allocated.
 		* \return	Pointer to the buffer allocated.
 		*/
-		virtual SQLPOINTER AllocateBuffer(SQLINTEGER columnSize, SQLLEN& bufferSize) const;
+		virtual SQLPOINTER AllocateBuffer(SQLINTEGER columnSize, SQLLEN& bufferSize) const = 0;
 
 
 		/*!
@@ -84,7 +84,7 @@ namespace exodbc
 		* \param	pBuffer Pointer to the buffer to be freed.
 		* \throw	Exception If passed pBuffer was not allocated by this ExtendedType.
 		*/
-		virtual void FreeBuffer(SQLPOINTER pBuffer) const;
+		virtual void FreeBuffer(SQLPOINTER pBuffer) const = 0;
 	}
 
 } // namespace exodbc
