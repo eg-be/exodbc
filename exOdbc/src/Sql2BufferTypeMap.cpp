@@ -29,13 +29,18 @@ namespace exodbc
 {
 	Sql2BufferTypeMap::Sql2BufferTypeMap() throw()
 		: m_hasDefault(false)
-		, m_defaultBufferType(0)
 	{}
 
 
-	void Sql2BufferTypeMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType) throw()
+	void Sql2BufferTypeMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType, CBufferTypeConstPtr pBufferType) throw()
 	{
-		m_typeMap[sqlType] = sqlCType;
+		exASSERT(pBufferType);
+		exASSERT(sqlCType != 0);
+		exASSERT(pBufferType->IsSqlCTypeSupported(sqlCType));
+
+		Sql2BufferTypeMapEntry entry(sqlCType, pBufferType);
+
+		m_typeMap[sqlType] = entry;
 	}
 
 
@@ -60,7 +65,8 @@ namespace exodbc
 		TypeMap::const_iterator it = m_typeMap.find(sqlType);
 		if (it != m_typeMap.end())
 		{
-			return it->second;
+			Sql2BufferTypeMapEntry entry = it->second;
+			return entry.m_sqlCType;
 		}
 
 		if (HasDefault())
@@ -80,17 +86,17 @@ namespace exodbc
 	}
 
 
-	void Sql2BufferTypeMap::SetDefault(SQLSMALLINT defaultBufferType) throw()
+	void Sql2BufferTypeMap::SetDefault(SQLSMALLINT defaultBufferType, CBufferTypeConstPtr pCBufferType) throw()
 	{
 		m_hasDefault = true;
-		m_defaultBufferType = defaultBufferType;
+		m_defaultBufferType = Sql2BufferTypeMapEntry(defaultBufferType, pCBufferType);
 	}
 
 
 	SQLSMALLINT Sql2BufferTypeMap::GetDefault() const
 	{
 		exASSERT(HasDefault());
-		return m_defaultBufferType;
+		return m_defaultBufferType.m_sqlCType;
 	}
 
 
