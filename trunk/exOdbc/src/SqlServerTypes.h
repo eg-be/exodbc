@@ -1,3 +1,5 @@
+#if ENABLE_SQL_SERVER_TYPES
+
 /*!
 * \file SqlServerTypes.h
 * \author Elias Gerber <eg@elisium.ch>
@@ -48,3 +50,5 @@ namespace exodbc
 } // namespace exodbc
 
 #endif // SQL_SERVER_TYPES_H
+
+#endif
