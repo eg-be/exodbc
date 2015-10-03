@@ -8,6 +8,8 @@
 
 #include "stdafx.h"
 
+#if ENABLE_SQL_SERVER_TYPES
+
 // Own header
 #include "SqlServerTypes.h"
 
@@ -31,3 +33,5 @@ namespace exodbc
 
 
 } // namespace exodbc
+
+#endif
