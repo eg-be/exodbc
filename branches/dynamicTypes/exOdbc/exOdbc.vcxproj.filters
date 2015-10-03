@@ -64,11 +64,14 @@
     <ClInclude Include="include\Sql2BufferTypeMap.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ExtendedType.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\SqlServerTypes.h">
       <Filter>src\ExtendedTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CBufferType.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GenericCBufferType.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +116,9 @@
     </ClCompile>
     <ClCompile Include="src\SqlServerTypes.cpp">
       <Filter>src\ExtendedTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GenericCBufferType.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
