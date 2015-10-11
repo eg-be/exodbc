@@ -29,7 +29,79 @@ namespace exodbc
 
 	// Classes
 	// -------
-	
+	//template<typename T, typename std::enable_if<!std::is_pointer<T>::value, T>::type arg = 0>
+	//class Test
+	//{
+
+	//};
+
+	//Test<int> g_test1;
+	//Test<int*> g_test2;
+
+	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
+	class SqlCBuffer
+	{
+	public:
+		SqlCBuffer()
+		{
+			//typename std::enable_if<!std::is_pointer<T>::value, T>::type arg
+
+			//static_assert(!std::is_pointer<T>::value,
+			//	"The argument to func must not be a pointer.");
+			ZeroMemory(&m_buffer, GetBufferSize());
+		};
+
+		~SqlCBuffer() {};
+
+		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
+		void SetValue(const T& value) throw() { m_buffer = value; };
+		T GetValue() const throw() { return m_buffer; };
+		SQLLEN GetBufferSize() const throw() { return sizeof(m_buffer); };
+
+	private:
+		T m_buffer;
+	};
+
+	typedef SqlCBuffer<SQLSMALLINT, SQL_C_SSHORT> SqlSmallIntBuffer;
+	typedef SqlCBuffer<SQLINTEGER, SQL_C_SLONG> SqlIntBuffer;
+	typedef SqlCBuffer<SQLBIGINT, SQL_C_SBIGINT> SqlBigIntBuffer;
+	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TYPE_TIME> SqlTimeTypeStructBuffer;
+	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TIME> SqlTimeStructBuffer;
+
+	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
+	class SqlCArrayBuffer
+	{
+	private:
+		SqlCArrayBuffer() 
+		{ 
+			exASSERT(false); 
+		};
+
+	public:
+		SqlCArrayBuffer(SQLLEN nrOfElements)
+			: m_buffer(nrOfElements)
+		{
+			ZeroMemory((void*) m_buffer.data(), GetBufferSize());
+		};
+
+		~SqlCArrayBuffer() 
+		{};
+
+		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
+		void SetValue(const T* value, SQLLEN valueSize) throw() { exASSERT(valueSize == GetBufferSize()); memcpy(m_buffer.data(), value, GetBufferSize()); };
+		void SetValue(const std::vector<T>& value) { exASSERT(value.size() == m_buffer.size()); m_buffer = value; };
+		const T* GetValue(SQLLEN& bufferSize) const throw() { bufferSize = GetBufferSize(); return m_buffer.data(); };
+		SQLLEN GetBufferSize() const throw() { return sizeof(T) * GetNrOfElements(); };
+		SQLLEN GetNrOfElements() const throw() { return m_buffer.size(); };
+
+	private:
+		std::vector<T> m_buffer;
+	};
+	typedef SqlCArrayBuffer<SQLWCHAR, SQL_C_WCHAR> SqlWCharArray;
+	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_CHAR> SqlCharArray;
+	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_BINARY> SqlBinaryArray;
+
+
 	/*!
 	* \class ExtendedTypes
 	*
@@ -90,9 +162,9 @@ namespace exodbc
 		//virtual void FreeBuffer(SQLPOINTER pBuffer) const = 0;
 
 
-		virtual SQLSMALLINT GetAsSmallInt() const = 0;
-		//virtual SQLINTEGER GetAsInt() { throw NotSupportedException(NotSupportedException::Type::SQL_C_TYPE, sqlCBufferType); };
-		//virtual SQLBIGINT GetAsBigInt() { throw NotSupportedException(NotSupportedException::Type::SQL_C_TYPE, sqlCBufferType); };
+		//virtual SQLSMALLINT GetSmallInt() const = 0;
+		//virtual SQLINTEGER GetInt() const = 0;
+		//virtual SQLBIGINT GetBigInt() { throw NotSupportedException(NotSupportedException::Type::SQL_C_TYPE, sqlCBufferType); };
 		//virtual std::wstring GetAsWString(SQLPOINTER pBuffer, SQLSMALLINT sqlCBufferType) { throw NotSupportedException(NotSupportedException::Type::SQL_C_TYPE, sqlCBufferType); };
 		//virtual std::string GetAsString(SQLPOINTER pBuffer, SQLSMALLINT sqlCBufferType) { throw NotSupportedException(NotSupportedException::Type::SQL_C_TYPE, sqlCBufferType); };
 		//virtual SQLDOUBLE GetAsDouble(SQLPOINTER pBuffer, SQLSMALLINT sqlCBufferType) { throw NotSupportedException(NotSupportedException::Type::SQL_C_TYPE, sqlCBufferType); };
@@ -103,7 +175,7 @@ namespace exodbc
 		//virtual SQL_NUMERIC_STRUCT GetAsNumeric(SQLPOINTER pBuffer, SQLSMALLINT sqlCBufferType) { throw NotSupportedException(NotSupportedException::Type::SQL_C_TYPE, sqlCBufferType); };
 
 
-		virtual void SetFromSmallInt(SQLSMALLINT value);
+		//virtual void SetSmallInt(SQLSMALLINT value);
 	};
 
 	typedef std::shared_ptr<CBufferType> CBufferTypePtr;
