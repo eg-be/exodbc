@@ -32,7 +32,7 @@ namespace exodbc
 	class EXODBCAPI GenericCBufferType
 		: public CBufferType
 	{
-	private:
+	public:
 		GenericCBufferType();
 
 		/*!
@@ -55,9 +55,9 @@ namespace exodbc
 
 		virtual bool IsSqlCTypeSupported(SQLSMALLINT sqlCType) const;
 
-		virtual SQLSMALLINT GetAsSmallInt() const;
+		virtual SQLSMALLINT GetSmallInt() const;
 
-		virtual void SetFromSmallInt(SQLSMALLINT value);
+		virtual void SetSmallInt(SQLSMALLINT value);
 
 	private:
 		SQLPOINTER m_pBuffer;

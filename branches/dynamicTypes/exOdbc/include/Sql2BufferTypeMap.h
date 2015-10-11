@@ -36,8 +36,6 @@ namespace exodbc
 	};
 
 	typedef std::map<SQLSMALLINT, Sql2BufferTypeMapEntry> TypeMap;
-	typedef std::shared_ptr<TypeMap> Sql2BufferTypeMapPtr;
-	typedef std::shared_ptr<const TypeMap> ConstSql2BufferTypeMapPtr;
 
 	/*!
 	* \class Sql2BufferTypeMap
@@ -117,6 +115,10 @@ namespace exodbc
 
 		TypeMap m_typeMap;
 	};
+
+	typedef std::shared_ptr<Sql2BufferTypeMap> Sql2BufferTypeMapPtr;
+	typedef std::shared_ptr<const Sql2BufferTypeMap> ConstSql2BufferTypeMapPtr;
+
 	
 	/*!
 	 * \class DefaultSql2BufferMap

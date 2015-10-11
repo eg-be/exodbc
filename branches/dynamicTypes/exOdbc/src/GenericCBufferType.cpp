@@ -162,4 +162,24 @@ namespace exodbc
 	{
 		return s_supportedCBufferTypes.find(sqlCType) != s_supportedCBufferTypes.end();
 	}
+
+
+	SQLSMALLINT GenericCBufferType::GetSmallInt() const
+	{
+		exASSERT(m_pBuffer);
+		exASSERT(m_bufferSqlCType == SQL_C_SSHORT);
+
+		SQLSMALLINT* pSi = static_cast<SQLSMALLINT*>(m_pBuffer);
+		return *pSi;
+	}
+
+
+	void GenericCBufferType::SetSmallInt(SQLSMALLINT value)
+	{
+		exASSERT(m_pBuffer);
+		exASSERT(m_bufferSqlCType == SQL_C_SHORT);
+
+		SQLSMALLINT* pSi = static_cast<SQLSMALLINT*>(m_pBuffer);
+		*pSi = value;
+	}
 } // namespace exodbc
