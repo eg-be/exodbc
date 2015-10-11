@@ -38,16 +38,35 @@ namespace exodbc
 	//Test<int> g_test1;
 	//Test<int*> g_test2;
 
+	class SqlCBufferLengthIndicator
+	{
+	public:
+		SqlCBufferLengthIndicator()
+			: m_cb(0)
+		{}
+
+		~SqlCBufferLengthIndicator()
+		{};
+
+		void SetCb(SQLLEN cb) throw() { m_cb = cb; };
+		SQLLEN GetCb() const throw() { return m_cb; };
+
+		void SetNull() throw() { m_cb = SQL_NULL_DATA; };
+		bool IsNull() throw() { return m_cb == SQL_NULL_DATA; };
+
+	private:
+		SQLLEN m_cb;
+	};
+
+
 	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCBuffer
+		: public SqlCBufferLengthIndicator
 	{
 	public:
 		SqlCBuffer()
+			: SqlCBufferLengthIndicator()
 		{
-			//typename std::enable_if<!std::is_pointer<T>::value, T>::type arg
-
-			//static_assert(!std::is_pointer<T>::value,
-			//	"The argument to func must not be a pointer.");
 			ZeroMemory(&m_buffer, GetBufferSize());
 		};
 
@@ -56,6 +75,7 @@ namespace exodbc
 		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
 		void SetValue(const T& value) throw() { m_buffer = value; };
 		T GetValue() const throw() { return m_buffer; };
+		const T* GetBuffer() const throw() { return &m_buffer; };
 		SQLLEN GetBufferSize() const throw() { return sizeof(m_buffer); };
 
 	private:
@@ -68,18 +88,23 @@ namespace exodbc
 	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TYPE_TIME> SqlTimeTypeStructBuffer;
 	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TIME> SqlTimeStructBuffer;
 
+
+
 	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCArrayBuffer
+		: public SqlCBufferLengthIndicator
 	{
 	private:
 		SqlCArrayBuffer() 
+			: SqlCBufferLengthIndicator()
 		{ 
 			exASSERT(false); 
 		};
 
 	public:
 		SqlCArrayBuffer(SQLLEN nrOfElements)
-			: m_buffer(nrOfElements)
+			: SqlCBufferLengthIndicator()
+			, m_buffer(nrOfElements)
 		{
 			ZeroMemory((void*) m_buffer.data(), GetBufferSize());
 		};
@@ -88,9 +113,9 @@ namespace exodbc
 		{};
 
 		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
-		void SetValue(const T* value, SQLLEN valueSize) throw() { exASSERT(valueSize == GetBufferSize()); memcpy(m_buffer.data(), value, GetBufferSize()); };
+		void SetValue(const T* value, SQLLEN valueBufferSize) throw() { exASSERT(valueBufferSize == GetBufferSize()); memcpy(m_buffer.data(), value, GetBufferSize()); };
 		void SetValue(const std::vector<T>& value) { exASSERT(value.size() == m_buffer.size()); m_buffer = value; };
-		const T* GetValue(SQLLEN& bufferSize) const throw() { bufferSize = GetBufferSize(); return m_buffer.data(); };
+		const T* GetBuffer() const throw() { return m_buffer.data(); };
 		SQLLEN GetBufferSize() const throw() { return sizeof(T) * GetNrOfElements(); };
 		SQLLEN GetNrOfElements() const throw() { return m_buffer.size(); };
 
