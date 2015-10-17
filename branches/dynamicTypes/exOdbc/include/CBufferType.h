@@ -54,29 +54,53 @@ namespace exodbc
 		void SetNull() throw() { m_cb = SQL_NULL_DATA; };
 		bool IsNull() throw() { return m_cb == SQL_NULL_DATA; };
 
-	private:
+	protected:
 		SQLLEN m_cb;
 	};
+
+
+	//class SqlCBufferAccessible
+	//{
+	//public:
+	//	virtual SQLSMALLINT GetSqlCType() const throw() = 0;
+	//	virtual const SQLPOINTER GetCBuffer() const throw() = 0;
+	//	virtual SQLLEN GetBufferSize() const throw() = 0;
+	//};
+
+
+	//class SqlCBufferBindable
+	//{
+	//public:
+	//	virtual void BindForSelect(SQLHSTMT hStmt, SQLSMALLINT columnNr, SQLINTEGER columnSize, SQLSMALLINT decimalDigits) const throw() = 0;
+	//	virtual void BindAsParam(SQLHSTMT hStmt, SQLSMALLINT parameterNumber, SQLSMALLINT databaseSqlType, SQLSMALLINT decimalDigits) const throw() = 0;
+	//};
 
 
 	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCBuffer
 		: public SqlCBufferLengthIndicator
+//		, public SqlCBufferAccessible
 	{
 	public:
 		SqlCBuffer()
 			: SqlCBufferLengthIndicator()
 		{
-			ZeroMemory(&m_buffer, GetBufferSize());
+			ZeroMemory(&m_buffer, sizeof(m_buffer));
 		};
 
 		~SqlCBuffer() {};
 
-		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
 		void SetValue(const T& value) throw() { m_buffer = value; };
 		T GetValue() const throw() { return m_buffer; };
 		const T* GetBuffer() const throw() { return &m_buffer; };
-		SQLLEN GetBufferSize() const throw() { return sizeof(m_buffer); };
+
+		//template<typename T = Q>
+		//typename std::enable_if<!std::is_same<T, SQL_NUMERIC_STRUCT>::value, bool>::type>
+		//void BindForSelect() {};
+
+		//virtual SQLSMALLINT GetSqlCType() const throw() { return sqlCType; };
+		//virtual const SQLPOINTER GetCBuffer() const throw() { return (SQLPOINTER*)GetBuffer(); };
+		//virtual SQLLEN GetBufferSize() const throw() { return sizeof(m_buffer); };
 
 	private:
 		T m_buffer;
@@ -93,12 +117,13 @@ namespace exodbc
 	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCArrayBuffer
 		: public SqlCBufferLengthIndicator
+//		, public SqlCBufferAccessible
 	{
 	private:
 		SqlCArrayBuffer() 
 			: SqlCBufferLengthIndicator()
 		{ 
-			exASSERT(false); 
+			static_assert(false, "Default Constructor is not supported, must use SqlCArrayBuffer(SQLLEN nrOfElements)");
 		};
 
 	public:
@@ -106,18 +131,20 @@ namespace exodbc
 			: SqlCBufferLengthIndicator()
 			, m_buffer(nrOfElements)
 		{
-			ZeroMemory((void*) m_buffer.data(), GetBufferSize());
+			ZeroMemory((void*) m_buffer.data(), sizeof(T) * nrOfElements);
 		};
 
 		~SqlCArrayBuffer() 
 		{};
 
-		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
 		void SetValue(const T* value, SQLLEN valueBufferSize) throw() { exASSERT(valueBufferSize == GetBufferSize()); memcpy(m_buffer.data(), value, GetBufferSize()); };
 		void SetValue(const std::vector<T>& value) { exASSERT(value.size() == m_buffer.size()); m_buffer = value; };
 		const T* GetBuffer() const throw() { return m_buffer.data(); };
-		SQLLEN GetBufferSize() const throw() { return sizeof(T) * GetNrOfElements(); };
 		SQLLEN GetNrOfElements() const throw() { return m_buffer.size(); };
+
+		//virtual SQLSMALLINT GetSqlCType() const throw() { return sqlCType; };
+		//virtual const SQLPOINTER GetCBuffer() const throw() { return (SQLPOINTER*)GetBuffer(); };
+		//virtual SQLLEN GetBufferSize() const throw() { return sizeof(T) * GetNrOfElements(); };
 
 	private:
 		std::vector<T> m_buffer;
@@ -126,6 +153,13 @@ namespace exodbc
 	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_CHAR> SqlCharArray;
 	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_BINARY> SqlBinaryArray;
 
+
+	/*
+	TODO next: The CBufferType class or so must now handle the concrete buffers.
+	and it must provide methods for Binding params and select buffers.
+
+	and somehow access to the values.
+	*/
 
 	/*!
 	* \class ExtendedTypes
