@@ -14,6 +14,7 @@
 
 // Other headers
 // System headers
+#include <mutex>
 
 // Forward declarations
 // --------------------
@@ -52,6 +53,7 @@ namespace exodbc
 	private:
 
 		BufferCreatorFuncsMap m_creatorFuncs;
+		mutable std::mutex m_creatorFuncsMutex;
 	};
 
 
