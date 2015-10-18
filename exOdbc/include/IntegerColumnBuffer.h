@@ -66,6 +66,9 @@ namespace exodbc
 		void SetValue(const T& value);
 		template<typename T>
 		void GetValue(T& value) const;
+		
+		template<typename T>
+		const T& GetBuffer() const;
 
 		virtual void BindSelect(SQLHSTMT hStmt, SQLSMALLINT columnNr) const;
 		virtual SQLSMALLINT GetSqlCType() const;
@@ -80,6 +83,22 @@ namespace exodbc
 
 		IntegerVariant m_intVariant;
 	};
+
+
+	template<typename T>
+	const T& IntegerColumnBuffer::GetBuffer() const 
+	{
+		try
+		{
+			return boost::get<T>(m_intVariant);
+		}
+		catch (const boost::bad_get& ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
+	}
 
 
 	template<typename T>
