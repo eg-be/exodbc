@@ -73,7 +73,7 @@
     <ClInclude Include="include\SqlCBuffer.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\SqlCBufferFactory.h">
+    <ClInclude Include="include\ColumnBufferFactory.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -121,6 +121,9 @@
       <Filter>src\ExtendedTypes</Filter>
     </ClCompile>
     <ClCompile Include="src\GenericCBufferType.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ColumnBufferFactory.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
