@@ -44,7 +44,7 @@ namespace exodbc
 	}
 
 
-	TEST_F(SqlCBufferLengthIndicatorTest, SetCb)
+	TEST_F(SqlCBufferLengthIndicatorTest, SetAndGetCb)
 	{
 		SqlCBufferLengthIndicator cb;
 		cb.SetCb(13);
@@ -84,8 +84,43 @@ namespace exodbc
 	}
 
 
+	// SqlCBuffer
+	// -------------
+	TEST_F(SqlCBufferTest, Construction)
+	{
+		// after construction buffer will be Null
+		SqlBigIntBuffer buff;
+		EXPECT_TRUE(buff.IsNull());
+	}
 
-	// Interfaces
-	// ----------
+
+	TEST_F(SqlCBufferTest, SetAndGetValue)
+	{
+		SqlBigIntBuffer buff;
+		buff.SetValue(13, buff.GetBufferLength());
+		EXPECT_EQ(13, buff.GetValue());
+	}
+
+
+	TEST_F(SqlCBufferTest, CopyConstruction)
+	{
+		// must internally use the same buffer
+		SqlBigIntBuffer buff;
+		buff.SetValue(25, buff.GetBufferLength());
+		ASSERT_EQ(25, buff.GetValue());
+
+		// create copy
+		SqlBigIntBuffer buff2(buff);
+		EXPECT_EQ(25, buff2.GetValue());
+
+		// changing either must change the other too
+		buff.SetValue(13, buff.GetBufferLength());
+		EXPECT_EQ(13, buff.GetValue());
+		EXPECT_EQ(13, buff.GetValue());
+
+		buff2.SetValue(14, buff.GetBufferLength());
+		EXPECT_EQ(14, buff.GetValue());
+		EXPECT_EQ(14, buff.GetValue());
+	}
 
 } //namespace exodbc

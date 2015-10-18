@@ -89,6 +89,7 @@ namespace exodbc
 			: SqlCBufferLengthIndicator()
 		{
 			m_pBuffer = std::make_shared<T>();
+			SetNull();
 		};
 
 		SqlCBuffer(const SqlCBuffer& other)
@@ -99,9 +100,10 @@ namespace exodbc
 		virtual ~SqlCBuffer() 
 		{};
 
-		void SetValue(const T& value) throw() { *m_pBuffer = value; };
+		void SetValue(const T& value, SQLLEN cb) throw() { *m_pBuffer = value; SetCb(cb); };
 		const T& GetValue() const throw() { return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const throw() { return m_pBuffer; };
+		SQLLEN GetBufferLength() const throw() { return sizeof(T); };
 
 	private:
 		std::shared_ptr<T> m_pBuffer;
@@ -133,6 +135,7 @@ namespace exodbc
 			, m_nrOfElements(nrOfElements)
 		{
 			m_pBuffer = std::shared_ptr<T>(new T[m_nrOfElements], std::default_delete<T[]>());
+			SetNull();
 		};
 
 		SqlCArrayBuffer(const SqlCArrayBuffer& other)
@@ -144,7 +147,12 @@ namespace exodbc
 		~SqlCArrayBuffer() 
 		{};
 
-		void SetValue(const T* value, SQLLEN valueBufferLength) throw() { exASSERT(valueBufferLength == GetBufferLength()); memcpy(m_pBuffer, value, GetBufferLength()); };
+		void SetValue(const T* value, SQLLEN valueBufferLength, SQLLEN cb) throw() 
+		{ 
+			exASSERT(valueBufferLength <= GetBufferLength()); 
+			memset(m_pBuffer, 0, GetBufferLength()); 
+			memcpy(m_pBuffer, value, valueBufferLength); 
+		};
 		const std::shared_ptr<T> GetBuffer() const throw() { return m_pBuffer; };
 		SQLLEN GetNrOfElements() const throw() { return m_nrOfElements; };
 		SQLLEN GetBufferLength() const throw() { return GetNrOfElements() * sizeof(T); };
