@@ -28,7 +28,7 @@
     <ClInclude Include="include\InfoObject.h" />
     <ClInclude Include="include\ObjectName.h" />
     <ClInclude Include="include\Sql2BufferTypeMap.h" />
-    <ClInclude Include="include\SqlCBufferFactory.h" />
+    <ClInclude Include="include\ColumnBufferFactory.h" />
     <ClInclude Include="include\Table.h" />
     <ClInclude Include="include\Helpers.h" />
     <ClInclude Include="include\exOdbc.h" />
@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ColumnBuffer.cpp" />
+    <ClCompile Include="src\ColumnBufferFactory.cpp" />
     <ClCompile Include="src\Database.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v120|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug_v120|x64'">NotUsing</PrecompiledHeader>
