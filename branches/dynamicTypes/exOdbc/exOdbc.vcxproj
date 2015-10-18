@@ -24,6 +24,7 @@
     <ClInclude Include="include\DebugNew.h" />
     <ClInclude Include="include\Environment.h" />
     <ClInclude Include="include\Exception.h" />
+    <ClInclude Include="include\IntegerColumnBuffer.h" />
     <ClInclude Include="include\SqlCBuffer.h" />
     <ClInclude Include="include\InfoObject.h" />
     <ClInclude Include="include\ObjectName.h" />
@@ -50,9 +51,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_v120|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Exception.cpp" />
+    <ClCompile Include="src\exOdbcMain.cpp" />
     <ClCompile Include="src\GenericCBufferType.cpp" />
     <ClCompile Include="src\Helpers.cpp" />
     <ClCompile Include="src\InfoObject.cpp" />
+    <ClCompile Include="src\IntegerColumnBuffer.cpp" />
     <ClCompile Include="src\ObjectName.cpp" />
     <ClCompile Include="src\Sql2BufferTypeMap.cpp" />
     <ClCompile Include="src\SqlServerTypes.cpp" />
