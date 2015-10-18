@@ -123,4 +123,59 @@ namespace exodbc
 		EXPECT_EQ(14, buff.GetValue());
 	}
 
+
+	// SqlCArrayBuffer
+	// -------------
+	TEST_F(SqlCArrayBufferTest, Construction)
+	{
+		// after construction buffer will be Null
+		SqlWCharArray arr(24);
+		EXPECT_TRUE(arr.IsNull());
+		EXPECT_EQ(24, arr.GetNrOfElements());
+		EXPECT_EQ(sizeof(SQLWCHAR) * 24, arr.GetBufferLength());
+	}
+
+
+	TEST_F(SqlCArrayBufferTest, SetAndGetValue)
+	{
+		SqlWCharArray arr(24);
+		wstring s(L"Hello");
+		arr.SetValue(s.c_str(), (s.length() + 1) * sizeof(SQLWCHAR), SQL_NTS);
+		wstring v(arr.GetBuffer().get());
+		EXPECT_EQ(s, v);
+		EXPECT_EQ(SQL_NTS, arr.GetCb());
+	}
+
+
+	TEST_F(SqlCArrayBufferTest, CopyConstruction)
+	{
+		// must internally use the same buffer
+		SqlWCharArray arr(24);
+		wstring s(L"Hello");
+		arr.SetValue(s.c_str(), (s.length() + 1) * sizeof(SQLWCHAR), SQL_NTS);
+		wstring v(arr.GetBuffer().get());
+		ASSERT_EQ(s, v);
+		ASSERT_EQ(SQL_NTS, arr.GetCb());
+
+		// create copy
+		SqlWCharArray arr2(arr);
+		wstring v2(arr2.GetBuffer().get());
+		EXPECT_EQ(s, v2);
+
+		// changing either must change the other too
+		s = L"World";
+		arr.SetValue(s.c_str(), (s.length() + 1) * sizeof(SQLWCHAR), SQL_NTS);
+		v = arr.GetBuffer().get();
+		v2 = arr2.GetBuffer().get();
+		EXPECT_EQ(s, v);
+		EXPECT_EQ(s, v2);
+
+		s = L"Moon";
+		arr2.SetValue(s.c_str(), (s.length() + 1) * sizeof(SQLWCHAR), SQL_NTS);
+		v = arr.GetBuffer().get();
+		v2 = arr2.GetBuffer().get();
+		EXPECT_EQ(s, v);
+		EXPECT_EQ(s, v2);
+	}
+
 } //namespace exodbc
