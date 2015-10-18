@@ -24,7 +24,7 @@
     <ClInclude Include="include\DebugNew.h" />
     <ClInclude Include="include\Environment.h" />
     <ClInclude Include="include\Exception.h" />
-    <ClInclude Include="include\CBufferType.h" />
+    <ClInclude Include="include\SqlCBuffer.h" />
     <ClInclude Include="include\InfoObject.h" />
     <ClInclude Include="include\ObjectName.h" />
     <ClInclude Include="include\Sql2BufferTypeMap.h" />

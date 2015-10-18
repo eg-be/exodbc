@@ -10,7 +10,7 @@
 
 // Same component headers
 #include "exOdbc.h"
-#include "CBufferType.h"
+#include "SqlCBuffer.h"
 
 // Other headers
 // System headers
