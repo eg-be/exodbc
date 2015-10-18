@@ -34,4 +34,12 @@ namespace exodbc
 		virtual void TearDown() {};
 	};
 
+
+	class SqlCBufferTest : public ::testing::Test
+	{
+	protected:
+		virtual void SetUp() {};
+		virtual void TearDown() {};
+	};
+
 } // namespace exodbc
