@@ -35,6 +35,7 @@ namespace exodbc
 			while (it != IntegerColumnBuffer::s_supportedCTypes.end())
 			{
 				fact.RegisterColumnBufferCreationFunc(*it, &IntegerColumnBuffer::CreateBuffer);
+				++it;
 			}
 		}
 		catch (const Exception& ex)
