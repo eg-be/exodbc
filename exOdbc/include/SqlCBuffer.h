@@ -73,7 +73,7 @@ namespace exodbc
 		SQLLEN GetCb() const throw() { return *m_pCb; };
 
 		void SetNull() throw() { *m_pCb = SQL_NULL_DATA; };
-		bool IsNull() throw() { return *m_pCb == SQL_NULL_DATA; };
+		bool IsNull() const throw() { return *m_pCb == SQL_NULL_DATA; };
 
 	protected:
 		std::shared_ptr<SQLLEN> m_pCb;
@@ -100,19 +100,23 @@ namespace exodbc
 		virtual ~SqlCBuffer() 
 		{};
 
-		static SQLSMALLINT GetSqlCType() { return sqlCType; };
+		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
+		static SQLLEN GetBufferLength() throw() { return sizeof(T); };
 
+		void SetValue(const T& value) throw() { SetValue(value, GetBufferLength()); };
 		void SetValue(const T& value, SQLLEN cb) throw() { *m_pBuffer = value; SetCb(cb); };
 		const T& GetValue() const throw() { return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const throw() { return m_pBuffer; };
-		SQLLEN GetBufferLength() const throw() { return sizeof(T); };
 
 	private:
 		std::shared_ptr<T> m_pBuffer;
 	};
 
-	typedef SqlCBuffer<SQLSMALLINT, SQL_C_SSHORT> SqlSmallIntBuffer;
-	typedef SqlCBuffer<SQLINTEGER, SQL_C_SLONG> SqlIntBuffer;
+	typedef SqlCBuffer<SQLSMALLINT, SQL_C_USHORT> SqlUShortBuffer;
+	typedef SqlCBuffer<SQLINTEGER, SQL_C_ULONG> SqlULongBuffer;
+	typedef SqlCBuffer<SQLBIGINT, SQL_C_UBIGINT> SqlUBigIntBuffer;
+	typedef SqlCBuffer<SQLSMALLINT, SQL_C_SSHORT> SqlShortBuffer;
+	typedef SqlCBuffer<SQLINTEGER, SQL_C_SLONG> SqlLongBuffer;
 	typedef SqlCBuffer<SQLBIGINT, SQL_C_SBIGINT> SqlBigIntBuffer;
 	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TYPE_TIME> SqlTimeTypeStructBuffer;
 	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TIME> SqlTimeStructBuffer;

@@ -11,6 +11,7 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Exception.h"
+#include "InfoObject.h"
 
 // Other headers
 // System headers
@@ -29,14 +30,17 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class IColumnBuffer
+	class EXODBCAPI IColumnBuffer
 	{
 	public:
 		virtual void BindSelect(SQLHSTMT hStmt, SQLSMALLINT columnNr) const = 0;
 		virtual SQLSMALLINT GetSqlCType() const = 0;
+
+		virtual bool IsNull() const = 0;
+		virtual void SetNull() = 0;
 	};
 
-	class ColumnBufferFactory
+	class EXODBCAPI ColumnBufferFactory
 	{
 		typedef std::function<std::shared_ptr<IColumnBuffer>(SQLSMALLINT)> BufferCreationFunc;
 		typedef std::map<SQLSMALLINT, BufferCreationFunc> BufferCreatorFuncsMap;
@@ -51,12 +55,17 @@ namespace exodbc
 
 	public:
 		std::shared_ptr<IColumnBuffer> CreateColumnBuffer(SQLSMALLINT sqlCBufferType);
+
 		void RegisterColumnBufferCreationFunc(SQLSMALLINT sqlCBufferType, BufferCreationFunc func);
 
 	private:
 		BufferCreatorFuncsMap m_creatorFuncs;
+
+		// todo: cannot use mutex if we do from dllmain, remove from dllmain
 //		std::mutex m_creatorFuncsMutex;
 	};
+
+	typedef std::shared_ptr<IColumnBuffer> IColumnBufferPtr;
 
 
 } // namespace exodbc

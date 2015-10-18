@@ -199,6 +199,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\EnvironmentTest.h" />
     <ClInclude Include="src\ExcelTest.h" />
+    <ClInclude Include="src\IntegerColumnBufferTest.h" />
     <ClInclude Include="src\ManualTestTables.h" />
     <ClInclude Include="src\SqlCBufferTest.h" />
     <ClInclude Include="src\TableTest.h" />
@@ -216,6 +217,7 @@
   <ItemGroup>
     <ClCompile Include="src\EnvironmentTest.cpp" />
     <ClCompile Include="src\ExcelTest.cpp" />
+    <ClCompile Include="src\IntegerColumnBufferTest.cpp" />
     <ClCompile Include="src\ManualTestTables.cpp" />
     <ClCompile Include="src\SqlCBufferTest.cpp" />
     <ClCompile Include="src\TableTest.cpp" />

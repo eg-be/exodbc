@@ -55,10 +55,9 @@ namespace exodbc
 	}
 
 
-	std::shared_ptr<IColumnBuffer> ColumnBufferFactory::CreateColumnBuffer(SQLSMALLINT sqlCBufferType)
+	IColumnBufferPtr ColumnBufferFactory::CreateColumnBuffer(SQLSMALLINT sqlCBufferType)
 	{
 //		std::lock_guard<std::mutex> lock(m_creatorFuncsMutex);
-
 		BufferCreatorFuncsMap::const_iterator it = m_creatorFuncs.find(sqlCBufferType);
 		if (it == m_creatorFuncs.end())
 		{
@@ -69,6 +68,7 @@ namespace exodbc
 
 		return it->second(sqlCBufferType);
 	}
+
 
 	// Interfaces
 	// ----------
