@@ -46,6 +46,8 @@ namespace exodbc
 
 	void ColumnBufferFactory::RegisterColumnBufferCreationFunc(SQLSMALLINT sqlCBufferType, BufferCreationFunc func)
 	{
+		std::lock_guard<std::mutex> lock(m_creatorFuncsMutex);
+
 		// Allow a type to be registered only once
 		exASSERT(m_creatorFuncs.find(sqlCBufferType) == m_creatorFuncs.end());
 		
@@ -55,6 +57,8 @@ namespace exodbc
 
 	std::shared_ptr<IColumnBuffer> ColumnBufferFactory::CreateColumnBuffer(SQLSMALLINT sqlCBufferType) const
 	{
+		std::lock_guard<std::mutex> lock(m_creatorFuncsMutex);
+
 		BufferCreatorFuncsMap::const_iterator it = m_creatorFuncs.find(sqlCBufferType);
 		if (it == m_creatorFuncs.end())
 		{
