@@ -67,11 +67,11 @@
     <ClInclude Include="src\SqlServerTypes.h">
       <Filter>src\ExtendedTypes</Filter>
     </ClInclude>
-    <ClInclude Include="include\CBufferType.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\GenericCBufferType.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SqlCBuffer.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

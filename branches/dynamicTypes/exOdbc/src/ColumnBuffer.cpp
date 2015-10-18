@@ -49,6 +49,9 @@ namespace exodbc
 
 		try
 		{
+			SqlSmallIntBuffer iBuff;
+			SqlWCharArray wcharArr(4);
+
 			// Create ObjectName from ColumnInfo
 			m_pName = new ColumnInfo(columnInfo);
 
