@@ -32,6 +32,8 @@ namespace exodbc
 	class IColumnBuffer
 	{
 	public:
+		virtual void BindSelect(SQLHSTMT hStmt, SQLSMALLINT columnNr) const = 0;
+		virtual SQLSMALLINT GetSqlCType() const = 0;
 	};
 
 	class ColumnBufferFactory
@@ -47,13 +49,13 @@ namespace exodbc
 		ColumnBufferFactory() {};
 		ColumnBufferFactory(const ColumnBufferFactory& other) {};
 
-		std::shared_ptr<IColumnBuffer> CreateColumnBuffer(SQLSMALLINT sqlCBufferType) const;
+	public:
+		std::shared_ptr<IColumnBuffer> CreateColumnBuffer(SQLSMALLINT sqlCBufferType);
 		void RegisterColumnBufferCreationFunc(SQLSMALLINT sqlCBufferType, BufferCreationFunc func);
 
 	private:
-
 		BufferCreatorFuncsMap m_creatorFuncs;
-		mutable std::mutex m_creatorFuncsMutex;
+//		std::mutex m_creatorFuncsMutex;
 	};
 
 

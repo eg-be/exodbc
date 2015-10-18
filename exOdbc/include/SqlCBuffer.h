@@ -100,6 +100,8 @@ namespace exodbc
 		virtual ~SqlCBuffer() 
 		{};
 
+		static SQLSMALLINT GetSqlCType() { return sqlCType; };
+
 		void SetValue(const T& value, SQLLEN cb) throw() { *m_pBuffer = value; SetCb(cb); };
 		const T& GetValue() const throw() { return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const throw() { return m_pBuffer; };

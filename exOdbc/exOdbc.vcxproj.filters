@@ -76,6 +76,9 @@
     <ClInclude Include="include\ColumnBufferFactory.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\IntegerColumnBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -124,6 +127,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ColumnBufferFactory.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IntegerColumnBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\exOdbcMain.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
