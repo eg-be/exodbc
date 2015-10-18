@@ -121,7 +121,7 @@ namespace exodbc
 	class SqlCArrayBuffer
 		: public SqlCBufferLengthIndicator
 	{
-	private:
+	public:
 		SqlCArrayBuffer() 
 			: SqlCBufferLengthIndicator()
 			, m_nrOfElements(0)
@@ -129,7 +129,6 @@ namespace exodbc
 			static_assert(false, "Default Constructor is not supported, must use SqlCArrayBuffer(SQLLEN nrOfElements)");
 		};
 
-	public:
 		SqlCArrayBuffer(SQLLEN nrOfElements)
 			: SqlCBufferLengthIndicator()
 			, m_nrOfElements(nrOfElements)
@@ -150,8 +149,9 @@ namespace exodbc
 		void SetValue(const T* value, SQLLEN valueBufferLength, SQLLEN cb) throw() 
 		{ 
 			exASSERT(valueBufferLength <= GetBufferLength()); 
-			memset(m_pBuffer, 0, GetBufferLength()); 
-			memcpy(m_pBuffer, value, valueBufferLength); 
+			memset(m_pBuffer.get(), 0, GetBufferLength()); 
+			memcpy(m_pBuffer.get(), value, valueBufferLength);
+			SetCb(cb);
 		};
 		const std::shared_ptr<T> GetBuffer() const throw() { return m_pBuffer; };
 		SQLLEN GetNrOfElements() const throw() { return m_nrOfElements; };

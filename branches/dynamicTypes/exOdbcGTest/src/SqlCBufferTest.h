@@ -42,4 +42,12 @@ namespace exodbc
 		virtual void TearDown() {};
 	};
 
+
+	class SqlCArrayBufferTest : public ::testing::Test
+	{
+	protected:
+		virtual void SetUp() {};
+		virtual void TearDown() {};
+	};
+
 } // namespace exodbc
