@@ -14,6 +14,8 @@
 #include "InfoObject.h"
 
 // Other headers
+#include <boost/any.hpp>
+
 // System headers
 #include <mutex>
 
@@ -55,6 +57,8 @@ namespace exodbc
 
 	public:
 		std::shared_ptr<IColumnBuffer> CreateColumnBuffer(SQLSMALLINT sqlCBufferType);
+
+		boost::any CreateSqlCBuffer(SQLSMALLINT sqlCBufferType) const;
 
 		void RegisterColumnBufferCreationFunc(SQLSMALLINT sqlCBufferType, BufferCreationFunc func);
 
