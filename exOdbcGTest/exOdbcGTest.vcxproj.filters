@@ -60,6 +60,12 @@
     <ClInclude Include="src\TestDbCreator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\SqlCBufferTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\IntegerColumnBufferTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\HelpersTest.cpp">
@@ -99,6 +105,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\TestDbCreator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SqlCBufferTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IntegerColumnBufferTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

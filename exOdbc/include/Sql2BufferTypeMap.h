@@ -12,6 +12,7 @@
 
 // Same component headers
 #include "exOdbc.h"
+#include "SqlCBuffer.h"
 
 // Other headers
 // System headers
@@ -22,6 +23,20 @@
 
 namespace exodbc
 {
+	struct Sql2BufferTypeMapEntry
+	{
+		Sql2BufferTypeMapEntry() : m_sqlCType(0) {};
+		Sql2BufferTypeMapEntry(SQLSMALLINT sqlCType, CBufferTypeConstPtr pCBufferType)
+			: m_sqlCType(sqlCType)
+			, m_pCBufferType(pCBufferType)
+		{};
+
+		SQLSMALLINT m_sqlCType;
+		CBufferTypeConstPtr m_pCBufferType;
+	};
+
+	typedef std::map<SQLSMALLINT, Sql2BufferTypeMapEntry> TypeMap;
+
 	/*!
 	* \class Sql2BufferTypeMap
 	*
@@ -43,7 +58,7 @@ namespace exodbc
 		* \param sqlType	The SQL Type.
 		* \param sqlCType	The SQL C Type to map this SQL Type to.
 		*/
-		virtual void RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType) throw();
+		virtual void RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType, CBufferTypeConstPtr pBufferType) throw();
 
 
 		/*!
@@ -83,7 +98,7 @@ namespace exodbc
 		* \brief	Set the Default Type.
 		* \param defaultBufferType	Default SQL C Type.
 		*/
-		virtual void SetDefault(SQLSMALLINT defaultBufferType) throw();
+		virtual void SetDefault(SQLSMALLINT defaultBufferType, CBufferTypeConstPtr pBufferType) throw();
 
 
 		/*!
@@ -95,13 +110,15 @@ namespace exodbc
 
 	protected:
 		bool		m_hasDefault;
-		SQLSMALLINT	m_defaultBufferType;
+		Sql2BufferTypeMapEntry	m_defaultBufferType;
 
-		typedef std::map<SQLSMALLINT, SQLSMALLINT> TypeMap;
+
 		TypeMap m_typeMap;
 	};
+
 	typedef std::shared_ptr<Sql2BufferTypeMap> Sql2BufferTypeMapPtr;
 	typedef std::shared_ptr<const Sql2BufferTypeMap> ConstSql2BufferTypeMapPtr;
+
 	
 	/*!
 	 * \class DefaultSql2BufferMap

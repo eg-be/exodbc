@@ -14,7 +14,7 @@
 
 // Same component headers
 #include "exOdbc.h"
-#include "ExtendedType.h"
+#include "CBufferType.h"
 
 // Other headers
 // System headers
@@ -42,7 +42,7 @@ namespace exodbc
 	*
 	*/
 	class EXODBCAPI SqlServerTypes
-		: public ExtendedType
+		: public CBufferType
 	{
 
 	};

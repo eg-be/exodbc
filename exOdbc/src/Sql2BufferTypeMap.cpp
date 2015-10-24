@@ -14,6 +14,7 @@
 
 // Same component headers
 #include "Exception.h"
+#include "GenericCBufferType.h"
 
 // Other headers
 
@@ -29,13 +30,18 @@ namespace exodbc
 {
 	Sql2BufferTypeMap::Sql2BufferTypeMap() throw()
 		: m_hasDefault(false)
-		, m_defaultBufferType(0)
 	{}
 
 
-	void Sql2BufferTypeMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType) throw()
+	void Sql2BufferTypeMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType, CBufferTypeConstPtr pBufferType) throw()
 	{
-		m_typeMap[sqlType] = sqlCType;
+		exASSERT(pBufferType);
+		exASSERT(sqlCType != 0);
+		exASSERT(pBufferType->IsSqlCTypeSupported(sqlCType));
+
+		Sql2BufferTypeMapEntry entry(sqlCType, pBufferType);
+
+		m_typeMap[sqlType] = entry;
 	}
 
 
@@ -60,7 +66,8 @@ namespace exodbc
 		TypeMap::const_iterator it = m_typeMap.find(sqlType);
 		if (it != m_typeMap.end())
 		{
-			return it->second;
+			Sql2BufferTypeMapEntry entry = it->second;
+			return entry.m_sqlCType;
 		}
 
 		if (HasDefault())
@@ -80,98 +87,107 @@ namespace exodbc
 	}
 
 
-	void Sql2BufferTypeMap::SetDefault(SQLSMALLINT defaultBufferType) throw()
+	void Sql2BufferTypeMap::SetDefault(SQLSMALLINT defaultBufferType, CBufferTypeConstPtr pCBufferType) throw()
 	{
 		m_hasDefault = true;
-		m_defaultBufferType = defaultBufferType;
+		m_defaultBufferType = Sql2BufferTypeMapEntry(defaultBufferType, pCBufferType);
 	}
 
 
 	SQLSMALLINT Sql2BufferTypeMap::GetDefault() const
 	{
 		exASSERT(HasDefault());
-		return m_defaultBufferType;
+		return m_defaultBufferType.m_sqlCType;
 	}
 
 
 	DefaultSql2BufferMap::DefaultSql2BufferMap(OdbcVersion odbcVersion)
 	{
-		RegisterType(SQL_SMALLINT, SQL_C_SSHORT);
-		RegisterType(SQL_INTEGER, SQL_C_SLONG);
-		RegisterType(SQL_BIGINT, SQL_C_SBIGINT);
-		RegisterType(SQL_CHAR, SQL_C_CHAR);
-		RegisterType(SQL_VARCHAR, SQL_C_CHAR);
-		RegisterType(SQL_WCHAR, SQL_C_WCHAR);
-		RegisterType(SQL_WVARCHAR, SQL_C_WCHAR);
-		RegisterType(SQL_DOUBLE, SQL_C_DOUBLE);
-		RegisterType(SQL_FLOAT, SQL_C_DOUBLE);
-		RegisterType(SQL_REAL, SQL_C_FLOAT);
+		CBufferTypeConstPtr genericBufferCreator = std::make_shared<GenericCBufferType>();
+		RegisterType(SQL_SMALLINT, SQL_C_SSHORT, genericBufferCreator);
+		RegisterType(SQL_INTEGER, SQL_C_SLONG, genericBufferCreator);
+		RegisterType(SQL_BIGINT, SQL_C_SBIGINT, genericBufferCreator);
+		RegisterType(SQL_CHAR, SQL_C_CHAR, genericBufferCreator);
+		RegisterType(SQL_VARCHAR, SQL_C_CHAR, genericBufferCreator);
+		RegisterType(SQL_WCHAR, SQL_C_WCHAR, genericBufferCreator);
+		RegisterType(SQL_WVARCHAR, SQL_C_WCHAR, genericBufferCreator);
+		RegisterType(SQL_DOUBLE, SQL_C_DOUBLE, genericBufferCreator);
+		RegisterType(SQL_FLOAT, SQL_C_DOUBLE, genericBufferCreator);
+		RegisterType(SQL_REAL, SQL_C_FLOAT, genericBufferCreator);
 		if (odbcVersion >= OdbcVersion::V_3)
 		{
 			// Register the Odbc Version 3.x Types only if the version is >= 3.x
-			RegisterType(SQL_TYPE_DATE, SQL_C_TYPE_DATE);
-			RegisterType(SQL_TYPE_TIME, SQL_C_TYPE_TIME);
-			RegisterType(SQL_TYPE_TIMESTAMP, SQL_C_TYPE_TIMESTAMP);
+			RegisterType(SQL_TYPE_DATE, SQL_C_TYPE_DATE, genericBufferCreator);
+			RegisterType(SQL_TYPE_TIME, SQL_C_TYPE_TIME, genericBufferCreator);
+			RegisterType(SQL_TYPE_TIMESTAMP, SQL_C_TYPE_TIMESTAMP, genericBufferCreator);
 			// But always register the old 2.x types. Some DBs still report them when working with 3.x
 			// But map them to the new 3.x types if we have >= 3.x
-			RegisterType(SQL_DATE, SQL_C_TYPE_DATE);
-			RegisterType(SQL_TIME, SQL_C_TYPE_TIME);
-			RegisterType(SQL_TIMESTAMP, SQL_C_TYPE_TIMESTAMP);
+			RegisterType(SQL_DATE, SQL_C_TYPE_DATE, genericBufferCreator);
+			RegisterType(SQL_TIME, SQL_C_TYPE_TIME, genericBufferCreator);
+			RegisterType(SQL_TIMESTAMP, SQL_C_TYPE_TIMESTAMP, genericBufferCreator);
 		}
 		else
 		{
 			// register old 2.x types and map them to the old types
-			RegisterType(SQL_DATE, SQL_C_DATE);
-			RegisterType(SQL_TIME, SQL_C_TIME);
-			RegisterType(SQL_TIMESTAMP, SQL_C_TIMESTAMP);
+			RegisterType(SQL_DATE, SQL_C_DATE, genericBufferCreator);
+			RegisterType(SQL_TIME, SQL_C_TIME, genericBufferCreator);
+			RegisterType(SQL_TIMESTAMP, SQL_C_TIMESTAMP, genericBufferCreator);
 		}
 #ifdef HAVE_MSODBCSQL_H
 		if (odbcVersion >= OdbcVersion::V_3_8)
 		{
-			RegisterType(SQL_SS_TIME2, SQL_C_SS_TIME2);
+			RegisterType(SQL_SS_TIME2, SQL_C_SS_TIME2, genericBufferCreator);
 		}
 		else if (odbcVersion >= OdbcVersion::V_3)
 		{
-			RegisterType(SQL_SS_TIME2, SQL_C_TYPE_TIME);
+			RegisterType(SQL_SS_TIME2, SQL_C_TYPE_TIME, genericBufferCreator);
 		}
 		else
 		{
-			RegisterType(SQL_SS_TIME2, SQL_C_TIME);
+			RegisterType(SQL_SS_TIME2, SQL_C_TIME, genericBufferCreator);
 		}
 #endif
 
-		RegisterType(SQL_BINARY, SQL_C_BINARY);
-		RegisterType(SQL_VARBINARY, SQL_C_BINARY);
-		RegisterType(SQL_LONGVARBINARY, SQL_C_BINARY);
-		RegisterType(SQL_NUMERIC, SQL_C_NUMERIC);
-		RegisterType(SQL_DECIMAL, SQL_C_NUMERIC);
+		RegisterType(SQL_BINARY, SQL_C_BINARY, genericBufferCreator);
+		RegisterType(SQL_VARBINARY, SQL_C_BINARY, genericBufferCreator);
+		RegisterType(SQL_LONGVARBINARY, SQL_C_BINARY, genericBufferCreator);
+		RegisterType(SQL_NUMERIC, SQL_C_NUMERIC, genericBufferCreator);
+		RegisterType(SQL_DECIMAL, SQL_C_NUMERIC, genericBufferCreator);
 	}
 
 
 	WCharSql2BufferMap::WCharSql2BufferMap()
 	{
-		SetDefault(SQL_C_WCHAR);
+		CBufferTypeConstPtr genericBufferCreator = std::make_shared<GenericCBufferType>();
+
+		SetDefault(SQL_C_WCHAR, genericBufferCreator);
 	}
 
 
 	CharSql2BufferMap::CharSql2BufferMap()
 	{
-		SetDefault(SQL_C_CHAR);
+		CBufferTypeConstPtr genericBufferCreator = std::make_shared<GenericCBufferType>();
+
+		SetDefault(SQL_C_CHAR, genericBufferCreator);
 	}
 
 
 	CharAsWCharSql2BufferMap::CharAsWCharSql2BufferMap(OdbcVersion odbcVersion)
 		: DefaultSql2BufferMap(odbcVersion)
 	{
-		RegisterType(SQL_CHAR, SQL_C_WCHAR);
-		RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
+		CBufferTypeConstPtr genericBufferCreator = std::make_shared<GenericCBufferType>();
+
+		RegisterType(SQL_CHAR, SQL_C_WCHAR, genericBufferCreator);
+		RegisterType(SQL_VARCHAR, SQL_C_WCHAR, genericBufferCreator);
 	}
 
 
 	WCharAsCharSql2BufferMap::WCharAsCharSql2BufferMap(OdbcVersion odbcVersion)
 		: DefaultSql2BufferMap(odbcVersion)
 	{
-		RegisterType(SQL_WCHAR, SQL_C_CHAR);
-		RegisterType(SQL_WVARCHAR, SQL_C_CHAR);
+		CBufferTypeConstPtr genericBufferCreator = std::make_shared<GenericCBufferType>();
+
+		RegisterType(SQL_WCHAR, SQL_C_CHAR, genericBufferCreator);
+		RegisterType(SQL_WVARCHAR, SQL_C_CHAR, genericBufferCreator);
 	}
 }

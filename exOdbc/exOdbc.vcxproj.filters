@@ -64,11 +64,20 @@
     <ClInclude Include="include\Sql2BufferTypeMap.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ExtendedType.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\SqlServerTypes.h">
       <Filter>src\ExtendedTypes</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GenericCBufferType.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SqlCBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ColumnBufferFactory.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\IntegerColumnBuffer.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +122,18 @@
     </ClCompile>
     <ClCompile Include="src\SqlServerTypes.cpp">
       <Filter>src\ExtendedTypes</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GenericCBufferType.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ColumnBufferFactory.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\IntegerColumnBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\exOdbcMain.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
