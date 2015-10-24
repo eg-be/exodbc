@@ -20,6 +20,7 @@
 #include "Environment.h"
 #include "Exception.h"
 #include "Sql2BufferTypeMap.h"
+#include "ColumnBufferFactory.h"
 
 // Other headers
 
@@ -314,6 +315,7 @@ namespace exodbc
 		exASSERT(m_manualColumns == false);
 		exASSERT(m_columnBuffers.size() == 0);
 		exASSERT(m_pDb->IsOpen());
+		exASSERT(m_sqlCBuffers.empty());
 
 		// Nest try-catch to always free eventually allocated buffers
 		try
@@ -351,6 +353,10 @@ namespace exodbc
 				ColumnInfo colInfo = columns[columnIndex];
 				try
 				{
+					SQLSMALLINT sqlCType = m_pSql2BufferTypeMap->GetBufferType(colInfo.GetSqlType());
+					boost::any buffer = ColumnBufferFactory::Instance().CreateSqlCBuffer(sqlCType);
+					m_sqlCBuffers[bufferIndex] = buffer;
+
 					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, odbcVersion, m_pSql2BufferTypeMap, columnFlags);
 					m_columnBuffers[bufferIndex] = pColBuff;
 					++bufferIndex;
@@ -1376,6 +1382,26 @@ namespace exodbc
 						++boundColumnNumber;
 					}
 				}
+
+				for (std::map<SQLUSMALLINT, boost::any>::iterator it = m_sqlCBuffers.begin(); it != m_sqlCBuffers.end(); ++it)
+				{
+					SQLUSMALLINT colIndex = it->first;
+					boost::any sqlCBuffer = it->second;
+					try
+					{
+						const SqlLongBuffer& sl = boost::any_cast<const SqlLongBuffer&>(sqlCBuffer);
+						const SqlCBufferLengthIndicator& bl = boost::any_cast<const SqlCBufferLengthIndicator&>(sqlCBuffer);
+						const SqlCBufferLengthIndicator* pLi = boost::any_cast<const SqlCBufferLengthIndicator*>(sqlCBuffer);
+						int p = 3;
+					}
+					catch (const boost::bad_any_cast& ex)
+					{
+						WrapperException we(ex);
+						SET_EXCEPTION_SOURCE(we);
+						throw we;
+					}
+				}
+
 				boundSelect = true;
 			}
 

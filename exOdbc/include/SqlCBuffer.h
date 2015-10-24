@@ -13,6 +13,8 @@
 #include "Exception.h"
 
 // Other headers
+#include <boost/any.hpp>
+
 // System headers
 #include <set>
 
@@ -108,9 +110,20 @@ namespace exodbc
 		const T& GetValue() const throw() { return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const throw() { return m_pBuffer; };
 
+		void BindSelect() {};
+
 	private:
 		std::shared_ptr<T> m_pBuffer;
 	};
+
+
+	class SqlCBufferAnyWrapper
+	{
+	public:
+		boost::any m_sqlCBuffer;
+		std::function<void()> m_bindSelectFunction;
+	};
+
 
 	typedef SqlCBuffer<SQLSMALLINT, SQL_C_USHORT> SqlUShortBuffer;
 	typedef SqlCBuffer<SQLINTEGER, SQL_C_ULONG> SqlULongBuffer;

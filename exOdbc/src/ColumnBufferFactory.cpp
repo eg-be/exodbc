@@ -14,6 +14,7 @@
 
 // Same component headers
 #include "Exception.h"
+#include "SqlCBuffer.h"
 
 // Other headers
 
@@ -69,6 +70,41 @@ namespace exodbc
 		return it->second(sqlCBufferType);
 	}
 
+
+	class Foo
+	{
+	public:
+		void Bar(int i) const {};
+	};
+
+	boost::any ColumnBufferFactory::CreateSqlCBuffer(SQLSMALLINT sqlCBufferType) const
+	{
+		SqlCBufferAnyWrapper wrapper;
+
+		std::function<void(const Foo&, int)> f_add_display = &Foo::Bar;
+//		std::function<void(const Foo&)> f = &Foo::Bar;
+
+		switch (sqlCBufferType)
+		{
+		case SQL_C_USHORT:
+			wrapper.m_sqlCBuffer = SqlUShortBuffer();
+			break;
+		case SQL_C_SSHORT:
+			return SqlShortBuffer();
+		case SQL_C_ULONG:
+			return SqlULongBuffer();
+		case SQL_C_SLONG:
+			return SqlLongBuffer();
+		case SQL_C_UBIGINT:
+			return SqlUBigIntBuffer();
+		case SQL_C_SBIGINT:
+			return SqlBigIntBuffer();
+		}
+
+		NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, sqlCBufferType);
+		SET_EXCEPTION_SOURCE(nse);
+		throw nse;
+	}
 
 	// Interfaces
 	// ----------

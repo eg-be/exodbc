@@ -4073,6 +4073,22 @@ namespace exodbc
 	}
 
 
+	TEST_P(TableTest, FooBar)
+	{
+		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		Table iTable(&m_db, AF_SELECT, intTypesTableName, L"", L"", L"");
+		try
+		{
+			iTable.Open();
+		}
+		catch (const Exception& ex)
+		{
+			int p = 3;
+		}
+
+	}
+
+
 // Interfaces
 // ----------
 
