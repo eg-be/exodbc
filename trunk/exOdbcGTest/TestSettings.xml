@@ -10,26 +10,38 @@
 
   <Dsn>
     <Disabled>1</Disabled>
-    <Name>exMySql</Name>
+    <Name>exMySql_64</Name>
     <User>ex</User>
     <Pass>extest</Pass>
     <Case>lower</Case>
   </Dsn>
 
   <Dsn>
-    <Disabled>0</Disabled>
-    <Name>exDB2</Name>
+    <Disabled>1</Disabled>
+    <Name>exDB2_64</Name>
     <User>db2ex</User>
     <Pass>extest</Pass>
     <Case>upper</Case>
   </Dsn>
 
-  <!--ConnectionString>
-    <Disabled>0</Disabled>
+  <ConnectionString>
+    <Disabled>1</Disabled>
     <Value>Driver={SQL Server Native Client 11.0};Server=192.168.56.20\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;</Value>
     <Case>lower</Case>
-  </ConnectionString-->
-  
+  </ConnectionString>
+
+  <ConnectionString>
+    <Disabled>1</Disabled>
+    <Value>Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;</Value>
+    <Case>lower</Case>
+  </ConnectionString>
+
+  <ConnectionString>
+    <Disabled>0</Disabled>
+    <Value>Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;</Value>
+    <Case>upper</Case>
+  </ConnectionString>
+
   <CreateDb>0</CreateDb>
   
   <LogLevel>Info</LogLevel>
