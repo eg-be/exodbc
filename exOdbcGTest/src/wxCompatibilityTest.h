@@ -36,7 +36,7 @@ namespace exodbc
 	
 	// Classes
 	// -------
-	class wxCompatibilityTest : public ::testing::TestWithParam<TestParams>
+	class wxCompatibilityTest : public ::testing::Test
 	{
 	public:
 		static void SetUpTestCase();
@@ -50,12 +50,6 @@ namespace exodbc
 		exodbc::Environment	m_env;
 		exodbc::Database	m_db;
 	};
-
-	INSTANTIATE_TEST_CASE_P(
-		ParametrizedOdbc,
-		wxCompatibilityTest,
-		::testing::ValuesIn(g_odbcInfos));	 
-
 }
 
 

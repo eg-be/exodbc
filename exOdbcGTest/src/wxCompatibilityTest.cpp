@@ -38,7 +38,7 @@ namespace exodbc
 	void wxCompatibilityTest::SetUp()
 	{
 		// Run for every test
-		m_odbcInfo = GetParam();
+		m_odbcInfo = g_odbcInfo;
 
 		// Set up environment
 		m_env.Init(OdbcVersion::V_3);
@@ -67,7 +67,7 @@ namespace exodbc
 
 
 	// Test opening the tables we use in the later tests
-	TEST_P(wxCompatibilityTest, OpenTableCheckExistance)
+	TEST_F(wxCompatibilityTest, OpenTableCheckExistance)
 	{
 		MCharTypesTable charTypesTable(&m_db, m_odbcInfo.m_namesCase);
 		EXPECT_NO_THROW(charTypesTable.Open(TOF_CHECK_EXISTANCE));
@@ -100,7 +100,7 @@ namespace exodbc
 
 
 	// Test basic GetNext
-	TEST_P(wxCompatibilityTest, GetNextTest)
+	TEST_F(wxCompatibilityTest, GetNextTest)
 	{
 		MCharTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -130,7 +130,7 @@ namespace exodbc
 
 
 	// Test reading datatypes
-	TEST_P(wxCompatibilityTest, SelectDateTypes)
+	TEST_F(wxCompatibilityTest, SelectDateTypes)
 	{
 		MDateTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
@@ -213,7 +213,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, SelectIntTypes)
+	TEST_F(wxCompatibilityTest, SelectIntTypes)
 	{
 		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -261,7 +261,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, SelectWCharTypes)
+	TEST_F(wxCompatibilityTest, SelectWCharTypes)
 	{
 		MWCharTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -297,7 +297,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, SelectFloatTypes)
+	TEST_F(wxCompatibilityTest, SelectFloatTypes)
 	{		
 		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -353,7 +353,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, SelectNumericTypesAsChar)
+	TEST_F(wxCompatibilityTest, SelectNumericTypesAsChar)
 	{
 		MNumericTypesAsCharTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -419,7 +419,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, SelectBlobTypes)
+	TEST_F(wxCompatibilityTest, SelectBlobTypes)
 	{
 		MBlobTypesTable table(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -467,7 +467,7 @@ namespace exodbc
 	}
 	
 
-	TEST_P(wxCompatibilityTest, SelectIncompleteTable)
+	TEST_F(wxCompatibilityTest, SelectIncompleteTable)
 	{
 		MCharTable table(&m_db, m_odbcInfo.m_namesCase);
 		MIncompleteCharTable incTable(&m_db, m_odbcInfo.m_namesCase);
@@ -528,7 +528,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, ExecSql_InsertCharTypes)
+	TEST_F(wxCompatibilityTest, ExecSql_InsertCharTypes)
 	{
 		MWCharTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"CharTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -561,7 +561,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, ExecSQL_InsertFloatTypes)
+	TEST_F(wxCompatibilityTest, ExecSQL_InsertFloatTypes)
 	{
 		MFloatTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"FloatTypes_tmp");
 		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
@@ -610,7 +610,7 @@ namespace exodbc
 		EXPECT_FALSE(table.SelectNext());
 	}
 
-	TEST_P(wxCompatibilityTest, ExecSQL_InsertNumericTypesAsChar)
+	TEST_F(wxCompatibilityTest, ExecSQL_InsertNumericTypesAsChar)
 	{
 		MNumericTypesAsCharTable table(&m_db, m_odbcInfo.m_namesCase, L"NumericTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -666,7 +666,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, ExecSQL_InsertIntTypes)
+	TEST_F(wxCompatibilityTest, ExecSQL_InsertIntTypes)
 	{
 		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"IntegerTypes_tmp");
 		ASSERT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
@@ -703,7 +703,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(wxCompatibilityTest, ExecSQL_InsertDateTypes)
+	TEST_F(wxCompatibilityTest, ExecSQL_InsertDateTypes)
 	{
 		MDateTypesTable table(&m_db, m_odbcInfo.m_namesCase, L"DateTypes_tmp");
 		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)

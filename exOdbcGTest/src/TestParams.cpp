@@ -92,41 +92,58 @@ namespace exodbc
 
 			// Parse the XML into the property tree.
 			pt::read_xml(settingsFile.string(), tree);
-			bool dsnDisabled = tree.get<bool>(L"TestSettings.Dsn.Disabled");
-			if (!dsnDisabled)
+
+			for (const pt::wptree::value_type &v : tree.get_child(L"TestSettings"))
 			{
-				m_dsn = tree.get<std::wstring>(L"TestSettings.Dsn.Name");
-				m_username = tree.get<std::wstring>(L"TestSettings.Dsn.User");
-				m_password = tree.get<std::wstring>(L"TestSettings.Dsn.Pass");
+				wstring elementName = v.first.data();
+				pt::wptree subTree = v.second;
+				if (elementName == L"Dsn")
+				{
+					bool disabled = subTree.get<bool>(L"Disabled");
+					if (!disabled)
+					{
+						m_dsn = subTree.get<wstring>(L"Name");
+						m_username = subTree.get<wstring>(L"User");
+						m_password = subTree.get<wstring>(L"Pass");
+					}
+				}
+				if (elementName == L"ConnectionString")
+				{
+					bool disabled = subTree.get<bool>(L"Disabled");
+					if (!disabled)
+					{
+						m_connectionString = subTree.get<wstring>(L"Value");
+					}
+				}
+				else if (elementName == L"ConnectionString" || elementName == L"Dsn")
+				{
+					bool disabled = subTree.get<bool>(L"Disabled");
+					if (!disabled)
+					{
+						wstring namesCase = subTree.get<wstring>(L"Case");
+						if (ba::iequals(namesCase, L"u") || ba::iequals(namesCase, L"upper"))
+						{
+							m_namesCase = test::Case::UPPER;
+						}
+						else if (ba::iequals(namesCase, L"l") || ba::iequals(namesCase, L"lower"))
+						{
+							m_namesCase = test::Case::LOWER;
+						}
+						else
+						{
+							wstringstream ws;
+							ws << L"TestSettings.Case must be either 'upper', 'u', 'lower' or 'l', but it is " << namesCase;
+							IllegalArgumentException ae(ws.str());
+							SET_EXCEPTION_SOURCE(ae);
+							throw ae;
+						}
+					}
+				}
 			}
 
-			bool csDisabled = tree.get<bool>(L"TestSettings.ConnectionString.Disabled");
-			if (!csDisabled)
-			{
-				m_connectionString = tree.get<std::wstring>(L"TestSettings.ConnectionString.Value");
-			}
-
-			if (dsnDisabled && csDisabled)
+			if (!IsUsable())
 			{
 				LOG_WARNING(L"DSN and ConnectionString are both disabled");
-			}
-
-			wstring namesCase = tree.get<wstring>(L"TestSettings.Case");
-			if (ba::iequals(namesCase, L"u") || ba::iequals(namesCase, L"upper"))
-			{
-				m_namesCase = test::Case::UPPER;
-			}
-			else if (ba::iequals(namesCase, L"l") || ba::iequals(namesCase, L"lower"))
-			{
-				m_namesCase = test::Case::LOWER;
-			}
-			else
-			{
-				wstringstream ws;
-				ws << L"TestSettings.Case must be either 'upper', 'u', 'lower' or 'l', but it is " << namesCase;
-				IllegalArgumentException ae(ws.str());
-				SET_EXCEPTION_SOURCE(ae);
-				throw ae;
 			}
 
 			m_createDb = tree.get<bool>(L"TestSettings.CreateDb");

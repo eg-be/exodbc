@@ -557,16 +557,15 @@ namespace exodbc
 		exodbc::Table nst(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
 
 		// Expect to fail if we open with default flags
-		EXPECT_THROW(nst.Open(), NotSupportedException);
-
+		ASSERT_THROW(nst.Open(), NotSupportedException);
 		// But not if we pass the flag to skip
 		{
 			LogLevelFatal llf;
-			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
+			ASSERT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
 		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
-		nst.Select();
+		EXPECT_NO_THROW(nst.Select());
 		EXPECT_TRUE(nst.SelectNext());
 		SQLINTEGER id, int1, int2;
 		EXPECT_NO_THROW(id = nst.GetInt(0));
@@ -594,7 +593,7 @@ namespace exodbc
 		}
 
 		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
-		nst.Select();
+		EXPECT_NO_THROW(nst.Select());
 		EXPECT_TRUE(nst.SelectNext());
 		SQLINTEGER id, int1, int2;
 		EXPECT_NO_THROW(id = nst.GetInt(0));
