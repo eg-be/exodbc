@@ -1,7 +1,7 @@
 <TestSettings>
 
   <Dsn>
-    <Disabled>1</Disabled>
+    <Disabled>0</Disabled>
     <Name>exSqlServer_64</Name>
     <User>ex</User>
     <Pass>extest</Pass>
@@ -65,7 +65,7 @@
   </ConnectionString>
 
   <ConnectionString>
-    <Disabled>0</Disabled>
+    <Disabled>1</Disabled>
     <Value>Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\exOdbc\exOdbcGTest\access\exodbc.mdb;Uid=Admin;Pwd=;</Value>
     <Case>lower</Case>
   </ConnectionString>  

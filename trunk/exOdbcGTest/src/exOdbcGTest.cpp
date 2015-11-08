@@ -29,8 +29,6 @@
 namespace exodbc
 {
 	TestParams g_odbcInfo;
-	std::vector<TestParams> g_odbcInfos = std::vector<TestParams>();
-	boost::log::trivial::severity_level g_logSeverity = boost::log::trivial::error;
 }
 
 namespace ba = boost::algorithm;
@@ -115,7 +113,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	// Set defaults
 	bool doCreateDb = false;
-	g_logSeverity = boost::log::trivial::info;
+	g_odbcInfo.m_logSeverity = boost::log::trivial::info;
 
 	// Iterate given options
 	for (int i = 1; i < argc; i++)
@@ -133,22 +131,22 @@ int _tmain(int argc, _TCHAR* argv[])
 			switch (arg[logLevel.length()])
 			{
 			case 'T':
-				g_logSeverity = boost::log::trivial::trace;
+				g_odbcInfo.m_logSeverity = boost::log::trivial::trace;
 				break;
 			case 'D':
-				g_logSeverity = boost::log::trivial::debug;
+				g_odbcInfo.m_logSeverity = boost::log::trivial::debug;
 				break;
 			case 'I':
-				g_logSeverity = boost::log::trivial::info;
+				g_odbcInfo.m_logSeverity = boost::log::trivial::info;
 				break;
 			case 'W':
-				g_logSeverity = boost::log::trivial::warning;
+				g_odbcInfo.m_logSeverity = boost::log::trivial::warning;
 				break;
 			case 'E':
-				g_logSeverity = boost::log::trivial::error;
+				g_odbcInfo.m_logSeverity = boost::log::trivial::error;
 				break;
 			case 'F':
-				g_logSeverity = boost::log::trivial::fatal;
+				g_odbcInfo.m_logSeverity = boost::log::trivial::fatal;
 				break;
 			}
 		}
@@ -189,18 +187,18 @@ int _tmain(int argc, _TCHAR* argv[])
 			{
 				test::Case nameCase = upperDsn.length() > 0 ? test::Case::UPPER : test::Case::LOWER;
 				TestParams dsnEntry(tokens[0], tokens[1], tokens[2], nameCase);
-				g_odbcInfos.push_back(dsnEntry);
+				g_odbcInfo = dsnEntry;
 			}
 		}
 		if (upperCs.length() > 0 || lowerCs.length() > 0)
 		{
 			test::Case nameCase = upperCs.length() > 0 ? test::Case::UPPER : test::Case::LOWER;
 			TestParams csEntry(upperCs.length() > 0 ? upperCs : lowerCs, nameCase);
-			g_odbcInfos.push_back(csEntry);
+			g_odbcInfo = csEntry;
 		}
 	}
 
-	if (g_odbcInfos.size() == 0)
+	if (!g_odbcInfo.IsUsable())
 	{
 		// Read default settings
 		LOG_INFO(L"Loading Default Settings from TestSettings.xml");
@@ -219,7 +217,6 @@ int _tmain(int argc, _TCHAR* argv[])
 				settingsPath /= L"exOdbcGTest/TestSettings.xml";
 			}
 			g_odbcInfo.Load(settingsPath);
-			g_logSeverity = g_odbcInfo.m_logSeverity;
 			doCreateDb = g_odbcInfo.m_createDb;
 		}
 		catch (const Exception& ex)
@@ -229,54 +226,44 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 	}
 	else
-	{
-		// while removing just take the first one
-		if (g_odbcInfos.size() > 1)
-		{
-			LOG_WARNING(L"Ignoring multiple database settings, using only the first valid");
-		}
-		g_odbcInfo = g_odbcInfos[0];
-		LOG_INFO(L"Running tests against: " << g_odbcInfo);
-	}
+
+	LOG_INFO(L"Running tests against: " << g_odbcInfo);
 
 	// Set a filter for the logging
 	boost::log::core::get()->set_filter
 		(
-		boost::log::trivial::severity >= boost::ref(g_logSeverity)
+		boost::log::trivial::severity >= boost::ref(g_odbcInfo.m_logSeverity)
 		);
 
 	// Check if we need to re-create the dbs
 	if (doCreateDb)
 	{
-		for (std::vector<TestParams>::const_iterator it = g_odbcInfos.begin(); it != g_odbcInfos.end(); ++it)
+		try
 		{
-			try
+			namespace fs = boost::filesystem;
+			// Prepare Db-creator
+			TestDbCreator creator(g_odbcInfo);
+			// The base-path is relative to our app-path
+			TCHAR moduleFile[MAX_PATH];
+			if (::GetModuleFileName(NULL, moduleFile, MAX_PATH) == 0)
 			{
-				namespace fs = boost::filesystem;
-				// Prepare Db-creator
-				TestDbCreator creator(*it);
-				// The base-path is relative to our app-path
-				TCHAR moduleFile[MAX_PATH];
-				if (::GetModuleFileName(NULL, moduleFile, MAX_PATH) == 0)
-				{
-					THROW_WITH_SOURCE(Exception, L"Failed in GetModuleFileName");
-				}
-				fs::wpath exePath(moduleFile);
-				fs::wpath exeDir = exePath.parent_path();
-				fs::wpath scriptDir = exeDir / L"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
-				if (!fs::is_directory(scriptDir))
-				{
-					THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"ScriptDirectory '%s' is not a directory") % scriptDir.native()));
-				}
-				creator.SetScriptDirectory(scriptDir);
-				creator.RunAllScripts();
+				THROW_WITH_SOURCE(Exception, L"Failed in GetModuleFileName");
 			}
-			catch (const Exception& ex)
+			fs::wpath exePath(moduleFile);
+			fs::wpath exeDir = exePath.parent_path();
+			fs::wpath scriptDir = exeDir / L"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
+			if (!fs::is_directory(scriptDir))
 			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to create Test-Database for DSN '%s': %s") % it->m_dsn % ex.ToString()));
-				::getchar();
-				return -1;
+				THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"ScriptDirectory '%s' is not a directory") % scriptDir.native()));
 			}
+			creator.SetScriptDirectory(scriptDir);
+			creator.RunAllScripts();
+		}
+		catch (const Exception& ex)
+		{
+			LOG_ERROR(boost::str(boost::wformat(L"Failed to create Test-Database for DSN '%s': %s") % g_odbcInfo.m_dsn % ex.ToString()));
+			::getchar();
+			return -1;
 		}
 	}
 

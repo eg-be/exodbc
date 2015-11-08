@@ -31,11 +31,6 @@ namespace exodbc
 {
 	extern TestParams g_odbcInfo;
 
-	extern std::vector<TestParams> g_odbcInfos;
-
-	extern boost::log::trivial::severity_level g_logSeverity;
-	
-
 	// Structs
 	// -------
 
@@ -53,9 +48,9 @@ namespace exodbc
 
 	struct LogLevelTrace
 	{
-		LogLevelTrace() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::trace; };
+		LogLevelTrace() { m_originalLevel = g_odbcInfo.m_logSeverity; g_odbcInfo.m_logSeverity = boost::log::trivial::trace; };
 
-		~LogLevelTrace() { g_logSeverity = m_originalLevel; };
+		~LogLevelTrace() { g_odbcInfo.m_logSeverity = m_originalLevel; };
 
 	private:
 		boost::log::trivial::severity_level m_originalLevel;
@@ -64,9 +59,9 @@ namespace exodbc
 
 	struct LogLevelDebug
 	{
-		LogLevelDebug() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::debug; };
+		LogLevelDebug() { m_originalLevel = g_odbcInfo.m_logSeverity; g_odbcInfo.m_logSeverity = boost::log::trivial::debug; };
 
-		~LogLevelDebug() { g_logSeverity = m_originalLevel; };
+		~LogLevelDebug() { g_odbcInfo.m_logSeverity = m_originalLevel; };
 
 	private:
 		boost::log::trivial::severity_level m_originalLevel;
@@ -75,9 +70,9 @@ namespace exodbc
 
 	struct LogLevelInfo
 	{
-		LogLevelInfo() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::info; };
+		LogLevelInfo() { m_originalLevel = g_odbcInfo.m_logSeverity; g_odbcInfo.m_logSeverity = boost::log::trivial::info; };
 
-		~LogLevelInfo() { g_logSeverity = m_originalLevel; };
+		~LogLevelInfo() { g_odbcInfo.m_logSeverity = m_originalLevel; };
 
 	private:
 		boost::log::trivial::severity_level m_originalLevel;
@@ -86,9 +81,9 @@ namespace exodbc
 
 	struct LogLevelWarning
 	{
-		LogLevelWarning() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::warning; };
+		LogLevelWarning() { m_originalLevel = g_odbcInfo.m_logSeverity; g_odbcInfo.m_logSeverity = boost::log::trivial::warning; };
 
-		~LogLevelWarning() { g_logSeverity = m_originalLevel; };
+		~LogLevelWarning() { g_odbcInfo.m_logSeverity = m_originalLevel; };
 
 	private:
 		boost::log::trivial::severity_level m_originalLevel;
@@ -98,9 +93,9 @@ namespace exodbc
 	struct LogLevelError
 	{
 	public:
-		LogLevelError() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::error; };
+		LogLevelError() { m_originalLevel = g_odbcInfo.m_logSeverity; g_odbcInfo.m_logSeverity = boost::log::trivial::error; };
 
-		~LogLevelError() { g_logSeverity = m_originalLevel; };
+		~LogLevelError() { g_odbcInfo.m_logSeverity = m_originalLevel; };
 	
 	private:
 		boost::log::trivial::severity_level m_originalLevel;
@@ -109,9 +104,9 @@ namespace exodbc
 
 	struct LogLevelFatal
 	{
-		LogLevelFatal() { m_originalLevel = g_logSeverity; g_logSeverity = boost::log::trivial::fatal; };
+		LogLevelFatal() { m_originalLevel = g_odbcInfo.m_logSeverity; g_odbcInfo.m_logSeverity = boost::log::trivial::fatal; };
 
-		~LogLevelFatal() { g_logSeverity = m_originalLevel; };
+		~LogLevelFatal() { g_odbcInfo.m_logSeverity = m_originalLevel; };
 
 	private:
 		boost::log::trivial::severity_level m_originalLevel;
