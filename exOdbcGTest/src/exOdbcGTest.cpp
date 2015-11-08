@@ -28,7 +28,8 @@
 // -------
 namespace exodbc
 {
-	std::vector<SOdbcInfo> g_odbcInfos = std::vector<SOdbcInfo>();
+	TestParams g_odbcInfo;
+	std::vector<TestParams> g_odbcInfos = std::vector<TestParams>();
 	boost::log::trivial::severity_level g_logSeverity = boost::log::trivial::error;
 }
 
@@ -60,55 +61,57 @@ bool extractParamValue( int argc, const _TCHAR* const argv[],const std::wstring&
 	return false;
 }
 
+
+void printHelp()
+{
+	using namespace std;
+
+	wcerr << L"Usage: exOdbcGTest [OPTION]... [DATABASE]\n";
+	wcerr << L"Run unit-tests against DATABASE or read configuration from TestSettings.xml.\n";
+	wcerr << L"If DATABASE is not specified, all settings will be read from the file\n";
+	wcerr << L"TestSettings.xml located in the search-path for the app.\n";
+	wcerr << L"\n";
+	wcerr << L"DATABASE must specify how to connect to the database and which case the test\n";
+	wcerr << L"tables use. You can either supply a connection-string or a DSN-entry (which also\n";
+	wcerr << L"requires username and password).\n";
+	wcerr << L" To connect using a configured DSN entry use:\n";
+	wcerr << L"\n";
+	wcerr << L"  DSN=dsn;user;pass (to connect to a database with UPPER-case names)\n";
+	wcerr << L"  dsn=dsn;user;pass (to connect to a database with lower-case names)\n";
+	wcerr << L"\n";
+	wcerr << L" or to connect using a connection-string use:\n";
+	wcerr << L"\n";
+	wcerr << L"  CS=connectionString (to connect to a database with UPPER-case names)\n";
+	wcerr << L"  cs=connectionString (to connect to a database with lower-case names)\n";
+	wcerr << L"\n";
+	wcerr << L"Note that you must frame the 'cs=connectionString' with \" if your connection\n";
+	wcerr << L"string contains white spaces.\n";
+	wcerr << L"\n";
+	wcerr << L"--createDb       Runs the script to create the test databases.\n";
+	wcerr << L"--logLevelN      Set the logLevel to N, where N must be a single Letter:\n";
+	wcerr << L"                 (T)race, (D)ebug, (I)nfo, (W)arning, (E)rror, (F)atal\n";
+	wcerr << L"\n";
+	wcerr << L"Examples:\n";
+	wcerr << L" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass\n";
+	wcerr << L"  to run the tests against a configured DSN entry named 'db2', using uppercase\n";
+	wcerr << L"  names and log level Waring. Before the tests are run, the scripts to create\n";
+	wcerr << L"  the test database are run.\n";
+	wcerr << L" exodbcGTest CS=\"Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;\"\n";
+	wcerr << L"  to run the tests using a connection string, against a DB which uses uppercase.\n";
+}
+
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	using namespace std;
 	using namespace exodbc;
+	namespace ba = boost::algorithm;
 
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
 	int status = 0;
-	if(argc < 2)
-	{
-		// Not enough args
-		wcerr << L"Usage: exOdbcGTest [OPTION]... DATABASE... \n";
-		wcerr << L"Run unit-tests against DATABASE.\n";
-		wcerr << L"\n";
-		wcerr << L"DATABASE must specify how to connect to the database and which case the test\n";
-		wcerr << L"tables use. You can either supply a connection-string or a DSN-entry (which also\n";
-		wcerr << L"requires username and password).\n";
-		wcerr << L" To connect using a configured DSN entry use:\n";
-		wcerr << L"\n";
-		wcerr << L"  DSN=dsn;user;pass (to connect to a database with UPPER-case names)\n";
-		wcerr << L"  dsn=dsn;user;pass (to connect to a database with lower-case names)\n";
-		wcerr << L"\n";
-		wcerr << L" or to connect using a connection-string use:\n";
-		wcerr << L"\n";
-		wcerr << L"  CS=connectionString (to connect to a database with UPPER-case names)\n";
-		wcerr << L"  cs=connectionString (to connect to a database with lower-case names)\n";
-		wcerr << L"\n";
-		wcerr << L"Note that you must frame the 'cs=connectionString' with \" if your connection\n"; 
-		wcerr << L"string contains white spaces.\n";
-		wcerr << L"\n";
-		wcerr << L"--createDb       Runs the script to create the test databases.\n";
-		wcerr << L"--logLevelN      Set the logLevel to N, where N must be a single Letter:\n";
-		wcerr << L"                 (T)race, (D)ebug, (I)nfo, (W)arning, (E)rror, (F)atal\n";
-		wcerr << L"\n";
-		wcerr << L"Examples:\n";
-		wcerr << L" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass\n";
-		wcerr << L"  to run the tests against a configured DSN entry named 'db2', using uppercase\n";
-		wcerr << L"  names and log level Waring. Before the tests are run, the scripts to create\n";
-		wcerr << L"  the test database are run.\n";
-		wcerr << L" exodbcGTest dsn=ms;uid;pass DSN=db2;uid;pass dsn=mysql;uid;pass\n";
-		wcerr << L"  to run the tests against three configured DSN entries, using twice lowercase\n";
-		wcerr << L"  and once uppercase.\n";
-		wcerr << L" exodbcGTest CS=\"Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;\"\n";
-		wcerr << L"  to run the tests using a connection string, against a DB which uses uppercase.\n";
-
-		status = 10;
-	}
 
 	// Set defaults
 	bool doCreateDb = false;
@@ -185,21 +188,55 @@ int _tmain(int argc, _TCHAR* argv[])
 			else
 			{
 				test::Case nameCase = upperDsn.length() > 0 ? test::Case::UPPER : test::Case::LOWER;
-				SOdbcInfo dsnEntry(tokens[0], tokens[1], tokens[2], nameCase);
+				TestParams dsnEntry(tokens[0], tokens[1], tokens[2], nameCase);
 				g_odbcInfos.push_back(dsnEntry);
 			}
 		}
 		if (upperCs.length() > 0 || lowerCs.length() > 0)
 		{
 			test::Case nameCase = upperCs.length() > 0 ? test::Case::UPPER : test::Case::LOWER;
-			SOdbcInfo csEntry(upperCs.length() > 0 ? upperCs : lowerCs, nameCase);
+			TestParams csEntry(upperCs.length() > 0 ? upperCs : lowerCs, nameCase);
 			g_odbcInfos.push_back(csEntry);
 		}
 	}
 
 	if (g_odbcInfos.size() == 0)
 	{
-		LOG_WARNING(L"Have no valid DSN or ConnectionString");
+		// Read default settings
+		LOG_INFO(L"Loading Default Settings from TestSettings.xml");
+		try
+		{
+			// Try to locate TestSettings.xml in directory of exe
+			namespace fs = boost::filesystem;
+			fs::wpath exePath(argv[0]);
+			exePath.normalize();
+			fs::wpath exeDir = exePath.parent_path();
+			fs::wpath settingsPath = exeDir / L"TestSettings.xml";
+			if( ! fs::exists(settingsPath))
+			{ 
+				// try if it is up somewhere in my working copy
+				settingsPath = settingsPath.parent_path().parent_path().parent_path().parent_path();
+				settingsPath /= L"exOdbcGTest/TestSettings.xml";
+			}
+			g_odbcInfo.Load(settingsPath);
+			g_logSeverity = g_odbcInfo.m_logSeverity;
+			doCreateDb = g_odbcInfo.m_createDb;
+		}
+		catch (const Exception& ex)
+		{
+			LOG_ERROR(ex.ToString());
+			return -1;
+		}
+	}
+	else
+	{
+		// while removing just take the first one
+		if (g_odbcInfos.size() > 1)
+		{
+			LOG_WARNING(L"Ignoring multiple database settings, using only the first valid");
+		}
+		g_odbcInfo = g_odbcInfos[0];
+		LOG_INFO(L"Running tests against: " << g_odbcInfo);
 	}
 
 	// Set a filter for the logging
@@ -211,7 +248,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	// Check if we need to re-create the dbs
 	if (doCreateDb)
 	{
-		for (std::vector<SOdbcInfo>::const_iterator it = g_odbcInfos.begin(); it != g_odbcInfos.end(); ++it)
+		for (std::vector<TestParams>::const_iterator it = g_odbcInfos.begin(); it != g_odbcInfos.end(); ++it)
 		{
 			try
 			{
@@ -246,8 +283,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	// Note: We cannot call Init earlier, we must call it after we've set up the global with the param-values
 	::testing::InitGoogleTest(&argc, argv);
 
-	if(status != 0)
+	if (status != 0)
+	{
+		printHelp();
 		return status;
+	}
 
 	int result = RUN_ALL_TESTS();
 	

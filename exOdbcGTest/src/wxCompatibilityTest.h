@@ -36,7 +36,7 @@ namespace exodbc
 	
 	// Classes
 	// -------
-	class wxCompatibilityTest : public ::testing::TestWithParam<SOdbcInfo>
+	class wxCompatibilityTest : public ::testing::TestWithParam<TestParams>
 	{
 	public:
 		static void SetUpTestCase();
@@ -46,7 +46,7 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 
-		SOdbcInfo m_odbcInfo;
+		TestParams m_odbcInfo;
 		exodbc::Environment	m_env;
 		exodbc::Database	m_db;
 	};

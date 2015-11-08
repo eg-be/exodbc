@@ -29,34 +29,42 @@
 // -------
 namespace exodbc
 {
-	struct SOdbcInfo
+	struct TestParams
 	{
-		SOdbcInfo()
+		TestParams()
 		{ }
 
-		SOdbcInfo(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, test::Case namesCase = test::Case::LOWER)
+		TestParams(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, test::Case namesCase = test::Case::LOWER)
 			: m_dsn(dsn)
 			, m_username(username)
 			, m_password(password)
 			, m_namesCase(namesCase)
 		{};
 
-		SOdbcInfo(const std::wstring& connectionString, test::Case namesCase)
+		TestParams(const std::wstring& connectionString, test::Case namesCase)
 			: m_connectionString(connectionString)
 			, m_namesCase(namesCase)
 		{};
 
-		bool HasConnectionString() const { return m_connectionString.length() > 0; }
+		void Load(const boost::filesystem::wpath& settingsFile);
+
+		bool HasConnectionString() const noexcept { return m_connectionString.length() > 0; }
+
+		bool HasDsn() const noexcept { return m_dsn.length() > 0; }
+
+		bool IsUsable() const noexcept { return HasConnectionString() || HasDsn(); };
 
 		std::wstring m_dsn;
 		std::wstring m_username;
 		std::wstring m_password;
 		std::wstring m_connectionString;
 		test::Case m_namesCase;
+		boost::log::trivial::severity_level m_logSeverity;
+		bool m_createDb;
 	};
 
-	::std::ostream& operator<<(::std::ostream& os, const SOdbcInfo& oi);
-	::std::wostream& operator<<(::std::wostream& os, const SOdbcInfo& oi);
+	::std::ostream& operator<<(::std::ostream& os, const TestParams& oi);
+	::std::wostream& operator<<(::std::wostream& os, const TestParams& oi);
 
 } // namespace exodbc
 

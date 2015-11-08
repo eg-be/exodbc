@@ -34,7 +34,7 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class ParamHelpersTest : public ::testing::TestWithParam<SOdbcInfo>
+	class ParamHelpersTest : public ::testing::TestWithParam<TestParams>
 	{
 
 	public:
@@ -45,7 +45,7 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 
-		SOdbcInfo m_odbcInfo;
+		TestParams m_odbcInfo;
 
 		Environment m_env;
 		Database m_db;

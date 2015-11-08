@@ -120,4 +120,7 @@
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="TestSettings.xml" />
+  </ItemGroup>
 </Project>

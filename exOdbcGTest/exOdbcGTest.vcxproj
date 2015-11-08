@@ -112,7 +112,7 @@
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir)\sql $(TargetDir)</Command>
+      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir) $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -136,7 +136,7 @@
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir)\sql $(TargetDir)</Command>
+      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir) $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -164,7 +164,7 @@
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir)\sql $(TargetDir)</Command>
+      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir) $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -192,7 +192,7 @@
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir)\sql $(TargetDir)</Command>
+      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir) $(TargetDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -250,6 +250,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="exOdbcGTest.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="TestSettings.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

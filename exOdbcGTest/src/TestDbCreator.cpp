@@ -34,7 +34,7 @@ namespace exodbc
 {
 	// Construction
 	// -------------
-	TestDbCreator::TestDbCreator(const SOdbcInfo& odbcInfo)
+	TestDbCreator::TestDbCreator(const TestParams& odbcInfo)
 		: m_odbcInfo(odbcInfo)
 	{
 		// prepare env

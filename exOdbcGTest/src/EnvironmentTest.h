@@ -28,7 +28,7 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class EnvironmentTest : public ::testing::TestWithParam<SOdbcInfo>
+	class EnvironmentTest : public ::testing::Test
 	{
 
 	public:
@@ -39,14 +39,8 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 
-		SOdbcInfo m_odbcInfo;
+		TestParams m_odbcInfo;
 	};
-
-	INSTANTIATE_TEST_CASE_P(
-		ParametrizedOdbc,
-		EnvironmentTest,
-		::testing::ValuesIn(g_odbcInfos));
-
 } // namespace exodbc
 
 #endif // EnvironmentTEST_H

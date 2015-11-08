@@ -1,0 +1,31 @@
+<TestSettings>
+  
+  <Dsn>
+    <Disabled>0</Disabled>
+    <Name>exSqlServer</Name>
+    <User>ex</User>
+    <Pass>ex</Pass>
+  </Dsn>
+  
+  <ConnectionString>
+    <Disabled>1</Disabled>
+    <Value>dfdasf</Value>
+  </ConnectionString>
+  
+  <CreateDb>0</CreateDb>
+  
+  <LogLevel>Info</LogLevel>
+  <Case>lower</Case>
+  
+  <!-- 
+  <LogLevel>(T)race</LogLevel>";  
+  <LogLevel>(D)ebug</LogLevel>";
+  <LogLevel>(I)nfo</LogLevel>
+  <LogLevel>(E)rror</LogLevel>
+  <LogLevel>(F)atal</LogLevel>
+  
+  <Case>(l)ower</Case>
+  <Case>(u)pper</Case>
+  -->
+
+</TestSettings>

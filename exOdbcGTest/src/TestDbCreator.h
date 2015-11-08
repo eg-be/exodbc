@@ -38,7 +38,7 @@ namespace exodbc
 	class TestDbCreator
 	{
 	public:
-		TestDbCreator(const SOdbcInfo& odbcInfo);
+		TestDbCreator(const TestParams& odbcInfo);
 		~TestDbCreator();
 
 		void RunAllScripts();
@@ -60,7 +60,7 @@ namespace exodbc
 
 		boost::filesystem::wpath m_scriptDirectoryPath;
 
-		SOdbcInfo m_odbcInfo;
+		TestParams m_odbcInfo;
 		Environment m_env;
 		Database m_db;
 	};
