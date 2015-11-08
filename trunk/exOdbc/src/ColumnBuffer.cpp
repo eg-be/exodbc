@@ -646,6 +646,7 @@ namespace exodbc
 #endif
 		case SQL_C_BINARY:
 			exASSERT(!columnInfo.IsColumnSizeNull());
+			exASSERT(columnInfo.GetColumnSize() > 0);
 			return columnInfo.GetColumnSize() * sizeof(SQLCHAR);
 		case SQL_C_NUMERIC:
 			return sizeof(SQL_NUMERIC_STRUCT);
