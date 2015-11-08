@@ -31,7 +31,7 @@
 namespace exodbc
 {
 
-	class ExcelTest : public ::testing::TestWithParam<TestParams>
+	class ExcelTest : public ::testing::Test
 	{
 	
 	protected:
@@ -42,11 +42,6 @@ namespace exodbc
 		Environment m_env;
 		TestParams m_odbcInfo;
 	};
-
-	INSTANTIATE_TEST_CASE_P(
-		ParametrizedOdbc,
-		ExcelTest,
-		::testing::ValuesIn(g_odbcInfos));
 
 } // namespace exodbc
 
