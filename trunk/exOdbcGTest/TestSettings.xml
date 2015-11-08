@@ -25,13 +25,21 @@
   </Dsn>
 
   <Dsn>
-    <Disabled>0</Disabled>
+    <Disabled>1</Disabled>
     <Name>exExcel</Name>
     <User></User>
     <Pass></Pass>
     <Case>lower</Case>
-  </Dsn>  
-  
+  </Dsn>
+
+  <Dsn>
+    <Disabled>1</Disabled>
+    <Name>exAccess</Name>
+    <User></User>
+    <Pass></Pass>
+    <Case>lower</Case>
+  </Dsn>
+
   <ConnectionString>
     <Disabled>1</Disabled>
     <Value>Driver={SQL Server Native Client 11.0};Server=192.168.56.20\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;</Value>
@@ -50,6 +58,18 @@
     <Case>upper</Case>
   </ConnectionString>
 
+  <ConnectionString>
+    <Disabled>1</Disabled>
+    <Value>Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=E:\exOdbc\exOdbcGTest\excel\excelTest.xls;</Value>
+    <Case>lower</Case>
+  </ConnectionString>
+
+  <ConnectionString>
+    <Disabled>0</Disabled>
+    <Value>Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\exOdbc\exOdbcGTest\access\exodbc.mdb;Uid=Admin;Pwd=;</Value>
+    <Case>lower</Case>
+  </ConnectionString>  
+  
   <CreateDb>0</CreateDb>
   
   <LogLevel>Info</LogLevel>
