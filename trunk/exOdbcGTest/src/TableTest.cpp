@@ -50,7 +50,7 @@ namespace exodbc
 
 	void TableTest::SetUp()
 	{
-		m_odbcInfo = GetParam();
+		m_odbcInfo = g_odbcInfo;
 
 		// Set up Env
 		// Try to set to the ODBC v3 : We need that for the tests to run correct. 3.8 is not supported by all databases and we dont use specific stuff from it.
@@ -81,7 +81,7 @@ namespace exodbc
 
 	// Open / Close
 	// ------------
-	TEST_P(TableTest, OpenManualReadOnlyWithoutCheck)
+	TEST_F(TableTest, OpenManualReadOnlyWithoutCheck)
 	{
 		// Open an existing table without checking for privileges or existence
 		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
@@ -98,7 +98,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenManualWritableWithoutCheckPrivOrExist)
+	TEST_F(TableTest, OpenManualWritableWithoutCheckPrivOrExist)
 	{
 		// Open an existing table without checking for privileges or existence
 		Table iTable(&m_db, AF_READ_WRITE, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
@@ -124,7 +124,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenAutoDefaultCtr)
+	TEST_F(TableTest, OpenAutoDefaultCtr)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table table;
@@ -133,7 +133,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenManualDefaultCtr)
+	TEST_F(TableTest, OpenManualDefaultCtr)
 	{
 		// Open an existing manual table for reading
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -155,7 +155,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, CopyCtr)
+	TEST_F(TableTest, CopyCtr)
 	{
 		// Create a table
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -185,7 +185,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenManualCheckExistence)
+	TEST_F(TableTest, OpenManualCheckExistence)
 	{
 		// Open a table with checking for existence
 		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
@@ -201,7 +201,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenManualCheckColumnFlagSelect)
+	TEST_F(TableTest, OpenManualCheckColumnFlagSelect)
 	{
 		// Open a table manually but do not set the Select flag for all columns
 		Table iTable(&m_db, AF_SELECT, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
@@ -243,7 +243,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenManualCheckColumnFlagInsert)
+	TEST_F(TableTest, OpenManualCheckColumnFlagInsert)
 	{
 		// Open a table manually but do not set the Insert flag for all columns
 		Table iTable(&m_db, AF_SELECT | AF_INSERT | AF_DELETE, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
@@ -300,7 +300,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenManualCheckColumnFlagUpdate)
+	TEST_F(TableTest, OpenManualCheckColumnFlagUpdate)
 	{
 		// Open a table manually but do not set the Update flag for all columns
 		Table iTable(&m_db, AF_SELECT | AF_UPDATE | AF_DELETE | AF_INSERT, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
@@ -366,7 +366,7 @@ namespace exodbc
 	}
 	
 
-	TEST_P(TableTest, OpenManualPrimaryKeys)
+	TEST_F(TableTest, OpenManualPrimaryKeys)
 	{
 		// Open a table by defining primary keys manually
 		// Open a table manually but do not set the Select flag for all columns
@@ -430,7 +430,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenAutoWithoutCheck)
+	TEST_F(TableTest, OpenAutoWithoutCheck)
 	{
 		// Open an auto-table without checking for privileges or existence
 		// This makes only sense if we've already determined the correct TableInfo structure
@@ -453,7 +453,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenAutoCheckExistence)
+	TEST_F(TableTest, OpenAutoCheckExistence)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table table(&m_db, AF_READ, tableName, L"", L"", L"");
@@ -470,7 +470,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenAutoCheckPrivs)
+	TEST_F(TableTest, OpenAutoCheckPrivs)
 	{
 		// Test to open read-only a table we know we have all rights:
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -517,7 +517,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenManualWithUnsupportedColumn)
+	TEST_F(TableTest, OpenManualWithUnsupportedColumn)
 	{
 		Table iTable(&m_db, AF_SELECT, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
 		SQLINTEGER id = 0;
@@ -551,7 +551,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenAutoWithUnsupportedColumn)
+	TEST_F(TableTest, OpenAutoWithUnsupportedColumn)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
 		exodbc::Table nst(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
@@ -580,7 +580,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectFromAutoWithUnsupportedColumn)
+	TEST_F(TableTest, SelectFromAutoWithUnsupportedColumn)
 	{
 
 
@@ -607,7 +607,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertIntoAutoWithUnsupportedColumn)
+	TEST_F(TableTest, InsertIntoAutoWithUnsupportedColumn)
 	{
 
 
@@ -653,7 +653,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, UpdateIntoAutoWithUnsupportedColumn)
+	TEST_F(TableTest, UpdateIntoAutoWithUnsupportedColumn)
 	{
 
 
@@ -704,7 +704,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DeleteFromAutoWithUnsupportedColumn)
+	TEST_F(TableTest, DeleteFromAutoWithUnsupportedColumn)
 	{
 
 
@@ -751,7 +751,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, Close)
+	TEST_F(TableTest, Close)
 	{
 		// Create table
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -779,7 +779,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, OpenAndCloseAndOpenAndClose)
+	TEST_F(TableTest, OpenAndCloseAndOpenAndClose)
 	{
 		// Create a Table, open for reading
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -797,7 +797,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SetAccessFlags)
+	TEST_F(TableTest, SetAccessFlags)
 	{
 		// Create a Table, for reading only
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
@@ -827,7 +827,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, IsQueryOnly)
+	TEST_F(TableTest, IsQueryOnly)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
@@ -867,7 +867,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, MissingAccessFlagsThrowOnWrite)
+	TEST_F(TableTest, MissingAccessFlagsThrowOnWrite)
 	{
 		// Open a read-only table
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
@@ -892,7 +892,7 @@ namespace exodbc
 
 	// Select / GetNext
 	// ----------------
-	TEST_P(TableTest, Select)
+	TEST_F(TableTest, Select)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
@@ -904,7 +904,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectFirst)
+	TEST_F(TableTest, SelectFirst)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -924,7 +924,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectLast)
+	TEST_F(TableTest, SelectLast)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -943,7 +943,7 @@ namespace exodbc
 		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 7, -13, 26, 10502));
 	}
 
-	TEST_P(TableTest, SelectAbsolute)
+	TEST_F(TableTest, SelectAbsolute)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -960,7 +960,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectRelative)
+	TEST_F(TableTest, SelectRelative)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -986,7 +986,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectPrev)
+	TEST_F(TableTest, SelectPrev)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -1009,7 +1009,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectNext)
+	TEST_F(TableTest, SelectNext)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
@@ -1030,7 +1030,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectClose)
+	TEST_F(TableTest, SelectClose)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
@@ -1044,7 +1044,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectHasMASEnabled)
+	TEST_F(TableTest, SelectHasMASEnabled)
 	{
 		// Test if we can have multiple active statements.
 		// For MS SQL Server, this is disabled by default and must be activated manually
@@ -1096,7 +1096,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectMoreColumnsThanBound)
+	TEST_F(TableTest, SelectMoreColumnsThanBound)
 	{
 		// What happens if we query more columns than actually bound?
 		// See ticket #65
@@ -1142,7 +1142,7 @@ namespace exodbc
 
 	// Count
 	// -----
-	TEST_P(TableTest, Count)
+	TEST_F(TableTest, Count)
 	{
 		Table table(&m_db, AF_READ, test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
 		ASSERT_NO_THROW(table.Open());
@@ -1175,7 +1175,7 @@ namespace exodbc
 
 	// GetValues
 	// ---------
-	TEST_P(TableTest, SelectAutoIntValues)
+	TEST_F(TableTest, SelectAutoIntValues)
 	{
 		namespace tt = test;
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -1219,7 +1219,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectManualIntValues)
+	TEST_F(TableTest, SelectManualIntValues)
 	{
 		MIntTypesTable iTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(iTable.Open());
@@ -1259,7 +1259,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectWCharIntValues)
+	TEST_F(TableTest, SelectWCharIntValues)
 	{
 		// And some tables with auto-columns
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
@@ -1305,7 +1305,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectAutoFloatValues)
+	TEST_F(TableTest, SelectAutoFloatValues)
 	{
 		wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
 		Table fTable(&m_db, AF_READ, floatTypesTableName, L"", L"", L"");
@@ -1346,7 +1346,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectManualFloatValues)
+	TEST_F(TableTest, SelectManualFloatValues)
 	{
 		MFloatTypesTable fTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(fTable.Open());
@@ -1399,7 +1399,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectWCharFloatValues)
+	TEST_F(TableTest, SelectWCharFloatValues)
 	{
 		wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
 		Table fTable(&m_db, AF_READ, floatTypesTableName, L"", L"", L"");
@@ -1437,7 +1437,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectAutoWCharValues)
+	TEST_F(TableTest, SelectAutoWCharValues)
 	{
 		std::wstring charTypesTableName = test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, AF_READ, charTypesTableName, L"", L"", L"");
@@ -1496,7 +1496,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectManualWCharValues)
+	TEST_F(TableTest, SelectManualWCharValues)
 	{
 		MWCharTypesTable wTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(wTable.Open());
@@ -1552,7 +1552,7 @@ namespace exodbc
 	}
 
 	
-	TEST_P(TableTest, SelectAutoCharValues)
+	TEST_F(TableTest, SelectAutoCharValues)
 	{
 		std::wstring charTypesTableName = test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase);
 		Table charTypesAutoTable(&m_db, AF_READ, charTypesTableName, L"", L"", L"");
@@ -1610,7 +1610,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectManualCharValues)
+	TEST_F(TableTest, SelectManualCharValues)
 	{
 		MCharTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(cTable.Open());
@@ -1665,7 +1665,7 @@ namespace exodbc
 	}
 	
 
-	TEST_P(TableTest, SelectAutoDateValues)
+	TEST_F(TableTest, SelectAutoDateValues)
 	{
 		// Note how to read fractions:
 		// [b]   The value of the fraction field is the number of billionths of a second and ranges from 0 through 999,999,999 (1 less than 1 billion). 
@@ -1797,7 +1797,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectManualDateValues)
+	TEST_F(TableTest, SelectManualDateValues)
 	{
 		MDateTypesTable cTable(&m_db, m_odbcInfo.m_namesCase);
 		// MS SQL Server does not report time as supported, but their extension TIME2 - but this will work only if odbc-version is >= 3.8
@@ -1837,7 +1837,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectWCharDateValues)
+	TEST_F(TableTest, SelectWCharDateValues)
 	{
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES, m_odbcInfo.m_namesCase);
 		Table dTable(&m_db, AF_READ, dateTypesTableName, L"", L"", L"");
@@ -1879,7 +1879,7 @@ namespace exodbc
 	}
 
 	
-	TEST_P(TableTest, SelectAutoBlobValues)
+	TEST_F(TableTest, SelectAutoBlobValues)
 	{
 		std::wstring blobTypesTableName = test::GetTableName(test::TableId::BLOBTYPES, m_odbcInfo.m_namesCase);
 		Table bTable(&m_db, AF_READ, blobTypesTableName, L"", L"", L"");
@@ -1959,7 +1959,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectManualBlobValues)
+	TEST_F(TableTest, SelectManualBlobValues)
 	{
 		MBlobTypesTable bTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(bTable.Open());
@@ -2014,7 +2014,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, IsNullAutoNumericValue)
+	TEST_F(TableTest, IsNullAutoNumericValue)
 	{
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, AF_READ, numericTypesTableName, L"", L"", L"");
@@ -2072,7 +2072,7 @@ namespace exodbc
 	}
 	
 	
-	TEST_P(TableTest, SelectAutoNumericValue)
+	TEST_F(TableTest, SelectAutoNumericValue)
 	{
 		// \note: There is a special Tests for NULL values, its complicated enough.
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
@@ -2154,7 +2154,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, SelectManualNumericValue)
+	TEST_F(TableTest, SelectManualNumericValue)
 	{
 		MNumericTypesTable nTable(&m_db, m_odbcInfo.m_namesCase);
 		ASSERT_NO_THROW(nTable.Open());
@@ -2224,7 +2224,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, IsNullManualNumericValue)
+	TEST_F(TableTest, IsNullManualNumericValue)
 	{
 		std::wstring numericTypesTableName = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, AF_READ, numericTypesTableName, L"", L"", L"");
@@ -2284,7 +2284,7 @@ namespace exodbc
 
 	// Delete rows: We do not test that for the different data-types, its just deleting a row.
 	// -----------
-	TEST_P(TableTest, DeleteWhere)
+	TEST_F(TableTest, DeleteWhere)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, AF_SELECT | AF_DELETE_WHERE | AF_INSERT, intTypesTableName, L"", L"", L"");
@@ -2311,7 +2311,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, DeleteWhereShouldReturnSQL_NO_DATA)
+	TEST_F(TableTest, DeleteWhereShouldReturnSQL_NO_DATA)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, AF_SELECT | AF_DELETE_WHERE, intTypesTableName, L"", L"", L"");
@@ -2341,7 +2341,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, Delete)
+	TEST_F(TableTest, Delete)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, AF_SELECT | AF_DELETE_PK, intTypesTableName, L"", L"", L"");
@@ -2372,7 +2372,7 @@ namespace exodbc
 
 	// Insert rows
 	// -----------
-	TEST_P(TableTest, InsertIntTypes)
+	TEST_F(TableTest, InsertIntTypes)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, AF_SELECT | AF_INSERT, intTypesTableName, L"", L"", L"");
@@ -2408,7 +2408,7 @@ namespace exodbc
 
 
 	// just do only one test to insert the manual types, its all the same, except that opening is a little bit different
-	TEST_P(TableTest, InsertManualIntTypes)
+	TEST_F(TableTest, InsertManualIntTypes)
 	{
 		// Open an existing table without checking for privileges or existence
 		Table iTable(&m_db, AF_SELECT | AF_INSERT, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
@@ -2457,7 +2457,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertDateTypes)
+	TEST_F(TableTest, InsertDateTypes)
 	{
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 		Table dTable(&m_db, AF_SELECT | AF_INSERT, dateTypesTableName, L"", L"", L"");
@@ -2550,7 +2550,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertFloatTypes)
+	TEST_F(TableTest, InsertFloatTypes)
 	{
 		std::wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table fTable(&m_db, AF_READ_WRITE, floatTypesTableName, L"", L"", L"");
@@ -2602,7 +2602,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertNumericTypes)
+	TEST_F(TableTest, InsertNumericTypes)
 	{
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, AF_READ_WRITE, numericTypesTmpTableName, L"", L"", L"");
@@ -2651,7 +2651,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertNumericTypes_5_3)
+	TEST_F(TableTest, InsertNumericTypes_5_3)
 	{
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, AF_READ_WRITE, numericTypesTmpTableName, L"", L"", L"");
@@ -2679,7 +2679,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertNumericTypes_18_0)
+	TEST_F(TableTest, InsertNumericTypes_18_0)
 	{
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, AF_READ_WRITE, numericTypesTmpTableName, L"", L"", L"");
@@ -2714,7 +2714,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertNumericTypes_18_10)
+	TEST_F(TableTest, InsertNumericTypes_18_10)
 	{
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, AF_READ_WRITE, numericTypesTmpTableName, L"", L"", L"");
@@ -2748,7 +2748,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertNumericTypes_All)
+	TEST_F(TableTest, InsertNumericTypes_All)
 	{
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table t(&m_db, AF_READ_WRITE, numericTypesTmpTableName, L"", L"", L"");
@@ -2803,7 +2803,7 @@ namespace exodbc
 	}
 
 	
-	TEST_P(TableTest, InsertBlobTypes)
+	TEST_F(TableTest, InsertBlobTypes)
 	{
 		std::wstring blobTypesTmpTableName = test::GetTableName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table bTable(&m_db, AF_SELECT | AF_INSERT, blobTypesTmpTableName, L"", L"", L"");
@@ -2899,7 +2899,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertCharTypes)
+	TEST_F(TableTest, InsertCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(&m_db, AF_SELECT | AF_INSERT, charTypesTmpTableName, L"", L"", L"");
@@ -2961,7 +2961,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertWCharTypes)
+	TEST_F(TableTest, InsertWCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(&m_db, AF_SELECT | AF_INSERT, charTypesTmpTableName, L"", L"", L"");
@@ -3023,7 +3023,7 @@ namespace exodbc
 
 	// Manual Table Inserts and Update rows
 	// -----------
-	TEST_P(TableTest, InsertAndUpdateManualIntTable)
+	TEST_F(TableTest, InsertAndUpdateManualIntTable)
 	{
 		std::wstring intTypesTmpTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -3079,7 +3079,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertAndUpdateManualCharTable)
+	TEST_F(TableTest, InsertAndUpdateManualCharTable)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -3162,7 +3162,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertAndUpdateManualFloatTypes)
+	TEST_F(TableTest, InsertAndUpdateManualFloatTypes)
 	{
 		std::wstring floatTypesTmpTableName = test::GetTableName(test::TableId::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -3220,7 +3220,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertAndUpdateManualDateTypes)
+	TEST_F(TableTest, InsertAndUpdateManualDateTypes)
 	{
 		std::wstring dateTypesTmpTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -3349,7 +3349,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertAndUpdateManualNumericTypes)
+	TEST_F(TableTest, InsertAndUpdateManualNumericTypes)
 	{
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -3413,7 +3413,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, InsertAndUpdateManualBlobTypes)
+	TEST_F(TableTest, InsertAndUpdateManualBlobTypes)
 	{
 		std::wstring blobTypesTmpTableName = test::GetTableName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
 
@@ -3473,7 +3473,7 @@ namespace exodbc
 
 	// Update rows
 	// -----------
-	TEST_P(TableTest, UpdateIntTypes)
+	TEST_F(TableTest, UpdateIntTypes)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, AF_SELECT | AF_INSERT | AF_UPDATE_PK, intTypesTableName, L"", L"", L"");
@@ -3559,7 +3559,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, UpdateDateTypes)
+	TEST_F(TableTest, UpdateDateTypes)
 	{
 		std::wstring dateTypesTableName = test::GetTableName(test::TableId::DATETYPES_TMP, m_odbcInfo.m_namesCase);
 		Table dTable(&m_db, AF_SELECT | AF_INSERT | AF_UPDATE_PK, dateTypesTableName, L"", L"", L"");
@@ -3647,7 +3647,7 @@ namespace exodbc
 	}
 
 	
-	TEST_P(TableTest, UpdateNumericTypes)
+	TEST_F(TableTest, UpdateNumericTypes)
 	{
 		std::wstring numericTypesTmpTableName = test::GetTableName(test::TableId::NUMERICTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table nTable(&m_db, AF_SELECT | AF_INSERT | AF_UPDATE_PK, numericTypesTmpTableName, L"", L"", L"");
@@ -3735,7 +3735,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, UpdateFloatTypes)
+	TEST_F(TableTest, UpdateFloatTypes)
 	{
 		std::wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table fTable(&m_db, AF_SELECT | AF_INSERT | AF_UPDATE_PK, floatTypesTableName, L"", L"", L"");
@@ -3797,7 +3797,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, UpdateWCharTypes)
+	TEST_F(TableTest, UpdateWCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(&m_db, AF_SELECT | AF_UPDATE_PK | AF_INSERT, charTypesTmpTableName, L"", L"", L"");
@@ -3860,7 +3860,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, UpdateCharTypes)
+	TEST_F(TableTest, UpdateCharTypes)
 	{
 		std::wstring charTypesTmpTableName = test::GetTableName(test::TableId::CHARTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table cTable(&m_db, AF_SELECT | AF_INSERT | AF_UPDATE, charTypesTmpTableName, L"", L"", L"");
@@ -3921,7 +3921,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, UpdateBlobTypes)
+	TEST_F(TableTest, UpdateBlobTypes)
 	{
 		std::wstring blobTypesTmpTableName = test::GetTableName(test::TableId::BLOBTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table bTable(&m_db, AF_SELECT | AF_INSERT | AF_UPDATE, blobTypesTmpTableName, L"", L"", L"");
@@ -4005,7 +4005,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, UpdateWhere)
+	TEST_F(TableTest, UpdateWhere)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, AF_SELECT | AF_INSERT | AF_UPDATE_WHERE, intTypesTableName, L"", L"", L"");
@@ -4060,7 +4060,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(TableTest, GetColumnBufferIndex)
+	TEST_F(TableTest, GetColumnBufferIndex)
 	{
 		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
 		Table iTable(&m_db, AF_SELECT, intTypesTableName, L"", L"", L"");
