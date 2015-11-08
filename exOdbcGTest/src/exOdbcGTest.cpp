@@ -225,7 +225,6 @@ int _tmain(int argc, _TCHAR* argv[])
 			return -1;
 		}
 	}
-	else
 
 	LOG_INFO(L"Running tests against: " << g_odbcInfo);
 
