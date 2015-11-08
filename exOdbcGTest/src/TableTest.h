@@ -37,7 +37,7 @@ namespace exodbc
 // -------
 namespace exodbc
 {
-	class TableTest : public ::testing::TestWithParam<TestParams>
+	class TableTest : public ::testing::Test
 	{
 	public:
 		static void SetUpTestCase();
@@ -51,11 +51,6 @@ namespace exodbc
 		exodbc::Database m_db;
 		TestParams m_odbcInfo;
 	};
-
-	INSTANTIATE_TEST_CASE_P(
-		ParametrizedOdbc,
-		TableTest,
-		::testing::ValuesIn(g_odbcInfos));
 } // namespace exodbc
 
 
