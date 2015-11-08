@@ -40,7 +40,8 @@ namespace exodbc
 	void ParamHelpersTest::SetUp()
 	{
 		// Set up is called for every test
-		m_odbcInfo = GetParam();
+		m_odbcInfo = g_odbcInfo;
+
 		ASSERT_NO_THROW(m_env.Init(OdbcVersion::V_3));
 
 		ASSERT_NO_THROW(m_db.Init(&m_env));
@@ -60,7 +61,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ParamHelpersTest, AllocateStatementHandle)
+	TEST_F(ParamHelpersTest, AllocateStatementHandle)
 	{
 		// We expect failure if we pass an invalid handle
 		SQLHDBC hNull = SQL_NULL_HDBC;
@@ -79,7 +80,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ParamHelpersTest, FreeStatementHandle)
+	TEST_F(ParamHelpersTest, FreeStatementHandle)
 	{
 		// We expect failure if we pass an invalid handle and have the flag INVALID set
 		SQLHSTMT hNull = SQL_NULL_HSTMT;
@@ -102,7 +103,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ParamHelpersTest, CloseStmtHandle)
+	TEST_F(ParamHelpersTest, CloseStmtHandle)
 	{
 		SQLHSTMT hNull = SQL_NULL_HSTMT;
 		{
@@ -165,7 +166,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ParamHelpersTest, GetInfo)
+	TEST_F(ParamHelpersTest, GetInfo)
 	{
 		// Simply test reading a string and an int value works - that means, does return some data
 		std::wstring serverName;
@@ -184,7 +185,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ParamHelpersTest, GetData)
+	TEST_F(ParamHelpersTest, GetData)
 	{
 		// Test by reading some char value
 
@@ -261,7 +262,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ParamHelpersTest, GetRowDescriptorHandle)
+	TEST_F(ParamHelpersTest, GetRowDescriptorHandle)
 	{
 		// Open a statement, to test getting the row-descriptor
 		SQLHSTMT hStmt = SQL_NULL_HSTMT;
@@ -303,7 +304,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ParamHelpersTest, SetDescriptionField)
+	TEST_F(ParamHelpersTest, SetDescriptionField)
 	{
 		// Test by setting the description of a numeric column
 
@@ -353,7 +354,7 @@ namespace exodbc
 	}
 
 
-	// StaticHelpersTest
+	// HelpersTest
 	// =================
 
 	void StaticHelpersTest::SetUp()
