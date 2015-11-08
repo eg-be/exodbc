@@ -39,7 +39,7 @@ namespace exodbc
 
 	void ExcelTest::SetUp()
 	{
-		m_odbcInfo = GetParam();
+		m_odbcInfo = g_odbcInfo;
 
 		// Set up is called for every test
 		ASSERT_NO_THROW(m_env.Init(OdbcVersion::V_3));
@@ -52,7 +52,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ExcelTest, OpenDatabase)
+	TEST_F(ExcelTest, OpenDatabase)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.Init(&m_env));
@@ -68,7 +68,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ExcelTest, FindTables)
+	TEST_F(ExcelTest, FindTables)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.Init(&m_env));
@@ -96,7 +96,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ExcelTest, OpenAutoTableAsWChar)
+	TEST_F(ExcelTest, OpenAutoTableAsWChar)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.Init(&m_env));
@@ -116,7 +116,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ExcelTest, SpecialQueryNameWorkaround)
+	TEST_F(ExcelTest, SpecialQueryNameWorkaround)
 	{
 		// See Ticket #111 - this is fixed and no workarounds are needed
 		Database db;
@@ -171,7 +171,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ExcelTest, SelectManualWCharValues)
+	TEST_F(ExcelTest, SelectManualWCharValues)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.Init(&m_env));
@@ -224,7 +224,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(ExcelTest, SelectAutoWCharValues)
+	TEST_F(ExcelTest, SelectAutoWCharValues)
 	{
 		Database db;
 		ASSERT_NO_THROW(db.Init(&m_env));

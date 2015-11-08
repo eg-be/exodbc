@@ -24,6 +24,14 @@
     <Case>upper</Case>
   </Dsn>
 
+  <Dsn>
+    <Disabled>0</Disabled>
+    <Name>exExcel</Name>
+    <User></User>
+    <Pass></Pass>
+    <Case>lower</Case>
+  </Dsn>  
+  
   <ConnectionString>
     <Disabled>1</Disabled>
     <Value>Driver={SQL Server Native Client 11.0};Server=192.168.56.20\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;</Value>
@@ -37,7 +45,7 @@
   </ConnectionString>
 
   <ConnectionString>
-    <Disabled>0</Disabled>
+    <Disabled>1</Disabled>
     <Value>Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;</Value>
     <Case>upper</Case>
   </ConnectionString>
