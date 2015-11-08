@@ -115,7 +115,7 @@ namespace exodbc
 						m_connectionString = subTree.get<wstring>(L"Value");
 					}
 				}
-				else if (elementName == L"ConnectionString" || elementName == L"Dsn")
+				if (elementName == L"ConnectionString" || elementName == L"Dsn")
 				{
 					bool disabled = subTree.get<bool>(L"Disabled");
 					if (!disabled)
