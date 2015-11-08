@@ -39,7 +39,8 @@ namespace exodbc
 
 	void EnvironmentTest::SetUp()
 	{
-		m_odbcInfo = GetParam();
+		ASSERT_TRUE(g_odbcInfo.IsUsable());
+		m_odbcInfo = g_odbcInfo;
 	}
 
 	void EnvironmentTest::TearDown()
@@ -48,7 +49,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(EnvironmentTest, AllocateEnvironmentHandle)
+	TEST_F(EnvironmentTest, AllocateEnvironmentHandle)
 	{
 		Environment env;
 		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
@@ -60,7 +61,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(EnvironmentTest, FreeEnvironmentHandle)
+	TEST_F(EnvironmentTest, FreeEnvironmentHandle)
 	{
 		// First simply test alloc - free
 		Environment env;
@@ -80,7 +81,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(EnvironmentTest, CopyConstructor)
+	TEST_F(EnvironmentTest, CopyConstructor)
 	{
 		Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(env.HasEnvironmentHandle());
@@ -99,7 +100,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(EnvironmentTest, SetOdbcVersion)
+	TEST_F(EnvironmentTest, SetOdbcVersion)
 	{
 		// Test with setting it explict
 		Environment env_v2;
@@ -116,7 +117,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(EnvironmentTest, ListDataSources)
+	TEST_F(EnvironmentTest, ListDataSources)
 	{
 		Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(env.HasEnvironmentHandle());

@@ -29,7 +29,9 @@
 // -------
 namespace exodbc
 {
-	extern std::vector<SOdbcInfo> g_odbcInfos;
+	extern TestParams g_odbcInfo;
+
+	extern std::vector<TestParams> g_odbcInfos;
 
 	extern boost::log::trivial::severity_level g_logSeverity;
 	
