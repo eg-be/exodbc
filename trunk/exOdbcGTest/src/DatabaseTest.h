@@ -32,7 +32,7 @@
 // -------
 namespace exodbc
 {
-	class DatabaseTest : public ::testing::TestWithParam<TestParams>
+	class DatabaseTest : public ::testing::Test
 	{
 	public:
 		static void SetUpTestCase();
@@ -46,14 +46,6 @@ namespace exodbc
 		exodbc::Database	m_db;
 		TestParams m_odbcInfo;
 	};
-
-//	static std::vector<SOdbcInfo> test;
-
-	INSTANTIATE_TEST_CASE_P(
-		ParametrizedOdbc,
-		DatabaseTest,
-		::testing::ValuesIn(g_odbcInfos));
-
 } // namespace exodbc
 
 #endif // DBTEST_H

@@ -119,6 +119,12 @@ namespace exodbc
 
 	TEST_F(EnvironmentTest, ListDataSources)
 	{
+		if (m_odbcInfo.HasConnectionString())
+		{
+			LOG_WARNING(L"Skipping Test ListDataSources, because Test is implemented to stupid it only works with a named DSN");
+			return;
+		}
+
 		Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(env.HasEnvironmentHandle());
 

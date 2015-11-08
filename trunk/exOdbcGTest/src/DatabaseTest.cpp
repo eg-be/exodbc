@@ -47,7 +47,7 @@ namespace exodbc
 	void DatabaseTest::SetUp()
 	{
 		// Set up is called for every test
-		m_odbcInfo = GetParam();
+		m_odbcInfo = g_odbcInfo;
 		m_env.Init(OdbcVersion::V_3);
 		ASSERT_NO_THROW(m_db.Init(&m_env));
 		if (m_odbcInfo.HasConnectionString())
@@ -69,7 +69,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, CopyConstructor)
+	TEST_F(DatabaseTest, CopyConstructor)
 	{
 		Database db1(&m_env);
 		Database c1(db1);
@@ -88,7 +88,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, PrintDatabaseInfo)
+	TEST_F(DatabaseTest, PrintDatabaseInfo)
 	{
 		Database db(&m_env);
 		if (m_odbcInfo.HasConnectionString())
@@ -109,7 +109,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, PrintDatabaseTypeInfo)
+	TEST_F(DatabaseTest, PrintDatabaseTypeInfo)
 	{
 		Database db(&m_env);
 		if (m_odbcInfo.HasConnectionString())
@@ -141,7 +141,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, SetConnectionAttributes)
+	TEST_F(DatabaseTest, SetConnectionAttributes)
 	{
 		Database db(&m_env);
 
@@ -149,14 +149,14 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, ReadTransactionIsolationMode)
+	TEST_F(DatabaseTest, ReadTransactionIsolationMode)
 	{
 		TransactionIsolationMode tiMode = m_db.ReadTransactionIsolationMode();
 		EXPECT_NE(TransactionIsolationMode::UNKNOWN, tiMode);
 	}
 
 
-	TEST_P(DatabaseTest, SetTransactionIsolationMode)
+	TEST_F(DatabaseTest, SetTransactionIsolationMode)
 	{
 		TransactionIsolationMode tiMode = TransactionIsolationMode::READ_COMMITTED;
 		EXPECT_NO_THROW(m_db.SetTransactionIsolationMode(tiMode));
@@ -199,7 +199,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, CanSetTransactionIsolationMode)
+	TEST_F(DatabaseTest, CanSetTransactionIsolationMode)
 	{
 		EXPECT_TRUE(m_db.CanSetTransactionIsolationMode(TransactionIsolationMode::READ_COMMITTED));
 		// Those are not supported by Access, for the rest we expect support
@@ -213,7 +213,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, GetTracefile)
+	TEST_F(DatabaseTest, GetTracefile)
 	{
 		wstring tracefile;
 		EXPECT_NO_THROW(tracefile = m_db.GetTracefile());
@@ -221,7 +221,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, SetTracefile)
+	TEST_F(DatabaseTest, SetTracefile)
 	{
 		TCHAR tmpDir[MAX_PATH + 1];
 		DWORD ret = GetTempPath(MAX_PATH + 1, tmpDir);
@@ -234,7 +234,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, SetTrace)
+	TEST_F(DatabaseTest, SetTrace)
 	{
 		Database db(&m_env);
 		EXPECT_NO_THROW(db.SetTrace(true));
@@ -244,7 +244,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, GetTrace)
+	TEST_F(DatabaseTest, GetTrace)
 	{
 		Database db(&m_env);
 		ASSERT_NO_THROW(db.SetTrace(true));
@@ -254,7 +254,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, DoSomeTrace)
+	TEST_F(DatabaseTest, DoSomeTrace)
 	{
 		// Set tracefile first, do that on a db not open yet
 		TCHAR tmpDir[MAX_PATH + 1];
@@ -296,7 +296,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, Open)
+	TEST_F(DatabaseTest, Open)
 	{		
 		// Open an existing db by passing the Env to the ctor
 		Environment env(OdbcVersion::V_3);
@@ -337,7 +337,7 @@ namespace exodbc
 
 
 	// TODO: Test Close. Close should return a value if succeeded
-	TEST_P(DatabaseTest, Close)
+	TEST_F(DatabaseTest, Close)
 	{
 		// Try to close a db that really is open
 		Database db1(&m_env);
@@ -358,13 +358,13 @@ namespace exodbc
 		//EXPECT_FALSE(db2.Close());
 	}
 
-	TEST_P(DatabaseTest, ReadCommitMode)
+	TEST_F(DatabaseTest, ReadCommitMode)
 	{
 		// We default to manual commit
 		EXPECT_EQ(CommitMode::MANUAL, m_db.ReadCommitMode());
 	}
 
-	TEST_P(DatabaseTest, SetCommitMode)
+	TEST_F(DatabaseTest, SetCommitMode)
 	{
 		Database db(&m_env);
 		if (m_odbcInfo.HasConnectionString())
@@ -394,7 +394,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, ReadDataTypesInfo)
+	TEST_F(DatabaseTest, ReadDataTypesInfo)
 	{
 		Database db(&m_env);
 
@@ -431,10 +431,16 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, DetectDbms)
+	TEST_F(DatabaseTest, DetectDbms)
 	{
 		// We just know how we name the different odbc-sources
 		// TODO: This is not nice, but is there any other reliable way? Add to doc somewhere
+
+		if (m_odbcInfo.HasConnectionString())
+		{
+			LOG_WARNING(L"Skipping Test DetectDbms, because Test is implemented to stupid it only works with a named DSN");
+			return;
+		}
 
 		if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"DB2"))
 		{
@@ -459,7 +465,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, CommitTransaction)
+	TEST_F(DatabaseTest, CommitTransaction)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
@@ -531,7 +537,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, RollbackTransaction)
+	TEST_F(DatabaseTest, RollbackTransaction)
 	{
 		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
 		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
@@ -556,7 +562,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, ReadCatalogs)
+	TEST_F(DatabaseTest, ReadCatalogs)
 	{
  		std::vector<std::wstring> cats;
 		ASSERT_NO_THROW(cats = m_db.ReadCatalogs());
@@ -580,7 +586,7 @@ namespace exodbc
 		}
 	}
 
-	TEST_P(DatabaseTest, ReadSchemas)
+	TEST_F(DatabaseTest, ReadSchemas)
 	{
 		std::vector<std::wstring> schemas;
 		EXPECT_NO_THROW(schemas = m_db.ReadSchemas());
@@ -607,7 +613,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, ReadTableTypes)
+	TEST_F(DatabaseTest, ReadTableTypes)
 	{
 		std::vector<std::wstring> tableTypes;
 		EXPECT_NO_THROW(tableTypes = m_db.ReadTableTypes());
@@ -617,7 +623,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, ReadTablePrivileges)
+	TEST_F(DatabaseTest, ReadTablePrivileges)
 	{
 		TablePrivilegesVector privs;
 		std::wstring tableName;
@@ -678,7 +684,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, ReadTablePrimaryKeysInfo)
+	TEST_F(DatabaseTest, ReadTablePrimaryKeysInfo)
 	{
 		TablePrimaryKeysVector pks;
 		
@@ -717,7 +723,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, ReadTableColumnInfo)
+	TEST_F(DatabaseTest, ReadTableColumnInfo)
 	{
 		std::vector<ColumnInfo> cols;
 		std::wstring tableName;
@@ -772,7 +778,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, FindTables)
+	TEST_F(DatabaseTest, FindTables)
 	{
 		TableInfosVector tables;
 		std::wstring tableName;
@@ -866,7 +872,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, ReadCompleteCatalog)
+	TEST_F(DatabaseTest, ReadCompleteCatalog)
 	{
 		SDbCatalogInfo cat;
 		EXPECT_NO_THROW( cat = m_db.ReadCompleteCatalog());
@@ -883,7 +889,7 @@ namespace exodbc
 	}
 
 
-	TEST_P(DatabaseTest, ReadColumnCount)
+	TEST_F(DatabaseTest, ReadColumnCount)
 	{
 		std::wstring tableName = L"";
 		std::wstring schemaName = L"";
