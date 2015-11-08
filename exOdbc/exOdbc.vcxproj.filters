@@ -11,9 +11,6 @@
     <Filter Include="include">
       <UniqueIdentifier>{abc03522-dbd0-4424-939d-56429752ed8a}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\ExtendedTypes">
-      <UniqueIdentifier>{5abea615-e3df-4e3e-9f8b-7d20a4c5dc2a}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Helpers.h">
@@ -64,12 +61,6 @@
     <ClInclude Include="include\Sql2BufferTypeMap.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ExtendedType.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="src\SqlServerTypes.h">
-      <Filter>src\ExtendedTypes</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -110,9 +101,6 @@
     </ClCompile>
     <ClCompile Include="src\Sql2BufferTypeMap.cpp">
       <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\SqlServerTypes.cpp">
-      <Filter>src\ExtendedTypes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
