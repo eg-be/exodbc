@@ -34,7 +34,7 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class ParamHelpersTest : public ::testing::TestWithParam<TestParams>
+	class ParamHelpersTest : public ::testing::Test
 	{
 
 	public:
@@ -50,11 +50,6 @@ namespace exodbc
 		Environment m_env;
 		Database m_db;
 	};
-
-	INSTANTIATE_TEST_CASE_P(
-		ParametrizedOdbc,
-		ParamHelpersTest,
-		::testing::ValuesIn(g_odbcInfos));
 
 	class StaticHelpersTest : public ::testing::Test {
 
