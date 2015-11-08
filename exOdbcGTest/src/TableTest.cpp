@@ -2866,8 +2866,8 @@ namespace exodbc
 		sqlstmt = (boost::wformat(L"%s = 100") % idName).str();
 		bTable.Select(sqlstmt);
 		EXPECT_TRUE(bTable.SelectNext());
-		SQLINTEGER bufferSize = 0;
-		SQLINTEGER cb = 0;
+		SQLLEN bufferSize = 0;
+		SQLLEN cb = 0;
 		const SQLCHAR* pEmpty = bTable.GetBinaryValue(1, bufferSize, cb);
 		EXPECT_EQ(0, memcmp(empty, pEmpty, sizeof(empty)));
 

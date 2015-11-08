@@ -351,7 +351,7 @@ namespace exodbc
 		// note, from ms-doc: 
 		// Character strings pointed to by the ValuePtr argument of SQLSetConnectAttr have a length of StringLength bytes.
 		SQLINTEGER cb = 0;
-		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACEFILE, (SQLPOINTER)path.c_str(), (path.length()) * sizeof(SQLWCHAR));
+		SQLRETURN ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_TRACEFILE, (SQLPOINTER)path.c_str(), ((SQLINTEGER)path.length()) * sizeof(SQLWCHAR));
 		THROW_IFN_SUCCEEDED(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_hdbc);
 	}
 
@@ -362,8 +362,8 @@ namespace exodbc
 
 		// Assume some max length, querying the driver about length did not really work
 		SQLINTEGER cb = 0;
-		size_t charBuffSize = MAX_PATH + 1;
-		size_t byteBuffSize = sizeof(SQLWCHAR) * charBuffSize;
+		SQLINTEGER charBuffSize = MAX_PATH + 1;
+		SQLINTEGER byteBuffSize = sizeof(SQLWCHAR) * charBuffSize;
 		std::unique_ptr<SQLWCHAR[]> buffer(new SQLWCHAR[charBuffSize]);
 		memset(buffer.get(), 0, byteBuffSize);
 		SQLRETURN ret = SQLGetConnectAttr(m_hdbc, SQL_ATTR_TRACEFILE, (SQLPOINTER)buffer.get(), byteBuffSize, &cb);
