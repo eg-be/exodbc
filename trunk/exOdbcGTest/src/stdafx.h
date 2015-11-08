@@ -17,6 +17,7 @@
 #include "boost/iostreams/stream.hpp"
 #include "boost/filesystem.hpp"
 #include "boost/algorithm/algorithm.hpp"
+#include "boost/foreach.hpp"
 
 // system
 #include <stdio.h>
