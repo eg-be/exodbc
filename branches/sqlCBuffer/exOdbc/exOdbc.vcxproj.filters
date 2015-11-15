@@ -61,6 +61,9 @@
     <ClInclude Include="include\Sql2BufferTypeMap.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\SqlCBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -100,6 +103,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Sql2BufferTypeMap.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SqlCBuffer.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

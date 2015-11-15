@@ -14,6 +14,7 @@
 
 // Same component headers
 // Other headers
+#include "SqlCBuffer.h"
 
 // Debug
 #include "DebugNew.h"
