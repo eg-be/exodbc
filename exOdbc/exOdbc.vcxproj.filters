@@ -64,6 +64,9 @@
     <ClInclude Include="include\SqlCBuffer.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\Bindable.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">

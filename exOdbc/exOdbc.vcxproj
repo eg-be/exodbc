@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Bindable.h" />
     <ClInclude Include="include\ColumnBuffer.h" />
     <ClInclude Include="include\Database.h" />
     <ClInclude Include="include\DebugNew.h" />
