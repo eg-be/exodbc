@@ -118,11 +118,14 @@ namespace exodbc
 	*/
 	class EXODBCAPI ManualColumnInfo
 		: public ObjectName
+		, public ColumnBindInfo
 	{
 	private:
 		ManualColumnInfo();
 
 	public:
+
+		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName);
 
 		/*!
 		* \brief Create new ManualColumnInfo
@@ -132,7 +135,7 @@ namespace exodbc
 		* \param decimalDigits	The number of digits of the fractional part of a decimal value.
 		* \throw Exception		If queryName is empty.
 		*/
-		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize, SQLSMALLINT decimalDigits);
 
 		/*!
 		* \brief Return the Query Name for this ManualColumnInfo
@@ -155,27 +158,27 @@ namespace exodbc
 		* \brief Get the ColumnSize set on Construction.
 		* \return SQLINTEGER
 		*/
-		SQLINTEGER GetColumnSize() const throw();
+//		SQLINTEGER GetColumnSize() const throw();
 
 
 		/*!
 		* \brief Get the DecimalDigits set on Construction.
 		* \return SQLSMALLINT
 		*/
-		SQLSMALLINT GetDecimalDigits() const throw();
+	//	SQLSMALLINT GetDecimalDigits() const throw();
 
 
 		/*!
 		* \brief Get the SQL Type set on Construction.
 		* \return SQLSMALLINT
 		*/
-		SQLSMALLINT GetSqlType() const throw();
+	//	SQLSMALLINT GetSqlType() const throw();
 
 	private:
-		SQLSMALLINT m_sqlType;
+		//SQLSMALLINT m_sqlType;
 		std::wstring m_queryName;
-		SQLINTEGER m_columnSize;
-		SQLSMALLINT m_decimalDigits;
+		//SQLINTEGER m_columnSize;
+		//SQLSMALLINT m_decimalDigits;
 	};
 
 
