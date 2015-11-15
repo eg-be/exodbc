@@ -346,6 +346,25 @@ namespace exodbc
 				columnFlags |= CF_INSERT;
 			}
 			int bufferIndex = 0;
+
+			for (int columnIndex = 0; columnIndex < (SQLUSMALLINT)columns.size(); columnIndex++)
+			{
+				const ColumnInfo& colInfo = columns[columnIndex];
+				try
+				{
+					SQLSMALLINT sqlCType = m_pSql2BufferTypeMap->GetBufferType(colInfo.GetSqlType());
+					SqlCBufferVariant sqlCBuffer = CreateBuffer(sqlCType);
+//					auto sqlCBuffer = CreateBuffer(sqlCType);
+					m_columnBufferMap[bufferIndex] = sqlCBuffer;
+					++bufferIndex;
+				}
+				catch (NotSupportedException& nse)
+				{
+					int p = 3;
+				}
+			}
+
+			bufferIndex = 0;
 			for (int columnIndex = 0; columnIndex < (SQLSMALLINT)columns.size(); columnIndex++)
 			{
 				ColumnInfo colInfo = columns[columnIndex];

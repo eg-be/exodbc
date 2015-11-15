@@ -43,6 +43,12 @@ namespace exodbc
 			: m_pCb(other.m_pCb)
 		{};
 
+		SqlCBufferLengthIndicator& operator=(const SqlCBufferLengthIndicator& other)
+		{
+			m_pCb = other.m_pCb;
+			return *this;
+		}
+
 		virtual ~SqlCBufferLengthIndicator()
 		{};
 
@@ -68,6 +74,13 @@ namespace exodbc
 			m_pBuffer = std::make_shared<T>();
 			SetNull();
 		};
+
+		SqlCBuffer& operator=(const SqlCBuffer& other)
+		{
+			SqlCBufferLengthIndicator::operator=(other);
+			m_pBuffer = other.m_pBuffer;
+			return *this;
+		}
 
 		SqlCBuffer(const SqlCBuffer& other)
 			: SqlCBufferLengthIndicator(other)
@@ -128,9 +141,18 @@ namespace exodbc
 			, m_nrOfElements(other.m_nrOfElements)
 		{};
 
-		~SqlCArrayBuffer() 
+		SqlCArrayBuffer& operator=(const SqlCArrayBuffer& other)
+		{
+			SqlCBufferLengthIndicator::operator=(other);
+			m_nrOfElements = other.m_nrOfElements;
+			m_pBuffer = other.m_pBuffer;
+			return *this;
+		}
+
+		virtual ~SqlCArrayBuffer() 
 		{};
 
+		// \todo we should rather use std::copy here.
 		void SetValue(const T* value, SQLLEN valueBufferLength, SQLLEN cb) throw() 
 		{ 
 			exASSERT(valueBufferLength <= GetBufferLength()); 
@@ -147,7 +169,7 @@ namespace exodbc
 		//virtual SQLLEN GetBufferSize() const throw() { return sizeof(T) * GetNrOfElements(); };
 
 	private:
-		const SQLLEN m_nrOfElements;
+		SQLLEN m_nrOfElements;
 		std::shared_ptr<T> m_pBuffer;
 	};
 	
@@ -159,6 +181,8 @@ namespace exodbc
 		SqlTimeTypeStructBuffer, SqlTimeStructBuffer,
 		SqlWCharArray, SqlCharArray, SqlBinaryArray> SqlCBufferVariant;
 	
+	typedef std::map<SQLUSMALLINT, SqlCBufferVariant> SqlCBufferVariantMap;
+
 	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType);
 
 } // namespace exodbc

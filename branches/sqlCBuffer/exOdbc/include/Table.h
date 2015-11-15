@@ -19,6 +19,7 @@
 #include "Exception.h"
 #include "ObjectName.h"
 #include "Sql2BufferTypeMap.h"
+#include "SqlCBuffer.h"
 
 // Other headers
 #include "boost/any.hpp"
@@ -1000,6 +1001,8 @@ namespace exodbc
 		std::set<SQLUSMALLINT> m_primaryKeyColumnIndexes;	///< If this set contains values during Open(), the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is activated implicitly. 
 															///< The ColumnBuffers marked in this set will be used as primary key columns.
 															///< Used if columns are not defined manually but queried, but the Database does not support SQLPrimaryKeys.
+
+		SqlCBufferVariantMap m_columnBufferMap;
 
 		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
