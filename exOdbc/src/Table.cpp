@@ -363,6 +363,11 @@ namespace exodbc
 					int p = 3;
 				}
 			}
+			for (int i = 0; i < bufferIndex; i++)
+			{
+				SqlCBufferVariant var = m_columnBufferMap[bufferIndex];
+				boost::apply_visitor(BindSelectVisitor(), var);
+			}
 
 			bufferIndex = 0;
 			for (int columnIndex = 0; columnIndex < (SQLSMALLINT)columns.size(); columnIndex++)
