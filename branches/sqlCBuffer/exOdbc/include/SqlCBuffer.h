@@ -98,7 +98,7 @@ namespace exodbc
 		const T& GetValue() const throw() { return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const throw() { return m_pBuffer; };
 
-		void BindSelect() {};
+		void BindSelect() const {};
 
 	private:
 		std::shared_ptr<T> m_pBuffer;
@@ -152,6 +152,9 @@ namespace exodbc
 		virtual ~SqlCArrayBuffer() 
 		{};
 
+		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
+		SQLLEN GetBufferLength() const throw() { return sizeof(T) * GetNrOfElements(); };
+
 		// \todo we should rather use std::copy here.
 		void SetValue(const T* value, SQLLEN valueBufferLength, SQLLEN cb) throw() 
 		{ 
@@ -162,11 +165,8 @@ namespace exodbc
 		};
 		const std::shared_ptr<T> GetBuffer() const throw() { return m_pBuffer; };
 		SQLLEN GetNrOfElements() const throw() { return m_nrOfElements; };
-		SQLLEN GetBufferLength() const throw() { return GetNrOfElements() * sizeof(T); };
 
-		virtual SQLSMALLINT GetSqlCType() const throw() { return sqlCType; };
-		//virtual const SQLPOINTER GetCBuffer() const throw() { return (SQLPOINTER*)GetBuffer(); };
-		//virtual SQLLEN GetBufferSize() const throw() { return sizeof(T) * GetNrOfElements(); };
+		void BindSelect() const {};
 
 	private:
 		SQLLEN m_nrOfElements;
@@ -182,6 +182,18 @@ namespace exodbc
 		SqlWCharArray, SqlCharArray, SqlBinaryArray> SqlCBufferVariant;
 	
 	typedef std::map<SQLUSMALLINT, SqlCBufferVariant> SqlCBufferVariantMap;
+
+	class BindSelectVisitor
+		: public boost::static_visitor<void>
+	{
+	public:
+
+		template<typename T>
+		void operator()(const T& t) const
+		{
+			t.BindSelect();
+		}
+	};
 
 	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType);
 
