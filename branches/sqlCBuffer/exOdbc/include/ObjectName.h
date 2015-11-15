@@ -53,15 +53,6 @@ namespace exodbc
 		*/
 		bool operator==(const ObjectName& other) const;
 	};
-
-
-	class EXODBCAPI BindInfo
-	{
-	public:
-		virtual ~BindInfo();
-
-
-	};
 }
 
 #endif // OBJECTNAME_H

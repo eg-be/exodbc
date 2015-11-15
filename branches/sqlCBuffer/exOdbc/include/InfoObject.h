@@ -73,6 +73,43 @@ namespace exodbc
 	typedef std::vector<TableInfo> TableInfosVector;
 
 
+	class EXODBCAPI ColumnBindInfo
+	{
+	public:
+		ColumnBindInfo()
+			: m_sqlType(SQL_UNKNOWN_TYPE)
+			, m_columnSize(0)
+			, m_decimalDigits(0)
+		{};
+
+		ColumnBindInfo(SQLSMALLINT sqlType)
+			: m_sqlType(sqlType)
+			, m_columnSize(0)
+			, m_decimalDigits(0)
+		{};
+
+		ColumnBindInfo(SQLSMALLINT sqlType, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+			: m_sqlType(sqlType)
+			, m_columnSize(columnSize)
+			, m_decimalDigits(decimalDigits)
+		{};
+
+		virtual ~ColumnBindInfo() {};
+
+	public:
+
+		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
+		SQLSMALLINT GetDecimalDigits() const noexcept { return m_decimalDigits; };
+
+		SQLSMALLINT GetSqlType() const noexcept { return m_sqlType; };
+
+	protected:
+		SQLSMALLINT m_sqlType;
+		SQLINTEGER m_columnSize;
+		SQLSMALLINT m_decimalDigits;
+	};
+
+
 	/*!
 	* \class	ManualColumnInfo
 	* \brief	Information about a column defined manually and buffer allocated manually.
