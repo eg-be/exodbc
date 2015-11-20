@@ -130,24 +130,24 @@ namespace exodbc
 		const T& GetValue() const noexcept { return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const noexcept { return m_pBuffer; };
 
-		void BindSelect(const ColumnBindInfo& bindInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+		void BindSelect(const ColumnBindInfo& boundHandleInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
 		{
 			exASSERT(columnNr >= 1);
 			exASSERT(hStmt != SQL_NULL_HSTMT);
-			ColumnBoundHandle bindInfo(hStmt, columnNr);
-			exASSERT_MSG(m_boundSelects.find(bindInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
+			ColumnBoundHandle boundHandleInfo(hStmt, columnNr);
+			exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
 
 			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, (SQLPOINTER*)m_pBuffer.get(), GetBufferLength(), m_pCb.get());
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
-			m_boundSelects.insert(bindInfo);
+			m_boundSelects.insert(boundHandleInfo);
 		};
 
 		void UnbindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
 		{
 			exASSERT(columnNr >= 1);
 			exASSERT(hStmt != SQL_NULL_HSTMT);
-			ColumnBoundHandle bindInfo(hStmt, columnNr);
-			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(bindInfo);
+			ColumnBoundHandle boundHandleInfo(hStmt, columnNr);
+			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(boundHandleInfo);
 			exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
 			
 			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, NULL, 0, NULL);
@@ -155,7 +155,7 @@ namespace exodbc
 			m_boundSelects.erase(it);
 		}
 
-	private:
+		private:
 		std::shared_ptr<T> m_pBuffer;
 
 		std::set<ColumnBoundHandle> m_boundSelects;
@@ -168,6 +168,8 @@ namespace exodbc
 		exASSERT(hStmt != SQL_NULL_HSTMT);
 		exASSERT(bindInfo.GetColumnSize() > 0);
 		exASSERT(bindInfo.GetDecimalDigits() >= 0);
+		ColumnBoundHandle boundHandleInfo(hStmt, columnNr);
+		exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
 
 		SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
@@ -176,6 +178,7 @@ namespace exodbc
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER) m_pBuffer.get());
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER) m_pCb.get());
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER) m_pCb.get());
+		m_boundSelects.insert(boundHandleInfo);
 	}
 
 	template<>
@@ -183,12 +186,16 @@ namespace exodbc
 	{
 		exASSERT(columnNr >= 1);
 		exASSERT(hStmt != SQL_NULL_HSTMT);
-		
+		ColumnBoundHandle boundHandleInfo(hStmt, columnNr);
+		std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(boundHandleInfo);
+		exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
+
 		SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)NULL);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)NULL);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)NULL);
+		m_boundSelects.erase(it);
 	}
 
 	typedef SqlCBuffer<SQLSMALLINT, SQL_C_USHORT> SqlUShortBuffer;
