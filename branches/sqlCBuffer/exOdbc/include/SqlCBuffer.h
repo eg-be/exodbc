@@ -11,6 +11,7 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Exception.h"
+#include "InfoObject.h"
 
 // Other headers
 #include "boost/variant.hpp"
@@ -82,11 +83,34 @@ namespace exodbc
 		const T& GetValue() const noexcept { return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const noexcept { return m_pBuffer; };
 
-		void BindSelect() const {};
+		void BindSelect(const ColumnBindInfo& bindInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+		{
+			exASSERT(columnNr >= 1);
+			exASSERT(hStmt != SQL_NULL_HSTMT);
+			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, (SQLPOINTER*)m_pBuffer.get(), GetBufferLength(), m_pCb.get());
+			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
+		};
 
 	private:
 		std::shared_ptr<T> m_pBuffer;
 	};
+
+	template<>
+	void SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindSelect(const ColumnBindInfo& bindInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+	{
+		exASSERT(columnNr >= 1);
+		exASSERT(hStmt != SQL_NULL_HSTMT);
+		exASSERT(bindInfo.GetColumnSize() > 0);
+		exASSERT(bindInfo.GetDecimalDigits() >= 0);
+
+		SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN) bindInfo.GetColumnSize()));
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER) bindInfo.GetDecimalDigits());
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER) m_pBuffer.get());
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER) m_pCb.get());
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER) m_pCb.get());
+	}
 
 	typedef SqlCBuffer<SQLSMALLINT, SQL_C_USHORT> SqlUShortBuffer;
 	typedef SqlCBuffer<SQLINTEGER, SQL_C_ULONG> SqlULongBuffer;
@@ -161,7 +185,7 @@ namespace exodbc
 		template<typename T>
 		void operator()(const T& t) const
 		{
-			t.BindSelect();
+//			t.BindSelect();
 		}
 	};
 
