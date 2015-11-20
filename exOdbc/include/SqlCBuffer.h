@@ -56,6 +56,37 @@ namespace exodbc
 		std::shared_ptr<SQLLEN> m_pCb;
 	};
 
+	struct EXODBCAPI ColumnBoundHandle
+	{
+		ColumnBoundHandle(SQLHSTMT hStmt, SQLSMALLINT columnNr)
+			: m_hStmt(hStmt)
+			, m_columnNr(columnNr)
+		{};
+
+		ColumnBoundHandle(const ColumnBoundHandle& other) = default;
+
+		~ColumnBoundHandle()
+		{};
+
+		bool operator==(const ColumnBoundHandle& other) const noexcept
+		{
+			return other.m_hStmt == m_hStmt && other.m_columnNr == m_columnNr;
+		};
+
+		bool operator!=(const ColumnBoundHandle& other) const noexcept
+		{
+			return !(*this == other);
+		};
+
+		bool operator<(const ColumnBoundHandle& other) const noexcept
+		{
+			return m_hStmt < other.m_hStmt && m_columnNr < other.m_columnNr;
+		}
+
+		const SQLHSTMT m_hStmt;
+		const SQLSMALLINT m_columnNr;
+	};
+
 
 	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCBuffer
@@ -72,8 +103,24 @@ namespace exodbc
 		SqlCBuffer& operator=(const SqlCBuffer& other) = default;
 		SqlCBuffer(const SqlCBuffer& other) = default;
 
-		virtual ~SqlCBuffer() 
-		{};
+		~SqlCBuffer()
+		{
+			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.begin();
+			while (it != m_boundSelects.end())
+			{
+				// unbind
+				ColumnBoundHandle bindInfo = *it;
+				try
+				{
+					UnbindSelect(bindInfo.m_hStmt, bindInfo.m_columnNr);
+				}
+				catch (const Exception& ex)
+				{
+					LOG_ERROR(boost::str(boost::wformat(L"Failed to unbind column %d from handle %d: %s") % bindInfo.m_columnNr %bindInfo.m_hStmt %ex.ToString()));
+				}
+				it = m_boundSelects.erase(it);
+			}
+		};
 
 		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
 		static SQLLEN GetBufferLength() noexcept { return sizeof(T); };
@@ -87,12 +134,31 @@ namespace exodbc
 		{
 			exASSERT(columnNr >= 1);
 			exASSERT(hStmt != SQL_NULL_HSTMT);
+			ColumnBoundHandle bindInfo(hStmt, columnNr);
+			exASSERT_MSG(m_boundSelects.find(bindInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
+
 			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, (SQLPOINTER*)m_pBuffer.get(), GetBufferLength(), m_pCb.get());
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
+			m_boundSelects.insert(bindInfo);
 		};
+
+		void UnbindSelect(SQLHSTMT hStmt, SQLUSMALLINT columnNr)
+		{
+			exASSERT(columnNr >= 1);
+			exASSERT(hStmt != SQL_NULL_HSTMT);
+			ColumnBoundHandle bindInfo(hStmt, columnNr);
+			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(bindInfo);
+			exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
+			
+			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, NULL, 0, NULL);
+			//THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
+			//m_boundSelects.erase(it);
+		}
 
 	private:
 		std::shared_ptr<T> m_pBuffer;
+
+		std::set<ColumnBoundHandle> m_boundSelects;
 	};
 
 	template<>
@@ -121,6 +187,7 @@ namespace exodbc
 	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TYPE_TIME> SqlTimeTypeStructBuffer;
 	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TIME> SqlTimeStructBuffer;
 
+	typedef SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC> SqlNumericStructBuffer;
 
 
 	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
