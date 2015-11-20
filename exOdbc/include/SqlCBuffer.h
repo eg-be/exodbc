@@ -112,7 +112,7 @@ namespace exodbc
 				ColumnBoundHandle bindInfo = *it;
 				try
 				{
-					UnbindSelect(bindInfo.m_hStmt, bindInfo.m_columnNr);
+					UnbindSelect(bindInfo.m_columnNr, bindInfo.m_hStmt);
 				}
 				catch (const Exception& ex)
 				{
@@ -142,7 +142,7 @@ namespace exodbc
 			m_boundSelects.insert(bindInfo);
 		};
 
-		void UnbindSelect(SQLHSTMT hStmt, SQLUSMALLINT columnNr)
+		void UnbindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
 		{
 			exASSERT(columnNr >= 1);
 			exASSERT(hStmt != SQL_NULL_HSTMT);
@@ -151,8 +151,9 @@ namespace exodbc
 			exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
 			
 			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, NULL, 0, NULL);
+			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
 			//THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
-			//m_boundSelects.erase(it);
+			m_boundSelects.erase(it);
 		}
 
 	private:

@@ -487,7 +487,7 @@ namespace exodbc
 		for(it = errs.begin(); it != errs.end(); it++) \
 		{ \
 			const SErrorInfo& err = *it; \
-			ws << std::endl << L"\t" << err; \
+			ws << std::endl << L"\t" << err.ToString(); \
 		} \
 		BOOST_LOG_TRIVIAL(logLevel) << ws.str(); \
 	} while( 0 )
