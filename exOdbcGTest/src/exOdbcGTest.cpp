@@ -59,9 +59,29 @@ bool extractParamValue( int argc, const _TCHAR* const argv[],const std::wstring&
 	return false;
 }
 
+#include "boost/variant/polymorphic_get.hpp"
 
 void printHelp()
 {
+	struct Base
+	{
+		int m = 5;
+	};
+	struct Der : public Base
+	{
+		int u = 3;
+	};
+	boost::variant<Der> var = Der();
+	try
+	{
+		Base b = boost::polymorphic_get<Base>(var);
+		Der d = boost::polymorphic_get<Der>(var);
+		int p = 3;
+	}
+	catch (boost::bad_get& ex)
+	{
+		int p = 3;
+	}
 	using namespace std;
 
 	wcerr << L"Usage: exOdbcGTest [OPTION]... [DATABASE]\n";
@@ -101,6 +121,8 @@ void printHelp()
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	printHelp();
+
 	using namespace std;
 	using namespace exodbc;
 	namespace ba = boost::algorithm;
