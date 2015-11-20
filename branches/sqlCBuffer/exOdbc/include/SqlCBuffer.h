@@ -39,24 +39,17 @@ namespace exodbc
 			m_pCb = std::make_shared<SQLLEN>(0);
 		}
 
-		SqlCBufferLengthIndicator(const SqlCBufferLengthIndicator& other)
-			: m_pCb(other.m_pCb)
-		{};
-
-		SqlCBufferLengthIndicator& operator=(const SqlCBufferLengthIndicator& other)
-		{
-			m_pCb = other.m_pCb;
-			return *this;
-		}
+		SqlCBufferLengthIndicator(const SqlCBufferLengthIndicator& other) = default;
+		SqlCBufferLengthIndicator& operator=(const SqlCBufferLengthIndicator& other) = default;
 
 		virtual ~SqlCBufferLengthIndicator()
 		{};
 
-		void SetCb(SQLLEN cb) throw() { *m_pCb = cb; };
-		SQLLEN GetCb() const throw() { return *m_pCb; };
+		void SetCb(SQLLEN cb) noexcept { *m_pCb = cb; };
+		SQLLEN GetCb() const noexcept { return *m_pCb; };
 
-		void SetNull() throw() { *m_pCb = SQL_NULL_DATA; };
-		bool IsNull() const throw() { return *m_pCb == SQL_NULL_DATA; };
+		void SetNull() noexcept { *m_pCb = SQL_NULL_DATA; };
+		bool IsNull() const noexcept { return *m_pCb == SQL_NULL_DATA; };
 
 	protected:
 		std::shared_ptr<SQLLEN> m_pCb;
@@ -75,28 +68,19 @@ namespace exodbc
 			SetNull();
 		};
 
-		SqlCBuffer& operator=(const SqlCBuffer& other)
-		{
-			SqlCBufferLengthIndicator::operator=(other);
-			m_pBuffer = other.m_pBuffer;
-			return *this;
-		}
-
-		SqlCBuffer(const SqlCBuffer& other)
-			: SqlCBufferLengthIndicator(other)
-			, m_pBuffer(other.m_pBuffer)
-		{};
+		SqlCBuffer& operator=(const SqlCBuffer& other) = default;
+		SqlCBuffer(const SqlCBuffer& other) = default;
 
 		virtual ~SqlCBuffer() 
 		{};
 
-		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
-		static SQLLEN GetBufferLength() throw() { return sizeof(T); };
+		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
+		static SQLLEN GetBufferLength() noexcept { return sizeof(T); };
 
-		void SetValue(const T& value) throw() { SetValue(value, GetBufferLength()); };
-		void SetValue(const T& value, SQLLEN cb) throw() { *m_pBuffer = value; SetCb(cb); };
-		const T& GetValue() const throw() { return *m_pBuffer; };
-		std::shared_ptr<const T> GetBuffer() const throw() { return m_pBuffer; };
+		void SetValue(const T& value) noexcept { SetValue(value, GetBufferLength()); };
+		void SetValue(const T& value, SQLLEN cb) noexcept { *m_pBuffer = value; SetCb(cb); };
+		const T& GetValue() const noexcept { return *m_pBuffer; };
+		std::shared_ptr<const T> GetBuffer() const noexcept { return m_pBuffer; };
 
 		void BindSelect() const {};
 
@@ -120,12 +104,7 @@ namespace exodbc
 		: public SqlCBufferLengthIndicator
 	{
 	public:
-		SqlCArrayBuffer() 
-			: SqlCBufferLengthIndicator()
-			, m_nrOfElements(0)
-		{ 
-			static_assert(false, "Default Constructor is not supported, must use SqlCArrayBuffer(SQLLEN nrOfElements)");
-		};
+		SqlCArrayBuffer() = delete;
 
 		SqlCArrayBuffer(SQLLEN nrOfElements)
 			: SqlCBufferLengthIndicator()
@@ -135,36 +114,25 @@ namespace exodbc
 			SetNull();
 		};
 
-		SqlCArrayBuffer(const SqlCArrayBuffer& other)
-			: SqlCBufferLengthIndicator(other)
-			, m_pBuffer(other.m_pBuffer)
-			, m_nrOfElements(other.m_nrOfElements)
-		{};
-
-		SqlCArrayBuffer& operator=(const SqlCArrayBuffer& other)
-		{
-			SqlCBufferLengthIndicator::operator=(other);
-			m_nrOfElements = other.m_nrOfElements;
-			m_pBuffer = other.m_pBuffer;
-			return *this;
-		}
+		SqlCArrayBuffer(const SqlCArrayBuffer& other) = default;
+		SqlCArrayBuffer& operator=(const SqlCArrayBuffer& other) = default;
 
 		virtual ~SqlCArrayBuffer() 
 		{};
 
-		static SQLSMALLINT GetSqlCType() throw() { return sqlCType; };
-		SQLLEN GetBufferLength() const throw() { return sizeof(T) * GetNrOfElements(); };
+		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
+		SQLLEN GetBufferLength() const noexcept { return sizeof(T) * GetNrOfElements(); };
 
 		// \todo we should rather use std::copy here.
-		void SetValue(const T* value, SQLLEN valueBufferLength, SQLLEN cb) throw() 
+		void SetValue(const T* value, SQLLEN valueBufferLength, SQLLEN cb)
 		{ 
 			exASSERT(valueBufferLength <= GetBufferLength()); 
 			memset(m_pBuffer.get(), 0, GetBufferLength()); 
 			memcpy(m_pBuffer.get(), value, valueBufferLength);
 			SetCb(cb);
 		};
-		const std::shared_ptr<T> GetBuffer() const throw() { return m_pBuffer; };
-		SQLLEN GetNrOfElements() const throw() { return m_nrOfElements; };
+		const std::shared_ptr<T> GetBuffer() const noexcept { return m_pBuffer; };
+		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
 
 		void BindSelect() const {};
 
@@ -182,6 +150,8 @@ namespace exodbc
 		SqlWCharArray, SqlCharArray, SqlBinaryArray> SqlCBufferVariant;
 	
 	typedef std::map<SQLUSMALLINT, SqlCBufferVariant> SqlCBufferVariantMap;
+
+
 
 	class BindSelectVisitor
 		: public boost::static_visitor<void>
