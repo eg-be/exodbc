@@ -108,7 +108,7 @@ namespace exodbc
 		SqlCBuffer& operator=(const SqlCBuffer& other) = default;
 		SqlCBuffer(const SqlCBuffer& other) = default;
 
-		~SqlCBuffer()
+		virtual ~SqlCBuffer()
 		{
 			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.begin();
 			while (it != m_boundSelects.end())
@@ -229,6 +229,7 @@ namespace exodbc
 	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCArrayBuffer
 		: public SqlCBufferLengthIndicator
+		, public ColumnFlags
 	{
 	public:
 		SqlCArrayBuffer() = delete;
@@ -245,7 +246,23 @@ namespace exodbc
 		SqlCArrayBuffer& operator=(const SqlCArrayBuffer& other) = default;
 
 		virtual ~SqlCArrayBuffer() 
-		{};
+		{
+			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.begin();
+			while (it != m_boundSelects.end())
+			{
+				// unbind
+				ColumnBoundHandle bindInfo = *it;
+				try
+				{
+					UnbindSelect(bindInfo.m_columnNr, bindInfo.m_hStmt);
+				}
+				catch (const Exception& ex)
+				{
+					LOG_ERROR(boost::str(boost::wformat(L"Failed to unbind column %d from handle %d: %s") % bindInfo.m_columnNr %bindInfo.m_hStmt %ex.ToString()));
+				}
+				it = m_boundSelects.erase(it);
+			}
+		};
 
 		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
 		SQLLEN GetBufferLength() const noexcept { return sizeof(T) * GetNrOfElements(); };
@@ -261,11 +278,35 @@ namespace exodbc
 		const std::shared_ptr<T> GetBuffer() const noexcept { return m_pBuffer; };
 		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
 
-		void BindSelect(const ColumnBindInfo& boundHandleInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt) {};
+		void BindSelect(const ColumnBindInfo& boundHandleInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt) 
+		{
+			exASSERT(columnNr >= 1);
+			exASSERT(hStmt != SQL_NULL_HSTMT);
+			ColumnBoundHandle boundHandleInfo(hStmt, columnNr);
+			exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
+
+			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, (SQLPOINTER*)m_pBuffer.get(), GetBufferLength(), m_pCb.get());
+			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
+			m_boundSelects.insert(boundHandleInfo);
+		};
+
+		void UnbindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+		{
+			exASSERT(columnNr >= 1);
+			exASSERT(hStmt != SQL_NULL_HSTMT);
+			ColumnBoundHandle boundHandleInfo(hStmt, columnNr);
+			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(boundHandleInfo);
+			exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
+
+			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, NULL, 0, NULL);
+			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
+			m_boundSelects.erase(it);
+		}
 
 	private:
 		SQLLEN m_nrOfElements;
 		std::shared_ptr<T> m_pBuffer;
+		std::set<ColumnBoundHandle> m_boundSelects;
 	};
 	
 	// Array types
@@ -290,8 +331,8 @@ namespace exodbc
 	{
 	public:
 		BindSelectVisitor() = delete;
-		BindSelectVisitor(const ColumnBindInfo& boundHandleInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
-			: m_boundHandleInfo(boundHandleInfo)
+		BindSelectVisitor(const ColumnBindInfo& columnBindInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+			: m_columnBindInfo(columnBindInfo)
 			, m_columnNr(columnNr)
 			, m_hStmt(hStmt)
 		{};
@@ -299,14 +340,17 @@ namespace exodbc
 		template<typename T>
 		void operator()(const T& t) const
 		{
-			t.BindSelect(m_boundHandleInfo, m_columnNr, m_hStmt);
+			t.BindSelect(m_columnBindInfo, m_columnNr, m_hStmt);
 		}
 	private:
-		ColumnBindInfo m_boundHandleInfo;
+		ColumnBindInfo m_columnBindInfo;
 		SQLUSMALLINT m_columnNr;
 		SQLHSTMT m_hStmt;
 	};
 
 	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType);
+	extern EXODBCAPI SqlCBufferVariant CreateArrayBuffer(SQLSMALLINT sqlCType, const ColumnInfo& columnInfo);
+	extern EXODBCAPI SQLLEN CalculateDisplaySize(SQLSMALLINT sqlType, SQLINTEGER columnSize, SQLSMALLINT numPrecRadix, SQLSMALLINT decimalDigits);
+	extern EXODBCAPI bool IsArrayType(SQLSMALLINT sqlCType);
 
 } // namespace exodbc

@@ -38,6 +38,12 @@ namespace exodbc
 			: m_flags(flags)
 		{};
 
+		virtual ~EnumFlags() 
+		{};
+
+		EnumFlags(const EnumFlags& other) = default;
+		EnumFlags& operator=(const EnumFlags& other) = default;
+
 		bool Test(ET flag) const noexcept
 		{
 			return (m_flags & flag) == flag;
