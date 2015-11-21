@@ -333,17 +333,21 @@ namespace exodbc
 			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
 			// And how to open this column
 			OldColumnFlags columnFlags = CF_NONE;
+			ColumnFlags flags;
 			if (TestAccessFlag(AF_SELECT))
 			{
 				columnFlags |= CF_SELECT;
+				flags.Set(ColumnFlag::SELECT);
 			}
 			if (TestAccessFlag(AF_UPDATE_WHERE) || TestAccessFlag(AF_UPDATE_PK))
 			{
 				columnFlags |= CF_UPDATE;
+				flags.Set(ColumnFlag::UPDATE);
 			}
 			if (TestAccessFlag(AF_INSERT))
 			{
 				columnFlags |= CF_INSERT;
+				flags.Set(ColumnFlag::INSERT);
 			}
 			int bufferIndex = 0;
 
@@ -354,12 +358,20 @@ namespace exodbc
 				{
 					SQLSMALLINT sqlCType = m_pSql2BufferTypeMap->GetBufferType(colInfo.GetSqlType());
 					SqlCBufferVariant sqlCBuffer = CreateBuffer(sqlCType);
+					ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(sqlCBuffer);
+					columnFlags = flags;
 					m_columnBufferMap[bufferIndex] = sqlCBuffer;
 					++bufferIndex;
 				}
-				catch (NotSupportedException& nse)
+				catch (const NotSupportedException& nse)
 				{
 					int p = 3;
+				}
+				catch (const boost::bad_polymorphic_get& ex)
+				{
+					WrapperException we(ex);
+					SET_EXCEPTION_SOURCE(we);
+					throw we;
 				}
 			}
 
@@ -1399,7 +1411,11 @@ namespace exodbc
 				for (SqlCBufferVariantMap::iterator it = m_columnBufferMap.begin(); it != m_columnBufferMap.end(); it++)
 				{
 					SqlCBufferVariant& columnBuffer = it->second;
+					const ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
+					if (columnFlags.Test(ColumnFlag::SELECT))
+					{
 
+					}
 				}
 
 				boundSelect = true;

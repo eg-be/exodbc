@@ -12,9 +12,11 @@
 #include "exOdbc.h"
 #include "Exception.h"
 #include "InfoObject.h"
+#include "EnumFlags.h"
 
 // Other headers
 #include "boost/variant.hpp"
+#include "boost/variant/polymorphic_get.hpp"
 
 // System headers
 
@@ -56,31 +58,6 @@ namespace exodbc
 		std::shared_ptr<SQLLEN> m_pCb;
 	};
 
-	class ColumnFlagsHolder
-	{
-	public:
-		ColumnFlagsHolder() noexcept
-			: m_flags(CF_NONE)
-		{};
-
-		bool IsFlagSet(OldColumnFlag columnFlag) const noexcept { return (m_flags & columnFlag) == columnFlag; };
-
-
-		/*!
-		* \brief	Set a ColumnFlags.
-		*/
-		void SetFlag(OldColumnFlag columnFlag) noexcept { m_flags |= columnFlag; };
-
-
-		/*!
-		* \brief	Clear a ColumnFlags.
-		*/
-		void ClearFlag(OldColumnFlag columnFlag) noexcept { m_flags &= ~columnFlag; };
-
-	protected:
-		OldColumnFlags m_flags;
-	};
-
 	struct ColumnBoundHandle
 	{
 		ColumnBoundHandle(SQLHSTMT hStmt, SQLSMALLINT columnNr)
@@ -117,10 +94,12 @@ namespace exodbc
 	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCBuffer
 		: public SqlCBufferLengthIndicator
+		, public ColumnFlags
 	{
 	public:
 		SqlCBuffer()
 			: SqlCBufferLengthIndicator()
+			, ColumnFlags()
 		{
 			m_pBuffer = std::make_shared<T>();
 			SetNull();
