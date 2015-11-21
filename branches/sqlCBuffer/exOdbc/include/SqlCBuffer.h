@@ -33,31 +33,6 @@ namespace exodbc
 
 	// Classes
 	// -------
-
-	class SqlCBufferLengthIndicator
-	{
-	public:
-		SqlCBufferLengthIndicator()
-		{
-			m_pCb = std::make_shared<SQLLEN>(0);
-		}
-
-		SqlCBufferLengthIndicator(const SqlCBufferLengthIndicator& other) = default;
-		SqlCBufferLengthIndicator& operator=(const SqlCBufferLengthIndicator& other) = default;
-
-		virtual ~SqlCBufferLengthIndicator()
-		{};
-
-		void SetCb(SQLLEN cb) noexcept { *m_pCb = cb; };
-		SQLLEN GetCb() const noexcept { return *m_pCb; };
-
-		void SetNull() noexcept { *m_pCb = SQL_NULL_DATA; };
-		bool IsNull() const noexcept { return *m_pCb == SQL_NULL_DATA; };
-
-	protected:
-		std::shared_ptr<SQLLEN> m_pCb;
-	};
-
 	struct ColumnBoundHandle
 	{
 		ColumnBoundHandle(SQLHSTMT hStmt, SQLSMALLINT columnNr)
@@ -91,15 +66,64 @@ namespace exodbc
 	};
 
 
+	class SqlCBufferLengthIndicator
+	{
+	public:
+		SqlCBufferLengthIndicator()
+		{
+			m_pCb = std::make_shared<SQLLEN>(0);
+		}
+
+		SqlCBufferLengthIndicator(const SqlCBufferLengthIndicator& other) = default;
+		SqlCBufferLengthIndicator& operator=(const SqlCBufferLengthIndicator& other) = default;
+
+		virtual ~SqlCBufferLengthIndicator()
+		{};
+
+		void SetCb(SQLLEN cb) noexcept { *m_pCb = cb; };
+		SQLLEN GetCb() const noexcept { return *m_pCb; };
+
+		void SetNull() noexcept { *m_pCb = SQL_NULL_DATA; };
+		bool IsNull() const noexcept { return *m_pCb == SQL_NULL_DATA; };
+
+	protected:
+		std::shared_ptr<SQLLEN> m_pCb;
+	};
+
+
+	class ExtendedBindArguments
+	{
+	public:
+		ExtendedBindArguments()
+			: m_columnSize(0)
+			, m_decimalDigits(0)
+		{};
+
+		virtual ~ExtendedBindArguments()
+		{};
+
+		void SetColumnSize(SQLINTEGER columnSize) noexcept { m_columnSize = columnSize; };
+		void SetDecimalDigits(SQLSMALLINT decimalDigits) noexcept { m_decimalDigits = decimalDigits; };
+
+		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
+		SQLSMALLINT GetDecimalDigits() const noexcept { return m_decimalDigits; };
+
+	protected:
+		SQLINTEGER m_columnSize;
+		SQLSMALLINT m_decimalDigits;
+	};
+
 	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCBuffer
 		: public SqlCBufferLengthIndicator
 		, public ColumnFlags
+		, public ExtendedBindArguments
 	{
 	public:
 		SqlCBuffer()
 			: SqlCBufferLengthIndicator()
 			, ColumnFlags()
+			, ExtendedBindArguments()
 		{
 			m_pBuffer = std::make_shared<T>();
 			SetNull();
@@ -135,7 +159,7 @@ namespace exodbc
 		const T& GetValue() const noexcept { return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const noexcept { return m_pBuffer; };
 
-		void BindSelect(const ColumnBindInfo& boundHandleInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+		void BindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
 		{
 			exASSERT(columnNr >= 1);
 			exASSERT(hStmt != SQL_NULL_HSTMT);
@@ -162,24 +186,23 @@ namespace exodbc
 
 	private:
 		std::shared_ptr<T> m_pBuffer;
-
 		std::set<ColumnBoundHandle> m_boundSelects;
 	};
 
 	template<>
-	void SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindSelect(const ColumnBindInfo& bindInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+	void SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
 	{
 		exASSERT(columnNr >= 1);
 		exASSERT(hStmt != SQL_NULL_HSTMT);
-		exASSERT(bindInfo.GetColumnSize() > 0);
-		exASSERT(bindInfo.GetDecimalDigits() >= 0);
+		exASSERT(m_columnSize > 0);
+		exASSERT(m_decimalDigits >= 0);
 		ColumnBoundHandle boundHandleInfo(hStmt, columnNr);
 		exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
 
 		SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN) bindInfo.GetColumnSize()));
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER) bindInfo.GetDecimalDigits());
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN) m_columnSize));
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER) m_decimalDigits);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER) m_pBuffer.get());
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER) m_pCb.get());
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER) m_pCb.get());
@@ -230,12 +253,15 @@ namespace exodbc
 	class SqlCArrayBuffer
 		: public SqlCBufferLengthIndicator
 		, public ColumnFlags
+		, public ExtendedBindArguments
 	{
 	public:
 		SqlCArrayBuffer() = delete;
 
 		SqlCArrayBuffer(SQLLEN nrOfElements)
 			: SqlCBufferLengthIndicator()
+			, ColumnFlags()
+			, ExtendedBindArguments()
 			, m_nrOfElements(nrOfElements)
 		{
 			m_pBuffer = std::shared_ptr<T>(new T[m_nrOfElements], std::default_delete<T[]>());
@@ -278,7 +304,7 @@ namespace exodbc
 		const std::shared_ptr<T> GetBuffer() const noexcept { return m_pBuffer; };
 		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
 
-		void BindSelect(const ColumnBindInfo& boundHandleInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt) 
+		void BindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt) 
 		{
 			exASSERT(columnNr >= 1);
 			exASSERT(hStmt != SQL_NULL_HSTMT);
@@ -326,29 +352,28 @@ namespace exodbc
 	
 	typedef std::map<SQLUSMALLINT, SqlCBufferVariant> SqlCBufferVariantMap;
 
+
 	class BindSelectVisitor
 		: public boost::static_visitor<void>
 	{
 	public:
 		BindSelectVisitor() = delete;
-		BindSelectVisitor(const ColumnBindInfo& columnBindInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
-			: m_columnBindInfo(columnBindInfo)
-			, m_columnNr(columnNr)
+		BindSelectVisitor(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+			: m_columnNr(columnNr)
 			, m_hStmt(hStmt)
 		{};
 
 		template<typename T>
-		void operator()(const T& t) const
+		void operator()(T& t) const
 		{
-			t.BindSelect(m_columnBindInfo, m_columnNr, m_hStmt);
+			t.BindSelect(m_columnNr, m_hStmt);
 		}
 	private:
-		ColumnBindInfo m_columnBindInfo;
 		SQLUSMALLINT m_columnNr;
 		SQLHSTMT m_hStmt;
 	};
 
-	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType);
+	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType, const ColumnBindInfo& bindInfo);
 	extern EXODBCAPI SqlCBufferVariant CreateArrayBuffer(SQLSMALLINT sqlCType, const ColumnInfo& columnInfo);
 	extern EXODBCAPI SQLLEN CalculateDisplaySize(SQLSMALLINT sqlType, SQLINTEGER columnSize, SQLSMALLINT numPrecRadix, SQLSMALLINT decimalDigits);
 	extern EXODBCAPI bool IsArrayType(SQLSMALLINT sqlCType);

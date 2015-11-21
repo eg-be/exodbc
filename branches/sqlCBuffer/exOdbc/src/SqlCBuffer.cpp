@@ -26,7 +26,7 @@ using namespace std;
 namespace exodbc
 {
 
-	SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType)
+	SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType, const ColumnBindInfo& bindInfo)
 	{
 		switch (sqlCType)
 		{
