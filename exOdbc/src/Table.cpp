@@ -143,18 +143,18 @@ namespace exodbc
 			// If columns were created automatically, they were deleted from Open() in case of failure.
 			// \note: We must free the buffers before deleting our statements - the buffers may still
 			// be bound to our statements.
-			if (m_manualColumns)
-			{
-				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
-				{
-					ColumnBuffer* pBuffer = it->second;
-					delete pBuffer;
-				}
-				m_columnBuffers.clear();
-			}
+			//if (m_manualColumns)
+			//{
+			//	for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+			//	{
+			//		ColumnBuffer* pBuffer = it->second;
+			//		delete pBuffer;
+			//	}
+			//	m_columnBuffers.clear();
+			//}
 
 			FreeStatements();
-			exASSERT(m_columnBuffers.size() == 0);
+			//exASSERT(m_columnBuffers.size() == 0);
 		}
 		catch (Exception& ex)
 		{
@@ -312,7 +312,7 @@ namespace exodbc
 	void Table::CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns)
 	{
 		exASSERT(m_manualColumns == false);
-		exASSERT(m_columnBuffers.size() == 0);
+		exASSERT(m_columns.size() == 0);
 		exASSERT(m_pDb->IsOpen());
 
 		// Nest try-catch to always free eventually allocated buffers
@@ -378,13 +378,9 @@ namespace exodbc
 					{
 						extendedColumnProperties.SetDecimalDigits(colInfo.GetDecimalDigits());
 					}
-					m_columnBufferMap[bufferIndex] = sqlCBuffer;
+					m_columns[bufferIndex] = sqlCBuffer;
 					++bufferIndex;
 				}
-				//catch (const NotSupportedException& nse)
-				//{
-				//	int p = 3;
-				//}
 				catch (const boost::bad_polymorphic_get& ex)
 				{
 					WrapperException we(ex);
@@ -393,44 +389,44 @@ namespace exodbc
 				}
 			}
 
-			bufferIndex = 0;
-			for (int columnIndex = 0; columnIndex < (SQLSMALLINT)columns.size(); columnIndex++)
-			{
-				ColumnInfo colInfo = columns[columnIndex];
-				try
-				{
-					ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, odbcVersion, m_pSql2BufferTypeMap, columnFlags);
-					m_columnBuffers[bufferIndex] = pColBuff;
-					++bufferIndex;
-				}
-				catch (NotSupportedException& nse)
-				{
-					if (skipUnsupportedColumns)
-					{
-						// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
-						LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetQueryName() % nse.ToString()));
-						++bufferIndex;
-						continue;
-					}
-					else
-					{
-						// rethrow
-						throw;
-					}
-				}
-			}
+			//bufferIndex = 0;
+			//for (int columnIndex = 0; columnIndex < (SQLSMALLINT)columns.size(); columnIndex++)
+			//{
+			//	ColumnInfo colInfo = columns[columnIndex];
+			//	try
+			//	{
+			//		ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, odbcVersion, m_pSql2BufferTypeMap, columnFlags);
+			//		m_columnBuffers[bufferIndex] = pColBuff;
+			//		++bufferIndex;
+			//	}
+			//	catch (NotSupportedException& nse)
+			//	{
+			//		if (skipUnsupportedColumns)
+			//		{
+			//			// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
+			//			LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetQueryName() % nse.ToString()));
+			//			++bufferIndex;
+			//			continue;
+			//		}
+			//		else
+			//		{
+			//			// rethrow
+			//			throw;
+			//		}
+			//	}
+			//}
 
 		}
 		catch (Exception& ex)
 		{
 			HIDE_UNUSED(ex);
-			// Free allocated buffers and rethrow
-			for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
-			{
-				ColumnBuffer* pColumnBuffer = it->second;
-				delete pColumnBuffer;
-			}
-			m_columnBuffers.clear();
+			//// Free allocated buffers and rethrow
+			//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+			//{
+			//	ColumnBuffer* pColumnBuffer = it->second;
+			//	delete pColumnBuffer;
+			//}
+			//m_columnBuffers.clear();
 			throw;
 		}
 	}
@@ -499,17 +495,30 @@ namespace exodbc
 
 	std::wstring Table::BuildFieldsStatement() const
 	{
-		exASSERT(m_columnBuffers.size() > 0);
+		exASSERT(m_columns.size() > 0);
 
 		std::wstring fields = L"";
-		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
-		while (it != m_columnBuffers.end())
+		SqlCBufferVariantMap::const_iterator it = m_columns.begin();
+		while (it != m_columns.end())
 		{
-			ColumnBuffer* pBuffer = it->second;
-			if (pBuffer->IsColumnFlagSet(CF_SELECT))
+			SqlCBufferVariant var = it->second;
+			try
 			{
-				fields += pBuffer->GetQueryName();
-				fields += L", ";
+				const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(var);
+				const ColumnFlags columnFlags = boost::polymorphic_get<ColumnFlags>(var);
+				if (columnFlags.Test(ColumnFlag::SELECT))
+				{
+					std::shared_ptr<ObjectName> pColumnName = props.GetObjectName();
+					exASSERT(pColumnName);
+					fields += pColumnName->GetQueryName();
+					fields += L", ";
+				}
+			}
+			catch (const boost::bad_polymorphic_get& ex)
+			{
+				WrapperException we(ex);
+				SET_EXCEPTION_SOURCE(we);
+				throw we;
 			}
 			++it;
 		}
@@ -521,158 +530,158 @@ namespace exodbc
 
 	void Table::BindDeleteParameters()
 	{
-		exASSERT(m_columnBuffers.size() > 0);
-		exASSERT(TestAccessFlag(AF_DELETE_PK));
-		exASSERT(m_hStmtDeletePk != SQL_NULL_HSTMT);
+		//exASSERT(m_columnBuffers.size() > 0);
+		//exASSERT(TestAccessFlag(AF_DELETE_PK));
+		//exASSERT(m_hStmtDeletePk != SQL_NULL_HSTMT);
 
-		// Build statement
-		// note: parem-number reflects here the number of the param in the created prepared statement, so we
-		// cannot use the values from the ColumnBuffer column index.
-		int paramNr = 1;
-		wstring deleteStmt = (boost::wformat(L"DELETE FROM %s WHERE ") % m_tableInfo.GetQueryName()).str();
-		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		{
-			ColumnBuffer* pBuffer = it->second;
-			if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
-			{
-				// Bind this parameter as primary key and include it in the statement
-				pBuffer->BindParameter(m_hStmtDeletePk, paramNr);
-				deleteStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
-				paramNr++;
-			}
-		}
-		boost::erase_last(deleteStmt, L" AND ");
-		// ensure that we have something in our where clause
-		if (paramNr <= 1)
-		{
-			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to prepare a DELETE statement (probably because flag AF_DELETE_PK is set), but no ColumnBuffers were bound as PrimaryKeys to build a WHERE clause") % m_tableInfo.GetQueryName()));
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
+		//// Build statement
+		//// note: parem-number reflects here the number of the param in the created prepared statement, so we
+		//// cannot use the values from the ColumnBuffer column index.
+		//int paramNr = 1;
+		//wstring deleteStmt = (boost::wformat(L"DELETE FROM %s WHERE ") % m_tableInfo.GetQueryName()).str();
+		//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		//{
+		//	ColumnBuffer* pBuffer = it->second;
+		//	if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
+		//	{
+		//		// Bind this parameter as primary key and include it in the statement
+		//		pBuffer->BindParameter(m_hStmtDeletePk, paramNr);
+		//		deleteStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
+		//		paramNr++;
+		//	}
+		//}
+		//boost::erase_last(deleteStmt, L" AND ");
+		//// ensure that we have something in our where clause
+		//if (paramNr <= 1)
+		//{
+		//	Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to prepare a DELETE statement (probably because flag AF_DELETE_PK is set), but no ColumnBuffers were bound as PrimaryKeys to build a WHERE clause") % m_tableInfo.GetQueryName()));
+		//	SET_EXCEPTION_SOURCE(ex);
+		//	throw ex;
+		//}
 
-		// Prepare to delete
-		SQLRETURN ret = SQLPrepare(m_hStmtDeletePk, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
+		//// Prepare to delete
+		//SQLRETURN ret = SQLPrepare(m_hStmtDeletePk, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
+		//THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
 	}
 
 
 	void Table::BindUpdateParameters()
 	{
-		exASSERT(m_columnBuffers.size() > 0);
-		exASSERT(TestAccessFlag(AF_UPDATE_PK));
-		exASSERT(m_hStmtUpdatePk != SQL_NULL_HSTMT);
+		//exASSERT(m_columnBuffers.size() > 0);
+		//exASSERT(TestAccessFlag(AF_UPDATE_PK));
+		//exASSERT(m_hStmtUpdatePk != SQL_NULL_HSTMT);
 
-		// Build statement..
-		wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
-		// .. first the values to update
-		// note: parem-number reflects here the number of the param in the created prepared statement, so we
-		// cannot use the values from the ColumnBuffer column index.
-		int paramNr = 1;
-		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		{
-			ColumnBuffer* pBuffer = it->second;
-			if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
-			{
-				// Bind this parameter as update parameter and include it in the statement
-				// The update params come first, so the numbering works
-				pBuffer->BindParameter(m_hStmtUpdatePk, paramNr);
-				updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
-				paramNr++;
-			}
-		}
-		boost::erase_last(updateStmt, L",");
-		// ensure that we have something to update
-		if (paramNr <= 1)
-		{	
-			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind update parameters (probably because flag AF_UPDATE_PK is set), but no ColumnBuffers were bound for UPDATing") % m_tableInfo.GetQueryName()));
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		updateStmt += L"WHERE ";
-		bool haveWhereParam = false;
-		for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		{
-			ColumnBuffer* pBuffer = it->second;
-			if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
-			{
-				// Bind this parameter as primary key and include it in the where part of the statement
-				// The update params come first, so the numbering works
-				pBuffer->BindParameter(m_hStmtUpdatePk, paramNr);
-				updateStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
-				paramNr++;
-				haveWhereParam = true;
-			}
-		}
-		boost::erase_last(updateStmt, L"AND ");
-		// and ensure that we have something as where
-		exASSERT(haveWhereParam);
+		//// Build statement..
+		//wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
+		//// .. first the values to update
+		//// note: parem-number reflects here the number of the param in the created prepared statement, so we
+		//// cannot use the values from the ColumnBuffer column index.
+		//int paramNr = 1;
+		//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		//{
+		//	ColumnBuffer* pBuffer = it->second;
+		//	if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
+		//	{
+		//		// Bind this parameter as update parameter and include it in the statement
+		//		// The update params come first, so the numbering works
+		//		pBuffer->BindParameter(m_hStmtUpdatePk, paramNr);
+		//		updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
+		//		paramNr++;
+		//	}
+		//}
+		//boost::erase_last(updateStmt, L",");
+		//// ensure that we have something to update
+		//if (paramNr <= 1)
+		//{	
+		//	Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind update parameters (probably because flag AF_UPDATE_PK is set), but no ColumnBuffers were bound for UPDATing") % m_tableInfo.GetQueryName()));
+		//	SET_EXCEPTION_SOURCE(ex);
+		//	throw ex;
+		//}
+		//updateStmt += L"WHERE ";
+		//bool haveWhereParam = false;
+		//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		//{
+		//	ColumnBuffer* pBuffer = it->second;
+		//	if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
+		//	{
+		//		// Bind this parameter as primary key and include it in the where part of the statement
+		//		// The update params come first, so the numbering works
+		//		pBuffer->BindParameter(m_hStmtUpdatePk, paramNr);
+		//		updateStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
+		//		paramNr++;
+		//		haveWhereParam = true;
+		//	}
+		//}
+		//boost::erase_last(updateStmt, L"AND ");
+		//// and ensure that we have something as where
+		//exASSERT(haveWhereParam);
 
-		// Prepare to update
-		SQLRETURN ret = SQLPrepare(m_hStmtUpdatePk, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
+		//// Prepare to update
+		//SQLRETURN ret = SQLPrepare(m_hStmtUpdatePk, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
+		//THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
 	}
 
 
 	void Table::BindInsertParameters()
 	{
-		exASSERT(m_columnBuffers.size() > 0);
-		exASSERT(TestAccessFlag(AF_INSERT));
-		exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
+		//exASSERT(m_columnBuffers.size() > 0);
+		//exASSERT(TestAccessFlag(AF_INSERT));
+		//exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
 
-		// Build a statement with parameter-markers
-		// note: parem-number reflects here the number of the param in the created prepared statement, so we
-		// cannot use the values from the ColumnBuffer column index.
-		SQLSMALLINT paramNr = 1;
-		std::wstring insertStmt = L"INSERT INTO " + m_tableInfo.GetQueryName() + L" (";
-		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
-		while (it != m_columnBuffers.end())
-		{
-			ColumnBuffer* pBuffer = it->second;
-			// Bind parameter if it is marked an INSERTable
-			if (pBuffer->IsColumnFlagSet(CF_INSERT))
-			{
-				pBuffer->BindParameter(m_hStmtInsert, paramNr);
-				// prepare statement
-				insertStmt += pBuffer->GetQueryName() + L", ";
-				paramNr++;
-			}
-			++it;
-		}
-		// ensure that we have something to insert
-		if (paramNr <= 1)
-		{
-			Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind insert parameters (probably because flag AF_INSERT is set), but no ColumnBuffers were bound for INSERTing") % m_tableInfo.GetQueryName()));
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		boost::erase_last(insertStmt, L", ");
-		// and set markers for the values
-		insertStmt += L") VALUES(";
-		for (int i = 0; i < paramNr - 2; i++)
-		{
-			insertStmt += L"?, ";
-		}
-		insertStmt += L"?)";
+		//// Build a statement with parameter-markers
+		//// note: parem-number reflects here the number of the param in the created prepared statement, so we
+		//// cannot use the values from the ColumnBuffer column index.
+		//SQLSMALLINT paramNr = 1;
+		//std::wstring insertStmt = L"INSERT INTO " + m_tableInfo.GetQueryName() + L" (";
+		//ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
+		//while (it != m_columnBuffers.end())
+		//{
+		//	ColumnBuffer* pBuffer = it->second;
+		//	// Bind parameter if it is marked an INSERTable
+		//	if (pBuffer->IsColumnFlagSet(CF_INSERT))
+		//	{
+		//		pBuffer->BindParameter(m_hStmtInsert, paramNr);
+		//		// prepare statement
+		//		insertStmt += pBuffer->GetQueryName() + L", ";
+		//		paramNr++;
+		//	}
+		//	++it;
+		//}
+		//// ensure that we have something to insert
+		//if (paramNr <= 1)
+		//{
+		//	Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind insert parameters (probably because flag AF_INSERT is set), but no ColumnBuffers were bound for INSERTing") % m_tableInfo.GetQueryName()));
+		//	SET_EXCEPTION_SOURCE(ex);
+		//	throw ex;
+		//}
+		//boost::erase_last(insertStmt, L", ");
+		//// and set markers for the values
+		//insertStmt += L") VALUES(";
+		//for (int i = 0; i < paramNr - 2; i++)
+		//{
+		//	insertStmt += L"?, ";
+		//}
+		//insertStmt += L"?)";
 
-		// Prepare to update
-		SQLRETURN ret = SQLPrepare(m_hStmtInsert, (SQLWCHAR*) insertStmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtInsert);
+		//// Prepare to update
+		//SQLRETURN ret = SQLPrepare(m_hStmtInsert, (SQLWCHAR*) insertStmt.c_str(), SQL_NTS);
+		//THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtInsert);
 	}
 
 
 	bool Table::ColumnBufferExists(SQLSMALLINT columnIndex) const throw()
 	{
-		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.find(columnIndex);
-		return it != m_columnBuffers.end();
+		SqlCBufferVariantMap::const_iterator it = m_columns.find(columnIndex);
+		return it != m_columns.end();
 	}
 
 
-	ColumnBuffer* Table::GetColumnBuffer(SQLSMALLINT columnIndex) const
+	const SqlCBufferVariant& Table::GetColumnVariant(SQLSMALLINT columnIndex) const
 	{
 		exASSERT(IsOpen());
 
-		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.find(columnIndex);
-		if (it == m_columnBuffers.end())
+		SqlCBufferVariantMap::const_iterator it = m_columns.find(columnIndex);
+		if (it == m_columns.end())
 		{
 			IllegalArgumentException ex(boost::str(boost::wformat(L"ColumnIndex %d is not a zero-based bound or manually defined ColumnBuffer") % columnIndex));
 			SET_EXCEPTION_SOURCE(ex);
@@ -683,24 +692,36 @@ namespace exodbc
 	}
 
 
-	ColumnBuffer* Table::GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const
+	const SqlCBufferVariant& Table::GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuffer = GetColumnBuffer(columnIndex);
-		if (pBuffer->IsNull())
+		const SqlCBufferVariant& column = GetColumnVariant(columnIndex);
+		try
 		{
-			NullValueException ex(pBuffer->GetQueryName());
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
+			const SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(column);
+			const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
+			if (cb.IsNull())
+			{
+				std::shared_ptr<ObjectName> objectName = props.GetObjectName();
+				NullValueException ex(objectName != NULL ? objectName->GetQueryName() : L"???");
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
+			}
+			return column;
 		}
-		return pBuffer;
+		catch (const boost::bad_polymorphic_get& ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
 	}
 
 
 	std::set<SQLSMALLINT> Table::GetColumnBufferIndexes() const throw()
 	{
 		std::set<SQLSMALLINT> columnIndexes;
-		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
-		while (it != m_columnBuffers.end())
+		SqlCBufferVariantMap::const_iterator it = m_columns.begin();
+		while (it != m_columns.end())
 		{
 			columnIndexes.insert(it->first);
 			++it;
@@ -711,20 +732,34 @@ namespace exodbc
 
 	SQLSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive /* = true */) const
 	{
-		ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
-		while (it != m_columnBuffers.end())
+		SqlCBufferVariantMap::const_iterator it = m_columns.begin();
+		while (it != m_columns.end())
 		{
-			const ColumnBuffer* pBuffer = it->second;
+			const SqlCBufferVariant& column = it->second;
+			std::shared_ptr<ObjectName> pColumnName(NULL);
+			try
+			{
+				const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
+				pColumnName = props.GetObjectName();
+			}
+			catch (const boost::bad_polymorphic_get& ex)
+			{
+				WrapperException we(ex);
+				SET_EXCEPTION_SOURCE(we);
+				throw we;
+			}
+
+			exASSERT(pColumnName != NULL);
 			if (caseSensitive)
 			{		
-				if (pBuffer->GetQueryName() == columnQueryName)
+				if (pColumnName->GetQueryName() == columnQueryName)
 				{
 					return it->first;
 				}
 			}
 			else
 			{
-				if (boost::iequals(pBuffer->GetQueryName(), columnQueryName))
+				if (boost::iequals(pColumnName->GetQueryName(), columnQueryName))
 				{
 					return it->first;
 				}
@@ -937,54 +972,54 @@ namespace exodbc
 
 	void Table::Update(const std::wstring& where)
 	{
-		exASSERT(IsOpen());
-		exASSERT(TestAccessFlag(AF_UPDATE_WHERE));
-		exASSERT(m_hStmtUpdateWhere != SQL_NULL_HSTMT);
-		exASSERT(!where.empty());
+		//exASSERT(IsOpen());
+		//exASSERT(TestAccessFlag(AF_UPDATE_WHERE));
+		//exASSERT(m_hStmtUpdateWhere != SQL_NULL_HSTMT);
+		//exASSERT(!where.empty());
 
-		try
-		{
-			// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set
-			wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
-			// .. first the values to update
-			// note: parem-number reflects here the number of the param in the created prepared statement, so we
-			// cannot use the values from the ColumnBuffer column index.
-			int paramNr = 1;
-			for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-			{
-				ColumnBuffer* pBuffer = it->second;
-				if (pBuffer->IsColumnFlagSet(CF_UPDATE))
-				{
-					// Bind this parameter as update parameter and include it in the statement
-					pBuffer->BindParameter(m_hStmtUpdateWhere, paramNr);
-					updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
-					paramNr++;
-				}
-			}
-			boost::erase_last(updateStmt, L",");
-			exASSERT_MSG(paramNr > 1, L"No columns are bound that have the flag CF_UPDATE set");
-			updateStmt += (L"WHERE " + where);
+		//try
+		//{
+		//	// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set
+		//	wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
+		//	// .. first the values to update
+		//	// note: parem-number reflects here the number of the param in the created prepared statement, so we
+		//	// cannot use the values from the ColumnBuffer column index.
+		//	int paramNr = 1;
+		//	for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		//	{
+		//		ColumnBuffer* pBuffer = it->second;
+		//		if (pBuffer->IsColumnFlagSet(CF_UPDATE))
+		//		{
+		//			// Bind this parameter as update parameter and include it in the statement
+		//			pBuffer->BindParameter(m_hStmtUpdateWhere, paramNr);
+		//			updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
+		//			paramNr++;
+		//		}
+		//	}
+		//	boost::erase_last(updateStmt, L",");
+		//	exASSERT_MSG(paramNr > 1, L"No columns are bound that have the flag CF_UPDATE set");
+		//	updateStmt += (L"WHERE " + where);
 
-			// Prepare to update
-			SQLRETURN ret = SQLPrepare(m_hStmtUpdateWhere, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
-			THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
+		//	// Prepare to update
+		//	SQLRETURN ret = SQLPrepare(m_hStmtUpdateWhere, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
+		//	THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 
-			// And Execute
-			ret = SQLExecute(m_hStmtUpdateWhere);
-			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
+		//	// And Execute
+		//	ret = SQLExecute(m_hStmtUpdateWhere);
+		//	THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 
-			// Always unbind all parameters at the end
-			ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
-		}
-		catch (const Exception& ex)
-		{
-			// Always unbind all parameters at the end
-			SQLRETURN ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
-			WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere, boost::str(boost::wformat(L"Failed to unbind UpdateWhere-handle during cleanup of exception '%s") % ex.ToString()));
-			// rethrow
-			throw;
-		}
+		//	// Always unbind all parameters at the end
+		//	ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
+		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
+		//}
+		//catch (const Exception& ex)
+		//{
+		//	// Always unbind all parameters at the end
+		//	SQLRETURN ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
+		//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere, boost::str(boost::wformat(L"Failed to unbind UpdateWhere-handle during cleanup of exception '%s") % ex.ToString()));
+		//	// rethrow
+		//	throw;
+		//}
 
 	}
 
@@ -1001,87 +1036,85 @@ namespace exodbc
 
 	void Table::SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		*pBuff = value;
+		//ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		//*pBuff = value;
 	}
 
 
 	void Table::SetBinaryValue(SQLSMALLINT columnIndex, const SQLCHAR* buffer, SQLINTEGER bufferSize)
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		pBuff->SetBinaryValue(buffer, bufferSize);
+		//ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+		//pBuff->SetBinaryValue(buffer, bufferSize);
 	}
 
 
 	void Table::SetColumnNull(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		pBuff->SetNull();
+		SqlCBufferVariant var = GetColumnVariant(columnIndex);
+		try
+		{
+			SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
+			ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(var);
+			exASSERT(flags.Test(ColumnFlag::NULLABLE));
+			cb.SetNull();
+		}
+		catch (const boost::bad_polymorphic_get& ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
 	}
 
 
 	SQLSMALLINT Table::GetSmallInt(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQLSMALLINT smallInt = *pBuff;
-		return smallInt;
+		const SqlSShortBuffer& buff = GetNonNullColumn<SqlSShortBuffer>(columnIndex);
+		return buff.GetValue();
 	}
 
 
 	SQLINTEGER Table::GetInt(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQLINTEGER i = *pBuff;
-		return i;
+		const SqlSLongBuffer& buff = GetNonNullColumn<SqlSLongBuffer>(columnIndex);
+		return buff.GetValue();
 	}
 
 
 	SQLBIGINT Table::GetBigInt(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQLBIGINT bigInt = *pBuff;
-		return bigInt;
+		const SqlSBigIntBuffer& buff = GetNonNullColumn<SqlSBigIntBuffer>(columnIndex);
+		return buff.GetValue();
 	}
 
 
 	SQL_DATE_STRUCT Table::GetDate(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQL_DATE_STRUCT date = *pBuff;
-		return date;
+		const SqlTypeDateStructBuffer& buff = GetNonNullColumn<SqlTypeDateStructBuffer>(columnIndex);
+		return buff.GetValue();
 	}
 
 
 	SQL_TIME_STRUCT Table::GetTime(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQL_TIME_STRUCT time = *pBuff;
-		return time;
+		const SqlTypeTimeStructBuffer& buff = GetNonNullColumn<SqlTypeTimeStructBuffer>(columnIndex);
+		return buff.GetValue();
 	}
-
-#if HAVE_MSODBCSQL_H
-	SQL_SS_TIME2_STRUCT Table::GetTime2(SQLSMALLINT columnIndex) const
-	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQL_SS_TIME2_STRUCT time2 = *pBuff;
-		return time2;
-	}
-#endif
 
 
 	SQL_TIMESTAMP_STRUCT Table::GetTimeStamp(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQL_TIMESTAMP_STRUCT timestamp = *pBuff;
-		return timestamp;
+		const SqlTypeTimestampStructBuffer& buff = GetNonNullColumn<SqlTypeTimestampStructBuffer>(columnIndex);
+		return buff.GetValue();
 	}
 
 
 	std::string Table::GetString(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		std::string s = *pBuff;
-
+		const SqlCharArray& buff = GetNonNullColumn<SqlCharArray>(columnIndex);
+		std::shared_ptr<SQLCHAR> pChar = buff.GetBuffer();
+		exASSERT(pChar != NULL);
+		std::string s(reinterpret_cast<const char*>(pChar.get()));
 		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
 		{
 			boost::trim_left(s);
@@ -1097,9 +1130,10 @@ namespace exodbc
 
 	std::wstring Table::GetWString(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		std::wstring ws = *pBuff;
-
+		const SqlWCharArray& buff = GetNonNullColumn<SqlWCharArray>(columnIndex);
+		std::shared_ptr<SQLWCHAR> pChar = buff.GetBuffer();
+		exASSERT(pChar != NULL);
+		std::wstring ws(pChar.get());
 		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
 		{
 			boost::trim_left(ws);
@@ -1115,76 +1149,103 @@ namespace exodbc
 
 	SQLDOUBLE Table::GetDouble(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQLDOUBLE d = *pBuff;
-		return d;
+		const SqlDoubleBuffer& buff = GetNonNullColumn<SqlDoubleBuffer>(columnIndex);
+		return buff.GetValue();
 	}
 
 
 	SQLREAL Table::GetReal(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQLREAL r = *pBuff;
-		return r;
+		const SqlRealBuffer& buff = GetNonNullColumn<SqlRealBuffer>(columnIndex);
+		return buff.GetValue();
 	}
 
 
 	SQL_NUMERIC_STRUCT Table::GetNumeric(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuff = GetNonNullColumnBuffer(columnIndex);
-		SQL_NUMERIC_STRUCT num = *pBuff;
-		return num;
+		const SqlNumericStructBuffer& buff = GetNonNullColumn<SqlNumericStructBuffer>(columnIndex);
+		return buff.GetValue();
 	}
 
 
-	BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
-	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		return pBuff->GetValue();
-	}
+	//BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
+	//{
+	//	ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
+	//	return pBuff->GetValue();
+	//}
 
 
 	const SQLCHAR* Table::GetBinaryValue(SQLSMALLINT columnIndex, SQLLEN& bufferSize, SQLLEN& lengthIndicator) const
 	{
-		ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		exASSERT(!pBuff->IsNull());
-		const SQLCHAR* pBuffer = *pBuff;
-		bufferSize = pBuff->GetBufferSize();
-		lengthIndicator = pBuff->GetCb();
-		return pBuffer;
+		const SqlBinaryArray& column = GetNonNullColumn<SqlBinaryArray>(columnIndex);
+		const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
+		try
+		{
+			const SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
+			lengthIndicator = cb.GetCb();
+		}
+		catch (const boost::bad_polymorphic_get& ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
+
+		bufferSize = column.GetBufferLength();
+		return column.GetBuffer().get();
 	}
 
 
 	bool Table::IsColumnNull(SQLSMALLINT columnIndex) const
 	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);		
-		return pBuff->IsNull();
+		const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
+		try
+		{
+			const SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
+			return cb.IsNull();
+		}
+		catch (const boost::bad_polymorphic_get& ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
 	}
 
 
 	bool Table::IsColumnNullable(SQLSMALLINT columnIndex) const
 	{
-		const ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		return pBuff->IsNullable();
+		const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
+		try
+		{
+			const ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(var);
+			return flags.Test(ColumnFlag::NULLABLE);
+		}
+		catch (const boost::bad_polymorphic_get& ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
 	}
 
 
 	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 	{
-		exASSERT(columnIndex >= 0);
-		exASSERT( ! queryName.empty());
-		exASSERT(bufferSize > 0);
-		exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
-		exASSERT( ! ( (sqlType == SQL_UNKNOWN_TYPE) && ((flags & CF_INSERT) || (flags & CF_UPDATE)) ) );
-		exASSERT(!IsOpen());
-		// Flag that columns are created manually
-		m_manualColumns = true;
-		// Read OdbcVersion from Environment
-		const Environment* pEnv = m_pDb->GetEnvironment();
-		exASSERT(pEnv != NULL);
-		ManualColumnInfo colInfo(sqlType, queryName, columnSize, decimalDigits);
-		ColumnBuffer* pColumnBuffer = new ColumnBuffer(colInfo, sqlCType, pBuffer, bufferSize, pEnv->GetOdbcVersion(), flags);
-		m_columnBuffers[columnIndex] = pColumnBuffer;
+		//exASSERT(columnIndex >= 0);
+		//exASSERT( ! queryName.empty());
+		//exASSERT(bufferSize > 0);
+		//exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
+		//exASSERT( ! ( (sqlType == SQL_UNKNOWN_TYPE) && ((flags & CF_INSERT) || (flags & CF_UPDATE)) ) );
+		//exASSERT(!IsOpen());
+		//// Flag that columns are created manually
+		//m_manualColumns = true;
+		//// Read OdbcVersion from Environment
+		//const Environment* pEnv = m_pDb->GetEnvironment();
+		//exASSERT(pEnv != NULL);
+		//ManualColumnInfo colInfo(sqlType, queryName, columnSize, decimalDigits);
+		//ColumnBuffer* pColumnBuffer = new ColumnBuffer(colInfo, sqlCType, pBuffer, bufferSize, pEnv->GetOdbcVersion(), flags);
+		//m_columnBuffers[columnIndex] = pColumnBuffer;
 	}
 
 
@@ -1282,54 +1343,54 @@ namespace exodbc
 			{
 				// Check that the manually defined columns do not violate our access-flags
 				// and check that manually defined types are supported by the database
-				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); )
-				{
-					ColumnBuffer* pBuffer = it->second;
-					if (pBuffer->IsColumnFlagSet(CF_SELECT) && !TestAccessFlag(AF_SELECT))
-					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
-						SET_EXCEPTION_SOURCE(ex);
-						throw ex;
-					}
-					if (pBuffer->IsColumnFlagSet(CF_INSERT) && !TestAccessFlag(AF_INSERT))
-					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
-						SET_EXCEPTION_SOURCE(ex);
-						throw ex;
-					}
-					if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !(TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_UPDATE_WHERE)))
-					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
-						SET_EXCEPTION_SOURCE(ex);
-						throw ex;
-					}
-					// type-check
-					bool remove = false;
-					SQLSMALLINT sqlType = pBuffer->GetSqlType();
-					if (!TestOpenFlag(TOF_IGNORE_DB_TYPE_INFOS) && sqlType != SQL_UNKNOWN_TYPE && !m_pDb->IsSqlTypeSupported(sqlType))
-					{
-						if (TestOpenFlag(TOF_SKIP_UNSUPPORTED_COLUMNS))
-						{
-							LOG_WARNING(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % pBuffer->GetQueryNameNoThrow() % it->first % SqlType2s(sqlType) % sqlType));
-							remove = true;
-						}
-						else
-						{
-							Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % pBuffer->GetQueryNameNoThrow() % it->first % SqlType2s(sqlType) % sqlType));
-							SET_EXCEPTION_SOURCE(ex);
-							throw ex;
-						}
-					}
-					if (remove)
-					{
-						delete pBuffer;
-						m_columnBuffers.erase(it++);
-					}
-					else
-					{
-						++it;
-					}
-				}
+				//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); )
+				//{
+				//	ColumnBuffer* pBuffer = it->second;
+				//	if (pBuffer->IsColumnFlagSet(CF_SELECT) && !TestAccessFlag(AF_SELECT))
+				//	{
+				//		Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
+				//		SET_EXCEPTION_SOURCE(ex);
+				//		throw ex;
+				//	}
+				//	if (pBuffer->IsColumnFlagSet(CF_INSERT) && !TestAccessFlag(AF_INSERT))
+				//	{
+				//		Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
+				//		SET_EXCEPTION_SOURCE(ex);
+				//		throw ex;
+				//	}
+				//	if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !(TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_UPDATE_WHERE)))
+				//	{
+				//		Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
+				//		SET_EXCEPTION_SOURCE(ex);
+				//		throw ex;
+				//	}
+				//	// type-check
+				//	bool remove = false;
+				//	SQLSMALLINT sqlType = pBuffer->GetSqlType();
+				//	if (!TestOpenFlag(TOF_IGNORE_DB_TYPE_INFOS) && sqlType != SQL_UNKNOWN_TYPE && !m_pDb->IsSqlTypeSupported(sqlType))
+				//	{
+				//		if (TestOpenFlag(TOF_SKIP_UNSUPPORTED_COLUMNS))
+				//		{
+				//			LOG_WARNING(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % pBuffer->GetQueryNameNoThrow() % it->first % SqlType2s(sqlType) % sqlType));
+				//			remove = true;
+				//		}
+				//		else
+				//		{
+				//			Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % pBuffer->GetQueryNameNoThrow() % it->first % SqlType2s(sqlType) % sqlType));
+				//			SET_EXCEPTION_SOURCE(ex);
+				//			throw ex;
+				//		}
+				//	}
+				//	if (remove)
+				//	{
+				//		delete pBuffer;
+				//		m_columnBuffers.erase(it++);
+				//	}
+				//	else
+				//	{
+				//		++it;
+				//	}
+				//}
 			}
 
 			// Prepare the FieldStatement to be used for selects
@@ -1363,14 +1424,24 @@ namespace exodbc
 				for (std::set<SQLUSMALLINT>::const_iterator it = m_primaryKeyColumnIndexes.begin(); it != m_primaryKeyColumnIndexes.end(); ++it)
 				{
 					// Get corresponding Buffer and set the flag CF_PRIMARY_KEY
-					ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.find(*it);
-					if (itBuffs == m_columnBuffers.end())
+					SqlCBufferVariantMap::iterator itCols = m_columns.find(*it);
+					if (itCols == m_columns.end())
 					{
 						Exception ex(boost::str(boost::wformat(L"No ColumnBuffer was found for a manually defined primary key column index (index = %d)") % *it));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
-					itBuffs->second->SetColumnFlag(CF_PRIMARY_KEY);
+					try
+					{
+						ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(itCols->second);
+						flags.Set(ColumnFlag::PRIMARY_KEY);
+					}
+					catch (const boost::bad_polymorphic_get& ex)
+					{
+						WrapperException we(ex);
+						SET_EXCEPTION_SOURCE(we);
+						throw we;
+					}
 				}
 			}
 			else
@@ -1386,15 +1457,27 @@ namespace exodbc
 						const ObjectName* pKeyName = dynamic_cast<const ObjectName*>(&keyInfo);
 						// Find corresponding ColumnBuffer
 						bool settedFlagOnBuffer = false;
-						for (ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.begin(); itBuffs != m_columnBuffers.end(); ++itBuffs)
+						for (SqlCBufferVariantMap::iterator itCols = m_columns.begin(); itCols != m_columns.end(); ++itCols)
 						{
-							ColumnBuffer* pBuffer = itBuffs->second;
-							const ObjectName* pBuffName = pBuffer->GetName();
-							if (*pKeyName == *pBuffName)
+							SqlCBufferVariant& column = itCols->second;
+							try
 							{
-								pBuffer->SetColumnFlag(CF_PRIMARY_KEY);
-								settedFlagOnBuffer = true;
-								break;
+								ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
+								std::shared_ptr<ObjectName> pName = props.GetObjectName();
+								exASSERT(pName != NULL);
+								if (*pKeyName == *pName)
+								{
+									ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(column);
+									flags.Set(ColumnFlag::PRIMARY_KEY);
+									settedFlagOnBuffer = true;
+									break;
+								}
+							}
+							catch (const boost::bad_polymorphic_get& ex)
+							{
+								WrapperException we(ex);
+								SET_EXCEPTION_SOURCE(we);
+								throw we;
 							}
 						}
 						if (!settedFlagOnBuffer)
@@ -1412,21 +1495,7 @@ namespace exodbc
 			if (TestAccessFlag(AF_SELECT))
 			{
 				SQLSMALLINT boundColumnNumber = 1;
-				for (ColumnBufferPtrMap::iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-				{
-					// Only bind those marked for select - no danger if primary keys are not bound, it is checked later
-					// if the table is opened for writing that all pks are bound
-					ColumnBuffer* pBuffer = it->second;
-					if (pBuffer->IsColumnFlagSet(CF_SELECT))
-					{
-						SQLUSMALLINT colIndex = it->first;
-						pBuffer->Bind(m_hStmtSelect, boundColumnNumber);
-						++boundColumnNumber;
-					}
-				}
-
-				boundColumnNumber = 1;
-				for (SqlCBufferVariantMap::iterator it = m_columnBufferMap.begin(); it != m_columnBufferMap.end(); it++)
+				for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
 				{
 					SqlCBufferVariant& columnBuffer = it->second;
 					const ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
@@ -1434,7 +1503,6 @@ namespace exodbc
 					{
 						BindSelectVisitor bindSelect(boundColumnNumber, m_hStmtSelect);
 						boost::apply_visitor(bindSelect, columnBuffer);
-						int p = 3;
 					}
 				}
 
@@ -1446,39 +1514,42 @@ namespace exodbc
 			if (TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK))
 			{
 				// Need to have at least one primary key, and all primary key buffers must be bound
-				int primaryKeyCount = 0;
-				for (ColumnBufferPtrMap::const_iterator itBuffs = m_columnBuffers.begin(); itBuffs != m_columnBuffers.end(); ++itBuffs)
-				{
-					const ColumnBuffer* pBuffer = itBuffs->second;
-					if (pBuffer->IsPrimaryKey())
-					{
-						primaryKeyCount++;
-						if ( ! pBuffer->IsBound())
-						{
-							Exception ex((boost::wformat(L"PrimaryKey ColumnBuffer '%s' of Table '%s' is not Bound().") %pBuffer->GetQueryNameNoThrow() % m_tableInfo.GetQueryName()).str());
-							SET_EXCEPTION_SOURCE(ex);
-							throw ex;
-						}
-					}
-				}
-				if (primaryKeyCount == 0)
-				{
-					Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetQueryName()).str());
-					SET_EXCEPTION_SOURCE(ex);
-					throw ex;
-				}
+				// \todo: Need to have pk is true, but the check if they are bound is useless, not?
+				// we must check when preparing the statements that we are bound, not here ??
+				//int primaryKeyCount = 0;
+				//for (SqlCBufferVariantMap::const_iterator itCols = m_columns.begin(); itCols != m_columns.end(); ++itCols)
+				//{
+				//	const SqlCBufferVariant& column = itCols->second;
 
-				if (TestAccessFlag(AF_UPDATE_PK))
-				{
-					BindUpdateParameters();
-					boundUpdatePk = true;
-				}
+				//	if (pBuffer->IsPrimaryKey())
+				//	{
+				//		primaryKeyCount++;
+				//		if ( ! pBuffer->IsBound())
+				//		{
+				//			Exception ex((boost::wformat(L"PrimaryKey ColumnBuffer '%s' of Table '%s' is not Bound().") %pBuffer->GetQueryNameNoThrow() % m_tableInfo.GetQueryName()).str());
+				//			SET_EXCEPTION_SOURCE(ex);
+				//			throw ex;
+				//		}
+				//	}
+				//}
+				//if (primaryKeyCount == 0)
+				//{
+				//	Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetQueryName()).str());
+				//	SET_EXCEPTION_SOURCE(ex);
+				//	throw ex;
+				//}
 
-				if (TestAccessFlag(AF_DELETE_PK))
-				{
-					BindDeleteParameters();
-					boundDeletePk = true;
-				}
+				//if (TestAccessFlag(AF_UPDATE_PK))
+				//{
+				//	BindUpdateParameters();
+				//	boundUpdatePk = true;
+				//}
+
+				//if (TestAccessFlag(AF_DELETE_PK))
+				//{
+				//	BindDeleteParameters();
+				//	boundDeletePk = true;
+				//}
 			}
 
 			// Bind INSERT params
@@ -1518,12 +1589,12 @@ namespace exodbc
 			// delete the ColumnBuffers if we have allocated them during this process (if not manual)
 			if (!m_manualColumns)
 			{
-				for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
-				{
-					ColumnBuffer* pBuffer = it->second;
-					delete pBuffer;
-				}
-				m_columnBuffers.clear();
+				//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
+				//{
+				//	ColumnBuffer* pBuffer = it->second;
+				//	delete pBuffer;
+				//}
+				//m_columnBuffers.clear();
 			}
 			// and rethrow
 			throw;
@@ -1570,17 +1641,17 @@ namespace exodbc
 			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
 		}
 
-		// Delete ColumnBuffers if they were created automatically
-		if (!m_manualColumns)
-		{
-			ColumnBufferPtrMap::iterator it;
-			for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-			{
-				ColumnBuffer* pBuffer = it->second;
-				delete pBuffer;
-			}
-			m_columnBuffers.clear();
-		}
+		//// Delete ColumnBuffers if they were created automatically
+		//if (!m_manualColumns)
+		//{
+		//	ColumnBufferPtrMap::iterator it;
+		//	for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
+		//	{
+		//		ColumnBuffer* pBuffer = it->second;
+		//		delete pBuffer;
+		//	}
+		//	m_columnBuffers.clear();
+		//}
 
 		m_isOpen = false;
 	}
@@ -1683,15 +1754,24 @@ namespace exodbc
 
 	void Table::SetColumnNTS(SQLSMALLINT columnIndex) const
 	{
-		ColumnBuffer* pBuffer = GetColumnBuffer(columnIndex);
-		pBuffer->SetCb(SQL_NTS);
+		SetColumnLengthIndicator(columnIndex, SQL_NTS);
 	}
 
 
 	void Table::SetColumnLengthIndicator(SQLSMALLINT columnIndex, SQLLEN cb) const
 	{
-		ColumnBuffer* pBuffer = GetColumnBuffer(columnIndex);
-		pBuffer->SetCb(cb);
+		const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
+		try
+		{
+			SqlCBufferLengthIndicator varCb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
+			varCb.SetCb(cb);
+		}
+		catch (const boost::bad_polymorphic_get& ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
 	}
 
 

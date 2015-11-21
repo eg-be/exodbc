@@ -216,10 +216,10 @@ namespace exodbc
 
 		ASSERT_NO_THROW(iTable.Open());
 		// We expect all columnBuffers to be bound, except nr 2
-		ColumnBuffer* pBuffId = iTable.GetColumnBuffer(0);
-		ColumnBuffer* pBuffsi = iTable.GetColumnBuffer(1);
-		ColumnBuffer* pBuffi = iTable.GetColumnBuffer(2);
-		ColumnBuffer* pBuffbi = iTable.GetColumnBuffer(3);
+		ColumnBuffer* pBuffId = iTable.GetColumnVariant(0);
+		ColumnBuffer* pBuffsi = iTable.GetColumnVariant(1);
+		ColumnBuffer* pBuffi = iTable.GetColumnVariant(2);
+		ColumnBuffer* pBuffbi = iTable.GetColumnVariant(3);
 		EXPECT_TRUE(pBuffId->IsBound());
 		EXPECT_TRUE(pBuffsi->IsBound());
 		EXPECT_FALSE(pBuffi->IsBound());
@@ -571,7 +571,7 @@ namespace exodbc
 		EXPECT_NO_THROW(id = nst.GetInt(0));
 		EXPECT_NO_THROW(int1 = nst.GetInt(1));
 		EXPECT_FALSE(nst.ColumnBufferExists(2));
-		EXPECT_THROW(nst.GetColumnBuffer(2), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumnVariant(2), IllegalArgumentException);
 		EXPECT_NO_THROW(int2 = nst.GetInt(3));
 		EXPECT_EQ(1, id);
 		EXPECT_EQ(10, int1);
@@ -598,7 +598,7 @@ namespace exodbc
 		SQLINTEGER id, int1, int2;
 		EXPECT_NO_THROW(id = nst.GetInt(0));
 		EXPECT_NO_THROW(int1 = nst.GetInt(1));
-		EXPECT_THROW(nst.GetColumnBuffer(2), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumnVariant(2), IllegalArgumentException);
 		EXPECT_NO_THROW(int2 = nst.GetInt(3));
 		EXPECT_EQ(1, id);
 		EXPECT_EQ(10, int1);

@@ -633,6 +633,22 @@ namespace exodbc
 		void		SetColumnNTS(SQLSMALLINT columnIndex) const;
 
 
+		template<typename T>
+		const T& GetNonNullColumn(SQLSMALLINT columnIndex) const
+		{
+			const SqlCBufferVariant column = GetNonNullColumnBuffer(columnIndex);
+			try
+			{
+				return boost::get<T>(column);
+			}
+			catch (const boost::bad_get& ex)
+			{
+				WrapperException we(ex);
+				SET_EXCEPTION_SOURCE(we);
+				throw we;
+			}
+		}
+
 		/*!
 		* \brief	Access the current value of columnIndex as SQLSMALLINT.
 		* \details	Casts the value if casting is possible without loosing data 
@@ -751,7 +767,7 @@ namespace exodbc
 		* \see		ColumnBuffer::GetValue()
 		* \see		BufferVariant
 		*/
-		BufferVariant GetColumnValue(SQLSMALLINT columnIndex) const;
+//		BufferVariant GetColumnValue(SQLSMALLINT columnIndex) const;
 
 
 		/*!
@@ -800,7 +816,7 @@ namespace exodbc
 		* \return	ColumnBuffer.
 		* \throw	Exception If no ColumnBuffer with the passed columnIndex is found.
 		*/
-		ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
+		const SqlCBufferVariant& GetColumnVariant(SQLSMALLINT columnIndex) const;
 
 
 		/*!
@@ -973,7 +989,7 @@ namespace exodbc
 		* \throw	Exception If no columnBuffer found, or if the ColumnBuffer is Null.
 		* \throw	NullValueException if the value is NULL.
 		*/
-		ColumnBuffer* GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const;
+		const SqlCBufferVariant& GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const;
 
 		const Database*				m_pDb;	///< Database this table belongs to.
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
@@ -1002,9 +1018,9 @@ namespace exodbc
 															///< The ColumnBuffers marked in this set will be used as primary key columns.
 															///< Used if columns are not defined manually but queried, but the Database does not support SQLPrimaryKeys.
 
-		SqlCBufferVariantMap m_columnBufferMap;
+		SqlCBufferVariantMap m_columns;
 
-		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
+//		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
 		bool				m_manualColumns;		///< If true the table was initialized by passing the number of columns that will be defined later manually
 

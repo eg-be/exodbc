@@ -251,7 +251,7 @@ namespace exodbc
 
 	// Floating types
 	typedef SqlCBuffer<SQLDOUBLE, SQL_C_DOUBLE> SqlDoubleBuffer;
-	typedef SqlCBuffer<SQLFLOAT, SQL_C_FLOAT> SqlFloatBuffer;
+	typedef SqlCBuffer<SQLREAL, SQL_C_FLOAT> SqlRealBuffer;
 
 	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCArrayBuffer
@@ -351,7 +351,7 @@ namespace exodbc
 		SqlTypeDateStructBuffer, SqlDateStructBuffer,
 		SqlTypeTimestampStructBuffer, SqlTimestamptStructBuffer,
 		SqlNumericStructBuffer,
-		SqlFloatBuffer, SqlDoubleBuffer,
+		SqlDoubleBuffer, SqlRealBuffer,
 		SqlWCharArray, SqlCharArray, SqlBinaryArray> SqlCBufferVariant;
 	
 	typedef std::map<SQLUSMALLINT, SqlCBufferVariant> SqlCBufferVariantMap;
