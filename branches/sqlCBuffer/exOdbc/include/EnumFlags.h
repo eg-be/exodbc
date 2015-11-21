@@ -53,9 +53,6 @@ namespace exodbc
 			m_flags &= ~flag;
 		};
 
-		ET GetFlags() const noexcept { return m_flags; };
-		void SetFlags(ET flags) noexcept { m_flags = flags; };
-
 	private:
 		ET m_flags;
 	};
