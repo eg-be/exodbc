@@ -63,25 +63,6 @@ bool extractParamValue( int argc, const _TCHAR* const argv[],const std::wstring&
 
 void printHelp()
 {
-	struct Base
-	{
-		int m = 5;
-	};
-	struct Der : public Base
-	{
-		int u = 3;
-	};
-	boost::variant<Der> var = Der();
-	try
-	{
-		Base b = boost::polymorphic_get<Base>(var);
-		Der d = boost::polymorphic_get<Der>(var);
-		int p = 3;
-	}
-	catch (boost::bad_get& ex)
-	{
-		int p = 3;
-	}
 	using namespace std;
 
 	wcerr << L"Usage: exOdbcGTest [OPTION]... [DATABASE]\n";
@@ -297,7 +278,17 @@ int _tmain(int argc, _TCHAR* argv[])
 		return status;
 	}
 
-	int result = RUN_ALL_TESTS();
+	int result = 0;
+	try
+	{
+		result = RUN_ALL_TESTS();
+	}
+	catch (const Exception& ex)
+	{
+		result = -13;
+		LOG_ERROR(L"TEST RUN ABORTED");
+		LOG_ERROR(ex.ToString());
+	}
 	
 	return result;
 }
