@@ -89,14 +89,14 @@ namespace exodbc
 	TEST_F(SqlCBufferTest, Construction)
 	{
 		// after construction buffer will be Null
-		SqlBigIntBuffer buff;
+		SqlSBigIntBuffer buff;
 		EXPECT_TRUE(buff.IsNull());
 	}
 
 
 	TEST_F(SqlCBufferTest, SetAndGetValue)
 	{
-		SqlBigIntBuffer buff;
+		SqlSBigIntBuffer buff;
 		buff.SetValue(13, buff.GetBufferLength());
 		EXPECT_EQ(13, buff.GetValue());
 	}
@@ -105,12 +105,12 @@ namespace exodbc
 	TEST_F(SqlCBufferTest, CopyConstruction)
 	{
 		// must internally use the same buffer
-		SqlBigIntBuffer buff;
+		SqlSBigIntBuffer buff;
 		buff.SetValue(25, buff.GetBufferLength());
 		ASSERT_EQ(25, buff.GetValue());
 
 		// create copy
-		SqlBigIntBuffer buff2(buff);
+		SqlSBigIntBuffer buff2(buff);
 		EXPECT_EQ(25, buff2.GetValue());
 
 		// changing either must change the other too

@@ -32,16 +32,34 @@ namespace exodbc
 		{
 		case SQL_C_USHORT:
 			return SqlUShortBuffer();
-		case SQL_C_SHORT:
-			return SqlShortBuffer();
+		case SQL_C_SSHORT:
+			return SqlSShortBuffer();
 		case SQL_C_ULONG:
 			return SqlULongBuffer();
 		case SQL_C_SLONG:
-			return SqlLongBuffer();
+			return SqlSLongBuffer();
 		case SQL_C_UBIGINT:
 			return SqlUBigIntBuffer();
 		case SQL_C_SBIGINT:
-			return SqlBigIntBuffer();
+			return SqlSBigIntBuffer();
+		case SQL_C_TYPE_TIME:
+			return SqlTypeTimeStructBuffer();
+		case SQL_C_TIME:
+			return SqlTimeStructBuffer();
+		case SQL_C_TYPE_DATE:
+			return SqlTypeDateStructBuffer();
+		case SQL_C_DATE:
+			return SqlDateStructBuffer();
+		case SQL_C_TYPE_TIMESTAMP:
+			return SqlTypeTimestampStructBuffer();
+		case SQL_C_TIMESTAMP:
+			return SqlTimeStructBuffer();
+		case SQL_C_NUMERIC:
+			return SqlNumericStructBuffer();
+		case SQL_C_FLOAT:
+			return SqlFloatBuffer();
+		case SQL_C_DOUBLE:
+			return SqlDoubleBuffer();
 		default:
 			NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, sqlCType);
 			SET_EXCEPTION_SOURCE(nse);

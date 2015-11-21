@@ -354,7 +354,6 @@ namespace exodbc
 				{
 					SQLSMALLINT sqlCType = m_pSql2BufferTypeMap->GetBufferType(colInfo.GetSqlType());
 					SqlCBufferVariant sqlCBuffer = CreateBuffer(sqlCType);
-//					auto sqlCBuffer = CreateBuffer(sqlCType);
 					m_columnBufferMap[bufferIndex] = sqlCBuffer;
 					++bufferIndex;
 				}
@@ -362,11 +361,6 @@ namespace exodbc
 				{
 					int p = 3;
 				}
-			}
-			for (int i = 0; i < bufferIndex; i++)
-			{
-				SqlCBufferVariant var = m_columnBufferMap[bufferIndex];
-				boost::apply_visitor(BindSelectVisitor(), var);
 			}
 
 			bufferIndex = 0;
@@ -1400,6 +1394,14 @@ namespace exodbc
 						++boundColumnNumber;
 					}
 				}
+
+				boundColumnNumber = 1;
+				for (SqlCBufferVariantMap::iterator it = m_columnBufferMap.begin(); it != m_columnBufferMap.end(); it++)
+				{
+					SqlCBufferVariant& columnBuffer = it->second;
+
+				}
+
 				boundSelect = true;
 			}
 
