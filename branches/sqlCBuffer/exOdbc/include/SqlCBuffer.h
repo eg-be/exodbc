@@ -91,15 +91,15 @@ namespace exodbc
 	};
 
 
-	class ExtendedBindArguments
+	class ExtendedBindArgumentsHolder
 	{
 	public:
-		ExtendedBindArguments()
+		ExtendedBindArgumentsHolder()
 			: m_columnSize(0)
 			, m_decimalDigits(0)
 		{};
 
-		virtual ~ExtendedBindArguments()
+		virtual ~ExtendedBindArgumentsHolder()
 		{};
 
 		void SetColumnSize(SQLINTEGER columnSize) noexcept { m_columnSize = columnSize; };
@@ -117,13 +117,13 @@ namespace exodbc
 	class SqlCBuffer
 		: public SqlCBufferLengthIndicator
 		, public ColumnFlags
-		, public ExtendedBindArguments
+		, public ExtendedBindArgumentsHolder
 	{
 	public:
 		SqlCBuffer()
 			: SqlCBufferLengthIndicator()
 			, ColumnFlags()
-			, ExtendedBindArguments()
+			, ExtendedBindArgumentsHolder()
 		{
 			m_pBuffer = std::make_shared<T>();
 			SetNull();
@@ -253,7 +253,7 @@ namespace exodbc
 	class SqlCArrayBuffer
 		: public SqlCBufferLengthIndicator
 		, public ColumnFlags
-		, public ExtendedBindArguments
+		, public ExtendedBindArgumentsHolder
 	{
 	public:
 		SqlCArrayBuffer() = delete;
@@ -261,7 +261,7 @@ namespace exodbc
 		SqlCArrayBuffer(SQLLEN nrOfElements)
 			: SqlCBufferLengthIndicator()
 			, ColumnFlags()
-			, ExtendedBindArguments()
+			, ExtendedBindArgumentsHolder()
 			, m_nrOfElements(nrOfElements)
 		{
 			m_pBuffer = std::shared_ptr<T>(new T[m_nrOfElements], std::default_delete<T[]>());
