@@ -56,10 +56,10 @@ namespace exodbc
 			return SqlTimeStructBuffer();
 		case SQL_C_NUMERIC:
 			return SqlNumericStructBuffer();
-		case SQL_C_FLOAT:
-			return SqlFloatBuffer();
 		case SQL_C_DOUBLE:
 			return SqlDoubleBuffer();
+		case SQL_C_FLOAT:
+			return SqlRealBuffer();
 		default:
 			NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, sqlCType);
 			SET_EXCEPTION_SOURCE(nse);
