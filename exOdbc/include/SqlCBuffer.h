@@ -63,8 +63,9 @@ namespace exodbc
 			, m_columnNr(columnNr)
 		{};
 
+		ColumnBoundHandle() = delete;
 		ColumnBoundHandle(const ColumnBoundHandle& other) = default;
-
+		ColumnBoundHandle& operator=(const ColumnBoundHandle& other) = default;
 		~ColumnBoundHandle()
 		{};
 
@@ -155,7 +156,7 @@ namespace exodbc
 			m_boundSelects.erase(it);
 		}
 
-		private:
+	private:
 		std::shared_ptr<T> m_pBuffer;
 
 		std::set<ColumnBoundHandle> m_boundSelects;
@@ -198,17 +199,28 @@ namespace exodbc
 		m_boundSelects.erase(it);
 	}
 
+	// Integer types
 	typedef SqlCBuffer<SQLSMALLINT, SQL_C_USHORT> SqlUShortBuffer;
 	typedef SqlCBuffer<SQLINTEGER, SQL_C_ULONG> SqlULongBuffer;
 	typedef SqlCBuffer<SQLBIGINT, SQL_C_UBIGINT> SqlUBigIntBuffer;
-	typedef SqlCBuffer<SQLSMALLINT, SQL_C_SSHORT> SqlShortBuffer;
-	typedef SqlCBuffer<SQLINTEGER, SQL_C_SLONG> SqlLongBuffer;
-	typedef SqlCBuffer<SQLBIGINT, SQL_C_SBIGINT> SqlBigIntBuffer;
-	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TYPE_TIME> SqlTimeTypeStructBuffer;
+	typedef SqlCBuffer<SQLSMALLINT, SQL_C_SSHORT> SqlSShortBuffer;
+	typedef SqlCBuffer<SQLINTEGER, SQL_C_SLONG> SqlSLongBuffer;
+	typedef SqlCBuffer<SQLBIGINT, SQL_C_SBIGINT> SqlSBigIntBuffer;
+	
+	// datetime types
+	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TYPE_TIME> SqlTypeTimeStructBuffer;
 	typedef SqlCBuffer<SQL_TIME_STRUCT, SQL_C_TIME> SqlTimeStructBuffer;
+	typedef SqlCBuffer<SQL_DATE_STRUCT, SQL_C_TYPE_DATE> SqlTypeDateStructBuffer;
+	typedef SqlCBuffer<SQL_DATE_STRUCT, SQL_C_DATE> SqlDateStructBuffer;
+	typedef SqlCBuffer<SQL_TIMESTAMP_STRUCT, SQL_C_TYPE_TIMESTAMP> SqlTypeTimestampStructBuffer;
+	typedef SqlCBuffer<SQL_TIMESTAMP_STRUCT, SQL_C_TIMESTAMP> SqlTimestamptStructBuffer;
 
+	// Numeric types
 	typedef SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC> SqlNumericStructBuffer;
 
+	// Floating types
+	typedef SqlCBuffer<SQLDOUBLE, SQL_C_DOUBLE> SqlDoubleBuffer;
+	typedef SqlCBuffer<SQLFLOAT, SQL_C_FLOAT> SqlFloatBuffer;
 
 	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCArrayBuffer
@@ -245,35 +257,50 @@ namespace exodbc
 		const std::shared_ptr<T> GetBuffer() const noexcept { return m_pBuffer; };
 		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
 
-		void BindSelect() const {};
+		void BindSelect(const ColumnBindInfo& boundHandleInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt) {};
 
 	private:
 		SQLLEN m_nrOfElements;
 		std::shared_ptr<T> m_pBuffer;
 	};
 	
+	// Array types
 	typedef SqlCArrayBuffer<SQLWCHAR, SQL_C_WCHAR> SqlWCharArray;
 	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_CHAR> SqlCharArray;
 	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_BINARY> SqlBinaryArray;
 
-	typedef boost::variant<SqlUShortBuffer, SqlShortBuffer, SqlULongBuffer, SqlLongBuffer, SqlUBigIntBuffer, SqlBigIntBuffer,
-		SqlTimeTypeStructBuffer, SqlTimeStructBuffer,
+	// the variant
+	typedef boost::variant<
+		SqlUShortBuffer, SqlSShortBuffer, SqlULongBuffer, SqlSLongBuffer, SqlUBigIntBuffer, SqlSBigIntBuffer,
+		SqlTypeTimeStructBuffer, SqlTimeStructBuffer,
+		SqlTypeDateStructBuffer, SqlDateStructBuffer,
+		SqlTypeTimestampStructBuffer, SqlTimestamptStructBuffer,
+		SqlNumericStructBuffer,
+		SqlFloatBuffer, SqlDoubleBuffer,
 		SqlWCharArray, SqlCharArray, SqlBinaryArray> SqlCBufferVariant;
 	
 	typedef std::map<SQLUSMALLINT, SqlCBufferVariant> SqlCBufferVariantMap;
-
-
 
 	class BindSelectVisitor
 		: public boost::static_visitor<void>
 	{
 	public:
+		BindSelectVisitor() = delete;
+		BindSelectVisitor(const ColumnBindInfo& boundHandleInfo, SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+			: m_boundHandleInfo(boundHandleInfo)
+			, m_columnNr(columnNr)
+			, m_hStmt(hStmt)
+		{};
 
 		template<typename T>
 		void operator()(const T& t) const
 		{
-//			t.BindSelect();
+			t.BindSelect(m_boundHandleInfo, m_columnNr, m_hStmt);
 		}
+	private:
+		ColumnBindInfo m_boundHandleInfo;
+		SQLUSMALLINT m_columnNr;
+		SQLHSTMT m_hStmt;
 	};
 
 	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType);
