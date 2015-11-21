@@ -183,7 +183,8 @@ namespace exodbc
 			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(boundHandleInfo);
 			exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
 			
-			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, NULL, 0, NULL);
+			// \todo: have access violation from here. why? from ClearIntTypesTmpTable, from Table Destructor.
+			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, NULL, 0, NULL); 
 			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
 			m_boundSelects.erase(it);
 		}
