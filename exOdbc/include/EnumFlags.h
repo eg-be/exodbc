@@ -1,0 +1,87 @@
+/*!
+* \file EnumFlags.h
+* \author Elias Gerber <eg@elisium.ch>
+* \date 21.11.2015
+* \brief Header file for info objects.
+* \copyright GNU Lesser General Public License Version 3
+*
+*/
+
+#pragma once
+
+// Same component headers
+#include "bitmask_operators.hpp"
+
+// Other headers
+
+// System headers
+
+// Forward declarations
+// --------------------
+
+namespace exodbc
+{
+	/*!
+	* \class EnumFlags
+	* \brief Wrapper around a enum class defining flags.
+	*/
+	template<typename ET, typename std::enable_if<std::is_enum<ET>::value, void>::type* = 0>
+	class EnumFlags
+	{
+	public:
+		EnumFlags()
+		{
+			m_flags = static_cast<ET>(0);
+		};
+
+		EnumFlags(ET flags)
+			: m_flags(flags)
+		{};
+
+		bool Test(ET flag) const noexcept
+		{
+			return (m_flags & flag) == flag;
+		};
+
+		void Set(ET flag) noexcept
+		{
+			m_flags |= flag;
+		};
+
+		void Clear(ET flag) noexcept
+		{
+			m_flags &= ~flag;
+		};
+
+		ET GetFlags() const noexcept { return m_flags; };
+		void SetFlags(ET flags) noexcept { m_flags = flags; };
+
+	private:
+		ET m_flags;
+	};
+
+	/*!
+	* \enum ColumnFlag
+	* \brief Define flags of a Column.
+	*/
+	enum class ColumnFlag
+	{
+		CF_NONE = 0x0,		///< No flags.
+
+		CF_SELECT = 0x1,	///< Include Column in Selects.
+		CF_UPDATE = 0x2,	///< Include Column in Updates.
+		CF_INSERT = 0x4,	///< Include Column in Inserts.
+		CF_NULLABLE = 0x8,	///< Column is null able.
+		CF_PRIMARY_KEY = 0x10,	///< Column is primary key.
+
+		CF_READ = CF_SELECT,	///< CF_SELECT
+		CF_WRITE = CF_UPDATE | CF_INSERT,	///< CF_UPDATE | CF_INSERT
+		CF_READ_WRITE = CF_SELECT | CF_UPDATE | CF_INSERT	///< CF_SELECT | CF_UPDATE | CF_INSERT
+	};
+	template<>
+	struct enable_bitmask_operators<ColumnFlag> {
+		static const bool enable = true;
+	};
+
+	typedef EnumFlags<ColumnFlag> ColumnFlags;
+}

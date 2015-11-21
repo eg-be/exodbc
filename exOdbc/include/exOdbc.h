@@ -22,7 +22,6 @@
 // class 'foo' needs to have dll-interface to be used by clients of class 'bar'"
 // see Ticket #94
 #pragma warning(disable:4251)
-
 #include <windows.h>
 
 #include <sql.h>
@@ -145,12 +144,12 @@ namespace exodbc
 
 	// Flags
 	// =====
-
+	
 	/*!
 	* \enum ColumnFlag
 	* \brief Define flags of a Column.
 	*/
-	enum ColumnFlag
+	enum OldColumnFlag
 	{
 		CF_NONE = 0x0,		///< No flags.
 
@@ -169,7 +168,7 @@ namespace exodbc
 	* \typedef ColumnFlags
 	* \brief Flag holder for ColumnFlag flags.
 	*/
-	typedef unsigned int ColumnFlags;
+	typedef unsigned int OldColumnFlags;
 
 
 	/*!

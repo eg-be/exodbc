@@ -56,7 +56,32 @@ namespace exodbc
 		std::shared_ptr<SQLLEN> m_pCb;
 	};
 
-	struct EXODBCAPI ColumnBoundHandle
+	class ColumnFlagsHolder
+	{
+	public:
+		ColumnFlagsHolder() noexcept
+			: m_flags(CF_NONE)
+		{};
+
+		bool IsFlagSet(OldColumnFlag columnFlag) const noexcept { return (m_flags & columnFlag) == columnFlag; };
+
+
+		/*!
+		* \brief	Set a ColumnFlags.
+		*/
+		void SetFlag(OldColumnFlag columnFlag) noexcept { m_flags |= columnFlag; };
+
+
+		/*!
+		* \brief	Clear a ColumnFlags.
+		*/
+		void ClearFlag(OldColumnFlag columnFlag) noexcept { m_flags &= ~columnFlag; };
+
+	protected:
+		OldColumnFlags m_flags;
+	};
+
+	struct ColumnBoundHandle
 	{
 		ColumnBoundHandle(SQLHSTMT hStmt, SQLSMALLINT columnNr)
 			: m_hStmt(hStmt)

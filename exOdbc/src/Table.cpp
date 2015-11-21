@@ -332,7 +332,7 @@ namespace exodbc
 			// We need to know which ODBC version we are using, might throw
 			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
 			// And how to open this column
-			ColumnFlags columnFlags = CF_NONE;
+			OldColumnFlags columnFlags = CF_NONE;
 			if (TestAccessFlag(AF_SELECT))
 			{
 				columnFlags |= CF_SELECT;
@@ -1139,7 +1139,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 	{
 		exASSERT(columnIndex >= 0);
 		exASSERT( ! queryName.empty());
