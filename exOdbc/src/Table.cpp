@@ -357,7 +357,15 @@ namespace exodbc
 				try
 				{
 					SQLSMALLINT sqlCType = m_pSql2BufferTypeMap->GetBufferType(colInfo.GetSqlType());
-					SqlCBufferVariant sqlCBuffer = CreateBuffer(sqlCType);
+					SqlCBufferVariant sqlCBuffer;
+					if (IsArrayType(sqlCType))
+					{
+						sqlCBuffer = CreateArrayBuffer(sqlCType, colInfo);
+					}
+					else
+					{
+						sqlCBuffer = CreateBuffer(sqlCType);
+					}
 					ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(sqlCBuffer);
 					columnFlags = flags;
 					m_columnBufferMap[bufferIndex] = sqlCBuffer;
@@ -1414,7 +1422,7 @@ namespace exodbc
 					const ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
 					if (columnFlags.Test(ColumnFlag::SELECT))
 					{
-
+						int p = 3;
 					}
 				}
 
