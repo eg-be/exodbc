@@ -147,7 +147,7 @@ namespace exodbc
 		* \see	Bind()
 		* \throw Exception If creating a corresponding buffer fails.
 		*/
-		ColumnBuffer(const ColumnInfo& columnInfo, OdbcVersion odbcVersion, ConstSql2BufferTypeMapPtr pSql2BufferTypeMap, ColumnFlags flags = CF_SELECT);
+		ColumnBuffer(const ColumnInfo& columnInfo, OdbcVersion odbcVersion, ConstSql2BufferTypeMapPtr pSql2BufferTypeMap, OldColumnFlags flags = CF_SELECT);
 
 
 		/*!
@@ -172,7 +172,7 @@ namespace exodbc
 		* \see	HaveBuffer()
 		* \see	Bind()
 		*/
-		ColumnBuffer(const ManualColumnInfo& columnInfo, SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT);
+		ColumnBuffer(const ManualColumnInfo& columnInfo, SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, OdbcVersion odbcVersion, OldColumnFlags flags = CF_SELECT);
 
 
 		~ColumnBuffer();
@@ -368,7 +368,7 @@ namespace exodbc
 		/*!
 		* \brief	Test if a ColumnFlags is set.
 		*/
-		bool IsColumnFlagSet(ColumnFlag columnFlag) const throw() { return (m_flags & columnFlag) == columnFlag; };
+		bool IsColumnFlagSet(OldColumnFlag columnFlag) const throw() { return (m_flags & columnFlag) == columnFlag; };
 
 
 		/*!
@@ -376,7 +376,7 @@ namespace exodbc
 		* \details	Flags must be set before the ColumnBuffer is Bound to the buffer!
 		* \throw	Exception
 		*/
-		void SetColumnFlag(ColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags |= columnFlag; };
+		void SetColumnFlag(OldColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags |= columnFlag; };
 
 
 		/*!
@@ -384,7 +384,7 @@ namespace exodbc
 		* \details	Flags must be cleared before the ColumnBuffer is Bound!
 		* \throw	Exception
 		*/
-		void ClearColumnFlag(ColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags &= ~columnFlag; };
+		void ClearColumnFlag(OldColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags &= ~columnFlag; };
 
 
 		/*!
@@ -673,7 +673,7 @@ namespace exodbc
 #endif
 		SQL_NUMERIC_STRUCT*		GetNumericPtr() const;
 
-		ColumnFlags				m_flags;				///< Flags, set during construction.
+		OldColumnFlags				m_flags;				///< Flags, set during construction.
 		SQLINTEGER				m_columnSize;			///< Column Size, either read from ColumnInfo during construction or set manually. -1 indicates unknown.
 		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from ColumnInfo during construction or set manually. -1 indicates unkonwn.
 		ObjectName*				m_pName;				///< The name of this object. Created during construction, freed on deletion.

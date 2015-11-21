@@ -64,6 +64,12 @@
     <ClInclude Include="include\SqlCBuffer.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\bitmask_operators.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\EnumFlags.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
