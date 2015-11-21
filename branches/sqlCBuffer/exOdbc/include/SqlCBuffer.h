@@ -91,39 +91,43 @@ namespace exodbc
 	};
 
 
-	class ExtendedBindArgumentsHolder
+	class ExtendedColumnPropertiesHolder
 	{
 	public:
-		ExtendedBindArgumentsHolder()
+		ExtendedColumnPropertiesHolder()
 			: m_columnSize(0)
 			, m_decimalDigits(0)
+			, m_pObjectName(NULL)
 		{};
 
-		virtual ~ExtendedBindArgumentsHolder()
+		virtual ~ExtendedColumnPropertiesHolder()
 		{};
 
 		void SetColumnSize(SQLINTEGER columnSize) noexcept { m_columnSize = columnSize; };
 		void SetDecimalDigits(SQLSMALLINT decimalDigits) noexcept { m_decimalDigits = decimalDigits; };
-
+		void SetObjectName(std::shared_ptr<ObjectName> pObjectName) { exASSERT(pObjectName != NULL); m_pObjectName = pObjectName; };
+		
 		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
 		SQLSMALLINT GetDecimalDigits() const noexcept { return m_decimalDigits; };
+		std::shared_ptr<ObjectName> GetObjectName() const noexcept { return m_pObjectName; };
 
 	protected:
 		SQLINTEGER m_columnSize;
 		SQLSMALLINT m_decimalDigits;
+		std::shared_ptr<ObjectName> m_pObjectName;
 	};
 
 	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class SqlCBuffer
 		: public SqlCBufferLengthIndicator
 		, public ColumnFlags
-		, public ExtendedBindArgumentsHolder
+		, public ExtendedColumnPropertiesHolder
 	{
 	public:
 		SqlCBuffer()
 			: SqlCBufferLengthIndicator()
 			, ColumnFlags()
-			, ExtendedBindArgumentsHolder()
+			, ExtendedColumnPropertiesHolder()
 		{
 			m_pBuffer = std::make_shared<T>();
 			SetNull();
@@ -253,7 +257,7 @@ namespace exodbc
 	class SqlCArrayBuffer
 		: public SqlCBufferLengthIndicator
 		, public ColumnFlags
-		, public ExtendedBindArgumentsHolder
+		, public ExtendedColumnPropertiesHolder
 	{
 	public:
 		SqlCArrayBuffer() = delete;
@@ -261,7 +265,7 @@ namespace exodbc
 		SqlCArrayBuffer(SQLLEN nrOfElements)
 			: SqlCBufferLengthIndicator()
 			, ColumnFlags()
-			, ExtendedBindArgumentsHolder()
+			, ExtendedColumnPropertiesHolder()
 			, m_nrOfElements(nrOfElements)
 		{
 			m_pBuffer = std::shared_ptr<T>(new T[m_nrOfElements], std::default_delete<T[]>());

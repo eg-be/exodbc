@@ -368,14 +368,15 @@ namespace exodbc
 					}
 					ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(sqlCBuffer);
 					columnFlags = flags;
-					ExtendedBindArgumentsHolder& extendedBindArgs = boost::polymorphic_get<ExtendedBindArgumentsHolder>(sqlCBuffer);
+					ExtendedColumnPropertiesHolder& extendedColumnProperties = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(sqlCBuffer);
+					extendedColumnProperties.SetObjectName(std::make_shared<ColumnInfo>(colInfo));
 					if(!colInfo.IsColumnSizeNull())
 					{
-						extendedBindArgs.SetColumnSize(colInfo.GetColumnSize());
+						extendedColumnProperties.SetColumnSize(colInfo.GetColumnSize());
 					}
 					if (!colInfo.IsDecimalDigitsNull())
 					{
-						extendedBindArgs.SetDecimalDigits(colInfo.GetDecimalDigits());
+						extendedColumnProperties.SetDecimalDigits(colInfo.GetDecimalDigits());
 					}
 					m_columnBufferMap[bufferIndex] = sqlCBuffer;
 					++bufferIndex;
