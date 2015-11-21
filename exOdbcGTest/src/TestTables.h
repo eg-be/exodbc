@@ -87,7 +87,7 @@ namespace exodbc
 		*			is compared using SQLINTEGER (as access has no SQLSMALLINT, nor SQLBIGINT).
 		* \return	AssertionSuccess or AssertionFailure.
 		*/
-		::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt);
+//		::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt);
 
 		/*!
 		* \brief	Insert an Integer value
