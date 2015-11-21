@@ -364,17 +364,26 @@ namespace exodbc
 					}
 					else
 					{
-						sqlCBuffer = CreateBuffer(sqlCType);
+						sqlCBuffer = CreateBuffer(sqlCType, colInfo);
 					}
 					ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(sqlCBuffer);
 					columnFlags = flags;
+					ExtendedBindArguments& extendedBindArgs = boost::polymorphic_get<ExtendedBindArguments>(sqlCBuffer);
+					if(!colInfo.IsColumnSizeNull())
+					{
+						extendedBindArgs.SetColumnSize(colInfo.GetColumnSize());
+					}
+					if (!colInfo.IsDecimalDigitsNull())
+					{
+						extendedBindArgs.SetDecimalDigits(colInfo.GetDecimalDigits());
+					}
 					m_columnBufferMap[bufferIndex] = sqlCBuffer;
 					++bufferIndex;
 				}
-				catch (const NotSupportedException& nse)
-				{
-					int p = 3;
-				}
+				//catch (const NotSupportedException& nse)
+				//{
+				//	int p = 3;
+				//}
 				catch (const boost::bad_polymorphic_get& ex)
 				{
 					WrapperException we(ex);
@@ -1422,6 +1431,8 @@ namespace exodbc
 					const ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
 					if (columnFlags.Test(ColumnFlag::SELECT))
 					{
+						BindSelectVisitor bindSelect(boundColumnNumber, m_hStmtSelect);
+						boost::apply_visitor(bindSelect, columnBuffer);
 						int p = 3;
 					}
 				}
