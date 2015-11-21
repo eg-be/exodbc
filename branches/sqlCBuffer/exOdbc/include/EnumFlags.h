@@ -66,17 +66,17 @@ namespace exodbc
 	*/
 	enum class ColumnFlag
 	{
-		CF_NONE = 0x0,		///< No flags.
+		NONE = 0x0,		///< No flags.
 
-		CF_SELECT = 0x1,	///< Include Column in Selects.
-		CF_UPDATE = 0x2,	///< Include Column in Updates.
-		CF_INSERT = 0x4,	///< Include Column in Inserts.
-		CF_NULLABLE = 0x8,	///< Column is null able.
-		CF_PRIMARY_KEY = 0x10,	///< Column is primary key.
+		SELECT = 0x1,	///< Include Column in Selects.
+		UPDATE = 0x2,	///< Include Column in Updates.
+		INSERT = 0x4,	///< Include Column in Inserts.
+		NULLABLE = 0x8,	///< Column is null able.
+		PRIMARY_KEY = 0x10,	///< Column is primary key.
 
-		CF_READ = CF_SELECT,	///< CF_SELECT
-		CF_WRITE = CF_UPDATE | CF_INSERT,	///< CF_UPDATE | CF_INSERT
-		CF_READ_WRITE = CF_SELECT | CF_UPDATE | CF_INSERT	///< CF_SELECT | CF_UPDATE | CF_INSERT
+		READ = SELECT,	///< SELECT
+		WRITE = UPDATE | INSERT,	///< UPDATE | INSERT
+		READ_WRITE = SELECT | UPDATE | INSERT	///< SELECT | UPDATE | INSERT
 	};
 	template<>
 	struct enable_bitmask_operators<ColumnFlag> {
