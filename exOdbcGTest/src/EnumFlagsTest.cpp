@@ -40,24 +40,24 @@ namespace exodbc
 		ColumnFlags flags;
 		
 		// No flag must be set
-		EXPECT_FALSE(flags.Test(ColumnFlag::CF_SELECT));
-		EXPECT_FALSE(flags.Test(ColumnFlag::CF_UPDATE));
-		EXPECT_FALSE(flags.Test(ColumnFlag::CF_INSERT));
-		EXPECT_FALSE(flags.Test(ColumnFlag::CF_NULLABLE));
-		EXPECT_FALSE(flags.Test(ColumnFlag::CF_PRIMARY_KEY));
+		EXPECT_FALSE(flags.Test(ColumnFlag::SELECT));
+		EXPECT_FALSE(flags.Test(ColumnFlag::UPDATE));
+		EXPECT_FALSE(flags.Test(ColumnFlag::INSERT));
+		EXPECT_FALSE(flags.Test(ColumnFlag::NULLABLE));
+		EXPECT_FALSE(flags.Test(ColumnFlag::PRIMARY_KEY));
 	}
 
 
 	TEST_F(EnumFlagsTest, ConstructFlags)
 	{
-		ColumnFlags flags(ColumnFlag::CF_NULLABLE | ColumnFlag::CF_INSERT);
+		ColumnFlags flags(ColumnFlag::NULLABLE | ColumnFlag::INSERT);
 
 		// No flag must be set except constructed
-		EXPECT_FALSE(flags.Test(ColumnFlag::CF_SELECT));
-		EXPECT_FALSE(flags.Test(ColumnFlag::CF_UPDATE));
-		EXPECT_TRUE(flags.Test(ColumnFlag::CF_INSERT));
-		EXPECT_TRUE(flags.Test(ColumnFlag::CF_NULLABLE));
-		EXPECT_FALSE(flags.Test(ColumnFlag::CF_PRIMARY_KEY));
+		EXPECT_FALSE(flags.Test(ColumnFlag::SELECT));
+		EXPECT_FALSE(flags.Test(ColumnFlag::UPDATE));
+		EXPECT_TRUE(flags.Test(ColumnFlag::INSERT));
+		EXPECT_TRUE(flags.Test(ColumnFlag::NULLABLE));
+		EXPECT_FALSE(flags.Test(ColumnFlag::PRIMARY_KEY));
 
 	}
 
@@ -65,11 +65,11 @@ namespace exodbc
 	{
 		ColumnFlags f;
 
-		EXPECT_FALSE(f.Test(ColumnFlag::CF_NULLABLE));
-		f.Set(ColumnFlag::CF_NULLABLE);
-		EXPECT_TRUE(f.Test(ColumnFlag::CF_NULLABLE));
-		f.Clear(ColumnFlag::CF_NULLABLE);
-		EXPECT_FALSE(f.Test(ColumnFlag::CF_NULLABLE));
+		EXPECT_FALSE(f.Test(ColumnFlag::NULLABLE));
+		f.Set(ColumnFlag::NULLABLE);
+		EXPECT_TRUE(f.Test(ColumnFlag::NULLABLE));
+		f.Clear(ColumnFlag::NULLABLE);
+		EXPECT_FALSE(f.Test(ColumnFlag::NULLABLE));
 	}
 
 	// Interfaces
