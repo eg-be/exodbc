@@ -368,7 +368,7 @@ namespace exodbc
 					}
 					ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(sqlCBuffer);
 					columnFlags = flags;
-					ExtendedBindArguments& extendedBindArgs = boost::polymorphic_get<ExtendedBindArguments>(sqlCBuffer);
+					ExtendedBindArgumentsHolder& extendedBindArgs = boost::polymorphic_get<ExtendedBindArgumentsHolder>(sqlCBuffer);
 					if(!colInfo.IsColumnSizeNull())
 					{
 						extendedBindArgs.SetColumnSize(colInfo.GetColumnSize());
