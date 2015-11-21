@@ -167,84 +167,84 @@ namespace exodbc
 		};
 
 
-		::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt)
-		{
-			try
-			{
-				::testing::AssertionResult failure = ::testing::AssertionFailure();
-				bool failed = false;
+		//::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt)
+		//{
+		//	try
+		//	{
+		//		::testing::AssertionResult failure = ::testing::AssertionFailure();
+		//		bool failed = false;
 
-				BufferVariant id = iTable.GetColumnValue(0);
-				BufferVariant tsmallInt = iTable.GetColumnValue(1);
-				BufferVariant tint = iTable.GetColumnValue(2);
-				BufferVariant tbigInt = iTable.GetColumnValue(3);
+		//		BufferVariant id = iTable.GetColumnValue(0);
+		//		BufferVariant tsmallInt = iTable.GetColumnValue(1);
+		//		BufferVariant tint = iTable.GetColumnValue(2);
+		//		BufferVariant tbigInt = iTable.GetColumnValue(3);
 
-				FComperator<Int, SQLINTEGER, SQLINTEGER> idComperator = { failure, db };
-				if (!idComperator(expId, id))
-				{
-					failed = true;
-				}
+		//		FComperator<Int, SQLINTEGER, SQLINTEGER> idComperator = { failure, db };
+		//		if (!idComperator(expId, id))
+		//		{
+		//			failed = true;
+		//		}
 
-				if (db.GetDbms() == DatabaseProduct::ACCESS)
-				{
-					// Access has no BigInt, we simply ignore that column
-					expBigInt = ValueIndicator::IGNORE_VAL;
-					// Also Access has no Smallints. we still have those values in our tests, but we stored them as INT
-					FComperator<SmallInt, SQLSMALLINT, SQLINTEGER> tSmallIntComperator = { failure, db };
-					if (!tSmallIntComperator(expSmallInt, tsmallInt))
-					{
-						failed = true;
-					}
-				}
-				else
-				{
-					FComperator<SmallInt, SQLSMALLINT, SQLSMALLINT> tSmallIntComperator = { failure, db };
-					if (!tSmallIntComperator(expSmallInt, tsmallInt))
-					{
-						failed = true;
-					}
-				}
+		//		if (db.GetDbms() == DatabaseProduct::ACCESS)
+		//		{
+		//			// Access has no BigInt, we simply ignore that column
+		//			expBigInt = ValueIndicator::IGNORE_VAL;
+		//			// Also Access has no Smallints. we still have those values in our tests, but we stored them as INT
+		//			FComperator<SmallInt, SQLSMALLINT, SQLINTEGER> tSmallIntComperator = { failure, db };
+		//			if (!tSmallIntComperator(expSmallInt, tsmallInt))
+		//			{
+		//				failed = true;
+		//			}
+		//		}
+		//		else
+		//		{
+		//			FComperator<SmallInt, SQLSMALLINT, SQLSMALLINT> tSmallIntComperator = { failure, db };
+		//			if (!tSmallIntComperator(expSmallInt, tsmallInt))
+		//			{
+		//				failed = true;
+		//			}
+		//		}
 
-				FComperator<Int, SQLINTEGER, SQLINTEGER> tIntComperator = { failure, db };
-				FComperator<BigInt, SQLBIGINT, SQLBIGINT> tBigIntComperator = { failure, db };
+		//		FComperator<Int, SQLINTEGER, SQLINTEGER> tIntComperator = { failure, db };
+		//		FComperator<BigInt, SQLBIGINT, SQLBIGINT> tBigIntComperator = { failure, db };
 
-				if ( ! (
-						tIntComperator(expInt, tint)
-					&&	tBigIntComperator(expBigInt, tbigInt)
-					))
-				{
-					failed = true;
-				}
+		//		if ( ! (
+		//				tIntComperator(expInt, tint)
+		//			&&	tBigIntComperator(expBigInt, tbigInt)
+		//			))
+		//		{
+		//			failed = true;
+		//		}
 
-				if (failed)
-				{
-					std::string top = boost::str(boost::format("Records are not equal:"));
-					std::string hed = boost::str(boost::format("          | %18s | %18s | %18s | %18s") % "idintegertypes" %"tsmalint" %"tint" %"tbigint");
-					std::string dat;
-					try
-					{
-								dat = boost::str(boost::format("  values: | %18d | %18d | %18d | %18d") % iTable.GetString(0) % iTable.GetString(1) % iTable.GetString(2) % iTable.GetString(3));
-					}
-					catch (Exception& ex)
-					{
-						dat = boost::str(boost::format("  values: ERROR - failed printing row as str: %s") % ex.what());
-					}
-					failure << top << std::endl << hed << std::endl << dat << std::endl;
-					return failure;
-				}
-			}
-			catch (boost::bad_get& ex)
-			{
-				return ::testing::AssertionFailure() << "ERROR: boost::bad_get thrown while comparing column values: " << ex.what();
-			}
-			catch (Exception& ex)
-			{
-				return ::testing::AssertionFailure() << "ERROR: exodbc::Exception thrown while comparing column values: " << ex.what();
-			}
+		//		if (failed)
+		//		{
+		//			std::string top = boost::str(boost::format("Records are not equal:"));
+		//			std::string hed = boost::str(boost::format("          | %18s | %18s | %18s | %18s") % "idintegertypes" %"tsmalint" %"tint" %"tbigint");
+		//			std::string dat;
+		//			try
+		//			{
+		//						dat = boost::str(boost::format("  values: | %18d | %18d | %18d | %18d") % iTable.GetString(0) % iTable.GetString(1) % iTable.GetString(2) % iTable.GetString(3));
+		//			}
+		//			catch (Exception& ex)
+		//			{
+		//				dat = boost::str(boost::format("  values: ERROR - failed printing row as str: %s") % ex.what());
+		//			}
+		//			failure << top << std::endl << hed << std::endl << dat << std::endl;
+		//			return failure;
+		//		}
+		//	}
+		//	catch (boost::bad_get& ex)
+		//	{
+		//		return ::testing::AssertionFailure() << "ERROR: boost::bad_get thrown while comparing column values: " << ex.what();
+		//	}
+		//	catch (Exception& ex)
+		//	{
+		//		return ::testing::AssertionFailure() << "ERROR: exodbc::Exception thrown while comparing column values: " << ex.what();
+		//	}
 
-			return ::testing::AssertionSuccess();
+		//	return ::testing::AssertionSuccess();
 
-		}
+		//}
 
 
 		void InsertIntTypesTmp(test::Case nameCase, const exodbc::Database& db, Int id, SmallInt tSmallInt, Int tInt, BigInt tBigInt, bool commitTrans /* = true */)
