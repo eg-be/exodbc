@@ -226,19 +226,19 @@ namespace exodbc
 	* \brief Hints for FreeStatementHandle() if it shall throw or not.
 	* \see FreeStatementHandle()
 	*/
-	enum FreeStatementThrowFlag
-	{
-		FSTF_NO_THROW = 0x0,	///< Do not throw if SQLFreeHandle fails.
-		FSTF_THROW_ON_SQL_ERROR = 0x01,	///< Throw if SQLFreeHandle return with SQL_ERROR.
-		FSTF_THROW_ON_SQL_INVALID_HANDLE = 0x02	//< Throw if SQLFreeHandle returns with SQL_INVALID_HANDLE.
-	};
+	//enum FreeStatementThrowFlag
+	//{
+	//	FSTF_NO_THROW = 0x0,	///< Do not throw if SQLFreeHandle fails.
+	//	FSTF_THROW_ON_SQL_ERROR = 0x01,	///< Throw if SQLFreeHandle return with SQL_ERROR.
+	//	FSTF_THROW_ON_SQL_INVALID_HANDLE = 0x02	//< Throw if SQLFreeHandle returns with SQL_INVALID_HANDLE.
+	//};
 
 	/*!
 	* \typedef FreeStatementThrowFlags 
 	* \brief	Should be a mask of FreeStatementThrowFlag.
 	* \see	FreeStatementThrowFlag
 	*/
-	typedef unsigned int FreeStatementThrowFlags;
+	//typedef unsigned int FreeStatementThrowFlags;
 
 	/*!
 	* \brief	Free the statement handle passed, return SQL_NULL_HSTMT if the handle is invalid after this function returns
@@ -252,7 +252,7 @@ namespace exodbc
 	* \throw	Exception	Depending on flags
 	* \see		FreeStatementThrowFlag
 	*/
-	extern EXODBCAPI SQLHSTMT FreeStatementHandle(SQLHSTMT hStmt, FreeStatementThrowFlags flags = FSTF_THROW_ON_SQL_ERROR | FSTF_THROW_ON_SQL_INVALID_HANDLE);
+//	extern EXODBCAPI SQLHSTMT FreeStatementHandle(SQLHSTMT hStmt, FreeStatementThrowFlags flags = FSTF_THROW_ON_SQL_ERROR | FSTF_THROW_ON_SQL_INVALID_HANDLE);
 
 
 	/*!
@@ -262,7 +262,7 @@ namespace exodbc
 	* \return	Newly allocates statement handle.
 	* \throw	Exception	If allocating fails, or hDbc is a SQL_NULL_HDBC.
 	*/
-	extern EXODBCAPI SQLHSTMT AllocateStatementHandle(SQLHDBC hDbc);
+//	extern EXODBCAPI SQLHSTMT AllocateStatementHandle(SQLHDBC hDbc);
 
 
 	/*!
