@@ -211,7 +211,6 @@
     <ClInclude Include="src\TestDbCreator.h" />
     <ClInclude Include="src\TestParams.h" />
     <ClInclude Include="src\TestTables.h" />
-    <ClInclude Include="src\VisitorsTest.h" />
     <ClInclude Include="src\wxCompatibilityTest.h" />
   </ItemGroup>
   <ItemGroup>
@@ -233,7 +232,6 @@
     <ClCompile Include="src\TestDbCreator.cpp" />
     <ClCompile Include="src\TestParams.cpp" />
     <ClCompile Include="src\TestTables.cpp" />
-    <ClCompile Include="src\VisitorsTests.cpp" />
     <ClCompile Include="src\wxCompatibilityTest.cpp" />
   </ItemGroup>
   <ItemGroup>
