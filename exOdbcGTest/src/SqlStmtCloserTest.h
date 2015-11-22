@@ -1,15 +1,13 @@
 /*!
-* \file HelpersTest.h
+* \file SqlStmtCloserTest.h
 * \author Elias Gerber <eg@elisium.ch>
-* \date 09.08.2014
+* \date 22.11.2015
 * \copyright GNU Lesser General Public License Version 3
-* 
+*
 * [Brief Header-file description]
-*/ 
+*/
 
 #pragma once
-#ifndef HELPERSTEST_H
-#define HELPERSTEST_H
 
 // Same component headers
 #include "exOdbcGTest.h"
@@ -35,28 +33,16 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class ParamHelpersTest : public ::testing::Test
-	{
 
-	public:
-		//static void SetUpTestCase() {};
-		//static void TearDownTestCase() {};
+	class StatementCloserTest : public ::testing::Test
+	{
 
 	protected:
 		virtual void SetUp();
-		virtual void TearDown();
 
 		TestParams m_odbcInfo;
-
 		EnvironmentPtr m_pEnv = std::make_shared<Environment>();
 		DatabasePtr m_pDb = std::make_shared<Database>();
 	};
 
-	class StaticHelpersTest : public ::testing::Test {
-
-	protected:
-		virtual void SetUp();
-		virtual void TearDown();
-	};
 } // namespace exodbc
-#endif // HELPERSTEST_H
