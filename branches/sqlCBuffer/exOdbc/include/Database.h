@@ -716,6 +716,8 @@ namespace exodbc
 
 	};  // Database
 
+	typedef std::shared_ptr<Database> DatabasePtr;
+	typedef std::shared_ptr<const Database> ConstDatabasePtr;
 }	// namespace exodbc
 
 #endif // DATABASE_H

@@ -38,17 +38,17 @@ namespace exodbc
 		: m_odbcInfo(odbcInfo)
 	{
 		// prepare env
-		m_env.Init(OdbcVersion::V_3);
+		m_pEnv->Init(OdbcVersion::V_3);
 
 		// Create and open Database
-		m_db.Init(&m_env);
+		m_pDb->Init(m_pEnv);
 		if (odbcInfo.HasConnectionString())
 		{
-			m_db.Open(odbcInfo.m_connectionString);
+			m_pDb->Open(odbcInfo.m_connectionString);
 		}
 		else
 		{
-			m_db.Open(odbcInfo.m_dsn, odbcInfo.m_username, odbcInfo.m_password);
+			m_pDb->Open(odbcInfo.m_dsn, odbcInfo.m_username, odbcInfo.m_password);
 		}
 	}
 
@@ -123,7 +123,7 @@ namespace exodbc
 				{
 					try
 					{
-						m_db.ExecSql(stmt);
+						m_pDb->ExecSql(stmt);
 					}
 					catch (const Exception& ex)
 					{
@@ -143,9 +143,9 @@ namespace exodbc
 		}
 		if (!ba::trim_copy(stmt).empty())
 		{
-			m_db.ExecSql(stmt);
+			m_pDb->ExecSql(stmt);
 		}
-		m_db.CommitTrans();
+		m_pDb->CommitTrans();
 	}
 
 
@@ -163,15 +163,15 @@ namespace exodbc
 			bool execute = !stmt.empty() && (line.empty() || ba::ends_with(ba::trim_copy(stmt), L";"));
 			if (execute)
 			{
-				m_db.ExecSql(stmt);
+				m_pDb->ExecSql(stmt);
 				stmt = L"";
 			}
 		}
 		if (!stmt.empty())
 		{
-			m_db.ExecSql(stmt);
+			m_pDb->ExecSql(stmt);
 		}
-		m_db.CommitTrans();
+		m_pDb->CommitTrans();
 	}
 
 
@@ -208,7 +208,7 @@ namespace exodbc
 	{
 		try
 		{
-			m_db.ExecSql(sqlstmt);
+			m_pDb->ExecSql(sqlstmt);
 		}
 		catch (const Exception& ex)
 		{
@@ -222,7 +222,7 @@ namespace exodbc
 		try
 		{
 			wstring drop = boost::str(boost::wformat(L"DROP TABLE %s") % tableName);
-			m_db.ExecSql(drop);
+			m_pDb->ExecSql(drop);
 		}
 		catch (const Exception& ex)
 		{

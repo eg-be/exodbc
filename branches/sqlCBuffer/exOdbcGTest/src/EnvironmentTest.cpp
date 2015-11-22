@@ -49,36 +49,36 @@ namespace exodbc
 	}
 
 
-	TEST_F(EnvironmentTest, AllocateEnvironmentHandle)
-	{
-		Environment env;
-		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
-		// We will fail to allocate a second one
-		// Suppress the output of the assertion helper
-		LogLevelFatal lf;
-		DontDebugBreak ddb;
-		EXPECT_THROW(env.AllocateEnvironmentHandle(), AssertionException);
-	}
+	//TEST_F(EnvironmentTest, AllocateEnvironmentHandle)
+	//{
+	//	Environment env;
+	//	ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
+	//	// We will fail to allocate a second one
+	//	// Suppress the output of the assertion helper
+	//	LogLevelFatal lf;
+	//	DontDebugBreak ddb;
+	//	EXPECT_THROW(env.AllocateEnvironmentHandle(), AssertionException);
+	//}
 
 
-	TEST_F(EnvironmentTest, FreeEnvironmentHandle)
-	{
-		// First simply test alloc - free
-		Environment env;
-		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
-		EXPECT_NO_THROW(env.FreeEnvironmentHandle());
-		
-		// Now test that we fail to free if there is still a database around
-		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
-		ASSERT_NO_THROW(env.SetOdbcVersion(OdbcVersion::V_3));
-		{
-			Database db(&env);
-			EXPECT_THROW(env.FreeEnvironmentHandle(), SqlResultException);
-		}
+	//TEST_F(EnvironmentTest, FreeEnvironmentHandle)
+	//{
+	//	// First simply test alloc - free
+	//	Environment env;
+	//	ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
+	//	EXPECT_NO_THROW(env.FreeEnvironmentHandle());
+	//	
+	//	// Now test that we fail to free if there is still a database around
+	//	ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
+	//	ASSERT_NO_THROW(env.SetOdbcVersion(OdbcVersion::V_3));
+	//	{
+	//		Database db(&env);
+	//		EXPECT_THROW(env.FreeEnvironmentHandle(), SqlResultException);
+	//	}
 
-		// Once the database is gone, we can free the env
-		EXPECT_NO_THROW(env.FreeEnvironmentHandle());
-	}
+	//	// Once the database is gone, we can free the env
+	//	EXPECT_NO_THROW(env.FreeEnvironmentHandle());
+	//}
 
 
 	TEST_F(EnvironmentTest, CopyConstructor)

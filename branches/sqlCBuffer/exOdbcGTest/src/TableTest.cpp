@@ -55,26 +55,26 @@ namespace exodbc
 		// Set up Env
 		// Try to set to the ODBC v3 : We need that for the tests to run correct. 3.8 is not supported by all databases and we dont use specific stuff from it.
 		// except for the TIME2 things, sql server specific. those tests can create their own env.
-		m_env.Init(OdbcVersion::V_3);
+		m_pEnv->Init(OdbcVersion::V_3);
 
 		// And database
-		ASSERT_NO_THROW(m_db.Init(&m_env));
+		ASSERT_NO_THROW(m_pDb->Init(m_pEnv));
 		if (m_odbcInfo.HasConnectionString())
 		{
-			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));
+			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_connectionString));
 		}
 		else
 		{
-			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		}
 	}
 
 
 	void TableTest::TearDown()
 	{
-		if (m_db.IsOpen())
+		if (m_pDb->IsOpen())
 		{
-			EXPECT_NO_THROW(m_db.Close());
+			EXPECT_NO_THROW(m_pDb->Close());
 		}
 	}
 	

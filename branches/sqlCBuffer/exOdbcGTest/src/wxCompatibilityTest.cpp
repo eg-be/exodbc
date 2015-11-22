@@ -44,7 +44,8 @@ namespace exodbc
 		m_env.Init(OdbcVersion::V_3);
 
 		// And the db
-		ASSERT_NO_THROW(m_db.Init(&m_env));
+		ConstEnvironmentPtr pEnv(&m_env);
+		ASSERT_NO_THROW(m_db.Init(pEnv));
 		if (m_odbcInfo.HasConnectionString())
 		{
 			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));
