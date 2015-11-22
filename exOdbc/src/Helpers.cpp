@@ -387,6 +387,24 @@ namespace exodbc
 	}
 
 
+	std::wstring HandleType2s(SQLSMALLINT type)
+	{
+		switch (type)
+		{
+		case SQL_HANDLE_ENV:
+			return L"ENV";
+		case SQL_HANDLE_DBC:
+			return L"DBC";
+		case SQL_HANDLE_STMT:
+			return L"STMT";
+		case SQL_HANDLE_DESC:
+			return L"DESC";
+		default:
+			return L"???";
+		}
+	}
+
+
 	SErrorInfoVector GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
 	{
 		exASSERT(hEnv != SQL_NULL_HENV || hDbc != SQL_NULL_HDBC || hStmt != SQL_NULL_HSTMT || hDesc != SQL_NULL_HDESC);

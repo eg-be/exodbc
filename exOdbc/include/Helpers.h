@@ -193,6 +193,8 @@ namespace exodbc
 	extern EXODBCAPI std::wstring DatabaseProcudt2s(DatabaseProduct dbms);
 
 
+	extern EXODBCAPI std::wstring HandleType2s(SQLSMALLINT type);
+
 	/*!
 	 * \brief	Gets all errors for all passed handles. Should never throw as long
 	 *			you pass in at least one non-NULL handle.

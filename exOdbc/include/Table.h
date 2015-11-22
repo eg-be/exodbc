@@ -20,6 +20,7 @@
 #include "ObjectName.h"
 #include "Sql2BufferTypeMap.h"
 #include "SqlCBuffer.h"
+#include "SqlHandle.h"
 
 // Other headers
 #include "boost/any.hpp"
@@ -996,12 +997,12 @@ namespace exodbc
 
 		// ODBC Handles
 		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
-		SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
-		SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
-		SQLHSTMT		m_hStmtDeletePk;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
-		SQLHSTMT		m_hStmtUpdatePk;	///< Statement-handle used to do UPDATEs. Primary key columns are bound, a prepared statement using column-markers is created.
-		SQLHSTMT		m_hStmtDeleteWhere;	///< Statement-handle to do DELETEs using a passed WHERE clause.
-		SQLHSTMT		m_hStmtUpdateWhere;	///< Statement-handle to do UPDATEs using a passed WHERE clause.
+		//SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
+		//SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
+		//SQLHSTMT		m_hStmtDeletePk;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
+		//SQLHSTMT		m_hStmtUpdatePk;	///< Statement-handle used to do UPDATEs. Primary key columns are bound, a prepared statement using column-markers is created.
+		//SQLHSTMT		m_hStmtDeleteWhere;	///< Statement-handle to do DELETEs using a passed WHERE clause.
+		//SQLHSTMT		m_hStmtUpdateWhere;	///< Statement-handle to do UPDATEs using a passed WHERE clause.
 
 		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
 
