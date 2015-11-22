@@ -35,28 +35,10 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class ParamHelpersTest : public ::testing::Test
-	{
-
-	public:
-		//static void SetUpTestCase() {};
-		//static void TearDownTestCase() {};
+	class HelpersTest : public ::testing::Test {
 
 	protected:
-		virtual void SetUp();
-		virtual void TearDown();
 
-		TestParams m_odbcInfo;
-
-		EnvironmentPtr m_pEnv = std::make_shared<Environment>();
-		DatabasePtr m_pDb = std::make_shared<Database>();
-	};
-
-	class StaticHelpersTest : public ::testing::Test {
-
-	protected:
-		virtual void SetUp();
-		virtual void TearDown();
 	};
 } // namespace exodbc
 #endif // HELPERSTEST_H

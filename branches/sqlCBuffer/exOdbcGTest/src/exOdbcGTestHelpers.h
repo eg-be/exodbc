@@ -27,6 +27,7 @@ namespace exodbctest
 {
 	extern exodbc::EnvironmentPtr CreateEnv(exodbc::OdbcVersion odbcVersion = exodbc::OdbcVersion::V_3);
 	extern exodbc::DatabasePtr OpenTestDb(exodbc::ConstEnvironmentPtr pEnv);
+	extern exodbc::DatabasePtr OpenTestDb(exodbc::OdbcVersion odbcVersion = exodbc::OdbcVersion::V_3);
 
 	// Structs
 	// -------
