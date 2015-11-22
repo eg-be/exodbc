@@ -43,6 +43,13 @@ namespace exodbctest
 		return pDb;
 	}
 
+
+	exodbc::DatabasePtr OpenTestDb(exodbc::OdbcVersion odbcVersion /* = exodbc::OdbcVersion::V_3 */)
+	{
+		exodbc::EnvironmentPtr pEnv = CreateEnv(odbcVersion);
+		return OpenTestDb(pEnv);
+	}
+
 	// Static consts
 	// -------------
 
