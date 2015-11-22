@@ -7,12 +7,9 @@
 */ 
 
 #pragma once
-#ifndef ENVIRONMENT_H
-#define ENVIRONMENT_H
 
 // Same component headers
 #include "exOdbc.h"
-#include "Helpers.h"
 #include "InfoObject.h"
 #include "SqlHandle.h"
 
@@ -39,79 +36,76 @@ namespace exodbc
 	* \brief Represents the ODBC-Environment. Every Database needs an environment, 
 	* but one environment can be used to open multiple databases.
 	* 
-	* This class will allocate the Environment-Handle that is required
-	* for all later operations and sets the ODBC Version to 3.x or higher.
-	* The handle is freed on destruction.
+	* This class will manage the ODBC Environment Handle that is required
+	* for all later operations in a SqlEnvHandlePtr. The shared_ptr will be valid
+	* during object lifetime as the SqlEnvHandle is allocated during construction.
+	* The Connection handle itself will be created during Init().
 	* 
 	*/
 	class EXODBCAPI Environment
 	{
-	// Test helpers:
-#if EXODBC_TEST
-		FRIEND_TEST(EnvironmentTest, FreeEnvironmentHandle);
-		FRIEND_TEST(EnvironmentTest, AllocateEnvironmentHandle);
-#endif
-
 	public:
 		/*!
 		 * \brief	Default constructor.
 		 * 			You must manually call Init() after creating the object.
+		 *			Sets ODBC Version to OdbcVersion::UNKNOWN.
 		 * \see		Init()
+		 * \throw	std::bad_alloc If creation of SqlEnvHandlePtr fails.
 		 */
-		Environment() throw();
+		Environment();
 
 
 		/*!
-		 * \brief	Constructor. Tries to alloc the environment handle and to set the ODBC-version.
+		 * \brief	Constructor. Calls Init() with passed odbcVersion.
+		 *			After Construction the ODBC Environment Handle is allocated
+		 *			and OdbcVersion is set to passed odbcVersion.
 		 *
-		 * \param	odbcVersion	The ODBC version.
-		 * \throw	Exception If AllocateEnvironmentHandle() or SetOdbcVersion() fails.
+		 * \param	odbcVersion	The ODBC version to set.
+		 * \throw	std::bad_alloc If creation of SqlEnvHandlePtr fails.
+		 * \throw	Exception If Init() fails.
 		 */
 		Environment(OdbcVersion odbcVersion);
 
 
 		/*!
 		* \brief	Copy Constructor.
-		* \details	If the passed Environment has a valid ODBC-Version set, the environment
-		*			will be created with the same version.
-		* \param	odbcVersion	The ODBC version.
-		* \throw	Exception If AllocateEnvironmentHandle() or SetOdbcVersion() fails.
+		* \details	If the passed Environment has a valid ODBC Version set, the environment
+		*			will be created with the same version by calling Init().
+		* \param	other Environment to copy.
+		* \throw	Exception If Init() fails.
 		*/
 		Environment(const Environment& other);
 
 
 		/*!
-		 * \brief		Destructor. Tries to free the env-handle, if one is allocated.
-		 * \details	If freeing the handle fails an error is logged, but no Exception
-		 *				is being thrown. You will leak handles in this case.
+		 * \brief		Destructor. 
 		 */
 		~Environment();
 
 
 		/*!
 		* \brief	Must be called if Environment has been created using Default Constructor.
-		* \details	Can only be called once. Allocates the Environment handle and sets the
+		* \details	Can only be called once. Allocates the ODBC Environment handle and sets the
 		*			passed OdbcVersion.
 		* \param	odbcVersion The ODBC Version to set on this Environment.
-		* \see		HasEnvironmentHandle()
+		* \see		IsEnvHandleAllocated()
 		* \throw	Exception
 		*/
 		void Init(OdbcVersion odbcVersion);
 
 
 		/*!
-		 * \brief	Returns true is a Henv is allocated.
-		 * \details	The environment handle is allocated if the object was created using one
-		 *			of the non default constructors, or Init() has been called.
+		 * \brief	Returns true if the SqlEnvHandle has an allocated ODBC Environment handle.
 		 */
-		bool			HasEnvironmentHandle() const { exASSERT(m_pHEnv); return m_pHEnv->IsAllocated(); };
+		bool			IsEnvHandleAllocated() const { exASSERT(m_pHEnv); return m_pHEnv->IsAllocated(); };
 
 
 		/*!
-		* \brief	Returns the Environment handle.
-		* \throw	Exception if no Henv is allocated.
+		* \brief	Returns the shared_ptr to the SqlEnvHandle holding the ODBC Environment handle.
+		*			Note that this does not guarantee that the SqlEnvHandle returned actually has 
+		*			Environment Handle allocated or that the pointer is not NULL.
 		*/
-		ConstSqlEnvHandlePtr	GetEnvironmentHandle() const { exASSERT(HasEnvironmentHandle()); return m_pHEnv; };
+		ConstSqlEnvHandlePtr	GetSqlEnvHandle() const noexcept { return m_pHEnv; };
 
 		
 		/*!
@@ -119,7 +113,7 @@ namespace exodbc
 		 *			ReadOdbcVersion() if setting seemed to be successfull.
 		 *
 		 * \param	version	The version.
-		 * \throw	Exception if no Henv is allocated, or setting the version fails.
+		 * \throw	Exception if no ODBC Environment Handle is allocated, or setting the version fails.
 		 */
 		void			SetOdbcVersion(OdbcVersion version);		
 
@@ -129,7 +123,7 @@ namespace exodbc
 		 *			cached value.
 		 * 
 		 * \return	The ODBC version or OV_UNKNOWN if read version is unknown.
-		 * \throw	Exception If no Henv is allocated, or reading the version fails.
+		 * \throw	Exception If no ODBC Environment Handle is allocated, or reading the version fails.
 		 */
 		OdbcVersion		ReadOdbcVersion() const;
 
@@ -150,8 +144,7 @@ namespace exodbc
 		/*!
 		 * \brief		List data sources.
 		 * \details	List the Data Source Names (DSN) entries available.
-		 *				Fails if no environment handle is allocated.
-		 * \see			HasHEnv()
+		 *				Fails if no ODBC Environment Handle is allocated.
 		 * \param	mode	Decide to list all DSNs, or only user / system DSNs.
 		 * \return	Found Data Source Names.
 		 * \throw	Exception
@@ -160,25 +153,9 @@ namespace exodbc
 
 
 	private:		
-		/*!
-		* \brief	Tries to allocate a new environment handle to be used by this Environment.
-		* 			Cannot be called if a Henv is allocated.
-		*	\throw	Exception If Henv is already allocated or Allocating fails.
-		*/
-		//void			AllocateEnvironmentHandle();
-
-
-		/*!
-		* \brief	Tries to free an allocated Henv.
-		* 			Can only be called if a Henv is allocated.
-		* \throw	Exception if no Henv is allocated
-		*/
-		//void			FreeEnvironmentHandle();
-
 		// Members
 		// -------
-		SqlEnvHandlePtr m_pHEnv;
-		//SQLHENV m_henv;	///< Environment handle
+		SqlEnvHandlePtr m_pHEnv;	///< Environment handle
 		mutable OdbcVersion m_odbcVersion; ///< Cached ODBC version
 
 	};  // class Environment
@@ -187,5 +164,3 @@ namespace exodbc
 	typedef std::shared_ptr<const Environment> ConstEnvironmentPtr;
 }
 
-
-#endif // ENVIRONMENT_H
