@@ -39,6 +39,7 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
+		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -58,6 +59,7 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
+		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -79,6 +81,7 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
+		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -297,19 +300,19 @@ namespace exodbc
 
 	void Table::SetCursorOptions(bool forwardOnlyCursors)
 	{
-		exASSERT(m_hStmtSelect != SQL_NULL_HSTMT);
+		//exASSERT(m_hStmtSelect != SQL_NULL_HSTMT);
 
-		SQLRETURN ret = 0;
-		if (forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
-		{
-			ret = SQLSetStmtAttr(m_hStmtSelect, SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_NONSCROLLABLE, NULL);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_hStmtSelect, L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
-		}
-		else
-		{
-			ret = SQLSetStmtAttr(m_hStmtSelect, SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_SCROLLABLE, NULL);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_hStmtSelect, L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
-		}
+		//SQLRETURN ret = 0;
+		//if (forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
+		//{
+		//	ret = SQLSetStmtAttr(m_hStmtSelect, SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_NONSCROLLABLE, NULL);
+		//	THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_hStmtSelect, L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
+		//}
+		//else
+		//{
+		//	ret = SQLSetStmtAttr(m_hStmtSelect, SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_SCROLLABLE, NULL);
+		//	THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_hStmtSelect, L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
+		//}
 	}
 
 
@@ -439,13 +442,14 @@ namespace exodbc
 	void Table::FreeStatements()
 	{
 		exASSERT(!IsOpen());
+		exASSERT(m_pHStmtSelect);
 
-		//// Free allocated statements
+		// Free allocated statements - reset the allocated stmt-handles
 		//if (m_hStmtCount != SQL_NULL_HSTMT)
 		//{
 		//	m_hStmtCount = FreeStatementHandle(m_hStmtCount);
 		//}
-		//if (m_hStmtSelect != SQL_NULL_HSTMT)
+		//if (m_pHStmtSelect->IsAllocated())
 		//{
 		//	m_hStmtSelect = FreeStatementHandle(m_hStmtSelect);
 		//}
@@ -476,23 +480,24 @@ namespace exodbc
 
 	bool Table::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
 	{
-		exASSERT(!TestOpenFlag(TOF_FORWARD_ONLY_CURSORS));
-		exASSERT(IsSelectOpen());
+		//exASSERT(!TestOpenFlag(TOF_FORWARD_ONLY_CURSORS));
+		//exASSERT(IsSelectOpen());
 
-		SQLRETURN ret = SQLFetchScroll(m_hStmtSelect, fetchOrientation, fetchOffset);
-		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
-		{
-			wstring msg = boost::str(boost::wformat(L"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
-			SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_hStmtSelect, msg);
-			SET_EXCEPTION_SOURCE(sre);
-			throw sre;
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
-		}
+		//SQLRETURN ret = SQLFetchScroll(m_hStmtSelect, fetchOrientation, fetchOffset);
+		//if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
+		//{
+		//	wstring msg = boost::str(boost::wformat(L"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
+		//	SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_hStmtSelect, msg);
+		//	SET_EXCEPTION_SOURCE(sre);
+		//	throw sre;
+		//}
+		//if (ret == SQL_SUCCESS_WITH_INFO)
+		//{
+		//	LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
+		//}
 
-		return SQL_SUCCEEDED(ret);
+		//return SQL_SUCCEEDED(ret);
+		return false;
 	}
 
 
@@ -841,17 +846,17 @@ namespace exodbc
 
 	void Table::SelectBySqlStmt(const std::wstring& sqlStmt)
 	{
-		exASSERT(IsOpen());
-		exASSERT(!sqlStmt.empty());
+		//exASSERT(IsOpen());
+		//exASSERT(!sqlStmt.empty());
 
-		if (IsSelectOpen())
-		{
-			SelectClose();
-		}
+		//if (IsSelectOpen())
+		//{
+		//	SelectClose();
+		//}
 
-		SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCESS(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtSelect);
-		m_selectQueryOpen = true;
+		//SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
+		//THROW_IFN_SUCCESS(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtSelect);
+		//m_selectQueryOpen = true;
 	}
 
 
@@ -887,28 +892,29 @@ namespace exodbc
 
 	bool Table::SelectNext()
 	{
-		exASSERT(IsSelectOpen());
-		
-		SQLRETURN ret = SQLFetch(m_hStmtSelect);
-		if ( ! (SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
-		{
-			SqlResultException sre(L"SQLFetch", ret, SQL_HANDLE_STMT, m_hStmtSelect);
-			SET_EXCEPTION_SOURCE(sre);
-			throw sre;
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
-		}
+		//exASSERT(IsSelectOpen());
+		//
+		//SQLRETURN ret = SQLFetch(m_hStmtSelect);
+		//if ( ! (SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
+		//{
+		//	SqlResultException sre(L"SQLFetch", ret, SQL_HANDLE_STMT, m_hStmtSelect);
+		//	SET_EXCEPTION_SOURCE(sre);
+		//	throw sre;
+		//}
+		//if (ret == SQL_SUCCESS_WITH_INFO)
+		//{
+		//	LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
+		//}
 
-		return SQL_SUCCEEDED(ret);
+		//return SQL_SUCCEEDED(ret);
+		return false;
 	}
 
 	
 	void Table::SelectClose()
 	{
-		CloseStmtHandle(m_hStmtSelect, StmtCloseMode::IgnoreNotOpen);
-		m_selectQueryOpen = false;
+		//CloseStmtHandle(m_hStmtSelect, StmtCloseMode::IgnoreNotOpen);
+		//m_selectQueryOpen = false;
 	}
 
 
@@ -1030,11 +1036,13 @@ namespace exodbc
 
 	SQLLEN Table::SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr)
 	{
-		exASSERT(IsSelectOpen());
-		SQLLEN value = 0;
-		SQLRETURN ret = SQLColAttribute(m_hStmtSelect, columnIndex + 1, (SQLUSMALLINT)attr, NULL, NULL, NULL, &value);
-		THROW_IFN_SUCCEEDED(SQLColAttribute, ret, SQL_HANDLE_STMT, m_hStmtSelect);
-		return value;
+		//exASSERT(IsSelectOpen());
+		//SQLLEN value = 0;
+		//SQLRETURN ret = SQLColAttribute(m_hStmtSelect, columnIndex + 1, (SQLUSMALLINT)attr, NULL, NULL, NULL, &value);
+		//THROW_IFN_SUCCEEDED(SQLColAttribute, ret, SQL_HANDLE_STMT, m_hStmtSelect);
+		//return value;
+
+		return 0;
 	}
 
 
@@ -1505,8 +1513,8 @@ namespace exodbc
 					const ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
 					if (columnFlags.Test(ColumnFlag::SELECT))
 					{
-						BindSelectVisitor bindSelect(boundColumnNumber, m_hStmtSelect);
-						boost::apply_visitor(bindSelect, columnBuffer);
+						//BindSelectVisitor bindSelect(boundColumnNumber, m_hStmtSelect);
+						//boost::apply_visitor(bindSelect, columnBuffer);
 					}
 				}
 
