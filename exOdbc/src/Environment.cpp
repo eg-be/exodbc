@@ -80,57 +80,9 @@ namespace exodbc
 	}
 
 
-	//void Environment::AllocateEnvironmentHandle()
-	//{
-	//	// This is here to help trap if you are getting a new henv
-	//	// without releasing an existing henv
-	//	exASSERT(!HasEnvironmentHandle());
-
-	//	// Initialize the ODBC Environment for Database Operations
-	//	SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_henv);
-	//	if (!SQL_SUCCEEDED(ret))
-	//	{
-	//		SqlResultException ex(L"SQLAllocHandle", ret, L"Failed to allocated ODBC-Env Handle");
-	//		SET_EXCEPTION_SOURCE(ex);
-	//		throw ex;
-	//	}
-	//}
-
-
-	//void Environment::FreeEnvironmentHandle()
-	//{
-	//	exASSERT(m_henv);
-
-	//	SQLRETURN ret = SQL_SUCCESS;
-
-	//	if (SQL_NULL_HENV != m_henv)
-	//	{
-	//		// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
-	//		ret = SQLFreeHandle(SQL_HANDLE_ENV, m_henv);
-	//		if (ret == SQL_ERROR)
-	//		{
-	//			// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-	//			SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_ENV, m_henv, L"Freeing ODBC-Environment Handle failed with SQL_ERROR, handle is still valid. Are all Connection-handles freed?");
-	//			SET_EXCEPTION_SOURCE(ex);
-	//			throw ex;
-	//		}
-	//		else if (ret == SQL_INVALID_HANDLE)
-	//		{
-	//			// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
-	//			m_henv = SQL_NULL_HENV;
-	//			SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Env Handle failed with SQL_INVALID_HANDLE.");
-	//			SET_EXCEPTION_SOURCE(ex);
-	//			throw ex;
-	//		}
-	//		// We have SUCCESS
-	//		m_henv = SQL_NULL_HENV;
-	//	}
-	//}
-
-
 	void Environment::SetOdbcVersion(OdbcVersion version)
 	{
-		exASSERT(HasEnvironmentHandle());
+		exASSERT(IsEnvHandleAllocated());
 
 		// Remember: because the SQLPOINTER is interpreted as an int value.. for int-attrs..
 		SQLRETURN ret;
@@ -157,7 +109,7 @@ namespace exodbc
 
 	OdbcVersion Environment::ReadOdbcVersion() const
 	{
-		exASSERT(HasEnvironmentHandle());
+		exASSERT(IsEnvHandleAllocated());
 
 		unsigned long value = 0;
 		SQLRETURN ret = SQLGetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
@@ -199,8 +151,7 @@ namespace exodbc
 
 	DataSourcesVector Environment::ListDataSources(ListMode mode) const
 	{
-		exASSERT(m_pHEnv);
-		exASSERT(m_pHEnv->IsAllocated());
+		exASSERT(IsEnvHandleAllocated());
 
 		SQLSMALLINT nameBufferLength, descBufferLength = 0;
 		SQLWCHAR nameBuffer[SQL_MAX_DSN_LENGTH + 1];

@@ -43,7 +43,6 @@ namespace exodbc
 		m_odbcInfo = g_odbcInfo;
 
 		ASSERT_NO_THROW(m_pEnv->Init(OdbcVersion::V_3));
-
 		ASSERT_NO_THROW(m_pDb->Init(m_pEnv));
 		if (m_odbcInfo.HasConnectionString())
 		{

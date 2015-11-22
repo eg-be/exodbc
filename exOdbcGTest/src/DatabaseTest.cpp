@@ -301,7 +301,7 @@ namespace exodbc
 		// Open an existing db by passing the Env to the ctor
 		EnvironmentPtr pEnv = std::make_shared<Environment>(OdbcVersion::V_3);
 		//Environment env(OdbcVersion::V_3);
-		ASSERT_TRUE(pEnv->HasEnvironmentHandle());
+		ASSERT_TRUE(pEnv->IsEnvHandleAllocated());
 		Database db(pEnv);
 		if (m_odbcInfo.HasConnectionString())
 		{
