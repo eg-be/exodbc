@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 #include "Environment.h"
 #include "Database.h"
+#include "SqlStatementCloser.h"
 
 // System headers
 
@@ -58,5 +59,16 @@ namespace exodbc
 		virtual void TearDown();
 	};
 
+
+	class StatementCloserTest : public ::testing::Test
+	{
+
+	protected:
+		virtual void SetUp();;
+
+		TestParams m_odbcInfo;
+		EnvironmentPtr m_pEnv = std::make_shared<Environment>();
+		DatabasePtr m_pDb = std::make_shared<Database>();
+	};
 } // namespace exodbc
 #endif // HELPERSTEST_H

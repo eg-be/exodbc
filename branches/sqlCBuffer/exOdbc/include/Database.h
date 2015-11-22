@@ -494,12 +494,11 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Get an eventually allocated connection handle.
-		* \return	Connection handle if allocated, or SQL_NULL_HDBC.
-		* \see		AllocateConnectionHandle()
-		* \throw	Exception If no handle is allocated.
+		* \brief	Returns the shared_ptr to the SqlDbcHandle holding the ODBC Connection handle.
+		*			Note that this does not guarantee that the SqlDbcHandle returned actually has an
+		*			ODBC Connection Handle allocated or that the pointer is not NULL.
 		*/
-		ConstSqlDbcHandlePtr	GetConnectionHandle() const         { exASSERT(HasConnectionHandle()); return m_pHDbc; }
+		ConstSqlDbcHandlePtr	GetSqlDbcHandle() const noexcept       { return m_pHDbc; }
 
 
 		/*!

@@ -35,6 +35,88 @@ namespace exodbc
 	// Implementation
 	// --------------
 
+	// StatementCloserTest
+	// ===================
+	void StatementCloserTest::SetUp()
+	{
+		// Set up is called for every test
+		m_odbcInfo = g_odbcInfo;
+
+		ASSERT_NO_THROW(m_pEnv->Init(OdbcVersion::V_3));
+		ASSERT_NO_THROW(m_pDb->Init(m_pEnv));
+		if (m_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+		}
+	}
+
+
+	TEST_F(StatementCloserTest, CloseStmtHandle)
+	{
+		SQLHSTMT hNull = SQL_NULL_HSTMT;
+		{
+			// We assert if we pass a null handle
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(StatementCloser::CloseStmtHandle(hNull, StatementCloser::Mode::IgnoreNotOpen), AssertionException);
+		}
+
+		// Allocate a valid statement handle from an open connection handle
+		SqlStmtHandlePtr pHStmt = std::make_shared<SqlStmtHandle>();
+		ASSERT_NO_THROW(pHStmt->AllocateWithParent(m_pDb->GetSqlDbcHandle()));
+
+		// This statement is not open yet, we shall fail to free it
+		{
+			if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+			{
+				LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
+			}
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
+		}
+		// But not if we ignore the cursor-state
+		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
+
+		// Open statement by doing some operation on it
+		std::wstring sqlstmt;
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+		}
+		else
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+		}
+		// convert schema name to upper if needed
+		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
+		{
+			boost::algorithm::to_upper(sqlstmt);
+		}
+
+		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLWCHAR*) sqlstmt.c_str(), SQL_NTS);
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+
+		// Closing it first time must work
+		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen));
+
+		// Closing it a second time must fail
+		if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+		{
+			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
+		}
+		DontDebugBreak ddb;
+		LogLevelFatal llf;
+		EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
+
+		// Free the statement by letting going out of scope
+	}
+
+
 	// ParamHelpersTest
 	// ================
 	void ParamHelpersTest::SetUp()
@@ -60,83 +142,20 @@ namespace exodbc
 	}
 
 
-	//TEST_F(ParamHelpersTest, CloseStmtHandle)
-	//{
-	//	SQLHSTMT hNull = SQL_NULL_HSTMT;
-	//	{
-	//		// We assert if we pass a null handle
-	//		DontDebugBreak ddb;
-	//		LogLevelFatal llf;
-	//		EXPECT_THROW(CloseStmtHandle(hNull, StmtCloseMode::IgnoreNotOpen), AssertionException);
-	//	}
-
-	//	// Allocate a valid statement handle
-	//	SQLHSTMT hStmt = SQL_NULL_HSTMT;
-	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
-
-	//	// This is not open yet, we shall fail to free it
-	//	{
-	//		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
-	//		{
-	//			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
-	//		}
-	//		DontDebugBreak ddb;
-	//		LogLevelFatal llf;
-	//		EXPECT_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen), SqlResultException);
-	//	}
-	//	// But not if we ignore the cursor-state
-	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
-
-	//	// Open statement by doing some operation on it
-	//	std::wstring sqlstmt;
-	//	if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-	//	{
-	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
-	//	}
-	//	else
-	//	{
-	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
-	//	}
-	//	// convert schema name to upper if needed
-	//	if (m_odbcInfo.m_namesCase == test::Case::UPPER)
-	//	{
-	//		boost::algorithm::to_upper(sqlstmt);
-	//	}
-
-	//	SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*) sqlstmt.c_str(), SQL_NTS);
-	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
-
-	//	// Closing it first time must work
-	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen));
-
-	//	// Closing it a second time must fail
-	//	if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
-	//	{
-	//		LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
-	//	}
-	//	DontDebugBreak ddb;
-	//	LogLevelFatal llf;
-	//	EXPECT_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen), SqlResultException);
-
-	//	// Close the statement
-	//	EXPECT_NO_THROW(FreeStatementHandle(hStmt));
-	//}
-
-
 	TEST_F(ParamHelpersTest, GetInfo)
 	{
 		// Simply test reading a string and an int value works - that means, does return some data
 		std::wstring serverName;
 
 		ASSERT_TRUE(m_pDb->HasConnectionHandle());
-		GetInfo(m_pDb->GetConnectionHandle()->GetHandle(), SQL_SERVER_NAME, serverName);
+		GetInfo(m_pDb->GetSqlDbcHandle()->GetHandle(), SQL_SERVER_NAME, serverName);
 		EXPECT_FALSE(serverName.empty());
 
 		// and read some int value
 		// okay, it would be bad luck if one driver reports 1313
 		SQLUSMALLINT maxStmts = 1313;
 		SWORD cb = 0;
-		GetInfo(m_pDb->GetConnectionHandle()->GetHandle(), SQL_MAX_CONCURRENT_ACTIVITIES, &maxStmts, sizeof(maxStmts), &cb);
+		GetInfo(m_pDb->GetSqlDbcHandle()->GetHandle(), SQL_MAX_CONCURRENT_ACTIVITIES, &maxStmts, sizeof(maxStmts), &cb);
 		EXPECT_NE(1313, maxStmts);
 		EXPECT_NE(0, cb);
 	}
@@ -148,7 +167,7 @@ namespace exodbc
 
 	//	// Allocate a valid statement handle
 	//	SQLHSTMT hStmt = SQL_NULL_HSTMT;
-	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetSqlDbcHandle()));
 
 	//	// Open statement by doing some operation on it
 	//	std::wstring sqlstmt;
@@ -223,7 +242,7 @@ namespace exodbc
 	//{
 	//	// Open a statement, to test getting the row-descriptor
 	//	SQLHSTMT hStmt = SQL_NULL_HSTMT;
-	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetSqlDbcHandle()));
 
 	//	// Open statement by doing some operation on it
 	//	std::wstring sqlstmt;
@@ -267,7 +286,7 @@ namespace exodbc
 
 	//	// Open a statement,
 	//	SQLHSTMT hStmt = SQL_NULL_HSTMT;
-	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetSqlDbcHandle()));
 
 	//	// Open statement by doing some operation on it
 	//	std::wstring sqlstmt;

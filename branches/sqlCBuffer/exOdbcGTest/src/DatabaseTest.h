@@ -42,8 +42,8 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 
-		EnvironmentPtr m_pEnv;
-		DatabasePtr	m_pDb;
+		EnvironmentPtr m_pEnv = std::make_shared<Environment>();
+		DatabasePtr	m_pDb = std::make_shared<Database>();
 		TestParams m_odbcInfo;
 	};
 } // namespace exodbc
