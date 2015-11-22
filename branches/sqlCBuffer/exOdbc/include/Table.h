@@ -996,7 +996,8 @@ namespace exodbc
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
 		// ODBC Handles
-		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
+		SqlStmtHandlePtr	m_pHStmtSelect;
+		//SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
 		//SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
 		//SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
 		//SQLHSTMT		m_hStmtDeletePk;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
