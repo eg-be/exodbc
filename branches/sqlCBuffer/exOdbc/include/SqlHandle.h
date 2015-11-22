@@ -104,7 +104,7 @@ namespace exodbc
 			if(tHandleType == SQL_HANDLE_ENV)
 			{
 				exASSERT(pParentHandle == NULL);
-				SQLRETURN  = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_handle);
+				SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_handle);
 				if (!SQL_SUCCEEDED(ret))
 				{
 					SqlResultException ex(L"SQLAllocHandle", ret, L"Failed to allocated ODBC-Env Handle, no additional error information is available.");

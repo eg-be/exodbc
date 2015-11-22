@@ -103,6 +103,7 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
+		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
