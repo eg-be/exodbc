@@ -30,6 +30,7 @@
     <ClInclude Include="include\ObjectName.h" />
     <ClInclude Include="include\Sql2BufferTypeMap.h" />
     <ClInclude Include="include\SqlCBuffer.h" />
+    <ClInclude Include="include\SqlHandle.h" />
     <ClInclude Include="include\Table.h" />
     <ClInclude Include="include\Helpers.h" />
     <ClInclude Include="include\exOdbc.h" />

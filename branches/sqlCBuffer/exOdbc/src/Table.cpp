@@ -39,13 +39,13 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		, m_hStmtCount(SQL_NULL_HSTMT)
-		, m_hStmtSelect(SQL_NULL_HSTMT)
-		, m_hStmtInsert(SQL_NULL_HSTMT)
-		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		//, m_hStmtCount(SQL_NULL_HSTMT)
+		//, m_hStmtSelect(SQL_NULL_HSTMT)
+		//, m_hStmtInsert(SQL_NULL_HSTMT)
+		//, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
 		, m_openFlags(TOF_NONE)
 	{ }
@@ -58,13 +58,13 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		, m_hStmtCount(SQL_NULL_HSTMT)
-		, m_hStmtSelect(SQL_NULL_HSTMT)
-		, m_hStmtInsert(SQL_NULL_HSTMT)
-		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		//, m_hStmtCount(SQL_NULL_HSTMT)
+		//, m_hStmtSelect(SQL_NULL_HSTMT)
+		//, m_hStmtInsert(SQL_NULL_HSTMT)
+		//, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
 		, m_openFlags(TOF_NONE)
 	{
@@ -79,13 +79,13 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		, m_hStmtCount(SQL_NULL_HSTMT)
-		, m_hStmtSelect(SQL_NULL_HSTMT)
-		, m_hStmtInsert(SQL_NULL_HSTMT)
-		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		//, m_hStmtCount(SQL_NULL_HSTMT)
+		//, m_hStmtSelect(SQL_NULL_HSTMT)
+		//, m_hStmtInsert(SQL_NULL_HSTMT)
+		//, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
 		, m_openFlags(TOF_NONE)
 	{
@@ -100,13 +100,13 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		, m_hStmtCount(SQL_NULL_HSTMT)
-		, m_hStmtSelect(SQL_NULL_HSTMT)
-		, m_hStmtInsert(SQL_NULL_HSTMT)
-		, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
+		//, m_hStmtCount(SQL_NULL_HSTMT)
+		//, m_hStmtSelect(SQL_NULL_HSTMT)
+		//, m_hStmtInsert(SQL_NULL_HSTMT)
+		//, m_hStmtUpdatePk(SQL_NULL_HSTMT)
+		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
+		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
+		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
 		, m_openFlags(TOF_NONE)
 	{
@@ -223,74 +223,74 @@ namespace exodbc
 		exASSERT(!IsOpen());
 		exASSERT(m_pDb->IsOpen());
 
-		exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
-		exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
-		exASSERT(SQL_NULL_HSTMT == m_hStmtInsert);
-		exASSERT(SQL_NULL_HSTMT == m_hStmtUpdatePk);
-		exASSERT(SQL_NULL_HSTMT == m_hStmtDeleteWhere);
-		exASSERT(SQL_NULL_HSTMT == m_hStmtUpdateWhere);
+		//exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
+		//exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
+		//exASSERT(SQL_NULL_HSTMT == m_hStmtInsert);
+		//exASSERT(SQL_NULL_HSTMT == m_hStmtUpdatePk);
+		//exASSERT(SQL_NULL_HSTMT == m_hStmtDeleteWhere);
+		//exASSERT(SQL_NULL_HSTMT == m_hStmtUpdateWhere);
 
-		SQLHDBC hdbc = m_pDb->GetConnectionHandle();
+		//SQLHDBC hdbc = m_pDb->GetConnectionHandle();
 
-		// Allocate handles needed
-		if (TestAccessFlag(AF_SELECT))
-		{
-			m_hStmtCount = AllocateStatementHandle(hdbc);
-			m_hStmtSelect = AllocateStatementHandle(hdbc);
-		}
+		//// Allocate handles needed
+		//if (TestAccessFlag(AF_SELECT))
+		//{
+		//	m_hStmtCount = AllocateStatementHandle(hdbc);
+		//	m_hStmtSelect = AllocateStatementHandle(hdbc);
+		//}
 
-		// Allocate handles needed for writing
-		if (TestAccessFlag(AF_INSERT))
-		{
-			m_hStmtInsert = AllocateStatementHandle(hdbc);
-		}
-		if (TestAccessFlag(AF_UPDATE_PK))
-		{
-			m_hStmtUpdatePk = AllocateStatementHandle(hdbc);
-		}
-		if (TestAccessFlag(AF_UPDATE_WHERE))
-		{
-			m_hStmtUpdateWhere = AllocateStatementHandle(hdbc);
-		}
+		//// Allocate handles needed for writing
+		//if (TestAccessFlag(AF_INSERT))
+		//{
+		//	m_hStmtInsert = AllocateStatementHandle(hdbc);
+		//}
+		//if (TestAccessFlag(AF_UPDATE_PK))
+		//{
+		//	m_hStmtUpdatePk = AllocateStatementHandle(hdbc);
+		//}
+		//if (TestAccessFlag(AF_UPDATE_WHERE))
+		//{
+		//	m_hStmtUpdateWhere = AllocateStatementHandle(hdbc);
+		//}
 
-		if (TestAccessFlag(AF_DELETE_PK))
-		{
-			m_hStmtDeletePk = AllocateStatementHandle(hdbc);
-		}
-		if (TestAccessFlag(AF_DELETE_WHERE))
-		{
-			m_hStmtDeleteWhere = AllocateStatementHandle(hdbc);
-		}
+		//if (TestAccessFlag(AF_DELETE_PK))
+		//{
+		//	m_hStmtDeletePk = AllocateStatementHandle(hdbc);
+		//}
+		//if (TestAccessFlag(AF_DELETE_WHERE))
+		//{
+		//	m_hStmtDeleteWhere = AllocateStatementHandle(hdbc);
+		//}
 	}
 
 
 	bool Table::HasAllStatements() const throw()
 	{
 		bool haveAll = true;
-		if (haveAll && TestAccessFlag(AF_SELECT))
-		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtSelect) && (SQL_NULL_HSTMT != m_hStmtCount);
-		}
-		if (haveAll && TestAccessFlag(AF_UPDATE_PK))
-		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtUpdatePk);
-		}
-		if (haveAll && TestAccessFlag(AF_UPDATE_WHERE))
-		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtUpdateWhere);
-		}
-		if (haveAll && TestAccessFlag(AF_INSERT))
-		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtInsert);
-		}
-		if (haveAll && TestAccessFlag(AF_DELETE_PK))
-		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtDeletePk);
-		}
-		if (haveAll && TestAccessFlag(AF_DELETE_WHERE))
-		{
-			haveAll = (SQL_NULL_HSTMT != m_hStmtDeleteWhere);
-		}
+		//if (haveAll && TestAccessFlag(AF_SELECT))
+		//{
+		//	haveAll = (SQL_NULL_HSTMT != m_hStmtSelect) && (SQL_NULL_HSTMT != m_hStmtCount);
+		//}
+		//if (haveAll && TestAccessFlag(AF_UPDATE_PK))
+		//{
+		//	haveAll = (SQL_NULL_HSTMT != m_hStmtUpdatePk);
+		//}
+		//if (haveAll && TestAccessFlag(AF_UPDATE_WHERE))
+		//{
+		//	haveAll = (SQL_NULL_HSTMT != m_hStmtUpdateWhere);
+		//}
+		//if (haveAll && TestAccessFlag(AF_INSERT))
+		//{
+		//	haveAll = (SQL_NULL_HSTMT != m_hStmtInsert);
+		//}
+		//if (haveAll && TestAccessFlag(AF_DELETE_PK))
+		//{
+		//	haveAll = (SQL_NULL_HSTMT != m_hStmtDeletePk);
+		//}
+		//if (haveAll && TestAccessFlag(AF_DELETE_WHERE))
+		//{
+		//	haveAll = (SQL_NULL_HSTMT != m_hStmtDeleteWhere);
+		//}
 		return haveAll;
 	}
 
@@ -440,37 +440,37 @@ namespace exodbc
 	{
 		exASSERT(!IsOpen());
 
-		// Free allocated statements
-		if (m_hStmtCount != SQL_NULL_HSTMT)
-		{
-			m_hStmtCount = FreeStatementHandle(m_hStmtCount);
-		}
-		if (m_hStmtSelect != SQL_NULL_HSTMT)
-		{
-			m_hStmtSelect = FreeStatementHandle(m_hStmtSelect);
-		}
+		//// Free allocated statements
+		//if (m_hStmtCount != SQL_NULL_HSTMT)
+		//{
+		//	m_hStmtCount = FreeStatementHandle(m_hStmtCount);
+		//}
+		//if (m_hStmtSelect != SQL_NULL_HSTMT)
+		//{
+		//	m_hStmtSelect = FreeStatementHandle(m_hStmtSelect);
+		//}
 
-		// And then those needed for writing
-		if (m_hStmtInsert != SQL_NULL_HSTMT)
-		{
-			m_hStmtInsert = FreeStatementHandle(m_hStmtInsert);
-		}
-		if (m_hStmtDeletePk != SQL_NULL_HSTMT)
-		{
-			m_hStmtDeletePk = FreeStatementHandle(m_hStmtDeletePk);
-		}
-		if (m_hStmtDeleteWhere != SQL_NULL_HSTMT)
-		{
-			m_hStmtDeleteWhere = FreeStatementHandle(m_hStmtDeleteWhere);
-		}
-		if (m_hStmtUpdatePk != SQL_NULL_HSTMT)
-		{
-			m_hStmtUpdatePk = FreeStatementHandle(m_hStmtUpdatePk);
-		}
-		if (m_hStmtUpdateWhere != SQL_NULL_HSTMT)
-		{
-			m_hStmtUpdateWhere = FreeStatementHandle(m_hStmtUpdateWhere);
-		}
+		//// And then those needed for writing
+		//if (m_hStmtInsert != SQL_NULL_HSTMT)
+		//{
+		//	m_hStmtInsert = FreeStatementHandle(m_hStmtInsert);
+		//}
+		//if (m_hStmtDeletePk != SQL_NULL_HSTMT)
+		//{
+		//	m_hStmtDeletePk = FreeStatementHandle(m_hStmtDeletePk);
+		//}
+		//if (m_hStmtDeleteWhere != SQL_NULL_HSTMT)
+		//{
+		//	m_hStmtDeleteWhere = FreeStatementHandle(m_hStmtDeleteWhere);
+		//}
+		//if (m_hStmtUpdatePk != SQL_NULL_HSTMT)
+		//{
+		//	m_hStmtUpdatePk = FreeStatementHandle(m_hStmtUpdatePk);
+		//}
+		//if (m_hStmtUpdateWhere != SQL_NULL_HSTMT)
+		//{
+		//	m_hStmtUpdateWhere = FreeStatementHandle(m_hStmtUpdateWhere);
+		//}
 	}
 
 
@@ -789,34 +789,34 @@ namespace exodbc
 		exASSERT(IsOpen());
 
 		// Close Statement handle on exit
-		StatementCloser stmtCloser(m_hStmtCount, false, true);
+		//StatementCloser stmtCloser(m_hStmtCount, false, true);
 
 		SQLUBIGINT count = 0;
-		std::wstring sqlstmt;
-		if ( ! whereStatement.empty())
-		{
-			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereStatement).str();
-		}
-		else
-		{
-			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
-		}
+		//std::wstring sqlstmt;
+		//if ( ! whereStatement.empty())
+		//{
+		//	sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereStatement).str();
+		//}
+		//else
+		//{
+		//	sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
+		//}
 
-		SQLRETURN ret = SQLExecDirect(m_hStmtCount, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtCount);
-			
-		ret = SQLFetch(m_hStmtCount);
-		THROW_IFN_SUCCEEDED(SQLFetch, ret, SQL_HANDLE_STMT, m_hStmtCount);
+		//SQLRETURN ret = SQLExecDirect(m_hStmtCount, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		//THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtCount);
+		//	
+		//ret = SQLFetch(m_hStmtCount);
+		//THROW_IFN_SUCCEEDED(SQLFetch, ret, SQL_HANDLE_STMT, m_hStmtCount);
 
-		bool isNull = false;
-		SQLLEN cb = 0;
-		GetData(m_hStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
-		if (isNull)
-		{
-			Exception ex(boost::str(boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt));
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
+		//bool isNull = false;
+		//SQLLEN cb = 0;
+		//GetData(m_hStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
+		//if (isNull)
+		//{
+		//	Exception ex(boost::str(boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt));
+		//	SET_EXCEPTION_SOURCE(ex);
+		//	throw ex;
+		//}
 
 		return count;
 	}
@@ -916,9 +916,9 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(AF_INSERT));
-		exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
-		SQLRETURN ret = SQLExecute(m_hStmtInsert);
-		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtInsert);
+		//exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
+		//SQLRETURN ret = SQLExecute(m_hStmtInsert);
+		//THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtInsert);
 	}
 
 
@@ -926,18 +926,18 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(AF_DELETE_PK));
-		exASSERT(m_hStmtDeletePk != SQL_NULL_HSTMT);
-		SQLRETURN ret = SQLExecute(m_hStmtDeletePk);
-		if (failOnNoData && ret == SQL_NO_DATA)
-		{
-			SqlResultException ex(L"SQLExecute", ret, L"Did not expect a SQL_NO_DATA while executing a delete-query");
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		if (!(!failOnNoData && ret == SQL_NO_DATA))
-		{
-			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
-		}
+		//exASSERT(m_hStmtDeletePk != SQL_NULL_HSTMT);
+		//SQLRETURN ret = SQLExecute(m_hStmtDeletePk);
+		//if (failOnNoData && ret == SQL_NO_DATA)
+		//{
+		//	SqlResultException ex(L"SQLExecute", ret, L"Did not expect a SQL_NO_DATA while executing a delete-query");
+		//	SET_EXCEPTION_SOURCE(ex);
+		//	throw ex;
+		//}
+		//if (!(!failOnNoData && ret == SQL_NO_DATA))
+		//{
+		//	THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
+		//}
 	}
 
 
@@ -945,22 +945,22 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(AF_DELETE_WHERE));
-		exASSERT(m_hStmtDeleteWhere != SQL_NULL_HSTMT);
-		exASSERT(!where.empty());
+		//exASSERT(m_hStmtDeleteWhere != SQL_NULL_HSTMT);
+		//exASSERT(!where.empty());
 
-		wstring sqlstmt = (boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % where).str();
-		exASSERT(sqlstmt.length() < INT_MAX);
-		SQLRETURN ret = SQLExecDirect(m_hStmtDeleteWhere, (SQLWCHAR*)sqlstmt.c_str(), (SQLINTEGER) sqlstmt.length());
-		if (failOnNoData && ret == SQL_NO_DATA)
-		{
-			SqlResultException ex(L"SQLExecute", ret, boost::str(boost::wformat(L"Did not expect a SQL_NO_DATA while executing the delete-query '%s'") %sqlstmt));
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		if ( ! (!failOnNoData && ret == SQL_NO_DATA))
-		{
-			THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
-		}
+		//wstring sqlstmt = (boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % where).str();
+		//exASSERT(sqlstmt.length() < INT_MAX);
+		//SQLRETURN ret = SQLExecDirect(m_hStmtDeleteWhere, (SQLWCHAR*)sqlstmt.c_str(), (SQLINTEGER) sqlstmt.length());
+		//if (failOnNoData && ret == SQL_NO_DATA)
+		//{
+		//	SqlResultException ex(L"SQLExecute", ret, boost::str(boost::wformat(L"Did not expect a SQL_NO_DATA while executing the delete-query '%s'") %sqlstmt));
+		//	SET_EXCEPTION_SOURCE(ex);
+		//	throw ex;
+		//}
+		//if ( ! (!failOnNoData && ret == SQL_NO_DATA))
+		//{
+		//	THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
+		//}
 	}
 
 
@@ -968,9 +968,9 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(AF_UPDATE_PK));
-		exASSERT(m_hStmtUpdatePk != SQL_NULL_HSTMT);
-		SQLRETURN ret = SQLExecute(m_hStmtUpdatePk);
-		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
+		//exASSERT(m_hStmtUpdatePk != SQL_NULL_HSTMT);
+		//SQLRETURN ret = SQLExecute(m_hStmtUpdatePk);
+		//THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
 	}
 
 
@@ -1569,26 +1569,26 @@ namespace exodbc
 		catch (const Exception& ex)
 		{
 			// Unbind all Buffers
-			if (boundSelect)
-			{
-				SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
-				WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect, boost::str(boost::wformat(L"Failed to unbind from Select-handle during cleanup of Exception '%s': %s") % ex.ToString()));
-			}
-			if (boundDeletePk)
-			{
-				SQLRETURN ret = SQLFreeStmt(m_hStmtDeletePk, SQL_RESET_PARAMS);
-				WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeletePk, boost::str(boost::wformat(L"Failed to unbind from DeletePk-handle during cleanup of Exception '%s': %s") % ex.ToString()));
-			}
-			if (boundUpdatePk)
-			{
-				SQLRETURN ret = SQLFreeStmt(m_hStmtUpdatePk, SQL_RESET_PARAMS);
-				WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk, boost::str(boost::wformat(L"Failed to unbind from UpdatePk-handle during cleanup of Exception '%s': %s") % ex.ToString()));
-			}
-			if (boundInsert)
-			{
-				SQLRETURN ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
-				WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert, boost::str(boost::wformat(L"Failed to unbind from Insert-handle during cleanup of Exception '%s': %s") % ex.ToString()));
-			}
+			//if (boundSelect)
+			//{
+			//	SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
+			//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect, boost::str(boost::wformat(L"Failed to unbind from Select-handle during cleanup of Exception '%s': %s") % ex.ToString()));
+			//}
+			//if (boundDeletePk)
+			//{
+			//	SQLRETURN ret = SQLFreeStmt(m_hStmtDeletePk, SQL_RESET_PARAMS);
+			//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeletePk, boost::str(boost::wformat(L"Failed to unbind from DeletePk-handle during cleanup of Exception '%s': %s") % ex.ToString()));
+			//}
+			//if (boundUpdatePk)
+			//{
+			//	SQLRETURN ret = SQLFreeStmt(m_hStmtUpdatePk, SQL_RESET_PARAMS);
+			//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk, boost::str(boost::wformat(L"Failed to unbind from UpdatePk-handle during cleanup of Exception '%s': %s") % ex.ToString()));
+			//}
+			//if (boundInsert)
+			//{
+			//	SQLRETURN ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
+			//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert, boost::str(boost::wformat(L"Failed to unbind from Insert-handle during cleanup of Exception '%s': %s") % ex.ToString()));
+			//}
 
 			// delete the ColumnBuffers if we have allocated them during this process (if not manual)
 			if (!m_manualColumns)
@@ -1610,40 +1610,40 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 
-		// Unbind ColumnBuffers
-		SQLRETURN ret = SQL_SUCCESS;
-		if (TestAccessFlag(AF_SELECT))
-		{
-			ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect);
-		}
+		//// Unbind ColumnBuffers
+		//SQLRETURN ret = SQL_SUCCESS;
+		//if (TestAccessFlag(AF_SELECT))
+		//{
+		//	ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
+		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect);
+		//}
 
-		// And column parameters, if we were bound rw
-		if (TestAccessFlag(AF_INSERT))
-		{
-			ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert);
-		}
-		if (TestAccessFlag(AF_DELETE_PK))
-		{
-			ret = SQLFreeStmt(m_hStmtDeletePk, SQL_RESET_PARAMS);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
-		}
-		if (TestAccessFlag(AF_DELETE_WHERE))
-		{
-			ret = SQLFreeStmt(m_hStmtDeleteWhere, SQL_RESET_PARAMS);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
-		}
-		if (TestAccessFlag(AF_UPDATE_PK))
-		{
-			ret = SQLFreeStmt(m_hStmtUpdatePk, SQL_RESET_PARAMS);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
-		}
-		if (TestAccessFlag(AF_UPDATE_WHERE))
-		{
-			ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_RESET_PARAMS);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
-		}
+		//// And column parameters, if we were bound rw
+		//if (TestAccessFlag(AF_INSERT))
+		//{
+		//	ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
+		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert);
+		//}
+		//if (TestAccessFlag(AF_DELETE_PK))
+		//{
+		//	ret = SQLFreeStmt(m_hStmtDeletePk, SQL_RESET_PARAMS);
+		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
+		//}
+		//if (TestAccessFlag(AF_DELETE_WHERE))
+		//{
+		//	ret = SQLFreeStmt(m_hStmtDeleteWhere, SQL_RESET_PARAMS);
+		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
+		//}
+		//if (TestAccessFlag(AF_UPDATE_PK))
+		//{
+		//	ret = SQLFreeStmt(m_hStmtUpdatePk, SQL_RESET_PARAMS);
+		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
+		//}
+		//if (TestAccessFlag(AF_UPDATE_WHERE))
+		//{
+		//	ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_RESET_PARAMS);
+		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
+		//}
 
 		//// Delete ColumnBuffers if they were created automatically
 		//if (!m_manualColumns)
