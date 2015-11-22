@@ -191,8 +191,8 @@ namespace exodbc
 		try
 		{
 			// Allocate a statement handle from the database connection to be used internally and the exec-handle
-			m_pHStmt->Allocate();
-			m_pHStmtExecSql->Allocate();
+			m_pHStmt->AllocateWithParent(m_pHDbc);
+			m_pHStmtExecSql->AllocateWithParent(m_pHDbc);
 
 			// Query the data source for info about itself
 			m_dbInf = ReadDbInfo();
