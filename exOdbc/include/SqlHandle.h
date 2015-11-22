@@ -46,10 +46,8 @@ namespace exodbc
 			, m_pParentHandle(NULL)
 		{};
 
-
 		SqlHandle(const SqlHandle& other) = delete;
 		SqlHandle& operator=(const SqlHandle& other) = delete;
-
 
 		/*!
 		* \brief	If the internal tHandleType is not a SQL_NULL_HANDLE,
@@ -194,7 +192,7 @@ namespace exodbc
 	};
 
 	/** Environment-handle */
-	typedef SqlHandle<SQLHENV, SQL_HANDLE_ENV, SQLHANDLE> SqlEnvHandle;	
+	typedef SqlHandle<SQLHENV, SQL_HANDLE_ENV, SQLHANDLE> SqlEnvHandle;
 	/** Environment-handle SharedPtr */
 	typedef std::shared_ptr<SqlEnvHandle> SqlEnvHandlePtr;
 	/** Environment-handle Const SharedPtr */
@@ -214,6 +212,94 @@ namespace exodbc
 	/** Statement-handle Const SharedPtr */
 	typedef std::shared_ptr<const SqlStmtHandle> ConstSqlStmtHandlePtr;
 
+	// specialize for the Descriptior handle
+	template<>
+	class SqlHandle<SQLHDESC, SQL_HANDLE_DESC, SqlStmtHandle>
+	{
+	public:
+		/*!
+		* \brief	Constructs an SQL_NULL_HANDLE. Call Allocate() later to allocate the handle.
+		* \see		Allocate()
+		*/
+		SqlHandle(ConstSqlStmtHandlePtr pStmt, RowDescriptorType type)
+			: m_handle(SQL_NULL_HDESC)
+			, m_pParentHandle(NULL)
+		{
+			AllocateWithParent(pStmt, type);
+		};
+
+		SqlHandle() = delete;
+		SqlHandle(const SqlHandle& other) = delete;
+		SqlHandle& operator=(const SqlHandle& other) = delete;
+
+		/*!
+		* \brief	Nothing to do on a desc-handle, deleted auto with its parent stmt-handle
+		*/
+		~SqlHandle()
+		{ }
+
+	private:
+		void AllocateWithParent(ConstSqlStmtHandlePtr pStmtHandle, RowDescriptorType type)
+		{
+			exASSERT(pStmtHandle != NULL);
+			exASSERT(pStmtHandle->IsAllocated());
+
+			// Allowed only if not already allocated
+			exASSERT(m_handle == SQL_NULL_HANDLE);
+			exASSERT(m_pParentHandle == NULL);
+
+			SQLRETURN ret = SQLGetStmtAttr(pStmtHandle->GetHandle(), (SQLINTEGER)type, &m_handle, 0, NULL);
+			THROW_IFN_SUCCEEDED(SQLGetStmtAttr, ret, SQL_HANDLE_STMT, pStmtHandle->GetHandle());
+
+			// success, remember parent
+			m_pParentHandle = pStmtHandle;
+		}
+
+	public:
+		/*!
+		* \brief	Get the handle. Throws if IsAllocated() returns false.
+		* \throw	AssertionException If no handle is allocated.
+		*/
+		SQLHDESC GetHandle() const { exASSERT(IsAllocated()); return m_handle; };
+
+		/*!
+		* \brief	Returns true if a handle is allocated.
+		*/
+		bool IsAllocated() const noexcept { return m_handle != SQL_NULL_HDESC; };
+
+
+		/*!
+		* \brief	Returns the type of the Handle.
+		*/
+		SQLSMALLINT GetHandleType() const noexcept { return SQL_HANDLE_DESC; };
+
+		bool operator==(const SqlHandle& other) const noexcept
+		{
+			return GetHandleType() == other.GetHandleType()
+				&& m_handle == other.m_handle;
+		};
+
+		bool operator!=(const SqlHandle& other) const noexcept
+		{
+			return !(*this == other);
+		};
+
+		bool operator<(const SqlHandle& other) const noexcept
+		{
+			return GetHandleType() < other.GetHandleType() && m_handle < other.m_handle;
+		}
+
+	private:
+		SQLHDESC m_handle;
+		ConstSqlStmtHandlePtr m_pParentHandle;
+	};
+
+	/** Descriptor-handle*/
+	typedef SqlHandle<SQLHDESC, SQL_HANDLE_DESC, SqlStmtHandle> SqlDescHandle;
+	/** Descriptor-handle SharedPtr */
+	typedef std::shared_ptr<SqlDescHandle> SqlDescHandlePtr;
+	/** Descriptor-handle Const SharedPtr */
+	typedef std::shared_ptr<const SqlDescHandle> ConstSqlDescHandlePtr;
 
 } // namespace exodbc
 
