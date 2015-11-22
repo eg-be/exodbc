@@ -488,26 +488,6 @@ namespace exodbc
 	}
 
 
-	void CloseStmtHandle(SQLHANDLE hStmt, StmtCloseMode mode)
-	{
-		exASSERT(hStmt);
-
-		SQLRETURN ret;
-		if (mode == StmtCloseMode::IgnoreNotOpen)
-		{
-			//  calling SQLFreeStmt with the SQL_CLOSE option has no effect on the application if no cursor is open on the statement
-			ret = SQLFreeStmt(hStmt, SQL_CLOSE);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, hStmt);
-		}
-		else
-		{
-			// SQLCloseCursor returns SQLSTATE 24000 (Invalid cursor state) if no cursor is open. 
-			ret = SQLCloseCursor(hStmt);
-			THROW_IFN_SUCCEEDED(SQLCloseCursor, ret, SQL_HANDLE_STMT, hStmt);
-		}
-	}
-
-
 	void GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, std::wstring& sValue)
 	{
 		// Determine buffer length
@@ -773,32 +753,6 @@ namespace exodbc
 		}
 		// SQL_SUCCESS
 		return SQL_NULL_HSTMT;
-	}
-
-
-	StatementCloser::StatementCloser(SQLHSTMT hStmt, bool closeOnConstruction /* = false */, bool closeOnDestruction /* = true */)
-		: m_hStmt(hStmt)
-		, m_closeOnDestruction(closeOnDestruction)
-	{
-		if (closeOnDestruction)
-		{
-			CloseStmtHandle(m_hStmt, StmtCloseMode::IgnoreNotOpen);
-		}
-	}
-
-
-	StatementCloser::~StatementCloser()
-	{
-		try
-		{
-			CloseStmtHandle(m_hStmt, StmtCloseMode::IgnoreNotOpen);
-		}
-		catch (Exception& ex)
-		{
-			// Should never happen?
-			// \todo Ticket #100
-			LOG_ERROR(ex.ToString());
-		}		
 	}
 }
 
