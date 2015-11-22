@@ -154,6 +154,10 @@ namespace exodbc
 			//}
 
 			FreeStatements();
+			
+			// Notify the columnBuffers that we have just freed all statements
+
+
 			//exASSERT(m_columnBuffers.size() == 0);
 		}
 		catch (Exception& ex)

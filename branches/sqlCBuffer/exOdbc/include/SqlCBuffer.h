@@ -145,13 +145,13 @@ namespace exodbc
 				ColumnBoundHandle bindInfo = *it;
 				try
 				{
-					UnbindSelect(bindInfo.m_columnNr, bindInfo.m_hStmt);
+					it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_hStmt);
 				}
 				catch (const Exception& ex)
 				{
 					LOG_ERROR(boost::str(boost::wformat(L"Failed to unbind column %d from handle %d: %s") % bindInfo.m_columnNr %bindInfo.m_hStmt %ex.ToString()));
+					++it;
 				}
-				it = m_boundSelects.erase(it);
 			}
 		};
 
@@ -175,7 +175,7 @@ namespace exodbc
 			m_boundSelects.insert(boundHandleInfo);
 		};
 
-		void UnbindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+		std::set<ColumnBoundHandle>::iterator UnbindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
 		{
 			exASSERT(columnNr >= 1);
 			exASSERT(hStmt != SQL_NULL_HSTMT);
@@ -184,9 +184,10 @@ namespace exodbc
 			exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
 			
 			// \todo: have access violation from here. why? from ClearIntTypesTmpTable, from Table Destructor.
+			// because we first free the statement in the Table and then unbind from here.
 			SQLRETURN ret = SQLBindCol(hStmt, columnNr, sqlCType, NULL, 0, NULL); 
 			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, hStmt);
-			m_boundSelects.erase(it);
+			return m_boundSelects.erase(it);
 		}
 
 	private:
@@ -215,7 +216,7 @@ namespace exodbc
 	}
 
 	template<>
-	void SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::UnbindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+	std::set<ColumnBoundHandle>::iterator SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::UnbindSelect(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
 	{
 		exASSERT(columnNr >= 1);
 		exASSERT(hStmt != SQL_NULL_HSTMT);
@@ -228,7 +229,7 @@ namespace exodbc
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)NULL);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)NULL);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)NULL);
-		m_boundSelects.erase(it);
+		return m_boundSelects.erase(it);
 	}
 
 	// Integer types
