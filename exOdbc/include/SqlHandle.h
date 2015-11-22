@@ -48,7 +48,7 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Constructs an handle of typename THANDLE, using SqlHandle as parent handle,
+		* \brief	Constructs an handle of typename THANDLE, using pParentHandle as parent handle,
 		*			by calling Allocate.
 		* \see		Allocate()
 		* \throw	Exception
@@ -85,10 +85,11 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Allocates a handle of type tHandleType, using PHANDLE as parent handle.
+		* \brief	Allocates a handle of type tHandleType, using pParentHandle as parent.
 		*			The allocated tHandleType is stored internally ("the handle") for later use.
 		*			If the tHandleType of this is SQL_HANDLE_ENV, parentHandle must be a
-		*			SQL_NULL_HANDLE.
+		*			NULL pointer.
+		*			If this function succeeds, IsAllocated() returns true afterwards.
 		* \see		Allocate()
 		* \throw	AssertionException If this has already an allocated handle
 		* \throw	SqlResultException If allocating fails.
@@ -125,7 +126,8 @@ namespace exodbc
 		
 		/*!
 		* \brief	Frees the internal tHandleType. Sets the internal handle to
-		*			SQL_NULL_HANDLE upon success.
+		*			SQL_NULL_HANDLE upon success, and resets the interanl 
+		*			shared_ptr to the parent handle.
 		* \throw	AssertionException If no handle is allocated.
 		* \throw	SqlResultException If freeing fails.
 		*/
