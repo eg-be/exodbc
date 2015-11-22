@@ -48,7 +48,7 @@ namespace exodbc
 		void SetScriptDirectory(const boost::filesystem::wpath& path);
 		boost::filesystem::wpath GetScriptDirectory() const;
 
-		DatabaseProduct GetDbms() const { return m_db.GetDbms(); };
+		DatabaseProduct GetDbms() const { return m_pDb->GetDbms(); };
 
 	private:
 
@@ -61,8 +61,8 @@ namespace exodbc
 		boost::filesystem::wpath m_scriptDirectoryPath;
 
 		TestParams m_odbcInfo;
-		Environment m_env;
-		Database m_db;
+		EnvironmentPtr m_pEnv;
+		DatabasePtr m_pDb;
 	};
 
 } // namespace exodbc

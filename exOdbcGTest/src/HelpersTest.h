@@ -47,8 +47,8 @@ namespace exodbc
 
 		TestParams m_odbcInfo;
 
-		Environment m_env;
-		Database m_db;
+		EnvironmentPtr m_pEnv;
+		DatabasePtr m_pDb;
 	};
 
 	class StaticHelpersTest : public ::testing::Test {

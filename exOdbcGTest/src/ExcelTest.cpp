@@ -42,7 +42,7 @@ namespace exodbc
 		m_odbcInfo = g_odbcInfo;
 
 		// Set up is called for every test
-		ASSERT_NO_THROW(m_env.Init(OdbcVersion::V_3));
+		ASSERT_NO_THROW(m_pEnv->Init(OdbcVersion::V_3));
 	}
 
 
@@ -55,7 +55,7 @@ namespace exodbc
 	TEST_F(ExcelTest, OpenDatabase)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.Init(&m_env));
+		ASSERT_NO_THROW(db.Init(m_pEnv));
 		// We cannot set Commit-mode on excel
 		if (m_odbcInfo.HasConnectionString())
 		{
@@ -71,7 +71,7 @@ namespace exodbc
 	TEST_F(ExcelTest, FindTables)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.Init(&m_env));
+		ASSERT_NO_THROW(db.Init(m_pEnv));
 		if (m_odbcInfo.HasConnectionString())
 		{
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
@@ -99,7 +99,7 @@ namespace exodbc
 	TEST_F(ExcelTest, OpenAutoTableAsWChar)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.Init(&m_env));
+		ASSERT_NO_THROW(db.Init(m_pEnv));
 		if (m_odbcInfo.HasConnectionString())
 		{
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
@@ -120,7 +120,7 @@ namespace exodbc
 	{
 		// See Ticket #111 - this is fixed and no workarounds are needed
 		Database db;
-		ASSERT_NO_THROW(db.Init(&m_env));
+		ASSERT_NO_THROW(db.Init(m_pEnv));
 		if (m_odbcInfo.HasConnectionString())
 		{
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
@@ -174,7 +174,7 @@ namespace exodbc
 	TEST_F(ExcelTest, SelectManualWCharValues)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.Init(&m_env));
+		ASSERT_NO_THROW(db.Init(m_pEnv));
 		if (m_odbcInfo.HasConnectionString())
 		{
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
@@ -227,7 +227,7 @@ namespace exodbc
 	TEST_F(ExcelTest, SelectAutoWCharValues)
 	{
 		Database db;
-		ASSERT_NO_THROW(db.Init(&m_env));
+		ASSERT_NO_THROW(db.Init(m_pEnv));
 		if (m_odbcInfo.HasConnectionString())
 		{
 			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));

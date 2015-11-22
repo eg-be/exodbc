@@ -42,8 +42,8 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 
-		exodbc::Environment m_env;
-		exodbc::Database	m_db;
+		EnvironmentPtr m_pEnv;
+		DatabasePtr	m_pDb;
 		TestParams m_odbcInfo;
 	};
 } // namespace exodbc

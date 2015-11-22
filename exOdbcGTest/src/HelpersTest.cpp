@@ -42,16 +42,16 @@ namespace exodbc
 		// Set up is called for every test
 		m_odbcInfo = g_odbcInfo;
 
-		ASSERT_NO_THROW(m_env.Init(OdbcVersion::V_3));
+		ASSERT_NO_THROW(m_pEnv->Init(OdbcVersion::V_3));
 
-		ASSERT_NO_THROW(m_db.Init(&m_env));
+		ASSERT_NO_THROW(m_pDb->Init(m_pEnv));
 		if (m_odbcInfo.HasConnectionString())
 		{
-			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_connectionString));
+			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_connectionString));
 		}
 		else
 		{
-			ASSERT_NO_THROW(m_db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
 		}
 	}
 
@@ -61,109 +61,67 @@ namespace exodbc
 	}
 
 
-	TEST_F(ParamHelpersTest, AllocateStatementHandle)
-	{
-		// We expect failure if we pass an invalid handle
-		SQLHDBC hNull = SQL_NULL_HDBC;
-		{
-			DontDebugBreak ddb;
-			LogLevelFatal llf;
-			EXPECT_THROW(AllocateStatementHandle(hNull), AssertionException);
-		}
+	//TEST_F(ParamHelpersTest, CloseStmtHandle)
+	//{
+	//	SQLHSTMT hNull = SQL_NULL_HSTMT;
+	//	{
+	//		// We assert if we pass a null handle
+	//		DontDebugBreak ddb;
+	//		LogLevelFatal llf;
+	//		EXPECT_THROW(CloseStmtHandle(hNull, StmtCloseMode::IgnoreNotOpen), AssertionException);
+	//	}
 
-		// But success on a valid handle
-		ASSERT_TRUE(m_db.HasConnectionHandle());
-		SQLHSTMT hStmt = SQL_NULL_HSTMT;
-		EXPECT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+	//	// Allocate a valid statement handle
+	//	SQLHSTMT hStmt = SQL_NULL_HSTMT;
+	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
 
-		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
-	}
+	//	// This is not open yet, we shall fail to free it
+	//	{
+	//		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+	//		{
+	//			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
+	//		}
+	//		DontDebugBreak ddb;
+	//		LogLevelFatal llf;
+	//		EXPECT_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen), SqlResultException);
+	//	}
+	//	// But not if we ignore the cursor-state
+	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
 
+	//	// Open statement by doing some operation on it
+	//	std::wstring sqlstmt;
+	//	if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+	//	{
+	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+	//	}
+	//	else
+	//	{
+	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+	//	}
+	//	// convert schema name to upper if needed
+	//	if (m_odbcInfo.m_namesCase == test::Case::UPPER)
+	//	{
+	//		boost::algorithm::to_upper(sqlstmt);
+	//	}
 
-	TEST_F(ParamHelpersTest, FreeStatementHandle)
-	{
-		// We expect failure if we pass an invalid handle and have the flag INVALID set
-		SQLHSTMT hNull = SQL_NULL_HSTMT;
-		{
-			DontDebugBreak ddb;
-			LogLevelFatal llf;
-			EXPECT_THROW(FreeStatementHandle(hNull, FSTF_THROW_ON_SQL_INVALID_HANDLE), SqlResultException);
-		}
+	//	SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*) sqlstmt.c_str(), SQL_NTS);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
-		// But not if we pass only the error flag or the no-throw flag
-		EXPECT_NO_THROW(FreeStatementHandle(hNull, FSTF_THROW_ON_SQL_ERROR));
-		EXPECT_NO_THROW(FreeStatementHandle(hNull, FSTF_NO_THROW));
+	//	// Closing it first time must work
+	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen));
 
-		// Now take a valid handle, this should not throw
-		ASSERT_TRUE(m_db.HasConnectionHandle());
-		SQLHSTMT hStmt = SQL_NULL_HSTMT;
-		EXPECT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+	//	// Closing it a second time must fail
+	//	if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
+	//	{
+	//		LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
+	//	}
+	//	DontDebugBreak ddb;
+	//	LogLevelFatal llf;
+	//	EXPECT_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen), SqlResultException);
 
-		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
-	}
-
-
-	TEST_F(ParamHelpersTest, CloseStmtHandle)
-	{
-		SQLHSTMT hNull = SQL_NULL_HSTMT;
-		{
-			// We assert if we pass a null handle
-			DontDebugBreak ddb;
-			LogLevelFatal llf;
-			EXPECT_THROW(CloseStmtHandle(hNull, StmtCloseMode::IgnoreNotOpen), AssertionException);
-		}
-
-		// Allocate a valid statement handle
-		SQLHSTMT hStmt = SQL_NULL_HSTMT;
-		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
-
-		// This is not open yet, we shall fail to free it
-		{
-			if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
-			{
-				LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
-			}
-			DontDebugBreak ddb;
-			LogLevelFatal llf;
-			EXPECT_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen), SqlResultException);
-		}
-		// But not if we ignore the cursor-state
-		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
-
-		// Open statement by doing some operation on it
-		std::wstring sqlstmt;
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
-		}
-		else
-		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
-		}
-		// convert schema name to upper if needed
-		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
-		{
-			boost::algorithm::to_upper(sqlstmt);
-		}
-
-		SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*) sqlstmt.c_str(), SQL_NTS);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
-
-		// Closing it first time must work
-		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen));
-
-		// Closing it a second time must fail
-		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
-		{
-			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
-		}
-		DontDebugBreak ddb;
-		LogLevelFatal llf;
-		EXPECT_THROW(CloseStmtHandle(hStmt, StmtCloseMode::ThrowIfNotOpen), SqlResultException);
-
-		// Close the statement
-		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
-	}
+	//	// Close the statement
+	//	EXPECT_NO_THROW(FreeStatementHandle(hStmt));
+	//}
 
 
 	TEST_F(ParamHelpersTest, GetInfo)
@@ -171,187 +129,187 @@ namespace exodbc
 		// Simply test reading a string and an int value works - that means, does return some data
 		std::wstring serverName;
 
-		ASSERT_TRUE(m_db.HasConnectionHandle());
-		GetInfo(m_db.GetConnectionHandle(), SQL_SERVER_NAME, serverName);
+		ASSERT_TRUE(m_pDb->HasConnectionHandle());
+		GetInfo(m_pDb->GetConnectionHandle()->GetHandle(), SQL_SERVER_NAME, serverName);
 		EXPECT_FALSE(serverName.empty());
 
 		// and read some int value
 		// okay, it would be bad luck if one driver reports 1313
 		SQLUSMALLINT maxStmts = 1313;
 		SWORD cb = 0;
-		GetInfo(m_db.GetConnectionHandle(), SQL_MAX_CONCURRENT_ACTIVITIES, &maxStmts, sizeof(maxStmts), &cb);
+		GetInfo(m_pDb->GetConnectionHandle()->GetHandle(), SQL_MAX_CONCURRENT_ACTIVITIES, &maxStmts, sizeof(maxStmts), &cb);
 		EXPECT_NE(1313, maxStmts);
 		EXPECT_NE(0, cb);
 	}
 
 
-	TEST_F(ParamHelpersTest, GetData)
-	{
-		// Test by reading some char value
+	//TEST_F(ParamHelpersTest, GetData)
+	//{
+	//	// Test by reading some char value
 
-		// Allocate a valid statement handle
-		SQLHSTMT hStmt = SQL_NULL_HSTMT;
-		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+	//	// Allocate a valid statement handle
+	//	SQLHSTMT hStmt = SQL_NULL_HSTMT;
+	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
 
-		// Open statement by doing some operation on it
-		std::wstring sqlstmt;
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
-		}
-		else
-		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
-		}
-		// convert schema name to upper if needed
-		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
-		{
-			boost::algorithm::to_upper(sqlstmt);
-		}
-		SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));		
-		ret = SQLFetch(hStmt);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+	//	// Open statement by doing some operation on it
+	//	std::wstring sqlstmt;
+	//	if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+	//	{
+	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+	//	}
+	//	else
+	//	{
+	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+	//	}
+	//	// convert schema name to upper if needed
+	//	if (m_odbcInfo.m_namesCase == test::Case::UPPER)
+	//	{
+	//		boost::algorithm::to_upper(sqlstmt);
+	//	}
+	//	SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));		
+	//	ret = SQLFetch(hStmt);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
-		// Read some non-null string-data with enough chars
-		bool isNull = false;
-		std::wstring value;
-		EXPECT_NO_THROW(GetData(hStmt, 2, 20, value, &isNull));
-		EXPECT_FALSE(isNull);
-		EXPECT_EQ(L"הצüאיט", value);
-		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+	//	// Read some non-null string-data with enough chars
+	//	bool isNull = false;
+	//	std::wstring value;
+	//	EXPECT_NO_THROW(GetData(hStmt, 2, 20, value, &isNull));
+	//	EXPECT_FALSE(isNull);
+	//	EXPECT_EQ(L"הצüאיט", value);
+	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
 
-		// Trim the read-value in GetData
-		ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
-		ret = SQLFetch(hStmt);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+	//	// Trim the read-value in GetData
+	//	ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
+	//	ret = SQLFetch(hStmt);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
-		{
-			// note that this will info about data truncation
-			LogLevelWarning llw;
-			EXPECT_NO_THROW(GetData(hStmt, 2, 3, value, &isNull));
-		}
-		EXPECT_EQ(L"הצü", value);
-		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+	//	{
+	//		// note that this will info about data truncation
+	//		LogLevelWarning llw;
+	//		EXPECT_NO_THROW(GetData(hStmt, 2, 3, value, &isNull));
+	//	}
+	//	EXPECT_EQ(L"הצü", value);
+	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
 
-		// Read some int value
-		ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
-		ret = SQLFetch(hStmt);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
-		SQLINTEGER id = 0;
-		SQLLEN ind = 0;
-		EXPECT_NO_THROW(GetData(hStmt, 1, SQL_C_SLONG, &id, NULL, &ind, &isNull));
-		EXPECT_EQ(3, id);
-		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+	//	// Read some int value
+	//	ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
+	//	ret = SQLFetch(hStmt);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
+	//	SQLINTEGER id = 0;
+	//	SQLLEN ind = 0;
+	//	EXPECT_NO_THROW(GetData(hStmt, 1, SQL_C_SLONG, &id, NULL, &ind, &isNull));
+	//	EXPECT_EQ(3, id);
+	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
 
-		// And test at least one null value
-		ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
-		ret = SQLFetch(hStmt);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
-		value = L"";
-		EXPECT_NO_THROW(GetData(hStmt, 3, 20, value, &isNull));
-		EXPECT_TRUE(isNull);
-		EXPECT_EQ(L"", value);
-		
-		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
-		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
+	//	// And test at least one null value
+	//	ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
+	//	ret = SQLFetch(hStmt);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
+	//	value = L"";
+	//	EXPECT_NO_THROW(GetData(hStmt, 3, 20, value, &isNull));
+	//	EXPECT_TRUE(isNull);
+	//	EXPECT_EQ(L"", value);
+	//	
+	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+	//	EXPECT_NO_THROW(FreeStatementHandle(hStmt));
 
-	}
-
-
-	TEST_F(ParamHelpersTest, GetRowDescriptorHandle)
-	{
-		// Open a statement, to test getting the row-descriptor
-		SQLHSTMT hStmt = SQL_NULL_HSTMT;
-		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
-
-		// Open statement by doing some operation on it
-		std::wstring sqlstmt;
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
-		}
-		else
-		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
-		}
-		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
-		{
-			boost::algorithm::to_upper(sqlstmt);
-		}
-		SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
-
-		// Test getting descriptor-handle
-		SQLHDESC hDesc = SQL_NULL_HDESC;
-		// We shall fail if we pass an invalid handle
-		{
-			LogLevelFatal llf;
-			DontDebugBreak ddb;
-			EXPECT_THROW(GetRowDescriptorHandle(SQL_NULL_HSTMT, RowDescriptorType::ROW), AssertionException);
-		}
-
-		// but not by passing the valid statement
-		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW));
-		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM));
-
-		// Close things
-		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
-		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
-	}
+	//}
 
 
-	TEST_F(ParamHelpersTest, SetDescriptionField)
-	{
-		// Test by setting the description of a numeric column
+	//TEST_F(ParamHelpersTest, GetRowDescriptorHandle)
+	//{
+	//	// Open a statement, to test getting the row-descriptor
+	//	SQLHSTMT hStmt = SQL_NULL_HSTMT;
+	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
 
-		// Open a statement,
-		SQLHSTMT hStmt = SQL_NULL_HSTMT;
-		ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+	//	// Open statement by doing some operation on it
+	//	std::wstring sqlstmt;
+	//	if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+	//	{
+	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+	//	}
+	//	else
+	//	{
+	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+	//	}
+	//	if (m_odbcInfo.m_namesCase == test::Case::UPPER)
+	//	{
+	//		boost::algorithm::to_upper(sqlstmt);
+	//	}
+	//	SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
-		// Open statement by doing some operation on it
-		std::wstring sqlstmt;
-		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
-		}
-		else
-		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
-		}
-		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
-		{
-			boost::algorithm::to_upper(sqlstmt);
-		}
-		SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+	//	// Test getting descriptor-handle
+	//	SQLHDESC hDesc = SQL_NULL_HDESC;
+	//	// We shall fail if we pass an invalid handle
+	//	{
+	//		LogLevelFatal llf;
+	//		DontDebugBreak ddb;
+	//		EXPECT_THROW(GetRowDescriptorHandle(SQL_NULL_HSTMT, RowDescriptorType::ROW), AssertionException);
+	//	}
 
-		// Except to fail when passing a null handle
-		{
-			LogLevelFatal llf;
-			DontDebugBreak ddb;
-			EXPECT_THROW(SetDescriptionField(SQL_NULL_HSTMT, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC), AssertionException);
-		}
+	//	// but not by passing the valid statement
+	//	EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW));
+	//	EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM));
 
-		SQLHANDLE hDesc = SQL_NULL_HDESC;
-		EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM));
+	//	// Close things
+	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+	//	EXPECT_NO_THROW(FreeStatementHandle(hStmt));
+	//}
 
-		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
-		{
-			SQL_NUMERIC_STRUCT num;
-			EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC));
-			EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_PRECISION, (SQLPOINTER)18));
-			EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_SCALE, (SQLPOINTER)10));
-			EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_DATA_PTR, (SQLPOINTER)&num));
-		}
 
-		// Close things
-		EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
-		EXPECT_NO_THROW(FreeStatementHandle(hStmt));
-	}
+	//TEST_F(ParamHelpersTest, SetDescriptionField)
+	//{
+	//	// Test by setting the description of a numeric column
+
+	//	// Open a statement,
+	//	SQLHSTMT hStmt = SQL_NULL_HSTMT;
+	//	ASSERT_NO_THROW(hStmt = AllocateStatementHandle(m_db.GetConnectionHandle()));
+
+	//	// Open statement by doing some operation on it
+	//	std::wstring sqlstmt;
+	//	if (m_db.GetDbms() == DatabaseProduct::ACCESS)
+	//	{
+	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+	//	}
+	//	else
+	//	{
+	//		sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, m_odbcInfo.m_namesCase));
+	//	}
+	//	if (m_odbcInfo.m_namesCase == test::Case::UPPER)
+	//	{
+	//		boost::algorithm::to_upper(sqlstmt);
+	//	}
+	//	SQLRETURN ret = SQLExecDirect(hStmt, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+	//	EXPECT_TRUE(SQL_SUCCEEDED(ret));
+
+	//	// Except to fail when passing a null handle
+	//	{
+	//		LogLevelFatal llf;
+	//		DontDebugBreak ddb;
+	//		EXPECT_THROW(SetDescriptionField(SQL_NULL_HSTMT, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC), AssertionException);
+	//	}
+
+	//	SQLHANDLE hDesc = SQL_NULL_HDESC;
+	//	EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM));
+
+	//	if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+	//	{
+	//		SQL_NUMERIC_STRUCT num;
+	//		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC));
+	//		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_PRECISION, (SQLPOINTER)18));
+	//		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_SCALE, (SQLPOINTER)10));
+	//		EXPECT_NO_THROW(SetDescriptionField(hDesc, 3, SQL_DESC_DATA_PTR, (SQLPOINTER)&num));
+	//	}
+
+	//	// Close things
+	//	EXPECT_NO_THROW(CloseStmtHandle(hStmt, StmtCloseMode::IgnoreNotOpen));
+	//	EXPECT_NO_THROW(FreeStatementHandle(hStmt));
+	//}
 
 
 	// HelpersTest
