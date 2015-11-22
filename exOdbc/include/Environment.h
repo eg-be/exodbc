@@ -14,6 +14,7 @@
 #include "exOdbc.h"
 #include "Helpers.h"
 #include "InfoObject.h"
+#include "SqlHandle.h"
 
 // Other headers
 // System headers
@@ -103,14 +104,14 @@ namespace exodbc
 		 * \details	The environment handle is allocated if the object was created using one
 		 *			of the non default constructors, or Init() has been called.
 		 */
-		bool			HasEnvironmentHandle() const	{ return m_henv != SQL_NULL_HENV; };
+		bool			HasEnvironmentHandle() const { exASSERT(m_pHenv); return m_pHenv->IsAllocated(); };
 
 
 		/*!
 		* \brief	Returns the Environment handle.
 		* \throw	Exception if no Henv is allocated.
 		*/
-		SQLHENV			GetEnvironmentHandle() const		{ exASSERT(HasEnvironmentHandle());  return m_henv; };
+		ConstSqlEnvHandlePtr	GetEnvironmentHandle() const { exASSERT(HasEnvironmentHandle()); return m_pHenv; };
 
 		
 		/*!
@@ -176,7 +177,8 @@ namespace exodbc
 
 		// Members
 		// -------
-		SQLHENV m_henv;	///< Environment handle
+		SqlEnvHandlePtr m_pHenv;
+		//SQLHENV m_henv;	///< Environment handle
 		mutable OdbcVersion m_odbcVersion; ///< Cached ODBC version
 
 	};  // class Environment
