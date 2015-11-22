@@ -30,14 +30,14 @@ namespace exodbc
 	// ------------
 	
 	Environment::Environment()
-		: m_pHenv(std::make_shared<SqlEnvHandle>())
+		: m_pHEnv(std::make_shared<SqlEnvHandle>())
 		, m_odbcVersion(OdbcVersion::UNKNOWN)
 	{
 	}
 	
 	
 	Environment::Environment(OdbcVersion odbcVersion)
-		: m_pHenv(std::make_shared<SqlEnvHandle>())
+		: m_pHEnv(std::make_shared<SqlEnvHandle>())
 		, m_odbcVersion(OdbcVersion::UNKNOWN)
 	{
 		// Note: Init will call SetOdbcVersion, this will read
@@ -48,7 +48,7 @@ namespace exodbc
 
 
 	Environment::Environment(const Environment& other)
-		: m_pHenv(std::make_shared<SqlEnvHandle>())
+		: m_pHEnv(std::make_shared<SqlEnvHandle>())
 		, m_odbcVersion(OdbcVersion::UNKNOWN)
 	{
 		OdbcVersion odbcVersion = other.GetOdbcVersion();
@@ -72,10 +72,10 @@ namespace exodbc
 	void Environment::Init(OdbcVersion odbcVersion)
 	{
 		exASSERT(odbcVersion != OdbcVersion::UNKNOWN);
-		exASSERT(!m_pHenv->IsAllocated());
+		exASSERT(!m_pHEnv->IsAllocated());
 
 		//AllocateEnvironmentHandle();
-		m_pHenv->Allocate(NULL);
+		m_pHEnv->Allocate();
 		SetOdbcVersion(odbcVersion);
 	}
 
@@ -137,19 +137,19 @@ namespace exodbc
 		switch(version)
 		{
 		case OdbcVersion::V_2:
-			ret = SQLSetEnvAttr(m_pHenv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC2, NULL);
+			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC2, NULL);
 			break;
 		case OdbcVersion::V_3:
-			ret = SQLSetEnvAttr(m_pHenv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
+			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
 			break;
 		case OdbcVersion::V_3_8:
-			ret = SQLSetEnvAttr(m_pHenv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
+			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
 			break;
 		default:
 			THROW_WITH_SOURCE(IllegalArgumentException, (boost::wformat(L"Unknown ODBC Version value: %d") % (int) version).str());
 		}
 
-		THROW_IFN_SUCCEEDED_MSG(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_pHenv->GetHandle(), (boost::wformat(L"Failed to set SQL_ATTR_ODBC_VERSION to value %d") % (int) version).str());
+		THROW_IFN_SUCCEEDED_MSG(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle(), (boost::wformat(L"Failed to set SQL_ATTR_ODBC_VERSION to value %d") % (int) version).str());
 
 		ReadOdbcVersion();
 	}
@@ -160,9 +160,9 @@ namespace exodbc
 		exASSERT(HasEnvironmentHandle());
 
 		unsigned long value = 0;
-		SQLRETURN ret = SQLGetEnvAttr(m_pHenv->GetHandle(), SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
+		SQLRETURN ret = SQLGetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
 
-		THROW_IFN_SUCCEEDED_MSG(SQLGetEnvAttr, ret, SQL_HANDLE_ENV, m_pHenv->GetHandle(), L"Failed to read SQL_ATTR_ODBC_VERSION");
+		THROW_IFN_SUCCEEDED_MSG(SQLGetEnvAttr, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle(), L"Failed to read SQL_ATTR_ODBC_VERSION");
 
 		switch(value)
 		{
@@ -189,7 +189,7 @@ namespace exodbc
 
 	OdbcVersion Environment::GetOdbcVersion() const
 	{
-		if (m_odbcVersion == OdbcVersion::UNKNOWN && m_pHenv && m_pHenv->IsAllocated())
+		if (m_odbcVersion == OdbcVersion::UNKNOWN && m_pHEnv && m_pHEnv->IsAllocated())
 		{
 			ReadOdbcVersion();
 		}
@@ -199,8 +199,8 @@ namespace exodbc
 
 	DataSourcesVector Environment::ListDataSources(ListMode mode) const
 	{
-		exASSERT(m_pHenv);
-		exASSERT(m_pHenv->IsAllocated());
+		exASSERT(m_pHEnv);
+		exASSERT(m_pHEnv->IsAllocated());
 
 		SQLSMALLINT nameBufferLength, descBufferLength = 0;
 		SQLWCHAR nameBuffer[SQL_MAX_DSN_LENGTH + 1];
@@ -221,13 +221,13 @@ namespace exodbc
 		// Like that we might miss some parts of the descriptions.. 
 		SQLSMALLINT maxDescLength = 0;
 		SQLRETURN ret = SQL_NO_DATA;
-		ret = SQLDataSources(m_pHenv->GetHandle(), direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
+		ret = SQLDataSources(m_pHEnv->GetHandle(), direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
 		if(ret == SQL_NO_DATA)
 		{
 			// no data at all, but succeeded, else we would have an err-state
 			return dataSources;
 		}
-		THROW_IFN_SUCCEEDED(SQLDataSources, ret, SQL_HANDLE_ENV, m_pHenv->GetHandle());
+		THROW_IFN_SUCCEEDED(SQLDataSources, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle());
 
 		do
 		{
@@ -237,13 +237,13 @@ namespace exodbc
 				maxDescLength = descBufferLength;
 			}
 			// Go on fetching lengths of descriptions
-			ret = SQLDataSources(m_pHenv->GetHandle(), SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
+			ret = SQLDataSources(m_pHEnv->GetHandle(), SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
 		}while(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
 		THROW_IFN_NO_DATA(SQLDataSources, ret);
 
 		// Now fetch with description
 		std::unique_ptr<SQLWCHAR[]> descBuffer(new SQLWCHAR[maxDescLength + 1]);
-		ret = SQLDataSources(m_pHenv->GetHandle(), direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
+		ret = SQLDataSources(m_pHEnv->GetHandle(), direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
 		if(ret == SQL_NO_DATA)
 		{
 			SqlResultException ex(L"SQLDataSources", ret, L"SQL_NO_DATA is not expected to happen here - we've found records in the previous round, they can't be gone now!");
@@ -257,7 +257,7 @@ namespace exodbc
 			ds.m_dsn = nameBuffer;
 			ds.m_description = descBuffer.get();
 			dataSources.push_back(ds);
-			ret = SQLDataSources(m_pHenv->GetHandle(), SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
+			ret = SQLDataSources(m_pHEnv->GetHandle(), SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
 		}while(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
 
 		THROW_IFN_NO_DATA(SQLDataSources, ret);

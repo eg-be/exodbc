@@ -104,14 +104,14 @@ namespace exodbc
 		 * \details	The environment handle is allocated if the object was created using one
 		 *			of the non default constructors, or Init() has been called.
 		 */
-		bool			HasEnvironmentHandle() const { exASSERT(m_pHenv); return m_pHenv->IsAllocated(); };
+		bool			HasEnvironmentHandle() const { exASSERT(m_pHEnv); return m_pHEnv->IsAllocated(); };
 
 
 		/*!
 		* \brief	Returns the Environment handle.
 		* \throw	Exception if no Henv is allocated.
 		*/
-		ConstSqlEnvHandlePtr	GetEnvironmentHandle() const { exASSERT(HasEnvironmentHandle()); return m_pHenv; };
+		ConstSqlEnvHandlePtr	GetEnvironmentHandle() const { exASSERT(HasEnvironmentHandle()); return m_pHEnv; };
 
 		
 		/*!
@@ -165,7 +165,7 @@ namespace exodbc
 		* 			Cannot be called if a Henv is allocated.
 		*	\throw	Exception If Henv is already allocated or Allocating fails.
 		*/
-		void			AllocateEnvironmentHandle();
+		//void			AllocateEnvironmentHandle();
 
 
 		/*!
@@ -173,15 +173,18 @@ namespace exodbc
 		* 			Can only be called if a Henv is allocated.
 		* \throw	Exception if no Henv is allocated
 		*/
-		void			FreeEnvironmentHandle();
+		//void			FreeEnvironmentHandle();
 
 		// Members
 		// -------
-		SqlEnvHandlePtr m_pHenv;
+		SqlEnvHandlePtr m_pHEnv;
 		//SQLHENV m_henv;	///< Environment handle
 		mutable OdbcVersion m_odbcVersion; ///< Cached ODBC version
 
 	};  // class Environment
+
+	typedef std::shared_ptr<Environment> EnvironmentPtr;
+	typedef std::shared_ptr<const Environment> ConstEnvironmentPtr;
 }
 
 

@@ -73,6 +73,9 @@
     <ClInclude Include="include\SqlHandle.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\SqlStatementCloser.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -115,6 +118,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\SqlCBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SqlStatementCloser.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

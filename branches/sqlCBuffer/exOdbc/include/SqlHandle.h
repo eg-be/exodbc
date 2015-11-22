@@ -33,7 +33,7 @@ namespace exodbc
 	*
 	* \brief A wrapper around a SQLHANDLE. Handle gets freed on destruction.
 	*/
-	template<typename THANDLE, SQLSMALLINT tHandleType>
+	template<typename THANDLE, SQLSMALLINT tHandleType, typename TPARENTSQLHANDLE>
 	class SqlHandle
 	{
 	public:
@@ -46,19 +46,6 @@ namespace exodbc
 			, m_pParentHandle(NULL)
 		{};
 
-
-		/*!
-		* \brief	Constructs an handle of typename THANDLE, using pParentHandle as parent handle,
-		*			by calling Allocate.
-		* \see		Allocate()
-		* \throw	Exception
-		*/
-		SqlHandle(std::shared_ptr<const SqlHandle> pParentHandle)
-			: m_handle(SQL_NULL_HANDLE)
-			, m_pParentHandle(NULL)
-		{
-			Allocate(pParentHandle);
-		};
 
 		SqlHandle(const SqlHandle& other) = delete;
 		SqlHandle& operator=(const SqlHandle& other) = delete;
@@ -83,6 +70,23 @@ namespace exodbc
 			}
 		}
 
+		void Allocate()
+		{
+			// Allowed only if not already allocated
+			exASSERT(m_handle == SQL_NULL_HANDLE);
+			exASSERT(m_pParentHandle == NULL);
+
+			// This shall only be allowed for the environment handle so far. All others have a parent
+			exASSERT(tHandleType == SQL_HANDLE_ENV);
+			SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_handle);
+			if (!SQL_SUCCEEDED(ret))
+			{
+				SqlResultException ex(L"SQLAllocHandle", ret, L"Failed to allocated ODBC-Env Handle, no additional error information is available.");
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
+			}
+		}
+
 
 		/*!
 		* \brief	Allocates a handle of type tHandleType, using pParentHandle as parent.
@@ -94,33 +98,21 @@ namespace exodbc
 		* \throw	AssertionException If this has already an allocated handle
 		* \throw	SqlResultException If allocating fails.
 		*/
-		void Allocate(std::shared_ptr<const SqlHandle> pParentHandle)
+		void AllocateWithParent(std::shared_ptr<const TPARENTSQLHANDLE> pParentHandle)
 		{
+			exASSERT(pParentHandle != NULL);
+			exASSERT(pParentHandle->IsAllocated());
+
 			// Allowed only if not already allocated
 			exASSERT(m_handle == SQL_NULL_HANDLE);
 			exASSERT(m_pParentHandle == NULL);
 
 			// The environment handle has no parent handle
-			if(tHandleType == SQL_HANDLE_ENV)
-			{
-				exASSERT(pParentHandle == NULL);
-				SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_handle);
-				if (!SQL_SUCCEEDED(ret))
-				{
-					SqlResultException ex(L"SQLAllocHandle", ret, L"Failed to allocated ODBC-Env Handle, no additional error information is available.");
-					SET_EXCEPTION_SOURCE(ex);
-					throw ex;
-				}
-			}
-			else
-			{
-				exASSERT(pParentHandle != NULL);
-				exASSERT(pParentHandle->IsAllocated());
-				SQLRETURN ret = SQLAllocHandle(tHandleType, pParentHandle->GetHandle(), &m_handle);
-				THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, pParentHandle->GetHandleType(), pParentHandle->GetHandle());
-				// success, remember parent
-				m_pParentHandle = pParentHandle;
-			}
+			exASSERT(tHandleType != SQL_HANDLE_ENV);
+			SQLRETURN ret = SQLAllocHandle(tHandleType, pParentHandle->GetHandle(), &m_handle);
+			THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, pParentHandle->GetHandleType(), pParentHandle->GetHandle());
+			// success, remember parent
+			m_pParentHandle = pParentHandle;
 		}
 
 		
@@ -198,25 +190,25 @@ namespace exodbc
 
 	private:
 		THANDLE m_handle;
-		std::shared_ptr<const SqlHandle> m_pParentHandle;
+		std::shared_ptr<const TPARENTSQLHANDLE> m_pParentHandle;
 	};
 
 	/** Environment-handle */
-	typedef SqlHandle<SQLHENV, SQL_HANDLE_ENV> SqlEnvHandle;	
+	typedef SqlHandle<SQLHENV, SQL_HANDLE_ENV, SQLHANDLE> SqlEnvHandle;	
 	/** Environment-handle SharedPtr */
 	typedef std::shared_ptr<SqlEnvHandle> SqlEnvHandlePtr;
 	/** Environment-handle Const SharedPtr */
 	typedef std::shared_ptr<const SqlEnvHandle> ConstSqlEnvHandlePtr;
 
 	/** DatabaseConnection-handle */
-	typedef SqlHandle<SQLHDBC, SQL_HANDLE_DBC> SqlDbcHandle;
+	typedef SqlHandle<SQLHDBC, SQL_HANDLE_DBC, SqlEnvHandle> SqlDbcHandle;
 	/** DatabaseConnection-handle SharedPtr */
 	typedef std::shared_ptr<SqlDbcHandle> SqlDbcHandlePtr;
 	/** DatabaseConnection-handle Const SharedPtr */
 	typedef std::shared_ptr<const SqlDbcHandle> ConstSqlDbcHandlePtr;
 
 	/** Statement-handle*/
-	typedef SqlHandle<SQLHSTMT, SQL_HANDLE_STMT> SqlStmtHandle;
+	typedef SqlHandle<SQLHSTMT, SQL_HANDLE_STMT, SqlDbcHandle> SqlStmtHandle;
 	/** Statement-handle SharedPtr */
 	typedef std::shared_ptr<SqlStmtHandle> SqlStmtHandlePtr;
 	/** Statement-handle Const SharedPtr */

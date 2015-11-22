@@ -222,30 +222,6 @@ namespace exodbc
 
 
 	/*!
-	* \enum	StmtCloseMode
-	* \brief Hints for CloseStmtHandle() if it shall throw or not.
-	* \see	CloseStmtHandle()
-	*/
-	enum class StmtCloseMode
-	{
-		ThrowIfNotOpen,	///< Throw if trying to free a statement handle that is not open.
-		IgnoreNotOpen	///< Do not throw if trying to close an already closed statement handle.
-	};
-
-	/*!
-	* \brief	Close the cursor associated with the passed statement handle.
-	* \details	Depending on StmtCloseMode, this will call SQLFreeStatement or SQLCloseCursor.
-	*			Depending on StmtCloseMode, the function will throw if the cursor was not open
-	*			before this function was called.
-	* \param	hStmt		The statement handle.
-	* \param	mode		Determine whether the function should fail if the cursor is not open.
-	* \see		StmtCloseMode
-	* \throw	Exception	Depending on StmtCloseMode.
-	*/
-	extern EXODBCAPI void	CloseStmtHandle(SQLHANDLE hStmt, StmtCloseMode mode);
-
-
-	/*!
 	* \enum	FreeStatementThrowFlag
 	* \brief Hints for FreeStatementHandle() if it shall throw or not.
 	* \see FreeStatementHandle()
@@ -454,16 +430,6 @@ namespace exodbc
 
 	// Classes
 	// -------
-	class StatementCloser
-	{
-	public:
-		StatementCloser(SQLHSTMT hStmt, bool closeOnConstruction = false, bool closeOnDestruction = true);
-		~StatementCloser();
-
-	private:
-		SQLHSTMT m_hStmt;
-		bool m_closeOnDestruction;
-	};
 }
 
 // LOG Helpers

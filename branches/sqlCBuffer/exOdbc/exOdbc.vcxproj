@@ -31,6 +31,7 @@
     <ClInclude Include="include\Sql2BufferTypeMap.h" />
     <ClInclude Include="include\SqlCBuffer.h" />
     <ClInclude Include="include\SqlHandle.h" />
+    <ClInclude Include="include\SqlStatementCloser.h" />
     <ClInclude Include="include\Table.h" />
     <ClInclude Include="include\Helpers.h" />
     <ClInclude Include="include\exOdbc.h" />
@@ -54,6 +55,7 @@
     <ClCompile Include="src\ObjectName.cpp" />
     <ClCompile Include="src\Sql2BufferTypeMap.cpp" />
     <ClCompile Include="src\SqlCBuffer.cpp" />
+    <ClCompile Include="src\SqlStatementCloser.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
