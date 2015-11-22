@@ -96,4 +96,33 @@ namespace exodbc
 		EXPECT_THROW(hStmt2.Allocate(), AssertionException);
 	}
 
+
+	TEST_F(SqlHandleTest, AllocDesc)
+	{
+		// Use a Database and create a stmt handle from there
+		DatabasePtr pDb = OpenTestDb(OdbcVersion::V_3);
+		SqlStmtHandlePtr pHStmt = std::make_shared<SqlStmtHandle>();
+		ASSERT_NO_THROW(pHStmt->AllocateWithParent(pDb->GetSqlDbcHandle()));
+
+		// Open statement by doing some operation on it
+		std::wstring sqlstmt;
+		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase));
+		}
+		else
+		{
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase));
+		}
+		if (g_odbcInfo.m_namesCase == test::Case::UPPER)
+		{
+			boost::algorithm::to_upper(sqlstmt);
+		}
+		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		ASSERT_TRUE(SQL_SUCCEEDED(ret));
+
+		// now test by creating a row descriptor:
+		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
+	}
+
 } // namespace exodbc
