@@ -52,7 +52,7 @@ namespace exodbc
 	{ }
 
 
-	Table::Table(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
+	Table::Table(ConstDatabasePtr pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
 		: m_manualColumns(false)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
@@ -74,7 +74,7 @@ namespace exodbc
 	}
 
 
-	Table::Table(const Database* pDb, AccessFlags afs, const TableInfo& tableInfo)
+	Table::Table(ConstDatabasePtr pDb, AccessFlags afs, const TableInfo& tableInfo)
 		: m_manualColumns(false)
 		, m_haveTableInfo(false)
 		, m_accessFlags(AF_NONE)
@@ -173,7 +173,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void Table::Init(const Database* pDb, AccessFlags afs, const TableInfo& tableInfo)
+	void Table::Init(ConstDatabasePtr pDb, AccessFlags afs, const TableInfo& tableInfo)
 	{
 		exASSERT(pDb);
 		exASSERT(pDb->IsOpen());
@@ -195,7 +195,7 @@ namespace exodbc
 	}
 
 
-	void Table::Init(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
+	void Table::Init(ConstDatabasePtr pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
 	{
 		exASSERT(pDb);
 		exASSERT(pDb->IsOpen());
@@ -1412,14 +1412,14 @@ namespace exodbc
 			// Optionally check privileges
 			if (TestOpenFlag(TOF_CHECK_PRIVILEGES))
 			{
-				m_tablePrivileges.Initialize(m_pDb, m_tableInfo);
+				m_tablePrivileges.Init(m_pDb, m_tableInfo);
 				// We always need to be able to select, but the rest only if we want to write
-				if ((TestAccessFlag(AF_SELECT) && !m_tablePrivileges.IsSet(TP_SELECT))
-					|| (TestAccessFlag(AF_UPDATE_PK) && !m_tablePrivileges.IsSet(TP_UPDATE))
-					|| (TestAccessFlag(AF_UPDATE_WHERE) && !m_tablePrivileges.IsSet(TP_UPDATE))
-					|| (TestAccessFlag(AF_INSERT) && !m_tablePrivileges.IsSet(TP_INSERT))
-					|| (TestAccessFlag(AF_DELETE_PK) && !m_tablePrivileges.IsSet(TP_DELETE))
-					|| (TestAccessFlag(AF_DELETE_WHERE) && !m_tablePrivileges.IsSet(TP_DELETE))
+				if ((TestAccessFlag(AF_SELECT) && !m_tablePrivileges.Test(TablePrivilege::SELECT))
+					|| (TestAccessFlag(AF_UPDATE_PK) && !m_tablePrivileges.Test(TablePrivilege::UPDATE))
+					|| (TestAccessFlag(AF_UPDATE_WHERE) && !m_tablePrivileges.Test(TablePrivilege::UPDATE))
+					|| (TestAccessFlag(AF_INSERT) && !m_tablePrivileges.Test(TablePrivilege::INSERT))
+					|| (TestAccessFlag(AF_DELETE_PK) && !m_tablePrivileges.Test(TablePrivilege::DEL))
+					|| (TestAccessFlag(AF_DELETE_WHERE) && !m_tablePrivileges.Test(TablePrivilege::DEL))
 					)
 				{
 					Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s'") % m_tableInfo.GetQueryName()).str());
