@@ -15,6 +15,7 @@
 // Same component headers
 #include "exOdbcGTest.h"
 #include "ManualTestTables.h"
+#include "exOdbcGTestHelpers.h"
 
 // Other headers
 #include "Environment.h"
@@ -39,18 +40,13 @@
 // Implementation
 // --------------
 using namespace std;
+using namespace exodbctest;
 
 namespace exodbc
 {
-	void TableTest::SetUpTestCase()
-	{
-
-	}
-
-
 	void TableTest::SetUp()
 	{
-		m_odbcInfo = g_odbcInfo;
+		ASSERT_TRUE(g_odbcInfo.IsUsable());
 
 		// Set up Env
 		// Try to set to the ODBC v3 : We need that for the tests to run correct. 3.8 is not supported by all databases and we dont use specific stuff from it.
@@ -58,15 +54,7 @@ namespace exodbc
 		m_pEnv->Init(OdbcVersion::V_3);
 
 		// And database
-		ASSERT_NO_THROW(m_pDb->Init(m_pEnv));
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		}
+		ASSERT_NO_THROW(m_pDb = OpenTestDb(m_pEnv));
 	}
 
 
@@ -124,13 +112,13 @@ namespace exodbc
 //	}
 //
 //
-//	TEST_F(TableTest, OpenAutoDefaultCtr)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table table;
-//		EXPECT_NO_THROW(table.Init(&m_db, AF_READ, tableName, L"", L"", L""));
-//		EXPECT_NO_THROW(table.Open());
-//	}
+	TEST_F(TableTest, OpenAutoDefaultCtr)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table table;
+		//EXPECT_NO_THROW(table.Init(&m_db, AF_READ, tableName, L"", L"", L""));
+		//EXPECT_NO_THROW(table.Open());
+	}
 //
 //
 //	TEST_F(TableTest, OpenManualDefaultCtr)

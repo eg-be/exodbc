@@ -43,24 +43,13 @@ using namespace exodbctest;
 
 namespace exodbc
 {
-	void DatabaseTest::SetUpTestCase()
-	{
-	}
-
 	void DatabaseTest::SetUp()
 	{
 		// Set up is called for every test
-		m_odbcInfo = g_odbcInfo;
+		ASSERT_TRUE(g_odbcInfo.IsUsable());
+
 		m_pEnv->Init(OdbcVersion::V_3);
-		ASSERT_NO_THROW(m_pDb->Init(m_pEnv));
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(m_pDb->Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		}
+		ASSERT_NO_THROW(m_pDb = OpenTestDb(m_pEnv));
 	}
 
 	void DatabaseTest::TearDown()
@@ -93,54 +82,32 @@ namespace exodbc
 
 	TEST_F(DatabaseTest, PrintDatabaseInfo)
 	{
-		Database db(m_pEnv);
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		}
-		{
-			LogLevelInfo lli;
-			LOG_INFO(L"Will print Database Information now");
-			LOG_INFO(L"===================================");
-			LOG_INFO(db.GetDbInfo().ToString());
-			LOG_INFO(L"===================================");
-		}
+		LogLevelInfo lli;
+		LOG_INFO(L"Will print Database Information now");
+		LOG_INFO(L"===================================");
+		LOG_INFO(m_pDb->GetDbInfo().ToString());
+		LOG_INFO(L"===================================");
 	}
 
 
 	TEST_F(DatabaseTest, PrintDatabaseTypeInfo)
 	{
-		Database db(m_pEnv);
-		if (m_odbcInfo.HasConnectionString())
+		LogLevelInfo lli;
+		std::wstringstream ws;
+		ws << L"Will print Database Type Information now" << std::endl;
+		ws << L"===================================" << std::endl;
+		ws << std::endl;
+		SqlTypeInfosVector types = m_pDb->GetTypeInfos();
+		std::set<SSqlTypeInfo> typesSet(types.begin(), types.end());
+		bool first = true;
+		for (std::set<SSqlTypeInfo>::const_iterator it = typesSet.begin(); it != typesSet.end(); ++it)
 		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+			ws << it->ToOneLineStr(first) << std::endl;
+			if (first)
+				first = false;
 		}
-		else
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		}
-		{
-			LogLevelInfo lli;
-			std::wstringstream ws;
-			ws << L"Will print Database Type Information now" << std::endl;
-			ws << L"===================================" << std::endl;
-			ws << std::endl;
-			SqlTypeInfosVector types = db.GetTypeInfos();
-			std::set<SSqlTypeInfo> typesSet(types.begin(), types.end());
-			bool first = true;
-			for (std::set<SSqlTypeInfo>::const_iterator it = typesSet.begin(); it != typesSet.end(); ++it)
-			{
-				ws << it->ToOneLineStr(first) << std::endl;
-				if (first)
-					first = false;
-			}
-			ws << L"===================================";
-			LOG_INFO(ws.str());
-		}
+		ws << L"===================================";
+		LOG_INFO(ws.str());
 	}
 
 
@@ -279,13 +246,13 @@ namespace exodbc
 		EXPECT_NO_THROW(db.SetTrace(true));
 
 		// Open db
-		if (m_odbcInfo.HasConnectionString())
+		if (g_odbcInfo.HasConnectionString())
 		{
-			db.Open(m_odbcInfo.m_connectionString);
+			db.Open(g_odbcInfo.m_connectionString);
 		}
 		else
 		{
-			db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
+			db.Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password);
 		}
 
 		// now one must exist
@@ -300,29 +267,29 @@ namespace exodbc
 		//Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(pEnv->IsEnvHandleAllocated());
 		Database db(pEnv);
-		if (m_odbcInfo.HasConnectionString())
+		if (g_odbcInfo.HasConnectionString())
 		{
-			EXPECT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+			EXPECT_NO_THROW(db.Open(g_odbcInfo.m_connectionString));
 		}
 		else
 		{
-			EXPECT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			EXPECT_NO_THROW(db.Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password));
 		}
 		EXPECT_NO_THROW(db.Close());
 
 		// Open an existing db using the default c'tor and setting params on db
 		Database db2;
 		ASSERT_NO_THROW(db2.Init(pEnv));
-		if (m_odbcInfo.HasConnectionString())
+		if (g_odbcInfo.HasConnectionString())
 		{
 			// also test that the returned connection-string is not empty
 			wstring outConnStr;
-			EXPECT_NO_THROW(outConnStr = db2.Open(m_odbcInfo.m_connectionString));
+			EXPECT_NO_THROW(outConnStr = db2.Open(g_odbcInfo.m_connectionString));
 			EXPECT_FALSE(outConnStr.empty());
 		}
 		else
 		{
-			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			EXPECT_NO_THROW(db2.Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password));
 		}
 		EXPECT_NO_THROW(db2.Close());
 
@@ -334,27 +301,26 @@ namespace exodbc
 	}
 
 
-	// TODO: Test Close. Close should return a value if succeeded
 	TEST_F(DatabaseTest, Close)
 	{
 		// Try to close a db that really is open
 		Database db1(m_pEnv);
-		if (m_odbcInfo.HasConnectionString())
+		if (g_odbcInfo.HasConnectionString())
 		{
-			ASSERT_NO_THROW(db1.Open(m_odbcInfo.m_connectionString));
+			ASSERT_NO_THROW(db1.Open(g_odbcInfo.m_connectionString));
 		}
 		else
 		{
-			ASSERT_NO_THROW(db1.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
+			ASSERT_NO_THROW(db1.Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password));
 		}
 
 		EXPECT_NO_THROW(db1.Close());
 
-		// \todo: Close works okay, does not return false if there is nothing to do
-		//// And one that is not open
-		//Database db2(m_pDbEnv);
-		//EXPECT_FALSE(db2.Close());
+		// Closing one that is not open must just do nothing, but should not fail
+		Database db2(m_pEnv);
+		EXPECT_NO_THROW(db2.Close());
 	}
+
 
 	TEST_F(DatabaseTest, ReadCommitMode)
 	{
@@ -364,53 +330,32 @@ namespace exodbc
 
 	TEST_F(DatabaseTest, SetCommitMode)
 	{
-		Database db(m_pEnv);
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		}
-
 		// We default to manual commit
-		EXPECT_EQ(CommitMode::MANUAL, db.GetCommitMode());
-		EXPECT_EQ(CommitMode::MANUAL, db.ReadCommitMode());
+		EXPECT_EQ(CommitMode::MANUAL, m_pDb->GetCommitMode());
+		EXPECT_EQ(CommitMode::MANUAL, m_pDb->ReadCommitMode());
 
 		// Switch to auto
-		EXPECT_NO_THROW(db.SetCommitMode(CommitMode::AUTO));
+		EXPECT_NO_THROW(m_pDb->SetCommitMode(CommitMode::AUTO));
 		// internal member should already be updated
-		EXPECT_EQ(CommitMode::AUTO, db.GetCommitMode());
-		EXPECT_EQ(CommitMode::AUTO, db.ReadCommitMode());
+		EXPECT_EQ(CommitMode::AUTO, m_pDb->GetCommitMode());
+		EXPECT_EQ(CommitMode::AUTO, m_pDb->ReadCommitMode());
 
 		// and back to manual
-		EXPECT_NO_THROW(db.SetCommitMode(CommitMode::MANUAL));
+		EXPECT_NO_THROW(m_pDb->SetCommitMode(CommitMode::MANUAL));
 		// internal member should already be updated
-		EXPECT_EQ(CommitMode::MANUAL, db.GetCommitMode());
-		EXPECT_EQ(CommitMode::MANUAL, db.ReadCommitMode());
+		EXPECT_EQ(CommitMode::MANUAL, m_pDb->GetCommitMode());
+		EXPECT_EQ(CommitMode::MANUAL, m_pDb->ReadCommitMode());
 	}
 
 
 	TEST_F(DatabaseTest, ReadDataTypesInfo)
 	{
-		Database db(m_pEnv);
-
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-		}
-
 		std::vector<SSqlTypeInfo> types;
-		ASSERT_NO_THROW(types = db.ReadDataTypesInfo());
+		ASSERT_NO_THROW(types = m_pDb->ReadDataTypesInfo());
 		EXPECT_TRUE(types.size() > 0);
 
 		std::wstringstream ws;
-		ws << L"TypeInfo of database with DSN '" << (m_odbcInfo.HasConnectionString() ? m_odbcInfo.m_connectionString : m_odbcInfo.m_dsn) << L"', total " << types.size() << L" types reported:" << std::endl;
+		ws << L"TypeInfo of database with DSN '" << (g_odbcInfo.HasConnectionString() ? g_odbcInfo.m_connectionString : g_odbcInfo.m_dsn) << L"', total " << types.size() << L" types reported:" << std::endl;
 		bool first = true;
 		std::vector<SSqlTypeInfo>::const_iterator it = types.begin();
 		while(it != types.end())
@@ -434,31 +379,31 @@ namespace exodbc
 		// We just know how we name the different odbc-sources
 		// TODO: This is not nice, but is there any other reliable way? Add to doc somewhere
 
-		if (m_odbcInfo.HasConnectionString())
+		if (g_odbcInfo.HasConnectionString())
 		{
 			LOG_WARNING(L"Skipping Test DetectDbms, because Test is implemented to stupid it only works with a named DSN");
 			return;
 		}
 
-		if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"DB2"))
+		if(boost::algorithm::find_first(g_odbcInfo.m_dsn, L"DB2"))
 		{
 			EXPECT_TRUE(m_pDb->GetDbms() == DatabaseProduct::DB2);
 		}
-		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"MySql"))
+		else if(boost::algorithm::find_first(g_odbcInfo.m_dsn, L"MySql"))
 		{
 			EXPECT_TRUE(m_pDb->GetDbms() == DatabaseProduct::MY_SQL);
 		}
-		else if(boost::algorithm::find_first(m_odbcInfo.m_dsn, L"SqlServer"))
+		else if(boost::algorithm::find_first(g_odbcInfo.m_dsn, L"SqlServer"))
 		{
 			EXPECT_TRUE(m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER);
 		}
-		else if (boost::algorithm::find_first(m_odbcInfo.m_dsn, L"Access"))
+		else if (boost::algorithm::find_first(g_odbcInfo.m_dsn, L"Access"))
 		{
 			EXPECT_TRUE(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 		}
 		else
 		{
-			EXPECT_EQ(std::wstring(L"Unknown DSN name"), m_odbcInfo.m_dsn);
+			EXPECT_EQ(std::wstring(L"Unknown DSN name"), g_odbcInfo.m_dsn);
 		}
 	}
 
@@ -739,8 +684,8 @@ namespace exodbc
 		
 		// Find the table-info
 		TableInfo iInfo;
-		wstring intTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
+		wstring intTableName = GetTableName(TableId::INTEGERTYPES);
+		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
 		ASSERT_NO_THROW(iInfo = m_pDb->FindOneTable(intTableName, L"", L"", L""));
 
 		EXPECT_NO_THROW(pks = m_pDb->ReadTablePrimaryKeys(iInfo));
@@ -751,10 +696,10 @@ namespace exodbc
 		}
 
 		TableInfo mkInfo;
-		wstring multiKeyTableName = test::GetTableName(test::TableId::MULTIKEY, m_odbcInfo.m_namesCase);
-		wstring mkId1 = test::ConvertNameCase(L"id1", m_odbcInfo.m_namesCase);
-		wstring mkId2 = test::ConvertNameCase(L"id2", m_odbcInfo.m_namesCase);
-		wstring mkId3 = test::ConvertNameCase(L"id3", m_odbcInfo.m_namesCase);
+		wstring multiKeyTableName = GetTableName(TableId::MULTIKEY);
+		wstring mkId1 = ToDbCase(L"id1");
+		wstring mkId2 = ToDbCase(L"id2");
+		wstring mkId3 = ToDbCase(L"id3");
 		EXPECT_NO_THROW(mkInfo = m_pDb->FindOneTable(multiKeyTableName, L"", L"", L""));
 
 		EXPECT_NO_THROW(pks = m_pDb->ReadTablePrimaryKeys(mkInfo));
