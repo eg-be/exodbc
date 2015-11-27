@@ -21,6 +21,7 @@
 #include "Exception.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
+#include "boost/filesystem.hpp"
 
 // Debug
 #include "DebugNew.h"
@@ -256,19 +257,26 @@ namespace exodbc
 
 	TEST_F(DatabaseTest, DoSomeTrace)
 	{
+		namespace fs = boost::filesystem;
+
 		// Set tracefile first, do that on a db not open yet
 		TCHAR tmpDir[MAX_PATH + 1];
 		DWORD ret = GetTempPath(MAX_PATH + 1, tmpDir);
 		ASSERT_TRUE(ret > 0);
 		wstring tracefile(&tmpDir[0]);
-		wstring filename = boost::str(boost::wformat(L"trace_%s_DoSomeTrace.log") % DatabaseProcudt2s(m_pDb->GetDbms()));
+		wstring filename = boost::str(boost::wformat(L"DatabaseTest_DoSomeTrace_%s.log") % DatabaseProcudt2s(m_pDb->GetDbms()));
 		tracefile += filename;
+
+		// remove an existing trace-file
+		boost::system::error_code fserr;
+		fs::remove(tracefile, fserr);
+		ASSERT_FALSE(fs::exists(tracefile));
 
 		Database db(m_pEnv);
 		ASSERT_NO_THROW(db.SetTracefile(tracefile));
 		EXPECT_NO_THROW(db.SetTrace(true));
 
-		// Open db, and open a table, do some query on the table
+		// Open db
 		if (m_odbcInfo.HasConnectionString())
 		{
 			db.Open(m_odbcInfo.m_connectionString);
@@ -278,21 +286,8 @@ namespace exodbc
 			db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
 		}
 
-		test::ClearIntTypesTmpTable(db, m_odbcInfo.m_namesCase);
-		Table iTable(&db, AF_READ_WRITE, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
-		if (db.GetDbms() == DatabaseProduct::ACCESS)
-		{
-			iTable.SetColumnPrimaryKeyIndexes({ 0 });
-		}
-		iTable.Open();
-		iTable.SetColumnValue(0, (SQLINTEGER) 100);
-		iTable.SetColumnNull(1);
-		iTable.SetColumnValue(2, (SQLINTEGER) 113);
-		iTable.SetColumnNull(3);
-		iTable.Insert();
-		
-		iTable.SetColumnValue(2, (SQLINTEGER) 223);
-		iTable.Update();
+		// now one must exist
+		EXPECT_TRUE(fs::exists(tracefile));
 	}
 
 
