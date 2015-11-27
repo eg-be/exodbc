@@ -171,7 +171,7 @@ namespace exodbc
 			NotFailOnNoData		///< Return True if ExecSql returns SLQ_NO_DATA
 		};
 		/**
-		 * \brief	Executes the SQL operation on the internal stmt-handle.
+		 * \brief	Executes the SQL operation on the internal exec Sql statement handle.
 		 * \param	sqlStmt	The SQL statement.
 		 * \param	mode   	If FailOnNoData is set, Exception is thrown if SQL returns NO_DATA.
 		 * 					This happens for example on DB2 if you do a DELETE with a WHERE
@@ -179,6 +179,9 @@ namespace exodbc
 		 * \throw	Exception If executing SQL failed, or depending on mode if no records are affected.
 		 */
 		void         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = ExecFailMode::NotFailOnNoData);
+
+
+		SqlStmtHandlePtr GetExecSqlHandle() const noexcept { return m_pHStmtExecSql; };
 
 
 		/*!
