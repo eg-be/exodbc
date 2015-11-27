@@ -37,9 +37,6 @@ namespace exodbc
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
 		, m_pHStmt(std::make_shared<SqlStmtHandle>())
 		, m_pHStmtExecSql(std::make_shared<SqlStmtHandle>())
-		//, m_hdbc(SQL_NULL_HDBC)
-		//, m_hstmt(SQL_NULL_HSTMT)
-		//, m_hstmtExecSql(SQL_NULL_HSTMT)
 		, m_dbmsType(DatabaseProduct::UNKNOWN)
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
@@ -54,9 +51,6 @@ namespace exodbc
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
 		, m_pHStmt(std::make_shared<SqlStmtHandle>())
 		, m_pHStmtExecSql(std::make_shared<SqlStmtHandle>())
-		//, m_hdbc(SQL_NULL_HDBC)
-		//, m_hstmt(SQL_NULL_HSTMT)
-		//, m_hstmtExecSql(SQL_NULL_HSTMT)
 		, m_dbmsType(DatabaseProduct::UNKNOWN)
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
@@ -73,9 +67,6 @@ namespace exodbc
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
 		, m_pHStmt(std::make_shared<SqlStmtHandle>())
 		, m_pHStmtExecSql(std::make_shared<SqlStmtHandle>())
-		//, m_hdbc(SQL_NULL_HDBC)
-		//, m_hstmt(SQL_NULL_HSTMT)
-		//, m_hstmtExecSql(SQL_NULL_HSTMT)
 		, m_dbmsType(DatabaseProduct::UNKNOWN)
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
@@ -99,10 +90,6 @@ namespace exodbc
 			{
 				Close();
 			}
-//			if (HasConnectionHandle())
-//			{
-//				FreeConnectionHandle();
-//			}
 		}
 		catch (Exception& ex)
 		{
@@ -128,45 +115,6 @@ namespace exodbc
 	}
 
 
-	//void Database::FreeConnectionHandle()
-	//{
-	//	exASSERT(HasConnectionHandle());
-
-	//	// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
-	//	SQLRETURN ret = SQLFreeHandle(SQL_HANDLE_DBC, m_hdbc);
-	//	// if SQL_ERROR is returned, the handle is still valid, error information can be fetched, use our standard logger
-	//	if (ret == SQL_ERROR)
-	//	{
-	//		// if SQL_ERROR is returned, the handle is still valid, error information can be fetched
-	//		SqlResultException ex(L"SQLFreeHandle", ret, SQL_HANDLE_DBC, m_hdbc, L"Freeing ODBC-Connection Handle failed with SQL_ERROR, handle is still valid.");
-	//		SET_EXCEPTION_SOURCE(ex);
-	//		LOG_ERROR(ex.ToString());
-	//	}
-	//	else if (ret == SQL_INVALID_HANDLE)
-	//	{
-	//		// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
-	//		m_hdbc = SQL_NULL_HDBC;
-	//		SqlResultException ex(L"SQLFreeHandle", ret, L"Freeing ODBC-Connection Handle failed with SQL_INVALID_HANDLE.");
-	//		SET_EXCEPTION_SOURCE(ex);
-	//		LOG_ERROR(ex.ToString());
-	//	}
-	//	// We have SUCCESS
-	//	m_hdbc = SQL_NULL_HDBC;
-	//}
-
-
-	//void Database::AllocateConnectionHandle()
-	//{
-	//	exASSERT(!HasConnectionHandle());
-	//	exASSERT(m_pEnv != NULL);
-	//	exASSERT(m_pEnv->HasEnvironmentHandle());
-
-	//	// Allocate the DBC-Handle from our environment
-	//	SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_DBC, m_pEnv->GetEnvironmentHandle(), &m_hdbc);
-	//	THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_ENV, m_pEnv->GetEnvironmentHandle());
-	//}
-
-
 	void Database::OpenImpl()
 	{
 		exASSERT(m_pHDbc);
@@ -174,20 +122,8 @@ namespace exodbc
 		exASSERT(!m_pHStmt->IsAllocated());
 		exASSERT(!m_pHStmtExecSql->IsAllocated());
 
-		//// Note: SQLAllocHandle will set the output-handle to SQL_NULL_HDBC, SQL_NULL_HSTMT, or SQL_NULL_HENV in case of failure
-		//SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmt);
-		//// safe to throw directly, no handle has been allocated so far
-		//THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_hdbc);
-
-		//ret = SQLAllocHandle(SQL_HANDLE_STMT, m_hdbc, &m_hstmtExecSql);
-		//// Need to free the m_hstmt handle - okay to throw if we fail, no other handle allocated
-		//if (!SQL_SUCCEEDED(ret))
-		//{
-		//	m_hstmt = FreeStatementHandle(m_hstmt);
-		//}
-		//THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, SQL_HANDLE_DBC, m_hdbc);
-
-		// Everything else might throw, let this function free the handles in case of failure
+		// Everything might throw, let this function free the handles in case of failure, 
+		// so that we are back in the state before this function was called.
 		try
 		{
 			// Allocate a statement handle from the database connection to be used internally and the exec-handle
@@ -232,7 +168,7 @@ namespace exodbc
 		catch (const Exception& ex)
 		{
 			HIDE_UNUSED(ex);
-			// Try to free what we've allocated
+			// Try to free what we've allocated and rethrow
 			if (m_pHStmt->IsAllocated())
 			{
 				m_pHStmt->Free();
@@ -752,8 +688,6 @@ namespace exodbc
 		// Free statement handles - just reset them, that should be enough
 		m_pHStmt.reset();
 		m_pHStmtExecSql.reset();
-		//m_hstmt = FreeStatementHandle(m_hstmt);
-		//m_hstmtExecSql = FreeStatementHandle(m_hstmtExecSql);
 
 		// Try to disconnect from the data source
 		SQLRETURN ret = SQLDisconnect(m_pHDbc->GetHandle());

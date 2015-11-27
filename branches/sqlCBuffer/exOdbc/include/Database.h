@@ -634,23 +634,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Tries to allocate a new DBC-Handle from the internally stored Environment. 
-		*			Handle will be freed on destruction.
-		* \details	Can only be called if no connection-handle is allocated yet.
-		* \throw	Exception If a handle is already allocated or allocating fails,
-		*/
-		//void		AllocateConnectionHandle();
-
-
-		/*!
-		* \brief	Frees the database connection handle.
-		* \throw	SqlResultException if SQLFreeHandle returns SQL_ERROR or SQL_INVALID_HANDLE
-		*			Exception If no database connection handle is allocated.
-		*/
-		//void			FreeConnectionHandle();
-
-
-		/*!
 		* \brief	Query the Database using SQLGetInfo.
 		* \return	DatabaseInfo populated with values.
 		* \throw	Exception If reading Database info fails or no connection handle is allocated.
@@ -710,9 +693,6 @@ namespace exodbc
 		SqlDbcHandlePtr m_pHDbc;			///< ODBC DB Connection handle
 		SqlStmtHandlePtr m_pHStmt;			///< ODBC Statement handle used for all internal functions except ExecSql()
 		SqlStmtHandlePtr m_pHStmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
-		//SQLHDBC  m_hdbc;			///< ODBC DB Connection handle
-		//SQLHSTMT m_hstmt;			///< ODBC Statement handle used for all internal functions except ExecSql()
-		//SQLHSTMT m_hstmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
 
 		CommitMode		m_commitMode;	///< Commit Mode set currently
 
