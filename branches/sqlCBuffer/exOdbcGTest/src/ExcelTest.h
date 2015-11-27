@@ -40,7 +40,6 @@ namespace exodbc
 		virtual void TearDown();
 
 		EnvironmentPtr m_pEnv;
-		TestParams m_odbcInfo;
 	};
 
 } // namespace exodbc
