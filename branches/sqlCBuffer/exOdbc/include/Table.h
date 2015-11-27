@@ -22,6 +22,7 @@
 #include "SqlCBuffer.h"
 #include "SqlHandle.h"
 #include "Database.h"
+#include "EnumFlags.h"
 
 // Other headers
 #include "boost/any.hpp"
@@ -92,7 +93,7 @@ namespace exodbc
 		* \see		Init(const Database*, AccessFlags, const TableInfo&)
 		* \throw	Exception
 		*/
-		Table(ConstDatabasePtr pDb, AccessFlags afs, const TableInfo& tableInfo);
+		Table(ConstDatabasePtr pDb, TableAccessFlags afs, const TableInfo& tableInfo);
 
 
 		/*!
@@ -100,7 +101,7 @@ namespace exodbc
 		* \see		Init(const Database* pDb, AccessFlags, const std::wstring&, const std::wstring&, const std::wstring&, const std::wstring&)
 		* \throw	Exception
 		*/
-		Table(ConstDatabasePtr pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
+		Table(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
 
 
 		/*!
@@ -131,7 +132,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		void Init(ConstDatabasePtr pDb, AccessFlags afs, const TableInfo& tableInfo);
+		void Init(ConstDatabasePtr pDb, TableAccessFlags afs, const TableInfo& tableInfo);
 
 
 		/*!
@@ -152,7 +153,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		void Init(ConstDatabasePtr pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
+		void Init(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
 			
 
 		/*!
@@ -275,7 +276,7 @@ namespace exodbc
 		*			required for the current AccessFlags set.
 		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
 		*/
-		void		SetAccessFlag(AccessFlag ac);
+		void		SetAccessFlag(TableAccessFlag ac);
 
 
 		/*!
@@ -287,7 +288,7 @@ namespace exodbc
 		*			required for the current AccessFlags set.
 		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
 		*/
-		void		ClearAccessFlag(AccessFlag ac);
+		void		ClearAccessFlag(TableAccessFlag ac);
 
 
 		/*!
@@ -301,19 +302,19 @@ namespace exodbc
 		*			required for the current AccessFlags set.
 		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
 		*/
-		void		SetAccessFlags(AccessFlags acs);
+		void		SetAccessFlags(TableAccessFlags acs);
 
 
 		/*!
 		* \brief	Test if an AccessFlag is set.
 		*/
-		bool		TestAccessFlag(AccessFlag ac) const throw();
+		bool		TestAccessFlag(TableAccessFlag ac) const noexcept;
 
 
 		/*!
 		* \brief	Get the AccessFlags bitmask.
 		*/
-		AccessFlags	GetAccessFlags() const throw() { return m_accessFlags; };
+		TableAccessFlags	GetAccessFlags() const noexcept { return m_tableAccessFlags; };
 
 
 		/*!
@@ -1009,7 +1010,7 @@ namespace exodbc
 		TableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		bool				m_isOpen;				///< Set to true after Open has been called
 		TableOpenFlags		m_openFlags;			///< Flags used to open the table in the call to Open().
-		AccessFlags			m_accessFlags;			///< Bitmask for the AccessFlag flags.
+		TableAccessFlags	m_tableAccessFlags;		///< Bit mask for the AccessFlag flags. Column flags are derived from those if not set explicitly.
 		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
 
 		// Column information

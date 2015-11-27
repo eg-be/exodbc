@@ -35,7 +35,7 @@ namespace exodbc
 	Table::Table()
 		: m_manualColumns(false)
 		, m_haveTableInfo(false)
-		, m_accessFlags(AF_NONE)
+		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
@@ -52,10 +52,10 @@ namespace exodbc
 	{ }
 
 
-	Table::Table(ConstDatabasePtr pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
+	Table::Table(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
 		: m_manualColumns(false)
 		, m_haveTableInfo(false)
-		, m_accessFlags(AF_NONE)
+		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
@@ -74,10 +74,10 @@ namespace exodbc
 	}
 
 
-	Table::Table(ConstDatabasePtr pDb, AccessFlags afs, const TableInfo& tableInfo)
+	Table::Table(ConstDatabasePtr pDb, TableAccessFlags afs, const TableInfo& tableInfo)
 		: m_manualColumns(false)
 		, m_haveTableInfo(false)
-		, m_accessFlags(AF_NONE)
+		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
@@ -99,7 +99,7 @@ namespace exodbc
 	Table::Table(const Table& other)
 		: m_manualColumns(false)
 		, m_haveTableInfo(false)
-		, m_accessFlags(AF_NONE)
+		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
@@ -173,7 +173,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void Table::Init(ConstDatabasePtr pDb, AccessFlags afs, const TableInfo& tableInfo)
+	void Table::Init(ConstDatabasePtr pDb, TableAccessFlags afs, const TableInfo& tableInfo)
 	{
 		exASSERT(pDb);
 		exASSERT(pDb->IsOpen());
@@ -195,7 +195,7 @@ namespace exodbc
 	}
 
 
-	void Table::Init(ConstDatabasePtr pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
+	void Table::Init(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
 	{
 		exASSERT(pDb);
 		exASSERT(pDb->IsOpen());
@@ -342,17 +342,17 @@ namespace exodbc
 			// And how to open this column
 			OldColumnFlags columnFlags = CF_NONE;
 			ColumnFlags flags;
-			if (TestAccessFlag(AF_SELECT))
+			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
 				columnFlags |= CF_SELECT;
 				flags.Set(ColumnFlag::SELECT);
 			}
-			if (TestAccessFlag(AF_UPDATE_WHERE) || TestAccessFlag(AF_UPDATE_PK))
+			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE) || TestAccessFlag(TableAccessFlag::AF_UPDATE_PK))
 			{
 				columnFlags |= CF_UPDATE;
 				flags.Set(ColumnFlag::UPDATE);
 			}
-			if (TestAccessFlag(AF_INSERT))
+			if (TestAccessFlag(TableAccessFlag::AF_INSERT))
 			{
 				columnFlags |= CF_INSERT;
 				flags.Set(ColumnFlag::INSERT);
@@ -922,7 +922,7 @@ namespace exodbc
 	void Table::Insert() const
 	{
 		exASSERT(IsOpen());
-		exASSERT(TestAccessFlag(AF_INSERT));
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_INSERT));
 		//exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
 		//SQLRETURN ret = SQLExecute(m_hStmtInsert);
 		//THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtInsert);
@@ -932,7 +932,7 @@ namespace exodbc
 	void Table::Delete(bool failOnNoData /* = true */)
 	{
 		exASSERT(IsOpen());
-		exASSERT(TestAccessFlag(AF_DELETE_PK));
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_DELETE_PK));
 		//exASSERT(m_hStmtDeletePk != SQL_NULL_HSTMT);
 		//SQLRETURN ret = SQLExecute(m_hStmtDeletePk);
 		//if (failOnNoData && ret == SQL_NO_DATA)
@@ -951,7 +951,7 @@ namespace exodbc
 	void Table::Delete(const std::wstring& where, bool failOnNoData /* = true */) const
 	{
 		exASSERT(IsOpen());
-		exASSERT(TestAccessFlag(AF_DELETE_WHERE));
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_DELETE_WHERE));
 		//exASSERT(m_hStmtDeleteWhere != SQL_NULL_HSTMT);
 		//exASSERT(!where.empty());
 
@@ -974,7 +974,7 @@ namespace exodbc
 	void Table::Update()
 	{
 		exASSERT(IsOpen());
-		exASSERT(TestAccessFlag(AF_UPDATE_PK));
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK));
 		//exASSERT(m_hStmtUpdatePk != SQL_NULL_HSTMT);
 		//SQLRETURN ret = SQLExecute(m_hStmtUpdatePk);
 		//THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
@@ -1414,12 +1414,12 @@ namespace exodbc
 			{
 				m_tablePrivileges.Init(m_pDb, m_tableInfo);
 				// We always need to be able to select, but the rest only if we want to write
-				if ((TestAccessFlag(AF_SELECT) && !m_tablePrivileges.Test(TablePrivilege::SELECT))
-					|| (TestAccessFlag(AF_UPDATE_PK) && !m_tablePrivileges.Test(TablePrivilege::UPDATE))
-					|| (TestAccessFlag(AF_UPDATE_WHERE) && !m_tablePrivileges.Test(TablePrivilege::UPDATE))
-					|| (TestAccessFlag(AF_INSERT) && !m_tablePrivileges.Test(TablePrivilege::INSERT))
-					|| (TestAccessFlag(AF_DELETE_PK) && !m_tablePrivileges.Test(TablePrivilege::DEL))
-					|| (TestAccessFlag(AF_DELETE_WHERE) && !m_tablePrivileges.Test(TablePrivilege::DEL))
+				if ((TestAccessFlag(TableAccessFlag::AF_SELECT) && !m_tablePrivileges.Test(TablePrivilege::SELECT))
+					|| (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) && !m_tablePrivileges.Test(TablePrivilege::UPDATE))
+					|| (TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE) && !m_tablePrivileges.Test(TablePrivilege::UPDATE))
+					|| (TestAccessFlag(TableAccessFlag::AF_INSERT) && !m_tablePrivileges.Test(TablePrivilege::INSERT))
+					|| (TestAccessFlag(TableAccessFlag::AF_DELETE_PK) && !m_tablePrivileges.Test(TablePrivilege::DEL))
+					|| (TestAccessFlag(TableAccessFlag::AF_DELETE_WHERE) && !m_tablePrivileges.Test(TablePrivilege::DEL))
 					)
 				{
 					Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s'") % m_tableInfo.GetQueryName()).str());
@@ -1460,7 +1460,7 @@ namespace exodbc
 			else
 			{
 				// If we need the primary keys and are allowed to query them, try to fetch them from the database
-				if ((TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK)) && !TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
+				if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK)) && !TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
 				{
 					TablePrimaryKeysVector primaryKeys = m_pDb->ReadTablePrimaryKeys(m_tableInfo);
 					// Match them against the ColumnBuffers
@@ -1505,7 +1505,7 @@ namespace exodbc
 
 			// Bind the member variables for field exchange between
 			// the Table object and the ODBC record for Select()
-			if (TestAccessFlag(AF_SELECT))
+			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
 				SQLSMALLINT boundColumnNumber = 1;
 				for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
@@ -1524,7 +1524,7 @@ namespace exodbc
 
 			// Create additional UPDATE and DELETE statement-handles to be used with the pk-columns
 			// and bind the params. PKs are required.
-			if (TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_DELETE_PK))
+			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
 			{
 				// Need to have at least one primary key, and all primary key buffers must be bound
 				// \todo: Need to have pk is true, but the check if they are bound is useless, not?
@@ -1566,7 +1566,7 @@ namespace exodbc
 			}
 
 			// Bind INSERT params
-			if (TestAccessFlag(AF_INSERT))
+			if (TestAccessFlag(TableAccessFlag::AF_INSERT))
 			{
 				BindInsertParameters();
 				boundInsert = true;
@@ -1670,7 +1670,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetAccessFlag(AccessFlag ac)
+	void Table::SetAccessFlag(TableAccessFlag ac)
 	{
 		exASSERT(!IsOpen());
 
@@ -1680,12 +1680,13 @@ namespace exodbc
 			return;
 		}
 
-		AccessFlags newFlags = ( m_accessFlags | ac );
+		TableAccessFlags newFlags(m_tableAccessFlags);
+		newFlags.Set(ac);
 		SetAccessFlags(newFlags);
 	}
 
 
-	void Table::ClearAccessFlag(AccessFlag ac)
+	void Table::ClearAccessFlag(TableAccessFlag ac)
 	{
 		exASSERT(!IsOpen());
 
@@ -1695,17 +1696,18 @@ namespace exodbc
 			return;
 		}
 
-		AccessFlags newFlags = ( m_accessFlags & ~ac );
+		TableAccessFlags newFlags(m_tableAccessFlags);
+		newFlags.Clear(ac);
 		SetAccessFlags(newFlags);
 	}
 
 
-	void Table::SetAccessFlags(AccessFlags acs)
+	void Table::SetAccessFlags(TableAccessFlags acs)
 	{
 		exASSERT(!IsOpen());
 		exASSERT(m_pDb->IsOpen());
 
-		if (m_accessFlags == acs)
+		if (m_tableAccessFlags == acs)
 		{
 			// Same flags, return
 			return;
@@ -1713,18 +1715,14 @@ namespace exodbc
 
 		// Free statements, then re-allocate all
 		FreeStatements();
-		m_accessFlags = acs;
+		m_tableAccessFlags = acs;
 		AllocateStatements();
 	}
 
 
-	bool Table::TestAccessFlag(AccessFlag af) const throw()
+	bool Table::TestAccessFlag(TableAccessFlag af) const throw()
 	{
-		if (m_accessFlags & af)
-		{
-			return true;
-		}
-		return false;
+		return m_tableAccessFlags.Test(af);
 	}
 
 
@@ -1794,9 +1792,9 @@ namespace exodbc
 	*			AF_UPDATE_PK, AF_UPDATE_WHERE, AF_INSERT, AF_DELETE_PK or AF_DELETE_WHERE are set.
 	*/
 	bool Table::IsQueryOnly() const throw()  {
-		return TestAccessFlag(AF_READ) &&
-				! ( TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_UPDATE_WHERE)
-					|| TestAccessFlag(AF_INSERT)
-					|| TestAccessFlag(AF_DELETE_PK) || TestAccessFlag(AF_DELETE_PK));
+		return TestAccessFlag(TableAccessFlag::AF_READ) &&
+				! ( TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)
+					|| TestAccessFlag(TableAccessFlag::AF_INSERT)
+					|| TestAccessFlag(TableAccessFlag::AF_DELETE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK));
 	}
 }
