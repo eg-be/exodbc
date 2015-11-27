@@ -579,26 +579,35 @@ namespace exodbc
 
 	TEST_F(DatabaseTest, RollbackTransaction)
 	{
-		//std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-		//exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-		//ASSERT_NO_THROW(iTable.Open());
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
 
-		//ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
+		// insert something, but do not commit
+		DatabasePtr pDb = OpenTestDb();
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		wstring schemaName = L"exodbc.";
+		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			schemaName = L"";
+		}
+		wstring sqlInsert = boost::str(boost::wformat(L"INSERT INTO %s%s (%s) VALUES (101)") % schemaName %tableName %idColName);
 
-		//// No records now
-		//iTable.Select();
-		//EXPECT_FALSE( iTable.SelectNext());
+		pDb->ExecSql(sqlInsert);
+		// now rollback
+		EXPECT_NO_THROW(pDb->RollbackTrans());
+		pDb->Close();
 
-		//// Insert one
-		//ASSERT_NO_THROW(test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, test::ValueIndicator::IS_NULL, false));
-		//// We have a record now
-		//iTable.Select();
-		//EXPECT_TRUE( iTable.SelectNext() );
+		// Reading again should not show any record at all
+		pDb = OpenTestDb();
+		wstring sqlCount = boost::str(boost::wformat(L"SELECT COUNT(*) FROM %s%s") % schemaName % tableName);
+		pDb->ExecSql(sqlCount);
+		SQLRETURN ret = SQLFetch(pDb->GetExecSqlHandle()->GetHandle());
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
-		//// We rollback and expect no record
-		//EXPECT_NO_THROW(m_pDb->RollbackTrans());
-		//iTable.Select();
-		//EXPECT_FALSE( iTable.SelectNext());
+		SQLINTEGER count;
+		SQLLEN cb;
+		GetData(pDb->GetExecSqlHandle()->GetHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
+		EXPECT_EQ(0, count);
 	}
 
 
