@@ -14,6 +14,7 @@
 
 // Same component headers
 #include "ManualTestTables.h"
+#include "exOdbcGTestHelpers.h"
 
 // Other headers
 #include "Environment.h"
@@ -38,6 +39,7 @@
 // Implementation
 // --------------
 using namespace std;
+using namespace exodbctest;
 
 namespace exodbc
 {
@@ -463,7 +465,49 @@ namespace exodbc
 
 	TEST_F(DatabaseTest, CommitTransaction)
 	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
+
+		// insert something, but do not commit, just close the Db
+		DatabasePtr pDb = OpenTestDb();
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		wstring schemaName = L"exodbc.";
+		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			schemaName = L"";
+		}
+		wstring sqlInsert = boost::str(boost::wformat(L"INSERT INTO %s%s (%s) VALUES (101)") %schemaName %tableName %idColName);
+
+		pDb->ExecSql(sqlInsert);
+		pDb->Close();
+
+		// Reading again should not show any record at all
+		pDb = OpenTestDb();
+		wstring sqlCount = boost::str(boost::wformat(L"SELECT COUNT(*) FROM %s%s") % schemaName % tableName);
+		pDb->ExecSql(sqlCount);
+		SQLRETURN ret = SQLFetch(pDb->GetExecSqlHandle()->GetHandle());
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+
+		SQLINTEGER count;
+		SQLLEN cb;
+		GetData(pDb->GetExecSqlHandle()->GetHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
+		EXPECT_EQ(0, count);
+
+		// now insert again and commit
+		pDb->ExecSql(sqlInsert);
+		EXPECT_NO_THROW(pDb->CommitTrans());
+		pDb->Close();
+
+		// Reading again must show the record inserted
+		pDb = OpenTestDb();
+		pDb->ExecSql(sqlCount);
+		ret = SQLFetch(pDb->GetExecSqlHandle()->GetHandle());
+		EXPECT_TRUE(SQL_SUCCEEDED(ret));
+
+		GetData(pDb->GetExecSqlHandle()->GetHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
+		EXPECT_EQ(1, count);
+
+
 //		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
 //		ASSERT_NO_THROW(iTable.Open());
 //
