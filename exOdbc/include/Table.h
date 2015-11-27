@@ -21,6 +21,7 @@
 #include "Sql2BufferTypeMap.h"
 #include "SqlCBuffer.h"
 #include "SqlHandle.h"
+#include "Database.h"
 
 // Other headers
 #include "boost/any.hpp"
@@ -29,11 +30,6 @@
 
 // Forward declarations
 // --------------------
-namespace exodbc
-{
-	class Database;
-}
-
 namespace exodbc
 {
 	// Consts
@@ -96,7 +92,7 @@ namespace exodbc
 		* \see		Init(const Database*, AccessFlags, const TableInfo&)
 		* \throw	Exception
 		*/
-		Table(const Database* pDb, AccessFlags afs, const TableInfo& tableInfo);
+		Table(ConstDatabasePtr pDb, AccessFlags afs, const TableInfo& tableInfo);
 
 
 		/*!
@@ -104,7 +100,7 @@ namespace exodbc
 		* \see		Init(const Database* pDb, AccessFlags, const std::wstring&, const std::wstring&, const std::wstring&, const std::wstring&)
 		* \throw	Exception
 		*/
-		Table(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
+		Table(ConstDatabasePtr pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
 
 
 		/*!
@@ -135,7 +131,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		void Init(const Database* pDb, AccessFlags afs, const TableInfo& tableInfo);
+		void Init(ConstDatabasePtr pDb, AccessFlags afs, const TableInfo& tableInfo);
 
 
 		/*!
@@ -156,7 +152,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		void Init(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
+		void Init(ConstDatabasePtr pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
 			
 
 		/*!
@@ -992,7 +988,8 @@ namespace exodbc
 		*/
 		const SqlCBufferVariant& GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const;
 
-		const Database*				m_pDb;	///< Database this table belongs to.
+		ConstDatabasePtr		m_pDb;
+//		const Database*				m_pDb;	///< Database this table belongs to.
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
 		// ODBC Handles
