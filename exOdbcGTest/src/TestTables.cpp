@@ -247,209 +247,209 @@ namespace exodbc
 		//}
 
 
-		void InsertIntTypesTmp(test::Case nameCase, const exodbc::Database& db, Int id, SmallInt tSmallInt, Int tInt, BigInt tBigInt, bool commitTrans /* = true */)
-		{
-			std::wstring tableName;
-			try
-			{
-				// Note: We only allow the indicator to be set to NULL
-				ValueIndicator idInd = GetValueIndicator(id);
-				ValueIndicator smallIntInd = GetValueIndicator(tSmallInt);
-				ValueIndicator intInd = GetValueIndicator(tInt);
-				ValueIndicator bigIntInd = GetValueIndicator(tBigInt);
-				exASSERT(idInd == ValueIndicator::NO_INDICATOR || idInd == ValueIndicator::IS_NULL);
-				exASSERT(smallIntInd == ValueIndicator::NO_INDICATOR || smallIntInd == ValueIndicator::IS_NULL);
-				exASSERT(intInd == ValueIndicator::NO_INDICATOR || intInd == ValueIndicator::IS_NULL);
-				exASSERT(bigIntInd == ValueIndicator::NO_INDICATOR || bigIntInd == ValueIndicator::IS_NULL);
+		//void InsertIntTypesTmp(test::Case nameCase, const exodbc::Database& db, Int id, SmallInt tSmallInt, Int tInt, BigInt tBigInt, bool commitTrans /* = true */)
+		//{
+		//	std::wstring tableName;
+		//	try
+		//	{
+		//		// Note: We only allow the indicator to be set to NULL
+		//		ValueIndicator idInd = GetValueIndicator(id);
+		//		ValueIndicator smallIntInd = GetValueIndicator(tSmallInt);
+		//		ValueIndicator intInd = GetValueIndicator(tInt);
+		//		ValueIndicator bigIntInd = GetValueIndicator(tBigInt);
+		//		exASSERT(idInd == ValueIndicator::NO_INDICATOR || idInd == ValueIndicator::IS_NULL);
+		//		exASSERT(smallIntInd == ValueIndicator::NO_INDICATOR || smallIntInd == ValueIndicator::IS_NULL);
+		//		exASSERT(intInd == ValueIndicator::NO_INDICATOR || intInd == ValueIndicator::IS_NULL);
+		//		exASSERT(bigIntInd == ValueIndicator::NO_INDICATOR || bigIntInd == ValueIndicator::IS_NULL);
 
-				// Get an insertable IntTypesTmp Table
-				tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
-				std::wstring idColName = GetIdColumnName(test::TableId::INTEGERTYPES_TMP, nameCase);
-				exodbc::Table intTable(&db, AF_SELECT | AF_INSERT, tableName, L"", L"", L"");
-				intTable.Open();
+		//		// Get an insertable IntTypesTmp Table
+		//		tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
+		//		std::wstring idColName = GetIdColumnName(test::TableId::INTEGERTYPES_TMP, nameCase);
+		//		exodbc::Table intTable(&db, AF_SELECT | AF_INSERT, tableName, L"", L"", L"");
+		//		intTable.Open();
 
-				// Insert given values
-				// Note: BufferVariant defaults to NULL value
-				BufferVariant idVal;
-				BufferVariant tSmallIntVal;
-				BufferVariant tIntVal;
-				BufferVariant tBigIntVal;
-				if (idInd != ValueIndicator::IS_NULL)
-				{
-					idVal = boost::get<SQLINTEGER>(id);
-				}
-				if (smallIntInd != ValueIndicator::IS_NULL)
-				{
-					if (db.GetDbms() == DatabaseProduct::ACCESS)
-					{
-						tSmallIntVal = (SQLINTEGER) boost::get<SQLSMALLINT>(tSmallInt);
-					}
-					else
-					{
-						tSmallIntVal = boost::get<SQLSMALLINT>(tSmallInt);
-					}
-				}
-				if (intInd != ValueIndicator::IS_NULL)
-				{
-					tIntVal = boost::get<SQLINTEGER>(tInt);
-				}
-				if (bigIntInd != ValueIndicator::IS_NULL)
-				{
-					// on access, we stay on the null value
-					if (db.GetDbms() != DatabaseProduct::ACCESS)
-					{
-						tBigIntVal = boost::get<SQLBIGINT>(tBigInt);
-					}
-				}
-				intTable.SetColumnValue(0, idVal);
-				intTable.SetColumnValue(1, tSmallIntVal);
-				intTable.SetColumnValue(2, tIntVal);
-				intTable.SetColumnValue(3, tBigIntVal);
-				intTable.Insert();
-				if (commitTrans)
-				{
-					db.CommitTrans();
-				}
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
-				throw;
-			}
+		//		// Insert given values
+		//		// Note: BufferVariant defaults to NULL value
+		//		BufferVariant idVal;
+		//		BufferVariant tSmallIntVal;
+		//		BufferVariant tIntVal;
+		//		BufferVariant tBigIntVal;
+		//		if (idInd != ValueIndicator::IS_NULL)
+		//		{
+		//			idVal = boost::get<SQLINTEGER>(id);
+		//		}
+		//		if (smallIntInd != ValueIndicator::IS_NULL)
+		//		{
+		//			if (db.GetDbms() == DatabaseProduct::ACCESS)
+		//			{
+		//				tSmallIntVal = (SQLINTEGER) boost::get<SQLSMALLINT>(tSmallInt);
+		//			}
+		//			else
+		//			{
+		//				tSmallIntVal = boost::get<SQLSMALLINT>(tSmallInt);
+		//			}
+		//		}
+		//		if (intInd != ValueIndicator::IS_NULL)
+		//		{
+		//			tIntVal = boost::get<SQLINTEGER>(tInt);
+		//		}
+		//		if (bigIntInd != ValueIndicator::IS_NULL)
+		//		{
+		//			// on access, we stay on the null value
+		//			if (db.GetDbms() != DatabaseProduct::ACCESS)
+		//			{
+		//				tBigIntVal = boost::get<SQLBIGINT>(tBigInt);
+		//			}
+		//		}
+		//		intTable.SetColumnValue(0, idVal);
+		//		intTable.SetColumnValue(1, tSmallIntVal);
+		//		intTable.SetColumnValue(2, tIntVal);
+		//		intTable.SetColumnValue(3, tBigIntVal);
+		//		intTable.Insert();
+		//		if (commitTrans)
+		//		{
+		//			db.CommitTrans();
+		//		}
+		//	}
+		//	catch (exodbc::Exception& ex)
+		//	{
+		//		LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
+		//		throw;
+		//	}
 
-		}
-
-
-		void ClearIntTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
-		{
-			std::wstring tableName;
-			try
-			{
-				// Create a deletable table and delete on it
-				tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
-				std::wstring idColName = GetIdColumnName(test::TableId::INTEGERTYPES_TMP, nameCase);
-				exodbc::Table intTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
-				intTable.Open();
-				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
-				intTable.Delete(where, false);
-				db.CommitTrans();
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
-				throw;
-			}
-		}
+		//}
 
 
-		void ClearDateTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
-		{
-			std::wstring tableName;
-			try
-			{
-				// Create a deletable table and delete on it
-				tableName = GetTableName(test::TableId::DATETYPES_TMP, nameCase);
-				std::wstring idColName = GetIdColumnName(test::TableId::DATETYPES_TMP, nameCase);
-				exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
-				dTable.Open();
-				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
-				dTable.Delete(where, false);
-				db.CommitTrans();
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
-				throw;
-			}
-		}
+		//void ClearIntTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
+		//{
+		//	std::wstring tableName;
+		//	try
+		//	{
+		//		// Create a deletable table and delete on it
+		//		tableName = GetTableName(test::TableId::INTEGERTYPES_TMP, nameCase);
+		//		std::wstring idColName = GetIdColumnName(test::TableId::INTEGERTYPES_TMP, nameCase);
+		//		exodbc::Table intTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
+		//		intTable.Open();
+		//		std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
+		//		intTable.Delete(where, false);
+		//		db.CommitTrans();
+		//	}
+		//	catch (exodbc::Exception& ex)
+		//	{
+		//		LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
+		//		throw;
+		//	}
+		//}
 
 
-		void ClearCharTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
-		{
-			std::wstring tableName;
-			try
-			{
-				// Create a deletable table and delete on it
-				tableName = GetTableName(test::TableId::CHARTYPES_TMP, nameCase);
-				std::wstring idColName = GetIdColumnName(test::TableId::CHARTYPES_TMP, nameCase);
-				exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
-				dTable.Open();
-				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
-				dTable.Delete(where, false);
-				db.CommitTrans();
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
-				throw;
-			}
-		}
+		//void ClearDateTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
+		//{
+		//	std::wstring tableName;
+		//	try
+		//	{
+		//		// Create a deletable table and delete on it
+		//		tableName = GetTableName(test::TableId::DATETYPES_TMP, nameCase);
+		//		std::wstring idColName = GetIdColumnName(test::TableId::DATETYPES_TMP, nameCase);
+		//		exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
+		//		dTable.Open();
+		//		std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
+		//		dTable.Delete(where, false);
+		//		db.CommitTrans();
+		//	}
+		//	catch (exodbc::Exception& ex)
+		//	{
+		//		LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
+		//		throw;
+		//	}
+		//}
 
 
-		void ClearNumericTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
-		{
-			std::wstring tableName;
-			try
-			{
-				// Create a deletable table and delete on it
-				tableName = GetTableName(test::TableId::NUMERICTYPES_TMP, nameCase);
-				std::wstring idColName = GetIdColumnName(test::TableId::NUMERICTYPES_TMP, nameCase);
-				exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
-				dTable.Open();
-				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
-				dTable.Delete(where, false);
-				db.CommitTrans();
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
-				throw;
-			}
-		}
+		//void ClearCharTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
+		//{
+		//	std::wstring tableName;
+		//	try
+		//	{
+		//		// Create a deletable table and delete on it
+		//		tableName = GetTableName(test::TableId::CHARTYPES_TMP, nameCase);
+		//		std::wstring idColName = GetIdColumnName(test::TableId::CHARTYPES_TMP, nameCase);
+		//		exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
+		//		dTable.Open();
+		//		std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
+		//		dTable.Delete(where, false);
+		//		db.CommitTrans();
+		//	}
+		//	catch (exodbc::Exception& ex)
+		//	{
+		//		LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
+		//		throw;
+		//	}
+		//}
 
 
-		void ClearBlobTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
-		{
-			std::wstring tableName;
-			try
-			{
-				// Create a deletable table and delete on it
-				tableName = GetTableName(test::TableId::BLOBTYPES_TMP, nameCase);
-				std::wstring idColName = GetIdColumnName(test::TableId::BLOBTYPES_TMP, nameCase);
-				exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
-				dTable.Open();
-				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
-				dTable.Delete(where, false);
-				db.CommitTrans();
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
-				throw;
-			}
-		}
+		//void ClearNumericTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
+		//{
+		//	std::wstring tableName;
+		//	try
+		//	{
+		//		// Create a deletable table and delete on it
+		//		tableName = GetTableName(test::TableId::NUMERICTYPES_TMP, nameCase);
+		//		std::wstring idColName = GetIdColumnName(test::TableId::NUMERICTYPES_TMP, nameCase);
+		//		exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
+		//		dTable.Open();
+		//		std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
+		//		dTable.Delete(where, false);
+		//		db.CommitTrans();
+		//	}
+		//	catch (exodbc::Exception& ex)
+		//	{
+		//		LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
+		//		throw;
+		//	}
+		//}
 
 
-		void ClearFloatTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
-		{
-			std::wstring tableName;
-			try
-			{
-				// Create a deletable table and delete on it
-				tableName = GetTableName(test::TableId::FLOATTYPES_TMP, nameCase);
-				std::wstring idColName = GetIdColumnName(test::TableId::FLOATTYPES_TMP, nameCase);
-				exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
-				dTable.Open();
-				std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
-				dTable.Delete(where, false);
-				db.CommitTrans();
-			}
-			catch (exodbc::Exception& ex)
-			{
-				LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
-				throw;
-			}
-		}
+		//void ClearBlobTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
+		//{
+		//	std::wstring tableName;
+		//	try
+		//	{
+		//		// Create a deletable table and delete on it
+		//		tableName = GetTableName(test::TableId::BLOBTYPES_TMP, nameCase);
+		//		std::wstring idColName = GetIdColumnName(test::TableId::BLOBTYPES_TMP, nameCase);
+		//		exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
+		//		dTable.Open();
+		//		std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
+		//		dTable.Delete(where, false);
+		//		db.CommitTrans();
+		//	}
+		//	catch (exodbc::Exception& ex)
+		//	{
+		//		LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
+		//		throw;
+		//	}
+		//}
+
+
+		//void ClearFloatTypesTmpTable(const exodbc::Database& db, test::Case nameCase)
+		//{
+		//	std::wstring tableName;
+		//	try
+		//	{
+		//		// Create a deletable table and delete on it
+		//		tableName = GetTableName(test::TableId::FLOATTYPES_TMP, nameCase);
+		//		std::wstring idColName = GetIdColumnName(test::TableId::FLOATTYPES_TMP, nameCase);
+		//		exodbc::Table dTable(&db, AF_SELECT | AF_DELETE_WHERE, tableName, L"", L"", L"");
+		//		dTable.Open();
+		//		std::wstring where = boost::str(boost::wformat(L"%s >= 0 OR %s < 0") % idColName %idColName);
+		//		dTable.Delete(where, false);
+		//		db.CommitTrans();
+		//	}
+		//	catch (exodbc::Exception& ex)
+		//	{
+		//		LOG_ERROR(boost::str(boost::wformat(L"Failed to clear test table '%s': %s") % tableName %ex.ToString()));
+		//		throw;
+		//	}
+		//}
 		// \todo: See ticket #82
 		//exodbc::Table GetEmptyTestTable(TestTables::Table table, TestTables::NameCase nameCase, exodbc::Database& db)
 		//{

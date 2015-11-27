@@ -13,6 +13,7 @@
 #include "ExcelTest.h"
 
 // Same component headers
+#include "exOdbcGTestHelpers.h"
 
 // Other headers
 #include "Database.h"
@@ -33,14 +34,13 @@
 // Implementation
 // --------------
 using namespace std;
+using namespace exodbctest;
 
 namespace exodbc
 {
 
 	void ExcelTest::SetUp()
 	{
-		m_odbcInfo = g_odbcInfo;
-
 		// Set up is called for every test
 		ASSERT_NO_THROW(m_pEnv->Init(OdbcVersion::V_3));
 	}
@@ -57,31 +57,22 @@ namespace exodbc
 		Database db;
 		ASSERT_NO_THROW(db.Init(m_pEnv));
 		// We cannot set Commit-mode on excel
-		if (m_odbcInfo.HasConnectionString())
+		if (g_odbcInfo.HasConnectionString())
 		{
-			EXPECT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
+			EXPECT_NO_THROW(db.Open(g_odbcInfo.m_connectionString));
 		}
 		else
 		{
-			EXPECT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
+			EXPECT_NO_THROW(db.Open(g_odbcInfo.m_dsn, L"", L""));
 		}
 	}
 
 
 	TEST_F(ExcelTest, FindTables)
 	{
-		Database db;
-		ASSERT_NO_THROW(db.Init(m_pEnv));
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
-		}
+		DatabasePtr pDb = OpenTestDb(m_pEnv);
 		TableInfosVector tables;
-		ASSERT_NO_THROW(tables = db.FindTables(L"", L"", L"", L""));
+		ASSERT_NO_THROW(tables = pDb->FindTables(L"", L"", L"", L""));
 		// Must contain our sheet 'TestTable$'
 		bool foundTestTableSheet = false;
 		TableInfosVector::const_iterator it;
@@ -98,18 +89,9 @@ namespace exodbc
 
 	TEST_F(ExcelTest, OpenAutoTableAsWChar)
 	{
-		Database db;
-		ASSERT_NO_THROW(db.Init(m_pEnv));
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
-		}
+		DatabasePtr pDb = OpenTestDb(m_pEnv);
 		// Create Table
-		Table tTable(&db, AF_READ, L"TestTable$", L"", L"", L"");
+		Table tTable(pDb, AF_READ, L"TestTable$", L"", L"", L"");
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open());
 		// Opening works, but selecting does not
@@ -119,17 +101,8 @@ namespace exodbc
 	TEST_F(ExcelTest, SpecialQueryNameWorkaround)
 	{
 		// See Ticket #111 - this is fixed and no workarounds are needed
-		Database db;
-		ASSERT_NO_THROW(db.Init(m_pEnv));
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
-		}
-		Table tTable(&db, AF_READ, L"TestTable$", L"", L"", L"");
+		DatabasePtr pDb = OpenTestDb(m_pEnv);
+		Table tTable(pDb, AF_READ, L"TestTable$", L"", L"", L"");
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open(TOF_CHECK_EXISTANCE));
@@ -150,9 +123,9 @@ namespace exodbc
 
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
+		ASSERT_NO_THROW(tableInfo = pDb->FindOneTable(L"TestTable$", L"", L"", L""));
 
-		Table tTable2(&db, AF_READ, tableInfo);
+		Table tTable2(pDb, AF_READ, tableInfo);
 		tTable2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable2.Open(TOF_CHECK_EXISTANCE));
 
@@ -173,22 +146,13 @@ namespace exodbc
 
 	TEST_F(ExcelTest, SelectManualWCharValues)
 	{
-		Database db;
-		ASSERT_NO_THROW(db.Init(m_pEnv));
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
-		}
+		DatabasePtr pDb = OpenTestDb(m_pEnv);
 		// Find the correct table:
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
+		ASSERT_NO_THROW(tableInfo = pDb->FindOneTable(L"TestTable$", L"", L"", L""));
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		// And create the manual table:
-		Table tTable(&db, AF_READ, tableInfo);
+		Table tTable(pDb, AF_READ, tableInfo);
 		SQLWCHAR id[512];
 		SQLWCHAR ic[512];
 		SQLWCHAR fc[512];
@@ -226,21 +190,12 @@ namespace exodbc
 
 	TEST_F(ExcelTest, SelectAutoWCharValues)
 	{
-		Database db;
-		ASSERT_NO_THROW(db.Init(m_pEnv));
-		if (m_odbcInfo.HasConnectionString())
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_connectionString));
-		}
-		else
-		{
-			ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"", L""));
-		}
+		DatabasePtr pDb = OpenTestDb(m_pEnv);
 		// Find the correct table:
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = db.FindOneTable(L"TestTable$", L"", L"", L""));
+		ASSERT_NO_THROW(tableInfo = pDb->FindOneTable(L"TestTable$", L"", L"", L""));
 		// And create the auto table:
-		Table tTable(&db, AF_READ, tableInfo);
+		Table tTable(pDb, AF_READ, tableInfo);
 		ASSERT_NO_THROW(tTable.Open(TOF_NONE));
 
 		// Select all Rows

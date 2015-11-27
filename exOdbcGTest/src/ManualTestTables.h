@@ -13,16 +13,14 @@
 #include "TestTables.h"
 
 // Other headers
+#include "Database.h"
 #include "Table.h"
 
 // System headers
 
 // Forward declarations
 // --------------------
-namespace exodbc
-{
-	class Database;
-}
+
 
 // Structs
 // -------
@@ -37,7 +35,7 @@ namespace exodbc
 	{
 	public:
 
-		MIntTypesTable(const Database* pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"IntegerTypes");
+		MIntTypesTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"IntegerTypes");
 		virtual ~MIntTypesTable() {};
 
 		// Size of Type							Bytes		Min						Max
@@ -54,7 +52,7 @@ namespace exodbc
 	class MFloatTypesTable : public exodbc::Table
 	{
 	public:
-		MFloatTypesTable(const Database* pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"FloatTypes");
+		MFloatTypesTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"FloatTypes");
 		virtual ~MFloatTypesTable() {};
 
 		// Note: SQLFLOAT is typedefed to SQLDOUBLE (!!). Use SQLREAL for explicit FLOAT!
@@ -72,7 +70,7 @@ namespace exodbc
 	{
 	public:
 
-		MCharTypesTable(const Database* pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"CharTypes");
+		MCharTypesTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"CharTypes");
 		virtual ~MCharTypesTable() {};
 
 		SQLINTEGER	m_idCharTypes;
@@ -90,7 +88,7 @@ namespace exodbc
 	{
 	public:
 
-		MWCharTypesTable(const Database* pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"CharTypes");
+		MWCharTypesTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"CharTypes");
 		virtual ~MWCharTypesTable() {};
 
 		SQLINTEGER	m_idCharTypes;
@@ -106,7 +104,7 @@ namespace exodbc
 	class MDateTypesTable : public exodbc::Table
 	{
 	public:
-		MDateTypesTable(const Database* pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"DateTypes");
+		MDateTypesTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"DateTypes");
 		virtual ~MDateTypesTable() {};
 
 		SQLINTEGER				m_idDateTypes;
@@ -122,7 +120,7 @@ namespace exodbc
 	class MBlobTypesTable : public exodbc::Table
 	{
 	public:
-		MBlobTypesTable(const Database* pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"BlobTypes");
+		MBlobTypesTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"BlobTypes");
 		virtual ~MBlobTypesTable() {};
 
 		SQLINTEGER		m_idBlobTypes;
@@ -136,7 +134,7 @@ namespace exodbc
 	class MNumericTypesTable : public exodbc::Table
 	{
 	public:
-		MNumericTypesTable(const Database* pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"NumericTypes");
+		MNumericTypesTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"NumericTypes");
 		virtual ~MNumericTypesTable() {};
 
 		SQLINTEGER			m_idNumericTypes;
@@ -152,7 +150,7 @@ namespace exodbc
 	class MNumericTypesAsCharTable : public exodbc::Table
 	{
 	public:
-		MNumericTypesAsCharTable(const Database* pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"NumericTypes");
+		MNumericTypesAsCharTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER, const std::wstring& name = L"NumericTypes");
 		virtual ~MNumericTypesAsCharTable() {};
 
 		SQLINTEGER			m_idNumericTypes;
@@ -168,7 +166,7 @@ namespace exodbc
 	class MCharTable : public exodbc::Table
 	{
 	public:
-		MCharTable(const Database* pDb, test::Case namesCase = test::Case::LOWER);
+		MCharTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER);
 		virtual ~MCharTable() {};
 
 		SQLINTEGER	m_idCharTable;
@@ -183,7 +181,7 @@ namespace exodbc
 	class MIncompleteCharTable : public exodbc::Table
 	{
 	public:
-		MIncompleteCharTable(const Database* pDb, test::Case namesCase = test::Case::LOWER);
+		MIncompleteCharTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER);
 		virtual ~MIncompleteCharTable() {};
 
 		SQLINTEGER	m_idCharTable;
@@ -199,7 +197,7 @@ namespace exodbc
 	class MNotExistingTable : public exodbc::Table
 	{
 	public:
-		MNotExistingTable(const Database* pDb, test::Case namesCase = test::Case::LOWER);
+		MNotExistingTable(ConstDatabasePtr pDb, test::Case namesCase = test::Case::LOWER);
 		~MNotExistingTable() {};
 
 		SQLINTEGER		m_idNotExisting;

@@ -116,7 +116,7 @@ namespace exodbc
 	{
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		exodbc::Table table;
-		//EXPECT_NO_THROW(table.Init(&m_db, AF_READ, tableName, L"", L"", L""));
+		EXPECT_NO_THROW(table.Init(m_pDb, AF_READ, tableName, L"", L"", L""));
 		//EXPECT_NO_THROW(table.Open());
 	}
 //
