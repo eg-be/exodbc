@@ -91,7 +91,7 @@ namespace exodbc
 	{
 		DatabasePtr pDb = OpenTestDb(m_pEnv);
 		// Create Table
-		Table tTable(pDb, AF_READ, L"TestTable$", L"", L"", L"");
+		Table tTable(pDb, TableAccessFlag::AF_READ, L"TestTable$");
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open());
 		// Opening works, but selecting does not
@@ -102,7 +102,7 @@ namespace exodbc
 	{
 		// See Ticket #111 - this is fixed and no workarounds are needed
 		DatabasePtr pDb = OpenTestDb(m_pEnv);
-		Table tTable(pDb, AF_READ, L"TestTable$", L"", L"", L"");
+		Table tTable(pDb, TableAccessFlag::AF_READ, L"TestTable$");
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open(TOF_CHECK_EXISTANCE));
@@ -125,7 +125,7 @@ namespace exodbc
 		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = pDb->FindOneTable(L"TestTable$", L"", L"", L""));
 
-		Table tTable2(pDb, AF_READ, tableInfo);
+		Table tTable2(pDb, TableAccessFlag::AF_READ, tableInfo);
 		tTable2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable2.Open(TOF_CHECK_EXISTANCE));
 
@@ -152,7 +152,7 @@ namespace exodbc
 		ASSERT_NO_THROW(tableInfo = pDb->FindOneTable(L"TestTable$", L"", L"", L""));
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		// And create the manual table:
-		Table tTable(pDb, AF_READ, tableInfo);
+		Table tTable(pDb, TableAccessFlag::AF_READ, tableInfo);
 		SQLWCHAR id[512];
 		SQLWCHAR ic[512];
 		SQLWCHAR fc[512];
@@ -195,7 +195,7 @@ namespace exodbc
 		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = pDb->FindOneTable(L"TestTable$", L"", L"", L""));
 		// And create the auto table:
-		Table tTable(pDb, AF_READ, tableInfo);
+		Table tTable(pDb, TableAccessFlag::AF_READ, tableInfo);
 		ASSERT_NO_THROW(tTable.Open(TOF_NONE));
 
 		// Select all Rows

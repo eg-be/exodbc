@@ -35,7 +35,7 @@ namespace exodbc
 	// IntTypesTable
 	// ---------------
 	MIntTypesTable::MIntTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"IntegerTypes" */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
 	{
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
@@ -52,7 +52,7 @@ namespace exodbc
 	// FloatTypesTable
 	// ---------------
 	MFloatTypesTable::MFloatTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"FloatTypes" */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
 	{
 		m_idFloatTypes = 0;
 		m_double = 0;
@@ -88,7 +88,7 @@ namespace exodbc
 	// CharTypesTable
 	// --------------
 	MCharTypesTable::MCharTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
@@ -118,7 +118,7 @@ namespace exodbc
 	// WCharTypesTable
 	// --------------
 	MWCharTypesTable::MWCharTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
@@ -148,7 +148,7 @@ namespace exodbc
 	// DateTypesTable
 	// ---------------
 	MDateTypesTable::MDateTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"DateTypes" */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
 	{
 		m_idDateTypes = 0;
 		ZeroMemory(&m_date, sizeof(m_date));
@@ -177,7 +177,7 @@ namespace exodbc
 	// BlobTypesTable
 	// --------------
 	MBlobTypesTable::MBlobTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"BlobTypes" */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
 	{
 		ZeroMemory(m_blob, sizeof(m_blob));
 		ZeroMemory(m_varblob_20, sizeof(m_varblob_20));
@@ -191,7 +191,7 @@ namespace exodbc
 	// MNumericTypesTable
 	// -----------------
 	MNumericTypesTable::MNumericTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
 	{
 		m_idNumericTypes = 0;
 
@@ -209,7 +209,7 @@ namespace exodbc
 	// MNumericTypesAsCharTable
 	// -----------------
 	MNumericTypesAsCharTable::MNumericTypesAsCharTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(name, namesCase), L"", L"", L"")
 	{
 		m_idNumericTypes = 0;
 		m_wcdecimal_18_0[0] = 0;
@@ -226,7 +226,7 @@ namespace exodbc
 	// CharTable
 	// ---------
 	MCharTable::MCharTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(L"chartable", namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(L"chartable", namesCase), L"", L"", L"")
 	{
 		m_idCharTable = 0;
 		m_col2[0] = 0;
@@ -243,7 +243,7 @@ namespace exodbc
 	// IncompleteCharTable
 	// -------------------
 	MIncompleteCharTable::MIncompleteCharTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, AF_READ, test::ConvertNameCase(L"chartable", namesCase), L"", L"", L"")
+		: Table(pDb, TableAccessFlag::AF_READ, test::ConvertNameCase(L"chartable", namesCase), L"", L"", L"")
 	{
 		m_idCharTable = 0;
 		m_col2[0] = 0;
@@ -260,7 +260,7 @@ namespace exodbc
 	// NotExistingTable
 	// ----------------
 	MNotExistingTable::MNotExistingTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, AF_READ_WRITE, test::ConvertNameCase(L"notexisting", namesCase))
+		: Table(pDb, TableAccessFlag::AF_READ_WRITE, test::ConvertNameCase(L"notexisting", namesCase))
 	{
 		m_idNotExisting = 0;
 
