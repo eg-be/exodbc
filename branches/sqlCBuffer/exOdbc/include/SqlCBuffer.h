@@ -399,6 +399,37 @@ namespace exodbc
 		std::shared_ptr<T> m_pBuffer;
 		std::set<ColumnBoundHandle> m_boundSelects;
 	};
+
+	class SqlCPointerBuffer
+		: public SqlCBufferLengthIndicator
+		, public ColumnFlags
+		, public ExtendedColumnPropertiesHolder
+	{
+	public:
+		SqlCPointerBuffer(const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+			: m_pBuffer(pBuffer)
+			, m_sqlCType(sqlCType)
+			, m_bufferLength(bufferSize)
+		{
+			ManualColumnInfo colInfo(sqlType, queryName);
+			SetObjectName(std::make_shared <ManualColumnInfo> (colInfo));
+			Set(flags);
+			SetDecimalDigits(decimalDigits);
+			SetColumnSize(columnSize);
+		};
+
+		SqlCPointerBuffer& operator=(const SqlCPointerBuffer& other) = default;
+		SqlCPointerBuffer(const SqlCPointerBuffer& other) = default;
+
+		SQLSMALLINT GetSqlCType() const noexcept { return m_sqlCType; };
+		SQLLEN GetBufferLength() const noexcept { return m_bufferLength; };
+
+	private:
+		SQLPOINTER m_pBuffer;
+		SQLSMALLINT m_sqlCType;
+		SQLLEN m_bufferLength;
+
+	};
 	
 	// Array types
 	typedef SqlCArrayBuffer<SQLWCHAR, SQL_C_WCHAR> SqlWCharArray;
