@@ -1303,7 +1303,8 @@ namespace exodbc
 
 	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
 	{
-
+		SqlCPointerBuffer column(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
+		SetColumn(columnIndex, column);
 	}
 
 

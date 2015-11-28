@@ -406,6 +406,7 @@ namespace exodbc
 		, public ExtendedColumnPropertiesHolder
 	{
 	public:
+		SqlCPointerBuffer() = delete;
 		SqlCPointerBuffer(const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
 			: m_pBuffer(pBuffer)
 			, m_sqlCType(sqlCType)
@@ -543,7 +544,9 @@ namespace exodbc
 		SqlTypeTimestampStructBuffer, SqlTimestamptStructBuffer,
 		SqlNumericStructBuffer,
 		SqlDoubleBuffer, SqlRealBuffer,
-		SqlWCharArray, SqlCharArray, SqlBinaryArray> SqlCBufferVariant;
+		SqlWCharArray, SqlCharArray, SqlBinaryArray,
+		SqlCPointerBuffer
+	> SqlCBufferVariant;
 	
 	typedef std::map<SQLUSMALLINT, SqlCBufferVariant> SqlCBufferVariantMap;
 
