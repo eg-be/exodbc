@@ -102,6 +102,7 @@ namespace exodbc
 			: m_columnSize(0)
 			, m_decimalDigits(0)
 			, m_pObjectName(NULL)
+			, m_sqlType(SQL_UNKNOWN_TYPE)
 		{};
 
 		virtual ~ExtendedColumnPropertiesHolder()
@@ -110,14 +111,17 @@ namespace exodbc
 		void SetColumnSize(SQLINTEGER columnSize) noexcept { m_columnSize = columnSize; };
 		void SetDecimalDigits(SQLSMALLINT decimalDigits) noexcept { m_decimalDigits = decimalDigits; };
 		void SetObjectName(std::shared_ptr<ObjectName> pObjectName) { exASSERT(pObjectName != NULL); m_pObjectName = pObjectName; };
-		
+		void SetSqlType(SQLSMALLINT sqlType) noexcept { m_sqlType = sqlType; };
+
 		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
 		SQLSMALLINT GetDecimalDigits() const noexcept { return m_decimalDigits; };
 		std::shared_ptr<ObjectName> GetObjectName() const noexcept { return m_pObjectName; };
+		SQLSMALLINT GetSqlType() const noexcept { return m_sqlType; };
 
 	protected:
 		SQLINTEGER m_columnSize;
 		SQLSMALLINT m_decimalDigits;
+		SQLSMALLINT m_sqlType;
 		std::shared_ptr<ObjectName> m_pObjectName;
 	};
 
@@ -417,6 +421,7 @@ namespace exodbc
 			Set(flags);
 			SetDecimalDigits(decimalDigits);
 			SetColumnSize(columnSize);
+			SetSqlType(sqlType);
 		};
 
 		SqlCPointerBuffer& operator=(const SqlCPointerBuffer& other) = default;

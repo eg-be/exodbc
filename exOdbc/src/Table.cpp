@@ -399,6 +399,7 @@ namespace exodbc
 					columnFlags = flags;
 					ExtendedColumnPropertiesHolder& extendedColumnProperties = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(sqlCBuffer);
 					extendedColumnProperties.SetObjectName(std::make_shared<ColumnInfo>(colInfo));
+					extendedColumnProperties.SetSqlType(colInfo.GetSqlType());
 					if(!colInfo.IsColumnSizeNull())
 					{
 						extendedColumnProperties.SetColumnSize(colInfo.GetColumnSize());
@@ -1298,6 +1299,9 @@ namespace exodbc
 
 		// okay, remember the passed variant
 		m_columns[columnIndex] = column;
+
+		// Flag that columns are created manually
+		m_manualColumns = true;
 	}
 
 
@@ -1421,54 +1425,71 @@ namespace exodbc
 			{
 				// Check that the manually defined columns do not violate our access-flags
 				// and check that manually defined types are supported by the database
-				//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); )
-				//{
-				//	ColumnBuffer* pBuffer = it->second;
-				//	if (pBuffer->IsColumnFlagSet(CF_SELECT) && !TestAccessFlag(AF_SELECT))
-				//	{
-				//		Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
-				//		SET_EXCEPTION_SOURCE(ex);
-				//		throw ex;
-				//	}
-				//	if (pBuffer->IsColumnFlagSet(CF_INSERT) && !TestAccessFlag(AF_INSERT))
-				//	{
-				//		Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
-				//		SET_EXCEPTION_SOURCE(ex);
-				//		throw ex;
-				//	}
-				//	if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !(TestAccessFlag(AF_UPDATE_PK) || TestAccessFlag(AF_UPDATE_WHERE)))
-				//	{
-				//		Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % pBuffer->GetQueryNameNoThrow() % it->first %m_tableInfo.GetQueryName()));
-				//		SET_EXCEPTION_SOURCE(ex);
-				//		throw ex;
-				//	}
-				//	// type-check
-				//	bool remove = false;
-				//	SQLSMALLINT sqlType = pBuffer->GetSqlType();
-				//	if (!TestOpenFlag(TOF_IGNORE_DB_TYPE_INFOS) && sqlType != SQL_UNKNOWN_TYPE && !m_pDb->IsSqlTypeSupported(sqlType))
-				//	{
-				//		if (TestOpenFlag(TOF_SKIP_UNSUPPORTED_COLUMNS))
-				//		{
-				//			LOG_WARNING(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % pBuffer->GetQueryNameNoThrow() % it->first % SqlType2s(sqlType) % sqlType));
-				//			remove = true;
-				//		}
-				//		else
-				//		{
-				//			Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % pBuffer->GetQueryNameNoThrow() % it->first % SqlType2s(sqlType) % sqlType));
-				//			SET_EXCEPTION_SOURCE(ex);
-				//			throw ex;
-				//		}
-				//	}
-				//	if (remove)
-				//	{
-				//		delete pBuffer;
-				//		m_columnBuffers.erase(it++);
-				//	}
-				//	else
-				//	{
-				//		++it;
-				//	}
-				//}
+				SqlCBufferVariantMap::iterator it = m_columns.begin();
+				while(it != m_columns.end())
+				{
+					SqlCBufferVariant& columnBuffer = it->second;
+					ColumnFlags columnFlags;
+					wstring queryName;
+					SQLSMALLINT sqlType = SQL_UNKNOWN_TYPE;
+					try
+					{
+						columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
+						const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(columnBuffer);
+						sqlType = props.GetSqlType();
+						std::shared_ptr<const ObjectName> pName = props.GetObjectName();
+						exASSERT(pName);
+						queryName = pName->GetQueryName();
+					}
+					catch (const boost::bad_polymorphic_get& ex)
+					{
+						WrapperException we(ex);
+						SET_EXCEPTION_SOURCE(we);
+						throw we;
+					}
+					if (columnFlags.Test(ColumnFlag::CF_SELECT) && !TestAccessFlag(TableAccessFlag::AF_SELECT))
+					{
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+						SET_EXCEPTION_SOURCE(ex);
+						throw ex;
+					}
+					if (columnFlags.Test(ColumnFlag::CF_INSERT) && !TestAccessFlag(TableAccessFlag::AF_INSERT))
+					{
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+						SET_EXCEPTION_SOURCE(ex);
+						throw ex;
+					}
+					if (columnFlags.Test(ColumnFlag::CF_UPDATE) && !(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)))
+					{
+						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+						SET_EXCEPTION_SOURCE(ex);
+						throw ex;
+					}
+					// type-check
+					bool remove = false;
+					if (!TestOpenFlag(TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS) && sqlType != SQL_UNKNOWN_TYPE && !m_pDb->IsSqlTypeSupported(sqlType))
+					{
+						if (TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS))
+						{
+							LOG_WARNING(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % queryName % it->first % SqlType2s(sqlType) % sqlType));
+							remove = true;
+						}
+						else
+						{
+							Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % queryName % it->first % SqlType2s(sqlType) % sqlType));
+							SET_EXCEPTION_SOURCE(ex);
+							throw ex;
+						}
+					}
+					if (remove)
+					{
+						it = m_columns.erase(it);
+					}
+					else
+					{
+						++it;
+					}
+				}
 			}
 
 			// Prepare the FieldStatement to be used for selects
@@ -1642,6 +1663,7 @@ namespace exodbc
 		}
 		catch (const Exception& ex)
 		{
+			HIDE_UNUSED(ex);
 			// Unbind all Buffers
 			for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
 			{

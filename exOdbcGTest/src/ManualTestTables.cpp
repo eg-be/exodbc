@@ -38,8 +38,8 @@ namespace exodbc
 {
 	// IntTypesTable
 	// ---------------
-	MIntTypesTable::MIntTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"IntegerTypes" */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name), L"", L"", L"")
+	MIntTypesTable::MIntTypesTable(ConstDatabasePtr pDb, const std::wstring& name /* = L"IntegerTypes" */)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
 		m_idIntegerTypes = 0;
 		m_smallInt = 0;
@@ -55,8 +55,8 @@ namespace exodbc
 
 	// FloatTypesTable
 	// ---------------
-	MFloatTypesTable::MFloatTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"FloatTypes" */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name), L"", L"", L"")
+	MFloatTypesTable::MFloatTypesTable(ConstDatabasePtr pDb, const std::wstring& name /* = L"FloatTypes" */)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
 		m_idFloatTypes = 0;
 		m_double = 0;
@@ -91,8 +91,8 @@ namespace exodbc
 
 	// CharTypesTable
 	// --------------
-	MCharTypesTable::MCharTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name), L"", L"", L"")
+	MCharTypesTable::MCharTypesTable(ConstDatabasePtr pDb, const std::wstring& name /* = L"CharTypes" */)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
@@ -121,8 +121,8 @@ namespace exodbc
 
 	// WCharTypesTable
 	// --------------
-	MWCharTypesTable::MWCharTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"CharTypes" */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name), L"", L"", L"")
+	MWCharTypesTable::MWCharTypesTable(ConstDatabasePtr pDb, const std::wstring& name /* = L"CharTypes" */)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
@@ -151,8 +151,8 @@ namespace exodbc
 
 	// DateTypesTable
 	// ---------------
-	MDateTypesTable::MDateTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"DateTypes" */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name), L"", L"", L"")
+	MDateTypesTable::MDateTypesTable(ConstDatabasePtr pDb, const std::wstring& name /* = L"DateTypes" */)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
 		m_idDateTypes = 0;
 		ZeroMemory(&m_date, sizeof(m_date));
@@ -180,8 +180,8 @@ namespace exodbc
 
 	// BlobTypesTable
 	// --------------
-	MBlobTypesTable::MBlobTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"BlobTypes" */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name), L"", L"", L"")
+	MBlobTypesTable::MBlobTypesTable(ConstDatabasePtr pDb, const std::wstring& name /* = L"BlobTypes" */)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
 		ZeroMemory(m_blob, sizeof(m_blob));
 		ZeroMemory(m_varblob_20, sizeof(m_varblob_20));
@@ -194,8 +194,8 @@ namespace exodbc
 
 	// MNumericTypesTable
 	// -----------------
-	MNumericTypesTable::MNumericTypesTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name), L"", L"", L"")
+	MNumericTypesTable::MNumericTypesTable(ConstDatabasePtr pDb, const std::wstring& name /* = L"NumericTypes" */)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
 		m_idNumericTypes = 0;
 
@@ -212,8 +212,8 @@ namespace exodbc
 
 	// MNumericTypesAsCharTable
 	// -----------------
-	MNumericTypesAsCharTable::MNumericTypesAsCharTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */, const std::wstring& name /* = L"NumericTypes" */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name), L"", L"", L"")
+	MNumericTypesAsCharTable::MNumericTypesAsCharTable(ConstDatabasePtr pDb, const std::wstring& name /* = L"NumericTypes" */)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
 		m_idNumericTypes = 0;
 		m_wcdecimal_18_0[0] = 0;
@@ -229,8 +229,8 @@ namespace exodbc
 
 	// CharTable
 	// ---------
-	MCharTable::MCharTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(L"chartable"), L"", L"", L"")
+	MCharTable::MCharTable(ConstDatabasePtr pDb)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(L"chartable"))
 	{
 		m_idCharTable = 0;
 		m_col2[0] = 0;
@@ -246,8 +246,8 @@ namespace exodbc
 
 	// IncompleteCharTable
 	// -------------------
-	MIncompleteCharTable::MIncompleteCharTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(L"chartable"), L"", L"", L"")
+	MIncompleteCharTable::MIncompleteCharTable(ConstDatabasePtr pDb)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(L"chartable"))
 	{
 		m_idCharTable = 0;
 		m_col2[0] = 0;
@@ -263,7 +263,7 @@ namespace exodbc
 
 	// NotExistingTable
 	// ----------------
-	MNotExistingTable::MNotExistingTable(ConstDatabasePtr pDb, test::Case namesCase /* = TestTables::NC_LOWER */)
+	MNotExistingTable::MNotExistingTable(ConstDatabasePtr pDb)
 		: Table(pDb, TableAccessFlag::AF_READ_WRITE, ToDbCase(L"notexisting"))
 	{
 		m_idNotExisting = 0;
