@@ -86,32 +86,32 @@ namespace exodbc
 	}
 
 
-//	TEST_F(TableTest, OpenManualWritableWithoutCheckPrivOrExist)
-//	{
-//		// Open an existing table without checking for privileges or existence
-//		Table iTable(&m_db, AF_READ_WRITE, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		SQLINTEGER id = 0;
-//		SQLSMALLINT si = 0;
-//		SQLINTEGER i = 0;
-//		SQLBIGINT bi = 0;
-//		SQLINTEGER bii = 0;
-//		int type = SQL_C_SLONG;
-//		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
-//		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT | CF_UPDATE);
-//		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			// access has no bigint
-//			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bii, SQL_C_SLONG, sizeof(bii), CF_SELECT | CF_INSERT);
-//		}
-//		else
-//		{
-//			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
-//		}
-//		EXPECT_NO_THROW(iTable.Open(TOF_NONE));
-//	}
-//
-//
+	TEST_F(TableTest, OpenManualWritableWithoutCheckPrivOrExist)
+	{
+		// Open an existing table without checking for privileges or existence
+		Table iTable(m_pDb, TableAccessFlag::AF_READ_WRITE, GetTableName(TableId::INTEGERTYPES));
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		SQLINTEGER bii = 0;
+		int type = SQL_C_SLONG;
+		iTable.SetColumn(0, ToDbCase(L"idintegertypes"), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), ColumnFlag::CF_SELECT | ColumnFlag::CF_INSERT | ColumnFlag::CF_PRIMARY_KEY);
+		iTable.SetColumn(1, ToDbCase(L"tsmallint"), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), ColumnFlag::CF_SELECT | ColumnFlag::CF_INSERT | ColumnFlag::CF_UPDATE);
+		iTable.SetColumn(2, ToDbCase(L"tint"), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), ColumnFlag::CF_SELECT);
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// access has no bigint
+			iTable.SetColumn(3, ToDbCase(L"tbigint"), SQL_INTEGER, &bii, SQL_C_SLONG, sizeof(bii), ColumnFlag::CF_SELECT | ColumnFlag::CF_INSERT);
+		}
+		else
+		{
+			iTable.SetColumn(3, ToDbCase(L"tbigint"), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), ColumnFlag::CF_SELECT | ColumnFlag::CF_INSERT);
+		}
+		EXPECT_NO_THROW(iTable.Open(TableOpenFlag::TOF_NONE));
+	}
+
+
 	TEST_F(TableTest, OpenAutoDefaultCtr)
 	{
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
@@ -119,30 +119,30 @@ namespace exodbc
 		EXPECT_NO_THROW(table.Init(m_pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L""));
 		EXPECT_NO_THROW(table.Open());
 	}
-//
-//
-//	TEST_F(TableTest, OpenManualDefaultCtr)
-//	{
-//		// Open an existing manual table for reading
-//		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//
-//		Table iTable;
-//		iTable.Init(&m_db, AF_READ, intTypesTableName, L"", L"", L"");
-//		// Set Columns
-//		SQLINTEGER id;
-//		SQLSMALLINT tSmallint;
-//		SQLINTEGER tInt;
-//		SQLBIGINT tBigint;
-//
-//		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_PRIMARY_KEY);
-//		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tSmallint, SQL_C_SSHORT, sizeof(tSmallint), CF_SELECT);
-//		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tInt, SQL_C_SLONG, sizeof(tInt), CF_SELECT);
-//		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tBigint, SQL_C_SBIGINT, sizeof(tBigint), CF_SELECT);
-//		
-//		EXPECT_NO_THROW(iTable.Open());
-//	}
-//
-//
+
+
+	TEST_F(TableTest, OpenManualDefaultCtr)
+	{
+		// Open an existing manual table for reading
+		std::wstring intTypesTableName = GetTableName(TableId::INTEGERTYPES);
+
+		Table iTable;
+		iTable.Init(m_pDb, TableAccessFlag::AF_READ, intTypesTableName);
+		// Set Columns
+		SQLINTEGER id;
+		SQLSMALLINT tSmallint;
+		SQLINTEGER tInt;
+		SQLBIGINT tBigint;
+
+		iTable.SetColumn(0, ToDbCase(L"idintegertypes"), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
+		iTable.SetColumn(1, ToDbCase(L"tsmallint"), SQL_INTEGER, &tSmallint, SQL_C_SSHORT, sizeof(tSmallint), ColumnFlag::CF_SELECT);
+		iTable.SetColumn(2, ToDbCase(L"tint"), SQL_INTEGER, &tInt, SQL_C_SLONG, sizeof(tInt), ColumnFlag::CF_SELECT);
+		iTable.SetColumn(3, ToDbCase(L"tbigint"), SQL_INTEGER, &tBigint, SQL_C_SBIGINT, sizeof(tBigint), ColumnFlag::CF_SELECT);
+		
+		EXPECT_NO_THROW(iTable.Open());
+	}
+
+
 	TEST_F(TableTest, CopyCtr)
 	{
 		// Create a table
@@ -171,24 +171,24 @@ namespace exodbc
 		EXPECT_TRUE(c2.HasTableInfo());
 		EXPECT_EQ(c1.GetTableInfo(), c2.GetTableInfo());
 	}
-//
-//
-//	TEST_F(TableTest, OpenManualCheckExistence)
-//	{
-//		// Open a table with checking for existence
-//		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
-//		EXPECT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
-//
-//		// Open a non-existing table
-//		{
-//			LogLevelFatal llFatal;
-//			LOG_ERROR(L"Warning: This test is supposed to spit errors");
-//			MNotExistingTable neTable(&m_db, m_odbcInfo.m_namesCase);
-//			EXPECT_THROW(neTable.Open(TOF_CHECK_EXISTANCE), exodbc::Exception);
-//		}
-//	}
-//
-//
+
+
+	TEST_F(TableTest, OpenManualCheckExistence)
+	{
+		// Open a table with checking for existence
+		MIntTypesTable table(m_pDb);
+		EXPECT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
+
+		// Open a non-existing table
+		{
+			LogLevelFatal llFatal;
+			LOG_ERROR(L"Warning: This test is supposed to spit errors");
+			MNotExistingTable neTable(m_pDb);
+			EXPECT_THROW(neTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE), exodbc::Exception);
+		}
+	}
+
+
 //	TEST_F(TableTest, OpenManualCheckColumnFlagSelect)
 //	{
 //		// Open a table manually but do not set the Select flag for all columns
