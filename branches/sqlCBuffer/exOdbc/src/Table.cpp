@@ -20,6 +20,7 @@
 #include "Environment.h"
 #include "Exception.h"
 #include "Sql2BufferTypeMap.h"
+#include "SqlStatementCloser.h"
 
 // Other headers
 
@@ -881,17 +882,18 @@ namespace exodbc
 
 	void Table::SelectBySqlStmt(const std::wstring& sqlStmt)
 	{
-		//exASSERT(IsOpen());
-		//exASSERT(!sqlStmt.empty());
+		exASSERT(IsOpen());
+		exASSERT(!sqlStmt.empty());
+		exASSERT(m_pHStmtSelect->IsAllocated());
 
-		//if (IsSelectOpen())
-		//{
-		//	SelectClose();
-		//}
+		if (IsSelectOpen())
+		{
+			SelectClose();
+		}
 
-		//SQLRETURN ret = SQLExecDirect(m_hStmtSelect, (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
-		//THROW_IFN_SUCCESS(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtSelect);
-		//m_selectQueryOpen = true;
+		SQLRETURN ret = SQLExecDirect(m_pHStmtSelect->GetHandle(), (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
+		THROW_IFN_SUCCESS(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle());
+		m_selectQueryOpen = true;
 	}
 
 
@@ -948,8 +950,8 @@ namespace exodbc
 	
 	void Table::SelectClose()
 	{
-		//CloseStmtHandle(m_hStmtSelect, StmtCloseMode::IgnoreNotOpen);
-		//m_selectQueryOpen = false;
+		StatementCloser::CloseStmtHandle(m_pHStmtSelect, StatementCloser::Mode::IgnoreNotOpen);
+		m_selectQueryOpen = false;
 	}
 
 
