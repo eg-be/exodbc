@@ -999,6 +999,8 @@ namespace exodbc
 
 		// ODBC Handles
 		SqlStmtHandlePtr	m_pHStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
+		SqlStmtHandlePtr	m_pHStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
+
 		//SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
 		//SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
 		//SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.

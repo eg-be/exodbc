@@ -40,6 +40,7 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
+		, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -60,6 +61,7 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
+		, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -82,6 +84,7 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
+		, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -104,6 +107,7 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
+		, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -157,7 +161,7 @@ namespace exodbc
 			//	m_columnBuffers.clear();
 			//}
 
-			FreeStatements();
+			// FreeStatements();
 			
 			// Notify the columnBuffers that we have just freed all statements
 
@@ -227,6 +231,8 @@ namespace exodbc
 		exASSERT(!IsOpen());
 		exASSERT(m_pDb->IsOpen());
 
+		exASSERT(!m_pHStmtSelect->IsAllocated());
+		exASSERT(!m_pHStmtCount->IsAllocated());
 		//exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
 		//exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
 		//exASSERT(SQL_NULL_HSTMT == m_hStmtInsert);
@@ -235,46 +241,61 @@ namespace exodbc
 		//exASSERT(SQL_NULL_HSTMT == m_hStmtUpdateWhere);
 
 		//SQLHDBC hdbc = m_pDb->GetConnectionHandle();
+		ConstSqlDbcHandlePtr pHDbc = m_pDb->GetSqlDbcHandle();
 
-		//// Allocate handles needed
-		//if (TestAccessFlag(AF_SELECT))
-		//{
-		//	m_hStmtCount = AllocateStatementHandle(hdbc);
-		//	m_hStmtSelect = AllocateStatementHandle(hdbc);
-		//}
+		// Allocate handles needed, on failure try to de-allocate everything
+		try
+		{
+			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
+			{
+				m_pHStmtSelect->AllocateWithParent(pHDbc);
+				m_pHStmtCount->AllocateWithParent(pHDbc);
+			}
 
-		//// Allocate handles needed for writing
-		//if (TestAccessFlag(AF_INSERT))
-		//{
-		//	m_hStmtInsert = AllocateStatementHandle(hdbc);
-		//}
-		//if (TestAccessFlag(AF_UPDATE_PK))
-		//{
-		//	m_hStmtUpdatePk = AllocateStatementHandle(hdbc);
-		//}
-		//if (TestAccessFlag(AF_UPDATE_WHERE))
-		//{
-		//	m_hStmtUpdateWhere = AllocateStatementHandle(hdbc);
-		//}
+			//// Allocate handles needed for writing
+			//if (TestAccessFlag(AF_INSERT))
+			//{
+			//	m_hStmtInsert = AllocateStatementHandle(hdbc);
+			//}
+			//if (TestAccessFlag(AF_UPDATE_PK))
+			//{
+			//	m_hStmtUpdatePk = AllocateStatementHandle(hdbc);
+			//}
+			//if (TestAccessFlag(AF_UPDATE_WHERE))
+			//{
+			//	m_hStmtUpdateWhere = AllocateStatementHandle(hdbc);
+			//}
 
-		//if (TestAccessFlag(AF_DELETE_PK))
-		//{
-		//	m_hStmtDeletePk = AllocateStatementHandle(hdbc);
-		//}
-		//if (TestAccessFlag(AF_DELETE_WHERE))
-		//{
-		//	m_hStmtDeleteWhere = AllocateStatementHandle(hdbc);
-		//}
+			//if (TestAccessFlag(AF_DELETE_PK))
+			//{
+			//	m_hStmtDeletePk = AllocateStatementHandle(hdbc);
+			//}
+			//if (TestAccessFlag(AF_DELETE_WHERE))
+			//{
+			//	m_hStmtDeleteWhere = AllocateStatementHandle(hdbc);
+			//}
+		}
+		catch (const Exception& ex)
+		{
+			HIDE_UNUSED(ex);
+			if (m_pHStmtSelect->IsAllocated())
+				m_pHStmtSelect->Free();
+			if (m_pHStmtCount->IsAllocated())
+				m_pHStmtCount->Free();
+
+			// rethrow
+			throw;
+		}
 	}
 
 
 	bool Table::HasAllStatements() const throw()
 	{
 		bool haveAll = true;
-		//if (haveAll && TestAccessFlag(AF_SELECT))
-		//{
-		//	haveAll = (SQL_NULL_HSTMT != m_hStmtSelect) && (SQL_NULL_HSTMT != m_hStmtCount);
-		//}
+		if (haveAll && TestAccessFlag(TableAccessFlag::AF_SELECT))
+		{
+			haveAll = m_pHStmtSelect->IsAllocated() && m_pHStmtCount->IsAllocated();
+		}
 		//if (haveAll && TestAccessFlag(AF_UPDATE_PK))
 		//{
 		//	haveAll = (SQL_NULL_HSTMT != m_hStmtUpdatePk);
@@ -301,19 +322,19 @@ namespace exodbc
 
 	void Table::SetCursorOptions(bool forwardOnlyCursors)
 	{
-		//exASSERT(m_hStmtSelect != SQL_NULL_HSTMT);
+		exASSERT(m_pHStmtSelect->IsAllocated());
 
-		//SQLRETURN ret = 0;
-		//if (forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
-		//{
-		//	ret = SQLSetStmtAttr(m_hStmtSelect, SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_NONSCROLLABLE, NULL);
-		//	THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_hStmtSelect, L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
-		//}
-		//else
-		//{
-		//	ret = SQLSetStmtAttr(m_hStmtSelect, SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_SCROLLABLE, NULL);
-		//	THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_hStmtSelect, L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
-		//}
+		SQLRETURN ret = 0;
+		if (forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
+		{
+			ret = SQLSetStmtAttr(m_pHStmtSelect->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_NONSCROLLABLE, NULL);
+			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
+		}
+		else
+		{
+			ret = SQLSetStmtAttr(m_pHStmtSelect->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_SCROLLABLE, NULL);
+			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
+		}
 	}
 
 
@@ -443,9 +464,21 @@ namespace exodbc
 	void Table::FreeStatements()
 	{
 		exASSERT(!IsOpen());
-		exASSERT(m_pHStmtSelect);
 
-		// Free allocated statements - reset the allocated stmt-handles
+		// Don no call free on the statements, but create new shared_ptrs.
+		// If someone managed somehow to still have a reference to an allocated stmt
+		// the shared_ptr will manage destruction once the last client is gone.
+		// This is not public, and should only happen if not open,
+		// when TableAccessFlags are modified before the table is opened.
+		m_pHStmtSelect = std::make_shared<SqlStmtHandle>();
+		m_pHStmtCount = std::make_shared<SqlStmtHandle>();
+
+		//if (m_pHStmtSelect->IsAllocated())
+		//	m_pHStmtSelect->Free();
+
+		//if (m_pHStmtCount->IsAllocated())
+		//	m_pHStmtCount->Free();
+
 		//if (m_hStmtCount != SQL_NULL_HSTMT)
 		//{
 		//	m_hStmtCount = FreeStatementHandle(m_hStmtCount);
@@ -1514,8 +1547,8 @@ namespace exodbc
 					const ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
 					if (columnFlags.Test(ColumnFlag::SELECT))
 					{
-						//BindSelectVisitor bindSelect(boundColumnNumber, m_hStmtSelect);
-						//boost::apply_visitor(bindSelect, columnBuffer);
+						BindSelectVisitor bindSelect(boundColumnNumber, m_pHStmtSelect);
+						boost::apply_visitor(bindSelect, columnBuffer);
 					}
 				}
 
@@ -1578,6 +1611,13 @@ namespace exodbc
 		catch (const Exception& ex)
 		{
 			// Unbind all Buffers
+			for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
+			{
+				SqlCBufferVariant& columnBuffer = it->second;
+				UnbindVisitor unbind;
+				boost::apply_visitor(unbind, columnBuffer);
+			}
+
 			//if (boundSelect)
 			//{
 			//	SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
@@ -1599,9 +1639,10 @@ namespace exodbc
 			//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert, boost::str(boost::wformat(L"Failed to unbind from Insert-handle during cleanup of Exception '%s': %s") % ex.ToString()));
 			//}
 
-			// delete the ColumnBuffers if we have allocated them during this process (if not manual)
+			// remove the ColumnBuffers if we have allocated them during this process (if not manual)
 			if (!m_manualColumns)
 			{
+				m_columns.clear();
 				//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
 				//{
 				//	ColumnBuffer* pBuffer = it->second;
@@ -1618,6 +1659,21 @@ namespace exodbc
 	void Table::Close()
 	{
 		exASSERT(IsOpen());
+
+		// Unbind all buffers
+		for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
+		{
+			SqlCBufferVariant& columnBuffer = it->second;
+			UnbindVisitor unbind;
+			boost::apply_visitor(unbind, columnBuffer);
+		}
+
+		// remove the ColumnBuffers if we have allocated them during this process (if not manual)
+		if (!m_manualColumns)
+		{
+			m_columns.clear();
+		}
+
 
 		//// Unbind ColumnBuffers
 		//SQLRETURN ret = SQL_SUCCESS;

@@ -143,34 +143,34 @@ namespace exodbc
 //	}
 //
 //
-//	TEST_F(TableTest, CopyCtr)
-//	{
-//		// Create a table
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table t1(&m_db, AF_READ, tableName);
-//
-//		// Create a copy of that table
-//		Table c1(t1);
-//		EXPECT_EQ(t1.m_initialTableName, c1.m_initialTableName);
-//		EXPECT_EQ(t1.m_initialSchemaName, c1.m_initialSchemaName);
-//		EXPECT_EQ(t1.m_initialCatalogName, c1.m_initialCatalogName);
-//		EXPECT_EQ(t1.m_initialTypeName, c1.m_initialTypeName);
-//		EXPECT_EQ(t1.GetAccessFlags(), c1.GetAccessFlags());
-//
-//		// If we open the table..
-//		EXPECT_NO_THROW(c1.Open());
-//
-//		// and create another copy from it..
-//		Table c2(c1);
-//		EXPECT_EQ(t1.m_initialTableName, c1.m_initialTableName);
-//		EXPECT_EQ(t1.m_initialSchemaName, c1.m_initialSchemaName);
-//		EXPECT_EQ(t1.m_initialCatalogName, c1.m_initialCatalogName);
-//		EXPECT_EQ(t1.m_initialTypeName, c1.m_initialTypeName);
-//		EXPECT_EQ(t1.GetAccessFlags(), c1.GetAccessFlags());
-//		// .. we should already have the table info on the copy
-//		EXPECT_TRUE(c2.HasTableInfo());
-//		EXPECT_EQ(c1.GetTableInfo(), c2.GetTableInfo());
-//	}
+	TEST_F(TableTest, CopyCtr)
+	{
+		// Create a table
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table t1(m_pDb, TableAccessFlag::AF_READ, tableName);
+
+		// Create a copy of that table
+		Table c1(t1);
+		EXPECT_EQ(t1.m_initialTableName, c1.m_initialTableName);
+		EXPECT_EQ(t1.m_initialSchemaName, c1.m_initialSchemaName);
+		EXPECT_EQ(t1.m_initialCatalogName, c1.m_initialCatalogName);
+		EXPECT_EQ(t1.m_initialTypeName, c1.m_initialTypeName);
+		EXPECT_EQ(t1.GetAccessFlags(), c1.GetAccessFlags());
+
+		// If we open the table..
+		EXPECT_NO_THROW(c1.Open());
+
+		// and create another copy from it..
+		Table c2(c1);
+		EXPECT_EQ(t1.m_initialTableName, c1.m_initialTableName);
+		EXPECT_EQ(t1.m_initialSchemaName, c1.m_initialSchemaName);
+		EXPECT_EQ(t1.m_initialCatalogName, c1.m_initialCatalogName);
+		EXPECT_EQ(t1.m_initialTypeName, c1.m_initialTypeName);
+		EXPECT_EQ(t1.GetAccessFlags(), c1.GetAccessFlags());
+		// .. we should already have the table info on the copy
+		EXPECT_TRUE(c2.HasTableInfo());
+		EXPECT_EQ(c1.GetTableInfo(), c2.GetTableInfo());
+	}
 //
 //
 //	TEST_F(TableTest, OpenManualCheckExistence)
@@ -416,95 +416,95 @@ namespace exodbc
 //		}
 //		EXPECT_NO_THROW(iTable3.Open(TOF_DO_NOT_QUERY_PRIMARY_KEYS));
 //	}
-//
-//
-//	TEST_F(TableTest, OpenAutoWithoutCheck)
-//	{
-//		// Open an auto-table without checking for privileges or existence
-//		// This makes only sense if we've already determined the correct TableInfo structure
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		TableInfo tableInfo;
-//		EXPECT_NO_THROW(tableInfo = m_db.FindOneTable(tableName, L"", L"", L""));
-//
-//		exodbc::Table table(&m_db, AF_READ, tableInfo);
-//		EXPECT_NO_THROW(table.Open(TOF_NONE));
-//
-//		// If we try to open an auto-table this will never work if you've passed invalid information:
-//		// As soon as the columns are searched, we expect to fail
-//		{
-//			LogLevelFatal llFatal;
-//			LOG_ERROR(L"Warning: This test is supposed to spit errors");
-//			TableInfo neTableInfo(L"NotExisting", L"", L"", L"", L"");
-//			Table neTable(&m_db, AF_READ, neTableInfo);
-//			EXPECT_THROW(neTable.Open(TOF_NONE), Exception);
-//		}
-//	}
-//
-//
-//	TEST_F(TableTest, OpenAutoCheckExistence)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table table(&m_db, AF_READ, tableName, L"", L"", L"");
-//		EXPECT_NO_THROW(table.Open(TOF_CHECK_EXISTANCE));
-//
-//		// Open a non-existing table
-//		{
-//			LogLevelFatal llFatal;
-//			LOG_ERROR(L"Warning: This test is supposed to spit errors");
-//			std::wstring neName = test::GetTableName(test::TableId::NOT_EXISTING, m_odbcInfo.m_namesCase);
-//			exodbc::Table neTable(&m_db, AF_READ, neName, L"", L"", L"");
-//			EXPECT_THROW(neTable.Open(TOF_CHECK_EXISTANCE), Exception);
-//		}
-//	}
-//
-//
-//	TEST_F(TableTest, OpenAutoCheckPrivs)
-//	{
-//		// Test to open read-only a table we know we have all rights:
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table rTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		EXPECT_NO_THROW(rTable.Open(TOF_CHECK_PRIVILEGES));
-//
-//		// Test to open read-write a table we know we have all rights:
-//		exodbc::Table rTable2(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//		EXPECT_NO_THROW(rTable2.Open(TOF_CHECK_PRIVILEGES));
-//
-//		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-//		{
-//			// We only have a Read-only user for ms sql server
-//			Database db(&m_env);
-//			if (m_odbcInfo.HasConnectionString())
-//			{
-//				return;
-//			}
-//			else
-//			{
-//				ASSERT_NO_THROW(db.Open(m_odbcInfo.m_dsn, L"exReadOnly", L"exReadOnly"));
-//			}
-//
-//			// Test to open a table read-only
-//			// Note that here in ms server we have given the user no rights except the select for this table
-//			// If you add him to some role, things will get messed up: No privs are reported, but the user can
-//			// still access the table for selecting
-//			exodbc::Table table2(&db, AF_READ, tableName, L"", L"", L"");
-//			EXPECT_NO_THROW(table2.Open(TOF_CHECK_PRIVILEGES));
-//
-//			// We expect to fail if trying to open for writing
-//			table2.Close();
-//			table2.SetAccessFlags(AF_READ_WRITE);
-//			EXPECT_THROW(table2.Open(TOF_CHECK_PRIVILEGES), Exception);
-//
-//			// But we do not fail if we do not check the privs
-//			EXPECT_NO_THROW(table2.Open());
-//
-//			// Try to open one we do not even have the rights for
-//			std::wstring table3Name = test::GetTableName(test::TableId::NUMERICTYPES, m_odbcInfo.m_namesCase);
-//			Table table3(&db, AF_READ, table3Name, L"", L"", L"");
-//			EXPECT_THROW(table3.Open(), Exception);
-//		}
-//	}
-//
-//
+
+
+	TEST_F(TableTest, OpenAutoWithoutCheck)
+	{
+		// Open an auto-table without checking for privileges or existence
+		// This makes only sense if we've already determined the correct TableInfo structure
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		TableInfo tableInfo;
+		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(tableName, L"", L"", L""));
+
+		exodbc::Table table(m_pDb, TableAccessFlag::AF_READ, tableInfo);
+		EXPECT_NO_THROW(table.Open(TableOpenFlag::TOF_NONE));
+
+		// If we try to open an auto-table this will never work if you've passed invalid information:
+		// As soon as the columns are searched, we expect to fail
+		{
+			LogLevelFatal llFatal;
+			LOG_ERROR(L"Warning: This test is supposed to spit errors");
+			TableInfo neTableInfo(L"NotExisting", L"", L"", L"", L"");
+			Table neTable(m_pDb, TableAccessFlag::AF_READ, neTableInfo);
+			EXPECT_THROW(neTable.Open(TableOpenFlag::TOF_NONE), Exception);
+		}
+	}
+
+
+	TEST_F(TableTest, OpenAutoCheckExistence)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table table(m_pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
+		EXPECT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
+
+		// Open a non-existing table
+		{
+			LogLevelFatal llFatal;
+			LOG_ERROR(L"Warning: This test is supposed to spit errors");
+			std::wstring neName = GetTableName(TableId::NOT_EXISTING);
+			exodbc::Table neTable(m_pDb, TableAccessFlag::AF_READ, neName, L"", L"", L"");
+			EXPECT_THROW(neTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE), Exception);
+		}
+	}
+
+
+	TEST_F(TableTest, OpenAutoCheckPrivs)
+	{
+		// Test to open read-only a table we know we have all rights:
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table rTable(m_pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
+		EXPECT_NO_THROW(rTable.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES));
+
+		// Test to open read-write a table we know we have all rights:
+		exodbc::Table rTable2(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName, L"", L"", L"");
+		EXPECT_NO_THROW(rTable2.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES));
+
+		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			// We only have a Read-only user for ms sql server
+			DatabasePtr pDb = std::make_shared<Database>(m_pEnv);
+			if (g_odbcInfo.HasConnectionString())
+			{
+				return;
+			}
+			else
+			{
+				ASSERT_NO_THROW(pDb->Open(g_odbcInfo.m_dsn, L"exReadOnly", L"exReadOnly"));
+			}
+
+			// Test to open a table read-only
+			// Note that here in ms server we have given the user no rights except the select for this table
+			// If you add him to some role, things will get messed up: No privs are reported, but the user can
+			// still access the table for selecting
+			exodbc::Table table2(pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
+			EXPECT_NO_THROW(table2.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES));
+
+			// We expect to fail if trying to open for writing
+			table2.Close();
+			table2.SetAccessFlags(TableAccessFlag::AF_READ_WRITE);
+			EXPECT_THROW(table2.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES), Exception);
+
+			// But we do not fail if we do not check the privs
+			EXPECT_NO_THROW(table2.Open());
+
+			// Try to open one we do not even have the rights for
+			std::wstring table3Name = GetTableName(TableId::NUMERICTYPES);
+			Table table3(pDb, TableAccessFlag::AF_READ, table3Name, L"", L"", L"");
+			EXPECT_THROW(table3.Open(), Exception);
+		}
+	}
+
+
 //	TEST_F(TableTest, OpenManualWithUnsupportedColumn)
 //	{
 //		Table iTable(&m_db, AF_SELECT, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
@@ -537,36 +537,36 @@ namespace exodbc
 //		EXPECT_EQ(2147483647, iTable.GetInt(2));
 //		EXPECT_FALSE(iTable.ColumnBufferExists(3));
 //	}
-//
-//
-//	TEST_F(TableTest, OpenAutoWithUnsupportedColumn)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
-//		exodbc::Table nst(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//
-//		// Expect to fail if we open with default flags
-//		ASSERT_THROW(nst.Open(), NotSupportedException);
-//		// But not if we pass the flag to skip
-//		{
-//			LogLevelFatal llf;
-//			ASSERT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
-//		}
-//
-//		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
-//		EXPECT_NO_THROW(nst.Select());
-//		EXPECT_TRUE(nst.SelectNext());
-//		SQLINTEGER id, int1, int2;
-//		EXPECT_NO_THROW(id = nst.GetInt(0));
-//		EXPECT_NO_THROW(int1 = nst.GetInt(1));
-//		EXPECT_FALSE(nst.ColumnBufferExists(2));
-//		EXPECT_THROW(nst.GetColumnVariant(2), IllegalArgumentException);
-//		EXPECT_NO_THROW(int2 = nst.GetInt(3));
-//		EXPECT_EQ(1, id);
-//		EXPECT_EQ(10, int1);
-//		EXPECT_EQ(12, int2);
-//	}
-//
-//
+
+
+	//TEST_F(TableTest, OpenAutoWithUnsupportedColumn)
+	//{
+	//	std::wstring tableName = GetTableName(TableId::NOT_SUPPORTED);
+	//	exodbc::Table nst(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName, L"", L"", L"");
+
+	//	// Expect to fail if we open with default flags
+	//	ASSERT_THROW(nst.Open(), NotSupportedException);
+	//	// But not if we pass the flag to skip
+	//	{
+	//		LogLevelFatal llf;
+	//		ASSERT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
+	//	}
+
+	//	// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
+	//	EXPECT_NO_THROW(nst.Select());
+	//	EXPECT_TRUE(nst.SelectNext());
+	//	SQLINTEGER id, int1, int2;
+	//	EXPECT_NO_THROW(id = nst.GetInt(0));
+	//	EXPECT_NO_THROW(int1 = nst.GetInt(1));
+	//	EXPECT_FALSE(nst.ColumnBufferExists(2));
+	//	EXPECT_THROW(nst.GetColumnVariant(2), IllegalArgumentException);
+	//	EXPECT_NO_THROW(int2 = nst.GetInt(3));
+	//	EXPECT_EQ(1, id);
+	//	EXPECT_EQ(10, int1);
+	//	EXPECT_EQ(12, int2);
+	//}
+
+
 //	TEST_F(TableTest, SelectFromAutoWithUnsupportedColumn)
 //	{
 //
@@ -738,122 +738,122 @@ namespace exodbc
 //	}
 //
 //
-//	TEST_F(TableTest, Close)
-//	{
-//		// Create table
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//
-//		// Close when not open must fail
-//		{
-//			DontDebugBreak ddb;
-//			LogLevelFatal llf;
-//			EXPECT_THROW(iTable.Close(), AssertionException);
-//		}
-//
-//		// Open a Table read-only
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		// Close must work
-//		EXPECT_NO_THROW(iTable.Close());
-//
-//		// Close an already closed table
-//		{
-//			DontDebugBreak ddb;
-//			LogLevelFatal llf;
-//			EXPECT_THROW(iTable.Close(), AssertionException);
-//		}
-//	}
-//
-//
-//	TEST_F(TableTest, OpenAndCloseAndOpenAndClose)
-//	{
-//		// Create a Table, open for reading
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		// Close Table
-//		EXPECT_NO_THROW(iTable.Close());
-//
-//		// Open again for reading
-//		EXPECT_NO_THROW(iTable.Open());
-//
-//		// And close again
-//		EXPECT_NO_THROW(iTable.Close());
-//	}
-//
-//
-//	TEST_F(TableTest, SetAccessFlags)
-//	{
-//		// Create a Table, for reading only
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//
-//		// Before opening it, change the mode, then open
-//		ASSERT_NO_THROW(iTable.SetAccessFlags(AF_READ_WRITE));
-//		// Do not forget to set the primary keys if this is an Access database
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			iTable.SetColumnPrimaryKeyIndexes({ 0 });
-//		}
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		// We cannot change the mode if the table is open
-//		{
-//			DontDebugBreak ddb;
-//			LogLevelFatal llf;
-//			EXPECT_THROW(iTable.SetAccessFlags(AF_READ), AssertionException);
-//		}
-//
-//		// But when we close first we can
-//		EXPECT_NO_THROW(iTable.Close());
-//		EXPECT_NO_THROW(iTable.SetAccessFlags(AF_READ));
-//		// And we can open it again
-//		EXPECT_NO_THROW(iTable.Open());
-//	}
-//
-//
-//	TEST_F(TableTest, IsQueryOnly)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		
-//		EXPECT_TRUE(iTable.IsQueryOnly());
-//
-//		iTable.SetAccessFlag(AF_UPDATE);
-//		EXPECT_FALSE(iTable.IsQueryOnly());
-//		iTable.ClearAccessFlag(AF_UPDATE);
-//		EXPECT_TRUE(iTable.IsQueryOnly());
-//
-//		iTable.SetAccessFlag(AF_INSERT);
-//		EXPECT_FALSE(iTable.IsQueryOnly());
-//		iTable.ClearAccessFlag(AF_INSERT);
-//		EXPECT_TRUE(iTable.IsQueryOnly());
-//
-//		iTable.SetAccessFlag(AF_DELETE);
-//		EXPECT_FALSE(iTable.IsQueryOnly());
-//		iTable.ClearAccessFlag(AF_DELETE);
-//		EXPECT_TRUE(iTable.IsQueryOnly());
-//
-//		// and one that is initially rw
-//		exodbc::Table iTable2(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//		EXPECT_FALSE(iTable2.IsQueryOnly());
-//		iTable2.ClearAccessFlag(AF_INSERT);
-//		EXPECT_FALSE(iTable2.IsQueryOnly());
-//
-//		iTable2.ClearAccessFlag(AF_DELETE);
-//		EXPECT_FALSE(iTable2.IsQueryOnly());
-//
-//		iTable2.ClearAccessFlag(AF_UPDATE);
-//		EXPECT_TRUE(iTable2.IsQueryOnly());
-//
-//		// remove read, we are no longer query only
-//		iTable2.ClearAccessFlag(AF_SELECT);
-//		EXPECT_FALSE(iTable2.IsQueryOnly());
-//	}
-//
-//
+	TEST_F(TableTest, Close)
+	{
+		// Create table
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
+
+		// Close when not open must fail
+		{
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(iTable.Close(), AssertionException);
+		}
+
+		// Open a Table read-only
+		ASSERT_NO_THROW(iTable.Open());
+
+		// Close must work
+		EXPECT_NO_THROW(iTable.Close());
+
+		// Close an already closed table
+		{
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(iTable.Close(), AssertionException);
+		}
+	}
+
+
+	TEST_F(TableTest, OpenAndCloseAndOpenAndClose)
+	{
+		// Create a Table, open for reading
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
+		ASSERT_NO_THROW(iTable.Open());
+
+		// Close Table
+		EXPECT_NO_THROW(iTable.Close());
+
+		// Open again for reading
+		EXPECT_NO_THROW(iTable.Open());
+
+		// And close again
+		EXPECT_NO_THROW(iTable.Close());
+	}
+
+
+	TEST_F(TableTest, SetAccessFlags)
+	{
+		// Create a Table, for reading only
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
+
+		// Before opening it, change the mode, then open
+		ASSERT_NO_THROW(iTable.SetAccessFlags(TableAccessFlag::AF_READ_WRITE));
+		// Do not forget to set the primary keys if this is an Access database
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
+		ASSERT_NO_THROW(iTable.Open());
+
+		// We cannot change the mode if the table is open
+		{
+			DontDebugBreak ddb;
+			LogLevelFatal llf;
+			EXPECT_THROW(iTable.SetAccessFlags(TableAccessFlag::AF_READ), AssertionException);
+		}
+
+		// But when we close first we can
+		EXPECT_NO_THROW(iTable.Close());
+		EXPECT_NO_THROW(iTable.SetAccessFlags(TableAccessFlag::AF_READ));
+		// And we can open it again
+		EXPECT_NO_THROW(iTable.Open());
+	}
+
+
+	TEST_F(TableTest, IsQueryOnly)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
+		
+		EXPECT_TRUE(iTable.IsQueryOnly());
+
+		iTable.SetAccessFlag(TableAccessFlag::AF_UPDATE);
+		EXPECT_FALSE(iTable.IsQueryOnly());
+		iTable.ClearAccessFlag(TableAccessFlag::AF_UPDATE);
+		EXPECT_TRUE(iTable.IsQueryOnly());
+
+		iTable.SetAccessFlag(TableAccessFlag::AF_INSERT);
+		EXPECT_FALSE(iTable.IsQueryOnly());
+		iTable.ClearAccessFlag(TableAccessFlag::AF_INSERT);
+		EXPECT_TRUE(iTable.IsQueryOnly());
+
+		iTable.SetAccessFlag(TableAccessFlag::AF_DELETE);
+		EXPECT_FALSE(iTable.IsQueryOnly());
+		iTable.ClearAccessFlag(TableAccessFlag::AF_DELETE);
+		EXPECT_TRUE(iTable.IsQueryOnly());
+
+		// and one that is initially rw
+		exodbc::Table iTable2(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName, L"", L"", L"");
+		EXPECT_FALSE(iTable2.IsQueryOnly());
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_INSERT);
+		EXPECT_FALSE(iTable2.IsQueryOnly());
+
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_DELETE);
+		EXPECT_FALSE(iTable2.IsQueryOnly());
+
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_UPDATE);
+		EXPECT_TRUE(iTable2.IsQueryOnly());
+
+		// remove read, we are no longer query only
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_SELECT);
+		EXPECT_FALSE(iTable2.IsQueryOnly());
+	}
+
+
 //	TEST_F(TableTest, MissingAccessFlagsThrowOnWrite)
 //	{
 //		// Open a read-only table
