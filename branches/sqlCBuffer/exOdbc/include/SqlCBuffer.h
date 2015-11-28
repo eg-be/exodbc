@@ -196,8 +196,6 @@ namespace exodbc
 			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(boundHandleInfo);
 			exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
 			
-			// \todo: have access violation from here. why? from ClearIntTypesTmpTable, from Table Destructor.
-			// because we first free the statement in the Table and then unbind from here.
 			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, NULL, 0, NULL); 
 			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 			return m_boundSelects.erase(it);
@@ -388,19 +386,19 @@ namespace exodbc
 	{
 	public:
 		BindSelectVisitor() = delete;
-		BindSelectVisitor(SQLUSMALLINT columnNr, SQLHSTMT hStmt)
+		BindSelectVisitor(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 			: m_columnNr(columnNr)
-			, m_hStmt(hStmt)
+			, m_pHStmt(pHStmt)
 		{};
 
 		template<typename T>
 		void operator()(T& t) const
 		{
-			t.BindSelect(m_columnNr, m_hStmt);
+			t.BindSelect(m_columnNr, m_pHStmt);
 		}
 	private:
 		SQLUSMALLINT m_columnNr;
-		SQLHSTMT m_hStmt;
+		ConstSqlStmtHandlePtr m_pHStmt;
 	};
 
 	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType, const ColumnBindInfo& bindInfo);
