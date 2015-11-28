@@ -366,17 +366,17 @@ namespace exodbc
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
 				columnFlags |= CF_SELECT;
-				flags.Set(ColumnFlag::SELECT);
+				flags.Set(ColumnFlag::CF_SELECT);
 			}
 			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE) || TestAccessFlag(TableAccessFlag::AF_UPDATE_PK))
 			{
 				columnFlags |= CF_UPDATE;
-				flags.Set(ColumnFlag::UPDATE);
+				flags.Set(ColumnFlag::CF_UPDATE);
 			}
 			if (TestAccessFlag(TableAccessFlag::AF_INSERT))
 			{
 				columnFlags |= CF_INSERT;
-				flags.Set(ColumnFlag::INSERT);
+				flags.Set(ColumnFlag::CF_INSERT);
 			}
 			int bufferIndex = 0;
 
@@ -549,7 +549,7 @@ namespace exodbc
 			{
 				const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(var);
 				const ColumnFlags columnFlags = boost::polymorphic_get<ColumnFlags>(var);
-				if (columnFlags.Test(ColumnFlag::SELECT))
+				if (columnFlags.Test(ColumnFlag::CF_SELECT))
 				{
 					std::shared_ptr<ObjectName> pColumnName = props.GetObjectName();
 					exASSERT(pColumnName);
@@ -1101,7 +1101,7 @@ namespace exodbc
 		{
 			SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
 			ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(var);
-			exASSERT(flags.Test(ColumnFlag::NULLABLE));
+			exASSERT(flags.Test(ColumnFlag::CF_NULLABLE));
 			cb.SetNull();
 		}
 		catch (const boost::bad_polymorphic_get& ex)
@@ -1265,7 +1265,7 @@ namespace exodbc
 		try
 		{
 			const ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(var);
-			return flags.Test(ColumnFlag::NULLABLE);
+			return flags.Test(ColumnFlag::CF_NULLABLE);
 		}
 		catch (const boost::bad_polymorphic_get& ex)
 		{
@@ -1301,30 +1301,30 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize /* = 0 */, SQLSMALLINT decimalDigits /* = 0 */)
 	{
 		SqlCPointerBuffer column(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
 		SetColumn(columnIndex, column);
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
-	{
-		//exASSERT(columnIndex >= 0);
-		//exASSERT( ! queryName.empty());
-		//exASSERT(bufferSize > 0);
-		//exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
-		//exASSERT( ! ( (sqlType == SQL_UNKNOWN_TYPE) && ((flags & CF_INSERT) || (flags & CF_UPDATE)) ) );
-		//exASSERT(!IsOpen());
-		//// Flag that columns are created manually
-		//m_manualColumns = true;
-		//// Read OdbcVersion from Environment
-		//const Environment* pEnv = m_pDb->GetEnvironment();
-		//exASSERT(pEnv != NULL);
-		//ManualColumnInfo colInfo(sqlType, queryName, columnSize, decimalDigits);
-		//ColumnBuffer* pColumnBuffer = new ColumnBuffer(colInfo, sqlCType, pBuffer, bufferSize, pEnv->GetOdbcVersion(), flags);
-		//m_columnBuffers[columnIndex] = pColumnBuffer;
-	}
+	//void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
+	//{
+	//	//exASSERT(columnIndex >= 0);
+	//	//exASSERT( ! queryName.empty());
+	//	//exASSERT(bufferSize > 0);
+	//	//exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
+	//	//exASSERT( ! ( (sqlType == SQL_UNKNOWN_TYPE) && ((flags & CF_INSERT) || (flags & CF_UPDATE)) ) );
+	//	//exASSERT(!IsOpen());
+	//	//// Flag that columns are created manually
+	//	//m_manualColumns = true;
+	//	//// Read OdbcVersion from Environment
+	//	//const Environment* pEnv = m_pDb->GetEnvironment();
+	//	//exASSERT(pEnv != NULL);
+	//	//ManualColumnInfo colInfo(sqlType, queryName, columnSize, decimalDigits);
+	//	//ColumnBuffer* pColumnBuffer = new ColumnBuffer(colInfo, sqlCType, pBuffer, bufferSize, pEnv->GetOdbcVersion(), flags);
+	//	//m_columnBuffers[columnIndex] = pColumnBuffer;
+	//}
 
 
 	void Table::SetColumnPrimaryKeyIndexes(const std::set<SQLUSMALLINT>& columnIndexes)
@@ -1512,7 +1512,7 @@ namespace exodbc
 					try
 					{
 						ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(itCols->second);
-						flags.Set(ColumnFlag::PRIMARY_KEY);
+						flags.Set(ColumnFlag::CF_PRIMARY_KEY);
 					}
 					catch (const boost::bad_polymorphic_get& ex)
 					{
@@ -1546,7 +1546,7 @@ namespace exodbc
 								if (*pKeyName == *pName)
 								{
 									ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(column);
-									flags.Set(ColumnFlag::PRIMARY_KEY);
+									flags.Set(ColumnFlag::CF_PRIMARY_KEY);
 									settedFlagOnBuffer = true;
 									break;
 								}
@@ -1577,7 +1577,7 @@ namespace exodbc
 				{
 					SqlCBufferVariant& columnBuffer = it->second;
 					const ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
-					if (columnFlags.Test(ColumnFlag::SELECT))
+					if (columnFlags.Test(ColumnFlag::CF_SELECT))
 					{
 						BindSelectVisitor bindSelect(boundColumnNumber, m_pHStmtSelect);
 						boost::apply_visitor(bindSelect, columnBuffer);
@@ -1587,7 +1587,7 @@ namespace exodbc
 				boundSelect = true;
 			}
 
-			// Create additional UPDATE and DELETE statement-handles to be used with the pk-columns
+			// Create additional CF_UPDATE and DELETE statement-handles to be used with the pk-columns
 			// and bind the params. PKs are required.
 			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
 			{
@@ -1630,7 +1630,7 @@ namespace exodbc
 				//}
 			}
 
-			// Bind INSERT params
+			// Bind CF_INSERT params
 			if (TestAccessFlag(TableAccessFlag::AF_INSERT))
 			{
 				BindInsertParameters();
