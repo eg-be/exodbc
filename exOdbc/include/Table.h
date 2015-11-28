@@ -862,6 +862,12 @@ namespace exodbc
 		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 
+		void		SetColumn(SQLUSMALLINT columnIndex, SqlCBufferVariant column);
+
+
+		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits);
+
+
 		/*!
 		* \brief	Manually set the column indexes of primary key columns.
 		* \details	If a table is Open()ed for AF_UPDATE or AF_DELETE, the primary keys must be known.

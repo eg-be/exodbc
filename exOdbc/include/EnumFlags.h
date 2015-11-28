@@ -54,6 +54,11 @@ namespace exodbc
 			m_flags |= flag;
 		};
 
+		void Set(const EnumFlags& other) noexcept
+		{
+			m_flags = other.m_flags;
+		}
+
 		void Clear(ET flag) noexcept
 		{
 			m_flags &= ~flag;
@@ -64,7 +69,7 @@ namespace exodbc
 			return m_flags == other.m_flags;
 		}
 
-	private:
+	protected:
 		ET m_flags;
 	};
 

@@ -1276,6 +1276,37 @@ namespace exodbc
 	}
 
 
+	void Table::SetColumn(SQLUSMALLINT columnIndex, SqlCBufferVariant column)
+	{
+		exASSERT(columnIndex >= 0);
+		exASSERT(m_columns.find(columnIndex) == m_columns.end());
+
+		// test if we have a non-empty query name
+		try
+		{
+			const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
+			std::shared_ptr<ObjectName> pName = props.GetObjectName();
+			exASSERT(pName);
+			exASSERT(!pName->GetQueryName().empty());
+		}
+		catch (const boost::bad_polymorphic_get& ex)
+		{
+			WrapperException we(ex);
+			SET_EXCEPTION_SOURCE(we);
+			throw we;
+		}
+
+		// okay, remember the passed variant
+		m_columns[columnIndex] = column;
+	}
+
+
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+	{
+
+	}
+
+
 	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
 	{
 		//exASSERT(columnIndex >= 0);
