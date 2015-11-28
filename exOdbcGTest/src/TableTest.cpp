@@ -877,20 +877,20 @@ namespace exodbc
 //	}
 //
 //
-//	// Select / GetNext
-//	// ----------------
-//	TEST_F(TableTest, Select)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		EXPECT_NO_THROW(iTable.Select(L""));
-//
-//		iTable.SelectClose();
-//	}
-//
-//
+	// Select / GetNext
+	// ----------------
+	TEST_F(TableTest, Select)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		ASSERT_NO_THROW(iTable.Open());
+
+		EXPECT_NO_THROW(iTable.Select(L""));
+
+		iTable.SelectClose();
+	}
+
+
 //	TEST_F(TableTest, SelectFirst)
 //	{
 //		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
