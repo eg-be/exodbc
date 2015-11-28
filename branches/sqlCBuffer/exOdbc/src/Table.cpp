@@ -929,22 +929,22 @@ namespace exodbc
 
 	bool Table::SelectNext()
 	{
-		//exASSERT(IsSelectOpen());
-		//
-		//SQLRETURN ret = SQLFetch(m_hStmtSelect);
-		//if ( ! (SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
-		//{
-		//	SqlResultException sre(L"SQLFetch", ret, SQL_HANDLE_STMT, m_hStmtSelect);
-		//	SET_EXCEPTION_SOURCE(sre);
-		//	throw sre;
-		//}
-		//if (ret == SQL_SUCCESS_WITH_INFO)
-		//{
-		//	LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
-		//}
+		exASSERT(IsSelectOpen());
+		exASSERT(m_pHStmtSelect->IsAllocated());
+			
+		SQLRETURN ret = SQLFetch(m_pHStmtSelect->GetHandle());
+		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
+		{
+			SqlResultException sre(L"SQLFetch", ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle());
+			SET_EXCEPTION_SOURCE(sre);
+			throw sre;
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_pHStmtSelect->GetHandle(), ret, SQLFetch);
+		}
 
-		//return SQL_SUCCEEDED(ret);
-		return false;
+		return SQL_SUCCEEDED(ret);
 	}
 
 	

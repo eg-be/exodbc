@@ -994,43 +994,43 @@ namespace exodbc
 //		// no more prev records available:
 //		EXPECT_FALSE(iTable.SelectPrev());
 //	}
-//
-//
-//	TEST_F(TableTest, SelectNext)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		// We expect 7 Records
-//		iTable.Select(L"");
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_FALSE(iTable.SelectNext());
-//
-//		iTable.SelectClose();
-//	}
-//
-//
-//	TEST_F(TableTest, SelectClose)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//		
-//		// Do something that opens a transaction
-//		iTable.Select(L"");
-//		EXPECT_NO_THROW(iTable.SelectClose());
-//		// We should be closed now
-//		EXPECT_FALSE(iTable.IsSelectOpen());
-//	}
-//
-//
+
+
+	TEST_F(TableTest, SelectNext)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		ASSERT_NO_THROW(iTable.Open());
+
+		// We expect 7 Records
+		iTable.Select(L"");
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_FALSE(iTable.SelectNext());
+
+		iTable.SelectClose();
+	}
+
+
+	TEST_F(TableTest, SelectClose)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		ASSERT_NO_THROW(iTable.Open());
+		
+		// Do something that opens a transaction
+		iTable.Select(L"");
+		EXPECT_NO_THROW(iTable.SelectClose());
+		// We should be closed now
+		EXPECT_FALSE(iTable.IsSelectOpen());
+	}
+
+
 //	TEST_F(TableTest, SelectHasMASEnabled)
 //	{
 //		// Test if we can have multiple active statements.
