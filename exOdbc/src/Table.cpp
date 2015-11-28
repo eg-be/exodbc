@@ -48,7 +48,7 @@ namespace exodbc
 		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
-		, m_openFlags(TOF_NONE)
+		//, m_openFlags(TOF_NONE)
 	{ }
 
 
@@ -68,7 +68,7 @@ namespace exodbc
 		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
-		, m_openFlags(TOF_NONE)
+		//, m_openFlags(TOF_NONE)
 	{
 		Init(pDb, afs, tableName, schemaName, catalogName, tableType);
 	}
@@ -90,7 +90,7 @@ namespace exodbc
 		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
-		, m_openFlags(TOF_NONE)
+		//, m_openFlags(TOF_NONE)
 	{
 		Init(pDb, afs, tableInfo);
 	}
@@ -112,7 +112,7 @@ namespace exodbc
 		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
 		, m_selectQueryOpen(false)
-		, m_openFlags(TOF_NONE)
+		//, m_openFlags(TOF_NONE)
 	{
 		// note: This constructor will always copy the search-names. Maybe they were set on other,
 		// and then the TableInfo was searched. Do not loose the information about the search-names.
@@ -1122,42 +1122,42 @@ namespace exodbc
 	}
 
 
-	std::string Table::GetString(SQLSMALLINT columnIndex) const
-	{
-		const SqlCharArray& buff = GetNonNullColumn<SqlCharArray>(columnIndex);
-		std::shared_ptr<SQLCHAR> pChar = buff.GetBuffer();
-		exASSERT(pChar != NULL);
-		std::string s(reinterpret_cast<const char*>(pChar.get()));
-		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
-		{
-			boost::trim_left(s);
-		}
-		if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
-		{
-			boost::trim_right(s);
-		}
+	//std::string Table::GetString(SQLSMALLINT columnIndex) const
+	//{
+	//	const SqlCharArray& buff = GetNonNullColumn<SqlCharArray>(columnIndex);
+	//	std::shared_ptr<SQLCHAR> pChar = buff.GetBuffer();
+	//	exASSERT(pChar != NULL);
+	//	std::string s(reinterpret_cast<const char*>(pChar.get()));
+	//	if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
+	//	{
+	//		boost::trim_left(s);
+	//	}
+	//	if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
+	//	{
+	//		boost::trim_right(s);
+	//	}
 
-		return s;
-	}
+	//	return s;
+	//}
 
 
-	std::wstring Table::GetWString(SQLSMALLINT columnIndex) const
-	{
-		const SqlWCharArray& buff = GetNonNullColumn<SqlWCharArray>(columnIndex);
-		std::shared_ptr<SQLWCHAR> pChar = buff.GetBuffer();
-		exASSERT(pChar != NULL);
-		std::wstring ws(pChar.get());
-		if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
-		{
-			boost::trim_left(ws);
-		}
-		if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
-		{
-			boost::trim_right(ws);
-		}
+	//std::wstring Table::GetWString(SQLSMALLINT columnIndex) const
+	//{
+	//	const SqlWCharArray& buff = GetNonNullColumn<SqlWCharArray>(columnIndex);
+	//	std::shared_ptr<SQLWCHAR> pChar = buff.GetBuffer();
+	//	exASSERT(pChar != NULL);
+	//	std::wstring ws(pChar.get());
+	//	if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
+	//	{
+	//		boost::trim_left(ws);
+	//	}
+	//	if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
+	//	{
+	//		boost::trim_right(ws);
+	//	}
 
-		return ws;
-	}
+	//	return ws;
+	//}
 
 
 	SQLDOUBLE Table::GetDouble(SQLSMALLINT columnIndex) const
@@ -1298,7 +1298,7 @@ namespace exodbc
 		// Set TOF_DO_NOT_QUERY_PRIMARY_KEYS this flag for Access, Access does not support SQLPrimaryKeys
 		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			m_openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
+			m_openFlags.Set(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS);
 		}
 
 		// Nest try/catch the free the buffers created in here if we fail somewhere
@@ -1313,11 +1313,11 @@ namespace exodbc
 			// Do not try to set on Access or Excel, they report 'Optional feature not implemented' (even if trying to set forward-only)
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::EXCEL)
 			{
-				m_openFlags |= TOF_FORWARD_ONLY_CURSORS;
+				m_openFlags.Set(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS);
 			}
 			else
 			{
-				SetCursorOptions(TestOpenFlag(TOF_FORWARD_ONLY_CURSORS));
+				SetCursorOptions(TestOpenFlag(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS));
 			}
 
 			// If we do not already have a TableInfo for our table, we absolutely must find one
@@ -1332,7 +1332,7 @@ namespace exodbc
 
 			// If we are asked to check existence and have not just proved we exist just find a table
 			// Search using the info from the now available m_tableInfo
-			if (TestOpenFlag(TOF_CHECK_EXISTANCE) && !searchedTable)
+			if (TestOpenFlag(TableOpenFlag::TOF_CHECK_EXISTANCE) && !searchedTable)
 			{
 				// Will throw if not one is found
 				std::wstring catalogName = m_tableInfo.GetCatalog();
@@ -1350,7 +1350,7 @@ namespace exodbc
 			// If we are asked to create our columns automatically, read the column information and create the buffers
 			if (!m_manualColumns)
 			{
-				CreateAutoColumnBuffers(m_tableInfo, TestOpenFlag(TOF_SKIP_UNSUPPORTED_COLUMNS));
+				CreateAutoColumnBuffers(m_tableInfo, TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 			}
 			else
 			{
@@ -1410,7 +1410,7 @@ namespace exodbc
 			m_fieldsStatement = BuildFieldsStatement();
 
 			// Optionally check privileges
-			if (TestOpenFlag(TOF_CHECK_PRIVILEGES))
+			if (TestOpenFlag(TableOpenFlag::TOF_CHECK_PRIVILEGES))
 			{
 				m_tablePrivileges.Init(m_pDb, m_tableInfo);
 				// We always need to be able to select, but the rest only if we want to write
@@ -1432,7 +1432,7 @@ namespace exodbc
 			if (m_primaryKeyColumnIndexes.size() > 0)
 			{
 				// And implicitly activate the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS
-				m_openFlags |= TOF_DO_NOT_QUERY_PRIMARY_KEYS;
+				m_openFlags.Set(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS);
 
 				for (std::set<SQLUSMALLINT>::const_iterator it = m_primaryKeyColumnIndexes.begin(); it != m_primaryKeyColumnIndexes.end(); ++it)
 				{
@@ -1460,7 +1460,7 @@ namespace exodbc
 			else
 			{
 				// If we need the primary keys and are allowed to query them, try to fetch them from the database
-				if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK)) && !TestOpenFlag(TOF_DO_NOT_QUERY_PRIMARY_KEYS))
+				if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK)) && !TestOpenFlag(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS))
 				{
 					TablePrimaryKeysVector primaryKeys = m_pDb->ReadTablePrimaryKeys(m_tableInfo);
 					// Match them against the ColumnBuffers
@@ -1720,45 +1720,41 @@ namespace exodbc
 	}
 
 
-	bool Table::TestAccessFlag(TableAccessFlag af) const throw()
+	bool Table::TestAccessFlag(TableAccessFlag af) const noexcept
 	{
 		return m_tableAccessFlags.Test(af);
 	}
 
 
-	bool Table::TestOpenFlag(TableOpenFlag of) const throw()
+	bool Table::TestOpenFlag(TableOpenFlag of) const noexcept
 	{
-		if (m_openFlags & of)
-		{
-			return true;
-		}
-		return false;
+		return m_openFlags.Test(of);
 	}
 
 
 
-	void Table::SetCharTrimLeft(bool trimLeft) throw()
+	void Table::SetCharTrimLeft(bool trimLeft) noexcept
 	{
 		if (trimLeft)
 		{
-			m_openFlags |= TOF_CHAR_TRIM_LEFT;
+			m_openFlags.Set(TableOpenFlag::TOF_CHAR_TRIM_LEFT);
 		}
 		else
 		{
-			m_openFlags &= ~TOF_CHAR_TRIM_LEFT;
+			m_openFlags.Clear(TableOpenFlag::TOF_CHAR_TRIM_LEFT);
 		}
 	}
 
 
-	void Table::SetCharTrimRight(bool trimRight) throw()
+	void Table::SetCharTrimRight(bool trimRight) noexcept
 	{
 		if (trimRight)
 		{
-			m_openFlags |= TOF_CHAR_TRIM_RIGHT;
+			m_openFlags.Set(TableOpenFlag::TOF_CHAR_TRIM_RIGHT);
 		}
 		else
 		{
-			m_openFlags &= ~TOF_CHAR_TRIM_RIGHT;
+			m_openFlags.Clear(TableOpenFlag::TOF_CHAR_TRIM_RIGHT);
 		}
 	}
 
