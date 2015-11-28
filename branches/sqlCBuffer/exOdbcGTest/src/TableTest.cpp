@@ -69,23 +69,23 @@ namespace exodbc
 
 	// Open / Close
 	// ------------
-//	TEST_F(TableTest, OpenManualReadOnlyWithoutCheck)
-//	{
-//		// Open an existing table without checking for privileges or existence
-//		MIntTypesTable table(&m_db, m_odbcInfo.m_namesCase);
-//		EXPECT_NO_THROW(table.Open(TOF_NONE));
-//
-//		// If we pass in the TableInfo directly we should also be able to "open"
-//		// a totally non-sense table:
-//		TableInfo neTableInfo(L"NotExisting", L"", L"", L"", L"");
-//		Table neTable(&m_db, AF_READ, neTableInfo);
-//		SQLINTEGER idNotExisting = 0;
-//		neTable.SetColumn(0, L"idNotExistring", SQL_INTEGER, &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting), CF_SELECT);
-//		EXPECT_NO_THROW(neTable.Open(TOF_NONE));
-//		// \todo So we can prove in the test that we will fail doing a SELECT later
-//	}
-//
-//
+	TEST_F(TableTest, OpenManualReadOnlyWithoutCheck)
+	{
+		// Open an existing table without checking for privileges or existence
+		MIntTypesTable table(m_pDb);
+		EXPECT_NO_THROW(table.Open(TableOpenFlag::TOF_NONE));
+
+		// If we pass in the TableInfo directly we should also be able to "open"
+		// a totally non-sense table:
+		TableInfo neTableInfo(L"NotExisting", L"", L"", L"", L"");
+		Table neTable(m_pDb, TableAccessFlag::AF_READ, neTableInfo);
+		SQLINTEGER idNotExisting = 0;
+		neTable.SetColumn(0, L"idNotExistring", SQL_INTEGER, &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting), ColumnFlag::CF_SELECT);
+		EXPECT_NO_THROW(neTable.Open(TableOpenFlag::TOF_NONE));
+		// \todo So we can prove in the test that we will fail doing a SELECT later
+	}
+
+
 //	TEST_F(TableTest, OpenManualWritableWithoutCheckPrivOrExist)
 //	{
 //		// Open an existing table without checking for privileges or existence
