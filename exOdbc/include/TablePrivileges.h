@@ -34,13 +34,6 @@ namespace exodbc
 	// Structs
 	// -------
 
-	enum TablePrivilegeOld
-	{
-		TP_SELECT = 0x1,
-		TP_INSERT = 0x2,
-		TP_UPDATE = 0x4,
-		TP_DELETE = 0x8,
-	};
 	// Classes
 	// -------
 	enum class TablePrivilege
