@@ -142,10 +142,11 @@ namespace exodbc
 
 		virtual ~SqlCBuffer()
 		{
+			// unbind selects, one by one, do not stop if one fails but try the next one
+			// (thats why this is not done using Unbind() )
 			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.begin();
 			while (it != m_boundSelects.end())
 			{
-				// unbind
 				ColumnBoundHandle bindInfo = *it;
 				try
 				{
@@ -187,6 +188,25 @@ namespace exodbc
 			m_boundSelects.insert(boundHandleInfo);
 		};
 
+
+		/*!
+		* \brief	Unbinds from all handles bound.
+		* \throw	Exception
+		*/
+		void Unbind()
+		{
+			// unbind selects
+			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.begin();
+			while (it != m_boundSelects.end())
+			{
+				ColumnBoundHandle bindInfo = *it;
+				exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
+				it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
+			}
+		}
+
+
+	protected:
 		std::set<ColumnBoundHandle>::iterator UnbindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
 			exASSERT(columnNr >= 1);
@@ -195,8 +215,8 @@ namespace exodbc
 			ColumnBoundHandle boundHandleInfo(pHStmt, columnNr);
 			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(boundHandleInfo);
 			exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
-			
-			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, NULL, 0, NULL); 
+
+			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, NULL, 0, NULL);
 			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 			return m_boundSelects.erase(it);
 		}
@@ -301,7 +321,7 @@ namespace exodbc
 				{
 					if (bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated())
 					{
-						UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
+						it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
 					}
 					else
 					{
@@ -311,8 +331,8 @@ namespace exodbc
 				catch (const Exception& ex)
 				{
 					LOG_ERROR(boost::str(boost::wformat(L"Failed to unbind column %d from stmt-handle %d: %s") % bindInfo.m_columnNr %bindInfo.m_pHStmt->GetHandle() %ex.ToString()));
+					++it;
 				}
-				it = m_boundSelects.erase(it);
 			}
 		};
 
@@ -343,7 +363,24 @@ namespace exodbc
 			m_boundSelects.insert(boundHandleInfo);
 		};
 
-		void UnbindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+		/*!
+		* \brief	Unbinds from all handles bound.
+		* \throw	Exception
+		*/
+		void Unbind()
+		{
+			// unbind selects
+			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.begin();
+			while (it != m_boundSelects.end())
+			{
+				ColumnBoundHandle bindInfo = *it;
+				exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
+				it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
+			}
+		}
+
+	protected:
+		std::set<ColumnBoundHandle>::iterator UnbindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
 			exASSERT(columnNr >= 1);
 			exASSERT(pHStmt != NULL);
@@ -354,7 +391,7 @@ namespace exodbc
 
 			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, NULL, 0, NULL);
 			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
-			m_boundSelects.erase(it);
+			return m_boundSelects.erase(it);
 		}
 
 	private:
@@ -399,6 +436,18 @@ namespace exodbc
 	private:
 		SQLUSMALLINT m_columnNr;
 		ConstSqlStmtHandlePtr m_pHStmt;
+	};
+
+	class UnbindVisitor
+		: public boost::static_visitor<void>
+	{
+	public:
+
+		template<typename T>
+		void operator()(T& t) const
+		{
+			t.Unbind();
+		}
 	};
 
 	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType, const ColumnBindInfo& bindInfo);
