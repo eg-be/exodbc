@@ -105,7 +105,7 @@ namespace exodbc
 		Table tTable(pDb, TableAccessFlag::AF_READ, L"TestTable$");
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
-		EXPECT_NO_THROW(tTable.Open(TOF_CHECK_EXISTANCE));
+		EXPECT_NO_THROW(tTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 
 		// Query
 		EXPECT_NO_THROW(tTable.Select());
@@ -127,7 +127,7 @@ namespace exodbc
 
 		Table tTable2(pDb, TableAccessFlag::AF_READ, tableInfo);
 		tTable2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
-		EXPECT_NO_THROW(tTable2.Open(TOF_CHECK_EXISTANCE));
+		EXPECT_NO_THROW(tTable2.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 
 		// Query
 		EXPECT_NO_THROW(tTable2.Select());
@@ -165,7 +165,7 @@ namespace exodbc
 		ASSERT_NO_THROW(tTable.SetColumn(4, L"Mixed", SQL_VARCHAR, mx, SQL_C_WCHAR, sizeof(id), OldColumnFlag::CF_SELECT));
 
 		// \todo: Do not check existence while opening, it would overwrite our manually set SpecialSqlQueryName -> See Ticket #111 
-		ASSERT_NO_THROW(tTable.Open(TOF_NONE));
+		ASSERT_NO_THROW(tTable.Open(TableOpenFlag::TOF_NONE));
 			
 		EXPECT_NO_THROW(tTable.Select(L""));
 		int rowCount = 0;
@@ -196,7 +196,7 @@ namespace exodbc
 		ASSERT_NO_THROW(tableInfo = pDb->FindOneTable(L"TestTable$", L"", L"", L""));
 		// And create the auto table:
 		Table tTable(pDb, TableAccessFlag::AF_READ, tableInfo);
-		ASSERT_NO_THROW(tTable.Open(TOF_NONE));
+		ASSERT_NO_THROW(tTable.Open(TableOpenFlag::TOF_NONE));
 
 		// Select all Rows
 		std::wstring id, ic, fc, tc, mx;

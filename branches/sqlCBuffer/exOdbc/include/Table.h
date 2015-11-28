@@ -229,7 +229,7 @@ namespace exodbc
 		* \see		SetColumn()
 		* \throw	Exception If already open, table is not found, columns fail to bind..
 		*/
-		void		Open(TableOpenFlags openFlags = TOF_CHECK_EXISTANCE);
+		void		Open(TableOpenFlags openFlags = TableOpenFlag::TOF_CHECK_EXISTANCE);
 
 
 		/*!
@@ -320,7 +320,7 @@ namespace exodbc
 		/*!
 		* \brief	Test if a TableOpenFlag is set.
 		*/
-		bool		TestOpenFlag(TableOpenFlag flag) const throw();
+		bool		TestOpenFlag(TableOpenFlag flag) const noexcept;
 
 
 		/*!
@@ -328,7 +328,7 @@ namespace exodbc
 		* \details	Note that the value set here is overriden by the value
 		*			passed to Open() in the TableOpenFlags.
 		*/
-		void		SetCharTrimRight(bool trimRight) throw();
+		void		SetCharTrimRight(bool trimRight) noexcept;
 
 
 		/*!
@@ -336,7 +336,7 @@ namespace exodbc
 		* \details	Note that the value set here is overriden by the value
 		*			passed to Open() in the TableOpenFlags.
 		*/
-		void		SetCharTrimLeft(bool trimLeft) throw();
+		void		SetCharTrimLeft(bool trimLeft) noexcept;
 
 
 		/*!
@@ -346,7 +346,7 @@ namespace exodbc
 		* \see		GetTableInfo()
 		* \return	Returns true if this table has a TableInfo set that can be fetched using GetTableInfo()
 		*/
-		bool		HasTableInfo() const throw() { return m_haveTableInfo; }
+		bool		HasTableInfo() const noexcept { return m_haveTableInfo; }
 
 
 		/*!
@@ -716,7 +716,9 @@ namespace exodbc
 		* \param	columnIndex Zero based index of a bound column.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		std::string GetString(SQLSMALLINT columnIndex) const;
+		std::string GetString(SQLSMALLINT columnIndex) const {
+			return "TODO";
+		};
 
 
 		/*!
@@ -725,7 +727,9 @@ namespace exodbc
 		* \param	columnIndex Zero based index of a bound column.
 		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
 		*/
-		std::wstring GetWString(SQLSMALLINT columnIndex) const;
+		std::wstring GetWString(SQLSMALLINT columnIndex) const {
+			return L"TODO";
+		};
 		
 
 		/*!
@@ -994,7 +998,7 @@ namespace exodbc
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
 		// ODBC Handles
-		SqlStmtHandlePtr	m_pHStmtSelect;
+		SqlStmtHandlePtr	m_pHStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
 		//SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
 		//SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
 		//SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
