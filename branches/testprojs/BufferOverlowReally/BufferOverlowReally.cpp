@@ -9,6 +9,8 @@
 #include <iostream>
 #include <tchar.h>
 #include <windows.h>
+#include <vector>
+#include <memory>
 
 // odbc-things
 #include <sql.h>
@@ -56,12 +58,32 @@ int main()
 		return -1;
 	}
 	ret = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+	int elements = 20;
 
-	SQLWCHAR buff[20];
-	
+	// Allocate a Buffer using [] - works fine.
+	//SQLWCHAR buff[20];
+
+	// and the same thing using a vector
+	std::vector<SQLWCHAR> vecBuff(elements, 'a');
+
+	// and using a sharedptr
+	//std::shared_ptr<SQLWCHAR> pBuff(new SQLWCHAR[elements], std::default_delete<SQLWCHAR[]>());
+
 	SQLINTEGER cb = 0;
 	
-	ret = SQLBindCol(hstmt, 1, SQL_C_WCHAR, (SQLPOINTER*)buff, 20, &cb);
+	// bind using [] buffer
+//	ret = SQLBindCol(hstmt, 1, SQL_C_WCHAR, (SQLPOINTER*)buff, elements * sizeof(SQLWCHAR), &cb);
+
+	// bind using vector buffer
+	ret = SQLBindCol(hstmt, 1, SQL_C_WCHAR, (SQLPOINTER*)&vecBuff[0], elements * sizeof(SQLWCHAR), &cb);
+
+	// or using shared-ptr
+	//ret = SQLBindCol(hstmt, 1, SQL_C_WCHAR, (SQLPOINTER*)pBuff.get(), elements * sizeof(SQLWCHAR), &cb);
+
+	std::shared_ptr<std::vector<SQLWCHAR>> pVec = std::make_shared<std::vector<SQLWCHAR>>(9);
+	(*pVec)[0] = 'a';
+	(*pVec)[1] = 'b';
+
 	if (!SQL_SUCCEEDED(ret))
 	{
 		printErrors(SQL_HANDLE_STMT, hstmt);
@@ -84,8 +106,15 @@ int main()
 		return -1;
 	}
 
-	std::wcout << buff << std::endl;
+	// buff
+//	std::wcout << buff << std::endl;
 
+	// vect
+	std::wstring val(vecBuff.data());
+	std::wcout << val.c_str() << std::endl;
+
+	// shared_ptr
+	//std::wcout << pBuff << std::endl;
 	return 0;
 }
 
