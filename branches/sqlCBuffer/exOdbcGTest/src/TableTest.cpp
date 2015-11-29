@@ -545,61 +545,58 @@ namespace exodbc
 //	}
 
 
-	//TEST_F(TableTest, OpenAutoWithUnsupportedColumn)
-	//{
-	//	std::wstring tableName = GetTableName(TableId::NOT_SUPPORTED);
-	//	exodbc::Table nst(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName, L"", L"", L"");
+	TEST_F(TableTest, OpenAutoSkipUnsupportedColumn)
+	{
+		std::wstring tableName = GetTableName(TableId::NOT_SUPPORTED);
+		exodbc::Table nst(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName);
 
-	//	// Expect to fail if we open with default flags
-	//	ASSERT_THROW(nst.Open(), NotSupportedException);
-	//	// But not if we pass the flag to skip
-	//	{
-	//		LogLevelFatal llf;
-	//		ASSERT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
-	//	}
+		// Expect to fail if we open with default flags
+		ASSERT_THROW(nst.Open(), NotSupportedException);
+		// But not if we pass the flag to skip
+		{
+			LogLevelFatal llf;
+			ASSERT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
 
-	//	// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
-	//	EXPECT_NO_THROW(nst.Select());
-	//	EXPECT_TRUE(nst.SelectNext());
-	//	SQLINTEGER id, int1, int2;
-	//	EXPECT_NO_THROW(id = nst.GetInt(0));
-	//	EXPECT_NO_THROW(int1 = nst.GetInt(1));
-	//	EXPECT_FALSE(nst.ColumnBufferExists(2));
-	//	EXPECT_THROW(nst.GetColumnVariant(2), IllegalArgumentException);
-	//	EXPECT_NO_THROW(int2 = nst.GetInt(3));
-	//	EXPECT_EQ(1, id);
-	//	EXPECT_EQ(10, int1);
-	//	EXPECT_EQ(12, int2);
-	//}
+		// We should now have column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
+		SqlSLongBuffer id;
+		SqlSLongBuffer int1;
+		SqlSLongBuffer int2;
+
+		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(0));
+		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(1));
+		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(3));
+
+		EXPECT_THROW(nst.GetColumn<SqlSLongBuffer>(2), IllegalArgumentException);
+	}
 
 
-//	TEST_F(TableTest, SelectFromAutoWithUnsupportedColumn)
-//	{
-//
-//
-//		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED, m_odbcInfo.m_namesCase);
-//		exodbc::Table nst(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//
-//		// we do not if we pass the flag to skip
-//		{
-//			LogLevelFatal llf;
-//			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
-//		}
-//
-//		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
-//		EXPECT_NO_THROW(nst.Select());
-//		EXPECT_TRUE(nst.SelectNext());
-//		SQLINTEGER id, int1, int2;
-//		EXPECT_NO_THROW(id = nst.GetInt(0));
-//		EXPECT_NO_THROW(int1 = nst.GetInt(1));
-//		EXPECT_THROW(nst.GetColumnVariant(2), IllegalArgumentException);
-//		EXPECT_NO_THROW(int2 = nst.GetInt(3));
-//		EXPECT_EQ(1, id);
-//		EXPECT_EQ(10, int1);
-//		EXPECT_EQ(12, int2);
-//	}
-//
-//
+	TEST_F(TableTest, SelectFromAutoWithSkippedUnsupportedColumn)
+	{
+		std::wstring tableName = GetTableName(TableId::NOT_SUPPORTED);
+		exodbc::Table nst(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName);
+
+		// we do not fail to open if we pass the flag to skip
+		{
+			LogLevelFatal llf;
+			EXPECT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+
+		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
+		SqlSLongBuffer id = nst.GetColumn<SqlSLongBuffer>(0);
+		SqlSLongBuffer int1 = nst.GetColumn<SqlSLongBuffer>(1);
+		SqlSLongBuffer int2 = nst.GetColumn<SqlSLongBuffer>(3);
+
+		EXPECT_THROW(nst.GetColumn<SqlSLongBuffer>(2), IllegalArgumentException);
+
+		EXPECT_NO_THROW(nst.Select());
+		EXPECT_TRUE(nst.SelectNext());
+		EXPECT_EQ(1, id.GetValue());
+		EXPECT_EQ(10, int1.GetValue());
+		EXPECT_EQ(12, int2.GetValue());
+	}
+
+
 //	TEST_F(TableTest, InsertIntoAutoWithUnsupportedColumn)
 //	{
 //
