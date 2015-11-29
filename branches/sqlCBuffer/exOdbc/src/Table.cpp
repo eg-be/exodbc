@@ -418,46 +418,29 @@ namespace exodbc
 					SET_EXCEPTION_SOURCE(we);
 					throw we;
 				}
+				catch (const NotSupportedException& nse)
+				{
+					if (skipUnsupportedColumns)
+					{
+						// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
+						LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetQueryName() % nse.ToString()));
+						++bufferIndex;
+						continue;
+					}
+					else
+					{
+						// rethrow
+						throw;
+					}
+
+				}
 			}
-
-			//bufferIndex = 0;
-			//for (int columnIndex = 0; columnIndex < (SQLSMALLINT)columns.size(); columnIndex++)
-			//{
-			//	ColumnInfo colInfo = columns[columnIndex];
-			//	try
-			//	{
-			//		ColumnBuffer* pColBuff = new ColumnBuffer(colInfo, odbcVersion, m_pSql2BufferTypeMap, columnFlags);
-			//		m_columnBuffers[bufferIndex] = pColBuff;
-			//		++bufferIndex;
-			//	}
-			//	catch (NotSupportedException& nse)
-			//	{
-			//		if (skipUnsupportedColumns)
-			//		{
-			//			// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
-			//			LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetQueryName() % nse.ToString()));
-			//			++bufferIndex;
-			//			continue;
-			//		}
-			//		else
-			//		{
-			//			// rethrow
-			//			throw;
-			//		}
-			//	}
-			//}
-
 		}
 		catch (Exception& ex)
 		{
 			HIDE_UNUSED(ex);
-			//// Free allocated buffers and rethrow
-			//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
-			//{
-			//	ColumnBuffer* pColumnBuffer = it->second;
-			//	delete pColumnBuffer;
-			//}
-			//m_columnBuffers.clear();
+			// Rollback all buffers created and rethrow
+			m_columns.clear();
 			throw;
 		}
 	}
