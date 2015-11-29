@@ -499,24 +499,24 @@ namespace exodbc
 
 	bool Table::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
 	{
-		//exASSERT(!TestOpenFlag(TOF_FORWARD_ONLY_CURSORS));
-		//exASSERT(IsSelectOpen());
+		exASSERT(!TestOpenFlag(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS));
+		exASSERT(IsSelectOpen());
+		exASSERT(m_pHStmtSelect->IsAllocated());
 
-		//SQLRETURN ret = SQLFetchScroll(m_hStmtSelect, fetchOrientation, fetchOffset);
-		//if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
-		//{
-		//	wstring msg = boost::str(boost::wformat(L"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
-		//	SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_hStmtSelect, msg);
-		//	SET_EXCEPTION_SOURCE(sre);
-		//	throw sre;
-		//}
-		//if (ret == SQL_SUCCESS_WITH_INFO)
-		//{
-		//	LOG_WARNING_STMT(m_hStmtSelect, ret, SQLFetch);
-		//}
+		SQLRETURN ret = SQLFetchScroll(m_pHStmtSelect->GetHandle(), fetchOrientation, fetchOffset);
+		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
+		{
+			wstring msg = boost::str(boost::wformat(L"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
+			SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle(), msg);
+			SET_EXCEPTION_SOURCE(sre);
+			throw sre;
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_pHStmtSelect->GetHandle(), ret, SQLFetch);
+		}
 
-		//return SQL_SUCCEEDED(ret);
-		return false;
+		return SQL_SUCCEEDED(ret);
 	}
 
 
