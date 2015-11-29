@@ -1311,54 +1311,75 @@ namespace exodbc
 //			EXPECT_EQ(9223372036854775807, iTable.m_bigInt);
 //		}
 //	}
-//
-//
-//	TEST_F(TableTest, SelectWCharIntValues)
-//	{
-//		// And some tables with auto-columns
-//		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		Table iTable(&m_db, AF_READ, intTypesTableName, L"", L"", L"");
-//		iTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		std::wstring id, smallInt, i, bigInt;
-//		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_NO_THROW(smallInt = iTable.GetWString(1));
-//		EXPECT_EQ(L"-32768", smallInt);
-//
-//		iTable.Select((boost::wformat(L"%s = 2") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_NO_THROW(smallInt = iTable.GetWString(1));
-//		EXPECT_EQ(L"32767", smallInt);
-//
-//		iTable.Select((boost::wformat(L"%s = 3") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_NO_THROW(i = iTable.GetWString(2));
-//		EXPECT_EQ(L"-2147483648", i);
-//
-//		iTable.Select((boost::wformat(L"%s = 4") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_NO_THROW(i = iTable.GetWString(2));
-//		EXPECT_EQ(L"2147483647", i);
-//
-//		// No bigints on access
-//		if (m_db.GetDbms() != DatabaseProduct::ACCESS)
-//		{
-//			iTable.Select((boost::wformat(L"%s = 5") % idName).str());
-//			EXPECT_TRUE(iTable.SelectNext());
-//			EXPECT_NO_THROW(bigInt = iTable.GetWString(3));
-//			EXPECT_EQ(L"-9223372036854775808", bigInt);
-//
-//			iTable.Select((boost::wformat(L"%s = 6") % idName).str());
-//			EXPECT_TRUE(iTable.SelectNext());
-//			EXPECT_NO_THROW(bigInt = iTable.GetWString(3));
-//			EXPECT_EQ(L"9223372036854775807", bigInt);
-//		}
-//	}
-//
-//
+
+	TEST_F(TableTest, BuffProb)
+	{
+		SqlSLongBuffer intCol;
+		SqlStmtHandle hStmt;
+		hStmt.AllocateWithParent(m_pDb->GetSqlDbcHandle());
+		SQLLEN buffLen = intCol.GetBufferLength();
+		SQLINTEGER cb = 0;
+		SQLRETURN ret = SQLBindCol(hStmt.GetHandle(), 1, SQL_C_SLONG, (SQLPOINTER*)(intCol.GetBuffer().get()), buffLen, &cb);
+
+	}
+
+	TEST_F(TableTest, SelectWCharIntValues)
+	{
+		// Int table, let it bind only to WChar buffers
+		std::wstring intTypesTableName = GetTableName(TableId::INTEGERTYPES);
+		std::wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		Table iTable(m_pDb, TableAccessFlag::AF_READ, intTypesTableName);
+		iTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
+		ASSERT_NO_THROW(iTable.Open());
+
+		SqlWCharArray idCol = iTable.GetColumn<SqlWCharArray>(0);
+		SqlWCharArray shortCol = iTable.GetColumn<SqlWCharArray>(1);
+		SqlWCharArray intCol = iTable.GetColumn<SqlWCharArray>(2);
+		SqlWCharArray bigIntCol = iTable.GetColumn<SqlWCharArray>(3);
+		SQLLEN len = idCol.GetBufferLength();
+
+		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
+		iTable.SelectNext();
+		wstring s(shortCol.GetBuffer()->data());
+		EXPECT_EQ(L"-32768", s);
+		int p = 3;
+		//EXPECT_TRUE(iTable.SelectNext());
+		//SQLWCHAR* pChar = shortCol;
+		//wstring s = shortCol;
+		//int p = 3;
+//		EXPECT_EQ(L"-32768", shortCol);
+
+		//iTable.Select((boost::wformat(L"%s = 2") % idName).str());
+		//EXPECT_TRUE(iTable.SelectNext());
+		//EXPECT_NO_THROW(smallInt = iTable.GetWString(1));
+		//EXPECT_EQ(L"32767", smallInt);
+
+		//iTable.Select((boost::wformat(L"%s = 3") % idName).str());
+		//EXPECT_TRUE(iTable.SelectNext());
+		//EXPECT_NO_THROW(i = iTable.GetWString(2));
+		//EXPECT_EQ(L"-2147483648", i);
+
+		//iTable.Select((boost::wformat(L"%s = 4") % idName).str());
+		//EXPECT_TRUE(iTable.SelectNext());
+		//EXPECT_NO_THROW(i = iTable.GetWString(2));
+		//EXPECT_EQ(L"2147483647", i);
+
+		//// No bigints on access
+		//if (m_db.GetDbms() != DatabaseProduct::ACCESS)
+		//{
+		//	iTable.Select((boost::wformat(L"%s = 5") % idName).str());
+		//	EXPECT_TRUE(iTable.SelectNext());
+		//	EXPECT_NO_THROW(bigInt = iTable.GetWString(3));
+		//	EXPECT_EQ(L"-9223372036854775808", bigInt);
+
+		//	iTable.Select((boost::wformat(L"%s = 6") % idName).str());
+		//	EXPECT_TRUE(iTable.SelectNext());
+		//	EXPECT_NO_THROW(bigInt = iTable.GetWString(3));
+		//	EXPECT_EQ(L"9223372036854775807", bigInt);
+		//}
+	}
+
+
 //	TEST_F(TableTest, SelectAutoFloatValues)
 //	{
 //		wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
