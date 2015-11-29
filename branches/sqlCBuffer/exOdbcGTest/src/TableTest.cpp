@@ -894,109 +894,169 @@ namespace exodbc
 	}
 
 
-//	TEST_F(TableTest, SelectFirst)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//		// We expect some Records
-//		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
-//		ASSERT_NO_THROW(iTable.Select(sqlWhere));
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 4, test::ValueIndicator::IS_NULL, 2147483647, test::ValueIndicator::IS_NULL));
-//
-//		// now Select the first again
-//		EXPECT_TRUE(iTable.SelectFirst());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
-//	}
-//
-//
-//	TEST_F(TableTest, SelectLast)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//		// We expect some Records
-//		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
-//		ASSERT_NO_THROW(iTable.Select(sqlWhere));
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 4, test::ValueIndicator::IS_NULL, 2147483647, test::ValueIndicator::IS_NULL));
-//
-//		// now Select the last record
-//		EXPECT_TRUE(iTable.SelectLast());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 7, -13, 26, 10502));
-//	}
-//
-//	TEST_F(TableTest, SelectAbsolute)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//		// We expect some Records
-//		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
-//		ASSERT_NO_THROW(iTable.Select(sqlWhere));
-//		EXPECT_TRUE(iTable.SelectAbsolute(3));
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 4, test::ValueIndicator::IS_NULL, 2147483647, test::ValueIndicator::IS_NULL));
-//
-//		// Select something not in result set
-//		EXPECT_FALSE(iTable.SelectAbsolute(20));
-//	}
-//
-//
-//	TEST_F(TableTest, SelectRelative)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//		// We expect some Records
-//		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
-//		ASSERT_NO_THROW(iTable.Select(sqlWhere));
-//		// Note: For MySQL to be able to select relative, a record must be selected first. Else, SelectRelative will choose wrong offset
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
-//		EXPECT_TRUE(iTable.SelectRelative(1));
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 3, test::ValueIndicator::IS_NULL, (-2147483647 - 1), test::ValueIndicator::IS_NULL));
-//		// Move by one forward
-//		EXPECT_TRUE(iTable.SelectRelative(1));
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 4, test::ValueIndicator::IS_NULL, 2147483647, test::ValueIndicator::IS_NULL));
-//		// And one back again
-//		EXPECT_TRUE(iTable.SelectRelative(-1));
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 3, test::ValueIndicator::IS_NULL, (-2147483647 - 1), test::ValueIndicator::IS_NULL));
-//
-//		// Select something not in result set
-//		EXPECT_FALSE(iTable.SelectRelative(20));
-//	}
-//
-//
-//	TEST_F(TableTest, SelectPrev)
-//	{
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//		
-//		// We expect some Records
-//		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
-//		ASSERT_NO_THROW(iTable.Select(sqlWhere));
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 3, test::ValueIndicator::IS_NULL, (-2147483647 - 1), test::ValueIndicator::IS_NULL));
-//
-//		// now Select the prev record - we have the first again
-//		EXPECT_TRUE(iTable.SelectPrev());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
-//		// no more prev records available:
-//		EXPECT_FALSE(iTable.SelectPrev());
-//	}
+	TEST_F(TableTest, SelectFirst)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		std::wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		ASSERT_NO_THROW(iTable.Open());
+
+		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
+		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
+		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
+
+		// We expect some Record that is not the one with id 2 if we move forward three times
+		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
+		ASSERT_NO_THROW(iTable.Select(sqlWhere));
+		ASSERT_TRUE(iTable.SelectNext());
+		ASSERT_TRUE(iTable.SelectNext());
+		ASSERT_TRUE(iTable.SelectNext());
+
+		ASSERT_NE(2, idCol);
+
+
+		// now Select the first again using SelectFirst
+		// we must have the record with id 2
+		EXPECT_TRUE(iTable.SelectFirst());
+		EXPECT_EQ(2, idCol);
+		EXPECT_EQ(32767, shortCol);
+		EXPECT_TRUE(intCol.IsNull());
+		EXPECT_TRUE(bigIntCol.IsNull());
+	}
+
+
+	TEST_F(TableTest, SelectLast)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		std::wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		ASSERT_NO_THROW(iTable.Open());
+
+		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
+		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
+		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
+
+		// We expect some Record that is not the one with id 2 if we move away from that one
+		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
+		ASSERT_NO_THROW(iTable.Select(sqlWhere));
+		ASSERT_TRUE(iTable.SelectNext());
+		ASSERT_TRUE(iTable.SelectNext());
+		ASSERT_TRUE(iTable.SelectNext());
+
+		ASSERT_NE(2, idCol);
+
+		// now Select the last record
+		EXPECT_TRUE(iTable.SelectLast());
+		EXPECT_EQ(7, idCol);
+		EXPECT_EQ(-13, shortCol);
+		EXPECT_EQ(26, intCol);
+		EXPECT_EQ(10502, bigIntCol);
+	}
+
+
+	TEST_F(TableTest, SelectAbsolute)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		std::wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		ASSERT_NO_THROW(iTable.Open());
+
+		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
+		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
+		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
+
+		// Move the 3rd record in the result-set. 
+		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
+		ASSERT_NO_THROW(iTable.Select(sqlWhere));
+		EXPECT_TRUE(iTable.SelectAbsolute(3));
+		EXPECT_EQ(4, idCol);
+		EXPECT_TRUE(shortCol.IsNull());
+		EXPECT_EQ(2147483647, intCol);
+		EXPECT_TRUE(bigIntCol.IsNull());
+
+		// Select something not in result set
+		EXPECT_FALSE(iTable.SelectAbsolute(20));
+	}
+
+
+	TEST_F(TableTest, SelectRelative)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		std::wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		ASSERT_NO_THROW(iTable.Open());
+
+		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
+		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
+		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
+
+		// We expect some Records
+		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
+		ASSERT_NO_THROW(iTable.Select(sqlWhere));
+		// Note: For MySQL to be able to select relative, a record must be selected first. Else, SelectRelative will choose wrong offset
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(2, idCol);
+		EXPECT_EQ(32767, shortCol);
+		EXPECT_TRUE(intCol.IsNull());
+		EXPECT_TRUE(bigIntCol.IsNull());
+
+		// Move by one forward
+		EXPECT_TRUE(iTable.SelectRelative(1));
+		EXPECT_EQ(3, idCol);
+		
+		// Move by one forward
+		EXPECT_TRUE(iTable.SelectRelative(1));
+		EXPECT_EQ(4, idCol);
+
+		// And one back again, check complete record
+		EXPECT_TRUE(iTable.SelectRelative(-1));
+		EXPECT_EQ(3, idCol);
+		EXPECT_TRUE(shortCol.IsNull());
+		EXPECT_EQ((-2147483647 - 1), intCol);
+		EXPECT_TRUE(bigIntCol.IsNull());
+
+		// Select something not in result set
+		EXPECT_FALSE(iTable.SelectRelative(20));
+	}
+
+
+	TEST_F(TableTest, SelectPrev)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		std::wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		ASSERT_NO_THROW(iTable.Open());
+
+		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
+		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
+		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
+		
+		// We expect some Records
+		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
+		ASSERT_NO_THROW(iTable.Select(sqlWhere));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(2, idCol);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(3, idCol);
+		EXPECT_TRUE(shortCol.IsNull());
+		EXPECT_EQ((-2147483647 - 1), intCol);
+		EXPECT_TRUE(bigIntCol.IsNull());
+
+		// now Select the prev record - we have the first again
+		EXPECT_TRUE(iTable.SelectPrev());
+		EXPECT_EQ(2, idCol);
+		EXPECT_EQ(32767, shortCol);
+		EXPECT_TRUE(intCol.IsNull());
+		EXPECT_TRUE(bigIntCol.IsNull());
+
+		// no more prev records available:
+		EXPECT_FALSE(iTable.SelectPrev());
+	}
 
 
 	TEST_F(TableTest, SelectNext)
