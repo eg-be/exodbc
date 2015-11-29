@@ -1127,39 +1127,39 @@ namespace exodbc
 //	}
 //
 //
-//	// Count
-//	// -----
-//	TEST_F(TableTest, Count)
-//	{
-//		Table table(&m_db, AF_READ, test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		ASSERT_NO_THROW(table.Open());
-//
-//		SQLUBIGINT all;
-//		EXPECT_NO_THROW(all = table.Count(L""));
-//		EXPECT_EQ(6, all);
-//
-//		// \todo: Check some really big table, with billions of rows
-//		SQLUBIGINT some;
-//		std::wstring whereStmt = L"tdouble > 0";
-//		if (m_db.GetDbms() == DatabaseProduct::DB2)
-//		{
-//			whereStmt = L"TDOUBLE > 0";
-//		}
-//		EXPECT_NO_THROW(some = table.Count(whereStmt));
-//		EXPECT_EQ(1, some);
-//		whereStmt = L"tdouble > 0 OR tfloat > 0";
-//		if (m_db.GetDbms() == DatabaseProduct::DB2)
-//		{
-//			whereStmt = L"TDOUBLE > 0 OR TFLOAT > 0";
-//		}
-//		EXPECT_NO_THROW(some = table.Count(whereStmt));
-//		EXPECT_EQ(2, some);
-//
-//		// we should fail with an exception if we query using a non-sense where-stmt
-//		EXPECT_THROW(table.Count(L"a query that is invalid for sure"), Exception);
-//	}
-//
-//
+	// Count
+	// -----
+	TEST_F(TableTest, Count)
+	{
+		Table table(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::FLOATTYPES));
+		ASSERT_NO_THROW(table.Open());
+
+		SQLUBIGINT all;
+		EXPECT_NO_THROW(all = table.Count(L""));
+		EXPECT_EQ(6, all);
+
+		// \todo: Check some really big table, with billions of rows
+		SQLUBIGINT some;
+		std::wstring whereStmt = L"tdouble > 0";
+		if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+		{
+			whereStmt = L"TDOUBLE > 0";
+		}
+		EXPECT_NO_THROW(some = table.Count(whereStmt));
+		EXPECT_EQ(1, some);
+		whereStmt = L"tdouble > 0 OR tfloat > 0";
+		if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+		{
+			whereStmt = L"TDOUBLE > 0 OR TFLOAT > 0";
+		}
+		EXPECT_NO_THROW(some = table.Count(whereStmt));
+		EXPECT_EQ(2, some);
+
+		// we should fail with an exception if we query using a non-sense where-stmt
+		EXPECT_THROW(table.Count(L"a query that is invalid for sure"), Exception);
+	}
+
+
 //	// GetValues
 //	// ---------
 //	TEST_F(TableTest, SelectAutoIntValues)

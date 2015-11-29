@@ -828,36 +828,37 @@ namespace exodbc
 	SQLUBIGINT Table::Count(const std::wstring& whereStatement)
 	{
 		exASSERT(IsOpen());
+		exASSERT(m_pHStmtCount->IsAllocated());
 
 		// Close Statement handle on exit
-		//StatementCloser stmtCloser(m_hStmtCount, false, true);
+		StatementCloser stmtCloser(m_pHStmtCount, false, true);
 
 		SQLUBIGINT count = 0;
-		//std::wstring sqlstmt;
-		//if ( ! whereStatement.empty())
-		//{
-		//	sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereStatement).str();
-		//}
-		//else
-		//{
-		//	sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
-		//}
+		std::wstring sqlstmt;
+		if ( ! whereStatement.empty())
+		{
+			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereStatement).str();
+		}
+		else
+		{
+			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
+		}
 
-		//SQLRETURN ret = SQLExecDirect(m_hStmtCount, (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		//THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_hStmtCount);
-		//	
-		//ret = SQLFetch(m_hStmtCount);
-		//THROW_IFN_SUCCEEDED(SQLFetch, ret, SQL_HANDLE_STMT, m_hStmtCount);
+		SQLRETURN ret = SQLExecDirect(m_pHStmtCount->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pHStmtCount->GetHandle());
+			
+		ret = SQLFetch(m_pHStmtCount->GetHandle());
+		THROW_IFN_SUCCEEDED(SQLFetch, ret, SQL_HANDLE_STMT, m_pHStmtCount->GetHandle());
 
-		//bool isNull = false;
-		//SQLLEN cb = 0;
-		//GetData(m_hStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
-		//if (isNull)
-		//{
-		//	Exception ex(boost::str(boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt));
-		//	SET_EXCEPTION_SOURCE(ex);
-		//	throw ex;
-		//}
+		bool isNull = false;
+		SQLLEN cb = 0;
+		GetData(m_pHStmtCount->GetHandle(), 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
+		if (isNull)
+		{
+			Exception ex(boost::str(boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt));
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
 
 		return count;
 	}
