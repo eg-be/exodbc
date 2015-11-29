@@ -634,10 +634,10 @@ namespace exodbc
 		template<typename T>
 		const T& GetNonNullColumn(SQLSMALLINT columnIndex) const
 		{
-			const SqlCBufferVariant& column = GetNonNullColumnVariant(columnIndex);
+			const SqlCBufferVariant& columnVariant = GetNonNullColumnVariant(columnIndex);
 			try
 			{
-				return boost::get<T>(column);
+				return boost::get<T>(columnVariant);
 			}
 			catch (const boost::bad_get& ex)
 			{
@@ -651,10 +651,10 @@ namespace exodbc
 		template<typename T>
 		const T& GetColumn(SQLSMALLINT columnIndex) const
 		{
-			const SqlCBufferVariant& column = GetColumnVariant(columnIndex);
+			const SqlCBufferVariant& columnVariant = GetColumnVariant(columnIndex);
 			try
 			{
-				return boost::get<T>(column);
+				return boost::get<T>(columnVariant);
 			}
 			catch (const boost::bad_get& ex)
 			{
@@ -663,6 +663,7 @@ namespace exodbc
 				throw we;
 			}
 		}
+
 
 		/*!
 		* \brief	Access the current value of columnIndex as SQLSMALLINT.

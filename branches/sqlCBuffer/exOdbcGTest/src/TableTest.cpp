@@ -189,48 +189,48 @@ namespace exodbc
 	}
 
 
-//	TEST_F(TableTest, OpenManualCheckColumnFlagSelect)
-//	{
-//		// Open a table manually but do not set the Select flag for all columns
-//		Table iTable(&m_db, AF_SELECT, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		SQLINTEGER id = 0;
-//		SQLSMALLINT si = 0;
-//		SQLINTEGER i = 0;
-//		SQLBIGINT bi = 0;
-//		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT);
-//		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_NULLABLE);
-//		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_NONE | CF_NULLABLE);
-//		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_NULLABLE);
-//
-//		ASSERT_NO_THROW(iTable.Open());
-//		// We expect all columnBuffers to be bound, except nr 2
-//		ColumnBuffer* pBuffId = iTable.GetColumnVariant(0);
-//		ColumnBuffer* pBuffsi = iTable.GetColumnVariant(1);
-//		ColumnBuffer* pBuffi = iTable.GetColumnVariant(2);
-//		ColumnBuffer* pBuffbi = iTable.GetColumnVariant(3);
-//		EXPECT_TRUE(pBuffId->IsBound());
-//		EXPECT_TRUE(pBuffsi->IsBound());
-//		EXPECT_FALSE(pBuffi->IsBound());
-//		EXPECT_TRUE(pBuffbi->IsBound());
-//
-//		// And we should be able to select a row
-//		wstring sqlstmt = boost::str(boost::wformat(L"%s = 7") % test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
-//		iTable.Select(sqlstmt);
-//		EXPECT_TRUE(iTable.SelectNext());
-//		// and have all values
-//		EXPECT_EQ(7, id);
-//		EXPECT_EQ(-13, si);
-//		EXPECT_EQ(0, i);
-//		EXPECT_EQ(10502, bi);
-//		{
-//			LogLevelFatal llf;
-//			DontDebugBreak ddb;
-//			// except the not bound column, we are unable to get its value, but its buffer has not changed
-//			EXPECT_THROW(boost::get<SQLINTEGER>(iTable.GetColumnValue(2)), AssertionException);
-//		}
-//	}
-//
-//
+	//TEST_F(TableTest, OpenManualCheckColumnFlagSelect)
+	//{
+	//	// Open a table manually but do not set the Select flag for all columns
+	//	Table iTable(&m_db, AF_SELECT, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
+	//	SQLINTEGER id = 0;
+	//	SQLSMALLINT si = 0;
+	//	SQLINTEGER i = 0;
+	//	SQLBIGINT bi = 0;
+	//	iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT);
+	//	iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_NULLABLE);
+	//	iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_NONE | CF_NULLABLE);
+	//	iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_NULLABLE);
+
+	//	ASSERT_NO_THROW(iTable.Open());
+	//	// We expect all columnBuffers to be bound, except nr 2
+	//	ColumnBuffer* pBuffId = iTable.GetColumnVariant(0);
+	//	ColumnBuffer* pBuffsi = iTable.GetColumnVariant(1);
+	//	ColumnBuffer* pBuffi = iTable.GetColumnVariant(2);
+	//	ColumnBuffer* pBuffbi = iTable.GetColumnVariant(3);
+	//	EXPECT_TRUE(pBuffId->IsBound());
+	//	EXPECT_TRUE(pBuffsi->IsBound());
+	//	EXPECT_FALSE(pBuffi->IsBound());
+	//	EXPECT_TRUE(pBuffbi->IsBound());
+
+	//	// And we should be able to select a row
+	//	wstring sqlstmt = boost::str(boost::wformat(L"%s = 7") % test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+	//	iTable.Select(sqlstmt);
+	//	EXPECT_TRUE(iTable.SelectNext());
+	//	// and have all values
+	//	EXPECT_EQ(7, id);
+	//	EXPECT_EQ(-13, si);
+	//	EXPECT_EQ(0, i);
+	//	EXPECT_EQ(10502, bi);
+	//	{
+	//		LogLevelFatal llf;
+	//		DontDebugBreak ddb;
+	//		// except the not bound column, we are unable to get its value, but its buffer has not changed
+	//		EXPECT_THROW(boost::get<SQLINTEGER>(iTable.GetColumnValue(2)), AssertionException);
+	//	}
+	//}
+
+
 //	TEST_F(TableTest, OpenManualCheckColumnFlagInsert)
 //	{
 //		// Open a table manually but do not set the Insert flag for all columns
@@ -1160,52 +1160,56 @@ namespace exodbc
 	}
 
 
-//	// GetValues
-//	// ---------
-//	TEST_F(TableTest, SelectAutoIntValues)
-//	{
-//		namespace tt = test;
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		std::wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//
-//		// The first column has a smallint set, we can read that as any int value -32768
-//		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 1, -32768, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
-//		iTable.SelectClose();
-//
-//		iTable.Select((boost::wformat(L"%s = 2") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 2, 32767, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL));
-//		iTable.SelectClose();
-//
-//		// The 2nd column has a int set, we can read that as int or bigint value -2147483648
-//		iTable.Select((boost::wformat(L"%s = 3") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 3, test::ValueIndicator::IS_NULL, (-2147483647 - 1), test::ValueIndicator::IS_NULL));
-//		iTable.SelectClose();
-//
-//		iTable.Select((boost::wformat(L"%s = 4") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 4, test::ValueIndicator::IS_NULL, 2147483647, test::ValueIndicator::IS_NULL));
-//		iTable.SelectClose();
-//
-//		// The 3rd column has a bigint set, we can read that as bigint value -9223372036854775808
-//		iTable.Select((boost::wformat(L"%s = 5") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 5, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, (-9223372036854775807 - 1)));
-//		iTable.SelectClose();
-//
-//		iTable.Select((boost::wformat(L"%s = 6") % idName).str());
-//		EXPECT_TRUE(iTable.SelectNext());
-//		EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, 6, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, 9223372036854775807));
-//		iTable.SelectClose();
-//	}
-//
-//
+	// GetValues
+	// ---------
+	TEST_F(TableTest, SelectAutoIntValues)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		std::wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		ASSERT_NO_THROW(iTable.Open());
+
+		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
+		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
+		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
+
+		// The first column has a smallint set value -32768
+		iTable.Select((boost::wformat(L"%s = 1") % idName).str());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(-32768, shortCol.GetValue());
+		iTable.SelectClose();
+
+		iTable.Select((boost::wformat(L"%s = 2") % idName).str());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(32767, shortCol.GetValue());
+		iTable.SelectClose();
+
+		// The 2nd column has a int set, value -2147483648
+		iTable.Select((boost::wformat(L"%s = 3") % idName).str());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ((-2147483647 - 1), intCol.GetValue());
+		iTable.SelectClose();
+
+		iTable.Select((boost::wformat(L"%s = 4") % idName).str());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(2147483647, intCol.GetValue());
+		iTable.SelectClose();
+
+		// The 3rd column has a bigint set, -9223372036854775808
+		iTable.Select((boost::wformat(L"%s = 5") % idName).str());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ((-9223372036854775807 - 1), bigIntCol.GetValue());
+		iTable.SelectClose();
+
+		iTable.Select((boost::wformat(L"%s = 6") % idName).str());
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(9223372036854775807, bigIntCol.GetValue());
+		iTable.SelectClose();
+	}
+
+
 //	TEST_F(TableTest, SelectManualIntValues)
 //	{
 //		MIntTypesTable iTable(&m_db, m_odbcInfo.m_namesCase);
