@@ -737,7 +737,7 @@ namespace exodbc
 	}
 
 
-	const SqlCBufferVariant& Table::GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const
+	const SqlCBufferVariant& Table::GetNonNullColumnVariant(SQLSMALLINT columnIndex) const
 	{
 		const SqlCBufferVariant& column = GetColumnVariant(columnIndex);
 		try
@@ -1605,6 +1605,7 @@ namespace exodbc
 					{
 						BindSelectVisitor bindSelect(boundColumnNumber, m_pHStmtSelect);
 						boost::apply_visitor(bindSelect, columnBuffer);
+						boundColumnNumber++;
 					}
 				}
 

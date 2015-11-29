@@ -634,7 +634,24 @@ namespace exodbc
 		template<typename T>
 		const T& GetNonNullColumn(SQLSMALLINT columnIndex) const
 		{
-			const SqlCBufferVariant column = GetNonNullColumnBuffer(columnIndex);
+			const SqlCBufferVariant& column = GetNonNullColumnVariant(columnIndex);
+			try
+			{
+				return boost::get<T>(column);
+			}
+			catch (const boost::bad_get& ex)
+			{
+				WrapperException we(ex);
+				SET_EXCEPTION_SOURCE(we);
+				throw we;
+			}
+		}
+
+
+		template<typename T>
+		const T& GetColumn(SQLSMALLINT columnIndex) const
+		{
+			const SqlCBufferVariant& column = GetColumnVariant(columnIndex);
 			try
 			{
 				return boost::get<T>(column);
@@ -997,7 +1014,7 @@ namespace exodbc
 		* \throw	Exception If no columnBuffer found, or if the ColumnBuffer is Null.
 		* \throw	NullValueException if the value is NULL.
 		*/
-		const SqlCBufferVariant& GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const;
+		const SqlCBufferVariant& GetNonNullColumnVariant(SQLSMALLINT columnIndex) const;
 
 		ConstDatabasePtr		m_pDb;
 //		const Database*				m_pDb;	///< Database this table belongs to.
