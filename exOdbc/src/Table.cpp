@@ -1210,22 +1210,23 @@ namespace exodbc
 
 	const SQLCHAR* Table::GetBinaryValue(SQLSMALLINT columnIndex, SQLLEN& bufferSize, SQLLEN& lengthIndicator) const
 	{
-		const SqlBinaryArray& column = GetNonNullColumn<SqlBinaryArray>(columnIndex);
-		const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
-		try
-		{
-			const SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
-			lengthIndicator = cb.GetCb();
-		}
-		catch (const boost::bad_polymorphic_get& ex)
-		{
-			WrapperException we(ex);
-			SET_EXCEPTION_SOURCE(we);
-			throw we;
-		}
+		//const SqlBinaryArray& column = GetNonNullColumn<SqlBinaryArray>(columnIndex);
+		//const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
+		//try
+		//{
+		//	const SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
+		//	lengthIndicator = cb.GetCb();
+		//}
+		//catch (const boost::bad_polymorphic_get& ex)
+		//{
+		//	WrapperException we(ex);
+		//	SET_EXCEPTION_SOURCE(we);
+		//	throw we;
+		//}
 
-		bufferSize = column.GetBufferLength();
-		return column.GetBuffer().get();
+		//bufferSize = column.GetBufferLength();
+		//return column.GetBuffer().get();
+		return NULL;
 	}
 
 

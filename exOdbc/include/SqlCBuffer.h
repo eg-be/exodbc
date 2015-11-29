@@ -308,8 +308,15 @@ namespace exodbc
 			, ColumnFlags()
 			, ExtendedColumnPropertiesHolder()
 			, m_nrOfElements(nrOfElements)
+			//, m_vect(nrOfElements)
+			, m_pBuffer(std::make_shared<std::vector<T>>(nrOfElements))
 		{
-			m_pBuffer = std::shared_ptr<T>(new T[m_nrOfElements], std::default_delete<T[]>());
+			//m_vect = std::vector<T>(m_nrOfElements);
+
+			//m_pBuffer = std::make_shared<std::vector<T>>(m_nrOfElements);
+			//m_pBuffer = std::shared_ptr<T>(new T[m_nrOfElements], std::default_delete<T[]>());
+			// [](double* arr) { delete[] arr; }
+			//m_pBuffer = new T[m_nrOfElements];
 			SetNull();
 		};
 
@@ -345,16 +352,32 @@ namespace exodbc
 		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
 		SQLLEN GetBufferLength() const noexcept { return sizeof(T) * GetNrOfElements(); };
 
-		// \todo we should rather use std::copy here.
-		void SetValue(const T* value, SQLLEN valueBufferLength, SQLLEN cb)
+		void SetValue(const std::vector<T>& value, SQLLEN cb)
 		{ 
-			exASSERT(valueBufferLength <= GetBufferLength()); 
-			memset(m_pBuffer.get(), 0, GetBufferLength()); 
-			memcpy(m_pBuffer.get(), value, valueBufferLength);
+			exASSERT(value.size() <= m_pBuffer->capacity()); 
+			size_t index = 0;
+			for (std::vector<T>::const_iterator it = value.begin(); it != value.end(); ++it)
+			{
+				(*m_pBuffer)[index] = *it;
+				++index;
+			}
+			// null-terminate if last element added not already was a '0'
+			// and if there is still some space for the last '0'
+			// if there is no space, fail
+			if (cb == SQL_NTS && value.back() != 0)
+			{
+				exASSERT(index < m_pBuffer->capacity());
+				(*m_pBuffer)[index] = 0;
+			}
+			//memset(m_pBuffer.get(), 0, GetBufferLength()); 
+			//memcpy(m_pBuffer.get(), value, valueBufferLength);
 			SetCb(cb);
 		};
-		const std::shared_ptr<T> GetBuffer() const noexcept { return m_pBuffer; };
+		const std::shared_ptr<std::vector<T>> GetBuffer() const noexcept { return m_pBuffer; };
+		//const std::shared_ptr<T> GetBuffer() const noexcept { return m_pBuffer; };
 		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
+
+		//operator T*() const noexcept { return m_pBuffer.get(); };
 
 		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
@@ -364,7 +387,14 @@ namespace exodbc
 			ColumnBoundHandle boundHandleInfo(pHStmt, columnNr);
 			exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
 
-			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*)m_pBuffer.get(), GetBufferLength(), m_pCb.get());
+			//SQLLEN l = GetBufferLength();
+			//SQLPOINTER* pVec = (SQLPOINTER*) &(m_pBuffer.get()[0]);
+			//SQLSMALLINT targetType = sqlCType;
+			//SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*) &m_vect[0], l, m_pCb.get());
+			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*) &(*m_pBuffer)[0], GetBufferLength(), m_pCb.get());
+//			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*)(m_pBuffer.get()), 4, m_pCb.get());
+//			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*)(m_pBuffer.get()), GetBufferLength(), m_pCb.get());
+//			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*)m_pBuffer, GetBufferLength(), m_pCb.get());
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 			m_boundSelects.insert(boundHandleInfo);
 		};
@@ -402,7 +432,11 @@ namespace exodbc
 
 	private:
 		SQLLEN m_nrOfElements;
-		std::shared_ptr<T> m_pBuffer;
+		std::shared_ptr<std::vector<T>> m_pBuffer;
+		//std::vector<T> m_vect;
+		//std::shared_ptr<std::vector<T>> m_pBuffer;
+		//std::shared_ptr<T> m_pBuffer;
+		//T* m_pBuffer;
 		std::set<ColumnBoundHandle> m_boundSelects;
 	};
 

@@ -140,8 +140,8 @@ namespace exodbc
 	{
 		SqlWCharArray arr(24);
 		wstring s(L"Hello");
-		arr.SetValue(s.c_str(), (s.length() + 1) * sizeof(SQLWCHAR), SQL_NTS);
-		wstring v(arr.GetBuffer().get());
+		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
+		wstring v(arr.GetBuffer()->data());
 		EXPECT_EQ(s, v);
 		EXPECT_EQ(SQL_NTS, arr.GetCb());
 	}
@@ -152,28 +152,28 @@ namespace exodbc
 		// must internally use the same buffer
 		SqlWCharArray arr(24);
 		wstring s(L"Hello");
-		arr.SetValue(s.c_str(), (s.length() + 1) * sizeof(SQLWCHAR), SQL_NTS);
-		wstring v(arr.GetBuffer().get());
+		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
+		wstring v(arr.GetBuffer()->data());
 		ASSERT_EQ(s, v);
 		ASSERT_EQ(SQL_NTS, arr.GetCb());
 
 		// create copy
 		SqlWCharArray arr2(arr);
-		wstring v2(arr2.GetBuffer().get());
+		wstring v2(arr2.GetBuffer()->data());
 		EXPECT_EQ(s, v2);
 
 		// changing either must change the other too
 		s = L"World";
-		arr.SetValue(s.c_str(), (s.length() + 1) * sizeof(SQLWCHAR), SQL_NTS);
-		v = arr.GetBuffer().get();
-		v2 = arr2.GetBuffer().get();
+		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
+		v = arr.GetBuffer()->data();
+		v2 = arr2.GetBuffer()->data();
 		EXPECT_EQ(s, v);
 		EXPECT_EQ(s, v2);
 
 		s = L"Moon";
-		arr2.SetValue(s.c_str(), (s.length() + 1) * sizeof(SQLWCHAR), SQL_NTS);
-		v = arr.GetBuffer().get();
-		v2 = arr2.GetBuffer().get();
+		arr2.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
+		v = arr.GetBuffer()->data();
+		v2 = arr2.GetBuffer()->data();
 		EXPECT_EQ(s, v);
 		EXPECT_EQ(s, v2);
 	}
