@@ -286,6 +286,7 @@ namespace exodbc
 	public:
 		NullValueException(std::wstring columnName)
 			: Exception()
+			, m_columnName(columnName)
 		{
 			m_what = w2s(ToString());
 		}
@@ -298,9 +299,7 @@ namespace exodbc
 		virtual const char* what() const throw() { return m_what.c_str(); };
 
 	private:
-		std::wstring m_tableName;
 		std::wstring m_columnName;
-		SQLSMALLINT m_columnIndex;
 	};
 
 
