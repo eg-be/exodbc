@@ -179,6 +179,8 @@ namespace exodbc
 		const T& GetValue() const noexcept { return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const noexcept { return m_pBuffer; };
 
+		operator T() const noexcept { return GetValue(); };
+
 		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
 			exASSERT(columnNr >= 1);
