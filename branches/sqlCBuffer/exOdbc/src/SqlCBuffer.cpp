@@ -80,7 +80,7 @@ namespace exodbc
 			SQLINTEGER columnSize = columnInfo.IsColumnSizeNull() ? 0 : columnInfo.GetColumnSize();
 			SQLSMALLINT numPrecRadix = columnInfo.IsNumPrecRadixNull() ? 0 : columnInfo.GetNumPrecRadix();
 			SQLSMALLINT decimalDigits = columnInfo.IsDecimalDigitsNull() ? 0 : columnInfo.GetDecimalDigits();
-			SQLLEN arraySize = CalculateDisplaySize(sqlCType, columnSize, numPrecRadix, decimalDigits);
+			SQLLEN arraySize = CalculateDisplaySize(columnInfo.GetSqlType(), columnSize, numPrecRadix, decimalDigits);
 			if (sqlCType == SQL_C_CHAR)
 			{
 				return SqlCharArray(arraySize);
