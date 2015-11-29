@@ -192,15 +192,21 @@ namespace exodbc
 	//TEST_F(TableTest, OpenManualCheckColumnFlagSelect)
 	//{
 	//	// Open a table manually but do not set the Select flag for all columns
-	//	Table iTable(&m_db, AF_SELECT, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
+	//	Table iTable(m_pDb, TableAccessFlag::AF_SELECT, GetTableName(TableId::INTEGERTYPES));
+
+	//	SqlSLongBuffer idCol;
+	//	SqlSShortBuffer shortCol;
+	//	SqlSLongBuffer intCol;
+	//	SqlSBigIntBuffer bigIntCol;
+
 	//	SQLINTEGER id = 0;
 	//	SQLSMALLINT si = 0;
 	//	SQLINTEGER i = 0;
 	//	SQLBIGINT bi = 0;
-	//	iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT);
-	//	iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_NULLABLE);
-	//	iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_NONE | CF_NULLABLE);
-	//	iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_NULLABLE);
+	//	iTable.SetColumn(0, ToDbCase(L"idintegertypes"), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), TableOpenFlag::CF_SELECT);
+	//	iTable.SetColumn(1, ToDbCase(L"tsmallint"), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), TableOpenFlag::CF_SELECT | TableOpenFlag::CF_NULLABLE);
+	//	iTable.SetColumn(2, ToDbCase(L"tint"), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), TableOpenFlag::CF_NONE);
+	//	iTable.SetColumn(3, ToDbCase(L"tbigint"), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), TableOpenFlag::CF_SELECT | TableOpenFlag::CF_NULLABLE);
 
 	//	ASSERT_NO_THROW(iTable.Open());
 	//	// We expect all columnBuffers to be bound, except nr 2
