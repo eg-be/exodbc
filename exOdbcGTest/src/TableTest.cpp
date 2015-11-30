@@ -1374,47 +1374,66 @@ namespace exodbc
 	}
 
 
-//	TEST_F(TableTest, SelectAutoFloatValues)
-//	{
-//		wstring floatTypesTableName = test::GetTableName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
-//		Table fTable(&m_db, AF_READ, floatTypesTableName, L"", L"", L"");
-//		ASSERT_NO_THROW(fTable.Open());
-//
-//		SQLDOUBLE val;
-//		wstring str;
-//		std::wstring idName = test::GetIdColumnName(test::TableId::FLOATTYPES, m_odbcInfo.m_namesCase);
-//		fTable.Select((boost::wformat(L"%s = 1") % idName).str());
-//		EXPECT_TRUE(fTable.SelectNext());
-//		EXPECT_NO_THROW(val = fTable.GetDouble(2));
-//		EXPECT_EQ(0.0, val);
-//
-//		fTable.Select((boost::wformat(L"%s = 2") % idName).str());
-//		EXPECT_TRUE(fTable.SelectNext());
-//		EXPECT_NO_THROW(val = fTable.GetDouble(2));
-//		EXPECT_EQ((int)(1e3 * 3.141), (int)(1e3 * val));
-//
-//		fTable.Select((boost::wformat(L"%s = 3") % idName).str());
-//		EXPECT_TRUE(fTable.SelectNext());
-//		EXPECT_NO_THROW(val = fTable.GetDouble(2));
-//		EXPECT_EQ((int)(1e3 * -3.141), (int)(1e3 * val));
-//
-//		fTable.Select((boost::wformat(L"%s = 4") % idName).str());
-//		EXPECT_TRUE(fTable.SelectNext());
-//		EXPECT_NO_THROW(val = fTable.GetDouble(1));
-//		EXPECT_EQ(0.0, val);
-//
-//		fTable.Select((boost::wformat(L"%s = 5") % idName).str());
-//		EXPECT_TRUE(fTable.SelectNext());
-//		EXPECT_NO_THROW(val = fTable.GetDouble(1));
-//		EXPECT_EQ((int)(1e6 * 3.141592), (int)(1e6 * val));
-//
-//		fTable.Select((boost::wformat(L"%s = 6") % idName).str());
-//		EXPECT_TRUE(fTable.SelectNext());
-//		EXPECT_NO_THROW(val = fTable.GetDouble(1));
-//		EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * val));
-//	}
-//
-//
+	TEST_F(TableTest, SelectAutoFloatValues)
+	{
+		wstring floatTypesTableName = GetTableName(TableId::FLOATTYPES);
+		std::wstring idName = GetIdColumnName(TableId::FLOATTYPES);
+
+		Table fTable(m_pDb, TableAccessFlag::AF_READ, floatTypesTableName);
+		ASSERT_NO_THROW(fTable.Open());
+
+		SqlSLongBuffer idCol = fTable.GetColumn<SqlSLongBuffer>(0);
+		SqlDoubleBuffer doubleCol = fTable.GetColumn<SqlDoubleBuffer>(1);
+
+		fTable.Select((boost::wformat(L"%s = 4") % idName).str());
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_EQ(0.0, doubleCol.GetValue());
+
+		fTable.Select((boost::wformat(L"%s = 5") % idName).str());
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_EQ((int)(1e6 * 3.141592), (int)(1e6 * doubleCol.GetValue()));
+
+		fTable.Select((boost::wformat(L"%s = 6") % idName).str());
+		EXPECT_TRUE(fTable.SelectNext());
+		EXPECT_EQ((int)(1e6 * -3.141592), (int)(1e6 * doubleCol.GetValue()));
+
+		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER ||
+			m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// SQL Server never reports REAL type, while others do
+			SqlDoubleBuffer floatCol = fTable.GetColumn<SqlDoubleBuffer>(2);
+
+			fTable.Select((boost::wformat(L"%s = 1") % idName).str());
+			fTable.SelectNext();
+			EXPECT_EQ(0.0, floatCol.GetValue());
+
+			fTable.Select((boost::wformat(L"%s = 2") % idName).str());
+			EXPECT_TRUE(fTable.SelectNext());
+			EXPECT_EQ((int)(1e3 * 3.141), (int)(1e3 * floatCol.GetValue()));
+
+			fTable.Select((boost::wformat(L"%s = 3") % idName).str());
+			EXPECT_TRUE(fTable.SelectNext());
+			EXPECT_EQ((int)(1e3 * -3.141), (int)(1e3 * floatCol.GetValue()));
+		}
+		else
+		{
+			SqlRealBuffer realCol = fTable.GetColumn<SqlRealBuffer>(2);
+
+			fTable.Select((boost::wformat(L"%s = 1") % idName).str());
+			fTable.SelectNext();
+			EXPECT_EQ(0.0, realCol.GetValue());
+
+			fTable.Select((boost::wformat(L"%s = 2") % idName).str());
+			EXPECT_TRUE(fTable.SelectNext());
+			EXPECT_EQ((int)(1e3 * 3.141), (int)(1e3 * realCol.GetValue()));
+
+			fTable.Select((boost::wformat(L"%s = 3") % idName).str());
+			EXPECT_TRUE(fTable.SelectNext());
+			EXPECT_EQ((int)(1e3 * -3.141), (int)(1e3 * realCol.GetValue()));
+		}
+	}
+
+
 //	TEST_F(TableTest, SelectManualFloatValues)
 //	{
 //		MFloatTypesTable fTable(&m_db, m_odbcInfo.m_namesCase);
