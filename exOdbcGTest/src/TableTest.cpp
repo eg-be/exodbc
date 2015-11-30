@@ -1342,41 +1342,35 @@ namespace exodbc
 		iTable.SelectNext();
 		wstring s(shortCol.GetBuffer()->data());
 		EXPECT_EQ(L"-32768", s);
-		int p = 3;
-		//EXPECT_TRUE(iTable.SelectNext());
-		//SQLWCHAR* pChar = shortCol;
-		//wstring s = shortCol;
-		//int p = 3;
-//		EXPECT_EQ(L"-32768", shortCol);
 
-		//iTable.Select((boost::wformat(L"%s = 2") % idName).str());
-		//EXPECT_TRUE(iTable.SelectNext());
-		//EXPECT_NO_THROW(smallInt = iTable.GetWString(1));
-		//EXPECT_EQ(L"32767", smallInt);
+		iTable.Select((boost::wformat(L"%s = 2") % idName).str());
+		iTable.SelectNext();
+		s = shortCol.GetBuffer()->data();;
+		EXPECT_EQ(L"32767", s);
 
-		//iTable.Select((boost::wformat(L"%s = 3") % idName).str());
-		//EXPECT_TRUE(iTable.SelectNext());
-		//EXPECT_NO_THROW(i = iTable.GetWString(2));
-		//EXPECT_EQ(L"-2147483648", i);
+		iTable.Select((boost::wformat(L"%s = 3") % idName).str());
+		iTable.SelectNext();
+		s = intCol.GetBuffer()->data();
+		EXPECT_EQ(L"-2147483648", s);
 
-		//iTable.Select((boost::wformat(L"%s = 4") % idName).str());
-		//EXPECT_TRUE(iTable.SelectNext());
-		//EXPECT_NO_THROW(i = iTable.GetWString(2));
-		//EXPECT_EQ(L"2147483647", i);
+		iTable.Select((boost::wformat(L"%s = 4") % idName).str());
+		iTable.SelectNext();
+		s = intCol.GetBuffer()->data();
+		EXPECT_EQ(L"2147483647", s);
 
-		//// No bigints on access
-		//if (m_db.GetDbms() != DatabaseProduct::ACCESS)
-		//{
-		//	iTable.Select((boost::wformat(L"%s = 5") % idName).str());
-		//	EXPECT_TRUE(iTable.SelectNext());
-		//	EXPECT_NO_THROW(bigInt = iTable.GetWString(3));
-		//	EXPECT_EQ(L"-9223372036854775808", bigInt);
+		// No bigints on access
+		if (m_pDb->GetDbms() != DatabaseProduct::ACCESS)
+		{
+			iTable.Select((boost::wformat(L"%s = 5") % idName).str());
+			iTable.SelectNext();
+			s = bigIntCol.GetBuffer()->data();
+			EXPECT_EQ(L"-9223372036854775808", s);
 
-		//	iTable.Select((boost::wformat(L"%s = 6") % idName).str());
-		//	EXPECT_TRUE(iTable.SelectNext());
-		//	EXPECT_NO_THROW(bigInt = iTable.GetWString(3));
-		//	EXPECT_EQ(L"9223372036854775807", bigInt);
-		//}
+			iTable.Select((boost::wformat(L"%s = 6") % idName).str());
+			iTable.SelectNext();
+			s = bigIntCol.GetBuffer()->data();
+			EXPECT_EQ(L"9223372036854775807", s);
+		}
 	}
 
 
