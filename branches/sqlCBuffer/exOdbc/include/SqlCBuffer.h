@@ -176,7 +176,7 @@ namespace exodbc
 
 		void SetValue(const T& value) noexcept { SetValue(value, GetBufferLength()); };
 		void SetValue(const T& value, SQLLEN cb) noexcept { *m_pBuffer = value; SetCb(cb); };
-		const T& GetValue() const noexcept { return *m_pBuffer; };
+		const T& GetValue() const { exASSERT(!IsNull()); return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const noexcept { return m_pBuffer; };
 
 		operator T() const noexcept { return GetValue(); };
