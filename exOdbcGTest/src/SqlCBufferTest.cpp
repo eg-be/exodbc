@@ -309,4 +309,97 @@ namespace exodbc
 		f(4);
 		EXPECT_TRUE(realCol.IsNull());
 	}
+
+
+	TEST_F(WCharColumnTest, ReadCharValues)
+	{
+		{
+			wstring colName = L"tvarchar";
+			SqlWCharArray varcharCol(colName, 128 + 1);
+			varcharCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
+
+			f(1);
+			EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetWString());
+			f(3);
+			EXPECT_EQ(L"הצüאיט", varcharCol.GetWString());
+			f(2);
+			EXPECT_TRUE(varcharCol.IsNull());
+		}
+
+		{
+			wstring colName = L"tchar";
+			SqlWCharArray charCol(colName, 128 + 1);
+			charCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
+
+			// Note: MySql and Access trim the char values, other DBs do not trim
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+			{
+				f(2);
+				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetWString());
+				f(4);
+				EXPECT_EQ(L"הצüאיט", charCol.GetWString());
+			}
+			else
+			{
+				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ה'
+				// Therefore, the number of preceding whitespaces is not equal on DB2 
+				f(2);
+				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetWString());
+				f(4);
+				EXPECT_EQ(L"הצüאיט", boost::trim_copy(charCol.GetWString()));
+			}
+
+			f(1);
+			EXPECT_TRUE(charCol.IsNull());
+		}
+	}
+
+
+	TEST_F(CharColumnTest, ReadCharValues)
+	{
+		{
+			wstring colName = L"tvarchar";
+			SqlCharArray varcharCol(colName, 128 + 1);
+			varcharCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
+
+			f(1);
+			EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetString());
+			f(3);
+			EXPECT_EQ("הצüאיט", varcharCol.GetString());
+			f(2);
+			EXPECT_TRUE(varcharCol.IsNull());
+		}
+
+		{
+			wstring colName = L"tchar";
+			SqlCharArray charCol(colName, 128 + 1);
+			charCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
+
+			// Note: MySql and Access trim the char values, other DBs do not trim
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+			{
+				f(2);
+				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetString());
+				f(4);
+				EXPECT_EQ("הצüאיט", charCol.GetString());
+			}
+			else
+			{
+				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ה'
+				// Therefore, the number of preceding whitespaces is not equal on DB2 
+				f(2);
+				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetString());
+				f(4);
+				EXPECT_EQ("הצüאיט", boost::trim_copy(charCol.GetString()));
+			}
+
+			f(1);
+			EXPECT_TRUE(charCol.IsNull());
+		}
+	}
+
 } //namespace exodbc

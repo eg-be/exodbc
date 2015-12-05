@@ -391,6 +391,9 @@ namespace exodbc
 
 		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
 
+		std::wstring GetWString() const noexcept { return m_pBuffer->data(); };
+		std::string GetString() const noexcept { return (char*) m_pBuffer->data(); };
+
 		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
 			exASSERT(columnNr >= 1);
@@ -452,6 +455,11 @@ namespace exodbc
 		std::set<ColumnBoundHandle> m_boundSelects;
 		std::wstring m_queryName;
 	};
+
+	// Array types
+	typedef SqlCArrayBuffer<SQLWCHAR, SQL_C_WCHAR> SqlWCharArray;
+	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_CHAR> SqlCharArray;
+	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_BINARY> SqlBinaryArray;
 
 	class SqlCPointerBuffer
 		: public SqlCBufferLengthIndicator
@@ -587,10 +595,6 @@ namespace exodbc
 		std::wstring m_queryName;
 	};
 	
-	// Array types
-	typedef SqlCArrayBuffer<SQLWCHAR, SQL_C_WCHAR> SqlWCharArray;
-	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_CHAR> SqlCharArray;
-	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_BINARY> SqlBinaryArray;
 
 	// the variant
 	typedef boost::variant<
