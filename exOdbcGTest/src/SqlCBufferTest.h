@@ -62,4 +62,10 @@ namespace exodbc
 	class BigIntColumnTest : public ColumnTestBase
 	{};
 
+	class DoubleColumnTest : public ColumnTestBase
+	{};
+
+	class RealColumnTest : public ColumnTestBase
+	{};
+
 } // namespace exodbc
