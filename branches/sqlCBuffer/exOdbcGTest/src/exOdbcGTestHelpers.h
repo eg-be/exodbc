@@ -55,6 +55,7 @@ namespace exodbctest
 	extern exodbc::DatabasePtr OpenTestDb(exodbc::ConstEnvironmentPtr pEnv);
 	extern exodbc::DatabasePtr OpenTestDb(exodbc::OdbcVersion odbcVersion = exodbc::OdbcVersion::V_3);
 
+	extern std::wstring PrependSchemaOrCatalogName(exodbc::DatabaseProduct dbms, const std::wstring& name);
 	extern std::wstring GetTableName(TableId tableId);
 	extern std::wstring GetIdColumnName(TableId tableId);
 	extern std::wstring ToDbCase(const std::wstring& str);

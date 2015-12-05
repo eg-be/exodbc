@@ -14,6 +14,7 @@
 
 // Other headers
 #include "gtest/gtest.h"
+#include "Database.h"
 
 // System headers
 
@@ -29,25 +30,36 @@ namespace exodbc
 {
 	class SqlCBufferLengthIndicatorTest : public ::testing::Test
 	{
-	protected:
-		virtual void SetUp() {};
-		virtual void TearDown() {};
 	};
 
 
 	class SqlCBufferTest : public ::testing::Test
 	{
-	protected:
-		virtual void SetUp() {};
-		virtual void TearDown() {};
 	};
 
 
 	class SqlCArrayBufferTest : public ::testing::Test
 	{
-	protected:
-		virtual void SetUp() {};
-		virtual void TearDown() {};
 	};
+
+
+	class ColumnTestBase : public ::testing::Test
+	{
+		protected:
+			virtual void SetUp();
+
+			DatabasePtr m_pDb;
+			SqlStmtHandlePtr m_pStmt;
+	};
+
+
+	class ShortColumnTest : public ColumnTestBase
+	{};
+
+	class LongColumnTest : public ColumnTestBase
+	{};
+
+	class BigIntColumnTest : public ColumnTestBase
+	{};
 
 } // namespace exodbc

@@ -13,8 +13,11 @@
 #include "SqlCBufferTest.h"
 
 // Same component headers
+#include "exOdbcGTestHelpers.h"
+
 // Other headers
 #include "SqlCBuffer.h"
+#include "SqlStatementCloser.h"
 
 // Debug
 #include "DebugNew.h"
@@ -31,6 +34,7 @@
 // Implementation
 // --------------
 using namespace std;
+using namespace exodbctest;
 
 namespace exodbc
 {
@@ -180,4 +184,92 @@ namespace exodbc
 		EXPECT_EQ(s, v2);
 	}
 
+
+	void ColumnTestBase::SetUp()
+	{
+		m_pDb = OpenTestDb(OdbcVersion::V_3);
+		m_pStmt = std::make_shared<SqlStmtHandle>();
+		m_pStmt->AllocateWithParent(m_pDb->GetSqlDbcHandle());
+	}
+
+
+	struct FSelectFetcher
+	{
+		FSelectFetcher(DatabaseProduct dbms, SqlStmtHandlePtr pStmt, exodbctest::TableId tableId, const std::wstring& queryColumnName)
+			: m_tableId(tableId)
+			, m_queryColumnName(ToDbCase(queryColumnName))
+			, m_pStmt(pStmt)
+			, m_dbms(dbms)
+		{
+		}
+
+		void operator()(SQLINTEGER idValue)
+		{
+			StatementCloser stmtCloser(m_pStmt);
+
+			wstring tableName = GetTableName(TableId::INTEGERTYPES);
+			tableName = PrependSchemaOrCatalogName(m_dbms, tableName);
+			wstring idColName = GetIdColumnName(TableId::INTEGERTYPES);
+			wstring sqlStmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s = %d") % m_queryColumnName % tableName % idColName % idValue);
+
+			SQLRETURN ret = SQLExecDirect(m_pStmt->GetHandle(), (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
+			THROW_IFN_SUCCESS(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
+			ret = SQLFetch(m_pStmt->GetHandle());
+			THROW_IFN_SUCCESS(SQLFetch, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
+		}
+
+		DatabaseProduct m_dbms;
+		SqlStmtHandlePtr m_pStmt;
+		exodbctest::TableId m_tableId;
+		wstring m_queryColumnName;
+	};
+
+
+	TEST_F(ShortColumnTest, ReadValue)
+	{
+		wstring colName = ToDbCase(L"exodbc.tshort");
+		SqlSShortBuffer shortCol(colName);
+		shortCol.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, L"tsmallint");
+
+		f(1);
+		EXPECT_EQ(-32768, shortCol.GetValue());
+		f(2);
+		EXPECT_EQ(32767, shortCol.GetValue());
+		f(3);
+		EXPECT_TRUE(shortCol.IsNull());
+	}
+
+
+	TEST_F(LongColumnTest, ReadValue)
+	{
+		wstring colName = ToDbCase(L"exodbc.tshort");
+		SqlSLongBuffer longCol(colName);
+		longCol.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, L"tint");
+
+		f(3);
+		EXPECT_EQ((-2147483647 -1), longCol.GetValue());
+		f(4);
+		EXPECT_EQ(2147483647, longCol.GetValue());
+		f(5);
+		EXPECT_TRUE(longCol.IsNull());
+	}
+
+
+	TEST_F(BigIntColumnTest, ReadValue)
+	{
+		wstring colName = ToDbCase(L"exodbc.tbigint");
+		SqlSBigIntBuffer biCol(colName);
+		biCol.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, L"tbigint");
+
+		f(5);
+		EXPECT_EQ((-9223372036854775807 - 1), biCol.GetValue());
+		f(6);
+		EXPECT_EQ(9223372036854775807, biCol.GetValue());
+		f(4);
+		EXPECT_TRUE(biCol.IsNull());
+
+	}
 } //namespace exodbc

@@ -99,6 +99,18 @@ namespace exodbctest
 	}
 
 
+	std::wstring PrependSchemaOrCatalogName(exodbc::DatabaseProduct dbms, const std::wstring& name)
+	{
+		wstring prefix;
+		if (dbms != DatabaseProduct::ACCESS)
+		{
+			prefix = L"exodbc.";
+		}
+
+		ToDbCase(prefix);
+		return prefix + name;
+	}
+
 	std::wstring GetTableName(TableId table)
 	{
 		std::map<TableId, std::wstring>::const_iterator it = g_TableNames.find(table);
