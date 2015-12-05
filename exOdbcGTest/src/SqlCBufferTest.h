@@ -68,7 +68,9 @@ namespace exodbc
 	class RealColumnTest : public ColumnTestBase
 	{};
 
-	
+	class NumericColumnTest : public ColumnTestBase
+	{};
+
 	class WCharColumnTest : public ColumnTestBase
 	{};
 

@@ -33,7 +33,7 @@
   </Dsn>
 
   <Dsn>
-    <Disabled>1</Disabled>
+    <Disabled>01</Disabled>
     <Name>exAccess</Name>
     <User></User>
     <Pass></Pass>
