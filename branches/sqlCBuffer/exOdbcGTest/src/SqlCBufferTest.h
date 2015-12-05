@@ -68,4 +68,11 @@ namespace exodbc
 	class RealColumnTest : public ColumnTestBase
 	{};
 
+	
+	class WCharColumnTest : public ColumnTestBase
+	{};
+
+	class CharColumnTest : public ColumnTestBase
+	{};
+
 } // namespace exodbc
