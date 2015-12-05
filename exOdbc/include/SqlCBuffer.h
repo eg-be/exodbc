@@ -101,7 +101,6 @@ namespace exodbc
 		ExtendedColumnPropertiesHolder()
 			: m_columnSize(0)
 			, m_decimalDigits(0)
-			, m_pObjectName(NULL)
 			, m_sqlType(SQL_UNKNOWN_TYPE)
 		{};
 
@@ -110,19 +109,16 @@ namespace exodbc
 
 		void SetColumnSize(SQLINTEGER columnSize) noexcept { m_columnSize = columnSize; };
 		void SetDecimalDigits(SQLSMALLINT decimalDigits) noexcept { m_decimalDigits = decimalDigits; };
-		void SetObjectName(std::shared_ptr<ObjectName> pObjectName) { exASSERT(pObjectName != NULL); m_pObjectName = pObjectName; };
 		void SetSqlType(SQLSMALLINT sqlType) noexcept { m_sqlType = sqlType; };
 
 		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
 		SQLSMALLINT GetDecimalDigits() const noexcept { return m_decimalDigits; };
-		std::shared_ptr<ObjectName> GetObjectName() const noexcept { return m_pObjectName; };
 		SQLSMALLINT GetSqlType() const noexcept { return m_sqlType; };
 
 	protected:
 		SQLINTEGER m_columnSize;
 		SQLSMALLINT m_decimalDigits;
 		SQLSMALLINT m_sqlType;
-		std::shared_ptr<ObjectName> m_pObjectName;
 	};
 
 	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
@@ -136,6 +132,16 @@ namespace exodbc
 			: SqlCBufferLengthIndicator()
 			, ColumnFlags()
 			, ExtendedColumnPropertiesHolder()
+		{
+			m_pBuffer = std::make_shared<T>();
+			SetNull();
+		};
+
+		SqlCBuffer(const std::wstring& queryName)
+			: SqlCBufferLengthIndicator()
+			, ColumnFlags()
+			, ExtendedColumnPropertiesHolder()
+			, m_queryName(queryName)
 		{
 			m_pBuffer = std::make_shared<T>();
 			SetNull();
@@ -178,6 +184,8 @@ namespace exodbc
 		void SetValue(const T& value, SQLLEN cb) noexcept { *m_pBuffer = value; SetCb(cb); };
 		const T& GetValue() const { exASSERT(!IsNull()); return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const noexcept { return m_pBuffer; };
+
+		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
 
 		operator T() const noexcept { return GetValue(); };
 
@@ -230,6 +238,7 @@ namespace exodbc
 	private:
 		std::shared_ptr<T> m_pBuffer;
 		std::set<ColumnBoundHandle> m_boundSelects;
+		std::wstring m_queryName;
 	};
 
 	template<>
@@ -303,13 +312,14 @@ namespace exodbc
 	public:
 		SqlCArrayBuffer() = delete;
 
-		SqlCArrayBuffer(SQLLEN nrOfElements)
+		SqlCArrayBuffer(const std::wstring& queryName, SQLLEN nrOfElements)
 			: SqlCBufferLengthIndicator()
 			, ColumnFlags()
 			, ExtendedColumnPropertiesHolder()
 			, m_nrOfElements(nrOfElements)
 			//, m_vect(nrOfElements)
 			, m_pBuffer(std::make_shared<std::vector<T>>(nrOfElements))
+			, m_queryName(queryName)
 		{
 			//m_vect = std::vector<T>(m_nrOfElements);
 
@@ -379,6 +389,8 @@ namespace exodbc
 
 		//operator T*() const noexcept { return m_pBuffer.get(); };
 
+		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
+
 		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
 			exASSERT(columnNr >= 1);
@@ -438,6 +450,7 @@ namespace exodbc
 		//std::shared_ptr<T> m_pBuffer;
 		//T* m_pBuffer;
 		std::set<ColumnBoundHandle> m_boundSelects;
+		std::wstring m_queryName;
 	};
 
 	class SqlCPointerBuffer
@@ -451,9 +464,9 @@ namespace exodbc
 			: m_pBuffer(pBuffer)
 			, m_sqlCType(sqlCType)
 			, m_bufferLength(bufferSize)
+			, m_queryName(queryName)
 		{
 			ManualColumnInfo colInfo(sqlType, queryName);
-			SetObjectName(std::make_shared <ManualColumnInfo> (colInfo));
 			Set(flags);
 			SetDecimalDigits(decimalDigits);
 			SetColumnSize(columnSize);
@@ -521,6 +534,7 @@ namespace exodbc
 			m_boundSelects.insert(boundHandleInfo);
 		}
 
+		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
 
 		/*!
 		* \brief	Unbinds from all handles bound.
@@ -570,6 +584,7 @@ namespace exodbc
 		SQLLEN m_bufferLength;
 
 		std::set<ColumnBoundHandle> m_boundSelects;
+		std::wstring m_queryName;
 	};
 	
 	// Array types
@@ -624,8 +639,19 @@ namespace exodbc
 		}
 	};
 
-	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType, const ColumnBindInfo& bindInfo);
-	extern EXODBCAPI SqlCBufferVariant CreateArrayBuffer(SQLSMALLINT sqlCType, const ColumnInfo& columnInfo);
+	class QueryNameVisitor
+		: public boost::static_visitor<const std::wstring&>
+	{
+	public:
+		template<typename T>
+		const std::wstring& operator()(T& t) const
+		{
+			return t.GetQueryName();
+		}
+	};
+
+	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType, const std::wstring& queryName);
+	extern EXODBCAPI SqlCBufferVariant CreateArrayBuffer(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo);
 	extern EXODBCAPI SQLLEN CalculateDisplaySize(SQLSMALLINT sqlType, SQLINTEGER columnSize, SQLSMALLINT numPrecRadix, SQLSMALLINT decimalDigits);
 	extern EXODBCAPI bool IsArrayType(SQLSMALLINT sqlCType);
 

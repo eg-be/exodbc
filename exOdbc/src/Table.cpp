@@ -390,16 +390,15 @@ namespace exodbc
 					SqlCBufferVariant sqlCBuffer;
 					if (IsArrayType(sqlCType))
 					{
-						sqlCBuffer = CreateArrayBuffer(sqlCType, colInfo);
+						sqlCBuffer = CreateArrayBuffer(sqlCType, colInfo.GetQueryName(), colInfo);
 					}
 					else
 					{
-						sqlCBuffer = CreateBuffer(sqlCType, colInfo);
+						sqlCBuffer = CreateBuffer(sqlCType, colInfo.GetQueryName());
 					}
 					ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(sqlCBuffer);
 					columnFlags = flags;
 					ExtendedColumnPropertiesHolder& extendedColumnProperties = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(sqlCBuffer);
-					extendedColumnProperties.SetObjectName(std::make_shared<ColumnInfo>(colInfo));
 					extendedColumnProperties.SetSqlType(colInfo.GetSqlType());
 					if(!colInfo.IsColumnSizeNull())
 					{
@@ -536,9 +535,8 @@ namespace exodbc
 				const ColumnFlags columnFlags = boost::polymorphic_get<ColumnFlags>(var);
 				if (columnFlags.Test(ColumnFlag::CF_SELECT))
 				{
-					std::shared_ptr<ObjectName> pColumnName = props.GetObjectName();
-					exASSERT(pColumnName);
-					fields += pColumnName->GetQueryName();
+					std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), var);
+					fields += queryName;
 					fields += L", ";
 				}
 			}
@@ -729,8 +727,8 @@ namespace exodbc
 			const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
 			if (cb.IsNull())
 			{
-				std::shared_ptr<ObjectName> objectName = props.GetObjectName();
-				NullValueException ex(objectName != NULL ? objectName->GetQueryName() : L"???");
+				std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), column);
+				NullValueException ex(queryName);
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -764,30 +762,18 @@ namespace exodbc
 		while (it != m_columns.end())
 		{
 			const SqlCBufferVariant& column = it->second;
-			std::shared_ptr<ObjectName> pColumnName(NULL);
-			try
-			{
-				const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
-				pColumnName = props.GetObjectName();
-			}
-			catch (const boost::bad_polymorphic_get& ex)
-			{
-				WrapperException we(ex);
-				SET_EXCEPTION_SOURCE(we);
-				throw we;
-			}
+			std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), column);
 
-			exASSERT(pColumnName != NULL);
 			if (caseSensitive)
 			{		
-				if (pColumnName->GetQueryName() == columnQueryName)
+				if (queryName == columnQueryName)
 				{
 					return it->first;
 				}
 			}
 			else
 			{
-				if (boost::iequals(pColumnName->GetQueryName(), columnQueryName))
+				if (boost::iequals(queryName, columnQueryName))
 				{
 					return it->first;
 				}
@@ -1270,19 +1256,8 @@ namespace exodbc
 		exASSERT(m_columns.find(columnIndex) == m_columns.end());
 
 		// test if we have a non-empty query name
-		try
-		{
-			const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
-			std::shared_ptr<ObjectName> pName = props.GetObjectName();
-			exASSERT(pName);
-			exASSERT(!pName->GetQueryName().empty());
-		}
-		catch (const boost::bad_polymorphic_get& ex)
-		{
-			WrapperException we(ex);
-			SET_EXCEPTION_SOURCE(we);
-			throw we;
-		}
+		const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), column);
+		exASSERT(!queryName.empty());
 
 		// okay, remember the passed variant
 		m_columns[columnIndex] = column;
@@ -1417,16 +1392,13 @@ namespace exodbc
 				{
 					SqlCBufferVariant& columnBuffer = it->second;
 					ColumnFlags columnFlags;
-					wstring queryName;
+					const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
 					SQLSMALLINT sqlType = SQL_UNKNOWN_TYPE;
 					try
 					{
 						columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
 						const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(columnBuffer);
 						sqlType = props.GetSqlType();
-						std::shared_ptr<const ObjectName> pName = props.GetObjectName();
-						exASSERT(pName);
-						queryName = pName->GetQueryName();
 					}
 					catch (const boost::bad_polymorphic_get& ex)
 					{
@@ -1549,9 +1521,8 @@ namespace exodbc
 							try
 							{
 								ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
-								std::shared_ptr<ObjectName> pName = props.GetObjectName();
-								exASSERT(pName != NULL);
-								if (*pKeyName == *pName)
+								const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), column);
+								if (pKeyName->GetQueryName() == queryName)
 								{
 									ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(column);
 									flags.Set(ColumnFlag::CF_PRIMARY_KEY);
