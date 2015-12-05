@@ -129,16 +129,17 @@ namespace exodbc
 	TEST_F(SqlCArrayBufferTest, Construction)
 	{
 		// after construction buffer will be Null
-		SqlWCharArray arr(24);
+		SqlWCharArray arr(L"ColumnName", 24);
 		EXPECT_TRUE(arr.IsNull());
 		EXPECT_EQ(24, arr.GetNrOfElements());
 		EXPECT_EQ(sizeof(SQLWCHAR) * 24, arr.GetBufferLength());
+		EXPECT_EQ(L"ColumnName", arr.GetQueryName());
 	}
 
 
 	TEST_F(SqlCArrayBufferTest, SetAndGetValue)
 	{
-		SqlWCharArray arr(24);
+		SqlWCharArray arr(L"ColumnName", 24);
 		wstring s(L"Hello");
 		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
 		wstring v(arr.GetBuffer()->data());
@@ -150,7 +151,7 @@ namespace exodbc
 	TEST_F(SqlCArrayBufferTest, CopyConstruction)
 	{
 		// must internally use the same buffer
-		SqlWCharArray arr(24);
+		SqlWCharArray arr(L"ColumnName", 24);
 		wstring s(L"Hello");
 		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
 		wstring v(arr.GetBuffer()->data());
@@ -161,6 +162,7 @@ namespace exodbc
 		SqlWCharArray arr2(arr);
 		wstring v2(arr2.GetBuffer()->data());
 		EXPECT_EQ(s, v2);
+		EXPECT_EQ(arr.GetQueryName(), arr2.GetQueryName());
 
 		// changing either must change the other too
 		s = L"World";

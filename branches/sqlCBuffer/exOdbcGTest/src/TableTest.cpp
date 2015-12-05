@@ -559,9 +559,6 @@ namespace exodbc
 		}
 
 		// We should now have column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
-		SqlSLongBuffer id;
-		SqlSLongBuffer int1;
-		SqlSLongBuffer int2;
 
 		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(0));
 		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(1));
@@ -1312,16 +1309,7 @@ namespace exodbc
 //		}
 //	}
 
-	TEST_F(TableTest, BuffProb)
-	{
-		SqlSLongBuffer intCol;
-		SqlStmtHandle hStmt;
-		hStmt.AllocateWithParent(m_pDb->GetSqlDbcHandle());
-		SQLLEN buffLen = intCol.GetBufferLength();
-		SQLINTEGER cb = 0;
-		SQLRETURN ret = SQLBindCol(hStmt.GetHandle(), 1, SQL_C_SLONG, (SQLPOINTER*)(intCol.GetBuffer().get()), buffLen, &cb);
 
-	}
 
 	TEST_F(TableTest, SelectWCharIntValues)
 	{
