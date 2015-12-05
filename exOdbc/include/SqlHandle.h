@@ -212,13 +212,13 @@ namespace exodbc
 	/** Statement-handle Const SharedPtr */
 	typedef std::shared_ptr<const SqlStmtHandle> ConstSqlStmtHandlePtr;
 
-	// specialize for the Descriptior handle
+	// specialize for the Descriptor handle
 	template<>
 	class SqlHandle<SQLHDESC, SQL_HANDLE_DESC, SqlStmtHandle>
 	{
 	public:
 		/*!
-		* \brief	Constructs an SQL_NULL_HANDLE. Call Allocate() later to allocate the handle.
+		* \brief	Creates a RowDescriptorHandle from the given Statement handle.
 		* \see		Allocate()
 		*/
 		SqlHandle(ConstSqlStmtHandlePtr pStmt, RowDescriptorType type)
