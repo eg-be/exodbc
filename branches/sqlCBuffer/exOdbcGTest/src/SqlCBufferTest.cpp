@@ -311,6 +311,39 @@ namespace exodbc
 	}
 
 
+	TEST_F(NumericColumnTest, Read_18_0_Value)
+	{
+		wstring colName = L"tdecimal_18_0";
+		SqlNumericStructBuffer num18_0_Col(colName);
+		num18_0_Col.SetColumnSize(18);
+		num18_0_Col.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
+
+		f(1);
+		const SQL_NUMERIC_STRUCT& num = num18_0_Col.GetValue();
+		SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
+		EXPECT_EQ(18, num.precision);
+		EXPECT_EQ(0, num.scale);
+		EXPECT_EQ(1, num.sign);
+		EXPECT_EQ(0, *pVal);
+
+		f(2);
+		EXPECT_EQ(18, num.precision);
+		EXPECT_EQ(0, num.scale);
+		EXPECT_EQ(1, num.sign);
+		EXPECT_EQ(123456789012345678, *pVal);
+
+		f(3);
+		EXPECT_EQ(18, num.precision);
+		EXPECT_EQ(0, num.scale);
+		EXPECT_EQ(0, num.sign);
+		EXPECT_EQ(123456789012345678, *pVal);
+
+		f(4);
+		EXPECT_TRUE(num18_0_Col.IsNull());
+	}
+
+
 	TEST_F(WCharColumnTest, ReadCharValues)
 	{
 		{
