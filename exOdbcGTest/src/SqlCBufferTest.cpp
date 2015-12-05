@@ -378,6 +378,28 @@ namespace exodbc
 	}
 
 
+	TEST_F(NumericColumnTest, Read_5_3_Value)
+	{
+		wstring colName = L"tdecimal_5_3";
+		SqlNumericStructBuffer num5_3_Col(colName);
+		num5_3_Col.SetColumnSize(5);
+		num5_3_Col.SetDecimalDigits(3);
+		num5_3_Col.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
+
+		f(2);
+		const SQL_NUMERIC_STRUCT& num = num5_3_Col.GetValue();
+		SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
+		EXPECT_EQ(5, num.precision);
+		EXPECT_EQ(3, num.scale);
+		EXPECT_EQ(1, num.sign);
+		EXPECT_EQ(12345, *pVal);
+
+		f(1);
+		EXPECT_TRUE(num5_3_Col.IsNull());
+	}
+
+
 	TEST_F(WCharColumnTest, ReadCharValues)
 	{
 		{
