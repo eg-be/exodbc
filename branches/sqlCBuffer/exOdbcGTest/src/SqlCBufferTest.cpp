@@ -1581,7 +1581,15 @@ namespace exodbc
 			EXPECT_EQ(L"ä ö ü", boost::trim_right_copy(charCol.GetWString()));
 
 			f(103);
-			EXPECT_EQ(L"abcdefgh  ", charCol.GetWString());
+			// It seems like MySql always trims whitespaces - even if we've set them explicitly
+			if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+			{
+				EXPECT_EQ(L"abcdefgh", charCol.GetWString());
+			}
+			else
+			{
+				EXPECT_EQ(L"abcdefgh  ", charCol.GetWString());
+			}
 
 			f(100);
 			EXPECT_TRUE(charCol.IsNull());
