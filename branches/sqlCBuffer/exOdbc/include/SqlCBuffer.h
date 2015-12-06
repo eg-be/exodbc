@@ -203,6 +203,36 @@ namespace exodbc
 		};
 
 
+		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt)
+		{
+			//exASSERT_MSG(GetSqlType() != SQL_UNKNOWN_TYPE, L"Extended Property SqlType must be set if this Buffer shall be used as parameter");
+			exASSERT(paramNr >= 1);
+			exASSERT(pHStmt != NULL);
+			exASSERT(pHStmt->IsAllocated());
+			ColumnBoundHandle boundHandleInfo(pHStmt, paramNr);
+			exASSERT_MSG(m_boundParams.find(boundHandleInfo) == m_boundParams.end(), L"Already bound to passed hStmt and paramNr as Parameter on this buffer");
+
+			// Query the database about the parameter
+			SQLSMALLINT paramSqlType = SQL_UNKNOWN_TYPE;
+			SQLULEN paramCharSize = 0;
+			SQLSMALLINT paramDecimalDigits = 0;
+			SQLSMALLINT paramNullable = SQL_NULLABLE_UNKNOWN;
+			SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
+			THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+			// Check if we think its nullable, but the db does not think so
+			if (Test(ColumnFlag::CF_NULLABLE))
+			{
+				exASSERT_MSG(paramNullable == SQL_NULLABLE, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
+			}
+
+			// And bind using the information just read
+			ret = SQLBindParameter(pHStmt->GetHandle(),paramNr, SQL_PARAM_INPUT, sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*) m_pBuffer.get(), GetBufferLength(), m_pCb.get());
+			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+			m_boundParams.insert(boundHandleInfo);
+		}
+
+
 		/*!
 		* \brief	Unbinds from all handles bound.
 		* \throw	Exception
@@ -217,7 +247,18 @@ namespace exodbc
 				exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
 				it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
 			}
+			// I see no way to unbind single params?
+			std::set<ColumnBoundHandle>::iterator itParams = m_boundParams.begin();
+			while (itParams != m_boundParams.end())
+			{
+				ColumnBoundHandle bindInfo = *itParams;
+				exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
+				SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
+				THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+				itParams = m_boundParams.erase(itParams);
+			}
 		}
+
 
 
 	protected:
@@ -238,6 +279,7 @@ namespace exodbc
 	private:
 		std::shared_ptr<T> m_pBuffer;
 		std::set<ColumnBoundHandle> m_boundSelects;
+		std::set<ColumnBoundHandle> m_boundParams;
 		std::wstring m_queryName;
 	};
 

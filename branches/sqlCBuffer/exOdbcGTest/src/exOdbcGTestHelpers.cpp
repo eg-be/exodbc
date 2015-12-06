@@ -163,7 +163,7 @@ namespace exodbctest
 		wstring schemaName = L"exodbc.";
 		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			wstring schemaName = L"";
+			schemaName = L"";
 		}
 		schemaName = ToDbCase(schemaName);
 
