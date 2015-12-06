@@ -843,25 +843,25 @@ namespace exodbc
 			num18_10_Col.SetValue(num);
 			i();
 
-			//num.precision = 18;
-			//num.scale = 10;
-			//num.sign = 1;
-			//v = 123456789012345678;
-			//::memcpy(num.val, &v, sizeof(v));
+			num.precision = 18;
+			num.scale = 10;
+			num.sign = 1;
+			v = 123456789012345678;
+			::memcpy(num.val, &v, sizeof(v));
 
-			//idCol.SetValue(102);
-			//num18_10_Col.SetValue(num);
-			//i();
+			idCol.SetValue(102);
+			num18_10_Col.SetValue(num);
+			i();
 
-			//num.precision = 18;
-			//num.scale = 10;
-			//num.sign = 0;
-			//v = 123456789012345678;
-			//::memcpy(num.val, &v, sizeof(v));
+			num.precision = 18;
+			num.scale = 10;
+			num.sign = 0;
+			v = 123456789012345678;
+			::memcpy(num.val, &v, sizeof(v));
 
-			//idCol.SetValue(103);
-			//num18_10_Col.SetValue(num);
-			//i();
+			idCol.SetValue(103);
+			num18_10_Col.SetValue(num);
+			i();
 
 			m_pDb->CommitTrans();
 		}
@@ -878,19 +878,19 @@ namespace exodbc
 			const SQL_NUMERIC_STRUCT& num = num18_10_Col.GetValue();
 			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
 			EXPECT_EQ(18, num.precision);
-			EXPECT_EQ(0, num.scale);
+			EXPECT_EQ(10, num.scale);
 			EXPECT_EQ(1, num.sign);
 			EXPECT_EQ(0, *pVal);
 
 			f(102);
 			EXPECT_EQ(18, num.precision);
-			EXPECT_EQ(0, num.scale);
+			EXPECT_EQ(10, num.scale);
 			EXPECT_EQ(1, num.sign);
 			EXPECT_EQ(123456789012345678, *pVal);
 
 			f(103);
 			EXPECT_EQ(18, num.precision);
-			EXPECT_EQ(0, num.scale);
+			EXPECT_EQ(10, num.scale);
 			EXPECT_EQ(0, num.sign);
 			EXPECT_EQ(123456789012345678, *pVal);
 
