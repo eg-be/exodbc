@@ -69,6 +69,11 @@ namespace exodbc
 			return m_flags == other.m_flags;
 		}
 
+		ET GetFlags() const noexcept
+		{
+			return m_flags;
+		}
+
 	protected:
 		ET m_flags;
 	};
