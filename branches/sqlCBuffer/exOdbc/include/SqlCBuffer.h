@@ -234,7 +234,7 @@ namespace exodbc
 			// Check if we think its nullable, but the db does not think so
 			if (Test(ColumnFlag::CF_NULLABLE))
 			{
-				exASSERT_MSG(paramNullable == SQL_NULLABLE, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
+				exASSERT_MSG(paramNullable == SQL_NULLABLE || paramNullable == SQL_NULLABLE_UNKNOWN, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
 			}
 
 			// And bind using the information just read
@@ -365,7 +365,7 @@ namespace exodbc
 		// Check if we think its nullable, but the db does not think so
 		if (Test(ColumnFlag::CF_NULLABLE))
 		{
-			exASSERT_MSG(paramNullable == SQL_NULLABLE, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
+			exASSERT_MSG(paramNullable == SQL_NULLABLE || paramNullable == SQL_NULLABLE_UNKNOWN, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
 		}
 
 		// And bind using the information just read
@@ -497,6 +497,9 @@ namespace exodbc
 		std::wstring GetWString() const noexcept { return m_pBuffer->data(); };
 		std::string GetString() const noexcept { return (char*) m_pBuffer->data(); };
 
+		void SetWString(const std::wstring& ws) { std::vector<SQLWCHAR> vec(ws.begin(), ws.end()); SetValue(vec, SQL_NTS); };
+		void SetString(const std::string& s) { std::vector<SQLCHAR> vec(s.begin(), s.end()); SetValue(vec, SQL_NTS); }
+
 		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
 			exASSERT(columnNr >= 1);
@@ -505,14 +508,7 @@ namespace exodbc
 			ColumnBoundHandle boundHandleInfo(pHStmt, columnNr);
 			exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
 
-			//SQLLEN l = GetBufferLength();
-			//SQLPOINTER* pVec = (SQLPOINTER*) &(m_pBuffer.get()[0]);
-			//SQLSMALLINT targetType = sqlCType;
-			//SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*) &m_vect[0], l, m_pCb.get());
 			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*) &(*m_pBuffer)[0], GetBufferLength(), m_pCb.get());
-//			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*)(m_pBuffer.get()), 4, m_pCb.get());
-//			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*)(m_pBuffer.get()), GetBufferLength(), m_pCb.get());
-//			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*)m_pBuffer, GetBufferLength(), m_pCb.get());
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 			m_boundSelects.insert(boundHandleInfo);
 		};
@@ -531,7 +527,57 @@ namespace exodbc
 				exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
 				it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
 			}
+			// I see no way to unbind single params?
+			std::set<ColumnBoundHandle>::iterator itParams = m_boundParams.begin();
+			while (itParams != m_boundParams.end())
+			{
+				ColumnBoundHandle bindInfo = *itParams;
+				exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
+				SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
+				THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+				itParams = m_boundParams.erase(itParams);
+			}
 		}
+
+		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
+		{
+			exASSERT(paramNr >= 1);
+			exASSERT(pHStmt != NULL);
+			exASSERT(pHStmt->IsAllocated());
+			ColumnBoundHandle boundHandleInfo(pHStmt, paramNr);
+			exASSERT_MSG(m_boundParams.find(boundHandleInfo) == m_boundParams.end(), L"Already bound to passed hStmt and paramNr as Parameter on this buffer");
+
+			// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
+			// on the extended properties (or fail, if those are not set)
+			SQLSMALLINT paramSqlType = SQL_UNKNOWN_TYPE;
+			SQLULEN paramCharSize = 0;
+			SQLSMALLINT paramDecimalDigits = 0;
+			SQLSMALLINT paramNullable = SQL_NULLABLE_UNKNOWN;
+			if (useSqlDescribeParam)
+			{
+				SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
+				THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+			}
+			else
+			{
+				paramSqlType = GetSqlType();
+				exASSERT(paramSqlType != SQL_UNKNOWN_TYPE);
+				paramDecimalDigits = GetDecimalDigits();
+				paramCharSize = GetColumnSize();
+			}
+
+			// Check if we think its nullable, but the db does not think so
+			if (Test(ColumnFlag::CF_NULLABLE))
+			{
+				exASSERT_MSG((paramNullable == SQL_NULLABLE || paramNullable == SQL_NULLABLE_UNKNOWN), L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
+			}
+
+			// And bind using the information just read
+			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(), paramNr, SQL_PARAM_INPUT, sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*)&(*m_pBuffer)[0], GetBufferLength(), m_pCb.get());
+			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+			m_boundParams.insert(boundHandleInfo);
+		}
+
 
 	protected:
 		std::set<ColumnBoundHandle>::iterator UnbindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
@@ -551,11 +597,8 @@ namespace exodbc
 	private:
 		SQLLEN m_nrOfElements;
 		std::shared_ptr<std::vector<T>> m_pBuffer;
-		//std::vector<T> m_vect;
-		//std::shared_ptr<std::vector<T>> m_pBuffer;
-		//std::shared_ptr<T> m_pBuffer;
-		//T* m_pBuffer;
 		std::set<ColumnBoundHandle> m_boundSelects;
+		std::set<ColumnBoundHandle> m_boundParams;
 		std::wstring m_queryName;
 	};
 
