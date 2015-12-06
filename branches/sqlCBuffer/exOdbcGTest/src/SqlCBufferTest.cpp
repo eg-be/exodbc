@@ -1056,6 +1056,67 @@ namespace exodbc
 	}
 
 
+	TEST_F(TypeTimeColumnTest, WriteValue)
+	{
+		TableId tableId = TableId::DATETYPES_TMP;
+
+		wstring colName = ToDbCase(L"ttime");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlTypeTimeStructBuffer time(colName);
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				time.SetSqlType(SQL_TYPE_TIME);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			time.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			SQL_TIME_STRUCT t;
+			t.hour = 15;
+			t.minute = 22;
+			t.second = 45;
+
+			idCol.SetValue(101);
+			time.SetValue(t);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlTypeTimeStructBuffer time(colName);
+			time.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			const SQL_TIME_STRUCT& t = time.GetValue();
+			EXPECT_EQ(15, t.hour);
+			EXPECT_EQ(22, t.minute);
+			EXPECT_EQ(45, t.second);
+
+			f(100);
+			EXPECT_TRUE(time.IsNull());
+		}
+	}
+
+
 	TEST_F(TypeDateColumnTest, ReadValue)
 	{
 		wstring colName = L"tdate";
@@ -1071,6 +1132,67 @@ namespace exodbc
 
 		f(2);
 		EXPECT_TRUE(date.IsNull());
+	}
+
+
+	TEST_F(TypeDateColumnTest, WriteValue)
+	{
+		TableId tableId = TableId::DATETYPES_TMP;
+
+		wstring colName = ToDbCase(L"tdate");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlTypeDateStructBuffer date(colName);
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				date.SetSqlType(SQL_TYPE_DATE);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			date.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			SQL_DATE_STRUCT d;
+			d.day = 26;
+			d.month = 01;
+			d.year = 1983;
+
+			idCol.SetValue(101);
+			date.SetValue(d);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlTypeDateStructBuffer date(colName);
+			date.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			const SQL_DATE_STRUCT& d = date.GetValue();
+			EXPECT_EQ(26, d.day);
+			EXPECT_EQ(1, d.month);
+			EXPECT_EQ(1983, d.year);
+
+			f(100);
+			EXPECT_TRUE(date.IsNull());
+		}
 	}
 
 
