@@ -670,6 +670,104 @@ namespace exodbc
 	}
 
 
+	TEST_F(NumericColumnTest, Write_18_0_Value)
+	{
+		TableId tableId = TableId::NUMERICTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tdecimal_18_0");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlNumericStructBuffer num18_0_Col(colName);
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				num18_0_Col.SetSqlType(SQL_NUMERIC);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			num18_0_Col.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			SQLBIGINT v = 0;
+			SQL_NUMERIC_STRUCT num;
+			::ZeroMemory(num.val, sizeof(num.val));
+			num.precision = 18;
+			num.scale = 0;
+			num.sign = 1;
+			::memcpy(num.val, &v, sizeof(v));
+
+			idCol.SetValue(101);
+			num18_0_Col.SetValue(num);
+			i();
+
+			num.precision = 18;
+			num.scale = 0;
+			num.sign = 1;
+			v = 123456789012345678;
+			::memcpy(num.val, &v, sizeof(v));
+
+			idCol.SetValue(102);
+			num18_0_Col.SetValue(num);
+			i();
+
+			num.precision = 18;
+			num.scale = 0;
+			num.sign = 0;
+			v = 123456789012345678;
+			::memcpy(num.val, &v, sizeof(v));
+
+			idCol.SetValue(103);
+			num18_0_Col.SetValue(num);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlNumericStructBuffer num18_0_Col(colName);
+			num18_0_Col.SetColumnSize(18);
+			num18_0_Col.SetDecimalDigits(0);
+			num18_0_Col.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			const SQL_NUMERIC_STRUCT& num = num18_0_Col.GetValue();
+			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
+			EXPECT_EQ(18, num.precision);
+			EXPECT_EQ(0, num.scale);
+			EXPECT_EQ(1, num.sign);
+			EXPECT_EQ(0, *pVal);
+
+			f(102);
+			EXPECT_EQ(18, num.precision);
+			EXPECT_EQ(0, num.scale);
+			EXPECT_EQ(1, num.sign);
+			EXPECT_EQ(123456789012345678, *pVal);
+
+			f(103);
+			EXPECT_EQ(18, num.precision);
+			EXPECT_EQ(0, num.scale);
+			EXPECT_EQ(0, num.sign);
+			EXPECT_EQ(123456789012345678, *pVal);
+
+			f(100);
+			EXPECT_TRUE(num18_0_Col.IsNull());
+		}
+	}
+
+
 	TEST_F(NumericColumnTest, Read_18_10_Value)
 	{
 		wstring colName = L"tdecimal_18_10";
@@ -702,6 +800,105 @@ namespace exodbc
 		f(1);
 		EXPECT_TRUE(num18_10_Col.IsNull());
 	}
+
+
+	TEST_F(NumericColumnTest, Write_18_10_Value)
+	{
+		TableId tableId = TableId::NUMERICTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tdecimal_18_10");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlNumericStructBuffer num18_10_Col(colName);
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				num18_10_Col.SetSqlType(SQL_NUMERIC);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			num18_10_Col.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			SQLBIGINT v = 0;
+			SQL_NUMERIC_STRUCT num;
+			::ZeroMemory(num.val, sizeof(num.val));
+			num.precision = 18;
+			num.scale = 10;
+			num.sign = 1;
+			::memcpy(num.val, &v, sizeof(v));
+
+			idCol.SetValue(101);
+			num18_10_Col.SetValue(num);
+			i();
+
+			//num.precision = 18;
+			//num.scale = 10;
+			//num.sign = 1;
+			//v = 123456789012345678;
+			//::memcpy(num.val, &v, sizeof(v));
+
+			//idCol.SetValue(102);
+			//num18_10_Col.SetValue(num);
+			//i();
+
+			//num.precision = 18;
+			//num.scale = 10;
+			//num.sign = 0;
+			//v = 123456789012345678;
+			//::memcpy(num.val, &v, sizeof(v));
+
+			//idCol.SetValue(103);
+			//num18_10_Col.SetValue(num);
+			//i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlNumericStructBuffer num18_10_Col(colName);
+			num18_10_Col.SetColumnSize(18);
+			num18_10_Col.SetDecimalDigits(10);
+			num18_10_Col.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			const SQL_NUMERIC_STRUCT& num = num18_10_Col.GetValue();
+			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
+			EXPECT_EQ(18, num.precision);
+			EXPECT_EQ(0, num.scale);
+			EXPECT_EQ(1, num.sign);
+			EXPECT_EQ(0, *pVal);
+
+			f(102);
+			EXPECT_EQ(18, num.precision);
+			EXPECT_EQ(0, num.scale);
+			EXPECT_EQ(1, num.sign);
+			EXPECT_EQ(123456789012345678, *pVal);
+
+			f(103);
+			EXPECT_EQ(18, num.precision);
+			EXPECT_EQ(0, num.scale);
+			EXPECT_EQ(0, num.sign);
+			EXPECT_EQ(123456789012345678, *pVal);
+
+			f(100);
+			EXPECT_TRUE(num18_10_Col.IsNull());
+		}
+	}
+
 
 
 	TEST_F(NumericColumnTest, Read_5_3_Value)
