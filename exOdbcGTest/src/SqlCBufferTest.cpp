@@ -185,6 +185,8 @@ namespace exodbc
 	}
 
 
+	// Basic Read / Write tests
+	// ------------------------
 	void ColumnTestBase::SetUp()
 	{
 		m_pDb = OpenTestDb(OdbcVersion::V_3);
@@ -200,8 +202,7 @@ namespace exodbc
 			, m_columnQueryName(ToDbCase(columnQueryName))
 			, m_pStmt(pStmt)
 			, m_dbms(dbms)
-		{
-		}
+		{}
 
 		void operator()(SQLINTEGER idValue)
 		{
@@ -217,7 +218,39 @@ namespace exodbc
 			ret = SQLFetch(m_pStmt->GetHandle());
 			THROW_IFN_SUCCESS(SQLFetch, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
 		}
+	
+	protected:
+		DatabaseProduct m_dbms;
+		SqlStmtHandlePtr m_pStmt;
+		exodbctest::TableId m_tableId;
+		wstring m_columnQueryName;
+	};
 
+
+	struct FInserter
+	{
+		FInserter(DatabaseProduct dbms, SqlStmtHandlePtr pStmt, exodbctest::TableId tableId, const std::wstring& columnQueryName)
+			: m_tableId(tableId)
+			, m_columnQueryName(ToDbCase(columnQueryName))
+			, m_pStmt(pStmt)
+			, m_dbms(dbms)
+		{
+			// prepare the insert statement
+			wstring tableName = GetTableName(m_tableId);
+			tableName = PrependSchemaOrCatalogName(m_dbms, tableName);
+			wstring idColName = GetIdColumnName(m_tableId);
+			wstring sqlstmt = boost::str(boost::wformat(L"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % m_columnQueryName);
+			SQLRETURN ret = SQLPrepare(pStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+			THROW_IFN_SUCCESS(SQLPrepare, ret, SQL_HANDLE_STMT, pStmt->GetHandle());
+		}
+
+		void operator()()
+		{
+			SQLRETURN ret = SQLExecute(m_pStmt->GetHandle());
+			THROW_IFN_SUCCESS(SQLExecute, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
+		}
+
+	protected:
 		DatabaseProduct m_dbms;
 		SqlStmtHandlePtr m_pStmt;
 		exodbctest::TableId m_tableId;
@@ -238,6 +271,55 @@ namespace exodbc
 		EXPECT_EQ(32767, shortCol.GetValue());
 		f(3);
 		EXPECT_TRUE(shortCol.IsNull());
+	}
+
+
+	TEST_F(ShortColumnTest, WriteValue)
+	{
+		TableId tableId = TableId::INTEGERTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tsmallint");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlSShortBuffer shortCol(colName);
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt);
+			shortCol.BindParameter(2, m_pStmt);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			shortCol.SetValue(-32768);
+			i();
+
+			idCol.SetValue(102);
+			shortCol.SetValue(32767);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlSShortBuffer shortCol(colName);
+			shortCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			EXPECT_EQ(-32768, shortCol.GetValue());
+			f(102);
+			EXPECT_EQ(32767, shortCol.GetValue());
+			f(100);
+			EXPECT_TRUE(shortCol.IsNull());
+
+		}
 	}
 
 
@@ -676,7 +758,6 @@ namespace exodbc
 			f(3);
 			EXPECT_TRUE(varBlobCol.IsNull());
 		}
-
 	}
 
 } //namespace exodbc
