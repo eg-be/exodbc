@@ -944,18 +944,17 @@ namespace exodbc
 
 		/*!
 		* \brief	Creates the ColumnBuffers for the table.
-		* \detailed	Can only be called if m_manulColumns is set to false. Will query the Database about the
-		*			column of the table and allocate corresponding column buffers.
+		* \detailed	Will query the Database about the columns of the table and create corresponding SqlCBufferVariant
+		*			objects.
+		*			If no STableInfo is available, one is fetched from the database and remembered for later use.
 		*			Creation of the buffer will fail if the SQL type of that column is not supported. If the flag
-		*			skipUnsupportedColumns is set to true, this column is simply ignored. Else the function fails.
-		*			If this function fails, all allocated buffers are deleted and m_columnBuffers is cleared.
-		*			On success, after this function returns m_columnBuffers contains the allocated Buffers to be used
-		*			with this table.
-		*			Note that in case columns have been skipped, the keys to the table might contain "gaps", say columns 2 failed
-		*			to bind, the keys will so something like 1, 3, 4, .. 
-		* \throw	Exception If m_manualColumns is set to true, or m_columnBuffers is not empty, or creation of ColumnBuffers fails.
+		*			skipUnsupportedColumns is set to true, this column is simply ignored.
+		*			If this function fails,
+		*			On success a vector of ColumnBuffers is returned. The order is the same as encountered when querying
+		*			the database. The Table has stored the STableInfo now.
+		* \throw	Exception If no Columns are found.
 		*/
-		void		CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns);
+		std::vector<SqlCBufferVariant> CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns);
 
 		
 		/*!

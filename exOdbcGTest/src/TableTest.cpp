@@ -558,13 +558,16 @@ namespace exodbc
 			ASSERT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
-		// We should now have column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
+		// The table is: id, int1, xml, int2
+		// but we fail to read xml, so we have only indexes
+		// 0, 1, 2 which map to
+		// id, int1, int2
 
 		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(0));
 		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(1));
-		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(3));
+		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(2));
 
-		EXPECT_THROW(nst.GetColumn<SqlSLongBuffer>(2), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumn<SqlSLongBuffer>(3), IllegalArgumentException);
 	}
 
 
@@ -579,12 +582,15 @@ namespace exodbc
 			EXPECT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
-		// We should now be able to select from column indexed 0 (id), 1 (int1) and 3 (int2) - 2 (xml) should be missing
+		// The table is: id, int1, xml, int2
+		// but we fail to read xml, so we have only indexes
+		// 0, 1, 2 which map to
+		// id, int1, int2
 		SqlSLongBuffer id = nst.GetColumn<SqlSLongBuffer>(0);
 		SqlSLongBuffer int1 = nst.GetColumn<SqlSLongBuffer>(1);
-		SqlSLongBuffer int2 = nst.GetColumn<SqlSLongBuffer>(3);
+		SqlSLongBuffer int2 = nst.GetColumn<SqlSLongBuffer>(2);
 
-		EXPECT_THROW(nst.GetColumn<SqlSLongBuffer>(2), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumn<SqlSLongBuffer>(3), IllegalArgumentException);
 
 		EXPECT_NO_THROW(nst.Select());
 		EXPECT_TRUE(nst.SelectNext());
