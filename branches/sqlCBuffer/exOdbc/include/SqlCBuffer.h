@@ -203,7 +203,7 @@ namespace exodbc
 		};
 
 
-		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt)
+		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
 		{
 			//exASSERT_MSG(GetSqlType() != SQL_UNKNOWN_TYPE, L"Extended Property SqlType must be set if this Buffer shall be used as parameter");
 			exASSERT(paramNr >= 1);
@@ -212,13 +212,24 @@ namespace exodbc
 			ColumnBoundHandle boundHandleInfo(pHStmt, paramNr);
 			exASSERT_MSG(m_boundParams.find(boundHandleInfo) == m_boundParams.end(), L"Already bound to passed hStmt and paramNr as Parameter on this buffer");
 
-			// Query the database about the parameter
+			// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
+			// on the extended properties (or fail, if those are not set)
 			SQLSMALLINT paramSqlType = SQL_UNKNOWN_TYPE;
 			SQLULEN paramCharSize = 0;
 			SQLSMALLINT paramDecimalDigits = 0;
 			SQLSMALLINT paramNullable = SQL_NULLABLE_UNKNOWN;
-			SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
-			THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+			if (useSqlDescribeParam)
+			{
+				SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
+				THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+			}
+			else
+			{			
+				paramSqlType = GetSqlType();
+				exASSERT(paramSqlType != SQL_UNKNOWN_TYPE);
+				paramDecimalDigits = GetDecimalDigits();
+				paramCharSize = GetColumnSize();
+			}
 
 			// Check if we think its nullable, but the db does not think so
 			if (Test(ColumnFlag::CF_NULLABLE))
@@ -227,7 +238,7 @@ namespace exodbc
 			}
 
 			// And bind using the information just read
-			ret = SQLBindParameter(pHStmt->GetHandle(),paramNr, SQL_PARAM_INPUT, sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*) m_pBuffer.get(), GetBufferLength(), m_pCb.get());
+			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(),paramNr, SQL_PARAM_INPUT, sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*) m_pBuffer.get(), GetBufferLength(), m_pCb.get());
 			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 			m_boundParams.insert(boundHandleInfo);
 		}

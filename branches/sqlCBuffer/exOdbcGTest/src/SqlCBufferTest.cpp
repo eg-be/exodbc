@@ -283,14 +283,20 @@ namespace exodbc
 		ClearTmpTable(tableId);
 
 		{
+			// must close the statement before using it for reading. Else at least MySql fails.
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
 			SqlSLongBuffer idCol(idColName);
 			SqlSShortBuffer shortCol(colName);
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				shortCol.SetSqlType(SQL_INTEGER);
+			}
 			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt);
-			shortCol.BindParameter(2, m_pStmt);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			shortCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
 
 			// insert the default null value
 			idCol.SetValue(100);
@@ -320,7 +326,6 @@ namespace exodbc
 			EXPECT_EQ(32767, shortCol.GetValue());
 			f(100);
 			EXPECT_TRUE(shortCol.IsNull());
-
 		}
 	}
 
@@ -341,6 +346,62 @@ namespace exodbc
 	}
 
 
+	TEST_F(LongColumnTest, WriteValue)
+	{
+		TableId tableId = TableId::INTEGERTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tint");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlSLongBuffer longCol(colName);
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				longCol.SetSqlType(SQL_INTEGER);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			longCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			longCol.SetValue((-2147483647 - 1));
+			i();
+
+			idCol.SetValue(102);
+			longCol.SetValue(2147483647);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlSLongBuffer longCol(colName);
+			longCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			EXPECT_EQ((-2147483647 - 1), longCol.GetValue());
+			f(102);
+			EXPECT_EQ(2147483647, longCol.GetValue());
+			f(100);
+			EXPECT_TRUE(longCol.IsNull());
+		}
+	}
+
+
 	TEST_F(BigIntColumnTest, ReadValue)
 	{
 		wstring colName = ToDbCase(L"tbigint");
@@ -354,6 +415,62 @@ namespace exodbc
 		EXPECT_EQ(9223372036854775807, biCol.GetValue());
 		f(4);
 		EXPECT_TRUE(biCol.IsNull());
+	}
+
+
+	TEST_F(BigIntColumnTest, WriteValue)
+	{
+		TableId tableId = TableId::INTEGERTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tbigint");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlSBigIntBuffer biCol(colName);
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				biCol.SetSqlType(SQL_INTEGER);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			biCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			biCol.SetValue((-9223372036854775807 - 1));
+			i();
+
+			idCol.SetValue(102);
+			biCol.SetValue(9223372036854775807);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlSBigIntBuffer biCol(colName);
+			biCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			EXPECT_EQ((-9223372036854775807 - 1), biCol.GetValue());
+			f(102);
+			EXPECT_EQ(9223372036854775807, biCol.GetValue());
+			f(100);
+			EXPECT_TRUE(biCol.IsNull());
+		}
 	}
 
 
