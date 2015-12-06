@@ -506,6 +506,7 @@ namespace exodbc
 
 	TEST_F(WCharColumnTest, ReadCharValues)
 	{
+		// note that when working witch chars, we add one element for the terminating \0 char.
 		{
 			wstring colName = L"tvarchar";
 			SqlWCharArray varcharCol(colName, 128 + 1);
@@ -552,6 +553,7 @@ namespace exodbc
 
 	TEST_F(CharColumnTest, ReadCharValues)
 	{
+		// note that when working witch chars, we add one element for the terminating \0 char.
 		{
 			wstring colName = L"tvarchar";
 			SqlCharArray varcharCol(colName, 128 + 1);
@@ -593,6 +595,88 @@ namespace exodbc
 			f(1);
 			EXPECT_TRUE(charCol.IsNull());
 		}
+	}
+
+
+	TEST_F(BinaryColumnTest, ReadValue)
+	{
+		// Set up the values we expect to read:
+
+		const vector<SQLCHAR> empty = { 
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+
+		const vector<SQLCHAR> ff = { 
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255
+		};
+
+		const vector<SQLCHAR> abc = { 
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67
+		};
+
+		const vector<SQLCHAR> abc_ff = { 
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67,
+			0xff, 0xff, 0xff, 0xff
+		};
+
+		{
+			wstring colName = L"tblob";
+			SqlBinaryArray blobCol(colName, 16);
+			blobCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
+
+			f(1);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(empty, *blobCol.GetBuffer());
+
+			f(2);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(ff, *blobCol.GetBuffer());
+
+			f(3);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(abc, *blobCol.GetBuffer());
+
+			f(4);
+			EXPECT_TRUE(blobCol.IsNull());
+		}
+
+		{
+			wstring colName = L"tvarblob_20";
+			SqlBinaryArray varBlobCol(colName, 20);
+			varBlobCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
+
+			f(4);
+			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
+			// Cb must reflect this
+			EXPECT_EQ(16, varBlobCol.GetCb());
+			const shared_ptr<vector<SQLCHAR>> pBuff = varBlobCol.GetBuffer();
+			EXPECT_EQ(20, pBuff->size());
+			// Only compare first 16 elements
+			vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+			EXPECT_EQ(abc, first16Elements);
+
+			f(5);
+			EXPECT_EQ(20, varBlobCol.GetCb());
+			EXPECT_EQ(abc_ff, *varBlobCol.GetBuffer());
+
+			f(3);
+			EXPECT_TRUE(varBlobCol.IsNull());
+		}
+
 	}
 
 } //namespace exodbc
