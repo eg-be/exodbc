@@ -1882,4 +1882,234 @@ namespace exodbc
 		}
 	}
 
+
+	TEST_F(BinaryColumnTest, WriteBlobValue)
+	{
+		// Set up the values we expect to read/write:
+
+		const vector<SQLCHAR> empty = {
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+
+		const vector<SQLCHAR> ff = {
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255
+		};
+
+		const vector<SQLCHAR> abc = {
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67
+		};
+
+		const vector<SQLCHAR> abc_ff = {
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67,
+			0xff, 0xff, 0xff, 0xff
+		};
+
+		TableId tableId = TableId::BLOBTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tblob");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlBinaryArray blobCol(colName, 16);
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				blobCol.SetSqlType(SQL_BINARY);
+				blobCol.SetColumnSize(16);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			blobCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			blobCol.SetValue(empty);
+			i();
+
+			idCol.SetValue(102);
+			blobCol.SetValue(ff);
+			i();
+
+			idCol.SetValue(103);
+			blobCol.SetValue(abc);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// read back written values
+			wstring colName = L"tblob";
+			SqlBinaryArray blobCol(colName, 16);
+			blobCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(empty, *blobCol.GetBuffer());
+
+			f(102);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(ff, *blobCol.GetBuffer());
+
+			f(103);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(abc, *blobCol.GetBuffer());
+
+			f(100);
+			EXPECT_TRUE(blobCol.IsNull());
+		}
+	}
+
+
+	TEST_F(BinaryColumnTest, WriteVarblobValue)
+	{
+		// Set up the values we expect to read/write:
+
+		const vector<SQLCHAR> empty = {
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+
+		const vector<SQLCHAR> ff = {
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255
+		};
+
+		const vector<SQLCHAR> abc = {
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67
+		};
+
+		const vector<SQLCHAR> abc_ff = {
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67,
+			0xff, 0xff, 0xff, 0xff
+		};
+
+		TableId tableId = TableId::BLOBTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tvarblob_20");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlBinaryArray varblobCol(colName, 20);
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				varblobCol.SetSqlType(SQL_BINARY);
+				varblobCol.SetColumnSize(20);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			varblobCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			idCol.SetValue(101);
+			varblobCol.SetValue(empty);
+			i();
+
+			idCol.SetValue(102);
+			varblobCol.SetValue(ff);
+			i();
+
+			idCol.SetValue(103);
+			varblobCol.SetValue(abc);
+			i();
+
+			idCol.SetValue(104);
+			varblobCol.SetValue(abc_ff);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// read back written values
+			wstring colName = L"tvarblob_20";
+			SqlBinaryArray varblobCol(colName, 20);
+			varblobCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
+
+			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
+			// Cb must reflect this
+			const shared_ptr<vector<SQLCHAR>> pBuff = varblobCol.GetBuffer();
+			EXPECT_EQ(20, pBuff->size());
+			// Only compare first 16 elements in the following tests, except where we really put in 20 bytes.
+
+
+			f(101);
+			EXPECT_EQ(16, varblobCol.GetCb());
+			{
+				vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+				EXPECT_EQ(empty, first16Elements);
+			}
+
+			f(102);
+			EXPECT_EQ(16, varblobCol.GetCb());
+			{
+				vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+				EXPECT_EQ(ff, first16Elements);
+			}
+
+			f(103);
+			EXPECT_EQ(16, varblobCol.GetCb());
+			{
+				vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+				EXPECT_EQ(abc, first16Elements);
+			}
+
+			// here we read 20 bytes
+			f(104);
+			EXPECT_EQ(20, varblobCol.GetCb());
+			EXPECT_EQ(abc_ff, *varblobCol.GetBuffer());
+
+			f(100);
+			EXPECT_TRUE(varblobCol.IsNull());
+		}
+	}
+
 } //namespace exodbc

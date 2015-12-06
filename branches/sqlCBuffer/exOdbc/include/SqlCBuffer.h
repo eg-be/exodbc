@@ -465,15 +465,16 @@ namespace exodbc
 		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
 		SQLLEN GetBufferLength() const noexcept { return sizeof(T) * GetNrOfElements(); };
 
+		void SetValue(const std::vector<SQLCHAR>& value)
+		{
+			SetValue(value, value.size());
+		}
+
 		void SetValue(const std::vector<T>& value, SQLLEN cb)
 		{ 
 			exASSERT(value.size() <= m_pBuffer->capacity()); 
 			size_t index = 0;
-			for (std::vector<T>::const_iterator it = value.begin(); it != value.end(); ++it)
-			{
-				(*m_pBuffer)[index] = *it;
-				++index;
-			}
+			m_pBuffer->assign(value.begin(), value.end());
 			// null-terminate if last element added not already was a '0'
 			// and if there is still some space for the last '0'
 			// if there is no space, fail
@@ -482,8 +483,6 @@ namespace exodbc
 				exASSERT(index < m_pBuffer->capacity());
 				(*m_pBuffer)[index] = 0;
 			}
-			//memset(m_pBuffer.get(), 0, GetBufferLength()); 
-			//memcpy(m_pBuffer.get(), value, valueBufferLength);
 			SetCb(cb);
 		};
 		const std::shared_ptr<std::vector<T>> GetBuffer() const noexcept { return m_pBuffer; };
