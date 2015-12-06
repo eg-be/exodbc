@@ -339,109 +339,98 @@ namespace exodbc
 	}
 
 
-	void Table::CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns)
+	std::vector<SqlCBufferVariant> Table::CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns)
 	{
-		exASSERT(m_manualColumns == false);
-		exASSERT(m_columns.size() == 0);
 		exASSERT(m_pDb->IsOpen());
 
-		// Nest try-catch to always free eventually allocated buffers
-		try
+		// Ensure we have a TableInfo
+		if (!m_haveTableInfo)
 		{
-			// Will throw if fails
-			ColumnInfosVector columns = m_pDb->ReadTableColumnInfo(tableInfo);
-			// Remember column sizes and create ColumnBuffers
-			exASSERT(columns.size() <= SHRT_MAX);
-			SQLSMALLINT numCols = (SQLSMALLINT) columns.size();
-			if (numCols == 0)
-			{
-				Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetQueryName()).str());
-				SET_EXCEPTION_SOURCE(ex);
-				throw ex;
-			}
-			// We need to know which ODBC version we are using, might throw
-			OdbcVersion odbcVersion = m_pDb->GetMaxSupportedOdbcVersion();
-			// And how to open this column
-			OldColumnFlags columnFlags = CF_NONE;
-			ColumnFlags flags;
-			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
-			{
-				columnFlags |= CF_SELECT;
-				flags.Set(ColumnFlag::CF_SELECT);
-			}
-			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE) || TestAccessFlag(TableAccessFlag::AF_UPDATE_PK))
-			{
-				columnFlags |= CF_UPDATE;
-				flags.Set(ColumnFlag::CF_UPDATE);
-			}
-			if (TestAccessFlag(TableAccessFlag::AF_INSERT))
-			{
-				columnFlags |= CF_INSERT;
-				flags.Set(ColumnFlag::CF_INSERT);
-			}
-			int bufferIndex = 0;
+			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
+			m_haveTableInfo = true;
+		}
 
-			for (int columnIndex = 0; columnIndex < (SQLUSMALLINT)columns.size(); columnIndex++)
-			{
-				const ColumnInfo& colInfo = columns[columnIndex];
-				try
-				{
-					SQLSMALLINT sqlCType = m_pSql2BufferTypeMap->GetBufferType(colInfo.GetSqlType());
-					SqlCBufferVariant sqlCBuffer;
-					if (IsArrayType(sqlCType))
-					{
-						sqlCBuffer = CreateArrayBuffer(sqlCType, colInfo.GetQueryName(), colInfo);
-					}
-					else
-					{
-						sqlCBuffer = CreateBuffer(sqlCType, colInfo.GetQueryName());
-					}
-					ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(sqlCBuffer);
-					columnFlags = flags;
-					ExtendedColumnPropertiesHolder& extendedColumnProperties = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(sqlCBuffer);
-					extendedColumnProperties.SetSqlType(colInfo.GetSqlType());
-					if(!colInfo.IsColumnSizeNull())
-					{
-						extendedColumnProperties.SetColumnSize(colInfo.GetColumnSize());
-					}
-					if (!colInfo.IsDecimalDigitsNull())
-					{
-						extendedColumnProperties.SetDecimalDigits(colInfo.GetDecimalDigits());
-					}
-					m_columns[bufferIndex] = sqlCBuffer;
-					++bufferIndex;
-				}
-				catch (const boost::bad_polymorphic_get& ex)
-				{
-					WrapperException we(ex);
-					SET_EXCEPTION_SOURCE(we);
-					throw we;
-				}
-				catch (const NotSupportedException& nse)
-				{
-					if (skipUnsupportedColumns)
-					{
-						// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
-						LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetQueryName() % nse.ToString()));
-						++bufferIndex;
-						continue;
-					}
-					else
-					{
-						// rethrow
-						throw;
-					}
+		// Query Columns and create SqlCBuffers
+		ColumnInfosVector columnInfos = m_pDb->ReadTableColumnInfo(tableInfo);
+		exASSERT(columnInfos.size() <= SHRT_MAX);
+		SQLSMALLINT numCols = (SQLSMALLINT)columnInfos.size();
+		if (numCols == 0)
+		{
+			Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetQueryName()).str());
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+		// Derive the ColumnFlags from the TableAccessFlags
+		OldColumnFlags columnFlags = CF_NONE;
+		ColumnFlags flags;
+		if (TestAccessFlag(TableAccessFlag::AF_SELECT))
+		{
+			columnFlags |= CF_SELECT;
+			flags.Set(ColumnFlag::CF_SELECT);
+		}
+		if (TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE) || TestAccessFlag(TableAccessFlag::AF_UPDATE_PK))
+		{
+			columnFlags |= CF_UPDATE;
+			flags.Set(ColumnFlag::CF_UPDATE);
+		}
+		if (TestAccessFlag(TableAccessFlag::AF_INSERT))
+		{
+			columnFlags |= CF_INSERT;
+			flags.Set(ColumnFlag::CF_INSERT);
+		}
 
+		std::vector<SqlCBufferVariant> columns;
+		for (int columnIndex = 0; columnIndex < (SQLUSMALLINT)columnInfos.size(); columnIndex++)
+		{
+			const ColumnInfo& colInfo = columnInfos[columnIndex];
+			try
+			{
+				SQLSMALLINT sqlCType = m_pSql2BufferTypeMap->GetBufferType(colInfo.GetSqlType());
+				SqlCBufferVariant sqlCBuffer;
+				if (IsArrayType(sqlCType))
+				{
+					sqlCBuffer = CreateArrayBuffer(sqlCType, colInfo.GetQueryName(), colInfo);
+				}
+				else
+				{
+					sqlCBuffer = CreateBuffer(sqlCType, colInfo.GetQueryName());
+				}
+				ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(sqlCBuffer);
+				columnFlags = flags;
+				ExtendedColumnPropertiesHolder& extendedColumnProperties = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(sqlCBuffer);
+				extendedColumnProperties.SetSqlType(colInfo.GetSqlType());
+				if(!colInfo.IsColumnSizeNull())
+				{
+					extendedColumnProperties.SetColumnSize(colInfo.GetColumnSize());
+				}
+				if (!colInfo.IsDecimalDigitsNull())
+				{
+					extendedColumnProperties.SetDecimalDigits(colInfo.GetDecimalDigits());
+				}
+				columns.push_back(sqlCBuffer);
+			}
+			catch (const boost::bad_polymorphic_get& ex)
+			{
+				WrapperException we(ex);
+				SET_EXCEPTION_SOURCE(we);
+				throw we;
+			}
+			catch (const NotSupportedException& nse)
+			{
+				if (skipUnsupportedColumns)
+				{
+					// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
+					LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetQueryName() % nse.ToString()));
+					continue;
+				}
+				else
+				{
+					// rethrow
+					throw;
 				}
 			}
 		}
-		catch (Exception& ex)
-		{
-			HIDE_UNUSED(ex);
-			// Rollback all buffers created and rethrow
-			m_columns.clear();
-			throw;
-		}
+		return columns;
 	}
 
 
@@ -1381,7 +1370,11 @@ namespace exodbc
 			// If we are asked to create our columns automatically, read the column information and create the buffers
 			if (!m_manualColumns)
 			{
-				CreateAutoColumnBuffers(m_tableInfo, TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
+				const std::vector<SqlCBufferVariant>& columns = CreateAutoColumnBuffers(m_tableInfo, TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
+				for (size_t i = 0; i < columns.size(); ++i)
+				{
+					m_columns[i] = columns[i];
+				}
 			}
 			else
 			{
