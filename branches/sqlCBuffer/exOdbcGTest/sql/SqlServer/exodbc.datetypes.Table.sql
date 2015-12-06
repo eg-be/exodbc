@@ -21,7 +21,7 @@ CREATE TABLE [exodbc].[datetypes](
 ) ON [PRIMARY]
 END
 GO
-INSERT [exodbc].[datetypes] ([iddatetypes], [tdate], [ttime], [ttimestamp]) VALUES (1, CAST(N'1983-01-26' AS Date), CAST(N'13:55:56.1234567' AS Time), CAST(N'1983-01-26 13:55:56.000' AS DateTime))
+INSERT [exodbc].[datetypes] ([iddatetypes], [tdate], [ttime], [ttimestamp]) VALUES (1, CAST(N'1983-01-26' AS Date), CAST(N'13:55:56' AS Time), CAST(N'1983-01-26 13:55:56.000' AS DateTime))
 INSERT [exodbc].[datetypes] ([iddatetypes], [tdate], [ttime], [ttimestamp]) VALUES (2, NULL, NULL, CAST(N'1983-01-26 13:55:56.123' AS DateTime))
-INSERT [exodbc].[datetypes] ([iddatetypes], [tdate], [ttime], [ttimestamp]) VALUES (3, NULL, NULL, NULL)
+INSERT [exodbc].[datetypes] ([iddatetypes], [tdate], [ttime], [ttimestamp]) VALUES (3, NULL, CAST(N'13:55:56.1234567' AS Time), NULL)
 INSERT [exodbc].[datetypes] ([iddatetypes], [tdate], [ttime], [ttimestamp]) VALUES (4, NULL, NULL, CAST(N'1983-01-26 13:55:56.010' AS DateTime))
