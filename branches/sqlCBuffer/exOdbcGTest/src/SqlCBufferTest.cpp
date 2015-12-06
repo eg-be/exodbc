@@ -817,14 +817,22 @@ namespace exodbc
 			// Prepare the id-col (required) and the col to insert
 			SqlSLongBuffer idCol(idColName);
 			SqlNumericStructBuffer num18_10_Col(colName);
-			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			bool queryParameterInfo = ! (		m_pDb->GetDbms() == DatabaseProduct::ACCESS
+											||	m_pDb->GetDbms() == DatabaseProduct::MY_SQL);
+			if(!queryParameterInfo)
 			{
+				// Access does not implement SqlDescribeParam
+				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
+				// and a type that indicates it wants varchars for numeric-things.
+				// but setting everything manually works fine
 				idCol.SetSqlType(SQL_INTEGER);
 				num18_10_Col.SetSqlType(SQL_NUMERIC);
+				num18_10_Col.SetColumnSize(18);
+				num18_10_Col.SetDecimalDigits(10);
 			}
 			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			num18_10_Col.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			num18_10_Col.BindParameter(2, m_pStmt, queryParameterInfo);
 
 			// insert the default null value
 			idCol.SetValue(100);
@@ -938,14 +946,22 @@ namespace exodbc
 			// Prepare the id-col (required) and the col to insert
 			SqlSLongBuffer idCol(idColName);
 			SqlNumericStructBuffer num5_3_Col(colName);
-			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS
+				|| m_pDb->GetDbms() == DatabaseProduct::MY_SQL);
+			if (!queryParameterInfo)
 			{
+				// Access does not implement SqlDescribeParam
+				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
+				// and a type that indicates it wants varchars for numeric-things.
+				// but setting everything manually works fine
 				idCol.SetSqlType(SQL_INTEGER);
 				num5_3_Col.SetSqlType(SQL_NUMERIC);
+				num5_3_Col.SetColumnSize(5);
+				num5_3_Col.SetDecimalDigits(3);
 			}
 			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			num5_3_Col.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			num5_3_Col.BindParameter(2, m_pStmt, queryParameterInfo);
 
 			// insert the default null value
 			idCol.SetValue(100);
