@@ -493,6 +493,68 @@ namespace exodbc
 	}
 
 
+	TEST_F(DoubleColumnTest, WriteValue)
+	{
+		TableId tableId = TableId::FLOATTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tdouble");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlDoubleBuffer doubleCol(colName);
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				doubleCol.SetSqlType(SQL_DOUBLE);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			doubleCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			doubleCol.SetValue((0.0));
+			i();
+
+			idCol.SetValue(102);
+			doubleCol.SetValue(3.141592);
+			i();
+
+			idCol.SetValue(103);
+			doubleCol.SetValue(-3.141592);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlDoubleBuffer doubleCol(colName);
+			doubleCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			EXPECT_EQ(0.0, doubleCol.GetValue());
+			f(102);
+			EXPECT_EQ(3.141592, doubleCol.GetValue());
+			f(103);
+			EXPECT_EQ(-3.141592, doubleCol.GetValue());
+			f(100);
+			EXPECT_TRUE(doubleCol.IsNull());
+		}
+	}
+
+
 	TEST_F(RealColumnTest, ReadValue)
 	{
 		wstring colName = L"tfloat";
@@ -509,6 +571,69 @@ namespace exodbc
 
 		f(4);
 		EXPECT_TRUE(realCol.IsNull());
+	}
+
+
+	TEST_F(RealColumnTest, WriteValue)
+	{
+		// \todo: This is pure luck that the test works, rounding errors might occur already on inserting
+		TableId tableId = TableId::FLOATTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tfloat");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlRealBuffer realCol(colName);
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				realCol.SetSqlType(SQL_REAL);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			realCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			realCol.SetValue((0.0));
+			i();
+
+			idCol.SetValue(102);
+			realCol.SetValue(3.141f);
+			i();
+
+			idCol.SetValue(103);
+			realCol.SetValue(-3.141f);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlRealBuffer realCol(colName);
+			realCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			EXPECT_EQ(0.0, realCol.GetValue());
+			f(102);
+			EXPECT_EQ((int)(3.141 * 1e3), (int)(1e3 * realCol.GetValue()));
+			f(103);
+			EXPECT_EQ((int)(-3.141 * 1e3), (int)(1e3 * realCol.GetValue()));
+			f(100);
+			EXPECT_TRUE(realCol.IsNull());
+		}
 	}
 
 
