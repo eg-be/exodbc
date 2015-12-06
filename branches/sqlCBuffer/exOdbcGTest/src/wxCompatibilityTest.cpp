@@ -195,7 +195,6 @@ namespace exodbc
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_FALSE(table.IsColumnNull(0));
 		EXPECT_TRUE(table.IsColumnNull(1));
-		EXPECT_TRUE(table.IsColumnNull(2));
 		EXPECT_TRUE(table.IsColumnNull(3));
 	}
 
