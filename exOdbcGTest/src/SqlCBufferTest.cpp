@@ -1455,6 +1455,140 @@ namespace exodbc
 	}
 
 
+	TEST_F(WCharColumnTest, WriteVarcharValue)
+	{
+		TableId tableId = TableId::CHARTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tvarchar");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+		
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlWCharArray varcharCol(colName, 128 + 1);
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				varcharCol.SetSqlType(SQL_VARCHAR);
+				varcharCol.SetColumnSize(128);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			varcharCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			varcharCol.SetWString(L"Hello World");
+			i();
+
+			idCol.SetValue(102);
+			varcharCol.SetWString(L"ä ö ü");
+			i();
+
+			idCol.SetValue(103);
+			varcharCol.SetWString(L"   ");
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			SqlWCharArray varcharCol(colName, 128 + 1);
+			varcharCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ(L"Hello World", varcharCol.GetWString());
+
+			f(102);
+			EXPECT_EQ(L"ä ö ü", varcharCol.GetWString());
+
+			f(103);
+			EXPECT_EQ(L"   ", varcharCol.GetWString());
+
+			f(100);
+			EXPECT_TRUE(varcharCol.IsNull());
+		}
+	}
+
+
+	TEST_F(WCharColumnTest, WriteCharValue)
+	{
+		TableId tableId = TableId::CHARTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tchar_10");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlWCharArray charCol(colName, 10 + 1);
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				charCol.SetSqlType(SQL_CHAR);
+				charCol.SetColumnSize(10);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			charCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			charCol.SetWString(L"HelloWorld");
+			i();
+
+			idCol.SetValue(102);
+			charCol.SetWString(L"ä ö ü");
+			i();
+
+			idCol.SetValue(103);
+			charCol.SetWString(L"abcdefgh  ");
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			SqlWCharArray charCol(colName, 128 + 1);
+			charCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ(L"HelloWorld", charCol.GetWString());
+
+			f(102);
+			EXPECT_EQ(L"ä ö ü", boost::trim_right_copy(charCol.GetWString()));
+
+			f(103);
+			EXPECT_EQ(L"abcdefgh  ", charCol.GetWString());
+
+			f(100);
+			EXPECT_TRUE(charCol.IsNull());
+		}
+	}
+
+
 	TEST_F(CharColumnTest, ReadCharValues)
 	{
 		// note that when working witch chars, we add one element for the terminating \0 char.
@@ -1497,6 +1631,140 @@ namespace exodbc
 			}
 
 			f(1);
+			EXPECT_TRUE(charCol.IsNull());
+		}
+	}
+
+
+	TEST_F(CharColumnTest, WriteVarcharValue)
+	{
+		TableId tableId = TableId::CHARTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tvarchar");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlCharArray varcharCol(colName, 128 + 1);
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				varcharCol.SetSqlType(SQL_VARCHAR);
+				varcharCol.SetColumnSize(128);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			varcharCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			varcharCol.SetString("Hello World");
+			i();
+
+			idCol.SetValue(102);
+			varcharCol.SetString("ä ö ü");
+			i();
+
+			idCol.SetValue(103);
+			varcharCol.SetString("   ");
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			SqlCharArray varcharCol(colName, 128 + 1);
+			varcharCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ("Hello World", varcharCol.GetString());
+
+			f(102);
+			EXPECT_EQ("ä ö ü", varcharCol.GetString());
+
+			f(103);
+			EXPECT_EQ("   ", varcharCol.GetString());
+
+			f(100);
+			EXPECT_TRUE(varcharCol.IsNull());
+		}
+	}
+
+
+	TEST_F(CharColumnTest, WriteCharValue)
+	{
+		TableId tableId = TableId::CHARTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tchar_10");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlCharArray charCol(colName, 10 + 1);
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				charCol.SetSqlType(SQL_CHAR);
+				charCol.SetColumnSize(10);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			charCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			idCol.SetValue(101);
+			charCol.SetString("HelloWorld");
+			i();
+
+			idCol.SetValue(102);
+			charCol.SetString("ä ö ü");
+			i();
+
+			idCol.SetValue(103);
+			charCol.SetString("abcdefgh  ");
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			SqlCharArray charCol(colName, 128 + 1);
+			charCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ("HelloWorld", charCol.GetString());
+
+			f(102);
+			EXPECT_EQ("ä ö ü", boost::trim_right_copy(charCol.GetString()));
+
+			f(103);
+			EXPECT_EQ("abcdefgh  ", charCol.GetString());
+
+			f(100);
 			EXPECT_TRUE(charCol.IsNull());
 		}
 	}
