@@ -474,7 +474,11 @@ namespace exodbc
 		{ 
 			exASSERT(value.size() <= m_pBuffer->capacity()); 
 			size_t index = 0;
-			m_pBuffer->assign(value.begin(), value.end());
+			for (std::vector<T>::const_iterator it = value.begin(); it != value.end(); ++it)
+			{
+				(*m_pBuffer)[index] = *it;
+				++index;
+			}
 			// null-terminate if last element added not already was a '0'
 			// and if there is still some space for the last '0'
 			// if there is no space, fail
