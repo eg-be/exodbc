@@ -86,4 +86,7 @@ namespace exodbc
 	class CharColumnTest : public ColumnTestBase
 	{};
 
+	class BinaryColumnTest : public ColumnTestBase
+	{};
+
 } // namespace exodbc
