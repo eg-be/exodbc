@@ -923,6 +923,105 @@ namespace exodbc
 	}
 
 
+	TEST_F(NumericColumnTest, Write_5_3_Value)
+	{
+		TableId tableId = TableId::NUMERICTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tdecimal_5_3");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SqlSLongBuffer idCol(idColName);
+			SqlNumericStructBuffer num5_3_Col(colName);
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				num5_3_Col.SetSqlType(SQL_NUMERIC);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			num5_3_Col.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idCol.SetValue(100);
+			i();
+
+			// and some non-null values
+			SQLBIGINT v = 0;
+			SQL_NUMERIC_STRUCT num;
+			::ZeroMemory(num.val, sizeof(num.val));
+			num.precision = 5;
+			num.scale = 3;
+			num.sign = 1;
+			::memcpy(num.val, &v, sizeof(v));
+
+			idCol.SetValue(101);
+			num5_3_Col.SetValue(num);
+			i();
+
+			num.precision = 5;
+			num.scale = 3;
+			num.sign = 1;
+			v = 12345;
+			::memcpy(num.val, &v, sizeof(v));
+
+			idCol.SetValue(102);
+			num5_3_Col.SetValue(num);
+			i();
+
+			num.precision = 5;
+			num.scale = 3;
+			num.sign = 0;
+			v = 12345;
+			::memcpy(num.val, &v, sizeof(v));
+
+			idCol.SetValue(103);
+			num5_3_Col.SetValue(num);
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlNumericStructBuffer num5_3_Col(colName);
+			num5_3_Col.SetColumnSize(5);
+			num5_3_Col.SetDecimalDigits(3);
+			num5_3_Col.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			const SQL_NUMERIC_STRUCT& num = num5_3_Col.GetValue();
+			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
+			EXPECT_EQ(5, num.precision);
+			EXPECT_EQ(3, num.scale);
+			EXPECT_EQ(1, num.sign);
+			EXPECT_EQ(0, *pVal);
+
+			f(102);
+			EXPECT_EQ(5, num.precision);
+			EXPECT_EQ(3, num.scale);
+			EXPECT_EQ(1, num.sign);
+			EXPECT_EQ(12345, *pVal);
+
+			f(103);
+			EXPECT_EQ(5, num.precision);
+			EXPECT_EQ(3, num.scale);
+			EXPECT_EQ(0, num.sign);
+			EXPECT_EQ(12345, *pVal);
+
+			f(100);
+			EXPECT_TRUE(num5_3_Col.IsNull());
+		}
+	}
+
+
+
 	TEST_F(TypeTimeColumnTest, ReadValue)
 	{
 		wstring colName = L"ttime";
