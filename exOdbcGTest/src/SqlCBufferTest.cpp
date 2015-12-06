@@ -95,6 +95,15 @@ namespace exodbc
 		// after construction buffer will be Null
 		SqlSBigIntBuffer buff;
 		EXPECT_TRUE(buff.IsNull());
+		EXPECT_EQ(ColumnFlag::CF_NONE, buff.GetFlags());
+
+		// test that we can construct with flags
+		SqlSBigIntBuffer buff2(L"SomeName", ColumnFlag::CF_PRIMARY_KEY | ColumnFlag::CF_SELECT);
+		EXPECT_TRUE(buff2.IsNull());
+		EXPECT_TRUE(buff2.Test(ColumnFlag::CF_PRIMARY_KEY));
+		EXPECT_TRUE(buff2.Test(ColumnFlag::CF_SELECT));
+		EXPECT_EQ(ColumnFlag::CF_PRIMARY_KEY | ColumnFlag::CF_SELECT, buff2.GetFlags());
+		EXPECT_EQ(L"SomeName", buff2.GetQueryName());
 	}
 
 

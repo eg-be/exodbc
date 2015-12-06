@@ -137,9 +137,9 @@ namespace exodbc
 			SetNull();
 		};
 
-		SqlCBuffer(const std::wstring& queryName)
+		SqlCBuffer(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: SqlCBufferLengthIndicator()
-			, ColumnFlags()
+			, ColumnFlags(flags)
 			, ExtendedColumnPropertiesHolder()
 			, m_queryName(queryName)
 		{
@@ -415,21 +415,14 @@ namespace exodbc
 	public:
 		SqlCArrayBuffer() = delete;
 
-		SqlCArrayBuffer(const std::wstring& queryName, SQLLEN nrOfElements)
+		SqlCArrayBuffer(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: SqlCBufferLengthIndicator()
-			, ColumnFlags()
+			, ColumnFlags(flags)
 			, ExtendedColumnPropertiesHolder()
 			, m_nrOfElements(nrOfElements)
-			//, m_vect(nrOfElements)
 			, m_pBuffer(std::make_shared<std::vector<T>>(nrOfElements))
 			, m_queryName(queryName)
 		{
-			//m_vect = std::vector<T>(m_nrOfElements);
-
-			//m_pBuffer = std::make_shared<std::vector<T>>(m_nrOfElements);
-			//m_pBuffer = std::shared_ptr<T>(new T[m_nrOfElements], std::default_delete<T[]>());
-			// [](double* arr) { delete[] arr; }
-			//m_pBuffer = new T[m_nrOfElements];
 			SetNull();
 		};
 
