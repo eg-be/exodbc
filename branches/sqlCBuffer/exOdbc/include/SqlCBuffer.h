@@ -333,6 +333,56 @@ namespace exodbc
 		return m_boundSelects.erase(it);
 	}
 
+	template<>
+	void SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam)
+	{
+		//exASSERT_MSG(GetSqlType() != SQL_UNKNOWN_TYPE, L"Extended Property SqlType must be set if this Buffer shall be used as parameter");
+		exASSERT(paramNr >= 1);
+		exASSERT(pHStmt != NULL);
+		exASSERT(pHStmt->IsAllocated());
+		ColumnBoundHandle boundHandleInfo(pHStmt, paramNr);
+		exASSERT_MSG(m_boundParams.find(boundHandleInfo) == m_boundParams.end(), L"Already bound to passed hStmt and paramNr as Parameter on this buffer");
+
+		// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
+		// on the extended properties (or fail, if those are not set)
+		SQLSMALLINT paramSqlType = SQL_UNKNOWN_TYPE;
+		SQLULEN paramCharSize = 0;
+		SQLSMALLINT paramDecimalDigits = 0;
+		SQLSMALLINT paramNullable = SQL_NULLABLE_UNKNOWN;
+		if (useSqlDescribeParam)
+		{
+			SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
+			THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+		}
+		else
+		{
+			paramSqlType = GetSqlType();
+			exASSERT(paramSqlType != SQL_UNKNOWN_TYPE);
+			paramDecimalDigits = GetDecimalDigits();
+			paramCharSize = GetColumnSize();
+		}
+
+		// Check if we think its nullable, but the db does not think so
+		if (Test(ColumnFlag::CF_NULLABLE))
+		{
+			exASSERT_MSG(paramNullable == SQL_NULLABLE, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
+		}
+
+		// And bind using the information just read
+		SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(), paramNr, SQL_PARAM_INPUT, SQL_C_NUMERIC, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*)m_pBuffer.get(), GetBufferLength(), m_pCb.get());
+		THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+		// Do some additional steps for numeric types
+		SQLHANDLE hDesc = GetRowDescriptorHandle(pHStmt->GetHandle(), RowDescriptorType::PARAM);
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramCharSize));
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDecimalDigits);
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)m_pBuffer.get());
+
+		m_boundParams.insert(boundHandleInfo);
+	}
+
+
 	// Integer types
 	typedef SqlCBuffer<SQLSMALLINT, SQL_C_USHORT> SqlUShortBuffer;
 	typedef SqlCBuffer<SQLINTEGER, SQL_C_ULONG> SqlULongBuffer;
