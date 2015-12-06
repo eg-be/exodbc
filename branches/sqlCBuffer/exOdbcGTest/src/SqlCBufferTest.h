@@ -71,6 +71,15 @@ namespace exodbc
 	class NumericColumnTest : public ColumnTestBase
 	{};
 
+	class TypeTimeColumnTest : public ColumnTestBase
+	{};
+
+	class TypeDateColumnTest : public ColumnTestBase
+	{};
+
+	class TypeTimestampColumnTest : public ColumnTestBase
+	{};
+
 	class WCharColumnTest : public ColumnTestBase
 	{};
 

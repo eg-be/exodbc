@@ -400,6 +400,110 @@ namespace exodbc
 	}
 
 
+	TEST_F(TypeTimeColumnTest, ReadValue)
+	{
+		wstring colName = L"ttime";
+		SqlTypeTimeStructBuffer time(colName);
+		time.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
+
+		f(1);
+		const SQL_TIME_STRUCT& t = time.GetValue();
+		EXPECT_EQ(13, t.hour);
+		EXPECT_EQ(55, t.minute);
+		EXPECT_EQ(56, t.second);
+
+		f(2);
+		EXPECT_TRUE(time.IsNull());
+	}
+
+
+	TEST_F(TypeDateColumnTest, ReadValue)
+	{
+		wstring colName = L"tdate";
+		SqlTypeDateStructBuffer date(colName);
+		date.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
+
+		f(1);
+		const SQL_DATE_STRUCT& d = date.GetValue();
+		EXPECT_EQ(1983, d.year);
+		EXPECT_EQ(1, d.month);
+		EXPECT_EQ(26, d.day);
+
+		f(2);
+		EXPECT_TRUE(date.IsNull());
+	}
+
+
+	TEST_F(TypeTimestampColumnTest, ReadValue)
+	{
+		wstring colName = L"ttimestamp";
+		{
+			// Test without any fraction
+
+			SqlTypeTimestampStructBuffer tsCol(colName);
+			tsCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
+
+			f(1);
+			const SQL_TIMESTAMP_STRUCT& ts = tsCol.GetValue();
+			EXPECT_EQ(1983, ts.year);
+			EXPECT_EQ(1, ts.month);
+			EXPECT_EQ(26, ts.day);
+			EXPECT_EQ(13, ts.hour);
+			EXPECT_EQ(55, ts.minute);
+			EXPECT_EQ(56, ts.second);
+			EXPECT_EQ(0, ts.fraction);
+
+			f(3);
+			EXPECT_TRUE(tsCol.IsNull());
+		}
+
+		{
+			// Test with fractions, database specific precision
+			if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+			{
+				// SQL-Server has a max precision of 3 for the fractions
+				SqlTypeTimestampStructBuffer tsCol(colName);
+				tsCol.SetDecimalDigits(3);
+				tsCol.BindSelect(1, m_pStmt);
+				FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
+
+				f(2);
+				const SQL_TIMESTAMP_STRUCT& ts = tsCol.GetValue();
+				EXPECT_EQ(1983, ts.year);
+				EXPECT_EQ(1, ts.month);
+				EXPECT_EQ(26, ts.day);
+				EXPECT_EQ(13, ts.hour);
+				EXPECT_EQ(55, ts.minute);
+				EXPECT_EQ(56, ts.second);
+				EXPECT_EQ(123000000, ts.fraction);
+			}
+			
+			if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+			{
+				// DB2 has a max precision of 6 for the fraction
+				SqlTypeTimestampStructBuffer tsCol(colName);
+				tsCol.SetDecimalDigits(6);
+				tsCol.BindSelect(1, m_pStmt);
+				FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
+
+				f(2);
+				const SQL_TIMESTAMP_STRUCT& ts = tsCol.GetValue();
+				EXPECT_EQ(1983, ts.year);
+				EXPECT_EQ(1, ts.month);
+				EXPECT_EQ(26, ts.day);
+				EXPECT_EQ(13, ts.hour);
+				EXPECT_EQ(55, ts.minute);
+				EXPECT_EQ(56, ts.second);
+				EXPECT_EQ(123456000, ts.fraction);
+			}
+		}
+
+	}
+
+
 	TEST_F(WCharColumnTest, ReadCharValues)
 	{
 		{
