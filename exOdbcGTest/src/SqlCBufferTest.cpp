@@ -283,6 +283,8 @@ namespace exodbc
 		ClearTmpTable(tableId);
 
 		{
+			StatementCloser closer(m_pStmt);
+
 			// Prepare the id-col (required) and the col to insert
 			SqlSLongBuffer idCol(idColName);
 			SqlSShortBuffer shortCol(colName);
