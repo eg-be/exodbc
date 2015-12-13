@@ -339,7 +339,7 @@ namespace exodbc
 	}
 
 
-	std::vector<SqlCBufferVariant> Table::CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns)
+	std::vector<SqlCBufferVariant> Table::CreateAutoColumnBuffers(bool skipUnsupportedColumns)
 	{
 		exASSERT(m_pDb->IsOpen());
 
@@ -351,12 +351,12 @@ namespace exodbc
 		}
 
 		// Query Columns and create SqlCBuffers
-		ColumnInfosVector columnInfos = m_pDb->ReadTableColumnInfo(tableInfo);
+		ColumnInfosVector columnInfos = m_pDb->ReadTableColumnInfo(m_tableInfo);
 		exASSERT(columnInfos.size() <= SHRT_MAX);
 		SQLSMALLINT numCols = (SQLSMALLINT)columnInfos.size();
 		if (numCols == 0)
 		{
-			Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetQueryName()).str());
+			Exception ex((boost::wformat(L"No columns found for table '%s'") % m_tableInfo.GetQueryName()).str());
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -1370,10 +1370,10 @@ namespace exodbc
 			// If we are asked to create our columns automatically, read the column information and create the buffers
 			if (!m_manualColumns)
 			{
-				const std::vector<SqlCBufferVariant>& columns = CreateAutoColumnBuffers(m_tableInfo, TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
+				const std::vector<SqlCBufferVariant>& columns = CreateAutoColumnBuffers(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 				for (size_t i = 0; i < columns.size(); ++i)
 				{
-					m_columns[i] = columns[i];
+					m_columns[(SQLUSMALLINT)i] = columns[i];
 				}
 			}
 			else
