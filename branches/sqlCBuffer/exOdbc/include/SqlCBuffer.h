@@ -796,6 +796,17 @@ namespace exodbc
 		}
 	};
 
+	class SqlCTypeVisitor
+		: public boost::static_visitor<SQLSMALLINT>
+	{
+	public:
+		template<typename T>
+		const SQLSMALLINT operator()(T& t) const
+		{
+			return t.GetSqlCType();
+		}
+	};
+
 	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType, const std::wstring& queryName);
 	extern EXODBCAPI SqlCBufferVariant CreateArrayBuffer(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo);
 	extern EXODBCAPI SQLLEN CalculateDisplaySize(SQLSMALLINT sqlType, SQLINTEGER columnSize, SQLSMALLINT numPrecRadix, SQLSMALLINT decimalDigits);

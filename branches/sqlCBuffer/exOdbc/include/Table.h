@@ -921,6 +921,21 @@ namespace exodbc
 		const Sql2BufferTypeMapPtr GetSql2BufferTypeMap() const;
 
 
+		/*!
+		* \brief	Creates the ColumnBuffers for the table.
+		* \detailed	Will query the Database about the columns of the table and create corresponding SqlCBufferVariant
+		*			objects.
+		*			If no STableInfo is available, one is fetched from the database and remembered for later use.
+		*			Creation of the buffer will fail if the SQL type of that column is not supported. If the flag
+		*			skipUnsupportedColumns is set to true, this column is simply ignored.
+		*			If this function fails,
+		*			On success a vector of ColumnBuffers is returned. The order is the same as encountered when querying
+		*			the database. The Table has stored the STableInfo now.
+		* \throw	Exception If no Columns are found.
+		*/
+		std::vector<SqlCBufferVariant> CreateAutoColumnBuffers(bool skipUnsupportedColumns);
+
+
 		// Private stuff
 		// -------------
 	private:
@@ -940,21 +955,6 @@ namespace exodbc
 		* \throw Exception
 		*/
 		void SetCursorOptions(bool forwardOnlyCursors);
-
-
-		/*!
-		* \brief	Creates the ColumnBuffers for the table.
-		* \detailed	Will query the Database about the columns of the table and create corresponding SqlCBufferVariant
-		*			objects.
-		*			If no STableInfo is available, one is fetched from the database and remembered for later use.
-		*			Creation of the buffer will fail if the SQL type of that column is not supported. If the flag
-		*			skipUnsupportedColumns is set to true, this column is simply ignored.
-		*			If this function fails,
-		*			On success a vector of ColumnBuffers is returned. The order is the same as encountered when querying
-		*			the database. The Table has stored the STableInfo now.
-		* \throw	Exception If no Columns are found.
-		*/
-		std::vector<SqlCBufferVariant> CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns);
 
 		
 		/*!

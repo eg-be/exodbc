@@ -1389,6 +1389,84 @@ namespace exodbc
 	}
 
 
+	TEST_F(TableTest, CreateAutoIntBuffers)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		vector<SqlCBufferVariant> columns = iTable.CreateAutoColumnBuffers(false);
+		
+		EXPECT_EQ(4, columns.size());
+		// Access reports everything as int columns
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[0]));
+			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[1]));
+			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[2]));
+			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[3]));
+		}
+		else
+		{
+			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[0]));
+			EXPECT_NO_THROW(boost::get<SqlSShortBuffer>(columns[1]));
+			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[2]));
+			EXPECT_NO_THROW(boost::get<SqlSBigIntBuffer>(columns[3]));
+		}
+	}
+
+
+	TEST_F(TableTest, CreateAutoBlobBuffers)
+	{
+		wstring tableName = GetTableName(TableId::BLOBTYPES);
+		Table bTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		vector<SqlCBufferVariant> columns = bTable.CreateAutoColumnBuffers(false);
+
+		EXPECT_EQ(3, columns.size());
+
+		EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[0]));
+		EXPECT_NO_THROW(boost::get<SqlBinaryArray>(columns[1]));
+		EXPECT_NO_THROW(boost::get<SqlBinaryArray>(columns[2]));
+
+		SqlBinaryArray blob16 = boost::get<SqlBinaryArray>(columns[1]);
+		SqlBinaryArray varblob20 = boost::get<SqlBinaryArray>(columns[2]);
+
+		EXPECT_EQ(16, blob16.GetBufferLength());
+		EXPECT_EQ(20, varblob20.GetBufferLength());
+		EXPECT_EQ(16, blob16.GetNrOfElements());
+		EXPECT_EQ(20, varblob20.GetNrOfElements());
+	}
+
+
+	TEST_F(TableTest, CreateAutoCharBuffers)
+	{
+		wstring tableName = GetTableName(TableId::CHARTYPES);
+		Table cTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+
+		// Enforce binding to SqlWChar - in sql server we have nvarchar and varchar,
+		// db2 seems to default to cchar.
+		//cTable.SetSql2BufferTypeMap(std::make_shared<WCharSql2BufferMap>());
+		vector<SqlCBufferVariant> columns = cTable.CreateAutoColumnBuffers(false);
+
+		EXPECT_EQ(5, columns.size());
+
+		SqlCTypeVisitor cTypeV;
+
+		EXPECT_EQ(SQL_C_SLONG, boost::apply_visitor(cTypeV, columns[0]));
+		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[0]));
+		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[0]));
+		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[0]));
+		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[0]));
+
+		SqlWCharArray varchar128 = boost::get<SqlWCharArray>(columns[1]);
+		SqlWCharArray char128 = boost::get<SqlWCharArray>(columns[2]);
+		SqlWCharArray varchar10 = boost::get<SqlWCharArray>(columns[3]);
+		SqlWCharArray char10 = boost::get<SqlWCharArray>(columns[4]);
+
+		EXPECT_EQ(128 + 1, varchar128.GetNrOfElements());
+		EXPECT_EQ(128 + 1, char128.GetNrOfElements());
+		EXPECT_EQ(10 + 1, varchar10.GetNrOfElements());
+		EXPECT_EQ(10 + 1, char10.GetNrOfElements());
+	}
+
 // Interfaces
 // ----------
 
