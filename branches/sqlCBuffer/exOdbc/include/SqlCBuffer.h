@@ -703,7 +703,7 @@ namespace exodbc
 			ColumnBoundHandle boundHandleInfo(pHStmt, columnNr);
 			exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
 
-			if (m_columnSize > 0 || m_decimalDigits > 0)
+			if (m_sqlCType == SQL_C_NUMERIC)
 			{
 				SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
 				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_TYPE, (SQLPOINTER)m_sqlCType);
