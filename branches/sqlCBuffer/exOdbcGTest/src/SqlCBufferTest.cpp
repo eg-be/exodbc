@@ -2257,4 +2257,119 @@ namespace exodbc
 	}
 
 
+	TEST_F(SqlCPointerTest, ReadCharValues)
+	{
+		// note that when working witch chars, we add one element for the terminating \0 char.
+		{
+			wstring colName = L"tvarchar";
+			std::vector<SQLCHAR> buffer(128 + 1);
+			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
+			varcharCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
+
+			string s;
+
+			f(1);
+			s = (char*)buffer.data();
+			EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", s);
+			f(3);
+			s = (char*)buffer.data();
+			EXPECT_EQ("הצüאיט", s);
+			f(2);
+			EXPECT_TRUE(varcharCol.IsNull());
+		}
+
+		{
+			wstring colName = L"tchar";
+			std::vector<SQLCHAR> buffer(128 + 1);
+			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
+			charCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
+
+			string s;
+			// Note: MySql and Access trim the char values, other DBs do not trim
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+			{
+				f(2);
+				s = (char*)buffer.data();
+				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", s);
+				f(4);
+				s = (char*)buffer.data();
+				EXPECT_EQ("הצüאיט", s);
+			}
+			else
+			{
+				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ה'
+				// Therefore, the number of preceding whitespaces is not equal on DB2 
+				f(2);
+				s = (char*)buffer.data();
+				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", s);
+				f(4);
+				s = (char*)buffer.data();
+				EXPECT_EQ("הצüאיט", boost::trim_copy(s));
+			}
+
+			f(1);
+			EXPECT_TRUE(charCol.IsNull());
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadWCharValues)
+	{
+		// note that when working witch chars, we add one element for the terminating \0 char.
+		{
+			wstring colName = L"tvarchar";
+			std::vector<SQLWCHAR> buffer(128 + 1);
+			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 0, 0);
+			varcharCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
+
+			wstring ws;
+			f(1);
+			ws = buffer.data();
+			EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", ws);
+			f(3);
+			ws = buffer.data();
+			EXPECT_EQ(L"הצüאיט", ws);
+			f(2);
+			EXPECT_TRUE(varcharCol.IsNull());
+		}
+
+		{
+			wstring colName = L"tchar";
+			std::vector<SQLWCHAR> buffer(128 + 1);
+			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 0, 0);
+			charCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
+
+			// Note: MySql and Access trim the char values, other DBs do not trim
+			wstring ws;
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+			{
+				f(2);
+				ws = buffer.data();
+				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", ws);
+				f(4);
+				ws = buffer.data();
+				EXPECT_EQ(L"הצüאיט", ws);
+			}
+			else
+			{
+				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ה'
+				// Therefore, the number of preceding whitespaces is not equal on DB2 
+				f(2);
+				ws = buffer.data();
+				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", ws);
+				f(4);
+				ws = buffer.data();
+				EXPECT_EQ(L"הצüאיט", boost::trim_copy(ws));
+			}
+
+			f(1);
+			EXPECT_TRUE(charCol.IsNull());
+		}
+	}
+
+
 } //namespace exodbc
