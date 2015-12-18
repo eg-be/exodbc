@@ -2263,7 +2263,7 @@ namespace exodbc
 		{
 			wstring colName = L"tvarchar";
 			std::vector<SQLCHAR> buffer(128 + 1);
-			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 128, 0);
 			varcharCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -2282,7 +2282,7 @@ namespace exodbc
 		{
 			wstring colName = L"tchar";
 			std::vector<SQLCHAR> buffer(128 + 1);
-			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 128, 0);
 			charCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -2321,7 +2321,7 @@ namespace exodbc
 		{
 			wstring colName = L"tvarchar";
 			std::vector<SQLWCHAR> buffer(128 + 1);
-			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 128, 0);
 			varcharCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -2339,7 +2339,7 @@ namespace exodbc
 		{
 			wstring colName = L"tchar";
 			std::vector<SQLWCHAR> buffer(128 + 1);
-			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 128, 0);
 			charCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
