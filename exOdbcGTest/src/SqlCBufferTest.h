@@ -89,7 +89,6 @@ namespace exodbc
 	class BinaryColumnTest : public ColumnTestBase
 	{};
 
-
 	class SqlCPointerTest : public ColumnTestBase
 	{};
 
