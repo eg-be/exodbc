@@ -175,6 +175,25 @@ namespace exodbc
 					++it;
 				}
 			}
+
+			// Unbind all params
+			std::set<ColumnBoundHandle>::iterator itParams = m_boundParams.begin();
+			while (itParams != m_boundParams.end())
+			{
+				ColumnBoundHandle bindInfo = *itParams;
+				try
+				{
+					exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
+					SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
+					THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+					itParams = m_boundParams.erase(itParams);
+				}
+				catch (const Exception& ex)
+				{
+					LOG_ERROR(boost::str(boost::wformat(L"Failed to unbind column %d from parameter stmt-handle %d: %s") % bindInfo.m_columnNr %bindInfo.m_pHStmt->GetHandle() % ex.ToString()));
+					++itParams;
+				}
+			}
 		};
 
 		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
@@ -451,6 +470,24 @@ namespace exodbc
 				{
 					LOG_ERROR(boost::str(boost::wformat(L"Failed to unbind column %d from stmt-handle %d: %s") % bindInfo.m_columnNr %bindInfo.m_pHStmt->GetHandle() %ex.ToString()));
 					++it;
+				}
+				// Unbind all params
+				std::set<ColumnBoundHandle>::iterator itParams = m_boundParams.begin();
+				while (itParams != m_boundParams.end())
+				{
+					try
+					{
+						ColumnBoundHandle bindInfo = *itParams;
+						exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
+						SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
+						THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+						itParams = m_boundParams.erase(itParams);
+					}
+					catch (const Exception& ex)
+					{
+						LOG_ERROR(boost::str(boost::wformat(L"Failed to unbind column %d from parameter stmt-handle %d: %s") % bindInfo.m_columnNr %bindInfo.m_pHStmt->GetHandle() % ex.ToString()));
+						++itParams;
+					}
 				}
 			}
 		};
