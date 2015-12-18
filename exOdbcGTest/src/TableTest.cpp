@@ -1442,8 +1442,11 @@ namespace exodbc
 		Table cTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
 		// Enforce binding to SqlWChar - in sql server we have nvarchar and varchar,
-		// db2 seems to default to cchar.
-		//cTable.SetSql2BufferTypeMap(std::make_shared<WCharSql2BufferMap>());
+		// db2 seems to default to cchar - we simplfiy the test by binding those to wchar too.
+		auto pTypeMap = std::make_shared<DefaultSql2BufferMap>(OdbcVersion::V_3);
+		pTypeMap->RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
+		pTypeMap->RegisterType(SQL_CHAR, SQL_C_WCHAR);
+		cTable.SetSql2BufferTypeMap(pTypeMap);
 		vector<SqlCBufferVariant> columns = cTable.CreateAutoColumnBuffers(false);
 
 		EXPECT_EQ(5, columns.size());
@@ -1451,10 +1454,10 @@ namespace exodbc
 		SqlCTypeVisitor cTypeV;
 
 		EXPECT_EQ(SQL_C_SLONG, boost::apply_visitor(cTypeV, columns[0]));
-		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[0]));
-		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[0]));
-		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[0]));
-		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[0]));
+		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[1]));
+		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[2]));
+		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[3]));
+		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[4]));
 
 		SqlWCharArray varchar128 = boost::get<SqlWCharArray>(columns[1]);
 		SqlWCharArray char128 = boost::get<SqlWCharArray>(columns[2]);
@@ -1465,6 +1468,99 @@ namespace exodbc
 		EXPECT_EQ(128 + 1, char128.GetNrOfElements());
 		EXPECT_EQ(10 + 1, varchar10.GetNrOfElements());
 		EXPECT_EQ(10 + 1, char10.GetNrOfElements());
+	}
+
+
+	TEST_F(TableTest, CreateAutoDateTypeBuffers)
+	{
+		wstring tableName = GetTableName(TableId::DATETYPES);
+		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+
+		auto columns = dTable.CreateAutoColumnBuffers(false);
+		EXPECT_EQ(4, columns.size());
+
+		SqlCTypeVisitor cTypeV;
+
+		EXPECT_EQ(SQL_C_SLONG, boost::apply_visitor(cTypeV, columns[0]));
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			// Access reports only Timestamps
+			EXPECT_EQ(SQL_C_TYPE_TIMESTAMP, boost::apply_visitor(cTypeV, columns[1]));
+			EXPECT_EQ(SQL_C_TYPE_TIMESTAMP, boost::apply_visitor(cTypeV, columns[2]));
+		}
+		else
+		{
+			EXPECT_EQ(SQL_C_TYPE_DATE, boost::apply_visitor(cTypeV, columns[1]));
+			EXPECT_EQ(SQL_C_TYPE_TIME, boost::apply_visitor(cTypeV, columns[2]));
+		}
+		EXPECT_EQ(SQL_C_TYPE_TIMESTAMP, boost::apply_visitor(cTypeV, columns[3]));
+
+		SqlTypeTimestampStructBuffer ts = boost::get<SqlTypeTimestampStructBuffer>(columns[3]);
+		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ(3, ts.GetDecimalDigits());
+		}
+		else if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+		{
+			EXPECT_EQ(6, ts.GetDecimalDigits());
+		}
+		else
+		{
+			EXPECT_EQ(0, ts.GetDecimalDigits());
+		}
+	}
+
+
+	TEST_F(TableTest, CreateAutoFloatTypeBuffers)
+	{
+		wstring tableName = GetTableName(TableId::FLOATTYPES);
+		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+
+		auto columns = dTable.CreateAutoColumnBuffers(false);
+		EXPECT_EQ(3, columns.size());
+
+		SqlCTypeVisitor cTypeV;
+
+		EXPECT_EQ(SQL_C_SLONG, boost::apply_visitor(cTypeV, columns[0]));
+		EXPECT_EQ(SQL_C_DOUBLE, boost::apply_visitor(cTypeV, columns[1]));
+		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER
+			|| m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			EXPECT_EQ(SQL_C_DOUBLE, boost::apply_visitor(cTypeV, columns[2]));
+		}
+		else
+		{
+			EXPECT_EQ(SQL_C_FLOAT, boost::apply_visitor(cTypeV, columns[2]));
+		}
+	}
+
+
+	TEST_F(TableTest, CreateAutoNumericTypeBuffers)
+	{
+		wstring tableName = GetTableName(TableId::NUMERICTYPES);
+		Table nTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+
+		auto columns = nTable.CreateAutoColumnBuffers(false);
+		EXPECT_EQ(4, columns.size());
+		SqlCTypeVisitor cTypeV;
+
+		EXPECT_EQ(SQL_C_SLONG, boost::apply_visitor(cTypeV, columns[0]));
+		EXPECT_EQ(SQL_C_NUMERIC, boost::apply_visitor(cTypeV, columns[1]));
+		EXPECT_EQ(SQL_C_NUMERIC, boost::apply_visitor(cTypeV, columns[2]));
+		EXPECT_EQ(SQL_C_NUMERIC, boost::apply_visitor(cTypeV, columns[3]));
+
+		auto num18_0 = boost::get<SqlNumericStructBuffer>(columns[1]);
+		auto num18_10 = boost::get<SqlNumericStructBuffer>(columns[2]);
+		auto num5_3 = boost::get<SqlNumericStructBuffer>(columns[3]);
+
+		EXPECT_EQ(18, num18_0.GetColumnSize());
+		EXPECT_EQ(0, num18_0.GetDecimalDigits());
+
+		EXPECT_EQ(18, num18_10.GetColumnSize());
+		EXPECT_EQ(10, num18_10.GetDecimalDigits());
+
+		EXPECT_EQ(5, num5_3.GetColumnSize());
+		EXPECT_EQ(3, num5_3.GetDecimalDigits());
 	}
 
 // Interfaces
