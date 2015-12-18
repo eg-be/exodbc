@@ -2121,4 +2121,140 @@ namespace exodbc
 		}
 	}
 
+
+	TEST_F(SqlCPointerTest, ReadShortValue)
+	{
+		wstring colName = ToDbCase(L"tsmallint");
+		SQLSMALLINT buffer = 0;
+		SqlCPointerBuffer shortCol(colName, SQL_INTEGER, &buffer, SQL_C_SSHORT, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
+		shortCol.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
+
+		f(1);
+		EXPECT_EQ(-32768, buffer);
+		f(2);
+		EXPECT_EQ(32767, buffer);
+		f(3);
+		EXPECT_TRUE(shortCol.IsNull());
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadLongValue)
+	{
+		wstring colName = ToDbCase(L"tint");
+		SQLINTEGER buffer = 0;
+		SqlCPointerBuffer longCol(colName, SQL_INTEGER, &buffer, SQL_C_SLONG, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
+
+		longCol.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
+
+		f(3);
+		EXPECT_EQ((-2147483647 - 1), buffer);
+		f(4);
+		EXPECT_EQ(2147483647, buffer);
+		f(5);
+		EXPECT_TRUE(longCol.IsNull());
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadBigIntValue)
+	{
+		wstring colName = ToDbCase(L"tbigint");
+		SQLBIGINT buffer = 0;
+		SqlCPointerBuffer biCol(colName, SQL_INTEGER, &buffer, SQL_C_SBIGINT, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
+
+		biCol.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
+
+		f(5);
+		EXPECT_EQ((-9223372036854775807 - 1), buffer);
+		f(6);
+		EXPECT_EQ(9223372036854775807, buffer);
+		f(4);
+		EXPECT_TRUE(biCol.IsNull());
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadBinaryValue)
+	{
+		// Set up the values we expect to read:
+
+		const vector<SQLCHAR> empty = {
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+
+		const vector<SQLCHAR> ff = {
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255
+		};
+
+		const vector<SQLCHAR> abc = {
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67
+		};
+
+		const vector<SQLCHAR> abc_ff = {
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67,
+			0xff, 0xff, 0xff, 0xff
+		};
+
+		{
+			wstring colName = L"tblob";
+			vector<SQLCHAR> buffer(16);
+			SqlCPointerBuffer blobCol(colName, SQL_BINARY, &buffer[0], SQL_C_BINARY, 16 * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
+			blobCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
+
+			f(1);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(empty, buffer);
+
+			f(2);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(ff, buffer);
+
+			f(3);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(abc, buffer);
+
+			f(4);
+			EXPECT_TRUE(blobCol.IsNull());
+		}
+
+		{
+			wstring colName = L"tvarblob_20";
+			vector<SQLCHAR> buffer(20);
+			SqlCPointerBuffer varBlobCol(colName, SQL_BINARY, &buffer[0], SQL_C_BINARY, 20 * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
+			varBlobCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
+
+			f(4);
+			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
+			// Cb must reflect this
+			EXPECT_EQ(16, varBlobCol.GetCb());
+			EXPECT_EQ(20, buffer.size());
+			// Only compare first 16 elements
+			vector<SQLCHAR> first16Elements(buffer.begin(), buffer.begin() + 16);
+			EXPECT_EQ(abc, first16Elements);
+
+			f(5);
+			EXPECT_EQ(20, varBlobCol.GetCb());
+			EXPECT_EQ(abc_ff, buffer);
+
+			f(3);
+			EXPECT_TRUE(varBlobCol.IsNull());
+		}
+	}
+
+
 } //namespace exodbc
