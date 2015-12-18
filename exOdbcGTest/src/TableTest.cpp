@@ -1563,6 +1563,46 @@ namespace exodbc
 		EXPECT_EQ(3, num5_3.GetDecimalDigits());
 	}
 
+
+	TEST_F(TableTest, CreateAutoSkipUnsupported)
+	{
+		// Disable the support for one type.
+		// Disable support for Integer by removing it from the typeMap
+		auto pTypeMap = std::make_shared<DefaultSql2BufferMap>(OdbcVersion::V_3);
+		pTypeMap->ClearType(SQL_INTEGER);
+
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		iTable.SetSql2BufferTypeMap(pTypeMap);
+		auto columns = iTable.CreateAutoColumnBuffers(true);
+
+		// The id col and the tint column should be missing
+		// except for access, there everything should be missing
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			EXPECT_EQ(0, columns.size());
+		}
+		else
+		{
+			EXPECT_EQ(2, columns.size());
+		}
+	}
+
+
+	TEST_F(TableTest, CreateAutoFailOnUnsupported)
+	{
+		// Disable the support for one type.
+		// Disable support for Integer by removing it from the typeMap
+		auto pTypeMap = std::make_shared<DefaultSql2BufferMap>(OdbcVersion::V_3);
+		pTypeMap->ClearType(SQL_INTEGER);
+
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		iTable.SetSql2BufferTypeMap(pTypeMap);
+
+		EXPECT_THROW(iTable.CreateAutoColumnBuffers(false), NotSupportedException);
+	}
+
 // Interfaces
 // ----------
 
