@@ -2590,4 +2590,113 @@ namespace exodbc
 		EXPECT_TRUE(num5_3_Col.IsNull());
 	}
 
+
+	TEST_F(SqlCPointerTest, WriteBlobValue)
+	{
+		// Set up the values we expect to read/write:
+
+		const vector<SQLCHAR> empty = {
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0,
+			0, 0, 0, 0
+		};
+
+		const vector<SQLCHAR> ff = {
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255,
+			255, 255, 255, 255
+		};
+
+		const vector<SQLCHAR> abc = {
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67
+		};
+
+		const vector<SQLCHAR> abc_ff = {
+			0xab, 0xcd, 0xef, 0xf0,
+			0x12, 0x34, 0x56, 0x78,
+			0x90, 0xab, 0xcd, 0xef,
+			0x01, 0x23, 0x45, 0x67,
+			0xff, 0xff, 0xff, 0xff
+		};
+
+		TableId tableId = TableId::BLOBTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tblob");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQLCHAR buffer[16];
+			SqlCPointerBuffer blobCol(colName, SQL_BINARY, (SQLPOINTER)buffer, SQL_C_BINARY, sizeof(buffer), ColumnFlag::CF_NULLABLE, 16, 0);
+
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				blobCol.SetSqlType(SQL_BINARY);
+				blobCol.SetColumnSize(16);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			blobCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			// Note that we also need to set Cb
+			idBuffer = 101;
+			blobCol.SetCb(16);
+			memcpy((void*)buffer, (void*)&empty[0], sizeof(buffer));
+			i();
+
+			idBuffer = 102;
+			memcpy((void*)buffer, (void*)&ff[0], sizeof(buffer));
+			i();
+
+			idBuffer = 103;
+			memcpy((void*)buffer, (void*)&abc[0], sizeof(buffer));
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// read back written values
+			wstring colName = L"tblob";
+			vector<SQLCHAR> buffer(16);
+			SqlCPointerBuffer blobCol(colName, SQL_BINARY, &buffer[0], SQL_C_BINARY, 16 * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 16, 0);
+			blobCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(empty, buffer);
+
+			f(102);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(ff, buffer);
+
+			f(103);
+			EXPECT_EQ(16, blobCol.GetCb());
+			EXPECT_EQ(abc, buffer);
+
+			f(100);
+			EXPECT_TRUE(blobCol.IsNull());
+		}
+	}
+
 } //namespace exodbc
