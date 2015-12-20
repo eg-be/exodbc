@@ -87,6 +87,13 @@ namespace exodbc
 	}
 
 
+	void PreparedStatement::BindColumn(SqlCBufferVariant column, SQLUSMALLINT columnNr)
+	{
+		BindSelectVisitor sv(columnNr, m_pHStmt);
+		boost::apply_visitor(sv, column);
+	}
+
+
 	void PreparedStatement::Prepare()
 	{
 		exASSERT(m_pHStmt);
