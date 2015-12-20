@@ -11,6 +11,9 @@
 // Same component headers
 #include "exOdbc.h"
 #include "SqlHandle.h"
+#include "SqlCBuffer.h"
+#include "Database.h"
+#include "SqlCBuffer.h"
 
 // Other headers
 // System headers
@@ -36,27 +39,76 @@ namespace exodbc
 	*		 SqlCBuffer classes matching those markers can be bound to
 	*		 execute the statement once or multiple times.
 	*/
-	class PreparedStatement
+	class EXODBCAPI PreparedStatement
 	{
 	public:
+
+		/*!
+		* A static lists of drivers that do not support SqlDescribeParam.
+		* Unknown databases are expected to support it, so true is returned.
+		* Access and Excel are known for not supporting.
+		*/
+		static bool DatabaseSupportsDescribeParam(DatabaseProduct dbms) noexcept
+		{
+			return !(dbms == DatabaseProduct::ACCESS || dbms == DatabaseProduct::EXCEL);
+		};
+
 		PreparedStatement() = delete;
+		PreparedStatement(const PreparedStatement& other) = delete;
+
+		~PreparedStatement();
 
 		/*!
-		* \brief	Constructs a Prepared statement using the passed pHDbc to
-		*			allocate a new statement to be used.
-		* \see		Allocate()
+		* \brief Constructs a statement from the given Database.
+		* \see DatabseSupportsDescribeParam()
 		*/
-		PreparedStatement(ConstSqlDbcHandlePtr pHDbc, const std::wstring& sqlstmt);
+		PreparedStatement(ConstDatabasePtr pDb, const std::wstring& sqlstmt);
 
 
 		/*!
-		* \brief	Constructs a Prepared statement using the passed pHStmt.
-		* \see		Allocate()
+		* \brief	Constructs a statement handle using the passed pHDbc to
+		*			prepare the statement for execution.
+		* \see DatabseSupportsDescribeParam()
 		*/
-		PreparedStatement(SqlStmtHandlePtr pHStmt, const std::wstring& stqlstmt);
-		
+		PreparedStatement(ConstSqlDbcHandlePtr pHDbc, DatabaseProduct dbc, const std::wstring& sqlstmt);
+
+
+		/*!
+		* \brief	Constructs a statement handle using the passed pHDbc to
+		*			prepare the statement for execution.
+		*			If useSqlDescribeParam is true, the function SqlDescribeParams is
+		*			used during parameter binding (not supported by all dbs).
+		*/
+		PreparedStatement(ConstSqlDbcHandlePtr pHDbc, bool useSqlDescribeParam, const std::wstring& sqlstmt);		
+
+
+		void BindParameter(SqlCBufferVariant column, SQLUSMALLINT columnNr);
+
+
+		void Execute();
+
+
+		/*!
+		* \brief	Returns m_useSqlDescribeParam
+		*/
+		bool GetUseSqlDescribeParam() const noexcept { return m_useSqlDescribeParam; };
+
+
+		/*!
+		* \brief	Returns the statement used (and managed) by this PreparedStatement.
+		*/
+		ConstSqlStmtHandlePtr GetStmt() const noexcept { return m_pHStmt; };
+
 	private:
+
+		/*!
+		* \brief	Calls SQLPrepare using m_sqlstmt and m_pHStmt.
+		*/
+		void Prepare();
+
 		SqlStmtHandlePtr m_pHStmt;	///< The statement we operate on
+		const std::wstring m_sqlstmt;	///< The SQL for our statement.
+		bool m_useSqlDescribeParam;
 	};
 
 } // namespace exodbc

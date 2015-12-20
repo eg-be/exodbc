@@ -169,10 +169,10 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Get the handle. Throws if IsAllocated() returns false.
-		* \throw	AssertionException If no handle is allocated.
+		* \brief	Get the handle. Does not throw could return SQL_NULL_HANDLE if not allocated yet.
+		* \see		IsAllocated()
 		*/
-		THANDLE GetHandle() const { exASSERT(IsAllocated()); return m_handle; };
+		THANDLE GetHandle() const noexcept { return m_handle; };
 		
 		/*!
 		* \brief	Returns true if a handle is allocated.
@@ -272,10 +272,10 @@ namespace exodbc
 
 	public:
 		/*!
-		* \brief	Get the handle. Throws if IsAllocated() returns false.
-		* \throw	AssertionException If no handle is allocated.
+		* \brief	Get the handle. Might return SQL_NULL_HANDLE if not allocated.
+		* \see		IsAllocated()
 		*/
-		SQLHDESC GetHandle() const { exASSERT(IsAllocated()); return m_handle; };
+		SQLHDESC GetHandle() const noexcept { return m_handle; };
 
 		/*!
 		* \brief	Returns true if a handle is allocated.
