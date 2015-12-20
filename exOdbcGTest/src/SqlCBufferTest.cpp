@@ -445,7 +445,7 @@ namespace exodbc
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
 				idCol.SetSqlType(SQL_INTEGER);
-				biCol.SetSqlType(SQL_INTEGER);
+				biCol.SetSqlType(SQL_BIGINT);
 			}
 			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
@@ -2857,7 +2857,7 @@ namespace exodbc
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
 				idCol.SetSqlType(SQL_INTEGER);
-				biCol.SetSqlType(SQL_INTEGER);
+				biCol.SetSqlType(SQL_BIGINT);
 			}
 			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
