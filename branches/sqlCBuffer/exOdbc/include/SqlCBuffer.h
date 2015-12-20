@@ -207,7 +207,7 @@ namespace exodbc
 
 		void SetValue(const T& value) noexcept { SetValue(value, GetBufferLength()); };
 		void SetValue(const T& value, SQLLEN cb) noexcept { *m_pBuffer = value; SetCb(cb); };
-		const T& GetValue() const { exASSERT(!IsNull()); return *m_pBuffer; };
+		const T& GetValue() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return *m_pBuffer; };
 		std::shared_ptr<const T> GetBuffer() const noexcept { return m_pBuffer; };
 
 		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
@@ -526,15 +526,14 @@ namespace exodbc
 			SetCb(cb);
 		};
 		const std::shared_ptr<std::vector<T>> GetBuffer() const noexcept { return m_pBuffer; };
-		//const std::shared_ptr<T> GetBuffer() const noexcept { return m_pBuffer; };
 		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
 
 		//operator T*() const noexcept { return m_pBuffer.get(); };
 
 		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
 
-		std::wstring GetWString() const { exASSERT(!IsNull()); return m_pBuffer->data(); };
-		std::string GetString() const { exASSERT(!IsNull()); return (char*)m_pBuffer->data(); };
+		std::wstring GetWString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return m_pBuffer->data(); };
+		std::string GetString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return (char*)m_pBuffer->data(); };
 
 		void SetWString(const std::wstring& ws) { std::vector<SQLWCHAR> vec(ws.begin(), ws.end()); SetValue(vec, SQL_NTS); };
 		void SetString(const std::string& s) { std::vector<SQLCHAR> vec(s.begin(), s.end()); SetValue(vec, SQL_NTS); }
@@ -645,6 +644,7 @@ namespace exodbc
 	typedef SqlCArrayBuffer<SQLWCHAR, SQL_C_WCHAR> SqlWCharArray;
 	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_CHAR> SqlCharArray;
 	typedef SqlCArrayBuffer<SQLCHAR, SQL_C_BINARY> SqlBinaryArray;
+
 
 	class SqlCPointerBuffer
 		: public SqlCBufferLengthIndicator
