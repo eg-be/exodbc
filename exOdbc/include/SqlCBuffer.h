@@ -14,6 +14,7 @@
 #include "InfoObject.h"
 #include "EnumFlags.h"
 #include "SqlHandle.h"
+#include "Helpers.h"
 
 // Other headers
 #include "boost/variant.hpp"
@@ -330,7 +331,7 @@ namespace exodbc
 		ColumnBoundHandle boundHandleInfo(pHStmt, columnNr);
 		exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
 
-		SQLHDESC hDesc = GetRowDescriptorHandle(pHStmt->GetHandle(), RowDescriptorType::ROW);
+		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN) m_columnSize));
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER) m_decimalDigits);
@@ -350,7 +351,7 @@ namespace exodbc
 		std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(boundHandleInfo);
 		exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
 
-		SQLHDESC hDesc = GetRowDescriptorHandle(pHStmt->GetHandle(), RowDescriptorType::ROW);
+		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)NULL);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)NULL);
@@ -398,7 +399,7 @@ namespace exodbc
 		THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 
 		// Do some additional steps for numeric types
-		SQLHANDLE hDesc = GetRowDescriptorHandle(pHStmt->GetHandle(), RowDescriptorType::PARAM);
+		SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramCharSize));
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDecimalDigits);
@@ -788,7 +789,7 @@ namespace exodbc
 			// Do some additional steps for numeric types
 			if (m_sqlCType == SQL_C_NUMERIC)
 			{
-				SQLHANDLE hDesc = GetRowDescriptorHandle(pHStmt->GetHandle(), RowDescriptorType::PARAM);
+				SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
 				SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
 				SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramCharSize));
 				SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDecimalDigits);

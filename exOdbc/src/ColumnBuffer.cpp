@@ -224,11 +224,13 @@ namespace exodbc
 			// Do some additional steps for numeric types
 			if (SQL_C_NUMERIC == m_bufferType)
 			{
-				SQLHANDLE hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM);
-				SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
-				SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, (SQLPOINTER) ((SQLLEN)m_columnSize));
-				SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
-				SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
+				// broken now
+				exASSERT(false);
+				//SQLHANDLE hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM);
+				//SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+				//SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_PRECISION, (SQLPOINTER) ((SQLLEN)m_columnSize));
+				//SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
+				//SetDescriptionField(hDesc, pBp->m_parameterNumber, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
 			}
 		}
 		catch (const Exception& ex)
@@ -267,11 +269,13 @@ namespace exodbc
 
 		if (m_bufferType == SQL_C_NUMERIC)
 		{
-			SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER)m_bufferType);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)NULL);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)NULL);
-			SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)NULL);
+			// broken now
+			exASSERT(false);
+			//SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW);
+			//SetDescriptionField(hDesc, m_columnNr, SQL_DESC_TYPE, (SQLPOINTER)m_bufferType);
+			//SetDescriptionField(hDesc, m_columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)NULL);
+			//SetDescriptionField(hDesc, m_columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)NULL);
+			//SetDescriptionField(hDesc, m_columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)NULL);
 		}
 		else
 		{
@@ -328,13 +332,15 @@ namespace exodbc
 			exASSERT(m_columnSize > 0);
 			exASSERT(m_decimalDigits >= 0);
 
-			SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW);
-			SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER)m_bufferType);
-			SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
-			SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
-			SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
-			SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
-			SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
+			// broken now
+			exASSERT(false);
+			//SQLHDESC hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::ROW);
+			//SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER)m_bufferType);
+			//SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
+			//SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
+			//SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)pBuffer);
+			//SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
+			//SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
 		}
 		else
 		{

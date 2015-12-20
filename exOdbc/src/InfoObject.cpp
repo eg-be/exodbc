@@ -14,6 +14,7 @@
 
 // Same component headers
 #include "Exception.h"
+#include "Helpers.h"
 
 // Other headers
 
@@ -314,41 +315,37 @@ namespace exodbc
 	}
 
 
-	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, WStringProperty prop)
+	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, WStringProperty prop)
 	{
-		exASSERT(hDbc != SQL_NULL_HDBC);
 		std::wstring value;
-		GetInfo(hDbc, (SQLUSMALLINT)prop, value);
+		GetInfo(pHDbc, (SQLUSMALLINT)prop, value);
 		SetProperty(prop, value);
 	}
 
 
-	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, USmallIntProperty prop)
+	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, USmallIntProperty prop)
 	{
-		exASSERT(hDbc != SQL_NULL_HDBC);
 		SQLUSMALLINT value;
 		SQLSMALLINT cb;
-		GetInfo(hDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+		GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
 		SetProperty(prop, value);
 	}
 
 
-	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, UIntProperty prop)
+	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, UIntProperty prop)
 	{
-		exASSERT(hDbc != SQL_NULL_HDBC);
 		SQLUINTEGER value;
 		SQLSMALLINT cb;
-		GetInfo(hDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+		GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
 		SetProperty(prop, value);
 	}
 
 
-	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, IntProperty prop)
+	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, IntProperty prop)
 	{
-		exASSERT(hDbc != SQL_NULL_HDBC);
 		SQLINTEGER value;
 		SQLSMALLINT cb;
-		GetInfo(hDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+		GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
 		SetProperty(prop, value);
 	}
 

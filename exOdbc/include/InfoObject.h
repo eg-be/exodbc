@@ -14,12 +14,14 @@
 // Same component headers
 #include "exOdbc.h"
 #include "ObjectName.h"
+#include "SqlHandle.h"
 
 // Other headers
 
 // System headers
 #include <string>
 #include <vector>
+#include <map>
 
 // Forward declarations
 // --------------------
@@ -470,10 +472,10 @@ namespace exodbc
 		void SetProperty(UIntProperty prop, SQLUINTEGER value);
 		void SetProperty(IntProperty prop, SQLINTEGER value);
 
-		void ReadAndStoryProperty(SQLHDBC hDbc, WStringProperty prop);
-		void ReadAndStoryProperty(SQLHDBC hDbc, USmallIntProperty prop);
-		void ReadAndStoryProperty(SQLHDBC hDbc, UIntProperty prop);
-		void ReadAndStoryProperty(SQLHDBC hDbc, IntProperty prop);
+		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, WStringProperty prop);
+		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, USmallIntProperty prop);
+		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, UIntProperty prop);
+		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, IntProperty prop);
 
 		std::wstring GetWStringProperty(WStringProperty prop) const;
 		SQLUSMALLINT GetUSmallIntProperty(USmallIntProperty prop) const;

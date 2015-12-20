@@ -49,14 +49,14 @@ namespace exodbc
 		DatabasePtr pDb = OpenTestDb();
 
 		ASSERT_TRUE(pDb->HasConnectionHandle());
-		GetInfo(pDb->GetSqlDbcHandle()->GetHandle(), SQL_SERVER_NAME, serverName);
+		GetInfo(pDb->GetSqlDbcHandle(), SQL_SERVER_NAME, serverName);
 		EXPECT_FALSE(serverName.empty());
 
 		// and read some int value
 		// okay, it would be bad luck if one driver reports 1313
 		SQLUSMALLINT maxStmts = 1313;
 		SWORD cb = 0;
-		GetInfo(pDb->GetSqlDbcHandle()->GetHandle(), SQL_MAX_CONCURRENT_ACTIVITIES, &maxStmts, sizeof(maxStmts), &cb);
+		GetInfo(pDb->GetSqlDbcHandle(), SQL_MAX_CONCURRENT_ACTIVITIES, &maxStmts, sizeof(maxStmts), &cb);
 		EXPECT_NE(1313, maxStmts);
 		EXPECT_NE(0, cb);
 	}
@@ -94,7 +94,7 @@ namespace exodbc
 		// Read some non-null string-data with enough chars
 		bool isNull = false;
 		std::wstring value;
-		EXPECT_NO_THROW(GetData(pHStmt->GetHandle(), 2, 20, value, &isNull));
+		EXPECT_NO_THROW(GetData(pHStmt, 2, 20, value, &isNull));
 		EXPECT_FALSE(isNull);
 		EXPECT_EQ(L"הצüאיט", value);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt->GetHandle(), StatementCloser::Mode::IgnoreNotOpen));
@@ -108,7 +108,7 @@ namespace exodbc
 		{
 			// note that this will info about data truncation
 			LogLevelWarning llw;
-			EXPECT_NO_THROW(GetData(pHStmt->GetHandle(), 2, 3, value, &isNull));
+			EXPECT_NO_THROW(GetData(pHStmt, 2, 3, value, &isNull));
 		}
 		EXPECT_EQ(L"הצü", value);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt->GetHandle(), StatementCloser::Mode::IgnoreNotOpen));
@@ -120,7 +120,7 @@ namespace exodbc
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		SQLINTEGER id = 0;
 		SQLLEN ind = 0;
-		EXPECT_NO_THROW(GetData(pHStmt->GetHandle(), 1, SQL_C_SLONG, &id, NULL, &ind, &isNull));
+		EXPECT_NO_THROW(GetData(pHStmt, 1, SQL_C_SLONG, &id, NULL, &ind, &isNull));
 		EXPECT_EQ(3, id);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt->GetHandle(), StatementCloser::Mode::IgnoreNotOpen));
 
@@ -130,7 +130,7 @@ namespace exodbc
 		ret = SQLFetch(pHStmt->GetHandle());
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		value = L"";
-		EXPECT_NO_THROW(GetData(pHStmt->GetHandle(), 3, 20, value, &isNull));
+		EXPECT_NO_THROW(GetData(pHStmt, 3, 20, value, &isNull));
 		EXPECT_TRUE(isNull);
 		EXPECT_EQ(L"", value);
 		
@@ -167,7 +167,6 @@ namespace exodbc
 		// Except to fail when passing a null handle
 		{
 			LogLevelFatal llf;
-			DontDebugBreak ddb;
 			EXPECT_THROW(SetDescriptionField(SQL_NULL_HSTMT, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC), AssertionException);
 		}
 
@@ -193,24 +192,9 @@ namespace exodbc
 	{
 		// We except an assertion if not at least one handle is valid
 		{
-			DontDebugBreak ddb;
 			LogLevelFatal llf;
 			EXPECT_THROW(GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC), AssertionException);
 		}
-	}
-
-
-	TEST_F(HelpersTest, DontDebugBreak)
-	{
-		// DebugBreak shall default to false (that means we will break)
-		EXPECT_FALSE(GetDontDebugBreak());
-		{
-			// Disable breaking
-			DontDebugBreak ddb;
-			EXPECT_TRUE(GetDontDebugBreak());
-		}
-		// and here we break again again
-		EXPECT_FALSE(GetDontDebugBreak());
 	}
 
 

@@ -58,7 +58,6 @@ namespace exodbc
 		SQLHSTMT hNull = SQL_NULL_HSTMT;
 		{
 			// We assert if we pass a null handle
-			DontDebugBreak ddb;
 			LogLevelFatal llf;
 			EXPECT_THROW(StatementCloser::CloseStmtHandle(hNull, StatementCloser::Mode::IgnoreNotOpen), AssertionException);
 		}
@@ -73,7 +72,6 @@ namespace exodbc
 			{
 				LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
 			}
-			DontDebugBreak ddb;
 			LogLevelFatal llf;
 			EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
 		}
@@ -107,7 +105,6 @@ namespace exodbc
 		{
 			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
 		}
-		DontDebugBreak ddb;
 		LogLevelFatal llf;
 		EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
 

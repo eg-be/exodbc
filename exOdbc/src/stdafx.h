@@ -48,7 +48,6 @@
 #endif
 
 // our stuff
-#include "Helpers.h"
-
+#include "exOdbc.h"
 
 // TODO: reference additional headers your program requires here

@@ -752,7 +752,6 @@ namespace exodbc
 
 		// Close when not open must fail
 		{
-			DontDebugBreak ddb;
 			LogLevelFatal llf;
 			EXPECT_THROW(iTable.Close(), AssertionException);
 		}
@@ -765,7 +764,6 @@ namespace exodbc
 
 		// Close an already closed table
 		{
-			DontDebugBreak ddb;
 			LogLevelFatal llf;
 			EXPECT_THROW(iTable.Close(), AssertionException);
 		}
@@ -807,7 +805,6 @@ namespace exodbc
 
 		// We cannot change the mode if the table is open
 		{
-			DontDebugBreak ddb;
 			LogLevelFatal llf;
 			EXPECT_THROW(iTable.SetAccessFlags(TableAccessFlag::AF_READ), AssertionException);
 		}
