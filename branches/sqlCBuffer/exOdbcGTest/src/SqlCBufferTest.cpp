@@ -3017,4 +3017,320 @@ namespace exodbc
 		}
 	}
 
+
+	TEST_F(SqlCPointerTest, WriteCharValue)
+	{
+		TableId tableId = TableId::CHARTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tchar_10");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQLCHAR buffer[10 + 1];
+			SqlCPointerBuffer charCol(colName, SQL_CHAR, (SQLPOINTER)buffer, SQL_C_CHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 10, 0);
+
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				charCol.SetSqlType(SQL_CHAR);
+				charCol.SetColumnSize(10);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			charCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			idBuffer = 101;
+			charCol.SetCb(SQL_NTS);
+			strcpy((char*)buffer, "HelloWorld");
+			i();
+
+			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
+			{
+				// MySql fails here, with SQLSTATE HY000
+				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
+				idBuffer = 102;
+				strcpy((char*)buffer, "ä ö ü");
+				i();
+			}
+
+			idBuffer = 103;
+			strcpy((char*)buffer, "abcdefgh  ");
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			SqlCharArray charCol(colName, 128 + 1);
+			charCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ("HelloWorld", charCol.GetString());
+
+			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
+			{
+				f(102);
+				EXPECT_EQ("ä ö ü", boost::trim_right_copy(charCol.GetString()));
+			}
+
+			f(103);
+			// It seems like MySql always trims whitespaces - even if we've set them explicitly
+			if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+			{
+				EXPECT_EQ("abcdefgh", charCol.GetString());
+			}
+			else
+			{
+				EXPECT_EQ("abcdefgh  ", charCol.GetString());
+			}
+
+			f(100);
+			EXPECT_TRUE(charCol.IsNull());
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, WriteWCharValue)
+	{
+		TableId tableId = TableId::CHARTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tchar_10");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQLWCHAR buffer[10 + 1];
+			SqlCPointerBuffer charCol(colName, SQL_WCHAR, (SQLPOINTER)buffer, SQL_C_WCHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 10, 0);
+
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				charCol.SetSqlType(SQL_CHAR);
+				charCol.SetColumnSize(10);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			charCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			idBuffer = 101;
+			charCol.SetCb(SQL_NTS);
+			wcscpy(buffer, L"HelloWorld");
+			i();
+
+			idBuffer = 102;
+			wcscpy(buffer, L"ä ö ü");
+			i();
+
+			idBuffer = 103;
+			wcscpy(buffer, L"abcdefgh  ");
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			SqlWCharArray charCol(colName, 128 + 1);
+			charCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ(L"HelloWorld", charCol.GetWString());
+
+			f(102);
+			EXPECT_EQ(L"ä ö ü", boost::trim_right_copy(charCol.GetWString()));
+
+			f(103);
+			// It seems like MySql always trims whitespaces - even if we've set them explicitly
+			if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+			{
+				EXPECT_EQ(L"abcdefgh", charCol.GetWString());
+			}
+			else
+			{
+				EXPECT_EQ(L"abcdefgh  ", charCol.GetWString());
+			}
+
+			f(100);
+			EXPECT_TRUE(charCol.IsNull());
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, WriteVarcharValue)
+	{
+		TableId tableId = TableId::CHARTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tvarchar");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQLCHAR buffer[128 + 1];
+			SqlCPointerBuffer varcharCol(colName, SQL_CHAR, (SQLPOINTER)buffer, SQL_C_CHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 128, 0);
+
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				varcharCol.SetSqlType(SQL_VARCHAR);
+				varcharCol.SetColumnSize(128);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			varcharCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			idBuffer = 101;
+			varcharCol.SetCb(SQL_NTS);
+			strcpy((char*)buffer, "Hello World");
+			i();
+
+			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
+			{
+				// MySql fails here, with SQLSTATE HY000
+				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
+				idBuffer = 102;
+				strcpy((char*)buffer, "ä ö ü");
+				i();
+			}
+
+			idBuffer = 103;
+			strcpy((char*)buffer, "   ");
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			SqlCharArray varcharCol(colName, 128 + 1);
+			varcharCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ("Hello World", varcharCol.GetString());
+
+			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
+			{
+				f(102);
+				EXPECT_EQ("ä ö ü", varcharCol.GetString());
+			}
+
+			f(103);
+			EXPECT_EQ("   ", varcharCol.GetString());
+
+			f(100);
+			EXPECT_TRUE(varcharCol.IsNull());
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, WriteWVarcharValue)
+	{
+		TableId tableId = TableId::CHARTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tvarchar");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQLWCHAR buffer[128 + 1];
+			SqlCPointerBuffer varcharCol(colName, SQL_WCHAR, (SQLPOINTER)buffer, SQL_C_WCHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 128, 0);
+
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				varcharCol.SetSqlType(SQL_VARCHAR);
+				varcharCol.SetColumnSize(128);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			varcharCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			idBuffer = 101;
+			varcharCol.SetCb(SQL_NTS);
+			wcscpy(buffer, L"Hello World");
+			i();
+
+			idBuffer = 102;
+			wcscpy(buffer, L"ä ö ü");
+			i();
+
+			idBuffer = 103;
+			wcscpy(buffer, L"   ");
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			SqlWCharArray varcharCol(colName, 128 + 1);
+			varcharCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
+
+			f(101);
+			EXPECT_EQ(L"Hello World", varcharCol.GetWString());
+
+			f(102);
+			EXPECT_EQ(L"ä ö ü", varcharCol.GetWString());
+
+			f(103);
+			EXPECT_EQ(L"   ", varcharCol.GetWString());
+
+			f(100);
+			EXPECT_TRUE(varcharCol.IsNull());
+		}
+	}
+
 } //namespace exodbc
