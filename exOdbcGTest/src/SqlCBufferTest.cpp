@@ -3333,4 +3333,415 @@ namespace exodbc
 		}
 	}
 
+
+	TEST_F(SqlCPointerTest, WriteDateValue)
+	{
+		TableId tableId = TableId::DATETYPES_TMP;
+
+		wstring colName = ToDbCase(L"tdate");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQL_DATE_STRUCT buffer;
+			SqlCPointerBuffer date(colName, SQL_DATE, (SQLPOINTER)&buffer, SQL_C_TYPE_DATE, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				date.SetSqlType(SQL_TYPE_DATE);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			date.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			buffer.day = 26;
+			buffer.month = 01;
+			buffer.year = 1983;
+
+			idBuffer = 101;
+			date.SetCb(sizeof(buffer));
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlTypeDateStructBuffer date(colName);
+			date.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			const SQL_DATE_STRUCT& d = date.GetValue();
+			EXPECT_EQ(26, d.day);
+			EXPECT_EQ(1, d.month);
+			EXPECT_EQ(1983, d.year);
+
+			f(100);
+			EXPECT_TRUE(date.IsNull());
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, WriteTimeValue)
+	{
+		TableId tableId = TableId::DATETYPES_TMP;
+
+		wstring colName = ToDbCase(L"ttime");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQL_TIME_STRUCT buffer;
+			SqlCPointerBuffer time(colName, SQL_TIME, (SQLPOINTER)&buffer, SQL_C_TYPE_TIME, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				time.SetSqlType(SQL_TYPE_TIME);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			time.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			buffer.hour = 15;
+			buffer.minute = 22;
+			buffer.second = 45;
+			time.SetCb(sizeof(buffer));
+			idBuffer = 101;
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlTypeTimeStructBuffer time(colName);
+			time.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			const SQL_TIME_STRUCT& t = time.GetValue();
+			EXPECT_EQ(15, t.hour);
+			EXPECT_EQ(22, t.minute);
+			EXPECT_EQ(45, t.second);
+
+			f(100);
+			EXPECT_TRUE(time.IsNull());
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, WriteTimestampValue)
+	{
+		TableId tableId = TableId::DATETYPES_TMP;
+
+		wstring colName = ToDbCase(L"ttimestamp");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// test without any fractions
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQL_TIMESTAMP_STRUCT buffer;
+			SqlCPointerBuffer tsCol(colName, SQL_TIMESTAMP, (SQLPOINTER)&buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				tsCol.SetSqlType(SQL_TYPE_TIMESTAMP);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			tsCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			buffer.day = 9;
+			buffer.month = 02;
+			buffer.year = 1982;
+			buffer.hour = 23;
+			buffer.minute = 59;
+			buffer.second = 59;
+			buffer.fraction = 0;
+			tsCol.SetCb(sizeof(buffer));
+			idBuffer = 101;
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// and test with fractions
+			SQLUINTEGER fraction = 0;
+			SQLSMALLINT decimalDigits = 0;
+			if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+			{
+				// SQL-Server has a max precision of 3 for the fractions
+				fraction = 123000000;
+			}
+			if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+			{
+				// DB2 has a max precision of 6 for the fraction
+				fraction = 123456000;
+			}
+
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQL_TIMESTAMP_STRUCT buffer;
+			SqlCPointerBuffer tsCol(colName, SQL_TIMESTAMP, (SQLPOINTER)&buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+
+			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
+			if (!queryParameterInfo)
+			{
+				// Access does not implement SqlDescribeParam
+				idCol.SetSqlType(SQL_INTEGER);
+				tsCol.SetSqlType(SQL_TYPE_TIMESTAMP);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
+			tsCol.BindParameter(2, m_pStmt, queryParameterInfo);
+
+			buffer.day = 9;
+			buffer.month = 02;
+			buffer.year = 1982;
+			buffer.hour = 23;
+			buffer.minute = 59;
+			buffer.second = 59;
+			buffer.fraction = fraction;
+			tsCol.SetCb(sizeof(buffer));
+			idBuffer = 102;
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			{
+				SqlTypeTimestampStructBuffer tsCol(colName);
+				tsCol.BindSelect(1, m_pStmt);
+				FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+				f(101);
+				const SQL_TIMESTAMP_STRUCT& ts = tsCol.GetValue();
+				EXPECT_EQ(9, ts.day);
+				EXPECT_EQ(2, ts.month);
+				EXPECT_EQ(1982, ts.year);
+				EXPECT_EQ(23, ts.hour);
+				EXPECT_EQ(59, ts.minute);
+				EXPECT_EQ(59, ts.second);
+				EXPECT_EQ(0, ts.fraction);
+
+				f(100);
+				EXPECT_TRUE(tsCol.IsNull());
+			}
+			{
+				// and test with fractions
+				SQLUINTEGER fraction = 0;
+				SQLSMALLINT decimalDigits = 0;
+				if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+				{
+					// SQL-Server has a max precision of 3 for the fractions
+					fraction = 123000000;
+					decimalDigits = 3;
+				}
+				if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+				{
+					// DB2 has a max precision of 6 for the fraction
+					fraction = 123456000;
+					decimalDigits = 6;
+				}
+
+				SqlTypeTimestampStructBuffer tsCol(colName);
+				tsCol.SetDecimalDigits(decimalDigits);
+				tsCol.BindSelect(1, m_pStmt);
+				FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+				f(102);
+				const SQL_TIMESTAMP_STRUCT& ts = tsCol.GetValue();
+				EXPECT_EQ(9, ts.day);
+				EXPECT_EQ(2, ts.month);
+				EXPECT_EQ(1982, ts.year);
+				EXPECT_EQ(23, ts.hour);
+				EXPECT_EQ(59, ts.minute);
+				EXPECT_EQ(59, ts.second);
+				EXPECT_EQ(fraction, ts.fraction);
+			}
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, WriteDoubleValue)
+	{
+		TableId tableId = TableId::FLOATTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tdouble");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQLDOUBLE buffer;
+			SqlCPointerBuffer doubleCol(colName, SQL_DOUBLE, (SQLPOINTER)&buffer, SQL_C_DOUBLE, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				doubleCol.SetSqlType(SQL_DOUBLE);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			doubleCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			idBuffer = 101;
+			doubleCol.SetCb(sizeof(SQLDOUBLE));
+			buffer = 0.0;
+			i();
+
+			idBuffer = 102;
+			buffer = 3.141592;
+			i();
+
+			idBuffer = 103;
+			buffer = -3.141592;
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlDoubleBuffer doubleCol(colName);
+			doubleCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			EXPECT_EQ(0.0, doubleCol.GetValue());
+			f(102);
+			EXPECT_EQ(3.141592, doubleCol.GetValue());
+			f(103);
+			EXPECT_EQ(-3.141592, doubleCol.GetValue());
+			f(100);
+			EXPECT_TRUE(doubleCol.IsNull());
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, WriteRealValue)
+	{
+		// \todo: This is pure luck that the test works, rounding errors might occur already on inserting
+		TableId tableId = TableId::FLOATTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tfloat");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQLREAL buffer;
+			SqlCPointerBuffer realCol(colName, SQL_REAL, (SQLPOINTER)&buffer, SQL_C_FLOAT, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				realCol.SetSqlType(SQL_REAL);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			realCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			idBuffer = 101;
+			realCol.SetCb(sizeof(buffer));
+			buffer = 0.0;
+			i();
+
+			idBuffer = 102;
+			buffer = 3.141f;
+			i();
+
+			idBuffer = 103;
+			buffer = -3.141f;
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlRealBuffer realCol(colName);
+			realCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			EXPECT_EQ(0.0, realCol.GetValue());
+			f(102);
+			EXPECT_EQ((int)(3.141 * 1e3), (int)(1e3 * realCol.GetValue()));
+			f(103);
+			EXPECT_EQ((int)(-3.141 * 1e3), (int)(1e3 * realCol.GetValue()));
+			f(100);
+			EXPECT_TRUE(realCol.IsNull());
+		}
+	}
 } //namespace exodbc
