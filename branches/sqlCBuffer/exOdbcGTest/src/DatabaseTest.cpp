@@ -68,7 +68,6 @@ namespace exodbc
 
 		EXPECT_TRUE(c1.HasConnectionHandle());
 		{
-			DontDebugBreak ddb;
 			LogLevelError lle;
 			EXPECT_THROW(c1.Init(m_pEnv), AssertionException);
 		}
@@ -435,7 +434,7 @@ namespace exodbc
 
 		SQLINTEGER count;
 		SQLLEN cb;
-		GetData(pDb->GetExecSqlHandle()->GetHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
+		GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
 		EXPECT_EQ(0, count);
 
 		// now insert again and commit
@@ -449,7 +448,7 @@ namespace exodbc
 		ret = SQLFetch(pDb->GetExecSqlHandle()->GetHandle());
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
-		GetData(pDb->GetExecSqlHandle()->GetHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
+		GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
 		EXPECT_EQ(1, count);
 
 
@@ -551,7 +550,7 @@ namespace exodbc
 
 		SQLINTEGER count;
 		SQLLEN cb;
-		GetData(pDb->GetExecSqlHandle()->GetHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
+		GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
 		EXPECT_EQ(0, count);
 	}
 

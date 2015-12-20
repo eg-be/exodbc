@@ -469,48 +469,46 @@ namespace exodbc
 		exASSERT(m_pHDbc);
 		exASSERT(m_pHDbc->IsAllocated());
 
-		SQLHDBC hdbc = m_pHDbc->GetHandle();
-
 		DatabaseInfo dbInf;
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::AccessibleTables);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::DatabaseName);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::DbmsName);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::DbmsVersion);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::DriverName);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::DriverOdbcVersion);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::DriverVersion);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::OdbcSupportIEF);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::OdbcVersion);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::OuterJoins);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::ProcedureSupport);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::SearchPatternEscape);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::WStringProperty::ServerName);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::AccessibleTables);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DatabaseName);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DbmsName);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DbmsVersion);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DriverName);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DriverOdbcVersion);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DriverVersion);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::OdbcSupportIEF);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::OdbcVersion);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::OuterJoins);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::ProcedureSupport);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::SearchPatternEscape);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::ServerName);
 
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::CursorCommitBehavior);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::CursorRollbackBehavior);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::MaxCatalogNameLen);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::MaxColumnNameLen);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::MaxConcurrentActivs);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::MaxConnections);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::MaxSchemaNameLen);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::MaxTableNameLen);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::NonNullableColumns);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::OdbcSagCliConformance);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::USmallIntProperty::TxnCapable);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::CursorCommitBehavior);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::CursorRollbackBehavior);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxCatalogNameLen);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxColumnNameLen);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxConcurrentActivs);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxConnections);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxSchemaNameLen);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxTableNameLen);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::NonNullableColumns);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::OdbcSagCliConformance);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::TxnCapable);
 
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::DefaultTxnIsolation);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::ScrollOptions);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::TxnIsolationOption);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::CursorSensitity);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::DynamicCursorAttributes1);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::ForwardOnlyCursorAttributes1);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::KeysetCursorAttributes1);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::StaticCursorAttributes1);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::KeysetCursorAttributes2);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::UIntProperty::StaticCursorAttributes2);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::DefaultTxnIsolation);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::ScrollOptions);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::TxnIsolationOption);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::CursorSensitity);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::DynamicCursorAttributes1);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::ForwardOnlyCursorAttributes1);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::KeysetCursorAttributes1);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::StaticCursorAttributes1);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::KeysetCursorAttributes2);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::StaticCursorAttributes2);
 
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::IntProperty::PositionedStatements);
-		dbInf.ReadAndStoryProperty(hdbc, DatabaseInfo::IntProperty::PosOperations);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::IntProperty::PositionedStatements);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::IntProperty::PosOperations);
 
 		return dbInf;
 	}
@@ -566,7 +564,7 @@ namespace exodbc
 		SQLLEN cb;
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)   // Table Information
 		{
-			GetData(m_pHStmt->GetHandle(), colNr, SQL_C_WCHAR, buffer.get(), charLen * sizeof(SQLWCHAR), &cb, NULL);
+			GetData(m_pHStmt, colNr, SQL_C_WCHAR, buffer.get(), charLen * sizeof(SQLWCHAR), &cb, NULL);
 			results.push_back(buffer.get());
 		}
 
@@ -610,12 +608,10 @@ namespace exodbc
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_pHStmt, true, true);
 
-		SQLHSTMT hstmt = m_pHStmt->GetHandle();
+		SQLRETURN ret = SQLGetTypeInfo(m_pHStmt->GetHandle(), SQL_ALL_TYPES);
+		THROW_IFN_SUCCEEDED(SQLGetTypeInfo, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
-		SQLRETURN ret = SQLGetTypeInfo(hstmt, SQL_ALL_TYPES);
-		THROW_IFN_SUCCEEDED(SQLGetTypeInfo, ret, SQL_HANDLE_STMT, hstmt);
-
-		ret = SQLFetch(hstmt);
+		ret = SQLFetch(m_pHStmt->GetHandle());
 		int count = 0;
 		SQLWCHAR typeName[DB_MAX_TYPE_NAME_LEN + 1];
 		SQLWCHAR literalPrefix[DB_MAX_LITERAL_PREFIX_LEN + 1];
@@ -633,36 +629,36 @@ namespace exodbc
 			SSqlTypeInfo info;
 			
 			cb = 0;
-			GetData(hstmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL);
+			GetData(m_pHStmt, 1, SQL_C_WCHAR, typeName, sizeof(typeName), &cb, NULL);
 			info.m_typeName = typeName;
 
-			GetData(hstmt, 2, SQL_C_SSHORT, &info.m_sqlType, sizeof(info.m_sqlType), &cb, NULL);
-			GetData(hstmt, 3, SQL_C_SLONG, &info.m_columnSize, sizeof(info.m_columnSize), &cb, &info.m_columnSizeIsNull);
-			GetData(hstmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.m_literalPrefixIsNull);
+			GetData(m_pHStmt, 2, SQL_C_SSHORT, &info.m_sqlType, sizeof(info.m_sqlType), &cb, NULL);
+			GetData(m_pHStmt, 3, SQL_C_SLONG, &info.m_columnSize, sizeof(info.m_columnSize), &cb, &info.m_columnSizeIsNull);
+			GetData(m_pHStmt, 4, SQL_C_WCHAR, literalPrefix, sizeof(literalPrefix), &cb, &info.m_literalPrefixIsNull);
 			info.m_literalPrefix = literalPrefix;
-			GetData(hstmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.m_literalSuffixIsNull);
+			GetData(m_pHStmt, 5, SQL_C_WCHAR, literalSuffix, sizeof(literalSuffix), &cb, &info.m_literalSuffixIsNull);
 			info.m_literalSuffix = literalSuffix;
-			GetData(hstmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.m_createParamsIsNull);
+			GetData(m_pHStmt, 6, SQL_C_WCHAR, createParams, sizeof(createParams), &cb, &info.m_createParamsIsNull);
 			info.m_createParams = createParams;
-			GetData(hstmt, 7, SQL_C_SSHORT, &info.m_nullable, sizeof(info.m_nullable), &cb, NULL);
-			GetData(hstmt, 8, SQL_C_SSHORT, &info.m_caseSensitive, sizeof(info.m_caseSensitive), &cb, NULL);
-			GetData(hstmt, 9, SQL_C_SSHORT, &info.m_searchable, sizeof(info.m_searchable), &cb, NULL);
-			GetData(hstmt, 10, SQL_C_SSHORT, &info.m_unsigned, sizeof(info.m_unsigned), &cb, &info.m_unsignedIsNull);
-			GetData(hstmt, 11, SQL_C_SSHORT, &info.m_fixedPrecisionScale, sizeof(info.m_fixedPrecisionScale), &cb, NULL);
-			GetData(hstmt, 12, SQL_C_SSHORT, &info.m_autoUniqueValue, sizeof(info.m_autoUniqueValue), &cb, &info.m_autoUniqueValueIsNull);
-			GetData(hstmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.m_localTypeNameIsNull);
+			GetData(m_pHStmt, 7, SQL_C_SSHORT, &info.m_nullable, sizeof(info.m_nullable), &cb, NULL);
+			GetData(m_pHStmt, 8, SQL_C_SSHORT, &info.m_caseSensitive, sizeof(info.m_caseSensitive), &cb, NULL);
+			GetData(m_pHStmt, 9, SQL_C_SSHORT, &info.m_searchable, sizeof(info.m_searchable), &cb, NULL);
+			GetData(m_pHStmt, 10, SQL_C_SSHORT, &info.m_unsigned, sizeof(info.m_unsigned), &cb, &info.m_unsignedIsNull);
+			GetData(m_pHStmt, 11, SQL_C_SSHORT, &info.m_fixedPrecisionScale, sizeof(info.m_fixedPrecisionScale), &cb, NULL);
+			GetData(m_pHStmt, 12, SQL_C_SSHORT, &info.m_autoUniqueValue, sizeof(info.m_autoUniqueValue), &cb, &info.m_autoUniqueValueIsNull);
+			GetData(m_pHStmt, 13, SQL_C_WCHAR, localTypeName, sizeof(localTypeName), &cb, &info.m_localTypeNameIsNull);
 			info.m_localTypeName = localTypeName;
-			GetData(hstmt, 14, SQL_C_SSHORT, &info.m_minimumScale, sizeof(info.m_minimumScale), &cb, &info.m_minimumScaleIsNull);
-			GetData(hstmt, 15, SQL_C_SSHORT, &info.m_maximumScale, sizeof(info.m_maximumScale), &cb, &info.m_maximumScaleIsNull);
-			GetData(hstmt, 16, SQL_C_SSHORT, &info.m_sqlDataType, sizeof(info.m_sqlDataType), &cb, NULL);
-			GetData(hstmt, 17, SQL_C_SSHORT, &info.m_sqlDateTimeSub, sizeof(info.m_sqlDateTimeSub), &cb, &info.m_sqlDateTimeSubIsNull);
-			GetData(hstmt, 18, SQL_C_SSHORT, &info.m_numPrecRadix, sizeof(info.m_numPrecRadix), &cb, &info.m_numPrecRadixIsNull);
-			GetData(hstmt, 19, SQL_C_SSHORT, &info.m_intervalPrecision, sizeof(info.m_intervalPrecision), &cb, &info.m_intervalPrecisionIsNull);
+			GetData(m_pHStmt, 14, SQL_C_SSHORT, &info.m_minimumScale, sizeof(info.m_minimumScale), &cb, &info.m_minimumScaleIsNull);
+			GetData(m_pHStmt, 15, SQL_C_SSHORT, &info.m_maximumScale, sizeof(info.m_maximumScale), &cb, &info.m_maximumScaleIsNull);
+			GetData(m_pHStmt, 16, SQL_C_SSHORT, &info.m_sqlDataType, sizeof(info.m_sqlDataType), &cb, NULL);
+			GetData(m_pHStmt, 17, SQL_C_SSHORT, &info.m_sqlDateTimeSub, sizeof(info.m_sqlDateTimeSub), &cb, &info.m_sqlDateTimeSubIsNull);
+			GetData(m_pHStmt, 18, SQL_C_SSHORT, &info.m_numPrecRadix, sizeof(info.m_numPrecRadix), &cb, &info.m_numPrecRadixIsNull);
+			GetData(m_pHStmt, 19, SQL_C_SSHORT, &info.m_intervalPrecision, sizeof(info.m_intervalPrecision), &cb, &info.m_intervalPrecisionIsNull);
 
 			types.push_back(info);
 
 			count++;
-			ret = SQLFetch(hstmt);
+			ret = SQLFetch(m_pHStmt->GetHandle());
 		}
 		THROW_IFN_NO_DATA(SQLFetch, ret);
 
@@ -777,11 +773,11 @@ namespace exodbc
 			buffTableRemarks[0] = 0;
 
 			SQLLEN cb;
-			GetData(m_pHStmt->GetHandle(), 1, SQL_C_WCHAR, buffCatalog.get(), m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &isCatalogNull);
-			GetData(m_pHStmt->GetHandle(), 2, SQL_C_WCHAR, buffSchema.get(), m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &isSchemaNull);
-			GetData(m_pHStmt->GetHandle(), 3, SQL_C_WCHAR, buffTableName.get(), m_dbInf.GetMaxTableNameLen() * sizeof(SQLWCHAR), &cb, NULL);
-			GetData(m_pHStmt->GetHandle(), 4, SQL_C_WCHAR, buffTableType.get(), DB_MAX_TABLE_TYPE_LEN * sizeof(SQLWCHAR), &cb, NULL);
-			GetData(m_pHStmt->GetHandle(), 5, SQL_C_WCHAR, buffTableRemarks.get(), DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLWCHAR), &cb, NULL);
+			GetData(m_pHStmt, 1, SQL_C_WCHAR, buffCatalog.get(), m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLWCHAR), &cb, &isCatalogNull);
+			GetData(m_pHStmt, 2, SQL_C_WCHAR, buffSchema.get(), m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLWCHAR), &cb, &isSchemaNull);
+			GetData(m_pHStmt, 3, SQL_C_WCHAR, buffTableName.get(), m_dbInf.GetMaxTableNameLen() * sizeof(SQLWCHAR), &cb, NULL);
+			GetData(m_pHStmt, 4, SQL_C_WCHAR, buffTableType.get(), DB_MAX_TABLE_TYPE_LEN * sizeof(SQLWCHAR), &cb, NULL);
+			GetData(m_pHStmt, 5, SQL_C_WCHAR, buffTableRemarks.get(), DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLWCHAR), &cb, NULL);
 
 			TableInfo table(buffTableName.get(), buffTableType.get(), buffTableRemarks.get(), buffCatalog.get(), buffSchema.get(), isCatalogNull, isSchemaNull, GetDbms());
 			tables.push_back(table);
@@ -862,12 +858,12 @@ namespace exodbc
 			std::wstring catalogName, schemaName, tableName, columnName, keyName;
 			bool isCatalogNull, isSchemaNull, isKeyNameNull;
 			SQLSMALLINT keySequence;
-			GetData(m_pHStmt->GetHandle(), 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
-			GetData(m_pHStmt->GetHandle(), 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
-			GetData(m_pHStmt->GetHandle(), 3, m_dbInf.GetMaxTableNameLen(), tableName);
-			GetData(m_pHStmt->GetHandle(), 4, m_dbInf.GetMaxColumnNameLen(), columnName);
-			GetData(m_pHStmt->GetHandle(), 5, SQL_C_SHORT, &keySequence, sizeof(keySequence), &cb, NULL);
-			GetData(m_pHStmt->GetHandle(), 6, DB_MAX_PRIMARY_KEY_NAME_LEN, keyName, &isKeyNameNull);
+			GetData(m_pHStmt, 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
+			GetData(m_pHStmt, 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
+			GetData(m_pHStmt, 3, m_dbInf.GetMaxTableNameLen(), tableName);
+			GetData(m_pHStmt, 4, m_dbInf.GetMaxColumnNameLen(), columnName);
+			GetData(m_pHStmt, 5, SQL_C_SHORT, &keySequence, sizeof(keySequence), &cb, NULL);
+			GetData(m_pHStmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, keyName, &isKeyNameNull);
 			TablePrimaryKeyInfo pk(catalogName, schemaName, tableName, columnName, keySequence, keyName, isCatalogNull, isSchemaNull, isKeyNameNull);
 			primaryKeys.push_back(pk);
 		}
@@ -920,13 +916,13 @@ namespace exodbc
 		{
 
 			STablePrivilegesInfo priv;
-			GetData(m_pHStmt->GetHandle(), 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
-			GetData(m_pHStmt->GetHandle(), 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
-			GetData(m_pHStmt->GetHandle(), 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
-			GetData(m_pHStmt->GetHandle(), 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);
-			GetData(m_pHStmt->GetHandle(), 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
-			GetData(m_pHStmt->GetHandle(), 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
-			GetData(m_pHStmt->GetHandle(), 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
+			GetData(m_pHStmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
+			GetData(m_pHStmt, 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
+			GetData(m_pHStmt, 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
+			GetData(m_pHStmt, 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);
+			GetData(m_pHStmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
+			GetData(m_pHStmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
+			GetData(m_pHStmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
 
 			privileges.push_back(priv);
 		}
@@ -992,24 +988,24 @@ namespace exodbc
 			// Fetch data from columns
 
 			SQLLEN cb;
-			GetData(m_pHStmt->GetHandle(), 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
-			GetData(m_pHStmt->GetHandle(), 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
-			GetData(m_pHStmt->GetHandle(), 3, m_dbInf.GetMaxTableNameLen(), tableName);
-			GetData(m_pHStmt->GetHandle(), 4, m_dbInf.GetMaxColumnNameLen(), columnName);
-			GetData(m_pHStmt->GetHandle(), 5, SQL_C_SSHORT, &sqlType, sizeof(sqlType), &cb, NULL);
-			GetData(m_pHStmt->GetHandle(), 6, DB_MAX_TYPE_NAME_LEN, typeName);
-			GetData(m_pHStmt->GetHandle(), 7, SQL_C_SLONG, &columnSize, sizeof(columnSize), &cb, &isColumnSizeNull);
-			GetData(m_pHStmt->GetHandle(), 8, SQL_C_SLONG, &bufferSize, sizeof(bufferSize), &cb, &isBufferSizeNull);
-			GetData(m_pHStmt->GetHandle(), 9, SQL_C_SSHORT, &decimalDigits, sizeof(decimalDigits), &cb, &isDecimalDigitsNull);
-			GetData(m_pHStmt->GetHandle(), 10, SQL_C_SSHORT, &numPrecRadix, sizeof(numPrecRadix), &cb, &isNumPrecRadixNull);
-			GetData(m_pHStmt->GetHandle(), 11, SQL_C_SSHORT, &nullable, sizeof(nullable), &cb, NULL);
-			GetData(m_pHStmt->GetHandle(), 12, DB_MAX_COLUMN_REMARKS_LEN, remarks, &isRemarksNull);
-			GetData(m_pHStmt->GetHandle(), 13, DB_MAX_COLUMN_DEFAULT_LEN, defaultValue, &isDefaultValueNull);
-			GetData(m_pHStmt->GetHandle(), 14, SQL_C_SSHORT, &sqlDataType, sizeof(sqlDataType), &cb, NULL);
-			GetData(m_pHStmt->GetHandle(), 15, SQL_C_SSHORT, &sqlDatetimeSub, sizeof(sqlDatetimeSub), &cb, &isSqlDatetimeSubNull);
-			GetData(m_pHStmt->GetHandle(), 16, SQL_C_SLONG, &charOctetLength, sizeof(charOctetLength), &cb, &isCharOctetLengthNull);
-			GetData(m_pHStmt->GetHandle(), 17, SQL_C_SLONG, &ordinalPosition, sizeof(ordinalPosition), &cb, NULL);
-			GetData(m_pHStmt->GetHandle(), 18, DB_MAX_YES_NO_LEN, isNullable, &isIsNullableNull);
+			GetData(m_pHStmt, 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
+			GetData(m_pHStmt, 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
+			GetData(m_pHStmt, 3, m_dbInf.GetMaxTableNameLen(), tableName);
+			GetData(m_pHStmt, 4, m_dbInf.GetMaxColumnNameLen(), columnName);
+			GetData(m_pHStmt, 5, SQL_C_SSHORT, &sqlType, sizeof(sqlType), &cb, NULL);
+			GetData(m_pHStmt, 6, DB_MAX_TYPE_NAME_LEN, typeName);
+			GetData(m_pHStmt, 7, SQL_C_SLONG, &columnSize, sizeof(columnSize), &cb, &isColumnSizeNull);
+			GetData(m_pHStmt, 8, SQL_C_SLONG, &bufferSize, sizeof(bufferSize), &cb, &isBufferSizeNull);
+			GetData(m_pHStmt, 9, SQL_C_SSHORT, &decimalDigits, sizeof(decimalDigits), &cb, &isDecimalDigitsNull);
+			GetData(m_pHStmt, 10, SQL_C_SSHORT, &numPrecRadix, sizeof(numPrecRadix), &cb, &isNumPrecRadixNull);
+			GetData(m_pHStmt, 11, SQL_C_SSHORT, &nullable, sizeof(nullable), &cb, NULL);
+			GetData(m_pHStmt, 12, DB_MAX_COLUMN_REMARKS_LEN, remarks, &isRemarksNull);
+			GetData(m_pHStmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, defaultValue, &isDefaultValueNull);
+			GetData(m_pHStmt, 14, SQL_C_SSHORT, &sqlDataType, sizeof(sqlDataType), &cb, NULL);
+			GetData(m_pHStmt, 15, SQL_C_SSHORT, &sqlDatetimeSub, sizeof(sqlDatetimeSub), &cb, &isSqlDatetimeSubNull);
+			GetData(m_pHStmt, 16, SQL_C_SLONG, &charOctetLength, sizeof(charOctetLength), &cb, &isCharOctetLengthNull);
+			GetData(m_pHStmt, 17, SQL_C_SLONG, &ordinalPosition, sizeof(ordinalPosition), &cb, NULL);
+			GetData(m_pHStmt, 18, DB_MAX_YES_NO_LEN, isNullable, &isIsNullableNull);
 
 			if (++m_lastIndex != ordinalPosition)
 			{
