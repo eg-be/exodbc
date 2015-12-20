@@ -62,9 +62,21 @@ namespace exodbc
 	}
 
 
-	TEST_F(PreparedStatementTest, BindParameter)
+	TEST_F(PreparedStatementTest, SelectValues)
 	{
-		// Prepare to insert some ints
+		//wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		//tableName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		//wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		//wstring intColName = ToDbCase(L"tint");
+		//wstring sqlstmt = boost::str(boost::wformat(L"SELECT %s, %s FROM %s WHERE %s = 4"))
+		//wstringstream ws;
+		//ws << L"SELECT " << idColName << L", " << intColName << L" FROM " << tableName << L" WHERE "
+	}
+
+
+	TEST_F(PreparedStatementTest, InsertValues)
+	{
+		// Prepare to insert some values
 		// Determine query names from a Table
 		ClearTmpTable(TableId::INTEGERTYPES_TMP);
 		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
@@ -107,6 +119,13 @@ namespace exodbc
 			ps.Execute();
 		}
 		m_pDb->CommitTrans();
+
+		// try to read 10 records now
+		iTable.Open();
+		EXPECT_EQ(10, iTable.Count());
 	}
+
+
+
 
 } // namespace exodbc

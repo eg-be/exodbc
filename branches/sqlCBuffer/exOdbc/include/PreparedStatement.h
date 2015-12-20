@@ -82,9 +82,23 @@ namespace exodbc
 		PreparedStatement(ConstSqlDbcHandlePtr pHDbc, bool useSqlDescribeParam, const std::wstring& sqlstmt);		
 
 
+		/*!
+		* \brief	Bind a SqlCBufferVariant to a parameter marker ('?').
+		*/
 		void BindParameter(SqlCBufferVariant column, SQLUSMALLINT columnNr);
 
 
+		/*!
+		* \brief	Bind a SqlCBufferVariant to a column of a result set (for
+		*			example a SELECT query).
+		*/
+		void BindColumn(SqlCBufferVariant column, SQLUSMALLINT columnNr);
+
+
+
+		/*!
+		* Execute PreparedStatement using the bound Parameters / Columns
+		*/
 		void Execute();
 
 

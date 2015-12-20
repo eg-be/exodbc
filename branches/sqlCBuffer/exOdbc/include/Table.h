@@ -366,7 +366,14 @@ namespace exodbc
 		* \return	count The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
 		* \throw	Exception If failed.
 		*/
-		SQLUBIGINT		Count(const std::wstring& whereStatement);
+		SQLUBIGINT	Count(const std::wstring& whereStatement);
+
+
+		/*!
+		* \brief	Calls Count() with no whereStatement.
+		* \See		Count(const std::wstring& whereStatement);
+		*/
+		SQLUBIGINT	Count() { return Count(L""); };
 
 
 		/*!
