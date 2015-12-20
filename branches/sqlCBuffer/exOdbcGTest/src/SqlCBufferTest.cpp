@@ -1260,7 +1260,6 @@ namespace exodbc
 			EXPECT_EQ(56, ts.second);
 			EXPECT_EQ(fraction, ts.fraction);
 		}
-
 	}
 
 
@@ -2175,7 +2174,7 @@ namespace exodbc
 	}
 
 
-	TEST_F(SqlCPointerTest, ReadBinaryValue)
+	TEST_F(SqlCPointerTest, ReadBlobValue)
 	{
 		// Set up the values we expect to read:
 
@@ -2371,5 +2370,224 @@ namespace exodbc
 		}
 	}
 
+
+	TEST_F(SqlCPointerTest, ReadDateValues)
+	{
+		wstring colName = L"tdate";
+
+		SQL_DATE_STRUCT buffer;
+		SqlCPointerBuffer date(colName, SQL_DATE, &buffer, SQL_C_TYPE_DATE, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
+		date.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
+
+		f(1);
+		EXPECT_EQ(1983, buffer.year);
+		EXPECT_EQ(1, buffer.month);
+		EXPECT_EQ(26, buffer.day);
+
+		f(2);
+		EXPECT_TRUE(date.IsNull());
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadTimeValue)
+	{
+		wstring colName = L"ttime";
+		SQL_TIME_STRUCT buffer;
+		SqlCPointerBuffer time(colName, SQL_TIME, &buffer, SQL_C_TYPE_TIME, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
+		time.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
+
+		f(1);
+		EXPECT_EQ(13, buffer.hour);
+		EXPECT_EQ(55, buffer.minute);
+		EXPECT_EQ(56, buffer.second);
+
+		f(2);
+		EXPECT_TRUE(time.IsNull());
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadTimestampValue)
+	{
+		wstring colName = L"ttimestamp";
+		{
+			// Test without any fraction
+			SQL_TIMESTAMP_STRUCT buffer;
+			SqlCPointerBuffer tsCol(colName, SQL_TIMESTAMP, &buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
+			tsCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
+
+			f(1);
+			EXPECT_EQ(1983, buffer.year);
+			EXPECT_EQ(1, buffer.month);
+			EXPECT_EQ(26, buffer.day);
+			EXPECT_EQ(13, buffer.hour);
+			EXPECT_EQ(55, buffer.minute);
+			EXPECT_EQ(56, buffer.second);
+			EXPECT_EQ(0, buffer.fraction);
+
+			f(3);
+			EXPECT_TRUE(tsCol.IsNull());
+		}
+
+		{
+			// Test with fractions, database specific precision
+			SQLUINTEGER fraction = 0;
+			SQLSMALLINT decimalDigits = 0;
+			if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+			{
+				// SQL-Server has a max precision of 3 for the fractions
+				fraction = 123000000;
+				decimalDigits = 3;
+			}
+			if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+			{
+				// DB2 has a max precision of 6 for the fraction
+				fraction = 123456000;
+				decimalDigits = 6;
+			}
+
+			SQL_TIMESTAMP_STRUCT buffer;
+			SqlCPointerBuffer tsCol(colName, SQL_TIMESTAMP, &buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NONE, 0, decimalDigits);
+			tsCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
+
+			f(2);
+			EXPECT_EQ(1983, buffer.year);
+			EXPECT_EQ(1, buffer.month);
+			EXPECT_EQ(26, buffer.day);
+			EXPECT_EQ(13, buffer.hour);
+			EXPECT_EQ(55, buffer.minute);
+			EXPECT_EQ(56, buffer.second);
+			EXPECT_EQ(fraction, buffer.fraction);
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadDoubleValue)
+	{
+		wstring colName = L"tdouble";
+		SQLDOUBLE buffer;
+		SqlCPointerBuffer doubleCol(colName, SQL_DOUBLE, &buffer, SQL_C_DOUBLE, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
+		doubleCol.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::FLOATTYPES, colName);
+
+		f(4);
+		EXPECT_EQ((0.0), buffer);
+		f(5);
+		EXPECT_EQ(3.141592, buffer);
+		f(6);
+		EXPECT_EQ(-3.141592, buffer);
+
+		f(3);
+		EXPECT_TRUE(doubleCol.IsNull());
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadRealValue)
+	{
+		wstring colName = L"tfloat";
+		SQLREAL buffer;
+		SqlCPointerBuffer realCol(colName, SQL_REAL, &buffer, SQL_C_FLOAT, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
+		realCol.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::FLOATTYPES, colName);
+
+		f(1);
+		EXPECT_EQ((0.0), buffer);
+		f(2);
+		EXPECT_EQ((int)(3.141 * 1e3), (int)(1e3 * buffer));
+		f(3);
+		EXPECT_EQ((int)(-3.141 * 1e3), (int)(1e3 * buffer));
+
+		f(4);
+		EXPECT_TRUE(realCol.IsNull());
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadNumeric_18_0_Value)
+	{
+		wstring colName = L"tdecimal_18_0";
+		SQL_NUMERIC_STRUCT buffer;
+		SqlCPointerBuffer num18_0_Col(colName, SQL_NUMERIC, &buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NONE, 18, 0);
+		num18_0_Col.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
+
+		f(1);
+		SQLBIGINT* pVal = (SQLBIGINT*)&buffer.val;
+		EXPECT_EQ(18, buffer.precision);
+		EXPECT_EQ(0, buffer.scale);
+		EXPECT_EQ(1, buffer.sign);
+		EXPECT_EQ(0, *pVal);
+
+		f(2);
+		EXPECT_EQ(18, buffer.precision);
+		EXPECT_EQ(0, buffer.scale);
+		EXPECT_EQ(1, buffer.sign);
+		EXPECT_EQ(123456789012345678, *pVal);
+
+		f(3);
+		EXPECT_EQ(18, buffer.precision);
+		EXPECT_EQ(0, buffer.scale);
+		EXPECT_EQ(0, buffer.sign);
+		EXPECT_EQ(123456789012345678, *pVal);
+
+		f(4);
+		EXPECT_TRUE(num18_0_Col.IsNull());
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadNumeric_18_10_Value)
+	{
+		wstring colName = L"tdecimal_18_10";
+		SQL_NUMERIC_STRUCT buffer;
+		SqlCPointerBuffer num18_10_Col(colName, SQL_NUMERIC, &buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NONE, 18, 10);
+		num18_10_Col.SetColumnSize(18);
+		num18_10_Col.SetDecimalDigits(10);
+		num18_10_Col.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
+
+		f(4);
+		SQLBIGINT* pVal = (SQLBIGINT*)&buffer.val;
+		EXPECT_EQ(18, buffer.precision);
+		EXPECT_EQ(10, buffer.scale);
+		EXPECT_EQ(1, buffer.sign);
+		EXPECT_EQ(0, *pVal);
+
+		f(5);
+		EXPECT_EQ(18, buffer.precision);
+		EXPECT_EQ(10, buffer.scale);
+		EXPECT_EQ(1, buffer.sign);
+		EXPECT_EQ(123456789012345678, *pVal);
+
+		f(6);
+		EXPECT_EQ(18, buffer.precision);
+		EXPECT_EQ(10, buffer.scale);
+		EXPECT_EQ(0, buffer.sign);
+		EXPECT_EQ(123456789012345678, *pVal);
+
+		f(1);
+		EXPECT_TRUE(num18_10_Col.IsNull());
+	}
+
+
+	TEST_F(SqlCPointerTest, ReadNumeric_5_3_Value)
+	{
+		wstring colName = L"tdecimal_5_3";
+		SQL_NUMERIC_STRUCT buffer;
+		SqlCPointerBuffer num5_3_Col(colName, SQL_NUMERIC, &buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NONE, 5, 3);
+		num5_3_Col.BindSelect(1, m_pStmt);
+		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
+
+		f(2);
+		SQLBIGINT* pVal = (SQLBIGINT*)&buffer.val;
+		EXPECT_EQ(5, buffer.precision);
+		EXPECT_EQ(3, buffer.scale);
+		EXPECT_EQ(1, buffer.sign);
+		EXPECT_EQ(12345, *pVal);
+
+		f(1);
+		EXPECT_TRUE(num5_3_Col.IsNull());
+	}
 
 } //namespace exodbc
