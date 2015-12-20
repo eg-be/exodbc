@@ -202,6 +202,7 @@
     <ClInclude Include="src\EnumFlagsTest.h" />
     <ClInclude Include="src\exOdbcGTestHelpers.h" />
     <ClInclude Include="src\ManualTestTables.h" />
+    <ClInclude Include="src\PreparedStatementTest.h" />
     <ClInclude Include="src\SqlCBufferTest.h" />
     <ClInclude Include="src\SqlHandleTest.h" />
     <ClInclude Include="src\SqlStmtCloserTest.h" />
@@ -222,6 +223,7 @@
     <ClCompile Include="src\EnumFlagsTest.cpp" />
     <ClCompile Include="src\exOdbcGTestHelpers.cpp" />
     <ClCompile Include="src\ManualTestTables.cpp" />
+    <ClCompile Include="src\PreparedStatementTest.cpp" />
     <ClCompile Include="src\SqlCBufferTest.cpp" />
     <ClCompile Include="src\SqlHandleTest.cpp" />
     <ClCompile Include="src\SqlStmtCloserTest.cpp" />

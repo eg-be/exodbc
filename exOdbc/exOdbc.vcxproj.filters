@@ -79,6 +79,9 @@
     <ClInclude Include="include\PreparedStatement.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\SqlCBufferVisitors.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -127,6 +130,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\PreparedStatement.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SqlCBufferVisitors.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

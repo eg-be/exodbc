@@ -167,13 +167,10 @@ namespace exodbc
 				ColumnBoundHandle bindInfo = *it;
 				try
 				{
+					// Unbind if still bound
 					if (bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated())
 					{
 						it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
-					}
-					else
-					{
-						LOG_ERROR(L"Unexpected ColumnBoundHandle bindInfo: Either m_pHStmt not set, or m_pHStmt not allocated.");
 					}
 				}
 				catch (const Exception& ex)
@@ -190,9 +187,11 @@ namespace exodbc
 				ColumnBoundHandle bindInfo = *itParams;
 				try
 				{
-					exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
-					SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
-					THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+					if(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated())
+					{
+						SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
+						THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+					}
 					itParams = m_boundParams.erase(itParams);
 				}
 				catch (const Exception& ex)
@@ -468,10 +467,6 @@ namespace exodbc
 					{
 						it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
 					}
-					else
-					{
-						LOG_ERROR(L"Unexpected ColumnBoundHandle bindInfo: Either m_pHStmt not set, or m_pHStmt not allocated.");
-					}
 				}
 				catch (const Exception& ex)
 				{
@@ -485,9 +480,11 @@ namespace exodbc
 					try
 					{
 						ColumnBoundHandle bindInfo = *itParams;
-						exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
-						SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
-						THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+						if(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated())
+						{
+							SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
+							THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+						}
 						itParams = m_boundParams.erase(itParams);
 					}
 					catch (const Exception& ex)
@@ -686,10 +683,6 @@ namespace exodbc
 					{
 						it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
 					}
-					else
-					{
-						LOG_ERROR(L"Unexpected ColumnBoundHandle bindInfo: Either m_pHStmt not set, or m_pHStmt not allocated.");
-					}
 				}
 				catch (const Exception& ex)
 				{
@@ -704,9 +697,11 @@ namespace exodbc
 				ColumnBoundHandle bindInfo = *itParams;
 				try
 				{
-					exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
-					SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
-					THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+					if (bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated())
+					{
+						SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
+						THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
+					}
 					itParams = m_boundParams.erase(itParams);
 				}
 				catch (const Exception& ex)
@@ -878,61 +873,6 @@ namespace exodbc
 	> SqlCBufferVariant;
 	
 	typedef std::map<SQLUSMALLINT, SqlCBufferVariant> SqlCBufferVariantMap;
-
-
-	class BindSelectVisitor
-		: public boost::static_visitor<void>
-	{
-	public:
-		BindSelectVisitor() = delete;
-		BindSelectVisitor(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
-			: m_columnNr(columnNr)
-			, m_pHStmt(pHStmt)
-		{};
-
-		template<typename T>
-		void operator()(T& t) const
-		{
-			t.BindSelect(m_columnNr, m_pHStmt);
-		}
-	private:
-		SQLUSMALLINT m_columnNr;
-		ConstSqlStmtHandlePtr m_pHStmt;
-	};
-
-	class UnbindVisitor
-		: public boost::static_visitor<void>
-	{
-	public:
-
-		template<typename T>
-		void operator()(T& t) const
-		{
-			t.Unbind();
-		}
-	};
-
-	class QueryNameVisitor
-		: public boost::static_visitor<const std::wstring&>
-	{
-	public:
-		template<typename T>
-		const std::wstring& operator()(T& t) const
-		{
-			return t.GetQueryName();
-		}
-	};
-
-	class SqlCTypeVisitor
-		: public boost::static_visitor<SQLSMALLINT>
-	{
-	public:
-		template<typename T>
-		const SQLSMALLINT operator()(T& t) const
-		{
-			return t.GetSqlCType();
-		}
-	};
 
 	extern EXODBCAPI SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType, const std::wstring& queryName);
 	extern EXODBCAPI SqlCBufferVariant CreateArrayBuffer(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo);
