@@ -2869,7 +2869,6 @@ namespace exodbc
 
 			// and some non-null values
 			idBuffer = 101;
-			int p = sizeof(buffer);
 			biCol.SetCb(sizeof(buffer));
 			buffer = (-9223372036854775807 - 1);
 			i();
@@ -2893,6 +2892,128 @@ namespace exodbc
 			EXPECT_EQ(9223372036854775807, biCol.GetValue());
 			f(100);
 			EXPECT_TRUE(biCol.IsNull());
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, WriteLongValue)
+	{
+		TableId tableId = TableId::INTEGERTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tint");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQLINTEGER buffer = 0;
+			SqlCPointerBuffer longCol(colName, SQL_INTEGER, (SQLPOINTER)&buffer, SQL_C_SLONG, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+
+			// Prepare the id-col (required) and the col to insert
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				longCol.SetSqlType(SQL_INTEGER);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			longCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			idBuffer = 101;
+			longCol.SetCb(sizeof(buffer));
+			buffer = (-2147483647 - 1);
+			i();
+
+			idBuffer = 102;
+			buffer = 2147483647;
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlSLongBuffer longCol(colName);
+			longCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			EXPECT_EQ((-2147483647 - 1), longCol.GetValue());
+			f(102);
+			EXPECT_EQ(2147483647, longCol.GetValue());
+			f(100);
+			EXPECT_TRUE(longCol.IsNull());
+		}
+	}
+
+
+	TEST_F(SqlCPointerTest, WriteShortValue)
+	{
+		TableId tableId = TableId::INTEGERTYPES_TMP;
+
+		wstring colName = ToDbCase(L"tsmallint");
+		wstring idColName = GetIdColumnName(tableId);
+		ClearTmpTable(tableId);
+
+		{
+			// must close the statement before using it for reading. Else at least MySql fails.
+			StatementCloser closer(m_pStmt);
+
+			// Prepare the id-col (required) and the col to insert
+			SQLINTEGER idBuffer;
+			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SQLSMALLINT buffer = 0;
+			SqlCPointerBuffer shortCol(colName, SQL_SMALLINT, (SQLPOINTER)&buffer, SQL_C_SSHORT, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+
+			// Prepare the id-col (required) and the col to insert
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				idCol.SetSqlType(SQL_INTEGER);
+				shortCol.SetSqlType(SQL_INTEGER);
+			}
+			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			shortCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+
+			// insert the default null value
+			idBuffer = 100;
+			i();
+
+			// and some non-null values
+			idBuffer = 101;
+			shortCol.SetCb(sizeof(buffer));
+			buffer = -32768;
+			i();
+
+			idBuffer = 102;
+			buffer = 32767;
+			i();
+
+			m_pDb->CommitTrans();
+		}
+
+		{
+			// Read back just inserted values
+			SqlSShortBuffer shortCol(colName);
+			shortCol.BindSelect(1, m_pStmt);
+			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
+
+			f(101);
+			EXPECT_EQ(-32768, shortCol.GetValue());
+			f(102);
+			EXPECT_EQ(32767, shortCol.GetValue());
+			f(100);
+			EXPECT_TRUE(shortCol.IsNull());
 		}
 	}
 
