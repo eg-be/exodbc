@@ -533,8 +533,8 @@ namespace exodbc
 
 		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
 
-		std::wstring GetWString() const noexcept { return m_pBuffer->data(); };
-		std::string GetString() const noexcept { return (char*) m_pBuffer->data(); };
+		std::wstring GetWString() const { exASSERT(!IsNull()); return m_pBuffer->data(); };
+		std::string GetString() const { exASSERT(!IsNull()); return (char*)m_pBuffer->data(); };
 
 		void SetWString(const std::wstring& ws) { std::vector<SQLWCHAR> vec(ws.begin(), ws.end()); SetValue(vec, SQL_NTS); };
 		void SetString(const std::string& s) { std::vector<SQLCHAR> vec(s.begin(), s.end()); SetValue(vec, SQL_NTS); }
