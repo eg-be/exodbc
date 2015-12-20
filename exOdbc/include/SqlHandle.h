@@ -38,13 +38,28 @@ namespace exodbc
 	{
 	public:
 		/*!
-		* \brief	Constructs an SQL_NULL_HANDLE. Call Allocate() later to allocate the handle.
+		* \brief	Constructs an SQL_NULL_HANDLE. Call Allocate() or AllocateWithParent()
+		*			later to allocate the handle.
 		* \see		Allocate()
+		* \see		AllocateWithParent()
 		*/
 		SqlHandle()
 			: m_handle(SQL_NULL_HANDLE)
 			, m_pParentHandle(NULL)
 		{};
+
+
+		/*!
+		* \brief	Constructs a new handle using the passed handle as parent
+		*			by calling AllocateWithParent() uppon construction.
+		* \see		AllocateWithParent()
+		*/
+		SqlHandle(std::shared_ptr<const TPARENTSQLHANDLE> pParentHandle)
+			: m_handle(SQL_NULL_HANDLE)
+			, m_pParentHandle(NULL)
+		{
+			AllocateWithParent(pParentHandle);
+		}
 
 		SqlHandle(const SqlHandle& other) = delete;
 		SqlHandle& operator=(const SqlHandle& other) = delete;

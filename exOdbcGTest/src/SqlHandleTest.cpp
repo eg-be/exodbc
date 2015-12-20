@@ -73,6 +73,9 @@ namespace exodbc
 		// Fail without parent
 		SqlDbcHandle hDbc2;
 		EXPECT_THROW(hDbc2.Allocate(), AssertionException);
+
+		// Construct one using the parent constructor
+		EXPECT_NO_THROW(SqlDbcHandle hDbc2(env.GetSqlEnvHandle()));
 	}
 
 
@@ -94,6 +97,9 @@ namespace exodbc
 		// Fail without parent
 		SqlStmtHandle hStmt2;
 		EXPECT_THROW(hStmt2.Allocate(), AssertionException);
+
+		// Construct one using the parent constructor
+		EXPECT_NO_THROW(SqlStmtHandle hStmt2(pDb->GetSqlDbcHandle()));
 	}
 
 
