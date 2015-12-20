@@ -107,7 +107,7 @@ namespace exodbctest
 			prefix = L"exodbc.";
 		}
 
-		ToDbCase(prefix);
+		prefix = ToDbCase(prefix);
 		return prefix + name;
 	}
 
