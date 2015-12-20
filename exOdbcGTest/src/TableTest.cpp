@@ -905,9 +905,7 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Open());
 
 		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
 		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
-		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
 
 		// We expect some Record that is not the one with id 2 if we move forward three times
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
@@ -918,14 +916,11 @@ namespace exodbc
 
 		ASSERT_NE(2, idCol);
 
-
 		// now Select the first again using SelectFirst
 		// we must have the record with id 2
 		EXPECT_TRUE(iTable.SelectFirst());
 		EXPECT_EQ(2, idCol);
-		EXPECT_EQ(32767, shortCol);
 		EXPECT_TRUE(intCol.IsNull());
-		EXPECT_TRUE(bigIntCol.IsNull());
 	}
 
 
@@ -937,9 +932,7 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Open());
 
 		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
 		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
-		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
 
 		// We expect some Record that is not the one with id 2 if we move away from that one
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
@@ -953,9 +946,7 @@ namespace exodbc
 		// now Select the last record
 		EXPECT_TRUE(iTable.SelectLast());
 		EXPECT_EQ(7, idCol);
-		EXPECT_EQ(-13, shortCol);
 		EXPECT_EQ(26, intCol);
-		EXPECT_EQ(10502, bigIntCol);
 	}
 
 
@@ -967,18 +958,14 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Open());
 
 		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
 		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
-		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
 
 		// Move the 3rd record in the result-set. 
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
 		ASSERT_NO_THROW(iTable.Select(sqlWhere));
 		EXPECT_TRUE(iTable.SelectAbsolute(3));
 		EXPECT_EQ(4, idCol);
-		EXPECT_TRUE(shortCol.IsNull());
 		EXPECT_EQ(2147483647, intCol);
-		EXPECT_TRUE(bigIntCol.IsNull());
 
 		// Select something not in result set
 		EXPECT_FALSE(iTable.SelectAbsolute(20));
@@ -993,9 +980,7 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Open());
 
 		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
 		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
-		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
 
 		// We expect some Records
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
@@ -1003,9 +988,7 @@ namespace exodbc
 		// Note: For MySQL to be able to select relative, a record must be selected first. Else, SelectRelative will choose wrong offset
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_EQ(2, idCol);
-		EXPECT_EQ(32767, shortCol);
 		EXPECT_TRUE(intCol.IsNull());
-		EXPECT_TRUE(bigIntCol.IsNull());
 
 		// Move by one forward
 		EXPECT_TRUE(iTable.SelectRelative(1));
@@ -1018,9 +1001,7 @@ namespace exodbc
 		// And one back again, check complete record
 		EXPECT_TRUE(iTable.SelectRelative(-1));
 		EXPECT_EQ(3, idCol);
-		EXPECT_TRUE(shortCol.IsNull());
 		EXPECT_EQ((-2147483647 - 1), intCol);
-		EXPECT_TRUE(bigIntCol.IsNull());
 
 		// Select something not in result set
 		EXPECT_FALSE(iTable.SelectRelative(20));
@@ -1035,9 +1016,7 @@ namespace exodbc
 		ASSERT_NO_THROW(iTable.Open());
 
 		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSShortBuffer shortCol = iTable.GetColumn<SqlSShortBuffer>(1);
 		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
-		SqlSBigIntBuffer bigIntCol = iTable.GetColumn<SqlSBigIntBuffer>(3);
 		
 		// We expect some Records
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
@@ -1046,16 +1025,12 @@ namespace exodbc
 		EXPECT_EQ(2, idCol);
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_EQ(3, idCol);
-		EXPECT_TRUE(shortCol.IsNull());
 		EXPECT_EQ((-2147483647 - 1), intCol);
-		EXPECT_TRUE(bigIntCol.IsNull());
 
 		// now Select the prev record - we have the first again
 		EXPECT_TRUE(iTable.SelectPrev());
 		EXPECT_EQ(2, idCol);
-		EXPECT_EQ(32767, shortCol);
 		EXPECT_TRUE(intCol.IsNull());
-		EXPECT_TRUE(bigIntCol.IsNull());
 
 		// no more prev records available:
 		EXPECT_FALSE(iTable.SelectPrev());
