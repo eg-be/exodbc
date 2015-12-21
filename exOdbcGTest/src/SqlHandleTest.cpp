@@ -140,6 +140,10 @@ namespace exodbc
 		hEnv.ConnectFreedSignal([&](const SqlEnvHandle& h) -> void
 		{
 			signalCalled = true;
+			// it must be the same handle we have
+			EXPECT_EQ(hEnv, h);
+			// and must already be freed
+			EXPECT_FALSE(h.IsAllocated());
 		});
 		
 		hEnv.Free();
@@ -152,6 +156,42 @@ namespace exodbc
 			env2.Allocate();
 			env2.ConnectFreedSignal([&](const SqlEnvHandle& h) -> void
 			{
+				signalCalled2 = true;
+				EXPECT_EQ(env2, h);
+				EXPECT_FALSE(h.IsAllocated());
+			});
+			// do not free, just let it go out of scope
+		}
+		EXPECT_TRUE(signalCalled2);
+	}
+
+
+	TEST_F(SqlHandleTest, FreeHandleSignal)
+	{
+		SqlEnvHandle hEnv;
+		hEnv.Allocate();
+		bool signalCalled = false;
+		hEnv.ConnectFreeSignal([&](const SqlEnvHandle& h) -> void
+		{
+			// The handle must still be the same and allocated
+			EXPECT_EQ(hEnv, h);
+			EXPECT_TRUE(h.IsAllocated());
+			signalCalled = true;
+		});
+
+		hEnv.Free();
+		EXPECT_TRUE(signalCalled);
+
+		// If it goes out of scope it should be called to
+		bool signalCalled2 = false;
+		{
+			SqlEnvHandle env2;
+			env2.Allocate();
+			env2.ConnectFreeSignal([&](const SqlEnvHandle& h) -> void
+			{
+				// The handle must be the same and allocated
+				EXPECT_EQ(env2, h);
+				EXPECT_TRUE(h.IsAllocated());
 				signalCalled2 = true;
 			});
 			// do not free, just let it go out of scope
