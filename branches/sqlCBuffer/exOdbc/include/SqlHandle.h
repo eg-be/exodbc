@@ -41,6 +41,9 @@ namespace exodbc
 		typedef boost::signals2::signal<void(const SqlHandle&)> FreedSignal;
 		typedef typename FreedSignal::slot_type FreedSignalSlotType;
 
+		typedef boost::signals2::signal<void(const SqlHandle&)> FreeSignal;
+		typedef typename FreedSignal::slot_type FreeSignalSlotType;
+
 	public:
 		/*!
 		* \brief	Constructs an SQL_NULL_HANDLE. Call Allocate() or AllocateWithParent()
@@ -145,6 +148,9 @@ namespace exodbc
 		{
 			exASSERT(m_handle != SQL_NULL_HANDLE);
 
+			// Before freeing, trigger signal that we are going to be freed
+			m_freeSignal(*this);
+
 			// Returns only SQL_SUCCESS, SQL_ERROR, or SQL_INVALID_HANDLE.
 			SQLRETURN ret = SQLFreeHandle(tHandleType, m_handle);
 
@@ -171,7 +177,7 @@ namespace exodbc
 			m_handle = SQL_NULL_HANDLE;
 			m_pParentHandle.reset();
 
-			// trigger signal
+			// trigger freed signal
 			m_freedSignal(*this);
 		}
 
@@ -180,6 +186,12 @@ namespace exodbc
 		* \brief	Connect a signal that gets called after the handle has been freed successfully.
 		*/
 		boost::signals2::connection ConnectFreedSignal(const FreedSignalSlotType& slot) { return m_freedSignal.connect(slot); };
+
+
+		/*!
+		* \brief	Connect a signal that gets called before trying to free the handle.
+		*/
+		boost::signals2::connection ConnectFreeSignal(const FreeSignalSlotType& slot) { return m_freeSignal.connect(slot); };
 
 
 		/*!
@@ -219,6 +231,7 @@ namespace exodbc
 		THANDLE m_handle;
 		std::shared_ptr<const TPARENTSQLHANDLE> m_pParentHandle;
 		FreedSignal m_freedSignal;
+		FreeSignal m_freeSignal;
 	};
 
 	/** Environment-handle */
