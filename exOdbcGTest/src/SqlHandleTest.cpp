@@ -131,4 +131,31 @@ namespace exodbc
 		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
 	}
 
+
+	TEST_F(SqlHandleTest, FreeHandleSignal)
+	{
+		SqlEnvHandle hEnv;
+		hEnv.Allocate();
+		bool signalCalled = false;
+		hEnv.ConnectFreedSignal([&](int p) -> void
+		{
+			signalCalled = true;
+		});
+		hEnv.Free();
+		EXPECT_TRUE(signalCalled);
+
+		// If it goes out of scope it should be called to
+		bool signalCalled2 = false;
+		{
+			SqlEnvHandle env2;
+			env2.Allocate();
+			//env2.ConnectFreedSignal([&]
+			//{
+			//	signalCalled2 = true;
+			//});
+			// do not free, just let it go out of scope
+		}
+		EXPECT_TRUE(signalCalled2);
+	}
+
 } // namespace exodbc

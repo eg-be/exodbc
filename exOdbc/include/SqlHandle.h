@@ -13,6 +13,8 @@
 #include "Exception.h"
 
 // Other headers
+#include "boost/signals2.hpp"
+
 // System headers
 
 // Forward declarations
@@ -20,6 +22,9 @@
 
 namespace exodbc
 {
+	typedef boost::signals2::signal<void(int)> FreedSignal;
+	typedef FreedSignal::slot_type FreedSignalSlotType;
+
 	// Consts
 	// ------
 
@@ -131,7 +136,7 @@ namespace exodbc
 		
 		/*!
 		* \brief	Frees the internal tHandleType. Sets the internal handle to
-		*			SQL_NULL_HANDLE upon success, and resets the interanl 
+		*			SQL_NULL_HANDLE upon success, and resets the internal 
 		*			shared_ptr to the parent handle.
 		* \throw	AssertionException If no handle is allocated.
 		* \throw	SqlResultException If freeing fails.
@@ -165,7 +170,16 @@ namespace exodbc
 			// successfully freed
 			m_handle = SQL_NULL_HANDLE;
 			m_pParentHandle.reset();
+
+			// trigger signal
+			m_freedSignal(55);
 		}
+
+
+		/*!
+		* \brief	Connect a signal that gets called after the handle has been freed successfully.
+		*/
+		boost::signals2::connection ConnectFreedSignal(const FreedSignalSlotType& slot) { return m_freedSignal.connect(slot); };
 
 
 		/*!
@@ -178,6 +192,8 @@ namespace exodbc
 		* \brief	Returns true if a handle is allocated.
 		*/
 		bool IsAllocated() const noexcept { return m_handle != SQL_NULL_HANDLE; };
+
+		void ConnectStmtFreedSignal() { return m_freedSignal.co }
 
 
 		/*!
@@ -204,6 +220,7 @@ namespace exodbc
 	private:
 		THANDLE m_handle;
 		std::shared_ptr<const TPARENTSQLHANDLE> m_pParentHandle;
+		FreedSignal m_freedSignal;
 	};
 
 	/** Environment-handle */
