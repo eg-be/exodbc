@@ -22,9 +22,6 @@
 
 namespace exodbc
 {
-	typedef boost::signals2::signal<void(int)> FreedSignal;
-	typedef FreedSignal::slot_type FreedSignalSlotType;
-
 	// Consts
 	// ------
 
@@ -41,6 +38,9 @@ namespace exodbc
 	template<typename THANDLE, SQLSMALLINT tHandleType, typename TPARENTSQLHANDLE>
 	class SqlHandle
 	{
+		typedef boost::signals2::signal<void(const SqlHandle&)> FreedSignal;
+		typedef typename FreedSignal::slot_type FreedSignalSlotType;
+
 	public:
 		/*!
 		* \brief	Constructs an SQL_NULL_HANDLE. Call Allocate() or AllocateWithParent()
@@ -172,7 +172,7 @@ namespace exodbc
 			m_pParentHandle.reset();
 
 			// trigger signal
-			m_freedSignal(55);
+			m_freedSignal(*this);
 		}
 
 
@@ -192,8 +192,6 @@ namespace exodbc
 		* \brief	Returns true if a handle is allocated.
 		*/
 		bool IsAllocated() const noexcept { return m_handle != SQL_NULL_HANDLE; };
-
-		void ConnectStmtFreedSignal() { return m_freedSignal.co }
 
 
 		/*!

@@ -132,15 +132,16 @@ namespace exodbc
 	}
 
 
-	TEST_F(SqlHandleTest, FreeHandleSignal)
+	TEST_F(SqlHandleTest, FreedHandleSignal)
 	{
 		SqlEnvHandle hEnv;
 		hEnv.Allocate();
 		bool signalCalled = false;
-		hEnv.ConnectFreedSignal([&](int p) -> void
+		hEnv.ConnectFreedSignal([&](const SqlEnvHandle& h) -> void
 		{
 			signalCalled = true;
 		});
+		
 		hEnv.Free();
 		EXPECT_TRUE(signalCalled);
 
@@ -149,10 +150,10 @@ namespace exodbc
 		{
 			SqlEnvHandle env2;
 			env2.Allocate();
-			//env2.ConnectFreedSignal([&]
-			//{
-			//	signalCalled2 = true;
-			//});
+			env2.ConnectFreedSignal([&](const SqlEnvHandle& h) -> void
+			{
+				signalCalled2 = true;
+			});
 			// do not free, just let it go out of scope
 		}
 		EXPECT_TRUE(signalCalled2);
