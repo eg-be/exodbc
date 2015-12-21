@@ -1369,6 +1369,7 @@ namespace exodbc
 			}
 
 			// If we are asked to create our columns automatically, read the column information and create the buffers
+
 			if (!m_manualColumns)
 			{
 				const std::vector<SqlCBufferVariant>& columns = CreateAutoColumnBuffers(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));

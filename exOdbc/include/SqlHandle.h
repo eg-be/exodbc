@@ -39,10 +39,10 @@ namespace exodbc
 	class SqlHandle
 	{
 		typedef boost::signals2::signal<void(const SqlHandle&)> FreedSignal;
-		typedef typename FreedSignal::slot_type FreedSignalSlotType;
+		typedef typename FreedSignal::slot_type FreedSignalSlot;
 
 		typedef boost::signals2::signal<void(const SqlHandle&)> FreeSignal;
-		typedef typename FreedSignal::slot_type FreeSignalSlotType;
+		typedef typename FreedSignal::slot_type FreeSignalSlot;
 
 	public:
 		/*!
@@ -185,13 +185,13 @@ namespace exodbc
 		/*!
 		* \brief	Connect a signal that gets called after the handle has been freed successfully.
 		*/
-		boost::signals2::connection ConnectFreedSignal(const FreedSignalSlotType& slot) { return m_freedSignal.connect(slot); };
+		boost::signals2::connection ConnectFreedSignal(const FreedSignalSlot& slot) const { return m_freedSignal.connect(slot); };
 
 
 		/*!
 		* \brief	Connect a signal that gets called before trying to free the handle.
 		*/
-		boost::signals2::connection ConnectFreeSignal(const FreeSignalSlotType& slot) { return m_freeSignal.connect(slot); };
+		boost::signals2::connection ConnectFreeSignal(const FreeSignalSlot& slot) const { return m_freeSignal.connect(slot); };
 
 
 		/*!
@@ -230,8 +230,8 @@ namespace exodbc
 	private:
 		THANDLE m_handle;
 		std::shared_ptr<const TPARENTSQLHANDLE> m_pParentHandle;
-		FreedSignal m_freedSignal;
-		FreeSignal m_freeSignal;
+		mutable FreedSignal m_freedSignal;
+		mutable FreeSignal m_freeSignal;
 	};
 
 	/** Environment-handle */

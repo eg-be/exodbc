@@ -19,6 +19,7 @@
 // Other headers
 #include "boost/variant.hpp"
 #include "boost/variant/polymorphic_get.hpp"
+#include "boost/signals2.hpp"
 
 // System headers
 
@@ -200,6 +201,14 @@ namespace exodbc
 					++itParams;
 				}
 			}
+
+			// Disconnect signals
+			auto itConns = m_freeSignalConnections.begin();
+			while (itConns != m_freeSignalConnections.end())
+			{
+				itConns->disconnect();
+				++itConns;
+			}
 		};
 
 		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
@@ -228,9 +237,26 @@ namespace exodbc
 		};
 
 
+		void OnStatementFreed(const SqlStmtHandle& stmt) 
+		{
+			// If we are bound to that handle unbind
+			auto it = m_boundSelects.begin();
+			while (it != m_boundSelects.end())
+			{
+				if (*(it->m_pHStmt) == stmt)
+					break;
+				++it;
+			}
+			if (it != m_boundSelects.end())
+			{
+				UnbindSelect(it->m_columnNr, it->m_pHStmt);
+			}
+			// And for params - remove all bindings
+		};
+
+
 		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
 		{
-			//exASSERT_MSG(GetSqlType() != SQL_UNKNOWN_TYPE, L"Extended Property SqlType must be set if this Buffer shall be used as parameter");
 			exASSERT(paramNr >= 1);
 			exASSERT(pHStmt != NULL);
 			exASSERT(pHStmt->IsAllocated());
@@ -266,6 +292,10 @@ namespace exodbc
 			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(),paramNr, SQL_PARAM_INPUT, sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*) m_pBuffer.get(), GetBufferLength(), m_pCb.get());
 			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 			m_boundParams.insert(boundHandleInfo);
+
+			// Connect a signal that we are bound to this handle now
+			m_freeSignalConnections.push_back(pHStmt->ConnectFreeSignal(boost::bind(&SqlCBuffer::OnStatementFreed, this, _1)));
+			//boost::signals2::scoped_connection conn = pHStmt->ConnectFreeSignal(boost::bind(&SqlCBuffer::OnStatementFreed, this, _1));
 		}
 
 
@@ -298,6 +328,11 @@ namespace exodbc
 
 
 	protected:
+		std::set<ColumnBoundHandle>::iterator UnbindParam(const ColumnBoundHandle& boundHandleInfo)
+		{
+			// .. we cannot unbind a single param..
+		}
+
 		std::set<ColumnBoundHandle>::iterator UnbindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
 			exASSERT(columnNr >= 1);
@@ -317,6 +352,7 @@ namespace exodbc
 		std::set<ColumnBoundHandle> m_boundSelects;
 		std::set<ColumnBoundHandle> m_boundParams;
 		std::wstring m_queryName;
+		std::vector<boost::signals2::connection> m_freeSignalConnections;
 	};
 
 	template<>
