@@ -12,6 +12,7 @@
 
 
 #pragma once
+#pragma warning(disable:4503)
 
 #include "targetver.h"
 
