@@ -160,54 +160,31 @@ namespace exodbc
 
 		virtual ~SqlCBuffer()
 		{
-			// unbind selects, one by one, do not stop if one fails but try the next one
-			// (thats why this is not done using Unbind() )
-			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.begin();
-			while (it != m_boundSelects.end())
+			// If we are still bound to columns or params, release the bindings and disconnect the signals
+			// Also disconnect all signals
+			for (auto it = m_resetParamsConnections.begin(); it != m_resetParamsConnections.end(); ++it)
 			{
-				ColumnBoundHandle bindInfo = *it;
 				try
 				{
-					// Unbind if still bound
-					if (bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated())
-					{
-						it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
-					}
+					it->first->ResetParams();
 				}
 				catch (const Exception& ex)
 				{
-					LOG_ERROR(boost::str(boost::wformat(L"Failed to unbind column %d from stmt-handle %d: %s") % bindInfo.m_columnNr %bindInfo.m_pHStmt->GetHandle() %ex.ToString()));
-					++it;
+					LOG_ERROR(ex.ToString());
 				}
+				it->second.disconnect();
 			}
-
-			// Unbind all params
-			std::set<ColumnBoundHandle>::iterator itParams = m_boundParams.begin();
-			while (itParams != m_boundParams.end())
+			for (auto it = m_unbindColumnsConnections.begin(); it != m_unbindColumnsConnections.end(); ++it)
 			{
-				ColumnBoundHandle bindInfo = *itParams;
 				try
 				{
-					if(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated())
-					{
-						SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
-						THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
-					}
-					itParams = m_boundParams.erase(itParams);
+					it->first->UnbindColumns();
 				}
 				catch (const Exception& ex)
 				{
-					LOG_ERROR(boost::str(boost::wformat(L"Failed to unbind column %d from parameter stmt-handle %d: %s") % bindInfo.m_columnNr %bindInfo.m_pHStmt->GetHandle() % ex.ToString()));
-					++itParams;
+					LOG_ERROR(ex.ToString());
 				}
-			}
-
-			// Disconnect signals
-			auto itConns = m_freeSignalConnections.begin();
-			while (itConns != m_freeSignalConnections.end())
-			{
-				itConns->disconnect();
-				++itConns;
+				it->second.disconnect();
 			}
 		};
 
@@ -228,31 +205,50 @@ namespace exodbc
 			exASSERT(columnNr >= 1);
 			exASSERT(pHStmt != NULL);
 			exASSERT(pHStmt->IsAllocated());
-			ColumnBoundHandle boundHandleInfo(pHStmt, columnNr);
-			exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
 
 			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*)m_pBuffer.get(), GetBufferLength(), m_pCb.get());
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
-			m_boundSelects.insert(boundHandleInfo);
+
+			// get a notification if unbound
+			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectFreeSignal(boost::bind(&SqlCBuffer::OnUnbindColumns, this, _1));
 		};
 
 
-		void OnStatementFreed(const SqlStmtHandle& stmt) 
+		void OnResetParams(const SqlStmtHandle& stmt)
 		{
-			// If we are bound to that handle unbind
-			auto it = m_boundSelects.begin();
-			while (it != m_boundSelects.end())
+			// remove from our map, we are no longer interested in resetting params on destruction
+
+			auto it = m_resetParamsConnections.begin(); 
+			while(it != m_resetParamsConnections.end())
 			{
-				if (*(it->m_pHStmt) == stmt)
-					break;
-				++it;
+				if (*(it->first) == stmt)
+				{
+					it = m_resetParamsConnections.erase(it);
+				}
+				else
+				{
+					++it;
+				}
 			}
-			if (it != m_boundSelects.end())
+		}
+
+
+		void OnUnbindColumns(const SqlStmtHandle& stmt)
+		{
+			// remove from our map, we are no longer interested in resetting params on destruction
+			auto it = m_unbindColumnsConnections.begin();
+			while(it != m_unbindColumnsConnections.end())
 			{
-				UnbindSelect(it->m_columnNr, it->m_pHStmt);
+				if (*(it->first) == stmt)
+				{
+					it = m_unbindColumnsConnections.erase(it);
+				}
+				else
+				{
+					++it;
+				}
 			}
-			// And for params - remove all bindings
-		};
+		}
 
 
 		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
@@ -260,8 +256,6 @@ namespace exodbc
 			exASSERT(paramNr >= 1);
 			exASSERT(pHStmt != NULL);
 			exASSERT(pHStmt->IsAllocated());
-			ColumnBoundHandle boundHandleInfo(pHStmt, paramNr);
-			exASSERT_MSG(m_boundParams.find(boundHandleInfo) == m_boundParams.end(), L"Already bound to passed hStmt and paramNr as Parameter on this buffer");
 
 			// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
 			// on the extended properties (or fail, if those are not set)
@@ -291,68 +285,16 @@ namespace exodbc
 			// And bind using the information just read
 			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(),paramNr, SQL_PARAM_INPUT, sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*) m_pBuffer.get(), GetBufferLength(), m_pCb.get());
 			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
-			m_boundParams.insert(boundHandleInfo);
 
-			// Connect a signal that we are bound to this handle now
-			m_freeSignalConnections.push_back(pHStmt->ConnectFreeSignal(boost::bind(&SqlCBuffer::OnStatementFreed, this, _1)));
-			//boost::signals2::scoped_connection conn = pHStmt->ConnectFreeSignal(boost::bind(&SqlCBuffer::OnStatementFreed, this, _1));
-		}
-
-
-		/*!
-		* \brief	Unbinds from all handles bound.
-		* \throw	Exception
-		*/
-		void Unbind()
-		{
-			// unbind selects
-			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.begin();
-			while (it != m_boundSelects.end())
-			{
-				ColumnBoundHandle bindInfo = *it;
-				exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
-				it = UnbindSelect(bindInfo.m_columnNr, bindInfo.m_pHStmt);
-			}
-			// I see no way to unbind single params?
-			std::set<ColumnBoundHandle>::iterator itParams = m_boundParams.begin();
-			while (itParams != m_boundParams.end())
-			{
-				ColumnBoundHandle bindInfo = *itParams;
-				exASSERT(bindInfo.m_pHStmt && bindInfo.m_pHStmt->IsAllocated());
-				SQLRETURN ret = SQLFreeStmt(bindInfo.m_pHStmt->GetHandle(), SQL_RESET_PARAMS);
-				THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, bindInfo.m_pHStmt->GetHandle());
-				itParams = m_boundParams.erase(itParams);
-			}
-		}
-
-
-
-	protected:
-		std::set<ColumnBoundHandle>::iterator UnbindParam(const ColumnBoundHandle& boundHandleInfo)
-		{
-			// .. we cannot unbind a single param..
-		}
-
-		std::set<ColumnBoundHandle>::iterator UnbindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
-		{
-			exASSERT(columnNr >= 1);
-			exASSERT(pHStmt != NULL);
-			exASSERT(pHStmt->IsAllocated());
-			ColumnBoundHandle boundHandleInfo(pHStmt, columnNr);
-			std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(boundHandleInfo);
-			exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
-
-			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, NULL, 0, NULL);
-			THROW_IFN_SUCCEEDED(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
-			return m_boundSelects.erase(it);
+			// Connect a signal that we are bound to this handle now and get notified if params get reseted
+			m_resetParamsConnections[pHStmt] = pHStmt->ConnectFreeSignal(boost::bind(&SqlCBuffer::OnResetParams, this, _1));
 		}
 
 	private:
 		std::shared_ptr<T> m_pBuffer;
-		std::set<ColumnBoundHandle> m_boundSelects;
-		std::set<ColumnBoundHandle> m_boundParams;
 		std::wstring m_queryName;
-		std::vector<boost::signals2::connection> m_freeSignalConnections;
+		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_unbindColumnsConnections;
+		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_resetParamsConnections;
 	};
 
 	template<>
@@ -363,8 +305,6 @@ namespace exodbc
 		exASSERT(pHStmt->IsAllocated());
 		exASSERT(m_columnSize > 0);
 		exASSERT(m_decimalDigits >= 0);
-		ColumnBoundHandle boundHandleInfo(pHStmt, columnNr);
-		exASSERT_MSG(m_boundSelects.find(boundHandleInfo) == m_boundSelects.end(), L"Already bound to passed hStmt and column for Select on this buffer");
 
 		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
@@ -373,26 +313,11 @@ namespace exodbc
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER) m_pBuffer.get());
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER) m_pCb.get());
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER) m_pCb.get());
-		m_boundSelects.insert(boundHandleInfo);
+
+		// get a notification if unbound
+		m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectFreeSignal(boost::bind(&SqlCBuffer::OnUnbindColumns, this, _1));
 	}
 
-	template<>
-	std::set<ColumnBoundHandle>::iterator SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::UnbindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
-	{
-		exASSERT(columnNr >= 1);
-		exASSERT(pHStmt != NULL);
-		exASSERT(pHStmt->IsAllocated());
-		ColumnBoundHandle boundHandleInfo(pHStmt, columnNr);
-		std::set<ColumnBoundHandle>::iterator it = m_boundSelects.find(boundHandleInfo);
-		exASSERT_MSG(it != m_boundSelects.end(), L"Not bound to passed hStmt and column for Select on this buffer");
-
-		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLINTEGER)NULL);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLINTEGER)NULL);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLINTEGER)NULL);
-		return m_boundSelects.erase(it);
-	}
 
 	template<>
 	void SqlCBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam)
@@ -401,8 +326,6 @@ namespace exodbc
 		exASSERT(paramNr >= 1);
 		exASSERT(pHStmt != NULL);
 		exASSERT(pHStmt->IsAllocated());
-		ColumnBoundHandle boundHandleInfo(pHStmt, paramNr);
-		exASSERT_MSG(m_boundParams.find(boundHandleInfo) == m_boundParams.end(), L"Already bound to passed hStmt and paramNr as Parameter on this buffer");
 
 		// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
 		// on the extended properties (or fail, if those are not set)
@@ -440,7 +363,8 @@ namespace exodbc
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDecimalDigits);
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)m_pBuffer.get());
 
-		m_boundParams.insert(boundHandleInfo);
+		// Connect a signal that we are bound to this handle now and get notified if params get reseted
+		m_resetParamsConnections[pHStmt] = pHStmt->ConnectFreeSignal(boost::bind(&SqlCBuffer::OnResetParams, this, _1));
 	}
 
 
