@@ -1619,12 +1619,14 @@ namespace exodbc
 		{
 			HIDE_UNUSED(ex);
 			// Unbind all Buffers
-			for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
-			{
-				SqlCBufferVariant& columnBuffer = it->second;
-				UnbindVisitor unbind;
-				boost::apply_visitor(unbind, columnBuffer);
-			}
+			m_pHStmtSelect->UnbindColumns();
+
+			//for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
+			//{
+			//	SqlCBufferVariant& columnBuffer = it->second;
+			//	UnbindVisitor unbind;
+			//	boost::apply_visitor(unbind, columnBuffer);
+			//}
 
 			//if (boundSelect)
 			//{
@@ -1668,13 +1670,8 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 
-		// Unbind all buffers
-		for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
-		{
-			SqlCBufferVariant& columnBuffer = it->second;
-			UnbindVisitor unbind;
-			boost::apply_visitor(unbind, columnBuffer);
-		}
+		// Unbind all Columns
+		m_pHStmtSelect->UnbindColumns();
 
 		// remove the ColumnBuffers if we have allocated them during this process (if not manual)
 		if (!m_manualColumns)

@@ -30,6 +30,7 @@ namespace exodbc
 
 	// Classes
 	// -------
+
 	/*!
 	* \class SqlHandle
 	*
@@ -38,11 +39,14 @@ namespace exodbc
 	template<typename THANDLE, SQLSMALLINT tHandleType, typename TPARENTSQLHANDLE>
 	class SqlHandle
 	{
-		typedef boost::signals2::signal<void(const SqlHandle&)> FreedSignal;
-		typedef typename FreedSignal::slot_type FreedSignalSlot;
-
 		typedef boost::signals2::signal<void(const SqlHandle&)> FreeSignal;
-		typedef typename FreedSignal::slot_type FreeSignalSlot;
+		typedef typename FreeSignal::slot_type FreeSignalSlot;
+
+		typedef boost::signals2::signal<void(const SqlHandle&)> ResetParamsSignal;
+		typedef typename ResetParamsSignal::slot_type ResetParamsSignalSlot;
+
+		typedef boost::signals2::signal<void(const SqlHandle&)> UnbindColumnsSignal;
+		typedef typename UnbindColumnsSignal::slot_type UnbindColumnsSignalSlot;
 
 	public:
 		/*!
@@ -177,15 +181,56 @@ namespace exodbc
 			m_handle = SQL_NULL_HANDLE;
 			m_pParentHandle.reset();
 
-			// trigger freed signal
-			m_freedSignal(*this);
+			// notify that params have been resetted and columns are unbound now
+			m_resetParamsSignal(*this);
+			m_unbindColumnsSignal(*this);
 		}
 
 
 		/*!
-		* \brief	Connect a signal that gets called after the handle has been freed successfully.
+		* \brief Resets all parameters bound to this Handle by calling SQLFreeStmt() with SQL_RESET_PARAMS.
+		*		On Success, the ResetParamsSignal is fired.
 		*/
-		boost::signals2::connection ConnectFreedSignal(const FreedSignalSlot& slot) const { return m_freedSignal.connect(slot); };
+		void ResetParams() const
+		{
+			exASSERT(m_handle != SQL_NULL_HANDLE);
+			exASSERT(tHandleType == SQL_HANDLE_STMT);
+
+			SQLRETURN ret = SQLFreeStmt(m_handle, SQL_RESET_PARAMS);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_handle);
+
+			// trigger signal
+			m_resetParamsSignal(*this);
+		}
+
+
+		/*!
+		* \brief Resets all columns bound to this Handle by calling SQLFreeStmt() with SQL_UNBIND.
+		*		On Success, the UnbindColumnsSignal is fired.
+		*/
+		void UnbindColumns() const
+		{
+			exASSERT(m_handle != SQL_NULL_HANDLE);
+			exASSERT(tHandleType == SQL_HANDLE_STMT);
+
+			SQLRETURN ret = SQLFreeStmt(m_handle, SQL_UNBIND);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_handle);
+
+			// trigger signal
+			m_unbindColumnsSignal(*this);
+		}
+
+
+		/*!
+		* \brief	Connect a signal that gets called whenever Params have been reseted using ResetParams()
+		*/
+		boost::signals2::connection ConnectResetParamsSignal(const ResetParamsSignalSlot& slot) const { return m_resetParamsSignal.connect(slot); };
+
+		
+		/*!
+		* \brief	Connect a signal that gets called whenever Columns have been unbound using UnbindColumns()
+		*/
+		boost::signals2::connection ConnectUnbindColumnsSignal(const UnbindColumnsSignalSlot& slot) const { return m_unbindColumnsSignal.connect(slot); };
 
 
 		/*!
@@ -230,8 +275,9 @@ namespace exodbc
 	private:
 		THANDLE m_handle;
 		std::shared_ptr<const TPARENTSQLHANDLE> m_pParentHandle;
-		mutable FreedSignal m_freedSignal;
 		mutable FreeSignal m_freeSignal;
+		mutable UnbindColumnsSignal m_unbindColumnsSignal;
+		mutable ResetParamsSignal m_resetParamsSignal;
 	};
 
 	/** Environment-handle */
@@ -345,4 +391,3 @@ namespace exodbc
 	typedef std::shared_ptr<const SqlDescHandle> ConstSqlDescHandlePtr;
 
 } // namespace exodbc
-

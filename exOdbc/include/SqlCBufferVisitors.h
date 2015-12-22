@@ -80,18 +80,6 @@ namespace exodbc
 		bool m_useSqlDescribeParam;
 	};
 
-	class UnbindVisitor
-		: public boost::static_visitor<void>
-	{
-	public:
-
-		template<typename T>
-		void operator()(T& t) const
-		{
-			t.Unbind();
-		}
-	};
-
 	class QueryNameVisitor
 		: public boost::static_visitor<const std::wstring&>
 	{
