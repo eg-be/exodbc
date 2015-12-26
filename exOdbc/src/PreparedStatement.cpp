@@ -80,14 +80,14 @@ namespace exodbc
 	}
 
 
-	void PreparedStatement::BindParameter(SqlCBufferVariant column, SQLUSMALLINT columnNr)
+	void PreparedStatement::BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr)
 	{
 		BindParamVisitor pv(columnNr, m_pHStmt, m_useSqlDescribeParam);
 		boost::apply_visitor(pv, column);
 	}
 
 
-	void PreparedStatement::BindColumn(SqlCBufferVariant column, SQLUSMALLINT columnNr)
+	void PreparedStatement::BindColumn(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr)
 	{
 		BindSelectVisitor sv(columnNr, m_pHStmt);
 		boost::apply_visitor(sv, column);

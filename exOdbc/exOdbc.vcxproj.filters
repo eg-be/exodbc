@@ -46,9 +46,6 @@
     <ClInclude Include="include\Exception.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\Visitors.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\ObjectName.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -56,9 +53,6 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\Sql2BufferTypeMap.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SqlCBuffer.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\bitmask_operators.hpp">
@@ -77,6 +71,9 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\SqlCBufferVisitors.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ColumnBuffer.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -105,9 +102,6 @@
     <ClCompile Include="src\Exception.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Visitors.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\ObjectName.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -117,9 +111,6 @@
     <ClCompile Include="src\Sql2BufferTypeMap.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\SqlCBuffer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\SqlStatementCloser.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -127,6 +118,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\SqlCBufferVisitors.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ColumnBuffer.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

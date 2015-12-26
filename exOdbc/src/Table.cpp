@@ -339,7 +339,7 @@ namespace exodbc
 	}
 
 
-	std::vector<SqlCBufferVariant> Table::CreateAutoColumnBuffers(bool skipUnsupportedColumns)
+	std::vector<ColumnBufferPtrVariant> Table::CreateAutoColumnBuffers(bool skipUnsupportedColumns)
 	{
 		exASSERT(m_pDb->IsOpen());
 
@@ -375,35 +375,35 @@ namespace exodbc
 			flags.Set(ColumnFlag::CF_INSERT);
 		}
 
-		std::vector<SqlCBufferVariant> columns;
+		std::vector<ColumnBufferPtrVariant> columns;
 		for (int columnIndex = 0; columnIndex < (SQLUSMALLINT)columnInfos.size(); columnIndex++)
 		{
 			const ColumnInfo& colInfo = columnInfos[columnIndex];
 			try
 			{
 				SQLSMALLINT sqlCType = m_pSql2BufferTypeMap->GetBufferType(colInfo.GetSqlType());
-				SqlCBufferVariant sqlCBuffer;
+				ColumnBufferPtrVariant columnPtrVariant;
 				if (IsArrayType(sqlCType))
 				{
-					sqlCBuffer = CreateArrayBuffer(sqlCType, colInfo.GetQueryName(), colInfo);
+					columnPtrVariant = CreateColumnArrayBufferPtr(sqlCType, colInfo.GetQueryName(), colInfo);
 				}
 				else
 				{
-					sqlCBuffer = CreateBuffer(sqlCType, colInfo.GetQueryName());
+					columnPtrVariant = CreateColumnBufferPtr(sqlCType, colInfo.GetQueryName());
 				}
-				ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(sqlCBuffer);
-				columnFlags = flags;
-				ExtendedColumnPropertiesHolder& extendedColumnProperties = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(sqlCBuffer);
-				extendedColumnProperties.SetSqlType(colInfo.GetSqlType());
+				std::shared_ptr<ColumnFlags> pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnPtrVariant);
+				pColumnFlags->Set(flags);
+				std::shared_ptr<ExtendedColumnPropertiesHolder> pExtendedProps = boost::apply_visitor(ExtendedColumnPropertiesHolderPtrVisitor(), columnPtrVariant);
+				pExtendedProps->SetSqlType(colInfo.GetSqlType());
 				if(!colInfo.IsColumnSizeNull())
 				{
-					extendedColumnProperties.SetColumnSize(colInfo.GetColumnSize());
+					pExtendedProps->SetColumnSize(colInfo.GetColumnSize());
 				}
 				if (!colInfo.IsDecimalDigitsNull())
 				{
-					extendedColumnProperties.SetDecimalDigits(colInfo.GetDecimalDigits());
+					pExtendedProps->SetDecimalDigits(colInfo.GetDecimalDigits());
 				}
-				columns.push_back(sqlCBuffer);
+				columns.push_back(columnPtrVariant);
 			}
 			catch (const boost::bad_polymorphic_get& ex)
 			{
@@ -510,26 +510,16 @@ namespace exodbc
 		exASSERT(m_columns.size() > 0);
 
 		std::wstring fields = L"";
-		SqlCBufferVariantMap::const_iterator it = m_columns.begin();
+		ColumnBufferPtrVariantMap::const_iterator it = m_columns.begin();
 		while (it != m_columns.end())
 		{
-			SqlCBufferVariant var = it->second;
-			try
+			ColumnBufferPtrVariant var = it->second;
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), var);
+			if (pFlags->Test(ColumnFlag::CF_SELECT))
 			{
-				const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(var);
-				const ColumnFlags columnFlags = boost::polymorphic_get<ColumnFlags>(var);
-				if (columnFlags.Test(ColumnFlag::CF_SELECT))
-				{
-					std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), var);
-					fields += queryName;
-					fields += L", ";
-				}
-			}
-			catch (const boost::bad_polymorphic_get& ex)
-			{
-				WrapperException we(ex);
-				SET_EXCEPTION_SOURCE(we);
-				throw we;
+				std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), var);
+				fields += queryName;
+				fields += L", ";
 			}
 			++it;
 		}
@@ -682,16 +672,16 @@ namespace exodbc
 
 	bool Table::ColumnBufferExists(SQLSMALLINT columnIndex) const throw()
 	{
-		SqlCBufferVariantMap::const_iterator it = m_columns.find(columnIndex);
+		ColumnBufferPtrVariantMap::const_iterator it = m_columns.find(columnIndex);
 		return it != m_columns.end();
 	}
 
 
-	const SqlCBufferVariant& Table::GetColumnVariant(SQLSMALLINT columnIndex) const
+	const ColumnBufferPtrVariant& Table::GetColumnBufferPtrVariant(SQLSMALLINT columnIndex) const
 	{
 		exASSERT(IsOpen());
 
-		SqlCBufferVariantMap::const_iterator it = m_columns.find(columnIndex);
+		ColumnBufferPtrVariantMap::const_iterator it = m_columns.find(columnIndex);
 		if (it == m_columns.end())
 		{
 			IllegalArgumentException ex(boost::str(boost::wformat(L"ColumnIndex %d is not a zero-based bound or manually defined ColumnBuffer") % columnIndex));
@@ -703,35 +693,24 @@ namespace exodbc
 	}
 
 
-	const SqlCBufferVariant& Table::GetNonNullColumnVariant(SQLSMALLINT columnIndex) const
+	const ColumnBufferPtrVariant& Table::GetNonNullColumnBufferPtrVariant(SQLSMALLINT columnIndex) const
 	{
-		const SqlCBufferVariant& column = GetColumnVariant(columnIndex);
-		try
+		const ColumnBufferPtrVariant& columnPtrVariant = GetColumnBufferPtrVariant(columnIndex);
+		if (boost::apply_visitor(IsNullVisitor(), columnPtrVariant))
 		{
-			const SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(column);
-			const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
-			if (cb.IsNull())
-			{
-				std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), column);
-				NullValueException ex(queryName);
-				SET_EXCEPTION_SOURCE(ex);
-				throw ex;
-			}
-			return column;
+			std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), columnPtrVariant);
+			NullValueException ex(queryName);
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
 		}
-		catch (const boost::bad_polymorphic_get& ex)
-		{
-			WrapperException we(ex);
-			SET_EXCEPTION_SOURCE(we);
-			throw we;
-		}
+		return columnPtrVariant;
 	}
 
 
 	std::set<SQLSMALLINT> Table::GetColumnBufferIndexes() const throw()
 	{
 		std::set<SQLSMALLINT> columnIndexes;
-		SqlCBufferVariantMap::const_iterator it = m_columns.begin();
+		ColumnBufferPtrVariantMap::const_iterator it = m_columns.begin();
 		while (it != m_columns.end())
 		{
 			columnIndexes.insert(it->first);
@@ -743,10 +722,10 @@ namespace exodbc
 
 	SQLSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive /* = true */) const
 	{
-		SqlCBufferVariantMap::const_iterator it = m_columns.begin();
+		ColumnBufferPtrVariantMap::const_iterator it = m_columns.begin();
 		while (it != m_columns.end())
 		{
-			const SqlCBufferVariant& column = it->second;
+			const ColumnBufferPtrVariant& column = it->second;
 			std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), column);
 
 			if (caseSensitive)
@@ -1047,123 +1026,14 @@ namespace exodbc
 
 	void Table::SetColumnNull(SQLSMALLINT columnIndex) const
 	{
-		SqlCBufferVariant var = GetColumnVariant(columnIndex);
-		try
-		{
-			SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
-			ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(var);
-			exASSERT(flags.Test(ColumnFlag::CF_NULLABLE));
-			cb.SetNull();
-		}
-		catch (const boost::bad_polymorphic_get& ex)
-		{
-			WrapperException we(ex);
-			SET_EXCEPTION_SOURCE(we);
-			throw we;
-		}
+		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
+		ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), var);
+		exASSERT(pFlags->Test(ColumnFlag::CF_NULLABLE));
+		ColumnBufferLengthIndicatorPtr pCb = boost::apply_visitor(ColumnBufferLengthIndicatorPtrVisitor(), var);
+		pCb->SetNull();
 	}
 
-
-	SQLSMALLINT Table::GetSmallInt(SQLSMALLINT columnIndex) const
-	{
-		const SqlSShortBuffer& buff = GetNonNullColumn<SqlSShortBuffer>(columnIndex);
-		return buff.GetValue();
-	}
-
-
-	SQLINTEGER Table::GetInt(SQLSMALLINT columnIndex) const
-	{
-		const SqlSLongBuffer& buff = GetNonNullColumn<SqlSLongBuffer>(columnIndex);
-		return buff.GetValue();
-	}
-
-
-	SQLBIGINT Table::GetBigInt(SQLSMALLINT columnIndex) const
-	{
-		const SqlSBigIntBuffer& buff = GetNonNullColumn<SqlSBigIntBuffer>(columnIndex);
-		return buff.GetValue();
-	}
-
-
-	SQL_DATE_STRUCT Table::GetDate(SQLSMALLINT columnIndex) const
-	{
-		const SqlTypeDateStructBuffer& buff = GetNonNullColumn<SqlTypeDateStructBuffer>(columnIndex);
-		return buff.GetValue();
-	}
-
-
-	SQL_TIME_STRUCT Table::GetTime(SQLSMALLINT columnIndex) const
-	{
-		const SqlTypeTimeStructBuffer& buff = GetNonNullColumn<SqlTypeTimeStructBuffer>(columnIndex);
-		return buff.GetValue();
-	}
-
-
-	SQL_TIMESTAMP_STRUCT Table::GetTimeStamp(SQLSMALLINT columnIndex) const
-	{
-		const SqlTypeTimestampStructBuffer& buff = GetNonNullColumn<SqlTypeTimestampStructBuffer>(columnIndex);
-		return buff.GetValue();
-	}
-
-
-	//std::string Table::GetString(SQLSMALLINT columnIndex) const
-	//{
-	//	const SqlCharArray& buff = GetNonNullColumn<SqlCharArray>(columnIndex);
-	//	std::shared_ptr<SQLCHAR> pChar = buff.GetBuffer();
-	//	exASSERT(pChar != NULL);
-	//	std::string s(reinterpret_cast<const char*>(pChar.get()));
-	//	if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
-	//	{
-	//		boost::trim_left(s);
-	//	}
-	//	if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
-	//	{
-	//		boost::trim_right(s);
-	//	}
-
-	//	return s;
-	//}
-
-
-	//std::wstring Table::GetWString(SQLSMALLINT columnIndex) const
-	//{
-	//	const SqlWCharArray& buff = GetNonNullColumn<SqlWCharArray>(columnIndex);
-	//	std::shared_ptr<SQLWCHAR> pChar = buff.GetBuffer();
-	//	exASSERT(pChar != NULL);
-	//	std::wstring ws(pChar.get());
-	//	if (TestOpenFlag(TOF_CHAR_TRIM_LEFT))
-	//	{
-	//		boost::trim_left(ws);
-	//	}
-	//	if (TestOpenFlag(TOF_CHAR_TRIM_RIGHT))
-	//	{
-	//		boost::trim_right(ws);
-	//	}
-
-	//	return ws;
-	//}
-
-
-	SQLDOUBLE Table::GetDouble(SQLSMALLINT columnIndex) const
-	{
-		const SqlDoubleBuffer& buff = GetNonNullColumn<SqlDoubleBuffer>(columnIndex);
-		return buff.GetValue();
-	}
-
-
-	SQLREAL Table::GetReal(SQLSMALLINT columnIndex) const
-	{
-		const SqlRealBuffer& buff = GetNonNullColumn<SqlRealBuffer>(columnIndex);
-		return buff.GetValue();
-	}
-
-
-	SQL_NUMERIC_STRUCT Table::GetNumeric(SQLSMALLINT columnIndex) const
-	{
-		const SqlNumericStructBuffer& buff = GetNonNullColumn<SqlNumericStructBuffer>(columnIndex);
-		return buff.GetValue();
-	}
-
+	
 
 	//BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
 	//{
@@ -1175,7 +1045,7 @@ namespace exodbc
 	const SQLCHAR* Table::GetBinaryValue(SQLSMALLINT columnIndex, SQLLEN& bufferSize, SQLLEN& lengthIndicator) const
 	{
 		//const SqlBinaryArray& column = GetNonNullColumn<SqlBinaryArray>(columnIndex);
-		//const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
+		//const ColumnBufferPtrVariant& var = GetColumnVariant(columnIndex);
 		//try
 		//{
 		//	const SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
@@ -1196,39 +1066,21 @@ namespace exodbc
 
 	bool Table::IsColumnNull(SQLSMALLINT columnIndex) const
 	{
-		const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
-		try
-		{
-			const SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
-			return cb.IsNull();
-		}
-		catch (const boost::bad_polymorphic_get& ex)
-		{
-			WrapperException we(ex);
-			SET_EXCEPTION_SOURCE(we);
-			throw we;
-		}
+		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
+		ColumnBufferLengthIndicatorPtr pCb = boost::apply_visitor(ColumnBufferLengthIndicatorPtrVisitor(), var);
+		return pCb->IsNull();
 	}
 
 
 	bool Table::IsColumnNullable(SQLSMALLINT columnIndex) const
 	{
-		const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
-		try
-		{
-			const ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(var);
-			return flags.Test(ColumnFlag::CF_NULLABLE);
-		}
-		catch (const boost::bad_polymorphic_get& ex)
-		{
-			WrapperException we(ex);
-			SET_EXCEPTION_SOURCE(we);
-			throw we;
-		}
+		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
+		ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), var);
+		return pFlags->Test(ColumnFlag::CF_NULLABLE);
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, SqlCBufferVariant column)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, ColumnBufferPtrVariant column)
 	{
 		exASSERT(columnIndex >= 0);
 		exASSERT(m_columns.find(columnIndex) == m_columns.end());
@@ -1247,8 +1099,8 @@ namespace exodbc
 
 	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize /* = 0 */, SQLSMALLINT decimalDigits /* = 0 */)
 	{
-		SqlCPointerBuffer column(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
-		SetColumn(columnIndex, column);
+		SqlCPointerBufferPtr pColumn = std::make_shared<SqlCPointerBuffer>(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
+		SetColumn(columnIndex, pColumn);
 	}
 
 
@@ -1360,7 +1212,7 @@ namespace exodbc
 
 			if (!m_manualColumns)
 			{
-				const std::vector<SqlCBufferVariant>& columns = CreateAutoColumnBuffers(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
+				const std::vector<ColumnBufferPtrVariant>& columns = CreateAutoColumnBuffers(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 				for (size_t i = 0; i < columns.size(); ++i)
 				{
 					m_columns[(SQLUSMALLINT)i] = columns[i];
@@ -1370,38 +1222,27 @@ namespace exodbc
 			{
 				// Check that the manually defined columns do not violate our access-flags
 				// and check that manually defined types are supported by the database
-				SqlCBufferVariantMap::iterator it = m_columns.begin();
+				ColumnBufferPtrVariantMap::iterator it = m_columns.begin();
 				while(it != m_columns.end())
 				{
-					SqlCBufferVariant& columnBuffer = it->second;
-					ColumnFlags columnFlags;
+					ColumnBufferPtrVariant& columnBuffer = it->second;
 					const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
-					SQLSMALLINT sqlType = SQL_UNKNOWN_TYPE;
-					try
-					{
-						columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
-						const ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(columnBuffer);
-						sqlType = props.GetSqlType();
-					}
-					catch (const boost::bad_polymorphic_get& ex)
-					{
-						WrapperException we(ex);
-						SET_EXCEPTION_SOURCE(we);
-						throw we;
-					}
-					if (columnFlags.Test(ColumnFlag::CF_SELECT) && !TestAccessFlag(TableAccessFlag::AF_SELECT))
+					ColumnFlagsPtr pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
+					ExtendedColumnPropertiesHolderPtr pProps = boost::apply_visitor(ExtendedColumnPropertiesHolderPtrVisitor(), columnBuffer);
+					SQLSMALLINT sqlType = pProps->GetSqlType();
+					if (pColumnFlags->Test(ColumnFlag::CF_SELECT) && !TestAccessFlag(TableAccessFlag::AF_SELECT))
 					{
 						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
-					if (columnFlags.Test(ColumnFlag::CF_INSERT) && !TestAccessFlag(TableAccessFlag::AF_INSERT))
+					if (pColumnFlags->Test(ColumnFlag::CF_INSERT) && !TestAccessFlag(TableAccessFlag::AF_INSERT))
 					{
 						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
-					if (columnFlags.Test(ColumnFlag::CF_UPDATE) && !(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)))
+					if (pColumnFlags->Test(ColumnFlag::CF_UPDATE) && !(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)))
 					{
 						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
 						SET_EXCEPTION_SOURCE(ex);
@@ -1465,24 +1306,15 @@ namespace exodbc
 				for (std::set<SQLUSMALLINT>::const_iterator it = m_primaryKeyColumnIndexes.begin(); it != m_primaryKeyColumnIndexes.end(); ++it)
 				{
 					// Get corresponding Buffer and set the flag CF_PRIMARY_KEY
-					SqlCBufferVariantMap::iterator itCols = m_columns.find(*it);
+					ColumnBufferPtrVariantMap::iterator itCols = m_columns.find(*it);
 					if (itCols == m_columns.end())
 					{
 						Exception ex(boost::str(boost::wformat(L"No ColumnBuffer was found for a manually defined primary key column index (index = %d)") % *it));
 						SET_EXCEPTION_SOURCE(ex);
 						throw ex;
 					}
-					try
-					{
-						ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(itCols->second);
-						flags.Set(ColumnFlag::CF_PRIMARY_KEY);
-					}
-					catch (const boost::bad_polymorphic_get& ex)
-					{
-						WrapperException we(ex);
-						SET_EXCEPTION_SOURCE(we);
-						throw we;
-					}
+					ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), itCols->second);
+					pFlags->Set(ColumnFlag::CF_PRIMARY_KEY);
 				}
 			}
 			else
@@ -1498,26 +1330,16 @@ namespace exodbc
 						const ObjectName* pKeyName = dynamic_cast<const ObjectName*>(&keyInfo);
 						// Find corresponding ColumnBuffer
 						bool settedFlagOnBuffer = false;
-						for (SqlCBufferVariantMap::iterator itCols = m_columns.begin(); itCols != m_columns.end(); ++itCols)
+						for (ColumnBufferPtrVariantMap::iterator itCols = m_columns.begin(); itCols != m_columns.end(); ++itCols)
 						{
-							SqlCBufferVariant& column = itCols->second;
-							try
+							ColumnBufferPtrVariant column = itCols->second;
+							const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), column);
+							if (pKeyName->GetQueryName() == queryName)
 							{
-								ExtendedColumnPropertiesHolder& props = boost::polymorphic_get<ExtendedColumnPropertiesHolder>(column);
-								const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), column);
-								if (pKeyName->GetQueryName() == queryName)
-								{
-									ColumnFlags& flags = boost::polymorphic_get<ColumnFlags>(column);
-									flags.Set(ColumnFlag::CF_PRIMARY_KEY);
-									settedFlagOnBuffer = true;
-									break;
-								}
-							}
-							catch (const boost::bad_polymorphic_get& ex)
-							{
-								WrapperException we(ex);
-								SET_EXCEPTION_SOURCE(we);
-								throw we;
+								ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), column);
+								pFlags->Set(ColumnFlag::CF_PRIMARY_KEY);
+								settedFlagOnBuffer = true;
+								break;
 							}
 						}
 						if (!settedFlagOnBuffer)
@@ -1535,11 +1357,11 @@ namespace exodbc
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
 				SQLSMALLINT boundColumnNumber = 1;
-				for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
+				for (ColumnBufferPtrVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
 				{
-					SqlCBufferVariant& columnBuffer = it->second;
-					const ColumnFlags& columnFlags = boost::polymorphic_get<ColumnFlags>(columnBuffer);
-					if (columnFlags.Test(ColumnFlag::CF_SELECT))
+					ColumnBufferPtrVariant columnBuffer = it->second;
+					ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
+					if (pFlags->Test(ColumnFlag::CF_SELECT))
 					{
 						BindSelectVisitor bindSelect(boundColumnNumber, m_pHStmtSelect);
 						boost::apply_visitor(bindSelect, columnBuffer);
@@ -1816,18 +1638,9 @@ namespace exodbc
 
 	void Table::SetColumnLengthIndicator(SQLSMALLINT columnIndex, SQLLEN cb) const
 	{
-		const SqlCBufferVariant& var = GetColumnVariant(columnIndex);
-		try
-		{
-			SqlCBufferLengthIndicator varCb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
-			varCb.SetCb(cb);
-		}
-		catch (const boost::bad_polymorphic_get& ex)
-		{
-			WrapperException we(ex);
-			SET_EXCEPTION_SOURCE(we);
-			throw we;
-		}
+		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
+		ColumnBufferLengthIndicatorPtr pCb = boost::apply_visitor(ColumnBufferLengthIndicatorPtrVisitor(), var);
+		pCb->SetCb(cb);
 	}
 
 

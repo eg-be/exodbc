@@ -10,7 +10,7 @@
 
 // Same component headers
 #include "exOdbc.h"
-#include "SqlCBuffer.h"
+#include "ColumnBuffer.h"
 #include "PreparedStatement.h"
 
 // Other headers
@@ -45,7 +45,7 @@ namespace exodbc
 		template<typename T>
 		void operator()(T& t) const
 		{
-			t.BindSelect(m_columnNr, m_pHStmt);
+			t->BindSelect(m_columnNr, m_pHStmt);
 		}
 	private:
 		SQLUSMALLINT m_columnNr;
@@ -71,7 +71,7 @@ namespace exodbc
 		template<typename T>
 		void operator()(T& t) const
 		{
-			t.BindParameter(m_paramNr, m_pHStmt, m_useSqlDescribeParam);
+			t->BindParameter(m_paramNr, m_pHStmt, m_useSqlDescribeParam);
 		}
 
 	private:
@@ -87,7 +87,57 @@ namespace exodbc
 		template<typename T>
 		const std::wstring& operator()(T& t) const
 		{
-			return t.GetQueryName();
+			return t->GetQueryName();
+		}
+	};
+
+	class IsNullVisitor
+		: public boost::static_visitor<bool>
+	{
+	public:
+		template<typename T>
+		bool operator()(T& t) const
+		{
+			return t->IsNull();
+		}
+	};
+
+	class ColumnFlagsPtrVisitor
+		: public boost::static_visitor<std::shared_ptr<ColumnFlags>>
+	{
+	public:
+		template<typename T>
+		std::shared_ptr<ColumnFlags> operator()(T& t) const
+		{
+			std::shared_ptr<ColumnFlags> pFlags = std::dynamic_pointer_cast<ColumnFlags>(t);
+			exASSERT(pFlags);
+			return pFlags;
+		}
+	};
+
+	class ExtendedColumnPropertiesHolderPtrVisitor
+		: public boost::static_visitor<std::shared_ptr<ExtendedColumnPropertiesHolder>>
+	{
+	public:
+		template<typename T>
+		std::shared_ptr<ExtendedColumnPropertiesHolder> operator()(T& t) const
+		{
+			std::shared_ptr<ExtendedColumnPropertiesHolder> pProps = std::dynamic_pointer_cast<ExtendedColumnPropertiesHolder>(t);
+			exASSERT(pProps);
+			return pProps;
+		}
+	};
+
+	class ColumnBufferLengthIndicatorPtrVisitor
+		: public boost::static_visitor < ColumnBufferLengthIndicatorPtr >
+	{
+	public:
+		template<typename T>
+		ColumnBufferLengthIndicatorPtr operator()(T& t) const
+		{
+			ColumnBufferLengthIndicatorPtr pCb = std::dynamic_pointer_cast<ColumnBufferLengthIndicator>(t);
+			exASSERT(pCb);
+			return pCb;
 		}
 	};
 
@@ -98,7 +148,7 @@ namespace exodbc
 		template<typename T>
 		const SQLSMALLINT operator()(T& t) const
 		{
-			return t.GetSqlCType();
+			return t->GetSqlCType();
 		}
 	};
 

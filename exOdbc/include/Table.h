@@ -18,7 +18,7 @@
 #include "Exception.h"
 #include "ObjectName.h"
 #include "Sql2BufferTypeMap.h"
-#include "SqlCBuffer.h"
+#include "ColumnBuffer.h"
 #include "SqlHandle.h"
 #include "Database.h"
 #include "EnumFlags.h"
@@ -629,7 +629,7 @@ namespace exodbc
 		template<typename T>
 		const T& GetNonNullColumn(SQLSMALLINT columnIndex) const
 		{
-			const SqlCBufferVariant& columnVariant = GetNonNullColumnVariant(columnIndex);
+			const ColumnBufferPtrVariant& columnVariant = GetNonNullColumnBufferPtrVariant(columnIndex);
 			try
 			{
 				return boost::get<T>(columnVariant);
@@ -646,7 +646,7 @@ namespace exodbc
 		template<typename T>
 		const T& GetColumn(SQLSMALLINT columnIndex) const
 		{
-			const SqlCBufferVariant& columnVariant = GetColumnVariant(columnIndex);
+			const ColumnBufferPtrVariant& columnVariant = GetColumnBufferPtrVariant(columnIndex);
 			try
 			{
 				return boost::get<T>(columnVariant);
@@ -658,131 +658,6 @@ namespace exodbc
 				throw we;
 			}
 		}
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQLSMALLINT.
-		* \details	Casts the value if casting is possible without loosing data 
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLSMALLINT GetSmallInt(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQLINTEGER.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLINTEGER	GetInt(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQLBIGINT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLBIGINT	GetBigInt(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_DATE_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_DATE_STRUCT GetDate(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_TIME_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_TIME_STRUCT GetTime(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_TIMESTAMP_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_TIMESTAMP_STRUCT GetTimeStamp(SQLSMALLINT columnIndex) const;
-
-#if HAVE_MSODBCSQL_H
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_SS_TIME2_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_SS_TIME2_STRUCT GetTime2(SQLSMALLINT columnIndex) const;
-#endif
-
-		/*!
-		* \brief	Access the current value of columnIndex as std::string.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		std::string GetString(SQLSMALLINT columnIndex) const {
-			return "TODO";
-		};
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as std::wstring.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		std::wstring GetWString(SQLSMALLINT columnIndex) const {
-			return L"TODO";
-		};
-		
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQLDOUBLE.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLDOUBLE GetDouble(SQLSMALLINT columnIndex) const;
-
-		
-		/*!
-		* \brief	Access the current value of columnIndex as SQLREAL.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLREAL GetReal(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_NUMERIC_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_NUMERIC_STRUCT GetNumeric(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Get the value of the ColumnBuffer given by columnIndex as BufferVariant.
-		* \param	columnIndex Zero based ColumnBuffer index.
-		* \throw	Exception If ColumnBuffer not found, or the value held by the ColumnBuffer
-		*			cannot be returned as BufferVariant.
-		*			Note that it will not throw if the value is a NULL value, the BufferVariant will hold
-		*			the NullValue::IS_NULL indicator then.
-		* \see		ColumnBuffer::GetValue()
-		* \see		BufferVariant
-		*/
-//		BufferVariant GetColumnValue(SQLSMALLINT columnIndex) const;
 
 
 		/*!
@@ -831,7 +706,7 @@ namespace exodbc
 		* \return	ColumnBuffer.
 		* \throw	Exception If no ColumnBuffer with the passed columnIndex is found.
 		*/
-		const SqlCBufferVariant& GetColumnVariant(SQLSMALLINT columnIndex) const;
+		const ColumnBufferPtrVariant& GetColumnBufferPtrVariant(SQLSMALLINT columnIndex) const;
 
 
 		/*!
@@ -875,7 +750,7 @@ namespace exodbc
 		//void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
 
 
-		void		SetColumn(SQLUSMALLINT columnIndex, SqlCBufferVariant column);
+		void		SetColumn(SQLUSMALLINT columnIndex, ColumnBufferPtrVariant column);
 
 
 		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize = 0, SQLSMALLINT decimalDigits = 0);
@@ -918,7 +793,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Creates the ColumnBuffers for the table.
-		* \detailed	Will query the Database about the columns of the table and create corresponding SqlCBufferVariant
+		* \detailed	Will query the Database about the columns of the table and create corresponding ColumnBufferPtrVariant
 		*			objects.
 		*			If no STableInfo is available, one is fetched from the database and remembered for later use.
 		*			Creation of the buffer will fail if the SQL type of that column is not supported. If the flag
@@ -928,7 +803,7 @@ namespace exodbc
 		*			the database. The Table has stored the STableInfo now.
 		* \throw	Exception If no Columns are found.
 		*/
-		std::vector<SqlCBufferVariant> CreateAutoColumnBuffers(bool skipUnsupportedColumns);
+		std::vector<ColumnBufferPtrVariant> CreateAutoColumnBuffers(bool skipUnsupportedColumns);
 
 
 		// Private stuff
@@ -1009,7 +884,7 @@ namespace exodbc
 		* \throw	Exception If no columnBuffer found, or if the ColumnBuffer is Null.
 		* \throw	NullValueException if the value is NULL.
 		*/
-		const SqlCBufferVariant& GetNonNullColumnVariant(SQLSMALLINT columnIndex) const;
+		const ColumnBufferPtrVariant& GetNonNullColumnBufferPtrVariant(SQLSMALLINT columnIndex) const;
 
 		ConstDatabasePtr		m_pDb;
 //		const Database*				m_pDb;	///< Database this table belongs to.
@@ -1042,7 +917,7 @@ namespace exodbc
 															///< The ColumnBuffers marked in this set will be used as primary key columns.
 															///< Used if columns are not defined manually but queried, but the Database does not support SQLPrimaryKeys.
 
-		SqlCBufferVariantMap m_columns;
+		ColumnBufferPtrVariantMap m_columns;
 
 //		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
