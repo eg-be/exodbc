@@ -156,32 +156,6 @@ namespace exodbc
 
 	// Flags
 	// =====
-	
-	/*!
-	* \enum ColumnFlag
-	* \brief Define flags of a Column.
-	*/
-	enum OldColumnFlag
-	{
-		CF_NONE = 0x0,		///< No flags.
-
-		CF_SELECT = 0x1,	///< Include Column in Selects.
-		CF_UPDATE = 0x2,	///< Include Column in Updates.
-		CF_INSERT = 0x4,	///< Include Column in Inserts.
-		CF_NULLABLE = 0x8,	///< Column is null able.
-		CF_PRIMARY_KEY = 0x10,	///< Column is primary key.
-
-		CF_READ = CF_SELECT,	///< CF_SELECT
-		CF_WRITE = CF_UPDATE | CF_INSERT,	///< CF_UPDATE | CF_INSERT
-		CF_READ_WRITE = CF_SELECT | CF_UPDATE | CF_INSERT	///< CF_SELECT | CF_UPDATE | CF_INSERT
-	};
-
-	/*!
-	* \typedef ColumnFlags
-	* \brief Flag holder for ColumnFlag flags.
-	*/
-	typedef unsigned int OldColumnFlags;
-
 
 	// Structs
 	// -------

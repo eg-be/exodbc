@@ -15,7 +15,6 @@
 
 // Same component headers
 #include "Helpers.h"
-#include "ColumnBuffer.h"
 #include "Database.h"
 #include "Environment.h"
 #include "Exception.h"
@@ -362,21 +361,17 @@ namespace exodbc
 			throw ex;
 		}
 		// Derive the ColumnFlags from the TableAccessFlags
-		OldColumnFlags columnFlags = CF_NONE;
 		ColumnFlags flags;
 		if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 		{
-			columnFlags |= CF_SELECT;
 			flags.Set(ColumnFlag::CF_SELECT);
 		}
 		if (TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE) || TestAccessFlag(TableAccessFlag::AF_UPDATE_PK))
 		{
-			columnFlags |= CF_UPDATE;
 			flags.Set(ColumnFlag::CF_UPDATE);
 		}
 		if (TestAccessFlag(TableAccessFlag::AF_INSERT))
 		{
-			columnFlags |= CF_INSERT;
 			flags.Set(ColumnFlag::CF_INSERT);
 		}
 
@@ -1040,13 +1035,6 @@ namespace exodbc
 		//return value;
 
 		return 0;
-	}
-
-
-	void Table::SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value) const
-	{
-		//ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		//*pBuff = value;
 	}
 
 
