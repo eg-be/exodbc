@@ -132,32 +132,34 @@ namespace exodbc
 
 		virtual ~ColumnBuffer()
 		{
-			//// If we are still bound to columns or params, release the bindings and disconnect the signals
-			//// Also disconnect all signals
-			//for (auto it = m_resetParamsConnections.begin(); it != m_resetParamsConnections.end(); ++it)
-			//{
-			//	try
-			//	{
-			//		it->first->ResetParams();
-			//	}
-			//	catch (const Exception& ex)
-			//	{
-			//		LOG_ERROR(ex.ToString());
-			//	}
-			//	it->second.disconnect();
-			//}
-			//for (auto it = m_unbindColumnsConnections.begin(); it != m_unbindColumnsConnections.end(); ++it)
-			//{
-			//	try
-			//	{
-			//		it->first->UnbindColumns();
-			//	}
-			//	catch (const Exception& ex)
-			//	{
-			//		LOG_ERROR(ex.ToString());
-			//	}
-			//	it->second.disconnect();
-			//}
+			// If we are still bound to columns or params, release the bindings and disconnect the signals
+			// Also disconnect all signals
+			for (auto it = m_resetParamsConnections.begin(); it != m_resetParamsConnections.end(); ++it)
+			{
+				// disconnect first, we know its being reseted
+				it->second.disconnect();
+				try
+				{
+					it->first->ResetParams();
+				}
+				catch (const Exception& ex)
+				{
+					LOG_ERROR(ex.ToString());
+				}
+			}
+			for (auto it = m_unbindColumnsConnections.begin(); it != m_unbindColumnsConnections.end(); ++it)
+			{
+				// disconnect first, we know its being unbound now.
+				it->second.disconnect();
+				try
+				{
+					it->first->UnbindColumns();
+				}
+				catch (const Exception& ex)
+				{
+					LOG_ERROR(ex.ToString());
+				}
+			}
 		};
 
 		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
@@ -187,38 +189,39 @@ namespace exodbc
 
 		void OnResetParams(const SqlStmtHandle& stmt)
 		{
-			//// remove from our map, we are no longer interested in resetting params on destruction
-
-			//auto it = m_resetParamsConnections.begin(); 
-			//while(it != m_resetParamsConnections.end())
-			//{
-			//	if (*(it->first) == stmt)
-			//	{
-			//		it = m_resetParamsConnections.erase(it);
-			//	}
-			//	else
-			//	{
-			//		++it;
-			//	}
-			//}
+			// remove from our map, we are no longer interested in resetting params on destruction
+			auto it = m_resetParamsConnections.begin(); 
+			while(it != m_resetParamsConnections.end())
+			{
+				if (*(it->first) == stmt)
+				{
+					it->second.disconnect();
+					it = m_resetParamsConnections.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
 		}
 
 
 		void OnUnbindColumns(const SqlStmtHandle& stmt)
 		{
-			//// remove from our map, we are no longer interested in resetting params on destruction
-			//auto it = m_unbindColumnsConnections.begin();
-			//while(it != m_unbindColumnsConnections.end())
-			//{
-			//	if (*(it->first) == stmt)
-			//	{
-			//		it = m_unbindColumnsConnections.erase(it);
-			//	}
-			//	else
-			//	{
-			//		++it;
-			//	}
-			//}
+			// remove from our map, we are no longer interested in resetting params on destruction
+			auto it = m_unbindColumnsConnections.begin();
+			while(it != m_unbindColumnsConnections.end())
+			{
+				if (*(it->first) == stmt)
+				{
+					it->second.disconnect();
+					it = m_unbindColumnsConnections.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
 		}
 
 
