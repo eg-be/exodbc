@@ -81,7 +81,7 @@ namespace exodbc
 		ClearTmpTable(TableId::INTEGERTYPES_TMP);
 		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
 		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		std::vector<SqlCBufferVariant> columns = iTable.CreateAutoColumnBuffers(false);
+		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false);
 		ASSERT_EQ(4, columns.size());
 
 		wstring queryTableName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
@@ -112,7 +112,7 @@ namespace exodbc
 		EXPECT_EQ(1, 1);
 		// Insert some values
 		// And execute multiple times
-		SqlSLongBuffer idCol = boost::get<SqlSLongBuffer>(columns[0]);
+		LongColumnBuffer idCol = boost::get<LongColumnBuffer>(columns[0]);
 		for (int i = 200; i < 210; i++)
 		{
 			idCol.SetValue(i);

@@ -564,11 +564,11 @@ namespace exodbc
 		// 0, 1, 2 which map to
 		// id, int1, int2
 
-		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(0));
-		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(1));
-		EXPECT_NO_THROW(nst.GetColumn<SqlSLongBuffer>(2));
+		EXPECT_NO_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(0));
+		EXPECT_NO_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(1));
+		EXPECT_NO_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(2));
 
-		EXPECT_THROW(nst.GetColumn<SqlSLongBuffer>(3), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(3), IllegalArgumentException);
 	}
 
 
@@ -587,17 +587,17 @@ namespace exodbc
 		// but we fail to read xml, so we have only indexes
 		// 0, 1, 2 which map to
 		// id, int1, int2
-		SqlSLongBuffer id = nst.GetColumn<SqlSLongBuffer>(0);
-		SqlSLongBuffer int1 = nst.GetColumn<SqlSLongBuffer>(1);
-		SqlSLongBuffer int2 = nst.GetColumn<SqlSLongBuffer>(2);
+		LongColumnBufferPtr pId = nst.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		LongColumnBufferPtr pInt1 = nst.GetColumnBufferPtr<LongColumnBufferPtr>(1);
+		LongColumnBufferPtr pInt2 = nst.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 
-		EXPECT_THROW(nst.GetColumn<SqlSLongBuffer>(3), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(3), IllegalArgumentException);
 
 		EXPECT_NO_THROW(nst.Select());
 		EXPECT_TRUE(nst.SelectNext());
-		EXPECT_EQ(1, id.GetValue());
-		EXPECT_EQ(10, int1.GetValue());
-		EXPECT_EQ(12, int2.GetValue());
+		EXPECT_EQ(1, pId->GetValue());
+		EXPECT_EQ(10, pInt1->GetValue());
+		EXPECT_EQ(12, pInt2->GetValue());
 	}
 
 
@@ -902,8 +902,8 @@ namespace exodbc
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
 		ASSERT_NO_THROW(iTable.Open());
 
-		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 
 		// We expect some Record that is not the one with id 2 if we move forward three times
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
@@ -912,13 +912,13 @@ namespace exodbc
 		ASSERT_TRUE(iTable.SelectNext());
 		ASSERT_TRUE(iTable.SelectNext());
 
-		ASSERT_NE(2, idCol);
+		ASSERT_NE(2, *pIdCol);
 
 		// now Select the first again using SelectFirst
 		// we must have the record with id 2
 		EXPECT_TRUE(iTable.SelectFirst());
-		EXPECT_EQ(2, idCol);
-		EXPECT_TRUE(intCol.IsNull());
+		EXPECT_EQ(2, *pIdCol);
+		EXPECT_TRUE(pIntCol->IsNull());
 	}
 
 
@@ -929,8 +929,8 @@ namespace exodbc
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
 		ASSERT_NO_THROW(iTable.Open());
 
-		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 
 		// We expect some Record that is not the one with id 2 if we move away from that one
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
@@ -939,12 +939,12 @@ namespace exodbc
 		ASSERT_TRUE(iTable.SelectNext());
 		ASSERT_TRUE(iTable.SelectNext());
 
-		ASSERT_NE(2, idCol);
+		ASSERT_NE(2, *pIdCol);
 
 		// now Select the last record
 		EXPECT_TRUE(iTable.SelectLast());
-		EXPECT_EQ(7, idCol);
-		EXPECT_EQ(26, intCol);
+		EXPECT_EQ(7, *pIdCol);
+		EXPECT_EQ(26, *pIntCol);
 	}
 
 
@@ -955,15 +955,15 @@ namespace exodbc
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
 		ASSERT_NO_THROW(iTable.Open());
 
-		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 
 		// Move the 3rd record in the result-set. 
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
 		ASSERT_NO_THROW(iTable.Select(sqlWhere));
 		EXPECT_TRUE(iTable.SelectAbsolute(3));
-		EXPECT_EQ(4, idCol);
-		EXPECT_EQ(2147483647, intCol);
+		EXPECT_EQ(4, *pIdCol);
+		EXPECT_EQ(2147483647, *pIntCol);
 
 		// Select something not in result set
 		EXPECT_FALSE(iTable.SelectAbsolute(20));
@@ -977,29 +977,29 @@ namespace exodbc
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
 		ASSERT_NO_THROW(iTable.Open());
 
-		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 
 		// We expect some Records
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
 		ASSERT_NO_THROW(iTable.Select(sqlWhere));
 		// Note: For MySQL to be able to select relative, a record must be selected first. Else, SelectRelative will choose wrong offset
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(2, idCol);
-		EXPECT_TRUE(intCol.IsNull());
+		EXPECT_EQ(2, *pIdCol);
+		EXPECT_TRUE(pIntCol->IsNull());
 
 		// Move by one forward
 		EXPECT_TRUE(iTable.SelectRelative(1));
-		EXPECT_EQ(3, idCol);
+		EXPECT_EQ(3, *pIdCol);
 		
 		// Move by one forward
 		EXPECT_TRUE(iTable.SelectRelative(1));
-		EXPECT_EQ(4, idCol);
+		EXPECT_EQ(4, *pIdCol);
 
 		// And one back again, check complete record
 		EXPECT_TRUE(iTable.SelectRelative(-1));
-		EXPECT_EQ(3, idCol);
-		EXPECT_EQ((-2147483647 - 1), intCol);
+		EXPECT_EQ(3, *pIdCol);
+		EXPECT_EQ((-2147483647 - 1), *pIntCol);
 
 		// Select something not in result set
 		EXPECT_FALSE(iTable.SelectRelative(20));
@@ -1013,22 +1013,22 @@ namespace exodbc
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
 		ASSERT_NO_THROW(iTable.Open());
 
-		SqlSLongBuffer idCol = iTable.GetColumn<SqlSLongBuffer>(0);
-		SqlSLongBuffer intCol = iTable.GetColumn<SqlSLongBuffer>(2);
+		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 		
 		// We expect some Records
 		std::wstring sqlWhere = boost::str(boost::wformat(L"%s >= 2 ORDER BY %s ASC") % idName % idName);
 		ASSERT_NO_THROW(iTable.Select(sqlWhere));
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(2, idCol);
+		EXPECT_EQ(2, *pIdCol);
 		EXPECT_TRUE(iTable.SelectNext());
-		EXPECT_EQ(3, idCol);
-		EXPECT_EQ((-2147483647 - 1), intCol);
+		EXPECT_EQ(3, *pIdCol);
+		EXPECT_EQ((-2147483647 - 1), *pIntCol);
 
 		// now Select the prev record - we have the first again
 		EXPECT_TRUE(iTable.SelectPrev());
-		EXPECT_EQ(2, idCol);
-		EXPECT_TRUE(intCol.IsNull());
+		EXPECT_EQ(2, *pIdCol);
+		EXPECT_TRUE(pIntCol->IsNull());
 
 		// no more prev records available:
 		EXPECT_FALSE(iTable.SelectPrev());
@@ -1366,23 +1366,23 @@ namespace exodbc
 	{
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
-		vector<SqlCBufferVariant> columns = iTable.CreateAutoColumnBuffers(false);
+		vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false);
 		
 		EXPECT_EQ(4, columns.size());
 		// Access reports everything as int columns
 		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[0]));
-			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[1]));
-			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[2]));
-			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[3]));
+			EXPECT_NO_THROW(boost::get<LongColumnBufferPtr>(columns[0]));
+			EXPECT_NO_THROW(boost::get<LongColumnBufferPtr>(columns[1]));
+			EXPECT_NO_THROW(boost::get<LongColumnBufferPtr>(columns[2]));
+			EXPECT_NO_THROW(boost::get<LongColumnBufferPtr>(columns[3]));
 		}
 		else
 		{
-			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[0]));
-			EXPECT_NO_THROW(boost::get<SqlSShortBuffer>(columns[1]));
-			EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[2]));
-			EXPECT_NO_THROW(boost::get<SqlSBigIntBuffer>(columns[3]));
+			EXPECT_NO_THROW(boost::get<LongColumnBufferPtr>(columns[0]));
+			EXPECT_NO_THROW(boost::get<ShortColumnBufferPtr>(columns[1]));
+			EXPECT_NO_THROW(boost::get<LongColumnBufferPtr>(columns[2]));
+			EXPECT_NO_THROW(boost::get<BigIntColumnBufferPtr>(columns[3]));
 		}
 	}
 
@@ -1391,21 +1391,21 @@ namespace exodbc
 	{
 		wstring tableName = GetTableName(TableId::BLOBTYPES);
 		Table bTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
-		vector<SqlCBufferVariant> columns = bTable.CreateAutoColumnBuffers(false);
+		vector<ColumnBufferPtrVariant> columns = bTable.CreateAutoColumnBufferPtrs(false);
 
 		EXPECT_EQ(3, columns.size());
 
-		EXPECT_NO_THROW(boost::get<SqlSLongBuffer>(columns[0]));
-		EXPECT_NO_THROW(boost::get<SqlBinaryArray>(columns[1]));
-		EXPECT_NO_THROW(boost::get<SqlBinaryArray>(columns[2]));
+		EXPECT_NO_THROW(boost::get<LongColumnBufferPtr>(columns[0]));
+		EXPECT_NO_THROW(boost::get<BinaryColumnBufferPtr>(columns[1]));
+		EXPECT_NO_THROW(boost::get<BinaryColumnBufferPtr>(columns[2]));
 
-		SqlBinaryArray blob16 = boost::get<SqlBinaryArray>(columns[1]);
-		SqlBinaryArray varblob20 = boost::get<SqlBinaryArray>(columns[2]);
+		BinaryColumnBufferPtr pBlob16 = boost::get<BinaryColumnBufferPtr>(columns[1]);
+		BinaryColumnBufferPtr pVarblob20 = boost::get<BinaryColumnBufferPtr>(columns[2]);
 
-		EXPECT_EQ(16, blob16.GetBufferLength());
-		EXPECT_EQ(20, varblob20.GetBufferLength());
-		EXPECT_EQ(16, blob16.GetNrOfElements());
-		EXPECT_EQ(20, varblob20.GetNrOfElements());
+		EXPECT_EQ(16, pBlob16->GetBufferLength());
+		EXPECT_EQ(20, pVarblob20->GetBufferLength());
+		EXPECT_EQ(16, pBlob16->GetNrOfElements());
+		EXPECT_EQ(20, pVarblob20->GetNrOfElements());
 	}
 
 
@@ -1420,7 +1420,7 @@ namespace exodbc
 		pTypeMap->RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
 		pTypeMap->RegisterType(SQL_CHAR, SQL_C_WCHAR);
 		cTable.SetSql2BufferTypeMap(pTypeMap);
-		vector<SqlCBufferVariant> columns = cTable.CreateAutoColumnBuffers(false);
+		vector<ColumnBufferPtrVariant> columns = cTable.CreateAutoColumnBufferPtrs(false);
 
 		EXPECT_EQ(5, columns.size());
 
@@ -1432,15 +1432,15 @@ namespace exodbc
 		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[3]));
 		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[4]));
 
-		SqlWCharArray varchar128 = boost::get<SqlWCharArray>(columns[1]);
-		SqlWCharArray char128 = boost::get<SqlWCharArray>(columns[2]);
-		SqlWCharArray varchar10 = boost::get<SqlWCharArray>(columns[3]);
-		SqlWCharArray char10 = boost::get<SqlWCharArray>(columns[4]);
+		WCharColumnBufferPtr pVarchar128 = boost::get<WCharColumnBufferPtr>(columns[1]);
+		WCharColumnBufferPtr pChar128 = boost::get<WCharColumnBufferPtr>(columns[2]);
+		WCharColumnBufferPtr pVarchar10 = boost::get<WCharColumnBufferPtr>(columns[3]);
+		WCharColumnBufferPtr pChar10 = boost::get<WCharColumnBufferPtr>(columns[4]);
 
-		EXPECT_EQ(128 + 1, varchar128.GetNrOfElements());
-		EXPECT_EQ(128 + 1, char128.GetNrOfElements());
-		EXPECT_EQ(10 + 1, varchar10.GetNrOfElements());
-		EXPECT_EQ(10 + 1, char10.GetNrOfElements());
+		EXPECT_EQ(128 + 1, pVarchar128->GetNrOfElements());
+		EXPECT_EQ(128 + 1, pChar128->GetNrOfElements());
+		EXPECT_EQ(10 + 1, pVarchar10->GetNrOfElements());
+		EXPECT_EQ(10 + 1, pChar10->GetNrOfElements());
 	}
 
 
@@ -1449,7 +1449,7 @@ namespace exodbc
 		wstring tableName = GetTableName(TableId::DATETYPES);
 		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		auto columns = dTable.CreateAutoColumnBuffers(false);
+		auto columns = dTable.CreateAutoColumnBufferPtrs(false);
 		EXPECT_EQ(4, columns.size());
 
 		SqlCTypeVisitor cTypeV;
@@ -1468,18 +1468,18 @@ namespace exodbc
 		}
 		EXPECT_EQ(SQL_C_TYPE_TIMESTAMP, boost::apply_visitor(cTypeV, columns[3]));
 
-		SqlTypeTimestampStructBuffer ts = boost::get<SqlTypeTimestampStructBuffer>(columns[3]);
+		TypeTimestampColumnBufferPtr pTs = boost::get<TypeTimestampColumnBufferPtr>(columns[3]);
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
-			EXPECT_EQ(3, ts.GetDecimalDigits());
+			EXPECT_EQ(3, pTs->GetDecimalDigits());
 		}
 		else if (m_pDb->GetDbms() == DatabaseProduct::DB2)
 		{
-			EXPECT_EQ(6, ts.GetDecimalDigits());
+			EXPECT_EQ(6, pTs->GetDecimalDigits());
 		}
 		else
 		{
-			EXPECT_EQ(0, ts.GetDecimalDigits());
+			EXPECT_EQ(0, pTs->GetDecimalDigits());
 		}
 	}
 
@@ -1489,7 +1489,7 @@ namespace exodbc
 		wstring tableName = GetTableName(TableId::FLOATTYPES);
 		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		auto columns = dTable.CreateAutoColumnBuffers(false);
+		auto columns = dTable.CreateAutoColumnBufferPtrs(false);
 		EXPECT_EQ(3, columns.size());
 
 		SqlCTypeVisitor cTypeV;
@@ -1513,7 +1513,7 @@ namespace exodbc
 		wstring tableName = GetTableName(TableId::NUMERICTYPES);
 		Table nTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		auto columns = nTable.CreateAutoColumnBuffers(false);
+		auto columns = nTable.CreateAutoColumnBufferPtrs(false);
 		EXPECT_EQ(4, columns.size());
 		SqlCTypeVisitor cTypeV;
 
@@ -1522,18 +1522,18 @@ namespace exodbc
 		EXPECT_EQ(SQL_C_NUMERIC, boost::apply_visitor(cTypeV, columns[2]));
 		EXPECT_EQ(SQL_C_NUMERIC, boost::apply_visitor(cTypeV, columns[3]));
 
-		auto num18_0 = boost::get<SqlNumericStructBuffer>(columns[1]);
-		auto num18_10 = boost::get<SqlNumericStructBuffer>(columns[2]);
-		auto num5_3 = boost::get<SqlNumericStructBuffer>(columns[3]);
+		auto pNum18_0 = boost::get<NumericColumnBufferPtr>(columns[1]);
+		auto pNum18_10 = boost::get<NumericColumnBufferPtr>(columns[2]);
+		auto pNum5_3 = boost::get<NumericColumnBufferPtr>(columns[3]);
 
-		EXPECT_EQ(18, num18_0.GetColumnSize());
-		EXPECT_EQ(0, num18_0.GetDecimalDigits());
+		EXPECT_EQ(18, pNum18_0->GetColumnSize());
+		EXPECT_EQ(0, pNum18_0->GetDecimalDigits());
 
-		EXPECT_EQ(18, num18_10.GetColumnSize());
-		EXPECT_EQ(10, num18_10.GetDecimalDigits());
+		EXPECT_EQ(18, pNum18_10->GetColumnSize());
+		EXPECT_EQ(10, pNum18_10->GetDecimalDigits());
 
-		EXPECT_EQ(5, num5_3.GetColumnSize());
-		EXPECT_EQ(3, num5_3.GetDecimalDigits());
+		EXPECT_EQ(5, pNum5_3->GetColumnSize());
+		EXPECT_EQ(3, pNum5_3->GetDecimalDigits());
 	}
 
 
@@ -1547,7 +1547,7 @@ namespace exodbc
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 		iTable.SetSql2BufferTypeMap(pTypeMap);
-		auto columns = iTable.CreateAutoColumnBuffers(true);
+		auto columns = iTable.CreateAutoColumnBufferPtrs(true);
 
 		// The id col and the tint column should be missing
 		// except for access, there everything should be missing
@@ -1573,7 +1573,7 @@ namespace exodbc
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 		iTable.SetSql2BufferTypeMap(pTypeMap);
 
-		EXPECT_THROW(iTable.CreateAutoColumnBuffers(false), NotSupportedException);
+		EXPECT_THROW(iTable.CreateAutoColumnBufferPtrs(false), NotSupportedException);
 	}
 
 // Interfaces
