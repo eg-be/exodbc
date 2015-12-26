@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\bitmask_operators.hpp" />
-    <ClInclude Include="include\ColumnBuffer.h" />
     <ClInclude Include="include\Database.h" />
     <ClInclude Include="include\DebugNew.h" />
     <ClInclude Include="include\EnumFlags.h" />
@@ -44,7 +43,6 @@
     <ClInclude Include="src\targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ColumnBuffer.cpp" />
     <ClCompile Include="src\Database.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>

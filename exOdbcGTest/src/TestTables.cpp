@@ -131,39 +131,39 @@ namespace exodbc
 			::testing::AssertionResult& m_result;
 			const Database& m_db;
 
-			bool operator()(TExp expected, BufferVariant value)
-			{
-				ValueIndicator indicator = GetValueIndicator(expected);
+			//bool operator()(TExp expected, BufferVariant value)
+			//{
+			//	//ValueIndicator indicator = GetValueIndicator(expected);
 
-				if (indicator == ValueIndicator::IGNORE_VAL)
-				{
-					return true;
-				}
+			//	//if (indicator == ValueIndicator::IGNORE_VAL)
+			//	//{
+			//	//	return true;
+			//	//}
 
-				if (indicator == ValueIndicator::IS_NULL && value.which() != 0)
-				{
-					m_result << "Expected NULL, but the value is not." << std::endl;
-					return false;
-				}
+			//	//if (indicator == ValueIndicator::IS_NULL && value.which() != 0)
+			//	//{
+			//	//	m_result << "Expected NULL, but the value is not." << std::endl;
+			//	//	return false;
+			//	//}
 
-				if (indicator == ValueIndicator::NO_INDICATOR)
-				{
-					TExpSqlType expI = boost::get<TExpSqlType>(expected);
-					if (value.which() == 0)
-					{
-						m_result << "Expected " << expI << ", but the value is NULL" << std::endl;
-						return false;
-					}
-					TBufferSqlType i = boost::get<TBufferSqlType>(value);
-					if (i != expI)
-					{
-						m_result << "Expected " << expI << ", but the value is " << i << "" << std::endl;
-						return false;
-					}
-				}
+			//	//if (indicator == ValueIndicator::NO_INDICATOR)
+			//	//{
+			//	//	TExpSqlType expI = boost::get<TExpSqlType>(expected);
+			//	//	if (value.which() == 0)
+			//	//	{
+			//	//		m_result << "Expected " << expI << ", but the value is NULL" << std::endl;
+			//	//		return false;
+			//	//	}
+			//	//	TBufferSqlType i = boost::get<TBufferSqlType>(value);
+			//	//	if (i != expI)
+			//	//	{
+			//	//		m_result << "Expected " << expI << ", but the value is " << i << "" << std::endl;
+			//	//		return false;
+			//	//	}
+			//	//}
 
-				return true;
-			}
+			//	return false;
+			//}
 		};
 
 

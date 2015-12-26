@@ -37,9 +37,6 @@
     <ClInclude Include="include\Environment.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ColumnBuffer.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\DebugNew.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -100,9 +97,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Environment.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ColumnBuffer.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\TablePrivileges.cpp">
