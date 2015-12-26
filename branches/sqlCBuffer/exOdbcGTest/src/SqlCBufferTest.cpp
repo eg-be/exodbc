@@ -66,28 +66,6 @@ namespace exodbc
 	}
 
 
-	TEST_F(SqlCBufferLengthIndicatorTest, CopyConstruction)
-	{
-		// must internally use the same cb-buffer
-		ColumnBufferLengthIndicator cb;
-		cb.SetCb(25);
-		ASSERT_EQ(25, cb.GetCb());
-
-		// create copy
-		ColumnBufferLengthIndicator cb2(cb);
-		EXPECT_EQ(25, cb2.GetCb());
-
-		// changing either must change the other too
-		cb.SetCb(13);
-		EXPECT_EQ(13, cb.GetCb());
-		EXPECT_EQ(13, cb2.GetCb());
-
-		cb2.SetCb(14);
-		EXPECT_EQ(14, cb.GetCb());
-		EXPECT_EQ(14, cb2.GetCb());
-	}
-
-
 	// SqlCBuffer
 	// -------------
 	TEST_F(SqlCBufferTest, Construction)
@@ -115,28 +93,6 @@ namespace exodbc
 	}
 
 
-	TEST_F(SqlCBufferTest, CopyConstruction)
-	{
-		// must internally use the same buffer
-		BigIntColumnBuffer buff;
-		buff.SetValue(25, buff.GetBufferLength());
-		ASSERT_EQ(25, buff.GetValue());
-
-		// create copy
-		BigIntColumnBuffer buff2(buff);
-		EXPECT_EQ(25, buff2.GetValue());
-
-		// changing either must change the other too
-		buff.SetValue(13, buff.GetBufferLength());
-		EXPECT_EQ(13, buff.GetValue());
-		EXPECT_EQ(13, buff.GetValue());
-
-		buff2.SetValue(14, buff.GetBufferLength());
-		EXPECT_EQ(14, buff.GetValue());
-		EXPECT_EQ(14, buff.GetValue());
-	}
-
-
 	// SqlCArrayBuffer
 	// -------------
 	TEST_F(SqlCArrayBufferTest, Construction)
@@ -155,42 +111,9 @@ namespace exodbc
 		WCharColumnArrayBuffer arr(L"ColumnName", 24);
 		wstring s(L"Hello");
 		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
-		wstring v(arr.GetBuffer()->data());
+		wstring v(arr.GetBuffer().data());
 		EXPECT_EQ(s, v);
 		EXPECT_EQ(SQL_NTS, arr.GetCb());
-	}
-
-
-	TEST_F(SqlCArrayBufferTest, CopyConstruction)
-	{
-		// must internally use the same buffer
-		WCharColumnArrayBuffer arr(L"ColumnName", 24);
-		wstring s(L"Hello");
-		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
-		wstring v(arr.GetBuffer()->data());
-		ASSERT_EQ(s, v);
-		ASSERT_EQ(SQL_NTS, arr.GetCb());
-
-		// create copy
-		WCharColumnArrayBuffer arr2(arr);
-		wstring v2(arr2.GetBuffer()->data());
-		EXPECT_EQ(s, v2);
-		EXPECT_EQ(arr.GetQueryName(), arr2.GetQueryName());
-
-		// changing either must change the other too
-		s = L"World";
-		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
-		v = arr.GetBuffer()->data();
-		v2 = arr2.GetBuffer()->data();
-		EXPECT_EQ(s, v);
-		EXPECT_EQ(s, v2);
-
-		s = L"Moon";
-		arr2.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
-		v = arr.GetBuffer()->data();
-		v2 = arr2.GetBuffer()->data();
-		EXPECT_EQ(s, v);
-		EXPECT_EQ(s, v2);
 	}
 
 
@@ -1850,15 +1773,15 @@ namespace exodbc
 
 			f(1);
 			EXPECT_EQ(16, blobCol.GetCb());
-			EXPECT_EQ(empty, *blobCol.GetBuffer());
+			EXPECT_EQ(empty, blobCol.GetBuffer());
 
 			f(2);
 			EXPECT_EQ(16, blobCol.GetCb());
-			EXPECT_EQ(ff, *blobCol.GetBuffer());
+			EXPECT_EQ(ff, blobCol.GetBuffer());
 
 			f(3);
 			EXPECT_EQ(16, blobCol.GetCb());
-			EXPECT_EQ(abc, *blobCol.GetBuffer());
+			EXPECT_EQ(abc, blobCol.GetBuffer());
 
 			f(4);
 			EXPECT_TRUE(blobCol.IsNull());
@@ -1874,15 +1797,15 @@ namespace exodbc
 			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
 			// Cb must reflect this
 			EXPECT_EQ(16, varBlobCol.GetCb());
-			const shared_ptr<vector<SQLCHAR>> pBuff = varBlobCol.GetBuffer();
-			EXPECT_EQ(20, pBuff->size());
+			vector<SQLCHAR> buff = varBlobCol.GetBuffer();
+			EXPECT_EQ(20, buff.size());
 			// Only compare first 16 elements
-			vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+			vector<SQLCHAR> first16Elements(buff.begin(), buff.begin() + 16);
 			EXPECT_EQ(abc, first16Elements);
 
 			f(5);
 			EXPECT_EQ(20, varBlobCol.GetCb());
-			EXPECT_EQ(abc_ff, *varBlobCol.GetBuffer());
+			EXPECT_EQ(abc_ff, varBlobCol.GetBuffer());
 
 			f(3);
 			EXPECT_TRUE(varBlobCol.IsNull());
@@ -1977,15 +1900,15 @@ namespace exodbc
 
 			f(101);
 			EXPECT_EQ(16, blobCol.GetCb());
-			EXPECT_EQ(empty, *blobCol.GetBuffer());
+			EXPECT_EQ(empty, blobCol.GetBuffer());
 
 			f(102);
 			EXPECT_EQ(16, blobCol.GetCb());
-			EXPECT_EQ(ff, *blobCol.GetBuffer());
+			EXPECT_EQ(ff, blobCol.GetBuffer());
 
 			f(103);
 			EXPECT_EQ(16, blobCol.GetCb());
-			EXPECT_EQ(abc, *blobCol.GetBuffer());
+			EXPECT_EQ(abc, blobCol.GetBuffer());
 
 			f(100);
 			EXPECT_TRUE(blobCol.IsNull());
@@ -2083,36 +2006,36 @@ namespace exodbc
 
 			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
 			// Cb must reflect this
-			const shared_ptr<vector<SQLCHAR>> pBuff = varblobCol.GetBuffer();
-			EXPECT_EQ(20, pBuff->size());
+			vector<SQLCHAR> buff = varblobCol.GetBuffer();
+			EXPECT_EQ(20, buff.size());
 			// Only compare first 16 elements in the following tests, except where we really put in 20 bytes.
 
 
 			f(101);
 			EXPECT_EQ(16, varblobCol.GetCb());
 			{
-				vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+				vector<SQLCHAR> first16Elements(buff.begin(), buff.begin() + 16);
 				EXPECT_EQ(empty, first16Elements);
 			}
 
 			f(102);
 			EXPECT_EQ(16, varblobCol.GetCb());
 			{
-				vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+				vector<SQLCHAR> first16Elements(buff.begin(), buff.begin() + 16);
 				EXPECT_EQ(ff, first16Elements);
 			}
 
 			f(103);
 			EXPECT_EQ(16, varblobCol.GetCb());
 			{
-				vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+				vector<SQLCHAR> first16Elements(buff.begin(), buff.begin() + 16);
 				EXPECT_EQ(abc, first16Elements);
 			}
 
 			// here we read 20 bytes
 			f(104);
 			EXPECT_EQ(20, varblobCol.GetCb());
-			EXPECT_EQ(abc_ff, *varblobCol.GetBuffer());
+			EXPECT_EQ(abc_ff, varblobCol.GetBuffer());
 
 			f(100);
 			EXPECT_TRUE(varblobCol.IsNull());
@@ -2798,36 +2721,36 @@ namespace exodbc
 
 			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
 			// Cb must reflect this
-			const shared_ptr<vector<SQLCHAR>> pBuff = varblobCol.GetBuffer();
-			EXPECT_EQ(20, pBuff->size());
+			vector<SQLCHAR> buff = varblobCol.GetBuffer();
+			EXPECT_EQ(20, buff.size());
 			// Only compare first 16 elements in the following tests, except where we really put in 20 bytes.
 
 
 			f(101);
 			EXPECT_EQ(16, varblobCol.GetCb());
 			{
-				vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+				vector<SQLCHAR> first16Elements(buff.begin(), buff.begin() + 16);
 				EXPECT_EQ(empty, first16Elements);
 			}
 
 			f(102);
 			EXPECT_EQ(16, varblobCol.GetCb());
 			{
-				vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+				vector<SQLCHAR> first16Elements(buff.begin(), buff.begin() + 16);
 				EXPECT_EQ(ff, first16Elements);
 			}
 
 			f(103);
 			EXPECT_EQ(16, varblobCol.GetCb());
 			{
-				vector<SQLCHAR> first16Elements(pBuff->begin(), pBuff->begin() + 16);
+				vector<SQLCHAR> first16Elements(buff.begin(), buff.begin() + 16);
 				EXPECT_EQ(abc, first16Elements);
 			}
 
 			// here we read 20 bytes
 			f(104);
 			EXPECT_EQ(20, varblobCol.GetCb());
-			EXPECT_EQ(abc_ff, *varblobCol.GetBuffer());
+			EXPECT_EQ(abc_ff, varblobCol.GetBuffer());
 
 			f(100);
 			EXPECT_TRUE(varblobCol.IsNull());

@@ -112,10 +112,10 @@ namespace exodbc
 		EXPECT_EQ(1, 1);
 		// Insert some values
 		// And execute multiple times
-		LongColumnBuffer idCol = boost::get<LongColumnBuffer>(columns[0]);
+		LongColumnBufferPtr pIdCol = boost::get<LongColumnBufferPtr>(columns[0]);
 		for (int i = 200; i < 210; i++)
 		{
-			idCol.SetValue(i);
+			pIdCol->SetValue(i);
 			ps.Execute();
 		}
 		m_pDb->CommitTrans();
