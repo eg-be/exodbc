@@ -2006,7 +2006,7 @@ namespace exodbc
 
 			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
 			// Cb must reflect this
-			vector<SQLCHAR> buff = varblobCol.GetBuffer();
+			const vector<SQLCHAR>& buff = varblobCol.GetBuffer();
 			EXPECT_EQ(20, buff.size());
 			// Only compare first 16 elements in the following tests, except where we really put in 20 bytes.
 
@@ -2721,7 +2721,7 @@ namespace exodbc
 
 			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
 			// Cb must reflect this
-			vector<SQLCHAR> buff = varblobCol.GetBuffer();
+			const vector<SQLCHAR>& buff = varblobCol.GetBuffer();
 			EXPECT_EQ(20, buff.size());
 			// Only compare first 16 elements in the following tests, except where we really put in 20 bytes.
 
