@@ -183,7 +183,7 @@ namespace exodbc
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 
 			// get a notification if unbound
-			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectFreeSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
+			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
 		};
 
 
@@ -261,7 +261,7 @@ namespace exodbc
 			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 
 			// Connect a signal that we are bound to this handle now and get notified if params get reseted
-			m_resetParamsConnections[pHStmt] = pHStmt->ConnectFreeSignal(boost::bind(&ColumnBuffer::OnResetParams, this, _1));
+			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBuffer::OnResetParams, this, _1));
 		}
 
 	private:
