@@ -644,7 +644,7 @@ namespace exodbc
 
 
 		template<typename T>
-		const T& GetColumn(SQLSMALLINT columnIndex) const
+		T GetColumnBufferPtr(SQLSMALLINT columnIndex) const
 		{
 			const ColumnBufferPtrVariant& columnVariant = GetColumnBufferPtrVariant(columnIndex);
 			try
@@ -803,7 +803,7 @@ namespace exodbc
 		*			the database. The Table has stored the STableInfo now.
 		* \throw	Exception If no Columns are found.
 		*/
-		std::vector<ColumnBufferPtrVariant> CreateAutoColumnBuffers(bool skipUnsupportedColumns);
+		std::vector<ColumnBufferPtrVariant> CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns);
 
 
 		// Private stuff

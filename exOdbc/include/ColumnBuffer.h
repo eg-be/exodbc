@@ -419,7 +419,7 @@ namespace exodbc
 
 		void SetValue(const std::vector<T>& value, SQLLEN cb)
 		{ 
-			exASSERT(value.size() <= buffer.capacity()); 
+			exASSERT(value.size() <= m_buffer.capacity()); 
 			size_t index = 0;
 			for (auto it = value.begin(); it != value.end(); ++it)
 			{

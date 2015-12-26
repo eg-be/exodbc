@@ -339,7 +339,7 @@ namespace exodbc
 	}
 
 
-	std::vector<ColumnBufferPtrVariant> Table::CreateAutoColumnBuffers(bool skipUnsupportedColumns)
+	std::vector<ColumnBufferPtrVariant> Table::CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns)
 	{
 		exASSERT(m_pDb->IsOpen());
 
@@ -1212,7 +1212,7 @@ namespace exodbc
 
 			if (!m_manualColumns)
 			{
-				const std::vector<ColumnBufferPtrVariant>& columns = CreateAutoColumnBuffers(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
+				const std::vector<ColumnBufferPtrVariant>& columns = CreateAutoColumnBufferPtrs(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 				for (size_t i = 0; i < columns.size(); ++i)
 				{
 					m_columns[(SQLUSMALLINT)i] = columns[i];
