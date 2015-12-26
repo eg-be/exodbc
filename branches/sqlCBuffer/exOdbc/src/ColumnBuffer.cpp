@@ -10,7 +10,7 @@
 #include "stdafx.h"
 
 // Own header
-#include "SqlCBuffer.h"
+#include "ColumnBuffer.h"
 
 // Same component headers
 // Other headers
@@ -26,40 +26,40 @@ using namespace std;
 namespace exodbc
 {
 
-	SqlCBufferVariant CreateBuffer(SQLSMALLINT sqlCType, const std::wstring& queryName)
+	ColumnBufferPtrVariant CreateColumnBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName)
 	{
 		switch (sqlCType)
 		{
 		case SQL_C_USHORT:
-			return SqlUShortBuffer(queryName);
+			return UShortColumnBuffer::Create(queryName);
 		case SQL_C_SSHORT:
-			return SqlSShortBuffer(queryName);
+			return ShortColumnBuffer::Create(queryName);
 		case SQL_C_ULONG:
-			return SqlULongBuffer(queryName);
+			return ULongColumnBuffer::Create(queryName);
 		case SQL_C_SLONG:
-			return SqlSLongBuffer(queryName);
+			return LongColumnBuffer::Create(queryName);
 		case SQL_C_UBIGINT:
-			return SqlUBigIntBuffer(queryName);
+			return UBigIntColumnBuffer::Create(queryName);
 		case SQL_C_SBIGINT:
-			return SqlSBigIntBuffer(queryName);
+			return BigIntColumnBuffer::Create(queryName);
 		case SQL_C_TYPE_TIME:
-			return SqlTypeTimeStructBuffer(queryName);
+			return TypeTimeColumnBuffer::Create(queryName);
 		case SQL_C_TIME:
-			return SqlTimeStructBuffer(queryName);
+			return TimeColumnBuffer::Create(queryName);
 		case SQL_C_TYPE_DATE:
-			return SqlTypeDateStructBuffer(queryName);
+			return TypeDateColumnBuffer::Create(queryName);
 		case SQL_C_DATE:
-			return SqlDateStructBuffer(queryName);
+			return DateColumnBuffer::Create(queryName);
 		case SQL_C_TYPE_TIMESTAMP:
-			return SqlTypeTimestampStructBuffer(queryName);
+			return TypeTimestampColumnBuffer::Create(queryName);
 		case SQL_C_TIMESTAMP:
-			return SqlTimeStructBuffer(queryName);
+			return TimeColumnBuffer::Create(queryName);
 		case SQL_C_NUMERIC:
-			return SqlNumericStructBuffer(queryName);
+			return NumericColumnBuffer::Create(queryName);
 		case SQL_C_DOUBLE:
-			return SqlDoubleBuffer(queryName);
+			return DoubleColumnBuffer::Create(queryName);
 		case SQL_C_FLOAT:
-			return SqlRealBuffer(queryName);
+			return RealColumnBuffer::Create(queryName);
 		default:
 			NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, sqlCType);
 			SET_EXCEPTION_SOURCE(nse);
@@ -68,7 +68,7 @@ namespace exodbc
 	}
 
 
-	SqlCBufferVariant CreateArrayBuffer(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo)
+	ColumnBufferPtrVariant CreateColumnArrayBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo)
 	{
 		exASSERT(IsArrayType(sqlCType));
 
@@ -83,17 +83,17 @@ namespace exodbc
 			SQLLEN arraySize = CalculateDisplaySize(columnInfo.GetSqlType(), columnSize, numPrecRadix, decimalDigits);
 			if (sqlCType == SQL_C_CHAR)
 			{
-				return SqlCharArray(queryName, arraySize);
+				return CharColumnArrayBuffer::Create(queryName, arraySize);
 			}
 			else
 			{
-				return SqlWCharArray(queryName, arraySize);
+				return WCharColumnArrayBuffer::Create(queryName, arraySize);
 			}
 			break;
 		}
 		case SQL_C_BINARY:
 			exASSERT(!columnInfo.IsColumnSizeNull());
-			return SqlBinaryArray(queryName, columnInfo.GetColumnSize());
+			return BinaryColumnArrayBuffer::Create(queryName, columnInfo.GetColumnSize());
 		default:
 			NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, sqlCType);
 			SET_EXCEPTION_SOURCE(nse);

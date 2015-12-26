@@ -102,7 +102,7 @@ namespace exodbc
 	};
 
 	typedef EnumFlags<ColumnFlag> ColumnFlags;
-
+	typedef std::shared_ptr<ColumnFlags> ColumnFlagsPtr;
 
 	/*!
 	* \enum AccessFlag

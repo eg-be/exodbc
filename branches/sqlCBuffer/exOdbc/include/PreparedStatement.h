@@ -11,9 +11,9 @@
 // Same component headers
 #include "exOdbc.h"
 #include "SqlHandle.h"
-#include "SqlCBuffer.h"
+#include "ColumnBuffer.h"
 #include "Database.h"
-#include "SqlCBuffer.h"
+#include "ColumnBuffer.h"
 
 // Other headers
 // System headers
@@ -83,16 +83,16 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Bind a SqlCBufferVariant to a parameter marker ('?').
+		* \brief	Bind a ColumnBufferPtrVariant to a parameter marker ('?').
 		*/
-		void BindParameter(SqlCBufferVariant column, SQLUSMALLINT columnNr);
+		void BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr);
 
 
 		/*!
-		* \brief	Bind a SqlCBufferVariant to a column of a result set (for
+		* \brief	Bind a ColumnBufferPtrVariant to a column of a result set (for
 		*			example a SELECT query).
 		*/
-		void BindColumn(SqlCBufferVariant column, SQLUSMALLINT columnNr);
+		void BindColumn(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr);
 
 
 
