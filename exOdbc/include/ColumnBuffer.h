@@ -95,45 +95,17 @@ namespace exodbc
 	};
 	typedef std::shared_ptr<ExtendedColumnPropertiesHolder> ExtendedColumnPropertiesHolderPtr;
 
-	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
-	class ColumnBuffer
-		: public ColumnBufferLengthIndicator
-		, public ColumnFlags
-		, public ExtendedColumnPropertiesHolder
+
+	class ColumnBufferBindInfoHolder
 	{
 	public:
-		ColumnBuffer()
-			: ColumnBufferLengthIndicator()
-			, ColumnFlags()
-			, ExtendedColumnPropertiesHolder()
-		{
-			::ZeroMemory(&m_buffer, sizeof(T));
-			SetNull();
-		};
+		ColumnBufferBindInfoHolder() = default;
+		ColumnBufferBindInfoHolder(const ColumnBufferBindInfoHolder& other) = delete;
+		ColumnBufferBindInfoHolder& operator=(const ColumnBufferBindInfoHolder& other) = delete;
 
-		ColumnBuffer(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
-			: ColumnBufferLengthIndicator()
-			, ColumnFlags(flags)
-			, ExtendedColumnPropertiesHolder()
-			, m_queryName(queryName)
-		{
-			::ZeroMemory(&m_buffer, sizeof(T));
-			SetNull();
-		};
-
-		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName)
-		{
-			return std::make_shared<ColumnBuffer>(queryName);
-		}
-
-
-		ColumnBuffer& operator=(const ColumnBuffer& other) = delete;
-		ColumnBuffer(const ColumnBuffer& other) = delete;
-
-		virtual ~ColumnBuffer()
+		virtual ~ColumnBufferBindInfoHolder()
 		{
 			// If we are still bound to columns or params, release the bindings and disconnect the signals
-			// Also disconnect all signals
 			for (auto it = m_resetParamsConnections.begin(); it != m_resetParamsConnections.end(); ++it)
 			{
 				// disconnect first, we know its being reseted
@@ -162,6 +134,90 @@ namespace exodbc
 			}
 		};
 
+		void OnResetParams(const SqlStmtHandle& stmt)
+		{
+			// remove from our map, we are no longer interested in resetting params on destruction
+			auto it = m_resetParamsConnections.begin();
+			while (it != m_resetParamsConnections.end())
+			{
+				if (*(it->first) == stmt)
+				{
+					it->second.disconnect();
+					it = m_resetParamsConnections.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+		}
+
+
+		void OnUnbindColumns(const SqlStmtHandle& stmt)
+		{
+			// remove from our map, we are no longer interested in resetting params on destruction
+			auto it = m_unbindColumnsConnections.begin();
+			while (it != m_unbindColumnsConnections.end())
+			{
+				if (*(it->first) == stmt)
+				{
+					it->second.disconnect();
+					it = m_unbindColumnsConnections.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+		}
+
+	protected:
+		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_unbindColumnsConnections;
+		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_resetParamsConnections;
+	};
+
+
+	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
+	class ColumnBuffer
+		: public ColumnBufferLengthIndicator
+		, public ColumnFlags
+		, public ExtendedColumnPropertiesHolder
+		, public ColumnBufferBindInfoHolder
+	{
+	public:
+		ColumnBuffer()
+			: ColumnBufferLengthIndicator()
+			, ColumnFlags()
+			, ExtendedColumnPropertiesHolder()
+			, ColumnBufferBindInfoHolder()
+		{
+			::ZeroMemory(&m_buffer, sizeof(T));
+			SetNull();
+		};
+
+		ColumnBuffer(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
+			: ColumnBufferLengthIndicator()
+			, ColumnFlags(flags)
+			, ExtendedColumnPropertiesHolder()
+			, ColumnBufferBindInfoHolder()
+			, m_queryName(queryName)
+		{
+			::ZeroMemory(&m_buffer, sizeof(T));
+			SetNull();
+		};
+
+		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName)
+		{
+			return std::make_shared<ColumnBuffer>(queryName);
+		}
+
+
+		ColumnBuffer& operator=(const ColumnBuffer& other) = delete;
+		ColumnBuffer(const ColumnBuffer& other) = delete;
+
+		virtual ~ColumnBuffer()
+		{ };
+
 		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
 		static SQLLEN GetBufferLength() noexcept { return sizeof(T); };
 
@@ -185,44 +241,6 @@ namespace exodbc
 			// get a notification if unbound
 			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
 		};
-
-
-		void OnResetParams(const SqlStmtHandle& stmt)
-		{
-			// remove from our map, we are no longer interested in resetting params on destruction
-			auto it = m_resetParamsConnections.begin(); 
-			while(it != m_resetParamsConnections.end())
-			{
-				if (*(it->first) == stmt)
-				{
-					it->second.disconnect();
-					it = m_resetParamsConnections.erase(it);
-				}
-				else
-				{
-					++it;
-				}
-			}
-		}
-
-
-		void OnUnbindColumns(const SqlStmtHandle& stmt)
-		{
-			// remove from our map, we are no longer interested in resetting params on destruction
-			auto it = m_unbindColumnsConnections.begin();
-			while(it != m_unbindColumnsConnections.end())
-			{
-				if (*(it->first) == stmt)
-				{
-					it->second.disconnect();
-					it = m_unbindColumnsConnections.erase(it);
-				}
-				else
-				{
-					++it;
-				}
-			}
-		}
 
 
 		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
@@ -267,8 +285,6 @@ namespace exodbc
 	private:
 		T m_buffer;
 		std::wstring m_queryName;
-		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_unbindColumnsConnections;
-		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_resetParamsConnections;
 	};
 
 	template<>
@@ -289,7 +305,7 @@ namespace exodbc
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER) &m_cb);
 
 		// get a notification if unbound
-		m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectFreeSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
+		m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
 	}
 
 
@@ -338,7 +354,7 @@ namespace exodbc
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer);
 
 		// Connect a signal that we are bound to this handle now and get notified if params get reseted
-		m_resetParamsConnections[pHStmt] = pHStmt->ConnectFreeSignal(boost::bind(&ColumnBuffer::OnResetParams, this, _1));
+		m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBuffer::OnResetParams, this, _1));
 	}
 
 
@@ -385,6 +401,7 @@ namespace exodbc
 		: public ColumnBufferLengthIndicator
 		, public ColumnFlags
 		, public ExtendedColumnPropertiesHolder
+		, public ColumnBufferBindInfoHolder
 	{
 	public:
 		ColumnArrayBuffer() = delete;
@@ -458,6 +475,9 @@ namespace exodbc
 
 			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*) &m_buffer[0], GetBufferLength(), &m_cb);
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+			// get a notification if unbound
+			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnArrayBuffer::OnUnbindColumns, this, _1));
 		};
 
 
@@ -495,6 +515,9 @@ namespace exodbc
 			// And bind using the information just read
 			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(), paramNr, SQL_PARAM_INPUT, sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*)&m_buffer[0], GetBufferLength(), &m_cb);
 			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+			// Connect a signal that we are bound to this handle now and get notified if params get reseted
+			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnArrayBuffer::OnResetParams, this, _1));
 		}
 
 	private:
@@ -516,6 +539,7 @@ namespace exodbc
 		: public ColumnBufferLengthIndicator
 		, public ColumnFlags
 		, public ExtendedColumnPropertiesHolder
+		, public ColumnBufferBindInfoHolder
 	{
 	public:
 		SqlCPointerBuffer() = delete;
@@ -539,9 +563,6 @@ namespace exodbc
 
 		virtual ~SqlCPointerBuffer()
 		{
-			// unbind selects, one by one, do not stop if one fails but try the next one
-			// (thats why this is not done using Unbind() )
-
 		};
 
 		SQLSMALLINT GetSqlCType() const noexcept { return m_sqlCType; };
@@ -570,6 +591,9 @@ namespace exodbc
 				SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, m_sqlCType, (SQLPOINTER*)m_pBuffer, GetBufferLength(), &m_cb);
 				THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 			}
+			
+			// get a notification if unbound
+			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&SqlCPointerBuffer::OnUnbindColumns, this, _1));
 		}
 
 		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
@@ -618,6 +642,8 @@ namespace exodbc
 				SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)m_pBuffer);
 			}
 
+			// Connect a signal that we are bound to this handle now and get notified if params get reseted
+			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&SqlCPointerBuffer::OnResetParams, this, _1));
 		}
 
 
