@@ -22,6 +22,7 @@
 #include "SqlHandle.h"
 #include "Database.h"
 #include "EnumFlags.h"
+#include "ExecutableStatement.h"
 
 // Other headers
 #include "boost/any.hpp"
@@ -491,13 +492,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Check if a Select() Query is open.
-		* \return	True if a Select() Query is open and rows can be iterated using SelectNext()
-		*/
-		bool		IsSelectOpen() const { return m_selectQueryOpen; };
-
-
-		/*!
 		* \brief	Inserts the current values into the database as a new row.
 		* \details	The values in the ColumnBuffer currently bound will be inserted
 		*			into the database.
@@ -817,30 +811,15 @@ namespace exodbc
 		*
 		* \throw	Exception If any of the handles to be allocated is not null currently.
 		*/
-		void AllocateStatements();
+		void AllocateStatements(bool forwardOnlyCursors);
 
-
-		/*!
-		* \brief	Set Options on Statement handles related to Cursor things.
-		* \throw Exception
-		*/
-		void SetCursorOptions(bool forwardOnlyCursors);
-
-		
+	
 		/*!
 		* \brief	Frees all handles that are not set to null. Freed handles are set to NULL.
 		* \throw	SqlResultException if freeing one of the handles fail. No other handles
 		*			will be freed after one handle fails to free.
 		*/
 		void		FreeStatements();
-
-
-		/*!
-		* \brief	Wrapper to SQLFetchScroll
-		* \throw	Exception if TOF_FORWARD_ONLY_CURSORS is set, or no Select-Statement is open,
-		*			or if SQLFetchScroll does not return with SQL_SUCCEEDED or SQL_NO_DATA.
-		*/
-		bool		SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset);
 
 
 		/*!
@@ -889,8 +868,12 @@ namespace exodbc
 		ConstDatabasePtr		m_pDb;	///< Database this table belongs to.
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
+		// Executable Statements used
+		ExecutableStatement	m_stmtCount;
+		ExecutableStatement m_stmtSelect;
+
 		// ODBC Handles
-		SqlStmtHandlePtr	m_pHStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
+		//SqlStmtHandlePtr	m_pHStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
 		//SqlStmtHandlePtr	m_pHStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
 
 		//SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
@@ -901,7 +884,7 @@ namespace exodbc
 		//SQLHSTMT		m_hStmtDeleteWhere;	///< Statement-handle to do DELETEs using a passed WHERE clause.
 		//SQLHSTMT		m_hStmtUpdateWhere;	///< Statement-handle to do UPDATEs using a passed WHERE clause.
 
-		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
+		//bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
 
 		// Table Information
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set

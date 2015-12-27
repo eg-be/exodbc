@@ -41,7 +41,7 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
+		//, m_pHStmtSelect(make_shared<SqlStmtHandle>())
 		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
@@ -50,7 +50,7 @@ namespace exodbc
 		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
 		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		, m_selectQueryOpen(false)
+		//, m_selectQueryOpen(false)
 		//, m_openFlags(TOF_NONE)
 	{ }
 
@@ -62,7 +62,7 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
+		//, m_pHStmtSelect(make_shared<SqlStmtHandle>())
 		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
@@ -71,7 +71,7 @@ namespace exodbc
 		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
 		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		, m_selectQueryOpen(false)
+		//, m_selectQueryOpen(false)
 		//, m_openFlags(TOF_NONE)
 	{
 		Init(pDb, afs, tableName, schemaName, catalogName, tableType);
@@ -85,7 +85,7 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
+		//, m_pHStmtSelect(make_shared<SqlStmtHandle>())
 		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
@@ -94,7 +94,7 @@ namespace exodbc
 		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
 		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		, m_selectQueryOpen(false)
+		//, m_selectQueryOpen(false)
 		//, m_openFlags(TOF_NONE)
 	{
 		Init(pDb, afs, tableInfo);
@@ -108,7 +108,7 @@ namespace exodbc
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
+		//, m_pHStmtSelect(make_shared<SqlStmtHandle>())
 		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
@@ -117,7 +117,7 @@ namespace exodbc
 		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
 		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
 		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		, m_selectQueryOpen(false)
+		//, m_selectQueryOpen(false)
 		//, m_openFlags(TOF_NONE)
 	{
 		// note: This constructor will always copy the search-names. Maybe they were set on other,
@@ -228,12 +228,13 @@ namespace exodbc
 	}
 
 
-	void Table::AllocateStatements()
+	void Table::AllocateStatements(bool forwardOnlyCursors)
 	{
 		exASSERT(!IsOpen());
 		exASSERT(m_pDb->IsOpen());
 
-		exASSERT(!m_pHStmtSelect->IsAllocated());
+		//exASSERT(m_stmtCount->)
+		//exASSERT(!m_pHStmtSelect->IsAllocated());
 		//exASSERT(!m_pHStmtCount->IsAllocated());
 		//exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
 		//exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
@@ -250,7 +251,9 @@ namespace exodbc
 		{
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
-				m_pHStmtSelect->AllocateWithParent(pHDbc);
+				m_stmtCount.Init(m_pDb, forwardOnlyCursors);
+				m_stmtSelect.Init(m_pDb, forwardOnlyCursors);
+				//m_pHStmtSelect->AllocateWithParent(pHDbc);
 				//m_pHStmtCount->AllocateWithParent(pHDbc);
 			}
 
@@ -280,8 +283,10 @@ namespace exodbc
 		catch (const Exception& ex)
 		{
 			HIDE_UNUSED(ex);
-			if (m_pHStmtSelect->IsAllocated())
-				m_pHStmtSelect->Free();
+			m_stmtCount.Reset();
+			m_stmtSelect.Reset();
+			//if (m_pHStmtSelect->IsAllocated())
+				//m_pHStmtSelect->Free();
 			//if (m_pHStmtCount->IsAllocated())
 			//	m_pHStmtCount->Free();
 
@@ -319,24 +324,6 @@ namespace exodbc
 		//	haveAll = (SQL_NULL_HSTMT != m_hStmtDeleteWhere);
 		//}
 		return haveAll;
-	}
-
-
-	void Table::SetCursorOptions(bool forwardOnlyCursors)
-	{
-		exASSERT(m_pHStmtSelect->IsAllocated());
-
-		SQLRETURN ret = 0;
-		if (forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
-		{
-			ret = SQLSetStmtAttr(m_pHStmtSelect->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_NONSCROLLABLE, NULL);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
-		}
-		else
-		{
-			ret = SQLSetStmtAttr(m_pHStmtSelect->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER) SQL_SCROLLABLE, NULL);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
-		}
 	}
 
 
@@ -433,15 +420,11 @@ namespace exodbc
 
 	void Table::FreeStatements()
 	{
-		exASSERT(!IsOpen());
+		// Do NOT check for IsOpen() here. If Open() fails it will call FreeStatements to do its cleanup
+		// exASSERT(IsOpen());
 
-		// Don no call free on the statements, but create new shared_ptrs.
-		// If someone managed somehow to still have a reference to an allocated stmt
-		// the shared_ptr will manage destruction once the last client is gone.
-		// This is not public, and should only happen if not open,
-		// when TableAccessFlags are modified before the table is opened.
-		m_pHStmtSelect = std::make_shared<SqlStmtHandle>();
-		//m_pHStmtCount = std::make_shared<SqlStmtHandle>();
+		m_stmtCount.Reset();
+		m_stmtSelect.Reset();
 
 		//if (m_pHStmtSelect->IsAllocated())
 		//	m_pHStmtSelect->Free();
@@ -480,30 +463,6 @@ namespace exodbc
 		//	m_hStmtUpdateWhere = FreeStatementHandle(m_hStmtUpdateWhere);
 		//}
 	}
-
-
-	bool Table::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
-	{
-		exASSERT(!TestOpenFlag(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS));
-		exASSERT(IsSelectOpen());
-		exASSERT(m_pHStmtSelect->IsAllocated());
-
-		SQLRETURN ret = SQLFetchScroll(m_pHStmtSelect->GetHandle(), fetchOrientation, fetchOffset);
-		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
-		{
-			wstring msg = boost::str(boost::wformat(L"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
-			SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle(), msg);
-			SET_EXCEPTION_SOURCE(sre);
-			throw sre;
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(m_pHStmtSelect->GetHandle(), ret, SQLFetch);
-		}
-
-		return SQL_SUCCEEDED(ret);
-	}
-
 
 
 	std::wstring Table::BuildFieldsStatement() const
@@ -808,74 +767,50 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(!sqlStmt.empty());
-		exASSERT(m_pHStmtSelect->IsAllocated());
 
-		if (IsSelectOpen())
-		{
-			SelectClose();
-		}
-
-		SQLRETURN ret = SQLExecDirect(m_pHStmtSelect->GetHandle(), (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCESS(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle());
-		m_selectQueryOpen = true;
+		m_stmtSelect.ExecuteDirect(sqlStmt);
 	}
 
 
 	bool Table::SelectPrev()
 	{
-		return SelectFetchScroll(SQL_FETCH_PREV, NULL);
+		return m_stmtSelect.SelectPrev();
 	}
 
 
 	bool Table::SelectFirst()
 	{
-		return SelectFetchScroll(SQL_FETCH_FIRST, NULL);
+		return m_stmtSelect.SelectFirst();
 	}
 
 
 	bool Table::SelectLast()
 	{
-		return SelectFetchScroll(SQL_FETCH_LAST, NULL);
+		return m_stmtSelect.SelectLast();
 	}
 
 
 	bool Table::SelectAbsolute(SQLLEN position)
 	{
-		return SelectFetchScroll(SQL_FETCH_ABSOLUTE, position);
+		return m_stmtSelect.SelectAbsolute(position);
 	}
 
 
 	bool Table::SelectRelative(SQLLEN offset)
 	{
-		return SelectFetchScroll(SQL_FETCH_RELATIVE, offset);
+		return m_stmtSelect.SelectRelative(offset);
 	}
 
 
 	bool Table::SelectNext()
 	{
-		exASSERT(IsSelectOpen());
-		exASSERT(m_pHStmtSelect->IsAllocated());
-			
-		SQLRETURN ret = SQLFetch(m_pHStmtSelect->GetHandle());
-		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
-		{
-			SqlResultException sre(L"SQLFetch", ret, SQL_HANDLE_STMT, m_pHStmtSelect->GetHandle());
-			SET_EXCEPTION_SOURCE(sre);
-			throw sre;
-		}
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			LOG_WARNING_STMT(m_pHStmtSelect->GetHandle(), ret, SQLFetch);
-		}
-
-		return SQL_SUCCEEDED(ret);
+		return m_stmtSelect.SelectNext();
 	}
 
 	
 	void Table::SelectClose()
 	{
-		StatementCloser::CloseStmtHandle(m_pHStmtSelect, StatementCloser::Mode::IgnoreNotOpen);
-		m_selectQueryOpen = false;
+		m_stmtSelect.SelectClose();
 	}
 
 
@@ -1140,10 +1075,9 @@ namespace exodbc
 		exASSERT(m_pDb);
 		exASSERT(m_pDb->IsOpen());
 		exASSERT(!IsOpen());
-		exASSERT(HasAllStatements());
-		// \note: We do not force a user to define columns.
 
-		// Init open flags
+		// Init open flags and update them with flags implicitely set by checking db-driver
+		// ---------------
 		m_openFlags = openFlags;
 
 		// Set TOF_DO_NOT_QUERY_PRIMARY_KEYS this flag for Access, Access does not support SQLPrimaryKeys
@@ -1151,6 +1085,15 @@ namespace exodbc
 		{
 			m_openFlags.Set(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS);
 		}
+
+		// Access and Excel seem to support only forward cursors, so activate that flag
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::EXCEL)
+		{
+			m_openFlags.Set(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS);
+		}
+
+		// Allocate all statements we need
+		AllocateStatements(m_openFlags.Test(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS));
 
 		// Nest try/catch the free the buffers created in here if we fail somewhere
 		// and to unbind all handles that were bound
@@ -1160,17 +1103,6 @@ namespace exodbc
 		bool boundInsert = false;
 		try
 		{
-			// Try to set Cursor-Options
-			// Do not try to set on Access or Excel, they report 'Optional feature not implemented' (even if trying to set forward-only)
-			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::EXCEL)
-			{
-				m_openFlags.Set(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS);
-			}
-			else
-			{
-				SetCursorOptions(TestOpenFlag(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS));
-			}
-
 			// If we do not already have a TableInfo for our table, we absolutely must find one
 			bool searchedTable = false;
 			if (!m_haveTableInfo)
@@ -1353,8 +1285,7 @@ namespace exodbc
 					ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
 					if (pFlags->Test(ColumnFlag::CF_SELECT))
 					{
-						BindSelectVisitor bindSelect(boundColumnNumber, m_pHStmtSelect);
-						boost::apply_visitor(bindSelect, columnBuffer);
+						m_stmtSelect.BindColumn( columnBuffer, boundColumnNumber);
 						boundColumnNumber++;
 					}
 				}
@@ -1418,8 +1349,12 @@ namespace exodbc
 		catch (const Exception& ex)
 		{
 			HIDE_UNUSED(ex);
-			// Unbind all Buffers
-			m_pHStmtSelect->UnbindColumns();
+			
+			// Reset all stmts
+			FreeStatements();
+			
+			//m_pHStmtSelect->UnbindColumns();
+
 
 			//for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
 			//{
@@ -1471,13 +1406,16 @@ namespace exodbc
 		exASSERT(IsOpen());
 
 		// Unbind all Columns
-		m_pHStmtSelect->UnbindColumns();
+		//m_pHStmtSelect->UnbindColumns();
 
 		// remove the ColumnBuffers if we have allocated them during this process (if not manual)
 		if (!m_manualColumns)
 		{
 			m_columns.clear();
 		}
+
+		// Reset all statements
+		FreeStatements();
 
 
 		//// Unbind ColumnBuffers
@@ -1575,9 +1513,9 @@ namespace exodbc
 		}
 
 		// Free statements, then re-allocate all
-		FreeStatements();
+		//FreeStatements();
 		m_tableAccessFlags = acs;
-		AllocateStatements();
+		//AllocateStatements();
 	}
 
 
