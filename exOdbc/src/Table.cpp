@@ -251,8 +251,8 @@ namespace exodbc
 		{
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
-				m_stmtCount.Init(m_pDb, forwardOnlyCursors);
-				m_stmtSelect.Init(m_pDb, forwardOnlyCursors);
+				m_directStmtCount.Init(m_pDb, forwardOnlyCursors);
+				m_directStmtSelect.Init(m_pDb, forwardOnlyCursors);
 				//m_pHStmtSelect->AllocateWithParent(pHDbc);
 				//m_pHStmtCount->AllocateWithParent(pHDbc);
 			}
@@ -283,8 +283,8 @@ namespace exodbc
 		catch (const Exception& ex)
 		{
 			HIDE_UNUSED(ex);
-			m_stmtCount.Reset();
-			m_stmtSelect.Reset();
+			m_directStmtCount.Reset();
+			m_directStmtSelect.Reset();
 			//if (m_pHStmtSelect->IsAllocated())
 				//m_pHStmtSelect->Free();
 			//if (m_pHStmtCount->IsAllocated())
@@ -423,8 +423,8 @@ namespace exodbc
 		// Do NOT check for IsOpen() here. If Open() fails it will call FreeStatements to do its cleanup
 		// exASSERT(IsOpen());
 
-		m_stmtCount.Reset();
-		m_stmtSelect.Reset();
+		m_directStmtCount.Reset();
+		m_directStmtSelect.Reset();
 
 		//if (m_pHStmtSelect->IsAllocated())
 		//	m_pHStmtSelect->Free();
@@ -721,6 +721,7 @@ namespace exodbc
 	SQLUBIGINT Table::Count(const std::wstring& whereStatement)
 	{
 		exASSERT(IsOpen());
+		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT));
 
 		// Prepare a Statement to be executed to count
 		// we need a column to store the result
@@ -766,51 +767,52 @@ namespace exodbc
 	void Table::SelectBySqlStmt(const std::wstring& sqlStmt)
 	{
 		exASSERT(IsOpen());
+		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT));
 		exASSERT(!sqlStmt.empty());
 
-		m_stmtSelect.ExecuteDirect(sqlStmt);
+		m_directStmtSelect.ExecuteDirect(sqlStmt);
 	}
 
 
 	bool Table::SelectPrev()
 	{
-		return m_stmtSelect.SelectPrev();
+		return m_directStmtSelect.SelectPrev();
 	}
 
 
 	bool Table::SelectFirst()
 	{
-		return m_stmtSelect.SelectFirst();
+		return m_directStmtSelect.SelectFirst();
 	}
 
 
 	bool Table::SelectLast()
 	{
-		return m_stmtSelect.SelectLast();
+		return m_directStmtSelect.SelectLast();
 	}
 
 
 	bool Table::SelectAbsolute(SQLLEN position)
 	{
-		return m_stmtSelect.SelectAbsolute(position);
+		return m_directStmtSelect.SelectAbsolute(position);
 	}
 
 
 	bool Table::SelectRelative(SQLLEN offset)
 	{
-		return m_stmtSelect.SelectRelative(offset);
+		return m_directStmtSelect.SelectRelative(offset);
 	}
 
 
 	bool Table::SelectNext()
 	{
-		return m_stmtSelect.SelectNext();
+		return m_directStmtSelect.SelectNext();
 	}
 
 	
 	void Table::SelectClose()
 	{
-		m_stmtSelect.SelectClose();
+		m_directStmtSelect.SelectClose();
 	}
 
 
@@ -1285,7 +1287,7 @@ namespace exodbc
 					ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
 					if (pFlags->Test(ColumnFlag::CF_SELECT))
 					{
-						m_stmtSelect.BindColumn( columnBuffer, boundColumnNumber);
+						m_directStmtSelect.BindColumn( columnBuffer, boundColumnNumber);
 						boundColumnNumber++;
 					}
 				}

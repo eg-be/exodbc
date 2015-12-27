@@ -869,12 +869,12 @@ namespace exodbc
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
 		// Executable Statements used
-		ExecutableStatement	m_stmtCount;
-		ExecutableStatement m_stmtSelect;
+		ExecutableStatement	m_directStmtCount;	///< Statement used to do SELECTs using ExecuteDirect. Columns are bound.
+		ExecutableStatement m_directStmtSelect;	///< Statement-handle used to do COUNTs. Columns are not bound.
 
 		// ODBC Handles
-		//SqlStmtHandlePtr	m_pHStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
-		//SqlStmtHandlePtr	m_pHStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
+		//SqlStmtHandlePtr	m_pHStmtSelect;	
+		//SqlStmtHandlePtr	m_pHStmtCount;	
 
 		//SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
 		//SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
