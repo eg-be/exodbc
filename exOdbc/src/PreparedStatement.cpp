@@ -14,6 +14,7 @@
 
 // Same component headers
 #include "SqlCBufferVisitors.h"
+#include "SqlStatementCloser.h"
 
 // Other headers
 
@@ -28,7 +29,7 @@ using namespace std;
 namespace exodbc
 {
 	PreparedStatement::PreparedStatement(ConstDatabasePtr pDb, const std::wstring& sqlstmt)
-		: m_sqlstmt(sqlstmt)
+		: m_isPrepared(false)
 		, m_useSqlDescribeParam(false)
 	{
 		exASSERT(pDb);
@@ -36,26 +37,16 @@ namespace exodbc
 
 		m_useSqlDescribeParam = DatabaseSupportsDescribeParam(pDb->GetDbms());
 		m_pHStmt = std::make_shared<SqlStmtHandle>(pDb->GetSqlDbcHandle());
-		Prepare();
-	}
-
-
-	PreparedStatement::PreparedStatement(ConstSqlDbcHandlePtr pHDbc, DatabaseProduct dbc, const std::wstring& sqlstmt)
-		: m_sqlstmt(sqlstmt)
-		, m_useSqlDescribeParam(false)
-	{
-		m_useSqlDescribeParam = DatabaseSupportsDescribeParam(dbc);
-		m_pHStmt = std::make_shared<SqlStmtHandle>(pHDbc);
-		Prepare();
+		Prepare(sqlstmt);
 	}
 
 
 	PreparedStatement::PreparedStatement(ConstSqlDbcHandlePtr pHDbc, bool useSqlDescribeParam, const std::wstring& sqlstmt)
-		: m_sqlstmt(sqlstmt)
+		: m_isPrepared(false)
 		, m_useSqlDescribeParam(useSqlDescribeParam)
 	{
 		m_pHStmt = std::make_shared<SqlStmtHandle>(pHDbc);
-		Prepare();
+		Prepare(sqlstmt);
 	}
 
 
@@ -75,6 +66,11 @@ namespace exodbc
 
 	void PreparedStatement::Execute()
 	{
+		exASSERT(m_isPrepared);
+
+		// Always discard pending results first
+		SelectClose();
+
 		SQLRETURN ret = SQLExecute(m_pHStmt->GetHandle());
 		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 	}
@@ -94,12 +90,101 @@ namespace exodbc
 	}
 
 
-	void PreparedStatement::Prepare()
+	void PreparedStatement::Prepare(const std::wstring& sqlstmt)
 	{
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
 
-		SQLRETURN ret = SQLPrepare(m_pHStmt->GetHandle(), (SQLWCHAR*)m_sqlstmt.c_str(), SQL_NTS);
+		m_sqlstmt = sqlstmt;
+
+		SQLRETURN ret = SQLPrepare(m_pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+
+		m_isPrepared = true;
+	}
+
+
+	void PreparedStatement::UnbindColumns()
+	{
+		m_pHStmt->UnbindColumns();
+	}
+
+	
+	void PreparedStatement::UnbindParams()
+	{
+		m_pHStmt->ResetParams();
+	}
+
+
+	void PreparedStatement::SelectClose()
+	{
+		StatementCloser::CloseStmtHandle(m_pHStmt, StatementCloser::Mode::IgnoreNotOpen);
+	}
+
+
+	bool PreparedStatement::SelectPrev()
+	{
+		return SelectFetchScroll(SQL_FETCH_PREV, NULL);
+	}
+
+
+	bool PreparedStatement::SelectFirst()
+	{
+		return SelectFetchScroll(SQL_FETCH_FIRST, NULL);
+	}
+
+
+	bool PreparedStatement::SelectLast()
+	{
+		return SelectFetchScroll(SQL_FETCH_LAST, NULL);
+	}
+
+
+	bool PreparedStatement::SelectAbsolute(SQLLEN position)
+	{
+		return SelectFetchScroll(SQL_FETCH_ABSOLUTE, position);
+	}
+
+
+	bool PreparedStatement::SelectRelative(SQLLEN offset)
+	{
+		return SelectFetchScroll(SQL_FETCH_RELATIVE, offset);
+	}
+
+
+	bool PreparedStatement::SelectNext()
+	{
+		SQLRETURN ret = SQLFetch(m_pHStmt->GetHandle());
+		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
+		{
+			SqlResultException sre(L"SQLFetch", ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+			SET_EXCEPTION_SOURCE(sre);
+			throw sre;
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_pHStmt->GetHandle(), ret, SQLFetch);
+		}
+
+		return SQL_SUCCEEDED(ret);
+	}
+
+
+	bool PreparedStatement::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
+	{
+		SQLRETURN ret = SQLFetchScroll(m_pHStmt->GetHandle(), fetchOrientation, fetchOffset);
+		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
+		{
+			wstring msg = boost::str(boost::wformat(L"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
+			SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), msg);
+			SET_EXCEPTION_SOURCE(sre);
+			throw sre;
+		}
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			LOG_WARNING_STMT(m_pHStmt->GetHandle(), ret, SQLFetch);
+		}
+
+		return SQL_SUCCEEDED(ret);
 	}
 }

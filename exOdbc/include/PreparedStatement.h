@@ -13,7 +13,7 @@
 #include "SqlHandle.h"
 #include "ColumnBuffer.h"
 #include "Database.h"
-#include "ColumnBuffer.h"
+#include "Table.h"
 
 // Other headers
 // System headers
@@ -36,7 +36,7 @@ namespace exodbc
 	* \class PreparedStatement
 	*
 	* \brief Takes an SQL Statement that can contain parameter markers ('?').
-	*		 SqlCBuffer classes matching those markers can be bound to
+	*		 ColumnBuffer classes matching those markers can be bound to
 	*		 execute the statement once or multiple times.
 	*/
 	class EXODBCAPI PreparedStatement
@@ -63,14 +63,6 @@ namespace exodbc
 		* \see DatabseSupportsDescribeParam()
 		*/
 		PreparedStatement(ConstDatabasePtr pDb, const std::wstring& sqlstmt);
-
-
-		/*!
-		* \brief	Constructs a statement handle using the passed pHDbc to
-		*			prepare the statement for execution.
-		* \see DatabseSupportsDescribeParam()
-		*/
-		PreparedStatement(ConstSqlDbcHandlePtr pHDbc, DatabaseProduct dbc, const std::wstring& sqlstmt);
 
 
 		/*!
@@ -113,16 +105,61 @@ namespace exodbc
 		*/
 		ConstSqlStmtHandlePtr GetStmt() const noexcept { return m_pHStmt; };
 
-	private:
 
 		/*!
 		* \brief	Calls SQLPrepare using m_sqlstmt and m_pHStmt.
 		*/
-		void Prepare();
+		void Prepare(const std::wstring& sqlstmt);
 
+
+		bool IsPrepared() const noexcept { return m_isPrepared; };
+
+
+		void UnbindColumns();
+
+
+		void UnbindParams();
+
+
+		void SelectClose();
+
+
+		bool SelectNext();
+
+
+		bool SelectPrev();
+
+
+		bool SelectFirst();
+
+
+		bool SelectLast();
+
+
+		bool SelectAbsolute(SQLLEN position);
+
+
+		bool SelectRelative(SQLLEN offset);
+
+
+	protected:
+		bool SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset);
+
+	private:
 		SqlStmtHandlePtr m_pHStmt;	///< The statement we operate on
-		const std::wstring m_sqlstmt;	///< The SQL for our statement.
+		std::wstring m_sqlstmt;	///< The SQL for our statement.
+		bool m_isPrepared;
 		bool m_useSqlDescribeParam;
+	};
+
+
+	class EXODBCAPI PreparedInsertStatement
+		: public PreparedStatement
+	{
+	public:
+		PreparedInsertStatement() = delete;
+		PreparedInsertStatement(const PreparedInsertStatement& other) = delete;
+		PreparedInsertStatement(const Table& table);
 	};
 
 } // namespace exodbc
