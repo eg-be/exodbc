@@ -1065,8 +1065,6 @@ namespace exodbc
 		// Do something that opens a transaction
 		iTable.Select(L"");
 		EXPECT_NO_THROW(iTable.SelectClose());
-		// We should be closed now
-		EXPECT_FALSE(iTable.IsSelectOpen());
 	}
 
 
