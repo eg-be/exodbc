@@ -159,24 +159,44 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Closes an eventually open cursor (result set). Save to call even if no
-		*			result set is open.
+		* \brief	Selects the next record in a result set.
 		*/
 		bool SelectNext();
 
 
+		/*!
+		* \brief	Selects the previous record in a result set.
+		*/
 		bool SelectPrev();
 
 
+		/*!
+		* \brief	Selects the first record in a result set.
+		*/
 		bool SelectFirst();
 
 
+		/*!
+		* \brief	Selects the last record in a result set.
+		*/
 		bool SelectLast();
 
 
+		/*!
+		* \brief	Fetches the record at absolute position fromt the current active recordset.
+		*/
 		bool SelectAbsolute(SQLLEN position);
 
 
+		/*!
+		* \brief	Fetches the record at relative position to the currently selected record.
+		* \return	True if record at relative position has been fetched, false if no record available.
+		* \note		MySql seems to get confused if no record is selected before doing the first SelectRelative():
+		*			If just a statement is executed, I would expect the cursor to be positioned before the
+		*			first row. So a SelectRelative(3) should select the 3rd record. But on MySql a SelectRelative(3)
+		*			selects the 4th record. If you do a SelectNext() first and then a SelectRelative(2), the
+		*			3rd record is selected correctly.
+		*/
 		bool SelectRelative(SQLLEN offset);
 
 
@@ -188,6 +208,7 @@ namespace exodbc
 		SqlStmtHandlePtr m_pHStmt;	///< The statement we operate on
 		ConstDatabasePtr m_pDb;
 		bool m_isPrepared;
+		bool m_forwardOnlyCursors;
 	};
 } // namespace exodbc
 
