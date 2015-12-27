@@ -341,7 +341,7 @@ namespace exodbc
 	}
 
 
-	TEST_F(ExecutableStatementTest, InsertValues)
+	TEST_F(ExecutableStatementTest, WriteValues)
 	{
 		// Prepare to insert some values
 		// Determine query names from a Table
@@ -391,18 +391,4 @@ namespace exodbc
 		iTable.Open();
 		EXPECT_EQ(10, iTable.Count());
 	}
-
-
-	TEST_F(ExecutableStatementTest, DeleteValues)
-	{
-
-	}
-
-
-	TEST_F(ExecutableStatementTest, UpdateValues)
-	{
-
-	}
-
-
 } // namespace exodbc
