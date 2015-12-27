@@ -32,7 +32,7 @@ namespace exodbc
 	// Classes
 	// -------
 
-	class PreparedStatementTest : public ::testing::Test
+	class ExecutableStatementTest : public ::testing::Test
 	{
 	protected:
 		virtual void SetUp();

@@ -67,17 +67,14 @@
     <ClInclude Include="include\SqlStatementCloser.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\PreparedStatement.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\SqlCBufferVisitors.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\ColumnBuffer.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ExecuteDirectStatement.h">
-      <Filter>src</Filter>
+    <ClInclude Include="include\ExecutableStatement.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -117,16 +114,13 @@
     <ClCompile Include="src\SqlStatementCloser.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\PreparedStatement.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\SqlCBufferVisitors.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ColumnBuffer.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\ExecuteDirectStatement.cpp">
+    <ClCompile Include="src\ExecutableStatement.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
