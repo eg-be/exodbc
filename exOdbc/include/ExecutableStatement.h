@@ -146,6 +146,12 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Unbinds all parameters bound to the handle held by this ExecutableStatement.
+		*/
+		void UnbindParams();
+
+
+		/*!
 		* \brief	Closes an eventually open cursor (result set). Save to call even if no
 		*			result set is open.
 		*/

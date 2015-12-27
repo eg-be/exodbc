@@ -149,7 +149,17 @@ namespace exodbc
 
 	void ExecutableStatement::UnbindColumns()
 	{
+		exASSERT(m_pHStmt);
+
 		m_pHStmt->UnbindColumns();
+	}
+
+
+	void ExecutableStatement::UnbindParams()
+	{
+		exASSERT(m_pHStmt);
+
+		m_pHStmt->ResetParams();
 	}
 
 
@@ -191,6 +201,9 @@ namespace exodbc
 
 	bool ExecutableStatement::SelectNext()
 	{
+		exASSERT(m_pHStmt);
+		exASSERT(m_pHStmt->IsAllocated());
+
 		SQLRETURN ret = SQLFetch(m_pHStmt->GetHandle());
 		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
 		{
@@ -209,6 +222,9 @@ namespace exodbc
 
 	bool ExecutableStatement::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
 	{
+		exASSERT(m_pHStmt);
+		exASSERT(m_pHStmt->IsAllocated());
+
 		SQLRETURN ret = SQLFetchScroll(m_pHStmt->GetHandle(), fetchOrientation, fetchOffset);
 		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
 		{
