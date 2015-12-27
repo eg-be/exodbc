@@ -11,7 +11,6 @@
 // Same component headers
 #include "exOdbc.h"
 #include "ColumnBuffer.h"
-#include "PreparedStatement.h"
 
 // Other headers
 // System headers
@@ -61,11 +60,6 @@ namespace exodbc
 			: m_paramNr(paramNr)
 			, m_pHStmt(pHStmt)
 			, m_useSqlDescribeParam(useSqlDescribeParam)
-		{};
-		BindParamVisitor(SQLUSMALLINT paramNr, const PreparedStatement& prepStmt)
-			: m_paramNr(paramNr)
-			, m_pHStmt(prepStmt.GetStmt())
-			, m_useSqlDescribeParam(prepStmt.GetUseSqlDescribeParam())
 		{};
 
 		template<typename T>

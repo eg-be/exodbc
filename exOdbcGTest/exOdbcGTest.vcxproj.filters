@@ -69,13 +69,10 @@
     <ClInclude Include="src\SqlHandleTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\PreparedStatementTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\stdafx.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\ExecuteDirectStatementTest.h">
+    <ClInclude Include="src\ExecutableStatementTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -131,10 +128,7 @@
     <ClCompile Include="src\SqlHandleTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\PreparedStatementTest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ExecuteDirectStatementTest.cpp">
+    <ClCompile Include="src\ExecutableStatementTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
