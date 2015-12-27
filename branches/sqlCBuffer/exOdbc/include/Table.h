@@ -807,6 +807,9 @@ namespace exodbc
 		* \brief	Allocate the statement handles required by this Table.
 		* \details  Allocates the statements using the connection handle from the Database
 		*			passed in Constructor.
+		*			If Allocating one statement fails, all statements are reseted before the
+		*			Exception is thrown.
+		*			This will also allocate the buffer required for the count statement
 		* \see		HasStatements()
 		*
 		* \throw	Exception If any of the handles to be allocated is not null currently.
@@ -816,6 +819,7 @@ namespace exodbc
 	
 		/*!
 		* \brief	Frees all handles that are not set to null. Freed handles are set to NULL.
+		* \details	This will also free the buffer used by the count statement.
 		* \throw	SqlResultException if freeing one of the handles fail. No other handles
 		*			will be freed after one handle fails to free.
 		*/
@@ -870,7 +874,9 @@ namespace exodbc
 
 		// Executable Statements used
 		ExecutableStatement	m_directStmtCount;	///< Statement used to do SELECTs using ExecuteDirect. Columns are bound.
-		ExecutableStatement m_directStmtSelect;	///< Statement-handle used to do COUNTs. Columns are not bound.
+		ExecutableStatement m_directStmtSelect;	///< Statement used to do COUNTs. First Column of Result is bound to m_pSelectCountResultBuffer.
+
+		UBigIntColumnBufferPtr m_pSelectCountResultBuffer;	///< The buffer used to retrieve the result of a SELECT COUNT operation.
 
 		// ODBC Handles
 		//SqlStmtHandlePtr	m_pHStmtSelect;	

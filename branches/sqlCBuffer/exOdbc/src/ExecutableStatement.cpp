@@ -109,7 +109,7 @@ namespace exodbc
 		SelectClose();
 
 		SQLRETURN ret = SQLExecDirect(m_pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCESS(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+		THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 	}
 
 
