@@ -76,6 +76,16 @@ namespace exodbc
 		SqlHandle(const SqlHandle& other) = delete;
 		SqlHandle& operator=(const SqlHandle& other) = delete;
 
+
+		/*!
+		* \brief: Create a new instance wrapped into a shared_ptr
+		*/
+		static std::shared_ptr<SqlHandle> Create(std::shared_ptr<const TPARENTSQLHANDLE> pParentHandle)
+		{
+			return std::make_shared<SqlHandle>(pParentHandle);
+		}
+
+
 		/*!
 		* \brief	If the internal tHandleType is not a SQL_NULL_HANDLE,
 		*			Free() is called. 
