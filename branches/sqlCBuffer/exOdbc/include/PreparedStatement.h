@@ -54,6 +54,11 @@ namespace exodbc
 		};
 
 
+		/*!
+		* A static lists of drivers that do not support to set Cursor Options.
+		* Unknown databases are expected to support it, so true is returned.
+		* Access and Excel are known for not supporting.
+		*/
 		static bool DatabaseSupportsCursorOptions(DatabaseProduct dbms) noexcept
 		{
 			return !(dbms == DatabaseProduct::ACCESS || dbms == DatabaseProduct::EXCEL);
