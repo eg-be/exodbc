@@ -53,25 +53,43 @@ namespace exodbc
 			return !(dbms == DatabaseProduct::ACCESS || dbms == DatabaseProduct::EXCEL);
 		};
 
-		PreparedStatement() = delete;
+
+		static bool DatabaseSupportsCursorOptions(DatabaseProduct dbms) noexcept
+		{
+			return !(dbms == DatabaseProduct::ACCESS || dbms == DatabaseProduct::EXCEL);
+		}
+
+		/*!
+		* \brief Construct an empty PreparedStatement. You must call Init() before
+		* you can start using the PreparedStatement.
+		*/
+		PreparedStatement();
+		
 		PreparedStatement(const PreparedStatement& other) = delete;
 
 		~PreparedStatement();
 
 		/*!
 		* \brief Constructs a statement from the given Database.
+		* \details Call Prepare() afterwards to set the sql statement.
+		* \see DatabseSupportsDescribeParam()
+		*/
+		PreparedStatement(ConstDatabasePtr pDb);
+
+
+		/*!
+		* \brief Constructs a statement from the given Database, using
+		* the given sqlstmt. The statement will be prepared during construction.
 		* \see DatabseSupportsDescribeParam()
 		*/
 		PreparedStatement(ConstDatabasePtr pDb, const std::wstring& sqlstmt);
 
 
 		/*!
-		* \brief	Constructs a statement handle using the passed pHDbc to
-		*			prepare the statement for execution.
-		*			If useSqlDescribeParam is true, the function SqlDescribeParams is
-		*			used during parameter binding (not supported by all dbs).
+		* Initialize the PreparedStatement. Must be called only once, and only
+		* if the default Constructor has been used.
 		*/
-		PreparedStatement(ConstSqlDbcHandlePtr pHDbc, bool useSqlDescribeParam, const std::wstring& sqlstmt);		
+		void Init(ConstDatabasePtr pDb);
 
 
 		/*!
@@ -150,6 +168,7 @@ namespace exodbc
 		std::wstring m_sqlstmt;	///< The SQL for our statement.
 		bool m_isPrepared;
 		bool m_useSqlDescribeParam;
+		ConstDatabasePtr m_pDb;
 	};
 
 

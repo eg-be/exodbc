@@ -28,24 +28,29 @@ using namespace std;
 
 namespace exodbc
 {
-	PreparedStatement::PreparedStatement(ConstDatabasePtr pDb, const std::wstring& sqlstmt)
+	PreparedStatement::PreparedStatement()
 		: m_isPrepared(false)
 		, m_useSqlDescribeParam(false)
-	{
-		exASSERT(pDb);
-		exASSERT(pDb->IsOpen());
+		, m_pDb(NULL)
+	{ }
 
-		m_useSqlDescribeParam = DatabaseSupportsDescribeParam(pDb->GetDbms());
-		m_pHStmt = std::make_shared<SqlStmtHandle>(pDb->GetSqlDbcHandle());
-		Prepare(sqlstmt);
+
+	PreparedStatement::PreparedStatement(ConstDatabasePtr pDb)
+		: m_isPrepared(false)
+		, m_useSqlDescribeParam(false)
+		, m_pDb(NULL)
+	{
+		Init(pDb);
 	}
 
 
-	PreparedStatement::PreparedStatement(ConstSqlDbcHandlePtr pHDbc, bool useSqlDescribeParam, const std::wstring& sqlstmt)
+	PreparedStatement::PreparedStatement(ConstDatabasePtr pDb, const std::wstring& sqlstmt)
 		: m_isPrepared(false)
-		, m_useSqlDescribeParam(useSqlDescribeParam)
+		, m_useSqlDescribeParam(false)
+		, m_pDb(NULL)
 	{
-		m_pHStmt = std::make_shared<SqlStmtHandle>(pHDbc);
+		Init(pDb);
+
 		Prepare(sqlstmt);
 	}
 
@@ -54,13 +59,25 @@ namespace exodbc
 	{
 		try
 		{
-			// we should not care? should we?
+			// we should not care? should we? Maybe better to wait and let it go out of scope?
 			m_pHStmt->Free();
 		}
 		catch (const Exception& ex)
 		{
 			LOG_ERROR(ex.ToString());
 		}
+	}
+
+
+	void PreparedStatement::Init(ConstDatabasePtr pDb)
+	{
+		exASSERT(m_pDb == NULL);
+		exASSERT(pDb);
+		exASSERT(pDb->IsOpen());
+
+		m_pDb = pDb;
+		m_useSqlDescribeParam = DatabaseSupportsDescribeParam(m_pDb->GetDbms());
+		m_pHStmt = std::make_shared<SqlStmtHandle>(m_pDb->GetSqlDbcHandle());
 	}
 
 
