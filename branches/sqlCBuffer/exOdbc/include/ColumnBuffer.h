@@ -206,9 +206,13 @@ namespace exodbc
 			SetNull();
 		};
 
-		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName)
+
+		/*!
+		* \brief: Create a new instance wrapped into a shared_ptr
+		*/
+		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
 		{
-			return std::make_shared<ColumnBuffer>(queryName);
+			return std::make_shared<ColumnBuffer>(queryName, flags);
 		}
 
 
@@ -424,10 +428,15 @@ namespace exodbc
 		{
 		};
 
-		static std::shared_ptr<ColumnArrayBuffer> Create(const std::wstring& queryName, SQLLEN nrOfElements)
+
+		/*!
+		* \brief: Create a new instance wrapped into a shared_ptr
+		*/
+		static std::shared_ptr<ColumnArrayBuffer> Create(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
 		{
-			return std::make_shared<ColumnArrayBuffer>(queryName, nrOfElements);
+			return std::make_shared<ColumnArrayBuffer>(queryName, nrOfElements, flags);
 		}
+
 
 		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
 		SQLLEN GetBufferLength() const noexcept { return sizeof(T) * GetNrOfElements(); };
@@ -562,8 +571,17 @@ namespace exodbc
 		SqlCPointerBuffer(const SqlCPointerBuffer& other) = delete;
 
 		virtual ~SqlCPointerBuffer()
+		{ };
+
+
+		/*!
+		* \brief: Create a new instance wrapped into a shared_ptr
+		*/
+		static std::shared_ptr<SqlCPointerBuffer> Create(const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
 		{
-		};
+			return std::make_shared<SqlCPointerBuffer>(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
+		}
+
 
 		SQLSMALLINT GetSqlCType() const noexcept { return m_sqlCType; };
 		SQLLEN GetBufferLength() const noexcept { return m_bufferLength; };
