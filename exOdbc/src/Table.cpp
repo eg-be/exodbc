@@ -251,7 +251,9 @@ namespace exodbc
 		{
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
-				m_directStmtCount.Init(m_pDb, forwardOnlyCursors);
+				// note: The count statements never needs scrollable cursors. If we enable them and then exeucte a
+				// SELECT COUNT, ms sql server will report a warning saying 'Cursor type changed'.
+				m_directStmtCount.Init(m_pDb, true);
 				m_directStmtSelect.Init(m_pDb, forwardOnlyCursors);
 
 				// Create the buffer required for counts
