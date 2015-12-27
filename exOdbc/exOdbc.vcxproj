@@ -25,6 +25,7 @@
     <ClInclude Include="include\EnumFlags.h" />
     <ClInclude Include="include\Environment.h" />
     <ClInclude Include="include\Exception.h" />
+    <ClInclude Include="include\ExecuteDirectStatement.h" />
     <ClInclude Include="include\InfoObject.h" />
     <ClInclude Include="include\ObjectName.h" />
     <ClInclude Include="include\PreparedStatement.h" />
@@ -49,6 +50,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Exception.cpp" />
+    <ClCompile Include="src\ExecuteDirectStatement.cpp" />
     <ClCompile Include="src\Helpers.cpp" />
     <ClCompile Include="src\InfoObject.cpp" />
     <ClCompile Include="src\ObjectName.cpp" />

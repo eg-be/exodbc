@@ -1,8 +1,8 @@
 /*!
-* \file PreparedStatement.cpp
+* \file ExecuteDirectStatement.cpp
 * \author Elias Gerber <eg@elisium.ch>
-* \date 20.12.2015
-* \brief Source file for PreparedStatement class.
+* \date 27.12.2015
+* \brief Source file for ExecuteDirectStatement class.
 * \copyright GNU Lesser General Public License Version 3
 *
 */
@@ -10,7 +10,7 @@
 #include "stdafx.h"
 
 // Own header
-#include "PreparedStatement.h"
+#include "ExecuteDirectStatement.h"
 
 // Same component headers
 #include "SqlCBufferVisitors.h"
@@ -28,34 +28,19 @@ using namespace std;
 
 namespace exodbc
 {
-	PreparedStatement::PreparedStatement()
-		: m_isPrepared(false)
-		, m_useSqlDescribeParam(false)
-		, m_pDb(NULL)
+	ExecuteDirectStatement::ExecuteDirectStatement()
+		: m_pDb(NULL)
 	{ }
 
 
-	PreparedStatement::PreparedStatement(ConstDatabasePtr pDb)
-		: m_isPrepared(false)
-		, m_useSqlDescribeParam(false)
-		, m_pDb(NULL)
+	ExecuteDirectStatement::ExecuteDirectStatement(ConstDatabasePtr pDb)
+		: m_pDb(NULL)
 	{
 		Init(pDb);
 	}
 
 
-	PreparedStatement::PreparedStatement(ConstDatabasePtr pDb, const std::wstring& sqlstmt)
-		: m_isPrepared(false)
-		, m_useSqlDescribeParam(false)
-		, m_pDb(NULL)
-	{
-		Init(pDb);
-
-		Prepare(sqlstmt);
-	}
-
-
-	PreparedStatement::~PreparedStatement()
+	ExecuteDirectStatement::~ExecuteDirectStatement()
 	{
 		try
 		{
@@ -69,107 +54,80 @@ namespace exodbc
 	}
 
 
-	void PreparedStatement::Init(ConstDatabasePtr pDb)
+	void ExecuteDirectStatement::Init(ConstDatabasePtr pDb)
 	{
 		exASSERT(m_pDb == NULL);
 		exASSERT(pDb);
 		exASSERT(pDb->IsOpen());
 
 		m_pDb = pDb;
-		m_useSqlDescribeParam = DatabaseSupportsDescribeParam(m_pDb->GetDbms());
 		m_pHStmt = std::make_shared<SqlStmtHandle>(m_pDb->GetSqlDbcHandle());
 	}
 
 
-	void PreparedStatement::Execute()
+	void ExecuteDirectStatement::ExecuteDirect(const std::wstring& sqlstmt)
 	{
-		exASSERT(m_isPrepared);
-
+		exASSERT(m_pHStmt);
+		exASSERT(m_pHStmt->IsAllocated());
+		exASSERT(!sqlstmt.empty());
 		// Always discard pending results first
 		SelectClose();
 
-		SQLRETURN ret = SQLExecute(m_pHStmt->GetHandle());
-		THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+		SQLRETURN ret = SQLExecDirect(m_pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		THROW_IFN_SUCCESS(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 	}
 
 
-	void PreparedStatement::BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr)
-	{
-		BindParamVisitor pv(columnNr, m_pHStmt, m_useSqlDescribeParam);
-		boost::apply_visitor(pv, column);
-	}
-
-
-	void PreparedStatement::BindColumn(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr)
+	void ExecuteDirectStatement::BindColumn(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr)
 	{
 		BindSelectVisitor sv(columnNr, m_pHStmt);
 		boost::apply_visitor(sv, column);
 	}
 
 
-	void PreparedStatement::Prepare(const std::wstring& sqlstmt)
-	{
-		exASSERT(m_pHStmt);
-		exASSERT(m_pHStmt->IsAllocated());
-
-		m_sqlstmt = sqlstmt;
-
-		SQLRETURN ret = SQLPrepare(m_pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
-
-		m_isPrepared = true;
-	}
-
-
-	void PreparedStatement::UnbindColumns()
+	void ExecuteDirectStatement::UnbindColumns()
 	{
 		m_pHStmt->UnbindColumns();
 	}
 
-	
-	void PreparedStatement::UnbindParams()
-	{
-		m_pHStmt->ResetParams();
-	}
 
-
-	void PreparedStatement::SelectClose()
+	void ExecuteDirectStatement::SelectClose()
 	{
 		StatementCloser::CloseStmtHandle(m_pHStmt, StatementCloser::Mode::IgnoreNotOpen);
 	}
 
 
-	bool PreparedStatement::SelectPrev()
+	bool ExecuteDirectStatement::SelectPrev()
 	{
 		return SelectFetchScroll(SQL_FETCH_PREV, NULL);
 	}
 
 
-	bool PreparedStatement::SelectFirst()
+	bool ExecuteDirectStatement::SelectFirst()
 	{
 		return SelectFetchScroll(SQL_FETCH_FIRST, NULL);
 	}
 
 
-	bool PreparedStatement::SelectLast()
+	bool ExecuteDirectStatement::SelectLast()
 	{
 		return SelectFetchScroll(SQL_FETCH_LAST, NULL);
 	}
 
 
-	bool PreparedStatement::SelectAbsolute(SQLLEN position)
+	bool ExecuteDirectStatement::SelectAbsolute(SQLLEN position)
 	{
 		return SelectFetchScroll(SQL_FETCH_ABSOLUTE, position);
 	}
 
 
-	bool PreparedStatement::SelectRelative(SQLLEN offset)
+	bool ExecuteDirectStatement::SelectRelative(SQLLEN offset)
 	{
 		return SelectFetchScroll(SQL_FETCH_RELATIVE, offset);
 	}
 
 
-	bool PreparedStatement::SelectNext()
+	bool ExecuteDirectStatement::SelectNext()
 	{
 		SQLRETURN ret = SQLFetch(m_pHStmt->GetHandle());
 		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
@@ -187,7 +145,7 @@ namespace exodbc
 	}
 
 
-	bool PreparedStatement::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
+	bool ExecuteDirectStatement::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
 	{
 		SQLRETURN ret = SQLFetchScroll(m_pHStmt->GetHandle(), fetchOrientation, fetchOffset);
 		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
