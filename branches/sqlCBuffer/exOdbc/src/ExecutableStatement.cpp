@@ -31,12 +31,14 @@ namespace exodbc
 	ExecutableStatement::ExecutableStatement()
 		: m_pDb(NULL)
 		, m_isPrepared(false)
+		, m_forwardOnlyCursors(false)
 	{ }
 
 
 	ExecutableStatement::ExecutableStatement(ConstDatabasePtr pDb, bool forwardOnlyCursor /* = false */)
 		: m_pDb(NULL)
 		, m_isPrepared(false)
+		, m_forwardOnlyCursors(false)
 	{
 		Init(pDb, forwardOnlyCursor);
 	}
@@ -69,6 +71,10 @@ namespace exodbc
 		{
 			SetCursorOptions(forwardOnlyCursors);
 		}
+		else
+		{
+			m_forwardOnlyCursors = true;
+		}
 	}
 
 
@@ -84,11 +90,13 @@ namespace exodbc
 		{
 			ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_NONSCROLLABLE, NULL);
 			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
+			m_forwardOnlyCursors = true;
 		}
 		else
 		{
 			ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_SCROLLABLE, NULL);
 			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
+			m_forwardOnlyCursors = false;
 		}
 	}
 
@@ -222,6 +230,7 @@ namespace exodbc
 
 	bool ExecutableStatement::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
 	{
+		exASSERT(!m_forwardOnlyCursors);
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
 

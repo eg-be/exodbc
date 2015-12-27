@@ -170,6 +170,177 @@ namespace exodbc
 	}
 
 
+	TEST_F(ExecutableStatementTest, SelectFirst)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
+
+		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") %idName %tableQueryName %idName %idName );
+		ExecutableStatement ds(m_pDb);
+		ds.BindColumn(pIdCol, 1);
+		ds.ExecuteDirect(sqlsmt);
+
+		// We expect some Record that is not the one with id 2 if we move forward a few times
+		ds.SelectNext();
+		ds.SelectNext();
+		ds.SelectNext();
+
+		ASSERT_NE(2, *pIdCol);
+
+		// now Select the first again using SelectFirst
+		// we must have the record with id 2
+		EXPECT_TRUE(ds.SelectFirst());
+		EXPECT_EQ(2, *pIdCol);
+	}
+
+
+	TEST_F(ExecutableStatementTest, SelectLast)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
+
+		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		ExecutableStatement ds(m_pDb);
+		ds.BindColumn(pIdCol, 1);
+		ds.ExecuteDirect(sqlsmt);
+
+		// Directly select the last record
+		EXPECT_TRUE(ds.SelectLast());
+		EXPECT_EQ(7, *pIdCol);
+	}
+
+
+	TEST_F(ExecutableStatementTest, SelectNext)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
+
+		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		ExecutableStatement ds(m_pDb);
+		ds.BindColumn(pIdCol, 1);
+		ds.ExecuteDirect(sqlsmt);
+
+		// Before any select cursor is not modified
+		EXPECT_TRUE(pIdCol->IsNull());
+
+		// Select some records until we reach the end
+		EXPECT_TRUE(ds.SelectNext());
+		EXPECT_EQ(2, *pIdCol);
+		EXPECT_TRUE(ds.SelectNext());
+		EXPECT_EQ(3, *pIdCol);
+		EXPECT_TRUE(ds.SelectNext());
+		EXPECT_EQ(4, *pIdCol);
+		EXPECT_TRUE(ds.SelectNext());
+		EXPECT_EQ(5, *pIdCol);
+		EXPECT_TRUE(ds.SelectNext());
+		EXPECT_EQ(6, *pIdCol);
+		EXPECT_TRUE(ds.SelectNext());
+		EXPECT_EQ(7, *pIdCol);
+		
+		EXPECT_FALSE(ds.SelectNext());
+	}
+
+
+	TEST_F(ExecutableStatementTest, SelectPrev)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
+
+		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		ExecutableStatement ds(m_pDb);
+		ds.BindColumn(pIdCol, 1);
+		ds.ExecuteDirect(sqlsmt);
+
+		// Before any select cursor is not modified
+		EXPECT_TRUE(pIdCol->IsNull());
+
+		// Select some records
+		EXPECT_TRUE(ds.SelectNext());
+		EXPECT_EQ(2, *pIdCol);
+		EXPECT_TRUE(ds.SelectNext());
+		EXPECT_EQ(3, *pIdCol);
+		// and move back again
+		EXPECT_TRUE(ds.SelectPrev());
+		EXPECT_EQ(2, *pIdCol);
+		EXPECT_FALSE(ds.SelectPrev());
+	}
+
+
+	TEST_F(ExecutableStatementTest, SelectAbsolute)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
+
+		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		ExecutableStatement ds(m_pDb);
+		ds.BindColumn(pIdCol, 1);
+		ds.ExecuteDirect(sqlsmt);
+
+		// Before any select cursor is not modified
+		EXPECT_TRUE(pIdCol->IsNull());
+
+		// Select the 3rd record
+		EXPECT_TRUE(ds.SelectAbsolute(3));
+		EXPECT_EQ(4, *pIdCol);
+
+		// and the 6th
+		EXPECT_TRUE(ds.SelectAbsolute(6));
+		EXPECT_EQ(7, *pIdCol);
+	}
+
+
+	TEST_F(ExecutableStatementTest, SelectRelative)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
+
+		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		ExecutableStatement ds(m_pDb);
+		ds.BindColumn(pIdCol, 1);
+		ds.ExecuteDirect(sqlsmt);
+
+		// Before any select cursor is not modified
+		EXPECT_TRUE(pIdCol->IsNull());
+
+		// Note: For MySQL to be able to select relative, a record must be selected first. Else, SelectRelative will choose wrong offset
+		EXPECT_TRUE(ds.SelectNext());
+		EXPECT_EQ(2, *pIdCol);
+
+		// Move by one forward
+		EXPECT_TRUE(ds.SelectRelative(1));
+		EXPECT_EQ(3, *pIdCol);
+
+		// Move by one forward
+		EXPECT_TRUE(ds.SelectRelative(1));
+		EXPECT_EQ(4, *pIdCol);
+
+		// And one back again, check complete record
+		EXPECT_TRUE(ds.SelectRelative(-1));
+		EXPECT_EQ(3, *pIdCol);
+
+		// Select something not in result set
+		EXPECT_FALSE(ds.SelectRelative(20));
+	}
+
+
 	TEST_F(ExecutableStatementTest, InsertValues)
 	{
 		// Prepare to insert some values
