@@ -21,6 +21,7 @@
 #include "Sql2BufferTypeMap.h"
 #include "SqlStatementCloser.h"
 #include "SqlCBufferVisitors.h"
+#include "ExecutableStatement.h"
 
 // Other headers
 
@@ -41,7 +42,7 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
-		, m_pHStmtCount(make_shared<SqlStmtHandle>())
+		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -62,7 +63,7 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
-		, m_pHStmtCount(make_shared<SqlStmtHandle>())
+		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -85,7 +86,7 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
-		, m_pHStmtCount(make_shared<SqlStmtHandle>())
+		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -108,7 +109,7 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
 		, m_pHStmtSelect(make_shared<SqlStmtHandle>())
-		, m_pHStmtCount(make_shared<SqlStmtHandle>())
+		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
 		//, m_hStmtCount(SQL_NULL_HSTMT)
 		//, m_hStmtSelect(SQL_NULL_HSTMT)
 		//, m_hStmtInsert(SQL_NULL_HSTMT)
@@ -233,7 +234,7 @@ namespace exodbc
 		exASSERT(m_pDb->IsOpen());
 
 		exASSERT(!m_pHStmtSelect->IsAllocated());
-		exASSERT(!m_pHStmtCount->IsAllocated());
+		//exASSERT(!m_pHStmtCount->IsAllocated());
 		//exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
 		//exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
 		//exASSERT(SQL_NULL_HSTMT == m_hStmtInsert);
@@ -250,7 +251,7 @@ namespace exodbc
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
 				m_pHStmtSelect->AllocateWithParent(pHDbc);
-				m_pHStmtCount->AllocateWithParent(pHDbc);
+				//m_pHStmtCount->AllocateWithParent(pHDbc);
 			}
 
 			//// Allocate handles needed for writing
@@ -281,8 +282,8 @@ namespace exodbc
 			HIDE_UNUSED(ex);
 			if (m_pHStmtSelect->IsAllocated())
 				m_pHStmtSelect->Free();
-			if (m_pHStmtCount->IsAllocated())
-				m_pHStmtCount->Free();
+			//if (m_pHStmtCount->IsAllocated())
+			//	m_pHStmtCount->Free();
 
 			// rethrow
 			throw;
@@ -293,10 +294,10 @@ namespace exodbc
 	bool Table::HasAllStatements() const throw()
 	{
 		bool haveAll = true;
-		if (haveAll && TestAccessFlag(TableAccessFlag::AF_SELECT))
-		{
-			haveAll = m_pHStmtSelect->IsAllocated() && m_pHStmtCount->IsAllocated();
-		}
+		//if (haveAll && TestAccessFlag(TableAccessFlag::AF_SELECT))
+		//{
+		//	haveAll = m_pHStmtSelect->IsAllocated() && m_pHStmtCount->IsAllocated();
+		//}
 		//if (haveAll && TestAccessFlag(AF_UPDATE_PK))
 		//{
 		//	haveAll = (SQL_NULL_HSTMT != m_hStmtUpdatePk);
@@ -440,7 +441,7 @@ namespace exodbc
 		// This is not public, and should only happen if not open,
 		// when TableAccessFlags are modified before the table is opened.
 		m_pHStmtSelect = std::make_shared<SqlStmtHandle>();
-		m_pHStmtCount = std::make_shared<SqlStmtHandle>();
+		//m_pHStmtCount = std::make_shared<SqlStmtHandle>();
 
 		//if (m_pHStmtSelect->IsAllocated())
 		//	m_pHStmtSelect->Free();
@@ -761,12 +762,14 @@ namespace exodbc
 	SQLUBIGINT Table::Count(const std::wstring& whereStatement)
 	{
 		exASSERT(IsOpen());
-		exASSERT(m_pHStmtCount->IsAllocated());
 
-		// Close Statement handle on exit
-		StatementCloser stmtCloser(m_pHStmtCount, false, true);
+		// Prepare a Statement to be executed to count
+		// we need a column to store the result
+		UBigIntColumnBufferPtr pResultColumn = UBigIntColumnBuffer::Create(L"");
+		ExecutableStatement ds(m_pDb, true);
+		ds.BindColumn(pResultColumn, 1);
 
-		SQLUBIGINT count = 0;
+		// build the sql to execute
 		std::wstring sqlstmt;
 		if ( ! whereStatement.empty())
 		{
@@ -777,23 +780,10 @@ namespace exodbc
 			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
 		}
 
-		SQLRETURN ret = SQLExecDirect(m_pHStmtCount->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pHStmtCount->GetHandle());
-			
-		ret = SQLFetch(m_pHStmtCount->GetHandle());
-		THROW_IFN_SUCCEEDED(SQLFetch, ret, SQL_HANDLE_STMT, m_pHStmtCount->GetHandle());
+		ds.ExecuteDirect(sqlstmt);
+		exASSERT(ds.SelectNext());
 
-		bool isNull = false;
-		SQLLEN cb = 0;
-		GetData(m_pHStmtCount, 1, SQL_C_UBIGINT, &count, sizeof(count), &cb, &isNull);
-		if (isNull)
-		{
-			Exception ex(boost::str(boost::wformat(L"Read Value for '%s' is NULL") % sqlstmt));
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-
-		return count;
+		return *pResultColumn;
 	}
 
 

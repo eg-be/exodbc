@@ -886,13 +886,12 @@ namespace exodbc
 		*/
 		const ColumnBufferPtrVariant& GetNonNullColumnBufferPtrVariant(SQLSMALLINT columnIndex) const;
 
-		ConstDatabasePtr		m_pDb;
-//		const Database*				m_pDb;	///< Database this table belongs to.
+		ConstDatabasePtr		m_pDb;	///< Database this table belongs to.
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
 		// ODBC Handles
 		SqlStmtHandlePtr	m_pHStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
-		SqlStmtHandlePtr	m_pHStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
+		//SqlStmtHandlePtr	m_pHStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
 
 		//SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
 		//SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.

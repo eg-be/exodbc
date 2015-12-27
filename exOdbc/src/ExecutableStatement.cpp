@@ -46,15 +46,7 @@ namespace exodbc
 
 	ExecutableStatement::~ExecutableStatement()
 	{
-		try
-		{
-			// we should not care? should we? Maybe better to wait and let it go out of scope?
-			m_pHStmt->Free();
-		}
-		catch (const Exception& ex)
-		{
-			LOG_ERROR(ex.ToString());
-		}
+		// We do not free the handle explicitly. Let it go out of scope, it will destroy itself once no one needs it.
 	}
 
 
@@ -75,6 +67,13 @@ namespace exodbc
 		{
 			m_forwardOnlyCursors = true;
 		}
+	}
+
+
+	void ExecutableStatement::Reset()
+	{
+		m_pHStmt.reset();
+		m_pDb.reset();
 	}
 
 

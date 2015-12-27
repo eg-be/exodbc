@@ -84,16 +84,24 @@ namespace exodbc
 
 
 		/*!
-		* \brief Explicitly frees the handle on destruction.
+		* \brief Does nothing.
 		*/
 		virtual ~ExecutableStatement();
 
 
 		/*!
 		* \brief	Initialize the ExecutableStatement. Must be called only once, and only
-		*			if the default Constructor has been used.
+		*			if the default Constructor has been used, or after Reset() has been called.
 		*/
 		void Init(ConstDatabasePtr pDb, bool forwardOnlyCursors);
+
+
+		/*!
+		* \brief	Resets this ExecutableStatement: It will be in the same state as if it has
+		*			been constructed using the default constructor. Call Init() after you've called
+		*			Reset() and you want to re-use the ExectuableStatement again.
+		*/
+		void Reset();
 
 
 		/*!
