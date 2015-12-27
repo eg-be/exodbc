@@ -253,8 +253,9 @@ namespace exodbc
 			{
 				m_directStmtCount.Init(m_pDb, forwardOnlyCursors);
 				m_directStmtSelect.Init(m_pDb, forwardOnlyCursors);
-				//m_pHStmtSelect->AllocateWithParent(pHDbc);
-				//m_pHStmtCount->AllocateWithParent(pHDbc);
+
+				// Create the buffer required for counts
+				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", ColumnFlag::CF_SELECT);
 			}
 
 			//// Allocate handles needed for writing
@@ -283,12 +284,9 @@ namespace exodbc
 		catch (const Exception& ex)
 		{
 			HIDE_UNUSED(ex);
+			m_pSelectCountResultBuffer.reset();
 			m_directStmtCount.Reset();
 			m_directStmtSelect.Reset();
-			//if (m_pHStmtSelect->IsAllocated())
-				//m_pHStmtSelect->Free();
-			//if (m_pHStmtCount->IsAllocated())
-			//	m_pHStmtCount->Free();
 
 			// rethrow
 			throw;
@@ -422,6 +420,8 @@ namespace exodbc
 	{
 		// Do NOT check for IsOpen() here. If Open() fails it will call FreeStatements to do its cleanup
 		// exASSERT(IsOpen());
+
+		m_pSelectCountResultBuffer.reset();
 
 		m_directStmtCount.Reset();
 		m_directStmtSelect.Reset();
@@ -722,14 +722,9 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT));
+		exASSERT(m_pSelectCountResultBuffer);
 
-		// Prepare a Statement to be executed to count
-		// we need a column to store the result
-		UBigIntColumnBufferPtr pResultColumn = UBigIntColumnBuffer::Create(L"");
-		ExecutableStatement ds(m_pDb, true);
-		ds.BindColumn(pResultColumn, 1);
-
-		// build the sql to execute
+		// Prepare the sql to be executed on our internal ExecutableStatement
 		std::wstring sqlstmt;
 		if ( ! whereStatement.empty())
 		{
@@ -740,10 +735,12 @@ namespace exodbc
 			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
 		}
 
-		ds.ExecuteDirect(sqlstmt);
-		exASSERT(ds.SelectNext());
+		m_directStmtCount.ExecuteDirect(sqlstmt);
+		exASSERT(m_directStmtCount.SelectNext());
 
-		return *pResultColumn;
+		m_directStmtCount.SelectClose();
+
+		return *m_pSelectCountResultBuffer;
 	}
 
 
@@ -1274,6 +1271,13 @@ namespace exodbc
 						}
 					}
 				}
+			}
+
+			// Bind the Buffer for the Count operations
+			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
+			{
+				exASSERT(m_pSelectCountResultBuffer);
+				m_directStmtCount.BindColumn(m_pSelectCountResultBuffer, 1);
 			}
 
 			// Bind the member variables for field exchange between
