@@ -96,6 +96,9 @@ namespace exodbc
 		void Init(ConstDatabasePtr pDb, bool forwardOnlyCursors);
 
 
+		/*!
+		* \brief	Returns true if Init() was called and m_pDb is not null.
+		*/
 		bool IsInitialized() const noexcept { return m_pDb != NULL; };
 
 
