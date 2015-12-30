@@ -32,6 +32,8 @@ namespace exodbc
 		: m_pDb(NULL)
 		, m_isPrepared(false)
 		, m_forwardOnlyCursors(false)
+		, m_boundColumns(false)
+		, m_boundParams(false)
 	{ }
 
 
@@ -39,6 +41,8 @@ namespace exodbc
 		: m_pDb(NULL)
 		, m_isPrepared(false)
 		, m_forwardOnlyCursors(false)
+		, m_boundColumns(false)
+		, m_boundParams(false)
 	{
 		Init(pDb, forwardOnlyCursor);
 	}
@@ -47,6 +51,29 @@ namespace exodbc
 	ExecutableStatement::~ExecutableStatement()
 	{
 		// We do not free the handle explicitly. Let it go out of scope, it will destroy itself once no one needs it.
+		// but unbind things as long as the ExecutableStatement cannot be copied.
+		if (m_boundParams)
+		{
+			try
+			{
+				m_pHStmt->ResetParams();
+			}
+			catch (const Exception& ex)
+			{
+				LOG_ERROR(ex.ToString());
+			}
+		}
+		if (m_boundColumns)
+		{
+			try
+			{
+				m_pHStmt->UnbindColumns();
+			}
+			catch (const Exception& ex)
+			{
+				LOG_ERROR(ex.ToString());
+			}
+		}
 	}
 
 
@@ -72,6 +99,16 @@ namespace exodbc
 
 	void ExecutableStatement::Reset()
 	{
+		if (m_boundColumns)
+		{
+			m_pHStmt->UnbindColumns();
+			m_boundColumns = false;
+		}
+		if(m_boundParams)
+		{
+			m_pHStmt->ResetParams();
+			m_boundParams = false;
+		}
 		m_pHStmt.reset();
 		m_pDb.reset();
 	}
@@ -142,6 +179,7 @@ namespace exodbc
 	{
 		BindSelectVisitor sv(columnNr, m_pHStmt);
 		boost::apply_visitor(sv, column);
+		m_boundColumns = true;
 	}
 
 
@@ -151,6 +189,7 @@ namespace exodbc
 
 		BindParamVisitor pv(columnNr, m_pHStmt, DatabaseSupportsCursorOptions(m_pDb->GetDbms()));
 		boost::apply_visitor(pv, column);
+		m_boundParams = true;
 	}
 
 
