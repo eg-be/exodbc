@@ -255,33 +255,11 @@ namespace exodbc
 				// SELECT COUNT, ms sql server will report a warning saying 'Cursor type changed'.
 				m_execStmtCount.Init(m_pDb, true);
 				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
+				m_execStmtInsert.Init(m_pDb, forwardOnlyCursors);
 
 				// Create the buffer required for counts
 				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", ColumnFlag::CF_SELECT);
 			}
-
-			//// Allocate handles needed for writing
-			//if (TestAccessFlag(AF_INSERT))
-			//{
-			//	m_hStmtInsert = AllocateStatementHandle(hdbc);
-			//}
-			//if (TestAccessFlag(AF_UPDATE_PK))
-			//{
-			//	m_hStmtUpdatePk = AllocateStatementHandle(hdbc);
-			//}
-			//if (TestAccessFlag(AF_UPDATE_WHERE))
-			//{
-			//	m_hStmtUpdateWhere = AllocateStatementHandle(hdbc);
-			//}
-
-			//if (TestAccessFlag(AF_DELETE_PK))
-			//{
-			//	m_hStmtDeletePk = AllocateStatementHandle(hdbc);
-			//}
-			//if (TestAccessFlag(AF_DELETE_WHERE))
-			//{
-			//	m_hStmtDeleteWhere = AllocateStatementHandle(hdbc);
-			//}
 		}
 		catch (const Exception& ex)
 		{
@@ -289,6 +267,7 @@ namespace exodbc
 			m_pSelectCountResultBuffer.reset();
 			m_execStmtCount.Reset();
 			m_execStmtSelect.Reset();
+			m_execStmtInsert.Reset();
 
 			// rethrow
 			throw;
@@ -427,43 +406,8 @@ namespace exodbc
 
 		m_execStmtCount.Reset();
 		m_execStmtSelect.Reset();
+		m_execStmtInsert.Reset();
 
-		//if (m_pHStmtSelect->IsAllocated())
-		//	m_pHStmtSelect->Free();
-
-		//if (m_pHStmtCount->IsAllocated())
-		//	m_pHStmtCount->Free();
-
-		//if (m_hStmtCount != SQL_NULL_HSTMT)
-		//{
-		//	m_hStmtCount = FreeStatementHandle(m_hStmtCount);
-		//}
-		//if (m_pHStmtSelect->IsAllocated())
-		//{
-		//	m_hStmtSelect = FreeStatementHandle(m_hStmtSelect);
-		//}
-
-		//// And then those needed for writing
-		//if (m_hStmtInsert != SQL_NULL_HSTMT)
-		//{
-		//	m_hStmtInsert = FreeStatementHandle(m_hStmtInsert);
-		//}
-		//if (m_hStmtDeletePk != SQL_NULL_HSTMT)
-		//{
-		//	m_hStmtDeletePk = FreeStatementHandle(m_hStmtDeletePk);
-		//}
-		//if (m_hStmtDeleteWhere != SQL_NULL_HSTMT)
-		//{
-		//	m_hStmtDeleteWhere = FreeStatementHandle(m_hStmtDeleteWhere);
-		//}
-		//if (m_hStmtUpdatePk != SQL_NULL_HSTMT)
-		//{
-		//	m_hStmtUpdatePk = FreeStatementHandle(m_hStmtUpdatePk);
-		//}
-		//if (m_hStmtUpdateWhere != SQL_NULL_HSTMT)
-		//{
-		//	m_hStmtUpdateWhere = FreeStatementHandle(m_hStmtUpdateWhere);
-		//}
 	}
 
 
@@ -587,48 +531,44 @@ namespace exodbc
 
 	void Table::BindInsertParameters()
 	{
-		//exASSERT(m_columnBuffers.size() > 0);
-		//exASSERT(TestAccessFlag(AF_INSERT));
-		//exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
+		exASSERT( ! m_columns.empty());
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_INSERT));
+		exASSERT(m_execStmtInsert.IsInitialized());
 
-		//// Build a statement with parameter-markers
-		//// note: parem-number reflects here the number of the param in the created prepared statement, so we
-		//// cannot use the values from the ColumnBuffer column index.
-		//SQLSMALLINT paramNr = 1;
-		//std::wstring insertStmt = L"INSERT INTO " + m_tableInfo.GetQueryName() + L" (";
-		//ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin();
-		//while (it != m_columnBuffers.end())
-		//{
-		//	ColumnBuffer* pBuffer = it->second;
-		//	// Bind parameter if it is marked an INSERTable
-		//	if (pBuffer->IsColumnFlagSet(CF_INSERT))
-		//	{
-		//		pBuffer->BindParameter(m_hStmtInsert, paramNr);
-		//		// prepare statement
-		//		insertStmt += pBuffer->GetQueryName() + L", ";
-		//		paramNr++;
-		//	}
-		//	++it;
-		//}
-		//// ensure that we have something to insert
-		//if (paramNr <= 1)
-		//{
-		//	Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind insert parameters (probably because flag AF_INSERT is set), but no ColumnBuffers were bound for INSERTing") % m_tableInfo.GetQueryName()));
-		//	SET_EXCEPTION_SOURCE(ex);
-		//	throw ex;
-		//}
-		//boost::erase_last(insertStmt, L", ");
-		//// and set markers for the values
-		//insertStmt += L") VALUES(";
-		//for (int i = 0; i < paramNr - 2; i++)
-		//{
-		//	insertStmt += L"?, ";
-		//}
-		//insertStmt += L"?)";
+		// Build a statement with parameter-markers
+		vector<ColumnBufferPtrVariant> colsToBind;
+		wstring markers;
+		wstring fields;
+		auto it = m_columns.begin();
+		while (it != m_columns.end())
+		{
+			ColumnBufferPtrVariant pVar = it->second;
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), pVar);
+			if (pFlags->Test(ColumnFlag::CF_INSERT))
+			{
+				fields+= boost::apply_visitor(QueryNameVisitor(), pVar);
+				fields += L", ";
+				markers+= L"?, ";
+				colsToBind.push_back(pVar);
+			}
+			++it;
+		}
+		boost::erase_last(fields, L", ");
+		boost::erase_last(markers, L", ");
+		wstring stmt = boost::str(boost::wformat(L"INSERT INTO %s (%s) VALUES(%s)") % m_tableInfo.GetQueryName() % fields % markers);
 
-		//// Prepare to update
-		//SQLRETURN ret = SQLPrepare(m_hStmtInsert, (SQLWCHAR*) insertStmt.c_str(), SQL_NTS);
-		//THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtInsert);
+		// check that we actually have some column to insert
+		exASSERT_MSG( ! colsToBind.empty(), L"No Columns flaged for INSERTing");
+
+		// .. and prepare stmt
+		m_execStmtInsert.Prepare(stmt);
+
+		// and binding of columns... we must do that after calling Prepare - or
+		// not use SqlDescribeParam during Bind
+		for (size_t i = 0; i < colsToBind.size(); ++i)
+		{
+			m_execStmtInsert.BindParameter(colsToBind[i], (SQLSMALLINT)(i + 1));
+		}
 	}
 
 
