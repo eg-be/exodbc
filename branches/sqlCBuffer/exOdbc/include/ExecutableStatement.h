@@ -96,6 +96,9 @@ namespace exodbc
 		void Init(ConstDatabasePtr pDb, bool forwardOnlyCursors);
 
 
+		bool IsInitialized() const noexcept { return m_pDb != NULL; };
+
+
 		/*!
 		* \brief	Resets this ExecutableStatement: It will be in the same state as if it has
 		*			been constructed using the default constructor. Call Init() after you've called
