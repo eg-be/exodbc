@@ -253,8 +253,8 @@ namespace exodbc
 			{
 				// note: The count statements never needs scrollable cursors. If we enable them and then exeucte a
 				// SELECT COUNT, ms sql server will report a warning saying 'Cursor type changed'.
-				m_directStmtCount.Init(m_pDb, true);
-				m_directStmtSelect.Init(m_pDb, forwardOnlyCursors);
+				m_execStmtCount.Init(m_pDb, true);
+				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
 
 				// Create the buffer required for counts
 				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", ColumnFlag::CF_SELECT);
@@ -287,8 +287,8 @@ namespace exodbc
 		{
 			HIDE_UNUSED(ex);
 			m_pSelectCountResultBuffer.reset();
-			m_directStmtCount.Reset();
-			m_directStmtSelect.Reset();
+			m_execStmtCount.Reset();
+			m_execStmtSelect.Reset();
 
 			// rethrow
 			throw;
@@ -425,8 +425,8 @@ namespace exodbc
 
 		m_pSelectCountResultBuffer.reset();
 
-		m_directStmtCount.Reset();
-		m_directStmtSelect.Reset();
+		m_execStmtCount.Reset();
+		m_execStmtSelect.Reset();
 
 		//if (m_pHStmtSelect->IsAllocated())
 		//	m_pHStmtSelect->Free();
@@ -737,10 +737,10 @@ namespace exodbc
 			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
 		}
 
-		m_directStmtCount.ExecuteDirect(sqlstmt);
-		exASSERT(m_directStmtCount.SelectNext());
+		m_execStmtCount.ExecuteDirect(sqlstmt);
+		exASSERT(m_execStmtCount.SelectNext());
 
-		m_directStmtCount.SelectClose();
+		m_execStmtCount.SelectClose();
 
 		return *m_pSelectCountResultBuffer;
 	}
@@ -769,49 +769,49 @@ namespace exodbc
 		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT));
 		exASSERT(!sqlStmt.empty());
 
-		m_directStmtSelect.ExecuteDirect(sqlStmt);
+		m_execStmtSelect.ExecuteDirect(sqlStmt);
 	}
 
 
 	bool Table::SelectPrev()
 	{
-		return m_directStmtSelect.SelectPrev();
+		return m_execStmtSelect.SelectPrev();
 	}
 
 
 	bool Table::SelectFirst()
 	{
-		return m_directStmtSelect.SelectFirst();
+		return m_execStmtSelect.SelectFirst();
 	}
 
 
 	bool Table::SelectLast()
 	{
-		return m_directStmtSelect.SelectLast();
+		return m_execStmtSelect.SelectLast();
 	}
 
 
 	bool Table::SelectAbsolute(SQLLEN position)
 	{
-		return m_directStmtSelect.SelectAbsolute(position);
+		return m_execStmtSelect.SelectAbsolute(position);
 	}
 
 
 	bool Table::SelectRelative(SQLLEN offset)
 	{
-		return m_directStmtSelect.SelectRelative(offset);
+		return m_execStmtSelect.SelectRelative(offset);
 	}
 
 
 	bool Table::SelectNext()
 	{
-		return m_directStmtSelect.SelectNext();
+		return m_execStmtSelect.SelectNext();
 	}
 
 	
 	void Table::SelectClose()
 	{
-		m_directStmtSelect.SelectClose();
+		m_execStmtSelect.SelectClose();
 	}
 
 
@@ -1279,7 +1279,7 @@ namespace exodbc
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
 				exASSERT(m_pSelectCountResultBuffer);
-				m_directStmtCount.BindColumn(m_pSelectCountResultBuffer, 1);
+				m_execStmtCount.BindColumn(m_pSelectCountResultBuffer, 1);
 			}
 
 			// Bind the member variables for field exchange between
@@ -1293,7 +1293,7 @@ namespace exodbc
 					ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
 					if (pFlags->Test(ColumnFlag::CF_SELECT))
 					{
-						m_directStmtSelect.BindColumn( columnBuffer, boundColumnNumber);
+						m_execStmtSelect.BindColumn( columnBuffer, boundColumnNumber);
 						boundColumnNumber++;
 					}
 				}
