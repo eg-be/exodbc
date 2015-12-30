@@ -38,6 +38,8 @@ namespace exodbc
 	* \details	Provides a statement handle to execute arbitrary SQL.
 	*			ColumnBuffer classes can be bound to retrieve the results of
 	*			that SQL statement, and / or as parameters for the statement.
+	*			On destruction, the columns and or params will be resetted
+	*			on the underlying handle and the handle will be freed.
 	*/
 	class EXODBCAPI ExecutableStatement
 	{
@@ -77,11 +79,9 @@ namespace exodbc
 		ExecutableStatement(ConstDatabasePtr pDb, bool forwardOnlyCursors = false);		
 		
 		
-		/*!
-		* \brief Prevent copies.
-		*/
+		// brief Prevent copies.
 		ExecutableStatement(const ExecutableStatement& other) = delete;
-
+		ExecutableStatement& operator=(const ExecutableStatement& other) = delete;
 
 		/*!
 		* \brief Does nothing.
@@ -100,6 +100,8 @@ namespace exodbc
 		* \brief	Resets this ExecutableStatement: It will be in the same state as if it has
 		*			been constructed using the default constructor. Call Init() after you've called
 		*			Reset() and you want to re-use the ExectuableStatement again.
+		* \details	If any params or columns have been bound using this ExcecutableStatement, 
+		*			the corresponding Unbind function is called on the Stmt-handle.
 		*/
 		void Reset();
 
@@ -217,6 +219,9 @@ namespace exodbc
 		ConstDatabasePtr m_pDb;
 		bool m_isPrepared;
 		bool m_forwardOnlyCursors;
+
+		bool m_boundColumns;
+		bool m_boundParams;
 	};
 } // namespace exodbc
 
