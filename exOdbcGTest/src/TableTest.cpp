@@ -1191,8 +1191,61 @@ namespace exodbc
 	}
 
 
-	// GetValues
+	// Insert rows
 	// ---------
+	TEST_F(TableTest, Insert)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
+
+		{
+			// First insert where all columns are bound
+			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT, tableName);
+			iTable.Open();
+
+			// If we do not set a value for the primary key, fail
+			EXPECT_THROW(iTable.Insert(), SqlResultException);
+
+			// Set some values
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+			pId->SetValue(300);
+			pInt->SetValue(400);
+
+			EXPECT_NO_THROW(iTable.Insert());
+		}
+		{
+			// Now insert with only id-column bound for inserting, and the int column only bound for selecting
+			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT, tableName);
+			auto columns = iTable.CreateAutoColumnBufferPtrs(false);
+			LongColumnBufferPtr pId = boost::get<LongColumnBufferPtr>(columns[0]);
+			LongColumnBufferPtr pInt = boost::get<LongColumnBufferPtr>(columns[2]);
+			pInt->Clear(ColumnFlag::CF_INSERT);
+			iTable.SetColumn(0, columns[0]);
+			iTable.SetColumn(1, columns[2]);
+			iTable.Open();
+			pId->SetValue(301);
+			pInt->SetValue(401);
+			iTable.Insert();
+		}
+		m_pDb->CommitTrans();
+
+		// Read back values
+		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		iTable.Open();
+		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		wstring sqlWhere = boost::str(boost::wformat(L"%s = 300 OR %s = 301 ORDER by %s") % idColName %idColName %idColName);
+		iTable.Select(sqlWhere);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(300, *pId);
+		EXPECT_EQ(400, *pInt);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(301, *pId);
+		EXPECT_TRUE(pInt->IsNull());
+	}
 
 
 //	// Delete rows: We do not test that for the different data-types, its just deleting a row.

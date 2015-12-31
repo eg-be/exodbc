@@ -152,7 +152,7 @@ namespace exodbc
 		/*!
 		* \brief	Executes a statement that has been prepared using Prepare() using SQLExecute.
 		*/
-		void ExecutePrepared();
+		void ExecutePrepared() const;
 
 
 		/*!
@@ -171,7 +171,7 @@ namespace exodbc
 		* \brief	Closes an eventually open cursor (result set). Save to call even if no
 		*			result set is open.
 		*/
-		void SelectClose();
+		void SelectClose() const;
 
 
 		/*!

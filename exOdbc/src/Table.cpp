@@ -805,9 +805,7 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(TableAccessFlag::AF_INSERT));
-		//exASSERT(m_hStmtInsert != SQL_NULL_HSTMT);
-		//SQLRETURN ret = SQLExecute(m_hStmtInsert);
-		//THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtInsert);
+		m_execStmtInsert.ExecutePrepared();
 	}
 
 
@@ -1189,8 +1187,6 @@ namespace exodbc
 			{
 				CheckPrivileges();
 			}
-
-
 
 			// Maybe the primary keys have been set manually? Then just forward them to the ColumnBuffers
 			if (m_primaryKeyColumnIndexes.size() > 0)

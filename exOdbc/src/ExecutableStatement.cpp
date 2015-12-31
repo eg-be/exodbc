@@ -163,7 +163,7 @@ namespace exodbc
 	}
 
 
-	void ExecutableStatement::ExecutePrepared()
+	void ExecutableStatement::ExecutePrepared() const
 	{
 		exASSERT(m_isPrepared);
 
@@ -209,7 +209,7 @@ namespace exodbc
 	}
 
 
-	void ExecutableStatement::SelectClose()
+	void ExecutableStatement::SelectClose() const
 	{
 		StatementCloser::CloseStmtHandle(m_pHStmt, StatementCloser::Mode::IgnoreNotOpen);
 	}
