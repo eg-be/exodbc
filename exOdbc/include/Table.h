@@ -800,6 +800,17 @@ namespace exodbc
 		std::vector<ColumnBufferPtrVariant> CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns);
 
 
+		
+		/*!
+		* \brief	Returns the TableInfo for this Table.
+		* \details	If the TableInfo has already been queried and is stored internally, the internally
+		*			stored TableInfo is returned. Else the Database is queried for a TableInfo matching
+		*			the given search-names during construction. If exactly one matching Table is found,
+		*			the corresponding TableInfo is stored internally and returned.
+		*/
+		const TableInfo& GetTableInfo();
+
+
 		// Private stuff
 		// -------------
 	private:
@@ -827,12 +838,12 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Iterates the bound columns and returns the field part of a statement.
-		* \details	Queries each bound column for its SqlName.
+		* \brief	Iterates the columns defined and creates a field-statement of 
+		*			the Columns that have the flag CF_SELECT set.
 		* \return	A string in the form "Field1, Field2, .., FieldN"
-		* \throw	Exception If no ColumnBuffers are bound.
+		* \throw	Exception If no Columns are defined.
 		*/
-		std::wstring BuildFieldsStatement() const;
+		std::wstring BuildSelectFieldsStatement() const;
 
 
 		/*!
@@ -908,7 +919,6 @@ namespace exodbc
 		ColumnBufferPtrVariantMap m_columns;
 
 //		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
-		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
 		bool				m_manualColumns;		///< If true the table was initialized by passing the number of columns that will be defined later manually
 
 		// Table information set during construction, that was used to find the matching TableInfo if none was passed
