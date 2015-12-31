@@ -465,16 +465,16 @@ namespace exodbc
 	}
 
 
-	TEST_F(TableTest, OpenAutoCheckPrivs)
+	TEST_F(TableTest, CheckPrivileges)
 	{
 		// Test to open read-only a table we know we have all rights:
 		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		exodbc::Table rTable(m_pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
-		EXPECT_NO_THROW(rTable.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES));
+		EXPECT_NO_THROW(rTable.CheckPrivileges());
 
 		// Test to open read-write a table we know we have all rights:
 		exodbc::Table rTable2(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName, L"", L"", L"");
-		EXPECT_NO_THROW(rTable2.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES));
+		EXPECT_NO_THROW(rTable2.CheckPrivileges());
 
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
@@ -494,20 +494,14 @@ namespace exodbc
 			// If you add him to some role, things will get messed up: No privs are reported, but the user can
 			// still access the table for selecting
 			exodbc::Table table2(pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
-			EXPECT_NO_THROW(table2.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES));
+			EXPECT_NO_THROW(table2.CheckPrivileges());
 
 			// We expect to fail if trying to open for writing
-			table2.Close();
 			table2.SetAccessFlags(TableAccessFlag::AF_READ_WRITE);
-			EXPECT_THROW(table2.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES), Exception);
+			EXPECT_THROW(table2.CheckPrivileges(), MissingTablePrivilegeException);
 
-			// But we do not fail if we do not check the privs
-			EXPECT_NO_THROW(table2.Open());
-
-			// Try to open one we do not even have the rights for
-			std::wstring table3Name = GetTableName(TableId::NUMERICTYPES);
-			Table table3(pDb, TableAccessFlag::AF_READ, table3Name, L"", L"", L"");
-			EXPECT_THROW(table3.Open(), Exception);
+			// If we open the Table and do not check privileges, we fail later when trying to prepare a write-statement
+			EXPECT_THROW(table2.Open(), SqlResultException);
 		}
 	}
 

@@ -350,16 +350,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Return the Table information of this Table.
-		* \details	Returns the TableInfo of this table, if one has been set either during construction
-		*			or one was read during Open().
-		* \see		HasTableInfo()
-		* \throw	Exception if no table info is available.
-		*/
-		TableInfo	GetTableInfo() const;
-
-
-		/*!
 		* \brief	Counts how many rows would be selected in this table by the passed WHERE clause.
 		* \details	If whereStatement is empty, no WHERE clause is added
 		* \param	whereStatement Do not include 'WHERE' in the passed where clause
@@ -807,8 +797,29 @@ namespace exodbc
 		*			stored TableInfo is returned. Else the Database is queried for a TableInfo matching
 		*			the given search-names during construction. If exactly one matching Table is found,
 		*			the corresponding TableInfo is stored internally and returned.
+		* \throw	Exception
 		*/
 		const TableInfo& GetTableInfo();
+
+
+		/*!
+		* \brief	Returns the TableInfo for this Table if it is already set.
+		* \details	If the TableInfo has already been queried and is stored internally, the internally
+		*			stored TableInfo is returned. Else the Database is queried for a TableInfo matching
+		*			the given search-names during construction. If exactly one matching Table is found,
+		*			the corresponding TableInfo is returned (but not stored internally).
+		* \throw	Exception
+		*/
+		TableInfo GetTableInfo() const;
+
+
+		/*!
+		* \brief	Checks that the privileges for the currently logged-in user are sufficient
+		*			for the TableAccessFlags defined on this Table.
+		* \throw	PrivilegesException If privileges are not sufficient for given TableAccessFlags
+		* \throw	Exception If reading or parsing fails.
+		*/
+		void		CheckPrivileges() const;
 
 
 		// Private stuff
@@ -909,7 +920,6 @@ namespace exodbc
 		bool				m_isOpen;				///< Set to true after Open has been called
 		TableOpenFlags		m_openFlags;			///< Flags used to open the table in the call to Open().
 		TableAccessFlags	m_tableAccessFlags;		///< Bit mask for the AccessFlag flags. Column flags are derived from those if not set explicitly.
-		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
 
 		// Column information
 		std::set<SQLUSMALLINT> m_primaryKeyColumnIndexes;	///< If this set contains values during Open(), the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is activated implicitly. 
