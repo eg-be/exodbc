@@ -30,6 +30,25 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	std::wstring TablePrivileges::ToString(TablePrivilege priv)
+	{
+		switch (priv)
+		{
+		case TablePrivilege::SELECT:
+			return L"SELECT";
+		case TablePrivilege::INSERT:
+			return L"INSERT";
+		case TablePrivilege::UPDATE:
+			return L"UPDATE";
+		case TablePrivilege::DEL:
+			return L"DELETE";
+		case TablePrivilege::NONE:
+			return L"NONE";
+		default:
+			return L"???";
+		}
+	}
+
 	void TablePrivileges::Init(ConstDatabasePtr pDb, const TableInfo& tableInfo)
 	{
 		exASSERT(pDb);
@@ -60,5 +79,14 @@ namespace exodbc
 				Set(TablePrivilege::DEL);
 			}
 		}
+	}
+
+
+	std::wstring MissingTablePrivilegeException::ToString() const throw()
+	{
+		std::wstringstream ws;
+		ws << Exception::ToString();
+		ws << L"Missing Privilege '" << TablePrivileges::ToString(m_missingPriv) << L"' on Table '" << m_tableInfo.GetQueryName() << L"'";
+		return ws.str();
 	}
 } // namespace exodbc

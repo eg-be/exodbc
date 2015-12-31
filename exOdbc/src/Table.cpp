@@ -124,7 +124,7 @@ namespace exodbc
 		// and then the TableInfo was searched. Do not loose the information about the search-names.
 		if (other.HasTableInfo())
 		{
-			Init(other.m_pDb, other.GetAccessFlags(), other.GetTableInfo());
+			Init(other.m_pDb, other.GetAccessFlags(), other.m_tableInfo);
 			m_initialTableName = other.m_initialTableName;
 			m_initialSchemaName = other.m_initialSchemaName;
 			m_initialCatalogName = other.m_initialCatalogName;
@@ -404,6 +404,52 @@ namespace exodbc
 	}
 
 
+	TableInfo Table::GetTableInfo() const
+	{
+		if (!m_haveTableInfo)
+		{
+			return m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
+		}
+		return m_tableInfo;
+	}
+
+
+	void Table::CheckPrivileges() const
+	{
+		exASSERT(m_pDb);
+
+		const TableInfo& tableInfo = GetTableInfo();
+
+		TablePrivileges tablePrivs;
+		tablePrivs.Init(m_pDb, tableInfo);
+
+		if (TestAccessFlag(TableAccessFlag::AF_SELECT) && !tablePrivs.Test(TablePrivilege::SELECT))
+		{
+			MissingTablePrivilegeException e(TablePrivilege::SELECT, tableInfo);
+			SET_EXCEPTION_SOURCE(e);
+			throw e;
+		}
+		if (TestAccessFlag(TableAccessFlag::AF_INSERT) && !tablePrivs.Test(TablePrivilege::INSERT))
+		{
+			MissingTablePrivilegeException e(TablePrivilege::INSERT, tableInfo);
+			SET_EXCEPTION_SOURCE(e);
+			throw e;
+		}
+		if ((TestAccessFlag(TableAccessFlag::AF_DELETE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_WHERE)) && !tablePrivs.Test(TablePrivilege::DEL))
+		{
+			MissingTablePrivilegeException e(TablePrivilege::DEL, tableInfo);
+			SET_EXCEPTION_SOURCE(e);
+			throw e;
+		}
+		if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)) && !tablePrivs.Test(TablePrivilege::UPDATE))
+		{
+			MissingTablePrivilegeException e(TablePrivilege::UPDATE, tableInfo);
+			SET_EXCEPTION_SOURCE(e);
+			throw e;
+		}
+	}
+
+
 	void Table::FreeStatements()
 	{
 		// Do NOT check for IsOpen() here. If Open() fails it will call FreeStatements to do its cleanup
@@ -657,13 +703,6 @@ namespace exodbc
 		NotFoundException nfe(boost::str(boost::wformat(L"No ColumnBuffer found with QueryName '%s'") % columnQueryName));
 		SET_EXCEPTION_SOURCE(nfe);
 		throw nfe;
-	}
-
-
-	TableInfo Table::GetTableInfo() const
-	{
-		exASSERT(m_haveTableInfo);
-		return m_tableInfo;
 	}
 
 
@@ -1148,20 +1187,7 @@ namespace exodbc
 			// Optionally check privileges
 			if (TestOpenFlag(TableOpenFlag::TOF_CHECK_PRIVILEGES))
 			{
-				m_tablePrivileges.Init(m_pDb, m_tableInfo);
-				// We always need to be able to select, but the rest only if we want to write
-				if ((TestAccessFlag(TableAccessFlag::AF_SELECT) && !m_tablePrivileges.Test(TablePrivilege::SELECT))
-					|| (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) && !m_tablePrivileges.Test(TablePrivilege::UPDATE))
-					|| (TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE) && !m_tablePrivileges.Test(TablePrivilege::UPDATE))
-					|| (TestAccessFlag(TableAccessFlag::AF_INSERT) && !m_tablePrivileges.Test(TablePrivilege::INSERT))
-					|| (TestAccessFlag(TableAccessFlag::AF_DELETE_PK) && !m_tablePrivileges.Test(TablePrivilege::DEL))
-					|| (TestAccessFlag(TableAccessFlag::AF_DELETE_WHERE) && !m_tablePrivileges.Test(TablePrivilege::DEL))
-					)
-				{
-					Exception ex((boost::wformat(L"Not sufficient Privileges to Open Table '%s'") % m_tableInfo.GetQueryName()).str());
-					SET_EXCEPTION_SOURCE(ex);
-					throw ex;
-				}
+				CheckPrivileges();
 			}
 
 

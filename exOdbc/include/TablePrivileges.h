@@ -15,6 +15,7 @@
 #include "InfoObject.h"
 #include "EnumFlags.h"
 #include "Database.h"
+#include "Exception.h"
 
 // Other headers
 // System headers
@@ -61,6 +62,9 @@ namespace exodbc
 		: public EnumFlags<TablePrivilege>
 	{
 	public:
+
+		static std::wstring ToString(TablePrivilege priv);
+
 		/*!
 		* \brief	Create an empty TablePrivileges with no TablePrivilege set.
 		*/
@@ -84,6 +88,35 @@ namespace exodbc
 		void Init(const TablePrivilegesVector& tablePrivs);
 	};
 
-} // namesapce exodbc
+
+	/*!
+	* \class	PrivilegeException
+	* \brief	Thrown if Privileges are not okay to do a given operation
+	*/
+	class EXODBCAPI MissingTablePrivilegeException
+		: public Exception
+	{
+	public:
+		MissingTablePrivilegeException() = delete;
+		MissingTablePrivilegeException(TablePrivilege missingPriv, const TableInfo& tableInfo)
+			: Exception()
+			, m_missingPriv(missingPriv)
+			, m_tableInfo(tableInfo)
+		{
+			m_what = w2s(ToString());
+		}
+
+		virtual ~MissingTablePrivilegeException() {};
+
+		virtual std::wstring ToString() const throw();
+
+		virtual std::wstring GetName() const noexcept { return L"exodbc::MissingTablePrivilegeException"; };
+
+	protected:
+		TablePrivilege m_missingPriv;
+		TableInfo m_tableInfo;
+	};
+
+} // namespace exodbc
 
 #endif // TABLE_PRIVILEGES_H

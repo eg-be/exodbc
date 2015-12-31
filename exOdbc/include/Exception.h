@@ -23,8 +23,6 @@
 
 namespace exodbc
 {
-	class ObjectName;
-
 	// Typedefs
 	// --------
 
