@@ -17,7 +17,7 @@
   </Dsn>
 
   <Dsn>
-    <Disabled>0</Disabled>
+    <Disabled>01</Disabled>
     <Name>exDB2_64</Name>
     <User>db2ex</User>
     <Pass>extest</Pass>
@@ -25,7 +25,7 @@
   </Dsn>
 
   <Dsn>
-    <Disabled>0</Disabled>
+    <Disabled>01</Disabled>
     <Name>exAccess</Name>
     <User></User>
     <Pass></Pass>
