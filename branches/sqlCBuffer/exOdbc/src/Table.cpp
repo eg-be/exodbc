@@ -310,20 +310,15 @@ namespace exodbc
 	{
 		exASSERT(m_pDb->IsOpen());
 
-		// Ensure we have a TableInfo
-		if (!m_haveTableInfo)
-		{
-			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
-			m_haveTableInfo = true;
-		}
+		const TableInfo& tableInfo = GetTableInfo();
 
 		// Query Columns and create SqlCBuffers
-		ColumnInfosVector columnInfos = m_pDb->ReadTableColumnInfo(m_tableInfo);
+		ColumnInfosVector columnInfos = m_pDb->ReadTableColumnInfo(tableInfo);
 		exASSERT(columnInfos.size() <= SHRT_MAX);
 		SQLSMALLINT numCols = (SQLSMALLINT)columnInfos.size();
 		if (numCols == 0)
 		{
-			Exception ex((boost::wformat(L"No columns found for table '%s'") % m_tableInfo.GetQueryName()).str());
+			Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetQueryName()).str());
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -397,6 +392,18 @@ namespace exodbc
 	}
 
 
+	const TableInfo& Table::GetTableInfo()
+	{
+		if (!m_haveTableInfo)
+		{
+			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
+			m_haveTableInfo = true;
+		}
+
+		return m_tableInfo;
+	}
+
+
 	void Table::FreeStatements()
 	{
 		// Do NOT check for IsOpen() here. If Open() fails it will call FreeStatements to do its cleanup
@@ -411,7 +418,7 @@ namespace exodbc
 	}
 
 
-	std::wstring Table::BuildFieldsStatement() const
+	std::wstring Table::BuildSelectFieldsStatement() const
 	{
 		exASSERT(m_columns.size() > 0);
 
@@ -693,11 +700,11 @@ namespace exodbc
 		std::wstring sqlstmt;
 		if (!whereStatement.empty())
 		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s WHERE %s") % m_fieldsStatement % m_tableInfo.GetQueryName() % whereStatement).str();
+			sqlstmt = (boost::wformat(L"SELECT %s FROM %s WHERE %s") % BuildSelectFieldsStatement() % m_tableInfo.GetQueryName() % whereStatement).str();
 		}
 		else
 		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % m_fieldsStatement % m_tableInfo.GetQueryName()).str();
+			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % BuildSelectFieldsStatement() % m_tableInfo.GetQueryName()).str();
 		}
 		SelectBySqlStmt(sqlstmt);
 	}
@@ -1138,9 +1145,6 @@ namespace exodbc
 				}
 			}
 
-			// Prepare the FieldStatement to be used for selects
-			m_fieldsStatement = BuildFieldsStatement();
-
 			// Optionally check privileges
 			if (TestOpenFlag(TableOpenFlag::TOF_CHECK_PRIVILEGES))
 			{
@@ -1159,6 +1163,8 @@ namespace exodbc
 					throw ex;
 				}
 			}
+
+
 
 			// Maybe the primary keys have been set manually? Then just forward them to the ColumnBuffers
 			if (m_primaryKeyColumnIndexes.size() > 0)
