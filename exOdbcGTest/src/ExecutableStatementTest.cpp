@@ -92,7 +92,7 @@ namespace exodbc
 		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES);
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false);
+		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false);
 		ASSERT_EQ(4, columns.size());
 
 		// Build a select stmt
@@ -140,7 +140,7 @@ namespace exodbc
 		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES);
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false);
+		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false);
 		ASSERT_EQ(4, columns.size());
 
 		// Build a select stmt
@@ -371,7 +371,7 @@ namespace exodbc
 		ClearTmpTable(TableId::INTEGERTYPES_TMP);
 		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
 		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false);
+		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false);
 		ASSERT_EQ(4, columns.size());
 
 		wstring queryTableName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);

@@ -76,6 +76,7 @@ namespace exodbc
 	{
 #if EXODBC_TEST
 		FRIEND_TEST(TableTest, CopyCtr);
+		FRIEND_TEST(TableTest, QueryPrimaryKeysAndUpdateColumns);
 #endif
 
 	public:
@@ -264,7 +265,7 @@ namespace exodbc
 		* \return	True if this table was constructed using a Constructor for a table
 		*			with manual columns.
 		*/
-		bool		IsManualColumns() const throw() { return m_manualColumns; };
+		bool		IsManualColumns() const throw() { return m_autoCreatedColumns; };
 
 
 		/*!
@@ -697,7 +698,7 @@ namespace exodbc
 		* \brief	Return a set of columnIndexes for the ColumnBuffers of this Table.
 		* \details	Returns the keyset of the internal ColumnBufferMap
 		*/
-		std::set<SQLSMALLINT> GetColumnBufferIndexes() const throw();
+		std::set<SQLUSMALLINT> GetColumnBufferIndexes() const throw();
 
 
 		/*!
@@ -706,7 +707,7 @@ namespace exodbc
 		* \param	caseSensitive 
 		* \throw	NotFoundException If no such ColumnBuffer is found.
 		*/
-		SQLSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
+		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
 
 
 		/*!
@@ -747,7 +748,7 @@ namespace exodbc
 		*			so this method is provided to set primary keys indexes manually.
 		*			If you call this method, the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is implicitly active
 		*			during Open().
-		*			After ColumnBuffers have been created, the flag CF_PRIMARY_KEY is set on the ColumnBuffers 
+		*			During open, the flag CF_PRIMARY_KEY is set on the ColumnBuffers 
 		*			that match the passed columnIndexes.
 		*			Must be called before the Table is Open()ed.
 		* \param	columnIndexes ColumnIndexes that are primary Key. ColumnIndexes is 0-indexed and must match
@@ -776,7 +777,8 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Creates the ColumnBuffers for the table.
+		* \brief	Creates the ColumnBuffers for the table and returns them as a Vector. Depending on the options passed,
+		*			the columns are stored on the Table for later use during Open().
 		* \detailed	Will query the Database about the columns of the table and create corresponding ColumnBufferPtrVariant
 		*			objects.
 		*			If no STableInfo is available, one is fetched from the database and remembered for later use.
@@ -785,10 +787,28 @@ namespace exodbc
 		*			If this function fails,
 		*			On success a vector of ColumnBuffers is returned. The order is the same as encountered when querying
 		*			the database. The Table has stored the STableInfo now.
+		* \param	skipUnsupportedColumns If set to true, the method will not fail if it encounters a Column
+		*			with a SQL-Type that is not supported by the Sql2BufferTypeMap used. It will just ignore that column.
+		*			If set to false, the Method will throw a NotSupportedException.
+		* \param	setAsTableColumns	If set to true, those columns are set as the Columns for the Table before the vector
+		*			is returned. If false, the vector is just returned without changing the columns of the Table.
 		* \throw	Exception If no Columns are found.
 		*/
-		std::vector<ColumnBufferPtrVariant> CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns);
+		std::vector<ColumnBufferPtrVariant> CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns, bool setAsTableColumns);
 
+
+		/*!
+		* \brief	Set a ColumnFlag on a Column defined on this Table.
+		* Exception	If Table is already open or columnIndex is not defined.
+		*/
+		void SetColumnFlag(SQLUSMALLINT columnIndex, ColumnFlag flag) const;
+
+
+		/*!
+		* \brief	Clear a ColumnFlag on a Column defined on this Table.
+		* Exception	If Table is already open or columnIndex is not defined.
+		*/
+		void ClearColumnFlag(SQLUSMALLINT columnIndex, ColumnFlag flag) const;
 
 		
 		/*!
@@ -891,6 +911,33 @@ namespace exodbc
 		*/
 		const ColumnBufferPtrVariant& GetNonNullColumnBufferPtrVariant(SQLSMALLINT columnIndex) const;
 
+
+		/*!
+		* \brief	Queries the Database about the primary keys of this table,
+		*			tries to identify the corresponding columns (by comparing names)
+		*			and sets the flag on the corresponding column.
+		* \throw	Exception If querying fails, or not for all queried primary keys column a 
+		*			corresponding ColumnBuffer is found.
+		*/
+		void	QueryPrimaryKeysAndUpdateColumns() const;
+
+
+		/*!
+		* \brief	Throws an Exception if a Column has an flag set that violates the TableAccessFlags.
+		*			Like CF_INSERT is set, but TableAccessFlags are only AF_READ
+		*/
+		void	CheckColumnFlags() const;
+
+
+		/*!
+		* \brief	Checks for every Column if its SQL type matches one of the SQL types reported
+		*			as supported types by the Database.
+		*			If removeUnsupported is true, a not supported Column is removed from the internal map.
+		*			Else, an NotSupportedException is thrown
+		*/
+		void	CheckSqlTypes(bool removeUnsupported);
+
+
 		ConstDatabasePtr		m_pDb;	///< Database this table belongs to.
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
@@ -930,7 +977,7 @@ namespace exodbc
 		ColumnBufferPtrVariantMap m_columns;
 
 //		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
-		bool				m_manualColumns;		///< If true the table was initialized by passing the number of columns that will be defined later manually
+		bool				m_autoCreatedColumns;		///< If true the columns were created during Open() automatically by querying the database about the table.
 
 		// Table information set during construction, that was used to find the matching TableInfo if none was passed
 		std::wstring  m_initialTableName;		///< Table name set on initialization
