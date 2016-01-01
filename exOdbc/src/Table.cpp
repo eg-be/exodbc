@@ -37,42 +37,22 @@ namespace exodbc
 	Table::Table()
 		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
-		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		//, m_pHStmtSelect(make_shared<SqlStmtHandle>())
-		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
-		//, m_hStmtCount(SQL_NULL_HSTMT)
-		//, m_hStmtSelect(SQL_NULL_HSTMT)
-		//, m_hStmtInsert(SQL_NULL_HSTMT)
-		//, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		//, m_selectQueryOpen(false)
-		//, m_openFlags(TOF_NONE)
+		, m_tableAccessFlags(TableAccessFlag::AF_NONE)
+		, m_openFlags(TableOpenFlag::TOF_NONE)
 	{ }
 
 
 	Table::Table(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
 		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
-		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		//, m_pHStmtSelect(make_shared<SqlStmtHandle>())
-		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
-		//, m_hStmtCount(SQL_NULL_HSTMT)
-		//, m_hStmtSelect(SQL_NULL_HSTMT)
-		//, m_hStmtInsert(SQL_NULL_HSTMT)
-		//, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		//, m_selectQueryOpen(false)
-		//, m_openFlags(TOF_NONE)
+		, m_tableAccessFlags(TableAccessFlag::AF_NONE)
+		, m_openFlags(TableOpenFlag::TOF_NONE)
 	{
 		Init(pDb, afs, tableName, schemaName, catalogName, tableType);
 	}
@@ -81,21 +61,11 @@ namespace exodbc
 	Table::Table(ConstDatabasePtr pDb, TableAccessFlags afs, const TableInfo& tableInfo)
 		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
-		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		//, m_pHStmtSelect(make_shared<SqlStmtHandle>())
-		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
-		//, m_hStmtCount(SQL_NULL_HSTMT)
-		//, m_hStmtSelect(SQL_NULL_HSTMT)
-		//, m_hStmtInsert(SQL_NULL_HSTMT)
-		//, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		//, m_selectQueryOpen(false)
-		//, m_openFlags(TOF_NONE)
+		, m_tableAccessFlags(TableAccessFlag::AF_NONE)
+		, m_openFlags(TableOpenFlag::TOF_NONE)
 	{
 		Init(pDb, afs, tableInfo);
 	}
@@ -104,21 +74,11 @@ namespace exodbc
 	Table::Table(const Table& other)
 		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
-		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_isOpen(false)
-		//, m_pHStmtSelect(make_shared<SqlStmtHandle>())
-		//, m_pHStmtCount(make_shared<SqlStmtHandle>())
-		//, m_hStmtCount(SQL_NULL_HSTMT)
-		//, m_hStmtSelect(SQL_NULL_HSTMT)
-		//, m_hStmtInsert(SQL_NULL_HSTMT)
-		//, m_hStmtUpdatePk(SQL_NULL_HSTMT)
-		//, m_hStmtDeletePk(SQL_NULL_HSTMT)
-		//, m_hStmtDeleteWhere(SQL_NULL_HSTMT)
-		//, m_hStmtUpdateWhere(SQL_NULL_HSTMT)
-		//, m_selectQueryOpen(false)
-		//, m_openFlags(TOF_NONE)
+		, m_tableAccessFlags(TableAccessFlag::AF_NONE)
+		, m_openFlags(TableOpenFlag::TOF_NONE)
 	{
 		// note: This constructor will always copy the search-names. Maybe they were set on other,
 		// and then the TableInfo was searched. Do not loose the information about the search-names.
@@ -1499,33 +1459,6 @@ namespace exodbc
 	bool Table::TestOpenFlag(TableOpenFlag of) const noexcept
 	{
 		return m_openFlags.Test(of);
-	}
-
-
-
-	void Table::SetCharTrimLeft(bool trimLeft) noexcept
-	{
-		if (trimLeft)
-		{
-			m_openFlags.Set(TableOpenFlag::TOF_CHAR_TRIM_LEFT);
-		}
-		else
-		{
-			m_openFlags.Clear(TableOpenFlag::TOF_CHAR_TRIM_LEFT);
-		}
-	}
-
-
-	void Table::SetCharTrimRight(bool trimRight) noexcept
-	{
-		if (trimRight)
-		{
-			m_openFlags.Set(TableOpenFlag::TOF_CHAR_TRIM_RIGHT);
-		}
-		else
-		{
-			m_openFlags.Clear(TableOpenFlag::TOF_CHAR_TRIM_RIGHT);
-		}
 	}
 
 

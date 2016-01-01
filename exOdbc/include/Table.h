@@ -203,14 +203,6 @@ namespace exodbc
 		*			If set, the SQL Types of manually defined columns are not validated against the supported
 		*			types reported by the Database. If this flag is set, the flag TOF_SKIP_UNSUPPORTED_COLUMNS
 		*			does nothing for manually defined columns.
-		*  - TOF_CHAR_TRIM_LEFT:
-		*			If set, values retrieved using GetStringValue(SQLSMALLINT columnIndex)
-		*			or GetWStringValue(SQLSMALLINT columnIndex) are trimmed on the left
-		*			before being set on str.
-		*  - TOF_CHAR_TRIM_RIGHT:
-		*			If set, values retrieved using GetStringValue(SQLSMALLINT columnIndex)
-		*			or GetWStringValue(SQLSMALLINT columnIndex) are trimmed on the right
-		*			before being set on str.
 		*  - TOF_DO_NOT_QUERY_PRIMARY_KEYS:
 		*			If a table is opened with the AccessFlag::AF_UPDATE_PK or AccessFlag::AF_DELETE_PK set,
 		*			Primary keys are required. They are queried from the Database during Open(), unless
@@ -322,22 +314,6 @@ namespace exodbc
 		* \brief	Test if a TableOpenFlag is set.
 		*/
 		bool		TestOpenFlag(TableOpenFlag flag) const noexcept;
-
-
-		/*!
-		* \brief	Sets or Clears the TOF_TRIM_RIGHT flag.
-		* \details	Note that the value set here is overriden by the value
-		*			passed to Open() in the TableOpenFlags.
-		*/
-		void		SetCharTrimRight(bool trimRight) noexcept;
-
-
-		/*!
-		* \brief	Sets or Clears the TOF_TRIM_LEFT flag.
-		* \details	Note that the value set here is overriden by the value
-		*			passed to Open() in the TableOpenFlags.
-		*/
-		void		SetCharTrimLeft(bool trimLeft) noexcept;
 
 
 		/*!
@@ -956,20 +932,6 @@ namespace exodbc
 		ExecutableStatement m_execStmtDeletePk; ///< Statement to DELETE. WHERE clause is formed using primarky key columns.
 		UBigIntColumnBufferPtr m_pSelectCountResultBuffer;	///< The buffer used to retrieve the result of a SELECT COUNT operation.
 
-		// ODBC Handles
-		//SqlStmtHandlePtr	m_pHStmtSelect;	
-		//SqlStmtHandlePtr	m_pHStmtCount;	
-
-		//SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
-		//SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
-		//SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
-		//SQLHSTMT		m_hStmtDeletePk;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
-		//SQLHSTMT		m_hStmtUpdatePk;	///< Statement-handle used to do UPDATEs. Primary key columns are bound, a prepared statement using column-markers is created.
-		//SQLHSTMT		m_hStmtDeleteWhere;	///< Statement-handle to do DELETEs using a passed WHERE clause.
-		//SQLHSTMT		m_hStmtUpdateWhere;	///< Statement-handle to do UPDATEs using a passed WHERE clause.
-
-		//bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
-
 		// Table Information
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		TableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
@@ -982,9 +944,8 @@ namespace exodbc
 															///< The ColumnBuffers marked in this set will be used as primary key columns.
 															///< Used if columns are not defined manually but queried, but the Database does not support SQLPrimaryKeys.
 
-		ColumnBufferPtrVariantMap m_columns;
+		ColumnBufferPtrVariantMap m_columns;	///< A map with ColumnBuffers, key is the column-Index (starting at 0).
 
-//		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
 		bool				m_autoCreatedColumns;		///< If true the columns were created during Open() automatically by querying the database about the table.
 
 		// Table information set during construction, that was used to find the matching TableInfo if none was passed
@@ -992,13 +953,6 @@ namespace exodbc
 		std::wstring	m_initialSchemaName;	///< Schema name set on initialization
 		std::wstring	m_initialCatalogName;	///< Catalog name set on initialization
 		std::wstring	m_initialTypeName;		///< Type name set on initialization
-
-#ifdef EXODBCDEBUG
-	public:
-		size_t				GetTableId() const { return m_tableId; }
-	private:
-		size_t m_tableId; ///< Given by calling Database::RegisterTable() during Initialization.
-#endif
 
 	};  // Table
 

@@ -146,8 +146,6 @@ namespace exodbc
 		TOF_CHECK_EXISTANCE = 0x1,	///< Always check that a table identified by the STableInfo exists.
 		TOF_CHECK_PRIVILEGES = 0x2,	///< Check that we have sufficient privileges to open the table for the given TableAccessFlags.
 		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	///< Skip unsupported Columns when creating SqlCBuffers automatically from the info queried from the Database.
-		TOF_CHAR_TRIM_RIGHT = 0x8,	///< If set, string/wstring values accessed through this table are trimmed on the right before being returned as string/string.
-		TOF_CHAR_TRIM_LEFT = 0x10,	///< If set, string/wstring values accessed through this table are trimmed on the left before being returned as string/string.
 		TOF_DO_NOT_QUERY_PRIMARY_KEYS = 0x20, ///< If set, primary keys are not queried from the Database during Open().
 		TOF_IGNORE_DB_TYPE_INFOS = 0x40, ///< If set, the SQL Type info from the Database is not used to validate the given Columns SQL Data type.
 		TOF_FORWARD_ONLY_CURSORS = 0x80, ///< If set, forward-only cursors are used only, even if the Database would support Scrollable cursors.
