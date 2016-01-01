@@ -190,176 +190,7 @@ namespace exodbc
 	}
 
 
-	//TEST_F(TableTest, OpenManualCheckColumnFlagSelect)
-	//{
-	//	// Open a table manually but do not set the Select flag for all columns
-	//	Table iTable(m_pDb, TableAccessFlag::AF_SELECT, GetTableName(TableId::INTEGERTYPES));
 
-	//	SqlSLongBuffer idCol;
-	//	SqlSShortBuffer shortCol;
-	//	SqlSLongBuffer intCol;
-	//	SqlSBigIntBuffer bigIntCol;
-
-	//	SQLINTEGER id = 0;
-	//	SQLSMALLINT si = 0;
-	//	SQLINTEGER i = 0;
-	//	SQLBIGINT bi = 0;
-	//	iTable.SetColumn(0, ToDbCase(L"idintegertypes"), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), TableOpenFlag::CF_SELECT);
-	//	iTable.SetColumn(1, ToDbCase(L"tsmallint"), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), TableOpenFlag::CF_SELECT | TableOpenFlag::CF_NULLABLE);
-	//	iTable.SetColumn(2, ToDbCase(L"tint"), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), TableOpenFlag::CF_NONE);
-	//	iTable.SetColumn(3, ToDbCase(L"tbigint"), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), TableOpenFlag::CF_SELECT | TableOpenFlag::CF_NULLABLE);
-
-	//	ASSERT_NO_THROW(iTable.Open());
-	//	// We expect all columnBuffers to be bound, except nr 2
-	//	ColumnBuffer* pBuffId = iTable.GetColumnVariant(0);
-	//	ColumnBuffer* pBuffsi = iTable.GetColumnVariant(1);
-	//	ColumnBuffer* pBuffi = iTable.GetColumnVariant(2);
-	//	ColumnBuffer* pBuffbi = iTable.GetColumnVariant(3);
-	//	EXPECT_TRUE(pBuffId->IsBound());
-	//	EXPECT_TRUE(pBuffsi->IsBound());
-	//	EXPECT_FALSE(pBuffi->IsBound());
-	//	EXPECT_TRUE(pBuffbi->IsBound());
-
-	//	// And we should be able to select a row
-	//	wstring sqlstmt = boost::str(boost::wformat(L"%s = 7") % test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
-	//	iTable.Select(sqlstmt);
-	//	EXPECT_TRUE(iTable.SelectNext());
-	//	// and have all values
-	//	EXPECT_EQ(7, id);
-	//	EXPECT_EQ(-13, si);
-	//	EXPECT_EQ(0, i);
-	//	EXPECT_EQ(10502, bi);
-	//	{
-	//		LogLevelFatal llf;
-	//		DontDebugBreak ddb;
-	//		// except the not bound column, we are unable to get its value, but its buffer has not changed
-	//		EXPECT_THROW(boost::get<SQLINTEGER>(iTable.GetColumnValue(2)), AssertionException);
-	//	}
-	//}
-
-
-//	TEST_F(TableTest, OpenManualCheckColumnFlagInsert)
-//	{
-//		// Open a table manually but do not set the Insert flag for all columns
-//		Table iTable(&m_db, AF_SELECT | AF_INSERT | AF_DELETE, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		SQLINTEGER id = 0;
-//		SQLSMALLINT si = 0;
-//		SQLINTEGER i = 0;
-//		SQLBIGINT bi = 0;
-//		int type = SQL_C_SLONG;
-//
-//		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_INSERT | CF_PRIMARY_KEY);
-//		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
-//		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
-//		}
-//		else
-//		{
-//			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
-//		}
-//
-//		// Open and remove all data from the table
-//		iTable.Open();
-//		ASSERT_NO_THROW(test::ClearTestTable(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db));
-//
-//		// Insert a value by using our primary key - columnIndex 2 will not get inserted but the default NULL value will be set by the db
-//		iTable.SetColumnValue(0, (SQLINTEGER)11);
-//		iTable.SetColumnValue(1, (SQLSMALLINT)202);
-//		iTable.SetColumnValue(2, (SQLINTEGER)303);
-//		iTable.SetColumnValue(3, (SQLBIGINT)-404);
-//		EXPECT_NO_THROW(iTable.Insert());
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// Read back from another table
-//		// note that when opening an Access Table Access automatically, the second column will not get bound to a SMALLINT, as
-//		// Access reports it as SQL_INTEGER (Db-Type) which corresponds to C-Type of SQL_C_SLONG.
-//		// The other databases report it as SQL_SMALLINT which we bind to SQL_C_SSHORT
-//		Table iTable2(&m_db, AF_READ, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		iTable2.Open();
-//		iTable2.Select();
-//		ASSERT_TRUE(iTable2.SelectNext());
-//		EXPECT_EQ(11, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			EXPECT_EQ(202, boost::get<SQLINTEGER>(iTable2.GetColumnValue(1)));
-//			EXPECT_EQ(-404, boost::get<SQLINTEGER>(iTable2.GetColumnValue(3)));
-//		}
-//		else
-//		{
-//			EXPECT_EQ(202, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
-//			EXPECT_EQ(-404, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
-//		}
-//		EXPECT_TRUE(iTable2.IsColumnNull(2));
-//	}
-//
-//
-//	TEST_F(TableTest, OpenManualCheckColumnFlagUpdate)
-//	{
-//		// Open a table manually but do not set the Update flag for all columns
-//		Table iTable(&m_db, AF_SELECT | AF_UPDATE | AF_DELETE | AF_INSERT, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		SQLINTEGER id = 0;
-//		SQLSMALLINT si = 0;
-//		SQLINTEGER i = 0;
-//		SQLBIGINT bi = 0;
-//		int type = SQL_C_SLONG;
-//
-//		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT | CF_UPDATE | CF_INSERT | CF_PRIMARY_KEY);
-//		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_UPDATE | CF_INSERT);
-//		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT | CF_UPDATE);
-//		}
-//		else
-//		{
-//			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT | CF_UPDATE);
-//		}
-//
-//		// Open and remove all data from the table
-//		iTable.Open();
-//		ASSERT_NO_THROW(test::ClearTestTable(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase, iTable, m_db));
-//
-//		// Insert some value to update later
-//		iTable.SetColumnValue(0, (SQLINTEGER)11);
-//		iTable.SetColumnValue(1, (SQLSMALLINT)202);
-//		iTable.SetColumnValue(2, (SQLINTEGER)303);
-//		iTable.SetColumnValue(3, (SQLBIGINT)-404);
-//		EXPECT_NO_THROW(iTable.Insert());
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// Select to update
-//		iTable.Select();
-//		ASSERT_TRUE(iTable.SelectNext());
-//
-//		// Update - note column 2 will not get updated, flag not set
-//		// iTable.SetColumnValue(0, (SQLINTEGER) 11); //pk
-//		iTable.SetColumnValue(1, (SQLSMALLINT) 880);
-//		iTable.SetColumnValue(2, (SQLINTEGER) 990);
-//		iTable.SetColumnValue(3, (SQLBIGINT) 1001);
-//		EXPECT_NO_THROW(iTable.Update());
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// Read back from another table - column 2 still has the originally inserted value
-//		Table iTable2(&m_db, AF_READ, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		iTable2.Open();
-//		iTable2.Select();
-//		ASSERT_TRUE(iTable2.SelectNext());
-//		EXPECT_EQ(11, boost::get<SQLINTEGER>(iTable2.GetColumnValue(0)));
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			EXPECT_EQ(880, boost::get<SQLINTEGER>(iTable2.GetColumnValue(1)));
-//			EXPECT_EQ(1001, boost::get<SQLINTEGER>(iTable2.GetColumnValue(3)));
-//		}
-//		else
-//		{
-//			EXPECT_EQ(880, boost::get<SQLSMALLINT>(iTable2.GetColumnValue(1)));
-//			EXPECT_EQ(1001, boost::get<SQLBIGINT>(iTable2.GetColumnValue(3)));
-//		}
-//		EXPECT_EQ(303, boost::get<SQLINTEGER>(iTable2.GetColumnValue(2)));
-//	}
-//	
 //
 //	TEST_F(TableTest, OpenManualPrimaryKeys)
 //	{
@@ -889,6 +720,25 @@ namespace exodbc
 	}
 
 
+	TEST_F(TableTest, SelectFlag)
+	{
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		
+		// remove the select flag from the id column before opening the table
+		auto columns = iTable.CreateAutoColumnBufferPtrs(false, true);
+		ColumnFlagsPtr pFlag = boost::apply_visitor(ColumnFlagsPtrVisitor(), columns[0]);
+		auto idCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		pFlag->Clear(ColumnFlag::CF_SELECT);
+
+		iTable.Open();
+
+		EXPECT_NO_THROW(iTable.Select(L""));
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_TRUE(idCol->IsNull());
+	}
+
+
 	TEST_F(TableTest, SelectFirst)
 	{
 		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
@@ -1246,6 +1096,40 @@ namespace exodbc
 	}
 
 
+	TEST_F(TableTest, InsertFlag)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
+
+		{
+			// Now insert with only id-column bound for inserting, and the int column only bound for selecting
+			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT, tableName);
+			iTable.CreateAutoColumnBufferPtrs(false, true);
+			LongColumnBufferPtr pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			LongColumnBufferPtr pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+			pInt->Clear(ColumnFlag::CF_INSERT);
+			iTable.Open();
+			pId->SetValue(301);
+			pInt->SetValue(401);
+			iTable.Insert();
+		}
+		m_pDb->CommitTrans();
+
+		// Read back values
+		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		iTable.Open();
+		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		wstring sqlWhere = boost::str(boost::wformat(L"%s = 301 ORDER by %s") %idColName %idColName);
+		iTable.Select(sqlWhere);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(301, *pId);
+		EXPECT_TRUE(pInt->IsNull());
+	}
+
+
 	// Update rows
 	// ---------
 	TEST_F(TableTest, UpdatePk)
@@ -1306,6 +1190,67 @@ namespace exodbc
 		EXPECT_TRUE(iTable.SelectNext());
 		EXPECT_EQ(301, *pId);
 		EXPECT_EQ(501, *pInt);
+	}
+
+
+	TEST_F(TableTest, UpdateFlag)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
+
+		{
+			// Insert some rows
+			Table iTable(m_pDb, TableAccessFlag::AF_INSERT, tableName);
+			iTable.Open();
+
+			// Set some values
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+			pId->SetValue(300);
+			pInt->SetValue(400);
+			iTable.Insert();
+
+			pId->SetValue(301);
+			pInt->SetNull();
+			iTable.Insert();
+
+			m_pDb->CommitTrans();
+		}
+		{
+			// And update, but remove the UPDATE_FLAG from the value we are trying to change
+			Table iTable(m_pDb, TableAccessFlag::AF_UPDATE_PK, tableName);
+			auto columns = iTable.CreateAutoColumnBufferPtrs(false, true);
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+			pInt->Clear(ColumnFlag::CF_UPDATE);
+			iTable.Open();
+
+			pId->SetValue(300);
+			pInt->SetValue(500);
+			iTable.Update();
+
+			pId->SetValue(301);
+			pInt->SetValue(501);
+			iTable.Update();
+
+			m_pDb->CommitTrans();
+		}
+
+		// Read back values - int col was not updated, because flag was removed
+		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		iTable.Open();
+		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		wstring sqlWhere = boost::str(boost::wformat(L"%s = 300 OR %s = 301 ORDER by %s") % idColName %idColName %idColName);
+		iTable.Select(sqlWhere);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(300, *pId);
+		EXPECT_EQ(400, *pInt);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(301, *pId);
+		EXPECT_TRUE(pInt->IsNull());
 	}
 
 
