@@ -1309,6 +1309,69 @@ namespace exodbc
 	}
 
 
+	TEST_F(TableTest, UpdateWhere)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
+
+		{
+			// Insert some rows
+			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT | TableAccessFlag::AF_UPDATE_PK, tableName);
+			iTable.Open();
+
+			// Set some values
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+			pId->SetValue(300);
+			pInt->SetValue(400);
+			iTable.Insert();
+
+			pId->SetValue(301);
+			pInt->SetValue(401);
+			iTable.Insert();
+
+			m_pDb->CommitTrans();
+		}
+		{
+			// And update
+			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT | TableAccessFlag::AF_UPDATE_PK, tableName);
+			iTable.Open();
+
+			// Set some values - this time we also update the primary key columns
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+			pId->SetValue(3000);
+			pInt->SetValue(5000);
+			wstring where = boost::str(boost::wformat(L"%s = 300") % idColName);
+			iTable.Update(where);
+
+			pId->SetValue(3001);
+			pInt->SetValue(5001);
+			where = boost::str(boost::wformat(L"%s = 301") % idColName);
+			iTable.Update(where);
+
+			m_pDb->CommitTrans();
+		}
+
+		// Read back values
+		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		iTable.Open();
+		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+		wstring sqlWhere = boost::str(boost::wformat(L"%s = 3000 OR %s = 3001 ORDER by %s") % idColName %idColName %idColName);
+		iTable.Select(sqlWhere);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(3000, *pId);
+		EXPECT_EQ(5000, *pInt);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(3001, *pId);
+		EXPECT_EQ(5001, *pInt);
+	}
+
+
 //	// Delete rows: We do not test that for the different data-types, its just deleting a row.
 //	// -----------
 //	TEST_F(TableTest, DeleteWhere)

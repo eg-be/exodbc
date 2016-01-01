@@ -990,55 +990,50 @@ namespace exodbc
 
 	void Table::Update(const std::wstring& where)
 	{
-		//exASSERT(IsOpen());
-		//exASSERT(TestAccessFlag(AF_UPDATE_WHERE));
-		//exASSERT(m_hStmtUpdateWhere != SQL_NULL_HSTMT);
-		//exASSERT(!where.empty());
+		exASSERT(!m_columns.empty());
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK));
+		exASSERT(!where.empty());
 
-		//try
-		//{
-		//	// Format an update-statement that updates all Bound columns that have the flag CF_UPDATE set
-		//	wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
-		//	// .. first the values to update
-		//	// note: parem-number reflects here the number of the param in the created prepared statement, so we
-		//	// cannot use the values from the ColumnBuffer column index.
-		//	int paramNr = 1;
-		//	for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		//	{
-		//		ColumnBuffer* pBuffer = it->second;
-		//		if (pBuffer->IsColumnFlagSet(CF_UPDATE))
-		//		{
-		//			// Bind this parameter as update parameter and include it in the statement
-		//			pBuffer->BindParameter(m_hStmtUpdateWhere, paramNr);
-		//			updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
-		//			paramNr++;
-		//		}
-		//	}
-		//	boost::erase_last(updateStmt, L",");
-		//	exASSERT_MSG(paramNr > 1, L"No columns are bound that have the flag CF_UPDATE set");
-		//	updateStmt += (L"WHERE " + where);
+		ExecutableStatement execStmtUpdate;
+		execStmtUpdate.Init(m_pDb, true);
 
-		//	// Prepare to update
-		//	SQLRETURN ret = SQLPrepare(m_hStmtUpdateWhere, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
-		//	THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
+		// Build a statement with parameter-markers
+		vector<ColumnBufferPtrVariant> setParamsToBind;
+		wstring setMarkers;
+		auto it = m_columns.begin();
+		while (it != m_columns.end())
+		{
+			ColumnBufferPtrVariant pVar = it->second;
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), pVar);
+			if (pFlags->Test(ColumnFlag::CF_UPDATE))
+			{
+				setMarkers += boost::apply_visitor(QueryNameVisitor(), pVar);
+				setMarkers += L" = ?, ";
+				setParamsToBind.push_back(pVar);
+			}
+			++it;
+		}
+		boost::erase_last(setMarkers, L", ");
+		wstring stmt = boost::str(boost::wformat(L"UPDATE %s SET %s WHERE %s") % m_tableInfo.GetQueryName() % setMarkers % where);
 
-		//	// And Execute
-		//	ret = SQLExecute(m_hStmtUpdateWhere);
-		//	THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
+		// check that we actually have some columns to update and some for the where part
+		exASSERT_MSG(!setParamsToBind.empty(), L"No Columns flaged for UPDATEing");
 
-		//	// Always unbind all parameters at the end
-		//	ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
-		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
-		//}
-		//catch (const Exception& ex)
-		//{
-		//	// Always unbind all parameters at the end
-		//	SQLRETURN ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_UNBIND);
-		//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere, boost::str(boost::wformat(L"Failed to unbind UpdateWhere-handle during cleanup of exception '%s") % ex.ToString()));
-		//	// rethrow
-		//	throw;
-		//}
+		// .. and prepare stmt
+		execStmtUpdate.Prepare(stmt);
 
+		// and binding of columns... we must do that after calling Prepare - or
+		// not use SqlDescribeParam during Bind
+		// first come the set params, then the where markers
+		SQLSMALLINT paramNr = 1;
+		for (auto it = setParamsToBind.begin(); it != setParamsToBind.end(); ++it)
+		{
+			execStmtUpdate.BindParameter(*it, paramNr);
+			++paramNr;
+		}
+
+		// And do the update
+		execStmtUpdate.ExecutePrepared();
 	}
 
 
