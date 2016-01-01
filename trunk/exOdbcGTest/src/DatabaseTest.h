@@ -34,17 +34,12 @@ namespace exodbc
 {
 	class DatabaseTest : public ::testing::Test
 	{
-	public:
-		static void SetUpTestCase();
-		static void TearDownTestCase() {};
-
 	protected:
 		virtual void SetUp();
 		virtual void TearDown();
 
-		exodbc::Environment m_env;
-		exodbc::Database	m_db;
-		TestParams m_odbcInfo;
+		EnvironmentPtr m_pEnv = std::make_shared<Environment>();
+		DatabasePtr	m_pDb = std::make_shared<Database>();
 	};
 } // namespace exodbc
 

@@ -4,6 +4,7 @@
 //
 
 #pragma once
+#pragma warning(disable:4503)
 
 #include "targetver.h"
 
@@ -18,6 +19,7 @@
 #include "boost/filesystem.hpp"
 #include "boost/algorithm/algorithm.hpp"
 #include "boost/foreach.hpp"
+#include "boost/log/trivial.hpp"
 
 // system
 #include <stdio.h>

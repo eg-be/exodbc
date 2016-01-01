@@ -13,6 +13,9 @@
 // Same component headers
 #include "exOdbc.h"
 #include "InfoObject.h"
+#include "EnumFlags.h"
+#include "Database.h"
+#include "Exception.h"
 
 // Other headers
 // System headers
@@ -32,89 +35,88 @@ namespace exodbc
 	// Structs
 	// -------
 
-	enum TablePrivilege
-	{
-		TP_SELECT = 0x1,
-		TP_INSERT = 0x2,
-		TP_UPDATE = 0x4,
-		TP_DELETE = 0x8,
-	};
 	// Classes
 	// -------
+	enum class TablePrivilege
+	{
+		NONE = 0x0,
+
+		SELECT = 0x1,
+		UPDATE = 0x2,
+		INSERT = 0x4,
+		DEL = 0x8
+	};
+	template<>
+	struct enable_bitmask_operators<TablePrivilege> {
+		static const bool enable = true;
+	};
+
+
 	/*!
 	* \class TablePrivileges
 	*
 	* \brief Parses Table Privileges read from the database and caches them for later use.
 	*
 	*/
-	class EXODBCAPI TablePrivileges
+	class TablePrivileges
+		: public EnumFlags<TablePrivilege>
 	{
 	public:
+
+		static std::wstring ToString(TablePrivilege priv);
+
 		/*!
 		* \brief	Create an empty TablePrivileges with no TablePrivilege set.
 		*/
-		TablePrivileges();
-
-
-		/*!
-		* \brief	Create a TablePrivilege for the Table given by tableInfo.
-		* \details	Tries to Initialize() this TablePrivileges automatically.
-		* \throw	Exception If Initialization fails.
-		*/
-		TablePrivileges(const Database* pDb, const TableInfo& tableInfo);
-		
-		
-		~TablePrivileges() {};
-
+		TablePrivileges()
+			: EnumFlags()
+		{};
 
 		/*!
 		* \brief	Query database about the Privileges of the passed Table.
-		*			Marks object as initialized on success.
+		*			Overrides any privileges set with the values read from database.
 		* \throw	Exception If querying or parsing fails.
 		*/
-		void Initialize(const Database* pDb, const TableInfo& tableInfo);
+		void Init(ConstDatabasePtr pDb, const TableInfo& tableInfo);
 
 
 		/*!
-		* \brief	Initialize object from passed data. Marks as uninitialized first.
-		*			Marks object as initialized on success.
-		* \param	tablePrivs TablePrivilige s
+		* \brief	Overrides privileges with passed values.
+		* \param	tablePrivs
 		* \throw	Exception if Parsing passed data fails.
 		*/
-		void Initialize(const TablePrivilegesVector& tablePrivs) { return Parse(tablePrivs); };
-
-
-		/*!
-		* \brief	Returns true if Privileges have been parsed and can be queried.
-		*/
-		bool IsInitialized() const { return m_initialized; };
-
-
-		/*!
-		* \brief	Test if multiple TablePrivileges are set.
-		* \throw	Exception If not initialized.
-		*/
-		bool AreSet(unsigned int priv) const { exASSERT(IsInitialized());  return (m_privileges & priv) != 0; };
-		
-
-		/*!
-		* \brief	Test if a TablePrivilege is set.
-		* \throw	Exception If not initialized.
-		*/
-		bool IsSet(TablePrivilege priv) const { exASSERT(IsInitialized());  return (m_privileges & priv) != 0; };
-
-	private:
-		/*!
-		* \brief	Parses to TablePrivilege.
-		* \throw	Exception
-		*/
-		void Parse(const TablePrivilegesVector& tablePrivs);
-
-		bool m_initialized;
-
-		unsigned int m_privileges;
+		void Init(const TablePrivilegesVector& tablePrivs);
 	};
 
-} // namesapce exodbc
+
+	/*!
+	* \class	PrivilegeException
+	* \brief	Thrown if Privileges are not okay to do a given operation
+	*/
+	class EXODBCAPI MissingTablePrivilegeException
+		: public Exception
+	{
+	public:
+		MissingTablePrivilegeException() = delete;
+		MissingTablePrivilegeException(TablePrivilege missingPriv, const TableInfo& tableInfo)
+			: Exception()
+			, m_missingPriv(missingPriv)
+			, m_tableInfo(tableInfo)
+		{
+			m_what = w2s(ToString());
+		}
+
+		virtual ~MissingTablePrivilegeException() {};
+
+		virtual std::wstring ToString() const throw();
+
+		virtual std::wstring GetName() const noexcept { return L"exodbc::MissingTablePrivilegeException"; };
+
+	protected:
+		TablePrivilege m_missingPriv;
+		TableInfo m_tableInfo;
+	};
+
+} // namespace exodbc
 
 #endif // TABLE_PRIVILEGES_H

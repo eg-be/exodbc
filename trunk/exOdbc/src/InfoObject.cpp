@@ -14,6 +14,7 @@
 
 // Same component headers
 #include "Exception.h"
+#include "Helpers.h"
 
 // Other headers
 
@@ -121,17 +122,20 @@ namespace exodbc
 	// Class ManualColumnInfo
 	// ======================
 	ManualColumnInfo::ManualColumnInfo()
-		: m_sqlType(SQL_UNKNOWN_TYPE)
-		, m_columnSize(-1)
-		, m_decimalDigits(-1)
+		: ColumnBindInfo()
 	{}
 
 
-	ManualColumnInfo::ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
-		: m_sqlType(sqlType)
+	ManualColumnInfo::ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName)
+		: ColumnBindInfo(sqlType)
 		, m_queryName(queryName)
-		, m_columnSize(columnSize)
-		, m_decimalDigits(decimalDigits)
+	{
+		exASSERT(!queryName.empty());
+	}
+
+	ManualColumnInfo::ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+		: ColumnBindInfo(sqlType, columnSize, decimalDigits)
+		, m_queryName(queryName)
 	{
 		exASSERT(!queryName.empty());
 	}
@@ -155,32 +159,15 @@ namespace exodbc
 	}
 
 
-	SQLINTEGER ManualColumnInfo::GetColumnSize() const throw()
-	{
-		return m_columnSize;
-	}
-
-
-	SQLSMALLINT ManualColumnInfo::GetDecimalDigits() const throw()
-	{
-		return m_decimalDigits;
-	}
-
-
-	SQLSMALLINT ManualColumnInfo::GetSqlType() const throw()
-	{
-		return m_sqlType;
-	}
-
-
 	// Class ColumnInfo
 	// ================
 
 	ColumnInfo::ColumnInfo()
-		: m_sqlType(SQL_UNKNOWN_TYPE)
-		, m_columnSize(0)
+		: ColumnBindInfo()
+		//: m_sqlType(SQL_UNKNOWN_TYPE)
+		//, m_columnSize(0)
 		, m_bufferSize(0)
-		, m_decimalDigits(0)
+		//, m_decimalDigits(0)
 		, m_numPrecRadix(0)
 		, m_nullable(SQL_NULLABLE_UNKNOWN)
 		, m_sqlDataType(SQL_UNKNOWN_TYPE)
@@ -206,15 +193,16 @@ namespace exodbc
 		const std::wstring& remarks, const std::wstring& defaultValue, SQLSMALLINT sqlDataType, SQLSMALLINT sqlDatetimeSub, SQLINTEGER charOctetLength, SQLINTEGER ordinalPosition, 
 		const std::wstring& isNullable, bool isCatalogNull, bool isSchemaNull, bool isColumnSizeNull, bool isBufferSizeNull, bool isDecimalDigitsNull, bool isNumPrecRadixNull, 
 		bool isRemarksNull, bool isDefaultValueNull, bool isSqlDatetimeSubNull, bool isIsNullableNull)
-		: m_catalogName(catalogName)
+		: ColumnBindInfo(sqlType, columnSize, decimalDigits)
+		, m_catalogName(catalogName)
 		, m_schemaName(schemaName)
 		, m_tableName(tableName)
 		, m_columnName(columnName)
-		, m_sqlType(sqlType)
+		//, m_sqlType(sqlType)
 		, m_typeName(typeName)
-		, m_columnSize(columnSize)
+		//, m_columnSize(columnSize)
 		, m_bufferSize(bufferSize)
-		, m_decimalDigits(decimalDigits)
+		//, m_decimalDigits(decimalDigits)
 		, m_numPrecRadix(numPrecRadix)
 		, m_nullable(nullable)
 		, m_remarks(remarks)
@@ -327,41 +315,37 @@ namespace exodbc
 	}
 
 
-	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, WStringProperty prop)
+	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, WStringProperty prop)
 	{
-		exASSERT(hDbc != SQL_NULL_HDBC);
 		std::wstring value;
-		GetInfo(hDbc, (SQLUSMALLINT)prop, value);
+		GetInfo(pHDbc, (SQLUSMALLINT)prop, value);
 		SetProperty(prop, value);
 	}
 
 
-	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, USmallIntProperty prop)
+	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, USmallIntProperty prop)
 	{
-		exASSERT(hDbc != SQL_NULL_HDBC);
 		SQLUSMALLINT value;
 		SQLSMALLINT cb;
-		GetInfo(hDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+		GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
 		SetProperty(prop, value);
 	}
 
 
-	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, UIntProperty prop)
+	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, UIntProperty prop)
 	{
-		exASSERT(hDbc != SQL_NULL_HDBC);
 		SQLUINTEGER value;
 		SQLSMALLINT cb;
-		GetInfo(hDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+		GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
 		SetProperty(prop, value);
 	}
 
 
-	void DatabaseInfo::ReadAndStoryProperty(SQLHDBC hDbc, IntProperty prop)
+	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, IntProperty prop)
 	{
-		exASSERT(hDbc != SQL_NULL_HDBC);
 		SQLINTEGER value;
 		SQLSMALLINT cb;
-		GetInfo(hDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+		GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
 		SetProperty(prop, value);
 	}
 

@@ -37,9 +37,6 @@
     <ClInclude Include="include\Environment.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ColumnBuffer.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\DebugNew.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -49,9 +46,6 @@
     <ClInclude Include="include\Exception.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\Visitors.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\ObjectName.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -59,6 +53,27 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="include\Sql2BufferTypeMap.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bitmask_operators.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\EnumFlags.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SqlHandle.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SqlStatementCloser.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SqlCBufferVisitors.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ColumnBuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ExecutableStatement.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -81,16 +96,10 @@
     <ClCompile Include="src\Environment.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\ColumnBuffer.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\TablePrivileges.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Exception.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Visitors.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ObjectName.cpp">
@@ -100,6 +109,18 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Sql2BufferTypeMap.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SqlStatementCloser.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SqlCBufferVisitors.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ColumnBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ExecutableStatement.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

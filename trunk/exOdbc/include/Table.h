@@ -14,11 +14,15 @@
 
 // Same component headers
 #include "exOdbc.h"
-#include "ColumnBuffer.h"
 #include "TablePrivileges.h"
 #include "Exception.h"
 #include "ObjectName.h"
 #include "Sql2BufferTypeMap.h"
+#include "ColumnBuffer.h"
+#include "SqlHandle.h"
+#include "Database.h"
+#include "EnumFlags.h"
+#include "ExecutableStatement.h"
 
 // Other headers
 #include "boost/any.hpp"
@@ -27,11 +31,6 @@
 
 // Forward declarations
 // --------------------
-namespace exodbc
-{
-	class Database;
-}
-
 namespace exodbc
 {
 	// Consts
@@ -77,6 +76,7 @@ namespace exodbc
 	{
 #if EXODBC_TEST
 		FRIEND_TEST(TableTest, CopyCtr);
+		FRIEND_TEST(TableTest, QueryPrimaryKeysAndUpdateColumns);
 #endif
 
 	public:
@@ -94,7 +94,7 @@ namespace exodbc
 		* \see		Init(const Database*, AccessFlags, const TableInfo&)
 		* \throw	Exception
 		*/
-		Table(const Database* pDb, AccessFlags afs, const TableInfo& tableInfo);
+		Table(ConstDatabasePtr pDb, TableAccessFlags afs, const TableInfo& tableInfo);
 
 
 		/*!
@@ -102,7 +102,7 @@ namespace exodbc
 		* \see		Init(const Database* pDb, AccessFlags, const std::wstring&, const std::wstring&, const std::wstring&, const std::wstring&)
 		* \throw	Exception
 		*/
-		Table(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
+		Table(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
 
 
 		/*!
@@ -133,7 +133,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		void Init(const Database* pDb, AccessFlags afs, const TableInfo& tableInfo);
+		void Init(ConstDatabasePtr pDb, TableAccessFlags afs, const TableInfo& tableInfo);
 
 
 		/*!
@@ -154,7 +154,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		void Init(const Database* pDb, AccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
+		void Init(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
 			
 
 		/*!
@@ -203,14 +203,6 @@ namespace exodbc
 		*			If set, the SQL Types of manually defined columns are not validated against the supported
 		*			types reported by the Database. If this flag is set, the flag TOF_SKIP_UNSUPPORTED_COLUMNS
 		*			does nothing for manually defined columns.
-		*  - TOF_CHAR_TRIM_LEFT:
-		*			If set, values retrieved using GetStringValue(SQLSMALLINT columnIndex)
-		*			or GetWStringValue(SQLSMALLINT columnIndex) are trimmed on the left
-		*			before being set on str.
-		*  - TOF_CHAR_TRIM_RIGHT:
-		*			If set, values retrieved using GetStringValue(SQLSMALLINT columnIndex)
-		*			or GetWStringValue(SQLSMALLINT columnIndex) are trimmed on the right
-		*			before being set on str.
 		*  - TOF_DO_NOT_QUERY_PRIMARY_KEYS:
 		*			If a table is opened with the AccessFlag::AF_UPDATE_PK or AccessFlag::AF_DELETE_PK set,
 		*			Primary keys are required. They are queried from the Database during Open(), unless
@@ -230,7 +222,7 @@ namespace exodbc
 		* \see		SetColumn()
 		* \throw	Exception If already open, table is not found, columns fail to bind..
 		*/
-		void		Open(TableOpenFlags openFlags = TOF_CHECK_EXISTANCE);
+		void		Open(TableOpenFlags openFlags = TableOpenFlag::TOF_CHECK_EXISTANCE);
 
 
 		/*!
@@ -265,7 +257,7 @@ namespace exodbc
 		* \return	True if this table was constructed using a Constructor for a table
 		*			with manual columns.
 		*/
-		bool		IsManualColumns() const throw() { return m_manualColumns; };
+		bool		IsManualColumns() const throw() { return m_autoCreatedColumns; };
 
 
 		/*!
@@ -277,7 +269,7 @@ namespace exodbc
 		*			required for the current AccessFlags set.
 		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
 		*/
-		void		SetAccessFlag(AccessFlag ac);
+		void		SetAccessFlag(TableAccessFlag ac);
 
 
 		/*!
@@ -289,7 +281,7 @@ namespace exodbc
 		*			required for the current AccessFlags set.
 		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
 		*/
-		void		ClearAccessFlag(AccessFlag ac);
+		void		ClearAccessFlag(TableAccessFlag ac);
 
 
 		/*!
@@ -303,41 +295,25 @@ namespace exodbc
 		*			required for the current AccessFlags set.
 		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
 		*/
-		void		SetAccessFlags(AccessFlags acs);
+		void		SetAccessFlags(TableAccessFlags acs);
 
 
 		/*!
 		* \brief	Test if an AccessFlag is set.
 		*/
-		bool		TestAccessFlag(AccessFlag ac) const throw();
+		bool		TestAccessFlag(TableAccessFlag ac) const noexcept;
 
 
 		/*!
 		* \brief	Get the AccessFlags bitmask.
 		*/
-		AccessFlags	GetAccessFlags() const throw() { return m_accessFlags; };
+		TableAccessFlags	GetAccessFlags() const noexcept { return m_tableAccessFlags; };
 
 
 		/*!
 		* \brief	Test if a TableOpenFlag is set.
 		*/
-		bool		TestOpenFlag(TableOpenFlag flag) const throw();
-
-
-		/*!
-		* \brief	Sets or Clears the TOF_TRIM_RIGHT flag.
-		* \details	Note that the value set here is overriden by the value
-		*			passed to Open() in the TableOpenFlags.
-		*/
-		void		SetCharTrimRight(bool trimRight) throw();
-
-
-		/*!
-		* \brief	Sets or Clears the TOF_TRIM_LEFT flag.
-		* \details	Note that the value set here is overriden by the value
-		*			passed to Open() in the TableOpenFlags.
-		*/
-		void		SetCharTrimLeft(bool trimLeft) throw();
+		bool		TestOpenFlag(TableOpenFlag flag) const noexcept;
 
 
 		/*!
@@ -347,17 +323,7 @@ namespace exodbc
 		* \see		GetTableInfo()
 		* \return	Returns true if this table has a TableInfo set that can be fetched using GetTableInfo()
 		*/
-		bool		HasTableInfo() const throw() { return m_haveTableInfo; }
-
-
-		/*!
-		* \brief	Return the Table information of this Table.
-		* \details	Returns the TableInfo of this table, if one has been set either during construction
-		*			or one was read during Open().
-		* \see		HasTableInfo()
-		* \throw	Exception if no table info is available.
-		*/
-		TableInfo	GetTableInfo() const;
+		bool		HasTableInfo() const noexcept { return m_haveTableInfo; }
 
 
 		/*!
@@ -367,7 +333,14 @@ namespace exodbc
 		* \return	count The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
 		* \throw	Exception If failed.
 		*/
-		SQLUBIGINT		Count(const std::wstring& whereStatement);
+		SQLUBIGINT	Count(const std::wstring& whereStatement);
+
+
+		/*!
+		* \brief	Calls Count() with no whereStatement.
+		* \See		Count(const std::wstring& whereStatement);
+		*/
+		SQLUBIGINT	Count() { return Count(L""); };
 
 
 		/*!
@@ -486,13 +459,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Check if a Select() Query is open.
-		* \return	True if a Select() Query is open and rows can be iterated using SelectNext()
-		*/
-		bool		IsSelectOpen() const { return m_selectQueryOpen; };
-
-
-		/*!
 		* \brief	Inserts the current values into the database as a new row.
 		* \details	The values in the ColumnBuffer currently bound will be inserted
 		*			into the database.
@@ -588,17 +554,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Set the value of the ColumnBuffer given by columnIndex.
-		* \param	columnIndex Zero based ColumnBuffer index.
-		* \param	value Value to set.
-		* \throw	Exception If ColumnBuffer not found, or setting the value fails, for
-		*			example because it does not match the type of the buffer allocated, or
-		*			the value is NULL but the column not NULLABLE, etc.
-		*/
-		void		SetColumnValue(SQLSMALLINT columnIndex, const BufferVariant& value) const;
-
-
-		/*!
 		* \brief	Set a binary value of the ColumnBuffer given by columnIndex.
 		* \details	This will fail if the corresponding ColumnBuffer is not bound as a
 		*			binary buffer.
@@ -632,125 +587,38 @@ namespace exodbc
 		void		SetColumnNTS(SQLSMALLINT columnIndex) const;
 
 
-		/*!
-		* \brief	Access the current value of columnIndex as SQLSMALLINT.
-		* \details	Casts the value if casting is possible without loosing data 
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLSMALLINT GetSmallInt(SQLSMALLINT columnIndex) const;
+		template<typename T>
+		const T& GetNonNullColumn(SQLSMALLINT columnIndex) const
+		{
+			const ColumnBufferPtrVariant& columnVariant = GetNonNullColumnBufferPtrVariant(columnIndex);
+			try
+			{
+				return boost::get<T>(columnVariant);
+			}
+			catch (const boost::bad_get& ex)
+			{
+				WrapperException we(ex);
+				SET_EXCEPTION_SOURCE(we);
+				throw we;
+			}
+		}
 
 
-		/*!
-		* \brief	Access the current value of columnIndex as SQLINTEGER.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLINTEGER	GetInt(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQLBIGINT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLBIGINT	GetBigInt(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_DATE_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_DATE_STRUCT GetDate(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_TIME_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_TIME_STRUCT GetTime(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_TIMESTAMP_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_TIMESTAMP_STRUCT GetTimeStamp(SQLSMALLINT columnIndex) const;
-
-#if HAVE_MSODBCSQL_H
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_SS_TIME2_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_SS_TIME2_STRUCT GetTime2(SQLSMALLINT columnIndex) const;
-#endif
-
-		/*!
-		* \brief	Access the current value of columnIndex as std::string.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		std::string GetString(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as std::wstring.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		std::wstring GetWString(SQLSMALLINT columnIndex) const;
-		
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQLDOUBLE.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLDOUBLE GetDouble(SQLSMALLINT columnIndex) const;
-
-		
-		/*!
-		* \brief	Access the current value of columnIndex as SQLREAL.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQLREAL GetReal(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Access the current value of columnIndex as SQL_NUMERIC_STRUCT.
-		* \details	Casts the value if casting is possible without loosing data
-		* \param	columnIndex Zero based index of a bound column.
-		* \throw Exception If columnIndex is invalid, or the column value is NULL, or casting fails
-		*/
-		SQL_NUMERIC_STRUCT GetNumeric(SQLSMALLINT columnIndex) const;
-
-
-		/*!
-		* \brief	Get the value of the ColumnBuffer given by columnIndex as BufferVariant.
-		* \param	columnIndex Zero based ColumnBuffer index.
-		* \throw	Exception If ColumnBuffer not found, or the value held by the ColumnBuffer
-		*			cannot be returned as BufferVariant.
-		*			Note that it will not throw if the value is a NULL value, the BufferVariant will hold
-		*			the NullValue::IS_NULL indicator then.
-		* \see		ColumnBuffer::GetValue()
-		* \see		BufferVariant
-		*/
-		BufferVariant GetColumnValue(SQLSMALLINT columnIndex) const;
+		template<typename T>
+		T GetColumnBufferPtr(SQLSMALLINT columnIndex) const
+		{
+			const ColumnBufferPtrVariant& columnVariant = GetColumnBufferPtrVariant(columnIndex);
+			try
+			{
+				return boost::get<T>(columnVariant);
+			}
+			catch (const boost::bad_get& ex)
+			{
+				WrapperException we(ex);
+				SET_EXCEPTION_SOURCE(we);
+				throw we;
+			}
+		}
 
 
 		/*!
@@ -799,14 +667,14 @@ namespace exodbc
 		* \return	ColumnBuffer.
 		* \throw	Exception If no ColumnBuffer with the passed columnIndex is found.
 		*/
-		ColumnBuffer* GetColumnBuffer(SQLSMALLINT columnIndex) const;
+		const ColumnBufferPtrVariant& GetColumnBufferPtrVariant(SQLSMALLINT columnIndex) const;
 
 
 		/*!
 		* \brief	Return a set of columnIndexes for the ColumnBuffers of this Table.
 		* \details	Returns the keyset of the internal ColumnBufferMap
 		*/
-		std::set<SQLSMALLINT> GetColumnBufferIndexes() const throw();
+		std::set<SQLUSMALLINT> GetColumnBufferIndexes() const throw();
 
 
 		/*!
@@ -815,7 +683,7 @@ namespace exodbc
 		* \param	caseSensitive 
 		* \throw	NotFoundException If no such ColumnBuffer is found.
 		*/
-		SQLSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
+		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
 
 
 		/*!
@@ -840,7 +708,13 @@ namespace exodbc
 		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
 		* \throw	Exception If CF_INSERT or CF_UPDATE is set as ColumnFlags.
 		*/
-		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+		//void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+
+
+		void		SetColumn(SQLUSMALLINT columnIndex, ColumnBufferPtrVariant column);
+
+
+		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize = 0, SQLSMALLINT decimalDigits = 0);
 
 
 		/*!
@@ -850,7 +724,7 @@ namespace exodbc
 		*			so this method is provided to set primary keys indexes manually.
 		*			If you call this method, the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is implicitly active
 		*			during Open().
-		*			After ColumnBuffers have been created, the flag CF_PRIMARY_KEY is set on the ColumnBuffers 
+		*			During open, the flag CF_PRIMARY_KEY is set on the ColumnBuffers 
 		*			that match the passed columnIndexes.
 		*			Must be called before the Table is Open()ed.
 		* \param	columnIndexes ColumnIndexes that are primary Key. ColumnIndexes is 0-indexed and must match
@@ -878,6 +752,78 @@ namespace exodbc
 		const Sql2BufferTypeMapPtr GetSql2BufferTypeMap() const;
 
 
+		/*!
+		* \brief	Creates the ColumnBuffers for the table and returns them as a Vector. Depending on the options passed,
+		*			the columns are stored on the Table for later use during Open().
+		* \detailed	Will query the Database about the columns of the table and create corresponding ColumnBufferPtrVariant
+		*			objects.
+		*			If no STableInfo is available, one is fetched from the database and remembered for later use.
+		*			Creation of the buffer will fail if the SQL type of that column is not supported. If the flag
+		*			skipUnsupportedColumns is set to true, this column is simply ignored.
+		*			If this function fails,
+		*			On success a vector of ColumnBuffers is returned. The order is the same as encountered when querying
+		*			the database. The Table has stored the STableInfo now.
+		* \param	skipUnsupportedColumns If set to true, the method will not fail if it encounters a Column
+		*			with a SQL-Type that is not supported by the Sql2BufferTypeMap used. It will just ignore that column.
+		*			If set to false, the Method will throw a NotSupportedException.
+		* \param	setAsTableColumns	If set to true, those columns are set as the Columns for the Table before the vector
+		*			is returned. If false, the vector is just returned without changing the columns of the Table.
+		* \throw	Exception If no Columns are found.
+		*/
+		std::vector<ColumnBufferPtrVariant> CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns, bool setAsTableColumns);
+
+
+		/*!
+		* \brief	Set a ColumnFlag on a Column defined on this Table.
+		* Exception	If Table is already open or columnIndex is not defined.
+		*/
+		void SetColumnFlag(SQLUSMALLINT columnIndex, ColumnFlag flag) const;
+
+
+		/*!
+		* \brief	Clear a ColumnFlag on a Column defined on this Table.
+		* Exception	If Table is already open or columnIndex is not defined.
+		*/
+		void ClearColumnFlag(SQLUSMALLINT columnIndex, ColumnFlag flag) const;
+
+
+		/*!
+		* \brief	Returns a all ColumnBuffers that have the flag CF_PRIMARY_KEY set 
+		*/
+		ColumnBufferPtrVariantMap GetPrimaryKeyColumnBuffers() const;
+
+		
+		/*!
+		* \brief	Returns the TableInfo for this Table.
+		* \details	If the TableInfo has already been queried and is stored internally, the internally
+		*			stored TableInfo is returned. Else the Database is queried for a TableInfo matching
+		*			the given search-names during construction. If exactly one matching Table is found,
+		*			the corresponding TableInfo is stored internally and returned.
+		* \throw	Exception
+		*/
+		const TableInfo& GetTableInfo();
+
+
+		/*!
+		* \brief	Returns the TableInfo for this Table if it is already set.
+		* \details	If the TableInfo has already been queried and is stored internally, the internally
+		*			stored TableInfo is returned. Else the Database is queried for a TableInfo matching
+		*			the given search-names during construction. If exactly one matching Table is found,
+		*			the corresponding TableInfo is returned (but not stored internally).
+		* \throw	Exception
+		*/
+		TableInfo GetTableInfo() const;
+
+
+		/*!
+		* \brief	Checks that the privileges for the currently logged-in user are sufficient
+		*			for the TableAccessFlags defined on this Table.
+		* \throw	PrivilegesException If privileges are not sufficient for given TableAccessFlags
+		* \throw	Exception If reading or parsing fails.
+		*/
+		void		CheckPrivileges() const;
+
+
 		// Private stuff
 		// -------------
 	private:
@@ -885,38 +831,19 @@ namespace exodbc
 		* \brief	Allocate the statement handles required by this Table.
 		* \details  Allocates the statements using the connection handle from the Database
 		*			passed in Constructor.
+		*			If Allocating one statement fails, all statements are reseted before the
+		*			Exception is thrown.
+		*			This will also allocate the buffer required for the count statement
 		* \see		HasStatements()
 		*
 		* \throw	Exception If any of the handles to be allocated is not null currently.
 		*/
-		void AllocateStatements();
+		void AllocateStatements(bool forwardOnlyCursors);
 
-
-		/*!
-		* \brief	Set Options on Statement handles related to Cursor things.
-		* \throw Exception
-		*/
-		void SetCursorOptions(bool forwardOnlyCursors);
-
-
-		/*!
-		* \brief	Creates the ColumnBuffers for the table.
-		* \detailed	Can only be called if m_manulColumns is set to false. Will query the Database about the
-		*			column of the table and allocate corresponding column buffers.
-		*			Creation of the buffer will fail if the SQL type of that column is not supported. If the flag
-		*			skipUnsupportedColumns is set to true, this column is simply ignored. Else the function fails.
-		*			If this function fails, all allocated buffers are deleted and m_columnBuffers is cleared.
-		*			On success, after this function returns m_columnBuffers contains the allocated Buffers to be used
-		*			with this table.
-		*			Note that in case columns have been skipped, the keys to the table might contain "gaps", say columns 2 failed
-		*			to bind, the keys will so something like 1, 3, 4, .. 
-		* \throw	Exception If m_manualColumns is set to true, or m_columnBuffers is not empty, or creation of ColumnBuffers fails.
-		*/
-		void		CreateAutoColumnBuffers(const TableInfo& tableInfo, bool skipUnsupportedColumns);
-
-		
+	
 		/*!
 		* \brief	Frees all handles that are not set to null. Freed handles are set to NULL.
+		* \details	This will also free the buffer used by the count statement.
 		* \throw	SqlResultException if freeing one of the handles fail. No other handles
 		*			will be freed after one handle fails to free.
 		*/
@@ -924,20 +851,12 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Wrapper to SQLFetchScroll
-		* \throw	Exception if TOF_FORWARD_ONLY_CURSORS is set, or no Select-Statement is open,
-		*			or if SQLFetchScroll does not return with SQL_SUCCEEDED or SQL_NO_DATA.
-		*/
-		bool		SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset);
-
-
-		/*!
-		* \brief	Iterates the bound columns and returns the field part of a statement.
-		* \details	Queries each bound column for its SqlName.
+		* \brief	Iterates the columns defined and creates a field-statement of 
+		*			the Columns that have the flag CF_SELECT set.
 		* \return	A string in the form "Field1, Field2, .., FieldN"
-		* \throw	Exception If no ColumnBuffers are bound.
+		* \throw	Exception If no Columns are defined.
 		*/
-		std::wstring BuildFieldsStatement() const;
+		std::wstring BuildSelectFieldsStatement() const;
 
 
 		/*!
@@ -956,12 +875,13 @@ namespace exodbc
 		
 
 		/*!
-		* \brief	Prepares an SQL UPDATE Statement to update the values of the (non-primary-keys) bound columns.
-		*			The rows matching the bound primary keys will be bound.
+		* \brief	Prepares an SQL UPDATE Statement to update the values of the (non-primary-keys) columns
+		*			with the flag CF_UPDATE set. Where statement uses the primary key columns. And the
+		*			primary key columns are not updated!
 		* \throw	Exception If no ColumnBuffers are bound, not opened for writing, etc., or binding fails
 		*			or this Table has no bound primary key columns.
 		*/
-		void		BindUpdateParameters();
+		void		BindUpdatePkParameters();
 
 
 		/*!
@@ -972,51 +892,67 @@ namespace exodbc
 		* \throw	Exception If no columnBuffer found, or if the ColumnBuffer is Null.
 		* \throw	NullValueException if the value is NULL.
 		*/
-		ColumnBuffer* GetNonNullColumnBuffer(SQLSMALLINT columnIndex) const;
+		const ColumnBufferPtrVariant& GetNonNullColumnBufferPtrVariant(SQLSMALLINT columnIndex) const;
 
-		const Database*				m_pDb;	///< Database this table belongs to.
+
+		/*!
+		* \brief	Queries the Database about the primary keys of this table,
+		*			tries to identify the corresponding columns (by comparing names)
+		*			and sets the flag on the corresponding column.
+		* \throw	Exception If querying fails, or not for all queried primary keys column a 
+		*			corresponding ColumnBuffer is found.
+		*/
+		void	QueryPrimaryKeysAndUpdateColumns() const;
+
+
+		/*!
+		* \brief	Throws an Exception if a Column has an flag set that violates the TableAccessFlags.
+		*			Like CF_INSERT is set, but TableAccessFlags are only AF_READ
+		*/
+		void	CheckColumnFlags() const;
+
+
+		/*!
+		* \brief	Checks for every Column if its SQL type matches one of the SQL types reported
+		*			as supported types by the Database.
+		*			If removeUnsupported is true, a not supported Column is removed from the internal map.
+		*			Else, an NotSupportedException is thrown
+		*/
+		void	CheckSqlTypes(bool removeUnsupported);
+
+
+		ConstDatabasePtr		m_pDb;	///< Database this table belongs to.
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
-		// ODBC Handles
-		SQLHSTMT		m_hStmtSelect;	///< Statement-handle used to do SELECTs. Columns are bound.
-		SQLHSTMT		m_hStmtCount;	///< Statement-handle used to do COUNTs. Columns are not bound.
-		SQLHSTMT		m_hStmtInsert;	///< Statement-handle used to do INSERTs. Columns are bound, a prepared statement using column-markers is created.
-		SQLHSTMT		m_hStmtDeletePk;	///< Statement-handle used to do DELETs. Primary key columns are bound, a prepared statement using column-markers is created.
-		SQLHSTMT		m_hStmtUpdatePk;	///< Statement-handle used to do UPDATEs. Primary key columns are bound, a prepared statement using column-markers is created.
-		SQLHSTMT		m_hStmtDeleteWhere;	///< Statement-handle to do DELETEs using a passed WHERE clause.
-		SQLHSTMT		m_hStmtUpdateWhere;	///< Statement-handle to do UPDATEs using a passed WHERE clause.
-
-		bool		m_selectQueryOpen;	///< Set to True once a successful Select(), set to false on SelectClose()
+		// Executable Statements used
+		ExecutableStatement	m_execStmtCount;	///< Statement to SELECT using ExecuteDirect. Columns with flag CF_SELECT are bound.
+		ExecutableStatement m_execStmtSelect;	///< Statement to COUNT. First Column of Result is bound to m_pSelectCountResultBuffer.
+		ExecutableStatement m_execStmtInsert;	///< Statement to INSERT. Prepared SQL statement bound to all params with flag CF_INSERT.
+		ExecutableStatement m_execStmtUpdatePk;	///< Statement to UPDATE columns with flag CF_UPDATE. WHERE clause is formed using primary key columns.
+		ExecutableStatement m_execStmtDeletePk; ///< Statement to DELETE. WHERE clause is formed using primarky key columns.
+		UBigIntColumnBufferPtr m_pSelectCountResultBuffer;	///< The buffer used to retrieve the result of a SELECT COUNT operation.
 
 		// Table Information
 		bool				m_haveTableInfo;		///< True if m_tableInfo has been set
 		TableInfo			m_tableInfo;			///< TableInfo fetched from the db or set through constructor
 		bool				m_isOpen;				///< Set to true after Open has been called
 		TableOpenFlags		m_openFlags;			///< Flags used to open the table in the call to Open().
-		AccessFlags			m_accessFlags;			///< Bitmask for the AccessFlag flags.
-		TablePrivileges		m_tablePrivileges;		///< Table Privileges read during open if checkPermission was set.
+		TableAccessFlags	m_tableAccessFlags;		///< Bit mask for the AccessFlag flags. Column flags are derived from those if not set explicitly.
 
 		// Column information
 		std::set<SQLUSMALLINT> m_primaryKeyColumnIndexes;	///< If this set contains values during Open(), the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is activated implicitly. 
 															///< The ColumnBuffers marked in this set will be used as primary key columns.
 															///< Used if columns are not defined manually but queried, but the Database does not support SQLPrimaryKeys.
 
-		ColumnBufferPtrMap	m_columnBuffers;	///< A map with ColumnBuffers, key is the column-Index (starting at 0). Either read from the db during Open(), or set manually using SetColumn().
-		std::wstring		m_fieldsStatement;		///< Created during Open, after the columns have been bound. Contains the names of all columns separated by ',  ', to be used in a SELECT statement (avoid building it again and again)
-		bool				m_manualColumns;		///< If true the table was initialized by passing the number of columns that will be defined later manually
+		ColumnBufferPtrVariantMap m_columns;	///< A map with ColumnBuffers, key is the column-Index (starting at 0).
+
+		bool				m_autoCreatedColumns;		///< If true the columns were created during Open() automatically by querying the database about the table.
 
 		// Table information set during construction, that was used to find the matching TableInfo if none was passed
 		std::wstring  m_initialTableName;		///< Table name set on initialization
 		std::wstring	m_initialSchemaName;	///< Schema name set on initialization
 		std::wstring	m_initialCatalogName;	///< Catalog name set on initialization
 		std::wstring	m_initialTypeName;		///< Type name set on initialization
-
-#ifdef EXODBCDEBUG
-	public:
-		size_t				GetTableId() const { return m_tableId; }
-	private:
-		size_t m_tableId; ///< Given by calling Database::RegisterTable() during Initialization.
-#endif
 
 	};  // Table
 
