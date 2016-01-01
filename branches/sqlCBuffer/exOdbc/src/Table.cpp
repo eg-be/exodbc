@@ -1168,8 +1168,7 @@ namespace exodbc
 		exASSERT(m_pDb->IsOpen());
 		exASSERT(!IsOpen());
 
-		// Init open flags and update them with flags implicitely set by checking db-driver
-		// ---------------
+		// Init open flags and update them with flags implicitly set by checking db-driver
 		m_openFlags = openFlags;
 
 		// Set TOF_DO_NOT_QUERY_PRIMARY_KEYS this flag for Access, Access does not support SQLPrimaryKeys
@@ -1344,49 +1343,12 @@ namespace exodbc
 			HIDE_UNUSED(ex);
 			
 			// Reset all stmts
-			FreeStatements();
-			
-			//m_pHStmtSelect->UnbindColumns();
-
-
-			//for (SqlCBufferVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
-			//{
-			//	SqlCBufferVariant& columnBuffer = it->second;
-			//	UnbindVisitor unbind;
-			//	boost::apply_visitor(unbind, columnBuffer);
-			//}
-
-			//if (boundSelect)
-			//{
-			//	SQLRETURN ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
-			//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect, boost::str(boost::wformat(L"Failed to unbind from Select-handle during cleanup of Exception '%s': %s") % ex.ToString()));
-			//}
-			//if (boundDeletePk)
-			//{
-			//	SQLRETURN ret = SQLFreeStmt(m_hStmtDeletePk, SQL_RESET_PARAMS);
-			//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeletePk, boost::str(boost::wformat(L"Failed to unbind from DeletePk-handle during cleanup of Exception '%s': %s") % ex.ToString()));
-			//}
-			//if (boundUpdatePk)
-			//{
-			//	SQLRETURN ret = SQLFreeStmt(m_hStmtUpdatePk, SQL_RESET_PARAMS);
-			//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk, boost::str(boost::wformat(L"Failed to unbind from UpdatePk-handle during cleanup of Exception '%s': %s") % ex.ToString()));
-			//}
-			//if (boundInsert)
-			//{
-			//	SQLRETURN ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
-			//	WARN_IFN_SUCCEEDED_MSG(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert, boost::str(boost::wformat(L"Failed to unbind from Insert-handle during cleanup of Exception '%s': %s") % ex.ToString()));
-			//}
-
 			// remove the ColumnBuffers if we have allocated them during this process (if not manual)
+			FreeStatements();
+
 			if (m_autoCreatedColumns)
 			{
 				m_columns.clear();
-				//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
-				//{
-				//	ColumnBuffer* pBuffer = it->second;
-				//	delete pBuffer;
-				//}
-				//m_columnBuffers.clear();
 			}
 			// and rethrow
 			throw;
