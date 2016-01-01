@@ -90,6 +90,7 @@ namespace exodbc
 
 	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg /* = L"" */) throw()
 		: Exception(msg)
+		, m_ret(0)
 	{
 		// We have no Error-Info to fetch
 		BuildErrorMsg(sqlFunctionName, ret);
@@ -99,6 +100,7 @@ namespace exodbc
 
 	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg /* = L"" */) throw()
 		: Exception(msg)
+		, m_ret(ret)
 	{
 		// Fetch error-information from the database and build the error-msg
 		FetchErrorInfo(handleType, handle);

@@ -132,12 +132,15 @@ namespace exodbc
 		virtual std::wstring GetName() const throw() { return L"exodbc::SqlResultException"; };
 		virtual std::wstring ToString() const throw();
 
+		SQLRETURN GetRet() const noexcept { return m_ret; };
+
 	protected:
 		void FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) throw();
 		void BuildErrorMsg(const std::wstring& sqlFunctionName, SQLRETURN ret) throw();
 
 		SErrorInfoVector m_errors;
 		std::wstring m_errorMsg;
+		SQLRETURN m_ret;
 	};
 
 
