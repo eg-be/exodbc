@@ -1255,7 +1255,7 @@ namespace exodbc
 
 		{
 			// Insert some rows
-			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT | TableAccessFlag::AF_UPDATE_PK, tableName);
+			Table iTable(m_pDb, TableAccessFlag::AF_INSERT, tableName);
 			iTable.Open();
 
 			// Set some values
@@ -1273,7 +1273,7 @@ namespace exodbc
 		}
 		{
 			// And update
-			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT | TableAccessFlag::AF_UPDATE_PK, tableName);
+			Table iTable(m_pDb, TableAccessFlag::AF_UPDATE_PK, tableName);
 			iTable.Open();
 
 			// Set some values
@@ -1317,7 +1317,7 @@ namespace exodbc
 
 		{
 			// Insert some rows
-			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT | TableAccessFlag::AF_UPDATE_PK, tableName);
+			Table iTable(m_pDb, TableAccessFlag::AF_INSERT, tableName);
 			iTable.Open();
 
 			// Set some values
@@ -1335,7 +1335,7 @@ namespace exodbc
 		}
 		{
 			// And update
-			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT | TableAccessFlag::AF_UPDATE_PK, tableName);
+			Table iTable(m_pDb, TableAccessFlag::AF_UPDATE_WHERE, tableName);
 			iTable.Open();
 
 			// Set some values - this time we also update the primary key columns
@@ -1372,150 +1372,134 @@ namespace exodbc
 	}
 
 
-//	// Delete rows: We do not test that for the different data-types, its just deleting a row.
-//	// -----------
-//	TEST_F(TableTest, DeleteWhere)
-//	{
-//		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		Table iTable(&m_db, AF_SELECT | AF_DELETE_WHERE | AF_INSERT, intTypesTableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-//
-//		// Note: We could also do this in one transaction.
-//		// \todo: Write a separate transaction test about this, to check transaction-visibility
-//		// Try to delete eventually available leftovers, ignore if none exists
-//		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
-//
-//		// Now lets insert some data:
-//		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, 103, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL);
-//
-//		// Now we must have something to delete
-//		EXPECT_NO_THROW(iTable.Delete(sqlstmt, true));
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// And fetching shall return no results at all
-//		iTable.Select();
-//		EXPECT_FALSE(iTable.SelectNext());
-//	}
-//
-//
-//	TEST_F(TableTest, DeleteWhereShouldReturnSQL_NO_DATA)
-//	{
-//		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		Table iTable(&m_db, AF_SELECT | AF_DELETE_WHERE, intTypesTableName, L"", L"", L"");
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			iTable.SetColumnPrimaryKeyIndexes({ 0 });
-//		}
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		if (m_db.GetDbms() == DatabaseProduct::MY_SQL)
-//		{
-//			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #77");
-//		}
-//
-//		// Remove everything, ignoring if there was any data:
-//		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
-//
-//		// We can be sure now that nothing exists, and we will fail if we try to delete
-//		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-//		EXPECT_THROW(iTable.Delete(sqlstmt, true), SqlResultException);
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// And fetching shall return no results at all
-//		iTable.Select();
-//		EXPECT_FALSE(iTable.SelectNext());
-//	}
-//
-//
-//	TEST_F(TableTest, Delete)
-//	{
-//		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		Table iTable(&m_db, AF_SELECT | AF_DELETE_PK, intTypesTableName, L"", L"", L"");
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			iTable.SetColumnPrimaryKeyIndexes({ 0 });
-//		}
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-//
-//		// Remove everything, ignoring if there was any data:
-//		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
-//
-//		// Insert a row that we want to delete
-//		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, 99, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL, test::ValueIndicator::IS_NULL);
-//
-//		// Now lets delete that row by pointing the primary key column to it
-//		iTable.SetColumnValue(0, (SQLINTEGER) 99);
-//		EXPECT_NO_THROW(iTable.Delete());
-//
-//		// And fetching shall return no results at all
-//		iTable.Select();
-//		EXPECT_FALSE(iTable.SelectNext());
-//	}
-//
-//
+	// Delete rows
+	// ---------
+	TEST_F(TableTest, DeletePk)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
+
+		{
+			// Insert some rows
+			Table iTable(m_pDb, TableAccessFlag::AF_INSERT, tableName);
+			iTable.Open();
+
+			// Set some values
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+			pId->SetValue(600);
+			pInt->SetValue(700);
+			iTable.Insert();
+
+			pId->SetValue(601);
+			pInt->SetValue(701);
+			iTable.Insert();
+
+			pId->SetValue(602);
+			pInt->SetValue(702);
+			iTable.Insert();
+
+			m_pDb->CommitTrans();
+		}
+		{
+			// And delete
+			Table iTable(m_pDb, TableAccessFlag::AF_DELETE_PK, tableName);
+			iTable.Open();
+
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+			pId->SetValue(601);
+			iTable.Delete();
+
+			pId->SetValue(602);
+			iTable.Delete();
+
+			m_pDb->CommitTrans();
+		}
+
+		// Read back values
+		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		iTable.Open();
+		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		wstring sqlWhere = boost::str(boost::wformat(L"%s >= 600 ORDER BY %s") % idColName %idColName);
+		iTable.Select(sqlWhere);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(600, *pId);
+		EXPECT_EQ(700, *pInt);
+		EXPECT_FALSE(iTable.SelectNext());
+	}
 
 
-//
-//	TEST_F(TableTest, UpdateWhere)
-//	{
-//		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		Table iTable(&m_db, AF_SELECT | AF_INSERT | AF_UPDATE_WHERE, intTypesTableName, L"", L"", L"");
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			iTable.SetColumnPrimaryKeyIndexes({ 0 });
-//		}
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//
-//		// Remove everything, ignoring if there was any data:
-//		test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase);
-//
-//		// Insert some values
-//		for (int i = 1; i < 10; i++)
-//		{
-//			test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, i, i, i, i);
-//		}
-//
-//		// Now update using our WHERE statement. This allows us to update also key rows. Shift all values *(1000)
-//		int shift = 1000;
-//		for (int i = 1; i < 10; i++)
-//		{
-//			iTable.SetColumnValue(0, (SQLINTEGER)i * shift);
-//			iTable.SetColumnValue(2, (SQLINTEGER)(i * shift));
-//			if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//			{
-//				iTable.SetColumnValue(1, (SQLINTEGER)(i * shift));
-//				iTable.SetColumnNull(3);
-//			}
-//			else
-//			{
-//				iTable.SetColumnValue(1, (SQLSMALLINT)(i * shift));
-//				iTable.SetColumnValue(3, (SQLBIGINT)(i * shift));
-//			}
-//
-//			wstring sqlstmt = (boost::wformat(L"%s = %d") % idName %i).str();
-//			EXPECT_NO_THROW(iTable.Update(sqlstmt));
-//		}
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// And select them and compare
-//		wstring sqlstmt = (boost::wformat(L"%s > 0 ORDER BY %s") % idName %idName).str();
-//		iTable.Select(sqlstmt);
-//		for (int i = 1; i < 10; i++)
-//		{
-//			EXPECT_TRUE(iTable.SelectNext());
-//			EXPECT_TRUE(test::IsIntRecordEqual(m_db, iTable, i * shift, i * shift, i * shift, i * shift));
-//		}
-//		EXPECT_FALSE(iTable.SelectNext());
-//	}
+	TEST_F(TableTest, DeleteFailOnNoData)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
+
+		// try to delete from an empty table
+		Table iTable(m_pDb, TableAccessFlag::AF_DELETE_PK, tableName);
+		iTable.Open();
+
+		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+		// Expect to fail, except we pass the flag not to fail on SQL_NO_DATA
+		pId->SetValue(601);
+		EXPECT_THROW(iTable.Delete(true), SqlResultException);
+
+		pId->SetValue(601);
+		EXPECT_NO_THROW(iTable.Delete(false));
+	}
+
+
+	TEST_F(TableTest, DeleteWhere)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
+
+		{
+			// Insert some rows
+			Table iTable(m_pDb, TableAccessFlag::AF_INSERT, tableName);
+			iTable.Open();
+
+			// Set some values
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+			pId->SetValue(6000);
+			pInt->SetValue(7000);
+			iTable.Insert();
+
+			pId->SetValue(6001);
+			pInt->SetValue(7001);
+			iTable.Insert();
+
+			m_pDb->CommitTrans();
+		}
+		{
+			// And delete
+			Table iTable(m_pDb, TableAccessFlag::AF_DELETE_WHERE, tableName);
+			iTable.Open();
+
+			wstring where = boost::str(boost::wformat(L"%s >= 6000") % idColName);
+			iTable.Delete(where);
+
+			m_pDb->CommitTrans();
+		}
+
+		// Read back values - no more rows
+		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		iTable.Open();
+		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+		wstring sqlWhere = boost::str(boost::wformat(L"%s >= 0 ORDER by %s") % idColName %idColName);
+		iTable.Select(sqlWhere);
+		EXPECT_FALSE(iTable.SelectNext());
+	}
 
 
 	TEST_F(TableTest, GetColumnBufferIndex)

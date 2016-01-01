@@ -953,6 +953,7 @@ namespace exodbc
 		ExecutableStatement m_execStmtSelect;	///< Statement to COUNT. First Column of Result is bound to m_pSelectCountResultBuffer.
 		ExecutableStatement m_execStmtInsert;	///< Statement to INSERT. Prepared SQL statement bound to all params with flag CF_INSERT.
 		ExecutableStatement m_execStmtUpdatePk;	///< Statement to UPDATE columns with flag CF_UPDATE. WHERE clause is formed using primary key columns.
+		ExecutableStatement m_execStmtDeletePk; ///< Statement to DELETE. WHERE clause is formed using primarky key columns.
 		UBigIntColumnBufferPtr m_pSelectCountResultBuffer;	///< The buffer used to retrieve the result of a SELECT COUNT operation.
 
 		// ODBC Handles

@@ -256,11 +256,21 @@ namespace exodbc
 				// and the inserts and updates do not need to be scrollable.
 				m_execStmtCount.Init(m_pDb, true);
 				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
-				m_execStmtInsert.Init(m_pDb, true);
-				m_execStmtUpdatePk.Init(m_pDb, true);
 
 				// Create the buffer required for counts
 				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", ColumnFlag::CF_SELECT);
+			}
+			if (TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
+			{
+				m_execStmtDeletePk.Init(m_pDb, true);
+			}
+			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK))
+			{
+				m_execStmtUpdatePk.Init(m_pDb, true);
+			}
+			if (TestAccessFlag(TableAccessFlag::AF_INSERT))
+			{
+				m_execStmtInsert.Init(m_pDb, true);
 			}
 		}
 		catch (const Exception& ex)
@@ -271,6 +281,7 @@ namespace exodbc
 			m_execStmtSelect.Reset();
 			m_execStmtInsert.Reset();
 			m_execStmtUpdatePk.Reset();
+			m_execStmtDeletePk.Reset();
 
 			// rethrow
 			throw;
@@ -509,6 +520,7 @@ namespace exodbc
 		m_execStmtSelect.Reset();
 		m_execStmtInsert.Reset();
 		m_execStmtUpdatePk.Reset();
+		m_execStmtDeletePk.Reset();
 	}
 
 
@@ -538,38 +550,44 @@ namespace exodbc
 
 	void Table::BindDeleteParameters()
 	{
-		//exASSERT(m_columnBuffers.size() > 0);
-		//exASSERT(TestAccessFlag(AF_DELETE_PK));
-		//exASSERT(m_hStmtDeletePk != SQL_NULL_HSTMT);
+		exASSERT(!m_columns.empty());
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_DELETE_PK));
+		exASSERT(m_execStmtDeletePk.IsInitialized());
 
-		//// Build statement
-		//// note: parem-number reflects here the number of the param in the created prepared statement, so we
-		//// cannot use the values from the ColumnBuffer column index.
-		//int paramNr = 1;
-		//wstring deleteStmt = (boost::wformat(L"DELETE FROM %s WHERE ") % m_tableInfo.GetQueryName()).str();
-		//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		//{
-		//	ColumnBuffer* pBuffer = it->second;
-		//	if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
-		//	{
-		//		// Bind this parameter as primary key and include it in the statement
-		//		pBuffer->BindParameter(m_hStmtDeletePk, paramNr);
-		//		deleteStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
-		//		paramNr++;
-		//	}
-		//}
-		//boost::erase_last(deleteStmt, L" AND ");
-		//// ensure that we have something in our where clause
-		//if (paramNr <= 1)
-		//{
-		//	Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to prepare a DELETE statement (probably because flag AF_DELETE_PK is set), but no ColumnBuffers were bound as PrimaryKeys to build a WHERE clause") % m_tableInfo.GetQueryName()));
-		//	SET_EXCEPTION_SOURCE(ex);
-		//	throw ex;
-		//}
+		// Build a statement with parameter-markers
+		vector<ColumnBufferPtrVariant> whereParamsToBind;
+		wstring whereMarkers;
+		auto it = m_columns.begin();
+		while (it != m_columns.end())
+		{
+			ColumnBufferPtrVariant pVar = it->second;
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), pVar);
+			if (pFlags->Test(ColumnFlag::CF_PRIMARY_KEY))
+			{
+				whereMarkers += boost::apply_visitor(QueryNameVisitor(), pVar);
+				whereMarkers += L" = ?, ";
+				whereParamsToBind.push_back(pVar);
+			}
+			++it;
+		}
+		boost::erase_last(whereMarkers, L", ");
+		wstring stmt = boost::str(boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereMarkers);
 
-		//// Prepare to delete
-		//SQLRETURN ret = SQLPrepare(m_hStmtDeletePk, (SQLWCHAR*)deleteStmt.c_str(), SQL_NTS);
-		//THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
+		// check that we actually have some columns to update and some for the where part
+		exASSERT_MSG(!whereParamsToBind.empty(), L"No Columns usable to construct WHERE statement");
+
+		// .. and prepare stmt
+		m_execStmtDeletePk.Prepare(stmt);
+
+		// and binding of columns... we must do that after calling Prepare - or
+		// not use SqlDescribeParam during Bind
+		// first come the set params, then the where markers
+		SQLSMALLINT paramNr = 1;
+		for (auto it = whereParamsToBind.begin(); it != whereParamsToBind.end(); ++it)
+		{
+			m_execStmtDeletePk.BindParameter(*it, paramNr);
+			++paramNr;
+		}
 	}
 
 
@@ -942,41 +960,48 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(TableAccessFlag::AF_DELETE_PK));
-		//exASSERT(m_hStmtDeletePk != SQL_NULL_HSTMT);
-		//SQLRETURN ret = SQLExecute(m_hStmtDeletePk);
-		//if (failOnNoData && ret == SQL_NO_DATA)
-		//{
-		//	SqlResultException ex(L"SQLExecute", ret, L"Did not expect a SQL_NO_DATA while executing a delete-query");
-		//	SET_EXCEPTION_SOURCE(ex);
-		//	throw ex;
-		//}
-		//if (!(!failOnNoData && ret == SQL_NO_DATA))
-		//{
-		//	THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
-		//}
+
+		try
+		{
+			m_execStmtDeletePk.ExecutePrepared();
+		}
+		catch (const SqlResultException& ex)
+		{
+			HIDE_UNUSED(ex);
+			if (!failOnNoData && ex.GetRet() == SQL_NO_DATA)
+			{
+				return;
+			}
+			throw;
+		}
 	}
 
 
 	void Table::Delete(const std::wstring& where, bool failOnNoData /* = true */) const
 	{
-		exASSERT(IsOpen());
+		exASSERT(!m_columns.empty());
 		exASSERT(TestAccessFlag(TableAccessFlag::AF_DELETE_WHERE));
-		//exASSERT(m_hStmtDeleteWhere != SQL_NULL_HSTMT);
-		//exASSERT(!where.empty());
+		exASSERT(!where.empty());
 
-		//wstring sqlstmt = (boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % where).str();
-		//exASSERT(sqlstmt.length() < INT_MAX);
-		//SQLRETURN ret = SQLExecDirect(m_hStmtDeleteWhere, (SQLWCHAR*)sqlstmt.c_str(), (SQLINTEGER) sqlstmt.length());
-		//if (failOnNoData && ret == SQL_NO_DATA)
-		//{
-		//	SqlResultException ex(L"SQLExecute", ret, boost::str(boost::wformat(L"Did not expect a SQL_NO_DATA while executing the delete-query '%s'") %sqlstmt));
-		//	SET_EXCEPTION_SOURCE(ex);
-		//	throw ex;
-		//}
-		//if ( ! (!failOnNoData && ret == SQL_NO_DATA))
-		//{
-		//	THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
-		//}
+		ExecutableStatement execStmtDelete;
+		execStmtDelete.Init(m_pDb, true);
+
+		// Build a statement that we can directly execute
+		wstring stmt = boost::str(boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % where);
+		
+		try
+		{
+			execStmtDelete.ExecuteDirect(stmt);
+		}
+		catch (const SqlResultException& ex)
+		{
+			HIDE_UNUSED(ex);
+			if (!failOnNoData && ex.GetRet() == SQL_NO_DATA)
+			{
+				return;
+			}
+			throw;
+		}
 	}
 
 
@@ -991,7 +1016,7 @@ namespace exodbc
 	void Table::Update(const std::wstring& where)
 	{
 		exASSERT(!m_columns.empty());
-		exASSERT(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK));
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE));
 		exASSERT(!where.empty());
 
 		ExecutableStatement execStmtUpdate;
@@ -1314,11 +1339,10 @@ namespace exodbc
 					BindUpdatePkParameters();
 				}
 
-				//if (TestAccessFlag(AF_DELETE_PK))
-				//{
-				//	BindDeleteParameters();
-				//	boundDeletePk = true;
-				//}
+				if (TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
+				{
+					BindDeleteParameters();
+				}
 			}
 
 			// Bind CF_INSERT params
