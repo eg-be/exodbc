@@ -190,70 +190,44 @@ namespace exodbc
 	}
 
 
+	TEST_F(TableTest, OpenManualPrimaryKeys)
+	{
+		// Open a table by defining primary keys manually
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT | TableAccessFlag::AF_DELETE, GetTableName(TableId::INTEGERTYPES_TMP), L"", L"", L"");
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		iTable.SetColumn(0, ToDbCase(L"idintegertypes"), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), ColumnFlag::CF_SELECT |ColumnFlag::CF_PRIMARY_KEY);
+		iTable.SetColumn(1, ToDbCase(L"tsmallint"), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), ColumnFlag::CF_SELECT);
+		iTable.SetColumn(2, ToDbCase(L"tint"), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), ColumnFlag::CF_SELECT);
 
-//
-//	TEST_F(TableTest, OpenManualPrimaryKeys)
-//	{
-//		// Open a table by defining primary keys manually
-//		// Open a table manually but do not set the Select flag for all columns
-//		Table iTable(&m_db, AF_SELECT | AF_DELETE | AF_INSERT, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		SQLINTEGER id = 0;
-//		SQLSMALLINT si = 0;
-//		SQLINTEGER i = 0;
-//		SQLBIGINT bi = 0;
-//		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT |  CF_INSERT | CF_PRIMARY_KEY);
-//		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT | CF_INSERT);
-//		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT | CF_INSERT);
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
-//		}
-//		else
-//		{
-//			iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
-//		}
-//
-//		// Opening must work
-//		EXPECT_NO_THROW(iTable.Open(TOF_DO_NOT_QUERY_PRIMARY_KEYS));
-//
-//		// But opening if primary keys are not defined must fail
-//		Table iTable2(&m_db, AF_SELECT | AF_DELETE | AF_INSERT, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		SQLINTEGER id2 = 0;
-//		SQLSMALLINT si2 = 0;
-//		SQLINTEGER i2 = 0;
-//		SQLBIGINT bi2 = 0;
-//		iTable2.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id2, SQL_C_SLONG, sizeof(id2), CF_SELECT | CF_INSERT);
-//		iTable2.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si2, SQL_C_SSHORT, sizeof(si2), CF_SELECT | CF_INSERT);
-//		iTable2.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i2, SQL_C_SLONG, sizeof(i2), CF_SELECT | CF_INSERT);
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			iTable2.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
-//		}
-//		else
-//		{
-//			iTable2.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT | CF_INSERT);
-//		}
-//		EXPECT_THROW(iTable2.Open(TOF_DO_NOT_QUERY_PRIMARY_KEYS), Exception);
-//
-//		// But if we open for select only, we do not care about the primary keys
-//		Table iTable3(&m_db, AF_READ, test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		SQLINTEGER id3 = 0;
-//		SQLSMALLINT si3 = 0;
-//		SQLINTEGER i3 = 0;
-//		SQLBIGINT bi3 = 0;
-//		iTable3.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id3, SQL_C_SLONG, sizeof(id3), CF_SELECT);
-//		iTable3.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si3, SQL_C_SSHORT, sizeof(si3), CF_SELECT);
-//		iTable3.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i3, SQL_C_SLONG, sizeof(i3), CF_SELECT);
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			iTable3.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_INTEGER, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
-//		}
-//		else
-//		{
-//			iTable3.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
-//		}
-//		EXPECT_NO_THROW(iTable3.Open(TOF_DO_NOT_QUERY_PRIMARY_KEYS));
-//	}
+		// Opening for writing must work
+		EXPECT_NO_THROW(iTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+
+		// But opening if primary keys are not defined must fail
+		Table iTable2(m_pDb, TableAccessFlag::AF_SELECT | TableAccessFlag::AF_DELETE, GetTableName(TableId::INTEGERTYPES_TMP), L"", L"", L"");
+		SQLINTEGER id2 = 0;
+		SQLSMALLINT si2 = 0;
+		SQLINTEGER i2 = 0;
+		SQLBIGINT bi2 = 0;
+		iTable2.SetColumn(0, ToDbCase(L"idintegertypes"), SQL_INTEGER, &id2, SQL_C_SLONG, sizeof(id2), ColumnFlag::CF_SELECT);
+		iTable2.SetColumn(1, ToDbCase(L"tsmallint"), SQL_INTEGER, &si2, SQL_C_SSHORT, sizeof(si2), ColumnFlag::CF_SELECT);
+		iTable2.SetColumn(2, ToDbCase(L"tint"), SQL_INTEGER, &i2, SQL_C_SLONG, sizeof(i2), ColumnFlag::CF_SELECT);
+		EXPECT_THROW(iTable2.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS), Exception);
+
+		// But if we open for select only, we do not care about the primary keys
+		Table iTable3(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::INTEGERTYPES_TMP), L"", L"", L"");
+		SQLINTEGER id3 = 0;
+		SQLSMALLINT si3 = 0;
+		SQLINTEGER i3 = 0;
+		SQLBIGINT bi3 = 0;
+		iTable3.SetColumn(0, ToDbCase(L"idintegertypes"), SQL_INTEGER, &id3, SQL_C_SLONG, sizeof(id3), ColumnFlag::CF_SELECT);
+		iTable3.SetColumn(1, ToDbCase(L"tsmallint"), SQL_INTEGER, &si3, SQL_C_SSHORT, sizeof(si3), ColumnFlag::CF_SELECT);
+		iTable3.SetColumn(2, ToDbCase(L"tint"), SQL_INTEGER, &i3, SQL_C_SLONG, sizeof(i3), ColumnFlag::CF_SELECT);
+
+		EXPECT_NO_THROW(iTable3.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
+	}
 
 
 	TEST_F(TableTest, OpenAutoWithoutCheck)
@@ -337,38 +311,30 @@ namespace exodbc
 	}
 
 
-//	TEST_F(TableTest, OpenManualWithUnsupportedColumn)
-//	{
-//		Table iTable(&m_db, AF_SELECT, test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase), L"", L"", L"");
-//		SQLINTEGER id = 0;
-//		SQLSMALLINT si = 0;
-//		SQLINTEGER i = 0;
-//		SQLBIGINT bi = 0;
-//		int type = SQL_C_SLONG;
-//		
-//		wstring idName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//
-//		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_SELECT);
-//		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), CF_SELECT);
-//		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), CF_SELECT);
-//		// Set some silly type 30666 for the last column
-//		iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), 30666, &bi, SQL_C_SBIGINT, sizeof(bi), CF_SELECT);
-//		// Expect to fail if Opening without flag
-//		EXPECT_THROW(iTable.Open(), Exception);
-//		// But not if we skip
-//		{
-//			LogLevelError lle;
-//			EXPECT_NO_THROW(iTable.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
-//		}
-//		// We should be able to select now
-//		EXPECT_NO_THROW(iTable.Select(boost::str(boost::wformat(L"%s = 4") %idName)));
-//		EXPECT_TRUE(iTable.SelectNext());
-//		// just the last row doesnt exist
-//		EXPECT_EQ(4, iTable.GetInt(0));
-//		EXPECT_TRUE(iTable.IsColumnNull(1));
-//		EXPECT_EQ(2147483647, iTable.GetInt(2));
-//		EXPECT_FALSE(iTable.ColumnBufferExists(3));
-//	}
+	TEST_F(TableTest, OpenManualWithUnsupportedColumn)
+	{
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, GetTableName(TableId::INTEGERTYPES), L"", L"", L"");
+		SQLINTEGER id = 0;
+		SQLSMALLINT si = 0;
+		SQLINTEGER i = 0;
+		SQLBIGINT bi = 0;
+		int type = SQL_C_SLONG;
+		
+		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+
+		iTable.SetColumn(0, ToDbCase(L"idintegertypes"), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), ColumnFlag::CF_SELECT);
+		iTable.SetColumn(1, ToDbCase(L"tsmallint"), SQL_INTEGER, &si, SQL_C_SSHORT, sizeof(si), ColumnFlag::CF_SELECT);
+		iTable.SetColumn(2, ToDbCase(L"tint"), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), ColumnFlag::CF_SELECT);
+		// Set some silly type 30666 for the last column
+		iTable.SetColumn(3, ToDbCase(L"tbigint"), 30666, &bi, SQL_C_SBIGINT, sizeof(bi), ColumnFlag::CF_SELECT);
+		// Expect to fail if Opening without flag
+		EXPECT_THROW(iTable.Open(), Exception);
+		// But not if we skip
+		{
+			LogLevelError lle;
+			EXPECT_NO_THROW(iTable.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
+		}
+	}
 
 
 	TEST_F(TableTest, OpenAutoSkipUnsupportedColumn)
@@ -426,150 +392,6 @@ namespace exodbc
 	}
 
 
-//	TEST_F(TableTest, InsertIntoAutoWithUnsupportedColumn)
-//	{
-//
-//
-//		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
-//		exodbc::Table nst(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//
-//		// we do not if we pass the flag to skip
-//		{
-//			LogLevelFatal llf;
-//			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
-//		}
-//
-//		// Remove everything, ignoring if there was any data:
-//		wstring idName = test::GetIdColumnName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
-//		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-//		ASSERT_NO_THROW(nst.Delete(sqlstmt, false));
-//		ASSERT_NO_THROW(m_db.CommitTrans());
-//
-//		// Insert some data
-//		EXPECT_FALSE(nst.ColumnBufferExists(2));
-//		nst.SetColumnValue(0, (SQLINTEGER)2);
-//		nst.SetColumnValue(1, (SQLINTEGER)20);
-//		nst.SetColumnValue(3, (SQLINTEGER)22);
-//		EXPECT_NO_THROW(nst.Insert());
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// We should now be able to select. As a test, use a different table object
-//		exodbc::Table nst2(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//		{
-//			LogLevelFatal llf;
-//			EXPECT_NO_THROW(nst2.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
-//		}
-//
-//		nst2.Select();
-//		EXPECT_TRUE(nst2.SelectNext());
-//		SQLINTEGER id, int1, int2;
-//		EXPECT_NO_THROW(id = nst2.GetInt(0));
-//		EXPECT_NO_THROW(int1 = nst2.GetInt(1));
-//		EXPECT_NO_THROW(int2 = nst2.GetInt(3));
-//		EXPECT_EQ(2, id);
-//		EXPECT_EQ(20, int1);
-//		EXPECT_EQ(22, int2);
-//	}
-//
-//
-//	TEST_F(TableTest, UpdateIntoAutoWithUnsupportedColumn)
-//	{
-//
-//
-//		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
-//		exodbc::Table nst(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//
-//		// we do not if we pass the flag to skip
-//		{
-//			LogLevelFatal llf;
-//			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
-//		}
-//
-//		// Remove everything, ignoring if there was any data:
-//		wstring idName = test::GetIdColumnName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
-//		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-//		ASSERT_NO_THROW(nst.Delete(sqlstmt, false));
-//		ASSERT_NO_THROW(m_db.CommitTrans());
-//
-//		// Insert some data
-//		nst.SetColumnValue(0, (SQLINTEGER)2);
-//		nst.SetColumnValue(1, (SQLINTEGER)20);
-//		nst.SetColumnValue(3, (SQLINTEGER)22);
-//		EXPECT_NO_THROW(nst.Insert());
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// Now update it
-//		nst.SetColumnValue(1, (SQLINTEGER)30);
-//		nst.SetColumnValue(3, (SQLINTEGER)32);
-//		EXPECT_NO_THROW(nst.Update());
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// We should now be able to select. As a test, use a different table object
-//		exodbc::Table nst2(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//		{
-//			LogLevelFatal llf;
-//			EXPECT_NO_THROW(nst2.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
-//		}
-//
-//		nst2.Select();
-//		EXPECT_TRUE(nst2.SelectNext());
-//		SQLINTEGER id, int1, int2;
-//		EXPECT_NO_THROW(id = nst2.GetInt(0));
-//		EXPECT_NO_THROW(int1 = nst2.GetInt(1));
-//		EXPECT_NO_THROW(int2 = nst2.GetInt(3));
-//		EXPECT_EQ(2, id);
-//		EXPECT_EQ(30, int1);
-//		EXPECT_EQ(32, int2);
-//	}
-//
-//
-//	TEST_F(TableTest, DeleteFromAutoWithUnsupportedColumn)
-//	{
-//
-//
-//		std::wstring tableName = test::GetTableName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
-//		exodbc::Table nst(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//
-//		// we do not if we pass the flag to skip
-//		{
-//			LogLevelFatal llf;
-//			EXPECT_NO_THROW(nst.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
-//		}
-//
-//		// Remove everything, ignoring if there was any data:
-//		wstring idName = test::GetIdColumnName(test::TableId::NOT_SUPPORTED_TMP, m_odbcInfo.m_namesCase);
-//		wstring sqlstmt = (boost::wformat(L"%s > 0") % idName).str();
-//		ASSERT_NO_THROW(nst.Delete(sqlstmt, false));
-//		ASSERT_NO_THROW(m_db.CommitTrans());
-//
-//		// Insert some data
-//		nst.SetColumnValue(0, (SQLINTEGER)2);
-//		nst.SetColumnValue(1, (SQLINTEGER)20);
-//		nst.SetColumnValue(3, (SQLINTEGER)22);
-//		EXPECT_NO_THROW(nst.Insert());
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// Check its there
-//		ASSERT_NO_THROW(nst.Select());
-//		ASSERT_TRUE(nst.SelectNext());
-//
-//		// Now delete it
-//		nst.SetColumnValue(0, (SQLINTEGER)2);
-//		EXPECT_NO_THROW(nst.Delete());
-//		EXPECT_NO_THROW(m_db.CommitTrans());
-//
-//		// We should now longer be able to select it. As a test, use a different table object
-//		exodbc::Table nst2(&m_db, AF_READ_WRITE, tableName, L"", L"", L"");
-//		{
-//			LogLevelFatal llf;
-//			EXPECT_NO_THROW(nst2.Open(TOF_SKIP_UNSUPPORTED_COLUMNS));
-//		}
-//
-//		nst2.Select();
-//		EXPECT_FALSE(nst2.SelectNext());
-//	}
-//
-//
 	TEST_F(TableTest, Close)
 	{
 		// Create table
@@ -683,29 +505,25 @@ namespace exodbc
 	}
 
 
-//	TEST_F(TableTest, MissingAccessFlagsThrowOnWrite)
-//	{
-//		// Open a read-only table
-//		std::wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		// we should be able to set some silly value..
-//		iTable.SetColumnValue(0, (SQLINTEGER)333);
-//		// .. but not insert, delete or update it
-//		{
-//			LogLevelFatal llf;
-//			DontDebugBreak ddb;
-//			EXPECT_THROW(iTable.Insert(), AssertionException);
-//			EXPECT_THROW(iTable.Delete(), AssertionException);
-//			EXPECT_THROW(iTable.Update(), AssertionException);
-//		}
-//
-//		// we test that writing works in all those cases where we open RW
-//	}
-//
-//
+	TEST_F(TableTest, MissingAccessFlagsThrowOnWrite)
+	{
+		// Open a read-only table
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
+
+		ASSERT_NO_THROW(iTable.Open());
+
+		// .. but not insert, delete or update it
+		{
+			EXPECT_THROW(iTable.Insert(), AssertionException);
+			EXPECT_THROW(iTable.Delete(), AssertionException);
+			EXPECT_THROW(iTable.Update(), AssertionException);
+		}
+
+		// we test that writing works in all those cases where we open RW
+	}
+
+
 	// Select / GetNext
 	// ----------------
 	TEST_F(TableTest, Select)
@@ -962,52 +780,8 @@ namespace exodbc
 //		EXPECT_NO_THROW(iTable2.Select());
 //		EXPECT_TRUE(iTable2.SelectNext());
 //	}
-//
-//
-//	TEST_F(TableTest, SelectMoreColumnsThanBound)
-//	{
-//		// What happens if we query more columns than actually bound?
-//		// See ticket #65
-//		wstring tableName = test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		wstring schemaOrCatalogName = test::ConvertNameCase(L"exodbc", m_odbcInfo.m_namesCase);
-//		wstring idColName = test::GetIdColumnName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase);
-//		Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		// We do not bind the bigint-column
-//		SQLINTEGER id = 0;
-//		SQLSMALLINT tSmallInt = 0;
-//		SQLINTEGER tInt = 0;
-//		SQLBIGINT tBigInt = 0;
-//		iTable.SetColumn(0, test::ConvertNameCase(L"idintegertypes", m_odbcInfo.m_namesCase), SQL_INTEGER, &id, SQL_C_SLONG, sizeof(id), CF_PRIMARY_KEY | CF_SELECT);
-//		iTable.SetColumn(1, test::ConvertNameCase(L"tsmallint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tSmallInt, SQL_C_SSHORT, sizeof(tSmallInt), CF_SELECT);
-//		iTable.SetColumn(2, test::ConvertNameCase(L"tint", m_odbcInfo.m_namesCase), SQL_INTEGER, &tInt, SQL_C_SLONG, sizeof(tInt), CF_SELECT);
-//		//iTable.SetColumn(3, test::ConvertNameCase(L"tbigint", m_odbcInfo.m_namesCase), SQL_BIGINT, &tBigInt, SQL_C_SBIGINT, sizeof(tBigInt), CF_SELECT);
-//
-//		ASSERT_NO_THROW(iTable.Open());
-//		wstring sqlstmt;
-//		wstringstream ws;
-//		if (m_db.GetDbms() == DatabaseProduct::ACCESS)
-//		{
-//			// access has no schema / catalog name
-//			ws << L"SELECT * FROM " << tableName << L" WHERE " << idColName << L" = 7";
-//		}
-//		else
-//		{
-//			ws << L"SELECT * FROM " << schemaOrCatalogName << L"." << tableName << L" WHERE " << idColName << L" = 7";
-//		}
-//		ASSERT_NO_THROW(iTable.SelectBySqlStmt(ws.str()));
-//		ASSERT_TRUE(iTable.SelectNext());
-//		EXPECT_EQ(7, id);
-//		EXPECT_EQ(-13, tSmallInt);
-//		EXPECT_EQ(26, tInt);
-//		EXPECT_EQ(0, tBigInt);
-//		
-//		// Now execute some query on the database
-//		EXPECT_NO_THROW(m_db.ExecSql(ws.str()));
-//
-//		// .. works as expected.. what whas the issue with #65 ?
-//	}
-//
-//
+
+
 	// Count
 	// -----
 	TEST_F(TableTest, Count)
