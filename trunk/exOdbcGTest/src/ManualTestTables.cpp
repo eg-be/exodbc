@@ -157,7 +157,6 @@ namespace exodbc
 		m_idDateTypes = 0;
 		ZeroMemory(&m_date, sizeof(m_date));
 		ZeroMemory(&m_time, sizeof(m_time));
-		ZeroMemory(&m_time2, sizeof(m_time2));
 		ZeroMemory(&m_timestamp, sizeof(m_timestamp));
 
 		// Note: We are odbc 3, therefore use the new c-type (with type: SQL_C_TYPE_DATE instead of SQL_C_DATE).

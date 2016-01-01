@@ -125,20 +125,6 @@ namespace exodbc
 			RegisterType(SQL_TIME, SQL_C_TIME);
 			RegisterType(SQL_TIMESTAMP, SQL_C_TIMESTAMP);
 		}
-#ifdef HAVE_MSODBCSQL_H
-		if (odbcVersion >= OdbcVersion::V_3_8)
-		{
-			RegisterType(SQL_SS_TIME2, SQL_C_SS_TIME2);
-		}
-		else if (odbcVersion >= OdbcVersion::V_3)
-		{
-			RegisterType(SQL_SS_TIME2, SQL_C_TYPE_TIME);
-		}
-		else
-		{
-			RegisterType(SQL_SS_TIME2, SQL_C_TIME);
-		}
-#endif
 
 		RegisterType(SQL_BINARY, SQL_C_BINARY);
 		RegisterType(SQL_VARBINARY, SQL_C_BINARY);

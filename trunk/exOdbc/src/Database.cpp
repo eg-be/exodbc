@@ -366,47 +366,6 @@ namespace exodbc
 	}
 
 
-	bool Database::IsMarsEnabled()
-	{
-		exASSERT(IsOpen());
-
-		// Use the information from the db-inf, except for ms,
-		// if we have the additional info from HAVE_MSODBCSQL_H
-#ifdef HAVE_MSODBCSQL_H
-		if (GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-		{
-			SQLULEN value = 0;
-			SQLINTEGER cb = 0;
-			SQLRETURN ret = SQLGetConnectAttr(m_pHDbc->GetHandle(), SQL_COPT_SS_MARS_ENABLED, &value, sizeof(value), &cb);
-			THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Cannot read option SQL_COPT_SS_MARS_ENABLED.");
-			return value == SQL_MARS_ENABLED_YES;
-		}
-#endif
-		SQLINTEGER maxActiveStatements = m_dbInf.GetUSmallIntProperty(DatabaseInfo::USmallIntProperty::MaxConcurrentActivs);
-		return maxActiveStatements == 0 || maxActiveStatements > 1;
-	}
-
-
-#ifdef HAVE_MSODBCSQL_H
-	void Database::SetMarsEnabled(bool enableMars)
-	{
-		exASSERT(m_pHDbc);
-		exASSERT(m_pHDbc->IsAllocated());
-		exASSERT(!IsOpen());
-		SQLRETURN ret = 0;
-		if (enableMars)
-		{
-			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_COPT_SS_MARS_ENABLED, (SQLPOINTER)SQL_MARS_ENABLED_YES, SQL_IS_UINTEGER);
-		}
-		else
-		{
-			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_COPT_SS_MARS_ENABLED, (SQLPOINTER)SQL_MARS_ENABLED_NO, SQL_IS_UINTEGER);
-		}
-		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Cannot set option SQL_COPT_SS_MARS_ENABLED.");
-	}
-#endif
-
-
 	bool Database::IsSqlTypeSupported(SQLSMALLINT sqlType) const
 	{
 		exASSERT(IsOpen());
@@ -1093,10 +1052,6 @@ namespace exodbc
 			return TransactionIsolationMode::REPEATABLE_READ;
 		case SQL_TXN_SERIALIZABLE:
 			return TransactionIsolationMode::SERIALIZABLE;
-#if HAVE_MSODBCSQL_H
-		case SQL_TXN_SS_SNAPSHOT:
-			return TransactionIsolationMode::SNAPSHOT;
-#endif
 		}
 
 		return TransactionIsolationMode::UNKNOWN;
@@ -1152,25 +1107,6 @@ namespace exodbc
 
 		SQLRETURN ret;
 		std::wstring errStringMode;
-#if HAVE_MSODBCSQL_H
-		if (mode == TransactionIsolationMode::SNAPSHOT)
-		{
-			// Its confusing: MsSql Server 2014 seems to be unable to change the snapshot isolation if the commit mode is not set to autocommit
-			// If we do not set it to auto first, the next statement executed will complain that it was started under a different isolation mode than snapshot
-			bool wasManualCommit = false;
-			if (GetCommitMode() == CommitMode::MANUAL)
-			{
-				wasManualCommit = true;
-				SetCommitMode(CommitMode::AUTO);
-			}
-			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), (SQL_COPT_SS_TXN_ISOLATION), (SQLPOINTER)mode, NULL);
-			if (wasManualCommit)
-			{
-				SetCommitMode(CommitMode::MANUAL);
-			}
-		}
-		else
-#endif
 		{
 			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, NULL);
 		}

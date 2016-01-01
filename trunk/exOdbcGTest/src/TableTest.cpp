@@ -730,58 +730,6 @@ namespace exodbc
 	}
 
 
-//	TEST_F(TableTest, SelectHasMASEnabled)
-//	{
-//		// Test if we can have multiple active statements.
-//		// For MS SQL Server, this is disabled by default and must be activated manually
-//		// It must be activated before opening the database
-//
-//		// Use our already open database to determine the server type
-//		Database db(&m_env);
-//		if (m_db.GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-//		{
-//			// It is disabled by default on MS and must be enabled before opening the db:
-//			EXPECT_FALSE(m_db.IsMarsEnabled());
-//			ASSERT_NO_THROW(db.SetMarsEnabled(true));
-//		}
-//
-//		if (m_odbcInfo.HasConnectionString())
-//		{
-//			db.Open(m_odbcInfo.m_connectionString);
-//		}
-//		else
-//		{
-//			db.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password);
-//		}
-//		EXPECT_TRUE(db.IsMarsEnabled());
-//
-//		std::wstring intTypesTableName = test::GetTableName(test::TableId::INTEGERTYPES_TMP, m_odbcInfo.m_namesCase);
-//
-//		// Clear Table
-//		test::ClearIntTypesTmpTable(db, m_odbcInfo.m_namesCase);
-//
-//		// Insert some values
-//		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, db, 1, 10, 100, 1000);
-//		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, db, 2, 20, 200, 2000);
-//		test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, db, 3, 30, 300, 3000);
-//
-//		// Open one statement, select first record, but more records would be available
-//		Table iTable(&db, AF_READ, intTypesTableName, L"", L"", L"");
-//		iTable.Open();
-//		ASSERT_NO_THROW(iTable.Select());
-//		ASSERT_TRUE(iTable.SelectNext());
-//
-//		// Open another statement, where we also select some record. If MARS is not enabled, we would have 
-//		// to close the other result-set first: MS Sql Server fails with a "busy for other result" during Open(),
-//		// when it queries the Database to find the table.
-//		// While Access just fails on the SelectNext()
-//		Table iTable2(&db, AF_READ, intTypesTableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable2.Open());
-//		EXPECT_NO_THROW(iTable2.Select());
-//		EXPECT_TRUE(iTable2.SelectNext());
-//	}
-
-
 	// Count
 	// -----
 	TEST_F(TableTest, Count)
@@ -1321,8 +1269,18 @@ namespace exodbc
 		wstring tableName = GetTableName(TableId::DATETYPES);
 		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		auto columns = dTable.CreateAutoColumnBufferPtrs(false, false);
-		EXPECT_EQ(4, columns.size());
+		// Sql server reports TIME as TIME2 with SqlType -154 - skip that column
+		bool skipUnsupportedCols = m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER;
+		auto columns = dTable.CreateAutoColumnBufferPtrs(skipUnsupportedCols, false);
+		
+		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ(3, columns.size());
+		}
+		else
+		{
+			EXPECT_EQ(4, columns.size());
+		}
 
 		SqlCTypeVisitor cTypeV;
 
@@ -1333,14 +1291,24 @@ namespace exodbc
 			EXPECT_EQ(SQL_C_TYPE_TIMESTAMP, boost::apply_visitor(cTypeV, columns[1]));
 			EXPECT_EQ(SQL_C_TYPE_TIMESTAMP, boost::apply_visitor(cTypeV, columns[2]));
 		}
+		else if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			EXPECT_EQ(SQL_C_TYPE_DATE, boost::apply_visitor(cTypeV, columns[1]));
+		}
 		else
 		{
 			EXPECT_EQ(SQL_C_TYPE_DATE, boost::apply_visitor(cTypeV, columns[1]));
 			EXPECT_EQ(SQL_C_TYPE_TIME, boost::apply_visitor(cTypeV, columns[2]));
 		}
-		EXPECT_EQ(SQL_C_TYPE_TIMESTAMP, boost::apply_visitor(cTypeV, columns[3]));
+		size_t tsIndex = 3;
+		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			tsIndex = 2;
+		}
 
-		TypeTimestampColumnBufferPtr pTs = boost::get<TypeTimestampColumnBufferPtr>(columns[3]);
+		EXPECT_EQ(SQL_C_TYPE_TIMESTAMP, boost::apply_visitor(cTypeV, columns[tsIndex]));
+
+		TypeTimestampColumnBufferPtr pTs = boost::get<TypeTimestampColumnBufferPtr>(columns[tsIndex]);
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			EXPECT_EQ(3, pTs->GetDecimalDigits());
