@@ -1,701 +1,702 @@
 /*!
-* \file ColumnBuffer.h
+* \file SqlCBuffer.h
 * \author Elias Gerber <eg@elisium.ch>
-* \date 23.11.2014
-* \brief Header file for the ColumnBuffer class and its helpers.
+* \date 01.10.2015
+* \brief Header file for the CBufferType interface.
 * \copyright GNU Lesser General Public License Version 3
-*
 */
 
 #pragma once
-#ifndef COLUMNBUFFER_H
-#define COLUMNBUFFER_H
 
 // Same component headers
 #include "exOdbc.h"
-#include "Helpers.h"
+#include "Exception.h"
 #include "InfoObject.h"
-#include "Sql2BufferTypeMap.h"
+#include "EnumFlags.h"
+#include "SqlHandle.h"
+#include "Helpers.h"
 
 // Other headers
 #include "boost/variant.hpp"
+#include "boost/variant/polymorphic_get.hpp"
+#include "boost/signals2.hpp"
 
 // System headers
-#include <windows.h>
-#include <sql.h>
-#include <sqlext.h>
-#include <string>
-#include <vector>
-#include <map>
-
 
 // Forward declarations
 // --------------------
 
 namespace exodbc
 {
-	// Typedefs
-	// --------
-
-	/*!
-	* \typedef BufferPtrVariant
-	* \brief The Variant we use to store pointers to the actual buffer
-	* \details The following types can be stored:
-	*  - SQLSMALLINT*
-	*  - SQLINTEGER*
-	*  - SQLBIGINT*
-	*  - SQLCHAR*
-	*  - SQLWCHAR*
-	*  - SQLDOUBLE*
-	*  - SQLREAL*
-	*  - SQL_DATE_STRUCT*
-	*  - SQL_TIME_STRUCT*
-	*  - SQL_TIME2_STRUCT* / SQL_TIME_STRUCT*
-	*  - SQL_TIMESTAMP_STRUCT*
-	*  - SQL_NUMERIC_STRUCT*
-	* 
-	*/
-	typedef boost::variant<SQLSMALLINT*, SQLINTEGER*, SQLBIGINT*, 
-		SQLCHAR*, SQLWCHAR*, 
-		SQLDOUBLE*, SQLREAL*,
-		SQL_DATE_STRUCT*, SQL_TIME_STRUCT*, SQL_TIMESTAMP_STRUCT*,
-		SQL_NUMERIC_STRUCT*
-#if HAVE_MSODBCSQL_H
-		,SQL_SS_TIME2_STRUCT*
-#endif
-	> BufferPtrVariant;
-
-
-	/*!
-	* \enum NullValue
-	* \brief A pseudo value to store in the BufferVariant to indicate a NULL value.
-	*/
-	enum class NullValue
-	{
-		IS_NULL = 1	///< Indicates that the value is NULL.
-	};
-
-
-	/*!
-	* \typedef BufferVariant
-	* \brief A helper for setting / getting values. If you like it, work with a variant
-	* \details The following types can be stored:
-	*  - NullValue A boost::variant will always hold a valid, as this is the first entry in the
-	*              variant, every BufferVariant will default to a NULL value.
-	*  - SQLSMALLINT
-	*  - SQLINTEGER
-	*  - SQLBIGINT
-	*  - std::string
-	*  - std::wstring
-	*  - SQLDOUBLE
-	*  - SQL_DATE_STRUCT
-	*  - SQL_TIME_STRUCT
-	*  - SQL_TIME2_STRUCT / SQL_TIME_STRUCT
-	*  - SQL_TIMESTAMP_STRUCT
-	*  - SQL_NUMERIC_STRUCT
-	*/
-	typedef boost::variant<NullValue, SQLSMALLINT, SQLINTEGER, SQLBIGINT,
-		std::string, std::wstring,
-		SQLDOUBLE, SQLREAL,
-		SQL_DATE_STRUCT, SQL_TIME_STRUCT, SQL_TIMESTAMP_STRUCT,
-		SQL_NUMERIC_STRUCT
-#if HAVE_MSODBCSQL_H
-		, SQL_SS_TIME2_STRUCT
-#endif
-	> BufferVariant;
-
+	// Consts
+	// ------
 
 	// Structs
 	// -------
 
 	// Classes
 	// -------
-	
-	/*!
-	* \class ColumnBuffer
-	*
-	* \brief Provides the buffer to transfer data from a column of a record.
-	*
-	* If a ColumnBuffer is constructed by passing a ColumnInfo and a 
-	* Sql2BufferTypeMap, the ColumnBuffer will query the passed Sql2BufferTypeMap
-	* about the SQL C Type of the buffer to create. If the Sql2BufferTypeMap
-	* returns a SQL C Type, a corresponding Buffer to transfer data is created.
-	* This buffer will be managed by the ColumnBuffer.
-	* 
-	* If a ColumnBuffer is called by passing a ManualColumnInfo, an allocated
-	* buffer must be passed. The passed buffer will be used to transfer data.
-	* Do not free the buffer before the ColumnBuffer is destroyed.
-	*
-	*/
-	class EXODBCAPI ColumnBuffer
+	class ColumnBufferLengthIndicator
 	{
 	public:
-		/*!
-		* \brief	Create a new ColumnBuffer that will allocate a corresponding buffer 
-		*			using the data type information from the passed ColumnInfo and the passed Sql2BufferTypeMap.
-		* \details	The constructor will try to allocate a corresponding buffer.
-		*			Note: The constructor will examine ColumnInfo::m_isNullable and set the corresponding
-		*			ColumnFlags, overriding an eventually set value in the passed flags.
-		*			The ColumnBuffer will be set to SQL_NULL_DATA (even if the Column is not Nullable), so
-		*			set or fetch some valid data into the ColumnBuffer soon.
-		* \param columnInfo	The Information about the column we bind.
-		* \param odbcVersion ODBC Version to work with.
-		* \param pSql2BufferTypeMap The Sql2BufferTypeMap to be used to determine the BufferType (SQL C Type) during Construction.
-		* \param flags		Define if a column shall be included in write-operations, is part of primary-key, etc.
-		*
-		* \see	HaveBuffer()
-		* \see	Bind()
-		* \throw Exception If creating a corresponding buffer fails.
-		*/
-		ColumnBuffer(const ColumnInfo& columnInfo, OdbcVersion odbcVersion, ConstSql2BufferTypeMapPtr pSql2BufferTypeMap, ColumnFlags flags = CF_SELECT);
-
-
-		/*!
-		* \brief	Create a new ColumnBuffer that will use the buffer given inside BufferPtrVariant.
-		* \details	The constructor will not try to allocate a buffer on its own but update
-		*			its internal variant with the value of the passed bufferVariant and the corresponding
-		*			information.
-		*			The ColumnBuffer will not take ownership of the passed bufferVariant and will
-		*			not delete it.
-		*			Note that using this constructor you can pass almost any combination of conversions 
-		*			from SQL Types to ODBC C Types to the driver, as long as the buffer-type exists in the
-		*			BufferPtrVariant. Bind() will fail if the driver does not support the given conversion.
-		*			The SQL_NULL_DATA flag will not be set if you create a ColumnBuffer using this constructor
-		*			as there already is a buffer available containing some data.
-		* \param columnInfo			The ManualColumnInfo for this Column.
-		* \param sqlCType			The ODBC C Type of the buffer (like SQL_C_WCHAR, SQL_C_SLONG, etc.). This value will be forwarded to the driver during binding for select.
-		* \param bufferPtrVariant	Pointer to allocated buffer for the given sqlCType. Must be a buffer that can be held by a exodbc::BufferPtrVariant .
-		* \param bufferSize			Size of the allocated buffer.
-		* \param odbcVersion		ODBC-Version supported.
-		* \param	flags			Define if a column shall be included in write-operations, is part of primary-key, etc.
-		* 
-		* \see	HaveBuffer()
-		* \see	Bind()
-		*/
-		ColumnBuffer(const ManualColumnInfo& columnInfo, SQLSMALLINT sqlCType, BufferPtrVariant bufferPtrVariant, SQLLEN bufferSize, OdbcVersion odbcVersion, ColumnFlags flags = CF_SELECT);
-
-
-		~ColumnBuffer();
-
-	private:
-		// We cannot be copied
-		ColumnBuffer(const ColumnBuffer& other) { exASSERT(false);  };
-		ColumnBuffer() {};
-
-	public:
-		/*!
-		* \brief	Returns true if this ColumnBuffer has a buffer ready.
-		* \details	This can be true either because during construction a buffer
-		*			was allocated or because you've manually set a buffer.
-		* \return	True if buffer is ready.
-		*/
-		bool HasBuffer() const throw() { return m_haveBuffer; };
-
-
-		/*!
-		* \brief	Returns size of this buffer, fail if no buffer is allocated.
-		* \see		HasBuffer()
-		* \return	Buffer-size
-		*/
-		SQLLEN GetBufferSize() const { exASSERT(HasBuffer());  return m_bufferSize; };
-
-
-		/*!
-		* \brief	Returns type of this buffer.
-		* \return	Buffer-type.
-		*/
-		SQLSMALLINT GetBufferType() const throw() { return m_bufferType; };
-
-
-		/*!
-		* \brief	Returns SQL type of this ColumnBuffer.
-		* \return	SQL type.
-		*/
-		SQLSMALLINT GetSqlType() const throw() { return m_sqlType; };
-
-
-		/*!
-		* \brief	Tries to bind the buffer to the column using SQLBindCol
-		*			for non-numeric types, or SQLSetDescField for numeric types.
-		* \details	Fails if no buffer is allocated or if already bound.
-		*			The driver might fail to bind the column to the type.
-		*			On success, sets m_bound to true.
-		* \param	hStmt ODBC Statement handle to bind this ColumnBuffer to.
-		* \param	columnNr Column number that must match the column number of the
-		*			statement to bind to. Must be >= 1 (1-indexed).
-		* \throw	Exception If binding fails.
-		*/
-		void Bind(SQLHSTMT hStmt, SQLSMALLINT columnNr);
-
-
-		/*!
-		* \brief	Unbinds the buffer
-		* \details	Tries to unbind the buffer to the column using SQLBindCol
-		*			for non-numeric types, or SQLSetDescField for numeric types.
-		*			On success, sets m_bound to false.
-		*			Fails if not bound.
-		* \param	hStmt ODBC Statement handle to unbind this ColumnBuffer from.
-		* \throw	Exception If unbinding fails.
-		*/
-		void Unbind(SQLHSTMT hStmt);
-
-
-		/*!
-		* \brief	Tries to bind the buffer as parameter using SQLBindParameter.
-		*			If the buffer type is a numeric-type, the needed attributes are set.
-		* \details	Fails if no buffer is allocated or if already bound.
-		*			The driver might fail to bind.
-		* \param	hStmt ODBC Prepared Statement handle to bind this ColumnBuffer as parameter to.
-		* \param	parameterNumber Parameter number corresponding to a parameter marker in the 
-		*			prepared statement handle. Must be >= 1.
-		* \throw	Exception If binding fails.
-		*/
-		void BindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber);
-
-
-		/*!
-		* \brief	Tries to unbind the buffer as parameter using SQLFreeStmt.
-		*			Note that this will unbind ALL parameters bound to passed statement, see Ticket #59
-		* \details	Fails if no buffer is allocated or if already bound.
-		*			The driver might fail to bind.
-		* \param	hStmt ODBC Prepared Statement handle to unbind this ColumnBuffer as parameter from.
-		* \param	parameterNumber Parameter number corresponding to a parameter marker in the
-		*			prepared statement handle. Must be >= 1.
-		* \throw	Exception If unbinding fails.
-		*/
-		void UnbindParameter(SQLHSTMT hStmt, SQLSMALLINT parameterNumber);
-
-
-		/*!
-		* \brief	Returns true if this ColumnBuffer is bound.
-		* \return	True if Column is bound.
-		*/
-		bool IsBound() const throw() { return m_hStmt != SQL_NULL_HSTMT; };
-
-
-		/*!
-		* \brief	Access the length indicator passed to SQLBindCol / SQLBindParameter
-		* \details	Fails if no buffer is allocated or not bound.
-		* \return	Length indicator bound to column.
-		* \throw	Exception
-		*/
-		SQLLEN GetCb() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return  m_cb; };
-
-
-		/*!
-		* \brief	Set the value of the length indicator passed to SQLBindCol / SQLBIndParameter
-		* \details	This is needed in case you directly work with a buffer that for example
-		*			contains string-data, and you want to set the length indicator to SLQ_NTS,
-		*			or the length of the data to be inserted, etc.
-		*/
-		void SetCb(SQLLEN cb) throw() {	m_cb = cb; };
-
-
-		/*!
-		* \brief	Check if the current value is NULL.
-		* \details	Fails if no buffer is allocated or not bound.
-		* \return	True if current value is Null.
-		* \throw	Exception
-		*/
-		bool IsNull() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NULL_DATA; };
-
-
-		/*!
-		* \brief	Sets the current value to NULL.
-		* \details	Fails if not NULLable.
-		* \see IsNullable()
-		* \throw Exception If not Nullable.
-		*/
-		void SetNull();
-
-
-		/*!
-		* \brief	Tests if ColumnFlags::CF_NULLABLE is set.
-		* \see SetNull()
-		* \return	True if current value can be set to Null.
-		*/
-		bool IsNullable() const throw() { return IsColumnFlagSet(CF_NULLABLE); };
-
-		
-		/*!
-		* \brief	Check if the is SQL_NO_TOTAL.
-		* \details	Fails if no buffer is allocated or not bound.
-		* \return	True if current value is SQL_NO_TOTAL.
-		* \throw	Exception
-		*/
-		bool NoTotal() const { exASSERT(HasBuffer()); exASSERT(IsBound()); return m_cb == SQL_NO_TOTAL; };
-
-
-		/*!
-		* \brief	Get the query name for this ColumnBuffer.
-		* \return	The query name of the column matching this ColumnBuffer.
-		* \throw	Exception
-		*/
-		std::wstring GetQueryName() const;
-
-		
-		/*!
-		* \brief	Get the Object Name of this ColumnBuffer.
-		* \return	ObjectName created during construction, pointer is valid until this
-		*			ColumnBuffer is destroyed.
-		* \throw	Exception
-		*/
-		const ObjectName* GetName() const { exASSERT(m_pName); return m_pName; };
-
-
-		/*!
-		* \brief	Get the query name for this ColumnBuffer.
-		* \return	The query name of the column matching this ColumnBuffer, or ??? in case of failure.
-		*/
-		std::wstring GetQueryNameNoThrow() const throw();
-
-
-		/*!
-		* \brief	Set or clear the PrimaryKey flag.
-		* \details	Must be called before any parameters are bound.
-		* \param	isPrimaryKey True if this column is a primary key.
-		* \throw	Exception If parameters are already bound.
-		*/
-		void SetPrimaryKey(bool isPrimaryKey = true);
-
-
-		/*!
-		* \brief	Read the PrimaryKey flag.
-		*/
-		bool IsPrimaryKey() const throw() { return IsColumnFlagSet(CF_PRIMARY_KEY); };
-
-
-		/*!
-		* \brief	Test if a ColumnFlags is set.
-		*/
-		bool IsColumnFlagSet(ColumnFlag columnFlag) const throw() { return (m_flags & columnFlag) == columnFlag; };
-
-
-		/*!
-		* \brief	Set a ColumnFlags.
-		* \details	Flags must be set before the ColumnBuffer is Bound to the buffer!
-		* \throw	Exception
-		*/
-		void SetColumnFlag(ColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags |= columnFlag; };
-
-
-		/*!
-		* \brief	Clear a ColumnFlags.
-		* \details	Flags must be cleared before the ColumnBuffer is Bound!
-		* \throw	Exception
-		*/
-		void ClearColumnFlag(ColumnFlag columnFlag) { exASSERT(!IsBound());  m_flags &= ~columnFlag; };
-
-
-		/*!
-		* \brief	Set the value of a binary value. Copies the value into this ColumnBuffer.
-		* \details	If this ColumnBuffer has the type SQL_C_BINARY the value of pBuff is
-		*			copied into the Buffer of this ColumnBuffer. The Buffer is first filled with zeros,
-		*			so that the buffer will be zero-padded if bufferSize is small than the size
-		*			of the buffer allocated by this ColumnBuffer.
-		* \param	pBuff Pointer to the value to be copied.
-		* \param	bufferSize Size of the buffer pointed to by pBuff. Must be smaller or equal than
-		*			the size of the buffer allocated by this ColumnBuffer.
-		* \throw	Exception If not a binary buffer, or on any other error.
-		*/
-		void SetBinaryValue(const SQLCHAR* pBuff, SQLINTEGER bufferSize);
-
-
-		/*!
-		* \brief	Get the value as BufferVariant.
-		* \details	Return a BufferVariant with the value of this ColumnBuffer.
-		*			No conversion is done, depending on the type of the internal buffer allocated
-		*			a corresponding value object is created in BufferVariant.
-		*			If the column has the ColumnFlag::CF_NULLABLE set, and the value is NULL,
-		*			NullValue::IS_NULL is returned.
-		* \throw	Exception If the internal buffer cannot be assigned to a value held by BufferVariant.
-		*			This is the case mostly for binary data.
-		*/
-		BufferVariant GetValue() const;
-
-
-		// Operators
-		// ---------
-		/*!
-		* \brief	Copies the passed value into this ColumnBuffer. Does not work for all types, see Details!
-		* \details	Copies the value of the passed BufferVariant into this Buffer.
-		*			This does not work for BinaryData - we need to know the length of the data.
-		*			The following types work:
-		*			- NullValue::IS_NULL
-		*			- SQLSMALLINT
-		*			- SQLINTEGER
-		*			- SQLBIGINT
-		*			- SQLDOUBLE
-		*			- SQL_DATE_STRUCT
-		*			- SQL_TIME_STRUCT
-		*			- SQL_TIMESTAMP_STRUCT
-		*			- SQL_NUMERIC_STRUCT
-		*			- SQL_SS_TIME2_STRUCT
-		*
-		* \param	var Variant containing the value that shall be assigned to this Buffer.
-		* \see		SetBinaryValue()
-		* \throw	Exception If type of buffer does not match the value passed.
-		*/
-		void operator=(const BufferVariant& var);
-
-
-		/*!
-		* \brief	Cast the current value to a SQLSMALLINT if possible.
-		* \details	Fails if not bound.
-		* \return	Current value as SQLSMALLINT.
-		* \throw	CastException If value cannot be casted to an SQLSMALLINT or if data loss would occur.
-		*/
-		operator SQLSMALLINT() const;
-
-
-		/*!
-		* \brief	Cast the current value to a SQLINTEGER if possible.
-		* \details	Fails if not bound.
-		* \return	Current value as SQLINTEGER.
-		* \throw	CastException If value cannot be casted to an SQLINTEGER or if data loss would occur.
-		*/
-		operator SQLINTEGER() const;
-
-
-		/*!
-		* \brief	Cast the current value to a SQLBIGINT if possible.
-		* \details	Fails if not bound.
-		* \return	Current value as SQLBIGINT.
-		* \throw	CastException If value cannot be casted to an SQLBIGINT.
-		*/
-		operator SQLBIGINT() const;
-
-
-		/*!
-		* \brief	Cast the current value to a std::wstring if possible.
-		* \details	If the column is NULL, the string 'NULL' (without ') is
-		*			returned, else a WStringVisitor is applied.
-		*			Fails if not bound.
-		* \return	Current value as std::wstring.
-		* \throw	CastException If value cannot be casted to a std::wstring.
-		* \see		WStringVisitor
-		*/
-		operator std::wstring() const;
-
-		
-		/*!
-		* \brief	Cast the current value to a std::wstring if possible.
-		* \details	If the column is NULL, the string 'NULL' (without ') is
-		*			returned, else a StringVisitor is applied.
-		*			Fails if not bound.
-		* \return	Current value as std::wstring.
-		* \throw	CastException If value cannot be casted to a std::string.
-		* \see		StringVisitor
-		*/
-		operator std::string() const;
-
-
-		/*!
-		* \brief	Cast the current value to a SQLDOUBLE if possible.
-		* \details	Fails if not bound.
-		* \return	Current value as SQLDOUBLE.
-		* \throw	CastException If value cannot be casted to a SQLDOUBLE.
-		* \see		DoubleVisitor
-		*/
-		operator SQLDOUBLE() const;
-
-		
-		/*!
-		* \brief	Cast the current value to a SQLREAL if possible.
-		* \details	Fails if not bound.
-		* \return	Current value as SQLREAL.
-		* \throw	CastException If value cannot be casted to a SQLREAL.
-		* \see		RealVisitor
-		*/
-		operator SQLREAL() const;
-
-
-		/*!
-		* \brief	Cast the current value to a SQL_DATE_STRUCT if possible.
-		* \details	Fails if not bound. If the value is a Timestamp, the time-part is ignored.
-		* \return	Current value as SQL_DATE_STRUCT.
-		* \throw	CastException If value cannot be casted to a SQL_DATE_STRUCT.
-		* \see		TimestampVisitor
-		*/
-		operator SQL_DATE_STRUCT() const;
-
-
-		/*!
-		* \brief	Cast the current value to a SQL_TIME_STRUCT if possible.
-		* \details	Fails if not bound. If the value is a Timestamp, the date-part is ignored.
-		* \return	Current value as SQL_TIME_STRUCT.
-		* \throw	CastException If value cannot be casted to a SQL_TIME_STRUCT.
-		* \see		TimestampVisitor
-		*/
-		operator SQL_TIME_STRUCT() const;
-
-
-#if HAVE_MSODBCSQL_H
-		/*!
-		* \brief	Cast the current value to a SQL_SS_TIME2_STRUCT if possible.
-		* \details	Fails if not bound. If the value is a Timestamp, the date-part is ignored.
-		*			Only available if HAVE_MSODBCSQL_H is defined to 1.
-		* \return	Current value as SQL_SS_TIME2_STRUCT.
-		* \throw	CastException If value cannot be casted to a SQL_SS_TIME2_STRUCT.
-		* \see		TimestampVisitor
-		*/
-		operator SQL_SS_TIME2_STRUCT() const;
-#endif
-
-
-		/*!
-		* \brief	Cast the current value to a SQL_TIMESTAMP_STRUCT if possible.
-		* \details	Fails if not bound.
-		* \return	Current value as SQL_TIMESTAMP_STRUCT.
-		* \throw	CastException If value cannot be casted to a SQL_TIMESTAMP_STRUCT.
-		* \see		TimestampVisitor
-		*/
-		operator SQL_TIMESTAMP_STRUCT() const;
-
-
-		/*!
-		* \brief	Cast the current value to a SQL_TIMESTAMP_STRUCT if possible.
-		* \details	Fails if not bound.
-		* \return	Current value as SQL_TIMESTAMP_STRUCT.
-		* \throw	CastException If value cannot be casted to a SQL_TIMESTAMP_STRUCT.
-		* \see		TimestampVisitor
-		*/
-		operator SQL_NUMERIC_STRUCT() const;
-
-
-		/*!
-		* \brief	Access the current buffer value as a const SQLCHAR*
-		* \details	Returns the same pointer as it is stored in here. This is mainly used
-		*			for accessing binary data, to avoid to copy the binary buffer.
-		*			Do NOT delete the pointer returned by this operator, the ColumnBuffer will.
-		* \return	Const SQLCHAR* to the buffer-content.
-		* \throw	Exception
-		* \see		TimestampVisitor
-		*/
-		operator const SQLCHAR*() const;
-
-
-	private:
-		/*!
-		* \brief	Determine the buffer size for the buffer type given by m_bufferType 
-		* \details This is used internally if no buffer-size and buffer is given and the buffer must
-		*			thus be allocated automatically.
-		*			Must be called after m_bufferType is set.
-		*			The size of types with fixed lengths is given by sizeof() (like sizeof(SQLINTEGER).
-		*			For char-types the size is calculated by '(fieldlength + 1) * sizeof(char-type)',
-		*			where char-type is SQLCCHAR or SQLWCHAR. One extra space is allocated for the 
-		*			terminating \0.
-		*			In this case the passed columnInfo is needed to read the length of the column.
-		* \return	Size of buffer for type given by m_bufferType.
-		* \throw	NotSupportedException If m_bufferType has not supported value.
-		*/
-		SQLINTEGER DetermineBufferSize(const ColumnInfo& columnInfo) const;
-
-
-		/*!
-		* \brief	Tries to determine the size needed in chars if this ColumnBuffer is bound to a
-		*			char-type plus the terminating 0 char. Uses the passed ColumnInfo.
-		* \details Evaluates NUM_PREC_RADIX, COLUMN_SIZE and DECIMAL_DIGITS to determine the number
-		*			of chars needed to store numeric-types.
-		*			For date time types it uses ColumnSize.
-		*			For char-sizes it is the column-size.
-		*			For every type +1 is added for the terminating 0 char.
-		* \see		http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
-		* \return	Needed buffer size according to SQL type from ColumnInfo.
-		* \throw	NotSupportedException if the SQL Type from ColumnInfo is not supported.
-		*/
-		SQLINTEGER DetermineCharSize(const ColumnInfo& columnInfo) const;
-
-
-		/*!
-		* \brief	Get the allocated buffer as a void*.
-		* \details Determines the type using the ColumnInfo and gets the pointer from the variant.
-		*			Fails if no buffer is allocated.
-		* \return	void* to the current buffer.
-		* \throw	boost::bad_get If SQL-type does not match type in SQColumnInfo.
-		* \throw	NotSupportedException if type of m_bufferType is unknown.
-		*/
-		void* GetBuffer() const;
-
-
-		/*!
-		* \brief	Allocate a buffer in the variant.
-		* \details Allocates corresponding buffer. 
-		*			Sets m_allocatedBuffer to true on success.
-		* \param	bufferType An SQL_C_TYPE like SQL_C_SSHORT to describe the type to allocate
-		* \param	bufferSize Used for types that are not as simple as a SQLSMALLINT, for example binary buffer. For SQLCHAR[] and SQLWCHAR it is 
-		*			the number of characters.
-		* \throw	NotSupportedException If the bufferType is unknown.
-		* \throw	bad_alloc if allocating memory fails.
-		*/
-		void AllocateBuffer(SQLSMALLINT bufferType, SQLLEN bufferSize);
-
-
-		/*!
-		* \brief	Frees the Buffer in the variant.
-		* \details	Set m_allocatedBuffer to false on success.
-		* \throw	NotSupportedException If the bufferType is unknown.
-		* \throw	WrapperException if boost::get fails
-		*/
-		void FreeBuffer();
-
-
-		/*!
-		* \brief	Return the number of decimal digits set during construction.
-		* \return	Number of decimal digits if known or -1.
-		*/
-		SQLSMALLINT GetDecimalDigitals() const throw() {	return m_decimalDigits;	};
-
-
-		struct BoundParameter
+		ColumnBufferLengthIndicator()
 		{
-			BoundParameter() : m_hStmt(SQL_NULL_HSTMT), m_parameterNumber(0) {};
-			BoundParameter(SQLHSTMT hStmt, SQLUSMALLINT parameterNr) : m_hStmt(hStmt), m_parameterNumber(parameterNr) {};
-			SQLHSTMT		m_hStmt;
-			SQLUSMALLINT	m_parameterNumber;
+			m_cb = 0;
+		}
+
+		ColumnBufferLengthIndicator(const ColumnBufferLengthIndicator& other) = delete;
+		ColumnBufferLengthIndicator& operator=(const ColumnBufferLengthIndicator& other) = delete;
+
+		virtual ~ColumnBufferLengthIndicator()
+		{};
+
+		void SetCb(SQLLEN cb) noexcept { m_cb = cb; };
+		SQLLEN GetCb() const noexcept { return m_cb; };
+
+		void SetNull() noexcept { m_cb = SQL_NULL_DATA; };
+		bool IsNull() const noexcept { return m_cb == SQL_NULL_DATA; };
+
+	protected:
+		SQLLEN m_cb;
+	};
+	typedef std::shared_ptr<ColumnBufferLengthIndicator> ColumnBufferLengthIndicatorPtr;
+
+
+	class ExtendedColumnPropertiesHolder
+	{
+	public:
+		ExtendedColumnPropertiesHolder(SQLINTEGER columnSize, SQLSMALLINT decimalDigits, SQLSMALLINT sqlType)
+			: m_columnSize(columnSize)
+			, m_decimalDigits(decimalDigits)
+			, m_sqlType(sqlType)
+		{};
+
+		ExtendedColumnPropertiesHolder()
+			: m_columnSize(0)
+			, m_decimalDigits(0)
+			, m_sqlType(SQL_UNKNOWN_TYPE)
+		{};
+
+		virtual ~ExtendedColumnPropertiesHolder()
+		{};
+
+		void SetColumnSize(SQLINTEGER columnSize) noexcept { m_columnSize = columnSize; };
+		void SetDecimalDigits(SQLSMALLINT decimalDigits) noexcept { m_decimalDigits = decimalDigits; };
+		void SetSqlType(SQLSMALLINT sqlType) noexcept { m_sqlType = sqlType; };
+
+		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
+		SQLSMALLINT GetDecimalDigits() const noexcept { return m_decimalDigits; };
+		SQLSMALLINT GetSqlType() const noexcept { return m_sqlType; };
+
+	protected:
+		SQLINTEGER m_columnSize;
+		SQLSMALLINT m_decimalDigits;
+		SQLSMALLINT m_sqlType;
+	};
+	typedef std::shared_ptr<ExtendedColumnPropertiesHolder> ExtendedColumnPropertiesHolderPtr;
+
+
+	class ColumnBufferBindInfoHolder
+	{
+	public:
+		ColumnBufferBindInfoHolder() = default;
+		ColumnBufferBindInfoHolder(const ColumnBufferBindInfoHolder& other) = delete;
+		ColumnBufferBindInfoHolder& operator=(const ColumnBufferBindInfoHolder& other) = delete;
+
+		virtual ~ColumnBufferBindInfoHolder()
+		{
+			// If we are still bound to columns or params, release the bindings and disconnect the signals
+			for (auto it = m_resetParamsConnections.begin(); it != m_resetParamsConnections.end(); ++it)
+			{
+				// disconnect first, we know its being reseted
+				it->second.disconnect();
+				try
+				{
+					it->first->ResetParams();
+				}
+				catch (const Exception& ex)
+				{
+					LOG_ERROR(ex.ToString());
+				}
+			}
+			for (auto it = m_unbindColumnsConnections.begin(); it != m_unbindColumnsConnections.end(); ++it)
+			{
+				// disconnect first, we know its being unbound now.
+				it->second.disconnect();
+				try
+				{
+					it->first->UnbindColumns();
+				}
+				catch (const Exception& ex)
+				{
+					LOG_ERROR(ex.ToString());
+				}
+			}
 		};
-		typedef std::vector<BoundParameter*> BoundParameterPtrsVector;
 
-		// Helpers to quickly access the pointers inside the variant.
-		// All of these could throw a boost::bad_get
-		SQLSMALLINT*			GetSmallIntPtr() const;
-		SQLINTEGER*				GetIntPtr() const;
-		SQLBIGINT*				GetBigIntPtr() const;
-		SQLCHAR*				GetCharPtr() const;
-		SQLWCHAR*				GetWCharPtr() const;
-		SQLDOUBLE*				GetDoublePtr() const;
-		SQLREAL*				GetRealPtr() const;
-		SQL_DATE_STRUCT*		GetDatePtr() const;
-		SQL_TIME_STRUCT*		GetTimePtr() const;
-		SQL_TIMESTAMP_STRUCT*	GetTimestampPtr() const;
-#if HAVE_MSODBCSQL_H
-		SQL_SS_TIME2_STRUCT*	GetTime2Ptr() const;
-#endif
-		SQL_NUMERIC_STRUCT*		GetNumericPtr() const;
-
-		ColumnFlags				m_flags;				///< Flags, set during construction.
-		SQLINTEGER				m_columnSize;			///< Column Size, either read from ColumnInfo during construction or set manually. -1 indicates unknown.
-		SQLSMALLINT				m_decimalDigits;		///< Decimal digits, either read from ColumnInfo during construction or set manually. -1 indicates unkonwn.
-		ObjectName*				m_pName;				///< The name of this object. Created during construction, freed on deletion.
-		SQLUSMALLINT			m_columnNr;				///< Column number used during Bind(). Set to 0 during construction.
-		SQLSMALLINT				m_sqlType;				///< The SQL Type of the Column, like SQL_SMALLINT. Either set on construction or read from ColumnInfo::m_sqlType.
-		bool					m_haveBuffer;			///< True if a buffer is available, either because it was allocated or passed during construction.
-		bool					m_allocatedBuffer;		///< True if Buffer has been allocated and must be deleted on destruction. Set from AllocateBuffer()
-		SQLSMALLINT				m_bufferType;			///< ODBC C Type of the buffer allocated, as it was passed to the driver. like SQL_C_WCHAR, etc. Set from Ctor.
-		SQLLEN					m_bufferSize;			///< Size of an allocated or set from constructor buffer.
-		SQLHSTMT				m_hStmt;				///< Set to the statement handle this ColumnBuffer was bound to, initialized to SQL_NULL_HSTMT
-		BoundParameterPtrsVector	m_boundParameters;	
-
-		OdbcVersion m_odbcVersion;	///< OdbcVersion passed when creating this ColumnBuffer.
-
-		BufferPtrVariant m_bufferPtr;	///< Variant that holds the pointer to the actual buffer
-
-		SQLLEN		m_cb;	///< The length indicator set during Bind for this column
-
-	};  // class ColumnBuffer
-
-	typedef std::map<SQLUSMALLINT, ColumnBuffer*> ColumnBufferPtrMap;
-}
+		void OnResetParams(const SqlStmtHandle& stmt)
+		{
+			// remove from our map, we are no longer interested in resetting params on destruction
+			auto it = m_resetParamsConnections.begin();
+			while (it != m_resetParamsConnections.end())
+			{
+				if (*(it->first) == stmt)
+				{
+					it->second.disconnect();
+					it = m_resetParamsConnections.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+		}
 
 
-#endif // COLUMNBUFFER_H
+		void OnUnbindColumns(const SqlStmtHandle& stmt)
+		{
+			// remove from our map, we are no longer interested in resetting params on destruction
+			auto it = m_unbindColumnsConnections.begin();
+			while (it != m_unbindColumnsConnections.end())
+			{
+				if (*(it->first) == stmt)
+				{
+					it->second.disconnect();
+					it = m_unbindColumnsConnections.erase(it);
+				}
+				else
+				{
+					++it;
+				}
+			}
+		}
+
+	protected:
+		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_unbindColumnsConnections;
+		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_resetParamsConnections;
+	};
+
+
+	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
+	class ColumnBuffer
+		: public ColumnBufferLengthIndicator
+		, public ColumnFlags
+		, public ExtendedColumnPropertiesHolder
+		, public ColumnBufferBindInfoHolder
+	{
+	public:
+		ColumnBuffer()
+			: ColumnBufferLengthIndicator()
+			, ColumnFlags()
+			, ExtendedColumnPropertiesHolder()
+			, ColumnBufferBindInfoHolder()
+		{
+			::ZeroMemory(&m_buffer, sizeof(T));
+			SetNull();
+		};
+
+		ColumnBuffer(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
+			: ColumnBufferLengthIndicator()
+			, ColumnFlags(flags)
+			, ExtendedColumnPropertiesHolder()
+			, ColumnBufferBindInfoHolder()
+			, m_queryName(queryName)
+		{
+			::ZeroMemory(&m_buffer, sizeof(T));
+			SetNull();
+		};
+
+
+		/*!
+		* \brief: Create a new instance wrapped into a shared_ptr
+		*/
+		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
+		{
+			return std::make_shared<ColumnBuffer>(queryName, flags);
+		}
+
+
+		ColumnBuffer& operator=(const ColumnBuffer& other) = delete;
+		ColumnBuffer(const ColumnBuffer& other) = delete;
+
+		virtual ~ColumnBuffer()
+		{ };
+
+		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
+		static SQLLEN GetBufferLength() noexcept { return sizeof(T); };
+
+		void SetValue(const T& value) noexcept { SetValue(value, GetBufferLength()); };
+		void SetValue(const T& value, SQLLEN cb) noexcept { m_buffer = value; SetCb(cb); };
+		const T& GetValue() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return m_buffer; };
+
+		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
+
+		operator T() const noexcept { return GetValue(); };
+
+		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+		{
+			exASSERT(columnNr >= 1);
+			exASSERT(pHStmt != NULL);
+			exASSERT(pHStmt->IsAllocated());
+
+			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb);
+			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+			// get a notification if unbound
+			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
+		};
+
+
+		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
+		{
+			exASSERT(paramNr >= 1);
+			exASSERT(pHStmt != NULL);
+			exASSERT(pHStmt->IsAllocated());
+
+			// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
+			// on the extended properties (or fail, if those are not set)
+			SQLSMALLINT paramSqlType = SQL_UNKNOWN_TYPE;
+			SQLULEN paramCharSize = 0;
+			SQLSMALLINT paramDecimalDigits = 0;
+			SQLSMALLINT paramNullable = SQL_NULLABLE_UNKNOWN;
+			if (useSqlDescribeParam)
+			{
+				SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
+				THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+			}
+			else
+			{			
+				paramSqlType = GetSqlType();
+				exASSERT(paramSqlType != SQL_UNKNOWN_TYPE);
+				paramDecimalDigits = GetDecimalDigits();
+				paramCharSize = GetColumnSize();
+			}
+
+			// Check if we think its nullable, but the db does not think so
+			if (Test(ColumnFlag::CF_NULLABLE))
+			{
+				exASSERT_MSG(paramNullable == SQL_NULLABLE || paramNullable == SQL_NULLABLE_UNKNOWN, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
+			}
+
+			// And bind using the information just read
+			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(),paramNr, SQL_PARAM_INPUT, sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*) &m_buffer, GetBufferLength(), &m_cb);
+			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+			// Connect a signal that we are bound to this handle now and get notified if params get reseted
+			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBuffer::OnResetParams, this, _1));
+		}
+
+	private:
+		T m_buffer;
+		std::wstring m_queryName;
+	};
+
+	template<>
+	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+	{
+		exASSERT(columnNr >= 1);
+		exASSERT(pHStmt != NULL);
+		exASSERT(pHStmt->IsAllocated());
+		exASSERT(m_columnSize > 0);
+		exASSERT(m_decimalDigits >= 0);
+
+		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN) m_columnSize));
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER) m_decimalDigits);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER) &m_buffer);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER) &m_cb);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER) &m_cb);
+
+		// get a notification if unbound
+		m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
+	}
+
+
+	template<>
+	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam)
+	{
+		//exASSERT_MSG(GetSqlType() != SQL_UNKNOWN_TYPE, L"Extended Property SqlType must be set if this Buffer shall be used as parameter");
+		exASSERT(paramNr >= 1);
+		exASSERT(pHStmt != NULL);
+		exASSERT(pHStmt->IsAllocated());
+
+		// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
+		// on the extended properties (or fail, if those are not set)
+		SQLSMALLINT paramSqlType = SQL_UNKNOWN_TYPE;
+		SQLULEN paramCharSize = 0;
+		SQLSMALLINT paramDecimalDigits = 0;
+		SQLSMALLINT paramNullable = SQL_NULLABLE_UNKNOWN;
+		if (useSqlDescribeParam)
+		{
+			SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
+			THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+		}
+		else
+		{
+			paramSqlType = GetSqlType();
+			exASSERT(paramSqlType != SQL_UNKNOWN_TYPE);
+			paramDecimalDigits = GetDecimalDigits();
+			paramCharSize = GetColumnSize();
+		}
+
+		// Check if we think its nullable, but the db does not think so
+		if (Test(ColumnFlag::CF_NULLABLE))
+		{
+			exASSERT_MSG(paramNullable == SQL_NULLABLE || paramNullable == SQL_NULLABLE_UNKNOWN, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
+		}
+
+		// And bind using the information just read
+		SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(), paramNr, SQL_PARAM_INPUT, SQL_C_NUMERIC, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb);
+		THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+		// Do some additional steps for numeric types
+		SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramCharSize));
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDecimalDigits);
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer);
+
+		// Connect a signal that we are bound to this handle now and get notified if params get reseted
+		m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBuffer::OnResetParams, this, _1));
+	}
+
+
+	// Integer types
+	typedef ColumnBuffer<SQLSMALLINT, SQL_C_USHORT> UShortColumnBuffer;
+	typedef std::shared_ptr<UShortColumnBuffer> UShortColumnBufferPtr;
+	typedef ColumnBuffer<SQLINTEGER, SQL_C_ULONG> ULongColumnBuffer;
+	typedef std::shared_ptr<ULongColumnBuffer> ULongColumnBufferPtr;
+	typedef ColumnBuffer<SQLBIGINT, SQL_C_UBIGINT> UBigIntColumnBuffer;
+	typedef std::shared_ptr<UBigIntColumnBuffer> UBigIntColumnBufferPtr;
+	typedef ColumnBuffer<SQLSMALLINT, SQL_C_SSHORT> ShortColumnBuffer;
+	typedef std::shared_ptr<ShortColumnBuffer> ShortColumnBufferPtr;
+	typedef ColumnBuffer<SQLINTEGER, SQL_C_SLONG> LongColumnBuffer;
+	typedef std::shared_ptr<LongColumnBuffer> LongColumnBufferPtr;
+	typedef ColumnBuffer<SQLBIGINT, SQL_C_SBIGINT> BigIntColumnBuffer;
+	typedef std::shared_ptr<BigIntColumnBuffer> BigIntColumnBufferPtr;
+
+	// datetime types
+	typedef ColumnBuffer<SQL_TIME_STRUCT, SQL_C_TYPE_TIME> TypeTimeColumnBuffer;
+	typedef std::shared_ptr<TypeTimeColumnBuffer> TypeTimeColumnBufferPtr;
+	typedef ColumnBuffer<SQL_TIME_STRUCT, SQL_C_TIME> TimeColumnBuffer;
+	typedef std::shared_ptr<TimeColumnBuffer> TimeColumnBufferPtr;
+	typedef ColumnBuffer<SQL_DATE_STRUCT, SQL_C_TYPE_DATE> TypeDateColumnBuffer;
+	typedef std::shared_ptr<TypeDateColumnBuffer> TypeDateColumnBufferPtr;
+	typedef ColumnBuffer<SQL_DATE_STRUCT, SQL_C_DATE> DateColumnBuffer;
+	typedef std::shared_ptr<DateColumnBuffer> DateColumnBufferPtr;
+	typedef ColumnBuffer<SQL_TIMESTAMP_STRUCT, SQL_C_TYPE_TIMESTAMP> TypeTimestampColumnBuffer;
+	typedef std::shared_ptr<TypeTimestampColumnBuffer> TypeTimestampColumnBufferPtr;
+	typedef ColumnBuffer<SQL_TIMESTAMP_STRUCT, SQL_C_TIMESTAMP> TimestampColumnBuffer;
+	typedef std::shared_ptr<TimestampColumnBuffer> TimestampColumnBufferPtr;
+
+	// Numeric types
+	typedef ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC> NumericColumnBuffer;
+	typedef std::shared_ptr<NumericColumnBuffer> NumericColumnBufferPtr;
+
+	// Floating types
+	typedef ColumnBuffer<SQLDOUBLE, SQL_C_DOUBLE> DoubleColumnBuffer;
+	typedef std::shared_ptr<DoubleColumnBuffer> DoubleColumnBufferPtr;
+	typedef ColumnBuffer<SQLREAL, SQL_C_FLOAT> RealColumnBuffer;
+	typedef std::shared_ptr<RealColumnBuffer> RealColumnBufferPtr;
+
+	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
+	class ColumnArrayBuffer
+		: public ColumnBufferLengthIndicator
+		, public ColumnFlags
+		, public ExtendedColumnPropertiesHolder
+		, public ColumnBufferBindInfoHolder
+	{
+	public:
+		ColumnArrayBuffer() = delete;
+
+		ColumnArrayBuffer(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
+			: ColumnBufferLengthIndicator()
+			, ColumnFlags(flags)
+			, ExtendedColumnPropertiesHolder()
+			, m_nrOfElements(nrOfElements)
+			, m_buffer(nrOfElements)
+			, m_queryName(queryName)
+		{
+			SetNull();
+		};
+
+		ColumnArrayBuffer(const ColumnArrayBuffer& other) = delete;
+		ColumnArrayBuffer& operator=(const ColumnArrayBuffer& other) = delete;
+
+		virtual ~ColumnArrayBuffer() 
+		{
+		};
+
+
+		/*!
+		* \brief: Create a new instance wrapped into a shared_ptr
+		*/
+		static std::shared_ptr<ColumnArrayBuffer> Create(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
+		{
+			return std::make_shared<ColumnArrayBuffer>(queryName, nrOfElements, flags);
+		}
+
+
+		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
+		SQLLEN GetBufferLength() const noexcept { return sizeof(T) * GetNrOfElements(); };
+
+		void SetValue(const std::vector<SQLCHAR>& value)
+		{
+			SetValue(value, value.size());
+		}
+
+		void SetValue(const std::vector<T>& value, SQLLEN cb)
+		{ 
+			exASSERT(value.size() <= m_buffer.capacity()); 
+			size_t index = 0;
+			for (auto it = value.begin(); it != value.end(); ++it)
+			{
+				m_buffer[index] = *it;
+				++index;
+			}
+			// null-terminate if last element added not already was a '0'
+			// and if there is still some space for the last '0'
+			// if there is no space, fail
+			if (cb == SQL_NTS && value.back() != 0)
+			{
+				exASSERT(index < m_buffer.capacity());
+				m_buffer[index] = 0;
+			}
+			SetCb(cb);
+		};
+		const std::vector<T>& GetBuffer() const noexcept { return m_buffer; };
+		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
+
+		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
+
+		std::wstring GetWString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return m_buffer.data(); };
+		std::string GetString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return (char*)m_buffer.data(); };
+
+		void SetWString(const std::wstring& ws) { std::vector<SQLWCHAR> vec(ws.begin(), ws.end()); SetValue(vec, SQL_NTS); };
+		void SetString(const std::string& s) { std::vector<SQLCHAR> vec(s.begin(), s.end()); SetValue(vec, SQL_NTS); }
+
+		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+		{
+			exASSERT(columnNr >= 1);
+			exASSERT(pHStmt != NULL);
+			exASSERT(pHStmt->IsAllocated());
+
+			SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, (SQLPOINTER*) &m_buffer[0], GetBufferLength(), &m_cb);
+			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+			// get a notification if unbound
+			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnArrayBuffer::OnUnbindColumns, this, _1));
+		};
+
+
+		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
+		{
+			exASSERT(paramNr >= 1);
+			exASSERT(pHStmt != NULL);
+			exASSERT(pHStmt->IsAllocated());
+
+			// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
+			// on the extended properties (or fail, if those are not set)
+			SQLSMALLINT paramSqlType = SQL_UNKNOWN_TYPE;
+			SQLULEN paramCharSize = 0;
+			SQLSMALLINT paramDecimalDigits = 0;
+			SQLSMALLINT paramNullable = SQL_NULLABLE_UNKNOWN;
+			if (useSqlDescribeParam)
+			{
+				SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
+				THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+			}
+			else
+			{
+				paramSqlType = GetSqlType();
+				exASSERT(paramSqlType != SQL_UNKNOWN_TYPE);
+				paramDecimalDigits = GetDecimalDigits();
+				paramCharSize = GetColumnSize();
+			}
+
+			// Check if we think its nullable, but the db does not think so
+			if (Test(ColumnFlag::CF_NULLABLE))
+			{
+				exASSERT_MSG((paramNullable == SQL_NULLABLE || paramNullable == SQL_NULLABLE_UNKNOWN), L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
+			}
+
+			// And bind using the information just read
+			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(), paramNr, SQL_PARAM_INPUT, sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*)&m_buffer[0], GetBufferLength(), &m_cb);
+			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+			// Connect a signal that we are bound to this handle now and get notified if params get reseted
+			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnArrayBuffer::OnResetParams, this, _1));
+		}
+
+	private:
+		SQLLEN m_nrOfElements;
+		std::vector<T> m_buffer;
+		std::wstring m_queryName;
+	};
+
+	// Array types
+	typedef ColumnArrayBuffer<SQLWCHAR, SQL_C_WCHAR> WCharColumnArrayBuffer;
+	typedef std::shared_ptr<WCharColumnArrayBuffer> WCharColumnBufferPtr;
+	typedef ColumnArrayBuffer<SQLCHAR, SQL_C_CHAR> CharColumnArrayBuffer;
+	typedef std::shared_ptr<CharColumnArrayBuffer> CharColumnBufferPtr;
+	typedef ColumnArrayBuffer<SQLCHAR, SQL_C_BINARY> BinaryColumnArrayBuffer;
+	typedef std::shared_ptr<BinaryColumnArrayBuffer> BinaryColumnBufferPtr;
+
+
+	class SqlCPointerBuffer
+		: public ColumnBufferLengthIndicator
+		, public ColumnFlags
+		, public ExtendedColumnPropertiesHolder
+		, public ColumnBufferBindInfoHolder
+	{
+	public:
+		SqlCPointerBuffer() = delete;
+		SqlCPointerBuffer(const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+			: ColumnBufferLengthIndicator()
+			, ColumnFlags(flags)
+			, ExtendedColumnPropertiesHolder(columnSize, decimalDigits, sqlType)
+			, m_pBuffer(pBuffer)
+			, m_sqlCType(sqlCType)
+			, m_bufferLength(bufferSize)
+			, m_queryName(queryName)
+		{
+			if (flags.Test(ColumnFlag::CF_NULLABLE))
+			{
+				SetNull();
+			}
+		};
+
+		SqlCPointerBuffer& operator=(const SqlCPointerBuffer& other) = delete;
+		SqlCPointerBuffer(const SqlCPointerBuffer& other) = delete;
+
+		virtual ~SqlCPointerBuffer()
+		{ };
+
+
+		/*!
+		* \brief: Create a new instance wrapped into a shared_ptr
+		*/
+		static std::shared_ptr<SqlCPointerBuffer> Create(const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+		{
+			return std::make_shared<SqlCPointerBuffer>(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
+		}
+
+
+		SQLSMALLINT GetSqlCType() const noexcept { return m_sqlCType; };
+		SQLLEN GetBufferLength() const noexcept { return m_bufferLength; };
+
+		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+		{
+			exASSERT(columnNr >= 1);
+			exASSERT(pHStmt != NULL);
+			exASSERT(pHStmt->IsAllocated());
+			exASSERT(m_columnSize >= 0);
+			exASSERT(m_decimalDigits >= 0);
+
+			if (m_sqlCType == SQL_C_NUMERIC)
+			{
+				SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
+				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_TYPE, (SQLPOINTER)m_sqlCType);
+				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
+				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
+				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)m_pBuffer);
+				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
+				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
+			}
+			else
+			{
+				SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, m_sqlCType, (SQLPOINTER*)m_pBuffer, GetBufferLength(), &m_cb);
+				THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+			}
+			
+			// get a notification if unbound
+			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&SqlCPointerBuffer::OnUnbindColumns, this, _1));
+		}
+
+		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
+		{
+			//exASSERT_MSG(GetSqlType() != SQL_UNKNOWN_TYPE, L"Extended Property SqlType must be set if this Buffer shall be used as parameter");
+			exASSERT(paramNr >= 1);
+			exASSERT(pHStmt != NULL);
+			exASSERT(pHStmt->IsAllocated());
+
+			// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
+			// on the extended properties (or fail, if those are not set)
+			SQLSMALLINT paramSqlType = SQL_UNKNOWN_TYPE;
+			SQLULEN paramCharSize = 0;
+			SQLSMALLINT paramDecimalDigits = 0;
+			SQLSMALLINT paramNullable = SQL_NULLABLE_UNKNOWN;
+			if (useSqlDescribeParam)
+			{
+				SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
+				THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+			}
+			else
+			{
+				paramSqlType = GetSqlType();
+				exASSERT(paramSqlType != SQL_UNKNOWN_TYPE);
+				paramDecimalDigits = GetDecimalDigits();
+				paramCharSize = GetColumnSize();
+			}
+
+			// Check if we think its nullable, but the db does not think so
+			if (Test(ColumnFlag::CF_NULLABLE))
+			{
+				exASSERT_MSG(paramNullable == SQL_NULLABLE || paramNullable == SQL_NULLABLE_UNKNOWN, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
+			}
+
+			// And bind using the information just read
+			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(), paramNr, SQL_PARAM_INPUT, m_sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*)m_pBuffer, GetBufferLength(), &m_cb);
+			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+
+			// Do some additional steps for numeric types
+			if (m_sqlCType == SQL_C_NUMERIC)
+			{
+				SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
+				SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+				SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramCharSize));
+				SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDecimalDigits);
+				SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)m_pBuffer);
+			}
+
+			// Connect a signal that we are bound to this handle now and get notified if params get reseted
+			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&SqlCPointerBuffer::OnResetParams, this, _1));
+		}
+
+
+		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
+
+
+	private:
+		SQLPOINTER m_pBuffer;
+		SQLSMALLINT m_sqlCType;
+		SQLLEN m_bufferLength;
+
+		std::wstring m_queryName;
+	};
+
+	typedef std::shared_ptr<SqlCPointerBuffer> SqlCPointerBufferPtr;
+	
+
+	// the variant
+	typedef boost::variant<
+		UShortColumnBufferPtr, ShortColumnBufferPtr, ULongColumnBufferPtr, LongColumnBufferPtr, UBigIntColumnBufferPtr, BigIntColumnBufferPtr,
+		TypeTimeColumnBufferPtr, TimeColumnBufferPtr,
+		TypeDateColumnBufferPtr, DateColumnBufferPtr,
+		TypeTimestampColumnBufferPtr, TimestampColumnBufferPtr,
+		NumericColumnBufferPtr,
+		DoubleColumnBufferPtr, RealColumnBufferPtr,
+		WCharColumnBufferPtr, CharColumnBufferPtr,
+		BinaryColumnBufferPtr,
+		SqlCPointerBufferPtr
+	> ColumnBufferPtrVariant;
+	
+	typedef std::map<SQLUSMALLINT, ColumnBufferPtrVariant> ColumnBufferPtrVariantMap;
+
+	extern EXODBCAPI ColumnBufferPtrVariant CreateColumnBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName);
+	extern EXODBCAPI ColumnBufferPtrVariant CreateColumnArrayBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo);
+	extern EXODBCAPI SQLLEN CalculateDisplaySize(SQLSMALLINT sqlType, SQLINTEGER columnSize, SQLSMALLINT numPrecRadix, SQLSMALLINT decimalDigits);
+	extern EXODBCAPI bool IsArrayType(SQLSMALLINT sqlCType);
+
+} // namespace exodbc

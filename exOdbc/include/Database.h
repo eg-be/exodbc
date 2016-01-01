@@ -17,6 +17,8 @@
 #include "Helpers.h"
 #include "InfoObject.h"
 #include "Sql2BufferTypeMap.h"
+#include "SqlHandle.h"
+#include "Environment.h"
 
 // Other headers
 #if EXODBC_TEST
@@ -38,8 +40,6 @@
 // --------------------
 namespace exodbc
 {
-	class Environment;
-	class ColumnFormatter;
 	class Table;
 
 	// Structs
@@ -103,7 +103,7 @@ namespace exodbc
 		* \throw	Exception If handles cannot be allocated, or passed Environment does not have an
 		*			Environment handle to be used.
 		*/
-		Database(const Environment* pEnv);
+		Database(ConstEnvironmentPtr pEnv);
 
 		
 		/*!
@@ -122,7 +122,7 @@ namespace exodbc
 		*			Environment. Do not free the passed Environment before you free the database.
 		* \throw	Exception
 		*/
-		void Init(const Environment* pEnv);
+		void Init(ConstEnvironmentPtr pEnv);
 
 
 		/*!
@@ -171,7 +171,7 @@ namespace exodbc
 			NotFailOnNoData		///< Return True if ExecSql returns SLQ_NO_DATA
 		};
 		/**
-		 * \brief	Executes the SQL operation on the internal stmt-handle.
+		 * \brief	Executes the SQL operation on the internal exec Sql statement handle.
 		 * \param	sqlStmt	The SQL statement.
 		 * \param	mode   	If FailOnNoData is set, Exception is thrown if SQL returns NO_DATA.
 		 * 					This happens for example on DB2 if you do a DELETE with a WHERE
@@ -179,6 +179,9 @@ namespace exodbc
 		 * \throw	Exception If executing SQL failed, or depending on mode if no records are affected.
 		 */
 		void         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = ExecFailMode::NotFailOnNoData);
+
+
+		SqlStmtHandlePtr GetExecSqlHandle() const noexcept { return m_pHStmtExecSql; };
 
 
 		/*!
@@ -490,16 +493,15 @@ namespace exodbc
 		* \return	True if Connection handle is allocated.
 		* \see		AllocateConnectionHandle()
 		*/
-		bool			HasConnectionHandle() const throw()			{ return m_hdbc != SQL_NULL_HDBC; };
+		bool			HasConnectionHandle() const { exASSERT(m_pHDbc); return m_pHDbc->IsAllocated(); };
 
 
 		/*!
-		* \brief	Get an eventually allocated connection handle.
-		* \return	Connection handle if allocated, or SQL_NULL_HDBC.
-		* \see		AllocateConnectionHandle()
-		* \throw	Exception If no handle is allocated.
+		* \brief	Returns the shared_ptr to the SqlDbcHandle holding the ODBC Connection handle.
+		*			Note that this does not guarantee that the SqlDbcHandle returned actually has an
+		*			ODBC Connection Handle allocated or that the pointer is not NULL.
 		*/
-		SQLHDBC            GetConnectionHandle() const         { exASSERT(HasConnectionHandle()); return m_hdbc; }
+		ConstSqlDbcHandlePtr	GetSqlDbcHandle() const noexcept       { return m_pHDbc; }
 
 
 		/*!
@@ -524,7 +526,7 @@ namespace exodbc
 		* \brief	Get the Environment this Database was created from.
 		* \return	Environment if set.
 		*/
-		const Environment*	GetEnvironment() const { return m_pEnv; };
+		ConstEnvironmentPtr	GetEnvironment() const { return m_pEnv; };
 
 
 		/*!
@@ -632,23 +634,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Tries to allocate a new DBC-Handle from the internally stored Environment. 
-		*			Handle will be freed on destruction.
-		* \details	Can only be called if no connection-handle is allocated yet.
-		* \throw	Exception If a handle is already allocated or allocating fails,
-		*/
-		void		AllocateConnectionHandle();
-
-
-		/*!
-		* \brief	Frees the database connection handle.
-		* \throw	SqlResultException if SQLFreeHandle returns SQL_ERROR or SQL_INVALID_HANDLE
-		*			Exception If no database connection handle is allocated.
-		*/
-		void			FreeConnectionHandle();
-
-
-		/*!
 		* \brief	Query the Database using SQLGetInfo.
 		* \return	DatabaseInfo populated with values.
 		* \throw	Exception If reading Database info fails or no connection handle is allocated.
@@ -689,7 +674,7 @@ namespace exodbc
 
 		// Members
 		// -------
-		const Environment*	m_pEnv;		///< Environment of this Databaes
+		ConstEnvironmentPtr		m_pEnv;		///< Environment of this Databaes
 		DatabaseInfo			m_dbInf;
 		Sql2BufferTypeMapPtr	m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used from this Database. If none is set during OpenImp() a DefaultSql2BufferTypeMap is created.
 
@@ -704,14 +689,17 @@ namespace exodbc
 		DatabaseProduct		m_dbmsType;        ///< Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 
 		// ODBC handles created by the Database
-		SQLHDBC  m_hdbc;			///< ODBC DB Connection handle
-		SQLHSTMT m_hstmt;			///< ODBC Statement handle used for all internal functions except ExecSql()
-		SQLHSTMT m_hstmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
+
+		SqlDbcHandlePtr m_pHDbc;			///< ODBC DB Connection handle
+		SqlStmtHandlePtr m_pHStmt;			///< ODBC Statement handle used for all internal functions except ExecSql()
+		SqlStmtHandlePtr m_pHStmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
 
 		CommitMode		m_commitMode;	///< Commit Mode set currently
 
 	};  // Database
 
+	typedef std::shared_ptr<Database> DatabasePtr;
+	typedef std::shared_ptr<const Database> ConstDatabasePtr;
 }	// namespace exodbc
 
 #endif // DATABASE_H

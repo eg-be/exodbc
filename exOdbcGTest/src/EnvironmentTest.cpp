@@ -40,7 +40,6 @@ namespace exodbc
 	void EnvironmentTest::SetUp()
 	{
 		ASSERT_TRUE(g_odbcInfo.IsUsable());
-		m_odbcInfo = g_odbcInfo;
 	}
 
 	void EnvironmentTest::TearDown()
@@ -49,53 +48,21 @@ namespace exodbc
 	}
 
 
-	TEST_F(EnvironmentTest, AllocateEnvironmentHandle)
-	{
-		Environment env;
-		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
-		// We will fail to allocate a second one
-		// Suppress the output of the assertion helper
-		LogLevelFatal lf;
-		DontDebugBreak ddb;
-		EXPECT_THROW(env.AllocateEnvironmentHandle(), AssertionException);
-	}
-
-
-	TEST_F(EnvironmentTest, FreeEnvironmentHandle)
-	{
-		// First simply test alloc - free
-		Environment env;
-		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
-		EXPECT_NO_THROW(env.FreeEnvironmentHandle());
-		
-		// Now test that we fail to free if there is still a database around
-		ASSERT_NO_THROW(env.AllocateEnvironmentHandle());
-		ASSERT_NO_THROW(env.SetOdbcVersion(OdbcVersion::V_3));
-		{
-			Database db(&env);
-			EXPECT_THROW(env.FreeEnvironmentHandle(), SqlResultException);
-		}
-
-		// Once the database is gone, we can free the env
-		EXPECT_NO_THROW(env.FreeEnvironmentHandle());
-	}
-
-
 	TEST_F(EnvironmentTest, CopyConstructor)
 	{
 		Environment env(OdbcVersion::V_3);
-		ASSERT_TRUE(env.HasEnvironmentHandle());
+		ASSERT_TRUE(env.IsEnvHandleAllocated());
 		ASSERT_EQ(OdbcVersion::V_3, env.GetOdbcVersion());
-		ASSERT_TRUE(env.GetEnvironmentHandle() != SQL_NULL_HENV);
+		ASSERT_TRUE(env.GetSqlEnvHandle() != SQL_NULL_HENV);
 
 		Environment copy(env);
-		EXPECT_TRUE(copy.HasEnvironmentHandle());
+		EXPECT_TRUE(copy.IsEnvHandleAllocated());
 		EXPECT_EQ(OdbcVersion::V_3, copy.GetOdbcVersion());
-		EXPECT_NE(env.GetEnvironmentHandle(), copy.GetEnvironmentHandle());
+		EXPECT_NE(env.GetSqlEnvHandle(), copy.GetSqlEnvHandle());
 
 		Environment e2;
 		Environment c2(e2);
-		EXPECT_FALSE(c2.HasEnvironmentHandle());
+		EXPECT_FALSE(c2.IsEnvHandleAllocated());
 		EXPECT_EQ(OdbcVersion::UNKNOWN, c2.GetOdbcVersion());
 	}
 
@@ -119,14 +86,14 @@ namespace exodbc
 
 	TEST_F(EnvironmentTest, ListDataSources)
 	{
-		if (m_odbcInfo.HasConnectionString())
+		if (g_odbcInfo.HasConnectionString())
 		{
 			LOG_WARNING(L"Skipping Test ListDataSources, because Test is implemented to stupid it only works with a named DSN");
 			return;
 		}
 
 		Environment env(OdbcVersion::V_3);
-		ASSERT_TRUE(env.HasEnvironmentHandle());
+		ASSERT_TRUE(env.IsEnvHandleAllocated());
 
 		vector<SDataSource> dataSources;
 		ASSERT_NO_THROW(dataSources = env.ListDataSources(Environment::ListMode::All));
@@ -136,7 +103,7 @@ namespace exodbc
 		vector<SDataSource>::const_iterator it;
 		for(it = dataSources.begin(); it != dataSources.end(); it++)
 		{
-			if(it->m_dsn == m_odbcInfo.m_dsn)
+			if(it->m_dsn == g_odbcInfo.m_dsn)
 			{
 				foundDataSource = true;
 				break;

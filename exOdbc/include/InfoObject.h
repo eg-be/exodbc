@@ -14,12 +14,14 @@
 // Same component headers
 #include "exOdbc.h"
 #include "ObjectName.h"
+#include "SqlHandle.h"
 
 // Other headers
 
 // System headers
 #include <string>
 #include <vector>
+#include <map>
 
 // Forward declarations
 // --------------------
@@ -73,6 +75,43 @@ namespace exodbc
 	typedef std::vector<TableInfo> TableInfosVector;
 
 
+	class EXODBCAPI ColumnBindInfo
+	{
+	public:
+		ColumnBindInfo()
+			: m_sqlType(SQL_UNKNOWN_TYPE)
+			, m_columnSize(0)
+			, m_decimalDigits(0)
+		{};
+
+		ColumnBindInfo(SQLSMALLINT sqlType)
+			: m_sqlType(sqlType)
+			, m_columnSize(0)
+			, m_decimalDigits(0)
+		{};
+
+		ColumnBindInfo(SQLSMALLINT sqlType, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+			: m_sqlType(sqlType)
+			, m_columnSize(columnSize)
+			, m_decimalDigits(decimalDigits)
+		{};
+
+		virtual ~ColumnBindInfo() {};
+
+	public:
+
+		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
+		SQLSMALLINT GetDecimalDigits() const noexcept { return m_decimalDigits; };
+
+		SQLSMALLINT GetSqlType() const noexcept { return m_sqlType; };
+
+	protected:
+		SQLSMALLINT m_sqlType;
+		SQLINTEGER m_columnSize;
+		SQLSMALLINT m_decimalDigits;
+	};
+
+
 	/*!
 	* \class	ManualColumnInfo
 	* \brief	Information about a column defined manually and buffer allocated manually.
@@ -81,11 +120,14 @@ namespace exodbc
 	*/
 	class EXODBCAPI ManualColumnInfo
 		: public ObjectName
+		, public ColumnBindInfo
 	{
 	private:
 		ManualColumnInfo();
 
 	public:
+
+		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName);
 
 		/*!
 		* \brief Create new ManualColumnInfo
@@ -95,7 +137,7 @@ namespace exodbc
 		* \param decimalDigits	The number of digits of the fractional part of a decimal value.
 		* \throw Exception		If queryName is empty.
 		*/
-		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
+		ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize, SQLSMALLINT decimalDigits);
 
 		/*!
 		* \brief Return the Query Name for this ManualColumnInfo
@@ -118,27 +160,27 @@ namespace exodbc
 		* \brief Get the ColumnSize set on Construction.
 		* \return SQLINTEGER
 		*/
-		SQLINTEGER GetColumnSize() const throw();
+//		SQLINTEGER GetColumnSize() const throw();
 
 
 		/*!
 		* \brief Get the DecimalDigits set on Construction.
 		* \return SQLSMALLINT
 		*/
-		SQLSMALLINT GetDecimalDigits() const throw();
+	//	SQLSMALLINT GetDecimalDigits() const throw();
 
 
 		/*!
 		* \brief Get the SQL Type set on Construction.
 		* \return SQLSMALLINT
 		*/
-		SQLSMALLINT GetSqlType() const throw();
+	//	SQLSMALLINT GetSqlType() const throw();
 
 	private:
-		SQLSMALLINT m_sqlType;
+		//SQLSMALLINT m_sqlType;
 		std::wstring m_queryName;
-		SQLINTEGER m_columnSize;
-		SQLSMALLINT m_decimalDigits;
+		//SQLINTEGER m_columnSize;
+		//SQLSMALLINT m_decimalDigits;
 	};
 
 
@@ -150,6 +192,7 @@ namespace exodbc
 	*/
 	class EXODBCAPI ColumnInfo
 		: public ObjectName
+		, public ColumnBindInfo
 	{
 	private:
 		ColumnInfo();
@@ -214,11 +257,11 @@ namespace exodbc
 		std::wstring	GetSchemaName() const { exASSERT(!IsSchemaNull()); return m_schemaName; };
 		std::wstring	GetTableName() const { return m_tableName; };
 		std::wstring	GetColumnName() const { return m_columnName; };
-		SQLSMALLINT		GetSqlType() const { return m_sqlType; };
+		//SQLSMALLINT		GetSqlType() const { return m_sqlType; };
 		std::wstring	GetTypeName() const { return m_typeName; };
-		SQLINTEGER		GetColumnSize() const { exASSERT(!IsColumnSizeNull()); return m_columnSize; };
+		//SQLINTEGER		GetColumnSize() const { exASSERT(!IsColumnSizeNull()); return m_columnSize; };
 		SQLINTEGER		GetBufferSize() const { exASSERT(!IsBufferSizeNull()); return m_bufferSize; };
-		SQLSMALLINT		GetDecimalDigits() const { exASSERT(!IsDecimalDigitsNull()); return m_decimalDigits; };
+		//SQLSMALLINT		GetDecimalDigits() const { exASSERT(!IsDecimalDigitsNull()); return m_decimalDigits; };
 		SQLSMALLINT		GetNumPrecRadix() const { exASSERT(!IsNumPrecRadixNull()); return m_numPrecRadix; };
 		SQLSMALLINT		GetNullable() const { return m_nullable; };
 		std::wstring	GetRemarks() const { exASSERT(!IsRemarksNull()); return m_remarks; };
@@ -247,11 +290,11 @@ namespace exodbc
 		std::wstring	m_schemaName;		///< [NULLABLE] Schema name
 		std::wstring	m_tableName;		///< Table name
 		std::wstring	m_columnName;		///< Column Name. Empty for columns without a name
-		SQLSMALLINT		m_sqlType;			///< SQL data type
+		//SQLSMALLINT		m_sqlType;			///< SQL data type
 		std::wstring	m_typeName;			///< Data source-dependent type name
-		SQLINTEGER		m_columnSize;		///< [NULLABLE] for char-columns the max length in characters; numeric total nr of digits or total number of bits, see numPrecRadix.
+		//SQLINTEGER		m_columnSize;		///< [NULLABLE] for char-columns the max length in characters; numeric total nr of digits or total number of bits, see numPrecRadix.
 		SQLINTEGER		m_bufferSize;		///< [NULLABLE] Length of bits needed for SQLGetDat, SQLFetch if used with SQL_C_DEFAULT.
-		SQLSMALLINT		m_decimalDigits;	///< [NULLABLE] Total number of significant digits right of decimal. For time-stuff: number of digits in fractional part, ..
+		//SQLSMALLINT		m_decimalDigits;	///< [NULLABLE] Total number of significant digits right of decimal. For time-stuff: number of digits in fractional part, ..
 		SQLSMALLINT		m_numPrecRadix;		///< [NULLABLE] See msdn, defines nr. of decimal digits.
 		SQLSMALLINT		m_nullable;			///< SQL_NO_NULLS, SQL_NULLABLE or SQL_NULLABLE_UNKNOWN
 		std::wstring	m_remarks;			///< [NULLABLE] Description
@@ -429,10 +472,10 @@ namespace exodbc
 		void SetProperty(UIntProperty prop, SQLUINTEGER value);
 		void SetProperty(IntProperty prop, SQLINTEGER value);
 
-		void ReadAndStoryProperty(SQLHDBC hDbc, WStringProperty prop);
-		void ReadAndStoryProperty(SQLHDBC hDbc, USmallIntProperty prop);
-		void ReadAndStoryProperty(SQLHDBC hDbc, UIntProperty prop);
-		void ReadAndStoryProperty(SQLHDBC hDbc, IntProperty prop);
+		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, WStringProperty prop);
+		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, USmallIntProperty prop);
+		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, UIntProperty prop);
+		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, IntProperty prop);
 
 		std::wstring GetWStringProperty(WStringProperty prop) const;
 		SQLUSMALLINT GetUSmallIntProperty(USmallIntProperty prop) const;

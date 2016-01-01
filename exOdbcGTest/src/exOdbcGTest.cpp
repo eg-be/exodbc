@@ -59,6 +59,7 @@ bool extractParamValue( int argc, const _TCHAR* const argv[],const std::wstring&
 	return false;
 }
 
+#include "boost/variant/polymorphic_get.hpp"
 
 void printHelp()
 {
@@ -101,6 +102,8 @@ void printHelp()
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	printHelp();
+
 	using namespace std;
 	using namespace exodbc;
 	namespace ba = boost::algorithm;
@@ -275,7 +278,17 @@ int _tmain(int argc, _TCHAR* argv[])
 		return status;
 	}
 
-	int result = RUN_ALL_TESTS();
+	int result = 0;
+	try
+	{
+		result = RUN_ALL_TESTS();
+	}
+	catch (const Exception& ex)
+	{
+		result = -13;
+		LOG_ERROR(L"TEST RUN ABORTED");
+		LOG_ERROR(ex.ToString());
+	}
 	
 	return result;
 }

@@ -87,26 +87,26 @@ namespace exodbc
 		*			is compared using SQLINTEGER (as access has no SQLSMALLINT, nor SQLBIGINT).
 		* \return	AssertionSuccess or AssertionFailure.
 		*/
-		::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt);
+//		::testing::AssertionResult IsIntRecordEqual(const exodbc::Database& db, const exodbc::Table& iTable, Int expId, SmallInt expSmallInt, Int expInt, BigInt expBigInt);
 
 		/*!
 		* \brief	Insert an Integer value
 		* \details	If the passed db is of DatabaseType::ACCESS, the BigInt column is set to NULL. The smallInt column is inserted as SQLINTEGER.
 		* \throw	Exception
 		*/
-		void InsertIntTypesTmp(test::Case nameCase, const exodbc::Database& db, Int id, SmallInt tSmallInt, Int tInt, BigInt tBigInt, bool commitTrans = true);
+		//void InsertIntTypesTmp(test::Case nameCase, const exodbc::Database& db, Int id, SmallInt tSmallInt, Int tInt, BigInt tBigInt, bool commitTrans = true);
 		
 		// \todo: See ticket #82
 		// exodbc::Table GetEmptyTestTable(TestTables::Table table, TestTables::NameCase nameCase, exodbc::Database& db);
 
-		void ClearTestTable(test::TableId table, test::Case nameCase, exodbc::Table& testTable, exodbc::Database& db);
+		//void ClearTestTable(test::TableId table, test::Case nameCase, exodbc::Table& testTable, exodbc::Database& db);
 
-		void ClearIntTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
-		void ClearDateTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
-		void ClearCharTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
-		void ClearNumericTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
-		void ClearBlobTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
-		void ClearFloatTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
+		//void ClearIntTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
+		//void ClearDateTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
+		//void ClearCharTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
+		//void ClearNumericTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
+		//void ClearBlobTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
+		//void ClearFloatTypesTmpTable(const exodbc::Database& db, test::Case nameCase);
 
 	}
 

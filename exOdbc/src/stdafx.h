@@ -12,6 +12,7 @@
 
 
 #pragma once
+#pragma warning(disable:4503)
 
 #include "targetver.h"
 
@@ -20,6 +21,7 @@
 #include "boost/format.hpp"
 #include "boost/log/trivial.hpp"
 #include "boost/lexical_cast.hpp"
+#include "boost/signals2.hpp"
 
 // system
 #include <windows.h>
@@ -48,7 +50,6 @@
 #endif
 
 // our stuff
-#include "Helpers.h"
-
+#include "exOdbc.h"
 
 // TODO: reference additional headers your program requires here

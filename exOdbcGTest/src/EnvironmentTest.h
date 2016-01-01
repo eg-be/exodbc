@@ -30,16 +30,9 @@ namespace exodbc
 	// -------
 	class EnvironmentTest : public ::testing::Test
 	{
-
-	public:
-		static void SetUpTestCase() {};
-		static void TearDownTestCase() {};
-
 	protected:
 		virtual void SetUp();
 		virtual void TearDown();
-
-		TestParams m_odbcInfo;
 	};
 } // namespace exodbc
 

@@ -24,62 +24,69 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	TablePrivileges::TablePrivileges()
-		: m_initialized(false)
-	{
-
-	}
-
-
-	TablePrivileges::TablePrivileges(const Database* pDb, const TableInfo& tableInfo)
-		: m_initialized(false)
-	{
-		Initialize(pDb, tableInfo);
-		m_initialized = true;
-	}
 
 	// Destruction
 	// -----------
-	
 
 	// Implementation
 	// --------------
-	void TablePrivileges::Initialize(const Database* pDb, const TableInfo& tableInfo)
+	std::wstring TablePrivileges::ToString(TablePrivilege priv)
 	{
+		switch (priv)
+		{
+		case TablePrivilege::SELECT:
+			return L"SELECT";
+		case TablePrivilege::INSERT:
+			return L"INSERT";
+		case TablePrivilege::UPDATE:
+			return L"UPDATE";
+		case TablePrivilege::DEL:
+			return L"DELETE";
+		case TablePrivilege::NONE:
+			return L"NONE";
+		default:
+			return L"???";
+		}
+	}
+
+	void TablePrivileges::Init(ConstDatabasePtr pDb, const TableInfo& tableInfo)
+	{
+		exASSERT(pDb);
 		exASSERT(pDb->IsOpen());
-
-		m_privileges = 0;
-		m_initialized = false;
-		TablePrivilegesVector tablePrivs;
-
-		tablePrivs = pDb->ReadTablePrivileges(tableInfo);
-		Parse(tablePrivs);
-		m_initialized = true;
+		TablePrivilegesVector tablePrivs = pDb->ReadTablePrivileges(tableInfo);
+		Init(tablePrivs);
 	}
 
 
-	void TablePrivileges::Parse(const TablePrivilegesVector& tablePrivs)
+	void TablePrivileges::Init(const TablePrivilegesVector& tablePrivs)
 	{
-		// Very simple so far
 		for (TablePrivilegesVector::const_iterator it = tablePrivs.begin(); it != tablePrivs.end(); it++)
 		{
 			if (boost::iequals(L"SELECT", it->m_privilege))
 			{
-				m_privileges |= TP_SELECT;
+				Set(TablePrivilege::SELECT);
 			}
 			else if (boost::iequals(L"INSERT", it->m_privilege))
 			{
-				m_privileges |= TP_INSERT;
+				Set(TablePrivilege::INSERT);
 			}
 			else if (boost::iequals(L"UPDATE", it->m_privilege))
 			{
-				m_privileges |= TP_UPDATE;
+				Set(TablePrivilege::UPDATE);
 			}
 			else if (boost::iequals(L"DELETE", it->m_privilege))
 			{
-				m_privileges |= TP_DELETE;
+				Set(TablePrivilege::DEL);
 			}
 		}
 	}
 
+
+	std::wstring MissingTablePrivilegeException::ToString() const throw()
+	{
+		std::wstringstream ws;
+		ws << Exception::ToString();
+		ws << L"Missing Privilege '" << TablePrivileges::ToString(m_missingPriv) << L"' on Table '" << m_tableInfo.GetQueryName() << L"'";
+		return ws.str();
+	}
 } // namespace exodbc
