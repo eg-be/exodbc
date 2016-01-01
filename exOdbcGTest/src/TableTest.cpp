@@ -1246,6 +1246,69 @@ namespace exodbc
 	}
 
 
+	// Update rows
+	// ---------
+	TEST_F(TableTest, UpdatePk)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		ClearTmpTable(TableId::INTEGERTYPES_TMP);
+
+		{
+			// Insert some rows
+			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT | TableAccessFlag::AF_UPDATE_PK, tableName);
+			iTable.Open();
+
+			// Set some values
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+			pId->SetValue(300);
+			pInt->SetValue(400);
+			iTable.Insert();
+
+			pId->SetValue(301);
+			pInt->SetValue(401);
+			iTable.Insert();
+
+			m_pDb->CommitTrans();
+		}
+		{
+			// And update
+			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT | TableAccessFlag::AF_UPDATE_PK, tableName);
+			iTable.Open();
+
+			// Set some values
+			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+			
+			pId->SetValue(300);
+			pInt->SetValue(500);
+			iTable.Update();
+
+			pId->SetValue(301);
+			pInt->SetValue(501);
+			iTable.Update();
+			
+			m_pDb->CommitTrans();
+		}
+
+		// Read back values
+		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		iTable.Open();
+		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+
+		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES_TMP);
+		wstring sqlWhere = boost::str(boost::wformat(L"%s = 300 OR %s = 301 ORDER by %s") % idColName %idColName %idColName);
+		iTable.Select(sqlWhere);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(300, *pId);
+		EXPECT_EQ(500, *pInt);
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(301, *pId);
+		EXPECT_EQ(501, *pInt);
+	}
+
+
 //	// Delete rows: We do not test that for the different data-types, its just deleting a row.
 //	// -----------
 //	TEST_F(TableTest, DeleteWhere)

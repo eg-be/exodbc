@@ -810,6 +810,12 @@ namespace exodbc
 		*/
 		void ClearColumnFlag(SQLUSMALLINT columnIndex, ColumnFlag flag) const;
 
+
+		/*!
+		* \brief	Returns a all ColumnBuffers that have the flag CF_PRIMARY_KEY set 
+		*/
+		ColumnBufferPtrVariantMap GetPrimaryKeyColumnBuffers() const;
+
 		
 		/*!
 		* \brief	Returns the TableInfo for this Table.
@@ -893,12 +899,13 @@ namespace exodbc
 		
 
 		/*!
-		* \brief	Prepares an SQL UPDATE Statement to update the values of the (non-primary-keys) bound columns.
-		*			The rows matching the bound primary keys will be bound.
+		* \brief	Prepares an SQL UPDATE Statement to update the values of the (non-primary-keys) columns
+		*			with the flag CF_UPDATE set. Where statement uses the primary key columns. And the
+		*			primary key columns are not updated!
 		* \throw	Exception If no ColumnBuffers are bound, not opened for writing, etc., or binding fails
 		*			or this Table has no bound primary key columns.
 		*/
-		void		BindUpdateParameters();
+		void		BindUpdatePkParameters();
 
 
 		/*!
@@ -942,10 +949,10 @@ namespace exodbc
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
 		// Executable Statements used
-		ExecutableStatement	m_execStmtCount;	///< Statement used to do SELECTs using ExecuteDirect. Columns are bound.
-		ExecutableStatement m_execStmtSelect;	///< Statement used to do COUNTs. First Column of Result is bound to m_pSelectCountResultBuffer.
-		ExecutableStatement m_execStmtInsert;	///< Statement used to do INSERTs. Prepared SQL statement bound to all params with flag CF_INSERT.
-		
+		ExecutableStatement	m_execStmtCount;	///< Statement to SELECT using ExecuteDirect. Columns are bound.
+		ExecutableStatement m_execStmtSelect;	///< Statement to COUNT. First Column of Result is bound to m_pSelectCountResultBuffer.
+		ExecutableStatement m_execStmtInsert;	///< Statement to INSERT. Prepared SQL statement bound to all params with flag CF_INSERT.
+		ExecutableStatement m_execStmtUpdatePk;	///< Statement to UPDATE columns with flag CF_UPDATE. WHERE clause is formed using primary key columns.
 		UBigIntColumnBufferPtr m_pSelectCountResultBuffer;	///< The buffer used to retrieve the result of a SELECT COUNT operation.
 
 		// ODBC Handles
