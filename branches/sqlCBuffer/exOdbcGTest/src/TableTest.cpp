@@ -1217,12 +1217,10 @@ namespace exodbc
 		{
 			// Now insert with only id-column bound for inserting, and the int column only bound for selecting
 			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT, tableName);
-			auto columns = iTable.CreateAutoColumnBufferPtrs(false);
-			LongColumnBufferPtr pId = boost::get<LongColumnBufferPtr>(columns[0]);
-			LongColumnBufferPtr pInt = boost::get<LongColumnBufferPtr>(columns[2]);
+			iTable.CreateAutoColumnBufferPtrs(false, true);
+			LongColumnBufferPtr pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			LongColumnBufferPtr pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 			pInt->Clear(ColumnFlag::CF_INSERT);
-			iTable.SetColumn(0, columns[0]);
-			iTable.SetColumn(1, columns[2]);
 			iTable.Open();
 			pId->SetValue(301);
 			pInt->SetValue(401);
@@ -1411,7 +1409,7 @@ namespace exodbc
 	{
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
-		vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false);
+		vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false);
 		
 		EXPECT_EQ(4, columns.size());
 		// Access reports everything as int columns
@@ -1436,7 +1434,7 @@ namespace exodbc
 	{
 		wstring tableName = GetTableName(TableId::BLOBTYPES);
 		Table bTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
-		vector<ColumnBufferPtrVariant> columns = bTable.CreateAutoColumnBufferPtrs(false);
+		vector<ColumnBufferPtrVariant> columns = bTable.CreateAutoColumnBufferPtrs(false, false);
 
 		EXPECT_EQ(3, columns.size());
 
@@ -1465,7 +1463,7 @@ namespace exodbc
 		pTypeMap->RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
 		pTypeMap->RegisterType(SQL_CHAR, SQL_C_WCHAR);
 		cTable.SetSql2BufferTypeMap(pTypeMap);
-		vector<ColumnBufferPtrVariant> columns = cTable.CreateAutoColumnBufferPtrs(false);
+		vector<ColumnBufferPtrVariant> columns = cTable.CreateAutoColumnBufferPtrs(false, false);
 
 		EXPECT_EQ(5, columns.size());
 
@@ -1494,7 +1492,7 @@ namespace exodbc
 		wstring tableName = GetTableName(TableId::DATETYPES);
 		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		auto columns = dTable.CreateAutoColumnBufferPtrs(false);
+		auto columns = dTable.CreateAutoColumnBufferPtrs(false, false);
 		EXPECT_EQ(4, columns.size());
 
 		SqlCTypeVisitor cTypeV;
@@ -1534,7 +1532,7 @@ namespace exodbc
 		wstring tableName = GetTableName(TableId::FLOATTYPES);
 		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		auto columns = dTable.CreateAutoColumnBufferPtrs(false);
+		auto columns = dTable.CreateAutoColumnBufferPtrs(false, false);
 		EXPECT_EQ(3, columns.size());
 
 		SqlCTypeVisitor cTypeV;
@@ -1558,7 +1556,7 @@ namespace exodbc
 		wstring tableName = GetTableName(TableId::NUMERICTYPES);
 		Table nTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		auto columns = nTable.CreateAutoColumnBufferPtrs(false);
+		auto columns = nTable.CreateAutoColumnBufferPtrs(false, false);
 		EXPECT_EQ(4, columns.size());
 		SqlCTypeVisitor cTypeV;
 
@@ -1592,7 +1590,7 @@ namespace exodbc
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 		iTable.SetSql2BufferTypeMap(pTypeMap);
-		auto columns = iTable.CreateAutoColumnBufferPtrs(true);
+		auto columns = iTable.CreateAutoColumnBufferPtrs(true, false);
 
 		// The id col and the tint column should be missing
 		// except for access, there everything should be missing
@@ -1618,7 +1616,39 @@ namespace exodbc
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 		iTable.SetSql2BufferTypeMap(pTypeMap);
 
-		EXPECT_THROW(iTable.CreateAutoColumnBufferPtrs(false), NotSupportedException);
+		EXPECT_THROW(iTable.CreateAutoColumnBufferPtrs(false, false), NotSupportedException);
+	}
+
+
+	TEST_F(TableTest, QueryPrimaryKeysAndUpdateColumns)
+	{
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		auto columns = iTable.CreateAutoColumnBufferPtrs(false, true);
+		// no flags activated so far
+		for (size_t i = 0; i < columns.size(); ++i)
+		{
+			auto col = columns[i];
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), col);
+			EXPECT_FALSE(pFlags->Test(ColumnFlag::CF_PRIMARY_KEY));
+		}
+		// activate flags, must select first column
+		iTable.QueryPrimaryKeysAndUpdateColumns();
+		for (size_t i = 0; i < columns.size(); ++i)
+		{
+			auto col = columns[i];
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), col);
+			if (i == 0)
+			{
+				EXPECT_TRUE(pFlags->Test(ColumnFlag::CF_PRIMARY_KEY));
+			}
+			else
+			{
+				EXPECT_FALSE(pFlags->Test(ColumnFlag::CF_PRIMARY_KEY));
+			}
+		}
+
+
 	}
 
 // Interfaces

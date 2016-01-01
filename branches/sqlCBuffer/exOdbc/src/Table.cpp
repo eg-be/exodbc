@@ -35,7 +35,7 @@ namespace exodbc
 	// Construction
 	// ------------
 	Table::Table()
-		: m_manualColumns(false)
+		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
 		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
@@ -56,7 +56,7 @@ namespace exodbc
 
 
 	Table::Table(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
-		: m_manualColumns(false)
+		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
 		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
@@ -79,7 +79,7 @@ namespace exodbc
 
 
 	Table::Table(ConstDatabasePtr pDb, TableAccessFlags afs, const TableInfo& tableInfo)
-		: m_manualColumns(false)
+		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
 		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
@@ -102,7 +102,7 @@ namespace exodbc
 
 
 	Table::Table(const Table& other)
-		: m_manualColumns(false)
+		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
 		//, m_accessFlags(AF_NONE)
 		, m_pDb(NULL)
@@ -153,7 +153,7 @@ namespace exodbc
 			// If columns were created automatically, they were deleted from Open() in case of failure.
 			// \note: We must free the buffers before deleting our statements - the buffers may still
 			// be bound to our statements.
-			//if (m_manualColumns)
+			//if (m_autoCreatedColumns)
 			//{
 			//	for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
 			//	{
@@ -306,7 +306,7 @@ namespace exodbc
 	}
 
 
-	std::vector<ColumnBufferPtrVariant> Table::CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns)
+	std::vector<ColumnBufferPtrVariant> Table::CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns, bool setAsTableColumns)
 	{
 		exASSERT(m_pDb->IsOpen());
 
@@ -388,7 +388,37 @@ namespace exodbc
 				}
 			}
 		}
+
+		if (setAsTableColumns)
+		{
+			for (size_t i = 0; i < columns.size(); ++i)
+			{
+				m_columns[(SQLUSMALLINT)i] = columns[i];
+			}
+			m_autoCreatedColumns = true;
+		}
+
 		return columns;
+	}
+
+
+	void Table::SetColumnFlag(SQLUSMALLINT columnIndex, ColumnFlag flag) const
+	{
+		exASSERT(!IsOpen());
+
+		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
+		ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), var);
+		pFlags->Set(flag);
+	}
+
+
+	void Table::ClearColumnFlag(SQLUSMALLINT columnIndex, ColumnFlag flag) const
+	{
+		exASSERT(!IsOpen());
+
+		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
+		ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), var);
+		pFlags->Clear(flag);
 	}
 
 
@@ -634,8 +664,6 @@ namespace exodbc
 
 	const ColumnBufferPtrVariant& Table::GetColumnBufferPtrVariant(SQLSMALLINT columnIndex) const
 	{
-		exASSERT(IsOpen());
-
 		ColumnBufferPtrVariantMap::const_iterator it = m_columns.find(columnIndex);
 		if (it == m_columns.end())
 		{
@@ -662,9 +690,91 @@ namespace exodbc
 	}
 
 
-	std::set<SQLSMALLINT> Table::GetColumnBufferIndexes() const throw()
+	void Table::QueryPrimaryKeysAndUpdateColumns() const
 	{
-		std::set<SQLSMALLINT> columnIndexes;
+		exASSERT(m_haveTableInfo);
+		exASSERT(m_pDb);
+		
+		TablePrimaryKeysVector keys = m_pDb->ReadTablePrimaryKeys(m_tableInfo);
+		for (auto it = keys.begin(); it != keys.end(); ++it)
+		{
+			const TablePrimaryKeyInfo& keyInfo = *it;
+			SQLUSMALLINT colIndex = GetColumnBufferIndex(keyInfo.GetQueryName());
+			ColumnBufferPtrVariant column = GetColumnBufferPtrVariant(colIndex);
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), column);
+			pFlags->Set(ColumnFlag::CF_PRIMARY_KEY);
+		}
+	}
+
+
+	void Table::CheckColumnFlags() const
+	{
+		for (auto it = m_columns.begin(); it != m_columns.end(); ++it)
+		{
+			ColumnBufferPtrVariant columnBuffer = it->second;
+			const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
+			ColumnFlagsPtr pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
+			if (pColumnFlags->Test(ColumnFlag::CF_SELECT) && !TestAccessFlag(TableAccessFlag::AF_SELECT))
+			{
+				Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
+			}
+			if (pColumnFlags->Test(ColumnFlag::CF_INSERT) && !TestAccessFlag(TableAccessFlag::AF_INSERT))
+			{
+				Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
+			}
+			if (pColumnFlags->Test(ColumnFlag::CF_UPDATE) && !(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)))
+			{
+				Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
+			}
+		}
+	}
+
+
+	void Table::CheckSqlTypes(bool removeUnsupported)
+	{
+		auto it = m_columns.begin();
+		while(it != m_columns.end())
+		{
+			ColumnBufferPtrVariant columnBuffer = it->second;
+			const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
+			ColumnFlagsPtr pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
+			SQLSMALLINT sqlType = boost::apply_visitor(SqlTypeVisitor(), columnBuffer);
+			bool remove = false;
+			if (!m_pDb->IsSqlTypeSupported(sqlType))
+			{
+				if (TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS))
+				{
+					LOG_WARNING(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % queryName % it->first % SqlType2s(sqlType) % sqlType));
+					remove = true;
+				}			
+				else
+				{
+					Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % queryName % it->first % SqlType2s(sqlType) % sqlType));
+					SET_EXCEPTION_SOURCE(ex);
+					throw ex;
+				}
+			}
+			if (remove)
+			{
+				it = m_columns.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
+
+
+	std::set<SQLUSMALLINT> Table::GetColumnBufferIndexes() const throw()
+	{
+		std::set<SQLUSMALLINT> columnIndexes;
 		ColumnBufferPtrVariantMap::const_iterator it = m_columns.begin();
 		while (it != m_columns.end())
 		{
@@ -675,7 +785,7 @@ namespace exodbc
 	}
 
 
-	SQLSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive /* = true */) const
+	SQLUSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive /* = true */) const
 	{
 		ColumnBufferPtrVariantMap::const_iterator it = m_columns.begin();
 		while (it != m_columns.end())
@@ -1001,9 +1111,6 @@ namespace exodbc
 
 		// okay, remember the passed variant
 		m_columns[columnIndex] = column;
-
-		// Flag that columns are created manually
-		m_manualColumns = true;
 	}
 
 
@@ -1023,7 +1130,7 @@ namespace exodbc
 	//	//exASSERT( ! ( (sqlType == SQL_UNKNOWN_TYPE) && ((flags & CF_INSERT) || (flags & CF_UPDATE)) ) );
 	//	//exASSERT(!IsOpen());
 	//	//// Flag that columns are created manually
-	//	//m_manualColumns = true;
+	//	//m_autoCreatedColumns = true;
 	//	//// Read OdbcVersion from Environment
 	//	//const Environment* pEnv = m_pDb->GetEnvironment();
 	//	//exASSERT(pEnv != NULL);
@@ -1082,10 +1189,6 @@ namespace exodbc
 
 		// Nest try/catch the free the buffers created in here if we fail somewhere
 		// and to unbind all handles that were bound
-		bool boundSelect = false;
-		bool boundUpdatePk = false;
-		bool boundDeletePk = false;
-		bool boundInsert = false;
 		try
 		{
 			// If we do not already have a TableInfo for our table, we absolutely must find one
@@ -1115,132 +1218,49 @@ namespace exodbc
 				searchedTable = true;
 			}
 
-			// If we are asked to create our columns automatically, read the column information and create the buffers
-
-			if (!m_manualColumns)
+			// If no columns have been set so far try to create them automatically
+			if (m_columns.empty())
 			{
-				const std::vector<ColumnBufferPtrVariant>& columns = CreateAutoColumnBufferPtrs(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
-				for (size_t i = 0; i < columns.size(); ++i)
+				CreateAutoColumnBufferPtrs(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS), true);
+			}
+
+			// Set the CF_PRIMARY_KEY flag if information about primary key indexes have been set
+			if(!m_primaryKeyColumnIndexes.empty())
+			{
+				// And implicitly activate the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS
+				m_openFlags.Set(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS);
+
+				for (auto it = m_primaryKeyColumnIndexes.begin(); it != m_primaryKeyColumnIndexes.end(); ++it)
 				{
-					m_columns[(SQLUSMALLINT)i] = columns[i];
+					ColumnBufferPtrVariantMap::iterator itCols = m_columns.find(*it);
+					if (itCols == m_columns.end())
+					{
+						THROW_WITH_SOURCE(IllegalArgumentException, boost::str(boost::wformat(L"No ColumnBuffer was found for a manually defined primary key column index (index = %d)") % *it));
+					}
+					ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), itCols->second);
+					pFlags->Set(ColumnFlag::CF_PRIMARY_KEY);
 				}
 			}
-			else
+
+			// If we need the primary keys and are allowed to query them do that now
+			if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK)) && !TestOpenFlag(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS))
 			{
-				// Check that the manually defined columns do not violate our access-flags
-				// and check that manually defined types are supported by the database
-				ColumnBufferPtrVariantMap::iterator it = m_columns.begin();
-				while(it != m_columns.end())
-				{
-					ColumnBufferPtrVariant& columnBuffer = it->second;
-					const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
-					ColumnFlagsPtr pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
-					ExtendedColumnPropertiesHolderPtr pProps = boost::apply_visitor(ExtendedColumnPropertiesHolderPtrVisitor(), columnBuffer);
-					SQLSMALLINT sqlType = pProps->GetSqlType();
-					if (pColumnFlags->Test(ColumnFlag::CF_SELECT) && !TestAccessFlag(TableAccessFlag::AF_SELECT))
-					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
-						SET_EXCEPTION_SOURCE(ex);
-						throw ex;
-					}
-					if (pColumnFlags->Test(ColumnFlag::CF_INSERT) && !TestAccessFlag(TableAccessFlag::AF_INSERT))
-					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
-						SET_EXCEPTION_SOURCE(ex);
-						throw ex;
-					}
-					if (pColumnFlags->Test(ColumnFlag::CF_UPDATE) && !(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)))
-					{
-						Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
-						SET_EXCEPTION_SOURCE(ex);
-						throw ex;
-					}
-					// type-check
-					bool remove = false;
-					if (!TestOpenFlag(TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS) && sqlType != SQL_UNKNOWN_TYPE && !m_pDb->IsSqlTypeSupported(sqlType))
-					{
-						if (TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS))
-						{
-							LOG_WARNING(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % queryName % it->first % SqlType2s(sqlType) % sqlType));
-							remove = true;
-						}
-						else
-						{
-							Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % queryName % it->first % SqlType2s(sqlType) % sqlType));
-							SET_EXCEPTION_SOURCE(ex);
-							throw ex;
-						}
-					}
-					if (remove)
-					{
-						it = m_columns.erase(it);
-					}
-					else
-					{
-						++it;
-					}
-				}
+				QueryPrimaryKeysAndUpdateColumns();
+			}
+
+			// check that column flags match with table access flags
+			CheckColumnFlags();
+
+			// check that data types are supported if columns have been defined manually
+			if (!m_autoCreatedColumns && !TestOpenFlag(TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS))
+			{
+				CheckSqlTypes(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 			}
 
 			// Optionally check privileges
 			if (TestOpenFlag(TableOpenFlag::TOF_CHECK_PRIVILEGES))
 			{
 				CheckPrivileges();
-			}
-
-			// Maybe the primary keys have been set manually? Then just forward them to the ColumnBuffers
-			if (m_primaryKeyColumnIndexes.size() > 0)
-			{
-				// And implicitly activate the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS
-				m_openFlags.Set(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS);
-
-				for (std::set<SQLUSMALLINT>::const_iterator it = m_primaryKeyColumnIndexes.begin(); it != m_primaryKeyColumnIndexes.end(); ++it)
-				{
-					// Get corresponding Buffer and set the flag CF_PRIMARY_KEY
-					ColumnBufferPtrVariantMap::iterator itCols = m_columns.find(*it);
-					if (itCols == m_columns.end())
-					{
-						Exception ex(boost::str(boost::wformat(L"No ColumnBuffer was found for a manually defined primary key column index (index = %d)") % *it));
-						SET_EXCEPTION_SOURCE(ex);
-						throw ex;
-					}
-					ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), itCols->second);
-					pFlags->Set(ColumnFlag::CF_PRIMARY_KEY);
-				}
-			}
-			else
-			{
-				// If we need the primary keys and are allowed to query them, try to fetch them from the database
-				if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK)) && !TestOpenFlag(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS))
-				{
-					TablePrimaryKeysVector primaryKeys = m_pDb->ReadTablePrimaryKeys(m_tableInfo);
-					// Match them against the ColumnBuffers
-					for (TablePrimaryKeysVector::const_iterator itKeys = primaryKeys.begin(); itKeys != primaryKeys.end(); ++itKeys)
-					{
-						const TablePrimaryKeyInfo& keyInfo = *itKeys;
-						const ObjectName* pKeyName = dynamic_cast<const ObjectName*>(&keyInfo);
-						// Find corresponding ColumnBuffer
-						bool settedFlagOnBuffer = false;
-						for (ColumnBufferPtrVariantMap::iterator itCols = m_columns.begin(); itCols != m_columns.end(); ++itCols)
-						{
-							ColumnBufferPtrVariant column = itCols->second;
-							const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), column);
-							if (pKeyName->GetQueryName() == queryName)
-							{
-								ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), column);
-								pFlags->Set(ColumnFlag::CF_PRIMARY_KEY);
-								settedFlagOnBuffer = true;
-								break;
-							}
-						}
-						if (!settedFlagOnBuffer)
-						{
-							Exception ex((boost::wformat(L"Not all primary Keys of table '%s' have a corresponding ColumnBuffer. No ColumnBuffer found for PrimaryKey '%s'") % m_tableInfo.GetQueryName() % keyInfo.GetQueryName()).str());
-							SET_EXCEPTION_SOURCE(ex);
-							throw ex;
-						}
-					}
-				}
 			}
 
 			// Bind the Buffer for the Count operations
@@ -1265,8 +1285,6 @@ namespace exodbc
 						boundColumnNumber++;
 					}
 				}
-
-				boundSelect = true;
 			}
 
 			// Create additional CF_UPDATE and DELETE statement-handles to be used with the pk-columns
@@ -1316,7 +1334,6 @@ namespace exodbc
 			if (TestAccessFlag(TableAccessFlag::AF_INSERT))
 			{
 				BindInsertParameters();
-				boundInsert = true;
 			}
 
 			// Completed successfully
@@ -1361,7 +1378,7 @@ namespace exodbc
 			//}
 
 			// remove the ColumnBuffers if we have allocated them during this process (if not manual)
-			if (!m_manualColumns)
+			if (m_autoCreatedColumns)
 			{
 				m_columns.clear();
 				//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
@@ -1384,8 +1401,8 @@ namespace exodbc
 		// Unbind all Columns
 		//m_pHStmtSelect->UnbindColumns();
 
-		// remove the ColumnBuffers if we have allocated them during this process (if not manual)
-		if (!m_manualColumns)
+		// remove the ColumnBuffers if we have allocated them during Open()
+		if (m_autoCreatedColumns)
 		{
 			m_columns.clear();
 		}
@@ -1430,7 +1447,7 @@ namespace exodbc
 		//}
 
 		//// Delete ColumnBuffers if they were created automatically
-		//if (!m_manualColumns)
+		//if (!m_autoCreatedColumns)
 		//{
 		//	ColumnBufferPtrMap::iterator it;
 		//	for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)

@@ -146,4 +146,17 @@ namespace exodbc
 		}
 	};
 
+
+	class SqlTypeVisitor
+		: public boost::static_visitor<SQLSMALLINT>
+	{
+	public:
+		template<typename T>
+		const SQLSMALLINT operator()(T& t) const
+		{
+			return t->GetSqlType();
+		}
+	};
+
+
 } // namespace exodbc
