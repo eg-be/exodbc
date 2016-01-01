@@ -251,11 +251,13 @@ namespace exodbc
 		{
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
-				// note: The count statements never needs scrollable cursors. If we enable them and then exeucte a
+				// note: The count statements never needs scrollable cursors. If we enable them and then execute a
 				// SELECT COUNT, ms sql server will report a warning saying 'Cursor type changed'.
+				// and the inserts and updates do not need to be scrollable.
 				m_execStmtCount.Init(m_pDb, true);
 				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
-				m_execStmtInsert.Init(m_pDb, forwardOnlyCursors);
+				m_execStmtInsert.Init(m_pDb, true);
+				m_execStmtUpdatePk.Init(m_pDb, true);
 
 				// Create the buffer required for counts
 				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", ColumnFlag::CF_SELECT);
@@ -268,6 +270,7 @@ namespace exodbc
 			m_execStmtCount.Reset();
 			m_execStmtSelect.Reset();
 			m_execStmtInsert.Reset();
+			m_execStmtUpdatePk.Reset();
 
 			// rethrow
 			throw;
@@ -422,6 +425,21 @@ namespace exodbc
 	}
 
 
+	ColumnBufferPtrVariantMap Table::GetPrimaryKeyColumnBuffers() const
+	{
+		ColumnBufferPtrVariantMap primaryKeys;
+		for (auto it = m_columns.begin(); it != m_columns.end(); ++it)
+		{
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), it->second);
+			if (pFlags->Test(ColumnFlag::CF_PRIMARY_KEY))
+			{
+				primaryKeys[it->first] = it->second;
+			}
+		}
+		return primaryKeys;
+	}
+
+
 	const TableInfo& Table::GetTableInfo()
 	{
 		if (!m_haveTableInfo)
@@ -490,7 +508,7 @@ namespace exodbc
 		m_execStmtCount.Reset();
 		m_execStmtSelect.Reset();
 		m_execStmtInsert.Reset();
-
+		m_execStmtUpdatePk.Reset();
 	}
 
 
@@ -555,60 +573,61 @@ namespace exodbc
 	}
 
 
-	void Table::BindUpdateParameters()
+	void Table::BindUpdatePkParameters()
 	{
-		//exASSERT(m_columnBuffers.size() > 0);
-		//exASSERT(TestAccessFlag(AF_UPDATE_PK));
-		//exASSERT(m_hStmtUpdatePk != SQL_NULL_HSTMT);
+		exASSERT(!m_columns.empty());
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK));
+		exASSERT(m_execStmtUpdatePk.IsInitialized());
 
-		//// Build statement..
-		//wstring updateStmt = (boost::wformat(L"UPDATE %s SET ") % m_tableInfo.GetQueryName()).str();
-		//// .. first the values to update
-		//// note: parem-number reflects here the number of the param in the created prepared statement, so we
-		//// cannot use the values from the ColumnBuffer column index.
-		//int paramNr = 1;
-		//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		//{
-		//	ColumnBuffer* pBuffer = it->second;
-		//	if (pBuffer->IsColumnFlagSet(CF_UPDATE) && !pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
-		//	{
-		//		// Bind this parameter as update parameter and include it in the statement
-		//		// The update params come first, so the numbering works
-		//		pBuffer->BindParameter(m_hStmtUpdatePk, paramNr);
-		//		updateStmt += (boost::wformat(L"%s = ?, ") % pBuffer->GetQueryName()).str();
-		//		paramNr++;
-		//	}
-		//}
-		//boost::erase_last(updateStmt, L",");
-		//// ensure that we have something to update
-		//if (paramNr <= 1)
-		//{	
-		//	Exception ex(boost::str(boost::wformat(L"Table '%s' was requested to bind update parameters (probably because flag AF_UPDATE_PK is set), but no ColumnBuffers were bound for UPDATing") % m_tableInfo.GetQueryName()));
-		//	SET_EXCEPTION_SOURCE(ex);
-		//	throw ex;
-		//}
-		//updateStmt += L"WHERE ";
-		//bool haveWhereParam = false;
-		//for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		//{
-		//	ColumnBuffer* pBuffer = it->second;
-		//	if (pBuffer->IsColumnFlagSet(CF_PRIMARY_KEY))
-		//	{
-		//		// Bind this parameter as primary key and include it in the where part of the statement
-		//		// The update params come first, so the numbering works
-		//		pBuffer->BindParameter(m_hStmtUpdatePk, paramNr);
-		//		updateStmt += (boost::wformat(L"%s = ? AND ") % pBuffer->GetQueryName()).str();
-		//		paramNr++;
-		//		haveWhereParam = true;
-		//	}
-		//}
-		//boost::erase_last(updateStmt, L"AND ");
-		//// and ensure that we have something as where
-		//exASSERT(haveWhereParam);
+		// Build a statement with parameter-markers
+		vector<ColumnBufferPtrVariant> setParamsToBind;
+		vector<ColumnBufferPtrVariant> whereParamsToBind;
+		wstring setMarkers;
+		wstring whereMarkers;
+		auto it = m_columns.begin();
+		while (it != m_columns.end())
+		{
+			ColumnBufferPtrVariant pVar = it->second;
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), pVar);
+			if (pFlags->Test(ColumnFlag::CF_PRIMARY_KEY))
+			{
+				whereMarkers += boost::apply_visitor(QueryNameVisitor(), pVar);
+				whereMarkers += L" = ?, ";
+				whereParamsToBind.push_back(pVar);
+			}
+			else if (pFlags->Test(ColumnFlag::CF_UPDATE))
+			{				
+				setMarkers += boost::apply_visitor(QueryNameVisitor(), pVar);
+				setMarkers += L" = ?, ";
+				setParamsToBind.push_back(pVar);
+			}
+			++it;
+		}
+		boost::erase_last(setMarkers, L", ");
+		boost::erase_last(whereMarkers, L", ");
+		wstring stmt = boost::str(boost::wformat(L"UPDATE %s SET %s WHERE %s") % m_tableInfo.GetQueryName() % setMarkers % whereMarkers);
 
-		//// Prepare to update
-		//SQLRETURN ret = SQLPrepare(m_hStmtUpdatePk, (SQLWCHAR*)updateStmt.c_str(), SQL_NTS);
-		//THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
+		// check that we actually have some columns to update and some for the where part
+		exASSERT_MSG(!setParamsToBind.empty(), L"No Columns flaged for UPDATEing");
+		exASSERT_MSG(!whereParamsToBind.empty(), L"No Columns usable to construct WHERE statement");
+
+		// .. and prepare stmt
+		m_execStmtUpdatePk.Prepare(stmt);
+
+		// and binding of columns... we must do that after calling Prepare - or
+		// not use SqlDescribeParam during Bind
+		// first come the set params, then the where markers
+		SQLSMALLINT paramNr = 1;
+		for (auto it = setParamsToBind.begin(); it != setParamsToBind.end(); ++it)
+		{
+			m_execStmtUpdatePk.BindParameter(*it, paramNr);
+			++paramNr;
+		}
+		for (auto it = whereParamsToBind.begin(); it != whereParamsToBind.end(); ++it)
+		{
+			m_execStmtUpdatePk.BindParameter(*it, paramNr);
+			++paramNr;
+		}
 	}
 
 
@@ -965,9 +984,7 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK));
-		//exASSERT(m_hStmtUpdatePk != SQL_NULL_HSTMT);
-		//SQLRETURN ret = SQLExecute(m_hStmtUpdatePk);
-		//THROW_IFN_SUCCEEDED(SQLExecute, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
+		m_execStmtUpdatePk.ExecutePrepared();
 	}
 
 
@@ -1224,11 +1241,10 @@ namespace exodbc
 			}
 
 			// Set the CF_PRIMARY_KEY flag if information about primary key indexes have been set
+			// And implicitly activate the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS
 			if(!m_primaryKeyColumnIndexes.empty())
 			{
-				// And implicitly activate the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS
 				m_openFlags.Set(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS);
-
 				for (auto it = m_primaryKeyColumnIndexes.begin(); it != m_primaryKeyColumnIndexes.end(); ++it)
 				{
 					ColumnBufferPtrVariantMap::iterator itCols = m_columns.find(*it);
@@ -1288,39 +1304,20 @@ namespace exodbc
 
 			// Create additional CF_UPDATE and DELETE statement-handles to be used with the pk-columns
 			// and bind the params. PKs are required.
+			// Need to have at least one primary key.
 			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
 			{
-				// Need to have at least one primary key, and all primary key buffers must be bound
-				// \todo: Need to have pk is true, but the check if they are bound is useless, not?
-				// we must check when preparing the statements that we are bound, not here ??
-				//int primaryKeyCount = 0;
-				//for (SqlCBufferVariantMap::const_iterator itCols = m_columns.begin(); itCols != m_columns.end(); ++itCols)
-				//{
-				//	const SqlCBufferVariant& column = itCols->second;
+				if (GetPrimaryKeyColumnBuffers().empty())
+				{
+					Exception ex((boost::wformat(L"Table '%s' has no primary keys, cannot open with AF_UPDATE_PK or AF_DELETE_PK") % m_tableInfo.GetQueryName()).str());
+					SET_EXCEPTION_SOURCE(ex);
+					throw ex;
+				}
 
-				//	if (pBuffer->IsPrimaryKey())
-				//	{
-				//		primaryKeyCount++;
-				//		if ( ! pBuffer->IsBound())
-				//		{
-				//			Exception ex((boost::wformat(L"PrimaryKey ColumnBuffer '%s' of Table '%s' is not Bound().") %pBuffer->GetQueryNameNoThrow() % m_tableInfo.GetQueryName()).str());
-				//			SET_EXCEPTION_SOURCE(ex);
-				//			throw ex;
-				//		}
-				//	}
-				//}
-				//if (primaryKeyCount == 0)
-				//{
-				//	Exception ex((boost::wformat(L"Table '%s' has no primary keys") % m_tableInfo.GetQueryName()).str());
-				//	SET_EXCEPTION_SOURCE(ex);
-				//	throw ex;
-				//}
-
-				//if (TestAccessFlag(AF_UPDATE_PK))
-				//{
-				//	BindUpdateParameters();
-				//	boundUpdatePk = true;
-				//}
+				if (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK))
+				{
+					BindUpdatePkParameters();
+				}
 
 				//if (TestAccessFlag(AF_DELETE_PK))
 				//{
