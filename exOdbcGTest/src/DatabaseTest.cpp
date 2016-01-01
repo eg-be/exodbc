@@ -152,19 +152,6 @@ namespace exodbc
 		EXPECT_NO_THROW(m_pDb->SetTransactionIsolationMode(tiMode));
 		tiMode = m_pDb->ReadTransactionIsolationMode();
 		EXPECT_EQ(TransactionIsolationMode::SERIALIZABLE, tiMode);
-
-		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-		{
-#if HAVE_MSODBCSQL_H
-			tiMode = TransactionIsolationMode::SNAPSHOT;
-			EXPECT_NO_THROW(m_pDb->SetTransactionIsolationMode(tiMode));
-			tiMode = m_pDb->ReadTransactionIsolationMode();
-			EXPECT_EQ(TransactionIsolationMode::SNAPSHOT, tiMode);
-#else
-			LOG_WARNING(L"Skipping test because testing against Ms Sql Server but msodbcsql.h is missing");
-			EXPECT_TRUE(false);
-#endif
-		}
 	}
 
 
@@ -450,74 +437,6 @@ namespace exodbc
 
 		GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
 		EXPECT_EQ(1, count);
-
-
-//		exodbc::Table iTable(&m_db, AF_READ, tableName, L"", L"", L"");
-//		ASSERT_NO_THROW(iTable.Open());
-//
-//		ASSERT_NO_THROW(test::ClearIntTypesTmpTable(m_db, m_odbcInfo.m_namesCase));
-//		ASSERT_NO_THROW(test::InsertIntTypesTmp(m_odbcInfo.m_namesCase, m_db, 1, 44, 54543, test::ValueIndicator::IS_NULL, false));
-//
-//		// Note: If we try to read now from a different database, we do not see the inserted recorded until it is committed
-//		// BUT: Microsoft SQL Server will just block the second database while a transaction is open
-//		// We need to examine that behavior, it must be some option. -> Yes, it is the SNAPSHOT Transaction isolation
-//		{
-//			Database db2(&m_pEnv);
-//			if (m_odbcInfo.HasConnectionString())
-//			{
-//				EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_connectionString));
-//			}
-//			else
-//			{
-//				EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-//			}
-//			// This is extremely confusing: Why do we need to switch to AUTO_COMMIT to set the transaction mode to SNAPSHOT?
-//			// Note: Setting the transaction mode works always, but doing a query afterwards only if it was set during an auto-commit-mode ?? 
-//			// TODO: WTF???
-//			// I guess I got it now: If we change the Transaction-mode on the Connection-Handle, we need to get a new statement-handle afterwards or so:
-//			// Or: If we set the transaction-mode in the database itself at the very beginning, before the statement-handle of the database is opened
-//			// thing work fine, without the need to change the transaction-mode
-//			if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-//			{
-//#if HAVE_MSODBCSQL_H
-//				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TransactionIsolationMode::SNAPSHOT));
-//				exodbc::Table iTable2(&db2, AF_READ, tableName, L"", L"", L"");
-//				ASSERT_NO_THROW(iTable2.Open());
-//				iTable2.Select();
-//				EXPECT_FALSE(iTable2.SelectNext());
-//#else
-//				LOG_WARNING(L"Test runs agains MS SQL Server but HAVE_MSODBCSQL_H is not defined to 1. Cannot run test without setting Transaction Mode to Snapshot, or the test would block");
-//				EXPECT_TRUE(false);
-//#endif
-//			}
-//			else
-//			{
-//				EXPECT_NO_THROW(db2.SetTransactionIsolationMode(TransactionIsolationMode::READ_COMMITTED));
-//				exodbc::Table iTable2(&db2, AF_READ, tableName, L"", L"", L"");
-//				ASSERT_NO_THROW(iTable2.Open());
-//				iTable2.Select();
-//				EXPECT_FALSE(iTable2.SelectNext());
-//			}
-//		}
-//
-//		// Once we commit we have one record, also in a different database
-//		EXPECT_NO_THROW(m_pDb->CommitTrans());
-//
-//		Database db2(&m_pEnv);
-//		if (m_odbcInfo.HasConnectionString())
-//		{
-//			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_connectionString));
-//		}
-//		else
-//		{
-//			EXPECT_NO_THROW(db2.Open(m_odbcInfo.m_dsn, m_odbcInfo.m_username, m_odbcInfo.m_password));
-//		}
-//		{
-//			exodbc::Table iTable2(&m_db, AF_READ, tableName, L"", L"", L"");
-//			ASSERT_NO_THROW(iTable2.Open());
-//			iTable2.Select();
-//			EXPECT_TRUE(iTable2.SelectNext());
-//		}
 	}
 
 

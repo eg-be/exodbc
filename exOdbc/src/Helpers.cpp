@@ -153,20 +153,6 @@ namespace exodbc
 	}
 
 
-#ifdef HAVE_MSODBCSQL_H
-	SQL_SS_TIME2_STRUCT InitTime2(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction) throw()
-	{
-		SQL_SS_TIME2_STRUCT time2;
-		time2.hour = hour;
-		time2.minute = minute;
-		time2.second = second;
-		time2.fraction = fraction;
-
-		return time2;
-	}
-#endif
-
-
 	SQL_DATE_STRUCT InitDate(SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year) throw()
 	{
 		SQL_DATE_STRUCT date;

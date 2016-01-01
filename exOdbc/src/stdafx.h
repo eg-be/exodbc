@@ -44,10 +44,6 @@
 #include <sqlext.h>
 #include <sqlucode.h>
 #include <odbcinst.h>
-// If we have the header for the MS SQL Server, include it
-#if HAVE_MSODBCSQL_H
-	#include "msodbcsql.h"
-#endif
 
 // our stuff
 #include "exOdbc.h"

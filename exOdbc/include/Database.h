@@ -557,31 +557,6 @@ namespace exodbc
 		bool GetTrace() const;
 
 
-#ifdef HAVE_MSODBCSQL_H
-		/*!
-		* \brief	Set the property SQL_MAX_CONCURRENT_ACTIVITIES.
-		*			MS SQL Server specific.
-		*			Must be called before the database is opened.
-		* \details	Only available if HAVE_MSODBCSQL_H is defined.
-		* \throw	Exception
-		*/
-		void SetMarsEnabled(bool enableMars);
-#endif
-
-
-		/*!
-		* \brief	Returns if Multiple Active RecordSets are supported.
-		*			For MS SQL Server, if HAVE_MSODBCSQL_H is defined,
-		*			queries the property SQL_COPT_SS_MARS_ENABLED.
-		*			For all other databases this returns true 
-		*			if the value of the connection attribute
-		*			SQL_MAX_CONCURRENT_ACTIVITIES read during Open()
-		*			is == 0 or > 1.
-		* \return	SQL_COPT_SS_MARS_ENABLED or SQL_MAX_CONCURRENT_ACTIVITIES != 1
-		*/
-		bool IsMarsEnabled();
-
-
 		/*!
 		* \brief	Test if the passed SQL Type has been reported as supported
 		*			by the Database.

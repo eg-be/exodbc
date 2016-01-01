@@ -129,15 +129,6 @@ namespace exodbc
 	extern EXODBCAPI SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second) throw();
 
 
-#if HAVE_MSODBCSQL_H
-	/*!
-	* \brief	Return a SQL_SS_TIME2_STRUCT with the passed values set.
-	* \details	Only available if HAVE_MSODBCSQL_H is defined and the corresponding MS Sql Server headers are included.
-	*/
-	extern EXODBCAPI SQL_SS_TIME2_STRUCT InitTime2(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction) throw();
-#endif
-
-
 	/*!
 	* \brief	Return a SQL_DATE_STRUCT with the passed values set.
 	*/

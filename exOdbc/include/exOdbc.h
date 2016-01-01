@@ -28,9 +28,6 @@
 #include <sqlext.h>
 #include <sqlucode.h>
 #include <odbcinst.h>
-#if HAVE_MSODBCSQL_H
-	#include "msodbcsql.h"
-#endif
 
 namespace exodbc
 {
@@ -108,9 +105,6 @@ namespace exodbc
 		READ_COMMITTED = SQL_TXN_READ_COMMITTED,		///< Read Committed
 		REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,		///< Repeatable Read
 		SERIALIZABLE = SQL_TXN_SERIALIZABLE				///< Serializable
-#if HAVE_MSODBCSQL_H
-		, SNAPSHOT = SQL_TXN_SS_SNAPSHOT				///< Snapshot, only for MS SQL Server, and only if HAVE_MSODBCSQL_H is defined
-#endif
 	};
 
 
