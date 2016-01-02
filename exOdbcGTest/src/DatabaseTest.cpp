@@ -1,5 +1,5 @@
 /*!
- * \file DbTest.cpp
+ * \file DatabaseTest.cpp
  * \author Elias Gerber <eg@elisium.ch>
  * \date 22.07.2014
  * \copyright GNU Lesser General Public License Version 3

@@ -1,5 +1,5 @@
 /*!
-* \file PreparedStatementTest.h
+* \file ExecutableStatementTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 20.12.2015
 * \copyright GNU Lesser General Public License Version 3

@@ -203,7 +203,7 @@
     <ClInclude Include="src\exOdbcGTestHelpers.h" />
     <ClInclude Include="src\ManualTestTables.h" />
     <ClInclude Include="src\ExecutableStatementTest.h" />
-    <ClInclude Include="src\SqlCBufferTest.h" />
+    <ClInclude Include="src\ColumnBufferTest.h" />
     <ClInclude Include="src\SqlHandleTest.h" />
     <ClInclude Include="src\SqlStmtCloserTest.h" />
     <ClInclude Include="src\TableTest.h" />
@@ -223,7 +223,7 @@
     <ClCompile Include="src\exOdbcGTestHelpers.cpp" />
     <ClCompile Include="src\ManualTestTables.cpp" />
     <ClCompile Include="src\ExecutableStatementTest.cpp" />
-    <ClCompile Include="src\SqlCBufferTest.cpp" />
+    <ClCompile Include="src\ColumnBufferTest.cpp" />
     <ClCompile Include="src\SqlHandleTest.cpp" />
     <ClCompile Include="src\SqlStmtCloserTest.cpp" />
     <ClCompile Include="src\TableTest.cpp" />
