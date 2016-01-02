@@ -1,8 +1,8 @@
 /*!
-* \file SqlCBuffer.h
+* \file ColumnBuffer.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 01.10.2015
-* \brief Header file for the CBufferType interface.
+* \brief Header file for the ColumnBuffer class and all its helpers.
 * \copyright GNU Lesser General Public License Version 3
 */
 
