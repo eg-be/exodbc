@@ -389,8 +389,9 @@ namespace exodbc
 		* \details	Optionally queries the database about the parameter, using SQLDescribeParam.
 		*			Connects a signal on the passed statement handle to be notified if the params of the
 		*			handle get reseted.
-		* \param	columnNr 1-indexed parameter of the statement to be executed.
-		* \useSqlDescribeParam	If true, before calling SQLBindParam the database is queried about the
+		* \param	paramNr 1-indexed parameter of the statement to be executed.
+		* \param	pHStmt Statement to bind against.
+		* \param	useSqlDescribeParam	If true, before calling SQLBindParam the database is queried about the
 		*			details of the parameter using SQLDescribeParam. The statement should already be
 		*			prepared, else SQLDescribeParam will probably fail.
 		*/
@@ -710,8 +711,9 @@ namespace exodbc
 		* \details	Optionally queries the database about the parameter, using SQLDescribeParam.
 		*			Connects a signal on the passed statement handle to be notified if the params of the
 		*			handle get reseted.
-		* \param	columnNr 1-indexed parameter of the statement to be executed.
-		* \useSqlDescribeParam	If true, before calling SQLBindParam the database is queried about the
+		* \param	paramNr 1-indexed parameter of the statement to be executed.
+		* \param	pHStmt Statement to bind against.
+		* \param	useSqlDescribeParam	If true, before calling SQLBindParam the database is queried about the
 		*			details of the parameter using SQLDescribeParam. The statement should already be
 		*			prepared, else SQLDescribeParam will probably fail.
 		*/
@@ -883,8 +885,9 @@ namespace exodbc
 		*
 		*			If the SQL C Type is SQL_C_NUMERIC, binding is done using the description fields to properly set
 		*			DESC_PRESISION (passed Column Size) and DESC_SCALE (passed Decimal Digits).
-		* \param	columnNr 1-indexed parameter of the statement to be executed.
-		* \useSqlDescribeParam	If true, before calling SQLBindParam the database is queried about the
+		* \param	paramNr 1-indexed parameter of the statement to be executed.
+		* \param	pHStmt Statement to bind against.
+		* \param	useSqlDescribeParam	If true, before calling SQLBindParam the database is queried about the
 		*			details of the parameter using SQLDescribeParam. The statement should already be
 		*			prepared, else SQLDescribeParam will probably fail.
 		*/

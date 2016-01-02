@@ -1,5 +1,5 @@
 /*!
-* \file SqlCBuffer.cpp
+* \file ColumnBuffer.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 15.11.2015
 * \brief Source file for SqlCBuffer.

@@ -638,7 +638,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Do jobs common to all Open() implementations.
-		* \detailed	This function will ensure that if it fails no handles
+		* \details	This function will ensure that if it fails no handles
 		*			are left in an allocated state.
 		* \throw	Exception If anything goes wrong.
 		*/
