@@ -21,7 +21,7 @@
 #include "Environment.h"
 #include "Database.h"
 #include "Exception.h"
-#include "SqlCBufferVisitors.h"
+#include "ColumnBufferVisitors.h"
 #include "boost/log/trivial.hpp"
 #include "boost/log/core.hpp"
 #include "boost/log/expressions.hpp"

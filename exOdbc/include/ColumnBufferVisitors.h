@@ -1,5 +1,5 @@
 /*!
-* \file SqlCBufferVisitors.h
+* \file ColumnBufferVisitors.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 20.12.2015
 * \brief Header file for the Visitors to visit SqlCBuffer.
@@ -31,6 +31,12 @@ namespace exodbc
 
 	// Visitors
 	// --------
+
+	/*!
+	* \class BindSelectVisitor
+	* \brief Visitor to bind a ColumnBuffer to a statement handle as result set member.
+	* \details On applying this visitor, it will call BindSelect(columnNr, pHStmt) on the variant.
+	*/
 	class BindSelectVisitor
 		: public boost::static_visitor<void>
 	{
@@ -51,6 +57,12 @@ namespace exodbc
 		ConstSqlStmtHandlePtr m_pHStmt;
 	};
 
+
+	/*!
+	* \class BindParamVisitor
+	* \brief Visitor to bind a ColumnBuffer to a statement handle as input parameter
+	* \details On applying this visitor, it will call BindParameter(columnNr, pHStmt, m_useSqlDescribeParam) on the variant.
+	*/
 	class BindParamVisitor
 		: public boost::static_visitor<void>
 	{
@@ -74,6 +86,12 @@ namespace exodbc
 		bool m_useSqlDescribeParam;
 	};
 
+	
+	/*!
+	* \class QueryNameVisitor
+	* \brief Visitor get the query name of a ColumnBuffer.
+	* \details On applying this visitor, it will call GetQueryName() on the variant.
+	*/
 	class QueryNameVisitor
 		: public boost::static_visitor<const std::wstring&>
 	{
@@ -85,6 +103,12 @@ namespace exodbc
 		}
 	};
 
+
+	/*!
+	* \class IsNullVisitor
+	* \brief Visitor to test if a ColumnBuffer is NULL.
+	* \details On applying this visitor, it will call IsNull() on the variant.
+	*/
 	class IsNullVisitor
 		: public boost::static_visitor<bool>
 	{
@@ -96,6 +120,13 @@ namespace exodbc
 		}
 	};
 
+
+	/*!
+	* \class ColumnFlagsPtrVisitor
+	* \brief Visitor to cast a variant to a ColumnFlagsPtr
+	* \details	On applying this visitor, it will dynamic_pointer_cast the variant and throw
+	*			an AssertionException if the cast fails.
+	*/
 	class ColumnFlagsPtrVisitor
 		: public boost::static_visitor<std::shared_ptr<ColumnFlags>>
 	{
@@ -109,6 +140,13 @@ namespace exodbc
 		}
 	};
 
+
+	/*!
+	* \class ExtendedColumnPropertiesHolderPtrVisitor
+	* \brief Visitor to cast a variant to a ExtendedColumnPropertiesHolderPtr
+	* \details	On applying this visitor, it will dynamic_pointer_cast the variant and throw
+	*			an AssertionException if the cast fails.
+	*/
 	class ExtendedColumnPropertiesHolderPtrVisitor
 		: public boost::static_visitor<std::shared_ptr<ExtendedColumnPropertiesHolder>>
 	{
@@ -122,6 +160,13 @@ namespace exodbc
 		}
 	};
 
+
+	/*!
+	* \class ColumnBufferLengthIndicatorPtrVisitor
+	* \brief Visitor to cast a variant to a ColumnBufferLengthIndicatorPtr
+	* \details	On applying this visitor, it will dynamic_pointer_cast the variant and throw
+	*			an AssertionException if the cast fails.
+	*/
 	class ColumnBufferLengthIndicatorPtrVisitor
 		: public boost::static_visitor < ColumnBufferLengthIndicatorPtr >
 	{
@@ -135,6 +180,12 @@ namespace exodbc
 		}
 	};
 
+
+	/*!
+	* \class SqlCTypeVisitor
+	* \brief Visitor get the SQL C Type of a ColumnBuffer.
+	* \details On applying this visitor, it will call GetSqlCType() on the variant.
+	*/
 	class SqlCTypeVisitor
 		: public boost::static_visitor<SQLSMALLINT>
 	{
@@ -147,6 +198,11 @@ namespace exodbc
 	};
 
 
+	/*!
+	* \class SqlTypeVisitor
+	* \brief Visitor get the SQL Type of a ColumnBuffer.
+	* \details On applying this visitor, it will call GetSqlType() on the variant.
+	*/
 	class SqlTypeVisitor
 		: public boost::static_visitor<SQLSMALLINT>
 	{

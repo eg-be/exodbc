@@ -13,7 +13,7 @@
 #include "ExecutableStatement.h"
 
 // Same component headers
-#include "SqlCBufferVisitors.h"
+#include "ColumnBufferVisitors.h"
 #include "SqlStatementCloser.h"
 
 // Other headers

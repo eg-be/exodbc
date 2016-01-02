@@ -20,7 +20,7 @@
 #include "Exception.h"
 #include "Sql2BufferTypeMap.h"
 #include "SqlStatementCloser.h"
-#include "SqlCBufferVisitors.h"
+#include "ColumnBufferVisitors.h"
 #include "ExecutableStatement.h"
 
 // Other headers

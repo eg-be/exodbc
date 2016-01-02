@@ -30,7 +30,7 @@
     <ClInclude Include="include\ObjectName.h" />
     <ClInclude Include="include\Sql2BufferTypeMap.h" />
     <ClInclude Include="include\ColumnBuffer.h" />
-    <ClInclude Include="include\SqlCBufferVisitors.h" />
+    <ClInclude Include="include\ColumnBufferVisitors.h" />
     <ClInclude Include="include\SqlHandle.h" />
     <ClInclude Include="include\SqlStatementCloser.h" />
     <ClInclude Include="include\Table.h" />
@@ -55,7 +55,7 @@
     <ClCompile Include="src\ObjectName.cpp" />
     <ClCompile Include="src\Sql2BufferTypeMap.cpp" />
     <ClCompile Include="src\ColumnBuffer.cpp" />
-    <ClCompile Include="src\SqlCBufferVisitors.cpp" />
+    <ClCompile Include="src\ColumnBufferVisitors.cpp" />
     <ClCompile Include="src\SqlStatementCloser.cpp" />
     <ClCompile Include="src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

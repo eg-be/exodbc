@@ -1,5 +1,5 @@
 /*!
-* \file SqlCBufferVisitors.cpp
+* \file ColumnBufferVisitors.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 20.12.2015
 * \brief Source file for SqlCBuffer.
@@ -10,7 +10,7 @@
 #include "stdafx.h"
 
 // Own header
-#include "SqlCBufferVisitors.h"
+#include "ColumnBufferVisitors.h"
 
 // Same component headers
 // Other headers
