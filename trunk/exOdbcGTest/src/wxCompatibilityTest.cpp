@@ -1,5 +1,5 @@
 /*!
-* \file exCompatibilityTest.cpp
+* \file wxCompatibilityTest.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.08.2014
 * \copyright GNU Lesser General Public License Version 3

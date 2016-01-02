@@ -1,5 +1,5 @@
 /*!
-* \file SqlCBufferTest.h
+* \file ColumnBufferTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 18.10.2015
 * \copyright GNU Lesser General Public License Version 3
@@ -28,17 +28,17 @@
 // -------
 namespace exodbctest
 {
-	class SqlCBufferLengthIndicatorTest : public ::testing::Test
+	class ColumnBufferLengthIndicatorTest : public ::testing::Test
 	{
 	};
 
 
-	class SqlCBufferTest : public ::testing::Test
+	class ColumnBufferTest : public ::testing::Test
 	{
 	};
 
 
-	class SqlCArrayBufferTest : public ::testing::Test
+	class ColumnArrayBufferTest : public ::testing::Test
 	{
 	};
 

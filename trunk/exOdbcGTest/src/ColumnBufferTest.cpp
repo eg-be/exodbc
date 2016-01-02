@@ -1,5 +1,5 @@
 /*!
-* \file VisitorsTests.cpp
+* \file ColumnBufferTest.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.03.2015
 * \copyright GNU Lesser General Public License Version 3
@@ -10,7 +10,7 @@
 #include "stdafx.h"
 
 // Own header
-#include "SqlCBufferTest.h"
+#include "ColumnBufferTest.h"
 
 // Same component headers
 #include "exOdbcGTestHelpers.h"
@@ -40,7 +40,7 @@ namespace exodbctest
 {
 	// SqlCBufferLengthIndicator
 	// -------------
-	TEST_F(SqlCBufferLengthIndicatorTest, Construction)
+	TEST_F(ColumnBufferLengthIndicatorTest, Construction)
 	{
 		ColumnBufferLengthIndicator cb;
 		EXPECT_EQ(0, cb.GetCb());
@@ -48,7 +48,7 @@ namespace exodbctest
 	}
 
 
-	TEST_F(SqlCBufferLengthIndicatorTest, SetAndGetCb)
+	TEST_F(ColumnBufferLengthIndicatorTest, SetAndGetCb)
 	{
 		ColumnBufferLengthIndicator cb;
 		cb.SetCb(13);
@@ -56,7 +56,7 @@ namespace exodbctest
 	}
 
 
-	TEST_F(SqlCBufferLengthIndicatorTest, SetNull)
+	TEST_F(ColumnBufferLengthIndicatorTest, SetNull)
 	{
 		ColumnBufferLengthIndicator cb;
 		cb.SetNull();
@@ -68,7 +68,7 @@ namespace exodbctest
 
 	// SqlCBuffer
 	// -------------
-	TEST_F(SqlCBufferTest, Construction)
+	TEST_F(ColumnBufferTest, Construction)
 	{
 		// after construction buffer will be Null
 		BigIntColumnBuffer buff;
@@ -85,7 +85,7 @@ namespace exodbctest
 	}
 
 
-	TEST_F(SqlCBufferTest, SetAndGetValue)
+	TEST_F(ColumnBufferTest, SetAndGetValue)
 	{
 		BigIntColumnBuffer buff;
 		buff.SetValue(13, buff.GetBufferLength());
@@ -95,7 +95,7 @@ namespace exodbctest
 
 	// SqlCArrayBuffer
 	// -------------
-	TEST_F(SqlCArrayBufferTest, Construction)
+	TEST_F(ColumnArrayBufferTest, Construction)
 	{
 		// after construction buffer will be Null
 		WCharColumnArrayBuffer arr(L"ColumnName", 24);
@@ -106,7 +106,7 @@ namespace exodbctest
 	}
 
 
-	TEST_F(SqlCArrayBufferTest, SetAndGetValue)
+	TEST_F(ColumnArrayBufferTest, SetAndGetValue)
 	{
 		WCharColumnArrayBuffer arr(L"ColumnName", 24);
 		wstring s(L"Hello");
