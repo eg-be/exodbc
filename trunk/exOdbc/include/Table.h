@@ -261,14 +261,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Checks if this table is a table with manually defined columns.
-		* \return	True if this table was constructed using a Constructor for a table
-		*			with manual columns.
-		*/
-		bool		IsManualColumns() const noexcept { return m_autoCreatedColumns; };
-
-
-		/*!
 		* \brief	Set an AccessFlag. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
 		* \details	If the flag passed is already set, this function will do nothing.
@@ -595,23 +587,12 @@ namespace exodbc
 		void		SetColumnNTS(SQLSMALLINT columnIndex) const;
 
 
-		template<typename T>
-		const T& GetNonNullColumn(SQLSMALLINT columnIndex) const
-		{
-			const ColumnBufferPtrVariant& columnVariant = GetNonNullColumnBufferPtrVariant(columnIndex);
-			try
-			{
-				return boost::get<T>(columnVariant);
-			}
-			catch (const boost::bad_get& ex)
-			{
-				WrapperException we(ex);
-				SET_EXCEPTION_SOURCE(we);
-				throw we;
-			}
-		}
-
-
+		/*!
+		* \brief	Get the ColumnBuffer (as shared_ptr) at columnIndex.
+		* \details	Fetches the ColumnBufferPtrVariant and tries to extract the concrete ColumnBuffer
+		*			from the variant, using boost::get.
+		* \throw	Exception If no column is available for passed columnIndex, or if boost::get fails.
+		*/
 		template<typename T>
 		T GetColumnBufferPtr(SQLSMALLINT columnIndex) const
 		{
@@ -693,11 +674,19 @@ namespace exodbc
 		*/
 		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
 
+		
+		/*!
+		* \brief	Define a column manually.
+		* \details	Pass anything that fits into the variant of ColumnBuffers.
+		* \throw	Exception If a column is already defined at passed columnIndex or if Table is already open.
+		*/
+		void		SetColumn(SQLUSMALLINT columnIndex, ColumnBufferPtrVariant column);
+
 
 		/*!
-		* \brief	Define a column manually. The column is bound during Open().
-		* \details	Pass a buffer and a description of the buffer that shall be bound to a
-		*			table column once Open() is called.
+		* \brief	Define a column manually.
+		* \details	Pass a buffer and a description of the buffer to be used as a Column of this table.
+		*			Internally, this will create a SqlCPointerBuffer that can be stored in the variant of the columns.
 		* \param	columnIndex Zero based index of a bound column.
 		* \param	queryName Name of the column matching columnIndex. This name will be used
 		*			for queries.
@@ -708,26 +697,20 @@ namespace exodbc
 		* \param	sqlCType SQL_C_TYPE of the buffer hold by pBuffer, like SQL_C_CHAR, SQL_C_SINTEGER, etc.
 		*			This information will be forwarded to the ODBC driver while binding the column.
 		*			The driver will try to convert the column-value to the given type.
-		* \param	bufferSize The size of the buffer pointed to by pBuffer.
+		* \param	bufferSize The size of the buffer pointed to by pBuffer (in bytes).
 		* \param	flags Define if a column shall be included in write-operations, is part of primary-key, etc.
 		* \param	columnSize The number of digits of a decimal value (including the fractional part).
 		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_PRECISION.
 		* \param	decimalDigits The number of digits of the fractional part of a decimal value.
 		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
-		* \throw	Exception If CF_INSERT or CF_UPDATE is set as ColumnFlags.
+		* \throw	Exception If a column is already defined at passed columnIndex or if Table is already open.
 		*/
-		//void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize = -1, SQLSMALLINT decimalDigits = -1);
-
-
-		void		SetColumn(SQLUSMALLINT columnIndex, ColumnBufferPtrVariant column);
-
-
 		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize = 0, SQLSMALLINT decimalDigits = 0);
 
 
 		/*!
 		* \brief	Manually set the column indexes of primary key columns.
-		* \details	If a table is Open()ed for AF_UPDATE or AF_DELETE, the primary keys must be known.
+		* \details	If a table is Open()ed for AF_UPDATE_PK or AF_DELETE_PK, the primary keys must be known.
 		*			Some databases are unable to return them using SQLPrimaryKeys (Access for example),
 		*			so this method is provided to set primary keys indexes manually.
 		*			If you call this method, the flag TOF_DO_NOT_QUERY_PRIMARY_KEYS is implicitly active

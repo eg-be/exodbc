@@ -1099,6 +1099,7 @@ namespace exodbc
 
 	void Table::SetColumn(SQLUSMALLINT columnIndex, ColumnBufferPtrVariant column)
 	{
+		exASSERT(!IsOpen());
 		exASSERT(columnIndex >= 0);
 		exASSERT(m_columns.find(columnIndex) == m_columns.end());
 
