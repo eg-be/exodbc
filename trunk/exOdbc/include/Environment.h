@@ -138,8 +138,16 @@ namespace exodbc
 		*/
 		OdbcVersion		GetOdbcVersion() const;
 
-
-		enum class ListMode { All, System, User };
+		/*!
+		* \enum		ListMode
+		* \brief	What data sources to list in ListDataSources()
+		*/
+		enum class ListMode 
+		{ 
+			All,	///< System and User entries.
+			System, //< Only system entries.
+			User	//< Only user entries.
+		};
 
 		/*!
 		 * \brief		List data sources.

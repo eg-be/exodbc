@@ -39,6 +39,8 @@ namespace exodbctest
 	class DatabaseTest_ReadDataTypesInfo_Test;
 	class DatabaseTest_SetConnectionAttributes_Test;
 	class DatabaseTest_ReadDbInfo_Test;
+	class DatabaseTest_CommitTransaction_Test;
+	class DatabaseTest_RollbackTransaction_Test;
 }
 #endif
 
@@ -87,6 +89,8 @@ namespace exodbc
 		friend class exodbctest::DatabaseTest_ReadDataTypesInfo_Test;
 		friend class exodbctest::DatabaseTest_SetConnectionAttributes_Test;
 		friend class exodbctest::DatabaseTest_ReadDbInfo_Test;
+		friend class exodbctest::DatabaseTest_CommitTransaction_Test;
+		friend class exodbctest::DatabaseTest_RollbackTransaction_Test;
 #endif
 	public:
 		/*!
@@ -185,9 +189,6 @@ namespace exodbc
 		 * \throw	Exception If executing SQL failed, or depending on mode if no records are affected.
 		 */
 		void         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = ExecFailMode::NotFailOnNoData);
-
-
-		SqlStmtHandlePtr GetExecSqlHandle() const noexcept { return m_pHStmtExecSql; };
 
 
 		/*!
@@ -600,6 +601,12 @@ namespace exodbc
 		// -------------
 	private:
 		
+		/*!
+		* \brief	Returns the SqlStmtHandlePtr used by the ExecSql function.
+		*/
+		SqlStmtHandlePtr GetExecSqlHandle() const noexcept { return m_pHStmtExecSql; };
+
+
 		/*!
 		* \brief	Set the internal member m_dbmsType by examining m_dbInf.m_dbmsName
 		*/

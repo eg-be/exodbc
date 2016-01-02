@@ -79,12 +79,13 @@ namespace exodbc
 		ExecutableStatement(ConstDatabasePtr pDb, bool forwardOnlyCursors = false);		
 		
 		
-		// brief Prevent copies.
+		// Prevent copies.
 		ExecutableStatement(const ExecutableStatement& other) = delete;
 		ExecutableStatement& operator=(const ExecutableStatement& other) = delete;
 
 		/*!
-		* \brief Does nothing.
+		* \brief	If parameters or columns have been bound on this statement, call UnbindColumns() or
+		*			ResetParams() on the internal statement on destruction.
 		*/
 		virtual ~ExecutableStatement();
 
