@@ -97,7 +97,7 @@ namespace exodbctest
 		EXPECT_NO_THROW(GetData(pHStmt, 2, 20, value, &isNull));
 		EXPECT_FALSE(isNull);
 		EXPECT_EQ(L"הצüאיט", value);
-		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt->GetHandle(), StatementCloser::Mode::IgnoreNotOpen));
+		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Trim the read-value in GetData
 		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
@@ -111,7 +111,7 @@ namespace exodbctest
 			EXPECT_NO_THROW(GetData(pHStmt, 2, 3, value, &isNull));
 		}
 		EXPECT_EQ(L"הצü", value);
-		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt->GetHandle(), StatementCloser::Mode::IgnoreNotOpen));
+		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Read some int value
 		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
@@ -122,7 +122,7 @@ namespace exodbctest
 		SQLLEN ind = 0;
 		EXPECT_NO_THROW(GetData(pHStmt, 1, SQL_C_SLONG, &id, NULL, &ind, &isNull));
 		EXPECT_EQ(3, id);
-		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt->GetHandle(), StatementCloser::Mode::IgnoreNotOpen));
+		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// And test at least one null value
 		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
@@ -134,7 +134,7 @@ namespace exodbctest
 		EXPECT_TRUE(isNull);
 		EXPECT_EQ(L"", value);
 		
-		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt->GetHandle(), StatementCloser::Mode::IgnoreNotOpen));
+		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 	}
 
 

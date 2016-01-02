@@ -58,15 +58,14 @@ namespace exodbctest
 
 	TEST_F(StatementCloserTest, CloseStmtHandle)
 	{
-		SQLHSTMT hNull = SQL_NULL_HSTMT;
+		SqlStmtHandlePtr pHStmt = std::make_shared<SqlStmtHandle>();
 		{
 			// We assert if we pass a null handle
 			LogLevelFatal llf;
-			EXPECT_THROW(StatementCloser::CloseStmtHandle(hNull, StatementCloser::Mode::IgnoreNotOpen), AssertionException);
+			EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen), AssertionException);
 		}
 
 		// Allocate a valid statement handle from an open connection handle
-		SqlStmtHandlePtr pHStmt = std::make_shared<SqlStmtHandle>();
 		ASSERT_NO_THROW(pHStmt->AllocateWithParent(m_pDb->GetSqlDbcHandle()));
 
 		// This statement is not open yet, we shall fail to free it

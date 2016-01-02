@@ -107,7 +107,10 @@ namespace exodbc
 
 
 		/*!
-		* \brief 
+		* \brief	Allocates the internal handle.
+		* \details	Can be only be used if tHandleType is SQL_HANDLE_ENV, all other handles need a parent
+		*			to be allocated.
+		* \throw	Exception if already allocated, or if allocating fails.
 		*/
 		void Allocate()
 		{
@@ -159,6 +162,9 @@ namespace exodbc
 		* \brief	Frees the internal tHandleType. Sets the internal handle to
 		*			SQL_NULL_HANDLE upon success, and resets the internal 
 		*			shared_ptr to the parent handle.
+		*
+		*			Before freeing, fires the FreeSignal.
+		*			After freeing, fires the ResetParamsSignal and UnbindColumnsSignal.
 		* \throw	AssertionException If no handle is allocated.
 		* \throw	SqlResultException If freeing fails.
 		*/
@@ -195,7 +201,7 @@ namespace exodbc
 			m_handle = SQL_NULL_HANDLE;
 			m_pParentHandle.reset();
 
-			// notify that params have been resetted and columns are unbound now
+			// notify that params have been reseted and columns are unbound now
 			m_resetParamsSignal(*this);
 			m_unbindColumnsSignal(*this);
 		}
@@ -236,13 +242,13 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Connect a signal that gets called whenever Params have been reseted using ResetParams()
+		* \brief	Connect a signal that gets called whenever Params have been reseted.
 		*/
 		boost::signals2::connection ConnectResetParamsSignal(const ResetParamsSignalSlot& slot) const { return m_resetParamsSignal.connect(slot); };
 
 		
 		/*!
-		* \brief	Connect a signal that gets called whenever Columns have been unbound using UnbindColumns()
+		* \brief	Connect a signal that gets called whenever Columns have been unbound.
 		*/
 		boost::signals2::connection ConnectUnbindColumnsSignal(const UnbindColumnsSignalSlot& slot) const { return m_unbindColumnsSignal.connect(slot); };
 
@@ -270,17 +276,26 @@ namespace exodbc
 		*/
 		SQLSMALLINT GetHandleType() const noexcept { return tHandleType; };
 
+		/*!
+		* \brief	Handles are equal if they are of the same type and have the same value.
+		*/
 		bool operator==(const SqlHandle& other) const noexcept
 		{
 			return GetHandleType() == other.GetHandleType()
 				&& m_handle == other.m_handle;
 		};
 
+		/*!
+		* \brief	Handles are equal if they are of the same type and have the same value.
+		*/
 		bool operator!=(const SqlHandle& other) const noexcept
 		{
 			return !(*this == other);
 		};
 
+		/*!
+		* \brief	Orders by handle type and then handle value.
+		*/
 		bool operator<(const SqlHandle& other) const noexcept
 		{
 			return GetHandleType() < other.GetHandleType() && m_handle < other.m_handle;
@@ -342,6 +357,9 @@ namespace exodbc
 		{ }
 
 	private:
+		/*!
+		* \brief Creates description handle using SQLGEtStmtAttr.
+		*/
 		void AllocateWithParent(ConstSqlStmtHandlePtr pStmtHandle, RowDescriptorType type)
 		{
 			exASSERT(pStmtHandle != NULL);
@@ -376,17 +394,30 @@ namespace exodbc
 		*/
 		SQLSMALLINT GetHandleType() const noexcept { return SQL_HANDLE_DESC; };
 
+
+
+		/*!
+		* \brief	Handles are equal if they are of the same type and have the same value.
+		*/
 		bool operator==(const SqlHandle& other) const noexcept
 		{
 			return GetHandleType() == other.GetHandleType()
 				&& m_handle == other.m_handle;
 		};
 
+
+		/*!
+		* \brief	Handles are equal if they are of the same type and have the same value.
+		*/
 		bool operator!=(const SqlHandle& other) const noexcept
 		{
 			return !(*this == other);
 		};
 
+
+		/*!
+		* \brief	Orders by handle type and then handle value.
+		*/
 		bool operator<(const SqlHandle& other) const noexcept
 		{
 			return GetHandleType() < other.GetHandleType() && m_handle < other.m_handle;
