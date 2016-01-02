@@ -8,8 +8,6 @@
 */ 
 
 #pragma once
-#ifndef EnvironmentTEST_H
-#define EnvironmentTEST_H
 
 // Same component headers
 #include "exOdbcGTest.h"
@@ -21,7 +19,7 @@
 // Forward declarations
 // --------------------
 
-namespace exodbc
+namespace exodbctest
 {
 	// Structs
 	// -------
@@ -34,6 +32,5 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 	};
-} // namespace exodbc
+} // namespace exodbctest
 
-#endif // EnvironmentTEST_H

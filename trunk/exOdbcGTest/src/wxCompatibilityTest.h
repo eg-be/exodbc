@@ -10,8 +10,6 @@
 */ 
 
 #pragma once
-#ifndef WXCOMPATIBILITYTEST_H
-#define WXCOMPATIBILITYTEST_H
 
 // Same component headers
 #include "exOdbcGTest.h"
@@ -25,11 +23,10 @@
 // System headers
 
 
-namespace exodbc
+namespace exodbctest
 {
 	//	 Forward declarations
 	// --------------------
-	class Database;
 
 	// Structs
 	// -------
@@ -42,11 +39,9 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 
-		EnvironmentPtr m_pEnv = std::make_shared<Environment>();
-		DatabasePtr m_pDb = std::make_shared<Database>();
+		exodbc::EnvironmentPtr m_pEnv = std::make_shared<exodbc::Environment>();
+		exodbc::DatabasePtr m_pDb = std::make_shared<exodbc::Database>();
 
 	};
 }
 
-
-#endif // WXCOMPATIBILITYTEST_H

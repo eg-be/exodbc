@@ -8,8 +8,6 @@
 */ 
 
 #pragma once
-#ifndef EXODBCGTEST_H
-#define EXODBCGTEST_H
 
 // Same component headers
 #include "TestParams.h"
@@ -27,7 +25,7 @@
 
 // Globals
 // -------
-namespace exodbc
+namespace exodbctest
 {
 	extern TestParams g_odbcInfo;
 
@@ -112,7 +110,4 @@ namespace exodbc
 		boost::log::trivial::severity_level m_originalLevel;
 	};
 
-} // namespace exodbc
-
-
-#endif // EXODBCGTEST_H
+} // namespace exodbctest

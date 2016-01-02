@@ -26,7 +26,7 @@
 
 // Globals
 // -------
-namespace exodbc
+namespace exodbctest
 {
 	TestParams g_odbcInfo;
 }
@@ -99,9 +99,10 @@ void printHelp()
 	wcerr << L"  to run the tests using a connection string, against a DB which uses uppercase.\n";
 }
 
-
 int _tmain(int argc, _TCHAR* argv[])
 {
+	using namespace exodbctest;
+
 	printHelp();
 
 	using namespace std;
@@ -188,14 +189,14 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			else
 			{
-				test::Case nameCase = upperDsn.length() > 0 ? test::Case::UPPER : test::Case::LOWER;
+				Case nameCase = upperDsn.length() > 0 ? Case::UPPER : Case::LOWER;
 				TestParams dsnEntry(tokens[0], tokens[1], tokens[2], nameCase);
 				g_odbcInfo = dsnEntry;
 			}
 		}
 		if (upperCs.length() > 0 || lowerCs.length() > 0)
 		{
-			test::Case nameCase = upperCs.length() > 0 ? test::Case::UPPER : test::Case::LOWER;
+			Case nameCase = upperCs.length() > 0 ? Case::UPPER : Case::LOWER;
 			TestParams csEntry(upperCs.length() > 0 ? upperCs : lowerCs, nameCase);
 			g_odbcInfo = csEntry;
 		}

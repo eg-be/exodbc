@@ -23,9 +23,9 @@
 #include "DebugNew.h"
 
 using namespace std;
-using namespace exodbctest;
+using namespace exodbc;
 
-namespace exodbc
+namespace exodbctest
 {
 	//Static consts
 	// -------------

@@ -13,7 +13,6 @@
 #include "exOdbcGTestHelpers.h"
 
 // Same component headers
-#include "TestTables.h"
 
 // Other headers
 
@@ -80,13 +79,13 @@ namespace exodbctest
 	{
 		exodbc::DatabasePtr pDb = std::make_shared<exodbc::Database>(pEnv);
 
-		if (exodbc::g_odbcInfo.HasConnectionString())
+		if (g_odbcInfo.HasConnectionString())
 		{
-			pDb->Open(exodbc::g_odbcInfo.m_connectionString);
+			pDb->Open(g_odbcInfo.m_connectionString);
 		}
 		else
 		{
-			pDb->Open(exodbc::g_odbcInfo.m_dsn, exodbc::g_odbcInfo.m_username, exodbc::g_odbcInfo.m_password);
+			pDb->Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password);
 		}
 		return pDb;
 	}
@@ -129,7 +128,7 @@ namespace exodbctest
 
 	std::wstring ToDbCase(const std::wstring& str)
 	{
-		if (exodbc::g_odbcInfo.m_namesCase == exodbc::test::Case::UPPER)
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
 		{
 			return boost::algorithm::to_upper_copy(str);
 		}

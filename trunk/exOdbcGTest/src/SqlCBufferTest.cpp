@@ -34,9 +34,9 @@
 // Implementation
 // --------------
 using namespace std;
-using namespace exodbctest;
+using namespace exodbc;
 
-namespace exodbc
+namespace exodbctest
 {
 	// SqlCBufferLengthIndicator
 	// -------------
@@ -3966,4 +3966,4 @@ namespace exodbc
 			EXPECT_TRUE(num5_3_Col.IsNull());
 		}
 	}
-} //namespace exodbc
+} //namespace exodbctest

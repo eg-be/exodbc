@@ -8,8 +8,6 @@
 */ 
 
 #pragma once
-#ifndef HELPERSTEST_H
-#define HELPERSTEST_H
 
 // Same component headers
 #include "exOdbcGTest.h"
@@ -26,7 +24,7 @@
 // Forward declarations
 // --------------------
 
-namespace exodbc
+namespace exodbctest
 {
 
 
@@ -40,5 +38,5 @@ namespace exodbc
 	protected:
 
 	};
-} // namespace exodbc
-#endif // HELPERSTEST_H
+} // namespace exodbctest
+

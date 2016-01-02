@@ -14,6 +14,7 @@
 
 // Same component headers
 // Other headers
+#include "Exception.h"
 
 // Debug
 #include "DebugNew.h"
@@ -31,8 +32,9 @@
 // --------------
 
 using namespace std;
+using namespace exodbc;
 
-namespace exodbc
+namespace exodbctest
 {
 	::std::ostream& operator<<(::std::ostream& os, const TestParams& oi) {
 		std::wstringstream wos;
@@ -46,7 +48,7 @@ namespace exodbc
 				<< L"; Username: " << oi.m_username
 				<< L"; Password: " << oi.m_password;
 		}
-		wos << L"; Names: " << (oi.m_namesCase == test::Case::LOWER ? L"lowercase" : L"uppercase");
+		wos << L"; Names: " << (oi.m_namesCase == Case::LOWER ? L"lowercase" : L"uppercase");
 		std::string s;
 
 		// \todo Resolve with ticket #44 #53 - ugly conversion (but okay here, we know its only ascii)
@@ -74,7 +76,7 @@ namespace exodbc
 				<< L"; Username: " << oi.m_username
 				<< L"; Password: " << oi.m_password;
 		}
-		wos << L"; Names: " << (oi.m_namesCase == test::Case::LOWER ? L"lowercase" : L"uppercase");
+		wos << L"; Names: " << (oi.m_namesCase == Case::LOWER ? L"lowercase" : L"uppercase");
 		return wos;
 	}
 
@@ -123,11 +125,11 @@ namespace exodbc
 						wstring namesCase = subTree.get<wstring>(L"Case");
 						if (ba::iequals(namesCase, L"u") || ba::iequals(namesCase, L"upper"))
 						{
-							m_namesCase = test::Case::UPPER;
+							m_namesCase = Case::UPPER;
 						}
 						else if (ba::iequals(namesCase, L"l") || ba::iequals(namesCase, L"lower"))
 						{
-							m_namesCase = test::Case::LOWER;
+							m_namesCase = Case::LOWER;
 						}
 						else
 						{
@@ -187,4 +189,4 @@ namespace exodbc
 	// Interfaces
 	// ----------
 	
-} // namespace exodbc
+} // namespace exodbctest

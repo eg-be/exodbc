@@ -8,8 +8,6 @@
  */ 
 
 #pragma once
-#ifndef DBTABLETEST_H
-#define DBTABLETEST_H
 
 // Same component headers
 #include "exOdbcGTest.h"
@@ -24,18 +22,13 @@
 
 // Forward declarations
 // --------------------
-namespace exodbc
-{
-	class Table;
-	class MIntTypesTable;
-}
 
 // Structs
 // -------
 
 // Classes
 // -------
-namespace exodbc
+namespace exodbctest
 {
 	class TableTest : public ::testing::Test
 	{
@@ -44,10 +37,8 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 
-		EnvironmentPtr m_pEnv = std::make_shared<Environment>();
-		DatabasePtr m_pDb = std::make_shared<Database>();
+		exodbc::EnvironmentPtr m_pEnv = std::make_shared<exodbc::Environment>();
+		exodbc::DatabasePtr m_pDb = std::make_shared<exodbc::Database>();
 	};
-} // namespace exodbc
+} // namespace exodbctest
 
-
-#endif // DBTABLETEST_H

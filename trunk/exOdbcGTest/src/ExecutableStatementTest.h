@@ -22,7 +22,7 @@
 // Forward declarations
 // --------------------
 
-namespace exodbc
+namespace exodbctest
 {
 
 
@@ -37,8 +37,8 @@ namespace exodbc
 	protected:
 		virtual void SetUp();
 
-		EnvironmentPtr m_pEnv = std::make_shared<Environment>();
-		DatabasePtr m_pDb = std::make_shared<Database>();
+		exodbc::EnvironmentPtr m_pEnv = std::make_shared<exodbc::Environment>();
+		exodbc::DatabasePtr m_pDb = std::make_shared<exodbc::Database>();
 	};
 
-} // namespace exodbc
+} // namespace exodbctest

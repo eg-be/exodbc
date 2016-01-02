@@ -20,7 +20,7 @@
 // Forward declarations
 // --------------------
 
-namespace exodbc
+namespace exodbctest
 {
 	// Structs
 	// -------
@@ -39,4 +39,4 @@ namespace exodbc
 		//virtual void TearDown();
 	};
 
-} // namespace exodbc
+} // namespace exodbctest

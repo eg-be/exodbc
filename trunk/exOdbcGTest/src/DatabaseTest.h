@@ -8,8 +8,6 @@
  */ 
 
 #pragma once
-#ifndef DBTEST_H
-#define DBTEST_H
 
 // Same component headers
 #include "exOdbcGTest.h"
@@ -30,7 +28,7 @@
 
 // Classes
 // -------
-namespace exodbc
+namespace exodbctest
 {
 	class DatabaseTest : public ::testing::Test
 	{
@@ -38,9 +36,8 @@ namespace exodbc
 		virtual void SetUp();
 		virtual void TearDown();
 
-		EnvironmentPtr m_pEnv = std::make_shared<Environment>();
-		DatabasePtr	m_pDb = std::make_shared<Database>();
+		exodbc::EnvironmentPtr m_pEnv = std::make_shared<exodbc::Environment>();
+		exodbc::DatabasePtr	m_pDb = std::make_shared<exodbc::Database>();
 	};
-} // namespace exodbc
+} // namespace exodbctest
 
-#endif // DBTEST_H

@@ -18,14 +18,15 @@
 // Other headers
 #include "ExecutableStatement.h"
 #include "SqlCBufferVisitors.h"
+#include "Table.h"
 
 // Debug
 #include "DebugNew.h"
 
-using namespace exodbctest;
+using namespace exodbc;
 using namespace std;
 
-namespace exodbc
+namespace exodbctest
 {
 	// Static consts
 	// -------------
@@ -414,4 +415,4 @@ namespace exodbc
 		iTable.Open();
 		EXPECT_EQ(10, iTable.Count());
 	}
-} // namespace exodbc
+} // namespace exodbctest

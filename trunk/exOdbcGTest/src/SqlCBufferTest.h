@@ -26,7 +26,7 @@
 
 // Classes
 // -------
-namespace exodbc
+namespace exodbctest
 {
 	class SqlCBufferLengthIndicatorTest : public ::testing::Test
 	{
@@ -48,8 +48,8 @@ namespace exodbc
 		protected:
 			virtual void SetUp();
 
-			DatabasePtr m_pDb;
-			SqlStmtHandlePtr m_pStmt;
+			exodbc::DatabasePtr m_pDb;
+			exodbc::SqlStmtHandlePtr m_pStmt;
 	};
 
 
@@ -92,4 +92,4 @@ namespace exodbc
 	class SqlCPointerTest : public ColumnTestBase
 	{};
 
-} // namespace exodbc
+} // namespace exodbctest
