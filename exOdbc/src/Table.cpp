@@ -107,28 +107,6 @@ namespace exodbc
 			{
 				Close();
 			}
-
-			// If the table was created manually, we need to delete the column buffers
-			// that were allocated during SetColumn.
-			// If columns were created automatically, they were deleted from Open() in case of failure.
-			// \note: We must free the buffers before deleting our statements - the buffers may still
-			// be bound to our statements.
-			//if (m_autoCreatedColumns)
-			//{
-			//	for (ColumnBufferPtrMap::const_iterator it = m_columnBuffers.begin(); it != m_columnBuffers.end(); ++it)
-			//	{
-			//		ColumnBuffer* pBuffer = it->second;
-			//		delete pBuffer;
-			//	}
-			//	m_columnBuffers.clear();
-			//}
-
-			// FreeStatements();
-			
-			// Notify the columnBuffers that we have just freed all statements
-
-
-			//exASSERT(m_columnBuffers.size() == 0);
 		}
 		catch (Exception& ex)
 		{
@@ -155,9 +133,6 @@ namespace exodbc
 		// remember buffertype map, and allocate statements (by setting access flags)
 		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
 		SetAccessFlags(afs);
-
-		// statements should now be allocated
-		exASSERT(HasAllStatements());
 	}
 
 
@@ -179,12 +154,9 @@ namespace exodbc
 		m_initialCatalogName = catalogName;
 		m_initialTypeName = tableType;
 
-		// remember buffertype map, and allocate statements (by setting access flags)
+		// remember buffertype map, set AccessFlags
 		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
 		SetAccessFlags(afs);
-
-		// statements should now be allocated
-		exASSERT(HasAllStatements());
 	}
 
 
@@ -193,20 +165,9 @@ namespace exodbc
 		exASSERT(!IsOpen());
 		exASSERT(m_pDb->IsOpen());
 
-		//exASSERT(m_stmtCount->)
-		//exASSERT(!m_pHStmtSelect->IsAllocated());
-		//exASSERT(!m_pHStmtCount->IsAllocated());
-		//exASSERT(SQL_NULL_HSTMT == m_hStmtCount);
-		//exASSERT(SQL_NULL_HSTMT == m_hStmtSelect);
-		//exASSERT(SQL_NULL_HSTMT == m_hStmtInsert);
-		//exASSERT(SQL_NULL_HSTMT == m_hStmtUpdatePk);
-		//exASSERT(SQL_NULL_HSTMT == m_hStmtDeleteWhere);
-		//exASSERT(SQL_NULL_HSTMT == m_hStmtUpdateWhere);
-
-		//SQLHDBC hdbc = m_pDb->GetConnectionHandle();
 		ConstSqlDbcHandlePtr pHDbc = m_pDb->GetSqlDbcHandle();
 
-		// Allocate handles needed, on failure try to de-allocate everything
+		// Allocate handles needed, on failure try to deallocate everything
 		try
 		{
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
@@ -246,37 +207,6 @@ namespace exodbc
 			// rethrow
 			throw;
 		}
-	}
-
-
-	bool Table::HasAllStatements() const noexcept
-	{
-		bool haveAll = true;
-		//if (haveAll && TestAccessFlag(TableAccessFlag::AF_SELECT))
-		//{
-		//	haveAll = m_pHStmtSelect->IsAllocated() && m_pHStmtCount->IsAllocated();
-		//}
-		//if (haveAll && TestAccessFlag(AF_UPDATE_PK))
-		//{
-		//	haveAll = (SQL_NULL_HSTMT != m_hStmtUpdatePk);
-		//}
-		//if (haveAll && TestAccessFlag(AF_UPDATE_WHERE))
-		//{
-		//	haveAll = (SQL_NULL_HSTMT != m_hStmtUpdateWhere);
-		//}
-		//if (haveAll && TestAccessFlag(AF_INSERT))
-		//{
-		//	haveAll = (SQL_NULL_HSTMT != m_hStmtInsert);
-		//}
-		//if (haveAll && TestAccessFlag(AF_DELETE_PK))
-		//{
-		//	haveAll = (SQL_NULL_HSTMT != m_hStmtDeletePk);
-		//}
-		//if (haveAll && TestAccessFlag(AF_DELETE_WHERE))
-		//{
-		//	haveAll = (SQL_NULL_HSTMT != m_hStmtDeleteWhere);
-		//}
-		return haveAll;
 	}
 
 
@@ -472,7 +402,6 @@ namespace exodbc
 	void Table::FreeStatements()
 	{
 		// Do NOT check for IsOpen() here. If Open() fails it will call FreeStatements to do its cleanup
-		// exASSERT(IsOpen());
 
 		m_pSelectCountResultBuffer.reset();
 
@@ -1022,25 +951,6 @@ namespace exodbc
 	}
 
 
-	SQLLEN Table::SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr)
-	{
-		//exASSERT(IsSelectOpen());
-		//SQLLEN value = 0;
-		//SQLRETURN ret = SQLColAttribute(m_hStmtSelect, columnIndex + 1, (SQLUSMALLINT)attr, NULL, NULL, NULL, &value);
-		//THROW_IFN_SUCCEEDED(SQLColAttribute, ret, SQL_HANDLE_STMT, m_hStmtSelect);
-		//return value;
-
-		return 0;
-	}
-
-
-	void Table::SetBinaryValue(SQLSMALLINT columnIndex, const SQLCHAR* buffer, SQLINTEGER bufferSize)
-	{
-		//ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-		//pBuff->SetBinaryValue(buffer, bufferSize);
-	}
-
-
 	void Table::SetColumnNull(SQLSMALLINT columnIndex) const
 	{
 		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
@@ -1048,36 +958,6 @@ namespace exodbc
 		exASSERT(pFlags->Test(ColumnFlag::CF_NULLABLE));
 		ColumnBufferLengthIndicatorPtr pCb = boost::apply_visitor(ColumnBufferLengthIndicatorPtrVisitor(), var);
 		pCb->SetNull();
-	}
-
-	
-
-	//BufferVariant Table::GetColumnValue(SQLSMALLINT columnIndex) const
-	//{
-	//	ColumnBuffer* pBuff = GetColumnBuffer(columnIndex);
-	//	return pBuff->GetValue();
-	//}
-
-
-	const SQLCHAR* Table::GetBinaryValue(SQLSMALLINT columnIndex, SQLLEN& bufferSize, SQLLEN& lengthIndicator) const
-	{
-		//const SqlBinaryArray& column = GetNonNullColumn<SqlBinaryArray>(columnIndex);
-		//const ColumnBufferPtrVariant& var = GetColumnVariant(columnIndex);
-		//try
-		//{
-		//	const SqlCBufferLengthIndicator& cb = boost::polymorphic_get<SqlCBufferLengthIndicator>(var);
-		//	lengthIndicator = cb.GetCb();
-		//}
-		//catch (const boost::bad_polymorphic_get& ex)
-		//{
-		//	WrapperException we(ex);
-		//	SET_EXCEPTION_SOURCE(we);
-		//	throw we;
-		//}
-
-		//bufferSize = column.GetBufferLength();
-		//return column.GetBuffer().get();
-		return NULL;
 	}
 
 
@@ -1117,25 +997,6 @@ namespace exodbc
 		SqlCPointerBufferPtr pColumn = std::make_shared<SqlCPointerBuffer>(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
 		SetColumn(columnIndex, pColumn);
 	}
-
-
-	//void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, BufferPtrVariant pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, OldColumnFlags flags, SQLINTEGER columnSize /* = -1 */, SQLSMALLINT decimalDigits /* = -1 */)
-	//{
-	//	//exASSERT(columnIndex >= 0);
-	//	//exASSERT( ! queryName.empty());
-	//	//exASSERT(bufferSize > 0);
-	//	//exASSERT(m_columnBuffers.find(columnIndex) == m_columnBuffers.end());
-	//	//exASSERT( ! ( (sqlType == SQL_UNKNOWN_TYPE) && ((flags & CF_INSERT) || (flags & CF_UPDATE)) ) );
-	//	//exASSERT(!IsOpen());
-	//	//// Flag that columns are created manually
-	//	//m_autoCreatedColumns = true;
-	//	//// Read OdbcVersion from Environment
-	//	//const Environment* pEnv = m_pDb->GetEnvironment();
-	//	//exASSERT(pEnv != NULL);
-	//	//ManualColumnInfo colInfo(sqlType, queryName, columnSize, decimalDigits);
-	//	//ColumnBuffer* pColumnBuffer = new ColumnBuffer(colInfo, sqlCType, pBuffer, bufferSize, pEnv->GetOdbcVersion(), flags);
-	//	//m_columnBuffers[columnIndex] = pColumnBuffer;
-	//}
 
 
 	void Table::SetColumnPrimaryKeyIndexes(const std::set<SQLUSMALLINT>& columnIndexes)
@@ -1337,9 +1198,6 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 
-		// Unbind all Columns
-		//m_pHStmtSelect->UnbindColumns();
-
 		// remove the ColumnBuffers if we have allocated them during Open()
 		if (m_autoCreatedColumns)
 		{
@@ -1348,54 +1206,6 @@ namespace exodbc
 
 		// Reset all statements
 		FreeStatements();
-
-
-		//// Unbind ColumnBuffers
-		//SQLRETURN ret = SQL_SUCCESS;
-		//if (TestAccessFlag(AF_SELECT))
-		//{
-		//	ret = SQLFreeStmt(m_hStmtSelect, SQL_UNBIND);
-		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtSelect);
-		//}
-
-		//// And column parameters, if we were bound rw
-		//if (TestAccessFlag(AF_INSERT))
-		//{
-		//	ret = SQLFreeStmt(m_hStmtInsert, SQL_RESET_PARAMS);
-		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtInsert);
-		//}
-		//if (TestAccessFlag(AF_DELETE_PK))
-		//{
-		//	ret = SQLFreeStmt(m_hStmtDeletePk, SQL_RESET_PARAMS);
-		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeletePk);
-		//}
-		//if (TestAccessFlag(AF_DELETE_WHERE))
-		//{
-		//	ret = SQLFreeStmt(m_hStmtDeleteWhere, SQL_RESET_PARAMS);
-		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtDeleteWhere);
-		//}
-		//if (TestAccessFlag(AF_UPDATE_PK))
-		//{
-		//	ret = SQLFreeStmt(m_hStmtUpdatePk, SQL_RESET_PARAMS);
-		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdatePk);
-		//}
-		//if (TestAccessFlag(AF_UPDATE_WHERE))
-		//{
-		//	ret = SQLFreeStmt(m_hStmtUpdateWhere, SQL_RESET_PARAMS);
-		//	THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, m_hStmtUpdateWhere);
-		//}
-
-		//// Delete ColumnBuffers if they were created automatically
-		//if (!m_autoCreatedColumns)
-		//{
-		//	ColumnBufferPtrMap::iterator it;
-		//	for (it = m_columnBuffers.begin(); it != m_columnBuffers.end(); it++)
-		//	{
-		//		ColumnBuffer* pBuffer = it->second;
-		//		delete pBuffer;
-		//	}
-		//	m_columnBuffers.clear();
-		//}
 
 		m_isOpen = false;
 	}
@@ -1444,10 +1254,7 @@ namespace exodbc
 			return;
 		}
 
-		// Free statements, then re-allocate all
-		//FreeStatements();
 		m_tableAccessFlags = acs;
-		//AllocateStatements();
 	}
 
 
