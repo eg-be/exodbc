@@ -8,11 +8,8 @@
  */ 
 
 #pragma once
-#ifndef TESTPARAMS_H
-#define TESTPARAMS_H
 
 // Same component headers
-#include "TestTables.h"
 
 // Other headers
 #include "exOdbc.h"
@@ -27,21 +24,27 @@
 
 // Classes
 // -------
-namespace exodbc
+namespace exodbctest
 {
+	enum class Case
+	{
+		UPPER,	///< Tables will be created using all UPPERCASE letters for table- and column-names
+		LOWER	///< Tables will be created using all lowercase letters for table- and column-names
+	};
+
 	struct TestParams
 	{
 		TestParams()
 		{ }
 
-		TestParams(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, test::Case namesCase = test::Case::LOWER)
+		TestParams(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, Case namesCase = Case::LOWER)
 			: m_dsn(dsn)
 			, m_username(username)
 			, m_password(password)
 			, m_namesCase(namesCase)
 		{};
 
-		TestParams(const std::wstring& connectionString, test::Case namesCase)
+		TestParams(const std::wstring& connectionString, Case namesCase)
 			: m_connectionString(connectionString)
 			, m_namesCase(namesCase)
 		{};
@@ -58,7 +61,7 @@ namespace exodbc
 		std::wstring m_username;
 		std::wstring m_password;
 		std::wstring m_connectionString;
-		test::Case m_namesCase;
+		Case m_namesCase;
 		boost::log::trivial::severity_level m_logSeverity;
 		bool m_createDb;
 	};
@@ -66,6 +69,5 @@ namespace exodbc
 	::std::ostream& operator<<(::std::ostream& os, const TestParams& oi);
 	::std::wostream& operator<<(::std::wostream& os, const TestParams& oi);
 
-} // namespace exodbc
+} // namespace exodbctest
 
-#endif // TESTPARAMS_H

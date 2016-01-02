@@ -31,6 +31,16 @@
 
 // Forward declarations
 // --------------------
+
+#if EXODBC_TEST
+namespace exodbctest
+{
+	class TableTest_CopyCtr_Test;
+	class TableTest_QueryPrimaryKeysAndUpdateColumns_Test;
+
+}
+#endif;
+
 namespace exodbc
 {
 	// Consts
@@ -75,8 +85,8 @@ namespace exodbc
 	class EXODBCAPI Table
 	{
 #if EXODBC_TEST
-		FRIEND_TEST(TableTest, CopyCtr);
-		FRIEND_TEST(TableTest, QueryPrimaryKeysAndUpdateColumns);
+		friend class exodbctest::TableTest_CopyCtr_Test;
+		friend class exodbctest::TableTest_QueryPrimaryKeysAndUpdateColumns_Test;
 #endif
 
 	public:

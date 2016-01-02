@@ -8,12 +8,9 @@
 */
 
 #pragma once
-#ifndef TESTDBCREATOR_H
-#define TESTDBCREATOR_H
 
 // Same component headers
 #include "exOdbcGTest.h"
-#include "TestTables.h"
 
 // Other headers
 #include "Environment.h"
@@ -32,7 +29,7 @@
 
 // Classes
 // -------
-namespace exodbc
+namespace exodbctest
 {
 
 	class TestDbCreator
@@ -48,7 +45,7 @@ namespace exodbc
 		void SetScriptDirectory(const boost::filesystem::wpath& path);
 		boost::filesystem::wpath GetScriptDirectory() const;
 
-		DatabaseProduct GetDbms() const { return m_pDb->GetDbms(); };
+		exodbc::DatabaseProduct GetDbms() const { return m_pDb->GetDbms(); };
 
 	private:
 
@@ -61,10 +58,8 @@ namespace exodbc
 		boost::filesystem::wpath m_scriptDirectoryPath;
 
 		TestParams m_odbcInfo;
-		EnvironmentPtr m_pEnv;
-		DatabasePtr m_pDb;
+		exodbc::EnvironmentPtr m_pEnv;
+		exodbc::DatabasePtr m_pDb;
 	};
 
-} // namespace exodbc
-
-#endif // TESTDBCREATOR_H
+} // namespace exodbctest

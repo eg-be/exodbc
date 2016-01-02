@@ -29,8 +29,9 @@
 using namespace  std;
 namespace fs = boost::filesystem;
 namespace ba = boost::algorithm;
+using namespace exodbc;
 
-namespace exodbc
+namespace exodbctest
 {
 	// Construction
 	// -------------
@@ -233,4 +234,4 @@ namespace exodbc
 	// Interfaces
 	// ----------
 
-} //namespace exodbc
+} //namespace exodbctest

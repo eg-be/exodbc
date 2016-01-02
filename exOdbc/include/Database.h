@@ -35,13 +35,19 @@
 #include <sqlucode.h>
 #include <odbcinst.h>
 
+#if EXODBC_TEST
+namespace exodbctest
+{
+	class DatabaseTest_ReadDataTypesInfo_Test;
+	class DatabaseTest_SetConnectionAttributes_Test;
+	class DatabaseTest_ReadDbInfo_Test;
+}
+#endif
 
 // Forward declarations
 // --------------------
 namespace exodbc
 {
-	class Table;
-
 	// Structs
 	// -------
 
@@ -57,7 +63,7 @@ namespace exodbc
 	* to connect to the Database. It provides methods for opening and closing a
 	* connection to a database - see Open() and Close(). 
 	* If a Database is being closed and CommitMode is set to CM_MANUAL_COMMIT the
-	* Database will Rollback any ongoin transaction first.
+	* Database will Rollback any ongoing transaction first.
 	* There is basic support executing SQL on the Database directly
 	* using the generic ExecSql() and CommitTrans() functions.
 	* The ExecSQL() function uses its own Statement, so it will never be influenced
@@ -78,9 +84,11 @@ namespace exodbc
 	{
 		// Test helpers:
 #if EXODBC_TEST
-		FRIEND_TEST(DatabaseTest, ReadDataTypesInfo); 
-		FRIEND_TEST(DatabaseTest, SetConnectionAttributes);
-		FRIEND_TEST(DatabaseTest, ReadDbInfo);
+		// see: http://stackoverflow.com/questions/13171077/friend-test-in-google-test-possible-circular-dependency
+		// and: http://www.codeproject.com/Articles/484817/Google-e2-80-99splusgtestplusnotplushandlingplusfr
+		friend class exodbctest::DatabaseTest_ReadDataTypesInfo_Test;
+		friend class exodbctest::DatabaseTest_SetConnectionAttributes_Test;
+		friend class exodbctest::DatabaseTest_ReadDbInfo_Test;
 #endif
 	public:
 		/*!

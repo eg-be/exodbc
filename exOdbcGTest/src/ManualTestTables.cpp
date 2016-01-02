@@ -32,9 +32,9 @@
 
 // Implementation
 // --------------
-using namespace exodbctest;
+using namespace exodbc;
 
-namespace exodbc
+namespace exodbctest
 {
 	// IntTypesTable
 	// ---------------

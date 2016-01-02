@@ -41,9 +41,9 @@
 // Implementation
 // --------------
 using namespace std;
-using namespace exodbctest;
+using namespace exodbc;
 
-namespace exodbc
+namespace exodbctest
 {
 	void TableTest::SetUp()
 	{
@@ -1451,4 +1451,4 @@ namespace exodbc
 // Interfaces
 // ----------
 
-} // namespace exodbc
+} // namespace exodbctest

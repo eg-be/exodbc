@@ -31,8 +31,9 @@
 // Implementation
 // --------------
 using namespace std;
+using namespace exodbc;
 
-namespace exodbc
+namespace exodbctest
 {
 
 	TEST_F(EnumFlagsTest, InitFlags)

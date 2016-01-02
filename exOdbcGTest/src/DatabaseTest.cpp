@@ -39,9 +39,9 @@
 // Implementation
 // --------------
 using namespace std;
-using namespace exodbctest;
+using namespace exodbc;
 
-namespace exodbc
+namespace exodbctest
 {
 	void DatabaseTest::SetUp()
 	{

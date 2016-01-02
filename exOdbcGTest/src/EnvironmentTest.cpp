@@ -21,7 +21,7 @@
 // Debug
 #include "DebugNew.h"
 
-namespace exodbc
+namespace exodbctest
 {
 	// Static consts
 	// -------------
@@ -116,4 +116,4 @@ namespace exodbc
 	// Interfaces
 	// ----------
 
-} // namespace exodbc
+} // namespace exodbctest

@@ -8,8 +8,6 @@
 */
 
 #pragma once
-#ifndef EXCELTEST_H
-#define EXCELTEST_H
 
 // Same component headers
 #include "exOdbcGTest.h"
@@ -28,7 +26,7 @@
 
 // Classes
 // -------
-namespace exodbc
+namespace exodbctest
 {
 
 	class ExcelTest : public ::testing::Test
@@ -39,9 +37,7 @@ namespace exodbc
 
 		virtual void TearDown();
 
-		EnvironmentPtr m_pEnv;
+		exodbc::EnvironmentPtr m_pEnv;
 	};
 
-} // namespace exodbc
-
-#endif // EXCELTEST_H
+} // namespace exodbctest

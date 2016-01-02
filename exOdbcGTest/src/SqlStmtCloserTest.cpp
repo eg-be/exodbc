@@ -11,6 +11,7 @@
 
 // Own header
 #include "SqlStmtCloserTest.h"
+#include "exOdbcGTestHelpers.h"
 
 // Same component headers
 // Other headers
@@ -19,7 +20,9 @@
 // Debug
 #include "DebugNew.h"
 
-namespace exodbc
+using namespace exodbc;
+
+namespace exodbctest
 {
 	// Static consts
 	// -------------
@@ -82,14 +85,14 @@ namespace exodbc
 		std::wstring sqlstmt;
 		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s") % GetTableName(TableId::INTEGERTYPES));
 		}
 		else
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s") % test::GetTableName(test::TableId::INTEGERTYPES, m_odbcInfo.m_namesCase));
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s") % GetTableName(TableId::INTEGERTYPES));
 		}
 		// convert schema name to upper if needed
-		if (m_odbcInfo.m_namesCase == test::Case::UPPER)
+		if (m_odbcInfo.m_namesCase == Case::UPPER)
 		{
 			boost::algorithm::to_upper(sqlstmt);
 		}

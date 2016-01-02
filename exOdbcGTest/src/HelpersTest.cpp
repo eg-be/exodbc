@@ -22,9 +22,9 @@
 // Debug
 #include "DebugNew.h"
 
-using namespace exodbctest;
+using namespace exodbc;
 
-namespace exodbc
+namespace exodbctest
 {
 
 
@@ -75,14 +75,14 @@ namespace exodbc
 		std::wstring sqlstmt;
 		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase));
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % GetTableName(TableId::CHARTYPES) % GetIdColumnName(TableId::CHARTYPES));
 		}
 		else
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase));
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % GetTableName(TableId::CHARTYPES) % GetIdColumnName(TableId::CHARTYPES));
 		}
 		// convert schema name to upper if needed
-		if (g_odbcInfo.m_namesCase == test::Case::UPPER)
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
 		{
 			boost::algorithm::to_upper(sqlstmt);
 		}
@@ -151,13 +151,13 @@ namespace exodbc
 		std::wstring sqlstmt;
 		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase));
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % GetTableName(TableId::CHARTYPES) % GetIdColumnName(TableId::CHARTYPES));
 		}
 		else
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % test::GetTableName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase) % test::GetIdColumnName(test::TableId::CHARTYPES, g_odbcInfo.m_namesCase));
+			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % GetTableName(TableId::CHARTYPES) % GetIdColumnName(TableId::CHARTYPES));
 		}
-		if (g_odbcInfo.m_namesCase == test::Case::UPPER)
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
 		{
 			boost::algorithm::to_upper(sqlstmt);
 		}
@@ -288,4 +288,4 @@ namespace exodbc
 	// Interfaces
 	// ----------
 
-} // namespace exodbc
+} // namespace exodbctest

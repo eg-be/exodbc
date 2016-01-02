@@ -21,7 +21,7 @@
 // Forward declarations
 // --------------------
 
-namespace exodbc
+namespace exodbctest
 {
 
 
