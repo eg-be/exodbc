@@ -233,46 +233,6 @@ namespace exodbc
 
 
 	/*!
-	* \class CastException
-	* \brief Thrown if a Visitor cannot cast a value.
-	*
-	* Contains information about the source-type and the cast-target-type.
-	*/
-	class EXODBCAPI CastException
-		: public Exception
-	{
-	private:
-		CastException()
-			: Exception()
-			, m_cSourceType(SQL_UNKNOWN_TYPE)
-			, m_cDestType(SQL_UNKNOWN_TYPE)
-		{};
-
-	public:
-		CastException(SQLSMALLINT cSourceType, SQLSMALLINT cDestType)
-			: Exception()
-			, m_cSourceType(cSourceType)
-			, m_cDestType(cDestType)
-		{
-			m_what = w2s(ToString());
-		}
-
-		virtual ~CastException() {};
-
-		virtual std::wstring GetName() const noexcept { return L"exodbc::CastException"; };
-		virtual std::wstring ToString() const noexcept;
-
-		virtual const char* what() const noexcept { return m_what.c_str(); };
-
-	private:
-		std::string m_what;
-	public:
-		const SQLSMALLINT m_cSourceType;	///< Sql Type used as source value for the cast.
-		const SQLSMALLINT m_cDestType;		///< ODBC C Type used as destination value for the cast.
-	};	// class CastException
-
-
-	/*!
 	* \class NullValueException
 	* \brief Thrown if trying to access a value that is NULL.
 	*/

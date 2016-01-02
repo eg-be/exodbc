@@ -189,16 +189,6 @@ namespace exodbc
 	}
 
 
-	std::wstring CastException::ToString() const noexcept
-	{
-		std::wstringstream ws;
-		ws << Exception::ToString();
-		ws << L"Cannot cast from ODBC C Type " << SqLCType2s(m_cSourceType) << L"(" << m_cSourceType << L") ";
-		ws << L"to ODBC C Type " << SqLCType2s(m_cDestType) << L"(" << m_cDestType << L")";
-		return ws.str();
-	}
-
-
 	std::wstring NullValueException::ToString() const noexcept
 	{
 		std::wstringstream ws;
