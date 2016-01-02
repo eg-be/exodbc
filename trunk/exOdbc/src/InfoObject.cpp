@@ -119,46 +119,6 @@ namespace exodbc
 	}
 
 
-	// Class ManualColumnInfo
-	// ======================
-	ManualColumnInfo::ManualColumnInfo()
-		: ColumnBindInfo()
-	{}
-
-
-	ManualColumnInfo::ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName)
-		: ColumnBindInfo(sqlType)
-		, m_queryName(queryName)
-	{
-		exASSERT(!queryName.empty());
-	}
-
-	ManualColumnInfo::ManualColumnInfo(SQLSMALLINT sqlType, const std::wstring& queryName, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
-		: ColumnBindInfo(sqlType, columnSize, decimalDigits)
-		, m_queryName(queryName)
-	{
-		exASSERT(!queryName.empty());
-	}
-
-
-	std::wstring ManualColumnInfo::GetQueryName() const noexcept
-	{
-		return m_queryName;
-	}
-
-
-	std::wstring ManualColumnInfo::GetPureName() const
-	{
-		size_t lastDot = m_queryName.find_last_of(L".");
-		if (lastDot != wstring::npos)
-		{
-			exASSERT(m_queryName.length() > lastDot + 1);
-			return m_queryName.substr(lastDot + 1);
-		}
-		return m_queryName;
-	}
-
-
 	// Class ColumnInfo
 	// ================
 
