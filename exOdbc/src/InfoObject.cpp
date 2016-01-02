@@ -103,7 +103,7 @@ namespace exodbc
 	}
 
 
-	bool TableInfo::operator==(const TableInfo& other) const throw()
+	bool TableInfo::operator==(const TableInfo& other) const noexcept
 	{
 		return m_tableName == other.m_tableName
 			&& m_schemaName == other.m_schemaName
@@ -113,7 +113,7 @@ namespace exodbc
 	}
 
 
-	bool TableInfo::operator!=(const TableInfo& other) const throw()
+	bool TableInfo::operator!=(const TableInfo& other) const noexcept
 	{
 		return !(*this == other);
 	}
@@ -141,7 +141,7 @@ namespace exodbc
 	}
 
 
-	std::wstring ManualColumnInfo::GetQueryName() const throw()
+	std::wstring ManualColumnInfo::GetQueryName() const noexcept
 	{
 		return m_queryName;
 	}
@@ -226,14 +226,14 @@ namespace exodbc
 		exASSERT(!m_columnName.empty());
 	}
 
-	std::wstring ColumnInfo::GetQueryName() const throw()
+	std::wstring ColumnInfo::GetQueryName() const noexcept
 	{
 		// When querying, we use only the Column-name
 		return GetPureName();
 	}
 
 
-	std::wstring ColumnInfo::GetPureName() const throw()
+	std::wstring ColumnInfo::GetPureName() const noexcept
 	{
 		return m_columnName;
 	}

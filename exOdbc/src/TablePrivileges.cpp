@@ -82,7 +82,7 @@ namespace exodbc
 	}
 
 
-	std::wstring MissingTablePrivilegeException::ToString() const throw()
+	std::wstring MissingTablePrivilegeException::ToString() const noexcept
 	{
 		std::wstringstream ws;
 		ws << Exception::ToString();

@@ -37,13 +37,13 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	const char* Exception::what() const throw()
+	const char* Exception::what() const noexcept
 	{
 		return m_what.c_str();
 	}
 
 
-	void Exception::SetSourceInformation(int line, const std::wstring& fileName, const std::wstring& functionName)
+	void Exception::SetSourceInformation(int line, const std::wstring& fileName, const std::wstring& functionName) noexcept
 	{
 		m_line = line;
 		m_file = fileName;
@@ -53,7 +53,7 @@ namespace exodbc
 	}
 
 
-	std::wstring Exception::ToString() const throw()
+	std::wstring Exception::ToString() const noexcept
 	{
 		std::wstringstream ws;
 		ws << GetName();
@@ -78,7 +78,7 @@ namespace exodbc
 	}
 
 
-	std::wstring AssertionException::ToString() const throw()
+	std::wstring AssertionException::ToString() const noexcept
 	{
 		std::wstringstream ws;
 		ws << Exception::ToString();
@@ -88,7 +88,7 @@ namespace exodbc
 	}
 
 
-	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg /* = L"" */) throw()
+	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg /* = L"" */) noexcept
 		: Exception(msg)
 		, m_ret(0)
 	{
@@ -98,7 +98,7 @@ namespace exodbc
 	}
 
 
-	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg /* = L"" */) throw()
+	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg /* = L"" */) noexcept
 		: Exception(msg)
 		, m_ret(ret)
 	{
@@ -109,7 +109,7 @@ namespace exodbc
 	}
 
 
-	void SqlResultException::FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) throw()
+	void SqlResultException::FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) noexcept
 	{
 		try
 		{
@@ -128,7 +128,7 @@ namespace exodbc
 	}
 
 
-	void SqlResultException::BuildErrorMsg(const std::wstring& sqlFunctionName, SQLRETURN ret) throw()
+	void SqlResultException::BuildErrorMsg(const std::wstring& sqlFunctionName, SQLRETURN ret) noexcept
 	{
 		try
 		{
@@ -145,7 +145,7 @@ namespace exodbc
 	}
 
 
-	std::wstring SqlResultException::ToString() const throw()
+	std::wstring SqlResultException::ToString() const noexcept
 	{
 		std::wstringstream ws;
 		ws << Exception::ToString();
@@ -162,7 +162,7 @@ namespace exodbc
 	}
 
 
-	std::wstring NotSupportedException::ToString() const throw()
+	std::wstring NotSupportedException::ToString() const noexcept
 	{
 		std::wstringstream ws;
 		ws << Exception::ToString();
@@ -180,7 +180,7 @@ namespace exodbc
 	}
 
 
-	std::wstring WrapperException::ToString() const
+	std::wstring WrapperException::ToString() const noexcept
 	{
 		std::wstringstream ws;
 		ws << Exception::ToString();
@@ -189,7 +189,7 @@ namespace exodbc
 	}
 
 
-	std::wstring CastException::ToString() const throw()
+	std::wstring CastException::ToString() const noexcept
 	{
 		std::wstringstream ws;
 		ws << Exception::ToString();
@@ -199,7 +199,7 @@ namespace exodbc
 	}
 
 
-	std::wstring NullValueException::ToString() const throw()
+	std::wstring NullValueException::ToString() const noexcept
 	{
 		std::wstringstream ws;
 		ws << Exception::ToString();

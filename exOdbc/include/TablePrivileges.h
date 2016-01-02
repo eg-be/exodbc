@@ -106,7 +106,7 @@ namespace exodbc
 
 		virtual ~MissingTablePrivilegeException() {};
 
-		virtual std::wstring ToString() const throw();
+		virtual std::wstring ToString() const noexcept;
 
 		virtual std::wstring GetName() const noexcept { return L"exodbc::MissingTablePrivilegeException"; };
 

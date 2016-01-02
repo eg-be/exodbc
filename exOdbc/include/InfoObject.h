@@ -51,8 +51,8 @@ namespace exodbc
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
-		bool operator==(const TableInfo& other) const throw();
-		bool operator!=(const TableInfo& other) const throw();
+		bool operator==(const TableInfo& other) const noexcept;
+		bool operator!=(const TableInfo& other) const noexcept;
 
 	private:
 		DatabaseProduct		m_dbms;
@@ -141,7 +141,7 @@ namespace exodbc
 		* \brief Return the Query Name for this ManualColumnInfo
 		* \return std::wstring The QueryName passed upporn construction.
 		*/
-		virtual std::wstring GetQueryName() const throw() override;
+		virtual std::wstring GetQueryName() const noexcept override;
 		
 		
 		/*!
@@ -158,21 +158,21 @@ namespace exodbc
 		* \brief Get the ColumnSize set on Construction.
 		* \return SQLINTEGER
 		*/
-//		SQLINTEGER GetColumnSize() const throw();
+//		SQLINTEGER GetColumnSize() const noexcept;
 
 
 		/*!
 		* \brief Get the DecimalDigits set on Construction.
 		* \return SQLSMALLINT
 		*/
-	//	SQLSMALLINT GetDecimalDigits() const throw();
+	//	SQLSMALLINT GetDecimalDigits() const noexcept;
 
 
 		/*!
 		* \brief Get the SQL Type set on Construction.
 		* \return SQLSMALLINT
 		*/
-	//	SQLSMALLINT GetSqlType() const throw();
+	//	SQLSMALLINT GetSqlType() const noexcept;
 
 	private:
 		//SQLSMALLINT m_sqlType;
@@ -239,14 +239,14 @@ namespace exodbc
 		/*!
 		* \brief	Returns only the ColumnName.
 		*/
-		virtual std::wstring GetQueryName() const throw() override;
+		virtual std::wstring GetQueryName() const noexcept override;
 
 
 		/*!
 		* \brief	Returns the pure name, which is the columnName.
 		* \return std::wstring
 		*/
-		virtual std::wstring GetPureName() const throw() override;
+		virtual std::wstring GetPureName() const noexcept override;
 
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
