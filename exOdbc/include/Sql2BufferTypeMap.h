@@ -7,8 +7,6 @@
 */
 
 #pragma once
-#ifndef SQL2BUFFERMAP_H
-#define SQL2BUFFERMAP_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -220,5 +218,3 @@ namespace exodbc
 		WCharAsCharSql2BufferMap(OdbcVersion ocbcVersion);
 	};
 }
-
-#endif // SQL2BUFFERMAP_H

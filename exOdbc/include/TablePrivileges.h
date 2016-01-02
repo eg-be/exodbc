@@ -7,8 +7,6 @@
 */
 
 #pragma once
-#ifndef TABLE_PRIVILEGES_H
-#define TABLE_PRIVILEGES_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -118,5 +116,3 @@ namespace exodbc
 	};
 
 } // namespace exodbc
-
-#endif // TABLE_PRIVILEGES_H

@@ -7,8 +7,6 @@
 */ 
 
 #pragma once
-#ifndef EXODBC_H
-#define EXODBC_H
 
 // Defines to dll-import/export
 // ----------------------------
@@ -534,5 +532,3 @@ do {																\
 		(void)object; \
 	} while(0)
 
-
-#endif // EXODBC_H

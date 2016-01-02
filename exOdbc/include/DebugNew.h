@@ -9,8 +9,6 @@
 */
 
 #pragma once
-#ifndef DEBUGNEW_H
-#define DEBUGNEW_H
 
 #ifdef _DEBUG
 	#include <crtdbg.h>
@@ -38,4 +36,3 @@
 // Classes
 // -------
 
-#endif // DEBUGNEW_H

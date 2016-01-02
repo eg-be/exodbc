@@ -8,8 +8,6 @@
 */
 
 #pragma once
-#ifndef OBJECTNAME_H
-#define OBJECTNAME_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -54,5 +52,3 @@ namespace exodbc
 		bool operator==(const ObjectName& other) const;
 	};
 }
-
-#endif // OBJECTNAME_H

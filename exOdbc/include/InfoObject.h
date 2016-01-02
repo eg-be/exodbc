@@ -8,8 +8,6 @@
 */
 
 #pragma once
-#ifndef INFOOBJECT_H
-#define INFOOBJECT_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -617,5 +615,3 @@ namespace exodbc
 	*/
 	typedef std::vector<STablePrivilegesInfo> TablePrivilegesVector;
 }
-
-#endif // INFOOBJECT_H
