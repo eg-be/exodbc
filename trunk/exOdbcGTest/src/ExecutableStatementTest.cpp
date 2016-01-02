@@ -17,7 +17,7 @@
 
 // Other headers
 #include "ExecutableStatement.h"
-#include "SqlCBufferVisitors.h"
+#include "ColumnBufferVisitors.h"
 #include "Table.h"
 
 // Debug

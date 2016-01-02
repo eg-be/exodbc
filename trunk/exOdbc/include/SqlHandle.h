@@ -105,6 +105,10 @@ namespace exodbc
 			}
 		}
 
+
+		/*!
+		* \brief 
+		*/
 		void Allocate()
 		{
 			// Allowed only if not already allocated
