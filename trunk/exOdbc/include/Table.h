@@ -330,7 +330,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Calls Count() with no whereStatement.
-		* \See		Count(const std::wstring& whereStatement);
+		* \see		Count(const std::wstring& whereStatement);
 		*/
 		SQLUBIGINT	Count() { return Count(L""); };
 
@@ -372,7 +372,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Fetches the next record fromt the current active Select() recordset.
-		* \seee		Select()
+		* \see		Select()
 		* \return	True if next record has been fetched, false if no more records exist.
 		* \throw	Exception If no SelectQuery is open.
 		*/
@@ -381,7 +381,7 @@ namespace exodbc
 
 		/*!
 		* \brief	Fetches the previous record fromt the current active Select() recordset.
-		* \seee		Select()
+		* \see		Select()
 		* \return	True if previous record has been fetched, false if no more records exist.
 		* \throw	Exception If no SelectQuery is open, or if TOF_FORWARD_ONLY_CURSORS is set.
 		*/
@@ -625,7 +625,8 @@ namespace exodbc
 		/*!
 		* \brief	Searches the internal map of ColumnBuffers for a Buffer matching the
 		*			passed QueryName.
-		* \param	caseSensitive 
+		* \param	columnQueryName Name to search for
+		* \param	caseSensitive search case sensitive or not
 		* \throw	NotFoundException If no such ColumnBuffer is found.
 		*/
 		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
@@ -702,7 +703,7 @@ namespace exodbc
 		/*!
 		* \brief	Creates the ColumnBuffers for the table and returns them as a Vector. Depending on the options passed,
 		*			the columns are stored on the Table for later use during Open().
-		* \detailed	Will query the Database about the columns of the table and create corresponding ColumnBufferPtrVariant
+		* \details	Will query the Database about the columns of the table and create corresponding ColumnBufferPtrVariant
 		*			objects.
 		*			If no STableInfo is available, one is fetched from the database and remembered for later use.
 		*			Creation of the buffer will fail if the SQL type of that column is not supported. If the flag

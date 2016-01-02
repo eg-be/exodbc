@@ -1,5 +1,5 @@
 /*!
-* \file StatementCloser.h
+* \file SqlStatementCloser.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 22.11.2015
 * \brief Source file for the SqlStatementCloser
@@ -29,7 +29,7 @@ namespace exodbc
 	public:
 		
 		/*!
-		* \enum	StmtCloseMode
+		* \enum	Mode
 		* \brief Hints for CloseStmtHandle() if it shall throw or not.
 		* \see	CloseStmtHandle()
 		*/
@@ -44,12 +44,12 @@ namespace exodbc
 		* \details	Depending on StmtCloseMode, this will call SQLFreeStatement or SQLCloseCursor.
 		*			Depending on StmtCloseMode, the function will throw if the cursor was not open
 		*			before this function was called.
-		* \param	hStmt		The statement handle.
+		* \param	pHStmt		The statement handle.
 		* \param	mode		Determine whether the function should fail if the cursor is not open.
 		* \see		StmtCloseMode
 		* \throw	Exception	Depending on StmtCloseMode.
 		*/
-		static void	CloseStmtHandle(ConstSqlStmtHandlePtr pHstmt, Mode mode);
+		static void	CloseStmtHandle(ConstSqlStmtHandlePtr pHStmt, Mode mode);
 
 		/*!
 		* \brief Create new StatementCloser, depending on values passed it will close on construction and / or on destruction

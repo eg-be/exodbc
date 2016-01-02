@@ -330,7 +330,10 @@ namespace exodbc
 	/** Statement-handle Const SharedPtr */
 	typedef std::shared_ptr<const SqlStmtHandle> ConstSqlStmtHandlePtr;
 
-	// specialize for the Descriptor handle
+	/*!
+	* \class SqlHandle<SQLHDESC, SQL_HANDLE_DESC, SqlStmtHandle>
+	* \brief SqlHandle specialization for Description handles.
+	*/
 	template<>
 	class SqlHandle<SQLHDESC, SQL_HANDLE_DESC, SqlStmtHandle>
 	{

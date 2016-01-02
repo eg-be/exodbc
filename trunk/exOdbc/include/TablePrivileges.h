@@ -96,7 +96,7 @@ namespace exodbc
 
 
 	/*!
-	* \class	PrivilegeException
+	* \class	MissingTablePrivilegeException
 	* \brief	Thrown if Privileges are not okay to do a given operation
 	*/
 	class EXODBCAPI MissingTablePrivilegeException

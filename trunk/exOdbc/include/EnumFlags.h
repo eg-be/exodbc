@@ -105,7 +105,7 @@ namespace exodbc
 	typedef std::shared_ptr<ColumnFlags> ColumnFlagsPtr;
 
 	/*!
-	* \enum AccessFlag
+	* \enum TableAccessFlag
 	* \brief Defines how to Access a table.
 	*/
 	enum class TableAccessFlag
