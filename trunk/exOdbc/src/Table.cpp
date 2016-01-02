@@ -34,7 +34,7 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	Table::Table()
+	Table::Table() noexcept
 		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
 		, m_pDb(NULL)
@@ -249,7 +249,7 @@ namespace exodbc
 	}
 
 
-	bool Table::HasAllStatements() const throw()
+	bool Table::HasAllStatements() const noexcept
 	{
 		bool haveAll = true;
 		//if (haveAll && TestAccessFlag(TableAccessFlag::AF_SELECT))
@@ -652,7 +652,7 @@ namespace exodbc
 	}
 
 
-	bool Table::ColumnBufferExists(SQLSMALLINT columnIndex) const throw()
+	bool Table::ColumnBufferExists(SQLSMALLINT columnIndex) const noexcept
 	{
 		ColumnBufferPtrVariantMap::const_iterator it = m_columns.find(columnIndex);
 		return it != m_columns.end();
@@ -769,7 +769,7 @@ namespace exodbc
 	}
 
 
-	std::set<SQLUSMALLINT> Table::GetColumnBufferIndexes() const throw()
+	std::set<SQLUSMALLINT> Table::GetColumnBufferIndexes() const noexcept
 	{
 		std::set<SQLUSMALLINT> columnIndexes;
 		ColumnBufferPtrVariantMap::const_iterator it = m_columns.begin();
@@ -1481,7 +1481,7 @@ namespace exodbc
 	* \return	True if this table has the flag AF_READ set and none of the flags
 	*			AF_UPDATE_PK, AF_UPDATE_WHERE, AF_INSERT, AF_DELETE_PK or AF_DELETE_WHERE are set.
 	*/
-	bool Table::IsQueryOnly() const throw()  {
+	bool Table::IsQueryOnly() const noexcept  {
 		return TestAccessFlag(TableAccessFlag::AF_READ) &&
 				! ( TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)
 					|| TestAccessFlag(TableAccessFlag::AF_INSERT)

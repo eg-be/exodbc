@@ -31,7 +31,7 @@ namespace exodbc
 {
 	// Construction
 	// ------------
-	Database::Database()
+	Database::Database() noexcept
 		: m_pEnv(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
@@ -382,7 +382,7 @@ namespace exodbc
 	}
 
 
-	void Database::SetSql2BufferTypeMap(Sql2BufferTypeMapPtr pSql2BufferTypeMap) throw()
+	void Database::SetSql2BufferTypeMap(Sql2BufferTypeMapPtr pSql2BufferTypeMap) noexcept
 	{
 		m_pSql2BufferTypeMap = pSql2BufferTypeMap;
 	}

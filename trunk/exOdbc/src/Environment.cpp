@@ -29,7 +29,7 @@ namespace exodbc
 	// Construction
 	// ------------
 	
-	Environment::Environment()
+	Environment::Environment() noexcept
 		: m_pHEnv(std::make_shared<SqlEnvHandle>())
 		, m_odbcVersion(OdbcVersion::UNKNOWN)
 	{

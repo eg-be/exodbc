@@ -27,19 +27,19 @@ using namespace std;
 
 namespace exodbc
 {
-	Sql2BufferTypeMap::Sql2BufferTypeMap() throw()
+	Sql2BufferTypeMap::Sql2BufferTypeMap() noexcept
 		: m_hasDefault(false)
 		, m_defaultBufferType(0)
 	{}
 
 
-	void Sql2BufferTypeMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType) throw()
+	void Sql2BufferTypeMap::RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType) noexcept
 	{
 		m_typeMap[sqlType] = sqlCType;
 	}
 
 
-	void Sql2BufferTypeMap::ClearType(SQLSMALLINT sqlType) throw()
+	void Sql2BufferTypeMap::ClearType(SQLSMALLINT sqlType) noexcept
 	{
 		TypeMap::const_iterator it = m_typeMap.find(sqlType);
 		if (it != m_typeMap.end())
@@ -49,7 +49,7 @@ namespace exodbc
 	}
 
 
-	bool Sql2BufferTypeMap::ContainsType(SQLSMALLINT sqlType) const
+	bool Sql2BufferTypeMap::ContainsType(SQLSMALLINT sqlType) const noexcept
 	{
 		return m_typeMap.find(sqlType) != m_typeMap.end();
 	}
@@ -74,13 +74,13 @@ namespace exodbc
 	}
 
 
-	bool Sql2BufferTypeMap::HasDefault() const throw()
+	bool Sql2BufferTypeMap::HasDefault() const noexcept
 	{
 		return m_hasDefault;
 	}
 
 
-	void Sql2BufferTypeMap::SetDefault(SQLSMALLINT defaultBufferType) throw()
+	void Sql2BufferTypeMap::SetDefault(SQLSMALLINT defaultBufferType) noexcept
 	{
 		m_hasDefault = true;
 		m_defaultBufferType = defaultBufferType;

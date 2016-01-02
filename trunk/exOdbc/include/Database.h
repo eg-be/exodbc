@@ -96,7 +96,7 @@ namespace exodbc
 		*			Creates a new DefaultSql2BufferTypeMap to be used with this Database.
 		* \see		Init()
 		*/
-		Database() throw();
+		Database() noexcept;
 
 
 		/*!
@@ -577,7 +577,7 @@ namespace exodbc
 		* \brief	Set a Sql2BufferTypeMap to be used by this Database from now on.
 		* \param pSql2BufferTypeMap	Sql2BufferTypeMap to set.
 		*/
-		void		SetSql2BufferTypeMap(Sql2BufferTypeMapPtr pSql2BufferTypeMap) throw();
+		void		SetSql2BufferTypeMap(Sql2BufferTypeMapPtr pSql2BufferTypeMap) noexcept;
 
 
 		/*!

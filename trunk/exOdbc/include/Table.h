@@ -94,7 +94,7 @@ namespace exodbc
 		* \details	You must call one of the Init() methods if the Table was created using
 		*			this Default Constructor.
 		*/
-		Table() throw();
+		Table() noexcept;
 
 
 		/*!
@@ -170,7 +170,7 @@ namespace exodbc
 		* \return	True if all statements are allocated
 		* \see		AllocateStatements()
 		*/
-		bool HasAllStatements() const throw();
+		bool HasAllStatements() const noexcept;
 
 
 		/*!
@@ -249,7 +249,7 @@ namespace exodbc
 		* \return	True if Open() was already called succesfull
 		* \see		Open()
 		*/
-		bool		IsOpen() const throw() { return m_isOpen; };
+		bool		IsOpen() const noexcept { return m_isOpen; };
 
 
 		/*!
@@ -257,7 +257,7 @@ namespace exodbc
 		* \return	True if this table has the flag AF_READ set and none of the flags
 		*			AF_UPDATE_PK, AF_UPDATE_WHERE, AF_INSERT, AF_DELETE_PK or AF_DELETE_WHERE are set.
 		*/
-		bool		IsQueryOnly() const throw();
+		bool		IsQueryOnly() const noexcept;
 
 
 		/*!
@@ -265,7 +265,7 @@ namespace exodbc
 		* \return	True if this table was constructed using a Constructor for a table
 		*			with manual columns.
 		*/
-		bool		IsManualColumns() const throw() { return m_autoCreatedColumns; };
+		bool		IsManualColumns() const noexcept { return m_autoCreatedColumns; };
 
 
 		/*!
@@ -665,7 +665,7 @@ namespace exodbc
 		* \brief	Check if a ColumnBuffer exists at the given columnIndex.
 		* \return	True if a ColumnBuffer can be accessed using passed columnIndex.
 		*/
-		bool		ColumnBufferExists(SQLSMALLINT columnIndex) const throw();
+		bool		ColumnBufferExists(SQLSMALLINT columnIndex) const noexcept;
 
 
 		/*!
@@ -682,7 +682,7 @@ namespace exodbc
 		* \brief	Return a set of columnIndexes for the ColumnBuffers of this Table.
 		* \details	Returns the keyset of the internal ColumnBufferMap
 		*/
-		std::set<SQLUSMALLINT> GetColumnBufferIndexes() const throw();
+		std::set<SQLUSMALLINT> GetColumnBufferIndexes() const noexcept;
 
 
 		/*!

@@ -40,30 +40,30 @@ namespace exodbc
 		: public std::runtime_error
 	{
 	public:
-		Exception() throw() : std::runtime_error("exodbc::Exception"), m_line(0) { m_what = w2s(ToString()); };
-		Exception(const std::wstring& msg) throw() : std::runtime_error("exodbc::Exception"), m_line(0), m_msg(msg) { m_what = w2s(ToString()); };
+		Exception() noexcept : std::runtime_error("exodbc::Exception"), m_line(0) { m_what = w2s(ToString()); };
+		Exception(const std::wstring& msg) noexcept : std::runtime_error("exodbc::Exception"), m_line(0), m_msg(msg) { m_what = w2s(ToString()); };
 
-		virtual ~Exception() throw();
+		virtual ~Exception() noexcept;
 
-		virtual std::wstring ToString() const throw();
-		virtual std::wstring GetName() const throw()	{ return L"exodbc::Exception"; };
+		virtual std::wstring ToString() const noexcept;
+		virtual std::wstring GetName() const noexcept	{ return L"exodbc::Exception"; };
 
-		void SetSourceInformation(int line, const std::wstring& fileName, const std::wstring& functionName) throw();
+		void SetSourceInformation(int line, const std::wstring& fileName, const std::wstring& functionName) noexcept;
 
-		int GetLine() const throw()						{ return m_line; };
-		std::wstring GetFile() const throw()			{ return m_file; };
-		std::wstring GetFunctionName() const throw()	{ return m_functionname;; }
-		std::wstring GetMsg() const throw()				{ return m_msg; };
+		int GetLine() const noexcept						{ return m_line; };
+		std::wstring GetFile() const noexcept			{ return m_file; };
+		std::wstring GetFunctionName() const noexcept	{ return m_functionname;; }
+		std::wstring GetMsg() const noexcept				{ return m_msg; };
 
 		/*!
 		* \brief	Returns an UTF8 representation of an eventually passed message
 		* \return	Passed message as UTF8 multi byte string.
 		*/
-		virtual const char* what() const throw();
+		virtual const char* what() const noexcept;
 
 	protected:
-		//std::string ToUtf8Str(const std::wstring& s) const throw();
-		//std::wstring ToUtf16Str(const std::string& s) const throw();
+		//std::string ToUtf8Str(const std::wstring& s) const noexcept;
+		//std::wstring ToUtf16Str(const std::string& s) const noexcept;
 
 		int				m_line;
 		std::wstring	m_file;
@@ -85,7 +85,7 @@ namespace exodbc
 		AssertionException() : Exception() {};
 
 	public:
-		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition) throw()
+		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition) noexcept
 			: Exception()
 			, m_condition(condition)
 		{
@@ -93,7 +93,7 @@ namespace exodbc
 			m_what = w2s(ToString());
 		};
 
-		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition, const std::wstring& msg) throw()
+		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition, const std::wstring& msg) noexcept
 			: Exception(msg)
 			, m_condition(condition)
 		{
@@ -103,8 +103,8 @@ namespace exodbc
 
 		virtual ~AssertionException() {};
 
-		virtual std::wstring GetName() const throw() { return L"exodbc::AssertionException"; };
-		virtual std::wstring ToString() const throw();
+		virtual std::wstring GetName() const noexcept { return L"exodbc::AssertionException"; };
+		virtual std::wstring ToString() const noexcept;
 
 	protected:
 		std::wstring m_condition;
@@ -122,19 +122,19 @@ namespace exodbc
 		SqlResultException() : Exception() {};
 
 	public:
-		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg = L"") throw();
-		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg = L"") throw();
+		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg = L"") noexcept;
+		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg = L"") noexcept;
 
 		virtual ~SqlResultException() {};
 
-		virtual std::wstring GetName() const throw() { return L"exodbc::SqlResultException"; };
-		virtual std::wstring ToString() const throw();
+		virtual std::wstring GetName() const noexcept { return L"exodbc::SqlResultException"; };
+		virtual std::wstring ToString() const noexcept;
 
 		SQLRETURN GetRet() const noexcept { return m_ret; };
 
 	protected:
-		void FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) throw();
-		void BuildErrorMsg(const std::wstring& sqlFunctionName, SQLRETURN ret) throw();
+		void FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) noexcept;
+		void BuildErrorMsg(const std::wstring& sqlFunctionName, SQLRETURN ret) noexcept;
 
 		SErrorInfoVector m_errors;
 		std::wstring m_errorMsg;
@@ -153,13 +153,13 @@ namespace exodbc
 		IllegalArgumentException() : Exception() {};
 
 	public:
-		IllegalArgumentException(const std::wstring msg) throw()
+		IllegalArgumentException(const std::wstring msg) noexcept
 			: Exception(msg)
 		{};
 
 		virtual ~IllegalArgumentException() {};
 
-		virtual std::wstring GetName() const throw() { return L"exodbc::IllegalArgumentException"; };
+		virtual std::wstring GetName() const noexcept { return L"exodbc::IllegalArgumentException"; };
 	};
 
 
@@ -180,14 +180,14 @@ namespace exodbc
 			SQL_TYPE = 2
 		};
 
-		NotSupportedException(Type notSupported, SQLSMALLINT smallInt) throw()
+		NotSupportedException(Type notSupported, SQLSMALLINT smallInt) noexcept
 			: Exception()
 			, m_notSupported(notSupported)
 			, m_smallInt(smallInt)
 		{
 			m_what = w2s(ToString());
 		};
-		NotSupportedException(Type notSupported, SQLSMALLINT smallInt, const std::wstring& msg) throw()
+		NotSupportedException(Type notSupported, SQLSMALLINT smallInt, const std::wstring& msg) noexcept
 			: Exception(msg)
 			, m_notSupported(notSupported)
 			, m_smallInt(smallInt)
@@ -197,8 +197,8 @@ namespace exodbc
 
 		virtual ~NotSupportedException() {};
 
-		virtual std::wstring GetName() const throw() { return L"exodbc:NotSupportedException"; };
-		virtual std::wstring ToString() const throw();
+		virtual std::wstring GetName() const noexcept { return L"exodbc:NotSupportedException"; };
+		virtual std::wstring ToString() const noexcept;
 
 	private:
 		Type m_notSupported;
@@ -217,15 +217,15 @@ namespace exodbc
 		WrapperException() : Exception() {};
 
 	public:
-		WrapperException(const std::exception& ex) throw()
+		WrapperException(const std::exception& ex) noexcept
 			: Exception()
 			, m_innerExceptionMsg(ex.what())
 		{
 			m_what = w2s(ToString());
 		};
 
-		virtual std::wstring GetName() const throw() { return L"exodbc::WrapperException"; };
-		virtual std::wstring ToString() const throw();
+		virtual std::wstring GetName() const noexcept { return L"exodbc::WrapperException"; };
+		virtual std::wstring ToString() const noexcept;
 
 	private:
 		std::string m_innerExceptionMsg;
@@ -259,10 +259,10 @@ namespace exodbc
 
 		virtual ~CastException() {};
 
-		virtual std::wstring GetName() const throw() { return L"exodbc::CastException"; };
-		virtual std::wstring ToString() const throw();
+		virtual std::wstring GetName() const noexcept { return L"exodbc::CastException"; };
+		virtual std::wstring ToString() const noexcept;
 
-		virtual const char* what() const throw() { return m_what.c_str(); };
+		virtual const char* what() const noexcept { return m_what.c_str(); };
 
 	private:
 		std::string m_what;
@@ -292,10 +292,10 @@ namespace exodbc
 
 		virtual ~NullValueException() {};
 
-		virtual std::wstring GetName() const throw() { return L"exodbc::NullValueException"; };
-		virtual std::wstring ToString() const throw();
+		virtual std::wstring GetName() const noexcept { return L"exodbc::NullValueException"; };
+		virtual std::wstring ToString() const noexcept;
 
-		virtual const char* what() const throw() { return m_what.c_str(); };
+		virtual const char* what() const noexcept { return m_what.c_str(); };
 
 	private:
 		std::wstring m_columnName;
@@ -316,7 +316,7 @@ namespace exodbc
 
 		virtual ~NotImplementedException() {};
 
-		virtual std::wstring GetName() const throw() { return L"exodbc::NotImplementedException"; };
+		virtual std::wstring GetName() const noexcept { return L"exodbc::NotImplementedException"; };
 	};
 
 
@@ -338,6 +338,6 @@ namespace exodbc
 	public:
 		virtual ~NotFoundException() {};
 
-		virtual std::wstring GetName() const throw() { return L"exodbc::NotFoundException"; };
+		virtual std::wstring GetName() const noexcept { return L"exodbc::NotFoundException"; };
 	};
 }

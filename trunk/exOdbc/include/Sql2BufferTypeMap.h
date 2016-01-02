@@ -33,7 +33,7 @@ namespace exodbc
 		/*!
 		* \brief
 		*/
-		Sql2BufferTypeMap() throw();
+		Sql2BufferTypeMap() noexcept;
 		virtual ~Sql2BufferTypeMap() {};
 
 		/*!
@@ -41,14 +41,14 @@ namespace exodbc
 		* \param sqlType	The SQL Type.
 		* \param sqlCType	The SQL C Type to map this SQL Type to.
 		*/
-		virtual void RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType) throw();
+		virtual void RegisterType(SQLSMALLINT sqlType, SQLSMALLINT sqlCType) noexcept;
 
 
 		/*!
 		* \brief	Clear a Type. Does nothing if given SQL Type not registered.
 		* \param sqlType	The SQL Type to clear from the map.
 		*/
-		virtual void ClearType(SQLSMALLINT sqlType) throw();
+		virtual void ClearType(SQLSMALLINT sqlType) noexcept;
 
 
 		/*!
@@ -56,7 +56,7 @@ namespace exodbc
 		* \param sqlType	The SQL Type to test for.
 		* \return bool		True if the passed SQL Type is registered.
 		*/
-		virtual bool ContainsType(SQLSMALLINT sqlType) const throw();
+		virtual bool ContainsType(SQLSMALLINT sqlType) const noexcept;
 
 
 		/*!
@@ -74,14 +74,14 @@ namespace exodbc
 		* \brief	Test if a Default Type is set.
 		* \return bool	True if a Default has been set.
 		*/
-		virtual bool HasDefault() const throw();
+		virtual bool HasDefault() const noexcept;
 		
 		
 		/*!
 		* \brief	Set the Default Type.
 		* \param defaultBufferType	Default SQL C Type.
 		*/
-		virtual void SetDefault(SQLSMALLINT defaultBufferType) throw();
+		virtual void SetDefault(SQLSMALLINT defaultBufferType) noexcept;
 
 
 		/*!

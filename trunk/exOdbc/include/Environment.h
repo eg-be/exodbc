@@ -52,7 +52,7 @@ namespace exodbc
 		 * \see		Init()
 		 * \throw	std::bad_alloc If creation of SqlEnvHandlePtr fails.
 		 */
-		Environment();
+		Environment() noexcept;
 
 
 		/*!
