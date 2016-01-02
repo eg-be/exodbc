@@ -35,6 +35,11 @@ namespace exodbc
 
 	// Classes
 	// -------
+
+	/*!
+	* \enum TablePrivilege
+	* \brief Privileges of a Table for the user used to connect to the Database.
+	*/
 	enum class TablePrivilege
 	{
 		NONE = 0x0,
@@ -61,6 +66,9 @@ namespace exodbc
 	{
 	public:
 
+		/*!
+		* \brief Returns a string of the passed TablePrivilege.
+		*/
 		static std::wstring ToString(TablePrivilege priv);
 
 		/*!
@@ -96,6 +104,10 @@ namespace exodbc
 	{
 	public:
 		MissingTablePrivilegeException() = delete;
+
+		/*!
+		* \brief Create new MissingTablePrivilegeException where passed missingPriv misses on passed tableInfo.
+		*/
 		MissingTablePrivilegeException(TablePrivilege missingPriv, const TableInfo& tableInfo)
 			: Exception()
 			, m_missingPriv(missingPriv)
@@ -106,9 +118,8 @@ namespace exodbc
 
 		virtual ~MissingTablePrivilegeException() {};
 
-		virtual std::wstring ToString() const noexcept;
-
-		virtual std::wstring GetName() const noexcept { return L"exodbc::MissingTablePrivilegeException"; };
+		std::wstring ToString() const noexcept override;
+		std::wstring GetName() const noexcept override { return L"exodbc::MissingTablePrivilegeException"; };
 
 	protected:
 		TablePrivilege m_missingPriv;
