@@ -163,14 +163,6 @@ namespace exodbc
 		* \throw	Exception If allocating statements fail.
 		*/
 		void Init(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
-			
-
-		/*!
-		* \brief	Test if the required statements (depending on OpenFlags) are allocated.
-		* \return	True if all statements are allocated
-		* \see		AllocateStatements()
-		*/
-		bool HasAllStatements() const noexcept;
 
 
 		/*!
@@ -447,18 +439,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	A wrapper to SQLColAttributes, to fetch attributes of the columns of an open result set.
-		* \details	Can only be called if a Select() is open. Only for numeric attributes.
-		* \param	columnIndex zero based index of the column available in the result set.
-		* \param	attr Value to set.
-		* \see		http://msdn.microsoft.com/en-us/library/ms713558%28v=vs.85%29.aspx
-		* \return	Attribute value.
-		* \throw	Exception
-		*/
-		SQLLEN		SelectColumnAttribute(SQLSMALLINT columnIndex, ColumnAttribute attr);
-
-
-		/*!
 		* \brief	Inserts the current values into the database as a new row.
 		* \details	The values in the ColumnBuffer currently bound will be inserted
 		*			into the database.
@@ -554,18 +534,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Set a binary value of the ColumnBuffer given by columnIndex.
-		* \details	This will fail if the corresponding ColumnBuffer is not bound as a
-		*			binary buffer.
-		* \param	columnIndex Zero based ColumnBuffer index.
-		* \param	buffer Binary value to set.
-		* \param	bufferSize length of buffer.
-		* \throw	Exception If ColumnBuffer not found, or setting the value fails.
-		*/
-		void		SetBinaryValue(SQLSMALLINT columnIndex, const SQLCHAR* buffer, SQLINTEGER bufferSize);
-
-
-		/*!
 		* \brief	Sets the the length-indicator value of the ColumnBuffer
 		*			at columnIndex.
 		*/
@@ -608,18 +576,6 @@ namespace exodbc
 				throw we;
 			}
 		}
-
-
-		/*!
-		* \brief	Get the value of a binary ColumnBuffer given by columnIndex.
-		* \details	Returns a pointer to the buffer of the corresponding ColumnBuffer.
-		*			Every column, regardless of its type, can be retrieved.
-		* \param	columnIndex Zero based ColumnBuffer index.
-		* \param	bufferSize Will be filled with the size of the buffer returned.
-		* \param	lengthIndicator Will be filled with the length of the data in the buffer returned.
-		* \throw	Exception If ColumnBuffer not found, or if the Column is NULL.
-		*/
-		const SQLCHAR* GetBinaryValue(SQLSMALLINT columnIndex, SQLLEN& bufferSize, SQLLEN& lengthIndicator) const;
 
 
 		/*!
