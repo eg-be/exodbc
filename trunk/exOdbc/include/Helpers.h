@@ -7,8 +7,6 @@
 */ 
 
 #pragma once
-#ifndef HELPERS_H
-#define HELPERS_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -185,4 +183,3 @@ namespace exodbc
 	// -------
 }
 
-#endif // HELPERS_H

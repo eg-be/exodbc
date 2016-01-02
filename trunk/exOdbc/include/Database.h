@@ -9,8 +9,6 @@
  */
 
 #pragma once
-#ifndef DATABASE_H
-#define DATABASE_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -685,5 +683,4 @@ namespace exodbc
 	typedef std::shared_ptr<const Database> ConstDatabasePtr;
 }	// namespace exodbc
 
-#endif // DATABASE_H
 

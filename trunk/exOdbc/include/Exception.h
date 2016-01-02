@@ -8,8 +8,6 @@
 */
 
 #pragma once
-#ifndef Exception_H
-#define EXCEPTION_H
 
 // Same component headers
 #include "exOdbc.h"
@@ -343,6 +341,3 @@ namespace exodbc
 		virtual std::wstring GetName() const throw() { return L"exodbc::NotFoundException"; };
 	};
 }
-
-
-#endif // EXCEPTION_H
