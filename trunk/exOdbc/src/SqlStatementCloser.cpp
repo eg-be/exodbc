@@ -21,42 +21,23 @@
 // -------------
 namespace exodbc
 {
-	void StatementCloser::CloseStmtHandle(SQLHANDLE hStmt, Mode mode)
+	void StatementCloser::CloseStmtHandle(ConstSqlStmtHandlePtr pHStmt, Mode mode)
 	{
-		exASSERT(hStmt != SQL_NULL_HSTMT);
+		exASSERT(pHStmt);
+		exASSERT(pHStmt->IsAllocated());
 
 		SQLRETURN ret;
 		if (mode == Mode::IgnoreNotOpen)
 		{
 			//  calling SQLFreeStmt with the SQL_CLOSE option has no effect on the application if no cursor is open on the statement
-			ret = SQLFreeStmt(hStmt, SQL_CLOSE);
-			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, hStmt);
+			ret = SQLFreeStmt(pHStmt->GetHandle(), SQL_CLOSE);
+			THROW_IFN_SUCCEEDED(SQLFreeStmt, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 		}
 		else
 		{
 			// SQLCloseCursor returns SQLSTATE 24000 (Invalid cursor state) if no cursor is open. 
-			ret = SQLCloseCursor(hStmt);
-			THROW_IFN_SUCCEEDED(SQLCloseCursor, ret, SQL_HANDLE_STMT, hStmt);
-		}
-	}
-
-
-	void StatementCloser::CloseStmtHandle(ConstSqlStmtHandlePtr pHStmt, Mode mode)
-	{
-		exASSERT(pHStmt);
-		exASSERT(pHStmt->IsAllocated());
-		CloseStmtHandle(pHStmt->GetHandle(), mode);
-	}
-
-
-	StatementCloser::StatementCloser(SQLHSTMT hStmt, bool closeOnConstruction /* = false */, bool closeOnDestruction /* = true */)
-		: m_hStmt(hStmt)
-		, m_closeOnDestruction(closeOnDestruction)
-		, m_pHStmt(NULL)
-	{
-		if (closeOnConstruction)
-		{
-			CloseStmtHandle(m_hStmt, Mode::IgnoreNotOpen);
+			ret = SQLCloseCursor(pHStmt->GetHandle());
+			THROW_IFN_SUCCEEDED(SQLCloseCursor, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 		}
 	}
 
@@ -64,13 +45,12 @@ namespace exodbc
 	StatementCloser::StatementCloser(ConstSqlStmtHandlePtr pHStmt, bool closeOnConstruction /* = false */, bool closeOnDestruction /* = true */)
 		: m_pHStmt(pHStmt)
 		, m_closeOnDestruction(closeOnDestruction)
-		, m_hStmt(SQL_NULL_HSTMT)
 	{
 		if (closeOnConstruction)
 		{
 			exASSERT(m_pHStmt);
 			exASSERT(m_pHStmt->IsAllocated());
-			CloseStmtHandle(pHStmt->GetHandle(), Mode::IgnoreNotOpen);
+			CloseStmtHandle(pHStmt, Mode::IgnoreNotOpen);
 		}
 	}
 
@@ -81,14 +61,10 @@ namespace exodbc
 		{
 			if (m_closeOnDestruction)
 			{
-				if (m_hStmt)
-				{
-					CloseStmtHandle(m_hStmt, Mode::IgnoreNotOpen);
-				}
-				else if (m_pHStmt)
+				if (m_pHStmt)
 				{
 					exASSERT(m_pHStmt->IsAllocated());
-					CloseStmtHandle(m_pHStmt->GetHandle(), Mode::IgnoreNotOpen);
+					CloseStmtHandle(m_pHStmt, Mode::IgnoreNotOpen);
 				}
 
 			}
@@ -96,7 +72,6 @@ namespace exodbc
 		catch (Exception& ex)
 		{
 			// Should never happen?
-			// \todo Ticket #100
 			LOG_ERROR(ex.ToString());
 		}
 	}

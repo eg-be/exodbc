@@ -20,9 +20,14 @@
 // -------------
 namespace exodbc
 {
+	/*!
+	* \class	StatementCloser
+	* \brief	Helper that will close a statement on construction and/or destruction.
+	*/
 	class EXODBCAPI StatementCloser
 	{
 	public:
+		
 		/*!
 		* \enum	StmtCloseMode
 		* \brief Hints for CloseStmtHandle() if it shall throw or not.
@@ -46,15 +51,18 @@ namespace exodbc
 		*/
 		static void	CloseStmtHandle(ConstSqlStmtHandlePtr pHstmt, Mode mode);
 
-		static void	CloseStmtHandle(SQLHANDLE hStmt, Mode mode);
-
+		/*!
+		* \brief Create new StatementCloser, depending on values passed it will close on construction and / or on destruction
+		*/
 		StatementCloser(ConstSqlStmtHandlePtr pHStmt, bool closeOnConstruction = false, bool closeOnDestruction = true);
-		StatementCloser(SQLHSTMT hStmt, bool closeOnConstruction = false, bool closeOnDestruction = true);
+		
+		/*!
+		* \brief Depending how this StatementCloser was constructed, it will close the statement on destruction.
+		*/
 		~StatementCloser();
 
 	private:
 		ConstSqlStmtHandlePtr m_pHStmt;
-		SQLHSTMT m_hStmt;
 		bool m_closeOnDestruction;
 	};
 }
