@@ -1,5 +1,4 @@
-#ifndef JSS_BITMASK_HPP
-#define JSS_BITMASK_HPP
+#pragma  once
 
 // (C) Copyright 2015 Just Software Solutions Ltd
 //
@@ -99,4 +98,3 @@ operator^=(E& lhs,E rhs){
     return lhs;
 }
 
-#endif
