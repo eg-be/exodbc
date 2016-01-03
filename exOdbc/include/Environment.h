@@ -84,6 +84,13 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Create new Environment using passed ODBC version. Created Environment
+		*			is wrapped into a shared_ptr.
+		*/
+		static std::shared_ptr<Environment> Create(OdbcVersion odbcVersion);
+
+
+		/*!
 		* \brief	Must be called if Environment has been created using Default Constructor.
 		* \details	Can only be called once. Allocates the ODBC Environment handle and sets the
 		*			passed OdbcVersion.
