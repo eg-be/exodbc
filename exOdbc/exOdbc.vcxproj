@@ -177,7 +177,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -198,7 +198,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -222,10 +222,10 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
-      <Message>Updating Versioninfo</Message>
+      <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -246,10 +246,10 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\3rdParty\boost\stage\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\BuildScripts\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
-      <Message>Updating Versioninfo</Message>
+      <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
