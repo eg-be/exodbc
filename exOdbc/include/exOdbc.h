@@ -26,6 +26,10 @@
 #include <sqlext.h>
 #include <sqlucode.h>
 #include <odbcinst.h>
+#include <string>
+#include <vector>
+#include <sstream>
+#include "boost/log/trivial.hpp"
 
 namespace exodbc
 {
