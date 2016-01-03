@@ -982,7 +982,7 @@ namespace exodbc
 	extern EXODBCAPI ColumnBufferPtrVariant CreateColumnArrayBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo);
 	
 	/*!
-	* \brief	Calculate the "DisplaySize" of a given column: This is the number of characters requried if the column
+	* \brief	Calculate the "DisplaySize" of a given column: This is the number of characters required if the column
 	*			is bound to a SQL C character type.
 	* \details	See https://msdn.microsoft.com/en-us/library/ms713974%28v=vs.85%29.aspx for the details.
 	*/
