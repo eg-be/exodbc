@@ -100,6 +100,13 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	std::shared_ptr<Database> Database::Create(ConstEnvironmentPtr pEnv)
+	{
+		DatabasePtr pDb = std::make_shared<Database>(pEnv);
+		return pDb;
+	}
+
+
 	void Database::Init(ConstEnvironmentPtr pEnv)
 	{
 		exASSERT(pEnv != NULL);

@@ -69,6 +69,12 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	std::shared_ptr<Environment> Environment::Create(OdbcVersion odbcVersion)
+	{
+		EnvironmentPtr pEnv = std::make_shared<Environment>(odbcVersion);
+		return pEnv;
+	}
+
 	void Environment::Init(OdbcVersion odbcVersion)
 	{
 		exASSERT(odbcVersion != OdbcVersion::UNKNOWN);

@@ -127,6 +127,13 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Create new Database using passed ODBC Environment. Created Database
+		*			is wrapped into a shared_ptr.
+		*/
+		static std::shared_ptr<Database> Create(ConstEnvironmentPtr pEnv);
+
+
+		/*!
 		* \brief	Must be called if Database has been created using Default Constructor.
 		* \details	Can only be called once. Allocates the Connection handle from the passed
 		*			Environment. Do not free the passed Environment before you free the database.
