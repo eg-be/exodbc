@@ -83,10 +83,10 @@ int main()
 			std::wcout << L"id: " << pIdCharCol->GetWString() << L"; Name: " << pNameCharCol->GetWString() << L"; LastUpdate: " << pLastUpdateCharCol->GetWString() << std::endl;
 		}
 
-		// Or create a prepared statement that binds a buffers for results and for a parameter marker:
+		// Or create a prepared statement that binds buffers as result columns and as parameter markers:
 		ExecutableStatement stmt(pDb);
 		stmt.Prepare(L"SELECT name, lastUpdate FROM t1 WHERE id = ?");
-		// column and param indexes start at one
+		// column and param indexes start at 1
 		stmt.BindColumn(pNameCharCol, 1); // map to result column name
 		stmt.BindColumn(pLastUpdateCharCol, 2); // map to result column lastUpdate
 		stmt.BindParameter(pIdCol, 1); // map to first param marker
