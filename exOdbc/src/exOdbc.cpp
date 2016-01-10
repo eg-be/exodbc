@@ -88,29 +88,49 @@ namespace exodbc {
 
 	std::string w2s(const std::wstring& w) noexcept
 	{
-		std::stringstream ss;
-
-		for (size_t i = 0; i < w.length(); i++)
+		try
 		{
-			char c = (char)w[i];
-			ss << c;
+			std::wstring_convert<
+				std::codecvt_utf8_utf16< std::wstring::value_type >,
+				std::wstring::value_type
+			> utf16conv;
+			return utf16conv.to_bytes(w);
 		}
-
-		return ss.str();
+		catch (const std::exception& ex)
+		{
+			std::string s("Failed in w2s with std::exception: ");
+			s += ex.what();
+			return s;
+		}
+		catch (...)
+		{
+			std::string s("Failed in w2s with unknown exception.");
+			return s;
+		}
 	}
 
 
 	std::wstring s2w(const std::string& s) noexcept
 	{
-		std::wstringstream ws;
-
-		for (size_t i = 0; i < s.length(); i++)
+		try
 		{
-			char c = (char)s[i];
-			ws << c;
+			std::wstring_convert<
+				std::codecvt_utf8_utf16< std::wstring::value_type >,
+				std::wstring::value_type
+			> utf16conv;
+			return utf16conv.from_bytes(s);
 		}
-
-		return ws.str();
+		catch (const std::exception& ex)
+		{
+			HIDE_UNUSED(ex);
+			std::wstring ws(L"Failed in s2w with std::exception - unable to print what() as wstring, sorry.");
+			return ws;
+		}
+		catch (...)
+		{
+			std::wstring ws(L"Failed in s2w with unknown exception.");
+			return ws;
+		}
 	}
 
 
