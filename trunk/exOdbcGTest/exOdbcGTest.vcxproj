@@ -112,7 +112,9 @@
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir) $(TargetDir)</Command>
+      <Command>call "$(ProjectDir)\CopyCreateScripts.bat" "$(ProjectDir)" "$(TargetDir)"
+call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configuration)" "$(Platform)"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -136,7 +138,9 @@
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir) $(TargetDir)</Command>
+      <Command>call "$(ProjectDir)\CopyCreateScripts.bat" "$(ProjectDir)" "$(TargetDir)"
+call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configuration)" "$(Platform)"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -164,7 +168,9 @@
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir) $(TargetDir)</Command>
+      <Command>call "$(ProjectDir)\CopyCreateScripts.bat" "$(ProjectDir)" "$(TargetDir)"
+call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configuration)" "$(Platform)"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -192,7 +198,9 @@
       <Message>Updating VersionInfo</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>$(ProjectDir)\CopyCreateScripts.bat $(ProjectDir) $(TargetDir)</Command>
+      <Command>call "$(ProjectDir)\CopyCreateScripts.bat" "$(ProjectDir)" "$(TargetDir)"
+call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configuration)" "$(Platform)"
+</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -246,6 +254,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="CopyBoostDlls.bat" />
     <None Include="exOdbcGTest.rc2" />
     <None Include="CopyCreateScripts.bat" />
     <None Include="Version.h.template" />

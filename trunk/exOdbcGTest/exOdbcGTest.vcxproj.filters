@@ -132,6 +132,7 @@
     </None>
     <None Include="Version.h.template" />
     <None Include="CopyCreateScripts.bat" />
+    <None Include="CopyBoostDlls.bat" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="exOdbcGTest.rc">
