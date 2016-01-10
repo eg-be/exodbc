@@ -16,9 +16,6 @@
 #include "TestDbCreator.h"
 
 // Other headers
-#include "boost/log/trivial.hpp"
-#include "boost/log/core.hpp"
-#include "boost/log/expressions.hpp"
 #include "boost/filesystem.hpp"
 
 // Debug
@@ -59,7 +56,6 @@ bool extractParamValue( int argc, const _TCHAR* const argv[],const std::wstring&
 	return false;
 }
 
-#include "boost/variant/polymorphic_get.hpp"
 
 void printHelp()
 {
@@ -87,8 +83,6 @@ void printHelp()
 	wcerr << L"string contains white spaces.\n";
 	wcerr << L"\n";
 	wcerr << L"--createDb       Runs the script to create the test databases.\n";
-	wcerr << L"--logLevelN      Set the logLevel to N, where N must be a single Letter:\n";
-	wcerr << L"                 (T)race, (D)ebug, (I)nfo, (W)arning, (E)rror, (F)atal\n";
 	wcerr << L"\n";
 	wcerr << L"Examples:\n";
 	wcerr << L" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass\n";
@@ -117,12 +111,10 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	// Set defaults
 	bool doCreateDb = false;
-	g_odbcInfo.m_logSeverity = boost::log::trivial::info;
 
 	// Iterate given options
 	for (int i = 1; i < argc; i++)
 	{
-		std::wstring logLevel = L"--logLevel";
 		std::wstring createDb = L"--createDb";
 		std::wstring dsn = L"dsn=";
 		std::wstring DSN = L"DSN=";
@@ -130,31 +122,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		std::wstring CS = L"CS=";
 		std::wstring arg(argv[i]);
 		std::wstring upperDsn, lowerDsn, upperCs, lowerCs;
-		if (ba::starts_with(arg, logLevel) && arg.length() > logLevel.length())
-		{
-			switch (arg[logLevel.length()])
-			{
-			case 'T':
-				g_odbcInfo.m_logSeverity = boost::log::trivial::trace;
-				break;
-			case 'D':
-				g_odbcInfo.m_logSeverity = boost::log::trivial::debug;
-				break;
-			case 'I':
-				g_odbcInfo.m_logSeverity = boost::log::trivial::info;
-				break;
-			case 'W':
-				g_odbcInfo.m_logSeverity = boost::log::trivial::warning;
-				break;
-			case 'E':
-				g_odbcInfo.m_logSeverity = boost::log::trivial::error;
-				break;
-			case 'F':
-				g_odbcInfo.m_logSeverity = boost::log::trivial::fatal;
-				break;
-			}
-		}
-		else if (arg == createDb)
+		if (arg == createDb)
 		{
 			doCreateDb = true;
 		}
@@ -231,12 +199,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	LOG_INFO(L"Running tests against: " << g_odbcInfo);
-
-	// Set a filter for the logging
-	boost::log::core::get()->set_filter
-		(
-		boost::log::trivial::severity >= boost::ref(g_odbcInfo.m_logSeverity)
-		);
 
 	// Check if we need to re-create the dbs
 	if (doCreateDb)

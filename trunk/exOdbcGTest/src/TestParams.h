@@ -62,7 +62,6 @@ namespace exodbctest
 		std::wstring m_password;
 		std::wstring m_connectionString;
 		Case m_namesCase;
-		boost::log::trivial::severity_level m_logSeverity;
 		bool m_createDb;
 	};
 

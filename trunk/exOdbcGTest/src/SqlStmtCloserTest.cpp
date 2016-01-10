@@ -61,7 +61,6 @@ namespace exodbctest
 		SqlStmtHandlePtr pHStmt = std::make_shared<SqlStmtHandle>();
 		{
 			// We assert if we pass a null handle
-			LogLevelFatal llf;
 			EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen), AssertionException);
 		}
 
@@ -74,7 +73,6 @@ namespace exodbctest
 			{
 				LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
 			}
-			LogLevelFatal llf;
 			EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
 		}
 		// But not if we ignore the cursor-state
@@ -107,7 +105,6 @@ namespace exodbctest
 		{
 			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
 		}
-		LogLevelFatal llf;
 		EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
 
 		// Free the statement by letting going out of scope

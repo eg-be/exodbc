@@ -156,7 +156,7 @@ namespace exodbc
 		ws << L"\n";
 		for (size_t i = 0; i < m_errors.size(); i++)
 		{
-			ws << m_errors[i] << L"\n";
+			ws << m_errors[i].ToString() << L"\n";
 		}
 		return ws.str();
 	}
