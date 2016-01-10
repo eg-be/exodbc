@@ -15,7 +15,6 @@
 #include "Exception.h"
 
 // Other headers
-#include "boost/thread/locks.hpp"
 
 // Debug
 #include "DebugNew.h"

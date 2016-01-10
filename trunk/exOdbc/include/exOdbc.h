@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "boost/log/trivial.hpp"
+#include <iostream>
 
 namespace exodbc
 {
@@ -335,6 +335,44 @@ do {																\
 // LOG Helpers
 // ===========
 
+namespace exodbc
+{
+	enum class LogLevel
+	{
+		Error,
+		Warning,
+		Info,
+		Debug
+	};
+
+
+	extern std::wstring FormatOdbcMsg(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg, LogLevel logLevel);
+}
+
+// Generic Log-entry
+#define LOG_MSG(logLevel, msg) \
+	do { \
+    switch(logLevel) \
+	{ \
+	case exodbc::LogLevel::Error: \
+		std::wcerr << L"ERROR: "; break;\
+	case exodbc::LogLevel::Warning: \
+		std::wcerr << L"WARNING: "; break;\
+	case exodbc::LogLevel::Info: \
+		std::wcerr << L"INFO: "; break;\
+	case exodbc::LogLevel::Debug: \
+		std::wcerr << L"DEBUG: "; break;\
+	} \
+	std::wcerr << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " << msg; \
+	} while( 0 )
+
+// Generic Log-entry shortcuts
+#define LOG_ERROR(msg) LOG_MSG(exodbc::LogLevel::Error, msg)
+#define LOG_WARNING(msg) LOG_MSG(exodbc::LogLevel::Warning, msg)
+#define LOG_INFO(msg) LOG_MSG(exodbc::LogLevel::Info, msg)
+#define LOG_DEBUG(msg) LOG_MSG(exodbc::LogLevel::Debug, msg)
+
+// ODBC-Logging
 #define LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, logLevel) \
 	do { \
 		std::wstring msgStr(msg); \
@@ -357,13 +395,13 @@ do {																\
 			const SErrorInfo& err = *it; \
 			ws << std::endl << L"\t" << err.ToString(); \
 		} \
-		BOOST_LOG_TRIVIAL(logLevel) << ws.str(); \
+		LOG_MSG(logLevel, ws.str()); \
 	} while( 0 )
 
 // ODBC-Loggers, with a message
-#define LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, error)
-#define LOG_WARNING_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, warning)
-#define LOG_INFO_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, info)
+#define LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, exodbc::LogLevel::Error)
+#define LOG_WARNING_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, exodbc::LogLevel::Warning)
+#define LOG_INFO_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, exodbc::LogLevel::Info)
 
 // ODBC-Loggers, no message
 #define LOG_ERROR_ODBC(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction) LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, L"")
@@ -409,26 +447,18 @@ do {																\
 // Log NO_SUCESS
 #define LOG_ERROR_SQL_NO_SUCCESS(ret, SqlFunction) \
 	do { \
-		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret; \
+		std::wstringstream ws; \
+		ws << L"ODBC-Function '" < L#SqlFunction << L"' returned " << ret; \
+		LOG_MSG(exodbc::LogLevel::Error, ws.str()); \
 	} while( 0 )
 
 // Log expected NO_DATA
 #define LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SqlFunction) \
 	do { \
-		BOOST_LOG_TRIVIAL(error) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": ODBC-Function '" << L#SqlFunction << L"' returned " << ret << L", but we expected SQL_NO_DATA (" << SQL_NO_DATA << L")"; \
+		std::wstringstream ws; \
+		ws << L"ODBC-Function '" < L#SqlFunction << L"' returned " << ret << L", but we expected SQL_NO_DATA (" << SQL_NO_DATA << L")"; \
+		LOG_MSG(exodbc::LogLevel::Error, ws.str()); \
 	} while( 0 )
-
-// Generic Log-entry
-#define LOG_MSG(logLevel, msg) \
-	do { \
-	BOOST_LOG_TRIVIAL(logLevel) << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " << msg; \
-	} while( 0 )
-
-// Generic Log-entry shortcuts
-#define LOG_ERROR(msg) LOG_MSG(error, msg)
-#define LOG_WARNING(msg) LOG_MSG(warning, msg)
-#define LOG_INFO(msg) LOG_MSG(info, msg)
-#define LOG_DEBUG(msg) LOG_MSG(debug, msg)
 
 // SQL Warning Helpers
 // ===================

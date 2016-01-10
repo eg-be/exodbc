@@ -13,9 +13,6 @@
 #include "SqlHandle.h"
 
 // Other headers
-#include "boost/log/trivial.hpp"
-#include "boost/thread/shared_mutex.hpp"
-
 // System headers
 #include <string>
 #include <iostream>

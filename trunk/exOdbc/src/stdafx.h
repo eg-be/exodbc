@@ -16,12 +16,13 @@
 
 #include "targetver.h"
 
-// libs
+// libs - boos stuff
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
-#include "boost/log/trivial.hpp"
-#include "boost/lexical_cast.hpp"
 #include "boost/signals2.hpp"
+#include "boost/lexical_cast.hpp"
+#include "boost/variant.hpp"
+#include "boost/variant/polymorphic_get.hpp"
 
 // system
 #include <windows.h>
@@ -30,14 +31,6 @@
 #include <set>
 #include <locale>
 #include <codecvt>
-//#include <cstdio>
-//#include <tchar>
-//#include <string.h>
-//#include <assert.h>
-//#include <stdlib.h>
-//#include <ctype.h>
-//#include <vector>
-//#include <iostream>
 
 // odbc-things
 #include <sql.h>

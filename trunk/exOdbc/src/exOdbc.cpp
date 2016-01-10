@@ -38,10 +38,43 @@ namespace exodbc {
 		{
 			ws << L" Msg:       " << msg << std::endl;
 		}
-		BOOST_LOG_TRIVIAL(error) << ws.str();
+		LOG_ERROR(ws.str());
 
 		// Throw exception
 		throw AssertionException(line, file, function, condition, msg);
+	}
+
+
+	std::wstring FormatOdbcMsg(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg, LogLevel logLevel)
+	{
+		std::wstring msgStr(msg);
+		SErrorInfoVector errs = exodbc::GetAllErrors(hEnv, hDbc, hStmt, hDesc);
+		SErrorInfoVector::const_iterator it;
+		std::wstringstream handles;
+		if (hEnv)
+			handles << L"Env=" << hEnv << L";";
+		if (hDbc)
+			handles << L"Dbc=" << hDbc << L";";
+		if (hStmt)
+			handles << L"Stmt=" << hStmt << L";";
+		if (hDesc)
+			handles << L"Desc=" << hDesc << L";";
+
+		std::wstring type = L"Error(s)";
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			type = L"Info(s)";
+		}
+		std::wstringstream ws;
+		if (msgStr.length() > 0)
+			ws << msgStr << L": ";
+		ws << L"ODBC-Function '" << sqlFunctionName << L"' returned " << exodbc::SqlReturn2s(ret) << L" (" << ret << L"), with " << errs.size() << L" ODBC-" << type << L" from handle(s) '" << handles.str() << L"': ";
+		for (it = errs.begin(); it != errs.end(); it++)
+		{
+			const SErrorInfo& err = *it;
+			ws << std::endl << L"\t" << err.ToString();
+		}
+		return ws.str();
 	}
 
 
@@ -430,7 +463,11 @@ namespace exodbc {
 					errInfo.Msg = errMsg;
 					errors.push_back(errInfo);
 					if (ret == SQL_SUCCESS_WITH_INFO)
-						BOOST_LOG_TRIVIAL(warning) << L"Error msg from recNr " << recNr << L" got truncated";
+					{
+						std::wstringstream ws;
+						ws << L"Error msg from recNr " << recNr << L" got truncated";
+						LOG_WARNING(ws.str());
+					}
 				}
 				++recNr;
 			}
