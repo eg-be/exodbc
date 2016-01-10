@@ -23,8 +23,6 @@
 #include "ExecutableStatement.h"
 
 // Other headers
-#include "boost/any.hpp"
-
 // System headers
 
 // Forward declarations
