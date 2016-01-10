@@ -78,17 +78,10 @@ namespace exodbc {
 	}
 
 
-	std::wostream& operator<< (std::wostream &out, const SErrorInfo& ei)
-	{
-		out << L"SQLSTATE " << ei.SqlState << L"; Native Error: " << ei.NativeError << L"; " << ei.Msg.c_str();
-		return out;
-	}
-
-
 	std::wstring SErrorInfo::ToString() const
 	{
 		std::wstringstream ws;
-		ws << this;
+		ws << L"SQLSTATE " << SqlState << L"; Native Error: " << NativeError << L"; " << Msg.c_str();
 		return ws.str();
 	}
 

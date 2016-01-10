@@ -68,7 +68,6 @@ namespace exodbctest
 
 		EXPECT_TRUE(c1.HasConnectionHandle());
 		{
-			LogLevelError lle;
 			EXPECT_THROW(c1.Init(m_pEnv), AssertionException);
 		}
 
@@ -81,7 +80,6 @@ namespace exodbctest
 
 	TEST_F(DatabaseTest, PrintDatabaseInfo)
 	{
-		LogLevelInfo lli;
 		LOG_INFO(L"Will print Database Information now");
 		LOG_INFO(L"===================================");
 		LOG_INFO(m_pDb->GetDbInfo().ToString());
@@ -91,7 +89,6 @@ namespace exodbctest
 
 	TEST_F(DatabaseTest, PrintDatabaseTypeInfo)
 	{
-		LogLevelInfo lli;
 		std::wstringstream ws;
 		ws << L"Will print Database Type Information now" << std::endl;
 		ws << L"===================================" << std::endl;
@@ -356,7 +353,7 @@ namespace exodbctest
 
 		}
 
-		BOOST_LOG_TRIVIAL(info) << ws.str();
+		LOG_INFO(ws.str());
 	}
 
 

@@ -133,7 +133,6 @@ namespace exodbctest
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			// MS will complain about data loss
-			LogLevelError llErr;
 			EXPECT_TRUE(table.SelectNext());
 		}
 		else
@@ -148,7 +147,6 @@ namespace exodbctest
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
 			// MS will complain about data loss
-			LogLevelError llErr;
 			EXPECT_TRUE(table.SelectNext());
 		}
 		else

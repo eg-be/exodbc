@@ -22,9 +22,6 @@
 #include "Database.h"
 #include "Exception.h"
 #include "ColumnBufferVisitors.h"
-#include "boost/log/trivial.hpp"
-#include "boost/log/core.hpp"
-#include "boost/log/expressions.hpp"
 
 // Debug
 #include "DebugNew.h"
@@ -182,7 +179,6 @@ namespace exodbctest
 
 		// Open a non-existing table
 		{
-			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
 			MNotExistingTable neTable(m_pDb);
 			EXPECT_THROW(neTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE), exodbc::Exception);
@@ -244,7 +240,6 @@ namespace exodbctest
 		// If we try to open an auto-table this will never work if you've passed invalid information:
 		// As soon as the columns are searched, we expect to fail
 		{
-			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
 			TableInfo neTableInfo(L"NotExisting", L"", L"", L"", L"");
 			Table neTable(m_pDb, TableAccessFlag::AF_READ, neTableInfo);
@@ -261,7 +256,6 @@ namespace exodbctest
 
 		// Open a non-existing table
 		{
-			LogLevelFatal llFatal;
 			LOG_ERROR(L"Warning: This test is supposed to spit errors");
 			std::wstring neName = GetTableName(TableId::NOT_EXISTING);
 			exodbc::Table neTable(m_pDb, TableAccessFlag::AF_READ, neName, L"", L"", L"");
@@ -331,7 +325,6 @@ namespace exodbctest
 		EXPECT_THROW(iTable.Open(), Exception);
 		// But not if we skip
 		{
-			LogLevelError lle;
 			EXPECT_NO_THROW(iTable.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 	}
@@ -346,7 +339,6 @@ namespace exodbctest
 		ASSERT_THROW(nst.Open(), NotSupportedException);
 		// But not if we pass the flag to skip
 		{
-			LogLevelFatal llf;
 			ASSERT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
@@ -370,7 +362,6 @@ namespace exodbctest
 
 		// we do not fail to open if we pass the flag to skip
 		{
-			LogLevelFatal llf;
 			EXPECT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
@@ -400,7 +391,6 @@ namespace exodbctest
 
 		// Close when not open must fail
 		{
-			LogLevelFatal llf;
 			EXPECT_THROW(iTable.Close(), AssertionException);
 		}
 
@@ -412,7 +402,6 @@ namespace exodbctest
 
 		// Close an already closed table
 		{
-			LogLevelFatal llf;
 			EXPECT_THROW(iTable.Close(), AssertionException);
 		}
 	}
@@ -453,7 +442,6 @@ namespace exodbctest
 
 		// We cannot change the mode if the table is open
 		{
-			LogLevelFatal llf;
 			EXPECT_THROW(iTable.SetAccessFlags(TableAccessFlag::AF_READ), AssertionException);
 		}
 

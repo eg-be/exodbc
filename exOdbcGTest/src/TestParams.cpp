@@ -149,33 +149,6 @@ namespace exodbctest
 			}
 
 			m_createDb = tree.get<bool>(L"TestSettings.CreateDb");
-			
-			wstring logLevel = tree.get<wstring>(L"TestSettings.LogLevel");
-			if (ba::iequals(logLevel, L"T") || ba::iequals(logLevel, L"Trace"))
-			{
-				m_logSeverity = boost::log::trivial::trace;
-			}
-			else if (ba::iequals(logLevel, L"D") || ba::iequals(logLevel, L"Debug"))
-			{
-				m_logSeverity = boost::log::trivial::debug;
-			}
-			else if (ba::iequals(logLevel, L"I") || ba::iequals(logLevel, L"Info"))
-			{
-				m_logSeverity = boost::log::trivial::info;
-			}
-			else if (ba::iequals(logLevel, L"E") || ba::iequals(logLevel, L"Error"))
-			{
-				m_logSeverity = boost::log::trivial::error;
-			}
-			else if (ba::iequals(logLevel, L"F") || ba::iequals(logLevel, L"Fatal"))
-			{
-				m_logSeverity = boost::log::trivial::fatal;
-			}
-			else
-			{
-				LOG_WARNING(L"No valid log level specified, falling back to Info");
-				m_logSeverity = boost::log::trivial::info;
-			}
 		}
 		catch (const std::exception& ex)
 		{

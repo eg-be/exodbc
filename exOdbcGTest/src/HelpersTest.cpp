@@ -107,7 +107,6 @@ namespace exodbctest
 
 		{
 			// note that this will info about data truncation
-			LogLevelWarning llw;
 			EXPECT_NO_THROW(GetData(pHStmt, 2, 3, value, &isNull));
 		}
 		EXPECT_EQ(L"הצü", value);
@@ -166,7 +165,6 @@ namespace exodbctest
 
 		// Except to fail when passing a null handle
 		{
-			LogLevelFatal llf;
 			EXPECT_THROW(SetDescriptionField(SQL_NULL_HSTMT, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC), AssertionException);
 		}
 
@@ -192,7 +190,6 @@ namespace exodbctest
 	{
 		// We except an assertion if not at least one handle is valid
 		{
-			LogLevelFatal llf;
 			EXPECT_THROW(GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC), AssertionException);
 		}
 	}

@@ -1,4 +1,11 @@
-// ShortIntro.cpp : Defines the entry point for the console application.
+/*!
+* \file ShortIntro.cpp
+* \author Elias Gerber <eg@elisium.ch>
+* \date 03.01.2016
+* \copyright GNU Lesser General Public License Version 3
+*
+* ShortIntro Sample.
+*/
 
 #include <SDKDDKVer.h>
 #include <iostream>

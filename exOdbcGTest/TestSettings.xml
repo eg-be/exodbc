@@ -72,15 +72,7 @@
   
   <CreateDb>0</CreateDb>
   
-  <LogLevel>Info</LogLevel>
-  
-  <!-- 
-  <LogLevel>(T)race</LogLevel>";  
-  <LogLevel>(D)ebug</LogLevel>";
-  <LogLevel>(I)nfo</LogLevel>
-  <LogLevel>(E)rror</LogLevel>
-  <LogLevel>(F)atal</LogLevel>
-  
+  <!--  
   <Case>(l)ower</Case>
   <Case>(u)pper</Case>
   -->

@@ -186,9 +186,6 @@ namespace exodbc
 			}
 			throw;
 		}
-
-		// Completed Successfully
-		LOG_DEBUG((boost::wformat(L"Opened connection to database %s") %m_dbInf.GetDbmsName()).str());
 	}
 
 
@@ -655,7 +652,6 @@ namespace exodbc
 		SQLRETURN ret = SQLDisconnect(m_pHDbc->GetHandle());
 		THROW_IFN_SUCCEEDED(SQLDisconnect, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
 
-		LOG_DEBUG((boost::wformat(L"Closed connection to database %s") %m_dbInf.GetDbmsName()).str());
 		m_dbIsOpen = false;
 	}
 

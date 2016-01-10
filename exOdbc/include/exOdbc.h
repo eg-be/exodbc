@@ -174,7 +174,6 @@ namespace exodbc
 		SQLWCHAR		SqlState[5 + 1];
 		SQLINTEGER		NativeError;
 		std::wstring	Msg;
-		friend std::wostream& operator<< (std::wostream &out, const SErrorInfo& ei);
 
 		std::wstring ToString() const;
 	};
@@ -337,6 +336,10 @@ do {																\
 
 namespace exodbc
 {
+	/*!
+	* \enum LogLevel
+	* \brief Log level to use when logging messages. Currently only sets some prefix..
+	*/
 	enum class LogLevel
 	{
 		Error,
@@ -346,7 +349,10 @@ namespace exodbc
 	};
 
 
-	extern std::wstring FormatOdbcMsg(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg, LogLevel logLevel);
+	/*!
+	* \brief Format all Infos and Errors from passed handles into something human-readable.
+	*/
+	extern EXODBCAPI std::wstring FormatOdbcMsg(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg, LogLevel logLevel);
 }
 
 // Generic Log-entry
@@ -363,7 +369,7 @@ namespace exodbc
 	case exodbc::LogLevel::Debug: \
 		std::wcerr << L"DEBUG: "; break;\
 	} \
-	std::wcerr << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " << msg; \
+	std::wcerr << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " << msg << std::endl; \
 	} while( 0 )
 
 // Generic Log-entry shortcuts
@@ -375,27 +381,8 @@ namespace exodbc
 // ODBC-Logging
 #define LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, logLevel) \
 	do { \
-		std::wstring msgStr(msg); \
-		SErrorInfoVector errs = GetAllErrors(hEnv, hDbc, hStmt, hDesc); \
-		SErrorInfoVector::const_iterator it; \
-		std::wstringstream handles; \
-		if(hEnv) handles << L"Env=" << hEnv << L";"; \
-		if(hDbc) handles << L"Dbc=" << hDbc << L";"; \
-		if(hStmt) handles << L"Stmt=" << hStmt << L";"; \
-		if(hDesc) handles << L"Desc=" << hDesc << L";"; \
-		std::wstring type = L"Error(s)"; \
-		if(ret == SQL_SUCCESS_WITH_INFO) { type = L"Info(s)"; } \
-		std::wstringstream ws; \
-		ws << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " ; \
-		if(msgStr.length() > 0) \
-			ws << msgStr << L": "; \
-		ws << L"ODBC-Function '" << L#SqlFunction << L"' returned " << SqlReturn2s(ret) << L" (" << ret << L"), with " << errs.size() << L" ODBC-" << type << L" from handle(s) '" << handles.str() << L"': "; \
-		for(it = errs.begin(); it != errs.end(); it++) \
-		{ \
-			const SErrorInfo& err = *it; \
-			ws << std::endl << L"\t" << err.ToString(); \
-		} \
-		LOG_MSG(logLevel, ws.str()); \
+		std::wstring logOdbcMsgMsg = exodbc::FormatOdbcMsg(hEnv, hDbc, hStmt, hDesc, ret, L#SqlFunction, msg, logLevel); \
+		LOG_MSG(logLevel, logOdbcMsgMsg); \
 	} while( 0 )
 
 // ODBC-Loggers, with a message
