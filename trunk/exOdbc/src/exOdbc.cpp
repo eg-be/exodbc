@@ -16,7 +16,6 @@
 #include "LogManager.h"
 
 // Other headers
-
 // Debug
 #include "DebugNew.h"
 

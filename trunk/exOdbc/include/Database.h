@@ -20,7 +20,7 @@
 
 // Other headers
 #if EXODBC_TEST
-	#include "gtest/gtest_prod.h"
+	#include <gtest/gtest_prod.h>
 #endif
 
 // System headers

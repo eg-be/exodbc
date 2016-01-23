@@ -13,9 +13,7 @@
 #include "ObjectName.h"
 
 // Same component headers
-
 // Other headers
-
 // Debug
 #include "DebugNew.h"
 
