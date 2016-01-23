@@ -27,24 +27,6 @@ namespace exodbc {
 
 	// Implementation
 	// --------------
-	void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg)
-	{
-		std::wstringstream ws;
-		ws << L"ASSERTION failure!" << std::endl;
-		ws << L" File:      " << file << std::endl;
-		ws << L" Line:      " << line << std::endl;
-		ws << L" Function:  " << function << std::endl;
-		ws << L" Condition: " << condition << std::endl;
-		if (msg.length() > 0)
-		{
-			ws << L" Msg:       " << msg << std::endl;
-		}
-		LOG_ERROR(ws.str());
-
-		// Throw exception
-		throw AssertionException(line, file, function, condition, msg);
-	}
-
 
 	std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg)
 	{

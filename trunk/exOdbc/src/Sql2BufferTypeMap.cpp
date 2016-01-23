@@ -13,7 +13,9 @@
 #include "Sql2BufferTypeMap.h"
 
 // Same component headers
+#include "AssertionException.h"
 #include "Exception.h"
+#include "SpecializedExceptions.h"
 
 // Other headers
 

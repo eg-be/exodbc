@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\AssertionException.h" />
     <ClInclude Include="include\bitmask_operators.hpp" />
     <ClInclude Include="include\Database.h" />
     <ClInclude Include="include\DebugNew.h" />
@@ -30,6 +31,7 @@
     <ClInclude Include="include\LogHandler.h" />
     <ClInclude Include="include\LogManager.h" />
     <ClInclude Include="include\ObjectName.h" />
+    <ClInclude Include="include\SpecializedExceptions.h" />
     <ClInclude Include="include\Sql2BufferTypeMap.h" />
     <ClInclude Include="include\ColumnBuffer.h" />
     <ClInclude Include="include\ColumnBufferVisitors.h" />
@@ -44,6 +46,7 @@
     <ClInclude Include="src\targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AssertionException.cpp" />
     <ClCompile Include="src\Database.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -57,6 +60,7 @@
     <ClCompile Include="src\LogHandler.cpp" />
     <ClCompile Include="src\LogManager.cpp" />
     <ClCompile Include="src\ObjectName.cpp" />
+    <ClCompile Include="src\SpecializedExceptions.cpp" />
     <ClCompile Include="src\Sql2BufferTypeMap.cpp" />
     <ClCompile Include="src\ColumnBuffer.cpp" />
     <ClCompile Include="src\ColumnBufferVisitors.cpp" />

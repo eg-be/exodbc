@@ -10,7 +10,6 @@
 * are changed infrequently
 */
 
-
 #pragma once
 #pragma warning(disable:4503)
 
@@ -26,11 +25,14 @@
 
 // system
 #include <windows.h>
-#include <sstream>
-#include <string>
-#include <set>
 #include <locale>
 #include <codecvt>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <set>
+#include <vector>
+#include <map>
 
 // odbc-things
 #include <sql.h>
@@ -38,7 +40,3 @@
 #include <sqlucode.h>
 #include <odbcinst.h>
 
-// our stuff
-//#include "exOdbc.h"
-
-// TODO: reference additional headers your program requires here

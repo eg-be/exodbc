@@ -14,6 +14,7 @@
 
 // Same component headers
 #include "LogHandler.h"
+#include "AssertionException.h"
 
 // Other headers
 
