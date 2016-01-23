@@ -431,14 +431,6 @@ namespace exodbc
 #define LOG_INFO_STMT(hStmt, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, hStmt, NULL, ret, SqlFunction)
 #define LOG_INFO_DESC(hDesc, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, NULL, hDesc, ret, SqlFunction)
 
-// Log NO_SUCESS
-#define LOG_ERROR_SQL_NO_SUCCESS(ret, SqlFunction) \
-	do { \
-		std::wstringstream ws; \
-		ws << L"ODBC-Function '" < L#SqlFunction << L"' returned " << ret; \
-		LOG_MSG(exodbc::LogLevel::Error, ws.str()); \
-	} while( 0 )
-
 // Log expected NO_DATA
 #define LOG_ERROR_EXPECTED_SQL_NO_DATA(ret, SqlFunction) \
 	do { \
