@@ -45,7 +45,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring FormatOdbcMsg(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg, LogLevel logLevel)
+	std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg, LogLevel logLevel)
 	{
 		std::wstring msgStr(msg);
 		SErrorInfoVector errs = exodbc::GetAllErrors(hEnv, hDbc, hStmt, hDesc);
