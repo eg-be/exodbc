@@ -27,6 +27,8 @@
     <ClInclude Include="include\Exception.h" />
     <ClInclude Include="include\ExecutableStatement.h" />
     <ClInclude Include="include\InfoObject.h" />
+    <ClInclude Include="include\LogHandler.h" />
+    <ClInclude Include="include\LogManager.h" />
     <ClInclude Include="include\ObjectName.h" />
     <ClInclude Include="include\Sql2BufferTypeMap.h" />
     <ClInclude Include="include\ColumnBuffer.h" />
@@ -52,6 +54,8 @@
     <ClCompile Include="src\ExecutableStatement.cpp" />
     <ClCompile Include="src\Helpers.cpp" />
     <ClCompile Include="src\InfoObject.cpp" />
+    <ClCompile Include="src\LogHandler.cpp" />
+    <ClCompile Include="src\LogManager.cpp" />
     <ClCompile Include="src\ObjectName.cpp" />
     <ClCompile Include="src\Sql2BufferTypeMap.cpp" />
     <ClCompile Include="src\ColumnBuffer.cpp" />

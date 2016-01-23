@@ -10,6 +10,7 @@
 
 // Same component headers
 #include "exOdbc.h"
+#include "LogManager.h"
 #include "Exception.h"
 
 // Other headers

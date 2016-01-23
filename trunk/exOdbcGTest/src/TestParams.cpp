@@ -15,6 +15,7 @@
 // Same component headers
 // Other headers
 #include "Exception.h"
+#include "LogManager.h"
 
 // Debug
 #include "DebugNew.h"
