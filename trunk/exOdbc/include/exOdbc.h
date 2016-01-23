@@ -352,7 +352,7 @@ namespace exodbc
 	/*!
 	* \brief Format all Infos and Errors from passed handles into something human-readable.
 	*/
-	extern EXODBCAPI std::wstring FormatOdbcMsg(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg, LogLevel logLevel);
+	extern EXODBCAPI std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg, LogLevel logLevel);
 }
 
 // Generic Log-entry
@@ -381,7 +381,7 @@ namespace exodbc
 // ODBC-Logging
 #define LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, logLevel) \
 	do { \
-		std::wstring logOdbcMsgMsg = exodbc::FormatOdbcMsg(hEnv, hDbc, hStmt, hDesc, ret, L#SqlFunction, msg, logLevel); \
+		std::wstring logOdbcMsgMsg = exodbc::FormatOdbcMessages(hEnv, hDbc, hStmt, hDesc, ret, L#SqlFunction, msg, logLevel); \
 		LOG_MSG(logLevel, logOdbcMsgMsg); \
 	} while( 0 )
 
