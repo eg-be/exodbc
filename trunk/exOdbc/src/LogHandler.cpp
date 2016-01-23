@@ -27,7 +27,7 @@ using namespace std;
 
 namespace exodbc
 {
-	void StdErrLogHandler::LogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */) const
+	void StdErrLogHandler::OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */) const
 	{
 		std::wstringstream ws;
 

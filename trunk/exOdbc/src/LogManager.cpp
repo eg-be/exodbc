@@ -27,6 +27,8 @@ using namespace std;
 
 namespace exodbc
 {
+	LogManager g_logManager;
+
 	LogManager::LogManager()
 	{
 		LogHandlerPtr pDefaultHandler = std::make_shared<StdErrLogHandler>();
@@ -34,7 +36,7 @@ namespace exodbc
 	}
 
 
-	void LogManager::ClearLogHandlers()
+	void LogManager::ClearLogHandlers() noexcept
 	{
 		lock_guard<mutex> lock(m_logHandlersMutex);
 		m_logHandlers.clear();
@@ -55,7 +57,21 @@ namespace exodbc
 		lock_guard<mutex> lock(m_logHandlersMutex);
 		for (auto it = m_logHandlers.begin(); it != m_logHandlers.end(); ++it)
 		{
-			(*it)->LogMessage(level, msg, file, line, functionName);
+			(*it)->OnLogMessage(level, msg, file, line, functionName);
 		}
+	}
+
+
+	size_t LogManager::GetRegisteredLogHandlersCount() const noexcept
+	{
+		lock_guard<mutex> lock(m_logHandlersMutex);
+		return m_logHandlers.size();
+	}
+
+
+	std::vector<LogHandlerPtr> LogManager::GetLogHandlers() const noexcept
+	{
+		lock_guard<mutex> lock(m_logHandlersMutex);
+		return m_logHandlers;
 	}
 }

@@ -197,8 +197,10 @@ int _tmain(int argc, _TCHAR* argv[])
 			return -1;
 		}
 	}
-
-	LOG_INFO(L"Running tests against: " << g_odbcInfo);
+	
+	wstringstream ws;
+	ws << L"Running tests against: " << g_odbcInfo;
+	LOG_INFO(ws.str());
 
 	// Check if we need to re-create the dbs
 	if (doCreateDb)

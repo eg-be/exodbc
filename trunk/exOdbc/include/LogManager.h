@@ -2,7 +2,7 @@
 * \file LogManager.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.01.2016
-* \brief Header file for LogManager.
+* \brief Header file for LogManager and helper macros for Logging
 * \copyright GNU Lesser General Public License Version 3
 *
 */
@@ -36,38 +36,57 @@ namespace exodbc
 		Debug
 	};
 
+	/*!
+	* \class	LogManager
+	* \brief	A class that can hold LogHandler instances and forward log-messages
+	*			to those LogHandlers.
+	*			The class is thread-safe.
+	*/
 	class EXODBCAPI LogManager
 	{
 	public:
+		/*!
+		* \brief Default Constructor. Registers a StdErrLogHandler during construction.
+		*/
 		LogManager();
 
+		/*!
+		* \brief Registers the passed LogHandler.
+		*/
 		void RegisterLogHandler(LogHandlerPtr pHandler);
 
-		void ClearLogHandlers();
+		/*!
+		* \brief Removes all LogHandlers.
+		*/
+		void ClearLogHandlers() noexcept;
 
+		/*!
+		* \brief Forwards the passed message to all LogHandlers registered.
+		*/
 		void LogMessage(LogLevel level, const std::wstring& msg, const std::wstring& file = L"", int line = 0, const std::wstring& function = L"") const;
+
+		/*!
+		* \brief Return how many LogHandler instances are registered.
+		*/
+		size_t GetRegisteredLogHandlersCount() const noexcept;
+
+		/*!
+		* \brief Return all LogHandlers registered.
+		*/
+		std::vector<LogHandlerPtr> GetLogHandlers() const noexcept;
 
 	private:
 		std::vector<LogHandlerPtr> m_logHandlers;
 		mutable std::mutex m_logHandlersMutex;
 	};
+
+	extern EXODBCAPI LogManager g_logManager;	///< The global instance of the LogManager
 }
 
 // Generic Log-entry
 #define LOG_MSG(logLevel, msg) \
 	do { \
-    switch(logLevel) \
-	{ \
-	case exodbc::LogLevel::Error: \
-		std::wcerr << L"ERROR: "; break;\
-	case exodbc::LogLevel::Warning: \
-		std::wcerr << L"WARNING: "; break;\
-	case exodbc::LogLevel::Info: \
-		std::wcerr << L"INFO: "; break;\
-	case exodbc::LogLevel::Debug: \
-		std::wcerr << L"DEBUG: "; break;\
-	} \
-	std::wcerr << __FILEW__ << L"(" << __LINE__ << L") " << __FUNCTIONW__ << L": " << msg << std::endl; \
+		exodbc::g_logManager.LogMessage(logLevel, msg, __FILEW__, __LINE__, __FUNCTIONW__); \
 	} while( 0 )
 
 // Generic Log-entry shortcuts

@@ -209,6 +209,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
     <ClInclude Include="src\ExcelTest.h" />
     <ClInclude Include="src\EnumFlagsTest.h" />
     <ClInclude Include="src\exOdbcGTestHelpers.h" />
+    <ClInclude Include="src\LogManagerTest.h" />
     <ClInclude Include="src\ManualTestTables.h" />
     <ClInclude Include="src\ExecutableStatementTest.h" />
     <ClInclude Include="src\ColumnBufferTest.h" />
@@ -229,6 +230,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
     <ClCompile Include="src\ExcelTest.cpp" />
     <ClCompile Include="src\EnumFlagsTest.cpp" />
     <ClCompile Include="src\exOdbcGTestHelpers.cpp" />
+    <ClCompile Include="src\LogManagerTest.cpp" />
     <ClCompile Include="src\ManualTestTables.cpp" />
     <ClCompile Include="src\ExecutableStatementTest.cpp" />
     <ClCompile Include="src\ColumnBufferTest.cpp" />
