@@ -16,6 +16,7 @@
 // Other headers
 #include "Exception.h"
 #include "LogManager.h"
+#include "SpecializedExceptions.h"
 
 // Debug
 #include "DebugNew.h"

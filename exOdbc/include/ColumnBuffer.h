@@ -11,6 +11,7 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Exception.h"
+#include "SpecializedExceptions.h"
 #include "InfoObject.h"
 #include "EnumFlags.h"
 #include "SqlHandle.h"

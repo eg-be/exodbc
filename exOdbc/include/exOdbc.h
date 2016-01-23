@@ -20,16 +20,17 @@
 // class 'foo' needs to have dll-interface to be used by clients of class 'bar'"
 // see Ticket #94
 #pragma warning(disable:4251)
-#include <windows.h>
 
+// System includes
+#include <string>
+#include <vector>
+
+// odbc-things
+#include <windows.h>
 #include <sql.h>
 #include <sqlext.h>
 #include <sqlucode.h>
 #include <odbcinst.h>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <iostream>
 
 namespace exodbc
 {
@@ -186,13 +187,6 @@ namespace exodbc
 
 	// Global Helpers
 	// --------------
-	
-	/*!
-	* \brief Called by macros to throw Assertions
-	* \throw AssertionException if called.
-	*/
-	extern EXODBCAPI void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg);
-
 
 	/*!
 	* \brief Ugly conversion of small to wide - use only if you know that you have only ASCII chars in w.
@@ -307,120 +301,14 @@ namespace exodbc
 	* \see		GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
 	*/
 	extern EXODBCAPI SErrorInfoVector GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle);
-}
-
-// Macros
-// ------
-/*!
-* \brief exASSERT_MSG(cond, msg) - MACRO
-*
-* If cond evalutes to false, this Macro will always call exOnAssert().
-*/
-#define exASSERT_MSG(cond, msg)										\
-do {																\
-	if ( !(cond) )  {												\
-		exOnAssert(__FILEW__, __LINE__, __FUNCTIONW__,L#cond,msg);	\
-	}                                                               \
-} while ( 0 )
 
 
-/*!
-* \brief exASSERT(cond) - MACRO
-*
-* This macro is a simple shorthand to the macro exASSERT_MSG(const, msg), passing an empty message
-*/
-#define exASSERT(cond) exASSERT_MSG(cond, L"")
-
-// LOG Helpers
-// ===========
-
-namespace exodbc
-{
 	/*!
 	* \brief Format all Infos and Errors from passed handles into something human-readable.
 	*/
 	extern EXODBCAPI std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg);
 }
 
-// Exception Helpers
-// =================
-#define SET_EXCEPTION_SOURCE(Exception) \
-	do { \
-		Exception.SetSourceInformation(__LINE__, __FILEW__, __FUNCTIONW__); \
-	} while(0)
-
-#define THROW_WITH_SOURCE(ExceptionType, msg) \
-	do { \
-		ExceptionType ex(msg); \
-		SET_EXCEPTION_SOURCE(ex); \
-		throw ex; \
-	} while(0)
-
-// Helpers to throw if not successfully
-#define THROW_IFN_SUCCEEDED_SILENT_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
-	do { \
-		if(!SQL_SUCCEEDED(sqlReturn)) { \
-			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
-			SET_EXCEPTION_SOURCE(ex); \
-			throw ex; \
-		} \
-	} while(0)
-
-#define THROW_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
-	do { \
-		if(!SQL_SUCCEEDED(sqlReturn)) { \
-			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
-			SET_EXCEPTION_SOURCE(ex); \
-			throw ex; \
-		} \
-		if(SQL_SUCCESS_WITH_INFO == sqlReturn) { \
-			switch(handleType) { \
-			case SQL_HANDLE_ENV: \
-				LOG_INFO_ODBC(handle, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC, sqlReturn, sqlFunctionName); \
-				break; \
-			case SQL_HANDLE_DBC: \
-				LOG_INFO_ODBC(SQL_NULL_HENV, handle, SQL_NULL_HSTMT, SQL_NULL_HDESC, sqlReturn, sqlFunctionName); \
-				break; \
-			case SQL_HANDLE_STMT: \
-				LOG_INFO_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, handle, SQL_NULL_HDESC, sqlReturn, sqlFunctionName); \
-				break; \
-			case SQL_HANDLE_DESC: \
-				LOG_INFO_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, handle, sqlReturn, sqlFunctionName); \
-				break; \
-			default: \
-				THROW_WITH_SOURCE(IllegalArgumentException, L"Unknown handleType"); \
-			} \
-		} \
-	} while(0)
-
-#define THROW_IFN_SUCCESS_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
-	do { \
-		if(SQL_SUCCESS != sqlReturn) { \
-			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
-			SET_EXCEPTION_SOURCE(ex); \
-			throw ex; \
-		} \
-	} while (0)
-
-#define THROW_IFN_SUCCEEDED(sqlFunctionName, sqlReturn, handleType, handle) \
-	do { \
-		THROW_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, L""); \
-	} while(0)
-
-#define THROW_IFN_SUCCESS(sqlFunctionName, sqlReturn, handleType, handle) \
-	do { \
-		THROW_IFN_SUCCESS_MSG(sqlFunctionName, sqlReturn, handleType, handle, L""); \
-	} while(0)
-
-#define THROW_IFN_NO_DATA(sqlFunctionName, sqlReturn) \
-	do { \
-		if(SQL_NO_DATA != sqlReturn) \
-		{ \
-			SqlResultException ex(L#sqlFunctionName, ret, L"Expected SQL_NO_DATA."); \
-			SET_EXCEPTION_SOURCE(ex); \
-			throw ex; \
-		} \
-	} while(0)
 
 // Compiler Helpers
 // ================
