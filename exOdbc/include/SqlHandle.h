@@ -16,7 +16,7 @@
 #include "SpecializedExceptions.h"
 
 // Other headers
-#include "boost/signals2.hpp"
+#include <boost/signals2.hpp>
 
 // System headers
 

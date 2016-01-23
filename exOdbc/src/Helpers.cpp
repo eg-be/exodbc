@@ -15,7 +15,6 @@
 #include "Exception.h"
 
 // Other headers
-
 // Debug
 #include "DebugNew.h"
 

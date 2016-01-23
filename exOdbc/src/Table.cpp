@@ -24,7 +24,6 @@
 #include "ExecutableStatement.h"
 
 // Other headers
-
 // Debug
 #include "DebugNew.h"
 

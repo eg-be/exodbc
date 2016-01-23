@@ -17,7 +17,6 @@
 #include "AssertionException.h"
 
 // Other headers
-
 // Debug
 #include "DebugNew.h"
 
