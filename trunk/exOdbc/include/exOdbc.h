@@ -511,13 +511,6 @@ namespace exodbc
 		} \
 	} while(0)
 
-#define THROW_NOT_IMPLEMENTED() \
-	do { \
-		Exception ex; \
-		SET_EXCEPTION_SOURCE(ex); \
-		throw ex; \
-	} while(0)
-
 // Compiler Helpers
 // ================
 #define HIDE_UNUSED(object) \
