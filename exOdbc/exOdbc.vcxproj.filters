@@ -76,6 +76,12 @@
     <ClInclude Include="include\ColumnBufferVisitors.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\LogHandler.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LogManager.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
@@ -121,6 +127,12 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ColumnBufferVisitors.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LogHandler.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LogManager.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

@@ -39,6 +39,6 @@
 #include <odbcinst.h>
 
 // our stuff
-#include "exOdbc.h"
+//#include "exOdbc.h"
 
 // TODO: reference additional headers your program requires here

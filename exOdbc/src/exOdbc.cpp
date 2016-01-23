@@ -13,6 +13,7 @@
 
 // Same component headers
 #include "Helpers.h"
+#include "LogManager.h"
 
 // Other headers
 
@@ -45,7 +46,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg, LogLevel logLevel)
+	std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg)
 	{
 		std::wstring msgStr(msg);
 		SErrorInfoVector errs = exodbc::GetAllErrors(hEnv, hDbc, hStmt, hDesc);
