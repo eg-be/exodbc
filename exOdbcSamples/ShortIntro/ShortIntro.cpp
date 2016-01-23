@@ -10,6 +10,7 @@
 #include <SDKDDKVer.h>
 #include <iostream>
 
+#include "exOdbc.h"
 #include "Environment.h"
 #include "Database.h"
 #include "Table.h"
