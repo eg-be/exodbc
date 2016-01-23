@@ -447,18 +447,6 @@ namespace exodbc
 		LOG_MSG(exodbc::LogLevel::Error, ws.str()); \
 	} while( 0 )
 
-// SQL Warning Helpers
-// ===================
-#define WARN_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
-	do { \
-		if(!SQL_SUCCEEDED(sqlReturn)) { \
-			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
-			SET_EXCEPTION_SOURCE(ex); \
-			LOG_WARNING(ex.ToString()); \
-		} \
-	} while(0)
-
-
 // Exception Helpers
 // =================
 #define SET_EXCEPTION_SOURCE(Exception) \
