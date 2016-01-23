@@ -4,8 +4,10 @@
 //
 
 #pragma once
-#pragma warning(disable:4503)
-
+#pragma warning(disable: 4503)	// 'identifier' : decorated name length exceeded, name was truncated
+#pragma warning(disable: 4251)	// 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
+#define _SCL_SECURE_NO_WARNINGS 1	// 'function': was declared deprecated also 'std::<function name>': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct.
+#define _CRT_SECURE_NO_WARNINGS 1	// 'function': This function or variable may be unsafe. Consider using strcpy_s instead.
 #include "targetver.h"
 
 // libs

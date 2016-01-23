@@ -29,8 +29,10 @@ namespace exodbc
 
 	// Classes
 	// -------
-#pragma  warning(push)
-#pragma warning(disable:4275)
+
+#pragma warning(push)
+#pragma warning(disable: 4275)	// warning C4275: non dll-interface class 'std::runtime_error' used as base for dll-interface class 'exodbc::Exception'
+								// we are exporting from something that is part of std, it is save to ignore the warning
 
 	/*!
 	* \class Exception
@@ -116,7 +118,7 @@ namespace exodbc
 		std::string	m_what;
 	};
 
-#pragma warning(disable:4251)
+#pragma warning(pop)
 }
 
 // Generic Exception Macros
