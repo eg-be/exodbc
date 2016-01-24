@@ -507,4 +507,67 @@ namespace exodbc
 	typedef std::vector<STablePrivilegesInfo> TablePrivilegesVector;
 
 
+	/*
+	* \struct SColumnDescription
+	* \brief	Result of SQLDescribeCol operation.
+	*/
+	struct SColumnDescription
+	{
+		SColumnDescription()
+			: m_sqlType(SQL_UNKNOWN_TYPE)
+			, m_charSize(0)
+			, m_decimalDigits(0)
+			, m_nullable(SQL_NULLABLE_UNKNOWN)
+		{};
+		SColumnDescription(SQLSMALLINT paramSqlType, SQLULEN paramCharSize, SQLSMALLINT paramDecimalDigits, SQLSMALLINT paramNullable)
+			: m_sqlType(paramSqlType)
+			, m_charSize(paramCharSize)
+			, m_decimalDigits(paramDecimalDigits)
+			, m_nullable(paramNullable)
+		{};
+		SColumnDescription(SQLSMALLINT paramSqlType, SQLULEN paramCharSize, SQLSMALLINT paramDecimalDigits)
+			: m_sqlType(paramSqlType)
+			, m_charSize(paramCharSize)
+			, m_decimalDigits(paramDecimalDigits)
+			, m_nullable(SQL_NULLABLE_UNKNOWN)
+		{};
+
+		std::wstring m_name;
+		SQLSMALLINT m_sqlType;
+		SQLULEN m_charSize;
+		SQLSMALLINT m_decimalDigits;
+		SQLSMALLINT m_nullable;
+	};
+
+
+	/*
+	* \struct SParameterDescription
+	* \brief	Result of SQLDescribeParam operation.
+	*/
+	struct SParameterDescription
+	{
+		SParameterDescription()
+			: m_sqlType(SQL_UNKNOWN_TYPE)
+			, m_charSize(0)
+			, m_decimalDigits(0)
+			, m_nullable(SQL_NULLABLE_UNKNOWN)
+		{};
+		SParameterDescription(SQLSMALLINT paramSqlType, SQLULEN paramCharSize, SQLSMALLINT paramDecimalDigits, SQLSMALLINT paramNullable)
+			: m_sqlType(paramSqlType)
+			, m_charSize(paramCharSize)
+			, m_decimalDigits(paramDecimalDigits)
+			, m_nullable(paramNullable)
+		{};
+		SParameterDescription(SQLSMALLINT paramSqlType, SQLULEN paramCharSize, SQLSMALLINT paramDecimalDigits)
+			: m_sqlType(paramSqlType)
+			, m_charSize(paramCharSize)
+			, m_decimalDigits(paramDecimalDigits)
+			, m_nullable(SQL_NULLABLE_UNKNOWN)
+		{};
+
+		SQLSMALLINT m_sqlType;
+		SQLULEN m_charSize;
+		SQLSMALLINT m_decimalDigits;
+		SQLSMALLINT m_nullable;
+	};
 }

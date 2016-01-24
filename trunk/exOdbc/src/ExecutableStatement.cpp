@@ -162,6 +162,42 @@ namespace exodbc
 	}
 
 
+	SParameterDescription ExecutableStatement::DescribeParameter(SQLUSMALLINT paramNr) const
+	{
+		exASSERT(m_pHStmt);
+		exASSERT(m_pHStmt->IsAllocated());
+		exASSERT(paramNr >= 1);
+
+		SParameterDescription paramDesc;
+		SQLRETURN ret = SQLDescribeParam(m_pHStmt->GetHandle(), paramNr, &paramDesc.m_sqlType, &paramDesc.m_charSize, &paramDesc.m_decimalDigits, &paramDesc.m_nullable);
+		THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+		return paramDesc;
+	}
+
+
+	SColumnDescription ExecutableStatement::DescribeColumn(SQLUSMALLINT columnNr) const
+	{
+		exASSERT(m_pHStmt);
+		exASSERT(m_pHStmt->IsAllocated());
+		exASSERT(columnNr >= 1);
+		exASSERT(m_pDb);
+
+		SQLUSMALLINT maxColName = m_pDb->GetDbInfo().GetUSmallIntProperty(DatabaseInfo::USmallIntProperty::MaxColumnNameLen);
+		if (maxColName <= 0)
+		{
+			maxColName = DB_MAX_COLUMN_NAME_LEN_DEFAULT;
+		}
+		std::unique_ptr<SQLWCHAR[]> nameBuffer(new SQLWCHAR[maxColName + 1]);
+		SColumnDescription colDesc;
+		SQLRETURN ret = SQLDescribeCol(m_pHStmt->GetHandle(), columnNr, nameBuffer.get(), maxColName + 1, NULL, &colDesc.m_sqlType, &colDesc.m_charSize, &colDesc.m_decimalDigits, &colDesc.m_nullable);
+		THROW_IFN_SUCCEEDED(SQLDescribeCol, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+
+		colDesc.m_name = nameBuffer.get();
+
+		return colDesc;
+	}
+
+
 	void ExecutableStatement::ExecutePrepared() const
 	{
 		exASSERT(m_isPrepared);
@@ -182,11 +218,11 @@ namespace exodbc
 	}
 
 
-	void ExecutableStatement::BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr)
+	void ExecutableStatement::BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT paramNr)
 	{
 		exASSERT(m_pDb);
 
-		BindParamVisitor pv(columnNr, m_pHStmt, DatabaseSupportsCursorOptions(m_pDb->GetDbms()));
+		BindParamVisitor pv(paramNr, m_pHStmt, DatabaseSupportsDescribeParam(m_pDb->GetDbms()));
 		boost::apply_visitor(pv, column);
 		m_boundParams = true;
 	}
