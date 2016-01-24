@@ -42,7 +42,7 @@ namespace exodbctest
 	// -------------
 	TEST_F(ColumnBufferLengthIndicatorTest, Construction)
 	{
-		ColumnBufferLengthIndicator cb;
+		LengthIndicator cb;
 		EXPECT_EQ(0, cb.GetCb());
 		EXPECT_FALSE(cb.IsNull());
 	}
@@ -50,7 +50,7 @@ namespace exodbctest
 
 	TEST_F(ColumnBufferLengthIndicatorTest, SetAndGetCb)
 	{
-		ColumnBufferLengthIndicator cb;
+		LengthIndicator cb;
 		cb.SetCb(13);
 		EXPECT_EQ(13, cb.GetCb());
 	}
@@ -58,7 +58,7 @@ namespace exodbctest
 
 	TEST_F(ColumnBufferLengthIndicatorTest, SetNull)
 	{
-		ColumnBufferLengthIndicator cb;
+		LengthIndicator cb;
 		cb.SetNull();
 		EXPECT_TRUE(cb.IsNull());
 		cb.SetCb(25);

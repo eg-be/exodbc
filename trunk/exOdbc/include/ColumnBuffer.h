@@ -39,25 +39,25 @@ namespace exodbc
 	// -------
 	
 	/*!
-	* \class	ColumnBufferLengthIndicator
+	* \class	LengthIndicator
 	* \brief	Wraps around a SQLLEN member to manage the length indicator of a ColumnBuffer.
 	* \details	Cannot be copied.
 	*/
-	class ColumnBufferLengthIndicator
+	class LengthIndicator
 	{
 	public:
 		/*!
 		* \brief	Create new Instance, where Length Indicator is set to 0.
 		*/
-		ColumnBufferLengthIndicator()
+		LengthIndicator()
 		{
 			m_cb = 0;
 		}
 
-		ColumnBufferLengthIndicator(const ColumnBufferLengthIndicator& other) = delete;
-		ColumnBufferLengthIndicator& operator=(const ColumnBufferLengthIndicator& other) = delete;
+		LengthIndicator(const LengthIndicator& other) = delete;
+		LengthIndicator& operator=(const LengthIndicator& other) = delete;
 
-		virtual ~ColumnBufferLengthIndicator()
+		virtual ~LengthIndicator()
 		{};
 		
 		/*!
@@ -83,7 +83,7 @@ namespace exodbc
 	protected:
 		SQLLEN m_cb;
 	};
-	typedef std::shared_ptr<ColumnBufferLengthIndicator> ColumnBufferLengthIndicatorPtr;
+	typedef std::shared_ptr<LengthIndicator> ColumnBufferLengthIndicatorPtr;
 
 
 	/*!
@@ -391,7 +391,7 @@ namespace exodbc
 	*/
 	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class ColumnBuffer
-		: public ColumnBufferLengthIndicator
+		: public LengthIndicator
 		, public ColumnFlags
 		, public ExtendedColumnPropertiesHolder
 		, public ColumnBindable
@@ -402,7 +402,7 @@ namespace exodbc
 		* \brief	Create new buffer. ZeroMemory of the buffer and set it to NULL.
 		*/
 		ColumnBuffer()
-			: ColumnBufferLengthIndicator()
+			: LengthIndicator()
 			, ColumnFlags()
 			, ExtendedColumnPropertiesHolder()
 			, ColumnBindable()
@@ -415,7 +415,7 @@ namespace exodbc
 		* \brief	Create new buffer with passed queryName and flags. Sets the buffer to NULL.
 		*/
 		ColumnBuffer(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
-			: ColumnBufferLengthIndicator()
+			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ExtendedColumnPropertiesHolder()
 			, ColumnBindable()
@@ -616,7 +616,7 @@ namespace exodbc
 	*/
 	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class ColumnArrayBuffer
-		: public ColumnBufferLengthIndicator
+		: public LengthIndicator
 		, public ColumnFlags
 		, public ExtendedColumnPropertiesHolder
 		, public ColumnBindable
@@ -629,7 +629,7 @@ namespace exodbc
 		*			The buffer is set to NULL:
 		*/
 		ColumnArrayBuffer(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
-			: ColumnBufferLengthIndicator()
+			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ExtendedColumnPropertiesHolder()
 			, m_nrOfElements(nrOfElements)
@@ -807,7 +807,7 @@ namespace exodbc
 	*			on destruction.
 	*/
 	class SqlCPointerBuffer
-		: public ColumnBufferLengthIndicator
+		: public LengthIndicator
 		, public ColumnFlags
 		, public ExtendedColumnPropertiesHolder
 		, public ColumnBindable
@@ -829,7 +829,7 @@ namespace exodbc
 		* \param decimalDigits Decimal digits.
 		*/
 		SqlCPointerBuffer(const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferLength, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
-			: ColumnBufferLengthIndicator()
+			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ExtendedColumnPropertiesHolder(columnSize, decimalDigits, sqlType)
 			, m_pBuffer(pBuffer)
