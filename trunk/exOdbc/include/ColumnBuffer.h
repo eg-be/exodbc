@@ -870,14 +870,15 @@ namespace exodbc
 		*/
 		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
-			exASSERT(columnNr >= 1);
-			exASSERT(pHStmt != NULL);
-			exASSERT(pHStmt->IsAllocated());
-			exASSERT(m_columnSize >= 0);
-			exASSERT(m_decimalDigits >= 0);
-
 			if (m_sqlCType == SQL_C_NUMERIC)
 			{
+				// totally different than usually. do not forget to register unbind notification
+				exASSERT(columnNr >= 1);
+				exASSERT(pHStmt != NULL);
+				exASSERT(pHStmt->IsAllocated());
+				exASSERT(m_columnSize >= 0);
+				exASSERT(m_decimalDigits >= 0);
+
 				SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
 				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_TYPE, (SQLPOINTER)m_sqlCType);
 				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
@@ -885,15 +886,16 @@ namespace exodbc
 				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)m_pBuffer);
 				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
 				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
+
+				// get a notification if unbound
+				m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&SqlCPointerBuffer::OnUnbindColumns, this, _1));
 			}
 			else
 			{
-				SQLRETURN ret = SQLBindCol(pHStmt->GetHandle(), columnNr, m_sqlCType, (SQLPOINTER*)m_pBuffer, GetBufferLength(), &m_cb);
-				THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+				// Bind using base-class
+				BindSelectImpl(columnNr, pHStmt, m_sqlCType, m_pBuffer, GetBufferLength(), &m_cb);
 			}
 			
-			// get a notification if unbound
-			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&SqlCPointerBuffer::OnUnbindColumns, this, _1));
 		}
 
 		/*!
@@ -911,54 +913,30 @@ namespace exodbc
 		*			details of the parameter using SQLDescribeParam. The statement should already be
 		*			prepared, else SQLDescribeParam will probably fail.
 		*/
-		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam = true)
+		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam)
 		{
-			//exASSERT_MSG(GetSqlType() != SQL_UNKNOWN_TYPE, L"Extended Property SqlType must be set if this Buffer shall be used as parameter");
-			exASSERT(paramNr >= 1);
-			exASSERT(pHStmt != NULL);
-			exASSERT(pHStmt->IsAllocated());
-
-			// Query the database about the parameter. Note: Some Drivers (access) do not support querying, then use the info set
-			// on the extended properties (or fail, if those are not set)
-			SQLSMALLINT paramSqlType = SQL_UNKNOWN_TYPE;
-			SQLULEN paramCharSize = 0;
-			SQLSMALLINT paramDecimalDigits = 0;
-			SQLSMALLINT paramNullable = SQL_NULLABLE_UNKNOWN;
+			ColumnBufferBindInfoHolder::SParameterDescription paramDesc;
 			if (useSqlDescribeParam)
 			{
-				SQLRETURN ret = SQLDescribeParam(pHStmt->GetHandle(), paramNr, &paramSqlType, &paramCharSize, &paramDecimalDigits, &paramNullable);
-				THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
+				paramDesc = BindParameterImpl(paramNr, pHStmt, GetSqlCType(), m_pBuffer, GetBufferLength(), &m_cb, *this);
 			}
 			else
 			{
-				paramSqlType = GetSqlType();
-				exASSERT(paramSqlType != SQL_UNKNOWN_TYPE);
-				paramDecimalDigits = GetDecimalDigits();
-				paramCharSize = GetColumnSize();
+				paramDesc.m_paramSqlType = GetSqlType();
+				paramDesc.m_paramCharSize = GetColumnSize();
+				paramDesc.m_paramDecimalDigits = GetDecimalDigits();
+				BindParameterImpl(paramNr, pHStmt, GetSqlCType(), m_pBuffer, GetBufferLength(), &m_cb, paramDesc);
 			}
 
-			// Check if we think its nullable, but the db does not think so
-			if (Test(ColumnFlag::CF_NULLABLE))
-			{
-				exASSERT_MSG(paramNullable == SQL_NULLABLE || paramNullable == SQL_NULLABLE_UNKNOWN, L"Column is defined with flag CF_NULLABLE, but the Database has marked the parameter as not nullable");
-			}
-
-			// And bind using the information just read
-			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(), paramNr, SQL_PARAM_INPUT, m_sqlCType, paramSqlType, paramCharSize, paramDecimalDigits, (SQLPOINTER*)m_pBuffer, GetBufferLength(), &m_cb);
-			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
-
-			// Do some additional steps for numeric types
 			if (m_sqlCType == SQL_C_NUMERIC)
 			{
+				// Do some additional steps for numeric types
 				SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
 				SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
-				SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramCharSize));
-				SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDecimalDigits);
-				SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)m_pBuffer);
+				SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.m_paramCharSize));
+				SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDesc.m_paramDecimalDigits);
+				SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, m_pBuffer);
 			}
-
-			// Connect a signal that we are bound to this handle now and get notified if params get reseted
-			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&SqlCPointerBuffer::OnResetParams, this, _1));
 		}
 
 
