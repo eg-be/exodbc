@@ -1,0 +1,39 @@
+/*!
+ * \file Version.h
+ * \author Elias Gerber <eg@elisium.ch>
+ * \date 28.12.2013
+ * 
+ * File to generate Version.h from using the UpdateVersion.ps1 script.
+ */ 
+
+#pragma once
+#ifndef VERSION_H
+#define VERSION_H
+
+// Same component headers
+// Other headers
+// System headers
+#define EXODBC_VERSION_MAJOR		0
+#define EXODBC_VERSION_MINOR		8
+#define EXODBC_VERSION_BUILD		2
+#define EXODBC_VERSION_REV			$WCREV$
+#define EXODBC_VERSION_STRING		"0, 8, 2, $WCREV$\0"
+
+#define EXODBC_MIXED_REV_RANGE	$WCMIXED?"Mixed Range":"Exact Revision"$
+#define EXODBC_REV_RANGE			"$WCRANGE$"
+
+#define EXODBC_SVN_REPO			"$WCURL$"
+#define EXODBC_SVN_DATE			"$WCDATE$"
+
+#define EXODBC_SVN_LOCAL_MODS		$WCMODS?"Has local modifications":"No local modifications"$
+
+// Forward declarations
+// --------------------
+
+// Structs
+// -------
+
+// Classes
+// -------
+
+#endif // VERSION_H
