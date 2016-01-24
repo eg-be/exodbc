@@ -642,7 +642,8 @@ namespace exodbctest
 			// Prepare the id-col (required) and the col to insert
 			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
 			NumericColumnBufferPtr num18_0_Col(new NumericColumnBuffer(colName));
-			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS
+				|| m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
 			{
 				idCol->SetSqlType(SQL_INTEGER);
 				num18_0_Col->SetSqlType(SQL_NUMERIC);

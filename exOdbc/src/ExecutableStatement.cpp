@@ -218,12 +218,12 @@ namespace exodbc
 	}
 
 
-	void ExecutableStatement::BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT paramNr)
+	void ExecutableStatement::BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT paramNr, bool neverQueryParamDesc /* = false */)
 	{
 		exASSERT(m_pDb);
 
 		SParameterDescription paramDesc;
-		if (IsPrepared() && DatabaseSupportsDescribeParam(m_pDb->GetDbms()))
+		if (!neverQueryParamDesc && IsPrepared() && DatabaseSupportsDescribeParam(m_pDb->GetDbms(), boost::apply_visitor(SqlCTypeVisitor(), column)))
 		{
 			paramDesc = DescribeParameter(paramNr);
 		}
