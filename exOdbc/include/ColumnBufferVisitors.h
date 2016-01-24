@@ -174,7 +174,7 @@ namespace exodbc
 		template<typename T>
 		ColumnBufferLengthIndicatorPtr operator()(T& t) const
 		{
-			ColumnBufferLengthIndicatorPtr pCb = std::dynamic_pointer_cast<ColumnBufferLengthIndicator>(t);
+			ColumnBufferLengthIndicatorPtr pCb = std::dynamic_pointer_cast<LengthIndicator>(t);
 			exASSERT(pCb);
 			return pCb;
 		}
