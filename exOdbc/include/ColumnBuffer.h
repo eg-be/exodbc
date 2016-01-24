@@ -290,63 +290,6 @@ namespace exodbc
 
 
 		/*
-		* \struct SColumnDescription
-		* \brief	Result of SQLDescribeCol operation.
-		*/
-		struct SColumnDescription
-		{
-			SColumnDescription()
-				: m_sqlType(SQL_UNKNOWN_TYPE)
-				, m_charSize(0)
-				, m_decimalDigits(0)
-				, m_nullable(SQL_NULLABLE_UNKNOWN)
-			{};
-			SColumnDescription(SQLSMALLINT paramSqlType, SQLULEN paramCharSize, SQLSMALLINT paramDecimalDigits, SQLSMALLINT paramNullable)
-				: m_sqlType(paramSqlType)
-				, m_charSize(paramCharSize)
-				, m_decimalDigits(paramDecimalDigits)
-				, m_nullable(paramNullable)
-			{};
-			SColumnDescription(SQLSMALLINT paramSqlType, SQLULEN paramCharSize, SQLSMALLINT paramDecimalDigits)
-				: m_sqlType(paramSqlType)
-				, m_charSize(paramCharSize)
-				, m_decimalDigits(paramDecimalDigits)
-				, m_nullable(SQL_NULLABLE_UNKNOWN)
-			{};
-
-			std::wstring m_name;
-			SQLSMALLINT m_sqlType;
-			SQLULEN m_charSize;
-			SQLSMALLINT m_decimalDigits;
-			SQLSMALLINT m_nullable;
-		};
-
-		SColumnDescription BindColumnDescImpl(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb)
-		{
-			exASSERT(columnNr >= 1);
-			exASSERT(pHStmt != NULL);
-			exASSERT(pHStmt->IsAllocated());
-			exASSERT(pBuffer != NULL);
-			exASSERT(bufferLen > 0);
-			exASSERT(pCb != NULL);
-
-
-			SColumnDescription colDesc;
-			SQLWCHAR name[DB_MAX_COLUMN_NAME_LEN_DEFAULT + 1];
-			SQLRETURN ret = SQLDescribeCol(pHStmt->GetHandle(), columnNr, name, DB_MAX_COLUMN_NAME_LEN_DEFAULT + 1, NULL, &colDesc.m_sqlType, &colDesc.m_charSize, &colDesc.m_decimalDigits, &colDesc.m_nullable);
-			THROW_IFN_SUCCEEDED(SQLDescribeCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
-
-			// And bind
-			ret = SQLBindCol(pHStmt->GetHandle(), columnNr, sqlCType, pBuffer, bufferLen, pCb);
-			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
-
-			// get a notification if unbound
-			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBindable::OnUnbindColumns, this, _1));
-
-			return colDesc;
-		}
-
-		/*
 		* \struct SParameterDescription
 		* \brief	Result of SQLDescribeParam operation.
 		*/
@@ -380,7 +323,7 @@ namespace exodbc
 		/*!
 		* \brief Binds passed buffer as parameter using information passed.
 		*/
-		void BindParamDescImpl(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb, SParameterDescription paramDesc)
+		void BindParamImpl(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb, SParameterDescription paramDesc)
 		{
 			exASSERT(paramNr >= 1);
 			exASSERT(pHStmt != NULL);
@@ -403,7 +346,7 @@ namespace exodbc
 		* \brief	Binds passed buffer as parameter. The database is queried about a parameter given paramNr.
 		* \return	Result of SQLDescribeParam for given paramNr and pHStmt. 
 		*/
-		SParameterDescription BindParamDescImpl(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb, ColumnFlags columnFlags)
+		SParameterDescription BindParamImpl(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb, ColumnFlags columnFlags)
 		{
 			exASSERT(paramNr >= 1);
 			exASSERT(pHStmt != NULL);
@@ -564,7 +507,7 @@ namespace exodbc
 		{
 			if (useSqlDescribeParam)
 			{
-				BindParamDescImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, *this);
+				BindParamImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, *this);
 			}
 			else
 			{
@@ -572,7 +515,7 @@ namespace exodbc
 				paramDesc.m_sqlType = GetSqlType();
 				paramDesc.m_charSize = GetColumnSize();
 				paramDesc.m_decimalDigits = GetDecimalDigits();
-				BindParamDescImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
+				BindParamImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
 			}
 		}
 
@@ -610,14 +553,14 @@ namespace exodbc
 		ColumnBindable::SParameterDescription paramDesc;
 		if (useSqlDescribeParam)
 		{
-			paramDesc = BindParamDescImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, *this);
+			paramDesc = BindParamImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, *this);
 		}
 		else
 		{
 			paramDesc.m_sqlType = GetSqlType();
 			paramDesc.m_charSize = GetColumnSize();
 			paramDesc.m_decimalDigits = GetDecimalDigits();
-			BindParamDescImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
+			BindParamImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
 		}
 
 		// Do some additional steps for numeric types
@@ -832,7 +775,7 @@ namespace exodbc
 		{
 			if (useSqlDescribeParam)
 			{
-				BindParamDescImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer[0], GetBufferLength(), &m_cb, *this);
+				BindParamImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer[0], GetBufferLength(), &m_cb, *this);
 			}
 			else
 			{
@@ -840,7 +783,7 @@ namespace exodbc
 				paramDesc.m_sqlType = GetSqlType();
 				paramDesc.m_charSize = GetColumnSize();
 				paramDesc.m_decimalDigits = GetDecimalDigits();
-				BindParamDescImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer[0], GetBufferLength(), &m_cb, paramDesc);
+				BindParamImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer[0], GetBufferLength(), &m_cb, paramDesc);
 			}
 		}
 
@@ -986,14 +929,14 @@ namespace exodbc
 			ColumnBindable::SParameterDescription paramDesc;
 			if (useSqlDescribeParam)
 			{
-				paramDesc = BindParamDescImpl(paramNr, pHStmt, GetSqlCType(), m_pBuffer, GetBufferLength(), &m_cb, *this);
+				paramDesc = BindParamImpl(paramNr, pHStmt, GetSqlCType(), m_pBuffer, GetBufferLength(), &m_cb, *this);
 			}
 			else
 			{
 				paramDesc.m_sqlType = GetSqlType();
 				paramDesc.m_charSize = GetColumnSize();
 				paramDesc.m_decimalDigits = GetDecimalDigits();
-				BindParamDescImpl(paramNr, pHStmt, GetSqlCType(), m_pBuffer, GetBufferLength(), &m_cb, paramDesc);
+				BindParamImpl(paramNr, pHStmt, GetSqlCType(), m_pBuffer, GetBufferLength(), &m_cb, paramDesc);
 			}
 
 			if (m_sqlCType == SQL_C_NUMERIC)

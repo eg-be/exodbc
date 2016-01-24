@@ -13,6 +13,7 @@
 #include "SqlHandle.h"
 #include "ColumnBuffer.h"
 #include "Database.h"
+#include "InfoObject.h"
 
 // Other headers
 // System headers
@@ -127,7 +128,7 @@ namespace exodbc
 		* \details	The columnNr is 1-indexed and must match the parameter markers of 
 		*			the result-set SQL statement that is going to be executed.
 		*/
-		void BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr);
+		void BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT paramNr);
 
 
 		/*!
@@ -148,6 +149,18 @@ namespace exodbc
 		* \brief	Returns true if a statement has been prepared for execution using Prepare().
 		*/
 		bool IsPrepared() const noexcept { return m_isPrepared; };
+
+
+		/*!
+		* \brief	Calls SQLDescribeParam for parameter at paramNr and the handle of this ExecutableStatement.
+		*/
+		SParameterDescription DescribeParameter(SQLUSMALLINT paramNr) const;
+
+
+		/*!
+		* \brief	Calls SQLDescribeCol for column at columnNr and the handle of this ExecutableStatement.
+		*/
+		SColumnDescription DescribeColumn(SQLUSMALLINT columnNr) const;
 
 
 		/*!
