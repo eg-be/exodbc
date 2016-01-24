@@ -68,22 +68,22 @@ namespace exodbc
 	{
 	public:
 		BindParamVisitor() = delete;
-		BindParamVisitor(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam)
+		BindParamVisitor(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
 			: m_paramNr(paramNr)
 			, m_pHStmt(pHStmt)
-			, m_useSqlDescribeParam(useSqlDescribeParam)
+			, m_paramDesc(paramDesc)
 		{};
 
 		template<typename T>
 		void operator()(T& t) const
 		{
-			t->BindParameter(m_paramNr, m_pHStmt, m_useSqlDescribeParam);
+			t->BindParameter(m_paramNr, m_pHStmt, m_paramDesc);
 		}
 
 	private:
 		SQLUSMALLINT m_paramNr;
 		ConstSqlStmtHandlePtr m_pHStmt;
-		bool m_useSqlDescribeParam;
+		SParameterDescription m_paramDesc;
 	};
 
 	
@@ -191,7 +191,7 @@ namespace exodbc
 	{
 	public:
 		template<typename T>
-		const SQLSMALLINT operator()(T& t) const
+		SQLSMALLINT operator()(T& t) const
 		{
 			return t->GetSqlCType();
 		}
@@ -208,9 +208,26 @@ namespace exodbc
 	{
 	public:
 		template<typename T>
-		const SQLSMALLINT operator()(T& t) const
+		SQLSMALLINT operator()(T& t) const
 		{
 			return t->GetSqlType();
+		}
+	};
+
+
+	/*!
+	* \class SParamDescVisitor
+	* \brief Visitor get create a parameter description from a ColumnBuffer
+	* \details On applying this visitor, it will call CreateParamDescFromProps() on the variant.
+	*/
+	class SParamDescVisitor
+		: public boost::static_visitor<SParameterDescription>
+	{
+	public:
+		template<typename T>
+		SParameterDescription operator()(T& t) const
+		{
+			return t->CreateParamDescFromProps();
 		}
 	};
 
