@@ -160,36 +160,25 @@ namespace exodbctest
 	};
 
 
-	struct FInsert2
+	struct FInserter2
 	{
-		FInserter2(DatabaseProduct dbms, SqlStmtHandlePtr pStmt, exodbctest::TableId tableId, const std::wstring& columnQueryName)
-			: m_tableId(tableId)
-			, m_columnQueryName(ToDbCase(columnQueryName))
-			, m_pStmt(pStmt)
-			, m_dbms(dbms)
+		FInserter2(DatabasePtr pDb, exodbctest::TableId tableId, const std::wstring& columnQueryName)
 		{
 			// prepare the insert statement
-			wstring tableName = GetTableName(m_tableId);
-			tableName = PrependSchemaOrCatalogName(m_dbms, tableName);
-			wstring idColName = GetIdColumnName(m_tableId);
-			wstring sqlstmt = boost::str(boost::wformat(L"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % m_columnQueryName);
+			m_stmt.Init(pDb, true);
+			wstring tableName = GetTableName(tableId);
+			tableName = PrependSchemaOrCatalogName(pDb->GetDbms(), tableName);
+			wstring idColName = GetIdColumnName(tableId);
+			wstring sqlstmt = boost::str(boost::wformat(L"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % ToDbCase(columnQueryName));
 			m_stmt.Prepare(sqlstmt);
-			SQLRETURN ret = SQLPrepare(pStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
-			THROW_IFN_SUCCESS(SQLPrepare, ret, SQL_HANDLE_STMT, pStmt->GetHandle());
 		}
 
 		void operator()()
 		{
-			SQLRETURN ret = SQLExecute(m_pStmt->GetHandle());
-			THROW_IFN_SUCCESS(SQLExecute, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
+			m_stmt.ExecutePrepared();
 		}
 
-	protected:
 		ExecutableStatement m_stmt;
-		DatabaseProduct m_dbms;
-		SqlStmtHandlePtr m_pStmt;
-		exodbctest::TableId m_tableId;
-		wstring m_columnQueryName;
 	};
 
 
@@ -255,28 +244,28 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			ShortColumnBuffer shortCol(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			ShortColumnBufferPtr shortCol(new ShortColumnBuffer(colName));
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				shortCol.SetSqlType(SQL_INTEGER);
+				idCol->SetSqlType(SQL_INTEGER);
+				shortCol->SetSqlType(SQL_INTEGER);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			shortCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(shortCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			shortCol.SetValue(-32768);
+			idCol->SetValue(101);
+			shortCol->SetValue(-32768);
 			i();
 
-			idCol.SetValue(102);
-			shortCol.SetValue(32767);
+			idCol->SetValue(102);
+			shortCol->SetValue(32767);
 			i();
 
 			m_pDb->CommitTrans();
@@ -327,28 +316,28 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			LongColumnBuffer longCol(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			LongColumnBufferPtr longCol(new LongColumnBuffer(colName));
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				longCol.SetSqlType(SQL_INTEGER);
+				idCol->SetSqlType(SQL_INTEGER);
+				longCol->SetSqlType(SQL_INTEGER);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			longCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(longCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			longCol.SetValue((-2147483647 - 1));
+			idCol->SetValue(101);
+			longCol->SetValue((-2147483647 - 1));
 			i();
 
-			idCol.SetValue(102);
-			longCol.SetValue(2147483647);
+			idCol->SetValue(102);
+			longCol->SetValue(2147483647);
 			i();
 
 			m_pDb->CommitTrans();
@@ -399,28 +388,28 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			BigIntColumnBuffer biCol(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			BigIntColumnBufferPtr biCol(new BigIntColumnBuffer(colName));
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				biCol.SetSqlType(SQL_BIGINT);
+				idCol->SetSqlType(SQL_INTEGER);
+				biCol->SetSqlType(SQL_BIGINT);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			biCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(biCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			biCol.SetValue((-9223372036854775807 - 1));
+			idCol->SetValue(101);
+			biCol->SetValue((-9223372036854775807 - 1));
 			i();
 
-			idCol.SetValue(102);
-			biCol.SetValue(9223372036854775807);
+			idCol->SetValue(102);
+			biCol->SetValue(9223372036854775807);
 			i();
 
 			m_pDb->CommitTrans();
@@ -474,32 +463,32 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			DoubleColumnBuffer doubleCol(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			DoubleColumnBufferPtr doubleCol(new DoubleColumnBuffer(colName));
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				doubleCol.SetSqlType(SQL_DOUBLE);
+				idCol->SetSqlType(SQL_INTEGER);
+				doubleCol->SetSqlType(SQL_DOUBLE);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			doubleCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(doubleCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			doubleCol.SetValue((0.0));
+			idCol->SetValue(101);
+			doubleCol->SetValue((0.0));
 			i();
 
-			idCol.SetValue(102);
-			doubleCol.SetValue(3.141592);
+			idCol->SetValue(102);
+			doubleCol->SetValue(3.141592);
 			i();
 
-			idCol.SetValue(103);
-			doubleCol.SetValue(-3.141592);
+			idCol->SetValue(103);
+			doubleCol->SetValue(-3.141592);
 			i();
 
 			m_pDb->CommitTrans();
@@ -556,32 +545,32 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			RealColumnBuffer realCol(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			RealColumnBufferPtr realCol(new RealColumnBuffer(colName));
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				realCol.SetSqlType(SQL_REAL);
+				idCol->SetSqlType(SQL_INTEGER);
+				realCol->SetSqlType(SQL_REAL);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			realCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(realCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			realCol.SetValue((0.0));
+			idCol->SetValue(101);
+			realCol->SetValue((0.0));
 			i();
 
-			idCol.SetValue(102);
-			realCol.SetValue(3.141f);
+			idCol->SetValue(102);
+			realCol->SetValue(3.141f);
 			i();
 
-			idCol.SetValue(103);
-			realCol.SetValue(-3.141f);
+			idCol->SetValue(103);
+			realCol->SetValue(-3.141f);
 			i();
 
 			m_pDb->CommitTrans();
@@ -651,19 +640,19 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			NumericColumnBuffer num18_0_Col(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			NumericColumnBufferPtr num18_0_Col(new NumericColumnBuffer(colName));
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				num18_0_Col.SetSqlType(SQL_NUMERIC);
+				idCol->SetSqlType(SQL_INTEGER);
+				num18_0_Col->SetSqlType(SQL_NUMERIC);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			num18_0_Col.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(num18_0_Col, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
@@ -675,8 +664,8 @@ namespace exodbctest
 			num.sign = 1;
 			::memcpy(num.val, &v, sizeof(v));
 
-			idCol.SetValue(101);
-			num18_0_Col.SetValue(num);
+			idCol->SetValue(101);
+			num18_0_Col->SetValue(num);
 			i();
 
 			num.precision = 18;
@@ -685,8 +674,8 @@ namespace exodbctest
 			v = 123456789012345678;
 			::memcpy(num.val, &v, sizeof(v));
 
-			idCol.SetValue(102);
-			num18_0_Col.SetValue(num);
+			idCol->SetValue(102);
+			num18_0_Col->SetValue(num);
 			i();
 
 			num.precision = 18;
@@ -695,8 +684,8 @@ namespace exodbctest
 			v = 123456789012345678;
 			::memcpy(num.val, &v, sizeof(v));
 
-			idCol.SetValue(103);
-			num18_0_Col.SetValue(num);
+			idCol->SetValue(103);
+			num18_0_Col->SetValue(num);
 			i();
 
 			m_pDb->CommitTrans();
@@ -783,8 +772,8 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			NumericColumnBuffer num18_10_Col(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			NumericColumnBufferPtr num18_10_Col(new NumericColumnBuffer(colName));
 			bool queryParameterInfo = ! (		m_pDb->GetDbms() == DatabaseProduct::ACCESS
 											||	m_pDb->GetDbms() == DatabaseProduct::MY_SQL);
 			if(!queryParameterInfo)
@@ -793,17 +782,17 @@ namespace exodbctest
 				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
 				// and a type that indicates it wants varchars for numeric-things.
 				// but setting everything manually works fine
-				idCol.SetSqlType(SQL_INTEGER);
-				num18_10_Col.SetSqlType(SQL_NUMERIC);
-				num18_10_Col.SetColumnSize(18);
-				num18_10_Col.SetDecimalDigits(10);
+				idCol->SetSqlType(SQL_INTEGER);
+				num18_10_Col->SetSqlType(SQL_NUMERIC);
+				num18_10_Col->SetColumnSize(18);
+				num18_10_Col->SetDecimalDigits(10);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			num18_10_Col.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(num18_10_Col, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
@@ -815,8 +804,8 @@ namespace exodbctest
 			num.sign = 1;
 			::memcpy(num.val, &v, sizeof(v));
 
-			idCol.SetValue(101);
-			num18_10_Col.SetValue(num);
+			idCol->SetValue(101);
+			num18_10_Col->SetValue(num);
 			i();
 
 			num.precision = 18;
@@ -825,8 +814,8 @@ namespace exodbctest
 			v = 123456789012345678;
 			::memcpy(num.val, &v, sizeof(v));
 
-			idCol.SetValue(102);
-			num18_10_Col.SetValue(num);
+			idCol->SetValue(102);
+			num18_10_Col->SetValue(num);
 			i();
 
 			num.precision = 18;
@@ -835,8 +824,8 @@ namespace exodbctest
 			v = 123456789012345678;
 			::memcpy(num.val, &v, sizeof(v));
 
-			idCol.SetValue(103);
-			num18_10_Col.SetValue(num);
+			idCol->SetValue(103);
+			num18_10_Col->SetValue(num);
 			i();
 
 			m_pDb->CommitTrans();
@@ -912,8 +901,8 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			NumericColumnBuffer num5_3_Col(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer( idColName));
+			NumericColumnBufferPtr num5_3_Col(new NumericColumnBuffer(colName));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS
 				|| m_pDb->GetDbms() == DatabaseProduct::MY_SQL);
 			if (!queryParameterInfo)
@@ -922,17 +911,17 @@ namespace exodbctest
 				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
 				// and a type that indicates it wants varchars for numeric-things.
 				// but setting everything manually works fine
-				idCol.SetSqlType(SQL_INTEGER);
-				num5_3_Col.SetSqlType(SQL_NUMERIC);
-				num5_3_Col.SetColumnSize(5);
-				num5_3_Col.SetDecimalDigits(3);
+				idCol->SetSqlType(SQL_INTEGER);
+				num5_3_Col->SetSqlType(SQL_NUMERIC);
+				num5_3_Col->SetColumnSize(5);
+				num5_3_Col->SetDecimalDigits(3);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			num5_3_Col.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(num5_3_Col, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
@@ -944,8 +933,8 @@ namespace exodbctest
 			num.sign = 1;
 			::memcpy(num.val, &v, sizeof(v));
 
-			idCol.SetValue(101);
-			num5_3_Col.SetValue(num);
+			idCol->SetValue(101);
+			num5_3_Col->SetValue(num);
 			i();
 
 			num.precision = 5;
@@ -954,8 +943,8 @@ namespace exodbctest
 			v = 12345;
 			::memcpy(num.val, &v, sizeof(v));
 
-			idCol.SetValue(102);
-			num5_3_Col.SetValue(num);
+			idCol->SetValue(102);
+			num5_3_Col->SetValue(num);
 			i();
 
 			num.precision = 5;
@@ -964,8 +953,8 @@ namespace exodbctest
 			v = 12345;
 			::memcpy(num.val, &v, sizeof(v));
 
-			idCol.SetValue(103);
-			num5_3_Col.SetValue(num);
+			idCol->SetValue(103);
+			num5_3_Col->SetValue(num);
 			i();
 
 			m_pDb->CommitTrans();
@@ -1036,21 +1025,21 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			TypeTimeColumnBuffer time(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			TypeTimeColumnBufferPtr time(new TypeTimeColumnBuffer(colName));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				time.SetSqlType(SQL_TYPE_TIME);
+				idCol->SetSqlType(SQL_INTEGER);
+				time->SetSqlType(SQL_TYPE_TIME);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			time.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(time, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
@@ -1059,8 +1048,8 @@ namespace exodbctest
 			t.minute = 22;
 			t.second = 45;
 
-			idCol.SetValue(101);
-			time.SetValue(t);
+			idCol->SetValue(101);
+			time->SetValue(t);
 			i();
 
 			m_pDb->CommitTrans();
@@ -1115,21 +1104,21 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			TypeDateColumnBuffer date(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			TypeDateColumnBufferPtr date(new TypeDateColumnBuffer(colName));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				date.SetSqlType(SQL_TYPE_DATE);
+				idCol->SetSqlType(SQL_INTEGER);
+				date->SetSqlType(SQL_TYPE_DATE);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			date.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(date, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
@@ -1138,8 +1127,8 @@ namespace exodbctest
 			d.month = 01;
 			d.year = 1983;
 
-			idCol.SetValue(101);
-			date.SetValue(d);
+			idCol->SetValue(101);
+			date->SetValue(d);
 			i();
 
 			m_pDb->CommitTrans();
@@ -1235,21 +1224,21 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			TypeTimestampColumnBuffer tsCol(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			TypeTimestampColumnBufferPtr tsCol(new TypeTimestampColumnBuffer(colName));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				tsCol.SetSqlType(SQL_TYPE_TIMESTAMP);
+				idCol->SetSqlType(SQL_INTEGER);
+				tsCol->SetSqlType(SQL_TYPE_TIMESTAMP);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			tsCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(tsCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
@@ -1262,8 +1251,8 @@ namespace exodbctest
 			ts.second = 59;
 			ts.fraction = 0;
 
-			idCol.SetValue(101);
-			tsCol.SetValue(ts);
+			idCol->SetValue(101);
+			tsCol->SetValue(ts);
 			i();
 
 			m_pDb->CommitTrans();
@@ -1288,18 +1277,18 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			TypeTimestampColumnBuffer tsCol(colName);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			TypeTimestampColumnBufferPtr tsCol(new TypeTimestampColumnBuffer(colName));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				tsCol.SetSqlType(SQL_TYPE_TIMESTAMP);
+				idCol->SetSqlType(SQL_INTEGER);
+				tsCol->SetSqlType(SQL_TYPE_TIMESTAMP);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			tsCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(tsCol, 2);
 
 			SQL_TIMESTAMP_STRUCT ts;
 			ts.day = 9;
@@ -1310,8 +1299,8 @@ namespace exodbctest
 			ts.second = 59;
 			ts.fraction = fraction;
 
-			idCol.SetValue(102);
-			tsCol.SetValue(ts);
+			idCol->SetValue(102);
+			tsCol->SetValue(ts);
 			i();
 
 			m_pDb->CommitTrans();
@@ -1434,35 +1423,35 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			WCharColumnArrayBuffer varcharCol(colName, 128 + 1);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			WCharColumnBufferPtr varcharCol(new WCharColumnArrayBuffer(colName, 128 + 1));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				varcharCol.SetSqlType(SQL_VARCHAR);
-				varcharCol.SetColumnSize(128);
+				idCol->SetSqlType(SQL_INTEGER);
+				varcharCol->SetSqlType(SQL_VARCHAR);
+				varcharCol->SetColumnSize(128);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			varcharCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(varcharCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			varcharCol.SetWString(L"Hello World");
+			idCol->SetValue(101);
+			varcharCol->SetWString(L"Hello World");
 			i();
 
-			idCol.SetValue(102);
-			varcharCol.SetWString(L"ä ö ü");
+			idCol->SetValue(102);
+			varcharCol->SetWString(L"ä ö ü");
 			i();
 
-			idCol.SetValue(103);
-			varcharCol.SetWString(L"   ");
+			idCol->SetValue(103);
+			varcharCol->SetWString(L"   ");
 			i();
 
 			m_pDb->CommitTrans();
@@ -1501,35 +1490,35 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			WCharColumnArrayBuffer charCol(colName, 10 + 1);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			WCharColumnBufferPtr charCol(new WCharColumnArrayBuffer(colName, 10 + 1));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				charCol.SetSqlType(SQL_CHAR);
-				charCol.SetColumnSize(10);
+				idCol->SetSqlType(SQL_INTEGER);
+				charCol->SetSqlType(SQL_CHAR);
+				charCol->SetColumnSize(10);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			charCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(charCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			charCol.SetWString(L"HelloWorld");
+			idCol->SetValue(101);
+			charCol->SetWString(L"HelloWorld");
 			i();
 
-			idCol.SetValue(102);
-			charCol.SetWString(L"ä ö ü");
+			idCol->SetValue(102);
+			charCol->SetWString(L"ä ö ü");
 			i();
 
-			idCol.SetValue(103);
-			charCol.SetWString(L"abcdefgh  ");
+			idCol->SetValue(103);
+			charCol->SetWString(L"abcdefgh  ");
 			i();
 
 			m_pDb->CommitTrans();
@@ -1623,40 +1612,40 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			CharColumnArrayBuffer varcharCol(colName, 128 + 1);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			CharColumnBufferPtr varcharCol(new CharColumnArrayBuffer(colName, 128 + 1));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				varcharCol.SetSqlType(SQL_VARCHAR);
-				varcharCol.SetColumnSize(128);
+				idCol->SetSqlType(SQL_INTEGER);
+				varcharCol->SetSqlType(SQL_VARCHAR);
+				varcharCol->SetColumnSize(128);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			varcharCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(varcharCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			varcharCol.SetString("Hello World");
+			idCol->SetValue(101);
+			varcharCol->SetString("Hello World");
 			i();
 
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
-				idCol.SetValue(102);
-				varcharCol.SetString("ä ö ü");
+				idCol->SetValue(102);
+				varcharCol->SetString("ä ö ü");
 				i();
 			}
 
-			idCol.SetValue(103);
-			varcharCol.SetString("   ");
+			idCol->SetValue(103);
+			varcharCol->SetString("   ");
 			i();
 
 			m_pDb->CommitTrans();
@@ -1698,40 +1687,40 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			CharColumnArrayBuffer charCol(colName, 10 + 1);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			CharColumnBufferPtr charCol(new CharColumnArrayBuffer(colName, 10 + 1));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				charCol.SetSqlType(SQL_CHAR);
-				charCol.SetColumnSize(10);
+				idCol->SetSqlType(SQL_INTEGER);
+				charCol->SetSqlType(SQL_CHAR);
+				charCol->SetColumnSize(10);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			charCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(charCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			charCol.SetString("HelloWorld");
+			idCol->SetValue(101);
+			charCol->SetString("HelloWorld");
 			i();
 
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
-				idCol.SetValue(102);
-				charCol.SetString("ä ö ü");
+				idCol->SetValue(102);
+				charCol->SetString("ä ö ü");
 				i();
 			}
 
-			idCol.SetValue(103);
-			charCol.SetString("abcdefgh  ");
+			idCol->SetValue(103);
+			charCol->SetString("abcdefgh  ");
 			i();
 
 			m_pDb->CommitTrans();
@@ -1893,35 +1882,35 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			BinaryColumnArrayBuffer blobCol(colName, 16);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			BinaryColumnBufferPtr blobCol(new BinaryColumnArrayBuffer(colName, 16));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				blobCol.SetSqlType(SQL_BINARY);
-				blobCol.SetColumnSize(16);
+				idCol->SetSqlType(SQL_INTEGER);
+				blobCol->SetSqlType(SQL_BINARY);
+				blobCol->SetColumnSize(16);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			blobCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(blobCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
 			// and some non-null values
-			idCol.SetValue(101);
-			blobCol.SetValue(empty);
+			idCol->SetValue(101);
+			blobCol->SetValue(empty);
 			i();
 
-			idCol.SetValue(102);
-			blobCol.SetValue(ff);
+			idCol->SetValue(102);
+			blobCol->SetValue(ff);
 			i();
 
-			idCol.SetValue(103);
-			blobCol.SetValue(abc);
+			idCol->SetValue(103);
+			blobCol->SetValue(abc);
 			i();
 
 			m_pDb->CommitTrans();
@@ -1996,38 +1985,38 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			// Prepare the id-col (required) and the col to insert
-			LongColumnBuffer idCol(idColName);
-			BinaryColumnArrayBuffer varblobCol(colName, 20);
+			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
+			BinaryColumnBufferPtr varblobCol(new BinaryColumnArrayBuffer(colName, 20));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				varblobCol.SetSqlType(SQL_BINARY);
-				varblobCol.SetColumnSize(20);
+				idCol->SetSqlType(SQL_INTEGER);
+				varblobCol->SetSqlType(SQL_BINARY);
+				varblobCol->SetColumnSize(20);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			varblobCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(varblobCol, 2);
 
 			// insert the default null value
-			idCol.SetValue(100);
+			idCol->SetValue(100);
 			i();
 
-			idCol.SetValue(101);
-			varblobCol.SetValue(empty);
+			idCol->SetValue(101);
+			varblobCol->SetValue(empty);
 			i();
 
-			idCol.SetValue(102);
-			varblobCol.SetValue(ff);
+			idCol->SetValue(102);
+			varblobCol->SetValue(ff);
 			i();
 
-			idCol.SetValue(103);
-			varblobCol.SetValue(abc);
+			idCol->SetValue(103);
+			varblobCol->SetValue(abc);
 			i();
 
-			idCol.SetValue(104);
-			varblobCol.SetValue(abc_ff);
+			idCol->SetValue(104);
+			varblobCol->SetValue(abc_ff);
 			i();
 
 			m_pDb->CommitTrans();
@@ -2594,21 +2583,21 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLCHAR buffer[16];
-			SqlCPointerBuffer blobCol(colName, SQL_BINARY, (SQLPOINTER)buffer, SQL_C_BINARY, sizeof(buffer), ColumnFlag::CF_NULLABLE, 16, 0);
+			SqlCPointerBufferPtr blobCol(new SqlCPointerBuffer(colName, SQL_BINARY, (SQLPOINTER)buffer, SQL_C_BINARY, sizeof(buffer), ColumnFlag::CF_NULLABLE, 16, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				blobCol.SetSqlType(SQL_BINARY);
-				blobCol.SetColumnSize(16);
+				idCol->SetSqlType(SQL_INTEGER);
+				blobCol->SetSqlType(SQL_BINARY);
+				blobCol->SetColumnSize(16);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			blobCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(blobCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -2617,7 +2606,7 @@ namespace exodbctest
 			// and some non-null values
 			// Note that we also need to set Cb
 			idBuffer = 101;
-			blobCol.SetCb(16);
+			blobCol->SetCb(16);
 			memcpy((void*)buffer, (void*)&empty[0], sizeof(buffer));
 			i();
 
@@ -2703,21 +2692,21 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLCHAR buffer[20];
-			SqlCPointerBuffer varblobCol(colName, SQL_BINARY, (SQLPOINTER)buffer, SQL_C_BINARY, sizeof(buffer), ColumnFlag::CF_NULLABLE, 20, 0);
+			SqlCPointerBufferPtr varblobCol(new SqlCPointerBuffer(colName, SQL_BINARY, (SQLPOINTER)buffer, SQL_C_BINARY, sizeof(buffer), ColumnFlag::CF_NULLABLE, 20, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				varblobCol.SetSqlType(SQL_BINARY);
-				varblobCol.SetColumnSize(20);
+				idCol->SetSqlType(SQL_INTEGER);
+				varblobCol->SetSqlType(SQL_BINARY);
+				varblobCol->SetColumnSize(20);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			varblobCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(varblobCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -2726,22 +2715,22 @@ namespace exodbctest
 			// and some non-null values
 			// Note that we also need to set Cb
 			idBuffer = 101;
-			varblobCol.SetCb(empty.size());
+			varblobCol->SetCb(empty.size());
 			memcpy((void*)buffer, (void*)&empty[0], empty.size());
 			i();
 
 			idBuffer = 102;
-			varblobCol.SetCb(ff.size());
+			varblobCol->SetCb(ff.size());
 			memcpy((void*)buffer, (void*)&ff[0], ff.size());
 			i();
 
 			idBuffer = 103;
-			varblobCol.SetCb(abc.size());
+			varblobCol->SetCb(abc.size());
 			memcpy((void*)buffer, (void*)&abc[0], abc.size());
 			i();
 
 			idBuffer = 104;
-			varblobCol.SetCb(abc_ff.size());
+			varblobCol->SetCb(abc_ff.size());
 			memcpy((void*)buffer, (void*)&abc_ff[0], abc_ff.size());
 			i();
 
@@ -2808,18 +2797,18 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLBIGINT buffer = 0;
-			SqlCPointerBuffer biCol(colName, SQL_BIGINT, (SQLPOINTER)&buffer, SQL_C_SBIGINT, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+			SqlCPointerBufferPtr biCol(new SqlCPointerBuffer(colName, SQL_BIGINT, (SQLPOINTER)&buffer, SQL_C_SBIGINT, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0));
 
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				biCol.SetSqlType(SQL_BIGINT);
+				idCol->SetSqlType(SQL_INTEGER);
+				biCol->SetSqlType(SQL_BIGINT);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			biCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(biCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -2827,7 +2816,7 @@ namespace exodbctest
 
 			// and some non-null values
 			idBuffer = 101;
-			biCol.SetCb(sizeof(buffer));
+			biCol->SetCb(sizeof(buffer));
 			buffer = (-9223372036854775807 - 1);
 			i();
 
@@ -2868,19 +2857,19 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLINTEGER buffer = 0;
-			SqlCPointerBuffer longCol(colName, SQL_INTEGER, (SQLPOINTER)&buffer, SQL_C_SLONG, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+			SqlCPointerBufferPtr longCol(new SqlCPointerBuffer(colName, SQL_INTEGER, (SQLPOINTER)&buffer, SQL_C_SLONG, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0));
 
 			// Prepare the id-col (required) and the col to insert
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				longCol.SetSqlType(SQL_INTEGER);
+				idCol->SetSqlType(SQL_INTEGER);
+				longCol->SetSqlType(SQL_INTEGER);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			longCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(longCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -2888,7 +2877,7 @@ namespace exodbctest
 
 			// and some non-null values
 			idBuffer = 101;
-			longCol.SetCb(sizeof(buffer));
+			longCol->SetCb(sizeof(buffer));
 			buffer = (-2147483647 - 1);
 			i();
 
@@ -2929,19 +2918,19 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLSMALLINT buffer = 0;
-			SqlCPointerBuffer shortCol(colName, SQL_SMALLINT, (SQLPOINTER)&buffer, SQL_C_SSHORT, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+			SqlCPointerBufferPtr shortCol(new SqlCPointerBuffer(colName, SQL_SMALLINT, (SQLPOINTER)&buffer, SQL_C_SSHORT, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0));
 
 			// Prepare the id-col (required) and the col to insert
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				shortCol.SetSqlType(SQL_INTEGER);
+				idCol->SetSqlType(SQL_INTEGER);
+				shortCol->SetSqlType(SQL_INTEGER);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			shortCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(shortCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -2949,7 +2938,7 @@ namespace exodbctest
 
 			// and some non-null values
 			idBuffer = 101;
-			shortCol.SetCb(sizeof(buffer));
+			shortCol->SetCb(sizeof(buffer));
 			buffer = -32768;
 			i();
 
@@ -2990,21 +2979,21 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLCHAR buffer[10 + 1];
-			SqlCPointerBuffer charCol(colName, SQL_CHAR, (SQLPOINTER)buffer, SQL_C_CHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 10, 0);
+			SqlCPointerBufferPtr charCol(new SqlCPointerBuffer(colName, SQL_CHAR, (SQLPOINTER)buffer, SQL_C_CHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 10, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				charCol.SetSqlType(SQL_CHAR);
-				charCol.SetColumnSize(10);
+				idCol->SetSqlType(SQL_INTEGER);
+				charCol->SetSqlType(SQL_CHAR);
+				charCol->SetColumnSize(10);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			charCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(charCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3012,7 +3001,7 @@ namespace exodbctest
 
 			// and some non-null values
 			idBuffer = 101;
-			charCol.SetCb(SQL_NTS);
+			charCol->SetCb(SQL_NTS);
 			strcpy((char*)buffer, "HelloWorld");
 			i();
 
@@ -3077,21 +3066,21 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLWCHAR buffer[10 + 1];
-			SqlCPointerBuffer charCol(colName, SQL_WCHAR, (SQLPOINTER)buffer, SQL_C_WCHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 10, 0);
+			SqlCPointerBufferPtr charCol(new SqlCPointerBuffer(colName, SQL_WCHAR, (SQLPOINTER)buffer, SQL_C_WCHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 10, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				charCol.SetSqlType(SQL_CHAR);
-				charCol.SetColumnSize(10);
+				idCol->SetSqlType(SQL_INTEGER);
+				charCol->SetSqlType(SQL_CHAR);
+				charCol->SetColumnSize(10);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			charCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(charCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3099,7 +3088,7 @@ namespace exodbctest
 
 			// and some non-null values
 			idBuffer = 101;
-			charCol.SetCb(SQL_NTS);
+			charCol->SetCb(SQL_NTS);
 			wcscpy(buffer, L"HelloWorld");
 			i();
 
@@ -3156,21 +3145,21 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLCHAR buffer[128 + 1];
-			SqlCPointerBuffer varcharCol(colName, SQL_CHAR, (SQLPOINTER)buffer, SQL_C_CHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 128, 0);
+			SqlCPointerBufferPtr varcharCol(new SqlCPointerBuffer(colName, SQL_CHAR, (SQLPOINTER)buffer, SQL_C_CHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 128, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				varcharCol.SetSqlType(SQL_VARCHAR);
-				varcharCol.SetColumnSize(128);
+				idCol->SetSqlType(SQL_INTEGER);
+				varcharCol->SetSqlType(SQL_VARCHAR);
+				varcharCol->SetColumnSize(128);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			varcharCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(varcharCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3178,7 +3167,7 @@ namespace exodbctest
 
 			// and some non-null values
 			idBuffer = 101;
-			varcharCol.SetCb(SQL_NTS);
+			varcharCol->SetCb(SQL_NTS);
 			strcpy((char*)buffer, "Hello World");
 			i();
 
@@ -3235,21 +3224,21 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLWCHAR buffer[128 + 1];
-			SqlCPointerBuffer varcharCol(colName, SQL_WCHAR, (SQLPOINTER)buffer, SQL_C_WCHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 128, 0);
+			SqlCPointerBufferPtr varcharCol(new SqlCPointerBuffer(colName, SQL_WCHAR, (SQLPOINTER)buffer, SQL_C_WCHAR, sizeof(buffer), ColumnFlag::CF_NULLABLE, 128, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				varcharCol.SetSqlType(SQL_VARCHAR);
-				varcharCol.SetColumnSize(128);
+				idCol->SetSqlType(SQL_INTEGER);
+				varcharCol->SetSqlType(SQL_VARCHAR);
+				varcharCol->SetColumnSize(128);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			varcharCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(varcharCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3257,7 +3246,7 @@ namespace exodbctest
 
 			// and some non-null values
 			idBuffer = 101;
-			varcharCol.SetCb(SQL_NTS);
+			varcharCol->SetCb(SQL_NTS);
 			wcscpy(buffer, L"Hello World");
 			i();
 
@@ -3306,20 +3295,20 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQL_DATE_STRUCT buffer;
-			SqlCPointerBuffer date(colName, SQL_DATE, (SQLPOINTER)&buffer, SQL_C_TYPE_DATE, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+			SqlCPointerBufferPtr date(new SqlCPointerBuffer(colName, SQL_DATE, (SQLPOINTER)&buffer, SQL_C_TYPE_DATE, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				date.SetSqlType(SQL_TYPE_DATE);
+				idCol->SetSqlType(SQL_INTEGER);
+				date->SetSqlType(SQL_TYPE_DATE);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			date.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(date, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3331,7 +3320,7 @@ namespace exodbctest
 			buffer.year = 1983;
 
 			idBuffer = 101;
-			date.SetCb(sizeof(buffer));
+			date->SetCb(sizeof(buffer));
 			i();
 
 			m_pDb->CommitTrans();
@@ -3369,20 +3358,20 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQL_TIME_STRUCT buffer;
-			SqlCPointerBuffer time(colName, SQL_TIME, (SQLPOINTER)&buffer, SQL_C_TYPE_TIME, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+			SqlCPointerBufferPtr time(new SqlCPointerBuffer(colName, SQL_TIME, (SQLPOINTER)&buffer, SQL_C_TYPE_TIME, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				time.SetSqlType(SQL_TYPE_TIME);
+				idCol->SetSqlType(SQL_INTEGER);
+				time->SetSqlType(SQL_TYPE_TIME);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			time.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(time, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3392,7 +3381,7 @@ namespace exodbctest
 			buffer.hour = 15;
 			buffer.minute = 22;
 			buffer.second = 45;
-			time.SetCb(sizeof(buffer));
+			time->SetCb(sizeof(buffer));
 			idBuffer = 101;
 			i();
 
@@ -3432,20 +3421,20 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQL_TIMESTAMP_STRUCT buffer;
-			SqlCPointerBuffer tsCol(colName, SQL_TIMESTAMP, (SQLPOINTER)&buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+			SqlCPointerBufferPtr tsCol(new SqlCPointerBuffer(colName, SQL_TIMESTAMP, (SQLPOINTER)&buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				tsCol.SetSqlType(SQL_TYPE_TIMESTAMP);
+				idCol->SetSqlType(SQL_INTEGER);
+				tsCol->SetSqlType(SQL_TYPE_TIMESTAMP);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			tsCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(tsCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3459,7 +3448,7 @@ namespace exodbctest
 			buffer.minute = 59;
 			buffer.second = 59;
 			buffer.fraction = 0;
-			tsCol.SetCb(sizeof(buffer));
+			tsCol->SetCb(sizeof(buffer));
 			idBuffer = 101;
 			i();
 
@@ -3486,20 +3475,20 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQL_TIMESTAMP_STRUCT buffer;
-			SqlCPointerBuffer tsCol(colName, SQL_TIMESTAMP, (SQLPOINTER)&buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+			SqlCPointerBufferPtr tsCol(new SqlCPointerBuffer(colName, SQL_TIMESTAMP, (SQLPOINTER)&buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				idCol.SetSqlType(SQL_INTEGER);
-				tsCol.SetSqlType(SQL_TYPE_TIMESTAMP);
+				idCol->SetSqlType(SQL_INTEGER);
+				tsCol->SetSqlType(SQL_TYPE_TIMESTAMP);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			tsCol.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(tsCol, 2);
 
 			buffer.day = 9;
 			buffer.month = 02;
@@ -3508,7 +3497,7 @@ namespace exodbctest
 			buffer.minute = 59;
 			buffer.second = 59;
 			buffer.fraction = fraction;
-			tsCol.SetCb(sizeof(buffer));
+			tsCol->SetCb(sizeof(buffer));
 			idBuffer = 102;
 			i();
 
@@ -3585,18 +3574,18 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLDOUBLE buffer;
-			SqlCPointerBuffer doubleCol(colName, SQL_DOUBLE, (SQLPOINTER)&buffer, SQL_C_DOUBLE, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+			SqlCPointerBufferPtr doubleCol(new SqlCPointerBuffer(colName, SQL_DOUBLE, (SQLPOINTER)&buffer, SQL_C_DOUBLE, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0));
 
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				doubleCol.SetSqlType(SQL_DOUBLE);
+				idCol->SetSqlType(SQL_INTEGER);
+				doubleCol->SetSqlType(SQL_DOUBLE);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			doubleCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(doubleCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3604,7 +3593,7 @@ namespace exodbctest
 
 			// and some non-null values
 			idBuffer = 101;
-			doubleCol.SetCb(sizeof(SQLDOUBLE));
+			doubleCol->SetCb(sizeof(SQLDOUBLE));
 			buffer = 0.0;
 			i();
 
@@ -3652,18 +3641,18 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQLREAL buffer;
-			SqlCPointerBuffer realCol(colName, SQL_REAL, (SQLPOINTER)&buffer, SQL_C_FLOAT, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0);
+			SqlCPointerBufferPtr realCol(new SqlCPointerBuffer(colName, SQL_REAL, (SQLPOINTER)&buffer, SQL_C_FLOAT, sizeof(buffer), ColumnFlag::CF_NULLABLE, 0, 0));
 
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				realCol.SetSqlType(SQL_REAL);
+				idCol->SetSqlType(SQL_INTEGER);
+				realCol->SetSqlType(SQL_REAL);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			realCol.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(realCol, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3671,7 +3660,7 @@ namespace exodbctest
 
 			// and some non-null values
 			idBuffer = 101;
-			realCol.SetCb(sizeof(buffer));
+			realCol->SetCb(sizeof(buffer));
 			buffer = 0.0;
 			i();
 
@@ -3718,18 +3707,18 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQL_NUMERIC_STRUCT buffer;
-			SqlCPointerBuffer num18_0_Col(colName, SQL_NUMERIC, (SQLPOINTER)&buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NULLABLE, 18, 0);
+			SqlCPointerBufferPtr num18_0_Col(new SqlCPointerBuffer(colName, SQL_NUMERIC, (SQLPOINTER)&buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NULLABLE, 18, 0));
 
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 			{
-				idCol.SetSqlType(SQL_INTEGER);
-				num18_0_Col.SetSqlType(SQL_NUMERIC);
+				idCol->SetSqlType(SQL_INTEGER);
+				num18_0_Col->SetSqlType(SQL_NUMERIC);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
-			num18_0_Col.BindParameter(2, m_pStmt, m_pDb->GetDbms() != DatabaseProduct::ACCESS);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(num18_0_Col, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3742,7 +3731,7 @@ namespace exodbctest
 			buffer.scale = 0;
 			buffer.sign = 1;
 			::memcpy(buffer.val, &v, sizeof(v));
-			num18_0_Col.SetCb(sizeof(buffer));
+			num18_0_Col->SetCb(sizeof(buffer));
 			idBuffer = 101;
 			i();
 
@@ -3813,9 +3802,9 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQL_NUMERIC_STRUCT buffer;
-			SqlCPointerBuffer num18_10_Col(colName, SQL_NUMERIC, (SQLPOINTER)&buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NULLABLE, 18, 10);
+			SqlCPointerBufferPtr num18_10_Col(new SqlCPointerBuffer(colName, SQL_NUMERIC, (SQLPOINTER)&buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NULLABLE, 18, 10));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS
 				|| m_pDb->GetDbms() == DatabaseProduct::MY_SQL);
@@ -3825,14 +3814,14 @@ namespace exodbctest
 				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
 				// and a type that indicates it wants varchars for numeric-things.
 				// but setting everything manually works fine
-				idCol.SetSqlType(SQL_INTEGER);
-				num18_10_Col.SetSqlType(SQL_NUMERIC);
-				num18_10_Col.SetColumnSize(18);
-				num18_10_Col.SetDecimalDigits(10);
+				idCol->SetSqlType(SQL_INTEGER);
+				num18_10_Col->SetSqlType(SQL_NUMERIC);
+				num18_10_Col->SetColumnSize(18);
+				num18_10_Col->SetDecimalDigits(10);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			num18_10_Col.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(num18_10_Col, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3845,7 +3834,7 @@ namespace exodbctest
 			buffer.scale = 10;
 			buffer.sign = 1;
 			::memcpy(buffer.val, &v, sizeof(v));
-			num18_10_Col.SetCb(sizeof(buffer));
+			num18_10_Col->SetCb(sizeof(buffer));
 			idBuffer = 101;
 			i();
 
@@ -3915,9 +3904,9 @@ namespace exodbctest
 			StatementCloser closer(m_pStmt);
 
 			SQLINTEGER idBuffer;
-			SqlCPointerBuffer idCol(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0);
+			SqlCPointerBufferPtr idCol(new SqlCPointerBuffer(colName, SQL_INTEGER, &idBuffer, SQL_C_SLONG, sizeof(idBuffer), ColumnFlag::CF_NONE, 0, 0));
 			SQL_NUMERIC_STRUCT buffer;
-			SqlCPointerBuffer num5_3_Col(colName, SQL_NUMERIC, (SQLPOINTER)&buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NULLABLE, 5, 3);
+			SqlCPointerBufferPtr num5_3_Col(new SqlCPointerBuffer(colName, SQL_NUMERIC, (SQLPOINTER)&buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NULLABLE, 5, 3));
 
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS
 				|| m_pDb->GetDbms() == DatabaseProduct::MY_SQL);
@@ -3927,14 +3916,14 @@ namespace exodbctest
 				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
 				// and a type that indicates it wants varchars for numeric-things.
 				// but setting everything manually works fine
-				idCol.SetSqlType(SQL_INTEGER);
-				num5_3_Col.SetSqlType(SQL_NUMERIC);
-				num5_3_Col.SetColumnSize(5);
-				num5_3_Col.SetDecimalDigits(3);
+				idCol->SetSqlType(SQL_INTEGER);
+				num5_3_Col->SetSqlType(SQL_NUMERIC);
+				num5_3_Col->SetColumnSize(5);
+				num5_3_Col->SetDecimalDigits(3);
 			}
-			FInserter i(m_pDb->GetDbms(), m_pStmt, tableId, colName);
-			idCol.BindParameter(1, m_pStmt, queryParameterInfo);
-			num5_3_Col.BindParameter(2, m_pStmt, queryParameterInfo);
+			FInserter2 i(m_pDb, tableId, colName);
+			i.m_stmt.BindParameter(idCol, 1);
+			i.m_stmt.BindParameter(num5_3_Col, 2);
 
 			// insert the default null value
 			idBuffer = 100;
@@ -3947,7 +3936,7 @@ namespace exodbctest
 			buffer.scale = 3;
 			buffer.sign = 1;
 			::memcpy(buffer.val, &v, sizeof(v));
-			num5_3_Col.SetCb(sizeof(buffer));
+			num5_3_Col->SetCb(sizeof(buffer));
 			idBuffer = 101;
 			i();
 
