@@ -222,7 +222,17 @@ namespace exodbc
 	{
 		exASSERT(m_pDb);
 
-		BindParamVisitor pv(paramNr, m_pHStmt, DatabaseSupportsDescribeParam(m_pDb->GetDbms()));
+		SParameterDescription paramDesc;
+		if (IsPrepared() && DatabaseSupportsDescribeParam(m_pDb->GetDbms()))
+		{
+			paramDesc = DescribeParameter(paramNr);
+		}
+		else
+		{
+			paramDesc = boost::apply_visitor(SParamDescVisitor(), column);
+		}
+
+		BindParamVisitor pv(paramNr, m_pHStmt, paramDesc);
 		boost::apply_visitor(pv, column);
 		m_boundParams = true;
 	}

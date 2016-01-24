@@ -18,6 +18,7 @@
 // Other headers
 #include "ColumnBuffer.h"
 #include "SqlStatementCloser.h"
+#include "ExecutableStatement.h"
 
 // Debug
 #include "DebugNew.h"
@@ -159,6 +160,39 @@ namespace exodbctest
 	};
 
 
+	struct FInsert2
+	{
+		FInserter2(DatabaseProduct dbms, SqlStmtHandlePtr pStmt, exodbctest::TableId tableId, const std::wstring& columnQueryName)
+			: m_tableId(tableId)
+			, m_columnQueryName(ToDbCase(columnQueryName))
+			, m_pStmt(pStmt)
+			, m_dbms(dbms)
+		{
+			// prepare the insert statement
+			wstring tableName = GetTableName(m_tableId);
+			tableName = PrependSchemaOrCatalogName(m_dbms, tableName);
+			wstring idColName = GetIdColumnName(m_tableId);
+			wstring sqlstmt = boost::str(boost::wformat(L"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % m_columnQueryName);
+			m_stmt.Prepare(sqlstmt);
+			SQLRETURN ret = SQLPrepare(pStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+			THROW_IFN_SUCCESS(SQLPrepare, ret, SQL_HANDLE_STMT, pStmt->GetHandle());
+		}
+
+		void operator()()
+		{
+			SQLRETURN ret = SQLExecute(m_pStmt->GetHandle());
+			THROW_IFN_SUCCESS(SQLExecute, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
+		}
+
+	protected:
+		ExecutableStatement m_stmt;
+		DatabaseProduct m_dbms;
+		SqlStmtHandlePtr m_pStmt;
+		exodbctest::TableId m_tableId;
+		wstring m_columnQueryName;
+	};
+
+
 	struct FInserter
 	{
 		FInserter(DatabaseProduct dbms, SqlStmtHandlePtr pStmt, exodbctest::TableId tableId, const std::wstring& columnQueryName)
@@ -181,6 +215,8 @@ namespace exodbctest
 			SQLRETURN ret = SQLExecute(m_pStmt->GetHandle());
 			THROW_IFN_SUCCESS(SQLExecute, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
 		}
+
+
 
 	protected:
 		DatabaseProduct m_dbms;
