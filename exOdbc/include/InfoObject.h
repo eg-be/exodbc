@@ -505,4 +505,6 @@ namespace exodbc
 	* \brief std::vector of STablePrivilegesInfo objects.
 	*/
 	typedef std::vector<STablePrivilegesInfo> TablePrivilegesVector;
+
+
 }
