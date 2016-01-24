@@ -61,10 +61,15 @@ namespace exodbc
 		* A static lists of drivers that do not support SqlDescribeParam.
 		* Unknown databases are expected to support it, so true is returned.
 		* Access and Excel are known for not supporting.
+		* MySql returns strange results for numeric types, see #206
 		*/
-		static bool DatabaseSupportsDescribeParam(DatabaseProduct dbms) noexcept
+		static bool DatabaseSupportsDescribeParam(DatabaseProduct dbms, SQLSMALLINT sqlCType) noexcept
 		{
-			return !(dbms == DatabaseProduct::ACCESS || dbms == DatabaseProduct::EXCEL);
+			if (dbms == DatabaseProduct::ACCESS || dbms == DatabaseProduct::EXCEL)
+				return false;
+			if (dbms == DatabaseProduct::MY_SQL && sqlCType == SQL_C_NUMERIC)
+				return false;
+			return true;
 		};
 
 
@@ -127,8 +132,16 @@ namespace exodbc
 		* \brief	Bind a ColumnBufferPtrVariant to a parameter marker ('?').
 		* \details	The columnNr is 1-indexed and must match the parameter markers of 
 		*			the result-set SQL statement that is going to be executed.
+		*			If the statement has been prepared, and the Database supports querying
+		*			about parameter descriptions, the values for column size and decimal digits
+		*			are queried from the database.
+		*			
+		*			If the flag neverQueryParamDesc is true, params are never queried.
+		*			
+		*			If param description is not queried, one is created from the values
+		*			stored in the ColumnBuffer.
 		*/
-		void BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT paramNr);
+		void BindParameter(ColumnBufferPtrVariant column, SQLUSMALLINT paramNr, bool neverQueryParamDesc = false);
 
 
 		/*!
