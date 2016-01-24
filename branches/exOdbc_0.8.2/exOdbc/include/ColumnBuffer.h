@@ -271,6 +271,10 @@ namespace exodbc
 		*			handle gets unbound.
 		* \param	columnNr 1-indexed column of the result set.
 		* \param	pHStmt	Statement handle to bind against.
+		* \param	sqlCType SQL C Type of the buffer.
+		* \param	pBuffer Buffer to bind against.
+		* \param	bufferLen length of pBuffer in bytes.
+		* \param	pCb Length indicator to bind against.
 		*/
 		void BindColumnImpl(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb)
 		{
@@ -693,9 +697,7 @@ namespace exodbc
 		*			handle get reseted.
 		* \param	paramNr 1-indexed parameter of the statement to be executed.
 		* \param	pHStmt Statement to bind against.
-		* \param	useSqlDescribeParam	If true, before calling SQLBindParam the database is queried about the
-		*			details of the parameter using SQLDescribeParam. The statement should already be
-		*			prepared, else SQLDescribeParam will probably fail.
+		* \param	paramDesc	Description of the parameter.
 		*/
 		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
 		{
@@ -854,9 +856,7 @@ namespace exodbc
 		*			DESC_PRESISION (passed Column Size) and DESC_SCALE (passed Decimal Digits).
 		* \param	paramNr 1-indexed parameter of the statement to be executed.
 		* \param	pHStmt Statement to bind against.
-		* \param	useSqlDescribeParam	If true, before calling SQLBindParam the database is queried about the
-		*			details of the parameter using SQLDescribeParam. The statement should already be
-		*			prepared, else SQLDescribeParam will probably fail.
+		* \param	paramDesc	Description of the parameter.
 		*/
 		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
 		{
