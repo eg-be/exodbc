@@ -158,8 +158,9 @@ namespace exodbc
 
 
 	/*!
-	* \class	ColumnBufferBindInfoHolder
-	* \brief	Stores information on which statement handle a ColumnBuffer is bound to and
+	* \class	ColumnBindable
+	* \brief	Provides helpers to bind a buffer to a column as Parameter or Result.
+	*			Stores information on which statement handle a ColumnBuffer is bound to and
 	*			releases binding upon destruction.
 	* \details	Provides two protected maps indexed by a ConstSqlStmtHandlePtr with a value
 	*			of a boost::signal2::connection. ColumnBuffers that are being bound to
@@ -177,18 +178,18 @@ namespace exodbc
 	*			
 	*			Cannot be copied.
 	*/
-	class ColumnBufferBindInfoHolder
+	class ColumnBindable
 	{
 	public:
-		ColumnBufferBindInfoHolder() = default;
-		ColumnBufferBindInfoHolder(const ColumnBufferBindInfoHolder& other) = delete;
-		ColumnBufferBindInfoHolder& operator=(const ColumnBufferBindInfoHolder& other) = delete;
+		ColumnBindable() = default;
+		ColumnBindable(const ColumnBindable& other) = delete;
+		ColumnBindable& operator=(const ColumnBindable& other) = delete;
 
 		/*!
 		* \brief	On destruction, call ResetParams() and UnbindColumns() on all SqlHandles 
 		*			stored internally.
 		*/
-		virtual ~ColumnBufferBindInfoHolder()
+		virtual ~ColumnBindable()
 		{
 			// If we are still bound to columns or params, release the bindings and disconnect the signals
 			for (auto it = m_resetParamsConnections.begin(); it != m_resetParamsConnections.end(); ++it)
@@ -284,10 +285,13 @@ namespace exodbc
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 
 			// get a notification if unbound
-			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBufferBindInfoHolder::OnUnbindColumns, this, _1));
+			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBindable::OnUnbindColumns, this, _1));
 		};
 
-
+		/*
+		* \struct SParameterDescription
+		* \brief	Result of SQLDescribeParam operation.
+		*/
 		struct SParameterDescription
 		{
 			SParameterDescription()
@@ -315,6 +319,9 @@ namespace exodbc
 			SQLSMALLINT m_paramNullable;
 		};
 
+		/*!
+		* \brief Binds passed buffer as parameter using information passed.
+		*/
 		void BindParameterImpl(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb, SParameterDescription paramDesc)
 		{
 			exASSERT(paramNr >= 1);
@@ -330,11 +337,14 @@ namespace exodbc
 			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 
 			// Connect a signal that we are bound to this handle now and get notified if params get reseted
-			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBufferBindInfoHolder::OnResetParams, this, _1));
+			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBindable::OnResetParams, this, _1));
 		}
 
 
-
+		/*!
+		* \brief	Binds passed buffer as parameter. The database is queried about a parameter given paramNr.
+		* \return	Result of SQLDescribeParam for given paramNr and pHStmt. 
+		*/
 		SParameterDescription BindParameterImpl(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb, ColumnFlags columnFlags)
 		{
 			exASSERT(paramNr >= 1);
@@ -361,7 +371,7 @@ namespace exodbc
 			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 
 			// Connect a signal that we are bound to this handle now and get notified if params get reseted
-			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBufferBindInfoHolder::OnResetParams, this, _1));
+			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBindable::OnResetParams, this, _1));
 
 			return paramDesc;
 		}
@@ -384,7 +394,7 @@ namespace exodbc
 		: public ColumnBufferLengthIndicator
 		, public ColumnFlags
 		, public ExtendedColumnPropertiesHolder
-		, public ColumnBufferBindInfoHolder
+		, public ColumnBindable
 	{
 	public:
 
@@ -395,7 +405,7 @@ namespace exodbc
 			: ColumnBufferLengthIndicator()
 			, ColumnFlags()
 			, ExtendedColumnPropertiesHolder()
-			, ColumnBufferBindInfoHolder()
+			, ColumnBindable()
 		{
 			::ZeroMemory(&m_buffer, sizeof(T));
 			SetNull();
@@ -408,7 +418,7 @@ namespace exodbc
 			: ColumnBufferLengthIndicator()
 			, ColumnFlags(flags)
 			, ExtendedColumnPropertiesHolder()
-			, ColumnBufferBindInfoHolder()
+			, ColumnBindable()
 			, m_queryName(queryName)
 		{
 			::ZeroMemory(&m_buffer, sizeof(T));
@@ -500,7 +510,7 @@ namespace exodbc
 			}
 			else
 			{
-				ColumnBufferBindInfoHolder::SParameterDescription paramDesc;
+				ColumnBindable::SParameterDescription paramDesc;
 				paramDesc.m_paramSqlType = GetSqlType();
 				paramDesc.m_paramCharSize = GetColumnSize();
 				paramDesc.m_paramDecimalDigits = GetDecimalDigits();
@@ -539,7 +549,7 @@ namespace exodbc
 	template<>
 	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam)
 	{
-		ColumnBufferBindInfoHolder::SParameterDescription paramDesc;
+		ColumnBindable::SParameterDescription paramDesc;
 		if (useSqlDescribeParam)
 		{
 			paramDesc = BindParameterImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, *this);
@@ -609,7 +619,7 @@ namespace exodbc
 		: public ColumnBufferLengthIndicator
 		, public ColumnFlags
 		, public ExtendedColumnPropertiesHolder
-		, public ColumnBufferBindInfoHolder
+		, public ColumnBindable
 	{
 	public:
 		ColumnArrayBuffer() = delete;
@@ -768,7 +778,7 @@ namespace exodbc
 			}
 			else
 			{
-				ColumnBufferBindInfoHolder::SParameterDescription paramDesc;
+				ColumnBindable::SParameterDescription paramDesc;
 				paramDesc.m_paramSqlType = GetSqlType();
 				paramDesc.m_paramCharSize = GetColumnSize();
 				paramDesc.m_paramDecimalDigits = GetDecimalDigits();
@@ -800,7 +810,7 @@ namespace exodbc
 		: public ColumnBufferLengthIndicator
 		, public ColumnFlags
 		, public ExtendedColumnPropertiesHolder
-		, public ColumnBufferBindInfoHolder
+		, public ColumnBindable
 	{
 	public:
 		SqlCPointerBuffer() = delete;
@@ -915,7 +925,7 @@ namespace exodbc
 		*/
 		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, bool useSqlDescribeParam)
 		{
-			ColumnBufferBindInfoHolder::SParameterDescription paramDesc;
+			ColumnBindable::SParameterDescription paramDesc;
 			if (useSqlDescribeParam)
 			{
 				paramDesc = BindParameterImpl(paramNr, pHStmt, GetSqlCType(), m_pBuffer, GetBufferLength(), &m_cb, *this);
