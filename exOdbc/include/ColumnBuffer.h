@@ -513,7 +513,7 @@ namespace exodbc
 		* \param	columnNr 1-indexed column of the result set.
 		* \param	pHStmt	Statement handle to bind against.
 		*/
-		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+		void BindColumn(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
 			BindColumnImpl(columnNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer[0], GetBufferLength(), &m_cb);
 		};
@@ -559,7 +559,7 @@ namespace exodbc
 	};
 
 	template<>
-	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindColumn(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 	{
 		// Do this totally different than else. Does not work to first bind as usual and then set attrs... ?
 		exASSERT(columnNr >= 1);
@@ -722,7 +722,7 @@ namespace exodbc
 		* \param	columnNr 1-indexed column of the result set.
 		* \param	pHStmt	Statement handle to bind against.
 		*/
-		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+		void BindColumn(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 		{
 			if (m_sqlCType == SQL_C_NUMERIC)
 			{

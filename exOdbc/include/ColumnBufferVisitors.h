@@ -33,16 +33,16 @@ namespace exodbc
 	// --------
 
 	/*!
-	* \class BindSelectVisitor
+	* \class BindColumnVisitor
 	* \brief Visitor to bind a ColumnBuffer to a statement handle as result set member.
 	* \details On applying this visitor, it will call BindSelect(columnNr, pHStmt) on the variant.
 	*/
-	class BindSelectVisitor
+	class BindColumnVisitor
 		: public boost::static_visitor<void>
 	{
 	public:
-		BindSelectVisitor() = delete;
-		BindSelectVisitor(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+		BindColumnVisitor() = delete;
+		BindColumnVisitor(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 			: m_columnNr(columnNr)
 			, m_pHStmt(pHStmt)
 		{};
@@ -50,7 +50,7 @@ namespace exodbc
 		template<typename T>
 		void operator()(T& t) const
 		{
-			t->BindSelect(m_columnNr, m_pHStmt);
+			t->BindColumn(m_columnNr, m_pHStmt);
 		}
 	private:
 		SQLUSMALLINT m_columnNr;
