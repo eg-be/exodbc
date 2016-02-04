@@ -212,7 +212,7 @@ namespace exodbc
 
 	void ExecutableStatement::BindColumn(ColumnBufferPtrVariant column, SQLUSMALLINT columnNr)
 	{
-		BindSelectVisitor sv(columnNr, m_pHStmt);
+		BindColumnVisitor sv(columnNr, m_pHStmt);
 		boost::apply_visitor(sv, column);
 		m_boundColumns = true;
 	}

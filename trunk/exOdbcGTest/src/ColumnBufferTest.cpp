@@ -219,7 +219,7 @@ namespace exodbctest
 	{
 		wstring colName = ToDbCase(L"tsmallint");
 		ShortColumnBuffer shortCol(colName);
-		shortCol.BindSelect(1, m_pStmt);
+		shortCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
 
 		f(1);
@@ -274,7 +274,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			ShortColumnBuffer shortCol(colName);
-			shortCol.BindSelect(1, m_pStmt);
+			shortCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -291,7 +291,7 @@ namespace exodbctest
 	{
 		wstring colName = ToDbCase(L"tint");
 		LongColumnBuffer longCol(colName);
-		longCol.BindSelect(1, m_pStmt);
+		longCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
 
 		f(3);
@@ -346,7 +346,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			LongColumnBuffer longCol(colName);
-			longCol.BindSelect(1, m_pStmt);
+			longCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -363,7 +363,7 @@ namespace exodbctest
 	{
 		wstring colName = ToDbCase(L"tbigint");
 		BigIntColumnBuffer biCol(colName);
-		biCol.BindSelect(1, m_pStmt);
+		biCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
 
 		f(5);
@@ -418,7 +418,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			BigIntColumnBuffer biCol(colName);
-			biCol.BindSelect(1, m_pStmt);
+			biCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -435,7 +435,7 @@ namespace exodbctest
 	{
 		wstring colName = L"tdouble";
 		DoubleColumnBuffer doubleCol(colName);
-		doubleCol.BindSelect(1, m_pStmt);
+		doubleCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::FLOATTYPES, colName);
 
 		f(4);
@@ -497,7 +497,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			DoubleColumnBuffer doubleCol(colName);
-			doubleCol.BindSelect(1, m_pStmt);
+			doubleCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -516,7 +516,7 @@ namespace exodbctest
 	{
 		wstring colName = L"tfloat";
 		RealColumnBuffer realCol(colName);
-		realCol.BindSelect(1, m_pStmt);
+		realCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::FLOATTYPES, colName);
 
 		f(1);
@@ -579,7 +579,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			RealColumnBuffer realCol(colName);
-			realCol.BindSelect(1, m_pStmt);
+			realCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -599,7 +599,7 @@ namespace exodbctest
 		wstring colName = L"tdecimal_18_0";
 		NumericColumnBuffer num18_0_Col(colName);
 		num18_0_Col.SetColumnSize(18);
-		num18_0_Col.BindSelect(1, m_pStmt);
+		num18_0_Col.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
 
 		f(1);
@@ -697,7 +697,7 @@ namespace exodbctest
 			NumericColumnBuffer num18_0_Col(colName);
 			num18_0_Col.SetColumnSize(18);
 			num18_0_Col.SetDecimalDigits(0);
-			num18_0_Col.BindSelect(1, m_pStmt);
+			num18_0_Col.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -732,7 +732,7 @@ namespace exodbctest
 		NumericColumnBuffer num18_10_Col(colName);
 		num18_10_Col.SetColumnSize(18);
 		num18_10_Col.SetDecimalDigits(10);
-		num18_10_Col.BindSelect(1, m_pStmt);
+		num18_10_Col.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
 
 		f(4);
@@ -837,7 +837,7 @@ namespace exodbctest
 			NumericColumnBuffer num18_10_Col(colName);
 			num18_10_Col.SetColumnSize(18);
 			num18_10_Col.SetDecimalDigits(10);
-			num18_10_Col.BindSelect(1, m_pStmt);
+			num18_10_Col.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -873,7 +873,7 @@ namespace exodbctest
 		NumericColumnBuffer num5_3_Col(colName);
 		num5_3_Col.SetColumnSize(5);
 		num5_3_Col.SetDecimalDigits(3);
-		num5_3_Col.BindSelect(1, m_pStmt);
+		num5_3_Col.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
 
 		f(2);
@@ -966,7 +966,7 @@ namespace exodbctest
 			NumericColumnBuffer num5_3_Col(colName);
 			num5_3_Col.SetColumnSize(5);
 			num5_3_Col.SetDecimalDigits(3);
-			num5_3_Col.BindSelect(1, m_pStmt);
+			num5_3_Col.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -999,7 +999,7 @@ namespace exodbctest
 	{
 		wstring colName = L"ttime";
 		TypeTimeColumnBuffer time(colName);
-		time.BindSelect(1, m_pStmt);
+		time.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
 
 		f(1);
@@ -1059,7 +1059,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			TypeTimeColumnBuffer time(colName);
-			time.BindSelect(1, m_pStmt);
+			time.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -1078,7 +1078,7 @@ namespace exodbctest
 	{
 		wstring colName = L"tdate";
 		TypeDateColumnBuffer date(colName);
-		date.BindSelect(1, m_pStmt);
+		date.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
 
 		f(1);
@@ -1138,7 +1138,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			TypeDateColumnBuffer date(colName);
-			date.BindSelect(1, m_pStmt);
+			date.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -1159,7 +1159,7 @@ namespace exodbctest
 		{
 			// Test without any fraction
 			TypeTimestampColumnBuffer tsCol(colName);
-			tsCol.BindSelect(1, m_pStmt);
+			tsCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
 
 			f(1);
@@ -1195,7 +1195,7 @@ namespace exodbctest
 
 			TypeTimestampColumnBuffer tsCol(colName);
 			tsCol.SetDecimalDigits(decimalDigits);
-			tsCol.BindSelect(1, m_pStmt);
+			tsCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
 
 			f(2);
@@ -1311,7 +1311,7 @@ namespace exodbctest
 			// Read back just inserted values
 			{
 				TypeTimestampColumnBuffer tsCol(colName);
-				tsCol.BindSelect(1, m_pStmt);
+				tsCol.BindColumn(1, m_pStmt);
 				FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 				f(101);
@@ -1346,7 +1346,7 @@ namespace exodbctest
 
 				TypeTimestampColumnBuffer tsCol(colName);
 				tsCol.SetDecimalDigits(decimalDigits);
-				tsCol.BindSelect(1, m_pStmt);
+				tsCol.BindColumn(1, m_pStmt);
 				FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 				f(102);
@@ -1370,7 +1370,7 @@ namespace exodbctest
 		{
 			wstring colName = L"tvarchar";
 			WCharColumnBuffer varcharCol(colName, 128 + 1);
-			varcharCol.BindSelect(1, m_pStmt);
+			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			f(1);
@@ -1384,7 +1384,7 @@ namespace exodbctest
 		{
 			wstring colName = L"tchar";
 			WCharColumnBuffer charCol(colName, 128 + 1);
-			charCol.BindSelect(1, m_pStmt);
+			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			// Note: MySql and Access trim the char values, other DBs do not trim
@@ -1460,7 +1460,7 @@ namespace exodbctest
 
 		{
 			WCharColumnBuffer varcharCol(colName, 128 + 1);
-			varcharCol.BindSelect(1, m_pStmt);
+			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
 			f(101);
@@ -1527,7 +1527,7 @@ namespace exodbctest
 
 		{
 			WCharColumnBuffer charCol(colName, 128 + 1);
-			charCol.BindSelect(1, m_pStmt);
+			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
 			f(101);
@@ -1559,7 +1559,7 @@ namespace exodbctest
 		{
 			wstring colName = L"tvarchar";
 			CharColumnBuffer varcharCol(colName, 128 + 1);
-			varcharCol.BindSelect(1, m_pStmt);
+			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			f(1);
@@ -1573,7 +1573,7 @@ namespace exodbctest
 		{
 			wstring colName = L"tchar";
 			CharColumnBuffer charCol(colName, 128 + 1);
-			charCol.BindSelect(1, m_pStmt);
+			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			// Note: MySql and Access trim the char values, other DBs do not trim
@@ -1654,7 +1654,7 @@ namespace exodbctest
 
 		{
 			CharColumnBuffer varcharCol(colName, 128 + 1);
-			varcharCol.BindSelect(1, m_pStmt);
+			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
 			f(101);
@@ -1729,7 +1729,7 @@ namespace exodbctest
 
 		{
 			CharColumnBuffer charCol(colName, 128 + 1);
-			charCol.BindSelect(1, m_pStmt);
+			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
 			f(101);
@@ -1794,7 +1794,7 @@ namespace exodbctest
 		{
 			wstring colName = L"tblob";
 			BinaryColumnBuffer blobCol(colName, 16);
-			blobCol.BindSelect(1, m_pStmt);
+			blobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
 
 			f(1);
@@ -1816,7 +1816,7 @@ namespace exodbctest
 		{
 			wstring colName = L"tvarblob_20";
 			BinaryColumnBuffer varBlobCol(colName, 20);
-			varBlobCol.BindSelect(1, m_pStmt);
+			varBlobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
 
 			f(4);
@@ -1921,7 +1921,7 @@ namespace exodbctest
 			// read back written values
 			wstring colName = L"tblob";
 			BinaryColumnBuffer blobCol(colName, 16);
-			blobCol.BindSelect(1, m_pStmt);
+			blobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
 
 			f(101);
@@ -2027,7 +2027,7 @@ namespace exodbctest
 			// read back written values
 			wstring colName = L"tvarblob_20";
 			BinaryColumnBuffer varblobCol(colName, 20);
-			varblobCol.BindSelect(1, m_pStmt);
+			varblobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
 
 			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
@@ -2074,7 +2074,7 @@ namespace exodbctest
 		wstring colName = ToDbCase(L"tsmallint");
 		SQLSMALLINT buffer = 0;
 		SqlCPointerBuffer shortCol(colName, SQL_INTEGER, &buffer, SQL_C_SSHORT, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
-		shortCol.BindSelect(1, m_pStmt);
+		shortCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
 
 		f(1);
@@ -2092,7 +2092,7 @@ namespace exodbctest
 		SQLINTEGER buffer = 0;
 		SqlCPointerBuffer longCol(colName, SQL_INTEGER, &buffer, SQL_C_SLONG, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
 
-		longCol.BindSelect(1, m_pStmt);
+		longCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
 
 		f(3);
@@ -2110,7 +2110,7 @@ namespace exodbctest
 		SQLBIGINT buffer = 0;
 		SqlCPointerBuffer biCol(colName, SQL_INTEGER, &buffer, SQL_C_SBIGINT, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
 
-		biCol.BindSelect(1, m_pStmt);
+		biCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
 
 		f(5);
@@ -2159,7 +2159,7 @@ namespace exodbctest
 			wstring colName = L"tblob";
 			vector<SQLCHAR> buffer(16);
 			SqlCPointerBuffer blobCol(colName, SQL_BINARY, &buffer[0], SQL_C_BINARY, 16 * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
-			blobCol.BindSelect(1, m_pStmt);
+			blobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
 
 			f(1);
@@ -2182,7 +2182,7 @@ namespace exodbctest
 			wstring colName = L"tvarblob_20";
 			vector<SQLCHAR> buffer(20);
 			SqlCPointerBuffer varBlobCol(colName, SQL_BINARY, &buffer[0], SQL_C_BINARY, 20 * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
-			varBlobCol.BindSelect(1, m_pStmt);
+			varBlobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
 
 			f(4);
@@ -2211,7 +2211,7 @@ namespace exodbctest
 			wstring colName = L"tvarchar";
 			std::vector<SQLCHAR> buffer(128 + 1);
 			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 128, 0);
-			varcharCol.BindSelect(1, m_pStmt);
+			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			string s;
@@ -2230,7 +2230,7 @@ namespace exodbctest
 			wstring colName = L"tchar";
 			std::vector<SQLCHAR> buffer(128 + 1);
 			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 128, 0);
-			charCol.BindSelect(1, m_pStmt);
+			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			string s;
@@ -2269,7 +2269,7 @@ namespace exodbctest
 			wstring colName = L"tvarchar";
 			std::vector<SQLWCHAR> buffer(128 + 1);
 			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 128, 0);
-			varcharCol.BindSelect(1, m_pStmt);
+			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			wstring ws;
@@ -2287,7 +2287,7 @@ namespace exodbctest
 			wstring colName = L"tchar";
 			std::vector<SQLWCHAR> buffer(128 + 1);
 			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 128, 0);
-			charCol.BindSelect(1, m_pStmt);
+			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			// Note: MySql and Access trim the char values, other DBs do not trim
@@ -2325,7 +2325,7 @@ namespace exodbctest
 
 		SQL_DATE_STRUCT buffer;
 		SqlCPointerBuffer date(colName, SQL_DATE, &buffer, SQL_C_TYPE_DATE, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
-		date.BindSelect(1, m_pStmt);
+		date.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
 
 		f(1);
@@ -2343,7 +2343,7 @@ namespace exodbctest
 		wstring colName = L"ttime";
 		SQL_TIME_STRUCT buffer;
 		SqlCPointerBuffer time(colName, SQL_TIME, &buffer, SQL_C_TYPE_TIME, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
-		time.BindSelect(1, m_pStmt);
+		time.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
 
 		f(1);
@@ -2363,7 +2363,7 @@ namespace exodbctest
 			// Test without any fraction
 			SQL_TIMESTAMP_STRUCT buffer;
 			SqlCPointerBuffer tsCol(colName, SQL_TIMESTAMP, &buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
-			tsCol.BindSelect(1, m_pStmt);
+			tsCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
 
 			f(1);
@@ -2398,7 +2398,7 @@ namespace exodbctest
 
 			SQL_TIMESTAMP_STRUCT buffer;
 			SqlCPointerBuffer tsCol(colName, SQL_TIMESTAMP, &buffer, SQL_C_TYPE_TIMESTAMP, sizeof(buffer), ColumnFlag::CF_NONE, 0, decimalDigits);
-			tsCol.BindSelect(1, m_pStmt);
+			tsCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
 
 			f(2);
@@ -2418,7 +2418,7 @@ namespace exodbctest
 		wstring colName = L"tdouble";
 		SQLDOUBLE buffer;
 		SqlCPointerBuffer doubleCol(colName, SQL_DOUBLE, &buffer, SQL_C_DOUBLE, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
-		doubleCol.BindSelect(1, m_pStmt);
+		doubleCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::FLOATTYPES, colName);
 
 		f(4);
@@ -2438,7 +2438,7 @@ namespace exodbctest
 		wstring colName = L"tfloat";
 		SQLREAL buffer;
 		SqlCPointerBuffer realCol(colName, SQL_REAL, &buffer, SQL_C_FLOAT, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
-		realCol.BindSelect(1, m_pStmt);
+		realCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::FLOATTYPES, colName);
 
 		f(1);
@@ -2458,7 +2458,7 @@ namespace exodbctest
 		wstring colName = L"tdecimal_18_0";
 		SQL_NUMERIC_STRUCT buffer;
 		SqlCPointerBuffer num18_0_Col(colName, SQL_NUMERIC, &buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NONE, 18, 0);
-		num18_0_Col.BindSelect(1, m_pStmt);
+		num18_0_Col.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
 
 		f(1);
@@ -2492,7 +2492,7 @@ namespace exodbctest
 		SqlCPointerBuffer num18_10_Col(colName, SQL_NUMERIC, &buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NONE, 18, 10);
 		num18_10_Col.SetColumnSize(18);
 		num18_10_Col.SetDecimalDigits(10);
-		num18_10_Col.BindSelect(1, m_pStmt);
+		num18_10_Col.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
 
 		f(4);
@@ -2524,7 +2524,7 @@ namespace exodbctest
 		wstring colName = L"tdecimal_5_3";
 		SQL_NUMERIC_STRUCT buffer;
 		SqlCPointerBuffer num5_3_Col(colName, SQL_NUMERIC, &buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NONE, 5, 3);
-		num5_3_Col.BindSelect(1, m_pStmt);
+		num5_3_Col.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::NUMERICTYPES, colName);
 
 		f(2);
@@ -2627,7 +2627,7 @@ namespace exodbctest
 			wstring colName = L"tblob";
 			vector<SQLCHAR> buffer(16);
 			SqlCPointerBuffer blobCol(colName, SQL_BINARY, &buffer[0], SQL_C_BINARY, 16 * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 16, 0);
-			blobCol.BindSelect(1, m_pStmt);
+			blobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
 
 			f(101);
@@ -2742,7 +2742,7 @@ namespace exodbctest
 			// read back written values
 			wstring colName = L"tvarblob_20";
 			BinaryColumnBuffer varblobCol(colName, 20);
-			varblobCol.BindSelect(1, m_pStmt);
+			varblobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
 
 			// This is a varblob. The buffer is sized to 20, but in this column we read only 16 bytes.
@@ -2831,7 +2831,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			BigIntColumnBuffer biCol(colName);
-			biCol.BindSelect(1, m_pStmt);
+			biCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -2892,7 +2892,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			LongColumnBuffer longCol(colName);
-			longCol.BindSelect(1, m_pStmt);
+			longCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -2953,7 +2953,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			ShortColumnBuffer shortCol(colName);
-			shortCol.BindSelect(1, m_pStmt);
+			shortCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -3024,7 +3024,7 @@ namespace exodbctest
 
 		{
 			CharColumnBuffer charCol(colName, 128 + 1);
-			charCol.BindSelect(1, m_pStmt);
+			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
 			f(101);
@@ -3106,7 +3106,7 @@ namespace exodbctest
 
 		{
 			WCharColumnBuffer charCol(colName, 128 + 1);
-			charCol.BindSelect(1, m_pStmt);
+			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
 			f(101);
@@ -3190,7 +3190,7 @@ namespace exodbctest
 
 		{
 			CharColumnBuffer varcharCol(colName, 128 + 1);
-			varcharCol.BindSelect(1, m_pStmt);
+			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
 			f(101);
@@ -3264,7 +3264,7 @@ namespace exodbctest
 
 		{
 			WCharColumnBuffer varcharCol(colName, 128 + 1);
-			varcharCol.BindSelect(1, m_pStmt);
+			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
 			f(101);
@@ -3330,7 +3330,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			TypeDateColumnBuffer date(colName);
-			date.BindSelect(1, m_pStmt);
+			date.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -3392,7 +3392,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			TypeTimeColumnBuffer time(colName);
-			time.BindSelect(1, m_pStmt);
+			time.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -3509,7 +3509,7 @@ namespace exodbctest
 			// Read back just inserted values
 			{
 				TypeTimestampColumnBuffer tsCol(colName);
-				tsCol.BindSelect(1, m_pStmt);
+				tsCol.BindColumn(1, m_pStmt);
 				FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 				f(101);
@@ -3544,7 +3544,7 @@ namespace exodbctest
 
 				TypeTimestampColumnBuffer tsCol(colName);
 				tsCol.SetDecimalDigits(decimalDigits);
-				tsCol.BindSelect(1, m_pStmt);
+				tsCol.BindColumn(1, m_pStmt);
 				FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 				f(102);
@@ -3612,7 +3612,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			DoubleColumnBuffer doubleCol(colName);
-			doubleCol.BindSelect(1, m_pStmt);
+			doubleCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -3679,7 +3679,7 @@ namespace exodbctest
 		{
 			// Read back just inserted values
 			RealColumnBuffer realCol(colName);
-			realCol.BindSelect(1, m_pStmt);
+			realCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -3760,7 +3760,7 @@ namespace exodbctest
 			NumericColumnBuffer num18_0_Col(colName);
 			num18_0_Col.SetColumnSize(18);
 			num18_0_Col.SetDecimalDigits(0);
-			num18_0_Col.BindSelect(1, m_pStmt);
+			num18_0_Col.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -3863,7 +3863,7 @@ namespace exodbctest
 			NumericColumnBuffer num18_10_Col(colName);
 			num18_10_Col.SetColumnSize(18);
 			num18_10_Col.SetDecimalDigits(10);
-			num18_10_Col.BindSelect(1, m_pStmt);
+			num18_10_Col.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
@@ -3965,7 +3965,7 @@ namespace exodbctest
 			NumericColumnBuffer num5_3_Col(colName);
 			num5_3_Col.SetColumnSize(5);
 			num5_3_Col.SetDecimalDigits(3);
-			num5_3_Col.BindSelect(1, m_pStmt);
+			num5_3_Col.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, tableId, colName);
 
 			f(101);
