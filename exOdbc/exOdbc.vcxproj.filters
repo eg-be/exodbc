@@ -88,6 +88,9 @@
     <ClInclude Include="include\SpecializedExceptions.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\DoxygenToc.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Database.cpp">
