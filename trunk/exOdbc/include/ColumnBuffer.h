@@ -187,18 +187,19 @@ namespace exodbc
 
 		/*!
 		* \brief	On destruction, call ResetParams() and UnbindColumns() on all SqlHandles 
-		*			stored internally.
+		*			we are bound to as param or column
 		*/
 		virtual ~ColumnBindable()
 		{
 			// If we are still bound to columns or params, release the bindings and disconnect the signals
 			for (auto it = m_resetParamsConnections.begin(); it != m_resetParamsConnections.end(); ++it)
 			{
-				// disconnect first, we know its being reseted
-				it->second.disconnect();
+				// disconnect first, we know its being reseted and dont want to get signaled that we reset params now
+				std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p = it->second;
+				p.first.disconnect();
 				try
 				{
-					it->first->ResetParams();
+					p.second->ResetParams();
 				}
 				catch (const Exception& ex)
 				{
@@ -208,10 +209,11 @@ namespace exodbc
 			for (auto it = m_unbindColumnsConnections.begin(); it != m_unbindColumnsConnections.end(); ++it)
 			{
 				// disconnect first, we know its being unbound now.
-				it->second.disconnect();
+				std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p = it->second;
+				p.first.disconnect();
 				try
 				{
-					it->first->UnbindColumns();
+					p.second->UnbindColumns();
 				}
 				catch (const Exception& ex)
 				{
@@ -227,18 +229,11 @@ namespace exodbc
 		void OnResetParams(const SqlStmtHandle& stmt)
 		{
 			// remove from our map, we are no longer interested in resetting params on destruction
-			auto it = m_resetParamsConnections.begin();
-			while (it != m_resetParamsConnections.end())
+			auto it = m_resetParamsConnections.find(stmt.GetHandle());
+			if (it != m_resetParamsConnections.end())
 			{
-				if (*(it->first) == stmt)
-				{
-					it->second.disconnect();
-					it = m_resetParamsConnections.erase(it);
-				}
-				else
-				{
-					++it;
-				}
+				it->second.first.disconnect();
+				m_resetParamsConnections.erase(it);
 			}
 		}
 
@@ -249,18 +244,11 @@ namespace exodbc
 		void OnUnbindColumns(const SqlStmtHandle& stmt)
 		{
 			// remove from our map, we are no longer interested in resetting params on destruction
-			auto it = m_unbindColumnsConnections.begin();
-			while (it != m_unbindColumnsConnections.end())
+			auto it = m_unbindColumnsConnections.find(stmt.GetHandle());
+			if (it != m_unbindColumnsConnections.end())
 			{
-				if (*(it->first) == stmt)
-				{
-					it->second.disconnect();
-					it = m_unbindColumnsConnections.erase(it);
-				}
-				else
-				{
-					++it;
-				}
+				it->second.first.disconnect();
+				m_unbindColumnsConnections.erase(it);
 			}
 		}
 
@@ -289,7 +277,11 @@ namespace exodbc
 			THROW_IFN_SUCCESS(SQLBindCol, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 
 			// get a notification if unbound
-			m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBindable::OnUnbindColumns, this, _1));
+			if (m_unbindColumnsConnections.find(pHStmt->GetHandle()) == m_unbindColumnsConnections.end())
+			{
+				std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBindable::OnUnbindColumns, this, _1)), pHStmt);
+				m_unbindColumnsConnections[pHStmt->GetHandle()] = p;
+			}
 		};
 
 
@@ -311,13 +303,17 @@ namespace exodbc
 			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 
 			// Connect a signal that we are bound to this handle now and get notified if params get reseted
-			m_resetParamsConnections[pHStmt] = pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBindable::OnResetParams, this, _1));
+			if (m_resetParamsConnections.find(pHStmt->GetHandle()) == m_resetParamsConnections.end())
+			{
+				std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBindable::OnResetParams, this, _1)), pHStmt);
+				m_resetParamsConnections[pHStmt->GetHandle()] = p;
+			}
 		}
 
 
 	protected:
-		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_unbindColumnsConnections;
-		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_resetParamsConnections;
+		std::map<SQLHSTMT, std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr>> m_unbindColumnsConnections;
+		std::map<SQLHSTMT, std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr>> m_resetParamsConnections;
 	};
 
 
@@ -581,7 +577,11 @@ namespace exodbc
 		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
 
 		// get a notification if unbound
-		m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
+		if (m_unbindColumnsConnections.find(pHStmt->GetHandle()) == m_unbindColumnsConnections.end())
+		{
+			std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBindable::OnUnbindColumns, this, _1)), pHStmt);
+			m_unbindColumnsConnections[pHStmt->GetHandle()] = p;
+		}
 	}
 
 
@@ -742,7 +742,11 @@ namespace exodbc
 				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
 
 				// get a notification if unbound
-				m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&SqlCPointerBuffer::OnUnbindColumns, this, _1));
+				if (m_unbindColumnsConnections.find(pHStmt->GetHandle()) == m_unbindColumnsConnections.end())
+				{
+					std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectUnbindColumnsSignal(boost::bind(&SqlCPointerBuffer::OnUnbindColumns, this, _1)), pHStmt);
+					m_unbindColumnsConnections[pHStmt->GetHandle()] = p;
+				}
 			}
 			else
 			{
