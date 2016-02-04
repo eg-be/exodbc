@@ -82,17 +82,17 @@ namespace exodbc
 			SQLLEN arraySize = CalculateDisplaySize(columnInfo.GetSqlType(), columnSize, numPrecRadix, decimalDigits);
 			if (sqlCType == SQL_C_CHAR)
 			{
-				return CharColumnArrayBuffer::Create(queryName, arraySize);
+				return CharColumnBuffer::Create(queryName, arraySize);
 			}
 			else
 			{
-				return WCharColumnArrayBuffer::Create(queryName, arraySize);
+				return WCharColumnBuffer::Create(queryName, arraySize);
 			}
 			break;
 		}
 		case SQL_C_BINARY:
 			exASSERT(!columnInfo.IsColumnSizeNull());
-			return BinaryColumnArrayBuffer::Create(queryName, columnInfo.GetColumnSize());
+			return BinaryColumnBuffer::Create(queryName, columnInfo.GetColumnSize());
 		default:
 			NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, sqlCType);
 			SET_EXCEPTION_SOURCE(nse);

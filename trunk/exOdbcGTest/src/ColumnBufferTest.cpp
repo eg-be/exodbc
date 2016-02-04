@@ -72,7 +72,7 @@ namespace exodbctest
 	TEST_F(ColumnBufferTest, Construction)
 	{
 		// after construction buffer will be Null
-		BigIntColumnBuffer buff;
+		BigIntColumnBuffer buff(L"TestBuffer");
 		EXPECT_TRUE(buff.IsNull());
 		EXPECT_EQ(ColumnFlag::CF_NONE, buff.GetFlags());
 
@@ -88,7 +88,7 @@ namespace exodbctest
 
 	TEST_F(ColumnBufferTest, SetAndGetValue)
 	{
-		BigIntColumnBuffer buff;
+		BigIntColumnBuffer buff(L"TestBuffer");
 		buff.SetValue(13, buff.GetBufferLength());
 		EXPECT_EQ(13, buff.GetValue());
 	}
@@ -99,7 +99,7 @@ namespace exodbctest
 	TEST_F(ColumnArrayBufferTest, Construction)
 	{
 		// after construction buffer will be Null
-		WCharColumnArrayBuffer arr(L"ColumnName", 24);
+		WCharColumnBuffer arr(L"ColumnName", 24);
 		EXPECT_TRUE(arr.IsNull());
 		EXPECT_EQ(24, arr.GetNrOfElements());
 		EXPECT_EQ(sizeof(SQLWCHAR) * 24, arr.GetBufferLength());
@@ -109,7 +109,7 @@ namespace exodbctest
 
 	TEST_F(ColumnArrayBufferTest, SetAndGetValue)
 	{
-		WCharColumnArrayBuffer arr(L"ColumnName", 24);
+		WCharColumnBuffer arr(L"ColumnName", 24);
 		wstring s(L"Hello");
 		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
 		wstring v(arr.GetBuffer().data());
@@ -1369,7 +1369,7 @@ namespace exodbctest
 		// note that when working witch chars, we add one element for the terminating \0 char.
 		{
 			wstring colName = L"tvarchar";
-			WCharColumnArrayBuffer varcharCol(colName, 128 + 1);
+			WCharColumnBuffer varcharCol(colName, 128 + 1);
 			varcharCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -1383,7 +1383,7 @@ namespace exodbctest
 
 		{
 			wstring colName = L"tchar";
-			WCharColumnArrayBuffer charCol(colName, 128 + 1);
+			WCharColumnBuffer charCol(colName, 128 + 1);
 			charCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -1425,7 +1425,7 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
-			WCharColumnBufferPtr varcharCol(new WCharColumnArrayBuffer(colName, 128 + 1));
+			WCharColumnBufferPtr varcharCol(new WCharColumnBuffer(colName, 128 + 1));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
@@ -1459,7 +1459,7 @@ namespace exodbctest
 		}
 
 		{
-			WCharColumnArrayBuffer varcharCol(colName, 128 + 1);
+			WCharColumnBuffer varcharCol(colName, 128 + 1);
 			varcharCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
@@ -1492,7 +1492,7 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
-			WCharColumnBufferPtr charCol(new WCharColumnArrayBuffer(colName, 10 + 1));
+			WCharColumnBufferPtr charCol(new WCharColumnBuffer(colName, 10 + 1));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
@@ -1526,7 +1526,7 @@ namespace exodbctest
 		}
 
 		{
-			WCharColumnArrayBuffer charCol(colName, 128 + 1);
+			WCharColumnBuffer charCol(colName, 128 + 1);
 			charCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
@@ -1558,7 +1558,7 @@ namespace exodbctest
 		// note that when working witch chars, we add one element for the terminating \0 char.
 		{
 			wstring colName = L"tvarchar";
-			CharColumnArrayBuffer varcharCol(colName, 128 + 1);
+			CharColumnBuffer varcharCol(colName, 128 + 1);
 			varcharCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -1572,7 +1572,7 @@ namespace exodbctest
 
 		{
 			wstring colName = L"tchar";
-			CharColumnArrayBuffer charCol(colName, 128 + 1);
+			CharColumnBuffer charCol(colName, 128 + 1);
 			charCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -1614,7 +1614,7 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
-			CharColumnBufferPtr varcharCol(new CharColumnArrayBuffer(colName, 128 + 1));
+			CharColumnBufferPtr varcharCol(new CharColumnBuffer(colName, 128 + 1));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
@@ -1653,7 +1653,7 @@ namespace exodbctest
 		}
 
 		{
-			CharColumnArrayBuffer varcharCol(colName, 128 + 1);
+			CharColumnBuffer varcharCol(colName, 128 + 1);
 			varcharCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
@@ -1689,7 +1689,7 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
-			CharColumnBufferPtr charCol(new CharColumnArrayBuffer(colName, 10 + 1));
+			CharColumnBufferPtr charCol(new CharColumnBuffer(colName, 10 + 1));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
@@ -1728,7 +1728,7 @@ namespace exodbctest
 		}
 
 		{
-			CharColumnArrayBuffer charCol(colName, 128 + 1);
+			CharColumnBuffer charCol(colName, 128 + 1);
 			charCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
@@ -1793,7 +1793,7 @@ namespace exodbctest
 
 		{
 			wstring colName = L"tblob";
-			BinaryColumnArrayBuffer blobCol(colName, 16);
+			BinaryColumnBuffer blobCol(colName, 16);
 			blobCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
 
@@ -1815,7 +1815,7 @@ namespace exodbctest
 
 		{
 			wstring colName = L"tvarblob_20";
-			BinaryColumnArrayBuffer varBlobCol(colName, 20);
+			BinaryColumnBuffer varBlobCol(colName, 20);
 			varBlobCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
 
@@ -1884,7 +1884,7 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
-			BinaryColumnBufferPtr blobCol(new BinaryColumnArrayBuffer(colName, 16));
+			BinaryColumnBufferPtr blobCol(new BinaryColumnBuffer(colName, 16));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
@@ -1920,7 +1920,7 @@ namespace exodbctest
 		{
 			// read back written values
 			wstring colName = L"tblob";
-			BinaryColumnArrayBuffer blobCol(colName, 16);
+			BinaryColumnBuffer blobCol(colName, 16);
 			blobCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
 
@@ -1987,7 +1987,7 @@ namespace exodbctest
 
 			// Prepare the id-col (required) and the col to insert
 			LongColumnBufferPtr idCol(new LongColumnBuffer(idColName));
-			BinaryColumnBufferPtr varblobCol(new BinaryColumnArrayBuffer(colName, 20));
+			BinaryColumnBufferPtr varblobCol(new BinaryColumnBuffer(colName, 20));
 			bool queryParameterInfo = !(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 			if (!queryParameterInfo)
 			{
@@ -2026,7 +2026,7 @@ namespace exodbctest
 		{
 			// read back written values
 			wstring colName = L"tvarblob_20";
-			BinaryColumnArrayBuffer varblobCol(colName, 20);
+			BinaryColumnBuffer varblobCol(colName, 20);
 			varblobCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
 
@@ -2741,7 +2741,7 @@ namespace exodbctest
 		{
 			// read back written values
 			wstring colName = L"tvarblob_20";
-			BinaryColumnArrayBuffer varblobCol(colName, 20);
+			BinaryColumnBuffer varblobCol(colName, 20);
 			varblobCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
 
@@ -3023,7 +3023,7 @@ namespace exodbctest
 		}
 
 		{
-			CharColumnArrayBuffer charCol(colName, 128 + 1);
+			CharColumnBuffer charCol(colName, 128 + 1);
 			charCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
@@ -3105,7 +3105,7 @@ namespace exodbctest
 		}
 
 		{
-			WCharColumnArrayBuffer charCol(colName, 128 + 1);
+			WCharColumnBuffer charCol(colName, 128 + 1);
 			charCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
@@ -3189,7 +3189,7 @@ namespace exodbctest
 		}
 
 		{
-			CharColumnArrayBuffer varcharCol(colName, 128 + 1);
+			CharColumnBuffer varcharCol(colName, 128 + 1);
 			varcharCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
@@ -3263,7 +3263,7 @@ namespace exodbctest
 		}
 
 		{
-			WCharColumnArrayBuffer varcharCol(colName, 128 + 1);
+			WCharColumnBuffer varcharCol(colName, 128 + 1);
 			varcharCol.BindSelect(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES_TMP, colName);
 
