@@ -507,7 +507,7 @@ namespace exodbc
 	typedef std::vector<STablePrivilegesInfo> TablePrivilegesVector;
 
 
-	/*
+	/*!
 	* \struct SColumnDescription
 	* \brief	Result of SQLDescribeCol operation.
 	*/
@@ -540,7 +540,7 @@ namespace exodbc
 	};
 
 
-	/*
+	/*!
 	* \struct SParameterDescription
 	* \brief	Result of SQLDescribeParam operation.
 	*/
