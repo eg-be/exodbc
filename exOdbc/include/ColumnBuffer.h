@@ -320,14 +320,14 @@ namespace exodbc
 		std::map<ConstSqlStmtHandlePtr, boost::signals2::connection> m_resetParamsConnections;
 	};
 
+
 	/*!
 	* \class	ColumnBuffer
 	* \brief	Manages a buffer that is used to exchange data between the ODBC driver and exOdbc.
-	* \details	On construction, the memory of the buffer is filled with zeros.
-	*			
-	*			Cannot be copied and should probably be wrapped into a shared_ptr.
+	* \details	Cannot be copied and should probably be wrapped into a shared_ptr.
+	*			A ColumnBuffer can allocate exactly one element of type T, or a series of Ts (array).
 	*/
-	template<typename T, SQLSMALLINT sqlCType , typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
+	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
 	class ColumnBuffer
 		: public LengthIndicator
 		, public ColumnFlags
@@ -335,33 +335,45 @@ namespace exodbc
 		, public ColumnBindable
 	{
 	public:
+		ColumnBuffer() = delete;
 
 		/*!
-		* \brief	Create new buffer. ZeroMemory of the buffer and set it to NULL.
-		*/
-		ColumnBuffer()
-			: LengthIndicator()
-			, ColumnFlags()
-			, ExtendedColumnPropertiesHolder()
-			, ColumnBindable()
-		{
-			::ZeroMemory(&m_buffer, sizeof(T));
-			SetNull();
-		};
-
-		/*!
-		* \brief	Create new buffer with passed queryName and flags. Sets the buffer to NULL.
+		* \brief	Create a new buffer with one element of type T, with given queryName and flags.
+		*			The buffer is set to NULL.
 		*/
 		ColumnBuffer(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ExtendedColumnPropertiesHolder()
-			, ColumnBindable()
+			, m_nrOfElements(1)
+			, m_buffer(1)
 			, m_queryName(queryName)
 		{
-			::ZeroMemory(&m_buffer, sizeof(T));
 			SetNull();
 		};
+
+		/*!
+		* \brief	Create a new array buffer with given queryName, nrOfElements and flags.
+		*			The buffer is set to NULL.
+		*/
+		ColumnBuffer(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
+			: LengthIndicator()
+			, ColumnFlags(flags)
+			, ExtendedColumnPropertiesHolder()
+			, m_nrOfElements(nrOfElements)
+			, m_buffer(nrOfElements)
+			, m_queryName(queryName)
+		{
+			exASSERT(nrOfElements > 0);
+			SetNull();
+		};
+
+		ColumnBuffer(const ColumnBuffer& other) = delete;
+		ColumnBuffer& operator=(const ColumnBuffer& other) = delete;
+
+		virtual ~ColumnBuffer() 
+		{ };
+
 
 		/*!
 		* \brief: Create a new instance wrapped into a shared_ptr
@@ -372,218 +384,12 @@ namespace exodbc
 		}
 
 
-		ColumnBuffer& operator=(const ColumnBuffer& other) = delete;
-		ColumnBuffer(const ColumnBuffer& other) = delete;
-
-		virtual ~ColumnBuffer()
-		{ };
-
 		/*!
-		* \brief Return the SQL C Type of this ColumnBuffer.
+		* \brief: Create a new array instance wrapped into a shared_ptr
 		*/
-		static SQLSMALLINT GetSqlCType() noexcept { return sqlCType; };
-
-		/*!
-		* \brief	Get the length in bytes of the internal buffer.
-		*/
-		static SQLLEN GetBufferLength() noexcept { return sizeof(T); };
-
-		/*!
-		* \brief	Set the buffer to passed value. The length indicator is set to
-		*			the length of the buffer.
-		*/
-		void SetValue(const T& value) noexcept { SetValue(value, GetBufferLength()); };
-
-		/*!
-		* \brief	Set the buffer and the length indicator to the passed values.
-		*/
-		void SetValue(const T& value, SQLLEN cb) noexcept { m_buffer = value; SetCb(cb); };
-		
-		/*!
-		* \brief	Return the value held by the buffer, if the buffer is not set to NULL.
-		* \throw	NullValueException if buffer contains a NULL value.
-		*/
-		const T& GetValue() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return m_buffer; };
-
-		/*!
-		* \brief	Return the query name of this Buffer.
-		*/
-		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
-
-		/*!
-		* \brief	Wrapper for GetValue().
-		* \see		GetValue()
-		*/
-		operator T() const noexcept { return GetValue(); };
-
-		/*!
-		* \brief	Calls SqlBindCol to bind this ColumnBuffer to the result set of the passed statement handle.
-		* \details	Connects a signal on the passed statement handle to be notified if the columns of the
-		*			handle gets unbound.
-		* \param	columnNr 1-indexed column of the result set.
-		* \param	pHStmt	Statement handle to bind against.
-		*/
-		void BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
 		{
-			BindColumnImpl(columnNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb);
-		};
-
-		/*!
-		* \brief	Calls SqlBindParameter with SQL_PARAM_INPUT to bind the passed parameter as input parameter
-		*			on the passed statement handle.
-		* \details	Connects a signal on the passed statement handle to be notified if the params of the
-		*			handle get reseted.
-		* \param	paramNr 1-indexed parameter of the statement to be executed.
-		* \param	pHStmt Statement to bind against.
-		* \param	paramDesc Description of parameter.
-		*/
-		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
-		{
-			BindParamImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
-		}
-
-
-		/*!
-		* \brief Create a SParameterDescription from the information in this ColumnBuffer
-		*			without querying the database.
-		*/
-		SParameterDescription CreateParamDescFromProps()
-		{
-			SParameterDescription paramDesc;
-			paramDesc.m_sqlType = GetSqlType();
-			paramDesc.m_charSize = GetColumnSize();
-			paramDesc.m_decimalDigits = GetDecimalDigits();
-			if (Test(ColumnFlag::CF_NULLABLE))
-			{
-				paramDesc.m_nullable = SQL_NULLABLE;
-			}
-			return paramDesc;
-		}
-
-	private:
-		T m_buffer;
-		std::wstring m_queryName;
-	};
-
-	template<>
-	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
-	{
-		// Do this totally different than else. Does not work to first bind as usual and then set attrs... ?
-		exASSERT(columnNr >= 1);
-		exASSERT(pHStmt != NULL);
-		exASSERT(pHStmt->IsAllocated());
-		exASSERT(m_columnSize > 0);
-		exASSERT(m_decimalDigits >= 0);
-
-		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER) SQL_C_NUMERIC);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN) m_columnSize));
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER) m_decimalDigits);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER) &m_buffer);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER) &m_cb);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER) &m_cb);
-
-		// get a notification if unbound
-		m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
-	}
-
-
-	template<>
-	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
-	{
-		BindParamImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
-
-		// Do some additional steps for numeric types
-		SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.m_charSize));
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDesc.m_decimalDigits);
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer);
-	}
-
-
-	// Integer types
-	typedef ColumnBuffer<SQLSMALLINT, SQL_C_USHORT> UShortColumnBuffer;
-	typedef std::shared_ptr<UShortColumnBuffer> UShortColumnBufferPtr;
-	typedef ColumnBuffer<SQLINTEGER, SQL_C_ULONG> ULongColumnBuffer;
-	typedef std::shared_ptr<ULongColumnBuffer> ULongColumnBufferPtr;
-	typedef ColumnBuffer<SQLBIGINT, SQL_C_UBIGINT> UBigIntColumnBuffer;
-	typedef std::shared_ptr<UBigIntColumnBuffer> UBigIntColumnBufferPtr;
-	typedef ColumnBuffer<SQLSMALLINT, SQL_C_SSHORT> ShortColumnBuffer;
-	typedef std::shared_ptr<ShortColumnBuffer> ShortColumnBufferPtr;
-	typedef ColumnBuffer<SQLINTEGER, SQL_C_SLONG> LongColumnBuffer;
-	typedef std::shared_ptr<LongColumnBuffer> LongColumnBufferPtr;
-	typedef ColumnBuffer<SQLBIGINT, SQL_C_SBIGINT> BigIntColumnBuffer;
-	typedef std::shared_ptr<BigIntColumnBuffer> BigIntColumnBufferPtr;
-
-	// datetime types
-	typedef ColumnBuffer<SQL_TIME_STRUCT, SQL_C_TYPE_TIME> TypeTimeColumnBuffer;
-	typedef std::shared_ptr<TypeTimeColumnBuffer> TypeTimeColumnBufferPtr;
-	typedef ColumnBuffer<SQL_TIME_STRUCT, SQL_C_TIME> TimeColumnBuffer;
-	typedef std::shared_ptr<TimeColumnBuffer> TimeColumnBufferPtr;
-	typedef ColumnBuffer<SQL_DATE_STRUCT, SQL_C_TYPE_DATE> TypeDateColumnBuffer;
-	typedef std::shared_ptr<TypeDateColumnBuffer> TypeDateColumnBufferPtr;
-	typedef ColumnBuffer<SQL_DATE_STRUCT, SQL_C_DATE> DateColumnBuffer;
-	typedef std::shared_ptr<DateColumnBuffer> DateColumnBufferPtr;
-	typedef ColumnBuffer<SQL_TIMESTAMP_STRUCT, SQL_C_TYPE_TIMESTAMP> TypeTimestampColumnBuffer;
-	typedef std::shared_ptr<TypeTimestampColumnBuffer> TypeTimestampColumnBufferPtr;
-	typedef ColumnBuffer<SQL_TIMESTAMP_STRUCT, SQL_C_TIMESTAMP> TimestampColumnBuffer;
-	typedef std::shared_ptr<TimestampColumnBuffer> TimestampColumnBufferPtr;
-
-	// Numeric types
-	typedef ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC> NumericColumnBuffer;
-	typedef std::shared_ptr<NumericColumnBuffer> NumericColumnBufferPtr;
-
-	// Floating types
-	typedef ColumnBuffer<SQLDOUBLE, SQL_C_DOUBLE> DoubleColumnBuffer;
-	typedef std::shared_ptr<DoubleColumnBuffer> DoubleColumnBufferPtr;
-	typedef ColumnBuffer<SQLREAL, SQL_C_FLOAT> RealColumnBuffer;
-	typedef std::shared_ptr<RealColumnBuffer> RealColumnBufferPtr;
-
-	/*!
-	* \class	ColumnArrayBuffer
-	* \brief	Manages an array buffer that is used to exchange data between the ODBC driver and exOdbc.
-	* \details	Cannot be copied and should probably be wrapped into a shared_ptr.
-	*/
-	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
-	class ColumnArrayBuffer
-		: public LengthIndicator
-		, public ColumnFlags
-		, public ExtendedColumnPropertiesHolder
-		, public ColumnBindable
-	{
-	public:
-		ColumnArrayBuffer() = delete;
-
-		/*!
-		* \brief	Create a new array buffer with given queryName, size and flags.
-		*			The buffer is set to NULL:
-		*/
-		ColumnArrayBuffer(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
-			: LengthIndicator()
-			, ColumnFlags(flags)
-			, ExtendedColumnPropertiesHolder()
-			, m_nrOfElements(nrOfElements)
-			, m_buffer(nrOfElements)
-			, m_queryName(queryName)
-		{
-			SetNull();
-		};
-
-		ColumnArrayBuffer(const ColumnArrayBuffer& other) = delete;
-		ColumnArrayBuffer& operator=(const ColumnArrayBuffer& other) = delete;
-
-		virtual ~ColumnArrayBuffer() 
-		{
-		};
-
-
-		/*!
-		* \brief: Create a new instance wrapped into a shared_ptr
-		*/
-		static std::shared_ptr<ColumnArrayBuffer> Create(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
-		{
-			return std::make_shared<ColumnArrayBuffer>(queryName, nrOfElements, flags);
+			return std::make_shared<ColumnBuffer>(queryName, nrOfElements, flags);
 		}
 
 		/*!
@@ -600,6 +406,7 @@ namespace exodbc
 		/*!
 		* \brief	Set a binary value of the buffer. The length indicator is set to the size() of
 		*			the vector passed.
+		* \see		SetValue(const std::vector<T>& value, SQLLEN cb)
 		*/
 		void SetValue(const std::vector<SQLCHAR>& value)
 		{
@@ -618,11 +425,12 @@ namespace exodbc
 		*			added.
 		* \throw	Exception If value.size() is greated than the capacity of the buffer.
 		* \throw	AssertionException if cb is set to SQL_NTS but there is not enough space
-		*			in the internal buffer to null terminate.
+		*			in the internal buffer to null terminate and the data passed in value
+		*			is not already null-terminated.
 		*/
 		void SetValue(const std::vector<T>& value, SQLLEN cb)
 		{ 
-			exASSERT(value.size() <= m_buffer.capacity()); 
+			exASSERT_MSG(value.size() <= m_buffer.capacity(), L"Passed value exceeds size of buffer allocated.");
 			size_t index = 0;
 			for (auto it = value.begin(); it != value.end(); ++it)
 			{
@@ -634,11 +442,36 @@ namespace exodbc
 			// if there is no space, fail
 			if (cb == SQL_NTS && value.back() != 0)
 			{
-				exASSERT(index < m_buffer.capacity());
+				exASSERT_MSG(index < m_buffer.capacity(), L"Not enough space to null-terminate the buffer.");
 				m_buffer[index] = 0;
 			}
 			SetCb(cb);
 		};
+
+		/*!
+		* \brief	Set the first element of the buffer to passed value. The length indicator is set to
+		*			the length of one element of the buffer.
+		*/
+		void SetValue(const T& value) noexcept { SetValue(value, sizeof(T)); };
+
+		/*!
+		* \brief	Set the first element of the buffer and the length indicator to the passed values.
+		*/
+		void SetValue(const T& value, SQLLEN cb) noexcept { m_buffer[0] = value; SetCb(cb); };
+
+		/*!
+		* \brief	Return the value held by the first element of the buffer, if the buffer is not set to NULL.
+		* \throw	NullValueException if buffer contains a NULL value.
+		*/
+		const T& GetValue() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return m_buffer[0]; };
+
+
+		/*!
+		* \brief	Wrapper for GetValue().
+		* \see		GetValue()
+		*/
+		operator T() const noexcept { return GetValue(); };
+
 
 		/*!
 		* \brief	Get the array buffer.
@@ -706,7 +539,7 @@ namespace exodbc
 
 
 		/*!
-		* \brief Create a SParameterDescription from the information in this ColumnArrayBuffer
+		* \brief Create a SParameterDescription from the information in this ColumnBuffer
 		*			without querying the database.
 		*/
 		SParameterDescription CreateParamDescFromProps()
@@ -729,13 +562,87 @@ namespace exodbc
 		std::wstring m_queryName;
 	};
 
+	template<>
+	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindSelect(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
+	{
+		// Do this totally different than else. Does not work to first bind as usual and then set attrs... ?
+		exASSERT(columnNr >= 1);
+		exASSERT(pHStmt != NULL);
+		exASSERT(pHStmt->IsAllocated());
+		exASSERT(m_columnSize > 0);
+		exASSERT(m_decimalDigits >= 0);
+
+		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER)m_decimalDigits);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer[0]);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
+		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
+
+		// get a notification if unbound
+		m_unbindColumnsConnections[pHStmt] = pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBuffer::OnUnbindColumns, this, _1));
+	}
+
+
+	template<>
+	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
+	{
+		BindParamImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
+
+		// Do some additional steps for numeric types
+		SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.m_charSize));
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)paramDesc.m_decimalDigits);
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer[0]);
+	}
+
+	// Integer types
+	typedef ColumnBuffer<SQLSMALLINT, SQL_C_USHORT> UShortColumnBuffer;
+	typedef std::shared_ptr<UShortColumnBuffer> UShortColumnBufferPtr;
+	typedef ColumnBuffer<SQLINTEGER, SQL_C_ULONG> ULongColumnBuffer;
+	typedef std::shared_ptr<ULongColumnBuffer> ULongColumnBufferPtr;
+	typedef ColumnBuffer<SQLBIGINT, SQL_C_UBIGINT> UBigIntColumnBuffer;
+	typedef std::shared_ptr<UBigIntColumnBuffer> UBigIntColumnBufferPtr;
+	typedef ColumnBuffer<SQLSMALLINT, SQL_C_SSHORT> ShortColumnBuffer;
+	typedef std::shared_ptr<ShortColumnBuffer> ShortColumnBufferPtr;
+	typedef ColumnBuffer<SQLINTEGER, SQL_C_SLONG> LongColumnBuffer;
+	typedef std::shared_ptr<LongColumnBuffer> LongColumnBufferPtr;
+	typedef ColumnBuffer<SQLBIGINT, SQL_C_SBIGINT> BigIntColumnBuffer;
+	typedef std::shared_ptr<BigIntColumnBuffer> BigIntColumnBufferPtr;
+
+	// datetime types
+	typedef ColumnBuffer<SQL_TIME_STRUCT, SQL_C_TYPE_TIME> TypeTimeColumnBuffer;
+	typedef std::shared_ptr<TypeTimeColumnBuffer> TypeTimeColumnBufferPtr;
+	typedef ColumnBuffer<SQL_TIME_STRUCT, SQL_C_TIME> TimeColumnBuffer;
+	typedef std::shared_ptr<TimeColumnBuffer> TimeColumnBufferPtr;
+	typedef ColumnBuffer<SQL_DATE_STRUCT, SQL_C_TYPE_DATE> TypeDateColumnBuffer;
+	typedef std::shared_ptr<TypeDateColumnBuffer> TypeDateColumnBufferPtr;
+	typedef ColumnBuffer<SQL_DATE_STRUCT, SQL_C_DATE> DateColumnBuffer;
+	typedef std::shared_ptr<DateColumnBuffer> DateColumnBufferPtr;
+	typedef ColumnBuffer<SQL_TIMESTAMP_STRUCT, SQL_C_TYPE_TIMESTAMP> TypeTimestampColumnBuffer;
+	typedef std::shared_ptr<TypeTimestampColumnBuffer> TypeTimestampColumnBufferPtr;
+	typedef ColumnBuffer<SQL_TIMESTAMP_STRUCT, SQL_C_TIMESTAMP> TimestampColumnBuffer;
+	typedef std::shared_ptr<TimestampColumnBuffer> TimestampColumnBufferPtr;
+
+	// Numeric types
+	typedef ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC> NumericColumnBuffer;
+	typedef std::shared_ptr<NumericColumnBuffer> NumericColumnBufferPtr;
+
+	// Floating types
+	typedef ColumnBuffer<SQLDOUBLE, SQL_C_DOUBLE> DoubleColumnBuffer;
+	typedef std::shared_ptr<DoubleColumnBuffer> DoubleColumnBufferPtr;
+	typedef ColumnBuffer<SQLREAL, SQL_C_FLOAT> RealColumnBuffer;
+	typedef std::shared_ptr<RealColumnBuffer> RealColumnBufferPtr;
+
 	// Array types
-	typedef ColumnArrayBuffer<SQLWCHAR, SQL_C_WCHAR> WCharColumnArrayBuffer;
-	typedef std::shared_ptr<WCharColumnArrayBuffer> WCharColumnBufferPtr;
-	typedef ColumnArrayBuffer<SQLCHAR, SQL_C_CHAR> CharColumnArrayBuffer;
-	typedef std::shared_ptr<CharColumnArrayBuffer> CharColumnBufferPtr;
-	typedef ColumnArrayBuffer<SQLCHAR, SQL_C_BINARY> BinaryColumnArrayBuffer;
-	typedef std::shared_ptr<BinaryColumnArrayBuffer> BinaryColumnBufferPtr;
+	typedef ColumnBuffer<SQLWCHAR, SQL_C_WCHAR> WCharColumnBuffer;
+	typedef std::shared_ptr<WCharColumnBuffer> WCharColumnBufferPtr;
+	typedef ColumnBuffer<SQLCHAR, SQL_C_CHAR> CharColumnBuffer;
+	typedef std::shared_ptr<CharColumnBuffer> CharColumnBufferPtr;
+	typedef ColumnBuffer<SQLCHAR, SQL_C_BINARY> BinaryColumnBuffer;
+	typedef std::shared_ptr<BinaryColumnBuffer> BinaryColumnBufferPtr;
 
 	/*!
 	* \class	SqlCPointerBuffer
@@ -891,7 +798,9 @@ namespace exodbc
 			return paramDesc;
 		}
 
-
+		/*!
+		* \brief	Get query name.
+		*/
 		const std::wstring& GetQueryName() const noexcept { return m_queryName; };
 
 
@@ -927,7 +836,7 @@ namespace exodbc
 	extern EXODBCAPI ColumnBufferPtrVariant CreateColumnBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName);
 
 	/*!
-	* \brief Depending on passed SQL C Type, a corresponding ColumnArrayBuffer is created, wrapped into a shared_ptr and returned as variant.
+	* \brief Depending on passed SQL C Type, a corresponding ColumnBuffer is created, wrapped into a shared_ptr and returned as variant.
 	*/
 	extern EXODBCAPI ColumnBufferPtrVariant CreateColumnArrayBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo);
 	
@@ -939,7 +848,7 @@ namespace exodbc
 	extern EXODBCAPI SQLLEN CalculateDisplaySize(SQLSMALLINT sqlType, SQLINTEGER columnSize, SQLSMALLINT numPrecRadix, SQLSMALLINT decimalDigits);
 	
 	/*!
-	* \brief	Returns true if the passed SQL C Type should be used togehter with an ArrayColumnBuffer.
+	* \brief	Returns true if the passed SQL C Type should be used together with an ColumnBuffer that contains multiple elements.
 	* \details	Returns true for:
 	*			- SQL_C_CHAR
 	*			- SQL_C_WCHAR
