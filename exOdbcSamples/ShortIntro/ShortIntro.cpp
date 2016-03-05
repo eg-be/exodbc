@@ -10,11 +10,11 @@
 #include <SDKDDKVer.h>
 #include <iostream>
 
-#include "exOdbc.h"
-#include "Environment.h"
-#include "Database.h"
-#include "Table.h"
-#include "ExecutableStatement.h"
+#include "exodbc/exOdbc.h"
+#include "exodbc/Environment.h"
+#include "exodbc/Database.h"
+#include "exodbc/Table.h"
+#include "exodbc/ExecutableStatement.h"
 
 int main()
 {
