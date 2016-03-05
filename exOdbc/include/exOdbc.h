@@ -11,8 +11,12 @@
 // Some compiler tuning
 // --------------------
 #pragma warning(disable: 4251) // 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
-#define _SCL_SECURE_NO_WARNINGS 1	// 'function': was declared deprecated also 'std::<function name>': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct.
-#define _CRT_SECURE_NO_WARNINGS 1	// 'function': This function or variable may be unsafe. Consider using strcpy_s instead.
+#ifndef _SCL_SECURE_NO_WARNINGS
+	#define _SCL_SECURE_NO_WARNINGS 1	// 'function': was declared deprecated also 'std::<function name>': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct.
+#endif
+#ifndef _CRT_SECURE_NO_WARNINGS
+	#define _CRT_SECURE_NO_WARNINGS 1	// 'function': This function or variable may be unsafe. Consider using strcpy_s instead.
+#endif
 
 // Defines to dll-import/export
 // ----------------------------
