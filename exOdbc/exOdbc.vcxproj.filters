@@ -13,18 +13,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Helpers.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Database.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Table.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\exOdbc.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="src\stdafx.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -34,61 +22,73 @@
     <ClInclude Include="resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Environment.h">
+    <ClInclude Include="include\exodbc\AssertionException.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\DebugNew.h">
+    <ClInclude Include="include\exodbc\bitmask_operators.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\TablePrivileges.h">
+    <ClInclude Include="include\exodbc\ColumnBuffer.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\Exception.h">
+    <ClInclude Include="include\exodbc\ColumnBufferVisitors.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ObjectName.h">
+    <ClInclude Include="include\exodbc\Database.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\InfoObject.h">
+    <ClInclude Include="include\exodbc\DebugNew.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\Sql2BufferTypeMap.h">
+    <ClInclude Include="include\exodbc\DoxygenToc.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\bitmask_operators.hpp">
+    <ClInclude Include="include\exodbc\EnumFlags.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\EnumFlags.h">
+    <ClInclude Include="include\exodbc\Environment.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\SqlHandle.h">
+    <ClInclude Include="include\exodbc\Exception.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\SqlStatementCloser.h">
+    <ClInclude Include="include\exodbc\ExecutableStatement.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ColumnBuffer.h">
+    <ClInclude Include="include\exodbc\exOdbc.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ExecutableStatement.h">
+    <ClInclude Include="include\exodbc\Helpers.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ColumnBufferVisitors.h">
+    <ClInclude Include="include\exodbc\InfoObject.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\LogHandler.h">
+    <ClInclude Include="include\exodbc\LogHandler.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\LogManager.h">
+    <ClInclude Include="include\exodbc\LogManager.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\AssertionException.h">
+    <ClInclude Include="include\exodbc\ObjectName.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\SpecializedExceptions.h">
+    <ClInclude Include="include\exodbc\SpecializedExceptions.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\DoxygenToc.h">
+    <ClInclude Include="include\exodbc\Sql2BufferTypeMap.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\exodbc\SqlHandle.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\exodbc\SqlStatementCloser.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\exodbc\Table.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\exodbc\TablePrivileges.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
