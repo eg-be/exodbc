@@ -19,29 +19,29 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\AssertionException.h" />
-    <ClInclude Include="include\bitmask_operators.hpp" />
-    <ClInclude Include="include\Database.h" />
-    <ClInclude Include="include\DebugNew.h" />
-    <ClInclude Include="include\DoxygenToc.h" />
-    <ClInclude Include="include\EnumFlags.h" />
-    <ClInclude Include="include\Environment.h" />
-    <ClInclude Include="include\Exception.h" />
-    <ClInclude Include="include\ExecutableStatement.h" />
-    <ClInclude Include="include\InfoObject.h" />
-    <ClInclude Include="include\LogHandler.h" />
-    <ClInclude Include="include\LogManager.h" />
-    <ClInclude Include="include\ObjectName.h" />
-    <ClInclude Include="include\SpecializedExceptions.h" />
-    <ClInclude Include="include\Sql2BufferTypeMap.h" />
-    <ClInclude Include="include\ColumnBuffer.h" />
-    <ClInclude Include="include\ColumnBufferVisitors.h" />
-    <ClInclude Include="include\SqlHandle.h" />
-    <ClInclude Include="include\SqlStatementCloser.h" />
-    <ClInclude Include="include\Table.h" />
-    <ClInclude Include="include\Helpers.h" />
-    <ClInclude Include="include\exOdbc.h" />
-    <ClInclude Include="include\TablePrivileges.h" />
+    <ClInclude Include="include\exodbc\AssertionException.h" />
+    <ClInclude Include="include\exodbc\bitmask_operators.hpp" />
+    <ClInclude Include="include\exodbc\ColumnBuffer.h" />
+    <ClInclude Include="include\exodbc\ColumnBufferVisitors.h" />
+    <ClInclude Include="include\exodbc\Database.h" />
+    <ClInclude Include="include\exodbc\DebugNew.h" />
+    <ClInclude Include="include\exodbc\DoxygenToc.h" />
+    <ClInclude Include="include\exodbc\EnumFlags.h" />
+    <ClInclude Include="include\exodbc\Environment.h" />
+    <ClInclude Include="include\exodbc\Exception.h" />
+    <ClInclude Include="include\exodbc\ExecutableStatement.h" />
+    <ClInclude Include="include\exodbc\exOdbc.h" />
+    <ClInclude Include="include\exodbc\Helpers.h" />
+    <ClInclude Include="include\exodbc\InfoObject.h" />
+    <ClInclude Include="include\exodbc\LogHandler.h" />
+    <ClInclude Include="include\exodbc\LogManager.h" />
+    <ClInclude Include="include\exodbc\ObjectName.h" />
+    <ClInclude Include="include\exodbc\SpecializedExceptions.h" />
+    <ClInclude Include="include\exodbc\Sql2BufferTypeMap.h" />
+    <ClInclude Include="include\exodbc\SqlHandle.h" />
+    <ClInclude Include="include\exodbc\SqlStatementCloser.h" />
+    <ClInclude Include="include\exodbc\Table.h" />
+    <ClInclude Include="include\exodbc\TablePrivileges.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\stdafx.h" />
     <ClInclude Include="src\targetver.h" />
@@ -149,26 +149,26 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)\Bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>$(ProjectName)_$(PlatformToolset)</TargetName>
+    <OutDir>$(ProjectDir)\..\Bin\$(Platform)\$(Configuration)\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)\Bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>$(ProjectName)_$(PlatformToolset)</TargetName>
+    <OutDir>$(ProjectDir)\..\Bin\$(Platform)\$(Configuration)\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)\Bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>$(ProjectName)_$(PlatformToolset)</TargetName>
+    <OutDir>$(ProjectDir)\..\Bin\$(Platform)\$(Configuration)\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)\Bin\$(Platform)\$(Configuration)\</OutDir>
-    <TargetName>$(ProjectName)_$(PlatformToolset)</TargetName>
+    <OutDir>$(ProjectDir)\..\Bin\$(Platform)\$(Configuration)\</OutDir>
+    <TargetName>$(ProjectName)</TargetName>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -177,7 +177,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;EXODBC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(Projectdir)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdParty\boost;$(ProjectDir)\Include\exodbc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -186,7 +186,7 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(ProjectDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\exodbc\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -198,7 +198,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;EXODBC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(Projectdir)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdParty\boost;$(ProjectDir)\Include\exodbc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
@@ -207,7 +207,7 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(ProjectDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\exodbc\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -221,7 +221,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;EXODBC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(Projectdir)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdParty\boost;$(ProjectDir)\Include\exodbc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -231,7 +231,7 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(ProjectDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\exodbc\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -245,7 +245,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;EXODBC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\3rdParty\boost;$(Projectdir)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdParty\boost;$(ProjectDir)\Include\exodbc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -255,7 +255,7 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(ProjectDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\include\exodbc\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
