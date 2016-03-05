@@ -17,9 +17,9 @@
 #include "exOdbcGTestHelpers.h"
 
 // Other headers
-#include "Environment.h"
-#include "Database.h"
-#include "Exception.h"
+#include "exodbc/Environment.h"
+#include "exodbc/Database.h"
+#include "exodbc/Exception.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
 #include "boost/filesystem.hpp"

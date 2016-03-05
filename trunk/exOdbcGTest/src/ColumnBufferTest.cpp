@@ -16,9 +16,9 @@
 #include "exOdbcGTestHelpers.h"
 
 // Other headers
-#include "ColumnBuffer.h"
-#include "SqlStatementCloser.h"
-#include "ExecutableStatement.h"
+#include "exodbc/ColumnBuffer.h"
+#include "exodbc/SqlStatementCloser.h"
+#include "exodbc/ExecutableStatement.h"
 
 // Debug
 #include "DebugNew.h"

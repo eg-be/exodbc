@@ -12,8 +12,8 @@
 // Same component headers
 
 // Other headers
-#include "Database.h"
-#include "Table.h"
+#include "exodbc/Database.h"
+#include "exodbc/Table.h"
 
 // System headers
 

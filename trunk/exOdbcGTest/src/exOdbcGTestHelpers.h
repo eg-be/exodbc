@@ -15,8 +15,8 @@
 #include "exOdbcGTest.h"
 
 // Other headers
-#include "Environment.h"
-#include "Database.h"
+#include "exodbc/Environment.h"
+#include "exodbc/Database.h"
 
 // System headers
 #include <map>

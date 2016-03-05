@@ -14,9 +14,9 @@
 
 // Same component headers
 // Other headers
-#include "Exception.h"
-#include "LogManager.h"
-#include "SpecializedExceptions.h"
+#include "exodbc/Exception.h"
+#include "exodbc/LogManager.h"
+#include "exodbc/SpecializedExceptions.h"
 
 // Debug
 #include "DebugNew.h"

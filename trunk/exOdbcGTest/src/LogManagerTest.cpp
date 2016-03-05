@@ -14,8 +14,8 @@
 
 // Same component headers
 // Other headers
-#include "LogManager.h"
-#include "LogHandler.h"
+#include "exodbc/LogManager.h"
+#include "exodbc/LogHandler.h"
 
 // Debug
 #include "DebugNew.h"

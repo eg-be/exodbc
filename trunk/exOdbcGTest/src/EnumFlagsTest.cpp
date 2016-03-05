@@ -14,7 +14,7 @@
 
 // Same component headers
 // Other headers
-#include "EnumFlags.h"
+#include "exodbc/EnumFlags.h"
 
 // Debug
 #include "DebugNew.h"

@@ -13,8 +13,8 @@
 #include "exOdbcGTest.h"
 
 // Other headers
-#include "Environment.h"
-#include "Database.h"
+#include "exodbc/Environment.h"
+#include "exodbc/Database.h"
 #include "gtest/gtest.h"
 #include "boost/filesystem.hpp"
 
