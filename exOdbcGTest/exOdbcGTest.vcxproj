@@ -107,7 +107,7 @@
       <AdditionalDependencies>gtest-mdd_v140.lib;exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(ProjectDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -133,7 +133,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
       <AdditionalDependencies>gtest-mdd_v140.lib;exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(ProjectDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -163,7 +163,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
       <AdditionalDependencies>gtest-md_v140.lib;exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(ProjectDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
@@ -193,7 +193,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
       <AdditionalDependencies>gtest-md_v140.lib;exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(SolutionDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
+      <Command>powershell -ExecutionPolicy ByPass -NonInteractive "$(ProjectDir)\UpdateVersion.ps1" "$(ProjectDir)\Version.h.template" "$(ProjectDir)\src\Version.h"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>Updating VersionInfo</Message>
