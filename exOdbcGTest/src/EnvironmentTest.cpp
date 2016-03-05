@@ -14,9 +14,9 @@
 
 // Same component headers
 // Other headers
-#include "Environment.h"
-#include "Database.h"
-#include "Exception.h"
+#include "exodbc/Environment.h"
+#include "exodbc/Database.h"
+#include "exodbc/Exception.h"
 
 // Debug
 #include "DebugNew.h"

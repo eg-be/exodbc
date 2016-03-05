@@ -16,9 +16,9 @@
 #include "exOdbcGTestHelpers.h"
 
 // Other headers
-#include "SqlHandle.h"
-#include "Environment.h"
-#include "Database.h"
+#include "exodbc/SqlHandle.h"
+#include "exodbc/Environment.h"
+#include "exodbc/Database.h"
 
 // Debug
 #include "DebugNew.h"

@@ -16,8 +16,8 @@
 #include "exOdbcGTestHelpers.h"
 
 // Other headers
-#include "Database.h"
-#include "Table.h"
+#include "exodbc/Database.h"
+#include "exodbc/Table.h"
 
 // Debug
 #include "DebugNew.h"

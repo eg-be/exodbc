@@ -18,10 +18,10 @@
 #include "exOdbcGTestHelpers.h"
 
 // Other headers
-#include "Environment.h"
-#include "Database.h"
-#include "Exception.h"
-#include "ColumnBufferVisitors.h"
+#include "exodbc/Environment.h"
+#include "exodbc/Database.h"
+#include "exodbc/Exception.h"
+#include "exodbc/ColumnBufferVisitors.h"
 
 // Debug
 #include "DebugNew.h"

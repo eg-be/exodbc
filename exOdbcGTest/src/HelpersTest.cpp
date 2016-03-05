@@ -14,10 +14,9 @@
 
 // Same component headers
 #include "exOdbcGTestHelpers.h"
-#include "SqlStatementCloser.h"
 
 // Other headers
-
+#include "exodbc/SqlStatementCloser.h"
 
 // Debug
 #include "DebugNew.h"
