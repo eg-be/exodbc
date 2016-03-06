@@ -14,6 +14,10 @@
     <User>ex</User>
     <Pass>extest</Pass>
     <Case>lower</Case>
+    <Skip ticket="76">DatabaseTest.ReadTablePrivileges</Skip>
+    <Skip ticket="76">TableTest.CheckPrivileges</Skip>
+    <Skip ticket="120">StatementCloserTest.CloseStmtHandle</Skip>
+    <Skip ticket="77">TableTest.DeleteFailOnNoData</Skip>
   </Dsn>
 
   <Dsn>
@@ -30,6 +34,35 @@
     <User></User>
     <Pass></Pass>
     <Case>lower</Case>
+    <Skip>BigIntColumnTest.*</Skip>
+    <Skip>wxCompatibilityTest.*</Skip>
+    <Skip>NumericColumnTest.*</Skip>
+    <Skip>DatabaseTest.ReadSchemas</Skip>
+    <Skip>DatabaseTest.ReadTablePrimaryKeysInfo</Skip>
+    <Skip>DatabaseTest.ReadTablePrivileges</Skip>
+    <Skip>ExecutableStatementTest.SelectAbsolute</Skip>
+    <Skip>ExecutableStatementTest.SelectFirst</Skip>
+    <Skip>ExecutableStatementTest.SelectLast</Skip>
+    <Skip>ExecutableStatementTest.SelectPrev</Skip>
+    <Skip>ExecutableStatementTest.SelectRelative</Skip>
+    <Skip>SqlCPointerTest.ReadBigIntValue</Skip>
+    <Skip>SqlCPointerTest.WriteBigIntValue</Skip>
+    <Skip>SqlCPointerTest.ReadNumeric_*</Skip>
+    <Skip>SqlCPointerTest.WriteNumeric_*</Skip>
+    <Skip>TableTest.CheckPrivileges</Skip>
+    <Skip>TableTest.CreateAutoNumericTypeBuffers</Skip>
+    <Skip>TableTest.DeleteFailOnNoData</Skip>
+    <Skip>TableTest.DeletePk</Skip>
+    <Skip>TableTest.OpenAutoSkipUnsupportedColumn</Skip>
+    <Skip>TableTest.QueryPrimaryKeysAndUpdateColumns</Skip>
+    <Skip>TableTest.SelectAbsolute</Skip>
+    <Skip>TableTest.SelectFirst</Skip>
+    <Skip>TableTest.SelectFromAutoWithSkippedUnsupportedColumn</Skip>
+    <Skip>TableTest.SelectLast</Skip>
+    <Skip>TableTest.SelectPrev</Skip>
+    <Skip>TableTest.SelectRelative</Skip>
+    <Skip>TableTest.UpdateFlag</Skip>
+    <Skip>TableTest.UpdatePk</Skip>
   </Dsn>  
   
   <Dsn>
