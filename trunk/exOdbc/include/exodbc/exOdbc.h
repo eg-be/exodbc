@@ -24,7 +24,11 @@
 #ifdef EXODBC_EXPORTS
 	#define EXODBCAPI __declspec(dllexport)
 #else
-	#define EXODBCAPI __declspec(dllimport)
+	#ifdef EXODBC_IMPORTS
+		#define EXODBCAPI __declspec(dllimport)
+	#else
+		#define EXODBCAPI
+	#endif
 #endif
 
 // System includes
