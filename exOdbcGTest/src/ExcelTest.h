@@ -15,6 +15,7 @@
 // Other headers
 #include "gtest/gtest.h"
 #include "exodbc/Environment.h"
+#include "exodbc/Database.h"
 
 // System headers
 
@@ -37,7 +38,10 @@ namespace exodbctest
 
 		virtual void TearDown();
 
+		bool IsExcelDb();
+
 		exodbc::EnvironmentPtr m_pEnv;
+		exodbc::DatabasePtr m_pDb;
 	};
 
 } // namespace exodbctest
