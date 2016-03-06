@@ -135,6 +135,9 @@
     <ClCompile Include="src\ExecutableStatement.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ColumnBufferVisitors.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\LogHandler.cpp">
       <Filter>src</Filter>
     </ClCompile>
