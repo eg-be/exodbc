@@ -250,6 +250,4 @@ namespace exodbc
 	}
 }
 
-// Interfaces
-// ----------
 

@@ -75,8 +75,4 @@ namespace exodbc
 		}
 		return ws.str();
 	}
-
-	// Interfaces
-	// ----------
-
 }

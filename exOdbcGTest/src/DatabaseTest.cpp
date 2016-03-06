@@ -833,8 +833,4 @@ namespace exodbctest
 		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, L"", L"", L""));
 	}
 
-
-	// Interfaces
-	// ----------
-
 } //namespace exodbc

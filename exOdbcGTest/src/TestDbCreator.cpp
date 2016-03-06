@@ -231,7 +231,4 @@ namespace exodbctest
 		}
 	}
 
-	// Interfaces
-	// ----------
-
 } //namespace exodbctest

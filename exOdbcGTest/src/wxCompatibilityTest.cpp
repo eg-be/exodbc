@@ -672,10 +672,4 @@ namespace exodbctest
 		EXPECT_FALSE(table.SelectNext());
 	}
 
-
-
-	//Interfaces
-	// ----------
-	// 
-
 }

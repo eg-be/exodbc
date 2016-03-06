@@ -1062,8 +1062,4 @@ std::wstring SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */
 	{
 		return m_sqlDataType < other.m_sqlDataType;
 	}
-
-
-	// Interfaces
-	// ----------
 }

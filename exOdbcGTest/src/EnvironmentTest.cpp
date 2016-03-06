@@ -113,7 +113,5 @@ namespace exodbctest
 		EXPECT_TRUE(foundDataSource);
 
 	}
-	// Interfaces
-	// ----------
 
 } // namespace exodbctest
