@@ -332,8 +332,13 @@ namespace exodbctest
 
 	TEST_F(TableTest, OpenAutoSkipUnsupportedColumn)
 	{
-		std::wstring tableName = GetTableName(TableId::NOT_SUPPORTED);
-		exodbc::Table nst(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName);
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table nst(m_pDb, TableAccessFlag::AF_READ, tableName);
+
+		// Remove support for SHORT and BIGINT
+		Sql2BufferTypeMapPtr pTypeMap = m_pDb->GetSql2BufferTypeMap();
+		pTypeMap->ClearType(SQL_BIGINT);
+		pTypeMap->ClearType(SQL_SMALLINT);
 
 		// Expect to fail if we open with default flags
 		ASSERT_THROW(nst.Open(), NotSupportedException);
@@ -342,44 +347,47 @@ namespace exodbctest
 			ASSERT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
-		// The table is: id, int1, xml, int2
+		// The table is: id, short, int, bigint
 		// but we fail to read xml, so we have only indexes
-		// 0, 1, 2 which map to
-		// id, int1, int2
+		// 0, 1 which map to
+		// id, int
 
 		EXPECT_NO_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(0));
 		EXPECT_NO_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(1));
-		EXPECT_NO_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(2));
 
-		EXPECT_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(3), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(2), IllegalArgumentException);
 	}
 
 
 	TEST_F(TableTest, SelectFromAutoWithSkippedUnsupportedColumn)
 	{
-		std::wstring tableName = GetTableName(TableId::NOT_SUPPORTED);
-		exodbc::Table nst(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName);
+		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		std::wstring idColName = GetIdColumnName(TableId::INTEGERTYPES);
+		exodbc::Table nst(m_pDb, TableAccessFlag::AF_READ, tableName);
+
+		// Remove support for SHORT and BIGINT
+		Sql2BufferTypeMapPtr pTypeMap = m_pDb->GetSql2BufferTypeMap();
+		pTypeMap->ClearType(SQL_BIGINT);
+		pTypeMap->ClearType(SQL_SMALLINT);
 
 		// we do not fail to open if we pass the flag to skip
 		{
 			EXPECT_NO_THROW(nst.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 		}
 
-		// The table is: id, int1, xml, int2
+		// The table is: id, short, int, bigint
 		// but we fail to read xml, so we have only indexes
-		// 0, 1, 2 which map to
-		// id, int1, int2
+		// 0, 1 which map to
+		// id, int
 		LongColumnBufferPtr pId = nst.GetColumnBufferPtr<LongColumnBufferPtr>(0);
-		LongColumnBufferPtr pInt1 = nst.GetColumnBufferPtr<LongColumnBufferPtr>(1);
-		LongColumnBufferPtr pInt2 = nst.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+		LongColumnBufferPtr pInt = nst.GetColumnBufferPtr<LongColumnBufferPtr>(1);
 
-		EXPECT_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(3), IllegalArgumentException);
+		EXPECT_THROW(nst.GetColumnBufferPtr<LongColumnBufferPtr>(2), IllegalArgumentException);
 
-		EXPECT_NO_THROW(nst.Select());
+		EXPECT_NO_THROW(nst.Select(boost::str(boost::wformat(L"%s = 4") % idColName)));
 		EXPECT_TRUE(nst.SelectNext());
-		EXPECT_EQ(1, pId->GetValue());
-		EXPECT_EQ(10, pInt1->GetValue());
-		EXPECT_EQ(12, pInt2->GetValue());
+		EXPECT_EQ(4, pId->GetValue());
+		EXPECT_EQ(2147483647, pInt->GetValue());
 	}
 
 
