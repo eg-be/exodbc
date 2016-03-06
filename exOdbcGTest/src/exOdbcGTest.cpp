@@ -170,6 +170,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 	}
 
+	wstring customFilter;
 	if (!g_odbcInfo.IsUsable())
 	{
 		// Read default settings
@@ -188,7 +189,32 @@ int _tmain(int argc, _TCHAR* argv[])
 				settingsPath = settingsPath.parent_path().parent_path().parent_path().parent_path();
 				settingsPath /= L"exOdbcGTest/TestSettings.xml";
 			}
-			g_odbcInfo.Load(settingsPath);
+			vector<wstring> skipNames;
+			g_odbcInfo.Load(settingsPath, skipNames);
+			// Set a gtest-filter statement to skip those names if no gtest-filter arg is setted
+			bool haveFilter = false;
+			for (int i = 1; i < argc; i++)
+			{
+				wstring arg = argv[i];
+				if (arg.compare(0, 15, L"--gtest_filter=") == 0)
+				{
+					haveFilter = true;
+					break;
+				}
+			}
+			if (!haveFilter && !skipNames.empty())
+			{
+				// Add our default-filter
+				wstring filter = L"--gtest_filter=-" + skipNames[0];
+				size_t i = 1;
+				while (i < skipNames.size())
+				{
+					filter += L":" + skipNames[i];
+					++i;
+				}
+				customFilter = filter;
+			}
+
 			doCreateDb = g_odbcInfo.m_createDb;
 		}
 		catch (const Exception& ex)
@@ -234,8 +260,26 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 	}
 
+	// Pass our maybe modified arguments to google-test
+	int gTestArgc = argc;
+	_TCHAR** gTestArgv = NULL;
+	if (!customFilter.empty())
+	{
+		gTestArgc = argc + 1;
+	}
+	gTestArgv = new _TCHAR*[gTestArgc + 1];
+	gTestArgv[gTestArgc] = NULL;
+	for (int i = 0; i < argc; i++)
+	{
+		gTestArgv[i] = argv[i];
+	}
+	if (!customFilter.empty())
+	{
+		gTestArgv[gTestArgc - 1] = (_TCHAR*) customFilter.c_str();
+	}
+
 	// Note: We cannot call Init earlier, we must call it after we've set up the global with the param-values
-	::testing::InitGoogleTest(&argc, argv);
+	::testing::InitGoogleTest(&gTestArgc, gTestArgv);
 
 	if (status != 0)
 	{
@@ -255,6 +299,8 @@ int _tmain(int argc, _TCHAR* argv[])
 		LOG_ERROR(ex.ToString());
 	}
 	
+	delete[] gTestArgv;
+
 	return result;
 }
 

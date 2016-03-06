@@ -17,6 +17,7 @@
 #include "exodbc/Exception.h"
 #include "exodbc/LogManager.h"
 #include "exodbc/SpecializedExceptions.h"
+#include <boost/optional/optional.hpp>
 
 // Debug
 #include "DebugNew.h"
@@ -83,7 +84,7 @@ namespace exodbctest
 	}
 
 
-	void TestParams::Load(const boost::filesystem::wpath& settingsFile)
+	void TestParams::Load(const boost::filesystem::wpath& settingsFile, std::vector<wstring>& skipNames)
 	{
 		namespace pt = boost::property_tree;
 		namespace io = boost::iostreams;
@@ -140,6 +141,16 @@ namespace exodbctest
 							IllegalArgumentException ae(ws.str());
 							SET_EXCEPTION_SOURCE(ae);
 							throw ae;
+						}
+						// check if we have any Skip entries
+						for (const pt::wptree::value_type &c : subTree.get_child(L""))
+						{
+							wstring elementName = c.first.data();
+							if (elementName == L"Skip")
+							{
+								pt::wptree child = c.second;
+								skipNames.push_back(child.get<wstring>(L""));
+							}
 						}
 					}
 				}

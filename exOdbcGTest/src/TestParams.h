@@ -49,7 +49,7 @@ namespace exodbctest
 			, m_namesCase(namesCase)
 		{};
 
-		void Load(const boost::filesystem::wpath& settingsFile);
+		void Load(const boost::filesystem::wpath& settingsFile, std::vector<std::wstring>& skipNames);
 
 		bool HasConnectionString() const noexcept { return m_connectionString.length() > 0; }
 
