@@ -19,7 +19,6 @@
 
 // Other headers
 #include <boost/variant.hpp>
-#include <boost/variant/polymorphic_get.hpp>
 #include <boost/signals2.hpp>
 
 // System headers
