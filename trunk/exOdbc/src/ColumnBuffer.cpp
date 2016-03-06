@@ -180,7 +180,4 @@ namespace exodbc
 			throw nse;
 		}
 	}
-
-	// Interfaces
-	// ----------
 }

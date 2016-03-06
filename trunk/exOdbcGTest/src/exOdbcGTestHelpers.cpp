@@ -185,8 +185,4 @@ namespace exodbctest
 	// --------------
 
 
-
-	// Interfaces
-	// ----------
-
 } // namespace exodbc

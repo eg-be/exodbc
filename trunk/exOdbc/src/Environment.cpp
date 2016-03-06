@@ -222,7 +222,4 @@ namespace exodbc
 		return dataSources;
 	}
 
-	// Interfaces
-	// ----------
-
 }

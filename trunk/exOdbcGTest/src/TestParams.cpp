@@ -170,9 +170,5 @@ namespace exodbctest
 			throw we;
 		}
 	}
-
-
-	// Interfaces
-	// ----------
 	
 } // namespace exodbctest

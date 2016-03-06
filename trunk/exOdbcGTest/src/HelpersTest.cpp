@@ -280,8 +280,4 @@ namespace exodbctest
 		EXPECT_FALSE(IsTimestampEqual(ts1, ts2));
 		EXPECT_FALSE(IsTimestampEqual(ts3, ts2));
 	}
-
-	// Interfaces
-	// ----------
-
 } // namespace exodbctest

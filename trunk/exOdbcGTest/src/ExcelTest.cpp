@@ -228,8 +228,4 @@ namespace exodbctest
 		EXPECT_NO_THROW(tTable.Select(L""));
 	}
 
-
-	// Interfaces
-	// ----------
-
 } //namespace exodbctest

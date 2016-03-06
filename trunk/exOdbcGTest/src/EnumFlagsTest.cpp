@@ -73,7 +73,4 @@ namespace exodbctest
 		EXPECT_FALSE(f.Test(ColumnFlag::CF_NULLABLE));
 	}
 
-	// Interfaces
-	// ----------
-
 } //namespace exodbc

@@ -66,8 +66,3 @@ namespace exodbc
 		bool m_closeOnDestruction;
 	};
 }
-
-// Interfaces
-// ----------
-
-#pragma once
