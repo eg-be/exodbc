@@ -203,6 +203,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;GTEST_DONT_DEFINE_FAIL;GTEST_DONT_DEFINE_SUCCEED;EXODBC_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdParty\boost;$(ProjectDir)\..\3rdParty\googletest\include;$(ProjectDir)\..\exOdbc\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -255,6 +256,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;GTEST_DONT_DEFINE_FAIL;GTEST_DONT_DEFINE_SUCCEED;EXODBC_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdParty\boost;$(ProjectDir)\..\3rdParty\googletest\include;$(ProjectDir)\..\exOdbc\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -313,6 +315,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;GTEST_DONT_DEFINE_FAIL;GTEST_DONT_DEFINE_SUCCEED;EXODBC_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdParty\boost;$(ProjectDir)\..\3rdParty\googletest\include;$(ProjectDir)\..\exOdbc\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -373,6 +376,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;GTEST_DONT_DEFINE_FAIL;GTEST_DONT_DEFINE_SUCCEED;EXODBC_TEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\3rdParty\boost;$(ProjectDir)\..\3rdParty\googletest\include;$(ProjectDir)\..\exOdbc\include</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
