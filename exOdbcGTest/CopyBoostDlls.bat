@@ -10,7 +10,7 @@ set CONFIGURATION=%~3
 set PLATFORM=%~4
 
 for %%i in %BOOST_DLL_LIST% do (
-	IF %CONFIGURATION% == Debug (
+	IF %CONFIGURATION% == Debug_DLL (
 	    set FILENAME=%%i-%TOOLSET%-mt-gd-%BOOST_VERSION%.dll
 	) ELSE (
 	    set FILENAME="%%i-%TOOLSET%-mt-%BOOST_VERSION%.dll"
