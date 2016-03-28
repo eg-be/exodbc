@@ -13,6 +13,8 @@
 #include "EnvironmentTest.h"
 
 // Same component headers
+#include "exOdbcGTestHelpers.h"
+
 // Other headers
 #include "exodbc/Environment.h"
 #include "exodbc/Database.h"
@@ -111,7 +113,57 @@ namespace exodbctest
 		}
 
 		EXPECT_TRUE(foundDataSource);
+	}
 
+
+	TEST_F(EnvironmentTest, EnableConnectionPooling)
+	{
+		// Enable and disable pooling
+		EXPECT_NO_THROW(Environment::EnableConnectionPooling(ConnectionPooling::OFF));
+		EXPECT_NO_THROW(Environment::EnableConnectionPooling(ConnectionPooling::PER_DRIVER));
+		EXPECT_NO_THROW(Environment::EnableConnectionPooling(ConnectionPooling::PER_HENV));
+
+		// Test if open and closing a few connections is faster if pooling is enabled
+		size_t nrRuns = 100;
+		time_t start, end;
+		{
+			Environment::EnableConnectionPooling(ConnectionPooling::PER_DRIVER);
+			EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
+			time(&start);
+			for (size_t i = 0; i < nrRuns; ++i)
+			{
+				DatabasePtr pDb = OpenTestDb(pEnv);
+			}
+			time(&end);
+			wstring msg = boost::str(boost::wformat(L"Opening %d connections using PER_DRIVER took %d seconds") % nrRuns % (end - start));
+			LOG_INFO(msg);
+		}
+
+		{
+			Environment::EnableConnectionPooling(ConnectionPooling::PER_HENV);
+			EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
+			time(&start);
+			for (size_t i = 0; i < nrRuns; ++i)
+			{
+				DatabasePtr pDb = OpenTestDb(pEnv);
+			}
+			time(&end);
+			wstring msg = boost::str(boost::wformat(L"Opening %d connections using PER_HENV took %d seconds") % nrRuns % (end - start));
+			LOG_INFO(msg);
+		}
+
+		{
+			Environment::EnableConnectionPooling(ConnectionPooling::OFF);
+			EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
+			time(&start);
+			for (size_t i = 0; i < nrRuns; ++i)
+			{
+				DatabasePtr pDb = OpenTestDb(pEnv);
+			}
+			time(&end);
+			wstring msg = boost::str(boost::wformat(L"Opening %d connections using OFF took %d seconds") % nrRuns % (end - start));
+			LOG_INFO(msg);
+		}
 	}
 
 } // namespace exodbctest
