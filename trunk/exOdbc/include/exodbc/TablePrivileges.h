@@ -113,7 +113,7 @@ namespace exodbc
 			, m_missingPriv(missingPriv)
 			, m_tableInfo(tableInfo)
 		{
-			m_what = w2s(ToString());
+			m_what = utf16ToUtf8(ToString());
 		}
 
 		virtual ~MissingTablePrivilegeException() {};

@@ -48,7 +48,7 @@ namespace exodbc
 		m_file = fileName;
 		m_functionname = functionName;
 
-		m_what = w2s(ToString());
+		m_what = utf16ToUtf8(ToString());
 	}
 
 

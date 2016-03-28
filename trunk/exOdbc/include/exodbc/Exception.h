@@ -51,7 +51,7 @@ namespace exodbc
 			: std::runtime_error("exodbc::Exception")
 			, m_line(0) 
 		{ 
-			m_what = w2s(ToString()); 
+			m_what = utf16ToUtf8(ToString()); 
 		};
 		
 		/*!
@@ -62,7 +62,7 @@ namespace exodbc
 			, m_line(0)
 			, m_msg(msg) 
 		{ 
-			m_what = w2s(ToString()); 
+			m_what = utf16ToUtf8(ToString()); 
 		};
 
 		virtual ~Exception() noexcept;

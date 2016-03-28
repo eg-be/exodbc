@@ -68,7 +68,7 @@ namespace exodbc {
 	}
 
 
-	std::string w2s(const std::wstring& w) noexcept
+	std::string utf16ToUtf8(const std::wstring& w) noexcept
 	{
 		try
 		{
@@ -80,19 +80,19 @@ namespace exodbc {
 		}
 		catch (const std::exception& ex)
 		{
-			std::string s("Failed in w2s with std::exception: ");
+			std::string s("Failed in utf16ToUtf8 with std::exception: ");
 			s += ex.what();
 			return s;
 		}
 		catch (...)
 		{
-			std::string s("Failed in w2s with unknown exception.");
+			std::string s("Failed in utf16ToUtf8 with unknown exception.");
 			return s;
 		}
 	}
 
 
-	std::wstring s2w(const std::string& s) noexcept
+	std::wstring utf8ToUtf16(const std::string& s) noexcept
 	{
 		try
 		{
@@ -105,12 +105,12 @@ namespace exodbc {
 		catch (const std::exception& ex)
 		{
 			HIDE_UNUSED(ex);
-			std::wstring ws(L"Failed in s2w with std::exception - unable to print what() as wstring, sorry.");
+			std::wstring ws(L"Failed in utf8ToUtf16 with std::exception - unable to print what() as wstring, sorry.");
 			return ws;
 		}
 		catch (...)
 		{
-			std::wstring ws(L"Failed in s2w with unknown exception.");
+			std::wstring ws(L"Failed in utf8ToUtf16 with unknown exception.");
 			return ws;
 		}
 	}
