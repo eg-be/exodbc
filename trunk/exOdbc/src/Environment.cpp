@@ -69,6 +69,19 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	void Environment::EnableConnectionPooling(ConnectionPooling enablePooling)
+	{
+		SQLRETURN ret = SQLSetEnvAttr(SQL_NULL_HENV, SQL_ATTR_CONNECTION_POOLING, (SQLPOINTER)enablePooling, NULL);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			wstring msg = boost::str(boost::wformat(L"Failed to set Attribute SQL_ATTR_CONNECTION_POOLING to %d") % (int)enablePooling);
+			SqlResultException ex(L"SQLSetEnvAttr", ret, msg);
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+	}
+
+
 	std::shared_ptr<Environment> Environment::Create(OdbcVersion odbcVersion)
 	{
 		EnvironmentPtr pEnv = std::make_shared<Environment>(odbcVersion);
@@ -152,6 +165,13 @@ namespace exodbc
 			ReadOdbcVersion();
 		}
 		return m_odbcVersion;
+	}
+
+
+	void Environment::SetConnctionPoolingMatch(ConnectionPoolingMatch matchMode)
+	{
+		SQLRETURN ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_CP_MATCH, (SQLPOINTER)matchMode, NULL);
+		THROW_IFN_SUCCEEDED(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle());
 	}
 
 
