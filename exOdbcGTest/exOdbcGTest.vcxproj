@@ -208,7 +208,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\3rdParty\boost\stage\lib\x64;$(ProjectDir)\..\3rdParty\googletest\gtest-md\x64\Debug;$(ProjectDir)\..\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\3rdParty\boost\stage\lib\x64_static;$(ProjectDir)\..\3rdParty\googletest\gtest-md\x64\Debug;$(ProjectDir)\..\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtest-mdd_v140.lib;exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
@@ -261,7 +261,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\3rdParty\boost\stage\lib\x86;$(ProjectDir)\..\3rdParty\googletest\gtest-md\Win32\Debug;$(ProjectDir)\..\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\3rdParty\boost\stage\lib\x86_static;$(ProjectDir)\..\3rdParty\googletest\gtest-md\Win32\Debug;$(ProjectDir)\..\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtest-mdd_v140.lib;exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
@@ -322,7 +322,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\3rdParty\boost\stage\lib\x64;$(ProjectDir)\..\3rdParty\googletest\gtest-md\x64\Release;$(ProjectDir)\..\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\3rdParty\boost\stage\lib\x64_static;$(ProjectDir)\..\3rdParty\googletest\gtest-md\x64\Release;$(ProjectDir)\..\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtest-md_v140.lib;exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
@@ -383,7 +383,7 @@ call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configu
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\3rdParty\boost\stage\lib\x86;$(ProjectDir)\..\3rdParty\googletest\gtest-md\Win32\Release;$(ProjectDir)\..\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\3rdParty\boost\stage\lib\x86_static;$(ProjectDir)\..\3rdParty\googletest\gtest-md\Win32\Release;$(ProjectDir)\..\Bin\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>gtest-md_v140.lib;exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
