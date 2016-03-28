@@ -169,7 +169,7 @@ namespace exodbc
 	{
 		OFF = SQL_CP_OFF,	///< Connection Pooling disabled
 		PER_DRIVER = SQL_CP_ONE_PER_DRIVER, ///< One pool per driver
-		PER_HENV = SQL_CP_ONE_PER_HENV ///< One pool per Environment handle
+		PER_HENV = SQL_CP_ONE_PER_HENV ///< One pool per environment
 	};
 
 
