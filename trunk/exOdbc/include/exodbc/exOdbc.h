@@ -205,7 +205,7 @@ namespace exodbc
 	* \param w String to transform
 	* \return std::string
 	*/
-	extern std::string w2s(const std::wstring& w) noexcept;
+	extern EXODBCAPI std::string w2s(const std::wstring& w) noexcept;
 
 
 	/*!
@@ -215,7 +215,7 @@ namespace exodbc
 	* \param s String to transform
 	* \return std::wstring
 	*/
-	extern std::wstring s2w(const std::string& s) noexcept;
+	extern EXODBCAPI std::wstring s2w(const std::string& s) noexcept;
 
 
 	/*!
