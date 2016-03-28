@@ -47,8 +47,19 @@ namespace exodbc
 	public:
 		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const;
 	};
-
+	
 	typedef std::shared_ptr<StdErrLogHandler> StdErrLogHandlerPtr;
 
-
+	/*!
+	* \class	NullLogHandler
+	* \brief	A LogHandler that does nothing.
+	*/
+	class EXODBCAPI NullLogHandler
+		: public LogHandler
+	{
+	public:
+		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const {};
+	};
+	
+	typedef std::shared_ptr<NullLogHandler> NullLogHandlerPtr;
 }

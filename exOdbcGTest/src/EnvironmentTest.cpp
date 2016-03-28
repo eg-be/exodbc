@@ -19,6 +19,7 @@
 #include "exodbc/Environment.h"
 #include "exodbc/Database.h"
 #include "exodbc/Exception.h"
+#include "exodbc/LogHandler.h"
 
 // Debug
 #include "DebugNew.h"
@@ -124,8 +125,11 @@ namespace exodbctest
 		EXPECT_NO_THROW(Environment::EnableConnectionPooling(ConnectionPooling::PER_HENV));
 
 		// Test if open and closing a few connections is faster if pooling is enabled
-		size_t nrRuns = 100;
-		time_t start, end;
+		g_logManager.ClearLogHandlers();
+		NullLogHandlerPtr pNullLogger = std::make_shared<NullLogHandler>();
+		g_logManager.RegisterLogHandler(pNullLogger);
+		size_t nrRuns = 1000;
+		time_t start, end, deltaDriver, deltaEnv, deltaOff;
 		{
 			Environment::EnableConnectionPooling(ConnectionPooling::PER_DRIVER);
 			EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
@@ -135,8 +139,7 @@ namespace exodbctest
 				DatabasePtr pDb = OpenTestDb(pEnv);
 			}
 			time(&end);
-			wstring msg = boost::str(boost::wformat(L"Opening %d connections using PER_DRIVER took %d seconds") % nrRuns % (end - start));
-			LOG_INFO(msg);
+			deltaDriver = end - start;
 		}
 
 		{
@@ -148,8 +151,7 @@ namespace exodbctest
 				DatabasePtr pDb = OpenTestDb(pEnv);
 			}
 			time(&end);
-			wstring msg = boost::str(boost::wformat(L"Opening %d connections using PER_HENV took %d seconds") % nrRuns % (end - start));
-			LOG_INFO(msg);
+			deltaEnv = end - start;
 		}
 
 		{
@@ -161,9 +163,18 @@ namespace exodbctest
 				DatabasePtr pDb = OpenTestDb(pEnv);
 			}
 			time(&end);
-			wstring msg = boost::str(boost::wformat(L"Opening %d connections using OFF took %d seconds") % nrRuns % (end - start));
-			LOG_INFO(msg);
+			deltaOff = end - start;
 		}
+
+		StdErrLogHandlerPtr stdLogger = std::make_shared<StdErrLogHandler>();
+		g_logManager.ClearLogHandlers();
+		g_logManager.RegisterLogHandler(stdLogger);
+		wstring msg = boost::str(boost::wformat(L"Opening %d connections using PER_DRIVER took %d seconds") % nrRuns % deltaDriver);
+		LOG_INFO(msg);
+		msg = boost::str(boost::wformat(L"Opening %d connections using PER_HENV took %d seconds") % nrRuns % deltaEnv);
+		LOG_INFO(msg);
+		msg = boost::str(boost::wformat(L"Opening %d connections using OFF took %d seconds") % nrRuns % deltaOff);
+		LOG_INFO(msg);
 	}
 
 } // namespace exodbctest
