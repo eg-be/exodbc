@@ -38,7 +38,7 @@ namespace exodbc
 	{
 		// We have no Error-Info to fetch
 		BuildErrorMsg(sqlFunctionName, ret);
-		m_what = w2s(ToString());
+		m_what = utf16ToUtf8(ToString());
 	}
 
 
@@ -49,7 +49,7 @@ namespace exodbc
 		// Fetch error-information from the database and build the error-msg
 		FetchErrorInfo(handleType, handle);
 		BuildErrorMsg(sqlFunctionName, ret);
-		m_what = w2s(ToString());
+		m_what = utf16ToUtf8(ToString());
 	}
 
 
@@ -128,7 +128,7 @@ namespace exodbc
 	{
 		std::wstringstream ws;
 		ws << Exception::ToString();
-		ws << s2w(m_innerExceptionMsg);
+		ws << utf8ToUtf16(m_innerExceptionMsg);
 		return ws.str();
 	}
 

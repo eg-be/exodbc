@@ -199,23 +199,23 @@ namespace exodbc
 	// --------------
 
 	/*!
-	* \brief Ugly conversion of small to wide - use only if you know that you have only ASCII chars in w.
+	* \brief Converts a utf16 std::wstring to a utf-8 std::string.
 	*
-	* \details Transforms from wide to small by simply taking the numeric char-values.
+	* \details This method will never throw an exception but return garbage in case it failed.
 	* \param w String to transform
 	* \return std::string
 	*/
-	extern EXODBCAPI std::string w2s(const std::wstring& w) noexcept;
+	extern EXODBCAPI std::string utf16ToUtf8(const std::wstring& w) noexcept;
 
 
 	/*!
-	* \brief Ugly conversion of wide to small - use only if you know that you have only ASCII chars in s.
+	* \brief Converts a utf8 std::string to a uf16 std::wstring
 	*
-	* \details Transforms small wide to wide by simply taking the numeric char-values.
+	* \details This method will never throw an exception but return garbage in case it failed.
 	* \param s String to transform
 	* \return std::wstring
 	*/
-	extern EXODBCAPI std::wstring s2w(const std::string& s) noexcept;
+	extern EXODBCAPI std::wstring utf8ToUtf16(const std::string& s) noexcept;
 
 
 	/*!

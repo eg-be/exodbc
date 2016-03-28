@@ -50,7 +50,7 @@ namespace exodbc
 			, m_condition(condition)
 		{
 			SetSourceInformation(line, file, functionname);
-			m_what = w2s(ToString());
+			m_what = utf16ToUtf8(ToString());
 		};
 
 		/*!
@@ -61,7 +61,7 @@ namespace exodbc
 			, m_condition(condition)
 		{
 			SetSourceInformation(line, file, functionname);
-			m_what = w2s(ToString());
+			m_what = utf16ToUtf8(ToString());
 		};
 
 		virtual ~AssertionException() {};

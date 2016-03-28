@@ -124,7 +124,7 @@ namespace exodbc
 			, m_notSupported(notSupported)
 			, m_smallInt(smallInt)
 		{
-			m_what = w2s(ToString());
+			m_what = utf16ToUtf8(ToString());
 		};
 
 		/*!
@@ -135,7 +135,7 @@ namespace exodbc
 			, m_notSupported(notSupported)
 			, m_smallInt(smallInt)
 		{
-			m_what = w2s(ToString());
+			m_what = utf16ToUtf8(ToString());
 		};
 
 		virtual ~NotSupportedException() {};
@@ -169,7 +169,7 @@ namespace exodbc
 			: Exception()
 			, m_innerExceptionMsg(ex.what())
 		{
-			m_what = w2s(ToString());
+			m_what = utf16ToUtf8(ToString());
 		};
 
 		std::wstring GetName() const noexcept override { return L"exodbc::WrapperException"; };
@@ -197,7 +197,7 @@ namespace exodbc
 			: Exception()
 			, m_columnName(columnName)
 		{
-			m_what = w2s(ToString());
+			m_what = utf16ToUtf8(ToString());
 		}
 
 		virtual ~NullValueException() {};
