@@ -46,6 +46,16 @@ namespace exodbc
 	{
 	public:
 		/*!
+		* \brief	Enable connection pooling on the driver manager.
+		* \details	This option must be set before the Environment is allocated
+		*			to enable it on further Environments.
+		* \see		SqlConnect https://msdn.microsoft.com/en-us/library/ms711810%28v=vs.85%29.aspx
+		* \throw	SqlResultException if SetSetEnvAttr does not succeed.
+		*/
+		static void EnableConnectionPooling(ConnectionPooling enablePooling);
+
+
+		/*!
 		 * \brief	Default constructor.
 		 * 			You must manually call Init() after creating the object.
 		 *			Sets ODBC Version to OdbcVersion::UNKNOWN.
@@ -166,6 +176,14 @@ namespace exodbc
 		 */		
 		DataSourcesVector ListDataSources(ListMode mode) const;
 
+
+		/*!
+		* \brief	Set if connection opened from this environment must
+		*			match strict or not if connection pooling is enabled.
+		* \see		EnableConnectionPooling.
+		* \throw	Exception If no handle is allocated, or setting the attribute fails.
+		*/
+		void SetConnctionPoolingMatch(ConnectionPoolingMatch matchMode);
 
 	private:		
 		// Members
