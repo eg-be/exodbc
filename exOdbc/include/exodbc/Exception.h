@@ -103,9 +103,7 @@ namespace exodbc
 		std::wstring GetMsg() const noexcept				{ return m_msg; };
 
 		/*!
-		* \brief	Returns the same as ToString(), but with a way to primitive
-		*			transformation to std::string (from std::wstring). Use only
-		*			ascii chars in all exceptions, or you will get garbage.
+		* \brief	Returns the same as ToString(), but converted to an utf8-string.
 		*/
 		virtual const char* what() const noexcept;
 
