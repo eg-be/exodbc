@@ -23,8 +23,8 @@ namespace exodbc
 	/*!
 	* \class Sql2BufferTypeMap
 	*
-	* \brief Map defining the which SQL C Types SQL Types are mapped. Used by the ColumnBuffer
-	*		to determine the type of the Buffer to allocated, if ColumnBuffers are created
+	* \brief Map defining the which SQL C Types SQL Types are mapped. Used by the Table
+	*		to determine the type of the ColumnBuffer to be allocated, if ColumnBuffers are created
 	*		automatically.
 	*/
 	class EXODBCAPI Sql2BufferTypeMap
