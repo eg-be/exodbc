@@ -1,5 +1,5 @@
 /*!
-* \file ObjectName.cpp
+* \file LogHandler.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.01.2016
 * \brief Source file for name objects.
