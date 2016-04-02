@@ -86,36 +86,39 @@ namespace exodbc
 
 
 	/*!
-	* \class	ExtendedColumnPropertiesHolder
-	* \brief	Helper class to store various additional properties of a ColumnBuffer.
+	* \class	ColumnProperties
+	* \brief	Helper class to store various all properties of a ColumnBuffer that are not related to 
+	*			the ColumnBuffers type T.
 	* \details	Can store additional information about:
 	*			- Column size
 	*			- Decimal digits
 	*			- Sql Type
+	*			- Query name
 	*/
-	class ExtendedColumnPropertiesHolder
+	class ColumnProperties
 	{
 	public:
 
 		/*!
 		* \brief	Create new instance with passed values.
 		*/
-		ExtendedColumnPropertiesHolder(SQLINTEGER columnSize, SQLSMALLINT decimalDigits, SQLSMALLINT sqlType)
+		ColumnProperties(SQLINTEGER columnSize, SQLSMALLINT decimalDigits, SQLSMALLINT sqlType, std::wstring queryName)
 			: m_columnSize(columnSize)
 			, m_decimalDigits(decimalDigits)
 			, m_sqlType(sqlType)
+			, m_queryName(queryName)
 		{};
 
 		/*!
 		* \brief	Create new instance, column size and decimal digits are set to 0, SQL type is set to SQL_UNKNOWN_TYPE
 		*/
-		ExtendedColumnPropertiesHolder()
+		ColumnProperties()
 			: m_columnSize(0)
 			, m_decimalDigits(0)
 			, m_sqlType(SQL_UNKNOWN_TYPE)
 		{};
 
-		virtual ~ExtendedColumnPropertiesHolder()
+		virtual ~ColumnProperties()
 		{};
 
 		/*!
@@ -134,6 +137,11 @@ namespace exodbc
 		void SetSqlType(SQLSMALLINT sqlType) noexcept { m_sqlType = sqlType; };
 
 		/*!
+		* \brief	Set the query name.
+		*/
+		void SetQueryName(const std::wstring& queryName) noexcept { m_queryName = queryName; };
+
+		/*!
 		* \brief	Returns Column Size.
 		*/
 		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
@@ -148,12 +156,25 @@ namespace exodbc
 		*/
 		SQLSMALLINT GetSqlType() const noexcept { return m_sqlType; };
 
+		/*!
+		* \brief	Get query name.
+		* \throw	AssertionException if no query name is set.
+		* \see		HasQueryName()
+		*/
+		std::wstring GetQueryName() const { exASSERT(HasQueryName()); return m_queryName; };
+
+		/*!
+		* \brief	Returns true if a query name is set (is not empty).
+		*/
+		bool HasQueryName() const noexcept { return !m_queryName.empty(); };
+
 	protected:
 		SQLINTEGER m_columnSize;
 		SQLSMALLINT m_decimalDigits;
 		SQLSMALLINT m_sqlType;
+		std::wstring m_queryName;
 	};
-	typedef std::shared_ptr<ExtendedColumnPropertiesHolder> ExtendedColumnPropertiesHolderPtr;
+	typedef std::shared_ptr<ColumnProperties> ColumnPropertiesPtr;
 
 
 	/*!
@@ -326,7 +347,7 @@ namespace exodbc
 	class ColumnBuffer
 		: public LengthIndicator
 		, public ColumnFlags
-		, public ExtendedColumnPropertiesHolder
+		, public ColumnProperties
 		, public ColumnBindable
 	{
 	public:
@@ -339,12 +360,12 @@ namespace exodbc
 		ColumnBuffer(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
-			, ExtendedColumnPropertiesHolder()
+			, ColumnProperties()
 			, m_nrOfElements(1)
 			, m_buffer(1)
-			, m_queryName(queryName)
 		{
 			SetNull();
+			SetQueryName(queryName);
 		};
 
 
@@ -355,7 +376,7 @@ namespace exodbc
 		ColumnBuffer(SQLINTEGER sqlType = SQL_UNKNOWN_TYPE, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
-			, ExtendedColumnPropertiesHolder()
+			, ColumnProperties()
 			, m_nrOfElements(1)
 			, m_buffer(1)
 		{
@@ -371,13 +392,13 @@ namespace exodbc
 		ColumnBuffer(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
-			, ExtendedColumnPropertiesHolder()
+			, ColumnProperties()
 			, m_nrOfElements(nrOfElements)
 			, m_buffer(nrOfElements)
-			, m_queryName(queryName)
 		{
 			exASSERT(nrOfElements > 0);
 			SetNull();
+			SetQueryName(queryName);
 		};
 
 
@@ -388,13 +409,13 @@ namespace exodbc
 		ColumnBuffer(SQLLEN nrOfElements, const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
-			, ExtendedColumnPropertiesHolder()
+			, ColumnProperties()
 			, m_nrOfElements(nrOfElements)
 			, m_buffer(nrOfElements)
-			, m_queryName(queryName)
 		{
 			exASSERT(nrOfElements > 0);
 			SetNull();
+			SetQueryName(queryName);
 		};
 
 
@@ -405,10 +426,9 @@ namespace exodbc
 		ColumnBuffer(SQLLEN nrOfElements, SQLINTEGER sqlType = SQL_UNKNOWN_TYPE, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
-			, ExtendedColumnPropertiesHolder()
+			, ColumnProperties()
 			, m_nrOfElements(nrOfElements)
 			, m_buffer(nrOfElements)
-			, m_queryName(queryName)
 		{
 			exASSERT(nrOfElements > 0);
 			SetNull();
@@ -558,18 +578,6 @@ namespace exodbc
 		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
 
 		/*!
-		* \brief	Get query name.
-		* \throw	AssertionException if no query name is set.
-		* \see		HasQueryName()
-		*/
-		const std::wstring& GetQueryName() const { exASSERT(HasQueryName()); return m_queryName; };
-
-		/*!
-		* \brief	Returns true if a query name is set (is not empty).
-		*/
-		bool HasQueryName() const noexcept { return !m_queryName.empty(); };
-
-		/*!
 		* \brief	Get the data of the buffer as std::wstring
 		* \throw	NullValueException if buffer is set to NULL.
 		*/
@@ -640,7 +648,6 @@ namespace exodbc
 	private:
 		SQLLEN m_nrOfElements;
 		std::vector<T> m_buffer;
-		std::wstring m_queryName;
 	};
 
 	template<>
@@ -738,7 +745,7 @@ namespace exodbc
 	class SqlCPointerBuffer
 		: public LengthIndicator
 		, public ColumnFlags
-		, public ExtendedColumnPropertiesHolder
+		, public ColumnProperties
 		, public ColumnBindable
 	{
 	public:
@@ -760,11 +767,10 @@ namespace exodbc
 		SqlCPointerBuffer(const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferLength, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
 			: LengthIndicator()
 			, ColumnFlags(flags)
-			, ExtendedColumnPropertiesHolder(columnSize, decimalDigits, sqlType)
+			, ColumnProperties(columnSize, decimalDigits, sqlType, queryName)
 			, m_pBuffer(pBuffer)
 			, m_sqlCType(sqlCType)
 			, m_bufferLength(bufferLength)
-			, m_queryName(queryName)
 		{
 			if (flags.Test(ColumnFlag::CF_NULLABLE))
 			{
@@ -887,24 +893,10 @@ namespace exodbc
 			return paramDesc;
 		}
 
-		/*!
-		* \brief	Get query name.
-		* \throw	AssertionException if no query name is set.
-		* \see		HasQueryName()
-		*/
-		const std::wstring& GetQueryName() const { exASSERT(HasQueryName()); return m_queryName; };
-
-		/*!
-		* \brief	Returns true if a query name is set (is not empty).
-		*/
-		bool HasQueryName() const noexcept { return !m_queryName.empty(); };
-
 	private:
 		SQLPOINTER m_pBuffer;
 		SQLSMALLINT m_sqlCType;
 		SQLLEN m_bufferLength;
-
-		std::wstring m_queryName;
 	};
 
 	typedef std::shared_ptr<SqlCPointerBuffer> SqlCPointerBufferPtr;

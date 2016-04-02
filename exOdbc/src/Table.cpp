@@ -258,7 +258,7 @@ namespace exodbc
 				}
 				std::shared_ptr<ColumnFlags> pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnPtrVariant);
 				pColumnFlags->Set(flags);
-				std::shared_ptr<ExtendedColumnPropertiesHolder> pExtendedProps = boost::apply_visitor(ExtendedColumnPropertiesHolderPtrVisitor(), columnPtrVariant);
+				std::shared_ptr<ColumnProperties> pExtendedProps = boost::apply_visitor(ColumnPropertiesPtrVisitor(), columnPtrVariant);
 				pExtendedProps->SetSqlType(colInfo.GetSqlType());
 				if(!colInfo.IsColumnSizeNull())
 				{
