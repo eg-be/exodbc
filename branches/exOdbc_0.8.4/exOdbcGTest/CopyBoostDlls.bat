@@ -1,3 +1,9 @@
+@echo off
+
+rem Use as Post-Build step like:
+rem call "$(ProjectDir)\CopyBoostDlls.bat" "$(ProjectDir)" "$(TargetDir)" "$(Configuration)" "$(Platform)"
+rem to copy the boost dlls required by the passed build configuration to the target directory.
+
 @echo on & setlocal enabledelayedexpansion
 
 set BOOST_DLL_LIST=(boost_filesystem boost_system)
