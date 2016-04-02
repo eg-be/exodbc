@@ -163,18 +163,18 @@ namespace exodbc
 
 	/*!
 	* \class ColumnBufferLengthIndicatorPtrVisitor
-	* \brief Visitor to cast a variant to a ColumnBufferLengthIndicatorPtr
+	* \brief Visitor to cast a variant to a LengthIndicatorPtr
 	* \details	On applying this visitor, it will dynamic_pointer_cast the variant and throw
 	*			an AssertionException if the cast fails.
 	*/
 	class ColumnBufferLengthIndicatorPtrVisitor
-		: public boost::static_visitor < ColumnBufferLengthIndicatorPtr >
+		: public boost::static_visitor < LengthIndicatorPtr >
 	{
 	public:
 		template<typename T>
-		ColumnBufferLengthIndicatorPtr operator()(T& t) const
+		LengthIndicatorPtr operator()(T& t) const
 		{
-			ColumnBufferLengthIndicatorPtr pCb = std::dynamic_pointer_cast<LengthIndicator>(t);
+			LengthIndicatorPtr pCb = std::dynamic_pointer_cast<LengthIndicator>(t);
 			exASSERT(pCb);
 			return pCb;
 		}
