@@ -70,9 +70,6 @@
     <ClInclude Include="include\exodbc\LogManager.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\exodbc\ObjectName.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="include\exodbc\SpecializedExceptions.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -115,9 +112,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\Exception.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\ObjectName.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\InfoObject.cpp">

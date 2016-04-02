@@ -51,7 +51,6 @@
     <ClInclude Include="include\exodbc\InfoObject.h" />
     <ClInclude Include="include\exodbc\LogHandler.h" />
     <ClInclude Include="include\exodbc\LogManager.h" />
-    <ClInclude Include="include\exodbc\ObjectName.h" />
     <ClInclude Include="include\exodbc\SpecializedExceptions.h" />
     <ClInclude Include="include\exodbc\Sql2BufferTypeMap.h" />
     <ClInclude Include="include\exodbc\SqlHandle.h" />
@@ -80,7 +79,6 @@
     <ClCompile Include="src\InfoObject.cpp" />
     <ClCompile Include="src\LogHandler.cpp" />
     <ClCompile Include="src\LogManager.cpp" />
-    <ClCompile Include="src\ObjectName.cpp" />
     <ClCompile Include="src\SpecializedExceptions.cpp" />
     <ClCompile Include="src\Sql2BufferTypeMap.cpp" />
     <ClCompile Include="src\ColumnBuffer.cpp" />

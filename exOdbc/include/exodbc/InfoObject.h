@@ -11,7 +11,6 @@
 
 // Same component headers
 #include "exOdbc.h"
-#include "ObjectName.h"
 #include "SqlHandle.h"
 
 // Other headers
@@ -35,15 +34,14 @@ namespace exodbc
 	* \details Holds information about a table found using one of the catalog functions.
 	*/
 	class EXODBCAPI TableInfo
-		: public ObjectName
 	{	
 	public:
 		TableInfo();
 		TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
 		TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
 
-		virtual std::wstring GetQueryName() const override;
-		virtual std::wstring GetPureName() const override;
+		std::wstring GetQueryName() const;
+		std::wstring GetPureName() const;
 
 		std::wstring		GetType() const { return m_tableType; };
 		std::wstring		GetCatalog() const { return m_catalogName;};
@@ -81,7 +79,6 @@ namespace exodbc
 	*
 	*/
 	class EXODBCAPI ColumnInfo
-		: public ObjectName
 	{
 	private:
 		ColumnInfo();
@@ -130,14 +127,14 @@ namespace exodbc
 		/*!
 		* \brief	Returns only the ColumnName.
 		*/
-		virtual std::wstring GetQueryName() const noexcept override;
+		std::wstring GetQueryName() const noexcept;
 
 
 		/*!
 		* \brief	Returns the pure name, which is the columnName.
 		* \return std::wstring
 		*/
-		virtual std::wstring GetPureName() const noexcept override;
+		std::wstring GetPureName() const noexcept;
 
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
@@ -219,7 +216,6 @@ namespace exodbc
 	* \brief	Primary Keys of a table as fetched using SQLPrimaryKeys
 	*/
 	class EXODBCAPI TablePrimaryKeyInfo
-		: public ObjectName
 	{
 	public:
 		TablePrimaryKeyInfo();
@@ -227,8 +223,8 @@ namespace exodbc
 		TablePrimaryKeyInfo(const std::wstring& catalogName, const std::wstring& schemaName, const std::wstring& tableName, const std::wstring& columnName,
 			SQLSMALLINT keySequence, const std::wstring& keyName, bool isCatalogNull, bool isSchemaNull, bool isPrimaryKeyNameNull);
 
-		virtual std::wstring GetQueryName() const override;
-		virtual std::wstring GetPureName() const override;
+		std::wstring GetQueryName() const;
+		std::wstring GetPureName() const;
 
 		std::wstring GetCatalogName() const { exASSERT(!IsCatalogNull()); return m_catalogName; };
 		std::wstring GetSchemaName() const { exASSERT(!IsSchemaNull()); return m_schemaName; };

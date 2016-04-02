@@ -14,7 +14,6 @@
 #include "exOdbc.h"
 #include "TablePrivileges.h"
 #include "Exception.h"
-#include "ObjectName.h"
 #include "Sql2BufferTypeMap.h"
 #include "ColumnBuffer.h"
 #include "SqlHandle.h"
