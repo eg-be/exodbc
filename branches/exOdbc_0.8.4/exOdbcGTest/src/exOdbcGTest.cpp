@@ -181,13 +181,25 @@ int _tmain(int argc, _TCHAR* argv[])
 			namespace fs = boost::filesystem;
 			fs::wpath exePath(argv[0]);
 			exePath.normalize();
-			fs::wpath exeDir = exePath.parent_path();
-			fs::wpath settingsPath = exeDir / L"TestSettings.xml";
-			if( ! fs::exists(settingsPath))
+			fs::wpath confDir = exePath.parent_path();
+			fs::wpath settingsPath = confDir / L"TestSettings.xml";
+			while( ! fs::exists(settingsPath) && confDir.has_parent_path())
 			{ 
 				// try if it is up somewhere in my working copy
-				settingsPath = settingsPath.parent_path().parent_path().parent_path().parent_path();
-				settingsPath /= L"exOdbcGTest/TestSettings.xml";
+				confDir = confDir.parent_path();
+				settingsPath = confDir;
+				settingsPath /= L"TestSettings.xml";
+				if(!fs::exists(settingsPath))
+				{ 
+					settingsPath = confDir;
+					settingsPath /= L"exOdbcGTest/TestSettings.xml";
+				}
+			}
+			if (!fs::exists(settingsPath))
+			{
+				NotFoundException ex(boost::str(boost::wformat(L"No TestSettings.xml file found in directory %1% and its parent directories") % exePath.parent_path()));
+				SET_EXCEPTION_SOURCE(ex);
+				throw ex;
 			}
 			vector<wstring> skipNames;
 			g_odbcInfo.Load(settingsPath, skipNames);
