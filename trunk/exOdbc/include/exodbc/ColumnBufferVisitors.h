@@ -93,11 +93,11 @@ namespace exodbc
 	* \details On applying this visitor, it will call GetQueryName() on the variant.
 	*/
 	class QueryNameVisitor
-		: public boost::static_visitor<const std::wstring&>
+		: public boost::static_visitor<std::wstring>
 	{
 	public:
 		template<typename T>
-		const std::wstring& operator()(T& t) const
+		std::wstring operator()(T& t) const
 		{
 			return t->GetQueryName();
 		}
@@ -142,19 +142,19 @@ namespace exodbc
 
 
 	/*!
-	* \class ExtendedColumnPropertiesHolderPtrVisitor
+	* \class ColumnPropertiesPtrVisitor
 	* \brief Visitor to cast a variant to a ExtendedColumnPropertiesHolderPtr
 	* \details	On applying this visitor, it will dynamic_pointer_cast the variant and throw
 	*			an AssertionException if the cast fails.
 	*/
-	class ExtendedColumnPropertiesHolderPtrVisitor
-		: public boost::static_visitor<std::shared_ptr<ExtendedColumnPropertiesHolder>>
+	class ColumnPropertiesPtrVisitor
+		: public boost::static_visitor<std::shared_ptr<ColumnProperties>>
 	{
 	public:
 		template<typename T>
-		std::shared_ptr<ExtendedColumnPropertiesHolder> operator()(T& t) const
+		std::shared_ptr<ColumnProperties> operator()(T& t) const
 		{
-			std::shared_ptr<ExtendedColumnPropertiesHolder> pProps = std::dynamic_pointer_cast<ExtendedColumnPropertiesHolder>(t);
+			std::shared_ptr<ColumnProperties> pProps = std::dynamic_pointer_cast<ColumnProperties>(t);
 			exASSERT(pProps);
 			return pProps;
 		}
