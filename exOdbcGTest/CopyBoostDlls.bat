@@ -15,16 +15,17 @@ set TARGET_DIR=%~2
 set CONFIGURATION=%~3
 set PLATFORM=%~4
 
+if %PLATFORM% == Win32 (
+	set BOOST_DLL_DIR=%PROJECT_DIR%\..\3rdParty\boost\stage\lib\x86
+) ELSE (
+	set BOOST_DLL_DIR=%PROJECT_DIR%\..\3rdParty\boost\stage\lib\x64
+)
+
 for %%i in %BOOST_DLL_LIST% do (
 	IF %CONFIGURATION% == Debug_DLL (
 	    set FILENAME=%%i-%TOOLSET%-mt-gd-%BOOST_VERSION%.dll
 	) ELSE (
 	    set FILENAME="%%i-%TOOLSET%-mt-%BOOST_VERSION%.dll"
-	)
-	if %PLATFORM% == Win32 (
-		set BOOST_DLL_DIR=%PROJECT_DIR%\..\3rdParty\boost\stage\lib\x86
-	) ELSE (
-		set BOOST_DLL_DIR=%PROJECT_DIR%\..\3rdParty\boost\stage\lib\x64
 	)
 
 	set FULL_FILE_PATH=!BOOST_DLL_DIR!\!FILENAME!
