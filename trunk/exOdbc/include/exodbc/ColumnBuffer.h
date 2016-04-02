@@ -82,7 +82,7 @@ namespace exodbc
 	protected:
 		SQLLEN m_cb;
 	};
-	typedef std::shared_ptr<LengthIndicator> ColumnBufferLengthIndicatorPtr;
+	typedef std::shared_ptr<LengthIndicator> LengthIndicatorPtr;
 
 
 	/*!
