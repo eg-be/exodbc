@@ -128,7 +128,7 @@ namespace exodbctest
 		g_logManager.ClearLogHandlers();
 		NullLogHandlerPtr pNullLogger = std::make_shared<NullLogHandler>();
 		g_logManager.RegisterLogHandler(pNullLogger);
-		size_t nrRuns = 1000;
+		size_t nrRuns = 10;
 		time_t start, end, deltaDriver, deltaEnv, deltaOff;
 		{
 			Environment::EnableConnectionPooling(ConnectionPooling::PER_DRIVER);
