@@ -955,7 +955,7 @@ namespace exodbc
 		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
 		ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), var);
 		exASSERT(pFlags->Test(ColumnFlag::CF_NULLABLE));
-		LengthIndicatorPtr pCb = boost::apply_visitor(ColumnBufferLengthIndicatorPtrVisitor(), var);
+		LengthIndicatorPtr pCb = boost::apply_visitor(LengthIndicatorPtrVisitor(), var);
 		pCb->SetNull();
 	}
 
@@ -963,7 +963,7 @@ namespace exodbc
 	bool Table::IsColumnNull(SQLSMALLINT columnIndex) const
 	{
 		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
-		LengthIndicatorPtr pCb = boost::apply_visitor(ColumnBufferLengthIndicatorPtrVisitor(), var);
+		LengthIndicatorPtr pCb = boost::apply_visitor(LengthIndicatorPtrVisitor(), var);
 		return pCb->IsNull();
 	}
 
@@ -1278,7 +1278,7 @@ namespace exodbc
 	void Table::SetColumnLengthIndicator(SQLSMALLINT columnIndex, SQLLEN cb) const
 	{
 		ColumnBufferPtrVariant var = GetColumnBufferPtrVariant(columnIndex);
-		LengthIndicatorPtr pCb = boost::apply_visitor(ColumnBufferLengthIndicatorPtrVisitor(), var);
+		LengthIndicatorPtr pCb = boost::apply_visitor(LengthIndicatorPtrVisitor(), var);
 		pCb->SetCb(cb);
 	}
 
