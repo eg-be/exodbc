@@ -347,6 +347,11 @@ namespace exodbc
 			PositionedStatements = SQL_POSITIONED_STATEMENTS,
 		};
 
+		typedef std::map<WStringProperty, std::wstring> WStringMap;
+		typedef std::map<USmallIntProperty, SQLUSMALLINT> USmallIntMap;
+		typedef std::map<UIntProperty, SQLUINTEGER> UIntMap;
+		typedef std::map<IntProperty, SQLINTEGER> IntMap;
+
 		std::wstring GetPropertyName(WStringProperty prop) const;
 		std::wstring GetPropertyName(USmallIntProperty prop) const;
 		std::wstring GetPropertyName(UIntProperty prop) const;
@@ -367,6 +372,10 @@ namespace exodbc
 		SQLUINTEGER GetUIntProperty(UIntProperty prop) const;
 		SQLINTEGER GetIntProperty(IntProperty prop) const;
 
+		WStringMap GetWstringMap() const noexcept { return m_wstringMap; };
+		USmallIntMap GetUSmallIntMap() const noexcept { return m_uSmallIntMap; };
+		UIntMap GetUIntMap() const noexcept { return m_uIntMap; };
+		IntMap GetIntMap() const noexcept { return m_intMap; };
 
 		/*!
 		* \brief	Returns true if TxnCapable (SQL_TXN_CAPABLE) is not set to SQL_TC_NONE.
@@ -397,11 +406,6 @@ namespace exodbc
 		std::wstring ToString() const;
 
 	private:
-		typedef std::map<WStringProperty, std::wstring> WStringMap;
-		typedef std::map<USmallIntProperty, SQLUSMALLINT> USmallIntMap;
-		typedef std::map<UIntProperty, SQLUINTEGER> UIntMap;
-		typedef std::map<IntProperty, SQLINTEGER> IntMap;
-
 		WStringMap m_wstringMap;
 		USmallIntMap m_uSmallIntMap;
 		UIntMap m_uIntMap;
