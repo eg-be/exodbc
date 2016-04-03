@@ -16,6 +16,7 @@
 // Other headers
 // System headers
 #include <memory>
+#include <fstream>
 
 // Forward declarations
 // --------------------
@@ -30,9 +31,14 @@ namespace exodbc
 	{
 	public:
 		/*!
-		* \brief	Called from LogManager on every log message received. Do something usefull with it.
+		* \brief	Called from LogManager on every log message received. Do something useful with it.
 		*/
 		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const = 0;
+		
+		/*!
+		* \brief	Called from the LogManager to ensure that not two equal LogHandlers are registered.
+		*/
+		virtual bool operator==(const LogHandler& other) const = 0;
 	};
 
 	typedef std::shared_ptr<LogHandler> LogHandlerPtr;
@@ -45,7 +51,8 @@ namespace exodbc
 		: public LogHandler
 	{
 	public:
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const;
+		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const override;
+		virtual bool operator==(const LogHandler& other) const override;
 	};
 	
 	typedef std::shared_ptr<StdErrLogHandler> StdErrLogHandlerPtr;
@@ -58,8 +65,38 @@ namespace exodbc
 		: public LogHandler
 	{
 	public:
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const {};
+		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const override {};
+		virtual bool operator==(const LogHandler& other) const override;
 	};
 	
 	typedef std::shared_ptr<NullLogHandler> NullLogHandlerPtr;
+
+	/*!
+	* \class	FileLogHandler
+	* \brief	A simple LogHandler that prints all messages nicely formated to a file.
+	* \details	A file stream will be opened on the first message received and closed on destruction.
+	*			If prependTimestamp is true, messages are prefixed with a timestamp.
+	*/
+	class EXODBCAPI FileLogHandler
+		: public LogHandler
+	{
+	public:
+		FileLogHandler() = delete;
+		FileLogHandler(const FileLogHandler& other) = delete;
+		FileLogHandler(const std::wstring& filepath, bool prependTimestamp);
+
+		virtual ~FileLogHandler();
+
+		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const override;
+		virtual bool operator==(const LogHandler& other) const override;
+
+		std::wstring GetFilepath() const noexcept { return m_filepath; };
+	private:
+		mutable std::wofstream m_filestream;
+		bool m_prependTimestamp;
+		std::wstring m_filepath;
+		mutable bool m_firstMessage;
+	};
+
+	typedef std::shared_ptr<FileLogHandler> FileLogHandlerPtr;
 }

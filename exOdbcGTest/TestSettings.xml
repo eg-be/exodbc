@@ -1,5 +1,12 @@
 <TestSettings>
 
+  <CreateDb>0</CreateDb>
+  <LogLevel>Debug</LogLevel>
+<!--  <LogLevel>Info</LogLevel> -->
+<!--  <LogLevel>Warning</LogLevel> -->
+<!--  <LogLevel>Error</LogLevel> -->
+  <LogFile>1</LogFile>
+  
   <Dsn>
     <Disabled>0</Disabled>
     <Name>exSqlServer_64</Name>
@@ -103,11 +110,4 @@
     <Case>lower</Case>
   </ConnectionString>  
   
-  <CreateDb>0</CreateDb>
-  
-  <!--  
-  <Case>(l)ower</Case>
-  <Case>(u)pper</Case>
-  -->
-
 </TestSettings>

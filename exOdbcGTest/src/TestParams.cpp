@@ -16,6 +16,7 @@
 // Other headers
 #include "exodbc/Exception.h"
 #include "exodbc/LogManager.h"
+#include "exodbc/LogHandler.h"
 #include "exodbc/SpecializedExceptions.h"
 #include <boost/optional/optional.hpp>
 
@@ -84,6 +85,49 @@ namespace exodbctest
 	}
 
 
+	Case ReadCase(const boost::property_tree::wptree& subTree)
+	{
+		namespace pt = boost::property_tree;
+		namespace ba = boost::algorithm;
+
+		wstring namesCase = subTree.get<wstring>(L"Case");
+		if (ba::iequals(namesCase, L"u") || ba::iequals(namesCase, L"upper"))
+		{
+			return Case::UPPER;
+		}
+		else if (ba::iequals(namesCase, L"l") || ba::iequals(namesCase, L"lower"))
+		{
+			return Case::LOWER;
+		}
+		else
+		{
+			wstringstream ws;
+			ws << L"TestSettings.Case must be either 'upper', 'u', 'lower' or 'l', but it is " << namesCase;
+			IllegalArgumentException ae(ws.str());
+			SET_EXCEPTION_SOURCE(ae);
+			throw ae;
+		}
+	}
+
+
+	std::vector<wstring> ReadSkipNames(const boost::property_tree::wptree& subTree)
+	{
+		namespace pt = boost::property_tree;
+
+		std::vector<wstring> skipNames;
+		for (const pt::wptree::value_type &c : subTree.get_child(L""))
+		{
+			wstring elementName = c.first.data();
+			if (elementName == L"Skip")
+			{
+				pt::wptree child = c.second;
+				skipNames.push_back(child.get<wstring>(L""));
+			}
+		}
+		return skipNames;
+	}
+
+
 	void TestParams::Load(const boost::filesystem::wpath& settingsFile, std::vector<wstring>& skipNames)
 	{
 		namespace pt = boost::property_tree;
@@ -110,6 +154,9 @@ namespace exodbctest
 						m_dsn = subTree.get<wstring>(L"Name");
 						m_username = subTree.get<wstring>(L"User");
 						m_password = subTree.get<wstring>(L"Pass");
+						m_namesCase = ReadCase(subTree);
+						skipNames = ReadSkipNames(subTree);
+						break;
 					}
 				}
 				if (elementName == L"ConnectionString")
@@ -118,40 +165,9 @@ namespace exodbctest
 					if (!disabled)
 					{
 						m_connectionString = subTree.get<wstring>(L"Value");
-					}
-				}
-				if (elementName == L"ConnectionString" || elementName == L"Dsn")
-				{
-					bool disabled = subTree.get<bool>(L"Disabled");
-					if (!disabled)
-					{
-						wstring namesCase = subTree.get<wstring>(L"Case");
-						if (ba::iequals(namesCase, L"u") || ba::iequals(namesCase, L"upper"))
-						{
-							m_namesCase = Case::UPPER;
-						}
-						else if (ba::iequals(namesCase, L"l") || ba::iequals(namesCase, L"lower"))
-						{
-							m_namesCase = Case::LOWER;
-						}
-						else
-						{
-							wstringstream ws;
-							ws << L"TestSettings.Case must be either 'upper', 'u', 'lower' or 'l', but it is " << namesCase;
-							IllegalArgumentException ae(ws.str());
-							SET_EXCEPTION_SOURCE(ae);
-							throw ae;
-						}
-						// check if we have any Skip entries
-						for (const pt::wptree::value_type &c : subTree.get_child(L""))
-						{
-							wstring elementName = c.first.data();
-							if (elementName == L"Skip")
-							{
-								pt::wptree child = c.second;
-								skipNames.push_back(child.get<wstring>(L""));
-							}
-						}
+						m_namesCase = ReadCase(subTree);
+						skipNames = ReadSkipNames(subTree);
+						break;
 					}
 				}
 			}
@@ -161,7 +177,34 @@ namespace exodbctest
 				LOG_WARNING(L"DSN and ConnectionString are both disabled");
 			}
 
-			m_createDb = tree.get<bool>(L"TestSettings.CreateDb");
+			// create db
+			m_createDb = tree.get<bool>(L"TestSettings.CreateDb", false);
+			
+			// loglevel
+			wstring logLevelValue = tree.get<wstring>(L"TestSettings.LogLevel", L"Info");
+			if (boost::iequals(logLevelValue, L"Debug"))
+			{
+				g_logManager.SetGlobalLogLevel(LogLevel::Debug);
+			}
+			else if (boost::iequals(logLevelValue, L"Info"))
+			{
+				g_logManager.SetGlobalLogLevel(LogLevel::Info);
+			}
+			else if (boost::iequals(logLevelValue, L"Warning"))
+			{
+				g_logManager.SetGlobalLogLevel(LogLevel::Warning);
+			}
+			else if (boost::iequals(logLevelValue, L"Error"))
+			{
+				g_logManager.SetGlobalLogLevel(LogLevel::Error);
+			}
+			// logfile
+			bool logFile = tree.get<bool>(L"TestSettings.LogFile", false);
+			if (logFile)
+			{
+				FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(L"exOdbcGTest.log", true);
+				g_logManager.RegisterLogHandler(pFileLogger);
+			}
 		}
 		catch (const std::exception& ex)
 		{
