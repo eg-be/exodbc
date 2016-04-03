@@ -64,7 +64,9 @@ void printHelp()
 	wcerr << L"Usage: exOdbcGTest [OPTION]... [DATABASE]" << std::endl;
 	wcerr << L"Run unit-tests against DATABASE or read configuration from TestSettings.xml." << std::endl;
 	wcerr << L"If DATABASE is not specified, all settings will be read from the file" << std::endl;
-	wcerr << L"TestSettings.xml located in the search-path for the app." << std::endl;
+	wcerr << L"TestSettings.xml, located in either the directory of the app, or in a ." << std::endl;
+	wcerr << L"subdirectory named 'exOdbcGTest'. If the file is not found in the directory" << std::endl;
+	wcerr << L"of the app, all parent directories are searched the same way." << std::endl;
 	wcerr << std::endl;
 	wcerr << L"DATABASE must specify how to connect to the database and which case the test" << std::endl;
 	wcerr << L"tables use. You can either supply a connection-string or a DSN-entry (which also" << std::endl;
@@ -83,7 +85,11 @@ void printHelp()
 	wcerr << L"string contains white spaces." << std::endl;
 	wcerr << std::endl;
 	wcerr << L"OPTION can be:" << std::endl;
-	wcerr << L" --createDb       Runs the script to create the test databases before running the tests." << std::endl;
+	wcerr << L" --createDb       Run the scripts to create the test database before running the tests." << std::endl;
+	wcerr << L"                    The TestDbCreator will connect to the database and try to detect" << std::endl;
+	wcerr << L"                    the database system. If there is a subdirectory matching the" << std::endl;
+	wcerr << L"                    database system name in 'CreateScripts' directory, all scripts" << std::endl;
+	wcerr << L"                    inside that directory are run." << std::endl;
 	wcerr << L" --logLevelX      Set the log level, where X must be either"<< std::endl;
 	wcerr << L"                    E, W, I or D for Error, Warning, Info or Debug." << std::endl;
 	wcerr << L" --help           To show this help text." << std::endl;
@@ -283,19 +289,13 @@ int _tmain(int argc, _TCHAR* argv[])
 			namespace fs = boost::filesystem;
 			// Prepare Db-creator
 			TestDbCreator creator(g_odbcInfo);
-			// The base-path is relative to our app-path
-			TCHAR moduleFile[MAX_PATH];
-			if (::GetModuleFileName(NULL, moduleFile, MAX_PATH) == 0)
-			{
-				THROW_WITH_SOURCE(Exception, L"Failed in GetModuleFileName");
-			}
-			fs::wpath exePath(moduleFile);
-			fs::wpath exeDir = exePath.parent_path();
+			fs::wpath exeDir(fs::current_path());
 			fs::wpath scriptDir = exeDir / L"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
 			if (!fs::is_directory(scriptDir))
 			{
 				THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"ScriptDirectory '%s' is not a directory") % scriptDir.native()));
 			}
+			LOG_INFO(boost::str(boost::wformat(L"Running scripts from directory %s%") % scriptDir.native()));
 			creator.SetScriptDirectory(scriptDir);
 			creator.RunAllScripts();
 		}
