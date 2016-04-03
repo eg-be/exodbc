@@ -411,9 +411,9 @@ namespace exodbc
 			, ColumnFlags(flags)
 			, ColumnProperties()
 			, m_nrOfElements(nrOfElements)
-			, m_buffer(nrOfElements)
 		{
-			exASSERT(nrOfElements > 0);
+			exASSERT(m_nrOfElements > 0);
+			m_buffer.reserve(m_nrOfElements);
 			SetNull();
 			SetQueryName(queryName);
 		};
@@ -428,9 +428,9 @@ namespace exodbc
 			, ColumnFlags(flags)
 			, ColumnProperties()
 			, m_nrOfElements(nrOfElements)
-			, m_buffer(nrOfElements)
 		{
-			exASSERT(nrOfElements > 0);
+			exASSERT(m_nrOfElements > 0);
+			m_buffer.reserve(m_nrOfElements);
 			SetNull();
 			SetSqlType(sqlType);
 		};
