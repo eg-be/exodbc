@@ -17,6 +17,7 @@
 
 // Other headers
 #include "boost/filesystem.hpp"
+#include "exodbc/LogHandler.h"
 
 // Debug
 #include "DebugNew.h"
@@ -91,6 +92,7 @@ void printHelp()
 	wcerr << L"                    inside that directory are run." << std::endl;
 	wcerr << L" --logLevelX      Set the log level, where X must be either"<< std::endl;
 	wcerr << L"                    E, W, I or D for Error, Warning, Info or Debug." << std::endl;
+	wcerr << L" --logFile        Log additionally to a file 'exODbcGTest.log' in the current directory" << std::endl;
 	wcerr << L" --help           To show this help text." << std::endl;
 	wcerr << std::endl;
 	wcerr << L"Examples:" << std::endl;
@@ -134,6 +136,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		else if (ba::iequals(argv[i], L"--logLevelD"))
 		{
 			g_logManager.SetGlobalLogLevel(LogLevel::Debug);
+		}
+		else if (ba::iequals(argv[i], L"--logFile"))
+		{
+			FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(L"exOdbcGTest.log", true);
+			g_logManager.RegisterLogHandler(pFileLogger);
 		}
 	}
 
@@ -346,6 +353,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	
 	delete[] gTestArgv;
+
+	LOG_INFO(L"Test run finished");
 
 	return result;
 }

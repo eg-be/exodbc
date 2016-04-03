@@ -53,6 +53,15 @@ namespace exodbc
 		exASSERT(pHandler);
 		
 		lock_guard<mutex> lock(m_logHandlersMutex);
+		// Only register if not already registerd
+		for (auto it = m_logHandlers.begin(); it != m_logHandlers.end(); ++it)
+		{
+			LogHandlerPtr pLogHanlder = *it;
+			if (*pLogHanlder == *pHandler)
+			{
+				return;
+			}
+		}
 		m_logHandlers.push_back(pHandler);
 	}
 

@@ -16,6 +16,7 @@
 // Other headers
 #include "exodbc/Exception.h"
 #include "exodbc/LogManager.h"
+#include "exodbc/LogHandler.h"
 #include "exodbc/SpecializedExceptions.h"
 #include <boost/optional/optional.hpp>
 
@@ -176,7 +177,10 @@ namespace exodbctest
 				LOG_WARNING(L"DSN and ConnectionString are both disabled");
 			}
 
+			// create db
 			m_createDb = tree.get<bool>(L"TestSettings.CreateDb", false);
+			
+			// loglevel
 			wstring logLevelValue = tree.get<wstring>(L"TestSettings.LogLevel", L"Info");
 			if (boost::iequals(logLevelValue, L"Debug"))
 			{
@@ -193,6 +197,13 @@ namespace exodbctest
 			else if (boost::iequals(logLevelValue, L"Error"))
 			{
 				g_logManager.SetGlobalLogLevel(LogLevel::Error);
+			}
+			// logfile
+			bool logFile = tree.get<bool>(L"TestSettings.LogFile", false);
+			if (logFile)
+			{
+				FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(L"exOdbcGTest.log", true);
+				g_logManager.RegisterLogHandler(pFileLogger);
 			}
 		}
 		catch (const std::exception& ex)
