@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShortIntro", "ShortIntro\ShortIntro.vcxproj", "{8E0B2112-5703-4525-B91E-32F4C252FD59}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DatabaseInfo", "DatabaseInfo\DatabaseInfo.vcxproj", "{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_DLL|x64 = Debug_DLL|x64
@@ -33,6 +35,22 @@ Global
 		{8E0B2112-5703-4525-B91E-32F4C252FD59}.Release_LIB|x64.Build.0 = Release_LIB|x64
 		{8E0B2112-5703-4525-B91E-32F4C252FD59}.Release_LIB|x86.ActiveCfg = Release_LIB|Win32
 		{8E0B2112-5703-4525-B91E-32F4C252FD59}.Release_LIB|x86.Build.0 = Release_LIB|Win32
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Debug_DLL|x64.ActiveCfg = Debug_DLL|x64
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Debug_DLL|x64.Build.0 = Debug_DLL|x64
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Debug_DLL|x86.ActiveCfg = Debug_DLL|Win32
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Debug_DLL|x86.Build.0 = Debug_DLL|Win32
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Debug_LIB|x64.ActiveCfg = Debug_LIB|x64
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Debug_LIB|x64.Build.0 = Debug_LIB|x64
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Debug_LIB|x86.ActiveCfg = Debug_LIB|Win32
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Debug_LIB|x86.Build.0 = Debug_LIB|Win32
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_DLL|x64.ActiveCfg = Release_DLL|x64
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_DLL|x64.Build.0 = Release_DLL|x64
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_DLL|x86.ActiveCfg = Release_DLL|Win32
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_DLL|x86.Build.0 = Release_DLL|Win32
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_LIB|x64.ActiveCfg = Release_LIB|x64
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_LIB|x64.Build.0 = Release_LIB|x64
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_LIB|x86.ActiveCfg = Release_LIB|Win32
+		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_LIB|x86.Build.0 = Release_LIB|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
