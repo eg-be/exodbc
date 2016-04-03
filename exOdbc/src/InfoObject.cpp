@@ -865,7 +865,7 @@ std::wstring SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */
 	std::wstringstream ws;
 	if (withHeaderLine)
 	{
-		ws << (boost::wformat(L"||= %25s=||= %25s=||= %34s =||= %45s =||= %5s =||= %10s =||= %8s =||= %6s =||= %6s =||= %10s =||= %10s =||= %10s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %34s =||") % L"SQLType" %L"SQL Data Type (3)" %L"TypeName" %L"Local TypeName" %L"Unsig" %L"Precision" %L"Nullable" %L"AutoI" %L"CaseS." %L"Searchable" %L"Prefix" %L"Suffix" %L"FixPS" %L"MinSc" %L"MaxSc" %L"DTS3" %L"NuPR" %L"IntPr" %L"Create Params").str() << std::endl;
+		ws << (boost::wformat(L"||= %25s=||= %25s=||= %34s =||= %45s =||= %5s =||= %10s =||= %8s =||= %6s =||= %6s =||= %10s =||= %10s =||= %10s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %34s =||") % L"SQLType" %L"SQL Data Type (3)" %L"!TypeName" %L"Local !TypeName" %L"Unsigned" %L"Precision" %L"Nullable" %L"Auto Inc." %L"Case Sens." %L"Searchable" %L"Prefix" %L"Suffix" %L"Fixed Prec. Scale" %L"Min. Scale" %L"Max. Scale" %L"Sql DateTimeSub" %L"Num. Prec. Radix" %L"Interval Precision" %L"Create Params").str() << std::endl;
 	}
 
 	std::wstring sFSqlType = (boost::wformat(L"%18s (%4d)") % SqlType2s(m_sqlType) % m_sqlType).str();
@@ -914,7 +914,7 @@ std::wstring SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */
 		break;
 	}
 
-	std::wstring s = (boost::wformat(L"|| %25s|| %2s|| %34s || %45s || %5s || %10s || %8s || %6s || %6s || %10s || %10s || %10s || %5s || %5s || %5s || %5s || %5s || %5s || %34s ||") % sFSqlType %sSqlDataType %m_typeName %sLocalTypeName %sUnsigned %sPrecision %sNullable %sAutoUniqueValue %sCaseSensitive %sSearchable %sLiteralPrefix %sLiteralSuffix %sFixedPrecisionScale %sMinimumScale %sMinimumScale %sSqlDateTimeSub %sNumPrecRadix %sIntervalPrecision %sCreateParams).str();
+	std::wstring s = (boost::wformat(L"|| %25s|| %2s|| %34s || %45s || %5s || %10s || %8s || %6s || %6s || %10s || %10s || %10s || %5s || %5s || %5s || %5s || %5s || %5s || %34s ||") % sFSqlType %sSqlDataType %m_typeName %sLocalTypeName %sUnsigned %sPrecision %sNullable %sAutoUniqueValue %sCaseSensitive %sSearchable %sLiteralPrefix %sLiteralSuffix %sFixedPrecisionScale %sMinimumScale %sMaximumScale %sSqlDateTimeSub %sNumPrecRadix %sIntervalPrecision %sCreateParams).str();
 
 	ws << s;
 
