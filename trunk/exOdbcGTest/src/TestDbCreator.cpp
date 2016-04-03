@@ -39,9 +39,11 @@ namespace exodbctest
 		: m_odbcInfo(odbcInfo)
 	{
 		// prepare env
+		m_pEnv = std::make_shared<Environment>();
 		m_pEnv->Init(OdbcVersion::V_3);
 
 		// Create and open Database
+		m_pDb = std::make_shared<Database>();
 		m_pDb->Init(m_pEnv);
 		if (odbcInfo.HasConnectionString())
 		{

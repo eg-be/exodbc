@@ -17,6 +17,7 @@
 
 // Other headers
 #include "boost/filesystem.hpp"
+#include "exodbc/LogHandler.h"
 
 // Debug
 #include "DebugNew.h"
@@ -61,47 +62,86 @@ void printHelp()
 {
 	using namespace std;
 
-	wcerr << L"Usage: exOdbcGTest [OPTION]... [DATABASE]\n";
-	wcerr << L"Run unit-tests against DATABASE or read configuration from TestSettings.xml.\n";
-	wcerr << L"If DATABASE is not specified, all settings will be read from the file\n";
-	wcerr << L"TestSettings.xml located in the search-path for the app.\n";
-	wcerr << L"\n";
-	wcerr << L"DATABASE must specify how to connect to the database and which case the test\n";
-	wcerr << L"tables use. You can either supply a connection-string or a DSN-entry (which also\n";
-	wcerr << L"requires username and password).\n";
-	wcerr << L" To connect using a configured DSN entry use:\n";
-	wcerr << L"\n";
-	wcerr << L"  DSN=dsn;user;pass (to connect to a database with UPPER-case names)\n";
-	wcerr << L"  dsn=dsn;user;pass (to connect to a database with lower-case names)\n";
-	wcerr << L"\n";
-	wcerr << L" or to connect using a connection-string use:\n";
-	wcerr << L"\n";
-	wcerr << L"  CS=connectionString (to connect to a database with UPPER-case names)\n";
-	wcerr << L"  cs=connectionString (to connect to a database with lower-case names)\n";
-	wcerr << L"\n";
-	wcerr << L"Note that you must frame the 'cs=connectionString' with \" if your connection\n";
-	wcerr << L"string contains white spaces.\n";
-	wcerr << L"\n";
-	wcerr << L"--createDb       Runs the script to create the test databases.\n";
-	wcerr << L"\n";
-	wcerr << L"Examples:\n";
-	wcerr << L" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass\n";
-	wcerr << L"  to run the tests against a configured DSN entry named 'db2', using uppercase\n";
-	wcerr << L"  names and log level Waring. Before the tests are run, the scripts to create\n";
-	wcerr << L"  the test database are run.\n";
-	wcerr << L" exodbcGTest CS=\"Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;\"\n";
-	wcerr << L"  to run the tests using a connection string, against a DB which uses uppercase.\n";
+	wcerr << L"Usage: exOdbcGTest [OPTION]... [DATABASE]" << std::endl;
+	wcerr << L"Run unit-tests against DATABASE or read configuration from TestSettings.xml." << std::endl;
+	wcerr << L"If DATABASE is not specified, all settings will be read from the file" << std::endl;
+	wcerr << L"TestSettings.xml, located in either the directory of the app, or in a" << std::endl;
+	wcerr << L"subdirectory named 'exOdbcGTest'. If the file is not found in the directory" << std::endl;
+	wcerr << L"of the app, all parent directories are searched the same way." << std::endl;
+	wcerr << std::endl;
+	wcerr << L"If DATABASE is specified, you can either supply a connection-string or a DSN-entry" << std::endl;
+	wcerr << L"to indicate the connection info of the test database:" << std::endl;
+	wcerr << L" To connect using a configured DSN entry use:" << std::endl;
+	wcerr << L"" << std::endl;
+	wcerr << L"  DSN=dsn;user;pass (to connect to a database with UPPER-case names (tables/columns))" << std::endl;
+	wcerr << L"  dsn=dsn;user;pass (to connect to a database with lower-case names (tables/columns))" << std::endl;
+	wcerr << std::endl;
+	wcerr << L" or to connect using a connection-string use:" << std::endl;
+	wcerr << std::endl;
+	wcerr << L"  CS=connectionString (to connect to a database with UPPER-case names (tables/columns))" << std::endl;
+	wcerr << L"  cs=connectionString (to connect to a database with lower-case names (tables/columns))" << std::endl;
+	wcerr << std::endl;
+	wcerr << L"Note that you must frame the 'cs=connectionString' with \" if your connection" << std::endl;
+	wcerr << L"string contains white spaces." << std::endl;
+	wcerr << std::endl;
+	wcerr << L"OPTION can be:" << std::endl;
+	wcerr << L" --createDb       Run the scripts to create the test database before running the tests." << std::endl;
+	wcerr << L"                    The TestDbCreator will connect to the database and try to detect" << std::endl;
+	wcerr << L"                    the database system. If there is a subdirectory matching the" << std::endl;
+	wcerr << L"                    database system name in 'CreateScripts' directory, all scripts" << std::endl;
+	wcerr << L"                    inside that directory are run." << std::endl;
+	wcerr << L" --logLevelX      Set the log level, where X must be either"<< std::endl;
+	wcerr << L"                    E, W, I or D for Error, Warning, Info or Debug." << std::endl;
+	wcerr << L" --logFile        Log additionally to a file 'exODbcGTest.log' in the current directory" << std::endl;
+	wcerr << L" --help           To show this help text." << std::endl;
+	wcerr << std::endl;
+	wcerr << L"Examples:" << std::endl;
+	wcerr << L" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass" << std::endl;
+	wcerr << L"  to run the tests against a configured DSN entry named 'db2', using uppercase" << std::endl;
+	wcerr << L"  names and log level Waring. Before the tests are run, the scripts to create" << std::endl;
+	wcerr << L"  the test database are run." << std::endl;
+	wcerr << L" exodbcGTest CS=\"Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;\"" << std::endl;
+	wcerr << L"  to run the tests using a connection string, against a DB which uses uppercase." << std::endl;
 }
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	using namespace exodbctest;
-
-	printHelp();
-
 	using namespace std;
 	using namespace exodbc;
 	namespace ba = boost::algorithm;
+
+	// If --help is passed, just print usage and exit
+	// IF --logLevelX is set, set the log-level early
+	for (int i = 0; i < argc; i++)
+	{
+		if (ba::iequals(argv[i], L"--help"))
+		{
+			printHelp();
+			return -1;
+		}
+		else if (ba::iequals(argv[i], L"--logLevelE"))
+		{
+			g_logManager.SetGlobalLogLevel(LogLevel::Error);
+		}
+		else if (ba::iequals(argv[i], L"--logLevelW"))
+		{
+			g_logManager.SetGlobalLogLevel(LogLevel::Warning);
+		}
+		else if (ba::iequals(argv[i], L"--logLevelI"))
+		{
+			g_logManager.SetGlobalLogLevel(LogLevel::Info);
+		}
+		else if (ba::iequals(argv[i], L"--logLevelD"))
+		{
+			g_logManager.SetGlobalLogLevel(LogLevel::Debug);
+		}
+		else if (ba::iequals(argv[i], L"--logFile"))
+		{
+			FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(L"exOdbcGTest.log", true);
+			g_logManager.RegisterLogHandler(pFileLogger);
+		}
+	}
 
 #ifdef _DEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
@@ -169,19 +209,28 @@ int _tmain(int argc, _TCHAR* argv[])
 			g_odbcInfo = csEntry;
 		}
 	}
+	if (g_odbcInfo.IsUsable())
+	{
+		g_odbcInfo.m_createDb = doCreateDb;
+	}
 
 	wstring customFilter;
 	if (!g_odbcInfo.IsUsable())
 	{
 		// Read default settings
-		LOG_INFO(L"Loading Default Settings from TestSettings.xml");
+		LOG_INFO(L"No usable DSN or ConnectionString passed, loading settings from TestSettings.xml");
 		try
 		{
 			// Try to locate TestSettings.xml in directory of exe
 			namespace fs = boost::filesystem;
 			fs::wpath exePath(argv[0]);
 			exePath.normalize();
-			fs::wpath confDir = exePath.parent_path();
+			fs::wpath confDir(fs::current_path());
+			if (exePath.is_absolute())
+			{
+				confDir = exePath.parent_path();
+			}
+			LOG_INFO(boost::str(boost::wformat(L"Searching in %1% and its parent directories for TestSettings.xml") % confDir));
 			fs::wpath settingsPath = confDir / L"TestSettings.xml";
 			while( ! fs::exists(settingsPath) && confDir.has_parent_path())
 			{ 
@@ -197,10 +246,11 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			if (!fs::exists(settingsPath))
 			{
-				NotFoundException ex(boost::str(boost::wformat(L"No TestSettings.xml file found in directory %1% and its parent directories") % exePath.parent_path()));
+				NotFoundException ex(boost::str(boost::wformat(L"No TestSettings.xml file found")));
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
+			LOG_INFO(boost::str(boost::wformat(L"Using settings from %1%") % settingsPath));
 			vector<wstring> skipNames;
 			g_odbcInfo.Load(settingsPath, skipNames);
 			// Set a gtest-filter statement to skip those names if no gtest-filter arg is setted
@@ -227,7 +277,16 @@ int _tmain(int argc, _TCHAR* argv[])
 				customFilter = filter;
 			}
 
-			doCreateDb = g_odbcInfo.m_createDb;
+			// if we have been requested to create the db from the command-line
+			// let the command line win.
+			if (!doCreateDb)
+			{
+				doCreateDb = g_odbcInfo.m_createDb;
+			}
+			else
+			{
+				g_odbcInfo.m_createDb = doCreateDb;
+			}
 		}
 		catch (const Exception& ex)
 		{
@@ -248,19 +307,13 @@ int _tmain(int argc, _TCHAR* argv[])
 			namespace fs = boost::filesystem;
 			// Prepare Db-creator
 			TestDbCreator creator(g_odbcInfo);
-			// The base-path is relative to our app-path
-			TCHAR moduleFile[MAX_PATH];
-			if (::GetModuleFileName(NULL, moduleFile, MAX_PATH) == 0)
-			{
-				THROW_WITH_SOURCE(Exception, L"Failed in GetModuleFileName");
-			}
-			fs::wpath exePath(moduleFile);
-			fs::wpath exeDir = exePath.parent_path();
+			fs::wpath exeDir(fs::current_path());
 			fs::wpath scriptDir = exeDir / L"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
 			if (!fs::is_directory(scriptDir))
 			{
-				THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"ScriptDirectory '%s' is not a directory") % scriptDir.native()));
+				THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"ScriptDirectory '%1%' is not a directory") % scriptDir));
 			}
+			LOG_INFO(boost::str(boost::wformat(L"Running scripts from directory %1%") % scriptDir));
 			creator.SetScriptDirectory(scriptDir);
 			creator.RunAllScripts();
 		}
@@ -303,6 +356,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	try
 	{
 		result = RUN_ALL_TESTS();
+		LOG_INFO(L"Test run finished");
 	}
 	catch (const Exception& ex)
 	{

@@ -179,7 +179,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration);$(ProjectDir)\..\..\exOdbc\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -196,7 +196,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration);$(ProjectDir)\..\..\exOdbc\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -212,7 +212,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration);$(ProjectDir)\..\..\exOdbc\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -229,7 +229,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration);$(ProjectDir)\..\..\exOdbc\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -249,7 +249,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration);$(ProjectDir)\..\..\exOdbc\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -270,7 +270,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration);$(ProjectDir)\..\..\exOdbc\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -290,7 +290,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration);$(ProjectDir)\..\..\exOdbc\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -311,7 +311,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\..\Bin\$(Platform)\$(Configuration);$(ProjectDir)\..\..\exOdbc\Bin\$(Platform)\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>exOdbc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
