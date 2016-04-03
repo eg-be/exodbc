@@ -274,7 +274,16 @@ int _tmain(int argc, _TCHAR* argv[])
 				customFilter = filter;
 			}
 
-			doCreateDb = g_odbcInfo.m_createDb;
+			// if we have been requested to create the db from the command-line
+			// let the command line win.
+			if (!doCreateDb)
+			{
+				doCreateDb = g_odbcInfo.m_createDb;
+			}
+			else
+			{
+				g_odbcInfo.m_createDb = doCreateDb;
+			}
 		}
 		catch (const Exception& ex)
 		{
@@ -299,9 +308,9 @@ int _tmain(int argc, _TCHAR* argv[])
 			fs::wpath scriptDir = exeDir / L"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
 			if (!fs::is_directory(scriptDir))
 			{
-				THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"ScriptDirectory '%s' is not a directory") % scriptDir.native()));
+				THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"ScriptDirectory '%1%' is not a directory") % scriptDir));
 			}
-			LOG_INFO(boost::str(boost::wformat(L"Running scripts from directory %s%") % scriptDir.native()));
+			LOG_INFO(boost::str(boost::wformat(L"Running scripts from directory %1%") % scriptDir));
 			creator.SetScriptDirectory(scriptDir);
 			creator.RunAllScripts();
 		}
