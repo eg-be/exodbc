@@ -30,10 +30,10 @@ namespace exodbc
 	*/
 	enum class LogLevel
 	{
-		Error,
-		Warning,
-		Info,
-		Debug
+		Error = 10,
+		Warning = 9,
+		Info = 8,
+		Debug = 4
 	};
 
 	/*!
@@ -41,12 +41,17 @@ namespace exodbc
 	* \brief	A class that can hold LogHandler instances and forward log-messages
 	*			to those LogHandlers.
 	*			The class is thread-safe.
+	* \details	The LogManager has a global level that can be set on it. It will only
+	*			forward messages to its registered LogHandlers that have a logLevel
+	*			greater or equal than the currently set LogLevel
 	*/
 	class EXODBCAPI LogManager
 	{
 	public:
 		/*!
-		* \brief Default Constructor. Registers a StdErrLogHandler during construction.
+		* \brief Default Constructor. Registers a StdErrLogHandler during construction
+		*			and sets LogLevel to LogLevel::Info in release builds and
+		*			LogLevel::Debug in debug builds.
 		*/
 		LogManager();
 
@@ -75,9 +80,23 @@ namespace exodbc
 		*/
 		std::vector<LogHandlerPtr> GetLogHandlers() const noexcept;
 
+		/*!
+		* \brief Set the global log level. LogManager will only forward log messages
+		*			with a level higher or equal 
+		*/
+		void SetGlobalLogLevel(LogLevel level) noexcept;
+
+		/*!
+		* \brief
+		*/
+		LogLevel GetGlobalLogLevel() const noexcept;
+
 	private:
 		std::vector<LogHandlerPtr> m_logHandlers;
 		mutable std::mutex m_logHandlersMutex;
+
+		LogLevel m_globalLogLevel;
+		mutable std::mutex m_globalLogLevelMutex;
 	};
 
 	extern EXODBCAPI LogManager g_logManager;	///< The global instance of the LogManager
