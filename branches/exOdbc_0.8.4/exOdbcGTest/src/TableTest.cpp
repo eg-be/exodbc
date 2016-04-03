@@ -274,34 +274,6 @@ namespace exodbctest
 		// Test to open read-write a table we know we have all rights:
 		exodbc::Table rTable2(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName, L"", L"", L"");
 		EXPECT_NO_THROW(rTable2.CheckPrivileges());
-
-		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-		{
-			// We only have a Read-only user for ms sql server
-			DatabasePtr pDb = std::make_shared<Database>(m_pEnv);
-			if (g_odbcInfo.HasConnectionString())
-			{
-				return;
-			}
-			else
-			{
-				ASSERT_NO_THROW(pDb->Open(g_odbcInfo.m_dsn, L"exReadOnly", L"exReadOnly"));
-			}
-
-			// Test to open a table read-only
-			// Note that here in ms server we have given the user no rights except the select for this table
-			// If you add him to some role, things will get messed up: No privs are reported, but the user can
-			// still access the table for selecting
-			exodbc::Table table2(pDb, TableAccessFlag::AF_READ, tableName, L"", L"", L"");
-			EXPECT_NO_THROW(table2.CheckPrivileges());
-
-			// We expect to fail if trying to open for writing
-			table2.SetAccessFlags(TableAccessFlag::AF_READ_WRITE);
-			EXPECT_THROW(table2.CheckPrivileges(), MissingTablePrivilegeException);
-
-			// If we open the Table and do not check privileges, we fail later when trying to prepare a write-statement
-			EXPECT_THROW(table2.Open(), SqlResultException);
-		}
 	}
 
 
