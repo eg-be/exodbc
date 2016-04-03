@@ -5,7 +5,8 @@
 <!--  <LogLevel>Info</LogLevel> -->
 <!--  <LogLevel>Warning</LogLevel> -->
 <!--  <LogLevel>Error</LogLevel> -->
-
+  <LogFile>1</LogFile>
+  
   <Dsn>
     <Disabled>0</Disabled>
     <Name>exSqlServer_64</Name>

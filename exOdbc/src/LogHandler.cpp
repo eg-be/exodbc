@@ -16,6 +16,8 @@
 // Other headers
 #include <iostream>
 #include <sstream>
+#include <iomanip>
+#include <ctime>
 
 // Debug
 #include "DebugNew.h"
@@ -27,7 +29,7 @@ using namespace std;
 
 namespace exodbc
 {
-	void StdErrLogHandler::OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */) const
+	std::wstring FormatLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */)
 	{
 		std::wstringstream ws;
 
@@ -61,6 +63,100 @@ namespace exodbc
 
 		ws << L": " << msg;
 
-		wcout << ws.str() << endl;
+		return ws.str();
 	}
+
+	void StdErrLogHandler::OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */) const
+	{
+		wcout << FormatLogMessage(level, msg, filename, line, functionname) << endl;
+	}
+
+
+	bool StdErrLogHandler::operator==(const LogHandler& other) const
+	{
+		try
+		{
+			// all StdLogHandlers are equal
+			dynamic_cast<const StdErrLogHandler&>(other);
+			return true;
+		}
+		catch (const std::bad_cast& ex) 
+		{
+			HIDE_UNUSED(ex);
+			return false;
+		}
+	}
+
+
+	bool NullLogHandler::operator==(const LogHandler& other) const
+	{
+		try
+		{
+			// all NullLogHandler are equal
+			dynamic_cast<const NullLogHandler&>(other);
+			return true;
+		}
+		catch (const std::bad_cast& ex)
+		{
+			HIDE_UNUSED(ex);
+			return false;
+		}
+	}
+
+
+	FileLogHandler::FileLogHandler(const std::wstring& filepath, bool prependTimestamp)
+		: m_prependTimestamp(prependTimestamp)
+		, m_filepath(filepath)
+		, m_firstMessage(true)
+	{
+	}
+
+
+	FileLogHandler::~FileLogHandler()
+	{
+		if (m_filestream.is_open())
+		{
+			m_filestream.close();
+		}
+	}
+
+
+	void FileLogHandler::OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */) const
+	{
+		if (m_firstMessage)
+		{
+			m_filestream = wofstream(m_filepath, std::ofstream::out);
+			m_firstMessage = false;
+		}
+		if (m_filestream.is_open())
+		{
+			if (m_prependTimestamp)
+			{
+				auto t = std::time(nullptr);
+				std::tm timeinfo;
+				localtime_s(&timeinfo, &t);
+				//*std::localtime(&t);
+				m_filestream << std::put_time(&timeinfo, L"%d-%m-%Y %H-%M-%S") << L": ";
+			}
+
+			m_filestream << FormatLogMessage(level, msg, filename, line, functionname) << endl;
+		}
+	}
+
+
+	bool FileLogHandler::operator==(const LogHandler& other) const
+	{
+		try
+		{
+			// equal if the same file
+			auto& otherFileLogger = dynamic_cast<const FileLogHandler&>(other);
+			return otherFileLogger.GetFilepath() == GetFilepath();
+		}
+		catch (const std::bad_cast& ex)
+		{
+			HIDE_UNUSED(ex);
+			return false;
+		}
+	}
+
 }
