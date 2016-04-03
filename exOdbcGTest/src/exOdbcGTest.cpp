@@ -115,7 +115,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	// IF --logLevelX is set, set the log-level early
 	for (int i = 0; i < argc; i++)
 	{
-		std::wcout << argv[i] << std::endl;
 		if (ba::iequals(argv[i], L"--help"))
 		{
 			printHelp();
@@ -219,15 +218,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (!g_odbcInfo.IsUsable())
 	{
 		// Read default settings
-		LOG_INFO(L"No Dsn or Connection-String has been passed, trying to load settings from TestSettings.xml...");
+		LOG_INFO(L"Loading Default Settings from TestSettings.xml");
 		try
 		{
 			// Try to locate TestSettings.xml in directory of exe
 			namespace fs = boost::filesystem;
-			fs::wpath exePath(fs::current_path());
+			fs::wpath exePath(argv[0]);
 			exePath.normalize();
 			fs::wpath confDir = exePath.parent_path();
-			LOG_INFO(boost::str(boost::wformat(L"Searching for file TestSettings.xml in directory %1% and its parent directories.") % confDir));
 			fs::wpath settingsPath = confDir / L"TestSettings.xml";
 			while( ! fs::exists(settingsPath) && confDir.has_parent_path())
 			{ 
@@ -247,7 +245,6 @@ int _tmain(int argc, _TCHAR* argv[])
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
-			LOG_INFO(boost::str(boost::wformat(L"Using TestSettings.xml from %1%") % settingsPath));
 			vector<wstring> skipNames;
 			g_odbcInfo.Load(settingsPath, skipNames);
 			// Set a gtest-filter statement to skip those names if no gtest-filter arg is setted
