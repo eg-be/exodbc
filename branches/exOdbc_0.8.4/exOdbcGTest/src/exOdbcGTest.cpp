@@ -218,14 +218,19 @@ int _tmain(int argc, _TCHAR* argv[])
 	if (!g_odbcInfo.IsUsable())
 	{
 		// Read default settings
-		LOG_INFO(L"Loading Default Settings from TestSettings.xml");
+		LOG_INFO(L"No usable DSN or ConnectionString passed, loading settings from TestSettings.xml");
 		try
 		{
 			// Try to locate TestSettings.xml in directory of exe
 			namespace fs = boost::filesystem;
 			fs::wpath exePath(argv[0]);
 			exePath.normalize();
-			fs::wpath confDir = exePath.parent_path();
+			fs::wpath confDir(fs::current_path());
+			if (exePath.is_absolute())
+			{
+				confDir = exePath.parent_path();
+			}
+			LOG_INFO(boost::str(boost::wformat(L"Searching in %1% and its parent directories for TestSettings.xml") % confDir));
 			fs::wpath settingsPath = confDir / L"TestSettings.xml";
 			while( ! fs::exists(settingsPath) && confDir.has_parent_path())
 			{ 
@@ -241,10 +246,11 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			if (!fs::exists(settingsPath))
 			{
-				NotFoundException ex(boost::str(boost::wformat(L"No TestSettings.xml file found in directory %1% and its parent directories") % exePath.parent_path()));
+				NotFoundException ex(boost::str(boost::wformat(L"No TestSettings.xml file found")));
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
+			LOG_INFO(boost::str(boost::wformat(L"Using settings from %1%") % settingsPath));
 			vector<wstring> skipNames;
 			g_odbcInfo.Load(settingsPath, skipNames);
 			// Set a gtest-filter statement to skip those names if no gtest-filter arg is setted
@@ -350,6 +356,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	try
 	{
 		result = RUN_ALL_TESTS();
+		LOG_INFO(L"Test run finished");
 	}
 	catch (const Exception& ex)
 	{
@@ -359,8 +366,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	
 	delete[] gTestArgv;
-
-	LOG_INFO(L"Test run finished");
 
 	return result;
 }
