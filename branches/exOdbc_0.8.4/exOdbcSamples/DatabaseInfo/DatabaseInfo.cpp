@@ -24,57 +24,92 @@ namespace ba = boost::algorithm;
 using namespace exodbc;
 using namespace std;
 
-void printDbAndDriverInfo(ConstDatabasePtr pDb)
+
+void PrintDbHeader(ConstDatabasePtr pDb)
+{
+	DatabaseInfo dbInfo = pDb->GetDbInfo();
+
+	// print header for trac
+	wcout << boost::str(boost::wformat(L"== %s (%s) ==") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DbmsName) % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DbmsVersion)) << endl;
+	//wcout << endl;
+}
+
+
+void PrintDriverInfo(ConstDatabasePtr pDb)
+{
+	DatabaseInfo dbInfo = pDb->GetDbInfo();
+
+	// print header for trac
+	wcout << boost::str(boost::wformat(L"=== Driver Info ===")) << endl;
+	wcout << boost::str(boost::wformat(L"* Driver Name: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverName)) << endl;
+	wcout << boost::str(boost::wformat(L"* Driver Version: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverVersion)) << endl;
+	wcout << boost::str(boost::wformat(L"* Driver ODBC Version: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverOdbcVersion)) << endl;
+
+	//wcout << endl;
+}
+
+
+void PrintDbInfo(ConstDatabasePtr pDb)
 {
 	DatabaseInfo dbInfo = pDb->GetDbInfo();
 	
-	// print header for trac
-	std::wcout << boost::str(boost::wformat(L"== %s (%s) ==") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DbmsName) % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DbmsVersion) ) << std::endl;
-	std::wcout << boost::str(boost::wformat(L"=== Driver Info ===")) << std::endl;
-	std::wcout << boost::str(boost::wformat(L"* Driver Name: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverName)) << std::endl;
-	std::wcout << boost::str(boost::wformat(L"* Driver Version: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverVersion)) << std::endl;
-	std::wcout << boost::str(boost::wformat(L"* Driver ODBC Version: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverOdbcVersion)) << std::endl;
-
 	// And a table with all information
-	std::wcout << L"=== Database Info ===" << std::endl;
-	std::wcout << L"||=Property Name =||= Property Value =||" << std::endl;
+	wcout << L"=== Database Info ===" << endl;
+	wcout << L"||=Property Name =||= Property Value =||" << endl;
 	DatabaseInfo::WStringMap wstringMap = dbInfo.GetWstringMap();
 	for (auto it = wstringMap.begin(); it != wstringMap.end(); ++it)
 	{
-		std::wcout << boost::str(boost::wformat(L"||%-38s ||  %s  ||") % dbInfo.GetPropertyName(it->first) % it->second) << std::endl;
+		wcout << boost::str(boost::wformat(L"||%-38s ||  %s  ||") % dbInfo.GetPropertyName(it->first) % it->second) << endl;
 	}
 	DatabaseInfo::USmallIntMap usmallIntMap = dbInfo.GetUSmallIntMap();
 	for (auto it = usmallIntMap.begin(); it != usmallIntMap.end(); ++it)
 	{
-		std::wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second) << std::endl;
+		wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second) << endl;
 	}
 	DatabaseInfo::UIntMap uintMap = dbInfo.GetUIntMap();
 	for (auto it = uintMap.begin(); it != uintMap.end(); ++it)
 	{
-		std::wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second) << std::endl;
+		wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second) << endl;
 	}
 	DatabaseInfo::IntMap intMap = dbInfo.GetIntMap();
 	for (auto it = intMap.begin(); it != intMap.end(); ++it)
 	{
-		std::wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second %it->second) << std::endl;
+		wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second %it->second) << endl;
 	}
+	//wcout << endl;
 }
 
 
-void printDatabaseInfo()
+void printDatatypesInfo(ConstDatabasePtr pDb)
 {
-
+	wcout << L"=== Datatypes Info ===" << endl;
+	SqlTypeInfosVector types = pDb->GetTypeInfos();
+	bool first = true;
+	for (auto it = types.begin(); it != types.end(); ++it)
+	{
+		SSqlTypeInfo typeInfo = *it;
+		wcout << typeInfo.ToOneLineStrForTrac(first) << endl;
+		first = false;
+	}
+	//wcout << endl;
 }
 
+struct SConnectionInfo
+{
+	wstring m_dsn;
+	wstring m_user;
+	wstring m_pass;
+	wstring m_cs;
+};
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	try
 	{
 		// Parse arguments
-		wstring connectionString;
-		wstring dsn, user, pass;
-
+		//wstring connectionString;
+		//wstring dsn, user, pass;
+		vector<SConnectionInfo> connectionInfos;
 		for (int i = 0; i < argc; i++)
 		{
 			std::wstring dsnKey = L"dsn=";
@@ -87,7 +122,9 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 			else if (ba::starts_with(arg, csKey) && arg.length() > csKey.length())
 			{
-				connectionString = arg.substr(csKey.length());
+				SConnectionInfo conInfo;
+				conInfo.m_cs = arg.substr(csKey.length());
+				connectionInfos.push_back(conInfo);
 			}
 			if (dsnValue.length() > 0)
 			{
@@ -103,40 +140,55 @@ int _tmain(int argc, _TCHAR* argv[])
 				}
 				else
 				{
-					dsn = tokens[0];
-					user = tokens[1];
-					pass = tokens[2];
+					SConnectionInfo conInfo;
+					conInfo.m_dsn = tokens[0];
+					conInfo.m_user = tokens[1];
+					conInfo.m_pass = tokens[2];
+					connectionInfos.push_back(conInfo);
 				}
 			}
 		}
 
-		if (connectionString.empty() && dsn.empty())
+		if (connectionInfos.empty())
 		{
 			LOG_ERROR(L"No connection string given and no dsn given, exiting");
 			return -1;
 		}
 
 		// Create an environment with ODBC Version 3.0
+		g_logManager.SetGlobalLogLevel(LogLevel::Error);
 		EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
 
-		// And connect to a database using the environment.
-		DatabasePtr pDb = Database::Create(pEnv);
-		if (!connectionString.empty())
+		// And connect to a database using the environment,
+		// read info for every connection
+		for (auto it = connectionInfos.begin(); it != connectionInfos.end(); ++it)
 		{
-			pDb->Open(connectionString);
-		}
-		else
-		{
-			pDb->Open(dsn, user, pass);
-		}
+			SConnectionInfo conInf = *it;
+			DatabasePtr pDb = Database::Create(pEnv);
+			if (!conInf.m_cs.empty())
+			{
+				pDb->Open(conInf.m_cs);
+			}
+			else
+			{
+				pDb->Open(conInf.m_dsn, conInf.m_user, conInf.m_pass);
+			}
 
-		// Print some info
-		printDbAndDriverInfo(pDb);
+			// Print some info
+			PrintDbHeader(pDb);
+			PrintDriverInfo(pDb);
+			PrintDbInfo(pDb);
+			printDatatypesInfo(pDb);
+
+			// add some blank lines
+			wcout << endl;
+			wcout << endl;
+		}
 
 	}
 	catch (const Exception& ex)
 	{
-		std::wcerr << ex.ToString() << std::endl;
+		std::wcerr << ex.ToString() << endl;
 	}
     return 0;
 }
