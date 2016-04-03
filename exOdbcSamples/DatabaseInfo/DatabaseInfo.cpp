@@ -135,6 +135,8 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		// And print the columns by querying them from the table
 		QueryNameVisitor nameVisitor;
 		SqlTypeVisitor sqlTypeVisitor;
+		ColumnPropertiesPtrVisitor propsVisitor;
+		ColumnFlagsPtrVisitor flagsVisitor;
 		Table t(pDb, TableAccessFlag::AF_SELECT, ti);
 		vector<ColumnBufferPtrVariant> columns;
 		// disable logger while doing this
@@ -142,7 +144,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		g_logManager.ClearLogHandlers();
 		try
 		{
-			columns = t.CreateAutoColumnBufferPtrs(false, false);
+			columns = t.CreateAutoColumnBufferPtrs(true, true);
 		}
 		catch (const Exception& ex)
 		{
@@ -152,7 +154,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			wcout << L"}}}" << endl;
 			try
 			{
-				columns = t.CreateAutoColumnBufferPtrs(true, false);
+				columns = t.CreateAutoColumnBufferPtrs(true, true);
 			}
 			catch (const Exception& ex)
 			{
@@ -163,16 +165,22 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 				continue;
 			}
 		}
+		t.Open();
 		for (auto it = logHandlers.begin(); it != logHandlers.end(); ++it)
 		{
 			g_logManager.RegisterLogHandler(*it);
 		}
-		wcout << L"||= Column Query Name =|| Sql Type ||" << endl;
+		wcout << L"||=Column Query Name =||=Sql Type =||= Column Size=||= Decimal Digits=||= Nullable=||= Primary Key=||" << endl;
 		for (auto itCol = columns.begin(); itCol != columns.end(); ++itCol)
 		{
 			ColumnBufferPtrVariant pBuff = *itCol;
 			SQLSMALLINT sqlType = boost::apply_visitor(sqlTypeVisitor, pBuff);
-			wcout << boost::str(boost::wformat(L"|| %s || %s ||") % boost::apply_visitor(nameVisitor, *itCol) % SqlType2s(sqlType)) << endl;
+			wstring name = boost::apply_visitor(nameVisitor, pBuff);
+			ColumnPropertiesPtr pProps = boost::apply_visitor(propsVisitor, pBuff);
+			ColumnFlagsPtr pFlags = boost::apply_visitor(flagsVisitor, pBuff);
+			wstring nullable = pFlags->Test(ColumnFlag::CF_NULLABLE) ? L"NULLABLE" : L"";
+			wstring primary = pFlags->Test(ColumnFlag::CF_PRIMARY_KEY) ? L"PRIMARY": L"";
+			wcout << boost::str(boost::wformat(L"|| %s || %s || %d || %d || %s || %s ||") % name % SqlType2s(sqlType) % pProps->GetColumnSize() % pProps->GetDecimalDigits() % nullable % primary) << endl;
 		}
 	}
 }
