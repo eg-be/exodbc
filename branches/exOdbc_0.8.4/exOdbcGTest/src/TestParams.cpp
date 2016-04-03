@@ -161,7 +161,24 @@ namespace exodbctest
 				LOG_WARNING(L"DSN and ConnectionString are both disabled");
 			}
 
-			m_createDb = tree.get<bool>(L"TestSettings.CreateDb");
+			m_createDb = tree.get<bool>(L"TestSettings.CreateDb", false);
+			wstring logLevelValue = tree.get<wstring>(L"TestSettings.LogLevel", L"Info");
+			if (boost::iequals(logLevelValue, L"Debug"))
+			{
+				g_logManager.SetGlobalLogLevel(LogLevel::Debug);
+			}
+			else if (boost::iequals(logLevelValue, L"Info"))
+			{
+				g_logManager.SetGlobalLogLevel(LogLevel::Info);
+			}
+			else if (boost::iequals(logLevelValue, L"Warning"))
+			{
+				g_logManager.SetGlobalLogLevel(LogLevel::Warning);
+			}
+			else if (boost::iequals(logLevelValue, L"Error"))
+			{
+				g_logManager.SetGlobalLogLevel(LogLevel::Error);
+			}
 		}
 		catch (const std::exception& ex)
 		{
