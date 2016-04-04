@@ -224,8 +224,9 @@ namespace exodbc
 
 		/*!
 		* \brief	Close the table.
-		* \details	Unbinds and deletes all ColumnBuffers bound to this table. The information about
-		*			this table in the TableInfo queried during Open() is kept for future use.
+		* \details	Resets all statements used. If ColumnBuffers were created automatically during open,
+		*			those ColumnBuffers are removed. The TableInfo of this this table queried during Open() 
+		*			is kept for future use.
 		* \see		Open()
 		* \throw	Exception If not Open or unbinding fails.
 		*/
@@ -627,6 +628,16 @@ namespace exodbc
 		* \throw	NotFoundException If no such ColumnBuffer is found.
 		*/
 		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
+
+
+		/*!
+		* \brief	Removes all columns in this table. Can only be called if Table is not open yet.
+		* \details	This will remove all ColumnBuffers set on this Table (auto-created columns and
+		*			manually created columns).
+		* \see		IsOpen()
+		* \throw	AssertionException If already open.
+		*/
+		void		ClearColumns();
 
 		
 		/*!

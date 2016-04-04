@@ -980,6 +980,13 @@ namespace exodbc
 	}
 
 
+	void Table::ClearColumns()
+	{
+		exASSERT(!IsOpen());
+		m_columns.clear();
+	}
+
+
 	void Table::SetColumn(SQLUSMALLINT columnIndex, ColumnBufferPtrVariant column)
 	{
 		exASSERT(!IsOpen());
@@ -1204,6 +1211,8 @@ namespace exodbc
 		// remove the ColumnBuffers if we have allocated them during Open()
 		if (m_autoCreatedColumns)
 		{
+			// Do not call ClearColumns() here, because ClearColumns asserts
+			// that IsOpen() returns false.
 			m_columns.clear();
 		}
 
