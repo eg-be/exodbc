@@ -13,6 +13,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShortIntro", "exOdbcSamples
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DatabaseInfo", "exOdbcSamples\DatabaseInfo\DatabaseInfo.vcxproj", "{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{021A7F83-D491-491B-B4E9-93F4F56340C1} = {021A7F83-D491-491B-B4E9-93F4F56340C1}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

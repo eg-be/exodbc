@@ -780,7 +780,7 @@ namespace exodbctest
 			if(!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
+				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0, see #206
 				// and a type that indicates it wants varchars for numeric-things.
 				// but setting everything manually works fine
 				idCol->SetSqlType(SQL_INTEGER);
@@ -909,7 +909,7 @@ namespace exodbctest
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
+				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0, see #206
 				// and a type that indicates it wants varchars for numeric-things.
 				// but setting everything manually works fine
 				idCol->SetSqlType(SQL_INTEGER);
@@ -3812,7 +3812,7 @@ namespace exodbctest
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
+				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0, see #206
 				// and a type that indicates it wants varchars for numeric-things.
 				// but setting everything manually works fine
 				idCol->SetSqlType(SQL_INTEGER);
@@ -3914,7 +3914,7 @@ namespace exodbctest
 			if (!queryParameterInfo)
 			{
 				// Access does not implement SqlDescribeParam
-				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0
+				// MySql implements SqlDescribeParam, but returns columnSize of 255 and decimalDigits 0, see #206
 				// and a type that indicates it wants varchars for numeric-things.
 				// but setting everything manually works fine
 				idCol->SetSqlType(SQL_INTEGER);

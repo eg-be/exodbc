@@ -209,7 +209,7 @@ namespace exodbc
 	}
 
 
-	std::vector<ColumnBufferPtrVariant> Table::CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns, bool setAsTableColumns)
+	std::vector<ColumnBufferPtrVariant> Table::CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns, bool setAsTableColumns, bool queryPrimaryKeys)
 	{
 		exASSERT(m_pDb->IsOpen());
 
@@ -256,6 +256,10 @@ namespace exodbc
 				{
 					columnPtrVariant = CreateColumnBufferPtr(sqlCType, colInfo.GetQueryName());
 				}
+				if (!colInfo.IsIsNullableNull() && boost::algorithm::iequals(colInfo.GetIsNullable(), L"YES"))
+				{
+					flags.Set(ColumnFlag::CF_NULLABLE);
+				}
 				std::shared_ptr<ColumnFlags> pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnPtrVariant);
 				pColumnFlags->Set(flags);
 				std::shared_ptr<ColumnProperties> pExtendedProps = boost::apply_visitor(ColumnPropertiesPtrVisitor(), columnPtrVariant);
@@ -292,12 +296,23 @@ namespace exodbc
 			}
 		}
 
+		// Prepare a map for later storing or updating with pk-info
+		// \todo: why start with a vector.. use a map from begin
+		ColumnBufferPtrVariantMap columnMap;
+		for (size_t i = 0; i < columns.size(); ++i)
+		{
+			columnMap[(SQLUSMALLINT)i] = columns[i];
+		}
+
+		if (queryPrimaryKeys)
+		{
+			QueryPrimaryKeysAndUpdateColumns(columnMap);
+		}
+
+		// Do this as last step, it cannot fail but it will modify this object
 		if (setAsTableColumns)
 		{
-			for (size_t i = 0; i < columns.size(); ++i)
-			{
-				m_columns[(SQLUSMALLINT)i] = columns[i];
-			}
+			m_columns = columnMap;
 			m_autoCreatedColumns = true;
 		}
 
@@ -615,17 +630,19 @@ namespace exodbc
 	}
 
 
-	void Table::QueryPrimaryKeysAndUpdateColumns() const
+	void Table::QueryPrimaryKeysAndUpdateColumns(const ColumnBufferPtrVariantMap& columns) const
 	{
 		exASSERT(m_haveTableInfo);
 		exASSERT(m_pDb);
 		
 		TablePrimaryKeysVector keys = m_pDb->ReadTablePrimaryKeys(m_tableInfo);
-		for (auto it = keys.begin(); it != keys.end(); ++it)
+		for (auto itKey = keys.begin(); itKey != keys.end(); ++itKey)
 		{
-			const TablePrimaryKeyInfo& keyInfo = *it;
-			SQLUSMALLINT colIndex = GetColumnBufferIndex(keyInfo.GetQueryName());
-			ColumnBufferPtrVariant column = GetColumnBufferPtrVariant(colIndex);
+			const TablePrimaryKeyInfo& keyInfo = *itKey;
+			SQLUSMALLINT colIndex = GetColumnBufferIndex(keyInfo.GetQueryName(), columns);
+			auto itCol = columns.find(colIndex);
+			exASSERT(itCol != columns.end());
+			ColumnBufferPtrVariant column = itCol->second;
 			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), column);
 			pFlags->Set(ColumnFlag::CF_PRIMARY_KEY);
 		}
@@ -712,14 +729,20 @@ namespace exodbc
 
 	SQLUSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive /* = true */) const
 	{
-		ColumnBufferPtrVariantMap::const_iterator it = m_columns.begin();
-		while (it != m_columns.end())
+		return GetColumnBufferIndex(columnQueryName, m_columns, caseSensitive);
+	}
+
+
+	SQLUSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive /* = true */) const
+	{
+		ColumnBufferPtrVariantMap::const_iterator it = columns.begin();
+		while (it != columns.end())
 		{
 			const ColumnBufferPtrVariant& column = it->second;
 			std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), column);
 
 			if (caseSensitive)
-			{		
+			{
 				if (queryName == columnQueryName)
 				{
 					return it->first;
@@ -976,6 +999,13 @@ namespace exodbc
 	}
 
 
+	void Table::ClearColumns()
+	{
+		exASSERT(!IsOpen());
+		m_columns.clear();
+	}
+
+
 	void Table::SetColumn(SQLUSMALLINT columnIndex, ColumnBufferPtrVariant column)
 	{
 		exASSERT(!IsOpen());
@@ -1029,8 +1059,8 @@ namespace exodbc
 		// Init open flags and update them with flags implicitly set by checking db-driver
 		m_openFlags = openFlags;
 
-		// Set TOF_DO_NOT_QUERY_PRIMARY_KEYS this flag for Access, Access does not support SQLPrimaryKeys
-		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		// Set TOF_DO_NOT_QUERY_PRIMARY_KEYS this flag for Access and Excel, driver does not support SQLPrimaryKeys
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::EXCEL)
 		{
 			m_openFlags.Set(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS);
 		}
@@ -1078,7 +1108,7 @@ namespace exodbc
 			// If no columns have been set so far try to create them automatically
 			if (m_columns.empty())
 			{
-				CreateAutoColumnBufferPtrs(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS), true);
+				CreateAutoColumnBufferPtrs(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS), true, false);
 			}
 
 			// Set the CF_PRIMARY_KEY flag if information about primary key indexes have been set
@@ -1101,7 +1131,7 @@ namespace exodbc
 			// If we need the primary keys and are allowed to query them do that now
 			if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK)) && !TestOpenFlag(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS))
 			{
-				QueryPrimaryKeysAndUpdateColumns();
+				QueryPrimaryKeysAndUpdateColumns(m_columns);
 			}
 
 			// check that column flags match with table access flags
@@ -1200,6 +1230,8 @@ namespace exodbc
 		// remove the ColumnBuffers if we have allocated them during Open()
 		if (m_autoCreatedColumns)
 		{
+			// Do not call ClearColumns() here, because ClearColumns asserts
+			// that IsOpen() returns false.
 			m_columns.clear();
 		}
 
