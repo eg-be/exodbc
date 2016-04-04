@@ -623,11 +623,19 @@ namespace exodbc
 		/*!
 		* \brief	Searches the internal map of ColumnBuffers for a Buffer matching the
 		*			passed QueryName.
+		* \see		GetColumnBufferIndex(const std::wstring& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive)
+		*/
+		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
+
+
+		/*!
+		* \brief	Searches the passed map of ColumnBuffers for a Buffer matching the
+		*			passed QueryName.
 		* \param	columnQueryName Name to search for
 		* \param	caseSensitive search case sensitive or not
 		* \throw	NotFoundException If no such ColumnBuffer is found.
 		*/
-		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
+		SQLUSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive = true) const;
 
 
 		/*!
@@ -724,9 +732,13 @@ namespace exodbc
 		*			If set to false, the Method will throw a NotSupportedException.
 		* \param	setAsTableColumns	If set to true, those columns are set as the Columns for the Table before the vector
 		*			is returned. If false, the vector is just returned without changing the columns of the Table.
-		* \throw	Exception If no Columns are found.
+		* \param	queryPrimaryKeys If true, the Database will be queried for the primary key columns of this Table.
+		*			The ColumnBuffers created will be updated with the CF_PRIMARY_KEY flag if they match the returned list.
+		*			If a primary key column name returned by the Database is not found in the just created ColumnBuffers,
+		*			an Exception is thrown.
+		* \throw	Exception If no Columns are found or if not all primary key flags can be set.
 		*/
-		std::vector<ColumnBufferPtrVariant> CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns, bool setAsTableColumns);
+		std::vector<ColumnBufferPtrVariant> CreateAutoColumnBufferPtrs(bool skipUnsupportedColumns, bool setAsTableColumns, bool queryPrimaryKeys);
 
 
 		/*!
@@ -856,9 +868,9 @@ namespace exodbc
 		*			tries to identify the corresponding columns (by comparing names)
 		*			and sets the flag on the corresponding column.
 		* \throw	Exception If querying fails, or not for all queried primary keys column a 
-		*			corresponding ColumnBuffer is found.
+		*			corresponding ColumnBuffer is found in the passed columns map.
 		*/
-		void	QueryPrimaryKeysAndUpdateColumns() const;
+		void	QueryPrimaryKeysAndUpdateColumns(const ColumnBufferPtrVariantMap& columns) const;
 
 
 		/*!
