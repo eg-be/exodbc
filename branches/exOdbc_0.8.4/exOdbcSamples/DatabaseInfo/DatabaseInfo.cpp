@@ -107,9 +107,9 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		{};
 
 		DatabaseProduct m_dbms;
-
+		
 		const set<wstring> exOdbcTables = {
-			L"blobtypes", L"blobtypes_tmp"
+			L"blobtypes", L"blobtypes_tmp",
 			L"chartable", L"chartypes",	L"chartypes_tmp",
 			L"datetypes", L"datetypes_tmp",
 			L"floattypes", L"floattypes_tmp",
@@ -127,6 +127,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		bool operator()(const TableInfo& ti)
 		{
 			wstring tiName = ba::to_lower_copy(ti.GetPureName());
+
 			if (m_dbms == DatabaseProduct::EXCEL)
 			{
 				return excelTables.find(tiName) != excelTables.end();
@@ -136,14 +137,14 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 	};
 
 	TableInfosVector exodbcTables;
-	;
 	std::copy_if(allTables.begin(), allTables.end(), back_inserter(exodbcTables), Finder(pDb->GetDbms()));
 
-	std::wcout << L"=== Tables ===" << std::endl;
+	wcout << L"=== Tables ===" << endl;
 	for (auto it = exodbcTables.begin(); it != exodbcTables.end(); ++it)
 	{
 		TableInfo ti = *it;
 		wcout << boost::str(boost::wformat(L"==== %s ====") % ti.GetPureName()) << endl;
+		wcout << L"===== Structure =====" << endl;
 		wcout << boost::str(boost::wformat(L"* Catalog Name: %s") % (ti.HasCatalog() ? ti.GetCatalog() : L"<no catalog>")) << endl;
 		wcout << boost::str(boost::wformat(L"* Schema Name: %s") % (ti.HasSchema() ? ti.GetSchema() : L"<no schema>")) << endl;
 		wcout << boost::str(boost::wformat(L"* Table Name: %s") % ti.GetPureName()) << endl;
@@ -183,9 +184,9 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			}
 		}
 		t.Open();
-		for (auto it = logHandlers.begin(); it != logHandlers.end(); ++it)
+		for (auto itLog = logHandlers.begin(); itLog != logHandlers.end(); ++itLog)
 		{
-			g_logManager.RegisterLogHandler(*it);
+			g_logManager.RegisterLogHandler(*itLog);
 		}
 		wcout << L"||=Column Query Name =||=Sql Type =||= Column Size=||= Decimal Digits=||= Nullable=||= Primary Key=||" << endl;
 		for (auto itCol = columns.begin(); itCol != columns.end(); ++itCol)
@@ -198,6 +199,91 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			wstring nullable = pFlags->Test(ColumnFlag::CF_NULLABLE) ? L"NULLABLE" : L"";
 			wstring primary = pFlags->Test(ColumnFlag::CF_PRIMARY_KEY) ? L"PRIMARY": L"";
 			wcout << boost::str(boost::wformat(L"|| %s || %s || %d || %d || %s || %s ||") % name % SqlType2s(sqlType) % pProps->GetColumnSize() % pProps->GetDecimalDigits() % nullable % primary) << endl;
+		}
+
+		// Print the table content, by opening it as wchar-table.
+		t.Close();
+		t.ClearColumns();
+		// but skip _tmp tables
+		if (ba::ends_with(ba::to_lower_copy(ti.GetPureName()), L"_tmp"))
+		{
+			continue;
+		}
+
+		t.SetSql2BufferTypeMap(WCharSql2BufferMap::Create());
+		try
+		{
+			columns = t.CreateAutoColumnBufferPtrs(true, true);
+		}
+		catch (const Exception& ex)
+		{
+			wcout << L"'''Warning: ''' Not all columns have been created successfully, will try to skip columns:" << endl;
+			wcout << L"{{{" << endl;
+			wcout << ex.ToString() << endl;
+			wcout << L"}}}" << endl;
+		}
+		t.Open();
+
+		// print header
+		wcout << L"===== Content =====" << endl;
+		auto itCol = columns.begin();
+		bool first = true;
+		do
+		{
+			if (first && !columns.empty())
+			{
+				wcout << L"||= ";
+				first = false;
+			}
+			ColumnBufferPtrVariant pBuff = *itCol;
+			wstring name = boost::apply_visitor(nameVisitor, pBuff);
+			wcout << name;
+			++itCol;
+			if (itCol != columns.end())
+			{
+				wcout << L" =||= ";
+			}
+			else
+			{
+				wcout << L" =||";
+			}
+
+		} while (itCol != columns.end());
+		wcout << endl;
+
+		// And content
+		t.Select();
+		while (t.SelectNext())
+		{
+			auto itCol = columns.begin();
+			bool first = true;
+			do
+			{
+				if (first && !columns.empty())
+				{
+					wcout << L"||= ";
+					first = false;
+				}
+				WCharColumnBufferPtr pBuff = boost::get<WCharColumnBufferPtr>(*itCol);
+				if (!pBuff->IsNull())
+				{
+					wcout << pBuff->GetWString();
+				}
+				else
+				{
+					wcout << L"''NULL''";
+				}
+				++itCol;
+				if (itCol != columns.end())
+				{
+					wcout << L" =||= ";
+				}
+				else
+				{
+					wcout << L" =||" << endl;
+				}
+
+			} while (itCol != columns.end());
 		}
 	}
 }
