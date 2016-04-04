@@ -7,6 +7,9 @@
 * ShortIntro Sample.
 */
 
+
+#pragma warning(disable: 4503)	// 'identifier' : decorated name length exceeded, name was truncated
+
 #include <SDKDDKVer.h>
 #include <iostream>
 #include <tchar.h>
@@ -15,6 +18,8 @@
 #include "exodbc/Environment.h"
 #include "exodbc/Database.h"
 #include "exodbc/InfoObject.h"
+#include "exodbc/Table.h"
+#include "exodbc/ColumnBufferVisitors.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
@@ -24,14 +29,12 @@ namespace ba = boost::algorithm;
 using namespace exodbc;
 using namespace std;
 
-
 void PrintDbHeader(ConstDatabasePtr pDb)
 {
 	DatabaseInfo dbInfo = pDb->GetDbInfo();
 
 	// print header for trac
 	wcout << boost::str(boost::wformat(L"== %s (%s) ==") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DbmsName) % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DbmsVersion)) << endl;
-	//wcout << endl;
 }
 
 
@@ -44,15 +47,13 @@ void PrintDriverInfo(ConstDatabasePtr pDb)
 	wcout << boost::str(boost::wformat(L"* Driver Name: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverName)) << endl;
 	wcout << boost::str(boost::wformat(L"* Driver Version: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverVersion)) << endl;
 	wcout << boost::str(boost::wformat(L"* Driver ODBC Version: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverOdbcVersion)) << endl;
-
-	//wcout << endl;
 }
 
 
 void PrintDbInfo(ConstDatabasePtr pDb)
 {
 	DatabaseInfo dbInfo = pDb->GetDbInfo();
-	
+
 	// And a table with all information
 	wcout << L"=== Database Info ===" << endl;
 	wcout << L"||=Property Name =||= Property Value =||" << endl;
@@ -76,7 +77,6 @@ void PrintDbInfo(ConstDatabasePtr pDb)
 	{
 		wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second %it->second) << endl;
 	}
-	//wcout << endl;
 }
 
 
@@ -91,7 +91,202 @@ void printDatatypesInfo(ConstDatabasePtr pDb)
 		wcout << typeInfo.ToOneLineStrForTrac(first) << endl;
 		first = false;
 	}
-	//wcout << endl;
+}
+
+void printExOdbcTables(ConstDatabasePtr pDb)
+{
+	TableInfosVector allTables = pDb->FindTables(L"", L"", L"", L"");
+	struct Finder
+	{
+		Finder()
+			: m_dbms(DatabaseProduct::UNKNOWN)
+		{};
+
+		Finder(DatabaseProduct dbms)
+			: m_dbms(dbms)
+		{};
+
+		DatabaseProduct m_dbms;
+		
+		const set<wstring> exOdbcTables = {
+			L"blobtypes", L"blobtypes_tmp",
+			L"chartable", L"chartypes",	L"chartypes_tmp",
+			L"datetypes", L"datetypes_tmp",
+			L"floattypes", L"floattypes_tmp",
+			L"integertypes", L"integertypes_tmp",
+			L"multikey",
+			L"numerictypes", L"numerictypes_tmp",
+			L"selectonly",
+			L"not_existing",
+			L"not_supported",
+			L"not_supported_tmp"
+		};
+
+		const set<wstring> excelTables = { L"testtable$" };
+
+		bool operator()(const TableInfo& ti)
+		{
+			wstring tiName = ba::to_lower_copy(ti.GetPureName());
+
+			if (m_dbms == DatabaseProduct::EXCEL)
+			{
+				return excelTables.find(tiName) != excelTables.end();
+			}
+			return exOdbcTables.find(tiName) != exOdbcTables.end();
+		}
+	};
+
+	TableInfosVector exodbcTables;
+	std::copy_if(allTables.begin(), allTables.end(), back_inserter(exodbcTables), Finder(pDb->GetDbms()));
+
+	wcout << L"=== Tables ===" << endl;
+	for (auto it = exodbcTables.begin(); it != exodbcTables.end(); ++it)
+	{
+		TableInfo ti = *it;
+		wcout << boost::str(boost::wformat(L"==== %s ====") % ti.GetPureName()) << endl;
+		wcout << L"===== Structure =====" << endl;
+		wcout << boost::str(boost::wformat(L"* Catalog Name: %s") % (ti.HasCatalog() ? ti.GetCatalog() : L"<no catalog>")) << endl;
+		wcout << boost::str(boost::wformat(L"* Schema Name: %s") % (ti.HasSchema() ? ti.GetSchema() : L"<no schema>")) << endl;
+		wcout << boost::str(boost::wformat(L"* Table Name: %s") % ti.GetPureName()) << endl;
+		wcout << boost::str(boost::wformat(L"* Query Name: %s") % ti.GetQueryName()) << endl;
+
+		// And print the columns by querying them from the table
+		bool queryPrimaryKeys = !(pDb->GetDbms() == DatabaseProduct::ACCESS || pDb->GetDbms() == DatabaseProduct::EXCEL);
+		QueryNameVisitor nameVisitor;
+		SqlTypeVisitor sqlTypeVisitor;
+		ColumnPropertiesPtrVisitor propsVisitor;
+		ColumnFlagsPtrVisitor flagsVisitor;
+		Table t(pDb, TableAccessFlag::AF_READ, ti);
+		vector<ColumnBufferPtrVariant> columns;
+		// disable logger while doing this
+		vector<LogHandlerPtr> logHandlers = g_logManager.GetLogHandlers();
+		g_logManager.ClearLogHandlers();
+		try
+		{
+			columns = t.CreateAutoColumnBufferPtrs(true, true, queryPrimaryKeys);
+		}
+		catch (const Exception& ex)
+		{
+			wcout << L"'''Warning: ''' Not all columns have been created successfully, will try to skip columns:" << endl;
+			wcout << L"{{{" << endl;
+			wcout << ex.ToString() << endl;
+			wcout << L"}}}" << endl;
+			try
+			{
+				columns = t.CreateAutoColumnBufferPtrs(true, true, queryPrimaryKeys);
+			}
+			catch (const Exception& ex)
+			{
+				wcout << L"'''Error: ''' Failed to create columns:" << endl;
+				wcout << L"{{{" << endl;
+				wcout << ex.ToString() << endl;
+				wcout << L"}}}" << endl;
+				continue;
+			}
+		}
+		t.Open();
+		for (auto itLog = logHandlers.begin(); itLog != logHandlers.end(); ++itLog)
+		{
+			g_logManager.RegisterLogHandler(*itLog);
+		}
+		wcout << L"||=Column Query Name =||=Sql Type =||= Column Size=||= Decimal Digits=||= Nullable=||= Primary Key=||" << endl;
+		for (auto itCol = columns.begin(); itCol != columns.end(); ++itCol)
+		{
+			ColumnBufferPtrVariant pBuff = *itCol;
+			SQLSMALLINT sqlType = boost::apply_visitor(sqlTypeVisitor, pBuff);
+			wstring name = boost::apply_visitor(nameVisitor, pBuff);
+			ColumnPropertiesPtr pProps = boost::apply_visitor(propsVisitor, pBuff);
+			ColumnFlagsPtr pFlags = boost::apply_visitor(flagsVisitor, pBuff);
+			wstring nullable = pFlags->Test(ColumnFlag::CF_NULLABLE) ? L"NULLABLE" : L"";
+			wstring primary = pFlags->Test(ColumnFlag::CF_PRIMARY_KEY) ? L"PRIMARY": L"";
+			wcout << boost::str(boost::wformat(L"|| %s || %s || %d || %d || %s || %s ||") % name % SqlType2s(sqlType) % pProps->GetColumnSize() % pProps->GetDecimalDigits() % nullable % primary) << endl;
+		}
+
+		// Print the table content, by opening it as wchar-table.
+		t.Close();
+		t.ClearColumns();
+		// but skip _tmp tables
+		if (ba::ends_with(ba::to_lower_copy(ti.GetPureName()), L"_tmp"))
+		{
+			continue;
+		}
+
+		t.SetSql2BufferTypeMap(WCharSql2BufferMap::Create());
+		try
+		{
+			columns = t.CreateAutoColumnBufferPtrs(true, true, false);
+		}
+		catch (const Exception& ex)
+		{
+			wcout << L"'''Warning: ''' Not all columns have been created successfully, will try to skip columns:" << endl;
+			wcout << L"{{{" << endl;
+			wcout << ex.ToString() << endl;
+			wcout << L"}}}" << endl;
+		}
+		t.Open();
+
+		// print header
+		wcout << L"===== Content =====" << endl;
+		auto itCol = columns.begin();
+		bool first = true;
+		do
+		{
+			if (first && !columns.empty())
+			{
+				wcout << L"||= ";
+				first = false;
+			}
+			ColumnBufferPtrVariant pBuff = *itCol;
+			wstring name = boost::apply_visitor(nameVisitor, pBuff);
+			wcout << name;
+			++itCol;
+			if (itCol != columns.end())
+			{
+				wcout << L" =||= ";
+			}
+			else
+			{
+				wcout << L" =||";
+			}
+
+		} while (itCol != columns.end());
+		wcout << endl;
+
+		// And content
+		t.Select();
+		while (t.SelectNext())
+		{
+			auto itCol = columns.begin();
+			bool first = true;
+			do
+			{
+				if (first && !columns.empty())
+				{
+					wcout << L"||= ";
+					first = false;
+				}
+				WCharColumnBufferPtr pBuff = boost::get<WCharColumnBufferPtr>(*itCol);
+				if (!pBuff->IsNull())
+				{
+					wcout << pBuff->GetWString();
+				}
+				else
+				{
+					wcout << L"''NULL''";
+				}
+				++itCol;
+				if (itCol != columns.end())
+				{
+					wcout << L" =||= ";
+				}
+				else
+				{
+					wcout << L" =||" << endl;
+				}
+
+			} while (itCol != columns.end());
+		}
+	}
 }
 
 struct SConnectionInfo
@@ -175,10 +370,21 @@ int _tmain(int argc, _TCHAR* argv[])
 			}
 
 			// Print some info
-			PrintDbHeader(pDb);
-			PrintDriverInfo(pDb);
-			PrintDbInfo(pDb);
-			printDatatypesInfo(pDb);
+			// or maybe print tables
+			bool printTables = true;
+			if (!printTables)
+			{
+				PrintDbHeader(pDb);
+				PrintDriverInfo(pDb);
+				PrintDbInfo(pDb);
+				printDatatypesInfo(pDb);
+			}
+			else
+			{
+				PrintDbHeader(pDb);
+				PrintDriverInfo(pDb);
+				printExOdbcTables(pDb);
+			}
 
 			// add some blank lines
 			wcout << endl;
@@ -190,6 +396,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		std::wcerr << ex.ToString() << endl;
 	}
-    return 0;
+	return 0;
 }
 

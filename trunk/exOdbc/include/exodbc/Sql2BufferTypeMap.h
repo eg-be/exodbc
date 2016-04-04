@@ -140,7 +140,13 @@ namespace exodbc
 		* \param odbcVersion Depending on OdbcVersion passed different bindings are registered, see DefaultSql2BufferMap.
 		*/
 		DefaultSql2BufferMap(OdbcVersion odbcVersion);
+
+		/*!
+		* \brief	Create new instance wrapped into std::shared_ptr.
+		*/
+		static std::shared_ptr<DefaultSql2BufferMap> Create(OdbcVersion odbcVersion) { return std::make_shared<DefaultSql2BufferMap>(odbcVersion); };
 	};
+	typedef std::shared_ptr<DefaultSql2BufferMap> DefaultSql2BufferMapPtr;
 
 
 	/*!
@@ -159,7 +165,13 @@ namespace exodbc
 		* \brief Create new WCharSql2BufferMap.
 		*/
 		WCharSql2BufferMap();
+
+		/*!
+		* \brief	Create new instance wrapped into std::shared_ptr.
+		*/
+		static std::shared_ptr<WCharSql2BufferMap> Create() { return std::make_shared<WCharSql2BufferMap>(); };
 	};
+	typedef std::shared_ptr<WCharSql2BufferMap> WCharSql2BufferMapPtr;
 
 
 	/*!
@@ -178,7 +190,13 @@ namespace exodbc
 		* \brief Create new CharSql2BufferMap.
 		*/
 		CharSql2BufferMap();
+		
+		/*!
+		* \brief	Create new instance wrapped into std::shared_ptr.
+		*/
+		static std::shared_ptr<CharSql2BufferMap> Create() { return std::make_shared<CharSql2BufferMap>(); };
 	};
+	typedef std::shared_ptr<CharSql2BufferMap> CharSql2BufferMapPtr;
 
 
 	/*!
@@ -197,7 +215,13 @@ namespace exodbc
 		* \brief Create new CharAsWCharSql2BufferMap.
 		*/
 		CharAsWCharSql2BufferMap(OdbcVersion ocbcVersion);
+
+		/*!
+		* \brief	Create new instance wrapped into std::shared_ptr.
+		*/
+		static std::shared_ptr<CharAsWCharSql2BufferMap> Create(OdbcVersion odbcVersion) { return std::make_shared<CharAsWCharSql2BufferMap>(odbcVersion); };
 	};
+	typedef std::shared_ptr<CharAsWCharSql2BufferMap> CharAsWCharSql2BufferMapPtr;
 
 
 	/*!
@@ -216,5 +240,11 @@ namespace exodbc
 		* \brief Create new WCharAsCharSql2BufferMap.
 		*/
 		WCharAsCharSql2BufferMap(OdbcVersion ocbcVersion);
+		
+		/*!
+		* \brief	Create new instance wrapped into std::shared_ptr.
+		*/
+		static std::shared_ptr<WCharAsCharSql2BufferMap> Create(OdbcVersion odbcVersion) { return std::make_shared<WCharAsCharSql2BufferMap>(odbcVersion); };
 	};
+	typedef std::shared_ptr<WCharAsCharSql2BufferMap> WCharAsCharSql2BufferMapPtr;
 }
