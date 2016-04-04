@@ -25,6 +25,10 @@
     <Skip ticket="76">TableTest.CheckPrivileges</Skip>
     <Skip ticket="120">StatementCloserTest.CloseStmtHandle</Skip>
     <Skip ticket="77">TableTest.DeleteFailOnNoData</Skip>
+    <Workaround ticket="206">NumericColumnTest.Write_18_10_Value</Workaround>
+    <Workaround ticket="206">NumericColumnTest.Write_5_3_Value</Workaround>
+    <Workaround ticket="206">SqlCPointerTest.WriteNumeric_18_10_Value</Workaround>
+    <Workaround ticket="206">SqlCPointerTest.WriteNumeric_5_3_Value</Workaround>
   </Dsn>
 
   <Dsn>
