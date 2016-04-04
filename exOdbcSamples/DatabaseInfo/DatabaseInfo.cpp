@@ -98,6 +98,16 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 	TableInfosVector allTables = pDb->FindTables(L"", L"", L"", L"");
 	struct Finder
 	{
+		Finder()
+			: m_dbms(DatabaseProduct::UNKNOWN)
+		{};
+
+		Finder(DatabaseProduct dbms)
+			: m_dbms(dbms)
+		{};
+
+		DatabaseProduct m_dbms;
+
 		const set<wstring> exOdbcTables = {
 			L"blobtypes", L"blobtypes_tmp"
 			L"chartable", L"chartypes",	L"chartypes_tmp",
@@ -112,15 +122,22 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			L"not_supported_tmp"
 		};
 
+		const set<wstring> excelTables = { L"testtable$" };
+
 		bool operator()(const TableInfo& ti)
 		{
 			wstring tiName = ba::to_lower_copy(ti.GetPureName());
+			if (m_dbms == DatabaseProduct::EXCEL)
+			{
+				return excelTables.find(tiName) != excelTables.end();
+			}
 			return exOdbcTables.find(tiName) != exOdbcTables.end();
 		}
 	};
 
 	TableInfosVector exodbcTables;
-	std::copy_if(allTables.begin(), allTables.end(), back_inserter(exodbcTables), Finder());
+	;
+	std::copy_if(allTables.begin(), allTables.end(), back_inserter(exodbcTables), Finder(pDb->GetDbms()));
 
 	std::wcout << L"=== Tables ===" << std::endl;
 	for (auto it = exodbcTables.begin(); it != exodbcTables.end(); ++it)
@@ -137,7 +154,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		SqlTypeVisitor sqlTypeVisitor;
 		ColumnPropertiesPtrVisitor propsVisitor;
 		ColumnFlagsPtrVisitor flagsVisitor;
-		Table t(pDb, TableAccessFlag::AF_SELECT, ti);
+		Table t(pDb, TableAccessFlag::AF_READ, ti);
 		vector<ColumnBufferPtrVariant> columns;
 		// disable logger while doing this
 		vector<LogHandlerPtr> logHandlers = g_logManager.GetLogHandlers();
