@@ -151,6 +151,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		wcout << boost::str(boost::wformat(L"* Query Name: %s") % ti.GetQueryName()) << endl;
 
 		// And print the columns by querying them from the table
+		bool queryPrimaryKeys = !(pDb->GetDbms() == DatabaseProduct::ACCESS || pDb->GetDbms() == DatabaseProduct::EXCEL);
 		QueryNameVisitor nameVisitor;
 		SqlTypeVisitor sqlTypeVisitor;
 		ColumnPropertiesPtrVisitor propsVisitor;
@@ -162,7 +163,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		g_logManager.ClearLogHandlers();
 		try
 		{
-			columns = t.CreateAutoColumnBufferPtrs(true, true);
+			columns = t.CreateAutoColumnBufferPtrs(true, true, queryPrimaryKeys);
 		}
 		catch (const Exception& ex)
 		{
@@ -172,7 +173,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			wcout << L"}}}" << endl;
 			try
 			{
-				columns = t.CreateAutoColumnBufferPtrs(true, true);
+				columns = t.CreateAutoColumnBufferPtrs(true, true, queryPrimaryKeys);
 			}
 			catch (const Exception& ex)
 			{
@@ -213,7 +214,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		t.SetSql2BufferTypeMap(WCharSql2BufferMap::Create());
 		try
 		{
-			columns = t.CreateAutoColumnBufferPtrs(true, true);
+			columns = t.CreateAutoColumnBufferPtrs(true, true, false);
 		}
 		catch (const Exception& ex)
 		{

@@ -512,7 +512,7 @@ namespace exodbctest
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
 		
 		// remove the select flag from the id column before opening the table
-		auto columns = iTable.CreateAutoColumnBufferPtrs(false, true);
+		auto columns = iTable.CreateAutoColumnBufferPtrs(false, true, false);
 		ColumnFlagsPtr pFlag = boost::apply_visitor(ColumnFlagsPtrVisitor(), columns[0]);
 		auto idCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		pFlag->Clear(ColumnFlag::CF_SELECT);
@@ -757,7 +757,7 @@ namespace exodbctest
 		{
 			// Now insert with only id-column bound for inserting, and the int column only bound for selecting
 			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT, tableName);
-			iTable.CreateAutoColumnBufferPtrs(false, true);
+			iTable.CreateAutoColumnBufferPtrs(false, true, false);
 			LongColumnBufferPtr pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 			LongColumnBufferPtr pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 			pInt->Clear(ColumnFlag::CF_INSERT);
@@ -794,7 +794,7 @@ namespace exodbctest
 		{
 			// Now insert with only id-column bound for inserting, and the int column only bound for selecting
 			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT, tableName);
-			iTable.CreateAutoColumnBufferPtrs(false, true);
+			iTable.CreateAutoColumnBufferPtrs(false, true, false);
 			LongColumnBufferPtr pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 			LongColumnBufferPtr pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 			pInt->Clear(ColumnFlag::CF_INSERT);
@@ -909,7 +909,7 @@ namespace exodbctest
 		{
 			// And update, but remove the UPDATE_FLAG from the value we are trying to change
 			Table iTable(m_pDb, TableAccessFlag::AF_UPDATE_PK, tableName);
-			auto columns = iTable.CreateAutoColumnBufferPtrs(false, true);
+			auto columns = iTable.CreateAutoColumnBufferPtrs(false, true, false);
 			auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 			pInt->Clear(ColumnFlag::CF_UPDATE);
@@ -1154,7 +1154,7 @@ namespace exodbctest
 	{
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
-		vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false);
+		vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false, false);
 		
 		EXPECT_EQ(4, columns.size());
 		// Access reports everything as int columns
@@ -1179,7 +1179,7 @@ namespace exodbctest
 	{
 		wstring tableName = GetTableName(TableId::BLOBTYPES);
 		Table bTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
-		vector<ColumnBufferPtrVariant> columns = bTable.CreateAutoColumnBufferPtrs(false, false);
+		vector<ColumnBufferPtrVariant> columns = bTable.CreateAutoColumnBufferPtrs(false, false, false);
 
 		EXPECT_EQ(3, columns.size());
 
@@ -1208,7 +1208,7 @@ namespace exodbctest
 		pTypeMap->RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
 		pTypeMap->RegisterType(SQL_CHAR, SQL_C_WCHAR);
 		cTable.SetSql2BufferTypeMap(pTypeMap);
-		vector<ColumnBufferPtrVariant> columns = cTable.CreateAutoColumnBufferPtrs(false, false);
+		vector<ColumnBufferPtrVariant> columns = cTable.CreateAutoColumnBufferPtrs(false, false, false);
 
 		EXPECT_EQ(5, columns.size());
 
@@ -1239,7 +1239,7 @@ namespace exodbctest
 
 		// Sql server reports TIME as TIME2 with SqlType -154 - skip that column
 		bool skipUnsupportedCols = m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER;
-		auto columns = dTable.CreateAutoColumnBufferPtrs(skipUnsupportedCols, false);
+		auto columns = dTable.CreateAutoColumnBufferPtrs(skipUnsupportedCols, false, false);
 		
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
@@ -1297,7 +1297,7 @@ namespace exodbctest
 		wstring tableName = GetTableName(TableId::FLOATTYPES);
 		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		auto columns = dTable.CreateAutoColumnBufferPtrs(false, false);
+		auto columns = dTable.CreateAutoColumnBufferPtrs(false, false, false);
 		EXPECT_EQ(3, columns.size());
 
 		SqlCTypeVisitor cTypeV;
@@ -1321,7 +1321,7 @@ namespace exodbctest
 		wstring tableName = GetTableName(TableId::NUMERICTYPES);
 		Table nTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		auto columns = nTable.CreateAutoColumnBufferPtrs(false, false);
+		auto columns = nTable.CreateAutoColumnBufferPtrs(false, false, false);
 		EXPECT_EQ(4, columns.size());
 		SqlCTypeVisitor cTypeV;
 
@@ -1355,7 +1355,7 @@ namespace exodbctest
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 		iTable.SetSql2BufferTypeMap(pTypeMap);
-		auto columns = iTable.CreateAutoColumnBufferPtrs(true, false);
+		auto columns = iTable.CreateAutoColumnBufferPtrs(true, false, false);
 
 		// The id col and the tint column should be missing
 		// except for access, there everything should be missing
@@ -1381,7 +1381,7 @@ namespace exodbctest
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 		iTable.SetSql2BufferTypeMap(pTypeMap);
 
-		EXPECT_THROW(iTable.CreateAutoColumnBufferPtrs(false, false), NotSupportedException);
+		EXPECT_THROW(iTable.CreateAutoColumnBufferPtrs(false, false, false), NotSupportedException);
 	}
 
 
@@ -1389,7 +1389,7 @@ namespace exodbctest
 	{
 		wstring tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
-		auto columns = iTable.CreateAutoColumnBufferPtrs(false, true);
+		auto columns = iTable.CreateAutoColumnBufferPtrs(false, true, false);
 		// no flags activated so far
 		for (size_t i = 0; i < columns.size(); ++i)
 		{
@@ -1398,7 +1398,7 @@ namespace exodbctest
 			EXPECT_FALSE(pFlags->Test(ColumnFlag::CF_PRIMARY_KEY));
 		}
 		// activate flags, must select first column
-		iTable.QueryPrimaryKeysAndUpdateColumns();
+		iTable.QueryPrimaryKeysAndUpdateColumns(iTable.m_columns);
 		for (size_t i = 0; i < columns.size(); ++i)
 		{
 			auto col = columns[i];
