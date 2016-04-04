@@ -64,9 +64,9 @@ namespace exodbc
 	* connection to a database - see Open() and Close(). 
 	* If a Database is being closed and CommitMode is set to CM_MANUAL_COMMIT the
 	* Database will Rollback any ongoing transaction first.
-	* There is basic support executing SQL on the Database directly
+	* There is basic support executing SQL on the Database directly,
 	* using the generic ExecSql() and CommitTrans() functions.
-	* The ExecSQL() function uses its own Statement, so it will never be influenced
+	* The ExecSql() function uses its own Statement, so it will never be influenced
 	* by any of the Catalog-functions.
 	*
 	* The class provides methods to access the catalog functions of the database
