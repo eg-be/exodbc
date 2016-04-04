@@ -256,6 +256,10 @@ namespace exodbc
 				{
 					columnPtrVariant = CreateColumnBufferPtr(sqlCType, colInfo.GetQueryName());
 				}
+				if (!colInfo.IsIsNullableNull() && boost::algorithm::iequals(colInfo.GetIsNullable(), L"YES"))
+				{
+					flags.Set(ColumnFlag::CF_NULLABLE);
+				}
 				std::shared_ptr<ColumnFlags> pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnPtrVariant);
 				pColumnFlags->Set(flags);
 				std::shared_ptr<ColumnProperties> pExtendedProps = boost::apply_visitor(ColumnPropertiesPtrVisitor(), columnPtrVariant);
