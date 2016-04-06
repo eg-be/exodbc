@@ -632,7 +632,7 @@ namespace exodbc
 		* \brief	Searches the passed map of ColumnBuffers for a Buffer matching the
 		*			passed QueryName.
 		* \param	columnQueryName Name to search for
-		* \param	column The columns to search for a matching columnQueryName
+		* \param	columns The columns to search for a matching columnQueryName
 		* \param	caseSensitive search case sensitive or not
 		* \throw	NotFoundException If no such ColumnBuffer is found.
 		*/
