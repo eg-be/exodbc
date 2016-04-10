@@ -51,6 +51,7 @@
     <Skip>DatabaseTest.ReadSchemas</Skip>
     <Skip>DatabaseTest.ReadTablePrimaryKeysInfo</Skip>
     <Skip>DatabaseTest.ReadTablePrivileges</Skip>
+    <Skip>DatabaseTest.ReadSpecialColumns</Skip>
     <Skip>ExecutableStatementTest.SelectAbsolute</Skip>
     <Skip>ExecutableStatementTest.SelectFirst</Skip>
     <Skip>ExecutableStatementTest.SelectLast</Skip>
