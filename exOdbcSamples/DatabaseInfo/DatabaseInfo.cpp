@@ -1,5 +1,5 @@
 /*!
-* \file ShortIntro.cpp
+* \file DatabaseInfo.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 03.04.2016
 * \copyright GNU Lesser General Public License Version 3
