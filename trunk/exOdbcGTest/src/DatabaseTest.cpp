@@ -839,14 +839,21 @@ namespace exodbctest
 		// The integertypes table has an id column that should be unique inside a cursor.
 		// but others might change the value of a row identified by id during a transaction, etc.
 
-		wstring tableName = GetTableName(TableId::INTEGERTYPES);
-		TableInfo tableInfo = m_pDb->FindOneTable(tableName, L"", L"", L"");
+		wstring intTableName = GetTableName(TableId::INTEGERTYPES);
+		TableInfo intTableInfo = m_pDb->FindOneTable(intTableName, L"", L"", L"");
 		
-		SpecialColumnInfosVector specColsTransaction = m_pDb->ReadSpecialColumns(tableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::TRANSCATION);
-		SpecialColumnInfosVector specColsSession = m_pDb->ReadSpecialColumns(tableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::SESSION);
-		SpecialColumnInfosVector specColsCursor = m_pDb->ReadSpecialColumns(tableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::CURSOR);
+		SpecialColumnInfosVector specColsTransaction = m_pDb->ReadSpecialColumns(intTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::TRANSCATION);
+		SpecialColumnInfosVector specColsSession = m_pDb->ReadSpecialColumns(intTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::SESSION);
+		SpecialColumnInfosVector specColsCursor = m_pDb->ReadSpecialColumns(intTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::CURSOR);
 		EXPECT_EQ(1, specColsCursor.size());
 
+		wstring autoIdTableName = GetTableName(TableId::MULTIKEY);
+		TableInfo autoIdTableInfo = m_pDb->FindOneTable(autoIdTableName, L"", L"", L"");
+
+		specColsTransaction = m_pDb->ReadSpecialColumns(autoIdTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::TRANSCATION);
+		specColsSession = m_pDb->ReadSpecialColumns(autoIdTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::SESSION);
+		specColsCursor = m_pDb->ReadSpecialColumns(autoIdTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::CURSOR);
+		EXPECT_EQ(3, specColsCursor.size());
 
 	}
 
