@@ -343,15 +343,17 @@ namespace exodbc
 		*			If successful, a Select-Query is open. You can iterate the records
 		*			using SelectNext() to access the values of the records.
 		*			The cursor is positioned before the first records, so you must call
-		*			SelectNext() to access the first record.
-		*			If whereStatement is empty, no WHERE clause is added.
+		*			SelectNext() to access the first record.\n
+		*			If whereStatement is empty, no WHERE clause is added.\n
+		*			If orderStatement is empty, no ORDER clause is added.\n
 		*			If a select statement is open, the statement is closed first.
 		* \param	whereStatement Do not include 'WHERE' in the passed where clause
+		* \param	orderStatement Do not include 'ORDER BY' in the passed oder clause
 		* \see		SelectNext()
 		* \see		SelectClose()
 		* \throw	Exception If failed.
 		*/
-		void		Select(const std::wstring& whereStatement = L"");
+		void		Select(const std::wstring& whereStatement = L"", const std::wstring& orderStatement = L"");
 
 
 		/*!

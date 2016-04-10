@@ -790,20 +790,24 @@ namespace exodbc
 	}
 
 
-	void Table::Select(const std::wstring& whereStatement /* = L"" */)
+	void Table::Select(const std::wstring& whereStatement /* = L"" */, const std::wstring& orderStatement /* = L"" */)
 	{
 		exASSERT(IsOpen());
 
-		std::wstring sqlstmt;
+		wstringstream ws;
+		ws << L"SELECT " << BuildSelectFieldsStatement() << L" FROM " << m_tableInfo.GetQueryName();
+
 		if (!whereStatement.empty())
 		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s WHERE %s") % BuildSelectFieldsStatement() % m_tableInfo.GetQueryName() % whereStatement).str();
+			ws << L" WHERE " << whereStatement;
 		}
-		else
+
+		if (!orderStatement.empty())
 		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % BuildSelectFieldsStatement() % m_tableInfo.GetQueryName()).str();
+			ws << L" ORDER BY " << orderStatement;
 		}
-		SelectBySqlStmt(sqlstmt);
+
+		SelectBySqlStmt(ws.str());
 	}
 
 
