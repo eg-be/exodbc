@@ -178,7 +178,7 @@ namespace exodbc
 				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
 
 				// Create the buffer required for counts
-				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", ColumnFlag::CF_SELECT);
+				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", SQL_UNKNOWN_TYPE, ColumnFlag::CF_SELECT);
 			}
 			if (TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
 			{
