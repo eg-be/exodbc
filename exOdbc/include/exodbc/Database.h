@@ -336,6 +336,17 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Read special column information for a table.
+		* \details	This is a wrapper around SQLSpecialColumns.
+		* \param	table	Identify the table to query database about.
+		* \param	idType	The identifier type to query
+		* \param	scope	The row id scope to query, if identifier is set to IdentifierType::IDENTIFY_ROW_UNIQUELY
+		* \param	includeNullableColumns Include columns that can have NULL values in the special columns or not.
+		*/
+		SpecialColumnInfosVector ReadSpecialColumns(const TableInfo& table, IdentifierType idType, RowIdScope scope, bool includeNullableColumns = true) const;
+
+
+		/*!
 		 * \brief	Searches for tables using SQLTables. If any of the parameters passed is empty, SQLTables will be called
 		 * 			with a NULL value for that parameter, which indicates that we do not care about that param.
 		 * 			The attribute SQL_ATTR_METADATA_ID should default to FALSE, so all parameters are treated as pattern value

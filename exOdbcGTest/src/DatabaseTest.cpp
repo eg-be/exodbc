@@ -833,4 +833,21 @@ namespace exodbctest
 		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, L"", L"", L""));
 	}
 
+
+	TEST_F(DatabaseTest, ReadSpecialColumns)
+	{
+		// The integertypes table has an id column that should be unique inside a cursor.
+		// but others might change the value of a row identified by id during a transaction, etc.
+
+		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		TableInfo tableInfo = m_pDb->FindOneTable(tableName, L"", L"", L"");
+		
+		SpecialColumnInfosVector specColsTransaction = m_pDb->ReadSpecialColumns(tableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::TRANSCATION);
+		SpecialColumnInfosVector specColsSession = m_pDb->ReadSpecialColumns(tableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::SESSION);
+		SpecialColumnInfosVector specColsCursor = m_pDb->ReadSpecialColumns(tableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::CURSOR);
+		EXPECT_EQ(1, specColsCursor.size());
+
+
+	}
+
 } //namespace exodbc
