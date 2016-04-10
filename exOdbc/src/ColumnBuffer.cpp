@@ -30,35 +30,35 @@ namespace exodbc
 		switch (sqlCType)
 		{
 		case SQL_C_USHORT:
-			return UShortColumnBuffer::Create(queryName);
+			return UShortColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_SSHORT:
-			return ShortColumnBuffer::Create(queryName);
+			return ShortColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_ULONG:
-			return ULongColumnBuffer::Create(queryName);
+			return ULongColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_SLONG:
-			return LongColumnBuffer::Create(queryName);
+			return LongColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_UBIGINT:
-			return UBigIntColumnBuffer::Create(queryName);
+			return UBigIntColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_SBIGINT:
-			return BigIntColumnBuffer::Create(queryName);
+			return BigIntColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_TYPE_TIME:
-			return TypeTimeColumnBuffer::Create(queryName);
+			return TypeTimeColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_TIME:
-			return TimeColumnBuffer::Create(queryName);
+			return TimeColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_TYPE_DATE:
-			return TypeDateColumnBuffer::Create(queryName);
+			return TypeDateColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_DATE:
-			return DateColumnBuffer::Create(queryName);
+			return DateColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_TYPE_TIMESTAMP:
-			return TypeTimestampColumnBuffer::Create(queryName);
+			return TypeTimestampColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_TIMESTAMP:
-			return TimeColumnBuffer::Create(queryName);
+			return TimeColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_NUMERIC:
-			return NumericColumnBuffer::Create(queryName);
+			return NumericColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_DOUBLE:
-			return DoubleColumnBuffer::Create(queryName);
+			return DoubleColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		case SQL_C_FLOAT:
-			return RealColumnBuffer::Create(queryName);
+			return RealColumnBuffer::Create(queryName, SQL_UNKNOWN_TYPE);
 		default:
 			NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, sqlCType);
 			SET_EXCEPTION_SOURCE(nse);
@@ -82,17 +82,17 @@ namespace exodbc
 			SQLLEN arraySize = CalculateDisplaySize(columnInfo.GetSqlType(), columnSize, numPrecRadix, decimalDigits);
 			if (sqlCType == SQL_C_CHAR)
 			{
-				return CharColumnBuffer::Create(arraySize, queryName);
+				return CharColumnBuffer::Create(arraySize, queryName, SQL_UNKNOWN_TYPE);
 			}
 			else
 			{
-				return WCharColumnBuffer::Create(arraySize, queryName);
+				return WCharColumnBuffer::Create(arraySize, queryName, SQL_UNKNOWN_TYPE);
 			}
 			break;
 		}
 		case SQL_C_BINARY:
 			exASSERT(!columnInfo.IsColumnSizeNull());
-			return BinaryColumnBuffer::Create(columnInfo.GetColumnSize(), queryName);
+			return BinaryColumnBuffer::Create(columnInfo.GetColumnSize(), queryName, SQL_UNKNOWN_TYPE);
 		default:
 			NotSupportedException nse(NotSupportedException::Type::SQL_C_TYPE, sqlCType);
 			SET_EXCEPTION_SOURCE(nse);
