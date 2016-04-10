@@ -362,7 +362,9 @@ namespace exodbc
 		*			The cursor is positioned before the first records, so you must call
 		*			SelectNext() to access the first record.
 		*			If a select statement is open, the statement is closed first.
-		* \param	sqlStmt Must be a full SQL statement like 'SELECT foo FROM A WHERE x > 3'
+		* \param	sqlStmt Must be a full SQL statement like 'SELECT foo FROM A WHERE x > 3' and
+		*			all bound columns must be included or the retrieved data will be mixed within
+		*			the columns.
 		* \see		SelectNext()
 		* \see		SelectClose();
 		* \return	True if successful
