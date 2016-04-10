@@ -186,41 +186,6 @@ namespace exodbc
 	};
 
 
-	/*!
-	* \enum		IdentifierType
-	* \brief	Attribute values to query special columns: Type of special columns to query.
-	*/
-	enum class IdentifierType
-	{
-		IDENTIFY_ROW_UNIQUELY = SQL_BEST_ROWID,	///< Optimal set to identify a row uniquely. Can also be pseudo-columns like ROWID
-		AUTO_UPDATED = SQL_ROWVER	///< Set of columns that are updated automatically if any value in the row changes.
-	};
-
-
-	/*!
-	* \enum		RowIdScope
-	* \brief	Attribute values to query special columns: Scope of row-id values.
-	*/
-	enum class RowIdScope
-	{
-		CURSOR = SQL_SCOPE_CURROW,	///< Row id values are valid only while cursor is positioned on that row. Might change on later select of the same row.
-		TRANSCATION = SQL_SCOPE_TRANSACTION, ///< Row id values are valid during ongoing transaction.
-		SESSION = SQL_SCOPE_SESSION	///< Row id values are valid beyond transaction boundaries.
-	};
-
-
-	/*!
-	* \enum		PseudoColumn
-	* \brief	Information if a column is a pseudo column or not.
-	*/
-	enum class PseudoColumn
-	{
-		UNKNOWN = SQL_PC_UNKNOWN,	///< Not known
-		NOT_PSEUDO = SQL_PC_NOT_PSEUDO,	///< no pseudo column
-		PSEUDO = SQL_PC_PSEUDO	///< pseudo column, like Oracle ROWID
-	};
-
-
 	// Flags
 	// =====
 

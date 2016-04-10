@@ -200,7 +200,7 @@ namespace exodbctest
 		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
 		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
 
-		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
 
 		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") %idName %tableQueryName %idName %idName );
 		ExecutableStatement ds(m_pDb);
@@ -227,7 +227,7 @@ namespace exodbctest
 		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
 		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
 
-		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
 
 		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);
@@ -246,7 +246,7 @@ namespace exodbctest
 		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
 		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
 
-		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
 
 		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);
@@ -280,7 +280,7 @@ namespace exodbctest
 		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
 		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
 
-		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
 
 		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);
@@ -308,7 +308,7 @@ namespace exodbctest
 		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
 		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
 
-		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
 
 		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);
@@ -334,7 +334,7 @@ namespace exodbctest
 		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
 		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
 
-		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName);
 
 		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);

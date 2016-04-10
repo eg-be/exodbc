@@ -354,10 +354,10 @@ namespace exodbc
 		ColumnBuffer() = delete;
 
 		/*!
-		* \brief	Create a new buffer with one element of type T, passed queryName, sqlType and flags.
+		* \brief	Create a new buffer with one element of type T, passed queryName and flags.
 		*			The buffer is set to NULL.
 		*/
-		ColumnBuffer(const std::wstring& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		ColumnBuffer(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ColumnProperties()
@@ -366,7 +366,6 @@ namespace exodbc
 		{
 			SetNull();
 			SetQueryName(queryName);
-			SetSqlType(sqlType);
 		};
 
 
@@ -374,7 +373,7 @@ namespace exodbc
 		* \brief	Create a new buffer with one element of type T, passed sqlType and flags.
 		*			The buffer is set to NULL.
 		*/
-		ColumnBuffer(SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		ColumnBuffer(SQLINTEGER sqlType = SQL_UNKNOWN_TYPE, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ColumnProperties()
@@ -385,12 +384,12 @@ namespace exodbc
 			SetSqlType(sqlType);
 		};
 
-
 		/*!
 		* \brief	Create a new array buffer with passed queryName, nrOfElements and flags.
 		*			The buffer is set to NULL.
 		*/
-		ColumnBuffer(SQLLEN nrOfElements, const std::wstring& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		[[deprecated("Replaced by 'ColumnBuffer(SQLLEN nrOfElements, const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)', which is more consistent in specifingy the array-size as first argument.")]]
+		ColumnBuffer(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ColumnProperties()
@@ -400,7 +399,23 @@ namespace exodbc
 			m_buffer = std::vector<T>(m_nrOfElements);
 			SetNull();
 			SetQueryName(queryName);
-			SetSqlType(sqlType);
+		};
+
+
+		/*!
+		* \brief	Create a new array buffer with passed queryName, nrOfElements and flags.
+		*			The buffer is set to NULL.
+		*/
+		ColumnBuffer(SQLLEN nrOfElements, const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
+			: LengthIndicator()
+			, ColumnFlags(flags)
+			, ColumnProperties()
+			, m_nrOfElements(nrOfElements)
+		{
+			exASSERT(m_nrOfElements > 0);
+			m_buffer = std::vector<T>(m_nrOfElements);
+			SetNull();
+			SetQueryName(queryName);
 		};
 
 
@@ -408,7 +423,7 @@ namespace exodbc
 		* \brief	Create a new array buffer with passed sqlType, nrOfElements and flags.
 		*			The buffer is set to NULL.
 		*/
-		ColumnBuffer(SQLLEN nrOfElements, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		ColumnBuffer(SQLLEN nrOfElements, SQLINTEGER sqlType = SQL_UNKNOWN_TYPE, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ColumnProperties()
@@ -430,16 +445,16 @@ namespace exodbc
 		/*!
 		* \brief: Create a new instance wrapped into a shared_ptr
 		*/
-		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
 		{
-			return std::make_shared<ColumnBuffer>(queryName, sqlType, flags);
+			return std::make_shared<ColumnBuffer>(queryName, flags);
 		}
 
 
 		/*!
 		* \brief: Create a new instance wrapped into a shared_ptr
 		*/
-		static std::shared_ptr<ColumnBuffer> Create(SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		static std::shared_ptr<ColumnBuffer> Create(SQLINTEGER sqlType = SQL_UNKNOWN_TYPE, ColumnFlags flags = ColumnFlag::CF_NONE)
 		{
 			return std::make_shared<ColumnBuffer>(sqlType, flags);
 		}
@@ -448,16 +463,26 @@ namespace exodbc
 		/*!
 		* \brief: Create a new array instance wrapped into a shared_ptr
 		*/
-		static std::shared_ptr<ColumnBuffer> Create(SQLLEN nrOfElements, const std::wstring& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		[[deprecated("Replaced by 'Create(SQLLEN nrOfElements, const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)', which is more consistent in specifingy the array-size as first argument.")]]
+		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName, SQLLEN nrOfElements, ColumnFlags flags = ColumnFlag::CF_NONE)
 		{
-			return std::make_shared<ColumnBuffer>(nrOfElements, queryName, sqlType, flags);
+			return Create(nrOfElements, queryName, flags);
 		}
 
 
 		/*!
 		* \brief: Create a new array instance wrapped into a shared_ptr
 		*/
-		static std::shared_ptr<ColumnBuffer> Create(SQLLEN nrOfElements, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		static std::shared_ptr<ColumnBuffer> Create(SQLLEN nrOfElements, const std::wstring& queryName, ColumnFlags flags = ColumnFlag::CF_NONE)
+		{
+			return std::make_shared<ColumnBuffer>(nrOfElements, queryName, flags);
+		}
+
+
+		/*!
+		* \brief: Create a new array instance wrapped into a shared_ptr
+		*/
+		static std::shared_ptr<ColumnBuffer> Create(SQLLEN nrOfElements, SQLINTEGER sqlType = SQL_UNKNOWN_TYPE, ColumnFlags flags = ColumnFlag::CF_NONE)
 		{
 			return std::make_shared<ColumnBuffer>(nrOfElements, sqlType, flags);
 		}

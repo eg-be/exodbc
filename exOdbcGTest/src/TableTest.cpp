@@ -506,36 +506,6 @@ namespace exodbctest
 	}
 
 
-	TEST_F(TableTest, SelectOrder)
-	{
-		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);
-		std::wstring idColName = GetIdColumnName(TableId::INTEGERTYPES);
-		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		ASSERT_NO_THROW(iTable.Open());
-
-		EXPECT_NO_THROW(iTable.Select(L"", boost::str(boost::wformat(L"%s ASC") % idColName)));
-
-		// Test that we are ordered ascending
-		SQLINTEGER prev = 0;
-		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
-		while (iTable.SelectNext())
-		{
-			EXPECT_TRUE(prev < pIdCol->GetValue());
-			prev = pIdCol->GetValue();
-		}
-
-		// and descending
-		prev++;
-		EXPECT_NO_THROW(iTable.Select(L"", boost::str(boost::wformat(L"%s DESC") % idColName)));
-		while (iTable.SelectNext())
-		{
-			EXPECT_TRUE(prev > pIdCol->GetValue());
-			prev = pIdCol->GetValue();
-		}
-
-	}
-
-
 	TEST_F(TableTest, SelectFlag)
 	{
 		std::wstring tableName = GetTableName(TableId::INTEGERTYPES);

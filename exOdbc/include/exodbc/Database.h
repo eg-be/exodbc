@@ -64,9 +64,9 @@ namespace exodbc
 	* connection to a database - see Open() and Close(). 
 	* If a Database is being closed and CommitMode is set to CM_MANUAL_COMMIT the
 	* Database will Rollback any ongoing transaction first.
-	* There is basic support executing SQL on the Database directly,
+	* There is basic support executing SQL on the Database directly
 	* using the generic ExecSql() and CommitTrans() functions.
-	* The ExecSql() function uses its own Statement, so it will never be influenced
+	* The ExecSQL() function uses its own Statement, so it will never be influenced
 	* by any of the Catalog-functions.
 	*
 	* The class provides methods to access the catalog functions of the database
@@ -333,17 +333,6 @@ namespace exodbc
 		 * \throw Exception If reading ColumnInfo fails or not exactly one table matches.
 		 */
 		ColumnInfosVector	ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
-
-
-		/*!
-		* \brief	Read special column information for a table.
-		* \details	This is a wrapper around SQLSpecialColumns.
-		* \param	table	Identify the table to query database about.
-		* \param	idType	The identifier type to query
-		* \param	scope	The row id scope to query, if identifier is set to IdentifierType::IDENTIFY_ROW_UNIQUELY
-		* \param	includeNullableColumns Include columns that can have NULL values in the special columns or not.
-		*/
-		SpecialColumnInfosVector ReadSpecialColumns(const TableInfo& table, IdentifierType idType, RowIdScope scope, bool includeNullableColumns = true) const;
 
 
 		/*!
