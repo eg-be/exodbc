@@ -178,7 +178,7 @@ namespace exodbc
 				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
 
 				// Create the buffer required for counts
-				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", ColumnFlag::CF_SELECT);
+				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", SQL_UNKNOWN_TYPE, ColumnFlag::CF_SELECT);
 			}
 			if (TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
 			{
@@ -790,20 +790,24 @@ namespace exodbc
 	}
 
 
-	void Table::Select(const std::wstring& whereStatement /* = L"" */)
+	void Table::Select(const std::wstring& whereStatement /* = L"" */, const std::wstring& orderStatement /* = L"" */)
 	{
 		exASSERT(IsOpen());
 
-		std::wstring sqlstmt;
+		wstringstream ws;
+		ws << L"SELECT " << BuildSelectFieldsStatement() << L" FROM " << m_tableInfo.GetQueryName();
+
 		if (!whereStatement.empty())
 		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s WHERE %s") % BuildSelectFieldsStatement() % m_tableInfo.GetQueryName() % whereStatement).str();
+			ws << L" WHERE " << whereStatement;
 		}
-		else
+
+		if (!orderStatement.empty())
 		{
-			sqlstmt = (boost::wformat(L"SELECT %s FROM %s") % BuildSelectFieldsStatement() % m_tableInfo.GetQueryName()).str();
+			ws << L" ORDER BY " << orderStatement;
 		}
-		SelectBySqlStmt(sqlstmt);
+
+		SelectBySqlStmt(ws.str());
 	}
 
 

@@ -73,6 +73,76 @@ namespace exodbc
 
 
 	/*!
+	* \class	SpecialColumnInfo
+	* \brief	Information about a special column fetched using the catalog function SQLSpecialColumns.
+	* \see: https://msdn.microsoft.com/en-us/library/ms714602%28v=vs.85%29.aspx
+	*
+	*/
+	class EXODBCAPI SpecialColumnInfo
+	{
+	public:
+		SpecialColumnInfo()
+			: m_hasScope(false)
+			, m_pseudoColumn(PseudoColumn::UNKNOWN)
+		{};
+
+		SpecialColumnInfo(const std::wstring& columnName, RowIdScope scope, SQLSMALLINT sqlType, const std::wstring& sqlTypeName,
+			SQLINTEGER columnSize, SQLINTEGER bufferLength, SQLSMALLINT decimalDigits, PseudoColumn pseudoColumn)
+			: m_columnName(columnName)
+			, m_scope(scope)
+			, m_hasScope(true)
+			, m_sqlType(sqlType)
+			, m_sqlTypeName(sqlTypeName)
+			, m_columnSize(columnSize)
+			, m_bufferLength(bufferLength)
+			, m_decimalDigits(decimalDigits)
+			, m_pseudoColumn(pseudoColumn)
+		{};
+
+		SpecialColumnInfo(const std::wstring& columnName, SQLSMALLINT sqlType, const std::wstring& sqlTypeName,
+			SQLINTEGER columnSize, SQLINTEGER bufferLength, SQLSMALLINT decimalDigits, PseudoColumn pseudoColumn)
+			: m_columnName(columnName)
+			, m_hasScope(false)
+			, m_sqlType(sqlType)
+			, m_sqlTypeName(sqlTypeName)
+			, m_columnSize(columnSize)
+			, m_bufferLength(bufferLength)
+			, m_decimalDigits(decimalDigits)
+			, m_pseudoColumn(pseudoColumn)
+		{};
+
+
+		std::wstring GetColumnName() const noexcept { return m_columnName; };
+		RowIdScope GetScope() const { exASSERT(m_hasScope); return m_scope; };
+		SQLSMALLINT GetSqlType() const noexcept { return m_sqlType; };
+		std::wstring GetSqlTypeName() const noexcept { return m_sqlTypeName; };
+		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
+		SQLINTEGER GetBufferLength() const noexcept { return m_bufferLength; };
+		SQLSMALLINT GetDecimalDigits() const noexcept { return m_decimalDigits; };
+		PseudoColumn GetPseudoColumn() const noexcept { return m_pseudoColumn; };
+
+	private:
+		RowIdScope	m_scope;
+		bool		m_hasScope;
+
+		std::wstring m_columnName;
+		SQLSMALLINT m_sqlType;
+		std::wstring m_sqlTypeName;
+		SQLINTEGER m_columnSize;
+		SQLINTEGER m_bufferLength;
+		SQLSMALLINT m_decimalDigits;
+		PseudoColumn m_pseudoColumn;
+	};
+
+	/*!
+	* \typedef SpecialColumnInfosVector
+	* \brief std::vector of SpecialColumnInfo objects.
+	*/
+	typedef std::vector<SpecialColumnInfo> SpecialColumnInfosVector;
+
+
+
+	/*!
 	* \class	ColumnInfo
 	* \brief	Information about a column fetched using the catalog function SQLColumns.
 	* \see: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
