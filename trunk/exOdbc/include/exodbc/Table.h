@@ -177,30 +177,30 @@ namespace exodbc
 		*			the buffers passed there are used to bind only those columns defined manually.
 		*
 		* \param	openFlags Set flags how to open the Table:
-		*  - TOF_CHECK_PRIVILEGES  
+		*  - TableOpenFlag::TOF_CHECK_PRIVILEGES  
 		*			If set, the database will be queried checking if the current user
 		*			is allowed to do the required operations like Select, Update, Insert or Delete,
 		*			depending on the AccessFlags value passed during construction or set later.
-		*  - TOF_CHECK_EXISTANCE:
+		*  - TableOpenFlag::TOF_CHECK_EXISTANCE:
 		*			If set, the database will always be queried if a table matching the
 		*			passed definition during constructions actually exists in the database. Unsetting this
 		*			flag makes only sense if you've passed a TableInfo during construction, 
 		*			as else the Table is required to query the database anyway (and fails if not found).
-		*  - TOF_SKIP_UNSUPPORTED_COLUMNS:
+		*  - TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS:
 		*			If set, Columns for which no ColumnBuffer can be created are skipped. If not set an
 		*			Exception is thrown if creation of a ColumnBuffer fails (default).\n
 		*			If Columns are created automatically, the Database might report a SQL type that is not
 		*			implemented (No mapping of SQL-Type o SQL-C-Type). Set this flag to simply skip such columns.\n
 		*			If Columns have been set manually, Columns might have been defined using a SQL Type that
 		*			is not reported as supported from the Database. Set this flag to simply skip such
-		*			columns. See also TOF_IGNORE_DB_TYPE_INFOS.\n
-		*			If ColumnBuffers are skipped, the indexes of the bound ColumnBuffers will still match the 
-		*			indexes of the actual table, but there are gaps in the key-sequence of the ColumnBuffer map.
-		*  - TOF_IGNORE_DB_TYPE_INFOS:
+		*			columns. See also TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS.\n
+		*			If ColumnBuffers are skipped, the indexes of the bound ColumnBuffers will no longer match the
+		*			indexes of the actual table.
+		*  - TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS:
 		*			If set, the SQL Types of manually defined columns are not validated against the supported
-		*			types reported by the Database. If this flag is set, the flag TOF_SKIP_UNSUPPORTED_COLUMNS
+		*			types reported by the Database. If this flag is set, the flag TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS
 		*			does nothing for manually defined columns.
-		*  - TOF_DO_NOT_QUERY_PRIMARY_KEYS:
+		*  - TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS:
 		*			If a table is opened with the AccessFlag::AF_UPDATE_PK or AccessFlag::AF_DELETE_PK set,
 		*			Primary keys are required. They are queried from the Database during Open(), unless
 		*			this flag is set, or the column indexes of the Table have been passed prior to Open()
@@ -208,16 +208,19 @@ namespace exodbc
 		*			If this flag is set, the primary keys are not queried.\n
 		*			This flag is set automatically whenever Open() ing a Table from a Microsoft Access Database,
 		*			as the Access Driver I used for testing (ODBCJT32.DLL, v6.01.7601.17632, 
-		*			'Microsoft Access Driver (*.mdb')') does not support the SQLPrimaryKeys() method.
+		*			'Microsoft Access Driver (*.mdb')') does not support the SQLPrimaryKeys() method.\n
 		*			This flag is sometimes active implicitly, for example if you have manually defined 
-		*			primary key columns using SetColumnPrimaryKeyIndexes().
-		*  - TOF_FORWARD_ONLY_CURSORS:
+		*			primary key columns using SetColumnPrimaryKeyIndexes().\n
+		*			If you have set ColumnBuffers manually, and defined the corresponding ColumnFlag::CF_PRIMARY_KEY
+		*			on the corresponding ColumnBuffers, you might want to activate the flag.
+		*  - TableOpenFlag::TOF_FORWARD_ONLY_CURSORS:
 		*			If the Database supports Scrollable Cursors, the Table will try to use Scrollable Cursors
 		*			on the Query Statements. If this flag is set, the Table will always use forward-only Cursors.
 		* \see		IsOpen()
 		* \see		Close()
 		* \see		SetColumn()
-		* \throw	Exception If already open, table is not found, columns fail to bind..
+		* \see		SetColumnPrimaryKeyIndexes()
+		* \throw	Exception If already open, table is not found, columns fail to bind, etc.
 		*/
 		void		Open(TableOpenFlags openFlags = TableOpenFlag::TOF_CHECK_EXISTANCE);
 
