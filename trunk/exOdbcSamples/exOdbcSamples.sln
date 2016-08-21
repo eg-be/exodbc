@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShortIntro", "ShortIntro\ShortIntro.vcxproj", "{8E0B2112-5703-4525-B91E-32F4C252FD59}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DatabaseInfo", "DatabaseInfo\DatabaseInfo.vcxproj", "{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SqlCPointerBuffer", "SqlCPointerBuffer\SqlCPointerBuffer.vcxproj", "{928CA58B-A5D6-42AC-8E60-F97593856152}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,22 @@ Global
 		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_LIB|x64.Build.0 = Release_LIB|x64
 		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_LIB|x86.ActiveCfg = Release_LIB|Win32
 		{5E28FA93-2CF4-450A-88B1-EABE0CFC12BD}.Release_LIB|x86.Build.0 = Release_LIB|Win32
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Debug_DLL|x64.ActiveCfg = Debug_DLL|x64
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Debug_DLL|x64.Build.0 = Debug_DLL|x64
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Debug_DLL|x86.ActiveCfg = Debug_DLL|Win32
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Debug_DLL|x86.Build.0 = Debug_DLL|Win32
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Debug_LIB|x64.ActiveCfg = Debug_LIB|x64
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Debug_LIB|x64.Build.0 = Debug_LIB|x64
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Debug_LIB|x86.ActiveCfg = Debug_LIB|Win32
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Debug_LIB|x86.Build.0 = Debug_LIB|Win32
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Release_DLL|x64.ActiveCfg = Release_DLL|x64
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Release_DLL|x64.Build.0 = Release_DLL|x64
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Release_DLL|x86.ActiveCfg = Release_DLL|Win32
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Release_DLL|x86.Build.0 = Release_DLL|Win32
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Release_LIB|x64.ActiveCfg = Release_LIB|x64
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Release_LIB|x64.Build.0 = Release_LIB|x64
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Release_LIB|x86.ActiveCfg = Release_LIB|Win32
+		{928CA58B-A5D6-42AC-8E60-F97593856152}.Release_LIB|x86.Build.0 = Release_LIB|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
