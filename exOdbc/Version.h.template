@@ -13,10 +13,10 @@
 // Other headers
 // System headers
 #define EXODBC_VERSION_MAJOR		0
-#define EXODBC_VERSION_MINOR		9
-#define EXODBC_VERSION_BUILD		0
+#define EXODBC_VERSION_MINOR		8
+#define EXODBC_VERSION_BUILD		5
 #define EXODBC_VERSION_REV			$WCREV$
-#define EXODBC_VERSION_STRING		"0, 9, 0, $WCREV$\0"
+#define EXODBC_VERSION_STRING		"0, 8, 5, $WCREV$\0"
 
 #define EXODBC_MIXED_REV_RANGE	$WCMIXED?"Mixed Range":"Exact Revision"$
 #define EXODBC_REV_RANGE			"$WCRANGE$"
