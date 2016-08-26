@@ -47,13 +47,16 @@ namespace exodbc
 	*/
 	class EXODBCAPI LogManager
 	{
-	public:
+	private:
 		/*!
 		* \brief Default Constructor. Registers a StdErrLogHandler during construction
 		*			and sets LogLevel to LogLevel::Info in release builds and
 		*			LogLevel::Debug in debug builds.
 		*/
 		LogManager();
+
+	public:
+		static LogManager& Get();
 
 		/*!
 		* \brief Registers the passed LogHandler.
@@ -98,14 +101,12 @@ namespace exodbc
 		LogLevel m_globalLogLevel;
 		mutable std::mutex m_globalLogLevelMutex;
 	};
-
-	extern EXODBCAPI LogManager g_logManager;	///< The global instance of the LogManager
 }
 
 // Generic Log-entry
 #define LOG_MSG(logLevel, msg) \
 	do { \
-		exodbc::g_logManager.LogMessage(logLevel, msg, __FILEW__, __LINE__, __FUNCTIONW__); \
+		exodbc::LogManager::Get().LogMessage(logLevel, msg, __FILEW__, __LINE__, __FUNCTIONW__); \
 	} while( 0 )
 
 // Generic Log-entry shortcuts

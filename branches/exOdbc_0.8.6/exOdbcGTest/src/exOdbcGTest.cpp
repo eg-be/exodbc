@@ -122,24 +122,24 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 		else if (ba::iequals(argv[i], L"--logLevelE"))
 		{
-			g_logManager.SetGlobalLogLevel(LogLevel::Error);
+			LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
 		}
 		else if (ba::iequals(argv[i], L"--logLevelW"))
 		{
-			g_logManager.SetGlobalLogLevel(LogLevel::Warning);
+			LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
 		}
 		else if (ba::iequals(argv[i], L"--logLevelI"))
 		{
-			g_logManager.SetGlobalLogLevel(LogLevel::Info);
+			LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
 		}
 		else if (ba::iequals(argv[i], L"--logLevelD"))
 		{
-			g_logManager.SetGlobalLogLevel(LogLevel::Debug);
+			LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
 		}
 		else if (ba::iequals(argv[i], L"--logFile"))
 		{
 			FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(L"exOdbcGTest.log", true);
-			g_logManager.RegisterLogHandler(pFileLogger);
+			LogManager::Get().RegisterLogHandler(pFileLogger);
 		}
 	}
 
