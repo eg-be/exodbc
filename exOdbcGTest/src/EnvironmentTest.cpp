@@ -125,9 +125,9 @@ namespace exodbctest
 		EXPECT_NO_THROW(Environment::EnableConnectionPooling(ConnectionPooling::PER_HENV));
 
 		// Test if open and closing a few connections is faster if pooling is enabled
-		g_logManager.ClearLogHandlers();
+		LogManager::Get().ClearLogHandlers();
 		NullLogHandlerPtr pNullLogger = std::make_shared<NullLogHandler>();
-		g_logManager.RegisterLogHandler(pNullLogger);
+		LogManager::Get().RegisterLogHandler(pNullLogger);
 		size_t nrRuns = 10;
 		time_t start, end, deltaDriver, deltaEnv, deltaOff;
 		{
@@ -167,8 +167,8 @@ namespace exodbctest
 		}
 
 		StdErrLogHandlerPtr stdLogger = std::make_shared<StdErrLogHandler>();
-		g_logManager.ClearLogHandlers();
-		g_logManager.RegisterLogHandler(stdLogger);
+		LogManager::Get().ClearLogHandlers();
+		LogManager::Get().RegisterLogHandler(stdLogger);
 		wstring msg = boost::str(boost::wformat(L"Opening %d connections using PER_DRIVER took %d seconds") % nrRuns % deltaDriver);
 		LOG_INFO(msg);
 		msg = boost::str(boost::wformat(L"Opening %d connections using PER_HENV took %d seconds") % nrRuns % deltaEnv);
