@@ -41,6 +41,7 @@ namespace exodbc
 	* \brief	A class that can hold LogHandler instances and forward log-messages
 	*			to those LogHandlers.
 	*			The class is thread-safe.
+	*			The class is a Singleton, use Get() to get the only existing instance.
 	* \details	The LogManager has a global level that can be set on it. It will only
 	*			forward messages to its registered LogHandlers that have a logLevel
 	*			greater or equal than the currently set LogLevel
@@ -56,6 +57,9 @@ namespace exodbc
 		LogManager();
 
 	public:
+		/*!
+		* \brief Get the Singleton-instance.
+		*/
 		static LogManager& Get();
 
 		/*!
