@@ -37,5 +37,6 @@ include/mylib/myLib.h
 find_package(Boost 1.36.0)
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
-  add_library(myLib SHARED ${SRC_MYLIB} ${HEADERS_MYLIB} )
 endif()
+
+add_library(myLib SHARED ${SRC_MYLIB} ${HEADERS_MYLIB} )
