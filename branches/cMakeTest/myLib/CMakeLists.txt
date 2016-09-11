@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 project (myLib)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 # versioning
 set (myLib_VERSION_MAJOR 1)
 set (myLib_VERSION_MINOR 0)
@@ -15,11 +16,12 @@ if(SUBVERSION_FOUND)
   set (myLib_VERSION_REV ${Project_WC_REVISION})
 endif()
 
-
 configure_file (
   "${PROJECT_SOURCE_DIR}/myLibConfig.h.in"
   "${PROJECT_BINARY_DIR}/myLibConfig.h"
 )
+
+add_definitions(-D_UNICODE)
 
 include_directories ("${PROJECT_BINARY_DIR}")
 
