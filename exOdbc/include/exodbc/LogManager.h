@@ -41,19 +41,26 @@ namespace exodbc
 	* \brief	A class that can hold LogHandler instances and forward log-messages
 	*			to those LogHandlers.
 	*			The class is thread-safe.
+	*			The class is a Singleton, use Get() to get the only existing instance.
 	* \details	The LogManager has a global level that can be set on it. It will only
 	*			forward messages to its registered LogHandlers that have a logLevel
 	*			greater or equal than the currently set LogLevel
 	*/
 	class EXODBCAPI LogManager
 	{
-	public:
+	private:
 		/*!
 		* \brief Default Constructor. Registers a StdErrLogHandler during construction
 		*			and sets LogLevel to LogLevel::Info in release builds and
 		*			LogLevel::Debug in debug builds.
 		*/
 		LogManager();
+
+	public:
+		/*!
+		* \brief Get the Singleton-instance.
+		*/
+		static LogManager& Get();
 
 		/*!
 		* \brief Registers the passed LogHandler.
@@ -98,14 +105,12 @@ namespace exodbc
 		LogLevel m_globalLogLevel;
 		mutable std::mutex m_globalLogLevelMutex;
 	};
-
-	extern EXODBCAPI LogManager g_logManager;	///< The global instance of the LogManager
 }
 
 // Generic Log-entry
 #define LOG_MSG(logLevel, msg) \
 	do { \
-		exodbc::g_logManager.LogMessage(logLevel, msg, __FILEW__, __LINE__, __FUNCTIONW__); \
+		exodbc::LogManager::Get().LogMessage(logLevel, msg, __FILEW__, __LINE__, __FUNCTIONW__); \
 	} while( 0 )
 
 // Generic Log-entry shortcuts

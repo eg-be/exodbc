@@ -159,8 +159,8 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		Table t(pDb, TableAccessFlag::AF_READ, ti);
 		vector<ColumnBufferPtrVariant> columns;
 		// disable logger while doing this
-		vector<LogHandlerPtr> logHandlers = g_logManager.GetLogHandlers();
-		g_logManager.ClearLogHandlers();
+		vector<LogHandlerPtr> logHandlers = LogManager::Get().GetLogHandlers();
+		LogManager::Get().ClearLogHandlers();
 		try
 		{
 			columns = t.CreateAutoColumnBufferPtrs(true, true, queryPrimaryKeys);
@@ -187,7 +187,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		t.Open();
 		for (auto itLog = logHandlers.begin(); itLog != logHandlers.end(); ++itLog)
 		{
-			g_logManager.RegisterLogHandler(*itLog);
+			LogManager::Get().RegisterLogHandler(*itLog);
 		}
 		wcout << L"||=Column Query Name =||=Sql Type =||= Column Size=||= Decimal Digits=||= Nullable=||= Primary Key=||" << endl;
 		for (auto itCol = columns.begin(); itCol != columns.end(); ++itCol)
@@ -351,7 +351,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 
 		// Create an environment with ODBC Version 3.0
-		g_logManager.SetGlobalLogLevel(LogLevel::Error);
+		LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
 		EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
 
 		// And connect to a database using the environment,

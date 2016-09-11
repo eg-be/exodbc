@@ -28,7 +28,7 @@ namespace exodbctest
 	TEST_F(LogManagerTest, Construction)
 	{
 		// After construction, one StdErrLogger must have been created
-		LogManager mg;
+		LogManager& mg = LogManager::Get();
 
 		ASSERT_EQ(1, mg.GetRegisteredLogHandlersCount());
 		vector<LogHandlerPtr> handlers = mg.GetLogHandlers();
@@ -42,7 +42,7 @@ namespace exodbctest
 
 	TEST_F(LogManagerTest, ClearLogHandlers)
 	{
-		LogManager mg;
+		LogManager& mg = LogManager::Get();
 		EXPECT_EQ(1, mg.GetRegisteredLogHandlersCount());
 		mg.ClearLogHandlers();
 		EXPECT_EQ(0, mg.GetRegisteredLogHandlersCount());
