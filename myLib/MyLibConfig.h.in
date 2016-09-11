@@ -1,0 +1,4 @@
+// the configured options and settings for myLib
+#define myLib_VERSION_MAJOR @myLib_VERSION_MAJOR@
+#define myLib_VERSION_MINOR @myLib_VERSION_MINOR@
+#define myLib_VERSION_BUILD @myLib_VERSION_BUILD@
