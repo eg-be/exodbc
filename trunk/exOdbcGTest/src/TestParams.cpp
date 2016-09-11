@@ -184,26 +184,26 @@ namespace exodbctest
 			wstring logLevelValue = tree.get<wstring>(L"TestSettings.LogLevel", L"Info");
 			if (boost::iequals(logLevelValue, L"Debug"))
 			{
-				g_logManager.SetGlobalLogLevel(LogLevel::Debug);
+				LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
 			}
 			else if (boost::iequals(logLevelValue, L"Info"))
 			{
-				g_logManager.SetGlobalLogLevel(LogLevel::Info);
+				LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
 			}
 			else if (boost::iequals(logLevelValue, L"Warning"))
 			{
-				g_logManager.SetGlobalLogLevel(LogLevel::Warning);
+				LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
 			}
 			else if (boost::iequals(logLevelValue, L"Error"))
 			{
-				g_logManager.SetGlobalLogLevel(LogLevel::Error);
+				LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
 			}
 			// logfile
 			bool logFile = tree.get<bool>(L"TestSettings.LogFile", false);
 			if (logFile)
 			{
 				FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(L"exOdbcGTest.log", true);
-				g_logManager.RegisterLogHandler(pFileLogger);
+				LogManager::Get().RegisterLogHandler(pFileLogger);
 			}
 		}
 		catch (const std::exception& ex)

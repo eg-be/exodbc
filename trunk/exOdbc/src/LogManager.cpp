@@ -27,7 +27,11 @@ using namespace std;
 
 namespace exodbc
 {
-	LogManager g_logManager;
+	LogManager& LogManager::Get()
+	{
+		static LogManager instance;
+		return instance;
+	}
 
 	LogManager::LogManager()
 #ifdef _DEBUG
