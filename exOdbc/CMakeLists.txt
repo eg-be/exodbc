@@ -1,5 +1,8 @@
 cmake_minimum_required (VERSION 3.0)
-project (exodbc)
+project (exodbc 
+  VERSION 9.0.0.0
+  LANGUAGES CXX
+)
 
 # Only add Debug and Release Configuration  
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
