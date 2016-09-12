@@ -1,0 +1,5 @@
+// the configured options and settings for exodbc
+#define exodbc_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define exodbc_VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define exodbc_VERSION_BUILD @PROJECT_VERSION_BUILD@
+#define exodbc_VERSION_REV @PROJECT_VERSION_TWEAK@
