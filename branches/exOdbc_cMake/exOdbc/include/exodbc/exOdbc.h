@@ -21,10 +21,10 @@
 // Defines to dll-import/export
 // ----------------------------
 
-#ifdef EXODBC_EXPORTS
+#ifdef exodbc_EXPORTS
 	#define EXODBCAPI __declspec(dllexport)
 #else
-	#ifdef EXODBC_IMPORTS
+	#ifdef exodbc_IMPORTS
 		#define EXODBCAPI __declspec(dllimport)
 	#else
 		#define EXODBCAPI
