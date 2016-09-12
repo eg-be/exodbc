@@ -1,7 +1,5 @@
 cmake_minimum_required (VERSION 3.0)
-project (exodbc 
-  9.0.0.0
-  CXX)
+project (exodbc)
 
 # Only add Debug and Release Configuration  
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
@@ -28,12 +26,20 @@ configure_file (
   "${PROJECT_BINARY_DIR}/exodbcConfig.h"
 )
 
-add_definitions(-D_UNICODE)
+# some help for the compiler:
+if(MSVC)
+add_definitions(
+  -D_UNICODE
+  -D_SCL_SECURE_NO_WARNINGS
+  -D_CRT_SECURE_NO_WARNINGS
+)
+endif()
+
 
 # includes: Add the build dir where the updated files will be written too:
 include_directories ("${PROJECT_BINARY_DIR}")
 # and add the library headers:
-# include_directories ("${PROJECT_SOURCE_DIR}/include/exodbc")
+include_directories ("${PROJECT_SOURCE_DIR}/include/exodbc")
 
 # we explicitely list all files, as recommended by cmake:
 set ( SRC_EXODBC 
@@ -42,6 +48,7 @@ set ( SRC_EXODBC
   src/Database.cpp 
   src/Environment.cpp 
   src/Exception.cpp 
+  src/ExecutableStatement.cpp
   src/exOdbc.cpp 
   src/Helpers.cpp 
   src/InfoObject.cpp 
@@ -81,10 +88,19 @@ set ( HEADERS_EXODBC
 )
 
 # we depend on boost:
-find_package(Boost 1.55.0)
+find_package(Boost 1.55.0 REQUIRED)
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
+else()
+  message(WARNING "Boost libraries were not found, try setting CMAKE_PREFIX_PATH or BOOST_INCLUDE_DIR")
 endif()
 
-# and we build the exodbc library
-add_library(exodbc SHARED ${SRC_MYLIB} ${HEADERS_MYLIB} )
+# and we build the shared and static exodbc library
+add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} )
+add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} )
+
+# and for the linker, add odbc32.lib to the standard libraries:
+if(MSVC)
+  target_link_libraries(exodbc PRIVATE odbc32)
+  target_link_libraries(libexodbc PRIVATE odbc32)
+endif()
