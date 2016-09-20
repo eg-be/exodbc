@@ -7,6 +7,11 @@ project (exodbc
 # Only add Debug and Release Configuration  
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
+# put output into a folder 'bin'
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 # versioning
 #set (myLib_VERSION_MAJOR 1)
 #set (myLib_VERSION_MINOR 0)
@@ -90,6 +95,9 @@ set ( HEADERS_EXODBC
   include/exodbc/TablePrivileges.h
 )
 
+set (RES_EXODBC
+  res/exOdbctest.rc
+)
 
 # we depend on boost:
 find_package(Boost 1.55.0 REQUIRED)
@@ -100,8 +108,14 @@ else()
 endif()
 
 # and we build the shared and static exodbc library
-add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} )
-add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} )
+add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} )
+add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} )
+
+# provide a group for the rc-file
+source_group( "Resources"
+  FILES
+  res/exOdbctest.rc
+)
 
 # and for the linker, add odbc32.lib to the standard libraries:
 if(MSVC)
