@@ -95,6 +95,10 @@ set ( HEADERS_EXODBC
   include/exodbc/TablePrivileges.h
 )
 
+set ( CONFIG_EXODBC 
+  ${PROJECT_BINARY_DIR}/exodbcConfig.h
+)
+
 set (RES_EXODBC
   res/exOdbc.rc
 )
@@ -108,13 +112,18 @@ else()
 endif()
 
 # and we build the shared and static exodbc library
-add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} )
-add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} )
+add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${RES_EXODBC} )
+add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${RES_EXODBC} )
 
 # provide a group for the rc-file
 source_group( "Resources"
   FILES
   res/exOdbc.rc
+)
+
+source_group( "Config"
+  FILES
+  ${PROJECT_BINARY_DIR}/exodbcConfig.h
 )
 
 # and for the linker, add odbc32.lib to the standard libraries:
