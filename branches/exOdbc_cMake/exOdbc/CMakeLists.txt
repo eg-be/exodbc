@@ -96,7 +96,7 @@ set ( HEADERS_EXODBC
 )
 
 set (RES_EXODBC
-  res/exOdbctest.rc
+  res/exOdbc.rc
 )
 
 # we depend on boost:
@@ -114,7 +114,7 @@ add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} )
 # provide a group for the rc-file
 source_group( "Resources"
   FILES
-  res/exOdbctest.rc
+  res/exOdbc.rc
 )
 
 # and for the linker, add odbc32.lib to the standard libraries:
