@@ -8,8 +8,6 @@
 * Header file for the Table class and its helpers.
 */
 
-#include "stdafx.h"
-
 // Own header
 #include "Table.h"
 

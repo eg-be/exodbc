@@ -8,8 +8,6 @@
 * Source file for the Database class and its helpers.
 */
 
-#include "stdafx.h"
-
 // Own header
 #include "Database.h"
 

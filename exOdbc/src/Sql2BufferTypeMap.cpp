@@ -7,8 +7,6 @@
 *
 */
 
-#include "stdafx.h"
-
 // Own header
 #include "Sql2BufferTypeMap.h"
 

@@ -8,14 +8,21 @@
 
 #pragma once
 
-// Some compiler tuning
-// --------------------
-#pragma warning(disable: 4251) // 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
-#ifndef _SCL_SECURE_NO_WARNINGS
-	#define _SCL_SECURE_NO_WARNINGS 1	// 'function': was declared deprecated also 'std::<function name>': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct.
-#endif
-#ifndef _CRT_SECURE_NO_WARNINGS
-	#define _CRT_SECURE_NO_WARNINGS 1	// 'function': This function or variable may be unsafe. Consider using strcpy_s instead.
+// include the configuration here
+#include "exodbcConfig.h"
+
+// Some compiler tuning for different platforms
+// --------------------------------------------
+#ifdef _WIN32
+	#include <SDKDDKVer.h>
+	
+	#pragma warning(disable: 4251) // 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
+	#ifndef _SCL_SECURE_NO_WARNINGS
+		#define _SCL_SECURE_NO_WARNINGS 1	// 'function': was declared deprecated also 'std::<function name>': Function call with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct.
+	#endif
+	#ifndef _CRT_SECURE_NO_WARNINGS
+		#define _CRT_SECURE_NO_WARNINGS 1	// 'function': This function or variable may be unsafe. Consider using strcpy_s instead.
+	#endif
 #endif
 
 // Defines to dll-import/export
@@ -31,12 +38,26 @@
 	#endif
 #endif
 
+// libs - boost stuff
+#include "boost/algorithm/string.hpp"
+#include "boost/format.hpp"
+#include "boost/signals2.hpp"
+#include "boost/lexical_cast.hpp"
+#include "boost/variant.hpp"
+#include "boost/variant/polymorphic_get.hpp"
+
 // System includes
+#include <windows.h>
+#include <locale>
+#include <codecvt>
 #include <string>
+#include <iostream>
+#include <sstream>
+#include <set>
 #include <vector>
+#include <map>
 
 // odbc-things
-#include <windows.h>
 #include <sql.h>
 #include <sqlext.h>
 #include <sqlucode.h>

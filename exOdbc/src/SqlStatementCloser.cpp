@@ -6,8 +6,6 @@
 * \copyright GNU Lesser General Public License Version 3
 */
 
-#include "stdafx.h"
-
 // Own header
 #include "SqlStatementCloser.h"
 
