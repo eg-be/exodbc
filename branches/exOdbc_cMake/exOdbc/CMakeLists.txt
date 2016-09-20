@@ -67,7 +67,6 @@ set ( SRC_EXODBC
   src/SqlStatementCloser.cpp 
   src/Table.cpp 
   src/TablePrivileges.cpp 
-  src/targetver.h
 )
 
 set ( HEADERS_EXODBC
@@ -112,8 +111,8 @@ else()
 endif()
 
 # and we build the shared and static exodbc library
-add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${RES_EXODBC} )
-add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${RES_EXODBC} )
+add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
+add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
 
 # provide a group for the rc-file
 source_group( "Resources"
@@ -121,6 +120,7 @@ source_group( "Resources"
   res/exOdbc.rc
 )
 
+# and one for the generated config-file
 source_group( "Config"
   FILES
   ${PROJECT_BINARY_DIR}/exodbcConfig.h

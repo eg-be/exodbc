@@ -7,8 +7,6 @@
 *
 */
 
-#include "stdafx.h"
-
 // Own header
 #include "InfoObject.h"
 
