@@ -8,9 +8,6 @@
 
 #pragma once
 
-// include the configuration here
-#include "exodbcConfig.h"
-
 // Some compiler tuning for different platforms
 // --------------------------------------------
 #ifdef _WIN32

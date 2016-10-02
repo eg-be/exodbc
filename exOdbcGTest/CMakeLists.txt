@@ -34,6 +34,9 @@ add_definitions(
   -D_CRT_SECURE_NO_WARNINGS
 )
 endif()
+add_definitions(
+  -DEXODBC_TEST
+)
 
 
 # includes: Add the build dir where the updated files will be written too:
