@@ -12,19 +12,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# versioning
-#set (myLib_VERSION_MAJOR 1)
-#set (myLib_VERSION_MINOR 0)
-#set (myLib_VERSION_BUILD 9)
-#set (myLib_VERSION_REV 0)
-
 # update tweak version with info from subversion, if available:
 find_package(Subversion)
 if(SUBVERSION_FOUND)
   Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-  message("Current revision is ${Project_WC_REVISION}")
   Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
-  message("Last changed log is ${Project_LAST_CHANGED_LOG}")
   set (PROJECT_VERSION_TWEAK ${Project_WC_REVISION})
 endif()
 
@@ -106,8 +98,6 @@ set (RES_EXODBC
 find_package(Boost 1.55.0 REQUIRED)
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
-else()
-  message(WARNING "Boost libraries were not found, try setting CMAKE_PREFIX_PATH or BOOST_INCLUDE_DIR")
 endif()
 
 # and we build the shared and static exodbc library
