@@ -97,11 +97,11 @@ include_directories(${Boost_INCLUDE_DIRS})
 find_package(GTest 1.7.0 REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
-# and on exodbc
-add_dependencies(exodbcTest exodbc)
-
 # and we build the exodbcTest application
-add_executable(exodbcTest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
+add_executable(exodbctest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
+
+# and on exodbc
+add_dependencies(exodbctest exodbc)
 
 # provide a group for the rc-file
 source_group( "Resources"
@@ -115,7 +115,7 @@ source_group( "Config"
   ${PROJECT_BINARY_DIR}/exodbcTestConfig.h
 )
 
-target_link_libraries(exodbcTest exodbc)
+target_link_libraries(exodbctest exodbc)
 
 # and for the linker, add odbc32.lib to the standard libraries:
 #if(MSVC)
