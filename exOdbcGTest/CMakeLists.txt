@@ -41,51 +41,48 @@ include_directories ("${PROJECT_BINARY_DIR}")
 
 # we explicitely list all files, as recommended by cmake:
 set ( SRC_EXODBCTEST 
-  src/AssertionException.cpp 
-  src/ColumnBuffer.cpp 
-  src/Database.cpp 
-  src/Environment.cpp 
-  src/Exception.cpp 
-  src/ExecutableStatement.cpp
-  src/exOdbc.cpp 
-  src/Helpers.cpp 
-  src/InfoObject.cpp 
-  src/LogHandler.cpp 
-  src/LogManager.cpp 
-  src/SpecializedExceptions.cpp 
-  src/Sql2BufferTypeMap.cpp 
-  src/SqlStatementCloser.cpp 
-  src/Table.cpp 
-  src/TablePrivileges.cpp 
+  src/ColumnBufferTest.cpp 
+  src/DatabaseTest.cpp 
+  src/EnumFlagsTest.cpp
+  src/EnvironmentTest.cpp
+  src/ExcelTest.cpp
+  src/ExecutableStatementTest.cpp
+  src/exOdbcGTest.cpp 
+  src/exOdbcGTestHelpers.cpp 
+  src/HelpersTest.cpp 
+  src/LogManagerTest.cpp 
+  src/ManualTestTables.cpp
+  src/SqlHandleTest.cpp
+  src/SqlStmtCloserTest.cpp
+  src/TableTest.cpp 
+  src/TestDbCreator.cpp
+  src/TestParams.cpp
+  src/wxCompatibilityTest.cpp
 )
 
 set ( HEADERS_EXODBCTEST
-  include/exodbc/AssertionException.h
-  include/exodbc/bitmask_operators.hpp
-  include/exodbc/ColumnBuffer.h
-  include/exodbc/ColumnBufferVisitors.h
-  include/exodbc/Database.h
-  include/exodbc/DebugNew.h
-  include/exodbc/DoxygenToc.h
-  include/exodbc/EnumFlags.h
-  include/exodbc/Environment.h
-  include/exodbc/Exception.h
-  include/exodbc/ExecutableStatement.h
-  include/exodbc/exOdbc.h
-  include/exodbc/Helpers.h
-  include/exodbc/InfoObject.h
-  include/exodbc/LogHandler.h
-  include/exodbc/LogManager.h
-  include/exodbc/SpecializedExceptions.h
-  include/exodbc/Sql2BufferTypeMap.h
-  include/exodbc/SqlHandle.h
-  include/exodbc/SqlStatementCloser.h
-  include/exodbc/Table.h
-  include/exodbc/TablePrivileges.h
+  src/ColumnBufferTest.h
+  src/DatabaseTest.h
+  src/DebugNew.h
+  src/EnumFlagsTest.h
+  src/EnvironmentTest.h
+  src/ExcelTest.h
+  src/ExecutableStatementTest.h
+  src/exOdbcGTest.h
+  src/exOdbcGTestHelpers.h
+  src/HelpersTest.h
+  src/LogManagerTest.h
+  src/ManualTestTables.h
+  src/SqlHandleTest.h
+  src/SqlStmtCloserTest.h
+  src/TableTest.h 
+  src/TestDbCreator.h
+  src/TestParams.h
+  src/wxCompatibilityTest.h
 )
 
 set ( CONFIG_EXODBCTEST 
-  ${PROJECT_BINARY_DIR}/exodbcConfig.h
+  ${PROJECT_BINARY_DIR}/exodbcTestConfig.h
 )
 
 set (RES_EXODBCTEST
@@ -98,24 +95,23 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
-# and we build the shared and static exodbc library
-add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
-add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
+# and we build the exodbcTest application
+add_executable(exodbcTest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
 
 # provide a group for the rc-file
 source_group( "Resources"
   FILES
-  res/exOdbc.rc
+  res/exOdbcTest.rc
 )
 
 # and one for the generated config-file
 source_group( "Config"
   FILES
-  ${PROJECT_BINARY_DIR}/exodbcConfig.h
+  ${PROJECT_BINARY_DIR}/exodbcTestConfig.h
 )
 
 # and for the linker, add odbc32.lib to the standard libraries:
-if(MSVC)
-  target_link_libraries(exodbc PRIVATE odbc32)
-  target_link_libraries(libexodbc PRIVATE odbc32)
-endif()
+#if(MSVC)
+#  target_link_libraries(exodbc PRIVATE odbc32)
+#  target_link_libraries(libexodbc PRIVATE odbc32)
+#endif()
