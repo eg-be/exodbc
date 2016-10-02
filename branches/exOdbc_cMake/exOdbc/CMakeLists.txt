@@ -103,6 +103,8 @@ endif()
 # and we build the shared and static exodbc library
 add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
 add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
+target_include_directories(exodbc PUBLIC include)
+target_include_directories(libexodbc PUBLIC include)
 
 # provide a group for the rc-file
 source_group( "Resources"
