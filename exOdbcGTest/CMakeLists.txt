@@ -91,9 +91,14 @@ set (RES_EXODBCTEST
 
 # we depend on boost:
 find_package(Boost 1.55.0 REQUIRED)
-if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
-endif()
+include_directories(${Boost_INCLUDE_DIRS})
+
+# and on GTest
+find_package(GTest 1.7.0 REQUIRED)
+include_directories(${GTEST_INCLUDE_DIRS})
+
+# and on exodbc
+add_dependencies(exodbcTest exodbc)
 
 # and we build the exodbcTest application
 add_executable(exodbcTest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
@@ -109,6 +114,8 @@ source_group( "Config"
   FILES
   ${PROJECT_BINARY_DIR}/exodbcTestConfig.h
 )
+
+target_link_libraries(exodbcTest exodbc)
 
 # and for the linker, add odbc32.lib to the standard libraries:
 #if(MSVC)
