@@ -1,0 +1,39 @@
+Configure exOdbc
+----------------
+# From exOdbc top-level directory:
+# Create a directory for the build-environment and cd into it:
+mkdir build
+cd build
+
+# invoke cmake and pass path to the boost-headers:
+cmake -D BOOST_INCLUDEDIR=e:/lib/boost_1_62_0 ..
+
+# or specify a different generator:
+# cmake -G "Visual Studio 14 2015 Win64" -D BOOST_INCLUDEDIR=e:/lib/boost_1_62_0 ..
+
+Build exOdbc
+------------
+# From build-environment directory:
+# Build all targets:
+cmake --build .
+
+# Build a specific target:
+cmake --build . --target exodbc
+# The following targets are defined:
+exodbc:    exodbc as a shared library ('.dll')
+libexodbc: exodbc as a static library ('.lib')
+# Note: On windows, all targets link to the shared runtime-library ('/MD' or '/MDd')
+
+# Set build type:
+cmake --build . --config Release --target exodbc
+
+Clean oxOdbc
+--------------
+# From build-environment directory:
+cmake --build . --target clean
+
+Start over (Clean cmake environment)
+------------------------------------
+# Simply remove the build-environment directory:
+# From exOdbc top-level directory:
+rmdir /S /Q build
