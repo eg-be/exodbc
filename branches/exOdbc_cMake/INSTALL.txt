@@ -7,6 +7,9 @@ cd build
 
 # invoke cmake and pass path to the boost-headers:
 cmake -D BOOST_INCLUDEDIR=e:/lib/boost_1_62_0 ..
+# or export BOOST_ROOT first:
+set BOOST_ROOT=e:/lib/boost_1_62_0
+cmake ..
 
 # or specify a different generator:
 # cmake -G "Visual Studio 14 2015 Win64" -D BOOST_INCLUDEDIR=e:/lib/boost_1_62_0 ..

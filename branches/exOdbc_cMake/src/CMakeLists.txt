@@ -16,7 +16,7 @@ endif()
 # and place it in the include-folder (so it could be used)
 configure_file (
   "${PROJECT_SOURCE_DIR}/exodbcConfig.h.in"
-  "${PROJECT_BINARY_DIR}/../include/exodbc/exodbcConfig.h"
+  "${PROJECT_SOURCE_DIR}/../include/exodbc/exodbcConfig.h"
 )
 
 # compiler flags
@@ -107,7 +107,7 @@ source_group( "Resources"
 # and one for the generated config-file
 source_group( "Config"
   FILES
-  ${PROJECT_BINARY_DIR}/../include/exodbc/exodbcConfig.h
+  ../include/exodbc/exodbcConfig.h
 )
 
 # and for the linker, add odbc32.lib to the standard libraries:
