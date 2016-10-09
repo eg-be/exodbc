@@ -27,7 +27,7 @@ Finally build the library:
 
   cmake --build . --config Release
   cmake --build . --config Debug
-
+ 
 The resulting binaries have been placed in 'bin\[Debug|Release]'.
 
 Install reference
@@ -43,13 +43,19 @@ Some environment variables may change the resulting cmake-configuration:
 
 Dependencies
 ------------
-  libexOdbc:
-    - boost (header-only)
+libexOdbc:
+  - boost (header-only)
     
-  exOdbcTest
-    - boost (with compiled libraries)
-    - gtest
+exOdbcTest
+  - boost (with compiled libraries)
+  - gtest
 
+Various hints and notes
+-----------------------
+- By default, shared libraries are built. This is configured in the
+  CMakeLists.txt file inside the top-level directory, using
+    SET(BUILD_SHARED_LIBS ON)
+	
 Full build
 ----------
 Build all components including the tests and samples:
