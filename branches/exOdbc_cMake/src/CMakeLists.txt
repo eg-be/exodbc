@@ -1,15 +1,12 @@
 cmake_minimum_required (VERSION 3.0.2)
-project (libexodbc 
-  VERSION 0.9.0.0
-  LANGUAGES CXX
-)
+project (libexodbc)
 
 # update tweak version with info from subversion, if available:
 find_package(Subversion)
 if(SUBVERSION_FOUND)
   Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
   Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
-  set (PROJECT_VERSION_TWEAK ${Project_WC_REVISION})
+  set (LIBEXODBC_VERSION_TWEAK ${Project_WC_REVISION})
 endif()
 
 # create some files from the version information 
@@ -28,9 +25,7 @@ add_definitions(
 )
 endif()
 
-# includes: Add the build dir where the updated files will be written too:
-include_directories ("${PROJECT_BINARY_DIR}")
-# and add the library headers:
+# add the library headers:
 include_directories ("${PROJECT_SOURCE_DIR}/../include/exodbc")
 
 # we explicitely list all files, as recommended by cmake:
@@ -93,10 +88,10 @@ if(Boost_FOUND)
 endif()
 
 # and we exodbc
-add_library(libexodbc STATIC ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
-add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
+add_library(libexodbc ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
+#add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
+#target_include_directories(libexodbc PUBLIC include)
 target_include_directories(libexodbc PUBLIC include)
-target_include_directories(exodbc PUBLIC include)
 
 # provide a group for the rc-file
 source_group( "Resources"
@@ -113,5 +108,5 @@ source_group( "Config"
 # and for the linker, add odbc32.lib to the standard libraries:
 if(MSVC)
   target_link_libraries(libexodbc PRIVATE odbc32)
-  target_link_libraries(exodbc PRIVATE odbc32)
+#  target_link_libraries(exodbc PRIVATE odbc32)
  endif()
