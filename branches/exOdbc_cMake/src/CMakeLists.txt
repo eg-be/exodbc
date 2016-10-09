@@ -12,8 +12,8 @@ endif()
 # create some files from the version information 
 # and place it in the include-folder (so it could be used)
 configure_file (
-  "${PROJECT_SOURCE_DIR}/exodbcConfig.h.in"
-  "${PROJECT_SOURCE_DIR}/../include/exodbc/exodbcConfig.h"
+  "${PROJECT_SOURCE_DIR}/exOdbcConfig.h.in"
+  "${PROJECT_SOURCE_DIR}/../include/exodbc/exOdbcConfig.h"
 )
 
 # compiler flags
@@ -74,7 +74,7 @@ set ( HEADERS_EXODBC
 )
 
 set ( CONFIG_EXODBC 
-  ../include/exodbc/exodbcConfig.h
+  ../include/exodbc/exOdbcConfig.h
 )
 
 set (RES_EXODBC
@@ -102,7 +102,7 @@ source_group( "Resources"
 # and one for the generated config-file
 source_group( "Config"
   FILES
-  ../include/exodbc/exodbcConfig.h
+  ../include/exodbc/exOdbcConfig.h
 )
 
 # and for the linker, add odbc32.lib to the standard libraries:
