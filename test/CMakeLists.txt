@@ -6,13 +6,13 @@ find_package(Subversion)
 if(SUBVERSION_FOUND)
   Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
   Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
-  set (PROJECT_VERSION_TWEAK ${Project_WC_REVISION})
+  set (EXODBCTEST_VERSION_TWEAK ${Project_WC_REVISION})
 endif()
 
 # create some files from the version information:
 configure_file (
   "${PROJECT_SOURCE_DIR}/exOdbcTestConfig.h.in"
-  "${PROJECT_SOURCE_DIR}_DIR}/exOdbcTestConfig.h"
+  "${PROJECT_SOURCE_DIR}/exOdbcTestConfig.h"
 )
 
 # some help for the compiler:
@@ -89,7 +89,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 add_executable(exodbctest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
 
 # and on exodbc
-add_dependencies(exodbctest exodbc)
+add_dependencies(exodbctest libexodbc)
 
 # provide a group for the rc-file
 source_group( "Resources"
@@ -100,7 +100,7 @@ source_group( "Resources"
 # and one for the generated config-file
 source_group( "Config"
   FILES
-  exodbcTestConfig.h
+  exOdbcTestConfig.h
 )
 
 target_link_libraries(exodbctest exodbc)
