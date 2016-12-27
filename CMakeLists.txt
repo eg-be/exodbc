@@ -38,9 +38,9 @@ if(NOT $ENV{LIBEXODBC_ONLY})
   message(STATUS "Environment variable LIBEXODBC_ONLY is not set.")
   message(STATUS "Including 'test' in build.")
   
-  # and on GTest
-  SET(BUILD_GMOCK OFF)
-  SET(BUILD_GTEST ON)
+  # and on GTest. We only need GTest  
+  SET(BUILD_GMOCK OFF CACHE BOOL "Build libfoo shared library" FORCE)  
+  SET(BUILD_GTEST ON CACHE BOOL "Build libfoo shared library" FORCE)  
   
   # Download and unpack googletest at configure time
   configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
@@ -56,7 +56,7 @@ if(NOT $ENV{LIBEXODBC_ONLY})
   if(result)
     message(FATAL_ERROR "Build step for googletest failed: ${result}")
   endif()
-
+  
   # Prevent overriding the parent project's compiler/linker
   # settings on Windows
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
