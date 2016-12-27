@@ -88,7 +88,7 @@ if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
 endif()
 
-# and we exodbc
+# and we build the libexodbc library:
 add_library(libexodbc ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
 #add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
 #target_include_directories(libexodbc PUBLIC include)
