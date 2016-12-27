@@ -25,14 +25,10 @@
 // Defines to dll-import/export
 // ----------------------------
 
-#ifdef exodbc_EXPORTS
+#ifdef libexodbc_EXPORTS
 	#define EXODBCAPI __declspec(dllexport)
 #else
-	#ifdef exodbc_IMPORTS
-		#define EXODBCAPI __declspec(dllimport)
-	#else
-		#define EXODBCAPI
-	#endif
+	#define EXODBCAPI __declspec(dllimport)
 #endif
 
 // libs - boost stuff
