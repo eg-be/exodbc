@@ -13,6 +13,7 @@
 
 // Other headers
 #include "exodbc/exOdbc.h"
+#include "boost/filesystem.hpp"
 
 // System headers
 

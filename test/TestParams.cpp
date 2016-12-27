@@ -16,7 +16,9 @@
 #include "exodbc/LogManager.h"
 #include "exodbc/LogHandler.h"
 #include "exodbc/SpecializedExceptions.h"
-#include <boost/optional/optional.hpp>
+#include "boost/property_tree/ptree.hpp"
+#include "boost/property_tree/xml_parser.hpp"
+#include "boost/iostreams/stream.hpp"
 
 // Debug
 #include "DebugNew.h"
