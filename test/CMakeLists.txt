@@ -7,6 +7,7 @@ if(SUBVERSION_FOUND)
   Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
   Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
   set (EXODBCTEST_VERSION_TWEAK ${Project_WC_REVISION})
+  message(STATUS "Updating EXODBCTEST_VERSION_TWEAK to ${EXODBCTEST_VERSION_TWEAK}, read from ${PROJECT_SOURCE_DIR}")  
 endif()
 
 # create some files from the version information:
