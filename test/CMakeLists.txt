@@ -79,9 +79,22 @@ set (RES_EXODBCTEST
 )
 
 # we depend on boost:
+# http://stackoverflow.com/questions/28887680/linking-boost-library-with-boost-use-static-lib-off-on-windows
+set(Boost_NO_SYSTEM_PATHS true)
+set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
+set (Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.55.0 REQUIRED COMPONENTS
-                filesystem)
+                system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
+link_libraries(${Boost_LIBRARIES})
+if (WIN32)
+  # disable autolinking in boost
+  add_definitions( -DBOOST_ALL_NO_LIB )
+
+  # force all boost libraries to dynamic link (we already disabled
+  # autolinking, so I don't know why we need this, but we do!)
+  add_definitions( -DBOOST_ALL_DYN_LINK )
+endif()
 
 # we build the exodbcTest application
 add_executable(exodbctest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
