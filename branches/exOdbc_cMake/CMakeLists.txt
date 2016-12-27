@@ -39,8 +39,8 @@ if(NOT $ENV{LIBEXODBC_ONLY})
   message(STATUS "Including 'test' in build.")
   
   # and on GTest. We only need GTest  
-  SET(BUILD_GMOCK OFF CACHE BOOL "Build libfoo shared library" FORCE)  
-  SET(BUILD_GTEST ON CACHE BOOL "Build libfoo shared library" FORCE)  
+  SET(BUILD_GMOCK OFF CACHE BOOL "Builds the googlemock subproject" FORCE)  
+  SET(BUILD_GTEST ON CACHE BOOL "Builds the googletest subproject" FORCE)  
   
   # Download and unpack googletest at configure time
   configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
