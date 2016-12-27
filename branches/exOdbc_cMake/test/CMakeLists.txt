@@ -88,7 +88,7 @@ if (WIN32 AND NOT Boost_USE_STATIC_LIBS)
   # force all boost libraries to dynamic link. If not set, boost (?) somehow
   # wants to link to dlls names 'lib-whatever.lib', but on windows we do not have
   # a 'lib' prefix.
-  message(STATUS "Plattform is Win32 and Boost_USE_STATIC_LIBS is set to ${Boost_USE_STATIC_LIBS}: Adding BOOST_ALL_DYN_LINK")
+  message(STATUS "Plattform is Win32 and Boost_USE_STATIC_LIBS is not set: Adding BOOST_ALL_DYN_LINK")
   add_definitions( -DBOOST_ALL_DYN_LINK )
 endif()
 
