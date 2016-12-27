@@ -4,6 +4,9 @@ project (exodbc
   LANGUAGES CXX
 )
 
+option(BUILD_TESTS "Build exodbctest program" OFF)
+option(BUILD_SAMPLES "Build exodbcsamples programs" OFF)
+
 # Make the subprojects use the same-version-information
 # by providing them here
 set(EXODBC_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
@@ -29,7 +32,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 add_subdirectory(src)
-message(STATUS "foddo")
 # a note how we could set the env variable from within cmake:
 #SET(ENV{LIBEXODBC_ONLY} "1")
 if(NOT $ENV{LIBEXODBC_ONLY})
