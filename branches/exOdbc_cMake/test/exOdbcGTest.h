@@ -9,6 +9,12 @@
 
 #pragma once
 
+// Some compiler tuning for different platforms
+// --------------------------------------------
+#ifdef _WIN32
+	#include <SDKDDKVer.h>
+#endif
+
 // Same component headers
 #include "TestParams.h"
 
