@@ -24,9 +24,9 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # put output into a folder 'bin'
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Only add Debug and Release Configuration  
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
@@ -66,9 +66,9 @@ if(NOT $ENV{LIBEXODBC_ONLY})
   # The gtest/gtest_main targets carry header search path
   # dependencies automatically when using CMake 2.8.11 or
   # later. Otherwise we have to add them here ourselves.
-  # if (CMAKE_VERSION VERSION_LESS 2.8.11)
-    # include_directories("${gtest_SOURCE_DIR}/include")
-  # endif()  
+  if (CMAKE_VERSION VERSION_LESS 2.8.11)
+    include_directories("${gtest_SOURCE_DIR}/include")
+  endif()  
   
   
   add_subdirectory(test)

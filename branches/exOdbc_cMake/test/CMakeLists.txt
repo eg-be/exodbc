@@ -85,7 +85,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 # we build the exodbcTest application
 add_executable(exodbctest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
 
-# the exodbctest applications depends on other stuff: 
+# the exodbctest applications needs to link against libexodbc and gtest: 
 target_link_libraries(exodbctest libexodbc gtest)
 
 # provide a group for the rc-file
@@ -99,8 +99,6 @@ source_group( "Config"
   FILES
   exOdbcTestConfig.h
 )
-
-target_link_libraries(exodbctest exodbc)
 
 # and for the linker, add odbc32.lib to the standard libraries:
 #if(MSVC)
