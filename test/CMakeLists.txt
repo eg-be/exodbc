@@ -79,14 +79,15 @@ set (RES_EXODBCTEST
 )
 
 # we depend on boost:
-find_package(Boost 1.55.0 REQUIRED)
+find_package(Boost 1.55.0 REQUIRED COMPONENTS
+                filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # we build the exodbcTest application
 add_executable(exodbctest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
 
 # the exodbctest applications needs to link against libexodbc and gtest: 
-target_link_libraries(exodbctest libexodbc gtest)
+target_link_libraries(exodbctest libexodbc gtest ${Boost_LIBRARIES})
 
 # provide a group for the rc-file
 source_group( "Resources"
