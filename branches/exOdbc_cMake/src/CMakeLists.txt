@@ -92,7 +92,7 @@ endif()
 add_library(libexodbc ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
 #add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
 #target_include_directories(libexodbc PUBLIC include)
-target_include_directories(libexodbc PUBLIC include)
+target_include_directories(libexodbc PUBLIC ../include)
 
 # provide a group for the rc-file
 source_group( "Resources"
