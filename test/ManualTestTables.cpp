@@ -7,8 +7,6 @@
 * Declares classes derived from exodbc::Table that define their columns manually.
 */
 
-#include "stdafx.h"
-
 // Own header
 #include "ManualTestTables.h"
 

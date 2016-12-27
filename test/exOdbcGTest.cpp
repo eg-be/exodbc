@@ -7,8 +7,6 @@
  * Defines the entry point for the console (test-)application.
  */ 
 
-#include "stdafx.h"
-
 // Own header
 #include "exOdbcGTest.h"
 
