@@ -39,6 +39,9 @@ if(NOT $ENV{LIBEXODBC_ONLY})
   message(STATUS "Including 'test' in build.")
   
   # and on GTest
+  SET(BUILD_GMOCK OFF)
+  SET(BUILD_GTEST ON)
+  
   # Download and unpack googletest at configure time
   configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
