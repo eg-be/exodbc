@@ -82,17 +82,15 @@ set (RES_EXODBCTEST
 # http://stackoverflow.com/questions/28887680/linking-boost-library-with-boost-use-static-lib-off-on-windows
 set(Boost_NO_SYSTEM_PATHS true)
 set(Boost_USE_STATIC_LIBS OFF CACHE BOOL "use static libraries from Boost")
-set (Boost_USE_MULTITHREADED ON)
+set(Boost_USE_MULTITHREADED ON)
 find_package(Boost 1.55.0 REQUIRED COMPONENTS
                 system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 link_libraries(${Boost_LIBRARIES})
 if (WIN32)
-  # disable autolinking in boost
-  add_definitions( -DBOOST_ALL_NO_LIB )
-
-  # force all boost libraries to dynamic link (we already disabled
-  # autolinking, so I don't know why we need this, but we do!)
+  # force all boost libraries to dynamic link. If not set, boost (?) somehow
+  # wants to link to dlls names 'lib-whatever.lib', but on windows we do not have
+  # a 'lib' prefix.
   add_definitions( -DBOOST_ALL_DYN_LINK )
 endif()
 
