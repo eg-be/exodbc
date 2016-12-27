@@ -111,3 +111,9 @@ source_group( "Config"
   FILES
   exOdbcTestConfig.h
 )
+
+# on successfull compilation, copy the TestSettings.xml file
+add_custom_command(TARGET exodbctest POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy
+                       ${PROJECT_SOURCE_DIR}/TestSettings.xml
+                       $<TARGET_FILE_DIR:exodbctest>)
