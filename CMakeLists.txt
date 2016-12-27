@@ -23,6 +23,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 add_subdirectory(src)
+message(STATUS "foddo")
+# a note how we could set the env variable from within cmake:
+#SET(ENV{LIBEXODBC_ONLY} "1")
 if(NOT $ENV{LIBEXODBC_ONLY})
+  message(STATUS "Environment variable LIBEXODBC_ONLY is not set.")
+  message(STATUS "Including 'test' in build.")
   add_subdirectory(test)
 endif()
