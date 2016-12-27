@@ -113,8 +113,10 @@ add_dependencies(libgtest gtest)
 # and we build the exodbcTest application
 add_executable(exodbctest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
 
-# and on exodbc
-add_dependencies(exodbctest libexodbc libgtest)
+target_link_libraries(exodbctest libexodbc)
+
+# and the exodbctest applications depends on other things
+#add_dependencies(exodbctest libexodbc libgtest)
 
 # provide a group for the rc-file
 source_group( "Resources"
