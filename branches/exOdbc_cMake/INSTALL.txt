@@ -20,7 +20,6 @@ setting BOOST_ROOT (or alternatively, BOOST_INCLUDEDIR) and let cmake prepare
 the environment to build only the core exodbc library by setting BUILD_TESTS
 and BUILD_SAMPLES to samples OFF:
 
-  set LIBEXODBC_ONLY=1
   set BOOST_ROOT=e:/lib/boost_1_62_0
   cmake -DBUILD_TESTS=OFF -DBUILD_SAMPLES=OFF ..
 
