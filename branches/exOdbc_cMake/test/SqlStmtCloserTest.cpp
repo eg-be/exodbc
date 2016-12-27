@@ -7,8 +7,6 @@
 * [Brief CPP-file description]
 */
 
-#include "stdafx.h"
-
 // Own header
 #include "SqlStmtCloserTest.h"
 #include "exOdbcGTestHelpers.h"
