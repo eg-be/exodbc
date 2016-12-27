@@ -17,11 +17,12 @@ Create a directory for the build-environment and cd into it:
 
 Tell cmake where to look for the required boost header-only libraries by
 setting BOOST_ROOT (or alternatively, BOOST_INCLUDEDIR) and let cmake prepare
-the environment to build only the core exodbc library:
+the environment to build only the core exodbc library by setting BUILD_TESTS
+and BUILD_SAMPLES to samples OFF:
 
   set LIBEXODBC_ONLY=1
   set BOOST_ROOT=e:/lib/boost_1_62_0
-  cmake ..
+  cmake -DBUILD_TESTS=OFF -DBUILD_SAMPLES=OFF ..
 
 Finally build the library:
 
@@ -35,10 +36,10 @@ Install reference
 
 Environment variables
 ---------------------
-Some environment variables may change the resulting cmake-configuration:
+Some option variables may change the resulting cmake-configuration:
 
-  LIBEXODBC_ONLY: If set to a non-zero value, only the core exodbc library
-                  is built.
+  BUILD_TESTS: If set to ON, exodbctest is built.
+  BUILD_SAMPLES: If set to ON, samples are built.
 
 
 Dependencies
@@ -47,7 +48,7 @@ libexOdbc:
   - boost (header-only)
     
 exOdbcTest
-  - boost (with compiled libraries)
+  - boost (with compiled libraries, filesystem)
   - gtest
 
 Various hints and notes
