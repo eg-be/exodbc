@@ -33,13 +33,16 @@ The resulting binaries have been placed in 'bin\[Debug|Release]'.
 Install reference
 =================
 
-Environment variables
+Options
 ---------------------
 Some option variables may change the resulting cmake-configuration:
 
-  BUILD_TESTS: If set to ON, exodbctest is built.
-  BUILD_SAMPLES: If set to ON, samples are built.
-
+  BUILD_TESTS: If set to ON, exodbctest is built. Default: ON
+  BUILD_SAMPLES: If set to ON, samples are built. Default: ON
+  
+and how dependencies are used:
+  Boost_USE_STATIC_LIBS:  Set to ON to link against static libs of boost. 
+                          Default: OFF
 
 Dependencies
 ------------
@@ -55,7 +58,13 @@ Various hints and notes
 - By default, shared libraries are built. This is configured in the
   CMakeLists.txt file inside the top-level directory, using
     SET(BUILD_SHARED_LIBS ON)
-	
+- Use something like this to build the minimal required boost components:
+  bootstrap
+    b2 --with-filesystem variant=debug link=shared threading=multi runtime-link=shared address-model=32
+    b2 --with-filesystem variant=release link=shared threading=multi runtime-link=shared address-model=32
+- Use a 64bit generator:
+    cmake -G "Visual Studio 14 2015 Win64" ..
+  
 Full build
 ----------
 Build all components including the tests and samples:
@@ -65,18 +74,16 @@ Create a directory for the build-environment and cd into it:
 
   mkdir build
   cd build
-  
-Tell cmake where to look for the required libraries and let cmake prepare the
-environment:
 
-  set LIBEXODBC_ONLY=0
+Tell cmake where to look for the required boost libraries. boost-filesystem and
+boost-system are required to build the tests.
+
   set BOOST_ROOT=e:/lib/boost_1_62_0
-  set GTEST_ROOT=e:/lib/googletest-release-1.8.0
   cmake ..
 
-# From build-environment directory:
-# Build all targets:
-cmake --build .
+Build all targets:
+  
+  cmake --build .
 
 
 Configure exOdbc

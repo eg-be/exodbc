@@ -84,11 +84,11 @@ find_package(Boost 1.55.0 REQUIRED COMPONENTS
                 system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 link_libraries(${Boost_LIBRARIES})
-if (WIN32)
+if (WIN32 AND NOT Boost_USE_STATIC_LIBS)
   # force all boost libraries to dynamic link. If not set, boost (?) somehow
   # wants to link to dlls names 'lib-whatever.lib', but on windows we do not have
   # a 'lib' prefix.
-  message(STATUS "Adding BOOST_ALL_DYN_LINK")
+  message(STATUS "Plattform is Win32 and Boost_USE_STATIC_LIBS is set to ${Boost_USE_STATIC_LIBS}: Adding BOOST_ALL_DYN_LINK")
   add_definitions( -DBOOST_ALL_DYN_LINK )
 endif()
 
