@@ -4,7 +4,7 @@ project (exodbc
   LANGUAGES CXX
 )
 
-option(BUILD_TESTS "Build exodbctest program" OFF)
+option(BUILD_TESTS "Build exodbctest program" ON)
 option(BUILD_SAMPLES "Build exodbcsamples programs" OFF)
 
 # Make the subprojects use the same-version-information
@@ -34,9 +34,8 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 add_subdirectory(src)
 # a note how we could set the env variable from within cmake:
 #SET(ENV{LIBEXODBC_ONLY} "1")
-if(NOT $ENV{LIBEXODBC_ONLY})
-  message(STATUS "Environment variable LIBEXODBC_ONLY is not set.")
-  message(STATUS "Including 'test' in build.")
+if(${BUILD_TESTS})
+  message(STATUS "Option BUILD_TESTS is set to ${BUILD_TESTS}, building exodbctest")
   
   # and on GTest. We only need GTest  
   SET(BUILD_GMOCK OFF CACHE BOOL "Builds the googlemock subproject" FORCE)  
@@ -73,6 +72,6 @@ if(NOT $ENV{LIBEXODBC_ONLY})
     include_directories("${gtest_SOURCE_DIR}/include")
   endif()  
   
-  
+  # and include the test directory:
   add_subdirectory(test)
 endif()
