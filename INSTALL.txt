@@ -60,17 +60,23 @@ Options
 -------
 Some option variables may change the resulting cmake-configuration:
 
-  BUILD_TESTS: If set to ON, exodbctest is built. Default: ON
-  BUILD_SAMPLES: If set to ON, samples are built. Default: ON
+  BUILD_TESTS:    If set to ON, exodbctest is built. 
+                  Default: ON
+  BUILD_SAMPLES:  If set to ON, samples are built. 
+                  Default: ON
   
 and how dependencies are used:
 
   Boost_USE_STATIC_LIBS:  Set to ON to link against static libs of boost. 
                           Default: OFF
-  BUILD_SHARED_LIBS:  Build shared or static libs. Default: ON
+  BUILD_SHARED_LIBS:      Build shared or static libs. 
+                          Default: ON
 
-For example, to build 64bit using vc140 and boost static libs, use:
-  cmake -G "Visual Studio 14 2015 Win64" -DBoost_USE_STATIC_LIBS=ON ..
+For example, to build 64bit vc140 without tests:
+  cmake -G "Visual Studio 14 2015 Win64" -BUILD_TESTS=OFF ..
+
+or to build 64bit vc140 as static lib and link against boost static libs:
+  cmake -G "Visual Studio 14 2015 Win64" -DBoost_USE_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ..
   
 Dependencies
 ------------
