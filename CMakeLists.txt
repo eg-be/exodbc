@@ -34,6 +34,11 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 add_subdirectory(src)
 
+if(${BUILD_SAMPLES})
+  message(STATUS "Option BUILD_SAMPLES is set to ${BUILD_SAMPLES}, building exodbcsamples")
+  add_subdirectory(samples/DatabaseInfo)
+endif()
+
 if(${BUILD_TESTS})
   message(STATUS "Option BUILD_TESTS is set to ${BUILD_TESTS}, building exodbctest")
   
