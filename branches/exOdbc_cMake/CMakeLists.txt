@@ -5,7 +5,7 @@ project (exodbc
 )
 
 option(BUILD_TESTS "Build exodbctest program" ON)
-option(BUILD_SAMPLES "Build exodbcsamples programs" OFF)
+option(BUILD_SAMPLES "Build exodbcsamples programs" ON)
 
 # Make the subprojects use the same-version-information
 # by providing them here
@@ -21,12 +21,6 @@ if(NOT DEFINED BUILD_SHARED_LIBS)
  SET(BUILD_SHARED_LIBS ON)
 endif()
 
-# Set the build type if it isn't already
-if(NOT CMAKE_BUILD_TYPE)
-  message(STATUS "CMAKE_BUILD_TYPE not set, defaulting to 'Release'")
-  set(CMAKE_BUILD_TYPE Release)
-endif()
-
 # put output into a folder 'bin'
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug)
@@ -39,8 +33,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 add_subdirectory(src)
-# a note how we could set the env variable from within cmake:
-#SET(ENV{LIBEXODBC_ONLY} "1")
+
 if(${BUILD_TESTS})
   message(STATUS "Option BUILD_TESTS is set to ${BUILD_TESTS}, building exodbctest")
   

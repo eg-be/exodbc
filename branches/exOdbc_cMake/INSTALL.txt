@@ -32,7 +32,9 @@ The resulting binaries have been placed in 'bin\[Debug|Release]'.
 
 Full build
 ==========
-Build all components including the tests and samples:
+Build all components including the tests and samples.
+Requires boost-filesystem and googletest for exodbctest. Googletest is fetched
+during configuration, boost-filesystem must be provided.
 
 From exOdbc top-level directory:
 Create a directory for the build-environment and cd into it:
@@ -45,20 +47,26 @@ boost-system are required to build the tests.
 
   set BOOST_ROOT=e:/lib/boost_1_62_0
   cmake ..
-
+  
 or to prepare for a 64bit build:
   cmake -G "Visual Studio 14 2015 Win64" ..
 
 Build all targets:
   
-  cmake --build .
+  cmake --build . --config Release
+
+or for release builds:
+  cmake --build . --config Debug
 
 Install reference
 =================
+Configuration options and dependencies. See the cmake documentation for
+more available options.
 
-Options
--------
-Some option variables may change the resulting cmake-configuration:
+Configuration Options
+---------------------
+Some option variables may change the resulting cmake-configuration and can
+be used with cmake:
 
   BUILD_TESTS:    If set to ON, exodbctest is built. 
                   Default: ON
@@ -70,13 +78,23 @@ and how dependencies are used:
   Boost_USE_STATIC_LIBS:  Set to ON to link against static libs of boost. 
                           Default: OFF
   BUILD_SHARED_LIBS:      Build shared or static libs. 
-                          Default: ON
+                          Default: OFF
 
-For example, to build 64bit vc140 without tests:
+For example, to configure vc140 release-builds without tests:
   cmake -G "Visual Studio 14 2015 Win64" -BUILD_TESTS=OFF ..
 
-or to build 64bit vc140 as static lib and link against boost static libs:
+To configure vc140 debug builds as static lib and link against boost static libs:
   cmake -G "Visual Studio 14 2015 Win64" -DBoost_USE_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ..
+
+To configure vc140 debug builds with dynamic linking:
+  cmake -G "Visual Studio 14 2015" -DBoost_USE_STATIC_LIBS=OFF -DBUILD_SHARED_LIBS=ON ..
+
+Building
+--------
+Use --config during build to choose either 'Release' or 'Debug' configuration 
+((Default is 'Debug'):
+
+  cmake --build . --config Release
   
 Dependencies
 ------------
@@ -84,15 +102,19 @@ libexodbc:
   - boost (header-only)
     
 exOdbcTest
-  - gtest
-  - boost (with compiled libraries, only boost-filesystem)
+  - gtest:  Fetched during compilation from github. See CMakeLists.txt.in for more
+            information.
+  - boost:  Only boost-filesystem is required (but it must be compiled).
   - libexodbc
   
 Use something like this to build the minimal required boost components:
     bootstrap
     b2 --with-filesystem variant=debug link=shared threading=multi runtime-link=shared address-model=32
     b2 --with-filesystem variant=release link=shared threading=multi runtime-link=shared address-model=32
-or for a 64bit generator:
+    b2 --with-filesystem variant=debug link=static threading=multi runtime-link=shared address-model=32
+    b2 --with-filesystem variant=release link=static threading=multi runtime-link=shared address-model=32
+
+    or for a 64bit generator:
     b2 --with-filesystem variant=debug link=shared threading=multi runtime-link=shared address-model=64
     b2 --with-filesystem variant=release link=shared threading=multi runtime-link=shared address-model=64
 
@@ -106,48 +128,3 @@ Start over (Clean cmake environment)
 # Simply remove the build-environment directory:
 # From exOdbc top-level directory:
 rmdir /S /Q build
-
-
-Various hints and notes
------------------------
-- By default, shared libraries are built. This is configured in the
-  CMakeLists.txt file inside the top-level directory, using
-    SET(BUILD_SHARED_LIBS ON)
-
-  
-
-
-
-Configure exOdbc
-----------------
-# From exOdbc top-level directory:
-# Create a directory for the build-environment and cd into it:
-mkdir build
-cd build
-
-# invoke cmake and pass path to the boost-headers:
-cmake -D BOOST_INCLUDEDIR=e:/lib/boost_1_62_0 ..
-# or export BOOST_ROOT first:
-# set BOOST_ROOT=e:/lib/boost_1_62_0
-cmake ..
-
-# or specify a different generator:
-# cmake -G "Visual Studio 14 2015 Win64" -D BOOST_INCLUDEDIR=e:/lib/boost_1_62_0 ..
-
-Build exOdbc
-------------
-# From build-environment directory:
-# Build all targets:
-cmake --build .
-
-# Build a specific target:
-cmake --build . --target exodbc
-# The following targets are defined:
-exodbc:    exodbc as a shared library ('.dll')
-libexodbc: exodbc as a static library ('.lib')
-# Note: On windows, all targets link to the shared runtime-library ('/MD' or '/MDd')
-
-# Set build type:
-cmake --build . --config Release --target exodbc
-
-
