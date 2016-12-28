@@ -78,10 +78,10 @@ and how dependencies are used:
   Boost_USE_STATIC_LIBS:  Set to ON to link against static libs of boost. 
                           Default: OFF
   BUILD_SHARED_LIBS:      Build shared or static libs. 
-                          Default: OFF
+                          Default: Set to ON if not defined.
 
-For example, to configure 64bit vc140 builds without tests:
-  cmake -G "Visual Studio 14 2015 Win64" -BUILD_TESTS=OFF ..
+For example, to configure 64bit vc140 builds without tests but with samples:
+  cmake -G "Visual Studio 14 2015 Win64" -DBUILD_TESTS=OFF ..
 
 To configure 64bit vc140 builds as static lib and link against boost static libs:
   cmake -G "Visual Studio 14 2015 Win64" -DBoost_USE_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ..
