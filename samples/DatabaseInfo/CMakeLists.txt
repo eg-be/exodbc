@@ -24,5 +24,5 @@ endif()
 # we build the DatabaseInfo application
 add_executable(DatabaseInfo ${SRC_DATABASEINFO} )
 
-# the exodbctest applications needs to link against libexodbc
+# the DatabaseInfo applications needs to link against libexodbc
 target_link_libraries(DatabaseInfo libexodbc)
