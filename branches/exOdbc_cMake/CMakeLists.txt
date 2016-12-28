@@ -15,7 +15,11 @@ set(EXODBC_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
 set(EXODBC_VERSION_REV "${PROJECT_VERSION_TWEAK}")
 
 # default to building shared-libraries
-SET(BUILD_SHARED_LIBS ON)
+message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+if(NOT DEFINED BUILD_SHARED_LIBS)
+ message(STATUS "BUILD_SHARED_LIBS not set, defaulting to 'ON'")
+ SET(BUILD_SHARED_LIBS ON)
+endif()
 
 # Set the build type if it isn't already
 if(NOT CMAKE_BUILD_TYPE)
