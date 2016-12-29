@@ -117,3 +117,19 @@ add_custom_command(TARGET exodbctest POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy
                        ${PROJECT_SOURCE_DIR}/TestSettings.xml
                        $<TARGET_FILE_DIR:exodbctest>)
+
+add_test( NAME MySqlTest 
+          COMMAND exodbctest
+          "cs=Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;"
+          "--gtest_filter=-DatabaseTest.ReadTablePrivileges:TableTest.CheckPrivileges:StatementCloserTest.CloseStmtHandle:TableTest.DeleteFailOnNoData"
+          )
+
+add_test( NAME SqlServerTest 
+          COMMAND exodbctest
+          "cs=Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;"
+          )
+          
+add_test( NAME Db2Test
+          COMMAND exodbctest
+          "CS=Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;")
+          
