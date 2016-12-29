@@ -272,12 +272,6 @@ namespace exodbc
 				}
 				columns.push_back(columnPtrVariant);
 			}
-			catch (const boost::bad_polymorphic_get& ex)
-			{
-				WrapperException we(ex);
-				SET_EXCEPTION_SOURCE(we);
-				throw we;
-			}
 			catch (const NotSupportedException& nse)
 			{
 				if (skipUnsupportedColumns)
