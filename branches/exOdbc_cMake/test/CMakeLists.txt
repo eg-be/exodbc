@@ -72,6 +72,7 @@ set ( HEADERS_EXODBCTEST
 
 set ( CONFIG_EXODBCTEST 
   exOdbcTestConfig.h
+  TestSettings.xml
 )
 
 set (RES_EXODBCTEST
@@ -108,6 +109,7 @@ source_group( "Resources"
 source_group( "Config"
   FILES
   exOdbcTestConfig.h
+  TestSettings.xml
 )
 
 # on successfull compilation, copy the TestSettings.xml file
