@@ -15,12 +15,14 @@ Create a directory for the build-environment and cd into it:
   mkdir build
   cd build
 
-Tell cmake where to look for the required boost header-only libraries by
-setting BOOST_ROOT (or alternatively, BOOST_INCLUDEDIR) and let cmake prepare
-the environment to build only the core exodbc library by setting BUILD_TESTS
-and BUILD_SAMPLES to samples OFF:
+On Windows you probably need to tell cmake where to look for the required boost
+header-only libraries by setting BOOST_ROOT (or alternatively, BOOST_INCLUDEDIR):
 
   set BOOST_ROOT=e:/lib/boost_1_62_0
+
+Then let cmake configure the environment to build only the core exodbc library 
+by setting BUILD_TESTS and BUILD_SAMPLES to samples OFF:
+
   cmake -DBUILD_TESTS=OFF -DBUILD_SAMPLES=OFF ..
 
 Finally build the library:
