@@ -43,7 +43,9 @@
 #include "boost/variant.hpp"
 
 // System includes
-#include <windows.h>
+#if _WIN32
+	#include <windows.h>
+#endif
 #include <locale>
 #include <codecvt>
 #include <string>
