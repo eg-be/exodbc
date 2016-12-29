@@ -41,7 +41,6 @@
 #include "boost/signals2.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/variant.hpp"
-#include "boost/variant/polymorphic_get.hpp"
 
 // System includes
 #include <windows.h>
