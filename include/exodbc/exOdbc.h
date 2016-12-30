@@ -12,6 +12,7 @@
 // --------------------------------------------
 #ifdef _WIN32
 	#include <SDKDDKVer.h>
+	#include <windows.h>
 	
 	#pragma warning(disable: 4251) // 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2'
 	#ifndef _SCL_SECURE_NO_WARNINGS
@@ -25,15 +26,48 @@
 // Defines to dll-import/export
 // ----------------------------
 
-#ifdef libexodbc_EXPORTS
-	#define EXODBCAPI __declspec(dllexport)
+// Generic helper definitions for shared library support
+#if defined _WIN32 || defined __CYGWIN__
+  #define EXODBC_HELPER_DLL_IMPORT __declspec(dllimport)
+  #define EXODBC_HELPER_DLL_EXPORT __declspec(dllexport)
+  #define EXODBC_HELPER_DLL_LOCAL
 #else
-	#ifdef libexodbc_IMPORTS
-		#define EXODBCAPI __declspec(dllimport)
-	#else
-		#define EXODBCAPI
-	#endif
+  #if __GNUC__ >= 4
+    #define EXODBC_HELPER_DLL_IMPORT __attribute__ ((visibility ("default")))
+    #define EXODBC_HELPER_DLL_EXPORT __attribute__ ((visibility ("default")))
+    #define EXODBC_HELPER_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+  #else
+    #define EXODBC_HELPER_DLL_IMPORT
+    #define EXODBC_HELPER_DLL_EXPORT
+    #define EXODBC_HELPER_DLL_LOCAL
+  #endif
 #endif
+
+// Now we use the generic helper definitions above to define FOX_API and FOX_LOCAL.
+// FOX_API is used for the public API symbols. It either DLL imports or DLL exports (or does nothing for static build)
+// FOX_LOCAL is used for non-api symbols.
+
+#ifdef EXODBC_DLL // defined if FOX is compiled as a DLL
+  #ifdef libexodbc_EXPORTS // defined if we are building the FOX DLL (instead of using it)
+    #define EXODBCAPI EXODBC_HELPER_DLL_EXPORT
+  #else
+    #define EXODBCAPI EXODBC_HELPER_DLL_IMPORT
+  #endif // FOX_DLL_EXPORTS
+  #define EXODBCLOCAL EXODBC_HELPER_DLL_LOCAL
+#else // FOX_DLL is not defined: this means FOX is a static lib.
+  #define EXODBCAPI
+  #define EXODBCLOCAL
+#endif // FOX_DLL
+
+// #ifdef libexodbc_EXPORTS
+// 	#define EXODBCAPI __declspec(dllexport)
+// #else
+// 	#ifdef libexodbc_IMPORTS
+// 		#define EXODBCAPI __declspec(dllimport)
+// 	#else
+// 		#define EXODBCAPI
+// 	#endif
+// #endif
 
 // libs - boost stuff
 #include "boost/algorithm/string.hpp"
@@ -43,9 +77,6 @@
 #include "boost/variant.hpp"
 
 // System includes
-#if _WIN32
-	#include <windows.h>
-#endif
 #include <locale>
 #include <codecvt>
 #include <string>
