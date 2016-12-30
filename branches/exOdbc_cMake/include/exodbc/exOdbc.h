@@ -435,6 +435,8 @@ namespace exodbc
 	* \brief Format all Infos and Errors from passed handles into something human-readable.
 	*/
 	extern EXODBCAPI std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg);
+    
+	extern EXODBCAPI std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::wstring msg);    
 }
 
 

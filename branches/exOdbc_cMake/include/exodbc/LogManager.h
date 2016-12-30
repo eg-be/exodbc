@@ -122,7 +122,7 @@ namespace exodbc
 // ODBC-Logging
 #define LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, logLevel) \
 	do { \
-		std::wstring logOdbcMsgMsg = exodbc::FormatOdbcMessages(hEnv, hDbc, hStmt, hDesc, ret, L#SqlFunction, msg); \
+		std::wstring logOdbcMsgMsg = exodbc::FormatOdbcMessages(hEnv, hDbc, hStmt, hDesc, ret, #SqlFunction, msg); \
 		LOG_MSG(logLevel, logOdbcMsgMsg); \
 	} while( 0 )
 
