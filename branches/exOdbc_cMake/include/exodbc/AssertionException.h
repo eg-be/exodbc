@@ -79,10 +79,7 @@ namespace exodbc
 	*/
 	extern EXODBCAPI void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg);
 
-	extern EXODBCAPI void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::string& condition, const std::wstring& msg)
-    {
-        exOnAssert(file, line, function, utf8ToUtf16(condition), msg);
-    };
+	extern EXODBCAPI void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::string& condition, const std::wstring& msg);
 }
 
 // AssertionException Macros

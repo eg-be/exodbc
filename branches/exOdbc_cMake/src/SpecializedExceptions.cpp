@@ -40,6 +40,10 @@ namespace exodbc
 	}
 
 
+	SqlResultException::SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, const std::wstring& msg /* = L"" */) noexcept
+		: SqlResultException(utf8ToUtf16(sqlFunctionName), ret, msg)
+	{}
+
 	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg /* = L"" */) noexcept
 		: Exception(msg)
 		, m_ret(ret)

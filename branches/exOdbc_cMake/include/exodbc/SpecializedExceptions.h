@@ -47,6 +47,8 @@ namespace exodbc
 		*/
 		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg = L"") noexcept;
 
+		SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, const std::wstring& msg = L"") noexcept;
+
 		/*!
 		* \brief Create a new SqlResultException that collects error information available from the passed handle.
 		*/
