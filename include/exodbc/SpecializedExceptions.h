@@ -52,6 +52,8 @@ namespace exodbc
 		*/
 		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg = L"") noexcept;
 
+		SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg = L"") noexcept;        
+        
 		virtual ~SqlResultException() {};
 
 		std::wstring GetName() const noexcept override { return L"exodbc::SqlResultException"; };
@@ -266,7 +268,7 @@ namespace exodbc
 #define THROW_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
 	do { \
 		if(!SQL_SUCCEEDED(sqlReturn)) { \
-			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
+			SqlResultException ex(#sqlFunctionName, sqlReturn, handleType, handle, msg); \
 			SET_EXCEPTION_SOURCE(ex); \
 			throw ex; \
 		} \
@@ -293,7 +295,7 @@ namespace exodbc
 #define THROW_IFN_SUCCESS_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
 	do { \
 		if(SQL_SUCCESS != sqlReturn) { \
-			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
+			SqlResultException ex(#sqlFunctionName, sqlReturn, handleType, handle, msg); \
 			SET_EXCEPTION_SOURCE(ex); \
 			throw ex; \
 		} \
@@ -313,7 +315,7 @@ namespace exodbc
 	do { \
 		if(SQL_NO_DATA != sqlReturn) \
 		{ \
-			SqlResultException ex(L#sqlFunctionName, ret, L"Expected SQL_NO_DATA."); \
+			SqlResultException ex(#sqlFunctionName, ret, L"Expected SQL_NO_DATA."); \
 			SET_EXCEPTION_SOURCE(ex); \
 			throw ex; \
 		} \

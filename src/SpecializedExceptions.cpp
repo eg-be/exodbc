@@ -49,6 +49,10 @@ namespace exodbc
 		BuildErrorMsg(sqlFunctionName, ret);
 		m_what = utf16ToUtf8(ToString());
 	}
+	
+	SqlResultException::SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg /* = L"" */) noexcept
+		: SqlResultException(utf8ToUtf16(sqlFunctionName), ret, handleType, handle, msg)
+	{}
 
 
 	void SqlResultException::FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) noexcept
