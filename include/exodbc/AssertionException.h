@@ -91,7 +91,7 @@ namespace exodbc
 #define exASSERT_MSG(cond, msg)										\
 do {																\
 	if ( !(cond) )  {												\
-		exOnAssert(__FILEW__, __LINE__, __FUNCTIONW__,L#cond,msg);	\
+		exOnAssert(FILENAME, __LINE__, FUNCTIONNAME,#cond,msg);	\
 	}                                                               \
 } while ( 0 )
 

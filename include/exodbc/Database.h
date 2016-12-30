@@ -27,7 +27,6 @@
 #include <vector>
 #include <map>
 #include <set>
-#include <windows.h>
 #include <sql.h>
 #include <sqlext.h>
 #include <sqlucode.h>

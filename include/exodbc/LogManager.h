@@ -110,7 +110,7 @@ namespace exodbc
 // Generic Log-entry
 #define LOG_MSG(logLevel, msg) \
 	do { \
-		exodbc::LogManager::Get().LogMessage(logLevel, msg, __FILEW__, __LINE__, __FUNCTIONW__); \
+		exodbc::LogManager::Get().LogMessage(logLevel, msg, FILENAME, __LINE__, FUNCTIONNAME); \
 	} while( 0 )
 
 // Generic Log-entry shortcuts
