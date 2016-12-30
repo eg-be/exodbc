@@ -34,7 +34,7 @@ namespace exodbctest
 	class TableTest_QueryPrimaryKeysAndUpdateColumns_Test;
 
 }
-#endif;
+#endif
 
 namespace exodbc
 {
