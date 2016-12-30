@@ -25,7 +25,7 @@
 
 #ifdef _WIN32
     #define FILENAME __FILEW__
-    #define FUNCTIONNAME __FUNCTION__
+    #define FUNCTIONNAME __FUNCTIONW__
 #else
     #define FILENAME utf8ToUtf16(__FILE__)
     #define FUNCTIONNAME utf8ToUtf16(__FUNCTION__)
