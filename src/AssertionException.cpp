@@ -50,6 +50,13 @@ namespace exodbc
 		throw AssertionException(line, file, function, condition, msg);
 	}
 
+
+	void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::string& condition, const std::wstring& msg)
+	{
+		exOnAssert(file, line, function, utf8ToUtf16(condition), msg);
+	}
+
+
 	std::wstring AssertionException::ToString() const noexcept
 	{
 		std::wstringstream ws;

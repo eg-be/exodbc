@@ -59,7 +59,7 @@ namespace exodbc {
 	
 	std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::wstring msg)
     {
-        FormatOdbcMessages(hEnv, hDbc, hStmt, hDesc, ret, utf8ToUtf16(SQL_FUNC_EXISTS), msg);
+        return FormatOdbcMessages(hEnv, hDbc, hStmt, hDesc, ret, utf8ToUtf16(sqlFunctionName), msg);
     }
 
 
