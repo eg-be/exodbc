@@ -31,6 +31,18 @@
     #define FUNCTIONNAME utf8ToUtf16(__FUNCTION__)
 #endif
 
+#ifdef _WIN32
+    #define SQLAPICHARTYPE SQLWCHAR
+#else
+    #define SQLAPICHARTYPE SQLCHAR
+#endif
+
+#ifdef _WIN32
+    #define SQLAPICHARCONVERT(ws) s
+#else
+    #define SQLAPICHARCONVERT(ws) utf16ToUtf8(ws)
+#endif
+
 // Defines to dll-import/export
 // ----------------------------
 
