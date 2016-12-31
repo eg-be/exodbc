@@ -643,7 +643,7 @@ namespace exodbc
 		* \param	caseSensitive search case sensitive or not
 		* \throw	NotFoundException If no such ColumnBuffer is found.
 		*/
-		SQLUSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive = true) const;
+		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive = true) const;
 
 
 		/*!
