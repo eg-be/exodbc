@@ -717,10 +717,10 @@ namespace exodbc
 
 		// Query db
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			catalogName.empty() ? NULL : (SQLWCHAR*) catalogName.c_str(), catalogName.empty() ? NULL : SQL_NTS,   // catname                 
-			schemaName.empty() ? NULL : (SQLWCHAR*) schemaName.c_str(), schemaName.empty() ? NULL : SQL_NTS,   // schema name
-			tableName.empty() ? NULL : (SQLWCHAR*) tableName.c_str(), tableName.empty() ? NULL : SQL_NTS,							// table name
-			tableType.empty() ? NULL : (SQLWCHAR*) tableType.c_str(), tableType.empty() ? NULL : SQL_NTS);
+			catalogName.empty() ? NULL : (SQLWCHAR*) catalogName.c_str(), catalogName.empty() ? NULL : 0,   // catname                 
+			schemaName.empty() ? NULL : (SQLWCHAR*) schemaName.c_str(), schemaName.empty() ? NULL : 0,   // schema name
+			tableName.empty() ? NULL : (SQLWCHAR*) tableName.c_str(), tableName.empty() ? NULL : 0,							// table name
+			tableType.empty() ? NULL : (SQLWCHAR*) tableType.c_str(), tableType.empty() ? NULL : 0);
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
@@ -766,7 +766,7 @@ namespace exodbc
 		int colCount = 0;
 		SQLRETURN ret = SQLColumns(m_pHStmt->GetHandle(),
 				(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,	// catalog
-				table.HasSchema() ? (SQLWCHAR*) table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : NULL,	// schema
+				table.HasSchema() ? (SQLWCHAR*) table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
 				(SQLWCHAR*) table.GetPureName().c_str(), SQL_NTS,		// tablename
 				NULL, 0);						// All columns
 
@@ -805,8 +805,8 @@ namespace exodbc
 		TablePrimaryKeysVector primaryKeys;
 
 		SQLRETURN ret = SQLPrimaryKeys(m_pHStmt->GetHandle(),
-			table.HasCatalog() ? (SQLWCHAR*)table.GetCatalog().c_str() : NULL, table.HasCatalog() ? SQL_NTS : NULL,
-			table.HasSchema() ? (SQLWCHAR*)table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : NULL,
+			table.HasCatalog() ? (SQLWCHAR*)table.GetCatalog().c_str() : NULL, table.HasCatalog() ? SQL_NTS : 0,
+			table.HasSchema() ? (SQLWCHAR*)table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,
 			(SQLWCHAR*)table.GetPureName().c_str(), SQL_NTS);
 
 		THROW_IFN_SUCCEEDED(SQLPrimaryKeys, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
@@ -867,7 +867,7 @@ namespace exodbc
 		// we always have a tablename, but only sometimes a schema
 		SQLRETURN ret = SQLTablePrivileges(m_pHStmt->GetHandle(),
 			(SQLWCHAR*) catalogQueryName.c_str(), SQL_NTS,
-			table.HasSchema() ? (SQLWCHAR*) table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : NULL,
+			table.HasSchema() ? (SQLWCHAR*) table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,
 			(SQLWCHAR*) table.GetPureName().c_str(), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTablePrivileges, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
@@ -1027,7 +1027,7 @@ namespace exodbc
 		int colCount = 0;
 		SQLRETURN ret = SQLColumns(m_pHStmt->GetHandle(),
 			(SQLWCHAR*)catalogQueryName.c_str(), SQL_NTS,	// catalog
-			table.HasSchema() ? (SQLWCHAR*)table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : NULL,	// schema
+			table.HasSchema() ? (SQLWCHAR*)table.GetSchema().c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
 			(SQLWCHAR*)table.GetPureName().c_str(), SQL_NTS,		// tablename
 			NULL, 0);						// All columns
 
