@@ -343,12 +343,12 @@ namespace exodbc
 
 		if (enable)
 		{
-			SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_ON, NULL);
+			SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_ON, 0);
 			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_ON");
 		}
 		else
 		{
-			SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_OFF, NULL);
+			SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_OFF, 0);
 			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
 		}
 	}
@@ -360,7 +360,7 @@ namespace exodbc
 		exASSERT(m_pHDbc->IsAllocated());
 
 		SQLUINTEGER value = 0;
-		SQLRETURN ret = SQLGetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, &value, NULL, NULL);
+		SQLRETURN ret = SQLGetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, &value, 0, 0);
 		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to read Attribute SQL_ATTR_TRACE");
 
 		return value == SQL_OPT_TRACE_ON;
@@ -410,7 +410,7 @@ namespace exodbc
 		exASSERT(m_pHDbc);
 		exASSERT(m_pHDbc->IsAllocated());
 
-		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, NULL);
+		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, 0);
 		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Cannot set SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
 
 		// Note: This is unsupported SQL_ATTR_METADATA_ID by most drivers. It should default to OFF
@@ -1173,12 +1173,12 @@ namespace exodbc
 		std::wstring errStringMode;
 		if (mode == CommitMode::MANUAL)
 		{
-			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_OFF, NULL);
+			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_OFF, 0);
 			errStringMode = L"SQL_AUTOCOMMIT_OFF";
 		}
 		else
 		{
-			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_ON, NULL);
+			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_ON, 0);
 			errStringMode = L"SQL_AUTOCOMMIT_ON";
 		}
 		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), (boost::wformat(L"Setting ATTR_AUTOCOMMIT to %s failed") % errStringMode).str());
@@ -1207,7 +1207,7 @@ namespace exodbc
 		SQLRETURN ret;
 		std::wstring errStringMode;
 		{
-			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, NULL);
+			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, 0);
 		}
 		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), (boost::wformat(L"Cannot set SQL_ATTR_TXN_ISOLATION to %d") % (int) mode).str());
 
