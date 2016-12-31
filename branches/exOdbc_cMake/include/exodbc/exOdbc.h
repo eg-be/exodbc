@@ -38,7 +38,7 @@
 #endif
 
 #ifdef _WIN32
-    #define SQLAPICHARCONVERT(ws) s
+    #define SQLAPICHARCONVERT(ws) ws
 #else
     #define SQLAPICHARCONVERT(ws) utf16ToUtf8(ws)
 #endif
