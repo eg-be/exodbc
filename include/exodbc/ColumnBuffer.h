@@ -343,7 +343,7 @@ namespace exodbc
 	* \details	Cannot be copied and should probably be wrapped into a shared_ptr.
 	*			A ColumnBuffer can allocate exactly one element of type T, or a series of Ts (array).
 	*/
-	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = 0>
+	template<typename T, SQLSMALLINT sqlCType, typename std::enable_if<!std::is_pointer<T>::value, T>::type* = nullptr>
 	class ColumnBuffer
 		: public LengthIndicator
 		, public ColumnFlags
