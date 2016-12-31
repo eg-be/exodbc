@@ -717,10 +717,10 @@ namespace exodbc
 
 		// Query db
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			catalogName.empty() ? NULL : (SQLWCHAR*) catalogName.c_str(), catalogName.empty() ? NULL : 0,   // catname                 
-			schemaName.empty() ? NULL : (SQLWCHAR*) schemaName.c_str(), schemaName.empty() ? NULL : 0,   // schema name
-			tableName.empty() ? NULL : (SQLWCHAR*) tableName.c_str(), tableName.empty() ? NULL : 0,							// table name
-			tableType.empty() ? NULL : (SQLWCHAR*) tableType.c_str(), tableType.empty() ? NULL : 0);
+			catalogName.empty() ? NULL : (SQLWCHAR*) catalogName.c_str(), catalogName.empty() ? 0 : SQL_NTS,   // catname                 
+			schemaName.empty() ? NULL : (SQLWCHAR*) schemaName.c_str(), schemaName.empty() ? 0 : SQL_NTS,   // schema name
+			tableName.empty() ? NULL : (SQLWCHAR*) tableName.c_str(), tableName.empty() ? 0 : SQL_NTS,							// table name
+			tableType.empty() ? NULL : (SQLWCHAR*) tableType.c_str(), tableType.empty() ? 0 : SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
