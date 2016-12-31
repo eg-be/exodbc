@@ -513,10 +513,10 @@ namespace exodbc
 		
 		std::unique_ptr<SQLWCHAR[]> buffer(new SQLWCHAR[charLen]);
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			(SQLWCHAR*)catalogName, SQL_NTS,   // catname                 
-			(SQLWCHAR*)schemaName, SQL_NTS,   // schema name
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(catalogName), SQL_NTS,   // catname                 
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(schemaName), SQL_NTS,   // schema name
 			L"", SQL_NTS,							// table name
-			(SQLWCHAR*)tableTypeName, SQL_NTS);
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(tableTypeName), SQL_NTS);
 
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
