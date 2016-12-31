@@ -25,7 +25,7 @@ namespace exodbc
 	* \class EnumFlags
 	* \brief Wrapper around a enum class defining flags.
 	*/
-	template<typename ET, typename std::enable_if<std::is_enum<ET>::value, void>::type* = 0>
+	template<typename ET, typename std::enable_if<std::is_enum<ET>::value, void>::type* = nullptr>
 	class EnumFlags
 	{
 	public:
