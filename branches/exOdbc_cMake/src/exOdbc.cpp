@@ -95,11 +95,10 @@ namespace exodbc {
 	}
 
 	
-// 	std::string utf16ToUtf8(const SQLWCHAR* w) noexcept
-// 	{
-//         std::wstring ws(w);
-//         return utf16ToUtf8(ws);
-//     }
+	std::string utf16ToUtf8(const SQLWCHAR* w) noexcept
+	{
+        return utf16ToUtf8(reinterpret_cast<const wchar_t*>(w));
+    }
     
 
 	std::wstring utf8ToUtf16(const std::string& s) noexcept
@@ -126,11 +125,10 @@ namespace exodbc {
 	}
 
 	
-// 	std::wstring utf8ToUtf16(const SQLCHAR* s) noexcept
-// 	{
-//         std::string ss(s);
-//         return utf8ToUtf16(ss);
-//     }
+	std::wstring utf8ToUtf16(const SQLCHAR* s) noexcept
+	{
+        return utf8ToUtf16(reinterpret_cast<const char*>(s));
+    }
 
 
 	std::wstring SqlTrueFalse2s(SQLSMALLINT b) noexcept
