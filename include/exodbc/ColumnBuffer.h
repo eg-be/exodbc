@@ -625,7 +625,7 @@ namespace exodbc
 		std::vector<T> m_buffer;
 	};
 
-	template<>
+	template<> inline
 	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindColumn(SQLUSMALLINT columnNr, ConstSqlStmtHandlePtr pHStmt)
 	{
 		// Do this totally different than else. Does not work to first bind as usual and then set attrs... ?
@@ -652,7 +652,7 @@ namespace exodbc
 	}
 
 
-	template<>
+	template<> inline
 	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
 	{
 		BindParamImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
@@ -664,6 +664,7 @@ namespace exodbc
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.m_decimalDigits));
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer[0]);
 	}
+	
 
 	// Integer types
 	typedef ColumnBuffer<SQLSMALLINT, SQL_C_USHORT> UShortColumnBuffer;
