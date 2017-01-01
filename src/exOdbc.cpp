@@ -429,7 +429,7 @@ namespace exodbc {
 
 		SErrorInfoVector errors;
 		SQLHANDLE handle = NULL;
-		SQLSMALLINT handleType = NULL;
+		SQLSMALLINT handleType = 0;
 
 		for (int i = 0; i < 4; i++)
 		{
@@ -462,14 +462,19 @@ namespace exodbc {
 			while (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
 			{
 				SErrorInfo errInfo;
-				SQLWCHAR errMsg[SQL_MAX_MESSAGE_LENGTH + 1];
-				errMsg[0] = 0;
+				SQLAPICHARTYPE errMsg[SQL_MAX_MESSAGE_LENGTH + 1];
+                SQLAPICHARTYPE sqlState[5 + 1];
+				errMsg[0] = '\0';
+                sqlState[0] = '\0';
 				SQLSMALLINT cb = 0;
-				ret = SQLGetDiagRec(handleType, handle, recNr, errInfo.SqlState, &errInfo.NativeError, errMsg, SQL_MAX_MESSAGE_LENGTH + 1, &cb);
+				ret = SQLGetDiagRec(handleType, handle, recNr, sqlState, &errInfo.NativeError, errMsg, SQL_MAX_MESSAGE_LENGTH + 1, &cb);
 				if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
 				{
+                    std::wstring wsSqlState = SQLRESCHARCONVERT(sqlState);
+                    memcpy(errInfo.SqlState, wsSqlState.c_str(), std::min<size_t>(wsSqlState.length(), 5));
+                    errInfo.SqlState[std::min<size_t>(wsSqlState.length(), 5)] = '\0';
 					errInfo.ErrorHandleType = handleType;
-					errInfo.Msg = errMsg;
+					errInfo.Msg = SQLRESCHARCONVERT(errMsg);
 					errors.push_back(errInfo);
 					if (ret == SQL_SUCCESS_WITH_INFO)
 					{
