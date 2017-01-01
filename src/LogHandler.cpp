@@ -52,7 +52,7 @@ namespace exodbc
 		if (line > 0)
 			ws << L"(" << line << L")";
 		else if (!filename.empty())
-			ws << L"(??)";
+			ws << L"(\?\?)";
 		if (!functionname.empty())
 			ws << functionname;
 
