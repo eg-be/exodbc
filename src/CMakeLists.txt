@@ -109,5 +109,6 @@ source_group( "Config"
 # and for the linker, add odbc32.lib to the standard libraries:
 if(MSVC)
   target_link_libraries(libexodbc PRIVATE odbc32)
-#  target_link_libraries(exodbc PRIVATE odbc32)
- endif()
+else()
+  target_link_libraries(libexodbc PRIVATE odbc)
+endif()
