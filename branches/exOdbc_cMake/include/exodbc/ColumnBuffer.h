@@ -556,13 +556,13 @@ namespace exodbc
 		* \brief	Get the data of the buffer as std::wstring
 		* \throw	NullValueException if buffer is set to NULL.
 		*/
-		std::wstring GetWString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return m_buffer.data(); };
+		std::wstring GetWString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return reinterpret_cast<const wchar_t*>(m_buffer.data()); };
 		
 		/*!
 		* \brief	Get the data of the buffer as std::string
 		* \throw	NullValueException if buffer is set to NULL.
 		*/
-		std::string GetString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return (char*)m_buffer.data(); };
+		std::string GetString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return reinterpret_cast<const char*>(m_buffer.data()); };
 
 		/*!
 		* \brief	Set passed std::wstring as value on the buffer. Null terminates the buffer.
