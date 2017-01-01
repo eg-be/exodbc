@@ -69,7 +69,7 @@ namespace exodbc
 	// --------------
 	void Environment::EnableConnectionPooling(ConnectionPooling enablePooling)
 	{
-		SQLRETURN ret = SQLSetEnvAttr(SQL_NULL_HENV, SQL_ATTR_CONNECTION_POOLING, (SQLPOINTER)enablePooling, NULL);
+		SQLRETURN ret = SQLSetEnvAttr(SQL_NULL_HENV, SQL_ATTR_CONNECTION_POOLING, (SQLPOINTER)enablePooling, 0);
 		if (!SQL_SUCCEEDED(ret))
 		{
 			wstring msg = boost::str(boost::wformat(L"Failed to set Attribute SQL_ATTR_CONNECTION_POOLING to %d") % (int)enablePooling);
@@ -106,13 +106,13 @@ namespace exodbc
 		switch(version)
 		{
 		case OdbcVersion::V_2:
-			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC2, NULL);
+			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC2, 0);
 			break;
 		case OdbcVersion::V_3:
-			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, NULL);
+			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3, 0);
 			break;
 		case OdbcVersion::V_3_8:
-			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, NULL);
+			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, 0);
 			break;
 		default:
 			THROW_WITH_SOURCE(IllegalArgumentException, (boost::wformat(L"Unknown ODBC Version value: %d") % (int) version).str());
@@ -129,7 +129,7 @@ namespace exodbc
 		exASSERT(IsEnvHandleAllocated());
 
 		unsigned long value = 0;
-		SQLRETURN ret = SQLGetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, &value, NULL, NULL);
+		SQLRETURN ret = SQLGetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, &value, 0, NULL);
 
 		THROW_IFN_SUCCEEDED_MSG(SQLGetEnvAttr, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle(), L"Failed to read SQL_ATTR_ODBC_VERSION");
 
@@ -168,7 +168,7 @@ namespace exodbc
 
 	void Environment::SetConnctionPoolingMatch(ConnectionPoolingMatch matchMode)
 	{
-		SQLRETURN ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_CP_MATCH, (SQLPOINTER)matchMode, NULL);
+		SQLRETURN ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_CP_MATCH, (SQLPOINTER)matchMode, 0);
 		THROW_IFN_SUCCEEDED(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle());
 	}
 
@@ -178,7 +178,7 @@ namespace exodbc
 		exASSERT(IsEnvHandleAllocated());
 
 		SQLSMALLINT nameBufferLength, descBufferLength = 0;
-		SQLWCHAR nameBuffer[SQL_MAX_DSN_LENGTH + 1];
+		SQLAPICHARTYPE nameBuffer[SQL_MAX_DSN_LENGTH + 1];
 
 		// empty result-vector
 		DataSourcesVector dataSources;
@@ -196,7 +196,7 @@ namespace exodbc
 		// Like that we might miss some parts of the descriptions.. 
 		SQLSMALLINT maxDescLength = 0;
 		SQLRETURN ret = SQL_NO_DATA;
-		ret = SQLDataSources(m_pHEnv->GetHandle(), direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
+		ret = SQLDataSources(m_pHEnv->GetHandle(), direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, 0, &descBufferLength);
 		if(ret == SQL_NO_DATA)
 		{
 			// no data at all, but succeeded, else we would have an err-state
@@ -212,12 +212,12 @@ namespace exodbc
 				maxDescLength = descBufferLength;
 			}
 			// Go on fetching lengths of descriptions
-			ret = SQLDataSources(m_pHEnv->GetHandle(), SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, NULL, &descBufferLength);
+			ret = SQLDataSources(m_pHEnv->GetHandle(), SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, NULL, 0, &descBufferLength);
 		}while(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
 		THROW_IFN_NO_DATA(SQLDataSources, ret);
 
 		// Now fetch with description
-		std::unique_ptr<SQLWCHAR[]> descBuffer(new SQLWCHAR[maxDescLength + 1]);
+		std::unique_ptr<SQLAPICHARTYPE[]> descBuffer(new SQLAPICHARTYPE[maxDescLength + 1]);
 		ret = SQLDataSources(m_pHEnv->GetHandle(), direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
 		if(ret == SQL_NO_DATA)
 		{
@@ -229,8 +229,8 @@ namespace exodbc
 		{
 			// Store dataSource
 			SDataSource ds;
-			ds.m_dsn = nameBuffer;
-			ds.m_description = descBuffer.get();
+			ds.m_dsn = SQLRESCHARCONVERT(nameBuffer);
+			ds.m_description = SQLRESCHARCONVERT(descBuffer.get());
 			dataSources.push_back(ds);
 			ret = SQLDataSources(m_pHEnv->GetHandle(), SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
 		}while(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);
