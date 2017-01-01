@@ -9,10 +9,11 @@
 
 
 #pragma warning(disable: 4503)	// 'identifier' : decorated name length exceeded, name was truncated
-
-#include <SDKDDKVer.h>
+#ifdef _WIN32
+    #include <SDKDDKVer.h>
+    #include <tchar.h>
+#endif
 #include <iostream>
-#include <tchar.h>
 
 #include "exodbc/exOdbc.h"
 #include "exodbc/Environment.h"
@@ -297,7 +298,11 @@ struct SConnectionInfo
 	wstring m_cs;
 };
 
+#ifdef _WIN32
 int _tmain(int argc, _TCHAR* argv[])
+#else
+int main(int argc, char* argv[])
+#endif
 {
 	try
 	{
@@ -309,7 +314,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			std::wstring dsnKey = L"dsn=";
 			std::wstring csKey = L"cs=";
+#ifdef _WIN32
 			std::wstring arg(argv[i]);
+#else
+            std::wstring arg(utf8ToUtf16(argv[i]));
+#endif
 			std::wstring dsnValue;
 			if (ba::starts_with(arg, dsnKey) && arg.length() > dsnKey.length())
 			{
