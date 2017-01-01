@@ -204,21 +204,21 @@ namespace exodbc
 		m_inConnectionStr = inConnectStr;
 
 		// Connect to the data source
-		SQLWCHAR outConnectBuffer[DB_MAX_CONNECTSTR_LEN + 1];
+		SQLAPICHARTYPE outConnectBuffer[DB_MAX_CONNECTSTR_LEN + 1];
 		SQLSMALLINT outConnectBufferLen;
 
 		// Note: 
 		// StringLength1: [Input] Length of *InConnectionString, in characters if the string is Unicode, or bytes if string is ANSI or DBCS.
 		// BufferLength: [Input] Length of the *OutConnectionString buffer, in characters.
 		SQLRETURN ret = SQLDriverConnect(m_pHDbc->GetHandle(), parentWnd, 
-			(SQLWCHAR*) m_inConnectionStr.c_str(),
+			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(m_inConnectionStr).c_str(),
 			(SQLSMALLINT) m_inConnectionStr.length(), 
-			(SQLWCHAR*) outConnectBuffer, 
+			(SQLAPICHARTYPE*) outConnectBuffer, 
 			DB_MAX_CONNECTSTR_LEN, &outConnectBufferLen, parentWnd == NULL ? SQL_DRIVER_NOPROMPT : SQL_DRIVER_COMPLETE);
 		THROW_IFN_SUCCEEDED(SQLDriverConnect, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
 
 		outConnectBuffer[outConnectBufferLen] = 0;
-		m_outConnectionStr = outConnectBuffer;
+		m_outConnectionStr = SQLRESCHARCONVERT((SQLAPICHARTYPE*)outConnectBuffer);
 		m_dbOpenedWithConnectionString = true;
 
 		// Do all the common stuff about opening
@@ -483,9 +483,9 @@ namespace exodbc
 
 		std::vector<std::wstring> results;
 
-		SQLPOINTER catalogName = L"";
-		SQLPOINTER schemaName = L"";
-		SQLPOINTER tableTypeName = L"";
+		std::wstring catalogName = L"";
+		std::wstring schemaName = L"";
+		std::wstring tableTypeName = L"";
 
 		SQLSMALLINT colNr = 0;
 		SQLUSMALLINT charLen = 0;
@@ -493,17 +493,17 @@ namespace exodbc
 		switch(mode)
 		{
 		case ReadCatalogInfoMode::AllCatalogs:
-			catalogName = SQL_ALL_CATALOGS;
+			catalogName = utf8ToUtf16(SQL_ALL_CATALOGS);
 			colNr = 1;
 			charLen = m_dbInf.GetMaxCatalogNameLen();
 			break;
 		case ReadCatalogInfoMode::AllSchemas:
-			schemaName = SQL_ALL_SCHEMAS;
+			schemaName = utf8ToUtf16(SQL_ALL_SCHEMAS);
 			colNr = 2;
 			charLen = m_dbInf.GetMaxSchemaNameLen();
 			break;
 		case ReadCatalogInfoMode::AllTableTypes:
-			tableTypeName = SQL_ALL_TABLE_TYPES;
+			tableTypeName = utf8ToUtf16(SQL_ALL_TABLE_TYPES);
 			colNr = 4;
 			charLen = m_dbInf.GetMaxTableTypeNameLen();
 			break;
@@ -511,12 +511,12 @@ namespace exodbc
 			exASSERT(false);
 		}
 		
-		std::unique_ptr<SQLWCHAR[]> buffer(new SQLWCHAR[charLen]);
+		std::unique_ptr<SQLAPICHARTYPE[]> buffer(new SQLAPICHARTYPE[charLen]);
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(catalogName), SQL_NTS,   // catname                 
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(schemaName), SQL_NTS,   // schema name
-			L"", SQL_NTS,							// table name
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(tableTypeName), SQL_NTS);
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(catalogName).c_str(), SQL_NTS,   // catname                 
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(schemaName).c_str(), SQL_NTS,   // schema name
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(L"").c_str(), SQL_NTS,							// table name
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(tableTypeName).c_str(), SQL_NTS);
 
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
@@ -524,8 +524,9 @@ namespace exodbc
 		SQLLEN cb;
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)   // Table Information
 		{
-			GetData(m_pHStmt, colNr, SQL_C_WCHAR, buffer.get(), charLen * sizeof(SQLWCHAR), &cb, NULL);
-			results.push_back(buffer.get());
+			GetData(m_pHStmt, colNr, SQLAPICHARTYPENAME, buffer.get(), charLen * sizeof(SQLAPICHARTYPE), &cb, NULL);
+            SYSTEMSTRINGTYPE s = SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(buffer.get());
+			results.push_back(SQLRESCHARCONVERT(s));
 		}
 
 		THROW_IFN_NO_DATA(SQLFetch, ret);

@@ -33,14 +33,22 @@
 
 #ifdef _WIN32
     #define SQLAPICHARTYPE SQLWCHAR
+    #define SQLAPICHARTYPENAME SQL_C_WCHAR
+    #define SYSTEMSTRINGTYPE std::wstring
 #else
     #define SQLAPICHARTYPE SQLCHAR
+    #define SQLAPICHARTYPENAME SQL_C_CHAR
+    #define SYSTEMSTRINGTYPE std::string
 #endif
 
 #ifdef _WIN32
     #define SQLAPICHARCONVERT(ws) ws
+    #define SQLRESCHARCONVERT(ws) ws
+    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(ws) std::wstring(reinterpret_cast<wchar_t*>(ws))
 #else
     #define SQLAPICHARCONVERT(ws) utf16ToUtf8(ws)
+    #define SQLRESCHARCONVERT(s) utf8ToUtf16(s)
+    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(s) std::string(reinterpret_cast<char*>(s))
 #endif
 
 // Defines to dll-import/export
@@ -337,6 +345,7 @@ namespace exodbc
 	*/
 	extern EXODBCAPI std::string utf16ToUtf8(const std::wstring& w) noexcept;
 
+// 	extern EXODBCAPI std::string utf16ToUtf8(const SQLWCHAR* w) noexcept;
 
 	/*!
 	* \brief Converts a utf8 std::string to a uf16 std::wstring
@@ -346,6 +355,8 @@ namespace exodbc
 	* \return std::wstring
 	*/
 	extern EXODBCAPI std::wstring utf8ToUtf16(const std::string& s) noexcept;
+
+//     extern EXODBCAPI std::wstring utf8ToUtf16(const SQLCHAR* s) noexcept;
 
 
 	/*!
