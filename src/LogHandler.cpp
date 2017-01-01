@@ -123,18 +123,16 @@ namespace exodbc
 	{
 		if (m_firstMessage)
 		{
-			m_filestream = wofstream(m_filepath, std::ofstream::out);
+			m_filestream = std::wofstream(SQLAPICHARCONVERT(m_filepath), std::ofstream::out);
 			m_firstMessage = false;
 		}
 		if (m_filestream.is_open())
 		{
 			if (m_prependTimestamp)
 			{
-				auto t = std::time(nullptr);
-				std::tm timeinfo;
-				localtime_s(&timeinfo, &t);
-				//*std::localtime(&t);
-				m_filestream << std::put_time(&timeinfo, L"%d-%m-%Y %H-%M-%S") << L": ";
+                std::time_t t = std::time(nullptr);
+                std::tm tm = *std::localtime(&t);
+				m_filestream << std::put_time(&tm, L"%d-%m-%Y %H-%M-%S") << L": ";
 			}
 
 			m_filestream << FormatLogMessage(level, msg, filename, line, functionname) << endl;
