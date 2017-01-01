@@ -220,7 +220,7 @@ namespace exodbc
 	SQL_NUMERIC_STRUCT InitNullNumeric() noexcept
 	{
 		SQL_NUMERIC_STRUCT num;
-		ZeroMemory(&num, sizeof(num));
+		memset(&num, 0, sizeof(num));
 		return num;
 	}
 
