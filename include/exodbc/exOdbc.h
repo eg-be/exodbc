@@ -21,6 +21,9 @@
 	#ifndef _CRT_SECURE_NO_WARNINGS
 		#define _CRT_SECURE_NO_WARNINGS 1	// 'function': This function or variable may be unsafe. Consider using strcpy_s instead.
 	#endif
+#else
+    #include <limits.h>
+    #define MAX_PATH PATH_MAX
 #endif
 
 #ifdef _WIN32
