@@ -7,6 +7,7 @@
 * ShortIntro Sample.
 */
 
+#ifdef _WIN32
 
 #include <SDKDDKVer.h>
 #include <iostream>
@@ -150,4 +151,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 	return 0;
 }
-
+#else
+int main(int argc, char* argv[])
+{
+    return 0;
+}
+#endif
