@@ -486,6 +486,7 @@ namespace exodbc
 		std::wstring catalogName = L"";
 		std::wstring schemaName = L"";
 		std::wstring tableTypeName = L"";
+		std::wstring tableName = L"";
 
 		SQLSMALLINT colNr = 0;
 		SQLUSMALLINT charLen = 0;
@@ -513,9 +514,9 @@ namespace exodbc
 		
 		std::unique_ptr<SQLAPICHARTYPE[]> buffer(new SQLAPICHARTYPE[charLen]);
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(catalogName).c_str(), SQL_NTS,   // catname                 
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(schemaName).c_str(), SQL_NTS,   // schema name
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(L"").c_str(), SQL_NTS,							// table name
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(catalogName).c_str(), SQL_NTS,		// catalog name                 
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(schemaName).c_str(), SQL_NTS,		// schema name
+			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(tableName).c_str(), SQL_NTS,			// table name
 			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(tableTypeName).c_str(), SQL_NTS);
 
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
