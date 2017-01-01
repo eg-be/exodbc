@@ -35,7 +35,7 @@ namespace exodbc
 		exASSERT(pHDbc);
 		exASSERT(pHDbc->IsAllocated());
 		SQLSMALLINT bufferSize = 0;
-		SQLRETURN ret = SQLGetInfo(pHDbc->GetHandle(), fInfoType, NULL, NULL, &bufferSize);
+		SQLRETURN ret = SQLGetInfo(pHDbc->GetHandle(), fInfoType, NULL, 0, &bufferSize);
 		{
 			// \note: DB2 will here always return SQL_SUCCESS_WITH_INFO to report that data got truncated, although we didnt even feed in a buffer.
 			// To avoid having tons of warning with the (wrong) info that data has been truncated, we just hide those messages here
@@ -54,7 +54,7 @@ namespace exodbc
 
 		GetInfo(pHDbc, fInfoType, (SQLPOINTER)buff.get(), bufferSize, &cb);
 
-		sValue = buff.get();
+		sValue = reinterpret_cast<const wchar_t*>(buff.get());
 	}
 
 
@@ -97,7 +97,7 @@ namespace exodbc
 
 		if(!isNull)
 		{
-			value = buffer.get();
+			value = reinterpret_cast<const wchar_t*>(buffer.get());
 		}
 		if(pIsNull)
 			*pIsNull = isNull;

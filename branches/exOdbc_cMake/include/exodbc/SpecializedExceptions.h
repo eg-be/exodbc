@@ -261,7 +261,7 @@ namespace exodbc
 #define THROW_IFN_SUCCEEDED_SILENT_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
 	do { \
 		if(!SQL_SUCCEEDED(sqlReturn)) { \
-			SqlResultException ex(L#sqlFunctionName, sqlReturn, handleType, handle, msg); \
+			SqlResultException ex(#sqlFunctionName, sqlReturn, handleType, handle, msg); \
 			SET_EXCEPTION_SOURCE(ex); \
 			throw ex; \
 		} \
