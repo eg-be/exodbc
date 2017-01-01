@@ -345,7 +345,7 @@ namespace exodbc
 	*/
 	extern EXODBCAPI std::string utf16ToUtf8(const std::wstring& w) noexcept;
 
-// 	extern EXODBCAPI std::string utf16ToUtf8(const SQLWCHAR* w) noexcept;
+ 	extern EXODBCAPI std::string utf16ToUtf8(const SQLWCHAR* w) noexcept;
 
 	/*!
 	* \brief Converts a utf8 std::string to a uf16 std::wstring
@@ -356,7 +356,7 @@ namespace exodbc
 	*/
 	extern EXODBCAPI std::wstring utf8ToUtf16(const std::string& s) noexcept;
 
-//     extern EXODBCAPI std::wstring utf8ToUtf16(const SQLCHAR* s) noexcept;
+    extern EXODBCAPI std::wstring utf8ToUtf16(const SQLCHAR* s) noexcept;
 
 
 	/*!
