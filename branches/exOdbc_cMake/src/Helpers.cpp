@@ -100,7 +100,9 @@ namespace exodbc
 			value = reinterpret_cast<const wchar_t*>(buffer.get());
 		}
 		if(pIsNull)
-			*pIsNull = isNull;
+        {
+            *pIsNull = isNull;
+        }
 	}
 
 
