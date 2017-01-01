@@ -7,7 +7,9 @@
 * ShortIntro Sample.
 */
 
+#ifdef _WIN32
 #include <SDKDDKVer.h>
+#endif
 #include <iostream>
 
 #include "exodbc/exOdbc.h"
