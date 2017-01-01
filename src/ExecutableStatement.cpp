@@ -121,13 +121,13 @@ namespace exodbc
 		SQLRETURN ret = 0;
 		if (forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
 		{
-			ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_NONSCROLLABLE, NULL);
+			ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_NONSCROLLABLE, 0);
 			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
 			m_forwardOnlyCursors = true;
 		}
 		else
 		{
-			ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_SCROLLABLE, NULL);
+			ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_SCROLLABLE, 0);
 			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
 			m_forwardOnlyCursors = false;
 		}
@@ -142,7 +142,7 @@ namespace exodbc
 		// Always discard pending results first
 		SelectClose();
 
-		SQLRETURN ret = SQLExecDirect(m_pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		SQLRETURN ret = SQLExecDirect(m_pHStmt->GetHandle(), (SQLAPICHARTYPE*) SQLAPICHARCONVERT(sqlstmt).c_str(), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 	}
 
@@ -153,7 +153,7 @@ namespace exodbc
 		exASSERT(m_pHStmt->IsAllocated());
 		exASSERT(!sqlstmt.empty());
 
-		SQLRETURN ret = SQLPrepare(m_pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		SQLRETURN ret = SQLPrepare(m_pHStmt->GetHandle(), (SQLAPICHARTYPE*) SQLAPICHARCONVERT(sqlstmt).c_str(), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		m_isPrepared = true;
@@ -185,12 +185,12 @@ namespace exodbc
 		{
 			maxColName = DB_MAX_COLUMN_NAME_LEN_DEFAULT;
 		}
-		std::unique_ptr<SQLWCHAR[]> nameBuffer(new SQLWCHAR[maxColName + 1]);
+		std::unique_ptr<SQLAPICHARTYPE[]> nameBuffer(new SQLAPICHARTYPE[maxColName + 1]);
 		SColumnDescription colDesc;
 		SQLRETURN ret = SQLDescribeCol(m_pHStmt->GetHandle(), columnNr, nameBuffer.get(), maxColName + 1, NULL, &colDesc.m_sqlType, &colDesc.m_charSize, &colDesc.m_decimalDigits, &colDesc.m_nullable);
 		THROW_IFN_SUCCEEDED(SQLDescribeCol, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
-		colDesc.m_name = nameBuffer.get();
+		colDesc.m_name = SQLRESCHARCONVERT(nameBuffer.get());
 
 		return colDesc;
 	}
@@ -260,19 +260,19 @@ namespace exodbc
 
 	bool ExecutableStatement::SelectPrev()
 	{
-		return SelectFetchScroll(SQL_FETCH_PREV, NULL);
+		return SelectFetchScroll(SQL_FETCH_PREV, 0);
 	}
 
 
 	bool ExecutableStatement::SelectFirst()
 	{
-		return SelectFetchScroll(SQL_FETCH_FIRST, NULL);
+		return SelectFetchScroll(SQL_FETCH_FIRST, 0);
 	}
 
 
 	bool ExecutableStatement::SelectLast()
 	{
-		return SelectFetchScroll(SQL_FETCH_LAST, NULL);
+		return SelectFetchScroll(SQL_FETCH_LAST, 0);
 	}
 
 
