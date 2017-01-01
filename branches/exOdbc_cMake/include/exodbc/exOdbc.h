@@ -116,6 +116,7 @@
 #include <set>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 // odbc-things
 #include <sql.h>
