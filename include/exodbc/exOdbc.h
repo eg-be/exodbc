@@ -47,11 +47,11 @@
 #ifdef _WIN32
     #define SQLAPICHARCONVERT(ws) ws
     #define SQLRESCHARCONVERT(ws) ws
-    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(ws) std::wstring(reinterpret_cast<wchar_t*>(ws))
+    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(ws) std::wstring(reinterpret_cast<const wchar_t*>(ws))
 #else
     #define SQLAPICHARCONVERT(ws) utf16ToUtf8(ws)
     #define SQLRESCHARCONVERT(s) utf8ToUtf16(s)
-    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(s) std::string(reinterpret_cast<char*>(s))
+    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(s) std::string(reinterpret_cast<const char*>(s))
 #endif
 
 // Defines to dll-import/export
