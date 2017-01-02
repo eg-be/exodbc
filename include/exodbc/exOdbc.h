@@ -49,7 +49,7 @@
 #ifdef _WIN32
     #define SQLAPICHARCONVERT(ws) ws
     #define SQLRESCHARCONVERT(ws) ws
-    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(ws) std::wstring(reinterpret_cast<const wchar_t*>(ws))
+    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(ws) std::string(reinterpret_cast<const wchar_t*>(ws))
 #else
     #define SQLAPICHARCONVERT(ws) utf16ToUtf8(ws)
     #define SQLRESCHARCONVERT(s) utf8ToUtf16(s)
@@ -328,9 +328,9 @@ namespace exodbc
 		SQLSMALLINT		ErrorHandleType; ///< Handle-type of the error. Is either SQL_HANDLE_ENV, SQL_HANDLE_DBC, SQL_HANDLE_STMT or SQL_HANDLE_DESC
 		SQLWCHAR		SqlState[5 + 1];
 		SQLINTEGER		NativeError;
-		std::wstring	Msg;
+		std::string	Msg;
 
-		std::wstring ToString() const;
+		std::string ToString() const;
 	};
 
 	/*!
@@ -343,62 +343,62 @@ namespace exodbc
 	// --------------
 
 	/*!
-	* \brief Converts a utf16 std::wstring to a utf-8 std::string.
+	* \brief Converts a utf16 std::string to a utf-8 std::string.
 	*
 	* \details This method will never throw an exception but return garbage in case it failed.
 	* \param w String to transform
 	* \return std::string
 	*/
-	extern EXODBCAPI std::string utf16ToUtf8(const std::wstring& w) noexcept;
+	extern EXODBCAPI std::string utf16ToUtf8(const std::string& w) noexcept;
 
  	extern EXODBCAPI std::string utf16ToUtf8(const SQLWCHAR* w) noexcept;
 
 	/*!
-	* \brief Converts a utf8 std::string to a uf16 std::wstring
+	* \brief Converts a utf8 std::string to a uf16 std::string
 	*
 	* \details This method will never throw an exception but return garbage in case it failed.
 	* \param s String to transform
-	* \return std::wstring
+	* \return std::string
 	*/
-	extern EXODBCAPI std::wstring utf8ToUtf16(const std::string& s) noexcept;
+	extern EXODBCAPI std::string utf8ToUtf16(const std::string& s) noexcept;
 
-    extern EXODBCAPI std::wstring utf8ToUtf16(const SQLCHAR* s) noexcept;
+    extern EXODBCAPI std::string utf8ToUtf16(const SQLCHAR* s) noexcept;
 
 
 	/*!
 	* \brief Returns the string TRUE, FALSE or ????? for the values SQL_TRUE, SQL_FALSE or anything else.
 	*
 	* \param b SQL_TRUE or SQL_FALSE
-	* \return std::wstring TRUE, FALSE or ?????
+	* \return std::string TRUE, FALSE or ?????
 	*/
-	extern EXODBCAPI std::wstring SqlTrueFalse2s(SQLSMALLINT b) noexcept;
+	extern EXODBCAPI std::string SqlTrueFalse2s(SQLSMALLINT b) noexcept;
 
 
 	/*!
 	* \brief Translates some often encountered SQLRETURN values to a string.
 	*
 	* \param ret Return code to translate.
-	* \return std::wstring Translation or '???' if unknown.
+	* \return std::string Translation or '???' if unknown.
 	*/
-	extern EXODBCAPI std::wstring SqlReturn2s(SQLRETURN ret) noexcept;
+	extern EXODBCAPI std::string SqlReturn2s(SQLRETURN ret) noexcept;
 
 
 	/*!
 	* \brief Transform the SQL_types like SQL_CHAR, SQL_NUMERIC, etc. to some string.
 	*
 	* \param sqlType SQL Type..
-	* \return std::wstring
+	* \return std::string
 	*/
-	extern EXODBCAPI std::wstring SqlType2s(SQLSMALLINT sqlType) noexcept;
+	extern EXODBCAPI std::string SqlType2s(SQLSMALLINT sqlType) noexcept;
 
 
 	/*!
 	* \brief Transform the SQL C-types like SQL_C_SLONG, SQL_C_WCHAR, etc. to some string, like "SQL_C_SLONG", etc.
 	*
 	* \param sqlCType Sql-C Type..
-	* \return std::wstring
+	* \return std::string
 	*/
-	extern EXODBCAPI std::wstring SqLCType2s(SQLSMALLINT sqlCType) noexcept;
+	extern EXODBCAPI std::string SqLCType2s(SQLSMALLINT sqlCType) noexcept;
 
 
 	/*!
@@ -406,9 +406,9 @@ namespace exodbc
 	*			Like SQL_C_SLONG becomes "SQLINTEGER"
 	*
 	* \param sqlCType Sql-C Type.
-	* \return std::wstring
+	* \return std::string
 	*/
-	extern EXODBCAPI std::wstring SqlCType2OdbcS(SQLSMALLINT sqlCType) noexcept;
+	extern EXODBCAPI std::string SqlCType2OdbcS(SQLSMALLINT sqlCType) noexcept;
 
 
 	/*!
@@ -423,15 +423,15 @@ namespace exodbc
 	*  ACCESS					| Access
 	*
 	* \param dbms
-	* \return std::wstring
+	* \return std::string
 	*/
-	extern EXODBCAPI std::wstring DatabaseProcudt2s(DatabaseProduct dbms) noexcept;
+	extern EXODBCAPI std::string DatabaseProcudt2s(DatabaseProduct dbms) noexcept;
 
 
 	/*!
 	* \brief Returns ENV, DBC, STMT, DESC or ???
 	*/
-	extern EXODBCAPI std::wstring HandleType2s(SQLSMALLINT type) noexcept;
+	extern EXODBCAPI std::string HandleType2s(SQLSMALLINT type) noexcept;
 
 
 	/*!
@@ -463,9 +463,9 @@ namespace exodbc
 	/*!
 	* \brief Format all Infos and Errors from passed handles into something human-readable.
 	*/
-	extern EXODBCAPI std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg);
+	extern EXODBCAPI std::string FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::string msg);
     
-	extern EXODBCAPI std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::wstring msg);    
+	extern EXODBCAPI std::string FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::string msg);    
 }
 
 

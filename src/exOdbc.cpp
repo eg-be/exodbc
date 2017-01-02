@@ -32,32 +32,32 @@ namespace exodbc {
 		SErrorInfoVector::const_iterator it;
 		std::wstringstream handles;
 		if (hEnv)
-			handles << L"Env=" << hEnv << L";";
+			handles << u8"Env=" << hEnv << u8";";
 		if (hDbc)
-			handles << L"Dbc=" << hDbc << L";";
+			handles << u8"Dbc=" << hDbc << u8";";
 		if (hStmt)
-			handles << L"Stmt=" << hStmt << L";";
+			handles << u8"Stmt=" << hStmt << u8";";
 		if (hDesc)
-			handles << L"Desc=" << hDesc << L";";
+			handles << u8"Desc=" << hDesc << u8";";
 
-		std::wstring type = L"Error(s)";
+		std::wstring type = u8"Error(s)";
 		if (ret == SQL_SUCCESS_WITH_INFO)
 		{
-			type = L"Info(s)";
+			type = u8"Info(s)";
 		}
 		std::wstringstream ws;
 		if (msgStr.length() > 0)
-			ws << msgStr << L": ";
-		ws << L"ODBC-Function '" << sqlFunctionName << L"' returned " << exodbc::SqlReturn2s(ret) << L" (" << ret << L"), with " << errs.size() << L" ODBC-" << type << L" from handle(s) '" << handles.str() << L"': ";
+			ws << msgStr << u8": ";
+		ws << u8"ODBC-Function '" << sqlFunctionName << u8"' returned " << exodbc::SqlReturn2s(ret) << u8" (" << ret << u8"), with " << errs.size() << u8" ODBC-" << type << u8" from handle(s) '" << handles.str() << u8"': ";
 		for (it = errs.begin(); it != errs.end(); it++)
 		{
 			const SErrorInfo& err = *it;
-			ws << std::endl << L"\t" << err.ToString();
+			ws << std::endl << u8"\t" << err.ToString();
 		}
 		return ws.str();
 	}
 	
-	std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::wstring msg)
+	std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg)
     {
         return FormatOdbcMessages(hEnv, hDbc, hStmt, hDesc, ret, utf8ToUtf16(sqlFunctionName), msg);
     }
@@ -66,12 +66,12 @@ namespace exodbc {
 	std::wstring SErrorInfo::ToString() const
 	{
 		std::wstringstream ws;
-		ws << L"SQLSTATE " << SqlState << L"; Native Error: " << NativeError << L"; " << Msg.c_str();
+		ws << u8"SQLSTATE " << SqlState << u8"; Native Error: " << NativeError << u8"; " << Msg.c_str();
 		return ws.str();
 	}
 
 
-	std::string utf16ToUtf8(const std::wstring& w) noexcept
+	std::wstring utf16ToUtf8(const std::wstring& w) noexcept
 	{
 		try
 		{
@@ -83,25 +83,25 @@ namespace exodbc {
 		}
 		catch (const std::exception& ex)
 		{
-			std::string s("Failed in utf16ToUtf8 with std::exception: ");
+			std::wstring s("Failed in utf16ToUtf8 with std::exception: ");
 			s += ex.what();
 			return s;
 		}
 		catch (...)
 		{
-			std::string s("Failed in utf16ToUtf8 with unknown exception.");
+			std::wstring s("Failed in utf16ToUtf8 with unknown exception.");
 			return s;
 		}
 	}
 
 	
-	std::string utf16ToUtf8(const SQLWCHAR* w) noexcept
+	std::wstring utf16ToUtf8(const SQLWCHAR* w) noexcept
 	{
         return utf16ToUtf8(reinterpret_cast<const wchar_t*>(w));
     }
     
 
-	std::wstring utf8ToUtf16(const std::string& s) noexcept
+	std::wstring utf8ToUtf16(const std::wstring& s) noexcept
 	{
 		try
 		{
@@ -114,12 +114,12 @@ namespace exodbc {
 		catch (const std::exception& ex)
 		{
 			HIDE_UNUSED(ex);
-			std::wstring ws(L"Failed in utf8ToUtf16 with std::exception - unable to print what() as wstring, sorry.");
+			std::wstring ws(u8"Failed in utf8ToUtf16 with std::exception - unable to print what() as wstring, sorry.");
 			return ws;
 		}
 		catch (...)
 		{
-			std::wstring ws(L"Failed in utf8ToUtf16 with unknown exception.");
+			std::wstring ws(u8"Failed in utf8ToUtf16 with unknown exception.");
 			return ws;
 		}
 	}
@@ -136,11 +136,11 @@ namespace exodbc {
 		switch (b)
 		{
 		case SQL_TRUE:
-			return L"TRUE";
+			return u8"TRUE";
 		case SQL_FALSE:
-			return L"FALSE";
+			return u8"FALSE";
 		default:
-			return L"?????";
+			return u8"?????";
 		}
 	}
 
@@ -150,19 +150,19 @@ namespace exodbc {
 		switch (ret)
 		{
 		case SQL_SUCCESS:
-			return L"SUCCESS";
+			return u8"SUCCESS";
 		case SQL_SUCCESS_WITH_INFO:
-			return L"SUCCESS_WITH_INFO";
+			return u8"SUCCESS_WITH_INFO";
 		case SQL_NO_DATA:
-			return L"SQL_NO_DATA";
+			return u8"SQL_NO_DATA";
 		case SQL_ERROR:
-			return L"SQL_ERROR";
+			return u8"SQL_ERROR";
 		case SQL_NEED_DATA:
-			return L"SQL_NEED_DATA";
+			return u8"SQL_NEED_DATA";
 		case SQL_INVALID_HANDLE:
-			return L"SQL_INVALID_HANDLE";
+			return u8"SQL_INVALID_HANDLE";
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
@@ -172,89 +172,89 @@ namespace exodbc {
 		switch (sqlType)
 		{
 		case SQL_CHAR:
-			return L"CHAR";
+			return u8"CHAR";
 		case SQL_VARCHAR:
-			return L"VARCHAR";
+			return u8"VARCHAR";
 		case SQL_LONGVARCHAR:
-			return L"LONGVARCHAR";
+			return u8"LONGVARCHAR";
 		case SQL_WCHAR:
-			return L"WCHAR";
+			return u8"WCHAR";
 		case SQL_WVARCHAR:
-			return L"WVARCHAR";
+			return u8"WVARCHAR";
 		case SQL_WLONGVARCHAR:
-			return L"WLONGVARCHAR";
+			return u8"WLONGVARCHAR";
 		case SQL_DECIMAL:
-			return L"DECIMAL";
+			return u8"DECIMAu8";
 		case SQL_NUMERIC:
-			return L"NUMERIC";
+			return u8"NUMERIC";
 		case SQL_SMALLINT:
-			return L"SMALLINT";
+			return u8"SMALLINT";
 		case SQL_INTEGER:
-			return L"INTEGER";
+			return u8"INTEGER";
 		case SQL_REAL:
-			return L"REAL";
+			return u8"REAu8";
 		case SQL_FLOAT:
-			return L"FLOAT";
+			return u8"FLOAT";
 		case SQL_DOUBLE:
-			return L"DOUBLE";
+			return u8"DOUBLE";
 		case SQL_BIT:
-			return L"BIT";
+			return u8"BIT";
 		case SQL_TINYINT:
-			return L"TINYINT";
+			return u8"TINYINT";
 		case SQL_BIGINT:
-			return L"BIGINT";
+			return u8"BIGINT";
 		case SQL_BINARY:
-			return L"BINARY";
+			return u8"BINARY";
 		case SQL_VARBINARY:
-			return L"VARBINARY";
+			return u8"VARBINARY";
 		case SQL_LONGVARBINARY:
-			return L"LONGVARBINARY";
+			return u8"LONGVARBINARY";
 		case SQL_TYPE_DATE:	//[6]
-			return L"TYPE_DATE";
+			return u8"TYPE_DATE";
 		case SQL_TYPE_TIME: //[6]
-			return L"TYPE_TIME";
+			return u8"TYPE_TIME";
 		case SQL_TYPE_TIMESTAMP: //[6]
-			return L"TYPE_TIMESTAMP";
+			return u8"TYPE_TIMESTAMP";
 		case SQL_DATE:
-			return L"DATE";
+			return u8"DATE";
 		case SQL_TIME:
-			return L"TIME";
+			return u8"TIME";
 		case SQL_TIMESTAMP:
-			return L"TIMESTAMP";
+			return u8"TIMESTAMP";
 			//		case SQL_TYPE_UTCDATETIME:
-			//			return L"TYPE_UTCDATETIME";
+			//			return u8"TYPE_UTCDATETIME";
 			//		case SQL_TYPE_UTCTIME:
-			//			return L"TYPE_UTCTIME";
+			//			return u8"TYPE_UTCTIME";
 		case SQL_INTERVAL_MONTH: //[7]
-			return L"INTERVAL_MONTH";
+			return u8"INTERVAL_MONTH";
 		case SQL_INTERVAL_YEAR: //[7]
-			return L"INTERVAL_YEAR";
+			return u8"INTERVAL_YEAR";
 		case SQL_INTERVAL_YEAR_TO_MONTH: //[7]
-			return L"INTERVAL_YEAR_TO_MONTH";
+			return u8"INTERVAL_YEAR_TO_MONTH";
 		case SQL_INTERVAL_DAY: //[7]
-			return L"INTERVAL_DAY";
+			return u8"INTERVAL_DAY";
 		case SQL_INTERVAL_HOUR: ///[7]
-			return L"INTERVAL_HOUR";
+			return u8"INTERVAL_HOUR";
 		case SQL_INTERVAL_MINUTE: //[7]
-			return L"INTERVAL_MINUTE";
+			return u8"INTERVAL_MINUTE";
 		case SQL_INTERVAL_SECOND: //[7]
-			return L"INTERVAL_SECOND";
+			return u8"INTERVAL_SECOND";
 		case SQL_INTERVAL_DAY_TO_HOUR: //[7]
-			return L"INTERVAL_DAY_TO_HOUR";
+			return u8"INTERVAL_DAY_TO_HOUR";
 		case SQL_INTERVAL_DAY_TO_MINUTE: //[7]
-			return L"INTERVAL_DAY_TO_MINUTE";
+			return u8"INTERVAL_DAY_TO_MINUTE";
 		case SQL_INTERVAL_DAY_TO_SECOND: //[7]
-			return L"INTERVAL_DAY_TO_SECOND";
+			return u8"INTERVAL_DAY_TO_SECOND";
 		case SQL_INTERVAL_HOUR_TO_MINUTE: //[7]
-			return L"INTERVAL_HOUR_TO_MINUTE";
+			return u8"INTERVAL_HOUR_TO_MINUTE";
 		case SQL_INTERVAL_HOUR_TO_SECOND: //[7]
-			return L"INTERVAL_HOUR_TO_SECOND";
+			return u8"INTERVAL_HOUR_TO_SECOND";
 		case SQL_INTERVAL_MINUTE_TO_SECOND: //[7]
-			return L"INTERVAL_MINUTE_TO_SECOND";
+			return u8"INTERVAL_MINUTE_TO_SECOND";
 		case SQL_GUID:
-			return L"GUID";
+			return u8"GUID";
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
@@ -264,60 +264,60 @@ namespace exodbc {
 		switch (sqlCType)
 		{
 		case SQL_C_STINYINT:
-			return L"SQL_C_STINYINT";
+			return u8"SQL_C_STINYINT";
 		case SQL_C_UTINYINT:
-			return L"SQL_C_UTINYINT";
+			return u8"SQL_C_UTINYINT";
 		case SQL_C_SSHORT:
-			return L"SQL_C_SSHORT";
+			return u8"SQL_C_SSHORT";
 		case SQL_C_USHORT:
-			return L"SQL_C_USHORT";
+			return u8"SQL_C_USHORT";
 		case SQL_C_SLONG:
-			return L"SQL_C_SLONG";
+			return u8"SQL_C_SLONG";
 		case SQL_C_ULONG:
 			// Note: This is also the type for SQL_C_BOOKMARK
-			return L"SQL_C_ULONG";
+			return u8"SQL_C_ULONG";
 		case SQL_C_SBIGINT:
-			return L"SQL_C_SBIGINT";
+			return u8"SQL_C_SBIGINT";
 		case SQL_C_UBIGINT:
-			return L"SQL_C_UBIGINT";
+			return u8"SQL_C_UBIGINT";
 		case SQL_C_CHAR:
-			return L"SQL_C_CHAR";
+			return u8"SQL_C_CHAR";
 		case SQL_C_WCHAR:
-			return L"SQL_C_WCHAR";
+			return u8"SQL_C_WCHAR";
 		case SQL_C_FLOAT:
-			return L"SQL_C_FLOAT";
+			return u8"SQL_C_FLOAT";
 		case SQL_C_DOUBLE:
-			return L"SQL_C_DOUBLE";
+			return u8"SQL_C_DOUBLE";
 		case SQL_C_BIT:
-			return L"SQL_C_BIT";
+			return u8"SQL_C_BIT";
 		case SQL_C_BINARY:
 			// Note: This is also the type for SQL_C_VARBOOKMARK:
-			return L"SQL_C_BINARY";
+			return u8"SQL_C_BINARY";
 			//case SQL_C_BOOKMARK:
-			//	return L"SQL_C_BOOKMARK";
+			//	return u8"SQL_C_BOOKMARK";
 			//case SQL_C_VARBOOKMARK:
-			//	return L"SQL_C_VARBOOKMARK";
+			//	return u8"SQL_C_VARBOOKMARK";
 		case SQL_C_TYPE_DATE:
-			return L"SQL_C_TYPE_DATE";
+			return u8"SQL_C_TYPE_DATE";
 		case SQL_C_TYPE_TIME:
-			return L"SQL_C_TYPE_TIME";
+			return u8"SQL_C_TYPE_TIME";
 		case SQL_C_TYPE_TIMESTAMP:
-			return L"SQL_C_TYPE_TIMESTAMP";
+			return u8"SQL_C_TYPE_TIMESTAMP";
 		case SQL_C_NUMERIC:
-			return L"SQL_C_NUMERIC";
+			return u8"SQL_C_NUMERIC";
 		case SQL_C_GUID:
-			return L"SQL_C_GUID";
+			return u8"SQL_C_GUID";
 
 			// Old odbc 2.x values
 		case SQL_C_DATE:
-			return L"SQL_C_DATE";
+			return u8"SQL_C_DATE";
 		case SQL_C_TIME:
-			return L"SQL_C_TIME";
+			return u8"SQL_C_TIME";
 		case SQL_C_TIMESTAMP:
-			return L"SQL_C_TIMESTAMP";
+			return u8"SQL_C_TIMESTAMP";
 
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
@@ -327,60 +327,60 @@ namespace exodbc {
 		switch (sqlCType)
 		{
 		case SQL_C_STINYINT:
-			return L"SQLSCHAR";
+			return u8"SQLSCHAR";
 		case SQL_C_UTINYINT:
-			return L"SQLCHAR";
+			return u8"SQLCHAR";
 		case SQL_C_SSHORT:
-			return L"SQLSMALLINT";
+			return u8"SQLSMALLINT";
 		case SQL_C_USHORT:
-			return L"SQLUSMALLINT";
+			return u8"SQLUSMALLINT";
 		case SQL_C_SLONG:
-			return L"SQLINTEGER";
+			return u8"SQLINTEGER";
 		case SQL_C_ULONG:
 			// Note: This is also the type for SQL_C_BOOKMARK
-			return L"SQLUINTEGER";
+			return u8"SQLUINTEGER";
 		case SQL_C_SBIGINT:
-			return L"SQLBIGNT";
+			return u8"SQLBIGNT";
 		case SQL_C_UBIGINT:
-			return L"SQLUBIGINT";
+			return u8"SQLUBIGINT";
 		case SQL_C_CHAR:
-			return L"SQLCHAR*";
+			return u8"SQLCHAR*";
 		case SQL_C_WCHAR:
-			return L"SQLWCHAR*";
+			return u8"SQLWCHAR*";
 		case SQL_C_FLOAT:
-			return L"SQLREAL";
+			return u8"SQLREAu8";
 		case SQL_C_DOUBLE:
-			return L"SQLDOUBLE";
+			return u8"SQLDOUBLE";
 		case SQL_C_BIT:
-			return L"SQLCHAR";
+			return u8"SQLCHAR";
 		case SQL_C_BINARY:
 			// Note: This is also the type for SQL_C_VARBOOKMARK:
-			return L"SQLCHAR*";
+			return u8"SQLCHAR*";
 			//case SQL_C_BOOKMARK:
-			//	return L"SQL_C_BOOKMARK";
+			//	return u8"SQL_C_BOOKMARK";
 			//case SQL_C_VARBOOKMARK:
-			//	return L"SQL_C_VARBOOKMARK";
+			//	return u8"SQL_C_VARBOOKMARK";
 		case SQL_C_TYPE_DATE:
-			return L"SQL_DATE_STRUCT";
+			return u8"SQL_DATE_STRUCT";
 		case SQL_C_TYPE_TIME:
-			return L"SQL_TIME_STRUCT";
+			return u8"SQL_TIME_STRUCT";
 		case SQL_C_TYPE_TIMESTAMP:
-			return L"SQL_TIMESTAMP_STRUCT";
+			return u8"SQL_TIMESTAMP_STRUCT";
 		case SQL_C_NUMERIC:
-			return L"SQL_NUMERIC_STRUCT";
+			return u8"SQL_NUMERIC_STRUCT";
 		case SQL_C_GUID:
-			return L"SQL_GUID";
+			return u8"SQL_GUID";
 
 			// Old odbc 2.x values
 		case SQL_C_DATE:
-			return L"SQL_DATE_STRUCT";
+			return u8"SQL_DATE_STRUCT";
 		case SQL_C_TIME:
-			return L"SQL_TIME_STRUCT";
+			return u8"SQL_TIME_STRUCT";
 		case SQL_C_TIMESTAMP:
-			return L"SQL_TIMESTAMP_STRUCT";
+			return u8"SQL_TIMESTAMP_STRUCT";
 
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
@@ -390,17 +390,17 @@ namespace exodbc {
 		switch (dbms)
 		{
 		case DatabaseProduct::DB2:
-			return L"DB2";
+			return u8"DB2";
 		case DatabaseProduct::MS_SQL_SERVER:
-			return L"SqlServer";
+			return u8"SqlServer";
 		case DatabaseProduct::MY_SQL:
-			return L"MySql";
+			return u8"MySql";
 		case DatabaseProduct::EXCEL:
-			return L"Excel";
+			return u8"Excel";
 		case DatabaseProduct::ACCESS:
-			return L"Access";
+			return u8"Access";
 		default:
-			return L"UnknownDbms";
+			return u8"UnknownDbms";
 		}
 	}
 
@@ -410,15 +410,15 @@ namespace exodbc {
 		switch (type)
 		{
 		case SQL_HANDLE_ENV:
-			return L"ENV";
+			return u8"ENV";
 		case SQL_HANDLE_DBC:
-			return L"DBC";
+			return u8"DBC";
 		case SQL_HANDLE_STMT:
-			return L"STMT";
+			return u8"STMT";
 		case SQL_HANDLE_DESC:
-			return L"DESC";
+			return u8"DESC";
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
@@ -479,7 +479,7 @@ namespace exodbc {
 					if (ret == SQL_SUCCESS_WITH_INFO)
 					{
 						std::wstringstream ws;
-						ws << L"Error msg from recNr " << recNr << L" got truncated";
+						ws << u8"Error msg from recNr " << recNr << u8" got truncated";
 						LOG_WARNING(ws.str());
 					}
 				}
@@ -488,7 +488,7 @@ namespace exodbc {
 
 			if (ret != SQL_NO_DATA)
 			{
-				LOG_WARNING(boost::str(boost::wformat(L"Calling SQLGetDiagRec did not end with %s (%d) but with %s (%d)") % SqlReturn2s(SQL_NO_DATA) % SQL_NO_DATA %SqlReturn2s(ret) % ret));
+				LOG_WARNING(boost::str(boost::wformat(u8"Calling SQLGetDiagRec did not end with %s (%d) but with %s (%d)") % SqlReturn2s(SQL_NO_DATA) % SQL_NO_DATA %SqlReturn2s(ret) % ret));
 			}
 		}
 
@@ -509,7 +509,7 @@ namespace exodbc {
 		case SQL_HANDLE_DESC:
 			return GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, handle);
 		default:
-			exASSERT_MSG(false, L"Unknown handleType");
+			exASSERT_MSG(false, u8"Unknown handleType");
 		}
 		return SErrorInfoVector();
 	}
