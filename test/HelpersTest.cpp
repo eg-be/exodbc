@@ -42,7 +42,7 @@ namespace exodbctest
 	TEST_F(HelpersTest, GetInfo)
 	{
 		// Simply test reading a string and an int value works - that means, does return some data
-		std::wstring serverName;
+		std::string serverName;
 		DatabasePtr pDb = OpenTestDb();
 
 		ASSERT_TRUE(pDb->HasConnectionHandle());
@@ -90,10 +90,10 @@ namespace exodbctest
 
 		// Read some non-null string-data with enough chars
 		bool isNull = false;
-		std::wstring value;
+		std::string value;
 		EXPECT_NO_THROW(GetData(pHStmt, 2, 20, value, &isNull));
 		EXPECT_FALSE(isNull);
-		EXPECT_EQ(L"הצüאיט", value);
+		EXPECT_EQ(u8"הצüאיט", value);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Trim the read-value in GetData
@@ -106,7 +106,7 @@ namespace exodbctest
 			// note that this will info about data truncation
 			EXPECT_NO_THROW(GetData(pHStmt, 2, 3, value, &isNull));
 		}
-		EXPECT_EQ(L"הצü", value);
+		EXPECT_EQ(u8"הצü", value);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Read some int value
@@ -125,10 +125,10 @@ namespace exodbctest
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		ret = SQLFetch(pHStmt->GetHandle());
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
-		value = L"";
+		value = u8"";
 		EXPECT_NO_THROW(GetData(pHStmt, 3, 20, value, &isNull));
 		EXPECT_TRUE(isNull);
-		EXPECT_EQ(L"", value);
+		EXPECT_EQ(u8"", value);
 		
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 	}
