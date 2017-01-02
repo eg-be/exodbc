@@ -314,7 +314,14 @@ namespace exodbc
 		// note, from ms-doc: 
 		// Character strings pointed to by the ValuePtr argument of SQLSetConnectAttr have a length of StringLength bytes.
 		SQLINTEGER cb = 0;
-		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)path.c_str(), ((SQLINTEGER)path.length()) * sizeof(SQLWCHAR));
+
+		// windows probably wants wchars here.. (?)
+#ifdef _WIN32
+		std::wstring wpath = utf8ToUtf16(path);
+		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)wpath.c_str(), ((SQLINTEGER)wpath.length()) * sizeof(SQLWCHAR));
+#else
+		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)path.c_str(), ((SQLINTEGER)path.length()) * sizeof(SQLCHAR));
+#endif
 		THROW_IFN_SUCCEEDED(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
 	}
 
