@@ -184,18 +184,18 @@ namespace exodbc
 			// if SQL_ERROR is returned, the handle is still valid, and error information can be fetched
 			if (ret == SQL_ERROR)
 			{
-				std::wstring msg = boost::str(boost::wformat(L"Freeing Handle %1% of type %2% failed with SQL_ERROR, handle is still valid.") % m_handle %HandleType2s(tHandleType));
-				SqlResultException ex(L"SQLFreeHandle", ret, tHandleType, m_handle, msg);
+				std::string msg = boost::str(boost::format(u8"Freeing Handle %1% of type %2% failed with SQL_ERROR, handle is still valid.") % m_handle %HandleType2s(tHandleType));
+				SqlResultException ex(u8"SQLFreeHandle", ret, tHandleType, m_handle, msg);
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
 			else if (ret == SQL_INVALID_HANDLE)
 			{
 				// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
-				std::wstring msg = boost::str(boost::wformat(L"Freeing Handle %1% of type %2% failed with SQL_INVALID_HANDLE.") % m_handle %HandleType2s(tHandleType));
+				std::string msg = boost::str(boost::format(u8"Freeing Handle %1% of type %2% failed with SQL_INVALID_HANDLE.") % m_handle %HandleType2s(tHandleType));
 				m_handle = SQL_NULL_HANDLE;
 				m_pParentHandle.reset();
-				SqlResultException ex(L"SQLFreeHandle", ret, msg);
+				SqlResultException ex(u8"SQLFreeHandle", ret, msg);
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
