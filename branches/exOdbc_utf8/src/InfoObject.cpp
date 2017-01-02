@@ -35,7 +35,7 @@ namespace exodbc
 	{ }
 
 
-	TableInfo::TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, DatabaseProduct dbms /* = DatabaseProduct::UNKNOWN */)
+	TableInfo::TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, const std::string& catalogName, const std::string schemaName, DatabaseProduct dbms /* = DatabaseProduct::UNKNOWN */)
 		: m_tableName(tableName)
 		, m_tableType(tableType)
 		, m_tableRemarks(tableRemarks)
@@ -47,7 +47,7 @@ namespace exodbc
 	{}
 
 
-	TableInfo::TableInfo(const std::wstring& tableName, const std::wstring& tableType, const std::wstring& tableRemarks, const std::wstring& catalogName, const std::wstring schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms /* = DatabaseProduct::UNKNOWN */)
+	TableInfo::TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, const std::string& catalogName, const std::string schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms /* = DatabaseProduct::UNKNOWN */)
 		: m_tableName(tableName)
 		, m_tableType(tableType)
 		, m_tableRemarks(tableRemarks)
@@ -59,7 +59,7 @@ namespace exodbc
 	{}
 
 
-	std::wstring TableInfo::GetQueryName() const
+	std::string TableInfo::GetQueryName() const
 	{
 		exASSERT( ! m_tableName.empty());
 
@@ -71,28 +71,28 @@ namespace exodbc
 			break;
 		case DatabaseProduct::EXCEL:
 			// For excel, add '[' and ']' around the pure table name.
-			return L"[" + m_tableName + L"]";
+			return u8"[" + m_tableName + u8"]";
 			break;
 		}
 
 		// As default, include everything we have
-		std::wstringstream ws;
+		std::stringstream ss;
 		if (HasCatalog())
 		{
-			ws << m_catalogName << L".";
+			ss << m_catalogName << u8".";
 		}
 		if (HasSchema())
 		{
-			ws << m_schemaName << L".";
+			ss << m_schemaName << u8".";
 		}
-		ws << m_tableName;
+		ss << m_tableName;
 
-		std::wstring str = ws.str();
+		std::string str = ss.str();
 		return str;
 	}
 
 
-	std::wstring TableInfo::GetPureName() const
+	std::string TableInfo::GetPureName() const
 	{
 		exASSERT(! m_tableName.empty());
 
@@ -144,10 +144,10 @@ namespace exodbc
 	{ }
 
 
-	ColumnInfo::ColumnInfo(const std::wstring& catalogName, const std::wstring& schemaName, const std::wstring& tableName, const std::wstring& columnName, SQLSMALLINT sqlType, 
-		const std::wstring& typeName, SQLINTEGER columnSize, SQLINTEGER bufferSize, SQLSMALLINT decimalDigits, SQLSMALLINT numPrecRadix, SQLSMALLINT nullable, 
-		const std::wstring& remarks, const std::wstring& defaultValue, SQLSMALLINT sqlDataType, SQLSMALLINT sqlDatetimeSub, SQLINTEGER charOctetLength, SQLINTEGER ordinalPosition, 
-		const std::wstring& isNullable, bool isCatalogNull, bool isSchemaNull, bool isColumnSizeNull, bool isBufferSizeNull, bool isDecimalDigitsNull, bool isNumPrecRadixNull, 
+	ColumnInfo::ColumnInfo(const std::string& catalogName, const std::string& schemaName, const std::string& tableName, const std::string& columnName, SQLSMALLINT sqlType, 
+		const std::string& typeName, SQLINTEGER columnSize, SQLINTEGER bufferSize, SQLSMALLINT decimalDigits, SQLSMALLINT numPrecRadix, SQLSMALLINT nullable, 
+		const std::string& remarks, const std::string& defaultValue, SQLSMALLINT sqlDataType, SQLSMALLINT sqlDatetimeSub, SQLINTEGER charOctetLength, SQLINTEGER ordinalPosition, 
+		const std::string& isNullable, bool isCatalogNull, bool isSchemaNull, bool isColumnSizeNull, bool isBufferSizeNull, bool isDecimalDigitsNull, bool isNumPrecRadixNull, 
 		bool isRemarksNull, bool isDefaultValueNull, bool isSqlDatetimeSubNull, bool isIsNullableNull)
 		: m_catalogName(catalogName)
 		, m_schemaName(schemaName)
@@ -181,14 +181,14 @@ namespace exodbc
 		exASSERT(!m_columnName.empty());
 	}
 
-	std::wstring ColumnInfo::GetQueryName() const noexcept
+	std::string ColumnInfo::GetQueryName() const noexcept
 	{
 		// When querying, we use only the Column-name
 		return GetPureName();
 	}
 
 
-	std::wstring ColumnInfo::GetPureName() const noexcept
+	std::string ColumnInfo::GetPureName() const noexcept
 	{
 		return m_columnName;
 	}
@@ -204,7 +204,7 @@ namespace exodbc
 	{}
 
 
-	TablePrimaryKeyInfo::TablePrimaryKeyInfo(const std::wstring& tableName, const std::wstring& columnName, SQLSMALLINT keySequence)
+	TablePrimaryKeyInfo::TablePrimaryKeyInfo(const std::string& tableName, const std::string& columnName, SQLSMALLINT keySequence)
 		: m_tableName(tableName)
 		, m_columnName(columnName)
 		, m_keySequence(keySequence)
@@ -214,8 +214,8 @@ namespace exodbc
 	{}
 
 
-	TablePrimaryKeyInfo::TablePrimaryKeyInfo(const std::wstring& catalogName, const std::wstring& schemaName, const std::wstring& tableName, const std::wstring& columnName, 
-		SQLSMALLINT keySequence, const std::wstring& keyName, bool isCatalogNull, bool isSchemaNull, bool isPrimaryKeyNameNull)
+	TablePrimaryKeyInfo::TablePrimaryKeyInfo(const std::string& catalogName, const std::string& schemaName, const std::string& tableName, const std::string& columnName, 
+		SQLSMALLINT keySequence, const std::string& keyName, bool isCatalogNull, bool isSchemaNull, bool isPrimaryKeyNameNull)
 		: m_catalogName(catalogName)
 		, m_schemaName(schemaName)
 		, m_tableName(tableName)
@@ -228,13 +228,13 @@ namespace exodbc
 	{}
 
 
-	std::wstring TablePrimaryKeyInfo::GetQueryName() const
+	std::string TablePrimaryKeyInfo::GetQueryName() const
 	{
 		return GetPureName();
 	}
 
 
-	std::wstring TablePrimaryKeyInfo::GetPureName() const
+	std::string TablePrimaryKeyInfo::GetPureName() const
 	{
 		exASSERT(!m_columnName.empty());
 		return m_columnName;
@@ -246,9 +246,9 @@ namespace exodbc
 	}
 
 
-	void DatabaseInfo::SetProperty(WStringProperty prop, const std::wstring& value)
+	void DatabaseInfo::SetProperty(StringProperty prop, const std::string& value)
 	{
-		m_wstringMap[prop] = value;
+		m_stringMap[prop] = value;
 	}
 
 
@@ -270,9 +270,9 @@ namespace exodbc
 	}
 
 
-	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, WStringProperty prop)
+	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, StringProperty prop)
 	{
-		std::wstring value;
+		std::string value;
 		GetInfo(pHDbc, (SQLUSMALLINT)prop, value);
 		SetProperty(prop, value);
 	}
@@ -305,125 +305,125 @@ namespace exodbc
 	}
 
 
-	std::wstring DatabaseInfo::GetPropertyName(WStringProperty prop) const
+	std::string DatabaseInfo::GetPropertyName(StringProperty prop) const
 	{
 		switch (prop)
 		{
-		case WStringProperty::ServerName:
-			return L"SQL_SERVER_NAME";
-		case WStringProperty::DatabaseName:
-			return L"SQL_DATABASE_NAME";
-		case WStringProperty::DbmsName:
-			return L"SQL_DBMS_NAME";
-		case WStringProperty::DbmsVersion:
-			return L"SQL_DBMS_VER";
-		case WStringProperty::DriverName:
-			return L"SQL_DRIVER_NAME";
-		case WStringProperty::DriverOdbcVersion:
-			return L"SQL_DRIVER_ODBC_VER";
-		case WStringProperty::DriverVersion:
-			return L"SQL_DRIVER_VER";
-		case WStringProperty::OdbcSupportIEF:
-			return L"SQL_ODBC_SQL_OPT_IEF";
-		case WStringProperty::OdbcVersion:
-			return L"SQL_ODBC_VER";
-		case WStringProperty::OuterJoins:
-			return L"SQL_OUTER_JOINS";
-		case WStringProperty::ProcedureSupport:
-			return L"SQL_PROCEDURES";
-		case WStringProperty::AccessibleTables:
-			return L"SQL_ACCESSIBLE_TABLES";
-		case WStringProperty::SearchPatternEscape:
-			return L"SQL_SEARCH_PATTERN_ESCAPE";
+		case StringProperty::ServerName:
+			return u8"SQL_SERVER_NAME";
+		case StringProperty::DatabaseName:
+			return u8"SQL_DATABASE_NAME";
+		case StringProperty::DbmsName:
+			return u8"SQL_DBMS_NAME";
+		case StringProperty::DbmsVersion:
+			return u8"SQL_DBMS_VER";
+		case StringProperty::DriverName:
+			return u8"SQL_DRIVER_NAME";
+		case StringProperty::DriverOdbcVersion:
+			return u8"SQL_DRIVER_ODBC_VER";
+		case StringProperty::DriverVersion:
+			return u8"SQL_DRIVER_VER";
+		case StringProperty::OdbcSupportIEF:
+			return u8"SQL_ODBC_SQL_OPT_IEF";
+		case StringProperty::OdbcVersion:
+			return u8"SQL_ODBC_VER";
+		case StringProperty::OuterJoins:
+			return u8"SQL_OUTER_JOINS";
+		case StringProperty::ProcedureSupport:
+			return u8"SQL_PROCEDURES";
+		case StringProperty::AccessibleTables:
+			return u8"SQL_ACCESSIBLE_TABLES";
+		case StringProperty::SearchPatternEscape:
+			return u8"SQL_SEARCH_PATTERN_ESCAPE";
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
 
-	std::wstring DatabaseInfo::GetPropertyName(USmallIntProperty prop) const
+	std::string DatabaseInfo::GetPropertyName(USmallIntProperty prop) const
 	{
 		switch (prop)
 		{
 		case USmallIntProperty::MaxConnections:
-			return L"SQL_MAX_DRIVER_CONNECTIONS";
+			return u8"SQL_MAX_DRIVER_CONNECTIONS";
 		case USmallIntProperty::MaxConcurrentActivs:
-			return L"SQL_MAX_CONCURRENT_ACTIVITIES";
+			return u8"SQL_MAX_CONCURRENT_ACTIVITIES";
 		case USmallIntProperty::OdbcSagCliConformance:
-			return L"SQL_ODBC_SAG_CLI_CONFORMANCE";
+			return u8"SQL_ODBC_SAG_CLI_CONFORMANCE";
 		case USmallIntProperty::CursorCommitBehavior:
-			return L"SQL_CURSOR_COMMIT_BEHAVIOR";
+			return u8"SQL_CURSOR_COMMIT_BEHAVIOR";
 		case USmallIntProperty::CursorRollbackBehavior:
-			return L"SQL_CURSOR_ROLLBACK_BEHAVIOR";
+			return u8"SQL_CURSOR_ROLLBACK_BEHAVIOR";
 		case USmallIntProperty::NonNullableColumns:
-			return L"SQL_NON_NULLABLE_COLUMNS";
+			return u8"SQL_NON_NULLABLE_COLUMNS";
 		case USmallIntProperty::TxnCapable:
-			return L"SQL_TXN_CAPABLE";
+			return u8"SQL_TXN_CAPABLE";
 		case USmallIntProperty::MaxCatalogNameLen:
-			return L"SQL_MAX_CATALOG_NAME_LEN";
+			return u8"SQL_MAX_CATALOG_NAME_LEN";
 		case USmallIntProperty::MaxSchemaNameLen:
-			return L"SQL_MAX_SCHEMA_NAME_LEN";
+			return u8"SQL_MAX_SCHEMA_NAME_LEN";
 		case USmallIntProperty::MaxTableNameLen:
-			return L"SQL_MAX_TABLE_NAME_LEN";
+			return u8"SQL_MAX_TABLE_NAME_LEN";
 		case USmallIntProperty::MaxColumnNameLen:
-			return L"SQL_MAX_COLUMN_NAME_LEN";
+			return u8"SQL_MAX_COLUMN_NAME_LEN";
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
 
-	std::wstring DatabaseInfo::GetPropertyName(UIntProperty prop) const
+	std::string DatabaseInfo::GetPropertyName(UIntProperty prop) const
 	{
 		switch (prop)
 		{
 		case UIntProperty::DefaultTxnIsolation:
-			return L"SQL_DEFAULT_TXN_ISOLATION";
+			return u8"SQL_DEFAULT_TXN_ISOLATION";
 		case UIntProperty::TxnIsolationOption:
-			return L"SQL_TXN_ISOLATION_OPTION";
+			return u8"SQL_TXN_ISOLATION_OPTION";
 		case UIntProperty::ScrollOptions:
-			return L"SQL_SCROLL_OPTIONS";
+			return u8"SQL_SCROLL_OPTIONS";
 		case UIntProperty::CursorSensitity:
-			return L"SQL_CURSOR_SENSITIVITY";
+			return u8"SQL_CURSOR_SENSITIVITY";
 		case UIntProperty::DynamicCursorAttributes1:
-			return L"SQL_DYNAMIC_CURSOR_ATTRIBUTES1";
+			return u8"SQL_DYNAMIC_CURSOR_ATTRIBUTES1";
 		case UIntProperty::ForwardOnlyCursorAttributes1:
-			return L"SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1";
+			return u8"SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1";
 		case UIntProperty::KeysetCursorAttributes1:
-			return L"SQL_KEYSET_CURSOR_ATTRIBUTES1";
+			return u8"SQL_KEYSET_CURSOR_ATTRIBUTES1";
 		case UIntProperty::StaticCursorAttributes1:
-			return L"SQL_STATIC_CURSOR_ATTRIBUTES1";
+			return u8"SQL_STATIC_CURSOR_ATTRIBUTES1";
 		case UIntProperty::KeysetCursorAttributes2:
-			return L"SQL_KEYSET_CURSOR_ATTRIBUTES2";
+			return u8"SQL_KEYSET_CURSOR_ATTRIBUTES2";
 		case UIntProperty::StaticCursorAttributes2:
-			return L"SQL_STATIC_CURSOR_ATTRIBUTES2";
+			return u8"SQL_STATIC_CURSOR_ATTRIBUTES2";
 
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
 
-	std::wstring DatabaseInfo::GetPropertyName(IntProperty prop) const
+	std::string DatabaseInfo::GetPropertyName(IntProperty prop) const
 	{
 		switch (prop)
 		{
 		case IntProperty::PosOperations:
-			return L"SQL_POS_OPERATIONS";
+			return u8"SQL_POS_OPERATIONS";
 		case IntProperty::PositionedStatements:
-			return L"SQL_POSITIONED_STATEMENTS";
+			return u8"SQL_POSITIONED_STATEMENTS";
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
 
-	std::wstring DatabaseInfo::GetWStringProperty(WStringProperty prop) const
+	std::string DatabaseInfo::GetStringProperty(StringProperty prop) const
 	{
-		WStringMap::const_iterator it = m_wstringMap.find(prop);
-		if (it == m_wstringMap.end())
+		StringMap::const_iterator it = m_stringMap.find(prop);
+		if (it == m_stringMap.end())
 		{
-			NotFoundException nfe(boost::str(boost::wformat(L"WString Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
+			NotFoundException nfe(boost::str(boost::format(u8"WString Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
 			SET_EXCEPTION_SOURCE(nfe);
 			throw nfe;
 		}
@@ -436,7 +436,7 @@ namespace exodbc
 		USmallIntMap::const_iterator it = m_uSmallIntMap.find(prop);
 		if (it == m_uSmallIntMap.end())
 		{
-			NotFoundException nfe(boost::str(boost::wformat(L"USmallInt Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
+			NotFoundException nfe(boost::str(boost::format(u8"USmallInt Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
 			SET_EXCEPTION_SOURCE(nfe);
 			throw nfe;
 		}
@@ -449,7 +449,7 @@ namespace exodbc
 		UIntMap::const_iterator it = m_uIntMap.find(prop);
 		if (it == m_uIntMap.end())
 		{
-			NotFoundException nfe(boost::str(boost::wformat(L"UInt Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
+			NotFoundException nfe(boost::str(boost::format(u8"UInt Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
 			SET_EXCEPTION_SOURCE(nfe);
 			throw nfe;
 		}
@@ -462,7 +462,7 @@ namespace exodbc
 		IntMap::const_iterator it = m_intMap.find(prop);
 		if (it == m_intMap.end())
 		{
-			NotFoundException nfe(boost::str(boost::wformat(L"Int Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
+			NotFoundException nfe(boost::str(boost::format(u8"Int Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
 			SET_EXCEPTION_SOURCE(nfe);
 			throw nfe;
 		}
@@ -485,166 +485,166 @@ namespace exodbc
 	}
 
 
-	std::wstring DatabaseInfo::GetDriverName() const
+	std::string DatabaseInfo::GetDriverName() const
 	{
-		return GetWStringProperty(WStringProperty::DriverName);
+		return GetStringProperty(StringProperty::DriverName);
 	}
 
 
-	std::wstring DatabaseInfo::GetDriverOdbcVersion() const
+	std::string DatabaseInfo::GetDriverOdbcVersion() const
 	{
-		return GetWStringProperty(WStringProperty::DriverOdbcVersion);
+		return GetStringProperty(StringProperty::DriverOdbcVersion);
 	}
 
 
-	std::wstring DatabaseInfo::GetDriverVersion() const
+	std::string DatabaseInfo::GetDriverVersion() const
 	{
-		return GetWStringProperty(WStringProperty::DriverVersion);
+		return GetStringProperty(StringProperty::DriverVersion);
 	}
 
 
-	std::wstring DatabaseInfo::GetDbmsName() const
+	std::string DatabaseInfo::GetDbmsName() const
 	{
-		return GetWStringProperty(WStringProperty::DbmsName);
+		return GetStringProperty(StringProperty::DbmsName);
 	}
 
 
-	std::wstring DatabaseInfo::ToString() const
+	std::string DatabaseInfo::ToString() const
 	{
-		std::wstringstream ws;
-		ws << std::endl;
-		ws << L"***** DATA SOURCE INFORMATION *****" << std::endl;
-		for (WStringMap::const_iterator it = m_wstringMap.begin(); it != m_wstringMap.end(); ++it)
+		std::stringstream ss;
+		ss << std::endl;
+		ss << u8"***** DATA SOURCE INFORMATION *****" << std::endl;
+		for (StringMap::const_iterator it = m_stringMap.begin(); it != m_stringMap.end(); ++it)
 		{
-			wstring tmp = boost::str(boost::wformat(L"%-38s : '%s'") % GetPropertyName(it->first) % it->second);
-			ws << tmp << std::endl;
+			string tmp = boost::str(boost::format(u8"%-38s : '%s'") % GetPropertyName(it->first) % it->second);
+			ss << tmp << std::endl;
 		}
-		ws << std::endl;
+		ss << std::endl;
 		for (USmallIntMap::const_iterator it = m_uSmallIntMap.begin(); it != m_uSmallIntMap.end(); ++it)
 		{
-			wstring tmp = boost::str(boost::wformat(L"%-38s : %#8x (%8d)") % GetPropertyName(it->first) % it->second % it->second);
-			ws << tmp << std::endl;
+			string tmp = boost::str(boost::format(u8"%-38s : %#8x (%8d)") % GetPropertyName(it->first) % it->second % it->second);
+			ss << tmp << std::endl;
 		}
-		ws << std::endl;
+		ss << std::endl;
 		for (UIntMap::const_iterator it = m_uIntMap.begin(); it != m_uIntMap.end(); ++it)
 		{
-			wstring tmp = boost::str(boost::wformat(L"%-38s : %#8x (%8d)") % GetPropertyName(it->first) % it->second % it->second);
-			ws << tmp << std::endl;
+			string tmp = boost::str(boost::format(u8"%-38s : %#8x (%8d)") % GetPropertyName(it->first) % it->second % it->second);
+			ss << tmp << std::endl;
 		}
-		ws << std::endl;
+		ss << std::endl;
 		for (IntMap::const_iterator it = m_intMap.begin(); it != m_intMap.end(); ++it)
 		{
-			wstring tmp = boost::str(boost::wformat(L"%-38s : %8d") % GetPropertyName(it->first) % it->second);
-			ws << tmp << std::endl;
+			string tmp = boost::str(boost::format(u8"%-38s : %8d") % GetPropertyName(it->first) % it->second);
+			ss << tmp << std::endl;
 		}
-		ws << std::endl;
+		ss << std::endl;
 		
-		ws << L"  SAG CLI Conf. Level: ";
+		ss << u8"  SAG CLI Conf. Level: ";
 		switch (GetUSmallIntProperty(USmallIntProperty::OdbcSagCliConformance))
 		{
-		case SQL_OSCC_NOT_COMPLIANT:    ws << L"Not Compliant";    break;
-		case SQL_OSCC_COMPLIANT:        ws << L"Compliant";        break;
+		case SQL_OSCC_NOT_COMPLIANT:    ss << u8"Not Compliant";    break;
+		case SQL_OSCC_COMPLIANT:        ss << u8"Compliant";        break;
 		}
-		ws << std::endl;
+		ss << std::endl;
 
-		ws << L"  Cursor COMMIT Behavior: ";
+		ss << u8"  Cursor COMMIT Behavior: ";
 		switch (GetUSmallIntProperty(USmallIntProperty::CursorCommitBehavior))
 		{
-		case SQL_CB_DELETE:        ws << L"Delete cursors";      break;
-		case SQL_CB_CLOSE:         ws << L"Close cursors";       break;
-		case SQL_CB_PRESERVE:      ws << L"Preserve cursors";    break;
+		case SQL_CB_DELETE:        ss << u8"Delete cursors";      break;
+		case SQL_CB_CLOSE:         ss << u8"Close cursors";       break;
+		case SQL_CB_PRESERVE:      ss << u8"Preserve cursors";    break;
 		}
-		ws << std::endl;
+		ss << std::endl;
 
-		ws << L"  Cursor ROLLBACK Behavior: ";
+		ss << u8"  Cursor ROLLBACK Behavior: ";
 		switch (GetUSmallIntProperty(USmallIntProperty::CursorRollbackBehavior))
 		{
-		case SQL_CB_DELETE:      ws << L"Delete cursors";      break;
-		case SQL_CB_CLOSE:       ws << L"Close cursors";       break;
-		case SQL_CB_PRESERVE:    ws << L"Preserve cursors";    break;
+		case SQL_CB_DELETE:      ss << u8"Delete cursors";      break;
+		case SQL_CB_CLOSE:       ss << u8"Close cursors";       break;
+		case SQL_CB_PRESERVE:    ss << u8"Preserve cursors";    break;
 		}
-		ws << std::endl;
+		ss << std::endl;
 
-		ws << L"  Support NOT NULL clause: ";
+		ss << u8"  Support NOT NULL clause: ";
 		switch (GetUSmallIntProperty(USmallIntProperty::NonNullableColumns))
 		{
-		case SQL_NNC_NULL:        ws << L"No";        break;
-		case SQL_NNC_NON_NULL:    ws << L"Yes";       break;
+		case SQL_NNC_NULL:        ss << u8"No";        break;
+		case SQL_NNC_NON_NULL:    ss << u8"Yes";       break;
 		}
-		ws << std::endl;
+		ss << std::endl;
 
-		ws << L"  Default Transaction Isolation: ";
+		ss << u8"  Default Transaction Isolation: ";
 		switch (GetUIntProperty(UIntProperty::DefaultTxnIsolation))
 		{
-		case SQL_TXN_READ_UNCOMMITTED:  ws << L"Read Uncommitted";    break;
-		case SQL_TXN_READ_COMMITTED:    ws << L"Read Committed";      break;
-		case SQL_TXN_REPEATABLE_READ:   ws << L"Repeatable Read";     break;
-		case SQL_TXN_SERIALIZABLE:      ws << L"Serializable";        break;
+		case SQL_TXN_READ_UNCOMMITTED:  ss << u8"Read Uncommitted";    break;
+		case SQL_TXN_READ_COMMITTED:    ss << u8"Read Committed";      break;
+		case SQL_TXN_REPEATABLE_READ:   ss << u8"Repeatable Read";     break;
+		case SQL_TXN_SERIALIZABLE:      ss << u8"Serializable";        break;
 		}
-		ws << std::endl;
+		ss << std::endl;
 
 		SQLUINTEGER txnIsolationOptions = GetUIntProperty(UIntProperty::TxnIsolationOption);
-		ws << L"  Transaction Isolation Options: ";
+		ss << u8"  Transaction Isolation Options: ";
 		if (txnIsolationOptions & SQL_TXN_READ_UNCOMMITTED)
-			ws << L"Read Uncommitted, ";
+			ss << u8"Read Uncommitted, ";
 		if (txnIsolationOptions & SQL_TXN_READ_COMMITTED)
-			ws << L"Read Committed, ";
+			ss << u8"Read Committed, ";
 		if (txnIsolationOptions & SQL_TXN_REPEATABLE_READ)
-			ws << L"Repeatable Read, ";
+			ss << u8"Repeatable Read, ";
 		if (txnIsolationOptions & SQL_TXN_SERIALIZABLE)
-			ws << L"Serializable, ";
-		ws << std::endl;
+			ss << u8"Serializable, ";
+		ss << std::endl;
 
-		ws << L"  Transaction Capable?: ";
+		ss << u8"  Transaction Capable?: ";
 		switch (GetUSmallIntProperty(USmallIntProperty::TxnCapable))
 		{
-		case SQL_TC_NONE:          ws << L"No";            break;
-		case SQL_TC_DML:           ws << L"DML Only";      break;
-		case SQL_TC_DDL_COMMIT:    ws << L"DDL Commit";    break;
-		case SQL_TC_DDL_IGNORE:    ws << L"DDL Ignore";    break;
-		case SQL_TC_ALL:           ws << L"DDL & DML";     break;
+		case SQL_TC_NONE:          ss << u8"No";            break;
+		case SQL_TC_DML:           ss << u8"DML Only";      break;
+		case SQL_TC_DDL_COMMIT:    ss << u8"DDL Commit";    break;
+		case SQL_TC_DDL_IGNORE:    ss << u8"DDL Ignore";    break;
+		case SQL_TC_ALL:           ss << u8"DDL & DMu8";     break;
 		}
-		ws << std::endl;
+		ss << std::endl;
 
 		SQLINTEGER posOperations = GetIntProperty(IntProperty::PosOperations);
-		ws << L"  Position Operations Supported (SQLSetPos): ";
+		ss << u8"  Position Operations Supported (SQLSetPos): ";
 		if (posOperations & SQL_POS_POSITION)
-			ws << L"Position, ";
+			ss << u8"Position, ";
 		if (posOperations & SQL_POS_REFRESH)
-			ws << L"Refresh, ";
+			ss << u8"Refresh, ";
 		if (posOperations & SQL_POS_UPDATE)
-			ws << L"Upd, ";
+			ss << u8"Upd, ";
 		if (posOperations & SQL_POS_DELETE)
-			ws << L"Del, ";
+			ss << u8"Del, ";
 		if (posOperations & SQL_POS_ADD)
-			ws << L"Add";
-		ws << std::endl;
+			ss << u8"Add";
+		ss << std::endl;
 
 		SQLINTEGER posStmts = GetIntProperty(IntProperty::PositionedStatements);
-		ws << L"  Positioned Statements Supported: ";
+		ss << u8"  Positioned Statements Supported: ";
 		if (posStmts & SQL_PS_POSITIONED_DELETE)
-			ws << L"Pos delete, ";
+			ss << u8"Pos delete, ";
 		if (posStmts & SQL_PS_POSITIONED_UPDATE)
-			ws << L"Pos update, ";
+			ss << u8"Pos update, ";
 		if (posStmts & SQL_PS_SELECT_FOR_UPDATE)
-			ws << L"Select for update";
-		ws << std::endl;
+			ss << u8"Select for update";
+		ss << std::endl;
 
 		SQLUINTEGER scrollOptions = GetUIntProperty(UIntProperty::ScrollOptions);
-		ws << L"  Scroll Options: ";
+		ss << u8"  Scroll Options: ";
 		if (scrollOptions & SQL_SO_FORWARD_ONLY)
-			ws << L"Fwd Only, ";
+			ss << u8"Fwd Only, ";
 		if (scrollOptions & SQL_SO_STATIC)
-			ws << L"Static, ";
+			ss << u8"Static, ";
 		if (scrollOptions & SQL_SO_KEYSET_DRIVEN)
-			ws << L"Keyset Driven, ";
+			ss << u8"Keyset Driven, ";
 		if (scrollOptions & SQL_SO_DYNAMIC)
-			ws << L"Dynamic, ";
+			ss << u8"Dynamic, ";
 		if (scrollOptions & SQL_SO_MIXED)
-			ws << L"Mixed";
-		ws << std::endl;
+			ss << u8"Mixed";
+		ss << std::endl;
 
-		return ws.str();
+		return ss.str();
 	}
 
 
@@ -733,14 +733,14 @@ namespace exodbc
 	//}
 
 
-	//std::wstring STableInfo::GetPureTableName() const
+	//std::string STableInfo::GetPureTableName() const
 	//{
 	//	exASSERT(!m_tableName.empty());
 	//	return m_tableName;
 	//}
 
 
-	//std::wstring STableInfo::GetSqlName() const
+	//std::string STableInfo::GetSqlName() const
 	//{
 	//	exASSERT(!m_tableName.empty());
 
@@ -770,30 +770,30 @@ namespace exodbc
 	//		includeName = true;
 	//		break;
 	//	case TableQueryNameHint::EXCEL:
-	//		return L"[" + m_tableName + L"]";
+	//		return u8"[" + m_tableName + u8"]";
 	//	}
 
-	//	std::wstringstream ws;
+	//	std::stringstream ss;
 	//	if (includeCat && HasCatalog())
 	//	{
-	//		ws << m_catalogName << L".";
+	//		ss << m_catalogName << u8".";
 	//	}
 	//	if (includeSchem && HasSchema())
 	//	{
-	//		ws << m_schemaName << L".";
+	//		ss << m_schemaName << u8".";
 	//	}
 	//	if (includeName)
 	//	{
-	//		ws << m_tableName << L".";
+	//		ss << m_tableName << u8".";
 	//	}
 
-	//	std::wstring str = ws.str();
-	//	boost::erase_last(str, L".");
+	//	std::string str = ss.str();
+	//	boost::erase_last(str, u8".");
 	//	return str;
 	//}
 
 
-	//std::wstring ColumnInfo::GetSqlName() const
+	//std::string ColumnInfo::GetSqlName() const
 	//{
 	//	exASSERT(!m_columnName.empty());
 
@@ -811,248 +811,248 @@ namespace exodbc
 	//	//	includeColumnName = true;
 	//	//	break;
 	//	//}
-	//	//std::wstringstream ws;
+	//	//std::stringstream ss;
 
 	//	//if (includeTableName)
 	//	//{
 	//	//	exASSERT(!m_tableName.empty());
-	//	//	ws << m_tableName << L".";
+	//	//	ss << m_tableName << u8".";
 	//	//}
 	//	//if (includeColumnName)
 	//	//{
-	//	//ws << m_columnName << L".";
+	//	//ss << m_columnName << u8".";
 	//	//}
 
-	//	//std::wstring str = ws.str();
-	//	//boost::erase_last(str, L".");
+	//	//std::string str = ss.str();
+	//	//boost::erase_last(str, u8".");
 	//	return m_columnName;
 	//}
 
 
 
-	//std::wstring TablePrimaryKeyInfo::GetSqlName(QueryNameFlags flags /* = QNF_TABLE | QNF_COLUMN */) const
+	//std::string TablePrimaryKeyInfo::GetSqlName(QueryNameFlags flags /* = QNF_TABLE | QNF_COLUMN */) const
 	//{
 	//	exASSERT(!m_tableName.empty());
 
-	//	std::wstringstream ws;
+	//	std::stringstream ss;
 	//	if (flags & QNF_CATALOG && !m_isCatalogNull)
 	//	{
-	//		ws << m_catalogName << L".";
+	//		ss << m_catalogName << u8".";
 	//	}
 	//	if (flags & QNF_SCHEMA && !m_isSchemaNull)
 	//	{
-	//		ws << m_schemaName << L".";
+	//		ss << m_schemaName << u8".";
 	//	}
 	//	if (flags & QNF_TABLE)
 	//	{
-	//		ws << m_tableName << L".";
+	//		ss << m_tableName << u8".";
 	//	}
 	//	if (flags & QNF_COLUMN)
 	//	{
-	//		ws << m_columnName << L".";
+	//		ss << m_columnName << u8".";
 	//	}
 
-	//	std::wstring str = ws.str();
-	//	boost::erase_last(str, L".");
+	//	std::string str = ss.str();
+	//	boost::erase_last(str, u8".");
 	//	return str;
 	//}
 
 
-std::wstring SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */) const
+std::string SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */) const
 {
-	std::wstringstream ws;
+	std::stringstream ss;
 	if (withHeaderLine)
 	{
-		ws << (boost::wformat(L"||= %25s=||= %25s=||= %34s =||= %45s =||= %5s =||= %10s =||= %8s =||= %6s =||= %6s =||= %10s =||= %10s =||= %10s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %34s =||") % L"SQLType" %L"SQL Data Type (3)" %L"!TypeName" %L"Local !TypeName" %L"Unsigned" %L"Precision" %L"Nullable" %L"Auto Inc." %L"Case Sens." %L"Searchable" %L"Prefix" %L"Suffix" %L"Fixed Prec. Scale" %L"Min. Scale" %L"Max. Scale" %L"Sql DateTimeSub" %L"Num. Prec. Radix" %L"Interval Precision" %L"Create Params").str() << std::endl;
+		ss << (boost::format(u8"||= %25s=||= %25s=||= %34s =||= %45s =||= %5s =||= %10s =||= %8s =||= %6s =||= %6s =||= %10s =||= %10s =||= %10s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %34s =||") % u8"SQLType" %u8"SQL Data Type (3)" %u8"!TypeName" %u8"Local !TypeName" %u8"Unsigned" %u8"Precision" %u8"Nullable" %u8"Auto Inc." %u8"Case Sens." %u8"Searchable" %u8"Prefix" %u8"Suffix" %u8"Fixed Prec. Scale" %u8"Min. Scale" %u8"Max. Scale" %u8"Sql DateTimeSub" %u8"Num. Prec. Radix" %u8"Interval Precision" %u8"Create Params").str() << std::endl;
 	}
 
-	std::wstring sFSqlType = (boost::wformat(L"%18s (%4d)") % SqlType2s(m_sqlType) % m_sqlType).str();
-	std::wstring sSqlDataType = (boost::wformat(L"%18s (%4d)") % SqlType2s(m_sqlDataType) % m_sqlDataType).str();
-	std::wstring sPrecision = (m_columnSizeIsNull ? L"NULL" : (boost::wformat(L"%d") % m_columnSize).str());
-	std::wstring sLiteralPrefix = m_literalPrefixIsNull ? L"NULL" : m_literalPrefix;
-	std::wstring sLiteralSuffix = m_literalSuffixIsNull ? L"NULL" : m_literalSuffix;
-	std::wstring sCreateParams = m_createParamsIsNull ? L"NULL" : m_createParams;
-	std::wstring sNullable = L"???";
-	std::wstring sCaseSensitive = SqlTrueFalse2s(m_caseSensitive);
-	std::wstring sSearchable = L"???";
-	std::wstring sUnsigned = m_unsignedIsNull ? L"NULL" : SqlTrueFalse2s(m_unsigned);
-	std::wstring sFixedPrecisionScale = SqlTrueFalse2s(m_fixedPrecisionScale);
-	std::wstring sAutoUniqueValue = m_autoUniqueValueIsNull ? L"NULL" : SqlTrueFalse2s(m_autoUniqueValue);
-	std::wstring sLocalTypeName = m_localTypeNameIsNull ? L"NULL" : m_localTypeName;
-	std::wstring sMinimumScale = m_minimumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") % m_minimumScale).str();
-	std::wstring sMaximumScale = m_maximumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") % m_maximumScale).str();
-	std::wstring sSqlDateTimeSub = m_sqlDateTimeSubIsNull ? L"NULL" : (boost::wformat(L"%d") % m_sqlDateTimeSub).str();
-	std::wstring sNumPrecRadix = m_numPrecRadixIsNull ? L"NULL" : (boost::wformat(L"%d") % m_numPrecRadix).str();
-	std::wstring sIntervalPrecision = m_intervalPrecisionIsNull ? L"NULL" : (boost::wformat(L"%d") % m_intervalPrecision).str();
+	std::string sFSqlType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlType) % m_sqlType).str();
+	std::string sSqlDataType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlDataType) % m_sqlDataType).str();
+	std::string sPrecision = (m_columnSizeIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_columnSize).str());
+	std::string sLiteralPrefix = m_literalPrefixIsNull ? u8"NULu8" : m_literalPrefix;
+	std::string sLiteralSuffix = m_literalSuffixIsNull ? u8"NULu8" : m_literalSuffix;
+	std::string sCreateParams = m_createParamsIsNull ? u8"NULu8" : m_createParams;
+	std::string sNullable = u8"???";
+	std::string sCaseSensitive = SqlTrueFalse2s(m_caseSensitive);
+	std::string sSearchable = u8"???";
+	std::string sUnsigned = m_unsignedIsNull ? u8"NULu8" : SqlTrueFalse2s(m_unsigned);
+	std::string sFixedPrecisionScale = SqlTrueFalse2s(m_fixedPrecisionScale);
+	std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULu8" : SqlTrueFalse2s(m_autoUniqueValue);
+	std::string sLocalTypeName = m_localTypeNameIsNull ? u8"NULu8" : m_localTypeName;
+	std::string sMinimumScale = m_minimumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_minimumScale).str();
+	std::string sMaximumScale = m_maximumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_maximumScale).str();
+	std::string sSqlDateTimeSub = m_sqlDateTimeSubIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_sqlDateTimeSub).str();
+	std::string sNumPrecRadix = m_numPrecRadixIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_numPrecRadix).str();
+	std::string sIntervalPrecision = m_intervalPrecisionIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_intervalPrecision).str();
 
 	switch (m_nullable)
 	{
 	case SQL_NO_NULLS:
-		sNullable = L"NO_NULLS";
+		sNullable = u8"NO_NULLS";
 		break;
 	case SQL_NULLABLE:
-		sNullable = L"NULLABLE";
+		sNullable = u8"NULLABLE";
 		break;
 	default:
-		sNullable = L"UNKNOWN";
+		sNullable = u8"UNKNOWN";
 	}
 	switch (m_searchable)
 	{
 	case SQL_PRED_NONE:
-		sSearchable = L"PRED_NONE";
+		sSearchable = u8"PRED_NONE";
 		break;
 	case SQL_PRED_CHAR:
-		sSearchable = L"PRED_CHAR";
+		sSearchable = u8"PRED_CHAR";
 		break;
 	case SQL_PRED_BASIC:
-		sSearchable = L"PRED_BASIC";
+		sSearchable = u8"PRED_BASIC";
 		break;
 	case SQL_SEARCHABLE:
-		sSearchable = L"SEARCHABLE";
+		sSearchable = u8"SEARCHABLE";
 		break;
 	}
 
-	std::wstring s = (boost::wformat(L"|| %25s|| %2s|| %34s || %45s || %5s || %10s || %8s || %6s || %6s || %10s || %10s || %10s || %5s || %5s || %5s || %5s || %5s || %5s || %34s ||") % sFSqlType %sSqlDataType %m_typeName %sLocalTypeName %sUnsigned %sPrecision %sNullable %sAutoUniqueValue %sCaseSensitive %sSearchable %sLiteralPrefix %sLiteralSuffix %sFixedPrecisionScale %sMinimumScale %sMaximumScale %sSqlDateTimeSub %sNumPrecRadix %sIntervalPrecision %sCreateParams).str();
+	std::string s = (boost::format(u8"|| %25s|| %2s|| %34s || %45s || %5s || %10s || %8s || %6s || %6s || %10s || %10s || %10s || %5s || %5s || %5s || %5s || %5s || %5s || %34s ||") % sFSqlType %sSqlDataType %m_typeName %sLocalTypeName %sUnsigned %sPrecision %sNullable %sAutoUniqueValue %sCaseSensitive %sSearchable %sLiteralPrefix %sLiteralSuffix %sFixedPrecisionScale %sMinimumScale %sMaximumScale %sSqlDateTimeSub %sNumPrecRadix %sIntervalPrecision %sCreateParams).str();
 
-	ws << s;
+	ss << s;
 
-	return ws.str();
+	return ss.str();
 }
 
 
-	std::wstring SSqlTypeInfo::ToOneLineStr(bool withHeaderLines /* = false */, bool withEndLine /* = false */) const
+	std::string SSqlTypeInfo::ToOneLineStr(bool withHeaderLines /* = false */, bool withEndLine /* = false */) const
 	{
-		std::wstringstream ws;
+		std::stringstream ss;
 		if (withHeaderLines)
 		{
-			ws << (boost::wformat(L"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str() << std::endl;
-			ws << (boost::wformat(L"| %25s | %25s | %34s | %45s | %5s | %10s | %8s | %6s | %6s | %10s | %10s | %10s | %5s | %5s | %5s | %5s | %5s | %5s | %34s |") % L"SQLType" %L"SQL Data Type (3)" %L"TypeName" %L"Local TypeName" %L"Unsig" %L"Precision" %L"Nullable" %L"AutoI" %L"CaseS." %L"Searchable" %L"Prefix" %L"Suffix" %L"FixPS" %L"MinSc" %L"MaxSc" %L"DTS3" %L"NuPR" %L"IntPr" %L"Create Params").str() << std::endl;
-			ws << (boost::wformat(L"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str() << std::endl;
+			ss << (boost::format(u8"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str() << std::endl;
+			ss << (boost::format(u8"| %25s | %25s | %34s | %45s | %5s | %10s | %8s | %6s | %6s | %10s | %10s | %10s | %5s | %5s | %5s | %5s | %5s | %5s | %34s |") % u8"SQLType" %u8"SQL Data Type (3)" %u8"TypeName" %u8"Local TypeName" %u8"Unsig" %u8"Precision" %u8"Nullable" %u8"AutoI" %u8"CaseS." %u8"Searchable" %u8"Prefix" %u8"Suffix" %u8"FixPS" %u8"MinSc" %u8"MaxSc" %u8"DTS3" %u8"NuPR" %u8"IntPr" %u8"Create Params").str() << std::endl;
+			ss << (boost::format(u8"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str() << std::endl;
 		}
 
-		std::wstring sFSqlType = (boost::wformat(L"%18s (%4d)") % SqlType2s(m_sqlType) % m_sqlType).str();
-		std::wstring sSqlDataType = (boost::wformat(L"%18s (%4d)") % SqlType2s(m_sqlDataType) % m_sqlDataType).str();
-		std::wstring sPrecision = (m_columnSizeIsNull ? L"NULL" : (boost::wformat(L"%d") % m_columnSize).str());
-		std::wstring sLiteralPrefix = m_literalPrefixIsNull ? L"NULL" : m_literalPrefix;
-		std::wstring sLiteralSuffix = m_literalSuffixIsNull ? L"NULL" : m_literalSuffix;
-		std::wstring sCreateParams = m_createParamsIsNull ? L"NULL" : m_createParams;
-		std::wstring sNullable = L"???";
-		std::wstring sCaseSensitive = SqlTrueFalse2s(m_caseSensitive);
-		std::wstring sSearchable = L"???";
-		std::wstring sUnsigned = m_unsignedIsNull ? L"NULL" : SqlTrueFalse2s(m_unsigned);
-		std::wstring sFixedPrecisionScale = SqlTrueFalse2s(m_fixedPrecisionScale);
-		std::wstring sAutoUniqueValue = m_autoUniqueValueIsNull ? L"NULL" : SqlTrueFalse2s(m_autoUniqueValue);
-		std::wstring sLocalTypeName = m_localTypeNameIsNull ? L"NULL" : m_localTypeName;
-		std::wstring sMinimumScale = m_minimumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") % m_minimumScale).str();
-		std::wstring sMaximumScale = m_maximumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") % m_maximumScale).str();
-		std::wstring sSqlDateTimeSub = m_sqlDateTimeSubIsNull ? L"NULL" : (boost::wformat(L"%d") % m_sqlDateTimeSub).str();
-		std::wstring sNumPrecRadix = m_numPrecRadixIsNull ? L"NULL" : (boost::wformat(L"%d") % m_numPrecRadix).str();
-		std::wstring sIntervalPrecision = m_intervalPrecisionIsNull ? L"NULL" : (boost::wformat(L"%d") % m_intervalPrecision).str();
+		std::string sFSqlType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlType) % m_sqlType).str();
+		std::string sSqlDataType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlDataType) % m_sqlDataType).str();
+		std::string sPrecision = (m_columnSizeIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_columnSize).str());
+		std::string sLiteralPrefix = m_literalPrefixIsNull ? u8"NULu8" : m_literalPrefix;
+		std::string sLiteralSuffix = m_literalSuffixIsNull ? u8"NULu8" : m_literalSuffix;
+		std::string sCreateParams = m_createParamsIsNull ? u8"NULu8" : m_createParams;
+		std::string sNullable = u8"???";
+		std::string sCaseSensitive = SqlTrueFalse2s(m_caseSensitive);
+		std::string sSearchable = u8"???";
+		std::string sUnsigned = m_unsignedIsNull ? u8"NULu8" : SqlTrueFalse2s(m_unsigned);
+		std::string sFixedPrecisionScale = SqlTrueFalse2s(m_fixedPrecisionScale);
+		std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULu8" : SqlTrueFalse2s(m_autoUniqueValue);
+		std::string sLocalTypeName = m_localTypeNameIsNull ? u8"NULu8" : m_localTypeName;
+		std::string sMinimumScale = m_minimumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_minimumScale).str();
+		std::string sMaximumScale = m_maximumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_maximumScale).str();
+		std::string sSqlDateTimeSub = m_sqlDateTimeSubIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_sqlDateTimeSub).str();
+		std::string sNumPrecRadix = m_numPrecRadixIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_numPrecRadix).str();
+		std::string sIntervalPrecision = m_intervalPrecisionIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_intervalPrecision).str();
 
 		switch (m_nullable)
 		{
 		case SQL_NO_NULLS:
-			sNullable = L"NO_NULLS";
+			sNullable = u8"NO_NULLS";
 			break;
 		case SQL_NULLABLE:
-			sNullable = L"NULLABLE";
+			sNullable = u8"NULLABLE";
 			break;
 		default:
-			sNullable = L"UNKNOWN";
+			sNullable = u8"UNKNOWN";
 		}
 		switch (m_searchable)
 		{
 		case SQL_PRED_NONE:
-			sSearchable = L"PRED_NONE";
+			sSearchable = u8"PRED_NONE";
 			break;
 		case SQL_PRED_CHAR:
-			sSearchable = L"PRED_CHAR";
+			sSearchable = u8"PRED_CHAR";
 			break;
 		case SQL_PRED_BASIC:
-			sSearchable = L"PRED_BASIC";
+			sSearchable = u8"PRED_BASIC";
 			break;
 		case SQL_SEARCHABLE:
-			sSearchable = L"SEARCHABLE";
+			sSearchable = u8"SEARCHABLE";
 			break;
 		}
 
-		std::wstring s = (boost::wformat(L"| %25s | %2s | %34s | %45s | %5s | %10s | %8s | %6s | %6s | %10s | %10s | %10s | %5s | %5s | %5s | %5s | %5s | %5s | %34s |") % sFSqlType %sSqlDataType %m_typeName %sLocalTypeName %sUnsigned %sPrecision %sNullable %sAutoUniqueValue %sCaseSensitive %sSearchable %sLiteralPrefix %sLiteralSuffix %sFixedPrecisionScale %sMinimumScale %sMinimumScale %sSqlDateTimeSub %sNumPrecRadix %sIntervalPrecision %sCreateParams).str();
+		std::string s = (boost::format(u8"| %25s | %2s | %34s | %45s | %5s | %10s | %8s | %6s | %6s | %10s | %10s | %10s | %5s | %5s | %5s | %5s | %5s | %5s | %34s |") % sFSqlType %sSqlDataType %m_typeName %sLocalTypeName %sUnsigned %sPrecision %sNullable %sAutoUniqueValue %sCaseSensitive %sSearchable %sLiteralPrefix %sLiteralSuffix %sFixedPrecisionScale %sMinimumScale %sMinimumScale %sSqlDateTimeSub %sNumPrecRadix %sIntervalPrecision %sCreateParams).str();
 
-		ws << s;
+		ss << s;
 
 		if (withEndLine)
 		{
-			ws << std::endl;
-			ws << (boost::wformat(L"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str() << std::endl;
+			ss << std::endl;
+			ss << (boost::format(u8"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str() << std::endl;
 		}
 
-		return ws.str();
+		return ss.str();
 	}
 
-	std::wstring SSqlTypeInfo::ToStr() const
+	std::string SSqlTypeInfo::ToStr() const
 	{
-		std::wstringstream ws;
-		std::wstring sNull = L"NULL";
+		std::stringstream ss;
+		std::string sNull = u8"NULu8";
 
-		ws << L"***** DATA TYPE INFORMATION *****" << std::endl;
-		ws << L" Name:                   " << m_typeName << std::endl;
-		ws << L"  SQL Type:              " << m_sqlType << std::endl;
-		ws << L"  Precision:             " << (m_columnSizeIsNull ? L"NULL" : (boost::wformat(L"%d") % m_columnSize).str()) << std::endl;
-		ws << L"  Literal Prefix:        " << (m_literalPrefixIsNull ? L"NULL" : m_literalPrefix) << std::endl;
-		ws << L"  Literal Suffix:        " << (m_literalSuffixIsNull ? L"NULL" : m_literalSuffix) << std::endl;
-		ws << L"  Create Params:         " << (m_createParamsIsNull ? L"NULL" : m_createParams) << std::endl;
+		ss << u8"***** DATA TYPE INFORMATION *****" << std::endl;
+		ss << u8" Name:                   " << m_typeName << std::endl;
+		ss << u8"  SQL Type:              " << m_sqlType << std::endl;
+		ss << u8"  Precision:             " << (m_columnSizeIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_columnSize).str()) << std::endl;
+		ss << u8"  Literal Prefix:        " << (m_literalPrefixIsNull ? u8"NULu8" : m_literalPrefix) << std::endl;
+		ss << u8"  Literal Suffix:        " << (m_literalSuffixIsNull ? u8"NULu8" : m_literalSuffix) << std::endl;
+		ss << u8"  Create Params:         " << (m_createParamsIsNull ? u8"NULu8" : m_createParams) << std::endl;
 
-		ws << L"  Nullable:              ";
+		ss << u8"  Nullable:              ";
 		switch (m_nullable)
 		{
 		case SQL_NO_NULLS:
-			ws << L"SQL_NO_NULL";
+			ss << u8"SQL_NO_NULu8";
 			break;
 		case SQL_NULLABLE:
-			ws << L"SQL_NULLABLE";
+			ss << u8"SQL_NULLABLE";
 			break;
 		case SQL_NULLABLE_UNKNOWN:
-			ws << L"SQL_NULLABLE_UNKNOWN";
+			ss << u8"SQL_NULLABLE_UNKNOWN";
 			break;
 		default:
-			ws << L"???";
+			ss << u8"???";
 			break;
 		}
-		ws << std::endl;
+		ss << std::endl;
 
-		ws << L"  Case Sensitive:        " << (m_caseSensitive == SQL_TRUE ? L"SQL_TRUE" : L"SQL_FALSE") << std::endl;
-		ws << L"  Searchable:            ";
+		ss << u8"  Case Sensitive:        " << (m_caseSensitive == SQL_TRUE ? u8"SQL_TRUE" : u8"SQL_FALSE") << std::endl;
+		ss << u8"  Searchable:            ";
 		switch (m_searchable)
 		{
 		case SQL_PRED_NONE:
-			ws << L"SQL_PRED_NONE";
+			ss << u8"SQL_PRED_NONE";
 			break;
 		case SQL_PRED_CHAR:
-			ws << L"SQL_PRED_CHAR";
+			ss << u8"SQL_PRED_CHAR";
 			break;
 		case SQL_PRED_BASIC:
-			ws << L"SQL_PRED_BASIC";
+			ss << u8"SQL_PRED_BASIC";
 			break;
 		case SQL_SEARCHABLE:
-			ws << L"SQL_SEARCHABLE";
+			ss << u8"SQL_SEARCHABLE";
 			break;
 		default:
-			ws << L"???";
+			ss << u8"???";
 			break;
 		}
-		ws << std::endl;
+		ss << std::endl;
 
-		ws << L"  Unsigned:              " << (m_unsignedIsNull ? L"NULL" : (m_unsigned == SQL_TRUE ? L"SQL_TRUE" : L"SQL_FALSE")) << std::endl;
-		ws << L"  Fixed Precision Scale: " << (m_fixedPrecisionScale == SQL_TRUE ? L"SQL_TRUE" : L"SQL_FALSE") << std::endl;
-		ws << L"  Auto Unique Value:     " << (m_autoUniqueValueIsNull ? L"NULL" : (m_autoUniqueValue == SQL_TRUE ? L"SQL_TRUE" : L"SQL_FALSE")) << std::endl;
-		ws << L"  Local Type Name:       " << (m_localTypeNameIsNull ? L"NULL" : m_localTypeName) << std::endl;
-		ws << L"  Minimum Scale:         " << (m_minimumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") % m_minimumScale).str()) << std::endl;
-		ws << L"  Maximum Scale:         " << (m_maximumScaleIsNull ? L"NULL" : (boost::wformat(L"%d") % m_maximumScale).str()) << std::endl;
-		ws << L"  SQL Data type:         " << m_sqlDataType << std::endl;
-		ws << L"  SQL Date Time Sub:     " << (m_sqlDateTimeSubIsNull ? L"NULL" : (boost::wformat(L"%d") % m_sqlDateTimeSub).str()) << std::endl;
-		ws << L"  Num Prec Radix:        " << (m_numPrecRadixIsNull ? L"NULL" : (boost::wformat(L"%d") % m_numPrecRadix).str()) << std::endl;
-		ws << L"  Interval Precision:    " << (m_intervalPrecisionIsNull ? L"NULL" : (boost::wformat(L"%d") % m_intervalPrecision).str()) << std::endl;
-		return ws.str();
+		ss << u8"  Unsigned:              " << (m_unsignedIsNull ? u8"NULu8" : (m_unsigned == SQL_TRUE ? u8"SQL_TRUE" : u8"SQL_FALSE")) << std::endl;
+		ss << u8"  Fixed Precision Scale: " << (m_fixedPrecisionScale == SQL_TRUE ? u8"SQL_TRUE" : u8"SQL_FALSE") << std::endl;
+		ss << u8"  Auto Unique Value:     " << (m_autoUniqueValueIsNull ? u8"NULu8" : (m_autoUniqueValue == SQL_TRUE ? u8"SQL_TRUE" : u8"SQL_FALSE")) << std::endl;
+		ss << u8"  Local Type Name:       " << (m_localTypeNameIsNull ? u8"NULu8" : m_localTypeName) << std::endl;
+		ss << u8"  Minimum Scale:         " << (m_minimumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_minimumScale).str()) << std::endl;
+		ss << u8"  Maximum Scale:         " << (m_maximumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_maximumScale).str()) << std::endl;
+		ss << u8"  SQL Data type:         " << m_sqlDataType << std::endl;
+		ss << u8"  SQL Date Time Sub:     " << (m_sqlDateTimeSubIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_sqlDateTimeSub).str()) << std::endl;
+		ss << u8"  Num Prec Radix:        " << (m_numPrecRadixIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_numPrecRadix).str()) << std::endl;
+		ss << u8"  Interval Precision:    " << (m_intervalPrecisionIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_intervalPrecision).str()) << std::endl;
+		return ss.str();
 	}
 
 
