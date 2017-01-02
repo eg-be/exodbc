@@ -72,10 +72,20 @@ namespace exodbc
 		*/
 		void ClearLogHandlers() noexcept;
 
+#ifdef _WIN32
+		/*!
+		* \brief Forwards the passed message to all LogHandlers registered. passed wstrings must be utf-16 encoded.
+		* \details This method is only enabled if _WIN32 is defined. The strings must be utf-16 encoded,
+		*			the method will only convert them to utf-8 strings and forward the call.
+		*/
+		void LogMessage(LogLevel level, const std::wstring& msg, const std::wstring& file = L"", int line = 0, const std::wstring& function = L"") const;
+#endif
+
 		/*!
 		* \brief Forwards the passed message to all LogHandlers registered.
 		*/
-		void LogMessage(LogLevel level, const std::wstring& msg, const std::wstring& file = L"", int line = 0, const std::wstring& function = L"") const;
+		void LogMessage(LogLevel level, const std::string& msg, const std::string& file = u8"", int line = 0, const std::string& function = u8"") const;
+
 
 		/*!
 		* \brief Return how many LogHandler instances are registered.
