@@ -345,9 +345,20 @@ int _tmain(int argc, _TCHAR* argv[])
 	{
 		gTestArgv[i] = argv[i];
 	}
+	// create the wide version so it will still exist later.
+	wstring wCustomFilter = utf8ToUtf16(customFilter);
 	if (!customFilter.empty())
 	{
-		gTestArgv[gTestArgc - 1] = (_TCHAR*) customFilter.c_str();
+		gTestArgv[gTestArgc - 1] = (_TCHAR*) wCustomFilter.c_str();
+	}
+
+	LOG_INFO(boost::str(boost::format(u8"Passing the following %d arguments to InitGoogleTest:") % gTestArgc ));
+	for (int i = 0; i < gTestArgc; i++)
+	{
+		wstring wa = gTestArgv[i];
+		string sa = utf16ToUtf8(wa);
+		string msg = boost::str(boost::format(u8"%d\t%s") % i % sa);
+		LOG_INFO(msg);
 	}
 
 	// Note: We cannot call Init earlier, we must call it after we've set up the global with the param-values
