@@ -67,7 +67,7 @@ namespace exodbc
 			return GetDefault();
 		}
 
-		NotSupportedException nse(NotSupportedException::Type::SQL_TYPE, sqlType, L"SQL Type is not registered in Sql2BufferTypeMap and no default Type is set: ");
+		NotSupportedException nse(NotSupportedException::Type::SQL_TYPE, sqlType, u8"SQL Type is not registered in Sql2BufferTypeMap and no default Type is set: ");
 		SET_EXCEPTION_SOURCE(nse);
 		throw nse;
 	}
