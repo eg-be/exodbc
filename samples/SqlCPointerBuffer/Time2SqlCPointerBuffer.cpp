@@ -43,41 +43,41 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		// And connect to a database using the environment.
 		DatabasePtr pDb = Database::Create(pEnv);
-		pDb->Open(L"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;");
+		pDb->Open(u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;");
 
 		// Create a table with a SQL Server time(7) column.
 		// The time2 column has a fractional part (while the general time columns in SQL do not have
 		// a fractional part).
 		try
 		{
-			pDb->ExecSql(L"DROP TABLE timeTable");
+			pDb->ExecSql(u8"DROP TABLE timeTable");
 			pDb->CommitTrans();
 		}
 		catch (const SqlResultException& ex)
 		{
-			std::wcerr << L"Warning: Drop failed: " << ex.ToString() << std::endl;
+			std::cerr << u8"Warning: Drop failed: " << ex.ToString() << std::endl;
 		}
-		pDb->ExecSql(L"CREATE TABLE timeTable ( id INTEGER IDENTITY(1, 1) PRIMARY KEY, timeCol time(7))");
-		pDb->ExecSql(L"INSERT INTO timeTable (timeCol) VALUES('15:13:02.1234567')");
+		pDb->ExecSql(u8"CREATE TABLE timeTable ( id INTEGER IDENTITY(1, 1) PRIMARY KEY, timeCol time(7))");
+		pDb->ExecSql(u8"INSERT INTO timeTable (timeCol) VALUES('15:13:02.1234567')");
 		pDb->CommitTrans();
 
 		// Opening the table will fail: This database sql type is not registered, an exception like
 		// exodbc:NotSupportedException[sql2buffertypemap.cpp(73)@exodbc::Sql2BufferTypeMap::GetBufferType]: SQL Type is not registered in Sql2BufferTypeMap and no default Type is set: Not Supported SQL Type??? (-154)
 		// will be thrown during Open()
-		Table t(pDb, TableAccessFlag::AF_READ_WRITE, L"timeTable");
+		Table t(pDb, TableAccessFlag::AF_READ_WRITE, u8"timeTable");
 		try
 		{
 			t.Open();
 		}
 		catch (const NotSupportedException& nse)
 		{
-			std::wcerr << L"As expected, opening fails because type is not supported: " << nse.ToString() << std::endl;
+			std::cerr << u8"As expected, opening fails because type is not supported: " << nse.ToString() << std::endl;
 		}
 
 		// If we want to open a table for updating where row to update is identified by the primary key,
 		// we need the primary key column too, so lets add it:
 		// (note: The primary key column is an auto-increment column (IDENDITY(1,1), we will only read it)
-		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(L"id", SQL_INTEGER, ColumnFlag::CF_PRIMARY_KEY | ColumnFlag::CF_READ);
+		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(u8"id", SQL_INTEGER, ColumnFlag::CF_PRIMARY_KEY | ColumnFlag::CF_READ);
 		t.SetColumn(1, pIdCol);
 
 		// We can bind the Sql Sever 'time(7)' column to a type SQL_SS_TIME2_STRUCT by creating the structure
@@ -87,10 +87,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		// Query the database about the appropriate values for ColumnSize and DecimalDigits:
 		SQLINTEGER columnSize = 0;
 		SQLSMALLINT decimalDigits = 0;
-		ColumnInfosVector colInfos = pDb->ReadTableColumnInfo(L"timeTable", L"", L"", L"");
+		ColumnInfosVector colInfos = pDb->ReadTableColumnInfo(u8"timeTable", u8"", u8"", u8"");
 		for (auto it = colInfos.begin(); it != colInfos.end(); ++it)
 		{
-			if (it->GetQueryName() == L"timeCol")
+			if (it->GetQueryName() == u8"timeCol")
 			{
 				columnSize = it->GetColumnSize();
 				decimalDigits = it->GetDecimalDigits();
@@ -100,7 +100,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		SQL_SS_TIME2_STRUCT time2;
 		int p = SQL_C_SS_TIME2;
 		SqlCPointerBufferPtr pTime2Col = SqlCPointerBuffer::Create(
-			L"timeCol",  // column name, used in queries
+			u8"timeCol",  // column name, used in queries
 			SQL_SS_TIME2, // column Sql type
 			(SQLPOINTER)&time2, // pointer to buffer
 			SQL_C_SS_TIME2, // buffer type
@@ -116,15 +116,15 @@ int _tmain(int argc, _TCHAR* argv[])
 		t.Open();
 
 		// Read the time2 value, including a fractional part:
-		t.Select(L"", boost::str(boost::wformat(L"%s ASC") % pTime2Col->GetQueryName()));
+		t.Select(u8"", boost::str(boost::format(u8"%s ASC") % pTime2Col->GetQueryName()));
 		if(t.SelectNext())
 		{ 
 			// And print the value
-			std::wcout << L"TimeCol value: " << time2.hour << L":" << time2.minute << L":" << time2.second << L"." << time2.fraction << endl;
+			std::wcout << u8"TimeCol value: " << time2.hour << u8":" << time2.minute << u8":" << time2.second << u8"." << time2.fraction << endl;
 		}
 		else
 		{
-			std::wcerr << L"No data found!" << std::endl;
+			std::cerr << u8"No data found!" << std::endl;
 		}
 
 		// And modify the value through our buffer:
@@ -139,15 +139,15 @@ int _tmain(int argc, _TCHAR* argv[])
 		pDb->CommitTrans();
 
 		// read back
-		t.Select(L"", boost::str(boost::wformat(L"%s DESC") % pTime2Col->GetQueryName()));
+		t.Select(u8"", boost::str(boost::format(u8"%s DESC") % pTime2Col->GetQueryName()));
 		while (t.SelectNext())
 		{
-			std::wcout << L"TimeCol value: " << time2.hour << L":" << time2.minute << L":" << time2.second << L"." << time2.fraction << endl;
+			std::wcout << u8"TimeCol value: " << time2.hour << u8":" << time2.minute << u8":" << time2.second << u8"." << time2.fraction << endl;
 		}
 	}
 	catch (const Exception& ex)
 	{
-		std::wcerr << ex.ToString() << std::endl;
+		std::cerr << ex.ToString() << std::endl;
 	}
 	return 0;
 }
