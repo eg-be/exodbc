@@ -45,41 +45,39 @@ namespace exodbc
 		/*!
 		* \brief Create AssertionException with source information.
 		*/
-		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition) noexcept
+		AssertionException(int line, const std::string& file, const std::string& functionname, const std::string& condition) noexcept
 			: Exception()
 			, m_condition(condition)
 		{
 			SetSourceInformation(line, file, functionname);
-			m_what = utf16ToUtf8(ToString());
+			m_what = ToString();
 		};
 
 		/*!
 		* \brief Create AssertionException with source information and message.
 		*/
-		AssertionException(int line, const std::wstring& file, const std::wstring& functionname, const std::wstring& condition, const std::wstring& msg) noexcept
+		AssertionException(int line, const std::string& file, const std::string& functionname, const std::string& condition, const std::string& msg) noexcept
 			: Exception(msg)
 			, m_condition(condition)
 		{
 			SetSourceInformation(line, file, functionname);
-			m_what = utf16ToUtf8(ToString());
+			m_what = ToString();
 		};
 
 		virtual ~AssertionException() {};
 
-		std::wstring GetName() const noexcept override { return L"exodbc::AssertionException"; };
-		std::wstring ToString() const noexcept override;
+		std::string GetName() const noexcept override { return u8"exodbc::AssertionException"; };
+		std::string ToString() const noexcept override;
 
 	protected:
-		std::wstring m_condition;
+		std::string m_condition;
 	};
 
 	/*!
 	* \brief Called by macros to throw Assertions
 	* \throw AssertionException if called.
 	*/
-	extern EXODBCAPI void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg);
-
-	extern EXODBCAPI void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::string& condition, const std::wstring& msg);
+	extern EXODBCAPI void exOnAssert(const std::string& file, int line, const std::string& function, const std::string& condition, const std::string& msg);
 }
 
 // AssertionException Macros
@@ -103,4 +101,4 @@ do {																\
 *
 * This macro is a simple shorthand to the macro exASSERT_MSG(const, msg), passing an empty message
 */
-#define exASSERT(cond) exASSERT_MSG(cond, L"")
+#define exASSERT(cond) exASSERT_MSG(cond, "")
