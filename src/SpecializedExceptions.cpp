@@ -76,7 +76,7 @@ namespace exodbc
 		{
 			std::stringstream ss;
 			ss << u8"SQL-Function " << sqlFunctionName << u8" returned ";
-			ss << SqlReturn2s(ret) << u8"(" << ret << L") with " << m_errors.size() << " ODBC-Error(s):";
+			ss << SqlReturn2s(ret) << u8"(" << ret << u8") with " << m_errors.size() << " ODBC-Error(s):";
 			m_errorMsg = ss.str();
 		}
 		catch (const Exception& e)
