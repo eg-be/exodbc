@@ -147,7 +147,7 @@ namespace exodbc
 		 * \return	The output-connection string returned by SQLDriverConnect().
 		 * \throw	Exception If Opening the Connection fails, or no Database handle is allocated.
 		 */
-		std::wstring	Open(const std::wstring& inConnectStr);
+		std::string	Open(const std::string& inConnectStr);
 
 
 		/*!
@@ -158,7 +158,7 @@ namespace exodbc
 		 * \return	The output-connection string returned by SQLDriverConnect().
 		 * \throw	Exception If opening fails.
 		 */
-		std::wstring	Open(const std::wstring& inConnectStr, SQLHWND parentWnd);
+		std::string	Open(const std::string& inConnectStr, SQLHWND parentWnd);
 
 
 		/*!
@@ -168,7 +168,7 @@ namespace exodbc
 		 * \param	authStr	The authentication string (password).
 		 * \throw	Exception If Opening the Connection fails, or no Database handle is allocated.
 		 */
-		void         Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr);
+		void         Open(const std::string& dsn, const std::string& uid, const std::string& authStr);
 
 
 		/*!
@@ -194,7 +194,7 @@ namespace exodbc
 		 * 					clause and no records are deleted.
 		 * \throw	Exception If executing SQL failed, or depending on mode if no records are affected.
 		 */
-		void         ExecSql(const std::wstring& sqlStmt, ExecFailMode mode = ExecFailMode::NotFailOnNoData);
+		void         ExecSql(const std::string& sqlStmt, ExecFailMode mode = ExecFailMode::NotFailOnNoData);
 
 
 		/*!
@@ -229,7 +229,7 @@ namespace exodbc
 		 * \return	Catalog names found.
 		 * \throw	Exception If reading catalogs fails.
 		 */
-		std::vector<std::wstring>	ReadCatalogs()		{ return ReadCatalogInfo(ReadCatalogInfoMode::AllCatalogs); };
+		std::vector<std::string>	ReadCatalogs()		{ return ReadCatalogInfo(ReadCatalogInfoMode::AllCatalogs); };
 
 
 		/*!
@@ -239,7 +239,7 @@ namespace exodbc
 		 * \throw	Exception if reading schemas fails or if the Database is an Access database (Access fails with 
 		 *			SQLSTATE HYC00; Native Error: 106; [Microsoft][ODBC Microsoft Access Driver]Optional feature not implemented )
 		 */
-		std::vector<std::wstring>	ReadSchemas()			{ exASSERT(GetDbms() != DatabaseProduct::ACCESS);  return ReadCatalogInfo(ReadCatalogInfoMode::AllSchemas); };
+		std::vector<std::string>	ReadSchemas()			{ exASSERT(GetDbms() != DatabaseProduct::ACCESS);  return ReadCatalogInfo(ReadCatalogInfoMode::AllSchemas); };
 
 
 		/*!
@@ -248,7 +248,7 @@ namespace exodbc
 		 * \return	Table type names found.
 		 * \throw	Exception If reading table types fails.
 		 */
-		std::vector<std::wstring>	ReadTableTypes()	{ return ReadCatalogInfo(ReadCatalogInfoMode::AllTableTypes); };
+		std::vector<std::string>	ReadTableTypes()	{ return ReadCatalogInfo(ReadCatalogInfoMode::AllTableTypes); };
 
 
 		/*!
@@ -277,7 +277,7 @@ namespace exodbc
 		 * \return	The column count for the matching table.
 		 * \throw	Exception If not exactly one table is found.
 		 */
-		int			ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType);
+		int			ReadColumnCount(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType);
 
 
 		/*!
@@ -299,7 +299,7 @@ namespace exodbc
 		 * \return	Privileges for exactly one matching table.
 		 * \throw	Exception	If reading privileges fails, or not exactly one table matches.
 		 */
-		TablePrivilegesVector	ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
+		TablePrivilegesVector	ReadTablePrivileges(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const;
 
 
 		/*!
@@ -331,7 +331,7 @@ namespace exodbc
 		 * \return		Columns of passed table.
 		 * \throw Exception If reading ColumnInfo fails or not exactly one table matches.
 		 */
-		ColumnInfosVector	ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
+		ColumnInfosVector	ReadTableColumnInfo(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const;
 
 
 		/*!
@@ -358,7 +358,7 @@ namespace exodbc
 		 * \return	The tables found that match the search-criteria.
 		 * \throw Exception			If querying the database fails.
 		 */
-		TableInfosVector		FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
+		TableInfosVector		FindTables(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const;
 
 
 		/*!
@@ -370,7 +370,7 @@ namespace exodbc
 		* \return	The table info of exactly one table that matches the passed search-criterias name, schema and catalog. Throws otherwise
 		* \throw	If not exactly one table can be found
 		*/
-		TableInfo		FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const;
+		TableInfo		FindOneTable(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const;
 
 
 		/*!
@@ -455,7 +455,7 @@ namespace exodbc
 		* \return	DSN set during Open().
 		* \throw	Exception
 		*/
-		const std::wstring& GetDataSourceName() const    { exASSERT(!m_dbOpenedWithConnectionString);  return m_dsn; }
+		const std::string& GetDataSourceName() const    { exASSERT(!m_dbOpenedWithConnectionString);  return m_dsn; }
 		
 
 		/*!
@@ -463,7 +463,7 @@ namespace exodbc
 		* \return	DSN set during Open().
 		* \throw	Exception
 		*/
-		const std::wstring& GetDatasourceName() const { exASSERT(!m_dbOpenedWithConnectionString);  return m_dsn; }
+		const std::string& GetDatasourceName() const { exASSERT(!m_dbOpenedWithConnectionString);  return m_dsn; }
 
 
 		/*!
@@ -471,7 +471,7 @@ namespace exodbc
 		* \return	Username set during Open().
 		* \throw	Exception
 		*/
-		const std::wstring& GetUsername() const     { exASSERT(!m_dbOpenedWithConnectionString);  return m_uid; }
+		const std::string& GetUsername() const     { exASSERT(!m_dbOpenedWithConnectionString);  return m_uid; }
 
 
 		/*!
@@ -479,7 +479,7 @@ namespace exodbc
 		* \return	Password set during Open().
 		* \throw	Exception
 		*/
-		const std::wstring& GetPassword() const      { exASSERT(!m_dbOpenedWithConnectionString);  return m_authStr; }
+		const std::string& GetPassword() const      { exASSERT(!m_dbOpenedWithConnectionString);  return m_authStr; }
 
 
 		/*!
@@ -487,7 +487,7 @@ namespace exodbc
 		* \return	Connection String passed during Open().
 		* \throw	Exception
 		*/
-		const std::wstring& GetConnectionInStr() const  { exASSERT(m_dbOpenedWithConnectionString); return m_inConnectionStr; }
+		const std::string& GetConnectionInStr() const  { exASSERT(m_dbOpenedWithConnectionString); return m_inConnectionStr; }
 
 
 		/*!
@@ -495,7 +495,7 @@ namespace exodbc
 		* \return	Connection String read from database after Open() was successful.
 		* \throw	Exception
 		*/
-		const std::wstring& GetConnectionOutStr() const { exASSERT(m_dbOpenedWithConnectionString); exASSERT(m_dbIsOpen);  return m_outConnectionStr; }
+		const std::string& GetConnectionOutStr() const { exASSERT(m_dbOpenedWithConnectionString); exASSERT(m_dbIsOpen);  return m_outConnectionStr; }
 
 
 		/*!
@@ -557,14 +557,14 @@ namespace exodbc
 		* \brief	Set Attribute SQL_ATTR_TRACEFILE to passed path.
 		* \throw	Exception
 		*/
-		void SetTracefile(const std::wstring path);
+		void SetTracefile(const std::string path);
 
 
 		/*!
 		* \brief	Get Attribute SQL_ATTR_TRACEFILE.
 		* \throw	Exception
 		*/
-		std::wstring GetTracefile() const;
+		std::string GetTracefile() const;
 
 
 		/*!
@@ -674,7 +674,7 @@ namespace exodbc
 		* \returns  Result containing of names.
 		* \throw	Exception If reading fails.
 		*/
-		std::vector<std::wstring>	ReadCatalogInfo(ReadCatalogInfoMode mode);
+		std::vector<std::string>	ReadCatalogInfo(ReadCatalogInfoMode mode);
 
 
 		// Members
@@ -686,11 +686,11 @@ namespace exodbc
 		SqlTypeInfosVector m_datatypes;	///< Queried from DB during Open
 		bool				m_dbIsOpen;			///< Set to true after SQLConnect was successful
 		bool				m_dbOpenedWithConnectionString;  ///< Was the database connection Opened with a connection string
-		std::wstring		m_dsn;             ///< Data source name
-		std::wstring		m_uid;             ///< User ID
-		std::wstring		m_authStr;         ///< Authorization string (password)
-		std::wstring		m_inConnectionStr; ///< Connection string used to connect to the database
-		std::wstring		m_outConnectionStr;///< Connection string returned by the database when a connection is successfully OpenImpled
+		std::string		m_dsn;             ///< Data source name
+		std::string		m_uid;             ///< User ID
+		std::string		m_authStr;         ///< Authorization string (password)
+		std::string		m_inConnectionStr; ///< Connection string used to connect to the database
+		std::string		m_outConnectionStr;///< Connection string returned by the database when a connection is successfully OpenImpled
 		DatabaseProduct		m_dbmsType;        ///< Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 
 		// ODBC handles created by the Database

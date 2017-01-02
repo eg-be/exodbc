@@ -122,11 +122,11 @@ namespace exodbc
 			exASSERT(m_pParentHandle == NULL);
 
 			// This shall only be allowed for the environment handle so far. All others have a parent
-			exASSERT_MSG(tHandleType == SQL_HANDLE_ENV, L"Only handles of type SQL_HANDLE_ENV can be Allocated without parent");
+			exASSERT_MSG(tHandleType == SQL_HANDLE_ENV, u8"Only handles of type SQL_HANDLE_ENV can be Allocated without parent");
 			SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_handle);
 			if (!SQL_SUCCEEDED(ret))
 			{
-				SqlResultException ex(L"SQLAllocHandle", ret, L"Failed to allocated ODBC-Env Handle, no additional error information is available.");
+				SqlResultException ex(u8"SQLAllocHandle", ret, u8"Failed to allocated ODBC-Env Handle, no additional error information is available.");
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -153,7 +153,7 @@ namespace exodbc
 			exASSERT(m_pParentHandle == NULL);
 
 			// The environment handle has no parent handle
-			exASSERT_MSG(tHandleType != SQL_HANDLE_ENV, L"Handles of type SQL_HANDLE_ENV must be allocated without parent");
+			exASSERT_MSG(tHandleType != SQL_HANDLE_ENV, u8"Handles of type SQL_HANDLE_ENV must be allocated without parent");
 			SQLRETURN ret = SQLAllocHandle(tHandleType, pParentHandle->GetHandle(), &m_handle);
 			THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, pParentHandle->GetHandleType(), pParentHandle->GetHandle());
 			// success, remember parent
