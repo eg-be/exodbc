@@ -144,7 +144,7 @@ namespace exodbctest
 			string idColName = GetIdColumnName(m_tableId);
 			string sqlStmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s = %d") % m_columnQueryName % tableName % idColName % idValue);
 
-			SQLRETURN ret = SQLExecDirect(m_pStmt->GetHandle(), (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
+			SQLRETURN ret = SQLExecDirect(m_pStmt->GetHandle(), (SQLAPICHARTYPE*) SQLAPICHARCONVERT(sqlStmt).c_str(), SQL_NTS);
 			THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
 			ret = SQLFetch(m_pStmt->GetHandle());
 			THROW_IFN_SUCCESS(SQLFetch, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
