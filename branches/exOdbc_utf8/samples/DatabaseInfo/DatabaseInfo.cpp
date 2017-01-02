@@ -35,7 +35,7 @@ void PrintDbHeader(ConstDatabasePtr pDb)
 	DatabaseInfo dbInfo = pDb->GetDbInfo();
 
 	// print header for trac
-	wcout << boost::str(boost::wformat(L"== %s (%s) ==") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DbmsName) % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DbmsVersion)) << endl;
+	cout << boost::str(boost::format(u8"== %s (%s) ==") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DbmsName) % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DbmsVersion)) << endl;
 }
 
 
@@ -44,10 +44,10 @@ void PrintDriverInfo(ConstDatabasePtr pDb)
 	DatabaseInfo dbInfo = pDb->GetDbInfo();
 
 	// print header for trac
-	wcout << boost::str(boost::wformat(L"=== Driver Info ===")) << endl;
-	wcout << boost::str(boost::wformat(L"* Driver Name: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverName)) << endl;
-	wcout << boost::str(boost::wformat(L"* Driver Version: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverVersion)) << endl;
-	wcout << boost::str(boost::wformat(L"* Driver ODBC Version: %s") % dbInfo.GetWStringProperty(DatabaseInfo::WStringProperty::DriverOdbcVersion)) << endl;
+	cout << boost::str(boost::format(u8"=== Driver Info ===")) << endl;
+	cout << boost::str(boost::format(u8"* Driver Name: %s") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DriverName)) << endl;
+	cout << boost::str(boost::format(u8"* Driver Version: %s") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DriverVersion)) << endl;
+	cout << boost::str(boost::format(u8"* Driver ODBC Version: %s") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DriverOdbcVersion)) << endl;
 }
 
 
@@ -56,47 +56,47 @@ void PrintDbInfo(ConstDatabasePtr pDb)
 	DatabaseInfo dbInfo = pDb->GetDbInfo();
 
 	// And a table with all information
-	wcout << L"=== Database Info ===" << endl;
-	wcout << L"||=Property Name =||= Property Value =||" << endl;
-	DatabaseInfo::WStringMap wstringMap = dbInfo.GetWstringMap();
-	for (auto it = wstringMap.begin(); it != wstringMap.end(); ++it)
+	cout << u8"=== Database Info ===" << endl;
+	cout << u8"||=Property Name =||= Property Value =||" << endl;
+	DatabaseInfo::StringMap stringMap = dbInfo.GetStringMap();
+	for (auto it = stringMap.begin(); it != stringMap.end(); ++it)
 	{
-		wcout << boost::str(boost::wformat(L"||%-38s ||  %s  ||") % dbInfo.GetPropertyName(it->first) % it->second) << endl;
+		cout << boost::str(boost::format(u8"||%-38s ||  %s  ||") % dbInfo.GetPropertyName(it->first) % it->second) << endl;
 	}
 	DatabaseInfo::USmallIntMap usmallIntMap = dbInfo.GetUSmallIntMap();
 	for (auto it = usmallIntMap.begin(); it != usmallIntMap.end(); ++it)
 	{
-		wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second) << endl;
+		cout << boost::str(boost::format(u8"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second) << endl;
 	}
 	DatabaseInfo::UIntMap uintMap = dbInfo.GetUIntMap();
 	for (auto it = uintMap.begin(); it != uintMap.end(); ++it)
 	{
-		wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second) << endl;
+		cout << boost::str(boost::format(u8"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second) << endl;
 	}
 	DatabaseInfo::IntMap intMap = dbInfo.GetIntMap();
 	for (auto it = intMap.begin(); it != intMap.end(); ++it)
 	{
-		wcout << boost::str(boost::wformat(L"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second %it->second) << endl;
+		cout << boost::str(boost::format(u8"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second %it->second) << endl;
 	}
 }
 
 
 void printDatatypesInfo(ConstDatabasePtr pDb)
 {
-	wcout << L"=== Datatypes Info ===" << endl;
+	cout << u8"=== Datatypes Info ===" << endl;
 	SqlTypeInfosVector types = pDb->GetTypeInfos();
 	bool first = true;
 	for (auto it = types.begin(); it != types.end(); ++it)
 	{
 		SSqlTypeInfo typeInfo = *it;
-		wcout << typeInfo.ToOneLineStrForTrac(first) << endl;
+		cout << typeInfo.ToOneLineStrForTrac(first) << endl;
 		first = false;
 	}
 }
 
 void printExOdbcTables(ConstDatabasePtr pDb)
 {
-	TableInfosVector allTables = pDb->FindTables(L"", L"", L"", L"");
+	TableInfosVector allTables = pDb->FindTables(u8"", u8"", u8"", u8"");
 	struct Finder
 	{
 		Finder()
@@ -109,25 +109,25 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 
 		DatabaseProduct m_dbms;
 		
-		const set<wstring> exOdbcTables = {
-			L"blobtypes", L"blobtypes_tmp",
-			L"chartable", L"chartypes",	L"chartypes_tmp",
-			L"datetypes", L"datetypes_tmp",
-			L"floattypes", L"floattypes_tmp",
-			L"integertypes", L"integertypes_tmp",
-			L"multikey",
-			L"numerictypes", L"numerictypes_tmp",
-			L"selectonly",
-			L"not_existing",
-			L"not_supported",
-			L"not_supported_tmp"
+		const set<string> exOdbcTables = {
+			u8"blobtypes", u8"blobtypes_tmp",
+			u8"chartable", u8"chartypes",	u8"chartypes_tmp",
+			u8"datetypes", u8"datetypes_tmp",
+			u8"floattypes", u8"floattypes_tmp",
+			u8"integertypes", u8"integertypes_tmp",
+			u8"multikey",
+			u8"numerictypes", u8"numerictypes_tmp",
+			u8"selectonly",
+			u8"not_existing",
+			u8"not_supported",
+			u8"not_supported_tmp"
 		};
 
-		const set<wstring> excelTables = { L"testtable$" };
+		const set<string> excelTables = { u8"testtable$" };
 
 		bool operator()(const TableInfo& ti)
 		{
-			wstring tiName = ba::to_lower_copy(ti.GetPureName());
+			string tiName = ba::to_lower_copy(ti.GetPureName());
 
 			if (m_dbms == DatabaseProduct::EXCEL)
 			{
@@ -140,16 +140,16 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 	TableInfosVector exodbcTables;
 	std::copy_if(allTables.begin(), allTables.end(), back_inserter(exodbcTables), Finder(pDb->GetDbms()));
 
-	wcout << L"=== Tables ===" << endl;
+	cout << u8"=== Tables ===" << endl;
 	for (auto it = exodbcTables.begin(); it != exodbcTables.end(); ++it)
 	{
 		TableInfo ti = *it;
-		wcout << boost::str(boost::wformat(L"==== %s ====") % ti.GetPureName()) << endl;
-		wcout << L"===== Structure =====" << endl;
-		wcout << boost::str(boost::wformat(L"* Catalog Name: %s") % (ti.HasCatalog() ? ti.GetCatalog() : L"<no catalog>")) << endl;
-		wcout << boost::str(boost::wformat(L"* Schema Name: %s") % (ti.HasSchema() ? ti.GetSchema() : L"<no schema>")) << endl;
-		wcout << boost::str(boost::wformat(L"* Table Name: %s") % ti.GetPureName()) << endl;
-		wcout << boost::str(boost::wformat(L"* Query Name: %s") % ti.GetQueryName()) << endl;
+		cout << boost::str(boost::format(u8"==== %s ====") % ti.GetPureName()) << endl;
+		cout << u8"===== Structure =====" << endl;
+		cout << boost::str(boost::format(u8"* Catalog Name: %s") % (ti.HasCatalog() ? ti.GetCatalog() : u8"<no catalog>")) << endl;
+		cout << boost::str(boost::format(u8"* Schema Name: %s") % (ti.HasSchema() ? ti.GetSchema() : u8"<no schema>")) << endl;
+		cout << boost::str(boost::format(u8"* Table Name: %s") % ti.GetPureName()) << endl;
+		cout << boost::str(boost::format(u8"* Query Name: %s") % ti.GetQueryName()) << endl;
 
 		// And print the columns by querying them from the table
 		bool queryPrimaryKeys = !(pDb->GetDbms() == DatabaseProduct::ACCESS || pDb->GetDbms() == DatabaseProduct::EXCEL);
@@ -168,20 +168,20 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		}
 		catch (const Exception& ex)
 		{
-			wcout << L"'''Warning: ''' Not all columns have been created successfully, will try to skip columns:" << endl;
-			wcout << L"{{{" << endl;
-			wcout << ex.ToString() << endl;
-			wcout << L"}}}" << endl;
+			cout << u8"'''Warning: ''' Not all columns have been created successfully, will try to skip columns:" << endl;
+			cout << u8"{{{" << endl;
+			cout << ex.ToString() << endl;
+			cout << u8"}}}" << endl;
 			try
 			{
 				columns = t.CreateAutoColumnBufferPtrs(true, true, queryPrimaryKeys);
 			}
 			catch (const Exception& ex)
 			{
-				wcout << L"'''Error: ''' Failed to create columns:" << endl;
-				wcout << L"{{{" << endl;
-				wcout << ex.ToString() << endl;
-				wcout << L"}}}" << endl;
+				cout << u8"'''Error: ''' Failed to create columns:" << endl;
+				cout << u8"{{{" << endl;
+				cout << ex.ToString() << endl;
+				cout << u8"}}}" << endl;
 				continue;
 			}
 		}
@@ -190,24 +190,24 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		{
 			LogManager::Get().RegisterLogHandler(*itLog);
 		}
-		wcout << L"||=Column Query Name =||=Sql Type =||= Column Size=||= Decimal Digits=||= Nullable=||= Primary Key=||" << endl;
+		cout << u8"||=Column Query Name =||=Sql Type =||= Column Size=||= Decimal Digits=||= Nullable=||= Primary Key=||" << endl;
 		for (auto itCol = columns.begin(); itCol != columns.end(); ++itCol)
 		{
 			ColumnBufferPtrVariant pBuff = *itCol;
 			SQLSMALLINT sqlType = boost::apply_visitor(sqlTypeVisitor, pBuff);
-			wstring name = boost::apply_visitor(nameVisitor, pBuff);
+			string name = boost::apply_visitor(nameVisitor, pBuff);
 			ColumnPropertiesPtr pProps = boost::apply_visitor(propsVisitor, pBuff);
 			ColumnFlagsPtr pFlags = boost::apply_visitor(flagsVisitor, pBuff);
-			wstring nullable = pFlags->Test(ColumnFlag::CF_NULLABLE) ? L"NULLABLE" : L"";
-			wstring primary = pFlags->Test(ColumnFlag::CF_PRIMARY_KEY) ? L"PRIMARY": L"";
-			wcout << boost::str(boost::wformat(L"|| %s || %s || %d || %d || %s || %s ||") % name % SqlType2s(sqlType) % pProps->GetColumnSize() % pProps->GetDecimalDigits() % nullable % primary) << endl;
+			string nullable = pFlags->Test(ColumnFlag::CF_NULLABLE) ? u8"NULLABLE" : u8"";
+			string primary = pFlags->Test(ColumnFlag::CF_PRIMARY_KEY) ? u8"PRIMARY": u8"";
+			cout << boost::str(boost::format(u8"|| %s || %s || %d || %d || %s || %s ||") % name % SqlType2s(sqlType) % pProps->GetColumnSize() % pProps->GetDecimalDigits() % nullable % primary) << endl;
 		}
 
 		// Print the table content, by opening it as wchar-table.
 		t.Close();
 		t.ClearColumns();
 		// but skip _tmp tables
-		if (ba::ends_with(ba::to_lower_copy(ti.GetPureName()), L"_tmp"))
+		if (ba::ends_with(ba::to_lower_copy(ti.GetPureName()), u8"_tmp"))
 		{
 			continue;
 		}
@@ -219,39 +219,39 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		}
 		catch (const Exception& ex)
 		{
-			wcout << L"'''Warning: ''' Not all columns have been created successfully, will try to skip columns:" << endl;
-			wcout << L"{{{" << endl;
-			wcout << ex.ToString() << endl;
-			wcout << L"}}}" << endl;
+			cout << u8"'''Warning: ''' Not all columns have been created successfully, will try to skip columns:" << endl;
+			cout << u8"{{{" << endl;
+			cout << ex.ToString() << endl;
+			cout << u8"}}}" << endl;
 		}
 		t.Open();
 
 		// print header
-		wcout << L"===== Content =====" << endl;
+		cout << u8"===== Content =====" << endl;
 		auto itCol = columns.begin();
 		bool first = true;
 		do
 		{
 			if (first && !columns.empty())
 			{
-				wcout << L"||= ";
+				cout << u8"||= ";
 				first = false;
 			}
 			ColumnBufferPtrVariant pBuff = *itCol;
-			wstring name = boost::apply_visitor(nameVisitor, pBuff);
-			wcout << name;
+			string name = boost::apply_visitor(nameVisitor, pBuff);
+			cout << name;
 			++itCol;
 			if (itCol != columns.end())
 			{
-				wcout << L" =||= ";
+				cout << u8" =||= ";
 			}
 			else
 			{
-				wcout << L" =||";
+				cout << u8" =||";
 			}
 
 		} while (itCol != columns.end());
-		wcout << endl;
+		cout << endl;
 
 		// And content
 		t.Select();
@@ -263,26 +263,26 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			{
 				if (first && !columns.empty())
 				{
-					wcout << L"||= ";
+					cout << u8"||= ";
 					first = false;
 				}
 				WCharColumnBufferPtr pBuff = boost::get<WCharColumnBufferPtr>(*itCol);
 				if (!pBuff->IsNull())
 				{
-					wcout << pBuff->GetWString();
+					cout << pBuff->GetString();
 				}
 				else
 				{
-					wcout << L"''NULL''";
+					cout << u8"''NULL''";
 				}
 				++itCol;
 				if (itCol != columns.end())
 				{
-					wcout << L" =||= ";
+					cout << u8" =||= ";
 				}
 				else
 				{
-					wcout << L" =||" << endl;
+					cout << u8" =||" << endl;
 				}
 
 			} while (itCol != columns.end());
@@ -292,10 +292,10 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 
 struct SConnectionInfo
 {
-	wstring m_dsn;
-	wstring m_user;
-	wstring m_pass;
-	wstring m_cs;
+	string m_dsn;
+	string m_user;
+	string m_pass;
+	string m_cs;
 };
 
 #ifdef _WIN32
@@ -307,35 +307,35 @@ int main(int argc, char* argv[])
 	try
 	{
 		// Parse arguments
-		//wstring connectionString;
-		//wstring dsn, user, pass;
+		//string connectionString;
+		//string dsn, user, pass;
 		vector<SConnectionInfo> connectionInfos;
 		for (int i = 0; i < argc; i++)
 		{
-			std::wstring dsnKey = L"dsn=";
-			std::wstring csKey = L"cs=";
+			std::string dsnKey = u8"dsn=";
+			std::string csKey = u8"cs=";
 #ifdef _WIN32
-			std::wstring arg(argv[i]);
+			std::string arg( utf16ToUtf8(argv[i]));
 #else
             std::string s1(argv[i]);
 
-            std::wstring ws1 = L"utf-16";
-            std::wstring ws2 = L"utf-32";
+            std::string ws1 = u8"utf-16";
+            std::string ws2 = u8"utf-32";
             const char16_t* a1 = u"utf-16";
             const char32_t* a2 = U"utf-32";
             
-            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+            std::string_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
             
             // the UTF-8 - UTF-32 standard conversion facet
-            std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
+            std::string_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
             
 			std::u32string u32 = cvt.from_bytes(argv[i]);
-// 			std::wstring ws22 = converter.from_bytes(a2);
-//             std::wcout << L"Foo: " << ws2 << std::endl;
+// 			std::string ws22 = converter.from_bytes(a2);
+//             std::cout << u8"Foo: " << ws2 << std::endl;
             
-            std::wstring arg(utf8ToUtf16(argv[i]));
+            std::string arg(utf8ToUtf16(argv[i]));
 #endif
-			std::wstring dsnValue;
+			std::string dsnValue;
 			if (ba::starts_with(arg, dsnKey) && arg.length() > dsnKey.length())
 			{
 				dsnValue = arg.substr(dsnKey.length());
@@ -348,15 +348,15 @@ int main(int argc, char* argv[])
 			}
 			if (dsnValue.length() > 0)
 			{
-				std::vector<std::wstring> tokens;
-				boost::split(tokens, dsnValue, boost::is_any_of(L";"));
+				std::vector<std::string> tokens;
+				boost::split(tokens, dsnValue, boost::is_any_of(u8";"));
 				if (tokens.size() != 3)
 				{
-					LOG_WARNING(boost::str(boost::wformat(L"Ignoring Dsn entry '%s' because it does not match the form 'dsnValue;user;pass'") % arg));
+					LOG_WARNING(boost::str(boost::format(u8"Ignoring Dsn entry '%s' because it does not match the form 'dsnValue;user;pass'") % arg));
 				}
 				else if (tokens[0].empty())
 				{
-					LOG_WARNING(boost::str(boost::wformat(L"Ignoring Dsn entry '%s' because DSN is empty.") % arg));
+					LOG_WARNING(boost::str(boost::format(u8"Ignoring Dsn entry '%s' because DSN is empty.") % arg));
 				}
 				else
 				{
@@ -371,7 +371,7 @@ int main(int argc, char* argv[])
 
 		if (connectionInfos.empty())
 		{
-			LOG_ERROR(L"No connection string given and no dsn given, exiting");
+			LOG_ERROR(u8"No connection string given and no dsn given, exiting");
 			return -1;
 		}
 
@@ -412,14 +412,14 @@ int main(int argc, char* argv[])
 			}
 
 			// add some blank lines
-			wcout << endl;
-			wcout << endl;
+			cout << endl;
+			cout << endl;
 		}
 
 	}
 	catch (const Exception& ex)
 	{
-		std::wcerr << ex.ToString() << endl;
+		std::cerr << ex.ToString() << endl;
 	}
 	return 0;
 }
