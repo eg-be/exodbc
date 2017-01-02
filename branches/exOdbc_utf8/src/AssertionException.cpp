@@ -34,7 +34,7 @@ namespace exodbc
 	// --------------
 	void exOnAssert(const std::string& file, int line, const std::string& function, const std::string& condition, const std::string& msg)
 	{
-		std::wstringstream ss;
+		std::stringstream ss;
 		ss << u8"ASSERTION failure!" << std::endl;
 		ss << u8" File:      " << file << std::endl;
 		ss << u8" Line:      " << line << std::endl;
@@ -48,12 +48,6 @@ namespace exodbc
 
 		// Throw exception
 		throw AssertionException(line, file, function, condition, msg);
-	}
-
-
-	void exOnAssert(const std::string& file, int line, const std::string& function, const std::string& condition, const std::string& msg)
-	{
-		exOnAssert(file, line, function, condition, msg);
 	}
 
 
