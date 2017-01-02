@@ -102,7 +102,7 @@ namespace exodbc
 		/*!
 		* \brief	Create new instance with passed values.
 		*/
-		ColumnProperties(SQLINTEGER columnSize, SQLSMALLINT decimalDigits, SQLSMALLINT sqlType, std::wstring queryName)
+		ColumnProperties(SQLINTEGER columnSize, SQLSMALLINT decimalDigits, SQLSMALLINT sqlType, std::string queryName)
 			: m_columnSize(columnSize)
 			, m_decimalDigits(decimalDigits)
 			, m_sqlType(sqlType)
@@ -139,7 +139,7 @@ namespace exodbc
 		/*!
 		* \brief	Set the query name.
 		*/
-		void SetQueryName(const std::wstring& queryName) noexcept { m_queryName = queryName; };
+		void SetQueryName(const std::string& queryName) noexcept { m_queryName = queryName; };
 
 		/*!
 		* \brief	Returns Column Size.
@@ -161,7 +161,7 @@ namespace exodbc
 		* \throw	AssertionException if no query name is set.
 		* \see		HasQueryName()
 		*/
-		std::wstring GetQueryName() const { exASSERT(HasQueryName()); return m_queryName; };
+		std::string GetQueryName() const { exASSERT(HasQueryName()); return m_queryName; };
 
 		/*!
 		* \brief	Returns true if a query name is set (is not empty).
@@ -172,7 +172,7 @@ namespace exodbc
 		SQLINTEGER m_columnSize;
 		SQLSMALLINT m_decimalDigits;
 		SQLSMALLINT m_sqlType;
-		std::wstring m_queryName;
+		std::string m_queryName;
 	};
 	typedef std::shared_ptr<ColumnProperties> ColumnPropertiesPtr;
 
@@ -357,7 +357,7 @@ namespace exodbc
 		* \brief	Create a new buffer with one element of type T, passed queryName, sqlType and flags.
 		*			The buffer is set to NULL.
 		*/
-		ColumnBuffer(const std::wstring& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		ColumnBuffer(const std::string& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ColumnProperties()
@@ -390,7 +390,7 @@ namespace exodbc
 		* \brief	Create a new array buffer with passed queryName, nrOfElements and flags.
 		*			The buffer is set to NULL.
 		*/
-		ColumnBuffer(SQLLEN nrOfElements, const std::wstring& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		ColumnBuffer(SQLLEN nrOfElements, const std::string& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
 			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ColumnProperties()
@@ -430,7 +430,7 @@ namespace exodbc
 		/*!
 		* \brief: Create a new instance wrapped into a shared_ptr
 		*/
-		static std::shared_ptr<ColumnBuffer> Create(const std::wstring& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		static std::shared_ptr<ColumnBuffer> Create(const std::string& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
 		{
 			return std::make_shared<ColumnBuffer>(queryName, sqlType, flags);
 		}
@@ -448,7 +448,7 @@ namespace exodbc
 		/*!
 		* \brief: Create a new array instance wrapped into a shared_ptr
 		*/
-		static std::shared_ptr<ColumnBuffer> Create(SQLLEN nrOfElements, const std::wstring& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
+		static std::shared_ptr<ColumnBuffer> Create(SQLLEN nrOfElements, const std::string& queryName, SQLSMALLINT sqlType, ColumnFlags flags = ColumnFlag::CF_NONE)
 		{
 			return std::make_shared<ColumnBuffer>(nrOfElements, queryName, sqlType, flags);
 		}
@@ -501,7 +501,7 @@ namespace exodbc
 		*/
 		void SetValue(const std::vector<T>& value, SQLLEN cb)
 		{ 
-			exASSERT_MSG(value.size() <= m_buffer.capacity(), L"Passed value exceeds size of buffer allocated.");
+			exASSERT_MSG(value.size() <= m_buffer.capacity(), u8"Passed value exceeds size of buffer allocated.");
 			size_t index = 0;
 			for (auto it = value.begin(); it != value.end(); ++it)
 			{
@@ -513,7 +513,7 @@ namespace exodbc
 			// if there is no space, fail
 			if (cb == SQL_NTS && value.back() != 0)
 			{
-				exASSERT_MSG(index < m_buffer.capacity(), L"Not enough space to null-terminate the buffer.");
+				exASSERT_MSG(index < m_buffer.capacity(), u8"Not enough space to null-terminate the buffer.");
 				m_buffer[index] = 0;
 			}
 			SetCb(cb);
@@ -740,7 +740,7 @@ namespace exodbc
 		* \param columnSize Column size.
 		* \param decimalDigits Decimal digits.
 		*/
-		SqlCPointerBuffer(const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferLength, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+		SqlCPointerBuffer(const std::string& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferLength, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
 			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ColumnProperties(columnSize, decimalDigits, sqlType, queryName)
@@ -764,7 +764,7 @@ namespace exodbc
 		/*!
 		* \brief: Create a new instance wrapped into a shared_ptr
 		*/
-		static std::shared_ptr<SqlCPointerBuffer> Create(const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+		static std::shared_ptr<SqlCPointerBuffer> Create(const std::string& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
 		{
 			return std::make_shared<SqlCPointerBuffer>(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
 		}
@@ -896,12 +896,12 @@ namespace exodbc
 	/*!
 	* \brief Depending on passed SQL C Type, a corresponding ColumnBuffer is created, wrapped into a shared_ptr and returned as variant.
 	*/
-	extern EXODBCAPI ColumnBufferPtrVariant CreateColumnBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName);
+	extern EXODBCAPI ColumnBufferPtrVariant CreateColumnBufferPtr(SQLSMALLINT sqlCType, const std::string& queryName);
 
 	/*!
 	* \brief Depending on passed SQL C Type, a corresponding ColumnBuffer is created, wrapped into a shared_ptr and returned as variant.
 	*/
-	extern EXODBCAPI ColumnBufferPtrVariant CreateColumnArrayBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo);
+	extern EXODBCAPI ColumnBufferPtrVariant CreateColumnArrayBufferPtr(SQLSMALLINT sqlCType, const std::string& queryName, const ColumnInfo& columnInfo);
 	
 	/*!
 	* \brief	Calculate the "DisplaySize" of a given column: This is the number of characters required if the column
