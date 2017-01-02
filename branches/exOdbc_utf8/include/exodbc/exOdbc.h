@@ -32,8 +32,8 @@
     //#define FILENAME __FILEW__
     //#define FUNCTIONNAME __FUNCTIONW__
 #else
-    #define FILENAME utf8ToUtf16(__FILE__)
-    #define FUNCTIONNAME utf8ToUtf16(__FUNCTION__)
+    #define FILENAME __FILE__
+    #define FUNCTIONNAME __FUNCTION__
 #endif
 
 #ifdef _WIN32
@@ -49,8 +49,8 @@
     #define SQLRESCHARCONVERT(ws) utf16ToUtf8(ws)
     #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(ws) std::wstring(reinterpret_cast<const wchar_t*>(ws))
 #else
-    #define SQLAPICHARCONVERT(s) (s)
-    #define SQLRESCHARCONVERT(s) (s)
+    #define SQLAPICHARCONVERT(s) s
+    #define SQLRESCHARCONVERT(s) s
     #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(s) std::string(reinterpret_cast<const char*>(s))
 #endif
 
