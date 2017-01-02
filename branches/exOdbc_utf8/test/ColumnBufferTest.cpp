@@ -70,23 +70,23 @@ namespace exodbctest
 	TEST_F(ColumnBufferTest, Construction)
 	{
 		// after construction buffer will be Null
-		BigIntColumnBuffer buff(L"TestBuffer", SQL_UNKNOWN_TYPE);
+		BigIntColumnBuffer buff(u8"TestBuffer", SQL_UNKNOWN_TYPE);
 		EXPECT_TRUE(buff.IsNull());
 		EXPECT_EQ(ColumnFlag::CF_NONE, buff.GetFlags());
 
 		// test that we can construct with flags
-		BigIntColumnBuffer buff2(L"SomeName", SQL_INTEGER, ColumnFlag::CF_PRIMARY_KEY | ColumnFlag::CF_SELECT);
+		BigIntColumnBuffer buff2(u8"SomeName", SQL_INTEGER, ColumnFlag::CF_PRIMARY_KEY | ColumnFlag::CF_SELECT);
 		EXPECT_TRUE(buff2.IsNull());
 		EXPECT_TRUE(buff2.Test(ColumnFlag::CF_PRIMARY_KEY));
 		EXPECT_TRUE(buff2.Test(ColumnFlag::CF_SELECT));
 		EXPECT_EQ(ColumnFlag::CF_PRIMARY_KEY | ColumnFlag::CF_SELECT, buff2.GetFlags());
-		EXPECT_EQ(L"SomeName", buff2.GetQueryName());
+		EXPECT_EQ(u8"SomeName", buff2.GetQueryName());
 	}
 
 
 	TEST_F(ColumnBufferTest, SetAndGetValue)
 	{
-		BigIntColumnBuffer buff(L"TestBuffer", SQL_UNKNOWN_TYPE);
+		BigIntColumnBuffer buff(u8"TestBuffer", SQL_UNKNOWN_TYPE);
 		buff.SetValue(13, buff.GetBufferLength());
 		EXPECT_EQ(13, buff.GetValue());
 	}
@@ -97,17 +97,17 @@ namespace exodbctest
 	TEST_F(ColumnArrayBufferTest, Construction)
 	{
 		// after construction buffer will be Null
-		WCharColumnBuffer arr(24, L"ColumnName", SQL_UNKNOWN_TYPE);
+		WCharColumnBuffer arr(24, u8"ColumnName", SQL_UNKNOWN_TYPE);
 		EXPECT_TRUE(arr.IsNull());
 		EXPECT_EQ(24, arr.GetNrOfElements());
 		EXPECT_EQ(sizeof(SQLWCHAR) * 24, arr.GetBufferLength());
-		EXPECT_EQ(L"ColumnName", arr.GetQueryName());
+		EXPECT_EQ(u8"ColumnName", arr.GetQueryName());
 	}
 
 
 	TEST_F(ColumnArrayBufferTest, SetAndGetValue)
 	{
-		WCharColumnBuffer arr(24, L"ColumnName", SQL_UNKNOWN_TYPE);
+		WCharColumnBuffer arr(24, u8"ColumnName", SQL_UNKNOWN_TYPE);
 		wstring s(L"Hello");
 		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
 		wstring v(arr.GetBuffer().data());
@@ -128,7 +128,7 @@ namespace exodbctest
 
 	struct FSelectFetcher
 	{
-		FSelectFetcher(DatabaseProduct dbms, SqlStmtHandlePtr pStmt, exodbctest::TableId tableId, const std::wstring& columnQueryName)
+		FSelectFetcher(DatabaseProduct dbms, SqlStmtHandlePtr pStmt, exodbctest::TableId tableId, const std::string& columnQueryName)
 			: m_tableId(tableId)
 			, m_columnQueryName(ToDbCase(columnQueryName))
 			, m_pStmt(pStmt)
@@ -139,10 +139,10 @@ namespace exodbctest
 		{
 			StatementCloser stmtCloser(m_pStmt);
 
-			wstring tableName = GetTableName(m_tableId);
+			string tableName = GetTableName(m_tableId);
 			tableName = PrependSchemaOrCatalogName(m_dbms, tableName);
-			wstring idColName = GetIdColumnName(m_tableId);
-			wstring sqlStmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s = %d") % m_columnQueryName % tableName % idColName % idValue);
+			string idColName = GetIdColumnName(m_tableId);
+			string sqlStmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s = %d") % m_columnQueryName % tableName % idColName % idValue);
 
 			SQLRETURN ret = SQLExecDirect(m_pStmt->GetHandle(), (SQLWCHAR*)sqlStmt.c_str(), SQL_NTS);
 			THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
@@ -154,20 +154,20 @@ namespace exodbctest
 		DatabaseProduct m_dbms;
 		SqlStmtHandlePtr m_pStmt;
 		exodbctest::TableId m_tableId;
-		wstring m_columnQueryName;
+		string m_columnQueryName;
 	};
 
 
 	struct FInserter2
 	{
-		FInserter2(DatabasePtr pDb, exodbctest::TableId tableId, const std::wstring& columnQueryName)
+		FInserter2(DatabasePtr pDb, exodbctest::TableId tableId, const std::string& columnQueryName)
 		{
 			// prepare the insert statement
 			m_stmt.Init(pDb, true);
-			wstring tableName = GetTableName(tableId);
+			string tableName = GetTableName(tableId);
 			tableName = PrependSchemaOrCatalogName(pDb->GetDbms(), tableName);
-			wstring idColName = GetIdColumnName(tableId);
-			wstring sqlstmt = boost::str(boost::wformat(L"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % ToDbCase(columnQueryName));
+			string idColName = GetIdColumnName(tableId);
+			string sqlstmt = boost::str(boost::format(u8"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % ToDbCase(columnQueryName));
 			m_stmt.Prepare(sqlstmt);
 		}
 
@@ -182,17 +182,17 @@ namespace exodbctest
 
 	struct FInserter
 	{
-		FInserter(DatabaseProduct dbms, SqlStmtHandlePtr pStmt, exodbctest::TableId tableId, const std::wstring& columnQueryName)
+		FInserter(DatabaseProduct dbms, SqlStmtHandlePtr pStmt, exodbctest::TableId tableId, const std::string& columnQueryName)
 			: m_tableId(tableId)
 			, m_columnQueryName(ToDbCase(columnQueryName))
 			, m_pStmt(pStmt)
 			, m_dbms(dbms)
 		{
 			// prepare the insert statement
-			wstring tableName = GetTableName(m_tableId);
+			string tableName = GetTableName(m_tableId);
 			tableName = PrependSchemaOrCatalogName(m_dbms, tableName);
-			wstring idColName = GetIdColumnName(m_tableId);
-			wstring sqlstmt = boost::str(boost::wformat(L"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % m_columnQueryName);
+			string idColName = GetIdColumnName(m_tableId);
+			string sqlstmt = boost::str(boost::format(u8"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % m_columnQueryName);
 			SQLRETURN ret = SQLPrepare(pStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
 			THROW_IFN_SUCCESS(SQLPrepare, ret, SQL_HANDLE_STMT, pStmt->GetHandle());
 		}
@@ -209,13 +209,13 @@ namespace exodbctest
 		DatabaseProduct m_dbms;
 		SqlStmtHandlePtr m_pStmt;
 		exodbctest::TableId m_tableId;
-		wstring m_columnQueryName;
+		string m_columnQueryName;
 	};
 
 
 	TEST_F(ShortColumnTest, ReadValue)
 	{
-		wstring colName = ToDbCase(L"tsmallint");
+		string colName = ToDbCase(u8"tsmallint");
 		ShortColumnBuffer shortCol(colName, SQL_UNKNOWN_TYPE);
 		shortCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
@@ -233,8 +233,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::INTEGERTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tsmallint");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tsmallint");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -287,7 +287,7 @@ namespace exodbctest
 
 	TEST_F(LongColumnTest, ReadValue)
 	{
-		wstring colName = ToDbCase(L"tint");
+		string colName = ToDbCase(u8"tint");
 		LongColumnBuffer longCol(colName, SQL_UNKNOWN_TYPE);
 		longCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
@@ -305,8 +305,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::INTEGERTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tint");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tint");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -359,7 +359,7 @@ namespace exodbctest
 
 	TEST_F(BigIntColumnTest, ReadValue)
 	{
-		wstring colName = ToDbCase(L"tbigint");
+		string colName = ToDbCase(u8"tbigint");
 		BigIntColumnBuffer biCol(colName, SQL_UNKNOWN_TYPE);
 		biCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::INTEGERTYPES, colName);
@@ -377,8 +377,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::INTEGERTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tbigint");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tbigint");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -431,7 +431,7 @@ namespace exodbctest
 
 	TEST_F(DoubleColumnTest, ReadValue)
 	{
-		wstring colName = L"tdouble";
+		string colName = u8"tdouble";
 		DoubleColumnBuffer doubleCol(colName, SQL_UNKNOWN_TYPE);
 		doubleCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::FLOATTYPES, colName);
@@ -452,8 +452,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::FLOATTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdouble");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdouble");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -512,7 +512,7 @@ namespace exodbctest
 
 	TEST_F(RealColumnTest, ReadValue)
 	{
-		wstring colName = L"tfloat";
+		string colName = u8"tfloat";
 		RealColumnBuffer realCol(colName, SQL_UNKNOWN_TYPE);
 		realCol.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::FLOATTYPES, colName);
@@ -534,8 +534,8 @@ namespace exodbctest
 		// \todo: This is pure luck that the test works, rounding errors might occur already on inserting
 		TableId tableId = TableId::FLOATTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tfloat");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tfloat");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -594,7 +594,7 @@ namespace exodbctest
 
 	TEST_F(NumericColumnTest, Read_18_0_Value)
 	{
-		wstring colName = L"tdecimal_18_0";
+		string colName = u8"tdecimal_18_0";
 		NumericColumnBuffer num18_0_Col(colName, SQL_UNKNOWN_TYPE);
 		num18_0_Col.SetColumnSize(18);
 		num18_0_Col.BindColumn(1, m_pStmt);
@@ -629,8 +629,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::NUMERICTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdecimal_18_0");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdecimal_18_0");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -726,7 +726,7 @@ namespace exodbctest
 
 	TEST_F(NumericColumnTest, Read_18_10_Value)
 	{
-		wstring colName = L"tdecimal_18_10";
+		string colName = u8"tdecimal_18_10";
 		NumericColumnBuffer num18_10_Col(colName, SQL_UNKNOWN_TYPE);
 		num18_10_Col.SetColumnSize(18);
 		num18_10_Col.SetDecimalDigits(10);
@@ -762,8 +762,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::NUMERICTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdecimal_18_10");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdecimal_18_10");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -867,7 +867,7 @@ namespace exodbctest
 
 	TEST_F(NumericColumnTest, Read_5_3_Value)
 	{
-		wstring colName = L"tdecimal_5_3";
+		string colName = u8"tdecimal_5_3";
 		NumericColumnBuffer num5_3_Col(colName, SQL_UNKNOWN_TYPE);
 		num5_3_Col.SetColumnSize(5);
 		num5_3_Col.SetDecimalDigits(3);
@@ -891,8 +891,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::NUMERICTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdecimal_5_3");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdecimal_5_3");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -995,7 +995,7 @@ namespace exodbctest
 
 	TEST_F(TypeTimeColumnTest, ReadValue)
 	{
-		wstring colName = L"ttime";
+		string colName = u8"ttime";
 		TypeTimeColumnBuffer time(colName, SQL_UNKNOWN_TYPE);
 		time.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
@@ -1015,8 +1015,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::DATETYPES_TMP;
 
-		wstring colName = ToDbCase(L"ttime");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"ttime");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -1074,7 +1074,7 @@ namespace exodbctest
 
 	TEST_F(TypeDateColumnTest, ReadValue)
 	{
-		wstring colName = L"tdate";
+		string colName = u8"tdate";
 		TypeDateColumnBuffer date(colName, SQL_UNKNOWN_TYPE);
 		date.BindColumn(1, m_pStmt);
 		FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::DATETYPES, colName);
@@ -1094,8 +1094,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::DATETYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdate");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdate");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -1153,7 +1153,7 @@ namespace exodbctest
 
 	TEST_F(TypeTimestampColumnTest, ReadValue)
 	{
-		wstring colName = L"ttimestamp";
+		string colName = u8"ttimestamp";
 		{
 			// Test without any fraction
 			TypeTimestampColumnBuffer tsCol(colName, SQL_UNKNOWN_TYPE);
@@ -1213,8 +1213,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::DATETYPES_TMP;
 
-		wstring colName = ToDbCase(L"ttimestamp");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"ttimestamp");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -1366,7 +1366,7 @@ namespace exodbctest
 	{
 		// note that when working witch chars, we add one element for the terminating \0 char.
 		{
-			wstring colName = L"tvarchar";
+			string colName = u8"tvarchar";
 			WCharColumnBuffer varcharCol(128 + 1, colName, SQL_UNKNOWN_TYPE);
 			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
@@ -1380,7 +1380,7 @@ namespace exodbctest
 		}
 
 		{
-			wstring colName = L"tchar";
+			string colName = u8"tchar";
 			WCharColumnBuffer charCol(128 + 1, colName, SQL_UNKNOWN_TYPE);
 			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
@@ -1413,8 +1413,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tvarchar");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tvarchar");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 		
 		{
@@ -1480,8 +1480,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tchar_10");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tchar_10");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -1555,21 +1555,21 @@ namespace exodbctest
 	{
 		// note that when working witch chars, we add one element for the terminating \0 char.
 		{
-			wstring colName = L"tvarchar";
+			string colName = u8"tvarchar";
 			CharColumnBuffer varcharCol(128 + 1, colName, SQL_UNKNOWN_TYPE);
 			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			f(1);
-			EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetString());
+			EXPECT_EQ(u8" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetString());
 			f(3);
-			EXPECT_EQ("הצüאיט", varcharCol.GetString());
+			EXPECT_EQ(u8"הצüאיט", varcharCol.GetString());
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
 
 		{
-			wstring colName = L"tchar";
+			string colName = u8"tchar";
 			CharColumnBuffer charCol(128 + 1, colName, SQL_UNKNOWN_TYPE);
 			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
@@ -1578,18 +1578,18 @@ namespace exodbctest
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
 			{
 				f(2);
-				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetString());
+				EXPECT_EQ(u8" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetString());
 				f(4);
-				EXPECT_EQ("הצüאיט", charCol.GetString());
+				EXPECT_EQ(u8"הצüאיט", charCol.GetString());
 			}
 			else
 			{
 				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ה'
 				// Therefore, the number of preceding whitespaces is not equal on DB2 
 				f(2);
-				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetString());
+				EXPECT_EQ(u8" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetString());
 				f(4);
-				EXPECT_EQ("הצüאיט", boost::trim_copy(charCol.GetString()));
+				EXPECT_EQ(u8"הצüאיט", boost::trim_copy(charCol.GetString()));
 			}
 
 			f(1);
@@ -1602,8 +1602,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tvarchar");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tvarchar");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -1677,8 +1677,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tchar_10");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tchar_10");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -1790,7 +1790,7 @@ namespace exodbctest
 		};
 
 		{
-			wstring colName = L"tblob";
+			string colName = u8"tblob";
 			BinaryColumnBuffer blobCol(16, colName, SQL_UNKNOWN_TYPE);
 			blobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
@@ -1812,7 +1812,7 @@ namespace exodbctest
 		}
 
 		{
-			wstring colName = L"tvarblob_20";
+			string colName = u8"tvarblob_20";
 			BinaryColumnBuffer varBlobCol(20, colName, SQL_UNKNOWN_TYPE);
 			varBlobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES, colName);
@@ -1872,8 +1872,8 @@ namespace exodbctest
 
 		TableId tableId = TableId::BLOBTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tblob");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tblob");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -1917,7 +1917,7 @@ namespace exodbctest
 
 		{
 			// read back written values
-			wstring colName = L"tblob";
+			string colName = u8"tblob";
 			BinaryColumnBuffer blobCol(16, colName, SQL_UNKNOWN_TYPE);
 			blobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
@@ -1975,8 +1975,8 @@ namespace exodbctest
 
 		TableId tableId = TableId::BLOBTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tvarblob_20");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tvarblob_20");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -2023,7 +2023,7 @@ namespace exodbctest
 
 		{
 			// read back written values
-			wstring colName = L"tvarblob_20";
+			string colName = u8"tvarblob_20";
 			BinaryColumnBuffer varblobCol(20, colName, SQL_UNKNOWN_TYPE);
 			varblobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
@@ -2069,7 +2069,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadShortValue)
 	{
-		wstring colName = ToDbCase(L"tsmallint");
+		string colName = ToDbCase(u8"tsmallint");
 		SQLSMALLINT buffer = 0;
 		SqlCPointerBuffer shortCol(colName, SQL_INTEGER, &buffer, SQL_C_SSHORT, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
 		shortCol.BindColumn(1, m_pStmt);
@@ -2086,7 +2086,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadLongValue)
 	{
-		wstring colName = ToDbCase(L"tint");
+		string colName = ToDbCase(u8"tint");
 		SQLINTEGER buffer = 0;
 		SqlCPointerBuffer longCol(colName, SQL_INTEGER, &buffer, SQL_C_SLONG, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
 
@@ -2104,7 +2104,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadBigIntValue)
 	{
-		wstring colName = ToDbCase(L"tbigint");
+		string colName = ToDbCase(u8"tbigint");
 		SQLBIGINT buffer = 0;
 		SqlCPointerBuffer biCol(colName, SQL_INTEGER, &buffer, SQL_C_SBIGINT, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
 
@@ -2154,7 +2154,7 @@ namespace exodbctest
 		};
 
 		{
-			wstring colName = L"tblob";
+			string colName = u8"tblob";
 			vector<SQLCHAR> buffer(16);
 			SqlCPointerBuffer blobCol(colName, SQL_BINARY, &buffer[0], SQL_C_BINARY, 16 * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
 			blobCol.BindColumn(1, m_pStmt);
@@ -2177,7 +2177,7 @@ namespace exodbctest
 		}
 
 		{
-			wstring colName = L"tvarblob_20";
+			string colName = u8"tvarblob_20";
 			vector<SQLCHAR> buffer(20);
 			SqlCPointerBuffer varBlobCol(colName, SQL_BINARY, &buffer[0], SQL_C_BINARY, 20 * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 0, 0);
 			varBlobCol.BindColumn(1, m_pStmt);
@@ -2206,7 +2206,7 @@ namespace exodbctest
 	{
 		// note that when working witch chars, we add one element for the terminating \0 char.
 		{
-			wstring colName = L"tvarchar";
+			string colName = u8"tvarchar";
 			std::vector<SQLCHAR> buffer(128 + 1);
 			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 128, 0);
 			varcharCol.BindColumn(1, m_pStmt);
@@ -2225,7 +2225,7 @@ namespace exodbctest
 		}
 
 		{
-			wstring colName = L"tchar";
+			string colName = u8"tchar";
 			std::vector<SQLCHAR> buffer(128 + 1);
 			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 128, 0);
 			charCol.BindColumn(1, m_pStmt);
@@ -2264,7 +2264,7 @@ namespace exodbctest
 	{
 		// note that when working witch chars, we add one element for the terminating \0 char.
 		{
-			wstring colName = L"tvarchar";
+			string colName = u8"tvarchar";
 			std::vector<SQLWCHAR> buffer(128 + 1);
 			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 128, 0);
 			varcharCol.BindColumn(1, m_pStmt);
@@ -2282,7 +2282,7 @@ namespace exodbctest
 		}
 
 		{
-			wstring colName = L"tchar";
+			string colName = u8"tchar";
 			std::vector<SQLWCHAR> buffer(128 + 1);
 			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_WCHAR, (128 + 1) * sizeof(SQLWCHAR), ColumnFlag::CF_NONE, 128, 0);
 			charCol.BindColumn(1, m_pStmt);
@@ -2319,7 +2319,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadDateValues)
 	{
-		wstring colName = L"tdate";
+		string colName = u8"tdate";
 
 		SQL_DATE_STRUCT buffer;
 		SqlCPointerBuffer date(colName, SQL_DATE, &buffer, SQL_C_TYPE_DATE, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
@@ -2338,7 +2338,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadTimeValue)
 	{
-		wstring colName = L"ttime";
+		string colName = u8"ttime";
 		SQL_TIME_STRUCT buffer;
 		SqlCPointerBuffer time(colName, SQL_TIME, &buffer, SQL_C_TYPE_TIME, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
 		time.BindColumn(1, m_pStmt);
@@ -2356,7 +2356,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadTimestampValue)
 	{
-		wstring colName = L"ttimestamp";
+		string colName = u8"ttimestamp";
 		{
 			// Test without any fraction
 			SQL_TIMESTAMP_STRUCT buffer;
@@ -2413,7 +2413,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadDoubleValue)
 	{
-		wstring colName = L"tdouble";
+		string colName = u8"tdouble";
 		SQLDOUBLE buffer;
 		SqlCPointerBuffer doubleCol(colName, SQL_DOUBLE, &buffer, SQL_C_DOUBLE, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
 		doubleCol.BindColumn(1, m_pStmt);
@@ -2433,7 +2433,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadRealValue)
 	{
-		wstring colName = L"tfloat";
+		string colName = u8"tfloat";
 		SQLREAL buffer;
 		SqlCPointerBuffer realCol(colName, SQL_REAL, &buffer, SQL_C_FLOAT, sizeof(buffer), ColumnFlag::CF_NONE, 0, 0);
 		realCol.BindColumn(1, m_pStmt);
@@ -2453,7 +2453,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadNumeric_18_0_Value)
 	{
-		wstring colName = L"tdecimal_18_0";
+		string colName = u8"tdecimal_18_0";
 		SQL_NUMERIC_STRUCT buffer;
 		SqlCPointerBuffer num18_0_Col(colName, SQL_NUMERIC, &buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NONE, 18, 0);
 		num18_0_Col.BindColumn(1, m_pStmt);
@@ -2485,7 +2485,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadNumeric_18_10_Value)
 	{
-		wstring colName = L"tdecimal_18_10";
+		string colName = u8"tdecimal_18_10";
 		SQL_NUMERIC_STRUCT buffer;
 		SqlCPointerBuffer num18_10_Col(colName, SQL_NUMERIC, &buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NONE, 18, 10);
 		num18_10_Col.SetColumnSize(18);
@@ -2519,7 +2519,7 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadNumeric_5_3_Value)
 	{
-		wstring colName = L"tdecimal_5_3";
+		string colName = u8"tdecimal_5_3";
 		SQL_NUMERIC_STRUCT buffer;
 		SqlCPointerBuffer num5_3_Col(colName, SQL_NUMERIC, &buffer, SQL_C_NUMERIC, sizeof(buffer), ColumnFlag::CF_NONE, 5, 3);
 		num5_3_Col.BindColumn(1, m_pStmt);
@@ -2572,8 +2572,8 @@ namespace exodbctest
 
 		TableId tableId = TableId::BLOBTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tblob");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tblob");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -2622,7 +2622,7 @@ namespace exodbctest
 
 		{
 			// read back written values
-			wstring colName = L"tblob";
+			string colName = u8"tblob";
 			vector<SQLCHAR> buffer(16);
 			SqlCPointerBuffer blobCol(colName, SQL_BINARY, &buffer[0], SQL_C_BINARY, 16 * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 16, 0);
 			blobCol.BindColumn(1, m_pStmt);
@@ -2681,8 +2681,8 @@ namespace exodbctest
 
 		TableId tableId = TableId::BLOBTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tvarblob_20");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tvarblob_20");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -2738,7 +2738,7 @@ namespace exodbctest
 
 		{
 			// read back written values
-			wstring colName = L"tvarblob_20";
+			string colName = u8"tvarblob_20";
 			BinaryColumnBuffer varblobCol(20, colName, SQL_UNKNOWN_TYPE);
 			varblobCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::BLOBTYPES_TMP, colName);
@@ -2786,8 +2786,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::INTEGERTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tbigint");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tbigint");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -2846,8 +2846,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::INTEGERTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tint");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tint");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -2907,8 +2907,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::INTEGERTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tsmallint");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tsmallint");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -2968,8 +2968,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tchar_10");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tchar_10");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3055,8 +3055,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tchar_10");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tchar_10");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3134,8 +3134,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tvarchar");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tvarchar");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3213,8 +3213,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tvarchar");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tvarchar");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3284,8 +3284,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::DATETYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdate");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdate");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3347,8 +3347,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::DATETYPES_TMP;
 
-		wstring colName = ToDbCase(L"ttime");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"ttime");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3409,8 +3409,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::DATETYPES_TMP;
 
-		wstring colName = ToDbCase(L"ttimestamp");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"ttimestamp");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3563,8 +3563,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::FLOATTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdouble");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdouble");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3630,8 +3630,8 @@ namespace exodbctest
 		// \todo: This is pure luck that the test works, rounding errors might occur already on inserting
 		TableId tableId = TableId::FLOATTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tfloat");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tfloat");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3696,8 +3696,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::NUMERICTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdecimal_18_0");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdecimal_18_0");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3791,8 +3791,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::NUMERICTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdecimal_18_10");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdecimal_18_10");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
@@ -3894,8 +3894,8 @@ namespace exodbctest
 	{
 		TableId tableId = TableId::NUMERICTYPES_TMP;
 
-		wstring colName = ToDbCase(L"tdecimal_5_3");
-		wstring idColName = GetIdColumnName(tableId);
+		string colName = ToDbCase(u8"tdecimal_5_3");
+		string idColName = GetIdColumnName(tableId);
 		ClearTmpTable(tableId);
 
 		{
