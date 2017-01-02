@@ -122,19 +122,19 @@ namespace exodbc
 		if (forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
 		{
 			ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_NONSCROLLABLE, 0);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
+			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
 			m_forwardOnlyCursors = true;
 		}
 		else
 		{
 			ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_SCROLLABLE, 0);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), L"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
+			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
 			m_forwardOnlyCursors = false;
 		}
 	}
 
 
-	void ExecutableStatement::ExecuteDirect(const std::wstring& sqlstmt)
+	void ExecutableStatement::ExecuteDirect(const std::string& sqlstmt)
 	{
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
@@ -147,7 +147,7 @@ namespace exodbc
 	}
 
 
-	void ExecutableStatement::Prepare(const std::wstring& sqlstmt)
+	void ExecutableStatement::Prepare(const std::string& sqlstmt)
 	{
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
@@ -296,7 +296,7 @@ namespace exodbc
 		SQLRETURN ret = SQLFetch(m_pHStmt->GetHandle());
 		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
 		{
-			SqlResultException sre(L"SQLFetch", ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+			SqlResultException sre(u8"SQLFetch", ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 			SET_EXCEPTION_SOURCE(sre);
 			throw sre;
 		}
@@ -318,8 +318,8 @@ namespace exodbc
 		SQLRETURN ret = SQLFetchScroll(m_pHStmt->GetHandle(), fetchOrientation, fetchOffset);
 		if (!(SQL_SUCCEEDED(ret) || ret == SQL_NO_DATA))
 		{
-			wstring msg = boost::str(boost::wformat(L"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
-			SqlResultException sre(L"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), msg);
+			std::string msg = boost::str(boost::format(u8"Failed in SQLFetchScroll with FetchOrientation %d") % fetchOrientation);
+			SqlResultException sre(u8"SQLFetchScroll", ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), msg);
 			SET_EXCEPTION_SOURCE(sre);
 			throw sre;
 		}

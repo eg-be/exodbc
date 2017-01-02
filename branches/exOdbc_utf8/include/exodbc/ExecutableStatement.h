@@ -148,14 +148,14 @@ namespace exodbc
 		* \brief	Execute the passed statement using SQLExecDirect.
 		* \details	Before the statement is executed an eventually open Cursor is closed.
 		*/
-		void ExecuteDirect(const std::wstring& sqlstmt);
+		void ExecuteDirect(const std::string& sqlstmt);
 
 
 		/*!
 		* \brief	Prepares the statement for multiple execution by calling SQLPrepare
 		*			with the passed sqlstmt.
 		*/
-		void Prepare(const std::wstring& sqlstmt);
+		void Prepare(const std::string& sqlstmt);
 
 
 		/*!
