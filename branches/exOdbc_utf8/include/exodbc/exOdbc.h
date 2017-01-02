@@ -39,20 +39,18 @@
 #ifdef _WIN32
     #define SQLAPICHARTYPE SQLWCHAR
     #define SQLAPICHARTYPENAME SQL_C_WCHAR
-    #define SYSTEMSTRINGTYPE std::wstring
 #else
     #define SQLAPICHARTYPE SQLCHAR
     #define SQLAPICHARTYPENAME SQL_C_CHAR
-    #define SYSTEMSTRINGTYPE std::string
 #endif
 
 #ifdef _WIN32
-    #define SQLAPICHARCONVERT(ws) ws
-    #define SQLRESCHARCONVERT(ws) ws
-    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(ws) std::string(reinterpret_cast<const wchar_t*>(ws))
+    #define SQLAPICHARCONVERT(s) utf8ToUtf16(s)
+    #define SQLRESCHARCONVERT(ws) utf16ToUtf8(ws)
+    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(ws) std::wstring(reinterpret_cast<const wchar_t*>(ws))
 #else
-    #define SQLAPICHARCONVERT(ws) utf16ToUtf8(ws)
-    #define SQLRESCHARCONVERT(s) utf8ToUtf16(s)
+    #define SQLAPICHARCONVERT(s) (s)
+    #define SQLRESCHARCONVERT(s) (s)
     #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(s) std::string(reinterpret_cast<const char*>(s))
 #endif
 
@@ -326,7 +324,7 @@ namespace exodbc
 		}
 
 		SQLSMALLINT		ErrorHandleType; ///< Handle-type of the error. Is either SQL_HANDLE_ENV, SQL_HANDLE_DBC, SQL_HANDLE_STMT or SQL_HANDLE_DESC
-		SQLWCHAR		SqlState[5 + 1];
+		SQLCHAR			SqlState[5 + 1];
 		SQLINTEGER		NativeError;
 		std::string	Msg;
 
@@ -349,7 +347,7 @@ namespace exodbc
 	* \param w String to transform
 	* \return std::string
 	*/
-	extern EXODBCAPI std::string utf16ToUtf8(const std::string& w) noexcept;
+	extern EXODBCAPI std::string utf16ToUtf8(const std::wstring& w) noexcept;
 
  	extern EXODBCAPI std::string utf16ToUtf8(const SQLWCHAR* w) noexcept;
 
@@ -360,9 +358,9 @@ namespace exodbc
 	* \param s String to transform
 	* \return std::string
 	*/
-	extern EXODBCAPI std::string utf8ToUtf16(const std::string& s) noexcept;
+	extern EXODBCAPI std::wstring utf8ToUtf16(const std::string& s) noexcept;
 
-    extern EXODBCAPI std::string utf8ToUtf16(const SQLCHAR* s) noexcept;
+    extern EXODBCAPI std::wstring utf8ToUtf16(const SQLCHAR* s) noexcept;
 
 
 	/*!
@@ -464,8 +462,6 @@ namespace exodbc
 	* \brief Format all Infos and Errors from passed handles into something human-readable.
 	*/
 	extern EXODBCAPI std::string FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::string msg);
-    
-	extern EXODBCAPI std::string FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::string msg);    
 }
 
 

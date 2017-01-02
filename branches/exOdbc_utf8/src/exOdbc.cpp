@@ -25,12 +25,12 @@ namespace exodbc {
 	// Implementation
 	// --------------
 
-	std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg)
+	std::string FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::string msg)
 	{
-		std::wstring msgStr(msg);
+		std::string msgStr(msg);
 		SErrorInfoVector errs = exodbc::GetAllErrors(hEnv, hDbc, hStmt, hDesc);
 		SErrorInfoVector::const_iterator it;
-		std::wstringstream handles;
+		std::stringstream handles;
 		if (hEnv)
 			handles << u8"Env=" << hEnv << u8";";
 		if (hDbc)
@@ -40,38 +40,33 @@ namespace exodbc {
 		if (hDesc)
 			handles << u8"Desc=" << hDesc << u8";";
 
-		std::wstring type = u8"Error(s)";
+		std::string type = u8"Error(s)";
 		if (ret == SQL_SUCCESS_WITH_INFO)
 		{
 			type = u8"Info(s)";
 		}
-		std::wstringstream ws;
+		std::stringstream ss;
 		if (msgStr.length() > 0)
-			ws << msgStr << u8": ";
-		ws << u8"ODBC-Function '" << sqlFunctionName << u8"' returned " << exodbc::SqlReturn2s(ret) << u8" (" << ret << u8"), with " << errs.size() << u8" ODBC-" << type << u8" from handle(s) '" << handles.str() << u8"': ";
+			ss << msgStr << u8": ";
+		ss << u8"ODBC-Function '" << sqlFunctionName << u8"' returned " << exodbc::SqlReturn2s(ret) << u8" (" << ret << u8"), with " << errs.size() << u8" ODBC-" << type << u8" from handle(s) '" << handles.str() << u8"': ";
 		for (it = errs.begin(); it != errs.end(); it++)
 		{
 			const SErrorInfo& err = *it;
-			ws << std::endl << u8"\t" << err.ToString();
+			ss << std::endl << u8"\t" << err.ToString();
 		}
-		return ws.str();
+		return ss.str();
 	}
-	
-	std::wstring FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::wstring sqlFunctionName, std::wstring msg)
-    {
-        return FormatOdbcMessages(hEnv, hDbc, hStmt, hDesc, ret, utf8ToUtf16(sqlFunctionName), msg);
-    }
 
 
-	std::wstring SErrorInfo::ToString() const
+	std::string SErrorInfo::ToString() const
 	{
-		std::wstringstream ws;
-		ws << u8"SQLSTATE " << SqlState << u8"; Native Error: " << NativeError << u8"; " << Msg.c_str();
-		return ws.str();
+		std::stringstream ss;
+		ss << u8"SQLSTATE " << SqlState << u8"; Native Error: " << NativeError << u8"; " << Msg.c_str();
+		return ss.str();
 	}
 
 
-	std::wstring utf16ToUtf8(const std::wstring& w) noexcept
+	std::string utf16ToUtf8(const std::wstring& w) noexcept
 	{
 		try
 		{
@@ -83,25 +78,26 @@ namespace exodbc {
 		}
 		catch (const std::exception& ex)
 		{
-			std::wstring s("Failed in utf16ToUtf8 with std::exception: ");
+			std::string s("Failed in utf16ToUtf8 with std::exception: ");
 			s += ex.what();
 			return s;
 		}
 		catch (...)
 		{
-			std::wstring s("Failed in utf16ToUtf8 with unknown exception.");
+			std::string s("Failed in utf16ToUtf8 with unknown exception.");
 			return s;
 		}
 	}
 
 	
-	std::wstring utf16ToUtf8(const SQLWCHAR* w) noexcept
+	std::string utf16ToUtf8(const SQLWCHAR* w) noexcept
 	{
-        return utf16ToUtf8(reinterpret_cast<const wchar_t*>(w));
+		std::wstring ws = reinterpret_cast<const wchar_t*>(w);
+        return utf16ToUtf8(ws);
     }
     
 
-	std::wstring utf8ToUtf16(const std::wstring& s) noexcept
+	std::wstring utf8ToUtf16(const std::string& s) noexcept
 	{
 		try
 		{
@@ -114,12 +110,12 @@ namespace exodbc {
 		catch (const std::exception& ex)
 		{
 			HIDE_UNUSED(ex);
-			std::wstring ws(u8"Failed in utf8ToUtf16 with std::exception - unable to print what() as wstring, sorry.");
+			std::wstring ws(L"Failed in utf8ToUtf16 with std::exception - unable to print what() as wstring, sorry.");
 			return ws;
 		}
 		catch (...)
 		{
-			std::wstring ws(u8"Failed in utf8ToUtf16 with unknown exception.");
+			std::wstring ws(L"Failed in utf8ToUtf16 with unknown exception.");
 			return ws;
 		}
 	}
@@ -131,7 +127,7 @@ namespace exodbc {
     }
 
 
-	std::wstring SqlTrueFalse2s(SQLSMALLINT b) noexcept
+	std::string SqlTrueFalse2s(SQLSMALLINT b) noexcept
 	{
 		switch (b)
 		{
@@ -145,7 +141,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring SqlReturn2s(SQLRETURN ret) noexcept
+	std::string SqlReturn2s(SQLRETURN ret) noexcept
 	{
 		switch (ret)
 		{
@@ -167,7 +163,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring SqlType2s(SQLSMALLINT sqlType) noexcept
+	std::string SqlType2s(SQLSMALLINT sqlType) noexcept
 	{
 		switch (sqlType)
 		{
@@ -259,7 +255,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring SqLCType2s(SQLSMALLINT sqlCType) noexcept
+	std::string SqLCType2s(SQLSMALLINT sqlCType) noexcept
 	{
 		switch (sqlCType)
 		{
@@ -322,7 +318,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring SqlCType2OdbcS(SQLSMALLINT sqlCType) noexcept
+	std::string SqlCType2OdbcS(SQLSMALLINT sqlCType) noexcept
 	{
 		switch (sqlCType)
 		{
@@ -385,7 +381,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring DatabaseProcudt2s(DatabaseProduct dbms) noexcept
+	std::string DatabaseProcudt2s(DatabaseProduct dbms) noexcept
 	{
 		switch (dbms)
 		{
@@ -405,7 +401,7 @@ namespace exodbc {
 	}
 
 
-	std::wstring HandleType2s(SQLSMALLINT type) noexcept
+	std::string HandleType2s(SQLSMALLINT type) noexcept
 	{
 		switch (type)
 		{
@@ -470,15 +466,15 @@ namespace exodbc {
 				ret = SQLGetDiagRec(handleType, handle, recNr, sqlState, &errInfo.NativeError, errMsg, SQL_MAX_MESSAGE_LENGTH + 1, &cb);
 				if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
 				{
-                    std::wstring wsSqlState = SQLRESCHARCONVERT(sqlState);
-                    memcpy(errInfo.SqlState, wsSqlState.c_str(), std::min<size_t>(wsSqlState.length(), 5));
-                    errInfo.SqlState[std::min<size_t>(wsSqlState.length(), 5)] = '\0';
+                    std::string ssqlState = SQLRESCHARCONVERT(sqlState);
+                    memcpy(errInfo.SqlState, ssqlState.c_str(), std::min<size_t>(ssqlState.length(), 5));
+                    errInfo.SqlState[std::min<size_t>(ssqlState.length(), 5)] = '\0';
 					errInfo.ErrorHandleType = handleType;
 					errInfo.Msg = SQLRESCHARCONVERT(errMsg);
 					errors.push_back(errInfo);
 					if (ret == SQL_SUCCESS_WITH_INFO)
 					{
-						std::wstringstream ws;
+						std::stringstream ws;
 						ws << u8"Error msg from recNr " << recNr << u8" got truncated";
 						LOG_WARNING(ws.str());
 					}
@@ -488,7 +484,7 @@ namespace exodbc {
 
 			if (ret != SQL_NO_DATA)
 			{
-				LOG_WARNING(boost::str(boost::wformat(u8"Calling SQLGetDiagRec did not end with %s (%d) but with %s (%d)") % SqlReturn2s(SQL_NO_DATA) % SQL_NO_DATA %SqlReturn2s(ret) % ret));
+				LOG_WARNING(boost::str(boost::format(u8"Calling SQLGetDiagRec did not end with %s (%d) but with %s (%d)") % SqlReturn2s(SQL_NO_DATA) % SQL_NO_DATA %SqlReturn2s(ret) % ret));
 			}
 		}
 
