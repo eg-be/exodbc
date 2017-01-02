@@ -72,8 +72,8 @@ namespace exodbc
 		SQLRETURN ret = SQLSetEnvAttr(SQL_NULL_HENV, SQL_ATTR_CONNECTION_POOLING, (SQLPOINTER)enablePooling, 0);
 		if (!SQL_SUCCEEDED(ret))
 		{
-			wstring msg = boost::str(boost::wformat(L"Failed to set Attribute SQL_ATTR_CONNECTION_POOLING to %d") % (int)enablePooling);
-			SqlResultException ex(L"SQLSetEnvAttr", ret, msg);
+			std::string msg = boost::str(boost::format(u8"Failed to set Attribute SQL_ATTR_CONNECTION_POOLING to %d") % (int)enablePooling);
+			SqlResultException ex(u8"SQLSetEnvAttr", ret, msg);
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -115,10 +115,10 @@ namespace exodbc
 			ret = SQLSetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, (SQLPOINTER) SQL_OV_ODBC3_80, 0);
 			break;
 		default:
-			THROW_WITH_SOURCE(IllegalArgumentException, (boost::wformat(L"Unknown ODBC Version value: %d") % (int) version).str());
+			THROW_WITH_SOURCE(IllegalArgumentException, (boost::format(u8"Unknown ODBC Version value: %d") % (int) version).str());
 		}
 
-		THROW_IFN_SUCCEEDED_MSG(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle(), (boost::wformat(L"Failed to set SQL_ATTR_ODBC_VERSION to value %d") % (int) version).str());
+		THROW_IFN_SUCCEEDED_MSG(SQLSetEnvAttr, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle(), (boost::format(u8"Failed to set SQL_ATTR_ODBC_VERSION to value %d") % (int) version).str());
 
 		ReadOdbcVersion();
 	}
@@ -131,7 +131,7 @@ namespace exodbc
 		unsigned long value = 0;
 		SQLRETURN ret = SQLGetEnvAttr(m_pHEnv->GetHandle(), SQL_ATTR_ODBC_VERSION, &value, 0, NULL);
 
-		THROW_IFN_SUCCEEDED_MSG(SQLGetEnvAttr, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle(), L"Failed to read SQL_ATTR_ODBC_VERSION");
+		THROW_IFN_SUCCEEDED_MSG(SQLGetEnvAttr, ret, SQL_HANDLE_ENV, m_pHEnv->GetHandle(), u8"Failed to read SQL_ATTR_ODBC_VERSION");
 
 		switch(value)
 		{
@@ -221,7 +221,7 @@ namespace exodbc
 		ret = SQLDataSources(m_pHEnv->GetHandle(), direction, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
 		if(ret == SQL_NO_DATA)
 		{
-			SqlResultException ex(L"SQLDataSources", ret, L"SQL_NO_DATA is not expected to happen here - we've found records in the previous round, they can't be gone now!");
+			SqlResultException ex(u8"SQLDataSources", ret, u8"SQL_NO_DATA is not expected to happen here - we've found records in the previous round, they can't be gone now!");
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
