@@ -38,19 +38,19 @@ namespace exodbctest
 		TestParams()
 		{ }
 
-		TestParams(const std::wstring& dsn, const std::wstring& username, const std::wstring& password, Case namesCase = Case::LOWER)
+		TestParams(const std::string& dsn, const std::string& username, const std::string& password, Case namesCase = Case::LOWER)
 			: m_dsn(dsn)
 			, m_username(username)
 			, m_password(password)
 			, m_namesCase(namesCase)
 		{};
 
-		TestParams(const std::wstring& connectionString, Case namesCase)
+		TestParams(const std::string& connectionString, Case namesCase)
 			: m_connectionString(connectionString)
 			, m_namesCase(namesCase)
 		{};
 
-		void Load(const boost::filesystem::wpath& settingsFile, std::vector<std::wstring>& skipNames);
+		void Load(const boost::filesystem::path& settingsFile, std::vector<std::string>& skipNames);
 
 		bool HasConnectionString() const noexcept { return m_connectionString.length() > 0; }
 
@@ -58,10 +58,10 @@ namespace exodbctest
 
 		bool IsUsable() const noexcept { return HasConnectionString() || HasDsn(); };
 
-		std::wstring m_dsn;
-		std::wstring m_username;
-		std::wstring m_password;
-		std::wstring m_connectionString;
+		std::string m_dsn;
+		std::string m_username;
+		std::string m_password;
+		std::string m_connectionString;
 		Case m_namesCase;
 		bool m_createDb;
 	};
