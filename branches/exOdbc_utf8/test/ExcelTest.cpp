@@ -67,13 +67,13 @@ namespace exodbctest
 			return;
 
 		TableInfosVector tables;
-		ASSERT_NO_THROW(tables = m_pDb->FindTables(L"", L"", L"", L""));
+		ASSERT_NO_THROW(tables = m_pDb->FindTables(u8"", u8"", u8"", u8""));
 		// Must contain our sheet 'TestTable$'
 		bool foundTestTableSheet = false;
 		TableInfosVector::const_iterator it;
 		for (it = tables.begin(); it != tables.end(); it++)
 		{
-			if (it->GetPureName() == L"TestTable$")
+			if (it->GetPureName() == u8"TestTable$")
 			{
 				foundTestTableSheet = true;
 			}
@@ -88,7 +88,7 @@ namespace exodbctest
 			return;
 
 		// Create Table
-		Table tTable(m_pDb, TableAccessFlag::AF_READ, L"TestTable$");
+		Table tTable(m_pDb, TableAccessFlag::AF_READ, u8"TestTable$");
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open());
 	}
@@ -100,7 +100,7 @@ namespace exodbctest
 			return;
 
 		// See Ticket #111 - this is fixed and no workarounds are needed
-		Table tTable(m_pDb, TableAccessFlag::AF_READ, L"TestTable$");
+		Table tTable(m_pDb, TableAccessFlag::AF_READ, u8"TestTable$");
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
@@ -120,7 +120,7 @@ namespace exodbctest
 
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(L"TestTable$", L"", L"", L""));
+		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
 
 		Table tTable2(m_pDb, TableAccessFlag::AF_READ, tableInfo);
 		tTable2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
@@ -148,7 +148,7 @@ namespace exodbctest
 
 		// Find the correct table:
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(L"TestTable$", L"", L"", L""));
+		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		// And create the manual table:
 		Table tTable(m_pDb, TableAccessFlag::AF_READ, tableInfo);
@@ -157,15 +157,15 @@ namespace exodbctest
 		SQLWCHAR fc[512];
 		SQLWCHAR tc[512];
 		SQLWCHAR mx[512];
-		ASSERT_NO_THROW(tTable.SetColumn(0, L"ID", SQL_VARCHAR, id, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
-		ASSERT_NO_THROW(tTable.SetColumn(1, L"Int", SQL_VARCHAR, ic, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
-		ASSERT_NO_THROW(tTable.SetColumn(2, L"Float", SQL_VARCHAR, fc, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
-		ASSERT_NO_THROW(tTable.SetColumn(3, L"Text", SQL_VARCHAR, tc, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
-		ASSERT_NO_THROW(tTable.SetColumn(4, L"Mixed", SQL_VARCHAR, mx, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
+		ASSERT_NO_THROW(tTable.SetColumn(0, u8"ID", SQL_VARCHAR, id, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
+		ASSERT_NO_THROW(tTable.SetColumn(1, u8"Int", SQL_VARCHAR, ic, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
+		ASSERT_NO_THROW(tTable.SetColumn(2, u8"Float", SQL_VARCHAR, fc, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
+		ASSERT_NO_THROW(tTable.SetColumn(3, u8"Text", SQL_VARCHAR, tc, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
+		ASSERT_NO_THROW(tTable.SetColumn(4, u8"Mixed", SQL_VARCHAR, mx, SQL_C_WCHAR, sizeof(id), ColumnFlag::CF_SELECT));
 
 		ASSERT_NO_THROW(tTable.Open());
 			
-		EXPECT_NO_THROW(tTable.Select(L""));
+		EXPECT_NO_THROW(tTable.Select(u8""));
 		int rowCount = 0;
 		while (tTable.SelectNext())
 		{
@@ -191,7 +191,7 @@ namespace exodbctest
 
 		// Find the correct table:
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(L"TestTable$", L"", L"", L""));
+		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
 		// And create the auto table:
 		Table tTable(m_pDb, TableAccessFlag::AF_READ, tableInfo);
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
@@ -205,7 +205,7 @@ namespace exodbctest
 		auto mixedCol = tTable.GetColumnBufferPtr<WCharColumnBufferPtr>(4);
 
 		std::wstring id, ic, fc, tc, mx;
-		tTable.Select(L"");
+		tTable.Select(u8"");
 		int rowCount = 0;
 		while (tTable.SelectNext())
 		{
@@ -223,7 +223,7 @@ namespace exodbctest
 			}
 		}
 
-		EXPECT_NO_THROW(tTable.Select(L""));
+		EXPECT_NO_THROW(tTable.Select(u8""));
 	}
 
 } //namespace exodbctest
