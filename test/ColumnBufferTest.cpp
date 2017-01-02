@@ -1561,9 +1561,9 @@ namespace exodbctest
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
 			f(1);
-			EXPECT_EQ(u8" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetString());
+			EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetString());
 			f(3);
-			EXPECT_EQ(u8"הצüאיט", varcharCol.GetString());
+			EXPECT_EQ("הצüאיט", varcharCol.GetString());
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
@@ -1578,18 +1578,18 @@ namespace exodbctest
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
 			{
 				f(2);
-				EXPECT_EQ(u8" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetString());
+				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetString());
 				f(4);
-				EXPECT_EQ(u8"הצüאיט", charCol.GetString());
+				EXPECT_EQ("הצüאיט", charCol.GetString());
 			}
 			else
 			{
 				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ה'
 				// Therefore, the number of preceding whitespaces is not equal on DB2 
 				f(2);
-				EXPECT_EQ(u8" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetString());
+				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetString());
 				f(4);
-				EXPECT_EQ(u8"הצüאיט", boost::trim_copy(charCol.GetString()));
+				EXPECT_EQ("הצüאיט", boost::trim_copy(charCol.GetString()));
 			}
 
 			f(1);
