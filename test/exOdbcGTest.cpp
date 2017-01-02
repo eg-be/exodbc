@@ -61,46 +61,46 @@ void printHelp()
 {
 	using namespace std;
 
-	wcerr << L"Usage: exOdbcGTest [OPTION]... [DATABASE]" << std::endl;
-	wcerr << L"Run unit-tests against DATABASE or read configuration from TestSettings.xml." << std::endl;
-	wcerr << L"If DATABASE is not specified, all settings will be read from the file" << std::endl;
-	wcerr << L"TestSettings.xml, located in either the directory of the app, or in a" << std::endl;
-	wcerr << L"subdirectory named 'exOdbcGTest'. If the file is not found in the directory" << std::endl;
-	wcerr << L"of the app, all parent directories are searched the same way." << std::endl;
-	wcerr << std::endl;
-	wcerr << L"If DATABASE is specified, you can either supply a connection-string or a DSN-entry" << std::endl;
-	wcerr << L"to indicate the connection info of the test database:" << std::endl;
-	wcerr << L" To connect using a configured DSN entry use:" << std::endl;
-	wcerr << L"" << std::endl;
-	wcerr << L"  DSN=dsn;user;pass (to connect to a database with UPPER-case names (tables/columns))" << std::endl;
-	wcerr << L"  dsn=dsn;user;pass (to connect to a database with lower-case names (tables/columns))" << std::endl;
-	wcerr << std::endl;
-	wcerr << L" or to connect using a connection-string use:" << std::endl;
-	wcerr << std::endl;
-	wcerr << L"  CS=connectionString (to connect to a database with UPPER-case names (tables/columns))" << std::endl;
-	wcerr << L"  cs=connectionString (to connect to a database with lower-case names (tables/columns))" << std::endl;
-	wcerr << std::endl;
-	wcerr << L"Note that you must frame the 'cs=connectionString' with \" if your connection" << std::endl;
-	wcerr << L"string contains white spaces." << std::endl;
-	wcerr << std::endl;
-	wcerr << L"OPTION can be:" << std::endl;
-	wcerr << L" --createDb       Run the scripts to create the test database before running the tests." << std::endl;
-	wcerr << L"                    The TestDbCreator will connect to the database and try to detect" << std::endl;
-	wcerr << L"                    the database system. If there is a subdirectory matching the" << std::endl;
-	wcerr << L"                    database system name in 'CreateScripts' directory, all scripts" << std::endl;
-	wcerr << L"                    inside that directory are run." << std::endl;
-	wcerr << L" --logLevelX      Set the log level, where X must be either"<< std::endl;
-	wcerr << L"                    E, W, I or D for Error, Warning, Info or Debug." << std::endl;
-	wcerr << L" --logFile        Log additionally to a file 'exODbcGTest.log' in the current directory" << std::endl;
-	wcerr << L" --help           To show this help text." << std::endl;
-	wcerr << std::endl;
-	wcerr << L"Examples:" << std::endl;
-	wcerr << L" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass" << std::endl;
-	wcerr << L"  to run the tests against a configured DSN entry named 'db2', using uppercase" << std::endl;
-	wcerr << L"  names and log level Waring. Before the tests are run, the scripts to create" << std::endl;
-	wcerr << L"  the test database are run." << std::endl;
-	wcerr << L" exodbcGTest CS=\"Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;\"" << std::endl;
-	wcerr << L"  to run the tests using a connection string, against a DB which uses uppercase." << std::endl;
+	cerr << u8"Usage: exOdbcGTest [OPTION]... [DATABASE]" << std::endl;
+	cerr << u8"Run unit-tests against DATABASE or read configuration from TestSettings.xml." << std::endl;
+	cerr << u8"If DATABASE is not specified, all settings will be read from the file" << std::endl;
+	cerr << u8"TestSettings.xml, located in either the directory of the app, or in a" << std::endl;
+	cerr << u8"subdirectory named 'exOdbcGTest'. If the file is not found in the directory" << std::endl;
+	cerr << u8"of the app, all parent directories are searched the same way." << std::endl;
+	cerr << std::endl;
+	cerr << u8"If DATABASE is specified, you can either supply a connection-string or a DSN-entry" << std::endl;
+	cerr << u8"to indicate the connection info of the test database:" << std::endl;
+	cerr << u8" To connect using a configured DSN entry use:" << std::endl;
+	cerr << u8"" << std::endl;
+	cerr << u8"  DSN=dsn;user;pass (to connect to a database with UPPER-case names (tables/columns))" << std::endl;
+	cerr << u8"  dsn=dsn;user;pass (to connect to a database with lower-case names (tables/columns))" << std::endl;
+	cerr << std::endl;
+	cerr << u8" or to connect using a connection-string use:" << std::endl;
+	cerr << std::endl;
+	cerr << u8"  CS=connectionString (to connect to a database with UPPER-case names (tables/columns))" << std::endl;
+	cerr << u8"  cs=connectionString (to connect to a database with lower-case names (tables/columns))" << std::endl;
+	cerr << std::endl;
+	cerr << u8"Note that you must frame the 'cs=connectionString' with \" if your connection" << std::endl;
+	cerr << u8"string contains white spaces." << std::endl;
+	cerr << std::endl;
+	cerr << u8"OPTION can be:" << std::endl;
+	cerr << u8" --createDb       Run the scripts to create the test database before running the tests." << std::endl;
+	cerr << u8"                    The TestDbCreator will connect to the database and try to detect" << std::endl;
+	cerr << u8"                    the database system. If there is a subdirectory matching the" << std::endl;
+	cerr << u8"                    database system name in 'CreateScripts' directory, all scripts" << std::endl;
+	cerr << u8"                    inside that directory are run." << std::endl;
+	cerr << u8" --logLevelX      Set the log level, where X must be either"<< std::endl;
+	cerr << u8"                    E, W, I or D for Error, Warning, Info or Debug." << std::endl;
+	cerr << u8" --logFile        Log additionally to a file 'exODbcGTest.log' in the current directory" << std::endl;
+	cerr << u8" --help           To show this help text." << std::endl;
+	cerr << std::endl;
+	cerr << u8"Examples:" << std::endl;
+	cerr << u8" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass" << std::endl;
+	cerr << u8"  to run the tests against a configured DSN entry named 'db2', using uppercase" << std::endl;
+	cerr << u8"  names and log level Waring. Before the tests are run, the scripts to create" << std::endl;
+	cerr << u8"  the test database are run." << std::endl;
+	cerr << u8" exodbcGTest CS=\"Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;\"" << std::endl;
+	cerr << u8"  to run the tests using a connection string, against a DB which uses uppercase." << std::endl;
 }
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -114,30 +114,30 @@ int _tmain(int argc, _TCHAR* argv[])
 	// IF --logLevelX is set, set the log-level early
 	for (int i = 0; i < argc; i++)
 	{
-		if (ba::iequals(argv[i], L"--help"))
+		if (ba::iequals(argv[i], u8"--help"))
 		{
 			printHelp();
 			return -1;
 		}
-		else if (ba::iequals(argv[i], L"--logLevelE"))
+		else if (ba::iequals(argv[i], u8"--logLevelE"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
 		}
-		else if (ba::iequals(argv[i], L"--logLevelW"))
+		else if (ba::iequals(argv[i], u8"--logLevelW"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
 		}
-		else if (ba::iequals(argv[i], L"--logLevelI"))
+		else if (ba::iequals(argv[i], u8"--logLevelI"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
 		}
-		else if (ba::iequals(argv[i], L"--logLevelD"))
+		else if (ba::iequals(argv[i], u8"--logLevelD"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
 		}
-		else if (ba::iequals(argv[i], L"--logFile"))
+		else if (ba::iequals(argv[i], u8"--logFile"))
 		{
-			FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(L"exOdbcGTest.log", true);
+			FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(u8"exOdbcGTest.log", true);
 			LogManager::Get().RegisterLogHandler(pFileLogger);
 		}
 	}
@@ -154,13 +154,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	// Iterate given options
 	for (int i = 1; i < argc; i++)
 	{
-		std::wstring createDb = L"--createDb";
-		std::wstring dsn = L"dsn=";
-		std::wstring DSN = L"DSN=";
-		std::wstring cs = L"cs=";
-		std::wstring CS = L"CS=";
-		std::wstring arg(argv[i]);
-		std::wstring upperDsn, lowerDsn, upperCs, lowerCs;
+		std::string createDb = u8"--createDb";
+		std::string dsn = u8"dsn=";
+		std::string DSN = u8"DSN=";
+		std::string cs = u8"cs=";
+		std::string CS = u8"CS=";
+#if _WIN32
+		std::string arg = utf16ToUtf8(argv[i]);
+#else
+		std::string arg(argv[i]);
+#endif
+		std::string upperDsn, lowerDsn, upperCs, lowerCs;
 		if (arg == createDb)
 		{
 			doCreateDb = true;
@@ -183,16 +187,16 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 		if (upperDsn.length() > 0 || lowerDsn.length() > 0)
 		{
-			std::wstring dsn = upperDsn.length() > 0 ? upperDsn : lowerDsn;
-			std::vector<std::wstring> tokens;
-			boost::split(tokens, dsn, boost::is_any_of(L";"));
+			std::string dsn = upperDsn.length() > 0 ? upperDsn : lowerDsn;
+			std::vector<std::string> tokens;
+			boost::split(tokens, dsn, boost::is_any_of(u8";"));
 			if (tokens.size() != 3)
 			{
-				LOG_WARNING(boost::str(boost::wformat(L"Ignoring Dsn entry '%s' because it does not match the form 'dsn;user;pass'") % arg));
+				LOG_WARNING(boost::str(boost::format(u8"Ignoring Dsn entry '%s' because it does not match the form 'dsn;user;pass'") % arg));
 			}
 			else if (tokens[0].empty())
 			{
-				LOG_WARNING(boost::str(boost::wformat(L"Ignoring Dsn entry '%s' because DSN is empty.") % arg));
+				LOG_WARNING(boost::str(boost::format(u8"Ignoring Dsn entry '%s' because DSN is empty.") % arg));
 			}
 			else
 			{
@@ -213,11 +217,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		g_odbcInfo.m_createDb = doCreateDb;
 	}
 
-	wstring customFilter;
+	string customFilter;
 	if (!g_odbcInfo.IsUsable())
 	{
 		// Read default settings
-		LOG_INFO(L"No usable DSN or ConnectionString passed, loading settings from TestSettings.xml");
+		LOG_INFO(u8"No usable DSN or ConnectionString passed, loading settings from TestSettings.xml");
 		try
 		{
 			// Try to locate TestSettings.xml in directory of exe
@@ -229,35 +233,39 @@ int _tmain(int argc, _TCHAR* argv[])
 			{
 				confDir = exePath.parent_path();
 			}
-			LOG_INFO(boost::str(boost::wformat(L"Searching in %1% and its parent directories for TestSettings.xml") % confDir));
-			fs::wpath settingsPath = confDir / L"TestSettings.xml";
+			LOG_INFO(boost::str(boost::format(u8"Searching in %1% and its parent directories for TestSettings.xml") % confDir));
+			fs::wpath settingsPath = confDir / u8"TestSettings.xml";
 			while( ! fs::exists(settingsPath) && confDir.has_parent_path())
 			{ 
 				// try if it is up somewhere in my working copy
 				confDir = confDir.parent_path();
 				settingsPath = confDir;
-				settingsPath /= L"TestSettings.xml";
+				settingsPath /= u8"TestSettings.xml";
 				if(!fs::exists(settingsPath))
 				{ 
 					settingsPath = confDir;
-					settingsPath /= L"exOdbcGTest/TestSettings.xml";
+					settingsPath /= u8"exOdbcGTest/TestSettings.xml";
 				}
 			}
 			if (!fs::exists(settingsPath))
 			{
-				NotFoundException ex(boost::str(boost::wformat(L"No TestSettings.xml file found")));
+				NotFoundException ex(boost::str(boost::format(u8"No TestSettings.xml file found")));
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
-			LOG_INFO(boost::str(boost::wformat(L"Using settings from %1%") % settingsPath));
-			vector<wstring> skipNames;
+			LOG_INFO(boost::str(boost::format(u8"Using settings from %1%") % settingsPath));
+			vector<string> skipNames;
 			g_odbcInfo.Load(settingsPath, skipNames);
 			// Set a gtest-filter statement to skip those names if no gtest-filter arg is setted
 			bool haveFilter = false;
 			for (int i = 1; i < argc; i++)
 			{
-				wstring arg = argv[i];
-				if (arg.compare(0, 15, L"--gtest_filter=") == 0)
+#ifdef _WIN32
+				string arg = utf16ToUtf8(argv[i]);
+#else
+				string arg = argv[i];
+#endif
+				if (arg.compare(0, 15, u8"--gtest_filter=") == 0)
 				{
 					haveFilter = true;
 					break;
@@ -266,11 +274,11 @@ int _tmain(int argc, _TCHAR* argv[])
 			if (!haveFilter && !skipNames.empty())
 			{
 				// Add our default-filter
-				wstring filter = L"--gtest_filter=-" + skipNames[0];
+				string filter = u8"--gtest_filter=-" + skipNames[0];
 				size_t i = 1;
 				while (i < skipNames.size())
 				{
-					filter += L":" + skipNames[i];
+					filter += u8":" + skipNames[i];
 					++i;
 				}
 				customFilter = filter;
@@ -294,9 +302,9 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 	}
 	
-	wstringstream ws;
-	ws << L"Running tests against: " << g_odbcInfo;
-	LOG_INFO(ws.str());
+	stringstream ss;
+	ss << u8"Running tests against: " << g_odbcInfo;
+	LOG_INFO(ss.str());
 
 	// Check if we need to re-create the dbs
 	if (doCreateDb)
@@ -307,18 +315,18 @@ int _tmain(int argc, _TCHAR* argv[])
 			// Prepare Db-creator
 			TestDbCreator creator(g_odbcInfo);
 			fs::wpath exeDir(fs::current_path());
-			fs::wpath scriptDir = exeDir / L"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
+			fs::wpath scriptDir = exeDir / u8"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
 			if (!fs::is_directory(scriptDir))
 			{
-				THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"ScriptDirectory '%1%' is not a directory") % scriptDir));
+				THROW_WITH_SOURCE(Exception, boost::str(boost::format(u8"ScriptDirectory '%1%' is not a directory") % scriptDir));
 			}
-			LOG_INFO(boost::str(boost::wformat(L"Running scripts from directory %1%") % scriptDir));
+			LOG_INFO(boost::str(boost::format(u8"Running scripts from directory %1%") % scriptDir));
 			creator.SetScriptDirectory(scriptDir);
 			creator.RunAllScripts();
 		}
 		catch (const Exception& ex)
 		{
-			LOG_ERROR(boost::str(boost::wformat(L"Failed to create Test-Database for DSN '%s': %s") % g_odbcInfo.m_dsn % ex.ToString()));
+			LOG_ERROR(boost::str(boost::format(u8"Failed to create Test-Database for DSN '%s': %s") % g_odbcInfo.m_dsn % ex.ToString()));
 			::getchar();
 			return -1;
 		}
@@ -355,12 +363,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	try
 	{
 		result = RUN_ALL_TESTS();
-		LOG_INFO(L"Test run finished");
+		LOG_INFO(u8"Test run finished");
 	}
 	catch (const Exception& ex)
 	{
 		result = -13;
-		LOG_ERROR(L"TEST RUN ABORTED");
+		LOG_ERROR(u8"TEST RUN ABORTED");
 		LOG_ERROR(ex.ToString());
 	}
 	
