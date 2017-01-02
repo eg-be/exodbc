@@ -42,7 +42,7 @@ namespace exodbc
 	{ }
 
 
-	Table::Table(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
+	Table::Table(ConstDatabasePtr pDb, TableAccessFlags afs, const std::string& tableName, const std::string& schemaName /* = u8"" */, const std::string& catalogName /* = u8"" */, const std::string& tableType /* = u8"" */)
 		: m_autoCreatedColumns(false)
 		, m_haveTableInfo(false)
 		, m_pDb(NULL)
@@ -133,7 +133,7 @@ namespace exodbc
 	}
 
 
-	void Table::Init(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName /* = L"" */, const std::wstring& catalogName /* = L"" */, const std::wstring& tableType /* = L"" */)
+	void Table::Init(ConstDatabasePtr pDb, TableAccessFlags afs, const std::string& tableName, const std::string& schemaName /* = u8"" */, const std::string& catalogName /* = u8"" */, const std::string& tableType /* = u8"" */)
 	{
 		exASSERT(pDb);
 		exASSERT(pDb->IsOpen());
@@ -176,7 +176,7 @@ namespace exodbc
 				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
 
 				// Create the buffer required for counts
-				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(L"", SQL_UNKNOWN_TYPE, ColumnFlag::CF_SELECT);
+				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(u8"", SQL_UNKNOWN_TYPE, ColumnFlag::CF_SELECT);
 			}
 			if (TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
 			{
@@ -219,7 +219,7 @@ namespace exodbc
 		SQLSMALLINT numCols = (SQLSMALLINT)columnInfos.size();
 		if (numCols == 0)
 		{
-			Exception ex((boost::wformat(L"No columns found for table '%s'") % tableInfo.GetQueryName()).str());
+			Exception ex((boost::format(u8"No columns found for table '%s'") % tableInfo.GetQueryName()).str());
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -254,7 +254,7 @@ namespace exodbc
 				{
 					columnPtrVariant = CreateColumnBufferPtr(sqlCType, colInfo.GetQueryName());
 				}
-				if (!colInfo.IsIsNullableNull() && boost::algorithm::iequals(colInfo.GetIsNullable(), L"YES"))
+				if (!colInfo.IsIsNullableNull() && boost::algorithm::iequals(colInfo.GetIsNullable(), u8"YES"))
 				{
 					flags.Set(ColumnFlag::CF_NULLABLE);
 				}
@@ -277,7 +277,7 @@ namespace exodbc
 				if (skipUnsupportedColumns)
 				{
 					// Ignore unsupported column. (note: If it has thrown from the constructor, memory is already deleted)
-					LOG_WARNING(boost::str(boost::wformat(L"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetQueryName() % nse.ToString()));
+					LOG_WARNING(boost::str(boost::format(u8"Failed to create ColumnBuffer for column '%s': %s") % colInfo.GetQueryName() % nse.ToString()));
 					continue;
 				}
 				else
@@ -419,11 +419,11 @@ namespace exodbc
 	}
 
 
-	std::wstring Table::BuildSelectFieldsStatement() const
+	std::string Table::BuildSelectFieldsStatement() const
 	{
 		exASSERT(m_columns.size() > 0);
 
-		std::wstring fields = L"";
+		std::string fields = u8"";
 		ColumnBufferPtrVariantMap::const_iterator it = m_columns.begin();
 		while (it != m_columns.end())
 		{
@@ -431,13 +431,13 @@ namespace exodbc
 			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), var);
 			if (pFlags->Test(ColumnFlag::CF_SELECT))
 			{
-				std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), var);
+				std::string queryName = boost::apply_visitor(QueryNameVisitor(), var);
 				fields += queryName;
-				fields += L", ";
+				fields += u8", ";
 			}
 			++it;
 		}
-		boost::algorithm::erase_last(fields, L", ");
+		boost::algorithm::erase_last(fields, u8", ");
 
 		return fields;
 	}
@@ -451,7 +451,7 @@ namespace exodbc
 
 		// Build a statement with parameter-markers
 		vector<ColumnBufferPtrVariant> whereParamsToBind;
-		wstring whereMarkers;
+		string whereMarkers;
 		auto it = m_columns.begin();
 		while (it != m_columns.end())
 		{
@@ -460,16 +460,16 @@ namespace exodbc
 			if (pFlags->Test(ColumnFlag::CF_PRIMARY_KEY))
 			{
 				whereMarkers += boost::apply_visitor(QueryNameVisitor(), pVar);
-				whereMarkers += L" = ?, ";
+				whereMarkers += u8" = ?, ";
 				whereParamsToBind.push_back(pVar);
 			}
 			++it;
 		}
-		boost::erase_last(whereMarkers, L", ");
-		wstring stmt = boost::str(boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereMarkers);
+		boost::erase_last(whereMarkers, u8", ");
+		string stmt = boost::str(boost::format(u8"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereMarkers);
 
 		// check that we actually have some columns to update and some for the where part
-		exASSERT_MSG(!whereParamsToBind.empty(), L"No Columns usable to construct WHERE statement");
+		exASSERT_MSG(!whereParamsToBind.empty(), u8"No Columns usable to construct WHERE statement");
 
 		// .. and prepare stmt
 		m_execStmtDeletePk.Prepare(stmt);
@@ -495,8 +495,8 @@ namespace exodbc
 		// Build a statement with parameter-markers
 		vector<ColumnBufferPtrVariant> setParamsToBind;
 		vector<ColumnBufferPtrVariant> whereParamsToBind;
-		wstring setMarkers;
-		wstring whereMarkers;
+		string setMarkers;
+		string whereMarkers;
 		auto it = m_columns.begin();
 		while (it != m_columns.end())
 		{
@@ -505,24 +505,24 @@ namespace exodbc
 			if (pFlags->Test(ColumnFlag::CF_PRIMARY_KEY))
 			{
 				whereMarkers += boost::apply_visitor(QueryNameVisitor(), pVar);
-				whereMarkers += L" = ?, ";
+				whereMarkers += u8" = ?, ";
 				whereParamsToBind.push_back(pVar);
 			}
 			else if (pFlags->Test(ColumnFlag::CF_UPDATE))
 			{				
 				setMarkers += boost::apply_visitor(QueryNameVisitor(), pVar);
-				setMarkers += L" = ?, ";
+				setMarkers += u8" = ?, ";
 				setParamsToBind.push_back(pVar);
 			}
 			++it;
 		}
-		boost::erase_last(setMarkers, L", ");
-		boost::erase_last(whereMarkers, L", ");
-		wstring stmt = boost::str(boost::wformat(L"UPDATE %s SET %s WHERE %s") % m_tableInfo.GetQueryName() % setMarkers % whereMarkers);
+		boost::erase_last(setMarkers, u8", ");
+		boost::erase_last(whereMarkers, u8", ");
+		string stmt = boost::str(boost::format(u8"UPDATE %s SET %s WHERE %s") % m_tableInfo.GetQueryName() % setMarkers % whereMarkers);
 
 		// check that we actually have some columns to update and some for the where part
-		exASSERT_MSG(!setParamsToBind.empty(), L"No Columns flaged for UPDATEing");
-		exASSERT_MSG(!whereParamsToBind.empty(), L"No Columns usable to construct WHERE statement");
+		exASSERT_MSG(!setParamsToBind.empty(), u8"No Columns flaged for UPDATEing");
+		exASSERT_MSG(!whereParamsToBind.empty(), u8"No Columns usable to construct WHERE statement");
 
 		// .. and prepare stmt
 		m_execStmtUpdatePk.Prepare(stmt);
@@ -552,8 +552,8 @@ namespace exodbc
 
 		// Build a statement with parameter-markers
 		vector<ColumnBufferPtrVariant> colsToBind;
-		wstring markers;
-		wstring fields;
+		string markers;
+		string fields;
 		auto it = m_columns.begin();
 		while (it != m_columns.end())
 		{
@@ -562,18 +562,18 @@ namespace exodbc
 			if (pFlags->Test(ColumnFlag::CF_INSERT))
 			{
 				fields+= boost::apply_visitor(QueryNameVisitor(), pVar);
-				fields += L", ";
-				markers+= L"?, ";
+				fields += u8", ";
+				markers+= u8"?, ";
 				colsToBind.push_back(pVar);
 			}
 			++it;
 		}
-		boost::erase_last(fields, L", ");
-		boost::erase_last(markers, L", ");
-		wstring stmt = boost::str(boost::wformat(L"INSERT INTO %s (%s) VALUES(%s)") % m_tableInfo.GetQueryName() % fields % markers);
+		boost::erase_last(fields, u8", ");
+		boost::erase_last(markers, u8", ");
+		string stmt = boost::str(boost::format(u8"INSERT INTO %s (%s) VALUES(%s)") % m_tableInfo.GetQueryName() % fields % markers);
 
 		// check that we actually have some column to insert
-		exASSERT_MSG( ! colsToBind.empty(), L"No Columns flaged for INSERTing");
+		exASSERT_MSG( ! colsToBind.empty(), u8"No Columns flaged for INSERTing");
 
 		// .. and prepare stmt
 		m_execStmtInsert.Prepare(stmt);
@@ -599,7 +599,7 @@ namespace exodbc
 		ColumnBufferPtrVariantMap::const_iterator it = m_columns.find(columnIndex);
 		if (it == m_columns.end())
 		{
-			IllegalArgumentException ex(boost::str(boost::wformat(L"ColumnIndex %d is not a zero-based bound or manually defined ColumnBuffer") % columnIndex));
+			IllegalArgumentException ex(boost::str(boost::format(u8"ColumnIndex %d is not a zero-based bound or manually defined ColumnBuffer") % columnIndex));
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -613,7 +613,7 @@ namespace exodbc
 		const ColumnBufferPtrVariant& columnPtrVariant = GetColumnBufferPtrVariant(columnIndex);
 		if (boost::apply_visitor(IsNullVisitor(), columnPtrVariant))
 		{
-			std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), columnPtrVariant);
+			std::string queryName = boost::apply_visitor(QueryNameVisitor(), columnPtrVariant);
 			NullValueException ex(queryName);
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
@@ -646,23 +646,23 @@ namespace exodbc
 		for (auto it = m_columns.begin(); it != m_columns.end(); ++it)
 		{
 			ColumnBufferPtrVariant columnBuffer = it->second;
-			const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
+			const std::string& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
 			ColumnFlagsPtr pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
 			if (pColumnFlags->Test(ColumnFlag::CF_SELECT) && !TestAccessFlag(TableAccessFlag::AF_SELECT))
 			{
-				Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+				Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
 			if (pColumnFlags->Test(ColumnFlag::CF_INSERT) && !TestAccessFlag(TableAccessFlag::AF_INSERT))
 			{
-				Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+				Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has ColumnFlag CF_INSERT set, but the AccessFlag AF_INSERT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
 			if (pColumnFlags->Test(ColumnFlag::CF_UPDATE) && !(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)))
 			{
-				Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+				Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -676,7 +676,7 @@ namespace exodbc
 		while(it != m_columns.end())
 		{
 			ColumnBufferPtrVariant columnBuffer = it->second;
-			const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
+			const std::string& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
 			ColumnFlagsPtr pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
 			SQLSMALLINT sqlType = boost::apply_visitor(SqlTypeVisitor(), columnBuffer);
 			bool remove = false;
@@ -684,12 +684,12 @@ namespace exodbc
 			{
 				if (TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS))
 				{
-					LOG_WARNING(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % queryName % it->first % SqlType2s(sqlType) % sqlType));
+					LOG_WARNING(boost::str(boost::format(u8"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % queryName % it->first % SqlType2s(sqlType) % sqlType));
 					remove = true;
 				}			
 				else
 				{
-					Exception ex(boost::str(boost::wformat(L"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % queryName % it->first % SqlType2s(sqlType) % sqlType));
+					Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % queryName % it->first % SqlType2s(sqlType) % sqlType));
 					SET_EXCEPTION_SOURCE(ex);
 					throw ex;
 				}
@@ -719,19 +719,19 @@ namespace exodbc
 	}
 
 
-	SQLUSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive /* = true */) const
+	SQLUSMALLINT Table::GetColumnBufferIndex(const std::string& columnQueryName, bool caseSensitive /* = true */) const
 	{
 		return GetColumnBufferIndex(columnQueryName, m_columns, caseSensitive);
 	}
 
 
-	SQLUSMALLINT Table::GetColumnBufferIndex(const std::wstring& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive /* = true */) const
+	SQLUSMALLINT Table::GetColumnBufferIndex(const std::string& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive /* = true */) const
 	{
 		ColumnBufferPtrVariantMap::const_iterator it = columns.begin();
 		while (it != columns.end())
 		{
 			const ColumnBufferPtrVariant& column = it->second;
-			std::wstring queryName = boost::apply_visitor(QueryNameVisitor(), column);
+			std::string queryName = boost::apply_visitor(QueryNameVisitor(), column);
 
 			if (caseSensitive)
 			{
@@ -750,27 +750,27 @@ namespace exodbc
 			++it;
 		}
 
-		NotFoundException nfe(boost::str(boost::wformat(L"No ColumnBuffer found with QueryName '%s'") % columnQueryName));
+		NotFoundException nfe(boost::str(boost::format(u8"No ColumnBuffer found with QueryName '%s'") % columnQueryName));
 		SET_EXCEPTION_SOURCE(nfe);
 		throw nfe;
 	}
 
 
-	SQLUBIGINT Table::Count(const std::wstring& whereStatement)
+	SQLUBIGINT Table::Count(const std::string& whereStatement)
 	{
 		exASSERT(IsOpen());
 		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT));
 		exASSERT(m_pSelectCountResultBuffer);
 
 		// Prepare the sql to be executed on our internal ExecutableStatement
-		std::wstring sqlstmt;
+		std::string sqlstmt;
 		if ( ! whereStatement.empty())
 		{
-			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereStatement).str();
+			sqlstmt = (boost::format(u8"SELECT COUNT(*) FROM %s WHERE %s") % m_tableInfo.GetQueryName() % whereStatement).str();
 		}
 		else
 		{
-			sqlstmt = (boost::wformat(L"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
+			sqlstmt = (boost::format(u8"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
 		}
 
 		m_execStmtCount.ExecuteDirect(sqlstmt);
@@ -782,28 +782,28 @@ namespace exodbc
 	}
 
 
-	void Table::Select(const std::wstring& whereStatement /* = L"" */, const std::wstring& orderStatement /* = L"" */)
+	void Table::Select(const std::string& whereStatement /* = u8"" */, const std::string& orderStatement /* = u8"" */)
 	{
 		exASSERT(IsOpen());
 
-		wstringstream ws;
-		ws << L"SELECT " << BuildSelectFieldsStatement() << L" FROM " << m_tableInfo.GetQueryName();
+		stringstream ws;
+		ws << u8"SELECT " << BuildSelectFieldsStatement() << u8" FROM " << m_tableInfo.GetQueryName();
 
 		if (!whereStatement.empty())
 		{
-			ws << L" WHERE " << whereStatement;
+			ws << u8" WHERE " << whereStatement;
 		}
 
 		if (!orderStatement.empty())
 		{
-			ws << L" ORDER BY " << orderStatement;
+			ws << u8" ORDER BY " << orderStatement;
 		}
 
 		SelectBySqlStmt(ws.str());
 	}
 
 
-	void Table::SelectBySqlStmt(const std::wstring& sqlStmt)
+	void Table::SelectBySqlStmt(const std::string& sqlStmt)
 	{
 		exASSERT(IsOpen());
 		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT));
@@ -884,7 +884,7 @@ namespace exodbc
 	}
 
 
-	void Table::Delete(const std::wstring& where, bool failOnNoData /* = true */) const
+	void Table::Delete(const std::string& where, bool failOnNoData /* = true */) const
 	{
 		exASSERT(!m_columns.empty());
 		exASSERT(TestAccessFlag(TableAccessFlag::AF_DELETE_WHERE));
@@ -894,7 +894,7 @@ namespace exodbc
 		execStmtDelete.Init(m_pDb, true);
 
 		// Build a statement that we can directly execute
-		wstring stmt = boost::str(boost::wformat(L"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % where);
+		string stmt = boost::str(boost::format(u8"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % where);
 		
 		try
 		{
@@ -920,7 +920,7 @@ namespace exodbc
 	}
 
 
-	void Table::Update(const std::wstring& where)
+	void Table::Update(const std::string& where)
 	{
 		exASSERT(!m_columns.empty());
 		exASSERT(TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE));
@@ -931,7 +931,7 @@ namespace exodbc
 
 		// Build a statement with parameter-markers
 		vector<ColumnBufferPtrVariant> setParamsToBind;
-		wstring setMarkers;
+		string setMarkers;
 		auto it = m_columns.begin();
 		while (it != m_columns.end())
 		{
@@ -940,16 +940,16 @@ namespace exodbc
 			if (pFlags->Test(ColumnFlag::CF_UPDATE))
 			{
 				setMarkers += boost::apply_visitor(QueryNameVisitor(), pVar);
-				setMarkers += L" = ?, ";
+				setMarkers += u8" = ?, ";
 				setParamsToBind.push_back(pVar);
 			}
 			++it;
 		}
-		boost::erase_last(setMarkers, L", ");
-		wstring stmt = boost::str(boost::wformat(L"UPDATE %s SET %s WHERE %s") % m_tableInfo.GetQueryName() % setMarkers % where);
+		boost::erase_last(setMarkers, u8", ");
+		string stmt = boost::str(boost::format(u8"UPDATE %s SET %s WHERE %s") % m_tableInfo.GetQueryName() % setMarkers % where);
 
 		// check that we actually have some columns to update and some for the where part
-		exASSERT_MSG(!setParamsToBind.empty(), L"No Columns flaged for UPDATEing");
+		exASSERT_MSG(!setParamsToBind.empty(), u8"No Columns flaged for UPDATEing");
 
 		// .. and prepare stmt
 		execStmtUpdate.Prepare(stmt);
@@ -1009,7 +1009,7 @@ namespace exodbc
 		exASSERT(m_columns.find(columnIndex) == m_columns.end());
 
 		// test if we have a non-empty query name
-		const std::wstring& queryName = boost::apply_visitor(QueryNameVisitor(), column);
+		const std::string& queryName = boost::apply_visitor(QueryNameVisitor(), column);
 		exASSERT(!queryName.empty());
 
 		// okay, remember the passed variant
@@ -1017,7 +1017,7 @@ namespace exodbc
 	}
 
 
-	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize /* = 0 */, SQLSMALLINT decimalDigits /* = 0 */)
+	void Table::SetColumn(SQLUSMALLINT columnIndex, const std::string& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize /* = 0 */, SQLSMALLINT decimalDigits /* = 0 */)
 	{
 		SqlCPointerBufferPtr pColumn = std::make_shared<SqlCPointerBuffer>(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
 		SetColumn(columnIndex, pColumn);
@@ -1089,13 +1089,13 @@ namespace exodbc
 			if (TestOpenFlag(TableOpenFlag::TOF_CHECK_EXISTANCE) && !searchedTable)
 			{
 				// Will throw if not one is found
-				std::wstring catalogName = m_tableInfo.GetCatalog();
-				std::wstring typeName = m_tableInfo.GetType();
+				std::string catalogName = m_tableInfo.GetCatalog();
+				std::string typeName = m_tableInfo.GetType();
 				if (m_pDb->GetDbms() == DatabaseProduct::EXCEL)
 				{
 					// workaround for #111
-					catalogName = L"";
-					typeName = L"";
+					catalogName = u8"";
+					typeName = u8"";
 				}
 				m_pDb->FindOneTable(m_tableInfo.GetPureName(), m_tableInfo.GetSchema(), catalogName, typeName);
 				searchedTable = true;
@@ -1117,7 +1117,7 @@ namespace exodbc
 					ColumnBufferPtrVariantMap::iterator itCols = m_columns.find(*it);
 					if (itCols == m_columns.end())
 					{
-						THROW_WITH_SOURCE(IllegalArgumentException, boost::str(boost::wformat(L"No ColumnBuffer was found for a manually defined primary key column index (index = %d)") % *it));
+						THROW_WITH_SOURCE(IllegalArgumentException, boost::str(boost::format(u8"No ColumnBuffer was found for a manually defined primary key column index (index = %d)") % *it));
 					}
 					ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), itCols->second);
 					pFlags->Set(ColumnFlag::CF_PRIMARY_KEY);
@@ -1176,7 +1176,7 @@ namespace exodbc
 			{
 				if (GetPrimaryKeyColumnBuffers().empty())
 				{
-					Exception ex((boost::wformat(L"Table '%s' has no primary keys, cannot open with AF_UPDATE_PK or AF_DELETE_PK") % m_tableInfo.GetQueryName()).str());
+					Exception ex((boost::format(u8"Table '%s' has no primary keys, cannot open with AF_UPDATE_PK or AF_DELETE_PK") % m_tableInfo.GetQueryName()).str());
 					SET_EXCEPTION_SOURCE(ex);
 					throw ex;
 				}

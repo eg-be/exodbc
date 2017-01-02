@@ -93,11 +93,11 @@ namespace exodbc
 	* \details On applying this visitor, it will call GetQueryName() on the ColumnBuffer.
 	*/
 	class QueryNameVisitor
-		: public boost::static_visitor<std::wstring>
+		: public boost::static_visitor<std::string>
 	{
 	public:
 		template<typename T>
-		std::wstring operator()(T& t) const
+		std::string operator()(T& t) const
 		{
 			return t->GetQueryName();
 		}
