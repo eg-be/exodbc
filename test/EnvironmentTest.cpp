@@ -89,7 +89,7 @@ namespace exodbctest
 	{
 		if (g_odbcInfo.HasConnectionString())
 		{
-			LOG_WARNING(L"Skipping Test ListDataSources, because Test is implemented to stupid it only works with a named DSN");
+			LOG_WARNING(u8"Skipping Test ListDataSources, because Test is implemented to stupid it only works with a named DSN");
 			return;
 		}
 
@@ -167,11 +167,11 @@ namespace exodbctest
 		StdErrLogHandlerPtr stdLogger = std::make_shared<StdErrLogHandler>();
 		LogManager::Get().ClearLogHandlers();
 		LogManager::Get().RegisterLogHandler(stdLogger);
-		wstring msg = boost::str(boost::wformat(L"Opening %d connections using PER_DRIVER took %d seconds") % nrRuns % deltaDriver);
+		string msg = boost::str(boost::format(u8"Opening %d connections using PER_DRIVER took %d seconds") % nrRuns % deltaDriver);
 		LOG_INFO(msg);
-		msg = boost::str(boost::wformat(L"Opening %d connections using PER_HENV took %d seconds") % nrRuns % deltaEnv);
+		msg = boost::str(boost::format(u8"Opening %d connections using PER_HENV took %d seconds") % nrRuns % deltaEnv);
 		LOG_INFO(msg);
-		msg = boost::str(boost::wformat(L"Opening %d connections using OFF took %d seconds") % nrRuns % deltaOff);
+		msg = boost::str(boost::format(u8"Opening %d connections using OFF took %d seconds") % nrRuns % deltaOff);
 		LOG_INFO(msg);
 	}
 
