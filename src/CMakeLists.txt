@@ -26,6 +26,13 @@ add_definitions(
 )
 endif()
 
+message(STATUS "BUILD_SHARED_LIBS is set to ${BUILD_SHARED_LIBS}")
+if(MSVC AND BUILD_SHARED_LIBS)
+add_definitions(
+  -DEXODBC_DLL
+)
+endif()
+
 # add the library headers:
 include_directories ("${PROJECT_SOURCE_DIR}/../include/exodbc")
 
