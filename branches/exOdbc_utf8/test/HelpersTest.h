@@ -15,9 +15,6 @@
 
 // Other headers
 #include "gtest/gtest.h"
-#include "exodbc/Environment.h"
-#include "exodbc/Database.h"
-#include "exodbc/SqlStatementCloser.h"
 
 // System headers
 
