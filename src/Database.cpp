@@ -221,7 +221,7 @@ namespace exodbc
 //		m_outConnectionStr = SQLRESCHARCONVERT((SQLAPICHARTYPE*)outConnectBuffer);
 //		m_outConnectionStr = (SQLCHAR*)outConnectBuffer;
 //		m_outConnectionStr = std::string(reinterpret_cast<const char*>(outConnectBuffer));
-        m_outConnectionStr = SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(SQLAPICHARCONVERT(outConnectBuffer));
+        m_outConnectionStr = SQLAPI_CHARTYPE_TO_STRING(outConnectBuffer);
 		m_dbOpenedWithConnectionString = true;
 
 		// Do all the common stuff about opening

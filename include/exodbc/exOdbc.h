@@ -54,6 +54,9 @@
     #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(s) std::string(reinterpret_cast<const char*>(s))
 #endif
 
+// the same for both: Convert to std::string from sqlapi-type:
+#define SQLAPI_CHARTYPE_TO_STRING(s) std::string(reinterpret_cast<const char*>(SQLAPICHARCONVERT(s)))
+
 // Defines to dll-import/export
 // ----------------------------
 
