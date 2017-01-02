@@ -34,32 +34,32 @@ namespace exodbc
 		switch (level)
 		{
 		case exodbc::LogLevel::Error: \
-			ss << L"ERROR"; break; \
+			ss << u8"ERROR"; break; \
 		case exodbc::LogLevel::Warning: \
-			ss << L"WARNING"; break; \
+			ss << u8"WARNING"; break; \
 		case exodbc::LogLevel::Info: \
-			ss << L"INFO"; break; \
+			ss << u8"INFO"; break; \
 		case exodbc::LogLevel::Debug: \
-			ss << L"DEBUG"; break; \
+			ss << u8"DEBUG"; break; \
 		}
 
 		bool haveSourceInfo = !filename.empty() || line > 0 || !functionname.empty();
 		if (haveSourceInfo)
-			ss << L" [";
+			ss << u8" [";
 
 		if (!filename.empty())
 			ss << filename;
 		if (line > 0)
-			ss << L"(" << line << L")";
+			ss << u8"(" << line << u8")";
 		else if (!filename.empty())
-			ss << L"(\?\?)";
+			ss << u8"(\?\?)";
 		if (!functionname.empty())
 			ss << functionname;
 
 		if (haveSourceInfo)
-			ss << L"]";
+			ss << u8"]";
 
-		ss << L": " << msg;
+		ss << u8": " << msg;
 
 		return ss.str();
 	}
