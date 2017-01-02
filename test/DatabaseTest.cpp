@@ -717,6 +717,9 @@ namespace exodbctest
 			// only tablenames
 			tableName = u8"integertypes";
 			break;
+		default:
+			LOG_ERROR(u8"Dbms not known, cannot run test!");
+			ASSERT_TRUE(false);
 		}
 		// Find one table by using only the table-name as search param
 		EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, u8"", u8"", u8""));

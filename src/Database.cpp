@@ -1288,7 +1288,7 @@ namespace exodbc
 		{
 			m_dbmsType = DatabaseProduct::MS_SQL_SERVER;
 		}
-		else if (boost::algorithm::contains(name, u8"MySQu8"))
+		else if (boost::algorithm::contains(name, u8"MySQL"))
 		{
 			m_dbmsType = DatabaseProduct::MY_SQL;
 		}
@@ -1296,7 +1296,7 @@ namespace exodbc
 		{
 			m_dbmsType = DatabaseProduct::DB2;
 		}
-		else if (boost::algorithm::contains(name, u8"EXCEu8"))
+		else if (boost::algorithm::contains(name, u8"EXCEL"))
 		{
 			m_dbmsType = DatabaseProduct::EXCEL;
 		}
