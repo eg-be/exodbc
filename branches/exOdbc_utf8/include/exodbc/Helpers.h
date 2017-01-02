@@ -33,7 +33,7 @@ namespace exodbc
 	* \see		SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
 	* \throw	Exception
 	*/
-	extern EXODBCAPI void		GetInfo(ConstSqlDbcHandlePtr pHDbc, SQLUSMALLINT fInfoType, std::wstring& sValue);
+	extern EXODBCAPI void		GetInfo(ConstSqlDbcHandlePtr pHDbc, SQLUSMALLINT fInfoType, std::string& sValue);
 
 
 	/*!
@@ -80,7 +80,7 @@ namespace exodbc
 	 *
 	 * \return	true if it succeeds, false if it fails.
 	 */
-	extern EXODBCAPI void		GetData(ConstSqlStmtHandlePtr pHStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull = NULL);
+	extern EXODBCAPI void		GetData(ConstSqlStmtHandlePtr pHStmt, SQLUSMALLINT colNr, size_t maxNrOfChars, std::string& value, bool* pIsNull = NULL);
 
 
 	/*!
