@@ -27,46 +27,50 @@ using namespace std;
 
 namespace exodbc
 {
-	std::wstring FormatLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */)
+	std::string FormatLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */)
 	{
-		std::wstringstream ws;
+		std::stringstream ss;
 
 		switch (level)
 		{
 		case exodbc::LogLevel::Error: \
-			ws << L"ERROR"; break; \
+			ss << L"ERROR"; break; \
 		case exodbc::LogLevel::Warning: \
-			ws << L"WARNING"; break; \
+			ss << L"WARNING"; break; \
 		case exodbc::LogLevel::Info: \
-			ws << L"INFO"; break; \
+			ss << L"INFO"; break; \
 		case exodbc::LogLevel::Debug: \
-			ws << L"DEBUG"; break; \
+			ss << L"DEBUG"; break; \
 		}
 
 		bool haveSourceInfo = !filename.empty() || line > 0 || !functionname.empty();
 		if (haveSourceInfo)
-			ws << L" [";
+			ss << L" [";
 
 		if (!filename.empty())
-			ws << filename;
+			ss << filename;
 		if (line > 0)
-			ws << L"(" << line << L")";
+			ss << L"(" << line << L")";
 		else if (!filename.empty())
-			ws << L"(\?\?)";
+			ss << L"(\?\?)";
 		if (!functionname.empty())
-			ws << functionname;
+			ss << functionname;
 
 		if (haveSourceInfo)
-			ws << L"]";
+			ss << L"]";
 
-		ws << L": " << msg;
+		ss << L": " << msg;
 
-		return ws.str();
+		return ss.str();
 	}
 
-	void StdErrLogHandler::OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */) const
+	void StdErrLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
 	{
-		wcout << FormatLogMessage(level, msg, filename, line, functionname) << endl;
+#ifdef _WIN32
+		wcout << utf8ToUtf16(FormatLogMessage(level, msg, filename, line, functionname)) << endl;
+#else
+		cout << FormatLogMessage(level, msg, filename, line, functionname) << endl;
+#endif
 	}
 
 
@@ -102,7 +106,7 @@ namespace exodbc
 	}
 
 
-	FileLogHandler::FileLogHandler(const std::wstring& filepath, bool prependTimestamp)
+	FileLogHandler::FileLogHandler(const std::string& filepath, bool prependTimestamp)
 		: m_prependTimestamp(prependTimestamp)
 		, m_filepath(filepath)
 		, m_firstMessage(true)
@@ -119,11 +123,11 @@ namespace exodbc
 	}
 
 
-	void FileLogHandler::OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */) const
+	void FileLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
 	{
 		if (m_firstMessage)
 		{
-			m_filestream = std::wofstream(SQLAPICHARCONVERT(m_filepath), std::ofstream::out);
+			m_filestream = std::ofstream(SQLAPICHARCONVERT(m_filepath), std::ofstream::out);
 			m_firstMessage = false;
 		}
 		if (m_filestream.is_open())
@@ -132,7 +136,7 @@ namespace exodbc
 			{
                 std::time_t t = std::time(nullptr);
                 std::tm tm = *std::localtime(&t);
-				m_filestream << std::put_time(&tm, L"%d-%m-%Y %H-%M-%S") << L": ";
+				m_filestream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << u8": ";
 			}
 
 			m_filestream << FormatLogMessage(level, msg, filename, line, functionname) << endl;

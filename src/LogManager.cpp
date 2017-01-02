@@ -67,8 +67,14 @@ namespace exodbc
 		m_logHandlers.push_back(pHandler);
 	}
 
-
+#ifdef _WIN32
 	void LogManager::LogMessage(LogLevel level, const std::wstring& msg, const std::wstring& file /* = L"" */, int line /* = 0 */, const std::wstring& functionName /* = L"" */) const
+	{
+		LogMessage(level, utf16ToUtf8(msg), utf16ToUtf8(file), line, utf16ToUtf8(functionName));
+	}
+#endif
+
+	void LogManager::LogMessage(LogLevel level, const std::string& msg, const std::string& file /* = u8"" */, int line /* = 0 */, const std::string& functionName /* = u8"" */) const
 	{
 		{
 			lock_guard<mutex> lock(m_globalLogLevelMutex);

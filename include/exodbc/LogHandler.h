@@ -33,7 +33,7 @@ namespace exodbc
 		/*!
 		* \brief	Called from LogManager on every log message received. Do something useful with it.
 		*/
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const = 0;
+		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const = 0;
 		
 		/*!
 		* \brief	Called from the LogManager to ensure that not two equal LogHandlers are registered.
@@ -51,7 +51,7 @@ namespace exodbc
 		: public LogHandler
 	{
 	public:
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const override;
+		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override;
 		virtual bool operator==(const LogHandler& other) const override;
 	};
 	
@@ -65,7 +65,7 @@ namespace exodbc
 		: public LogHandler
 	{
 	public:
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const override {};
+		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override {};
 		virtual bool operator==(const LogHandler& other) const override;
 	};
 	
@@ -83,18 +83,18 @@ namespace exodbc
 	public:
 		FileLogHandler() = delete;
 		FileLogHandler(const FileLogHandler& other) = delete;
-		FileLogHandler(const std::wstring& filepath, bool prependTimestamp);
+		FileLogHandler(const std::string& filepath, bool prependTimestamp);
 
 		virtual ~FileLogHandler();
 
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const override;
+		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override;
 		virtual bool operator==(const LogHandler& other) const override;
 
-		std::wstring GetFilepath() const noexcept { return m_filepath; };
+		std::string GetFilepath() const noexcept { return m_filepath; };
 	private:
-		mutable std::wofstream m_filestream;
+		mutable std::ofstream m_filestream;
 		bool m_prependTimestamp;
-		std::wstring m_filepath;
+		std::string m_filepath;
 		mutable bool m_firstMessage;
 	};
 
