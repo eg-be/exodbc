@@ -30,33 +30,25 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg /* = L"" */) noexcept
+	SqlResultException::SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, const std::string& msg /* = u8"" */) noexcept
 		: Exception(msg)
 		, m_ret(0)
 	{
 		// We have no Error-Info to fetch
 		BuildErrorMsg(sqlFunctionName, ret);
-		m_what = utf16ToUtf8(ToString());
+		m_what = ToString();
 	}
 
 
-	SqlResultException::SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, const std::wstring& msg /* = L"" */) noexcept
-		: SqlResultException(utf8ToUtf16(sqlFunctionName), ret, msg)
-	{}
-
-	SqlResultException::SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg /* = L"" */) noexcept
+	SqlResultException::SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::string& msg /* = u8"" */) noexcept
 		: Exception(msg)
 		, m_ret(ret)
 	{
 		// Fetch error-information from the database and build the error-msg
 		FetchErrorInfo(handleType, handle);
 		BuildErrorMsg(sqlFunctionName, ret);
-		m_what = utf16ToUtf8(ToString());
+		m_what = ToString();
 	}
-	
-	SqlResultException::SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg /* = L"" */) noexcept
-		: SqlResultException(utf8ToUtf16(sqlFunctionName), ret, handleType, handle, msg)
-	{}
 
 
 	void SqlResultException::FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) noexcept
@@ -72,79 +64,79 @@ namespace exodbc
 			errInfo.ErrorHandleType = handleType;
 			errInfo.SqlState[0] = 0;
 			errInfo.NativeError = 0;
-			errInfo.Msg = (boost::wformat(L"Failed to fetch Error-Info: %s") % e.ToString()).str();
+			errInfo.Msg = (boost::format(u8"Failed to fetch Error-Info: %s") % e.ToString()).str();
 			m_errors.push_back(errInfo);
 		}
 	}
 
 
-	void SqlResultException::BuildErrorMsg(const std::wstring& sqlFunctionName, SQLRETURN ret) noexcept
+	void SqlResultException::BuildErrorMsg(const std::string& sqlFunctionName, SQLRETURN ret) noexcept
 	{
 		try
 		{
-			std::wstringstream ws;
-			ws << L"SQL-Function " << sqlFunctionName << L" returned ";
-			ws << SqlReturn2s(ret) << L"(" << ret << L") with " << m_errors.size() << " ODBC-Error(s):";
-			m_errorMsg = ws.str();
+			std::stringstream ss;
+			ss << u8"SQL-Function " << sqlFunctionName << u8" returned ";
+			ss << SqlReturn2s(ret) << u8"(" << ret << L") with " << m_errors.size() << " ODBC-Error(s):";
+			m_errorMsg = ss.str();
 		}
 		catch (const Exception& e)
 		{
 			HIDE_UNUSED(e);
-			m_errorMsg = L"Failed to BuildErrorMsg";
+			m_errorMsg = u8"Failed to BuildErrorMsg";
 		}
 	}
 
 
-	std::wstring SqlResultException::ToString() const noexcept
+	std::string SqlResultException::ToString() const noexcept
 	{
-		std::wstringstream ws;
-		ws << Exception::ToString();
+		std::stringstream ss;
+		ss << Exception::ToString();
 		if (!m_errorMsg.empty())
 		{
-			ws << L": " << m_errorMsg;
+			ss << u8": " << m_errorMsg;
 		}
-		ws << L"\n";
+		ss << u8"\n";
 		for (size_t i = 0; i < m_errors.size(); i++)
 		{
-			ws << m_errors[i].ToString() << L"\n";
+			ss << m_errors[i].ToString() << u8"\n";
 		}
-		return ws.str();
+		return ss.str();
 	}
 
 
-	std::wstring NotSupportedException::ToString() const noexcept
+	std::string NotSupportedException::ToString() const noexcept
 	{
-		std::wstringstream ws;
-		ws << Exception::ToString();
-		ws << L"Not Supported ";
+		std::stringstream ss;
+		ss << Exception::ToString();
+		ss << u8"Not Supported ";
 		switch (m_notSupported)
 		{
 		case Type::SQL_C_TYPE:
-			ws << L"SQL C Type " << SqLCType2s(m_smallInt) << L" (" << m_smallInt << L")";
+			ss << u8"SQL C Type " << SqLCType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
 			break;
 		case Type::SQL_TYPE:
-			ws << L"SQL Type" << SqlType2s(m_smallInt) << L" (" << m_smallInt << L")";
+			ss << u8"SQL Type" << SqlType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
 			break;
 		}
-		return ws.str();
+		return ss.str();
 	}
 
 
-	std::wstring WrapperException::ToString() const noexcept
+	std::string WrapperException::ToString() const noexcept
 	{
-		std::wstringstream ws;
-		ws << Exception::ToString();
-		ws << utf8ToUtf16(m_innerExceptionMsg);
-		return ws.str();
+		std::stringstream ss;
+		ss << Exception::ToString();
+		ss << m_innerExceptionMsg;
+		return ss.str();
 	}
 
 
-	std::wstring NullValueException::ToString() const noexcept
+	std::string NullValueException::ToString() const noexcept
 	{
-		std::wstringstream ws;
-		ws << Exception::ToString();
-		ws << L"Cannot fetch value of column '" << m_columnName << L"', the value is NULL.";
-		return ws.str();
+		std::stringstream ss;
+		ss << Exception::ToString();
+		ss << u8"Cannot fetch value of column '" << m_columnName << u8"', the value is NULL.";
+		return ss.str();
 	}
 
 }

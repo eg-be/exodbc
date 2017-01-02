@@ -45,21 +45,19 @@ namespace exodbc
 		/*!
 		* \brief Create a new SqlResultException with the information passed.
 		*/
-		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, const std::wstring& msg = L"") noexcept;
+		SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, const std::string& msg = u8"") noexcept;
 
-		SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, const std::wstring& msg = L"") noexcept;
 
 		/*!
 		* \brief Create a new SqlResultException that collects error information available from the passed handle.
 		*/
-		SqlResultException(const std::wstring& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg = L"") noexcept;
+		SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::string& msg = u8"") noexcept;
 
-		SqlResultException(const std::string& sqlFunctionName, SQLRETURN ret, SQLSMALLINT handleType, SQLHANDLE handle, const std::wstring& msg = L"") noexcept;        
         
 		virtual ~SqlResultException() {};
 
-		std::wstring GetName() const noexcept override { return L"exodbc::SqlResultException"; };
-		std::wstring ToString() const noexcept override;
+		std::string GetName() const noexcept override { return u8"exodbc::SqlResultException"; };
+		std::string ToString() const noexcept override;
 
 		/*!
 		* \brief Returns the SQLRETURN value set during construction.
@@ -68,10 +66,10 @@ namespace exodbc
 
 	protected:
 		void FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) noexcept;
-		void BuildErrorMsg(const std::wstring& sqlFunctionName, SQLRETURN ret) noexcept;
+		void BuildErrorMsg(const std::string& sqlFunctionName, SQLRETURN ret) noexcept;
 
 		SErrorInfoVector m_errors;
-		std::wstring m_errorMsg;
+		std::string m_errorMsg;
 		SQLRETURN m_ret;
 	};
 
@@ -89,13 +87,13 @@ namespace exodbc
 		/*!
 		* \brief Create new IllegalArgumentException with given message.
 		*/
-		IllegalArgumentException(const std::wstring msg) noexcept
+		IllegalArgumentException(const std::string msg) noexcept
 			: Exception(msg)
 		{};
 
 		virtual ~IllegalArgumentException() {};
 
-		std::wstring GetName() const noexcept override { return L"exodbc::IllegalArgumentException"; };
+		std::string GetName() const noexcept override { return u8"exodbc::IllegalArgumentException"; };
 	};
 
 
@@ -128,24 +126,24 @@ namespace exodbc
 			, m_notSupported(notSupported)
 			, m_smallInt(smallInt)
 		{
-			m_what = utf16ToUtf8(ToString());
+			m_what = ToString();
 		};
 
 		/*!
 		* \brief Create new NotSupportedException with additional message.
 		*/
-		NotSupportedException(Type notSupported, SQLSMALLINT smallInt, const std::wstring& msg) noexcept
+		NotSupportedException(Type notSupported, SQLSMALLINT smallInt, const std::string& msg) noexcept
 			: Exception(msg)
 			, m_notSupported(notSupported)
 			, m_smallInt(smallInt)
 		{
-			m_what = utf16ToUtf8(ToString());
+			m_what = ToString();
 		};
 
 		virtual ~NotSupportedException() {};
 
-		std::wstring GetName() const noexcept override { return L"exodbc:NotSupportedException"; };
-		std::wstring ToString() const noexcept override;
+		std::string GetName() const noexcept override { return u8"exodbc:NotSupportedException"; };
+		std::string ToString() const noexcept override;
 
 	private:
 		Type m_notSupported;
@@ -173,11 +171,11 @@ namespace exodbc
 			: Exception()
 			, m_innerExceptionMsg(ex.what())
 		{
-			m_what = utf16ToUtf8(ToString());
+			m_what = ToString();
 		};
 
-		std::wstring GetName() const noexcept override { return L"exodbc::WrapperException"; };
-		std::wstring ToString() const noexcept override;
+		std::string GetName() const noexcept override { return u8"exodbc::WrapperException"; };
+		std::string ToString() const noexcept override;
 
 	private:
 		std::string m_innerExceptionMsg;
@@ -197,20 +195,20 @@ namespace exodbc
 		/*!
 		* \brief Create new NullValueException, the passed columnName is currently NULL.
 		*/
-		NullValueException(std::wstring columnName)
+		NullValueException(std::string columnName)
 			: Exception()
 			, m_columnName(columnName)
 		{
-			m_what = utf16ToUtf8(ToString());
+			m_what = ToString();
 		}
 
 		virtual ~NullValueException() {};
 
-		std::wstring GetName() const noexcept override { return L"exodbc::NullValueException"; };
-		std::wstring ToString() const noexcept override;
+		std::string GetName() const noexcept override { return u8"exodbc::NullValueException"; };
+		std::string ToString() const noexcept override;
 
 	private:
-		std::wstring m_columnName;
+		std::string m_columnName;
 	};
 
 
@@ -223,12 +221,12 @@ namespace exodbc
 	{
 	public:
 		NotImplementedException()
-			: Exception(L"Functionality not implemented")
+			: Exception(u8"Functionality not implemented")
 		{};
 
 		virtual ~NotImplementedException() {};
 
-		std::wstring GetName() const noexcept override { return L"exodbc::NotImplementedException"; };
+		std::string GetName() const noexcept override { return u8"exodbc::NotImplementedException"; };
 	};
 
 
@@ -245,13 +243,13 @@ namespace exodbc
 		/*!
 		* \brief Create new NotFoundException, adding a message about what was not found.
 		*/
-		NotFoundException(const std::wstring& msg)
+		NotFoundException(const std::string& msg)
 			: Exception(msg)
 		{};
 
 		virtual ~NotFoundException() {};
 
-		std::wstring GetName() const noexcept override { return L"exodbc::NotFoundException"; };
+		std::string GetName() const noexcept override { return u8"exodbc::NotFoundException"; };
 	};
 }
 
@@ -289,7 +287,7 @@ namespace exodbc
 				LOG_INFO_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, handle, sqlReturn, sqlFunctionName); \
 				break; \
 			default: \
-				THROW_WITH_SOURCE(IllegalArgumentException, L"Unknown handleType"); \
+				THROW_WITH_SOURCE(IllegalArgumentException, u8"Unknown handleType"); \
 			} \
 		} \
 	} while(0)
@@ -317,7 +315,7 @@ namespace exodbc
 	do { \
 		if(SQL_NO_DATA != sqlReturn) \
 		{ \
-			SqlResultException ex(#sqlFunctionName, ret, L"Expected SQL_NO_DATA."); \
+			SqlResultException ex(#sqlFunctionName, ret, u8"Expected SQL_NO_DATA."); \
 			SET_EXCEPTION_SOURCE(ex); \
 			throw ex; \
 		} \
