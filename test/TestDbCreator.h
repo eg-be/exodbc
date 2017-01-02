@@ -39,23 +39,23 @@ namespace exodbctest
 		~TestDbCreator();
 
 		void RunAllScripts();
-		void RunScript(const std::wstring& scriptName);
-		void RunScript(const boost::filesystem::wpath& scriptPath);
+		void RunScript(const std::string& scriptName);
+		void RunScript(const boost::filesystem::path& scriptPath);
 
-		void SetScriptDirectory(const boost::filesystem::wpath& path);
+		void SetScriptDirectory(const boost::filesystem::path& path);
 		boost::filesystem::wpath GetScriptDirectory() const;
 
 		exodbc::DatabaseProduct GetDbms() const { return m_pDb->GetDbms(); };
 
 	private:
 
-		std::vector<std::wstring> LoadScriptFile(const boost::filesystem::wpath& path) const;
+		std::vector<std::string> LoadScriptFile(const boost::filesystem::path& path) const;
 
-		void ExecSqlIgnoreFail(const std::wstring sqlstmt);
+		void ExecSqlIgnoreFail(const std::string sqlstmt);
 
-		void DropIfExists(const std::wstring& tableName);
+		void DropIfExists(const std::string& tableName);
 
-		boost::filesystem::wpath m_scriptDirectoryPath;
+		boost::filesystem::path m_scriptDirectoryPath;
 
 		TestParams m_odbcInfo;
 		exodbc::EnvironmentPtr m_pEnv;

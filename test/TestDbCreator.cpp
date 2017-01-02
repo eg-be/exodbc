@@ -62,17 +62,17 @@ namespace exodbctest
 	
 	// Implementation
 	// --------------
-	void TestDbCreator::SetScriptDirectory(const boost::filesystem::wpath& path)
+	void TestDbCreator::SetScriptDirectory(const boost::filesystem::path& path)
 	{
 		m_scriptDirectoryPath = path;
 	}
 	
 
-	boost::filesystem::wpath TestDbCreator::GetScriptDirectory() const
+	boost::filesystem::path TestDbCreator::GetScriptDirectory() const
 	{
 		if (m_scriptDirectoryPath.empty())
 		{
-			IllegalArgumentException ex(L"No ScriptDirectory set.");
+			IllegalArgumentException ex(u8"No ScriptDirectory set.");
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -83,41 +83,49 @@ namespace exodbctest
 	void TestDbCreator::RunAllScripts()
 	{
 
-		fs::wpath scriptDir = GetScriptDirectory();
+		fs::path scriptDir = GetScriptDirectory();
 		fs::directory_iterator end_itr;
 		for (fs::directory_iterator itr(scriptDir);	itr != end_itr;	++itr)
 		{
-			fs::wpath filePath = *itr;
-			wstring ext = filePath.extension().native();
+			fs::path filePath = *itr;
+#ifdef _WIN32
+			string ext = utf16ToUtf8(filePath.extension().native());
+#else
+			string ext = filePath.extension().native();
+#endif
 			ba::to_lower(ext);
-			if (ext == L".sql")
+			if (ext == u8".sql")
 			{
-				LOG_INFO(boost::str(boost::wformat(L"Running script '%s'") % filePath.native()));
+#ifdef _WIN32
+				LOG_INFO(boost::str(boost::format(u8"Running script '%s'") % utf16ToUtf8(filePath.native())));
+#else
+				LOG_INFO(boost::str(boost::format(u8"Running script '%s'") % filePath.native()));
+#endif
 				RunScript(filePath);
 			}
 		}
 	}
 
 
-	void TestDbCreator::RunScript(const boost::filesystem::wpath& scriptPath)
+	void TestDbCreator::RunScript(const boost::filesystem::path& scriptPath)
 	{
 		// Load the passed script
-		vector<wstring> lines = LoadScriptFile(scriptPath);
+		vector<string> lines = LoadScriptFile(scriptPath);
 		// Run as one long statement
-		std::wstring stmt;
-		for (vector<wstring>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+		std::string stmt;
+		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
 		{
 			namespace ba = boost::algorithm;
-			wstring line = *it;
-			stmt += (line + L" ");
+			string line = *it;
+			stmt += (line + u8" ");
 			// execute on ';' or on 'GO' or on empty line
-			bool execute = (line.empty() || ba::ends_with(ba::trim_copy(stmt), L";") || ba::ends_with(ba::trim_copy(stmt), L"GO"));
+			bool execute = (line.empty() || ba::ends_with(ba::trim_copy(stmt), u8";") || ba::ends_with(ba::trim_copy(stmt), u8"GO"));
 			if (execute)
 			{
 				// remove 'GO'
-				if (ba::trim_copy(line) == L"GO")
+				if (ba::trim_copy(line) == u8"GO")
 				{
-					ba::erase_last(stmt, L"GO");
+					ba::erase_last(stmt, u8"GO");
 				}
 				// might have become empty if GO was on a single line or so
 				if (!ba::trim_copy(stmt).empty())
@@ -129,16 +137,16 @@ namespace exodbctest
 					catch (const Exception& ex)
 					{
 						// exec failed - guess if this was the drop statement
-						if (ba::contains(ba::to_lower_copy(stmt), L"drop table"))
+						if (ba::contains(ba::to_lower_copy(stmt), u8"drop table"))
 						{
-							LOG_WARNING(boost::str(boost::wformat(L"Execution of a statement failed, but it was probably a DROP statement: %s") % ex.ToString()));
+							LOG_WARNING(boost::str(boost::format(u8"Execution of a statement failed, but it was probably a DROP statement: %s") % ex.ToString()));
 						}
 						else
 						{
 							throw;
 						}
 					}
-					stmt = L"";
+					stmt = u8"";
 				}
 			}
 		}
@@ -150,22 +158,22 @@ namespace exodbctest
 	}
 
 
-	void TestDbCreator::RunScript(const std::wstring& scriptName)
+	void TestDbCreator::RunScript(const std::string& scriptName)
 	{
 		// Load the passed script
-		vector<wstring> lines = LoadScriptFile(scriptName);
+		vector<string> lines = LoadScriptFile(scriptName);
 		// Run as one long statement
-		std::wstring stmt;
-		for (vector<wstring>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+		std::string stmt;
+		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
 		{
 			namespace ba = boost::algorithm;
-			wstring line = *it;
+			string line = *it;
 			stmt += line;
-			bool execute = !stmt.empty() && (line.empty() || ba::ends_with(ba::trim_copy(stmt), L";"));
+			bool execute = !stmt.empty() && (line.empty() || ba::ends_with(ba::trim_copy(stmt), u8";"));
 			if (execute)
 			{
 				m_pDb->ExecSql(stmt);
-				stmt = L"";
+				stmt = u8"";
 			}
 		}
 		if (!stmt.empty())
@@ -176,36 +184,44 @@ namespace exodbctest
 	}
 
 
-	vector<wstring> TestDbCreator::LoadScriptFile(const boost::filesystem::wpath& path) const
+	vector<string> TestDbCreator::LoadScriptFile(const boost::filesystem::path& path) const
 	{
-		vector<wstring> lines;
+		vector<string> lines;
 
-		wifstream wfile(path.native());
+		ifstream file(path.native());
 #pragma push_macro("new")
 #ifdef new
 #undef new
 #endif
-		wfile.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+		file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
 #pragma pop_macro("new")
-		if (!wfile.is_open())
+		if (!file.is_open())
 		{
-			THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"Failed to open file '%s'") % path.native()));
+#ifdef _WIN32
+			THROW_WITH_SOURCE(Exception, boost::str(boost::format(u8"Failed to open file '%s'") % utf16ToUtf8(path.native())));
+#else
+			THROW_WITH_SOURCE(Exception, boost::str(boost::format(u8"Failed to open file '%s'") % path.native()));
+#endif
 		}
-		wstring line;
-		while (getline(wfile, line))
+		string line;
+		while (getline(file, line))
 		{
 			lines.push_back(line);
 		}
-		if (wfile.bad())
+		if (file.bad())
 		{
-			THROW_WITH_SOURCE(Exception, boost::str(boost::wformat(L"Failed to read from file '%s'") % path.native()));
+#ifdef _WIN32
+			THROW_WITH_SOURCE(Exception, boost::str(boost::format(u8"Failed to read from file '%s'") % utf16ToUtf8(path.native())));
+#else
+			THROW_WITH_SOURCE(Exception, boost::str(boost::format(u8"Failed to read from file '%s'") % path.native()));
+#endif
 		}
 
 		return lines;
 	}
 	
 
-	void TestDbCreator::ExecSqlIgnoreFail(const std::wstring sqlstmt)
+	void TestDbCreator::ExecSqlIgnoreFail(const std::string sqlstmt)
 	{
 		try
 		{
@@ -213,21 +229,21 @@ namespace exodbctest
 		}
 		catch (const Exception& ex)
 		{
-			LOG_WARNING(boost::str(boost::wformat(L"Failed to Execute Statement: %s") % ex.ToString()));
+			LOG_WARNING(boost::str(boost::format(u8"Failed to Execute Statement: %s") % ex.ToString()));
 		}
 	}
 
 
-	void TestDbCreator::DropIfExists(const std::wstring& tableName)
+	void TestDbCreator::DropIfExists(const std::string& tableName)
 	{
 		try
 		{
-			wstring drop = boost::str(boost::wformat(L"DROP TABLE %s") % tableName);
+			string drop = boost::str(boost::format(u8"DROP TABLE %s") % tableName);
 			m_pDb->ExecSql(drop);
 		}
 		catch (const Exception& ex)
 		{
-			LOG_WARNING(boost::str(boost::wformat(L"Failed to drop Table %s: %s") % tableName % ex.ToString()));
+			LOG_WARNING(boost::str(boost::format(u8"Failed to drop Table %s: %s") % tableName % ex.ToString()));
 		}
 	}
 
