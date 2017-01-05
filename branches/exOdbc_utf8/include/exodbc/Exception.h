@@ -124,7 +124,7 @@ namespace exodbc
 
 #define SET_EXCEPTION_SOURCE(Exception) \
 	do { \
-		Exception.SetSourceInformation(__LINE__, FILENAME, FUNCTIONNAME); \
+		Exception.SetSourceInformation(__LINE__, __FILE__, __FUNCTION__); \
 	} while(0)
 
 #define THROW_WITH_SOURCE(ExceptionType, msg) \

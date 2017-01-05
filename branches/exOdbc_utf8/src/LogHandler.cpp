@@ -127,7 +127,7 @@ namespace exodbc
 	{
 		if (m_firstMessage)
 		{
-			m_filestream = std::ofstream(SQLAPICHARCONVERT(m_filepath), std::ofstream::out);
+			m_filestream = std::ofstream(m_filepath, std::ofstream::out);
 			m_firstMessage = false;
 		}
 		if (m_filestream.is_open())

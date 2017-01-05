@@ -466,11 +466,11 @@ namespace exodbc {
 				ret = SQLGetDiagRec(handleType, handle, recNr, sqlState, &errInfo.NativeError, errMsg, SQL_MAX_MESSAGE_LENGTH + 1, &cb);
 				if (ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO)
 				{
-                    std::string ssqlState = SQLRESCHARCONVERT(sqlState);
+                    std::string ssqlState = SQLAPICHARPTR_TO_EXODBCSTR(sqlState);
                     memcpy(errInfo.SqlState, ssqlState.c_str(), std::min<size_t>(ssqlState.length(), 5));
                     errInfo.SqlState[std::min<size_t>(ssqlState.length(), 5)] = '\0';
 					errInfo.ErrorHandleType = handleType;
-					errInfo.Msg = SQLRESCHARCONVERT(errMsg);
+					errInfo.Msg = SQLAPICHARPTR_TO_EXODBCSTR(errMsg);
 					errors.push_back(errInfo);
 					if (ret == SQL_SUCCESS_WITH_INFO)
 					{
