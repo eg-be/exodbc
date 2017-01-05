@@ -126,7 +126,7 @@ add_test( NAME MySqlTest
 
 add_test( NAME SqlServerTest 
           COMMAND exodbctest
-          "cs=Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;"
+          "cs=Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;"
           )
           
 add_test( NAME Db2Test

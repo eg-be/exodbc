@@ -92,7 +92,7 @@ namespace exodbctest
 			boost::algorithm::to_upper(sqlstmt);
 		}
 
-		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*) SQLAPICHARCONVERT(sqlstmt).c_str(), SQL_NTS);
+		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt).c_str(), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
 		// Closing it first time must work

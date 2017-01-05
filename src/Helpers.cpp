@@ -54,7 +54,7 @@ namespace exodbc
 
 		GetInfo(pHDbc, fInfoType, (SQLPOINTER)buff.get(), bufferSize, &cb);
 
-		sValue = SQLRESCHARCONVERT(buff.get());
+		sValue = SQLAPICHARPTR_TO_EXODBCSTR(buff.get());
 	}
 
 
@@ -97,7 +97,7 @@ namespace exodbc
 
 		if(!isNull)
 		{
-			value = SQLRESCHARCONVERT(buffer.get());
+			value = SQLAPICHARPTR_TO_EXODBCSTR(buffer.get());
 		}
 		if(pIsNull)
         {

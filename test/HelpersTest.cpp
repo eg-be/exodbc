@@ -83,7 +83,7 @@ namespace exodbctest
 		{
 			boost::algorithm::to_upper(sqlstmt);
 		}
-		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*) SQLAPICHARCONVERT(sqlstmt).c_str(), SQL_NTS);
+		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt).c_str(), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));		
 		ret = SQLFetch(pHStmt->GetHandle());
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
@@ -97,7 +97,7 @@ namespace exodbctest
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Trim the read-value in GetData
-		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)SQLAPICHARCONVERT(sqlstmt).c_str(), SQL_NTS);
+		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt).c_str(), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		ret = SQLFetch(pHStmt->GetHandle());
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
@@ -110,7 +110,7 @@ namespace exodbctest
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Read some int value
-		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)SQLAPICHARCONVERT(sqlstmt).c_str(), SQL_NTS);
+		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt).c_str(), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		ret = SQLFetch(pHStmt->GetHandle());
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
@@ -121,7 +121,7 @@ namespace exodbctest
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// And test at least one null value
-		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)SQLAPICHARCONVERT(sqlstmt).c_str(), SQL_NTS);
+		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt).c_str(), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		ret = SQLFetch(pHStmt->GetHandle());
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
@@ -157,7 +157,7 @@ namespace exodbctest
 		{
 			boost::algorithm::to_upper(sqlstmt);
 		}
-		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)SQLAPICHARCONVERT(sqlstmt).c_str(), SQL_NTS);
+		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt).c_str(), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
 		// Except to fail when passing a null handle

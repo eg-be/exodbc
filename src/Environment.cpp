@@ -229,8 +229,8 @@ namespace exodbc
 		{
 			// Store dataSource
 			SDataSource ds;
-			ds.m_dsn = SQLRESCHARCONVERT(nameBuffer);
-			ds.m_description = SQLRESCHARCONVERT(descBuffer.get());
+			ds.m_dsn = SQLAPICHARPTR_TO_EXODBCSTR(nameBuffer);
+			ds.m_description = SQLAPICHARPTR_TO_EXODBCSTR(descBuffer.get());
 			dataSources.push_back(ds);
 			ret = SQLDataSources(m_pHEnv->GetHandle(), SQL_FETCH_NEXT, nameBuffer, SQL_MAX_DSN_LENGTH + 1, &nameBufferLength, descBuffer.get(), maxDescLength + 1, &descBufferLength);
 		}while(ret == SQL_SUCCESS || ret == SQL_SUCCESS_WITH_INFO);

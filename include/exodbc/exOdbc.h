@@ -27,35 +27,22 @@
 #endif
 
 #ifdef _WIN32
-	#define FILENAME __FILE__
-	#define FUNCTIONNAME __FUNCTION__
-    //#define FILENAME __FILEW__
-    //#define FUNCTIONNAME __FUNCTIONW__
 #else
-    #define FILENAME __FILE__
-    #define FUNCTIONNAME __FUNCTION__
 #endif
 
+// We use _UNICODE on windows and therefore the w-versions of the sql api.
+// convert our utf8 strings to utf16 wstring when calling the sql api on windows:
 #ifdef _WIN32
-    #define SQLAPICHARTYPE SQLWCHAR
-    #define SQLAPICHARTYPENAME SQL_C_WCHAR
+	#define SQLAPICHARTYPE SQLWCHAR
+	#define SQLAPICHARTYPENAME SQL_C_WCHAR
+    #define EXODBCSTR_TO_SQLAPICHARPTR(s) (SQLAPICHARTYPE*)utf8ToUtf16(s)
+    #define SQLAPICHARPTR_TO_EXODBCSTR(ws) utf16ToUtf8(ws)
 #else
-    #define SQLAPICHARTYPE SQLCHAR
-    #define SQLAPICHARTYPENAME SQL_C_CHAR
+	#define SQLAPICHARTYPE SQLCHAR
+	#define SQLAPICHARTYPENAME SQL_C_CHAR
+	#define EXODBCSTR_TO_SQLAPICHARPTR(s) s
+    #define SQLAPICHARPTR_TO_EXODBCSTR(s) std::string(reinterpret_cast<const char*>(s))
 #endif
-
-#ifdef _WIN32
-    #define SQLAPICHARCONVERT(s) utf8ToUtf16(s)
-    #define SQLRESCHARCONVERT(ws) utf16ToUtf8(ws)
-    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(ws) std::wstring(reinterpret_cast<const wchar_t*>(ws))
-#else
-    #define SQLAPICHARCONVERT(s) s
-    #define SQLRESCHARCONVERT(s) s
-    #define SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(s) std::string(reinterpret_cast<const char*>(s))
-#endif
-
-// the same for both: Convert to std::string from sqlapi-type:
-#define SQLAPI_CHARTYPE_TO_STRING(s) std::string(reinterpret_cast<const char*>(SQLAPICHARCONVERT(s)))
 
 // Defines to dll-import/export
 // ----------------------------
