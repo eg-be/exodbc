@@ -317,23 +317,7 @@ int main(int argc, char* argv[])
 #ifdef _WIN32
 			std::string arg( utf16ToUtf8(argv[i]));
 #else
-            std::string s1(argv[i]);
-
-            std::string ws1 = u8"utf-16";
-            std::string ws2 = u8"utf-32";
-            const char16_t* a1 = u"utf-16";
-            const char32_t* a2 = U"utf-32";
-            
-            std::string_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-            
-            // the UTF-8 - UTF-32 standard conversion facet
-            std::string_convert<std::codecvt_utf8<char32_t>, char32_t> cvt;
-            
-			std::u32string u32 = cvt.from_bytes(argv[i]);
-// 			std::string ws22 = converter.from_bytes(a2);
-//             std::cout << u8"Foo: " << ws2 << std::endl;
-            
-            std::string arg(utf8ToUtf16(argv[i]));
+            std::string arg(argv[i]);
 #endif
 			std::string dsnValue;
 			if (ba::starts_with(arg, dsnKey) && arg.length() > dsnKey.length())

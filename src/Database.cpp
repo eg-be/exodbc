@@ -211,7 +211,7 @@ namespace exodbc
 		// StringLength1: [Input] Length of *InConnectionString, in characters if the string is Unicode, or bytes if string is ANSI or DBCS.
 		// BufferLength: [Input] Length of the *OutConnectionString buffer, in characters.
 		SQLRETURN ret = SQLDriverConnect(m_pHDbc->GetHandle(), parentWnd, 
-			EXODBCSTR_TO_SQLAPICHARPTR(m_inConnectionStr).c_str(),
+			EXODBCSTR_TO_SQLAPICHARPTR(m_inConnectionStr),
 			(SQLSMALLINT) m_inConnectionStr.length(), 
 			(SQLAPICHARTYPE*) outConnectBuffer, 
 			DB_MAX_CONNECTSTR_LEN, &outConnectBufferLen, parentWnd == NULL ? SQL_DRIVER_NOPROMPT : SQL_DRIVER_COMPLETE);
@@ -271,9 +271,9 @@ namespace exodbc
 
 		// Connect to the data source
 		SQLRETURN ret = SQLConnect(m_pHDbc->GetHandle(),
-			EXODBCSTR_TO_SQLAPICHARPTR(m_dsn).c_str(), SQL_NTS,
-			EXODBCSTR_TO_SQLAPICHARPTR(m_uid).c_str(), SQL_NTS,
-			EXODBCSTR_TO_SQLAPICHARPTR(m_authStr).c_str(), SQL_NTS);
+			EXODBCSTR_TO_SQLAPICHARPTR(m_dsn), SQL_NTS,
+			EXODBCSTR_TO_SQLAPICHARPTR(m_uid), SQL_NTS,
+			EXODBCSTR_TO_SQLAPICHARPTR(m_authStr), SQL_NTS);
 
 		// Do not reset an eventually allocated connection handle here.
 		// The destructor will reset it if one is allocated
@@ -525,10 +525,10 @@ namespace exodbc
 		
 		std::unique_ptr<SQLAPICHARTYPE[]> buffer(new SQLAPICHARTYPE[charLen]);
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			EXODBCSTR_TO_SQLAPICHARPTR(catalogName).c_str(), SQL_NTS,		// catalog name                 
-			EXODBCSTR_TO_SQLAPICHARPTR(schemaName).c_str(), SQL_NTS,		// schema name
-			EXODBCSTR_TO_SQLAPICHARPTR(tableName).c_str(), SQL_NTS,			// table name
-			EXODBCSTR_TO_SQLAPICHARPTR(tableTypeName).c_str(), SQL_NTS);
+			EXODBCSTR_TO_SQLAPICHARPTR(catalogName), SQL_NTS,		// catalog name                 
+			EXODBCSTR_TO_SQLAPICHARPTR(schemaName), SQL_NTS,		// schema name
+			EXODBCSTR_TO_SQLAPICHARPTR(tableName), SQL_NTS,			// table name
+			EXODBCSTR_TO_SQLAPICHARPTR(tableTypeName), SQL_NTS);
 
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
@@ -697,7 +697,7 @@ namespace exodbc
 
 		StatementCloser::CloseStmtHandle(m_pHStmtExecSql, StatementCloser::Mode::IgnoreNotOpen);
 
-		retcode = SQLExecDirect(m_pHStmtExecSql->GetHandle(),  EXODBCSTR_TO_SQLAPICHARPTR(sqlStmt).c_str(), SQL_NTS);
+		retcode = SQLExecDirect(m_pHStmtExecSql->GetHandle(),  EXODBCSTR_TO_SQLAPICHARPTR(sqlStmt), SQL_NTS);
 		if ( ! SQL_SUCCEEDED(retcode))
 		{
 			if (!(mode == ExecFailMode::NotFailOnNoData && retcode == SQL_NO_DATA))
@@ -729,10 +729,10 @@ namespace exodbc
 
 		// Query db
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			catalogName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(catalogName).c_str(), catalogName.empty() ? 0 : SQL_NTS,   // catname                 
-			schemaName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(schemaName).c_str(), schemaName.empty() ? 0 : SQL_NTS,   // schema name
-			tableName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(tableName).c_str(), tableName.empty() ? 0 : SQL_NTS,							// table name
-			tableType.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(tableType).c_str(), tableType.empty() ? 0 : SQL_NTS);
+			catalogName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(catalogName), catalogName.empty() ? 0 : SQL_NTS,   // catname                 
+			schemaName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(schemaName), schemaName.empty() ? 0 : SQL_NTS,   // schema name
+			tableName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(tableName), tableName.empty() ? 0 : SQL_NTS,							// table name
+			tableType.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(tableType), tableType.empty() ? 0 : SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
@@ -779,9 +779,9 @@ namespace exodbc
 		// we always have a tablename, but only sometimes a schema
 		int colCount = 0;
 		SQLRETURN ret = SQLColumns(m_pHStmt->GetHandle(),
-				 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName).c_str(), SQL_NTS,	// catalog
-				table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()).c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
-				 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()).c_str(), SQL_NTS,		// tablename
+				 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName), SQL_NTS,	// catalog
+				table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
+				 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS,		// tablename
 				NULL, 0);						// All columns
 
 		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
@@ -819,9 +819,9 @@ namespace exodbc
 		TablePrimaryKeysVector primaryKeys;
 
 		SQLRETURN ret = SQLPrimaryKeys(m_pHStmt->GetHandle(),
-			table.HasCatalog() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetCatalog()).c_str() : NULL, table.HasCatalog() ? SQL_NTS : 0,
-			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()).c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,
-			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()).c_str(), SQL_NTS);
+			table.HasCatalog() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetCatalog()) : NULL, table.HasCatalog() ? SQL_NTS : 0,
+			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,
+			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS);
 
 		THROW_IFN_SUCCEEDED(SQLPrimaryKeys, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
@@ -880,9 +880,9 @@ namespace exodbc
 		// Query privs
 		// we always have a tablename, but only sometimes a schema
 		SQLRETURN ret = SQLTablePrivileges(m_pHStmt->GetHandle(),
-			 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName).c_str(), SQL_NTS,
-			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()).c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,
-			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()).c_str(), SQL_NTS);
+			 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName), SQL_NTS,
+			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,
+			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTablePrivileges, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
@@ -934,9 +934,9 @@ namespace exodbc
 		}
 
 		SQLRETURN ret = SQLSpecialColumns(m_pHStmt->GetHandle(), (SQLSMALLINT)idType,
-			 EXODBCSTR_TO_SQLAPICHARPTR(catalogName).c_str(), (SQLSMALLINT) catalogName.length(),
-			 EXODBCSTR_TO_SQLAPICHARPTR(schemaName).c_str(), (SQLSMALLINT) schemaName.length(),
-			 EXODBCSTR_TO_SQLAPICHARPTR(tableName).c_str(), (SQLSMALLINT) tableName.length(),
+			 EXODBCSTR_TO_SQLAPICHARPTR(catalogName), (SQLSMALLINT) catalogName.length(),
+			 EXODBCSTR_TO_SQLAPICHARPTR(schemaName), (SQLSMALLINT) schemaName.length(),
+			 EXODBCSTR_TO_SQLAPICHARPTR(tableName), (SQLSMALLINT) tableName.length(),
 			(SQLSMALLINT)scope, nullable);
 		THROW_IFN_SUCCEEDED(SQLSpecialColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
@@ -1040,9 +1040,9 @@ namespace exodbc
 		// we always have a tablename, but only sometimes a schema		
 		int colCount = 0;
 		SQLRETURN ret = SQLColumns(m_pHStmt->GetHandle(),
-			 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName).c_str(), SQL_NTS,	// catalog
-			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()).c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
-			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()).c_str(), SQL_NTS,		// tablename
+			 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName), SQL_NTS,	// catalog
+			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
+			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS,		// tablename
 			NULL, 0);						// All columns
 
 		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
