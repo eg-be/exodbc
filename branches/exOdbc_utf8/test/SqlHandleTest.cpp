@@ -122,7 +122,7 @@ namespace exodbctest
 		{
 			boost::algorithm::to_upper(sqlstmt);
 		}
-		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt).c_str(), SQL_NTS);
+		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt), SQL_NTS);
 		ASSERT_TRUE(SQL_SUCCEEDED(ret));
 
 		// now test by creating a row descriptor:
