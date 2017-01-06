@@ -290,6 +290,15 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 	}
 }
 
+
+void printUsage()
+{
+	std::cout << u8"Usage: DatabaseInfo [-U user] [-P pass] [-DSN dsn] [-CS connectionString] [-PrintTestTables]" << std::endl;
+	std::cout << u8"       -DSN or -CS must be given. -U and -P is only used in combination with -DSN" << std::endl;
+	std::cout << u8"       -PrintTestTable: If passed, exodbctest tables are printed, else db and datatype infos" << std::endl;
+}
+
+
 struct SConnectionInfo
 {
 	string m_dsn;
@@ -307,55 +316,82 @@ int main(int argc, char* argv[])
 	try
 	{
 		// Parse arguments
-		//string connectionString;
-		//string dsn, user, pass;
+		if (argc < 2)
+		{
+			printUsage();
+			return - 1;
+		}
+		const std::string userKey = u8"-U";
+		const std::string passKey = u8"-P";
+		const std::string dsnKey = u8"-DSN";
+		const std::string csKey = u8"-CS";
+		const std::string testTablesKey = u8"-PrintTestTables";
+		bool printTestTables = false;
+		std::string userValue;
+		std::string passValue;
+		std::string dsnValue;
+		std::string csValue;
 		vector<SConnectionInfo> connectionInfos;
 		for (int i = 0; i < argc; i++)
 		{
-			std::string dsnKey = u8"dsn=";
-			std::string csKey = u8"cs=";
+			std::string argNext;
 #ifdef _WIN32
 			std::string arg( utf16ToUtf8(argv[i]));
+			if(i + 1 < argc)
+				argNext = utf16ToUtf8(argv[i + 1]);
 #else
             std::string arg(argv[i]);
+			if (i + 1 < argc)
+				argNext = argv[i + 1];
 #endif
-			std::string dsnValue;
-			if (ba::starts_with(arg, dsnKey) && arg.length() > dsnKey.length())
+			if (ba::equals(arg, userKey) && i + 1 < argc)
 			{
-				dsnValue = arg.substr(dsnKey.length());
+				userValue = utf16ToUtf8(argv[i + 1]);
 			}
-			else if (ba::starts_with(arg, csKey) && arg.length() > csKey.length())
+			if (ba::equals(arg, passKey) && i + 1 < argc)
 			{
-				SConnectionInfo conInfo;
-				conInfo.m_cs = arg.substr(csKey.length());
-				connectionInfos.push_back(conInfo);
+				passValue = utf16ToUtf8(argv[i + 1]);
 			}
-			if (dsnValue.length() > 0)
+			if (ba::equals(arg, dsnKey) && i + 1 < argc)
 			{
-				std::vector<std::string> tokens;
-				boost::split(tokens, dsnValue, boost::is_any_of(u8";"));
-				if (tokens.size() != 3)
-				{
-					LOG_WARNING(boost::str(boost::format(u8"Ignoring Dsn entry '%s' because it does not match the form 'dsnValue;user;pass'") % arg));
-				}
-				else if (tokens[0].empty())
-				{
-					LOG_WARNING(boost::str(boost::format(u8"Ignoring Dsn entry '%s' because DSN is empty.") % arg));
-				}
-				else
-				{
-					SConnectionInfo conInfo;
-					conInfo.m_dsn = tokens[0];
-					conInfo.m_user = tokens[1];
-					conInfo.m_pass = tokens[2];
-					connectionInfos.push_back(conInfo);
-				}
+				dsnValue = utf16ToUtf8(argv[i + 1]);
 			}
+			if (ba::equals(arg, csKey) && i + 1 < argc)
+			{
+				csValue = utf16ToUtf8(argv[i + 1]);
+			}
+			if (ba::equals(arg, testTablesKey))
+			{
+				printTestTables = true;
+			}
+			if (i + 1 >= argc && ba::istarts_with(arg, u8"-") && !ba::equals(arg, testTablesKey))
+			{
+				std::stringstream ss;
+				ss << u8"Ignoring argument '" << arg << u8"' because no value follows after argument.";
+				LOG_WARNING(ss.str());
+			}
+		}
+
+		if (!dsnValue.empty())
+		{
+			SConnectionInfo conInfo;
+			conInfo.m_dsn = dsnValue;
+			if (!userValue.empty())
+				conInfo.m_user = userValue;
+			if (!passValue.empty())
+				conInfo.m_pass = passValue;
+			connectionInfos.push_back(conInfo);
+		}
+		if (!csValue.empty())
+		{
+			SConnectionInfo conInfo;
+			conInfo.m_cs = csValue;
+			connectionInfos.push_back(conInfo);
 		}
 
 		if (connectionInfos.empty())
 		{
-			LOG_ERROR(u8"No connection string given and no dsn given, exiting");
+			LOG_ERROR(u8"No connection string (-CS) and no dsn (-DSN) passed, exiting");
 			return -1;
 		}
 
@@ -378,21 +414,19 @@ int main(int argc, char* argv[])
 				pDb->Open(conInf.m_dsn, conInf.m_user, conInf.m_pass);
 			}
 
-			// Print some info
-			// or maybe print tables
-			bool printTables = true;
-			if (!printTables)
+			// Print db-header and driver-info (always):
+			PrintDbHeader(pDb);
+			PrintDriverInfo(pDb);
+
+			// print db and types, or test-tables:
+			if (printTestTables)
 			{
-				PrintDbHeader(pDb);
-				PrintDriverInfo(pDb);
-				PrintDbInfo(pDb);
-				printDatatypesInfo(pDb);
+				printExOdbcTables(pDb);
 			}
 			else
 			{
-				PrintDbHeader(pDb);
-				PrintDriverInfo(pDb);
-				printExOdbcTables(pDb);
+				PrintDbInfo(pDb);
+				printDatatypesInfo(pDb);
 			}
 
 			// add some blank lines
