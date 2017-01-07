@@ -3090,15 +3090,15 @@ namespace exodbctest
 			// and some non-null values
 			idBuffer = 101;
 			charCol->SetCb(SQL_NTS);
-			wcscpy(buffer, L"HelloWorld");
+			wcscpy(reinterpret_cast<wchar_t*>(buffer), L"HelloWorld");
 			i();
 
 			idBuffer = 102;
-			wcscpy(buffer, L"ä ö ?");
+			wcscpy(reinterpret_cast<wchar_t*>(buffer), L"ä ö ?");
 			i();
 
 			idBuffer = 103;
-			wcscpy(buffer, L"abcdefgh  ");
+			wcscpy(reinterpret_cast<wchar_t*>(buffer), L"abcdefgh  ");
 			i();
 
 			m_pDb->CommitTrans();
@@ -3248,15 +3248,15 @@ namespace exodbctest
 			// and some non-null values
 			idBuffer = 101;
 			varcharCol->SetCb(SQL_NTS);
-			wcscpy(buffer, L"Hello World");
+			wcscpy(reinterpret_cast<wchar_t*>(buffer), L"Hello World");
 			i();
 
 			idBuffer = 102;
-			wcscpy(buffer, L"ä ö ?");
+			wcscpy(reinterpret_cast<wchar_t*>(buffer), L"ä ö ?");
 			i();
 
 			idBuffer = 103;
-			wcscpy(buffer, L"   ");
+			wcscpy(reinterpret_cast<wchar_t*>(buffer), L"   ");
 			i();
 
 			m_pDb->CommitTrans();
