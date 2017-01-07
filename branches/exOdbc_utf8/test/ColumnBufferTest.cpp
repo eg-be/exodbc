@@ -110,7 +110,8 @@ namespace exodbctest
 		WCharColumnBuffer arr(24, u8"ColumnName", SQL_UNKNOWN_TYPE);
 		wstring s(L"Hello");
 		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
-		wstring v(arr.GetBuffer().data());
+        const vector<SQLWCHAR> data = arr.GetBuffer();
+		wstring v(data.begin(), data.end());
 		EXPECT_EQ(s, v);
 		EXPECT_EQ(SQL_NTS, arr.GetCb());
 	}
@@ -193,7 +194,7 @@ namespace exodbctest
 			tableName = PrependSchemaOrCatalogName(m_dbms, tableName);
 			string idColName = GetIdColumnName(m_tableId);
 			string sqlstmt = boost::str(boost::format(u8"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % m_columnQueryName);
-			SQLRETURN ret = SQLPrepare(pStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+			SQLRETURN ret = SQLPrepare(pStmt->GetHandle(), EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt), SQL_NTS);
 			THROW_IFN_SUCCESS(SQLPrepare, ret, SQL_HANDLE_STMT, pStmt->GetHandle());
 		}
 
@@ -657,7 +658,7 @@ namespace exodbctest
 			// and some non-null values
 			SQLBIGINT v = 0;
 			SQL_NUMERIC_STRUCT num;
-			::ZeroMemory(num.val, sizeof(num.val));
+			::memset(num.val, 0, sizeof(num.val));
 			num.precision = 18;
 			num.scale = 0;
 			num.sign = 1;
@@ -797,7 +798,7 @@ namespace exodbctest
 			// and some non-null values
 			SQLBIGINT v = 0;
 			SQL_NUMERIC_STRUCT num;
-			::ZeroMemory(num.val, sizeof(num.val));
+			::memset(num.val, 0, sizeof(num.val));
 			num.precision = 18;
 			num.scale = 10;
 			num.sign = 1;
@@ -926,7 +927,7 @@ namespace exodbctest
 			// and some non-null values
 			SQLBIGINT v = 0;
 			SQL_NUMERIC_STRUCT num;
-			::ZeroMemory(num.val, sizeof(num.val));
+			::memset(num.val, 0, sizeof(num.val));
 			num.precision = 5;
 			num.scale = 3;
 			num.sign = 1;
@@ -1374,7 +1375,7 @@ namespace exodbctest
 			f(1);
 			EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetWString());
 			f(3);
-			EXPECT_EQ(L"הצüאיט", varcharCol.GetWString());
+			EXPECT_EQ(L"הצ?איט", varcharCol.GetWString());
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
@@ -1391,7 +1392,7 @@ namespace exodbctest
 				f(2);
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetWString());
 				f(4);
-				EXPECT_EQ(L"הצüאיט", charCol.GetWString());
+				EXPECT_EQ(L"הצ?איט", charCol.GetWString());
 			}
 			else
 			{
@@ -1400,7 +1401,7 @@ namespace exodbctest
 				f(2);
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetWString());
 				f(4);
-				EXPECT_EQ(L"הצüאיט", boost::trim_copy(charCol.GetWString()));
+				EXPECT_EQ(L"הצ?איט", boost::trim_copy(charCol.GetWString()));
 			}
 
 			f(1);
@@ -1446,7 +1447,7 @@ namespace exodbctest
 			i();
 
 			idCol->SetValue(102);
-			varcharCol->SetWString(L"ה צ ü");
+			varcharCol->SetWString(L"ה צ ?");
 			i();
 
 			idCol->SetValue(103);
@@ -1465,7 +1466,7 @@ namespace exodbctest
 			EXPECT_EQ(L"Hello World", varcharCol.GetWString());
 
 			f(102);
-			EXPECT_EQ(L"ה צ ü", varcharCol.GetWString());
+			EXPECT_EQ(L"ה צ ?", varcharCol.GetWString());
 
 			f(103);
 			EXPECT_EQ(L"   ", varcharCol.GetWString());
@@ -1513,7 +1514,7 @@ namespace exodbctest
 			i();
 
 			idCol->SetValue(102);
-			charCol->SetWString(L"ה צ ü");
+			charCol->SetWString(L"ה צ ?");
 			i();
 
 			idCol->SetValue(103);
@@ -1532,7 +1533,7 @@ namespace exodbctest
 			EXPECT_EQ(L"HelloWorld", charCol.GetWString());
 
 			f(102);
-			EXPECT_EQ(L"ה צ ü", boost::trim_right_copy(charCol.GetWString()));
+			EXPECT_EQ(L"ה צ ?", boost::trim_right_copy(charCol.GetWString()));
 
 			f(103);
 			// It seems like MySql always trims whitespaces - even if we've set them explicitly
@@ -1563,7 +1564,7 @@ namespace exodbctest
 			f(1);
 			EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetString());
 			f(3);
-			EXPECT_EQ("הצüאיט", varcharCol.GetString());
+			EXPECT_EQ("הצ?איט", varcharCol.GetString());
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
@@ -1580,7 +1581,7 @@ namespace exodbctest
 				f(2);
 				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetString());
 				f(4);
-				EXPECT_EQ("הצüאיט", charCol.GetString());
+				EXPECT_EQ("הצ?איט", charCol.GetString());
 			}
 			else
 			{
@@ -1589,7 +1590,7 @@ namespace exodbctest
 				f(2);
 				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetString());
 				f(4);
-				EXPECT_EQ("הצüאיט", boost::trim_copy(charCol.GetString()));
+				EXPECT_EQ("הצ?איט", boost::trim_copy(charCol.GetString()));
 			}
 
 			f(1);
@@ -1639,7 +1640,7 @@ namespace exodbctest
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
 				idCol->SetValue(102);
-				varcharCol->SetString("ה צ ü");
+				varcharCol->SetString("ה צ ?");
 				i();
 			}
 
@@ -1661,7 +1662,7 @@ namespace exodbctest
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				f(102);
-				EXPECT_EQ("ה צ ü", varcharCol.GetString());
+				EXPECT_EQ("ה צ ?", varcharCol.GetString());
 			}
 
 			f(103);
@@ -1714,7 +1715,7 @@ namespace exodbctest
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
 				idCol->SetValue(102);
-				charCol->SetString("ה צ ü");
+				charCol->SetString("ה צ ?");
 				i();
 			}
 
@@ -1736,7 +1737,7 @@ namespace exodbctest
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				f(102);
-				EXPECT_EQ("ה צ ü", boost::trim_right_copy(charCol.GetString()));
+				EXPECT_EQ("ה צ ?", boost::trim_right_copy(charCol.GetString()));
 			}
 
 			f(103);
@@ -2219,7 +2220,7 @@ namespace exodbctest
 			EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", s);
 			f(3);
 			s = (char*)buffer.data();
-			EXPECT_EQ("הצüאיט", s);
+			EXPECT_EQ("הצ?איט", s);
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
@@ -2240,7 +2241,7 @@ namespace exodbctest
 				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", s);
 				f(4);
 				s = (char*)buffer.data();
-				EXPECT_EQ("הצüאיט", s);
+				EXPECT_EQ("הצ?איט", s);
 			}
 			else
 			{
@@ -2251,7 +2252,7 @@ namespace exodbctest
 				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", s);
 				f(4);
 				s = (char*)buffer.data();
-				EXPECT_EQ("הצüאיט", boost::trim_copy(s));
+				EXPECT_EQ("הצ?איט", boost::trim_copy(s));
 			}
 
 			f(1);
@@ -2272,11 +2273,11 @@ namespace exodbctest
 
 			wstring ws;
 			f(1);
-			ws = buffer.data();
+			ws = wstring(buffer.data().begin(), buffer.data().end());
 			EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", ws);
 			f(3);
-			ws = buffer.data();
-			EXPECT_EQ(L"הצüאיט", ws);
+			ws = wstring(buffer.data().begin(), buffer.data().end());
+			EXPECT_EQ(L"הצ?איט", ws);
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
@@ -2297,7 +2298,7 @@ namespace exodbctest
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", ws);
 				f(4);
 				ws = buffer.data();
-				EXPECT_EQ(L"הצüאיט", ws);
+				EXPECT_EQ(L"הצ?איט", ws);
 			}
 			else
 			{
@@ -2308,7 +2309,7 @@ namespace exodbctest
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", ws);
 				f(4);
 				ws = buffer.data();
-				EXPECT_EQ(L"הצüאיט", boost::trim_copy(ws));
+				EXPECT_EQ(L"הצ?איט", boost::trim_copy(ws));
 			}
 
 			f(1);
@@ -3009,7 +3010,7 @@ namespace exodbctest
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
 				idBuffer = 102;
-				strcpy((char*)buffer, "ה צ ü");
+				strcpy((char*)buffer, "ה צ ?");
 				i();
 			}
 
@@ -3031,7 +3032,7 @@ namespace exodbctest
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				f(102);
-				EXPECT_EQ("ה צ ü", boost::trim_right_copy(charCol.GetString()));
+				EXPECT_EQ("ה צ ?", boost::trim_right_copy(charCol.GetString()));
 			}
 
 			f(103);
@@ -3092,7 +3093,7 @@ namespace exodbctest
 			i();
 
 			idBuffer = 102;
-			wcscpy(buffer, L"ה צ ü");
+			wcscpy(buffer, L"ה צ ?");
 			i();
 
 			idBuffer = 103;
@@ -3111,7 +3112,7 @@ namespace exodbctest
 			EXPECT_EQ(L"HelloWorld", charCol.GetWString());
 
 			f(102);
-			EXPECT_EQ(L"ה צ ü", boost::trim_right_copy(charCol.GetWString()));
+			EXPECT_EQ(L"ה צ ?", boost::trim_right_copy(charCol.GetWString()));
 
 			f(103);
 			// It seems like MySql always trims whitespaces - even if we've set them explicitly
@@ -3175,7 +3176,7 @@ namespace exodbctest
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
 				idBuffer = 102;
-				strcpy((char*)buffer, "ה צ ü");
+				strcpy((char*)buffer, "ה צ ?");
 				i();
 			}
 
@@ -3197,7 +3198,7 @@ namespace exodbctest
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				f(102);
-				EXPECT_EQ("ה צ ü", varcharCol.GetString());
+				EXPECT_EQ("ה צ ?", varcharCol.GetString());
 			}
 
 			f(103);
@@ -3250,7 +3251,7 @@ namespace exodbctest
 			i();
 
 			idBuffer = 102;
-			wcscpy(buffer, L"ה צ ü");
+			wcscpy(buffer, L"ה צ ?");
 			i();
 
 			idBuffer = 103;
@@ -3269,7 +3270,7 @@ namespace exodbctest
 			EXPECT_EQ(L"Hello World", varcharCol.GetWString());
 
 			f(102);
-			EXPECT_EQ(L"ה צ ü", varcharCol.GetWString());
+			EXPECT_EQ(L"ה צ ?", varcharCol.GetWString());
 
 			f(103);
 			EXPECT_EQ(L"   ", varcharCol.GetWString());
@@ -3725,7 +3726,7 @@ namespace exodbctest
 
 			// and some non-null values
 			SQLBIGINT v = 0;
-			::ZeroMemory(buffer.val, sizeof(buffer.val));
+			::memset(buffer.val, 0, sizeof(buffer.val));
 			buffer.precision = 18;
 			buffer.scale = 0;
 			buffer.sign = 1;
@@ -3828,7 +3829,7 @@ namespace exodbctest
 
 			// and some non-null values
 			SQLBIGINT v = 0;
-			::ZeroMemory(buffer.val, sizeof(buffer.val));
+			::memset(buffer.val, 0, sizeof(buffer.val));
 			buffer.precision = 18;
 			buffer.scale = 10;
 			buffer.sign = 1;
@@ -3930,7 +3931,7 @@ namespace exodbctest
 
 			// and some non-null values
 			SQLBIGINT v = 0;
-			::ZeroMemory(buffer.val, sizeof(buffer.val));
+			::memset(buffer.val, 0, sizeof(buffer.val));
 			buffer.precision = 5;
 			buffer.scale = 3;
 			buffer.sign = 1;
