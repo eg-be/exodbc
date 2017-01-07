@@ -180,7 +180,7 @@ namespace exodbc {
 		case SQL_WLONGVARCHAR:
 			return u8"WLONGVARCHAR";
 		case SQL_DECIMAL:
-			return u8"DECIMAu8";
+			return u8"DECIMAL";
 		case SQL_NUMERIC:
 			return u8"NUMERIC";
 		case SQL_SMALLINT:
