@@ -174,6 +174,7 @@ namespace exodbctest
 
 	TEST_F(DatabaseTest, SetTracefile)
 	{
+        boost::filesystem::path tmpPath = boost::filesystem::temp_directory_path();
 		TCHAR tmpDir[MAX_PATH + 1];
 		DWORD ret = GetTempPath(MAX_PATH + 1, tmpDir);
 		ASSERT_TRUE(ret > 0);
