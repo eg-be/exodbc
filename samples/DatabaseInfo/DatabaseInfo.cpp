@@ -203,7 +203,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			cout << boost::str(boost::format(u8"|| %s || %s || %d || %d || %s || %s ||") % name % SqlType2s(sqlType) % pProps->GetColumnSize() % pProps->GetDecimalDigits() % nullable % primary) << endl;
 		}
 
-		// Print the table content, by opening it as wchar-table.
+		// Print the table content, by opening it as char-table.
 		t.Close();
 		t.ClearColumns();
 		// but skip _tmp tables
@@ -212,7 +212,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			continue;
 		}
 
-		t.SetSql2BufferTypeMap(WCharSql2BufferMap::Create());
+		t.SetSql2BufferTypeMap(CharSql2BufferMap::Create());
 		try
 		{
 			columns = t.CreateAutoColumnBufferPtrs(true, true, false);
@@ -266,9 +266,10 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 					cout << u8"||= ";
 					first = false;
 				}
-				WCharColumnBufferPtr pBuff = boost::get<WCharColumnBufferPtr>(*itCol);
+				CharColumnBufferPtr pBuff = boost::get<CharColumnBufferPtr>(*itCol);
 				if (!pBuff->IsNull())
 				{
+                    string s = pBuff->GetString();
 					cout << pBuff->GetString();
 				}
 				else
