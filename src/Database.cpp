@@ -1053,6 +1053,21 @@ namespace exodbc
 		SQLINTEGER columnSize, bufferSize, charOctetLength, ordinalPosition;
 		bool isCatalogNull, isSchemaNull, isColumnSizeNull, isBufferSizeNull, isDecimalDigitsNull, isNumPrecRadixNull, isRemarksNull, isDefaultValueNull, isSqlDatetimeSubNull, isCharOctetLengthNull, isIsNullableNull;
 
+//         SQLCHAR tablen[ 64 ];
+//         SQLCHAR column[ 64 ];
+//         SQLSMALLINT type;
+//         SQLLEN indicator[ 3 ];
+//    
+//         ret = SQLBindCol( m_pHStmt->GetHandle(), 3, SQL_C_CHAR, tablen, sizeof( tablen ), &indicator[ 0 ] );
+//         ret = SQLBindCol( m_pHStmt->GetHandle(), 4, SQL_C_CHAR, column, sizeof( column ), &indicator[ 1 ] );
+//         ret = SQLBindCol( m_pHStmt->GetHandle(), 5, SQL_C_SSHORT, &type, 0, &indicator[ 2 ] );
+//         
+//         while (SQL_SUCCEEDED(ret = SQLFetch(m_pHStmt->GetHandle()))) {
+//             //printf( "%s.%s type %d\n", table, column, type );
+//             tableName = (const char*)tablen;
+//             columnName = (const char*)column;
+//         }        
+        
 		// Ensure ordinal-position is increasing constantly by one, starting at one
 		SQLINTEGER m_lastIndex = 0;
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
