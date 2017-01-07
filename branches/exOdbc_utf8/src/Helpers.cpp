@@ -97,6 +97,7 @@ namespace exodbc
 
 		if(!isNull)
 		{
+            value = (const char*) buffer.get();
 			value = SQLAPICHARPTR_TO_EXODBCSTR(buffer.get());
 		}
 		if(pIsNull)
