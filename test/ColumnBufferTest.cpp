@@ -110,11 +110,7 @@ namespace exodbctest
 		WCharColumnBuffer arr(24, u8"ColumnName", SQL_UNKNOWN_TYPE);
 		wstring s(L"Hello");
 		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
-#ifdef _WIN32
-		wstring v(arr.GetBuffer().data());
-#else
 		wstring v(reinterpret_cast<const wchar_t*>(arr.GetBuffer().data()));
-#endif
 		EXPECT_EQ(s, v);
 		EXPECT_EQ(SQL_NTS, arr.GetCb());
 	}
@@ -2278,18 +2274,10 @@ namespace exodbctest
 
 			wstring ws;
 			f(1);
-#ifdef _WIN32
-			ws = wstring(buffer.data());
-#else
 			ws = wstring(reinterpret_cast<const wchar_t*>(buffer.data()));
-#endif
 			EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", ws);
 			f(3);
-#ifdef _WIN32
-			ws = wstring(buffer.data());
-#else
 			ws = wstring(reinterpret_cast<const wchar_t*>(buffer.data()));
-#endif
 			EXPECT_EQ(L"äöüàéè", ws);
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
@@ -2307,18 +2295,10 @@ namespace exodbctest
 			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
 			{
 				f(2);
-#ifdef _WIN32
-				ws = buffer.data();
-#else
 				ws = reinterpret_cast<const wchar_t*>(buffer.data());
-#endif
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", ws);
 				f(4);
-#ifdef _WIN32
-				ws = buffer.data();
-#else
 				ws = reinterpret_cast<const wchar_t*>(buffer.data());                
-#endif
 				EXPECT_EQ(L"äöüàéè", ws);
 			}
 			else
@@ -2326,18 +2306,10 @@ namespace exodbctest
 				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ä'
 				// Therefore, the number of preceding whitespaces is not equal on DB2 
 				f(2);
-#ifdef _WIN32
-				ws = buffer.data();
-#else
 				ws = reinterpret_cast<const wchar_t*>(buffer.data());
-#endif
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", ws);
 				f(4);
-#ifdef _WIN32
-				ws = buffer.data();
-#else
 				ws = reinterpret_cast<const wchar_t*>(buffer.data());
-#endif
 				EXPECT_EQ(L"äöüàéè", boost::trim_copy(ws));
 			}
 
