@@ -97,7 +97,11 @@ endif()
 add_executable(exodbctest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
 
 # the exodbctest applications needs to link against libexodbc, odbc32, gtest, boost: 
-target_link_libraries(exodbctest libexodbc gtest ${Boost_LIBRARIES} odbc32)
+if(MSVC)
+  target_link_libraries(exodbctest libexodbc gtest ${Boost_LIBRARIES} odbc32)
+else()
+  target_link_libraries(exodbctest libexodbc gtest ${Boost_LIBRARIES} odbc)
+endif()
 
 # provide a group for the rc-file
 source_group( "Resources"
