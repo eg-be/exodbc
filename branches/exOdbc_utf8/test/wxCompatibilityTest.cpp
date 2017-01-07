@@ -252,19 +252,19 @@ namespace exodbctest
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes WHERE idchartypes = 1");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(table.m_varchar));
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_varchar)));
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes WHERE idchartypes = 2");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(table.m_char)));
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_char))));
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes WHERE idchartypes = 3");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L"äöüàéè"), boost::trim_right_copy(std::wstring(table.m_varchar)));
+		EXPECT_EQ( std::wstring(L"äöüàéè"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_varchar))));
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes WHERE idchartypes = 4");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L"äöüàéè"), boost::trim_right_copy(std::wstring(table.m_char)));
+		EXPECT_EQ( std::wstring(L"äöüàéè"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_char))));
 
 		// Test for NULL-Values
 		EXPECT_FALSE( table.IsColumnNull(0) );
@@ -342,15 +342,15 @@ namespace exodbctest
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 1");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L"0"), std::wstring(table.m_wcdecimal_18_0));
+		EXPECT_EQ( std::wstring(L"0"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_0)));
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 2");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
+		EXPECT_EQ( std::wstring(L"123456789012345678"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_0)));
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 3");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(table.m_wcdecimal_18_0));
+		EXPECT_EQ( std::wstring(L"-123456789012345678"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_0)));
 
 		// DB2 sends a ',', mysql/ms sends a '.' as delimeter
 		RecordProperty("Ticket", 35);
@@ -358,15 +358,15 @@ namespace exodbctest
 		{
 			table.SelectBySqlStmt(u8"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 4");
 			EXPECT_TRUE(table.SelectNext());
-			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(table.m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"0,0000000000"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_10)));	
 
 			table.SelectBySqlStmt(u8"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5");
 			EXPECT_TRUE(table.SelectNext());
-			EXPECT_EQ( std::wstring(L"12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"12345678,9012345678"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_10)));	
 
 			table.SelectBySqlStmt(u8"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6");
 			EXPECT_TRUE(table.SelectNext());
-			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(table.m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"-12345678,9012345678"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_10)));	
 		}
 		else
 		{
@@ -374,17 +374,17 @@ namespace exodbctest
 			EXPECT_TRUE(table.SelectNext());
 			// ms does not send first 0 ?
 			if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-				EXPECT_EQ( std::wstring(L".0000000000"), std::wstring(table.m_wcdecimal_18_10));	
+				EXPECT_EQ( std::wstring(L".0000000000"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_10)));	
 			else
-				EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(table.m_wcdecimal_18_10));	
+				EXPECT_EQ( std::wstring(L"0.0000000000"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_10)));	
 
 			table.SelectBySqlStmt(u8"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 5");
 			EXPECT_TRUE(table.SelectNext());
-			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"12345678.9012345678"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_10)));	
 
 			table.SelectBySqlStmt(u8"SELECT * FROM exodbc.numerictypes WHERE idnumerictypes = 6");
 			EXPECT_TRUE(table.SelectNext());
-			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(table.m_wcdecimal_18_10));	
+			EXPECT_EQ( std::wstring(L"-12345678.9012345678"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_wcdecimal_18_10)));	
 		}
 
 		// Test for NULL
@@ -467,9 +467,9 @@ namespace exodbctest
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(table.m_col2)));
-		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(table.m_col3)));
-		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(table.m_col4)));
+		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col2))));
+		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col3))));
+		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col4))));
 		EXPECT_FALSE(table.SelectNext());
 
 		// Select with fields on complete table
@@ -478,9 +478,9 @@ namespace exodbctest
 		table.m_col4[0] = 0;
 		table.SelectBySqlStmt(u8"SELECT idchartable, col2, col3, col4 FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(table.m_col2)));
-		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(table.m_col3)));
-		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(table.m_col4)));
+		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col2))));
+		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col3))));
+		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col4))));
 		EXPECT_FALSE(table.SelectNext());
 
 		// We fail to read with the star, because it will select columns id (1), c2(2), c3(3) and c4(4), but we have bound  
@@ -492,9 +492,9 @@ namespace exodbctest
 		incTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(incTable.SelectNext());
 		EXPECT_EQ(1, incTable.m_idCharTable);
-		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(incTable.m_col2)));
-		EXPECT_NE(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(incTable.m_col4)));
-		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(incTable.m_col4)));
+		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(incTable.m_col2))));
+		EXPECT_NE(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(incTable.m_col4))));
+		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(incTable.m_col4))));
 		EXPECT_FALSE(incTable.SelectNext());
 
 		// It does work if we pass the column names
@@ -504,8 +504,8 @@ namespace exodbctest
 		incTable.SelectBySqlStmt(u8"SELECT idchartable, col2, col4 FROM exodbc.chartable WHERE idchartable = 1");
 		EXPECT_TRUE(incTable.SelectNext());
 		EXPECT_EQ(1, incTable.m_idCharTable);
-		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(wstring(incTable.m_col2)));
-		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(wstring(incTable.m_col4)));
+		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(wstring(reinterpret_cast<const wchar_t*>(incTable.m_col2))));
+		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(wstring(reinterpret_cast<const wchar_t*>(incTable.m_col4))));
 		EXPECT_FALSE(incTable.SelectNext());
 	}
 
@@ -537,8 +537,8 @@ namespace exodbctest
 		// And note the triming
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes_tmp ORDER BY idchartypes ASC");
 		EXPECT_TRUE( table.SelectNext());
-		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(table.m_varchar));
-		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(table.m_char)));
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), std::wstring(reinterpret_cast<const wchar_t*>(table.m_varchar)));
+		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_char))));
 		EXPECT_FALSE(table.SelectNext());
 	}
 
