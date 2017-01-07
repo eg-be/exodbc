@@ -316,7 +316,7 @@ int main(int argc, char* argv[])
 	try
 	{
 		// Parse arguments
-		if (argc < 2)
+		if (argc < 3)
 		{
 			printUsage();
 			return - 1;
@@ -344,6 +344,11 @@ int main(int argc, char* argv[])
 			if (i + 1 < argc)
 				argNext = argv[i + 1];
 #endif
+			if (ba::equals(arg, u8"--help"))
+			{
+				printUsage();
+				return 0;
+			}
 			if (ba::equals(arg, userKey) && i + 1 < argc)
 			{
 				userValue = argNext;
@@ -367,7 +372,7 @@ int main(int argc, char* argv[])
 			if (i + 1 >= argc && ba::istarts_with(arg, u8"-") && !ba::equals(arg, testTablesKey))
 			{
 				std::stringstream ss;
-				ss << u8"Ignoring argument '" << arg << u8"' because no value follows after argument.";
+				ss << u8"Ignoring argument '" << arg << u8"' because no value follows after argument. See --help for usage.";
 				LOG_WARNING(ss.str());
 			}
 		}
@@ -391,7 +396,7 @@ int main(int argc, char* argv[])
 
 		if (connectionInfos.empty())
 		{
-			LOG_ERROR(u8"No connection string (-CS) and no dsn (-DSN) passed, exiting");
+			LOG_ERROR(u8"No connection string (-CS) and no dsn (-DSN) passed, exiting. See --help for usage.");
 			return -1;
 		}
 
