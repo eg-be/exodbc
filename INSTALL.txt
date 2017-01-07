@@ -1,4 +1,4 @@
-﻿INSTALL
+INSTALL
 =======
 Find updated versions of this document at: https://exodbc.elisium.ch
 

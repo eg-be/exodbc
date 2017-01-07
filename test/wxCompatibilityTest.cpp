@@ -260,11 +260,11 @@ namespace exodbctest
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes WHERE idchartypes = 3");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L"δφόΰιθ"), boost::trim_right_copy(std::wstring(table.m_varchar)));
+		EXPECT_EQ( std::wstring(L"Χ”Χ¦οΆ•ΧΧ™Χ"), boost::trim_right_copy(std::wstring(table.m_varchar)));
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes WHERE idchartypes = 4");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L"δφόΰιθ"), boost::trim_right_copy(std::wstring(table.m_char)));
+		EXPECT_EQ( std::wstring(L"Χ”Χ¦οΆ•ΧΧ™Χ"), boost::trim_right_copy(std::wstring(table.m_char)));
 
 		// Test for NULL-Values
 		EXPECT_FALSE( table.IsColumnNull(0) );

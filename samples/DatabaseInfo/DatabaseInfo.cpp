@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file DatabaseInfo.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 03.04.2016

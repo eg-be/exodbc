@@ -507,10 +507,10 @@ namespace exodbc
 		SQLSMALLINT		m_searchable;				///<  9 How the data type is used in a WHERE clause: SQL_PRED_NONE (no use), SQL_PRED_CHAR (only with LIKE), SQL_PRED_BASIC (all except LIKE), SQL_SEARCHABLE (anything)
 		SQLSMALLINT		m_unsigned;					///< 10 [NULLABLE] Whether the data type is unsigned: SQL_TRUE or SQL_FALSE
 		bool			m_unsignedIsNull;			///< 10 See SSqlTypeInfo::m_unsigned
-		SQLSMALLINT		m_fixedPrecisionScale;		///< 11 Whether the data type has predefined fixed precision and scale (which are data source–specific), such as a money data type: SQL_TRUE or SQL_FALSE
+		SQLSMALLINT		m_fixedPrecisionScale;		///< 11 Whether the data type has predefined fixed precision and scale (which are data sourceâ€“specific), such as a money data type: SQL_TRUE or SQL_FALSE
 		SQLSMALLINT		m_autoUniqueValue;			///< 12 [NULLABLE] Whether the data type is autoincrementing: SQL_TRUE or SQL_FALSE
 		bool			m_autoUniqueValueIsNull;	///< 12 See SSqlTypeInfo::m_autoUniqueValue
-		std::string	m_localTypeName;			///< 13 [NULLABLE] localized version of the data source–dependent name of the data type.
+		std::string	m_localTypeName;			///< 13 [NULLABLE] localized version of the data sourceâ€“dependent name of the data type.
 		bool			m_localTypeNameIsNull;		///< 13 See SSqlTypeInfo::m_localTypeName
 		SQLSMALLINT		m_minimumScale;				///< 14 [NULLABLE] The minimum scale of the data type on the data source. If a data type has a fixed scale, the MINIMUM_SCALE and MAXIMUM_SCALE columns both contain this value.
 		bool			m_minimumScaleIsNull;		///< 14 See SSqlTypeInfo::m_minimumScale
