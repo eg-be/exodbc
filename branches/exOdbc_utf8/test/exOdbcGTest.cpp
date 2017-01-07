@@ -16,7 +16,9 @@
 // Other headers
 #include "boost/filesystem.hpp"
 #include "exodbc/LogHandler.h"
-#include <tchar.h>
+#ifdef _WIN32
+    #include <tchar.h>
+#endif
 
 // Debug
 #include "DebugNew.h"
