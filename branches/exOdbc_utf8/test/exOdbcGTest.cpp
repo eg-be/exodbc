@@ -329,12 +329,20 @@ int main(int argc, char* argv[])
 
 	// Pass our maybe modified arguments to google-test
 	int gTestArgc = argc;
+#ifdef _WIN32
 	_TCHAR** gTestArgv = NULL;
+#else
+	char** gTestArgv = NULL
+#endif
 	if (!customFilter.empty())
 	{
 		gTestArgc = argc + 1;
 	}
+#ifdef _WIN32
 	gTestArgv = new _TCHAR*[gTestArgc + 1];
+#else
+	gTestArgv = new char*[gTestArgc + 1];
+#endif
 	gTestArgv[gTestArgc] = NULL;
 	for (int i = 0; i < argc; i++)
 	{
@@ -344,7 +352,11 @@ int main(int argc, char* argv[])
 	wstring wCustomFilter = utf8ToUtf16(customFilter);
 	if (!customFilter.empty())
 	{
+#ifdef _WIN32
 		gTestArgv[gTestArgc - 1] = (_TCHAR*) wCustomFilter.c_str();
+#else
+		gTestArgv[gTestArgc - 1] = (char*)customFilter.c_str();
+#endif
 	}
 
 	LOG_INFO(boost::str(boost::format(u8"Passing the following %d arguments to InitGoogleTest:") % gTestArgc ));
