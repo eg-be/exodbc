@@ -614,7 +614,7 @@ namespace exodbctest
 		EXPECT_TRUE(table.SelectNext());
 		EXPECT_EQ( -32768, table.m_smallInt);
 		EXPECT_EQ( INT_MIN, table.m_int);
-		EXPECT_EQ( -LLONG_MIN, table.m_bigInt);
+		EXPECT_EQ( LLONG_MIN, table.m_bigInt);
 		EXPECT_FALSE(table.SelectNext());
 
 		sqlstmt = u8"INSERT INTO exodbc.integertypes_tmp (idintegertypes, tsmallint, tint, tbigint) VALUES (2, 32767, 2147483647, 9223372036854775807)";
