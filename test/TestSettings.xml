@@ -9,7 +9,7 @@
   
   <Dsn>
     <Disabled>0</Disabled>
-    <Name>exSqlServer_64</Name>
+    <Name>extest</Name>
     <User>ex</User>
     <Pass>extest</Pass>
     <Case>lower</Case>

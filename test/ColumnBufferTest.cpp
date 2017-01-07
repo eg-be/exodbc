@@ -1361,7 +1361,7 @@ namespace exodbctest
 	}
 
 
-
+#ifdef _WIN32
 	TEST_F(WCharColumnTest, ReadCharValues)
 	{
 		// note that when working witch chars, we add one element for the terminating \0 char.
@@ -1407,8 +1407,9 @@ namespace exodbctest
 			EXPECT_TRUE(charCol.IsNull());
 		}
 	}
+#endif
 
-
+#ifdef _WIN32
 	TEST_F(WCharColumnTest, WriteVarcharValue)
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
@@ -1474,8 +1475,9 @@ namespace exodbctest
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
 	}
+#endif
 
-
+#ifdef _WIN32
 	TEST_F(WCharColumnTest, WriteCharValue)
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
@@ -1549,7 +1551,7 @@ namespace exodbctest
 			EXPECT_TRUE(charCol.IsNull());
 		}
 	}
-
+#endif
 
 	TEST_F(CharColumnTest, ReadCharValues)
 	{
@@ -3053,6 +3055,7 @@ namespace exodbctest
 	}
 
 
+#ifdef _WIN32
 	TEST_F(SqlCPointerTest, WriteWCharValue)
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
@@ -3130,7 +3133,7 @@ namespace exodbctest
 			EXPECT_TRUE(charCol.IsNull());
 		}
 	}
-
+#endif
 
 	TEST_F(SqlCPointerTest, WriteVarcharValue)
 	{
@@ -3210,7 +3213,7 @@ namespace exodbctest
 		}
 	}
 
-
+#ifdef _WIN32
 	TEST_F(SqlCPointerTest, WriteWVarcharValue)
 	{
 		TableId tableId = TableId::CHARTYPES_TMP;
@@ -3280,7 +3283,7 @@ namespace exodbctest
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
 	}
-
+#endif
 
 	TEST_F(SqlCPointerTest, WriteDateValue)
 	{
