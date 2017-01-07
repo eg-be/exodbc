@@ -174,16 +174,17 @@ namespace exodbctest
 
 	TEST_F(DatabaseTest, SetTracefile)
 	{
-        boost::filesystem::path tmpPath = boost::filesystem::temp_directory_path();
-		TCHAR tmpDir[MAX_PATH + 1];
-		DWORD ret = GetTempPath(MAX_PATH + 1, tmpDir);
-		ASSERT_TRUE(ret > 0);
-		wstring wTmpFile(&tmpDir[0]);
-		string tracefile = utf16ToUtf8(wTmpFile);
+        boost::filesystem::path tmpDir = boost::filesystem::temp_directory_path();
 		string filename = boost::str(boost::format(u8"trace_%s.log") % DatabaseProcudt2s(m_pDb->GetDbms()));
-		tracefile += filename;
+		boost::filesystem::path tracefilePath = tmpDir / filename;
 
-		EXPECT_NO_THROW(m_pDb->SetTracefile(tracefile));
+#ifdef _WIN32
+		string tracefilePathStr = utf16ToUtf8(tracefilePath.native());
+#else
+		string tracefilePathStr = tracefilePath.native();
+#endif
+
+		EXPECT_NO_THROW(m_pDb->SetTracefile(tracefilePathStr));
 	}
 
 
@@ -212,21 +213,23 @@ namespace exodbctest
 		namespace fs = boost::filesystem;
 
 		// Set tracefile first, do that on a db not open yet
-		TCHAR tmpDir[MAX_PATH + 1];
-		DWORD ret = GetTempPath(MAX_PATH + 1, tmpDir);
-		ASSERT_TRUE(ret > 0);
-		wstring wTraceFile(&tmpDir[0]);
-		string tracefile = utf16ToUtf8(wTraceFile);
-		string filename = boost::str(boost::format(u8"DatabaseTest_DoSomeTrace_%s.log") % DatabaseProcudt2s(m_pDb->GetDbms()));
-		tracefile += filename;
+		boost::filesystem::path tmpDir = boost::filesystem::temp_directory_path();
+		string filename = boost::str(boost::format(u8"trace_%s.log") % DatabaseProcudt2s(m_pDb->GetDbms()));
+		boost::filesystem::path tracefilePath = tmpDir / filename;
+
+#ifdef _WIN32
+		string tracefilePathStr = utf16ToUtf8(tracefilePath.native());
+#else
+		string tracefilePathStr = tracefilePath.native();
+#endif
 
 		// remove an existing trace-file
 		boost::system::error_code fserr;
-		fs::remove(tracefile, fserr);
-		ASSERT_FALSE(fs::exists(tracefile));
+		fs::remove(tracefilePath, fserr);
+		ASSERT_FALSE(fs::exists(tracefilePath));
 
 		Database db(m_pEnv);
-		ASSERT_NO_THROW(db.SetTracefile(tracefile));
+		ASSERT_NO_THROW(db.SetTracefile(tracefilePathStr));
 		EXPECT_NO_THROW(db.SetTrace(true));
 
 		// Open db
@@ -240,7 +243,7 @@ namespace exodbctest
 		}
 
 		// now one must exist
-		EXPECT_TRUE(fs::exists(tracefile));
+		EXPECT_TRUE(fs::exists(tracefilePath));
 	}
 
 
