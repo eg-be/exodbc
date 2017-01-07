@@ -93,7 +93,7 @@ namespace exodbctest
 		std::string value;
 		EXPECT_NO_THROW(GetData(pHStmt, 2, 20, value, &isNull));
 		EXPECT_FALSE(isNull);
-		EXPECT_EQ(u8"δφόΰιθ", value);
+		EXPECT_EQ(u8"Χ”Χ¦οΆ•ΧΧ™Χ", value);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Trim the read-value in GetData
@@ -106,7 +106,7 @@ namespace exodbctest
 			// note that this will info about data truncation
 			EXPECT_NO_THROW(GetData(pHStmt, 2, 3, value, &isNull));
 		}
-		EXPECT_EQ(u8"δφό", value);
+		EXPECT_EQ(u8"Χ”Χ¦οΆ•", value);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Read some int value

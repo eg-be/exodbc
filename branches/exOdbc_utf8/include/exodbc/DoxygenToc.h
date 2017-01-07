@@ -1,4 +1,4 @@
-﻿/*!
+/*!
 * \file DoxygenToc.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 04.02.2016

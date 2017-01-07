@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file SqlCPointerBuffer.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 10.04.2016
