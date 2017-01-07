@@ -116,7 +116,7 @@ namespace exodbctest
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		SQLINTEGER id = 0;
 		SQLLEN ind = 0;
-		EXPECT_NO_THROW(GetData(pHStmt, 1, SQL_C_SLONG, &id, NULL, &ind, &isNull));
+		EXPECT_NO_THROW(GetData(pHStmt, 1, SQL_C_SLONG, &id, 0, &ind, &isNull));
 		EXPECT_EQ(3, id);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
