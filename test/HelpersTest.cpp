@@ -96,7 +96,7 @@ namespace exodbctest
 		EXPECT_EQ(u8"äöüàéè", value);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
-		// Trim the read-value in GetData
+		// Trim the read-value in GetData. 
 		ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		ret = SQLFetch(pHStmt->GetHandle());
@@ -104,9 +104,12 @@ namespace exodbctest
 
 		{
 			// note that this will info about data truncation
-			EXPECT_NO_THROW(GetData(pHStmt, 2, 3, value, &isNull));
+            // note that if we set a size of 4 chars to read, this does not mean
+            // that we can read 4 logical chars, as  one char might use multiple bytes
+            // so we only test for starts_with.
+			EXPECT_NO_THROW(GetData(pHStmt, 2, 4, value, &isNull));
 		}
-		EXPECT_EQ(u8"äöü", value);
+		EXPECT_TRUE( boost::algorithm::starts_with(value, u8"äö"));
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Read some int value
