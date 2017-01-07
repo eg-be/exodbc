@@ -226,7 +226,7 @@ namespace exodbctest
 	TEST_F(HelpersTest, InitNumeric)
 	{
 		SQLCHAR val[SQL_MAX_NUMERIC_LEN];
-		FillMemory(val, SQL_MAX_NUMERIC_LEN, 1);
+		memset(val, 1, SQL_MAX_NUMERIC_LEN);
 		SQL_NUMERIC_STRUCT num = InitNumeric(18, 10, 1, val);
 		EXPECT_EQ(18, num.precision);
 		EXPECT_EQ(10, num.scale);
@@ -238,7 +238,7 @@ namespace exodbctest
 	TEST_F(HelpersTest, InitNullNumeric)
 	{
 		char nullMem[sizeof(SQL_NUMERIC_STRUCT)];
-		ZeroMemory(nullMem, sizeof(SQL_NUMERIC_STRUCT));
+		memset(nullMem, 0, sizeof(SQL_NUMERIC_STRUCT));
 
 		SQL_NUMERIC_STRUCT num = InitNullNumeric();
 		EXPECT_TRUE(memcmp(&num, &nullMem, sizeof(SQL_NUMERIC_STRUCT)) == 0);
