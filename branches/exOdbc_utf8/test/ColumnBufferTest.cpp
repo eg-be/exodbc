@@ -97,20 +97,24 @@ namespace exodbctest
 	TEST_F(ColumnArrayBufferTest, Construction)
 	{
 		// after construction buffer will be Null
-		WCharColumnBuffer arr(24, u8"ColumnName", SQL_UNKNOWN_TYPE);
+		CharColumnBuffer arr(24, u8"ColumnName", SQL_UNKNOWN_TYPE);
 		EXPECT_TRUE(arr.IsNull());
 		EXPECT_EQ(24, arr.GetNrOfElements());
-		EXPECT_EQ(sizeof(SQLWCHAR) * 24, arr.GetBufferLength());
+		EXPECT_EQ(sizeof(SQLCHAR) * 24, arr.GetBufferLength());
 		EXPECT_EQ(u8"ColumnName", arr.GetQueryName());
 	}
 
 
 	TEST_F(ColumnArrayBufferTest, SetAndGetValue)
 	{
-		WCharColumnBuffer arr(24, u8"ColumnName", SQL_UNKNOWN_TYPE);
-		wstring s(L"Hello");
-		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
-		wstring v(reinterpret_cast<const wchar_t*>(arr.GetBuffer().data()));
+		// use an array of some simple chars, but note;
+        // this test has nothing to do with characters, its only about setting
+        // and getting back the same bytes. but we use a string because of EQ.
+        // and we also want to test that the correct Cb gets returned
+        CharColumnBuffer arr(24, u8"ColumnName", SQL_UNKNOWN_TYPE);
+		string s("Hello");
+		arr.SetValue(std::vector<SQLCHAR>(s.begin(), s.end()), SQL_NTS);
+		string v(reinterpret_cast<const char*>(arr.GetBuffer().data()));
 		EXPECT_EQ(s, v);
 		EXPECT_EQ(SQL_NTS, arr.GetCb());
 	}
@@ -1555,12 +1559,17 @@ namespace exodbctest
 
 	TEST_F(CharColumnTest, ReadCharValues)
 	{
+#ifdef _WIN32
+        const size_t varCharColumnSize = 128 + 1;
+#else
+        const size_t varCharColumnSize = 128 + 7;
+#endif        
 		// note that when working witch chars, we add one element for the terminating \0 char.
 		// \note: We do not use u8 in the compares here: At least on windows against sql server
 		// we do not get utf8 strings, but some other encoding.
 		{
 			string colName = u8"tvarchar";
-			CharColumnBuffer varcharCol(128 + 1, colName, SQL_UNKNOWN_TYPE);
+			CharColumnBuffer varcharCol(varCharColumnSize, colName, SQL_UNKNOWN_TYPE);
 			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -1574,7 +1583,7 @@ namespace exodbctest
 
 		{
 			string colName = u8"tchar";
-			CharColumnBuffer charCol(128 + 1, colName, SQL_UNKNOWN_TYPE);
+			CharColumnBuffer charCol(varCharColumnSize, colName, SQL_UNKNOWN_TYPE);
 			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -2208,11 +2217,20 @@ namespace exodbctest
 
 	TEST_F(SqlCPointerTest, ReadCharValues)
 	{
-		// note that when working witch chars, we add one element for the terminating \0 char.
+        // note: When running this test against sql-server from linux, we need more space than
+        // the actual 128 chars of the column. why? sql-server uses nvarchar columns, but.. 
+        // why does it then work with only 128 chars in windows? on linux we get 'char truncation'
+        // but we only need one char more on linux.. ???
+#ifdef _WIN32
+        const size_t varCharColumnSize = 128 + 1;
+#else
+        const size_t varCharColumnSize = 128 + 7;
+#endif
+        // note that when working witch chars, we add one element for the terminating \0 char.
 		{
 			string colName = u8"tvarchar";
-			std::vector<SQLCHAR> buffer(128 + 1);
-			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 128, 0);
+			std::vector<SQLCHAR> buffer(varCharColumnSize);
+			SqlCPointerBuffer varcharCol(colName, SQL_VARCHAR, &buffer[0], SQL_C_CHAR, (varCharColumnSize) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, varCharColumnSize - 1, 0);
 			varcharCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -2230,8 +2248,8 @@ namespace exodbctest
 
 		{
 			string colName = u8"tchar";
-			std::vector<SQLCHAR> buffer(128 + 1);
-			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_CHAR, (128 + 1) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, 128, 0);
+			std::vector<SQLCHAR> buffer(varCharColumnSize);
+			SqlCPointerBuffer charCol(colName, SQL_CHAR, &buffer[0], SQL_C_CHAR, (varCharColumnSize) * sizeof(SQLCHAR), ColumnFlag::CF_NONE, varCharColumnSize - 1, 0);
 			charCol.BindColumn(1, m_pStmt);
 			FSelectFetcher f(m_pDb->GetDbms(), m_pStmt, TableId::CHARTYPES, colName);
 
@@ -2263,7 +2281,7 @@ namespace exodbctest
 		}
 	}
 
-
+#ifdef _WIN32
 	TEST_F(SqlCPointerTest, ReadWCharValues)
 	{
 		// note that when working witch chars, we add one element for the terminating \0 char.
@@ -2319,6 +2337,7 @@ namespace exodbctest
 			EXPECT_TRUE(charCol.IsNull());
 		}
 	}
+#endif
 
 
 	TEST_F(SqlCPointerTest, ReadDateValues)
