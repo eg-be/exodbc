@@ -1054,9 +1054,9 @@ namespace exodbc
 		bool isCatalogNull, isSchemaNull, isColumnSizeNull, isBufferSizeNull, isDecimalDigitsNull, isNumPrecRadixNull, isRemarksNull, isDefaultValueNull, isSqlDatetimeSubNull, isCharOctetLengthNull, isIsNullableNull;
 
 //         SQLCHAR tablen[ 64 ];
-//         SQLCHAR column[ 64 ];
+//          SQLCHAR column[ 129 ];
 //         SQLSMALLINT type;
-//         SQLLEN indicator[ 3 ];
+//          SQLLEN indicator[ 3 ];
 //    
 //         ret = SQLBindCol( m_pHStmt->GetHandle(), 3, SQL_C_CHAR, tablen, sizeof( tablen ), &indicator[ 0 ] );
 //         ret = SQLBindCol( m_pHStmt->GetHandle(), 4, SQL_C_CHAR, column, sizeof( column ), &indicator[ 1 ] );
@@ -1073,7 +1073,9 @@ namespace exodbc
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
 		{
 			// Fetch data from columns
-
+//             ret = SQLGetData(m_pHStmt->GetHandle(), 4, SQL_C_CHAR, column, sizeof(column), &indicator[0]);
+//             columnName = (const char*)column;
+            
 			SQLLEN cb;
 			GetData(m_pHStmt, 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
 			GetData(m_pHStmt, 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
