@@ -193,7 +193,7 @@ namespace exodbctest
 #ifdef new
 #undef new
 #endif
-		file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+		//file.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
 #pragma pop_macro("new")
 		if (!file.is_open())
 		{
