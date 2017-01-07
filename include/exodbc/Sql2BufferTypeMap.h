@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file Sql2BufferTypeMap.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 21.06.2014

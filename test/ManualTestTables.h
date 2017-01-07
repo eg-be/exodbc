@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ManualTestTables.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 26.12.2014

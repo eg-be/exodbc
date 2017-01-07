@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file TestDbCreator.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 04.04.2015

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ColumnBuffer.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 01.10.2015

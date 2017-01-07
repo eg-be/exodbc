@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file TableTest.cpp
  * \author Elias Gerber <eg@elisium.ch>
  * \date 22.07.2014

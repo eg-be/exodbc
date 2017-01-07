@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file Database.h
  * \author Elias Gerber <eg@elisium.ch>
  * \date 25.07.2014

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0.2)
+﻿cmake_minimum_required (VERSION 3.0.2)
 project (exodbctest)
 
 # update tweak version with info from subversion, if available:

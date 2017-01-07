@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ExcelTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 15.03.2015

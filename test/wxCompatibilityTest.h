@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file wxCompatibilityTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.08.2014

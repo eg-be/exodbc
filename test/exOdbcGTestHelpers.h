@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 /*!
 * \file exOdbcGTestHelpers.h
 * \author Elias Gerber <eg@elisium.ch>

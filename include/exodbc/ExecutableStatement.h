@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ExecutableStatement.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 26712.2015

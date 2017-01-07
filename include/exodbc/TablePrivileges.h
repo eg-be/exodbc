@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file TablePrivileges.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.12.2014

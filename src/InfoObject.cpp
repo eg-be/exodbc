@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file InfoObject.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 14.06.2015
