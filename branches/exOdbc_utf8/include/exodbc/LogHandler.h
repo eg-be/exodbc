@@ -96,6 +96,7 @@ namespace exodbc
 		bool m_prependTimestamp;
 		std::string m_filepath;
 		mutable bool m_firstMessage;
+		mutable std::mutex m_localtimeMutex;
 	};
 
 	typedef std::shared_ptr<FileLogHandler> FileLogHandlerPtr;

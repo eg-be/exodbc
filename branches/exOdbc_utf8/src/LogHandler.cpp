@@ -134,6 +134,7 @@ namespace exodbc
 		{
 			if (m_prependTimestamp)
 			{
+				lock_guard<mutex> lock(m_localtimeMutex);
                 std::time_t t = std::time(nullptr);
                 std::tm tm = *std::localtime(&t);
 				m_filestream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << u8": ";
