@@ -2314,7 +2314,11 @@ namespace exodbctest
 #endif
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", ws);
 				f(4);
+#ifdef _WIN32
 				ws = buffer.data();
+#else
+				ws = reinterpret_cast<const wchar_t*>(buffer.data());                
+#endif
 				EXPECT_EQ(L"äöüàéè", ws);
 			}
 			else
@@ -2322,10 +2326,18 @@ namespace exodbctest
 				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ä'
 				// Therefore, the number of preceding whitespaces is not equal on DB2 
 				f(2);
+#ifdef _WIN32
 				ws = buffer.data();
+#else
+				ws = reinterpret_cast<const wchar_t*>(buffer.data());
+#endif
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", ws);
 				f(4);
+#ifdef _WIN32
 				ws = buffer.data();
+#else
+				ws = reinterpret_cast<const wchar_t*>(buffer.data());
+#endif
 				EXPECT_EQ(L"äöüàéè", boost::trim_copy(ws));
 			}
 

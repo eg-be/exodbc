@@ -332,7 +332,7 @@ int main(int argc, char* argv[])
 #ifdef _WIN32
 	_TCHAR** gTestArgv = NULL;
 #else
-	char** gTestArgv = NULL
+	char** gTestArgv = NULL;
 #endif
 	if (!customFilter.empty())
 	{
@@ -362,8 +362,12 @@ int main(int argc, char* argv[])
 	LOG_INFO(boost::str(boost::format(u8"Passing the following %d arguments to InitGoogleTest:") % gTestArgc ));
 	for (int i = 0; i < gTestArgc; i++)
 	{
+#ifdef _WIN32
 		wstring wa = gTestArgv[i];
 		string sa = utf16ToUtf8(wa);
+#else
+		string sa = gTestArgv[i];        
+#endif
 		string msg = boost::str(boost::format(u8"%d\t%s") % i % sa);
 		LOG_INFO(msg);
 	}
