@@ -346,19 +346,19 @@ int main(int argc, char* argv[])
 #endif
 			if (ba::equals(arg, userKey) && i + 1 < argc)
 			{
-				userValue = utf16ToUtf8(argv[i + 1]);
+				userValue = argNext;
 			}
 			if (ba::equals(arg, passKey) && i + 1 < argc)
 			{
-				passValue = utf16ToUtf8(argv[i + 1]);
+				passValue = argNext;
 			}
 			if (ba::equals(arg, dsnKey) && i + 1 < argc)
 			{
-				dsnValue = utf16ToUtf8(argv[i + 1]);
+				dsnValue = argNext;
 			}
 			if (ba::equals(arg, csKey) && i + 1 < argc)
 			{
-				csValue = utf16ToUtf8(argv[i + 1]);
+				csValue = argNext;
 			}
 			if (ba::equals(arg, testTablesKey))
 			{
