@@ -153,9 +153,9 @@ namespace exodbctest
 		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
 		m_idDateTypes = 0;
-		ZeroMemory(&m_date, sizeof(m_date));
-		ZeroMemory(&m_time, sizeof(m_time));
-		ZeroMemory(&m_timestamp, sizeof(m_timestamp));
+		memset(&m_date, 0, sizeof(m_date));
+		memset(&m_time, 0, sizeof(m_time));
+		memset(&m_timestamp, 0, sizeof(m_timestamp));
 
 		// Note: We are odbc 3, therefore use the new c-type (with type: SQL_C_TYPE_DATE instead of SQL_C_DATE).
 		SetColumn(0, ToDbCase(u8"iddatetypes"), SQL_INTEGER, &m_idDateTypes, SQL_C_SLONG, sizeof(m_idDateTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
@@ -180,8 +180,8 @@ namespace exodbctest
 	MBlobTypesTable::MBlobTypesTable(ConstDatabasePtr pDb, const std::string& name /* = u8"BlobTypes" */)
 		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(name))
 	{
-		ZeroMemory(m_blob, sizeof(m_blob));
-		ZeroMemory(m_varblob_20, sizeof(m_varblob_20));
+		memset(m_blob, 0, sizeof(m_blob));
+		memset(m_varblob_20, 0, sizeof(m_varblob_20));
 
 		SetColumn(0, ToDbCase(u8"idblobtypes"), SQL_INTEGER, &m_idBlobTypes, SQL_C_SLONG, sizeof(m_idBlobTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
 		SetColumn(1, ToDbCase(u8"tblob"), SQL_BINARY, m_blob, SQL_C_BINARY, sizeof(m_blob), ColumnFlag::CF_SELECT);
@@ -196,9 +196,9 @@ namespace exodbctest
 	{
 		m_idNumericTypes = 0;
 
-		::ZeroMemory(&m_decimal_18_0, sizeof(m_decimal_18_0));
-		::ZeroMemory(&m_decimal_18_10, sizeof(m_decimal_18_10));
-		::ZeroMemory(&m_decimal_5_3, sizeof(m_decimal_5_3));
+		::memset(&m_decimal_18_0, 0, sizeof(m_decimal_18_0));
+		::memset(&m_decimal_18_10, 0, sizeof(m_decimal_18_10));
+		::memset(&m_decimal_5_3, 0, sizeof(m_decimal_5_3));
 
 		SetColumn(0, ToDbCase(u8"idnumerictypes"), SQL_INTEGER, &m_idNumericTypes, SQL_C_SLONG, sizeof(m_idNumericTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
 		SetColumn(1, ToDbCase(u8"tdecimal_18_0"), SQL_NUMERIC, &m_decimal_18_0, SQL_C_NUMERIC, sizeof(m_decimal_18_0), ColumnFlag::CF_SELECT, 18, 0);
