@@ -868,22 +868,22 @@ std::string SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */)
 
 	std::string sFSqlType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlType) % m_sqlType).str();
 	std::string sSqlDataType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlDataType) % m_sqlDataType).str();
-	std::string sPrecision = (m_columnSizeIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_columnSize).str());
-	std::string sLiteralPrefix = m_literalPrefixIsNull ? u8"NULu8" : m_literalPrefix;
-	std::string sLiteralSuffix = m_literalSuffixIsNull ? u8"NULu8" : m_literalSuffix;
-	std::string sCreateParams = m_createParamsIsNull ? u8"NULu8" : m_createParams;
+	std::string sPrecision = (m_columnSizeIsNull ? u8"NULL" : (boost::format(u8"%d") % m_columnSize).str());
+	std::string sLiteralPrefix = m_literalPrefixIsNull ? u8"NULL" : m_literalPrefix;
+	std::string sLiteralSuffix = m_literalSuffixIsNull ? u8"NULL" : m_literalSuffix;
+	std::string sCreateParams = m_createParamsIsNull ? u8"NULL" : m_createParams;
 	std::string sNullable = u8"???";
 	std::string sCaseSensitive = SqlTrueFalse2s(m_caseSensitive);
 	std::string sSearchable = u8"???";
-	std::string sUnsigned = m_unsignedIsNull ? u8"NULu8" : SqlTrueFalse2s(m_unsigned);
+	std::string sUnsigned = m_unsignedIsNull ? u8"NULL" : SqlTrueFalse2s(m_unsigned);
 	std::string sFixedPrecisionScale = SqlTrueFalse2s(m_fixedPrecisionScale);
-	std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULu8" : SqlTrueFalse2s(m_autoUniqueValue);
-	std::string sLocalTypeName = m_localTypeNameIsNull ? u8"NULu8" : m_localTypeName;
-	std::string sMinimumScale = m_minimumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_minimumScale).str();
-	std::string sMaximumScale = m_maximumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_maximumScale).str();
-	std::string sSqlDateTimeSub = m_sqlDateTimeSubIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_sqlDateTimeSub).str();
-	std::string sNumPrecRadix = m_numPrecRadixIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_numPrecRadix).str();
-	std::string sIntervalPrecision = m_intervalPrecisionIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_intervalPrecision).str();
+	std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULL" : SqlTrueFalse2s(m_autoUniqueValue);
+	std::string sLocalTypeName = m_localTypeNameIsNull ? u8"NULL" : m_localTypeName;
+	std::string sMinimumScale = m_minimumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_minimumScale).str();
+	std::string sMaximumScale = m_maximumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_maximumScale).str();
+	std::string sSqlDateTimeSub = m_sqlDateTimeSubIsNull ? u8"NULL" : (boost::format(u8"%d") % m_sqlDateTimeSub).str();
+	std::string sNumPrecRadix = m_numPrecRadixIsNull ? u8"NULL" : (boost::format(u8"%d") % m_numPrecRadix).str();
+	std::string sIntervalPrecision = m_intervalPrecisionIsNull ? u8"NULL" : (boost::format(u8"%d") % m_intervalPrecision).str();
 
 	switch (m_nullable)
 	{
@@ -932,22 +932,22 @@ std::string SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */)
 
 		std::string sFSqlType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlType) % m_sqlType).str();
 		std::string sSqlDataType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlDataType) % m_sqlDataType).str();
-		std::string sPrecision = (m_columnSizeIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_columnSize).str());
-		std::string sLiteralPrefix = m_literalPrefixIsNull ? u8"NULu8" : m_literalPrefix;
-		std::string sLiteralSuffix = m_literalSuffixIsNull ? u8"NULu8" : m_literalSuffix;
-		std::string sCreateParams = m_createParamsIsNull ? u8"NULu8" : m_createParams;
+		std::string sPrecision = (m_columnSizeIsNull ? u8"NULL" : (boost::format(u8"%d") % m_columnSize).str());
+		std::string sLiteralPrefix = m_literalPrefixIsNull ? u8"NULL" : m_literalPrefix;
+		std::string sLiteralSuffix = m_literalSuffixIsNull ? u8"NULL" : m_literalSuffix;
+		std::string sCreateParams = m_createParamsIsNull ? u8"NULL" : m_createParams;
 		std::string sNullable = u8"???";
 		std::string sCaseSensitive = SqlTrueFalse2s(m_caseSensitive);
 		std::string sSearchable = u8"???";
-		std::string sUnsigned = m_unsignedIsNull ? u8"NULu8" : SqlTrueFalse2s(m_unsigned);
+		std::string sUnsigned = m_unsignedIsNull ? u8"NULL" : SqlTrueFalse2s(m_unsigned);
 		std::string sFixedPrecisionScale = SqlTrueFalse2s(m_fixedPrecisionScale);
-		std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULu8" : SqlTrueFalse2s(m_autoUniqueValue);
-		std::string sLocalTypeName = m_localTypeNameIsNull ? u8"NULu8" : m_localTypeName;
-		std::string sMinimumScale = m_minimumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_minimumScale).str();
-		std::string sMaximumScale = m_maximumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_maximumScale).str();
-		std::string sSqlDateTimeSub = m_sqlDateTimeSubIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_sqlDateTimeSub).str();
-		std::string sNumPrecRadix = m_numPrecRadixIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_numPrecRadix).str();
-		std::string sIntervalPrecision = m_intervalPrecisionIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_intervalPrecision).str();
+		std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULL" : SqlTrueFalse2s(m_autoUniqueValue);
+		std::string sLocalTypeName = m_localTypeNameIsNull ? u8"NULL" : m_localTypeName;
+		std::string sMinimumScale = m_minimumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_minimumScale).str();
+		std::string sMaximumScale = m_maximumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_maximumScale).str();
+		std::string sSqlDateTimeSub = m_sqlDateTimeSubIsNull ? u8"NULL" : (boost::format(u8"%d") % m_sqlDateTimeSub).str();
+		std::string sNumPrecRadix = m_numPrecRadixIsNull ? u8"NULL" : (boost::format(u8"%d") % m_numPrecRadix).str();
+		std::string sIntervalPrecision = m_intervalPrecisionIsNull ? u8"NULL" : (boost::format(u8"%d") % m_intervalPrecision).str();
 
 		switch (m_nullable)
 		{
@@ -992,21 +992,21 @@ std::string SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */)
 	std::string SSqlTypeInfo::ToStr() const
 	{
 		std::stringstream ss;
-		std::string sNull = u8"NULu8";
+		std::string sNull = u8"NULL";
 
 		ss << u8"***** DATA TYPE INFORMATION *****" << std::endl;
 		ss << u8" Name:                   " << m_typeName << std::endl;
 		ss << u8"  SQL Type:              " << m_sqlType << std::endl;
-		ss << u8"  Precision:             " << (m_columnSizeIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_columnSize).str()) << std::endl;
-		ss << u8"  Literal Prefix:        " << (m_literalPrefixIsNull ? u8"NULu8" : m_literalPrefix) << std::endl;
-		ss << u8"  Literal Suffix:        " << (m_literalSuffixIsNull ? u8"NULu8" : m_literalSuffix) << std::endl;
-		ss << u8"  Create Params:         " << (m_createParamsIsNull ? u8"NULu8" : m_createParams) << std::endl;
+		ss << u8"  Precision:             " << (m_columnSizeIsNull ? u8"NULL" : (boost::format(u8"%d") % m_columnSize).str()) << std::endl;
+		ss << u8"  Literal Prefix:        " << (m_literalPrefixIsNull ? u8"NULL" : m_literalPrefix) << std::endl;
+		ss << u8"  Literal Suffix:        " << (m_literalSuffixIsNull ? u8"NULL" : m_literalSuffix) << std::endl;
+		ss << u8"  Create Params:         " << (m_createParamsIsNull ? u8"NULL" : m_createParams) << std::endl;
 
 		ss << u8"  Nullable:              ";
 		switch (m_nullable)
 		{
 		case SQL_NO_NULLS:
-			ss << u8"SQL_NO_NULu8";
+			ss << u8"SQL_NO_NULL";
 			break;
 		case SQL_NULLABLE:
 			ss << u8"SQL_NULLABLE";
@@ -1042,16 +1042,16 @@ std::string SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */)
 		}
 		ss << std::endl;
 
-		ss << u8"  Unsigned:              " << (m_unsignedIsNull ? u8"NULu8" : (m_unsigned == SQL_TRUE ? u8"SQL_TRUE" : u8"SQL_FALSE")) << std::endl;
+		ss << u8"  Unsigned:              " << (m_unsignedIsNull ? u8"NULL" : (m_unsigned == SQL_TRUE ? u8"SQL_TRUE" : u8"SQL_FALSE")) << std::endl;
 		ss << u8"  Fixed Precision Scale: " << (m_fixedPrecisionScale == SQL_TRUE ? u8"SQL_TRUE" : u8"SQL_FALSE") << std::endl;
-		ss << u8"  Auto Unique Value:     " << (m_autoUniqueValueIsNull ? u8"NULu8" : (m_autoUniqueValue == SQL_TRUE ? u8"SQL_TRUE" : u8"SQL_FALSE")) << std::endl;
-		ss << u8"  Local Type Name:       " << (m_localTypeNameIsNull ? u8"NULu8" : m_localTypeName) << std::endl;
-		ss << u8"  Minimum Scale:         " << (m_minimumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_minimumScale).str()) << std::endl;
-		ss << u8"  Maximum Scale:         " << (m_maximumScaleIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_maximumScale).str()) << std::endl;
+		ss << u8"  Auto Unique Value:     " << (m_autoUniqueValueIsNull ? u8"NULL" : (m_autoUniqueValue == SQL_TRUE ? u8"SQL_TRUE" : u8"SQL_FALSE")) << std::endl;
+		ss << u8"  Local Type Name:       " << (m_localTypeNameIsNull ? u8"NULL" : m_localTypeName) << std::endl;
+		ss << u8"  Minimum Scale:         " << (m_minimumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_minimumScale).str()) << std::endl;
+		ss << u8"  Maximum Scale:         " << (m_maximumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_maximumScale).str()) << std::endl;
 		ss << u8"  SQL Data type:         " << m_sqlDataType << std::endl;
-		ss << u8"  SQL Date Time Sub:     " << (m_sqlDateTimeSubIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_sqlDateTimeSub).str()) << std::endl;
-		ss << u8"  Num Prec Radix:        " << (m_numPrecRadixIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_numPrecRadix).str()) << std::endl;
-		ss << u8"  Interval Precision:    " << (m_intervalPrecisionIsNull ? u8"NULu8" : (boost::format(u8"%d") % m_intervalPrecision).str()) << std::endl;
+		ss << u8"  SQL Date Time Sub:     " << (m_sqlDateTimeSubIsNull ? u8"NULL" : (boost::format(u8"%d") % m_sqlDateTimeSub).str()) << std::endl;
+		ss << u8"  Num Prec Radix:        " << (m_numPrecRadixIsNull ? u8"NULL" : (boost::format(u8"%d") % m_numPrecRadix).str()) << std::endl;
+		ss << u8"  Interval Precision:    " << (m_intervalPrecisionIsNull ? u8"NULL" : (boost::format(u8"%d") % m_intervalPrecision).str()) << std::endl;
 		return ss.str();
 	}
 
