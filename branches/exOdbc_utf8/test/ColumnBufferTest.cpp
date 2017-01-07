@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ColumnBufferTest.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.03.2015
@@ -1554,6 +1554,8 @@ namespace exodbctest
 	TEST_F(CharColumnTest, ReadCharValues)
 	{
 		// note that when working witch chars, we add one element for the terminating \0 char.
+		// \note: We do not use u8 in the compares here: At least on windows against sql server
+		// we do not get utf8 strings, but some other encoding.
 		{
 			string colName = u8"tvarchar";
 			CharColumnBuffer varcharCol(128 + 1, colName, SQL_UNKNOWN_TYPE);

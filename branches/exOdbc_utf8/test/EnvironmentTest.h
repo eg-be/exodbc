@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file EnvironmentTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 27.07.2014

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file TestParams.h
  * \author Elias Gerber <eg@elisium.ch>
  * \date 22.07.2014

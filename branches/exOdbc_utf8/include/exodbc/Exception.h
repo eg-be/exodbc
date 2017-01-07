@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file Exception.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 24.01.2015

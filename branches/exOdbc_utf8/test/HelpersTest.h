@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file HelpersTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 09.08.2014

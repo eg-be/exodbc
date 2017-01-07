@@ -1,4 +1,4 @@
-#pragma  once
+﻿#pragma  once
 
 // (C) Copyright 2015 Just Software Solutions Ltd
 //

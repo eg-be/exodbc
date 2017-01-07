@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file LogManager.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.01.2016

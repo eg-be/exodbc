@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file exOdbc.h
  * \author Elias Gerber <eg@elisium.ch>
  * \date 09.02.2014

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ExecutableStatement.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 27.12.2015

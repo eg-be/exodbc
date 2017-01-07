@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file InfoObject.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 14.06.2014
