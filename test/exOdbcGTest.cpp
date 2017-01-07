@@ -43,22 +43,6 @@ namespace ba = boost::algorithm;
 
 // Implementation
 // --------------
-bool extractParamValue( int argc, const _TCHAR* const argv[],const std::wstring& name, std::wstring& value)
-{
-	for(int i = 0; i < argc; i++)
-	{
-		std::wstring arg(argv[i]);
-		if(arg.length() > name.length() && arg.substr(0, name.length()) == name)
-		{
-			value = arg.substr(name.length());
-			return true;
-		}
-	}
-
-	return false;
-}
-
-
 void printHelp()
 {
 	using namespace std;
@@ -105,7 +89,11 @@ void printHelp()
 	cerr << u8"  to run the tests using a connection string, against a DB which uses uppercase." << std::endl;
 }
 
+#ifdef _WIN32
 int _tmain(int argc, _TCHAR* argv[])
+#else
+int main(int argc, char* argv[])
+#endif
 {
 	using namespace exodbctest;
 	using namespace std;
@@ -116,28 +104,33 @@ int _tmain(int argc, _TCHAR* argv[])
 	// IF --logLevelX is set, set the log-level early
 	for (int i = 0; i < argc; i++)
 	{
-		if (ba::iequals(argv[i], u8"--help"))
+#ifdef _WIN32
+		string arg = utf16ToUtf8(argv[i]);
+#else
+		string arg = argv[i];
+#endif
+		if (ba::iequals(arg, u8"--help"))
 		{
 			printHelp();
 			return -1;
 		}
-		else if (ba::iequals(argv[i], u8"--logLevelE"))
+		else if (ba::iequals(arg, u8"--logLevelE"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
 		}
-		else if (ba::iequals(argv[i], u8"--logLevelW"))
+		else if (ba::iequals(arg, u8"--logLevelW"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
 		}
-		else if (ba::iequals(argv[i], u8"--logLevelI"))
+		else if (ba::iequals(arg, u8"--logLevelI"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
 		}
-		else if (ba::iequals(argv[i], u8"--logLevelD"))
+		else if (ba::iequals(arg, u8"--logLevelD"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
 		}
-		else if (ba::iequals(argv[i], u8"--logFile"))
+		else if (ba::iequals(arg, u8"--logFile"))
 		{
 			FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(u8"exOdbcGTest.log", true);
 			LogManager::Get().RegisterLogHandler(pFileLogger);
