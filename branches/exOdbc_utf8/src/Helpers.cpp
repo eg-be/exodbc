@@ -93,7 +93,7 @@ namespace exodbc
 		SQLLEN cb;
 		bool isNull = false;
 
-		GetData(pHStmt, colOrParamNr, SQL_C_WCHAR, buffer.get(), buffSize, &cb, &isNull);
+		GetData(pHStmt, colOrParamNr, SQLAPICHARTYPENAME, buffer.get(), buffSize, &cb, &isNull);
 
 		if(!isNull)
 		{
