@@ -1,4 +1,4 @@
-/*!
+ï»¿/*!
 * \file ColumnBufferTest.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.03.2015
@@ -110,8 +110,7 @@ namespace exodbctest
 		WCharColumnBuffer arr(24, u8"ColumnName", SQL_UNKNOWN_TYPE);
 		wstring s(L"Hello");
 		arr.SetValue(std::vector<SQLWCHAR>(s.begin(), s.end()), SQL_NTS);
-        const vector<SQLWCHAR> data = arr.GetBuffer();
-		wstring v(data.begin(), data.end());
+		wstring v(arr.GetBuffer().data());
 		EXPECT_EQ(s, v);
 		EXPECT_EQ(SQL_NTS, arr.GetCb());
 	}
@@ -1375,7 +1374,7 @@ namespace exodbctest
 			f(1);
 			EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetWString());
 			f(3);
-			EXPECT_EQ(L"äö?àéè", varcharCol.GetWString());
+			EXPECT_EQ(L"Ã¤Ã¶Ã¼Ã Ã©Ã¨", varcharCol.GetWString());
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
@@ -1392,16 +1391,16 @@ namespace exodbctest
 				f(2);
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetWString());
 				f(4);
-				EXPECT_EQ(L"äö?àéè", charCol.GetWString());
+				EXPECT_EQ(L"Ã¤Ã¶Ã¼Ã Ã©Ã¨", charCol.GetWString());
 			}
 			else
 			{
-				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ä'
+				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'Ã¤'
 				// Therefore, the number of preceding whitespaces is not equal on DB2 
 				f(2);
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetWString());
 				f(4);
-				EXPECT_EQ(L"äö?àéè", boost::trim_copy(charCol.GetWString()));
+				EXPECT_EQ(L"Ã¤Ã¶Ã¼Ã Ã©Ã¨", boost::trim_copy(charCol.GetWString()));
 			}
 
 			f(1);
@@ -1447,7 +1446,7 @@ namespace exodbctest
 			i();
 
 			idCol->SetValue(102);
-			varcharCol->SetWString(L"ä ö ?");
+			varcharCol->SetWString(L"Ã¤ Ã¶ ?");
 			i();
 
 			idCol->SetValue(103);
@@ -1466,7 +1465,7 @@ namespace exodbctest
 			EXPECT_EQ(L"Hello World", varcharCol.GetWString());
 
 			f(102);
-			EXPECT_EQ(L"ä ö ?", varcharCol.GetWString());
+			EXPECT_EQ(L"Ã¤ Ã¶ ?", varcharCol.GetWString());
 
 			f(103);
 			EXPECT_EQ(L"   ", varcharCol.GetWString());
@@ -1514,7 +1513,7 @@ namespace exodbctest
 			i();
 
 			idCol->SetValue(102);
-			charCol->SetWString(L"ä ö ?");
+			charCol->SetWString(L"Ã¤ Ã¶ ?");
 			i();
 
 			idCol->SetValue(103);
@@ -1533,7 +1532,7 @@ namespace exodbctest
 			EXPECT_EQ(L"HelloWorld", charCol.GetWString());
 
 			f(102);
-			EXPECT_EQ(L"ä ö ?", boost::trim_right_copy(charCol.GetWString()));
+			EXPECT_EQ(L"Ã¤ Ã¶ ?", boost::trim_right_copy(charCol.GetWString()));
 
 			f(103);
 			// It seems like MySql always trims whitespaces - even if we've set them explicitly
@@ -1564,7 +1563,7 @@ namespace exodbctest
 			f(1);
 			EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", varcharCol.GetString());
 			f(3);
-			EXPECT_EQ("äö?àéè", varcharCol.GetString());
+			EXPECT_EQ("Ã¤Ã¶Ã¼Ã Ã©Ã¨", varcharCol.GetString());
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
@@ -1581,16 +1580,16 @@ namespace exodbctest
 				f(2);
 				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", charCol.GetString());
 				f(4);
-				EXPECT_EQ("äö?àéè", charCol.GetString());
+				EXPECT_EQ("Ã¤Ã¶Ã¼Ã Ã©Ã¨", charCol.GetString());
 			}
 			else
 			{
-				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ä'
+				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'Ã¤'
 				// Therefore, the number of preceding whitespaces is not equal on DB2 
 				f(2);
 				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", charCol.GetString());
 				f(4);
-				EXPECT_EQ("äö?àéè", boost::trim_copy(charCol.GetString()));
+				EXPECT_EQ("Ã¤Ã¶Ã¼Ã Ã©Ã¨", boost::trim_copy(charCol.GetString()));
 			}
 
 			f(1);
@@ -1640,7 +1639,7 @@ namespace exodbctest
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
 				idCol->SetValue(102);
-				varcharCol->SetString("ä ö ?");
+				varcharCol->SetString("Ã¤ Ã¶ ?");
 				i();
 			}
 
@@ -1662,7 +1661,7 @@ namespace exodbctest
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				f(102);
-				EXPECT_EQ("ä ö ?", varcharCol.GetString());
+				EXPECT_EQ("Ã¤ Ã¶ ?", varcharCol.GetString());
 			}
 
 			f(103);
@@ -1715,7 +1714,7 @@ namespace exodbctest
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
 				idCol->SetValue(102);
-				charCol->SetString("ä ö ?");
+				charCol->SetString("Ã¤ Ã¶ ?");
 				i();
 			}
 
@@ -1737,7 +1736,7 @@ namespace exodbctest
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				f(102);
-				EXPECT_EQ("ä ö ?", boost::trim_right_copy(charCol.GetString()));
+				EXPECT_EQ("Ã¤ Ã¶ ?", boost::trim_right_copy(charCol.GetString()));
 			}
 
 			f(103);
@@ -2220,7 +2219,7 @@ namespace exodbctest
 			EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", s);
 			f(3);
 			s = (char*)buffer.data();
-			EXPECT_EQ("äö?àéè", s);
+			EXPECT_EQ("Ã¤Ã¶Ã¼Ã Ã©Ã¨", s);
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
@@ -2241,18 +2240,18 @@ namespace exodbctest
 				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", s);
 				f(4);
 				s = (char*)buffer.data();
-				EXPECT_EQ("äö?àéè", s);
+				EXPECT_EQ("Ã¤Ã¶Ã¼Ã Ã©Ã¨", s);
 			}
 			else
 			{
-				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ä'
+				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'Ã¤'
 				// Therefore, the number of preceding whitespaces is not equal on DB2 
 				f(2);
 				s = (char*)buffer.data();
 				EXPECT_EQ(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", s);
 				f(4);
 				s = (char*)buffer.data();
-				EXPECT_EQ("äö?àéè", boost::trim_copy(s));
+				EXPECT_EQ("Ã¤Ã¶Ã¼Ã Ã©Ã¨", boost::trim_copy(s));
 			}
 
 			f(1);
@@ -2273,11 +2272,11 @@ namespace exodbctest
 
 			wstring ws;
 			f(1);
-			ws = wstring(buffer.data().begin(), buffer.data().end());
+			ws = wstring(buffer.data());
 			EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", ws);
 			f(3);
-			ws = wstring(buffer.data().begin(), buffer.data().end());
-			EXPECT_EQ(L"äö?àéè", ws);
+			ws = wstring(buffer.data());
+			EXPECT_EQ(L"Ã¤Ã¶Ã¼Ã Ã©Ã¨", ws);
 			f(2);
 			EXPECT_TRUE(varcharCol.IsNull());
 		}
@@ -2298,18 +2297,18 @@ namespace exodbctest
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~", ws);
 				f(4);
 				ws = buffer.data();
-				EXPECT_EQ(L"äö?àéè", ws);
+				EXPECT_EQ(L"Ã¤Ã¶Ã¼Ã Ã©Ã¨", ws);
 			}
 			else
 			{
-				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'ä'
+				// Some Databases like DB2 do not offer a nchar type. They use 2 CHAR to store a special char like 'Ã¤'
 				// Therefore, the number of preceding whitespaces is not equal on DB2 
 				f(2);
 				ws = buffer.data();
 				EXPECT_EQ(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~                                 ", ws);
 				f(4);
 				ws = buffer.data();
-				EXPECT_EQ(L"äö?àéè", boost::trim_copy(ws));
+				EXPECT_EQ(L"Ã¤Ã¶Ã¼Ã Ã©Ã¨", boost::trim_copy(ws));
 			}
 
 			f(1);
@@ -3010,7 +3009,7 @@ namespace exodbctest
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
 				idBuffer = 102;
-				strcpy((char*)buffer, "ä ö ?");
+				strcpy((char*)buffer, "Ã¤ Ã¶ ?");
 				i();
 			}
 
@@ -3032,7 +3031,7 @@ namespace exodbctest
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				f(102);
-				EXPECT_EQ("ä ö ?", boost::trim_right_copy(charCol.GetString()));
+				EXPECT_EQ("Ã¤ Ã¶ ?", boost::trim_right_copy(charCol.GetString()));
 			}
 
 			f(103);
@@ -3093,7 +3092,7 @@ namespace exodbctest
 			i();
 
 			idBuffer = 102;
-			wcscpy(buffer, L"ä ö ?");
+			wcscpy(buffer, L"Ã¤ Ã¶ ?");
 			i();
 
 			idBuffer = 103;
@@ -3112,7 +3111,7 @@ namespace exodbctest
 			EXPECT_EQ(L"HelloWorld", charCol.GetWString());
 
 			f(102);
-			EXPECT_EQ(L"ä ö ?", boost::trim_right_copy(charCol.GetWString()));
+			EXPECT_EQ(L"Ã¤ Ã¶ ?", boost::trim_right_copy(charCol.GetWString()));
 
 			f(103);
 			// It seems like MySql always trims whitespaces - even if we've set them explicitly
@@ -3176,7 +3175,7 @@ namespace exodbctest
 				// MySql fails here, with SQLSTATE HY000
 				// Incorrect string value: '\xE4 \xF6 \xFC' for column 'tchar_10' at row 1
 				idBuffer = 102;
-				strcpy((char*)buffer, "ä ö ?");
+				strcpy((char*)buffer, "Ã¤ Ã¶ ?");
 				i();
 			}
 
@@ -3198,7 +3197,7 @@ namespace exodbctest
 			if (m_pDb->GetDbms() != DatabaseProduct::MY_SQL)
 			{
 				f(102);
-				EXPECT_EQ("ä ö ?", varcharCol.GetString());
+				EXPECT_EQ("Ã¤ Ã¶ ?", varcharCol.GetString());
 			}
 
 			f(103);
@@ -3251,7 +3250,7 @@ namespace exodbctest
 			i();
 
 			idBuffer = 102;
-			wcscpy(buffer, L"ä ö ?");
+			wcscpy(buffer, L"Ã¤ Ã¶ ?");
 			i();
 
 			idBuffer = 103;
@@ -3270,7 +3269,7 @@ namespace exodbctest
 			EXPECT_EQ(L"Hello World", varcharCol.GetWString());
 
 			f(102);
-			EXPECT_EQ(L"ä ö ?", varcharCol.GetWString());
+			EXPECT_EQ(L"Ã¤ Ã¶ ?", varcharCol.GetWString());
 
 			f(103);
 			EXPECT_EQ(L"   ", varcharCol.GetWString());
