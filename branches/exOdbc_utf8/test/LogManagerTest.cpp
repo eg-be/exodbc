@@ -33,7 +33,7 @@ namespace exodbctest
 
 		ASSERT_EQ(1, handlers.size());
 
-		StdErrLogHandlerPtr pStdErrLogger = dynamic_pointer_cast<StdErrLogHandler>(handlers[0]);
+		StdErrLogHandlerPtr pStdErrLogger = dynamic_pointer_cast<StdLogHandler>(handlers[0]);
 		EXPECT_FALSE(pStdErrLogger == NULL);
 	}
 

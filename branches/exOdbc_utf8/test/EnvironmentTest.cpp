@@ -164,7 +164,7 @@ namespace exodbctest
 			deltaOff = end - start;
 		}
 
-		StdErrLogHandlerPtr stdLogger = std::make_shared<StdErrLogHandler>();
+		StdErrLogHandlerPtr stdLogger = std::make_shared<StdLogHandler>();
 		LogManager::Get().ClearLogHandlers();
 		LogManager::Get().RegisterLogHandler(stdLogger);
 		string msg = boost::str(boost::format(u8"Opening %d connections using PER_DRIVER took %d seconds") % nrRuns % deltaDriver);

@@ -64,22 +64,38 @@ namespace exodbc
 		return ss.str();
 	}
 
-	void StdErrLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
+
+	void StdLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
 	{
-#ifdef _WIN32
-		wcout << utf8ToUtf16(FormatLogMessage(level, msg, filename, line, functionname)) << endl;
-#else
-		cout << FormatLogMessage(level, msg, filename, line, functionname) << endl;
-#endif
+		string formatedMessage = FormatLogMessage(level, msg, filename, line, functionname);
+		if (m_redirectToStdErr)
+		{
+			WRITE_STDERR_ENDL(formatedMessage);
+		}
+		if (m_redirectToStdOut)
+		{
+			WRITE_STDOUT_ENDL(formatedMessage);
+		}
+		if (!m_redirectToStdErr && !m_redirectToStdOut)
+		{
+			if (level >= LogLevel::Warning)
+			{
+				WRITE_STDERR_ENDL(formatedMessage);
+			}
+			else
+			{
+				WRITE_STDOUT_ENDL(formatedMessage);
+			}
+		}
 	}
 
 
-	bool StdErrLogHandler::operator==(const LogHandler& other) const
+	bool StdLogHandler::operator==(const LogHandler& other) const
 	{
 		try
 		{
 			// all StdLogHandlers are equal
-			dynamic_cast<const StdErrLogHandler&>(other);
+			dynamic_cast<const StdLogHandler&>(other);
 			return true;
 		}
 		catch (const std::bad_cast& ex) 
