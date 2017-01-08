@@ -240,21 +240,39 @@ namespace exodbctest
 		SetColumn(3, ToDbCase(u8"col4"), SQL_VARCHAR, m_col4, SQL_C_WCHAR, sizeof(m_col4), ColumnFlag::CF_SELECT);
 	}
 
-
-	// IncompleteCharTable
-	// -------------------
-	MIncompleteCharTable::MIncompleteCharTable(ConstDatabasePtr pDb)
-		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(u8"chartable"))
+	
+	// IntegerTable
+	// ------------
+	MIntegerTable::MIntegerTable(ConstDatabasePtr pDb)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(u8"integertable"))
 	{
-		m_idCharTable = 0;
-		m_col2[0] = 0;
-		//m_col3[0] = 0;
-		m_col4[0] = 0;
+		m_idIntegerTable = 0;
+		m_col2 = 0;
+		m_col3 = 0;
+		m_col4 = 0;
 
-		SetColumn(0, ToDbCase(u8"idchartable"), SQL_INTEGER, &m_idCharTable, SQL_C_SLONG, sizeof(m_idCharTable), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
-		SetColumn(1, ToDbCase(u8"col2"), SQL_VARCHAR, m_col2, SQL_C_WCHAR, sizeof(m_col2), ColumnFlag::CF_SELECT);
-		//SetColDefs(2, u8"col3", DB_DATA_TYPE_VARCHAR, m_col3, SQL_C_WCHAR, sizeof(m_col3), false, false, false, false);
-		SetColumn(3, ToDbCase(u8"col4"), SQL_VARCHAR, m_col4, SQL_C_WCHAR, sizeof(m_col4), ColumnFlag::CF_SELECT);
+		SetColumn(0, ToDbCase(u8"idintegertable"), SQL_INTEGER, &m_idIntegerTable, SQL_C_SLONG, sizeof(m_idIntegerTable), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
+		SetColumn(1, ToDbCase(u8"tint1"), SQL_INTEGER, &m_col2, SQL_C_SLONG, sizeof(m_col2), ColumnFlag::CF_SELECT);
+		SetColumn(2, ToDbCase(u8"tint2"), SQL_INTEGER, &m_col3, SQL_C_SLONG, sizeof(m_col3), ColumnFlag::CF_SELECT);
+		SetColumn(3, ToDbCase(u8"tint3"), SQL_INTEGER, &m_col4, SQL_C_SLONG, sizeof(m_col4), ColumnFlag::CF_SELECT);
+	}
+
+
+
+	// IncompleteIntegerTable
+	// ---------------------
+	MIncompleteIntegerTable::MIncompleteIntegerTable(ConstDatabasePtr pDb)
+		: Table(pDb, TableAccessFlag::AF_READ, ToDbCase(u8"integertable"))
+	{
+		m_idIntegerTable = 0;
+		m_col2 = 0;
+		//m_col3 = 0;
+		m_col4 = 0;
+
+		SetColumn(0, ToDbCase(u8"idintegertable"), SQL_INTEGER, &m_idIntegerTable, SQL_C_SLONG, sizeof(m_idIntegerTable), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
+		SetColumn(1, ToDbCase(u8"tint1"), SQL_INTEGER, &m_col2, SQL_C_SLONG, sizeof(m_col2), ColumnFlag::CF_SELECT);
+		//SetColumn(2, ToDbCase(u8"tint2"), SQL_INTEGER, &m_col3, SQL_C_SLONG, sizeof(m_col3), ColumnFlag::CF_SELECT);
+		SetColumn(2, ToDbCase(u8"tint3"), SQL_INTEGER, &m_col4, SQL_C_SLONG, sizeof(m_col4), ColumnFlag::CF_SELECT);
 	}
 
 
