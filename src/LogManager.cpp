@@ -38,7 +38,7 @@ namespace exodbc
 		: m_globalLogLevel(LogLevel::Info)
 #endif
 	{
-		LogHandlerPtr pDefaultHandler = std::make_shared<StdErrLogHandler>();
+		LogHandlerPtr pDefaultHandler = std::make_shared<StdLogHandler>();
 		RegisterLogHandler(pDefaultHandler);
 	}
 

@@ -44,18 +44,40 @@ namespace exodbc
 	typedef std::shared_ptr<LogHandler> LogHandlerPtr;
 
 	/*!
-	* \class	StdErrLogHandler
-	* \brief	A simple LogHandler that prints all messages nicely formated to stderr.
+	* \class	StdLogHandler
+	* \brief	A simple LogHandler that prints all messages nicely formated to stderr or stdout, depending on their level.
+	*			Messages with a LogLevel of Warning or Error are logged to stderr, Info and Debug to stdout.
+	*			The logger can be tweaked to output to stderr or stdout only, or to both.
+	* \details	Depending on RedirectToStdErr() and RedirectToStdOut() the logger will log to only stderr, stdout or 
+	*			to both. If only one of RedirectToStdErr() or RedirectToStdOut() is set to true, messages are
+	*			logged to that stream exclusively. If both are set, messages are logged to both streams. If none is
+	*			of them are set, messages are logged to stderr or stdout depending on their LogLevel. This is the
+	*			default behaviour.
 	*/
-	class EXODBCAPI StdErrLogHandler
+	class EXODBCAPI StdLogHandler
 		: public LogHandler
 	{
 	public:
+		StdLogHandler()
+			: m_redirectToStdErr(false)
+			, m_redirectToStdOut(false)
+		{};
+
 		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override;
 		virtual bool operator==(const LogHandler& other) const override;
+
+		void RedirectToStdErr(bool enable) noexcept { m_redirectToStdErr = enable; };
+		void RedirectoToStdOut(bool enable) noexcept { m_redirectToStdOut = enable; };
+
+		bool IsRedirectingToStdErr() const noexcept { return m_redirectToStdErr; };
+		bool IsRedirectingToStdOut() const noexcept { return m_redirectToStdOut; };
+
+	private:
+		bool m_redirectToStdErr;
+		bool m_redirectToStdOut;
 	};
 	
-	typedef std::shared_ptr<StdErrLogHandler> StdErrLogHandlerPtr;
+	typedef std::shared_ptr<StdLogHandler> StdErrLogHandlerPtr;
 
 	/*!
 	* \class	NullLogHandler

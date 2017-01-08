@@ -100,6 +100,8 @@ int main(int argc, char* argv[])
 	using namespace exodbc;
 	namespace ba = boost::algorithm;
 
+	bool haveConsoleLogLevel = false;
+
 	// If --help is passed, just print usage and exit
 	// IF --logLevelX is set, set the log-level early
 	for (int i = 0; i < argc; i++)
@@ -117,18 +119,22 @@ int main(int argc, char* argv[])
 		else if (ba::iequals(arg, u8"--logLevelE"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
+			haveConsoleLogLevel = true;
 		}
 		else if (ba::iequals(arg, u8"--logLevelW"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
+			haveConsoleLogLevel = true;
 		}
 		else if (ba::iequals(arg, u8"--logLevelI"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
+			haveConsoleLogLevel = true;
 		}
 		else if (ba::iequals(arg, u8"--logLevelD"))
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
+			haveConsoleLogLevel = true;
 		}
 		else if (ba::iequals(arg, u8"--logFile"))
 		{
@@ -250,7 +256,13 @@ int main(int argc, char* argv[])
 			}
 			LOG_INFO(boost::str(boost::format(u8"Using settings from %1%") % settingsPath));
 			vector<string> skipNames;
+			// Remember a log-level set on the console
+			LogLevel logLevel = LogManager::Get().GetGlobalLogLevel();
 			g_odbcInfo.Load(settingsPath, skipNames);
+			if (haveConsoleLogLevel)
+			{
+				LogManager::Get().SetGlobalLogLevel(logLevel);
+			}
 			// Set a gtest-filter statement to skip those names if no gtest-filter arg is setted
 			bool haveFilter = false;
 			for (int i = 1; i < argc; i++)
