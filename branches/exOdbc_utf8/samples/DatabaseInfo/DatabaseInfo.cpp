@@ -212,7 +212,11 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			continue;
 		}
 
+#ifdef _WIN32
+		t.SetSql2BufferTypeMap(WCharSql2BufferMap::Create());
+#else
 		t.SetSql2BufferTypeMap(CharSql2BufferMap::Create());
+#endif
 		try
 		{
 			columns = t.CreateAutoColumnBufferPtrs(true, true, false);
@@ -266,11 +270,20 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 					WRITE_STDOUT(u8"||= ");
 					first = false;
 				}
+#ifdef _WIN32
+				WCharColumnBufferPtr pBuff = boost::get<WCharColumnBufferPtr>(*itCol);
+#else
 				CharColumnBufferPtr pBuff = boost::get<CharColumnBufferPtr>(*itCol);
+#endif
 				if (!pBuff->IsNull())
 				{
-                    string s = pBuff->GetString();
-					WRITE_STDOUT(pBuff->GetString());
+#ifdef _WIN32
+					wstring ws = pBuff->GetWString();
+					string s = utf16ToUtf8(ws);
+#else
+					string s = pBuff->GetString();
+#endif
+					WRITE_STDOUT(s);
 				}
 				else
 				{
