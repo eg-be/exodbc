@@ -122,6 +122,12 @@ add_custom_command(TARGET exodbctest POST_BUILD
                        ${PROJECT_SOURCE_DIR}/TestSettings.xml
                        $<TARGET_FILE_DIR:exodbctest>)
 
+# and copy the create test db scripts:
+add_custom_command(TARGET exodbctest POST_BUILD
+					COMMAND ${CMAKE_COMMAND} -E copy_directory
+					${PROJECT_SOURCE_DIR}/sql
+					$<TARGET_FILE_DIR:exodbctest>/CreateScripts)
+
 add_test( NAME MySqlTest 
           COMMAND exodbctest
           "cs=Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;"

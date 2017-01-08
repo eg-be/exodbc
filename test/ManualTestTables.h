@@ -174,19 +174,34 @@ namespace exodbctest
 	};
 
 
-	// IncompleCharTable
-	// -----------------
-	class MIncompleteCharTable : public exodbc::Table
+	// IntegerTable
+	// ------------
+	class MIntegerTable : public exodbc::Table
 	{
 	public:
-		MIncompleteCharTable(exodbc::ConstDatabasePtr pDb);
-		virtual ~MIncompleteCharTable() {};
+		MIntegerTable(exodbc::ConstDatabasePtr pDb);
+		virtual ~MIntegerTable() {};
 
-		SQLINTEGER	m_idCharTable;
-		SQLWCHAR	m_col2[128 + 1];
+		SQLINTEGER	m_idIntegerTable;
+		SQLINTEGER	m_col2;
+		SQLINTEGER	m_col3;
+		SQLINTEGER	m_col4;
+	};
+
+
+	// IncompleIntegerTable
+	// --------------------
+	class MIncompleteIntegerTable : public exodbc::Table
+	{
+	public:
+		MIncompleteIntegerTable(exodbc::ConstDatabasePtr pDb);
+		virtual ~MIncompleteIntegerTable() {};
+
+		SQLINTEGER	m_idIntegerTable;
+		SQLINTEGER	m_col2;
 		// we do not bind col3 and have a gap
-		//SQLWCHAR	m_col3[128 + 1];
-		SQLWCHAR	m_col4[128 + 2];
+		//SQLINTEGER	m_col3;
+		SQLINTEGER	m_col4;
 	};
 
 

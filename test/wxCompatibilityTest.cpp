@@ -449,64 +449,63 @@ namespace exodbctest
 	}
 	
 
-	TEST_F(wxCompatibilityTest, SelectIncompleteTable)
+	TEST_F(wxCompatibilityTest, SelectUsingStarTable)
 	{
-		MCharTable table(m_pDb);
-		MIncompleteCharTable incTable(m_pDb);
-		ASSERT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
-		ASSERT_NO_THROW(incTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
+		// Selecting using the '*' will work if all columns are bound
+		MIntegerTable intTable(m_pDb);
+		ASSERT_NO_THROW(intTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 
 		std::string sqlstmt;
-		sqlstmt = u8"DELETE FROM exodbc.chartable WHERE idchartable >= 0";
-		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
-		EXPECT_NO_THROW(m_pDb->CommitTrans() );
+		intTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.integertable WHERE idintegertable = 1");
+		EXPECT_TRUE(intTable.SelectNext());
+		EXPECT_FALSE(intTable.IsColumnNull(0));
+		EXPECT_FALSE(intTable.IsColumnNull(1));
+		EXPECT_FALSE(intTable.IsColumnNull(2));
+		EXPECT_FALSE(intTable.IsColumnNull(3));
+		EXPECT_EQ(1, intTable.m_idIntegerTable);
+		EXPECT_EQ(2, intTable.m_col2);
+		EXPECT_EQ(3, intTable.m_col3);
+		EXPECT_EQ(4, intTable.m_col4);
 
-		// Select using '*' on complete table
-		sqlstmt = u8"INSERT INTO exodbc.chartable (idchartable, col2, col3, col4) VALUES (1, 'r1_c2', 'r1_c3', 'r1_c4')";
-		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
-		EXPECT_NO_THROW(m_pDb->CommitTrans());
-		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartable WHERE idchartable = 1");
-		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col2))));
-		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col3))));
-		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col4))));
-		EXPECT_FALSE(table.SelectNext());
+		intTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.integertable WHERE idintegertable = 2");
+		EXPECT_TRUE(intTable.SelectNext());
+		EXPECT_FALSE(intTable.IsColumnNull(0));
+		EXPECT_FALSE(intTable.IsColumnNull(1));
+		EXPECT_TRUE(intTable.IsColumnNull(2));
+		EXPECT_FALSE(intTable.IsColumnNull(3));
+		EXPECT_EQ(2, intTable.m_idIntegerTable);
+		EXPECT_EQ(20, intTable.m_col2);
+		EXPECT_EQ(40, intTable.m_col4);
+	}
 
-		// Select with fields on complete table
-		table.m_col2[0] = 0;
-		table.m_col3[0] = 0;
-		table.m_col4[0] = 0;
-		table.SelectBySqlStmt(u8"SELECT idchartable, col2, col3, col4 FROM exodbc.chartable WHERE idchartable = 1");
-		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col2))));
-		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col3))));
-		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_col4))));
-		EXPECT_FALSE(table.SelectNext());
 
-		// We fail to read with the star, because it will select columns id (1), c2(2), c3(3) and c4(4), but we have bound  
-		// the select statement to a query with 3 params only, with column numbers 1 (id), 2(c2), 3(which we expect to be c4, but is here c3)
-		// This is like that since Ticket #114 has been fixed (was before: Now test by reading the incomplete table using '*': 
-		//									It works as we've still used the indexes "as in the db" when we've bound the columns)
-		incTable.m_col2[0] = 0;
-		incTable.m_col4[0] = 0;
-		incTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartable WHERE idchartable = 1");
-		EXPECT_TRUE(incTable.SelectNext());
-		EXPECT_EQ(1, incTable.m_idCharTable);
-		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(incTable.m_col2))));
-		EXPECT_NE(std::wstring(L"r1_c4"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(incTable.m_col4))));
-		EXPECT_EQ(std::wstring(L"r1_c3"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(incTable.m_col4))));
-		EXPECT_FALSE(incTable.SelectNext());
+	TEST_F(wxCompatibilityTest, SelectIncompleteTable)
+	{
+		// Selecting using the '*' will not work if not columns are bound:
+		// we bind column 1, 2 and 4, but in column 4 we will get the result of the 
+		// not bound column 3 if we select using '*':
+		MIncompleteIntegerTable intTable(m_pDb);
+		ASSERT_NO_THROW(intTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 
-		// It does work if we pass the column names
-		RecordProperty("Ticket", 15);
-		incTable.m_col2[0] = 0;
-		incTable.m_col4[0] = 0;
-		incTable.SelectBySqlStmt(u8"SELECT idchartable, col2, col4 FROM exodbc.chartable WHERE idchartable = 1");
-		EXPECT_TRUE(incTable.SelectNext());
-		EXPECT_EQ(1, incTable.m_idCharTable);
-		EXPECT_EQ(std::wstring(L"r1_c2"), boost::trim_right_copy(wstring(reinterpret_cast<const wchar_t*>(incTable.m_col2))));
-		EXPECT_EQ(std::wstring(L"r1_c4"), boost::trim_right_copy(wstring(reinterpret_cast<const wchar_t*>(incTable.m_col4))));
-		EXPECT_FALSE(incTable.SelectNext());
+		std::string sqlstmt;
+		intTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.integertable WHERE idintegertable = 1");
+		EXPECT_TRUE(intTable.SelectNext());
+		EXPECT_FALSE(intTable.IsColumnNull(0));
+		EXPECT_FALSE(intTable.IsColumnNull(1));
+		EXPECT_FALSE(intTable.IsColumnNull(2));
+		EXPECT_EQ(1, intTable.m_idIntegerTable);
+		EXPECT_EQ(2, intTable.m_col2);
+		EXPECT_EQ(3, intTable.m_col4);
+
+		// But its not a problem if we list the columns to be selected
+		intTable.SelectBySqlStmt(u8"SELECT idintegertable, tint1, tint3 FROM exodbc.integertable WHERE idintegertable = 2");
+		EXPECT_TRUE(intTable.SelectNext());
+		EXPECT_FALSE(intTable.IsColumnNull(0));
+		EXPECT_FALSE(intTable.IsColumnNull(1));
+		EXPECT_FALSE(intTable.IsColumnNull(2));
+		EXPECT_EQ(2, intTable.m_idIntegerTable);
+		EXPECT_EQ(20, intTable.m_col2);
+		EXPECT_EQ(40, intTable.m_col4);
 	}
 
 
