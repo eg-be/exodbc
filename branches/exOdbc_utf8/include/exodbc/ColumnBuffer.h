@@ -552,17 +552,38 @@ namespace exodbc
 		*/
 		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
 
-		/*!
-		* \brief	Get the data of the buffer as std::wstring
-		* \throw	NullValueException if buffer is set to NULL.
-		*/
-		std::wstring GetWString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return reinterpret_cast<const wchar_t*>(m_buffer.data()); };
-		
-		/*!
-		* \brief	Get the data of the buffer as std::string
-		* \throw	NullValueException if buffer is set to NULL.
-		*/
-		std::string GetString() const { if (IsNull()) { NullValueException nve(GetQueryName()); SET_EXCEPTION_SOURCE(nve); throw nve; } return reinterpret_cast<const char*>(m_buffer.data()); };
+
+		///*!
+		//* \brief	Get the data of the buffer as std::wstring
+		//* \throw	NullValueException if buffer is set to NULL.
+		//*/
+		template<class Q = T>
+		typename std::enable_if<std::is_same<Q, SQLWCHAR>::value, std::wstring>::type GetWString() const
+		{
+			if (IsNull()) {
+				NullValueException nve(GetQueryName());
+				SET_EXCEPTION_SOURCE(nve);
+				throw nve;
+			}
+			return reinterpret_cast<const wchar_t*>(m_buffer.data());
+		};
+
+
+		///*!
+		//* \brief	Get the data of the buffer as std::string
+		//* \throw	NullValueException if buffer is set to NULL.
+		//*/
+		template<class Q = T>
+		typename std::enable_if<std::is_same<Q, SQLCHAR>::value, std::string>::type GetString() const
+		{
+			if (IsNull()) {
+				NullValueException nve(GetQueryName());
+				SET_EXCEPTION_SOURCE(nve);
+				throw nve;
+			}
+			return reinterpret_cast<const char*>(m_buffer.data());
+		};
+
 
 		/*!
 		* \brief	Set passed std::wstring as value on the buffer. Null terminates the buffer.
