@@ -91,6 +91,28 @@ namespace exodbc
 	}
 
 
+	void LogManager::WriteStdErr(const std::string& msg) const
+	{
+		lock_guard<mutex> lock(m_stderrMutex);
+#ifdef _WIN32
+		std::wcerr << utf8ToUtf16(msg) << std::endl;
+#else
+		std::cerr << msg << std::endl;
+#endif
+	}
+
+
+	void LogManager::WriteStdOut(const std::string& msg) const
+	{
+		lock_guard<mutex> lock(m_stdoutMutex);
+#ifdef _WIN32
+		std::wcout << utf8ToUtf16(msg) << std::endl;
+#else
+		std::cout << msg << std::endl;
+#endif
+	}
+
+
 	size_t LogManager::GetRegisteredLogHandlersCount() const noexcept
 	{
 		lock_guard<mutex> lock(m_logHandlersMutex);
