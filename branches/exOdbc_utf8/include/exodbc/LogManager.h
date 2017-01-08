@@ -88,6 +88,20 @@ namespace exodbc
 
 
 		/*!
+		* \brief Output the passed message to stderr. On linux, this will output to cerr, on windows it will
+		* convert the message to UTF-16 and output to wcerr. A newline is added at the end of msg.
+		*/
+		void WriteStdErr(const std::string& msg) const;
+
+
+		/*!
+		* \brief Output the passed message to stdout. On linux, this will output to cout, on windows it will
+		* convert the message to UTF-16 and output to wcout. A newline is added at the end of msg.
+		*/
+		void WriteStdOut(const std::string& msg) const;
+
+
+		/*!
 		* \brief Return how many LogHandler instances are registered.
 		*/
 		size_t GetRegisteredLogHandlersCount() const noexcept;
@@ -114,6 +128,9 @@ namespace exodbc
 
 		LogLevel m_globalLogLevel;
 		mutable std::mutex m_globalLogLevelMutex;
+
+		mutable std::mutex m_stdoutMutex;
+		mutable std::mutex m_stderrMutex;
 	};
 }
 
@@ -182,3 +199,8 @@ namespace exodbc
 #define LOG_INFO_STMT(hStmt, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, hStmt, NULL, ret, SqlFunction)
 #define LOG_INFO_DESC(hDesc, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, NULL, hDesc, ret, SqlFunction)
 
+// Generic helpers to write to stdout / stderr
+#define WRITE_STDOUT(msg) exodbc::LogManager::Get().WriteStdOut(msg);
+
+// Generic STDERR
+#define WRITE_STDERR(msg) exodbc::LogManager::Get().WriteStdErr(msg);
