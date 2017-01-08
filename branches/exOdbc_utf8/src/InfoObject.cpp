@@ -423,7 +423,7 @@ namespace exodbc
 		StringMap::const_iterator it = m_stringMap.find(prop);
 		if (it == m_stringMap.end())
 		{
-			NotFoundException nfe(boost::str(boost::format(u8"WString Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
+			NotFoundException nfe(boost::str(boost::format(u8"String Property '%s' (%d) not found") % GetPropertyName(prop) % (SQLUSMALLINT)prop));
 			SET_EXCEPTION_SOURCE(nfe);
 			throw nfe;
 		}

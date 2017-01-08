@@ -17,6 +17,7 @@
 #include "exodbc/Database.h"
 #include "exodbc/Table.h"
 #include "exodbc/ExecutableStatement.h"
+#include "exodbc/LogManager.h"
 
 int main()
 {
@@ -29,7 +30,7 @@ int main()
 
 		// And connect to a database using the environment.
 		DatabasePtr pDb = Database::Create(pEnv);
-		pDb->Open(u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;");
+		pDb->Open(u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;");
 
 		// Set up some test table - try to drop first if it already exists
 		// auto commit is off by default, so commit changes manually
@@ -79,18 +80,34 @@ int main()
 		// So open the table again, but let the driver convert everything to WCHAR buffers:
 		t.Close();
 
+#ifdef _WIN32
 		t.SetSql2BufferTypeMap(std::make_shared<WCharSql2BufferMap>());
+#else
+		t.SetSql2BufferTypeMap(std::make_shared<CharSql2BufferMap>());
+#endif
 		t.Open();
 
+#ifdef _WIN32
 		auto pIdCharCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(0);
 		auto pNameCharCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
 		auto pLastUpdateCharCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(2);
+#else
+		auto pIdCharCol = t.GetColumnBufferPtr<CharColumnBufferPtr>(0);
+		auto pNameCharCol = t.GetColumnBufferPtr<CharColumnBufferPtr>(1);
+		auto pLastUpdateCharCol = t.GetColumnBufferPtr<CharColumnBufferPtr>(2);
+#endif
 
 		// Simply query by manually providing a where statement:
 		t.Select(u8"id = 13");
 		while (t.SelectNext())
 		{
-			std::wcout << u8"id: " << pIdCharCol->GetWString() << u8"; Name: " << pNameCharCol->GetWString() << u8"; LastUpdate: " << pLastUpdateCharCol->GetWString() << std::endl;
+			std::stringstream ss;
+#ifdef _WIN32
+			ss << u8"id: " << utf16ToUtf8(pIdCharCol->GetWString()) << u8"; Name: " << utf16ToUtf8(pNameCharCol->GetWString()) << u8"; LastUpdate: " << utf16ToUtf8(pLastUpdateCharCol->GetWString());
+#else
+			ss << u8"id: " << pIdCharCol->GetString() << u8"; Name: " << pNameCharCol->GetString() << u8"; LastUpdate: " << pLastUpdateCharCol->GetString();
+#endif
+			WRITE_STDOUT_ENDL(ss.str());
 		}
 
 		// Or create a prepared statement that binds buffers as result columns and as parameter markers:
@@ -105,19 +122,27 @@ int main()
 		
 		while (stmt.SelectNext())
 		{
-			std::wcout << u8"id: " << *pIdCol << u8"; Name: " << pNameCharCol->GetWString() << u8"; LastUpdate: " << pLastUpdateCharCol->GetWString() << std::endl;
+			std::stringstream ss;
+#ifdef _WIN32
+			ss << u8"id: " << pIdCol->GetValue() << u8"; Name: " << utf16ToUtf8(pNameCharCol->GetWString()) << u8"; LastUpdate: " << utf16ToUtf8(pLastUpdateCharCol->GetWString());
+#else
+			ss << u8"id: " << pIdCol->GetValue() << u8"; Name: " << pNameCharCol->GetString() << u8"; LastUpdate: " << pLastUpdateCharCol->GetString();
+#endif
+			WRITE_STDOUT_ENDL(ss.str());
 		}
 
 		// Execute the same prepared statement again with different where values:
 		pIdCol->SetValue(99);
 		if (!stmt.SelectNext())
 		{
-			std::wcout << u8"No results found for id: " << *pIdCol << std::endl;
+			std::stringstream ss;
+			ss << u8"No results found for id: " << *pIdCol;
+			WRITE_STDOUT_ENDL(ss.str());
 		}
 	}
 	catch (const Exception& ex)
 	{
-		std::cerr << ex.ToString() << std::endl;
+		WRITE_STDERR_ENDL(ex.ToString());
 	}
     return 0;
 }

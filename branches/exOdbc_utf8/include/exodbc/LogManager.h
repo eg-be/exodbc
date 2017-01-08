@@ -91,14 +91,14 @@ namespace exodbc
 		* \brief Output the passed message to stderr. On linux, this will output to cerr, on windows it will
 		* convert the message to UTF-16 and output to wcerr. A newline is added at the end of msg.
 		*/
-		void WriteStdErr(const std::string& msg) const;
+		void WriteStdErr(const std::string& msg, bool appendEndl) const;
 
 
 		/*!
 		* \brief Output the passed message to stdout. On linux, this will output to cout, on windows it will
 		* convert the message to UTF-16 and output to wcout. A newline is added at the end of msg.
 		*/
-		void WriteStdOut(const std::string& msg) const;
+		void WriteStdOut(const std::string& msg, bool appendEndl) const;
 
 
 		/*!
@@ -199,8 +199,14 @@ namespace exodbc
 #define LOG_INFO_STMT(hStmt, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, hStmt, NULL, ret, SqlFunction)
 #define LOG_INFO_DESC(hDesc, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, NULL, hDesc, ret, SqlFunction)
 
-// Generic helpers to write to stdout / stderr
-#define WRITE_STDOUT(msg) exodbc::LogManager::Get().WriteStdOut(msg);
+// Write to std::cout or std::wcout, adding a std::endl after the message
+#define WRITE_STDOUT_ENDL(msg) exodbc::LogManager::Get().WriteStdOut(msg, true);
 
-// Generic STDERR
-#define WRITE_STDERR(msg) exodbc::LogManager::Get().WriteStdErr(msg);
+// Write to std::cerr or std::wcerr
+#define WRITE_STDERR_ENDL(msg) exodbc::LogManager::Get().WriteStdErr(msg, true);
+
+// Write to std::cout or std::wcout
+#define WRITE_STDOUT(msg) exodbc::LogManager::Get().WriteStdOut(msg, false);
+
+// Write to std::cerr or std::wcerr, adding a std::endl after the message
+#define WRITE_STDERR(msg) exodbc::LogManager::Get().WriteStdErr(msg, false);

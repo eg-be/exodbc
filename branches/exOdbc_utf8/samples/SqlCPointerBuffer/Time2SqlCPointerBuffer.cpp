@@ -43,7 +43,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		// And connect to a database using the environment.
 		DatabasePtr pDb = Database::Create(pEnv);
-		pDb->Open(u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;");
+		pDb->Open(u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;");
 
 		// Create a table with a SQL Server time(7) column.
 		// The time2 column has a fractional part (while the general time columns in SQL do not have
@@ -120,11 +120,13 @@ int _tmain(int argc, _TCHAR* argv[])
 		if(t.SelectNext())
 		{ 
 			// And print the value
-			std::wcout << u8"TimeCol value: " << time2.hour << u8":" << time2.minute << u8":" << time2.second << u8"." << time2.fraction << endl;
+			stringstream ss;
+			ss << u8"TimeCol value: " << time2.hour << u8":" << time2.minute << u8":" << time2.second << u8"." << time2.fraction;
+			WRITE_STDOUT_ENDL(ss.str());
 		}
 		else
 		{
-			std::cerr << u8"No data found!" << std::endl;
+			WRITE_STDERR_ENDL(u8"No data found!");
 		}
 
 		// And modify the value through our buffer:
@@ -142,12 +144,14 @@ int _tmain(int argc, _TCHAR* argv[])
 		t.Select(u8"", boost::str(boost::format(u8"%s DESC") % pTime2Col->GetQueryName()));
 		while (t.SelectNext())
 		{
-			std::wcout << u8"TimeCol value: " << time2.hour << u8":" << time2.minute << u8":" << time2.second << u8"." << time2.fraction << endl;
+			stringstream ss;
+			ss << u8"TimeCol value: " << time2.hour << u8":" << time2.minute << u8":" << time2.second << u8"." << time2.fraction << endl;
+			WRITE_STDOUT_ENDL(ss.str());
 		}
 	}
 	catch (const Exception& ex)
 	{
-		std::cerr << ex.ToString() << std::endl;
+		WRITE_STDERR_ENDL(ex.ToString());
 	}
 	return 0;
 }
