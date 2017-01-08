@@ -509,6 +509,7 @@ namespace exodbctest
 	}
 
 
+#ifdef _WIN32
 	TEST_F(wxCompatibilityTest, ExecSql_InsertCharTypes)
 	{
 		MWCharTypesTable table(m_pDb);
@@ -540,6 +541,7 @@ namespace exodbctest
 		EXPECT_EQ( std::wstring(L" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_char))));
 		EXPECT_FALSE(table.SelectNext());
 	}
+#endif
 
 
 	TEST_F(wxCompatibilityTest, ExecSQL_InsertFloatTypes)
