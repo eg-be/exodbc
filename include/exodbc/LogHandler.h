@@ -25,7 +25,8 @@ namespace exodbc
 {
 	/*!
 	* \class	LogHandler
-	* \brief	Interface for a LogHandler. Must be able to do something with log messages.
+	* \brief	Interface for a LogHandler. Must be able to do something with log messages. Note that OnLogMessage()
+	*			will be called from different threads from the LogManager.
 	*/
 	class EXODBCAPI LogHandler
 	{
@@ -75,6 +76,7 @@ namespace exodbc
 	private:
 		bool m_redirectToStdErr;
 		bool m_redirectToStdOut;
+		mutable std::mutex m_logMutex;
 	};
 	
 	typedef std::shared_ptr<StdLogHandler> StdErrLogHandlerPtr;
@@ -118,7 +120,7 @@ namespace exodbc
 		bool m_prependTimestamp;
 		std::string m_filepath;
 		mutable bool m_firstMessage;
-		mutable std::mutex m_localtimeMutex;
+		mutable std::mutex m_logMutex;
 	};
 
 	typedef std::shared_ptr<FileLogHandler> FileLogHandlerPtr;

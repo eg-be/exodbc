@@ -67,6 +67,7 @@ namespace exodbc
 
 	void StdLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
 	{
+		lock_guard<mutex> lock(m_logMutex);
 		string formatedMessage = FormatLogMessage(level, msg, filename, line, functionname);
 		if (m_redirectToStdErr)
 		{
@@ -141,6 +142,7 @@ namespace exodbc
 
 	void FileLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
 	{
+		lock_guard<mutex> lock(m_logMutex);
 		if (m_firstMessage)
 		{
 			m_filestream = std::ofstream(m_filepath, std::ofstream::out);
@@ -150,7 +152,6 @@ namespace exodbc
 		{
 			if (m_prependTimestamp)
 			{
-				lock_guard<mutex> lock(m_localtimeMutex);
                 std::time_t t = std::time(nullptr);
                 std::tm tm = *std::localtime(&t);
 				m_filestream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << u8": ";
