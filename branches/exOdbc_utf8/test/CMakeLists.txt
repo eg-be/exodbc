@@ -140,7 +140,7 @@ if(MSVC AND CMAKE_SIZEOF_VOID_P LESS 8)
 
 	add_test( NAME AccessTest
           COMMAND exodbctest
-          "cs=Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\\exOdbc\\exOdbcGTest\\access\\exodbc.mdb;Uid=Admin;Pwd=;"
+          "cs=Driver={Microsoft Access Driver (*.mdb)};Dbq=$<TARGET_FILE_DIR:exodbctest>\\exodbc.mdb;Uid=Admin;Pwd=;"
           "--gtest_filter=-BigIntColumnTest.*:wxCompatibilityTest.*:NumericColumnTest.*:DatabaseTest.ReadSchemas:DatabaseTest.ReadTablePrimaryKeysInfo:DatabaseTest.ReadTablePrivileges:DatabaseTest.ReadSpecialColumns:ExecutableStatementTest.SelectAbsolute:ExecutableStatementTest.SelectFirst:ExecutableStatementTest.SelectLast:ExecutableStatementTest.SelectPrev:ExecutableStatementTest.SelectRelative:SqlCPointerTest.ReadBigIntValue:SqlCPointerTest.WriteBigIntValue:SqlCPointerTest.ReadNumeric_*:SqlCPointerTest.WriteNumeric_*:TableTest.CheckPrivileges:TableTest.CreateAutoNumericTypeBuffers:TableTest.DeleteFailOnNoData:TableTest.DeletePk:TableTest.OpenAutoSkipUnsupportedColumn:TableTest.QueryPrimaryKeysAndUpdateColumns:TableTest.SelectAbsolute:TableTest.SelectFirst:TableTest.SelectFromAutoWithSkippedUnsupportedColumn:TableTest.SelectLast:TableTest.SelectPrev:TableTest.SelectRelative:TableTest.UpdateFlag:TableTest.UpdatePk"
           )
 
@@ -151,7 +151,7 @@ if(MSVC AND CMAKE_SIZEOF_VOID_P LESS 8)
 
 	add_test( NAME ExcelTest
           COMMAND exodbctest
-          "cs=Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=E:\\exOdbc\\exOdbcGTest\\excel\\excelTest.xls;"
+          "cs=Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=$<TARGET_FILE_DIR:exodbctest>\\excelTest.xls;"
           "--gtest_filter=ExcelTest.*"
           )
 endif()
@@ -170,4 +170,3 @@ add_test( NAME SqlServerTest
 add_test( NAME Db2Test
           COMMAND exodbctest
           "CS=Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;")
-          
