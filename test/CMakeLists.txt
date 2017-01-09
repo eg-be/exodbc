@@ -128,6 +128,28 @@ add_custom_command(TARGET exodbctest POST_BUILD
 					${PROJECT_SOURCE_DIR}/sql
 					$<TARGET_FILE_DIR:exodbctest>/CreateScripts)
 
+# copy the excel and access files only for windows and 32bit builds
+# and add the corresponding tests:
+if(MSVC AND CMAKE_SIZEOF_VOID_P LESS 8)
+	message(STATUS "Plattform is Win32 and CMAKE_SIZEOF_VOID_P is less than 8, assuming x86")
+	message(STATUS "Adding tests for Access and Excel")
+	add_custom_command(TARGET exodbctest POST_BUILD
+					COMMAND ${CMAKE_COMMAND} -E copy
+					${PROJECT_SOURCE_DIR}/db/access/exodbc.mdb
+					$<TARGET_FILE_DIR:exodbctest>)
+
+	add_test( NAME AccessTest
+          COMMAND exodbctest
+          "cs=Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\\exOdbc\\exOdbcGTest\\access\\exodbc.mdb;Uid=Admin;Pwd=;"
+          "--gtest_filter=-BigIntColumnTest.*:wxCompatibilityTest.*:NumericColumnTest.*:DatabaseTest.ReadSchemas:DatabaseTest.ReadTablePrimaryKeysInfo:DatabaseTest.ReadTablePrivileges:DatabaseTest.ReadSpecialColumns:ExecutableStatementTest.SelectAbsolute:ExecutableStatementTest.SelectFirst:ExecutableStatementTest.SelectLast:ExecutableStatementTest.SelectPrev:ExecutableStatementTest.SelectRelative:SqlCPointerTest.ReadBigIntValue:SqlCPointerTest.WriteBigIntValue:SqlCPointerTest.ReadNumeric_*:SqlCPointerTest.WriteNumeric_*:TableTest.CheckPrivileges:TableTest.CreateAutoNumericTypeBuffers:TableTest.DeleteFailOnNoData:TableTest.DeletePk:TableTest.OpenAutoSkipUnsupportedColumn:TableTest.QueryPrimaryKeysAndUpdateColumns:TableTest.SelectAbsolute:TableTest.SelectFirst:TableTest.SelectFromAutoWithSkippedUnsupportedColumn:TableTest.SelectLast:TableTest.SelectPrev:TableTest.SelectRelative:TableTest.UpdateFlag:TableTest.UpdatePk"
+          )
+
+	add_custom_command(TARGET exodbctest POST_BUILD
+					COMMAND ${CMAKE_COMMAND} -E copy
+					${PROJECT_SOURCE_DIR}/db/excel/excelTest.xls
+					$<TARGET_FILE_DIR:exodbctest>)
+endif()
+
 add_test( NAME MySqlTest 
           COMMAND exodbctest
           "cs=Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;"
