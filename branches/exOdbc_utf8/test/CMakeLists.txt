@@ -148,6 +148,12 @@ if(MSVC AND CMAKE_SIZEOF_VOID_P LESS 8)
 					COMMAND ${CMAKE_COMMAND} -E copy
 					${PROJECT_SOURCE_DIR}/db/excel/excelTest.xls
 					$<TARGET_FILE_DIR:exodbctest>)
+
+	add_test( NAME ExcelTest
+          COMMAND exodbctest
+          "cs=Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=E:\\exOdbc\\exOdbcGTest\\excel\\excelTest.xls;"
+          "--gtest_filter=ExcelTest.*"
+          )
 endif()
 
 add_test( NAME MySqlTest 
