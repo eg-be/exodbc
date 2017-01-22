@@ -163,6 +163,8 @@ To run tests against a specific database, a connection string is required:
   SQLSERVER_TEST_CS       Connection-String used to run tests against Sql Server
   MYSQL_TEST_CS           Connection-String used to run tests against MySql
   DB2_TEST_CS             Connection-String used to run tests against DB2
+  ACCESS_TEST_CS          Connection-String used to run tests against Access
+  EXCEL_TEST_CS           Connection-String used to run tests against Excel
   
 For every database, there is a cache variable allowing to set the --gtest_filter 
 argument value. It is used to skip tests that are known to fail on certain databases.
@@ -178,6 +180,13 @@ See: https://exodbc.elisium.ch/trac/query?milestone=exOdbc+Known+Failures&group=
                               Default: Filter out tests that are known to fail with Access
   EXCEL_TEST_GTEST_FILTER     Argument value for '--gtest_filter'
                               Default: 'ExcelTest.*' run only some very specific excel tests.
+  
+The log level used in exodbctest can be set using the following cache variables:
+  SQLSERVER_TEST_LOG_LEVEL    Default: '--logLevelW'
+  MYSQL_TEST_LOG_LEVEL        Default: '--logLevelW'
+  DB2_TEST_LOG_LEVEL          Default: '--logLevelW'
+  ACCESS_TEST_LOG_LEVEL       Default: '--logLevelW'
+  EXCEL_TEST_LOG_LEVEL        Default: '--logLevelW'
   
 Prepare Test Database
 ---------------------
@@ -216,3 +225,6 @@ TestSettings.xml
 If exodbctest is invoked without arguments, it will search for a file named 'TestSetting.xml'.
 If one is found, the connection string / dsn and which tests to run are determined from the
 TestSettings.xml file.
+
+If no argument '--gtest_filter' is given on the command-line, exodbctest will create such and
+argument that skips all tests defined to be skipped in TestSettings.xml.
