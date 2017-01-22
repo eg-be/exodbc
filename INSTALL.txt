@@ -55,10 +55,10 @@ or to prepare for a 64bit build:
 
 Build all targets:
   
-  cmake --build . --config Release
+  cmake --build . --config Debug
 
 or for release builds:
-  cmake --build . --config Debug
+  cmake --build . --config Release
 
 Install reference
 =================
@@ -70,17 +70,18 @@ Configuration Options
 Some option variables may change the resulting cmake-configuration and can
 be used with cmake:
 
-  BUILD_TESTS:    If set to ON, exodbctest is built. 
-                  Default: ON
-  BUILD_SAMPLES:  If set to ON, samples are built. 
-                  Default: ON
+  BUILD_TESTS:        If set to ON, exodbctest is built. 
+                      Default: ON
+  BUILD_SAMPLES:      If set to ON, samples are built. 
+                      Default: ON
+  BUILD_SHARED_LIBS:  Build shared or static libs. 
+                      Default: OFF
   
 and how dependencies are used:
 
   Boost_USE_STATIC_LIBS:  Set to ON to link against static libs of boost. 
                           Default: OFF
-  BUILD_SHARED_LIBS:      Build shared or static libs. 
-                          Default: Set to ON if not defined.
+  BOOST_ROOT:             Root directory of boost.
 
 For example, to configure 64bit vc140 builds without tests but with samples:
   cmake -G "Visual Studio 14 2015 Win64" -DBUILD_TESTS=OFF ..
@@ -88,13 +89,13 @@ For example, to configure 64bit vc140 builds without tests but with samples:
 To configure 64bit vc140 builds as static lib and link against boost static libs:
   cmake -G "Visual Studio 14 2015 Win64" -DBoost_USE_STATIC_LIBS=ON -DBUILD_SHARED_LIBS=OFF ..
 
-To configure 32bit vc140 builds with dynamic linking:
+To configure 32bit vc140 builds as shared lib with dynamic linking against boost:
   cmake -G "Visual Studio 14 2015" -DBoost_USE_STATIC_LIBS=OFF -DBUILD_SHARED_LIBS=ON ..
 
 Building
 --------
-Use --config during build to choose either 'Release' or 'Debug' configuration 
-((Default is 'Debug'):
+Use --config during build to choose either 'Release' or 'Debug' configuration .
+Default is 'Debug':
 
   cmake --build . --config Release
   
@@ -122,11 +123,96 @@ Use something like this to build the minimal required boost components:
 
 Clean build environment
 -----------------------
-# From build-environment directory:
-cmake --build . --target clean
+From build-environment directory:
+  
+  cmake --build . --target clean
 
 Start over (Clean cmake environment)
 ------------------------------------
-# Simply remove the build-environment directory:
-# From exOdbc top-level directory:
-rmdir /S /Q build
+Simply remove the build-environment directory.
+  
+Test Reference
+==============
+How to run the tests against different databases. exOdbc has been tested against various databases:
+
+* Sql Server
+* MySql
+* DB2
+* Access
+* Excel
+
+For most tests a database with a few tables is required.
+
+Test Options
+------------
+There are a few CMake options to configure which tests to include:
+
+  ENABLE_SQLSERVER_TEST:  Enable the test for Sql Server
+                          Default: ON
+  ENABLE_MYSQL_TEST:      Enable the test for MySql
+                          Default: ON for Windows, OFF for Linux.
+  ENABLE_DB2_TEST:        Enable the test for DB2
+                          Default: ON for Windows, OFF for Linux.
+  ENABLE_ACCESS_TEST      Enable the test for Access. Only set on Windows 32bit builds.
+                          Default: ON
+  ENABLE_EXCEL_TEST       Enable the test for Excel. Only set on Windows 32bit builds.
+                          Default: ON
+
+To run tests against a specific database, a connection string is required:
+
+  SQLSERVER_TEST_CS       Connection-String used to run tests against Sql Server
+  MYSQL_TEST_CS           Connection-String used to run tests against MySql
+  DB2_TEST_CS             Connection-String used to run tests against DB2
+  
+For every database, there is a cache variable allowing to set the --gtest_filter 
+argument value. It is used to skip tests that are known to fail on certain databases.
+See: https://exodbc.elisium.ch/trac/query?milestone=exOdbc+Known+Failures&group=component
+  
+  SQLSERVER_TEST_GTEST_FILTER Argument value for '--gtest_filter'
+                              Default: '*' - all tests are supposed to work on Sql Server
+  MYSQL_TEST_GTEST_FILTER     Argument value for '--gtest_filter'
+                              Default: Filter out tests that are known to fail with My Sql
+  DB2_TEST_GTEST_FILTER       Argument value for '--gtest_filter'
+                              Default: '*' - all tests are supposed to work on DB2
+  ACCESS_TEST_GTEST_FILTER    Argument value for '--gtest_filter'
+                              Default: Filter out tests that are known to fail with Access
+  EXCEL_TEST_GTEST_FILTER     Argument value for '--gtest_filter'
+                              Default: 'ExcelTest.*' run only some very specific excel tests.
+  
+Prepare Test Database
+---------------------
+Scripts to create test databases are provided in test/sql. For Access and Excel, there are database
+files provided in test/db.
+
+Create a new database using the database specific tools. Then run the scripts to create the
+required tables with their values in that database, or use exodbctest with the --createDb
+parameter.
+
+If the --createDb parameter is passed to exodbctest, exodbctest will try to connect to the database,
+using the passed connection string or dsn arguments, try to identify the database-type and run
+the corresponding scripts inside test/sql. Afterwards the tests are run.
+
+see exodbctest help for more information:
+  
+  exodbctest --help
+
+Run Tests
+---------
+Use ctest to run the tests. From the build-environment directory:
+
+  ctest --verbose -C Debug
+  ctest --verbose -C Release
+  
+To run a specific test use:
+
+  ctest --verbose -C Debug -R AccessTest
+
+To list tests:
+
+  ctest -C Debug -N
+  
+TestSettings.xml
+----------------
+If exodbctest is invoked without arguments, it will search for a file named 'TestSetting.xml'.
+If one is found, the connection string / dsn and which tests to run are determined from the
+TestSettings.xml file.
