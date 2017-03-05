@@ -29,7 +29,7 @@ BEGIN
             VALUE "FileDescription", "exOdbc DLL\0"
             VALUE "FileVersion", EXODBC_VERSION_STRING
             VALUE "InternalName", "exOdbc\0"
-            VALUE "LegalCopyright", "Copyright (C) 2016 Elias Gerber\0"
+            VALUE "LegalCopyright", "Copyright (C) 2017 Elias Gerber\0"
             VALUE "OriginalFilename", "exOdbc.dll\0"
             VALUE "ProductName", "exOdbc\0"
             VALUE "ProductVersion", EXODBC_VERSION_STRING

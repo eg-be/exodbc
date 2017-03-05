@@ -29,7 +29,7 @@ BEGIN
             VALUE "FileDescription", "exOdbcTest EXE\0"
             VALUE "FileVersion", EXODBCTEST_VERSION_STRING
             VALUE "InternalName", "exOdbc\0"
-            VALUE "LegalCopyright", "Copyright (C) 2016 Elias Gerber\0"
+            VALUE "LegalCopyright", "Copyright (C) 2017 Elias Gerber\0"
             VALUE "OriginalFilename", "exOdbcTest.exe\0"
             VALUE "ProductName", "exOdbcTest\0"
             VALUE "ProductVersion", EXODBCTEST_VERSION_STRING
