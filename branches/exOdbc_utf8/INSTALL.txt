@@ -50,7 +50,7 @@ boost-system are required to build the tests.
   set BOOST_ROOT=e:/lib/boost_1_62_0
   cmake ..
   
-or to prepare for a 64bit build:
+or to prepare a 64bit build (See cmake doc for a list of available Generators):
   cmake -G "Visual Studio 14 2015 Win64" ..
 
 Build all targets:
