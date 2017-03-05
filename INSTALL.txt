@@ -94,9 +94,10 @@ To configure 32bit vc140 builds as shared lib with dynamic linking against boost
 
 Building
 --------
-Use --config during build to choose either 'Release' or 'Debug' configuration .
+Use '--config' to build a 'Release' or 'Debug' configuration.
 Default is 'Debug':
 
+  cmake --build . --config Debug
   cmake --build . --config Release
   
 Dependencies
@@ -110,7 +111,8 @@ exOdbcTest
   - boost:  Only boost-filesystem is required (but it must be compiled).
   - libexodbc
   
-Use something like this to build the minimal required boost components:
+Some samples on how to build the required boost components, see the boost documentation for 
+more information:
     bootstrap
     b2 --with-filesystem variant=debug link=shared threading=multi runtime-link=shared address-model=32
     b2 --with-filesystem variant=release link=shared threading=multi runtime-link=shared address-model=32
@@ -169,6 +171,7 @@ To run tests against a specific database, a connection string is required:
 For every database, there is a cache variable allowing to set the --gtest_filter 
 argument value. It is used to skip tests that are known to fail on certain databases.
 See: https://exodbc.elisium.ch/trac/query?milestone=exOdbc+Known+Failures&group=component
+for a list of tests known to fail.
   
   SQLSERVER_TEST_GTEST_FILTER Argument value for '--gtest_filter'
                               Default: '*' - all tests are supposed to work on Sql Server
@@ -193,10 +196,9 @@ Prepare Test Database
 Scripts to create test databases are provided in test/sql. For Access and Excel, there are database
 files provided in test/db.
 
-Create a new database using the database specific tools. Then run the scripts to create the
-required tables with their values in that database, or use exodbctest with the --createDb
-parameter.
-
+First create a new database using the database specific tools. Then run the scripts in the test/sql 
+directory to create the required tables with their values in that database. You can also use 
+exodbctest with the --createDb parameter to create the required tables:
 If the --createDb parameter is passed to exodbctest, exodbctest will try to connect to the database,
 using the passed connection string or dsn arguments, try to identify the database-type and run
 the corresponding scripts inside test/sql. Afterwards the tests are run.
