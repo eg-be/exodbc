@@ -118,7 +118,18 @@ during configuring, using the option CMAKE_BUILD_TYPE
 
   cmake -DCMAKE_BUILD_TYPE=Debug ..
   cmake -DCMAKE_BUILD_TYPE=Release ..
- 
+
+Generated Files
+---------------
+Note that during configuration the following files will be generated inside the
+source folder:
+
+  include/exodbc/exodbcConfig.ha
+  test/exOdbcTestConfig.h
+
+Do not remove those files.
+
+  
 Dependencies
 ------------
 libexodbc:
