@@ -152,6 +152,14 @@ Start over (Clean cmake environment)
 ------------------------------------
 Simply remove the build-environment directory.
   
+Documentation
+=============
+Documentation requires doxygen and can be built using the target 'doc':
+
+  cmake --build . --target doc
+  
+The resulting docs will be placed in a folder 'doc'.
+
 Test Reference
 ==============
 How to run the tests against different databases. exOdbc has been tested against various databases:
