@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file Helpers.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.07.2014
@@ -29,7 +29,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void GetInfo(ConstSqlDbcHandlePtr pHDbc, SQLUSMALLINT fInfoType, std::wstring& sValue)
+	void GetInfo(ConstSqlDbcHandlePtr pHDbc, SQLUSMALLINT fInfoType, std::string& sValue)
 	{
 		// Determine buffer length
 		exASSERT(pHDbc);
@@ -39,22 +39,22 @@ namespace exodbc
 		{
 			// \note: DB2 will here always return SQL_SUCCESS_WITH_INFO to report that data got truncated, although we didnt even feed in a buffer.
 			// To avoid having tons of warning with the (wrong) info that data has been truncated, we just hide those messages here
-			THROW_IFN_SUCCEEDED_SILENT_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, pHDbc->GetHandle(), (boost::wformat(L"GetInfo for fInfoType %d failed") % fInfoType).str());
+			THROW_IFN_SUCCEEDED_SILENT_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, pHDbc->GetHandle(), (boost::format(u8"GetInfo for fInfoType %d failed") % fInfoType).str());
 		}
 
 		// According to the doc SQLGetInfo will always return byte-size. Therefore:
-		exASSERT((bufferSize % sizeof(SQLWCHAR)) == 0);
+		exASSERT((bufferSize % sizeof(SQLAPICHARTYPE)) == 0);
 
 		// Allocate buffer, add one for terminating 0 char.
-		SQLSMALLINT charSize = (bufferSize / sizeof(SQLWCHAR)) + 1;
-		bufferSize = charSize * sizeof(SQLWCHAR);
-		std::unique_ptr<SQLWCHAR[]> buff(new SQLWCHAR[charSize]);
+		SQLSMALLINT charSize = (bufferSize / sizeof(SQLAPICHARTYPE)) + 1;
+		bufferSize = charSize * sizeof(SQLAPICHARTYPE);
+		std::unique_ptr<SQLAPICHARTYPE[]> buff(new SQLAPICHARTYPE[charSize]);
 		buff[0] = 0;
 		SQLSMALLINT cb;
 
 		GetInfo(pHDbc, fInfoType, (SQLPOINTER)buff.get(), bufferSize, &cb);
 
-		sValue = reinterpret_cast<const wchar_t*>(buff.get());
+		sValue = SQLAPICHARPTR_TO_EXODBCSTR(buff.get());
 	}
 
 
@@ -63,7 +63,7 @@ namespace exodbc
 		exASSERT(pHDbc);
 		exASSERT(pHDbc->IsAllocated());
 		SQLRETURN ret = SQLGetInfo(pHDbc->GetHandle(), fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue);
-		THROW_IFN_SUCCEEDED_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, pHDbc->GetHandle(), (boost::wformat(L"GetInfo for fInfoType %d failed") % fInfoType).str());
+		THROW_IFN_SUCCEEDED_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, pHDbc->GetHandle(), (boost::format(u8"GetInfo for fInfoType %d failed") % fInfoType).str());
 	}
 
 
@@ -75,7 +75,7 @@ namespace exodbc
 
 		bool isNull;
 		SQLRETURN ret = SQLGetData(pHStmt->GetHandle(), colOrParamNr, targetType, pTargetValue, bufferLen, strLenOrIndPtr);
-		THROW_IFN_SUCCEEDED_MSG(SQLGetData, ret, SQL_HANDLE_STMT, pHStmt->GetHandle(), (boost::wformat(L"SGLGetData failed for Column %d") % colOrParamNr).str());
+		THROW_IFN_SUCCEEDED_MSG(SQLGetData, ret, SQL_HANDLE_STMT, pHStmt->GetHandle(), (boost::format(u8"SGLGetData failed for Column %d") % colOrParamNr).str());
 
 		isNull = (*strLenOrIndPtr == SQL_NULL_DATA);
 		if (pIsNull)
@@ -85,19 +85,20 @@ namespace exodbc
 	}
 
 
-	void GetData(ConstSqlStmtHandlePtr pHStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::wstring& value, bool* pIsNull /* = NULL */)
+	void GetData(ConstSqlStmtHandlePtr pHStmt, SQLUSMALLINT colOrParamNr, size_t maxNrOfChars, std::string& value, bool* pIsNull /* = NULL */)
 	{
-		value = L"";
-		std::unique_ptr<SQLWCHAR[]> buffer(new SQLWCHAR[maxNrOfChars + 1]);
-		size_t buffSize = sizeof(SQLWCHAR) * (maxNrOfChars + 1);
+		value = u8"";
+		std::unique_ptr<SQLAPICHARTYPE[]> buffer(new SQLAPICHARTYPE[maxNrOfChars + 1]);
+		size_t buffSize = sizeof(SQLAPICHARTYPE) * (maxNrOfChars + 1);
 		SQLLEN cb;
 		bool isNull = false;
 
-		GetData(pHStmt, colOrParamNr, SQL_C_WCHAR, buffer.get(), buffSize, &cb, &isNull);
+		GetData(pHStmt, colOrParamNr, SQLAPICHARTYPENAME, buffer.get(), buffSize, &cb, &isNull);
 
 		if(!isNull)
 		{
-			value = reinterpret_cast<const wchar_t*>(buffer.get());
+            value = (const char*) buffer.get();
+			value = SQLAPICHARPTR_TO_EXODBCSTR(buffer.get());
 		}
 		if(pIsNull)
         {

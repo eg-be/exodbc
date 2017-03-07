@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ShortIntro.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 03.01.2016
@@ -17,6 +17,7 @@
 #include "exodbc/Database.h"
 #include "exodbc/Table.h"
 #include "exodbc/ExecutableStatement.h"
+#include "exodbc/LogManager.h"
 
 int main()
 {
@@ -29,24 +30,24 @@ int main()
 
 		// And connect to a database using the environment.
 		DatabasePtr pDb = Database::Create(pEnv);
-		pDb->Open(L"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;");
+		pDb->Open(u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;");
 
 		// Set up some test table - try to drop first if it already exists
 		// auto commit is off by default, so commit changes manually
 		try
 		{
-			pDb->ExecSql(L"DROP TABLE t1");
+			pDb->ExecSql(u8"DROP TABLE t1");
 			pDb->CommitTrans();
 		}
 		catch (const SqlResultException& ex)
 		{
-			std::wcerr << L"Warning: Drop failed: " << ex.ToString() << std::endl;
+			std::cerr << u8"Warning: Drop failed: " << ex.ToString() << std::endl;
 		}
-		pDb->ExecSql(L"CREATE TABLE t1 ( id INTEGER NOT NULL PRIMARY KEY, name nvarchar(255), lastUpdate datetime)");
+		pDb->ExecSql(u8"CREATE TABLE t1 ( id INTEGER NOT NULL PRIMARY KEY, name nvarchar(255), lastUpdate datetime)");
 		pDb->CommitTrans();
 
 		// Create the Table. The Database will be queried about a table named 't1' of any type during open.
-		Table t(pDb, TableAccessFlag::AF_READ_WRITE, L"t1");
+		Table t(pDb, TableAccessFlag::AF_READ_WRITE, u8"t1");
 		t.Open();
 
 		// As we did not specify any columns to be bound, the Database has been queried about the columns of 't1'
@@ -56,7 +57,7 @@ int main()
 		auto pNameCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
 
 		// or identify the column by its queryname:
-		SQLUSMALLINT lastUpdateColIndex = t.GetColumnBufferIndex(L"lastUpdate");
+		SQLUSMALLINT lastUpdateColIndex = t.GetColumnBufferIndex(u8"lastUpdate");
 		auto pLastUpdateCol = t.GetColumnBufferPtr<TypeTimestampColumnBufferPtr>(lastUpdateColIndex);
 
 		// The column buffers have been bound for reading and writing data. During Open()
@@ -79,23 +80,39 @@ int main()
 		// So open the table again, but let the driver convert everything to WCHAR buffers:
 		t.Close();
 
+#ifdef _WIN32
 		t.SetSql2BufferTypeMap(std::make_shared<WCharSql2BufferMap>());
+#else
+		t.SetSql2BufferTypeMap(std::make_shared<CharSql2BufferMap>());
+#endif
 		t.Open();
 
+#ifdef _WIN32
 		auto pIdCharCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(0);
 		auto pNameCharCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
 		auto pLastUpdateCharCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(2);
+#else
+		auto pIdCharCol = t.GetColumnBufferPtr<CharColumnBufferPtr>(0);
+		auto pNameCharCol = t.GetColumnBufferPtr<CharColumnBufferPtr>(1);
+		auto pLastUpdateCharCol = t.GetColumnBufferPtr<CharColumnBufferPtr>(2);
+#endif
 
 		// Simply query by manually providing a where statement:
-		t.Select(L"id = 13");
+		t.Select(u8"id = 13");
 		while (t.SelectNext())
 		{
-			std::wcout << L"id: " << pIdCharCol->GetWString() << L"; Name: " << pNameCharCol->GetWString() << L"; LastUpdate: " << pLastUpdateCharCol->GetWString() << std::endl;
+			std::stringstream ss;
+#ifdef _WIN32
+			ss << u8"id: " << utf16ToUtf8(pIdCharCol->GetWString()) << u8"; Name: " << utf16ToUtf8(pNameCharCol->GetWString()) << u8"; LastUpdate: " << utf16ToUtf8(pLastUpdateCharCol->GetWString());
+#else
+			ss << u8"id: " << pIdCharCol->GetString() << u8"; Name: " << pNameCharCol->GetString() << u8"; LastUpdate: " << pLastUpdateCharCol->GetString();
+#endif
+			WRITE_STDOUT_ENDL(ss.str());
 		}
 
 		// Or create a prepared statement that binds buffers as result columns and as parameter markers:
 		ExecutableStatement stmt(pDb);
-		stmt.Prepare(L"SELECT name, lastUpdate FROM t1 WHERE id = ?");
+		stmt.Prepare(u8"SELECT name, lastUpdate FROM t1 WHERE id = ?");
 		// column and param indexes start at 1
 		stmt.BindColumn(pNameCharCol, 1); // map to result column name
 		stmt.BindColumn(pLastUpdateCharCol, 2); // map to result column lastUpdate
@@ -105,19 +122,27 @@ int main()
 		
 		while (stmt.SelectNext())
 		{
-			std::wcout << L"id: " << *pIdCol << L"; Name: " << pNameCharCol->GetWString() << L"; LastUpdate: " << pLastUpdateCharCol->GetWString() << std::endl;
+			std::stringstream ss;
+#ifdef _WIN32
+			ss << u8"id: " << pIdCol->GetValue() << u8"; Name: " << utf16ToUtf8(pNameCharCol->GetWString()) << u8"; LastUpdate: " << utf16ToUtf8(pLastUpdateCharCol->GetWString());
+#else
+			ss << u8"id: " << pIdCol->GetValue() << u8"; Name: " << pNameCharCol->GetString() << u8"; LastUpdate: " << pLastUpdateCharCol->GetString();
+#endif
+			WRITE_STDOUT_ENDL(ss.str());
 		}
 
 		// Execute the same prepared statement again with different where values:
 		pIdCol->SetValue(99);
 		if (!stmt.SelectNext())
 		{
-			std::wcout << L"No results found for id: " << *pIdCol << std::endl;
+			std::stringstream ss;
+			ss << u8"No results found for id: " << *pIdCol;
+			WRITE_STDOUT_ENDL(ss.str());
 		}
 	}
 	catch (const Exception& ex)
 	{
-		std::wcerr << ex.ToString() << std::endl;
+		WRITE_STDERR_ENDL(ex.ToString());
 	}
     return 0;
 }

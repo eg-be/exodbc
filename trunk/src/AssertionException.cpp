@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file AssertionException.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.01.2016
@@ -32,37 +32,31 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::wstring& condition, const std::wstring& msg)
+	void exOnAssert(const std::string& file, int line, const std::string& function, const std::string& condition, const std::string& msg)
 	{
-		std::wstringstream ws;
-		ws << L"ASSERTION failure!" << std::endl;
-		ws << L" File:      " << file << std::endl;
-		ws << L" Line:      " << line << std::endl;
-		ws << L" Function:  " << function << std::endl;
-		ws << L" Condition: " << condition << std::endl;
+		std::stringstream ss;
+		ss << u8"ASSERTION failure!" << std::endl;
+		ss << u8" File:      " << file << std::endl;
+		ss << u8" Line:      " << line << std::endl;
+		ss << u8" Function:  " << function << std::endl;
+		ss << u8" Condition: " << condition << std::endl;
 		if (msg.length() > 0)
 		{
-			ws << L" Msg:       " << msg << std::endl;
+			ss << u8" Msg:       " << msg << std::endl;
 		}
-		LOG_ERROR(ws.str());
+		LOG_ERROR(ss.str());
 
 		// Throw exception
 		throw AssertionException(line, file, function, condition, msg);
 	}
 
 
-	void exOnAssert(const std::wstring& file, int line, const std::wstring& function, const std::string& condition, const std::wstring& msg)
+	std::string AssertionException::ToString() const noexcept
 	{
-		exOnAssert(file, line, function, utf8ToUtf16(condition), msg);
-	}
-
-
-	std::wstring AssertionException::ToString() const noexcept
-	{
-		std::wstringstream ws;
-		ws << Exception::ToString();
-		ws << L"\n";
-		ws << L"\tCondition: " << m_condition;
-		return ws.str();
+		std::stringstream ss;
+		ss << Exception::ToString();
+		ss << u8"\n";
+		ss << u8"\tCondition: " << m_condition;
+		return ss.str();
 	}
 }

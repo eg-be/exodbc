@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ManualTestTables.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 26.12.2014
@@ -34,7 +34,7 @@ namespace exodbctest
 	{
 	public:
 
-		MIntTypesTable(exodbc::ConstDatabasePtr pDb, const std::wstring& name = L"IntegerTypes");
+		MIntTypesTable(exodbc::ConstDatabasePtr pDb, const std::string& name = u8"IntegerTypes");
 		virtual ~MIntTypesTable() {};
 
 		// Size of Type							Bytes		Min						Max
@@ -51,7 +51,7 @@ namespace exodbctest
 	class MFloatTypesTable : public exodbc::Table
 	{
 	public:
-		MFloatTypesTable(exodbc::ConstDatabasePtr pDb, const std::wstring& name = L"FloatTypes");
+		MFloatTypesTable(exodbc::ConstDatabasePtr pDb, const std::string& name = u8"FloatTypes");
 		virtual ~MFloatTypesTable() {};
 
 		// Note: SQLFLOAT is typedefed to SQLDOUBLE (!!). Use SQLREAL for explicit FLOAT!
@@ -69,7 +69,7 @@ namespace exodbctest
 	{
 	public:
 
-		MCharTypesTable(exodbc::ConstDatabasePtr pDb, const std::wstring& name = L"CharTypes");
+		MCharTypesTable(exodbc::ConstDatabasePtr pDb, const std::string& name = u8"CharTypes");
 		virtual ~MCharTypesTable() {};
 
 		SQLINTEGER	m_idCharTypes;
@@ -87,7 +87,7 @@ namespace exodbctest
 	{
 	public:
 
-		MWCharTypesTable(exodbc::ConstDatabasePtr pDb, const std::wstring& name = L"CharTypes");
+		MWCharTypesTable(exodbc::ConstDatabasePtr pDb, const std::string& name = u8"CharTypes");
 		virtual ~MWCharTypesTable() {};
 
 		SQLINTEGER	m_idCharTypes;
@@ -103,7 +103,7 @@ namespace exodbctest
 	class MDateTypesTable : public exodbc::Table
 	{
 	public:
-		MDateTypesTable(exodbc::ConstDatabasePtr pDb, const std::wstring& name = L"DateTypes");
+		MDateTypesTable(exodbc::ConstDatabasePtr pDb, const std::string& name = u8"DateTypes");
 		virtual ~MDateTypesTable() {};
 
 		SQLINTEGER				m_idDateTypes;
@@ -118,7 +118,7 @@ namespace exodbctest
 	class MBlobTypesTable : public exodbc::Table
 	{
 	public:
-		MBlobTypesTable(exodbc::ConstDatabasePtr pDb, const std::wstring& name = L"BlobTypes");
+		MBlobTypesTable(exodbc::ConstDatabasePtr pDb, const std::string& name = u8"BlobTypes");
 		virtual ~MBlobTypesTable() {};
 
 		SQLINTEGER		m_idBlobTypes;
@@ -132,7 +132,7 @@ namespace exodbctest
 	class MNumericTypesTable : public exodbc::Table
 	{
 	public:
-		MNumericTypesTable(exodbc::ConstDatabasePtr pDb, const std::wstring& name = L"NumericTypes");
+		MNumericTypesTable(exodbc::ConstDatabasePtr pDb, const std::string& name = u8"NumericTypes");
 		virtual ~MNumericTypesTable() {};
 
 		SQLINTEGER			m_idNumericTypes;
@@ -148,7 +148,7 @@ namespace exodbctest
 	class MNumericTypesAsCharTable : public exodbc::Table
 	{
 	public:
-		MNumericTypesAsCharTable(exodbc::ConstDatabasePtr pDb, const std::wstring& name = L"NumericTypes");
+		MNumericTypesAsCharTable(exodbc::ConstDatabasePtr pDb, const std::string& name = u8"NumericTypes");
 		virtual ~MNumericTypesAsCharTable() {};
 
 		SQLINTEGER			m_idNumericTypes;
@@ -174,19 +174,34 @@ namespace exodbctest
 	};
 
 
-	// IncompleCharTable
-	// -----------------
-	class MIncompleteCharTable : public exodbc::Table
+	// IntegerTable
+	// ------------
+	class MIntegerTable : public exodbc::Table
 	{
 	public:
-		MIncompleteCharTable(exodbc::ConstDatabasePtr pDb);
-		virtual ~MIncompleteCharTable() {};
+		MIntegerTable(exodbc::ConstDatabasePtr pDb);
+		virtual ~MIntegerTable() {};
 
-		SQLINTEGER	m_idCharTable;
-		SQLWCHAR	m_col2[128 + 1];
+		SQLINTEGER	m_idIntegerTable;
+		SQLINTEGER	m_col2;
+		SQLINTEGER	m_col3;
+		SQLINTEGER	m_col4;
+	};
+
+
+	// IncompleIntegerTable
+	// --------------------
+	class MIncompleteIntegerTable : public exodbc::Table
+	{
+	public:
+		MIncompleteIntegerTable(exodbc::ConstDatabasePtr pDb);
+		virtual ~MIncompleteIntegerTable() {};
+
+		SQLINTEGER	m_idIntegerTable;
+		SQLINTEGER	m_col2;
 		// we do not bind col3 and have a gap
-		//SQLWCHAR	m_col3[128 + 1];
-		SQLWCHAR	m_col4[128 + 2];
+		//SQLINTEGER	m_col3;
+		SQLINTEGER	m_col4;
 	};
 
 

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file LogManager.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.01.2016
@@ -38,7 +38,7 @@ namespace exodbc
 		: m_globalLogLevel(LogLevel::Info)
 #endif
 	{
-		LogHandlerPtr pDefaultHandler = std::make_shared<StdErrLogHandler>();
+		LogHandlerPtr pDefaultHandler = std::make_shared<StdLogHandler>();
 		RegisterLogHandler(pDefaultHandler);
 	}
 
@@ -67,8 +67,14 @@ namespace exodbc
 		m_logHandlers.push_back(pHandler);
 	}
 
-
+#ifdef _WIN32
 	void LogManager::LogMessage(LogLevel level, const std::wstring& msg, const std::wstring& file /* = L"" */, int line /* = 0 */, const std::wstring& functionName /* = L"" */) const
+	{
+		LogMessage(level, utf16ToUtf8(msg), utf16ToUtf8(file), line, utf16ToUtf8(functionName));
+	}
+#endif
+
+	void LogManager::LogMessage(LogLevel level, const std::string& msg, const std::string& file /* = u8"" */, int line /* = 0 */, const std::string& functionName /* = u8"" */) const
 	{
 		{
 			lock_guard<mutex> lock(m_globalLogLevelMutex);
@@ -82,6 +88,36 @@ namespace exodbc
 		{
 			(*it)->OnLogMessage(level, msg, file, line, functionName);
 		}
+	}
+
+
+	void LogManager::WriteStdErr(const std::string& msg, bool appendEndl) const
+	{
+		lock_guard<mutex> lock(m_stderrMutex);
+#ifdef _WIN32
+		std::wcerr << utf8ToUtf16(msg);
+		if (appendEndl)
+			std::wcerr << std::endl;
+#else
+		std::cerr << msg;
+		if (appendEndl)
+			std::cerr << std::endl;
+#endif
+	}
+
+
+	void LogManager::WriteStdOut(const std::string& msg, bool appendEndl) const
+	{
+		lock_guard<mutex> lock(m_stdoutMutex);
+#ifdef _WIN32
+		std::wcout << utf8ToUtf16(msg);
+		if (appendEndl)
+			std::wcout << std::endl;
+#else
+		std::cout << msg;
+		if (appendEndl)
+			std::cout << std::endl;
+#endif
 	}
 
 

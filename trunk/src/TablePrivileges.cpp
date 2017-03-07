@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file TablePrivileges.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.12.2014
@@ -27,22 +27,22 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	std::wstring TablePrivileges::ToString(TablePrivilege priv)
+	std::string TablePrivileges::ToString(TablePrivilege priv)
 	{
 		switch (priv)
 		{
 		case TablePrivilege::SELECT:
-			return L"SELECT";
+			return u8"SELECT";
 		case TablePrivilege::INSERT:
-			return L"INSERT";
+			return u8"INSERT";
 		case TablePrivilege::UPDATE:
-			return L"UPDATE";
+			return u8"UPDATE";
 		case TablePrivilege::DEL:
-			return L"DELETE";
+			return u8"DELETE";
 		case TablePrivilege::NONE:
-			return L"NONE";
+			return u8"NONE";
 		default:
-			return L"???";
+			return u8"???";
 		}
 	}
 
@@ -59,19 +59,19 @@ namespace exodbc
 	{
 		for (TablePrivilegesVector::const_iterator it = tablePrivs.begin(); it != tablePrivs.end(); it++)
 		{
-			if (boost::iequals(L"SELECT", it->m_privilege))
+			if (boost::iequals(u8"SELECT", it->m_privilege))
 			{
 				Set(TablePrivilege::SELECT);
 			}
-			else if (boost::iequals(L"INSERT", it->m_privilege))
+			else if (boost::iequals(u8"INSERT", it->m_privilege))
 			{
 				Set(TablePrivilege::INSERT);
 			}
-			else if (boost::iequals(L"UPDATE", it->m_privilege))
+			else if (boost::iequals(u8"UPDATE", it->m_privilege))
 			{
 				Set(TablePrivilege::UPDATE);
 			}
-			else if (boost::iequals(L"DELETE", it->m_privilege))
+			else if (boost::iequals(u8"DELETE", it->m_privilege))
 			{
 				Set(TablePrivilege::DEL);
 			}
@@ -79,11 +79,11 @@ namespace exodbc
 	}
 
 
-	std::wstring MissingTablePrivilegeException::ToString() const noexcept
+	std::string MissingTablePrivilegeException::ToString() const noexcept
 	{
-		std::wstringstream ws;
-		ws << Exception::ToString();
-		ws << L"Missing Privilege '" << TablePrivileges::ToString(m_missingPriv) << L"' on Table '" << m_tableInfo.GetQueryName() << L"'";
-		return ws.str();
+		std::stringstream ss;
+		ss << Exception::ToString();
+		ss << u8"Missing Privilege '" << TablePrivileges::ToString(m_missingPriv) << u8"' on Table '" << m_tableInfo.GetQueryName() << u8"'";
+		return ss.str();
 	}
 } // namespace exodbc

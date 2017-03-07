@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file exOdbcGTestHelpers.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 22.11.2015
@@ -22,47 +22,47 @@ using namespace exodbc;
 
 namespace exodbctest
 {
-	const std::map<TableId, std::wstring> g_TableNames = {
-		{ TableId::BLOBTYPES, L"blobtypes" },
-		{ TableId::BLOBTYPES_TMP, L"blobtypes_tmp" },
-		{ TableId::CHARTABLE, L"chartable" },
-		{ TableId::CHARTYPES, L"chartypes" },
-		{ TableId::CHARTYPES_TMP, L"chartypes_tmp" },
-		{ TableId::DATETYPES, L"datetypes" },
-		{ TableId::DATETYPES_TMP, L"datetypes_tmp" },
-		{ TableId::FLOATTYPES, L"floattypes" },
-		{ TableId::FLOATTYPES_TMP, L"floattypes_tmp" },
-		{ TableId::INTEGERTYPES, L"integertypes" },
-		{ TableId::INTEGERTYPES_TMP, L"integertypes_tmp" },
-		{ TableId::MULTIKEY, L"multikey" },
-		{ TableId::NUMERICTYPES, L"numerictypes" },
-		{ TableId::NUMERICTYPES_TMP, L"numerictypes_tmp" },
-		{ TableId::SELECTONLY, L"selectonly" },
-		{ TableId::NOT_EXISTING, L"not_existing" },
-		{ TableId::NOT_SUPPORTED, L"not_supported" },
-		{ TableId::NOT_SUPPORTED_TMP, L"not_supported_tmp" }
+	const std::map<TableId, std::string> g_TableNames = {
+		{ TableId::BLOBTYPES, u8"blobtypes" },
+		{ TableId::BLOBTYPES_TMP, u8"blobtypes_tmp" },
+		{ TableId::CHARTABLE, u8"chartable" },
+		{ TableId::CHARTYPES, u8"chartypes" },
+		{ TableId::CHARTYPES_TMP, u8"chartypes_tmp" },
+		{ TableId::DATETYPES, u8"datetypes" },
+		{ TableId::DATETYPES_TMP, u8"datetypes_tmp" },
+		{ TableId::FLOATTYPES, u8"floattypes" },
+		{ TableId::FLOATTYPES_TMP, u8"floattypes_tmp" },
+		{ TableId::INTEGERTYPES, u8"integertypes" },
+		{ TableId::INTEGERTYPES_TMP, u8"integertypes_tmp" },
+		{ TableId::MULTIKEY, u8"multikey" },
+		{ TableId::NUMERICTYPES, u8"numerictypes" },
+		{ TableId::NUMERICTYPES_TMP, u8"numerictypes_tmp" },
+		{ TableId::SELECTONLY, u8"selectonly" },
+		{ TableId::NOT_EXISTING, u8"not_existing" },
+		{ TableId::NOT_SUPPORTED, u8"not_supported" },
+		{ TableId::NOT_SUPPORTED_TMP, u8"not_supported_tmp" }
 	};
 
 
-	const std::map<TableId, std::wstring> g_IdColumnNames = {
-		{ TableId::BLOBTYPES, L"idblobtypes" },
-		{ TableId::BLOBTYPES_TMP, L"idblobtypes" },
-		{ TableId::CHARTABLE, L"idchartable" },
-		{ TableId::CHARTYPES, L"idchartypes" },
-		{ TableId::CHARTYPES_TMP, L"idchartypes" },
-		{ TableId::DATETYPES, L"iddatetypes" },
-		{ TableId::DATETYPES_TMP, L"iddatetypes" },
-		{ TableId::FLOATTYPES, L"idfloattypes" },
-		{ TableId::FLOATTYPES_TMP, L"idfloattypes" },
-		{ TableId::INTEGERTYPES, L"idintegertypes" },
-		{ TableId::INTEGERTYPES_TMP, L"idintegertypes" },
-		{ TableId::MULTIKEY, L"idmultikey" },
-		{ TableId::NUMERICTYPES, L"idnumerictypes" },
-		{ TableId::NUMERICTYPES_TMP, L"idnumerictypes" },
-		{ TableId::SELECTONLY, L"idselectonly" },
-		{ TableId::NOT_EXISTING, L"idnot_existing" },
-		{ TableId::NOT_SUPPORTED, L"idnot_supported" },
-		{ TableId::NOT_SUPPORTED_TMP, L"idnot_supported" }
+	const std::map<TableId, std::string> g_IdColumnNames = {
+		{ TableId::BLOBTYPES, u8"idblobtypes" },
+		{ TableId::BLOBTYPES_TMP, u8"idblobtypes" },
+		{ TableId::CHARTABLE, u8"idchartable" },
+		{ TableId::CHARTYPES, u8"idchartypes" },
+		{ TableId::CHARTYPES_TMP, u8"idchartypes" },
+		{ TableId::DATETYPES, u8"iddatetypes" },
+		{ TableId::DATETYPES_TMP, u8"iddatetypes" },
+		{ TableId::FLOATTYPES, u8"idfloattypes" },
+		{ TableId::FLOATTYPES_TMP, u8"idfloattypes" },
+		{ TableId::INTEGERTYPES, u8"idintegertypes" },
+		{ TableId::INTEGERTYPES_TMP, u8"idintegertypes" },
+		{ TableId::MULTIKEY, u8"idmultikey" },
+		{ TableId::NUMERICTYPES, u8"idnumerictypes" },
+		{ TableId::NUMERICTYPES_TMP, u8"idnumerictypes" },
+		{ TableId::SELECTONLY, u8"idselectonly" },
+		{ TableId::NOT_EXISTING, u8"idnot_existing" },
+		{ TableId::NOT_SUPPORTED, u8"idnot_supported" },
+		{ TableId::NOT_SUPPORTED_TMP, u8"idnot_supported" }
 	};
 
 
@@ -96,35 +96,35 @@ namespace exodbctest
 	}
 
 
-	std::wstring PrependSchemaOrCatalogName(exodbc::DatabaseProduct dbms, const std::wstring& name)
+	std::string PrependSchemaOrCatalogName(exodbc::DatabaseProduct dbms, const std::string& name)
 	{
-		wstring prefix;
+		string prefix;
 		if (dbms != DatabaseProduct::ACCESS)
 		{
-			prefix = L"exodbc.";
+			prefix = u8"exodbc.";
 		}
 
 		prefix = ToDbCase(prefix);
 		return prefix + name;
 	}
 
-	std::wstring GetTableName(TableId table)
+	std::string GetTableName(TableId table)
 	{
-		std::map<TableId, std::wstring>::const_iterator it = g_TableNames.find(table);
+		std::map<TableId, std::string>::const_iterator it = g_TableNames.find(table);
 		assert(it != g_TableNames.end());
 		return ToDbCase(it->second);
 	}
 
 
-	std::wstring GetIdColumnName(TableId table)
+	std::string GetIdColumnName(TableId table)
 	{
-		std::map<TableId, std::wstring>::const_iterator it = g_IdColumnNames.find(table);
+		std::map<TableId, std::string>::const_iterator it = g_IdColumnNames.find(table);
 		assert(it != g_IdColumnNames.end());
 		return ToDbCase(it->second);
 	}
 
 
-	std::wstring ToDbCase(const std::wstring& str)
+	std::string ToDbCase(const std::string& str)
 	{
 		if (g_odbcInfo.m_namesCase == Case::UPPER)
 		{
@@ -149,22 +149,22 @@ namespace exodbctest
 
 		if (!isTmp)
 		{
-			LOG_ERROR(L"Is not a tmpTable");
+			LOG_ERROR(u8"Is not a tmpTable");
 			return;
 		}
 
 		DatabasePtr pDb = OpenTestDb(OdbcVersion::V_3);
 
-		wstring tableName = GetTableName(tmpTableId);
-		wstring idColName = GetIdColumnName(tmpTableId);
-		wstring schemaName = L"exodbc.";
+		string tableName = GetTableName(tmpTableId);
+		string idColName = GetIdColumnName(tmpTableId);
+		string schemaName = u8"exodbc.";
 		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			schemaName = L"";
+			schemaName = u8"";
 		}
 		schemaName = ToDbCase(schemaName);
 
-		wstring sql = boost::str(boost::wformat(L"DELETE FROM %s%s WHERE %s >= 0 OR %s <= 0") %schemaName %tableName %idColName %idColName);
+		string sql = boost::str(boost::format(u8"DELETE FROM %s%s WHERE %s >= 0 OR %s <= 0") %schemaName %tableName %idColName %idColName);
 		pDb->ExecSql(sql);
 		pDb->CommitTrans();
 	}

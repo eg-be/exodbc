@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file SqlHandleTest.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 22.11.2014
@@ -109,20 +109,20 @@ namespace exodbctest
 		ASSERT_NO_THROW(pHStmt->AllocateWithParent(pDb->GetSqlDbcHandle()));
 
 		// Open statement by doing some operation on it
-		std::wstring sqlstmt;
+		std::string sqlstmt;
 		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s WHERE %s = 3") % GetTableName(TableId::CHARTYPES) % GetIdColumnName(TableId::CHARTYPES));
+			sqlstmt = boost::str(boost::format(u8"SELECT * FROM %s WHERE %s = 3") % GetTableName(TableId::CHARTYPES) % GetIdColumnName(TableId::CHARTYPES));
 		}
 		else
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s WHERE %s = 3") % GetTableName(TableId::CHARTYPES) % GetIdColumnName(TableId::CHARTYPES));
+			sqlstmt = boost::str(boost::format(u8"SELECT * FROM exodbc.%s WHERE %s = 3") % GetTableName(TableId::CHARTYPES) % GetIdColumnName(TableId::CHARTYPES));
 		}
 		if (g_odbcInfo.m_namesCase == Case::UPPER)
 		{
 			boost::algorithm::to_upper(sqlstmt);
 		}
-		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt), SQL_NTS);
 		ASSERT_TRUE(SQL_SUCCEEDED(ret));
 
 		// now test by creating a row descriptor:

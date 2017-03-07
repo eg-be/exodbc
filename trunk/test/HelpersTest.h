@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file HelpersTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 09.08.2014
@@ -15,9 +15,6 @@
 
 // Other headers
 #include "gtest/gtest.h"
-#include "exodbc/Environment.h"
-#include "exodbc/Database.h"
-#include "exodbc/SqlStatementCloser.h"
 
 // System headers
 

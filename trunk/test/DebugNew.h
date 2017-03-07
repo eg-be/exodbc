@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file DebugNew.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 21.09.2014

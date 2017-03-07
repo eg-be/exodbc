@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file Database.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 25.07.2014
@@ -145,7 +145,7 @@ namespace exodbc
 			OdbcVersion maxSupportedVersion = GetMaxSupportedOdbcVersion();
 			if (envVersion > connectionVersion)
 			{
-				LOG_WARNING((boost::wformat(L"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int)envVersion %m_dbInf.GetDriverName() %m_dbInf.GetDriverVersion() % (int)connectionVersion %m_dbInf.GetDriverOdbcVersion() %m_dbInf.GetDbmsName() % (int)connectionVersion).str());
+				LOG_WARNING((boost::format(u8"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int)envVersion %m_dbInf.GetDriverName() %m_dbInf.GetDriverVersion() % (int)connectionVersion %m_dbInf.GetDriverOdbcVersion() %m_dbInf.GetDbmsName() % (int)connectionVersion).str());
 			}
 			if (!m_pSql2BufferTypeMap)
 			{
@@ -186,21 +186,21 @@ namespace exodbc
 	}
 
 
-	std::wstring Database::Open(const std::wstring& inConnectStr)
+	std::string Database::Open(const std::string& inConnectStr)
 	{
 		return Open(inConnectStr, NULL);
 	}
 
 
-	std::wstring Database::Open(const std::wstring& inConnectStr, SQLHWND parentWnd)
+	std::string Database::Open(const std::string& inConnectStr, SQLHWND parentWnd)
 	{
 		exASSERT(m_pHDbc);
 		exASSERT(m_pHDbc->IsAllocated());
 		exASSERT(!IsOpen());
 		exASSERT(!inConnectStr.empty());
-		m_dsn = L"";
-		m_uid = L"";
-		m_authStr = L"";
+		m_dsn = u8"";
+		m_uid = u8"";
+		m_authStr = u8"";
 		m_inConnectionStr = inConnectStr;
 
 		// Connect to the data source
@@ -211,14 +211,17 @@ namespace exodbc
 		// StringLength1: [Input] Length of *InConnectionString, in characters if the string is Unicode, or bytes if string is ANSI or DBCS.
 		// BufferLength: [Input] Length of the *OutConnectionString buffer, in characters.
 		SQLRETURN ret = SQLDriverConnect(m_pHDbc->GetHandle(), parentWnd, 
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(m_inConnectionStr).c_str(),
+			EXODBCSTR_TO_SQLAPICHARPTR(m_inConnectionStr),
 			(SQLSMALLINT) m_inConnectionStr.length(), 
 			(SQLAPICHARTYPE*) outConnectBuffer, 
 			DB_MAX_CONNECTSTR_LEN, &outConnectBufferLen, parentWnd == NULL ? SQL_DRIVER_NOPROMPT : SQL_DRIVER_COMPLETE);
 		THROW_IFN_SUCCEEDED(SQLDriverConnect, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
 
 		outConnectBuffer[outConnectBufferLen] = 0;
-		m_outConnectionStr = SQLRESCHARCONVERT((SQLAPICHARTYPE*)outConnectBuffer);
+//		m_outConnectionStr = SQLRESCHARCONVERT((SQLAPICHARTYPE*)outConnectBuffer);
+//		m_outConnectionStr = (SQLCHAR*)outConnectBuffer;
+//		m_outConnectionStr = std::string(reinterpret_cast<const char*>(outConnectBuffer));
+        m_outConnectionStr = SQLAPICHARPTR_TO_EXODBCSTR(outConnectBuffer);
 		m_dbOpenedWithConnectionString = true;
 
 		// Do all the common stuff about opening
@@ -238,7 +241,7 @@ namespace exodbc
 				SErrorInfoVector::const_iterator it;
 				for (it = errs.begin(); it != errs.end(); ++it)
 				{
-					LOG_ERROR(boost::str(boost::wformat(L"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
+					LOG_ERROR(boost::str(boost::format(u8"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
 				}
 			}
 
@@ -252,7 +255,7 @@ namespace exodbc
 	}
 
 
-	void Database::Open(const std::wstring& dsn, const std::wstring& uid, const std::wstring& authStr)
+	void Database::Open(const std::string& dsn, const std::string& uid, const std::string& authStr)
 	{
 		exASSERT(!IsOpen());
 		exASSERT(!dsn.empty());
@@ -263,14 +266,14 @@ namespace exodbc
 		m_authStr    = authStr;
 
 		// Not using a connection-string
-		m_inConnectionStr = L"";
-		m_outConnectionStr = L"";
+		m_inConnectionStr = u8"";
+		m_outConnectionStr = u8"";
 
 		// Connect to the data source
 		SQLRETURN ret = SQLConnect(m_pHDbc->GetHandle(),
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(m_dsn).c_str(), SQL_NTS,
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(m_uid).c_str(), SQL_NTS,
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(m_authStr).c_str(), SQL_NTS);
+			EXODBCSTR_TO_SQLAPICHARPTR(m_dsn), SQL_NTS,
+			EXODBCSTR_TO_SQLAPICHARPTR(m_uid), SQL_NTS,
+			EXODBCSTR_TO_SQLAPICHARPTR(m_authStr), SQL_NTS);
 
 		// Do not reset an eventually allocated connection handle here.
 		// The destructor will reset it if one is allocated
@@ -293,7 +296,7 @@ namespace exodbc
 				SErrorInfoVector::const_iterator it;
 				for (it = errs.begin(); it != errs.end(); ++it)
 				{
-					LOG_ERROR(boost::str(boost::wformat(L"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
+					LOG_ERROR(boost::str(boost::format(u8"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
 				}
 			}
 
@@ -306,7 +309,7 @@ namespace exodbc
 	}
 
 
-	void Database::SetTracefile(const std::wstring path)
+	void Database::SetTracefile(const std::string path)
 	{
 		exASSERT(m_pHDbc);
 		exASSERT(m_pHDbc->IsAllocated());
@@ -314,12 +317,19 @@ namespace exodbc
 		// note, from ms-doc: 
 		// Character strings pointed to by the ValuePtr argument of SQLSetConnectAttr have a length of StringLength bytes.
 		SQLINTEGER cb = 0;
-		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)path.c_str(), ((SQLINTEGER)path.length()) * sizeof(SQLWCHAR));
+
+		// windows probably wants wchars here.. (?)
+#ifdef _WIN32
+		std::wstring wpath = utf8ToUtf16(path);
+		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)wpath.c_str(), ((SQLINTEGER)wpath.length()) * sizeof(SQLWCHAR));
+#else
+		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)path.c_str(), ((SQLINTEGER)path.length()) * sizeof(SQLCHAR));
+#endif
 		THROW_IFN_SUCCEEDED(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
 	}
 
 
-	std::wstring Database::GetTracefile() const
+	std::string Database::GetTracefile() const
 	{
 		exASSERT(m_pHDbc);
 		exASSERT(m_pHDbc->IsAllocated());
@@ -332,7 +342,7 @@ namespace exodbc
 		memset(buffer.get(), 0, byteBuffSize);
 		SQLRETURN ret = SQLGetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)buffer.get(), byteBuffSize, &cb);
 		THROW_IFN_SUCCEEDED(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
-        std::wstring tracefile(SQLRESCHARCONVERT(buffer.get()));
+        std::string tracefile(SQLAPICHARPTR_TO_EXODBCSTR(buffer.get()));
 		return tracefile;
 	}
 
@@ -345,12 +355,12 @@ namespace exodbc
 		if (enable)
 		{
 			SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_ON, 0);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_ON");
+			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_ON");
 		}
 		else
 		{
 			SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_OFF, 0);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
+			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
 		}
 	}
 
@@ -362,7 +372,7 @@ namespace exodbc
 
 		SQLUINTEGER value = 0;
 		SQLRETURN ret = SQLGetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, &value, 0, 0);
-		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to read Attribute SQL_ATTR_TRACE");
+		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to read Attribute SQL_ATTR_TRACE");
 
 		return value == SQL_OPT_TRACE_ON;
 	}
@@ -412,13 +422,13 @@ namespace exodbc
 		exASSERT(m_pHDbc->IsAllocated());
 
 		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, 0);
-		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Cannot set SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Cannot set SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
 
 		// Note: This is unsupported SQL_ATTR_METADATA_ID by most drivers. It should default to OFF
 		//ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_METADATA_ID, (SQLPOINTER) SQL_TRUE, NULL);
 		//if(ret != SQL_SUCCESS)
 		//{
-		//	LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, L"Cannot set ATTR_METADATA_ID to SQL_FALSE");
+		//	LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, u8"Cannot set ATTR_METADATA_ID to SQL_FALSE");
 		//	ok = false;
 		//}
 	}
@@ -431,19 +441,19 @@ namespace exodbc
 		exASSERT(m_pHDbc->IsAllocated());
 
 		DatabaseInfo dbInf;
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::AccessibleTables);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DatabaseName);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DbmsName);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DbmsVersion);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DriverName);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DriverOdbcVersion);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::DriverVersion);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::OdbcSupportIEF);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::OdbcVersion);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::OuterJoins);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::ProcedureSupport);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::SearchPatternEscape);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::WStringProperty::ServerName);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::AccessibleTables);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DatabaseName);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DbmsName);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DbmsVersion);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DriverName);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DriverOdbcVersion);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DriverVersion);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::OdbcSupportIEF);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::OdbcVersion);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::OuterJoins);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::ProcedureSupport);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::SearchPatternEscape);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::ServerName);
 
 		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::CursorCommitBehavior);
 		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::CursorRollbackBehavior);
@@ -475,19 +485,19 @@ namespace exodbc
 	}
 
 
-	std::vector<std::wstring> Database::ReadCatalogInfo(ReadCatalogInfoMode mode)
+	std::vector<std::string> Database::ReadCatalogInfo(ReadCatalogInfoMode mode)
 	{
 		exASSERT(IsOpen());
 
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_pHStmt, true, true);
 
-		std::vector<std::wstring> results;
+		std::vector<std::string> results;
 
-		std::wstring catalogName = L"";
-		std::wstring schemaName = L"";
-		std::wstring tableTypeName = L"";
-		std::wstring tableName = L"";
+		std::string catalogName = u8"";
+		std::string schemaName = u8"";
+		std::string tableTypeName = u8"";
+		std::string tableName = u8"";
 
 		SQLSMALLINT colNr = 0;
 		SQLUSMALLINT charLen = 0;
@@ -495,17 +505,17 @@ namespace exodbc
 		switch(mode)
 		{
 		case ReadCatalogInfoMode::AllCatalogs:
-			catalogName = utf8ToUtf16(SQL_ALL_CATALOGS);
+			catalogName = SQL_ALL_CATALOGS;
 			colNr = 1;
 			charLen = m_dbInf.GetMaxCatalogNameLen();
 			break;
 		case ReadCatalogInfoMode::AllSchemas:
-			schemaName = utf8ToUtf16(SQL_ALL_SCHEMAS);
+			schemaName = SQL_ALL_SCHEMAS;
 			colNr = 2;
 			charLen = m_dbInf.GetMaxSchemaNameLen();
 			break;
 		case ReadCatalogInfoMode::AllTableTypes:
-			tableTypeName = utf8ToUtf16(SQL_ALL_TABLE_TYPES);
+			tableTypeName = SQL_ALL_TABLE_TYPES;
 			colNr = 4;
 			charLen = m_dbInf.GetMaxTableTypeNameLen();
 			break;
@@ -515,10 +525,10 @@ namespace exodbc
 		
 		std::unique_ptr<SQLAPICHARTYPE[]> buffer(new SQLAPICHARTYPE[charLen]);
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(catalogName).c_str(), SQL_NTS,		// catalog name                 
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(schemaName).c_str(), SQL_NTS,		// schema name
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(tableName).c_str(), SQL_NTS,			// table name
-			(SQLAPICHARTYPE*)SQLAPICHARCONVERT(tableTypeName).c_str(), SQL_NTS);
+			EXODBCSTR_TO_SQLAPICHARPTR(catalogName), SQL_NTS,		// catalog name                 
+			EXODBCSTR_TO_SQLAPICHARPTR(schemaName), SQL_NTS,		// schema name
+			EXODBCSTR_TO_SQLAPICHARPTR(tableName), SQL_NTS,			// table name
+			EXODBCSTR_TO_SQLAPICHARPTR(tableTypeName), SQL_NTS);
 
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
@@ -527,8 +537,7 @@ namespace exodbc
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)   // Table Information
 		{
 			GetData(m_pHStmt, colNr, SQLAPICHARTYPENAME, buffer.get(), charLen * sizeof(SQLAPICHARTYPE), &cb, NULL);
-            SYSTEMSTRINGTYPE s = SQLAPICHARTYPE_TO_SYSTEMSTRINGTYPE(buffer.get());
-			results.push_back(SQLRESCHARCONVERT(s));
+			results.push_back(SQLAPICHARPTR_TO_EXODBCSTR(buffer.get()));
 		}
 
 		THROW_IFN_NO_DATA(SQLFetch, ret);
@@ -537,20 +546,20 @@ namespace exodbc
 	}
 
 
-	TableInfo Database::FindOneTable(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
+	TableInfo Database::FindOneTable(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const
 	{
 		// Query the tables that match
 		TableInfosVector tables = FindTables(tableName, schemaName, catalogName, tableType);
 
 		if(tables.size() == 0)
 		{
-			Exception ex((boost::wformat(L"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s', typeName : '%s'") %tableName %schemaName %catalogName %tableType).str());
+			Exception ex((boost::format(u8"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s', typeName : '%s'") %tableName %schemaName %catalogName %tableType).str());
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
 		if(tables.size() != 1)
 		{
-			Exception ex((boost::wformat(L"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s', typeName : '%s'") %tableName %schemaName %catalogName %tableType).str());
+			Exception ex((boost::format(u8"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s', typeName : '%s'") %tableName %schemaName %catalogName %tableType).str());
 			SET_EXCEPTION_SOURCE(ex);
 			throw ex;
 		}
@@ -593,16 +602,16 @@ namespace exodbc
 			
 			cb = 0;
 			GetData(m_pHStmt, 1, SQLAPICHARTYPENAME, typeName, sizeof(typeName), &cb, NULL);
-			info.m_typeName = SQLRESCHARCONVERT(typeName);
+			info.m_typeName = SQLAPICHARPTR_TO_EXODBCSTR(typeName);
 
 			GetData(m_pHStmt, 2, SQL_C_SSHORT, &info.m_sqlType, sizeof(info.m_sqlType), &cb, NULL);
 			GetData(m_pHStmt, 3, SQL_C_SLONG, &info.m_columnSize, sizeof(info.m_columnSize), &cb, &info.m_columnSizeIsNull);
 			GetData(m_pHStmt, 4, SQLAPICHARTYPENAME, literalPrefix, sizeof(literalPrefix), &cb, &info.m_literalPrefixIsNull);
-			info.m_literalPrefix = SQLRESCHARCONVERT(literalPrefix);
+			info.m_literalPrefix = SQLAPICHARPTR_TO_EXODBCSTR(literalPrefix);
 			GetData(m_pHStmt, 5, SQLAPICHARTYPENAME, literalSuffix, sizeof(literalSuffix), &cb, &info.m_literalSuffixIsNull);
-			info.m_literalSuffix = SQLRESCHARCONVERT(literalSuffix);
+			info.m_literalSuffix = SQLAPICHARPTR_TO_EXODBCSTR(literalSuffix);
 			GetData(m_pHStmt, 6, SQLAPICHARTYPENAME, createParams, sizeof(createParams), &cb, &info.m_createParamsIsNull);
-			info.m_createParams = SQLRESCHARCONVERT(createParams);
+			info.m_createParams = SQLAPICHARPTR_TO_EXODBCSTR(createParams);
 			GetData(m_pHStmt, 7, SQL_C_SSHORT, &info.m_nullable, sizeof(info.m_nullable), &cb, NULL);
 			GetData(m_pHStmt, 8, SQL_C_SSHORT, &info.m_caseSensitive, sizeof(info.m_caseSensitive), &cb, NULL);
 			GetData(m_pHStmt, 9, SQL_C_SSHORT, &info.m_searchable, sizeof(info.m_searchable), &cb, NULL);
@@ -610,7 +619,7 @@ namespace exodbc
 			GetData(m_pHStmt, 11, SQL_C_SSHORT, &info.m_fixedPrecisionScale, sizeof(info.m_fixedPrecisionScale), &cb, NULL);
 			GetData(m_pHStmt, 12, SQL_C_SSHORT, &info.m_autoUniqueValue, sizeof(info.m_autoUniqueValue), &cb, &info.m_autoUniqueValueIsNull);
 			GetData(m_pHStmt, 13, SQLAPICHARTYPENAME, localTypeName, sizeof(localTypeName), &cb, &info.m_localTypeNameIsNull);
-			info.m_localTypeName = SQLRESCHARCONVERT(localTypeName);
+			info.m_localTypeName = SQLAPICHARPTR_TO_EXODBCSTR(localTypeName);
 			GetData(m_pHStmt, 14, SQL_C_SSHORT, &info.m_minimumScale, sizeof(info.m_minimumScale), &cb, &info.m_minimumScaleIsNull);
 			GetData(m_pHStmt, 15, SQL_C_SSHORT, &info.m_maximumScale, sizeof(info.m_maximumScale), &cb, &info.m_maximumScaleIsNull);
 			GetData(m_pHStmt, 16, SQL_C_SSHORT, &info.m_sqlDataType, sizeof(info.m_sqlDataType), &cb, NULL);
@@ -664,7 +673,7 @@ namespace exodbc
 
 		// Commit the transaction
 		SQLRETURN ret = SQLEndTran(SQL_HANDLE_DBC, m_pHDbc->GetHandle(), SQL_COMMIT);
-		THROW_IFN_SUCCEEDED_MSG(SQLEndTran, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to Commit Transaction");
+		THROW_IFN_SUCCEEDED_MSG(SQLEndTran, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to Commit Transaction");
 	}
 
 
@@ -676,11 +685,11 @@ namespace exodbc
 
 		// Rollback the transaction
 		SQLRETURN ret = SQLEndTran(SQL_HANDLE_DBC, m_pHDbc->GetHandle(), SQL_ROLLBACK);
-		THROW_IFN_SUCCEEDED_MSG(SQLEndTran, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to Rollback Transaction");
+		THROW_IFN_SUCCEEDED_MSG(SQLEndTran, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to Rollback Transaction");
 	}
 
 
-	void Database::ExecSql(const std::wstring& sqlStmt, ExecFailMode mode /* = NotFailOnNoData */)
+	void Database::ExecSql(const std::string& sqlStmt, ExecFailMode mode /* = NotFailOnNoData */)
 	{
 		exASSERT(IsOpen());
 
@@ -688,12 +697,12 @@ namespace exodbc
 
 		StatementCloser::CloseStmtHandle(m_pHStmtExecSql, StatementCloser::Mode::IgnoreNotOpen);
 
-		retcode = SQLExecDirect(m_pHStmtExecSql->GetHandle(), (SQLAPICHARTYPE*) SQLAPICHARCONVERT(sqlStmt).c_str(), SQL_NTS);
+		retcode = SQLExecDirect(m_pHStmtExecSql->GetHandle(),  EXODBCSTR_TO_SQLAPICHARPTR(sqlStmt), SQL_NTS);
 		if ( ! SQL_SUCCEEDED(retcode))
 		{
 			if (!(mode == ExecFailMode::NotFailOnNoData && retcode == SQL_NO_DATA))
 			{
-				SqlResultException ex(L"SQLExecDirect", retcode, SQL_HANDLE_STMT, m_pHStmtExecSql->GetHandle(), (boost::wformat(L"Failed to execute Stmt '%s'") % sqlStmt).str());
+				SqlResultException ex(u8"SQLExecDirect", retcode, SQL_HANDLE_STMT, m_pHStmtExecSql->GetHandle(), (boost::format(u8"Failed to execute Stmt '%s'") % sqlStmt).str());
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -701,7 +710,7 @@ namespace exodbc
 	}
 
 
-	TableInfosVector Database::FindTables(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
+	TableInfosVector Database::FindTables(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const
 	{
 		exASSERT(IsOpen());
 
@@ -720,10 +729,10 @@ namespace exodbc
 
 		// Query db
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			catalogName.empty() ? NULL : (SQLAPICHARTYPE*) SQLAPICHARCONVERT(catalogName).c_str(), catalogName.empty() ? 0 : SQL_NTS,   // catname                 
-			schemaName.empty() ? NULL : (SQLAPICHARTYPE*) SQLAPICHARCONVERT(schemaName).c_str(), schemaName.empty() ? 0 : SQL_NTS,   // schema name
-			tableName.empty() ? NULL : (SQLAPICHARTYPE*) SQLAPICHARCONVERT(tableName).c_str(), tableName.empty() ? 0 : SQL_NTS,							// table name
-			tableType.empty() ? NULL : (SQLAPICHARTYPE*) SQLAPICHARCONVERT(tableType).c_str(), tableType.empty() ? 0 : SQL_NTS);
+			catalogName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(catalogName), catalogName.empty() ? 0 : SQL_NTS,   // catname                 
+			schemaName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(schemaName), schemaName.empty() ? 0 : SQL_NTS,   // schema name
+			tableName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(tableName), tableName.empty() ? 0 : SQL_NTS,							// table name
+			tableType.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(tableType), tableType.empty() ? 0 : SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
@@ -741,9 +750,9 @@ namespace exodbc
 			GetData(m_pHStmt, 4, SQLAPICHARTYPENAME, buffTableType.get(), DB_MAX_TABLE_TYPE_LEN * sizeof(SQLAPICHARTYPE), &cb, NULL);
 			GetData(m_pHStmt, 5, SQLAPICHARTYPENAME, buffTableRemarks.get(), DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLAPICHARTYPE), &cb, NULL);
 
-			TableInfo table(SQLRESCHARCONVERT(buffTableName.get()), SQLRESCHARCONVERT(buffTableType.get()), 
-                            SQLRESCHARCONVERT(buffTableRemarks.get()), SQLRESCHARCONVERT(buffCatalog.get()), 
-                            SQLRESCHARCONVERT(buffSchema.get()), isCatalogNull, isSchemaNull, GetDbms());
+			TableInfo table(SQLAPICHARPTR_TO_EXODBCSTR(buffTableName.get()), SQLAPICHARPTR_TO_EXODBCSTR(buffTableType.get()), 
+                            SQLAPICHARPTR_TO_EXODBCSTR(buffTableRemarks.get()), SQLAPICHARPTR_TO_EXODBCSTR(buffCatalog.get()), 
+                            SQLAPICHARPTR_TO_EXODBCSTR(buffSchema.get()), isCatalogNull, isSchemaNull, GetDbms());
 			tables.push_back(table);
 		}
 		THROW_IFN_NO_DATA(SQLFetch, ret);
@@ -760,7 +769,7 @@ namespace exodbc
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
 		// DbCatalogTable, we set it to an empty string
-		std::wstring catalogQueryName = L"";
+		std::string catalogQueryName = u8"";
 		if (table.HasCatalog())
 		{
 			catalogQueryName = table.GetCatalog();
@@ -770,9 +779,9 @@ namespace exodbc
 		// we always have a tablename, but only sometimes a schema
 		int colCount = 0;
 		SQLRETURN ret = SQLColumns(m_pHStmt->GetHandle(),
-				(SQLAPICHARTYPE*) SQLAPICHARCONVERT(catalogQueryName).c_str(), SQL_NTS,	// catalog
-				table.HasSchema() ? (SQLAPICHARTYPE*) SQLAPICHARCONVERT(table.GetSchema()).c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
-				(SQLAPICHARTYPE*) SQLAPICHARCONVERT(table.GetPureName()).c_str(), SQL_NTS,		// tablename
+				 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName), SQL_NTS,	// catalog
+				table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
+				 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS,		// tablename
 				NULL, 0);						// All columns
 
 		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
@@ -788,7 +797,7 @@ namespace exodbc
 	}
 
 
-	int Database::ReadColumnCount(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType)
+	int Database::ReadColumnCount(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType)
 	{
 		// Find one matching table
 		TableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
@@ -810,16 +819,16 @@ namespace exodbc
 		TablePrimaryKeysVector primaryKeys;
 
 		SQLRETURN ret = SQLPrimaryKeys(m_pHStmt->GetHandle(),
-			table.HasCatalog() ? (SQLAPICHARTYPE*) SQLAPICHARCONVERT(table.GetCatalog()).c_str() : NULL, table.HasCatalog() ? SQL_NTS : 0,
-			table.HasSchema() ? (SQLAPICHARTYPE*) SQLAPICHARCONVERT(table.GetSchema()).c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(table.GetPureName()).c_str(), SQL_NTS);
+			table.HasCatalog() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetCatalog()) : NULL, table.HasCatalog() ? SQL_NTS : 0,
+			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,
+			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS);
 
 		THROW_IFN_SUCCEEDED(SQLPrimaryKeys, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
 		{
 			SQLLEN cb;
-			std::wstring catalogName, schemaName, tableName, columnName, keyName;
+			std::string catalogName, schemaName, tableName, columnName, keyName;
 			bool isCatalogNull, isSchemaNull, isKeyNameNull;
 			SQLSMALLINT keySequence;
 			GetData(m_pHStmt, 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
@@ -837,7 +846,7 @@ namespace exodbc
 	}
 
 
-	TablePrivilegesVector Database::ReadTablePrivileges(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
+	TablePrivilegesVector Database::ReadTablePrivileges(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const
 	{
 		exASSERT(IsOpen());
 
@@ -852,7 +861,7 @@ namespace exodbc
 	TablePrivilegesVector Database::ReadTablePrivileges(const TableInfo& table) const
 	{
 		exASSERT(IsOpen());
-		exASSERT_MSG(GetDbms() != DatabaseProduct::ACCESS, L"Access reports 'SQLSTATE IM001; Driver does not support this function' for SQLTablePrivileges");
+		exASSERT_MSG(GetDbms() != DatabaseProduct::ACCESS, u8"Access reports 'SQLSTATE IM001; Driver does not support this function' for SQLTablePrivileges");
 
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_pHStmt, true, true);
@@ -862,7 +871,7 @@ namespace exodbc
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
 		// DbCatalogTable, we set it to an empty string
-		std::wstring catalogQueryName = L"";
+		std::string catalogQueryName = u8"";
 		if (table.HasCatalog())
 		{
 			catalogQueryName = table.GetCatalog();
@@ -871,9 +880,9 @@ namespace exodbc
 		// Query privs
 		// we always have a tablename, but only sometimes a schema
 		SQLRETURN ret = SQLTablePrivileges(m_pHStmt->GetHandle(),
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(catalogQueryName).c_str(), SQL_NTS,
-			table.HasSchema() ? (SQLAPICHARTYPE*) SQLAPICHARCONVERT(table.GetSchema()).c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(table.GetPureName()).c_str(), SQL_NTS);
+			 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName), SQL_NTS,
+			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,
+			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTablePrivileges, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
@@ -906,9 +915,9 @@ namespace exodbc
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_pHStmt, true, true);
 
-		wstring catalogName;
-		wstring schemaName;
-		wstring tableName = table.GetPureName();
+		string catalogName;
+		string schemaName;
+		string tableName = table.GetPureName();
 		if (table.HasCatalog())
 		{
 			catalogName = table.GetCatalog();
@@ -925,9 +934,9 @@ namespace exodbc
 		}
 
 		SQLRETURN ret = SQLSpecialColumns(m_pHStmt->GetHandle(), (SQLSMALLINT)idType,
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(catalogName).c_str(), (SQLSMALLINT) catalogName.length(),
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(schemaName).c_str(), (SQLSMALLINT) schemaName.length(),
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(tableName).c_str(), (SQLSMALLINT) tableName.length(),
+			 EXODBCSTR_TO_SQLAPICHARPTR(catalogName), (SQLSMALLINT) catalogName.length(),
+			 EXODBCSTR_TO_SQLAPICHARPTR(schemaName), (SQLSMALLINT) schemaName.length(),
+			 EXODBCSTR_TO_SQLAPICHARPTR(tableName), (SQLSMALLINT) tableName.length(),
 			(SQLSMALLINT)scope, nullable);
 		THROW_IFN_SUCCEEDED(SQLSpecialColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
@@ -937,9 +946,9 @@ namespace exodbc
 
 			SQLSMALLINT scopeVal;
 			bool scopeIsNull;
-			wstring columnName;
+			string columnName;
 			SQLSMALLINT sqlType;
-			wstring sqlTypeName;
+			string sqlTypeName;
 			SQLINTEGER columnSize;
 			SQLINTEGER bufferLength;
 			SQLSMALLINT decimalDigits;
@@ -975,7 +984,7 @@ namespace exodbc
 					scope = RowIdScope::TRANSCATION;
 					break;
 				default:
-					exASSERT_MSG(false, boost::str(boost::wformat(L"Unknown Row id scope value %d") % scopeVal));
+					exASSERT_MSG(false, boost::str(boost::format(u8"Unknown Row id scope value %d") % scopeVal));
 				}
 			}
 
@@ -996,7 +1005,7 @@ namespace exodbc
 	}
 
 
-	ColumnInfosVector Database::ReadTableColumnInfo(const std::wstring& tableName, const std::wstring& schemaName, const std::wstring& catalogName, const std::wstring& tableType) const
+	ColumnInfosVector Database::ReadTableColumnInfo(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const
 	{
 		exASSERT(IsOpen());
 
@@ -1021,7 +1030,7 @@ namespace exodbc
 		// Note: The schema and table name arguments are Pattern Value arguments
 		// The catalog name is an ordinary argument. if we do not have one in the
 		// DbCatalogTable, we set it to an empty string
-		std::wstring catalogQueryName = L"";
+		std::string catalogQueryName = u8"";
 		if (table.HasCatalog())
 		{
 			catalogQueryName = table.GetCatalog();
@@ -1031,25 +1040,24 @@ namespace exodbc
 		// we always have a tablename, but only sometimes a schema		
 		int colCount = 0;
 		SQLRETURN ret = SQLColumns(m_pHStmt->GetHandle(),
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(catalogQueryName).c_str(), SQL_NTS,	// catalog
-			table.HasSchema() ? (SQLAPICHARTYPE*) SQLAPICHARCONVERT(table.GetSchema()).c_str() : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
-			(SQLAPICHARTYPE*) SQLAPICHARCONVERT(table.GetPureName()).c_str(), SQL_NTS,		// tablename
+			 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName), SQL_NTS,	// catalog
+			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
+			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS,		// tablename
 			NULL, 0);						// All columns
 
 		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		// Iterate rows
-		std::wstring catalogName, schemaName, tableName, columnName, typeName, remarks, defaultValue, isNullable;
+		std::string catalogName, schemaName, tableName, columnName, typeName, remarks, defaultValue, isNullable;
 		SQLSMALLINT sqlType, decimalDigits, numPrecRadix, nullable, sqlDataType, sqlDatetimeSub;
 		SQLINTEGER columnSize, bufferSize, charOctetLength, ordinalPosition;
-		bool isCatalogNull, isSchemaNull, isColumnSizeNull, isBufferSizeNull, isDecimalDigitsNull, isNumPrecRadixNull, isRemarksNull, isDefaultValueNull, isSqlDatetimeSubNull, isCharOctetLengthNull, isIsNullableNull;
-
+		bool isCatalogNull, isSchemaNull, isColumnSizeNull, isBufferSizeNull, isDecimalDigitsNull, isNumPrecRadixNull, isRemarksNull, isDefaultValueNull, isSqlDatetimeSubNull, isCharOctetLengthNull, isIsNullableNull;     
+        
 		// Ensure ordinal-position is increasing constantly by one, starting at one
 		SQLINTEGER m_lastIndex = 0;
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
 		{
 			// Fetch data from columns
-
 			SQLLEN cb;
 			GetData(m_pHStmt, 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
 			GetData(m_pHStmt, 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
@@ -1072,7 +1080,7 @@ namespace exodbc
 
 			if (++m_lastIndex != ordinalPosition)
 			{
-				Exception ex(L"Columns are not ordered strictly by ordinal position");
+				Exception ex(u8"Columns are not ordered strictly by ordinal position");
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -1093,7 +1101,7 @@ namespace exodbc
 	{
 		SDbCatalogInfo dbInf;
 
-		dbInf.m_tables = FindTables(L"", L"", L"", L"");
+		dbInf.m_tables = FindTables(u8"", u8"", u8"", u8"");
 
 		TableInfosVector::const_iterator it;
 		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
@@ -1123,7 +1131,7 @@ namespace exodbc
 		SQLULEN modeValue = 0;
 		SQLINTEGER cb;
 		SQLRETURN ret = SQLGetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_AUTOCOMMIT, &modeValue, sizeof(modeValue), &cb);
-		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to read Attr SQL_ATTR_AUTOCOMMIT");
+		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to read Attr SQL_ATTR_AUTOCOMMIT");
 
 		if(modeValue == SQL_AUTOCOMMIT_OFF)
 			mode = CommitMode::MANUAL;
@@ -1144,7 +1152,7 @@ namespace exodbc
 		SQLULEN modeValue = 0;
 		SQLINTEGER cb;
 		SQLRETURN ret = SQLGetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TXN_ISOLATION, &modeValue, sizeof(modeValue), &cb);
-		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), L"Failed to read Attr SQL_ATTR_TXN_ISOLATION");
+		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to read Attr SQL_ATTR_TXN_ISOLATION");
 
 		switch (modeValue)
 		{
@@ -1175,18 +1183,18 @@ namespace exodbc
 		}
 
 		SQLRETURN ret;
-		std::wstring errStringMode;
+		std::string errStringMode;
 		if (mode == CommitMode::MANUAL)
 		{
 			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_OFF, 0);
-			errStringMode = L"SQL_AUTOCOMMIT_OFF";
+			errStringMode = u8"SQL_AUTOCOMMIT_OFF";
 		}
 		else
 		{
 			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_AUTOCOMMIT, (SQLPOINTER) SQL_AUTOCOMMIT_ON, 0);
-			errStringMode = L"SQL_AUTOCOMMIT_ON";
+			errStringMode = u8"SQL_AUTOCOMMIT_ON";
 		}
-		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), (boost::wformat(L"Setting ATTR_AUTOCOMMIT to %s failed") % errStringMode).str());
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), (boost::format(u8"Setting ATTR_AUTOCOMMIT to %s failed") % errStringMode).str());
 
 		m_commitMode = mode;
 	}
@@ -1210,11 +1218,11 @@ namespace exodbc
 		}
 
 		SQLRETURN ret;
-		std::wstring errStringMode;
+		std::string errStringMode;
 		{
 			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, 0);
 		}
-		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), (boost::wformat(L"Cannot set SQL_ATTR_TXN_ISOLATION to %d") % (int) mode).str());
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), (boost::format(u8"Cannot set SQL_ATTR_TXN_ISOLATION to %d") % (int) mode).str());
 
 	}
 
@@ -1229,12 +1237,12 @@ namespace exodbc
 	OdbcVersion Database::GetDriverOdbcVersion() const
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
-		std::wstring driverOdbcVersion = m_dbInf.GetWStringProperty(DatabaseInfo::WStringProperty::DriverOdbcVersion);
+		std::string driverOdbcVersion = m_dbInf.GetStringProperty(DatabaseInfo::StringProperty::DriverOdbcVersion);
 		exASSERT( ! driverOdbcVersion.empty());
 
 		OdbcVersion ov = OdbcVersion::UNKNOWN;
-		std::vector<std::wstring> versions;
-		boost::split(versions, driverOdbcVersion, boost::is_any_of(L"."));
+		std::vector<std::string> versions;
+		boost::split(versions, driverOdbcVersion, boost::is_any_of(u8"."));
 		if (versions.size() == 2)
 		{
 			try
@@ -1257,7 +1265,7 @@ namespace exodbc
 			catch (boost::bad_lexical_cast& e)
 			{
 				HIDE_UNUSED(e);
-				THROW_WITH_SOURCE(Exception, (boost::wformat(L"Failed to determine odbc version from string '%s'") % driverOdbcVersion).str());
+				THROW_WITH_SOURCE(Exception, (boost::format(u8"Failed to determine odbc version from string '%s'") % driverOdbcVersion).str());
 			}
 		}
 		return ov;
@@ -1277,31 +1285,31 @@ namespace exodbc
 
 	void Database::DetectDbms()
 	{
-		std::wstring name = m_dbInf.GetDbmsName();
-		if (boost::algorithm::contains(name, L"Microsoft SQL Server"))
+		std::string name = m_dbInf.GetDbmsName();
+		if (boost::algorithm::contains(name, u8"Microsoft SQL Server"))
 		{
 			m_dbmsType = DatabaseProduct::MS_SQL_SERVER;
 		}
-		else if (boost::algorithm::contains(name, L"MySQL"))
+		else if (boost::algorithm::contains(name, u8"MySQL"))
 		{
 			m_dbmsType = DatabaseProduct::MY_SQL;
 		}
-		else if (boost::algorithm::contains(name, L"DB2"))
+		else if (boost::algorithm::contains(name, u8"DB2"))
 		{
 			m_dbmsType = DatabaseProduct::DB2;
 		}
-		else if (boost::algorithm::contains(name, L"EXCEL"))
+		else if (boost::algorithm::contains(name, u8"EXCEL"))
 		{
 			m_dbmsType = DatabaseProduct::EXCEL;
 		}
-		else if (boost::algorithm::contains(name, L"ACCESS"))
+		else if (boost::algorithm::contains(name, u8"ACCESS"))
 		{
 			m_dbmsType = DatabaseProduct::ACCESS;
 		}
 
 		if (m_dbmsType == DatabaseProduct::UNKNOWN)
 		{
-			LOG_WARNING((boost::wformat(L"Unknown database: %s") % m_dbInf.GetDbmsName()).str());
+			LOG_WARNING((boost::format(u8"Unknown database: %s") % m_dbInf.GetDbmsName()).str());
 		}
 	}
 }

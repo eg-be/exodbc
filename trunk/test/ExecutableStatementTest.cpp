@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ExecutableStatementTest.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 22.11.2014
@@ -54,10 +54,10 @@ namespace exodbctest
 	TEST_F(ExecutableStatementTest, Construct)
 	{
 		// Construct from valid and invalid database
-		EXPECT_NO_THROW(ExecutableStatement stmt(m_pDb, L"SELECT * FROM FOO"));
+		EXPECT_NO_THROW(ExecutableStatement stmt(m_pDb, u8"SELECT * FROM FOO"));
 
 		DatabasePtr pClosed = make_shared<Database>(m_pEnv);
-		EXPECT_THROW(ExecutableStatement stmt(pClosed, L"SELECT * FROM FOO"), AssertionException);
+		EXPECT_THROW(ExecutableStatement stmt(pClosed, u8"SELECT * FROM FOO"), AssertionException);
 
 		// Construct using default c'tor
 		ExecutableStatement stmt2;
@@ -88,16 +88,16 @@ namespace exodbctest
 	{
 		// Prepare to select some values
 		// Determine query names from a Table
-		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES);
-		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		string idColName = GetIdColumnName(TableId::INTEGERTYPES);
+		string tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
 		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false, false);
 		ASSERT_EQ(4, columns.size());
 
 		// Build a select stmt
-		wstring queryTableName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
-		wstringstream ws;
-		ws << L"SELECT ";
+		string queryTableName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		stringstream ws;
+		ws << u8"SELECT ";
 		auto it = columns.begin();
 		QueryNameVisitor qv;
 		while (it != columns.end())
@@ -106,10 +106,10 @@ namespace exodbctest
 			++it;
 			if (it != columns.end())
 			{
-				ws << L", ";
+				ws << u8", ";
 			}
 		}
-		ws << L" FROM " << queryTableName << L" ORDER BY " << idColName;
+		ws << u8" FROM " << queryTableName << u8" ORDER BY " << idColName;
 
 		// and bind columns
 		ExecutableStatement ds(m_pDb);
@@ -136,16 +136,16 @@ namespace exodbctest
 	{
 		// Prepare to select some values
 		// Determine query names from a Table
-		wstring idColName = GetIdColumnName(TableId::INTEGERTYPES);
-		wstring tableName = GetTableName(TableId::INTEGERTYPES);
+		string idColName = GetIdColumnName(TableId::INTEGERTYPES);
+		string tableName = GetTableName(TableId::INTEGERTYPES);
 		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
 		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false, false);
 		ASSERT_EQ(4, columns.size());
 
 		// Build a select stmt
-		wstring queryTableName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
-		wstringstream ws;
-		ws << L"SELECT ";
+		string queryTableName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		stringstream ws;
+		ws << u8"SELECT ";
 		auto it = columns.begin();
 		QueryNameVisitor qv;
 		while (it != columns.end())
@@ -154,10 +154,10 @@ namespace exodbctest
 			++it;
 			if (it != columns.end())
 			{
-				ws << L", ";
+				ws << u8", ";
 			}
 		}
-		ws << L" FROM " << queryTableName << L" WHERE " << idColName << L" = ?";
+		ws << u8" FROM " << queryTableName << u8" WHERE " << idColName << u8" = ?";
 
 		// and bind columns
 		ExecutableStatement ps(m_pDb);
@@ -194,13 +194,13 @@ namespace exodbctest
 
 	TEST_F(ExecutableStatementTest, SelectFirst)
 	{
-		wstring tableName = GetTableName(TableId::INTEGERTYPES);
-		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
-		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		string tableName = GetTableName(TableId::INTEGERTYPES);
+		string tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		string idName = GetIdColumnName(TableId::INTEGERTYPES);
 
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
-		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") %idName %tableQueryName %idName %idName );
+		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") %idName %tableQueryName %idName %idName );
 		ExecutableStatement ds(m_pDb);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
@@ -221,13 +221,13 @@ namespace exodbctest
 
 	TEST_F(ExecutableStatementTest, SelectLast)
 	{
-		wstring tableName = GetTableName(TableId::INTEGERTYPES);
-		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
-		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		string tableName = GetTableName(TableId::INTEGERTYPES);
+		string tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		string idName = GetIdColumnName(TableId::INTEGERTYPES);
 
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
-		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
@@ -240,13 +240,13 @@ namespace exodbctest
 
 	TEST_F(ExecutableStatementTest, SelectNext)
 	{
-		wstring tableName = GetTableName(TableId::INTEGERTYPES);
-		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
-		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		string tableName = GetTableName(TableId::INTEGERTYPES);
+		string tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		string idName = GetIdColumnName(TableId::INTEGERTYPES);
 
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
-		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
@@ -274,13 +274,13 @@ namespace exodbctest
 
 	TEST_F(ExecutableStatementTest, SelectPrev)
 	{
-		wstring tableName = GetTableName(TableId::INTEGERTYPES);
-		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
-		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		string tableName = GetTableName(TableId::INTEGERTYPES);
+		string tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		string idName = GetIdColumnName(TableId::INTEGERTYPES);
 
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
-		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
@@ -302,13 +302,13 @@ namespace exodbctest
 
 	TEST_F(ExecutableStatementTest, SelectAbsolute)
 	{
-		wstring tableName = GetTableName(TableId::INTEGERTYPES);
-		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
-		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		string tableName = GetTableName(TableId::INTEGERTYPES);
+		string tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		string idName = GetIdColumnName(TableId::INTEGERTYPES);
 
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
-		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
@@ -328,13 +328,13 @@ namespace exodbctest
 
 	TEST_F(ExecutableStatementTest, SelectRelative)
 	{
-		wstring tableName = GetTableName(TableId::INTEGERTYPES);
-		wstring tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
-		wstring idName = GetIdColumnName(TableId::INTEGERTYPES);
+		string tableName = GetTableName(TableId::INTEGERTYPES);
+		string tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		string idName = GetIdColumnName(TableId::INTEGERTYPES);
 
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
-		wstring sqlsmt = boost::str(boost::wformat(L"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
+		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
 		ExecutableStatement ds(m_pDb);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
@@ -368,14 +368,14 @@ namespace exodbctest
 		// Prepare to insert some values
 		// Determine query names from a Table
 		ClearTmpTable(TableId::INTEGERTYPES_TMP);
-		wstring tableName = GetTableName(TableId::INTEGERTYPES_TMP);
+		string tableName = GetTableName(TableId::INTEGERTYPES_TMP);
 		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
 		std::vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false, false);
 		ASSERT_EQ(4, columns.size());
 
-		wstring queryTableName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
-		wstringstream ws;
-		ws << L"INSERT INTO " << queryTableName << L" (";
+		string queryTableName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		stringstream ws;
+		ws << u8"INSERT INTO " << queryTableName << u8" (";
 		auto it = columns.begin();
 		QueryNameVisitor qv;
 		while (it != columns.end())
@@ -384,10 +384,10 @@ namespace exodbctest
 			++it;
 			if (it != columns.end())
 			{
-				ws << L", ";
+				ws << u8", ";
 			}
 		}
-		ws << L") VALUES(?, ?, ?, ?)";
+		ws << u8") VALUES(?, ?, ?, ?)";
 
 		ExecutableStatement ps(m_pDb);
 		ps.Prepare(ws.str());

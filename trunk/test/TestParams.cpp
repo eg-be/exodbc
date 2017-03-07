@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file TestParams.cpp
  * \author Elias Gerber <eg@elisium.ch>
  * \date 22.07.2014
@@ -41,94 +41,85 @@ using namespace exodbc;
 namespace exodbctest
 {
 	::std::ostream& operator<<(::std::ostream& os, const TestParams& oi) {
-		std::wstringstream wos;
+		std::stringstream ss;
 		if (oi.HasConnectionString())
 		{
-			wos << L"Connection String: " << oi.m_connectionString;
+			ss << u8"Connection String: " << oi.m_connectionString;
 		}
 		else
 		{
-			wos << L"DSN: " << oi.m_dsn
-				<< L"; Username: " << oi.m_username
-				<< L"; Password: " << oi.m_password;
+			ss << u8"DSN: " << oi.m_dsn
+				<< u8"; Username: " << oi.m_username
+				<< u8"; Password: " << oi.m_password;
 		}
-		wos << L"; Names: " << (oi.m_namesCase == Case::LOWER ? L"lowercase" : L"uppercase");
-		std::string s;
+		ss << u8"; Names: " << (oi.m_namesCase == Case::LOWER ? u8"lowercase" : u8"uppercase");
 
-		// \todo Resolve with ticket #44 #53 - ugly conversion (but okay here, we know its only ascii)
-		std::wstring ws = wos.str();
-		std::stringstream ss;
-		for(size_t i = 0; i < ws.length(); i++)
-		{
-			char c = (char) ws[i];
-			ss << c;
-		}
-		s = ss.str();
-
-		return os << s.c_str();
+		return os << ss.str();
 	}
 
 
 	::std::wostream& operator<<(::std::wostream& wos, const TestParams& oi) {
+		std::stringstream ss;
 		if (oi.HasConnectionString())
 		{
-			wos << L"Connection String: " << oi.m_connectionString;
+			ss << u8"Connection String: " << oi.m_connectionString;
 		}
 		else
 		{
-			wos << L"DSN: " << oi.m_dsn
-				<< L"; Username: " << oi.m_username
-				<< L"; Password: " << oi.m_password;
+			ss << u8"DSN: " << oi.m_dsn
+				<< u8"; Username: " << oi.m_username
+				<< u8"; Password: " << oi.m_password;
 		}
-		wos << L"; Names: " << (oi.m_namesCase == Case::LOWER ? L"lowercase" : L"uppercase");
-		return wos;
+		ss << u8"; Names: " << (oi.m_namesCase == Case::LOWER ? u8"lowercase" : u8"uppercase");
+		std::wstring ws = utf8ToUtf16(ss.str());
+		return wos << ws;
 	}
 
 
-	Case ReadCase(const boost::property_tree::wptree& subTree)
+	Case ReadCase(const boost::property_tree::ptree& subTree)
 	{
 		namespace pt = boost::property_tree;
 		namespace ba = boost::algorithm;
 
-		wstring namesCase = subTree.get<wstring>(L"Case");
-		if (ba::iequals(namesCase, L"u") || ba::iequals(namesCase, L"upper"))
+		string namesCase = subTree.get<string>(u8"Case");
+		if (ba::iequals(namesCase, u8"u") || ba::iequals(namesCase, u8"upper"))
 		{
 			return Case::UPPER;
 		}
-		else if (ba::iequals(namesCase, L"l") || ba::iequals(namesCase, L"lower"))
+		else if (ba::iequals(namesCase, u8"l") || ba::iequals(namesCase, u8"lower"))
 		{
 			return Case::LOWER;
 		}
 		else
 		{
-			wstringstream ws;
-			ws << L"TestSettings.Case must be either 'upper', 'u', 'lower' or 'l', but it is " << namesCase;
-			IllegalArgumentException ae(ws.str());
+			stringstream ss;
+			ss << u8"TestSettings.Case must be either 'upper', 'u', 'lower' or 'l', but it is " << namesCase;
+			IllegalArgumentException ae(ss.str());
 			SET_EXCEPTION_SOURCE(ae);
 			throw ae;
 		}
 	}
 
 
-	std::vector<wstring> ReadSkipNames(const boost::property_tree::wptree& subTree)
+	std::vector<string> ReadSkipNames(const boost::property_tree::ptree& subTree)
 	{
 		namespace pt = boost::property_tree;
 
-		std::vector<wstring> skipNames;
-		for (const pt::wptree::value_type &c : subTree.get_child(L""))
+		std::vector<string> skipNames;
+		for (const pt::ptree::value_type &c : subTree.get_child(u8""))
 		{
-			wstring elementName = c.first.data();
-			if (elementName == L"Skip")
+			string elementName = c.first.data();
+			if (elementName == u8"Skip")
 			{
-				pt::wptree child = c.second;
-				skipNames.push_back(child.get<wstring>(L""));
+				pt::ptree child = c.second;
+				skipNames.push_back(child.get<string>(u8""));
 			}
 		}
 		return skipNames;
 	}
 
 
-	void TestParams::Load(const boost::filesystem::wpath& settingsFile, std::vector<wstring>& skipNames)
+	void TestParams::Load(const boost::filesystem::path& settingsFile, std::vector<string>& skipNames)
 	{
 		namespace pt = boost::property_tree;
 		namespace io = boost::iostreams;
@@ -137,34 +128,34 @@ namespace exodbctest
 
 		try
 		{
-			pt::wptree tree;
+			pt::ptree tree;
 
 			// Parse the XML into the property tree.
 			pt::read_xml(settingsFile.string(), tree);
 
-			for (const pt::wptree::value_type &v : tree.get_child(L"TestSettings"))
+			for (const pt::ptree::value_type &v : tree.get_child(u8"TestSettings"))
 			{
-				wstring elementName = v.first.data();
-				pt::wptree subTree = v.second;
-				if (elementName == L"Dsn")
+				string elementName = v.first.data();
+				pt::ptree subTree = v.second;
+				if (elementName == u8"Dsn")
 				{
-					bool disabled = subTree.get<bool>(L"Disabled");
+					bool disabled = subTree.get<bool>(u8"Disabled");
 					if (!disabled)
 					{
-						m_dsn = subTree.get<wstring>(L"Name");
-						m_username = subTree.get<wstring>(L"User");
-						m_password = subTree.get<wstring>(L"Pass");
+						m_dsn = subTree.get<string>(u8"Name");
+						m_username = subTree.get<string>(u8"User");
+						m_password = subTree.get<string>(u8"Pass");
 						m_namesCase = ReadCase(subTree);
 						skipNames = ReadSkipNames(subTree);
 						break;
 					}
 				}
-				if (elementName == L"ConnectionString")
+				if (elementName == u8"ConnectionString")
 				{
-					bool disabled = subTree.get<bool>(L"Disabled");
+					bool disabled = subTree.get<bool>(u8"Disabled");
 					if (!disabled)
 					{
-						m_connectionString = subTree.get<wstring>(L"Value");
+						m_connectionString = subTree.get<string>(u8"Value");
 						m_namesCase = ReadCase(subTree);
 						skipNames = ReadSkipNames(subTree);
 						break;
@@ -174,35 +165,35 @@ namespace exodbctest
 
 			if (!IsUsable())
 			{
-				LOG_WARNING(L"DSN and ConnectionString are both disabled");
+				LOG_WARNING(u8"DSN and ConnectionString are both disabled");
 			}
 
 			// create db
-			m_createDb = tree.get<bool>(L"TestSettings.CreateDb", false);
+			m_createDb = tree.get<bool>(u8"TestSettings.CreateDb", false);
 			
 			// loglevel
-			wstring logLevelValue = tree.get<wstring>(L"TestSettings.LogLevel", L"Info");
-			if (boost::iequals(logLevelValue, L"Debug"))
+			string logLevelValue = tree.get<string>(u8"TestSettings.LogLevel", u8"Info");
+			if (boost::iequals(logLevelValue, u8"Debug"))
 			{
 				LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
 			}
-			else if (boost::iequals(logLevelValue, L"Info"))
+			else if (boost::iequals(logLevelValue, u8"Info"))
 			{
 				LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
 			}
-			else if (boost::iequals(logLevelValue, L"Warning"))
+			else if (boost::iequals(logLevelValue, u8"Warning"))
 			{
 				LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
 			}
-			else if (boost::iequals(logLevelValue, L"Error"))
+			else if (boost::iequals(logLevelValue, u8"Error"))
 			{
 				LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
 			}
 			// logfile
-			bool logFile = tree.get<bool>(L"TestSettings.LogFile", false);
+			bool logFile = tree.get<bool>(u8"TestSettings.LogFile", false);
 			if (logFile)
 			{
-				FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(L"exOdbcGTest.log", true);
+				FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(u8"exOdbcGTest.log", true);
 				LogManager::Get().RegisterLogHandler(pFileLogger);
 			}
 		}

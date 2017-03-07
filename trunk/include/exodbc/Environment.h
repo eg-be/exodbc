@@ -1,4 +1,4 @@
-/*!
+﻿/*!
  * \file Environment.h
  * \author Elias Gerber <eg@elisium.ch>
  * \date 25.07.2014
@@ -62,7 +62,7 @@ namespace exodbc
 		 * \see		Init()
 		 * \throw	std::bad_alloc If creation of SqlEnvHandlePtr fails.
 		 */
-		Environment() noexcept;
+		Environment();
 
 
 		/*!

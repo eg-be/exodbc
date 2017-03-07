@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0.2)
+﻿cmake_minimum_required (VERSION 3.0.2)
 project (libexodbc)
 
 # update tweak version with info from subversion, if available:
@@ -23,6 +23,13 @@ add_definitions(
   -D_UNICODE
   -D_SCL_SECURE_NO_WARNINGS
   -D_CRT_SECURE_NO_WARNINGS
+)
+endif()
+
+message(STATUS "BUILD_SHARED_LIBS is set to ${BUILD_SHARED_LIBS}")
+if(MSVC AND BUILD_SHARED_LIBS)
+add_definitions(
+  -DEXODBC_DLL
 )
 endif()
 
@@ -111,4 +118,14 @@ if(MSVC)
   target_link_libraries(libexodbc PRIVATE odbc32)
 else()
   target_link_libraries(libexodbc PRIVATE odbc)
+endif()
+
+# add a target to generate API documentation with Doxygen
+find_package(Doxygen)
+if(DOXYGEN_FOUND)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doygen-configuration.in ${CMAKE_CURRENT_BINARY_DIR}/Doxgen.configuration @ONLY)
+  add_custom_target(doc
+  ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxgen.configuration 
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
 endif()

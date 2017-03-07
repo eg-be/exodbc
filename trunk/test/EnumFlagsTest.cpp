@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file EnumFlagsTest.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 21.11.2015
