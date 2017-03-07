@@ -123,10 +123,9 @@ endif()
 # add a target to generate API documentation with Doxygen
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-add_custom_target(doc
-${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile 
-WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-COMMENT "Generating API documentation with Doxygen" VERBATIM
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doygen-configuration.in ${CMAKE_CURRENT_BINARY_DIR}/Doxgen.configuration @ONLY)
+  add_custom_target(doc
+  ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxgen.configuration 
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 endif()
