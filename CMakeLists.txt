@@ -11,6 +11,12 @@ option(BUILD_SAMPLES "Build exodbcsamples programs" ON)
 # dlls at the right place:
 option(BUILD_SHARED_LIBS "Build as shared library" OFF)
 
+# default to use boost as a static lib on windows, to avoid
+# having to copy around dlls:
+if(WIN32)
+  option(Boost_USE_STATIC_LIBS "Link against static boost libraries" ON)
+endif()
+
 # Only add Debug and Release Configuration  
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 

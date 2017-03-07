@@ -90,7 +90,7 @@ be used with cmake:
 and how dependencies are used:
 
   Boost_USE_STATIC_LIBS:  Set to ON to link against static libs of boost. 
-                          Default: OFF
+                          Default: ON on Windows, OFF else.
   BOOST_ROOT:             Root directory of boost.
 
 For example, to configure 64bit vc140 builds without tests but with samples:
