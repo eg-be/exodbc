@@ -8,8 +8,16 @@ obtain cmake for your platform: https://cmake.org/
 
 Quickstart
 ==========
-A short manual on how to build libexodbc only:
+A short manual on how to build libexodbc only, really quick version:
 From exOdbc top-level directory:
+
+  mkdir build
+  cd build
+  set BOOST_ROOT=e:/lib/boost_1_62_0 [mostly needed only on windows]
+  cmake -DBUILD_TESTS=OFF -DBUILD_SAMPLES=OFF ..
+  cmake --build .
+
+And some explanations:
 Create a directory for the build-environment and cd into it:
   
   mkdir build
@@ -27,16 +35,20 @@ by setting BUILD_TESTS and BUILD_SAMPLES to samples OFF:
 
 Finally build the library:
 
+  cmake --build .
+
+On Windows you can choose a build configurations ('Debug' or 'Release'):
+
   cmake --build . --config Release
   cmake --build . --config Debug
  
-The resulting binaries have been placed in 'bin\[Debug|Release]'.
+The resulting binaries have been placed in 'bin'.
 
 Full build
 ==========
 Build all components including the tests and samples.
-Requires boost-filesystem and googletest for exodbctest. Googletest is fetched
-during configuration, boost-filesystem must be provided.
+Requires boost-filesystem and googletest for exodbctest. Googletest is 
+downloaded during configuration, boost-filesystem must be provided.
 
 From exOdbc top-level directory:
 Create a directory for the build-environment and cd into it:
@@ -54,11 +66,9 @@ or to prepare a 64bit build (See cmake doc for a list of available Generators):
   cmake -G "Visual Studio 14 2015 Win64" ..
 
 Build all targets:
-  
-  cmake --build . --config Debug
 
-or for release builds:
-  cmake --build . --config Release
+  cmake --build .
+
 
 Install reference
 =================
@@ -92,14 +102,23 @@ To configure 64bit vc140 builds as static lib and link against boost static libs
 To configure 32bit vc140 builds as shared lib with dynamic linking against boost:
   cmake -G "Visual Studio 14 2015" -DBoost_USE_STATIC_LIBS=OFF -DBUILD_SHARED_LIBS=ON ..
 
-Building
---------
-Use '--config' to build a 'Release' or 'Debug' configuration.
-Default is 'Debug':
+Debug or Release build
+----------------------
+With multi-configuration generators like Visual Studio you can pick the build
+configuration during build time:
 
-  cmake --build . --config Debug
   cmake --build . --config Release
-  
+  cmake --build . --config Debug
+
+Note that only Release and Debug configurations are available. See 
+CMakeLists.txt for more details.
+
+With single-configuration generators you must pick the build configuration
+during configuring, using the option CMAKE_BUILD_TYPE
+
+  cmake -DCMAKE_BUILD_TYPE=Debug ..
+  cmake -DCMAKE_BUILD_TYPE=Release ..
+ 
 Dependencies
 ------------
 libexodbc:
@@ -224,9 +243,14 @@ To list tests:
   
 TestSettings.xml
 ----------------
+The main reason for this file is to have a convienent way of running the tests
+from inside Visual Studio. The Google Test Adapter plugin does not (yet?)
+provide a convinient way of passing arguments to the test app, and the Visual
+Studio dialog doesn't help much.
+
 If exodbctest is invoked without arguments, it will search for a file named 'TestSetting.xml'.
 If one is found, the connection string / dsn and which tests to run are determined from the
 TestSettings.xml file.
 
-If no argument '--gtest_filter' is given on the command-line, exodbctest will create such and
+If no argument '--gtest_filter' is given on the command-line, exodbctest will create such an
 argument that skips all tests defined to be skipped in TestSettings.xml.
