@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file SqlStmtCloserTest.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 22.11.2014
@@ -69,7 +69,7 @@ namespace exodbctest
 		{
 			if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
 			{
-				LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
+				LOG_WARNING(u8"This test is known to fail with MySQL, see Ticket #120");
 			}
 			EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
 		}
@@ -77,14 +77,14 @@ namespace exodbctest
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Open statement by doing some operation on it
-		std::wstring sqlstmt;
+		std::string sqlstmt;
 		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM %s") % GetTableName(TableId::INTEGERTYPES));
+			sqlstmt = boost::str(boost::format(u8"SELECT * FROM %s") % GetTableName(TableId::INTEGERTYPES));
 		}
 		else
 		{
-			sqlstmt = boost::str(boost::wformat(L"SELECT * FROM exodbc.%s") % GetTableName(TableId::INTEGERTYPES));
+			sqlstmt = boost::str(boost::format(u8"SELECT * FROM exodbc.%s") % GetTableName(TableId::INTEGERTYPES));
 		}
 		// convert schema name to upper if needed
 		if (m_odbcInfo.m_namesCase == Case::UPPER)
@@ -92,7 +92,7 @@ namespace exodbctest
 			boost::algorithm::to_upper(sqlstmt);
 		}
 
-		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLWCHAR*)sqlstmt.c_str(), SQL_NTS);
+		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
 		// Closing it first time must work
@@ -101,7 +101,7 @@ namespace exodbctest
 		// Closing it a second time must fail
 		if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
 		{
-			LOG_WARNING(L"This test is known to fail with MySQL, see Ticket #120");
+			LOG_WARNING(u8"This test is known to fail with MySQL, see Ticket #120");
 		}
 		EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
 

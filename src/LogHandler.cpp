@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file LogHandler.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.01.2016
@@ -27,55 +27,76 @@ using namespace std;
 
 namespace exodbc
 {
-	std::wstring FormatLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */)
+	std::string FormatLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */)
 	{
-		std::wstringstream ws;
+		std::stringstream ss;
 
 		switch (level)
 		{
 		case exodbc::LogLevel::Error: \
-			ws << L"ERROR"; break; \
+			ss << u8"ERROR"; break; \
 		case exodbc::LogLevel::Warning: \
-			ws << L"WARNING"; break; \
+			ss << u8"WARNING"; break; \
 		case exodbc::LogLevel::Info: \
-			ws << L"INFO"; break; \
+			ss << u8"INFO"; break; \
 		case exodbc::LogLevel::Debug: \
-			ws << L"DEBUG"; break; \
+			ss << u8"DEBUG"; break; \
 		}
 
 		bool haveSourceInfo = !filename.empty() || line > 0 || !functionname.empty();
 		if (haveSourceInfo)
-			ws << L" [";
+			ss << u8" [";
 
 		if (!filename.empty())
-			ws << filename;
+			ss << filename;
 		if (line > 0)
-			ws << L"(" << line << L")";
+			ss << u8"(" << line << u8")";
 		else if (!filename.empty())
-			ws << L"(\?\?)";
+			ss << u8"(\?\?)";
 		if (!functionname.empty())
-			ws << functionname;
+			ss << functionname;
 
 		if (haveSourceInfo)
-			ws << L"]";
+			ss << u8"]";
 
-		ws << L": " << msg;
+		ss << u8": " << msg;
 
-		return ws.str();
+		return ss.str();
 	}
 
-	void StdErrLogHandler::OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */) const
+
+	void StdLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
 	{
-		wcout << FormatLogMessage(level, msg, filename, line, functionname) << endl;
+		lock_guard<mutex> lock(m_logMutex);
+		string formatedMessage = FormatLogMessage(level, msg, filename, line, functionname);
+		if (m_redirectToStdErr)
+		{
+			WRITE_STDERR_ENDL(formatedMessage);
+		}
+		if (m_redirectToStdOut)
+		{
+			WRITE_STDOUT_ENDL(formatedMessage);
+		}
+		if (!m_redirectToStdErr && !m_redirectToStdOut)
+		{
+			if (level >= LogLevel::Warning)
+			{
+				WRITE_STDERR_ENDL(formatedMessage);
+			}
+			else
+			{
+				WRITE_STDOUT_ENDL(formatedMessage);
+			}
+		}
 	}
 
 
-	bool StdErrLogHandler::operator==(const LogHandler& other) const
+	bool StdLogHandler::operator==(const LogHandler& other) const
 	{
 		try
 		{
 			// all StdLogHandlers are equal
-			dynamic_cast<const StdErrLogHandler&>(other);
+			dynamic_cast<const StdLogHandler&>(other);
 			return true;
 		}
 		catch (const std::bad_cast& ex) 
@@ -102,7 +123,7 @@ namespace exodbc
 	}
 
 
-	FileLogHandler::FileLogHandler(const std::wstring& filepath, bool prependTimestamp)
+	FileLogHandler::FileLogHandler(const std::string& filepath, bool prependTimestamp)
 		: m_prependTimestamp(prependTimestamp)
 		, m_filepath(filepath)
 		, m_firstMessage(true)
@@ -119,11 +140,12 @@ namespace exodbc
 	}
 
 
-	void FileLogHandler::OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename /* = L"" */, int line /* = 0 */, const std::wstring& functionname /* = L"" */) const
+	void FileLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
 	{
+		lock_guard<mutex> lock(m_logMutex);
 		if (m_firstMessage)
 		{
-			m_filestream = std::wofstream(SQLAPICHARCONVERT(m_filepath), std::ofstream::out);
+			m_filestream = std::ofstream(m_filepath, std::ofstream::out);
 			m_firstMessage = false;
 		}
 		if (m_filestream.is_open())
@@ -132,7 +154,7 @@ namespace exodbc
 			{
                 std::time_t t = std::time(nullptr);
                 std::tm tm = *std::localtime(&t);
-				m_filestream << std::put_time(&tm, L"%d-%m-%Y %H-%M-%S") << L": ";
+				m_filestream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S") << u8": ";
 			}
 
 			m_filestream << FormatLogMessage(level, msg, filename, line, functionname) << endl;

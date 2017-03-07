@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file LogHandler.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.01.2016
@@ -25,7 +25,8 @@ namespace exodbc
 {
 	/*!
 	* \class	LogHandler
-	* \brief	Interface for a LogHandler. Must be able to do something with log messages.
+	* \brief	Interface for a LogHandler. Must be able to do something with log messages. Note that OnLogMessage()
+	*			will be called from different threads from the LogManager.
 	*/
 	class EXODBCAPI LogHandler
 	{
@@ -33,7 +34,7 @@ namespace exodbc
 		/*!
 		* \brief	Called from LogManager on every log message received. Do something useful with it.
 		*/
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const = 0;
+		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const = 0;
 		
 		/*!
 		* \brief	Called from the LogManager to ensure that not two equal LogHandlers are registered.
@@ -44,18 +45,41 @@ namespace exodbc
 	typedef std::shared_ptr<LogHandler> LogHandlerPtr;
 
 	/*!
-	* \class	StdErrLogHandler
-	* \brief	A simple LogHandler that prints all messages nicely formated to stderr.
+	* \class	StdLogHandler
+	* \brief	A simple LogHandler that prints all messages nicely formated to stderr or stdout, depending on their level.
+	*			Messages with a LogLevel of Warning or Error are logged to stderr, Info and Debug to stdout.
+	*			The logger can be tweaked to output to stderr or stdout only, or to both.
+	* \details	Depending on RedirectToStdErr() and RedirectToStdOut() the logger will log to only stderr, stdout or 
+	*			to both. If only one of RedirectToStdErr() or RedirectToStdOut() is set to true, messages are
+	*			logged to that stream exclusively. If both are set, messages are logged to both streams. If none is
+	*			of them are set, messages are logged to stderr or stdout depending on their LogLevel. This is the
+	*			default behaviour.
 	*/
-	class EXODBCAPI StdErrLogHandler
+	class EXODBCAPI StdLogHandler
 		: public LogHandler
 	{
 	public:
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const override;
+		StdLogHandler()
+			: m_redirectToStdErr(false)
+			, m_redirectToStdOut(false)
+		{};
+
+		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override;
 		virtual bool operator==(const LogHandler& other) const override;
+
+		void RedirectToStdErr(bool enable) noexcept { m_redirectToStdErr = enable; };
+		void RedirectoToStdOut(bool enable) noexcept { m_redirectToStdOut = enable; };
+
+		bool IsRedirectingToStdErr() const noexcept { return m_redirectToStdErr; };
+		bool IsRedirectingToStdOut() const noexcept { return m_redirectToStdOut; };
+
+	private:
+		bool m_redirectToStdErr;
+		bool m_redirectToStdOut;
+		mutable std::mutex m_logMutex;
 	};
 	
-	typedef std::shared_ptr<StdErrLogHandler> StdErrLogHandlerPtr;
+	typedef std::shared_ptr<StdLogHandler> StdErrLogHandlerPtr;
 
 	/*!
 	* \class	NullLogHandler
@@ -65,7 +89,7 @@ namespace exodbc
 		: public LogHandler
 	{
 	public:
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const override {};
+		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override {};
 		virtual bool operator==(const LogHandler& other) const override;
 	};
 	
@@ -83,19 +107,20 @@ namespace exodbc
 	public:
 		FileLogHandler() = delete;
 		FileLogHandler(const FileLogHandler& other) = delete;
-		FileLogHandler(const std::wstring& filepath, bool prependTimestamp);
+		FileLogHandler(const std::string& filepath, bool prependTimestamp);
 
 		virtual ~FileLogHandler();
 
-		virtual void OnLogMessage(LogLevel level, const std::wstring& msg, const std::wstring& filename = L"", int line = 0, const std::wstring& functionname = L"") const override;
+		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override;
 		virtual bool operator==(const LogHandler& other) const override;
 
-		std::wstring GetFilepath() const noexcept { return m_filepath; };
+		std::string GetFilepath() const noexcept { return m_filepath; };
 	private:
-		mutable std::wofstream m_filestream;
+		mutable std::ofstream m_filestream;
 		bool m_prependTimestamp;
-		std::wstring m_filepath;
+		std::string m_filepath;
 		mutable bool m_firstMessage;
+		mutable std::mutex m_logMutex;
 	};
 
 	typedef std::shared_ptr<FileLogHandler> FileLogHandlerPtr;

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file EnumFlags.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 21.11.2015

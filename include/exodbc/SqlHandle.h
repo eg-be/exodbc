@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file SqlHandle.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 22.11.2015
@@ -122,11 +122,11 @@ namespace exodbc
 			exASSERT(m_pParentHandle == NULL);
 
 			// This shall only be allowed for the environment handle so far. All others have a parent
-			exASSERT_MSG(tHandleType == SQL_HANDLE_ENV, L"Only handles of type SQL_HANDLE_ENV can be Allocated without parent");
+			exASSERT_MSG(tHandleType == SQL_HANDLE_ENV, u8"Only handles of type SQL_HANDLE_ENV can be Allocated without parent");
 			SQLRETURN ret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &m_handle);
 			if (!SQL_SUCCEEDED(ret))
 			{
-				SqlResultException ex(L"SQLAllocHandle", ret, L"Failed to allocated ODBC-Env Handle, no additional error information is available.");
+				SqlResultException ex(u8"SQLAllocHandle", ret, u8"Failed to allocated ODBC-Env Handle, no additional error information is available.");
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -153,7 +153,7 @@ namespace exodbc
 			exASSERT(m_pParentHandle == NULL);
 
 			// The environment handle has no parent handle
-			exASSERT_MSG(tHandleType != SQL_HANDLE_ENV, L"Handles of type SQL_HANDLE_ENV must be allocated without parent");
+			exASSERT_MSG(tHandleType != SQL_HANDLE_ENV, u8"Handles of type SQL_HANDLE_ENV must be allocated without parent");
 			SQLRETURN ret = SQLAllocHandle(tHandleType, pParentHandle->GetHandle(), &m_handle);
 			THROW_IFN_SUCCEEDED(SQLAllocHandle, ret, pParentHandle->GetHandleType(), pParentHandle->GetHandle());
 			// success, remember parent
@@ -184,18 +184,18 @@ namespace exodbc
 			// if SQL_ERROR is returned, the handle is still valid, and error information can be fetched
 			if (ret == SQL_ERROR)
 			{
-				std::wstring msg = boost::str(boost::wformat(L"Freeing Handle %1% of type %2% failed with SQL_ERROR, handle is still valid.") % m_handle %HandleType2s(tHandleType));
-				SqlResultException ex(L"SQLFreeHandle", ret, tHandleType, m_handle, msg);
+				std::string msg = boost::str(boost::format(u8"Freeing Handle %1% of type %2% failed with SQL_ERROR, handle is still valid.") % m_handle %HandleType2s(tHandleType));
+				SqlResultException ex(u8"SQLFreeHandle", ret, tHandleType, m_handle, msg);
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
 			else if (ret == SQL_INVALID_HANDLE)
 			{
 				// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
-				std::wstring msg = boost::str(boost::wformat(L"Freeing Handle %1% of type %2% failed with SQL_INVALID_HANDLE.") % m_handle %HandleType2s(tHandleType));
+				std::string msg = boost::str(boost::format(u8"Freeing Handle %1% of type %2% failed with SQL_INVALID_HANDLE.") % m_handle %HandleType2s(tHandleType));
 				m_handle = SQL_NULL_HANDLE;
 				m_pParentHandle.reset();
-				SqlResultException ex(L"SQLFreeHandle", ret, msg);
+				SqlResultException ex(u8"SQLFreeHandle", ret, msg);
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}

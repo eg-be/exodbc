@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file TablePrivileges.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.12.2014
@@ -69,7 +69,7 @@ namespace exodbc
 		/*!
 		* \brief Returns a string of the passed TablePrivilege.
 		*/
-		static std::wstring ToString(TablePrivilege priv);
+		static std::string ToString(TablePrivilege priv);
 
 		/*!
 		* \brief	Create an empty TablePrivileges with no TablePrivilege set.
@@ -113,13 +113,13 @@ namespace exodbc
 			, m_missingPriv(missingPriv)
 			, m_tableInfo(tableInfo)
 		{
-			m_what = utf16ToUtf8(ToString());
+			m_what = ToString();
 		}
 
 		virtual ~MissingTablePrivilegeException() {};
 
-		std::wstring ToString() const noexcept override;
-		std::wstring GetName() const noexcept override { return L"exodbc::MissingTablePrivilegeException"; };
+		std::string ToString() const noexcept override;
+		std::string GetName() const noexcept override { return u8"exodbc::MissingTablePrivilegeException"; };
 
 	protected:
 		TablePrivilege m_missingPriv;

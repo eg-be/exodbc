@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file ColumnBuffer.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 15.11.2015
@@ -23,7 +23,7 @@ using namespace std;
 namespace exodbc
 {
 
-	ColumnBufferPtrVariant CreateColumnBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName)
+	ColumnBufferPtrVariant CreateColumnBufferPtr(SQLSMALLINT sqlCType, const std::string& queryName)
 	{
 		switch (sqlCType)
 		{
@@ -65,7 +65,7 @@ namespace exodbc
 	}
 
 
-	ColumnBufferPtrVariant CreateColumnArrayBufferPtr(SQLSMALLINT sqlCType, const std::wstring& queryName, const ColumnInfo& columnInfo)
+	ColumnBufferPtrVariant CreateColumnArrayBufferPtr(SQLSMALLINT sqlCType, const std::string& queryName, const ColumnInfo& columnInfo)
 	{
 		exASSERT(IsArrayType(sqlCType));
 

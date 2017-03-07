@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file Exception.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 24.01.2015
@@ -51,18 +51,18 @@ namespace exodbc
 			: std::runtime_error("exodbc::Exception")
 			, m_line(0) 
 		{ 
-			m_what = utf16ToUtf8(ToString()); 
+			m_what = ToString(); 
 		};
 		
 		/*!
 		* \brief Create Exception with passed message. 
 		*/
-		Exception(const std::wstring& msg) noexcept 
+		Exception(const std::string& msg) noexcept 
 			: std::runtime_error("exodbc::Exception")
 			, m_line(0)
 			, m_msg(msg) 
 		{ 
-			m_what = utf16ToUtf8(ToString()); 
+			m_what = ToString(); 
 		};
 
 		virtual ~Exception() noexcept;
@@ -70,17 +70,17 @@ namespace exodbc
 		/*!
 		* \brief Formats a message using GetName(), message and if available source information.
 		*/
-		virtual std::wstring ToString() const noexcept;
+		virtual std::string ToString() const noexcept;
 
 		/*!
 		* \brief Return name of this Exception. Probably class name.
 		*/
-		virtual std::wstring GetName() const noexcept	{ return L"exodbc::Exception"; };
+		virtual std::string GetName() const noexcept	{ return u8"exodbc::Exception"; };
 
 		/*!
 		* \brief Set source information of the Exception origin.
 		*/
-		void SetSourceInformation(int line, const std::wstring& fileName, const std::wstring& functionName) noexcept;
+		void SetSourceInformation(int line, const std::string& fileName, const std::string& functionName) noexcept;
 
 		/*!
 		* \brief Return line number that triggered Exception.
@@ -90,17 +90,17 @@ namespace exodbc
 		/*!
 		* \brief Return file name that triggered Exception.
 		*/
-		std::wstring GetFile() const noexcept			{ return m_file; };
+		std::string GetFile() const noexcept			{ return m_file; };
 
 		/*!
 		* \brief Return function name that triggered Exception.
 		*/
-		std::wstring GetFunctionName() const noexcept	{ return m_functionname;; }
+		std::string GetFunctionName() const noexcept	{ return m_functionname;; }
 
 		/*!
 		* \brief Return message.
 		*/
-		std::wstring GetMsg() const noexcept				{ return m_msg; };
+		std::string GetMsg() const noexcept				{ return m_msg; };
 
 		/*!
 		* \brief	Returns the same as ToString(), but converted to an utf8-string.
@@ -109,10 +109,10 @@ namespace exodbc
 
 	protected:
 
-		int				m_line;
-		std::wstring	m_file;
-		std::wstring	m_functionname;
-		std::wstring	m_msg;
+		int			m_line;
+		std::string	m_file;
+		std::string	m_functionname;
+		std::string	m_msg;
 		std::string	m_what;
 	};
 
@@ -124,7 +124,7 @@ namespace exodbc
 
 #define SET_EXCEPTION_SOURCE(Exception) \
 	do { \
-		Exception.SetSourceInformation(__LINE__, FILENAME, FUNCTIONNAME); \
+		Exception.SetSourceInformation(__LINE__, __FILE__, __FUNCTION__); \
 	} while(0)
 
 #define THROW_WITH_SOURCE(ExceptionType, msg) \

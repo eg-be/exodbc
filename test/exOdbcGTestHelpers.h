@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 /*!
 * \file exOdbcGTestHelpers.h
 * \author Elias Gerber <eg@elisium.ch>
@@ -48,17 +48,17 @@ namespace exodbctest
 		NOT_SUPPORTED_TMP
 	};
 
-	extern const std::map<TableId, std::wstring> g_TableNames;
-	extern const std::map<TableId, std::wstring> g_IdColumnNames;
+	extern const std::map<TableId, std::string> g_TableNames;
+	extern const std::map<TableId, std::string> g_IdColumnNames;
 
 	extern exodbc::EnvironmentPtr CreateEnv(exodbc::OdbcVersion odbcVersion = exodbc::OdbcVersion::V_3);
 	extern exodbc::DatabasePtr OpenTestDb(exodbc::ConstEnvironmentPtr pEnv);
 	extern exodbc::DatabasePtr OpenTestDb(exodbc::OdbcVersion odbcVersion = exodbc::OdbcVersion::V_3);
 
-	extern std::wstring PrependSchemaOrCatalogName(exodbc::DatabaseProduct dbms, const std::wstring& name);
-	extern std::wstring GetTableName(TableId tableId);
-	extern std::wstring GetIdColumnName(TableId tableId);
-	extern std::wstring ToDbCase(const std::wstring& str);
+	extern std::string PrependSchemaOrCatalogName(exodbc::DatabaseProduct dbms, const std::string& name);
+	extern std::string GetTableName(TableId tableId);
+	extern std::string GetIdColumnName(TableId tableId);
+	extern std::string ToDbCase(const std::string& str);
 
 	extern void ClearTmpTable(TableId tmpTableId);
 

@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file LogManager.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.01.2016
@@ -72,10 +72,34 @@ namespace exodbc
 		*/
 		void ClearLogHandlers() noexcept;
 
+#ifdef _WIN32
+		/*!
+		* \brief Forwards the passed message to all LogHandlers registered. passed wstrings must be utf-16 encoded.
+		* \details This method is only enabled if _WIN32 is defined. The strings must be utf-16 encoded,
+		*			the method will only convert them to utf-8 strings and forward the call.
+		*/
+		void LogMessage(LogLevel level, const std::wstring& msg, const std::wstring& file = L"", int line = 0, const std::wstring& function = L"") const;
+#endif
+
 		/*!
 		* \brief Forwards the passed message to all LogHandlers registered.
 		*/
-		void LogMessage(LogLevel level, const std::wstring& msg, const std::wstring& file = L"", int line = 0, const std::wstring& function = L"") const;
+		void LogMessage(LogLevel level, const std::string& msg, const std::string& file = u8"", int line = 0, const std::string& function = u8"") const;
+
+
+		/*!
+		* \brief Output the passed message to stderr. On linux, this will output to cerr, on windows it will
+		* convert the message to UTF-16 and output to wcerr. A newline is added at the end of msg.
+		*/
+		void WriteStdErr(const std::string& msg, bool appendEndl) const;
+
+
+		/*!
+		* \brief Output the passed message to stdout. On linux, this will output to cout, on windows it will
+		* convert the message to UTF-16 and output to wcout. A newline is added at the end of msg.
+		*/
+		void WriteStdOut(const std::string& msg, bool appendEndl) const;
+
 
 		/*!
 		* \brief Return how many LogHandler instances are registered.
@@ -104,13 +128,16 @@ namespace exodbc
 
 		LogLevel m_globalLogLevel;
 		mutable std::mutex m_globalLogLevelMutex;
+
+		mutable std::mutex m_stdoutMutex;
+		mutable std::mutex m_stderrMutex;
 	};
 }
 
 // Generic Log-entry
 #define LOG_MSG(logLevel, msg) \
 	do { \
-		exodbc::LogManager::Get().LogMessage(logLevel, msg, FILENAME, __LINE__, FUNCTIONNAME); \
+		exodbc::LogManager::Get().LogMessage(logLevel, msg, __FILE__, __LINE__, __FUNCTION__); \
 	} while( 0 )
 
 // Generic Log-entry shortcuts
@@ -122,7 +149,7 @@ namespace exodbc
 // ODBC-Logging
 #define LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, logLevel) \
 	do { \
-		std::wstring logOdbcMsgMsg = exodbc::FormatOdbcMessages(hEnv, hDbc, hStmt, hDesc, ret, #SqlFunction, msg); \
+		std::string logOdbcMsgMsg = exodbc::FormatOdbcMessages(hEnv, hDbc, hStmt, hDesc, ret, #SqlFunction, msg); \
 		LOG_MSG(logLevel, logOdbcMsgMsg); \
 	} while( 0 )
 
@@ -132,9 +159,9 @@ namespace exodbc
 #define LOG_INFO_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg) LOG_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, msg, exodbc::LogLevel::Info)
 
 // ODBC-Loggers, no message
-#define LOG_ERROR_ODBC(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction) LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, L"")
-#define LOG_WARNING_ODBC(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction) LOG_WARNING_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, L"")
-#define LOG_INFO_ODBC(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction) LOG_INFO_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, L"")
+#define LOG_ERROR_ODBC(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction) LOG_ERROR_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, u8"")
+#define LOG_WARNING_ODBC(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction) LOG_WARNING_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, u8"")
+#define LOG_INFO_ODBC(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction) LOG_INFO_ODBC_MSG(hEnv, hDbc, hStmt, hDesc, ret, SqlFunction, u8"")
 
 // Log ODBC-Errors, from a specific handle (env, dbc, stmt, desc), with a message
 #define LOG_ERROR_ENV_MSG(hEnv, ret, SqlFunction, msgStr) LOG_ERROR_ODBC_MSG(hEnv, NULL, NULL, NULL, ret, SqlFunction, msgStr)
@@ -172,3 +199,14 @@ namespace exodbc
 #define LOG_INFO_STMT(hStmt, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, hStmt, NULL, ret, SqlFunction)
 #define LOG_INFO_DESC(hDesc, ret, SqlFunction) LOG_INFO_ODBC(NULL, NULL, NULL, hDesc, ret, SqlFunction)
 
+// Write to std::cout or std::wcout, adding a std::endl after the message
+#define WRITE_STDOUT_ENDL(msg) exodbc::LogManager::Get().WriteStdOut(msg, true);
+
+// Write to std::cerr or std::wcerr
+#define WRITE_STDERR_ENDL(msg) exodbc::LogManager::Get().WriteStdErr(msg, true);
+
+// Write to std::cout or std::wcout
+#define WRITE_STDOUT(msg) exodbc::LogManager::Get().WriteStdOut(msg, false);
+
+// Write to std::cerr or std::wcerr, adding a std::endl after the message
+#define WRITE_STDERR(msg) exodbc::LogManager::Get().WriteStdErr(msg, false);

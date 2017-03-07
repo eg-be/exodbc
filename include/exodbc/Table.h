@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file Table.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 25.07.2014
@@ -104,10 +104,10 @@ namespace exodbc
 
 		/*!
 		* \brief	Create a new Table using the passed search-names.
-		* \see		Init(const Database* pDb, AccessFlags, const std::wstring&, const std::wstring&, const std::wstring&, const std::wstring&)
+		* \see		Init(const Database* pDb, AccessFlags, const std::string&, const std::string&, const std::string&, const std::string&)
 		* \throw	Exception
 		*/
-		Table(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
+		Table(ConstDatabasePtr pDb, TableAccessFlags afs, const std::string& tableName, const std::string& schemaName = u8"", const std::string& catalogName = u8"", const std::string& tableType = u8"");
 
 
 		/*!
@@ -159,7 +159,7 @@ namespace exodbc
 		* \see		Open()
 		* \throw	Exception If allocating statements fail.
 		*/
-		void Init(ConstDatabasePtr pDb, TableAccessFlags afs, const std::wstring& tableName, const std::wstring& schemaName = L"", const std::wstring& catalogName = L"", const std::wstring& tableType = L"");
+		void Init(ConstDatabasePtr pDb, TableAccessFlags afs, const std::string& tableName, const std::string& schemaName = u8"", const std::string& catalogName = u8"", const std::string& tableType = u8"");
 
 
 		/*!
@@ -326,14 +326,14 @@ namespace exodbc
 		* \return	count The result of a 'SELECT COUNT(*) WHERE whereStatement' on the current table
 		* \throw	Exception If failed.
 		*/
-		SQLUBIGINT	Count(const std::wstring& whereStatement);
+		SQLUBIGINT	Count(const std::string& whereStatement);
 
 
 		/*!
 		* \brief	Calls Count() with no whereStatement.
-		* \see		Count(const std::wstring& whereStatement);
+		* \see		Count(const std::string& whereStatement);
 		*/
-		SQLUBIGINT	Count() { return Count(L""); };
+		SQLUBIGINT	Count() { return Count(u8""); };
 
 
 		/*!
@@ -353,7 +353,7 @@ namespace exodbc
 		* \see		SelectClose()
 		* \throw	Exception If failed.
 		*/
-		void		Select(const std::wstring& whereStatement = L"", const std::wstring& orderStatement = L"");
+		void		Select(const std::string& whereStatement = u8"", const std::string& orderStatement = u8"");
 
 
 		/*!
@@ -372,7 +372,7 @@ namespace exodbc
 		* \return	True if successful
 		* \throw	Exception If failed.
 		*/
-		void		SelectBySqlStmt(const std::wstring& sqlStmt);
+		void		SelectBySqlStmt(const std::string& sqlStmt);
 
 
 		/*!
@@ -494,7 +494,7 @@ namespace exodbc
 		* \throw	Exception on failure, or depending on failOnNoData, a SqlResultException if the
 		*			call to SQLExecute fails with SQL_NO_DATA.
 		*/
-		void		Delete(const std::wstring& where, bool failOnNoData = true) const;
+		void		Delete(const std::string& where, bool failOnNoData = true) const;
 
 
 		/*!
@@ -535,7 +535,7 @@ namespace exodbc
 		* \see		Database::CommitTrans()
 		* \throw	Exception if failed.
 		*/
-		void		Update(const std::wstring& where);
+		void		Update(const std::string& where);
 
 
 		/*!
@@ -630,9 +630,9 @@ namespace exodbc
 		/*!
 		* \brief	Searches the internal map of ColumnBuffers for a Buffer matching the
 		*			passed QueryName.
-		* \see		GetColumnBufferIndex(const std::wstring& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive)
+		* \see		GetColumnBufferIndex(const std::string& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive)
 		*/
-		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, bool caseSensitive = true) const;
+		SQLUSMALLINT GetColumnBufferIndex(const std::string& columnQueryName, bool caseSensitive = true) const;
 
 
 		/*!
@@ -643,7 +643,7 @@ namespace exodbc
 		* \param	caseSensitive search case sensitive or not
 		* \throw	NotFoundException If no such ColumnBuffer is found.
 		*/
-		SQLUSMALLINT GetColumnBufferIndex(const std::wstring& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive = true) const;
+		SQLUSMALLINT GetColumnBufferIndex(const std::string& columnQueryName, const ColumnBufferPtrVariantMap& columns, bool caseSensitive = true) const;
 
 
 		/*!
@@ -686,7 +686,7 @@ namespace exodbc
 		*			This is only used if the sqlCType is SQL_C_NUMERIC, to set SQL_DESC_SCALE.
 		* \throw	Exception If a column is already defined at passed columnIndex or if Table is already open.
 		*/
-		void		SetColumn(SQLUSMALLINT columnIndex, const std::wstring& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize = 0, SQLSMALLINT decimalDigits = 0);
+		void		SetColumn(SQLUSMALLINT columnIndex, const std::string& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize = 0, SQLSMALLINT decimalDigits = 0);
 
 
 		/*!
@@ -832,7 +832,7 @@ namespace exodbc
 		* \return	A string in the form "Field1, Field2, .., FieldN"
 		* \throw	Exception If no Columns are defined.
 		*/
-		std::wstring BuildSelectFieldsStatement() const;
+		std::string BuildSelectFieldsStatement() const;
 
 
 		/*!
@@ -925,10 +925,10 @@ namespace exodbc
 		bool				m_autoCreatedColumns;		///< If true the columns were created during Open() automatically by querying the database about the table.
 
 		// Table information set during construction, that was used to find the matching TableInfo if none was passed
-		std::wstring  m_initialTableName;		///< Table name set on initialization
-		std::wstring	m_initialSchemaName;	///< Schema name set on initialization
-		std::wstring	m_initialCatalogName;	///< Catalog name set on initialization
-		std::wstring	m_initialTypeName;		///< Type name set on initialization
+		std::string  m_initialTableName;		///< Table name set on initialization
+		std::string	m_initialSchemaName;	///< Schema name set on initialization
+		std::string	m_initialCatalogName;	///< Catalog name set on initialization
+		std::string	m_initialTypeName;		///< Type name set on initialization
 
 	};  // Table
 

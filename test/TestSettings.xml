@@ -1,4 +1,4 @@
-<TestSettings>
+﻿<TestSettings>
 
   <CreateDb>0</CreateDb>
   <LogLevel>Debug</LogLevel>
@@ -87,7 +87,7 @@
 
   <ConnectionString>
     <Disabled>1</Disabled>
-    <Value>Driver={SQL Server Native Client 11.0};Server=192.168.56.20\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;</Value>
+    <Value>Driver={SQL Server Native Client 11.0};Server=192.168.56.20\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;</Value>
     <Case>lower</Case>
   </ConnectionString>
 
