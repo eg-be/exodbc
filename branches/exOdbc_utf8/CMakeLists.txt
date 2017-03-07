@@ -4,8 +4,15 @@ project (exodbc
   LANGUAGES CXX
 )
 
+# Options:
 option(BUILD_TESTS "Build exodbctest program" ON)
 option(BUILD_SAMPLES "Build exodbcsamples programs" ON)
+# default to building static-libraries, so we dont need any 
+# dlls at the right place:
+option(BUILD_SHARED_LIBS "Build as shared library" OFF)
+
+# Only add Debug and Release Configuration  
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 # Make the subprojects use the same-version-information
 # by providing them here
@@ -14,15 +21,8 @@ set(EXODBC_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
 set(EXODBC_VERSION_PATCH "${PROJECT_VERSION_PATCH}")
 set(EXODBC_VERSION_REV "${PROJECT_VERSION_TWEAK}")
 
-# default to building shared-libraries
-option(BUILD_SHARED_LIBS "Build as shared library" OFF)
+# Output what we think we are building for:
 message(STATUS "BUILD_SHARED_LIBS is set to: ${BUILD_SHARED_LIBS}")
-# message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
-# if(NOT DEFINED BUILD_SHARED_LIBS)
- # message(STATUS "BUILD_SHARED_LIBS not set, defaulting to 'OFF'")
- # SET(BUILD_SHARED_LIBS OFF CACHE)
-# endif()
-
 if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
  message(STATUS "CMAKE_SIZEOF_VOID_P is ${CMAKE_SIZEOF_VOID_P}, indicating 64bit.")
 else()
@@ -33,15 +33,6 @@ endif()
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug)
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug)
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin/Debug)
-#set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release)
-#set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release)
-#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin/Release)
-
-# Only add Debug and Release Configuration  
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 add_subdirectory(src)
 
@@ -76,7 +67,9 @@ if(${BUILD_TESTS})
   endif()
   
   # Prevent overriding the parent project's compiler/linker
-  # settings on Windows
+  # settings on Windows: If not set, gtest will probably default to
+  # use /MT (static runtime lib), but we prefer /MD (shared/dll 
+  # runtime lib):
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
   # Add googletest directly to our build. This defines
