@@ -1,6 +1,19 @@
 ﻿cmake_minimum_required (VERSION 3.0.2)
 project (exodbctest)
 
+# we need googletest
+include(ExternalProject)
+ExternalProject_Add(googletest
+  GIT_REPOSITORY    https://github.com/google/googletest.git
+  GIT_TAG           release-1.8.0
+  SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
+  BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
+  INSTALL_COMMAND   ""
+  CMAKE_ARGS        -Wno-dev
+  CMAKE_CACHE_ARGS  -DBUILD_GMOCK:BOOL=OFF -DBUILD_GTEST:BOOL=ON -Dgtest_force_shared_crt:BOOL=ON
+)
+
+
 # add some options to enable / disable tests
 option(ENABLE_SQLSERVER_TEST "Enable the test for Sql Server" ON)
 set(SQLSERVER_TEST_CS "Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;" CACHE STRING "Connection-String used to run tests against Sql Server")
