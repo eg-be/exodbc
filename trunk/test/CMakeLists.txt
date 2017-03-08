@@ -183,12 +183,20 @@ endif()
 # we build the exodbcTest application
 add_executable(exodbctest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
 
+ExternalProject_Get_Property(googletest source_dir)
+message(STATUS "source_dir is: ${source_dir}")
+include_directories(${source_dir}/googletest/include)
+
+ExternalProject_Get_Property(googletest binary_dir)
+message(STATUS "binary_dir is: ${binary_dir}")
+
 # the exodbctest applications needs to link against libexodbc, odbc32, gtest, boost: 
 if(MSVC)
   target_link_libraries(exodbctest libexodbc gtest ${Boost_LIBRARIES} odbc32)
 else()
   target_link_libraries(exodbctest libexodbc gtest ${Boost_LIBRARIES} odbc)
 endif()
+add_dependencies(exodbctest googletest)
 
 # provide a group for the rc-file
 source_group( "Resources"
