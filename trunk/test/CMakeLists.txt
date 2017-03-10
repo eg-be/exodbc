@@ -1,19 +1,6 @@
 ﻿cmake_minimum_required (VERSION 3.0.2)
 project (exodbctest)
 
-# we need googletest
-include(ExternalProject)
-ExternalProject_Add(googletest
-  GIT_REPOSITORY    https://github.com/google/googletest.git
-  GIT_TAG           release-1.8.0
-  SOURCE_DIR        "${CMAKE_BINARY_DIR}/googletest-src"
-  BINARY_DIR        "${CMAKE_BINARY_DIR}/googletest-build"
-  INSTALL_COMMAND   ""
-  CMAKE_ARGS        -Wno-dev
-  CMAKE_CACHE_ARGS  -DBUILD_GMOCK:BOOL=OFF -DBUILD_GTEST:BOOL=ON -Dgtest_force_shared_crt:BOOL=ON
-)
-
-
 # add some options to enable / disable tests
 option(ENABLE_SQLSERVER_TEST "Enable the test for Sql Server" ON)
 set(SQLSERVER_TEST_CS "Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;" CACHE STRING "Connection-String used to run tests against Sql Server")
@@ -183,20 +170,12 @@ endif()
 # we build the exodbcTest application
 add_executable(exodbctest ${SRC_EXODBCTEST} ${HEADERS_EXODBCTEST} ${RES_EXODBCTEST} ${CONFIG_EXODBCTEST} )
 
-ExternalProject_Get_Property(googletest source_dir)
-message(STATUS "source_dir is: ${source_dir}")
-include_directories(${source_dir}/googletest/include)
-
-ExternalProject_Get_Property(googletest binary_dir)
-message(STATUS "binary_dir is: ${binary_dir}")
-
 # the exodbctest applications needs to link against libexodbc, odbc32, gtest, boost: 
 if(MSVC)
   target_link_libraries(exodbctest libexodbc gtest ${Boost_LIBRARIES} odbc32)
 else()
   target_link_libraries(exodbctest libexodbc gtest ${Boost_LIBRARIES} odbc)
 endif()
-add_dependencies(exodbctest googletest)
 
 # provide a group for the rc-file
 source_group( "Resources"
