@@ -89,6 +89,7 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/exOdbcTestConfig.h.in"
   "${PROJECT_SOURCE_DIR}/exOdbcTestConfig.h"
 )
+message(STATUS "Generated ${PROJECT_SOURCE_DIR}/exOdbcTestConfig.h")
 
 # some help for the compiler:
 if(MSVC)
@@ -102,7 +103,7 @@ add_definitions(
   -DEXODBC_TEST
 )
 
-# we explicitely list all files, as recommended by cmake:
+# we explicitely list all files:
 set ( SRC_EXODBCTEST 
   ColumnBufferTest.cpp 
   DatabaseTest.cpp 
@@ -153,15 +154,15 @@ set (RES_EXODBCTEST
   exOdbcTest.rc
 )
 
-# we depend on boost:
+# we depend on boost, with some built libs:
 # http://stackoverflow.com/questions/28887680/linking-boost-library-with-boost-use-static-lib-off-on-windows
 find_package(Boost 1.55.0 REQUIRED COMPONENTS
                 system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
 link_libraries(${Boost_LIBRARIES})
 if (WIN32 AND NOT Boost_USE_STATIC_LIBS)
-  # force all boost libraries to dynamic link. If not set, boost (?) somehow
-  # wants to link to dlls names 'lib-whatever.lib', but on windows we do not have
+  # force all boost libraries to link dynamically. If not set, boost tries
+  # to link againts dlls names 'lib-whatever.lib', but on windows we do not have
   # a 'lib' prefix.
   message(STATUS "Plattform is Win32 and Boost_USE_STATIC_LIBS is not set: Adding BOOST_ALL_DYN_LINK")
   add_definitions( -DBOOST_ALL_DYN_LINK )

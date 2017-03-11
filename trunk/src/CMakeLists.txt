@@ -2,10 +2,10 @@
 project (libexodbc)
 
 # update tweak version with info from subversion, if available:
+# note: WC_LOG needs access to the repo, do not use
 find_package(Subversion)
 if(SUBVERSION_FOUND)
   Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-#  Subversion_WC_LOG(${PROJECT_SOURCE_DIR} Project)
   set (LIBEXODBC_VERSION_TWEAK ${Project_WC_REVISION})
   message(STATUS "Updating LIBEXODBC_VERSION_TWEAK to ${LIBEXODBC_VERSION_TWEAK}, read from ${PROJECT_SOURCE_DIR}")
 endif()
@@ -16,6 +16,7 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/exOdbcConfig.h.in"
   "${PROJECT_SOURCE_DIR}/../include/exodbc/exOdbcConfig.h"
 )
+message(STATUS "Generated ${PROJECT_SOURCE_DIR}/../include/exodbc/exOdbcConfig.h")
 
 # compiler flags
 if(MSVC)
@@ -26,7 +27,6 @@ add_definitions(
 )
 endif()
 
-message(STATUS "BUILD_SHARED_LIBS is set to ${BUILD_SHARED_LIBS}")
 if(MSVC AND BUILD_SHARED_LIBS)
 add_definitions(
   -DEXODBC_DLL
@@ -36,7 +36,7 @@ endif()
 # add the library headers:
 include_directories ("${PROJECT_SOURCE_DIR}/../include/exodbc")
 
-# we explicitely list all files, as recommended by cmake:
+# we explicitely list all files:
 set ( SRC_EXODBC 
   AssertionException.cpp 
   ColumnBuffer.cpp 
@@ -97,8 +97,6 @@ endif()
 
 # and we build the libexodbc library:
 add_library(libexodbc ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
-#add_library(exodbc SHARED ${SRC_EXODBC} ${HEADERS_EXODBC} ${RES_EXODBC} ${CONFIG_EXODBC} )
-#target_include_directories(libexodbc PUBLIC include)
 target_include_directories(libexodbc PUBLIC ../include)
 
 # provide a group for the rc-file
