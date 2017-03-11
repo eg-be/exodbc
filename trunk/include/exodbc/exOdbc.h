@@ -64,31 +64,21 @@
   #endif
 #endif
 
-// Now we use the generic helper definitions above to define FOX_API and FOX_LOCAL.
-// FOX_API is used for the public API symbols. It either DLL imports or DLL exports (or does nothing for static build)
-// FOX_LOCAL is used for non-api symbols.
+// Now we use the generic helper definitions above to define import and export
+// EXODBC_LIB is used for the public API symbols. It either DLL imports or DLL exports (or does nothing for static build)
+// EXODBCLOCAL could be used for non-api symbols.
 
-#ifdef EXODBC_DLL // defined if FOX is compiled as a DLL
-  #ifdef libexodbc_EXPORTS // defined if we are building the FOX DLL (instead of using it)
+#ifdef EXODBC_LIB // defined if exodbc is compiled as a shared lib (dll on WIN32)
+  #ifdef libexodbc_EXPORTS // defined if we are building exodbc (instead of using it)
     #define EXODBCAPI EXODBC_HELPER_DLL_EXPORT
   #else
     #define EXODBCAPI EXODBC_HELPER_DLL_IMPORT
-  #endif // FOX_DLL_EXPORTS
+  #endif // libexodbc_EXPORTS
   #define EXODBCLOCAL EXODBC_HELPER_DLL_LOCAL
-#else // FOX_DLL is not defined: this means FOX is a static lib.
+#else // EXODBC_DLL is not defined, we have a static lib
   #define EXODBCAPI
   #define EXODBCLOCAL
-#endif // FOX_DLL
-
-// #ifdef libexodbc_EXPORTS
-// 	#define EXODBCAPI __declspec(dllexport)
-// #else
-// 	#ifdef libexodbc_IMPORTS
-// 		#define EXODBCAPI __declspec(dllimport)
-// 	#else
-// 		#define EXODBCAPI
-// 	#endif
-// #endif
+#endif // EXODBC_LIB
 
 // libs - boost stuff
 #include "boost/algorithm/string.hpp"

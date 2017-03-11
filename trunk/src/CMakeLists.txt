@@ -27,9 +27,10 @@ add_definitions(
 )
 endif()
 
-if(MSVC AND BUILD_SHARED_LIBS)
+# define import/export
+if(BUILD_SHARED_LIBS)
 add_definitions(
-  -DEXODBC_DLL
+  -DEXODBC_LIB
 )
 endif()
 
