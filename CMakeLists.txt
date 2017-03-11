@@ -80,6 +80,18 @@ if(${BUILD_TESTS})
 
   # Add googletest directly to our build. This defines
   # the gtest and gtest_main targets.
+  # hide some warnings from within googletest 1.8.0 with cmake 3.x
+  # by setting policy CMP0048 to OLD:
+  file(READ ${CMAKE_BINARY_DIR}/googletest-src/CMakeLists.txt GOOGELTEST_CMAKELISTS)
+  if(NOT GOOGELTEST_CMAKELISTS MATCHES "SET CMP0048 OLD")
+    string(TIMESTAMP NOW)
+    STRING(REGEX REPLACE 
+      "([^OLD].*)project\\(" 
+      "\\1# ${NOW} edited by exodbc/CMakeLists.txt. Avoid CMP0048 warnings:\ncmake_policy(SET CMP0048 OLD)\n\nproject(" 
+      GOOGELTEST_CMAKELISTS ${GOOGELTEST_CMAKELISTS})
+    file(WRITE ${CMAKE_BINARY_DIR}/googletest-src/CMakeLists.txt ${GOOGELTEST_CMAKELISTS})
+  endif()
+  
   add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                    ${CMAKE_BINARY_DIR}/googletest-build)
 
