@@ -29,4 +29,9 @@ endif()
 add_executable(SqlCPointerBuffer ${SRC_SQLCPOINTERBUFFER} ${HEADERS_SQLCPOINTERBUFFER})
 
 # the SqlCPointerBuffer applications needs to link against libexodbc
-target_link_libraries(SqlCPointerBuffer PRIVATE libexodbc)
+# and it needs to link against odbc, until #236 is resolved
+if(MSVC)
+  target_link_libraries(SqlCPointerBuffer libexodbc odbc32)
+else()
+  target_link_libraries(SqlCPointerBuffer libexodbc odbc)
+endif()
