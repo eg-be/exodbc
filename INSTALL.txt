@@ -143,15 +143,22 @@ exOdbcTest
   
 Some samples on how to build the required boost components, see the boost documentation for 
 more information:
+
     bootstrap
+    
+To build 32bit shared libs:
     b2 --with-filesystem variant=debug link=shared threading=multi runtime-link=shared address-model=32
     b2 --with-filesystem variant=release link=shared threading=multi runtime-link=shared address-model=32
+To build 32bit static libs:
     b2 --with-filesystem variant=debug link=static threading=multi runtime-link=shared address-model=32
     b2 --with-filesystem variant=release link=static threading=multi runtime-link=shared address-model=32
 
-    or for a 64bit generator:
+To build 64bit shared libs:
     b2 --with-filesystem variant=debug link=shared threading=multi runtime-link=shared address-model=64
     b2 --with-filesystem variant=release link=shared threading=multi runtime-link=shared address-model=64
+To build 64bit static libs:
+    b2 --with-filesystem variant=debug link=static threading=multi runtime-link=shared address-model=64
+    b2 --with-filesystem variant=release link=static threading=multi runtime-link=shared address-model=64
 
 Clean build environment
 -----------------------
