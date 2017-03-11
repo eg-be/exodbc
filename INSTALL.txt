@@ -8,12 +8,14 @@ obtain cmake for your platform: https://cmake.org/
 
 Quickstart
 ==========
-A short manual on how to build libexodbc only, really quick version:
+A short manual on how to build libexodbc only, without samples and tests.
+Required are the boost headers (http://www.boost.org/).
+
 From exOdbc top-level directory:
 
   mkdir build
   cd build
-  set BOOST_ROOT=e:/lib/boost_1_62_0 [mostly needed only on windows]
+  set BOOST_ROOT=e:/lib/boost_1_62_0 [Probably required for Windows only.]
   cmake -DBUILD_TESTS=OFF -DBUILD_SAMPLES=OFF ..
   cmake --build .
 
@@ -47,8 +49,8 @@ The resulting binaries have been placed in 'bin'.
 Full build
 ==========
 Build all components including the tests and samples.
-Requires boost-filesystem and googletest for exodbctest. Googletest is 
-downloaded during configuration, boost-filesystem must be provided.
+Requires the boost headers and a built library boost-filesystem. A working 
+git client is required to download googletest from github during configuration.
 
 From exOdbc top-level directory:
 Create a directory for the build-environment and cd into it:
