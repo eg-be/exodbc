@@ -86,7 +86,7 @@ if(${BUILD_TESTS})
   if(NOT GOOGELTEST_CMAKELISTS MATCHES "SET CMP0048 OLD")
     string(TIMESTAMP NOW)
     STRING(REGEX REPLACE 
-      "([^OLD].*)project\\(" 
+      "(.*cmake_minimum_required.*)project\\(" 
       "\\1# ${NOW} edited by exodbc/CMakeLists.txt. Avoid CMP0048 warnings:\ncmake_policy(SET CMP0048 OLD)\n\nproject(" 
       GOOGELTEST_CMAKELISTS ${GOOGELTEST_CMAKELISTS})
     file(WRITE ${CMAKE_BINARY_DIR}/googletest-src/CMakeLists.txt ${GOOGELTEST_CMAKELISTS})
