@@ -382,6 +382,10 @@ namespace exodbc
 	extern EXODBCAPI std::string HandleType2s(SQLSMALLINT type) noexcept;
 
 
+	/*!
+	* \class	ErrorHelper
+	* \brief	Contains some error handling related helper functions.
+	*/
 	class EXODBCAPI ErrorHelper
 	{
 	public:

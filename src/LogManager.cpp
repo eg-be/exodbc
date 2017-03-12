@@ -25,6 +25,19 @@ using namespace std;
 
 namespace exodbc
 {
+	LogLevelSetter::LogLevelSetter(LogLevel level)
+	{
+		m_originalLogLevel = LogManager::Get().GetGlobalLogLevel();
+		LogManager::Get().SetGlobalLogLevel(level);
+	}
+
+
+	LogLevelSetter::~LogLevelSetter()
+	{
+		LogManager::Get().SetGlobalLogLevel(m_originalLogLevel);
+	}
+
+
 	LogManager& LogManager::Get()
 	{
 		static LogManager instance;

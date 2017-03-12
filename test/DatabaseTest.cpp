@@ -66,7 +66,10 @@ namespace exodbctest
 		// Fail for not allocated environment
 		EnvironmentPtr pEnv = std::make_shared<Environment>();
 
-		EXPECT_THROW(db.Init(pEnv), AssertionException);
+		{
+			LogLevelSetter ll(LogLevel::None);
+			EXPECT_THROW(db.Init(pEnv), AssertionException);
+		}
 
 		// But succeed if statement becomes valid
 		pEnv->Init(OdbcVersion::V_3);
@@ -81,6 +84,7 @@ namespace exodbctest
 
 		EXPECT_TRUE(c1.HasConnectionHandle());
 		{
+			LogLevelSetter ll(LogLevel::None);
 			EXPECT_THROW(c1.Init(m_pEnv), AssertionException);
 		}
 

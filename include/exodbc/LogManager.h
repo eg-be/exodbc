@@ -26,25 +26,46 @@ namespace exodbc
 
 	/*!
 	* \enum LogLevel
-	* \brief Log level to use when logging messages. Currently only sets some prefix..
+	* \brief Log level to use when logging messages.
 	*/
 	enum class LogLevel
 	{
-		Error = 10,
-		Warning = 9,
-		Info = 8,
-		Debug = 4
+		None = 100,		//< No Output at all. Do not use to create log messages.
+		Error = 10,		//< Error and above.
+		Warning = 9,	//< Warning and above.
+		Info = 8,		//< Info and above.
+		Debug = 4		//< Everything.
 	};
+
+
+	/*!
+	* \class	LogLevelSetter
+	* \brief	On construction, remembers the active global LogLevel, then 
+	*			sets the global LogLevel to the passed value and on 
+	*			destructions restores original global LogLevel.
+	*/
+	class EXODBCAPI LogLevelSetter
+	{
+	public:
+		LogLevelSetter(LogLevel level);
+		~LogLevelSetter();
+
+	private:
+		LogLevel m_originalLogLevel;
+	};
+
 
 	/*!
 	* \class	LogManager
-	* \brief	A class that can hold LogHandler instances and forward log-messages
-	*			to those LogHandlers.
+	* \brief	A class that can hold LogHandler instances and forward 
+	*			log-messages to those LogHandlers.
 	*			The class is thread-safe.
-	*			The class is a Singleton, use Get() to get the only existing instance.
-	* \details	The LogManager has a global level that can be set on it. It will only
-	*			forward messages to its registered LogHandlers that have a logLevel
-	*			greater or equal than the currently set LogLevel
+	*			The class is a Singleton, use Get() to get the only existing
+	*			instance.
+	* \details	The LogManager has a global level that can be set on it. It
+	*			will only forward messages to its registered LogHandlers that
+	*			have a logLevel greater or equal than the currently set 
+	*			global LogLevel.
 	*/
 	class EXODBCAPI LogManager
 	{
