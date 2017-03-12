@@ -110,10 +110,10 @@ namespace exodbc
 		exASSERT(pEnv->IsEnvHandleAllocated());
 		exASSERT(m_pEnv == NULL);
 
-		// Allocate connection handle
-		m_pHDbc->AllocateWithParent(m_pEnv->GetSqlEnvHandle());
+		// Allocate connection handle from passed environment
+		m_pHDbc->AllocateWithParent(pEnv->GetSqlEnvHandle());
 
-		// success, remember environment
+		// success, remember environment used
 		m_pEnv = pEnv;
 	}
 
