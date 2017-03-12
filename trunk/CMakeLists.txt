@@ -4,6 +4,32 @@ project (exodbc
   LANGUAGES CXX
 )
 
+SET(CPACK_GENERATOR "TGZ")
+ 
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "exODBC - open source C++ ODBC library")
+set(CPACK_PACKAGE_VENDOR "Elias Gerber")
+set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/INSTALL.txt)
+set(CPACK_GENERATOR TGZ)
+set(
+CPACK_SOURCE_PACKAGE_FILE_NAME
+"libexodbc-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+CACHE INTERNAL "tarball basename"
+)
+set(CPACK_SOURCE_GENERATOR TGZ)
+# The following components are regex's to match anywhere (unless anchored)
+# in absolute path + filename to find files or directories to be excluded
+# from source tarball.
+message(STATUS "BIN IS ${CMAKE_BINARY_DIR}")
+set(CPACK_SOURCE_IGNORE_FILES
+"${CMAKE_BINARY_DIR}"
+"\\\\.svn"
+)
+include(CPack)
+
 # Options:
 option(BUILD_TESTS "Build exodbctest program" ON)
 option(BUILD_SAMPLES "Build exodbcsamples programs" ON)
