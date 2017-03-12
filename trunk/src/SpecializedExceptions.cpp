@@ -55,12 +55,12 @@ namespace exodbc
 	{
 		try
 		{
-			m_errors = GetAllErrors(handleType, handle);
+			m_errors = ErrorHelper::GetAllErrors(handleType, handle);
 		}
 		catch (const Exception& e)
 		{
 			// Append a faked Error-Info
-			SErrorInfo errInfo;
+			ErrorHelper::SErrorInfo errInfo;
 			errInfo.ErrorHandleType = handleType;
 			errInfo.SqlState[0] = 0;
 			errInfo.NativeError = 0;

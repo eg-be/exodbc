@@ -13,6 +13,7 @@
 // Same component headers
 #include "ColumnBufferVisitors.h"
 #include "SqlStatementCloser.h"
+#include "LogManagerOdbcMacros.h"
 
 // Other headers
 // Debug

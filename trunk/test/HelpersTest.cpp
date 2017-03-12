@@ -190,7 +190,7 @@ namespace exodbctest
 	{
 		// We except an assertion if not at least one handle is valid
 		{
-			EXPECT_THROW(GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC), AssertionException);
+			EXPECT_THROW(ErrorHelper::GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC), AssertionException);
 		}
 	}
 

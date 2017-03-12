@@ -17,6 +17,7 @@
 #include "Table.h"
 #include "Exception.h"
 #include "SqlStatementCloser.h"
+#include "LogManagerOdbcMacros.h"
 
 // Other headers
 // Debug
@@ -236,8 +237,8 @@ namespace exodbc
 			ret = SQLDisconnect(m_pHDbc->GetHandle());
 			if (!SQL_SUCCEEDED(ret))
 			{
-				SErrorInfoVector errs = GetAllErrors(SQL_HANDLE_DBC, m_pHDbc->GetHandle());
-				SErrorInfoVector::const_iterator it;
+				ErrorHelper::SErrorInfoVector errs = ErrorHelper::GetAllErrors(SQL_HANDLE_DBC, m_pHDbc->GetHandle());
+				ErrorHelper::SErrorInfoVector::const_iterator it;
 				for (it = errs.begin(); it != errs.end(); ++it)
 				{
 					LOG_ERROR(boost::str(boost::format(u8"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
@@ -291,8 +292,8 @@ namespace exodbc
 			ret = SQLDisconnect(m_pHDbc->GetHandle());
 			if ( ! SQL_SUCCEEDED(ret))
 			{
-				SErrorInfoVector errs = GetAllErrors(SQL_HANDLE_DBC, m_pHDbc->GetHandle());
-				SErrorInfoVector::const_iterator it;
+				ErrorHelper::SErrorInfoVector errs = ErrorHelper::GetAllErrors(SQL_HANDLE_DBC, m_pHDbc->GetHandle());
+				ErrorHelper::SErrorInfoVector::const_iterator it;
 				for (it = errs.begin(); it != errs.end(); ++it)
 				{
 					LOG_ERROR(boost::str(boost::format(u8"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
