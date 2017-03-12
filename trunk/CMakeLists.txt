@@ -14,16 +14,23 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "exODBC - open source C++ ODBC library")
 set(CPACK_PACKAGE_VENDOR "Elias Gerber")
 set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/INSTALL.txt)
 set(CPACK_GENERATOR TGZ)
+# try to add revision to filename
+SET(CPACK_PACKAGE_VERSION_TWEAK 0)
+find_package(Subversion)
+if(SUBVERSION_FOUND)
+  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
+  set (CPACK_PACKAGE_VERSION_TWEAK ${Project_WC_REVISION})
+  message(STATUS "Updating CPACK_PACKAGE_VERSION_TWEAK to ${CPACK_PACKAGE_VERSION_TWEAK}, read from ${PROJECT_SOURCE_DIR}")
+endif()
 set(
 CPACK_SOURCE_PACKAGE_FILE_NAME
-"libexodbc-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
+"libexodbc-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-r${CPACK_PACKAGE_VERSION_TWEAK}"
 CACHE INTERNAL "tarball basename"
 )
 set(CPACK_SOURCE_GENERATOR TGZ)
 # The following components are regex's to match anywhere (unless anchored)
 # in absolute path + filename to find files or directories to be excluded
 # from source tarball.
-message(STATUS "BIN IS ${CMAKE_BINARY_DIR}")
 set(CPACK_SOURCE_IGNORE_FILES
 "${CMAKE_BINARY_DIR}"
 "\\\\.svn"
