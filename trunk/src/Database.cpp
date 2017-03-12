@@ -108,14 +108,13 @@ namespace exodbc
 	{
 		exASSERT(pEnv != NULL);
 		exASSERT(pEnv->IsEnvHandleAllocated());
-
-		// remember the environment
 		exASSERT(m_pEnv == NULL);
-		m_pEnv = pEnv;
 
-		// And allocate connection handle
+		// Allocate connection handle
 		m_pHDbc->AllocateWithParent(m_pEnv->GetSqlEnvHandle());
-		//AllocateConnectionHandle();
+
+		// success, remember environment
+		m_pEnv = pEnv;
 	}
 
 
