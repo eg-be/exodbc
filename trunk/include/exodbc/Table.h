@@ -256,11 +256,8 @@ namespace exodbc
 		/*!
 		* \brief	Set an AccessFlag. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
-		* \details	If the flag passed is already set, this function will do nothing.
-		*			If a change is detected, and the statements were already allocated,
-		*			the function will free all statements and re-allocate the statements
-		*			required for the current AccessFlags set.
-		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
+		* \details	TableAccessFlags will be evaluated during Open().
+		* \throw	AssertionException If Table is already open.
 		*/
 		void		SetAccessFlag(TableAccessFlag ac);
 
@@ -268,11 +265,8 @@ namespace exodbc
 		/*!
 		* \brief	Clear an AccessFlag. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
-		* \details	If the flag passed is already cleared, this function will do nothing.
-		*			If a change is detected, and the statements were already allocated,
-		*			the function will free all statements and re-allocate the statements
-		*			required for the current AccessFlags set.
-		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
+		* \details	TableAccessFlags will be evaluated during Open().
+		* \throw	AssertionException If Table is already open.
 		*/
 		void		ClearAccessFlag(TableAccessFlag ac);
 
@@ -280,13 +274,8 @@ namespace exodbc
 		/*!
 		* \brief	Set multiple AccessFlags. Can only be called if Table is Closed, so
 		*			when IsOpen() returns false.
-		* \details	If the flags passed are the same as already set on the table, this
-		*			function will do nothing.
-		*
-		*			If a change is detected, and the statements were already allocated,
-		*			the function will free all statements and re-allocate the statements
-		*			required for the current AccessFlags set.
-		* \throw	Exception If Table is already open, or freeing / allocating statement handles fail.
+		* \details	TableAccessFlags will be evaluated during Open().
+		* \throw	AssertionException If Table is already open.
 		*/
 		void		SetAccessFlags(TableAccessFlags acs);
 

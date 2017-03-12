@@ -1273,13 +1273,6 @@ namespace exodbc
 	void Table::SetAccessFlags(TableAccessFlags acs)
 	{
 		exASSERT(!IsOpen());
-		exASSERT(m_pDb->IsOpen());
-
-		if (m_tableAccessFlags == acs)
-		{
-			// Same flags, return
-			return;
-		}
 
 		m_tableAccessFlags = acs;
 	}
