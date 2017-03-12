@@ -16,6 +16,7 @@
 #include "EnumFlags.h"
 #include "SqlHandle.h"
 #include "Helpers.h"
+#include "LogManagerOdbcMacros.h"
 
 // Other headers
 #include <boost/variant.hpp>

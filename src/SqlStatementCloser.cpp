@@ -8,6 +8,7 @@
 
 // Own header
 #include "SqlStatementCloser.h"
+#include "LogManagerOdbcMacros.h"
 
 // Same component headers
 // Other headers

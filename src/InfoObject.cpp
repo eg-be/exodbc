@@ -11,7 +11,7 @@
 #include "InfoObject.h"
 
 // Same component headers
-#include "Exception.h"
+#include "SpecializedExceptions.h"
 #include "Helpers.h"
 
 // Other headers
