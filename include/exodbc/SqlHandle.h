@@ -13,7 +13,7 @@
 #include "AssertionException.h"
 #include "LogManager.h"
 #include "Exception.h"
-//#include "LogManagerOdbcMacros.h"
+#include "LogManagerOdbcMacros.h"
 
 // Other headers
 #include <boost/signals2.hpp>

@@ -2,9 +2,7 @@
 * \file LogManagerOdbcMacros.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 12.03.2017
-* \brief Header file for ODBC helper macros for Logging. Use this file from 
-*		 within CPP files only or you will pull in a linker dependency on
-*		 odbc32.lib.
+* \brief Header file for ODBC helper macros for Logging.
 * \copyright GNU Lesser General Public License Version 3
 */
 
