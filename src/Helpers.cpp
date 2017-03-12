@@ -224,31 +224,6 @@ namespace exodbc
 		memset(&num, 0, sizeof(num));
 		return num;
 	}
-
-
-	long Str2Hex2Long(unsigned char hexValue[16])
-	{
-		long val = 0;
-		long value = 0;
-		int i = 1;
-		int last = 1;
-		int current;
-		int a = 0;
-		int b = 0;
-
-		for (i = 0; i <= 15; i++)
-		{
-			current = (int)hexValue[i];
-			a = current % 16; //Obtain LSD
-			b = current / 16; //Obtain MSD
-
-			value += last* a;
-			last = last * 16;
-			value += last* b;
-			last = last * 16;
-		}
-		return value;
-	}
 }
 
 
