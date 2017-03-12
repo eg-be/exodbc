@@ -119,7 +119,7 @@ namespace exodbc
 		exASSERT(pDb);
 		exASSERT(pDb->IsOpen());
 		
-		// Remember properties passed
+		// Remember db created from
 		exASSERT(m_pDb == NULL);
 		m_pDb = pDb;
 
@@ -127,7 +127,7 @@ namespace exodbc
 		m_haveTableInfo = true;
 		m_tableInfo = tableInfo;
 
-		// remember buffertype map, and allocate statements (by setting access flags)
+		// remember buffertype map and acess flags
 		m_pSql2BufferTypeMap = m_pDb->GetSql2BufferTypeMap();
 		SetAccessFlags(afs);
 	}
@@ -138,7 +138,7 @@ namespace exodbc
 		exASSERT(pDb);
 		exASSERT(pDb->IsOpen());
 
-		// Remember properties passed
+		// Remember db created from
 		exASSERT(m_pDb == NULL);
 		m_pDb = pDb;
 

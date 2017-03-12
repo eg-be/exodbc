@@ -59,6 +59,21 @@ namespace exodbctest
 	}
 
 
+	TEST_F(DatabaseTest, Init)
+	{
+		Database db;
+
+		// Fail for not allocated environment
+		EnvironmentPtr pEnv = std::make_shared<Environment>();
+
+		EXPECT_THROW(db.Init(pEnv), AssertionException);
+
+		// But succeed if statement becomes valid
+		pEnv->Init(OdbcVersion::V_3);
+		EXPECT_NO_THROW(db.Init(pEnv));
+	}
+
+
 	TEST_F(DatabaseTest, CopyConstructor)
 	{
 		Database db1(m_pEnv);

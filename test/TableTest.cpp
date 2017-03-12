@@ -63,6 +63,18 @@ namespace exodbctest
 	}
 	
 
+	TEST_F(TableTest, Init)
+	{
+		// Fail if we try to init a table with a not open database
+		DatabasePtr pDb = Database::Create(m_pEnv);
+		Table table;
+		EXPECT_THROW(table.Init(pDb, TableAccessFlag::AF_READ, TableInfo()), AssertionException);
+
+		// but succeed later
+		EXPECT_NO_THROW(table.Init(m_pDb, TableAccessFlag::AF_READ, TableInfo()));
+	}
+
+
 	// Open / Close
 	// ------------
 	TEST_F(TableTest, OpenManualReadOnlyWithoutCheck)

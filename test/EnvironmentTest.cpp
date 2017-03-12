@@ -49,6 +49,21 @@ namespace exodbctest
 	}
 
 
+	TEST_F(EnvironmentTest, Init)
+	{
+		Environment env;
+		// Fail for unknown
+		EXPECT_THROW(env.Init(OdbcVersion::UNKNOWN), AssertionException);
+
+		// But later succeed for valid values
+		EXPECT_NO_THROW(env.Init(OdbcVersion::V_2));
+
+		Environment env3, env38;
+		EXPECT_NO_THROW(env3.Init(OdbcVersion::V_3));
+		EXPECT_NO_THROW(env38.Init(OdbcVersion::V_3_8));
+	}
+
+
 	TEST_F(EnvironmentTest, CopyConstructor)
 	{
 		Environment env(OdbcVersion::V_3);
