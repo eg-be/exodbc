@@ -24,48 +24,6 @@ namespace exodbc {
 
 	// Implementation
 	// --------------
-
-	std::string FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::string msg)
-	{
-		std::string msgStr(msg);
-		SErrorInfoVector errs = exodbc::GetAllErrors(hEnv, hDbc, hStmt, hDesc);
-		SErrorInfoVector::const_iterator it;
-		std::stringstream handles;
-		if (hEnv)
-			handles << u8"Env=" << hEnv << u8";";
-		if (hDbc)
-			handles << u8"Dbc=" << hDbc << u8";";
-		if (hStmt)
-			handles << u8"Stmt=" << hStmt << u8";";
-		if (hDesc)
-			handles << u8"Desc=" << hDesc << u8";";
-
-		std::string type = u8"Error(s)";
-		if (ret == SQL_SUCCESS_WITH_INFO)
-		{
-			type = u8"Info(s)";
-		}
-		std::stringstream ss;
-		if (msgStr.length() > 0)
-			ss << msgStr << u8": ";
-		ss << u8"ODBC-Function '" << sqlFunctionName << u8"' returned " << exodbc::SqlReturn2s(ret) << u8" (" << ret << u8"), with " << errs.size() << u8" ODBC-" << type << u8" from handle(s) '" << handles.str() << u8"': ";
-		for (it = errs.begin(); it != errs.end(); it++)
-		{
-			const SErrorInfo& err = *it;
-			ss << std::endl << u8"\t" << err.ToString();
-		}
-		return ss.str();
-	}
-
-
-	std::string SErrorInfo::ToString() const
-	{
-		std::stringstream ss;
-		ss << u8"SQLSTATE " << SqlState << u8"; Native Error: " << NativeError << u8"; " << Msg.c_str();
-		return ss.str();
-	}
-
-
 	std::string utf16ToUtf8(const std::wstring& w) noexcept
 	{
 		try
@@ -419,7 +377,7 @@ namespace exodbc {
 	}
 
 
-	SErrorInfoVector GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
+	ErrorHelper::SErrorInfoVector ErrorHelper::GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
 	{
 		exASSERT(hEnv != SQL_NULL_HENV || hDbc != SQL_NULL_HDBC || hStmt != SQL_NULL_HSTMT || hDesc != SQL_NULL_HDESC);
 
@@ -492,7 +450,7 @@ namespace exodbc {
 	}
 
 
-	SErrorInfoVector GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle)
+	ErrorHelper::SErrorInfoVector ErrorHelper::GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle)
 	{
 		switch (handleType)
 		{
@@ -508,5 +466,46 @@ namespace exodbc {
 			exASSERT_MSG(false, u8"Unknown handleType");
 		}
 		return SErrorInfoVector();
+	}
+
+
+	std::string ErrorHelper::FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::string msg)
+	{
+		std::string msgStr(msg);
+		SErrorInfoVector errs = ErrorHelper::GetAllErrors(hEnv, hDbc, hStmt, hDesc);
+		SErrorInfoVector::const_iterator it;
+		std::stringstream handles;
+		if (hEnv)
+			handles << u8"Env=" << hEnv << u8";";
+		if (hDbc)
+			handles << u8"Dbc=" << hDbc << u8";";
+		if (hStmt)
+			handles << u8"Stmt=" << hStmt << u8";";
+		if (hDesc)
+			handles << u8"Desc=" << hDesc << u8";";
+
+		std::string type = u8"Error(s)";
+		if (ret == SQL_SUCCESS_WITH_INFO)
+		{
+			type = u8"Info(s)";
+		}
+		std::stringstream ss;
+		if (msgStr.length() > 0)
+			ss << msgStr << u8": ";
+		ss << u8"ODBC-Function '" << sqlFunctionName << u8"' returned " << exodbc::SqlReturn2s(ret) << u8" (" << ret << u8"), with " << errs.size() << u8" ODBC-" << type << u8" from handle(s) '" << handles.str() << u8"': ";
+		for (it = errs.begin(); it != errs.end(); it++)
+		{
+			const SErrorInfo& err = *it;
+			ss << std::endl << u8"\t" << err.ToString();
+		}
+		return ss.str();
+	}
+
+
+	std::string ErrorHelper::SErrorInfo::ToString() const
+	{
+		std::stringstream ss;
+		ss << u8"SQLSTATE " << SqlState << u8"; Native Error: " << NativeError << u8"; " << Msg.c_str();
+		return ss.str();
 	}
 }

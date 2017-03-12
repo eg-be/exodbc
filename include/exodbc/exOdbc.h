@@ -286,38 +286,8 @@ namespace exodbc
 	// Flags
 	// =====
 
-	// Structs
-	// -------
-	/*!
-	* \struct SErrorInfo
-	*
-	* \brief Store error-information from ODBC.
-	* \see		GetAllErrors()
-	*/
-	struct EXODBCAPI SErrorInfo
-	{
-		SErrorInfo()
-		{
-			SqlState[0] = 0;
-			NativeError = 0;
-			ErrorHandleType = 0;
-		}
 
-		SQLSMALLINT		ErrorHandleType; ///< Handle-type of the error. Is either SQL_HANDLE_ENV, SQL_HANDLE_DBC, SQL_HANDLE_STMT or SQL_HANDLE_DESC
-		SQLCHAR			SqlState[5 + 1];
-		SQLINTEGER		NativeError;
-		std::string	Msg;
-
-		std::string ToString() const;
-	};
-
-	/*!
-	* \typedef SErrorInfoVector
-	* \brief	Vector of SErrorInfo structs.
-	*/
-	typedef std::vector<SErrorInfo> SErrorInfoVector;
-
-	// Global Helpers
+	// Global Helpers without any logic to the SQL-API
 	// --------------
 
 	/*!
@@ -412,36 +382,70 @@ namespace exodbc
 	extern EXODBCAPI std::string HandleType2s(SQLSMALLINT type) noexcept;
 
 
-	/*!
-	* \brief	Gets all errors for all passed handles. Should never throw as long
-	*			you pass in at least one non-NULL handle.
-	*
-	* \param	hEnv 	(Optional) the environment.
-	* \param	hDbc 	(Optional) the dbc.
-	* \param	hStmt	(Optional) the statement.
-	* \param	hStmt	(Optional) the description.
-	* \param	hDesc	(Optional) the description handle.
-	*
-	* \return	all errors.
-	* \throw	AssertionException if not at least one of the handles is not a NULL handle.
-	*			This function will not throw if reading the errors from SQLGetDiagRec fails,
-	*			it will just log a warning.
-	*/
-	extern EXODBCAPI SErrorInfoVector GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc);
+	class EXODBCAPI ErrorHelper
+	{
+	public:
+
+		/*!
+		* \struct SErrorInfo
+		*
+		* \brief Store error-information from ODBC.
+		* \see		GetAllErrors()
+		*/
+		struct SErrorInfo
+		{
+			SErrorInfo()
+			{
+				SqlState[0] = 0;
+				NativeError = 0;
+				ErrorHandleType = 0;
+			}
+
+			SQLSMALLINT		ErrorHandleType; ///< Handle-type of the error. Is either SQL_HANDLE_ENV, SQL_HANDLE_DBC, SQL_HANDLE_STMT or SQL_HANDLE_DESC
+			SQLCHAR			SqlState[5 + 1];
+			SQLINTEGER		NativeError;
+			std::string	Msg;
+
+			std::string ToString() const;
+		};
+		/*!
+		* \typedef SErrorInfoVector
+		* \brief	Vector of SErrorInfo struct.
+		*/
+		typedef std::vector<SErrorInfo> SErrorInfoVector;
 
 
-	/*!
-	* \brief	A shorthand to GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
-	*			you pass in at least one non-NULL handle.
-	* \see		GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
-	*/
-	extern EXODBCAPI SErrorInfoVector GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle);
+		/*!
+		* \brief	Gets all errors for all passed handles. Should never throw as long
+		*			you pass in at least one non-NULL handle.
+		*
+		* \param	hEnv 	(Optional) the environment.
+		* \param	hDbc 	(Optional) the dbc.
+		* \param	hStmt	(Optional) the statement.
+		* \param	hStmt	(Optional) the description.
+		* \param	hDesc	(Optional) the description handle.
+		*
+		* \return	all errors.
+		* \throw	AssertionException if not at least one of the handles is not a NULL handle.
+		*			This function will not throw if reading the errors from SQLGetDiagRec fails,
+		*			it will just log a warning.
+		*/
+		static SErrorInfoVector GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc);
 
 
-	/*!
-	* \brief Format all Infos and Errors from passed handles into something human-readable.
-	*/
-	extern EXODBCAPI std::string FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::string msg);
+		/*!
+		* \brief	A shorthand to GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
+		*			you pass in at least one non-NULL handle.
+		* \see		GetAllErrors(SQLHANDLE hEnv, SQLHANDLE hDbc, SQLHANDLE hStmt, SQLHANDLE hDesc)
+		*/
+		static SErrorInfoVector GetAllErrors(SQLSMALLINT handleType, SQLHANDLE handle);
+
+
+		/*!
+		* \brief Format all Infos and Errors from passed handles into something human-readable.
+		*/
+		static std::string FormatOdbcMessages(SQLHENV hEnv, SQLHDBC hDbc, SQLHSTMT hStmt, SQLHDESC hDesc, SQLRETURN ret, std::string sqlFunctionName, std::string msg);
+	};
 }
 
 

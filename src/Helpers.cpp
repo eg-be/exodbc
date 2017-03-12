@@ -11,6 +11,7 @@
 
 // Same component headers
 #include "Exception.h"
+#include "LogManagerOdbcMacros.h"
 
 // Other headers
 // Debug

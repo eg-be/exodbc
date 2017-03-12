@@ -74,6 +74,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/InfoObject.h
   ../include/exodbc/LogHandler.h
   ../include/exodbc/LogManager.h
+  ../include/exodbc/LogManagerOdbcMacros.h
   ../include/exodbc/SpecializedExceptions.h
   ../include/exodbc/Sql2BufferTypeMap.h
   ../include/exodbc/SqlHandle.h

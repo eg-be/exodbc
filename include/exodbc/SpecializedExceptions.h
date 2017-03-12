@@ -68,7 +68,7 @@ namespace exodbc
 		void FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) noexcept;
 		void BuildErrorMsg(const std::string& sqlFunctionName, SQLRETURN ret) noexcept;
 
-		SErrorInfoVector m_errors;
+		ErrorHelper::SErrorInfoVector m_errors;
 		std::string m_errorMsg;
 		SQLRETURN m_ret;
 	};
@@ -252,71 +252,3 @@ namespace exodbc
 		std::string GetName() const noexcept override { return u8"exodbc::NotFoundException"; };
 	};
 }
-
-// SqlResultException Macros
-// -------------------------
-
-#define THROW_IFN_SUCCEEDED_SILENT_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
-	do { \
-		if(!SQL_SUCCEEDED(sqlReturn)) { \
-			SqlResultException ex(#sqlFunctionName, sqlReturn, handleType, handle, msg); \
-			SET_EXCEPTION_SOURCE(ex); \
-			throw ex; \
-		} \
-	} while(0)
-
-#define THROW_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
-	do { \
-		if(!SQL_SUCCEEDED(sqlReturn)) { \
-			SqlResultException ex(#sqlFunctionName, sqlReturn, handleType, handle, msg); \
-			SET_EXCEPTION_SOURCE(ex); \
-			throw ex; \
-		} \
-		if(SQL_SUCCESS_WITH_INFO == sqlReturn) { \
-			switch(handleType) { \
-			case SQL_HANDLE_ENV: \
-				LOG_INFO_ODBC(handle, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC, sqlReturn, sqlFunctionName); \
-				break; \
-			case SQL_HANDLE_DBC: \
-				LOG_INFO_ODBC(SQL_NULL_HENV, handle, SQL_NULL_HSTMT, SQL_NULL_HDESC, sqlReturn, sqlFunctionName); \
-				break; \
-			case SQL_HANDLE_STMT: \
-				LOG_INFO_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, handle, SQL_NULL_HDESC, sqlReturn, sqlFunctionName); \
-				break; \
-			case SQL_HANDLE_DESC: \
-				LOG_INFO_ODBC(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, handle, sqlReturn, sqlFunctionName); \
-				break; \
-			default: \
-				THROW_WITH_SOURCE(IllegalArgumentException, u8"Unknown handleType"); \
-			} \
-		} \
-	} while(0)
-
-#define THROW_IFN_SUCCESS_MSG(sqlFunctionName, sqlReturn, handleType, handle, msg) \
-	do { \
-		if(SQL_SUCCESS != sqlReturn) { \
-			SqlResultException ex(#sqlFunctionName, sqlReturn, handleType, handle, msg); \
-			SET_EXCEPTION_SOURCE(ex); \
-			throw ex; \
-		} \
-	} while (0)
-
-#define THROW_IFN_SUCCEEDED(sqlFunctionName, sqlReturn, handleType, handle) \
-	do { \
-		THROW_IFN_SUCCEEDED_MSG(sqlFunctionName, sqlReturn, handleType, handle, u8""); \
-	} while(0) \
-
-#define THROW_IFN_SUCCESS(sqlFunctionName, sqlReturn, handleType, handle) \
-	do { \
-		THROW_IFN_SUCCESS_MSG(sqlFunctionName, sqlReturn, handleType, handle, u8""); \
-	} while(0) \
-
-#define THROW_IFN_NO_DATA(sqlFunctionName, sqlReturn) \
-	do { \
-		if(SQL_NO_DATA != sqlReturn) \
-		{ \
-			SqlResultException ex(#sqlFunctionName, ret, u8"Expected SQL_NO_DATA."); \
-			SET_EXCEPTION_SOURCE(ex); \
-			throw ex; \
-		} \
-	} while(0)
