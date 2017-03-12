@@ -57,14 +57,20 @@ namespace exodbctest
 		EXPECT_NO_THROW(ExecutableStatement stmt(m_pDb, u8"SELECT * FROM FOO"));
 
 		DatabasePtr pClosed = make_shared<Database>(m_pEnv);
-		EXPECT_THROW(ExecutableStatement stmt(pClosed, u8"SELECT * FROM FOO"), AssertionException);
+		{
+			LogLevelSetter ll(LogLevel::None);
+			EXPECT_THROW(ExecutableStatement stmt(pClosed, u8"SELECT * FROM FOO"), AssertionException);
+		}
 
 		// Construct using default c'tor
 		ExecutableStatement stmt2;
 		EXPECT_NO_THROW(stmt2.Init(m_pDb, false));
 		
 		// Fail to init twice
-		EXPECT_THROW(stmt2.Init(m_pDb, false), AssertionException);
+		{
+			LogLevelSetter ll(LogLevel::None);
+			EXPECT_THROW(stmt2.Init(m_pDb, false), AssertionException);
+		}
 	}
 
 
@@ -75,7 +81,10 @@ namespace exodbctest
 		EXPECT_NO_THROW(stmt.Init(m_pDb, false));
 
 		// Fail to init twice
-		EXPECT_THROW(stmt.Init(m_pDb, false), AssertionException);
+		{
+			LogLevelSetter ll(LogLevel::None);
+			EXPECT_THROW(stmt.Init(m_pDb, false), AssertionException);
+		}
 
 		// But not if we reset first
 		EXPECT_NO_THROW(stmt.Reset());

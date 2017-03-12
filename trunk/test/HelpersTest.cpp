@@ -165,6 +165,7 @@ namespace exodbctest
 
 		// Except to fail when passing a null handle
 		{
+			LogLevelSetter ll(LogLevel::None);
 			EXPECT_THROW(SetDescriptionField(SQL_NULL_HSTMT, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC), AssertionException);
 		}
 
@@ -190,6 +191,7 @@ namespace exodbctest
 	{
 		// We except an assertion if not at least one handle is valid
 		{
+			LogLevelSetter ll(LogLevel::None);
 			EXPECT_THROW(ErrorHelper::GetAllErrors(SQL_NULL_HENV, SQL_NULL_HDBC, SQL_NULL_HSTMT, SQL_NULL_HDESC), AssertionException);
 		}
 	}

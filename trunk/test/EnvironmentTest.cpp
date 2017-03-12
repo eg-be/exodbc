@@ -53,7 +53,10 @@ namespace exodbctest
 	{
 		Environment env;
 		// Fail for unknown
-		EXPECT_THROW(env.Init(OdbcVersion::UNKNOWN), AssertionException);
+		{
+			LogLevelSetter ll(LogLevel::None);
+			EXPECT_THROW(env.Init(OdbcVersion::UNKNOWN), AssertionException);
+		}
 
 		// But later succeed for valid values
 		EXPECT_NO_THROW(env.Init(OdbcVersion::V_2));
