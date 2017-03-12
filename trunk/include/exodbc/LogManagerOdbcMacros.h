@@ -1,4 +1,4 @@
-/*!
+﻿/*!
 * \file LogManagerOdbcMacros.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 12.03.2017
