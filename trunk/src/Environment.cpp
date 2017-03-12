@@ -11,7 +11,8 @@
 #include "Environment.h"
 
 // Same component headers
-#include "Exception.h"
+#include "SpecializedExceptions.h"
+#include "LogManagerOdbcMacros.h"
 
 // Other headers
 // Debug

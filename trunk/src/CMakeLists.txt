@@ -115,9 +115,9 @@ source_group( "Config"
 
 # and for the linker, add odbc32.lib to the standard libraries:
 if(MSVC)
-  target_link_libraries(libexodbc PRIVATE odbc32)
+  target_link_libraries(libexodbc PUBLIC odbc32)
 else()
-  target_link_libraries(libexodbc PRIVATE odbc)
+  target_link_libraries(libexodbc PUBLIC odbc)
 endif()
 
 # add a target to generate API documentation with Doxygen
