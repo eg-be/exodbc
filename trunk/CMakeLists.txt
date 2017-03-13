@@ -39,7 +39,6 @@ set(CPACK_SOURCE_IGNORE_FILES
 include(CPack)
 
 # Options:
-option(BUILD_)
 option(BUILD_TESTS "Build exodbctest program" ON)
 option(BUILD_SAMPLES "Build exodbcsamples programs" ON)
 # default to building static-libraries, so we dont need any 
