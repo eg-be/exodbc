@@ -14,7 +14,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "exODBC - open source C++ ODBC library")
 set(CPACK_PACKAGE_VENDOR "Elias Gerber")
 set(CPACK_PACKAGE_DESCRIPTION_FILE ${CMAKE_CURRENT_SOURCE_DIR}/INSTALL.txt)
 set(CPACK_GENERATOR TGZ)
-set(CPACK_INSTALL_COMMANDS "")
+
 # try to add revision to filename
 SET(CPACK_PACKAGE_VERSION_TWEAK 0)
 find_package(Subversion)
