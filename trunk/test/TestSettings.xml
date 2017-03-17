@@ -8,7 +8,7 @@
   <LogFile>1</LogFile>
   
   <Dsn>
-    <Disabled>1</Disabled>
+    <Disabled>0</Disabled>
     <Name>exSqlServer_64</Name>
     <User>ex</User>
     <Pass>extest</Pass>
@@ -32,7 +32,7 @@
   </Dsn>
 
   <Dsn>
-    <Disabled>0</Disabled>
+    <Disabled>01</Disabled>
     <Name>exDB2_64</Name>
     <User>db2ex</User>
     <Pass>extest</Pass>

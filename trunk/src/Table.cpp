@@ -1037,7 +1037,7 @@ namespace exodbc
 	}
 
 
-	const Sql2BufferTypeMapPtr Table::GetSql2BufferTypeMap() const
+	ConstSql2BufferTypeMapPtr Table::GetSql2BufferTypeMap() const
 	{
 		exASSERT(m_pSql2BufferTypeMap);
 		return m_pSql2BufferTypeMap;
