@@ -183,7 +183,7 @@ namespace exodbc
 
 	/*!
 	* \class SqlCTypeVisitor
-	* \brief Visitor get the SQL C Type of a ColumnBuffer.
+	* \brief Visitor get the SQL C Type of a ColumnBuffer as SQLSMALLINT.
 	* \details On applying this visitor, it will call GetSqlCType() on the variant.
 	*/
 	class SqlCTypeVisitor

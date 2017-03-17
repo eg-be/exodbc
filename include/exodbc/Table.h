@@ -712,10 +712,10 @@ namespace exodbc
 
 		/*!
 		* \brief	Get the Sql2BufferTypeMap set on this Table.
-		* \return	const Sql2BufferTypeMap*
+		* \return	ConstSql2BufferTypeMapPtr
 		* \throw	Exception If no Sql2BufferTypeMap is set on this Table.
 		*/
-		const Sql2BufferTypeMapPtr GetSql2BufferTypeMap() const;
+		ConstSql2BufferTypeMapPtr GetSql2BufferTypeMap() const;
 
 
 		/*!
