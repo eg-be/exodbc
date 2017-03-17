@@ -616,6 +616,12 @@ namespace exodbc
 		std::set<SQLUSMALLINT> GetColumnBufferIndexes() const noexcept;
 
 
+		/*
+		* \brief	Returns the ColumnBuffer count for this Table.
+		*/
+		size_t GetColumnBufferCount() const noexcept { return m_columns.size();  };
+
+
 		/*!
 		* \brief	Searches the internal map of ColumnBuffers for a Buffer matching the
 		*			passed QueryName.
@@ -697,8 +703,7 @@ namespace exodbc
 
 		
 		/*!
-		* \brief	Set a Sql2BufferTypeMap. Must be set before Open() is called. Object must not be
-		*			deleted before Table is deleted.
+		* \brief	Set a Sql2BufferTypeMap. Must be set before Open() is called.
 		* \param pSql2BufferTypeMap	Sql2BufferTypeMap to set.
 		* \throw Exception If IsOpen() returns true.
 		*/

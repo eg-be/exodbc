@@ -121,6 +121,7 @@ set ( SRC_EXODBCTEST
   TableTest.cpp 
   TestDbCreator.cpp
   TestParams.cpp
+  Utf8Test.cpp
   wxCompatibilityTest.cpp
 )
 
@@ -142,6 +143,7 @@ set ( HEADERS_EXODBCTEST
   TableTest.h 
   TestDbCreator.h
   TestParams.h
+  Utf8Test.h
   wxCompatibilityTest.h
 )
 
