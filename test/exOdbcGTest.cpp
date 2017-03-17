@@ -335,7 +335,6 @@ int main(int argc, char* argv[])
 		catch (const Exception& ex)
 		{
 			LOG_ERROR(boost::str(boost::format(u8"Failed to create Test-Database for DSN '%s': %s") % g_odbcInfo.m_dsn % ex.ToString()));
-			::getchar();
 			return -1;
 		}
 	}
