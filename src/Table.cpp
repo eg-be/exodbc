@@ -211,7 +211,7 @@ namespace exodbc
 	{
 		exASSERT(m_pDb->IsOpen());
 
-		const TableInfo& tableInfo = GetTableInfo();
+		const TableInfo& tableInfo = ReadTableInfo();
 
 		// Query Columns and create SqlCBuffers
 		ColumnInfosVector columnInfos = m_pDb->ReadTableColumnInfo(tableInfo);
@@ -347,7 +347,7 @@ namespace exodbc
 	}
 
 
-	const TableInfo& Table::GetTableInfo()
+	const TableInfo& Table::ReadTableInfo()
 	{
 		if (!m_haveTableInfo)
 		{
@@ -359,12 +359,10 @@ namespace exodbc
 	}
 
 
-	TableInfo Table::GetTableInfo() const
+	const TableInfo& Table::GetTableInfo() const
 	{
-		if (!m_haveTableInfo)
-		{
-			return m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
-		}
+		exASSERT(m_haveTableInfo);
+
 		return m_tableInfo;
 	}
 
@@ -1078,9 +1076,7 @@ namespace exodbc
 			bool searchedTable = false;
 			if (!m_haveTableInfo)
 			{
-				// Finding will throw if not exactly one is found
-				m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
-				m_haveTableInfo = true;
+				ReadTableInfo();
 				searchedTable = true;
 			}
 

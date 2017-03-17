@@ -757,27 +757,13 @@ namespace exodbc
 		*/
 		ColumnBufferPtrVariantMap GetPrimaryKeyColumnBuffers() const;
 
-		
-		/*!
-		* \brief	Returns the TableInfo for this Table.
-		* \details	If the TableInfo has already been queried and is stored internally, the internally
-		*			stored TableInfo is returned. Else the Database is queried for a TableInfo matching
-		*			the given search-names during construction. If exactly one matching Table is found,
-		*			the corresponding TableInfo is stored internally and returned.
-		* \throw	Exception
-		*/
-		const TableInfo& GetTableInfo();
-
 
 		/*!
-		* \brief	Returns the TableInfo for this Table if it is already set.
-		* \details	If the TableInfo has already been queried and is stored internally, the internally
-		*			stored TableInfo is returned. Else the Database is queried for a TableInfo matching
-		*			the given search-names during construction. If exactly one matching Table is found,
-		*			the corresponding TableInfo is returned (but not stored internally).
-		* \throw	Exception
+		* \brief	Returns the TableInfo for this Table. Throws an AssertionException
+		*			if Table has no TableInfo stored. See HasTableInfo().
+		* \throw	Exception If no TableInfo is stored in this Table.
 		*/
-		TableInfo GetTableInfo() const;
+		const TableInfo& GetTableInfo() const;
 
 
 		/*!
@@ -884,6 +870,19 @@ namespace exodbc
 		*			Else, an NotSupportedException is thrown
 		*/
 		void	CheckSqlTypes(bool removeUnsupported);
+
+
+		/*!
+		* \brief	Returns the internally stored TableInfo for this Table, or queries the Database
+		*			about the TableInfo for this table, stores that TableInfo internally and returns it.
+		* \details	If the TableInfo has already been queried and is stored internally, the internally
+		*			stored TableInfo is returned. Else the Database is queried for a TableInfo matching
+		*			the given search-names during construction. If exactly one matching Table is found,
+		*			the corresponding TableInfo is stored internally and returned.
+		* \throw	Exception If no TableInfo is stored internally and not exactly one matching
+		*			TableInfo can be read from the Database.
+		*/
+		const TableInfo& ReadTableInfo();
 
 
 		ConstDatabasePtr		m_pDb;	///< Database this table belongs to.
