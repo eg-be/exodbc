@@ -66,7 +66,7 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
                 ":TableTest.SelectRelative"
                 ":TableTest.UpdateFlag"
                 ":TableTest.UpdatePk"
-                ":Utf8Test.*")               
+                ":UnicodeTest.*")               
   set(ACCESS_TEST_GTEST_FILTER "${accessFilters}" CACHE STRING "value for gtest argument '--gtest_filter': Skip tests known to fail")
   set(ACCESS_TEST_LOG_LEVEL "--logLevelW" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Access")  
 
@@ -122,7 +122,7 @@ set ( SRC_EXODBCTEST
   TableTest.cpp 
   TestDbCreator.cpp
   TestParams.cpp
-  Utf8Test.cpp
+  UnicodeTest.cpp
   wxCompatibilityTest.cpp
 )
 
@@ -144,7 +144,7 @@ set ( HEADERS_EXODBCTEST
   TableTest.h 
   TestDbCreator.h
   TestParams.h
-  Utf8Test.h
+  UnicodeTest.h
   wxCompatibilityTest.h
 )
 
