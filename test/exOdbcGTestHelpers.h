@@ -46,7 +46,7 @@ namespace exodbctest
 		NOT_EXISTING,
 		NOT_SUPPORTED,
 		NOT_SUPPORTED_TMP,
-		UTF8_TABLE
+		UNICODE_TABLE
 	};
 
 	extern const std::map<TableId, std::string> g_TableNames;

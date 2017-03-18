@@ -1,10 +1,10 @@
 ﻿/*!
- * \file Utf8Test.h
+ * \file UnicodeTest.h
  * \author Elias Gerber <eg@elisium.ch>
  * \date 17.03.2017
  * \copyright GNU Lesser General Public License Version 3
  * 
- * Utf8 specific tests.
+ * Unicode specific tests.
  */ 
 
 #pragma once
@@ -30,7 +30,7 @@
 // -------
 namespace exodbctest
 {
-	class Utf8Test : public ::testing::Test
+	class UnicodeTest : public ::testing::Test
 	{
 	public:
 	protected:

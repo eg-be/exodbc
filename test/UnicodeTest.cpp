@@ -1,14 +1,14 @@
 ﻿/*!
- * \file Utf8Test.cpp
+ * \file UnicodeTest.cpp
  * \author Elias Gerber <eg@elisium.ch>
  * \date 17.03.2017
  * \copyright GNU Lesser General Public License Version 3
  * 
- * Test for reading / writing utf8 strings.
+ * Test for reading / writing unicode strings.
  */ 
 
 // Own header
-#include "Utf8Test.h"
+#include "UnicodeTest.h"
 
 // Same component headers
 #include "exOdbcGTest.h"
@@ -38,7 +38,7 @@ using namespace exodbc;
 
 namespace exodbctest
 {
-	void Utf8Test::SetUp()
+	void UnicodeTest::SetUp()
 	{
 		ASSERT_TRUE(g_odbcInfo.IsUsable());
 
@@ -52,7 +52,7 @@ namespace exodbctest
 	}
 
 
-	void Utf8Test::TearDown()
+	void UnicodeTest::TearDown()
 	{
 		if (m_pDb->IsOpen())
 		{
@@ -61,39 +61,28 @@ namespace exodbctest
 	}
 	
 
-	TEST_F(Utf8Test, OpenAuto)
+	TEST_F(UnicodeTest, OpenAuto)
 	{
 		// Test that for every database auto columns with utf8 data can be created
-		Table t(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UTF8_TABLE));
+		Table uTable(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE));
 
-		//// For utf-8 data enforce binding to char instead of wchar
-		//auto bindMap = std::make_shared<DefaultSql2BufferMap>(OdbcVersion::V_3);
-		//bindMap->RegisterType(SQL_WVARCHAR, SQL_C_CHAR);
-		//// In sql server we used a varbinary column in the table.
-		//// lets override binding VARBINARY to SQL_C_BINARAY (which is SQL_C_CHAR probably anyway)
-		//if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-		//{
-		//	bindMap->RegisterType(SQL_VARBINARY, SQL_C_CHAR);
-		//}
-		//t.SetSql2BufferTypeMap(bindMap);
-
-		t.Open();
-		EXPECT_EQ(2, t.GetColumnBufferCount());
-		auto utf8Col = t.GetColumnBufferPtrVariant(1);
+		uTable.Open();
+		EXPECT_EQ(2, uTable.GetColumnBufferCount());
+		auto unicodeCol = uTable.GetColumnBufferPtrVariant(1);
 		
 		// Depending on the database used, the concrete column type created could be any of
 		// WCharColumnBuffer or CharColumnBuffer
 		// But all should have a column with a query name ending with 'content' (the
 		// name of the column)
-		string queryName = boost::apply_visitor(QueryNameVisitor(), utf8Col);
+		string queryName = boost::apply_visitor(QueryNameVisitor(), unicodeCol);
 		EXPECT_TRUE(boost::algorithm::iends_with(queryName, u8"content"));
 	}
 
 
-	TEST_F(Utf8Test, ReadAsSqlChar)
+	TEST_F(UnicodeTest, CreatedUnicodeColumn)
 	{
 		// Test that we can read utf-8 data as SQL_C_CHAR
-		Table u8Table(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UTF8_TABLE));
+		Table u8Table(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE));
 
 		// For utf-8 data enforce binding to char instead of wchar
 		//auto bindMap = std::make_shared<DefaultSql2BufferMap>(OdbcVersion::V_3);
@@ -107,7 +96,7 @@ namespace exodbctest
 		//u8Table.SetSql2BufferTypeMap(bindMap);
 
 		//u8Table.Open();
-		//string idColName = GetIdColumnName(TableId::UTF8_TABLE);
+		//string idColName = GetIdColumnName(TableId::UNICODE_TABLE);
 		//string sqlWhere = boost::str(boost::format(u8"%s = 1") % idColName);
 		//u8Table.Select(sqlWhere);
 		//u8Table.SelectNext();
