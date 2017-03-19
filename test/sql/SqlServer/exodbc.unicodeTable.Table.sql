@@ -1,4 +1,4 @@
-﻿USE [exodbc]
+USE [exodbc]
 GO
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[exodbc].[unicodetable]') AND type in (N'U'))
 DROP TABLE [exodbc].[unicodetable]
