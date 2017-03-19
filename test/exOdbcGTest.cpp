@@ -322,7 +322,9 @@ int main(int argc, char* argv[])
 			namespace fs = boost::filesystem;
 			// Prepare Db-creator
 			TestDbCreator creator(g_odbcInfo);
-			fs::wpath exeDir(fs::current_path());
+			fs::wpath exePath(argv[0]);
+			LOG_DEBUG(boost::str(boost::format(u8"Using exePath '%1%' as basepath to search for ScriptDirectory") % exePath));
+			fs::wpath exeDir = exePath.parent_path();
 			fs::wpath scriptDir = exeDir / u8"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
 			if (!fs::is_directory(scriptDir))
 			{
