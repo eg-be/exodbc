@@ -12,6 +12,7 @@
 // Same component headers
 #include "Helpers.h"
 #include "LogManager.h"
+#include "SpecializedExceptions.h"
 
 // Other headers
 // Debug
@@ -24,7 +25,7 @@ namespace exodbc {
 
 	// Implementation
 	// --------------
-	std::string utf16ToUtf8(const std::wstring& w) noexcept
+	std::string utf16ToUtf8(const std::wstring& w)
 	{
 		try
 		{
@@ -36,26 +37,21 @@ namespace exodbc {
 		}
 		catch (const std::exception& ex)
 		{
-			std::string s("Failed in utf16ToUtf8 with std::exception: ");
-			s += ex.what();
-			return s;
-		}
-		catch (...)
-		{
-			std::string s("Failed in utf16ToUtf8 with unknown exception.");
-			return s;
+			ConversionException ce(ConversionException::Type::UTF16_TO_UTF8, ex.what());
+			SET_EXCEPTION_SOURCE(ce);
+			throw ce;
 		}
 	}
 
 	
-	std::string utf16ToUtf8(const SQLWCHAR* w) noexcept
+	std::string utf16ToUtf8(const SQLWCHAR* w)
 	{
 		std::wstring ws = reinterpret_cast<const wchar_t*>(w);
         return utf16ToUtf8(ws);
     }
     
-
-	std::wstring utf8ToUtf16(const std::string& s) noexcept
+	
+	std::wstring utf8ToUtf16(const std::string& s)
 	{
 		try
 		{
@@ -67,19 +63,14 @@ namespace exodbc {
 		}
 		catch (const std::exception& ex)
 		{
-			HIDE_UNUSED(ex);
-			std::wstring ws(L"Failed in utf8ToUtf16 with std::exception - unable to print what() as wstring, sorry.");
-			return ws;
-		}
-		catch (...)
-		{
-			std::wstring ws(L"Failed in utf8ToUtf16 with unknown exception.");
-			return ws;
+			ConversionException ce(ConversionException::Type::UTF8_TO_UTF16, ex.what());
+			SET_EXCEPTION_SOURCE(ce);
+			throw ce;
 		}
 	}
 
 	
-	std::wstring utf8ToUtf16(const SQLCHAR* s) noexcept
+	std::wstring utf8ToUtf16(const SQLCHAR* s)
 	{
         return utf8ToUtf16(reinterpret_cast<const char*>(s));
     }
