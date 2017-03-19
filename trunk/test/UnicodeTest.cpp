@@ -84,10 +84,20 @@ namespace exodbctest
 		// Test that we can read utf-8 data as SQL_C_CHAR
 		Table uTable(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE));
 
+		// If we simply read back as SQL_C_CHAR on DB2 we get garbage on windows.
+		// Reading the CHAR Column as WCHAR works on windows
+#ifdef _WIN32
+		if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+		{
+			DefaultSql2BufferMapPtr pBindMap = std::make_shared<DefaultSql2BufferMap>(m_pEnv->GetOdbcVersion());
+			pBindMap->RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
+			uTable.SetSql2BufferTypeMap(pBindMap);
+		}
+#endif
+
 		// Read all rows
 		uTable.Open();
 		string idColName = GetIdColumnName(TableId::UNICODE_TABLE);
-
 		for (int i = 1; i <= 5; i++)
 		{
 			string sqlWhere = boost::str(boost::format(u8"%s = %d") % idColName % i);
