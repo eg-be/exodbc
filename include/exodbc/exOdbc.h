@@ -293,24 +293,30 @@ namespace exodbc
 	/*!
 	* \brief Converts a utf16 std::string to a utf-8 std::string.
 	*
-	* \details This method will never throw an exception but return garbage in case it failed.
 	* \param w String to transform
 	* \return std::string
+	* \ConversionException If conversion fails
 	*/
-	extern EXODBCAPI std::string utf16ToUtf8(const std::wstring& w) noexcept;
+	extern EXODBCAPI std::string utf16ToUtf8(const std::wstring& w);
 
- 	extern EXODBCAPI std::string utf16ToUtf8(const SQLWCHAR* w) noexcept;
+	/*!
+	* \see utf16ToUtf8(const std::wstring& w)
+	*/
+ 	extern EXODBCAPI std::string utf16ToUtf8(const SQLWCHAR* w);
 
 	/*!
 	* \brief Converts a utf8 std::string to a uf16 std::string
 	*
-	* \details This method will never throw an exception but return garbage in case it failed.
 	* \param s String to transform
 	* \return std::string
+	* \ConversionException If conversion fails
 	*/
-	extern EXODBCAPI std::wstring utf8ToUtf16(const std::string& s) noexcept;
+	extern EXODBCAPI std::wstring utf8ToUtf16(const std::string& s);
 
-    extern EXODBCAPI std::wstring utf8ToUtf16(const SQLCHAR* s) noexcept;
+	/*!
+	* \see utf8ToUtf16(const std::string& s)
+	*/
+    extern EXODBCAPI std::wstring utf8ToUtf16(const SQLCHAR* s);
 
 
 	/*!

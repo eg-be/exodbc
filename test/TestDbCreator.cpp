@@ -132,6 +132,7 @@ namespace exodbctest
 				{
 					try
 					{
+						LOG_INFO(boost::str(boost::format(u8"Executing SQL: %s") % stmt));
 						m_pDb->ExecSql(stmt);
 					}
 					catch (const Exception& ex)

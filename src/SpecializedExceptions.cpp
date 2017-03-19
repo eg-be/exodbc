@@ -139,4 +139,21 @@ namespace exodbc
 		return ss.str();
 	}
 
+
+	std::string ConversionException::ToString() const noexcept
+	{
+		std::stringstream ss;
+		ss << Exception::ToString();
+		ss << u8"Failed conversion type: ";
+		switch (m_conversion)
+		{
+		case Type::UTF16_TO_UTF8:
+			ss << u8"utf16 to utf8";
+			break;
+		case Type::UTF8_TO_UTF16:
+			ss << u8"utf8 to utf16";
+			break;
+		}
+		return ss.str();
+	}
 }

@@ -251,4 +251,55 @@ namespace exodbc
 
 		std::string GetName() const noexcept override { return u8"exodbc::NotFoundException"; };
 	};
+
+
+	/*!
+	* \class ConversionException
+	* \brief Thrown on not found stuff.
+	*/
+	class EXODBCAPI ConversionException
+		: public Exception
+	{
+	public:
+		ConversionException() = delete;
+
+		/*!
+		* \enum Type What conversion failed?
+		*/
+		enum class Type
+		{
+			UTF16_TO_UTF8 = 1,	///< utf-16 to utf-8 failed.
+			UTF8_TO_UTF16 = 2	///< utf-8 to utf-16 failed.
+		};
+
+		/*!
+		* \brief Create a new ConversionException.
+		*/
+		ConversionException(Type conversion)
+			: Exception()
+			, m_conversion(conversion)
+		{
+			m_what = ToString();
+		};
+
+		/*!
+		* \brief Create new ConversionException, adding a message.
+		*			Do not include what failed converting, it might be converted for output
+		*			later again.
+		*/
+		ConversionException(Type conversion, const std::string& msg)
+			: Exception(msg)
+			, m_conversion(conversion)
+		{
+			m_what = ToString();
+		};
+
+		virtual ~ConversionException() {};
+
+		std::string GetName() const noexcept override { return u8"exodbc::ConversionException"; };
+		std::string ToString() const noexcept override;
+
+	private:
+		Type m_conversion;
+	};
 }
