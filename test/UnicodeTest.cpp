@@ -79,7 +79,7 @@ namespace exodbctest
 	}
 
 
-	TEST_F(UnicodeTest, CreatedUnicodeColumn)
+	TEST_F(UnicodeTest, ReadUnicodeColumn)
 	{
 		// Test that we can read utf-8 data as SQL_C_CHAR
 		Table uTable(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE));
