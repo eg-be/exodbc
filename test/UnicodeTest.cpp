@@ -82,43 +82,64 @@ namespace exodbctest
 	TEST_F(UnicodeTest, CreatedUnicodeColumn)
 	{
 		// Test that we can read utf-8 data as SQL_C_CHAR
-		Table u8Table(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE));
+		Table uTable(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE));
 
-		// For utf-8 data enforce binding to char instead of wchar
-		//auto bindMap = std::make_shared<DefaultSql2BufferMap>(OdbcVersion::V_3);
-		//bindMap->RegisterType(SQL_WVARCHAR, SQL_C_CHAR);
-		//// In sql server we used a varbinary column in the table.
-		//// lets override binding VARBINARY to SQL_C_BINARAY (which is SQL_C_CHAR probably anyway)
-		//if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-		//{
-		//	bindMap->RegisterType(SQL_VARBINARY, SQL_C_CHAR);
-		//}
-		//u8Table.SetSql2BufferTypeMap(bindMap);
+		// Read all rows
+		uTable.Open();
+		string idColName = GetIdColumnName(TableId::UNICODE_TABLE);
 
-		//u8Table.Open();
-		//string idColName = GetIdColumnName(TableId::UNICODE_TABLE);
-		//string sqlWhere = boost::str(boost::format(u8"%s = 1") % idColName);
-		//u8Table.Select(sqlWhere);
-		//u8Table.SelectNext();
-		
-		//auto Content;
-		//if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-		//{
-		//	auto pContent = u8Table.GetColumnBufferPtr<BinaryColumnBufferPtr>(1);
-		//	string s1 = pContent->GetString();
-		//	string s2 = u8"После смерти отца оставил учёбу и поступил на службу газетным репортёром";
-		//	int p = 3;
-		//}
-		//else
-		//{
-		//	auto pContent = u8Table.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
-		//	wstring s1 = pContent->GetWString();
-		//	string s2 = u8"После смерти отца оставил учёбу и поступил на службу газетным репортёром";
-		//	wstring w3 = utf8ToUtf16(s2);
-		//	EXPECT_EQ(w3, s1);
-		//	int p = 3;
-		//}
-		//int p = 3;
+		for (int i = 1; i <= 5; i++)
+		{
+			string sqlWhere = boost::str(boost::format(u8"%s = %d") % idColName % i);
+			uTable.Select(sqlWhere);
+			uTable.SelectNext();
+
+			// Depending on the underlying database type, the driver may have reported a
+			// wchar or a char column. Be flexible on the buffer type expected:
+			auto contentColumnVariant = uTable.GetColumnBufferPtrVariant(1);
+			SQLSMALLINT sqlType = boost::apply_visitor(SqlCTypeVisitor(), contentColumnVariant);
+			string content;
+			switch (sqlType)
+			{
+			case SQL_C_WCHAR:
+			{
+				auto wcharContent = uTable.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
+				wstring wContent = wcharContent->GetWString();
+				content = utf16ToUtf8(wContent);
+				break;
+			}
+			case SQL_C_CHAR:
+			{
+				auto charContent = uTable.GetColumnBufferPtr<CharColumnBufferPtr>(1);
+				content = charContent->GetString();
+				break;
+			}
+			default:
+			{
+				ASSERT_TRUE(false);
+				break;
+			}
+			}
+
+			switch (i)
+			{
+			case 1:
+				EXPECT_EQ(u8"После смерти отца оставил учёбу и поступил на службу газетным репортёром", content);
+				break;
+			case 2:
+				EXPECT_EQ(u8"因此他对世界的原型的认识就比较广泛。迁徙和旅行对他的创作很有助益", content);
+				break;
+			case 3:
+				EXPECT_EQ(u8"Zürih üniversitesin de başladığı Alman Filolojisi eğitimini 1933 deki babasının ölümü üzerine", content);
+				break;
+			case 4:
+				EXPECT_EQ(u8"מקס פריש נולד ב-15 במאי 1911 בציריך, בן לאדריכל פרנץ ברונו פריש ולאשתו קרולינה בטינה", content);
+				break;
+			case 5:
+				EXPECT_EQ(u8"Στο έργο του ο Φρις διεισδύει, σχολιάζει και αναλύει τα διλήμματα του σύγχρονου ανθρώπου:", content);
+				break;
+			}
+		}
 	}
 
 } // namespace exodbctest
