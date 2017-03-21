@@ -295,7 +295,7 @@ namespace exodbc
 	*
 	* \param w String to transform
 	* \return std::string
-	* \ConversionException If conversion fails
+	* \throw ConversionException If conversion fails
 	*/
 	extern EXODBCAPI std::string utf16ToUtf8(const std::wstring& w);
 
@@ -309,7 +309,7 @@ namespace exodbc
 	*
 	* \param s String to transform
 	* \return std::string
-	* \ConversionException If conversion fails
+	* \throw ConversionException If conversion fails
 	*/
 	extern EXODBCAPI std::wstring utf8ToUtf16(const std::string& s);
 
