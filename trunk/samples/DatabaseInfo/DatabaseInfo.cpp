@@ -307,7 +307,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 
 void printUsage()
 {
-	WRITE_STDOUT_ENDL(u8"Usage: DatabaseInfo [-U user] [-P pass] [-DSN dsn] [-CS connectionString] [-PrintTestTables]");
+	WRITE_STDOUT_ENDL(u8"Usage: DatabaseInfo  [-PrintTestTables] [-U <user>] [-P <pass>] -DSN <dsn> | -CS <connectionString>");
 	WRITE_STDOUT_ENDL(u8"       -DSN or -CS must be given. -U and -P is only used in combination with -DSN");
 	WRITE_STDOUT_ENDL(u8"       -PrintTestTables: If passed, exodbctest tables are printed, else db and datatype infos");
 }
