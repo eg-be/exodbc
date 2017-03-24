@@ -1242,33 +1242,26 @@ namespace exodbctest
 		string tableName = GetTableName(TableId::CHARTYPES);
 		Table cTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
 
-		// Enforce binding to SqlWChar - in sql server we have nvarchar and varchar,
-		// db2 seems to default to cchar - we simplfiy the test by binding those to wchar too.
-		auto pTypeMap = std::make_shared<DefaultSql2BufferMap>(OdbcVersion::V_3);
-		pTypeMap->RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
-		pTypeMap->RegisterType(SQL_CHAR, SQL_C_WCHAR);
-		cTable.SetSql2BufferTypeMap(pTypeMap);
+		// Depending on the server config, the driver might report SQL_CHAR or 
+		// SQL_WCHAR as column type. Simply accept any of those to pass the test
 		vector<ColumnBufferPtrVariant> columns = cTable.CreateAutoColumnBufferPtrs(false, false, false);
 
-		EXPECT_EQ(5, columns.size());
+		ASSERT_EQ(3, columns.size());
 
 		SqlCTypeVisitor cTypeV;
 
-		EXPECT_EQ(SQL_C_SLONG, boost::apply_visitor(cTypeV, columns[0]));
-		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[1]));
-		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[2]));
-		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[3]));
-		EXPECT_EQ(SQL_C_WCHAR, boost::apply_visitor(cTypeV, columns[4]));
+		SQLSMALLINT columnType1 = boost::apply_visitor(cTypeV, columns[1]);
+		SQLSMALLINT columnType2 = boost::apply_visitor(cTypeV, columns[2]);
 
-		WCharColumnBufferPtr pVarchar128 = boost::get<WCharColumnBufferPtr>(columns[1]);
-		WCharColumnBufferPtr pChar128 = boost::get<WCharColumnBufferPtr>(columns[2]);
-		WCharColumnBufferPtr pVarchar10 = boost::get<WCharColumnBufferPtr>(columns[3]);
-		WCharColumnBufferPtr pChar10 = boost::get<WCharColumnBufferPtr>(columns[4]);
+		EXPECT_TRUE(columnType1 == SQL_C_CHAR || columnType1 == SQL_C_WCHAR);
+		EXPECT_TRUE(columnType2 == SQL_C_CHAR || columnType2 == SQL_C_WCHAR);
 
-		EXPECT_EQ(128 + 1, pVarchar128->GetNrOfElements());
-		EXPECT_EQ(128 + 1, pChar128->GetNrOfElements());
-		EXPECT_EQ(10 + 1, pVarchar10->GetNrOfElements());
-		EXPECT_EQ(10 + 1, pChar10->GetNrOfElements());
+		NrOfElementsVisitor elemCounter;
+		SQLLEN nrOfElements1 = boost::apply_visitor(elemCounter, columns[1]);
+		SQLLEN nrOfElements2 = boost::apply_visitor(elemCounter, columns[2]);
+
+		EXPECT_EQ(128 + 1, nrOfElements1);
+		EXPECT_EQ(128 + 1, nrOfElements2);
 	}
 
 

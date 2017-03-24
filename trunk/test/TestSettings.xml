@@ -105,13 +105,13 @@
 
   <ConnectionString>
     <Disabled>1</Disabled>
-    <Value>Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=E:\exOdbc\exOdbcGTest\excel\excelTest.xls;</Value>
+    <Value>Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=E:\exodbc\build_x86_static\bin\Debug\excelTest.xls;</Value>
     <Case>lower</Case>
   </ConnectionString>
 
   <ConnectionString>
     <Disabled>1</Disabled>
-    <Value>Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\exOdbc\exOdbcGTest\access\exodbc.mdb;Uid=Admin;Pwd=;</Value>
+    <Value>Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\exodbc\build_x86_static\bin\Debug\exodbc.mdb;Uid=Admin;Pwd=;</Value>
     <Case>lower</Case>
   </ConnectionString>  
   

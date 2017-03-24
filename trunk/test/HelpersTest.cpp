@@ -93,7 +93,7 @@ namespace exodbctest
 		std::string value;
 		EXPECT_NO_THROW(GetData(pHStmt, 2, 20, value, &isNull));
 		EXPECT_FALSE(isNull);
-		EXPECT_EQ(u8"äöüàéè", value);
+		EXPECT_EQ(u8"abcdef", value);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Trim the read-value in GetData. 
@@ -109,7 +109,7 @@ namespace exodbctest
             // so we only test for starts_with.
 			EXPECT_NO_THROW(GetData(pHStmt, 2, 4, value, &isNull));
 		}
-		EXPECT_TRUE( boost::algorithm::starts_with(value, u8"äö"));
+		EXPECT_TRUE( boost::algorithm::starts_with(value, u8"abcd"));
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
 		// Read some int value
