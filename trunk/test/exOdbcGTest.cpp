@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 
 	// its even enough to add a return call here and a leak with the 
 	// same size will be reported, whats wrong?
-	return 10;
+	// return 10;
 #endif
 
 	using namespace exodbctest;
