@@ -41,7 +41,8 @@ namespace exodbctest
 		{ TableId::NOT_EXISTING, u8"not_existing" },
 		{ TableId::NOT_SUPPORTED, u8"not_supported" },
 		{ TableId::NOT_SUPPORTED_TMP, u8"not_supported_tmp" },
-		{ TableId::UNICODE_TABLE, u8"unicodetable" }
+		{ TableId::UNICODE_TABLE, u8"unicodetable" },
+		{ TableId::UNICODE_TABLE_TMP, u8"unicodetable_tmp" }
 	};
 
 
@@ -64,7 +65,8 @@ namespace exodbctest
 		{ TableId::NOT_EXISTING, u8"idnot_existing" },
 		{ TableId::NOT_SUPPORTED, u8"idnot_supported" },
 		{ TableId::NOT_SUPPORTED_TMP, u8"idnot_supported" },
-		{ TableId::UNICODE_TABLE, u8"idunicodetable" }
+		{ TableId::UNICODE_TABLE, u8"idunicodetable" },
+		{ TableId::UNICODE_TABLE_TMP, u8"idunicodetable" }
 	};
 
 
