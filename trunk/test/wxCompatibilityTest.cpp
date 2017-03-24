@@ -242,7 +242,8 @@ namespace exodbctest
 		EXPECT_FALSE( table.IsColumnNull(3) );
 	}
 
-//#ifdef _WIN32
+
+#ifdef _WIN32
 	TEST_F(wxCompatibilityTest, SelectWCharTypes)
 	{
 		MWCharTypesTable table(m_pDb);
@@ -277,7 +278,8 @@ namespace exodbctest
 		EXPECT_FALSE( table.IsColumnNull(1) );
 		EXPECT_TRUE( table.IsColumnNull(2) );
 	}
-//#endif
+#endif
+
 
 	TEST_F(wxCompatibilityTest, SelectFloatTypes)
 	{		
