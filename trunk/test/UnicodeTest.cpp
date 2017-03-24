@@ -130,23 +130,27 @@ namespace exodbctest
 				break;
 			}
 			}
-
+			string r1 = u8"После смерти отца оставил учёбу и поступил на службу газетным репортёром";
+			string r2 = u8"因此他对世界的原型的认识就比较广泛。迁徙和旅行对他的创作很有助益";
+			string r3 = u8"Zürih üniversitesin de başladığı Alman Filolojisi eğitimini 1933 deki babasının ölümü üzerine";
+			string r4 = u8"מקס פריש נולד ב-15 במאי 1911 בציריך, בן לאדריכל פרנץ ברונו פריש ולאשתו קרולינה בטינה";
+			string r5 = u8"Στο έργο του ο Φρις διεισδύει, σχολιάζει και αναλύει τα διλήμματα του σύγχρονου ανθρώπου:";
 			switch (i)
 			{
 			case 1:
-				EXPECT_EQ(u8"После смерти отца оставил учёбу и поступил на службу газетным репортёром", content);
+				EXPECT_EQ(r1, content);
 				break;
 			case 2:
-				EXPECT_EQ(u8"因此他对世界的原型的认识就比较广泛。迁徙和旅行对他的创作很有助益", content);
+				EXPECT_EQ(r2, content);
 				break;
 			case 3:
-				EXPECT_EQ(u8"Zürih üniversitesin de başladığı Alman Filolojisi eğitimini 1933 deki babasının ölümü üzerine", content);
+				EXPECT_EQ(r3, content);
 				break;
 			case 4:
-				EXPECT_EQ(u8"מקס פריש נולד ב-15 במאי 1911 בציריך, בן לאדריכל פרנץ ברונו פריש ולאשתו קרולינה בטינה", content);
+				EXPECT_EQ(r4, content);
 				break;
 			case 5:
-				EXPECT_EQ(u8"Στο έργο του ο Φρις διεισδύει, σχολιάζει και αναλύει τα διλήμματα του σύγχρονου ανθρώπου:", content);
+				EXPECT_EQ(r5, content);
 				break;
 			}
 		}
