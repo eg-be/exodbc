@@ -62,7 +62,7 @@ namespace exodbctest
 		}
 #else
 		// And on linux, force sql server to bind its nvarchar column to
-		// a std::string. Tests work like that altough I'm not 1005 sure that
+		// a std::string. Tests work like that altough I'm not 100% sure that
 		// this is really correct..
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
@@ -175,42 +175,83 @@ namespace exodbctest
 		// Test that we can write some unicode data into the db
 		ClearTmpTable(TableId::UNICODE_TABLE_TMP);
 
-		//Table uTable(m_pDb, TableAccessFlag::AF_READ_WRITE, GetTableName(TableId::UNICODE_TABLE_TMP));
+		const string content = u8"دائما ما كان ماكس فريش يختار الموضوعات التي تتعلق بهوية الأنسان، وأيضا الموضوعات المتعلقة بعلاقة الرجل بالمرأة";
+		const SQLINTEGER id = 101;
 
-		//// Open table and get access to auto created column buffers
-		//// Set some values on the buffers and try to insert that row
-		//uTable.Open();
-		//auto pIdColumn = uTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
-		//pIdColumn->SetValue(101);
+		{
+			// insert in one table
+			Table uTable(m_pDb, TableAccessFlag::AF_READ_WRITE, GetTableName(TableId::UNICODE_TABLE_TMP));
 
-		//// Depending on the underlying database type, the driver may have reported a
-		//// wchar or a char column. Be flexible on the buffer type expected:
-		//string content = u8"دائما ما كان ماكس فريش يختار الموضوعات التي تتعلق بهوية الأنسان، وأيضا الموضوعات المتعلقة بعلاقة الرجل بالمرأة";
-		//auto pContentColumnVariant = uTable.GetColumnBufferPtrVariant(1);
-		//SQLSMALLINT sqlType = boost::apply_visitor(SqlCTypeVisitor(), pContentColumnVariant);
-		//switch (sqlType)
-		//{
-		//case SQL_C_WCHAR:
-		//{
-		//	auto pContentColumn = uTable.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
-		//	wstring wcontent = utf8ToUtf16(content);
-		//	pContentColumn->SetWString(wcontent);
-		//	break;
-		//}
-		//case SQL_C_CHAR:
-		//{
-		//	auto pContent = uTable.GetColumnBufferPtr<CharColumnBufferPtr>(1);
-		//	pContent->SetString(content);
-		//	break;
-		//}
-		//default:
-		//	ASSERT_TRUE(false);
-		//	break;
-		//}
+			// Open table and get access to auto created column buffers
+			// Set some values on the buffers and try to insert that row
+			uTable.Open();
+			auto pIdColumn = uTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+			pIdColumn->SetValue(id);
 
-		//// and finally insert
-		//uTable.Insert();
-		//m_pDb->CommitTrans();
+			// Depending on the underlying database type, the driver may have reported a
+			// wchar or a char column. Be flexible on the buffer type expected:
+			auto pContentColumnVariant = uTable.GetColumnBufferPtrVariant(1);
+			SQLSMALLINT sqlType = boost::apply_visitor(SqlCTypeVisitor(), pContentColumnVariant);
+			switch (sqlType)
+			{
+			case SQL_C_WCHAR:
+			{
+				auto pContentColumn = uTable.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
+				wstring wcontent = utf8ToUtf16(content);
+				pContentColumn->SetWString(wcontent);
+				break;
+			}
+			case SQL_C_CHAR:
+			{
+				auto pContent = uTable.GetColumnBufferPtr<CharColumnBufferPtr>(1);
+				pContent->SetString(content);
+				break;
+			}
+			default:
+				ASSERT_TRUE(false);
+				break;
+			}
+
+			// and finally insert
+			uTable.Insert();
+			m_pDb->CommitTrans();
+		}
+
+		// Read back in another table
+		Table u2(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE_TMP));
+
+		// Open table and get access to auto created column buffers
+		u2.Open();
+		string idColName = GetIdColumnName(TableId::UNICODE_TABLE_TMP);
+		string whereStmt = boost::str(boost::format(u8"%s = %d") % idColName % id);
+		u2.Select(whereStmt);
+		u2.SelectNext();
+
+		// Depending on the underlying database type, the driver may have reported a
+		// wchar or a char column. Be flexible on the buffer type expected:
+		auto pContentColumnVariant = u2.GetColumnBufferPtrVariant(1);
+		SQLSMALLINT sqlType = boost::apply_visitor(SqlCTypeVisitor(), pContentColumnVariant);
+		string readContent;
+		switch (sqlType)
+		{
+		case SQL_C_WCHAR:
+		{
+			auto pContentColumn = u2.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
+			readContent = utf16ToUtf8(pContentColumn->GetWString());
+			break;
+		}
+		case SQL_C_CHAR:
+		{
+			auto pContent = u2.GetColumnBufferPtr<CharColumnBufferPtr>(1);
+			readContent = pContent->GetString();
+			break;
+		}
+		default:
+			ASSERT_TRUE(false);
+			break;
+		}
+
+		EXPECT_EQ(content, readContent);
 	}
 
 } // namespace exodbctest

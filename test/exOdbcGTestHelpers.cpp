@@ -143,18 +143,19 @@ namespace exodbctest
 
 	void ClearTmpTable(TableId tmpTableId)
 	{
-		bool isTmp = (tmpTableId == TableId::BLOBTYPES_TMP
+		bool isTempTable = (tmpTableId == TableId::BLOBTYPES_TMP
 			|| tmpTableId == TableId::CHARTYPES_TMP
 			|| tmpTableId == TableId::DATETYPES_TMP
 			|| tmpTableId == TableId::FLOATTYPES_TMP
 			|| tmpTableId == TableId::INTEGERTYPES_TMP
 			|| tmpTableId == TableId::NUMERICTYPES_TMP
-			|| tmpTableId == TableId::NOT_SUPPORTED_TMP);
+			|| tmpTableId == TableId::NOT_SUPPORTED_TMP
+			|| tmpTableId == TableId::UNICODE_TABLE_TMP);
 
-		if (!isTmp)
+		if (!isTempTable)
 		{
-			LOG_ERROR(u8"Is not a tmpTable");
-			return;
+			string msg = boost::str(boost::format(u8"Table '%s' is not known to be a temp-table, not allowed to clean") % GetTableName(tmpTableId));
+			exASSERT_MSG(isTempTable, msg);
 		}
 
 		DatabasePtr pDb = OpenTestDb(OdbcVersion::V_3);
