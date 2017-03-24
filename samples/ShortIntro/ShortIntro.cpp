@@ -30,9 +30,20 @@ int main()
 
 		// And connect to a database using the environment.
 		DatabasePtr pDb = Database::Create(pEnv);
-		pDb->Open(u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;");
 
-		// Set up some test table - try to drop first if it already exists
+		std::string connectionString = u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;";
+		std::stringstream ss;
+		ss << u8"Connecting to: " << connectionString;
+		
+		// Note: WRITE_STDOUT_ENDL will write to std::wcout on _WIN32, and convert utf-8 to utf-16
+		// else to std::cout
+		WRITE_STDOUT_ENDL(ss.str());
+		
+		// Open connection to database:
+		pDb->Open(connectionString);
+
+		// Create a test table in the database
+		// try to drop first if it already exists, but ignore failing to drop
 		// auto commit is off by default, so commit changes manually
 		try
 		{
@@ -41,28 +52,32 @@ int main()
 		}
 		catch (const SqlResultException& ex)
 		{
-			std::cerr << u8"Warning: Drop failed: " << ex.ToString() << std::endl;
+			std::stringstream ss;
+			ss << u8"Warning: Drop failed: " << ex.ToString();
+			WRITE_STDOUT_ENDL(ss.str());
 		}
 		pDb->ExecSql(u8"CREATE TABLE t1 ( id INTEGER NOT NULL PRIMARY KEY, name nvarchar(255), lastUpdate datetime)");
 		pDb->CommitTrans();
 
-		// Create the Table. The Database will be queried about a table named 't1' of any type during open.
+		// Create the Table object
 		Table t(pDb, TableAccessFlag::AF_READ_WRITE, u8"t1");
+		// and open it.
+		// The Database will be queried about a table named 't1' of any type during open.
 		t.Open();
 
 		// As we did not specify any columns to be bound, the Database has been queried about the columns of 't1'
-		// It used the DefaultSql2BufferMap to map the SQL types reported by the Database to SQL C types supported
-		// by the variant used to store ColumnBuffers
+		// It used the DefaultSql2BufferMap to map the SQL types reported by the Database to SQL C types 
+		// supported by the variant used to store ColumnBuffers. Get access to those buffers:
 		auto pIdCol = t.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		auto pNameCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
 
-		// or identify the column by its queryname:
+		// or identify the column by its query name:
 		SQLUSMALLINT lastUpdateColIndex = t.GetColumnBufferIndex(u8"lastUpdate");
 		auto pLastUpdateCol = t.GetColumnBufferPtr<TypeTimestampColumnBufferPtr>(lastUpdateColIndex);
 
 		// The column buffers have been bound for reading and writing data. During Open()
-		// statements have been prepared to so dome common tasks like inserting, updating, etc.
-		// so lets insert a row:
+		// statements have been prepared to select, insert, update or delete.
+		// insert a row:
 		pIdCol->SetValue(13);
 		pNameCol->SetWString(L"lazy dog"); // Only compilable if underlying ColumnBuffer is of type <SQLWCHAR>
 		// fully specify the timestamp:
@@ -76,15 +91,18 @@ int main()
 		t.Insert();
 		pDb->CommitTrans();
 
-		// Reading back those timestamp values is easier if we let the driver convert it to a (w)string.
-		// So open the table again, but let the driver convert everything to WCHAR buffers:
+		// When reading back timestamps let the driver convert the values to a string.
+		// Close table..
 		t.Close();
 
+		// Setup a new Sql2BufferTypeMap that binds every sql type to
+		// a char or wchar:
 #ifdef _WIN32
 		t.SetSql2BufferTypeMap(std::make_shared<WCharSql2BufferMap>());
 #else
 		t.SetSql2BufferTypeMap(std::make_shared<CharSql2BufferMap>());
 #endif
+		// and open table again:
 		t.Open();
 
 #ifdef _WIN32
