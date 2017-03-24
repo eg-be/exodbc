@@ -49,6 +49,27 @@ namespace exodbctest
 
 		// And database
 		ASSERT_NO_THROW(m_pDb = OpenTestDb(m_pEnv));
+
+		// Depending on the Database and operating system, we need to tweak 
+		// how we want to read different column types
+		// If we simply read back as SQL_C_CHAR on DB2 we get garbage on windows.
+		// Reading the CHAR Column as WCHAR works on windows
+		Sql2BufferTypeMapPtr pBindMap = m_pDb->GetSql2BufferTypeMap();
+#ifdef _WIN32
+		if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+		{
+			pBindMap->RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
+		}
+#else
+		// And on linux, force sql server to bind its nvarchar column to
+		// a std::string. Tests work like that altough I'm not 1005 sure that
+		// this is really correct..
+		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			pBindMap->RegisterType(SQL_WVARCHAR, SQL_C_CHAR);
+		}
+#endif
+
 	}
 
 
@@ -81,28 +102,8 @@ namespace exodbctest
 
 	TEST_F(UnicodeTest, ReadUnicodeColumn)
 	{
-		// Test that we can read utf-8 data as SQL_C_CHAR
+		// Test that we can read some unicode data
 		Table uTable(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE));
-
-		// If we simply read back as SQL_C_CHAR on DB2 we get garbage on windows.
-		// Reading the CHAR Column as WCHAR works on windows
-#ifdef _WIN32
-		if (m_pDb->GetDbms() == DatabaseProduct::DB2)
-		{
-			DefaultSql2BufferMapPtr pBindMap = std::make_shared<DefaultSql2BufferMap>(m_pEnv->GetOdbcVersion());
-			pBindMap->RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
-			uTable.SetSql2BufferTypeMap(pBindMap);
-		}
-#else
-        // and if we read SQL_WVARCHAR on linux we get garbage here. Force SQL Server to pBindMap
-        // its WVARCHAR columns to SQL_C_CHAR
-		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
-		{
-			DefaultSql2BufferMapPtr pBindMap = std::make_shared<DefaultSql2BufferMap>(m_pEnv->GetOdbcVersion());
-			pBindMap->RegisterType(SQL_WVARCHAR, SQL_C_CHAR);
-			uTable.SetSql2BufferTypeMap(pBindMap);
-		}
-#endif
 
 		// Read all rows
 		uTable.Open();
@@ -161,8 +162,55 @@ namespace exodbctest
 			case 5:
 				EXPECT_EQ(r5, content);
 				break;
+			default:
+				ASSERT_TRUE(false);
+				break;
 			}
 		}
+	}
+
+
+	TEST_F(UnicodeTest, WriteUnicodeColumn)
+	{
+		// Test that we can write some unicode data into the db
+		ClearTmpTable(TableId::UNICODE_TABLE_TMP);
+
+		//Table uTable(m_pDb, TableAccessFlag::AF_READ_WRITE, GetTableName(TableId::UNICODE_TABLE_TMP));
+
+		//// Open table and get access to auto created column buffers
+		//// Set some values on the buffers and try to insert that row
+		//uTable.Open();
+		//auto pIdColumn = uTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		//pIdColumn->SetValue(101);
+
+		//// Depending on the underlying database type, the driver may have reported a
+		//// wchar or a char column. Be flexible on the buffer type expected:
+		//string content = u8"دائما ما كان ماكس فريش يختار الموضوعات التي تتعلق بهوية الأنسان، وأيضا الموضوعات المتعلقة بعلاقة الرجل بالمرأة";
+		//auto pContentColumnVariant = uTable.GetColumnBufferPtrVariant(1);
+		//SQLSMALLINT sqlType = boost::apply_visitor(SqlCTypeVisitor(), pContentColumnVariant);
+		//switch (sqlType)
+		//{
+		//case SQL_C_WCHAR:
+		//{
+		//	auto pContentColumn = uTable.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
+		//	wstring wcontent = utf8ToUtf16(content);
+		//	pContentColumn->SetWString(wcontent);
+		//	break;
+		//}
+		//case SQL_C_CHAR:
+		//{
+		//	auto pContent = uTable.GetColumnBufferPtr<CharColumnBufferPtr>(1);
+		//	pContent->SetString(content);
+		//	break;
+		//}
+		//default:
+		//	ASSERT_TRUE(false);
+		//	break;
+		//}
+
+		//// and finally insert
+		//uTable.Insert();
+		//m_pDb->CommitTrans();
 	}
 
 } // namespace exodbctest
