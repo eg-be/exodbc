@@ -112,10 +112,10 @@ namespace exodbc
 		switch (m_notSupported)
 		{
 		case Type::SQL_C_TYPE:
-			ss << u8"SQL C Type " << SqLCType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
+			ss << u8"SQL C Type: " << SqLCType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
 			break;
 		case Type::SQL_TYPE:
-			ss << u8"SQL Type" << SqlType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
+			ss << u8"SQL Type: " << SqlType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
 			break;
 		}
 		return ss.str();
