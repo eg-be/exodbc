@@ -96,6 +96,34 @@ int _tmain(int argc, _TCHAR* argv[])
 int main(int argc, char* argv[])
 #endif
 {
+#ifdef _DEBUG
+	// Leaks are being reported, always the same size, like
+	/*
+	Detected memory leaks!
+	Dumping objects ->
+	{8868750} normal block at 0x01137B28, 8 bytes long.
+	Data: < z      > F0 7A 13 01 00 00 00 00
+	{8868749} normal block at 0x010973E0, 32 bytes long.
+	Data: < s   s   s      > E0 73 09 01 E0 73 09 01 E0 73 09 01 01 01 CD CD
+	{8868748} normal block at 0x01137AF0, 12 bytes long.
+	Data: <({   s      > 28 7B 13 01 E0 73 09 01 00 00 00 00
+	{8868747} normal block at 0x010A8628, 24 bytes long.
+	Data: <                > FF FF FF FF FF FF FF FF 00 00 00 00 00 00 00 00
+	Object dump complete.
+	*/
+	// I have no clue if the report is wrong or where the leak
+	// should come from.. see #260
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	//_CrtSetBreakAlloc(9554);
+	//_CrtSetBreakAlloc(9553);
+	//_CrtSetBreakAlloc(9552);
+	//_CrtSetBreakAlloc(9609);
+
+	// its even enough to add a return call here and a leak with the 
+	// same size will be reported, whats wrong?
+	return 10;
+#endif
+
 	using namespace exodbctest;
 	using namespace std;
 	using namespace exodbc;
@@ -143,10 +171,6 @@ int main(int argc, char* argv[])
 			LogManager::Get().RegisterLogHandler(pFileLogger);
 		}
 	}
-
-#ifdef _DEBUG
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#endif
 
 	int status = 0;
 
