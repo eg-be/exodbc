@@ -549,7 +549,7 @@ namespace exodbc
 		const std::vector<T>& GetBuffer() const noexcept { return m_buffer; };
 
 		/*!
-		* \brief	Get the number of elements allocated.
+		* \brief	Get the number of elements T allocated.
 		*/
 		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
 
@@ -761,14 +761,16 @@ namespace exodbc
 		* \param flags		ColumnFlags of the column.
 		* \param columnSize Column size.
 		* \param decimalDigits Decimal digits.
+		* \param nrOfElements Count how many elements of sqlType are allocated within pBuffer.
 		*/
-		SqlCPointerBuffer(const std::string& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferLength, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+		SqlCPointerBuffer(const std::string& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferLength, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits, SQLLEN nrOfElements = 1)
 			: LengthIndicator()
 			, ColumnFlags(flags)
 			, ColumnProperties(columnSize, decimalDigits, sqlType, queryName)
 			, m_pBuffer(pBuffer)
 			, m_sqlCType(sqlCType)
 			, m_bufferLength(bufferLength)
+			, m_nrOfElements(nrOfElements)
 		{
 			if (flags.Test(ColumnFlag::CF_NULLABLE))
 			{
@@ -786,9 +788,9 @@ namespace exodbc
 		/*!
 		* \brief: Create a new instance wrapped into a shared_ptr
 		*/
-		static std::shared_ptr<SqlCPointerBuffer> Create(const std::string& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits)
+		static std::shared_ptr<SqlCPointerBuffer> Create(const std::string& queryName, SQLSMALLINT sqlType, SQLPOINTER pBuffer, SQLSMALLINT sqlCType, SQLLEN bufferSize, ColumnFlags flags, SQLINTEGER columnSize, SQLSMALLINT decimalDigits, SQLLEN nrOfElements = 1)
 		{
-			return std::make_shared<SqlCPointerBuffer>(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits);
+			return std::make_shared<SqlCPointerBuffer>(queryName, sqlType, pBuffer, sqlCType, bufferSize, flags, columnSize, decimalDigits, nrOfElements);
 		}
 
 		/*!
@@ -800,6 +802,13 @@ namespace exodbc
 		* \brief	Get the length in bytes of the internal buffer.
 		*/
 		SQLLEN GetBufferLength() const noexcept { return m_bufferLength; };
+
+
+		/*!
+		* \brief	Get the number of elements allocated.
+		*/
+		SQLLEN GetNrOfElements() const noexcept { return m_nrOfElements; };
+
 
 		/*!
 		* \brief	Calls SqlBindCol to bind this ColumnBuffer to the result set of the passed statement handle.
@@ -891,10 +900,12 @@ namespace exodbc
 			return paramDesc;
 		}
 
+
 	private:
 		SQLPOINTER m_pBuffer;
 		SQLSMALLINT m_sqlCType;
 		SQLLEN m_bufferLength;
+		SQLLEN m_nrOfElements;
 	};
 
 	typedef std::shared_ptr<SqlCPointerBuffer> SqlCPointerBufferPtr;

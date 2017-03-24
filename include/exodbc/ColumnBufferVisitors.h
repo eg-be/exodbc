@@ -232,4 +232,20 @@ namespace exodbc
 	};
 
 
+	/*!
+	* \class NrOfElementsVisitor
+	* \brief Visitor to get the number of elements this buffer is holding (of its type).
+	* \details On applying this visitor, it will call GetNrOfElements() on the ColumnBuffer.
+	*/
+	class NrOfElementsVisitor
+		: public boost::static_visitor<SQLLEN>
+	{
+	public:
+		template<typename T>
+		SQLLEN operator()(T& t) const
+		{
+			return t->GetNrOfElements();
+		}
+	};
+
 } // namespace exodbc

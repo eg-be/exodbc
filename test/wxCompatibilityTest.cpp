@@ -97,7 +97,7 @@ namespace exodbctest
 		{
 			count++;
 		}
-		EXPECT_EQ(6, count);
+		EXPECT_EQ(4, count);
 
 		// Expect no entries
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes WHERE idchartypes = 7");
@@ -242,7 +242,7 @@ namespace exodbctest
 		EXPECT_FALSE( table.IsColumnNull(3) );
 	}
 
-#ifdef _WIN32
+//#ifdef _WIN32
 	TEST_F(wxCompatibilityTest, SelectWCharTypes)
 	{
 		MWCharTypesTable table(m_pDb);
@@ -260,11 +260,11 @@ namespace exodbctest
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes WHERE idchartypes = 3");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L"äöüàéè"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_varchar))));
+		EXPECT_EQ( std::wstring(L"abcdef"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_varchar))));
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.chartypes WHERE idchartypes = 4");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( std::wstring(L"äöüàéè"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_char))));
+		EXPECT_EQ( std::wstring(L"abcdef"), boost::trim_right_copy(std::wstring(reinterpret_cast<const wchar_t*>(table.m_char))));
 
 		// Test for NULL-Values
 		EXPECT_FALSE( table.IsColumnNull(0) );
@@ -277,7 +277,7 @@ namespace exodbctest
 		EXPECT_FALSE( table.IsColumnNull(1) );
 		EXPECT_TRUE( table.IsColumnNull(2) );
 	}
-#endif
+//#endif
 
 	TEST_F(wxCompatibilityTest, SelectFloatTypes)
 	{		
