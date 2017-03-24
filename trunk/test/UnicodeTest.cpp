@@ -93,6 +93,15 @@ namespace exodbctest
 			pBindMap->RegisterType(SQL_VARCHAR, SQL_C_WCHAR);
 			uTable.SetSql2BufferTypeMap(pBindMap);
 		}
+#else
+        // and if we read SQL_WVARCHAR on linux we get garbage here. Force SQL Server to pBindMap
+        // its WVARCHAR columns to SQL_C_CHAR
+		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		{
+			DefaultSql2BufferMapPtr pBindMap = std::make_shared<DefaultSql2BufferMap>(m_pEnv->GetOdbcVersion());
+			pBindMap->RegisterType(SQL_WVARCHAR, SQL_C_CHAR);
+			uTable.SetSql2BufferTypeMap(pBindMap);
+		}
 #endif
 
 		// Read all rows
