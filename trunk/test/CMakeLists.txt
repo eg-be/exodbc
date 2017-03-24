@@ -81,7 +81,7 @@ endif()
 find_package(Subversion)
 if(SUBVERSION_FOUND)
   Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-  set (EXODBCTEST_VERSION_TWEAK ${Project_WC_REVISION})
+  set (EXODBCTEST_VERSION_TWEAK ${Project_WC_LAST_CHANGED_REV})
   message(STATUS "Updating EXODBCTEST_VERSION_TWEAK to ${EXODBCTEST_VERSION_TWEAK}, read from ${PROJECT_SOURCE_DIR}")  
 endif()
 
