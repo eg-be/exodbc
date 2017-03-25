@@ -9,6 +9,7 @@
 
 #ifdef _WIN32
 #include <SDKDDKVer.h>
+#include <tchar.h>
 #endif
 #include <iostream>
 
@@ -18,8 +19,13 @@
 #include "exodbc/Table.h"
 #include "exodbc/ExecutableStatement.h"
 #include "exodbc/LogManager.h"
+#include "exodbc/ColumnBufferWrapper.h"
 
-int main()
+#ifdef _WIN32
+int _tmain(int argc, _TCHAR* argv[])
+#else
+int main(int argc, char* argv[])
+#endif
 {
 	using namespace exodbc;
 
@@ -31,23 +37,34 @@ int main()
 		// And connect to a database using the environment.
 		DatabasePtr pDb = Database::Create(pEnv);
 
+		// if argv[1] is given, assume its a connection string, else some built-in default cs:
+		// std::string connectionString = "Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;"
+		// std::string connectionString = ""Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;CurrentSchema=EXODBC"
 		std::string connectionString = u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;";
-		std::stringstream ss;
-		ss << u8"Connecting to: " << connectionString;
+		if (argc >= 2)
+		{
+#ifdef _WIN32
+			connectionString = utf16ToUtf8(argv[1]);
+#else
+			connectionString = argv[1];
+#endif
+		}
 		
 		// Note: WRITE_STDOUT_ENDL will write to std::wcout on _WIN32, and convert utf-8 to utf-16
-		// else to std::cout
-		WRITE_STDOUT_ENDL(ss.str());
+		// else directly to std::cout
+		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"Connecting to: %s") % connectionString));
 		
 		// Open connection to database:
 		pDb->Open(connectionString);
+		DatabaseInfo dbInfo = pDb->GetDbInfo();
+		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"Connected to: %s, using %s") % dbInfo.GetDbmsName() % dbInfo.GetDriverName()));
 
-		// Create a test table in the database
+		// Create a test table in the database with a few entries
 		// try to drop first if it already exists, but ignore failing to drop
 		// auto commit is off by default, so commit changes manually
 		try
 		{
-			pDb->ExecSql(u8"DROP TABLE t1");
+			pDb->ExecSql(u8"DROP TABLE T1");
 			pDb->CommitTrans();
 		}
 		catch (const SqlResultException& ex)
@@ -56,111 +73,127 @@ int main()
 			ss << u8"Warning: Drop failed: " << ex.ToString();
 			WRITE_STDOUT_ENDL(ss.str());
 		}
-		pDb->ExecSql(u8"CREATE TABLE t1 ( id INTEGER NOT NULL PRIMARY KEY, name nvarchar(255), lastUpdate datetime)");
+		if (pDb->GetDbms() == DatabaseProduct::DB2)
+		{
+			pDb->ExecSql(u8"CREATE TABLE T1 ( id INTEGER NOT NULL PRIMARY KEY, name varchar(16), lastUpdate timestamp)");
+		}
+		else
+		{
+			pDb->ExecSql(u8"CREATE TABLE T1 ( id INTEGER NOT NULL PRIMARY KEY, name varchar(16), lastUpdate datetime)");
+		}
+		pDb->ExecSql(u8"INSERT INTO T1 (id, name, lastUpdate) VALUES(101, 'Cat', '1993-10-24 21:12:04')");
+		pDb->ExecSql(u8"INSERT INTO T1 (id, name, lastUpdate) VALUES(102, 'Dog', '2011-08-01 04:02:06')");
 		pDb->CommitTrans();
 
-		// Create the Table object
-		Table t(pDb, TableAccessFlag::AF_READ_WRITE, u8"t1");
-		// and open it.
-		// The Database will be queried about a table named 't1' of any type during open.
+		// Create the Table object and Open() it.
+		// The Database will be queried about a table named 't1' of any type (view, table, ..) during open.
+		Table t(pDb, TableAccessFlag::AF_READ_WRITE, u8"T1");
 		t.Open();
+		// As we did not specify any ColumnBuffer manually before calling Open()
+		// the Database has been queried about the columns of table 't1'.
+		// For every column found its SQL Type (like SQL_VARCHAR, SQL_INTEGER) is examined
+		// to create a ColumnBufferPtr with a matching SQL C Type (like SQL_C_CHAR, SQL_C_SLONG).
+		// (The mapping of SQL Types to SQL C Types is defined in a Sql2BufferTypeMap and can
+		// be changed dynamically.)
 
-		// As we did not specify any columns to be bound, the Database has been queried about the columns of 't1'
-		// It used the DefaultSql2BufferMap to map the SQL types reported by the Database to SQL C types 
-		// supported by the variant used to store ColumnBuffers. Get access to those buffers:
+		// For an INTEGER column most probably a LongColumnBuffer has been created,
+		// while for a datetime column a TypeTimestampColumnBuffer has been created:
 		auto pIdCol = t.GetColumnBufferPtr<LongColumnBufferPtr>(0);
-		auto pNameCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
+		auto pLastUpdateCol = t.GetColumnBufferPtr<TypeTimestampColumnBufferPtr>(2);
 
-		// or identify the column by its query name:
-		SQLUSMALLINT lastUpdateColIndex = t.GetColumnBufferIndex(u8"lastUpdate");
-		auto pLastUpdateCol = t.GetColumnBufferPtr<TypeTimestampColumnBufferPtr>(lastUpdateColIndex);
+		// Depending on the database, driver and operating system, a string column
+		// might get reported as SQL_VARCHAR or SQL_WVARCHAR. We could either query
+		// the ColumnBufferPtrVariant about its concrete type, or just ignore
+		// the concrete type and work with a StringColumnWrapper.
+		// The StringColumnWrapper will convert from/to string/wstring as needed.
+		StringColumnWrapper nameColumnWrapper(t.GetColumnBufferPtrVariant(1));
 
-		// The column buffers have been bound for reading and writing data. During Open()
-		// statements have been prepared to select, insert, update or delete.
-		// insert a row:
-		pIdCol->SetValue(13);
-		pNameCol->SetWString(L"lazy dog"); // Only compilable if underlying ColumnBuffer is of type <SQLWCHAR>
-		// fully specify the timestamp:
-		SQL_TIMESTAMP_STRUCT ts;
-		ts.day = 26; ts.month = 1; ts.year = 1983;
-		ts.hour = 13; ts.minute = 45; ts.second = 27; 
-		ts.fraction = 0; // its database dependent if fractions are supported and with which precision. Show that in a later sample.
-		pLastUpdateCol->SetValue(ts);
+		// Lets iterate all rows in the database,
+		// and print them line by line:
+		WRITE_STDOUT_ENDL(u8"Printing content of Table 'T1':");
+		WRITE_STDOUT_ENDL(u8"");
 
-		// Insert the values in the column Buffers.
-		t.Insert();
-		pDb->CommitTrans();
-
-		// When reading back timestamps let the driver convert the values to a string.
-		// Close table..
-		t.Close();
-
-		// Setup a new Sql2BufferTypeMap that binds every sql type to
-		// a char or wchar:
-#ifdef _WIN32
-		t.SetSql2BufferTypeMap(std::make_shared<WCharSql2BufferMap>());
-#else
-		t.SetSql2BufferTypeMap(std::make_shared<CharSql2BufferMap>());
-#endif
-		// and open table again:
-		t.Open();
-
-#ifdef _WIN32
-		auto pIdCharCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(0);
-		auto pNameCharCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(1);
-		auto pLastUpdateCharCol = t.GetColumnBufferPtr<WCharColumnBufferPtr>(2);
-#else
-		auto pIdCharCol = t.GetColumnBufferPtr<CharColumnBufferPtr>(0);
-		auto pNameCharCol = t.GetColumnBufferPtr<CharColumnBufferPtr>(1);
-		auto pLastUpdateCharCol = t.GetColumnBufferPtr<CharColumnBufferPtr>(2);
-#endif
-
-		// Simply query by manually providing a where statement:
-		t.Select(u8"id = 13");
+		t.Select();
+		std::string s = boost::str(boost::format(u8"%4s %16s %s")
+			% u8"id" % u8"name" % u8"lastUpdate"
+		);
+		WRITE_STDOUT_ENDL(s);
+		WRITE_STDOUT_ENDL(u8"==============================");
 		while (t.SelectNext())
 		{
-			std::stringstream ss;
-#ifdef _WIN32
-			ss << u8"id: " << utf16ToUtf8(pIdCharCol->GetWString()) << u8"; Name: " << utf16ToUtf8(pNameCharCol->GetWString()) << u8"; LastUpdate: " << utf16ToUtf8(pLastUpdateCharCol->GetWString());
-#else
-			ss << u8"id: " << pIdCharCol->GetString() << u8"; Name: " << pNameCharCol->GetString() << u8"; LastUpdate: " << pLastUpdateCharCol->GetString();
-#endif
-			WRITE_STDOUT_ENDL(ss.str());
+			s = boost::str(boost::format(u8"%4d %16s %s") 
+				% pIdCol->GetValue() 
+				% nameColumnWrapper.GetValue<std::string>()
+				% TimestampToSqlString(pLastUpdateCol->GetValue())
+				);
+			WRITE_STDOUT_ENDL(s);
 		}
+		WRITE_STDOUT_ENDL(u8"");
 
-		// Or create a prepared statement that binds buffers as result columns and as parameter markers:
+		// Update the row with a primary key id value of 101:
+		pIdCol->SetValue(101);
+		pLastUpdateCol->SetValue(InitUtcTimestamp());
+		nameColumnWrapper.SetValue(u8"Updated");
+		t.Update();
+
+		// Insert a single entry
+		pIdCol->SetValue(200);
+		pLastUpdateCol->SetValue(InitUtcTimestamp());
+		nameColumnWrapper.SetValue(u8"Inserted");
+		t.Insert();
+
+		// Insert multiple rows using a prepared statement:
 		ExecutableStatement stmt(pDb);
-		stmt.Prepare(u8"SELECT name, lastUpdate FROM t1 WHERE id = ?");
-		// column and param indexes start at 1
-		stmt.BindColumn(pNameCharCol, 1); // map to result column name
-		stmt.BindColumn(pLastUpdateCharCol, 2); // map to result column lastUpdate
-		stmt.BindParameter(pIdCol, 1); // map to first param marker
-		pIdCol->SetValue(13);
-		stmt.ExecutePrepared();
-		
-		while (stmt.SelectNext())
+		std::string sql = u8"INSERT INTO T1 (id, name, lastUpdate) VALUES(?, ?, ?)";
+		stmt.Prepare(sql);
+		// Bind our columns as parameters:
+		ColumnBufferPtrVariant pNameCol = t.GetColumnBufferPtrVariant(1);
+		stmt.BindParameter(pIdCol, 1);
+		stmt.BindParameter(pNameCol, 2);
+		stmt.BindParameter(pLastUpdateCol, 3);
+
+		// Execute the prepared statement multiple times:
+		for (int i = 300; i < 310; ++i)
 		{
-			std::stringstream ss;
-#ifdef _WIN32
-			ss << u8"id: " << pIdCol->GetValue() << u8"; Name: " << utf16ToUtf8(pNameCharCol->GetWString()) << u8"; LastUpdate: " << utf16ToUtf8(pLastUpdateCharCol->GetWString());
-#else
-			ss << u8"id: " << pIdCol->GetValue() << u8"; Name: " << pNameCharCol->GetString() << u8"; LastUpdate: " << pLastUpdateCharCol->GetString();
-#endif
-			WRITE_STDOUT_ENDL(ss.str());
+			pIdCol->SetValue(i);
+			std::string name = boost::str(boost::format(u8"Insert: %d") % i);
+			nameColumnWrapper.SetValue(name);
+			pLastUpdateCol->SetValue(InitUtcTimestamp());
+			stmt.ExecutePrepared();
 		}
 
-		// Execute the same prepared statement again with different where values:
-		pIdCol->SetValue(99);
-		if (!stmt.SelectNext())
+		// Commit everything
+		pDb->CommitTrans();
+
+		// And print the table again:
+		WRITE_STDOUT_ENDL(u8"Printing content of Table 'T1':");
+		WRITE_STDOUT_ENDL(u8"");
+
+		t.Select();
+		s = boost::str(boost::format(u8"%4s %16s %s")
+			% u8"id" % u8"name" % u8"lastUpdate"
+		);
+		WRITE_STDOUT_ENDL(s);
+		WRITE_STDOUT_ENDL(u8"==============================");
+		while (t.SelectNext())
 		{
-			std::stringstream ss;
-			ss << u8"No results found for id: " << *pIdCol;
-			WRITE_STDOUT_ENDL(ss.str());
+			SQL_TIMESTAMP_STRUCT ts = pLastUpdateCol->GetValue();
+			s = boost::str(boost::format(u8"%4d %16s %s")
+				% pIdCol->GetValue()
+				% nameColumnWrapper.GetValue<std::string>()
+				% TimestampToSqlString(pLastUpdateCol->GetValue())
+			);
+			WRITE_STDOUT_ENDL(s);
 		}
+		WRITE_STDOUT_ENDL(u8"");
 	}
 	catch (const Exception& ex)
 	{
 		WRITE_STDERR_ENDL(ex.ToString());
+	}
+	catch (const std::exception& ex)
+	{
+		WRITE_STDERR_ENDL(ex.what());
 	}
     return 0;
 }

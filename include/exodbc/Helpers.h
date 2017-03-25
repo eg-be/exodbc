@@ -137,6 +137,12 @@ namespace exodbc
 
 
 	/*!
+	* \brief	Return a SQL_TIMESTAMP_STRUCT, set to now in UTC. Fraction is set to 0.
+	*/
+	extern EXODBCAPI SQL_TIMESTAMP_STRUCT InitUtcTimestamp();
+
+
+	/*!
 	* \brief	Return a SQL_NUMERIC_STRUCT with the passed values set.
 	*/
 	extern EXODBCAPI SQL_NUMERIC_STRUCT InitNumeric(SQLCHAR precision, SQLSCHAR scale, SQLCHAR sign, SQLCHAR val[SQL_MAX_NUMERIC_LEN]) noexcept;
@@ -165,6 +171,12 @@ namespace exodbc
 	*/
 	extern EXODBCAPI bool IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2) noexcept;
 
+
+	/*
+	* \brief	Format the value of a SQL_TIMESTAMP_STRUCT as 'YYYY-MM-DD hh:mm:ss' and return as string.
+	*			If includeFraction is true, the fractional part of ts is added, as (ts.fraction / 1'000'000'000).
+	*/
+	extern EXODBCAPI std::string TimestampToSqlString(const SQL_TIMESTAMP_STRUCT& ts, bool includeFraction = false) noexcept;
 
 	// Classes
 	// -------
