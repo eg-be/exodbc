@@ -456,14 +456,6 @@ namespace exodbc
 		* \throw	Exception
 		*/
 		const std::string& GetDataSourceName() const    { exASSERT(!m_dbOpenedWithConnectionString);  return m_dsn; }
-		
-
-		/*!
-		* \brief	Get DSN set during Open().
-		* \return	DSN set during Open().
-		* \throw	Exception
-		*/
-		const std::string& GetDatasourceName() const { exASSERT(!m_dbOpenedWithConnectionString);  return m_dsn; }
 
 
 		/*!
