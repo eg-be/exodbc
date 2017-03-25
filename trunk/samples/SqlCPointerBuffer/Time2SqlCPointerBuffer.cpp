@@ -45,9 +45,19 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		// And connect to a database using the environment.
 		DatabasePtr pDb = Database::Create(pEnv);
-		string cs = u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;";
-		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"Connecting to: %s") % cs));
-		pDb->Open(cs);
+
+		// if argv[1] is given, assume its a connection string, else use some built-in default cs:
+		std::string connectionString = u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;";
+		if (argc >= 2)
+		{
+#ifdef _WIN32
+			connectionString = utf16ToUtf8(argv[1]);
+#else
+			connectionString = argv[1];
+#endif
+		}
+		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"Connecting to: %s") % connectionString));
+		pDb->Open(connectionString);
 
 		// Create a table with a SQL Server time(7) column.
 		// The time2 column has a fractional part (while the general time columns in SQL do not have
