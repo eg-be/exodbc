@@ -152,6 +152,25 @@ namespace exodbc
 
 
 	/*!
+	* \class NotAllowedException
+	* \brief Thrown if operation is not allowed, for example setting a column
+	*		to NULL if it doesnt have the NULLABLE flag set.
+	*/
+	class EXODBCAPI NotAllowedException
+		: public Exception
+	{
+	public:
+		NotAllowedException() = delete;
+
+		NotAllowedException(const std::string& msg) noexcept
+			: Exception(msg)
+		{};
+
+		std::string GetName() const noexcept override { return u8"exodbc::NotAllowedException"; };
+	};
+
+
+	/*!
 	* \class WrapperException
 	* \brief Wrapper around a std::exception
 	*/
@@ -255,7 +274,7 @@ namespace exodbc
 
 	/*!
 	* \class ConversionException
-	* \brief Thrown on not found stuff.
+	* \brief Thrown if converting from and to utf8 / utf16 fails.
 	*/
 	class EXODBCAPI ConversionException
 		: public Exception

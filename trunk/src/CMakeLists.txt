@@ -41,6 +41,7 @@ include_directories ("${PROJECT_SOURCE_DIR}/../include/exodbc")
 set ( SRC_EXODBC 
   AssertionException.cpp 
   ColumnBuffer.cpp 
+  ColumnBufferWrapper.cpp
   Database.cpp 
   Environment.cpp 
   Exception.cpp 
@@ -62,6 +63,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/bitmask_operators.hpp
   ../include/exodbc/ColumnBuffer.h
   ../include/exodbc/ColumnBufferVisitors.h
+  ../include/exodbc/ColumnBufferWrapper.h
   ../include/exodbc/Database.h
   ../include/exodbc/DebugNew.h
   ../include/exodbc/DoxygenToc.h
