@@ -122,6 +122,33 @@ namespace exodbc
 
 
 	/*!
+	* \class SetNullVisitor
+	* \brief Visitor to set a ColumnBuffer to NULL
+	* \details On applying this visitor, it will call SetNull() on the ColumnBuffer.
+	* \throw NotAllowedException If the flag ColumnFlag::CF_NULLABLE is not set.
+	*/
+	class SetNullVisitor
+		: public boost::static_visitor<void>
+	{
+	public:
+		template<typename T>
+		void operator()(T& t) const
+		{
+			// Test if we are allowed to set the column to NULL
+			ColumnFlagsPtr pFlags = std::dynamic_pointer_cast<ColumnFlags>(t);
+			exASSERT(pFlags);
+			if (!pFlags->Test(ColumnFlag::CF_NULLABLE))
+			{
+				std::string msg = boost::str(boost::format("ColumnFlag::CF_NULLABLE is not set on column '%s'") % t->GetQueryName());
+				THROW_WITH_SOURCE(NotAllowedException, msg);
+			}
+			t->SetNull();
+		}
+
+	};
+
+
+	/*!
 	* \class ColumnFlagsPtrVisitor
 	* \brief Visitor to cast a ColumnBuffer to a ColumnFlagsPtr
 	* \details	On applying this visitor, it will dynamic_pointer_cast the ColumnBuffer and throw
