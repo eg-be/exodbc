@@ -14,6 +14,8 @@
 #include "LogManagerOdbcMacros.h"
 
 // Other headers
+#include <chrono>
+
 // Debug
 #include "DebugNew.h"
 
@@ -178,6 +180,26 @@ namespace exodbc
 	}
 
 
+	SQL_TIMESTAMP_STRUCT InitUtcTimestamp()
+	{
+		auto now = std::chrono::system_clock::now();
+		auto tt = std::chrono::system_clock::to_time_t(now);
+		tm utc_tm = *gmtime(&tt);
+
+		SQL_TIMESTAMP_STRUCT ts;
+		ts.hour = utc_tm.tm_hour;
+		ts.minute = utc_tm.tm_min;
+		ts.second = utc_tm.tm_sec;
+		ts.fraction = 0;
+
+		ts.year = 1900 + utc_tm.tm_year;
+		ts.month = utc_tm.tm_mon;
+		ts.day = utc_tm.tm_mday;
+
+		return ts;
+	}
+
+
 	bool IsTimeEqual(const SQL_TIME_STRUCT& t1, const SQL_TIME_STRUCT& t2) noexcept
 	{
 		return t1.hour == t2.hour
@@ -223,6 +245,19 @@ namespace exodbc
 		SQL_NUMERIC_STRUCT num;
 		memset(&num, 0, sizeof(num));
 		return num;
+	}
+
+
+	std::string TimestampToSqlString(const SQL_TIMESTAMP_STRUCT& ts, bool includeFraction /* = false */) noexcept
+	{
+		std::string s = boost::str(boost::format(u8"%04d-%02d-%02d %02d:%02d:%02d") % ts.year % ts.month % ts.day
+			% ts.hour % ts.minute % ts.second);
+		if (includeFraction)
+		{
+			s.append(u8".");
+			s.append(boost::str(boost::format(u8"%f") % ((float)ts.fraction / 1000000000.0f)));
+		}
+		return s;
 	}
 }
 
