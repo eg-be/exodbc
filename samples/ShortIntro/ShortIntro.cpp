@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 		// And connect to a database using the environment.
 		DatabasePtr pDb = Database::Create(pEnv);
 
-		// if argv[1] is given, assume its a connection string, else some built-in default cs:
+		// if argv[1] is given, assume its a connection string, else use some built-in default cs:
 		// std::string connectionString = "Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;"
 		// std::string connectionString = ""Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;CurrentSchema=EXODBC"
 		std::string connectionString = u8"Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;";
