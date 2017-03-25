@@ -5,7 +5,7 @@ project (exodbctest)
 option(ENABLE_SQLSERVER_TEST "Enable the test for Sql Server" ON)
 set(SQLSERVER_TEST_CS "Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;" CACHE STRING "Connection-String used to run tests against Sql Server")
 set(SQLSERVER_TEST_GTEST_FILTER "*" CACHE STRING "value for gtest argument '--gtest_filter': Run all tests")
-set(SQLSERVER_TEST_LOG_LEVEL "--logLevelW" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Sql Server")
+set(SQLSERVER_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Sql Server")
 
 if(WIN32)
   option(ENABLE_MYSQL_TEST "Enable the test for MySql" ON)
@@ -19,7 +19,7 @@ if(ENABLE_MYSQL_TEST)
 								":StatementCloserTest.CloseStmtHandle"
 								":TableTest.DeleteFailOnNoData")  
   set(MYSQL_TEST_GTEST_FILTER "${mySqlFilters}" CACHE STRING "value for gtest argument '--gtest_filter': Skip tests known to fail")
-  set(MYSQL_TEST_LOG_LEVEL "--logLevelW" CACHE STRING "LogLevel argument passed to exodbctest to run tests against MySql")  
+  set(MYSQL_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against MySql")  
 endif()
 
 if(WIN32)
@@ -30,7 +30,7 @@ endif()
 if(ENABLE_DB2_TEST)
   set(DB2_TEST_CS "Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;" CACHE STRING "Connection-String used to run tests against DB2")
   set(DB2_TEST_GTEST_FILTER "*" CACHE STRING "value for gtest argument '--gtest_filter': Run all tests")
-  set(DB2_TEST_LOG_LEVEL "--logLevelW" CACHE STRING "LogLevel argument passed to exodbctest to run tests against DB2")    
+  set(DB2_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against DB2")    
 endif()
 
 if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
@@ -68,12 +68,12 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
                 ":TableTest.UpdatePk"
                 ":UnicodeTest.*")               
   set(ACCESS_TEST_GTEST_FILTER "${accessFilters}" CACHE STRING "value for gtest argument '--gtest_filter': Skip tests known to fail")
-  set(ACCESS_TEST_LOG_LEVEL "--logLevelW" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Access")  
+  set(ACCESS_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Access")  
 
 	option(ENABLE_EXCEL_TEST "Enable the test for Excel" ON)
   set(EXCEL_TEST_CS "Driver={Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)};DBQ=$<TARGET_FILE_DIR:exodbctest>\\excelTest.xls;" CACHE STRING "Connection-String used to run tests against Excel.")    
   set(EXCEL_TEST_GTEST_FILTER "ExcelTest.*" CACHE STRING "value for gtest argument '--gtest_filter': Only test the few very basic Excel-things")
-  set(EXCEL_TEST_LOG_LEVEL "--logLevelW" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Excel")    
+  set(EXCEL_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Excel")    
 endif()
 
 
@@ -216,9 +216,9 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
 
 		add_test( NAME AccessTest
               COMMAND exodbctest
-              "cs=${ACCESS_TEST_CS}"
+              "-CS" "${ACCESS_TEST_CS}"
               "--gtest_filter=${ACCESS_TEST_GTEST_FILTER}"
-              "${ACCESS_TEST_LOG_LEVEL}"
+              "-logLevel" "${ACCESS_TEST_LOG_LEVEL}"
             )
 	endif()
 
@@ -230,9 +230,9 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
 
 		add_test( NAME ExcelTest
               COMMAND exodbctest
-              "cs=${EXCEL_TEST_CS}"
+              "-CS" "${EXCEL_TEST_CS}"
               "--gtest_filter=${EXCEL_TEST_GTEST_FILTER}"
-              "${EXCEL_TEST_LOG_LEVEL}"
+              "-logLevel" "${EXCEL_TEST_LOG_LEVEL}"
             )
 	endif()
 endif()
@@ -240,26 +240,26 @@ endif()
 if(ENABLE_MYSQL_TEST)
 	add_test( NAME MySqlTest 
             COMMAND exodbctest
-            "cs=${MYSQL_TEST_CS}"
+            "-CS" "${MYSQL_TEST_CS}"
             "--gtest_filter=${MYSQL_TEST_GTEST_FILTER}"
-            "${MYSQL_TEST_LOG_LEVEL}"
+            "-logLevel" "${MYSQL_TEST_LOG_LEVEL}"
           )
 endif()
 
 if(ENABLE_SQLSERVER_TEST)
 	add_test( NAME SqlServerTest 
             COMMAND exodbctest
-            "cs=${SQLSERVER_TEST_CS}"
+            "-CS" "${SQLSERVER_TEST_CS}"
             "--gtest_filter=${SQLSERVER_TEST_GTEST_FILTER}"
-            "${SQLSERVER_TEST_LOG_LEVEL}"
+            "-logLevel" "${SQLSERVER_TEST_LOG_LEVEL}"
           )
 endif()
 
 if(ENABLE_DB2_TEST)
 	add_test( NAME Db2Test
             COMMAND exodbctest
-            "CS=${DB2_TEST_CS}"
+            "-CS" "${DB2_TEST_CS}"
             "--gtest_filter=${DB2_TEST_GTEST_FILTER}"
-            "${DB2_TEST_LOG_LEVEL}"
+            "-logLevel" "${DB2_TEST_LOG_LEVEL}"
           )
 endif()

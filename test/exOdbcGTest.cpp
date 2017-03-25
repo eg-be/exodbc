@@ -47,48 +47,43 @@ void printHelp()
 {
 	using namespace std;
 
-	WRITE_STDOUT_ENDL(u8"Usage: exOdbcGTest [OPTION]... [DATABASE]");
-	WRITE_STDOUT_ENDL(u8"Run unit-tests against DATABASE or read configuration from TestSettings.xml.");
-	WRITE_STDOUT_ENDL(u8"If DATABASE is not specified, all settings will be read from the file");
-	WRITE_STDOUT_ENDL(u8"TestSettings.xml, located in either the directory of the app, or in a");
-	WRITE_STDOUT_ENDL(u8"subdirectory named 'exOdbcGTest'. If the file is not found in the directory");
-	WRITE_STDOUT_ENDL(u8"of the app, all parent directories are searched the same way.");
-	WRITE_STDOUT_ENDL("");
-	WRITE_STDOUT_ENDL("If DATABASE is specified, you can either supply a connection-string or a DSN-");
-	WRITE_STDOUT_ENDL("entry to indicate the connection info of the test database:");
-	WRITE_STDOUT_ENDL(" To connect using a configured DSN entry use:");
-	WRITE_STDOUT_ENDL("");
-	WRITE_STDOUT_ENDL("  DSN=dsn;user;pass (connect to a db with UPPER-case names (tables/columns))");
-	WRITE_STDOUT_ENDL("  dsn=dsn;user;pass (connect to a db with lower-case names (tables/columns))");
-	WRITE_STDOUT_ENDL("");
-	WRITE_STDOUT_ENDL(" or to connect using a connection-string use:");
-	WRITE_STDOUT_ENDL("");
-	WRITE_STDOUT_ENDL("  CS=connectionString (connect to a db with UPPER-case names (tables/columns))");
-	WRITE_STDOUT_ENDL("  cs=connectionString (connect to a db with lower-case names (tables/columns))");
-	WRITE_STDOUT_ENDL("");
-	WRITE_STDOUT_ENDL("Note that you must frame the 'cs=connectionString' with \" if your connection");
-	WRITE_STDOUT_ENDL("string contains white spaces.");
-	WRITE_STDOUT_ENDL("");
+	WRITE_STDOUT_ENDL(u8"Usage: exodbctest [OPTION]... [-DSN <dsn> [-U <user>] [-P <pass>] | -CS <connectionString>]");
+	WRITE_STDOUT_ENDL(u8"");
+	WRITE_STDOUT_ENDL(u8"Run unit-tests against a database.");
+	WRITE_STDOUT_ENDL(u8"Requires a Data Source Name (DSN) or Connection String (CS).");
+	WRITE_STDOUT_ENDL(u8"A DSN or a CS can be passed as arguments. If no argument '-DSN' or '-CS' is");
+	WRITE_STDOUT_ENDL(u8"passed, the executable directory is searched for a file 'TestSettings.xml'.");
+	WRITE_STDOUT_ENDL(u8"If no -argument '-DSN' or '-CS' is passed and file 'TestSettings.xml' is not");
+	WRITE_STDOUT_ENDL(u8"found test execution fails.");
+	WRITE_STDOUT_ENDL(u8"");
+	WRITE_STDOUT_ENDL(u8"To connect using a DSN use the arguments:");
+	WRITE_STDOUT_ENDL(u8" -DSN      <dsn>   Data Source Name");
+	WRITE_STDOUT_ENDL(u8" -U        <user>  Username. Optional.");
+	WRITE_STDOUT_ENDL(u8" -P        <pass>  Password. Optional.");
+	WRITE_STDOUT_ENDL(u8"");
+	WRITE_STDOUT_ENDL(u8"To connect using a CS use the argument:");
+	WRITE_STDOUT_ENDL(u8" -CS       <cs>    Connection String");
+	WRITE_STDOUT_ENDL(u8"");
 	WRITE_STDOUT_ENDL("OPTION can be:");
-	WRITE_STDOUT_ENDL(" --createDb       Run the scripts to create the test database before running");
-	WRITE_STDOUT_ENDL("                   the tests. The TestDbCreator will connect to the database");
-	WRITE_STDOUT_ENDL("                   and try to detect the database system. If there is a ");
-	WRITE_STDOUT_ENDL("                   subdirectory matching the database system name in");
-	WRITE_STDOUT_ENDL("                   'CreateScripts' directory, all scripts inside that directory");
-	WRITE_STDOUT_ENDL("                   are run");
-	WRITE_STDOUT_ENDL(" --logLevelX      Set the log level, where X must be either");
-	WRITE_STDOUT_ENDL("                   E, W, I or D for Error, Warning, Info or Debug.");
-	WRITE_STDOUT_ENDL(" --logFile        Log additionally to file 'exODbcGTest.log' in the current dir");
-	WRITE_STDOUT_ENDL(" --help           To show this help text.");
-	WRITE_STDOUT_ENDL("");
-	WRITE_STDOUT_ENDL("Examples:");
-	WRITE_STDOUT_ENDL(" exodbcGTest --createDb --logLevelW DSN=db2;uid;pass");
-	WRITE_STDOUT_ENDL("  to run the tests against a configured DSN entry named 'db2', using uppercase");
-	WRITE_STDOUT_ENDL("  names and log level Waring. Before the tests are run, the scripts to create");
-	WRITE_STDOUT_ENDL("  the test database are run.");
-	WRITE_STDOUT_ENDL(" exodbcGTest CS=\"Driver={IBM DB2 ODBC DRIVER};Database=EXODBC;Hostname=192.168.56.20;Port=50000;Protocol=TCPIP;Uid=db2ex;Pwd=extest;\"");
-	WRITE_STDOUT_ENDL("  to run the tests using a connection string, against a DB which uses uppercase.");
+	WRITE_STDOUT_ENDL(" -createDb           Run the scripts to create the test database. exodbctest");
+	WRITE_STDOUT_ENDL("                     will connect to the database and try to detect the");
+	WRITE_STDOUT_ENDL("                     database system. If there is a subdirectory matching the");
+	WRITE_STDOUT_ENDL("                     database system name in the 'CreateScripts' directory,");
+	WRITE_STDOUT_ENDL("                     all scripts inside that directory are run against the");
+	WRITE_STDOUT_ENDL("                     database. If creation is successfully, exodbctest runs the");
+	WRITE_STDOUT_ENDL(u8"                   tests afterwards, else it exits with a non-zero status.");
+	WRITE_STDOUT_ENDL(u8"-logLevel <level>  Set the Log Level. <level> can be 'Debug', Info',");
+	WRITE_STDOUT_ENDL(u8"                   'Warning' or 'Error'. Default is 'Info'.");
+	WRITE_STDOUT_ENDL(u8"-logFile  <file>   Log additionally to a file named <file>. <file> can be");
+	WRITE_STDOUT_ENDL(u8"                   relative to exodbctest or absolute.");
+	WRITE_STDOUT_ENDL(u8"-case     <u|l>    Specify whether table and column names are in lower or");
+	WRITE_STDOUT_ENDL(u8"                   upper case letters. Must be either 'u' for uppercase or");
+	WRITE_STDOUT_ENDL(u8"                   'l' for lowercase. Default is 'l'.");
+	WRITE_STDOUT_ENDL(u8"-help              Show this text.");
+	WRITE_STDOUT_ENDL(u8"--help             Show this text and the help for googletest.");
+	WRITE_STDOUT_ENDL(u8"");
 }
+
 
 #ifdef _WIN32
 int _tmain(int argc, _TCHAR* argv[])
@@ -132,122 +127,129 @@ int main(int argc, char* argv[])
 	bool haveConsoleLogLevel = false;
 
 	// If --help is passed, just print usage and exit
-	// IF --logLevelX is set, set the log-level early
+	// If --logLevel is set, set the log-level early
+	const std::string userKey = u8"-U";
+	const std::string passKey = u8"-P";
+	const std::string dsnKey = u8"-DSN";
+	const std::string csKey = u8"-CS";
+	const std::string createDbKey = u8"-createDb";
+	const std::string logLevelKey = u8"-logLevel";
+	const std::string logFileKey = u8"-logFile";
+	const std::string caseKey = u8"-case";
+	const std::string helpKey = u8"-help";
+	const std::string helpHelpKey = u8"--help";
+	std::string userValue, passValue, dsnValue;
+	std::string csValue;
+	bool createDbValue = false;
+	LogLevel logLevelValue = LogLevel::Info;
+	Case caseValue = Case::LOWER;
+
 	for (int i = 0; i < argc; i++)
 	{
+		std::string argNext;
 #ifdef _WIN32
-		string arg = utf16ToUtf8(argv[i]);
-#else
-		string arg = argv[i];
-#endif
-		if (ba::iequals(arg, u8"--help"))
-		{
-			printHelp();
-			return -1;
-		}
-		else if (ba::iequals(arg, u8"--logLevelE"))
-		{
-			LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
-			haveConsoleLogLevel = true;
-		}
-		else if (ba::iequals(arg, u8"--logLevelW"))
-		{
-			LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
-			haveConsoleLogLevel = true;
-		}
-		else if (ba::iequals(arg, u8"--logLevelI"))
-		{
-			LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
-			haveConsoleLogLevel = true;
-		}
-		else if (ba::iequals(arg, u8"--logLevelD"))
-		{
-			LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
-			haveConsoleLogLevel = true;
-		}
-		else if (ba::iequals(arg, u8"--logFile"))
-		{
-			FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(u8"exOdbcGTest.log", true);
-			LogManager::Get().RegisterLogHandler(pFileLogger);
-		}
-	}
-
-	int status = 0;
-
-	// Set defaults
-	bool doCreateDb = false;
-
-	// Iterate given options
-	for (int i = 1; i < argc; i++)
-	{
-		std::string createDb = u8"--createDb";
-		std::string dsn = u8"dsn=";
-		std::string DSN = u8"DSN=";
-		std::string cs = u8"cs=";
-		std::string CS = u8"CS=";
-#if _WIN32
-		std::string arg = utf16ToUtf8(argv[i]);
+		std::string arg(utf16ToUtf8(argv[i]));
+		if (i + 1 < argc)
+			argNext = utf16ToUtf8(argv[i + 1]);
 #else
 		std::string arg(argv[i]);
+		if (i + 1 < argc)
+			argNext = argv[i + 1];
 #endif
-		std::string upperDsn, lowerDsn, upperCs, lowerCs;
-		if (arg == createDb)
+		if (ba::equals(arg, helpKey))
 		{
-			doCreateDb = true;
+			printHelp();
+			return 0;
 		}
-		else if (ba::starts_with(arg, DSN) && arg.length() > DSN.length())
+		if (ba::equals(arg, helpHelpKey))
 		{
-			upperDsn = arg.substr(DSN.length());
+			printHelp();
+			// And also print googletest help
+			::testing::InitGoogleTest(&argc, argv);
+			return 0;
 		}
-		else if (ba::starts_with(arg, dsn) && arg.length() > dsn.length())
+		if (ba::equals(arg, userKey) && i + 1 < argc)
 		{
-			lowerDsn = arg.substr(dsn.length());
+			userValue = argNext;
 		}
-		else if (ba::starts_with(arg, CS) && arg.length() > CS.length())
+		if (ba::equals(arg, passKey) && i + 1 < argc)
 		{
-			upperCs = arg.substr(CS.length());
+			passValue = argNext;
 		}
-		else if (ba::starts_with(arg, cs) && arg.length() > cs.length())
+		if (ba::equals(arg, dsnKey) && i + 1 < argc)
 		{
-			lowerCs = arg.substr(cs.length());
+			dsnValue = argNext;
 		}
-		if (upperDsn.length() > 0 || lowerDsn.length() > 0)
+		if (ba::equals(arg, csKey) && i + 1 < argc)
 		{
-			std::string dsn = upperDsn.length() > 0 ? upperDsn : lowerDsn;
-			std::vector<std::string> tokens;
-			boost::split(tokens, dsn, boost::is_any_of(u8";"));
-			if (tokens.size() != 3)
-			{
-				LOG_WARNING(boost::str(boost::format(u8"Ignoring Dsn entry '%s' because it does not match the form 'dsn;user;pass'") % arg));
-			}
-			else if (tokens[0].empty())
-			{
-				LOG_WARNING(boost::str(boost::format(u8"Ignoring Dsn entry '%s' because DSN is empty.") % arg));
-			}
+			csValue = argNext;
+		}
+		if (ba::equals(arg, logFileKey) && i + 1 < argc)
+		{
+			FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(argNext, true);
+			LogManager::Get().RegisterLogHandler(pFileLogger);
+		}
+		if (ba::equals(arg, logLevelKey) && i + 1 < argc)
+		{
+			string logLevelString = argNext;
+			if (ba::iequals(logLevelString, u8"Debug"))
+				LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
+			else if (ba::iequals(logLevelString, u8"Info"))
+				LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
+			else if (ba::iequals(logLevelString, u8"Warning"))
+				LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
+			else if (ba::iequals(logLevelString, u8"Error"))
+				LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
 			else
 			{
-				Case nameCase = upperDsn.length() > 0 ? Case::UPPER : Case::LOWER;
-				TestParams dsnEntry(tokens[0], tokens[1], tokens[2], nameCase);
-				g_odbcInfo = dsnEntry;
+				LOG_ERROR(boost::str(boost::format(u8"Unknown Log Level '%s'") % logLevelString));
+				return 1;
 			}
 		}
-		if (upperCs.length() > 0 || lowerCs.length() > 0)
+		if (ba::equals(arg, caseKey) && i + 1 < argc)
 		{
-			Case nameCase = upperCs.length() > 0 ? Case::UPPER : Case::LOWER;
-			TestParams csEntry(upperCs.length() > 0 ? upperCs : lowerCs, nameCase);
-			g_odbcInfo = csEntry;
+			string caseKeyString = argNext;
+			if (ba::iequals(caseKeyString, u8"l"))
+				caseValue = Case::LOWER;
+			else if (ba::iequals(caseKeyString, u8"u"))
+				caseValue = Case::UPPER;
+			else
+			{
+				LOG_ERROR(boost::str(boost::format(u8"Unknown Case '%s'") % caseKeyString));
+				return 1;
+			}
+		}
+		if (ba::equals(arg, createDbKey))
+		{
+			createDbValue = true;
 		}
 	}
-	if (g_odbcInfo.IsUsable())
+
+	if (!dsnValue.empty() && !csValue.empty())
 	{
-		g_odbcInfo.m_createDb = doCreateDb;
+		LOG_ERROR(u8"Muest use either '-CS' or '-DSN [-U <user>] [-P <pass>]', cannot use both");
+		return 1;
 	}
 
 	string customFilter;
-	if (!g_odbcInfo.IsUsable())
+	if (!dsnValue.empty() || !csValue.empty())
+	{
+		if (!dsnValue.empty())
+		{
+			TestParams dsnEntry(dsnValue, userValue, passValue, caseValue);
+			g_odbcInfo = dsnEntry;
+		}
+		if (!csValue.empty())
+		{
+			TestParams csEntry(csValue, caseValue);
+			g_odbcInfo = csEntry;
+		}
+		g_odbcInfo.m_createDb = createDbValue;
+	}
+	else
 	{
 		// Read default settings
-		LOG_INFO(u8"No usable DSN or ConnectionString passed, loading settings from TestSettings.xml");
+		LOG_INFO(u8"No argument '-DSN' or -CS' passed, loading settings from TestSettings.xml");
 		try
 		{
 			// Try to locate TestSettings.xml in directory of exe
@@ -261,14 +263,14 @@ int main(int argc, char* argv[])
 			}
 			LOG_INFO(boost::str(boost::format(u8"Searching in %1% and its parent directories for TestSettings.xml") % confDir));
 			fs::wpath settingsPath = confDir / u8"TestSettings.xml";
-			while( ! fs::exists(settingsPath) && confDir.has_parent_path())
-			{ 
+			while (!fs::exists(settingsPath) && confDir.has_parent_path())
+			{
 				// try if it is up somewhere in my working copy
 				confDir = confDir.parent_path();
 				settingsPath = confDir;
 				settingsPath /= u8"TestSettings.xml";
-				if(!fs::exists(settingsPath))
-				{ 
+				if (!fs::exists(settingsPath))
+				{
 					settingsPath = confDir;
 					settingsPath /= u8"exOdbcGTest/TestSettings.xml";
 				}
@@ -318,28 +320,28 @@ int main(int argc, char* argv[])
 
 			// if we have been requested to create the db from the command-line
 			// let the command line win.
-			if (!doCreateDb)
+			if (!createDbValue)
 			{
-				doCreateDb = g_odbcInfo.m_createDb;
+				createDbValue = g_odbcInfo.m_createDb;
 			}
 			else
 			{
-				g_odbcInfo.m_createDb = doCreateDb;
+				g_odbcInfo.m_createDb = createDbValue;
 			}
 		}
 		catch (const Exception& ex)
 		{
 			LOG_ERROR(ex.ToString());
-			return -1;
+			return 10;
 		}
 	}
 	
 	stringstream ss;
-	ss << u8"Running tests against: " << g_odbcInfo;
+	ss << u8"Using connection information: " << g_odbcInfo;
 	LOG_INFO(ss.str());
 
 	// Check if we need to re-create the dbs
-	if (doCreateDb)
+	if (createDbValue)
 	{
 		try
 		{
@@ -361,7 +363,7 @@ int main(int argc, char* argv[])
 		catch (const Exception& ex)
 		{
 			LOG_ERROR(boost::str(boost::format(u8"Failed to create Test-Database for DSN '%s': %s") % g_odbcInfo.m_dsn % ex.ToString()));
-			return -1;
+			return 20;
 		}
 	}
 
@@ -413,12 +415,6 @@ int main(int argc, char* argv[])
 	// Note: We cannot call Init earlier, we must call it after we've set up the global with the param-values
 	::testing::InitGoogleTest(&gTestArgc, gTestArgv);
 
-	if (status != 0)
-	{
-		printHelp();
-		return status;
-	}
-
 	int result = 0;
 	try
 	{
@@ -427,7 +423,7 @@ int main(int argc, char* argv[])
 	}
 	catch (const Exception& ex)
 	{
-		result = -13;
+		result = 100;
 		LOG_ERROR(u8"TEST RUN ABORTED");
 		LOG_ERROR(ex.ToString());
 	}
@@ -436,6 +432,3 @@ int main(int argc, char* argv[])
 
 	return result;
 }
-
-
-
