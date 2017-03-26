@@ -72,15 +72,15 @@ void printHelp()
 	WRITE_STDOUT_ENDL("                     all scripts inside that directory are run against the");
 	WRITE_STDOUT_ENDL("                     database. If creation is successfully, exodbctest runs the");
 	WRITE_STDOUT_ENDL(u8"                   tests afterwards, else it exits with a non-zero status.");
-	WRITE_STDOUT_ENDL(u8"-logLevel <level>  Set the Log Level. <level> can be 'Debug', Info',");
+	WRITE_STDOUT_ENDL(u8" -logLevel <level> Set the Log Level. <level> can be 'Debug', Info',");
 	WRITE_STDOUT_ENDL(u8"                   'Warning' or 'Error'. Default is 'Info'.");
-	WRITE_STDOUT_ENDL(u8"-logFile  <file>   Log additionally to a file named <file>. <file> can be");
+	WRITE_STDOUT_ENDL(u8" -logFile  <file>  Log additionally to a file named <file>. <file> can be");
 	WRITE_STDOUT_ENDL(u8"                   relative to exodbctest or absolute.");
-	WRITE_STDOUT_ENDL(u8"-case     <u|l>    Specify whether table and column names are in lower or");
+	WRITE_STDOUT_ENDL(u8" -case     <u|l>   Specify whether table and column names are in lower or");
 	WRITE_STDOUT_ENDL(u8"                   upper case letters. Must be either 'u' for uppercase or");
 	WRITE_STDOUT_ENDL(u8"                   'l' for lowercase. Default is 'l'.");
-	WRITE_STDOUT_ENDL(u8"-help              Show this text.");
-	WRITE_STDOUT_ENDL(u8"--help             Show this text and the help for googletest.");
+	WRITE_STDOUT_ENDL(u8" -help             Show this text.");
+	WRITE_STDOUT_ENDL(u8" --help            Show this text and the help for googletest.");
 	WRITE_STDOUT_ENDL(u8"");
 }
 
