@@ -81,6 +81,7 @@ if(${BUILD_SAMPLES})
   add_subdirectory(samples/DatabaseInfo)
   add_subdirectory(samples/ShortIntro)
   add_subdirectory(samples/SqlCPointerBuffer)  
+  add_subdirectory(samples/ListOdbcSources)  
 endif()
 
 if(${BUILD_TESTS})
