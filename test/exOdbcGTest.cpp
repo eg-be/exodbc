@@ -57,30 +57,32 @@ void printHelp()
 	WRITE_STDOUT_ENDL(u8"found test execution fails.");
 	WRITE_STDOUT_ENDL(u8"");
 	WRITE_STDOUT_ENDL(u8"To connect using a DSN use the arguments:");
-	WRITE_STDOUT_ENDL(u8" -DSN      <dsn>   Data Source Name");
-	WRITE_STDOUT_ENDL(u8" -U        <user>  Username. Optional.");
-	WRITE_STDOUT_ENDL(u8" -P        <pass>  Password. Optional.");
+	WRITE_STDOUT_ENDL(u8" -DSN      <dsn>    Data Source Name");
+	WRITE_STDOUT_ENDL(u8" -U        <user>   Username. Optional.");
+	WRITE_STDOUT_ENDL(u8" -P        <pass>   Password. Optional.");
 	WRITE_STDOUT_ENDL(u8"");
-	WRITE_STDOUT_ENDL(u8"To connect using a CS use the argument:");
-	WRITE_STDOUT_ENDL(u8" -CS       <cs>    Connection String");
+	WRITE_STDOUT_ENDL(u8"To connect using a  CS use the argument:");
+	WRITE_STDOUT_ENDL(u8" -CS       <cs>     Connection String");
 	WRITE_STDOUT_ENDL(u8"");
 	WRITE_STDOUT_ENDL("OPTION can be:");
-	WRITE_STDOUT_ENDL(" -createDb           Run the scripts to create the test database. exodbctest");
-	WRITE_STDOUT_ENDL("                     will connect to the database and try to detect the");
-	WRITE_STDOUT_ENDL("                     database system. If there is a subdirectory matching the");
-	WRITE_STDOUT_ENDL("                     database system name in the 'CreateScripts' directory,");
-	WRITE_STDOUT_ENDL("                     all scripts inside that directory are run against the");
-	WRITE_STDOUT_ENDL("                     database. If creation is successfully, exodbctest runs the");
-	WRITE_STDOUT_ENDL(u8"                   tests afterwards, else it exits with a non-zero status.");
-	WRITE_STDOUT_ENDL(u8" -logLevel <level> Set the Log Level. <level> can be 'Debug', Info',");
-	WRITE_STDOUT_ENDL(u8"                   'Warning' or 'Error'. Default is 'Info'.");
-	WRITE_STDOUT_ENDL(u8" -logFile  <file>  Log additionally to a file named <file>. <file> can be");
-	WRITE_STDOUT_ENDL(u8"                   relative to exodbctest or absolute.");
-	WRITE_STDOUT_ENDL(u8" -case     <u|l>   Specify whether table and column names are in lower or");
-	WRITE_STDOUT_ENDL(u8"                   upper case letters. Must be either 'u' for uppercase or");
-	WRITE_STDOUT_ENDL(u8"                   'l' for lowercase. Default is 'l'.");
-	WRITE_STDOUT_ENDL(u8" -help             Show this text.");
-	WRITE_STDOUT_ENDL(u8" --help            Show this text and the help for googletest.");
+	WRITE_STDOUT_ENDL(" --createDb           Run the scripts to create the test database. exodbctest");
+	WRITE_STDOUT_ENDL("                      will connect to the database and try to detect the");
+	WRITE_STDOUT_ENDL("                      database system. If there is a subdirectory matching the");
+	WRITE_STDOUT_ENDL("                      database system name in the 'CreateScripts' directory,");
+	WRITE_STDOUT_ENDL("                      all scripts inside that directory are run against the");
+	WRITE_STDOUT_ENDL("                      database. If creation is successfully, exodbctest runs the");
+	WRITE_STDOUT_ENDL(" --createDbOnly       Only do the '--createDb' task then exit without running");
+	WRITE_STDOUT_ENDL("                      any tests.");
+	WRITE_STDOUT_ENDL(u8"                    tests afterwards, else it exits with a non-zero status.");
+	WRITE_STDOUT_ENDL(u8" --logLevel <level> Set the Log Level. <level> can be 'Debug', Info',");
+	WRITE_STDOUT_ENDL(u8"                    'Warning' or 'Error'. Default is 'Info'.");
+	WRITE_STDOUT_ENDL(u8" --logFile  <file>  Log additionally to a file named <file>. <file> can be");
+	WRITE_STDOUT_ENDL(u8"                    relative to exodbctest or absolute.");
+	WRITE_STDOUT_ENDL(u8" --case     <u|l>   Specify whether table and column names are in lower or");
+	WRITE_STDOUT_ENDL(u8"                    upper case letters. Must be either 'u' for uppercase or");
+	WRITE_STDOUT_ENDL(u8"                    'l' for lowercase. Default is 'l'.");
+	WRITE_STDOUT_ENDL(u8" -help              Show this text.");
+	WRITE_STDOUT_ENDL(u8" --help             Show this text and the help for googletest.");
 	WRITE_STDOUT_ENDL(u8"");
 }
 
@@ -132,15 +134,17 @@ int main(int argc, char* argv[])
 	const std::string passKey = u8"-P";
 	const std::string dsnKey = u8"-DSN";
 	const std::string csKey = u8"-CS";
-	const std::string createDbKey = u8"-createDb";
-	const std::string logLevelKey = u8"-logLevel";
-	const std::string logFileKey = u8"-logFile";
-	const std::string caseKey = u8"-case";
+	const std::string createDbKey = u8"--createDb";
+	const std::string createDbOnlyKey = u8"--createDbOnly";
+	const std::string logLevelKey = u8"--logLevel";
+	const std::string logFileKey = u8"--logFile";
+	const std::string caseKey = u8"--case";
 	const std::string helpKey = u8"-help";
 	const std::string helpHelpKey = u8"--help";
 	std::string userValue, passValue, dsnValue;
 	std::string csValue;
 	bool createDbValue = false;
+	bool createDbOnlyValue = false;
 	LogLevel logLevelValue = LogLevel::Info;
 	Case caseValue = Case::LOWER;
 
@@ -222,6 +226,10 @@ int main(int argc, char* argv[])
 		if (ba::equals(arg, createDbKey))
 		{
 			createDbValue = true;
+		}
+		if (ba::equals(arg, createDbOnlyKey))
+		{
+			createDbOnlyValue = true;
 		}
 	}
 
@@ -341,7 +349,7 @@ int main(int argc, char* argv[])
 	LOG_INFO(ss.str());
 
 	// Check if we need to re-create the dbs
-	if (createDbValue)
+	if (createDbValue || createDbOnlyValue)
 	{
 		try
 		{
@@ -364,6 +372,10 @@ int main(int argc, char* argv[])
 		{
 			LOG_ERROR(boost::str(boost::format(u8"Failed to create Test-Database for DSN '%s': %s") % g_odbcInfo.m_dsn % ex.ToString()));
 			return 20;
+		}
+		if (createDbOnlyValue)
+		{
+			return 0;
 		}
 	}
 
