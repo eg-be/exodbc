@@ -232,11 +232,11 @@ for a list of tests known to fail.
                               Default: 'ExcelTest.*' run only some very specific excel tests.
   
 The log level used in exodbctest can be set using the following cache variables:
-  SQLSERVER_TEST_LOG_LEVEL    Default: '--logLevelW'
-  MYSQL_TEST_LOG_LEVEL        Default: '--logLevelW'
-  DB2_TEST_LOG_LEVEL          Default: '--logLevelW'
-  ACCESS_TEST_LOG_LEVEL       Default: '--logLevelW'
-  EXCEL_TEST_LOG_LEVEL        Default: '--logLevelW'
+  SQLSERVER_TEST_LOG_LEVEL    Default: 'Warning'
+  MYSQL_TEST_LOG_LEVEL        Default: 'Warning'
+  DB2_TEST_LOG_LEVEL          Default: 'Warning'
+  ACCESS_TEST_LOG_LEVEL       Default: 'Warning'
+  EXCEL_TEST_LOG_LEVEL        Default: 'Warning'
   
 Prepare Test Database
 ---------------------
