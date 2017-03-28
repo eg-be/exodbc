@@ -649,6 +649,8 @@ namespace exodbctest
 			{
 				idCol->SetSqlType(SQL_INTEGER);
 				num18_0_Col->SetSqlType(SQL_NUMERIC);
+				num18_0_Col->SetColumnSize(18);
+				num18_0_Col->SetDecimalDigits(0);
 			}
 			FInserter2 i(m_pDb, tableId, colName);
 			i.m_stmt.BindParameter(idCol, 1);
@@ -671,6 +673,7 @@ namespace exodbctest
 			num18_0_Col->SetValue(num);
 			i();
 
+			::memset(num.val, 0, sizeof(num.val));
 			num.precision = 18;
 			num.scale = 0;
 			num.sign = 1;
@@ -681,6 +684,7 @@ namespace exodbctest
 			num18_0_Col->SetValue(num);
 			i();
 
+			::memset(num.val, 0, sizeof(num.val));
 			num.precision = 18;
 			num.scale = 0;
 			num.sign = 0;
