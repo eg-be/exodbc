@@ -40,7 +40,6 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
   set(ACCESS_TEST_CS "Driver={Microsoft Access Driver (*.mdb)};Dbq=$<TARGET_FILE_DIR:exodbctest>\\exodbc.mdb;Uid=Admin;Pwd=;ExtendedAnsiSQL=1;" CACHE STRING "Connection-String used to run tests against Access.")  
   string(CONCAT accessFilters "-BigIntColumnTest.*"
                 ":wxCompatibilityTest.*"
-                ":NumericColumnTest.*"
                 ":DatabaseTest.ReadSchemas"
                 ":DatabaseTest.ReadTablePrimaryKeysInfo"
                 ":DatabaseTest.ReadTablePrivileges"
