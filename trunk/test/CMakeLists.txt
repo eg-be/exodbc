@@ -37,7 +37,7 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
 	message(STATUS "Plattform is Win32 and CMAKE_SIZEOF_VOID_P is ${CMAKE_SIZEOF_VOID_P}, assuming x86 and adding options to test Access and Excel")
 
 	option(ENABLE_ACCESS_TEST "Enable the test for Access" ON)
-  set(ACCESS_TEST_CS "Driver={Microsoft Access Driver (*.mdb)};Dbq=$<TARGET_FILE_DIR:exodbctest>\\exodbc.mdb;Uid=Admin;Pwd=;" CACHE STRING "Connection-String used to run tests against Access.")  
+  set(ACCESS_TEST_CS "Driver={Microsoft Access Driver (*.mdb)};Dbq=$<TARGET_FILE_DIR:exodbctest>\\exodbc.mdb;Uid=Admin;Pwd=;ExtendedAnsiSQL=1" CACHE STRING "Connection-String used to run tests against Access.")  
   string(CONCAT accessFilters "-BigIntColumnTest.*"
                 ":wxCompatibilityTest.*"
                 ":NumericColumnTest.*"
