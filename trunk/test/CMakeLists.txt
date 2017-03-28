@@ -218,7 +218,7 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
               COMMAND exodbctest
               "-CS" "${ACCESS_TEST_CS}"
               "--gtest_filter=${ACCESS_TEST_GTEST_FILTER}"
-              "-logLevel" "${ACCESS_TEST_LOG_LEVEL}"
+              "--logLevel" "${ACCESS_TEST_LOG_LEVEL}"
             )
 	endif()
 
@@ -232,7 +232,7 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
               COMMAND exodbctest
               "-CS" "${EXCEL_TEST_CS}"
               "--gtest_filter=${EXCEL_TEST_GTEST_FILTER}"
-              "-logLevel" "${EXCEL_TEST_LOG_LEVEL}"
+              "--logLevel" "${EXCEL_TEST_LOG_LEVEL}"
             )
 	endif()
 endif()
@@ -242,7 +242,7 @@ if(ENABLE_MYSQL_TEST)
             COMMAND exodbctest
             "-CS" "${MYSQL_TEST_CS}"
             "--gtest_filter=${MYSQL_TEST_GTEST_FILTER}"
-            "-logLevel" "${MYSQL_TEST_LOG_LEVEL}"
+            "--logLevel" "${MYSQL_TEST_LOG_LEVEL}"
           )
 endif()
 
@@ -251,7 +251,7 @@ if(ENABLE_SQLSERVER_TEST)
             COMMAND exodbctest
             "-CS" "${SQLSERVER_TEST_CS}"
             "--gtest_filter=${SQLSERVER_TEST_GTEST_FILTER}"
-            "-logLevel" "${SQLSERVER_TEST_LOG_LEVEL}"
+            "--logLevel" "${SQLSERVER_TEST_LOG_LEVEL}"
           )
 endif()
 
@@ -260,6 +260,6 @@ if(ENABLE_DB2_TEST)
             COMMAND exodbctest
             "-CS" "${DB2_TEST_CS}"
             "--gtest_filter=${DB2_TEST_GTEST_FILTER}"
-            "-logLevel" "${DB2_TEST_LOG_LEVEL}"
+            "--logLevel" "${DB2_TEST_LOG_LEVEL}"
           )
 endif()
