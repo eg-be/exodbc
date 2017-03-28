@@ -33,11 +33,11 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8"Search for ODBC DSN entries and prints found entries to stdout.");
 	WRITE_STDOUT_ENDL(u8"Searches for ODBC DSN entries of type 'All' as default.");
 	WRITE_STDOUT_ENDL("OPTION can be:");
-	WRITE_STDOUT_ENDL(u8" -SystemOnly             If passed, only System DSN entries are searched.");
-	WRITE_STDOUT_ENDL(u8" -UserOnly               If passed, only User DSN entries are searched.");
-	WRITE_STDOUT_ENDL(u8" -OdbcVersion <version>  Set ODBC Version to use. Valid values are '2', '3'");
+	WRITE_STDOUT_ENDL(u8" --systemOnly            If passed, only System DSN entries are searched.");
+	WRITE_STDOUT_ENDL(u8" --userOnly              If passed, only User DSN entries are searched.");
+	WRITE_STDOUT_ENDL(u8" --odbcVersion <version> Set ODBC Version to use. Valid values are '2', '3'");
 	WRITE_STDOUT_ENDL(u8"                         or '3.8'. Default is '3'.");
-	WRITE_STDOUT_ENDL(u8" -ShowArch               If set, tests if sizeof(void*) is 4 or 8 and prints");
+	WRITE_STDOUT_ENDL(u8" --showArch              If set, tests if sizeof(void*) is 4 or 8 and prints");
 	WRITE_STDOUT_ENDL(u8"                         the result as 'x86' for 4 and 'x64' for 8.");
 }
 
@@ -52,10 +52,10 @@ int main(int argc, char* argv[])
 		// Parse arguments
 		const std::string helpKey = u8"-help";
 		const std::string helpKey2 = u8"--help";
-		const std::string systemOnlyKey = u8"-SystemOnly";
-		const std::string userOnlyKey = u8"-UserOnly";
-		const std::string odbcVersionKey = u8"-OdbcVersion";
-		const std::string showArchKey = u8"-ShowArch";
+		const std::string systemOnlyKey = u8"--systemOnly";
+		const std::string userOnlyKey = u8"--userOnly";
+		const std::string odbcVersionKey = u8"--odbcVersion";
+		const std::string showArchKey = u8"--showArch";
 		bool systemOnly = false;
 		bool userOnly = false;
 		bool showArch = false;
