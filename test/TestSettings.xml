@@ -111,7 +111,7 @@
 
   <ConnectionString>
     <Disabled>1</Disabled>
-    <Value>Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\exodbc\build_x86_static\bin\Debug\exodbc.mdb;Uid=Admin;Pwd=;</Value>
+    <Value>Driver={Microsoft Access Driver (*.mdb)};Dbq=E:\exodbc\build_x86_static\bin\Debug\exodbc.mdb;Uid=Admin;Pwd=;ExtendedAnsiSQL=1;</Value>
     <Case>lower</Case>
   </ConnectionString>  
   
