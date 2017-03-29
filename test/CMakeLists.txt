@@ -217,6 +217,7 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
               "-CS" "${ACCESS_TEST_CS}"
               "--gtest_filter=${ACCESS_TEST_GTEST_FILTER}"
               "--logLevel" "${ACCESS_TEST_LOG_LEVEL}"
+              "--case" "l"
             )
 	endif()
 
@@ -231,6 +232,7 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
               "-CS" "${EXCEL_TEST_CS}"
               "--gtest_filter=${EXCEL_TEST_GTEST_FILTER}"
               "--logLevel" "${EXCEL_TEST_LOG_LEVEL}"
+              "--case" "l"
             )
 	endif()
 endif()
@@ -241,6 +243,7 @@ if(ENABLE_MYSQL_TEST)
             "-CS" "${MYSQL_TEST_CS}"
             "--gtest_filter=${MYSQL_TEST_GTEST_FILTER}"
             "--logLevel" "${MYSQL_TEST_LOG_LEVEL}"
+            "--case" "l"
           )
 endif()
 
@@ -250,6 +253,7 @@ if(ENABLE_SQLSERVER_TEST)
             "-CS" "${SQLSERVER_TEST_CS}"
             "--gtest_filter=${SQLSERVER_TEST_GTEST_FILTER}"
             "--logLevel" "${SQLSERVER_TEST_LOG_LEVEL}"
+            "--case" "l"
           )
 endif()
 
@@ -259,5 +263,6 @@ if(ENABLE_DB2_TEST)
             "-CS" "${DB2_TEST_CS}"
             "--gtest_filter=${DB2_TEST_GTEST_FILTER}"
             "--logLevel" "${DB2_TEST_LOG_LEVEL}"
+            "--case" "u"
           )
 endif()
