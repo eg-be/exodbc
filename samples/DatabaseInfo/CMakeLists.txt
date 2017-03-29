@@ -22,7 +22,7 @@ if(Boost_FOUND)
 endif()
 
 # we build the DatabaseInfo application
-add_executable(DatabaseInfo ${SRC_DATABASEINFO} )
+add_executable(databaseinfo ${SRC_DATABASEINFO} )
 
 # the DatabaseInfo applications needs to link against libexodbc
-target_link_libraries(DatabaseInfo libexodbc)
+target_link_libraries(databaseinfo libexodbc)

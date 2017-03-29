@@ -26,7 +26,7 @@ if(Boost_FOUND)
 endif()
 
 # we build the SqlCPointerBuffer application
-add_executable(SqlCPointerBuffer ${SRC_SQLCPOINTERBUFFER} ${HEADERS_SQLCPOINTERBUFFER})
+add_executable(sqlcpointerbuffer ${SRC_SQLCPOINTERBUFFER} ${HEADERS_SQLCPOINTERBUFFER})
 
 # the SqlCPointerBuffer applications needs to link against libexodbc
-target_link_libraries(SqlCPointerBuffer libexodbc)
+target_link_libraries(sqlcpointerbuffer libexodbc)

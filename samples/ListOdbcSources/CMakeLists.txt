@@ -26,7 +26,7 @@ if(Boost_FOUND)
 endif()
 
 # we build the SqlCPointerBuffer application
-add_executable(ListOdbcSources ${SRC_LISTODBCSOURCES} ${HEADERS_LISTODBCSOURCES})
+add_executable(listodbcsources ${SRC_LISTODBCSOURCES} ${HEADERS_LISTODBCSOURCES})
 
 # the ListOdbcSources applications needs to link against libexodbc
-target_link_libraries(ListOdbcSources libexodbc)
+target_link_libraries(listodbcsources libexodbc)

@@ -22,7 +22,7 @@ if(Boost_FOUND)
 endif()
 
 # we build the ShortIntro application
-add_executable(ShortIntro ${SRC_SHORTINTRO} )
+add_executable(shortintro ${SRC_SHORTINTRO} )
 
 # the ShortIntro applications needs to link against libexodbc
-target_link_libraries(ShortIntro libexodbc)
+target_link_libraries(shortintro libexodbc)
