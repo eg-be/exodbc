@@ -21,8 +21,8 @@ CREATE TABLE [exodbc].[floattypes](
 END
 GO
 INSERT [exodbc].[floattypes] ([idfloattypes], [tdouble], [tfloat]) VALUES (1, NULL, 0)
-INSERT [exodbc].[floattypes] ([idfloattypes], [tdouble], [tfloat]) VALUES (2, NULL, 3.141)
-INSERT [exodbc].[floattypes] ([idfloattypes], [tdouble], [tfloat]) VALUES (3, NULL, -3.141)
+INSERT [exodbc].[floattypes] ([idfloattypes], [tdouble], [tfloat]) VALUES (2, NULL, 2.684)
+INSERT [exodbc].[floattypes] ([idfloattypes], [tdouble], [tfloat]) VALUES (3, NULL, -2.684)
 INSERT [exodbc].[floattypes] ([idfloattypes], [tdouble], [tfloat]) VALUES (4, 0, NULL)
 INSERT [exodbc].[floattypes] ([idfloattypes], [tdouble], [tfloat]) VALUES (5, 3.141592, NULL)
 INSERT [exodbc].[floattypes] ([idfloattypes], [tdouble], [tfloat]) VALUES (6, -3.141592, NULL)
