@@ -28,7 +28,7 @@ namespace ba = boost::algorithm;
 
 void printUsage()
 {
-	WRITE_STDOUT_ENDL(u8"Usage: ListOdbcSources  [OPTION]...");
+	WRITE_STDOUT_ENDL(u8"Usage: listodbcsources  [OPTION]...");
 	WRITE_STDOUT_ENDL(u8"");
 	WRITE_STDOUT_ENDL(u8"Search for ODBC DSN entries and prints found entries to stdout.");
 	WRITE_STDOUT_ENDL(u8"Searches for ODBC DSN entries of type 'All' as default.");
