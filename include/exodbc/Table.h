@@ -894,8 +894,8 @@ namespace exodbc
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
 		// Executable Statements used
-		ExecutableStatement	m_execStmtCount;	///< Statement to SELECT using ExecuteDirect. Columns with flag CF_SELECT are bound.
-		ExecutableStatement m_execStmtSelect;	///< Statement to COUNT. First Column of Result is bound to m_pSelectCountResultBuffer.
+		ExecutableStatement	m_execStmtCount;	///< Statement to COUNT. First Column of Result is bound to m_pSelectCountResultBuffer.
+		ExecutableStatement m_execStmtSelect;	///< Statement to SELECT using ExecuteDirect. Columns with flag CF_SELECT are bound.
 		ExecutableStatement m_execStmtInsert;	///< Statement to INSERT. Prepared SQL statement bound to all params with flag CF_INSERT.
 		ExecutableStatement m_execStmtUpdatePk;	///< Statement to UPDATE columns with flag CF_UPDATE. WHERE clause is formed using primary key columns.
 		ExecutableStatement m_execStmtDeletePk; ///< Statement to DELETE. WHERE clause is formed using primarky key columns.
