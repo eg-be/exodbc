@@ -182,6 +182,12 @@ namespace exodbctest
 			// insert in one table
 			Table uTable(m_pDb, TableAccessFlag::AF_READ_WRITE, GetTableName(TableId::UNICODE_TABLE_TMP));
 
+			// Do not forget to set the primary keys if this is an Access database
+			if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+			{
+				uTable.SetColumnPrimaryKeyIndexes({ 0 });
+			}
+
 			// Open table and get access to auto created column buffers
 			// Set some values on the buffers and try to insert that row
 			uTable.Open();

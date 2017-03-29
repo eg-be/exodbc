@@ -64,8 +64,7 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
                 ":TableTest.SelectLast:TableTest.SelectPrev"
                 ":TableTest.SelectRelative"
                 ":TableTest.UpdateFlag"
-                ":TableTest.UpdatePk"
-                ":UnicodeTest.*")               
+                ":TableTest.UpdatePk")
   set(ACCESS_TEST_GTEST_FILTER "${accessFilters}" CACHE STRING "value for gtest argument '--gtest_filter': Skip tests known to fail")
   set(ACCESS_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Access")  
 
