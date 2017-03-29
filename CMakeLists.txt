@@ -82,6 +82,7 @@ if(${BUILD_SAMPLES})
   add_subdirectory(samples/ShortIntro)
   add_subdirectory(samples/SqlCPointerBuffer)  
   add_subdirectory(samples/ListOdbcSources)  
+  add_subdirectory(samples/OdbcConnectionTest)
 endif()
 
 if(${BUILD_TESTS})
