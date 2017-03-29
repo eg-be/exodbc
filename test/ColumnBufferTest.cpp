@@ -524,9 +524,9 @@ namespace exodbctest
 		f(1);
 		EXPECT_EQ((0.0), realCol.GetValue());
 		f(2);
-		EXPECT_EQ((int)(3.141 * 1e3), (int)(1e3 * realCol.GetValue()));
+		EXPECT_EQ((int)(2.684* 1e3), (int)(1e3 * realCol.GetValue()));
 		f(3);
-		EXPECT_EQ((int)(-3.141 * 1e3), (int)(1e3 * realCol.GetValue()));
+		EXPECT_EQ((int)(-2.684 * 1e3), (int)(1e3 * realCol.GetValue()));
 
 		f(4);
 		EXPECT_TRUE(realCol.IsNull());
@@ -2384,9 +2384,9 @@ namespace exodbctest
 		f(1);
 		EXPECT_EQ((0.0), buffer);
 		f(2);
-		EXPECT_EQ((int)(3.141 * 1e3), (int)(1e3 * buffer));
+		EXPECT_EQ((int)(2.684 * 1e3), (int)(1e3 * buffer));
 		f(3);
-		EXPECT_EQ((int)(-3.141 * 1e3), (int)(1e3 * buffer));
+		EXPECT_EQ((int)(-2.684 * 1e3), (int)(1e3 * buffer));
 
 		f(4);
 		EXPECT_TRUE(realCol.IsNull());

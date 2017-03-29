@@ -292,11 +292,11 @@ namespace exodbctest
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 2");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( (int)(1e3 * 3.141), (int)(1e3 * table.m_float));
+		EXPECT_EQ( (int)(1e3 * 2.684), (int)(1e3 * table.m_float));
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 3");
 		EXPECT_TRUE(table.SelectNext());
-		EXPECT_EQ( (int)(1e3 * -3.141), (int)(1e3 * table.m_float));
+		EXPECT_EQ( (int)(1e3 * -2.684), (int)(1e3 * table.m_float));
 
 		table.SelectBySqlStmt(u8"SELECT * FROM exodbc.floattypes WHERE idfloattypes = 4");
 		EXPECT_TRUE(table.SelectNext());
