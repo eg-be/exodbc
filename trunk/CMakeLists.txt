@@ -23,11 +23,22 @@ if(SUBVERSION_FOUND)
   set (CPACK_PACKAGE_VERSION_TWEAK ${Project_WC_LAST_CHANGED_REV})
   message(STATUS "Updating CPACK_PACKAGE_VERSION_TWEAK to ${CPACK_PACKAGE_VERSION_TWEAK}, read from ${PROJECT_SOURCE_DIR}")
 endif()
-set(
-CPACK_SOURCE_PACKAGE_FILE_NAME
-"libexodbc-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-r${CPACK_PACKAGE_VERSION_TWEAK}"
-CACHE INTERNAL "tarball basename"
-)
+
+if(DEFINED CPACK_EXPLICIT_VERSIONNAME)
+  set(
+    CPACK_SOURCE_PACKAGE_FILE_NAME
+    "libexodbc-${CPACK_EXPLICIT_VERSIONNAME}-r${CPACK_PACKAGE_VERSION_TWEAK}"
+    CACHE INTERNAL "tarball basename" FORCE
+  )
+else()
+  set(
+    CPACK_SOURCE_PACKAGE_FILE_NAME
+    "libexodbc-${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}-r${CPACK_PACKAGE_VERSION_TWEAK}"
+    CACHE INTERNAL "tarball basename" FORCE
+  )
+endif()
+message(STATUS "Cpack output file is set to ${CPACK_SOURCE_PACKAGE_FILE_NAME}")
+
 set(CPACK_SOURCE_GENERATOR TGZ)
 # The following components are regex's to match anywhere (unless anchored)
 # in absolute path + filename to find files or directories to be excluded
