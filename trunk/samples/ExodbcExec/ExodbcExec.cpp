@@ -12,6 +12,8 @@
 #include "ExodbcExec.h"
 
 // Same component headers
+#include "CommandGenerator.h"
+
 // Other headers
 #ifdef _WIN32
 	#include <SDKDDKVer.h>
@@ -153,7 +155,7 @@ int main(int argc, char* argv[])
 		}
 
 		EnvironmentPtr pEnv = Environment::Create(odbcVersionValue);
-		DatabasePtr pDb(pEnv);
+		DatabasePtr pDb = Database::Create(pEnv);
 
 		if (!csValue.empty())
 		{
@@ -171,7 +173,8 @@ int main(int argc, char* argv[])
 
 		// Start exodbcexec on that db:
 		exodbcexec::ExodbcExec exec(pDb);
-		exec.run();
+		exodbcexec::InputGeneratorPtr pGen = std::make_shared<exodbcexec::StdInGenerator>();
+		exec.Run(pGen);
 	}
 	catch (const Exception& ex)
 	{
@@ -187,7 +190,7 @@ namespace exodbcexec
 		: m_pDb(pDb)
 	{}
 
-	void Run()
+	void ExodbcExec::Run(InputGeneratorPtr pInGen)
 	{
 
 	}

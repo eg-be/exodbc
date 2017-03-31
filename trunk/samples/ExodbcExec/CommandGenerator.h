@@ -1,8 +1,8 @@
 ﻿/*!
-* \file OdbcExec.h
+* \file InputGenerator.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 31.03.2017
-* \brief Header file for odbcexec
+* \brief Header file for CommandGenerator
 * \copyright GNU Lesser General Public License Version 3
 *
 */
@@ -11,11 +11,9 @@
 
 // Same component headers
 // Other headers
-#include "exodbc/Database.h"
-
 // System headers
 #include <string>
-#include <vector>
+#include <memory>
 
 // Forward declarations
 // --------------------
@@ -32,17 +30,21 @@ namespace exodbcexec
 	// -------
 
 	/*!
-	* \class ExodbcExec
+	* \class InputGenerator
 	* \brief An e
 	*/
-	class ExodbcExec
+	class InputGenerator
 	{
 	public:
-		ExodbcExec(exodbc::DatabasePtr pDb);
-
-		void Run(const CommandGenerator& comGen);
-
+		virtual std::string GetNextSqlCommand() = 0;
 	private:
-		exodbc::DatabasePtr m_pDb;
+	};
+	typedef std::shared_ptr<InputGenerator> InputGeneratorPtr;
+
+	class StdInGenerator
+		: public InputGenerator
+	{
+	public:
+		std::string GetNextSqlCommand() { return u8""; };
 	};
 }
