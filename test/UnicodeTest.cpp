@@ -85,7 +85,7 @@ namespace exodbctest
 	TEST_F(UnicodeTest, OpenAuto)
 	{
 		// Test that for every database auto columns with utf8 data can be created
-		Table uTable(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE));
+		Table uTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, GetTableName(TableId::UNICODE_TABLE));
 
 		uTable.Open();
 		EXPECT_EQ(2, uTable.GetColumnBufferCount());
@@ -103,7 +103,7 @@ namespace exodbctest
 	TEST_F(UnicodeTest, ReadUnicodeColumn)
 	{
 		// Test that we can read some unicode data
-		Table uTable(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE));
+		Table uTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, GetTableName(TableId::UNICODE_TABLE));
 
 		// Read all rows
 		uTable.Open();
@@ -224,7 +224,7 @@ namespace exodbctest
 		}
 
 		// Read back in another table
-		Table u2(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::UNICODE_TABLE_TMP));
+		Table u2(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, GetTableName(TableId::UNICODE_TABLE_TMP));
 
 		// Open table and get access to auto created column buffers
 		u2.Open();

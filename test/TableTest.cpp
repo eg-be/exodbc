@@ -86,9 +86,9 @@ namespace exodbctest
 		// If we pass in the TableInfo directly we should also be able to "open"
 		// a totally non-sense table:
 		TableInfo neTableInfo(u8"NotExisting", u8"", u8"", u8"", u8"");
-		Table neTable(m_pDb, TableAccessFlag::AF_READ, neTableInfo);
+		Table neTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, neTableInfo);
 		SQLINTEGER idNotExisting = 0;
-		neTable.SetColumn(0, u8"idNotExistring", SQL_INTEGER, &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting), ColumnFlag::CF_SELECT);
+		neTable.SetColumn(0, u8"idNotExistring", SQL_INTEGER, &idNotExisting, SQL_C_SLONG, sizeof(idNotExisting), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
 		EXPECT_NO_THROW(neTable.Open(TableOpenFlag::TOF_NONE));
 		// \todo So we can prove in the test that we will fail doing a SELECT later
 	}
@@ -124,7 +124,7 @@ namespace exodbctest
 	{
 		string tableName = GetTableName(TableId::INTEGERTYPES);
 		exodbc::Table table;
-		EXPECT_NO_THROW(table.Init(m_pDb, TableAccessFlag::AF_READ, tableName, u8"", u8"", u8""));
+		EXPECT_NO_THROW(table.Init(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName, u8"", u8"", u8""));
 		EXPECT_NO_THROW(table.Open());
 	}
 
@@ -155,7 +155,7 @@ namespace exodbctest
 	{
 		// Create a table
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
-		exodbc::Table t1(m_pDb, TableAccessFlag::AF_READ, tableName);
+		exodbc::Table t1(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 
 		// Create a copy of that table
 		Table c1(t1);
@@ -166,7 +166,7 @@ namespace exodbctest
 		EXPECT_EQ(t1.GetAccessFlags(), c1.GetAccessFlags());
 
 		// If we open the table..
-		EXPECT_NO_THROW(c1.Open());
+		c1.Open();
 
 		// and create another copy from it..
 		Table c2(c1);
@@ -199,7 +199,7 @@ namespace exodbctest
 	TEST_F(TableTest, OpenManualPrimaryKeys)
 	{
 		// Open a table by defining primary keys manually
-		Table iTable(m_pDb, TableAccessFlag::AF_SELECT | TableAccessFlag::AF_DELETE, GetTableName(TableId::INTEGERTYPES_TMP), u8"", u8"", u8"");
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE | TableAccessFlag::AF_DELETE_PK, GetTableName(TableId::INTEGERTYPES_TMP), u8"", u8"", u8"");
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -212,7 +212,7 @@ namespace exodbctest
 		EXPECT_NO_THROW(iTable.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS));
 
 		// But opening if primary keys are not defined must fail
-		Table iTable2(m_pDb, TableAccessFlag::AF_SELECT | TableAccessFlag::AF_DELETE, GetTableName(TableId::INTEGERTYPES_TMP), u8"", u8"", u8"");
+		Table iTable2(m_pDb, TableAccessFlag::AF_SELECT_WHERE | TableAccessFlag::AF_DELETE_PK, GetTableName(TableId::INTEGERTYPES_TMP), u8"", u8"", u8"");
 		SQLINTEGER id2 = 0;
 		SQLSMALLINT si2 = 0;
 		SQLINTEGER i2 = 0;
@@ -223,7 +223,7 @@ namespace exodbctest
 		EXPECT_THROW(iTable2.Open(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS), Exception);
 
 		// But if we open for select only, we do not care about the primary keys
-		Table iTable3(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::INTEGERTYPES_TMP), u8"", u8"", u8"");
+		Table iTable3(m_pDb, TableAccessFlag::AF_SELECT_WHERE, GetTableName(TableId::INTEGERTYPES_TMP), u8"", u8"", u8"");
 		SQLINTEGER id3 = 0;
 		SQLSMALLINT si3 = 0;
 		SQLINTEGER i3 = 0;
@@ -244,7 +244,7 @@ namespace exodbctest
 		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(tableName, u8"", u8"", u8""));
 
-		exodbc::Table table(m_pDb, TableAccessFlag::AF_READ, tableInfo);
+		exodbc::Table table(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableInfo);
 		EXPECT_NO_THROW(table.Open(TableOpenFlag::TOF_NONE));
 
 		// If we try to open an auto-table this will never work if you've passed invalid information:
@@ -261,14 +261,14 @@ namespace exodbctest
 	TEST_F(TableTest, OpenAutoCheckExistence)
 	{
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
-		exodbc::Table table(m_pDb, TableAccessFlag::AF_READ, tableName, u8"", u8"", u8"");
+		exodbc::Table table(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName, u8"", u8"", u8"");
 		EXPECT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 
 		// Open a non-existing table
 		{
 			LOG_ERROR(u8"Warning: This test is supposed to spit errors");
 			std::string neName = GetTableName(TableId::NOT_EXISTING);
-			exodbc::Table neTable(m_pDb, TableAccessFlag::AF_READ, neName, u8"", u8"", u8"");
+			exodbc::Table neTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, neName, u8"", u8"", u8"");
 			EXPECT_THROW(neTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE), Exception);
 		}
 	}
@@ -289,7 +289,7 @@ namespace exodbctest
 
 	TEST_F(TableTest, OpenManualWithUnsupportedColumn)
 	{
-		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, GetTableName(TableId::INTEGERTYPES), u8"", u8"", u8"");
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, GetTableName(TableId::INTEGERTYPES), u8"", u8"", u8"");
 		SQLINTEGER id = 0;
 		SQLSMALLINT si = 0;
 		SQLINTEGER i = 0;
@@ -377,7 +377,7 @@ namespace exodbctest
 	{
 		// Create table
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
-		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName, u8"", u8"", u8"");
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName, u8"", u8"", u8"");
 
 		// Close when not open must fail
 		{
@@ -401,7 +401,7 @@ namespace exodbctest
 	{
 		// Create a Table, open for reading
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
-		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName, u8"", u8"", u8"");
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName, u8"", u8"", u8"");
 		ASSERT_NO_THROW(iTable.Open());
 
 		// Close Table
@@ -450,9 +450,9 @@ namespace exodbctest
 		
 		EXPECT_TRUE(iTable.IsQueryOnly());
 
-		iTable.SetAccessFlag(TableAccessFlag::AF_UPDATE);
+		iTable.SetAccessFlag(TableAccessFlag::AF_UPDATE_PK);
 		EXPECT_FALSE(iTable.IsQueryOnly());
-		iTable.ClearAccessFlag(TableAccessFlag::AF_UPDATE);
+		iTable.ClearAccessFlag(TableAccessFlag::AF_UPDATE_PK);
 		EXPECT_TRUE(iTable.IsQueryOnly());
 
 		iTable.SetAccessFlag(TableAccessFlag::AF_INSERT);
@@ -460,9 +460,9 @@ namespace exodbctest
 		iTable.ClearAccessFlag(TableAccessFlag::AF_INSERT);
 		EXPECT_TRUE(iTable.IsQueryOnly());
 
-		iTable.SetAccessFlag(TableAccessFlag::AF_DELETE);
+		iTable.SetAccessFlag(TableAccessFlag::AF_DELETE_WHERE);
 		EXPECT_FALSE(iTable.IsQueryOnly());
-		iTable.ClearAccessFlag(TableAccessFlag::AF_DELETE);
+		iTable.ClearAccessFlag(TableAccessFlag::AF_DELETE_WHERE);
 		EXPECT_TRUE(iTable.IsQueryOnly());
 
 		// and one that is initially rw
@@ -471,14 +471,17 @@ namespace exodbctest
 		iTable2.ClearAccessFlag(TableAccessFlag::AF_INSERT);
 		EXPECT_FALSE(iTable2.IsQueryOnly());
 
-		iTable2.ClearAccessFlag(TableAccessFlag::AF_DELETE);
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_DELETE_PK);
 		EXPECT_FALSE(iTable2.IsQueryOnly());
 
-		iTable2.ClearAccessFlag(TableAccessFlag::AF_UPDATE);
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_UPDATE_PK);
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_UPDATE_WHERE);
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_DELETE_WHERE);
 		EXPECT_TRUE(iTable2.IsQueryOnly());
 
 		// remove read, we are no longer query only
-		iTable2.ClearAccessFlag(TableAccessFlag::AF_SELECT);
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_SELECT_WHERE);
+		iTable2.ClearAccessFlag(TableAccessFlag::AF_SELECT_PK);
 		EXPECT_FALSE(iTable2.IsQueryOnly());
 	}
 
@@ -487,15 +490,17 @@ namespace exodbctest
 	{
 		// Open a read-only table
 		std::string tableName = GetTableName(TableId::INTEGERTYPES_TMP);
-		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName, u8"", u8"", u8"");
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName, u8"", u8"", u8"");
 
-		ASSERT_NO_THROW(iTable.Open());
+		iTable.Open();
 
-		// .. but not insert, delete or update it
+		// we cannot not insert, delete or update it
 		{
 			EXPECT_THROW(iTable.Insert(), AssertionException);
-			EXPECT_THROW(iTable.Delete(), AssertionException);
-			EXPECT_THROW(iTable.Update(), AssertionException);
+			EXPECT_THROW(iTable.DeleteByPkValues(), AssertionException);
+			EXPECT_THROW(iTable.Delete(u8""), AssertionException);
+			EXPECT_THROW(iTable.UpdateByPkValues(), AssertionException);
+			EXPECT_THROW(iTable.Update(u8""), AssertionException);
 		}
 
 		// we test that writing works in all those cases where we open RW
@@ -507,10 +512,26 @@ namespace exodbctest
 	TEST_F(TableTest, Select)
 	{
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
-		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 		ASSERT_NO_THROW(iTable.Open());
 
 		EXPECT_NO_THROW(iTable.Select(u8""));
+
+		iTable.SelectClose();
+	}
+
+
+	TEST_F(TableTest, SelectByPkValues)
+	{
+		std::string tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_SELECT_PK, tableName);
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
+		iTable.Open();
+
+		EXPECT_NO_THROW(iTable.SelectByPkValues());
 
 		iTable.SelectClose();
 	}
@@ -520,7 +541,7 @@ namespace exodbctest
 	{
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
 		std::string idColName = GetIdColumnName(TableId::INTEGERTYPES);
-		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 		ASSERT_NO_THROW(iTable.Open());
 
 		EXPECT_NO_THROW(iTable.Select(u8"", boost::str(boost::format(u8"%s ASC") % idColName)));
@@ -549,7 +570,7 @@ namespace exodbctest
 	TEST_F(TableTest, SelectFlag)
 	{
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
-		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 		
 		// remove the select flag from the id column before opening the table
 		auto columns = iTable.CreateAutoColumnBufferPtrs(false, true, false);
@@ -708,7 +729,7 @@ namespace exodbctest
 	TEST_F(TableTest, SelectNext)
 	{
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
-		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 		ASSERT_NO_THROW(iTable.Open());
 
 		// We expect 7 Records
@@ -726,10 +747,35 @@ namespace exodbctest
 	}
 
 
+	TEST_F(TableTest, SelectNextFromPkValue)
+	{
+		std::string tableName = GetTableName(TableId::INTEGERTYPES);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_SELECT_PK, tableName);
+		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
+		{
+			iTable.SetColumnPrimaryKeyIndexes({ 0 });
+		}
+		
+		iTable.Open();
+		auto pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
+		auto pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
+		pIdCol->SetValue(2);
+		iTable.SelectByPkValues();
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(2, pIdCol->GetValue());
+		EXPECT_TRUE(pIntCol->IsNull());
+		pIdCol->SetValue(7);
+		iTable.SelectByPkValues();
+		EXPECT_TRUE(iTable.SelectNext());
+		EXPECT_EQ(7, pIdCol->GetValue());
+		EXPECT_EQ(26, pIntCol->GetValue());
+	}
+
+
 	TEST_F(TableTest, SelectClose)
 	{
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
-		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 		ASSERT_NO_THROW(iTable.Open());
 		
 		// Do something that opens a transaction
@@ -742,7 +788,7 @@ namespace exodbctest
 	// -----
 	TEST_F(TableTest, Count)
 	{
-		Table table(m_pDb, TableAccessFlag::AF_READ, GetTableName(TableId::FLOATTYPES));
+		Table table(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, GetTableName(TableId::FLOATTYPES));
 		ASSERT_NO_THROW(table.Open());
 
 		SQLUBIGINT all;
@@ -780,7 +826,7 @@ namespace exodbctest
 
 		{
 			// First insert where all columns are bound
-			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT, tableName);
+			Table iTable(m_pDb, TableAccessFlag::AF_INSERT, tableName);
 			iTable.Open();
 
 			// If we do not set a value for the primary key, fail
@@ -795,8 +841,8 @@ namespace exodbctest
 			EXPECT_NO_THROW(iTable.Insert());
 		}
 		{
-			// Now insert with only id-column bound for inserting, and the int column only bound for selecting
-			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT, tableName);
+			// Now insert with only id-column bound for inserting
+			Table iTable(m_pDb, TableAccessFlag::AF_INSERT, tableName);
 			iTable.CreateAutoColumnBufferPtrs(false, true, false);
 			LongColumnBufferPtr pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 			LongColumnBufferPtr pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -809,7 +855,7 @@ namespace exodbctest
 		m_pDb->CommitTrans();
 
 		// Read back values
-		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 		iTable.Open();
 		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -832,8 +878,8 @@ namespace exodbctest
 		ClearTmpTable(TableId::INTEGERTYPES_TMP);
 
 		{
-			// Now insert with only id-column bound for inserting, and the int column only bound for selecting
-			Table iTable(m_pDb, TableAccessFlag::AF_READ | TableAccessFlag::AF_INSERT, tableName);
+			// Now insert with only id-column bound for inserting
+			Table iTable(m_pDb, TableAccessFlag::AF_INSERT, tableName);
 			iTable.CreateAutoColumnBufferPtrs(false, true, false);
 			LongColumnBufferPtr pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 			LongColumnBufferPtr pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -846,7 +892,7 @@ namespace exodbctest
 		m_pDb->CommitTrans();
 
 		// Read back values
-		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 		iTable.Open();
 		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -896,11 +942,11 @@ namespace exodbctest
 			
 			pId->SetValue(300);
 			pInt->SetValue(500);
-			iTable.Update();
+			iTable.UpdateByPkValues();
 
 			pId->SetValue(301);
 			pInt->SetValue(501);
-			iTable.Update();
+			iTable.UpdateByPkValues();
 			
 			m_pDb->CommitTrans();
 		}
@@ -957,11 +1003,11 @@ namespace exodbctest
 
 			pId->SetValue(300);
 			pInt->SetValue(500);
-			iTable.Update();
+			iTable.UpdateByPkValues();
 
 			pId->SetValue(301);
 			pInt->SetValue(501);
-			iTable.Update();
+			iTable.UpdateByPkValues();
 
 			m_pDb->CommitTrans();
 		}
@@ -1031,7 +1077,7 @@ namespace exodbctest
 		}
 
 		// Read back values
-		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 		iTable.Open();
 		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -1085,10 +1131,10 @@ namespace exodbctest
 			auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
 
 			pId->SetValue(601);
-			iTable.Delete();
+			iTable.DeleteByPkValues();
 
 			pId->SetValue(602);
-			iTable.Delete();
+			iTable.DeleteByPkValues();
 
 			m_pDb->CommitTrans();
 		}
@@ -1123,10 +1169,10 @@ namespace exodbctest
 
 		// Expect to fail, except we pass the flag not to fail on SQL_NO_DATA
 		pId->SetValue(601);
-		EXPECT_THROW(iTable.Delete(true), SqlResultException);
+		EXPECT_THROW(iTable.DeleteByPkValues(true), SqlResultException);
 
 		pId->SetValue(601);
-		EXPECT_NO_THROW(iTable.Delete(false));
+		EXPECT_NO_THROW(iTable.DeleteByPkValues(false));
 	}
 
 
@@ -1166,7 +1212,7 @@ namespace exodbctest
 		}
 
 		// Read back values - no more rows
-		Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
+		Table iTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableName);
 		iTable.Open();
 		auto pId = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		auto pInt = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -1180,7 +1226,7 @@ namespace exodbctest
 	TEST_F(TableTest, GetColumnBufferIndex)
 	{
 		std::string intTypesTableName = GetTableName(TableId::INTEGERTYPES);
-		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, intTypesTableName);
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, intTypesTableName);
 		ASSERT_NO_THROW(iTable.Open());
 
 		EXPECT_EQ(0, iTable.GetColumnBufferIndex(u8"idintegertypes", false));
@@ -1193,7 +1239,7 @@ namespace exodbctest
 	TEST_F(TableTest, CreateAutoIntBuffers)
 	{
 		string tableName = GetTableName(TableId::INTEGERTYPES);
-		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, tableName);
 		vector<ColumnBufferPtrVariant> columns = iTable.CreateAutoColumnBufferPtrs(false, false, false);
 		
 		EXPECT_EQ(4, columns.size());
@@ -1218,7 +1264,7 @@ namespace exodbctest
 	TEST_F(TableTest, CreateAutoBlobBuffers)
 	{
 		string tableName = GetTableName(TableId::BLOBTYPES);
-		Table bTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		Table bTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, tableName);
 		vector<ColumnBufferPtrVariant> columns = bTable.CreateAutoColumnBufferPtrs(false, false, false);
 
 		EXPECT_EQ(3, columns.size());
@@ -1240,7 +1286,7 @@ namespace exodbctest
 	TEST_F(TableTest, CreateAutoCharBuffers)
 	{
 		string tableName = GetTableName(TableId::CHARTYPES);
-		Table cTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		Table cTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, tableName);
 
 		// Depending on the server config, the driver might report SQL_CHAR or 
 		// SQL_WCHAR as column type. Simply accept any of those to pass the test
@@ -1268,7 +1314,7 @@ namespace exodbctest
 	TEST_F(TableTest, CreateAutoDateTypeBuffers)
 	{
 		string tableName = GetTableName(TableId::DATETYPES);
-		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		Table dTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, tableName);
 
 		// Sql server reports TIME as TIME2 with SqlType -154 - skip that column
 		bool skipUnsupportedCols = m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER;
@@ -1328,7 +1374,7 @@ namespace exodbctest
 	TEST_F(TableTest, CreateAutoFloatTypeBuffers)
 	{
 		string tableName = GetTableName(TableId::FLOATTYPES);
-		Table dTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		Table dTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, tableName);
 
 		auto columns = dTable.CreateAutoColumnBufferPtrs(false, false, false);
 		EXPECT_EQ(3, columns.size());
@@ -1352,7 +1398,7 @@ namespace exodbctest
 	TEST_F(TableTest, CreateAutoNumericTypeBuffers)
 	{
 		string tableName = GetTableName(TableId::NUMERICTYPES);
-		Table nTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		Table nTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, tableName);
 
 		auto columns = nTable.CreateAutoColumnBufferPtrs(false, false, false);
 		EXPECT_EQ(4, columns.size());
@@ -1386,7 +1432,7 @@ namespace exodbctest
 		pTypeMap->ClearType(SQL_INTEGER);
 
 		string tableName = GetTableName(TableId::INTEGERTYPES);
-		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, tableName);
 		iTable.SetSql2BufferTypeMap(pTypeMap);
 		auto columns = iTable.CreateAutoColumnBufferPtrs(true, false, false);
 
@@ -1411,7 +1457,7 @@ namespace exodbctest
 		pTypeMap->ClearType(SQL_INTEGER);
 
 		string tableName = GetTableName(TableId::INTEGERTYPES);
-		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, tableName);
 		iTable.SetSql2BufferTypeMap(pTypeMap);
 
 		EXPECT_THROW(iTable.CreateAutoColumnBufferPtrs(false, false, false), NotSupportedException);
@@ -1421,7 +1467,7 @@ namespace exodbctest
 	TEST_F(TableTest, QueryPrimaryKeysAndUpdateColumns)
 	{
 		string tableName = GetTableName(TableId::INTEGERTYPES);
-		Table iTable(m_pDb, TableAccessFlag::AF_SELECT, tableName);
+		Table iTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, tableName);
 		auto columns = iTable.CreateAutoColumnBufferPtrs(false, true, false);
 		// no flags activated so far
 		for (size_t i = 0; i < columns.size(); ++i)

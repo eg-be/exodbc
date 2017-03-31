@@ -88,7 +88,7 @@ namespace exodbctest
 			return;
 
 		// Create Table
-		Table tTable(m_pDb, TableAccessFlag::AF_READ, u8"TestTable$");
+		Table tTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, u8"TestTable$");
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open());
 	}
@@ -100,7 +100,7 @@ namespace exodbctest
 			return;
 
 		// See Ticket #111 - this is fixed and no workarounds are needed
-		Table tTable(m_pDb, TableAccessFlag::AF_READ, u8"TestTable$");
+		Table tTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, u8"TestTable$");
 		// Note that excel reports wired datatypes, doubles for ints (1.0000000 instead of 1), etc., so for the tests use chars
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
@@ -122,7 +122,7 @@ namespace exodbctest
 		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
 
-		Table tTable2(m_pDb, TableAccessFlag::AF_READ, tableInfo);
+		Table tTable2(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableInfo);
 		tTable2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		EXPECT_NO_THROW(tTable2.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 
@@ -151,7 +151,7 @@ namespace exodbctest
 		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		// And create the manual table:
-		Table tTable(m_pDb, TableAccessFlag::AF_READ, tableInfo);
+		Table tTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableInfo);
 		SQLWCHAR id[512];
 		SQLWCHAR ic[512];
 		SQLWCHAR fc[512];
@@ -193,7 +193,7 @@ namespace exodbctest
 		TableInfo tableInfo;
 		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
 		// And create the auto table:
-		Table tTable(m_pDb, TableAccessFlag::AF_READ, tableInfo);
+		Table tTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableInfo);
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
 		ASSERT_NO_THROW(tTable.Open(TableOpenFlag::TOF_NONE));
 
