@@ -7,7 +7,7 @@
 */
 
 // Own header
-#include "CommandGenerator.h"
+#include "InputGenerator.h"
 
 // Same component headers
 // Other headers

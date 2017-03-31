@@ -10,7 +10,7 @@
 #pragma once
 
 // Same component headers
-#include "CommandGenerator.h"
+#include "InputGenerator.h"
 
 // Other headers
 #include "exodbc/Database.h"
