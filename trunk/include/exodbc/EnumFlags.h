@@ -110,24 +110,30 @@ namespace exodbc
 	*/
 	enum class TableAccessFlag
 	{
-		AF_NONE = 0x0,			///< No AccessFlags, no statements are going to be created.
+		AF_NONE = 0x0,			///< No AccessFlags.
 
-		AF_SELECT = 0x1,		///< Access for SELECTing.
+		AF_SELECT_PK = 0x1,		///< Access for SELECting rows identified by bound primary key values.
+		AF_SELECT_WHERE = 0x2,	///< Access for SELECTing rows by manually passing a where clause.
 
-		AF_UPDATE_PK = 0x2,		///< Access for UPDATEing where rows to update are identified by the bound primary key value(s).
-		AF_UPDATE_WHERE = 0x4,	///< Access for UPDATEing where rows to update are identified using a manually passed where clause.
-		AF_UPDATE = AF_UPDATE_PK | AF_UPDATE_WHERE,	///< AF_UPDATE_PK | AF_UPDATE_WHERE
+		AF_COUNT_WHERE = 0x80,	///< Access for COUNTing number of rows by manually passing a where clause.
 
-		AF_INSERT = 0x8,		///< Access for INSERTing.
+		AF_UPDATE_PK = 0x4,		///< Access for UPDATEing where rows to update are identified by the bound primary key values.
+		AF_UPDATE_WHERE = 0x8,	///< Access for UPDATEing where rows to update are identified using a manually passed where clause.
 
-		AF_DELETE_PK = 0x10,	///< Access for DELETEing where rows to delete are identified by the bound primary key value(s).
-		AF_DELETE_WHERE = 0x20,	///< Access for DELETEing where rows to delete are identified using a manually passed where clause.
-		AF_DELETE = AF_DELETE_PK | AF_DELETE_WHERE,	///< AF_DELETE_PK | AF_DELETE_WHERE
+		AF_INSERT = 0x10,		///< Access for INSERTing.
 
-		AF_READ = AF_SELECT,	///< AF_SELECT
-		AF_WRITE = AF_UPDATE | AF_INSERT | AF_DELETE,	///<AF_UPDATE | AF_INSERT | AF_DELETE
-		AF_READ_WRITE = AF_READ | AF_WRITE	///< AF_READ | AF_WRITE
-	};
+		AF_DELETE_PK = 0x20,	///< Access for DELETEing where rows to delete are identified by the bound primary key values.
+		AF_DELETE_WHERE = 0x40,	///< Access for DELETEing where rows to delete are identified using a manually passed where clause.
+
+		AF_READ = AF_SELECT_WHERE | AF_SELECT_PK | AF_COUNT_WHERE,	///< All select and count
+		AF_READ_WITHOUT_PK = AF_SELECT_WHERE | AF_COUNT_WHERE,	///< Select where no primary keys are required
+
+		AF_WRITE = AF_UPDATE_PK | AF_UPDATE_WHERE | AF_INSERT | AF_DELETE_PK | AF_DELETE_WHERE,	///< All update / insert / delete
+		AF_WRITE_WITHOUT_PK = AF_UPDATE_WHERE | AF_INSERT | AF_DELETE_WHERE,	///< Update / Insert / Delete without need for primary keys
+
+		AF_READ_WRITE = AF_READ | AF_WRITE,	///< Everything 
+		AF_READ_WRITE_WITHOUT_PK = AF_READ_WITHOUT_PK | AF_WRITE_WITHOUT_PK	///< Everything without need for primary keys
+	}; 
 	template<>
 	struct enable_bitmask_operators<TableAccessFlag> {
 		static const bool enable = true;

@@ -167,14 +167,16 @@ namespace exodbc
 		// Allocate handles needed, on failure try to deallocate everything
 		try
 		{
-			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
+			if (TestAccessFlag(TableAccessFlag::AF_SELECT_WHERE) || TestAccessFlag(TableAccessFlag::AF_SELECT_PK))
+			{
+				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
+			}
+			if (TestAccessFlag(TableAccessFlag::AF_COUNT_WHERE))
 			{
 				// note: The count statements never needs scrollable cursors. If we enable them and then execute a
 				// SELECT COUNT, ms sql server will report a warning saying 'Cursor type changed'.
 				// and the inserts and updates do not need to be scrollable.
-				m_execStmtCount.Init(m_pDb, true);
-				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
-
+				m_execStmtCountWhere.Init(m_pDb, true);
 				// Create the buffer required for counts
 				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(u8"", SQL_UNKNOWN_TYPE, ColumnFlag::CF_SELECT);
 			}
@@ -195,7 +197,7 @@ namespace exodbc
 		{
 			HIDE_UNUSED(ex);
 			m_pSelectCountResultBuffer.reset();
-			m_execStmtCount.Reset();
+			m_execStmtCountWhere.Reset();
 			m_execStmtSelect.Reset();
 			m_execStmtInsert.Reset();
 			m_execStmtUpdatePk.Reset();
@@ -225,7 +227,7 @@ namespace exodbc
 		}
 		// Derive the ColumnFlags from the TableAccessFlags
 		ColumnFlags flags;
-		if (TestAccessFlag(TableAccessFlag::AF_SELECT))
+		if (TestAccessFlag(TableAccessFlag::AF_SELECT_WHERE) || TestAccessFlag(TableAccessFlag::AF_SELECT_PK))
 		{
 			flags.Set(ColumnFlag::CF_SELECT);
 		}
@@ -376,7 +378,7 @@ namespace exodbc
 		TablePrivileges tablePrivs;
 		tablePrivs.Init(m_pDb, tableInfo);
 
-		if (TestAccessFlag(TableAccessFlag::AF_SELECT) && !tablePrivs.Test(TablePrivilege::SELECT))
+		if (TestAccessFlag(TableAccessFlag::AF_SELECT_WHERE) && !tablePrivs.Test(TablePrivilege::SELECT))
 		{
 			MissingTablePrivilegeException e(TablePrivilege::SELECT, tableInfo);
 			SET_EXCEPTION_SOURCE(e);
@@ -409,7 +411,7 @@ namespace exodbc
 
 		m_pSelectCountResultBuffer.reset();
 
-		m_execStmtCount.Reset();
+		m_execStmtCountWhere.Reset();
 		m_execStmtSelect.Reset();
 		m_execStmtInsert.Reset();
 		m_execStmtUpdatePk.Reset();
@@ -441,7 +443,7 @@ namespace exodbc
 	}
 
 
-	void Table::BindDeleteParameters()
+	void Table::BindDeletePkParameters()
 	{
 		exASSERT(!m_columns.empty());
 		exASSERT(TestAccessFlag(TableAccessFlag::AF_DELETE_PK));
@@ -585,6 +587,48 @@ namespace exodbc
 	}
 
 
+	void Table::BindSelectPkParameters()
+	{
+		exASSERT(!m_columns.empty());
+		exASSERT(TestAccessFlag(TableAccessFlag::AF_SELECT_PK));
+		exASSERT(m_execStmtSelect.IsInitialized());
+
+		// determine a where clause 
+		vector<ColumnBufferPtrVariant> whereParamsToBind;
+		string whereMarkers;
+		auto it = m_columns.begin();
+		while (it != m_columns.end())
+		{
+			ColumnBufferPtrVariant pVar = it->second;
+			ColumnFlagsPtr pFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), pVar);
+			if (pFlags->Test(ColumnFlag::CF_PRIMARY_KEY))
+			{
+				whereMarkers += boost::apply_visitor(QueryNameVisitor(), pVar);
+				whereMarkers += u8" = ?, ";
+				whereParamsToBind.push_back(pVar);
+			}
+			++it;
+		}
+		boost::erase_last(whereMarkers, u8", ");
+
+		// check that we actually have some columns for the where part
+		exASSERT_MSG(!whereParamsToBind.empty(), u8"No Columns usable to construct WHERE statement");
+
+		// .. and prepare stmt
+		string stmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s") % BuildSelectFieldsStatement() % m_tableInfo.GetQueryName() % whereMarkers);
+		m_execStmtSelect.Prepare(stmt);
+
+		// and binding of columns... we must do that after calling Prepare - or
+		// not use SqlDescribeParam during Bind
+		SQLSMALLINT paramNr = 1;
+		for (auto it = whereParamsToBind.begin(); it != whereParamsToBind.end(); ++it)
+		{
+			m_execStmtSelect.BindParameter(*it, paramNr);
+			++paramNr;
+		}
+	}
+
+
 	bool Table::ColumnBufferExists(SQLSMALLINT columnIndex) const noexcept
 	{
 		ColumnBufferPtrVariantMap::const_iterator it = m_columns.find(columnIndex);
@@ -646,9 +690,9 @@ namespace exodbc
 			ColumnBufferPtrVariant columnBuffer = it->second;
 			const std::string& queryName = boost::apply_visitor(QueryNameVisitor(), columnBuffer);
 			ColumnFlagsPtr pColumnFlags = boost::apply_visitor(ColumnFlagsPtrVisitor(), columnBuffer);
-			if (pColumnFlags->Test(ColumnFlag::CF_SELECT) && !TestAccessFlag(TableAccessFlag::AF_SELECT))
+			if (pColumnFlags->Test(ColumnFlag::CF_SELECT) && !(TestAccessFlag(TableAccessFlag::AF_SELECT_PK) || TestAccessFlag(TableAccessFlag::AF_SELECT_WHERE)))
 			{
-				Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+				Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has ColumnFlag CF_SELECT set, but the AccessFlag AF_SELECT_PK or AF_SELECT_WHERE is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -660,7 +704,7 @@ namespace exodbc
 			}
 			if (pColumnFlags->Test(ColumnFlag::CF_UPDATE) && !(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)))
 			{
-				Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
+				Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has ColumnFlag CF_UPDATE set, but the AccessFlag AF_UPDATE_PK or AF_UPDATE_WHERE is not set on the table %s") % queryName % it->first %m_tableInfo.GetQueryName()));
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
 			}
@@ -757,7 +801,7 @@ namespace exodbc
 	SQLUBIGINT Table::Count(const std::string& whereStatement)
 	{
 		exASSERT(IsOpen());
-		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT));
+		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT_WHERE));
 		exASSERT(m_pSelectCountResultBuffer);
 
 		// Prepare the sql to be executed on our internal ExecutableStatement
@@ -771,10 +815,10 @@ namespace exodbc
 			sqlstmt = (boost::format(u8"SELECT COUNT(*) FROM %s") % m_tableInfo.GetQueryName()).str();
 		}
 
-		m_execStmtCount.ExecuteDirect(sqlstmt);
-		exASSERT(m_execStmtCount.SelectNext());
+		m_execStmtCountWhere.ExecuteDirect(sqlstmt);
+		exASSERT(m_execStmtCountWhere.SelectNext());
 
-		m_execStmtCount.SelectClose();
+		m_execStmtCountWhere.SelectClose();
 
 		return *m_pSelectCountResultBuffer;
 	}
@@ -801,10 +845,18 @@ namespace exodbc
 	}
 
 
+	void Table::SelectByPkValues()
+	{
+		exASSERT(IsOpen());
+
+		m_execStmtSelect.ExecutePrepared();
+	}
+
+
 	void Table::SelectBySqlStmt(const std::string& sqlStmt)
 	{
 		exASSERT(IsOpen());
-		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT));
+		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT_WHERE));
 		exASSERT(!sqlStmt.empty());
 
 		m_execStmtSelect.ExecuteDirect(sqlStmt);
@@ -861,7 +913,7 @@ namespace exodbc
 	}
 
 
-	void Table::Delete(bool failOnNoData /* = true */)
+	void Table::DeleteByPkValues(bool failOnNoData /* = true */)
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(TableAccessFlag::AF_DELETE_PK));
@@ -910,7 +962,7 @@ namespace exodbc
 	}
 
 
-	void Table::Update()
+	void Table::UpdateByPkValues()
 	{
 		exASSERT(IsOpen());
 		exASSERT(TestAccessFlag(TableAccessFlag::AF_UPDATE_PK));
@@ -1121,7 +1173,10 @@ namespace exodbc
 			}
 
 			// If we need the primary keys and are allowed to query them do that now
-			if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK)) && !TestOpenFlag(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS))
+			if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) 
+				|| TestAccessFlag(TableAccessFlag::AF_DELETE_PK)
+				|| TestAccessFlag(TableAccessFlag::AF_SELECT_PK)) 
+				&& !TestOpenFlag(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS))
 			{
 				QueryPrimaryKeysAndUpdateColumns(m_columns);
 			}
@@ -1142,15 +1197,14 @@ namespace exodbc
 			}
 
 			// Bind the Buffer for the Count operations
-			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
+			if (TestAccessFlag(TableAccessFlag::AF_COUNT_WHERE))
 			{
 				exASSERT(m_pSelectCountResultBuffer);
-				m_execStmtCount.BindColumn(m_pSelectCountResultBuffer, 1);
+				m_execStmtCountWhere.BindColumn(m_pSelectCountResultBuffer, 1);
 			}
 
-			// Bind the member variables for field exchange between
-			// the Table object and the ODBC record for Select()
-			if (TestAccessFlag(TableAccessFlag::AF_SELECT))
+			// Bind all columns with flag CF_SELECT set to the Select-where and/or Select-pk statement:
+			if (TestAccessFlag(TableAccessFlag::AF_SELECT_WHERE) || TestAccessFlag(TableAccessFlag::AF_SELECT_PK))
 			{
 				SQLSMALLINT boundColumnNumber = 1;
 				for (ColumnBufferPtrVariantMap::iterator it = m_columns.begin(); it != m_columns.end(); it++)
@@ -1168,7 +1222,9 @@ namespace exodbc
 			// Create additional CF_UPDATE and DELETE statement-handles to be used with the pk-columns
 			// and bind the params. PKs are required.
 			// Need to have at least one primary key.
-			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
+			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) 
+				|| TestAccessFlag(TableAccessFlag::AF_DELETE_PK)
+				|| TestAccessFlag(TableAccessFlag::AF_SELECT_PK))
 			{
 				if (GetPrimaryKeyColumnBuffers().empty())
 				{
@@ -1176,15 +1232,17 @@ namespace exodbc
 					SET_EXCEPTION_SOURCE(ex);
 					throw ex;
 				}
-
 				if (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK))
 				{
 					BindUpdatePkParameters();
 				}
-
 				if (TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
 				{
-					BindDeleteParameters();
+					BindDeletePkParameters();
+				}
+				if (TestAccessFlag(TableAccessFlag::AF_SELECT_PK))
+				{
+					BindSelectPkParameters();
 				}
 			}
 
@@ -1302,13 +1360,12 @@ namespace exodbc
 
 	/*!
 	* \brief	Checks if we can only read from this table.
-	* \return	True if this table has the flag AF_READ set and none of the flags
-	*			AF_UPDATE_PK, AF_UPDATE_WHERE, AF_INSERT, AF_DELETE_PK or AF_DELETE_WHERE are set.
+	* \return	True if at least one SELECT flags is set and no update, insert or delete flags are set.
 	*/
 	bool Table::IsQueryOnly() const noexcept  {
-		return TestAccessFlag(TableAccessFlag::AF_READ) &&
-				! ( TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)
-					|| TestAccessFlag(TableAccessFlag::AF_INSERT)
-					|| TestAccessFlag(TableAccessFlag::AF_DELETE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_PK));
+		return (TestAccessFlag(TableAccessFlag::AF_SELECT_PK) || TestAccessFlag(TableAccessFlag::AF_SELECT_WHERE)) 
+			&& !TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) && !TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)
+			&& !TestAccessFlag(TableAccessFlag::AF_DELETE_PK) && !TestAccessFlag(TableAccessFlag::AF_DELETE_WHERE)
+			&& !TestAccessFlag(TableAccessFlag::AF_INSERT);
 	}
 }

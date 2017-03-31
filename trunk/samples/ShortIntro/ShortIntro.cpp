@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 		pIdCol->SetValue(101);
 		pLastUpdateCol->SetValue(InitUtcTimestamp());
 		nameColumnWrapper.SetValue(u8"Updated");
-		t.Update();
+		t.UpdateByPkValues();
 
 		// Insert a single entry
 		pIdCol->SetValue(200);

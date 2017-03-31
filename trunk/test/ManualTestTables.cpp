@@ -95,8 +95,6 @@ namespace exodbctest
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
 		m_char[0] = 0;
-		m_varchar_10[0] = 0;
-		m_char_10[0] = 0;
 
 		SetColumn(0, ToDbCase(u8"idchartypes"), SQL_INTEGER, &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
 		if (pDb->GetDbms() == DatabaseProduct::ACCESS)
@@ -104,15 +102,11 @@ namespace exodbctest
 			// Access does not report SQL_VARCHAR as a supported type, it will report the WVARCHAR, lets try converting that to SQL_C_CHAR
 			SetColumn(1, ToDbCase(u8"tvarchar"), SQL_WVARCHAR, m_varchar, SQL_C_CHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
 			SetColumn(2, ToDbCase(u8"tchar"), SQL_WVARCHAR, m_char, SQL_C_CHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
-			SetColumn(3, ToDbCase(u8"tvarchar_10"), SQL_WVARCHAR, m_varchar_10, SQL_C_CHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
-			SetColumn(4, ToDbCase(u8"tchar_10"), SQL_WVARCHAR, m_char_10, SQL_C_CHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
 		}
 		else
 		{
 			SetColumn(1, ToDbCase(u8"tvarchar"), SQL_VARCHAR, m_varchar, SQL_C_CHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
 			SetColumn(2, ToDbCase(u8"tchar"), SQL_VARCHAR, m_char, SQL_C_CHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
-			SetColumn(3, ToDbCase(u8"tvarchar_10"), SQL_VARCHAR, m_varchar_10, SQL_C_CHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
-			SetColumn(4, ToDbCase(u8"tchar_10"), SQL_VARCHAR, m_char_10, SQL_C_CHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
 		}
 	}
 
@@ -125,8 +119,6 @@ namespace exodbctest
 		m_idCharTypes = 0;
 		m_varchar[0] = 0;
 		m_char[0] = 0;
-		m_varchar_10[0] = 0;
-		m_char_10[0] = 0;
 
 		SetColumn(0, ToDbCase(u8"idchartypes"), SQL_INTEGER, &m_idCharTypes, SQL_C_SLONG, sizeof(m_idCharTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
 		if (pDb->GetDbms() == DatabaseProduct::MY_SQL || pDb->GetDbms() == DatabaseProduct::DB2)
@@ -134,15 +126,11 @@ namespace exodbctest
 			// MySql and DB2 do not report SQL_WVARCHAR as a supported type, use the SQL_VARCHAR type as database-type
 			SetColumn(1, ToDbCase(u8"tvarchar"), SQL_VARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
 			SetColumn(2, ToDbCase(u8"tchar"), SQL_VARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
-			SetColumn(3, ToDbCase(u8"tvarchar_10"), SQL_VARCHAR, m_varchar_10, SQL_C_WCHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
-			SetColumn(4, ToDbCase(u8"tchar_10"), SQL_VARCHAR, m_char_10, SQL_C_WCHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
 		}
 		else
 		{
 			SetColumn(1, ToDbCase(u8"tvarchar"), SQL_WVARCHAR, m_varchar, SQL_C_WCHAR, sizeof(m_varchar), ColumnFlag::CF_SELECT);
 			SetColumn(2, ToDbCase(u8"tchar"), SQL_WVARCHAR, m_char, SQL_C_WCHAR, sizeof(m_char), ColumnFlag::CF_SELECT);
-			SetColumn(3, ToDbCase(u8"tvarchar_10"), SQL_WVARCHAR, m_varchar_10, SQL_C_WCHAR, sizeof(m_varchar_10), ColumnFlag::CF_SELECT);
-			SetColumn(4, ToDbCase(u8"tchar_10"), SQL_WVARCHAR, m_char_10, SQL_C_WCHAR, sizeof(m_char_10), ColumnFlag::CF_SELECT);
 		}
 	}
 

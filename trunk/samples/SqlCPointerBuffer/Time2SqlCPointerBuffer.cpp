@@ -160,7 +160,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		time2.minute = 16;
 		time2.second = 34;
 		time2.fraction = 25000000; // 0.025 seconds -> 25'000'000 billionths of a second
-		t.Update();
+		t.UpdateByPkValues();
 		time2.fraction = 500000000; // 0.5 seconds -> 500'000'000 billionths of a second
 		t.Insert();
 		pDb->CommitTrans();

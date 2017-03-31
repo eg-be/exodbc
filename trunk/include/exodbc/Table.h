@@ -52,19 +52,20 @@ namespace exodbc
 	*
 	* \brief Represent a Table from a Database. Every Table needs a Database.
 	*
-	* This class will allocate the Statements-Handles that are required
+	* This class will allocate some Statements-Handles 
 	* to query and modify the table. Which statements handles are allocated depends
 	* on the AccessFlags set.
 	*
-	* After creating the Table you can manually define which columns are bound
-	* for data-exchange using SetColumn().
+	* After creating the Table you can manually set ColumnBuffer objects as Table columns
+	* for data exchange using SetColumn().
 	*
-	* If no Columns have been bound manually when Open() is called, the Table will
-	* query the Database about the Columns and bind all Columns of the Table.
+	* If Open() is called and no ColumnBuffers have been set manually using SetColumn(), the Table will
+	* query the Database about the columns of this table and create corresponding ColumnBuffers.
 	*
 	* Columns bound to the table will be updated with the values of the current record
-	* this table points to. Calling methods like Update(), Delete() or Insert() will
-	* modify the table in the database using the current values.
+	* this table points to. The record can be updated using any of the Select() methods.
+	* To modify the data in the database, set the values to write on the corresponding
+	* ColumnBuffer and then call any of the methods Update(), Delete(),  Insert().
 	*
 	* A table that queries the database about its columns will always try to bind all columns.
 	* A table where columns are defined manually will only bind those columns defined.
@@ -346,6 +347,23 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Executes a 'SELECT col1, col2, .., colN WHERE PK1 = p1 AND PK2 = p2, ..' for the Table.
+		* \details	All ColumnBuffers that had the flag flag CF_SELECT set during open are included 
+		*			in the SELECT part and all ColumnBuffers that had CF_PRIMARY_KEY set during Open()
+		*			are part of the	WHERE clause.
+		*			If successful, a Select-Query is open. You can iterate the records
+		*			using SelectNext() to access the values of the records.
+		*			The cursor is positioned before the first records,  call
+		*			SelectNext() to access the first record.\n
+		*			If a select statement is open, the statement is closed first.
+		* \see		SelectNext()
+		* \see		SelectClose()
+		* \throw	Exception If failed.
+		*/
+		void		SelectByPkValues();
+
+
+		/*!
 		* \brief	Executes the passed SQL statement on the open Table.
 		* \details	Query by passing the complete SQL statement.
 		*			If successful, a Select-Query is open. You can iterate the records
@@ -437,8 +455,8 @@ namespace exodbc
 		* \details	The values in the ColumnBuffer currently bound will be inserted
 		*			into the database.
 		*			An prepared INSERT statement is used to insert the values identified
-		*			by the bound ColumnBuffers that have the flag ColumnFlags::CF_INSERT set.
-		*			Fails if the table has not been opened using READ_WRITE.
+		*			by the bound ColumnBuffers that have the flag ColumnFlags::CF_INSERT set. \n
+		*			Fails if the table has not been opened using TableAccessFlag::AF_INSERT. \n
 		*			This will not commit the transaction.
 		* \see		Database::CommitTrans()
 		* \throw	Exception on failure.
@@ -450,12 +468,8 @@ namespace exodbc
 		* \brief	Deletes the row identified by the values of the bound primary key columns.
 		* \details	A prepared DELETE statement is used to delete the row that matches all
 		*			primary keys of this Table. The key values are read from the ColumnBuffers bound
-		*			to the primary key columns. You can either use the Select(), SelectNext(), etc.
-		*			functions to load the key values of a record to delete into the buffer, or
-		*			you can manually set the values in the buffers that match the primary key columns.
-		*			Fails if not all primary keys are bound.
-		*			Fails if no primary keys are set on the table.
-		*			Fails if the table has not been opened using READ_WRITE.
+		*			to the primary key columns.
+		*			Fails if the table has not been opened using TableAccessFlag::AF_DELETE_PK. \n
 		*			This will not commit the transaction.
 		* \param	failOnNoData If set to true the function will return false if the result of
 		*			the DELETE is SQL_NO_DATA.
@@ -463,7 +477,7 @@ namespace exodbc
 		* \throw	Exception on failure, or depending on failOnNoData, a SqlResultException if the 
 		*			call to SQLExecute fails with SQL_NO_DATA.
 		*/
-		void		Delete(bool failOnNoData = true);
+		void		DeleteByPkValues(bool failOnNoData = true);
 
 
 		/*!
@@ -471,9 +485,9 @@ namespace exodbc
 		* \details	A DELETE statement for this Table is created, using the passed
 		*			WHERE clause.
 		*			This uses an independent statement and will not modify the values in
-		*			the ColumnBuffers or any ongoing Select() call.
-		*			Fails if the table has not been opened using READ_WRITE.
-		*			Fails if where is empty.
+		*			the ColumnBuffers or any ongoing Select() call. \n
+		*			Fails if the table has not been opened using TableAccessFlag::AF_DELETE_WHERE. \n
+		*			Fails if where is empty. \n
 		*			This will not commit the transaction.
 		* \param	where WHERE clause to be used. Do not include 'WHERE', the Table will add this.
 		*			Not allowed to be empty.
@@ -492,20 +506,15 @@ namespace exodbc
 		*			set.
 		* \details	A prepared UPDATE statement is used to update the row(s) that matches all
 		*			primary key values of this Table. The key values are read from the ColumnBuffers bound
-		*			to the primary key columns. You can either use the Select(), SelectNext(), etc.
-		*			functions to load the key values of a record to delete into the buffer, or
-		*			you can manually set the values in the buffers that match the primary key columns.
+		*			to the primary key columns. 
 		*			The prepared statement will update the bound columns where the ColumnBuffer has 
-		*			the flag ColumnFlags::CF_UPDATE set and the flag ColumnFlags::CF_PRIMARY_KEY is not set.
-		*			Fails if not all primary keys are bound.
-		*			Fails if no primary keys are set on the table.
-		*			Fails if the table has not been opened using READ_WRITE.
-		*			Fails if no bound columns have the flag CF_UPDATE set.
+		*			the flag ColumnFlags::CF_UPDATE set and the flag ColumnFlags::CF_PRIMARY_KEY is not set. \n
+		*			Fails if the table has not been opened using TableAccessFlag::AF_UPDATE_PK. \n
 		*			This will not commit the transaction.
 		* \see		Database::CommitTrans()
 		* \throw	Exception if failed.
 		*/
-		void		Update();
+		void		UpdateByPkValues();
 
 
 		/*!
@@ -516,9 +525,10 @@ namespace exodbc
 		*			A prepared statement is created to update the columns bound to ColumnBuffers that have the 
 		*			flag ColumnFlags::CF_UPDATE set with the values stored in the ColumnBuffer.
 		*			Note that this will also update the bound primary-key columns (those that have the flag
-		*			ColumnFlags::CF_PRIMARY_KEY set), if the column has the flag ColumnFlags::CF_UPDATE set.
-		*			Fails if the table has not been opened using READ_WRITE.
-		*			Fails if where is empty.
+		*			ColumnFlags::CF_PRIMARY_KEY set), if the column has the flag ColumnFlags::CF_UPDATE set. \n
+		*			Fails if the table has not been opened using TableAccessFlag::AF_UPDATE_WHERE. \n
+		*			Fails if no columns have the ColumnFlag::CF_UPDATE set. \n
+		*			Fails if where is empty. \n
 		*			This will not commit the transaction.
 		* \param	where WHERE clause to be used. Do not include 'WHERE', the Table will add this.
 		* \see		Database::CommitTrans()
@@ -827,7 +837,7 @@ namespace exodbc
 		* \throw	Exception If no ColumnBuffers are bound, not opened for writing, etc., or binding fails
 		*			or this Table has no bound primary key columns.
 		*/
-		void		BindDeleteParameters();
+		void		BindDeletePkParameters();
 		
 
 		/*!
@@ -838,6 +848,14 @@ namespace exodbc
 		*			or this Table has no bound primary key columns.
 		*/
 		void		BindUpdatePkParameters();
+
+
+		/*!
+		* \brief	Prepares an SQL SELECT Statement to select all columns with the flag CF_SELECT set.
+		*			WHERE statement is formed using all columns with the flag CF_PRIMARY_KEY set.
+		* \throw	Exception
+		*/
+		void		BindSelectPkParameters();
 
 
 		/*!
@@ -894,11 +912,11 @@ namespace exodbc
 		Sql2BufferTypeMapPtr		m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used by this Table. Set during Construction by reading from Database, or altered using Setters.
 
 		// Executable Statements used
-		ExecutableStatement	m_execStmtCount;	///< Statement to COUNT. First Column of Result is bound to m_pSelectCountResultBuffer.
-		ExecutableStatement m_execStmtSelect;	///< Statement to SELECT using ExecuteDirect. Columns with flag CF_SELECT are bound.
+		ExecutableStatement	m_execStmtCountWhere;	///< Statement to COUNT. First Column of Result is bound to m_pSelectCountResultBuffer.
+		ExecutableStatement m_execStmtSelect;	///< Statement to SELECT columns with flag CF_SELECT. WHERE clause is passed manually or primary key columns are used.
 		ExecutableStatement m_execStmtInsert;	///< Statement to INSERT. Prepared SQL statement bound to all params with flag CF_INSERT.
 		ExecutableStatement m_execStmtUpdatePk;	///< Statement to UPDATE columns with flag CF_UPDATE. WHERE clause is formed using primary key columns.
-		ExecutableStatement m_execStmtDeletePk; ///< Statement to DELETE. WHERE clause is formed using primarky key columns.
+		ExecutableStatement m_execStmtDeletePk; ///< Statement to DELETE. WHERE clause is formed using primary key columns.
 		UBigIntColumnBufferPtr m_pSelectCountResultBuffer;	///< The buffer used to retrieve the result of a SELECT COUNT operation.
 
 		// Table Information
