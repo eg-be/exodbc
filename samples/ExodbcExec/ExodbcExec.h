@@ -10,6 +10,8 @@
 #pragma once
 
 // Same component headers
+#include "CommandGenerator.h"
+
 // Other headers
 #include "exodbc/Database.h"
 
@@ -40,7 +42,7 @@ namespace exodbcexec
 	public:
 		ExodbcExec(exodbc::DatabasePtr pDb);
 
-		void Run(const CommandGenerator& comGen);
+		void Run(InputGeneratorPtr pInGen);
 
 	private:
 		exodbc::DatabasePtr m_pDb;
