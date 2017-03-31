@@ -12,7 +12,7 @@
 #include "ExodbcExec.h"
 
 // Same component headers
-#include "CommandGenerator.h"
+#include "InputGenerator.h"
 
 // Other headers
 #ifdef _WIN32

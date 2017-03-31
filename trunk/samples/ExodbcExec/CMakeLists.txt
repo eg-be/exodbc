@@ -12,12 +12,12 @@ endif()
 
 # files:
 set ( SRC_EXODBCEXEC
-  CommandGenerator.cpp
+  InputGenerator.cpp
   ExodbcExec.cpp
 )
 
 set ( HEADERS_EXODBCEXEC
-  CommandGenerator.h
+  InputGenerator.h
   DebugNew.h
   ExodbcExec.h
 )
