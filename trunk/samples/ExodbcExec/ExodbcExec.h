@@ -14,6 +14,7 @@
 
 // Other headers
 #include "exodbc/Database.h"
+#include "exodbc/ExecutableStatement.h"
 
 // System headers
 #include <string>
@@ -40,11 +41,24 @@ namespace exodbcexec
 	class ExodbcExec
 	{
 	public:
-		ExodbcExec(exodbc::DatabasePtr pDb);
 
-		void Run(InputGeneratorPtr pInGen);
+		const static std::string COMMAND_EXIT;
+		const static std::string COMMAND_EXIT_SHORT;
+		const static std::string COMMAND_HELP;
+		const static std::string COMMAND_HELP_SHORT;
+		const static std::string COMMAND_PRINT;
+		const static std::string COMMAND_PRINT_SHORT;
+
+		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError);
+
+		int Run(InputGeneratorPtr pInGen);
+
+		void PrintHelp();
+		void PrintAll();
 
 	private:
+		bool m_exitOnError;
 		exodbc::DatabasePtr m_pDb;
+		exodbc::ExecutableStatement m_stmt;
 	};
 }
