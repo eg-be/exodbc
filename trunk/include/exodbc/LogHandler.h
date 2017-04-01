@@ -62,6 +62,7 @@ namespace exodbc
 		StdLogHandler()
 			: m_redirectToStdErr(false)
 			, m_redirectToStdOut(false)
+			, m_showFileInfo(true)
 		{};
 
 		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override;
@@ -69,11 +70,14 @@ namespace exodbc
 
 		void RedirectToStdErr(bool enable) noexcept { m_redirectToStdErr = enable; };
 		void RedirectoToStdOut(bool enable) noexcept { m_redirectToStdOut = enable; };
+		void SetShowFileInfo(bool enable) noexcept { m_showFileInfo = enable; };
 
 		bool IsRedirectingToStdErr() const noexcept { return m_redirectToStdErr; };
 		bool IsRedirectingToStdOut() const noexcept { return m_redirectToStdOut; };
+		bool IsShowingFileInfo() const noexcept { return m_showFileInfo; };
 
 	private:
+		bool m_showFileInfo;	///< If not set, filename, line-nr and function-name are not included.
 		bool m_redirectToStdErr;
 		bool m_redirectToStdOut;
 		mutable std::mutex m_logMutex;

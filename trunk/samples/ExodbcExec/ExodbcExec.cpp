@@ -21,6 +21,7 @@
 #endif
 #include "exodbc/exOdbc.h"
 #include "exodbc/LogManager.h"
+#include "exodbc/LogHandler.h"
 #include "exodbc/Environment.h"
 #include "exodbc/Database.h"
 #include "exodbc/ColumnBufferWrapper.h"
@@ -50,7 +51,7 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8" -U        <user>        Username. Optional.");
 	WRITE_STDOUT_ENDL(u8" -P        <pass>        Password. Optional.");
 	WRITE_STDOUT_ENDL(u8"");
-	WRITE_STDOUT_ENDL(u8"To connect using a       CS use the argument:");
+	WRITE_STDOUT_ENDL(u8"To connect using a CS use the argument:");
 	WRITE_STDOUT_ENDL(u8" -CS       <cs>          Connection String");
 	WRITE_STDOUT_ENDL(u8"");
 	WRITE_STDOUT_ENDL("OPTION can be:");
@@ -83,6 +84,13 @@ int main(int argc, char* argv[])
 	}
 	try
 	{
+		// Pretty printing:
+		StdErrLogHandlerPtr pStdLogger = std::make_shared<StdLogHandler>();
+		pStdLogger->SetShowFileInfo(false);
+		LogManager::Get().ClearLogHandlers();
+		LogManager::Get().RegisterLogHandler(pStdLogger);
+		
+		// parse args:
 		const std::string helpKey = u8"--help";
 		const std::string userKey = u8"-U";
 		const std::string passKey = u8"-P";
@@ -156,7 +164,7 @@ int main(int argc, char* argv[])
 					odbcVersionValue = OdbcVersion::V_3_8;
 				else
 				{
-					WRITE_STDERR_ENDL(boost::str(boost::format(u8"Unknown OdvcVersion '%s'") % odbcVersionStringValue));
+					WRITE_STDERR_ENDL(boost::str(boost::format(u8"Unknown OdvcVersion '%s'.") % odbcVersionStringValue));
 					return 2;
 				}
 			}
@@ -173,7 +181,7 @@ int main(int argc, char* argv[])
 					LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
 				else
 				{
-					LOG_ERROR(boost::str(boost::format(u8"Unknown Log Level '%s'") % logLevelString));
+					LOG_ERROR(boost::str(boost::format(u8"Unknown Log Level '%s'.") % logLevelString));
 					return 2;
 				}
 			}
@@ -182,7 +190,7 @@ int main(int argc, char* argv[])
 		if ((dsnValue.empty() && csValue.empty()) 
 			|| (!dsnValue.empty() && !csValue.empty()))
 		{
-			LOG_ERROR(u8"Muest use either '-CS' or '-DSN [-U <user>] [-P <pass>]', cannot use both");
+			LOG_ERROR(u8"Must use either '-CS' or '-DSN [-U <user>] [-P <pass>]', cannot use both.");
 			return 2;
 		}
 
@@ -196,17 +204,17 @@ int main(int argc, char* argv[])
 
 		if (!csValue.empty())
 		{
-			LOG_INFO(boost::str(boost::format(u8"Trying to connect using Connection String '%s'") % csValue));
+			LOG_INFO(boost::str(boost::format(u8"Trying to connect using Connection String '%s'...") % csValue));
 			pDb->Open(csValue);
 		}
 		else
 		{
-			LOG_INFO(boost::str(boost::format(u8"Trying to connect using DSN '%s', User '%s' and Password '%s'") % dsnValue % userValue % passValue));
+			LOG_INFO(boost::str(boost::format(u8"Trying to connect using DSN '%s', User '%s' and Password '%s' ..") % dsnValue % userValue % passValue));
 			pDb->Open(dsnValue, userValue, passValue);
 		}
 		const DatabaseInfo& dbInfo = pDb->GetDbInfo();
 
-		LOG_INFO(boost::str(boost::format(u8"Successfully connected to database system '%s' using driver '%s'") % dbInfo.GetDbmsName() % dbInfo.GetDriverName()));
+		LOG_INFO(boost::str(boost::format(u8"Successfully connected to database system '%s' using driver '%s'.") % dbInfo.GetDbmsName() % dbInfo.GetDriverName()));
 
 		// Start exodbcexec on that db:
 		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue);
@@ -336,7 +344,7 @@ namespace exodbcexec
 		for (SQLSMALLINT colNr = 1; colNr <= nrOfCols; ++colNr)
 		{
 			SColumnDescription colDesc = m_stmt.DescribeColumn(colNr);
-			LOG_DEBUG(boost::str(boost::format(u8"Binding column nr %d: name: '%s'; charsize: %d") % colNr % colDesc.m_name % colDesc.m_charSize));
+			LOG_DEBUG(boost::str(boost::format(u8"Binding column nr %d: name: '%s'; charsize: %d.") % colNr % colDesc.m_name % colDesc.m_charSize));
 			// add +3 chars to charsize: 1 for '\0', 1 for '.' and 1 for '-':
 #ifdef _WIN32
 			WCharColumnBufferPtr pColBuffer = WCharColumnBuffer::Create(colDesc.m_charSize + 3, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
@@ -380,6 +388,12 @@ namespace exodbcexec
 
 	void ExodbcExec::Print(ExodbcExec::PrintMode mode)
 	{
+		if (m_currentColumns.empty())
+		{
+			LOG_WARNING(u8"No record set with bound columns is open.");
+			return;
+		}
+
 		// print current or all
 		if (mode == PrintMode::Current)
 		{
@@ -428,24 +442,26 @@ namespace exodbcexec
 
 	void ExodbcExec::PrintHelp()
 	{
-		LOG_INFO(u8"Any input that is not recognized as a command will be executed as SQL against");
-		LOG_INFO(u8"the database connected to.");
-		LOG_INFO(u8"Commands can be abbreviated. For example, 'Exit SQL execution documented as'");
-		LOG_INFO(u8"'!exit,!e,!q', can be invoked using '!exit' or '!e' or '!q'.");
-		LOG_INFO(u8"Commands are:");
-		LOG_INFO(u8" !exit,!e,!q         Exit SQL execution.");
-		LOG_INFO(u8" !quit               See !exit.");
-		LOG_INFO(u8" !next,!sn           Select next record.");
-		LOG_INFO(u8" !prev,!sp           Select previous record.");
-		LOG_INFO(u8" !first,!sf          Select first record.");
-		LOG_INFO(u8" !last,!sl           Select last record.");
-		LOG_INFO(u8" !printAll,!pa       Print all records of the current recordset.");
-		LOG_INFO(u8"                     If forward only cursors is set to false, !printAll will");
-		LOG_INFO(u8"                     first execue a '!first' and then print and iterate all");
-		LOG_INFO(u8"                     records by calling '!next'.");
-		LOG_INFO(u8"                     If forward only cursors is set to true, all remaining");
-		LOG_INFO(u8"                     records found using '!next' are printed");
-		LOG_INFO(u8" !printCurrent,!pc   Print the current record.");
-		LOG_INFO(u8" !(h)elp             Show this help.");
+		WRITE_STDOUT_ENDL(u8"Any input that is not recognized as a command will be executed as SQL");
+		WRITE_STDOUT_ENDL(u8"against the database connected to.");
+		WRITE_STDOUT_ENDL(u8"Commands can be abbreviated. For example the command 'Exit SQL");
+		WRITE_STDOUT_ENDL(u8"execution', documented as '!exit,!e,!q', can be invoked using '!exit'");
+		WRITE_STDOUT_ENDL(u8" or '!e' or '!q'.");
+		WRITE_STDOUT_ENDL(u8"");
+		WRITE_STDOUT_ENDL(u8"Commands are:");
+		WRITE_STDOUT_ENDL(u8" !exit,!e,!q         Exit SQL execution.");
+		WRITE_STDOUT_ENDL(u8" !quit               See !exit.");
+		WRITE_STDOUT_ENDL(u8" !next,!sn           Select next record.");
+		WRITE_STDOUT_ENDL(u8" !prev,!sp           Select previous record.");
+		WRITE_STDOUT_ENDL(u8" !first,!sf          Select first record.");
+		WRITE_STDOUT_ENDL(u8" !last,!sl           Select last record.");
+		WRITE_STDOUT_ENDL(u8" !printAll,!pa       Print all records of the current recordset.");
+		WRITE_STDOUT_ENDL(u8"                     If forward only cursors is set to false, !printAll");
+		WRITE_STDOUT_ENDL(u8"                     will first execue a '!first' and then print and");
+		WRITE_STDOUT_ENDL(u8"                     iterate all records by calling '!next'.");
+		WRITE_STDOUT_ENDL(u8"                     If forward only cursors is set to true, all");
+		WRITE_STDOUT_ENDL(u8"                     remaining records found using '!next' are printed");
+		WRITE_STDOUT_ENDL(u8" !printCurrent,!pc   Print the current record.");
+		WRITE_STDOUT_ENDL(u8" !help,!h            Show this help.");
 	}
 }
