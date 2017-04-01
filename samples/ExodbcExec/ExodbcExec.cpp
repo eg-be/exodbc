@@ -56,6 +56,8 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8" --silent                Hides all output.");
 	WRITE_STDOUT_ENDL(u8" --odbcVersion <version> Set ODBC Version to use. Valid values are '2', '3'");
 	WRITE_STDOUT_ENDL(u8"                         or '3.8'. Default is '3'.");
+	WRITE_STDOUT_ENDL(u8" --exitOnError           Exits with a non-zero status if SQL execution");
+	WRITE_STDOUT_ENDL(u8"                         fails. Default is to log a warning and continue.");
 	WRITE_STDOUT_ENDL(u8" --help                  Show this text and return with -1.");
 }
 
@@ -79,10 +81,12 @@ int main(int argc, char* argv[])
 		const std::string dsnKey = u8"-DSN";
 		const std::string csKey = u8"-CS";
 		const std::string silentKey = u8"--silent";
+		const std::string exitOnErrorKey = u8"--exitOnError";
 		const std::string odbcVersionKey = u8"--odbcVersion";
 		std::string userValue, passValue, dsnValue;
 		std::string csValue;
 		bool silent = false;
+		bool exitOnError = false;
 		OdbcVersion odbcVersionValue = OdbcVersion::V_3;
 		for (int i = 0; i < argc; i++)
 		{
@@ -120,6 +124,10 @@ int main(int argc, char* argv[])
 			if (ba::equals(arg, silentKey))
 			{
 				silent = true;
+			}
+			if (ba::equals(arg, exitOnErrorKey))
+			{
+				exitOnError = true;
 			}
 			if (ba::equals(arg, odbcVersionKey) && i + 1 < argc)
 			{
@@ -172,26 +180,101 @@ int main(int argc, char* argv[])
 		LOG_INFO(boost::str(boost::format(u8"Successfully connected to database system '%s' using driver '%s'") % dbInfo.GetDbmsName() % dbInfo.GetDriverName()));
 
 		// Start exodbcexec on that db:
-		exodbcexec::ExodbcExec exec(pDb);
+		exodbcexec::ExodbcExec exec(pDb, exitOnError);
 		exodbcexec::InputGeneratorPtr pGen = std::make_shared<exodbcexec::StdInGenerator>();
-		exec.Run(pGen);
+		return exec.Run(pGen);
 	}
 	catch (const Exception& ex)
 	{
 		LOG_ERROR(ex.ToString());
 		return 1;
 	}
-	return 0;
 }
 
 namespace exodbcexec
 {
-	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb)
-		: m_pDb(pDb)
-	{}
 
-	void ExodbcExec::Run(InputGeneratorPtr pInGen)
+	const std::string ExodbcExec::COMMAND_EXIT			= u8"!exit";
+	const std::string ExodbcExec::COMMAND_EXIT_SHORT	= u8"!e";
+	const std::string ExodbcExec::COMMAND_HELP			= u8"!help";
+	const std::string ExodbcExec::COMMAND_HELP_SHORT	= u8"!h";
+	const std::string ExodbcExec::COMMAND_PRINT			= u8"!print";
+	const std::string ExodbcExec::COMMAND_PRINT_SHORT	= u8"!p";
+
+
+	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError)
+		: m_pDb(pDb)
+		, m_exitOnError(exitOnError)
+	{
+		m_stmt.Init(m_pDb, true);
+	}
+
+
+	int ExodbcExec::Run(InputGeneratorPtr pInGen)
+	{
+		std::string command;
+		LOG_INFO(boost::str(boost::format(u8"Ready to execute SQL. Type '!exit' to exit, or '!help' for help.")));
+		while (pInGen->GetNextCommand(command) == InputGenerator::GetCommandResult::HAVE_COMMAND)
+		{
+			if (ba::equals(COMMAND_EXIT, command) || ba::equals(COMMAND_EXIT_SHORT, command))
+				break;
+
+			try
+			{
+				if (ba::equals(COMMAND_HELP, command) || ba::equals(COMMAND_HELP_SHORT, command))
+				{
+					PrintHelp();
+				}
+				if (ba::equals(COMMAND_HELP, command) || ba::equals(COMMAND_HELP_SHORT, command))
+				{
+					PrintAll();
+				}
+				else
+				{
+					LOG_INFO(boost::str(boost::format(u8"Executing '%s'") % command));
+					auto start = std::chrono::high_resolution_clock::now();
+					m_stmt.ExecuteDirect(command);
+					auto end = std::chrono::high_resolution_clock::now();
+					auto elapsed = end - start;
+					auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+					LOG_INFO(boost::str(boost::format(u8"Success. Execution took %1%ms.")
+						% millis.count()));
+				}
+			}
+			catch (const exodbc::SqlResultException& sre)
+			{
+				if (m_exitOnError)
+				{
+					LOG_ERROR(sre.ToString());
+					return 10;
+				}
+				LOG_WARNING(sre.ToString());
+			}
+			catch (const exodbc::Exception& ex)
+			{
+				LOG_ERROR(ex.ToString());
+				return 20;
+			}
+		}
+		return 0;
+	}
+
+
+	void ExodbcExec::PrintAll()
 	{
 
+	}
+
+
+	void ExodbcExec::PrintHelp()
+	{
+		LOG_INFO(u8"Any input that is not recognized as a command will be executed as SQL against");
+		LOG_INFO(u8"the database connected to.");
+		LOG_INFO(u8"Commands can be abbreviated using the first letters of the command, like");
+		LOG_INFO(u8"command documented as '!(e)xit' can be invoked using '!e' or '!exit'.");
+		LOG_INFO(u8"Commands are:");
+		LOG_INFO(u8" !(e)xit    Exit SQL execution.");
+		LOG_INFO(u8" !(p)rint   Print all records of the current recordset.");
+		LOG_INFO(u8" !(h)elp    Show this help.");
 	}
 }

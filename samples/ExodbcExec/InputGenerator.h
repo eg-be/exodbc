@@ -31,12 +31,19 @@ namespace exodbcexec
 
 	/*!
 	* \class InputGenerator
-	* \brief An e
+	* \brief Interface to get the next SQL command to execute.
 	*/
 	class InputGenerator
 	{
 	public:
-		virtual std::string GetNextSqlCommand() = 0;
+		enum class GetCommandResult
+		{
+			HAVE_COMMAND,
+			NO_COMMAND
+		};
+
+		virtual GetCommandResult GetNextCommand(std::string& command) = 0;
+
 	private:
 	};
 	typedef std::shared_ptr<InputGenerator> InputGeneratorPtr;
@@ -45,6 +52,6 @@ namespace exodbcexec
 		: public InputGenerator
 	{
 	public:
-		std::string GetNextSqlCommand() { return u8""; };
+		GetCommandResult GetNextCommand(std::string& command);
 	};
 }
