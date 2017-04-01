@@ -372,6 +372,23 @@ namespace exodbctest
 	}
 
 
+	TEST_F(ExecutableStatementTest, GetNrOfColumns)
+	{
+		string tableName = GetTableName(TableId::INTEGERTYPES);
+		string tableQueryName = PrependSchemaOrCatalogName(m_pDb->GetDbms(), tableName);
+		string idName = GetIdColumnName(TableId::INTEGERTYPES);
+
+		string sqlsmt = boost::str(boost::format(u8"SELECT * FROM %s") %tableQueryName);
+		ExecutableStatement ds(m_pDb);
+		ds.ExecuteDirect(sqlsmt);
+		EXPECT_EQ(4, ds.GetNrOfColumns());
+
+		sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s") % idName %tableQueryName);
+		ds.ExecuteDirect(sqlsmt);
+		EXPECT_EQ(1, ds.GetNrOfColumns());
+	}
+
+
 	TEST_F(ExecutableStatementTest, WriteValues)
 	{
 		// Prepare to insert some values

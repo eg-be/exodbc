@@ -197,6 +197,18 @@ namespace exodbc
 	}
 
 
+	SQLSMALLINT ExecutableStatement::GetNrOfColumns() const
+	{
+		exASSERT(m_pHStmt);
+		exASSERT(m_pHStmt->IsAllocated());
+		SQLSMALLINT columnCount = 0;
+		SQLRETURN ret = SQLNumResultCols(m_pHStmt->GetHandle(), &columnCount);
+		THROW_IFN_SUCCEEDED(SQLNumResultCols, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+
+		return columnCount;
+	}
+
+
 	void ExecutableStatement::ExecutePrepared() const
 	{
 		exASSERT(m_isPrepared);

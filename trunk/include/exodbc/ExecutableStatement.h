@@ -177,6 +177,12 @@ namespace exodbc
 
 
 		/*!
+		* Calls SQLNumResultsCols to get the number of columns in the current result set of this ExecutableStatement.
+		*/
+		SQLSMALLINT GetNrOfColumns() const;
+
+
+		/*!
 		* \brief	Executes a statement that has been prepared using Prepare() using SQLExecute.
 		*/
 		void ExecutePrepared() const;
