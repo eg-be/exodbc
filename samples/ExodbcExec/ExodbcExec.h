@@ -15,10 +15,12 @@
 // Other headers
 #include "exodbc/Database.h"
 #include "exodbc/ExecutableStatement.h"
+#include "exodbc/ColumnBufferWrapper.h"
 
 // System headers
 #include <string>
 #include <vector>
+#include <set>
 
 // Forward declarations
 // --------------------
@@ -42,21 +44,30 @@ namespace exodbcexec
 	{
 	public:
 
-		const static std::string COMMAND_EXIT;
-		const static std::string COMMAND_EXIT_SHORT;
-		const static std::string COMMAND_HELP;
-		const static std::string COMMAND_HELP_SHORT;
-		const static std::string COMMAND_PRINT;
-		const static std::string COMMAND_PRINT_SHORT;
+		const static std::set<std::string> COMMAND_EXIT;
+		const static std::set<std::string> COMMAND_HELP;
+		const static std::set<std::string> COMMAND_PRINT;
+		const static std::set<std::string> COMMAND_SELECT_NEXT;
+		const static std::set<std::string> COMMAND_SELECT_PREV;
+		const static std::set<std::string> COMMAND_SELECT_FIRST;
+		const static std::set<std::string> COMMAND_SELECT_LAST;
 
 		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError);
 
 		int Run(InputGeneratorPtr pInGen);
 
+		enum  class PrintMode
+		{
+			All,
+			Current
+		};
+
 		void PrintHelp();
-		void PrintAll();
+		void Print(PrintMode mode);
 
 	private:
+		std::string PrintCurrentRecord(const std::vector<exodbc::StringColumnWrapper>& columns) const;
+
 		bool m_exitOnError;
 		exodbc::DatabasePtr m_pDb;
 		exodbc::ExecutableStatement m_stmt;

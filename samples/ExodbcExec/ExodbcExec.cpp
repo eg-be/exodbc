@@ -23,6 +23,7 @@
 #include "exodbc/LogManager.h"
 #include "exodbc/Environment.h"
 #include "exodbc/Database.h"
+#include "exodbc/ColumnBufferWrapper.h"
 
 #include "boost/format.hpp"
 
@@ -57,7 +58,10 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8" --odbcVersion <version> Set ODBC Version to use. Valid values are '2', '3'");
 	WRITE_STDOUT_ENDL(u8"                         or '3.8'. Default is '3'.");
 	WRITE_STDOUT_ENDL(u8" --exitOnError           Exits with a non-zero status if SQL execution");
-	WRITE_STDOUT_ENDL(u8"                         fails. Default is to log a warning and continue.");
+	WRITE_STDOUT_ENDL(u8"                         fails or any SQL related call fails. Default is to");
+	WRITE_STDOUT_ENDL(u8"                         log a warning and continue.");
+	WRITE_STDOUT_ENDL(u8" --logLevel <level> Set the Log Level. <level> can be 'Debug', Info',");
+	WRITE_STDOUT_ENDL(u8"                    'Warning' or 'Error'. Default is 'Info'.");
 	WRITE_STDOUT_ENDL(u8" --help                  Show this text and return with -1.");
 }
 
@@ -80,6 +84,7 @@ int main(int argc, char* argv[])
 		const std::string passKey = u8"-P";
 		const std::string dsnKey = u8"-DSN";
 		const std::string csKey = u8"-CS";
+		const std::string logLevelKey = u8"--logLevel";
 		const std::string silentKey = u8"--silent";
 		const std::string exitOnErrorKey = u8"--exitOnError";
 		const std::string odbcVersionKey = u8"--odbcVersion";
@@ -88,6 +93,7 @@ int main(int argc, char* argv[])
 		bool silent = false;
 		bool exitOnError = false;
 		OdbcVersion odbcVersionValue = OdbcVersion::V_3;
+		LogLevel logLevelValue = LogLevel::Info;
 		for (int i = 0; i < argc; i++)
 		{
 			std::string argNext;
@@ -144,6 +150,23 @@ int main(int argc, char* argv[])
 					return 2;
 				}
 			}
+			if (ba::equals(arg, logLevelKey) && i + 1 < argc)
+			{
+				string logLevelString = argNext;
+				if (ba::iequals(logLevelString, u8"Debug"))
+					LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
+				else if (ba::iequals(logLevelString, u8"Info"))
+					LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
+				else if (ba::iequals(logLevelString, u8"Warning"))
+					LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
+				else if (ba::iequals(logLevelString, u8"Error"))
+					LogManager::Get().SetGlobalLogLevel(LogLevel::Error);
+				else
+				{
+					LOG_ERROR(boost::str(boost::format(u8"Unknown Log Level '%s'") % logLevelString));
+					return 2;
+				}
+			}
 		}
 
 		if ((dsnValue.empty() && csValue.empty()) 
@@ -156,10 +179,6 @@ int main(int argc, char* argv[])
 		if (silent)
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::None);
-		}
-		else
-		{
-			LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
 		}
 
 		EnvironmentPtr pEnv = Environment::Create(odbcVersionValue);
@@ -194,13 +213,13 @@ int main(int argc, char* argv[])
 namespace exodbcexec
 {
 
-	const std::string ExodbcExec::COMMAND_EXIT			= u8"!exit";
-	const std::string ExodbcExec::COMMAND_EXIT_SHORT	= u8"!e";
-	const std::string ExodbcExec::COMMAND_HELP			= u8"!help";
-	const std::string ExodbcExec::COMMAND_HELP_SHORT	= u8"!h";
-	const std::string ExodbcExec::COMMAND_PRINT			= u8"!print";
-	const std::string ExodbcExec::COMMAND_PRINT_SHORT	= u8"!p";
-
+	const std::set<std::string> ExodbcExec::COMMAND_EXIT = { u8"!exit", u8"!e" };
+	const std::set<std::string> ExodbcExec::COMMAND_HELP = { u8"!help", u8"!h" };
+	const std::set<std::string> ExodbcExec::COMMAND_PRINT = { u8"!print", u8"!p" };
+	const std::set<std::string> ExodbcExec::COMMAND_SELECT_NEXT = { u8"!next", u8"!n" };
+	const std::set<std::string> ExodbcExec::COMMAND_SELECT_PREV = { u8"!prev", u8"!r" };
+	const std::set<std::string> ExodbcExec::COMMAND_SELECT_FIRST = { u8"!first", u8"!f" };
+	const std::set<std::string> ExodbcExec::COMMAND_SELECT_LAST = { u8"!last", u8"!l" };
 
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError)
 		: m_pDb(pDb)
@@ -216,18 +235,34 @@ namespace exodbcexec
 		LOG_INFO(boost::str(boost::format(u8"Ready to execute SQL. Type '!exit' to exit, or '!help' for help.")));
 		while (pInGen->GetNextCommand(command) == InputGenerator::GetCommandResult::HAVE_COMMAND)
 		{
-			if (ba::equals(COMMAND_EXIT, command) || ba::equals(COMMAND_EXIT_SHORT, command))
+			if (COMMAND_EXIT.find(command) != COMMAND_EXIT.end())
 				break;
 
 			try
 			{
-				if (ba::equals(COMMAND_HELP, command) || ba::equals(COMMAND_HELP_SHORT, command))
+				if (COMMAND_HELP.find(command) != COMMAND_HELP.end())
 				{
 					PrintHelp();
 				}
-				if (ba::equals(COMMAND_HELP, command) || ba::equals(COMMAND_HELP_SHORT, command))
+				else if (COMMAND_PRINT.find(command) != COMMAND_PRINT.end())
 				{
-					PrintAll();
+					Print(PrintMode::All);
+				}
+				else if (COMMAND_SELECT_NEXT.find(command) != COMMAND_SELECT_NEXT.end())
+				{
+
+				}
+				else if (COMMAND_SELECT_PREV.find(command) != COMMAND_SELECT_PREV.end())
+				{
+
+				}
+				else if (COMMAND_SELECT_FIRST.find(command) != COMMAND_SELECT_FIRST.end())
+				{
+
+				}
+				else if (COMMAND_SELECT_LAST.find(command) != COMMAND_SELECT_LAST.end())
+				{
+
 				}
 				else
 				{
@@ -260,9 +295,70 @@ namespace exodbcexec
 	}
 
 
-	void ExodbcExec::PrintAll()
+	void ExodbcExec::Print(ExodbcExec::PrintMode mode)
 	{
+		SQLSMALLINT nrOfCols = m_stmt.GetNrOfColumns();
+		if (nrOfCols == 0)
+		{
+			LOG_WARNING(u8"No columns available in current result set.");
+			return;
+		}
 
+		m_stmt.UnbindColumns();
+
+		// Bind columns
+		std::vector<StringColumnWrapper> stringCols;
+		for (SQLSMALLINT colNr = 1; colNr <= nrOfCols; ++colNr)
+		{
+			SColumnDescription colDesc = m_stmt.DescribeColumn(colNr);
+			LOG_DEBUG(boost::str(boost::format(u8"Binding column nr %d: name: '%s'; charsize: %d") % colNr % colDesc.m_name % colDesc.m_charSize));
+			// add +3 chars to charsize: 1 for '\0', 1 for '.' and 1 for '-':
+#ifdef _WIN32
+			WCharColumnBufferPtr pColBuffer = WCharColumnBuffer::Create(colDesc.m_charSize + 3, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
+#endif
+			StringColumnWrapper wrapper(pColBuffer);
+			stringCols.push_back(wrapper);
+			m_stmt.BindColumn(pColBuffer, colNr);
+		}
+
+		// and print current or all
+		if (mode == PrintMode::Current)
+		{
+			PrintCurrentRecord(stringCols);
+		}
+		else if (mode == PrintMode::All)
+		{
+			size_t rowCount = 1;
+			bool haveNext = m_stmt.SelectNext();
+			while (m_stmt.SelectNext())
+			{
+				stringstream ss;
+				ss << u8"row: " << rowCount << ": ";
+				ss << PrintCurrentRecord(stringCols);
+				LOG_INFO(ss.str());
+				++rowCount;
+			}
+			LOG_INFO(u8"No more results available");
+		}
+		m_stmt.UnbindColumns();
+	}
+	
+
+	std::string ExodbcExec::PrintCurrentRecord(const std::vector<exodbc::StringColumnWrapper>& columns) const
+	{
+		stringstream ss;
+		std::vector<StringColumnWrapper>::const_iterator it = columns.begin();
+		while (it != columns.end())
+		{
+			if (it->IsNull())
+				ss << u8"NULL";
+			else
+				ss << it->GetValue<std::string>();
+			++it;
+			if (it != columns.end())
+				ss << u8";";
+		}
+		return ss.str();
 	}
 
 
