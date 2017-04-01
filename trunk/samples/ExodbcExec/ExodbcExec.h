@@ -52,6 +52,8 @@ namespace exodbcexec
 		const static std::set<std::string> COMMAND_SELECT_PREV;
 		const static std::set<std::string> COMMAND_SELECT_FIRST;
 		const static std::set<std::string> COMMAND_SELECT_LAST;
+		const static std::set<std::string> COMMAND_COMMIT_TRANS;
+		const static std::set<std::string> COMMAND_ROLLBACK_TRANS;
 
 		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors);
 
