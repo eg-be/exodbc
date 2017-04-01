@@ -165,6 +165,12 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Returns true if forward only cursors are set.
+		*/
+		bool IsForwardOnlyCursor() const noexcept { return m_forwardOnlyCursors; };
+
+
+		/*!
 		* \brief	Calls SQLDescribeParam for parameter at paramNr and the handle of this ExecutableStatement.
 		*/
 		SParameterDescription DescribeParameter(SQLUSMALLINT paramNr) const;
