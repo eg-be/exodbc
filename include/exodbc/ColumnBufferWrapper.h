@@ -71,6 +71,9 @@ namespace exodbc
 		*/
 		SQLSMALLINT GetSqlCType() const;
 
+
+		ColumnBufferPtrVariant GetVariant() const { return m_columnBufferVariant; };
+
 	protected:
 		ColumnBufferPtrVariant m_columnBufferVariant;
 	};
@@ -103,7 +106,7 @@ namespace exodbc
 		typename std::enable_if<std::is_same<std::string, TDataType>::value ||
 			std::is_same<char const *, TDataType>::value,
 			TDataType>::type
-			GetValue()
+			GetValue() const
 		{
 			SQLSMALLINT sqlCType = GetSqlCType();
 
@@ -138,7 +141,7 @@ namespace exodbc
 		typename std::enable_if<std::is_same<std::wstring, TDataType>::value ||
 			std::is_same<wchar_t const *, TDataType>::value,
 			TDataType>::type
-			GetValue()
+			GetValue() const
 		{
 			SQLSMALLINT sqlCType = GetSqlCType();
 
