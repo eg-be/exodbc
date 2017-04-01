@@ -46,30 +46,44 @@ namespace exodbcexec
 
 		const static std::set<std::string> COMMAND_EXIT;
 		const static std::set<std::string> COMMAND_HELP;
-		const static std::set<std::string> COMMAND_PRINT;
+		const static std::set<std::string> COMMAND_PRINT_ALL;
+		const static std::set<std::string> COMMAND_PRINT_CURRENT;
 		const static std::set<std::string> COMMAND_SELECT_NEXT;
 		const static std::set<std::string> COMMAND_SELECT_PREV;
 		const static std::set<std::string> COMMAND_SELECT_FIRST;
 		const static std::set<std::string> COMMAND_SELECT_LAST;
 
-		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError);
+		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors);
 
 		int Run(InputGeneratorPtr pInGen);
 
-		enum  class PrintMode
+		enum class PrintMode
 		{
 			All,
 			Current
 		};
 
+		enum class SelectMode
+		{
+			Next,
+			Prev,
+			First,
+			Last
+		};
+
 		void PrintHelp();
 		void Print(PrintMode mode);
+		void Select(SelectMode mode);
 
 	private:
-		std::string PrintCurrentRecord(const std::vector<exodbc::StringColumnWrapper>& columns) const;
+		std::string CurrentRecordToString(const std::vector<exodbc::StringColumnWrapper>& columns) const;
+		void BindColumns();
+		void UnbindColumns();
 
 		bool m_exitOnError;
 		exodbc::DatabasePtr m_pDb;
 		exodbc::ExecutableStatement m_stmt;
+		bool m_forwardOnlyCursors;
+		std::vector<exodbc::StringColumnWrapper> m_currentColumns;
 	};
 }
