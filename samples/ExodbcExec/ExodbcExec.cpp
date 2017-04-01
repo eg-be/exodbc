@@ -58,6 +58,7 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8" --silent                Hides all output.");
 	WRITE_STDOUT_ENDL(u8" --odbcVersion <version> Set ODBC Version to use. Valid values are '2', '3'");
 	WRITE_STDOUT_ENDL(u8"                         or '3.8'. Default is '3'.");
+	WRITE_STDOUT_ENDL(u8" --autoCommitOn          Enable auto commit. Default is to commit manual.");
 	WRITE_STDOUT_ENDL(u8" --forwardOnlyCursors    Disables the commands '!prev', '!first' and");
 	WRITE_STDOUT_ENDL(u8"                         '!last'. Only '!next' can be used to iterate");
 	WRITE_STDOUT_ENDL(u8"                         records. If not set, positionable cursors are");
@@ -97,6 +98,7 @@ int main(int argc, char* argv[])
 		const std::string dsnKey = u8"-DSN";
 		const std::string csKey = u8"-CS";
 		const std::string logLevelKey = u8"--logLevel";
+		const std::string autoCommitKey = u8"--autoCommitOn";
 		const std::string silentKey = u8"--silent";
 		const std::string forwardOnlyCursorsKey = u8"--forwardOnlyCursors";
 		const std::string exitOnErrorKey = u8"--exitOnError";
@@ -106,6 +108,7 @@ int main(int argc, char* argv[])
 		bool silent = false;
 		bool exitOnError = false;
 		bool forwardOnlyCursorsValue = false;
+		bool autoCommitValue = false;
 		OdbcVersion odbcVersionValue = OdbcVersion::V_3;
 		LogLevel logLevelValue = LogLevel::Info;
 		for (int i = 0; i < argc; i++)
@@ -140,6 +143,10 @@ int main(int argc, char* argv[])
 			if (ba::equals(arg, csKey) && i + 1 < argc)
 			{
 				csValue = argNext;
+			}
+			if (ba::equals(arg, autoCommitKey))
+			{
+				autoCommitValue = true;
 			}
 			if (ba::equals(arg, silentKey))
 			{
@@ -216,6 +223,13 @@ int main(int argc, char* argv[])
 
 		LOG_INFO(boost::str(boost::format(u8"Successfully connected to database system '%s' using driver '%s'.") % dbInfo.GetDbmsName() % dbInfo.GetDriverName()));
 
+		if (autoCommitValue)
+		{
+			LOG_INFO(u8"Enabling auto commit ..");
+			pDb->SetCommitMode(CommitMode::AUTO);
+			LOG_INFO(u8"auto commit is on.");
+		}
+
 		// Start exodbcexec on that db:
 		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue);
 		exodbcexec::InputGeneratorPtr pGen = std::make_shared<exodbcexec::StdInGenerator>();
@@ -239,6 +253,8 @@ namespace exodbcexec
 	const std::set<std::string> ExodbcExec::COMMAND_SELECT_PREV = { u8"!prev", u8"!sp" };
 	const std::set<std::string> ExodbcExec::COMMAND_SELECT_FIRST = { u8"!first", u8"!sf" };
 	const std::set<std::string> ExodbcExec::COMMAND_SELECT_LAST = { u8"!last", u8"!sl" };
+	const std::set<std::string> ExodbcExec::COMMAND_COMMIT_TRANS = { u8"!commitTrans", u8"!ct" };
+	const std::set<std::string> ExodbcExec::COMMAND_ROLLBACK_TRANS = { u8"!rollbackTrans", u8"!rt" };
 
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors)
 		: m_pDb(pDb)
@@ -287,6 +303,14 @@ namespace exodbcexec
 				else if (!m_forwardOnlyCursors && COMMAND_SELECT_LAST.find(command) != COMMAND_SELECT_LAST.end())
 				{
 					Select(SelectMode::Last);
+				}
+				else if (COMMAND_COMMIT_TRANS.find(command) != COMMAND_COMMIT_TRANS.end())
+				{
+					m_pDb->CommitTrans();
+				}
+				else if (COMMAND_ROLLBACK_TRANS.find(command) != COMMAND_ROLLBACK_TRANS.end())
+				{
+					m_pDb->RollbackTrans();
 				}
 				else
 				{
@@ -462,6 +486,9 @@ namespace exodbcexec
 		WRITE_STDOUT_ENDL(u8"                     If forward only cursors is set to true, all");
 		WRITE_STDOUT_ENDL(u8"                     remaining records found using '!next' are printed");
 		WRITE_STDOUT_ENDL(u8" !printCurrent,!pc   Print the current record.");
+		WRITE_STDOUT_ENDL(u8" !commitTrans,!ct    Commit any ongoing transations.");
+		WRITE_STDOUT_ENDL(u8" !rollbackTrans,!rt  Rollback all ongoing transactions.");
+
 		WRITE_STDOUT_ENDL(u8" !help,!h            Show this help.");
 	}
 }
