@@ -272,36 +272,64 @@ namespace exodbc
 
 	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, StringProperty prop)
 	{
-		std::string value;
-		GetInfo(pHDbc, (SQLUSMALLINT)prop, value);
-		SetProperty(prop, value);
+		try
+		{
+			std::string value;
+			GetInfo(pHDbc, (SQLUSMALLINT)prop, value);
+			SetProperty(prop, value);
+		}
+		catch (const Exception& ex)
+		{
+			LOG_WARNING(boost::str(boost::format(u8"Failed to read database property %s (%d): %s") % GetPropertyName(prop) % (SQLUSMALLINT)prop % ex.ToString()));
+		}
 	}
 
 
 	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, USmallIntProperty prop)
 	{
-		SQLUSMALLINT value;
-		SQLSMALLINT cb;
-		GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
-		SetProperty(prop, value);
+		try
+		{
+			SQLUSMALLINT value;
+			SQLSMALLINT cb;
+			GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+			SetProperty(prop, value);
+		}
+		catch (const Exception& ex)
+		{
+			LOG_WARNING(boost::str(boost::format(u8"Failed to read database property %s (%d): %s") % GetPropertyName(prop) % (SQLUSMALLINT)prop % ex.ToString()));
+		}
 	}
 
 
 	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, UIntProperty prop)
 	{
-		SQLUINTEGER value;
-		SQLSMALLINT cb;
-		GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
-		SetProperty(prop, value);
+		try
+		{
+			SQLUINTEGER value;
+			SQLSMALLINT cb;
+			GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+			SetProperty(prop, value);
+		}
+		catch (const Exception& ex)
+		{
+			LOG_WARNING(boost::str(boost::format(u8"Failed to read database property %s (%d): %s") % GetPropertyName(prop) % (SQLUSMALLINT)prop % ex.ToString()));
+		}
 	}
 
 
 	void DatabaseInfo::ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, IntProperty prop)
 	{
-		SQLINTEGER value;
-		SQLSMALLINT cb;
-		GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
-		SetProperty(prop, value);
+		try
+		{
+			SQLINTEGER value;
+			SQLSMALLINT cb;
+			GetInfo(pHDbc, (SQLUSMALLINT)prop, &value, sizeof(value), &cb);
+			SetProperty(prop, value);
+		}
+		catch (const Exception& ex)
+		{
+			LOG_WARNING(boost::str(boost::format(u8"Failed to read database property %s (%d): %s") % GetPropertyName(prop) % (SQLUSMALLINT)prop % ex.ToString()));
+		}
 	}
 
 
