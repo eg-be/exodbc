@@ -353,6 +353,9 @@ namespace exodbcexec
 		LOG_INFO(boost::str(boost::format(u8"Ready to execute SQL. Type '!exit' to exit, or '!help' for help.")));
 		while (pInGen->GetNextCommand(command) == InputGenerator::GetCommandResult::HAVE_COMMAND)
 		{
+			if (command.empty())
+				continue;
+
 			if (COMMAND_EXIT.find(command) != COMMAND_EXIT.end())
 				break;
 
