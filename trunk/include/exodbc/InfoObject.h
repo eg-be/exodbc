@@ -352,6 +352,7 @@ namespace exodbc
 	* \class	DatabaseInfo
 	* \brief	The following structure contains database information gathered from the Database
 	* 			when the Database is first Opened.
+	*			Not all attributes may be present.
 	*/
 	class EXODBCAPI DatabaseInfo
 	{
@@ -436,6 +437,11 @@ namespace exodbc
 		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, USmallIntProperty prop);
 		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, UIntProperty prop);
 		void ReadAndStoryProperty(SqlDbcHandlePtr pHDbc, IntProperty prop);
+
+		bool HasProperty(StringProperty prop) const noexcept { return m_stringMap.find(prop) != m_stringMap.end(); };
+		bool HasProperty(USmallIntProperty prop) const noexcept { return m_uSmallIntMap.find(prop) != m_uSmallIntMap.end(); };
+		bool HasProperty(UIntProperty prop) const noexcept { return m_uIntMap.find(prop) != m_uIntMap.end(); };
+		bool HasProperty(IntProperty prop) const noexcept { return m_intMap.find(prop) != m_intMap.end(); };
 
 		std::string GetStringProperty(StringProperty prop) const;
 		SQLUSMALLINT GetUSmallIntProperty(USmallIntProperty prop) const;
