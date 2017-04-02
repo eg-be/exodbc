@@ -68,6 +68,11 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8"                         log a warning and continue.");
 	WRITE_STDOUT_ENDL(u8" --logLevel <level>      Set the Log Level. <level> can be 'Debug', Info',");
 	WRITE_STDOUT_ENDL(u8"                         'Warning' or 'Error'. Default is 'Info'.");
+	WRITE_STDOUT_ENDL(u8" --columnSeparator <str> Character or String displayed to separate values");
+	WRITE_STDOUT_ENDL(u8"                         of different columns when printing column data.");
+	WRITE_STDOUT_ENDL(u8"                         Default is '||'.");
+	WRITE_STDOUT_ENDL(u8" --noHeader              Do not add a header row with column names when");
+	WRITE_STDOUT_ENDL(u8"                         printing column data. Default is to add a header");
 	WRITE_STDOUT_ENDL(u8" --help                  Show this text and return with -1.");
 }
 
@@ -88,6 +93,7 @@ int main(int argc, char* argv[])
 		// Pretty printing:
 		StdErrLogHandlerPtr pStdLogger = std::make_shared<StdLogHandler>();
 		pStdLogger->SetShowFileInfo(false);
+		pStdLogger->SetHideLogLevel(LogLevel::Info);
 		LogManager::Get().ClearLogHandlers();
 		LogManager::Get().RegisterLogHandler(pStdLogger);
 		
@@ -98,6 +104,8 @@ int main(int argc, char* argv[])
 		const std::string dsnKey = u8"-DSN";
 		const std::string csKey = u8"-CS";
 		const std::string logLevelKey = u8"--logLevel";
+		const std::string columnSeparatorKey = u8"--columnSeparator";
+		const std::string noHeaderKey = u8"--noHeader";
 		const std::string autoCommitKey = u8"--autoCommitOn";
 		const std::string silentKey = u8"--silent";
 		const std::string forwardOnlyCursorsKey = u8"--forwardOnlyCursors";
@@ -105,10 +113,12 @@ int main(int argc, char* argv[])
 		const std::string odbcVersionKey = u8"--odbcVersion";
 		std::string userValue, passValue, dsnValue;
 		std::string csValue;
+		std::string columnSeparatorValue = u8"||";
 		bool silent = false;
 		bool exitOnError = false;
 		bool forwardOnlyCursorsValue = false;
 		bool autoCommitValue = false;
+		bool noHeaderValue = false;
 		OdbcVersion odbcVersionValue = OdbcVersion::V_3;
 		LogLevel logLevelValue = LogLevel::Info;
 		for (int i = 0; i < argc; i++)
@@ -144,6 +154,10 @@ int main(int argc, char* argv[])
 			{
 				csValue = argNext;
 			}
+			if (ba::equals(arg, columnSeparatorKey) && i + 1 < argc)
+			{
+				columnSeparatorValue = argNext;
+			}
 			if (ba::equals(arg, autoCommitKey))
 			{
 				autoCommitValue = true;
@@ -151,6 +165,10 @@ int main(int argc, char* argv[])
 			if (ba::equals(arg, silentKey))
 			{
 				silent = true;
+			}
+			if (ba::equals(arg, noHeaderKey))
+			{
+				noHeaderValue = true;
 			}
 			if (ba::equals(arg, forwardOnlyCursorsKey))
 			{
@@ -231,7 +249,7 @@ int main(int argc, char* argv[])
 		}
 
 		// Start exodbcexec on that db:
-		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue);
+		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue, columnSeparatorValue, noHeaderValue);
 		exodbcexec::InputGeneratorPtr pGen = std::make_shared<exodbcexec::StdInGenerator>();
 		return exec.Run(pGen);
 	}
@@ -256,10 +274,13 @@ namespace exodbcexec
 	const std::set<std::string> ExodbcExec::COMMAND_COMMIT_TRANS = { u8"!commitTrans", u8"!ct" };
 	const std::set<std::string> ExodbcExec::COMMAND_ROLLBACK_TRANS = { u8"!rollbackTrans", u8"!rt" };
 
-	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors)
+	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator,
+			bool printNoHeader)
 		: m_pDb(pDb)
 		, m_exitOnError(exitOnError)
 		, m_forwardOnlyCursors(forwardOnlyCursors)
+		, m_columnSeparator(columnSeparator)
+		, m_printNoHeader(printNoHeader)
 	{
 		m_stmt.Init(m_pDb, m_forwardOnlyCursors);
 	}
@@ -318,7 +339,9 @@ namespace exodbcexec
 						LOG_WARNING(boost::str(boost::format(u8"Input starts with '!' but is not recognized as a command, executing as SQL.")));
 
 					// Before executing, unbind any bound columns
-					UnbindColumns();
+					if( ! m_currentColumns.empty())
+						UnbindColumns();
+
 					LOG_INFO(boost::str(boost::format(u8"Executing '%s'") % command));
 					auto start = std::chrono::high_resolution_clock::now();
 					m_stmt.ExecuteDirect(command);
@@ -419,6 +442,10 @@ namespace exodbcexec
 		}
 
 		// print current or all
+		if (!m_printNoHeader)
+		{
+			LOG_INFO(GetHeaderString(m_currentColumns));
+		}
 		if (mode == PrintMode::Current)
 		{
 			LOG_INFO(CurrentRecordToString(m_currentColumns));
@@ -435,7 +462,7 @@ namespace exodbcexec
 			while (haveNext)
 			{
 				stringstream ss;
-				ss << u8"row: " << rowCount << ": ";
+				ss << u8"row: " << rowCount << m_columnSeparator;
 				ss << CurrentRecordToString(m_currentColumns);
 				LOG_INFO(ss.str());
 				haveNext = m_stmt.SelectNext();
@@ -458,7 +485,23 @@ namespace exodbcexec
 				ss << it->GetValue<std::string>();
 			++it;
 			if (it != columns.end())
-				ss << u8";";
+				ss << m_columnSeparator;
+		}
+		return ss.str();
+	}
+
+
+	std::string ExodbcExec::GetHeaderString(const std::vector<exodbc::StringColumnWrapper>& columns) const
+	{
+		stringstream ss;
+		std::vector<StringColumnWrapper>::const_iterator it = columns.begin();
+		while (it != columns.end())
+		{
+			ColumnBufferPtrVariant pCol = it->GetVariant();
+			ss << boost::apply_visitor(QueryNameVisitor(), pCol);
+			++it;
+			if (it != columns.end())
+				ss << m_columnSeparator;
 		}
 		return ss.str();
 	}

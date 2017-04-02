@@ -55,7 +55,8 @@ namespace exodbcexec
 		const static std::set<std::string> COMMAND_COMMIT_TRANS;
 		const static std::set<std::string> COMMAND_ROLLBACK_TRANS;
 
-		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors);
+		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator, 
+					bool printNoHeader);
 
 		int Run(InputGeneratorPtr pInGen);
 
@@ -79,6 +80,7 @@ namespace exodbcexec
 
 	private:
 		std::string CurrentRecordToString(const std::vector<exodbc::StringColumnWrapper>& columns) const;
+		std::string GetHeaderString(const std::vector<exodbc::StringColumnWrapper>& columns) const;
 		void BindColumns();
 		void UnbindColumns();
 
@@ -87,5 +89,7 @@ namespace exodbcexec
 		exodbc::ExecutableStatement m_stmt;
 		bool m_forwardOnlyCursors;
 		std::vector<exodbc::StringColumnWrapper> m_currentColumns;
+		std::string m_columnSeparator;
+		bool m_printNoHeader;
 	};
 }
