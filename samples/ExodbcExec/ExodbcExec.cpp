@@ -73,6 +73,10 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8"                         Default is '||'.");
 	WRITE_STDOUT_ENDL(u8" --noHeader              Do not add a header row with column names when");
 	WRITE_STDOUT_ENDL(u8"                         printing column data. Default is to add a header");
+	WRITE_STDOUT_ENDL(u8" --fixedPrintSize        When printing column values, format them with a");
+	WRITE_STDOUT_ENDL(u8"                         fixed size. The print size of the field is equal");
+	WRITE_STDOUT_ENDL(u8"                         to the number of characters that the corresponding");
+	WRITE_STDOUT_ENDL(u8"                         buffer holds.");
 	WRITE_STDOUT_ENDL(u8" --help                  Show this text and return with -1.");
 }
 
@@ -109,6 +113,7 @@ int main(int argc, char* argv[])
 		const std::string autoCommitKey = u8"--autoCommitOn";
 		const std::string silentKey = u8"--silent";
 		const std::string forwardOnlyCursorsKey = u8"--forwardOnlyCursors";
+		const std::string fixedPrintSizeKey = u8"--fixedPrintSize";
 		const std::string exitOnErrorKey = u8"--exitOnError";
 		const std::string odbcVersionKey = u8"--odbcVersion";
 		std::string userValue, passValue, dsnValue;
@@ -119,6 +124,7 @@ int main(int argc, char* argv[])
 		bool forwardOnlyCursorsValue = false;
 		bool autoCommitValue = false;
 		bool noHeaderValue = false;
+		bool fixedPrintSizeValue = false;
 		OdbcVersion odbcVersionValue = OdbcVersion::V_3;
 		LogLevel logLevelValue = LogLevel::Info;
 		for (int i = 0; i < argc; i++)
@@ -161,6 +167,10 @@ int main(int argc, char* argv[])
 			if (ba::equals(arg, autoCommitKey))
 			{
 				autoCommitValue = true;
+			}
+			if (ba::equals(arg, fixedPrintSizeKey))
+			{
+				fixedPrintSizeValue = true;
 			}
 			if (ba::equals(arg, silentKey))
 			{
@@ -249,7 +259,8 @@ int main(int argc, char* argv[])
 		}
 
 		// Start exodbcexec on that db:
-		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue, columnSeparatorValue, noHeaderValue);
+		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue, columnSeparatorValue, 
+			noHeaderValue, fixedPrintSizeValue);
 		exodbcexec::InputGeneratorPtr pGen = std::make_shared<exodbcexec::StdInGenerator>();
 		return exec.Run(pGen);
 	}
@@ -275,12 +286,13 @@ namespace exodbcexec
 	const std::set<std::string> ExodbcExec::COMMAND_ROLLBACK_TRANS = { u8"!rollbackTrans", u8"!rt" };
 
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator,
-			bool printNoHeader)
+			bool printNoHeader, bool fixedPrintSize)
 		: m_pDb(pDb)
 		, m_exitOnError(exitOnError)
 		, m_forwardOnlyCursors(forwardOnlyCursors)
 		, m_columnSeparator(columnSeparator)
 		, m_printNoHeader(printNoHeader)
+		, m_fixedPrintSize(fixedPrintSize)
 	{
 		m_stmt.Init(m_pDb, m_forwardOnlyCursors);
 	}
@@ -462,7 +474,7 @@ namespace exodbcexec
 			while (haveNext)
 			{
 				stringstream ss;
-				ss << u8"row: " << rowCount << m_columnSeparator;
+				//ss << u8"row: " << rowCount << m_columnSeparator;
 				ss << CurrentRecordToString(m_currentColumns);
 				LOG_INFO(ss.str());
 				haveNext = m_stmt.SelectNext();
@@ -479,10 +491,26 @@ namespace exodbcexec
 		std::vector<StringColumnWrapper>::const_iterator it = columns.begin();
 		while (it != columns.end())
 		{
+			string sval;
 			if (it->IsNull())
-				ss << u8"NULL";
+				sval = u8"NULL";
 			else
-				ss << it->GetValue<std::string>();
+				sval = it->GetValue<std::string>();
+			if (m_fixedPrintSize)
+			{
+				ColumnBufferPtrVariant pCol = it->GetVariant();
+				string sheader = boost::apply_visitor(QueryNameVisitor(), pCol);
+				SQLLEN nrOfHeaderChars =(SQLLEN) sheader.length();
+				SQLLEN nrOfElements = boost::apply_visitor(NrOfElementsVisitor(), pCol);
+				// note that one element added was the terminating '\0', do not add that to print
+				SQLLEN printSize = max(nrOfElements - 1, nrOfHeaderChars);
+				exASSERT(printSize >= 1);
+				stringstream fss;
+				fss << u8"%" << printSize << "s";
+				sval = boost::str(boost::format(fss.str()) % sval);
+			}
+			ss << sval;
+
 			++it;
 			if (it != columns.end())
 				ss << m_columnSeparator;
@@ -498,7 +526,20 @@ namespace exodbcexec
 		while (it != columns.end())
 		{
 			ColumnBufferPtrVariant pCol = it->GetVariant();
-			ss << boost::apply_visitor(QueryNameVisitor(), pCol);
+			string sheader = boost::apply_visitor(QueryNameVisitor(), pCol);
+			if (m_fixedPrintSize)
+			{
+				SQLLEN nrOfElements = boost::apply_visitor(NrOfElementsVisitor(), pCol);
+				SQLLEN nrOfHeaderChars = (SQLLEN) sheader.length();
+				// note that one element added was the terminating '\0', do not add that to print
+				SQLLEN printSize = max(nrOfElements - 1, nrOfHeaderChars);
+				exASSERT(printSize >= 1);
+				stringstream fss;
+				fss << u8"%" << printSize << "s";
+				sheader = boost::str(boost::format(fss.str()) % sheader);
+			}
+			ss << sheader;
+
 			++it;
 			if (it != columns.end())
 				ss << m_columnSeparator;
