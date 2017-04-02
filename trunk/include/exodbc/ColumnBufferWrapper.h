@@ -72,6 +72,9 @@ namespace exodbc
 		SQLSMALLINT GetSqlCType() const;
 
 
+		/*!
+		* \brief Get the variant ColumnBufferPtrVariant held by this wrapper.
+		*/
 		ColumnBufferPtrVariant GetVariant() const { return m_columnBufferVariant; };
 
 	protected:
