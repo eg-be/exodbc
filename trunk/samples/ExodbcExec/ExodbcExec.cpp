@@ -55,33 +55,37 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8" -CS       <cs>          Connection String");
 	WRITE_STDOUT_ENDL(u8"");
 	WRITE_STDOUT_ENDL("OPTION can be:");
-	WRITE_STDOUT_ENDL(u8" --silent                Hides all output, except '!help'.");
-	WRITE_STDOUT_ENDL(u8" --odbcVersion <version> Set ODBC Version to use. Valid values are '2', '3'");
-	WRITE_STDOUT_ENDL(u8"                         or '3.8'. Default is '3'.");
+	WRITE_STDOUT_ENDL(u8" --addRowNr              When printing column values, add a column in front");
+	WRITE_STDOUT_ENDL(u8"                         that prints the row number.");
 	WRITE_STDOUT_ENDL(u8" --autoCommitOn          Enable auto commit. Default is to commit manual.");
-	WRITE_STDOUT_ENDL(u8" --forwardOnlyCursors    Disables the commands '!prev', '!first' and");
-	WRITE_STDOUT_ENDL(u8"                         '!last'. Only '!next' can be used to iterate");
-	WRITE_STDOUT_ENDL(u8"                         records. If not set, positionable cursors are");
-	WRITE_STDOUT_ENDL(u8"                         enabled by default.");
-	WRITE_STDOUT_ENDL(u8" --exitOnError           Exits with a non-zero status if SQL execution");
-	WRITE_STDOUT_ENDL(u8"                         fails or any SQL related call fails. Default is to");
-	WRITE_STDOUT_ENDL(u8"                         log a warning and continue.");
-	WRITE_STDOUT_ENDL(u8" --logLevel <level>      Set the Log Level. <level> can be 'Debug', Info',");
-	WRITE_STDOUT_ENDL(u8"                         'Output', 'Warning' or 'Error'. Default is 'Info'.");
-	WRITE_STDOUT_ENDL(u8"                         On 'Output', only results from queries and warnings");
-	WRITE_STDOUT_ENDL(u8"                         or errors are printed.");
+	WRITE_STDOUT_ENDL(u8" --charColType    <type> The SQL C Type of the column buffers to create.");
+	WRITE_STDOUT_ENDL(u8"                         Must be either 'SQLCHAR' or 'SQLWCHAR'.");
+	WRITE_STDOUT_ENDL(u8"                         Default is to use 'SQLWCHAR' on windows and");
+	WRITE_STDOUT_ENDL(u8"                         'SQLCHAR' else.");
 	WRITE_STDOUT_ENDL(u8" --columnSeparator <str> Character or String displayed to separate values");
 	WRITE_STDOUT_ENDL(u8"                         of different columns when printing column data.");
 	WRITE_STDOUT_ENDL(u8"                         Default is '||'.");
-	WRITE_STDOUT_ENDL(u8" --noHeader              Do not add a header row with column names when");
-	WRITE_STDOUT_ENDL(u8"                         printing column data. Default is to add a header");
+	WRITE_STDOUT_ENDL(u8" --exitOnError           Exits with a non-zero status if SQL execution");
+	WRITE_STDOUT_ENDL(u8"                         fails or any SQL related call fails. Default is to");
+	WRITE_STDOUT_ENDL(u8"                         log a warning and continue.");
 	WRITE_STDOUT_ENDL(u8" --fixedPrintSize        When printing column values, format them with a");
 	WRITE_STDOUT_ENDL(u8"                         fixed size. The print size of the field is equal");
 	WRITE_STDOUT_ENDL(u8"                         to the number of characters that the corresponding");
 	WRITE_STDOUT_ENDL(u8"                         buffer holds.");
-	WRITE_STDOUT_ENDL(u8" --addRowNr              When printing column values, add a column in front");
-	WRITE_STDOUT_ENDL(u8"                         that prints the row number.");
+	WRITE_STDOUT_ENDL(u8" --forwardOnlyCursors    Disables the commands '!prev', '!first' and");
+	WRITE_STDOUT_ENDL(u8"                         '!last'. Only '!next' can be used to iterate");
+	WRITE_STDOUT_ENDL(u8"                         records. If not set, positionable cursors are");
+	WRITE_STDOUT_ENDL(u8"                         enabled by default.");
 	WRITE_STDOUT_ENDL(u8" --help                  Show this text and return with -1.");
+	WRITE_STDOUT_ENDL(u8" --logLevel <level>      Set the Log Level. <level> can be 'Debug', Info',");
+	WRITE_STDOUT_ENDL(u8"                         'Output', 'Warning' or 'Error'. Default is 'Info'.");
+	WRITE_STDOUT_ENDL(u8"                         On 'Output', only results from queries and warnings");
+	WRITE_STDOUT_ENDL(u8"                         or errors are printed.");
+	WRITE_STDOUT_ENDL(u8" --noHeader              Do not add a header row with column names when");
+	WRITE_STDOUT_ENDL(u8"                         printing column data. Default is to add a header");
+	WRITE_STDOUT_ENDL(u8" --odbcVersion <version> Set ODBC Version to use. Valid values are '2', '3'");
+	WRITE_STDOUT_ENDL(u8"                         or '3.8'. Default is '3'.");
+	WRITE_STDOUT_ENDL(u8" --silent                Hides all output, except '!help'.");
 }
 
 #ifdef _WIN32
@@ -114,6 +118,7 @@ int main(int argc, char* argv[])
 		const std::string csKey = u8"-CS";
 		const std::string logLevelKey = u8"--logLevel";
 		const std::string columnSeparatorKey = u8"--columnSeparator";
+		const std::string charColTypeKey = u8"--charColType";
 		const std::string noHeaderKey = u8"--noHeader";
 		const std::string autoCommitKey = u8"--autoCommitOn";
 		const std::string silentKey = u8"--silent";
@@ -132,6 +137,8 @@ int main(int argc, char* argv[])
 		bool noHeaderValue = false;
 		bool fixedPrintSizeValue = false;
 		bool addRowNrValue = false;
+		bool forceCharCols = false;
+		bool forceWCharCols = false;
 		OdbcVersion odbcVersionValue = OdbcVersion::V_3;
 		LogLevel logLevelValue = LogLevel::Info;
 		for (int i = 0; i < argc; i++)
@@ -170,6 +177,19 @@ int main(int argc, char* argv[])
 			if (ba::equals(arg, columnSeparatorKey) && i + 1 < argc)
 			{
 				columnSeparatorValue = argNext;
+			}
+			if (ba::equals(arg, charColTypeKey) && i + 1 < argc)
+			{
+				string charColTypeValue = argNext;
+				if (ba::iequals(u8"SQLCHAR", charColTypeValue))
+					forceCharCols = true;
+				else if (ba::iequals(u8"SQLWCHAR", charColTypeValue))
+					forceWCharCols = true;
+				else
+				{
+					WRITE_STDERR_ENDL(boost::str(boost::format(u8"Unknown charColType '%s'.") % charColTypeValue));
+					return 2;
+				}
 			}
 			if (ba::equals(arg, autoCommitKey))
 			{
@@ -272,8 +292,14 @@ int main(int argc, char* argv[])
 		}
 
 		// Start exodbcexec on that db:
+		exodbcexec::ExodbcExec::CharColumnMode charColMode = exodbcexec::ExodbcExec::CharColumnMode::Auto;
+		if (forceCharCols)
+			charColMode = exodbcexec::ExodbcExec::CharColumnMode::Char;
+		else if (forceWCharCols)
+			charColMode = exodbcexec::ExodbcExec::CharColumnMode::WChar;
+
 		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue, columnSeparatorValue, 
-			noHeaderValue, fixedPrintSizeValue, addRowNrValue);
+			noHeaderValue, fixedPrintSizeValue, addRowNrValue, charColMode);
 		exodbcexec::InputGeneratorPtr pGen = std::make_shared<exodbcexec::StdInGenerator>();
 		return exec.Run(pGen);
 	}
@@ -299,7 +325,7 @@ namespace exodbcexec
 	const std::set<std::string> ExodbcExec::COMMAND_ROLLBACK_TRANS = { u8"!rollbackTrans", u8"!rt" };
 
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator,
-			bool printNoHeader, bool fixedPrintSize, bool printRowNr)
+			bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode)
 		: m_pDb(pDb)
 		, m_exitOnError(exitOnError)
 		, m_forwardOnlyCursors(forwardOnlyCursors)
@@ -307,7 +333,16 @@ namespace exodbcexec
 		, m_printNoHeader(printNoHeader)
 		, m_fixedPrintSize(fixedPrintSize)
 		, m_printRowNr(printRowNr)
+		, m_charColumnMode(charColMode)
 	{
+		if (m_charColumnMode == CharColumnMode::Auto)
+		{
+#ifdef _WIN32
+			m_charColumnMode = CharColumnMode::WChar;
+#else
+			m_charColumnMode = CharColumnMode::Char;
+#endif
+		}
 		m_stmt.Init(m_pDb, m_forwardOnlyCursors);
 	}
 
@@ -419,11 +454,16 @@ namespace exodbcexec
 			SColumnDescription colDesc = m_stmt.DescribeColumn(colNr);
 			LOG_DEBUG(boost::str(boost::format(u8"Binding column nr %d: name: '%s'; charsize: %d.") % colNr % colDesc.m_name % colDesc.m_charSize));
 			// add +3 chars to charsize: 1 for '\0', 1 for '.' and 1 for '-':
-#ifdef _WIN32
-			WCharColumnBufferPtr pColBuffer = WCharColumnBuffer::Create(colDesc.m_charSize + 3, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
-#else
-			CharColumnBufferPtr pColBuffer = CharColumnBufferPtr::Create(colDesc.m_charSize + 3, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
-#endif
+			exASSERT(m_charColumnMode != CharColumnMode::Auto);
+			ColumnBufferPtrVariant pColBuffer;
+			if (m_charColumnMode == CharColumnMode::WChar)
+			{
+				pColBuffer = WCharColumnBuffer::Create(colDesc.m_charSize + 3, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
+			}
+			else if (m_charColumnMode == CharColumnMode::Char)
+			{
+				pColBuffer = CharColumnBuffer::Create(colDesc.m_charSize + 3, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
+			}
 			m_stmt.BindColumn(pColBuffer, colNr);
 			StringColumnWrapper wrapper(pColBuffer);
 			m_currentColumns.push_back(wrapper);
