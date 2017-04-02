@@ -261,7 +261,7 @@ namespace exodbc
 
 	/*!
 	* \class NrOfElementsVisitor
-	* \brief Visitor to get the number of elements this buffer is holding (of its type).
+	* \brief Visitor to get the number of elements this buffer is holding (of its type) as SQLLEN.
 	* \details On applying this visitor, it will call GetNrOfElements() on the ColumnBuffer.
 	*/
 	class NrOfElementsVisitor
