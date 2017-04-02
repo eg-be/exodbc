@@ -29,6 +29,7 @@
 #include "boost/format.hpp"
 #include <boost/algorithm/string/iter_find.hpp>
 #include <boost/algorithm/string/finder.hpp>
+#include <boost/lexical_cast.hpp>
 
 // Debug
 #include "DebugNew.h"
@@ -64,6 +65,11 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8"                         Must be either 'SQLCHAR' or 'SQLWCHAR'.");
 	WRITE_STDOUT_ENDL(u8"                         Default is to use 'SQLWCHAR' on windows and");
 	WRITE_STDOUT_ENDL(u8"                         'SQLCHAR' else.");
+	WRITE_STDOUT_ENDL(u8" --charColSize    <size> The size in number of characters for the column");
+	WRITE_STDOUT_ENDL(u8"                         buffers to create for data exchange. If not set");
+	WRITE_STDOUT_ENDL(u8"                         or set to 0, the database is queried about the size");
+	WRITE_STDOUT_ENDL(u8"                         of a column before corresponding buffers are");
+	WRITE_STDOUT_ENDL(u8"                         created.");
 	WRITE_STDOUT_ENDL(u8" --columnSeparator <str> Character or String displayed to separate values");
 	WRITE_STDOUT_ENDL(u8"                         of different columns when printing column data.");
 	WRITE_STDOUT_ENDL(u8"                         Default is '||'.");
@@ -127,6 +133,7 @@ int main(int argc, char* argv[])
 		const std::string csKey = u8"-CS";
 		const std::string logLevelKey = u8"--logLevel";
 		const std::string columnSeparatorKey = u8"--columnSeparator";
+		const std::string charColSizeKey = u8"--charColSize";
 		const std::string sqlSeparatorKey = u8"--sqlSeparator";
 		const std::string charColTypeKey = u8"--charColType";
 		const std::string noHeaderKey = u8"--noHeader";
@@ -150,6 +157,7 @@ int main(int argc, char* argv[])
 		bool addRowNrValue = false;
 		bool forceCharCols = false;
 		bool forceWCharCols = false;
+		SQLLEN charColSizeValue = 0;
 		OdbcVersion odbcVersionValue = OdbcVersion::V_3;
 		LogLevel logLevelValue = LogLevel::Info;
 		for (int i = 0; i < argc; i++)
@@ -192,6 +200,23 @@ int main(int argc, char* argv[])
 			if (ba::equals(arg, sqlSeparatorKey) && i + 1 < argc)
 			{
 				sqlSeparatorValue = argNext;
+			}
+			if (ba::equals(arg, charColSizeKey) && i + 1 < argc)
+			{
+				string charColSizeStringValue = argNext;
+				try
+				{
+					charColSizeValue = boost::lexical_cast<SQLINTEGER>(charColSizeStringValue);
+				}
+				catch (const boost::bad_lexical_cast&)
+				{
+					charColSizeValue = -1;
+				}
+				if (charColSizeValue < 0)
+				{
+					WRITE_STDOUT_ENDL(boost::str(boost::format(u8"Invalid charColSize value '%s'.") % charColSizeStringValue));
+					return 2;
+				}
 			}
 			if (ba::equals(arg, charColTypeKey) && i + 1 < argc)
 			{
@@ -314,7 +339,7 @@ int main(int argc, char* argv[])
 			charColMode = exodbcexec::ExodbcExec::CharColumnMode::WChar;
 
 		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue, columnSeparatorValue, 
-			noHeaderValue, fixedPrintSizeValue, addRowNrValue, charColMode, sqlSeparatorValue);
+			noHeaderValue, fixedPrintSizeValue, addRowNrValue, charColMode, charColSizeValue, sqlSeparatorValue);
 		exodbcexec::InputGeneratorPtr pGen = std::make_shared<exodbcexec::StdInGenerator>();
 		return exec.Run(pGen);
 	}
@@ -341,7 +366,7 @@ namespace exodbcexec
 
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator,
 			bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode,
-			const std::string& sqlSeparator)
+			SQLLEN charColSize,	const std::string& sqlSeparator)
 		: m_pDb(pDb)
 		, m_exitOnError(exitOnError)
 		, m_forwardOnlyCursors(forwardOnlyCursors)
@@ -350,8 +375,10 @@ namespace exodbcexec
 		, m_fixedPrintSize(fixedPrintSize)
 		, m_printRowNr(printRowNr)
 		, m_charColumnMode(charColMode)
+		, m_charColSize(charColSize)
 		, m_sqlSeparator(sqlSeparator)
 	{
+		exASSERT(charColSize >= 0);
 		if (m_charColumnMode == CharColumnMode::Auto)
 		{
 #ifdef _WIN32
@@ -493,7 +520,11 @@ namespace exodbcexec
 			// add +3 chars to charsize: 1 for '\0', 1 for '.' and 1 for '-':
 			exASSERT(m_charColumnMode != CharColumnMode::Auto);
 			ColumnBufferPtrVariant pColBuffer;
-			SQLINTEGER bufferSize = colDesc.m_charSize + 3;
+			SQLLEN bufferSize = 0;
+			if (m_charColSize > 0)
+				bufferSize = m_charColSize + 1;
+			else
+				bufferSize = colDesc.m_charSize + 3;
 			string bufferType;
 			if (m_charColumnMode == CharColumnMode::WChar)
 			{

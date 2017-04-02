@@ -64,7 +64,7 @@ namespace exodbcexec
 
 		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator, 
 					bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode,
-					const std::string& sqlSeparator);
+					SQLLEN charColSize,	const std::string& sqlSeparator);
 
 		int Run(InputGeneratorPtr pInGen);
 
@@ -102,6 +102,7 @@ namespace exodbcexec
 		bool m_fixedPrintSize;
 		bool m_printRowNr;
 		CharColumnMode m_charColumnMode;
+		SQLLEN m_charColSize;
 		std::string m_sqlSeparator;
 	};
 }
