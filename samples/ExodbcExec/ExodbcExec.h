@@ -44,6 +44,13 @@ namespace exodbcexec
 	{
 	public:
 
+		enum class CharColumnMode
+		{
+			Auto,
+			Char,
+			WChar
+		};
+
 		const static std::set<std::string> COMMAND_EXIT;
 		const static std::set<std::string> COMMAND_HELP;
 		const static std::set<std::string> COMMAND_PRINT_ALL;
@@ -56,7 +63,7 @@ namespace exodbcexec
 		const static std::set<std::string> COMMAND_ROLLBACK_TRANS;
 
 		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator, 
-					bool printNoHeader, bool fixedPrintSize, bool printRowNr);
+					bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode);
 
 		int Run(InputGeneratorPtr pInGen);
 
@@ -93,5 +100,6 @@ namespace exodbcexec
 		bool m_printNoHeader;
 		bool m_fixedPrintSize;
 		bool m_printRowNr;
+		CharColumnMode m_charColumnMode;
 	};
 }
