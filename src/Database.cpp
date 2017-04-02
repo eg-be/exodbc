@@ -218,9 +218,6 @@ namespace exodbc
 		THROW_IFN_SUCCEEDED(SQLDriverConnect, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
 
 		outConnectBuffer[outConnectBufferLen] = 0;
-//		m_outConnectionStr = SQLRESCHARCONVERT((SQLAPICHARTYPE*)outConnectBuffer);
-//		m_outConnectionStr = (SQLCHAR*)outConnectBuffer;
-//		m_outConnectionStr = std::string(reinterpret_cast<const char*>(outConnectBuffer));
         m_outConnectionStr = SQLAPICHARPTR_TO_EXODBCSTR(outConnectBuffer);
 		m_dbOpenedWithConnectionString = true;
 
