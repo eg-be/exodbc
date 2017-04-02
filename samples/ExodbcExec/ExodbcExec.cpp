@@ -77,6 +77,8 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8"                         fixed size. The print size of the field is equal");
 	WRITE_STDOUT_ENDL(u8"                         to the number of characters that the corresponding");
 	WRITE_STDOUT_ENDL(u8"                         buffer holds.");
+	WRITE_STDOUT_ENDL(u8" --addRowNr              When printing column values, add a column in front");
+	WRITE_STDOUT_ENDL(u8"                         that prints the row number.");
 	WRITE_STDOUT_ENDL(u8" --help                  Show this text and return with -1.");
 }
 
@@ -114,6 +116,7 @@ int main(int argc, char* argv[])
 		const std::string silentKey = u8"--silent";
 		const std::string forwardOnlyCursorsKey = u8"--forwardOnlyCursors";
 		const std::string fixedPrintSizeKey = u8"--fixedPrintSize";
+		const std::string addRowNrKey = u8"--addRowNr";
 		const std::string exitOnErrorKey = u8"--exitOnError";
 		const std::string odbcVersionKey = u8"--odbcVersion";
 		std::string userValue, passValue, dsnValue;
@@ -125,6 +128,7 @@ int main(int argc, char* argv[])
 		bool autoCommitValue = false;
 		bool noHeaderValue = false;
 		bool fixedPrintSizeValue = false;
+		bool addRowNrValue = false;
 		OdbcVersion odbcVersionValue = OdbcVersion::V_3;
 		LogLevel logLevelValue = LogLevel::Info;
 		for (int i = 0; i < argc; i++)
@@ -171,6 +175,10 @@ int main(int argc, char* argv[])
 			if (ba::equals(arg, fixedPrintSizeKey))
 			{
 				fixedPrintSizeValue = true;
+			}
+			if (ba::equals(arg, addRowNrKey))
+			{
+				addRowNrValue = true;
 			}
 			if (ba::equals(arg, silentKey))
 			{
@@ -260,7 +268,7 @@ int main(int argc, char* argv[])
 
 		// Start exodbcexec on that db:
 		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue, columnSeparatorValue, 
-			noHeaderValue, fixedPrintSizeValue);
+			noHeaderValue, fixedPrintSizeValue, addRowNrValue);
 		exodbcexec::InputGeneratorPtr pGen = std::make_shared<exodbcexec::StdInGenerator>();
 		return exec.Run(pGen);
 	}
@@ -286,13 +294,14 @@ namespace exodbcexec
 	const std::set<std::string> ExodbcExec::COMMAND_ROLLBACK_TRANS = { u8"!rollbackTrans", u8"!rt" };
 
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator,
-			bool printNoHeader, bool fixedPrintSize)
+			bool printNoHeader, bool fixedPrintSize, bool printRowNr)
 		: m_pDb(pDb)
 		, m_exitOnError(exitOnError)
 		, m_forwardOnlyCursors(forwardOnlyCursors)
 		, m_columnSeparator(columnSeparator)
 		, m_printNoHeader(printNoHeader)
 		, m_fixedPrintSize(fixedPrintSize)
+		, m_printRowNr(printRowNr)
 	{
 		m_stmt.Init(m_pDb, m_forwardOnlyCursors);
 	}
@@ -460,7 +469,13 @@ namespace exodbcexec
 		}
 		if (mode == PrintMode::Current)
 		{
-			LOG_INFO(CurrentRecordToString(m_currentColumns));
+			stringstream ss;
+			if (m_printRowNr && m_fixedPrintSize)
+				ss << boost::str(boost::format(u8"%10d") % 1) << m_columnSeparator;
+			else if (m_printRowNr)
+				ss << boost::str(boost::format(u8"%d") % 1) << m_columnSeparator;
+			ss << CurrentRecordToString(m_currentColumns);
+			LOG_INFO(ss.str());
 		}
 		else if (mode == PrintMode::All)
 		{
@@ -474,7 +489,11 @@ namespace exodbcexec
 			while (haveNext)
 			{
 				stringstream ss;
-				//ss << u8"row: " << rowCount << m_columnSeparator;
+				if (m_printRowNr && m_fixedPrintSize)
+					ss << boost::str(boost::format(u8"%10d") % rowCount) << m_columnSeparator;
+				else if(m_printRowNr)
+					ss << boost::str(boost::format(u8"%d") % rowCount) << m_columnSeparator;
+
 				ss << CurrentRecordToString(m_currentColumns);
 				LOG_INFO(ss.str());
 				haveNext = m_stmt.SelectNext();
@@ -523,6 +542,9 @@ namespace exodbcexec
 	{
 		stringstream ss;
 		std::vector<StringColumnWrapper>::const_iterator it = columns.begin();
+		if (m_printRowNr)
+			ss << boost::str(boost::format(u8"%10s") % u8"ROW") << m_columnSeparator;
+
 		while (it != columns.end())
 		{
 			ColumnBufferPtrVariant pCol = it->GetVariant();
