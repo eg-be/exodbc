@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
 
 		if (!csValue.empty())
 		{
-			LOG_INFO(boost::str(boost::format(u8"Trying to connect using Connection String '%s'...") % csValue));
+			LOG_INFO(boost::str(boost::format(u8"Trying to connect using Connection String '%s' ..") % csValue));
 			pDb->Open(csValue);
 		}
 		else
@@ -490,18 +490,22 @@ namespace exodbcexec
 		for (SQLSMALLINT colNr = 1; colNr <= nrOfCols; ++colNr)
 		{
 			SColumnDescription colDesc = m_stmt.DescribeColumn(colNr);
-			LOG_DEBUG(boost::str(boost::format(u8"Binding column nr %d: name: '%s'; charsize: %d.") % colNr % colDesc.m_name % colDesc.m_charSize));
 			// add +3 chars to charsize: 1 for '\0', 1 for '.' and 1 for '-':
 			exASSERT(m_charColumnMode != CharColumnMode::Auto);
 			ColumnBufferPtrVariant pColBuffer;
+			SQLINTEGER bufferSize = colDesc.m_charSize + 3;
+			string bufferType;
 			if (m_charColumnMode == CharColumnMode::WChar)
 			{
-				pColBuffer = WCharColumnBuffer::Create(colDesc.m_charSize + 3, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
+				pColBuffer = WCharColumnBuffer::Create(bufferSize, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
+				bufferType = u8"SQLWCHAR";
 			}
 			else if (m_charColumnMode == CharColumnMode::Char)
 			{
-				pColBuffer = CharColumnBuffer::Create(colDesc.m_charSize + 3, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
+				pColBuffer = CharColumnBuffer::Create(bufferSize, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
+				bufferType = u8"SQLCHAR";
 			}
+			LOG_DEBUG(boost::str(boost::format(u8"Binding column nr %d: name: '%s'; charsize: %d; buffersize: %d; buffertype: %s") % colNr % colDesc.m_name % colDesc.m_charSize % bufferSize % bufferType));
 			m_stmt.BindColumn(pColBuffer, colNr);
 			StringColumnWrapper wrapper(pColBuffer);
 			m_currentColumns.push_back(wrapper);
@@ -677,7 +681,6 @@ namespace exodbcexec
 		WRITE_STDOUT_ENDL(u8" !printCurrent,!pc   Print the current record.");
 		WRITE_STDOUT_ENDL(u8" !commitTrans,!ct    Commit any ongoing transations.");
 		WRITE_STDOUT_ENDL(u8" !rollbackTrans,!rt  Rollback all ongoing transactions.");
-
 		WRITE_STDOUT_ENDL(u8" !help,!h            Show this help.");
 	}
 }
