@@ -63,7 +63,8 @@ namespace exodbcexec
 		const static std::set<std::string> COMMAND_ROLLBACK_TRANS;
 
 		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator, 
-					bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode);
+					bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode,
+					const std::string& sqlSeparator);
 
 		int Run(InputGeneratorPtr pInGen);
 
@@ -101,5 +102,6 @@ namespace exodbcexec
 		bool m_fixedPrintSize;
 		bool m_printRowNr;
 		CharColumnMode m_charColumnMode;
+		std::string m_sqlSeparator;
 	};
 }

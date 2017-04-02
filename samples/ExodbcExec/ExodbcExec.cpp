@@ -27,6 +27,8 @@
 #include "exodbc/ColumnBufferWrapper.h"
 
 #include "boost/format.hpp"
+#include <boost/algorithm/string/iter_find.hpp>
+#include <boost/algorithm/string/finder.hpp>
 
 // Debug
 #include "DebugNew.h"
@@ -86,6 +88,13 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8" --odbcVersion <version> Set ODBC Version to use. Valid values are '2', '3'");
 	WRITE_STDOUT_ENDL(u8"                         or '3.8'. Default is '3'.");
 	WRITE_STDOUT_ENDL(u8" --silent                Hides all output, except '!help'.");
+	WRITE_STDOUT_ENDL(u8" --sqlSeparator    <str> Character or String to separate SQL commands.");
+	WRITE_STDOUT_ENDL(u8"                         If set, every SQL command is tokenized using the");
+	WRITE_STDOUT_ENDL(u8"                         passed <str> as delimiter. Each token is then");
+	WRITE_STDOUT_ENDL(u8"                         executed in its own SQLExecute call.");
+	WRITE_STDOUT_ENDL(u8"                         Defaults to not set.");
+	WRITE_STDOUT_ENDL(u8"                         Note: If one query fails, query execution is");
+	WRITE_STDOUT_ENDL(u8"                         aborted.");
 }
 
 #ifdef _WIN32
@@ -118,6 +127,7 @@ int main(int argc, char* argv[])
 		const std::string csKey = u8"-CS";
 		const std::string logLevelKey = u8"--logLevel";
 		const std::string columnSeparatorKey = u8"--columnSeparator";
+		const std::string sqlSeparatorKey = u8"--sqlSeparator";
 		const std::string charColTypeKey = u8"--charColType";
 		const std::string noHeaderKey = u8"--noHeader";
 		const std::string autoCommitKey = u8"--autoCommitOn";
@@ -130,6 +140,7 @@ int main(int argc, char* argv[])
 		std::string userValue, passValue, dsnValue;
 		std::string csValue;
 		std::string columnSeparatorValue = u8"||";
+		std::string sqlSeparatorValue = u8"";
 		bool silent = false;
 		bool exitOnError = false;
 		bool forwardOnlyCursorsValue = false;
@@ -177,6 +188,10 @@ int main(int argc, char* argv[])
 			if (ba::equals(arg, columnSeparatorKey) && i + 1 < argc)
 			{
 				columnSeparatorValue = argNext;
+			}
+			if (ba::equals(arg, sqlSeparatorKey) && i + 1 < argc)
+			{
+				sqlSeparatorValue = argNext;
 			}
 			if (ba::equals(arg, charColTypeKey) && i + 1 < argc)
 			{
@@ -299,7 +314,7 @@ int main(int argc, char* argv[])
 			charColMode = exodbcexec::ExodbcExec::CharColumnMode::WChar;
 
 		exodbcexec::ExodbcExec exec(pDb, exitOnError, forwardOnlyCursorsValue, columnSeparatorValue, 
-			noHeaderValue, fixedPrintSizeValue, addRowNrValue, charColMode);
+			noHeaderValue, fixedPrintSizeValue, addRowNrValue, charColMode, sqlSeparatorValue);
 		exodbcexec::InputGeneratorPtr pGen = std::make_shared<exodbcexec::StdInGenerator>();
 		return exec.Run(pGen);
 	}
@@ -325,7 +340,8 @@ namespace exodbcexec
 	const std::set<std::string> ExodbcExec::COMMAND_ROLLBACK_TRANS = { u8"!rollbackTrans", u8"!rt" };
 
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator,
-			bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode)
+			bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode,
+			const std::string& sqlSeparator)
 		: m_pDb(pDb)
 		, m_exitOnError(exitOnError)
 		, m_forwardOnlyCursors(forwardOnlyCursors)
@@ -334,6 +350,7 @@ namespace exodbcexec
 		, m_fixedPrintSize(fixedPrintSize)
 		, m_printRowNr(printRowNr)
 		, m_charColumnMode(charColMode)
+		, m_sqlSeparator(sqlSeparator)
 	{
 		if (m_charColumnMode == CharColumnMode::Auto)
 		{
@@ -406,14 +423,32 @@ namespace exodbcexec
 					if( ! m_currentColumns.empty())
 						UnbindColumns();
 
-					LOG_INFO(boost::str(boost::format(u8"Executing '%s'") % command));
-					auto start = std::chrono::high_resolution_clock::now();
-					m_stmt.ExecuteDirect(command);
-					auto end = std::chrono::high_resolution_clock::now();
-					auto elapsed = end - start;
-					auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-					LOG_INFO(boost::str(boost::format(u8"Success. Execution took %1%ms.")
-						% millis.count()));
+					// Tokenize commands if a sql separator is set
+					vector<string> cmds;
+					if ( ! m_sqlSeparator.empty())
+					{
+						iter_split(cmds, command, boost::algorithm::first_finder(m_sqlSeparator));
+					}
+					else
+					{
+						cmds.push_back(command);
+					}
+
+					for (vector<string>::const_iterator it = cmds.begin(); it != cmds.end(); ++it)
+					{
+						string cmd = *it;
+						if (cmd.empty())
+							continue;
+
+						LOG_INFO(boost::str(boost::format(u8"Executing '%s'") % cmd));
+						auto start = std::chrono::high_resolution_clock::now();
+						m_stmt.ExecuteDirect(cmd);
+						auto end = std::chrono::high_resolution_clock::now();
+						auto elapsed = end - start;
+						auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+						LOG_INFO(boost::str(boost::format(u8"Success. Execution took %1%ms.")
+							% millis.count()));
+					}
 					// And bind columns, if there are any
 					if (m_stmt.GetNrOfColumns() > 0)
 					{
