@@ -44,6 +44,36 @@ namespace exodbc
 
 	typedef std::shared_ptr<LogHandler> LogHandlerPtr;
 
+
+	class EXODBCAPI LogHandlerBase
+	{
+	public:
+		LogHandlerBase()
+			: m_showFileInfo(true)
+			, m_showLogLevel(true)
+		{};
+
+		virtual ~LogHandlerBase() {};
+
+		void SetShowFileInfo(bool enable) noexcept { m_showFileInfo = enable; };
+		void SetShowLogLevel(bool enable) noexcept { m_showLogLevel = enable; };
+		void SetHideLogLevel(LogLevel level) noexcept { m_hideLogLevel.insert(level); };
+		void ClearHideLogLevel(LogLevel level) noexcept { m_hideLogLevel.erase(level); };
+		void ClearHideLogLevel() noexcept { m_hideLogLevel.clear(); };
+
+		bool GetShowFileInfo() const noexcept { return m_showFileInfo; };
+		bool GetShowLogLevel() const noexcept { return m_showLogLevel; };
+		bool GetHideLogLevel(LogLevel level) const noexcept { return m_hideLogLevel.find(level) != m_hideLogLevel.end(); };
+
+	protected:
+		std::string FormatLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const noexcept;
+
+		bool m_showFileInfo;	///< If not set, filename, line-nr and function-name are not included.
+		bool m_showLogLevel;	///< If not set, the log level like ERROR, INFO, etc. is never shown at the beginning of the message
+		std::set<LogLevel> m_hideLogLevel;	///< If a LogLevel is part of this list, it is NOT shown at the beginning of the message
+	};
+
+
 	/*!
 	* \class	StdLogHandler
 	* \brief	A simple LogHandler that prints all messages nicely formated to stderr or stdout, depending on their level.
@@ -57,12 +87,13 @@ namespace exodbc
 	*/
 	class EXODBCAPI StdLogHandler
 		: public LogHandler
+		, public LogHandlerBase
 	{
 	public:
 		StdLogHandler()
-			: m_redirectToStdErr(false)
+			: LogHandlerBase()
+			, m_redirectToStdErr(false)
 			, m_redirectToStdOut(false)
-			, m_showFileInfo(true)
 		{};
 
 		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override;
@@ -70,14 +101,11 @@ namespace exodbc
 
 		void RedirectToStdErr(bool enable) noexcept { m_redirectToStdErr = enable; };
 		void RedirectoToStdOut(bool enable) noexcept { m_redirectToStdOut = enable; };
-		void SetShowFileInfo(bool enable) noexcept { m_showFileInfo = enable; };
 
 		bool IsRedirectingToStdErr() const noexcept { return m_redirectToStdErr; };
 		bool IsRedirectingToStdOut() const noexcept { return m_redirectToStdOut; };
-		bool IsShowingFileInfo() const noexcept { return m_showFileInfo; };
 
 	private:
-		bool m_showFileInfo;	///< If not set, filename, line-nr and function-name are not included.
 		bool m_redirectToStdErr;
 		bool m_redirectToStdOut;
 		mutable std::mutex m_logMutex;
@@ -91,8 +119,13 @@ namespace exodbc
 	*/
 	class EXODBCAPI NullLogHandler
 		: public LogHandler
+		, public LogHandlerBase
 	{
 	public:
+		NullLogHandler()
+			: LogHandlerBase()
+		{};
+
 		virtual void OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename = u8"", int line = 0, const std::string& functionname = u8"") const override {};
 		virtual bool operator==(const LogHandler& other) const override;
 	};
@@ -107,6 +140,7 @@ namespace exodbc
 	*/
 	class EXODBCAPI FileLogHandler
 		: public LogHandler
+		, public LogHandlerBase
 	{
 	public:
 		FileLogHandler() = delete;

@@ -27,39 +27,48 @@ using namespace std;
 
 namespace exodbc
 {
-	std::string FormatLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */)
+	std::string LogHandlerBase::FormatLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const noexcept
 	{
 		std::stringstream ss;
 
-		switch (level)
+		if (m_showLogLevel && m_hideLogLevel.find(level) == m_hideLogLevel.end())
 		{
-		case exodbc::LogLevel::Error: \
-			ss << u8"ERROR"; break; \
-		case exodbc::LogLevel::Warning: \
-			ss << u8"WARNING"; break; \
-		case exodbc::LogLevel::Info: \
-			ss << u8"INFO"; break; \
-		case exodbc::LogLevel::Debug: \
-			ss << u8"DEBUG"; break; \
+			switch (level)
+			{
+			case exodbc::LogLevel::Error: \
+				ss << u8"ERROR"; break; \
+			case exodbc::LogLevel::Warning: \
+				ss << u8"WARNING"; break; \
+			case exodbc::LogLevel::Info: \
+				ss << u8"INFO"; break; \
+			case exodbc::LogLevel::Debug: \
+				ss << u8"DEBUG"; break; \
+			}
+			ss << u8" ";
 		}
 
 		bool haveSourceInfo = !filename.empty() || line > 0 || !functionname.empty();
-		if (haveSourceInfo)
-			ss << u8" [";
+		if (haveSourceInfo && m_showFileInfo)
+		{
+			ss << u8"[";
 
-		if (!filename.empty())
-			ss << filename;
-		if (line > 0)
-			ss << u8"(" << line << u8")";
-		else if (!filename.empty())
-			ss << u8"(\?\?)";
-		if (!functionname.empty())
-			ss << functionname;
+			if (!filename.empty())
+				ss << filename;
+			if (line > 0)
+				ss << u8"(" << line << u8")";
+			else if (!filename.empty())
+				ss << u8"(\?\?)";
+			if (!functionname.empty())
+				ss << functionname;
 
-		if (haveSourceInfo)
-			ss << u8"]";
+			if (haveSourceInfo)
+				ss << u8"]";
+		}
 
-		ss << u8": " << msg;
+		if (ss.tellp() > 0)
+			ss << u8": ";
+		
+		ss << msg;
 
 		return ss.str();
 	}
@@ -129,7 +138,8 @@ namespace exodbc
 
 
 	FileLogHandler::FileLogHandler(const std::string& filepath, bool prependTimestamp)
-		: m_prependTimestamp(prependTimestamp)
+		: LogHandlerBase()
+		, m_prependTimestamp(prependTimestamp)
 		, m_filepath(filepath)
 		, m_firstMessage(true)
 	{
