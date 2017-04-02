@@ -39,10 +39,14 @@ namespace exodbc
 				ss << u8"ERROR"; break; \
 			case exodbc::LogLevel::Warning: \
 				ss << u8"WARNING"; break; \
+			case exodbc::LogLevel::Output: \
+				ss << u8"OUTPUT"; break; \
 			case exodbc::LogLevel::Info: \
 				ss << u8"INFO"; break; \
 			case exodbc::LogLevel::Debug: \
 				ss << u8"DEBUG"; break; \
+			default: \
+				ss << u8"UNKNOWN"; break; \
 			}
 			ss << u8" ";
 		}

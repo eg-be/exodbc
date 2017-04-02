@@ -33,8 +33,9 @@ namespace exodbc
 		None = 100,		//< No Output at all. Do not use to create log messages.
 		Error = 10,		//< Error and above.
 		Warning = 9,	//< Warning and above.
-		Info = 8,		//< Info and above.
-		Debug = 4		//< Everything.
+		Output = 7,		//< Output from result sets.
+		Info = 5,		//< Info and above.
+		Debug = 3		//< Everything.
 	};
 
 
@@ -164,6 +165,7 @@ namespace exodbc
 // Generic Log-entry shortcuts
 #define LOG_ERROR(msg) LOG_MSG(exodbc::LogLevel::Error, msg)
 #define LOG_WARNING(msg) LOG_MSG(exodbc::LogLevel::Warning, msg)
+#define LOG_OUTPUT(msg) LOG_MSG(exodbc::LogLevel::Output, msg)
 #define LOG_INFO(msg) LOG_MSG(exodbc::LogLevel::Info, msg)
 #define LOG_DEBUG(msg) LOG_MSG(exodbc::LogLevel::Debug, msg)
 
