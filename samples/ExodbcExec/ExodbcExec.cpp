@@ -55,7 +55,7 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8" -CS       <cs>          Connection String");
 	WRITE_STDOUT_ENDL(u8"");
 	WRITE_STDOUT_ENDL("OPTION can be:");
-	WRITE_STDOUT_ENDL(u8" --silent                Hides all output.");
+	WRITE_STDOUT_ENDL(u8" --silent                Hides all output, except '!help'.");
 	WRITE_STDOUT_ENDL(u8" --odbcVersion <version> Set ODBC Version to use. Valid values are '2', '3'");
 	WRITE_STDOUT_ENDL(u8"                         or '3.8'. Default is '3'.");
 	WRITE_STDOUT_ENDL(u8" --autoCommitOn          Enable auto commit. Default is to commit manual.");
@@ -67,7 +67,9 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8"                         fails or any SQL related call fails. Default is to");
 	WRITE_STDOUT_ENDL(u8"                         log a warning and continue.");
 	WRITE_STDOUT_ENDL(u8" --logLevel <level>      Set the Log Level. <level> can be 'Debug', Info',");
-	WRITE_STDOUT_ENDL(u8"                         'Warning' or 'Error'. Default is 'Info'.");
+	WRITE_STDOUT_ENDL(u8"                         'Output', 'Warning' or 'Error'. Default is 'Info'.");
+	WRITE_STDOUT_ENDL(u8"                         On 'Output', only results from queries and warnings");
+	WRITE_STDOUT_ENDL(u8"                         or errors are printed.");
 	WRITE_STDOUT_ENDL(u8" --columnSeparator <str> Character or String displayed to separate values");
 	WRITE_STDOUT_ENDL(u8"                         of different columns when printing column data.");
 	WRITE_STDOUT_ENDL(u8"                         Default is '||'.");
@@ -100,6 +102,7 @@ int main(int argc, char* argv[])
 		StdErrLogHandlerPtr pStdLogger = std::make_shared<StdLogHandler>();
 		pStdLogger->SetShowFileInfo(false);
 		pStdLogger->SetHideLogLevel(LogLevel::Info);
+		pStdLogger->SetHideLogLevel(LogLevel::Output);
 		LogManager::Get().ClearLogHandlers();
 		LogManager::Get().RegisterLogHandler(pStdLogger);
 		
@@ -218,6 +221,8 @@ int main(int argc, char* argv[])
 					LogManager::Get().SetGlobalLogLevel(LogLevel::Debug);
 				else if (ba::iequals(logLevelString, u8"Info"))
 					LogManager::Get().SetGlobalLogLevel(LogLevel::Info);
+				else if (ba::iequals(logLevelString, u8"Output"))
+					LogManager::Get().SetGlobalLogLevel(LogLevel::Output);
 				else if (ba::iequals(logLevelString, u8"Warning"))
 					LogManager::Get().SetGlobalLogLevel(LogLevel::Warning);
 				else if (ba::iequals(logLevelString, u8"Error"))
@@ -465,7 +470,7 @@ namespace exodbcexec
 		// print current or all
 		if (!m_printNoHeader)
 		{
-			LOG_INFO(GetHeaderString(m_currentColumns));
+			LOG_OUTPUT(GetHeaderString(m_currentColumns));
 		}
 		if (mode == PrintMode::Current)
 		{
@@ -475,7 +480,7 @@ namespace exodbcexec
 			else if (m_printRowNr)
 				ss << boost::str(boost::format(u8"%d") % 1) << m_columnSeparator;
 			ss << CurrentRecordToString(m_currentColumns);
-			LOG_INFO(ss.str());
+			LOG_OUTPUT(ss.str());
 		}
 		else if (mode == PrintMode::All)
 		{
@@ -495,7 +500,7 @@ namespace exodbcexec
 					ss << boost::str(boost::format(u8"%d") % rowCount) << m_columnSeparator;
 
 				ss << CurrentRecordToString(m_currentColumns);
-				LOG_INFO(ss.str());
+				LOG_OUTPUT(ss.str());
 				haveNext = m_stmt.SelectNext();
 				++rowCount;
 			}
