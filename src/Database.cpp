@@ -1215,7 +1215,6 @@ namespace exodbc
 		}
 
 		SQLRETURN ret;
-		std::string errStringMode;
 		{
 			ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)mode, 0);
 		}
