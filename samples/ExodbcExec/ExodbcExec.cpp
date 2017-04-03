@@ -18,6 +18,8 @@
 #ifdef _WIN32
 	#include <SDKDDKVer.h>
 	#include <tchar.h>
+	#include <io.h>
+	#include <fcntl.h>
 #endif
 #include "exodbc/exOdbc.h"
 #include "exodbc/LogManager.h"
@@ -73,6 +75,16 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8" --columnSeparator <str> Character or String displayed to separate values");
 	WRITE_STDOUT_ENDL(u8"                         of different columns when printing column data.");
 	WRITE_STDOUT_ENDL(u8"                         Default is '||'.");
+#ifdef _WIN32
+	WRITE_STDOUT_ENDL(u8" --enableUtf16TextMode   On windows, sets the std::wcerr and std::wcout");
+	WRITE_STDOUT_ENDL(u8"                         streams to UTF16 textmode. This will do a call to");
+	WRITE_STDOUT_ENDL(u8"                         '_setmode(_fileno(stdout), _O_U16TEXT);' for both");
+	WRITE_STDOUT_ENDL(u8"                         streams.");
+	WRITE_STDOUT_ENDL(u8"                         Only available on windows and it is recommended");
+	WRITE_STDOUT_ENDL(u8"                         to set this value. Else there is a risk of a broken");
+	WRITE_STDOUT_ENDL(u8"                         wcerr / wcout stream if some utf 16 chars arrive on");
+	WRITE_STDOUT_ENDL(u8"                         the stream.");
+#endif
 	WRITE_STDOUT_ENDL(u8" --exitOnError           Exits with a non-zero status if SQL execution");
 	WRITE_STDOUT_ENDL(u8"                         fails or any SQL related call fails. Default is to");
 	WRITE_STDOUT_ENDL(u8"                         log a warning and continue.");
@@ -137,6 +149,7 @@ int main(int argc, char* argv[])
 		const std::string sqlSeparatorKey = u8"--sqlSeparator";
 		const std::string charColTypeKey = u8"--charColType";
 		const std::string noHeaderKey = u8"--noHeader";
+		const std::string enableUtf16TextModeKey = u8"--enableUtf16TextMode";
 		const std::string autoCommitKey = u8"--autoCommitOn";
 		const std::string silentKey = u8"--silent";
 		const std::string forwardOnlyCursorsKey = u8"--forwardOnlyCursors";
@@ -157,6 +170,7 @@ int main(int argc, char* argv[])
 		bool addRowNrValue = false;
 		bool forceCharCols = false;
 		bool forceWCharCols = false;
+		bool enableUtf16TextModeValue = false;
 		SQLLEN charColSizeValue = 0;
 		OdbcVersion odbcVersionValue = OdbcVersion::V_3;
 		LogLevel logLevelValue = LogLevel::Info;
@@ -235,6 +249,10 @@ int main(int argc, char* argv[])
 			{
 				autoCommitValue = true;
 			}
+			if (ba::equals(arg, enableUtf16TextModeKey))
+			{
+				enableUtf16TextModeValue = true;
+			}
 			if (ba::equals(arg, fixedPrintSizeKey))
 			{
 				fixedPrintSizeValue = true;
@@ -306,6 +324,14 @@ int main(int argc, char* argv[])
 		{
 			LogManager::Get().SetGlobalLogLevel(LogLevel::None);
 		}
+
+#ifdef _WIN32
+		if (enableUtf16TextModeValue)
+		{
+			_setmode(_fileno(stdout), _O_U16TEXT);
+			_setmode(_fileno(stderr), _O_U16TEXT);
+		}
+#endif
 
 		EnvironmentPtr pEnv = Environment::Create(odbcVersionValue);
 		DatabasePtr pDb = Database::Create(pEnv);
