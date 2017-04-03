@@ -418,16 +418,8 @@ namespace exodbc
 		exASSERT(m_pHDbc);
 		exASSERT(m_pHDbc->IsAllocated());
 
-		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, 0);
-		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Cannot set SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
-
-		// Note: This is unsupported SQL_ATTR_METADATA_ID by most drivers. It should default to OFF
-		//ret = SQLSetConnectAttr(m_hdbc, SQL_ATTR_METADATA_ID, (SQLPOINTER) SQL_TRUE, NULL);
-		//if(ret != SQL_SUCCESS)
-		//{
-		//	LOG_ERROR_DBC_MSG(m_hdbc, ret, SQLSetConnectAttr, u8"Cannot set ATTR_METADATA_ID to SQL_FALSE");
-		//	ok = false;
-		//}
+		// For the moment do nothing here. 
+		// There is no need to set any connection attributes right now, we assume defaults are fine.
 	}
 
 
