@@ -420,27 +420,39 @@ namespace exodbcexec
 
 	int ExodbcExec::Run(InputGeneratorPtr pInGen)
 	{
-		std::string command;
 		LOG_INFO(boost::str(boost::format(u8"Ready to execute SQL. Type '!exit' to exit, or '!help' for help.")));
-		while (pInGen->GetNextCommand(command) == InputGenerator::GetCommandResult::HAVE_COMMAND)
+		InputGenerator::GetCommandResult getCmdResult = InputGenerator::GetCommandResult::NO_COMMAND;
+		auto GetInput = [&]() {
+			string input;
+			getCmdResult = pInGen->GetNextCommand(input);
+			return input;
+		};
+		do
 		{
-			if (command.empty())
+			const string input = GetInput();
+
+			if (input.empty())
 				continue;
 
-			if (COMMAND_EXIT.find(command) != COMMAND_EXIT.end())
+			if (COMMAND_EXIT.find(input) != COMMAND_EXIT.end())
 				break;
 
 			try
 			{
+				std::string command;
 				std::vector<std::string> commandArgs;
-				if (ba::starts_with(command, u8"!"))
+				if (ba::starts_with(input, u8"!"))
 				{
 					// split arguments in command, get the argument part first
-					size_t wsPos = command.find(u8" ");
+					size_t wsPos = input.find(u8" ");
+					if (wsPos == string::npos)
+					{
+						command = input;
+					}
 					if (wsPos != string::npos)
 					{
-						string argsPart = boost::trim_copy(command.substr(wsPos));
-						command = command.substr(0, wsPos);
+						string argsPart = boost::trim_copy(input.substr(wsPos));
+						command = input.substr(0, wsPos);
 						string currentArg;
 						bool inFramedPart = false;
 						// and iterate, but respect arguments in "", like "Hello world", or "   "
@@ -544,7 +556,7 @@ namespace exodbcexec
  				}
 				else
 				{
-					if (ba::starts_with(command, u8"!"))
+					if (ba::starts_with(input, u8"!"))
 						LOG_WARNING(boost::str(boost::format(u8"Input starts with '!' but is not recognized as a command, executing as SQL.")));
 
 					// Before executing, unbind any bound columns
@@ -555,11 +567,11 @@ namespace exodbcexec
 					vector<string> cmds;
 					if ( ! m_sqlSeparator.empty())
 					{
-						iter_split(cmds, command, boost::algorithm::first_finder(m_sqlSeparator));
+						iter_split(cmds, input, boost::algorithm::first_finder(m_sqlSeparator));
 					}
 					else
 					{
-						cmds.push_back(command);
+						cmds.push_back(input);
 					}
 
 					for (vector<string>::const_iterator it = cmds.begin(); it != cmds.end(); ++it)
@@ -599,6 +611,8 @@ namespace exodbcexec
 				return 20;
 			}
 		}
+		while (getCmdResult == InputGenerator::GetCommandResult::HAVE_COMMAND);
+
 		return 0;
 	}
 
