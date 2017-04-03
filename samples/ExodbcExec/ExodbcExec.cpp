@@ -389,6 +389,7 @@ namespace exodbcexec
 	const std::set<std::string> ExodbcExec::COMMAND_SELECT_LAST = { u8"!last", u8"!sl" };
 	const std::set<std::string> ExodbcExec::COMMAND_COMMIT_TRANS = { u8"!commitTrans", u8"!ct" };
 	const std::set<std::string> ExodbcExec::COMMAND_ROLLBACK_TRANS = { u8"!rollbackTrans", u8"!rt" };
+	const std::set<std::string> ExodbcExec::COMMAND_FIND = { u8"!find", u8"!f" };
 
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator,
 			bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode,
@@ -431,6 +432,50 @@ namespace exodbcexec
 
 			try
 			{
+				std::vector<std::string> commandArgs;
+				if (ba::starts_with(command, u8"!"))
+				{
+					// split arguments in command, get the argument part first
+					size_t wsPos = command.find(u8" ");
+					if (wsPos != string::npos)
+					{
+						string argsPart = boost::trim_copy(command.substr(wsPos));
+						command = command.substr(0, wsPos);
+						string currentArg;
+						bool inFramedPart = false;
+						// and iterate, but respect arguments in "", like "Hello world", or "   "
+						for (string::const_iterator it = argsPart.begin(); it != argsPart.end(); ++it)
+						{
+							if (*it == '"')
+							{
+								if (!inFramedPart)
+								{
+									inFramedPart = true;
+								}
+								else
+								{
+									inFramedPart = false;
+									commandArgs.push_back(currentArg);
+									currentArg = u8"";
+								}
+							}
+							else if (*it == ' ' && !inFramedPart && !currentArg.empty())
+							{
+								commandArgs.push_back(currentArg);
+								currentArg = u8"";
+							}
+							else if(*it != ' ' || inFramedPart)
+							{
+								currentArg += *it;
+							}
+						}
+						if (!currentArg.empty())
+						{
+							commandArgs.push_back(currentArg);
+						}
+					}
+				}
+
 				if (COMMAND_HELP.find(command) != COMMAND_HELP.end())
 				{
 					PrintHelp();
@@ -467,6 +512,36 @@ namespace exodbcexec
 				{
 					m_pDb->RollbackTrans();
 				}
+				else if (COMMAND_FIND.find(command) != COMMAND_FIND.end())
+				{
+					string name = commandArgs.size() >= 1 ? commandArgs[0] : u8"";
+					string schema = commandArgs.size() >= 2 ? commandArgs[1] : u8"";
+					string catalog = commandArgs.size() >= 3 ? commandArgs[2] : u8"";
+					string type = commandArgs.size() >= 4 ? commandArgs[3] : u8"";
+					LOG_INFO(boost::str(boost::format(u8"Searching for tables with name: '%s'; schema: '%s'; catalog: '%s'; Type: '%s'") 
+						% name % schema % catalog % type));
+					auto start = std::chrono::high_resolution_clock::now();
+					TableInfosVector tables = m_pDb->FindTables(name, schema, catalog, type);
+					auto end = std::chrono::high_resolution_clock::now();
+					auto elapsed = end - start;
+					auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+					LOG_INFO(boost::str(boost::format(u8"Success, found %d table(s). Execution took %dms.")
+						% tables.size() % millis.count()));
+
+					if (tables.size() > 0)
+					{
+						LOG_OUTPUT(boost::str(boost::format(u8"%18s%s%18s%s%18s%s%18s")
+							% u8"Name" % m_columnSeparator % u8"Schema" % m_columnSeparator
+							% u8"Catalog" % m_columnSeparator % u8"type"));
+						for (TableInfosVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
+						{
+							LOG_OUTPUT(boost::str(boost::format(u8"%18s%s%18s%s%18s%s%18s")
+								% it->GetPureName() % m_columnSeparator % it->GetSchema() % m_columnSeparator
+								% it->GetCatalog() % m_columnSeparator % it->GetType()));
+						}
+						LOG_INFO(u8"No more results available");
+					}
+ 				}
 				else
 				{
 					if (ba::starts_with(command, u8"!"))
@@ -643,7 +718,7 @@ namespace exodbcexec
 				haveNext = m_stmt.SelectNext();
 				++rowCount;
 			}
-			LOG_INFO(u8"No more results available");
+			LOG_INFO(u8"No more results available.");
 		}
 	}
 	
@@ -738,6 +813,15 @@ namespace exodbcexec
 		WRITE_STDOUT_ENDL(u8" !printCurrent,!pc   Print the current record.");
 		WRITE_STDOUT_ENDL(u8" !commitTrans,!ct    Commit any ongoing transations.");
 		WRITE_STDOUT_ENDL(u8" !rollbackTrans,!rt  Rollback all ongoing transactions.");
+		WRITE_STDOUT_ENDL(u8"");
+		WRITE_STDOUT_ENDL(u8" !find,!f          [name] [schema] [catalog] [type]");
+		WRITE_STDOUT_ENDL(u8"                     Searches for objects.");
+		WRITE_STDOUT_ENDL(u8"                     [name] [schema], [catalog] and [type] are optional.");
+		WRITE_STDOUT_ENDL(u8"                     See the documentation of SQLTables for more");
+		WRITE_STDOUT_ENDL(u8"                     information about the arguments.");
+		WRITE_STDOUT_ENDL(u8"                     If an argument is not given, an empty string is");
+		WRITE_STDOUT_ENDL(u8"                     used. Use \" to frame an argument value if it");
+		WRITE_STDOUT_ENDL(u8"                     contains whitespaces.");
 		WRITE_STDOUT_ENDL(u8" !help,!h            Show this help.");
 	}
 }
