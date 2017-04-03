@@ -122,13 +122,17 @@ namespace exodbc
 		try
 		{
 			SQLRETURN ret = 0;
-			if (forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
+			// Try to read the currently active value first, and only try to change if a change is required:
+			SQLULEN currentValue;
+			ret = SQLGetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)&currentValue, sizeof(currentValue), 0);
+			THROW_IFN_SUCCEEDED_MSG(SQLGetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to get Statement Attr SQL_ATTR_CURSOR_SCROLLABLE");
+			if (currentValue != SQL_NONSCROLLABLE && forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
 			{
 				ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_NONSCROLLABLE, 0);
 				THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
 				m_forwardOnlyCursors = true;
 			}
-			else
+			else if(currentValue != SQL_SCROLLABLE)
 			{
 				ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_SCROLLABLE, 0);
 				THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
