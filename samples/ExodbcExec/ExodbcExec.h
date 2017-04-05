@@ -62,6 +62,9 @@ namespace exodbcexec
 		const static std::set<std::string> COMMAND_COMMIT_TRANS;
 		const static std::set<std::string> COMMAND_ROLLBACK_TRANS;
 		const static std::set<std::string> COMMAND_FIND;
+		const static std::set<std::string> COMMAND_LIST_TABLES;
+		const static std::set<std::string> COMMAND_LIST_SCHEMAS;
+		const static std::set<std::string> COMMAND_LIST_CATALOGS;
 
 		ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator, 
 					bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode,
@@ -83,9 +86,18 @@ namespace exodbcexec
 			Last
 		};
 
+		enum class ListMode
+		{
+			Types,
+			Schemas,
+			Catalogs
+		};
+		std::string ToString(ListMode mode) const noexcept;
+
 		void PrintHelp();
 		void Print(PrintMode mode);
 		void Select(SelectMode mode);
+		void List(ListMode mode);
 
 	private:
 		std::string CurrentRecordToString(const std::vector<exodbc::StringColumnWrapper>& columns) const;
