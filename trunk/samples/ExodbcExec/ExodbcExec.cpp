@@ -390,6 +390,9 @@ namespace exodbcexec
 	const std::set<std::string> ExodbcExec::COMMAND_COMMIT_TRANS = { u8"!commitTrans", u8"!ct" };
 	const std::set<std::string> ExodbcExec::COMMAND_ROLLBACK_TRANS = { u8"!rollbackTrans", u8"!rt" };
 	const std::set<std::string> ExodbcExec::COMMAND_FIND = { u8"!find", u8"!f" };
+	const std::set<std::string> ExodbcExec::COMMAND_LIST_TABLES = { u8"!listTables", u8"!lt" };
+	const std::set<std::string> ExodbcExec::COMMAND_LIST_SCHEMAS = { u8"!listSchemas", u8"!ls" };
+	const std::set<std::string> ExodbcExec::COMMAND_LIST_CATALOGS = { u8"!listCatalogs", u8"!lc" };
 
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator,
 			bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode,
@@ -523,6 +526,18 @@ namespace exodbcexec
 				else if (COMMAND_ROLLBACK_TRANS.find(command) != COMMAND_ROLLBACK_TRANS.end())
 				{
 					m_pDb->RollbackTrans();
+				}
+				else if (COMMAND_LIST_TABLES.find(command) != COMMAND_LIST_TABLES.end())
+				{
+					List(ListMode::Types);
+				}
+				else if (COMMAND_LIST_SCHEMAS.find(command) != COMMAND_LIST_SCHEMAS.end())
+				{
+					List(ListMode::Schemas);
+				}
+				else if (COMMAND_LIST_CATALOGS.find(command) != COMMAND_LIST_CATALOGS.end())
+				{
+					List(ListMode::Catalogs);
 				}
 				else if (COMMAND_FIND.find(command) != COMMAND_FIND.end())
 				{
@@ -687,6 +702,54 @@ namespace exodbcexec
 	}
 
 
+	void ExodbcExec::List(ExodbcExec::ListMode mode)
+	{
+		auto Lister = [&](ListMode mode) {
+			switch (mode)
+			{
+			case ListMode::Types:
+			case ListMode::Schemas:
+				return m_pDb->ReadSchemas();
+			case ListMode::Catalogs:
+				return m_pDb->ReadCatalogs();
+				break;
+			}
+			exASSERT(false);
+		};
+
+		vector<string> data;
+		LOG_INFO(boost::str(boost::format(u8"Listing all %s ..") % ToString(mode)));
+		auto start = std::chrono::high_resolution_clock::now();
+		switch (mode)
+		{
+		case ListMode::Types:
+			data = m_pDb->ReadTableTypes();
+			break;
+		case ListMode::Schemas:
+			data = m_pDb->ReadSchemas();
+			break;
+		case ListMode::Catalogs:
+			data = m_pDb->ReadCatalogs();
+			break;
+		}
+		auto end = std::chrono::high_resolution_clock::now();
+		auto elapsed = end - start;
+		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+		LOG_INFO(boost::str(boost::format(u8"Success, found %d %s. Execution took %dms.")
+			% data.size() % ToString(mode) % millis.count()));
+
+		if (!data.empty())
+		{
+			LOG_INFO(boost::str(boost::format(u8"Name")));
+			LOG_INFO(boost::str(boost::format(u8"----")));
+			for (vector<string>::const_iterator it = data.begin(); it != data.end(); ++it)
+			{
+				LOG_INFO(*it);
+			}
+		}
+	}
+
+
 	void ExodbcExec::Print(ExodbcExec::PrintMode mode)
 	{
 		if (m_currentColumns.empty())
@@ -803,6 +866,21 @@ namespace exodbcexec
 	}
 
 
+	std::string ExodbcExec::ToString(ListMode mode) const noexcept
+	{
+		switch (mode)
+		{
+		case ListMode::Catalogs:
+			return u8"Catalogs";
+		case ListMode::Schemas:
+			return u8"Schemas";
+		case ListMode::Types:
+			return u8"Types";
+		}
+		return u8"???";
+	}
+
+
 	void ExodbcExec::PrintHelp()
 	{
 		WRITE_STDOUT_ENDL(u8"Any input that is not recognized as a command will be executed as SQL");
@@ -825,6 +903,9 @@ namespace exodbcexec
 		WRITE_STDOUT_ENDL(u8"                     If forward only cursors is set to true, all");
 		WRITE_STDOUT_ENDL(u8"                     remaining records found using '!next' are printed");
 		WRITE_STDOUT_ENDL(u8" !printCurrent,!pc   Print the current record.");
+		WRITE_STDOUT_ENDL(u8" !listTables,!lt     List all tables.");
+		WRITE_STDOUT_ENDL(u8" !listSchemas,!ls    List all schemas.");
+		WRITE_STDOUT_ENDL(u8" !listCatalogs,!lc   List all catalogs.");
 		WRITE_STDOUT_ENDL(u8" !commitTrans,!ct    Commit any ongoing transations.");
 		WRITE_STDOUT_ENDL(u8" !rollbackTrans,!rt  Rollback all ongoing transactions.");
 		WRITE_STDOUT_ENDL(u8"");
