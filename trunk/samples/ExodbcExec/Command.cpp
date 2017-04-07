@@ -63,6 +63,24 @@ namespace exodbcexec
 	}
 
 
+	string Select::GetHelp() const noexcept
+	{
+		switch (m_mode)
+		{
+		case Mode::First:
+			return u8"Select first record.";
+		case Mode::Last:
+			return u8"Select last record.";
+		case Mode::Next:
+			return u8"Select next record.";
+		case Mode::Prev:
+			return u8"Select previous record.";
+		}
+		exASSERT(false);
+		return{};
+	}
+
+
 	void Select::Execute(const std::vector<std::string> & args)
 	{
 		exASSERT(m_pStmt);
@@ -96,6 +114,18 @@ namespace exodbcexec
 	}
 
 
+	string Commit::GetHelp() const noexcept
+	{
+		return u8"Commit any ongoing transations.";
+	}
+
+
+	string Rollback::GetHelp() const noexcept
+	{
+		return u8"Rollback all ongoing transactions.";
+	}
+
+
 	void Rollback::Execute(const std::vector<std::string>& args)
 	{
 		exASSERT(m_pDb);
@@ -111,6 +141,25 @@ namespace exodbcexec
 			return{ u8"printCurrent", u8"pc" };
 		case Mode::AllRecords:
 			return{ u8"printAll", u8"pa" };
+		}
+		exASSERT(false);
+		return{};
+	}
+
+
+	string Print::GetHelp() const noexcept
+	{
+		switch (m_mode)
+		{
+		case Mode::CurrentRecord:
+			return u8"Print the current record.";
+		case Mode::AllRecords:
+			return	u8"Print all records of the current record set. "
+					u8"If forward only cursors is set to false, !printAll "
+					u8"will first execute a '!first' and then print and "
+					u8"iterate all records by calling '!next'. "
+					u8"If forward only cursors is set to true, all "
+					u8"remaining records found using '!next' are printed.";
 		}
 		exASSERT(false);
 		return{};
@@ -263,5 +312,16 @@ namespace exodbcexec
 		ss << m_columnSeparator;
 		ss << CurrentRecordToString();
 		return ss.str();
+	}
+
+
+	void Help::Execute(const std::vector<std::string>& args)
+	{
+		stringstream ss;
+		ss <<			u8"Any input that is not recognized as a command will be executed as SQL "
+						u8"against the database connected to.";
+		ss <<			u8"Commands can be abbreviated. For example the command 'Exit SQL "
+						u8"execution', documented as '!exit,!e,!q', can be invoked using '!exit' "
+						u8" or '!e' or '!q'.";
 	}
 }

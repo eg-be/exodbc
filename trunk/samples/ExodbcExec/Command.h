@@ -48,6 +48,8 @@ namespace exodbcexec
 		virtual void Execute(const std::vector<std::string>& args) = 0;
 
 		virtual bool Hidden() const noexcept { return false; };
+
+		virtual std::string GetHelp() const noexcept = 0;
 	};
 
 	typedef std::shared_ptr<Command> CommandPtr;
@@ -72,6 +74,7 @@ namespace exodbcexec
 		virtual void Execute(const std::vector<std::string>& args);
 
 		virtual bool Hidden() const noexcept { return true; };
+		virtual std::string GetHelp() const noexcept { return u8"Execute SQL."; };
 
 	private:
 		exodbc::ExecutableStatementPtr m_pStmt;
@@ -97,6 +100,7 @@ namespace exodbcexec
 
 		virtual std::set<std::string> GetAliases() const noexcept;
 		virtual void Execute(const std::vector<std::string> & args);
+		virtual std::string GetHelp() const noexcept;
 
 	private:
 		Mode m_mode;
@@ -115,6 +119,7 @@ namespace exodbcexec
 
 		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"commitTrans", u8"ct" }; };
 		virtual void Execute(const std::vector<std::string>& args);
+		virtual std::string GetHelp() const noexcept;
 
 	private:
 		exodbc::DatabasePtr m_pDb;
@@ -131,9 +136,19 @@ namespace exodbcexec
 
 		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"rollbackTrans", u8"rt" }; };
 		virtual void Execute(const std::vector<std::string>& args);
+		virtual std::string GetHelp() const noexcept;
 
 	private:
 		exodbc::DatabasePtr m_pDb;
+	};
+
+
+	class Help
+		: public Command
+	{
+		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"help", u8"h" }; };
+		virtual void Execute(const std::vector<std::string>& args);
+		virtual std::string GetHelp() const noexcept { return u8"Show this help text."; };
 	};
 
 
@@ -162,6 +177,7 @@ namespace exodbcexec
 
 		virtual std::set<std::string> GetAliases() const noexcept;
 		virtual void Execute(const std::vector<std::string> & args);
+		virtual std::string GetHelp() const noexcept;
 
 	private:
 		static const size_t DEFAULT_ROWNR_WIDTH = 10;
