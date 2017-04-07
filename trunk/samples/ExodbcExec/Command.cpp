@@ -320,6 +320,7 @@ namespace exodbcexec
 		stringstream ss;
 		ss <<			u8"Any input that is not recognized as a command will be executed as SQL "
 						u8"against the database connected to.";
+		ss.clear();
 		ss <<			u8"Commands can be abbreviated. For example the command 'Exit SQL "
 						u8"execution', documented as '!exit,!e,!q', can be invoked using '!exit' "
 						u8" or '!e' or '!q'.";
