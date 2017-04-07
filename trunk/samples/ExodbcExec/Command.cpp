@@ -65,6 +65,7 @@ namespace exodbcexec
 
 	void Select::Execute(const std::vector<std::string> & args)
 	{
+		exASSERT(m_pStmt);
 		bool res = false;
 		switch (m_mode)
 		{
@@ -85,6 +86,20 @@ namespace exodbcexec
 		{
 			LOG_WARNING(u8"No Record selected");
 		}
+	}
+
+
+	void Commit::Execute(const std::vector<std::string>& args)
+	{
+		exASSERT(m_pDb);
+		m_pDb->CommitTrans();
+	}
+
+
+	void Rollback::Execute(const std::vector<std::string>& args)
+	{
+		exASSERT(m_pDb);
+		m_pDb->RollbackTrans();
 	}
 
 
