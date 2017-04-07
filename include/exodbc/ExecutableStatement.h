@@ -18,6 +18,7 @@
 // Other headers
 // System headers
 #include <string>
+#include <memory>
 
 // Forward declarations
 // --------------------
@@ -268,5 +269,7 @@ namespace exodbc
 		bool m_boundColumns;
 		bool m_boundParams;
 	};
+
+	typedef std::shared_ptr<ExecutableStatement> ExecutableStatementPtr;
 } // namespace exodbc
 

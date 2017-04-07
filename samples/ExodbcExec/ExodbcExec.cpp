@@ -418,6 +418,19 @@ namespace exodbcexec
 #endif
 		}
 		m_stmt.Init(m_pDb, m_forwardOnlyCursors);
+
+		m_pStmt = make_shared<ExecutableStatement>(m_pDb, m_forwardOnlyCursors);
+
+//		CreateCommands();
+		RegisterCommand(make_shared<ExecuteSql>(m_pStmt));
+		RegisterCommand(make_shared<Select>(Select::Mode::First, m_pStmt));
+		RegisterCommand(make_shared<Select>(Select::Mode::Last, m_pStmt));
+		RegisterCommand(make_shared<Select>(Select::Mode::Next, m_pStmt));
+		RegisterCommand(make_shared<Select>(Select::Mode::Prev, m_pStmt));
+		RegisterCommand(make_shared<Print>(Print::Mode::CurrentRecord, m_currentColumns, m_pStmt,
+			columnSeparator, !printNoHeader, printRowNr, fixedPrintSize, 0));
+		RegisterCommand(make_shared<Print>(Print::Mode::AllRecords, m_currentColumns, m_pStmt,
+			columnSeparator, !printNoHeader, printRowNr, fixedPrintSize, 0));
 	}
 
 
@@ -442,174 +455,208 @@ namespace exodbcexec
 
 			try
 			{
-				std::string command;
-				std::vector<std::string> commandArgs;
+				// Try to find a command
+				CommandPtr pCommand = nullptr;
+				vector<string> args;
 				if (ba::starts_with(input, u8"!"))
 				{
-					// split arguments in command, get the argument part first
-					size_t wsPos = input.find(u8" ");
-					if (wsPos == string::npos)
-					{
-						command = input;
-					}
-					if (wsPos != string::npos)
-					{
-						string argsPart = boost::trim_copy(input.substr(wsPos));
-						command = input.substr(0, wsPos);
-						string currentArg;
-						bool inFramedPart = false;
-						// and iterate, but respect arguments in "", like "Hello world", or "   "
-						for (string::const_iterator it = argsPart.begin(); it != argsPart.end(); ++it)
-						{
-							if (*it == '"')
-							{
-								if (!inFramedPart)
-								{
-									inFramedPart = true;
-								}
-								else
-								{
-									inFramedPart = false;
-									commandArgs.push_back(currentArg);
-									currentArg = u8"";
-								}
-							}
-							else if (*it == ' ' && !inFramedPart && !currentArg.empty())
-							{
-								commandArgs.push_back(currentArg);
-								currentArg = u8"";
-							}
-							else if(*it != ' ' || inFramedPart)
-							{
-								currentArg += *it;
-							}
-						}
-						if (!currentArg.empty())
-						{
-							commandArgs.push_back(currentArg);
-						}
-					}
+					boost::split(args, input.substr(1), boost::is_any_of(u8" "));
+					string cmd = args.front();
+					args.erase(args.begin());
+					pCommand = GetCommand(cmd);
 				}
-
-				if (COMMAND_HELP.find(command) != COMMAND_HELP.end())
+				if (pCommand)
 				{
-					PrintHelp();
+					pCommand->Execute(args);
 				}
-				else if (COMMAND_PRINT_ALL.find(command) != COMMAND_PRINT_ALL.end())
-				{
-					Print(PrintMode::All);
-				}
-				else if(COMMAND_PRINT_CURRENT.find(command) != COMMAND_PRINT_CURRENT.end())
-				{
-					Print(PrintMode::Current);
-				}
-				else if (COMMAND_SELECT_NEXT.find(command) != COMMAND_SELECT_NEXT.end())
-				{
-					Select(SelectMode::Next);
-				}
-				else if (!m_forwardOnlyCursors && COMMAND_SELECT_PREV.find(command) != COMMAND_SELECT_PREV.end())
-				{
-					Select(SelectMode::Prev);
-				}
-				else if (!m_forwardOnlyCursors && COMMAND_SELECT_FIRST.find(command) != COMMAND_SELECT_FIRST.end())
-				{
-					Select(SelectMode::First);
-				}
-				else if (!m_forwardOnlyCursors && COMMAND_SELECT_LAST.find(command) != COMMAND_SELECT_LAST.end())
-				{
-					Select(SelectMode::Last);
-				}
-				else if (COMMAND_COMMIT_TRANS.find(command) != COMMAND_COMMIT_TRANS.end())
-				{
-					m_pDb->CommitTrans();
-				}
-				else if (COMMAND_ROLLBACK_TRANS.find(command) != COMMAND_ROLLBACK_TRANS.end())
-				{
-					m_pDb->RollbackTrans();
-				}
-				else if (COMMAND_LIST_TABLES.find(command) != COMMAND_LIST_TABLES.end())
-				{
-					List(ListMode::Types);
-				}
-				else if (COMMAND_LIST_SCHEMAS.find(command) != COMMAND_LIST_SCHEMAS.end())
-				{
-					List(ListMode::Schemas);
-				}
-				else if (COMMAND_LIST_CATALOGS.find(command) != COMMAND_LIST_CATALOGS.end())
-				{
-					List(ListMode::Catalogs);
-				}
-				else if (COMMAND_FIND.find(command) != COMMAND_FIND.end())
-				{
-					string name = commandArgs.size() >= 1 ? commandArgs[0] : u8"";
-					string schema = commandArgs.size() >= 2 ? commandArgs[1] : u8"";
-					string catalog = commandArgs.size() >= 3 ? commandArgs[2] : u8"";
-					string type = commandArgs.size() >= 4 ? commandArgs[3] : u8"";
-					LOG_INFO(boost::str(boost::format(u8"Searching for tables with name: '%s'; schema: '%s'; catalog: '%s'; Type: '%s'") 
-						% name % schema % catalog % type));
-					auto start = std::chrono::high_resolution_clock::now();
-					TableInfosVector tables = m_pDb->FindTables(name, schema, catalog, type);
-					auto end = std::chrono::high_resolution_clock::now();
-					auto elapsed = end - start;
-					auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-					LOG_INFO(boost::str(boost::format(u8"Success, found %d table(s). Execution took %dms.")
-						% tables.size() % millis.count()));
-
-					if (tables.size() > 0)
-					{
-						LOG_OUTPUT(boost::str(boost::format(u8"%18s%s%18s%s%18s%s%18s")
-							% u8"Name" % m_columnSeparator % u8"Schema" % m_columnSeparator
-							% u8"Catalog" % m_columnSeparator % u8"type"));
-						for (TableInfosVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
-						{
-							LOG_OUTPUT(boost::str(boost::format(u8"%18s%s%18s%s%18s%s%18s")
-								% it->GetPureName() % m_columnSeparator % it->GetSchema() % m_columnSeparator
-								% it->GetCatalog() % m_columnSeparator % it->GetType()));
-						}
-						LOG_INFO(u8"No more results available");
-					}
- 				}
 				else
 				{
 					if (ba::starts_with(input, u8"!"))
-						LOG_WARNING(boost::str(boost::format(u8"Input starts with '!' but is not recognized as a command, executing as SQL.")));
+						LOG_WARNING(boost::str(boost::format(u8"Input starts with '!', but is not recognized as a command, executing as SQL.")));
 
-					// Before executing, unbind any bound columns
-					if( ! m_currentColumns.empty())
+					// no command found, pass original input to ExecuteSql
+					CommandPtr pExec = GetCommand(ExecuteSql::NAME, true);
+					exASSERT(pExec);
+					if (!m_currentColumns.empty())
+					{
 						UnbindColumns();
-
-					// Tokenize commands if a sql separator is set
-					vector<string> cmds;
-					if ( ! m_sqlSeparator.empty())
-					{
-						iter_split(cmds, input, boost::algorithm::first_finder(m_sqlSeparator));
 					}
-					else
-					{
-						cmds.push_back(input);
-					}
-
-					for (vector<string>::const_iterator it = cmds.begin(); it != cmds.end(); ++it)
-					{
-						string cmd = *it;
-						if (cmd.empty())
-							continue;
-
-						LOG_INFO(boost::str(boost::format(u8"Executing '%s'") % cmd));
-						auto start = std::chrono::high_resolution_clock::now();
-						m_stmt.ExecuteDirect(cmd);
-						auto end = std::chrono::high_resolution_clock::now();
-						auto elapsed = end - start;
-						auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-						LOG_INFO(boost::str(boost::format(u8"Success. Execution took %1%ms.")
-							% millis.count()));
-					}
-					// And bind columns, if there are any
-					if (m_stmt.GetNrOfColumns() > 0)
+					pExec->Execute({ input });
+					if (m_pStmt->GetNrOfColumns() > 0)
 					{
 						BindColumns();
 					}
 				}
+
+
+				//std::string command;
+				//std::vector<std::string> commandArgs;
+				//if (ba::starts_with(input, u8"!"))
+				//{
+				//	// split arguments in command, get the argument part first
+				//	size_t wsPos = input.find(u8" ");
+				//	if (wsPos == string::npos)
+				//	{
+				//		command = input;
+				//	}
+				//	if (wsPos != string::npos)
+				//	{
+				//		string argsPart = boost::trim_copy(input.substr(wsPos));
+				//		command = input.substr(0, wsPos);
+				//		string currentArg;
+				//		bool inFramedPart = false;
+				//		// and iterate, but respect arguments in "", like "Hello world", or "   "
+				//		for (string::const_iterator it = argsPart.begin(); it != argsPart.end(); ++it)
+				//		{
+				//			if (*it == '"')
+				//			{
+				//				if (!inFramedPart)
+				//				{
+				//					inFramedPart = true;
+				//				}
+				//				else
+				//				{
+				//					inFramedPart = false;
+				//					commandArgs.push_back(currentArg);
+				//					currentArg = u8"";
+				//				}
+				//			}
+				//			else if (*it == ' ' && !inFramedPart && !currentArg.empty())
+				//			{
+				//				commandArgs.push_back(currentArg);
+				//				currentArg = u8"";
+				//			}
+				//			else if(*it != ' ' || inFramedPart)
+				//			{
+				//				currentArg += *it;
+				//			}
+				//		}
+				//		if (!currentArg.empty())
+				//		{
+				//			commandArgs.push_back(currentArg);
+				//		}
+				//	}
+				//}
+
+				//if (COMMAND_HELP.find(command) != COMMAND_HELP.end())
+				//{
+				//	PrintHelp();
+				//}
+				//else if (COMMAND_PRINT_ALL.find(command) != COMMAND_PRINT_ALL.end())
+				//{
+				//	Print(PrintMode::All);
+				//}
+				//else if(COMMAND_PRINT_CURRENT.find(command) != COMMAND_PRINT_CURRENT.end())
+				//{
+				//	Print(PrintMode::Current);
+				//}
+				//else if (COMMAND_SELECT_NEXT.find(command) != COMMAND_SELECT_NEXT.end())
+				//{
+				//	Select(SelectMode::Next);
+				//}
+				//else if (!m_forwardOnlyCursors && COMMAND_SELECT_PREV.find(command) != COMMAND_SELECT_PREV.end())
+				//{
+				//	Select(SelectMode::Prev);
+				//}
+				//else if (!m_forwardOnlyCursors && COMMAND_SELECT_FIRST.find(command) != COMMAND_SELECT_FIRST.end())
+				//{
+				//	Select(SelectMode::First);
+				//}
+				//else if (!m_forwardOnlyCursors && COMMAND_SELECT_LAST.find(command) != COMMAND_SELECT_LAST.end())
+				//{
+				//	Select(SelectMode::Last);
+				//}
+				//else if (COMMAND_COMMIT_TRANS.find(command) != COMMAND_COMMIT_TRANS.end())
+				//{
+				//	m_pDb->CommitTrans();
+				//}
+				//else if (COMMAND_ROLLBACK_TRANS.find(command) != COMMAND_ROLLBACK_TRANS.end())
+				//{
+				//	m_pDb->RollbackTrans();
+				//}
+				//else if (COMMAND_LIST_TABLES.find(command) != COMMAND_LIST_TABLES.end())
+				//{
+				//	List(ListMode::Types);
+				//}
+				//else if (COMMAND_LIST_SCHEMAS.find(command) != COMMAND_LIST_SCHEMAS.end())
+				//{
+				//	List(ListMode::Schemas);
+				//}
+				//else if (COMMAND_LIST_CATALOGS.find(command) != COMMAND_LIST_CATALOGS.end())
+				//{
+				//	List(ListMode::Catalogs);
+				//}
+				//else if (COMMAND_FIND.find(command) != COMMAND_FIND.end())
+				//{
+				//	string name = commandArgs.size() >= 1 ? commandArgs[0] : u8"";
+				//	string schema = commandArgs.size() >= 2 ? commandArgs[1] : u8"";
+				//	string catalog = commandArgs.size() >= 3 ? commandArgs[2] : u8"";
+				//	string type = commandArgs.size() >= 4 ? commandArgs[3] : u8"";
+				//	LOG_INFO(boost::str(boost::format(u8"Searching for tables with name: '%s'; schema: '%s'; catalog: '%s'; Type: '%s'") 
+				//		% name % schema % catalog % type));
+				//	auto start = std::chrono::high_resolution_clock::now();
+				//	TableInfosVector tables = m_pDb->FindTables(name, schema, catalog, type);
+				//	auto end = std::chrono::high_resolution_clock::now();
+				//	auto elapsed = end - start;
+				//	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+				//	LOG_INFO(boost::str(boost::format(u8"Success, found %d table(s). Execution took %dms.")
+				//		% tables.size() % millis.count()));
+
+				//	if (tables.size() > 0)
+				//	{
+				//		LOG_OUTPUT(boost::str(boost::format(u8"%18s%s%18s%s%18s%s%18s")
+				//			% u8"Name" % m_columnSeparator % u8"Schema" % m_columnSeparator
+				//			% u8"Catalog" % m_columnSeparator % u8"type"));
+				//		for (TableInfosVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
+				//		{
+				//			LOG_OUTPUT(boost::str(boost::format(u8"%18s%s%18s%s%18s%s%18s")
+				//				% it->GetPureName() % m_columnSeparator % it->GetSchema() % m_columnSeparator
+				//				% it->GetCatalog() % m_columnSeparator % it->GetType()));
+				//		}
+				//		LOG_INFO(u8"No more results available");
+				//	}
+ 			//	}
+				//else
+				//{
+				//	if (ba::starts_with(input, u8"!"))
+				//		LOG_WARNING(boost::str(boost::format(u8"Input starts with '!' but is not recognized as a command, executing as SQL.")));
+
+				//	// Before executing, unbind any bound columns
+				//	if( ! m_currentColumns.empty())
+				//		UnbindColumns();
+
+				//	// Tokenize commands if a sql separator is set
+				//	vector<string> cmds;
+				//	if ( ! m_sqlSeparator.empty())
+				//	{
+				//		iter_split(cmds, input, boost::algorithm::first_finder(m_sqlSeparator));
+				//	}
+				//	else
+				//	{
+				//		cmds.push_back(input);
+				//	}
+
+				//	for (vector<string>::const_iterator it = cmds.begin(); it != cmds.end(); ++it)
+				//	{
+				//		string cmd = *it;
+				//		if (cmd.empty())
+				//			continue;
+
+				//		LOG_INFO(boost::str(boost::format(u8"Executing '%s'") % cmd));
+				//		auto start = std::chrono::high_resolution_clock::now();
+				//		m_stmt.ExecuteDirect(cmd);
+				//		auto end = std::chrono::high_resolution_clock::now();
+				//		auto elapsed = end - start;
+				//		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+				//		LOG_INFO(boost::str(boost::format(u8"Success. Execution took %1%ms.")
+				//			% millis.count()));
+				//	}
+				//	// And bind columns, if there are any
+				//	if (m_stmt.GetNrOfColumns() > 0)
+				//	{
+				//		BindColumns();
+				//	}
+				//}
 			}
 			catch (const exodbc::SqlResultException& sre)
 			{
@@ -632,11 +679,53 @@ namespace exodbcexec
 	}
 
 
+	void ExodbcExec::CreateCommands()
+	{
+		//RegisterCommand(make_shared<ExecuteSql>(m_pStmt));
+		//RegisterCommand(make_shared<Select>(Select::Mode::First, m_pStmt));
+		//RegisterCommand(make_shared<Select>(Select::Mode::Last, m_pStmt));
+		//RegisterCommand(make_shared<Select>(Select::Mode::Next, m_pStmt));
+		//RegisterCommand(make_shared<Select>(Select::Mode::Prev, m_pStmt));
+		//RegisterCommand(make_shared<Select>(Print::Mode::CurrentRecord, m_currentColumns));
+		//RegisterCommand(make_shared<Select>(Print::Mode::AllRecords, m_currentColumns));
+	}
+
+
+	void ExodbcExec::RegisterCommand(CommandPtr pCommand)
+	{
+		exASSERT(pCommand);
+
+		const set<string>& aliases = pCommand->GetAliases();
+		for (set<string>::const_iterator it = aliases.begin(); it != aliases.end(); ++it)
+		{
+			exASSERT_MSG(m_commands.find(*it) == m_commands.end(), 
+				boost::str(boost::format(u8"Command '%s' is already registered!") % *it));
+		}
+		for (set<string>::const_iterator it = aliases.begin(); it != aliases.end(); ++it)
+		{
+			m_commands[*it] = pCommand;
+		}
+	}
+
+
+	CommandPtr ExodbcExec::GetCommand(const std::string& name, bool includeHidden /* = false */) const
+	{
+		exASSERT(!name.empty());
+
+		map<string, CommandPtr>::const_iterator it = m_commands.find(name);
+		if (it != m_commands.end() && (!it->second->Hidden() || includeHidden))
+		{
+			return it->second;
+		}
+		return nullptr;
+	}
+
+
 	void ExodbcExec::BindColumns()
 	{
 		exASSERT(m_currentColumns.empty());
 
-		SQLSMALLINT nrOfCols = m_stmt.GetNrOfColumns();
+		SQLSMALLINT nrOfCols = m_pStmt->GetNrOfColumns();
 		if (nrOfCols == 0)
 		{
 			LOG_WARNING(u8"No columns available in current result set.");
@@ -646,7 +735,7 @@ namespace exodbcexec
 		// Bind columns
 		for (SQLSMALLINT colNr = 1; colNr <= nrOfCols; ++colNr)
 		{
-			SColumnDescription colDesc = m_stmt.DescribeColumn(colNr);
+			SColumnDescription colDesc = m_pStmt->DescribeColumn(colNr);
 			// add +3 chars to charsize: 1 for '\0', 1 for '.' and 1 for '-':
 			exASSERT(m_charColumnMode != CharColumnMode::Auto);
 			ColumnBufferPtrVariant pColBuffer;
@@ -667,7 +756,7 @@ namespace exodbcexec
 				bufferType = u8"SQLCHAR";
 			}
 			LOG_DEBUG(boost::str(boost::format(u8"Binding column nr %d: name: '%s'; charsize: %d; buffersize: %d; buffertype: %s") % colNr % colDesc.m_name % colDesc.m_charSize % bufferSize % bufferType));
-			m_stmt.BindColumn(pColBuffer, colNr);
+			m_pStmt->BindColumn(pColBuffer, colNr);
 			StringColumnWrapper wrapper(pColBuffer);
 			m_currentColumns.push_back(wrapper);
 		}
@@ -677,29 +766,29 @@ namespace exodbcexec
 	void ExodbcExec::UnbindColumns()
 	{
 		LOG_DEBUG(boost::str(boost::format(u8"Unbinding %d columns") % m_currentColumns.size()));
-		m_stmt.UnbindColumns();
+		m_pStmt->UnbindColumns();
 		m_currentColumns.clear();
 	}
 
 
-	void ExodbcExec::Select(SelectMode mode)
-	{
-		switch (mode)
-		{
-		case SelectMode::First:
-			m_stmt.SelectFirst();
-			break;
-		case SelectMode::Last:
-			m_stmt.SelectLast();
-			break;
-		case SelectMode::Next:
-			m_stmt.SelectNext();
-			break;
-		case SelectMode::Prev:
-			m_stmt.SelectPrev();
-			break;
-		}
-	}
+	//void ExodbcExec::Select(SelectMode mode)
+	//{
+	//	switch (mode)
+	//	{
+	//	case SelectMode::First:
+	//		m_stmt.SelectFirst();
+	//		break;
+	//	case SelectMode::Last:
+	//		m_stmt.SelectLast();
+	//		break;
+	//	case SelectMode::Next:
+	//		m_stmt.SelectNext();
+	//		break;
+	//	case SelectMode::Prev:
+	//		m_stmt.SelectPrev();
+	//		break;
+	//	}
+	//}
 
 
 	void ExodbcExec::List(ExodbcExec::ListMode mode)
@@ -750,54 +839,54 @@ namespace exodbcexec
 	}
 
 
-	void ExodbcExec::Print(ExodbcExec::PrintMode mode)
-	{
-		if (m_currentColumns.empty())
-		{
-			LOG_WARNING(u8"No record set with bound columns is open.");
-			return;
-		}
+	//void ExodbcExec::Print(ExodbcExec::PrintMode mode)
+	//{
+	//	if (m_currentColumns.empty())
+	//	{
+	//		LOG_WARNING(u8"No record set with bound columns is open.");
+	//		return;
+	//	}
 
-		// print current or all
-		if (!m_printNoHeader)
-		{
-			LOG_OUTPUT(GetHeaderString(m_currentColumns));
-		}
-		if (mode == PrintMode::Current)
-		{
-			stringstream ss;
-			if (m_printRowNr && m_fixedPrintSize)
-				ss << boost::str(boost::format(u8"%10d") % 1) << m_columnSeparator;
-			else if (m_printRowNr)
-				ss << boost::str(boost::format(u8"%d") % 1) << m_columnSeparator;
-			ss << CurrentRecordToString(m_currentColumns);
-			LOG_OUTPUT(ss.str());
-		}
-		else if (mode == PrintMode::All)
-		{
-			size_t rowCount = 1;
+	//	// print current or all
+	//	if (!m_printNoHeader)
+	//	{
+	//		LOG_OUTPUT(GetHeaderString(m_currentColumns));
+	//	}
+	//	if (mode == PrintMode::Current)
+	//	{
+	//		stringstream ss;
+	//		if (m_printRowNr && m_fixedPrintSize)
+	//			ss << boost::str(boost::format(u8"%10d") % 1) << m_columnSeparator;
+	//		else if (m_printRowNr)
+	//			ss << boost::str(boost::format(u8"%d") % 1) << m_columnSeparator;
+	//		ss << CurrentRecordToString(m_currentColumns);
+	//		LOG_OUTPUT(ss.str());
+	//	}
+	//	else if (mode == PrintMode::All)
+	//	{
+	//		size_t rowCount = 1;
 
-			bool haveNext = false;
-			if (m_stmt.IsForwardOnlyCursor())
-				haveNext = m_stmt.SelectNext();
-			else
-				haveNext = m_stmt.SelectFirst();
-			while (haveNext)
-			{
-				stringstream ss;
-				if (m_printRowNr && m_fixedPrintSize)
-					ss << boost::str(boost::format(u8"%10d") % rowCount) << m_columnSeparator;
-				else if(m_printRowNr)
-					ss << boost::str(boost::format(u8"%d") % rowCount) << m_columnSeparator;
+	//		bool haveNext = false;
+	//		if (m_stmt.IsForwardOnlyCursor())
+	//			haveNext = m_stmt.SelectNext();
+	//		else
+	//			haveNext = m_stmt.SelectFirst();
+	//		while (haveNext)
+	//		{
+	//			stringstream ss;
+	//			if (m_printRowNr && m_fixedPrintSize)
+	//				ss << boost::str(boost::format(u8"%10d") % rowCount) << m_columnSeparator;
+	//			else if(m_printRowNr)
+	//				ss << boost::str(boost::format(u8"%d") % rowCount) << m_columnSeparator;
 
-				ss << CurrentRecordToString(m_currentColumns);
-				LOG_OUTPUT(ss.str());
-				haveNext = m_stmt.SelectNext();
-				++rowCount;
-			}
-			LOG_INFO(u8"No more results available.");
-		}
-	}
+	//			ss << CurrentRecordToString(m_currentColumns);
+	//			LOG_OUTPUT(ss.str());
+	//			haveNext = m_stmt.SelectNext();
+	//			++rowCount;
+	//		}
+	//		LOG_INFO(u8"No more results available.");
+	//	}
+	//}
 	
 
 	std::string ExodbcExec::CurrentRecordToString(const std::vector<exodbc::StringColumnWrapper>& columns) const

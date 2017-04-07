@@ -12,14 +12,16 @@ endif()
 
 # files:
 set ( SRC_EXODBCEXEC
-  InputGenerator.cpp
-  ExodbcExec.cpp
+  Command.cpp
+  ExodbcExec.cpp  
+  InputGenerator.cpp  
 )
 
 set ( HEADERS_EXODBCEXEC
-  InputGenerator.h
+  Command.h
   DebugNew.h
   ExodbcExec.h
+  InputGenerator.h
 )
 
 # we depend on boost, but header-only:

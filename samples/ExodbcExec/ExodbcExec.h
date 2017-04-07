@@ -11,6 +11,7 @@
 
 // Same component headers
 #include "InputGenerator.h"
+#include "Command.h"
 
 // Other headers
 #include "exodbc/Database.h"
@@ -95,8 +96,8 @@ namespace exodbcexec
 		std::string ToString(ListMode mode) const noexcept;
 
 		void PrintHelp();
-		void Print(PrintMode mode);
-		void Select(SelectMode mode);
+		//void Print(PrintMode mode);
+		//void Select(SelectMode mode);
 		void List(ListMode mode);
 
 	private:
@@ -117,5 +118,13 @@ namespace exodbcexec
 		CharColumnMode m_charColumnMode;
 		SQLLEN m_charColSize;
 		std::string m_sqlSeparator;
+
+		void CreateCommands();
+		void RegisterCommand(CommandPtr pCommand);
+
+		exodbc::ExecutableStatementPtr m_pStmt;
+
+		CommandPtr GetCommand(const std::string& name, bool includeHidden = false) const;
+		std::map<std::string, CommandPtr> m_commands;
 	};
 }
