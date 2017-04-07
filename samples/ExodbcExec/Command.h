@@ -105,6 +105,38 @@ namespace exodbcexec
 	typedef std::shared_ptr<Select> SelectPtr;
 
 
+	class Commit
+		: public Command
+	{
+	public:
+		Commit(exodbc::DatabasePtr pDb)
+			: m_pDb(pDb)
+		{};
+
+		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"commitTrans", u8"ct" }; };
+		virtual void Execute(const std::vector<std::string>& args);
+
+	private:
+		exodbc::DatabasePtr m_pDb;
+	};
+
+
+	class Rollback
+		: public Command
+	{
+	public:
+		Rollback(exodbc::DatabasePtr pDb)
+			: m_pDb(pDb)
+		{};
+
+		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"rollbackTrans", u8"rt" }; };
+		virtual void Execute(const std::vector<std::string>& args);
+
+	private:
+		exodbc::DatabasePtr m_pDb;
+	};
+
+
 	class Print
 		: public Command
 	{

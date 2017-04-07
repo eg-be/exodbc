@@ -431,6 +431,8 @@ namespace exodbcexec
 			columnSeparator, !printNoHeader, printRowNr, fixedPrintSize, 0));
 		RegisterCommand(make_shared<Print>(Print::Mode::AllRecords, m_currentColumns, m_pStmt,
 			columnSeparator, !printNoHeader, printRowNr, fixedPrintSize, 0));
+		RegisterCommand(make_shared<Commit>(m_pDb));
+		RegisterCommand(make_shared<Rollback>(m_pDb));
 	}
 
 
