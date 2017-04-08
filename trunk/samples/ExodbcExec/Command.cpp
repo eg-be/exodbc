@@ -47,7 +47,7 @@ namespace exodbcexec
 	}
 
 
-	set<string> Select::GetAliases() const noexcept
+	vector<string> Select::GetAliases() const noexcept
 	{
 		switch (m_mode)
 		{
@@ -135,7 +135,7 @@ namespace exodbcexec
 	}
 
 
-	set<string> Print::GetAliases() const noexcept
+	vector<string> Print::GetAliases() const noexcept
 	{
 		switch (m_mode)
 		{
@@ -327,6 +327,25 @@ namespace exodbcexec
 						u8"execution', documented as '!exit,!e,!q', can be invoked using '!exit' "
 						u8" or '!e' or '!q'.";
 		Write(ss);
+		// And output all commands
+		for (set<CommandPtr>::const_iterator it = m_commands.begin(); it != m_commands.end(); ++it)
+		{
+			CommandPtr pCommand = *it;
+			const vector<string>& cmds = pCommand->GetAliases();
+			string aliases;
+			vector<string>::const_iterator itA = cmds.begin();
+			while (itA != cmds.end())
+			{
+				aliases += Command::COMMAND_PREFIX;
+				aliases += *itA;
+				++itA;
+				if (itA != cmds.end())
+				{
+					aliases += u8",";
+				}
+			}
+			Write(aliases);
+		}
 	}
 
 

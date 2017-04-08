@@ -121,10 +121,11 @@ namespace exodbcexec
 
 		void CreateCommands();
 		void RegisterCommand(CommandPtr pCommand);
+		CommandPtr GetCommand(const std::string& name, bool includeHidden = false) const;
+		std::set<CommandPtr> GetCommands() const noexcept;
 
 		exodbc::ExecutableStatementPtr m_pStmt;
 
-		CommandPtr GetCommand(const std::string& name, bool includeHidden = false) const;
 		std::map<std::string, CommandPtr> m_commands;
 	};
 }
