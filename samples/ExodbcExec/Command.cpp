@@ -328,6 +328,7 @@ namespace exodbcexec
 						u8" or '!e' or '!q'.";
 		Write(ss);
 		// And output all commands
+		size_t maxAliasesWidth = 20;
 		for (set<CommandPtr>::const_iterator it = m_commands.begin(); it != m_commands.end(); ++it)
 		{
 			CommandPtr pCommand = *it;
@@ -344,7 +345,11 @@ namespace exodbcexec
 					aliases += u8",";
 				}
 			}
-			Write(aliases);
+			// Assume max 20 chars for aliases:
+			stringstream ss;
+			ss << u8"%-" << maxAliasesWidth << u8"s%s";
+			string toWrite = boost::str(boost::format(ss.str()) % aliases % pCommand->GetHelp());
+			Write(toWrite);
 		}
 	}
 
