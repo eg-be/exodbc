@@ -22,6 +22,8 @@ using namespace exodbc;
 
 namespace exodbcexec
 {
+	const std::string Command::COMMAND_PREFIX = u8"!";
+
 	const std::string ExecuteSql::NAME = u8"execSql";
 
 	void ExecuteSql::Execute(const std::vector<std::string>& args)
@@ -320,9 +322,62 @@ namespace exodbcexec
 		stringstream ss;
 		ss <<			u8"Any input that is not recognized as a command will be executed as SQL "
 						u8"against the database connected to.";
-		ss.clear();
+		Write(ss);
 		ss <<			u8"Commands can be abbreviated. For example the command 'Exit SQL "
 						u8"execution', documented as '!exit,!e,!q', can be invoked using '!exit' "
 						u8" or '!e' or '!q'.";
+		Write(ss);
+	}
+
+
+	vector<string> Help::Split(const std::string& input, size_t maxChars /* = 80 */) const noexcept
+	{
+		vector<string> lines;
+		size_t count = 0;
+		string tmp;
+		for (string::const_iterator it = input.begin(); it != input.end(); ++it)
+		{
+			tmp += *it;
+			++count;
+			if (count >= maxChars)
+			{
+				string nextLine;
+				for (string::const_reverse_iterator rt = tmp.rbegin(); rt != tmp.rend(); ++rt)
+				{
+					if (*rt == ' ')
+					{
+						lines.push_back(tmp);
+						tmp = nextLine;
+						count = 0;
+						break;
+					}
+					else
+					{
+						nextLine.insert(nextLine.begin(), *rt);
+						tmp.pop_back();
+					}
+				}
+			}
+		}
+		if (!tmp.empty())
+			lines.push_back(tmp);
+		return lines;
+	}
+
+
+	void Help::Write(const std::string& str) const noexcept
+	{
+		vector<string> lines = Split(str);
+		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+		{
+			WRITE_STDOUT_ENDL(*it);
+		}
+	}
+
+
+	void Help::Write(std::stringstream& ss) const noexcept
+	{
+		Write(ss.str());
+		ss.swap(stringstream());
 	}
 }

@@ -43,6 +43,8 @@ namespace exodbcexec
 	class Command
 	{
 	public:
+		static const std::string COMMAND_PREFIX;
+
 		virtual std::set<std::string> GetAliases() const noexcept = 0;
 
 		virtual void Execute(const std::vector<std::string>& args) = 0;
@@ -116,7 +118,6 @@ namespace exodbcexec
 		Commit(exodbc::DatabasePtr pDb)
 			: m_pDb(pDb)
 		{};
-
 		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"commitTrans", u8"ct" }; };
 		virtual void Execute(const std::vector<std::string>& args);
 		virtual std::string GetHelp() const noexcept;
@@ -149,6 +150,11 @@ namespace exodbcexec
 		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"help", u8"h" }; };
 		virtual void Execute(const std::vector<std::string>& args);
 		virtual std::string GetHelp() const noexcept { return u8"Show this help text."; };
+
+	private:
+		std::vector<std::string> Split(const std::string& input, size_t maxChars = 79) const noexcept;
+		void Write(const std::string& str) const noexcept;
+		void Write(std::stringstream& ss) const noexcept;
 	};
 
 
