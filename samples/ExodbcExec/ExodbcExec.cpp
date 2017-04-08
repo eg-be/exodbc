@@ -433,6 +433,7 @@ namespace exodbcexec
 			columnSeparator, !printNoHeader, printRowNr, fixedPrintSize, 0));
 		RegisterCommand(make_shared<Commit>(m_pDb));
 		RegisterCommand(make_shared<Rollback>(m_pDb));
+		RegisterCommand(make_shared<Help>());
 	}
 
 
@@ -460,7 +461,7 @@ namespace exodbcexec
 				// Try to find a command
 				CommandPtr pCommand = nullptr;
 				vector<string> args;
-				if (ba::starts_with(input, u8"!"))
+				if (ba::starts_with(input, Command::COMMAND_PREFIX))
 				{
 					boost::split(args, input.substr(1), boost::is_any_of(u8" "));
 					string cmd = args.front();
