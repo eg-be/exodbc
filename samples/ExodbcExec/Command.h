@@ -45,13 +45,20 @@ namespace exodbcexec
 	public:
 		static const std::string COMMAND_PREFIX;
 
-		virtual std::set<std::string> GetAliases() const noexcept = 0;
+		virtual std::vector<std::string> GetAliases() const noexcept = 0;
 
 		virtual void Execute(const std::vector<std::string>& args) = 0;
 
 		virtual bool Hidden() const noexcept { return false; };
 
 		virtual std::string GetHelp() const noexcept = 0;
+
+		//bool operator< (const Command& c) const
+		//{
+		//	const std::string& a1 = GetAliases().size() >= 1 ? *(GetAliases().begin()) : u8"";
+		//	const std::string& c1 = c.GetAliases().size() >= 1 ? *(c.GetAliases().begin()) : u8"";
+		//	return a1 < c1;
+		//}
 	};
 
 	typedef std::shared_ptr<Command> CommandPtr;
@@ -71,7 +78,7 @@ namespace exodbcexec
 			exASSERT(m_pStmt->IsInitialized());
 		};
 
-		virtual std::set<std::string> GetAliases() const noexcept { return {NAME}; };
+		virtual std::vector<std::string> GetAliases() const noexcept { return {NAME}; };
 
 		virtual void Execute(const std::vector<std::string>& args);
 
@@ -100,7 +107,7 @@ namespace exodbcexec
 			, m_mode(mode)
 		{};
 
-		virtual std::set<std::string> GetAliases() const noexcept;
+		virtual std::vector<std::string> GetAliases() const noexcept;
 		virtual void Execute(const std::vector<std::string> & args);
 		virtual std::string GetHelp() const noexcept;
 
@@ -118,7 +125,7 @@ namespace exodbcexec
 		Commit(exodbc::DatabasePtr pDb)
 			: m_pDb(pDb)
 		{};
-		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"commitTrans", u8"ct" }; };
+		virtual std::vector<std::string> GetAliases() const noexcept { return{ u8"commitTrans", u8"ct" }; };
 		virtual void Execute(const std::vector<std::string>& args);
 		virtual std::string GetHelp() const noexcept;
 
@@ -135,7 +142,7 @@ namespace exodbcexec
 			: m_pDb(pDb)
 		{};
 
-		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"rollbackTrans", u8"rt" }; };
+		virtual std::vector<std::string> GetAliases() const noexcept { return{ u8"rollbackTrans", u8"rt" }; };
 		virtual void Execute(const std::vector<std::string>& args);
 		virtual std::string GetHelp() const noexcept;
 
@@ -147,7 +154,13 @@ namespace exodbcexec
 	class Help
 		: public Command
 	{
-		virtual std::set<std::string> GetAliases() const noexcept { return{ u8"help", u8"h" }; };
+	public:
+		Help(const std::set<CommandPtr>& cmds)
+		{
+			m_commands.insert(cmds.begin(), cmds.end());
+		};
+
+		virtual std::vector<std::string> GetAliases() const noexcept { return{ u8"help", u8"h" }; };
 		virtual void Execute(const std::vector<std::string>& args);
 		virtual std::string GetHelp() const noexcept { return u8"Show this help text."; };
 
@@ -155,6 +168,20 @@ namespace exodbcexec
 		std::vector<std::string> Split(const std::string& input, size_t maxChars = 79) const noexcept;
 		void Write(const std::string& str) const noexcept;
 		void Write(std::stringstream& ss) const noexcept;
+		
+		struct SOrderCommands
+		{
+			bool operator()(CommandPtr pCmd1, CommandPtr pCmd2) const
+			{
+				const std::vector<std::string>& c1Aliases = pCmd1->GetAliases();
+				const std::vector<std::string>& c2Aliases = pCmd2->GetAliases();
+				const std::string c1Ali = c1Aliases.size() > 0 ? c1Aliases[0] : u8"";
+				const std::string c2Ali = c2Aliases.size() > 0 ? c2Aliases[0] : u8"";
+				return c1Ali < c2Ali;
+			}
+		};
+
+		std::set<CommandPtr, SOrderCommands> m_commands;
 	};
 
 
@@ -181,7 +208,7 @@ namespace exodbcexec
 			, m_fixedPrintSizeWidth(fixedPrintSizeWidth)
 		{};
 
-		virtual std::set<std::string> GetAliases() const noexcept;
+		virtual std::vector<std::string> GetAliases() const noexcept;
 		virtual void Execute(const std::vector<std::string> & args);
 		virtual std::string GetHelp() const noexcept;
 

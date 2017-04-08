@@ -433,7 +433,7 @@ namespace exodbcexec
 			columnSeparator, !printNoHeader, printRowNr, fixedPrintSize, 0));
 		RegisterCommand(make_shared<Commit>(m_pDb));
 		RegisterCommand(make_shared<Rollback>(m_pDb));
-		RegisterCommand(make_shared<Help>());
+		RegisterCommand(make_shared<Help>(GetCommands()));
 	}
 
 
@@ -698,13 +698,13 @@ namespace exodbcexec
 	{
 		exASSERT(pCommand);
 
-		const set<string>& aliases = pCommand->GetAliases();
-		for (set<string>::const_iterator it = aliases.begin(); it != aliases.end(); ++it)
+		const vector<string>& aliases = pCommand->GetAliases();
+		for (vector<string>::const_iterator it = aliases.begin(); it != aliases.end(); ++it)
 		{
 			exASSERT_MSG(m_commands.find(*it) == m_commands.end(), 
 				boost::str(boost::format(u8"Command '%s' is already registered!") % *it));
 		}
-		for (set<string>::const_iterator it = aliases.begin(); it != aliases.end(); ++it)
+		for (vector<string>::const_iterator it = aliases.begin(); it != aliases.end(); ++it)
 		{
 			m_commands[*it] = pCommand;
 		}
@@ -721,6 +721,21 @@ namespace exodbcexec
 			return it->second;
 		}
 		return nullptr;
+	}
+
+
+	set<CommandPtr> ExodbcExec::GetCommands() const noexcept
+	{
+		set<CommandPtr> cmds;
+		for (std::map<std::string, CommandPtr>::const_iterator it = m_commands.begin();
+			it != m_commands.end(); ++it)
+		{
+			if (!it->second->Hidden())
+			{
+				cmds.insert(it->second);
+			}
+		}
+		return cmds;
 	}
 
 
