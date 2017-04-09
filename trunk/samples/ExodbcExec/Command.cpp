@@ -47,6 +47,18 @@ namespace exodbcexec
 	}
 
 
+	string Exit::GetHelp() const noexcept
+	{
+		return u8"Exit exodbcexec.";
+	}
+
+
+	void Exit::Execute(const std::vector<std::string> & args)
+	{
+
+	}
+
+
 	vector<string> Select::GetAliases() const noexcept
 	{
 		switch (m_mode)

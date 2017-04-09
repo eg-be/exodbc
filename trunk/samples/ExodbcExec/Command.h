@@ -57,6 +57,16 @@ namespace exodbcexec
 	typedef std::shared_ptr<Command> CommandPtr;
 
 
+	class Exit
+		: public Command
+	{
+	public:
+		virtual std::vector<std::string> GetAliases() const noexcept { return{u8"exit", u8"e", u8"quit", u8"q"}; };
+		virtual void Execute(const std::vector<std::string> & args);
+		virtual std::string GetHelp() const noexcept;
+	};
+
+
 	class ExecuteSql
 		: public Command
 	{

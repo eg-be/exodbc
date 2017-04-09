@@ -432,6 +432,7 @@ namespace exodbcexec
 			columnSeparator, !printNoHeader, printRowNr, fixedPrintSize, 0));
 		RegisterCommand(make_shared<Commit>(m_pDb));
 		RegisterCommand(make_shared<Rollback>(m_pDb));
+		RegisterCommand(make_shared<Exit>());
 		RegisterCommand(make_shared<Help>(GetCommands()));
 	}
 
