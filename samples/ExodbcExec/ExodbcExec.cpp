@@ -421,7 +421,6 @@ namespace exodbcexec
 
 		m_pStmt = make_shared<ExecutableStatement>(m_pDb, m_forwardOnlyCursors);
 
-//		CreateCommands();
 		RegisterCommand(make_shared<ExecuteSql>(m_pStmt));
 		RegisterCommand(make_shared<Select>(Select::Mode::First, m_pStmt));
 		RegisterCommand(make_shared<Select>(Select::Mode::Last, m_pStmt));
@@ -679,18 +678,6 @@ namespace exodbcexec
 		while (getCmdResult == InputGenerator::GetCommandResult::HAVE_COMMAND);
 
 		return 0;
-	}
-
-
-	void ExodbcExec::CreateCommands()
-	{
-		//RegisterCommand(make_shared<ExecuteSql>(m_pStmt));
-		//RegisterCommand(make_shared<Select>(Select::Mode::First, m_pStmt));
-		//RegisterCommand(make_shared<Select>(Select::Mode::Last, m_pStmt));
-		//RegisterCommand(make_shared<Select>(Select::Mode::Next, m_pStmt));
-		//RegisterCommand(make_shared<Select>(Select::Mode::Prev, m_pStmt));
-		//RegisterCommand(make_shared<Select>(Print::Mode::CurrentRecord, m_currentColumns));
-		//RegisterCommand(make_shared<Select>(Print::Mode::AllRecords, m_currentColumns));
 	}
 
 

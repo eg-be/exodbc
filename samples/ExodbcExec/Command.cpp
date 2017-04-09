@@ -320,78 +320,46 @@ namespace exodbcexec
 	void Help::Execute(const std::vector<std::string>& args)
 	{
 		stringstream ss;
-		ss <<			u8"Any input that is not recognized as a command will be executed as SQL "
-						u8"against the database connected to.";
+		ss << u8"The following commands are available:";
 		Write(ss);
-		ss <<			u8"Commands can be abbreviated. For example the command 'Exit SQL "
-						u8"execution', documented as '!exit,!e,!q', can be invoked using '!exit' "
-						u8" or '!e' or '!q'.";
-		Write(ss);
-		// And output all commands
-		size_t maxAliasesWidth = 20;
+		// print commands:
 		for (set<CommandPtr>::const_iterator it = m_commands.begin(); it != m_commands.end(); ++it)
 		{
 			CommandPtr pCommand = *it;
-			const vector<string>& cmds = pCommand->GetAliases();
-			string aliases;
-			vector<string>::const_iterator itA = cmds.begin();
-			while (itA != cmds.end())
-			{
-				aliases += Command::COMMAND_PREFIX;
-				aliases += *itA;
-				++itA;
-				if (itA != cmds.end())
-				{
-					aliases += u8",";
-				}
-			}
-			// Assume max 20 chars for aliases:
-			stringstream ss;
-			ss << u8"%-" << maxAliasesWidth << u8"s%s";
-			string toWrite = boost::str(boost::format(ss.str()) % aliases % pCommand->GetHelp());
-			Write(toWrite);
+			Write(pCommand);
 		}
+		ss <<	u8"Commands can be abbreviated. For example the command 'Exit SQL "
+				u8"execution', documented as '!exit,!e,!q', can be invoked using '!exit' "
+				u8" or '!e' or '!q'.";
+		Write(ss);
+		ss <<	u8"Any input that is not recognized as a command will be executed as SQL "
+				u8"against the database connected to.";
+		Write(ss);
 	}
 
 
-	vector<string> Help::Split(const std::string& input, size_t maxChars /* = 80 */) const noexcept
+	void Help::Write(CommandPtr pCommand, size_t maxChars /* = DEFAULT_MAXCHARS */) const noexcept
 	{
-		vector<string> lines;
-		size_t count = 0;
-		string tmp;
-		for (string::const_iterator it = input.begin(); it != input.end(); ++it)
+		exASSERT(pCommand);
+		size_t maxAliasesWidth = 20;
+		vector<string> lines = Split(pCommand->GetHelp(), maxChars, maxAliasesWidth);
+		// modify and add alias to the first line
+		exASSERT(!lines.empty());
+		vector<string> aliases = pCommand->GetAliases();
+		string saliases = u8" ";
+		vector<string>::const_iterator it = aliases.begin();
+		while (it != aliases.end())
 		{
-			tmp += *it;
-			++count;
-			if (count >= maxChars)
-			{
-				string nextLine;
-				for (string::const_reverse_iterator rt = tmp.rbegin(); rt != tmp.rend(); ++rt)
-				{
-					if (*rt == ' ')
-					{
-						lines.push_back(tmp);
-						tmp = nextLine;
-						count = 0;
-						break;
-					}
-					else
-					{
-						nextLine.insert(nextLine.begin(), *rt);
-						tmp.pop_back();
-					}
-				}
-			}
+			saliases += Command::COMMAND_PREFIX;
+			saliases += *it;
+			++it;
+			if (it != aliases.end())
+				saliases += u8",";
 		}
-		if (!tmp.empty())
-			lines.push_back(tmp);
-		return lines;
-	}
-
-
-	void Help::Write(const std::string& str) const noexcept
-	{
-		vector<string> lines = Split(str);
+		stringstream ssf;
+		ssf << u8"%-" << maxAliasesWidth << u8"s%s";
+		string firstLineTrimed = boost::trim_copy(lines[0]);
+		lines[0] = boost::str(boost::format(ssf.str()) % saliases % firstLineTrimed );
 		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
 		{
 			WRITE_STDOUT_ENDL(*it);
@@ -399,9 +367,55 @@ namespace exodbcexec
 	}
 
 
-	void Help::Write(std::stringstream& ss) const noexcept
+	void Help::Write(const std::string& str, size_t maxChars /* = DEFAULT_MAXCHARS */) const noexcept
+	{
+		vector<string> lines = Split(str, maxChars);
+		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
+		{
+			WRITE_STDOUT_ENDL(*it);
+		}
+	}
+
+
+	void Help::Write(std::stringstream& ss, size_t maxChars /* = DEFAULT_MAXCHARS */) const noexcept
 	{
 		Write(ss.str());
 		ss.swap(stringstream());
+	}
+
+
+	vector<string> Help::Split(const std::string& str, size_t maxChars, size_t indent /* = 0 */) const noexcept
+	{
+		vector<string> lines;
+		string tmp;
+		string sindent(indent, ' ');
+		tmp += sindent;
+		// tokenize into words
+		vector<string> words;
+		boost::split(words, str, boost::is_any_of(" "));
+		bool firstWord = true;
+		for (vector<string>::const_iterator it = words.begin(); it != words.end(); ++it)
+		{
+			const string& word = *it;
+			if (tmp.length() + (firstWord ? 0 : 1) + word.length() <= maxChars)
+			{
+				if (firstWord)
+					firstWord = false;
+				else
+					tmp += u8" ";
+				tmp += word;
+			}
+			else
+			{
+				lines.push_back(tmp);
+				tmp = sindent;
+				tmp += *it;
+			}
+		}
+		if (!tmp.empty())
+		{
+			lines.push_back(tmp);
+		}
+		return lines;
 	}
 }
