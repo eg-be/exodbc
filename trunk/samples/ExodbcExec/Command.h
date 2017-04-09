@@ -52,13 +52,6 @@ namespace exodbcexec
 		virtual bool Hidden() const noexcept { return false; };
 
 		virtual std::string GetHelp() const noexcept = 0;
-
-		//bool operator< (const Command& c) const
-		//{
-		//	const std::string& a1 = GetAliases().size() >= 1 ? *(GetAliases().begin()) : u8"";
-		//	const std::string& c1 = c.GetAliases().size() >= 1 ? *(c.GetAliases().begin()) : u8"";
-		//	return a1 < c1;
-		//}
 	};
 
 	typedef std::shared_ptr<Command> CommandPtr;
