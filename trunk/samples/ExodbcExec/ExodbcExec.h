@@ -119,7 +119,6 @@ namespace exodbcexec
 		SQLLEN m_charColSize;
 		std::string m_sqlSeparator;
 
-		void CreateCommands();
 		void RegisterCommand(CommandPtr pCommand);
 		CommandPtr GetCommand(const std::string& name, bool includeHidden = false) const;
 		std::set<CommandPtr> GetCommands() const noexcept;

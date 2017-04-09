@@ -155,6 +155,8 @@ namespace exodbcexec
 		: public Command
 	{
 	public:
+		const static size_t DEFAULT_MAXCHARS = 79;
+
 		Help(const std::set<CommandPtr>& cmds)
 		{
 			m_commands.insert(cmds.begin(), cmds.end());
@@ -165,9 +167,10 @@ namespace exodbcexec
 		virtual std::string GetHelp() const noexcept { return u8"Show this help text."; };
 
 	private:
-		std::vector<std::string> Split(const std::string& input, size_t maxChars = 79) const noexcept;
-		void Write(const std::string& str) const noexcept;
-		void Write(std::stringstream& ss) const noexcept;
+		std::vector<std::string> Split(const std::string& str, size_t maxChars, size_t indent = 0) const noexcept;
+		void Write(CommandPtr pCommand, size_t maxChars = DEFAULT_MAXCHARS) const noexcept;
+		void Write(const std::string& str, size_t maxChars = DEFAULT_MAXCHARS) const noexcept;
+		void Write(std::stringstream& ss, size_t maxChars = DEFAULT_MAXCHARS) const noexcept;
 		
 		struct SOrderCommands
 		{
