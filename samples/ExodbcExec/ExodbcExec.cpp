@@ -407,6 +407,7 @@ namespace exodbcexec
 		, m_charColumnMode(charColMode)
 		, m_charColSize(charColSize)
 		, m_sqlSeparator(sqlSeparator)
+		, m_exitFlag(false)
 	{
 		exASSERT(charColSize >= 0);
 		if (m_charColumnMode == CharColumnMode::Auto)
@@ -432,7 +433,7 @@ namespace exodbcexec
 			columnSeparator, !printNoHeader, printRowNr, fixedPrintSize, 0));
 		RegisterCommand(make_shared<Commit>(m_pDb));
 		RegisterCommand(make_shared<Rollback>(m_pDb));
-		RegisterCommand(make_shared<Exit>());
+		RegisterCommand(make_shared<Exit>(m_exitFlag));
 		RegisterCommand(make_shared<Help>(GetCommands()));
 	}
 
@@ -453,8 +454,8 @@ namespace exodbcexec
 			if (input.empty())
 				continue;
 
-			if (COMMAND_EXIT.find(input) != COMMAND_EXIT.end())
-				break;
+			//if (COMMAND_EXIT.find(input) != COMMAND_EXIT.end())
+			//	break;
 
 			try
 			{
@@ -676,7 +677,7 @@ namespace exodbcexec
 				return 20;
 			}
 		}
-		while (getCmdResult == InputGenerator::GetCommandResult::HAVE_COMMAND);
+		while (getCmdResult == InputGenerator::GetCommandResult::HAVE_COMMAND && !m_exitFlag);
 
 		return 0;
 	}

@@ -126,5 +126,7 @@ namespace exodbcexec
 		exodbc::ExecutableStatementPtr m_pStmt;
 
 		std::map<std::string, CommandPtr> m_commands;
+
+		bool m_exitFlag;
 	};
 }
