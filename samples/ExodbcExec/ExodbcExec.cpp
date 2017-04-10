@@ -378,22 +378,6 @@ int main(int argc, char* argv[])
 
 namespace exodbcexec
 {
-
-	const std::set<std::string> ExodbcExec::COMMAND_EXIT = { u8"!exit", u8"!e", u8"!quit", u8"!q" };
-	const std::set<std::string> ExodbcExec::COMMAND_HELP = { u8"!help", u8"!h" };
-	const std::set<std::string> ExodbcExec::COMMAND_PRINT_ALL = { u8"!printAll", u8"!pa" };
-	const std::set<std::string> ExodbcExec::COMMAND_PRINT_CURRENT = { u8"!printCurrent", u8"!pc" };
-	const std::set<std::string> ExodbcExec::COMMAND_SELECT_NEXT = { u8"!next", u8"!sn" };
-	const std::set<std::string> ExodbcExec::COMMAND_SELECT_PREV = { u8"!prev", u8"!sp" };
-	const std::set<std::string> ExodbcExec::COMMAND_SELECT_FIRST = { u8"!first", u8"!sf" };
-	const std::set<std::string> ExodbcExec::COMMAND_SELECT_LAST = { u8"!last", u8"!sl" };
-	const std::set<std::string> ExodbcExec::COMMAND_COMMIT_TRANS = { u8"!commitTrans", u8"!ct" };
-	const std::set<std::string> ExodbcExec::COMMAND_ROLLBACK_TRANS = { u8"!rollbackTrans", u8"!rt" };
-	const std::set<std::string> ExodbcExec::COMMAND_FIND = { u8"!find", u8"!f" };
-	const std::set<std::string> ExodbcExec::COMMAND_LIST_TABLES = { u8"!listTables", u8"!lt" };
-	const std::set<std::string> ExodbcExec::COMMAND_LIST_SCHEMAS = { u8"!listSchemas", u8"!ls" };
-	const std::set<std::string> ExodbcExec::COMMAND_LIST_CATALOGS = { u8"!listCatalogs", u8"!lc" };
-
 	ExodbcExec::ExodbcExec(exodbc::DatabasePtr pDb, bool exitOnError, bool forwardOnlyCursors, const std::string& columnSeparator,
 			bool printNoHeader, bool fixedPrintSize, bool printRowNr, CharColumnMode charColMode,
 			SQLLEN charColSize,	const std::string& sqlSeparator)
@@ -433,7 +417,7 @@ namespace exodbcexec
 			columnSeparator, !printNoHeader, printRowNr, fixedPrintSize, 0));
 		RegisterCommand(make_shared<Commit>(m_pDb));
 		RegisterCommand(make_shared<Rollback>(m_pDb));
-		RegisterCommand(make_shared<Exit>(m_exitFlag));
+		RegisterCommand(make_shared<Exit>(this));
 		RegisterCommand(make_shared<Help>(GetCommands()));
 	}
 
@@ -453,9 +437,6 @@ namespace exodbcexec
 
 			if (input.empty())
 				continue;
-
-			//if (COMMAND_EXIT.find(input) != COMMAND_EXIT.end())
-			//	break;
 
 			try
 			{
@@ -491,176 +472,6 @@ namespace exodbcexec
 						BindColumns();
 					}
 				}
-
-
-				//std::string command;
-				//std::vector<std::string> commandArgs;
-				//if (ba::starts_with(input, u8"!"))
-				//{
-				//	// split arguments in command, get the argument part first
-				//	size_t wsPos = input.find(u8" ");
-				//	if (wsPos == string::npos)
-				//	{
-				//		command = input;
-				//	}
-				//	if (wsPos != string::npos)
-				//	{
-				//		string argsPart = boost::trim_copy(input.substr(wsPos));
-				//		command = input.substr(0, wsPos);
-				//		string currentArg;
-				//		bool inFramedPart = false;
-				//		// and iterate, but respect arguments in "", like "Hello world", or "   "
-				//		for (string::const_iterator it = argsPart.begin(); it != argsPart.end(); ++it)
-				//		{
-				//			if (*it == '"')
-				//			{
-				//				if (!inFramedPart)
-				//				{
-				//					inFramedPart = true;
-				//				}
-				//				else
-				//				{
-				//					inFramedPart = false;
-				//					commandArgs.push_back(currentArg);
-				//					currentArg = u8"";
-				//				}
-				//			}
-				//			else if (*it == ' ' && !inFramedPart && !currentArg.empty())
-				//			{
-				//				commandArgs.push_back(currentArg);
-				//				currentArg = u8"";
-				//			}
-				//			else if(*it != ' ' || inFramedPart)
-				//			{
-				//				currentArg += *it;
-				//			}
-				//		}
-				//		if (!currentArg.empty())
-				//		{
-				//			commandArgs.push_back(currentArg);
-				//		}
-				//	}
-				//}
-
-				//if (COMMAND_HELP.find(command) != COMMAND_HELP.end())
-				//{
-				//	PrintHelp();
-				//}
-				//else if (COMMAND_PRINT_ALL.find(command) != COMMAND_PRINT_ALL.end())
-				//{
-				//	Print(PrintMode::All);
-				//}
-				//else if(COMMAND_PRINT_CURRENT.find(command) != COMMAND_PRINT_CURRENT.end())
-				//{
-				//	Print(PrintMode::Current);
-				//}
-				//else if (COMMAND_SELECT_NEXT.find(command) != COMMAND_SELECT_NEXT.end())
-				//{
-				//	Select(SelectMode::Next);
-				//}
-				//else if (!m_forwardOnlyCursors && COMMAND_SELECT_PREV.find(command) != COMMAND_SELECT_PREV.end())
-				//{
-				//	Select(SelectMode::Prev);
-				//}
-				//else if (!m_forwardOnlyCursors && COMMAND_SELECT_FIRST.find(command) != COMMAND_SELECT_FIRST.end())
-				//{
-				//	Select(SelectMode::First);
-				//}
-				//else if (!m_forwardOnlyCursors && COMMAND_SELECT_LAST.find(command) != COMMAND_SELECT_LAST.end())
-				//{
-				//	Select(SelectMode::Last);
-				//}
-				//else if (COMMAND_COMMIT_TRANS.find(command) != COMMAND_COMMIT_TRANS.end())
-				//{
-				//	m_pDb->CommitTrans();
-				//}
-				//else if (COMMAND_ROLLBACK_TRANS.find(command) != COMMAND_ROLLBACK_TRANS.end())
-				//{
-				//	m_pDb->RollbackTrans();
-				//}
-				//else if (COMMAND_LIST_TABLES.find(command) != COMMAND_LIST_TABLES.end())
-				//{
-				//	List(ListMode::Types);
-				//}
-				//else if (COMMAND_LIST_SCHEMAS.find(command) != COMMAND_LIST_SCHEMAS.end())
-				//{
-				//	List(ListMode::Schemas);
-				//}
-				//else if (COMMAND_LIST_CATALOGS.find(command) != COMMAND_LIST_CATALOGS.end())
-				//{
-				//	List(ListMode::Catalogs);
-				//}
-				//else if (COMMAND_FIND.find(command) != COMMAND_FIND.end())
-				//{
-				//	string name = commandArgs.size() >= 1 ? commandArgs[0] : u8"";
-				//	string schema = commandArgs.size() >= 2 ? commandArgs[1] : u8"";
-				//	string catalog = commandArgs.size() >= 3 ? commandArgs[2] : u8"";
-				//	string type = commandArgs.size() >= 4 ? commandArgs[3] : u8"";
-				//	LOG_INFO(boost::str(boost::format(u8"Searching for tables with name: '%s'; schema: '%s'; catalog: '%s'; Type: '%s'") 
-				//		% name % schema % catalog % type));
-				//	auto start = std::chrono::high_resolution_clock::now();
-				//	TableInfosVector tables = m_pDb->FindTables(name, schema, catalog, type);
-				//	auto end = std::chrono::high_resolution_clock::now();
-				//	auto elapsed = end - start;
-				//	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-				//	LOG_INFO(boost::str(boost::format(u8"Success, found %d table(s). Execution took %dms.")
-				//		% tables.size() % millis.count()));
-
-				//	if (tables.size() > 0)
-				//	{
-				//		LOG_OUTPUT(boost::str(boost::format(u8"%18s%s%18s%s%18s%s%18s")
-				//			% u8"Name" % m_columnSeparator % u8"Schema" % m_columnSeparator
-				//			% u8"Catalog" % m_columnSeparator % u8"type"));
-				//		for (TableInfosVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
-				//		{
-				//			LOG_OUTPUT(boost::str(boost::format(u8"%18s%s%18s%s%18s%s%18s")
-				//				% it->GetPureName() % m_columnSeparator % it->GetSchema() % m_columnSeparator
-				//				% it->GetCatalog() % m_columnSeparator % it->GetType()));
-				//		}
-				//		LOG_INFO(u8"No more results available");
-				//	}
- 			//	}
-				//else
-				//{
-				//	if (ba::starts_with(input, u8"!"))
-				//		LOG_WARNING(boost::str(boost::format(u8"Input starts with '!' but is not recognized as a command, executing as SQL.")));
-
-				//	// Before executing, unbind any bound columns
-				//	if( ! m_currentColumns.empty())
-				//		UnbindColumns();
-
-				//	// Tokenize commands if a sql separator is set
-				//	vector<string> cmds;
-				//	if ( ! m_sqlSeparator.empty())
-				//	{
-				//		iter_split(cmds, input, boost::algorithm::first_finder(m_sqlSeparator));
-				//	}
-				//	else
-				//	{
-				//		cmds.push_back(input);
-				//	}
-
-				//	for (vector<string>::const_iterator it = cmds.begin(); it != cmds.end(); ++it)
-				//	{
-				//		string cmd = *it;
-				//		if (cmd.empty())
-				//			continue;
-
-				//		LOG_INFO(boost::str(boost::format(u8"Executing '%s'") % cmd));
-				//		auto start = std::chrono::high_resolution_clock::now();
-				//		m_stmt.ExecuteDirect(cmd);
-				//		auto end = std::chrono::high_resolution_clock::now();
-				//		auto elapsed = end - start;
-				//		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-				//		LOG_INFO(boost::str(boost::format(u8"Success. Execution took %1%ms.")
-				//			% millis.count()));
-				//	}
-				//	// And bind columns, if there are any
-				//	if (m_stmt.GetNrOfColumns() > 0)
-				//	{
-				//		BindColumns();
-				//	}
-				//}
 			}
 			catch (const exodbc::SqlResultException& sre)
 			{
@@ -778,241 +589,92 @@ namespace exodbcexec
 	}
 
 
-	//void ExodbcExec::Select(SelectMode mode)
+	//void ExodbcExec::List(ExodbcExec::ListMode mode)
 	//{
+	//	auto Lister = [&](ListMode mode) {
+	//		switch (mode)
+	//		{
+	//		case ListMode::Types:
+	//		case ListMode::Schemas:
+	//			return m_pDb->ReadSchemas();
+	//		case ListMode::Catalogs:
+	//			return m_pDb->ReadCatalogs();
+	//			break;
+	//		}
+	//		exASSERT(false);
+	//	};
+
+	//	vector<string> data;
+	//	LOG_INFO(boost::str(boost::format(u8"Listing all %s ..") % ToString(mode)));
+	//	auto start = std::chrono::high_resolution_clock::now();
 	//	switch (mode)
 	//	{
-	//	case SelectMode::First:
-	//		m_stmt.SelectFirst();
+	//	case ListMode::Types:
+	//		data = m_pDb->ReadTableTypes();
 	//		break;
-	//	case SelectMode::Last:
-	//		m_stmt.SelectLast();
+	//	case ListMode::Schemas:
+	//		data = m_pDb->ReadSchemas();
 	//		break;
-	//	case SelectMode::Next:
-	//		m_stmt.SelectNext();
-	//		break;
-	//	case SelectMode::Prev:
-	//		m_stmt.SelectPrev();
+	//	case ListMode::Catalogs:
+	//		data = m_pDb->ReadCatalogs();
 	//		break;
 	//	}
-	//}
+	//	auto end = std::chrono::high_resolution_clock::now();
+	//	auto elapsed = end - start;
+	//	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+	//	LOG_INFO(boost::str(boost::format(u8"Success, found %d %s. Execution took %dms.")
+	//		% data.size() % ToString(mode) % millis.count()));
 
-
-	void ExodbcExec::List(ExodbcExec::ListMode mode)
-	{
-		auto Lister = [&](ListMode mode) {
-			switch (mode)
-			{
-			case ListMode::Types:
-			case ListMode::Schemas:
-				return m_pDb->ReadSchemas();
-			case ListMode::Catalogs:
-				return m_pDb->ReadCatalogs();
-				break;
-			}
-			exASSERT(false);
-		};
-
-		vector<string> data;
-		LOG_INFO(boost::str(boost::format(u8"Listing all %s ..") % ToString(mode)));
-		auto start = std::chrono::high_resolution_clock::now();
-		switch (mode)
-		{
-		case ListMode::Types:
-			data = m_pDb->ReadTableTypes();
-			break;
-		case ListMode::Schemas:
-			data = m_pDb->ReadSchemas();
-			break;
-		case ListMode::Catalogs:
-			data = m_pDb->ReadCatalogs();
-			break;
-		}
-		auto end = std::chrono::high_resolution_clock::now();
-		auto elapsed = end - start;
-		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-		LOG_INFO(boost::str(boost::format(u8"Success, found %d %s. Execution took %dms.")
-			% data.size() % ToString(mode) % millis.count()));
-
-		if (!data.empty())
-		{
-			LOG_INFO(boost::str(boost::format(u8"Name")));
-			LOG_INFO(boost::str(boost::format(u8"----")));
-			for (vector<string>::const_iterator it = data.begin(); it != data.end(); ++it)
-			{
-				LOG_INFO(*it);
-			}
-		}
-	}
-
-
-	//void ExodbcExec::Print(ExodbcExec::PrintMode mode)
-	//{
-	//	if (m_currentColumns.empty())
+	//	if (!data.empty())
 	//	{
-	//		LOG_WARNING(u8"No record set with bound columns is open.");
-	//		return;
-	//	}
-
-	//	// print current or all
-	//	if (!m_printNoHeader)
-	//	{
-	//		LOG_OUTPUT(GetHeaderString(m_currentColumns));
-	//	}
-	//	if (mode == PrintMode::Current)
-	//	{
-	//		stringstream ss;
-	//		if (m_printRowNr && m_fixedPrintSize)
-	//			ss << boost::str(boost::format(u8"%10d") % 1) << m_columnSeparator;
-	//		else if (m_printRowNr)
-	//			ss << boost::str(boost::format(u8"%d") % 1) << m_columnSeparator;
-	//		ss << CurrentRecordToString(m_currentColumns);
-	//		LOG_OUTPUT(ss.str());
-	//	}
-	//	else if (mode == PrintMode::All)
-	//	{
-	//		size_t rowCount = 1;
-
-	//		bool haveNext = false;
-	//		if (m_stmt.IsForwardOnlyCursor())
-	//			haveNext = m_stmt.SelectNext();
-	//		else
-	//			haveNext = m_stmt.SelectFirst();
-	//		while (haveNext)
+	//		LOG_INFO(boost::str(boost::format(u8"Name")));
+	//		LOG_INFO(boost::str(boost::format(u8"----")));
+	//		for (vector<string>::const_iterator it = data.begin(); it != data.end(); ++it)
 	//		{
-	//			stringstream ss;
-	//			if (m_printRowNr && m_fixedPrintSize)
-	//				ss << boost::str(boost::format(u8"%10d") % rowCount) << m_columnSeparator;
-	//			else if(m_printRowNr)
-	//				ss << boost::str(boost::format(u8"%d") % rowCount) << m_columnSeparator;
-
-	//			ss << CurrentRecordToString(m_currentColumns);
-	//			LOG_OUTPUT(ss.str());
-	//			haveNext = m_stmt.SelectNext();
-	//			++rowCount;
+	//			LOG_INFO(*it);
 	//		}
-	//		LOG_INFO(u8"No more results available.");
 	//	}
 	//}
-	
-
-	std::string ExodbcExec::CurrentRecordToString(const std::vector<exodbc::StringColumnWrapper>& columns) const
-	{
-		stringstream ss;
-		std::vector<StringColumnWrapper>::const_iterator it = columns.begin();
-		while (it != columns.end())
-		{
-			string sval;
-			if (it->IsNull())
-				sval = u8"NULL";
-			else
-				sval = it->GetValue<std::string>();
-			if (m_fixedPrintSize)
-			{
-				ColumnBufferPtrVariant pCol = it->GetVariant();
-				string sheader = boost::apply_visitor(QueryNameVisitor(), pCol);
-				SQLLEN nrOfHeaderChars =(SQLLEN) sheader.length();
-				SQLLEN nrOfElements = boost::apply_visitor(NrOfElementsVisitor(), pCol);
-				// note that one element added was the terminating '\0', do not add that to print
-				SQLLEN printSize = max(nrOfElements - 1, nrOfHeaderChars);
-				exASSERT(printSize >= 1);
-				stringstream fss;
-				fss << u8"%" << printSize << "s";
-				sval = boost::str(boost::format(fss.str()) % sval);
-			}
-			ss << sval;
-
-			++it;
-			if (it != columns.end())
-				ss << m_columnSeparator;
-		}
-		return ss.str();
-	}
 
 
-	std::string ExodbcExec::GetHeaderString(const std::vector<exodbc::StringColumnWrapper>& columns) const
-	{
-		stringstream ss;
-		std::vector<StringColumnWrapper>::const_iterator it = columns.begin();
-		if (m_printRowNr)
-			ss << boost::str(boost::format(u8"%10s") % u8"ROW") << m_columnSeparator;
-
-		while (it != columns.end())
-		{
-			ColumnBufferPtrVariant pCol = it->GetVariant();
-			string sheader = boost::apply_visitor(QueryNameVisitor(), pCol);
-			if (m_fixedPrintSize)
-			{
-				SQLLEN nrOfElements = boost::apply_visitor(NrOfElementsVisitor(), pCol);
-				SQLLEN nrOfHeaderChars = (SQLLEN) sheader.length();
-				// note that one element added was the terminating '\0', do not add that to print
-				SQLLEN printSize = max(nrOfElements - 1, nrOfHeaderChars);
-				exASSERT(printSize >= 1);
-				stringstream fss;
-				fss << u8"%" << printSize << "s";
-				sheader = boost::str(boost::format(fss.str()) % sheader);
-			}
-			ss << sheader;
-
-			++it;
-			if (it != columns.end())
-				ss << m_columnSeparator;
-		}
-		return ss.str();
-	}
 
 
-	std::string ExodbcExec::ToString(ListMode mode) const noexcept
-	{
-		switch (mode)
-		{
-		case ListMode::Catalogs:
-			return u8"Catalogs";
-		case ListMode::Schemas:
-			return u8"Schemas";
-		case ListMode::Types:
-			return u8"Types";
-		}
-		return u8"???";
-	}
-
-
-	void ExodbcExec::PrintHelp()
-	{
-		WRITE_STDOUT_ENDL(u8"Any input that is not recognized as a command will be executed as SQL");
-		WRITE_STDOUT_ENDL(u8"against the database connected to.");
-		WRITE_STDOUT_ENDL(u8"Commands can be abbreviated. For example the command 'Exit SQL");
-		WRITE_STDOUT_ENDL(u8"execution', documented as '!exit,!e,!q', can be invoked using '!exit'");
-		WRITE_STDOUT_ENDL(u8" or '!e' or '!q'.");
-		WRITE_STDOUT_ENDL(u8"");
-		WRITE_STDOUT_ENDL(u8"Commands are:");
-		WRITE_STDOUT_ENDL(u8" !exit,!e,!q         Exit SQL execution.");
-		WRITE_STDOUT_ENDL(u8" !quit               See !exit.");
-		WRITE_STDOUT_ENDL(u8" !next,!sn           Select next record.");
-		WRITE_STDOUT_ENDL(u8" !prev,!sp           Select previous record.");
-		WRITE_STDOUT_ENDL(u8" !first,!sf          Select first record.");
-		WRITE_STDOUT_ENDL(u8" !last,!sl           Select last record.");
-		WRITE_STDOUT_ENDL(u8" !printAll,!pa       Print all records of the current recordset.");
-		WRITE_STDOUT_ENDL(u8"                     If forward only cursors is set to false, !printAll");
-		WRITE_STDOUT_ENDL(u8"                     will first execue a '!first' and then print and");
-		WRITE_STDOUT_ENDL(u8"                     iterate all records by calling '!next'.");
-		WRITE_STDOUT_ENDL(u8"                     If forward only cursors is set to true, all");
-		WRITE_STDOUT_ENDL(u8"                     remaining records found using '!next' are printed");
-		WRITE_STDOUT_ENDL(u8" !printCurrent,!pc   Print the current record.");
-		WRITE_STDOUT_ENDL(u8" !listTables,!lt     List all tables.");
-		WRITE_STDOUT_ENDL(u8" !listSchemas,!ls    List all schemas.");
-		WRITE_STDOUT_ENDL(u8" !listCatalogs,!lc   List all catalogs.");
-		WRITE_STDOUT_ENDL(u8" !commitTrans,!ct    Commit any ongoing transations.");
-		WRITE_STDOUT_ENDL(u8" !rollbackTrans,!rt  Rollback all ongoing transactions.");
-		WRITE_STDOUT_ENDL(u8"");
-		WRITE_STDOUT_ENDL(u8" !find,!f          [name] [schema] [catalog] [type]");
-		WRITE_STDOUT_ENDL(u8"                     Searches for objects.");
-		WRITE_STDOUT_ENDL(u8"                     [name] [schema], [catalog] and [type] are optional.");
-		WRITE_STDOUT_ENDL(u8"                     See the documentation of SQLTables for more");
-		WRITE_STDOUT_ENDL(u8"                     information about the arguments.");
-		WRITE_STDOUT_ENDL(u8"                     If an argument is not given, an empty string is");
-		WRITE_STDOUT_ENDL(u8"                     used. Use \" to frame an argument value if it");
-		WRITE_STDOUT_ENDL(u8"                     contains whitespaces.");
-		WRITE_STDOUT_ENDL(u8" !help,!h            Show this help.");
-	}
+	//void ExodbcExec::PrintHelp()
+	//{
+	//	WRITE_STDOUT_ENDL(u8"Any input that is not recognized as a command will be executed as SQL");
+	//	WRITE_STDOUT_ENDL(u8"against the database connected to.");
+	//	WRITE_STDOUT_ENDL(u8"Commands can be abbreviated. For example the command 'Exit SQL");
+	//	WRITE_STDOUT_ENDL(u8"execution', documented as '!exit,!e,!q', can be invoked using '!exit'");
+	//	WRITE_STDOUT_ENDL(u8" or '!e' or '!q'.");
+	//	WRITE_STDOUT_ENDL(u8"");
+	//	WRITE_STDOUT_ENDL(u8"Commands are:");
+	//	WRITE_STDOUT_ENDL(u8" !exit,!e,!q         Exit SQL execution.");
+	//	WRITE_STDOUT_ENDL(u8" !quit               See !exit.");
+	//	WRITE_STDOUT_ENDL(u8" !next,!sn           Select next record.");
+	//	WRITE_STDOUT_ENDL(u8" !prev,!sp           Select previous record.");
+	//	WRITE_STDOUT_ENDL(u8" !first,!sf          Select first record.");
+	//	WRITE_STDOUT_ENDL(u8" !last,!sl           Select last record.");
+	//	WRITE_STDOUT_ENDL(u8" !printAll,!pa       Print all records of the current recordset.");
+	//	WRITE_STDOUT_ENDL(u8"                     If forward only cursors is set to false, !printAll");
+	//	WRITE_STDOUT_ENDL(u8"                     will first execue a '!first' and then print and");
+	//	WRITE_STDOUT_ENDL(u8"                     iterate all records by calling '!next'.");
+	//	WRITE_STDOUT_ENDL(u8"                     If forward only cursors is set to true, all");
+	//	WRITE_STDOUT_ENDL(u8"                     remaining records found using '!next' are printed");
+	//	WRITE_STDOUT_ENDL(u8" !printCurrent,!pc   Print the current record.");
+	//	WRITE_STDOUT_ENDL(u8" !listTables,!lt     List all tables.");
+	//	WRITE_STDOUT_ENDL(u8" !listSchemas,!ls    List all schemas.");
+	//	WRITE_STDOUT_ENDL(u8" !listCatalogs,!lc   List all catalogs.");
+	//	WRITE_STDOUT_ENDL(u8" !commitTrans,!ct    Commit any ongoing transations.");
+	//	WRITE_STDOUT_ENDL(u8" !rollbackTrans,!rt  Rollback all ongoing transactions.");
+	//	WRITE_STDOUT_ENDL(u8"");
+	//	WRITE_STDOUT_ENDL(u8" !find,!f          [name] [schema] [catalog] [type]");
+	//	WRITE_STDOUT_ENDL(u8"                     Searches for objects.");
+	//	WRITE_STDOUT_ENDL(u8"                     [name] [schema], [catalog] and [type] are optional.");
+	//	WRITE_STDOUT_ENDL(u8"                     See the documentation of SQLTables for more");
+	//	WRITE_STDOUT_ENDL(u8"                     information about the arguments.");
+	//	WRITE_STDOUT_ENDL(u8"                     If an argument is not given, an empty string is");
+	//	WRITE_STDOUT_ENDL(u8"                     used. Use \" to frame an argument value if it");
+	//	WRITE_STDOUT_ENDL(u8"                     contains whitespaces.");
+	//	WRITE_STDOUT_ENDL(u8" !help,!h            Show this help.");
+	//}
 }
