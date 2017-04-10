@@ -26,6 +26,8 @@
 
 namespace exodbcexec
 {
+	class ExodbcExec;
+
 	// Typedefs
 	// --------
 
@@ -61,16 +63,16 @@ namespace exodbcexec
 		: public Command
 	{
 	public:
-		Exit(bool& exitFlag)
-			: m_exitFlag(exitFlag)
+		Exit(ExodbcExec* pExodbcExec)
+			: m_pExodbcExec(pExodbcExec)
 		{};
 
 		virtual std::vector<std::string> GetAliases() const noexcept { return{u8"exit", u8"e", u8"quit", u8"q"}; };
-		virtual void Execute(const std::vector<std::string> & args) { m_exitFlag = true; };
+		virtual void Execute(const std::vector<std::string> & args);
 		virtual std::string GetHelp() const noexcept { return u8"Exit exodbcexec.";	};
 
 	private:
-		bool& m_exitFlag;
+		ExodbcExec* m_pExodbcExec;
 	};
 
 

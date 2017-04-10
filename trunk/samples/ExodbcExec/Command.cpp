@@ -10,6 +10,8 @@
 #include "Command.h"
 
 // Same component headers
+#include "ExodbcExec.h"
+
 // Other headers
 #include "exodbc/exOdbc.h"
 #include "exodbc/ColumnBufferWrapper.h"
@@ -44,6 +46,13 @@ namespace exodbcexec
 			LOG_INFO(boost::str(boost::format(u8"Success. Execution took %1%ms.")
 				% millis.count()));
 		}
+	}
+
+
+	void Exit::Execute(const std::vector<std::string> & args)
+	{
+		exASSERT(m_pExodbcExec);
+		m_pExodbcExec->RequestExit();
 	}
 
 
