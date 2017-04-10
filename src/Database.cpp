@@ -443,6 +443,7 @@ namespace exodbc
 		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::ProcedureSupport);
 		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::SearchPatternEscape);
 		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::ServerName);
+		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::SqlIdentifierQuoteChar);
 
 		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::CursorCommitBehavior);
 		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::CursorRollbackBehavior);

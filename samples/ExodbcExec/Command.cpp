@@ -15,6 +15,7 @@
 // Other headers
 #include "exodbc/exOdbc.h"
 #include "exodbc/ColumnBufferWrapper.h"
+#include "exodbc/InfoObject.h"
 
 // Debug
 #include "DebugNew.h"
@@ -426,5 +427,16 @@ namespace exodbcexec
 			lines.push_back(tmp);
 		}
 		return lines;
+	}
+
+
+	void DbInfo::Execute(const std::vector<std::string> & args)
+	{
+		// Sort alphabetically
+		auto strProps = m_dbInfo.GetStringMap();
+		for (auto it = strProps.begin(); it != strProps.end(); ++it)
+		{
+			LOG_OUTPUT(boost::str(boost::format(u8"%-30s: %s") % m_dbInfo.GetPropertyName(it->first) % it->second));
+		}
 	}
 }

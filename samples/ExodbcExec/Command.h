@@ -13,6 +13,7 @@
 // Other headers
 #include "exodbc/ColumnBufferWrapper.h"
 #include "exodbc/ExecutableStatement.h"
+#include "exodbc/InfoObject.h"
 
 // System headers
 #include <string>
@@ -243,5 +244,22 @@ namespace exodbcexec
 		bool m_fixedPrintSize;
 		size_t m_fixedPrintSizeWidth;
 		std::string m_columnSeparator;
+	};
+
+
+	class DbInfo
+		: public Command
+	{
+	public:
+		DbInfo(const exodbc::DatabaseInfo& dbInfo)
+			: m_dbInfo(dbInfo)
+		{};
+
+		virtual std::vector<std::string> GetAliases() const noexcept { return{ u8"dbInfo" }; };
+		virtual void Execute(const std::vector<std::string> & args);
+		virtual std::string GetHelp() const noexcept { return u8"Print various database properties"; };
+
+	private:
+		exodbc::DatabaseInfo  m_dbInfo;
 	};
 }
