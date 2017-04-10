@@ -378,6 +378,8 @@ namespace exodbc
 			ProcedureSupport = SQL_PROCEDURES,
 			AccessibleTables = SQL_ACCESSIBLE_TABLES,
 			SearchPatternEscape = SQL_SEARCH_PATTERN_ESCAPE,
+
+			SqlIdentifierQuoteChar = SQL_IDENTIFIER_QUOTE_CHAR
 		};
 
 		enum class USmallIntProperty
