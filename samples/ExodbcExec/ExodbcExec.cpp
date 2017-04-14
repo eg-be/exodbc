@@ -418,7 +418,7 @@ namespace exodbcexec
 		RegisterCommand(make_shared<Commit>(m_pDb));
 		RegisterCommand(make_shared<Rollback>(m_pDb));
 		RegisterCommand(make_shared<Exit>(this));
-		RegisterCommand(make_shared<DbInfo>(m_pDb->GetDbInfo()));
+		RegisterCommand(make_shared<DbInfo>(m_pDb));
 		RegisterCommand(make_shared<Help>(GetCommands()));
 	}
 

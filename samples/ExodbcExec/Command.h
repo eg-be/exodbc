@@ -251,8 +251,8 @@ namespace exodbcexec
 		: public Command
 	{
 	public:
-		DbInfo(const exodbc::DatabaseInfo& dbInfo)
-			: m_dbInfo(dbInfo)
+		DbInfo(const exodbc::DatabasePtr pDb)
+			: m_pDb(pDb)
 		{};
 
 		virtual std::vector<std::string> GetAliases() const noexcept { return{ u8"dbInfo" }; };
@@ -260,6 +260,6 @@ namespace exodbcexec
 		virtual std::string GetHelp() const noexcept { return u8"Print various database properties"; };
 
 	private:
-		exodbc::DatabaseInfo  m_dbInfo;
+		exodbc::DatabasePtr m_pDb;
 	};
 }

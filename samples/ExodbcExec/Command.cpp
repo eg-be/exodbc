@@ -15,7 +15,8 @@
 // Other headers
 #include "exodbc/exOdbc.h"
 #include "exodbc/ColumnBufferWrapper.h"
-#include "exodbc/InfoObject.h"
+//#include "exodbc/InfoObject.h"
+#include "exodbc/SqlInfoProperty.h"
 
 // Debug
 #include "DebugNew.h"
@@ -432,11 +433,21 @@ namespace exodbcexec
 
 	void DbInfo::Execute(const std::vector<std::string> & args)
 	{
-		// Sort alphabetically
-		auto strProps = m_dbInfo.GetStringMap();
-		for (auto it = strProps.begin(); it != strProps.end(); ++it)
+		SqlInfoProperties props;
+		props.Init(m_pDb->GetSqlDbcHandle());
+		auto dbms = props.GetProperties(SqlInfoProperty::InfoType::DBMS);
+		LOG_OUTPUT(u8"DBMS Product Information");
+		LOG_OUTPUT(u8"========================");
+		for (auto it = dbms.begin(); it != dbms.end(); ++it)
 		{
-			LOG_OUTPUT(boost::str(boost::format(u8"%-30s: %s") % m_dbInfo.GetPropertyName(it->first) % it->second));
+			LOG_OUTPUT(boost::str(boost::format(u8"%-30s: %s") % it->GetName() % it->GetStringValue()));
+		}
+		auto dataSource = props.GetProperties(SqlInfoProperty::InfoType::DataSource);
+		LOG_OUTPUT(u8"Data Source Information");
+		LOG_OUTPUT(u8"=======================");
+		for (auto it = dataSource.begin(); it != dataSource.end(); ++it)
+		{
+			LOG_OUTPUT(boost::str(boost::format(u8"%-30s: %s") % it->GetName() % it->GetStringValue()));
 		}
 	}
 }
