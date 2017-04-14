@@ -52,7 +52,7 @@ set ( SRC_EXODBC
   LogHandler.cpp 
   LogManager.cpp 
   SpecializedExceptions.cpp 
-  SqlInfo.cpp
+  SqlInfoProperty.cpp
   Sql2BufferTypeMap.cpp 
   SqlStatementCloser.cpp 
   Table.cpp 
@@ -81,7 +81,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/SpecializedExceptions.h
   ../include/exodbc/Sql2BufferTypeMap.h
   ../include/exodbc/SqlHandle.h
-  ../include/exodbc/SqlInfo.h  
+  ../include/exodbc/SqlInfoProperty.h  
   ../include/exodbc/SqlStatementCloser.h
   ../include/exodbc/Table.h
   ../include/exodbc/TablePrivileges.h
