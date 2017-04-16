@@ -68,6 +68,86 @@ namespace exodbc
 
 	// Implementation
 	// --------------
+	void Environment::SetTracefile(const std::string& path)
+	{
+		// note, from ms-doc: 
+		// Character strings pointed to by the ValuePtr argument of SQLSetConnectAttr have a length of StringLength bytes.
+		SQLINTEGER cb = 0;
+
+		// windows probably wants wchars here.. (?)
+#ifdef _WIN32
+		std::wstring wpath = utf8ToUtf16(path);
+		SQLRETURN ret = SQLSetConnectAttr(NULL, SQL_ATTR_TRACEFILE, (SQLPOINTER)wpath.c_str(), ((SQLINTEGER)wpath.length()) * sizeof(SQLWCHAR));
+#else
+		SQLRETURN ret = SQLSetConnectAttr(NULL, SQL_ATTR_TRACEFILE, (SQLPOINTER)path.c_str(), ((SQLINTEGER)path.length()) * sizeof(SQLCHAR));
+#endif
+		if (!SQL_SUCCEEDED(ret))
+		{
+			Exception ex(boost::str(boost::format(u8"Failed to set attribute SQL_ATTR_TRACEFILE to '%s'") % path));
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+	}
+
+
+	std::string Environment::GetTracefile()
+	{
+		// Assume some max length, querying the driver about length did not really work
+		SQLINTEGER cb = 0;
+		SQLINTEGER charBuffSize = MAX_PATH + 1;
+		SQLINTEGER byteBuffSize = sizeof(SQLAPICHARTYPE) * charBuffSize;
+		std::unique_ptr<SQLAPICHARTYPE[]> buffer(new SQLAPICHARTYPE[charBuffSize]);
+		memset(buffer.get(), 0, byteBuffSize);
+		SQLRETURN ret = SQLGetConnectAttr(NULL, SQL_ATTR_TRACEFILE, (SQLPOINTER)buffer.get(), byteBuffSize, &cb);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			Exception ex(u8"Failed to read attribute SQL_ATTR_TRACEFILE");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+
+		std::string tracefile(SQLAPICHARPTR_TO_EXODBCSTR(buffer.get()));
+		return tracefile;
+	}
+
+
+	void Environment::SetTrace(bool enable)
+	{
+		SQLRETURN ret = 0;
+		if (enable)
+			ret = SQLSetConnectAttr(NULL, SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_ON, 0);
+		else
+			ret = SQLSetConnectAttr(NULL, SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_OFF, 0);
+
+		if (!SQL_SUCCEEDED(ret))
+		{
+			string msg;
+			if (enable)
+				msg = boost::str(boost::format(u8"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_ON"));
+			else
+				msg = boost::str(boost::format(u8"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF"));
+			Exception ex(msg);
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+	}
+
+
+	bool Environment::GetTrace()
+	{
+		SQLUINTEGER value = 0;
+		SQLRETURN ret = SQLGetConnectAttr(NULL, SQL_ATTR_TRACE, &value, 0, 0);
+		if (!SQL_SUCCEEDED(ret))
+		{
+			Exception ex(u8"Failed to read Attribute SQL_ATTR_TRACE");
+			SET_EXCEPTION_SOURCE(ex);
+			throw ex;
+		}
+
+		return value == SQL_OPT_TRACE_ON;
+	}
+
+
 	void Environment::EnableConnectionPooling(ConnectionPooling enablePooling)
 	{
 		SQLRETURN ret = SQLSetEnvAttr(SQL_NULL_HENV, SQL_ATTR_CONNECTION_POOLING, (SQLPOINTER)enablePooling, 0);
