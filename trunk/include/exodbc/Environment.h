@@ -56,6 +56,37 @@ namespace exodbc
 
 
 		/*!
+		* \brief	Set Attribute SQL_ATTR_TRACEFILE to passed path.
+		* \throw	Exception
+		*/
+		static void SetTracefile(const std::string& path);
+		
+
+		/*!
+		* \brief	Get Attribute SQL_ATTR_TRACEFILE.
+		* \throw	Exception
+		*/
+		static std::string GetTracefile();
+
+
+		/*!
+		* \brief	Set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_ON or 
+		*			SQL_OPT_TRACE_OFF, depending on enable.
+		* \details	Note that the trace option does not depend on any handle,
+		*			it will be activated globally for the running application.
+		* \throw	Exception
+		*/
+		static void SetTrace(bool enable);
+
+
+		/*!
+		* \brief	Get Attribute SQL_ATTR_TRACE.
+		* \throw	Exception
+		*/
+		static bool GetTrace();
+
+
+		/*!
 		 * \brief	Default constructor.
 		 * 			You must manually call Init() after creating the object.
 		 *			Sets ODBC Version to OdbcVersion::UNKNOWN.

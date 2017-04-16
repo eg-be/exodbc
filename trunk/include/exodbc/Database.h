@@ -523,34 +523,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Set Attribute SQL_ATTR_TRACEFILE to passed path.
-		* \throw	Exception
-		*/
-		void SetTracefile(const std::string path);
-
-
-		/*!
-		* \brief	Get Attribute SQL_ATTR_TRACEFILE.
-		* \throw	Exception
-		*/
-		std::string GetTracefile() const;
-
-
-		/*!
-		* \brief	Set Attribute SQL_ATTR_TRACE.
-		* \throw	Exception
-		*/
-		void SetTrace(bool enable);
-
-
-		/*!
-		* \brief	Get Attribute SQL_ATTR_TRACE.
-		* \throw	Exception
-		*/
-		bool GetTrace() const;
-
-
-		/*!
 		* \brief	Test if the passed SQL Type has been reported as supported
 		*			by the Database.
 		* \return	Searches the DataTypes info and compares against SqlType (ODBC 2.0)

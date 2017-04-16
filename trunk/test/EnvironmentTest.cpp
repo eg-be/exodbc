@@ -193,4 +193,89 @@ namespace exodbctest
 		LOG_INFO(msg);
 	}
 
+
+	TEST_F(EnvironmentTest, SetAndGetTrace)
+	{
+		EXPECT_NO_THROW(Environment::SetTrace(true));
+		EXPECT_TRUE(Environment::GetTrace());
+		EXPECT_NO_THROW(Environment::SetTrace(false));
+		EXPECT_FALSE(Environment::GetTrace());
+	}
+
+
+	TEST_F(EnvironmentTest, SetAndGetTracefile)
+	{
+		// create some unique tracefile:
+		boost::filesystem::path tmpDir = boost::filesystem::temp_directory_path();
+		boost::filesystem::path traceFile = tmpDir / boost::filesystem::unique_path();
+		traceFile += u8".trace";
+
+#ifdef _WIN32
+		string tracefilePathStr = utf16ToUtf8(traceFile.native());
+#else
+		string tracefilePathStr = traceFile.native();
+#endif
+		EXPECT_NO_THROW(Environment::SetTracefile(tracefilePathStr));
+
+		string getTracefilePathStr;
+		EXPECT_NO_THROW(getTracefilePathStr = Environment::GetTracefile());
+		EXPECT_EQ(tracefilePathStr, getTracefilePathStr);
+	}
+
+
+	TEST_F(EnvironmentTest, DoSomeTrace)
+	{
+		// create some unique tracefile:
+		boost::filesystem::path tmpDir = boost::filesystem::temp_directory_path();
+		boost::filesystem::path traceFile = tmpDir / boost::filesystem::unique_path();
+		traceFile += u8".trace";
+
+#ifdef _WIN32
+		string tracefilePathStr = utf16ToUtf8(traceFile.native());
+#else
+		string tracefilePathStr = traceFile.native();
+#endif
+
+		// remove an existing trace-file
+		boost::system::error_code fserr;
+		boost::filesystem::remove(traceFile, fserr);
+		ASSERT_FALSE(boost::filesystem::exists(traceFile));
+
+		// Now enable tracing and set the tracefile
+		Environment::SetTracefile(tracefilePathStr);
+		Environment::SetTrace(true);
+
+		// Create an env and open a database
+		EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
+		DatabasePtr pDb = Database::Create(pEnv);
+		if (g_odbcInfo.HasConnectionString())
+		{
+			pDb->Open(g_odbcInfo.m_connectionString);
+		}
+		else
+		{
+			pDb->Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password);
+		}
+
+		// Disable trace
+		Environment::SetTrace(false);
+
+		// now one must exist
+		EXPECT_TRUE(boost::filesystem::exists(traceFile));
+
+		// And it must stop growing, even if we close and open the db again:
+		uintmax_t size1 = boost::filesystem::file_size(traceFile);
+		pDb->Close();
+		if (g_odbcInfo.HasConnectionString())
+		{
+			pDb->Open(g_odbcInfo.m_connectionString);
+		}
+		else
+		{
+			pDb->Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password);
+		}
+		uintmax_t size2 = boost::filesystem::file_size(traceFile);
+		EXPECT_EQ(size1, size2);
+	}
+
 } // namespace exodbctest

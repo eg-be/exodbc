@@ -306,75 +306,6 @@ namespace exodbc
 	}
 
 
-	void Database::SetTracefile(const std::string path)
-	{
-		exASSERT(m_pHDbc);
-		exASSERT(m_pHDbc->IsAllocated());
-
-		// note, from ms-doc: 
-		// Character strings pointed to by the ValuePtr argument of SQLSetConnectAttr have a length of StringLength bytes.
-		SQLINTEGER cb = 0;
-
-		// windows probably wants wchars here.. (?)
-#ifdef _WIN32
-		std::wstring wpath = utf8ToUtf16(path);
-		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)wpath.c_str(), ((SQLINTEGER)wpath.length()) * sizeof(SQLWCHAR));
-#else
-		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)path.c_str(), ((SQLINTEGER)path.length()) * sizeof(SQLCHAR));
-#endif
-		THROW_IFN_SUCCEEDED(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
-	}
-
-
-	std::string Database::GetTracefile() const
-	{
-		exASSERT(m_pHDbc);
-		exASSERT(m_pHDbc->IsAllocated());
-
-		// Assume some max length, querying the driver about length did not really work
-		SQLINTEGER cb = 0;
-		SQLINTEGER charBuffSize = MAX_PATH + 1;
-		SQLINTEGER byteBuffSize = sizeof(SQLAPICHARTYPE) * charBuffSize;
-		std::unique_ptr<SQLAPICHARTYPE[]> buffer(new SQLAPICHARTYPE[charBuffSize]);
-		memset(buffer.get(), 0, byteBuffSize);
-		SQLRETURN ret = SQLGetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACEFILE, (SQLPOINTER)buffer.get(), byteBuffSize, &cb);
-		THROW_IFN_SUCCEEDED(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
-        std::string tracefile(SQLAPICHARPTR_TO_EXODBCSTR(buffer.get()));
-		return tracefile;
-	}
-
-
-	void Database::SetTrace(bool enable)
-	{
-		exASSERT(m_pHDbc);
-		exASSERT(m_pHDbc->IsAllocated());
-
-		if (enable)
-		{
-			SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_ON, 0);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_ON");
-		}
-		else
-		{
-			SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER)SQL_OPT_TRACE_OFF, 0);
-			THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to set Attribute SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
-		}
-	}
-
-
-	bool Database::GetTrace() const
-	{
-		exASSERT(m_pHDbc);
-		exASSERT(m_pHDbc->IsAllocated());
-
-		SQLUINTEGER value = 0;
-		SQLRETURN ret = SQLGetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, &value, 0, 0);
-		THROW_IFN_SUCCEEDED_MSG(SQLGetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Failed to read Attribute SQL_ATTR_TRACE");
-
-		return value == SQL_OPT_TRACE_ON;
-	}
-
-
 	bool Database::IsSqlTypeSupported(SQLSMALLINT sqlType) const
 	{
 		exASSERT(IsOpen());
@@ -594,9 +525,9 @@ namespace exodbc
 			RollbackTrans();
 		}
 
-		// Free statement handles - just reset them, that should be enough
-		m_pHStmt.reset();
-		m_pHStmtExecSql.reset();
+		// Free statement handles - keep the pointers, but free the handle held
+		m_pHStmt->Free();
+		m_pHStmtExecSql->Free();
 
 		// And also clear all props read
 		m_props.Reset();

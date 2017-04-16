@@ -176,89 +176,6 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseTest, GetTracefile)
-	{
-		string tracefile;
-		EXPECT_NO_THROW(tracefile = m_pDb->GetTracefile());
-		LOG_INFO(boost::str(boost::format(u8"Tracefile is: '%s'") % tracefile));
-	}
-
-
-	TEST_F(DatabaseTest, SetTracefile)
-	{
-        boost::filesystem::path tmpDir = boost::filesystem::temp_directory_path();
-		string filename = boost::str(boost::format(u8"trace_%s.log") % DatabaseProcudt2s(m_pDb->GetDbms()));
-		boost::filesystem::path tracefilePath = tmpDir / filename;
-
-#ifdef _WIN32
-		string tracefilePathStr = utf16ToUtf8(tracefilePath.native());
-#else
-		string tracefilePathStr = tracefilePath.native();
-#endif
-
-		EXPECT_NO_THROW(m_pDb->SetTracefile(tracefilePathStr));
-	}
-
-
-	TEST_F(DatabaseTest, SetTrace)
-	{
-		Database db(m_pEnv);
-		EXPECT_NO_THROW(db.SetTrace(true));
-
-		// and disable again
-		EXPECT_NO_THROW(db.SetTrace(false));
-	}
-
-
-	TEST_F(DatabaseTest, GetTrace)
-	{
-		Database db(m_pEnv);
-		ASSERT_NO_THROW(db.SetTrace(true));
-		EXPECT_TRUE(db.GetTrace());
-		ASSERT_NO_THROW(db.SetTrace(false));
-		EXPECT_FALSE(db.GetTrace());
-	}
-
-
-	TEST_F(DatabaseTest, DoSomeTrace)
-	{
-		namespace fs = boost::filesystem;
-
-		// Set tracefile first, do that on a db not open yet
-		boost::filesystem::path tmpDir = boost::filesystem::temp_directory_path();
-		string filename = boost::str(boost::format(u8"trace_%s.log") % DatabaseProcudt2s(m_pDb->GetDbms()));
-		boost::filesystem::path tracefilePath = tmpDir / filename;
-
-#ifdef _WIN32
-		string tracefilePathStr = utf16ToUtf8(tracefilePath.native());
-#else
-		string tracefilePathStr = tracefilePath.native();
-#endif
-
-		// remove an existing trace-file
-		boost::system::error_code fserr;
-		fs::remove(tracefilePath, fserr);
-		ASSERT_FALSE(fs::exists(tracefilePath));
-
-		Database db(m_pEnv);
-		ASSERT_NO_THROW(db.SetTracefile(tracefilePathStr));
-		EXPECT_NO_THROW(db.SetTrace(true));
-
-		// Open db
-		if (g_odbcInfo.HasConnectionString())
-		{
-			db.Open(g_odbcInfo.m_connectionString);
-		}
-		else
-		{
-			db.Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password);
-		}
-
-		// now one must exist
-		EXPECT_TRUE(fs::exists(tracefilePath));
-	}
-
-
 	TEST_F(DatabaseTest, Open)
 	{		
 		// Open an existing db by passing the Env to the ctor
@@ -318,6 +235,35 @@ namespace exodbctest
 		// Closing one that is not open must just do nothing, but should not fail
 		Database db2(m_pEnv);
 		EXPECT_NO_THROW(db2.Close());
+	}
+
+
+	TEST_F(DatabaseTest, OpenCloseOpenClose)
+	{
+		// subsequent open, close, open, close must be possible
+		Database db1(m_pEnv);
+		if (g_odbcInfo.HasConnectionString())
+		{
+			ASSERT_NO_THROW(db1.Open(g_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			ASSERT_NO_THROW(db1.Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password));
+		}
+
+		EXPECT_NO_THROW(db1.Close());
+
+		// and open and close again
+		if (g_odbcInfo.HasConnectionString())
+		{
+			EXPECT_NO_THROW(db1.Open(g_odbcInfo.m_connectionString));
+		}
+		else
+		{
+			EXPECT_NO_THROW(db1.Open(g_odbcInfo.m_dsn, g_odbcInfo.m_username, g_odbcInfo.m_password));
+		}
+
+		EXPECT_NO_THROW(db1.Close());
 	}
 
 
