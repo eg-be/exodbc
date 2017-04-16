@@ -456,5 +456,12 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
+		auto supportedSql = props.GetProperties(SqlInfoProperty::InfoType::SupportedSql);
+		LOG_OUTPUT(u8"Supported SQL Information");
+		LOG_OUTPUT(u8"=========================");
+		for (auto it = supportedSql.begin(); it != supportedSql.end(); ++it)
+		{
+			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
+		}
 	}
 }

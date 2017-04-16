@@ -117,9 +117,10 @@ namespace exodbc
 
 	private:
 		void ReadAllProperties();
-		void RegisterDriverInformation();
+		void RegisterDriverProperties();
 		void RegisterDbmsProperties();
 		void RegisterDataSourceProperties();
+		void RegisterSupportedSqlProperties();
 
 		void RegisterProperty(SQLUSMALLINT id, const std::string& name, SqlInfoProperty::InfoType infoType, SqlInfoProperty::ValueType valueType);
 
