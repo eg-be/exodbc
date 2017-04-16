@@ -29,7 +29,7 @@ namespace ba = boost::algorithm;
 
 void printUsage()
 {
-	WRITE_STDOUT_ENDL(u8"Usage: odbcconnectiontest  [OPTION]... [-DSN <dsn> [-U <user>] [-P <pass>] | -CS <connectionString>] ");
+	WRITE_STDOUT_ENDL(u8"Usage: odbcconnect  [OPTION]... [-DSN <dsn> [-U <user>] [-P <pass>] | -CS <connectionString>] ");
 	WRITE_STDOUT_ENDL(u8"");
 	WRITE_STDOUT_ENDL(u8"Tests if connecting to a database succeeds.");
 	WRITE_STDOUT_ENDL(u8"On success prints the database system name to stdout, or on failure an error");
