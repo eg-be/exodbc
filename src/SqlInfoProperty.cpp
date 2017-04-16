@@ -151,20 +151,69 @@ namespace exodbc
 
 
 
-	SqlInfoProperties::SqlInfoProperties(ConstSqlDbcHandlePtr pHdbc)
+	SqlInfoProperties::SqlInfoProperties(ConstSqlDbcHandlePtr pHdbc, bool readAllProperties)
 	{
-		Init(pHdbc);
+		Init(pHdbc, readAllProperties);
 	}
 
 
-	void SqlInfoProperties::Init(ConstSqlDbcHandlePtr pHdbc)
+	void SqlInfoProperties::Init(ConstSqlDbcHandlePtr pHdbc, bool readAllProperties)
 	{
 		exASSERT(pHdbc);
 		exASSERT(pHdbc->IsAllocated());
+		m_pHdbc = pHdbc;
 
 		RegisterDbmsProperties();
 		RegisterDataSourceProperties();
-		LoadProperties(pHdbc);
+		RegisterDriverInformation();
+
+		if (readAllProperties)
+		{
+			ReadAllProperties();
+		}
+	}
+
+
+	void SqlInfoProperties::RegisterDriverInformation()
+	{
+		using it = SqlInfoProperty::InfoType;
+		using vt = SqlInfoProperty::ValueType;
+		SqlInfoProperty::InfoType iType = it::Driver;
+
+		RegisterProperty(SQL_ACTIVE_ENVIRONMENTS, u8"SQL_ACTIVE_ENVIRONMENTS", iType, vt::USmallInt);
+		RegisterProperty(SQL_ASYNC_DBC_FUNCTIONS, u8"SQL_ASYNC_DBC_FUNCTIONS", iType, vt::UInt);
+		RegisterProperty(SQL_ASYNC_MODE, u8"SQL_ASYNC_MODE", iType, vt::UInt);
+		RegisterProperty(SQL_ASYNC_NOTIFICATION, u8"SQL_ASYNC_NOTIFICATION", iType, vt::UInt);
+		RegisterProperty(SQL_BATCH_ROW_COUNT, u8"SQL_BATCH_ROW_COUNT", iType, vt::UInt);
+		RegisterProperty(SQL_BATCH_SUPPORT, u8"SQL_BATCH_SUPPORT", iType, vt::UInt);
+		RegisterProperty(SQL_DATA_SOURCE_NAME, u8"SQL_DATA_SOURCE_NAME", iType, vt::String_Any);
+		RegisterProperty(SQL_DRIVER_AWARE_POOLING_SUPPORTED, u8"SQL_DRIVER_AWARE_POOLING_SUPPORTED", iType, vt::UInt);
+		RegisterProperty(SQL_DRIVER_NAME, u8"SQL_DRIVER_NAME", iType, vt::String_Any);
+		RegisterProperty(SQL_DRIVER_ODBC_VER, u8"SQL_DRIVER_ODBC_VER", iType, vt::String_Any);
+		RegisterProperty(SQL_DRIVER_NAME, u8"SQL_DRIVER_NAME", iType, vt::String_Any);
+		RegisterProperty(SQL_DYNAMIC_CURSOR_ATTRIBUTES1, u8"SQL_DYNAMIC_CURSOR_ATTRIBUTES1", iType, vt::UInt);
+		RegisterProperty(SQL_DYNAMIC_CURSOR_ATTRIBUTES2, u8"SQL_DYNAMIC_CURSOR_ATTRIBUTES2", iType, vt::UInt);
+		RegisterProperty(SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1, u8"SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1", iType, vt::UInt);
+		RegisterProperty(SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2, u8"SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES2", iType, vt::UInt);
+		RegisterProperty(SQL_FILE_USAGE, u8"SQL_FILE_USAGE", iType, vt::UInt);
+		RegisterProperty(SQL_GETDATA_EXTENSIONS, u8"SQL_GETDATA_EXTENSIONS", iType, vt::UInt);
+		RegisterProperty(SQL_INFO_SCHEMA_VIEWS, u8"SQL_INFO_SCHEMA_VIEWS", iType, vt::UInt);
+		RegisterProperty(SQL_KEYSET_CURSOR_ATTRIBUTES1, u8"SQL_KEYSET_CURSOR_ATTRIBUTES1", iType, vt::UInt);
+		RegisterProperty(SQL_KEYSET_CURSOR_ATTRIBUTES2, u8"SQL_KEYSET_CURSOR_ATTRIBUTES2", iType, vt::UInt);
+		RegisterProperty(SQL_MAX_ASYNC_CONCURRENT_STATEMENTS, u8"SQL_MAX_ASYNC_CONCURRENT_STATEMENTS", iType, vt::UInt);
+		RegisterProperty(SQL_MAX_CONCURRENT_ACTIVITIES, u8"SQL_MAX_CONCURRENT_ACTIVITIES", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_DRIVER_CONNECTIONS, u8"SQL_MAX_DRIVER_CONNECTIONS", iType, vt::USmallInt);
+		RegisterProperty(SQL_ODBC_INTERFACE_CONFORMANCE, u8"SQL_ODBC_INTERFACE_CONFORMANCE", iType, vt::UInt);
+		//RegisterProperty(SQL_ODBC_STANDARD_CLI_CONFORMANCE, u8"SQL_ODBC_STANDARD_CLI_CONFORMANCE", iType, vt::UInt);
+		RegisterProperty(SQL_ODBC_VER, u8"SQL_ODBC_VER", iType, vt::String_Any);
+		RegisterProperty(SQL_PARAM_ARRAY_ROW_COUNTS, u8"SQL_PARAM_ARRAY_ROW_COUNTS", iType, vt::UInt);
+		RegisterProperty(SQL_PARAM_ARRAY_SELECTS, u8"SQL_PARAM_ARRAY_SELECTS", iType, vt::UInt);
+		RegisterProperty(SQL_ROW_UPDATES, u8"SQL_ROW_UPDATES", iType, vt::String_N_Y);
+		RegisterProperty(SQL_SEARCH_PATTERN_ESCAPE, u8"SQL_SEARCH_PATTERN_ESCAPE", iType, vt::String_Any);
+		RegisterProperty(SQL_SERVER_NAME, u8"SQL_SERVER_NAME", iType, vt::String_Any);
+		RegisterProperty(SQL_STATIC_CURSOR_ATTRIBUTES1, u8"SQL_STATIC_CURSOR_ATTRIBUTES1", iType, vt::UInt);
+		RegisterProperty(SQL_STATIC_CURSOR_ATTRIBUTES2, u8"SQL_STATIC_CURSOR_ATTRIBUTES2", iType, vt::UInt);
+
 	}
 
 
@@ -231,15 +280,30 @@ namespace exodbc
 	}
 
 
-	void SqlInfoProperties::LoadProperties(ConstSqlDbcHandlePtr pHdbc)
+	SqlInfoProperty SqlInfoProperties::GetProperty(SQLUSMALLINT infoId)
 	{
-		exASSERT(pHdbc);
-		exASSERT(pHdbc->IsAllocated());
+		PropsMap::iterator it = m_props.find(infoId);
+		if (it == m_props.end())
+		{
+			NotFoundException nfe(boost::str(boost::format(u8"Property with id %d is not registered") % infoId));
+			SET_EXCEPTION_SOURCE(nfe);
+			throw nfe;
+		}
+		SqlInfoProperty& prop = it->second;
+		if (!prop.GetValueRead())
+		{
+			prop.ReadProperty(m_pHdbc);
+		}
+		return prop;
+	}
 
+
+	void SqlInfoProperties::ReadAllProperties()
+	{
 		for (PropsMap::iterator it = m_props.begin(); it != m_props.end(); ++it)
 		{
 			SqlInfoProperty& prop = it->second;
-			prop.ReadProperty(pHdbc);
+			prop.ReadProperty(m_pHdbc);
 		}
 	}
 

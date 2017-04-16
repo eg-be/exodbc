@@ -102,9 +102,9 @@ namespace exodbc
 		SqlInfoProperties()
 		{};
 
-		SqlInfoProperties(ConstSqlDbcHandlePtr pHdbc);
+		SqlInfoProperties(ConstSqlDbcHandlePtr pHdbc, bool readAllProperties);
 
-		void Init(ConstSqlDbcHandlePtr pHdbc);
+		void Init(ConstSqlDbcHandlePtr pHdbc, bool readAllProperties);
 
 		struct SLexicalCompare {
 			bool operator() (const SqlInfoProperty& lhs, const SqlInfoProperty& rhs) const {
@@ -113,8 +113,11 @@ namespace exodbc
 		};
 		std::set<SqlInfoProperty, SLexicalCompare> GetProperties(SqlInfoProperty::InfoType infoType) const noexcept;
 
+		SqlInfoProperty GetProperty(SQLUSMALLINT infoId);
+
 	private:
-		void LoadProperties(ConstSqlDbcHandlePtr pHdbc);
+		void ReadAllProperties();
+		void RegisterDriverInformation();
 		void RegisterDbmsProperties();
 		void RegisterDataSourceProperties();
 
@@ -122,5 +125,6 @@ namespace exodbc
 
 		typedef std::map<SQLUSMALLINT, SqlInfoProperty> PropsMap;
 		PropsMap m_props;
+		ConstSqlDbcHandlePtr m_pHdbc;
 	};
 } // namespace exodbc
