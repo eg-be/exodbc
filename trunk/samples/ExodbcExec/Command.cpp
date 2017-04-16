@@ -434,20 +434,27 @@ namespace exodbcexec
 	void DbInfo::Execute(const std::vector<std::string> & args)
 	{
 		SqlInfoProperties props;
-		props.Init(m_pDb->GetSqlDbcHandle());
+		props.Init(m_pDb->GetSqlDbcHandle(), true);
 		auto dbms = props.GetProperties(SqlInfoProperty::InfoType::DBMS);
 		LOG_OUTPUT(u8"DBMS Product Information");
 		LOG_OUTPUT(u8"========================");
 		for (auto it = dbms.begin(); it != dbms.end(); ++it)
 		{
-			LOG_OUTPUT(boost::str(boost::format(u8"%-30s: %s") % it->GetName() % it->GetStringValue()));
+			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
 		auto dataSource = props.GetProperties(SqlInfoProperty::InfoType::DataSource);
 		LOG_OUTPUT(u8"Data Source Information");
 		LOG_OUTPUT(u8"=======================");
 		for (auto it = dataSource.begin(); it != dataSource.end(); ++it)
 		{
-			LOG_OUTPUT(boost::str(boost::format(u8"%-30s: %s") % it->GetName() % it->GetStringValue()));
+			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
+		}
+		auto driver = props.GetProperties(SqlInfoProperty::InfoType::Driver);
+		LOG_OUTPUT(u8"Driver Information");
+		LOG_OUTPUT(u8"==================");
+		for (auto it = driver.begin(); it != driver.end(); ++it)
+		{
+			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
 	}
 }
