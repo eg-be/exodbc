@@ -165,7 +165,8 @@ namespace exodbc
 
 		RegisterDbmsProperties();
 		RegisterDataSourceProperties();
-		RegisterDriverInformation();
+		RegisterDriverProperties();
+		RegisterSupportedSqlProperties();
 
 		if (readAllProperties)
 		{
@@ -174,7 +175,7 @@ namespace exodbc
 	}
 
 
-	void SqlInfoProperties::RegisterDriverInformation()
+	void SqlInfoProperties::RegisterDriverProperties()
 	{
 		using it = SqlInfoProperty::InfoType;
 		using vt = SqlInfoProperty::ValueType;
@@ -258,6 +259,63 @@ namespace exodbc
 		RegisterProperty(SQL_TXN_ISOLATION_OPTION, u8"SQL_TXN_ISOLATION_OPTION", iType, vt::UInt);
 		RegisterProperty(SQL_USER_NAME, u8"SQL_USER_NAME", iType, vt::String_Any);
 
+	}
+
+
+	void SqlInfoProperties::RegisterSupportedSqlProperties()
+	{
+		using it = SqlInfoProperty::InfoType;
+		using vt = SqlInfoProperty::ValueType;
+		SqlInfoProperty::InfoType iType = it::SupportedSql;
+
+		RegisterProperty(SQL_AGGREGATE_FUNCTIONS, u8"SQL_AGGREGATE_FUNCTIONS", iType, vt::UInt);
+		RegisterProperty(SQL_ALTER_DOMAIN, u8"SQL_ALTER_DOMAIN", iType, vt::UInt);
+		//RegisterProperty(SQL_ALTER_SCHEMA, u8"SQL_ALTER_SCHEMA", iType, vt::UInt);
+		RegisterProperty(SQL_ALTER_TABLE, u8"SQL_ALTER_TABLE", iType, vt::UInt);
+		//RegisterProperty(SQL_ANSI_SQL_DATETIME_LITERALS, u8"SQL_ANSI_SQL_DATETIME_LITERALS", iType, vt::UInt);
+		RegisterProperty(SQL_CATALOG_LOCATION, u8"SQL_CATALOG_LOCATION", iType, vt::USmallInt);
+		RegisterProperty(SQL_CATALOG_NAME, u8"SQL_CATALOG_NAME", iType, vt::String_N_Y);
+		RegisterProperty(SQL_CATALOG_NAME_SEPARATOR, u8"SQL_CATALOG_NAME_SEPARATOR", iType, vt::String_Any);
+		RegisterProperty(SQL_CATALOG_USAGE, u8"SQL_CATALOG_USAGE", iType, vt::UInt);
+		RegisterProperty(SQL_COLUMN_ALIAS, u8"SQL_COLUMN_ALIAS", iType, vt::String_N_Y);
+		RegisterProperty(SQL_CORRELATION_NAME, u8"SQL_CORRELATION_NAME", iType, vt::USmallInt);
+		RegisterProperty(SQL_CREATE_ASSERTION, u8"SQL_CREATE_ASSERTION", iType, vt::UInt);
+		RegisterProperty(SQL_CREATE_CHARACTER_SET, u8"SQL_CREATE_CHARACTER_SET", iType, vt::UInt);
+		RegisterProperty(SQL_CREATE_COLLATION, u8"SQL_CREATE_COLLATION", iType, vt::UInt);
+		RegisterProperty(SQL_CREATE_DOMAIN, u8"SQL_CREATE_DOMAIN", iType, vt::UInt);
+		RegisterProperty(SQL_CREATE_SCHEMA, u8"SQL_CREATE_SCHEMA", iType, vt::UInt);
+		RegisterProperty(SQL_CREATE_TABLE, u8"SQL_CREATE_TABLE", iType, vt::UInt);
+		RegisterProperty(SQL_CREATE_TRANSLATION, u8"SQL_CREATE_TRANSLATION", iType, vt::UInt);
+		RegisterProperty(SQL_DDL_INDEX, u8"SQL_DDL_INDEX", iType, vt::UInt);
+		RegisterProperty(SQL_DROP_ASSERTION, u8"SQL_DROP_ASSERTION", iType, vt::UInt);
+		RegisterProperty(SQL_DROP_CHARACTER_SET, u8"SQL_DROP_CHARACTER_SET", iType, vt::UInt);
+		RegisterProperty(SQL_DROP_CHARACTER_SET, u8"SQL_DROP_CHARACTER_SET", iType, vt::UInt);
+		RegisterProperty(SQL_DROP_COLLATION, u8"SQL_DROP_COLLATION", iType, vt::UInt);
+		RegisterProperty(SQL_DROP_DOMAIN, u8"SQL_DROP_DOMAIN", iType, vt::UInt);
+		RegisterProperty(SQL_DROP_SCHEMA, u8"SQL_DROP_SCHEMA", iType, vt::UInt);
+		RegisterProperty(SQL_DROP_TABLE, u8"SQL_DROP_TABLE", iType, vt::UInt);
+		RegisterProperty(SQL_DROP_TRANSLATION, u8"SQL_DROP_TRANSLATION", iType, vt::UInt);
+		RegisterProperty(SQL_DROP_VIEW, u8"SQL_DROP_VIEW", iType, vt::UInt);
+		RegisterProperty(SQL_EXPRESSIONS_IN_ORDERBY, u8"SQL_EXPRESSIONS_IN_ORDERBY", iType, vt::String_N_Y);
+		RegisterProperty(SQL_GROUP_BY, u8"SQL_GROUP_BY", iType, vt::USmallInt);
+		RegisterProperty(SQL_IDENTIFIER_CASE, u8"SQL_IDENTIFIER_CASE", iType, vt::USmallInt);
+		RegisterProperty(SQL_IDENTIFIER_QUOTE_CHAR, u8"SQL_IDENTIFIER_QUOTE_CHAR", iType, vt::String_Any);
+		RegisterProperty(SQL_INDEX_KEYWORDS, u8"SQL_INDEX_KEYWORDS", iType, vt::UInt);
+		RegisterProperty(SQL_INSERT_STATEMENT, u8"SQL_INSERT_STATEMENT", iType, vt::UInt);
+		RegisterProperty(SQL_INTEGRITY, u8"SQL_INTEGRITY", iType, vt::String_N_Y);
+		RegisterProperty(SQL_KEYWORDS, u8"SQL_KEYWORDS", iType, vt::String_Any);
+		RegisterProperty(SQL_LIKE_ESCAPE_CLAUSE, u8"SQL_LIKE_ESCAPE_CLAUSE", iType, vt::String_N_Y);
+		RegisterProperty(SQL_NON_NULLABLE_COLUMNS, u8"SQL_NON_NULLABLE_COLUMNS", iType, vt::USmallInt);
+		RegisterProperty(SQL_SQL_CONFORMANCE, u8"SQL_SQL_CONFORMANCE", iType, vt::UInt);
+		RegisterProperty(SQL_OJ_CAPABILITIES, u8"SQL_OJ_CAPABILITIES", iType, vt::UInt);
+		RegisterProperty(SQL_ORDER_BY_COLUMNS_IN_SELECT, u8"SQL_ORDER_BY_COLUMNS_IN_SELECT", iType, vt::String_N_Y);
+		RegisterProperty(SQL_OUTER_JOINS, u8"SQL_OUTER_JOINS", iType, vt::String_N_Y);
+		RegisterProperty(SQL_PROCEDURES, u8"SQL_PROCEDURES", iType, vt::String_N_Y);
+		RegisterProperty(SQL_QUOTED_IDENTIFIER_CASE, u8"SQL_QUOTED_IDENTIFIER_CASE", iType, vt::USmallInt);
+		RegisterProperty(SQL_SCHEMA_USAGE, u8"SQL_SCHEMA_USAGE", iType, vt::UInt);
+		RegisterProperty(SQL_SPECIAL_CHARACTERS, u8"SQL_SPECIAL_CHARACTERS", iType, vt::String_Any);
+		RegisterProperty(SQL_SUBQUERIES, u8"SQL_SUBQUERIES", iType, vt::UInt);
+		RegisterProperty(SQL_UNION, u8"SQL_UNION", iType, vt::UInt);
 	}
 
 
