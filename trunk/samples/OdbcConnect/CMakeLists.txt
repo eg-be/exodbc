@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required (VERSION 3.0.2)
-project (OdbcConnectionTest)
+project (OdbcConnect)
 
 # some help for the compiler:
 if(MSVC)
@@ -12,7 +12,7 @@ endif()
 
 # files:
 set ( SRC_ODBCCONNECTIONTEST
-  OdbcConnectionTest.cpp
+  OdbcConnect.cpp
 )
 
 set ( HEADERS_ODBCCONNECTIONTEST
@@ -26,7 +26,7 @@ if(Boost_FOUND)
 endif()
 
 # we build the SqlCPointerBuffer application
-add_executable(odbcconnectiontest ${SRC_ODBCCONNECTIONTEST} ${HEADERS_ODBCCONNECTIONTEST})
+add_executable(odbcconnect ${SRC_ODBCCONNECTIONTEST} ${HEADERS_ODBCCONNECTIONTEST})
 
 # the ListOdbcSources applications needs to link against libexodbc
-target_link_libraries(odbcconnectiontest libexodbc)
+target_link_libraries(odbcconnect libexodbc)
