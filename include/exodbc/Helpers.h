@@ -23,34 +23,6 @@
 namespace exodbc
 {
 	/*!
-	* \brief	A wrapper to SQLGetInfo to read a String info.
-	* 
-	* \param	pHDbc					The Database connection handle.
-	* \param	fInfoType				Type of the information.
-	* \param [in,out]	sValue			String to receive the value read.
-	* \details This will first call SQLGetInfo to determine the size of the buffer, then allocate a
-	*			corresponding buffer and call GetInfo(SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
-	* \see		SQLHDBC hDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
-	* \throw	Exception
-	*/
-	extern EXODBCAPI void		GetInfo(ConstSqlDbcHandlePtr pHDbc, SQLUSMALLINT fInfoType, std::string& sValue);
-
-
-	/*!
-	 * \brief	A wrapper to SQLGetInfo.
-	 *
-	 * \param	pHDbc					The Database connection handle.
-	 * \param	fInfoType				Type of the information.
-	 * \param	pInfoValue			Output buffer pointer.
-	 * \param	cbInfoValueMax			Length of buffer.
-	 * \param [in,out]	pcbInfoValue	Out-pointer for total length in bytes (excluding null-terminate char for string-values).
-	 * \see		http://msdn.microsoft.com/en-us/library/ms711681%28v=vs.85%29.aspx
-	 * \throw	Exception
-	 */
-	extern EXODBCAPI void		GetInfo(ConstSqlDbcHandlePtr pHDbc, SQLUSMALLINT fInfoType, SQLPOINTER pInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue);
-
-
-	/*!
 	 * \brief	Gets one field of a record of the passed stmt-handle.
 	 *
 	 * \param	pHStmt				  	The statement-handle.

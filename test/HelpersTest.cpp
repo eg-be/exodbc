@@ -36,29 +36,6 @@ namespace exodbctest
 
 	// Implementation
 	// --------------
-
-
-
-	TEST_F(HelpersTest, GetInfo)
-	{
-		// Simply test reading a string and an int value works - that means, does return some data
-		std::string serverName;
-		DatabasePtr pDb = OpenTestDb();
-
-		ASSERT_TRUE(pDb->HasConnectionHandle());
-		GetInfo(pDb->GetSqlDbcHandle(), SQL_SERVER_NAME, serverName);
-		EXPECT_FALSE(serverName.empty());
-
-		// and read some int value
-		// okay, it would be bad luck if one driver reports 1313
-		SQLUSMALLINT maxStmts = 1313;
-		SWORD cb = 0;
-		GetInfo(pDb->GetSqlDbcHandle(), SQL_MAX_CONCURRENT_ACTIVITIES, &maxStmts, sizeof(maxStmts), &cb);
-		EXPECT_NE(1313, maxStmts);
-		EXPECT_NE(0, cb);
-	}
-
-
 	TEST_F(HelpersTest, GetData)
 	{
 		// Test by reading some char value

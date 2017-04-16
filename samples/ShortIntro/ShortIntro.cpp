@@ -56,8 +56,8 @@ int main(int argc, char* argv[])
 		
 		// Open connection to database:
 		pDb->Open(connectionString);
-		DatabaseInfo dbInfo = pDb->GetDbInfo();
-		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"Connected to: %s, using %s") % dbInfo.GetDbmsName() % dbInfo.GetDriverName()));
+		SqlInfoProperties props = pDb->GetProperties();
+		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"Connected to: %s, using %s") % props.GetDbmsName() % props.GetDriverName()));
 
 		// Create a test table in the database with a few entries
 		// try to drop first if it already exists, but ignore failing to drop

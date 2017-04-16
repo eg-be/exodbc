@@ -116,6 +116,7 @@ set ( SRC_EXODBCTEST
   LogManagerTest.cpp 
   ManualTestTables.cpp
   SqlHandleTest.cpp
+  SqlInfoPropertyTest.cpp
   SqlStmtCloserTest.cpp
   TableTest.cpp 
   TestDbCreator.cpp
@@ -138,6 +139,7 @@ set ( HEADERS_EXODBCTEST
   LogManagerTest.h
   ManualTestTables.h
   SqlHandleTest.h
+  SqlInfoPropertyTest.h
   SqlStmtCloserTest.h
   TableTest.h 
   TestDbCreator.h

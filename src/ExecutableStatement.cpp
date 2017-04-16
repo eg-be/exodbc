@@ -126,7 +126,7 @@ namespace exodbc
 			SQLULEN currentValue;
 			ret = SQLGetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)&currentValue, sizeof(currentValue), 0);
 			THROW_IFN_SUCCEEDED_MSG(SQLGetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to get Statement Attr SQL_ATTR_CURSOR_SCROLLABLE");
-			if (currentValue != SQL_NONSCROLLABLE && forwardOnlyCursors || m_pDb->GetDbInfo().GetForwardOnlyCursors())
+			if (currentValue != SQL_NONSCROLLABLE && forwardOnlyCursors || m_pDb->GetProperties().GetForwardOnlyCursors())
 			{
 				ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_NONSCROLLABLE, 0);
 				THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
@@ -193,11 +193,7 @@ namespace exodbc
 		exASSERT(columnNr >= 1);
 		exASSERT(m_pDb);
 
-		SQLUSMALLINT maxColName = m_pDb->GetDbInfo().GetUSmallIntProperty(DatabaseInfo::USmallIntProperty::MaxColumnNameLen);
-		if (maxColName <= 0)
-		{
-			maxColName = DB_MAX_COLUMN_NAME_LEN_DEFAULT;
-		}
+		SQLUSMALLINT maxColName = m_pDb->GetProperties().GetMaxColumnNameLen();
 		std::unique_ptr<SQLAPICHARTYPE[]> nameBuffer(new SQLAPICHARTYPE[maxColName + 1]);
 		SColumnDescription colDesc;
 		SQLRETURN ret = SQLDescribeCol(m_pHStmt->GetHandle(), columnNr, nameBuffer.get(), maxColName + 1, NULL, &colDesc.m_sqlType, &colDesc.m_charSize, &colDesc.m_decimalDigits, &colDesc.m_nullable);

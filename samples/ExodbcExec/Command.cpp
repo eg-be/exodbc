@@ -434,7 +434,7 @@ namespace exodbcexec
 	void DbInfo::Execute(const std::vector<std::string> & args)
 	{
 		SqlInfoProperties props;
-		props.Init(m_pDb->GetSqlDbcHandle(), true);
+		props.Init(m_pDb->GetSqlDbcHandle());
 		auto dbms = props.GetProperties(SqlInfoProperty::InfoType::DBMS);
 		LOG_OUTPUT(u8"DBMS Product Information");
 		LOG_OUTPUT(u8"========================");

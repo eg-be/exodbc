@@ -44,17 +44,19 @@ namespace exodbctest
 	void DatabaseTest::SetUp()
 	{
 		// Set up is called for every test
-		ASSERT_TRUE(g_odbcInfo.IsUsable());
-
 		m_pEnv->Init(OdbcVersion::V_3);
-		ASSERT_NO_THROW(m_pDb = OpenTestDb(m_pEnv));
+		m_pDb = OpenTestDb(m_pEnv);
+		int p = 3;
+		int z = p + 3;
+
 	}
+
 
 	void DatabaseTest::TearDown()
 	{
 		if(m_pDb->IsOpen())
 		{
-			EXPECT_NO_THROW(m_pDb->Close());
+			m_pDb->Close();
 		}
 	}
 
@@ -92,15 +94,6 @@ namespace exodbctest
 		Database c2(db2);
 		EXPECT_FALSE(c2.HasConnectionHandle());
 		EXPECT_NO_THROW(c2.Init(m_pEnv));
-	}
-
-
-	TEST_F(DatabaseTest, PrintDatabaseInfo)
-	{
-		LOG_INFO(u8"Will print Database Information now");
-		LOG_INFO(u8"===================================");
-		LOG_INFO(m_pDb->GetDbInfo().ToString());
-		LOG_INFO(u8"===================================");
 	}
 
 
