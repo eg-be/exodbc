@@ -113,7 +113,7 @@ namespace exodbctest
 		DatabasePtr pDb = OpenTestDb(OdbcVersion::V_3);
 
 		// Try to read two values and hope that the driver will return a non-default value
-		SqlInfoProperty prop1(SQL_DATA_SOURCE_NAME, u8"SQL_DATA_SOURCE_NAME", it::DataSource, vt::String_Any);
+		SqlInfoProperty prop1(SQL_ODBC_VER, u8"SQL_ODBC_VER", it::Driver, vt::String_Any);
 
 		string v1 = boost::get<string>(prop1.GetValue());
 
