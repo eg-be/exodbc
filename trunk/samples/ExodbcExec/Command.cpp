@@ -463,5 +463,12 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
+		auto sqlLimits = props.GetProperties(SqlInfoProperty::InfoType::SqlLimits);
+		LOG_OUTPUT(u8"SQL Limits Information");
+		LOG_OUTPUT(u8"======================");
+		for (auto it = sqlLimits.begin(); it != sqlLimits.end(); ++it)
+		{
+			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
+		}
 	}
 }
