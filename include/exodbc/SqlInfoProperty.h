@@ -123,6 +123,7 @@ namespace exodbc
 		void RegisterSupportedSqlProperties();
 		void RegisterSqlLimitsProperties();
 		void RegisterScalerFunctionProperties();
+		void RegisterConversionProperties();
 
 		void RegisterProperty(SQLUSMALLINT id, const std::string& name, SqlInfoProperty::InfoType infoType, SqlInfoProperty::ValueType valueType);
 

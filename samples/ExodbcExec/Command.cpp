@@ -477,5 +477,12 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
+		auto conversion = props.GetProperties(SqlInfoProperty::InfoType::Conversion);
+		LOG_OUTPUT(u8"Conversion Information");
+		LOG_OUTPUT(u8"======================");
+		for (auto it = conversion.begin(); it != conversion.end(); ++it)
+		{
+			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
+		}
 	}
 }

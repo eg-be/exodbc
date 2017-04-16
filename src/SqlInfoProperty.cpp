@@ -169,6 +169,7 @@ namespace exodbc
 		RegisterSupportedSqlProperties();
 		RegisterSqlLimitsProperties();
 		RegisterScalerFunctionProperties();
+		RegisterConversionProperties();
 
 		if (readAllProperties)
 		{
@@ -363,6 +364,35 @@ namespace exodbc
 		RegisterProperty(SQL_TIMEDATE_ADD_INTERVALS, u8"SQL_TIMEDATE_ADD_INTERVALS", iType, vt::UInt);
 		RegisterProperty(SQL_TIMEDATE_DIFF_INTERVALS, u8"SQL_TIMEDATE_DIFF_INTERVALS", iType, vt::UInt);
 		RegisterProperty(SQL_TIMEDATE_FUNCTIONS, u8"SQL_TIMEDATE_FUNCTIONS", iType, vt::UInt);
+	}
+
+
+	void SqlInfoProperties::RegisterConversionProperties()
+	{
+		using it = SqlInfoProperty::InfoType;
+		using vt = SqlInfoProperty::ValueType;
+		SqlInfoProperty::InfoType iType = it::Conversion;
+
+		RegisterProperty(SQL_CONVERT_BIGINT, u8"SQL_CONVERT_BIGINT", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_BINARY, u8"SQL_CONVERT_BINARY", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_BIT, u8"SQL_CONVERT_BIT", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_CHAR, u8"SQL_CONVERT_CHAR", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_DATE, u8"SQL_CONVERT_DATE", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_DECIMAL, u8"SQL_CONVERT_DECIMAL", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_DOUBLE, u8"SQL_CONVERT_DOUBLE", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_INTEGER, u8"SQL_CONVERT_INTEGER", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_INTERVAL_YEAR_MONTH, u8"SQL_CONVERT_INTERVAL_YEAR_MONTH", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_INTERVAL_DAY_TIME, u8"SQL_CONVERT_INTERVAL_DAY_TIME", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_LONGVARBINARY, u8"SQL_CONVERT_LONGVARBINARY", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_LONGVARCHAR, u8"SQL_CONVERT_LONGVARCHAR", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_NUMERIC, u8"SQL_CONVERT_NUMERIC", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_REAL, u8"SQL_CONVERT_REAL", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_SMALLINT, u8"SQL_CONVERT_SMALLINT", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_TIME, u8"SQL_CONVERT_TIME", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_TIMESTAMP, u8"SQL_CONVERT_TIMESTAMP", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_TINYINT, u8"SQL_CONVERT_TINYINT", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_VARBINARY, u8"SQL_CONVERT_VARBINARY", iType, vt::UInt);
+		RegisterProperty(SQL_CONVERT_VARCHAR, u8"SQL_CONVERT_VARCHAR", iType, vt::UInt);
 	}
 
 
