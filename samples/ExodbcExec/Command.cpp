@@ -470,5 +470,12 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
+		auto scalarFunction = props.GetProperties(SqlInfoProperty::InfoType::ScalarFunction);
+		LOG_OUTPUT(u8"Scalar Function Information");
+		LOG_OUTPUT(u8"===========================");
+		for (auto it = scalarFunction.begin(); it != scalarFunction.end(); ++it)
+		{
+			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
+		}
 	}
 }

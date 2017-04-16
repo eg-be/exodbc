@@ -168,6 +168,7 @@ namespace exodbc
 		RegisterDriverProperties();
 		RegisterSupportedSqlProperties();
 		RegisterSqlLimitsProperties();
+		RegisterScalerFunctionProperties();
 
 		if (readAllProperties)
 		{
@@ -346,6 +347,22 @@ namespace exodbc
 		RegisterProperty(SQL_MAX_TABLE_NAME_LEN, u8"SQL_MAX_TABLE_NAME_LEN", iType, vt::USmallInt);
 		RegisterProperty(SQL_MAX_TABLES_IN_SELECT, u8"SQL_MAX_TABLES_IN_SELECT", iType, vt::USmallInt);
 		RegisterProperty(SQL_MAX_USER_NAME_LEN, u8"SQL_MAX_USER_NAME_LEN", iType, vt::USmallInt);
+	}
+
+
+	void SqlInfoProperties::RegisterScalerFunctionProperties()
+	{
+		using it = SqlInfoProperty::InfoType;
+		using vt = SqlInfoProperty::ValueType;
+		SqlInfoProperty::InfoType iType = it::ScalarFunction;
+
+		RegisterProperty(SQL_CONVERT_FUNCTIONS, u8"SQL_CONVERT_FUNCTIONS", iType, vt::UInt);
+		RegisterProperty(SQL_NUMERIC_FUNCTIONS, u8"SQL_NUMERIC_FUNCTIONS", iType, vt::UInt);
+		RegisterProperty(SQL_STRING_FUNCTIONS, u8"SQL_STRING_FUNCTIONS", iType, vt::UInt);
+		RegisterProperty(SQL_SYSTEM_FUNCTIONS, u8"SQL_SYSTEM_FUNCTIONS", iType, vt::UInt);
+		RegisterProperty(SQL_TIMEDATE_ADD_INTERVALS, u8"SQL_TIMEDATE_ADD_INTERVALS", iType, vt::UInt);
+		RegisterProperty(SQL_TIMEDATE_DIFF_INTERVALS, u8"SQL_TIMEDATE_DIFF_INTERVALS", iType, vt::UInt);
+		RegisterProperty(SQL_TIMEDATE_FUNCTIONS, u8"SQL_TIMEDATE_FUNCTIONS", iType, vt::UInt);
 	}
 
 
