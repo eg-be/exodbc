@@ -32,44 +32,6 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void GetInfo(ConstSqlDbcHandlePtr pHDbc, SQLUSMALLINT fInfoType, std::string& sValue)
-	{
-		// Determine buffer length
-		exASSERT(pHDbc);
-		exASSERT(pHDbc->IsAllocated());
-		SQLSMALLINT bufferSize = 0;
-		SQLRETURN ret = SQLGetInfo(pHDbc->GetHandle(), fInfoType, NULL, 0, &bufferSize);
-		{
-			// \note: DB2 will here always return SQL_SUCCESS_WITH_INFO to report that data got truncated, although we didnt even feed in a buffer.
-			// To avoid having tons of warning with the (wrong) info that data has been truncated, we just hide those messages here
-			THROW_IFN_SUCCEEDED_SILENT_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, pHDbc->GetHandle(), (boost::format(u8"GetInfo for fInfoType %d failed") % fInfoType).str());
-		}
-
-		// According to the doc SQLGetInfo will always return byte-size. Therefore:
-		exASSERT((bufferSize % sizeof(SQLAPICHARTYPE)) == 0);
-
-		// Allocate buffer, add one for terminating 0 char.
-		SQLSMALLINT charSize = (bufferSize / sizeof(SQLAPICHARTYPE)) + 1;
-		bufferSize = charSize * sizeof(SQLAPICHARTYPE);
-		std::unique_ptr<SQLAPICHARTYPE[]> buff(new SQLAPICHARTYPE[charSize]);
-		buff[0] = 0;
-		SQLSMALLINT cb;
-
-		GetInfo(pHDbc, fInfoType, (SQLPOINTER)buff.get(), bufferSize, &cb);
-
-		sValue = SQLAPICHARPTR_TO_EXODBCSTR(buff.get());
-	}
-
-
-	void GetInfo(ConstSqlDbcHandlePtr pHDbc, SQLUSMALLINT fInfoType, SQLPOINTER rgbInfoValue, SQLSMALLINT cbInfoValueMax, SQLSMALLINT* pcbInfoValue)
-	{
-		exASSERT(pHDbc);
-		exASSERT(pHDbc->IsAllocated());
-		SQLRETURN ret = SQLGetInfo(pHDbc->GetHandle(), fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue);
-		THROW_IFN_SUCCEEDED_MSG(SQLGetInfo, ret, SQL_HANDLE_DBC, pHDbc->GetHandle(), (boost::format(u8"GetInfo for fInfoType %d failed") % fInfoType).str());
-	}
-
-
 	void GetData(ConstSqlStmtHandlePtr pHStmt, SQLUSMALLINT colOrParamNr, SQLSMALLINT targetType, SQLPOINTER pTargetValue, SQLLEN bufferLen, SQLLEN* strLenOrIndPtr, bool* pIsNull)
 	{
 		exASSERT(pHStmt);

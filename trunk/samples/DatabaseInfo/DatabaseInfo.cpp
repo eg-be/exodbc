@@ -32,66 +32,66 @@ using namespace std;
 
 void PrintDbHeader(ConstDatabasePtr pDb)
 {
-	DatabaseInfo dbInfo = pDb->GetDbInfo();
+	//DatabaseInfo dbInfo = pDb->GetDbInfo();
 
-	// print header for trac
-	WRITE_STDOUT_ENDL(boost::str(boost::format(u8"== %s (%s) ==") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DbmsName) % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DbmsVersion)));
+	//// print header for trac
+	//WRITE_STDOUT_ENDL(boost::str(boost::format(u8"== %s (%s) ==") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DbmsName) % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DbmsVersion)));
 }
 
 
 void PrintDriverInfo(ConstDatabasePtr pDb)
 {
-	DatabaseInfo dbInfo = pDb->GetDbInfo();
+	//DatabaseInfo dbInfo = pDb->GetDbInfo();
 
-	// print header for trac
-	WRITE_STDOUT_ENDL(boost::str(boost::format(u8"=== Driver Info ===")));
-	WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Driver Name: %s") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DriverName)));
-	WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Driver Version: %s") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DriverVersion)));
-	WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Driver ODBC Version: %s") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DriverOdbcVersion)));
+	//// print header for trac
+	//WRITE_STDOUT_ENDL(boost::str(boost::format(u8"=== Driver Info ===")));
+	//WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Driver Name: %s") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DriverName)));
+	//WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Driver Version: %s") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DriverVersion)));
+	//WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Driver ODBC Version: %s") % dbInfo.GetStringProperty(DatabaseInfo::StringProperty::DriverOdbcVersion)));
 }
 
 
 void PrintDbInfo(ConstDatabasePtr pDb)
 {
-	DatabaseInfo dbInfo = pDb->GetDbInfo();
+	//DatabaseInfo dbInfo = pDb->GetDbInfo();
 
-	// And a table with all information
-	WRITE_STDOUT_ENDL(u8"=== Database Info ===");
-	WRITE_STDOUT_ENDL(u8"||=Property Name =||= Property Value =||");
-	DatabaseInfo::StringMap stringMap = dbInfo.GetStringMap();
-	for (auto it = stringMap.begin(); it != stringMap.end(); ++it)
-	{
-		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"||%-38s ||  %s  ||") % dbInfo.GetPropertyName(it->first) % it->second));
-	}
-	DatabaseInfo::USmallIntMap usmallIntMap = dbInfo.GetUSmallIntMap();
-	for (auto it = usmallIntMap.begin(); it != usmallIntMap.end(); ++it)
-	{
-		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second));
-	}
-	DatabaseInfo::UIntMap uintMap = dbInfo.GetUIntMap();
-	for (auto it = uintMap.begin(); it != uintMap.end(); ++it)
-	{
-		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second));
-	}
-	DatabaseInfo::IntMap intMap = dbInfo.GetIntMap();
-	for (auto it = intMap.begin(); it != intMap.end(); ++it)
-	{
-		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second %it->second));
-	}
+	//// And a table with all information
+	//WRITE_STDOUT_ENDL(u8"=== Database Info ===");
+	//WRITE_STDOUT_ENDL(u8"||=Property Name =||= Property Value =||");
+	//DatabaseInfo::StringMap stringMap = dbInfo.GetStringMap();
+	//for (auto it = stringMap.begin(); it != stringMap.end(); ++it)
+	//{
+	//	WRITE_STDOUT_ENDL(boost::str(boost::format(u8"||%-38s ||  %s  ||") % dbInfo.GetPropertyName(it->first) % it->second));
+	//}
+	//DatabaseInfo::USmallIntMap usmallIntMap = dbInfo.GetUSmallIntMap();
+	//for (auto it = usmallIntMap.begin(); it != usmallIntMap.end(); ++it)
+	//{
+	//	WRITE_STDOUT_ENDL(boost::str(boost::format(u8"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second));
+	//}
+	//DatabaseInfo::UIntMap uintMap = dbInfo.GetUIntMap();
+	//for (auto it = uintMap.begin(); it != uintMap.end(); ++it)
+	//{
+	//	WRITE_STDOUT_ENDL(boost::str(boost::format(u8"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second % it->second));
+	//}
+	//DatabaseInfo::IntMap intMap = dbInfo.GetIntMap();
+	//for (auto it = intMap.begin(); it != intMap.end(); ++it)
+	//{
+	//	WRITE_STDOUT_ENDL(boost::str(boost::format(u8"||%-38s || %#8x (%8d)||") % dbInfo.GetPropertyName(it->first) % it->second %it->second));
+	//}
 }
 
 
 void printDatatypesInfo(ConstDatabasePtr pDb)
 {
-	WRITE_STDOUT_ENDL(u8"=== Datatypes Info ===");
-	SqlTypeInfosVector types = pDb->GetTypeInfos();
-	bool first = true;
-	for (auto it = types.begin(); it != types.end(); ++it)
-	{
-		SSqlTypeInfo typeInfo = *it;
-		WRITE_STDOUT_ENDL(typeInfo.ToOneLineStrForTrac(first));
-		first = false;
-	}
+	//WRITE_STDOUT_ENDL(u8"=== Datatypes Info ===");
+	//SqlTypeInfosVector types = pDb->GetTypeInfos();
+	//bool first = true;
+	//for (auto it = types.begin(); it != types.end(); ++it)
+	//{
+	//	SSqlTypeInfo typeInfo = *it;
+	//	WRITE_STDOUT_ENDL(typeInfo.ToOneLineStrForTrac(first));
+	//	first = false;
+	//}
 }
 
 void printExOdbcTables(ConstDatabasePtr pDb)

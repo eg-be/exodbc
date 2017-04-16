@@ -161,9 +161,10 @@ int main(int argc, char* argv[])
 			LOG_INFO(boost::str(boost::format(u8"Trying to connect using DSN '%s', User '%s' and Password '%s'") % dsnValue % userValue % passValue));
 			db.Open(dsnValue, userValue, passValue);
 		}
-		const DatabaseInfo& dbInfo = db.GetDbInfo();
+		string dbmsName = db.GetProperties().GetDbmsName();
+		string driverName = db.GetProperties().GetDriverName();
 
-		LOG_INFO(boost::str(boost::format(u8"Successfully connected to database system '%s' using driver '%s'") % dbInfo.GetDbmsName() % dbInfo.GetDriverName()));
+		LOG_INFO(boost::str(boost::format(u8"Successfully connected to database system '%s' using driver '%s'") % dbmsName % driverName));
 	}
 	catch (const Exception& ex)
 	{

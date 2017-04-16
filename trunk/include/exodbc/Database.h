@@ -17,6 +17,7 @@
 #include "Sql2BufferTypeMap.h"
 #include "SqlHandle.h"
 #include "Environment.h"
+#include "SqlInfoProperty.h"
 
 // Other headers
 #if EXODBC_TEST
@@ -428,26 +429,13 @@ namespace exodbc
 		* \return	true if mode supported by database.
 		*/
 		bool		CanSetTransactionIsolationMode(TransactionIsolationMode mode) const;
-	
-	
-		/*!
-		* \brief	Read the ODBC version supported by the driver.
-		* \details	Fails if not connected. Does not read the version from the environment
-		*			but from the DatabaseInfo populated during connecting to the database.
-		* \return	ODBC version or OV_UNKNOWN.
-		* \throw	Exception If parsing the version returned from the driver fails, or the version
-		*			from the driver has not yet been read (is read during Open()).
-		*/
-		OdbcVersion GetDriverOdbcVersion() const;
 
-	
+
 		/*!
-		* \brief	Determines which ODBC Version to use.
-		* \details	Chooses the max ODBC Version that is supported by the environment and the driver.
-		* \return	Max ODBC version supported by driver and env or OV_UNKNOWN.
-		* \throw	Exception 
+		* \brief	Returns the SqlInfoProperties set of this Database. If the Database is not 
+		*			open yet, the properties will contain only default values.
 		*/
-		OdbcVersion GetMaxSupportedOdbcVersion() const;
+		SqlInfoProperties GetProperties() const noexcept { return m_props; };
 
 
 		/*!
@@ -518,17 +506,6 @@ namespace exodbc
 		*			ODBC Connection Handle allocated or that the pointer is not NULL.
 		*/
 		ConstSqlDbcHandlePtr	GetSqlDbcHandle() const noexcept       { return m_pHDbc; }
-
-
-		/*!
-		* \brief	Get the DatabaseInfo if it is available.
-		* \details	During Open() the database is queried about information about itself,
-		*			if successful this information is stored in an DatabaseInfo internally.
-		*			DatabaseInfo is empty until Open() was successful.
-		* \return	DatabaseInfo with information corresponding to the database connected.
-		* \throw	Exception If database is not open yet and therefore DatabaseInfo is unknown.
-		*/
-		DatabaseInfo GetDbInfo()	const				{ exASSERT(IsOpen());  return m_dbInf; }
 
 
 		/*!
@@ -617,25 +594,11 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Set the internal member m_dbmsType by examining m_dbInf.m_dbmsName
-		*/
-		void		DetectDbms();
-
-
-		/*!
 		* \brief	Queries SQLGetTypeInfo to populate a SSqlTypeInfo struct.
 		* \return	Types Filled with data types supported by the db
 		* \throw	Exception If the internal statement handle is not allocated, or reading fails.
 		*/
 		SqlTypeInfosVector ReadDataTypesInfo();
-
-
-		/*!
-		* \brief	Query the Database using SQLGetInfo.
-		* \return	DatabaseInfo populated with values.
-		* \throw	Exception If reading Database info fails or no connection handle is allocated.
-		*/
-		DatabaseInfo			ReadDbInfo();
 		
 		
 		/*!
@@ -671,8 +634,8 @@ namespace exodbc
 
 		// Members
 		// -------
-		ConstEnvironmentPtr		m_pEnv;		///< Environment of this Databaes
-		DatabaseInfo			m_dbInf;
+		ConstEnvironmentPtr		m_pEnv;		///< Environment of this Database
+		SqlInfoProperties		m_props;	///< Properties read from SqlGetInfo
 		Sql2BufferTypeMapPtr	m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used from this Database. If none is set during OpenImp() a DefaultSql2BufferTypeMap is created.
 
 		SqlTypeInfosVector m_datatypes;	///< Queried from DB during Open

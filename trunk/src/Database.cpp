@@ -134,33 +134,32 @@ namespace exodbc
 			m_pHStmt->AllocateWithParent(m_pHDbc);
 			m_pHStmtExecSql->AllocateWithParent(m_pHDbc);
 
-			// Query the data source for info about itself
-			m_dbInf = ReadDbInfo();
+			// Try to load all informations we need
+			m_props.Init(m_pHDbc);
 
-			// Check that our ODBC-Version matches
-			// We do not fail, what counts for us is the version of the
-			// environment.
-			OdbcVersion connectionVersion = GetDriverOdbcVersion();
-			OdbcVersion envVersion = m_pEnv->GetOdbcVersion();
-			OdbcVersion maxSupportedVersion = GetMaxSupportedOdbcVersion();
-			if (envVersion > connectionVersion)
+			// Check that our ODBC-Version matches, warn if driver cannot support request version.
+			// If versions do not match, still continue to use the environment version. the driver
+			// manger should handle the version difference
+			OdbcVersion driverOdbcVersion = m_props.GetDriverOdbcVersion();
+			OdbcVersion odbcVersion = m_pEnv->GetOdbcVersion();
+			if (odbcVersion > driverOdbcVersion)
 			{
-				LOG_WARNING((boost::format(u8"ODBC Version missmatch: Environment requested %d, but the driver (name: '%s' version: '%s') reported %d ('%s'). The Database ('%s') will be using %d") % (int)envVersion %m_dbInf.GetDriverName() %m_dbInf.GetDriverVersion() % (int)connectionVersion %m_dbInf.GetDriverOdbcVersion() %m_dbInf.GetDbmsName() % (int)connectionVersion).str());
+				LOG_WARNING(boost::str(boost::format(u8"ODBC Version missmatch: Environment requested %d, but the driver reported %d.") % (unsigned long) odbcVersion % (unsigned long) driverOdbcVersion ));
 			}
 			if (!m_pSql2BufferTypeMap)
 			{
-				m_pSql2BufferTypeMap = Sql2BufferTypeMapPtr(new DefaultSql2BufferMap(maxSupportedVersion));
+				m_pSql2BufferTypeMap = Sql2BufferTypeMapPtr(new DefaultSql2BufferMap(odbcVersion));
 			}
 
-			// Try to detect the type - this will update our internal type
-			DetectDbms();
+			// Try to detect the type and store it internally for later use
+			m_dbmsType = m_props.DetectDbms();
 
 			// Set Connection Options
 			SetConnectionAttributes();
 
 			// Default to manual commit, if the Database is able to set a commit mode. Anyway read the currently active mode, we need to know that
 			m_commitMode = ReadCommitMode();
-			if (m_dbInf.GetSupportsTransactions() && m_commitMode != CommitMode::MANUAL)
+			if (m_props.GetSupportsTransactions() && m_commitMode != CommitMode::MANUAL)
 			{
 				SetCommitMode(CommitMode::MANUAL);
 			}
@@ -173,6 +172,7 @@ namespace exodbc
 		{
 			HIDE_UNUSED(ex);
 			// Try to free what we've allocated and rethrow
+			m_props.Reset();
 			if (m_pHStmt->IsAllocated())
 			{
 				m_pHStmt->Free();
@@ -418,60 +418,11 @@ namespace exodbc
 		exASSERT(m_pHDbc);
 		exASSERT(m_pHDbc->IsAllocated());
 
+		SQLRETURN ret = SQLSetConnectAttr(m_pHDbc->GetHandle(), SQL_ATTR_TRACE, (SQLPOINTER) SQL_OPT_TRACE_OFF, 0);
+		THROW_IFN_SUCCEEDED_MSG(SQLSetConnectAttr, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle(), u8"Cannot set SQL_ATTR_TRACE to SQL_OPT_TRACE_OFF");
+
 		// For the moment do nothing here. 
 		// There is no need to set any connection attributes right now, we assume defaults are fine.
-	}
-
-
-	DatabaseInfo Database::ReadDbInfo()
-	{
-		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
-		exASSERT(m_pHDbc);
-		exASSERT(m_pHDbc->IsAllocated());
-
-		DatabaseInfo dbInf;
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::AccessibleTables);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DatabaseName);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DbmsName);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DbmsVersion);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DriverName);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DriverOdbcVersion);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::DriverVersion);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::OdbcSupportIEF);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::OdbcVersion);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::OuterJoins);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::ProcedureSupport);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::SearchPatternEscape);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::ServerName);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::StringProperty::SqlIdentifierQuoteChar);
-
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::CursorCommitBehavior);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::CursorRollbackBehavior);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxCatalogNameLen);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxColumnNameLen);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxConcurrentActivs);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxConnections);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxSchemaNameLen);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::MaxTableNameLen);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::NonNullableColumns);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::OdbcSagCliConformance);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::USmallIntProperty::TxnCapable);
-
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::DefaultTxnIsolation);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::ScrollOptions);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::TxnIsolationOption);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::CursorSensitity);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::DynamicCursorAttributes1);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::ForwardOnlyCursorAttributes1);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::KeysetCursorAttributes1);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::StaticCursorAttributes1);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::KeysetCursorAttributes2);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::UIntProperty::StaticCursorAttributes2);
-
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::IntProperty::PositionedStatements);
-		dbInf.ReadAndStoryProperty(m_pHDbc, DatabaseInfo::IntProperty::PosOperations);
-
-		return dbInf;
 	}
 
 
@@ -497,17 +448,17 @@ namespace exodbc
 		case ReadCatalogInfoMode::AllCatalogs:
 			catalogName = SQL_ALL_CATALOGS;
 			colNr = 1;
-			charLen = m_dbInf.GetMaxCatalogNameLen();
+			charLen = m_props.GetMaxCatalogNameLen();
 			break;
 		case ReadCatalogInfoMode::AllSchemas:
 			schemaName = SQL_ALL_SCHEMAS;
 			colNr = 2;
-			charLen = m_dbInf.GetMaxSchemaNameLen();
+			charLen = m_props.GetMaxSchemaNameLen();
 			break;
 		case ReadCatalogInfoMode::AllTableTypes:
 			tableTypeName = SQL_ALL_TABLE_TYPES;
 			colNr = 4;
-			charLen = m_dbInf.GetMaxTableTypeNameLen();
+			charLen = DB_MAX_TABLE_TYPE_LEN;
 			break;
 		default:
 			exASSERT(false);
@@ -647,6 +598,9 @@ namespace exodbc
 		m_pHStmt.reset();
 		m_pHStmtExecSql.reset();
 
+		// And also clear all props read
+		m_props.Reset();
+
 		// Try to disconnect from the data source
 		SQLRETURN ret = SQLDisconnect(m_pHDbc->GetHandle());
 		THROW_IFN_SUCCEEDED(SQLDisconnect, ret, SQL_HANDLE_DBC, m_pHDbc->GetHandle());
@@ -709,9 +663,9 @@ namespace exodbc
 
 		TableInfosVector tables;
 
-		std::unique_ptr<SQLAPICHARTYPE[]> buffCatalog(new SQLAPICHARTYPE[m_dbInf.GetMaxCatalogNameLen()]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffSchema(new SQLAPICHARTYPE[m_dbInf.GetMaxSchemaNameLen()]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffTableName(new SQLAPICHARTYPE[m_dbInf.GetMaxTableNameLen()]);
+		std::unique_ptr<SQLAPICHARTYPE[]> buffCatalog(new SQLAPICHARTYPE[m_props.GetMaxCatalogNameLen()]);
+		std::unique_ptr<SQLAPICHARTYPE[]> buffSchema(new SQLAPICHARTYPE[m_props.GetMaxSchemaNameLen()]);
+		std::unique_ptr<SQLAPICHARTYPE[]> buffTableName(new SQLAPICHARTYPE[m_props.GetMaxTableNameLen()]);
 		std::unique_ptr<SQLAPICHARTYPE[]> buffTableType(new SQLAPICHARTYPE[DB_MAX_TABLE_TYPE_LEN]);
 		std::unique_ptr<SQLAPICHARTYPE[]> buffTableRemarks(new SQLAPICHARTYPE[DB_MAX_TABLE_REMARKS_LEN]);
 		bool isCatalogNull = false;
@@ -734,9 +688,9 @@ namespace exodbc
 			buffTableRemarks[0] = 0;
 
 			SQLLEN cb;
-			GetData(m_pHStmt, 1, SQLAPICHARTYPENAME, buffCatalog.get(), m_dbInf.GetMaxCatalogNameLen() * sizeof(SQLAPICHARTYPE), &cb, &isCatalogNull);
-			GetData(m_pHStmt, 2, SQLAPICHARTYPENAME, buffSchema.get(), m_dbInf.GetMaxSchemaNameLen() * sizeof(SQLAPICHARTYPE), &cb, &isSchemaNull);
-			GetData(m_pHStmt, 3, SQLAPICHARTYPENAME, buffTableName.get(), m_dbInf.GetMaxTableNameLen() * sizeof(SQLAPICHARTYPE), &cb, NULL);
+			GetData(m_pHStmt, 1, SQLAPICHARTYPENAME, buffCatalog.get(), m_props.GetMaxCatalogNameLen() * sizeof(SQLAPICHARTYPE), &cb, &isCatalogNull);
+			GetData(m_pHStmt, 2, SQLAPICHARTYPENAME, buffSchema.get(), m_props.GetMaxSchemaNameLen() * sizeof(SQLAPICHARTYPE), &cb, &isSchemaNull);
+			GetData(m_pHStmt, 3, SQLAPICHARTYPENAME, buffTableName.get(), m_props.GetMaxTableNameLen() * sizeof(SQLAPICHARTYPE), &cb, NULL);
 			GetData(m_pHStmt, 4, SQLAPICHARTYPENAME, buffTableType.get(), DB_MAX_TABLE_TYPE_LEN * sizeof(SQLAPICHARTYPE), &cb, NULL);
 			GetData(m_pHStmt, 5, SQLAPICHARTYPENAME, buffTableRemarks.get(), DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLAPICHARTYPE), &cb, NULL);
 
@@ -821,10 +775,10 @@ namespace exodbc
 			std::string catalogName, schemaName, tableName, columnName, keyName;
 			bool isCatalogNull, isSchemaNull, isKeyNameNull;
 			SQLSMALLINT keySequence;
-			GetData(m_pHStmt, 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
-			GetData(m_pHStmt, 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
-			GetData(m_pHStmt, 3, m_dbInf.GetMaxTableNameLen(), tableName);
-			GetData(m_pHStmt, 4, m_dbInf.GetMaxColumnNameLen(), columnName);
+			GetData(m_pHStmt, 1, m_props.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
+			GetData(m_pHStmt, 2, m_props.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
+			GetData(m_pHStmt, 3, m_props.GetMaxTableNameLen(), tableName);
+			GetData(m_pHStmt, 4, m_props.GetMaxColumnNameLen(), columnName);
 			GetData(m_pHStmt, 5, SQL_C_SHORT, &keySequence, sizeof(keySequence), &cb, NULL);
 			GetData(m_pHStmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, keyName, &isKeyNameNull);
 			TablePrimaryKeyInfo pk(catalogName, schemaName, tableName, columnName, keySequence, keyName, isCatalogNull, isSchemaNull, isKeyNameNull);
@@ -879,9 +833,9 @@ namespace exodbc
 		{
 
 			STablePrivilegesInfo priv;
-			GetData(m_pHStmt, 1, m_dbInf.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
-			GetData(m_pHStmt, 2, m_dbInf.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
-			GetData(m_pHStmt, 3, m_dbInf.GetMaxTableNameLen(), priv.m_tableName);
+			GetData(m_pHStmt, 1, m_props.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
+			GetData(m_pHStmt, 2, m_props.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
+			GetData(m_pHStmt, 3, m_props.GetMaxTableNameLen(), priv.m_tableName);
 			GetData(m_pHStmt, 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);
 			GetData(m_pHStmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
 			GetData(m_pHStmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
@@ -945,7 +899,7 @@ namespace exodbc
 			SQLSMALLINT pseudoColVal;
 
 			GetData(m_pHStmt, 1, SQL_C_SSHORT, &scopeVal, sizeof(scopeVal), &cb, &scopeIsNull);
-			GetData(m_pHStmt, 2, m_dbInf.GetMaxColumnNameLen(), columnName);
+			GetData(m_pHStmt, 2, m_props.GetMaxColumnNameLen(), columnName);
 			GetData(m_pHStmt, 3, SQL_C_SSHORT, &sqlType, sizeof(sqlType), &cb, NULL);
 			GetData(m_pHStmt, 4, DB_MAX_TYPE_NAME_LEN, sqlTypeName);
 			GetData(m_pHStmt, 5, SQL_C_SLONG, &columnSize, sizeof(columnSize), &cb, NULL);
@@ -1049,10 +1003,10 @@ namespace exodbc
 		{
 			// Fetch data from columns
 			SQLLEN cb;
-			GetData(m_pHStmt, 1, m_dbInf.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
-			GetData(m_pHStmt, 2, m_dbInf.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
-			GetData(m_pHStmt, 3, m_dbInf.GetMaxTableNameLen(), tableName);
-			GetData(m_pHStmt, 4, m_dbInf.GetMaxColumnNameLen(), columnName);
+			GetData(m_pHStmt, 1, m_props.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
+			GetData(m_pHStmt, 2, m_props.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
+			GetData(m_pHStmt, 3, m_props.GetMaxTableNameLen(), tableName);
+			GetData(m_pHStmt, 4, m_props.GetMaxColumnNameLen(), columnName);
 			GetData(m_pHStmt, 5, SQL_C_SSHORT, &sqlType, sizeof(sqlType), &cb, NULL);
 			GetData(m_pHStmt, 6, DB_MAX_TYPE_NAME_LEN, typeName);
 			GetData(m_pHStmt, 7, SQL_C_SLONG, &columnSize, sizeof(columnSize), &cb, &isColumnSizeNull);
@@ -1218,87 +1172,7 @@ namespace exodbc
 	
 	bool Database::CanSetTransactionIsolationMode(TransactionIsolationMode mode) const
 	{
-		SQLUINTEGER txnIsolationOpts = m_dbInf.GetUIntProperty(DatabaseInfo::UIntProperty::TxnIsolationOption);
+		SQLUINTEGER txnIsolationOpts = boost::get<SQLUINTEGER>(m_props.GetProperty(SQL_TXN_ISOLATION_OPTION).GetValue());
 		return (txnIsolationOpts & (SQLUINTEGER)mode) != 0;
-	}
-
-
-	OdbcVersion Database::GetDriverOdbcVersion() const
-	{
-		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
-		std::string driverOdbcVersion = m_dbInf.GetStringProperty(DatabaseInfo::StringProperty::DriverOdbcVersion);
-		exASSERT( ! driverOdbcVersion.empty());
-
-		OdbcVersion ov = OdbcVersion::UNKNOWN;
-		std::vector<std::string> versions;
-		boost::split(versions, driverOdbcVersion, boost::is_any_of(u8"."));
-		if (versions.size() == 2)
-		{
-			try
-			{
-				short major = boost::lexical_cast<short>(versions[0]);
-				short minor = boost::lexical_cast<short>(versions[1]);
-				if (major >= 3 && minor >= 80)
-				{
-					ov = OdbcVersion::V_3_8;
-				}
-				else if (major >= 3)
-				{
-					ov = OdbcVersion::V_3;
-				}
-				else if (major >= 2)
-				{
-					ov = OdbcVersion::V_2;
-				}
-			}
-			catch (boost::bad_lexical_cast& e)
-			{
-				HIDE_UNUSED(e);
-				THROW_WITH_SOURCE(Exception, (boost::format(u8"Failed to determine odbc version from string '%s'") % driverOdbcVersion).str());
-			}
-		}
-		return ov;
-	}
-
-
-	OdbcVersion Database::GetMaxSupportedOdbcVersion() const
-	{
-		OdbcVersion driverVersion = GetDriverOdbcVersion();
-		if (driverVersion >= m_pEnv->GetOdbcVersion())
-		{
-			return m_pEnv->GetOdbcVersion();
-		}
-		return driverVersion;
-	}
-
-
-	void Database::DetectDbms()
-	{
-		std::string name = m_dbInf.GetDbmsName();
-		if (boost::algorithm::contains(name, u8"Microsoft SQL Server"))
-		{
-			m_dbmsType = DatabaseProduct::MS_SQL_SERVER;
-		}
-		else if (boost::algorithm::contains(name, u8"MySQL"))
-		{
-			m_dbmsType = DatabaseProduct::MY_SQL;
-		}
-		else if (boost::algorithm::contains(name, u8"DB2"))
-		{
-			m_dbmsType = DatabaseProduct::DB2;
-		}
-		else if (boost::algorithm::contains(name, u8"EXCEL"))
-		{
-			m_dbmsType = DatabaseProduct::EXCEL;
-		}
-		else if (boost::algorithm::contains(name, u8"ACCESS"))
-		{
-			m_dbmsType = DatabaseProduct::ACCESS;
-		}
-
-		if (m_dbmsType == DatabaseProduct::UNKNOWN)
-		{
-			LOG_WARNING((boost::format(u8"Unknown database: %s") % m_dbInf.GetDbmsName()).str());
-		}
 	}
 }

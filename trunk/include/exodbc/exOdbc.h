@@ -119,10 +119,10 @@ namespace exodbc
 	// if the corresponding value cannot be determined when querying the database about itself.
 	const int DB_MAX_TYPE_NAME_LEN				= 40;
 	const int DB_MAX_LOCAL_TYPE_NAME_LEN		= 256;
-	const int DB_MAX_TABLE_NAME_LEN_DEFAULT			= 128;	///< This value is sometimes also available from SDbInfo::maxTableNameLen
-	const int DB_MAX_SCHEMA_NAME_LEN_DEFAULT		= 128;	///< This value is sometimes also available from SDbInfo::maxSchemaNameLen
-	const int DB_MAX_CATALOG_NAME_LEN_DEFAULT		= 128;	///< This value is sometimes also available from SDbInfo::maxCatalogNameLen
-	const int DB_MAX_COLUMN_NAME_LEN_DEFAULT		= 128;	///< Value sometimes available from SdbInfo::m_maxColumnNameLen
+	const int DB_MAX_TABLE_NAME_LEN_DEFAULT			= 128;	///< Fall back value if SQLGetInfo returned 0 for SQL_MAX_TABLE_NAME_LEN
+	const int DB_MAX_SCHEMA_NAME_LEN_DEFAULT		= 128;	///< Fall back value if SQLGetInfo returned 0 for SQL_MAX_SCHEMA_NAME_LEN
+	const int DB_MAX_CATALOG_NAME_LEN_DEFAULT		= 128;	///< Fall back value if SQLGetInfo returned 0 for SQL_MAX_CATALOG_NAME_LEN
+	const int DB_MAX_COLUMN_NAME_LEN_DEFAULT		= 128;	///< Fall back value if SQLGetInfo returned 0 for SQL_MAX_COLUMN_NAME_LEN
 	const int DB_MAX_TABLE_TYPE_LEN			= 128;
 	const int DB_MAX_TABLE_REMARKS_LEN		= 512;
 	const int DB_MAX_COLUMN_REMARKS_LEN		= 512;

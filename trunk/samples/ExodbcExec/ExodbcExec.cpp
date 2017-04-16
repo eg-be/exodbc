@@ -346,9 +346,9 @@ int main(int argc, char* argv[])
 			LOG_INFO(boost::str(boost::format(u8"Trying to connect using DSN '%s', User '%s' and Password '%s' ..") % dsnValue % userValue % passValue));
 			pDb->Open(dsnValue, userValue, passValue);
 		}
-		const DatabaseInfo& dbInfo = pDb->GetDbInfo();
+		SqlInfoProperties props = pDb->GetProperties();
 
-		LOG_INFO(boost::str(boost::format(u8"Successfully connected to database system '%s' using driver '%s'.") % dbInfo.GetDbmsName() % dbInfo.GetDriverName()));
+		LOG_INFO(boost::str(boost::format(u8"Successfully connected to database system '%s' using driver '%s'.") % props.GetDbmsName() % props.GetDriverName()));
 
 		if (autoCommitValue)
 		{
