@@ -167,6 +167,7 @@ namespace exodbc
 		RegisterDataSourceProperties();
 		RegisterDriverProperties();
 		RegisterSupportedSqlProperties();
+		RegisterSqlLimitsProperties();
 
 		if (readAllProperties)
 		{
@@ -316,6 +317,35 @@ namespace exodbc
 		RegisterProperty(SQL_SPECIAL_CHARACTERS, u8"SQL_SPECIAL_CHARACTERS", iType, vt::String_Any);
 		RegisterProperty(SQL_SUBQUERIES, u8"SQL_SUBQUERIES", iType, vt::UInt);
 		RegisterProperty(SQL_UNION, u8"SQL_UNION", iType, vt::UInt);
+	}
+
+
+	void SqlInfoProperties::RegisterSqlLimitsProperties()
+	{
+		using it = SqlInfoProperty::InfoType;
+		using vt = SqlInfoProperty::ValueType;
+		SqlInfoProperty::InfoType iType = it::SqlLimits;
+
+		RegisterProperty(SQL_MAX_BINARY_LITERAL_LEN, u8"SQL_MAX_BINARY_LITERAL_LEN", iType, vt::UInt);
+		RegisterProperty(SQL_MAX_CATALOG_NAME_LEN, u8"SQL_MAX_CATALOG_NAME_LEN", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_CHAR_LITERAL_LEN, u8"SQL_MAX_CHAR_LITERAL_LEN", iType, vt::UInt);
+		RegisterProperty(SQL_MAX_COLUMN_NAME_LEN, u8"SQL_MAX_COLUMN_NAME_LEN", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_COLUMNS_IN_GROUP_BY, u8"SQL_MAX_COLUMNS_IN_GROUP_BY", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_COLUMNS_IN_INDEX, u8"SQL_MAX_COLUMNS_IN_INDEX", iType, vt::UInt);
+		RegisterProperty(SQL_MAX_COLUMNS_IN_ORDER_BY, u8"SQL_MAX_COLUMNS_IN_ORDER_BY", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_COLUMNS_IN_SELECT, u8"SQL_MAX_COLUMNS_IN_SELECT", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_COLUMNS_IN_TABLE, u8"SQL_MAX_COLUMNS_IN_TABLE", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_CURSOR_NAME_LEN, u8"SQL_MAX_CURSOR_NAME_LEN", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_IDENTIFIER_LEN, u8"SQL_MAX_IDENTIFIER_LEN", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_INDEX_SIZE, u8"SQL_MAX_INDEX_SIZE", iType, vt::UInt);
+		RegisterProperty(SQL_MAX_PROCEDURE_NAME_LEN, u8"SQL_MAX_PROCEDURE_NAME_LEN", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_ROW_SIZE, u8"SQL_MAX_ROW_SIZE", iType, vt::UInt);
+		RegisterProperty(SQL_MAX_ROW_SIZE_INCLUDES_LONG, u8"SQL_MAX_ROW_SIZE_INCLUDES_LONG", iType, vt::String_N_Y);
+		RegisterProperty(SQL_MAX_SCHEMA_NAME_LEN, u8"SQL_MAX_SCHEMA_NAME_LEN", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_STATEMENT_LEN, u8"SQL_MAX_STATEMENT_LEN", iType, vt::UInt);
+		RegisterProperty(SQL_MAX_TABLE_NAME_LEN, u8"SQL_MAX_TABLE_NAME_LEN", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_TABLES_IN_SELECT, u8"SQL_MAX_TABLES_IN_SELECT", iType, vt::USmallInt);
+		RegisterProperty(SQL_MAX_USER_NAME_LEN, u8"SQL_MAX_USER_NAME_LEN", iType, vt::USmallInt);
 	}
 
 
