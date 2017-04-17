@@ -419,6 +419,9 @@ namespace exodbcexec
 		RegisterCommand(make_shared<Rollback>(m_pDb));
 		RegisterCommand(make_shared<Exit>(this));
 		RegisterCommand(make_shared<DbInfo>(m_pDb));
+		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::TableTypes, m_pDb, !printNoHeader));
+		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::Schemas, m_pDb, !printNoHeader));
+		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::Catalogs, m_pDb, !printNoHeader));
 		RegisterCommand(make_shared<Help>(GetCommands()));
 	}
 
@@ -588,55 +591,6 @@ namespace exodbcexec
 		m_pStmt->UnbindColumns();
 		m_currentColumns.clear();
 	}
-
-
-	//void ExodbcExec::List(ExodbcExec::ListMode mode)
-	//{
-	//	auto Lister = [&](ListMode mode) {
-	//		switch (mode)
-	//		{
-	//		case ListMode::Types:
-	//		case ListMode::Schemas:
-	//			return m_pDb->ReadSchemas();
-	//		case ListMode::Catalogs:
-	//			return m_pDb->ReadCatalogs();
-	//			break;
-	//		}
-	//		exASSERT(false);
-	//	};
-
-	//	vector<string> data;
-	//	LOG_INFO(boost::str(boost::format(u8"Listing all %s ..") % ToString(mode)));
-	//	auto start = std::chrono::high_resolution_clock::now();
-	//	switch (mode)
-	//	{
-	//	case ListMode::Types:
-	//		data = m_pDb->ReadTableTypes();
-	//		break;
-	//	case ListMode::Schemas:
-	//		data = m_pDb->ReadSchemas();
-	//		break;
-	//	case ListMode::Catalogs:
-	//		data = m_pDb->ReadCatalogs();
-	//		break;
-	//	}
-	//	auto end = std::chrono::high_resolution_clock::now();
-	//	auto elapsed = end - start;
-	//	auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
-	//	LOG_INFO(boost::str(boost::format(u8"Success, found %d %s. Execution took %dms.")
-	//		% data.size() % ToString(mode) % millis.count()));
-
-	//	if (!data.empty())
-	//	{
-	//		LOG_INFO(boost::str(boost::format(u8"Name")));
-	//		LOG_INFO(boost::str(boost::format(u8"----")));
-	//		for (vector<string>::const_iterator it = data.begin(); it != data.end(); ++it)
-	//		{
-	//			LOG_INFO(*it);
-	//		}
-	//	}
-	//}
-
 
 
 

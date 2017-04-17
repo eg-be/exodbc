@@ -492,4 +492,80 @@ namespace exodbcexec
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
 	}
+
+
+	vector<string> ListCatalog::GetAliases() const noexcept
+	{
+		switch (m_mode)
+		{
+		case Mode::TableTypes:
+			return{ u8"listTableTypes", u8"ltt" };
+		case Mode::Schemas:
+			return{ u8"listSchemas", u8"ls" };
+		case Mode::Catalogs:
+			return{ u8"listCatalogs", u8"lc" };
+		}
+		exASSERT(false);
+		return{};
+	}
+
+
+	string ListCatalog::GetHelp() const noexcept
+	{
+		switch (m_mode)
+		{
+		case Mode::TableTypes:
+			return u8"List all table types.";
+		case Mode::Schemas:
+			return u8"List all schemas.";
+		case Mode::Catalogs:
+			return u8"List all catalogs.";
+		}
+		exASSERT(false);
+		return{};
+	}
+
+
+	void ListCatalog::Execute(const std::vector<std::string> & args)
+	{
+		string modes = u8"Table Types";
+		if (m_mode == Mode::Catalogs)
+			modes = u8"Catalogs";
+		else if (m_mode == Mode::Schemas)
+			modes = u8"Schemas";
+		vector<string> data;
+		LOG_INFO(boost::str(boost::format(u8"Listing all %s ..") % modes));
+		auto start = std::chrono::high_resolution_clock::now();
+		switch (m_mode)
+		{
+		case Mode::TableTypes:
+			data = m_pDb->ReadTableTypes();
+			break;
+		case Mode::Schemas:
+			data = m_pDb->ReadSchemas();
+			break;
+		case Mode::Catalogs:
+			data = m_pDb->ReadCatalogs();
+			break;
+		}
+		auto end = std::chrono::high_resolution_clock::now();
+		auto elapsed = end - start;
+		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+		LOG_INFO(boost::str(boost::format(u8"Success, found %d %s. Execution took %dms.")
+			% data.size() % modes % millis.count()));
+
+		if (!data.empty())
+		{
+			if (m_printHeaderRow)
+			{
+				LOG_OUTPUT(boost::str(boost::format(modes)));
+				string s(modes.length(), '=');
+				LOG_OUTPUT(s);
+			}
+			for (vector<string>::const_iterator it = data.begin(); it != data.end(); ++it)
+			{
+				LOG_OUTPUT(*it);
+			}
+		}
+	}
 }
