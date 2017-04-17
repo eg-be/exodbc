@@ -262,4 +262,33 @@ namespace exodbcexec
 	private:
 		exodbc::DatabasePtr m_pDb;
 	};
+
+
+	class ListCatalog
+		: public Command
+	{
+	public:
+		enum class Mode
+		{
+			TableTypes,
+			Schemas,
+			Catalogs
+		};
+
+		ListCatalog(Mode mode, exodbc::DatabasePtr pDb, bool printHeaderRow)
+			: m_pDb(pDb)
+			, m_mode(mode)
+			, m_printHeaderRow(printHeaderRow)
+		{};
+
+		virtual std::vector<std::string> GetAliases() const noexcept;
+		virtual void Execute(const std::vector<std::string> & args);
+		virtual std::string GetHelp() const noexcept;
+
+
+	private:
+		exodbc::DatabasePtr m_pDb;
+		Mode m_mode;
+		bool m_printHeaderRow;
+	};
 }
