@@ -355,6 +355,8 @@ namespace exodbcexec
 		size_t maxAliasesWidth = 20;
 		vector<string> lines = Split(pCommand->GetHelp(), maxChars, maxAliasesWidth);
 		// modify and add alias to the first line
+		// or, if the command has arguments, add the arguments syntax
+		// to the first line and continue with the help on the second line:
 		exASSERT(!lines.empty());
 		vector<string> aliases = pCommand->GetAliases();
 		string saliases = u8" ";
@@ -369,8 +371,16 @@ namespace exodbcexec
 		}
 		stringstream ssf;
 		ssf << u8"%-" << maxAliasesWidth << u8"s%s";
-		string firstLineTrimed = boost::trim_copy(lines[0]);
-		lines[0] = boost::str(boost::format(ssf.str()) % saliases % firstLineTrimed );
+		if (pCommand->HasArguments())
+		{
+			string firstLine = boost::str(boost::format(ssf.str()) % saliases % pCommand->GetArgumentsSyntax());
+			lines.insert(lines.begin(), firstLine);
+		}
+		else
+		{
+			string firstLineTrimed = boost::trim_copy(lines[0]);
+			lines[0] = boost::str(boost::format(ssf.str()) % saliases % firstLineTrimed);
+		}
 		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
 		{
 			WRITE_STDOUT_ENDL(*it);
@@ -567,5 +577,16 @@ namespace exodbcexec
 				LOG_OUTPUT(*it);
 			}
 		}
+	}
+
+
+	void Find::Execute(const std::vector<std::string> & args)
+	{
+
+	}
+
+	std::string Find::GetHelp() const noexcept
+	{
+		return u8"Search for tables, views, etc.";
 	}
 }
