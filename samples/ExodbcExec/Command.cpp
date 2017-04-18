@@ -499,7 +499,7 @@ namespace exodbcexec
 		switch (m_mode)
 		{
 		case Mode::TableTypes:
-			return{ u8"listTableTypes", u8"ltt" };
+			return{ u8"listTypes", u8"lt" };
 		case Mode::Schemas:
 			return{ u8"listSchemas", u8"ls" };
 		case Mode::Catalogs:
