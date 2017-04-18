@@ -422,6 +422,7 @@ namespace exodbcexec
 		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::TableTypes, m_pDb, !printNoHeader));
 		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::Schemas, m_pDb, !printNoHeader));
 		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::Catalogs, m_pDb, !printNoHeader));
+		RegisterCommand(make_shared<Find>(m_pDb));
 		RegisterCommand(make_shared<Help>(GetCommands()));
 	}
 

@@ -55,6 +55,10 @@ namespace exodbcexec
 		virtual bool Hidden() const noexcept { return false; };
 
 		virtual std::string GetHelp() const noexcept = 0;
+
+		virtual std::string GetArgumentsSyntax() const noexcept { return u8""; };
+
+		bool HasArguments() const noexcept { return !GetArgumentsSyntax().empty(); };
 	};
 
 	typedef std::shared_ptr<Command> CommandPtr;
@@ -290,5 +294,23 @@ namespace exodbcexec
 		exodbc::DatabasePtr m_pDb;
 		Mode m_mode;
 		bool m_printHeaderRow;
+	};
+
+
+	class Find
+		: public Command 
+	{
+	public:
+		Find(exodbc::DatabasePtr pDb)
+			: m_pDb(pDb)
+		{};
+
+		virtual std::vector<std::string> GetAliases() const noexcept { return{u8"find", u8"f"}; };
+		virtual void Execute(const std::vector<std::string> & args);
+		virtual std::string GetHelp() const noexcept;
+		virtual std::string GetArgumentsSyntax() const noexcept { return u8"[name] [schema] [catalog] [type]"; };
+
+	private:
+		exodbc::DatabasePtr m_pDb;
 	};
 }
