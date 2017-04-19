@@ -52,7 +52,8 @@ namespace exodbc
 		static void	CloseStmtHandle(ConstSqlStmtHandlePtr pHStmt, Mode mode);
 
 		/*!
-		* \brief Create new StatementCloser, depending on values passed it will close on construction and / or on destruction
+		* \brief Create new StatementCloser, depending on values passed it will close on construction and / or on destruction.
+		*		Does not throw if closing on construction or destruction fails because statement was not open.
 		*/
 		StatementCloser(ConstSqlStmtHandlePtr pHStmt, bool closeOnConstruction = false, bool closeOnDestruction = true);
 		
