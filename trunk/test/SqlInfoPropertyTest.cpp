@@ -170,4 +170,24 @@ namespace exodbctest
 		EXPECT_THROW(props.GetProperty(SQL_ASYNC_DBC_FUNCTIONS), NotFoundException);
 	}
 
+
+	TEST_F(SqlInfoPropertiesTest, ParseOdbcString)
+	{
+		EXPECT_EQ(OdbcVersion::V_2, SqlInfoProperties::ParseOdbcVersion(u8"2.0"));
+		EXPECT_EQ(OdbcVersion::V_2, SqlInfoProperties::ParseOdbcVersion(u8"2.18"));
+		EXPECT_EQ(OdbcVersion::V_3, SqlInfoProperties::ParseOdbcVersion(u8"3.0"));
+		EXPECT_EQ(OdbcVersion::V_3, SqlInfoProperties::ParseOdbcVersion(u8"3.51"));
+		EXPECT_EQ(OdbcVersion::V_3_8, SqlInfoProperties::ParseOdbcVersion(u8"3.80"));
+	}
+
+
+	TEST_F(SqlInfoPropertiesTest, IsPropertyRegistered)
+	{
+		SqlInfoProperties props;
+		EXPECT_FALSE(props.IsPropertyRegistered(SQL_DRIVER_ODBC_VER));
+		DatabasePtr pDb = OpenTestDb(OdbcVersion::V_3);
+		props.Init(pDb->GetSqlDbcHandle());
+		EXPECT_TRUE(props.IsPropertyRegistered(SQL_DRIVER_ODBC_VER));
+	}
+
 } // namespace exodbctest

@@ -193,7 +193,24 @@ namespace exodbc
 
 
 		/*!
+		* \brief Returns true if a SqlInfoProperty with passed infoId is registered.
+		*/
+		bool IsPropertyRegistered(SQLUSMALLINT infoId) const noexcept;
+
+
+		/*!
+		* \brief Reads a single property from the passed connection handle, if 
+		*		property has not already been read.
+		*		Property must be registered.
+		*		If forceUpdate is set to true, property will be read guaranteed.
+		* \throw NotFoundException if passed info id is not registered.
+		*/
+		void EnsurePropertyRead(ConstSqlDbcHandlePtr pHdbc, SQLUSMALLINT infoId, bool forceUpdate);
+
+
+		/*!
 		* \brief Reads all registered properties from the passed connection handle.
+		*		Does not throw but logs a warning if reading a property fails.
 		*/
 		void ReadAllProperties(ConstSqlDbcHandlePtr pHdbc);
 
@@ -261,14 +278,25 @@ namespace exodbc
 		SQLUSMALLINT GetMaxColumnNameLen() const;
 
 
+		/*
+		* \brief Return value of property SQL_SEARCH_PATTERN_ESCAPE.
+		*/
+		std::string GetSearchPatternEscape() const;
+
+
 		/*!
 		* \brief Returns true if SQL_SO_FORWARD_ONLY is set in the bitmask value of property SQL_SCROLL_OPTIONS.
 		*/
 		bool GetForwardOnlyCursors() const;
 
-	private:
+
+		/*!
+		* \brief Tries to extract a matching OdbcVersion from a string in the form '##.##'.
+		*		Returns OdbcVersion::UNKOWN if parsing fails.
+		*/
 		static OdbcVersion ParseOdbcVersion(const std::string& versionString);
 
+	private:
 		void RegisterDriverProperties(OdbcVersion odbcVersion);
 		void RegisterDbmsProperties(OdbcVersion odbcVersion);
 		void RegisterDataSourceProperties(OdbcVersion odbcVersion);

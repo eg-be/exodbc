@@ -56,13 +56,13 @@ namespace exodbc
 	private:
 		DatabaseProduct		m_dbms;
 
-		std::string		m_tableName;		///< Name
+		std::string		m_tableName;		///< Table name.
 		std::string		m_tableType;        ///< "TABLE" or "SYSTEM TABLE" etc.
 		std::string		m_tableRemarks;		///< Remarks
-		std::string		m_catalogName;		///< catalog
-		std::string		m_schemaName;		///< schema
-		bool				m_isCatalogNull;	///< True if m_catalogName is null.
-		bool				m_isSchemaNull;		///< True if m_schemaName is null.
+		std::string		m_catalogName;		///< Catalog name
+		std::string		m_schemaName;		///< Schema name.
+		bool				m_isCatalogNull;	///< True if NULL was returned for catalog name.
+		bool				m_isSchemaNull;		///< True if NULL was returned for schema name.
 	};
 
 	/*!
