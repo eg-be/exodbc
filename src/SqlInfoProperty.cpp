@@ -185,7 +185,7 @@ namespace exodbc
 		exASSERT(pHdbc->IsAllocated());
 
 		// Determine drivers odbc version:
-		SqlInfoProperty prop(SQL_DRIVER_ODBC_VER, u8"SQL_DRIVER_ODBC_VERSION", SqlInfoProperty::InfoType::Driver, SqlInfoProperty::ValueType::String_Any);
+		SqlInfoProperty prop(SQL_DRIVER_ODBC_VER, u8"SQL_DRIVER_ODBC_VER", SqlInfoProperty::InfoType::Driver, SqlInfoProperty::ValueType::String_Any);
 		prop.ReadProperty(pHdbc);
 		std::string driverOdbcVersion = prop.GetStringValue();
 		OdbcVersion ov = ParseOdbcVersion(driverOdbcVersion);
@@ -476,6 +476,27 @@ namespace exodbc
 	}
 
 
+	bool SqlInfoProperties::IsPropertyRegistered(SQLUSMALLINT infoId) const noexcept
+	{
+		PropsMap::const_iterator it = m_props.find(infoId);
+		return it != m_props.end();
+	}
+
+
+	void SqlInfoProperties::EnsurePropertyRead(ConstSqlDbcHandlePtr pHdbc, SQLUSMALLINT infoId, bool forceUpdate)
+	{
+		PropsMap::iterator it = m_props.find(infoId);
+		if (it == m_props.end())
+		{
+			NotFoundException nfe(boost::str(boost::format(u8"Property with id %d is not registered") % infoId));
+			SET_EXCEPTION_SOURCE(nfe);
+			throw nfe;
+		}
+		if(it->second.GetValueRead() || forceUpdate)
+			it->second.ReadProperty(pHdbc);
+	}
+
+
 	void SqlInfoProperties::ReadAllProperties(ConstSqlDbcHandlePtr pHdbc)
 	{
 		for (PropsMap::iterator it = m_props.begin(); it != m_props.end(); ++it)
@@ -640,5 +661,12 @@ namespace exodbc
 		SQLUINTEGER value = boost::get<SQLUINTEGER>(prop.GetValue());
 		value &= ~SQL_SO_FORWARD_ONLY;
 		return value == 0;
+	}
+
+
+	string SqlInfoProperties::GetSearchPatternEscape() const
+	{
+		SqlInfoProperty prop = GetProperty(SQL_SEARCH_PATTERN_ESCAPE);
+		return prop.GetStringValue();
 	}
 }

@@ -43,6 +43,7 @@ set ( SRC_EXODBC
   ColumnBuffer.cpp 
   ColumnBufferWrapper.cpp
   Database.cpp 
+  DatabaseCatalog.cpp
   Environment.cpp 
   Exception.cpp 
   ExecutableStatement.cpp
@@ -66,6 +67,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/ColumnBufferVisitors.h
   ../include/exodbc/ColumnBufferWrapper.h
   ../include/exodbc/Database.h
+  ../include/exodbc/DatabaseCatalog.h
   ../include/exodbc/DebugNew.h
   ../include/exodbc/DoxygenToc.h
   ../include/exodbc/EnumFlags.h
