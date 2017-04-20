@@ -46,9 +46,6 @@ namespace exodbctest
 		// Set up is called for every test
 		m_pEnv->Init(OdbcVersion::V_3);
 		m_pDb = OpenTestDb(m_pEnv);
-		int p = 3;
-		int z = p + 3;
-
 	}
 
 
