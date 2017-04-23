@@ -104,8 +104,15 @@ namespace exodbc
 	}
 
 
-	TableInfosVector DatabaseCatalog::FindTables(const std::string* pTableName, const std::string* pSchemaName, 
-		const std::string* pCatalogName, const std::string& tableType, MetadataMode mode) const
+	TableInfosVector DatabaseCatalog::FindTable(const std::string& tableName, const std::string& schemaName, 
+		const std::string& catalogName, const std::string& tableType, MetadataMode mode) const
+	{
+		//return FindTable((const char*)tableName.c_str(), (const char*)schemaName.c_str(), (const char*)catalogName.c_str(), tableType, mode);
+	}
+
+
+	TableInfosVector DatabaseCatalog::FindTables(const char* pTableName, const char* pSchemaName, 
+		const char* pCatalogName, const std::string& tableType, MetadataMode mode) const
 	{
 		if (m_stmtMode != mode)
 			SetMetadataAttribute(mode);
@@ -113,8 +120,8 @@ namespace exodbc
 		if (mode == MetadataMode::Identifier)
 		{
 			exASSERT_MSG(pTableName != nullptr, u8"pTableName must not be a nullptr if MetadataMode::Identifier is set");
-			exASSERT_MSG(pTableName != nullptr, u8"pSchemaName must not be a nullptr if MetadataMode::Identifier is set");
-			exASSERT_MSG(pTableName != nullptr, u8"pCatalogName must not be a nullptr if MetadataMode::Identifier is set");
+			exASSERT_MSG(pSchemaName != nullptr, u8"pSchemaName must not be a nullptr if MetadataMode::Identifier is set");
+			exASSERT_MSG(pCatalogName != nullptr, u8"pCatalogName must not be a nullptr if MetadataMode::Identifier is set");
 		}
 
 		// Close Statement and make sure it closes upon exit
@@ -132,9 +139,9 @@ namespace exodbc
 
 		// Query db
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			pCatalogName == nullptr ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(*pCatalogName), SQL_NTS,   // catname                 
-			pSchemaName == nullptr ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(*pSchemaName), SQL_NTS,   // schema name
-			pTableName == nullptr ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(*pTableName), SQL_NTS,	// table name
+			pCatalogName == nullptr ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(pCatalogName), SQL_NTS,   // catname                 
+			pSchemaName == nullptr ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(pSchemaName), SQL_NTS,   // schema name
+			pTableName == nullptr ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(pTableName), SQL_NTS,	// table name
 			tableType.empty() ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(tableType), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 

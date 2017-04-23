@@ -105,6 +105,7 @@ add_definitions(
 # we explicitely list all files:
 set ( SRC_EXODBCTEST 
   ColumnBufferTest.cpp 
+  DatabaseCatalogTest.cpp
   DatabaseTest.cpp 
   EnumFlagsTest.cpp
   EnvironmentTest.cpp
@@ -127,6 +128,7 @@ set ( SRC_EXODBCTEST
 
 set ( HEADERS_EXODBCTEST
   ColumnBufferTest.h
+  DatabaseCatalogTest.h
   DatabaseTest.h
   DebugNew.h
   EnumFlagsTest.h
