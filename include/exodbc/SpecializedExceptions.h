@@ -64,6 +64,19 @@ namespace exodbc
 		*/
 		SQLRETURN GetRet() const noexcept { return m_ret; };
 
+
+		/*!
+		* \brief Returns the list of errors collected during construction (if any were collected).
+		*/
+		ErrorHelper::SErrorInfoVector GetErrorInfos() const noexcept { return m_errors; };
+
+
+		/*!
+		* \brief Returns true if the list of errors collected during construction contains
+		*		one SErrorInfo with passed SQLSTATE.
+		*/
+		bool HasErrorInfo(const SQLCHAR* sqlState) const noexcept;
+
 	protected:
 		void FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) noexcept;
 		void BuildErrorMsg(const std::string& sqlFunctionName, SQLRETURN ret) noexcept;

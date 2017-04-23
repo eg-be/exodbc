@@ -51,6 +51,17 @@ namespace exodbc
 	}
 
 
+	bool SqlResultException::HasErrorInfo(const SQLCHAR* sqlState) const noexcept
+	{
+		for (ErrorHelper::SErrorInfoVector::const_iterator it = m_errors.begin(); it != m_errors.end(); ++it)
+		{
+			if (strcmp(reinterpret_cast<const char*>(sqlState), reinterpret_cast<const char*>(it->SqlState)) == 0)
+				return true;
+		}
+		return false;
+	}
+
+
 	void SqlResultException::FetchErrorInfo(SQLSMALLINT handleType, SQLHANDLE handle) noexcept
 	{
 		try
