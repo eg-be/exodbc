@@ -616,6 +616,20 @@ namespace exodbc
 	}
 
 
+	string SqlInfoProperties::GetSchemaTerm() const
+	{
+		SqlInfoProperty prop = GetProperty(SQL_SCHEMA_TERM);
+		return prop.GetStringValue();
+	}
+
+
+	string SqlInfoProperties::GetCatalogTerm() const
+	{
+		SqlInfoProperty prop = GetProperty(SQL_CATALOG_TERM);
+		return prop.GetStringValue();
+	}
+
+
 	SQLUSMALLINT SqlInfoProperties::GetMaxCatalogNameLen() const
 	{
 		SqlInfoProperty prop = GetProperty(SQL_MAX_CATALOG_NAME_LEN);

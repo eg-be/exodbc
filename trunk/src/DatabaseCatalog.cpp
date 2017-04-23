@@ -123,8 +123,8 @@ namespace exodbc
 		const std::string& catalogName /* = u8"%" */, const std::string& tableType /* = u8"" */) const
 	{
 		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), 
-			EXODBCSTR_TO_SQLAPICHARPTR(schemaName),
-			m_props.GetSupportsCatalogs() ? EXODBCSTR_TO_SQLAPICHARPTR(catalogName) : nullptr,
+			!m_props.GetSchemaTerm().empty() ? EXODBCSTR_TO_SQLAPICHARPTR(schemaName) : nullptr,
+			m_props.GetSupportsCatalogs() && !m_props.GetCatalogTerm().empty() ? EXODBCSTR_TO_SQLAPICHARPTR(catalogName) : nullptr,
 			tableType, MetadataMode::PatternValue);
 	}
 

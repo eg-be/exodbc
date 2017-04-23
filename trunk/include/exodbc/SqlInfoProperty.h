@@ -260,6 +260,18 @@ namespace exodbc
 
 
 		/*!
+		* \brief Returns the value of property SQL_SCHEMA_TERM. Empty value might indicate no support for schemas.
+		*/
+		std::string GetSchemaTerm() const;
+
+
+		/*!
+		* \brief Returns the value of property SQL_CATALOG_TERM. Empty values indicates no support for catalogs.
+		*/
+		std::string GetCatalogTerm() const;
+
+
+		/*!
 		* \brief If property value SQL_MAX_TABLE_NAME_LEN is > 0, the value is returned, else DB_MAX_TABLE_NAME_LEN_DEFAULT
 		*/
 		SQLUSMALLINT GetMaxTableNameLen() const;
