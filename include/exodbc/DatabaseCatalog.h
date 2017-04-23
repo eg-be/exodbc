@@ -71,7 +71,10 @@ namespace exodbc
 		*		Internally stores a copy of the passed shared_ptr and allocated
 		*		a statement from the passed connection handle.
 		*		Allocated statement is freed on destruction
-		* \param searchPatternEscape Value of SqlGetInfo attribute SQL_SEARCH_PATTERN_ESCAPE.
+		* \param pHdbc Connection handle to be used to create statements and read properties.
+		* \param props SqlInfoProperties Property SQL_SEARCH_PATTERN_ESCAPE must be
+		*				registered, if it is not read already, it is read using the
+		*				passed connection handle.
 		*/
 		void Init(ConstSqlDbcHandlePtr pHdbc, const SqlInfoProperties& props);
 
@@ -86,8 +89,11 @@ namespace exodbc
 		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).\n
 		*			Note that if the Environment ODBC Version is less than 3.x, 
 		*			catalogName does not accept search patterns.\n
-		*			If SqlInfoProperties::GetSupportsCatalogs() returns false, any passed
-		*			catalogName value is ignored (and a nullptr is passed to SQLTables).
+		*			If SqlInfoProperties::GetSupportsCatalogs() returns false or
+		*			SqlInfoProperties::GetCatalogTerm() returns an empty string, any passed
+		*			catalogName value is ignored (and a nullptr is passed to SQLTables).\n
+		*			If SqlInfoProperties::GetSchemaTerm() returns an empty string, any
+		*			passed schemaName is ignored (and a nullptr is passed to SQLTables).
 		*
 		*/
 		TableInfosVector SearchTables(const std::string& tableName = u8"%", const std::string& schemaName = u8"%",
@@ -97,10 +103,7 @@ namespace exodbc
 		/*!
 		* \brief Searches for tables using a pattern value (PV) argument for the table name.
 		* \details Schema name, catalog name are not set when querying the database, table type
-		*		   will be set to an empty string. This should return the same values as if SearchTables
-		*			is called with '%' set schema and catalog name.
-		* \see	SearchTables(const std::string& tableName = u8"%", const std::string& schemaName = u8"%",
-			const std::string& catalogName = u8"%", const std::string& tableType = u8"")
+		*		   will be set to an empty string.
 		*/
 		TableInfosVector SearchTablesByName(const std::string& tableName = u8"%") const;
 
