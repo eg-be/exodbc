@@ -72,7 +72,22 @@ namespace exodbc
 		// Read SQL_ATTR_METADATA_ID value, only modify if not already set to passed value
 		SQLUINTEGER metadataAttr;
 		SQLRETURN ret = SQLGetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_METADATA_ID, (SQLPOINTER)&metadataAttr, 0, nullptr);
-		THROW_IFN_SUCCEEDED(SQLGetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+		if (!SQL_SUCCEEDED(ret))
+		{
+			SqlResultException sre(u8"SQLGetStmtAttr", ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+			if (sre.HasErrorInfo(ErrorHelper::SQLSTATE_OPTIONAL_FEATURE_NOT_IMPLEMENTED))
+			{
+				// Not implemented by the driver, assume its default: 
+				LOG_INFO(boost::str(boost::format(u8"Driver %s does not support SQL_ATTR_METADATA_ID (SQLGetStmtAttr returned SQLSTATE %s), asssuming default value of FALSE")
+					% m_props.GetDriverName() % ErrorHelper::SQLSTATE_OPTIONAL_FEATURE_NOT_IMPLEMENTED));
+				return MetadataMode::PatternValue;
+			}
+			else
+			{
+				SET_EXCEPTION_SOURCE(sre);
+				throw sre;
+			}
+		}
 		exASSERT_MSG(metadataAttr == SQL_FALSE || metadataAttr == SQL_TRUE,
 			boost::str(boost::format(u8"Unknown value %d for SQL_ATTR_METADATA_ID read") % metadataAttr));
 

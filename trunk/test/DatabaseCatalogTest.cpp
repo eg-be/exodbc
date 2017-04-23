@@ -76,8 +76,13 @@ namespace exodbctest
 	{
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 		// we should find some tables if not restricting anything
-		TableInfosVector tables = dbCat.SearchTables();
-		EXPECT_TRUE(tables.size() > 0);
+		TableInfosVector allTables = dbCat.SearchTables();
+		EXPECT_TRUE(allTables.size() > 0);
+
+		// now restrict to tables named '%tmp' - we should have some in our test-db:
+		// that should be less than all tables:
+		TableInfosVector tmpTables = dbCat.SearchTables(u8"%tmp");
+		EXPECT_GT(allTables.size(), tmpTables.size());
 	}
 
 } //namespace exodbc

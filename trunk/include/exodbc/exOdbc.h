@@ -396,6 +396,8 @@ namespace exodbc
 	{
 	public:
 
+		const static SQLCHAR* SQLSTATE_OPTIONAL_FEATURE_NOT_IMPLEMENTED;
+
 		/*!
 		* \struct SErrorInfo
 		*

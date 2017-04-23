@@ -22,6 +22,7 @@ namespace exodbc {
 
 	// Static consts
 	// -------------
+	const SQLCHAR* ErrorHelper::SQLSTATE_OPTIONAL_FEATURE_NOT_IMPLEMENTED = (const SQLCHAR*)"HYC00";
 
 	// Implementation
 	// --------------
