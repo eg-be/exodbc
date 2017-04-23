@@ -94,8 +94,17 @@ namespace exodbc
 		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).
 		*			
 		*/
-		TableInfosVector FindTables(const std::string* pTableName, const std::string* pSchemaName, 
-			const std::string* pCatalogName, const std::string& tableType, MetadataMode mode) const;
+		TableInfosVector FindTables(const char* pTableName, const char* pSchemaName, 
+			const char* pCatalogName, const std::string& tableType, MetadataMode mode) const;
+
+
+		/*!
+		* \brief Searches for tables using the passed search-arguments.
+		* \see FindTables(const std::string* pTableName, const std::string* pSchemaName, 
+		*		const std::string* pCatalogName, const std::string& tableType, MetadataMode mode)
+		*/
+		TableInfosVector FindTable(const std::string& tableName, const std::string& schemaName,
+			const std::string& catalogName, const std::string& tableType, MetadataMode mode) const;
 
 
 		/*!
