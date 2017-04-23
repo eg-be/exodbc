@@ -77,11 +77,32 @@ namespace exodbc
 
 
 		/*!
+		* \brief Searches for tables using pattern value (PV) arguments.
+		* \details tableName, schemaName and catalogName are treated as pattern value 
+		*			arguments. Use '_' to match any single character or '%' to 
+		*			match any sequence of zero or more characters. Passing
+		*			an empty string ("") matches only the empty string.\n
+		*			tableType can be a comma separated list of values. If an empty string
+		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).
+		*
+		*/
+		TableInfosVector SearchTables(const std::string& tableName = u8"%", const std::string& schemaName = u8"%",
+			const std::string& catalogName = u8"%", const std::string& tableType = u8"") const;
+
+
+		/*!
+		* \brief Get value of SqlGetInfo property SQL_SEARCH_PATTERN_ESCAPE. Escape search strings
+		*		with returned value.
+		*/
+		std::string GetSearchPatternEscape() const { return m_props.GetSearchPatternEscape(); };
+
+	private:
+		/*!
 		* \brief Searches for tables using the passed search-arguments.
 		* \details If mode is to MetadataMode::PatternValue, tableName, schemaName
 		*			and catalogName are treated as pattern value arguments. Use '_' to
-		*			match any single character or '%' to match any sequence of zero or 
-		*			more characters. Passing a null pointer to search argument is 
+		*			match any single character or '%' to match any sequence of zero or
+		*			more characters. Passing a null pointer to search argument is
 		*			equivalent to passing '%' as search argument value, but passing
 		*			an empty string ("") matches only the empty string.\n
 		*			If mode is set to MetadataMode::Identifier, tableName, schemaName
@@ -92,28 +113,10 @@ namespace exodbc
 		*			result in a failure.\n
 		*			tableType can be a comma separated list of values. If an empty string
 		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).
-		*			
+		*
 		*/
-		TableInfosVector FindTables(const char* pTableName, const char* pSchemaName, 
-			const char* pCatalogName, const std::string& tableType, MetadataMode mode) const;
-
-
-		/*!
-		* \brief Searches for tables using the passed search-arguments.
-		* \see FindTables(const std::string* pTableName, const std::string* pSchemaName, 
-		*		const std::string* pCatalogName, const std::string& tableType, MetadataMode mode)
-		*/
-		TableInfosVector FindTable(const std::string& tableName, const std::string& schemaName,
-			const std::string& catalogName, const std::string& tableType, MetadataMode mode) const;
-
-
-		/*!
-		* \brief Get value of SqlGetInfo property SQL_SEARCH_PATTERN_ESCAPE. Escape search strings
-		*		with returned value.
-		*/
-		std::string GetSearchPatternEscape() const { return m_props.GetSearchPatternEscape(); };
-
-	private:
+		TableInfosVector SearchTables(SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName,
+			SQLAPICHARTYPE* pCatalogName, const std::string& tableType, MetadataMode mode) const;
 		void SetMetadataAttribute(MetadataMode mode) const;
 		MetadataMode GetMetadataAttribute() const;
 
