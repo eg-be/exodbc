@@ -122,8 +122,16 @@ namespace exodbc
 	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName /* = u8"%" */, const std::string& schemaName /* = u8"%" */, 
 		const std::string& catalogName /* = u8"%" */, const std::string& tableType /* = u8"" */) const
 	{
-		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), EXODBCSTR_TO_SQLAPICHARPTR(schemaName),
-			EXODBCSTR_TO_SQLAPICHARPTR(catalogName), tableType, MetadataMode::PatternValue);
+		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), 
+			EXODBCSTR_TO_SQLAPICHARPTR(schemaName),
+			m_props.GetSupportsCatalogs() ? EXODBCSTR_TO_SQLAPICHARPTR(catalogName) : nullptr,
+			tableType, MetadataMode::PatternValue);
+	}
+
+
+	TableInfosVector DatabaseCatalog::SearchTablesByName(const std::string& tableName /* = u8"%" */) const
+	{
+		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), nullptr, nullptr, u8"", MetadataMode::PatternValue);
 	}
 
 

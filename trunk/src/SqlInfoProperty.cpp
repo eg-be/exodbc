@@ -606,6 +606,16 @@ namespace exodbc
 	}
 
 
+	bool SqlInfoProperties::GetSupportsCatalogs() const
+	{
+		if (!IsPropertyRegistered(SQL_CATALOG_NAME))
+			return false;
+
+		SqlInfoProperty prop = GetProperty(SQL_CATALOG_NAME);
+		return prop.GetStringValue() == u8"Y";
+	}
+
+
 	SQLUSMALLINT SqlInfoProperties::GetMaxCatalogNameLen() const
 	{
 		SqlInfoProperty prop = GetProperty(SQL_MAX_CATALOG_NAME_LEN);
