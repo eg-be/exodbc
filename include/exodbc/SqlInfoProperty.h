@@ -254,6 +254,12 @@ namespace exodbc
 
 
 		/*!
+		* \brief Returns true if property SQL_CATALOG_NAME is set (from ODBC 3.x on) and its value is set to 'Y'.
+		*/
+		bool GetSupportsCatalogs() const;
+
+
+		/*!
 		* \brief If property value SQL_MAX_TABLE_NAME_LEN is > 0, the value is returned, else DB_MAX_TABLE_NAME_LEN_DEFAULT
 		*/
 		SQLUSMALLINT GetMaxTableNameLen() const;
