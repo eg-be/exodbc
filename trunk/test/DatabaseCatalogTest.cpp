@@ -72,10 +72,12 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseCatalogTest, FindPatternValue)
+	TEST_F(DatabaseCatalogTest, SearchTables)
 	{
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
-		TableInfosVector tables = dbCat.FindTables()
+		// we should find some tables if not restricting anything
+		TableInfosVector tables = dbCat.SearchTables();
+		EXPECT_TRUE(tables.size() > 0);
 	}
 
 } //namespace exodbc

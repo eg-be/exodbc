@@ -104,15 +104,16 @@ namespace exodbc
 	}
 
 
-	TableInfosVector DatabaseCatalog::FindTable(const std::string& tableName, const std::string& schemaName, 
-		const std::string& catalogName, const std::string& tableType, MetadataMode mode) const
+	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName /* = u8"%" */, const std::string& schemaName /* = u8"%" */, 
+		const std::string& catalogName /* = u8"%" */, const std::string& tableType /* = u8"" */) const
 	{
-		//return FindTable((const char*)tableName.c_str(), (const char*)schemaName.c_str(), (const char*)catalogName.c_str(), tableType, mode);
+		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), EXODBCSTR_TO_SQLAPICHARPTR(schemaName),
+			EXODBCSTR_TO_SQLAPICHARPTR(catalogName), tableType, MetadataMode::PatternValue);
 	}
 
 
-	TableInfosVector DatabaseCatalog::FindTables(const char* pTableName, const char* pSchemaName, 
-		const char* pCatalogName, const std::string& tableType, MetadataMode mode) const
+	TableInfosVector DatabaseCatalog::SearchTables(SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName,
+		SQLAPICHARTYPE* pCatalogName, const std::string& tableType, MetadataMode mode) const
 	{
 		if (m_stmtMode != mode)
 			SetMetadataAttribute(mode);
@@ -139,9 +140,9 @@ namespace exodbc
 
 		// Query db
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			pCatalogName == nullptr ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(pCatalogName), SQL_NTS,   // catname                 
-			pSchemaName == nullptr ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(pSchemaName), SQL_NTS,   // schema name
-			pTableName == nullptr ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(pTableName), SQL_NTS,	// table name
+			pCatalogName == nullptr ? NULL : pCatalogName, SQL_NTS,   // catname                 
+			pSchemaName == nullptr ? NULL : pSchemaName, SQL_NTS,   // schema name
+			pTableName == nullptr ? NULL : pTableName, SQL_NTS,	// table name
 			tableType.empty() ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(tableType), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
