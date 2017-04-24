@@ -80,7 +80,8 @@ namespace exodbc
 
 
 		/*!
-		* \brief Searches for tables using pattern value (PV) arguments.
+		* \brief Searches for tables using pattern value (PV) arguments for
+		*			table, schema and catalog name.
 		* \details tableName, schemaName and catalogName are treated as pattern value 
 		*			arguments. Use '_' to match any single character or '%' to 
 		*			match any sequence of zero or more characters. Passing
@@ -100,11 +101,25 @@ namespace exodbc
 			const std::string& catalogName, const std::string& tableType = u8"") const;
 
 
-
-
-		TableInfosVector SearchTable(const std::string& tableName, const std::string& schemaOrCatalogName, 
-			bool argSsSchemaName, const std::string& tableType = u8"") const;
-
+		/*!
+		* \brief Searches for tables using pattern value (PV) arguments for table
+		*			name and schema or catalog name. If argIsSchemaName is set to true,
+		*			the passed argument schemaOrCatalogName is treated as a
+		*			schema name and catalog name is ignored. If argIsSchemaName is 
+		*			false, the argument schemaOrCatalogName is treated as catalog
+		*			name and schema name is ignored.
+		* \details tableName and schemaNameOrCatalogName are treated as pattern value
+		*			arguments. Use '_' to match any single character or '%' to
+		*			match any sequence of zero or more characters. Passing
+		*			an empty string ("") matches only the empty string.\n
+		*			tableType can be a comma separated list of values. If an empty string
+		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).\n
+		*			Note that if the Environment ODBC Version is less than 3.x,
+		*			catalogName does not accept search patterns.\n
+		*
+		*/
+		TableInfosVector SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, 
+			bool argIsSchemaName, const std::string& tableType = u8"") const;
 
 
 		/*!
