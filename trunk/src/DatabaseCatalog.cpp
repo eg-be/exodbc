@@ -119,19 +119,19 @@ namespace exodbc
 	}
 
 
-	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName /* = u8"%" */, const std::string& schemaName /* = u8"%" */, 
-		const std::string& catalogName /* = u8"%" */, const std::string& tableType /* = u8"" */) const
+	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName, const std::string& schemaName, 
+		const std::string& catalogName, const std::string& tableType /* = u8"" */) const
 	{
-		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), 
+		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
 			!m_props.GetSchemaTerm().empty() ? EXODBCSTR_TO_SQLAPICHARPTR(schemaName) : nullptr,
 			m_props.GetSupportsCatalogs() && !m_props.GetCatalogTerm().empty() ? EXODBCSTR_TO_SQLAPICHARPTR(catalogName) : nullptr,
 			tableType, MetadataMode::PatternValue);
 	}
 
 
-	TableInfosVector DatabaseCatalog::SearchTablesByName(const std::string& tableName /* = u8"%" */) const
+	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName, const std::string& tableType /* = u8"%" */) const
 	{
-		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), nullptr, nullptr, u8"", MetadataMode::PatternValue);
+		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), nullptr, nullptr, tableType, MetadataMode::PatternValue);
 	}
 
 

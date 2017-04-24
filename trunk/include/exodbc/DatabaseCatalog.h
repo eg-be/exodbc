@@ -96,16 +96,22 @@ namespace exodbc
 		*			passed schemaName is ignored (and a nullptr is passed to SQLTables).
 		*
 		*/
-		TableInfosVector SearchTables(const std::string& tableName = u8"%", const std::string& schemaName = u8"%",
-			const std::string& catalogName = u8"%", const std::string& tableType = u8"") const;
+		TableInfosVector SearchTables(const std::string& tableName, const std::string& schemaName,
+			const std::string& catalogName, const std::string& tableType = u8"") const;
+
+
+
+
+		TableInfosVector SearchTable(const std::string& tableName, const std::string& schemaOrCatalogName, 
+			bool argSsSchemaName, const std::string& tableType = u8"") const;
+
 
 
 		/*!
 		* \brief Searches for tables using a pattern value (PV) argument for the table name.
-		* \details Schema name, catalog name are not set when querying the database, table type
-		*		   will be set to an empty string.
+		* \details Schema name, catalog name are not set when querying the database.
 		*/
-		TableInfosVector SearchTablesByName(const std::string& tableName = u8"%") const;
+		TableInfosVector SearchTables(const std::string& tableName, const std::string& tableType = u8"") const;
 
 
 		/*!
