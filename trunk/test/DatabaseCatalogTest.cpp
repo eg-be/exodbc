@@ -105,4 +105,52 @@ namespace exodbctest
 		EXPECT_GE(allTables2.size(), allTables.size());
 	}
 
+
+	TEST_F(DatabaseCatalogTest, SearchPatternEscape)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		// find some tmp table ending with '_tmp'
+		string esc = dbCat.GetSearchPatternEscape();
+		EXPECT_FALSE(esc.empty());
+
+		string tableNamePattern = boost::str(boost::format(u8"%%%s_tmp") % esc);
+		TableInfosVector tmpTables = dbCat.SearchTables(tableNamePattern);
+		EXPECT_FALSE(tmpTables.empty());
+
+		// every table must end with _tmp
+		for (TableInfosVector::const_iterator it = tmpTables.begin(); it != tmpTables.end(); ++it)
+		{
+			string tableName = it->GetPureName();
+			EXPECT_TRUE(boost::algorithm::iends_with(tableName, u8"_tmp"));
+		}
+	}
+
+
+	TEST_F(DatabaseCatalogTest, SearchTablesBySchemaOrCatalog)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		// find some table
+		TableInfosVector tables = dbCat.SearchTables(u8"integertypes");
+		ASSERT_FALSE(tables.empty());
+		
+		TableInfo ti = tables.front();
+		TableInfosVector tables2;
+		if(ti.HasCatalog())
+		{
+			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetCatalog(), false);
+		}
+		else if (ti.HasSchema())
+		{
+			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetSchema(), true);
+		}
+		else
+		{
+			// cannot do test
+			LOG_INFO(u8"Skipping test because nor schema or catalog was found");
+			return;
+		}
+		ASSERT_EQ(1, tables2.size());
+		EXPECT_EQ(ti, tables2.front());
+	}
+
 } //namespace exodbc
