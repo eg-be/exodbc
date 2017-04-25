@@ -114,6 +114,8 @@ namespace exodbctest
 		EXPECT_FALSE(esc.empty());
 
 		string tableNamePattern = boost::str(boost::format(u8"%%%s_tmp") % esc);
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
+			boost::algorithm::to_upper(tableNamePattern);
 		TableInfosVector tmpTables = dbCat.SearchTables(tableNamePattern);
 		EXPECT_FALSE(tmpTables.empty());
 
@@ -130,7 +132,10 @@ namespace exodbctest
 	{
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 		// find some table
-		TableInfosVector tables = dbCat.SearchTables(u8"integertypes");
+		string tableNamePattern = u8"integertypes";
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
+			boost::algorithm::to_upper(tableNamePattern);
+		TableInfosVector tables = dbCat.SearchTables(tableNamePattern);
 		ASSERT_FALSE(tables.empty());
 		
 		TableInfo ti = tables.front();
