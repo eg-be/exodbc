@@ -128,7 +128,23 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseCatalogTest, SearchTablesBySchemaOrCatalog)
+	TEST_F(DatabaseCatalogTest, SearchTablesByDetectingSchemaOrCatalog)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		// find some table
+		string tableNamePattern = u8"integertypes";
+		string schemaOrCatalogPattern = u8"exodbc";
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
+		{
+			boost::algorithm::to_upper(tableNamePattern);
+			boost::algorithm::to_upper(schemaOrCatalogPattern);
+		}
+		TableInfosVector tables = dbCat.SearchTables(tableNamePattern, schemaOrCatalogPattern);
+		ASSERT_FALSE(tables.empty());
+	}
+
+
+	TEST_F(DatabaseCatalogTest, SearchTablesBySettingSchemaOrCatalog)
 	{
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 		// find some table
@@ -142,11 +158,11 @@ namespace exodbctest
 		TableInfosVector tables2;
 		if(ti.HasCatalog())
 		{
-			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetCatalog(), false);
+			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetCatalog(), false, ti.GetType());
 		}
 		else if (ti.HasSchema())
 		{
-			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetSchema(), true);
+			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetSchema(), true, ti.GetType());
 		}
 		else
 		{

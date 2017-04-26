@@ -90,15 +90,13 @@ namespace exodbc
 		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).\n
 		*			Note that if the Environment ODBC Version is less than 3.x, 
 		*			catalogName does not accept search patterns.\n
-		*			If SqlInfoProperties::GetSupportsCatalogs() returns false or
-		*			SqlInfoProperties::GetCatalogTerm() returns an empty string, any passed
-		*			catalogName value is ignored (and a nullptr is passed to SQLTables).\n
-		*			If SqlInfoProperties::GetSchemaTerm() returns an empty string, any
-		*			passed schemaName is ignored (and a nullptr is passed to SQLTables).
-		*
+		*			If GetSupportsSchemas() returns false and schemaName is set to
+		*			an empty string, schemaName is ignored.\n
+		*			If GetSupportsCatalogs() returns false and catalogName is set to
+		*			an empty string, schemaName is ignored.\n
 		*/
 		TableInfosVector SearchTables(const std::string& tableName, const std::string& schemaName,
-			const std::string& catalogName, const std::string& tableType = u8"") const;
+			const std::string& catalogName, const std::string& tableType) const;
 
 
 		/*!
@@ -119,7 +117,32 @@ namespace exodbc
 		*
 		*/
 		TableInfosVector SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, 
-			bool argIsSchemaName, const std::string& tableType = u8"") const;
+			bool argIsSchemaName, const std::string& tableType) const;
+
+
+		/*!
+		* \brief Searches for tables using pattern value (PV) arguments for table
+		*			name and schema or catalog name. The SqlInfoProperties are
+		*			examined to decide if the Database supports catalogs or schemas.
+		*			If the Database does not support either catalogs or schemas (or
+		*			both), the method will fail and throw an Exception.
+		* \details tableName and schemaNameOrCatalogName are treated as pattern value
+		*			arguments. Use '_' to match any single character or '%' to
+		*			match any sequence of zero or more characters. Passing
+		*			an empty string ("") matches only the empty string.\n
+		*			To decide whether to treat schemaOrCatalogName as catalog or schema
+		*			name, the GetSupportsSchemas() and GetSupportsCatalogs() method are
+		*			examined. Exactly one of them must return true.\n
+		*			tableType can be a comma separated list of values. If an empty string
+		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).\n
+		*			Note that if the Environment ODBC Version is less than 3.x,
+		*			catalogName does not accept search patterns.\n
+		* \see		GetSupportsSchemas()
+		* \see		GetSupportsCatalogs()
+		*
+		*/
+		TableInfosVector SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, 
+			const std::string& tableType) const {	return TableInfosVector();	};
 
 
 		/*!
@@ -134,6 +157,20 @@ namespace exodbc
 		*		with returned value.
 		*/
 		std::string GetSearchPatternEscape() const { return m_props.GetSearchPatternEscape(); };
+
+
+		/*!
+		* \brief	Returns false If SqlInfoProperties::GetSchemaTerm() returns an empty string.
+		*/
+		bool GetSupportsSchemas() const;
+
+
+		/*!
+		* \brief	Returns false if SqlInfoProperties::GetSupportsCatalogs() returns false or
+		*			SqlInfoProperties::GetCatalogTerm() returns an empty string,
+		*/
+		bool GetSupportsCatalogs() const;
+
 
 	private:
 		/*!
