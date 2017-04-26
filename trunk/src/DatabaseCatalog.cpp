@@ -65,6 +65,51 @@ namespace exodbc
 	}
 
 
+	vector<string> DatabaseCatalog::ListCatalogs() const
+	{
+		string catalog = SQL_ALL_CATALOGS;
+		string empty = u8"";
+		TableInfosVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty), 
+				EXODBCSTR_TO_SQLAPICHARPTR(catalog), empty, MetadataMode::PatternValue);
+		vector<string> catalogs;
+		for (TableInfosVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
+		{
+			catalogs.push_back(it->GetCatalog());
+		}
+		return catalogs;
+	}
+
+
+	vector<string> DatabaseCatalog::ListSchemas() const
+	{
+		string schema = SQL_ALL_SCHEMAS;
+		string empty = u8"";
+		TableInfosVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(schema),
+			EXODBCSTR_TO_SQLAPICHARPTR(empty), empty, MetadataMode::PatternValue);
+		vector<string> schemas;
+		for (TableInfosVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
+		{
+			schemas.push_back(it->GetCatalog());
+		}
+		return schemas;
+	}
+
+
+	vector<string> DatabaseCatalog::ListTableTypes() const
+	{
+		string type = SQL_ALL_TABLE_TYPES;
+		string empty = u8"";
+		TableInfosVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty),
+			EXODBCSTR_TO_SQLAPICHARPTR(empty), type, MetadataMode::PatternValue);
+		vector<string> types;
+		for (TableInfosVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
+		{
+			types.push_back(it->GetCatalog());
+		}
+		return types;
+	}
+
+
 	DatabaseCatalog::MetadataMode DatabaseCatalog::GetMetadataAttribute() const
 	{
 		exASSERT(m_pHStmt);
