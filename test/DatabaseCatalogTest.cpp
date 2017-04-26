@@ -72,6 +72,18 @@ namespace exodbctest
 	}
 
 
+	TEST_F(DatabaseCatalogTest, EscapePatternValueArguments)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		string pattern = u8"Foo%Ba_r";
+		string escaped = dbCat.EscapePatternValueArguments(pattern);
+		
+		string escSeq = dbCat.GetSearchPatternEscape();
+		string exp = boost::str(boost::format(u8"Foo%s%%Ba%s_r") % escSeq % escSeq);
+		EXPECT_EQ(exp, escaped);
+	}
+
+
 	TEST_F(DatabaseCatalogTest, SearchTables)
 	{
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
@@ -133,14 +145,29 @@ namespace exodbctest
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 		// find some table
 		string tableNamePattern = u8"integertypes";
-		string schemaOrCatalogPattern = u8"exodbc";
 		if (g_odbcInfo.m_namesCase == Case::UPPER)
 		{
 			boost::algorithm::to_upper(tableNamePattern);
-			boost::algorithm::to_upper(schemaOrCatalogPattern);
 		}
-		TableInfosVector tables = dbCat.SearchTables(tableNamePattern, schemaOrCatalogPattern);
+		TableInfosVector tables = dbCat.SearchTables(tableNamePattern);
 		ASSERT_FALSE(tables.empty());
+
+		// can only do test if table has either catalog or schema only
+		TableInfo ti = tables.front();
+		TableInfosVector tables2;
+		if ((ti.HasSchema() && !ti.HasCatalog()) || (!ti.HasSchema() && ti.HasCatalog()))
+		{
+			string schemaOrCatalogName = ti.HasSchema() ? ti.GetSchema() : ti.GetCatalog();
+			tables2 = dbCat.SearchTables(ti.GetPureName(), schemaOrCatalogName, ti.GetType());
+		}
+		else
+		{
+			// cannot do test
+			LOG_INFO(u8"Skipping test because not either schema or catalog was found");
+			return;
+		}
+		ASSERT_EQ(1, tables2.size());
+		EXPECT_EQ(ti, tables.front());
 	}
 
 
@@ -168,6 +195,33 @@ namespace exodbctest
 		{
 			// cannot do test
 			LOG_INFO(u8"Skipping test because nor schema or catalog was found");
+			return;
+		}
+		ASSERT_EQ(1, tables2.size());
+		EXPECT_EQ(ti, tables2.front());
+	}
+
+
+	TEST_F(DatabaseCatalogTest, SearchTablesBySchemaAndCatalog)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		// find some table
+		string tableNamePattern = u8"integertypes";
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
+			boost::algorithm::to_upper(tableNamePattern);
+		TableInfosVector tables = dbCat.SearchTables(tableNamePattern);
+		ASSERT_FALSE(tables.empty());
+
+		TableInfo ti = tables.front();
+		TableInfosVector tables2;
+		if (ti.HasCatalog() && ti.HasSchema())
+		{
+			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetSchema(), ti.GetCatalog(), u8"");
+		}
+		else
+		{
+			// cannot do test
+			LOG_INFO(u8"Skipping test because not schema and catalog was found");
 			return;
 		}
 		ASSERT_EQ(1, tables2.size());

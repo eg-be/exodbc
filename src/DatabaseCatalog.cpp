@@ -13,6 +13,7 @@
 // Same component headers
 #include "SqlStatementCloser.h"
 #include "Helpers.h"
+#include "SpecializedExceptions.h"
 
 // Other headers
 // Debug
@@ -127,7 +128,17 @@ namespace exodbc
 
 	bool DatabaseCatalog::GetSupportsSchemas() const
 	{
-		return m_props.GetSchemaTerm().empty();
+		return !m_props.GetSchemaTerm().empty();
+	}
+
+
+	std::string DatabaseCatalog::EscapePatternValueArguments(const std::string& input) const
+	{
+		string esc = GetSearchPatternEscape();
+		string escaped = input;
+		boost::algorithm::replace_all(escaped, u8"%", esc + u8"%");
+		boost::algorithm::replace_all(escaped, u8"_", esc + u8"_");
+		return escaped;
 	}
 
 
@@ -160,6 +171,29 @@ namespace exodbc
 				EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName),
 				tableType, MetadataMode::PatternValue);
 		}
+	}
+
+
+	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, const std::string& tableType) const
+	{
+		bool supportsCatalogs = GetSupportsCatalogs();
+		bool supportsSchemas = GetSupportsSchemas();
+		if (supportsCatalogs && supportsSchemas)
+		{
+			NotAllowedException nae(u8"Database supports catalogs and schemas, unable to determine type of schemaOrCatalogName argument");
+			SET_EXCEPTION_SOURCE(nae);
+			throw nae;
+		}
+		if (!(supportsCatalogs || supportsSchemas))
+		{
+			NotAllowedException nae(u8"Database does not support catalogs or schemas, cannot use schemaOrCatalogName argument");
+			SET_EXCEPTION_SOURCE(nae);
+			throw nae;
+		}
+		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
+			supportsSchemas ? EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName) : nullptr,
+			supportsCatalogs ? EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName) : nullptr,
+			tableType, MetadataMode::PatternValue);
 	}
 
 

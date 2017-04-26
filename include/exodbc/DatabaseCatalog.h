@@ -142,7 +142,7 @@ namespace exodbc
 		*
 		*/
 		TableInfosVector SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, 
-			const std::string& tableType) const {	return TableInfosVector();	};
+			const std::string& tableType) const;
 
 
 		/*!
@@ -157,6 +157,13 @@ namespace exodbc
 		*		with returned value.
 		*/
 		std::string GetSearchPatternEscape() const { return m_props.GetSearchPatternEscape(); };
+
+
+		/*!
+		* \brief Escapes the pattern value arguments '%' and '_' with the escape sequence returned
+		*		by GetSearchPatternEscape()
+		*/
+		std::string EscapePatternValueArguments(const std::string& input) const;
 
 
 		/*!
