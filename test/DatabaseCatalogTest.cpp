@@ -228,4 +228,42 @@ namespace exodbctest
 		EXPECT_EQ(ti, tables2.front());
 	}
 
+
+	TEST_F(DatabaseCatalogTest, ListCatalogs)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		vector<string> catalogs = dbCat.ListCatalogs();
+		if (dbCat.GetSupportsCatalogs())
+		{
+			EXPECT_FALSE(catalogs.empty());
+		}
+		else
+		{
+			LOG_INFO(u8"Skipping test because databse does not support catalogs");
+		}
+	}
+
+
+	TEST_F(DatabaseCatalogTest, ListSchemas)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		vector<string> schemas = dbCat.ListSchemas();
+		if (dbCat.GetSupportsSchemas())
+		{
+			EXPECT_FALSE(schemas.empty());
+		}
+		else
+		{
+			LOG_INFO(u8"Skipping test because databse does not support schemas");
+		}
+	}
+
+
+	TEST_F(DatabaseCatalogTest, ListTableTypes)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		vector<string> types = dbCat.ListTableTypes();
+		EXPECT_FALSE(types.empty());
+	}
+
 } //namespace exodbc

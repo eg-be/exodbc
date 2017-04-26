@@ -47,6 +47,7 @@
     <Case>lower</Case>
     <Skip>BigIntColumnTest.*</Skip>
     <Skip>wxCompatibilityTest.*</Skip>
+    <Skip>DatabaseCatalogTest.ListSchemas</Skip>
     <Skip>DatabaseTest.ReadSchemas</Skip>
     <Skip>DatabaseTest.ReadTablePrimaryKeysInfo</Skip>
     <Skip>DatabaseTest.ReadTablePrivileges</Skip>
