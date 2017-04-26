@@ -119,13 +119,25 @@ namespace exodbc
 	}
 
 
+	bool DatabaseCatalog::GetSupportsCatalogs() const
+	{
+		return m_props.GetSupportsCatalogs() && !m_props.GetCatalogTerm().empty();
+	}
+
+
+	bool DatabaseCatalog::GetSupportsSchemas() const
+	{
+		return m_props.GetSchemaTerm().empty();
+	}
+
+
 	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName, 
 		const std::string& schemaName, 
 		const std::string& catalogName, const std::string& tableType /* = u8"" */) const
 	{
 		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
-			!m_props.GetSchemaTerm().empty() ? EXODBCSTR_TO_SQLAPICHARPTR(schemaName) : nullptr,
-			m_props.GetSupportsCatalogs() && !m_props.GetCatalogTerm().empty() ? EXODBCSTR_TO_SQLAPICHARPTR(catalogName) : nullptr,
+			schemaName.empty() && !GetSupportsSchemas() ? nullptr : EXODBCSTR_TO_SQLAPICHARPTR(schemaName),
+			catalogName.empty() && !GetSupportsCatalogs() ? nullptr : EXODBCSTR_TO_SQLAPICHARPTR(catalogName),
 			tableType, MetadataMode::PatternValue);
 	}
 
