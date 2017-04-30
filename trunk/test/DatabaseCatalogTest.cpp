@@ -88,12 +88,12 @@ namespace exodbctest
 	{
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 		// we should find some tables if not restricting anything
-		TableInfosVector allTables = dbCat.SearchTables(u8"%");
+		TableInfoVector allTables = dbCat.SearchTables(u8"%");
 		EXPECT_TRUE(allTables.size() > 0);
 
 		// now restrict to tables named '%tmp' - we should have some in our test-db:
 		// that should be less than all tables:
-		TableInfosVector tmpTables = dbCat.SearchTables(u8"%tmp");
+		TableInfoVector tmpTables = dbCat.SearchTables(u8"%tmp");
 		EXPECT_GT(allTables.size(), tmpTables.size());
 	}
 
@@ -102,18 +102,18 @@ namespace exodbctest
 	{
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 		// we should find some tables if not restricting anything
-		TableInfosVector allTables = dbCat.SearchTables(u8"%");
+		TableInfoVector allTables = dbCat.SearchTables(u8"%");
 		EXPECT_TRUE(allTables.size() > 0);
 
 		// now restrict to tables named '%tmp' - we should have some in our test-db:
 		// that should be less than all tables:
-		TableInfosVector tmpTables = dbCat.SearchTables(u8"%tmp");
+		TableInfoVector tmpTables = dbCat.SearchTables(u8"%tmp");
 		EXPECT_GT(allTables.size(), tmpTables.size());
 
 		// theoretically, setting catalog name and schema name to nullptr, should
 		// be equal to calling them with '%', if pattern value arguments are used,
 		// but at least on sql server we get way more tables, so just test for >=
-		TableInfosVector allTables2 = dbCat.SearchTables(u8"%");
+		TableInfoVector allTables2 = dbCat.SearchTables(u8"%");
 		EXPECT_GE(allTables2.size(), allTables.size());
 	}
 
@@ -128,11 +128,11 @@ namespace exodbctest
 		string tableNamePattern = boost::str(boost::format(u8"%%%s_tmp") % esc);
 		if (g_odbcInfo.m_namesCase == Case::UPPER)
 			boost::algorithm::to_upper(tableNamePattern);
-		TableInfosVector tmpTables = dbCat.SearchTables(tableNamePattern);
+		TableInfoVector tmpTables = dbCat.SearchTables(tableNamePattern);
 		EXPECT_FALSE(tmpTables.empty());
 
 		// every table must end with _tmp
-		for (TableInfosVector::const_iterator it = tmpTables.begin(); it != tmpTables.end(); ++it)
+		for (TableInfoVector::const_iterator it = tmpTables.begin(); it != tmpTables.end(); ++it)
 		{
 			string tableName = it->GetPureName();
 			EXPECT_TRUE(boost::algorithm::iends_with(tableName, u8"_tmp"));
@@ -149,12 +149,12 @@ namespace exodbctest
 		{
 			boost::algorithm::to_upper(tableNamePattern);
 		}
-		TableInfosVector tables = dbCat.SearchTables(tableNamePattern);
+		TableInfoVector tables = dbCat.SearchTables(tableNamePattern);
 		ASSERT_FALSE(tables.empty());
 
 		// can only do test if table has either catalog or schema only
 		TableInfo ti = tables.front();
-		TableInfosVector tables2;
+		TableInfoVector tables2;
 		if ((ti.HasSchema() && !ti.HasCatalog()) || (!ti.HasSchema() && ti.HasCatalog()))
 		{
 			string schemaOrCatalogName = ti.HasSchema() ? ti.GetSchema() : ti.GetCatalog();
@@ -178,18 +178,18 @@ namespace exodbctest
 		string tableNamePattern = u8"integertypes";
 		if (g_odbcInfo.m_namesCase == Case::UPPER)
 			boost::algorithm::to_upper(tableNamePattern);
-		TableInfosVector tables = dbCat.SearchTables(tableNamePattern);
+		TableInfoVector tables = dbCat.SearchTables(tableNamePattern);
 		ASSERT_FALSE(tables.empty());
 		
 		TableInfo ti = tables.front();
-		TableInfosVector tables2;
+		TableInfoVector tables2;
 		if(ti.HasCatalog())
 		{
-			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetCatalog(), false, ti.GetType());
+			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetCatalog(), DatabaseCatalog::SchemaOrCatalogType::Catalog , ti.GetType());
 		}
 		else if (ti.HasSchema())
 		{
-			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetSchema(), true, ti.GetType());
+			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetSchema(), DatabaseCatalog::SchemaOrCatalogType::Schema, ti.GetType());
 		}
 		else
 		{
@@ -209,11 +209,11 @@ namespace exodbctest
 		string tableNamePattern = u8"integertypes";
 		if (g_odbcInfo.m_namesCase == Case::UPPER)
 			boost::algorithm::to_upper(tableNamePattern);
-		TableInfosVector tables = dbCat.SearchTables(tableNamePattern);
+		TableInfoVector tables = dbCat.SearchTables(tableNamePattern);
 		ASSERT_FALSE(tables.empty());
 
 		TableInfo ti = tables.front();
-		TableInfosVector tables2;
+		TableInfoVector tables2;
 		if (ti.HasCatalog() && ti.HasSchema())
 		{
 			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetSchema(), ti.GetCatalog(), u8"");
@@ -226,6 +226,23 @@ namespace exodbctest
 		}
 		ASSERT_EQ(1, tables2.size());
 		EXPECT_EQ(ti, tables2.front());
+	}
+
+
+	TEST_F(DatabaseCatalogTest, FindOneTable)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		// find one table
+		string tableNamePattern = u8"integertypes";
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
+			boost::algorithm::to_upper(tableNamePattern);
+		EXPECT_NO_THROW(dbCat.FindOneTable(tableNamePattern));
+
+		// Fail if we have multiple matching tables
+		tableNamePattern = u8"integertypes%";
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
+			boost::algorithm::to_upper(tableNamePattern);
+		EXPECT_THROW(dbCat.FindOneTable(tableNamePattern), NotFoundException);
 	}
 
 
@@ -264,6 +281,20 @@ namespace exodbctest
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 		vector<string> types = dbCat.ListTableTypes();
 		EXPECT_FALSE(types.empty());
+	}
+
+
+	TEST_F(DatabaseCatalogTest, Reset)
+	{
+		DatabaseCatalog dbCat;
+		// Init once is okay
+		dbCat.Init(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		// But twice must fail
+		EXPECT_THROW(dbCat.Init(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties()), AssertionException);
+
+		// But resetting it must allow to init again
+		dbCat.Reset();
+		EXPECT_NO_THROW(dbCat.Init(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties()));
 	}
 
 } //namespace exodbc

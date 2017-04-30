@@ -65,12 +65,13 @@ namespace exodbctest
 	{
 		if (!IsExcelDb())
 			return;
-
-		TableInfosVector tables;
-		ASSERT_NO_THROW(tables = m_pDb->FindTables(u8"", u8"", u8"", u8""));
+		
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		TableInfoVector tables;
+		ASSERT_NO_THROW(tables = pDbCat->SearchTables(u8"%"));
 		// Must contain our sheet 'TestTable$'
 		bool foundTestTableSheet = false;
-		TableInfosVector::const_iterator it;
+		TableInfoVector::const_iterator it;
 		for (it = tables.begin(); it != tables.end(); it++)
 		{
 			if (it->GetPureName() == u8"TestTable$")
@@ -119,8 +120,9 @@ namespace exodbctest
 		EXPECT_EQ(L"row1", textCol->GetWString());
 
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
+		ASSERT_NO_THROW(tableInfo = pDbCat->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
 
 		Table tTable2(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableInfo);
 		tTable2.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));
@@ -148,7 +150,8 @@ namespace exodbctest
 
 		// Find the correct table:
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		ASSERT_NO_THROW(tableInfo = pDbCat->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
 		// No need to set a special query-name using [TestTable$], the Table will handle that during Open()
 		// And create the manual table:
 		Table tTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableInfo);
@@ -191,7 +194,8 @@ namespace exodbctest
 
 		// Find the correct table:
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		ASSERT_NO_THROW(tableInfo = pDbCat->FindOneTable(u8"TestTable$", u8"", u8"", u8""));
 		// And create the auto table:
 		Table tTable(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableInfo);
 		tTable.SetSql2BufferTypeMap(Sql2BufferTypeMapPtr(new WCharSql2BufferMap()));

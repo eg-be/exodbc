@@ -154,6 +154,9 @@ namespace exodbc
 			// Try to detect the type and store it internally for later use
 			m_dbmsType = m_props.DetectDbms();
 
+			// Set up the Catalog information
+			m_pDbCatalog = std::make_shared<DatabaseCatalog>(m_pHDbc, m_props);
+
 			// Set Connection Options
 			SetConnectionAttributes();
 
@@ -172,6 +175,7 @@ namespace exodbc
 		{
 			HIDE_UNUSED(ex);
 			// Try to free what we've allocated and rethrow
+			m_pDbCatalog.reset();
 			m_props.Reset();
 			if (m_pHStmt->IsAllocated())
 			{
@@ -342,6 +346,13 @@ namespace exodbc
 	}
 
 
+	DatabaseCatalogPtr Database::GetDbCatalog() const
+	{
+		exASSERT(IsOpen());
+		return m_pDbCatalog;
+	}
+
+
 	void Database::SetConnectionAttributes()
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
@@ -354,90 +365,6 @@ namespace exodbc
 
 		// For the moment do nothing here. 
 		// There is no need to set any connection attributes right now, we assume defaults are fine.
-	}
-
-
-	std::vector<std::string> Database::ReadCatalogInfo(ReadCatalogInfoMode mode)
-	{
-		exASSERT(IsOpen());
-
-		// Close Statement and make sure it closes upon exit
-		StatementCloser stmtCloser(m_pHStmt, true, true);
-
-		std::vector<std::string> results;
-
-		std::string catalogName = u8"";
-		std::string schemaName = u8"";
-		std::string tableTypeName = u8"";
-		std::string tableName = u8"";
-
-		SQLSMALLINT colNr = 0;
-		SQLUSMALLINT charLen = 0;
-
-		switch(mode)
-		{
-		case ReadCatalogInfoMode::AllCatalogs:
-			catalogName = SQL_ALL_CATALOGS;
-			colNr = 1;
-			charLen = m_props.GetMaxCatalogNameLen();
-			break;
-		case ReadCatalogInfoMode::AllSchemas:
-			schemaName = SQL_ALL_SCHEMAS;
-			colNr = 2;
-			charLen = m_props.GetMaxSchemaNameLen();
-			break;
-		case ReadCatalogInfoMode::AllTableTypes:
-			tableTypeName = SQL_ALL_TABLE_TYPES;
-			colNr = 4;
-			charLen = DB_MAX_TABLE_TYPE_LEN;
-			break;
-		default:
-			exASSERT(false);
-		}
-		
-		std::unique_ptr<SQLAPICHARTYPE[]> buffer(new SQLAPICHARTYPE[charLen]);
-		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			EXODBCSTR_TO_SQLAPICHARPTR(catalogName), SQL_NTS,		// catalog name                 
-			EXODBCSTR_TO_SQLAPICHARPTR(schemaName), SQL_NTS,		// schema name
-			EXODBCSTR_TO_SQLAPICHARPTR(tableName), SQL_NTS,			// table name
-			EXODBCSTR_TO_SQLAPICHARPTR(tableTypeName), SQL_NTS);
-
-		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
-
-		// Read data
-		SQLLEN cb;
-		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)   // Table Information
-		{
-			GetData(m_pHStmt, colNr, SQLAPICHARTYPENAME, buffer.get(), charLen * sizeof(SQLAPICHARTYPE), &cb, NULL);
-			results.push_back(SQLAPICHARPTR_TO_EXODBCSTR(buffer.get()));
-		}
-
-		THROW_IFN_NO_DATA(SQLFetch, ret);
-
-		return results;
-	}
-
-
-	TableInfo Database::FindOneTable(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const
-	{
-		// Query the tables that match
-		TableInfosVector tables = FindTables(tableName, schemaName, catalogName, tableType);
-
-		if(tables.size() == 0)
-		{
-			Exception ex((boost::format(u8"No tables found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s', typeName : '%s'") %tableName %schemaName %catalogName %tableType).str());
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-		if(tables.size() != 1)
-		{
-			Exception ex((boost::format(u8"Not exactly one table found while searching for: tableName: '%s', schemName: '%s', catalogName: '%s', typeName : '%s'") %tableName %schemaName %catalogName %tableType).str());
-			SET_EXCEPTION_SOURCE(ex);
-			throw ex;
-		}
-
-		TableInfo table = tables[0];
-		return table;
 	}
 
 
@@ -529,8 +456,9 @@ namespace exodbc
 		m_pHStmt->Free();
 		m_pHStmtExecSql->Free();
 
-		// And also clear all props read
+		// And also clear all props read and the catalog
 		m_props.Reset();
+		m_pDbCatalog.reset();
 
 		// Try to disconnect from the data source
 		SQLRETURN ret = SQLDisconnect(m_pHDbc->GetHandle());
@@ -585,57 +513,6 @@ namespace exodbc
 	}
 
 
-	TableInfosVector Database::FindTables(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const
-	{
-		exASSERT(IsOpen());
-
-		// Close Statement and make sure it closes upon exit
-		StatementCloser stmtCloser(m_pHStmt, true, true);
-
-		TableInfosVector tables;
-
-		std::unique_ptr<SQLAPICHARTYPE[]> buffCatalog(new SQLAPICHARTYPE[m_props.GetMaxCatalogNameLen()]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffSchema(new SQLAPICHARTYPE[m_props.GetMaxSchemaNameLen()]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffTableName(new SQLAPICHARTYPE[m_props.GetMaxTableNameLen()]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffTableType(new SQLAPICHARTYPE[DB_MAX_TABLE_TYPE_LEN]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffTableRemarks(new SQLAPICHARTYPE[DB_MAX_TABLE_REMARKS_LEN]);
-		bool isCatalogNull = false;
-		bool isSchemaNull = false;
-
-		// Query db
-		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
-			catalogName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(catalogName), catalogName.empty() ? 0 : SQL_NTS,   // catname                 
-			schemaName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(schemaName), schemaName.empty() ? 0 : SQL_NTS,   // schema name
-			tableName.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(tableName), tableName.empty() ? 0 : SQL_NTS,							// table name
-			tableType.empty() ? NULL :  EXODBCSTR_TO_SQLAPICHARPTR(tableType), tableType.empty() ? 0 : SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
-
-		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
-		{
-			buffCatalog[0] = 0;
-			buffSchema[0] = 0;
-			buffTableName[0] = 0;
-			buffTableType[0] = 0;
-			buffTableRemarks[0] = 0;
-
-			SQLLEN cb;
-			GetData(m_pHStmt, 1, SQLAPICHARTYPENAME, buffCatalog.get(), m_props.GetMaxCatalogNameLen() * sizeof(SQLAPICHARTYPE), &cb, &isCatalogNull);
-			GetData(m_pHStmt, 2, SQLAPICHARTYPENAME, buffSchema.get(), m_props.GetMaxSchemaNameLen() * sizeof(SQLAPICHARTYPE), &cb, &isSchemaNull);
-			GetData(m_pHStmt, 3, SQLAPICHARTYPENAME, buffTableName.get(), m_props.GetMaxTableNameLen() * sizeof(SQLAPICHARTYPE), &cb, NULL);
-			GetData(m_pHStmt, 4, SQLAPICHARTYPENAME, buffTableType.get(), DB_MAX_TABLE_TYPE_LEN * sizeof(SQLAPICHARTYPE), &cb, NULL);
-			GetData(m_pHStmt, 5, SQLAPICHARTYPENAME, buffTableRemarks.get(), DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLAPICHARTYPE), &cb, NULL);
-
-			TableInfo table(SQLAPICHARPTR_TO_EXODBCSTR(buffTableName.get()), SQLAPICHARPTR_TO_EXODBCSTR(buffTableType.get()), 
-                            SQLAPICHARPTR_TO_EXODBCSTR(buffTableRemarks.get()), SQLAPICHARPTR_TO_EXODBCSTR(buffCatalog.get()), 
-                            SQLAPICHARPTR_TO_EXODBCSTR(buffSchema.get()), isCatalogNull, isSchemaNull, GetDbms());
-			tables.push_back(table);
-		}
-		THROW_IFN_NO_DATA(SQLFetch, ret);
-
-		return tables;
-	}
-
-
 	int Database::ReadColumnCount(const TableInfo& table)
 	{
 		// Close Statement and make sure it closes upon exit
@@ -675,7 +552,7 @@ namespace exodbc
 	int Database::ReadColumnCount(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType)
 	{
 		// Find one matching table
-		TableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
+		TableInfo table = m_pDbCatalog->FindOneTable(tableName, schemaName, catalogName, tableType);
 
 		// Forward the call		
 		return ReadColumnCount(table);
@@ -726,7 +603,7 @@ namespace exodbc
 		exASSERT(IsOpen());
 
 		// Find one matching table
-		TableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
+		TableInfo table = m_pDbCatalog->FindOneTable(tableName, schemaName, catalogName, tableType);
 
 		// Forward the call		
 		return ReadTablePrivileges(table);
@@ -885,7 +762,7 @@ namespace exodbc
 		exASSERT(IsOpen());
 
 		// Find one matching table
-		TableInfo table = FindOneTable(tableName, schemaName, catalogName, tableType);
+		TableInfo table = m_pDbCatalog->FindOneTable(tableName, schemaName, catalogName, tableType);
 
 		// Forward the call		
 		return ReadTableColumnInfo(table);
@@ -969,29 +846,6 @@ namespace exodbc
 		THROW_IFN_NO_DATA(SQLFetch, ret);
 
 		return columns;
-	}
-
-
-	SDbCatalogInfo Database::ReadCompleteCatalog()
-	{
-		SDbCatalogInfo dbInf;
-
-		dbInf.m_tables = FindTables(u8"", u8"", u8"", u8"");
-
-		TableInfosVector::const_iterator it;
-		for(it = dbInf.m_tables.begin(); it != dbInf.m_tables.end(); it++)
-		{
-			const TableInfo& table = *it;
-			if (table.HasCatalog())
-			{
-				dbInf.m_catalogs.insert(table.GetCatalog());
-			}
-			if (table.HasSchema())
-			{
-				dbInf.m_schemas.insert(table.GetSchema());
-			}
-		}
-		return dbInf;
 	}
 
 

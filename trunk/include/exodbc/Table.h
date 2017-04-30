@@ -104,7 +104,8 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Create a new Table using the passed search-names.
+		* \brief	Create a new Table using the passed search-names. If any of the passed names is set to an empty string
+		*			it is ignored.
 		* \see		Init(const Database* pDb, AccessFlags, const std::string&, const std::string&, const std::string&, const std::string&)
 		* \throw	Exception
 		*/

@@ -242,7 +242,8 @@ namespace exodbctest
 		// This makes only sense if we've already determined the correct TableInfo structure
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
 		TableInfo tableInfo;
-		ASSERT_NO_THROW(tableInfo = m_pDb->FindOneTable(tableName, u8"", u8"", u8""));
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		ASSERT_NO_THROW(tableInfo = pDbCat->FindOneTable(tableName, u8"", u8"", u8""));
 
 		exodbc::Table table(m_pDb, TableAccessFlag::AF_READ_WITHOUT_PK, tableInfo);
 		EXPECT_NO_THROW(table.Open(TableOpenFlag::TOF_NONE));
