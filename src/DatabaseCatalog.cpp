@@ -44,10 +44,7 @@ namespace exodbc
 	// -----------
 	DatabaseCatalog::~DatabaseCatalog()
 	{
-		if (m_pHStmt->IsAllocated())
-		{
-			m_pHStmt->Free();
-		}
+		Reset();
 	}
 
 
@@ -65,14 +62,24 @@ namespace exodbc
 	}
 
 
+	void DatabaseCatalog::Reset()
+	{
+		if (m_pHStmt->IsAllocated())
+		{
+			m_pHStmt->Free();
+		}
+		m_pHdbc.reset();
+	}
+
+
 	vector<string> DatabaseCatalog::ListCatalogs() const
 	{
 		string catalog = SQL_ALL_CATALOGS;
 		string empty = u8"";
-		TableInfosVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty), 
+		TableInfoVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty), 
 				EXODBCSTR_TO_SQLAPICHARPTR(catalog), empty, MetadataMode::PatternValue);
 		vector<string> catalogs;
-		for (TableInfosVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
+		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
 			catalogs.push_back(it->GetCatalog());
 		}
@@ -84,10 +91,10 @@ namespace exodbc
 	{
 		string schema = SQL_ALL_SCHEMAS;
 		string empty = u8"";
-		TableInfosVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(schema),
+		TableInfoVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(schema),
 			EXODBCSTR_TO_SQLAPICHARPTR(empty), empty, MetadataMode::PatternValue);
 		vector<string> schemas;
-		for (TableInfosVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
+		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
 			schemas.push_back(it->GetCatalog());
 		}
@@ -99,10 +106,10 @@ namespace exodbc
 	{
 		string type = SQL_ALL_TABLE_TYPES;
 		string empty = u8"";
-		TableInfosVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty),
+		TableInfoVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty),
 			EXODBCSTR_TO_SQLAPICHARPTR(empty), type, MetadataMode::PatternValue);
 		vector<string> types;
-		for (TableInfosVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
+		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
 			types.push_back(it->GetCatalog());
 		}
@@ -187,7 +194,7 @@ namespace exodbc
 	}
 
 
-	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName, 
+	TableInfoVector DatabaseCatalog::SearchTables(const std::string& tableName, 
 		const std::string& schemaName, 
 		const std::string& catalogName, const std::string& tableType /* = u8"" */) const
 	{
@@ -198,11 +205,11 @@ namespace exodbc
 	}
 
 
-	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName, 
-		const std::string& schemaOrCatalogName, bool argsIsSchemaName, 
+	TableInfoVector DatabaseCatalog::SearchTables(const std::string& tableName, 
+		const std::string& schemaOrCatalogName, SchemaOrCatalogType schemaOrCatalogType,
 		const std::string& tableType /* = u8"" */) const
 	{
-		if (argsIsSchemaName)
+		if (schemaOrCatalogType == SchemaOrCatalogType::Schema)
 		{
 			return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
 				EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName),
@@ -219,7 +226,7 @@ namespace exodbc
 	}
 
 
-	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, const std::string& tableType) const
+	TableInfoVector DatabaseCatalog::SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, const std::string& tableType) const
 	{
 		bool supportsCatalogs = GetSupportsCatalogs();
 		bool supportsSchemas = GetSupportsSchemas();
@@ -242,13 +249,53 @@ namespace exodbc
 	}
 
 
-	TableInfosVector DatabaseCatalog::SearchTables(const std::string& tableName, const std::string& tableType /* = u8"%" */) const
+	TableInfoVector DatabaseCatalog::SearchTables(const std::string& tableName, const std::string& tableType /* = u8"%" */) const
 	{
 		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), nullptr, nullptr, tableType, MetadataMode::PatternValue);
 	}
 
 
-	TableInfosVector DatabaseCatalog::SearchTables(SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName,
+	TableInfo DatabaseCatalog::FindOneTable(const std::string& tableName, const std::string& schemaName /* = u8"" */, 
+		const std::string& catalogName /* = u8"" */, const std::string& tableType /* = u8"" */) const
+	{
+		exASSERT(!tableName.empty());
+		bool haveSchema = !schemaName.empty();
+		bool haveCatalog = !catalogName.empty();
+		TableInfoVector matchingTables;
+		if (haveSchema && haveCatalog)
+			matchingTables = SearchTables(tableName, schemaName, catalogName, tableType);
+		else if (haveSchema)
+			matchingTables = SearchTables(tableName, schemaName, SchemaOrCatalogType::Schema, tableType);
+		else if (haveCatalog)
+			matchingTables = SearchTables(tableName, catalogName, SchemaOrCatalogType::Catalog, tableType);
+		else
+			matchingTables = SearchTables(tableName, tableType);
+		if (matchingTables.size() < 1)
+		{
+			NotFoundException nfe(boost::str(boost::format(u8"No Table was found matching tableName '%s', catalogName '%s', schemaName '%s', tableType '%s'.")
+				% tableName % catalogName % schemaName % tableType));
+			SET_EXCEPTION_SOURCE(nfe);
+			throw nfe;
+		}
+		else if (matchingTables.size() > 1)
+		{
+			stringstream ss;
+			ss << u8"Multiple Tables were found matching tableName '" << tableName << "', catalogName '" << catalogName
+				<< u8"' schemaName '" << schemaName << u8"' tableType '" << tableType << u8"': " << std::endl;
+			int count = 0;
+			for (TableInfoVector::const_iterator it = matchingTables.begin(); it != matchingTables.end(); ++it)
+			{
+				ss << u8"TableInfo[" << count << u8"]: " << it->ToString() << std::endl;
+			}
+			NotFoundException nfe(ss.str());
+			SET_EXCEPTION_SOURCE(nfe);
+			throw nfe;
+		}
+		return matchingTables.front();
+	}
+
+
+	TableInfoVector DatabaseCatalog::SearchTables(SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName,
 		SQLAPICHARTYPE* pCatalogName, const std::string& tableType, MetadataMode mode) const
 	{
 		if (m_stmtMode != mode)
@@ -264,7 +311,7 @@ namespace exodbc
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_pHStmt, true, true);
 
-		TableInfosVector tables;
+		TableInfoVector tables;
 
 		std::unique_ptr<SQLAPICHARTYPE[]> buffCatalog(new SQLAPICHARTYPE[m_props.GetMaxCatalogNameLen() + 1]);
 		std::unique_ptr<SQLAPICHARTYPE[]> buffSchema(new SQLAPICHARTYPE[m_props.GetMaxSchemaNameLen() + 1]);

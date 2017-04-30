@@ -27,52 +27,6 @@
 namespace exodbc
 {
 	/*!
-	* \class TableInfo
-	*
-	* \brief Information about a Table
-	*
-	* \details Holds information about a table found using one of the catalog functions.
-	*/
-	class EXODBCAPI TableInfo
-	{	
-	public:
-		TableInfo();
-		TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, const std::string& catalogName, const std::string schemaName, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
-		TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, const std::string& catalogName, const std::string schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
-
-		std::string GetQueryName() const;
-		std::string GetPureName() const;
-
-		std::string		GetType() const { return m_tableType; };
-		std::string		GetCatalog() const { return m_catalogName;};
-		std::string		GetSchema() const {	return m_schemaName; };
-
-		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
-		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
-
-		bool operator==(const TableInfo& other) const noexcept;
-		bool operator!=(const TableInfo& other) const noexcept;
-
-	private:
-		DatabaseProduct		m_dbms;
-
-		std::string		m_tableName;		///< Table name.
-		std::string		m_tableType;        ///< "TABLE" or "SYSTEM TABLE" etc.
-		std::string		m_tableRemarks;		///< Remarks
-		std::string		m_catalogName;		///< Catalog name
-		std::string		m_schemaName;		///< Schema name.
-		bool				m_isCatalogNull;	///< True if NULL was returned for catalog name.
-		bool				m_isSchemaNull;		///< True if NULL was returned for schema name.
-	};
-
-	/*!
-	* \typedef TableInfosVector
-	* \brief std::vector of TableInfo objects.
-	*/
-	typedef std::vector<TableInfo> TableInfosVector;
-
-
-	/*!
 	* \class	SpecialColumnInfo
 	* \brief	Information about a special column fetched using the catalog function SQLSpecialColumns.
 	* \see: https://msdn.microsoft.com/en-us/library/ms714602%28v=vs.85%29.aspx
@@ -401,18 +355,6 @@ namespace exodbc
 	* \brief std::vector of SSqlTypeInfo objects.
 	*/
 	typedef std::vector<SSqlTypeInfo> SqlTypeInfosVector;
-
-
-	/*!
-	* \struct	SDbCatalogInfo
-	* \brief	Description of the catalog of a database
-	*/
-	struct EXODBCAPI SDbCatalogInfo
-	{
-		TableInfosVector m_tables;
-		std::set<std::string> m_catalogs;
-		std::set<std::string> m_schemas;
-	};
 
 
 	/*!

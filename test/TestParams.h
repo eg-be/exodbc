@@ -43,11 +43,13 @@ namespace exodbctest
 			, m_username(username)
 			, m_password(password)
 			, m_namesCase(namesCase)
+			, m_createDb(false)
 		{};
 
 		TestParams(const std::string& connectionString, Case namesCase)
 			: m_connectionString(connectionString)
 			, m_namesCase(namesCase)
+			, m_createDb(false)
 		{};
 
 		void Load(const boost::filesystem::path& settingsFile, std::vector<std::string>& skipNames);

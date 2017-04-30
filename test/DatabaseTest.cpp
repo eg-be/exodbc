@@ -430,67 +430,6 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseTest, ReadCatalogs)
-	{
- 		std::vector<std::string> cats;
-		ASSERT_NO_THROW(cats = m_pDb->ReadCatalogs());
-		switch(m_pDb->GetDbms())
-		{
-		case DatabaseProduct::DB2:
-			// DB2 does not support catalogs. it reports zero catalogs
-			EXPECT_EQ(0, cats.size());
-			break;
-
-		case DatabaseProduct::MS_SQL_SERVER:
-		case DatabaseProduct::MY_SQL:
-			// Those report our test-db as a catalog
-			EXPECT_TRUE(std::find(cats.begin(), cats.end(), u8"exodbc") != cats.end());
-			break;
-		case DatabaseProduct::ACCESS:
-			// Returns the file-path as catalog, must be our file named 'exodbc' (note: .mdb is not in the path)
-			EXPECT_EQ(1, cats.size());
-			EXPECT_TRUE(boost::algorithm::ends_with(cats[0], u8"exodbc"));
-			break;
-		}
-	}
-
-	TEST_F(DatabaseTest, ReadSchemas)
-	{
-		std::vector<std::string> schemas;
-		EXPECT_NO_THROW(schemas = m_pDb->ReadSchemas());
-		switch(m_pDb->GetDbms())
-		{
-		case DatabaseProduct::DB2:
-			// DB2 reports our test-db as a schema
-			EXPECT_TRUE(schemas.size() > 0);
-			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), u8"EXODBC") != schemas.end());
-			break;
-		case DatabaseProduct::MY_SQL:
-			// Mysql reports one schema with an empty name
-			EXPECT_TRUE(schemas.size() == 1);
-			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), u8"") != schemas.end());
-			break;
-		case DatabaseProduct::MS_SQL_SERVER:
-			// ms sql server reported at least 3 schemas:
-			EXPECT_TRUE(schemas.size() >= 3);
-			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), u8"exodbc") != schemas.end());
-			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), u8"INFORMATION_SCHEMA") != schemas.end());
-			EXPECT_TRUE(std::find(schemas.begin(), schemas.end(), u8"sys") != schemas.end());
-			break;
-		}
-	}
-
-
-	TEST_F(DatabaseTest, ReadTableTypes)
-	{
-		std::vector<std::string> tableTypes;
-		EXPECT_NO_THROW(tableTypes = m_pDb->ReadTableTypes());
-		// Check that we have at least a type TABLE and a type VIEW
-		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), u8"TABLE") != tableTypes.end());
-		EXPECT_TRUE(std::find(tableTypes.begin(), tableTypes.end(), u8"VIEW") != tableTypes.end());
-	}
-
-
 	TEST_F(DatabaseTest, ReadTablePrivileges)
 	{
 		TablePrivilegesVector privs;
@@ -560,7 +499,8 @@ namespace exodbctest
 		TableInfo iInfo;
 		string intTableName = GetTableName(TableId::INTEGERTYPES);
 		string idName = GetIdColumnName(TableId::INTEGERTYPES);
-		ASSERT_NO_THROW(iInfo = m_pDb->FindOneTable(intTableName, u8"", u8"", u8""));
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		ASSERT_NO_THROW(iInfo = pDbCat->FindOneTable(intTableName, u8"", u8"", u8""));
 
 		EXPECT_NO_THROW(pks = m_pDb->ReadTablePrimaryKeys(iInfo));
 		EXPECT_EQ(1, pks.size());
@@ -574,7 +514,7 @@ namespace exodbctest
 		string mkId1 = ToDbCase(u8"id1");
 		string mkId2 = ToDbCase(u8"id2");
 		string mkId3 = ToDbCase(u8"id3");
-		EXPECT_NO_THROW(mkInfo = m_pDb->FindOneTable(multiKeyTableName, u8"", u8"", u8""));
+		EXPECT_NO_THROW(mkInfo = pDbCat->FindOneTable(multiKeyTableName, u8"", u8"", u8""));
 
 		EXPECT_NO_THROW(pks = m_pDb->ReadTablePrimaryKeys(mkInfo));
 		EXPECT_EQ(3, pks.size());
@@ -646,120 +586,6 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseTest, FindTables)
-	{
-		TableInfosVector tables;
-		std::string tableName;
-		std::string schemaName;
-		std::string catalogName;
-		switch(m_pDb->GetDbms())
-		{
-		case DatabaseProduct::MY_SQL:
-			// We know that mySql uses catalogs, not schemas:
-			tableName = u8"integertypes";
-			schemaName = u8"";
-			catalogName = u8"exodbc";
-			break;
-		case DatabaseProduct::DB2:
-			// We know that DB2 uses schemas (and uppercase):
-			tableName = u8"INTEGERTYPES";
-			schemaName = u8"EXODBC";
-			catalogName = u8"";
-			break;
-		case DatabaseProduct::MS_SQL_SERVER:
-			// And ms uses catalogs, which map to dbs and schemaName
-			tableName = u8"integertypes";
-			schemaName = u8"exodbc";
-			catalogName = u8"exodbc";
-			break;
-		case DatabaseProduct::ACCESS:
-			// only tablenames
-			tableName = u8"integertypes";
-			break;
-		default:
-			LOG_ERROR(u8"Dbms not known, cannot run test!");
-			ASSERT_TRUE(false);
-		}
-		// Find one table by using only the table-name as search param
-		EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, u8"", u8"", u8""));
-		EXPECT_EQ(1, tables.size());
-		// Find one table by using table-name and schema/catalog
-		EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, schemaName, catalogName, u8""));
-		EXPECT_EQ(1, tables.size());
-		// In all cases, we should not find anything if we use a schema or a catalog that does not exist
-		// \todo: Create Ticket (Info): Note: When using MySQL-Odbc driver, if 'do not use INFORMATION_SCHEMA' is set, this will fail due to an access denied for database "wrongCatalog"
-		// Access has no support for schemas
-		if (m_pDb->GetDbms() != DatabaseProduct::ACCESS)
-		{
-			EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, u8"WrongSchema", u8"", u8""));
-			EXPECT_EQ(0, tables.size());
-		}
-		EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, u8"", u8"WrongCatalog", u8""));
-		EXPECT_EQ(0, tables.size());
-		// Also, we have a table, not a view
-		EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, u8"", u8"", u8"VIEW"));
-		EXPECT_EQ(0, tables.size());
-		EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, u8"", u8"", u8"TABLE"));
-		EXPECT_EQ(1, tables.size());
-		// What about search-patterns? Note: Not use for table-type
-		// search patterns are not supported for schemas by Access:
-		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
-		{
-			EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, u8"", u8"%", u8""));
-		}
-		else
-		{
-			EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, u8"%", u8"%", u8""));
-		}
-		EXPECT_EQ(1, tables.size());
-		if(tables.size() > 0)
-		{
-			EXPECT_EQ(tableName, tables[0].GetPureName());
-			EXPECT_EQ(schemaName, tables[0].GetSchema());
-			if (m_pDb->GetDbms() != DatabaseProduct::ACCESS)
-			{
-				// still no support for catalogs on Access
-				EXPECT_EQ(catalogName, tables[0].GetCatalog());
-			}
-		}
-		std::string schemaPattern = schemaName;
-		if(schemaName.length() > 0)
-			schemaPattern = (boost::format(u8"%%%s%%") %schemaName).str();
-		std::string catalogPattern = catalogName;
-		if(catalogName.length() > 0)
-			catalogPattern = (boost::format(u8"%%%s%%") %catalogName).str();
-		EXPECT_NO_THROW(tables = m_pDb->FindTables(tableName, schemaPattern, catalogPattern, u8""));
-		EXPECT_EQ(1, tables.size());
-		if(tables.size() > 0)
-		{
-			EXPECT_EQ(tableName, tables[0].GetPureName());
-			EXPECT_EQ(schemaName, tables[0].GetSchema());
-			if (m_pDb->GetDbms() != DatabaseProduct::ACCESS)
-			{
-				// still no support for catalogs on Access
-				EXPECT_EQ(catalogName, tables[0].GetCatalog());
-			}
-		}
-	}
-
-
-	TEST_F(DatabaseTest, ReadCompleteCatalog)
-	{
-		SDbCatalogInfo cat;
-		EXPECT_NO_THROW( cat = m_pDb->ReadCompleteCatalog());
-		// TODO: This is confusing. DB2 reports schemas, what is correct, but mysql reports catalogs?? wtf?
-		if (m_pDb->GetDbms() == DatabaseProduct::DB2)
-		{
-			EXPECT_TRUE(cat.m_schemas.find(u8"EXODBC") != cat.m_schemas.end());
-		}
-		else if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
-		{
-			EXPECT_TRUE(cat.m_catalogs.find(u8"exodbc") != cat.m_catalogs.end());
-		}
-		EXPECT_GE((SQLINTEGER) cat.m_tables.size(), 12);
-	}
-
-
 	TEST_F(DatabaseTest, ReadColumnCount)
 	{
 		std::string tableName = u8"";
@@ -802,7 +628,8 @@ namespace exodbctest
 		// but others might change the value of a row identified by id during a transaction, etc.
 
 		string intTableName = GetTableName(TableId::INTEGERTYPES);
-		TableInfo intTableInfo = m_pDb->FindOneTable(intTableName, u8"", u8"", u8"");
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		TableInfo intTableInfo = pDbCat->FindOneTable(intTableName, u8"", u8"", u8"");
 		
 		SpecialColumnInfosVector specColsTransaction = m_pDb->ReadSpecialColumns(intTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::TRANSCATION);
 		SpecialColumnInfosVector specColsSession = m_pDb->ReadSpecialColumns(intTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::SESSION);
@@ -810,7 +637,7 @@ namespace exodbctest
 		EXPECT_EQ(1, specColsCursor.size());
 
 		string autoIdTableName = GetTableName(TableId::MULTIKEY);
-		TableInfo autoIdTableInfo = m_pDb->FindOneTable(autoIdTableName, u8"", u8"", u8"");
+		TableInfo autoIdTableInfo = pDbCat->FindOneTable(autoIdTableName, u8"", u8"", u8"");
 
 		specColsTransaction = m_pDb->ReadSpecialColumns(autoIdTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::TRANSCATION);
 		specColsSession = m_pDb->ReadSpecialColumns(autoIdTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::SESSION);

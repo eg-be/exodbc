@@ -96,7 +96,8 @@ void printDatatypesInfo(ConstDatabasePtr pDb)
 
 void printExOdbcTables(ConstDatabasePtr pDb)
 {
-	TableInfosVector allTables = pDb->FindTables(u8"", u8"", u8"", u8"");
+	DatabaseCatalogPtr pDbCat = pDb->GetDbCatalog();
+	TableInfoVector allTables = pDbCat->SearchTables(u8"", u8"", u8"", u8"");
 	struct Finder
 	{
 		Finder()
@@ -137,7 +138,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		}
 	};
 
-	TableInfosVector exodbcTables;
+	TableInfoVector exodbcTables;
 	std::copy_if(allTables.begin(), allTables.end(), back_inserter(exodbcTables), Finder(pDb->GetDbms()));
 
 	WRITE_STDOUT_ENDL(u8"=== Tables ===");

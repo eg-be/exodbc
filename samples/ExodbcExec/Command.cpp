@@ -546,16 +546,17 @@ namespace exodbcexec
 		vector<string> data;
 		LOG_INFO(boost::str(boost::format(u8"Listing all %s ..") % modes));
 		auto start = std::chrono::high_resolution_clock::now();
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
 		switch (m_mode)
 		{
 		case Mode::TableTypes:
-			data = m_pDb->ReadTableTypes();
+			data = pDbCat->ListTableTypes();
 			break;
 		case Mode::Schemas:
-			data = m_pDb->ReadSchemas();
+			data = pDbCat->ListSchemas();
 			break;
 		case Mode::Catalogs:
-			data = m_pDb->ReadCatalogs();
+			data = pDbCat->ListCatalogs();
 			break;
 		}
 		auto end = std::chrono::high_resolution_clock::now();

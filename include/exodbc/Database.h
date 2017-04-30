@@ -14,6 +14,8 @@
 #include "exOdbc.h"
 #include "Helpers.h"
 #include "InfoObject.h"
+#include "TableInfo.h"
+#include "DatabaseCatalog.h"
 #include "Sql2BufferTypeMap.h"
 #include "SqlHandle.h"
 #include "Environment.h"
@@ -214,43 +216,6 @@ namespace exodbc
 		void         RollbackTrans() const;
 
 
-		/**
-		 * \brief	Reads complete catalog. Queries the database using SQLTables with no search-string 
-		 * 			set at all. All parameters all NULL. This is due to the fact that SQL_ATTR_METADATA_ID
-		 * 			is not really implemented by all databases, so keep it simple.
-		 * \return	CatalogInfo
-		 * \throw	Exception If reading fails.
-		 */
-		SDbCatalogInfo	ReadCompleteCatalog();
-
-
-		/*!
-		 * \brief	Reads all Catalogs that are defined in the DB. This calls SQLTables with 
-		 * 			SQL_ALL_CATALOGS as catalog-name.
-		 * \return	Catalog names found.
-		 * \throw	Exception If reading catalogs fails.
-		 */
-		std::vector<std::string>	ReadCatalogs()		{ return ReadCatalogInfo(ReadCatalogInfoMode::AllCatalogs); };
-
-
-		/*!
-		 * \brief	Reads all schemas that are defined in the DB. This calls SQLTbles with
-		 * 			SQL_ALL_SCHEMAS as schema-name.
-		 * \return	Schema names found.
-		 * \throw	Exception if reading schemas fails.
-		 */
-		std::vector<std::string>	ReadSchemas()			{ return ReadCatalogInfo(ReadCatalogInfoMode::AllSchemas); };
-
-
-		/*!
-		 * \brief	Reads all table types that are defined by the DB. This call SQLTables with
-		 * 			SQL_ALL_TABLE_TYPES as table-type.
-		 * \return	Table type names found.
-		 * \throw	Exception If reading table types fails.
-		 */
-		std::vector<std::string>	ReadTableTypes()	{ return ReadCatalogInfo(ReadCatalogInfoMode::AllTableTypes); };
-
-
 		/*!
 		 * \brief	Queries the database using SQLColumns to determine the number of columns of
 		 * 			the passed Table (which should have been queried from the catalog, using
@@ -343,34 +308,6 @@ namespace exodbc
 		* \param	includeNullableColumns Include columns that can have NULL values in the special columns or not.
 		*/
 		SpecialColumnInfosVector ReadSpecialColumns(const TableInfo& table, IdentifierType idType, RowIdScope scope, bool includeNullableColumns = true) const;
-
-
-		/*!
-		 * \brief	Searches for tables using SQLTables. If any of the parameters passed is empty, SQLTables will be called
-		 * 			with a NULL value for that parameter, which indicates that we do not care about that param.
-		 * 			The attribute SQL_ATTR_METADATA_ID should default to FALSE, so all parameters are treated as pattern value
-		 * 			arguments (case sensitive, but you can use search patterns).
-		 * 			See: http://msdn.microsoft.com/en-us/library/ms711831%28v=vs.85%29.aspx
-		 * \param	tableName	  	Name of the table.
-		 * \param	schemaName	  	Name of the schema.
-		 * \param	catalogName   	Name of the catalog.
-		 * \param	tableType	  	Type of the table.
-		 * \return	The tables found that match the search-criteria.
-		 * \throw Exception			If querying the database fails.
-		 */
-		TableInfosVector		FindTables(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const;
-
-
-		/*!
-		* \brief	Searches for tables that match the passed arguments, return the table if exactly one such table is found.
-		* \param	tableName		  	Name of the table.
-		* \param	schemaName		  	Name of the schema.
-		* \param	catalogName		  	Name of the catalog.
-		* \param	tableType		  	Table Type name.
-		* \return	The table info of exactly one table that matches the passed search-criterias name, schema and catalog. Throws otherwise
-		* \throw	If not exactly one table can be found
-		*/
-		TableInfo		FindOneTable(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const;
 
 
 		/*!
@@ -554,6 +491,12 @@ namespace exodbc
 		SqlTypeInfosVector GetTypeInfos() const;
 
 
+		/*!
+		* \brief	Get the DatabaseCatalog associated with this Database.
+		* \throw	Exception if not Open()
+		*/
+		DatabaseCatalogPtr GetDbCatalog() const;
+
 		// Private stuff
 		// -------------
 	private:
@@ -588,26 +531,13 @@ namespace exodbc
 		void             OpenImpl();
 
 		
-		enum class ReadCatalogInfoMode
-		{
-			AllCatalogs,	///< Query all catalog names.
-			AllSchemas,		///< Query all schema names.
-			AllTableTypes	///< Query all table names.
-		};
-		/*!
-		* \brief	Queries the database about catalog-, schema- or table-names
-		* \param mode Determine which names to query.
-		* \returns  Result containing of names.
-		* \throw	Exception If reading fails.
-		*/
-		std::vector<std::string>	ReadCatalogInfo(ReadCatalogInfoMode mode);
-
 
 		// Members
 		// -------
 		ConstEnvironmentPtr		m_pEnv;		///< Environment of this Database
 		SqlInfoProperties		m_props;	///< Properties read from SqlGetInfo
 		Sql2BufferTypeMapPtr	m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used from this Database. If none is set during OpenImp() a DefaultSql2BufferTypeMap is created.
+		DatabaseCatalogPtr		m_pDbCatalog;	///< The catalog of this Database. Initialized during OpenImpl(), freed on Close()
 
 		SqlTypeInfosVector m_datatypes;	///< Queried from DB during Open
 		bool				m_dbIsOpen;			///< Set to true after SQLConnect was successful

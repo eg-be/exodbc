@@ -20,6 +20,7 @@
 #include "SqlStatementCloser.h"
 #include "ColumnBufferVisitors.h"
 #include "ExecutableStatement.h"
+#include "DatabaseCatalog.h"
 
 // Other headers
 // Debug
@@ -353,7 +354,8 @@ namespace exodbc
 	{
 		if (!m_haveTableInfo)
 		{
-			m_tableInfo = m_pDb->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
+			DatabaseCatalogPtr pDbCatalog = m_pDb->GetDbCatalog();
+			m_tableInfo = pDbCatalog->FindOneTable(m_initialTableName, m_initialSchemaName, m_initialCatalogName, m_initialTypeName);
 			m_haveTableInfo = true;
 		}
 
@@ -1145,7 +1147,8 @@ namespace exodbc
 					catalogName = u8"";
 					typeName = u8"";
 				}
-				m_pDb->FindOneTable(m_tableInfo.GetPureName(), m_tableInfo.GetSchema(), catalogName, typeName);
+				DatabaseCatalogPtr pDbCatalog = m_pDb->GetDbCatalog();
+				pDbCatalog->FindOneTable(m_tableInfo.GetPureName(), m_tableInfo.GetSchema(), catalogName, typeName);
 				searchedTable = true;
 			}
 

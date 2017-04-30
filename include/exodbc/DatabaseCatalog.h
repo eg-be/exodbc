@@ -13,7 +13,7 @@
 #include "exOdbc.h"
 #include "SqlHandle.h"
 #include "SqlInfoProperty.h"
-#include "InfoObject.h"
+#include "TableInfo.h"
 // Other headers
 // System headers
 
@@ -61,7 +61,7 @@ namespace exodbc
 		
 
 		/*!
-		* \brief Frees the allocated statement handle.
+		* \brief Calls Reset()
 		*/
 		~DatabaseCatalog();
 
@@ -77,6 +77,13 @@ namespace exodbc
 		*				passed connection handle.
 		*/
 		void Init(ConstSqlDbcHandlePtr pHdbc, const SqlInfoProperties& props);
+
+
+		/*!
+		* \brief Frees all handles allocated by this DatabaseCatalog. Init() can
+		*	be called again after this function succeeds.
+		*/
+		void Reset();
 
 
 		/*!
@@ -113,16 +120,22 @@ namespace exodbc
 		*			If GetSupportsCatalogs() returns false and catalogName is set to
 		*			an empty string, schemaName is ignored.\n
 		*/
-		TableInfosVector SearchTables(const std::string& tableName, const std::string& schemaName,
+		TableInfoVector SearchTables(const std::string& tableName, const std::string& schemaName,
 			const std::string& catalogName, const std::string& tableType) const;
 
 
+		enum class SchemaOrCatalogType
+		{
+			Schema,
+			Catalog
+		};
 		/*!
 		* \brief Searches for tables using pattern value (PV) arguments for table
-		*			name and schema or catalog name. If argIsSchemaName is set to true,
+		*			name and schema or catalog name. If schemaOrCatalogType is set 
+		*			to SchemaOrCatalogType::Schema,
 		*			the passed argument schemaOrCatalogName is treated as a
-		*			schema name and catalog name is ignored. If argIsSchemaName is 
-		*			false, the argument schemaOrCatalogName is treated as catalog
+		*			schema name and catalog name is ignored. If SchemaOrCatalogType is 
+		*			SchemaOrCatalogType::Catalog, the argument schemaOrCatalogName is treated as catalog
 		*			name and schema name is ignored.
 		* \details tableName and schemaNameOrCatalogName are treated as pattern value
 		*			arguments. Use '_' to match any single character or '%' to
@@ -134,8 +147,8 @@ namespace exodbc
 		*			catalogName does not accept search patterns.\n
 		*
 		*/
-		TableInfosVector SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, 
-			bool argIsSchemaName, const std::string& tableType) const;
+		TableInfoVector SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, 
+			SchemaOrCatalogType schemaOrCatalogType, const std::string& tableType) const;
 
 
 		/*!
@@ -159,7 +172,7 @@ namespace exodbc
 		* \see		GetSupportsCatalogs()
 		*
 		*/
-		TableInfosVector SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, 
+		TableInfoVector SearchTables(const std::string& tableName, const std::string& schemaOrCatalogName, 
 			const std::string& tableType) const;
 
 
@@ -167,7 +180,17 @@ namespace exodbc
 		* \brief Searches for tables using a pattern value (PV) argument for the table name.
 		* \details Schema name, catalog name are not set when querying the database.
 		*/
-		TableInfosVector SearchTables(const std::string& tableName, const std::string& tableType = u8"") const;
+		TableInfoVector SearchTables(const std::string& tableName, const std::string& tableType = u8"") const;
+
+
+		/*!
+		* \brief Search for exactly one table matching the passed arguments.
+		* \details	If any of the passed arguments except tableName is empty, the argument is ignored.
+		*			tableName is not allowed to be empty.
+		* \throw	NotFoundException If not exactly one table is found.
+		*/
+		TableInfo FindOneTable(const std::string& tableName, const std::string& schemaName = u8"",
+			const std::string& catalogName = u8"", const std::string& tableType = u8"") const;
 
 
 		/*!
@@ -216,7 +239,7 @@ namespace exodbc
 		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).
 		*
 		*/
-		TableInfosVector SearchTables(SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName,
+		TableInfoVector SearchTables(SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName,
 			SQLAPICHARTYPE* pCatalogName, const std::string& tableType, MetadataMode mode) const;
 		void SetMetadataAttribute(MetadataMode mode) const;
 		MetadataMode GetMetadataAttribute() const;
@@ -228,6 +251,7 @@ namespace exodbc
 		mutable MetadataMode m_stmtMode;
 	};
 
+	typedef std::shared_ptr<DatabaseCatalog> DatabaseCatalogPtr;
 
 }	// namespace exodbc
 

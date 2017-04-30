@@ -78,7 +78,7 @@
   </Dsn>  
   
   <Dsn>
-    <Disabled>1</Disabled>
+    <Disabled>01</Disabled>
     <Name>exExcel</Name>
     <User></User>
     <Pass></Pass>
