@@ -297,4 +297,43 @@ namespace exodbctest
 		EXPECT_NO_THROW(dbCat.Init(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties()));
 	}
 
+
+	TEST_F(DatabaseCatalogTest, ReadColumnInfo)
+	{
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+
+		// Find a table
+		string tableNamePattern = u8"integertypes";
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
+			boost::algorithm::to_upper(tableNamePattern);
+		
+		TableInfo intTable;
+		ASSERT_NO_THROW(intTable = dbCat.FindOneTable(tableNamePattern));
+
+		// And query all columns of this table:
+		ColumnInfosVector colInfo = dbCat.ReadColumnInfo(intTable);
+		ASSERT_EQ(4, colInfo.size());
+
+		ColumnInfo col1 = colInfo[0];
+		ColumnInfo col2 = colInfo[1];
+		ColumnInfo col3 = colInfo[2];
+		ColumnInfo col4 = colInfo[3];
+
+		string col1Name = u8"idintegertypes";
+		string col2Name = u8"tsmallint";
+		string col3Name = u8"tint";
+		string col4Name = u8"tbigint";
+		if (g_odbcInfo.m_namesCase == Case::UPPER)
+		{
+			boost::algorithm::to_upper(col1Name);
+			boost::algorithm::to_upper(col2Name);
+			boost::algorithm::to_upper(col3Name);
+			boost::algorithm::to_upper(col4Name);
+		}
+		EXPECT_EQ(col1Name, col1.GetColumnName());
+		EXPECT_EQ(col2Name, col2.GetColumnName());
+		EXPECT_EQ(col3Name, col3.GetColumnName());
+		EXPECT_EQ(col4Name, col4.GetColumnName());
+	}
+
 } //namespace exodbc

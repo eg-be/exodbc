@@ -14,6 +14,7 @@
 #include "SqlHandle.h"
 #include "SqlInfoProperty.h"
 #include "TableInfo.h"
+#include "InfoObject.h"
 // Other headers
 // System headers
 
@@ -113,6 +114,7 @@ namespace exodbc
 		*			an empty string ("") matches only the empty string.\n
 		*			tableType can be a comma separated list of values. If an empty string
 		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).\n
+		*			The case of table, schema and catalog name is significant.\n
 		*			Note that if the Environment ODBC Version is less than 3.x, 
 		*			catalogName does not accept search patterns.\n
 		*			If GetSupportsSchemas() returns false and schemaName is set to
@@ -141,6 +143,7 @@ namespace exodbc
 		*			arguments. Use '_' to match any single character or '%' to
 		*			match any sequence of zero or more characters. Passing
 		*			an empty string ("") matches only the empty string.\n
+		*			The case of tableName and schema or catalog name is significant.\n
 		*			tableType can be a comma separated list of values. If an empty string
 		*			is passed, the argument is ignored (equal to SQL_ALL_TABLE_TYPES).\n
 		*			Note that if the Environment ODBC Version is less than 3.x,
@@ -161,6 +164,7 @@ namespace exodbc
 		*			arguments. Use '_' to match any single character or '%' to
 		*			match any sequence of zero or more characters. Passing
 		*			an empty string ("") matches only the empty string.\n
+		*			The case of tableName and schema or catalog name is significant.\n
 		*			To decide whether to treat schemaOrCatalogName as catalog or schema
 		*			name, the GetSupportsSchemas() and GetSupportsCatalogs() method are
 		*			examined. Exactly one of them must return true.\n
@@ -220,15 +224,23 @@ namespace exodbc
 		bool GetSupportsCatalogs() const;
 
 
+		/*!
+		* \brief	Read the columns of a table. Fetch the required TableInfo using one
+		*			of the FindTables() functions.
+		*/
+		ColumnInfosVector ReadColumnInfo(const TableInfo& tableInfo) const;
+
+
 	private:
 		/*!
 		* \brief Searches for tables using the passed search-arguments.
-		* \details If mode is to MetadataMode::PatternValue, tableName, schemaName
-		*			and catalogName are treated as pattern value arguments. Use '_' to
+		* \details If mode is to MetadataMode::PatternValue, pTableName, pSchemaName
+		*			and pCatalogName are treated as pattern value arguments. Use '_' to
 		*			match any single character or '%' to match any sequence of zero or
 		*			more characters. Passing a null pointer to search argument is
 		*			equivalent to passing '%' as search argument value, but passing
 		*			an empty string ("") matches only the empty string.\n
+		*			The case is significant if MetadataMode::PatternValue is set.\n
 		*			If mode is set to MetadataMode::Identifier, tableName, schemaName
 		*			and catalogName are treated as identifier arguments. If a search
 		*			argument is a quoted string, the string within quotation  marks is
@@ -243,6 +255,21 @@ namespace exodbc
 			SQLAPICHARTYPE* pCatalogName, const std::string& tableType, MetadataMode mode) const;
 		void SetMetadataAttribute(MetadataMode mode) const;
 		MetadataMode GetMetadataAttribute() const;
+
+
+		/*!
+		* \brief Reads column information from SQLColumns for columns matching passed arguments.
+		* \details	If mode is set to MetadataMode::PatternValue, pColumnName, pTableName and
+		*			pSchemaName are treated as pattern value arguments.\n
+		*			catalogName is an ordinary argument (OA), it is treated as a literal string.\n
+		*			If a nullptr is passed an arguments, the argument is ignored,
+		*			that means set to a nullptr when querying the database using SQLColumns.\n
+		*			If mode is set to MetadataMode::Identifier, all arguments (including catalogName)
+		*			are treated as identifier values (IV).
+		*/
+		ColumnInfosVector ReadColumnInfo(SQLAPICHARTYPE* pColumnName, SQLAPICHARTYPE* pTableName,
+			SQLAPICHARTYPE* pSchemaName, SQLAPICHARTYPE* pCatalogName, MetadataMode mode) const;
+
 
 		ConstSqlDbcHandlePtr m_pHdbc;
 		SqlStmtHandlePtr m_pHStmt;
