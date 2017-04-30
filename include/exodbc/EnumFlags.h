@@ -106,11 +106,11 @@ namespace exodbc
 
 	/*!
 	* \enum TableAccessFlag
-	* \brief Defines how to Access a table.
+	* \brief Defines how to Access a table using Table functions like Select(), Insert(), Update(), etc.
 	*/
 	enum class TableAccessFlag
 	{
-		AF_NONE = 0x0,			///< No AccessFlags.
+		AF_NONE = 0x0,			///< Do not create any ColumnBuffer for a Table, but still query its TableInfo if requested.
 
 		AF_SELECT_PK = 0x1,		///< Access for SELECting rows identified by bound primary key values.
 		AF_SELECT_WHERE = 0x2,	///< Access for SELECTing rows by manually passing a where clause.
