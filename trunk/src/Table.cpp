@@ -803,7 +803,7 @@ namespace exodbc
 	SQLUBIGINT Table::Count(const std::string& whereStatement)
 	{
 		exASSERT(IsOpen());
-		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_SELECT_WHERE));
+		exASSERT(m_tableAccessFlags.Test(TableAccessFlag::AF_COUNT_WHERE));
 		exASSERT(m_pSelectCountResultBuffer);
 
 		// Prepare the sql to be executed on our internal ExecutableStatement
@@ -1152,8 +1152,9 @@ namespace exodbc
 				searchedTable = true;
 			}
 
-			// If no columns have been set so far try to create them automatically
-			if (m_columns.empty())
+			// If no columns have been set so far and we need any access, try to create ColumnBuffers automatically
+			// Do not create any buffers if no flags are set, or count where is the only flag set. all other ops need columns
+			if (m_columns.empty() && !(m_tableAccessFlags == TableAccessFlag::AF_NONE || m_tableAccessFlags == TableAccessFlag::AF_COUNT_WHERE))
 			{
 				CreateAutoColumnBufferPtrs(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS), true, false);
 			}

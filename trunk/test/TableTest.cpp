@@ -77,6 +77,45 @@ namespace exodbctest
 
 	// Open / Close
 	// ------------
+	TEST_F(TableTest, OpenNoAccessFlags)
+	{
+		// Opening a table without access flags should not bind any columns at all
+		// but reading a TableInfo from it must work.
+		string intTableName = GetTableName(TableId::INTEGERTYPES);
+		Table iTable(m_pDb, TableAccessFlag::AF_NONE, intTableName);
+		EXPECT_NO_THROW(iTable.Open());
+
+		// TableInfo must be available
+		TableInfo ti = iTable.GetTableInfo();
+		EXPECT_EQ(intTableName, ti.GetPureName());
+
+		// But no columns have been created
+		EXPECT_EQ(0, iTable.GetColumnBufferCount());
+	}
+
+
+	TEST_F(TableTest, OpenCountOnly)
+	{
+		// Opening a table for COUNT only
+		string intTableName = GetTableName(TableId::INTEGERTYPES);
+		Table iTable(m_pDb, TableAccessFlag::AF_COUNT_WHERE, intTableName);
+		EXPECT_NO_THROW(iTable.Open());
+
+		// TableInfo must be available
+		TableInfo ti = iTable.GetTableInfo();
+		EXPECT_EQ(intTableName, ti.GetPureName());
+
+		// But no columns have been created
+		EXPECT_EQ(0, iTable.GetColumnBufferCount());
+
+		// But we are able to COUNT:
+		SQLUBIGINT c1 = iTable.Count();
+		EXPECT_GT(c1, 0);
+		SQLUBIGINT c2 = iTable.Count(boost::str(boost::format(u8"%s > 0") % GetIdColumnName(TableId::INTEGERTYPES)));
+		EXPECT_EQ(c1, c2);
+	}
+
+
 	TEST_F(TableTest, OpenManualReadOnlyWithoutCheck)
 	{
 		// Open an existing table without checking for privileges or existence
