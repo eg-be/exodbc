@@ -79,12 +79,21 @@ namespace exodbc
 		void Init(ConstSqlDbcHandlePtr pHdbc, const SqlInfoProperties& props);
 
 
+		/*!
+		* \brief List all catalogs available in the Database.
+		*/
 		std::vector<std::string> ListCatalogs() const;
 
 
+		/*!
+		* \brief List all schemas available in the Database.
+		*/
 		std::vector<std::string> ListSchemas() const;
 
 
+		/*!
+		* \brief List all table types availabl ein the Database.
+		*/
 		std::vector<std::string> ListTableTypes() const;
 
 
