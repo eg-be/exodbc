@@ -41,7 +41,7 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
   string(CONCAT accessFilters "-BigIntColumnTest.*"
                 ":wxCompatibilityTest.*"
                 ":DatabaseCatalogTest.ListSchemas"
-                ":DatabaseCatalogTest.ReadPrimaryKeyInfo"
+                ":DatabaseCatalogTest.ReadSpecialColumnInfo"
                 ":DatabaseTest.ReadSchemas"
                 ":DatabaseTest.ReadTablePrivileges"
                 ":DatabaseTest.ReadSpecialColumns"

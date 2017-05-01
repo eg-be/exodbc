@@ -54,6 +54,7 @@ set ( SRC_EXODBC
   LogHandler.cpp 
   LogManager.cpp 
   PrimaryKeyInfo.cpp
+  SpecialColumnInfo.cpp
   SpecializedExceptions.cpp 
   SqlInfoProperty.cpp
   Sql2BufferTypeMap.cpp 
@@ -86,6 +87,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/LogManager.h
   ../include/exodbc/LogManagerOdbcMacros.h
   ../include/exodbc/PrimaryKeyInfo.h
+  ../include/exodbc/SpecialColumnInfo.h
   ../include/exodbc/SpecializedExceptions.h
   ../include/exodbc/Sql2BufferTypeMap.h
   ../include/exodbc/SqlHandle.h

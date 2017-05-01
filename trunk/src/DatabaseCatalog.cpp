@@ -568,4 +568,108 @@ namespace exodbc
 
 		return primaryKeys;
 	}
+
+
+	SpecialColumnInfoVector DatabaseCatalog::ReadSpecialColumnInfo(const TableInfo& tableInfo, SpecialColumnInfo::IdentifierType idType, 
+		SpecialColumnInfo::RowIdScope scope, bool includeNullableColumns /* = true */) const
+	{
+		return ReadSpecialColumnInfo(idType, EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetPureName()),
+			tableInfo.HasSchema() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetSchema()) : nullptr,
+			tableInfo.HasCatalog() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetCatalog()) : nullptr,
+			scope, includeNullableColumns, MetadataMode::PatternOrOrdinary);
+	}
+
+
+	SpecialColumnInfoVector DatabaseCatalog::ReadSpecialColumnInfo(SpecialColumnInfo::IdentifierType idType,
+		SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName, SQLAPICHARTYPE* pCatalogName,
+		SpecialColumnInfo::RowIdScope scope, bool includeNullableColumns, MetadataMode mode) const
+	{
+		exASSERT(m_pHStmt);
+		exASSERT(m_pHStmt->IsAllocated());
+		exASSERT(pTableName != nullptr);
+
+		if (m_stmtMode != mode)
+			SetMetadataAttribute(mode);
+
+		SpecialColumnInfoVector columns;
+
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_pHStmt, true, true);
+
+		SQLSMALLINT nullable = SQL_NO_NULLS;
+		if (includeNullableColumns)
+		{
+			nullable = SQL_NULLABLE;
+		}
+
+		SQLRETURN ret = SQLSpecialColumns(m_pHStmt->GetHandle(), (SQLSMALLINT)idType,
+			pCatalogName, SQL_NTS,
+			pSchemaName, SQL_NTS,
+			pTableName, SQL_NTS,
+			(SQLSMALLINT)scope, nullable);
+		THROW_IFN_SUCCEEDED(SQLSpecialColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+
+		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
+		{
+			SQLLEN cb;
+
+			SQLSMALLINT scopeVal;
+			bool scopeIsNull;
+			string columnName;
+			SQLSMALLINT sqlType;
+			string sqlTypeName;
+			SQLINTEGER columnSize;
+			SQLINTEGER bufferLength;
+			SQLSMALLINT decimalDigits;
+			SQLSMALLINT pseudoColVal;
+
+			GetData(m_pHStmt, 1, SQL_C_SSHORT, &scopeVal, sizeof(scopeVal), &cb, &scopeIsNull);
+			GetData(m_pHStmt, 2, m_props.GetMaxColumnNameLen(), columnName);
+			GetData(m_pHStmt, 3, SQL_C_SSHORT, &sqlType, sizeof(sqlType), &cb, NULL);
+			GetData(m_pHStmt, 4, DB_MAX_TYPE_NAME_LEN, sqlTypeName);
+			GetData(m_pHStmt, 5, SQL_C_SLONG, &columnSize, sizeof(columnSize), &cb, NULL);
+			GetData(m_pHStmt, 6, SQL_C_SLONG, &bufferLength, sizeof(bufferLength), &cb, NULL);
+			GetData(m_pHStmt, 7, SQL_C_SSHORT, &decimalDigits, sizeof(decimalDigits), &cb, NULL);
+			GetData(m_pHStmt, 8, SQL_C_SSHORT, &pseudoColVal, sizeof(pseudoColVal), &cb, NULL);
+
+			SpecialColumnInfo::PseudoColumn pseudoCol = SpecialColumnInfo::PseudoColumn::UNKNOWN;
+			if (pseudoColVal == (SQLSMALLINT)SpecialColumnInfo::PseudoColumn::NOT_PSEUDO)
+				pseudoCol = SpecialColumnInfo::PseudoColumn::NOT_PSEUDO;
+			else if (pseudoColVal == (SQLSMALLINT)SpecialColumnInfo::PseudoColumn::PSEUDO)
+				pseudoCol = SpecialColumnInfo::PseudoColumn::PSEUDO;
+
+			SpecialColumnInfo::RowIdScope scope;
+			if (!scopeIsNull)
+			{
+				switch (scopeVal)
+				{
+				case (SQLSMALLINT)SpecialColumnInfo::RowIdScope::CURSOR:
+					scope = SpecialColumnInfo::RowIdScope::CURSOR;
+					break;
+				case (SQLSMALLINT)SpecialColumnInfo::RowIdScope::SESSION:
+					scope = SpecialColumnInfo::RowIdScope::SESSION;
+					break;
+				case (SQLSMALLINT)SpecialColumnInfo::RowIdScope::TRANSCATION:
+					scope = SpecialColumnInfo::RowIdScope::TRANSCATION;
+					break;
+				default:
+					exASSERT_MSG(false, boost::str(boost::format(u8"Unknown Row id scope value %d") % scopeVal));
+				}
+			}
+
+			if (scopeIsNull)
+			{
+				SpecialColumnInfo specColInfo(columnName, sqlType, sqlTypeName, columnSize, bufferLength, decimalDigits, pseudoCol);
+				columns.push_back(specColInfo);
+			}
+			else
+			{
+				SpecialColumnInfo specColInfo(columnName, scope, sqlType, sqlTypeName, columnSize, bufferLength, decimalDigits, pseudoCol);
+				columns.push_back(specColInfo);
+			}
+		}
+		THROW_IFN_NO_DATA(SQLFetch, ret);
+
+		return columns;
+	}
 }

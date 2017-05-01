@@ -424,4 +424,28 @@ namespace exodbctest
 		LOG_INFO(ws.str());
 	}
 
+
+	TEST_F(DatabaseCatalogTest, ReadSpecialColumnInfo)
+	{
+		// The integertypes table has an id column that should be unique inside a cursor.
+		// but others might change the value of a row identified by id during a transaction, etc.
+
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		TableInfo intTableInfo = dbCat.FindOneTable(GetTableName(TableId::INTEGERTYPES));
+
+		SpecialColumnInfoVector specColsTransaction = dbCat.ReadSpecialColumnInfo(intTableInfo, SpecialColumnInfo::IdentifierType::UNIQUE_ROW, SpecialColumnInfo::RowIdScope::TRANSCATION);
+		SpecialColumnInfoVector specColsSession = dbCat.ReadSpecialColumnInfo(intTableInfo, SpecialColumnInfo::IdentifierType::UNIQUE_ROW, SpecialColumnInfo::RowIdScope::SESSION);
+		SpecialColumnInfoVector specColsCursor = dbCat.ReadSpecialColumnInfo(intTableInfo, SpecialColumnInfo::IdentifierType::UNIQUE_ROW, SpecialColumnInfo::RowIdScope::CURSOR);
+		EXPECT_EQ(1, specColsCursor.size());
+
+		string autoIdTableName = GetTableName(TableId::MULTIKEY);
+		TableInfo autoIdTableInfo = dbCat.FindOneTable(autoIdTableName, u8"", u8"", u8"");
+
+		specColsTransaction = dbCat.ReadSpecialColumnInfo(autoIdTableInfo, SpecialColumnInfo::IdentifierType::UNIQUE_ROW, SpecialColumnInfo::RowIdScope::TRANSCATION);
+		specColsSession = dbCat.ReadSpecialColumnInfo(autoIdTableInfo, SpecialColumnInfo::IdentifierType::UNIQUE_ROW, SpecialColumnInfo::RowIdScope::SESSION);
+		specColsCursor = dbCat.ReadSpecialColumnInfo(autoIdTableInfo, SpecialColumnInfo::IdentifierType::UNIQUE_ROW, SpecialColumnInfo::RowIdScope::CURSOR);
+		EXPECT_EQ(3, specColsCursor.size());
+
+	}
+
 } //namespace exodbc
