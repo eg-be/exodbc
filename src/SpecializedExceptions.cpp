@@ -83,18 +83,10 @@ namespace exodbc
 
 	void SqlResultException::BuildErrorMsg(const std::string& sqlFunctionName, SQLRETURN ret) noexcept
 	{
-		try
-		{
-			std::stringstream ss;
-			ss << u8"SQL-Function " << sqlFunctionName << u8" returned ";
-			ss << SqlReturn2s(ret) << u8"(" << ret << u8") with " << m_errors.size() << " ODBC-Error(s):";
-			m_errorMsg = ss.str();
-		}
-		catch (const Exception& e)
-		{
-			HIDE_UNUSED(e);
-			m_errorMsg = u8"Failed to BuildErrorMsg";
-		}
+		std::stringstream ss;
+		ss << u8"SQL-Function " << sqlFunctionName << u8" returned ";
+		ss << SqlReturn2s(ret) << u8"(" << ret << u8") with " << m_errors.size() << " ODBC-Error(s):";
+		m_errorMsg = ss.str();
 	}
 
 
