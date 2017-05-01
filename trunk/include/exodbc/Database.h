@@ -277,29 +277,6 @@ namespace exodbc
 
 
 		/*!
-		 * \brief		Reads table column information for the passed table.
-		 * \details	Returned table columns are ordered by TABLE_CAT, TABLE_SCHEM, TABLE_NAME, and ORDINAL_POSITION. 
-		 * \param		table The table.
-		 * \return		Columns of passed table.
-		 * \throw Exception If reading ColumnInfo fails.
-		 */
-		ColumnInfosVector	ReadTableColumnInfo(const TableInfo& table) const;
-
-
-		/*!
-		 * \brief	Reads table column information for exactly one table. This method will fail if the passed arguments
-		 * 			do not match exactly one table.
-		 * \param	tableName	   	Name of the table.
-		 * \param	schemaName	   	Name of the schema.
-		 * \param	catalogName	   	Name of the catalog.
-		 * \param	tableType	Table Type name
-		 * \return		Columns of passed table.
-		 * \throw Exception If reading ColumnInfo fails or not exactly one table matches.
-		 */
-		ColumnInfosVector	ReadTableColumnInfo(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const;
-
-
-		/*!
 		* \brief	Read special column information for a table.
 		* \details	This is a wrapper around SQLSpecialColumns.
 		* \param	table	Identify the table to query database about.

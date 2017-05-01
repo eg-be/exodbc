@@ -358,7 +358,7 @@ namespace exodbc
 	}
 
 
-	ColumnInfosVector DatabaseCatalog::ReadColumnInfo(const TableInfo& tableInfo) const
+	ColumnInfoVector DatabaseCatalog::ReadColumnInfo(const TableInfo& tableInfo) const
 	{
 		return ReadColumnInfo(nullptr,
 			EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetPureName()),
@@ -368,7 +368,7 @@ namespace exodbc
 	}
 
 
-	ColumnInfosVector DatabaseCatalog::ReadColumnInfo(SQLAPICHARTYPE* pColumnName, SQLAPICHARTYPE* pTableName, 
+	ColumnInfoVector DatabaseCatalog::ReadColumnInfo(SQLAPICHARTYPE* pColumnName, SQLAPICHARTYPE* pTableName, 
 		SQLAPICHARTYPE* pSchemaName, SQLAPICHARTYPE* pCatalogName, MetadataMode mode) const
 	{
 		exASSERT(m_pHStmt);
@@ -398,7 +398,7 @@ namespace exodbc
 
 		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
-		ColumnInfosVector columns;
+		ColumnInfoVector columns;
 
 		// Iterate rows
 		std::string catalogName, schemaName, tableName, columnName, typeName, remarks, defaultValue, isNullable;

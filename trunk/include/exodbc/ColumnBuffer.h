@@ -13,6 +13,7 @@
 #include "Exception.h"
 #include "SpecializedExceptions.h"
 #include "InfoObject.h"
+#include "ColumnInfo.h"
 #include "EnumFlags.h"
 #include "SqlHandle.h"
 #include "Helpers.h"

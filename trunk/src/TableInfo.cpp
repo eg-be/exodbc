@@ -1,8 +1,8 @@
 ﻿/*!
-* \file InfoObject.cpp
+* \file TableInfo.cpp
 * \author Elias Gerber <eg@elisium.ch>
-* \date 14.06.2015
-* \brief Source file for info objects.
+* \date 30.04.2017
+* \brief Source file for TableInfo.
 * \copyright GNU Lesser General Public License Version 3
 *
 */
