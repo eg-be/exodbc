@@ -25,55 +25,6 @@ using namespace std;
 
 namespace exodbc
 {
-	// Class TablePrimaryKeyInfo
-	// =========================
-	TablePrimaryKeyInfo::TablePrimaryKeyInfo()
-		: m_keySequence(0)
-		, m_isPrimaryKeyNameNull(true)
-		, m_isCatalogNull(true)
-		, m_isSchemaNull(true)
-	{}
-
-
-	TablePrimaryKeyInfo::TablePrimaryKeyInfo(const std::string& tableName, const std::string& columnName, SQLSMALLINT keySequence)
-		: m_tableName(tableName)
-		, m_columnName(columnName)
-		, m_keySequence(keySequence)
-		, m_isCatalogNull(true)
-		, m_isSchemaNull(true)
-		, m_isPrimaryKeyNameNull(true)
-	{}
-
-
-	TablePrimaryKeyInfo::TablePrimaryKeyInfo(const std::string& catalogName, const std::string& schemaName, const std::string& tableName, const std::string& columnName, 
-		SQLSMALLINT keySequence, const std::string& keyName, bool isCatalogNull, bool isSchemaNull, bool isPrimaryKeyNameNull)
-		: m_catalogName(catalogName)
-		, m_schemaName(schemaName)
-		, m_tableName(tableName)
-		, m_columnName(columnName)
-		, m_keySequence(keySequence)
-		, m_primaryKeyName(keyName)
-		, m_isCatalogNull(isCatalogNull)
-		, m_isSchemaNull(isSchemaNull)
-		, m_isPrimaryKeyNameNull(isPrimaryKeyNameNull)
-	{}
-
-
-	std::string TablePrimaryKeyInfo::GetQueryName() const
-	{
-		return GetPureName();
-	}
-
-
-	std::string TablePrimaryKeyInfo::GetPureName() const
-	{
-		exASSERT(!m_columnName.empty());
-		return m_columnName;
-	}
-
-
-
-
 	SSqlTypeInfo::SSqlTypeInfo()
 	{
 		m_sqlType = 0;

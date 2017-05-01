@@ -491,45 +491,6 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseTest, ReadTablePrimaryKeysInfo)
-	{
-		TablePrimaryKeysVector pks;
-		
-		// Find the table-info
-		TableInfo iInfo;
-		string intTableName = GetTableName(TableId::INTEGERTYPES);
-		string idName = GetIdColumnName(TableId::INTEGERTYPES);
-		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
-		ASSERT_NO_THROW(iInfo = pDbCat->FindOneTable(intTableName, u8"", u8"", u8""));
-
-		EXPECT_NO_THROW(pks = m_pDb->ReadTablePrimaryKeys(iInfo));
-		EXPECT_EQ(1, pks.size());
-		if (pks.size() == 1)
-		{
-			EXPECT_EQ(idName, pks[0].GetColumnName());
-		}
-
-		TableInfo mkInfo;
-		string multiKeyTableName = GetTableName(TableId::MULTIKEY);
-		string mkId1 = ToDbCase(u8"id1");
-		string mkId2 = ToDbCase(u8"id2");
-		string mkId3 = ToDbCase(u8"id3");
-		EXPECT_NO_THROW(mkInfo = pDbCat->FindOneTable(multiKeyTableName, u8"", u8"", u8""));
-
-		EXPECT_NO_THROW(pks = m_pDb->ReadTablePrimaryKeys(mkInfo));
-		EXPECT_EQ(3, pks.size());
-		if (pks.size() == 3)
-		{
-			EXPECT_EQ(mkId1, pks[0].GetColumnName());
-			EXPECT_EQ(1, pks[0].GetKeySequence());
-			EXPECT_EQ(mkId2, pks[1].GetColumnName());
-			EXPECT_EQ(2, pks[1].GetKeySequence());
-			EXPECT_EQ(mkId3, pks[2].GetColumnName());
-			EXPECT_EQ(3, pks[2].GetKeySequence());
-		}
-
-	}
-
 
 	TEST_F(DatabaseTest, ReadColumnCount)
 	{

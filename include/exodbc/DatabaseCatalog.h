@@ -15,6 +15,7 @@
 #include "SqlInfoProperty.h"
 #include "TableInfo.h"
 #include "ColumnInfo.h"
+#include "PrimaryKeyInfo.h"
 // Other headers
 // System headers
 
@@ -43,7 +44,7 @@ namespace exodbc
 		*/
 		enum class MetadataMode
 		{
-			PatternValue,	///< Set if SQL_ATTR_METADATA_ID is SQL_FALSE.
+			PatternOrOrdinary,	///< Set if SQL_ATTR_METADATA_ID is SQL_FALSE.
 			Identifier		///< Set if SQL_ATTR_METADATA_ID is SQL_TRUE.
 		};
 
@@ -231,16 +232,23 @@ namespace exodbc
 		ColumnInfoVector ReadColumnInfo(const TableInfo& tableInfo) const;
 
 
+		/*!
+		* \brief	Read the primary keys of a table. Fetch the required TableInfo using one
+		*			of the FindTables() functions.
+		*/
+		PrimaryKeyInfoVector ReadPrimaryKeyInfo(const TableInfo& tableInfo) const;
+
+
 	private:
 		/*!
 		* \brief Searches for tables using the passed search-arguments.
-		* \details If mode is to MetadataMode::PatternValue, pTableName, pSchemaName
+		* \details If mode is to MetadataMode::PatternOrOrdinary, pTableName, pSchemaName
 		*			and pCatalogName are treated as pattern value arguments. Use '_' to
 		*			match any single character or '%' to match any sequence of zero or
 		*			more characters. Passing a null pointer to search argument is
 		*			equivalent to passing '%' as search argument value, but passing
 		*			an empty string ("") matches only the empty string.\n
-		*			The case is significant if MetadataMode::PatternValue is set.\n
+		*			The case is significant if MetadataMode::PatternOrOrdinary is set.\n
 		*			If mode is set to MetadataMode::Identifier, tableName, schemaName
 		*			and catalogName are treated as identifier arguments. If a search
 		*			argument is a quoted string, the string within quotation  marks is
@@ -259,16 +267,30 @@ namespace exodbc
 
 		/*!
 		* \brief Reads column information from SQLColumns for columns matching passed arguments.
-		* \details	If mode is set to MetadataMode::PatternValue, pColumnName, pTableName and
+		* \details	If mode is set to MetadataMode::PatternOrOrdinary, pColumnName, pTableName and
 		*			pSchemaName are treated as pattern value arguments.\n
 		*			catalogName is an ordinary argument (OA), it is treated as a literal string.\n
 		*			If a nullptr is passed an arguments, the argument is ignored,
 		*			that means set to a nullptr when querying the database using SQLColumns.\n
 		*			If mode is set to MetadataMode::Identifier, all arguments (including catalogName)
-		*			are treated as identifier values (IV).
+		*			are treated as identifier values (ID).
 		*/
 		ColumnInfoVector ReadColumnInfo(SQLAPICHARTYPE* pColumnName, SQLAPICHARTYPE* pTableName,
 			SQLAPICHARTYPE* pSchemaName, SQLAPICHARTYPE* pCatalogName, MetadataMode mode) const;
+
+
+
+		/*!
+		* \brief Read Primary Key information from SQLPrimaryKeys for tables matching the passed arguments.
+		* \details	If mode is set MetadataMode::PatternOrOrdinary, pTableName, pSchemaName and
+		*			pCatalogName are treated as ordinary value (OV) arguments. Strings are treated
+		*			literally and the case is significant.
+		*			If mode is set to MetadataMode::Identifier, all arguments are treated as
+		*			identifier values (ID).\n
+		*			pTableName is not allowed to be a null pointer.
+		*/
+		PrimaryKeyInfoVector ReadPrimaryKeyInfo(SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName,
+			SQLAPICHARTYPE* pCatalogName, MetadataMode mode) const;
 
 
 		ConstSqlDbcHandlePtr m_pHdbc;

@@ -363,4 +363,37 @@ namespace exodbctest
 		EXPECT_EQ(10, col.GetDecimalDigits());
 	}
 
+
+	TEST_F(DatabaseCatalogTest, ReadPrimaryKeyInfo)
+	{
+		PrimaryKeyInfoVector pks;
+
+		// Find the table-info
+		TableInfo iInfo;
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+		ASSERT_NO_THROW(iInfo = dbCat.FindOneTable(GetTableName(TableId::INTEGERTYPES)));
+
+		// And read the primary keys 
+		pks = dbCat.ReadPrimaryKeyInfo(iInfo);
+		ASSERT_EQ(1, pks.size());
+		EXPECT_EQ(GetIdColumnName(TableId::INTEGERTYPES), pks[0].GetColumnName());
+
+		// And check for a table with multiple keys:
+		TableInfo mkInfo;
+		string multiKeyTableName = GetTableName(TableId::MULTIKEY);
+		string mkId1 = ToDbCase(u8"id1");
+		string mkId2 = ToDbCase(u8"id2");
+		string mkId3 = ToDbCase(u8"id3");
+		mkInfo = dbCat.FindOneTable(multiKeyTableName);
+
+		pks = dbCat.ReadPrimaryKeyInfo(mkInfo);
+		ASSERT_EQ(3, pks.size());
+		EXPECT_EQ(mkId1, pks[0].GetColumnName());
+		EXPECT_EQ(1, pks[0].GetKeySequence());
+		EXPECT_EQ(mkId2, pks[1].GetColumnName());
+		EXPECT_EQ(2, pks[1].GetKeySequence());
+		EXPECT_EQ(mkId3, pks[2].GetColumnName());
+		EXPECT_EQ(3, pks[2].GetKeySequence());
+	}
+
 } //namespace exodbc

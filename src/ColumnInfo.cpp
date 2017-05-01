@@ -2,7 +2,7 @@
 * \file ColumnInfo.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 01.05.2017
-* \brief Source file for info objects.
+* \brief Source file for ColumnInfo.
 * \copyright GNU Lesser General Public License Version 3
 *
 */
