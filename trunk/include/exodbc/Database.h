@@ -473,14 +473,6 @@ namespace exodbc
 		* \brief	Returns the SqlStmtHandlePtr used by the ExecSql function.
 		*/
 		SqlStmtHandlePtr GetExecSqlHandle() const noexcept { return m_pHStmtExecSql; };
-
-
-		/*!
-		* \brief	Queries SQLGetTypeInfo to populate a SSqlTypeInfo struct.
-		* \return	Types Filled with data types supported by the db
-		* \throw	Exception If the internal statement handle is not allocated, or reading fails.
-		*/
-		SqlTypeInfosVector ReadDataTypesInfo();
 		
 		
 		/*!

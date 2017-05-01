@@ -16,6 +16,8 @@
 #include "TableInfo.h"
 #include "ColumnInfo.h"
 #include "PrimaryKeyInfo.h"
+#include "SqlTypeInfo.h"
+
 // Other headers
 // System headers
 
@@ -237,6 +239,12 @@ namespace exodbc
 		*			of the FindTables() functions.
 		*/
 		PrimaryKeyInfoVector ReadPrimaryKeyInfo(const TableInfo& tableInfo) const;
+
+
+		/*!
+		* \brief Read information about all SQL types supported by the database, using SQLGetTypeInfo.
+		*/
+		SqlTypeInfosVector ReadSqlTypeInfo() const;
 
 
 	private:

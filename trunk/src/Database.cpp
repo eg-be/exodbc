@@ -168,7 +168,7 @@ namespace exodbc
 			}
 
 			// Query the datatypes
-			m_datatypes = ReadDataTypesInfo();
+			m_datatypes = m_pDbCatalog->ReadSqlTypeInfo();
 
 		}
 		catch (const Exception& ex)
@@ -365,75 +365,6 @@ namespace exodbc
 
 		// For the moment do nothing here. 
 		// There is no need to set any connection attributes right now, we assume defaults are fine.
-	}
-
-
-	SqlTypeInfosVector Database::ReadDataTypesInfo()
-	{
-		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
-		exASSERT(m_pHStmt);
-		exASSERT(m_pHStmt->IsAllocated());
-
-		SqlTypeInfosVector types;
-
-		// Close Statement and make sure it closes upon exit
-		StatementCloser stmtCloser(m_pHStmt, true, true);
-
-		SQLRETURN ret = SQLGetTypeInfo(m_pHStmt->GetHandle(), SQL_ALL_TYPES);
-		THROW_IFN_SUCCEEDED(SQLGetTypeInfo, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
-
-		ret = SQLFetch(m_pHStmt->GetHandle());
-		int count = 0;
-		SQLAPICHARTYPE typeName[DB_MAX_TYPE_NAME_LEN + 1];
-		SQLAPICHARTYPE literalPrefix[DB_MAX_LITERAL_PREFIX_LEN + 1];
-		SQLAPICHARTYPE literalSuffix[DB_MAX_LITERAL_SUFFIX_LEN + 1];
-		SQLAPICHARTYPE createParams[DB_MAX_CREATE_PARAMS_LIST_LEN + 1];
-		SQLAPICHARTYPE localTypeName[DB_MAX_LOCAL_TYPE_NAME_LEN + 1];
-		SQLLEN cb;
-		while(ret == SQL_SUCCESS)
-		{
-			typeName[0] = 0;
-			literalPrefix[0] = 0;
-			literalSuffix[0] = 0;
-			createParams[0] = 0;
-			localTypeName[0] = 0;
-			SSqlTypeInfo info;
-			
-			cb = 0;
-			GetData(m_pHStmt, 1, SQLAPICHARTYPENAME, typeName, sizeof(typeName), &cb, NULL);
-			info.m_typeName = SQLAPICHARPTR_TO_EXODBCSTR(typeName);
-
-			GetData(m_pHStmt, 2, SQL_C_SSHORT, &info.m_sqlType, sizeof(info.m_sqlType), &cb, NULL);
-			GetData(m_pHStmt, 3, SQL_C_SLONG, &info.m_columnSize, sizeof(info.m_columnSize), &cb, &info.m_columnSizeIsNull);
-			GetData(m_pHStmt, 4, SQLAPICHARTYPENAME, literalPrefix, sizeof(literalPrefix), &cb, &info.m_literalPrefixIsNull);
-			info.m_literalPrefix = SQLAPICHARPTR_TO_EXODBCSTR(literalPrefix);
-			GetData(m_pHStmt, 5, SQLAPICHARTYPENAME, literalSuffix, sizeof(literalSuffix), &cb, &info.m_literalSuffixIsNull);
-			info.m_literalSuffix = SQLAPICHARPTR_TO_EXODBCSTR(literalSuffix);
-			GetData(m_pHStmt, 6, SQLAPICHARTYPENAME, createParams, sizeof(createParams), &cb, &info.m_createParamsIsNull);
-			info.m_createParams = SQLAPICHARPTR_TO_EXODBCSTR(createParams);
-			GetData(m_pHStmt, 7, SQL_C_SSHORT, &info.m_nullable, sizeof(info.m_nullable), &cb, NULL);
-			GetData(m_pHStmt, 8, SQL_C_SSHORT, &info.m_caseSensitive, sizeof(info.m_caseSensitive), &cb, NULL);
-			GetData(m_pHStmt, 9, SQL_C_SSHORT, &info.m_searchable, sizeof(info.m_searchable), &cb, NULL);
-			GetData(m_pHStmt, 10, SQL_C_SSHORT, &info.m_unsigned, sizeof(info.m_unsigned), &cb, &info.m_unsignedIsNull);
-			GetData(m_pHStmt, 11, SQL_C_SSHORT, &info.m_fixedPrecisionScale, sizeof(info.m_fixedPrecisionScale), &cb, NULL);
-			GetData(m_pHStmt, 12, SQL_C_SSHORT, &info.m_autoUniqueValue, sizeof(info.m_autoUniqueValue), &cb, &info.m_autoUniqueValueIsNull);
-			GetData(m_pHStmt, 13, SQLAPICHARTYPENAME, localTypeName, sizeof(localTypeName), &cb, &info.m_localTypeNameIsNull);
-			info.m_localTypeName = SQLAPICHARPTR_TO_EXODBCSTR(localTypeName);
-			GetData(m_pHStmt, 14, SQL_C_SSHORT, &info.m_minimumScale, sizeof(info.m_minimumScale), &cb, &info.m_minimumScaleIsNull);
-			GetData(m_pHStmt, 15, SQL_C_SSHORT, &info.m_maximumScale, sizeof(info.m_maximumScale), &cb, &info.m_maximumScaleIsNull);
-			GetData(m_pHStmt, 16, SQL_C_SSHORT, &info.m_sqlDataType, sizeof(info.m_sqlDataType), &cb, NULL);
-			GetData(m_pHStmt, 17, SQL_C_SSHORT, &info.m_sqlDateTimeSub, sizeof(info.m_sqlDateTimeSub), &cb, &info.m_sqlDateTimeSubIsNull);
-			GetData(m_pHStmt, 18, SQL_C_SSHORT, &info.m_numPrecRadix, sizeof(info.m_numPrecRadix), &cb, &info.m_numPrecRadixIsNull);
-			GetData(m_pHStmt, 19, SQL_C_SSHORT, &info.m_intervalPrecision, sizeof(info.m_intervalPrecision), &cb, &info.m_intervalPrecisionIsNull);
-
-			types.push_back(info);
-
-			count++;
-			ret = SQLFetch(m_pHStmt->GetHandle());
-		}
-		THROW_IFN_NO_DATA(SQLFetch, ret);
-
-		return types;
 	}
 
 
