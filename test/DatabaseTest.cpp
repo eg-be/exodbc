@@ -290,32 +290,6 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseTest, ReadDataTypesInfo)
-	{
-		std::vector<SSqlTypeInfo> types;
-		ASSERT_NO_THROW(types = m_pDb->ReadDataTypesInfo());
-		EXPECT_TRUE(types.size() > 0);
-
-		std::stringstream ws;
-		ws << u8"TypeInfo of database with DSN '" << (g_odbcInfo.HasConnectionString() ? g_odbcInfo.m_connectionString : g_odbcInfo.m_dsn) << u8"', total " << types.size() << u8" types reported:" << std::endl;
-		bool first = true;
-		std::vector<SSqlTypeInfo>::const_iterator it = types.begin();
-		while(it != types.end())
-		{
-			SSqlTypeInfo t = *it;
-
-			++it;
-
-			ws << t.ToOneLineStr(first, it == types.end()) << std::endl;
-			if(first)
-				first = false;
-
-		}
-
-		LOG_INFO(ws.str());
-	}
-
-
 	TEST_F(DatabaseTest, DetectDbms)
 	{
 		// We just know how we name the different odbc-sources

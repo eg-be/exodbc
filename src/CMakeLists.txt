@@ -58,6 +58,7 @@ set ( SRC_EXODBC
   SqlInfoProperty.cpp
   Sql2BufferTypeMap.cpp 
   SqlStatementCloser.cpp 
+  SqlTypeInfo.cpp
   Table.cpp 
   TableInfo.cpp
   TablePrivileges.cpp 
@@ -90,6 +91,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/SqlHandle.h
   ../include/exodbc/SqlInfoProperty.h  
   ../include/exodbc/SqlStatementCloser.h
+  ../include/exodbc/SqlTypeInfo.h
   ../include/exodbc/Table.h
   ../include/exodbc/TableInfo.h
   ../include/exodbc/TablePrivileges.h
