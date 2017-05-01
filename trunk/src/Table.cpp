@@ -672,10 +672,11 @@ namespace exodbc
 		exASSERT(m_haveTableInfo);
 		exASSERT(m_pDb);
 		
-		TablePrimaryKeysVector keys = m_pDb->ReadTablePrimaryKeys(m_tableInfo);
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		PrimaryKeyInfoVector keys = pDbCat->ReadPrimaryKeyInfo(m_tableInfo);
 		for (auto itKey = keys.begin(); itKey != keys.end(); ++itKey)
 		{
-			const TablePrimaryKeyInfo& keyInfo = *itKey;
+			const PrimaryKeyInfo& keyInfo = *itKey;
 			SQLUSMALLINT colIndex = GetColumnBufferIndex(keyInfo.GetQueryName(), columns);
 			auto itCol = columns.find(colIndex);
 			exASSERT(itCol != columns.end());

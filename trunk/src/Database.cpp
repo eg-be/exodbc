@@ -559,45 +559,6 @@ namespace exodbc
 	}
 
 
-	TablePrimaryKeysVector Database::ReadTablePrimaryKeys(const TableInfo& table) const
-	{
-		exASSERT(IsOpen());
-		// Access returns 'SQLSTATE IM001; Native Error: 0; [Microsoft][ODBC Driver Manager] Driver does not support this function' for SQLPrimaryKeys
-		exASSERT(GetDbms() != DatabaseProduct::ACCESS);
-
-		// Close Statement and make sure it closes upon exit
-		StatementCloser stmtCloser(m_pHStmt, true, true);
-
-		TablePrimaryKeysVector primaryKeys;
-
-		SQLRETURN ret = SQLPrimaryKeys(m_pHStmt->GetHandle(),
-			table.HasCatalog() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetCatalog()) : NULL, table.HasCatalog() ? SQL_NTS : 0,
-			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,
-			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS);
-
-		THROW_IFN_SUCCEEDED(SQLPrimaryKeys, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
-
-		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
-		{
-			SQLLEN cb;
-			std::string catalogName, schemaName, tableName, columnName, keyName;
-			bool isCatalogNull, isSchemaNull, isKeyNameNull;
-			SQLSMALLINT keySequence;
-			GetData(m_pHStmt, 1, m_props.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
-			GetData(m_pHStmt, 2, m_props.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
-			GetData(m_pHStmt, 3, m_props.GetMaxTableNameLen(), tableName);
-			GetData(m_pHStmt, 4, m_props.GetMaxColumnNameLen(), columnName);
-			GetData(m_pHStmt, 5, SQL_C_SHORT, &keySequence, sizeof(keySequence), &cb, NULL);
-			GetData(m_pHStmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, keyName, &isKeyNameNull);
-			TablePrimaryKeyInfo pk(catalogName, schemaName, tableName, columnName, keySequence, keyName, isCatalogNull, isSchemaNull, isKeyNameNull);
-			primaryKeys.push_back(pk);
-		}
-		THROW_IFN_NO_DATA(SQLFetch, ret);
-
-		return primaryKeys;
-	}
-
-
 	TablePrivilegesVector Database::ReadTablePrivileges(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const
 	{
 		exASSERT(IsOpen());

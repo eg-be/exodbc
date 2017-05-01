@@ -27,14 +27,14 @@ namespace exodbc
 	// ------------
 	DatabaseCatalog::DatabaseCatalog()
 		:m_pHStmt(std::make_shared<SqlStmtHandle>())
-		, m_stmtMode(MetadataMode::PatternValue)
+		, m_stmtMode(MetadataMode::PatternOrOrdinary)
 	{
 	};
 
 
 	DatabaseCatalog::DatabaseCatalog(ConstSqlDbcHandlePtr pHdbc, const SqlInfoProperties& props)
 		:m_pHStmt(std::make_shared<SqlStmtHandle>())
-		, m_stmtMode(MetadataMode::PatternValue)
+		, m_stmtMode(MetadataMode::PatternOrOrdinary)
 	{
 		Init(pHdbc, props);
 	}
@@ -77,7 +77,7 @@ namespace exodbc
 		string catalog = SQL_ALL_CATALOGS;
 		string empty = u8"";
 		TableInfoVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty), 
-				EXODBCSTR_TO_SQLAPICHARPTR(catalog), empty, MetadataMode::PatternValue);
+				EXODBCSTR_TO_SQLAPICHARPTR(catalog), empty, MetadataMode::PatternOrOrdinary);
 		vector<string> catalogs;
 		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
@@ -92,7 +92,7 @@ namespace exodbc
 		string schema = SQL_ALL_SCHEMAS;
 		string empty = u8"";
 		TableInfoVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(schema),
-			EXODBCSTR_TO_SQLAPICHARPTR(empty), empty, MetadataMode::PatternValue);
+			EXODBCSTR_TO_SQLAPICHARPTR(empty), empty, MetadataMode::PatternOrOrdinary);
 		vector<string> schemas;
 		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
@@ -107,7 +107,7 @@ namespace exodbc
 		string type = SQL_ALL_TABLE_TYPES;
 		string empty = u8"";
 		TableInfoVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty),
-			EXODBCSTR_TO_SQLAPICHARPTR(empty), type, MetadataMode::PatternValue);
+			EXODBCSTR_TO_SQLAPICHARPTR(empty), type, MetadataMode::PatternOrOrdinary);
 		vector<string> types;
 		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
@@ -133,7 +133,7 @@ namespace exodbc
 				// Not implemented by the driver, assume its default: 
 				LOG_INFO(boost::str(boost::format(u8"Driver %s does not support SQL_ATTR_METADATA_ID (SQLGetStmtAttr returned SQLSTATE %s), asssuming default value of FALSE")
 					% m_props.GetDriverName() % ErrorHelper::SQLSTATE_OPTIONAL_FEATURE_NOT_IMPLEMENTED));
-				return MetadataMode::PatternValue;
+				return MetadataMode::PatternOrOrdinary;
 			}
 			else
 			{
@@ -145,7 +145,7 @@ namespace exodbc
 			boost::str(boost::format(u8"Unknown value %d for SQL_ATTR_METADATA_ID read") % metadataAttr));
 
 		if (metadataAttr == SQL_FALSE)
-			return MetadataMode::PatternValue;
+			return MetadataMode::PatternOrOrdinary;
 		else
 			return MetadataMode::Identifier;
 	}
@@ -166,7 +166,7 @@ namespace exodbc
 		THROW_IFN_SUCCEEDED(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 		
 		if (newValue == SQL_FALSE)
-			m_stmtMode = MetadataMode::PatternValue;
+			m_stmtMode = MetadataMode::PatternOrOrdinary;
 		else
 			m_stmtMode = MetadataMode::Identifier;
 	}
@@ -201,7 +201,7 @@ namespace exodbc
 		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
 			schemaName.empty() && !GetSupportsSchemas() ? nullptr : EXODBCSTR_TO_SQLAPICHARPTR(schemaName),
 			catalogName.empty() && !GetSupportsCatalogs() ? nullptr : EXODBCSTR_TO_SQLAPICHARPTR(catalogName),
-			tableType, MetadataMode::PatternValue);
+			tableType, MetadataMode::PatternOrOrdinary);
 	}
 
 
@@ -214,14 +214,14 @@ namespace exodbc
 			return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
 				EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName),
 				nullptr,
-				tableType, MetadataMode::PatternValue);
+				tableType, MetadataMode::PatternOrOrdinary);
 		}
 		else
 		{
 			return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
 				nullptr,
 				EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName),
-				tableType, MetadataMode::PatternValue);
+				tableType, MetadataMode::PatternOrOrdinary);
 		}
 	}
 
@@ -245,13 +245,13 @@ namespace exodbc
 		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
 			supportsSchemas ? EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName) : nullptr,
 			supportsCatalogs ? EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName) : nullptr,
-			tableType, MetadataMode::PatternValue);
+			tableType, MetadataMode::PatternOrOrdinary);
 	}
 
 
 	TableInfoVector DatabaseCatalog::SearchTables(const std::string& tableName, const std::string& tableType /* = u8"%" */) const
 	{
-		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), nullptr, nullptr, tableType, MetadataMode::PatternValue);
+		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), nullptr, nullptr, tableType, MetadataMode::PatternOrOrdinary);
 	}
 
 
@@ -364,7 +364,16 @@ namespace exodbc
 			EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetPureName()),
 			tableInfo.HasSchema() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetSchema()) : nullptr,
 			tableInfo.HasCatalog() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetCatalog()) : nullptr,
-			MetadataMode::PatternValue);
+			MetadataMode::PatternOrOrdinary);
+	}
+
+
+	PrimaryKeyInfoVector DatabaseCatalog::ReadPrimaryKeyInfo(const TableInfo& tableInfo) const
+	{
+		return ReadPrimaryKeyInfo(EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetPureName()),
+			tableInfo.HasSchema() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetSchema()) : nullptr,
+			tableInfo.HasCatalog() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetCatalog()) : nullptr,
+			MetadataMode::PatternOrOrdinary);
 	}
 
 
@@ -447,5 +456,48 @@ namespace exodbc
 		THROW_IFN_NO_DATA(SQLFetch, ret);
 
 		return columns;
+	}
+
+
+	PrimaryKeyInfoVector DatabaseCatalog::ReadPrimaryKeyInfo(SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName, 
+		SQLAPICHARTYPE* pCatalogName, MetadataMode mode) const
+	{
+		exASSERT(m_pHStmt);
+		exASSERT(m_pHStmt->IsAllocated());
+		exASSERT(pTableName != nullptr);
+
+		if (m_stmtMode != mode)
+			SetMetadataAttribute(mode);
+
+		// Close Statement and make sure it closes upon exit
+		StatementCloser stmtCloser(m_pHStmt, true, true);
+
+		PrimaryKeyInfoVector primaryKeys;
+
+		SQLRETURN ret = SQLPrimaryKeys(m_pHStmt->GetHandle(),
+			pCatalogName, SQL_NTS,
+			pSchemaName, SQL_NTS,
+			pTableName, SQL_NTS);
+
+		THROW_IFN_SUCCEEDED(SQLPrimaryKeys, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+
+		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
+		{
+			SQLLEN cb;
+			std::string catalogName, schemaName, tableName, columnName, keyName;
+			bool isCatalogNull, isSchemaNull, isKeyNameNull;
+			SQLSMALLINT keySequence;
+			GetData(m_pHStmt, 1, m_props.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
+			GetData(m_pHStmt, 2, m_props.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
+			GetData(m_pHStmt, 3, m_props.GetMaxTableNameLen(), tableName);
+			GetData(m_pHStmt, 4, m_props.GetMaxColumnNameLen(), columnName);
+			GetData(m_pHStmt, 5, SQL_C_SHORT, &keySequence, sizeof(keySequence), &cb, NULL);
+			GetData(m_pHStmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, keyName, &isKeyNameNull);
+			PrimaryKeyInfo pk(catalogName, schemaName, tableName, columnName, keySequence, keyName, isCatalogNull, isSchemaNull, isKeyNameNull);
+			primaryKeys.push_back(pk);
+		}
+		THROW_IFN_NO_DATA(SQLFetch, ret);
+
+		return primaryKeys;
 	}
 }

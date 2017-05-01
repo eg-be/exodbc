@@ -268,15 +268,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Reads table primary keys of exactly one table. 
-		* \param	table			  	Table definition to query primary keys.
-		* \return	The primary Keys found.
-		* \throw	If reading primary keys fails.
-		*/
-		TablePrimaryKeysVector		ReadTablePrimaryKeys(const TableInfo& table) const;
-
-
-		/*!
 		* \brief	Read special column information for a table.
 		* \details	This is a wrapper around SQLSpecialColumns.
 		* \param	table	Identify the table to query database about.
