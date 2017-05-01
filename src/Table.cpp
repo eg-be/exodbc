@@ -217,7 +217,8 @@ namespace exodbc
 		const TableInfo& tableInfo = ReadTableInfo();
 
 		// Query Columns and create SqlCBuffers
-		ColumnInfosVector columnInfos = m_pDb->ReadTableColumnInfo(tableInfo);
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		ColumnInfoVector columnInfos = pDbCat->ReadColumnInfo(tableInfo);
 		exASSERT(columnInfos.size() <= SHRT_MAX);
 		SQLSMALLINT numCols = (SQLSMALLINT)columnInfos.size();
 		if (numCols == 0)

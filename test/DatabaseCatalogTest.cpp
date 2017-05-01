@@ -311,7 +311,7 @@ namespace exodbctest
 		ASSERT_NO_THROW(intTable = dbCat.FindOneTable(tableNamePattern));
 
 		// And query all columns of this table:
-		ColumnInfosVector colInfo = dbCat.ReadColumnInfo(intTable);
+		ColumnInfoVector colInfo = dbCat.ReadColumnInfo(intTable);
 		ASSERT_EQ(4, colInfo.size());
 
 		ColumnInfo col1 = colInfo[0];
@@ -334,6 +334,33 @@ namespace exodbctest
 		EXPECT_EQ(col2Name, col2.GetColumnName());
 		EXPECT_EQ(col3Name, col3.GetColumnName());
 		EXPECT_EQ(col4Name, col4.GetColumnName());
+	}
+
+
+	TEST_F(DatabaseCatalogTest, ReadNumericColumnInfo)
+	{
+		// some more tests, try to read a specific numeric column and
+		// check that we get what we expect in the various members:
+
+		// First identify numerictypes table:
+		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
+
+		// Find a table
+		TableInfo numTable;
+		ASSERT_NO_THROW(numTable = dbCat.FindOneTable(GetTableName(TableId::NUMERICTYPES)));
+
+		// And query all columns of this table:
+		ColumnInfoVector colInfo = dbCat.ReadColumnInfo(numTable);
+		ASSERT_EQ(4, colInfo.size());
+
+		// Check concrete numeric values of the 3rd column:
+		ColumnInfo col = colInfo[2];
+		EXPECT_FALSE(col.IsNumPrecRadixNull());
+		EXPECT_FALSE(col.IsColumnSizeNull());
+		EXPECT_FALSE(col.IsDecimalDigitsNull());
+		EXPECT_EQ(10, col.GetNumPrecRadix());
+		EXPECT_EQ(18, col.GetColumnSize());
+		EXPECT_EQ(10, col.GetDecimalDigits());
 	}
 
 } //namespace exodbc

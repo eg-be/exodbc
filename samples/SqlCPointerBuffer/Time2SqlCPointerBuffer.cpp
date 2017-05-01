@@ -108,7 +108,11 @@ int _tmain(int argc, _TCHAR* argv[])
 		// Query the database about the appropriate values for ColumnSize and DecimalDigits:
 		SQLINTEGER columnSize = 0;
 		SQLSMALLINT decimalDigits = 0;
-		ColumnInfosVector colInfos = pDb->ReadTableColumnInfo(u8"timeTable", u8"", u8"", u8"");
+		// First fetch the correct TableInfo
+		DatabaseCatalogPtr pDbCat = pDb->GetDbCatalog();
+		TableInfo ti = pDbCat->FindOneTable(u8"timeTable");
+		// Then read the column information:
+		ColumnInfoVector colInfos = pDbCat->ReadColumnInfo(ti);
 		for (auto it = colInfos.begin(); it != colInfos.end(); ++it)
 		{
 			if (it->GetQueryName() == u8"timeCol")

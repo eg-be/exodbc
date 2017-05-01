@@ -531,61 +531,6 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseTest, ReadTableColumnInfo)
-	{
-		std::vector<ColumnInfo> cols;
-		std::string tableName;
-		std::string schemaName;
-		std::string catalogName;
-		std::string typeName;
-		switch(m_pDb->GetDbms())
-		{
-		case DatabaseProduct::MY_SQL:
-			// We know that mySql uses catalogs, not schemas:
-			tableName = u8"numerictypes";
-			schemaName = u8"";
-			catalogName = u8"exodbc";
-			typeName = u8"";
-			break;
-		case DatabaseProduct::DB2:
-			// We know that DB2 uses schemas:
-			tableName = u8"NUMERICTYPES";
-			schemaName = u8"EXODBC";
-			catalogName = u8"";
-			typeName = u8"";
-			break;
-		case DatabaseProduct::MS_SQL_SERVER:
-			// And ms uses catalogs, which map to dbs and schemaName
-			tableName = u8"numerictypes";
-			schemaName = u8"exodbc";
-			catalogName = u8"exodbc";
-			typeName = u8"";
-			break;
-		case DatabaseProduct::ACCESS:
-			tableName = u8"integertypes";
-			break;
-		}
-		EXPECT_NO_THROW(cols = m_pDb->ReadTableColumnInfo(tableName, schemaName, catalogName, typeName));
-		// Note: Access reads a different table
-		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
-		{
-			EXPECT_EQ(4, cols.size());
-		}
-		else
-		{
-			// Our decimals columns must have a num prec radix value of 10, a column size of the total digits, and a decimal digits the nr of digits after the delimeter
-			ASSERT_TRUE(cols.size() == 4);
-			ColumnInfo col = cols[2];
-			EXPECT_FALSE(col.IsNumPrecRadixNull());
-			EXPECT_FALSE(col.IsColumnSizeNull());
-			EXPECT_FALSE(col.IsDecimalDigitsNull());
-			EXPECT_EQ(10, col.GetNumPrecRadix());
-			EXPECT_EQ(18, col.GetColumnSize());
-			EXPECT_EQ(10, col.GetDecimalDigits());
-		}
-	}
-
-
 	TEST_F(DatabaseTest, ReadColumnCount)
 	{
 		std::string tableName = u8"";

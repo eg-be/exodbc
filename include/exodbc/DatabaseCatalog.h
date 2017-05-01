@@ -14,7 +14,7 @@
 #include "SqlHandle.h"
 #include "SqlInfoProperty.h"
 #include "TableInfo.h"
-#include "InfoObject.h"
+#include "ColumnInfo.h"
 // Other headers
 // System headers
 
@@ -228,7 +228,7 @@ namespace exodbc
 		* \brief	Read the columns of a table. Fetch the required TableInfo using one
 		*			of the FindTables() functions.
 		*/
-		ColumnInfosVector ReadColumnInfo(const TableInfo& tableInfo) const;
+		ColumnInfoVector ReadColumnInfo(const TableInfo& tableInfo) const;
 
 
 	private:
@@ -267,7 +267,7 @@ namespace exodbc
 		*			If mode is set to MetadataMode::Identifier, all arguments (including catalogName)
 		*			are treated as identifier values (IV).
 		*/
-		ColumnInfosVector ReadColumnInfo(SQLAPICHARTYPE* pColumnName, SQLAPICHARTYPE* pTableName,
+		ColumnInfoVector ReadColumnInfo(SQLAPICHARTYPE* pColumnName, SQLAPICHARTYPE* pTableName,
 			SQLAPICHARTYPE* pSchemaName, SQLAPICHARTYPE* pCatalogName, MetadataMode mode) const;
 
 
