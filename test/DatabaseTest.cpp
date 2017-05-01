@@ -500,30 +500,4 @@ namespace exodbctest
 		// we should also work if we just search by the tableName, as long as tableName is unique within db
 		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, u8"", u8"", u8""));
 	}
-
-
-	TEST_F(DatabaseTest, ReadSpecialColumns)
-	{
-		// The integertypes table has an id column that should be unique inside a cursor.
-		// but others might change the value of a row identified by id during a transaction, etc.
-
-		string intTableName = GetTableName(TableId::INTEGERTYPES);
-		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
-		TableInfo intTableInfo = pDbCat->FindOneTable(intTableName, u8"", u8"", u8"");
-		
-		SpecialColumnInfosVector specColsTransaction = m_pDb->ReadSpecialColumns(intTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::TRANSCATION);
-		SpecialColumnInfosVector specColsSession = m_pDb->ReadSpecialColumns(intTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::SESSION);
-		SpecialColumnInfosVector specColsCursor = m_pDb->ReadSpecialColumns(intTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::CURSOR);
-		EXPECT_EQ(1, specColsCursor.size());
-
-		string autoIdTableName = GetTableName(TableId::MULTIKEY);
-		TableInfo autoIdTableInfo = pDbCat->FindOneTable(autoIdTableName, u8"", u8"", u8"");
-
-		specColsTransaction = m_pDb->ReadSpecialColumns(autoIdTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::TRANSCATION);
-		specColsSession = m_pDb->ReadSpecialColumns(autoIdTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::SESSION);
-		specColsCursor = m_pDb->ReadSpecialColumns(autoIdTableInfo, IdentifierType::IDENTIFY_ROW_UNIQUELY, RowIdScope::CURSOR);
-		EXPECT_EQ(3, specColsCursor.size());
-
-	}
-
 } //namespace exodbc

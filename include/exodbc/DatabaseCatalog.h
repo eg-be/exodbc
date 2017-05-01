@@ -17,6 +17,7 @@
 #include "ColumnInfo.h"
 #include "PrimaryKeyInfo.h"
 #include "SqlTypeInfo.h"
+#include "SpecialColumnInfo.h"
 
 // Other headers
 // System headers
@@ -247,6 +248,18 @@ namespace exodbc
 		SqlTypeInfosVector ReadSqlTypeInfo() const;
 
 
+		/*!
+		* \brief	Read special column information for a table.
+		* \details	This is a wrapper around SQLSpecialColumns.
+		* \param	tableInfo	Identify the table to query database about.
+		* \param	idType		The identifier type to query
+		* \param	scope		The row id scope to query, if identifier is set to IdentifierType::IDENTIFY_ROW_UNIQUELY
+		* \param	includeNullableColumns Include columns that can have NULL values in the special columns or not.
+		*/
+		SpecialColumnInfoVector ReadSpecialColumnInfo(const TableInfo& tableInfo, SpecialColumnInfo::IdentifierType idType, 
+			SpecialColumnInfo::RowIdScope scope, bool includeNullableColumns = true) const;
+
+
 	private:
 		/*!
 		* \brief Searches for tables using the passed search-arguments.
@@ -299,6 +312,20 @@ namespace exodbc
 		*/
 		PrimaryKeyInfoVector ReadPrimaryKeyInfo(SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName,
 			SQLAPICHARTYPE* pCatalogName, MetadataMode mode) const;
+
+
+		/*!
+		* \brief	Read special column information for a table using SQLSpecialColumns.
+		If mode is set MetadataMode::PatternOrOrdinary, pTableName, pSchemaName and
+		*			pCatalogName are treated as ordinary value (OV) arguments. Strings are treated
+		*			literally and the case is significant.
+		*			If mode is set to MetadataMode::Identifier, all arguments are treated as
+		*			identifier values (ID).\n
+		*			pTableName is not allowed to be a null pointer.
+		*/
+		SpecialColumnInfoVector ReadSpecialColumnInfo(SpecialColumnInfo::IdentifierType idType,
+			SQLAPICHARTYPE* pTableName, SQLAPICHARTYPE* pSchemaName, SQLAPICHARTYPE* pCatalogName, 
+			SpecialColumnInfo::RowIdScope scope, bool includeNullableColumns, MetadataMode mode) const;
 
 
 		ConstSqlDbcHandlePtr m_pHdbc;

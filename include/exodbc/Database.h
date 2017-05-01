@@ -268,17 +268,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Read special column information for a table.
-		* \details	This is a wrapper around SQLSpecialColumns.
-		* \param	table	Identify the table to query database about.
-		* \param	idType	The identifier type to query
-		* \param	scope	The row id scope to query, if identifier is set to IdentifierType::IDENTIFY_ROW_UNIQUELY
-		* \param	includeNullableColumns Include columns that can have NULL values in the special columns or not.
-		*/
-		SpecialColumnInfosVector ReadSpecialColumns(const TableInfo& table, IdentifierType idType, RowIdScope scope, bool includeNullableColumns = true) const;
-
-
-		/*!
 		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT. The internal flag
 		 * 			m_commitMode is updated with the value red from the database, if reading
 		 *			was successful. In all other cases it is set to CM_UNKNOWN.
