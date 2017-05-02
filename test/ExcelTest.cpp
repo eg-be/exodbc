@@ -74,7 +74,7 @@ namespace exodbctest
 		TableInfoVector::const_iterator it;
 		for (it = tables.begin(); it != tables.end(); it++)
 		{
-			if (it->GetPureName() == u8"TestTable$")
+			if (it->GetName() == u8"TestTable$")
 			{
 				foundTestTableSheet = true;
 			}

@@ -128,7 +128,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 
 		bool operator()(const TableInfo& ti)
 		{
-			string tiName = ba::to_lower_copy(ti.GetPureName());
+			string tiName = ba::to_lower_copy(ti.GetName());
 
 			if (m_dbms == DatabaseProduct::EXCEL)
 			{
@@ -145,11 +145,11 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 	for (auto it = exodbcTables.begin(); it != exodbcTables.end(); ++it)
 	{
 		TableInfo ti = *it;
-		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"==== %s ====") % ti.GetPureName()));
+		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"==== %s ====") % ti.GetName()));
 		WRITE_STDOUT_ENDL(u8"===== Structure =====");
 		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Catalog Name: %s") % (ti.HasCatalog() ? ti.GetCatalog() : u8"<no catalog>")));
 		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Schema Name: %s") % (ti.HasSchema() ? ti.GetSchema() : u8"<no schema>")));
-		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Table Name: %s") % ti.GetPureName()));
+		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Table Name: %s") % ti.GetName()));
 		WRITE_STDOUT_ENDL(boost::str(boost::format(u8"* Query Name: %s") % ti.GetQueryName()));
 
 		// And print the columns by querying them from the table
@@ -208,7 +208,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 		t.Close();
 		t.ClearColumns();
 		// but skip _tmp tables
-		if (ba::ends_with(ba::to_lower_copy(ti.GetPureName()), u8"_tmp"))
+		if (ba::ends_with(ba::to_lower_copy(ti.GetName()), u8"_tmp"))
 		{
 			continue;
 		}

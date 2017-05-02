@@ -1114,7 +1114,7 @@ namespace exodbc
 					typeName = u8"";
 				}
 				DatabaseCatalogPtr pDbCatalog = m_pDb->GetDbCatalog();
-				pDbCatalog->FindOneTable(m_tableInfo.GetPureName(), m_tableInfo.GetSchema(), catalogName, typeName);
+				pDbCatalog->FindOneTable(m_tableInfo.GetName(), m_tableInfo.GetSchema(), catalogName, typeName);
 				searchedTable = true;
 			}
 

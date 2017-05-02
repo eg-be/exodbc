@@ -28,8 +28,8 @@ namespace exodbc
 	// ===============
 
 	TableInfo::TableInfo()
-		: m_isCatalogNull(false)
-		, m_isSchemaNull(false)
+		: m_isCatalogNull(true)
+		, m_isSchemaNull(true)
 		, m_dbms(DatabaseProduct::UNKNOWN)
 	{ }
 
@@ -43,7 +43,7 @@ namespace exodbc
 		, m_dbms(dbms)
 		, m_isCatalogNull(catalogName.empty())
 		, m_isSchemaNull(schemaName.empty())
-	{}
+	{ }
 
 
 	TableInfo::TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, const std::string& catalogName, const std::string schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms /* = DatabaseProduct::UNKNOWN */)
@@ -55,7 +55,7 @@ namespace exodbc
 		, m_dbms(dbms)
 		, m_isCatalogNull(isCatalogNull)
 		, m_isSchemaNull(isSchemaNull)
-	{}
+	{ }
 
 
 	std::string TableInfo::GetQueryName() const
@@ -91,20 +91,20 @@ namespace exodbc
 	}
 
 
-	std::string TableInfo::GetPureName() const
-	{
-		exASSERT(! m_tableName.empty());
-
-		return m_tableName;
-	}
-
-
 	std::string TableInfo::ToString() const noexcept
 	{
 		stringstream ss;
 		ss << u8"Name: '" << m_tableName << u8"'; ";
-		ss << u8"Schema: '" << m_schemaName << u8"'; ";
-		ss << u8"Catalog: '" << m_catalogName << u8"'; ";
+		ss << u8"Schema: '";
+		if (m_isSchemaNull)
+			ss << u8"NULL; ";
+		else
+			ss << m_schemaName << u8"'; ";
+		ss << u8"Catalog: '";
+		if (m_isCatalogNull)
+			ss << u8"NULL; ";
+		else
+			ss << m_catalogName << u8"; ";
 		ss << u8"Type: '" << m_tableType << u8"'";
 		return ss.str();
 	}
@@ -116,7 +116,9 @@ namespace exodbc
 			&& m_schemaName == other.m_schemaName
 			&& m_catalogName == other.m_catalogName
 			&& m_tableType == other.m_tableType
-			&& m_tableRemarks == other.m_tableRemarks;
+			&& m_tableRemarks == other.m_tableRemarks
+			&& m_isSchemaNull == other.m_isSchemaNull
+			&& m_isCatalogNull == other.m_isCatalogNull;
 	}
 
 

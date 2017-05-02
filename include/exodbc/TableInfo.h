@@ -25,33 +25,88 @@ namespace exodbc
 {
 	/*!
 	* \class TableInfo
-	*
-	* \brief Information about a Table
-	*
-	* \details Holds information about a table found using the SQLTables catalog function.
+	* \brief Information about a Table found using the SQLTables catalog function.
+	* \see DatabaseCatalog::SearchTables()
+	* \see DatabaseCatalog::FindOneTable()
 	*/
 	class EXODBCAPI TableInfo
 	{	
 	public:
+		/*!
+		* \brief Default constructor, all members are set to empty values, null flags are set to true.
+		*/
 		TableInfo();
+
+		/*!
+		* \brief Use passed values to init members. If schemaName or catalogName are empty, the corresponding
+		*		null flags are set to true.
+		*/
 		TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, 
 			const std::string& catalogName, const std::string schemaName, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
+
+		/*!
+		* \brief Use passed values to init members.
+		*/
 		TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, 
 			const std::string& catalogName, const std::string schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
 
+		/*!
+		* \brief Return the non-empty name to be used in queries like SELECT, UPDATE, etc.
+		* \throw AssertionException If no non-empty query name can be returned.
+		*/
 		std::string GetQueryName() const;
-		std::string GetPureName() const;
 
-		std::string		GetType() const { return m_tableType; };
-		std::string		GetCatalog() const { return m_catalogName;};
-		std::string		GetSchema() const {	return m_schemaName; };
+		/*!
+		* \return Table name. Empty value might be returned.
+		*/
+		std::string GetName() const noexcept { return m_tableName; };
 
-		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
-		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
+		/*!
+		* \return Table type. Empty value might be returned.
+		*/
+		std::string		GetType() const noexcept { return m_tableType; };
 
+		/*!
+		* \return Catalog name. Empty value might be returned.
+		* \see HasCatalog()
+		*/
+		std::string		GetCatalog() const noexcept { return m_catalogName;};
+
+		/*!
+		* \return Schema name. Empty value might be returned.
+		* \see HasSchema()
+		*/
+		std::string		GetSchema() const noexcept {	return m_schemaName; };
+
+		/*!
+		* \return True if null flag for Schema is not set and Schema Name is not empty.
+		*/
+		bool			HasSchema() const noexcept  { return !m_isSchemaNull && !m_schemaName.empty(); };
+
+		/*!
+		* \return True if null flag for Catalog is not set and Catalog Name is not empty.
+		*/
+		bool			HasCatalog() const noexcept  { return !m_isCatalogNull && !m_catalogName.empty(); };
+
+		/*!
+		* \return True if null flag for Schema is set.
+		*/
+		bool			IsSchemaNull() const noexcept { return m_isSchemaNull; };
+
+		/*!
+		* \brief True if null flag for Catalog is set.
+		*/
+		bool			IsCatalogNull() const noexcept { return m_isCatalogNull; };
+
+		/*!
+		* \brief Compares all members for equality
+		*/
 		bool operator==(const TableInfo& other) const noexcept;
 		bool operator!=(const TableInfo& other) const noexcept;
 
+		/*!
+		* \return One-line string with all properties of this TableInfo.
+		*/
 		std::string ToString() const noexcept;
 
 	private:
@@ -62,8 +117,8 @@ namespace exodbc
 		std::string		m_tableRemarks;		///< Remarks
 		std::string		m_catalogName;		///< Catalog name
 		std::string		m_schemaName;		///< Schema name.
-		bool				m_isCatalogNull;	///< True if NULL was returned for catalog name.
-		bool				m_isSchemaNull;		///< True if NULL was returned for schema name.
+		bool			m_isCatalogNull;	///< True if NULL was returned for catalog name.
+		bool			m_isSchemaNull;		///< True if NULL was returned for schema name.
 	};
 
 	/*!
