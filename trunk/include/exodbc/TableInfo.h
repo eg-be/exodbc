@@ -11,6 +11,8 @@
 
 // Same component headers
 #include "exOdbc.h"
+#include "SqlHandle.h"
+#include "SqlInfoProperty.h"
 
 // Other headers
 
@@ -49,6 +51,14 @@ namespace exodbc
 		*/
 		TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, 
 			const std::string& catalogName, const std::string schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
+
+		/*!
+		* \brief Create from a statement that is assumed to hold the results of SQLTables. The cursor must
+		*		be positioned at the row and is not modified, but column values are read.
+		* \throw Exception If reading any value fails, or if props does not hold all required properties.
+		*/
+		TableInfo(ConstSqlStmtHandlePtr pStmt, const SqlInfoProperties& props);
+
 
 		/*!
 		* \brief Return the non-empty name to be used in queries like SELECT, UPDATE, etc.
