@@ -372,42 +372,6 @@ namespace exodbc
 	}
 
 
-	void Table::CheckPrivileges() const
-	{
-		exASSERT(m_pDb);
-
-		const TableInfo& tableInfo = GetTableInfo();
-
-		TablePrivileges tablePrivs;
-		tablePrivs.Init(m_pDb, tableInfo);
-
-		if (TestAccessFlag(TableAccessFlag::AF_SELECT_WHERE) && !tablePrivs.Test(TablePrivilege::SELECT))
-		{
-			MissingTablePrivilegeException e(TablePrivilege::SELECT, tableInfo);
-			SET_EXCEPTION_SOURCE(e);
-			throw e;
-		}
-		if (TestAccessFlag(TableAccessFlag::AF_INSERT) && !tablePrivs.Test(TablePrivilege::INSERT))
-		{
-			MissingTablePrivilegeException e(TablePrivilege::INSERT, tableInfo);
-			SET_EXCEPTION_SOURCE(e);
-			throw e;
-		}
-		if ((TestAccessFlag(TableAccessFlag::AF_DELETE_PK) || TestAccessFlag(TableAccessFlag::AF_DELETE_WHERE)) && !tablePrivs.Test(TablePrivilege::DEL))
-		{
-			MissingTablePrivilegeException e(TablePrivilege::DEL, tableInfo);
-			SET_EXCEPTION_SOURCE(e);
-			throw e;
-		}
-		if ((TestAccessFlag(TableAccessFlag::AF_UPDATE_PK) || TestAccessFlag(TableAccessFlag::AF_UPDATE_WHERE)) && !tablePrivs.Test(TablePrivilege::UPDATE))
-		{
-			MissingTablePrivilegeException e(TablePrivilege::UPDATE, tableInfo);
-			SET_EXCEPTION_SOURCE(e);
-			throw e;
-		}
-	}
-
-
 	void Table::FreeStatements()
 	{
 		// Do NOT check for IsOpen() here. If Open() fails it will call FreeStatements to do its cleanup
@@ -1194,12 +1158,6 @@ namespace exodbc
 			if (!m_autoCreatedColumns && !TestOpenFlag(TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS))
 			{
 				CheckSqlTypes(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
-			}
-
-			// Optionally check privileges
-			if (TestOpenFlag(TableOpenFlag::TOF_CHECK_PRIVILEGES))
-			{
-				CheckPrivileges();
 			}
 
 			// Bind the Buffer for the Count operations

@@ -12,7 +12,6 @@
 
 // Same component headers
 #include "exOdbc.h"
-#include "TablePrivileges.h"
 #include "Exception.h"
 #include "Sql2BufferTypeMap.h"
 #include "ColumnBuffer.h"
@@ -780,15 +779,6 @@ namespace exodbc
 		* \throw	Exception If no TableInfo is stored in this Table.
 		*/
 		const TableInfo& GetTableInfo() const;
-
-
-		/*!
-		* \brief	Checks that the privileges for the currently logged-in user are sufficient
-		*			for the TableAccessFlags defined on this Table.
-		* \throw	PrivilegesException If privileges are not sufficient for given TableAccessFlags
-		* \throw	Exception If reading or parsing fails.
-		*/
-		void		CheckPrivileges() const;
 
 
 		// Private stuff

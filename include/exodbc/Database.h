@@ -246,28 +246,6 @@ namespace exodbc
 
 
 		/*!
-		 * \brief	Reads table privileges for the table(s) matching the passed SCatalogTable description.
-		 * \param	table		Defines the tablename, type, schema and catalog to search for privileges.
-		 * \return	Privileges	matching passed table.
-		 * \throw	Exception	If reading privileges fails.
-		 */
-		TablePrivilegesVector	ReadTablePrivileges(const TableInfo& table) const;
-
-
-		/*!
-		 * \brief	Reads table privileges of exactly one table. This method will fail if not
-		 * 			exactly one table is found matching the passed arguments.
-		 * \param	tableName		  	Name of the table.
-		 * \param	schemaName		  	Name of the schema.
-		 * \param	catalogName		  	Name of the catalog.
-		 * \param	tableType	Table Type name
-		 * \return	Privileges for exactly one matching table.
-		 * \throw	Exception	If reading privileges fails, or not exactly one table matches.
-		 */
-		TablePrivilegesVector	ReadTablePrivileges(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const;
-
-
-		/*!
 		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT. The internal flag
 		 * 			m_commitMode is updated with the value red from the database, if reading
 		 *			was successful. In all other cases it is set to CM_UNKNOWN.

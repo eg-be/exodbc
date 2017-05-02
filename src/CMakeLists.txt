@@ -62,7 +62,6 @@ set ( SRC_EXODBC
   SqlTypeInfo.cpp
   Table.cpp 
   TableInfo.cpp
-  TablePrivileges.cpp 
 )
 
 set ( HEADERS_EXODBC
@@ -96,7 +95,6 @@ set ( HEADERS_EXODBC
   ../include/exodbc/SqlTypeInfo.h
   ../include/exodbc/Table.h
   ../include/exodbc/TableInfo.h
-  ../include/exodbc/TablePrivileges.h
 )
 
 set ( CONFIG_EXODBC 

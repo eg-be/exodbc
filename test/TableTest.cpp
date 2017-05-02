@@ -314,19 +314,6 @@ namespace exodbctest
 	}
 
 
-	TEST_F(TableTest, CheckPrivileges)
-	{
-		// Test to open read-only a table we know we have all rights:
-		std::string tableName = GetTableName(TableId::INTEGERTYPES);
-		exodbc::Table rTable(m_pDb, TableAccessFlag::AF_READ, tableName, u8"", u8"", u8"");
-		EXPECT_NO_THROW(rTable.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES));
-
-		// Test to open read-write a table we know we have all rights:
-		exodbc::Table rTable2(m_pDb, TableAccessFlag::AF_READ_WRITE, tableName, u8"", u8"", u8"");
-		EXPECT_NO_THROW(rTable2.Open(TableOpenFlag::TOF_CHECK_PRIVILEGES));
-	}
-
-
 	TEST_F(TableTest, OpenManualWithUnsupportedColumn)
 	{
 		Table iTable(m_pDb, TableAccessFlag::AF_SELECT_WHERE, GetTableName(TableId::INTEGERTYPES), u8"", u8"", u8"");
