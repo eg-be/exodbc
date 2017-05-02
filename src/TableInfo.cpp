@@ -61,6 +61,9 @@ namespace exodbc
 
 	TableInfo::TableInfo(ConstSqlStmtHandlePtr pStmt, const SqlInfoProperties& props)
 	{
+		exASSERT(pStmt);
+		exASSERT(pStmt->IsAllocated());
+
 		m_dbms = props.DetectDbms();
 
 		SQLLEN cb = 0;
