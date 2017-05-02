@@ -69,7 +69,7 @@ namespace exodbc
 		GetData(pStmt, 2, props.GetMaxSchemaNameLen(), m_schemaName, &m_isSchemaNull);
 		GetData(pStmt, 3, props.GetMaxTableNameLen(), m_tableName);
 		GetData(pStmt, 4, props.GetMaxColumnNameLen(), m_columnName);
-		GetData(pStmt, 5, SQL_C_SHORT, &m_keySequence, sizeof(m_keySequence), &cb, NULL);
+		GetData(pStmt, 5, SQL_C_SHORT, &m_keySequence, sizeof(m_keySequence), &cb, nullptr);
 		GetData(pStmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, m_keyName, &m_isKeyNameNull);
 	}
 
