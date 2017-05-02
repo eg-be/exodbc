@@ -12,6 +12,8 @@
 // Same component headers
 #include "exOdbc.h"
 #include "AssertionException.h"
+#include "SqlHandle.h"
+#include "SqlInfoProperty.h"
 
 // Other headers
 // System headers
@@ -48,6 +50,15 @@ namespace exodbc
 		*/
 		PrimaryKeyInfo(const std::string& catalogName, const std::string& schemaName, const std::string& tableName, const std::string& columnName,
 			SQLSMALLINT keySequence, const std::string& keyName, bool isCatalogNull, bool isSchemaNull, bool isPrimaryKeyNameNull);
+
+
+		/*!
+		* \brief Create from a statement that is assumed to hold the results of SQLPrimaryKeys. The cursor must
+		*		be positioned at the row and is not modified, but column values are read.
+		* \throw Exception If reading any value fails, or if props does not hold all required properties.
+		*/
+		PrimaryKeyInfo(ConstSqlStmtHandlePtr pStmt, const SqlInfoProperties& props);
+
 
 		/*!
 		* \brief Return the non-empty name to be used in queries like SELECT, UPDATE, etc.
@@ -91,7 +102,7 @@ namespace exodbc
 		/*!
 		* \return Key Name. Empty value might be returned.
 		*/
-		std::string GetKeyName() const { exASSERT(!IsKeyNameNull()); return m_primaryKeyName; };
+		std::string GetKeyName() const { exASSERT(!IsKeyNameNull()); return m_keyName; };
 
 
 		/*!
@@ -121,7 +132,7 @@ namespace exodbc
 		/*!
 		* \brief True if null flag for Key Name is set.
 		*/
-		bool IsKeyNameNull() const { return m_isPrimaryKeyNameNull; };
+		bool IsKeyNameNull() const { return m_isKeyNameNull; };
 
 	private:
 		std::string	m_catalogName;	///< TABLE_CAT [Nullable]. Primary key table catalog name.
@@ -130,11 +141,11 @@ namespace exodbc
 		std::string	m_columnName;	///< COLUMN_NAME. Primary key column name.
 
 		SQLSMALLINT		m_keySequence;	///< KEY_SEQ. Column sequence number in key (starting with 1).
-		std::string	m_primaryKeyName;	///< PK_NAME [Nullable]. Column sequence number in key (starting with 1).
+		std::string		m_keyName;	///< PK_NAME [Nullable]. Column sequence number in key (starting with 1).
 
 		bool			m_isCatalogNull;		///< True if TABLE_CAT is Null.
 		bool			m_isSchemaNull;			///< True if TABLE_SCHEM is Null.
-		bool			m_isPrimaryKeyNameNull;	///< True if PK_NAME is Null.
+		bool			m_isKeyNameNull;	///< True if PK_NAME is Null.
 	};
 
 	/*!
