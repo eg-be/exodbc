@@ -12,6 +12,7 @@
 
 // Same component headers
 #include "AssertionException.h"
+#include "Helpers.h"
 
 // Other headers
 // Debug
@@ -28,7 +29,7 @@ namespace exodbc
 	// =========================
 	PrimaryKeyInfo::PrimaryKeyInfo()
 		: m_keySequence(0)
-		, m_isPrimaryKeyNameNull(true)
+		, m_isKeyNameNull(true)
 		, m_isCatalogNull(true)
 		, m_isSchemaNull(true)
 	{}
@@ -40,8 +41,8 @@ namespace exodbc
 		, m_keySequence(keySequence)
 		, m_isCatalogNull(true)
 		, m_isSchemaNull(true)
-		, m_isPrimaryKeyNameNull(true)
-	{}
+		, m_isKeyNameNull(true)
+	{ }
 
 
 	PrimaryKeyInfo::PrimaryKeyInfo(const std::string& catalogName, const std::string& schemaName, const std::string& tableName, const std::string& columnName,
@@ -51,11 +52,26 @@ namespace exodbc
 		, m_tableName(tableName)
 		, m_columnName(columnName)
 		, m_keySequence(keySequence)
-		, m_primaryKeyName(keyName)
+		, m_keyName(keyName)
 		, m_isCatalogNull(isCatalogNull)
 		, m_isSchemaNull(isSchemaNull)
-		, m_isPrimaryKeyNameNull(isPrimaryKeyNameNull)
-	{}
+		, m_isKeyNameNull(isPrimaryKeyNameNull)
+	{ }
+
+
+	PrimaryKeyInfo::PrimaryKeyInfo(ConstSqlStmtHandlePtr pStmt, const SqlInfoProperties& props)
+	{
+		exASSERT(pStmt);
+		exASSERT(pStmt->IsAllocated());
+
+		SQLLEN cb = 0;
+		GetData(pStmt, 1, props.GetMaxCatalogNameLen(), m_catalogName, &m_isCatalogNull);
+		GetData(pStmt, 2, props.GetMaxSchemaNameLen(), m_schemaName, &m_isSchemaNull);
+		GetData(pStmt, 3, props.GetMaxTableNameLen(), m_tableName);
+		GetData(pStmt, 4, props.GetMaxColumnNameLen(), m_columnName);
+		GetData(pStmt, 5, SQL_C_SHORT, &m_keySequence, sizeof(m_keySequence), &cb, NULL);
+		GetData(pStmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, m_keyName, &m_isKeyNameNull);
+	}
 
 
 	std::string PrimaryKeyInfo::GetQueryName() const

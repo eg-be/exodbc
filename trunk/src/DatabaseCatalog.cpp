@@ -528,18 +528,8 @@ namespace exodbc
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
 		{
-			SQLLEN cb;
-			std::string catalogName, schemaName, tableName, columnName, keyName;
-			bool isCatalogNull, isSchemaNull, isKeyNameNull;
-			SQLSMALLINT keySequence;
-			GetData(m_pHStmt, 1, m_props.GetMaxCatalogNameLen(), catalogName, &isCatalogNull);
-			GetData(m_pHStmt, 2, m_props.GetMaxSchemaNameLen(), schemaName, &isSchemaNull);
-			GetData(m_pHStmt, 3, m_props.GetMaxTableNameLen(), tableName);
-			GetData(m_pHStmt, 4, m_props.GetMaxColumnNameLen(), columnName);
-			GetData(m_pHStmt, 5, SQL_C_SHORT, &keySequence, sizeof(keySequence), &cb, NULL);
-			GetData(m_pHStmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, keyName, &isKeyNameNull);
-			PrimaryKeyInfo pk(catalogName, schemaName, tableName, columnName, keySequence, keyName, isCatalogNull, isSchemaNull, isKeyNameNull);
-			primaryKeys.push_back(pk);
+			PrimaryKeyInfo pki(m_pHStmt, m_props);
+			primaryKeys.push_back(pki);
 		}
 		THROW_IFN_NO_DATA(SQLFetch, ret);
 
