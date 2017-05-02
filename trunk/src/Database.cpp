@@ -464,7 +464,7 @@ namespace exodbc
 		SQLRETURN ret = SQLColumns(m_pHStmt->GetHandle(),
 				 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName), SQL_NTS,	// catalog
 				table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
-				 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS,		// tablename
+				 EXODBCSTR_TO_SQLAPICHARPTR(table.GetName()), SQL_NTS,		// tablename
 				NULL, 0);						// All columns
 
 		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());

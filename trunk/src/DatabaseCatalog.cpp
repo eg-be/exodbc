@@ -361,7 +361,7 @@ namespace exodbc
 	ColumnInfoVector DatabaseCatalog::ReadColumnInfo(const TableInfo& tableInfo) const
 	{
 		return ReadColumnInfo(nullptr,
-			EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetPureName()),
+			EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetName()),
 			tableInfo.HasSchema() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetSchema()) : nullptr,
 			tableInfo.HasCatalog() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetCatalog()) : nullptr,
 			MetadataMode::PatternOrOrdinary);
@@ -370,7 +370,7 @@ namespace exodbc
 
 	PrimaryKeyInfoVector DatabaseCatalog::ReadPrimaryKeyInfo(const TableInfo& tableInfo) const
 	{
-		return ReadPrimaryKeyInfo(EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetPureName()),
+		return ReadPrimaryKeyInfo(EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetName()),
 			tableInfo.HasSchema() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetSchema()) : nullptr,
 			tableInfo.HasCatalog() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetCatalog()) : nullptr,
 			MetadataMode::PatternOrOrdinary);
@@ -573,7 +573,7 @@ namespace exodbc
 	SpecialColumnInfoVector DatabaseCatalog::ReadSpecialColumnInfo(const TableInfo& tableInfo, SpecialColumnInfo::IdentifierType idType, 
 		SpecialColumnInfo::RowIdScope scope, bool includeNullableColumns /* = true */) const
 	{
-		return ReadSpecialColumnInfo(idType, EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetPureName()),
+		return ReadSpecialColumnInfo(idType, EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetName()),
 			tableInfo.HasSchema() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetSchema()) : nullptr,
 			tableInfo.HasCatalog() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetCatalog()) : nullptr,
 			scope, includeNullableColumns, MetadataMode::PatternOrOrdinary);

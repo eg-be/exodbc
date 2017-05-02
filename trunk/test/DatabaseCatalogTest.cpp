@@ -134,7 +134,7 @@ namespace exodbctest
 		// every table must end with _tmp
 		for (TableInfoVector::const_iterator it = tmpTables.begin(); it != tmpTables.end(); ++it)
 		{
-			string tableName = it->GetPureName();
+			string tableName = it->GetName();
 			EXPECT_TRUE(boost::algorithm::iends_with(tableName, u8"_tmp"));
 		}
 	}
@@ -158,7 +158,7 @@ namespace exodbctest
 		if ((ti.HasSchema() && !ti.HasCatalog()) || (!ti.HasSchema() && ti.HasCatalog()))
 		{
 			string schemaOrCatalogName = ti.HasSchema() ? ti.GetSchema() : ti.GetCatalog();
-			tables2 = dbCat.SearchTables(ti.GetPureName(), schemaOrCatalogName, ti.GetType());
+			tables2 = dbCat.SearchTables(ti.GetName(), schemaOrCatalogName, ti.GetType());
 		}
 		else
 		{
@@ -185,11 +185,11 @@ namespace exodbctest
 		TableInfoVector tables2;
 		if(ti.HasCatalog())
 		{
-			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetCatalog(), DatabaseCatalog::SchemaOrCatalogType::Catalog , ti.GetType());
+			tables2 = dbCat.SearchTables(ti.GetName(), ti.GetCatalog(), DatabaseCatalog::SchemaOrCatalogType::Catalog , ti.GetType());
 		}
 		else if (ti.HasSchema())
 		{
-			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetSchema(), DatabaseCatalog::SchemaOrCatalogType::Schema, ti.GetType());
+			tables2 = dbCat.SearchTables(ti.GetName(), ti.GetSchema(), DatabaseCatalog::SchemaOrCatalogType::Schema, ti.GetType());
 		}
 		else
 		{
@@ -216,7 +216,7 @@ namespace exodbctest
 		TableInfoVector tables2;
 		if (ti.HasCatalog() && ti.HasSchema())
 		{
-			tables2 = dbCat.SearchTables(ti.GetPureName(), ti.GetSchema(), ti.GetCatalog(), u8"");
+			tables2 = dbCat.SearchTables(ti.GetName(), ti.GetSchema(), ti.GetCatalog(), u8"");
 		}
 		else
 		{

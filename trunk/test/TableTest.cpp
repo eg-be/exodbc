@@ -87,7 +87,7 @@ namespace exodbctest
 
 		// TableInfo must be available
 		TableInfo ti = iTable.GetTableInfo();
-		EXPECT_EQ(intTableName, ti.GetPureName());
+		EXPECT_EQ(intTableName, ti.GetName());
 
 		// But no columns have been created
 		EXPECT_EQ(0, iTable.GetColumnBufferCount());
@@ -103,7 +103,7 @@ namespace exodbctest
 
 		// TableInfo must be available
 		TableInfo ti = iTable.GetTableInfo();
-		EXPECT_EQ(intTableName, ti.GetPureName());
+		EXPECT_EQ(intTableName, ti.GetName());
 
 		// But no columns have been created
 		EXPECT_EQ(0, iTable.GetColumnBufferCount());
