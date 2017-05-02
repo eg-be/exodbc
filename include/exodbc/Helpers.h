@@ -2,7 +2,7 @@
 * \file Helpers.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.07.2014
-* \brief Header file for generic Helpers, mostly about error-handling and assertions.
+* \brief Header file for generic Helpers.
 * \copyright GNU Lesser General Public License Version 3
 */ 
 
