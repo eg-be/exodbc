@@ -60,11 +60,12 @@ namespace exodbc
 
 	std::string PrimaryKeyInfo::GetQueryName() const
 	{
-		return GetPureName();
+		exASSERT(!m_columnName.empty());
+		return m_columnName;
 	}
 
 
-	std::string PrimaryKeyInfo::GetPureName() const
+	std::string PrimaryKeyInfo::GetColumnName() const
 	{
 		exASSERT(!m_columnName.empty());
 		return m_columnName;

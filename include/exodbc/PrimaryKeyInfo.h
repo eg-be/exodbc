@@ -30,25 +30,97 @@ namespace exodbc
 	class EXODBCAPI PrimaryKeyInfo
 	{
 	public:
+		/*!
+		* \brief Default constructor, all members are set to empty values, null flags are set to true.
+		*/
 		PrimaryKeyInfo();
+
+
+		/*!
+		* \brief Use passed values to init members. Null flags for catalog, schema and key name are set,
+		*		non passed values are empty.
+		*/
 		PrimaryKeyInfo(const std::string& tableName, const std::string& columnName, SQLSMALLINT keySequence);
+
+
+		/*!
+		* \brief Use passed values to init members.
+		*/
 		PrimaryKeyInfo(const std::string& catalogName, const std::string& schemaName, const std::string& tableName, const std::string& columnName,
 			SQLSMALLINT keySequence, const std::string& keyName, bool isCatalogNull, bool isSchemaNull, bool isPrimaryKeyNameNull);
 
+		/*!
+		* \brief Return the non-empty name to be used in queries like SELECT, UPDATE, etc.
+		* \throw AssertionException If no non-empty query name can be returned.
+		*/
 		std::string GetQueryName() const;
-		std::string GetPureName() const;
 
-		std::string GetCatalogName() const { exASSERT(!IsCatalogNull()); return m_catalogName; };
-		std::string GetSchemaName() const { exASSERT(!IsSchemaNull()); return m_schemaName; };
-		std::string GetTableName() const { return m_tableName; };
-		std::string GetColumnName() const { return m_columnName; };
 
-		SQLSMALLINT GetKeySequence() const { return m_keySequence; };
+		/*!
+		* \return Key column name. Empty value might be returned.
+		*/
+		std::string GetColumnName() const;
 
+
+		/*!
+		* \return Catalog name. Empty value might be returned.
+		* \see HasCatalog()
+		*/
+		std::string GetCatalog() const noexcept { return m_catalogName; };
+
+
+		/*!
+		* \return Schema name. Empty value might be returned.
+		* \see HasSchema()
+		*/
+		std::string GetSchema() const noexcept { return m_schemaName; };
+
+
+		/*!
+		* \return Table name. Empty value might be returned.
+		*/
+		std::string GetTable() const noexcept { return m_tableName; };
+
+
+		/*!
+		* \return Key Sequence Number, starting with 1 (0 if not set).
+		*/
+		SQLSMALLINT GetKeySequence() const noexcept { return m_keySequence; };
+
+
+		/*!
+		* \return Key Name. Empty value might be returned.
+		*/
 		std::string GetKeyName() const { exASSERT(!IsKeyNameNull()); return m_primaryKeyName; };
 
-		bool IsCatalogNull() const { return m_isCatalogNull; };
+
+		/*!
+		* \return True if null flag for Schema is not set and Schema Name is not empty.
+		*/
+		bool			HasSchema() const noexcept { return !m_isSchemaNull && !m_schemaName.empty(); };
+
+
+		/*!
+		* \return True if null flag for Catalog is not set and Catalog Name is not empty.
+		*/
+		bool			HasCatalog() const noexcept { return !m_isCatalogNull && !m_catalogName.empty(); };
+
+
+		/*!
+		* \return True if null flag for Schema is set.
+		*/
+		bool IsCatalogNull() const noexcept  { return m_isCatalogNull; };
+
+
+		/*!
+		* \brief True if null flag for Catalog is set.
+		*/
 		bool IsSchemaNull() const { return m_isSchemaNull; };
+
+
+		/*!
+		* \brief True if null flag for Key Name is set.
+		*/
 		bool IsKeyNameNull() const { return m_isPrimaryKeyNameNull; };
 
 	private:
