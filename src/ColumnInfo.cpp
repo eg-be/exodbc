@@ -37,17 +37,17 @@ namespace exodbc
 		, m_sqlDatetimeSub(0)
 		, m_charOctetLength(0)
 		, m_ordinalPosition(0)
-		, m_isCatalogNull(false)
-		, m_isSchemaNull(false)
-		, m_isColumnSizeNull(false)
-		, m_isBufferSizeNull(false)
-		, m_isDecimalDigitsNull(false)
-		, m_isNumPrecRadixNull(false)
-		, m_isRemarksNull(false)
-		, m_isDefaultValueNull(false)
-		, m_isSqlDatetimeSubNull(false)
-		, m_isCharOctetLengthNull(false)
-		, m_isIsNullableNull(false)
+		, m_isCatalogNull(true)
+		, m_isSchemaNull(true)
+		, m_isColumnSizeNull(true)
+		, m_isBufferSizeNull(true)
+		, m_isDecimalDigitsNull(true)
+		, m_isNumPrecRadixNull(true)
+		, m_isRemarksNull(true)
+		, m_isDefaultValueNull(true)
+		, m_isSqlDatetimeSubNull(true)
+		, m_isCharOctetLengthNull(true)
+		, m_isIsNullableNull(true)
 	{ }
 
 
@@ -84,19 +84,12 @@ namespace exodbc
 		, m_isDefaultValueNull(isDefaultValueNull)
 		, m_isSqlDatetimeSubNull(isSqlDatetimeSubNull)
 		, m_isIsNullableNull(isIsNullableNull)
-	{
-		exASSERT(!m_columnName.empty());
-	}
+	{ }
 
-	std::string ColumnInfo::GetQueryName() const noexcept
+	std::string ColumnInfo::GetQueryName() const
 	{
 		// When querying, we use only the Column-name
-		return GetPureName();
-	}
-
-
-	std::string ColumnInfo::GetPureName() const noexcept
-	{
+		exASSERT(!m_columnName.empty());
 		return m_columnName;
 	}
 }

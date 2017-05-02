@@ -26,47 +26,21 @@ namespace exodbc
 	/*!
 	* \class	ColumnInfo
 	* \brief	Information about a column fetched using the catalog function SQLColumns.
-	* \see: http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
-	*
+	* \see  http://msdn.microsoft.com/en-us/library/ms711683%28v=vs.85%29.aspx
+	* \see DatabaseCatalog::ReadColumnInfo()
 	*/
 	class EXODBCAPI ColumnInfo
 	{
-	private:
-		ColumnInfo();
-
 	public:
 		/*!
-		* \brief	Create new ColumnInfo.
-		* \details
-		* \param catalogName
-		* \param schemaName
-		* \param tableName
-		* \param columnName
-		* \param sqlType
-		* \param typeName
-		* \param columnSize
-		* \param bufferSize
-		* \param decimalDigits
-		* \param numPrecRadix
-		* \param nullable
-		* \param remarks
-		* \param defaultValue
-		* \param sqlDataType
-		* \param sqlDatetimeSub
-		* \param charOctetLength
-		* \param ordinalPosition
-		* \param isNullable
-		* \param isCatalogNull
-		* \param isSchemaNull
-		* \param isColumnSizeNull
-		* \param isBufferSizeNull
-		* \param isDecimalDigitsNull
-		* \param isNumPrecRadixNull
-		* \param isRemarksNull
-		* \param isDefaultValueNull
-		* \param isSqlDatetimeSubNull
-		* \param isIsNullableNull
-		* \throw Exception If columnName is empty.
+		* \brief Init all members with empty or 0 values. All null flags are set to true,
+		*		enum values are set to unknown value.
+		*/
+		ColumnInfo();
+
+
+		/*!
+		* \brief Use passed values to init members.
 		*/
 		ColumnInfo(const std::string& catalogName, const std::string& schemaName, const std::string& tableName, const std::string& columnName,
 			SQLSMALLINT sqlType, const std::string& typeName, SQLINTEGER columnSize, SQLINTEGER bufferSize, SQLSMALLINT decimalDigits, SQLSMALLINT numPrecRadix,
@@ -76,16 +50,16 @@ namespace exodbc
 			bool isIsNullableNull);
 
 		/*!
-		* \brief	Returns only the ColumnName.
+		* \brief Return the non-empty name to be used in queries like SELECT, UPDATE, etc.
+		* \throw AssertionException If no non-empty query name can be returned.
 		*/
-		std::string GetQueryName() const noexcept;
+		std::string GetQueryName() const;
 
 
 		/*!
-		* \brief	Returns the pure name, which is the columnName.
-		* \return std::string
+		* \return Table name. Empty value might be returned.
 		*/
-		std::string GetPureName() const noexcept;
+		std::string GetName() const noexcept { return m_tableName; }
 
 		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
 		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
