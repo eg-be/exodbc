@@ -399,7 +399,7 @@ namespace exodbctest
 
 	TEST_F(DatabaseCatalogTest, ReadSqlDataTypeInfo)
 	{
-		std::vector<SSqlTypeInfo> types;
+		std::vector<SqlTypeInfo> types;
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 
 		ASSERT_NO_THROW(types = dbCat.ReadSqlTypeInfo());
@@ -408,10 +408,10 @@ namespace exodbctest
 		std::stringstream ws;
 		ws << u8"TypeInfo of database with DSN '" << (g_odbcInfo.HasConnectionString() ? g_odbcInfo.m_connectionString : g_odbcInfo.m_dsn) << u8"', total " << types.size() << u8" types reported:" << std::endl;
 		bool first = true;
-		std::vector<SSqlTypeInfo>::const_iterator it = types.begin();
+		std::vector<SqlTypeInfo>::const_iterator it = types.begin();
 		while (it != types.end())
 		{
-			SSqlTypeInfo t = *it;
+			SqlTypeInfo t = *it;
 
 			++it;
 

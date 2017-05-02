@@ -316,7 +316,7 @@ namespace exodbc
 		SqlTypeInfosVector::const_iterator it = m_datatypes.begin();
 		while (it != m_datatypes.end())
 		{
-			if (it->m_sqlDataType == sqlType || it->m_sqlType == sqlType)
+			if (it->GetSqlDataType() == sqlType || it->GetSqlType() == sqlType)
 			{
 				return true;
 			}

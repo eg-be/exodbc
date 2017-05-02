@@ -12,6 +12,7 @@
 
 // Same component headers
 #include "AssertionException.h"
+#include "Helpers.h"
 
 // Other headers
 // Debug
@@ -24,38 +25,66 @@ using namespace std;
 
 namespace exodbc
 {
-	SSqlTypeInfo::SSqlTypeInfo()
+	SqlTypeInfo::SqlTypeInfo()
+	: m_sqlType(0)
+	, m_columnSize(0)
+	, m_columnSizeIsNull(true)
+	, m_literalPrefixIsNull(true)
+	, m_literalSuffixIsNull(true)
+	, m_createParamsIsNull(true)
+	, m_nullable(SQL_NULLABLE_UNKNOWN)
+	, m_caseSensitive(SQL_FALSE)
+	, m_searchable(SQL_PRED_NONE)
+	, m_unsigned(SQL_FALSE)
+	, m_unsignedIsNull(true)
+	, m_fixedPrecisionScale(SQL_FALSE)
+	, m_autoUniqueValue(SQL_FALSE)
+	, m_autoUniqueValueIsNull(true)
+	, m_localTypeNameIsNull(true)
+	, m_minimumScale(0)
+	, m_minimumScaleIsNull(true)
+	, m_maximumScale(0)
+	, m_maximumScaleIsNull(true)
+	, m_sqlDataType(0)
+	, m_sqlDateTimeSub(0)
+	, m_sqlDateTimeSubIsNull(true)
+	, m_numPrecRadix(0)
+	, m_numPrecRadixIsNull(true)
+	, m_intervalPrecision(0)
+	, m_intervalPrecisionIsNull(true)
+	{ }
+
+
+	SqlTypeInfo::SqlTypeInfo(ConstSqlStmtHandlePtr pStmt, const SqlInfoProperties& props)
 	{
-		m_sqlType = 0;
-		m_columnSize = 0;
-		m_columnSizeIsNull = false;
-		m_literalPrefixIsNull = false;
-		m_literalSuffixIsNull = false;
-		m_createParamsIsNull = false;
-		m_nullable = SQL_NULLABLE_UNKNOWN;
-		m_caseSensitive = SQL_FALSE;
-		m_searchable = SQL_PRED_NONE;
-		m_unsigned = SQL_FALSE;
-		m_unsignedIsNull = false;
-		m_fixedPrecisionScale = SQL_FALSE;
-		m_autoUniqueValue = SQL_FALSE;
-		m_autoUniqueValueIsNull = false;
-		m_localTypeNameIsNull = false;
-		m_minimumScale = 0;
-		m_minimumScaleIsNull = false;
-		m_maximumScale = 0;
-		m_maximumScaleIsNull = false;
-		m_sqlDataType = 0;
-		m_sqlDateTimeSub = 0;
-		m_sqlDateTimeSubIsNull = false;
-		m_numPrecRadix = 0;
-		m_numPrecRadixIsNull = false;
-		m_intervalPrecision = 0;
-		m_intervalPrecisionIsNull = false;
+		exASSERT(pStmt);
+		exASSERT(pStmt->IsAllocated());
+
+		SQLLEN cb = 0;
+
+		GetData(pStmt, 1, DB_MAX_TYPE_NAME_LEN, m_typeName);
+		GetData(pStmt, 2, SQL_C_SSHORT, &m_sqlType, sizeof(m_sqlType), &cb, nullptr);
+		GetData(pStmt, 3, SQL_C_SLONG, &m_columnSize, sizeof(m_columnSize), &cb, &m_columnSizeIsNull);
+		GetData(pStmt, 4, DB_MAX_LITERAL_PREFIX_LEN, m_literalPrefix, &m_literalPrefixIsNull);
+		GetData(pStmt, 5, DB_MAX_LITERAL_SUFFIX_LEN, m_literalSuffix, &m_literalSuffixIsNull);
+		GetData(pStmt, 6, DB_MAX_CREATE_PARAMS_LIST_LEN, m_createParams, &m_createParamsIsNull);
+		GetData(pStmt, 7, SQL_C_SSHORT, &m_nullable, sizeof(m_nullable), &cb, nullptr);
+		GetData(pStmt, 8, SQL_C_SSHORT, &m_caseSensitive, sizeof(m_caseSensitive), &cb, nullptr);
+		GetData(pStmt, 9, SQL_C_SSHORT, &m_searchable, sizeof(m_searchable), &cb, nullptr);
+		GetData(pStmt, 10, SQL_C_SSHORT, &m_unsigned, sizeof(m_unsigned), &cb, &m_unsignedIsNull);
+		GetData(pStmt, 11, SQL_C_SSHORT, &m_fixedPrecisionScale, sizeof(m_fixedPrecisionScale), &cb, nullptr);
+		GetData(pStmt, 12, SQL_C_SSHORT, &m_autoUniqueValue, sizeof(m_autoUniqueValue), &cb, &m_autoUniqueValueIsNull);
+		GetData(pStmt, 13, DB_MAX_LOCAL_TYPE_NAME_LEN, m_localTypeName, &m_localTypeNameIsNull);
+		GetData(pStmt, 14, SQL_C_SSHORT, &m_minimumScale, sizeof(m_minimumScale), &cb, &m_minimumScaleIsNull);
+		GetData(pStmt, 15, SQL_C_SSHORT, &m_maximumScale, sizeof(m_maximumScale), &cb, &m_maximumScaleIsNull);
+		GetData(pStmt, 16, SQL_C_SSHORT, &m_sqlDataType, sizeof(m_sqlDataType), &cb, nullptr);
+		GetData(pStmt, 17, SQL_C_SSHORT, &m_sqlDateTimeSub, sizeof(m_sqlDateTimeSub), &cb, &m_sqlDateTimeSubIsNull);
+		GetData(pStmt, 18, SQL_C_SSHORT, &m_numPrecRadix, sizeof(m_numPrecRadix), &cb, &m_numPrecRadixIsNull);
+		GetData(pStmt, 19, SQL_C_SSHORT, &m_intervalPrecision, sizeof(m_intervalPrecision), &cb, &m_intervalPrecisionIsNull);
 	}
 
 
-	std::string SSqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */) const
+	std::string SqlTypeInfo::ToOneLineStrForTrac(bool withHeaderLine /* = false */) const
 	{
 		std::stringstream ss;
 		if (withHeaderLine)
@@ -117,7 +146,7 @@ namespace exodbc
 	}
 
 
-	std::string SSqlTypeInfo::ToOneLineStr(bool withHeaderLines /* = false */, bool withEndLine /* = false */) const
+	std::string SqlTypeInfo::ToOneLineStr(bool withHeaderLines /* = false */, bool withEndLine /* = false */) const
 	{
 		std::stringstream ss;
 		if (withHeaderLines)
@@ -186,7 +215,7 @@ namespace exodbc
 		return ss.str();
 	}
 
-	std::string SSqlTypeInfo::ToStr() const
+	std::string SqlTypeInfo::ToStr() const
 	{
 		std::stringstream ss;
 		std::string sNull = u8"NULL";
@@ -253,7 +282,7 @@ namespace exodbc
 	}
 
 
-	bool SSqlTypeInfo::operator<(const SSqlTypeInfo& other) const
+	bool SqlTypeInfo::operator<(const SqlTypeInfo& other) const
 	{
 		return m_sqlDataType < other.m_sqlDataType;
 	}

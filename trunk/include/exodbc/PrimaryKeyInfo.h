@@ -28,6 +28,7 @@ namespace exodbc
 	/*!
 	* \class	PrimaryKeyInfo
 	* \brief	Primary Keys of a table as fetched using SQLPrimaryKeys
+	* \see		DatabaseCatalog::ReadPrimaryKeyInfo()
 	*/
 	class EXODBCAPI PrimaryKeyInfo
 	{

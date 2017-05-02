@@ -101,9 +101,9 @@ namespace exodbctest
 		ss << u8"===================================" << std::endl;
 		ss << std::endl;
 		SqlTypeInfosVector types = m_pDb->GetTypeInfos();
-		std::set<SSqlTypeInfo> typesSet(types.begin(), types.end());
+		std::set<SqlTypeInfo> typesSet(types.begin(), types.end());
 		bool first = true;
-		for (std::set<SSqlTypeInfo>::const_iterator it = typesSet.begin(); it != typesSet.end(); ++it)
+		for (std::set<SqlTypeInfo>::const_iterator it = typesSet.begin(); it != typesSet.end(); ++it)
 		{
 			ss << it->ToOneLineStr(first) << std::endl;
 			if (first)
