@@ -39,6 +39,7 @@ namespace exodbc
 		*/
 		TableInfo();
 
+
 		/*!
 		* \brief Use passed values to init members. If schemaName or catalogName are empty, the corresponding
 		*		null flags are set to true.
@@ -46,11 +47,13 @@ namespace exodbc
 		TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, 
 			const std::string& catalogName, const std::string schemaName, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
 
+
 		/*!
 		* \brief Use passed values to init members.
 		*/
 		TableInfo(const std::string& tableName, const std::string& tableType, const std::string& tableRemarks, 
 			const std::string& catalogName, const std::string schemaName, bool isCatalogNull, bool isSchemaNull, DatabaseProduct dbms = DatabaseProduct::UNKNOWN);
+
 
 		/*!
 		* \brief Create from a statement that is assumed to hold the results of SQLTables. The cursor must
@@ -66,15 +69,18 @@ namespace exodbc
 		*/
 		std::string GetQueryName() const;
 
+
 		/*!
 		* \return Table name. Empty value might be returned.
 		*/
 		std::string GetName() const noexcept { return m_tableName; };
 
+
 		/*!
 		* \return Table type. Empty value might be returned.
 		*/
 		std::string		GetType() const noexcept { return m_tableType; };
+
 
 		/*!
 		* \return Catalog name. Empty value might be returned.
@@ -82,37 +88,44 @@ namespace exodbc
 		*/
 		std::string		GetCatalog() const noexcept { return m_catalogName;};
 
+
 		/*!
 		* \return Schema name. Empty value might be returned.
 		* \see HasSchema()
 		*/
 		std::string		GetSchema() const noexcept {	return m_schemaName; };
 
+
 		/*!
 		* \return True if null flag for Schema is not set and Schema Name is not empty.
 		*/
 		bool			HasSchema() const noexcept  { return !m_isSchemaNull && !m_schemaName.empty(); };
+
 
 		/*!
 		* \return True if null flag for Catalog is not set and Catalog Name is not empty.
 		*/
 		bool			HasCatalog() const noexcept  { return !m_isCatalogNull && !m_catalogName.empty(); };
 
+
 		/*!
 		* \return True if null flag for Schema is set.
 		*/
 		bool			IsSchemaNull() const noexcept { return m_isSchemaNull; };
+
 
 		/*!
 		* \brief True if null flag for Catalog is set.
 		*/
 		bool			IsCatalogNull() const noexcept { return m_isCatalogNull; };
 
+
 		/*!
 		* \brief Compares all members for equality
 		*/
 		bool operator==(const TableInfo& other) const noexcept;
 		bool operator!=(const TableInfo& other) const noexcept;
+
 
 		/*!
 		* \return One-line string with all properties of this TableInfo.
