@@ -316,14 +316,6 @@ namespace exodbc
 
 		TableInfoVector tables;
 
-		std::unique_ptr<SQLAPICHARTYPE[]> buffCatalog(new SQLAPICHARTYPE[m_props.GetMaxCatalogNameLen() + 1]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffSchema(new SQLAPICHARTYPE[m_props.GetMaxSchemaNameLen() + 1]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffTableName(new SQLAPICHARTYPE[m_props.GetMaxTableNameLen() + 1]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffTableType(new SQLAPICHARTYPE[DB_MAX_TABLE_TYPE_LEN + 1]);
-		std::unique_ptr<SQLAPICHARTYPE[]> buffTableRemarks(new SQLAPICHARTYPE[DB_MAX_TABLE_REMARKS_LEN + 1]);
-		bool isCatalogNull = false;
-		bool isSchemaNull = false;
-
 		// Query db
 		SQLRETURN ret = SQLTables(m_pHStmt->GetHandle(),
 			pCatalogName == nullptr ? NULL : pCatalogName, SQL_NTS,   // catname                 
@@ -334,23 +326,8 @@ namespace exodbc
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
 		{
-			buffCatalog[0] = 0;
-			buffSchema[0] = 0;
-			buffTableName[0] = 0;
-			buffTableType[0] = 0;
-			buffTableRemarks[0] = 0;
-
-			SQLLEN cb;
-			GetData(m_pHStmt, 1, SQLAPICHARTYPENAME, buffCatalog.get(), m_props.GetMaxCatalogNameLen() * sizeof(SQLAPICHARTYPE), &cb, &isCatalogNull);
-			GetData(m_pHStmt, 2, SQLAPICHARTYPENAME, buffSchema.get(), m_props.GetMaxSchemaNameLen() * sizeof(SQLAPICHARTYPE), &cb, &isSchemaNull);
-			GetData(m_pHStmt, 3, SQLAPICHARTYPENAME, buffTableName.get(), m_props.GetMaxTableNameLen() * sizeof(SQLAPICHARTYPE), &cb, NULL);
-			GetData(m_pHStmt, 4, SQLAPICHARTYPENAME, buffTableType.get(), DB_MAX_TABLE_TYPE_LEN * sizeof(SQLAPICHARTYPE), &cb, NULL);
-			GetData(m_pHStmt, 5, SQLAPICHARTYPENAME, buffTableRemarks.get(), DB_MAX_TABLE_REMARKS_LEN * sizeof(SQLAPICHARTYPE), &cb, NULL);
-
-			TableInfo table(SQLAPICHARPTR_TO_EXODBCSTR(buffTableName.get()), SQLAPICHARPTR_TO_EXODBCSTR(buffTableType.get()),
-				SQLAPICHARPTR_TO_EXODBCSTR(buffTableRemarks.get()), SQLAPICHARPTR_TO_EXODBCSTR(buffCatalog.get()),
-				SQLAPICHARPTR_TO_EXODBCSTR(buffSchema.get()), isCatalogNull, isSchemaNull, m_props.DetectDbms());
-			tables.push_back(table);
+			TableInfo ti(m_pHStmt, m_props);
+			tables.push_back(ti);
 		}
 		THROW_IFN_NO_DATA(SQLFetch, ret);
 

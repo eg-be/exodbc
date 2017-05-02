@@ -243,6 +243,7 @@ namespace exodbc
 
 		/*!
 		* \brief Parses the string value of property SQL_DBMS_NAME  and tries to match it against a known DatabaseProduct.
+		*		Returns DatabaseProduct::UNKNOWN string does not match any known DatabaseProduct.
 		*/
 		DatabaseProduct DetectDbms() const;
 
