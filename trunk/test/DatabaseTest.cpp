@@ -404,68 +404,6 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseTest, ReadTablePrivileges)
-	{
-		TablePrivilegesVector privs;
-		std::string tableName;
-		std::string schemaName;
-		std::string catalogName;
-		std::string typeName;
-		switch(m_pDb->GetDbms())
-		{
-		case DatabaseProduct::MY_SQL:
-			// We know that mySql uses catalogs, not schemas:
-			tableName = u8"integertypes";
-			schemaName = u8"";
-			catalogName = u8"exodbc";
-			typeName = u8"";
-			LOG_WARNING(u8"This test is known to fail with MySQL, see Ticket #76");
-			break;
-		case DatabaseProduct::DB2:
-			// We know that DB2 uses schemas:
-			tableName = u8"INTEGERTYPES";
-			schemaName = u8"EXODBC";
-			catalogName = u8"";
-			typeName = u8"";
-			break;
-		case DatabaseProduct::MS_SQL_SERVER:
-			// And ms uses catalogs, which map to dbs and schemaName
-			tableName = u8"integertypes";
-			schemaName = u8"exodbc";
-			catalogName = u8"exodbc";
-			typeName = u8"";
-			break;
-		case DatabaseProduct::ACCESS:
-			// access only tablenames
-			tableName = u8"integertypes";
-		}
-		// \todo: This is simply not working with MySQL, see Ticket #76
-		EXPECT_NO_THROW(privs = m_pDb->ReadTablePrivileges(tableName, schemaName, catalogName, typeName));
-		bool canSelect = false;
-		bool canInsert = false;
-		bool canDelete = false;
-		bool canUpdate = false;
-		TablePrivilegesVector::const_iterator it;
-		for(it = privs.begin(); it != privs.end(); it++)
-		{
-			const STablePrivilegesInfo& priv = *it;
-			if(priv.m_privilege == u8"SELECT")
-				canSelect = true;
-			if(priv.m_privilege == u8"INSERT")
-				canInsert = true;
-			if(priv.m_privilege == u8"DELETE")
-				canDelete = true;
-			if(priv.m_privilege == u8"UPDATE")
-				canUpdate = true;
-		}
-		EXPECT_TRUE(canSelect);
-		EXPECT_TRUE(canInsert);
-		EXPECT_TRUE(canUpdate);
-		EXPECT_TRUE(canDelete);
-	}
-
-
-
 	TEST_F(DatabaseTest, ReadColumnCount)
 	{
 		std::string tableName = u8"";

@@ -490,66 +490,6 @@ namespace exodbc
 	}
 
 
-	TablePrivilegesVector Database::ReadTablePrivileges(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType) const
-	{
-		exASSERT(IsOpen());
-
-		// Find one matching table
-		TableInfo table = m_pDbCatalog->FindOneTable(tableName, schemaName, catalogName, tableType);
-
-		// Forward the call		
-		return ReadTablePrivileges(table);
-	}
-
-
-	TablePrivilegesVector Database::ReadTablePrivileges(const TableInfo& table) const
-	{
-		exASSERT(IsOpen());
-		exASSERT_MSG(GetDbms() != DatabaseProduct::ACCESS, u8"Access reports 'SQLSTATE IM001; Driver does not support this function' for SQLTablePrivileges");
-
-		// Close Statement and make sure it closes upon exit
-		StatementCloser stmtCloser(m_pHStmt, true, true);
-
-		TablePrivilegesVector privileges;
-
-		// Note: The schema and table name arguments are Pattern Value arguments
-		// The catalog name is an ordinary argument. if we do not have one in the
-		// DbCatalogTable, we set it to an empty string
-		std::string catalogQueryName = u8"";
-		if (table.HasCatalog())
-		{
-			catalogQueryName = table.GetCatalog();
-		}
-
-		// Query privs
-		// we always have a tablename, but only sometimes a schema
-		SQLRETURN ret = SQLTablePrivileges(m_pHStmt->GetHandle(),
-			 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName), SQL_NTS,
-			table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,
-			 EXODBCSTR_TO_SQLAPICHARPTR(table.GetPureName()), SQL_NTS);
-		THROW_IFN_SUCCEEDED(SQLTablePrivileges, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
-
-		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
-		{
-
-			STablePrivilegesInfo priv;
-			GetData(m_pHStmt, 1, m_props.GetMaxCatalogNameLen(), priv.m_catalogName, &priv.m_isCatalogNull);
-			GetData(m_pHStmt, 2, m_props.GetMaxSchemaNameLen(), priv.m_schemaName, &priv.m_isSchemaNull);
-			GetData(m_pHStmt, 3, m_props.GetMaxTableNameLen(), priv.m_tableName);
-			GetData(m_pHStmt, 4, DB_MAX_GRANTOR_LEN, priv.m_grantor, &priv.m_isGrantorNull);
-			GetData(m_pHStmt, 5, DB_MAX_GRANTEE_LEN, priv.m_grantee);
-			GetData(m_pHStmt, 6, DB_MAX_PRIVILEGES_LEN, priv.m_privilege);
-			GetData(m_pHStmt, 7, DB_MAX_IS_GRANTABLE_LEN, priv.m_grantable, &priv.m_isGrantableNull);
-
-			privileges.push_back(priv);
-		}
-
-		THROW_IFN_NO_DATA(SQLFetch, ret);
-
-		return privileges;
-	}
-
-
 	CommitMode Database::ReadCommitMode()
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()

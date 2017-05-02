@@ -150,7 +150,6 @@ namespace exodbc
 	{
 		TOF_NONE = 0x0,				///< No special flags are set.
 		TOF_CHECK_EXISTANCE = 0x1,	///< Always check that a table identified by the STableInfo exists.
-		TOF_CHECK_PRIVILEGES = 0x2,	///< Check that we have sufficient privileges to open the table for the given TableAccessFlags.
 		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	///< Skip unsupported Columns when creating SqlCBuffers automatically from the info queried from the Database.
 		TOF_DO_NOT_QUERY_PRIMARY_KEYS = 0x20, ///< If set, primary keys are not queried from the Database during Open().
 		TOF_IGNORE_DB_TYPE_INFOS = 0x40, ///< If set, the SQL Type info from the Database is not used to validate the given Columns SQL Data type.

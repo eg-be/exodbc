@@ -14,9 +14,7 @@ else()
 endif()
 if(ENABLE_MYSQL_TEST)
   set(MYSQL_TEST_CS "Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;" CACHE STRING "Connection-String used to run tests against MySql")
-	string(CONCAT mySqlFilters	"-DatabaseTest.ReadTablePrivileges"
-								":TableTest.CheckPrivileges"
-								":StatementCloserTest.CloseStmtHandle"
+	string(CONCAT mySqlFilters	"-StatementCloserTest.CloseStmtHandle"
 								":TableTest.DeleteFailOnNoData")  
   set(MYSQL_TEST_GTEST_FILTER "${mySqlFilters}" CACHE STRING "value for gtest argument '--gtest_filter': Skip tests known to fail")
   set(MYSQL_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against MySql")  
@@ -42,8 +40,8 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
                 ":wxCompatibilityTest.*"
                 ":DatabaseCatalogTest.ListSchemas"
                 ":DatabaseCatalogTest.ReadSpecialColumnInfo"
+				":DatabaseCatalogTest.ReadPrimaryKeyInfo"
                 ":DatabaseTest.ReadSchemas"
-                ":DatabaseTest.ReadTablePrivileges"
                 ":DatabaseTest.ReadSpecialColumns"
                 ":ExecutableStatementTest.SelectAbsolute"
                 ":ExecutableStatementTest.SelectFirst"
@@ -54,7 +52,6 @@ if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
                 ":SqlCPointerTest.WriteBigIntValue"
                 ":SqlCPointerTest.ReadNumeric_*"
                 ":SqlCPointerTest.WriteNumeric_*"
-                ":TableTest.CheckPrivileges"
                 ":TableTest.CreateAutoNumericTypeBuffers"
                 ":TableTest.DeleteFailOnNoData"
                 ":TableTest.DeletePk:TableTest.OpenAutoSkipUnsupportedColumn"

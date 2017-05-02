@@ -45,33 +45,6 @@ namespace exodbc
 
 
 	/*!
-	* \struct	STablePrivilegesInfo
-	* \brief	TablePrivileges fetched using the catalog function SQLTablePrivilege
-	*/
-	struct EXODBCAPI STablePrivilegesInfo
-	{
-		std::string	m_catalogName;
-		std::string	m_schemaName;
-		std::string	m_tableName;
-		std::string	m_grantor;
-		std::string	m_grantee;
-		std::string	m_privilege;
-		std::string	m_grantable;
-
-		bool			m_isCatalogNull;
-		bool			m_isSchemaNull;
-		bool			m_isGrantorNull;
-		bool			m_isGrantableNull;
-	};
-
-	/*!
-	* \typedef TablePrivilegesVector
-	* \brief std::vector of STablePrivilegesInfo objects.
-	*/
-	typedef std::vector<STablePrivilegesInfo> TablePrivilegesVector;
-
-
-	/*!
 	* \struct SColumnDescription
 	* \brief	Result of SQLDescribeCol operation.
 	*/
