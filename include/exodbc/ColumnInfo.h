@@ -61,39 +61,191 @@ namespace exodbc
 		*/
 		std::string GetName() const noexcept { return m_tableName; }
 
-		bool				HasSchema() const { return !m_isSchemaNull && m_schemaName.length() > 0; };
-		bool				HasCatalog() const { return !m_isCatalogNull && m_catalogName.length() > 0; };
 
-		std::string	GetCatalogName() const { exASSERT(!IsCatalogNull());  return m_catalogName; };
-		std::string	GetSchemaName() const { exASSERT(!IsSchemaNull()); return m_schemaName; };
-		std::string	GetTableName() const { return m_tableName; };
-		std::string	GetColumnName() const { return m_columnName; };
-		SQLSMALLINT		GetSqlType() const { return m_sqlType; };
-		std::string	GetTypeName() const { return m_typeName; };
-		SQLINTEGER		GetColumnSize() const { exASSERT(!IsColumnSizeNull()); return m_columnSize; };
-		SQLINTEGER		GetBufferSize() const { exASSERT(!IsBufferSizeNull()); return m_bufferSize; };
-		SQLSMALLINT		GetDecimalDigits() const { exASSERT(!IsDecimalDigitsNull()); return m_decimalDigits; };
-		SQLSMALLINT		GetNumPrecRadix() const { exASSERT(!IsNumPrecRadixNull()); return m_numPrecRadix; };
-		SQLSMALLINT		GetNullable() const { return m_nullable; };
-		std::string	GetRemarks() const { exASSERT(!IsRemarksNull()); return m_remarks; };
-		std::string	GetDefaultValue() const { exASSERT(!IsDefaultValueNull()); return m_defaultValue; };
-		SQLSMALLINT		GetSqlDataType() const { return m_sqlDataType; };
-		SQLSMALLINT		GetSqlDatetimeSub() const { exASSERT(!IsSqlDatetimeSubNull()); return m_sqlDatetimeSub; };
-		SQLINTEGER		GetCharOctetLength() const { exASSERT(!IsCharOctetLengthNull()); return m_charOctetLength; };
-		SQLINTEGER		GetOrdinalPosition() const { return m_ordinalPosition; };
-		std::string	GetIsNullable() const { return m_isNullable; };
+		/*!
+		* \return True if null flag for Schema is not set and Schema Name is not empty.
+		*/
+		bool				HasSchema() const noexcept { return !m_isSchemaNull && m_schemaName.length() > 0; };
 
-		bool			IsCatalogNull() const { return m_isCatalogNull; };
-		bool			IsSchemaNull() const { return m_isSchemaNull; };
-		bool			IsColumnSizeNull() const { return m_isColumnSizeNull; };
-		bool			IsBufferSizeNull() const { return m_isBufferSizeNull; };
-		bool			IsDecimalDigitsNull() const { return m_isDecimalDigitsNull; };
-		bool			IsNumPrecRadixNull() const { return m_isNumPrecRadixNull; };
-		bool			IsRemarksNull() const { return m_isRemarksNull; };
-		bool			IsDefaultValueNull() const { return m_isDefaultValueNull; };
-		bool			IsSqlDatetimeSubNull() const { return m_isSqlDatetimeSubNull; };
-		bool			IsCharOctetLengthNull() const { return m_isCharOctetLengthNull; };
-		bool			IsIsNullableNull() const { return m_isIsNullableNull; };
+
+		/*!
+		* \return True if null flag for Catalog is not set and Catalog Name is not empty.
+		*/
+		bool				HasCatalog() const noexcept { return !m_isCatalogNull && m_catalogName.length() > 0; };
+
+
+		/*!
+		* \brief True if null flag for Catalog is set.
+		*/
+		bool			IsCatalogNull() const noexcept { return m_isCatalogNull; };
+
+
+		/*!
+		* \return True if null flag for Schema is set.
+		*/
+		bool			IsSchemaNull() const noexcept { return m_isSchemaNull; };
+
+
+		/*!
+		* \return True if null flag for ColumSize is set.
+		*/
+		bool			IsColumnSizeNull() const noexcept { return m_isColumnSizeNull; };
+
+
+		/*!
+		* \return True if null flag for BufferSize is set.
+		*/
+		bool			IsBufferSizeNull() const noexcept { return m_isBufferSizeNull; };
+		
+
+		/*!
+		* \return True if null flag for DecimalDigits is set.
+		*/
+		bool			IsDecimalDigitsNull() const noexcept { return m_isDecimalDigitsNull; };
+
+
+		/*!
+		* \return True if null flag for NumPrecRadix is set.
+		*/
+		bool			IsNumPrecRadixNull() const noexcept { return m_isNumPrecRadixNull; };
+
+
+		/*!
+		* \return True if null flag for Remarks is set.
+		*/
+		bool			IsRemarksNull() const noexcept { return m_isRemarksNull; };
+
+
+		/*!
+		* \return True if null flag for DefaultValueNull is set.
+		*/
+		bool			IsDefaultValueNull() const noexcept { return m_isDefaultValueNull; };
+
+
+		/*!
+		* \return True if null flag for SqlDatetimeSub is set.
+		*/
+		bool			IsSqlDatetimeSubNull() const noexcept { return m_isSqlDatetimeSubNull; };
+
+
+		/*!
+		* \return True if null flag for CharOctetLength is set.
+		*/
+		bool			IsCharOctetLengthNull() const noexcept { return m_isCharOctetLengthNull; };
+
+
+		/*!
+		* \return True if null flag for IsNullable is set.
+		*/
+		bool			IsIsNullableNull() const noexcept { return m_isIsNullableNull; };
+
+
+		/*!
+		* \return Catalog name. Empty value might be returned.
+		*/
+		std::string	GetCatalogName() const noexcept { return m_catalogName; };
+
+
+		/*!
+		* \return Schema name. Empty value might be returned.
+		*/
+		std::string	GetSchemaName() const noexcept { return m_schemaName; };
+
+
+		/*!
+		* \return Table name. Empty value might be returned.
+		*/
+		std::string	GetTableName() const noexcept { return m_tableName; };
+
+
+		/*!
+		* \return Column name. Empty value might be returned.
+		*/
+		std::string	GetColumnName() const noexcept { return m_columnName; };
+
+
+		/*!
+		* \return SQL Type.
+		*/
+		SQLSMALLINT		GetSqlType() const noexcept { return m_sqlType; };
+
+
+		/*!
+		* \return SQL Type name. Empty value might be returned.
+		*/
+		std::string	GetTypeName() const noexcept { return m_typeName; };
+
+
+		/*!
+		* \return Column Size.
+		*/
+		SQLINTEGER		GetColumnSize() const noexcept { return m_columnSize; };
+
+
+		/*!
+		* \return Buffer Size.
+		*/
+		SQLINTEGER		GetBufferSize() const noexcept { return m_bufferSize; };
+
+
+		/*!
+		* \return Decimal Digits.
+		*/
+		SQLSMALLINT		GetDecimalDigits() const noexcept { return m_decimalDigits; };
+
+
+		/*!
+		* \return Num Prec Radix
+		*/
+		SQLSMALLINT		GetNumPrecRadix() const noexcept { return m_numPrecRadix; };
+
+
+		/*!
+		* \return Nullable
+		*/
+		SQLSMALLINT		GetNullable() const noexcept { return m_nullable; };
+
+
+		/*!
+		* \return Remarks. Empty value might be returned.
+		*/
+		std::string	GetRemarks() const noexcept { return m_remarks; };
+
+
+		/*!
+		* \return Default Value. Empty value might be returned.
+		*/
+		std::string	GetDefaultValue() const noexcept { return m_defaultValue; };
+
+
+		/*!
+		* \return SQL Data Type.
+		*/
+		SQLSMALLINT		GetSqlDataType() const noexcept { return m_sqlDataType; };
+
+
+		/*!
+		* \return SQL Datetime Sub.
+		*/
+		SQLSMALLINT		GetSqlDatetimeSub() const noexcept { return m_sqlDatetimeSub; };
+
+
+		/*!
+		* \return Char Octet Length
+		*/
+		SQLINTEGER		GetCharOctetLength() const noexcept { return m_charOctetLength; };
+
+
+		/*!
+		* \return Ordinal Position.
+		*/
+		SQLINTEGER		GetOrdinalPosition() const noexcept { return m_ordinalPosition; };
+
+
+		/*!
+		* \return True if null flag for Nullable is set.
+		*/
+		std::string	GetIsNullable() const noexcept { return m_isNullable; };
 
 	private:
 
