@@ -12,6 +12,8 @@
 // Same component headers
 #include "exOdbc.h"
 #include "AssertionException.h"
+#include "SqlHandle.h"
+#include "SqlInfoProperty.h"
 
 // Other headers
 // System headers
@@ -48,6 +50,15 @@ namespace exodbc
 			SQLINTEGER charOctetLength, SQLINTEGER ordinalPosition, const std::string& isNullable, bool isCatalogNull, bool isSchemaNull, bool isColumnSizeNull,
 			bool isBufferSizeNull, bool isDecimalDigitsNull, bool isNumPrecRadixNull, bool isRemarksNull, bool isDefaultValueNull, bool isSqlDatetimeSubNull,
 			bool isIsNullableNull);
+
+
+		/*!
+		* \brief Create from a statement that is assumed to hold the results of SQLColumns. The cursor must
+		*		be positioned at the row and is not modified, but column values are read.
+		* \throw Exception If reading any value fails, or if props does not hold all required properties.
+		*/
+		ColumnInfo(ConstSqlStmtHandlePtr pStmt, const SqlInfoProperties& props);
+
 
 		/*!
 		* \brief Return the non-empty name to be used in queries like SELECT, UPDATE, etc.
