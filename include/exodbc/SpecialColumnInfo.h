@@ -12,6 +12,8 @@
 // Same component headers
 #include "exOdbc.h"
 #include "AssertionException.h"
+#include "SqlHandle.h"
+#include "SqlInfoProperty.h"
 
 // Other headers
 // System headers
@@ -26,7 +28,10 @@ namespace exodbc
 	/*!
 	* \class	SpecialColumnInfo
 	* \brief	Information about a special column fetched using the catalog function SQLSpecialColumns.
-	* \see: https://msdn.microsoft.com/en-us/library/ms714602%28v=vs.85%29.aspx
+	* \details	A SpecialColumnInfo is either part of an optimal set of columns to identify
+	*			a row, or a set of columns that are updated whenever any value in the row changes.\n
+	* \see	SpecialColumnInfo::IdentifierType
+	* \see https://msdn.microsoft.com/en-us/library/ms714602%28v=vs.85%29.aspx
 	*
 	*/
 	class EXODBCAPI SpecialColumnInfo
@@ -34,7 +39,8 @@ namespace exodbc
 	public:
 		/*!
 		* \enum		IdentifierType
-		* \brief	Attribute values to query special columns: Type of special columns to query.
+		* \brief	Attribute values to query special columns: Type of special columns to query: Either columns
+		*			to match a single row, or columns that are updated whenever any value in the row changes.
 		*/
 		enum class IdentifierType
 		{
@@ -45,7 +51,8 @@ namespace exodbc
 
 		/*!
 		* \enum		RowIdScope
-		* \brief	Attribute values to query special columns: Scope of row-id values.
+		* \brief	Attribute values to query special columns: Scope of row-id values. Can only be applied if 
+		*			SpecialColumnInfo::IdentifierType was set to UNIQUE_ROW while reading the special columns.
 		*/
 		enum class RowIdScope
 		{
@@ -67,17 +74,29 @@ namespace exodbc
 		};
 
 
-
+		/*!
+		* \brief Default constructor, all members are set to empty  or 0 values, null flags are set to true.
+		*/
 		SpecialColumnInfo()
-			: m_hasScope(false)
+			: m_isScopeNull(true)
 			, m_pseudoColumn(PseudoColumn::UNKNOWN)
+			, m_sqlType(0)
+			, m_columnSize(0)
+			, m_bufferLength(0)
+			, m_decimalDigits(0)
 		{};
 
-		SpecialColumnInfo(const std::string& columnName, RowIdScope scope, SQLSMALLINT sqlType, const std::string& sqlTypeName,
+
+		/*!
+		* \brief Constructor to use when special columns have been queried using IdentifierType::UNIQUE_ROW.
+		*	Sets null flag for Scope to false and sets internal IdentifierType to UNIQUE_ROW.
+		*/
+		SpecialColumnInfo(RowIdScope scope, const std::string& columnName, SQLSMALLINT sqlType, const std::string& sqlTypeName,
 			SQLINTEGER columnSize, SQLINTEGER bufferLength, SQLSMALLINT decimalDigits, PseudoColumn pseudoColumn)
-			: m_columnName(columnName)
+			: m_isScopeNull(true)
+			, m_identType(IdentifierType::UNIQUE_ROW)
+			, m_columnName(columnName)
 			, m_scope(scope)
-			, m_hasScope(true)
 			, m_sqlType(sqlType)
 			, m_sqlTypeName(sqlTypeName)
 			, m_columnSize(columnSize)
@@ -86,10 +105,16 @@ namespace exodbc
 			, m_pseudoColumn(pseudoColumn)
 		{};
 
+
+		/*!
+		* \brief Constructor to use when special columns have been queried using IdentifierType::ROW_VERSION.
+		*		Sets null flag for Scope to true and sets internal IdentifierType to ROW_VERSION.
+		*/
 		SpecialColumnInfo(const std::string& columnName, SQLSMALLINT sqlType, const std::string& sqlTypeName,
 			SQLINTEGER columnSize, SQLINTEGER bufferLength, SQLSMALLINT decimalDigits, PseudoColumn pseudoColumn)
-			: m_columnName(columnName)
-			, m_hasScope(false)
+			: m_isScopeNull(true)
+			, m_identType(IdentifierType::ROW_VERSION)
+			, m_columnName(columnName)
 			, m_sqlType(sqlType)
 			, m_sqlTypeName(sqlTypeName)
 			, m_columnSize(columnSize)
@@ -99,18 +124,66 @@ namespace exodbc
 		{};
 
 
+		/*!
+		* \brief Create from a statement that is assumed to hold the results of SQLSpecialColumns. The cursor must
+		*		be positioned at the row and is not modified, but column values are read.
+		* \throw Exception If reading any value fails, or if props does not hold all required properties.
+		*/
+		SpecialColumnInfo(ConstSqlStmtHandlePtr pStmt, const SqlInfoProperties& props, IdentifierType identType);
+
+
+		/*!
+		* \return Column name. Empty value might be returned.
+		*/
 		std::string GetColumnName() const noexcept { return m_columnName; };
-		RowIdScope GetScope() const { exASSERT(m_hasScope); return m_scope; };
+
+
+		/*!
+		* \return Scope.
+		* \throw Exception if null flag for Scope is true.
+		*/
+		RowIdScope GetScope() const { exASSERT(!m_isScopeNull); return m_scope; };
+
+
+		/*!
+		* \return SQL Type.
+		*/
 		SQLSMALLINT GetSqlType() const noexcept { return m_sqlType; };
+
+
+		/*!
+		* \return SQL Type name. Empty value might be returned.
+		*/
 		std::string GetSqlTypeName() const noexcept { return m_sqlTypeName; };
+
+
+		/*!
+		* \return Column size.
+		*/
 		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
+
+
+		/*!
+		* \return Buffer length.
+		*/
 		SQLINTEGER GetBufferLength() const noexcept { return m_bufferLength; };
+
+
+		/*!
+		* \return Decimal Digits.
+		*/
 		SQLSMALLINT GetDecimalDigits() const noexcept { return m_decimalDigits; };
+
+
+		/*!
+		* \return Pseudo Column.
+		*/
 		PseudoColumn GetPseudoColumn() const noexcept { return m_pseudoColumn; };
 
 	private:
+		IdentifierType m_identType;
 		RowIdScope	m_scope;
-		bool		m_hasScope;
+		bool		m_isScopeNull;
 
 		std::string m_columnName;
 		SQLSMALLINT m_sqlType;
