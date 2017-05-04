@@ -254,7 +254,7 @@ namespace exodbc
 	}
 
 
-	DataSourcesVector Environment::ListDataSources(ListMode mode) const
+	Environment::DataSourceVector Environment::ListDataSources(ListMode mode) const
 	{
 		exASSERT(IsEnvHandleAllocated());
 
@@ -262,7 +262,7 @@ namespace exodbc
 		SQLAPICHARTYPE nameBuffer[SQL_MAX_DSN_LENGTH + 1];
 
 		// empty result-vector
-		DataSourcesVector dataSources;
+		DataSourceVector dataSources;
 
 		SQLUSMALLINT direction = SQL_FETCH_FIRST;
 		if (mode == ListMode::System)

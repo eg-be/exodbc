@@ -27,24 +27,6 @@
 namespace exodbc
 {
 	/*!
-	* \struct SDataSource
-	* \brief Contains information about a DataSource-Entry from the driver-manager
-	* \see Environment::ListDataSources
-	*/
-	struct EXODBCAPI SDataSource
-	{
-		std::string m_dsn;			///< DSN name.
-		std::string m_description;	///< Description.
-	};
-
-	/*!
-	* \typedef DataSourcesVector
-	* \brief std::vector of SDataSource objects.
-	*/
-	typedef std::vector<SDataSource> DataSourcesVector;
-
-
-	/*!
 	* \struct SColumnDescription
 	* \brief	Result of SQLDescribeCol operation.
 	*/
