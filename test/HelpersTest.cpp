@@ -16,6 +16,7 @@
 // Other headers
 #include "exodbc/SqlStatementCloser.h"
 #include "exodbc/GetDataWrapper.h"
+#include "exodbc/SetDescriptionFieldWrapper.h"
 
 // Debug
 #include "DebugNew.h"
@@ -141,24 +142,16 @@ namespace exodbctest
 		SQLRETURN ret = SQLExecDirect(pHStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt), SQL_NTS);
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
-		// Except to fail when passing a null handle
-		{
-			LogLevelSetter ll(LogLevel::None);
-			EXPECT_THROW(SetDescriptionField(SQL_NULL_HSTMT, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC), AssertionException);
-		}
-
 		// Get Descriptor for a param
 		SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
-		//SQLHANDLE hDesc = SQL_NULL_HDESC;
-		//EXPECT_NO_THROW(hDesc = GetRowDescriptorHandle(hStmt, RowDescriptorType::PARAM));
 
 		if (pDb->GetDbms() != DatabaseProduct::ACCESS)
 		{
 			SQL_NUMERIC_STRUCT num;
-			EXPECT_NO_THROW(SetDescriptionField(hDesc.GetHandle(), 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC));
-			EXPECT_NO_THROW(SetDescriptionField(hDesc.GetHandle(), 3, SQL_DESC_PRECISION, (SQLPOINTER)18));
-			EXPECT_NO_THROW(SetDescriptionField(hDesc.GetHandle(), 3, SQL_DESC_SCALE, (SQLPOINTER)10));
-			EXPECT_NO_THROW(SetDescriptionField(hDesc.GetHandle(), 3, SQL_DESC_DATA_PTR, (SQLPOINTER)&num));
+			EXPECT_NO_THROW(SetDescriptionFieldWrapper::SetDescriptionField(hDesc, 3, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC));
+			EXPECT_NO_THROW(SetDescriptionFieldWrapper::SetDescriptionField(hDesc, 3, SQL_DESC_PRECISION, (SQLPOINTER)18));
+			EXPECT_NO_THROW(SetDescriptionFieldWrapper::SetDescriptionField(hDesc, 3, SQL_DESC_SCALE, (SQLPOINTER)10));
+			EXPECT_NO_THROW(SetDescriptionFieldWrapper::SetDescriptionField(hDesc, 3, SQL_DESC_DATA_PTR, (SQLPOINTER)&num));
 		}
 	}
 

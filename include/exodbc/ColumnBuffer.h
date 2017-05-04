@@ -18,6 +18,7 @@
 #include "SqlHandle.h"
 #include "Helpers.h"
 #include "LogManagerOdbcMacros.h"
+#include "SetDescriptionFieldWrapper.h"
 
 // Other headers
 #include <boost/variant.hpp>
@@ -652,12 +653,12 @@ namespace exodbc
 		exASSERT(m_decimalDigits >= 0);
 
 		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)m_decimalDigits));
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer[0]);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
-		SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)m_decimalDigits));
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer[0]);
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
 
 		// get a notification if unbound
 		if (m_unbindColumnsConnections.find(pHStmt->GetHandle()) == m_unbindColumnsConnections.end())
@@ -675,10 +676,10 @@ namespace exodbc
 
 		// Do some additional steps for numeric types
 		SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.GetCharSize()));
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.GetDecimalDigits()));
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer[0]);
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.GetCharSize()));
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.GetDecimalDigits()));
+		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer[0]);
 	}
 	
 
@@ -826,12 +827,12 @@ namespace exodbc
 				exASSERT(m_decimalDigits >= 0);
 
 				SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
-				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_TYPE, (SQLPOINTER)((SQLLEN)m_sqlCType));
-				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
-				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)m_decimalDigits));
-				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)m_pBuffer);
-				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
-				SetDescriptionField(hDesc.GetHandle(), columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER)((SQLLEN)m_sqlCType));
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)m_decimalDigits));
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_DATA_PTR, (SQLPOINTER)m_pBuffer);
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_INDICATOR_PTR, (SQLPOINTER)&m_cb);
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_OCTET_LENGTH_PTR, (SQLPOINTER)&m_cb);
 
 				// get a notification if unbound
 				if (m_unbindColumnsConnections.find(pHStmt->GetHandle()) == m_unbindColumnsConnections.end())
@@ -869,10 +870,10 @@ namespace exodbc
 			{
 				// Do some additional steps for numeric types
 				SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
-				SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
-				SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.GetCharSize()));
-				SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.GetDecimalDigits()));
-				SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, m_pBuffer);
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.GetCharSize()));
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.GetDecimalDigits()));
+				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, m_pBuffer);
 			}
 		}
 

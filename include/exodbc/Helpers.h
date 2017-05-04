@@ -23,30 +23,6 @@
 namespace exodbc
 {
 	/*!
-	* \brief	A wrapper to SQLSetDescField
-	*
-	* \param	hDesc		 	The description handle to set an attribute for.
-	* \param	recordNumber	Column number to set the attribute for.
-	* \param	descriptionField Attribute to set.
-	* \param	value			Value to set.
-	* \throw	Exception
-	*/
-	extern EXODBCAPI void		SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value);
-
-
-	/*!
-	* \see SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value)
-	*/
-	extern EXODBCAPI void		SetDescriptionField(ConstSqlDescHandlePtr pHDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value);
-
-
-	/*!
-	* \see SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value)
-	*/
-	extern EXODBCAPI void		SetDescriptionField(const SqlDescHandle& hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value);
-
-
-	/*!
 	* \brief	Return a SQL_TIME_STRUCT with the passed values set.
 	*/
 	extern EXODBCAPI SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second) noexcept;
