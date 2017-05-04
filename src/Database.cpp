@@ -434,7 +434,7 @@ namespace exodbc
 	}
 
 
-	CommitMode Database::ReadCommitMode()
+	Database::CommitMode Database::ReadCommitMode()
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()
 		exASSERT(m_pHDbc);
@@ -458,7 +458,7 @@ namespace exodbc
 	}
 
 
-	TransactionIsolationMode Database::ReadTransactionIsolationMode()
+	Database::TransactionIsolationMode Database::ReadTransactionIsolationMode()
 	{
 		exASSERT(m_pHDbc);
 		exASSERT(m_pHDbc->IsAllocated());

@@ -26,10 +26,6 @@
     #define MAX_PATH PATH_MAX
 #endif
 
-#ifdef _WIN32
-#else
-#endif
-
 // We use _UNICODE on windows and therefore the w-versions of the sql api.
 // convert our utf8 strings to utf16 wstring when calling the sql api on windows:
 #ifdef _WIN32
@@ -109,33 +105,24 @@ namespace exodbc
 	// Global Consts
 	// =============
 
-	const int DB_MAX_CONNECTSTR_LEN = 1024;	///< SQLDriverConnects returns an output-connection string, assume this is the max-length of this string returned. MS recommends at least 1024 characters.
-
-	// Some defaults when binding to chars but no reasonable char-length can be determined.
-	const int DB_MAX_BIGINT_CHAR_LENGTH = 30;	///< If no reasonable char length can be determined from a columnInfo, this value is used for the size of the char-buffer (if converting bigints to char)
-	const int DB_MAX_DOUBLE_CHAR_LENGTH = 30;	///< If no reasonable char length can be determined from a columnInfo, this value is used for the size of the char-buffer (if converting doubles to char)
-
-	// Database Globals or defaults. The values named _DEFAULT are used as fallback
-	// if the corresponding value cannot be determined when querying the database about itself.
-	const int DB_MAX_TYPE_NAME_LEN				= 40;
-	const int DB_MAX_LOCAL_TYPE_NAME_LEN		= 256;
+	// Database Globals or defaults. The values named _DEFAULT are used as fall back
+	// if value cannot be read from SQLGetInfo().
+	const int DB_MAX_CONNECTSTR_LEN					= 1024;	///< SQLDriverConnects returns an output-connection string, assume this is the max-length of this string returned. MS recommends at least 1024 characters.
+	const int DB_MAX_TYPE_NAME_LEN					= 40;
+	const int DB_MAX_LOCAL_TYPE_NAME_LEN			= 256;
 	const int DB_MAX_TABLE_NAME_LEN_DEFAULT			= 128;	///< Fall back value if SQLGetInfo returned 0 for SQL_MAX_TABLE_NAME_LEN
 	const int DB_MAX_SCHEMA_NAME_LEN_DEFAULT		= 128;	///< Fall back value if SQLGetInfo returned 0 for SQL_MAX_SCHEMA_NAME_LEN
 	const int DB_MAX_CATALOG_NAME_LEN_DEFAULT		= 128;	///< Fall back value if SQLGetInfo returned 0 for SQL_MAX_CATALOG_NAME_LEN
 	const int DB_MAX_COLUMN_NAME_LEN_DEFAULT		= 128;	///< Fall back value if SQLGetInfo returned 0 for SQL_MAX_COLUMN_NAME_LEN
-	const int DB_MAX_TABLE_TYPE_LEN			= 128;
-	const int DB_MAX_TABLE_REMARKS_LEN		= 512;
-	const int DB_MAX_COLUMN_REMARKS_LEN		= 512;
-	const int DB_MAX_COLUMN_DEFAULT_LEN		= 512;
-	const int DB_MAX_LITERAL_PREFIX_LEN		= 128;
-	const int DB_MAX_LITERAL_SUFFIX_LEN		= 128;
-	const int DB_MAX_CREATE_PARAMS_LIST_LEN = 512;	
-	const int DB_MAX_GRANTOR_LEN			= 128;
-	const int DB_MAX_GRANTEE_LEN			= 128;
-	const int DB_MAX_PRIVILEGES_LEN			= 128;
-	const int DB_MAX_IS_GRANTABLE_LEN		= 4;
-	const int DB_MAX_YES_NO_LEN				= 3;
-	const int DB_MAX_PRIMARY_KEY_NAME_LEN	= 128;
+	const int DB_MAX_TABLE_TYPE_LEN					= 128;
+	const int DB_MAX_TABLE_REMARKS_LEN				= 512;
+	const int DB_MAX_COLUMN_REMARKS_LEN				= 512;
+	const int DB_MAX_COLUMN_DEFAULT_LEN				= 512;
+	const int DB_MAX_LITERAL_PREFIX_LEN				= 128;
+	const int DB_MAX_LITERAL_SUFFIX_LEN				= 128;
+	const int DB_MAX_CREATE_PARAMS_LIST_LEN			= 512;	
+	const int DB_MAX_PRIMARY_KEY_NAME_LEN			= 128;
+	const int DB_MAX_YES_NO_LEN						= 3;
 
 
 	// Enums
@@ -155,35 +142,6 @@ namespace exodbc
 
 
 	/*!
-	* \enum	CommitMode
-	* \brief	Defines whether auto commit is on or off.
-	* 			see: http://msdn.microsoft.com/en-us/library/ms713600%28v=vs.85%29.aspx
-	*/
-	enum class CommitMode
-	{
-		UNKNOWN = 50000,			///< Unknown Commit mode
-		AUTO = SQL_AUTOCOMMIT,		///< Autocommit on
-		MANUAL = SQL_AUTOCOMMIT_OFF	///< Autocommit off
-	};
-
-
-	/*!
-	* \enum	TransactionIsolationMode
-	*
-	* \brief	Defines the Transaction Isolation Mode
-	*			see: http://msdn.microsoft.com/en-us/library/ms709374%28v=vs.85%29.aspx
-	*/
-	enum class TransactionIsolationMode
-	{
-		UNKNOWN = 50000,								///< Unknown Transaction Isolation Level
-		READ_UNCOMMITTED = SQL_TXN_READ_UNCOMMITTED,	///< Read Uncommitted
-		READ_COMMITTED = SQL_TXN_READ_COMMITTED,		///< Read Committed
-		REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,		///< Repeatable Read
-		SERIALIZABLE = SQL_TXN_SERIALIZABLE				///< Serializable
-	};
-
-
-	/*!
 	* \enum		DatabaseProduct
 	* \brief	Known databases, identified by their product name while connecting the Database.
 	* \details	For the database products listed here, some tests should exists.
@@ -199,43 +157,6 @@ namespace exodbc
 	};
 
 
-	/*!
-	* \enum		RowDescriptorType
-	* \brief	A wrapper for the values of SQLGetStmtAttr to fetch a descriptor handle.
-	* \see		GetRowDescriptorHandle
-	*/
-	enum class RowDescriptorType
-	{
-		ROW = SQL_ATTR_APP_ROW_DESC,	///< SQL_ATTR_APP_ROW_DESC
-		PARAM = SQL_ATTR_APP_PARAM_DESC	///< SQL_ATTR_APP_PARAM_DESC
-	};
-
-
-	/*!
-	* \enum		ConnectionPooling
-	* \brief	Wrapper around the values for connection pooling
-	*/
-	enum class ConnectionPooling
-	{
-		OFF = SQL_CP_OFF,	///< Connection Pooling disabled
-		PER_DRIVER = SQL_CP_ONE_PER_DRIVER, ///< One pool per driver
-		PER_HENV = SQL_CP_ONE_PER_HENV ///< One pool per environment
-	};
-
-
-	/*!
-	* \enum		ConnectionPoolingMatch
-	* \brief	Attributes values for an environment if it works in
-	*			strict match mode or relaxed mode if connection pooling
-	*			is enabled.
-	*/
-	enum class ConnectionPoolingMatch
-	{
-		STRICT_MATCH = SQL_CP_STRICT_MATCH,
-		RELAXED_MATCH = SQL_CP_RELAXED_MATCH
-	};
-
-
 	// Flags
 	// =====
 
@@ -244,7 +165,7 @@ namespace exodbc
 	// --------------
 
 	/*!
-	* \brief Converts a utf16 std::string to a utf-8 std::string.
+	* \brief Converts a utf16 std::wstring to a utf-8 std::string.
 	*
 	* \param w String to transform
 	* \return std::string
@@ -252,19 +173,22 @@ namespace exodbc
 	*/
 	extern EXODBCAPI std::string utf16ToUtf8(const std::wstring& w);
 
+
 	/*!
 	* \see utf16ToUtf8(const std::wstring& w)
 	*/
  	extern EXODBCAPI std::string utf16ToUtf8(const SQLWCHAR* w);
 
+
 	/*!
-	* \brief Converts a utf8 std::string to a uf16 std::string
+	* \brief Converts a utf8 std::string to a uf16 std::wstring
 	*
 	* \param s String to transform
 	* \return std::string
 	* \throw ConversionException If conversion fails
 	*/
 	extern EXODBCAPI std::wstring utf8ToUtf16(const std::string& s);
+
 
 	/*!
 	* \see utf8ToUtf16(const std::string& s)

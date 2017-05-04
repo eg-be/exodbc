@@ -94,6 +94,35 @@ namespace exodbc
 #endif
 	public:
 		/*!
+		* \enum	CommitMode
+		* \brief	Defines whether auto commit is on or off.
+		* 			see: http://msdn.microsoft.com/en-us/library/ms713600%28v=vs.85%29.aspx
+		*/
+		enum class CommitMode
+		{
+			UNKNOWN = 50000,			///< Unknown Commit mode
+			AUTO = SQL_AUTOCOMMIT,		///< Autocommit on
+			MANUAL = SQL_AUTOCOMMIT_OFF	///< Autocommit off
+		};
+
+
+		/*!
+		* \enum	TransactionIsolationMode
+		*
+		* \brief	Defines the Transaction Isolation Mode
+		*			see: http://msdn.microsoft.com/en-us/library/ms709374%28v=vs.85%29.aspx
+		*/
+		enum class TransactionIsolationMode
+		{
+			UNKNOWN = 50000,								///< Unknown Transaction Isolation Level
+			READ_UNCOMMITTED = SQL_TXN_READ_UNCOMMITTED,	///< Read Uncommitted
+			READ_COMMITTED = SQL_TXN_READ_COMMITTED,		///< Read Committed
+			REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,		///< Repeatable Read
+			SERIALIZABLE = SQL_TXN_SERIALIZABLE				///< Serializable
+		};
+
+
+		/*!
 		* \brief	Default Constructor. You will need to manually call Init() later.
 		* \details	Default Constructor. You will need to call Init() 
 		*			afterwards to allocate the Database-handle.
