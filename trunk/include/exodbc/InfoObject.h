@@ -57,36 +57,4 @@ namespace exodbc
 		SQLSMALLINT m_decimalDigits;
 		SQLSMALLINT m_nullable;
 	};
-
-
-	/*!
-	* \struct SParameterDescription
-	* \brief	Result of SQLDescribeParam operation.
-	*/
-	struct SParameterDescription
-	{
-		SParameterDescription()
-			: m_sqlType(SQL_UNKNOWN_TYPE)
-			, m_charSize(0)
-			, m_decimalDigits(0)
-			, m_nullable(SQL_NULLABLE_UNKNOWN)
-		{};
-		SParameterDescription(SQLSMALLINT paramSqlType, SQLULEN paramCharSize, SQLSMALLINT paramDecimalDigits, SQLSMALLINT paramNullable)
-			: m_sqlType(paramSqlType)
-			, m_charSize(paramCharSize)
-			, m_decimalDigits(paramDecimalDigits)
-			, m_nullable(paramNullable)
-		{};
-		SParameterDescription(SQLSMALLINT paramSqlType, SQLULEN paramCharSize, SQLSMALLINT paramDecimalDigits)
-			: m_sqlType(paramSqlType)
-			, m_charSize(paramCharSize)
-			, m_decimalDigits(paramDecimalDigits)
-			, m_nullable(SQL_NULLABLE_UNKNOWN)
-		{};
-
-		SQLSMALLINT m_sqlType;
-		SQLULEN m_charSize;
-		SQLSMALLINT m_decimalDigits;
-		SQLSMALLINT m_nullable;
-	};
 }
