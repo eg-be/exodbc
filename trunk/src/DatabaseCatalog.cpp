@@ -95,7 +95,7 @@ namespace exodbc
 		vector<string> schemas;
 		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
-			schemas.push_back(it->GetCatalog());
+			schemas.push_back(it->GetSchema());
 		}
 		return schemas;
 	}
@@ -110,7 +110,7 @@ namespace exodbc
 		vector<string> types;
 		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
-			types.push_back(it->GetCatalog());
+			types.push_back(it->GetType());
 		}
 		return types;
 	}
