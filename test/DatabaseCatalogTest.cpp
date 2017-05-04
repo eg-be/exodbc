@@ -252,6 +252,16 @@ namespace exodbctest
 		if (dbCat.GetSupportsCatalogs())
 		{
 			EXPECT_FALSE(catalogs.empty());
+			bool allCatalogsEmpty = true;
+			for (vector<string>::const_iterator it = catalogs.begin(); it != catalogs.end(); ++it)
+			{
+				if (!it->empty())
+				{
+					allCatalogsEmpty = false;
+					break;
+				}
+			}
+			EXPECT_FALSE(allCatalogsEmpty);
 		}
 		else
 		{
@@ -267,6 +277,16 @@ namespace exodbctest
 		if (dbCat.GetSupportsSchemas())
 		{
 			EXPECT_FALSE(schemas.empty());
+			bool allSchemasEmpty = true;
+			for (vector<string>::const_iterator it = schemas.begin(); it != schemas.end(); ++it)
+			{
+				if (!it->empty())
+				{
+					allSchemasEmpty = false;
+					break;
+				}
+			}
+			EXPECT_FALSE(allSchemasEmpty);
 		}
 		else
 		{
@@ -280,6 +300,12 @@ namespace exodbctest
 		DatabaseCatalog dbCat(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 		vector<string> types = dbCat.ListTableTypes();
 		EXPECT_FALSE(types.empty());
+		// check that types are non-empty
+		for (vector<string>::const_iterator it = types.begin(); it != types.end(); ++it)
+		{
+			const string& typeName = *it;
+			EXPECT_FALSE(!typeName.empty());
+		}
 	}
 
 
