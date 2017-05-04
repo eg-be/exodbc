@@ -300,16 +300,18 @@ namespace exodbcexec
 		: public Command 
 	{
 	public:
-		Find(exodbc::DatabasePtr pDb)
+		Find(exodbc::DatabasePtr pDb, bool printHeaderRow)
 			: m_pDb(pDb)
+			, m_printHeaderRow(printHeaderRow)
 		{};
 
 		virtual std::vector<std::string> GetAliases() const noexcept { return{u8"find", u8"f"}; };
 		virtual void Execute(const std::vector<std::string> & args);
 		virtual std::string GetHelp() const noexcept;
-		virtual std::string GetArgumentsSyntax() const noexcept { return u8"[name] [schema] [catalog] [type]"; };
+		virtual std::string GetArgumentsSyntax() const noexcept;
 
 	private:
 		exodbc::DatabasePtr m_pDb;
+		bool m_printHeaderRow;
 	};
 }

@@ -61,7 +61,7 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8"");
 	WRITE_STDOUT_ENDL("OPTION can be:");
 	WRITE_STDOUT_ENDL(u8" --addRowNr              When printing column values, add a column in front");
-	WRITE_STDOUT_ENDL(u8"                         that prints the row number.");
+	WRITE_STDOUT_ENDL(u8"                         that prints the row number. Default is false.");
 	WRITE_STDOUT_ENDL(u8" --autoCommitOn          Enable auto commit. Default is to commit manual.");
 	WRITE_STDOUT_ENDL(u8" --charColType    <type> The SQL C Type of the column buffers to create.");
 	WRITE_STDOUT_ENDL(u8"                         Must be either 'SQLCHAR' or 'SQLWCHAR'.");
@@ -422,7 +422,7 @@ namespace exodbcexec
 		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::TableTypes, m_pDb, !printNoHeader));
 		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::Schemas, m_pDb, !printNoHeader));
 		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::Catalogs, m_pDb, !printNoHeader));
-		RegisterCommand(make_shared<Find>(m_pDb));
+		RegisterCommand(make_shared<Find>(m_pDb, !printNoHeader));
 		RegisterCommand(make_shared<Help>(GetCommands()));
 	}
 
