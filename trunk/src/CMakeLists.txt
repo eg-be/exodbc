@@ -42,6 +42,7 @@ set ( SRC_EXODBC
   AssertionException.cpp 
   ColumnBuffer.cpp 
   ColumnBufferWrapper.cpp
+  ColumnDescription.cpp
   ColumnInfo.cpp
   Database.cpp 
   DatabaseCatalog.cpp
@@ -50,7 +51,6 @@ set ( SRC_EXODBC
   ExecutableStatement.cpp
   exOdbc.cpp 
   Helpers.cpp 
-  InfoObject.cpp 
   LogHandler.cpp 
   LogManager.cpp 
   ParameterDescription.cpp
@@ -71,6 +71,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/ColumnBuffer.h
   ../include/exodbc/ColumnBufferVisitors.h
   ../include/exodbc/ColumnBufferWrapper.h
+  ../include/exodbc/ColumnDescription.h
   ../include/exodbc/ColumnInfo.h
   ../include/exodbc/Database.h
   ../include/exodbc/DatabaseCatalog.h
@@ -82,7 +83,6 @@ set ( HEADERS_EXODBC
   ../include/exodbc/ExecutableStatement.h
   ../include/exodbc/exOdbc.h
   ../include/exodbc/Helpers.h
-  ../include/exodbc/InfoObject.h
   ../include/exodbc/LogHandler.h
   ../include/exodbc/LogManager.h
   ../include/exodbc/LogManagerOdbcMacros.h

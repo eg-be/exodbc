@@ -13,7 +13,6 @@
 // Other headers
 #include "exodbc/ColumnBufferWrapper.h"
 #include "exodbc/ExecutableStatement.h"
-#include "exodbc/InfoObject.h"
 
 // System headers
 #include <string>

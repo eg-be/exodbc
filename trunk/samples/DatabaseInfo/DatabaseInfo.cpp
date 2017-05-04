@@ -18,7 +18,6 @@
 #include "exodbc/exOdbc.h"
 #include "exodbc/Environment.h"
 #include "exodbc/Database.h"
-#include "exodbc/InfoObject.h"
 #include "exodbc/Table.h"
 #include "exodbc/ColumnBufferVisitors.h"
 

@@ -558,7 +558,7 @@ namespace exodbcexec
 		// Bind columns
 		for (SQLSMALLINT colNr = 1; colNr <= nrOfCols; ++colNr)
 		{
-			SColumnDescription colDesc = m_pStmt->DescribeColumn(colNr);
+			ColumnDescription colDesc = m_pStmt->DescribeColumn(colNr);
 			// add +3 chars to charsize: 1 for '\0', 1 for '.' and 1 for '-':
 			exASSERT(m_charColumnMode != CharColumnMode::Auto);
 			ColumnBufferPtrVariant pColBuffer;
@@ -566,19 +566,19 @@ namespace exodbcexec
 			if (m_charColSize > 0)
 				bufferSize = m_charColSize + 1;
 			else
-				bufferSize = colDesc.m_charSize + 3;
+				bufferSize = colDesc.GetCharSize() + 3;
 			string bufferType;
 			if (m_charColumnMode == CharColumnMode::WChar)
 			{
-				pColBuffer = WCharColumnBuffer::Create(bufferSize, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
+				pColBuffer = WCharColumnBuffer::Create(bufferSize, colDesc.GetName(), colDesc.GetSqlType(), ColumnFlag::CF_SELECT);
 				bufferType = u8"SQLWCHAR";
 			}
 			else if (m_charColumnMode == CharColumnMode::Char)
 			{
-				pColBuffer = CharColumnBuffer::Create(bufferSize, colDesc.m_name, colDesc.m_sqlType, ColumnFlag::CF_SELECT);
+				pColBuffer = CharColumnBuffer::Create(bufferSize, colDesc.GetName(), colDesc.GetSqlType(), ColumnFlag::CF_SELECT);
 				bufferType = u8"SQLCHAR";
 			}
-			LOG_DEBUG(boost::str(boost::format(u8"Binding column nr %d: name: '%s'; charsize: %d; buffersize: %d; buffertype: %s") % colNr % colDesc.m_name % colDesc.m_charSize % bufferSize % bufferType));
+			LOG_DEBUG(boost::str(boost::format(u8"Binding column nr %d: name: '%s'; charsize: %d; buffersize: %d; buffertype: %s") % colNr % colDesc.GetName() % colDesc.GetCharSize() % bufferSize % bufferType));
 			m_pStmt->BindColumn(pColBuffer, colNr);
 			StringColumnWrapper wrapper(pColBuffer);
 			m_currentColumns.push_back(wrapper);
