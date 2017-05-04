@@ -50,6 +50,7 @@ set ( SRC_EXODBC
   Exception.cpp 
   ExecutableStatement.cpp
   exOdbc.cpp 
+  GetDataWrapper.cpp
   Helpers.cpp 
   LogHandler.cpp 
   LogManager.cpp 
@@ -82,6 +83,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/Exception.h
   ../include/exodbc/ExecutableStatement.h
   ../include/exodbc/exOdbc.h
+  ../include/exodbc/GetDataWrapper.h
   ../include/exodbc/Helpers.h
   ../include/exodbc/LogHandler.h
   ../include/exodbc/LogManager.h

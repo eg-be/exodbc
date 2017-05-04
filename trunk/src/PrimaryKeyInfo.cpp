@@ -12,7 +12,7 @@
 
 // Same component headers
 #include "AssertionException.h"
-#include "Helpers.h"
+#include "GetDataWrapper.h"
 
 // Other headers
 // Debug
@@ -65,12 +65,12 @@ namespace exodbc
 		exASSERT(pStmt->IsAllocated());
 
 		SQLLEN cb = 0;
-		GetData(pStmt, 1, props.GetMaxCatalogNameLen(), m_catalogName, &m_isCatalogNull);
-		GetData(pStmt, 2, props.GetMaxSchemaNameLen(), m_schemaName, &m_isSchemaNull);
-		GetData(pStmt, 3, props.GetMaxTableNameLen(), m_tableName);
-		GetData(pStmt, 4, props.GetMaxColumnNameLen(), m_columnName);
-		GetData(pStmt, 5, SQL_C_SHORT, &m_keySequence, sizeof(m_keySequence), &cb, nullptr);
-		GetData(pStmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, m_keyName, &m_isKeyNameNull);
+		GetDataWrapper::GetData(pStmt, 1, props.GetMaxCatalogNameLen(), m_catalogName, &m_isCatalogNull);
+		GetDataWrapper::GetData(pStmt, 2, props.GetMaxSchemaNameLen(), m_schemaName, &m_isSchemaNull);
+		GetDataWrapper::GetData(pStmt, 3, props.GetMaxTableNameLen(), m_tableName);
+		GetDataWrapper::GetData(pStmt, 4, props.GetMaxColumnNameLen(), m_columnName);
+		GetDataWrapper::GetData(pStmt, 5, SQL_C_SHORT, &m_keySequence, sizeof(m_keySequence), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 6, DB_MAX_PRIMARY_KEY_NAME_LEN, m_keyName, &m_isKeyNameNull);
 	}
 
 

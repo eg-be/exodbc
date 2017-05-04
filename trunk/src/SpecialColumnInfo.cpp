@@ -11,7 +11,7 @@
 #include "SpecialColumnInfo.h"
  
 // Same component headers
-#include "Helpers.h"
+#include "GetDataWrapper.h"
 
 // Other headers
 // Debug
@@ -34,14 +34,14 @@ namespace exodbc
 		SQLLEN cb = 0;
 		SQLSMALLINT scopeVal;
 		SQLSMALLINT pseudoColVal;
-		GetData(pStmt, 1, SQL_C_SSHORT, &scopeVal, sizeof(scopeVal), &cb, &m_isScopeNull);
-		GetData(pStmt, 2, props.GetMaxColumnNameLen(), m_columnName);
-		GetData(pStmt, 3, SQL_C_SSHORT, &m_sqlType, sizeof(m_sqlType), &cb, nullptr);
-		GetData(pStmt, 4, DB_MAX_TYPE_NAME_LEN, m_sqlTypeName);
-		GetData(pStmt, 5, SQL_C_SLONG, &m_columnSize, sizeof(m_columnSize), &cb, nullptr);
-		GetData(pStmt, 6, SQL_C_SLONG, &m_bufferLength, sizeof(m_bufferLength), &cb, nullptr);
-		GetData(pStmt, 7, SQL_C_SSHORT, &m_decimalDigits, sizeof(m_decimalDigits), &cb, nullptr);
-		GetData(pStmt, 8, SQL_C_SSHORT, &pseudoColVal, sizeof(pseudoColVal), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 1, SQL_C_SSHORT, &scopeVal, sizeof(scopeVal), &cb, &m_isScopeNull);
+		GetDataWrapper::GetData(pStmt, 2, props.GetMaxColumnNameLen(), m_columnName);
+		GetDataWrapper::GetData(pStmt, 3, SQL_C_SSHORT, &m_sqlType, sizeof(m_sqlType), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 4, DB_MAX_TYPE_NAME_LEN, m_sqlTypeName);
+		GetDataWrapper::GetData(pStmt, 5, SQL_C_SLONG, &m_columnSize, sizeof(m_columnSize), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 6, SQL_C_SLONG, &m_bufferLength, sizeof(m_bufferLength), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 7, SQL_C_SSHORT, &m_decimalDigits, sizeof(m_decimalDigits), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 8, SQL_C_SSHORT, &pseudoColVal, sizeof(pseudoColVal), &cb, nullptr);
 
 		if (!m_isScopeNull)
 		{
