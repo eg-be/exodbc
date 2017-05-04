@@ -45,6 +45,26 @@ namespace exodbc
 	class EXODBCAPI Environment
 	{
 	public:
+
+		/*!
+		* \struct SDataSource
+		* \brief Contains information about a DataSource-Entry from the driver-manager
+		* \see Environment::ListDataSources
+		*/
+		struct SDataSource
+		{
+			std::string m_dsn;			///< DSN name.
+			std::string m_description;	///< Description.
+		};
+
+
+		/*!
+		* \typedef DataSourceVector
+		* \brief std::vector of SDataSource objects.
+		*/
+		typedef std::vector<SDataSource> DataSourceVector;
+
+
 		/*!
 		* \brief	Enable connection pooling on the driver manager.
 		* \details	This option must be set before the Environment is allocated
@@ -205,7 +225,7 @@ namespace exodbc
 		 * \return	Found Data Source Names.
 		 * \throw	Exception
 		 */		
-		DataSourcesVector ListDataSources(ListMode mode) const;
+		DataSourceVector ListDataSources(ListMode mode) const;
 
 
 		/*!

@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 		}
 
 		Environment env(odbcVersionValue);
-		DataSourcesVector sources;
+		Environment::DataSourceVector sources;
 		string sourcesTypeName;
 		if (systemOnly)
 		{
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 		WRITE_STDOUT_ENDL(u8"");
 		WRITE_STDOUT_ENDL(boost::str(boost::format(u8" %-20s %s") % u8"Name" % u8"Description"));
 		WRITE_STDOUT_ENDL(u8"===================================================================");
-		for (DataSourcesVector::const_iterator it = sources.begin(); it != sources.end(); ++it)
+		for (Environment::DataSourceVector::const_iterator it = sources.begin(); it != sources.end(); ++it)
 		{
 			WRITE_STDOUT_ENDL(boost::str(boost::format(u8" %-20s %s") % it->m_dsn % it->m_description));
 		}

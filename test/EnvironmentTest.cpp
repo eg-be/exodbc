@@ -114,12 +114,12 @@ namespace exodbctest
 		Environment env(OdbcVersion::V_3);
 		ASSERT_TRUE(env.IsEnvHandleAllocated());
 
-		vector<SDataSource> dataSources;
+		vector<Environment::SDataSource> dataSources;
 		ASSERT_NO_THROW(dataSources = env.ListDataSources(Environment::ListMode::All));
 
 		// Expect that we find our DataSource in the list
 		bool foundDataSource = false;
-		vector<SDataSource>::const_iterator it;
+		vector<Environment::SDataSource>::const_iterator it;
 		for(it = dataSources.begin(); it != dataSources.end(); it++)
 		{
 			if(it->m_dsn == g_odbcInfo.m_dsn)
