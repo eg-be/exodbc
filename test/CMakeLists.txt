@@ -112,13 +112,13 @@ set ( SRC_EXODBCTEST
   exOdbcGTest.cpp 
   exOdbcGTestHelpers.cpp 
   GetDataWrapperTest.cpp
-  HelpersTest.cpp 
   LogManagerTest.cpp 
   ManualTestTables.cpp
   SetDescriptionFieldWrapperTest.cpp
   SqlHandleTest.cpp
   SqlInfoPropertyTest.cpp
   SqlStmtCloserTest.cpp
+  SqlStructHelperTest.cpp
   TableTest.cpp 
   TestDbCreator.cpp
   TestParams.cpp
@@ -138,13 +138,13 @@ set ( HEADERS_EXODBCTEST
   exOdbcGTest.h
   exOdbcGTestHelpers.h
   GetDataWrapperTest.h
-  HelpersTest.h
   LogManagerTest.h
   ManualTestTables.h
   SetDescriptionFieldWrapperTest.h
   SqlHandleTest.h
   SqlInfoPropertyTest.h
   SqlStmtCloserTest.h
+  SqlStructHelperTest.h
   TableTest.h 
   TestDbCreator.h
   TestParams.h

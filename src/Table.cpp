@@ -12,7 +12,6 @@
 #include "Table.h"
 
 // Same component headers
-#include "Helpers.h"
 #include "Database.h"
 #include "Environment.h"
 #include "Exception.h"

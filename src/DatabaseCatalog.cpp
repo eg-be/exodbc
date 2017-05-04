@@ -12,7 +12,6 @@
 
 // Same component headers
 #include "SqlStatementCloser.h"
-#include "Helpers.h"
 #include "SpecializedExceptions.h"
 
 // Other headers

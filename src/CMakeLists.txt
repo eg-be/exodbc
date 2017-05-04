@@ -51,7 +51,6 @@ set ( SRC_EXODBC
   ExecutableStatement.cpp
   exOdbc.cpp 
   GetDataWrapper.cpp
-  Helpers.cpp 
   LogHandler.cpp 
   LogManager.cpp 
   ParameterDescription.cpp
@@ -59,9 +58,10 @@ set ( SRC_EXODBC
   SetDescriptionFieldWrapper.cpp
   SpecialColumnInfo.cpp
   SpecializedExceptions.cpp 
-  SqlInfoProperty.cpp
   Sql2BufferTypeMap.cpp 
+  SqlInfoProperty.cpp
   SqlStatementCloser.cpp 
+  SqlStructHelper.cpp 
   SqlTypeInfo.cpp
   Table.cpp 
   TableInfo.cpp
@@ -85,7 +85,6 @@ set ( HEADERS_EXODBC
   ../include/exodbc/ExecutableStatement.h
   ../include/exodbc/exOdbc.h
   ../include/exodbc/GetDataWrapper.h
-  ../include/exodbc/Helpers.h
   ../include/exodbc/LogHandler.h
   ../include/exodbc/LogManager.h
   ../include/exodbc/LogManagerOdbcMacros.h
@@ -98,6 +97,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/SqlHandle.h
   ../include/exodbc/SqlInfoProperty.h  
   ../include/exodbc/SqlStatementCloser.h
+  ../include/exodbc/SqlStructHelper.h
   ../include/exodbc/SqlTypeInfo.h
   ../include/exodbc/Table.h
   ../include/exodbc/TableInfo.h

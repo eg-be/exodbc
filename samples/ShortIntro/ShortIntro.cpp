@@ -20,6 +20,7 @@
 #include "exodbc/ExecutableStatement.h"
 #include "exodbc/LogManager.h"
 #include "exodbc/ColumnBufferWrapper.h"
+#include "exodbc/SqlStructHelper.h"
 
 #ifdef _WIN32
 int _tmain(int argc, _TCHAR* argv[])
@@ -124,7 +125,7 @@ int main(int argc, char* argv[])
 			s = boost::str(boost::format(u8"%4d %16s %s") 
 				% pIdCol->GetValue() 
 				% nameColumnWrapper.GetValue<std::string>()
-				% TimestampToSqlString(pLastUpdateCol->GetValue())
+				% SqlStructHelper::TimestampToSqlString(pLastUpdateCol->GetValue())
 				);
 			WRITE_STDOUT_ENDL(s);
 		}
@@ -132,13 +133,13 @@ int main(int argc, char* argv[])
 
 		// Update the row with a primary key id value of 101:
 		pIdCol->SetValue(101);
-		pLastUpdateCol->SetValue(InitUtcTimestamp());
+		pLastUpdateCol->SetValue(SqlStructHelper::InitUtcTimestamp());
 		nameColumnWrapper.SetValue(u8"Updated");
 		t.UpdateByPkValues();
 
 		// Insert a single entry
 		pIdCol->SetValue(200);
-		pLastUpdateCol->SetValue(InitUtcTimestamp());
+		pLastUpdateCol->SetValue(SqlStructHelper::InitUtcTimestamp());
 		nameColumnWrapper.SetValue(u8"Inserted");
 		t.Insert();
 
@@ -158,7 +159,7 @@ int main(int argc, char* argv[])
 			pIdCol->SetValue(i);
 			std::string name = boost::str(boost::format(u8"Insert: %d") % i);
 			nameColumnWrapper.SetValue(name);
-			pLastUpdateCol->SetValue(InitUtcTimestamp());
+			pLastUpdateCol->SetValue(SqlStructHelper::InitUtcTimestamp());
 			stmt.ExecutePrepared();
 		}
 
@@ -181,7 +182,7 @@ int main(int argc, char* argv[])
 			s = boost::str(boost::format(u8"%4d %16s %s")
 				% pIdCol->GetValue()
 				% nameColumnWrapper.GetValue<std::string>()
-				% TimestampToSqlString(pLastUpdateCol->GetValue())
+				% SqlStructHelper::TimestampToSqlString(pLastUpdateCol->GetValue())
 			);
 			WRITE_STDOUT_ENDL(s);
 		}

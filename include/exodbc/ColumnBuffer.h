@@ -16,7 +16,6 @@
 #include "ColumnInfo.h"
 #include "EnumFlags.h"
 #include "SqlHandle.h"
-#include "Helpers.h"
 #include "LogManagerOdbcMacros.h"
 #include "SetDescriptionFieldWrapper.h"
 
