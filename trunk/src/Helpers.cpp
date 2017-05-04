@@ -32,30 +32,6 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	void SetDescriptionField(SQLHDESC hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value)
-	{
-		exASSERT(hDesc != SQL_NULL_HDESC);
-		exASSERT(recordNumber > 0);
-		SQLRETURN ret = SQLSetDescField(hDesc, recordNumber, descriptionField, value, 0);
-		THROW_IFN_SUCCEEDED(SQLSetDescField, ret, SQL_HANDLE_DESC, hDesc);
-	}
-
-
-	void SetDescriptionField(ConstSqlDescHandlePtr pHDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value)
-	{
-		exASSERT(pHDesc);
-		exASSERT(pHDesc->IsAllocated());
-		SetDescriptionField(pHDesc->GetHandle(), recordNumber, descriptionField, value);
-	}
-
-
-	void SetDescriptionField(const SqlDescHandle& hDesc, SQLSMALLINT recordNumber, SQLSMALLINT descriptionField, SQLPOINTER value)
-	{
-		exASSERT(hDesc.IsAllocated());
-		SetDescriptionField(hDesc.GetHandle(), recordNumber, descriptionField, value);
-	}
-
-
 	SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second) noexcept
 	{
 		SQL_TIME_STRUCT time;
