@@ -216,35 +216,6 @@ namespace exodbc
 
 
 		/*!
-		 * \brief	Queries the database using SQLColumns to determine the number of columns of
-		 * 			the passed Table (which should have been queried from the catalog, using
-		 * 			FindTable or similar).
-		 * 			Note: No checks are done to ensure the passed table matches only one table
-		 * 			of the database. You might get confusing results if you have for example
-		 * 			search-patterns set as table name in the passed TableInfo table.
-		 * \param	table	The table.
-		 * \return	The column count.
-		 * \throw	Exception If counting columns fails.
-		 */
-		int			ReadColumnCount(const TableInfo& table);
-
-
-		/*!
-		 * \brief	Reads column count for one table. First the database is queried for a table
-		 * 			that matches the passed arguments. If not exactly one such table is found this
-		 * 			function fails.
-		 * 			If exactly one table is found, the call is forwarded to ReadColumnCount
-		 * \param	tableName  	Name of the table.
-		 * \param	schemaName 	Name of the schema.
-		 * \param	catalogName	Name of the catalog.
-		 * \param	tableType	Table Type name
-		 * \return	The column count for the matching table.
-		 * \throw	Exception If not exactly one table is found.
-		 */
-		int			ReadColumnCount(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType);
-
-
-		/*!
 		 * \brief	Queries the database for the attribute SQL_ATTR_AUTOCOMMIT. The internal flag
 		 * 			m_commitMode is updated with the value red from the database, if reading
 		 *			was successful. In all other cases it is set to CM_UNKNOWN.
