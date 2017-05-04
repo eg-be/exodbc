@@ -15,6 +15,7 @@
 
 // Other headers
 #include "exodbc/SqlStatementCloser.h"
+#include "exodbc/GetDataWrapper.h"
 
 // Debug
 #include "DebugNew.h"
@@ -68,7 +69,7 @@ namespace exodbctest
 		// Read some non-null string-data with enough chars
 		bool isNull = false;
 		std::string value;
-		EXPECT_NO_THROW(GetData(pHStmt, 2, 20, value, &isNull));
+		EXPECT_NO_THROW(GetDataWrapper::GetData(pHStmt, 2, 20, value, &isNull));
 		EXPECT_FALSE(isNull);
 		EXPECT_EQ(u8"abcdef", value);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
@@ -84,7 +85,7 @@ namespace exodbctest
             // note that if we set a size of 4 chars to read, this does not mean
             // that we can read 4 logical chars, as  one char might use multiple bytes
             // so we only test for starts_with.
-			EXPECT_NO_THROW(GetData(pHStmt, 2, 4, value, &isNull));
+			EXPECT_NO_THROW(GetDataWrapper::GetData(pHStmt, 2, 4, value, &isNull));
 		}
 		EXPECT_TRUE( boost::algorithm::starts_with(value, u8"abcd"));
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
@@ -96,7 +97,7 @@ namespace exodbctest
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		SQLINTEGER id = 0;
 		SQLLEN ind = 0;
-		EXPECT_NO_THROW(GetData(pHStmt, 1, SQL_C_SLONG, &id, 0, &ind, &isNull));
+		EXPECT_NO_THROW(GetDataWrapper::GetData(pHStmt, 1, SQL_C_SLONG, &id, 0, &ind, &isNull));
 		EXPECT_EQ(3, id);
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::IgnoreNotOpen));
 
@@ -106,7 +107,7 @@ namespace exodbctest
 		ret = SQLFetch(pHStmt->GetHandle());
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 		value = u8"";
-		EXPECT_NO_THROW(GetData(pHStmt, 3, 20, value, &isNull));
+		EXPECT_NO_THROW(GetDataWrapper::GetData(pHStmt, 3, 20, value, &isNull));
 		EXPECT_TRUE(isNull);
 		EXPECT_EQ(u8"", value);
 		

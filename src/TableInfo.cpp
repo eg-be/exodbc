@@ -12,7 +12,7 @@
 
 // Same component headers
 #include "AssertionException.h"
-#include "Helpers.h"
+#include "GetDataWrapper.h"
 
 // Other headers
 // Debug
@@ -67,11 +67,11 @@ namespace exodbc
 		m_dbms = props.DetectDbms();
 
 		SQLLEN cb = 0;
-		GetData(pStmt, 1, props.GetMaxCatalogNameLen(), m_catalogName, &m_isCatalogNull);
-		GetData(pStmt, 2, props.GetMaxSchemaNameLen(), m_schemaName, &m_isSchemaNull);
-		GetData(pStmt, 3, props.GetMaxTableNameLen(), m_tableName);
-		GetData(pStmt, 4, DB_MAX_TABLE_TYPE_LEN, m_tableType);
-		GetData(pStmt, 5, DB_MAX_TABLE_REMARKS_LEN, m_tableRemarks);
+		GetDataWrapper::GetData(pStmt, 1, props.GetMaxCatalogNameLen(), m_catalogName, &m_isCatalogNull);
+		GetDataWrapper::GetData(pStmt, 2, props.GetMaxSchemaNameLen(), m_schemaName, &m_isSchemaNull);
+		GetDataWrapper::GetData(pStmt, 3, props.GetMaxTableNameLen(), m_tableName);
+		GetDataWrapper::GetData(pStmt, 4, DB_MAX_TABLE_TYPE_LEN, m_tableType);
+		GetDataWrapper::GetData(pStmt, 5, DB_MAX_TABLE_REMARKS_LEN, m_tableRemarks);
 	}
 
 

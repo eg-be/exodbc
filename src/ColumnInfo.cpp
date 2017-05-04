@@ -12,7 +12,7 @@
 
 // Same component headers
 #include "AssertionException.h"
-#include "Helpers.h"
+#include "GetDataWrapper.h"
 
 // Other headers
 // Debug
@@ -94,24 +94,24 @@ namespace exodbc
 		exASSERT(pStmt->IsAllocated());
 
 		SQLLEN cb = 0;
-		GetData(pStmt, 1, props.GetMaxCatalogNameLen(), m_catalogName, &m_isCatalogNull);
-		GetData(pStmt, 2, props.GetMaxSchemaNameLen(), m_schemaName, &m_isSchemaNull);
-		GetData(pStmt, 3, props.GetMaxTableNameLen(), m_tableName);
-		GetData(pStmt, 4, props.GetMaxColumnNameLen(), m_columnName);
-		GetData(pStmt, 5, SQL_C_SSHORT, &m_sqlType, sizeof(m_sqlType), &cb, nullptr);
-		GetData(pStmt, 6, DB_MAX_TYPE_NAME_LEN, m_typeName);
-		GetData(pStmt, 7, SQL_C_SLONG, &m_columnSize, sizeof(m_columnSize), &cb, &m_isColumnSizeNull);
-		GetData(pStmt, 8, SQL_C_SLONG, &m_bufferSize, sizeof(m_bufferSize), &cb, &m_isBufferSizeNull);
-		GetData(pStmt, 9, SQL_C_SSHORT, &m_decimalDigits, sizeof(m_decimalDigits), &cb, &m_isDecimalDigitsNull);
-		GetData(pStmt, 10, SQL_C_SSHORT, &m_numPrecRadix, sizeof(m_numPrecRadix), &cb, &m_isNumPrecRadixNull);
-		GetData(pStmt, 11, SQL_C_SSHORT, &m_nullable, sizeof(m_nullable), &cb, nullptr);
-		GetData(pStmt, 12, DB_MAX_COLUMN_REMARKS_LEN, m_remarks, &m_isRemarksNull);
-		GetData(pStmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, m_defaultValue, &m_isDefaultValueNull);
-		GetData(pStmt, 14, SQL_C_SSHORT, &m_sqlDataType, sizeof(m_sqlDataType), &cb, nullptr);
-		GetData(pStmt, 15, SQL_C_SSHORT, &m_sqlDatetimeSub, sizeof(m_sqlDatetimeSub), &cb, &m_isSqlDatetimeSubNull);
-		GetData(pStmt, 16, SQL_C_SLONG, &m_charOctetLength, sizeof(m_charOctetLength), &cb, &m_isCharOctetLengthNull);
-		GetData(pStmt, 17, SQL_C_SLONG, &m_ordinalPosition, sizeof(m_ordinalPosition), &cb, nullptr);
-		GetData(pStmt, 18, DB_MAX_YES_NO_LEN, m_isNullable, &m_isIsNullableNull);
+		GetDataWrapper::GetData(pStmt, 1, props.GetMaxCatalogNameLen(), m_catalogName, &m_isCatalogNull);
+		GetDataWrapper::GetData(pStmt, 2, props.GetMaxSchemaNameLen(), m_schemaName, &m_isSchemaNull);
+		GetDataWrapper::GetData(pStmt, 3, props.GetMaxTableNameLen(), m_tableName);
+		GetDataWrapper::GetData(pStmt, 4, props.GetMaxColumnNameLen(), m_columnName);
+		GetDataWrapper::GetData(pStmt, 5, SQL_C_SSHORT, &m_sqlType, sizeof(m_sqlType), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 6, DB_MAX_TYPE_NAME_LEN, m_typeName);
+		GetDataWrapper::GetData(pStmt, 7, SQL_C_SLONG, &m_columnSize, sizeof(m_columnSize), &cb, &m_isColumnSizeNull);
+		GetDataWrapper::GetData(pStmt, 8, SQL_C_SLONG, &m_bufferSize, sizeof(m_bufferSize), &cb, &m_isBufferSizeNull);
+		GetDataWrapper::GetData(pStmt, 9, SQL_C_SSHORT, &m_decimalDigits, sizeof(m_decimalDigits), &cb, &m_isDecimalDigitsNull);
+		GetDataWrapper::GetData(pStmt, 10, SQL_C_SSHORT, &m_numPrecRadix, sizeof(m_numPrecRadix), &cb, &m_isNumPrecRadixNull);
+		GetDataWrapper::GetData(pStmt, 11, SQL_C_SSHORT, &m_nullable, sizeof(m_nullable), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 12, DB_MAX_COLUMN_REMARKS_LEN, m_remarks, &m_isRemarksNull);
+		GetDataWrapper::GetData(pStmt, 13, DB_MAX_COLUMN_DEFAULT_LEN, m_defaultValue, &m_isDefaultValueNull);
+		GetDataWrapper::GetData(pStmt, 14, SQL_C_SSHORT, &m_sqlDataType, sizeof(m_sqlDataType), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 15, SQL_C_SSHORT, &m_sqlDatetimeSub, sizeof(m_sqlDatetimeSub), &cb, &m_isSqlDatetimeSubNull);
+		GetDataWrapper::GetData(pStmt, 16, SQL_C_SLONG, &m_charOctetLength, sizeof(m_charOctetLength), &cb, &m_isCharOctetLengthNull);
+		GetDataWrapper::GetData(pStmt, 17, SQL_C_SLONG, &m_ordinalPosition, sizeof(m_ordinalPosition), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 18, DB_MAX_YES_NO_LEN, m_isNullable, &m_isIsNullableNull);
 	}
 
 

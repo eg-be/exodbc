@@ -12,7 +12,7 @@
 
 // Same component headers
 #include "AssertionException.h"
-#include "Helpers.h"
+#include "GetDataWrapper.h"
 
 // Other headers
 // Debug
@@ -62,25 +62,25 @@ namespace exodbc
 
 		SQLLEN cb = 0;
 
-		GetData(pStmt, 1, DB_MAX_TYPE_NAME_LEN, m_typeName);
-		GetData(pStmt, 2, SQL_C_SSHORT, &m_sqlType, sizeof(m_sqlType), &cb, nullptr);
-		GetData(pStmt, 3, SQL_C_SLONG, &m_columnSize, sizeof(m_columnSize), &cb, &m_columnSizeIsNull);
-		GetData(pStmt, 4, DB_MAX_LITERAL_PREFIX_LEN, m_literalPrefix, &m_literalPrefixIsNull);
-		GetData(pStmt, 5, DB_MAX_LITERAL_SUFFIX_LEN, m_literalSuffix, &m_literalSuffixIsNull);
-		GetData(pStmt, 6, DB_MAX_CREATE_PARAMS_LIST_LEN, m_createParams, &m_createParamsIsNull);
-		GetData(pStmt, 7, SQL_C_SSHORT, &m_nullable, sizeof(m_nullable), &cb, nullptr);
-		GetData(pStmt, 8, SQL_C_SSHORT, &m_caseSensitive, sizeof(m_caseSensitive), &cb, nullptr);
-		GetData(pStmt, 9, SQL_C_SSHORT, &m_searchable, sizeof(m_searchable), &cb, nullptr);
-		GetData(pStmt, 10, SQL_C_SSHORT, &m_unsigned, sizeof(m_unsigned), &cb, &m_unsignedIsNull);
-		GetData(pStmt, 11, SQL_C_SSHORT, &m_fixedPrecisionScale, sizeof(m_fixedPrecisionScale), &cb, nullptr);
-		GetData(pStmt, 12, SQL_C_SSHORT, &m_autoUniqueValue, sizeof(m_autoUniqueValue), &cb, &m_autoUniqueValueIsNull);
-		GetData(pStmt, 13, DB_MAX_LOCAL_TYPE_NAME_LEN, m_localTypeName, &m_localTypeNameIsNull);
-		GetData(pStmt, 14, SQL_C_SSHORT, &m_minimumScale, sizeof(m_minimumScale), &cb, &m_minimumScaleIsNull);
-		GetData(pStmt, 15, SQL_C_SSHORT, &m_maximumScale, sizeof(m_maximumScale), &cb, &m_maximumScaleIsNull);
-		GetData(pStmt, 16, SQL_C_SSHORT, &m_sqlDataType, sizeof(m_sqlDataType), &cb, nullptr);
-		GetData(pStmt, 17, SQL_C_SSHORT, &m_sqlDateTimeSub, sizeof(m_sqlDateTimeSub), &cb, &m_sqlDateTimeSubIsNull);
-		GetData(pStmt, 18, SQL_C_SSHORT, &m_numPrecRadix, sizeof(m_numPrecRadix), &cb, &m_numPrecRadixIsNull);
-		GetData(pStmt, 19, SQL_C_SSHORT, &m_intervalPrecision, sizeof(m_intervalPrecision), &cb, &m_intervalPrecisionIsNull);
+		GetDataWrapper::GetData(pStmt, 1, DB_MAX_TYPE_NAME_LEN, m_typeName);
+		GetDataWrapper::GetData(pStmt, 2, SQL_C_SSHORT, &m_sqlType, sizeof(m_sqlType), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 3, SQL_C_SLONG, &m_columnSize, sizeof(m_columnSize), &cb, &m_columnSizeIsNull);
+		GetDataWrapper::GetData(pStmt, 4, DB_MAX_LITERAL_PREFIX_LEN, m_literalPrefix, &m_literalPrefixIsNull);
+		GetDataWrapper::GetData(pStmt, 5, DB_MAX_LITERAL_SUFFIX_LEN, m_literalSuffix, &m_literalSuffixIsNull);
+		GetDataWrapper::GetData(pStmt, 6, DB_MAX_CREATE_PARAMS_LIST_LEN, m_createParams, &m_createParamsIsNull);
+		GetDataWrapper::GetData(pStmt, 7, SQL_C_SSHORT, &m_nullable, sizeof(m_nullable), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 8, SQL_C_SSHORT, &m_caseSensitive, sizeof(m_caseSensitive), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 9, SQL_C_SSHORT, &m_searchable, sizeof(m_searchable), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 10, SQL_C_SSHORT, &m_unsigned, sizeof(m_unsigned), &cb, &m_unsignedIsNull);
+		GetDataWrapper::GetData(pStmt, 11, SQL_C_SSHORT, &m_fixedPrecisionScale, sizeof(m_fixedPrecisionScale), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 12, SQL_C_SSHORT, &m_autoUniqueValue, sizeof(m_autoUniqueValue), &cb, &m_autoUniqueValueIsNull);
+		GetDataWrapper::GetData(pStmt, 13, DB_MAX_LOCAL_TYPE_NAME_LEN, m_localTypeName, &m_localTypeNameIsNull);
+		GetDataWrapper::GetData(pStmt, 14, SQL_C_SSHORT, &m_minimumScale, sizeof(m_minimumScale), &cb, &m_minimumScaleIsNull);
+		GetDataWrapper::GetData(pStmt, 15, SQL_C_SSHORT, &m_maximumScale, sizeof(m_maximumScale), &cb, &m_maximumScaleIsNull);
+		GetDataWrapper::GetData(pStmt, 16, SQL_C_SSHORT, &m_sqlDataType, sizeof(m_sqlDataType), &cb, nullptr);
+		GetDataWrapper::GetData(pStmt, 17, SQL_C_SSHORT, &m_sqlDateTimeSub, sizeof(m_sqlDateTimeSub), &cb, &m_sqlDateTimeSubIsNull);
+		GetDataWrapper::GetData(pStmt, 18, SQL_C_SSHORT, &m_numPrecRadix, sizeof(m_numPrecRadix), &cb, &m_numPrecRadixIsNull);
+		GetDataWrapper::GetData(pStmt, 19, SQL_C_SSHORT, &m_intervalPrecision, sizeof(m_intervalPrecision), &cb, &m_intervalPrecisionIsNull);
 	}
 
 

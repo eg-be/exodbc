@@ -18,6 +18,7 @@
 #include "exodbc/Environment.h"
 #include "exodbc/Database.h"
 #include "exodbc/Exception.h"
+#include "exodbc/GetDataWrapper.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
 #include "boost/filesystem.hpp"
@@ -351,7 +352,7 @@ namespace exodbctest
 
 		SQLINTEGER count;
 		SQLLEN cb;
-		GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
+		GetDataWrapper::GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
 		EXPECT_EQ(0, count);
 
 		// now insert again and commit
@@ -365,7 +366,7 @@ namespace exodbctest
 		ret = SQLFetch(pDb->GetExecSqlHandle()->GetHandle());
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
-		GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
+		GetDataWrapper::GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
 		EXPECT_EQ(1, count);
 	}
 
@@ -399,7 +400,7 @@ namespace exodbctest
 
 		SQLINTEGER count;
 		SQLLEN cb;
-		GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
+		GetDataWrapper::GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
 		EXPECT_EQ(0, count);
 	}
 
