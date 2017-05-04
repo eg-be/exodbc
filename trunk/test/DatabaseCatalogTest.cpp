@@ -109,6 +109,11 @@ namespace exodbctest
 		// that should be less than all tables:
 		TableInfoVector tmpTables = dbCat.SearchTables(u8"%tmp");
 		EXPECT_GT(allTables.size(), tmpTables.size());
+
+		// And now restrict to matching really empty catalog / schema names:
+		// that must be less or equal to all tables
+		TableInfoVector emptyCatSchemTables = dbCat.SearchTables(u8"%", u8"", u8"", u8"");
+		EXPECT_LE(emptyCatSchemTables.size(), allTables.size());
 	}
 
 
