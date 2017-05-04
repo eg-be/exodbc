@@ -17,6 +17,7 @@
 #include "Exception.h"
 #include "SqlStatementCloser.h"
 #include "LogManagerOdbcMacros.h"
+#include "Sql2StringHelper.h"
 
 // Other headers
 // Debug
@@ -232,7 +233,7 @@ namespace exodbc
 				ErrorHelper::SErrorInfoVector::const_iterator it;
 				for (it = errs.begin(); it != errs.end(); ++it)
 				{
-					LOG_ERROR(boost::str(boost::format(u8"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
+					LOG_ERROR(boost::str(boost::format(u8"Failed to Disconnect from datasource with %s (%d): %s") % Sql2StringHelper::SqlReturn2s(ret) % ret % it->ToString()));
 				}
 			}
 
@@ -287,7 +288,7 @@ namespace exodbc
 				ErrorHelper::SErrorInfoVector::const_iterator it;
 				for (it = errs.begin(); it != errs.end(); ++it)
 				{
-					LOG_ERROR(boost::str(boost::format(u8"Failed to Disconnect from datasource with %s (%d): %s") % SqlReturn2s(ret) % ret % it->ToString()));
+					LOG_ERROR(boost::str(boost::format(u8"Failed to Disconnect from datasource with %s (%d): %s") % Sql2StringHelper::SqlReturn2s(ret) % ret % it->ToString()));
 				}
 			}
 

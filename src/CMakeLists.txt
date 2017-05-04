@@ -59,6 +59,7 @@ set ( SRC_EXODBC
   SpecialColumnInfo.cpp
   SpecializedExceptions.cpp 
   Sql2BufferTypeMap.cpp 
+  Sql2StringHelper.cpp
   SqlInfoProperty.cpp
   SqlStatementCloser.cpp 
   SqlStructHelper.cpp 
@@ -94,6 +95,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/SpecialColumnInfo.h
   ../include/exodbc/SpecializedExceptions.h
   ../include/exodbc/Sql2BufferTypeMap.h
+  ../include/exodbc/Sql2StringHelper.h
   ../include/exodbc/SqlHandle.h
   ../include/exodbc/SqlInfoProperty.h  
   ../include/exodbc/SqlStatementCloser.h

@@ -14,6 +14,7 @@
 #include "LogManager.h"
 #include "Exception.h"
 #include "LogManagerOdbcMacros.h"
+#include "Sql2StringHelper.h"
 
 // Other headers
 #include <boost/signals2.hpp>
@@ -184,7 +185,7 @@ namespace exodbc
 			// if SQL_ERROR is returned, the handle is still valid, and error information can be fetched
 			if (ret == SQL_ERROR)
 			{
-				std::string msg = boost::str(boost::format(u8"Freeing Handle %1% of type %2% failed with SQL_ERROR, handle is still valid.") % m_handle %HandleType2s(tHandleType));
+				std::string msg = boost::str(boost::format(u8"Freeing Handle %1% of type %2% failed with SQL_ERROR, handle is still valid.") % m_handle % Sql2StringHelper::HandleType2s(tHandleType));
 				SqlResultException ex(u8"SQLFreeHandle", ret, tHandleType, m_handle, msg);
 				SET_EXCEPTION_SOURCE(ex);
 				throw ex;
@@ -192,7 +193,7 @@ namespace exodbc
 			else if (ret == SQL_INVALID_HANDLE)
 			{
 				// If we've received INVALID_HANDLE our handle has probably already be deleted - anyway, its invalid, reset it.
-				std::string msg = boost::str(boost::format(u8"Freeing Handle %1% of type %2% failed with SQL_INVALID_HANDLE.") % m_handle %HandleType2s(tHandleType));
+				std::string msg = boost::str(boost::format(u8"Freeing Handle %1% of type %2% failed with SQL_INVALID_HANDLE.") % m_handle % Sql2StringHelper::HandleType2s(tHandleType));
 				m_handle = SQL_NULL_HANDLE;
 				m_pParentHandle.reset();
 				SqlResultException ex(u8"SQLFreeHandle", ret, msg);

@@ -20,6 +20,7 @@
 #include "ColumnBufferVisitors.h"
 #include "ExecutableStatement.h"
 #include "DatabaseCatalog.h"
+#include "Sql2StringHelper.h"
 
 // Other headers
 // Debug
@@ -693,12 +694,12 @@ namespace exodbc
 			{
 				if (TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS))
 				{
-					LOG_WARNING(boost::str(boost::format(u8"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % queryName % it->first % SqlType2s(sqlType) % sqlType));
+					LOG_WARNING(boost::str(boost::format(u8"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % queryName % it->first % Sql2StringHelper::SqlType2s(sqlType) % sqlType));
 					remove = true;
 				}			
 				else
 				{
-					Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % queryName % it->first % SqlType2s(sqlType) % sqlType));
+					Exception ex(boost::str(boost::format(u8"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type.") % queryName % it->first % Sql2StringHelper::SqlType2s(sqlType) % sqlType));
 					SET_EXCEPTION_SOURCE(ex);
 					throw ex;
 				}
