@@ -109,12 +109,6 @@ namespace exodbctest
 		// that should be less than all tables:
 		TableInfoVector tmpTables = dbCat.SearchTables(u8"%tmp");
 		EXPECT_GT(allTables.size(), tmpTables.size());
-
-		// theoretically, setting catalog name and schema name to nullptr, should
-		// be equal to calling them with '%', if pattern value arguments are used,
-		// but at least on sql server we get way more tables, so just test for >=
-		TableInfoVector allTables2 = dbCat.SearchTables(u8"%");
-		EXPECT_GE(allTables2.size(), allTables.size());
 	}
 
 
