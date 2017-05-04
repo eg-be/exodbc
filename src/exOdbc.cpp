@@ -13,6 +13,7 @@
 #include "Helpers.h"
 #include "LogManager.h"
 #include "SpecializedExceptions.h"
+#include "AssertionException.h"
 
 // Other headers
 // Debug
