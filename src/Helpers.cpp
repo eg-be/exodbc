@@ -56,16 +56,6 @@ namespace exodbc
 	}
 
 
-	SqlDescHandlePtr GetRowDescriptorHandle(ConstSqlStmtHandlePtr pHStmt, RowDescriptorType type)
-	{
-		exASSERT(pHStmt);
-		exASSERT(pHStmt->IsAllocated());
-
-		auto pHDesc = std::make_shared<SqlDescHandle>(pHStmt, type);
-		return pHDesc;
-	}
-
-
 	SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second) noexcept
 	{
 		SQL_TIME_STRUCT time;
