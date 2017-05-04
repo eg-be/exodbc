@@ -200,18 +200,6 @@ namespace exodbc
 
 
 	/*!
-	* \enum		ColumnAttribute
-	* \brief	A helper for the arguments in SQLColAttribute.
-	* \see		http://msdn.microsoft.com/en-us/library/ms713558%28v=vs.85%29.aspx
-	* \see		Table::SelectColumnAttribute()
-	*/
-	enum class ColumnAttribute
-	{
-		CA_PRECISION = SQL_DESC_PRECISION ///< A numeric value that for a numeric data type denotes the applicable precision, For data types SQL_TYPE_TIME, SQL_TYPE_TIMESTAMP, and all the interval data types that represent a time interval, its value is the applicable precision of the fractional seconds component. 
-	};
-
-
-	/*!
 	* \enum		RowDescriptorType
 	* \brief	A wrapper for the values of SQLGetStmtAttr to fetch a descriptor handle.
 	* \see		GetRowDescriptorHandle

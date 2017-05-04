@@ -10,7 +10,6 @@
 #include "exOdbc.h"
 
 // Same component headers
-#include "Helpers.h"
 #include "LogManager.h"
 #include "SpecializedExceptions.h"
 #include "AssertionException.h"
