@@ -10,12 +10,10 @@
 
 // Same component headers
 #include "exOdbc.h"
-#include "SqlHandle.h"
 
 // Other headers
 // System headers
 #include <string>
-#include <iostream>
 
 // Forward declarations
 // --------------------
