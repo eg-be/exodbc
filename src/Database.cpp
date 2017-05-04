@@ -33,7 +33,6 @@ namespace exodbc
 		: m_pEnv(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
-		, m_pHStmt(std::make_shared<SqlStmtHandle>())
 		, m_pHStmtExecSql(std::make_shared<SqlStmtHandle>())
 		, m_dbmsType(DatabaseProduct::UNKNOWN)
 		, m_dbIsOpen(false)
@@ -47,7 +46,6 @@ namespace exodbc
 		: m_pEnv(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
-		, m_pHStmt(std::make_shared<SqlStmtHandle>())
 		, m_pHStmtExecSql(std::make_shared<SqlStmtHandle>())
 		, m_dbmsType(DatabaseProduct::UNKNOWN)
 		, m_dbIsOpen(false)
@@ -63,7 +61,6 @@ namespace exodbc
 		: m_pEnv(NULL)
 		, m_pSql2BufferTypeMap(NULL)
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
-		, m_pHStmt(std::make_shared<SqlStmtHandle>())
 		, m_pHStmtExecSql(std::make_shared<SqlStmtHandle>())
 		, m_dbmsType(DatabaseProduct::UNKNOWN)
 		, m_dbIsOpen(false)
@@ -123,7 +120,6 @@ namespace exodbc
 	{
 		exASSERT(m_pHDbc);
 		exASSERT(m_pHDbc->IsAllocated());
-		exASSERT(!m_pHStmt->IsAllocated());
 		exASSERT(!m_pHStmtExecSql->IsAllocated());
 
 		// Everything might throw, let this function free the handles in case of failure, 
@@ -131,7 +127,6 @@ namespace exodbc
 		try
 		{
 			// Allocate a statement handle from the database connection to be used internally and the exec-handle
-			m_pHStmt->AllocateWithParent(m_pHDbc);
 			m_pHStmtExecSql->AllocateWithParent(m_pHDbc);
 
 			// Try to load all informations we need
@@ -177,10 +172,6 @@ namespace exodbc
 			// Try to free what we've allocated and rethrow
 			m_pDbCatalog.reset();
 			m_props.Reset();
-			if (m_pHStmt->IsAllocated())
-			{
-				m_pHStmt->Free();
-			}
 			if (m_pHStmtExecSql->IsAllocated())
 			{
 				m_pHStmtExecSql->Free();
@@ -384,7 +375,6 @@ namespace exodbc
 		}
 
 		// Free statement handles - keep the pointers, but free the handle held
-		m_pHStmt->Free();
 		m_pHStmtExecSql->Free();
 
 		// And also clear all props read and the catalog
@@ -530,8 +520,6 @@ namespace exodbc
 		exASSERT(m_pHDbc->IsAllocated());
 
 		// We need to ensure cursors are closed:
-		// The internal statement should be closed, the exec-statement could be open
-		StatementCloser::CloseStmtHandle(m_pHStmt, StatementCloser::Mode::IgnoreNotOpen);
 		StatementCloser::CloseStmtHandle(m_pHStmtExecSql, StatementCloser::Mode::IgnoreNotOpen);
 
 		// If Autocommit is off, we need to Rollback any ongoing transaction
