@@ -449,7 +449,6 @@ namespace exodbc
 		// ODBC handles created by the Database
 
 		SqlDbcHandlePtr m_pHDbc;			///< ODBC DB Connection handle
-		SqlStmtHandlePtr m_pHStmt;			///< ODBC Statement handle used for all internal functions except ExecSql()
 		SqlStmtHandlePtr m_pHStmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
 
 		CommitMode		m_commitMode;	///< Commit Mode set currently
