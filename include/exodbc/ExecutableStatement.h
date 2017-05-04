@@ -14,7 +14,7 @@
 #include "ColumnBuffer.h"
 #include "Database.h"
 #include "ParameterDescription.h"
-#include "InfoObject.h"
+#include "ColumnDescription.h"
 
 // Other headers
 // System headers
@@ -181,7 +181,7 @@ namespace exodbc
 		/*!
 		* \brief	Calls SQLDescribeCol for column at columnNr and the handle of this ExecutableStatement.
 		*/
-		SColumnDescription DescribeColumn(SQLUSMALLINT columnNr) const;
+		ColumnDescription DescribeColumn(SQLUSMALLINT columnNr) const;
 
 
 		/*!

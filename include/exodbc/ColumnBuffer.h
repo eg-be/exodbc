@@ -12,7 +12,6 @@
 #include "exOdbc.h"
 #include "Exception.h"
 #include "SpecializedExceptions.h"
-#include "InfoObject.h"
 #include "ParameterDescription.h"
 #include "ColumnInfo.h"
 #include "EnumFlags.h"

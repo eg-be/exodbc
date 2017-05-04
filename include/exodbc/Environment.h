@@ -10,7 +10,6 @@
 
 // Same component headers
 #include "exOdbc.h"
-#include "InfoObject.h"
 #include "SqlHandle.h"
 
 // Other headers

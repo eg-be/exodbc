@@ -184,20 +184,14 @@ namespace exodbc
 	}
 
 
-	SColumnDescription ExecutableStatement::DescribeColumn(SQLUSMALLINT columnNr) const
+	ColumnDescription ExecutableStatement::DescribeColumn(SQLUSMALLINT columnNr) const
 	{
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
 		exASSERT(columnNr >= 1);
 		exASSERT(m_pDb);
 
-		SQLUSMALLINT maxColName = m_pDb->GetProperties().GetMaxColumnNameLen();
-		std::unique_ptr<SQLAPICHARTYPE[]> nameBuffer(new SQLAPICHARTYPE[maxColName + 1]);
-		SColumnDescription colDesc;
-		SQLRETURN ret = SQLDescribeCol(m_pHStmt->GetHandle(), columnNr, nameBuffer.get(), maxColName + 1, NULL, &colDesc.m_sqlType, &colDesc.m_charSize, &colDesc.m_decimalDigits, &colDesc.m_nullable);
-		THROW_IFN_SUCCEEDED(SQLDescribeCol, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
-
-		colDesc.m_name = SQLAPICHARPTR_TO_EXODBCSTR(nameBuffer.get());
+		ColumnDescription colDesc(m_pHStmt, columnNr, m_pDb->GetProperties());
 
 		return colDesc;
 	}

@@ -13,7 +13,6 @@
 // Same component headers
 #include "exOdbc.h"
 #include "Helpers.h"
-#include "InfoObject.h"
 #include "TableInfo.h"
 #include "DatabaseCatalog.h"
 #include "Sql2BufferTypeMap.h"
