@@ -15,8 +15,8 @@
 // Other headers
 #include "exodbc/exOdbc.h"
 #include "exodbc/ColumnBufferWrapper.h"
-//#include "exodbc/InfoObject.h"
 #include "exodbc/SqlInfoProperty.h"
+#include <boost/tokenizer.hpp>
 
 // Debug
 #include "DebugNew.h"
@@ -544,9 +544,9 @@ namespace exodbcexec
 		else if (m_mode == Mode::Schemas)
 			modes = u8"Schemas";
 		vector<string> data;
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
 		LOG_INFO(boost::str(boost::format(u8"Listing all %s ..") % modes));
 		auto start = std::chrono::high_resolution_clock::now();
-		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
 		switch (m_mode)
 		{
 		case Mode::TableTypes:
@@ -583,11 +583,65 @@ namespace exodbcexec
 
 	void Find::Execute(const std::vector<std::string> & args)
 	{
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		bool haveType = args.size() >= 4;
+		bool haveCat = args.size() >= 3;
+		bool haveSchem = args.size() >= 2;
+		string name = u8"%";
+		if (args.size() >= 1)
+			name = args[0];
+		string type, cat, schem;
+		if (haveType)
+			type = args[3];
+		if (haveCat)
+			cat = args[2];
+		if (haveSchem)
+			schem = args[1];
 
+		LOG_INFO(boost::str(boost::format(u8"Searching using name: '%s', schema: '%s', catalog: '%s', type: '%s'") % name
+			% (haveSchem ? schem : u8"NULL")
+			% (haveCat ? cat : u8"NULL")
+			% (haveType ? type : u8"NULL")));
+		TableInfoVector tables;
+		auto start = std::chrono::high_resolution_clock::now();
+		if (haveSchem && haveCat)
+			tables = pDbCat->SearchTables(name, schem, cat, type);
+		else if (haveSchem)
+			tables = pDbCat->SearchTables(name, schem, DatabaseCatalog::SchemaOrCatalogType::Schema, type);
+		else if (haveCat)
+			tables = pDbCat->SearchTables(name, schem, DatabaseCatalog::SchemaOrCatalogType::Catalog, type);
+		else
+			tables = pDbCat->SearchTables(name, type);
+		auto end = std::chrono::high_resolution_clock::now();
+		auto elapsed = end - start;
+		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+		LOG_INFO(boost::str(boost::format(u8"Success, found %d Tables. Execution took %dms.")
+			% tables.size() % millis.count()));
+
+		boost::format f(u8"%18s");
+		if (!tables.empty() && m_printHeaderRow)
+		{
+			LOG_OUTPUT(boost::str(f % u8"Name"));
+		}
+		for (TableInfoVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
+		{
+			const TableInfo& ti = *it;
+			
+		}
 	}
+
+
+	std::string Find::GetArgumentsSyntax() const noexcept
+	{ 
+		return u8"name [schema] [catalog] [type]"; 
+	}
+
 
 	std::string Find::GetHelp() const noexcept
 	{
-		return u8"Search for tables, views, etc.";
+		return	u8"Search for tables, views, etc."
+				u8"If any argument of schema, catalog or type is empty, the argument is ";
+				u8"ignored. Use '%' to match zero or more characters and '%' to match "
+				u8"any single character.";
 	}
 }
