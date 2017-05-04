@@ -11,6 +11,7 @@
 // Same component headers
 #include "exOdbc.h"
 #include "ColumnBuffer.h"
+#include "ParameterDescription.h"
 
 // Other headers
 // System headers
@@ -61,14 +62,14 @@ namespace exodbc
 	/*!
 	* \class BindParamVisitor
 	* \brief Visitor to bind a ColumnBuffer to a statement handle as input parameter.
-	* \details On applying this visitor, it will call BindParameter(columnNr, pHStmt, m_useSqlDescribeParam) on the ColumnBuffer.
+	* \details On applying this visitor, it will call BindParameter(columnNr, pHStmt, paramDesc) on the ColumnBuffer.
 	*/
 	class BindParamVisitor
 		: public boost::static_visitor<void>
 	{
 	public:
 		BindParamVisitor() = delete;
-		BindParamVisitor(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
+		BindParamVisitor(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, const ParameterDescription& paramDesc)
 			: m_paramNr(paramNr)
 			, m_pHStmt(pHStmt)
 			, m_paramDesc(paramDesc)
@@ -83,7 +84,7 @@ namespace exodbc
 	private:
 		SQLUSMALLINT m_paramNr;
 		ConstSqlStmtHandlePtr m_pHStmt;
-		SParameterDescription m_paramDesc;
+		ParameterDescription m_paramDesc;
 	};
 
 	
@@ -243,16 +244,16 @@ namespace exodbc
 
 
 	/*!
-	* \class SParamDescVisitor
+	* \class ParamDescVisitor
 	* \brief Visitor to create a parameter description from a ColumnBuffer
 	* \details On applying this visitor, it will call CreateParamDescFromProps() on the ColumnBuffer.
 	*/
-	class SParamDescVisitor
-		: public boost::static_visitor<SParameterDescription>
+	class ParamDescVisitor
+		: public boost::static_visitor<ParameterDescription>
 	{
 	public:
 		template<typename T>
-		SParameterDescription operator()(T& t) const
+		ParameterDescription operator()(T& t) const
 		{
 			return t->CreateParamDescFromProps();
 		}

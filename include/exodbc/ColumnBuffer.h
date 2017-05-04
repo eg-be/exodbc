@@ -13,6 +13,7 @@
 #include "Exception.h"
 #include "SpecializedExceptions.h"
 #include "InfoObject.h"
+#include "ParameterDescription.h"
 #include "ColumnInfo.h"
 #include "EnumFlags.h"
 #include "SqlHandle.h"
@@ -310,7 +311,7 @@ namespace exodbc
 		/*!
 		* \brief Binds passed buffer as parameter using information passed.
 		*/
-		void BindParamImpl(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb, SParameterDescription paramDesc)
+		void BindParamImpl(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SQLSMALLINT sqlCType, SQLPOINTER pBuffer, SQLLEN bufferLen, SQLLEN* pCb, const ParameterDescription& paramDesc)
 		{
 			exASSERT(paramNr >= 1);
 			exASSERT(pHStmt != NULL);
@@ -318,10 +319,10 @@ namespace exodbc
 			exASSERT(pBuffer != NULL);
 			exASSERT(bufferLen > 0);
 			exASSERT(pCb != NULL);
-			exASSERT(paramDesc.m_sqlType != SQL_UNKNOWN_TYPE);
+			exASSERT(paramDesc.GetSqlType() != SQL_UNKNOWN_TYPE);
 
 			// bind using the information passed
-			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(), paramNr, SQL_PARAM_INPUT, sqlCType, paramDesc.m_sqlType, paramDesc.m_charSize, paramDesc.m_decimalDigits, pBuffer, bufferLen, pCb);
+			SQLRETURN ret = SQLBindParameter(pHStmt->GetHandle(), paramNr, SQL_PARAM_INPUT, sqlCType, paramDesc.GetSqlType(), paramDesc.GetCharSize(), paramDesc.GetDecimalDigits(), pBuffer, bufferLen, pCb);
 			THROW_IFN_SUCCESS(SQLBindParameter, ret, SQL_HANDLE_STMT, pHStmt->GetHandle());
 
 			// Connect a signal that we are bound to this handle now and get notified if params get reseted
@@ -619,7 +620,7 @@ namespace exodbc
 		* \param	pHStmt Statement to bind against.
 		* \param	paramDesc	Description of the parameter.
 		*/
-		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
+		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, const ParameterDescription& paramDesc)
 		{
 			BindParamImpl(paramNr, pHStmt, sqlCType, (SQLPOINTER*)&m_buffer[0], GetBufferLength(), &m_cb, paramDesc);
 		}
@@ -629,16 +630,9 @@ namespace exodbc
 		* \brief Create a SParameterDescription from the information in this ColumnBuffer
 		*			without querying the database.
 		*/
-		SParameterDescription CreateParamDescFromProps()
+		ParameterDescription CreateParamDescFromProps()
 		{
-			SParameterDescription paramDesc;
-			paramDesc.m_sqlType = GetSqlType();
-			paramDesc.m_charSize = GetColumnSize();
-			paramDesc.m_decimalDigits = GetDecimalDigits();
-			if (Test(ColumnFlag::CF_NULLABLE))
-			{
-				paramDesc.m_nullable = SQL_NULLABLE;
-			}
+			ParameterDescription paramDesc(GetSqlType(), GetColumnSize(), GetDecimalDigits(), Test(ColumnFlag::CF_NULLABLE) ? SQL_NULLABLE : SQL_NO_NULLS);
 			return paramDesc;
 		}
 
@@ -676,15 +670,15 @@ namespace exodbc
 
 
 	template<> inline
-	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
+	void ColumnBuffer<SQL_NUMERIC_STRUCT, SQL_C_NUMERIC>::BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, const ParameterDescription& paramDesc)
 	{
 		BindParamImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
 
 		// Do some additional steps for numeric types
 		SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.m_charSize));
-		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.m_decimalDigits));
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.GetCharSize()));
+		SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.GetDecimalDigits()));
 		SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, (SQLPOINTER)&m_buffer[0]);
 	}
 	
@@ -868,7 +862,7 @@ namespace exodbc
 		* \param	pHStmt Statement to bind against.
 		* \param	paramDesc	Description of the parameter.
 		*/
-		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, SParameterDescription paramDesc)
+		void BindParameter(SQLUSMALLINT paramNr, ConstSqlStmtHandlePtr pHStmt, const ParameterDescription& paramDesc)
 		{
 			BindParamImpl(paramNr, pHStmt, GetSqlCType(), m_pBuffer, GetBufferLength(), &m_cb, paramDesc);
 
@@ -877,8 +871,8 @@ namespace exodbc
 				// Do some additional steps for numeric types
 				SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
 				SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
-				SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.m_charSize));
-				SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.m_decimalDigits));
+				SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.GetCharSize()));
+				SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.GetDecimalDigits()));
 				SetDescriptionField(hDesc, paramNr, SQL_DESC_DATA_PTR, m_pBuffer);
 			}
 		}
@@ -888,16 +882,9 @@ namespace exodbc
 		* \brief Create a SParameterDescription from the information in this SqlCPointerBuffer
 		*			without querying the database.
 		*/
-		SParameterDescription CreateParamDescFromProps()
+		ParameterDescription CreateParamDescFromProps()
 		{
-			SParameterDescription paramDesc;
-			paramDesc.m_sqlType = GetSqlType();
-			paramDesc.m_charSize = GetColumnSize();
-			paramDesc.m_decimalDigits = GetDecimalDigits();
-			if (Test(ColumnFlag::CF_NULLABLE))
-			{
-				paramDesc.m_nullable = SQL_NULLABLE;
-			}
+			ParameterDescription paramDesc(GetSqlType(), GetColumnSize(), GetDecimalDigits(), Test(ColumnFlag::CF_NULLABLE) ? SQL_NULLABLE : SQL_NO_NULLS);
 			return paramDesc;
 		}
 

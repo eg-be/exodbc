@@ -173,15 +173,13 @@ namespace exodbc
 	}
 
 
-	SParameterDescription ExecutableStatement::DescribeParameter(SQLUSMALLINT paramNr) const
+	ParameterDescription ExecutableStatement::DescribeParameter(SQLUSMALLINT paramNr) const
 	{
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
 		exASSERT(paramNr >= 1);
 
-		SParameterDescription paramDesc;
-		SQLRETURN ret = SQLDescribeParam(m_pHStmt->GetHandle(), paramNr, &paramDesc.m_sqlType, &paramDesc.m_charSize, &paramDesc.m_decimalDigits, &paramDesc.m_nullable);
-		THROW_IFN_SUCCESS(SQLDescribeParam, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
+		ParameterDescription paramDesc(m_pHStmt, paramNr);
 		return paramDesc;
 	}
 
@@ -241,14 +239,14 @@ namespace exodbc
 	{
 		exASSERT(m_pDb);
 
-		SParameterDescription paramDesc;
+		ParameterDescription paramDesc;
 		if (!neverQueryParamDesc && IsPrepared() && DatabaseSupportsDescribeParam(m_pDb->GetDbms(), boost::apply_visitor(SqlCTypeVisitor(), column)))
 		{
 			paramDesc = DescribeParameter(paramNr);
 		}
 		else
 		{
-			paramDesc = boost::apply_visitor(SParamDescVisitor(), column);
+			paramDesc = boost::apply_visitor(ParamDescVisitor(), column);
 		}
 
 		BindParamVisitor pv(paramNr, m_pHStmt, paramDesc);

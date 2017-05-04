@@ -53,6 +53,7 @@ set ( SRC_EXODBC
   InfoObject.cpp 
   LogHandler.cpp 
   LogManager.cpp 
+  ParameterDescription.cpp
   PrimaryKeyInfo.cpp
   SpecialColumnInfo.cpp
   SpecializedExceptions.cpp 
@@ -85,6 +86,7 @@ set ( HEADERS_EXODBC
   ../include/exodbc/LogHandler.h
   ../include/exodbc/LogManager.h
   ../include/exodbc/LogManagerOdbcMacros.h
+  ../include/exodbc/ParameterDescription.h
   ../include/exodbc/PrimaryKeyInfo.h
   ../include/exodbc/SpecialColumnInfo.h
   ../include/exodbc/SpecializedExceptions.h

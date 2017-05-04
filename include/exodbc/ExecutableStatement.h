@@ -13,6 +13,7 @@
 #include "SqlHandle.h"
 #include "ColumnBuffer.h"
 #include "Database.h"
+#include "ParameterDescription.h"
 #include "InfoObject.h"
 
 // Other headers
@@ -174,7 +175,7 @@ namespace exodbc
 		/*!
 		* \brief	Calls SQLDescribeParam for parameter at paramNr and the handle of this ExecutableStatement.
 		*/
-		SParameterDescription DescribeParameter(SQLUSMALLINT paramNr) const;
+		ParameterDescription DescribeParameter(SQLUSMALLINT paramNr) const;
 
 
 		/*!
