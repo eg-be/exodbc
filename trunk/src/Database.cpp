@@ -444,52 +444,6 @@ namespace exodbc
 	}
 
 
-	int Database::ReadColumnCount(const TableInfo& table)
-	{
-		// Close Statement and make sure it closes upon exit
-		StatementCloser stmtCloser(m_pHStmt, true, true);
-
-		// Note: The schema and table name arguments are Pattern Value arguments
-		// The catalog name is an ordinary argument. if we do not have one in the
-		// DbCatalogTable, we set it to an empty string
-		std::string catalogQueryName = u8"";
-		if (table.HasCatalog())
-		{
-			catalogQueryName = table.GetCatalog();
-		}
-
-		// Query columns, note:
-		// we always have a tablename, but only sometimes a schema
-		int colCount = 0;
-		SQLRETURN ret = SQLColumns(m_pHStmt->GetHandle(),
-				 EXODBCSTR_TO_SQLAPICHARPTR(catalogQueryName), SQL_NTS,	// catalog
-				table.HasSchema() ?  EXODBCSTR_TO_SQLAPICHARPTR(table.GetSchema()) : NULL, table.HasSchema() ? SQL_NTS : 0,	// schema
-				 EXODBCSTR_TO_SQLAPICHARPTR(table.GetName()), SQL_NTS,		// tablename
-				NULL, 0);						// All columns
-
-		THROW_IFN_SUCCEEDED(SQLColumns, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
-
-		// Count the columns
-		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
-		{
-			++colCount;
-		}
-		THROW_IFN_NO_DATA(SQLColumns, ret);
-
-		return colCount;
-	}
-
-
-	int Database::ReadColumnCount(const std::string& tableName, const std::string& schemaName, const std::string& catalogName, const std::string& tableType)
-	{
-		// Find one matching table
-		TableInfo table = m_pDbCatalog->FindOneTable(tableName, schemaName, catalogName, tableType);
-
-		// Forward the call		
-		return ReadColumnCount(table);
-	}
-
-
 	CommitMode Database::ReadCommitMode()
 	{
 		// Note: On purpose we do not check for IsOpen() here, because we need to read that during OpenIml()

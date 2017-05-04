@@ -403,40 +403,4 @@ namespace exodbctest
 		GetDataWrapper::GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
 		EXPECT_EQ(0, count);
 	}
-
-
-	TEST_F(DatabaseTest, ReadColumnCount)
-	{
-		std::string tableName = u8"";
-		std::string schemaName = u8"";
-		std::string catalogName = u8"";
-		std::string typeName = u8"";
-		int nrCols = 4;
-		switch(m_pDb->GetDbms())
-		{
-		case DatabaseProduct::DB2:
-			// DB2 has schemas
-			tableName = u8"INTEGERTYPES";
-			schemaName = u8"EXODBC";
-			break;
-		case DatabaseProduct::MY_SQL:
-			// mysql has catalogs
-			tableName = u8"integertypes";
-			catalogName = u8"exodbc";
-			break;
-		case DatabaseProduct::MS_SQL_SERVER:
-			// ms has catalogs and schemas
-			tableName = u8"integertypes";
-			catalogName = u8"exodbc";
-			schemaName = u8"exodbc";
-			break;
-		case DatabaseProduct::ACCESS:
-			// access only tablenames
-			tableName = u8"integertypes";
-			break;
-		}
-		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, schemaName, catalogName, typeName));
-		// we should also work if we just search by the tableName, as long as tableName is unique within db
-		EXPECT_EQ(nrCols, m_pDb->ReadColumnCount(tableName, u8"", u8"", u8""));
-	}
 } //namespace exodbc
