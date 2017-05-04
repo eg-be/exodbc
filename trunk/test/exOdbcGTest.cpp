@@ -16,6 +16,7 @@
 // Other headers
 #include "boost/filesystem.hpp"
 #include "exodbc/LogHandler.h"
+#include "exodbc/Sql2StringHelper.h"
 #ifdef _WIN32
     #include <tchar.h>
 #endif
@@ -359,7 +360,7 @@ int main(int argc, char* argv[])
 			fs::wpath exePath(argv[0]);
 			LOG_DEBUG(boost::str(boost::format(u8"Using exePath '%1%' as basepath to search for ScriptDirectory") % exePath));
 			fs::wpath exeDir = exePath.parent_path();
-			fs::wpath scriptDir = exeDir / u8"CreateScripts" / DatabaseProcudt2s(creator.GetDbms());
+			fs::wpath scriptDir = exeDir / u8"CreateScripts" / Sql2StringHelper::DatabaseProcudt2s(creator.GetDbms());
 			if (!fs::is_directory(scriptDir))
 			{
 				THROW_WITH_SOURCE(Exception, boost::str(boost::format(u8"ScriptDirectory '%1%' is not a directory") % scriptDir));

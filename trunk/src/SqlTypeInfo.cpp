@@ -13,6 +13,7 @@
 // Same component headers
 #include "AssertionException.h"
 #include "GetDataWrapper.h"
+#include "Sql2StringHelper.h"
 
 // Other headers
 // Debug
@@ -92,18 +93,18 @@ namespace exodbc
 			ss << (boost::format(u8"||= %25s=||= %25s=||= %34s =||= %45s =||= %5s =||= %10s =||= %8s =||= %6s =||= %6s =||= %10s =||= %10s =||= %10s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %5s =||= %34s =||") % u8"SQLType" %u8"SQL Data Type (3)" %u8"!TypeName" %u8"Local !TypeName" %u8"Unsigned" %u8"Precision" %u8"Nullable" %u8"Auto Inc." %u8"Case Sens." %u8"Searchable" %u8"Prefix" %u8"Suffix" %u8"Fixed Prec. Scale" %u8"Min. Scale" %u8"Max. Scale" %u8"Sql DateTimeSub" %u8"Num. Prec. Radix" %u8"Interval Precision" %u8"Create Params").str() << std::endl;
 		}
 
-		std::string sFSqlType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlType) % m_sqlType).str();
-		std::string sSqlDataType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlDataType) % m_sqlDataType).str();
+		std::string sFSqlType = (boost::format(u8"%18s (%4d)") % Sql2StringHelper::SqlType2s(m_sqlType) % m_sqlType).str();
+		std::string sSqlDataType = (boost::format(u8"%18s (%4d)") % Sql2StringHelper::SqlType2s(m_sqlDataType) % m_sqlDataType).str();
 		std::string sPrecision = (m_columnSizeIsNull ? u8"NULL" : (boost::format(u8"%d") % m_columnSize).str());
 		std::string sLiteralPrefix = m_literalPrefixIsNull ? u8"NULL" : m_literalPrefix;
 		std::string sLiteralSuffix = m_literalSuffixIsNull ? u8"NULL" : m_literalSuffix;
 		std::string sCreateParams = m_createParamsIsNull ? u8"NULL" : m_createParams;
 		std::string sNullable = u8"???";
-		std::string sCaseSensitive = SqlTrueFalse2s(m_caseSensitive);
+		std::string sCaseSensitive = Sql2StringHelper::SqlTrueFalse2s(m_caseSensitive);
 		std::string sSearchable = u8"???";
-		std::string sUnsigned = m_unsignedIsNull ? u8"NULL" : SqlTrueFalse2s(m_unsigned);
-		std::string sFixedPrecisionScale = SqlTrueFalse2s(m_fixedPrecisionScale);
-		std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULL" : SqlTrueFalse2s(m_autoUniqueValue);
+		std::string sUnsigned = m_unsignedIsNull ? u8"NULL" : Sql2StringHelper::SqlTrueFalse2s(m_unsigned);
+		std::string sFixedPrecisionScale = Sql2StringHelper::SqlTrueFalse2s(m_fixedPrecisionScale);
+		std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULL" : Sql2StringHelper::SqlTrueFalse2s(m_autoUniqueValue);
 		std::string sLocalTypeName = m_localTypeNameIsNull ? u8"NULL" : m_localTypeName;
 		std::string sMinimumScale = m_minimumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_minimumScale).str();
 		std::string sMaximumScale = m_maximumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_maximumScale).str();
@@ -156,18 +157,18 @@ namespace exodbc
 			ss << (boost::format(u8"----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------")).str() << std::endl;
 		}
 
-		std::string sFSqlType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlType) % m_sqlType).str();
-		std::string sSqlDataType = (boost::format(u8"%18s (%4d)") % SqlType2s(m_sqlDataType) % m_sqlDataType).str();
+		std::string sFSqlType = (boost::format(u8"%18s (%4d)") % Sql2StringHelper::SqlType2s(m_sqlType) % m_sqlType).str();
+		std::string sSqlDataType = (boost::format(u8"%18s (%4d)") % Sql2StringHelper::SqlType2s(m_sqlDataType) % m_sqlDataType).str();
 		std::string sPrecision = (m_columnSizeIsNull ? u8"NULL" : (boost::format(u8"%d") % m_columnSize).str());
 		std::string sLiteralPrefix = m_literalPrefixIsNull ? u8"NULL" : m_literalPrefix;
 		std::string sLiteralSuffix = m_literalSuffixIsNull ? u8"NULL" : m_literalSuffix;
 		std::string sCreateParams = m_createParamsIsNull ? u8"NULL" : m_createParams;
 		std::string sNullable = u8"???";
-		std::string sCaseSensitive = SqlTrueFalse2s(m_caseSensitive);
+		std::string sCaseSensitive = Sql2StringHelper::SqlTrueFalse2s(m_caseSensitive);
 		std::string sSearchable = u8"???";
-		std::string sUnsigned = m_unsignedIsNull ? u8"NULL" : SqlTrueFalse2s(m_unsigned);
-		std::string sFixedPrecisionScale = SqlTrueFalse2s(m_fixedPrecisionScale);
-		std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULL" : SqlTrueFalse2s(m_autoUniqueValue);
+		std::string sUnsigned = m_unsignedIsNull ? u8"NULL" : Sql2StringHelper::SqlTrueFalse2s(m_unsigned);
+		std::string sFixedPrecisionScale = Sql2StringHelper::SqlTrueFalse2s(m_fixedPrecisionScale);
+		std::string sAutoUniqueValue = m_autoUniqueValueIsNull ? u8"NULL" : Sql2StringHelper::SqlTrueFalse2s(m_autoUniqueValue);
 		std::string sLocalTypeName = m_localTypeNameIsNull ? u8"NULL" : m_localTypeName;
 		std::string sMinimumScale = m_minimumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_minimumScale).str();
 		std::string sMaximumScale = m_maximumScaleIsNull ? u8"NULL" : (boost::format(u8"%d") % m_maximumScale).str();

@@ -20,6 +20,7 @@
 #include "exodbc/Database.h"
 #include "exodbc/Table.h"
 #include "exodbc/ColumnBufferVisitors.h"
+#include "exodbc/Sql2StringHelper.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
@@ -200,7 +201,7 @@ void printExOdbcTables(ConstDatabasePtr pDb)
 			ColumnFlagsPtr pFlags = boost::apply_visitor(flagsVisitor, pBuff);
 			string nullable = pFlags->Test(ColumnFlag::CF_NULLABLE) ? u8"NULLABLE" : u8"";
 			string primary = pFlags->Test(ColumnFlag::CF_PRIMARY_KEY) ? u8"PRIMARY": u8"";
-			WRITE_STDOUT_ENDL(boost::str(boost::format(u8"|| %s || %s || %d || %d || %s || %s ||") % name % SqlType2s(sqlType) % pProps->GetColumnSize() % pProps->GetDecimalDigits() % nullable % primary));
+			WRITE_STDOUT_ENDL(boost::str(boost::format(u8"|| %s || %s || %d || %d || %s || %s ||") % name % Sql2StringHelper::SqlType2s(sqlType) % pProps->GetColumnSize() % pProps->GetDecimalDigits() % nullable % primary));
 		}
 
 		// Print the table content, by opening it as char-table.

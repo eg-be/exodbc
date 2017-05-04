@@ -11,6 +11,8 @@
 #include "SpecializedExceptions.h"
 
 // Same component headers
+#include "Sql2StringHelper.h"
+
 // Other headers
 // Debug
 #include "DebugNew.h"
@@ -85,7 +87,7 @@ namespace exodbc
 	{
 		std::stringstream ss;
 		ss << u8"SQL-Function " << sqlFunctionName << u8" returned ";
-		ss << SqlReturn2s(ret) << u8"(" << ret << u8") with " << m_errors.size() << " ODBC-Error(s):";
+		ss << Sql2StringHelper::SqlReturn2s(ret) << u8"(" << ret << u8") with " << m_errors.size() << " ODBC-Error(s):";
 		m_errorMsg = ss.str();
 	}
 
@@ -115,10 +117,10 @@ namespace exodbc
 		switch (m_notSupported)
 		{
 		case Type::SQL_C_TYPE:
-			ss << u8"SQL C Type: " << SqLCType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
+			ss << u8"SQL C Type: " << Sql2StringHelper::SqLCType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
 			break;
 		case Type::SQL_TYPE:
-			ss << u8"SQL Type: " << SqlType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
+			ss << u8"SQL Type: " << Sql2StringHelper::SqlType2s(m_smallInt) << u8" (" << m_smallInt << u8")";
 			break;
 		}
 		return ss.str();
