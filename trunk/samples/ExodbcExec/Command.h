@@ -208,6 +208,8 @@ namespace exodbcexec
 		: public Command
 	{
 	public:
+		static const size_t DEFAULT_ROWNR_WIDTH = 10;
+
 		enum class Mode
 		{
 			CurrentRecord,
@@ -232,8 +234,6 @@ namespace exodbcexec
 		virtual std::string GetHelp() const noexcept;
 
 	private:
-		static const size_t DEFAULT_ROWNR_WIDTH = 10;
-
 		std::vector<std::string> GetHeaderRows() const noexcept;
 		std::string GetHeaderRow() const noexcept;
 		std::string CurrentRecordToString() const;
@@ -300,18 +300,30 @@ namespace exodbcexec
 		: public Command 
 	{
 	public:
-		Find(exodbc::DatabasePtr pDb, bool printHeaderRow)
+		Find(exodbc::DatabasePtr pDb, bool printHeaderRow, bool printRowNr, bool fixedPrintSize, const std::string& columnSeparator)
 			: m_pDb(pDb)
 			, m_printHeaderRow(printHeaderRow)
+			, m_printRowNr(printRowNr)
+			, m_fixedPrintSize(fixedPrintSize)
+			, m_columnSeparator(columnSeparator)
 		{};
 
+		static const size_t DEFAULT_ROWNR_WIDTH = 6;
+		static const size_t DEFAULT_FIELD_WIDTH = 18;
+		static const size_t DEFAULT_TYPE_WIDTH = 10;
 		virtual std::vector<std::string> GetAliases() const noexcept { return{u8"find", u8"f"}; };
 		virtual void Execute(const std::vector<std::string> & args);
 		virtual std::string GetHelp() const noexcept;
 		virtual std::string GetArgumentsSyntax() const noexcept;
 
+		std::vector<std::string> GetHeaderRows() const noexcept;
+		std::string GetRecordRow(const exodbc::TableInfo& ti, size_t rowNr) const noexcept;
+
 	private:
 		exodbc::DatabasePtr m_pDb;
 		bool m_printHeaderRow;
+		bool m_printRowNr;
+		bool m_fixedPrintSize;
+		std::string m_columnSeparator;
 	};
 }

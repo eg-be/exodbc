@@ -621,13 +621,93 @@ namespace exodbcexec
 		boost::format f(u8"%18s");
 		if (!tables.empty() && m_printHeaderRow)
 		{
-			LOG_OUTPUT(boost::str(f % u8"Name"));
+			vector<string> headers = GetHeaderRows();
+			for (vector<string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
+			{
+				LOG_OUTPUT(*it);
+			}
 		}
+		size_t rowNr = 0;
 		for (TableInfoVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
 		{
 			const TableInfo& ti = *it;
-			
+			LOG_OUTPUT(GetRecordRow(ti, rowNr));
+			++rowNr;
 		}
+	}
+
+
+	vector<string> Find::GetHeaderRows() const noexcept
+	{
+		stringstream ss;
+		if (m_printRowNr)
+		{
+			stringstream ssRowColFormat;
+			if (m_fixedPrintSize)
+				ssRowColFormat << u8"%-" << DEFAULT_ROWNR_WIDTH << u8"s";
+			else
+				ssRowColFormat << u8"%s";
+			string rowColFormat = ssRowColFormat.str();
+			ss << boost::str(boost::format(rowColFormat) % u8"ROW");
+			ss << m_columnSeparator;
+		}
+
+		int w = DEFAULT_FIELD_WIDTH;
+		stringstream ssColNameFormat;
+		if (m_fixedPrintSize)
+		{
+			ssColNameFormat << "%-" << w << "s" << m_columnSeparator << "%-" << w << "s" << m_columnSeparator;
+			ssColNameFormat << "%-" << w << "s" << m_columnSeparator << "%-" << DEFAULT_TYPE_WIDTH << "s";
+		}
+		else
+		{
+			ssColNameFormat << "%s" << m_columnSeparator << "%s" << m_columnSeparator << "%s" << m_columnSeparator << u"%s";
+		}
+		string cat = u8"Catalog";
+		string schem = u8"Schema";
+		string name = u8"Name";
+		string type = u8"Type";
+		string format = ssColNameFormat.str();
+		ss << boost::str(boost::format(format) % cat % schem % name % type);
+
+		string header1 = ss.str();
+		vector<string> rows;
+		rows.push_back(header1);
+		rows.push_back(string(header1.length(), '='));
+		return rows;
+	}
+
+
+	std::string Find::GetRecordRow(const TableInfo& ti, size_t rowNr) const noexcept
+	{
+		stringstream ss;
+		if (m_printRowNr)
+		{
+			stringstream ssRowColFormat;
+			if (m_fixedPrintSize)
+				ssRowColFormat << u8"%" << DEFAULT_ROWNR_WIDTH << u8"d";
+			else
+				ssRowColFormat << u8"%d";
+			string rowColFormat = ssRowColFormat.str();
+			ss << boost::str(boost::format(rowColFormat) % rowNr);
+			ss << m_columnSeparator;
+		}
+
+		int w = DEFAULT_FIELD_WIDTH;
+		stringstream ssColNameFormat;
+		if (m_fixedPrintSize)
+		{
+			ssColNameFormat << "%-" << w << "s" << m_columnSeparator << "%-" << w << "s" << m_columnSeparator;
+			ssColNameFormat << "%-" << w << "s" << m_columnSeparator << "%-" << DEFAULT_TYPE_WIDTH << "s";
+		}
+		else
+		{
+			ssColNameFormat << "%s" << m_columnSeparator << "%s" << m_columnSeparator << "%s" << m_columnSeparator << u"%s";
+		}
+		string format = ssColNameFormat.str();
+		ss << boost::str(boost::format(format) % ti.GetCatalog() % ti.GetSchema() % ti.GetName() % ti.GetType());
+
+		return ss.str();
 	}
 
 
