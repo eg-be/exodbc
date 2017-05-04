@@ -175,7 +175,7 @@ namespace exodbc
 	*/
 	enum class TransactionIsolationMode
 	{
-		UNKNOWN = 50000,								///< Unknown Transaction Isolation LEvel
+		UNKNOWN = 50000,								///< Unknown Transaction Isolation Level
 		READ_UNCOMMITTED = SQL_TXN_READ_UNCOMMITTED,	///< Read Uncommitted
 		READ_COMMITTED = SQL_TXN_READ_COMMITTED,		///< Read Committed
 		REPEATABLE_READ = SQL_TXN_REPEATABLE_READ,		///< Repeatable Read
