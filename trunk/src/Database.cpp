@@ -13,7 +13,6 @@
 
 // Same component headers
 #include "Environment.h"
-#include "Helpers.h"
 #include "Table.h"
 #include "Exception.h"
 #include "SqlStatementCloser.h"

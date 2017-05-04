@@ -1,5 +1,5 @@
 ﻿/*!
-* \file HelpersTest.h
+* \file SqlStructHelperTest.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 09.08.2014
 * \copyright GNU Lesser General Public License Version 3
@@ -30,7 +30,7 @@ namespace exodbctest
 
 	// Classes
 	// -------
-	class HelpersTest : public ::testing::Test {
+	class SqlStructHelperTest : public ::testing::Test {
 
 	protected:
 

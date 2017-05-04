@@ -1,13 +1,13 @@
 ﻿/*!
-* \file Helpers.cpp
+* \file SqlStructHelper.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 23.07.2014
-* \brief Source file for the Helpers
+* \brief Source file for SqlStructHelper
 * \copyright GNU Lesser General Public License Version 3
 */ 
 
 // Own header
-#include "Helpers.h"
+#include "SqlStructHelper.h"
 
 // Same component headers
 // Other headers
@@ -29,7 +29,7 @@ namespace exodbc
 
 	// Implementation
 	// --------------
-	SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second) noexcept
+	SQL_TIME_STRUCT SqlStructHelper::InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second) noexcept
 	{
 		SQL_TIME_STRUCT time;
 		time.hour = hour;
@@ -40,7 +40,7 @@ namespace exodbc
 	}
 
 
-	SQL_DATE_STRUCT InitDate(SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year) noexcept
+	SQL_DATE_STRUCT SqlStructHelper::InitDate(SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year) noexcept
 	{
 		SQL_DATE_STRUCT date;
 		date.year = year;
@@ -51,7 +51,7 @@ namespace exodbc
 	}
 
 
-	SQL_TIMESTAMP_STRUCT InitTimestamp(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction, SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year) noexcept
+	SQL_TIMESTAMP_STRUCT SqlStructHelper::InitTimestamp(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second, SQLUINTEGER fraction, SQLUSMALLINT day, SQLUSMALLINT month, SQLSMALLINT year) noexcept
 	{
 		SQL_TIMESTAMP_STRUCT timestamp;
 		timestamp.hour = hour;
@@ -66,7 +66,7 @@ namespace exodbc
 	}
 
 
-	SQL_TIMESTAMP_STRUCT InitUtcTimestamp()
+	SQL_TIMESTAMP_STRUCT SqlStructHelper::InitUtcTimestamp()
 	{
 		auto now = std::chrono::system_clock::now();
 		auto tt = std::chrono::system_clock::to_time_t(now);
@@ -86,7 +86,7 @@ namespace exodbc
 	}
 
 
-	bool IsTimeEqual(const SQL_TIME_STRUCT& t1, const SQL_TIME_STRUCT& t2) noexcept
+	bool SqlStructHelper::IsTimeEqual(const SQL_TIME_STRUCT& t1, const SQL_TIME_STRUCT& t2) noexcept
 	{
 		return t1.hour == t2.hour
 			&& t1.minute == t2.minute
@@ -94,7 +94,7 @@ namespace exodbc
 	}
 
 
-	bool IsDateEqual(const SQL_DATE_STRUCT& d1, const SQL_DATE_STRUCT& d2) noexcept
+	bool SqlStructHelper::IsDateEqual(const SQL_DATE_STRUCT& d1, const SQL_DATE_STRUCT& d2) noexcept
 	{
 		return d1.day == d2.day
 			&& d1.month == d2.month
@@ -102,7 +102,7 @@ namespace exodbc
 	}
 
 
-	bool IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2) noexcept
+	bool SqlStructHelper::IsTimestampEqual(const SQL_TIMESTAMP_STRUCT& ts1, const SQL_TIMESTAMP_STRUCT& ts2) noexcept
 	{
 		return ts1.hour == ts2.hour
 			&& ts1.minute == ts2.minute
@@ -114,7 +114,7 @@ namespace exodbc
 	}
 
 
-	SQL_NUMERIC_STRUCT InitNumeric(SQLCHAR precision, SQLSCHAR scale, SQLCHAR sign, SQLCHAR val[SQL_MAX_NUMERIC_LEN]) noexcept
+	SQL_NUMERIC_STRUCT SqlStructHelper::InitNumeric(SQLCHAR precision, SQLSCHAR scale, SQLCHAR sign, SQLCHAR val[SQL_MAX_NUMERIC_LEN]) noexcept
 	{
 		SQL_NUMERIC_STRUCT num;
 		num.precision = precision;
@@ -126,7 +126,7 @@ namespace exodbc
 	}
 
 
-	SQL_NUMERIC_STRUCT InitNullNumeric() noexcept
+	SQL_NUMERIC_STRUCT SqlStructHelper::InitNullNumeric() noexcept
 	{
 		SQL_NUMERIC_STRUCT num;
 		memset(&num, 0, sizeof(num));
@@ -134,7 +134,7 @@ namespace exodbc
 	}
 
 
-	std::string TimestampToSqlString(const SQL_TIMESTAMP_STRUCT& ts, bool includeFraction /* = false */) noexcept
+	std::string SqlStructHelper::TimestampToSqlString(const SQL_TIMESTAMP_STRUCT& ts, bool includeFraction /* = false */) noexcept
 	{
 		std::string s = boost::str(boost::format(u8"%04d-%02d-%02d %02d:%02d:%02d") % ts.year % ts.month % ts.day
 			% ts.hour % ts.minute % ts.second);
