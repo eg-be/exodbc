@@ -584,19 +584,42 @@ namespace exodbcexec
 	void Find::Execute(const std::vector<std::string> & args)
 	{
 		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
-		bool haveType = args.size() >= 4;
-		bool haveCat = args.size() >= 3;
-		bool haveSchem = args.size() >= 2;
 		string name = u8"%";
-		if (args.size() >= 1)
-			name = args[0];
 		string type, cat, schem;
-		if (haveType)
-			type = args[3];
-		if (haveCat)
-			cat = args[2];
-		if (haveSchem)
-			schem = args[1];
+		bool haveType = false;
+		bool haveCat = false;
+		bool haveSchem = false;
+		if (m_mode == Mode::Short)
+		{
+			haveType = args.size() >= 4;
+			haveCat = args.size() >= 3;
+			haveSchem = args.size() >= 2;
+			if (args.size() >= 1)
+				name = args[0];
+			if (haveType)
+				type = args[3];
+			if (haveCat)
+				cat = args[2];
+			if (haveSchem)
+				schem = args[1];
+		}
+		else
+		{
+			StdInGenerator in;
+			LOG_OUTPUT(u8"Enter Name pattern: ");
+			in.GetNextCommand(name);
+			LOG_OUTPUT(u8"Enter Schema pattern or 'NULL' to ignore: ");
+			in.GetNextCommand(schem);
+			LOG_OUTPUT(u8"Enter Catalog pattern or 'NULL' to ignore: ");
+			in.GetNextCommand(cat);
+			LOG_OUTPUT(u8"Enter Type(s), separated by ',': ");
+			in.GetNextCommand(type);
+			if (schem != u8"NULL")
+				haveSchem = true;
+			if (cat != u8"NULL")
+				haveCat = true;
+			haveType = true;
+		}
 
 		LOG_INFO(boost::str(boost::format(u8"Searching using name: '%s', schema: '%s', catalog: '%s', type: '%s'") % name
 			% (haveSchem ? schem : u8"NULL")
@@ -711,17 +734,48 @@ namespace exodbcexec
 	}
 
 
+	vector<string> Find::GetAliases() const noexcept
+	{
+		switch (m_mode)
+		{
+		case Mode::Short:
+			return { u8"find", u8"f" };
+		case Mode::Interactive:
+			return { u8"ifind", u8"if" };
+		}
+		exASSERT(false);
+		return{};
+	}
+
+
 	std::string Find::GetArgumentsSyntax() const noexcept
 	{ 
-		return u8"name [schema] [catalog] [type]"; 
+		switch (m_mode)
+		{
+		case Mode::Short:
+			return u8"name [schema] [catalog] [type]";
+		case Mode::Interactive:
+			return u8"";
+		}
+		exASSERT(false);
+		return u8"";
 	}
 
 
 	std::string Find::GetHelp() const noexcept
 	{
-		return	u8"Search for tables, views, etc."
-				u8"If any argument of schema, catalog or type is empty, the argument is ";
-				u8"ignored. Use '%' to match zero or more characters and '%' to match "
-				u8"any single character.";
+		switch (m_mode)
+		{
+		case Mode::Short:
+			return	u8"Search for tables, views, etc."
+					u8"If any argument of schema, catalog or type is empty, the argument is ";
+					u8"ignored. Use '%' to match zero or more characters and '%' to match "
+					u8"any single character.";
+		case Mode::Interactive:
+			return	u8"Search for tables, views, etc."
+					u8"Values for table, schema, catalog and type name are queried interactive.";
+		}
+		exASSERT(false);
+		return u8"";
 	}
 }

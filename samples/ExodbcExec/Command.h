@@ -300,8 +300,15 @@ namespace exodbcexec
 		: public Command 
 	{
 	public:
-		Find(exodbc::DatabasePtr pDb, bool printHeaderRow, bool printRowNr, bool fixedPrintSize, const std::string& columnSeparator)
-			: m_pDb(pDb)
+		enum class Mode
+		{
+			Short,
+			Interactive
+		};
+
+		Find(Mode mode, exodbc::DatabasePtr pDb, bool printHeaderRow, bool printRowNr, bool fixedPrintSize, const std::string& columnSeparator)
+			: m_mode(mode)
+			, m_pDb(pDb)
 			, m_printHeaderRow(printHeaderRow)
 			, m_printRowNr(printRowNr)
 			, m_fixedPrintSize(fixedPrintSize)
@@ -311,7 +318,7 @@ namespace exodbcexec
 		static const size_t DEFAULT_ROWNR_WIDTH = 6;
 		static const size_t DEFAULT_FIELD_WIDTH = 18;
 		static const size_t DEFAULT_TYPE_WIDTH = 10;
-		virtual std::vector<std::string> GetAliases() const noexcept { return{u8"find", u8"f"}; };
+		virtual std::vector<std::string> GetAliases() const noexcept;
 		virtual void Execute(const std::vector<std::string> & args);
 		virtual std::string GetHelp() const noexcept;
 		virtual std::string GetArgumentsSyntax() const noexcept;
@@ -320,6 +327,7 @@ namespace exodbcexec
 		std::string GetRecordRow(const exodbc::TableInfo& ti, size_t rowNr) const noexcept;
 
 	private:
+		Mode m_mode;
 		exodbc::DatabasePtr m_pDb;
 		bool m_printHeaderRow;
 		bool m_printRowNr;
