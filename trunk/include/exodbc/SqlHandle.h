@@ -342,6 +342,19 @@ namespace exodbc
 	class SqlHandle<SQLHDESC, SQL_HANDLE_DESC, SqlStmtHandle>
 	{
 	public:
+
+		/*!
+		* \enum		RowDescriptorType
+		* \brief	A wrapper for the values of SQLGetStmtAttr to fetch a descriptor handle.
+		* \see		GetRowDescriptorHandle
+		*/
+		enum class RowDescriptorType
+		{
+			ROW = SQL_ATTR_APP_ROW_DESC,	///< SQL_ATTR_APP_ROW_DESC
+			PARAM = SQL_ATTR_APP_PARAM_DESC	///< SQL_ATTR_APP_PARAM_DESC
+		};
+
+
 		/*!
 		* \brief	Creates a RowDescriptorHandle from the given Statement handle.
 		* \see		Allocate()

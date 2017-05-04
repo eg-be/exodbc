@@ -651,7 +651,7 @@ namespace exodbc
 		exASSERT(m_columnSize > 0);
 		exASSERT(m_decimalDigits >= 0);
 
-		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
+		SqlDescHandle hDesc(pHStmt, SqlDescHandle::RowDescriptorType::ROW);
 		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
 		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
 		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)m_decimalDigits));
@@ -674,7 +674,7 @@ namespace exodbc
 		BindParamImpl(paramNr, pHStmt, SQL_C_NUMERIC, (SQLPOINTER*)&m_buffer, GetBufferLength(), &m_cb, paramDesc);
 
 		// Do some additional steps for numeric types
-		SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
+		SqlDescHandle hDesc(pHStmt, SqlDescHandle::RowDescriptorType::PARAM);
 		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
 		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.GetCharSize()));
 		SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.GetDecimalDigits()));
@@ -825,7 +825,7 @@ namespace exodbc
 				exASSERT(m_columnSize >= 0);
 				exASSERT(m_decimalDigits >= 0);
 
-				SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
+				SqlDescHandle hDesc(pHStmt, SqlDescHandle::RowDescriptorType::ROW);
 				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_TYPE, (SQLPOINTER)((SQLLEN)m_sqlCType));
 				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)m_columnSize));
 				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, columnNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)m_decimalDigits));
@@ -868,7 +868,7 @@ namespace exodbc
 			if (m_sqlCType == SQL_C_NUMERIC)
 			{
 				// Do some additional steps for numeric types
-				SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
+				SqlDescHandle hDesc(pHStmt, SqlDescHandle::RowDescriptorType::PARAM);
 				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_TYPE, (SQLPOINTER)SQL_C_NUMERIC);
 				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_PRECISION, (SQLPOINTER)((SQLLEN)paramDesc.GetCharSize()));
 				SetDescriptionFieldWrapper::SetDescriptionField(hDesc, paramNr, SQL_DESC_SCALE, (SQLPOINTER)((SQLLEN)paramDesc.GetDecimalDigits()));

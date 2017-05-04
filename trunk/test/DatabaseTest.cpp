@@ -125,17 +125,17 @@ namespace exodbctest
 
 	TEST_F(DatabaseTest, ReadTransactionIsolationMode)
 	{
-		TransactionIsolationMode tiMode = m_pDb->ReadTransactionIsolationMode();
-		EXPECT_NE(TransactionIsolationMode::UNKNOWN, tiMode);
+		Database::TransactionIsolationMode tiMode = m_pDb->ReadTransactionIsolationMode();
+		EXPECT_NE(Database::TransactionIsolationMode::UNKNOWN, tiMode);
 	}
 
 
 	TEST_F(DatabaseTest, SetTransactionIsolationMode)
 	{
-		TransactionIsolationMode tiMode = TransactionIsolationMode::READ_COMMITTED;
+		Database::TransactionIsolationMode tiMode = Database::TransactionIsolationMode::READ_COMMITTED;
 		EXPECT_NO_THROW(m_pDb->SetTransactionIsolationMode(tiMode));
 		tiMode = m_pDb->ReadTransactionIsolationMode();
-		EXPECT_EQ(TransactionIsolationMode::READ_COMMITTED, tiMode);
+		EXPECT_EQ(Database::TransactionIsolationMode::READ_COMMITTED, tiMode);
 
 		// The rest is not supported by access
 		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS)
@@ -143,34 +143,34 @@ namespace exodbctest
 			return;
 		}
 
-		tiMode = TransactionIsolationMode::READ_UNCOMMITTED;
+		tiMode = Database::TransactionIsolationMode::READ_UNCOMMITTED;
 		EXPECT_NO_THROW(m_pDb->SetTransactionIsolationMode(tiMode));
 		tiMode = m_pDb->ReadTransactionIsolationMode();
-		EXPECT_EQ(TransactionIsolationMode::READ_UNCOMMITTED, tiMode);
+		EXPECT_EQ(Database::TransactionIsolationMode::READ_UNCOMMITTED, tiMode);
 
-		tiMode = TransactionIsolationMode::REPEATABLE_READ;
+		tiMode = Database::TransactionIsolationMode::REPEATABLE_READ;
 		EXPECT_NO_THROW(m_pDb->SetTransactionIsolationMode(tiMode));
 		tiMode = m_pDb->ReadTransactionIsolationMode();
-		EXPECT_EQ(TransactionIsolationMode::REPEATABLE_READ, tiMode);
+		EXPECT_EQ(Database::TransactionIsolationMode::REPEATABLE_READ, tiMode);
 
-		tiMode = TransactionIsolationMode::SERIALIZABLE;
+		tiMode = Database::TransactionIsolationMode::SERIALIZABLE;
 		EXPECT_NO_THROW(m_pDb->SetTransactionIsolationMode(tiMode));
 		tiMode = m_pDb->ReadTransactionIsolationMode();
-		EXPECT_EQ(TransactionIsolationMode::SERIALIZABLE, tiMode);
+		EXPECT_EQ(Database::TransactionIsolationMode::SERIALIZABLE, tiMode);
 	}
 
 
 	TEST_F(DatabaseTest, CanSetTransactionIsolationMode)
 	{
-		EXPECT_TRUE(m_pDb->CanSetTransactionIsolationMode(TransactionIsolationMode::READ_COMMITTED));
+		EXPECT_TRUE(m_pDb->CanSetTransactionIsolationMode(Database::TransactionIsolationMode::READ_COMMITTED));
 		// Those are not supported by Access, for the rest we expect support
 		if (m_pDb->GetDbms() != DatabaseProduct::ACCESS)
 		{
-			EXPECT_TRUE(m_pDb->CanSetTransactionIsolationMode(TransactionIsolationMode::READ_UNCOMMITTED));
-			EXPECT_TRUE(m_pDb->CanSetTransactionIsolationMode(TransactionIsolationMode::REPEATABLE_READ));
-			EXPECT_TRUE(m_pDb->CanSetTransactionIsolationMode(TransactionIsolationMode::SERIALIZABLE));
+			EXPECT_TRUE(m_pDb->CanSetTransactionIsolationMode(Database::TransactionIsolationMode::READ_UNCOMMITTED));
+			EXPECT_TRUE(m_pDb->CanSetTransactionIsolationMode(Database::TransactionIsolationMode::REPEATABLE_READ));
+			EXPECT_TRUE(m_pDb->CanSetTransactionIsolationMode(Database::TransactionIsolationMode::SERIALIZABLE));
 		}
-		EXPECT_FALSE(m_pDb->CanSetTransactionIsolationMode(TransactionIsolationMode::UNKNOWN));
+		EXPECT_FALSE(m_pDb->CanSetTransactionIsolationMode(Database::TransactionIsolationMode::UNKNOWN));
 	}
 
 
@@ -268,26 +268,26 @@ namespace exodbctest
 	TEST_F(DatabaseTest, ReadCommitMode)
 	{
 		// We default to manual commit
-		EXPECT_EQ(CommitMode::MANUAL, m_pDb->ReadCommitMode());
+		EXPECT_EQ(Database::CommitMode::MANUAL, m_pDb->ReadCommitMode());
 	}
 
 	TEST_F(DatabaseTest, SetCommitMode)
 	{
 		// We default to manual commit
-		EXPECT_EQ(CommitMode::MANUAL, m_pDb->GetCommitMode());
-		EXPECT_EQ(CommitMode::MANUAL, m_pDb->ReadCommitMode());
+		EXPECT_EQ(Database::CommitMode::MANUAL, m_pDb->GetCommitMode());
+		EXPECT_EQ(Database::CommitMode::MANUAL, m_pDb->ReadCommitMode());
 
 		// Switch to auto
-		EXPECT_NO_THROW(m_pDb->SetCommitMode(CommitMode::AUTO));
+		EXPECT_NO_THROW(m_pDb->SetCommitMode(Database::CommitMode::AUTO));
 		// internal member should already be updated
-		EXPECT_EQ(CommitMode::AUTO, m_pDb->GetCommitMode());
-		EXPECT_EQ(CommitMode::AUTO, m_pDb->ReadCommitMode());
+		EXPECT_EQ(Database::CommitMode::AUTO, m_pDb->GetCommitMode());
+		EXPECT_EQ(Database::CommitMode::AUTO, m_pDb->ReadCommitMode());
 
 		// and back to manual
-		EXPECT_NO_THROW(m_pDb->SetCommitMode(CommitMode::MANUAL));
+		EXPECT_NO_THROW(m_pDb->SetCommitMode(Database::CommitMode::MANUAL));
 		// internal member should already be updated
-		EXPECT_EQ(CommitMode::MANUAL, m_pDb->GetCommitMode());
-		EXPECT_EQ(CommitMode::MANUAL, m_pDb->ReadCommitMode());
+		EXPECT_EQ(Database::CommitMode::MANUAL, m_pDb->GetCommitMode());
+		EXPECT_EQ(Database::CommitMode::MANUAL, m_pDb->ReadCommitMode());
 	}
 
 

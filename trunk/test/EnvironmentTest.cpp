@@ -136,9 +136,9 @@ namespace exodbctest
 	TEST_F(EnvironmentTest, EnableConnectionPooling)
 	{
 		// Enable and disable pooling
-		EXPECT_NO_THROW(Environment::EnableConnectionPooling(ConnectionPooling::OFF));
-		EXPECT_NO_THROW(Environment::EnableConnectionPooling(ConnectionPooling::PER_DRIVER));
-		EXPECT_NO_THROW(Environment::EnableConnectionPooling(ConnectionPooling::PER_HENV));
+		EXPECT_NO_THROW(Environment::EnableConnectionPooling(Environment::ConnectionPooling::OFF));
+		EXPECT_NO_THROW(Environment::EnableConnectionPooling(Environment::ConnectionPooling::PER_DRIVER));
+		EXPECT_NO_THROW(Environment::EnableConnectionPooling(Environment::ConnectionPooling::PER_HENV));
 
 		// Test if open and closing a few connections is faster if pooling is enabled
 		LogManager::Get().ClearLogHandlers();
@@ -147,7 +147,7 @@ namespace exodbctest
 		size_t nrRuns = 10;
 		time_t start, end, deltaDriver, deltaEnv, deltaOff;
 		{
-			Environment::EnableConnectionPooling(ConnectionPooling::PER_DRIVER);
+			Environment::EnableConnectionPooling(Environment::ConnectionPooling::PER_DRIVER);
 			EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
 			time(&start);
 			for (size_t i = 0; i < nrRuns; ++i)
@@ -159,7 +159,7 @@ namespace exodbctest
 		}
 
 		{
-			Environment::EnableConnectionPooling(ConnectionPooling::PER_HENV);
+			Environment::EnableConnectionPooling(Environment::ConnectionPooling::PER_HENV);
 			EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
 			time(&start);
 			for (size_t i = 0; i < nrRuns; ++i)
@@ -171,7 +171,7 @@ namespace exodbctest
 		}
 
 		{
-			Environment::EnableConnectionPooling(ConnectionPooling::OFF);
+			Environment::EnableConnectionPooling(Environment::ConnectionPooling::OFF);
 			EnvironmentPtr pEnv = Environment::Create(OdbcVersion::V_3);
 			time(&start);
 			for (size_t i = 0; i < nrRuns; ++i)

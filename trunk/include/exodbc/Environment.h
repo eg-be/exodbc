@@ -46,6 +46,31 @@ namespace exodbc
 	public:
 
 		/*!
+		* \enum		ConnectionPooling
+		* \brief	Wrapper around the values for connection pooling
+		*/
+		enum class ConnectionPooling
+		{
+			OFF = SQL_CP_OFF,	///< Connection Pooling disabled
+			PER_DRIVER = SQL_CP_ONE_PER_DRIVER, ///< One pool per driver
+			PER_HENV = SQL_CP_ONE_PER_HENV ///< One pool per environment
+		};
+
+
+		/*!
+		* \enum		ConnectionPoolingMatch
+		* \brief	Attributes values for an environment if it works in
+		*			strict match mode or relaxed mode if connection pooling
+		*			is enabled.
+		*/
+		enum class ConnectionPoolingMatch
+		{
+			STRICT_MATCH = SQL_CP_STRICT_MATCH,
+			RELAXED_MATCH = SQL_CP_RELAXED_MATCH
+		};
+
+
+		/*!
 		* \struct SDataSource
 		* \brief Contains information about a DataSource-Entry from the driver-manager
 		* \see Environment::ListDataSources

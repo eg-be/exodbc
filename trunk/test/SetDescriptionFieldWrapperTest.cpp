@@ -63,7 +63,7 @@ namespace exodbctest
 		EXPECT_TRUE(SQL_SUCCEEDED(ret));
 
 		// Get Descriptor for a param
-		SqlDescHandle hDesc(pHStmt, RowDescriptorType::PARAM);
+		SqlDescHandle hDesc(pHStmt, SqlDescHandle::RowDescriptorType::PARAM);
 
 		if (pDb->GetDbms() != DatabaseProduct::ACCESS)
 		{

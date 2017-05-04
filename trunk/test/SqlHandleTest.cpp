@@ -126,7 +126,7 @@ namespace exodbctest
 		ASSERT_TRUE(SQL_SUCCEEDED(ret));
 
 		// now test by creating a row descriptor:
-		SqlDescHandle hDesc(pHStmt, RowDescriptorType::ROW);
+		SqlDescHandle hDesc(pHStmt, SqlDescHandle::RowDescriptorType::ROW);
 	}
 
 

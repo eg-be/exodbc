@@ -353,7 +353,7 @@ int main(int argc, char* argv[])
 		if (autoCommitValue)
 		{
 			LOG_INFO(u8"Enabling auto commit ..");
-			pDb->SetCommitMode(CommitMode::AUTO);
+			pDb->SetCommitMode(Database::CommitMode::AUTO);
 			LOG_INFO(u8"auto commit is on.");
 		}
 
