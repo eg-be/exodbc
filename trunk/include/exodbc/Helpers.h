@@ -47,17 +47,6 @@ namespace exodbc
 
 
 	/*!
-	* \brief	A wrapper to SQLGetStmtAttr
-	*
-	* \param	pHStmt		 	The statement.
-	* \param	type	Type of Description Handle to fetch from hStmt
-	* \return	Row Descriptor Handle
-	* \throw	Exception
-	*/
-	extern EXODBCAPI SqlDescHandlePtr	GetRowDescriptorHandle(ConstSqlStmtHandlePtr pHStmt, RowDescriptorType type);
-
-
-	/*!
 	* \brief	Return a SQL_TIME_STRUCT with the passed values set.
 	*/
 	extern EXODBCAPI SQL_TIME_STRUCT InitTime(SQLUSMALLINT hour, SQLUSMALLINT minute, SQLUSMALLINT second) noexcept;
