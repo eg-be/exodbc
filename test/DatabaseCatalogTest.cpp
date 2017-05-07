@@ -304,7 +304,7 @@ namespace exodbctest
 		for (vector<string>::const_iterator it = types.begin(); it != types.end(); ++it)
 		{
 			const string& typeName = *it;
-			EXPECT_FALSE(!typeName.empty());
+			EXPECT_FALSE(typeName.empty());
 		}
 	}
 
