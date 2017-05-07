@@ -451,7 +451,7 @@ namespace exodbc
 	}
 
 
-	set<SqlInfoProperty, SqlInfoProperties::SLexicalCompare> SqlInfoProperties::GetProperties(SqlInfoProperty::InfoType infoType) const noexcept
+	SqlInfoProperties::PropertiesSet SqlInfoProperties::GetSubset(SqlInfoProperty::InfoType infoType) const noexcept
 	{
 		set<SqlInfoProperty, SLexicalCompare> props;
 		for (PropsMap::const_iterator it = m_props.begin(); it != m_props.end(); ++it)

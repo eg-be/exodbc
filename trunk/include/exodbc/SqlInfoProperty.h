@@ -182,7 +182,8 @@ namespace exodbc
 				return lhs.GetName() < rhs.GetName();
 			}
 		};
-		std::set<SqlInfoProperty, SLexicalCompare> GetProperties(SqlInfoProperty::InfoType infoType) const noexcept;
+		typedef std::set<SqlInfoProperty, SLexicalCompare> PropertiesSet;
+		PropertiesSet GetSubset(SqlInfoProperty::InfoType infoType) const noexcept;
 
 
 		/*!
