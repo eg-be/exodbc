@@ -458,7 +458,7 @@ namespace exodbcexec
 	{
 		SqlInfoProperties props;
 		props.Init(m_pDb->GetSqlDbcHandle());
-		auto dbms = props.GetProperties(SqlInfoProperty::InfoType::DBMS);
+		auto dbms = props.GetSubset(SqlInfoProperty::InfoType::DBMS);
 		LOG_OUTPUT(u8"");
 		LOG_OUTPUT(u8"DBMS Product Information");
 		LOG_OUTPUT(u8"========================");
@@ -466,7 +466,7 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
-		auto dataSource = props.GetProperties(SqlInfoProperty::InfoType::DataSource);
+		auto dataSource = props.GetSubset(SqlInfoProperty::InfoType::DataSource);
 		LOG_OUTPUT(u8"");
 		LOG_OUTPUT(u8"Data Source Information");
 		LOG_OUTPUT(u8"=======================");
@@ -474,7 +474,7 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
-		auto driver = props.GetProperties(SqlInfoProperty::InfoType::Driver);
+		auto driver = props.GetSubset(SqlInfoProperty::InfoType::Driver);
 		LOG_OUTPUT(u8"");
 		LOG_OUTPUT(u8"Driver Information");
 		LOG_OUTPUT(u8"==================");
@@ -482,7 +482,7 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
-		auto supportedSql = props.GetProperties(SqlInfoProperty::InfoType::SupportedSql);
+		auto supportedSql = props.GetSubset(SqlInfoProperty::InfoType::SupportedSql);
 		LOG_OUTPUT(u8"");
 		LOG_OUTPUT(u8"Supported SQL Information");
 		LOG_OUTPUT(u8"=========================");
@@ -490,7 +490,7 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
-		auto sqlLimits = props.GetProperties(SqlInfoProperty::InfoType::SqlLimits);
+		auto sqlLimits = props.GetSubset(SqlInfoProperty::InfoType::SqlLimits);
 		LOG_OUTPUT(u8"");
 		LOG_OUTPUT(u8"SQL Limits Information");
 		LOG_OUTPUT(u8"======================");
@@ -498,7 +498,7 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
-		auto scalarFunction = props.GetProperties(SqlInfoProperty::InfoType::ScalarFunction);
+		auto scalarFunction = props.GetSubset(SqlInfoProperty::InfoType::ScalarFunction);
 		LOG_OUTPUT(u8"");
 		LOG_OUTPUT(u8"Scalar Function Information");
 		LOG_OUTPUT(u8"===========================");
@@ -506,7 +506,7 @@ namespace exodbcexec
 		{
 			LOG_OUTPUT(boost::str(boost::format(u8"%-40s: %s") % it->GetName() % it->GetStringValue()));
 		}
-		auto conversion = props.GetProperties(SqlInfoProperty::InfoType::Conversion);
+		auto conversion = props.GetSubset(SqlInfoProperty::InfoType::Conversion);
 		LOG_OUTPUT(u8"");
 		LOG_OUTPUT(u8"Conversion Information");
 		LOG_OUTPUT(u8"======================");
