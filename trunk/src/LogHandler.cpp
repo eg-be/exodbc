@@ -80,6 +80,9 @@ namespace exodbc
 
 	void StdLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
 	{
+		if (CustomLogLevelHidesMsg(level))
+			return;
+
 		lock_guard<mutex> lock(m_logMutex);
 		string formatedMessage;
 		if(m_showFileInfo)
@@ -161,6 +164,9 @@ namespace exodbc
 
 	void FileLogHandler::OnLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const
 	{
+		if (CustomLogLevelHidesMsg(level))
+			return;
+
 		lock_guard<mutex> lock(m_logMutex);
 		if (m_firstMessage)
 		{

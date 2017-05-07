@@ -97,12 +97,32 @@ namespace exodbc
 		*/
 		bool GetHideLogLevel(LogLevel level) const noexcept { return m_hideLogLevel.find(level) != m_hideLogLevel.end(); };
 
+
+		/*!
+		* \brief By default, a LogHandler logs all messages it receives from the LogManager.
+		*		Use this method to set a custom LogLevel for this LogHandler. Note that this will not change
+		*		the global LogLevel set in the LogManager.
+		*/
+		void SetLogLevel(LogLevel level) noexcept { m_hasCustomLogLevel = true; m_customLogLevel = level; }
+
+
+		/*!
+		* \brief Clear a custom LogLevel that has bee set on this LogHandler.
+		*/
+		void ClearLogLevel() noexcept { m_hasCustomLogLevel = false; };
+
+
 	protected:
+		bool CustomLogLevelHidesMsg(LogLevel msgLevel) const noexcept { return m_hasCustomLogLevel && (msgLevel < m_customLogLevel); };
+
 		std::string FormatLogMessage(LogLevel level, const std::string& msg, const std::string& filename /* = u8"" */, int line /* = 0 */, const std::string& functionname /* = u8"" */) const noexcept;
 
 		bool m_showFileInfo;	///< If not set, filename, line-nr and function-name are not included.
 		bool m_showLogLevel;	///< If not set, the log level like ERROR, INFO, etc. is never shown at the beginning of the message
 		std::set<LogLevel> m_hideLogLevel;	///< If a LogLevel is part of this list, it is NOT shown at the beginning of the message
+
+		bool m_hasCustomLogLevel;
+		LogLevel m_customLogLevel;
 	};
 
 
