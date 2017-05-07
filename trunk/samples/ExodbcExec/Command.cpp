@@ -30,6 +30,19 @@ namespace exodbcexec
 
 	const std::string ExecuteSql::NAME = u8"execSql";
 
+
+	std::chrono::milliseconds Command::ExecuteTimed(std::function<void()> func)
+	{
+		auto start = std::chrono::high_resolution_clock::now();
+		func();
+		auto end = std::chrono::high_resolution_clock::now();
+		auto elapsed = end - start;
+		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+
+		return millis;
+	}
+
+
 	void ExecuteSql::Execute(const std::vector<std::string>& args)
 	{
 		// Execute every argument as SQL:
@@ -589,12 +602,15 @@ namespace exodbcexec
 		bool haveType = false;
 		bool haveCat = false;
 		bool haveSchem = false;
+		bool printColumns = false;
+		if(!args.empty())
+			printColumns = args.back() == u8"-pc";
 		if (m_mode == Mode::Short)
 		{
-			haveType = args.size() >= 4;
-			haveCat = args.size() >= 3;
-			haveSchem = args.size() >= 2;
-			if (args.size() >= 1)
+			haveType = args.size() >= (size_t)(printColumns ? 5 : 4);
+			haveCat = args.size() >= (size_t)(printColumns ? 4 : 3);
+			haveSchem = args.size() >= (size_t)(printColumns ?  3 : 2);
+			if (args.size() >= (size_t)(printColumns ? 2 : 1))
 				name = args[0];
 			if (haveType)
 				type = args[3];
@@ -626,18 +642,17 @@ namespace exodbcexec
 			% (haveCat ? cat : u8"NULL")
 			% (haveType ? type : u8"NULL")));
 		TableInfoVector tables;
-		auto start = std::chrono::high_resolution_clock::now();
-		if (haveSchem && haveCat)
-			tables = pDbCat->SearchTables(name, schem, cat, type);
-		else if (haveSchem)
-			tables = pDbCat->SearchTables(name, schem, DatabaseCatalog::SchemaOrCatalogType::Schema, type);
-		else if (haveCat)
-			tables = pDbCat->SearchTables(name, schem, DatabaseCatalog::SchemaOrCatalogType::Catalog, type);
-		else
-			tables = pDbCat->SearchTables(name, type);
-		auto end = std::chrono::high_resolution_clock::now();
-		auto elapsed = end - start;
-		auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed);
+		auto millis = ExecuteTimed([&]()
+		{
+			if (haveSchem && haveCat)
+				tables = pDbCat->SearchTables(name, schem, cat, type);
+			else if (haveSchem)
+				tables = pDbCat->SearchTables(name, schem, DatabaseCatalog::SchemaOrCatalogType::Schema, type);
+			else if (haveCat)
+				tables = pDbCat->SearchTables(name, schem, DatabaseCatalog::SchemaOrCatalogType::Catalog, type);
+			else
+				tables = pDbCat->SearchTables(name, type);
+		});
 		LOG_INFO(boost::str(boost::format(u8"Success, found %d Tables. Execution took %dms.")
 			% tables.size() % millis.count()));
 
@@ -656,6 +671,14 @@ namespace exodbcexec
 			const TableInfo& ti = *it;
 			LOG_OUTPUT(GetRecordRow(ti, rowNr));
 			++rowNr;
+		}
+		if (printColumns)
+		{
+			for (TableInfoVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
+			{
+				const TableInfo& ti = *it;
+
+			}
 		}
 	}
 
@@ -753,9 +776,9 @@ namespace exodbcexec
 		switch (m_mode)
 		{
 		case Mode::Short:
-			return u8"name [schema] [catalog] [type]";
+			return u8"name [schema] [catalog] [type] [-pc]";
 		case Mode::Interactive:
-			return u8"";
+			return u8"[-pc]";
 		}
 		exASSERT(false);
 		return u8"";
@@ -768,12 +791,15 @@ namespace exodbcexec
 		{
 		case Mode::Short:
 			return	u8"Search for tables, views, etc."
-					u8"If any argument of schema, catalog or type is empty, the argument is ";
+					u8"If any argument of schema, catalog or type is empty, the argument is "
 					u8"ignored. Use '%' to match zero or more characters and '%' to match "
-					u8"any single character.";
+					u8"any single character. If argument '-pc' is passed, the column information "
+					u8"for any found table is printed after the list of tables has been printed.";
 		case Mode::Interactive:
 			return	u8"Search for tables, views, etc."
-					u8"Values for table, schema, catalog and type name are queried interactive.";
+					u8"Values for table, schema, catalog and type name are queried interactive."
+					u8"If argument '-pc' is passed, the column information "
+					u8"for any found table is printed after the list of tables has been printed.";
 		}
 		exASSERT(false);
 		return u8"";
