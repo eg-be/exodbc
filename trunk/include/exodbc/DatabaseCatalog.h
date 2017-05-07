@@ -245,7 +245,7 @@ namespace exodbc
 		/*!
 		* \brief Read information about all SQL types supported by the database, using SQLGetTypeInfo.
 		*/
-		SqlTypeInfosVector ReadSqlTypeInfo() const;
+		SqlTypeInfoVector ReadSqlTypeInfo() const;
 
 
 		/*!
