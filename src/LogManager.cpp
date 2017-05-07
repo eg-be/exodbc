@@ -80,6 +80,22 @@ namespace exodbc
 		m_logHandlers.push_back(pHandler);
 	}
 
+
+	void LogManager::RemoveLogHandler(LogHandlerPtr pHandler)
+	{
+		lock_guard<mutex> lock(m_logHandlersMutex);
+		for (auto it = m_logHandlers.begin(); it != m_logHandlers.end(); ++it)
+		{
+			LogHandlerPtr pLogHanlder = *it;
+			if (*pLogHanlder == *pHandler)
+			{
+				m_logHandlers.erase(it);
+				return;
+			}
+		}
+	}
+
+
 #ifdef _WIN32
 	void LogManager::LogMessage(LogLevel level, const std::wstring& msg, const std::wstring& file /* = L"" */, int line /* = 0 */, const std::wstring& functionName /* = L"" */) const
 	{
