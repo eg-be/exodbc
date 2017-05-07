@@ -123,6 +123,7 @@ namespace exodbcexec
 
 	vector<string> CreateTracPages::GetTestTableLines()
 	{
+		// Try to find tables first:
 		const set<string> tableNames = {
 			u8"blobtypes",
 			u8"blobtypes_tmp",
@@ -138,27 +139,25 @@ namespace exodbcexec
 			u8"multikey",
 			u8"numerictypes",
 			u8"numerictypes_tmp",
-			u8"not_supported",
 			u8"unicodetable",
 			u8"unicodetable_tmp"
 		};
 
+		TableInfoVector tables;
 		vector<string> lines;
-
 		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
-		for (set<string>::const_iterator it = tableNames.begin(); it != tableNames.end(); ++it)
+
+		if (m_pDb->GetProperties().DetectDbms() == DatabaseProduct::EXCEL)
 		{
-			// try to find table with upper or lowercase name:
-			TableInfo ti;
-			string tableSearchName = boost::algorithm::to_lower_copy(*it);
-			try
+			tables = pDbCat->SearchTables(u8"%");
+		}
+		else
+		{
+			for (set<string>::const_iterator it = tableNames.begin(); it != tableNames.end(); ++it)
 			{
-				ti = pDbCat->FindOneTable(tableSearchName);
-			}
-			catch (const NotFoundException& nfe)
-			{
-				HIDE_UNUSED(nfe);
-				boost::algorithm::to_upper(tableSearchName);
+				// try to find table with upper or lowercase name:
+				TableInfo ti;
+				string tableSearchName = boost::algorithm::to_lower_copy(*it);
 				try
 				{
 					ti = pDbCat->FindOneTable(tableSearchName);
@@ -166,21 +165,37 @@ namespace exodbcexec
 				catch (const NotFoundException& nfe)
 				{
 					HIDE_UNUSED(nfe);
+					boost::algorithm::to_upper(tableSearchName);
+					try
+					{
+						ti = pDbCat->FindOneTable(tableSearchName);
+					}
+					catch (const NotFoundException& nfe)
+					{
+						HIDE_UNUSED(nfe);
+						lines.push_back(boost::str(boost::format(u8"== %s ==") % tableSearchName));
+						lines.push_back(boost::str(boost::format(u8"[[span(style=color: #FF0000, **WARNING:**)]] No table was found while searching for a table '%s'/'%s'!")
+							% boost::algorithm::to_lower_copy(tableSearchName) % tableSearchName));
+						continue;
+					}
+				}
+				catch (const Exception& ex)
+				{
 					lines.push_back(boost::str(boost::format(u8"== %s ==") % tableSearchName));
-					lines.push_back(boost::str(boost::format(u8"[[span(style=color: #FF0000, **WARNING:**)]] No table was found while searching for a table '%s'/'%s'!")
-						% boost::algorithm::to_lower_copy(tableSearchName) % tableSearchName ));
+					lines.push_back(boost::str(boost::format(u8"[[span(style=color: #FF0000, **ERROR:**)]] Exeption catched while searching for table '%s'/'%s': '%s'!")
+						% boost::algorithm::to_lower_copy(tableSearchName) % tableSearchName % ex.ToString()));
 					continue;
 				}
+				tables.push_back(ti);
 			}
-			catch (const Exception& ex)
-			{
-				lines.push_back(boost::str(boost::format(u8"== %s ==") % tableSearchName));
-				lines.push_back(boost::str(boost::format(u8"[[span(style=color: #FF0000, **ERROR:**)]] Exeption catched while searching for table '%s'/'%s': '%s'!") 
-					% boost::algorithm::to_lower_copy(tableSearchName) % tableSearchName % ex.ToString()));
-				continue;
-			}
+		}
+
+		for (TableInfoVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
+		{
+			// try to find table with upper or lowercase name:
+			const TableInfo& ti = *it;
 			// Table was found, add search name and full name
-			lines.push_back(boost::str(boost::format(u8"== %s (%s) ==") % tableSearchName % ti.GetQueryName()));
+			lines.push_back(boost::str(boost::format(u8"== %s ==") % ti.GetQueryName()));
 
 			try
 			{
@@ -197,7 +212,7 @@ namespace exodbcexec
 			try
 			{
 				// Only add content if it is not a tmp-table
-				if (!boost::algorithm::iends_with(tableSearchName, u8"_tmp"))
+				if (!boost::algorithm::iends_with(ti.GetQueryName(), u8"_tmp"))
 				{
 					lines.push_back(u8"=== Content ===");
 					vector<string> contentLines = GetTestTableContentLines(ti);
