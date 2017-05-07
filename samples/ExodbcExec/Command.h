@@ -58,6 +58,12 @@ namespace exodbcexec
 		virtual std::string GetArgumentsSyntax() const noexcept { return u8""; };
 
 		bool HasArguments() const noexcept { return !GetArgumentsSyntax().empty(); };
+
+	protected:
+		/*
+		* \brief Execute the passed function. Returns ms needed to execute func.
+		*/
+		std::chrono::milliseconds ExecuteTimed(std::function<void()> func);
 	};
 
 	typedef std::shared_ptr<Command> CommandPtr;
