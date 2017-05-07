@@ -13,7 +13,7 @@
 
 // Same component headers
 #include "InputGenerator.h"
-#include "CreateTestDbPageCommand.h"
+#include "CreateTracPages.h"
 
 // Other headers
 #ifdef _WIN32
@@ -425,7 +425,8 @@ namespace exodbcexec
 		RegisterCommand(make_shared<ListCatalog>(ListCatalog::Mode::Catalogs, m_pDb, !printNoHeader));
 		RegisterCommand(make_shared<Find>(Find::Mode::Short, m_pDb, !printNoHeader, printRowNr, fixedPrintSize, columnSeparator));
 		RegisterCommand(make_shared<Find>(Find::Mode::Interactive, m_pDb, !printNoHeader, printRowNr, fixedPrintSize, columnSeparator));
-		RegisterCommand(make_shared<CreateTestDbPageCommand>(m_pDb));
+		RegisterCommand(make_shared<CreateTracPages>(CreateTracPages::Mode::DbInfo, m_pDb));
+		RegisterCommand(make_shared<CreateTracPages>(CreateTracPages::Mode::TestTables, m_pDb));
 		RegisterCommand(make_shared<Help>(GetCommands()));
 	}
 

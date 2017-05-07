@@ -13,14 +13,14 @@ endif()
 # files:
 set ( SRC_EXODBCEXEC
   Command.cpp
-  CreateTestDbPageCommand.cpp
+  CreateTracPages.cpp
   ExodbcExec.cpp  
   InputGenerator.cpp  
 )
 
 set ( HEADERS_EXODBCEXEC
   Command.h
-  CreateTestDbPageCommand.h
+  CreateTracPages.h
   DebugNew.h
   ExodbcExec.h
   InputGenerator.h
