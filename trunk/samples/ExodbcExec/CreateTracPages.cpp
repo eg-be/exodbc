@@ -16,6 +16,7 @@
 #include "exodbc/exOdbc.h"
 #include "exodbc/LogManager.h"
 #include "exodbc/LogHandler.h"
+#include "exodbc/Table.h"
 
 // Debug
 #include "DebugNew.h"
@@ -69,6 +70,7 @@ namespace exodbcexec
 			pFileLogger = std::make_shared<FileLogHandler>(args[0], false);
 			pFileLogger->SetShowLogLevel(false);
 			pFileLogger->SetShowFileInfo(false);
+			pFileLogger->SetLogLevel(LogLevel::Output);
 			LogManager::Get().RegisterLogHandler(pFileLogger);
 		}
 
@@ -167,7 +169,7 @@ namespace exodbcexec
 				{
 					HIDE_UNUSED(nfe);
 					lines.push_back(boost::str(boost::format(u8"== %s ==") % tableSearchName));
-					lines.push_back(boost::str(boost::format(u8"**WARNING:** No table was found while searching for a table '%s' or '%s'!")
+					lines.push_back(boost::str(boost::format(u8"**WARNING:** No table was found while searching for a table '%s'/'%s'!")
 						% boost::algorithm::to_lower_copy(tableSearchName) % tableSearchName ));
 					continue;
 				}
@@ -175,21 +177,37 @@ namespace exodbcexec
 			catch (const Exception& ex)
 			{
 				lines.push_back(boost::str(boost::format(u8"== %s ==") % tableSearchName));
-				lines.push_back(boost::str(boost::format(u8"**ERROR:** Exeption catched: '%s'!") % ex.ToString()));
+				lines.push_back(boost::str(boost::format(u8"**ERROR:** Exeption catched while searching for table '%s'/'%s': '%s'!") 
+					% boost::algorithm::to_lower_copy(tableSearchName) % tableSearchName % ex.ToString()));
 				continue;
 			}
 			// Table was found, add search name and full name
 			lines.push_back(boost::str(boost::format(u8"== %s (%s) ==") % tableSearchName % ti.GetQueryName()));
 
-			// Add structure of table
-			vector<string> structureLines = GetTestTableStructureLines(ti);
-			lines.insert(lines.end(), structureLines.begin(), structureLines.end());
-
-			// Only add content if it is not a tmp-table
-			if (!boost::algorithm::iends_with(tableSearchName, u8"_tmp"))
+			try
 			{
-				vector<string> contentLines = GetTestTableContentLines(ti);
-				lines.insert(lines.end(), contentLines.begin(), contentLines.end());
+				// Add structure of table
+				vector<string> structureLines = GetTestTableStructureLines(ti);
+				lines.insert(lines.end(), structureLines.begin(), structureLines.end());
+			}
+			catch (const Exception& ex)
+			{
+				lines.push_back(boost::str(boost::format(u8"**ERROR:** Exeption catched while reading structure of '%s': '%s'!")
+					% ti.GetQueryName() % ex.ToString()));
+			}
+			try
+			{
+				// Only add content if it is not a tmp-table
+				if (!boost::algorithm::iends_with(tableSearchName, u8"_tmp"))
+				{
+					vector<string> contentLines = GetTestTableContentLines(ti);
+					lines.insert(lines.end(), contentLines.begin(), contentLines.end());
+				}
+			}
+			catch (const Exception& ex)
+			{
+				lines.push_back(boost::str(boost::format(u8"**ERROR:** Exeption catched while reading content of '%s': '%s'!")
+					% ti.GetQueryName() % ex.ToString()));
 			}
 		}
 
@@ -201,7 +219,8 @@ namespace exodbcexec
 	{
 		boost::format numberFormat(u8"%d");
 		vector<string> lines;
-		lines.push_back(boost::str(boost::format(u8"||=Column Name= || =SQL Type= || =Column Size=|| =Decimal Digits=||")));
+		lines.push_back(u8"=== Structure ===");
+		lines.push_back(boost::str(boost::format(u8"||=Column Name =||= SQL Type =||= Column Size=||= Decimal Digits=||")));
 		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
 		ColumnInfoVector cols = pDbCat->ReadColumnInfo(ti);
 		for (ColumnInfoVector::const_iterator it = cols.begin(); it != cols.end(); ++it)
@@ -220,8 +239,50 @@ namespace exodbcexec
 
 	vector<string> CreateTracPages::GetTestTableContentLines(const exodbc::TableInfo& ti)
 	{
+		Sql2BufferTypeMapPtr pBufferTypeMap;
+#ifdef _WIN32
+		pBufferTypeMap = make_shared<WCharSql2BufferMap>();
+#else
+		pBufferTypeMap = make_shared(CharSql2BufferMap)();
+#endif
 		vector<string> lines;
-
+		lines.push_back(u8"=== Content ===");
+		Table tbl(m_pDb, TableAccessFlag::AF_SELECT_WHERE, ti);
+		tbl.SetSql2BufferTypeMap(pBufferTypeMap);
+		tbl.Open(TableOpenFlag::TOF_NONE);
+		set<SQLUSMALLINT> colIndexes = tbl.GetColumnBufferIndexes();
+		// Prepare the header
+		stringstream ss;
+		QueryNameVisitor qnv;
+		for (set<SQLUSMALLINT>::const_iterator it = colIndexes.begin(); it != colIndexes.end(); ++it)
+		{
+			ColumnBufferPtrVariant pColVar = tbl.GetColumnBufferPtrVariant(*it);
+			ss << u8"||= " << boost::apply_visitor(qnv, pColVar) << u8" =";
+		}
+		ss << u8"||";
+		lines.push_back(ss.str());
+		tbl.Select();
+		while (tbl.SelectNext())
+		{
+			stringstream ss;
+			for (set<SQLUSMALLINT>::const_iterator it = colIndexes.begin(); it != colIndexes.end(); ++it)
+			{
+				ColumnBufferPtrVariant pColVar = tbl.GetColumnBufferPtrVariant(*it);
+				StringColumnWrapper wa(pColVar);
+				ss << u8"||= ";
+				if (wa.IsNull())
+				{
+					ss << u8"NULL";
+				}
+				else
+				{
+					ss << wa.GetValue<std::string>();
+				}
+				ss << u8" =";
+			}
+			ss << u8"||";
+			lines.push_back(ss.str());
+		}
 		return lines;
 	}
 
