@@ -37,10 +37,7 @@ namespace exodbctest
 		{ TableId::MULTIKEY, u8"multikey" },
 		{ TableId::NUMERICTYPES, u8"numerictypes" },
 		{ TableId::NUMERICTYPES_TMP, u8"numerictypes_tmp" },
-		{ TableId::SELECTONLY, u8"selectonly" },
 		{ TableId::NOT_EXISTING, u8"not_existing" },
-		{ TableId::NOT_SUPPORTED, u8"not_supported" },
-		{ TableId::NOT_SUPPORTED_TMP, u8"not_supported_tmp" },
 		{ TableId::UNICODE_TABLE, u8"unicodetable" },
 		{ TableId::UNICODE_TABLE_TMP, u8"unicodetable_tmp" }
 	};
@@ -61,10 +58,7 @@ namespace exodbctest
 		{ TableId::MULTIKEY, u8"idmultikey" },
 		{ TableId::NUMERICTYPES, u8"idnumerictypes" },
 		{ TableId::NUMERICTYPES_TMP, u8"idnumerictypes" },
-		{ TableId::SELECTONLY, u8"idselectonly" },
 		{ TableId::NOT_EXISTING, u8"idnot_existing" },
-		{ TableId::NOT_SUPPORTED, u8"idnot_supported" },
-		{ TableId::NOT_SUPPORTED_TMP, u8"idnot_supported" },
 		{ TableId::UNICODE_TABLE, u8"idunicodetable" },
 		{ TableId::UNICODE_TABLE_TMP, u8"idunicodetable" }
 	};
@@ -149,7 +143,6 @@ namespace exodbctest
 			|| tmpTableId == TableId::FLOATTYPES_TMP
 			|| tmpTableId == TableId::INTEGERTYPES_TMP
 			|| tmpTableId == TableId::NUMERICTYPES_TMP
-			|| tmpTableId == TableId::NOT_SUPPORTED_TMP
 			|| tmpTableId == TableId::UNICODE_TABLE_TMP);
 
 		if (!isTempTable)
