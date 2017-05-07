@@ -89,7 +89,6 @@ add_subdirectory(src)
 
 if(${BUILD_SAMPLES})
   message(STATUS "Option BUILD_SAMPLES is set to ${BUILD_SAMPLES}, building exodbcsamples")
-  add_subdirectory(samples/DatabaseInfo)
   add_subdirectory(samples/ShortIntro)
   add_subdirectory(samples/SqlCPointerBuffer)  
   add_subdirectory(samples/ListOdbcSources)  
