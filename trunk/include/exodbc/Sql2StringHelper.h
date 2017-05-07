@@ -82,6 +82,12 @@ namespace exodbc
 
 
 		/*!
+		* \brief Return PRED_NONE, PRED_CHAR, PRED_BASIC or SEARCHABLE for corresponding SQL_ values.
+		*/
+		static std::string SqlSearchable2s(SQLSMALLINT searchable) noexcept;
+
+
+		/*!
 		* \brief	Transform a DatabaseProduct id to a name:
 		* \details
 		*  DatabaseProduct			| Value

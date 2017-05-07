@@ -58,8 +58,10 @@ namespace exodbcexec
 
 	private:
 		std::vector<std::string> GetDbInfoLines(exodbc::SqlInfoProperty::InfoType infoType);
-		std::string GetNameHeader();
+		std::vector<std::string> GetHeaderLines();
 		std::string GetPropertyTableNameHeader();
+
+		std::vector<std::string> GetTypeLines();
 
 		void AddEmptyLine(std::vector<std::string>& lines) const noexcept;
 

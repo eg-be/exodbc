@@ -228,6 +228,26 @@ namespace exodbc {
 		}
 	}
 
+
+	std::string Sql2StringHelper::SqlSearchable2s(SQLSMALLINT searchable) noexcept
+	{
+		switch (searchable)
+		{
+		case SQL_PRED_NONE:
+			return u8"PRED_NONE";
+		case SQL_PRED_CHAR:
+			return u8"PRED_CHAR";
+		case SQL_PRED_BASIC:
+			return u8"PRED_BASIC";
+		case SQL_SEARCHABLE:
+			return u8"SEARCHABLE";
+
+		default:
+			return u8"???";
+		}
+	}
+
+
 	std::string Sql2StringHelper::SqlCType2Odbcs(SQLSMALLINT sqlCType) noexcept
 	{
 		switch (sqlCType)
