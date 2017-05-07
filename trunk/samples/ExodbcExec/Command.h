@@ -329,8 +329,8 @@ namespace exodbcexec
 		virtual std::string GetHelp() const noexcept;
 		virtual std::string GetArgumentsSyntax() const noexcept;
 
-		std::vector<std::string> GetHeaderRows() const noexcept;
-		std::string GetRecordRow(const exodbc::TableInfo& ti, size_t rowNr) const noexcept;
+		std::vector<std::string> GetTableHeaderRows() const noexcept;
+		std::string GetTableRecordRow(const exodbc::TableInfo& ti, size_t rowNr) const noexcept;
 
 	private:
 		Mode m_mode;

@@ -659,7 +659,7 @@ namespace exodbcexec
 		boost::format f(u8"%18s");
 		if (!tables.empty() && m_printHeaderRow)
 		{
-			vector<string> headers = GetHeaderRows();
+			vector<string> headers = GetTableHeaderRows();
 			for (vector<string>::const_iterator it = headers.begin(); it != headers.end(); ++it)
 			{
 				LOG_OUTPUT(*it);
@@ -669,7 +669,7 @@ namespace exodbcexec
 		for (TableInfoVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
 		{
 			const TableInfo& ti = *it;
-			LOG_OUTPUT(GetRecordRow(ti, rowNr));
+			LOG_OUTPUT(GetTableRecordRow(ti, rowNr));
 			++rowNr;
 		}
 		if (printColumns)
@@ -677,13 +677,37 @@ namespace exodbcexec
 			for (TableInfoVector::const_iterator it = tables.begin(); it != tables.end(); ++it)
 			{
 				const TableInfo& ti = *it;
+				ColumnInfoVector columns;
+				LOG_INFO(boost::str(boost::format(u8"Reading Column Information for '%s'..") % ti.GetQueryName()));
+				auto millis = ExecuteTimed([&]()
+				{
+					columns = pDbCat->ReadColumnInfo(ti);
+				});
+				LOG_INFO(boost::str(boost::format(u8"Success, found %d Columns. Execution took %dms.")
+					% columns.size() % millis.count()));
 
+				LOG_INFO(boost::str(boost::format(u8"Columns of '%s':") % ti.GetQueryName()));
+				if (!columns.empty())
+				{
+					for (ColumnInfoVector::const_iterator it = columns.begin(); it != columns.end(); ++it)
+					{
+						const ColumnInfo& colInf = *it;
+						size_t pos = it - columns.begin();
+						LOG_OUTPUT(boost::str(boost::format(u8" [%d] Column Name:              %s") % pos % colInf.GetColumnName()));
+						LOG_OUTPUT(boost::str(boost::format(u8" [%d] SQL Type:                 %d (%s)") % pos % colInf.GetSqlType() % Sql2StringHelper::SqlType2s(colInf.GetSqlType())));
+						LOG_OUTPUT(boost::str(boost::format(u8" [%d] SQL Data Type [ODBC 3.0]: %d (%s)") % pos % colInf.GetSqlDataType() % Sql2StringHelper::SqlType2s(colInf.GetSqlDataType())));
+						LOG_OUTPUT(boost::str(boost::format(u8" [%d] Type Name:                %s") % pos % colInf.GetTypeName()));
+						LOG_OUTPUT(boost::str(boost::format(u8" [%d] Column Size:              %d") % pos % colInf.GetColumnSize()));
+						LOG_OUTPUT(boost::str(boost::format(u8" [%d] Decimal Digits:           %d") % pos % colInf.GetDecimalDigits()));
+						LOG_OUTPUT(boost::str(boost::format(u8" [%d] Nullable:                 %d (%s)") % pos % colInf.GetNullable() % Sql2StringHelper::SqlNullable2s(colInf.GetNullable())));
+					}
+				}
 			}
 		}
 	}
 
 
-	vector<string> Find::GetHeaderRows() const noexcept
+	vector<string> Find::GetTableHeaderRows() const noexcept
 	{
 		stringstream ss;
 		if (m_printRowNr)
@@ -724,7 +748,7 @@ namespace exodbcexec
 	}
 
 
-	std::string Find::GetRecordRow(const TableInfo& ti, size_t rowNr) const noexcept
+	std::string Find::GetTableRecordRow(const TableInfo& ti, size_t rowNr) const noexcept
 	{
 		stringstream ss;
 		if (m_printRowNr)
