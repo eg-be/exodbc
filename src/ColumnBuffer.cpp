@@ -142,11 +142,14 @@ namespace exodbc
 		case SQL_DOUBLE:
 			return 24 + 1;
 		
-		// For binary data we could assume its the column size plus a trailing '\0':
+		// according to https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/column-size columnSize is 
+		// length of bytes for binary data, and according to
+		// https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/display-size
+		// the required display size for binary data is length of column * 2
 		case SQL_BINARY:
 		case SQL_VARBINARY:
 			exASSERT(columnSize > 0);
-			return columnSize + 1;
+			return (columnSize * 2) + 1;
 		case SQL_TYPE_DATE:
 		case SQL_DATE:
 			return 11 + 1;
