@@ -1,5 +1,5 @@
 ﻿/*!
-* \file CreateTestDbPageCommand.cpp
+* \file CreateTracPages.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 07.05.2017
 * \copyright GNU Lesser General Public License Version 3
@@ -7,7 +7,7 @@
 */
 
 // Own header
-#include "CreateTestDbPageCommand.h"
+#include "CreateTracPages.h"
 
 // Same component headers
 #include "ExodbcExec.h"
@@ -25,12 +25,41 @@ using namespace exodbc;
 
 namespace exodbcexec
 {
-	string CreateTestDbPageCommand::GetArgumentsSyntax() const noexcept
+	string CreateTracPages::GetArgumentsSyntax() const noexcept
 	{
 		return u8"[outfile]";
 	}
 
-	void CreateTestDbPageCommand::Execute(const std::vector<std::string> & args)
+
+	vector<string> CreateTracPages::GetAliases() const noexcept {
+		switch (m_mode)
+		{
+		case Mode::DbInfo:
+			return{ u8"tracDbInfo", u8"tdbi" };
+		case Mode::TestTables:
+			return{ u8"tracTestTableInfo", u8"ttti"};
+		}
+		exASSERT(false);
+		return{};
+	}
+
+
+
+	string CreateTracPages::GetHelp() const noexcept
+	{
+		switch (m_mode)
+		{
+		case Mode::DbInfo:
+			return u8"Create a Trac page with database and driver information";
+		case Mode::TestTables:
+			return u8"Create a Trac page with test tables information.";
+		}
+		exASSERT(false);
+		return{};
+	}
+
+
+	void CreateTracPages::Execute(const std::vector<std::string> & args)
 	{
 		FileLogHandlerPtr pFileLogger = nullptr;
 
@@ -43,29 +72,39 @@ namespace exodbcexec
 			LogManager::Get().RegisterLogHandler(pFileLogger);
 		}
 
+		// a common header
 		vector<string> lines;
 		vector<string> header = GetHeaderLines();
 		lines.insert(lines.end(), header.begin(), header.end());
 		vector<string> connectionLines = GetConnectionLines();
 		lines.insert(lines.end(), connectionLines.begin(), connectionLines.end());
-		vector<string> driverInfo = GetDbInfoLines(SqlInfoProperty::InfoType::Driver);
-		lines.insert(lines.end(), driverInfo.begin(), driverInfo.end());
-		vector<string> dsInfo = GetDbInfoLines(SqlInfoProperty::InfoType::DataSource);
-		lines.insert(lines.end(), dsInfo.begin(), dsInfo.end());
-		vector<string> dbmsInfo = GetDbInfoLines(SqlInfoProperty::InfoType::DBMS);
-		lines.insert(lines.end(), dbmsInfo.begin(), dbmsInfo.end());
-		vector<string> limitsInfo = GetDbInfoLines(SqlInfoProperty::InfoType::SqlLimits);
-		lines.insert(lines.end(), limitsInfo.begin(), limitsInfo.end());
-		vector<string> supportedInfo = GetDbInfoLines(SqlInfoProperty::InfoType::SupportedSql);
-		lines.insert(lines.end(), supportedInfo.begin(), supportedInfo.end());
-		vector<string> scalarInfo = GetDbInfoLines(SqlInfoProperty::InfoType::ScalarFunction);
-		lines.insert(lines.end(), scalarInfo.begin(), scalarInfo.end());
-		vector<string> convInfo = GetDbInfoLines(SqlInfoProperty::InfoType::Conversion);
-		lines.insert(lines.end(), convInfo.begin(), convInfo.end());
 
-		lines.push_back(u8"== Datatypes Information ==");
-		vector<string> typeInfo = GetTypeLines();
-		lines.insert(lines.end(), typeInfo.begin(), typeInfo.end());
+		// then cmd-specific
+		if (m_mode == Mode::DbInfo)
+		{
+			vector<string> driverInfo = GetDbInfoLines(SqlInfoProperty::InfoType::Driver);
+			lines.insert(lines.end(), driverInfo.begin(), driverInfo.end());
+			vector<string> dsInfo = GetDbInfoLines(SqlInfoProperty::InfoType::DataSource);
+			lines.insert(lines.end(), dsInfo.begin(), dsInfo.end());
+			vector<string> dbmsInfo = GetDbInfoLines(SqlInfoProperty::InfoType::DBMS);
+			lines.insert(lines.end(), dbmsInfo.begin(), dbmsInfo.end());
+			vector<string> limitsInfo = GetDbInfoLines(SqlInfoProperty::InfoType::SqlLimits);
+			lines.insert(lines.end(), limitsInfo.begin(), limitsInfo.end());
+			vector<string> supportedInfo = GetDbInfoLines(SqlInfoProperty::InfoType::SupportedSql);
+			lines.insert(lines.end(), supportedInfo.begin(), supportedInfo.end());
+			vector<string> scalarInfo = GetDbInfoLines(SqlInfoProperty::InfoType::ScalarFunction);
+			lines.insert(lines.end(), scalarInfo.begin(), scalarInfo.end());
+			vector<string> convInfo = GetDbInfoLines(SqlInfoProperty::InfoType::Conversion);
+			lines.insert(lines.end(), convInfo.begin(), convInfo.end());
+
+			lines.push_back(u8"== Datatypes Information ==");
+			vector<string> typeInfo = GetTypeLines();
+			lines.insert(lines.end(), typeInfo.begin(), typeInfo.end());
+		}
+		else
+		{
+
+		}
 
 		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
 		{
@@ -79,7 +118,7 @@ namespace exodbcexec
 	}
 
 
-	vector<string> CreateTestDbPageCommand::GetDbInfoLines(SqlInfoProperty::InfoType infoType)
+	vector<string> CreateTracPages::GetDbInfoLines(SqlInfoProperty::InfoType infoType)
 	{
 		const SqlInfoProperties::PropertiesSet& props = m_pDb->GetProperties().GetSubset(infoType);
 		vector<string> lines;
@@ -107,7 +146,7 @@ namespace exodbcexec
 			lines.push_back(u8"== Supported SQL Information ==");
 			break;
 		}
-		lines.push_back(GetPropertyTableNameHeader());
+		lines.push_back(u8"||=Property Name =||= Property Value =||");
 		for (auto it = props.begin(); it != props.end(); ++it)
 		{
 			SqlInfoProperty::ValueType vt = it->GetValueType();
@@ -125,7 +164,7 @@ namespace exodbcexec
 	}
 
 
-	vector<string> CreateTestDbPageCommand::GetHeaderLines()
+	vector<string> CreateTracPages::GetHeaderLines()
 	{
 		vector<string> lines;
 		const SqlInfoProperties& props = m_pDb->GetProperties();
@@ -135,13 +174,7 @@ namespace exodbcexec
 	}
 
 
-	string CreateTestDbPageCommand::GetPropertyTableNameHeader()
-	{
-		return u8"||=Property Name =||= Property Value =||";
-	}
-
-
-	vector<string> CreateTestDbPageCommand::GetConnectionLines()
+	vector<string> CreateTracPages::GetConnectionLines()
 	{
 		vector<string> lines;
 		lines.push_back(u8"== Connection Information ==");
@@ -160,7 +193,7 @@ namespace exodbcexec
 	}
 
 
-	vector<string> CreateTestDbPageCommand::GetTypeLines()
+	vector<string> CreateTracPages::GetTypeLines()
 	{
 		vector<string> lines;
 		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
@@ -207,7 +240,7 @@ namespace exodbcexec
 	}
 
 
-	void CreateTestDbPageCommand::AddEmptyLine(std::vector<std::string>& lines) const noexcept
+	void CreateTracPages::AddEmptyLine(std::vector<std::string>& lines) const noexcept
 	{
 		lines.push_back(u8"");
 	}

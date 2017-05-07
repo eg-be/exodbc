@@ -1,8 +1,8 @@
 ﻿/*!
-* \file CreateTestDbPageCommand.h
+* \file CreateTracPages.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 07.05.2017
-* \brief Header file for CreateTestDbPageCommand
+* \brief Header file for CreateTracPages
 * \copyright GNU Lesser General Public License Version 3
 *
 */
@@ -29,8 +29,6 @@
 
 namespace exodbcexec
 {
-	class ExodbcExec;
-
 	// Typedefs
 	// --------
 
@@ -43,31 +41,42 @@ namespace exodbcexec
 
 
 
-	class CreateTestDbPageCommand
+	class CreateTracPages
 		: public Command
 	{
 	public:
-		CreateTestDbPageCommand(exodbc::DatabasePtr pDb)
+		enum class Mode
+		{
+			DbInfo,
+			TestTables
+		};
+
+		CreateTracPages(Mode mode, exodbc::DatabasePtr pDb)
 			: m_pDb(pDb)
+			, m_mode(mode)
 		{};
 
-		virtual std::vector<std::string> GetAliases() const noexcept { return{u8"createInfoPage", u8"cip"}; };
+		virtual std::vector<std::string> GetAliases() const noexcept;
 		virtual void Execute(const std::vector<std::string> & args);
-		virtual std::string GetHelp() const noexcept { return u8"Outputs trac markup to create a page about the connected Test-Database.";	};
+		virtual std::string GetHelp() const noexcept;
 		virtual std::string GetArgumentsSyntax() const noexcept;
 
 	private:
-		std::vector<std::string> GetDbInfoLines(exodbc::SqlInfoProperty::InfoType infoType);
+		// Common things
 		std::vector<std::string> GetHeaderLines();
-		std::string GetPropertyTableNameHeader();
-
-		std::vector<std::string> GetTypeLines();
-
 		std::vector<std::string> GetConnectionLines();
 
+		// DbInfo
+		std::vector<std::string> GetDbInfoLines(exodbc::SqlInfoProperty::InfoType infoType);
+		std::vector<std::string> GetTypeLines();
+
+		// TableInfo
+
+		// Helpers
 		void AddEmptyLine(std::vector<std::string>& lines) const noexcept;
 
 		exodbc::DatabasePtr m_pDb;
+		Mode m_mode;
 	};
 
 
