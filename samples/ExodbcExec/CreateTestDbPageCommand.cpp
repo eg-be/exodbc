@@ -44,7 +44,8 @@ namespace exodbcexec
 		}
 
 		vector<string> lines;
-		lines.push_back(GetNameHeader());
+		vector<string> header = GetHeaderLines();
+		lines.insert(lines.end(), header.begin(), header.end());
 		vector<string> driverInfo = GetDbInfoLines(SqlInfoProperty::InfoType::Driver);
 		lines.insert(lines.end(), driverInfo.begin(), driverInfo.end());
 		vector<string> dsInfo = GetDbInfoLines(SqlInfoProperty::InfoType::DataSource);
@@ -59,6 +60,10 @@ namespace exodbcexec
 		lines.insert(lines.end(), scalarInfo.begin(), scalarInfo.end());
 		vector<string> convInfo = GetDbInfoLines(SqlInfoProperty::InfoType::Conversion);
 		lines.insert(lines.end(), convInfo.begin(), convInfo.end());
+
+		lines.push_back(u8"== Datatypes Information ==");
+		vector<string> typeInfo = GetTypeLines();
+		lines.insert(lines.end(), typeInfo.begin(), typeInfo.end());
 
 		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
 		{
@@ -118,16 +123,66 @@ namespace exodbcexec
 	}
 
 
-	string CreateTestDbPageCommand::GetNameHeader()
+	vector<string> CreateTestDbPageCommand::GetHeaderLines()
 	{
+		vector<string> lines;
 		const SqlInfoProperties& props = m_pDb->GetProperties();
-		return boost::str(boost::format(u8"= %s =") % props.GetDbmsName() );
+		lines.push_back(boost::str(boost::format(u8"= %s: Database and Driver information =") % props.GetDbmsName()));
+		lines.push_back(u8"[[PageOutline]]");
+		return lines;
 	}
 
 
 	string CreateTestDbPageCommand::GetPropertyTableNameHeader()
 	{
 		return u8"||=Property Name =||= Property Value =||";
+	}
+
+
+	vector<string> CreateTestDbPageCommand::GetTypeLines()
+	{
+		vector<string> lines;
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		SqlTypeInfoVector types = pDbCat->ReadSqlTypeInfo();
+
+		string header = u8"||= SQLType =||= SQL Data Type (3) =||= !TypeName =||=  Local !TypeName =||= Unsigned =||= Column Size =||= Nullable ="
+						u8"||= Auto Unique =||= Case Sensitive =||= Searchable =||= Prefix =||= Suffix =||= Fixed Prec. Scale =||= Min. Scale ="
+						u8"||= Max. Scale =||= Sql !DateTimeSub =||= Num. Prec. Radix =||= Interval Precision =||= Create Params =||";
+		lines.push_back(header);
+
+		boost::format numberFormat(u8"%d");
+		boost::format lineFormat(
+			u8"||= %s (%d) =||= %s (%d) =||= %s =||= %s =||= %s =||= %d =||= %s ="
+			u8"||= %s =||= %s =||= %s =||= %s =||= %s =||= %s =||= %s ="
+			u8"||= %s =||= %s =||= %s =||= %s =||= %s =||");
+		for (SqlTypeInfoVector::const_iterator it = types.begin(); it != types.end(); ++it)
+		{
+			const SqlTypeInfo& ti = *it;
+			string s = boost::str(lineFormat 
+				% Sql2StringHelper::SqlType2s(ti.GetSqlType()) % ti.GetSqlType() 
+				% Sql2StringHelper::SqlType2s(ti.GetSqlDataType()) % ti.GetSqlDataType() 
+				% ti.GetTypeName()
+				% (ti.IsLocalTypeNameNull() ? u8"NULL" : ti.GetLocalTypeName())
+				% (ti.IsUnsignedNull() ? u8"NULL" : Sql2StringHelper::SqlTrueFalse2s(ti.GetUnsigned()))
+				% (ti.IsColumnSizeNull() ? 0 : ti.GetColumnSize())
+				% Sql2StringHelper::SqlNullable2s(ti.GetNullable())
+				% (ti.IsAutoUniqueValueNull() ? u8"NULL" : Sql2StringHelper::SqlTrueFalse2s(ti.GetAutoUniqueValue()))
+				% Sql2StringHelper::SqlTrueFalse2s(ti.GetCaseSensitive())
+				% Sql2StringHelper::SqlSearchable2s(ti.GetSearchable())
+				% (ti.IsLiteralPrefixNull() ? u8"NULL" : ti.GetLiteralPrefix())
+				% (ti.IsLiteralSuffixNull() ? u8"NULL" : ti.GetLiteralSuffix())
+				% Sql2StringHelper::SqlTrueFalse2s(ti.GetFixedPrecisionScale())
+				% (ti.IsMinimumScaleNull() ? u8"NULL" : boost::str(numberFormat % ti.GetMinimumScale()))
+				% (ti.IsMaximumScaleNull() ? u8"NULL" : boost::str(numberFormat % ti.GetMaximumScale()))
+				% (ti.IsSqlDateTimeSubNull() ? u8"NULL" : boost::str(numberFormat % ti.GetSqlDateTimeSub()))
+				% (ti.IsNumPrecRadixNull() ? u8"NULL" : boost::str(numberFormat % ti.GetNumPrecRadix()))
+				% (ti.IsIntervalPrecisionNull() ? u8"NULL" : boost::str(numberFormat % ti.GetIntervalPrecision()))
+				% (ti.IsCreateParamsNull() ? u8"NULL" : ti.GetCreateParams())
+			);
+			lines.push_back(s);
+		}
+
+		return lines;
 	}
 
 
