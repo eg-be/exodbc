@@ -71,6 +71,9 @@ namespace exodbcexec
 		std::vector<std::string> GetTypeLines();
 
 		// TableInfo
+		std::vector<std::string> GetTestTableLines();
+		std::vector<std::string> GetTestTableStructureLines(const exodbc::TableInfo& ti);
+		std::vector<std::string> GetTestTableContentLines(const exodbc::TableInfo& ti);
 
 		// Helpers
 		void AddEmptyLine(std::vector<std::string>& lines) const noexcept;
