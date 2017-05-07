@@ -55,14 +55,46 @@ namespace exodbc
 
 		virtual ~LogHandlerBase() {};
 
+		/*!
+		* \brief If enabled, source information is shown when formating log messages.
+		*/
 		void SetShowFileInfo(bool enable) noexcept { m_showFileInfo = enable; };
-		void SetShowLogLevel(bool enable) noexcept { m_showLogLevel = enable; };
-		void SetHideLogLevel(LogLevel level) noexcept { m_hideLogLevel.insert(level); };
-		void ClearHideLogLevel(LogLevel level) noexcept { m_hideLogLevel.erase(level); };
-		void ClearHideLogLevel() noexcept { m_hideLogLevel.clear(); };
 
+
+		/*!
+		* \brief If enabled, the log level is shown when formating log messages.
+		*/
+		void SetShowLogLevel(bool enable) noexcept { m_showLogLevel = enable; };
+
+
+		/*!
+		* \brief Disables outputting the log level in front of a log message for the given
+		*			LogLevel. 
+		*/
+		void SetHideLogLevel(LogLevel level) noexcept { m_hideLogLevel.insert(level); };
+
+
+		/*!
+		* \brief Clear flag to not print passed LogLevel in front of log messages.
+		*/
+		void ClearHideLogLevel(LogLevel level) noexcept { m_hideLogLevel.erase(level); };
+
+
+		/*!
+		* \brief Returns true if source information is added to log messages.
+		*/
 		bool GetShowFileInfo() const noexcept { return m_showFileInfo; };
+
+
+		/*!
+		* \brief Returns true if the log level is added to log messages.
+		*/
 		bool GetShowLogLevel() const noexcept { return m_showLogLevel; };
+
+
+		/*!
+		* \brief Returns true if adding the passed log level in front of a message has been disabled.
+		*/
 		bool GetHideLogLevel(LogLevel level) const noexcept { return m_hideLogLevel.find(level) != m_hideLogLevel.end(); };
 
 	protected:
