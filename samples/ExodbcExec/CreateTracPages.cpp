@@ -138,9 +138,7 @@ namespace exodbcexec
 			u8"multikey",
 			u8"numerictypes",
 			u8"numerictypes_tmp",
-			u8"selectonly",
 			u8"not_supported",
-			u8"not_supported_tmp",
 			u8"unicodetable",
 			u8"unicodetable_tmp"
 		};
