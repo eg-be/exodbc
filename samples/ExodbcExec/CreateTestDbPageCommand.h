@@ -63,6 +63,8 @@ namespace exodbcexec
 
 		std::vector<std::string> GetTypeLines();
 
+		std::vector<std::string> GetConnectionLines();
+
 		void AddEmptyLine(std::vector<std::string>& lines) const noexcept;
 
 		exodbc::DatabasePtr m_pDb;

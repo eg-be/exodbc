@@ -46,6 +46,8 @@ namespace exodbcexec
 		vector<string> lines;
 		vector<string> header = GetHeaderLines();
 		lines.insert(lines.end(), header.begin(), header.end());
+		vector<string> connectionLines = GetConnectionLines();
+		lines.insert(lines.end(), connectionLines.begin(), connectionLines.end());
 		vector<string> driverInfo = GetDbInfoLines(SqlInfoProperty::InfoType::Driver);
 		lines.insert(lines.end(), driverInfo.begin(), driverInfo.end());
 		vector<string> dsInfo = GetDbInfoLines(SqlInfoProperty::InfoType::DataSource);
@@ -136,6 +138,25 @@ namespace exodbcexec
 	string CreateTestDbPageCommand::GetPropertyTableNameHeader()
 	{
 		return u8"||=Property Name =||= Property Value =||";
+	}
+
+
+	vector<string> CreateTestDbPageCommand::GetConnectionLines()
+	{
+		vector<string> lines;
+		lines.push_back(u8"== Connection Information ==");
+		lines.push_back(u8"The following connection information was used to create this page:");
+		if (m_pDb->OpenedWithConnectionString())
+		{
+			lines.push_back(boost::str(boost::format(u8"* Connection String: //%s//") % m_pDb->GetConnectionInStr()));
+		}
+		else
+		{
+			lines.push_back(boost::str(boost::format(u8"* DSN: //%s//") % m_pDb->GetDataSourceName()));
+			lines.push_back(boost::str(boost::format(u8"* User: //%s//") % m_pDb->GetUsername()));
+			lines.push_back(boost::str(boost::format(u8"* Pass: //%s//") % m_pDb->GetPassword()));
+		}
+		return lines;
 	}
 
 
