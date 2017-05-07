@@ -68,12 +68,6 @@ namespace exodbc
 
 
 		/*!
-		* \return Table name. Empty value might be returned.
-		*/
-		std::string GetName() const noexcept { return m_tableName; }
-
-
-		/*!
 		* \return True if null flag for Schema is not set and Schema Name is not empty.
 		*/
 		bool				HasSchema() const noexcept { return !m_isSchemaNull && m_schemaName.length() > 0; };
