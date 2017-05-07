@@ -169,7 +169,7 @@ namespace exodbcexec
 				{
 					HIDE_UNUSED(nfe);
 					lines.push_back(boost::str(boost::format(u8"== %s ==") % tableSearchName));
-					lines.push_back(boost::str(boost::format(u8"**WARNING:** No table was found while searching for a table '%s'/'%s'!")
+					lines.push_back(boost::str(boost::format(u8"[[span(style=color: #FF0000, **WARNING:**)]] No table was found while searching for a table '%s'/'%s'!")
 						% boost::algorithm::to_lower_copy(tableSearchName) % tableSearchName ));
 					continue;
 				}
@@ -177,7 +177,7 @@ namespace exodbcexec
 			catch (const Exception& ex)
 			{
 				lines.push_back(boost::str(boost::format(u8"== %s ==") % tableSearchName));
-				lines.push_back(boost::str(boost::format(u8"**ERROR:** Exeption catched while searching for table '%s'/'%s': '%s'!") 
+				lines.push_back(boost::str(boost::format(u8"[[span(style=color: #FF0000, **ERROR:**)]] Exeption catched while searching for table '%s'/'%s': '%s'!") 
 					% boost::algorithm::to_lower_copy(tableSearchName) % tableSearchName % ex.ToString()));
 				continue;
 			}
@@ -187,12 +187,13 @@ namespace exodbcexec
 			try
 			{
 				// Add structure of table
+				lines.push_back(u8"=== Structure ===");
 				vector<string> structureLines = GetTestTableStructureLines(ti);
 				lines.insert(lines.end(), structureLines.begin(), structureLines.end());
 			}
 			catch (const Exception& ex)
 			{
-				lines.push_back(boost::str(boost::format(u8"**ERROR:** Exeption catched while reading structure of '%s': '%s'!")
+				lines.push_back(boost::str(boost::format(u8"[[span(style=color: #FF0000, **ERROR:**)]] Exeption catched while reading structure of '%s': '%s'!")
 					% ti.GetQueryName() % ex.ToString()));
 			}
 			try
@@ -200,13 +201,14 @@ namespace exodbcexec
 				// Only add content if it is not a tmp-table
 				if (!boost::algorithm::iends_with(tableSearchName, u8"_tmp"))
 				{
+					lines.push_back(u8"=== Content ===");
 					vector<string> contentLines = GetTestTableContentLines(ti);
 					lines.insert(lines.end(), contentLines.begin(), contentLines.end());
 				}
 			}
 			catch (const Exception& ex)
 			{
-				lines.push_back(boost::str(boost::format(u8"**ERROR:** Exeption catched while reading content of '%s': '%s'!")
+				lines.push_back(boost::str(boost::format(u8"[[span(style=color: #FF0000, **ERROR:**)]] Exeption catched while reading content of '%s': '%s'!")
 					% ti.GetQueryName() % ex.ToString()));
 			}
 		}
@@ -219,7 +221,6 @@ namespace exodbcexec
 	{
 		boost::format numberFormat(u8"%d");
 		vector<string> lines;
-		lines.push_back(u8"=== Structure ===");
 		lines.push_back(boost::str(boost::format(u8"||=Column Name =||= SQL Type =||= Column Size=||= Decimal Digits=||")));
 		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
 		ColumnInfoVector cols = pDbCat->ReadColumnInfo(ti);
@@ -246,7 +247,6 @@ namespace exodbcexec
 		pBufferTypeMap = make_shared(CharSql2BufferMap)();
 #endif
 		vector<string> lines;
-		lines.push_back(u8"=== Content ===");
 		Table tbl(m_pDb, TableAccessFlag::AF_SELECT_WHERE, ti);
 		tbl.SetSql2BufferTypeMap(pBufferTypeMap);
 		tbl.Open(TableOpenFlag::TOF_NONE);
