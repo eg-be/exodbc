@@ -82,7 +82,7 @@ namespace exodbc {
 		case SQL_INTEGER:
 			return u8"INTEGER";
 		case SQL_REAL:
-			return u8"REAu8";
+			return u8"REAL";
 		case SQL_FLOAT:
 			return u8"FLOAT";
 		case SQL_DOUBLE:
@@ -274,7 +274,7 @@ namespace exodbc {
 		case SQL_C_WCHAR:
 			return u8"SQLWCHAR*";
 		case SQL_C_FLOAT:
-			return u8"SQLREAu8";
+			return u8"SQLREAL";
 		case SQL_C_DOUBLE:
 			return u8"SQLDOUBLE";
 		case SQL_C_BIT:
