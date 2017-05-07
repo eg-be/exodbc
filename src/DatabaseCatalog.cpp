@@ -353,12 +353,12 @@ namespace exodbc
 	}
 
 
-	SqlTypeInfosVector DatabaseCatalog::ReadSqlTypeInfo() const
+	SqlTypeInfoVector DatabaseCatalog::ReadSqlTypeInfo() const
 	{
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
 
-		SqlTypeInfosVector types;
+		SqlTypeInfoVector types;
 
 		// Close Statement and make sure it closes upon exit
 		StatementCloser stmtCloser(m_pHStmt, true, true);

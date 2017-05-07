@@ -59,6 +59,92 @@ namespace exodbc
 		SQLSMALLINT GetSqlType() const noexcept { return m_sqlType; };
 
 
+		std::string GetTypeName() const noexcept { return m_typeName; };
+
+
+		SQLINTEGER GetColumnSize() const noexcept { return m_columnSize; };
+
+
+		bool IsColumnSizeNull() const noexcept { return m_columnSizeIsNull; };
+
+
+		std::string GetLiteralPrefix() const noexcept { return m_literalPrefix; };
+
+
+		bool IsLiteralPrefixNull() const noexcept { return m_literalPrefixIsNull; };
+
+
+		std::string GetLiteralSuffix() const noexcept { return m_literalSuffix; }
+
+
+		bool IsLiteralSuffixNull() const noexcept { return m_literalSuffixIsNull; };
+
+
+		std::string GetCreateParams() const noexcept { return m_createParams; };
+
+		bool IsCreateParamsNull() const noexcept { return m_createParamsIsNull; };
+
+
+		SQLSMALLINT GetNullable() const noexcept { return m_nullable; };
+
+
+		SQLSMALLINT GetCaseSensitive() const noexcept { return m_caseSensitive; };
+
+
+		SQLSMALLINT GetSearchable() const noexcept { return m_searchable; };
+
+
+		SQLSMALLINT GetUnsigned() const noexcept { return m_unsigned; };
+
+
+		bool IsUnsignedNull() const noexcept { return m_unsignedIsNull; };
+
+
+		SQLSMALLINT GetFixedPrecisionScale() const noexcept { return m_fixedPrecisionScale; };
+
+
+		SQLSMALLINT GetAutoUniqueValue() const noexcept { return m_autoUniqueValue; };
+
+
+		bool IsAutoUniqueValueNull() const noexcept { return m_autoUniqueValueIsNull; };
+
+
+		std::string GetLocalTypeName() const noexcept { return m_localTypeName; };
+
+
+		bool IsLocalTypeNameNull() const noexcept { return m_localTypeNameIsNull; };
+
+
+		SQLSMALLINT GetMinimumScale() const noexcept { return m_minimumScale; };
+
+
+		bool IsMinimumScaleNull() const noexcept { return m_minimumScaleIsNull; };
+
+
+		SQLSMALLINT GetMaximumScale() const noexcept { return m_maximumScale; };
+
+
+		bool IsMaximumScaleNull() const noexcept { return m_maximumScaleIsNull; };
+
+
+		SQLSMALLINT GetSqlDateTimeSub() const noexcept { return m_sqlDateTimeSub; };
+
+
+		bool IsSqlDateTimeSubNull() const noexcept { return m_sqlDateTimeSubIsNull; };
+
+
+		SQLINTEGER GetNumPrecRadix() const noexcept { return m_numPrecRadix; };
+
+
+		bool IsNumPrecRadixNull() const noexcept { return m_numPrecRadixIsNull; };
+
+
+		SQLINTEGER GetIntervalPrecision() const noexcept { return m_intervalPrecision; };
+
+
+		bool IsIntervalPrecisionNull() const noexcept { return m_intervalPrecisionIsNull; };
+
+
 		std::string ToOneLineStrForTrac(bool withHeaderLine /* = false */) const;
 		std::string ToOneLineStr(bool withHeaderLines = false, bool withEndLine = false) const;
 		std::string ToStr() const;
@@ -100,8 +186,8 @@ namespace exodbc
 	};
 
 	/*!
-	* \typedef SqlTypeInfosVector
+	* \typedef SqlTypeInfoVector
 	* \brief std::vector of SqlTypeInfo objects.
 	*/
-	typedef std::vector<SqlTypeInfo> SqlTypeInfosVector;
+	typedef std::vector<SqlTypeInfo> SqlTypeInfoVector;
 }

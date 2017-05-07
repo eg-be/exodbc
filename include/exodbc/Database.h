@@ -418,10 +418,10 @@ namespace exodbc
 
 		/*!
 		* \brief	Get the SqlTypeInfo queried during open..
-		* \return	SqlTypeInfosVector
+		* \return	SqlTypeInfoVector
 		* \throw	Exception If not Open().
 		*/
-		SqlTypeInfosVector GetTypeInfos() const;
+		SqlTypeInfoVector GetTypeInfos() const;
 
 
 		/*!
@@ -464,7 +464,7 @@ namespace exodbc
 		Sql2BufferTypeMapPtr	m_pSql2BufferTypeMap;	///< Sql2BufferTypeMap to be used from this Database. If none is set during OpenImp() a DefaultSql2BufferTypeMap is created.
 		DatabaseCatalogPtr		m_pDbCatalog;	///< The catalog of this Database. Initialized during OpenImpl(), freed on Close()
 
-		SqlTypeInfosVector m_datatypes;	///< Queried from DB during Open
+		SqlTypeInfoVector m_datatypes;	///< Queried from DB during Open
 		bool				m_dbIsOpen;			///< Set to true after SQLConnect was successful
 		bool				m_dbOpenedWithConnectionString;  ///< Was the database connection Opened with a connection string
 		std::string		m_dsn;             ///< Data source name
