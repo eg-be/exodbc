@@ -731,7 +731,7 @@ namespace exodbcexec
 		}
 		else
 		{
-			ssColNameFormat << "%s" << m_columnSeparator << "%s" << m_columnSeparator << "%s" << m_columnSeparator << u"%s";
+			ssColNameFormat << "%s" << m_columnSeparator << "%s" << m_columnSeparator << "%s" << m_columnSeparator << "%s";
 		}
 		string cat = u8"Catalog";
 		string schem = u8"Schema";
@@ -772,7 +772,7 @@ namespace exodbcexec
 		}
 		else
 		{
-			ssColNameFormat << "%s" << m_columnSeparator << "%s" << m_columnSeparator << "%s" << m_columnSeparator << u"%s";
+			ssColNameFormat << "%s" << m_columnSeparator << "%s" << m_columnSeparator << "%s" << m_columnSeparator << "%s";
 		}
 		string format = ssColNameFormat.str();
 		ss << boost::str(boost::format(format) % ti.GetCatalog() % ti.GetSchema() % ti.GetName() % ti.GetType());
