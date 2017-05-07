@@ -212,7 +212,23 @@ namespace exodbc {
 	}
 
 
-	std::string Sql2StringHelper::SqlCType2OdbcS(SQLSMALLINT sqlCType) noexcept
+	std::string Sql2StringHelper::SqlNullable2s(SQLSMALLINT nullable) noexcept
+	{
+		switch (nullable)
+		{
+		case SQL_NO_NULLS:
+			return u8"No Nulls";
+		case SQL_NULLABLE:
+			return u8"Nullable";
+		case SQL_NULLABLE_UNKNOWN:
+			return u8"Unknown";
+			
+		default:
+			return u8"???";
+		}
+	}
+
+	std::string Sql2StringHelper::SqlCType2Odbcs(SQLSMALLINT sqlCType) noexcept
 	{
 		switch (sqlCType)
 		{

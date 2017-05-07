@@ -72,7 +72,13 @@ namespace exodbc
 		* \param sqlCType Sql-C Type.
 		* \return std::string
 		*/
-		static std::string SqlCType2OdbcS(SQLSMALLINT sqlCType) noexcept;
+		static std::string SqlCType2Odbcs(SQLSMALLINT sqlCType) noexcept;
+
+
+		/*!
+		* \brief	Return "No Null" for SQL_NO_NULLS, "Nullable" for SQL_NULLABLE or "Nullable Unknown" for SQL_NULLABLE_UNKNOWN.
+		*/
+		static std::string SqlNullable2s(SQLSMALLINT nullable) noexcept;
 
 
 		/*!
