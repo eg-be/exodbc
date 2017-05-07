@@ -89,6 +89,13 @@ namespace exodbc
 		*/
 		void RegisterLogHandler(LogHandlerPtr pHandler);
 
+
+		/*!
+		* \brief Removes the passed LogHandler, does nothing if not registered.
+		*/
+		void RemoveLogHandler(LogHandlerPtr pHandler);
+
+
 		/*!
 		* \brief Removes all LogHandlers.
 		*/
