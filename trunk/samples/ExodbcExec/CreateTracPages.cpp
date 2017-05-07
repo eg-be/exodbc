@@ -103,7 +103,8 @@ namespace exodbcexec
 		}
 		else
 		{
-
+			vector<string> tableLines = GetTestTableLines();
+			lines.insert(lines.end(), tableLines.begin(), tableLines.end());
 		}
 
 		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
@@ -115,6 +116,113 @@ namespace exodbcexec
 		{
 			LogManager::Get().RemoveLogHandler(pFileLogger);
 		}
+	}
+
+
+	vector<string> CreateTracPages::GetTestTableLines()
+	{
+		const set<string> tableNames = {
+			u8"blobtypes",
+			u8"blobtypes_tmp",
+			u8"chartable",
+			u8"chartypes",
+			u8"chartypes_tmp",
+			u8"datetypes",
+			u8"datetypes_tmp",
+			u8"floattypes",
+			u8"floattypes_tmp",
+			u8"integertypes",
+			u8"integertypes_tmp",
+			u8"multikey",
+			u8"numerictypes",
+			u8"numerictypes_tmp",
+			u8"selectonly",
+			u8"not_supported",
+			u8"not_supported_tmp",
+			u8"unicodetable",
+			u8"unicodetable_tmp"
+		};
+
+		vector<string> lines;
+
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		for (set<string>::const_iterator it = tableNames.begin(); it != tableNames.end(); ++it)
+		{
+			// try to find table with upper or lowercase name:
+			TableInfo ti;
+			string tableSearchName = boost::algorithm::to_lower_copy(*it);
+			try
+			{
+				ti = pDbCat->FindOneTable(tableSearchName);
+			}
+			catch (const NotFoundException& nfe)
+			{
+				HIDE_UNUSED(nfe);
+				boost::algorithm::to_upper(tableSearchName);
+				try
+				{
+					ti = pDbCat->FindOneTable(tableSearchName);
+				}
+				catch (const NotFoundException& nfe)
+				{
+					HIDE_UNUSED(nfe);
+					lines.push_back(boost::str(boost::format(u8"== %s ==") % tableSearchName));
+					lines.push_back(boost::str(boost::format(u8"**WARNING:** No table was found while searching for a table '%s' or '%s'!")
+						% boost::algorithm::to_lower_copy(tableSearchName) % tableSearchName ));
+					continue;
+				}
+			}
+			catch (const Exception& ex)
+			{
+				lines.push_back(boost::str(boost::format(u8"== %s ==") % tableSearchName));
+				lines.push_back(boost::str(boost::format(u8"**ERROR:** Exeption catched: '%s'!") % ex.ToString()));
+				continue;
+			}
+			// Table was found, add search name and full name
+			lines.push_back(boost::str(boost::format(u8"== %s (%s) ==") % tableSearchName % ti.GetQueryName()));
+
+			// Add structure of table
+			vector<string> structureLines = GetTestTableStructureLines(ti);
+			lines.insert(lines.end(), structureLines.begin(), structureLines.end());
+
+			// Only add content if it is not a tmp-table
+			if (!boost::algorithm::iends_with(tableSearchName, u8"_tmp"))
+			{
+				vector<string> contentLines = GetTestTableContentLines(ti);
+				lines.insert(lines.end(), contentLines.begin(), contentLines.end());
+			}
+		}
+
+		return lines;
+	}
+
+
+	vector<string> CreateTracPages::GetTestTableStructureLines(const TableInfo& ti)
+	{
+		boost::format numberFormat(u8"%d");
+		vector<string> lines;
+		lines.push_back(boost::str(boost::format(u8"||=Column Name= || =SQL Type= || =Column Size=|| =Decimal Digits=||")));
+		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
+		ColumnInfoVector cols = pDbCat->ReadColumnInfo(ti);
+		for (ColumnInfoVector::const_iterator it = cols.begin(); it != cols.end(); ++it)
+		{
+			const ColumnInfo& ci = *it;
+			lines.push_back(boost::str(boost::format(u8"||%s || %s (%d) || %s|| %s||")
+				% ci.GetColumnName()
+				% Sql2StringHelper::SqlType2s(ci.GetSqlDataType()) % ci.GetSqlDataType()
+				% (ci.IsColumnSizeNull() ? u8"NULL" : boost::str(numberFormat % ci.GetColumnSize()))
+				% (ci.IsDecimalDigitsNull() ? u8"NULL" : boost::str(numberFormat % ci.GetDecimalDigits()))
+			));
+		}
+		return lines;
+	}
+
+
+	vector<string> CreateTracPages::GetTestTableContentLines(const exodbc::TableInfo& ti)
+	{
+		vector<string> lines;
+
+		return lines;
 	}
 
 
@@ -167,8 +275,13 @@ namespace exodbcexec
 	vector<string> CreateTracPages::GetHeaderLines()
 	{
 		vector<string> lines;
+		string addon;
+		if (m_mode == Mode::DbInfo)
+			addon = u8"Database and Driver Information";
+		else
+			addon = u8"Test Table Information";
 		const SqlInfoProperties& props = m_pDb->GetProperties();
-		lines.push_back(boost::str(boost::format(u8"= %s: Database and Driver information =") % props.GetDbmsName()));
+		lines.push_back(boost::str(boost::format(u8"= %s: %s =") % props.GetDbmsName() % addon));
 		lines.push_back(u8"[[PageOutline]]");
 		return lines;
 	}
