@@ -9,7 +9,7 @@
 
 // Own header
 #include "SqlStmtCloserTest.h"
-#include "exOdbcGTestHelpers.h"
+#include "exOdbcTestHelpers.h"
 
 // Same component headers
 // Other headers

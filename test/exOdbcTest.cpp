@@ -1,5 +1,5 @@
 ﻿/*!
- * \file exOdbcGTest.cpp
+ * \file exOdbcTest.cpp
  * \author Elias Gerber <eg@elisium.ch>
  * \date 22.07.2014
  * \copyright GNU Lesser General Public License Version 3
@@ -8,7 +8,7 @@
  */ 
 
 // Own header
-#include "exOdbcGTest.h"
+#include "exOdbcTest.h"
 
 // Same component headers
 #include "TestDbCreator.h"

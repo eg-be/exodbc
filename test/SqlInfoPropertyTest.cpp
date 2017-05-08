@@ -11,7 +11,7 @@
 #include "SqlInfoPropertyTest.h"
 
 // Same component headers
-#include "exOdbcGTestHelpers.h"
+#include "exOdbcTestHelpers.h"
 
 // Other headers
 // Debug

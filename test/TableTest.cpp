@@ -11,9 +11,9 @@
 #include "TableTest.h"
 
 // Same component headers
-#include "exOdbcGTest.h"
+#include "exOdbcTest.h"
 #include "ManualTestTables.h"
-#include "exOdbcGTestHelpers.h"
+#include "exOdbcTestHelpers.h"
 
 // Other headers
 #include "exodbc/Environment.h"

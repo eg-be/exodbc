@@ -109,8 +109,8 @@ set ( SRC_EXODBCTEST
   EnvironmentTest.cpp
   ExcelTest.cpp
   ExecutableStatementTest.cpp
-  exOdbcGTest.cpp 
-  exOdbcGTestHelpers.cpp 
+  exOdbcTest.cpp 
+  exOdbcTestHelpers.cpp 
   GetDataWrapperTest.cpp
   LogManagerTest.cpp 
   ManualTestTables.cpp
@@ -135,8 +135,8 @@ set ( HEADERS_EXODBCTEST
   EnvironmentTest.h
   ExcelTest.h
   ExecutableStatementTest.h
-  exOdbcGTest.h
-  exOdbcGTestHelpers.h
+  exOdbcTest.h
+  exOdbcTestHelpers.h
   GetDataWrapperTest.h
   LogManagerTest.h
   ManualTestTables.h

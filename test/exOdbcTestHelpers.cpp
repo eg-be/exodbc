@@ -1,5 +1,5 @@
 ﻿/*!
-* \file exOdbcGTestHelpers.cpp
+* \file exOdbcTestHelpers.cpp
 * \author Elias Gerber <eg@elisium.ch>
 * \date 22.11.2015
 * \copyright GNU Lesser General Public License Version 3
@@ -8,7 +8,7 @@
 */
 
 // Own header
-#include "exOdbcGTestHelpers.h"
+#include "exOdbcTestHelpers.h"
 
 // Same component headers
 

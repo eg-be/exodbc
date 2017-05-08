@@ -1,6 +1,6 @@
 ﻿#pragma once
 /*!
-* \file exOdbcGTestHelpers.h
+* \file exOdbcTestHelpers.h
 * \author Elias Gerber <eg@elisium.ch>
 * \date 22.11.2015
 * \copyright GNU Lesser General Public License Version 3
@@ -12,7 +12,7 @@
 #pragma once
 
 // Same component headers
-#include "exOdbcGTest.h"
+#include "exOdbcTest.h"
 
 // Other headers
 #include "exodbc/Environment.h"

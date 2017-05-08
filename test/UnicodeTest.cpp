@@ -11,8 +11,8 @@
 #include "UnicodeTest.h"
 
 // Same component headers
-#include "exOdbcGTest.h"
-#include "exOdbcGTestHelpers.h"
+#include "exOdbcTest.h"
+#include "exOdbcTestHelpers.h"
 
 // Other headers
 #include "exodbc/Environment.h"
