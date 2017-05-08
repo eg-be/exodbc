@@ -12,7 +12,7 @@
 #pragma once
 
 // Same component headers
-#include "exOdbcGTest.h"
+#include "exOdbcTest.h"
 #include "TestParams.h"
 
 // Other headers

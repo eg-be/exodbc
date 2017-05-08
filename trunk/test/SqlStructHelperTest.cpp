@@ -11,7 +11,7 @@
 #include "SqlStructHelperTest.h"
 
 // Same component headers
-#include "exOdbcGTestHelpers.h"
+#include "exOdbcTestHelpers.h"
 
 // Other headers
 #include "exodbc/SqlStatementCloser.h"

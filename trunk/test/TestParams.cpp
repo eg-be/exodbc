@@ -193,7 +193,7 @@ namespace exodbctest
 			bool logFile = tree.get<bool>(u8"TestSettings.LogFile", false);
 			if (logFile)
 			{
-				FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(u8"exOdbcGTest.log", true);
+				FileLogHandlerPtr pFileLogger = std::make_shared<FileLogHandler>(u8"exodbctest.log", true);
 				LogManager::Get().RegisterLogHandler(pFileLogger);
 			}
 		}

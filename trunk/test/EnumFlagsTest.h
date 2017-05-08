@@ -10,7 +10,7 @@
 #pragma once
 
 // Same component headers
-#include "exOdbcGTest.h"
+#include "exOdbcTest.h"
 
 // Other headers
 #include "gtest/gtest.h"

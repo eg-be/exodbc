@@ -11,7 +11,7 @@
 #include "SetDescriptionFieldWrapperTest.h"
 
 // Same component headers
-#include "exOdbcGTestHelpers.h"
+#include "exOdbcTestHelpers.h"
 
 // Other headers
 #include "exodbc/SetDescriptionFieldWrapper.h"

@@ -12,7 +12,7 @@
 
 // Same component headers
 #include "ManualTestTables.h"
-#include "exOdbcGTestHelpers.h"
+#include "exOdbcTestHelpers.h"
 
 // Other headers
 #include "exodbc/Environment.h"
