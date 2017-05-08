@@ -1,0 +1,42 @@
+/////////////////////////////////////////////////////////////////////// 
+// 
+// Version
+// 
+
+#include <windows.h>
+#include "../include/exodbc/exOdbcConfig.h"
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION EXODBC_VERSION_MAJOR,EXODBC_VERSION_MINOR,EXODBC_VERSION_PATCH,EXODBC_VERSION_REV
+ PRODUCTVERSION EXODBC_VERSION_MAJOR,EXODBC_VERSION_MINOR,EXODBC_VERSION_PATCH,EXODBC_VERSION_REV
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS VOS__WINDOWS32
+// FILETYPE 0x1L
+ FILETYPE VFT_DLL
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "exOdbc Library.\0"
+            VALUE "CompanyName", "Elias Gerber, eg@elisium.ch\0"
+            VALUE "FileDescription", "exOdbc DLL\0"
+            VALUE "FileVersion", EXODBC_VERSION_STRING
+            VALUE "InternalName", "exOdbc\0"
+            VALUE "LegalCopyright", "Copyright (C) 2017 Elias Gerber\0"
+            VALUE "OriginalFilename", "exOdbc.dll\0"
+            VALUE "ProductName", "exOdbc\0"
+            VALUE "ProductVersion", EXODBC_VERSION_STRING
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
