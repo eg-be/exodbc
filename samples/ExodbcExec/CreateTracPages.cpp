@@ -274,7 +274,32 @@ namespace exodbcexec
 		}
 		ss << u8"||";
 		lines.push_back(ss.str());
-		tbl.Select();
+		// MySql somehow does not convert binary columns to strings if we do not ask it to do so.
+		// workaround it. See http://stackoverflow.com/questions/43846489/sqlbindcol-binary-column-to-character-buffer-does-not-get-converted-to-string
+		if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL && boost::algorithm::istarts_with(ti.GetName(), u8"blobtypes"))
+		{
+			string sqlstmt = u8"SELECT ";
+			set<SQLUSMALLINT>::const_iterator it = colIndexes.begin();
+			while(it != colIndexes.end())
+			{
+				ColumnBufferPtrVariant pColVar = tbl.GetColumnBufferPtrVariant(*it);
+				SQLSMALLINT sqlType = boost::apply_visitor(SqlTypeVisitor(), pColVar);
+				if (sqlType == SQL_BINARY || sqlType == SQL_VARBINARY)
+					sqlstmt += boost::str(boost::format(u8"HEX(%s)") % boost::apply_visitor(qnv, pColVar));
+				else
+					sqlstmt += boost::apply_visitor(qnv, pColVar);
+				++it;
+				if (it != colIndexes.end())
+					sqlstmt += u8", ";
+			}
+			sqlstmt += u8" FROM ";
+			sqlstmt += ti.GetQueryName();
+			tbl.SelectBySqlStmt(sqlstmt);
+		}
+		else
+		{
+			tbl.Select();
+		}
 		while (tbl.SelectNext())
 		{
 			stringstream ss;
