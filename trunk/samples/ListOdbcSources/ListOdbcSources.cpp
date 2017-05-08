@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 			}
 			else
 			{
-				WRITE_STDOUT_ENDL(boost::str(boost::format(u8"sizeof(void*) is %d, indicating '???'") % s));
+				WRITE_STDOUT_ENDL(boost::str(boost::format(u8"sizeof(void*) is %d, indicating unknown architecture.") % s));
 			}
 		}
 
