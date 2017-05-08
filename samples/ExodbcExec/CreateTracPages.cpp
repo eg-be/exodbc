@@ -257,7 +257,7 @@ namespace exodbcexec
 #ifdef _WIN32
 		pBufferTypeMap = make_shared<WCharSql2BufferMap>();
 #else
-		pBufferTypeMap = make_shared(CharSql2BufferMap)();
+		pBufferTypeMap = make_shared<CharSql2BufferMap>();
 #endif
 		vector<string> lines;
 		Table tbl(m_pDb, TableAccessFlag::AF_SELECT_WHERE, ti);
