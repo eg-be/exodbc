@@ -60,10 +60,15 @@ namespace exodbctest
 		SqlInfoProperty propNYString(SQL_ROW_UPDATES, u8"SQL_ROW_UPDATES", it::Driver, vt::String_N_Y);
 		SqlInfoProperty propAnyString(SQL_ODBC_VER, u8"SQL_ODBC_VER", it::Driver, vt::String_Any);
 
-		EXPECT_EQ(u8"0 (0x0)", boost::apply_visitor(SqlInfoPropertyStringValueVisitor(), propUSmallInt.GetValue()));
-		EXPECT_EQ(u8"0 (0x0)", boost::apply_visitor(SqlInfoPropertyStringValueVisitor(), propUInt.GetValue()));
-		EXPECT_EQ(u8"N", boost::apply_visitor(SqlInfoPropertyStringValueVisitor(), propNYString.GetValue()));
-		EXPECT_EQ(u8"", boost::apply_visitor(SqlInfoPropertyStringValueVisitor(), propAnyString.GetValue()));
+        SqlInfoProperty::Value varUSmallInt = propUSmallInt.GetValue();
+        SqlInfoProperty::Value varUInt = propUInt.GetValue();
+        SqlInfoProperty::Value varNYString = propNYString.GetValue();
+        SqlInfoProperty::Value varAnyString = propAnyString.GetValue();
+        
+		EXPECT_EQ(u8"0 (0x0)", (boost::apply_visitor(SqlInfoPropertyStringValueVisitor(), varUSmallInt)));
+		EXPECT_EQ(u8"0 (0x0)", boost::apply_visitor(SqlInfoPropertyStringValueVisitor(), varUInt));
+		EXPECT_EQ(u8"N", boost::apply_visitor(SqlInfoPropertyStringValueVisitor(), varNYString));
+		EXPECT_EQ(u8"", boost::apply_visitor(SqlInfoPropertyStringValueVisitor(), varAnyString));
 	}
 
 
