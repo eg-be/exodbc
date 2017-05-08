@@ -414,7 +414,8 @@ namespace exodbcexec
 	void Help::Write(std::stringstream& ss, size_t maxChars /* = DEFAULT_MAXCHARS */) const noexcept
 	{
 		Write(ss.str());
-		ss.swap(stringstream());
+		stringstream ss2;
+		ss.swap(ss2);
 	}
 
 
