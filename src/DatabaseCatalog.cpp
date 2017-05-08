@@ -121,8 +121,9 @@ namespace exodbc
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
 
-		// Read SQL_ATTR_METADATA_ID value, only modify if not already set to passed value
-		SQLUINTEGER metadataAttr;
+		// Read SQL_ATTR_METADATA_ID value: We need to init that value, it seems like MySql connector does not
+		// overwrite it completely on 64bit builds..
+		SQLULEN metadataAttr = SQL_FALSE;
 		SQLRETURN ret = SQLGetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_METADATA_ID, (SQLPOINTER)&metadataAttr, 0, nullptr);
 		if (!SQL_SUCCEEDED(ret))
 		{
