@@ -454,7 +454,8 @@ namespace exodbcexec
 				vector<string> args;
 				if (ba::starts_with(input, Command::COMMAND_PREFIX))
 				{
-					boost::split(args, input.substr(1), boost::is_any_of(u8" "));
+					string substr = input.substr(1);
+					boost::split(args, substr, boost::is_any_of(u8" "));
 					string cmd = args.front();
 					args.erase(args.begin());
 					pCommand = GetCommand(cmd);
