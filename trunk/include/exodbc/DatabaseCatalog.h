@@ -333,6 +333,8 @@ namespace exodbc
 		SqlInfoProperties m_props;
 		// cache the currently active value:
 		mutable MetadataMode m_stmtMode;
+
+		const static SQLAPICHARTYPE* m_pAllPattern;
 	};
 
 	typedef std::shared_ptr<DatabaseCatalog> DatabaseCatalogPtr;
