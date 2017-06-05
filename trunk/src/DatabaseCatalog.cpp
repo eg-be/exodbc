@@ -316,7 +316,7 @@ namespace exodbc
 			exASSERT_MSG(pSchemaName != nullptr, u8"pSchemaName must not be a nullptr if MetadataMode::Identifier is set");
 			exASSERT_MSG(pCatalogName != nullptr, u8"pCatalogName must not be a nullptr if MetadataMode::Identifier is set");
 		}
-		else if(m_props.DetectDbms() == DatabaseProduct::POSTGRESQL)
+		else if(m_props.GetDbms() == DatabaseProduct::POSTGRESQL)
 		{
 			// If this is PostgreSQL, set null-pointers to '%', see #266
 			if (pTableName == nullptr)

@@ -147,7 +147,7 @@ namespace exodbcexec
 		vector<string> lines;
 		DatabaseCatalogPtr pDbCat = m_pDb->GetDbCatalog();
 
-		if (m_pDb->GetProperties().DetectDbms() == DatabaseProduct::EXCEL)
+		if (m_pDb->GetProperties().GetDbms() == DatabaseProduct::EXCEL)
 		{
 			tables = pDbCat->SearchTables(u8"%");
 		}

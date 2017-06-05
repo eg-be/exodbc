@@ -378,10 +378,9 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Try to match the Database Name to a known DatabaseProduct value.
-		* \return	DatabaseProduct value or DatabaseProduct::UNKNOWN.
+		* \brief	Get DatabaseProduct.
 		*/
-		DatabaseProduct       GetDbms() const { return m_dbmsType; };
+		DatabaseProduct       GetDbms() const { return m_props.GetDbms(); };
 
 
 		/*!
@@ -472,7 +471,6 @@ namespace exodbc
 		std::string		m_authStr;         ///< Authorization string (password)
 		std::string		m_inConnectionStr; ///< Connection string used to connect to the database
 		std::string		m_outConnectionStr;///< Connection string returned by the database when a connection is successfully OpenImpled
-		DatabaseProduct		m_dbmsType;        ///< Type of datasource - i.e. Oracle, dBase, SQLServer, etc
 
 		// ODBC handles created by the Database
 

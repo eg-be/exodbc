@@ -34,7 +34,6 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
 		, m_pHStmtExecSql(std::make_shared<SqlStmtHandle>())
-		, m_dbmsType(DatabaseProduct::UNKNOWN)
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
 		, m_commitMode(CommitMode::UNKNOWN)
@@ -47,7 +46,6 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
 		, m_pHStmtExecSql(std::make_shared<SqlStmtHandle>())
-		, m_dbmsType(DatabaseProduct::UNKNOWN)
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
 		, m_commitMode(CommitMode::UNKNOWN)
@@ -62,7 +60,6 @@ namespace exodbc
 		, m_pSql2BufferTypeMap(NULL)
 		, m_pHDbc(std::make_shared<SqlDbcHandle>())
 		, m_pHStmtExecSql(std::make_shared<SqlStmtHandle>())
-		, m_dbmsType(DatabaseProduct::UNKNOWN)
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
 		, m_commitMode(CommitMode::UNKNOWN)
@@ -145,9 +142,6 @@ namespace exodbc
 			{
 				m_pSql2BufferTypeMap = Sql2BufferTypeMapPtr(new DefaultSql2BufferMap(odbcVersion));
 			}
-
-			// Try to detect the type and store it internally for later use
-			m_dbmsType = m_props.DetectDbms();
 
 			// Set up the Catalog information
 			m_pDbCatalog = std::make_shared<DatabaseCatalog>(m_pHDbc, m_props);
