@@ -599,7 +599,8 @@ namespace exodbc
 		{
 			return DatabaseProduct::EXCEL;
 		}
-		else if (boost::algorithm::contains(name, u8"ACCESS"))
+		else if (boost::algorithm::contains(name, u8"ACCESS")
+            || boost::algorithm::contains(name, u8"MDBTOOLS"))
 		{
 			return DatabaseProduct::ACCESS;
 		}
