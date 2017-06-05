@@ -604,6 +604,10 @@ namespace exodbc
 		{
 			return DatabaseProduct::ACCESS;
 		}
+		else if (boost::algorithm::contains(name, u8"PostgreSQL"))
+		{
+			return DatabaseProduct::POSTGRESQL;
+		}
 
 		return DatabaseProduct::UNKNOWN;
 	}

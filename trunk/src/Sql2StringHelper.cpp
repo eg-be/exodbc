@@ -325,6 +325,8 @@ namespace exodbc {
 			return u8"Excel";
 		case DatabaseProduct::ACCESS:
 			return u8"Access";
+		case DatabaseProduct::POSTGRESQL:
+			return u8"PostgreSQL";
 		default:
 			return u8"UnknownDbms";
 		}
