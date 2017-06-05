@@ -151,12 +151,14 @@ namespace exodbc
 
 
 	SqlInfoProperties::SqlInfoProperties(ConstSqlDbcHandlePtr pHdbc)
+		: m_dbms(DatabaseProduct::UNKNOWN)
 	{
 		Init(pHdbc);
 	}
 
 
 	SqlInfoProperties::SqlInfoProperties(ConstSqlDbcHandlePtr pHdbc, OdbcVersion odbcVersion)
+		: m_dbms(DatabaseProduct::UNKNOWN)
 	{
 		Init(pHdbc, odbcVersion);
 	}
@@ -168,6 +170,12 @@ namespace exodbc
 		exASSERT(pHdbc->IsAllocated());
 
 		RegisterDbmsProperties(odbcVersion);
+		
+		// Now that property SQL_DBMS_NAME is set, try to read it, subsequent
+		// registers might depend on the dbms:
+		EnsurePropertyRead(pHdbc, SQL_DBMS_NAME, false);
+		m_dbms = DetectDbms(pHdbc);
+
 		RegisterDataSourceProperties(odbcVersion);
 		RegisterDriverProperties(odbcVersion);
 		RegisterSupportedSqlProperties(odbcVersion);
@@ -245,7 +253,8 @@ namespace exodbc
 			RegisterProperty(SQL_INFO_SCHEMA_VIEWS, u8"SQL_INFO_SCHEMA_VIEWS", iType, vt::UInt);
 			RegisterProperty(SQL_KEYSET_CURSOR_ATTRIBUTES1, u8"SQL_KEYSET_CURSOR_ATTRIBUTES1", iType, vt::UInt);
 			RegisterProperty(SQL_KEYSET_CURSOR_ATTRIBUTES2, u8"SQL_KEYSET_CURSOR_ATTRIBUTES2", iType, vt::UInt);
-			RegisterProperty(SQL_MAX_ASYNC_CONCURRENT_STATEMENTS, u8"SQL_MAX_ASYNC_CONCURRENT_STATEMENTS", iType, vt::UInt);
+			if(GetDbms() != DatabaseProduct::POSTGRESQL)
+				RegisterProperty(SQL_MAX_ASYNC_CONCURRENT_STATEMENTS, u8"SQL_MAX_ASYNC_CONCURRENT_STATEMENTS", iType, vt::UInt);
 			RegisterProperty(SQL_PARAM_ARRAY_ROW_COUNTS, u8"SQL_PARAM_ARRAY_ROW_COUNTS", iType, vt::UInt);
 			RegisterProperty(SQL_PARAM_ARRAY_SELECTS, u8"SQL_PARAM_ARRAY_SELECTS", iType, vt::UInt);
 			RegisterProperty(SQL_STATIC_CURSOR_ATTRIBUTES1, u8"SQL_STATIC_CURSOR_ATTRIBUTES1", iType, vt::UInt);
@@ -301,7 +310,8 @@ namespace exodbc
 		if (odbcVersion >= OdbcVersion::V_3)
 		{
 			RegisterProperty(SQL_COLLATION_SEQ, u8"SQL_COLLATION_SEQ", iType, vt::String_Any);
-			RegisterProperty(SQL_CURSOR_SENSITIVITY, u8"SQL_CURSOR_SENSITIVITY", iType, vt::UInt);
+			if (GetDbms() != DatabaseProduct::POSTGRESQL)
+				RegisterProperty(SQL_CURSOR_SENSITIVITY, u8"SQL_CURSOR_SENSITIVITY", iType, vt::UInt);
 			RegisterProperty(SQL_DESCRIBE_PARAMETER, u8"SQL_DESCRIBE_PARAMETER", iType, vt::String_N_Y);
 
 		}
@@ -447,9 +457,11 @@ namespace exodbc
 
 		if (odbcVersion >= OdbcVersion::V_3)
 		{
-			RegisterProperty(SQL_CONVERT_INTERVAL_YEAR_MONTH, u8"SQL_CONVERT_INTERVAL_YEAR_MONTH", iType, vt::UInt);
-			RegisterProperty(SQL_CONVERT_INTERVAL_DAY_TIME, u8"SQL_CONVERT_INTERVAL_DAY_TIME", iType, vt::UInt);
-
+			if (GetDbms() != DatabaseProduct::POSTGRESQL)
+			{
+				RegisterProperty(SQL_CONVERT_INTERVAL_YEAR_MONTH, u8"SQL_CONVERT_INTERVAL_YEAR_MONTH", iType, vt::UInt);
+				RegisterProperty(SQL_CONVERT_INTERVAL_DAY_TIME, u8"SQL_CONVERT_INTERVAL_DAY_TIME", iType, vt::UInt);
+			}
 		}
 	}
 
@@ -502,7 +514,7 @@ namespace exodbc
 			SET_EXCEPTION_SOURCE(nfe);
 			throw nfe;
 		}
-		if(it->second.GetValueRead() || forceUpdate)
+		if(!it->second.GetValueRead() || forceUpdate)
 			it->second.ReadProperty(pHdbc);
 	}
 
@@ -579,8 +591,9 @@ namespace exodbc
 	}
 
 
-	DatabaseProduct SqlInfoProperties::DetectDbms() const
+	DatabaseProduct SqlInfoProperties::DetectDbms(ConstSqlDbcHandlePtr pHdbc)
 	{
+		EnsurePropertyRead(pHdbc, SQL_DBMS_NAME, false);
 		SqlInfoProperty prop = GetProperty(SQL_DBMS_NAME);
 		std::string name = prop.GetStringValue();
 		if (boost::algorithm::contains(name, u8"Microsoft SQL Server"))

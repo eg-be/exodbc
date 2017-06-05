@@ -138,6 +138,7 @@ namespace exodbc
 		* \brief Create a new instance. Call Init() later to read all registered values.
 		*/
 		SqlInfoProperties()
+			: m_dbms(DatabaseProduct::UNKNOWN)
 		{};
 
 		/*!
@@ -241,13 +242,6 @@ namespace exodbc
 		*/
 		std::string GetDriverName() const;
 
-
-		/*!
-		* \brief Parses the string value of property SQL_DBMS_NAME  and tries to match it against a known DatabaseProduct.
-		*		Returns DatabaseProduct::UNKNOWN string does not match any known DatabaseProduct.
-		*/
-		DatabaseProduct DetectDbms() const;
-
 		
 		/*!
 		* \brief Checks if value of property SQL_TXN_CAPABLE is not set to SQL_TC_NONE.
@@ -316,7 +310,23 @@ namespace exodbc
 		*/
 		static OdbcVersion ParseOdbcVersion(const std::string& versionString);
 
+
+		/*!
+		* \brief Returns DatabaseProduct value parsed during Init().
+		* \see DetectDbms()
+		*/
+		DatabaseProduct GetDbms() const noexcept { return m_dbms; };
+
+
 	private:
+		/*!
+		* \brief Parses the string value of property SQL_DBMS_NAME  and tries to match it against a known DatabaseProduct.
+		*		If Property SQL_DBMS_NAME  has not yet been read, it is read first.
+		*		Returns DatabaseProduct::UNKNOWN string does not match any known DatabaseProduct.
+		* \throw SqlResultException If reading property fails.
+		*/
+		DatabaseProduct DetectDbms(ConstSqlDbcHandlePtr pHdbc);
+
 		void RegisterDriverProperties(OdbcVersion odbcVersion);
 		void RegisterDbmsProperties(OdbcVersion odbcVersion);
 		void RegisterDataSourceProperties(OdbcVersion odbcVersion);
@@ -329,5 +339,6 @@ namespace exodbc
 
 		typedef std::map<SQLUSMALLINT, SqlInfoProperty> PropsMap;
 		PropsMap m_props;
+		DatabaseProduct m_dbms;	///< Remember parsed value of dbms.
 	};
 } // namespace exodbc

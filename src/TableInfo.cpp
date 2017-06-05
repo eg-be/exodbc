@@ -64,7 +64,7 @@ namespace exodbc
 		exASSERT(pStmt);
 		exASSERT(pStmt->IsAllocated());
 
-		m_dbms = props.DetectDbms();
+		m_dbms = props.GetDbms();
 
 		SQLLEN cb = 0;
 		GetDataWrapper::GetData(pStmt, 1, props.GetMaxCatalogNameLen(), m_catalogName, &m_isCatalogNull);
