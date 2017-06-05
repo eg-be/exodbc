@@ -154,6 +154,7 @@ namespace exodbc
 		DB2,			///< IBM DB2
 		EXCEL,			///< Microsoft Excel
 		ACCESS,			///< Microsoft Access
+		POSTGRESQL,		///< PostgreSQL
 	};
 
 

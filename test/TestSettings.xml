@@ -8,7 +8,23 @@
   <LogFile>1</LogFile>
   
   <Dsn>
+    <Disabled>01</Disabled>
+    <Name>exPostgres_64</Name>
+    <User>ex</User>
+    <Pass>extest</Pass>
+    <Case>lower</Case>
+  </Dsn>
+
+  <Dsn>
     <Disabled>0</Disabled>
+    <Name>exPostgres</Name>
+    <User>ex</User>
+    <Pass>extest</Pass>
+    <Case>lower</Case>
+  </Dsn>
+
+  <Dsn>
+    <Disabled>01</Disabled>
     <Name>exSqlServer_64</Name>
     <User>ex</User>
     <Pass>extest</Pass>
