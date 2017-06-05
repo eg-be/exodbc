@@ -87,7 +87,9 @@ namespace exodbc
 	{
 		std::stringstream ss;
 		ss << u8"SQL-Function " << sqlFunctionName << u8" returned ";
-		ss << Sql2StringHelper::SqlReturn2s(ret) << u8"(" << ret << u8") with " << m_errors.size() << " ODBC-Error(s):";
+		ss << Sql2StringHelper::SqlReturn2s(ret) << u8"(" << ret << u8") with " << m_errors.size() << " ODBC-Error(s)";
+        if(!m_errors.empty())
+            ss << u8":";
 		m_errorMsg = ss.str();
 	}
 
@@ -100,7 +102,10 @@ namespace exodbc
 		{
 			ss << u8": " << m_errorMsg;
 		}
-		ss << u8"\n";
+		if(!m_errors.empty())
+        {
+            ss << u8"\n";
+        }
 		for (size_t i = 0; i < m_errors.size(); i++)
 		{
 			ss << m_errors[i].ToString() << u8"\n";

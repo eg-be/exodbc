@@ -186,9 +186,19 @@ namespace exodbc
 
 		// Determine drivers odbc version:
 		SqlInfoProperty prop(SQL_DRIVER_ODBC_VER, u8"SQL_DRIVER_ODBC_VER", SqlInfoProperty::InfoType::Driver, SqlInfoProperty::ValueType::String_Any);
-		prop.ReadProperty(pHdbc);
-		std::string driverOdbcVersion = prop.GetStringValue();
-		OdbcVersion ov = ParseOdbcVersion(driverOdbcVersion);
+        OdbcVersion ov = OdbcVersion::UNKNOWN;
+        try
+        {
+            prop.ReadProperty(pHdbc);
+            std::string driverOdbcVersion = prop.GetStringValue();
+            ov = ParseOdbcVersion(driverOdbcVersion);            
+        }
+        catch(const SqlResultException& ex)
+        {
+            LOG_WARNING(boost::str(boost::format(u8"Failed to determine driver ODBC-Version, assuming %d") 
+                % (unsigned long)OdbcVersion::V_2));
+            ov = OdbcVersion::V_2;
+        }
 		exASSERT(ov != OdbcVersion::UNKNOWN);
 		Init(pHdbc, ov);
 	}
