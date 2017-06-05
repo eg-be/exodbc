@@ -25,7 +25,6 @@ namespace exodbctest
 	const std::map<TableId, std::string> g_TableNames = {
 		{ TableId::BLOBTYPES, u8"blobtypes" },
 		{ TableId::BLOBTYPES_TMP, u8"blobtypes_tmp" },
-		{ TableId::CHARTABLE, u8"chartable" },
 		{ TableId::CHARTYPES, u8"chartypes" },
 		{ TableId::CHARTYPES_TMP, u8"chartypes_tmp" },
 		{ TableId::DATETYPES, u8"datetypes" },
@@ -46,7 +45,6 @@ namespace exodbctest
 	const std::map<TableId, std::string> g_IdColumnNames = {
 		{ TableId::BLOBTYPES, u8"idblobtypes" },
 		{ TableId::BLOBTYPES_TMP, u8"idblobtypes" },
-		{ TableId::CHARTABLE, u8"idchartable" },
 		{ TableId::CHARTYPES, u8"idchartypes" },
 		{ TableId::CHARTYPES_TMP, u8"idchartypes" },
 		{ TableId::DATETYPES, u8"iddatetypes" },
