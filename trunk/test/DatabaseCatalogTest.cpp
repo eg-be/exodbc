@@ -315,7 +315,10 @@ namespace exodbctest
 		// Init once is okay
 		dbCat.Init(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties());
 		// But twice must fail
-		EXPECT_THROW(dbCat.Init(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties()), AssertionException);
+		{
+			LogLevelSetter ll(LogLevel::None);
+			EXPECT_THROW(dbCat.Init(m_pDb->GetSqlDbcHandle(), m_pDb->GetProperties()), AssertionException);
+		}
 
 		// But resetting it must allow to init again
 		dbCat.Reset();
