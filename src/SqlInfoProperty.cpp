@@ -195,8 +195,8 @@ namespace exodbc
         }
         catch(const SqlResultException& ex)
         {
-            LOG_WARNING(boost::str(boost::format(u8"Failed to determine driver ODBC-Version, assuming %d") 
-                % (unsigned long)OdbcVersion::V_2));
+            LOG_WARNING(boost::str(boost::format(u8"Failed to determine driver ODBC-Version, assuming %d: %s") 
+                % (unsigned long)OdbcVersion::V_2 % ex.ToString()));
             ov = OdbcVersion::V_2;
         }
 		exASSERT(ov != OdbcVersion::UNKNOWN);
