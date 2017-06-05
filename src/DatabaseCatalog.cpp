@@ -22,6 +22,12 @@ using namespace std;
 
 namespace exodbc
 {
+#ifdef _WIN32
+	const SQLAPICHARTYPE* DatabaseCatalog::m_pAllPattern = L"%";
+#else
+	const SQLAPICHARTYPE* DatabaseCatalog::m_pAllPattern = u8"%";
+#endif
+
 	// Construction
 	// ------------
 	DatabaseCatalog::DatabaseCatalog()
@@ -309,6 +315,16 @@ namespace exodbc
 			exASSERT_MSG(pTableName != nullptr, u8"pTableName must not be a nullptr if MetadataMode::Identifier is set");
 			exASSERT_MSG(pSchemaName != nullptr, u8"pSchemaName must not be a nullptr if MetadataMode::Identifier is set");
 			exASSERT_MSG(pCatalogName != nullptr, u8"pCatalogName must not be a nullptr if MetadataMode::Identifier is set");
+		}
+		else if(m_props.DetectDbms() == DatabaseProduct::POSTGRESQL)
+		{
+			// If this is PostgreSQL, set null-pointers to '%', see #266
+			if (pTableName == nullptr)
+				pTableName = (SQLAPICHARTYPE*)DatabaseCatalog::m_pAllPattern;
+			if (pSchemaName == nullptr)
+				pSchemaName = (SQLAPICHARTYPE*) DatabaseCatalog::m_pAllPattern;
+			if (pCatalogName == nullptr)
+				pCatalogName = (SQLAPICHARTYPE*)DatabaseCatalog::m_pAllPattern;
 		}
 
 		// Close Statement and make sure it closes upon exit
