@@ -30,7 +30,6 @@ namespace exodbctest
 	{
 		BLOBTYPES,
 		BLOBTYPES_TMP,
-		CHARTABLE,
 		CHARTYPES,
 		CHARTYPES_TMP,
 		DATETYPES,
