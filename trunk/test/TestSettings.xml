@@ -1,7 +1,7 @@
 ﻿<TestSettings>
 
   <CreateDb>0</CreateDb>
-  <LogLevel>Debug</LogLevel>
+  <LogLevel>Info</LogLevel>
 <!--  <LogLevel>Info</LogLevel> -->
 <!--  <LogLevel>Warning</LogLevel> -->
 <!--  <LogLevel>Error</LogLevel> -->
@@ -13,6 +13,7 @@
     <User>ex</User>
     <Pass>extest</Pass>
     <Case>lower</Case>
+    <Skip ticket="120">StatementCloserTest.CloseStmtHandle</Skip>
   </Dsn>
 
   <Dsn>
@@ -21,6 +22,7 @@
     <User>ex</User>
     <Pass>extest</Pass>
     <Case>lower</Case>
+    <Skip ticket="120">StatementCloserTest.CloseStmtHandle</Skip>
   </Dsn>
 
   <Dsn>

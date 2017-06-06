@@ -67,9 +67,9 @@ namespace exodbctest
 
 		// This statement is not open yet, we shall fail to free it
 		{
-			if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+			if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL || m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
 			{
-				LOG_WARNING(u8"This test is known to fail with MySQL, see Ticket #120");
+				LOG_WARNING(u8"This test is known to fail with MySQL and PostgreSQL, see Ticket #120 and #289");
 			}
 			EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
 		}
@@ -99,9 +99,9 @@ namespace exodbctest
 		EXPECT_NO_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen));
 
 		// Closing it a second time must fail
-		if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
+		if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL || m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
 		{
-			LOG_WARNING(u8"This test is known to fail with MySQL, see Ticket #120");
+			LOG_WARNING(u8"This test is known to fail with MySQL and PostgreSQL, see Ticket #120 and #289");
 		}
 		EXPECT_THROW(StatementCloser::CloseStmtHandle(pHStmt, StatementCloser::Mode::ThrowIfNotOpen), SqlResultException);
 
