@@ -454,30 +454,29 @@ namespace exodbctest
 	TEST_F(wxCompatibilityTest, SelectUsingStarTable)
 	{
 		// Selecting using the '*' will work if all columns are bound
-		MIntegerTable intTable(m_pDb);
+		MIntTypesTable intTable(m_pDb);
 		ASSERT_NO_THROW(intTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 
 		std::string sqlstmt;
-		intTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.integertable WHERE idintegertable = 1");
+		intTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 4");
+		EXPECT_TRUE(intTable.SelectNext());
+		EXPECT_FALSE(intTable.IsColumnNull(0));
+		EXPECT_TRUE(intTable.IsColumnNull(1));
+		EXPECT_FALSE(intTable.IsColumnNull(2));
+		EXPECT_TRUE(intTable.IsColumnNull(3));
+		EXPECT_EQ(4, intTable.m_idIntegerTypes);
+		EXPECT_EQ(2147483647, intTable.m_int);
+
+		intTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 7");
 		EXPECT_TRUE(intTable.SelectNext());
 		EXPECT_FALSE(intTable.IsColumnNull(0));
 		EXPECT_FALSE(intTable.IsColumnNull(1));
 		EXPECT_FALSE(intTable.IsColumnNull(2));
 		EXPECT_FALSE(intTable.IsColumnNull(3));
-		EXPECT_EQ(1, intTable.m_idIntegerTable);
-		EXPECT_EQ(2, intTable.m_col2);
-		EXPECT_EQ(3, intTable.m_col3);
-		EXPECT_EQ(4, intTable.m_col4);
-
-		intTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.integertable WHERE idintegertable = 2");
-		EXPECT_TRUE(intTable.SelectNext());
-		EXPECT_FALSE(intTable.IsColumnNull(0));
-		EXPECT_FALSE(intTable.IsColumnNull(1));
-		EXPECT_TRUE(intTable.IsColumnNull(2));
-		EXPECT_FALSE(intTable.IsColumnNull(3));
-		EXPECT_EQ(2, intTable.m_idIntegerTable);
-		EXPECT_EQ(20, intTable.m_col2);
-		EXPECT_EQ(40, intTable.m_col4);
+		EXPECT_EQ(7, intTable.m_idIntegerTypes);
+		EXPECT_EQ(-13, intTable.m_smallInt);
+		EXPECT_EQ(26, intTable.m_int);
+		EXPECT_EQ(10502, intTable.m_bigInt);
 	}
 
 
@@ -486,28 +485,38 @@ namespace exodbctest
 		// Selecting using the '*' will not work if not columns are bound:
 		// we bind column 1, 2 and 4, but in column 4 we will get the result of the 
 		// not bound column 3 if we select using '*':
-		MIncompleteIntegerTable intTable(m_pDb);
+		Table intTable(m_pDb, TableAccessFlag::AF_READ, ToDbCase(GetTableName(TableId::INTEGERTYPES)));
+
+		SQLINTEGER idIntegerTypes = 0;
+		SQLSMALLINT smallInt = 0;
+		SQLBIGINT bigInt = 0;
+
+		intTable.SetColumn(0, ToDbCase(u8"idintegertypes"), SQL_INTEGER, &idIntegerTypes, SQL_C_SLONG, sizeof(idIntegerTypes), ColumnFlag::CF_SELECT | ColumnFlag::CF_PRIMARY_KEY);
+		intTable.SetColumn(1, ToDbCase(u8"tsmallint"), SQL_INTEGER, &smallInt, SQL_C_SSHORT, sizeof(smallInt), ColumnFlag::CF_SELECT);
+		intTable.SetColumn(2, ToDbCase(u8"tbigint"), SQL_INTEGER, &bigInt, SQL_C_SBIGINT, sizeof(bigInt), ColumnFlag::CF_SELECT);
+
+
 		ASSERT_NO_THROW(intTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 
 		std::string sqlstmt;
-		intTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.integertable WHERE idintegertable = 1");
+		intTable.SelectBySqlStmt(u8"SELECT * FROM exodbc.integertypes WHERE idintegertypes = 7");
 		EXPECT_TRUE(intTable.SelectNext());
 		EXPECT_FALSE(intTable.IsColumnNull(0));
 		EXPECT_FALSE(intTable.IsColumnNull(1));
 		EXPECT_FALSE(intTable.IsColumnNull(2));
-		EXPECT_EQ(1, intTable.m_idIntegerTable);
-		EXPECT_EQ(2, intTable.m_col2);
-		EXPECT_EQ(3, intTable.m_col4);
+		EXPECT_EQ(7, idIntegerTypes);
+		EXPECT_EQ(-13, smallInt);
+		EXPECT_EQ(26, bigInt);
 
 		// But its not a problem if we list the columns to be selected
-		intTable.SelectBySqlStmt(u8"SELECT idintegertable, tint1, tint3 FROM exodbc.integertable WHERE idintegertable = 2");
+		intTable.SelectBySqlStmt(u8"SELECT idintegertypes, tsmallint, tbigint FROM exodbc.integertypes WHERE idintegertypes = 7");
 		EXPECT_TRUE(intTable.SelectNext());
 		EXPECT_FALSE(intTable.IsColumnNull(0));
 		EXPECT_FALSE(intTable.IsColumnNull(1));
 		EXPECT_FALSE(intTable.IsColumnNull(2));
-		EXPECT_EQ(2, intTable.m_idIntegerTable);
-		EXPECT_EQ(20, intTable.m_col2);
-		EXPECT_EQ(40, intTable.m_col4);
+		EXPECT_EQ(7, idIntegerTypes);
+		EXPECT_EQ(-13, smallInt);
+		EXPECT_EQ(10502, bigInt);
 	}
 
 

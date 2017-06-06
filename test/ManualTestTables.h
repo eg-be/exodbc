@@ -170,37 +170,6 @@ namespace exodbctest
 	};
 
 
-	// IntegerTable
-	// ------------
-	class MIntegerTable : public exodbc::Table
-	{
-	public:
-		MIntegerTable(exodbc::ConstDatabasePtr pDb);
-		virtual ~MIntegerTable() {};
-
-		SQLINTEGER	m_idIntegerTable;
-		SQLINTEGER	m_col2;
-		SQLINTEGER	m_col3;
-		SQLINTEGER	m_col4;
-	};
-
-
-	// IncompleIntegerTable
-	// --------------------
-	class MIncompleteIntegerTable : public exodbc::Table
-	{
-	public:
-		MIncompleteIntegerTable(exodbc::ConstDatabasePtr pDb);
-		virtual ~MIncompleteIntegerTable() {};
-
-		SQLINTEGER	m_idIntegerTable;
-		SQLINTEGER	m_col2;
-		// we do not bind col3 and have a gap
-		//SQLINTEGER	m_col3;
-		SQLINTEGER	m_col4;
-	};
-
-
 	// NotExistingTable
 	// ----------------
 	class MNotExistingTable : public exodbc::Table
