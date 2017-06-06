@@ -27,3 +27,4 @@ INSERT [exodbc].[numerictypes] ([idnumerictypes], [tdecimal_18_0], [tdecimal_18_
 INSERT [exodbc].[numerictypes] ([idnumerictypes], [tdecimal_18_0], [tdecimal_18_10], [tdecimal_5_3]) VALUES (4, NULL, CAST(0.0000000000 AS Decimal(18, 10)), NULL)
 INSERT [exodbc].[numerictypes] ([idnumerictypes], [tdecimal_18_0], [tdecimal_18_10], [tdecimal_5_3]) VALUES (5, NULL, CAST(12345678.9012345678 AS Decimal(18, 10)), NULL)
 INSERT [exodbc].[numerictypes] ([idnumerictypes], [tdecimal_18_0], [tdecimal_18_10], [tdecimal_5_3]) VALUES (6, NULL, CAST(-12345678.9012345678 AS Decimal(18, 10)), NULL)
+INSERT [exodbc].[numerictypes] ([idnumerictypes], [tdecimal_18_0], [tdecimal_18_10], [tdecimal_5_3]) VALUES (7, NULL, CAST(123.0567 AS Decimal(18, 10)), NULL)
