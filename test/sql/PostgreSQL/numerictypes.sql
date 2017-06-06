@@ -14,4 +14,4 @@ INSERT INTO exodbc.numerictypes (idnumerictypes, tdecimal_18_0, tdecimal_18_10, 
 INSERT INTO exodbc.numerictypes (idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3) VALUES (4,NULL,0.0000000000,NULL);
 INSERT INTO exodbc.numerictypes (idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3) VALUES (5,NULL,12345678.9012345678,NULL);
 INSERT INTO exodbc.numerictypes (idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3) VALUES (6,NULL,-12345678.9012345678,NULL);
-INSERT INTO exodbc.numerictypes (idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3) VALUES (6,NULL,123.0567,NULL);
+INSERT INTO exodbc.numerictypes (idnumerictypes, tdecimal_18_0, tdecimal_18_10, tdecimal_5_3) VALUES (7,NULL,123.0567,NULL);
