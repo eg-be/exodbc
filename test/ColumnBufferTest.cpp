@@ -607,7 +607,12 @@ namespace exodbctest
 		f(1);
 		const SQL_NUMERIC_STRUCT& num = num18_0_Col.GetValue();
 		SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
-		EXPECT_EQ(18, num.precision);
+		// See #287
+		if(m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+			EXPECT_EQ(0, num.precision);
+		else
+			EXPECT_EQ(18, num.precision);
+
 		EXPECT_EQ(0, num.scale);
 		EXPECT_EQ(1, num.sign);
 		EXPECT_EQ(0, *pVal);
@@ -709,7 +714,13 @@ namespace exodbctest
 			f(101);
 			const SQL_NUMERIC_STRUCT& num = num18_0_Col.GetValue();
 			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
-			EXPECT_EQ(18, num.precision);
+
+			// See #287
+			if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+				EXPECT_EQ(0, num.precision);
+			else
+				EXPECT_EQ(18, num.precision);
+
 			EXPECT_EQ(0, num.scale);
 			EXPECT_EQ(1, num.sign);
 			EXPECT_EQ(0, *pVal);
@@ -744,7 +755,12 @@ namespace exodbctest
 		f(4);
 		const SQL_NUMERIC_STRUCT& num = num18_10_Col.GetValue();
 		SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
-		EXPECT_EQ(18, num.precision);
+		// See #287
+		if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+			EXPECT_EQ(10, num.precision);
+		else
+			EXPECT_EQ(18, num.precision);
+		
 		EXPECT_EQ(10, num.scale);
 		EXPECT_EQ(1, num.sign);
 		EXPECT_EQ(0, *pVal);
@@ -762,7 +778,12 @@ namespace exodbctest
 		EXPECT_EQ(123456789012345678, *pVal);
 
 		f(7);
-		EXPECT_EQ(18, num.precision);
+		// See #287
+		if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+			EXPECT_EQ(13, num.precision);
+		else
+			EXPECT_EQ(18, num.precision);
+
 		EXPECT_EQ(10, num.scale);
 		EXPECT_EQ(1, num.sign);
 		EXPECT_EQ(1230567000000, *pVal);
@@ -855,7 +876,13 @@ namespace exodbctest
 			f(101);
 			const SQL_NUMERIC_STRUCT& num = num18_10_Col.GetValue();
 			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
-			EXPECT_EQ(18, num.precision);
+
+			// See #287
+			if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+				EXPECT_EQ(10, num.precision);
+			else
+				EXPECT_EQ(18, num.precision);
+
 			EXPECT_EQ(10, num.scale);
 			EXPECT_EQ(1, num.sign);
 			EXPECT_EQ(0, *pVal);
@@ -984,7 +1011,13 @@ namespace exodbctest
 			f(101);
 			const SQL_NUMERIC_STRUCT& num = num5_3_Col.GetValue();
 			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
-			EXPECT_EQ(5, num.precision);
+
+			// See #287
+			if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+				EXPECT_EQ(3, num.precision);
+			else
+				EXPECT_EQ(5, num.precision);
+
 			EXPECT_EQ(3, num.scale);
 			EXPECT_EQ(1, num.sign);
 			EXPECT_EQ(0, *pVal);
@@ -2409,7 +2442,12 @@ namespace exodbctest
 
 		f(1);
 		SQLBIGINT* pVal = (SQLBIGINT*)&buffer.val;
-		EXPECT_EQ(18, buffer.precision);
+		// See #287
+		if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+			EXPECT_EQ(0, buffer.precision);
+		else
+			EXPECT_EQ(18, buffer.precision);
+
 		EXPECT_EQ(0, buffer.scale);
 		EXPECT_EQ(1, buffer.sign);
 		EXPECT_EQ(0, *pVal);
@@ -2443,7 +2481,12 @@ namespace exodbctest
 
 		f(4);
 		SQLBIGINT* pVal = (SQLBIGINT*)&buffer.val;
-		EXPECT_EQ(18, buffer.precision);
+		// See #287
+		if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+			EXPECT_EQ(10, buffer.precision);
+		else
+			EXPECT_EQ(18, buffer.precision);
+
 		EXPECT_EQ(10, buffer.scale);
 		EXPECT_EQ(1, buffer.sign);
 		EXPECT_EQ(0, *pVal);
@@ -2461,7 +2504,12 @@ namespace exodbctest
 		EXPECT_EQ(123456789012345678, *pVal);
 
 		f(7);
-		EXPECT_EQ(18, buffer.precision);
+		// See #287
+		if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+			EXPECT_EQ(13, buffer.precision);
+		else
+			EXPECT_EQ(18, buffer.precision);
+
 		EXPECT_EQ(10, buffer.scale);
 		EXPECT_EQ(1, buffer.sign);
 		EXPECT_EQ(1230567000000, *pVal);
@@ -3665,7 +3713,12 @@ namespace exodbctest
 			f(101);
 			const SQL_NUMERIC_STRUCT& num = num18_0_Col.GetValue();
 			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
-			EXPECT_EQ(18, num.precision);
+			// See #287
+			if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+				EXPECT_EQ(0, num.precision);
+			else
+				EXPECT_EQ(18, num.precision);
+
 			EXPECT_EQ(0, num.scale);
 			EXPECT_EQ(1, num.sign);
 			EXPECT_EQ(0, *pVal);
@@ -3768,7 +3821,12 @@ namespace exodbctest
 			f(101);
 			const SQL_NUMERIC_STRUCT& num = num18_10_Col.GetValue();
 			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
-			EXPECT_EQ(18, num.precision);
+			// See #287
+			if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+				EXPECT_EQ(10, num.precision);
+			else
+				EXPECT_EQ(18, num.precision);
+
 			EXPECT_EQ(10, num.scale);
 			EXPECT_EQ(1, num.sign);
 			EXPECT_EQ(0, *pVal);
@@ -3870,7 +3928,12 @@ namespace exodbctest
 			f(101);
 			const SQL_NUMERIC_STRUCT& num = num5_3_Col.GetValue();
 			SQLBIGINT* pVal = (SQLBIGINT*)&num.val;
-			EXPECT_EQ(5, num.precision);
+			// See #287
+			if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+				EXPECT_EQ(3, num.precision);
+			else
+				EXPECT_EQ(5, num.precision);
+
 			EXPECT_EQ(3, num.scale);
 			EXPECT_EQ(1, num.sign);
 			EXPECT_EQ(0, *pVal);
