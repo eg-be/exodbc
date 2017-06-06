@@ -761,6 +761,12 @@ namespace exodbctest
 		EXPECT_EQ(0, num.sign);
 		EXPECT_EQ(123456789012345678, *pVal);
 
+		f(7);
+		EXPECT_EQ(18, num.precision);
+		EXPECT_EQ(10, num.scale);
+		EXPECT_EQ(1, num.sign);
+		EXPECT_EQ(1230567000000, *pVal);
+
 		f(1);
 		EXPECT_TRUE(num18_10_Col.IsNull());
 	}
@@ -2453,6 +2459,12 @@ namespace exodbctest
 		EXPECT_EQ(10, buffer.scale);
 		EXPECT_EQ(0, buffer.sign);
 		EXPECT_EQ(123456789012345678, *pVal);
+
+		f(7);
+		EXPECT_EQ(18, buffer.precision);
+		EXPECT_EQ(10, buffer.scale);
+		EXPECT_EQ(1, buffer.sign);
+		EXPECT_EQ(1230567000000, *pVal);
 
 		f(1);
 		EXPECT_TRUE(num18_10_Col.IsNull());

@@ -32,6 +32,7 @@ namespace exodbc
 		, m_infoType(iType)
 		, m_valueType(vType)
 		, m_valueRead(false)
+		, m_unsupported(false)
 	{
 		switch (m_valueType)
 		{
@@ -270,7 +271,7 @@ namespace exodbc
 			RegisterProperty(SQL_STATIC_CURSOR_ATTRIBUTES2, u8"SQL_STATIC_CURSOR_ATTRIBUTES2", iType, vt::UInt);
 
 			// Mark properties known not to exist with certain drivers / databases:
-			if (GetDbms() != DatabaseProduct::POSTGRESQL)
+			if (GetDbms() == DatabaseProduct::POSTGRESQL)
 			{
 				MarkAsUnsupported(SQL_MAX_ASYNC_CONCURRENT_STATEMENTS);
 			}
@@ -329,7 +330,7 @@ namespace exodbc
 			RegisterProperty(SQL_DESCRIBE_PARAMETER, u8"SQL_DESCRIBE_PARAMETER", iType, vt::String_N_Y);
 
 			// Mark properties known not to exist with certain drivers / databases:
-			if (GetDbms() != DatabaseProduct::POSTGRESQL)
+			if (GetDbms() == DatabaseProduct::POSTGRESQL)
 			{
 				MarkAsUnsupported(SQL_CURSOR_SENSITIVITY);
 			}
@@ -479,7 +480,7 @@ namespace exodbc
 			RegisterProperty(SQL_CONVERT_INTERVAL_YEAR_MONTH, u8"SQL_CONVERT_INTERVAL_YEAR_MONTH", iType, vt::UInt);
 			RegisterProperty(SQL_CONVERT_INTERVAL_DAY_TIME, u8"SQL_CONVERT_INTERVAL_DAY_TIME", iType, vt::UInt);
 			// Mark properties known not to exist with certain drivers / databases:
-			if (GetDbms() != DatabaseProduct::POSTGRESQL)
+			if (GetDbms() == DatabaseProduct::POSTGRESQL)
 			{
 				MarkAsUnsupported(SQL_CONVERT_INTERVAL_YEAR_MONTH);
 				MarkAsUnsupported(SQL_CONVERT_INTERVAL_DAY_TIME);
