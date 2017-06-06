@@ -168,6 +168,7 @@ namespace exodbctest
 		switch(m_pDb->GetDbms())
 		{
 		case DatabaseProduct::DB2:
+		case DatabaseProduct::POSTGRESQL:
 			fraction = 123456000;
 			break;
 		case DatabaseProduct::MS_SQL_SERVER:
