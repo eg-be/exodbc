@@ -317,6 +317,10 @@ namespace exodbctest
 		{
 			EXPECT_TRUE(m_pDb->GetDbms() == DatabaseProduct::ACCESS);
 		}
+		else if (boost::algorithm::find_first(g_odbcInfo.m_dsn, u8"Postgres"))
+		{
+			EXPECT_TRUE(m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL);
+		}
 		else
 		{
 			EXPECT_EQ(std::string(u8"Unknown DSN name"), g_odbcInfo.m_dsn);
