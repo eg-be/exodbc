@@ -73,13 +73,16 @@ namespace exodbc
 
 		ValueType GetValueType() const noexcept { return m_valueType; };
 		InfoType GetInfoType() const noexcept { return m_infoType; };
-		Value GetValue() const noexcept { return m_value; };
+		Value GetValue() const noexcept;
 		SQLUSMALLINT GetInfoId() const noexcept { return m_infoId; };
 		std::string GetName() const noexcept { return m_infoName; };
 		bool GetValueRead() const noexcept { return m_valueRead; };
 
 		void ReadProperty(ConstSqlDbcHandlePtr pHdbc);
 		std::string GetStringValue() const;
+
+		bool GetIsUnsupported() const noexcept { return m_unsupported; };
+		void SetUnsupported(bool isUnsupported) noexcept { m_unsupported = isUnsupported; };
 
 	private:
 		/*!
@@ -114,6 +117,7 @@ namespace exodbc
 		ValueType m_valueType;
 		Value m_value;
 		bool m_valueRead;
+		bool m_unsupported;
 	};
 
 
@@ -336,6 +340,8 @@ namespace exodbc
 		void RegisterConversionProperties(OdbcVersion odbcVersion);
 
 		void RegisterProperty(SQLUSMALLINT id, const std::string& name, SqlInfoProperty::InfoType infoType, SqlInfoProperty::ValueType valueType);
+
+		void MarkAsUnsupported(SQLUSMALLINT infoId);
 
 		typedef std::map<SQLUSMALLINT, SqlInfoProperty> PropsMap;
 		PropsMap m_props;

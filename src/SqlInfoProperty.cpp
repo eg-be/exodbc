@@ -122,6 +122,16 @@ namespace exodbc
 	}
 
 
+	SqlInfoProperty::Value SqlInfoProperty::GetValue() const noexcept
+	{
+		if (m_unsupported)
+		{
+			LOG_WARNING(boost::str(boost::format(u8"Property %s (%d) is marked as unsupported for current database, its value has not been read") % GetName() % GetInfoId()));
+		}
+		return m_value;
+	}
+
+
 	std::string SqlInfoProperty::GetStringValue() const
 	{
 		return boost::apply_visitor(SqlInfoPropertyStringValueVisitor(), m_value);
@@ -253,12 +263,17 @@ namespace exodbc
 			RegisterProperty(SQL_INFO_SCHEMA_VIEWS, u8"SQL_INFO_SCHEMA_VIEWS", iType, vt::UInt);
 			RegisterProperty(SQL_KEYSET_CURSOR_ATTRIBUTES1, u8"SQL_KEYSET_CURSOR_ATTRIBUTES1", iType, vt::UInt);
 			RegisterProperty(SQL_KEYSET_CURSOR_ATTRIBUTES2, u8"SQL_KEYSET_CURSOR_ATTRIBUTES2", iType, vt::UInt);
-			if(GetDbms() != DatabaseProduct::POSTGRESQL)
-				RegisterProperty(SQL_MAX_ASYNC_CONCURRENT_STATEMENTS, u8"SQL_MAX_ASYNC_CONCURRENT_STATEMENTS", iType, vt::UInt);
+			RegisterProperty(SQL_MAX_ASYNC_CONCURRENT_STATEMENTS, u8"SQL_MAX_ASYNC_CONCURRENT_STATEMENTS", iType, vt::UInt);
 			RegisterProperty(SQL_PARAM_ARRAY_ROW_COUNTS, u8"SQL_PARAM_ARRAY_ROW_COUNTS", iType, vt::UInt);
 			RegisterProperty(SQL_PARAM_ARRAY_SELECTS, u8"SQL_PARAM_ARRAY_SELECTS", iType, vt::UInt);
 			RegisterProperty(SQL_STATIC_CURSOR_ATTRIBUTES1, u8"SQL_STATIC_CURSOR_ATTRIBUTES1", iType, vt::UInt);
 			RegisterProperty(SQL_STATIC_CURSOR_ATTRIBUTES2, u8"SQL_STATIC_CURSOR_ATTRIBUTES2", iType, vt::UInt);
+
+			// Mark properties known not to exist with certain drivers / databases:
+			if (GetDbms() != DatabaseProduct::POSTGRESQL)
+			{
+				MarkAsUnsupported(SQL_MAX_ASYNC_CONCURRENT_STATEMENTS);
+			}
 		}
 
 		if (odbcVersion >= OdbcVersion::V_3_8)
@@ -310,10 +325,14 @@ namespace exodbc
 		if (odbcVersion >= OdbcVersion::V_3)
 		{
 			RegisterProperty(SQL_COLLATION_SEQ, u8"SQL_COLLATION_SEQ", iType, vt::String_Any);
-			if (GetDbms() != DatabaseProduct::POSTGRESQL)
-				RegisterProperty(SQL_CURSOR_SENSITIVITY, u8"SQL_CURSOR_SENSITIVITY", iType, vt::UInt);
+			RegisterProperty(SQL_CURSOR_SENSITIVITY, u8"SQL_CURSOR_SENSITIVITY", iType, vt::UInt);
 			RegisterProperty(SQL_DESCRIBE_PARAMETER, u8"SQL_DESCRIBE_PARAMETER", iType, vt::String_N_Y);
 
+			// Mark properties known not to exist with certain drivers / databases:
+			if (GetDbms() != DatabaseProduct::POSTGRESQL)
+			{
+				MarkAsUnsupported(SQL_CURSOR_SENSITIVITY);
+			}
 		}
 
 	}
@@ -457,12 +476,28 @@ namespace exodbc
 
 		if (odbcVersion >= OdbcVersion::V_3)
 		{
+			RegisterProperty(SQL_CONVERT_INTERVAL_YEAR_MONTH, u8"SQL_CONVERT_INTERVAL_YEAR_MONTH", iType, vt::UInt);
+			RegisterProperty(SQL_CONVERT_INTERVAL_DAY_TIME, u8"SQL_CONVERT_INTERVAL_DAY_TIME", iType, vt::UInt);
+			// Mark properties known not to exist with certain drivers / databases:
 			if (GetDbms() != DatabaseProduct::POSTGRESQL)
 			{
-				RegisterProperty(SQL_CONVERT_INTERVAL_YEAR_MONTH, u8"SQL_CONVERT_INTERVAL_YEAR_MONTH", iType, vt::UInt);
-				RegisterProperty(SQL_CONVERT_INTERVAL_DAY_TIME, u8"SQL_CONVERT_INTERVAL_DAY_TIME", iType, vt::UInt);
+				MarkAsUnsupported(SQL_CONVERT_INTERVAL_YEAR_MONTH);
+				MarkAsUnsupported(SQL_CONVERT_INTERVAL_DAY_TIME);
 			}
 		}
+	}
+
+
+	void SqlInfoProperties::MarkAsUnsupported(SQLUSMALLINT infoId)
+	{
+		PropsMap::iterator it = m_props.find(infoId);
+		if (it == m_props.end())
+		{
+			NotFoundException nfe(boost::str(boost::format(u8"Property with id %d is not registered") % infoId));
+			SET_EXCEPTION_SOURCE(nfe);
+			throw nfe;
+		}
+		it->second.SetUnsupported(true);
 	}
 
 
@@ -524,13 +559,21 @@ namespace exodbc
 		for (PropsMap::iterator it = m_props.begin(); it != m_props.end(); ++it)
 		{
 			SqlInfoProperty& prop = it->second;
-			try
+			if (!prop.GetIsUnsupported())
 			{
-				prop.ReadProperty(pHdbc);
+				try
+				{
+					prop.ReadProperty(pHdbc);
+				}
+				catch (const SqlResultException& ex)
+				{
+					LOG_WARNING(boost::str(boost::format(u8"Failed to read property %s (%d): %s") % prop.GetName() % prop.GetInfoId() % ex.ToString()));
+				}
 			}
-			catch (const SqlResultException& ex)
+			else
 			{
-				LOG_WARNING(boost::str(boost::format(u8"Failed to read property %s (%d): %s") % prop.GetName() % prop.GetInfoId() % ex.ToString()));
+				LOG_DEBUG(boost::str(boost::format(u8"Skipping reading property %s (%d) because it is marked as unsupported for current database") 
+					% prop.GetName() % prop.GetInfoId()));
 			}
 		}
 	}
