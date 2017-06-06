@@ -1231,9 +1231,10 @@ namespace exodbctest
 				fraction = 123000000;
 				decimalDigits = 3;
 			}
-			if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+			if (m_pDb->GetDbms() == DatabaseProduct::DB2 || m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
 			{
 				// DB2 has a max precision of 6 for the fraction
+				// and for PostgreSQL we have 6 digits to
 				fraction = 123456000;
 				decimalDigits = 6;
 			}
@@ -2368,9 +2369,10 @@ namespace exodbctest
 				fraction = 123000000;
 				decimalDigits = 3;
 			}
-			if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+			if (m_pDb->GetDbms() == DatabaseProduct::DB2 || m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
 			{
 				// DB2 has a max precision of 6 for the fraction
+				// and for PostgreSQL we have 6 digits to
 				fraction = 123456000;
 				decimalDigits = 6;
 			}

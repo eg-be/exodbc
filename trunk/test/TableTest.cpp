@@ -1387,7 +1387,7 @@ namespace exodbctest
 		{
 			EXPECT_EQ(3, pTs->GetDecimalDigits());
 		}
-		else if (m_pDb->GetDbms() == DatabaseProduct::DB2)
+		else if (m_pDb->GetDbms() == DatabaseProduct::DB2 || m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
 		{
 			EXPECT_EQ(6, pTs->GetDecimalDigits());
 		}
