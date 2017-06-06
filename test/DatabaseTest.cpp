@@ -11,7 +11,6 @@
 #include "DatabaseTest.h"
 
 // Same component headers
-#include "ManualTestTables.h"
 #include "exOdbcTestHelpers.h"
 
 // Other headers
