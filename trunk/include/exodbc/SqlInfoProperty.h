@@ -303,12 +303,6 @@ namespace exodbc
 
 
 		/*!
-		* \brief Returns true if SQL_SO_FORWARD_ONLY is set in the bitmask value of property SQL_SCROLL_OPTIONS.
-		*/
-		bool GetForwardOnlyCursors() const;
-
-
-		/*!
 		* \brief Tries to extract a matching OdbcVersion from a string in the form '##.##'.
 		*		Returns OdbcVersion::UNKOWN if parsing fails.
 		*/

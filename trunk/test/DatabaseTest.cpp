@@ -406,4 +406,23 @@ namespace exodbctest
 		GetDataWrapper::GetData(pDb->GetExecSqlHandle(), 1, SQL_C_SLONG, &count, sizeof(count), &cb, NULL);
 		EXPECT_EQ(0, count);
 	}
+
+
+	TEST_F(DatabaseTest, SupportsScrollableCursor)
+	{
+		// Test that for Database where we think no support is built-in, false is returned
+		DatabasePtr pDb = OpenTestDb();
+		bool scrollableCursor = pDb->SupportsScrollableCursor();
+
+		if (pDb->GetDbms() == DatabaseProduct::ACCESS
+			|| pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+		{
+			EXPECT_FALSE(scrollableCursor);
+		}
+		else
+		{
+			EXPECT_TRUE(scrollableCursor);
+		}
+	}
+
 } //namespace exodbc

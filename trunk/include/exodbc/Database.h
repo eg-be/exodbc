@@ -429,10 +429,25 @@ namespace exodbc
 		*/
 		DatabaseCatalogPtr GetDbCatalog() const;
 
+
+		/*!
+		* \brief During Open() it is tested if scrollable cursors can be enabled
+		* on a statement handle. The value is remembered, and returned here.
+		* \return True if Database supports scrollable cursors by setting SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE.
+		*/
+		bool SupportsScrollableCursor() const;
+
+
 		// Private stuff
 		// -------------
 	private:
 		
+		/*!
+		* \brief Allocates a statement and tries to enable scrollable cursors.
+		* Returns true if enabling scrollable cursor succeeded, false otherwise.
+		*/
+		bool TestScrollableCursorSupport();
+
 		/*!
 		* \brief	Returns the SqlStmtHandlePtr used by the ExecSql function.
 		*/
@@ -473,11 +488,12 @@ namespace exodbc
 		std::string		m_outConnectionStr;///< Connection string returned by the database when a connection is successfully OpenImpled
 
 		// ODBC handles created by the Database
-
 		SqlDbcHandlePtr m_pHDbc;			///< ODBC DB Connection handle
 		SqlStmtHandlePtr m_pHStmtExecSql;	///< ODBC Statement handle used for the function ExecSql()
 
 		CommitMode		m_commitMode;	///< Commit Mode set currently
+
+		bool			m_supportsScrollableCursor;	///< During Open(), it is tested if scrollable cursor can be set and the value is remembered.
 
 	};  // Database
 

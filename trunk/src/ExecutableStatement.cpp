@@ -35,7 +35,7 @@ namespace exodbc
 	{ }
 
 
-	ExecutableStatement::ExecutableStatement(ConstDatabasePtr pDb, bool forwardOnlyCursor /* = false */)
+	ExecutableStatement::ExecutableStatement(ConstDatabasePtr pDb, bool forwardOnlyCursor)
 		: m_pDb(NULL)
 		, m_isPrepared(false)
 		, m_forwardOnlyCursors(false)
@@ -43,6 +43,17 @@ namespace exodbc
 		, m_boundParams(false)
 	{
 		Init(pDb, forwardOnlyCursor);
+	}
+
+
+	ExecutableStatement::ExecutableStatement(ConstDatabasePtr pDb)
+		: m_pDb(NULL)
+		, m_isPrepared(false)
+		, m_forwardOnlyCursors(false)
+		, m_boundColumns(false)
+		, m_boundParams(false)
+	{
+		Init(pDb, ! pDb->SupportsScrollableCursor());
 	}
 
 
@@ -84,13 +95,16 @@ namespace exodbc
 		m_pDb = pDb;
 		m_pHStmt = std::make_shared<SqlStmtHandle>(m_pDb->GetSqlDbcHandle());
 
-		if (DatabaseSupportsCursorOptions(m_pDb->GetDbms()))
+		// If we fail during init, go back into state before init was called
+		try
 		{
 			SetCursorOptions(forwardOnlyCursors);
 		}
-		else
+		catch (const Exception& ex)
 		{
-			m_forwardOnlyCursors = true;
+			HIDE_UNUSED(ex);
+			Reset();
+			throw;
 		}
 	}
 
@@ -126,13 +140,13 @@ namespace exodbc
 			SQLULEN currentValue;
 			ret = SQLGetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)&currentValue, sizeof(currentValue), 0);
 			THROW_IFN_SUCCEEDED_MSG(SQLGetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to get Statement Attr SQL_ATTR_CURSOR_SCROLLABLE");
-			if (currentValue != SQL_NONSCROLLABLE && forwardOnlyCursors || m_pDb->GetProperties().GetForwardOnlyCursors())
+			if (forwardOnlyCursors && currentValue != SQL_NONSCROLLABLE)
 			{
 				ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_NONSCROLLABLE, 0);
 				THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
 				m_forwardOnlyCursors = true;
 			}
-			else if(currentValue != SQL_SCROLLABLE)
+			else if(!forwardOnlyCursors && currentValue != SQL_SCROLLABLE)
 			{
 				ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_SCROLLABLE, 0);
 				THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
@@ -141,8 +155,17 @@ namespace exodbc
 		}
 		catch (const SqlResultException& sre)
 		{
-			LOG_WARNING(boost::str(boost::format(u8"Failed to set Cursor Options, assuming forwardOnlyCursors: %s") % sre.ToString()));
-			m_forwardOnlyCursors = true;
+			// If we failed because the driver does not support scrollable cursors, simply log a warning
+			// else re-throw exception.
+			if (sre.HasErrorInfo(ErrorHelper::SQLSTATE_OPTIONAL_FEATURE_NOT_IMPLEMENTED))
+			{
+				LOG_WARNING(boost::str(boost::format(u8"Failed to set Cursor Options because driver does not implement scrollable cursors, assuming forwardOnlyCursors: %s") % sre.ToString()));
+				m_forwardOnlyCursors = true;
+			}
+			else
+			{
+				throw;
+			}
 		}
 	}
 

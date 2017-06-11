@@ -1079,9 +1079,10 @@ namespace exodbc
 			m_openFlags.Set(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS);
 		}
 
-		// Access and Excel seem to support only forward cursors, so activate that flag
-		if (m_pDb->GetDbms() == DatabaseProduct::ACCESS || m_pDb->GetDbms() == DatabaseProduct::EXCEL)
+		// If the Database does not support scrollable cursors, do not even try to enable them
+		if ( ! m_pDb->SupportsScrollableCursor())
 		{
+			LOG_DEBUG(boost::str(boost::format(u8"Enabling flag TOF_FORWARD_ONLY_CURSORS, because Database does not suppport scrollable cursors")));
 			m_openFlags.Set(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS);
 		}
 

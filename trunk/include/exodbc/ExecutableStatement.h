@@ -47,18 +47,6 @@ namespace exodbc
 	class EXODBCAPI ExecutableStatement
 	{
 	public:
-
-		/*!
-		* A static lists of drivers that do not support to set Cursor Options.
-		* Unknown databases are expected to support it, so true is returned.
-		* Access and Excel are known for not supporting.
-		*/
-		static bool DatabaseSupportsCursorOptions(DatabaseProduct dbms) noexcept
-		{
-			return !(dbms == DatabaseProduct::ACCESS || dbms == DatabaseProduct::EXCEL);
-		}
-
-
 		/*!
 		* A static lists of drivers that do not support SqlDescribeParam.
 		* Unknown databases are expected to support it, so true is returned.
@@ -81,11 +69,20 @@ namespace exodbc
 		*/
 		ExecutableStatement();
 
+
 		/*!
-		* \brief Constructs a statement from the given Database.
+		* \brief Constructs a statement from the given Database, using passed value 
+		* to set scrollable cursors
 		*/
-		ExecutableStatement(ConstDatabasePtr pDb, bool forwardOnlyCursors = false);		
+		ExecutableStatement(ConstDatabasePtr pDb, bool forwardOnlyCursors);
 		
+
+		/*!
+		* \brief Constructs a statement from the given Database. Database is queried
+		* to determine support for scrollable cursors.
+		*/
+		ExecutableStatement(ConstDatabasePtr pDb);
+
 		
 		// Prevent copies.
 		ExecutableStatement(const ExecutableStatement& other) = delete;
