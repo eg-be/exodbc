@@ -751,15 +751,6 @@ namespace exodbc
 	}
 
 
-	bool SqlInfoProperties::GetForwardOnlyCursors() const
-	{
-		SqlInfoProperty prop = GetProperty(SQL_SCROLL_OPTIONS);
-		SQLUINTEGER value = boost::get<SQLUINTEGER>(prop.GetValue());
-		value &= ~SQL_SO_FORWARD_ONLY;
-		return value == 0;
-	}
-
-
 	string SqlInfoProperties::GetSearchPatternEscape() const
 	{
 		SqlInfoProperty prop = GetProperty(SQL_SEARCH_PATTERN_ESCAPE);

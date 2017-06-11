@@ -37,6 +37,7 @@ namespace exodbc
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
 		, m_commitMode(CommitMode::UNKNOWN)
+		, m_supportsScrollableCursor(false)
 	{
 	}
 
@@ -49,6 +50,7 @@ namespace exodbc
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
 		, m_commitMode(CommitMode::UNKNOWN)
+		, m_supportsScrollableCursor(false)
 	{
 		// Allocate the DBC-Handle and set the member m_pEnv
 		Init(pEnv);
@@ -63,6 +65,7 @@ namespace exodbc
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
 		, m_commitMode(CommitMode::UNKNOWN)
+		, m_supportsScrollableCursor(false)
 	{
 		if (other.GetEnvironment() != NULL)
 		{
@@ -148,6 +151,9 @@ namespace exodbc
 
 			// Set Connection Options
 			SetConnectionAttributes();
+
+			// Test if we can have scrollable cursors
+			m_supportsScrollableCursor = TestScrollableCursorSupport();
 
 			// Default to manual commit, if the Database is able to set a commit mode. Anyway read the currently active mode, we need to know that
 			m_commitMode = ReadCommitMode();
@@ -335,6 +341,39 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		return m_pDbCatalog;
+	}
+
+
+	bool Database::SupportsScrollableCursor() const
+	{
+		exASSERT(IsOpen());
+		return m_supportsScrollableCursor;
+	}
+
+
+	bool Database::TestScrollableCursorSupport()
+	{
+		// Do not asser for IsOpen(), this function is called during Opening
+		// but we need a valid connection handle
+		exASSERT(m_pHDbc);
+		exASSERT(m_pHDbc->IsAllocated());
+		SqlStmtHandle hStmt(m_pHDbc);
+		SQLRETURN ret = SQLSetStmtAttr(hStmt.GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_SCROLLABLE, 0);
+		try
+		{
+			THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, hStmt.GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
+			return true;
+		}
+		catch (const SqlResultException& sre)
+		{
+			if (!sre.HasErrorInfo(ErrorHelper::SQLSTATE_OPTIONAL_FEATURE_NOT_IMPLEMENTED))
+			{
+				LOG_WARNING(boost::str(boost::format(u8"Unexpected error return while testing if scrollable cursor can be enabled, assuming no support for scrollable cursor: %s")
+					% sre.ToString()));
+			}
+			return false;
+		}
+		return false;
 	}
 
 
