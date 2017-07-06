@@ -81,8 +81,12 @@ namespace exodbc
 	{
 		string catalog = SQL_ALL_CATALOGS;
 		string empty = u8"";
-		TableInfoVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty), 
-				EXODBCSTR_TO_SQLAPICHARPTR(catalog), empty, MetadataMode::PatternOrOrdinary);
+		TableInfoVector tableInfos = SearchTables(
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(empty).c_str(), 
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(empty).c_str(),
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(catalog).c_str(),
+			empty, 
+			MetadataMode::PatternOrOrdinary);
 		vector<string> catalogs;
 		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
@@ -96,8 +100,11 @@ namespace exodbc
 	{
 		string schema = SQL_ALL_SCHEMAS;
 		string empty = u8"";
-		TableInfoVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(schema),
-			EXODBCSTR_TO_SQLAPICHARPTR(empty), empty, MetadataMode::PatternOrOrdinary);
+		TableInfoVector tableInfos = SearchTables(
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(empty).c_str(),
+			(SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(schema).c_str(),
+			(SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(empty).c_str(),
+			empty, MetadataMode::PatternOrOrdinary);
 		vector<string> schemas;
 		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
@@ -111,8 +118,11 @@ namespace exodbc
 	{
 		string type = SQL_ALL_TABLE_TYPES;
 		string empty = u8"";
-		TableInfoVector tableInfos = SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(empty), EXODBCSTR_TO_SQLAPICHARPTR(empty),
-			EXODBCSTR_TO_SQLAPICHARPTR(empty), type, MetadataMode::PatternOrOrdinary);
+		TableInfoVector tableInfos = SearchTables(
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(empty).c_str(),
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(empty).c_str(),
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(empty).c_str(),
+			type, MetadataMode::PatternOrOrdinary);
 		vector<string> types;
 		for (TableInfoVector::const_iterator it = tableInfos.begin(); it != tableInfos.end(); ++it)
 		{
@@ -204,9 +214,9 @@ namespace exodbc
 		const std::string& schemaName, 
 		const std::string& catalogName, const std::string& tableType /* = u8"" */) const
 	{
-		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
-			schemaName.empty() && !GetSupportsSchemas() ? nullptr : EXODBCSTR_TO_SQLAPICHARPTR(schemaName),
-			catalogName.empty() && !GetSupportsCatalogs() ? nullptr : EXODBCSTR_TO_SQLAPICHARPTR(catalogName),
+		return SearchTables((SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(tableName).c_str(),
+			schemaName.empty() && !GetSupportsSchemas() ? nullptr : (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(schemaName).c_str(),
+			catalogName.empty() && !GetSupportsCatalogs() ? nullptr : (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(catalogName).c_str(),
 			tableType, MetadataMode::PatternOrOrdinary);
 	}
 
@@ -217,16 +227,18 @@ namespace exodbc
 	{
 		if (schemaOrCatalogType == SchemaOrCatalogType::Schema)
 		{
-			return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
-				EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName),
+			return SearchTables(
+				(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(tableName).c_str(),
+				(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(schemaOrCatalogName).c_str(),
 				nullptr,
 				tableType, MetadataMode::PatternOrOrdinary);
 		}
 		else
 		{
-			return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
+			return SearchTables(
+				(SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(tableName).c_str(),
 				nullptr,
-				EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName),
+				(SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(schemaOrCatalogName).c_str(),
 				tableType, MetadataMode::PatternOrOrdinary);
 		}
 	}
@@ -248,16 +260,16 @@ namespace exodbc
 			SET_EXCEPTION_SOURCE(nae);
 			throw nae;
 		}
-		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName),
-			supportsSchemas ? EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName) : nullptr,
-			supportsCatalogs ? EXODBCSTR_TO_SQLAPICHARPTR(schemaOrCatalogName) : nullptr,
+		return SearchTables((SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(tableName).c_str(),
+			supportsSchemas ? (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(schemaOrCatalogName).c_str() : nullptr,
+			supportsCatalogs ? (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(schemaOrCatalogName).c_str() : nullptr,
 			tableType, MetadataMode::PatternOrOrdinary);
 	}
 
 
 	TableInfoVector DatabaseCatalog::SearchTables(const std::string& tableName, const std::string& tableType /* = u8"%" */) const
 	{
-		return SearchTables(EXODBCSTR_TO_SQLAPICHARPTR(tableName), nullptr, nullptr, tableType, MetadataMode::PatternOrOrdinary);
+		return SearchTables((SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(tableName).c_str(), nullptr, nullptr, tableType, MetadataMode::PatternOrOrdinary);
 	}
 
 
@@ -337,7 +349,7 @@ namespace exodbc
 			pCatalogName == nullptr ? NULL : pCatalogName, SQL_NTS,   // catname                 
 			pSchemaName == nullptr ? NULL : pSchemaName, SQL_NTS,   // schema name
 			pTableName == nullptr ? NULL : pTableName, SQL_NTS,	// table name
-			tableType.empty() ? NULL : EXODBCSTR_TO_SQLAPICHARPTR(tableType), SQL_NTS);
+			tableType.empty() ? NULL : (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(tableType).c_str(), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLTables, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		while ((ret = SQLFetch(m_pHStmt->GetHandle())) == SQL_SUCCESS)
@@ -354,18 +366,18 @@ namespace exodbc
 	ColumnInfoVector DatabaseCatalog::ReadColumnInfo(const TableInfo& tableInfo) const
 	{
 		return ReadColumnInfo(nullptr,
-			EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetName()),
-			tableInfo.HasSchema() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetSchema()) : nullptr,
-			tableInfo.HasCatalog() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetCatalog()) : nullptr,
+			(SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(tableInfo.GetName()).c_str(),
+			tableInfo.HasSchema() ? (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(tableInfo.GetSchema()).c_str() : nullptr,
+			tableInfo.HasCatalog() ? (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(tableInfo.GetCatalog()).c_str() : nullptr,
 			MetadataMode::PatternOrOrdinary);
 	}
 
 
 	PrimaryKeyInfoVector DatabaseCatalog::ReadPrimaryKeyInfo(const TableInfo& tableInfo) const
 	{
-		return ReadPrimaryKeyInfo(EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetName()),
-			tableInfo.HasSchema() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetSchema()) : nullptr,
-			tableInfo.HasCatalog() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetCatalog()) : nullptr,
+		return ReadPrimaryKeyInfo((SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(tableInfo.GetName()).c_str(),
+			tableInfo.HasSchema() ? (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(tableInfo.GetSchema()).c_str() : nullptr,
+			tableInfo.HasCatalog() ? (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(tableInfo.GetCatalog()).c_str() : nullptr,
 			MetadataMode::PatternOrOrdinary);
 	}
 
@@ -478,9 +490,9 @@ namespace exodbc
 	SpecialColumnInfoVector DatabaseCatalog::ReadSpecialColumnInfo(const TableInfo& tableInfo, SpecialColumnInfo::IdentifierType idType, 
 		SpecialColumnInfo::RowIdScope scope, bool includeNullableColumns /* = true */) const
 	{
-		return ReadSpecialColumnInfo(idType, EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetName()),
-			tableInfo.HasSchema() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetSchema()) : nullptr,
-			tableInfo.HasCatalog() ? EXODBCSTR_TO_SQLAPICHARPTR(tableInfo.GetCatalog()) : nullptr,
+		return ReadSpecialColumnInfo(idType, (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(tableInfo.GetName()).c_str(),
+			tableInfo.HasSchema() ? (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(tableInfo.GetSchema()).c_str() : nullptr,
+			tableInfo.HasCatalog() ? (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(tableInfo.GetCatalog()).c_str() : nullptr,
 			scope, includeNullableColumns, MetadataMode::PatternOrOrdinary);
 	}
 

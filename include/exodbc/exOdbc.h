@@ -31,12 +31,12 @@
 #ifdef _WIN32
 	#define SQLAPICHARTYPE SQLWCHAR
 	#define SQLAPICHARTYPENAME SQL_C_WCHAR
-    #define EXODBCSTR_TO_SQLAPICHARPTR(s) (SQLAPICHARTYPE*)(utf8ToUtf16(s).c_str())
+	#define EXODBCSTR_TO_SQLAPISTR(s) utf8ToUtf16(s)
     #define SQLAPICHARPTR_TO_EXODBCSTR(ws) utf16ToUtf8(ws)
 #else
 	#define SQLAPICHARTYPE SQLCHAR
 	#define SQLAPICHARTYPENAME SQL_C_CHAR
-	#define EXODBCSTR_TO_SQLAPICHARPTR(s) (SQLAPICHARTYPE*)(s.c_str())
+	#define EXODBCSTR_TO_SQLAPISTR(s) s
     #define SQLAPICHARPTR_TO_EXODBCSTR(s) std::string(reinterpret_cast<const char*>(s))
 #endif
 

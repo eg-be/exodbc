@@ -148,7 +148,7 @@ namespace exodbctest
 			string idColName = GetIdColumnName(m_tableId);
 			string sqlStmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s = %d") % m_columnQueryName % tableName % idColName % idValue);
 
-			SQLRETURN ret = SQLExecDirect(m_pStmt->GetHandle(), (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPICHARPTR(sqlStmt), SQL_NTS);
+			SQLRETURN ret = SQLExecDirect(m_pStmt->GetHandle(), (SQLAPICHARTYPE*)EXODBCSTR_TO_SQLAPISTR(sqlStmt).c_str(), SQL_NTS);
 			THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
 			ret = SQLFetch(m_pStmt->GetHandle());
 			THROW_IFN_SUCCESS(SQLFetch, ret, SQL_HANDLE_STMT, m_pStmt->GetHandle());
@@ -197,7 +197,7 @@ namespace exodbctest
 			tableName = PrependSchemaOrCatalogName(m_dbms, tableName);
 			string idColName = GetIdColumnName(m_tableId);
 			string sqlstmt = boost::str(boost::format(u8"INSERT INTO %s (%s, %s) VALUES(?, ?)") % tableName % idColName % m_columnQueryName);
-			SQLRETURN ret = SQLPrepare(pStmt->GetHandle(), EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt), SQL_NTS);
+			SQLRETURN ret = SQLPrepare(pStmt->GetHandle(), (SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(sqlstmt).c_str(), SQL_NTS);
 			THROW_IFN_SUCCESS(SQLPrepare, ret, SQL_HANDLE_STMT, pStmt->GetHandle());
 		}
 

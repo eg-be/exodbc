@@ -206,7 +206,7 @@ namespace exodbc
 		// StringLength1: [Input] Length of *InConnectionString, in characters if the string is Unicode, or bytes if string is ANSI or DBCS.
 		// BufferLength: [Input] Length of the *OutConnectionString buffer, in characters.
 		SQLRETURN ret = SQLDriverConnect(m_pHDbc->GetHandle(), parentWnd, 
-			EXODBCSTR_TO_SQLAPICHARPTR(m_inConnectionStr),
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(m_inConnectionStr).c_str(),
 			(SQLSMALLINT) m_inConnectionStr.length(), 
 			(SQLAPICHARTYPE*) outConnectBuffer, 
 			DB_MAX_CONNECTSTR_LEN, &outConnectBufferLen, parentWnd == NULL ? SQL_DRIVER_NOPROMPT : SQL_DRIVER_COMPLETE);
@@ -263,9 +263,9 @@ namespace exodbc
 
 		// Connect to the data source
 		SQLRETURN ret = SQLConnect(m_pHDbc->GetHandle(),
-			EXODBCSTR_TO_SQLAPICHARPTR(m_dsn), SQL_NTS,
-			EXODBCSTR_TO_SQLAPICHARPTR(m_uid), SQL_NTS,
-			EXODBCSTR_TO_SQLAPICHARPTR(m_authStr), SQL_NTS);
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(m_dsn).c_str(), SQL_NTS,
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(m_uid).c_str(), SQL_NTS,
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(m_authStr).c_str(), SQL_NTS);
 
 		// Do not reset an eventually allocated connection handle here.
 		// The destructor will reset it if one is allocated
@@ -454,7 +454,8 @@ namespace exodbc
 
 		StatementCloser::CloseStmtHandle(m_pHStmtExecSql, StatementCloser::Mode::IgnoreNotOpen);
 
-		retcode = SQLExecDirect(m_pHStmtExecSql->GetHandle(),  EXODBCSTR_TO_SQLAPICHARPTR(sqlStmt), SQL_NTS);
+		retcode = SQLExecDirect(m_pHStmtExecSql->GetHandle(),  
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(sqlStmt).c_str(), SQL_NTS);
 		if ( ! SQL_SUCCEEDED(retcode))
 		{
 			if (!(mode == ExecFailMode::NotFailOnNoData && retcode == SQL_NO_DATA))
