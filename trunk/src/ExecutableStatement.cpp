@@ -178,7 +178,8 @@ namespace exodbc
 		// Always discard pending results first
 		SelectClose();
 
-		SQLRETURN ret = SQLExecDirect(m_pHStmt->GetHandle(),  EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt), SQL_NTS);
+		SQLRETURN ret = SQLExecDirect(m_pHStmt->GetHandle(),  
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(sqlstmt).c_str(), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLExecDirect, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 	}
 
@@ -189,7 +190,8 @@ namespace exodbc
 		exASSERT(m_pHStmt->IsAllocated());
 		exASSERT(!sqlstmt.empty());
 
-		SQLRETURN ret = SQLPrepare(m_pHStmt->GetHandle(),  EXODBCSTR_TO_SQLAPICHARPTR(sqlstmt), SQL_NTS);
+		SQLRETURN ret = SQLPrepare(m_pHStmt->GetHandle(),  
+			(SQLAPICHARTYPE*) EXODBCSTR_TO_SQLAPISTR(sqlstmt).c_str(), SQL_NTS);
 		THROW_IFN_SUCCEEDED(SQLPrepare, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle());
 
 		m_isPrepared = true;
