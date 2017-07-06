@@ -25,7 +25,7 @@ namespace exodbc
 #ifdef _WIN32
 	const SQLAPICHARTYPE* DatabaseCatalog::m_pAllPattern = L"%";
 #else
-	const SQLAPICHARTYPE* DatabaseCatalog::m_pAllPattern = u8"%";
+	const SQLAPICHARTYPE* DatabaseCatalog::m_pAllPattern = (SQLAPICHARTYPE*) u8"%";
 #endif
 
 	// Construction
