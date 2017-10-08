@@ -692,7 +692,7 @@ namespace exodbc
 			bool remove = false;
 			if (!m_pDb->IsSqlTypeSupported(sqlType))
 			{
-				if (TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS))
+				if (removeUnsupported)
 				{
 					LOG_WARNING(boost::str(boost::format(u8"Defined Column %s (%d) has SQL Type %s (%d) set, but the Database did not report this type as a supported SQL Type. The Column is skipped due to the flag TOF_SKIP_UNSUPPORTED_COLUMNS") % queryName % it->first % Sql2StringHelper::SqlType2s(sqlType) % sqlType));
 					remove = true;
