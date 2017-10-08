@@ -1303,10 +1303,20 @@ namespace exodbctest
 		BinaryColumnBufferPtr pBlob16 = boost::get<BinaryColumnBufferPtr>(columns[1]);
 		BinaryColumnBufferPtr pVarblob20 = boost::get<BinaryColumnBufferPtr>(columns[2]);
 
-		EXPECT_EQ(16, pBlob16->GetBufferLength());
-		EXPECT_EQ(20, pVarblob20->GetBufferLength());
-		EXPECT_EQ(16, pBlob16->GetNrOfElements());
-		EXPECT_EQ(20, pVarblob20->GetNrOfElements());
+		if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
+		{
+			EXPECT_EQ(BinaryColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH, pBlob16->GetBufferLength());
+			EXPECT_EQ(BinaryColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH, pVarblob20->GetBufferLength());
+			EXPECT_EQ(BinaryColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH, pBlob16->GetNrOfElements());
+			EXPECT_EQ(BinaryColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH, pVarblob20->GetNrOfElements());
+		}
+		else
+		{
+			EXPECT_EQ(16, pBlob16->GetBufferLength());
+			EXPECT_EQ(20, pVarblob20->GetBufferLength());
+			EXPECT_EQ(16, pBlob16->GetNrOfElements());
+			EXPECT_EQ(20, pVarblob20->GetNrOfElements());
+		}
 	}
 
 
