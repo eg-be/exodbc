@@ -149,8 +149,16 @@ namespace exodbc
 		case SQL_BINARY:
 		case SQL_VARBINARY:
 		case SQL_LONGVARBINARY:
+		{
+			if (columnSize == SQL_NO_TOTAL)
+			{
+				LOG_WARNING(boost::str(boost::format(u8"Calculating display size for a buffer with SQL_NO_TOTAL (%d) as columnSize. Using %d as fallback for columnSize")
+					% SQL_NO_TOTAL % CharColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH));
+				columnSize = CharColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH;
+			}
 			exASSERT(columnSize > 0);
 			return (columnSize * 2) + 1;
+		}
 		case SQL_TYPE_DATE:
 		case SQL_DATE:
 			return 11 + 1;

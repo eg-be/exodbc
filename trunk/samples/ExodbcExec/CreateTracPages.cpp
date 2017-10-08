@@ -64,16 +64,6 @@ namespace exodbcexec
 	{
 		FileLogHandlerPtr pFileLogger = nullptr;
 
-		if (!args.empty())
-		{
-			LOG_INFO(boost::str(boost::format(u8"Writting all output for Trac to '%s'") % args[0]));
-			pFileLogger = std::make_shared<FileLogHandler>(args[0], false);
-			pFileLogger->SetShowLogLevel(false);
-			pFileLogger->SetShowFileInfo(false);
-			pFileLogger->SetLogLevel(LogLevel::Output);
-			LogManager::Get().RegisterLogHandler(pFileLogger);
-		}
-
 		// a common header
 		vector<string> lines;
 		vector<string> header = GetHeaderLines();
@@ -107,6 +97,16 @@ namespace exodbcexec
 		{
 			vector<string> tableLines = GetTestTableLines();
 			lines.insert(lines.end(), tableLines.begin(), tableLines.end());
+		}
+
+		if (!args.empty())
+		{
+			LOG_INFO(boost::str(boost::format(u8"Writting all output for Trac to '%s'") % args[0]));
+			pFileLogger = std::make_shared<FileLogHandler>(args[0], false);
+			pFileLogger->SetShowLogLevel(false);
+			pFileLogger->SetShowFileInfo(false);
+			pFileLogger->SetLogLevel(LogLevel::Output);
+			LogManager::Get().RegisterLogHandler(pFileLogger);
 		}
 
 		for (vector<string>::const_iterator it = lines.begin(); it != lines.end(); ++it)
