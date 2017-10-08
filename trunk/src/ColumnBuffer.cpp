@@ -148,6 +148,7 @@ namespace exodbc
 		// the required display size for binary data is length of column * 2
 		case SQL_BINARY:
 		case SQL_VARBINARY:
+		case SQL_LONGVARBINARY:
 			exASSERT(columnSize > 0);
 			return (columnSize * 2) + 1;
 		case SQL_TYPE_DATE:

@@ -355,6 +355,8 @@ namespace exodbc
 	public:
 		ColumnBuffer() = delete;
 
+		const static SQLLEN SQL_NO_TOTAL_BUFFER_LENGTH = 65536;	///< Fall back: If trying to create a buffer with a length value of SQL_NO_TOTAL, this value is used as the buffer size.
+
 		/*!
 		* \brief	Create a new buffer with one element of type T, passed queryName, sqlType and flags.
 		*			The buffer is set to NULL.
@@ -398,6 +400,12 @@ namespace exodbc
 			, ColumnProperties()
 			, m_nrOfElements(nrOfElements)
 		{
+			if (m_nrOfElements == SQL_NO_TOTAL)
+			{
+				LOG_WARNING(boost::str(boost::format(u8"Trying to create a buffer with SQL_NO_TOTAL (%d) number of elements. Using %d as fallback for buffersize")
+					% SQL_NO_TOTAL % SQL_NO_TOTAL_BUFFER_LENGTH));
+				m_nrOfElements = SQL_NO_TOTAL_BUFFER_LENGTH;
+			}
 			exASSERT(m_nrOfElements > 0);
 			m_buffer = std::vector<T>(m_nrOfElements);
 			SetNull();
@@ -416,6 +424,12 @@ namespace exodbc
 			, ColumnProperties()
 			, m_nrOfElements(nrOfElements)
 		{
+			if (m_nrOfElements == SQL_NO_TOTAL)
+			{
+				LOG_WARNING(boost::str(boost::format(u8"Trying to create a buffer with SQL_NO_TOTAL (%d) number of elements. Using %d as fallback for buffersize")
+					% SQL_NO_TOTAL % SQL_NO_TOTAL_BUFFER_LENGTH));
+				m_nrOfElements = SQL_NO_TOTAL_BUFFER_LENGTH;
+			}
 			exASSERT(m_nrOfElements > 0);
 			m_buffer = std::vector<T>(m_nrOfElements);
 			SetNull();
