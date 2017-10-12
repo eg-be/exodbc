@@ -330,12 +330,13 @@ namespace exodbctest
 		iTable.SetColumn(2, ToDbCase(u8"tint"), SQL_INTEGER, &i, SQL_C_SLONG, sizeof(i), ColumnFlag::CF_SELECT);
 		// Set some silly type 30666 for the last column
 		iTable.SetColumn(3, ToDbCase(u8"tbigint"), 30666, &bi, SQL_C_SBIGINT, sizeof(bi), ColumnFlag::CF_SELECT);
-		// Expect to fail if Opening without flag
-		EXPECT_THROW(iTable.Open(), Exception);
-		// But not if we skip
-		{
-			EXPECT_NO_THROW(iTable.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
-		}
+		// Expect to fail if we explicitly check the type info:
+		EXPECT_THROW(iTable.Open(TableOpenFlag::TOF_CHECK_DB_TYPE_INFOS), Exception);
+		// But not if we do not check
+		EXPECT_NO_THROW(iTable.Open());
+		iTable.Close();
+		// Or also not if we check, but ask to skip unsupported:
+		EXPECT_NO_THROW(iTable.Open(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS | TableOpenFlag::TOF_CHECK_DB_TYPE_INFOS));
 	}
 
 

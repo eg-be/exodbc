@@ -65,7 +65,7 @@ namespace exodbctest
 		{
 			// Note: Sql Server does not report time as supported datatype, but rather time2.
 			// but if we wish to use that, we would need odbc 3.8
-			EXPECT_NO_THROW(dateTypesTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE | TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS));
+			EXPECT_NO_THROW(dateTypesTable.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 		}
 		else
 		{
@@ -120,7 +120,7 @@ namespace exodbctest
 		MDateTypesTable table(m_pDb);
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
-			ASSERT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE | TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS));
+			ASSERT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 		}
 		else
 		{
@@ -561,7 +561,7 @@ namespace exodbctest
 		MFloatTypesTable table(m_pDb);
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
-			ASSERT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE | TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS));
+			ASSERT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 		}
 		else
 		{
@@ -648,7 +648,7 @@ namespace exodbctest
 		MDateTypesTable table(m_pDb);
 		if (m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
 		{
-			ASSERT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE | TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS));
+			ASSERT_NO_THROW(table.Open(TableOpenFlag::TOF_CHECK_EXISTANCE));
 		}
 		else
 		{

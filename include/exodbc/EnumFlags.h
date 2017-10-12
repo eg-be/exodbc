@@ -144,16 +144,32 @@ namespace exodbc
 
 	/*!
 	* \enum TableOpenFlag
-	* \brief Defines how to open a table.
+	* \brief Defines how to open a table. See Table::Open()
 	*/
 	enum class TableOpenFlag
 	{
-		TOF_NONE = 0x0,				///< No special flags are set.
-		TOF_CHECK_EXISTANCE = 0x1,	///< Always check that a table identified by the STableInfo exists.
-		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	///< Skip unsupported Columns when creating SqlCBuffers automatically from the info queried from the Database.
-		TOF_DO_NOT_QUERY_PRIMARY_KEYS = 0x20, ///< If set, primary keys are not queried from the Database during Open().
-		TOF_IGNORE_DB_TYPE_INFOS = 0x40, ///< If set, the SQL Type info from the Database is not used to validate the given Columns SQL Data type. This is only used with manually defined columns
-		TOF_FORWARD_ONLY_CURSORS = 0x80, ///< If set, forward-only cursors are used only, even if the Database would support Scrollable cursors.
+		/// No special flags are set.
+		TOF_NONE = 0x0,		
+		
+		/// If set, the Database will always be queried for a matching Table (even if the Table has a valid STableInfo set).		
+		TOF_CHECK_EXISTANCE = 0x1,	
+
+		/// If set, columns that are not supported are ignored: <br>
+		/// If ColumnBuffers are created automatically, and a table column is encountered for which we do not 
+		/// know how to map its SLQ Type against an SQL C Type, this column is skipped. <br>
+		/// If Columns have been defined manually, and the flag TOF_CHECK_DB_TYPE_INFOS is set, 
+		/// and a column has a SQL Type that is not supported by the Database, it is removed from the defined columns.
+		TOF_SKIP_UNSUPPORTED_COLUMNS = 0x4,	
+		
+		/// If set, primary keys are not queried from the Database during Open().
+		TOF_DO_NOT_QUERY_PRIMARY_KEYS = 0x20, 
+		
+		/// Has only an effect if ColumnBuffers are set manually prior to calling Open(). <br>
+		/// If set, it is checked that the SQL Type defined for every ColumnBuffer is supported by the Database.		
+		TOF_CHECK_DB_TYPE_INFOS = 0x40, 
+
+		/// If set, forward-only cursors are used only, even if the Database would support Scrollable cursors.
+		TOF_FORWARD_ONLY_CURSORS = 0x80, 
 	};
 	template<>
 	struct enable_bitmask_operators<TableOpenFlag> {
