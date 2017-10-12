@@ -532,17 +532,20 @@ namespace exodbctest
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
 		// Note the escaping:
+		// IBM DB2: Escape using '
+		// PostgresQL: Escape using '
+		// Sql Server: Escape using '
+		// MySql: Escape using \
+		// (and remember that c++ wants \ )
+
 		// IBM DB2 wants to escape ' using '', mysql wants \'
 		// MYSQL needs \\ for \ 
-		RecordProperty("Ticket", 36);
-		if (m_pDb->GetDbms() == DatabaseProduct::DB2 || m_pDb->GetDbms() == DatabaseProduct::MS_SQL_SERVER)
+		std::string sqlEscapedValue = u8" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+		if (m_pDb->GetDbms() == DatabaseProduct::MY_SQL)
 		{
-			sqlstmt = (boost::format(u8"INSERT INTO exodbc.chartypes_tmp (idchartypes, tvarchar, tchar) VALUES (1, '%s', '%s')") % u8" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % u8" !\"#$%&''()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
+			sqlEscapedValue = u8" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 		}
-		else
-		{
-			sqlstmt = (boost::format(u8"INSERT INTO exodbc.chartypes_tmp (idchartypes, tvarchar, tchar) VALUES (1, '%s', '%s')") % u8" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~" % u8" !\"#$%&\\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\\\]^_`abcdefghijklmnopqrstuvwxyz{|}~").str();
-		}
+		sqlstmt = (boost::format(u8"INSERT INTO exodbc.chartypes_tmp (idchartypes, tvarchar, tchar) VALUES (1, '%s', '%s')") % sqlEscapedValue % sqlEscapedValue).str();
 		EXPECT_NO_THROW(m_pDb->ExecSql(sqlstmt));
 		EXPECT_NO_THROW(m_pDb->CommitTrans());
 
