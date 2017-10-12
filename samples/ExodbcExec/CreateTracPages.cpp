@@ -357,7 +357,44 @@ namespace exodbcexec
 		{
 			SqlInfoProperty::ValueType vt = it->GetValueType();
 			string strVal = it->GetStringValue();
-			// output of SQL_KEYWORDS has no ' ' after ',', what looks ugle
+			// Fine-tune SQL_SCROLL_OPTIONS
+			if (it->GetInfoId() == SQL_SCROLL_OPTIONS)
+			{
+				SQLUINTEGER iv = boost::get<SQLUINTEGER>(it->GetValue());
+				strVal.append(u8"[[BR]]SQL_SO_FORWARD_ONLY: ");
+				strVal.append(iv & SQL_SO_FORWARD_ONLY ? u8"Y" : "N");
+				strVal.append(u8"[[BR]]SQL_SO_STATIC: ");
+				strVal.append(iv & SQL_SO_STATIC ? u8"Y" : "N");
+				strVal.append(u8"[[BR]]SQL_SO_KEYSET_DRIVEN: ");
+				strVal.append(iv & SQL_SO_KEYSET_DRIVEN ? u8"Y" : "N");
+				strVal.append(u8"[[BR]]SQL_SO_DYNAMIC: ");
+				strVal.append(iv & SQL_SO_DYNAMIC ? u8"Y" : "N");
+				strVal.append(u8"[[BR]]SQL_SO_MIXED : ");
+				strVal.append(iv & SQL_SO_MIXED ? u8"Y" : "N");
+			}
+			// Fine-tune SQL_DYNAMIC_CURSOR_ATTRIBUTES1 (partial)
+			if (it->GetInfoId() == SQL_DYNAMIC_CURSOR_ATTRIBUTES1
+				|| it->GetInfoId() == SQL_KEYSET_CURSOR_ATTRIBUTES1
+				|| it->GetInfoId() == SQL_STATIC_CURSOR_ATTRIBUTES1)
+			{
+				SQLUINTEGER iv = boost::get<SQLUINTEGER>(it->GetValue());
+				strVal.append(u8"[[BR]]SQL_CA1_NEXT: ");
+				strVal.append(iv & SQL_CA1_NEXT ? u8"Y" : "N");
+				strVal.append(u8"[[BR]]SQL_CA1_ABSOLUTE: ");
+				strVal.append(iv & SQL_CA1_ABSOLUTE ? u8"Y" : "N");
+				strVal.append(u8"[[BR]]SQL_CA1_RELATIVE: ");
+				strVal.append(iv & SQL_CA1_RELATIVE ? u8"Y" : "N");
+				strVal.append(u8"[[BR]]SQL_CA1_BOOKMARK: ");
+				strVal.append(iv & SQL_CA1_BOOKMARK ? u8"Y" : "N");
+			}
+			// Fine-tune SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1 (partial)
+			if (it->GetInfoId() == SQL_FORWARD_ONLY_CURSOR_ATTRIBUTES1)
+			{
+				SQLUINTEGER iv = boost::get<SQLUINTEGER>(it->GetValue());
+				strVal.append(u8"[[BR]]SQL_CA1_NEXT: ");
+				strVal.append(iv & SQL_CA1_NEXT ? u8"Y" : "N");
+			}
+			// output of SQL_KEYWORDS has no ' ' (whitespace) after ',', what looks ugly
 			if (it->GetInfoId() == SQL_KEYWORDS)
 				boost::algorithm::replace_all(strVal, u8",", u8", ");
 			// format numberic values right and center text, except Y_N values
