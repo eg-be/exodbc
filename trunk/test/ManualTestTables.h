@@ -155,21 +155,6 @@ namespace exodbctest
 	};
 
 
-	// CharTable
-	// ---------
-	class MCharTable : public exodbc::Table
-	{
-	public:
-		MCharTable(exodbc::ConstDatabasePtr pDb);
-		virtual ~MCharTable() {};
-
-		SQLINTEGER	m_idCharTable;
-		SQLWCHAR	m_col2[128 + 1];
-		SQLWCHAR	m_col3[128 + 1];
-		SQLWCHAR	m_col4[128 + 2];
-	};
-
-
 	// NotExistingTable
 	// ----------------
 	class MNotExistingTable : public exodbc::Table
