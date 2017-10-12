@@ -127,7 +127,6 @@ namespace exodbcexec
 		const set<string> tableNames = {
 			u8"blobtypes",
 			u8"blobtypes_tmp",
-			u8"chartable",
 			u8"chartypes",
 			u8"chartypes_tmp",
 			u8"datetypes",
