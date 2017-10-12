@@ -1156,7 +1156,7 @@ namespace exodbc
 			CheckColumnFlags();
 
 			// check that data types are supported if columns have been defined manually
-			if (!m_autoCreatedColumns && !TestOpenFlag(TableOpenFlag::TOF_IGNORE_DB_TYPE_INFOS))
+			if (!m_autoCreatedColumns && TestOpenFlag(TableOpenFlag::TOF_CHECK_DB_TYPE_INFOS))
 			{
 				CheckSqlTypes(TestOpenFlag(TableOpenFlag::TOF_SKIP_UNSUPPORTED_COLUMNS));
 			}
