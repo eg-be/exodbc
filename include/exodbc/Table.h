@@ -791,7 +791,7 @@ namespace exodbc
 		*
 		* \throw	Exception If any of the handles to be allocated is not null currently.
 		*/
-		void AllocateStatements(bool forwardOnlyCursors);
+		void AllocateStatements(bool scrollableCursors);
 
 	
 		/*!

@@ -167,7 +167,7 @@ namespace exodbctest
 		FInserter2(DatabasePtr pDb, exodbctest::TableId tableId, const std::string& columnQueryName)
 		{
 			// prepare the insert statement
-			m_stmt.Init(pDb, true);
+			m_stmt.Init(pDb, false);
 			string tableName = GetTableName(tableId);
 			tableName = PrependSchemaOrCatalogName(pDb->GetDbms(), tableName);
 			string idColName = GetIdColumnName(tableId);

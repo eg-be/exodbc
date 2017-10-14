@@ -74,12 +74,11 @@ namespace exodbc
 		* \brief Constructs a statement from the given Database, using passed value 
 		* to set scrollable cursors
 		*/
-		ExecutableStatement(ConstDatabasePtr pDb, bool forwardOnlyCursors);
+		ExecutableStatement(ConstDatabasePtr pDb, bool scrollableCursor);
 		
 
 		/*!
-		* \brief Constructs a statement from the given Database. Database is queried
-		* to determine support for scrollable cursors.
+		* \brief Constructs a statement from the given Database. Scrollable cursor is disabled.
 		*/
 		ExecutableStatement(ConstDatabasePtr pDb);
 
@@ -99,7 +98,7 @@ namespace exodbc
 		* \brief	Initialize the ExecutableStatement. Must be called only once, and only
 		*			if the default Constructor has been used, or after Reset() has been called.
 		*/
-		void Init(ConstDatabasePtr pDb, bool forwardOnlyCursors);
+		void Init(ConstDatabasePtr pDb, bool scrollableCursor);
 
 
 		/*!
@@ -164,9 +163,9 @@ namespace exodbc
 
 
 		/*!
-		* \brief	Returns true if forward only cursors are set.
+		* \brief	Returns true if scrollable cursors are enabled
 		*/
-		bool IsForwardOnlyCursor() const noexcept { return m_forwardOnlyCursors; };
+		bool IsForwardOnlyCursor() const noexcept { return m_scrollableCursor; };
 
 
 		/*!
@@ -255,14 +254,14 @@ namespace exodbc
 
 
 	protected:
-		void SetCursorOptions(bool forwardOnlyCursors);
+		void SetCursorOptions(bool scrollableCursor);
 
 		bool SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset);
 
 		SqlStmtHandlePtr m_pHStmt;	///< The statement we operate on
 		ConstDatabasePtr m_pDb;
 		bool m_isPrepared;
-		bool m_forwardOnlyCursors;
+		bool m_scrollableCursor;
 
 		bool m_boundColumns;
 		bool m_boundParams;

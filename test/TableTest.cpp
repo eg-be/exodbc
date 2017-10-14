@@ -619,7 +619,7 @@ namespace exodbctest
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
 		std::string idName = GetIdColumnName(TableId::INTEGERTYPES);
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		ASSERT_NO_THROW(iTable.Open());
+		ASSERT_NO_THROW(iTable.Open(TableOpenFlag::TOF_SCROLLABLE_CURSORS));
 
 		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -646,7 +646,7 @@ namespace exodbctest
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
 		std::string idName = GetIdColumnName(TableId::INTEGERTYPES);
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		ASSERT_NO_THROW(iTable.Open());
+		ASSERT_NO_THROW(iTable.Open(TableOpenFlag::TOF_SCROLLABLE_CURSORS));
 
 		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -672,7 +672,7 @@ namespace exodbctest
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
 		std::string idName = GetIdColumnName(TableId::INTEGERTYPES);
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		ASSERT_NO_THROW(iTable.Open());
+		ASSERT_NO_THROW(iTable.Open(TableOpenFlag::TOF_SCROLLABLE_CURSORS));
 
 		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -694,7 +694,7 @@ namespace exodbctest
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
 		std::string idName = GetIdColumnName(TableId::INTEGERTYPES);
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		ASSERT_NO_THROW(iTable.Open());
+		ASSERT_NO_THROW(iTable.Open(TableOpenFlag::TOF_SCROLLABLE_CURSORS));
 
 		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);
@@ -730,7 +730,7 @@ namespace exodbctest
 		std::string tableName = GetTableName(TableId::INTEGERTYPES);
 		std::string idName = GetIdColumnName(TableId::INTEGERTYPES);
 		exodbc::Table iTable(m_pDb, TableAccessFlag::AF_READ, tableName);
-		ASSERT_NO_THROW(iTable.Open());
+		ASSERT_NO_THROW(iTable.Open(TableOpenFlag::TOF_SCROLLABLE_CURSORS));
 
 		LongColumnBufferPtr pIdCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(0);
 		LongColumnBufferPtr pIntCol = iTable.GetColumnBufferPtr<LongColumnBufferPtr>(2);

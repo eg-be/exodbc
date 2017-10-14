@@ -54,12 +54,12 @@ namespace exodbctest
 	TEST_F(ExecutableStatementTest, Construct)
 	{
 		// Construct from valid and invalid database
-		EXPECT_NO_THROW(ExecutableStatement stmt(m_pDb, u8"SELECT * FROM FOO"));
+		EXPECT_NO_THROW(ExecutableStatement stmt(m_pDb, false));
 
 		DatabasePtr pClosed = make_shared<Database>(m_pEnv);
 		{
 			LogLevelSetter ll(LogLevel::None);
-			EXPECT_THROW(ExecutableStatement stmt(pClosed, u8"SELECT * FROM FOO"), AssertionException);
+			EXPECT_THROW(ExecutableStatement stmt(pClosed, false), AssertionException);
 		}
 
 		// Construct using default c'tor
@@ -210,7 +210,7 @@ namespace exodbctest
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
 		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") %idName %tableQueryName %idName %idName );
-		ExecutableStatement ds(m_pDb);
+		ExecutableStatement ds(m_pDb, true);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
 
@@ -237,7 +237,7 @@ namespace exodbctest
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
 		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
-		ExecutableStatement ds(m_pDb);
+		ExecutableStatement ds(m_pDb, true);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
 
@@ -290,7 +290,7 @@ namespace exodbctest
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
 		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
-		ExecutableStatement ds(m_pDb);
+		ExecutableStatement ds(m_pDb, true);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
 
@@ -318,7 +318,7 @@ namespace exodbctest
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
 		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
-		ExecutableStatement ds(m_pDb);
+		ExecutableStatement ds(m_pDb, true);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
 
@@ -344,7 +344,7 @@ namespace exodbctest
 		LongColumnBufferPtr pIdCol = LongColumnBuffer::Create(idName, SQL_UNKNOWN_TYPE);
 
 		string sqlsmt = boost::str(boost::format(u8"SELECT %s FROM %s WHERE %s >= 2 ORDER BY %s ASC") % idName %tableQueryName %idName %idName);
-		ExecutableStatement ds(m_pDb);
+		ExecutableStatement ds(m_pDb, true);
 		ds.BindColumn(pIdCol, 1);
 		ds.ExecuteDirect(sqlsmt);
 
