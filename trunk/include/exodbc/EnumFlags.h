@@ -168,8 +168,8 @@ namespace exodbc
 		/// If set, it is checked that the SQL Type defined for every ColumnBuffer is supported by the Database.		
 		TOF_CHECK_DB_TYPE_INFOS = 0x40, 
 
-		/// If set, forward-only cursors are used only, even if the Database would support Scrollable cursors.
-		TOF_FORWARD_ONLY_CURSORS = 0x80, 
+		/// If set, scrollable cursors are enabled.
+		TOF_SCROLLABLE_CURSORS = 0x80, 
 	};
 	template<>
 	struct enable_bitmask_operators<TableOpenFlag> {

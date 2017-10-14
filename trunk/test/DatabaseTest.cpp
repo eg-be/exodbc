@@ -408,11 +408,11 @@ namespace exodbctest
 	}
 
 
-	TEST_F(DatabaseTest, SupportsScrollableCursor)
+	TEST_F(DatabaseTest, TestScrollableCursorSupport)
 	{
 		// Test that for Database where we think no support is built-in, false is returned
 		DatabasePtr pDb = OpenTestDb();
-		bool scrollableCursor = pDb->SupportsScrollableCursor();
+		bool scrollableCursor = pDb->TestScrollableCursorSupport();
 
 		if (pDb->GetDbms() == DatabaseProduct::ACCESS
 			|| pDb->GetDbms() == DatabaseProduct::POSTGRESQL)

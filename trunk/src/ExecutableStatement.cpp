@@ -29,31 +29,31 @@ namespace exodbc
 	ExecutableStatement::ExecutableStatement()
 		: m_pDb(NULL)
 		, m_isPrepared(false)
-		, m_forwardOnlyCursors(false)
+		, m_scrollableCursor(false)
 		, m_boundColumns(false)
 		, m_boundParams(false)
 	{ }
 
 
-	ExecutableStatement::ExecutableStatement(ConstDatabasePtr pDb, bool forwardOnlyCursor)
+	ExecutableStatement::ExecutableStatement(ConstDatabasePtr pDb, bool scrollableCursor)
 		: m_pDb(NULL)
 		, m_isPrepared(false)
-		, m_forwardOnlyCursors(false)
+		, m_scrollableCursor(false)
 		, m_boundColumns(false)
 		, m_boundParams(false)
 	{
-		Init(pDb, forwardOnlyCursor);
+		Init(pDb, scrollableCursor);
 	}
 
 
 	ExecutableStatement::ExecutableStatement(ConstDatabasePtr pDb)
 		: m_pDb(NULL)
 		, m_isPrepared(false)
-		, m_forwardOnlyCursors(false)
+		, m_scrollableCursor(false)
 		, m_boundColumns(false)
 		, m_boundParams(false)
 	{
-		Init(pDb, ! pDb->SupportsScrollableCursor());
+		Init(pDb, m_scrollableCursor);
 	}
 
 
@@ -86,7 +86,7 @@ namespace exodbc
 	}
 
 
-	void ExecutableStatement::Init(ConstDatabasePtr pDb, bool forwardOnlyCursors)
+	void ExecutableStatement::Init(ConstDatabasePtr pDb, bool scrollableCursor)
 	{
 		exASSERT(m_pDb == NULL);
 		exASSERT(pDb);
@@ -98,7 +98,7 @@ namespace exodbc
 		// If we fail during init, go back into state before init was called
 		try
 		{
-			SetCursorOptions(forwardOnlyCursors);
+			SetCursorOptions(scrollableCursor);
 		}
 		catch (const Exception& ex)
 		{
@@ -126,7 +126,7 @@ namespace exodbc
 	}
 
 
-	void ExecutableStatement::SetCursorOptions(bool forwardOnlyCursors)
+	void ExecutableStatement::SetCursorOptions(bool scrollableCursor)
 	{
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
@@ -140,27 +140,27 @@ namespace exodbc
 			SQLULEN currentValue;
 			ret = SQLGetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)&currentValue, sizeof(currentValue), 0);
 			THROW_IFN_SUCCEEDED_MSG(SQLGetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to get Statement Attr SQL_ATTR_CURSOR_SCROLLABLE");
-			if (forwardOnlyCursors && currentValue != SQL_NONSCROLLABLE)
+			if (!scrollableCursor && currentValue != SQL_NONSCROLLABLE)
 			{
 				ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_NONSCROLLABLE, 0);
 				THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_NONSCROLLABLE");
-				m_forwardOnlyCursors = true;
+				m_scrollableCursor = false;
 			}
-			else if(!forwardOnlyCursors && currentValue != SQL_SCROLLABLE)
+			else if(scrollableCursor && currentValue != SQL_SCROLLABLE)
 			{
 				ret = SQLSetStmtAttr(m_pHStmt->GetHandle(), SQL_ATTR_CURSOR_SCROLLABLE, (SQLPOINTER)SQL_SCROLLABLE, 0);
 				THROW_IFN_SUCCEEDED_MSG(SQLSetStmtAttr, ret, SQL_HANDLE_STMT, m_pHStmt->GetHandle(), u8"Failed to set Statement Attr SQL_ATTR_CURSOR_SCROLLABLE to SQL_SCROLLABLE");
-				m_forwardOnlyCursors = false;
+				m_scrollableCursor = true;
 			}
 		}
 		catch (const SqlResultException& sre)
 		{
-			// If we failed because the driver does not support scrollable cursors, simply log a warning
-			// else re-throw exception.
-			if (sre.HasErrorInfo(ErrorHelper::SQLSTATE_OPTIONAL_FEATURE_NOT_IMPLEMENTED))
+			// If we failed because the driver does not support scrollable cursors and
+			// we only need forward-only cursors, simply log a warning and assume forward-only
+			if (sre.HasErrorInfo(ErrorHelper::SQLSTATE_OPTIONAL_FEATURE_NOT_IMPLEMENTED) && !scrollableCursor)
 			{
-				LOG_WARNING(boost::str(boost::format(u8"Failed to set Cursor Options because driver does not implement scrollable cursors, assuming forwardOnlyCursors: %s") % sre.ToString()));
-				m_forwardOnlyCursors = true;
+				LOG_WARNING(boost::str(boost::format(u8"Failed to read or set Cursor Option SQL_ATTR_CURSOR_SCROLLABLE because driver does not support that atribute, assuming forwardOnlyCursors: %s") % sre.ToString()));
+				m_scrollableCursor = false;
 			}
 			else
 			{
@@ -349,7 +349,7 @@ namespace exodbc
 
 	bool ExecutableStatement::SelectFetchScroll(SQLSMALLINT fetchOrientation, SQLLEN fetchOffset)
 	{
-		exASSERT(!m_forwardOnlyCursors);
+		exASSERT(m_scrollableCursor);
 		exASSERT(m_pHStmt);
 		exASSERT(m_pHStmt->IsAllocated());
 

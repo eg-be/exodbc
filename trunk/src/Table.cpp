@@ -158,7 +158,7 @@ namespace exodbc
 	}
 
 
-	void Table::AllocateStatements(bool forwardOnlyCursors)
+	void Table::AllocateStatements(bool scrollableCursors)
 	{
 		exASSERT(!IsOpen());
 		exASSERT(m_pDb->IsOpen());
@@ -170,28 +170,28 @@ namespace exodbc
 		{
 			if (TestAccessFlag(TableAccessFlag::AF_SELECT_WHERE) || TestAccessFlag(TableAccessFlag::AF_SELECT_PK))
 			{
-				m_execStmtSelect.Init(m_pDb, forwardOnlyCursors);
+				m_execStmtSelect.Init(m_pDb, scrollableCursors);
 			}
 			if (TestAccessFlag(TableAccessFlag::AF_COUNT_WHERE))
 			{
 				// note: The count statements never needs scrollable cursors. If we enable them and then execute a
 				// SELECT COUNT, ms sql server will report a warning saying 'Cursor type changed'.
 				// and the inserts and updates do not need to be scrollable.
-				m_execStmtCountWhere.Init(m_pDb, true);
+				m_execStmtCountWhere.Init(m_pDb, false);
 				// Create the buffer required for counts
 				m_pSelectCountResultBuffer = UBigIntColumnBuffer::Create(u8"", SQL_UNKNOWN_TYPE, ColumnFlag::CF_SELECT);
 			}
 			if (TestAccessFlag(TableAccessFlag::AF_DELETE_PK))
 			{
-				m_execStmtDeletePk.Init(m_pDb, true);
+				m_execStmtDeletePk.Init(m_pDb, false);
 			}
 			if (TestAccessFlag(TableAccessFlag::AF_UPDATE_PK))
 			{
-				m_execStmtUpdatePk.Init(m_pDb, true);
+				m_execStmtUpdatePk.Init(m_pDb, false);
 			}
 			if (TestAccessFlag(TableAccessFlag::AF_INSERT))
 			{
-				m_execStmtInsert.Init(m_pDb, true);
+				m_execStmtInsert.Init(m_pDb, false);
 			}
 		}
 		catch (const Exception& ex)
@@ -909,7 +909,7 @@ namespace exodbc
 		exASSERT(!where.empty());
 
 		ExecutableStatement execStmtDelete;
-		execStmtDelete.Init(m_pDb, true);
+		execStmtDelete.Init(m_pDb, false);
 
 		// Build a statement that we can directly execute
 		string stmt = boost::str(boost::format(u8"DELETE FROM %s WHERE %s") % m_tableInfo.GetQueryName() % where);
@@ -945,7 +945,7 @@ namespace exodbc
 		exASSERT(!where.empty());
 
 		ExecutableStatement execStmtUpdate;
-		execStmtUpdate.Init(m_pDb, true);
+		execStmtUpdate.Init(m_pDb, false);
 
 		// Build a statement with parameter-markers
 		vector<ColumnBufferPtrVariant> setParamsToBind;
@@ -1079,15 +1079,8 @@ namespace exodbc
 			m_openFlags.Set(TableOpenFlag::TOF_DO_NOT_QUERY_PRIMARY_KEYS);
 		}
 
-		// If the Database does not support scrollable cursors, do not even try to enable them
-		if ( ! m_pDb->SupportsScrollableCursor())
-		{
-			LOG_DEBUG(boost::str(boost::format(u8"Enabling flag TOF_FORWARD_ONLY_CURSORS, because Database does not suppport scrollable cursors")));
-			m_openFlags.Set(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS);
-		}
-
 		// Allocate all statements we need
-		AllocateStatements(m_openFlags.Test(TableOpenFlag::TOF_FORWARD_ONLY_CURSORS));
+		AllocateStatements(m_openFlags.Test(TableOpenFlag::TOF_SCROLLABLE_CURSORS));
 
 		// Nest try/catch the free the buffers created in here if we fail somewhere
 		// and to unbind all handles that were bound

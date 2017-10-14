@@ -37,7 +37,6 @@ namespace exodbc
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
 		, m_commitMode(CommitMode::UNKNOWN)
-		, m_supportsScrollableCursor(false)
 	{
 	}
 
@@ -50,7 +49,6 @@ namespace exodbc
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
 		, m_commitMode(CommitMode::UNKNOWN)
-		, m_supportsScrollableCursor(false)
 	{
 		// Allocate the DBC-Handle and set the member m_pEnv
 		Init(pEnv);
@@ -65,7 +63,6 @@ namespace exodbc
 		, m_dbIsOpen(false)
 		, m_dbOpenedWithConnectionString(false)
 		, m_commitMode(CommitMode::UNKNOWN)
-		, m_supportsScrollableCursor(false)
 	{
 		if (other.GetEnvironment() != NULL)
 		{
@@ -151,9 +148,6 @@ namespace exodbc
 
 			// Set Connection Options
 			SetConnectionAttributes();
-
-			// Test if we can have scrollable cursors
-			m_supportsScrollableCursor = TestScrollableCursorSupport();
 
 			// Default to manual commit, if the Database is able to set a commit mode. Anyway read the currently active mode, we need to know that
 			m_commitMode = ReadCommitMode();
@@ -341,13 +335,6 @@ namespace exodbc
 	{
 		exASSERT(IsOpen());
 		return m_pDbCatalog;
-	}
-
-
-	bool Database::SupportsScrollableCursor() const
-	{
-		exASSERT(IsOpen());
-		return m_supportsScrollableCursor;
 	}
 
 
