@@ -24,13 +24,17 @@ string(CONCAT postgreSqlFilters	"-ExecutableStatementTest.SelectAbsolute"
                 ":TableTest.SelectPrev"
                 ":TableTest.SelectRelative"
                 ":DatabaseCatalogTest.ReadSpecialColumnInfo")
-if (CMAKE_SIZEOF_VOID_P LESS 8)
-  set(POSTGRESQL_CS "Driver={PostgreSQL Unicode};Server=192.168.56.20;Port=5432;Database=exodbc;Uid=ex;Pwd=extest" CACHE STRING "Connection-String used to run tests against PostgreSQL")
+# The default install for PostgreSQL odbc driver on linux has no (x64) added (debian, jessie)
+if (CMAKE_SIZEOF_VOID_P LESS 8 OR NOT WIN32)
+  set(POSTGRESQL_TEST_CS "Driver={PostgreSQL Unicode};Server=192.168.56.20;Port=5432;Database=exodbc;Uid=ex;Pwd=extest" CACHE STRING "Connection-String used to run tests against PostgreSQL")
 else()
-  set(POSTGRESQL_CS "Driver={PostgreSQL Unicode(x64)};Server=192.168.56.20;Port=5432;Database=exodbc;Uid=ex;Pwd=extest" CACHE STRING "Connection-String used to run tests against PostgreSQL")
+  set(POSTGRESQL_TEST_CS "Driver={PostgreSQL Unicode(x64)};Server=192.168.56.20;Port=5432;Database=exodbc;Uid=ex;Pwd=extest" CACHE STRING "Connection-String used to run tests against PostgreSQL")
 endif()
+# There are some different known failures on the linux / windows odbc driver:
 if (WIN32)
   set(postgreSqlFilters "${postgreSqlFilters}:StatementCloserTest.CloseStmtHandle")
+else()
+  set(postgreSqlFilters "${postgreSqlFilters}:DatabaseTest.CanSetTransactionIsolationMode")
 endif()
 set(POSTGRESQL_TEST_GTEST_FILTER "${postgreSqlFilters}" CACHE STRING "value for gtest argument '--gtest_filter': Skip tests known to fail")
 
