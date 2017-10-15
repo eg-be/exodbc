@@ -1,12 +1,41 @@
 ﻿cmake_minimum_required (VERSION 3.0.2)
 project (exodbctest)
 
-# add some options to enable / disable tests
+# add some options to enable / disable tests and add database specific values
+
+# SqlServer
 option(ENABLE_SQLSERVER_TEST "Enable the test for Sql Server" ON)
 set(SQLSERVER_TEST_CS "Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;" CACHE STRING "Connection-String used to run tests against Sql Server")
 set(SQLSERVER_TEST_GTEST_FILTER "*" CACHE STRING "value for gtest argument '--gtest_filter': Run all tests")
 set(SQLSERVER_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Sql Server")
 
+# Postgresql: Driver named differently depending on bitness
+# And depending on Plattform, we have different issues
+option(ENABLE_POSTGRESQL_TEST "Enable the test for PostgreSQL" ON)
+set(POSTGRESQL_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against PostgreSQL")
+string(CONCAT postgreSqlFilters	"-ExecutableStatementTest.SelectAbsolute"
+                ":ExecutableStatementTest.SelectFirst"
+                ":ExecutableStatementTest.SelectLast"
+                ":ExecutableStatementTest.SelectPrev"
+                ":ExecutableStatementTest.SelectRelative"
+                ":TableTest.SelectAbsolute"
+                ":TableTest.SelectFirst"
+                ":TableTest.SelectLast"
+                ":TableTest.SelectPrev"
+                ":TableTest.SelectRelative"
+                ":DatabaseCatalogTest.ReadSpecialColumnInfo")
+if (CMAKE_SIZEOF_VOID_P LESS 8)
+  set(POSTGRESQL_CS "Driver={PostgreSQL Unicode};Server=192.168.56.20;Port=5432;Database=exodbc;Uid=ex;Pwd=extest" CACHE STRING "Connection-String used to run tests against PostgreSQL")
+else()
+  set(POSTGRESQL_CS "Driver={PostgreSQL Unicode(x64)};Server=192.168.56.20;Port=5432;Database=exodbc;Uid=ex;Pwd=extest" CACHE STRING "Connection-String used to run tests against PostgreSQL")
+endif()
+if (WIN32)
+  set(postgreSqlFilters "${postgreSqlFilters}:StatementCloserTest.CloseStmtHandle")
+endif()
+set(POSTGRESQL_TEST_GTEST_FILTER "${postgreSqlFilters}" CACHE STRING "value for gtest argument '--gtest_filter': Skip tests known to fail")
+
+
+# MySql (failed to setup odbc on linux)
 if(WIN32)
   option(ENABLE_MYSQL_TEST "Enable the test for MySql" ON)
 else()
@@ -20,6 +49,7 @@ if(ENABLE_MYSQL_TEST)
   set(MYSQL_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against MySql")  
 endif()
 
+# DB2 (did not find odbc driver for linux)
 if(WIN32)
   option(ENABLE_DB2_TEST "Enable the test for DB2" ON)
 else()
@@ -31,6 +61,7 @@ if(ENABLE_DB2_TEST)
   set(DB2_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against DB2")    
 endif()
 
+# Access and Excel: We have only 32bit drivers and only on Windows
 if(WIN32 AND CMAKE_SIZEOF_VOID_P LESS 8)
 	message(STATUS "Plattform is Win32 and CMAKE_SIZEOF_VOID_P is ${CMAKE_SIZEOF_VOID_P}, assuming x86 and adding options to test Access and Excel")
 
@@ -259,6 +290,16 @@ if(ENABLE_SQLSERVER_TEST)
             "-CS" "${SQLSERVER_TEST_CS}"
             "--gtest_filter=${SQLSERVER_TEST_GTEST_FILTER}"
             "--logLevel" "${SQLSERVER_TEST_LOG_LEVEL}"
+            "--case" "l"
+          )
+endif()
+
+if(ENABLE_POSTGRESQL_TEST)
+	add_test( NAME PostgreSQLTest 
+            COMMAND exodbctest
+            "-CS" "${POSTGRESQL_TEST_CS}"
+            "--gtest_filter=${POSTGRESQL_TEST_GTEST_FILTER}"
+            "--logLevel" "${POSTGRESQL_TEST_LOG_LEVEL}"
             "--case" "l"
           )
 endif()
