@@ -153,8 +153,8 @@ namespace exodbc
 			if (columnSize == SQL_NO_TOTAL)
 			{
 				LOG_WARNING(boost::str(boost::format(u8"Calculating display size for a buffer with SQL_NO_TOTAL (%d) as columnSize. Using %d as fallback for columnSize")
-					% SQL_NO_TOTAL % CharColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH));
-				columnSize = CharColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH;
+					% SQL_NO_TOTAL % SQL_NO_TOTAL_BUFFER_LENGTH));
+				columnSize = SQL_NO_TOTAL_BUFFER_LENGTH;
 			}
 			exASSERT(columnSize > 0);
 			return (columnSize * 2) + 1;
