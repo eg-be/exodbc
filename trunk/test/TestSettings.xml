@@ -22,7 +22,7 @@
     <User>ex</User>
     <Pass>extest</Pass>
     <Case>lower</Case>
-    <Skip ticket="292">StatementCloserTest.CloseStmtHandle</Skip>
+    <Skip ticket="292" comment="Fails only on windows">StatementCloserTest.CloseStmtHandle</Skip>
     <Skip>ExecutableStatementTest.SelectAbsolute</Skip>
     <Skip>ExecutableStatementTest.SelectFirst</Skip>
     <Skip>ExecutableStatementTest.SelectLast</Skip>
