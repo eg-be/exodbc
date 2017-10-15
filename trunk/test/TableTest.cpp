@@ -1306,10 +1306,10 @@ namespace exodbctest
 
 		if (m_pDb->GetDbms() == DatabaseProduct::POSTGRESQL)
 		{
-			EXPECT_EQ(BinaryColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH, pBlob16->GetBufferLength());
-			EXPECT_EQ(BinaryColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH, pVarblob20->GetBufferLength());
-			EXPECT_EQ(BinaryColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH, pBlob16->GetNrOfElements());
-			EXPECT_EQ(BinaryColumnBuffer::SQL_NO_TOTAL_BUFFER_LENGTH, pVarblob20->GetNrOfElements());
+			EXPECT_EQ(exodbc::SQL_NO_TOTAL_BUFFER_LENGTH, pBlob16->GetBufferLength());
+			EXPECT_EQ(exodbc::SQL_NO_TOTAL_BUFFER_LENGTH, pVarblob20->GetBufferLength());
+			EXPECT_EQ(exodbc::SQL_NO_TOTAL_BUFFER_LENGTH, pBlob16->GetNrOfElements());
+			EXPECT_EQ(exodbc::SQL_NO_TOTAL_BUFFER_LENGTH, pVarblob20->GetNrOfElements());
 		}
 		else
 		{

@@ -355,8 +355,6 @@ namespace exodbc
 	public:
 		ColumnBuffer() = delete;
 
-		const static SQLLEN SQL_NO_TOTAL_BUFFER_LENGTH = 65536;	///< Fall back: If trying to create a buffer with a length value of SQL_NO_TOTAL, this value is used as the buffer size.
-
 		/*!
 		* \brief	Create a new buffer with one element of type T, passed queryName, sqlType and flags.
 		*			The buffer is set to NULL.

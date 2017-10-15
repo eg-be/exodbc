@@ -124,6 +124,7 @@ namespace exodbc
 	const int DB_MAX_PRIMARY_KEY_NAME_LEN			= 128;
 	const int DB_MAX_YES_NO_LEN						= 3;
 
+    const SQLLEN SQL_NO_TOTAL_BUFFER_LENGTH = 65536;	///< Fall back: If trying to create a buffer with a length value of SQL_NO_TOTAL, this value is used as the buffer size.    
 
 	// Enums
 	// =====
