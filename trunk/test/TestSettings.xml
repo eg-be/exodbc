@@ -22,7 +22,18 @@
     <User>ex</User>
     <Pass>extest</Pass>
     <Case>lower</Case>
-    <Skip ticket="120">StatementCloserTest.CloseStmtHandle</Skip>
+    <Skip ticket="292">StatementCloserTest.CloseStmtHandle</Skip>
+    <Skip>ExecutableStatementTest.SelectAbsolute</Skip>
+    <Skip>ExecutableStatementTest.SelectFirst</Skip>
+    <Skip>ExecutableStatementTest.SelectLast</Skip>
+    <Skip>ExecutableStatementTest.SelectPrev</Skip>
+    <Skip>ExecutableStatementTest.SelectRelative</Skip>
+    <Skip>TableTest.SelectAbsolute</Skip>
+    <Skip>TableTest.SelectFirst</Skip>
+    <Skip>TableTest.SelectLast</Skip>
+    <Skip>TableTest.SelectPrev</Skip>
+    <Skip>TableTest.SelectRelative</Skip>
+    <Skip ticket="293">DatabaseCatalogTest.ReadSpecialColumnInfo</Skip>
   </Dsn>
 
   <Dsn>
@@ -100,6 +111,13 @@
     <Pass></Pass>
     <Case>lower</Case>
   </Dsn>
+
+  <ConnectionString>
+    <Disabled>1</Disabled>
+    <Value>Driver={PostgreSQL Unicode};Server=192.168.56.20;Port=5432;Database=exodbc;Uid=ex;Pwd=extest</Value>
+    <!-- <Value>Driver={PostgreSQL Unicode(x64)};Server=192.168.56.20;Port=5432;Database=exodbc;Uid=ex;Pwd=extest</Value> -->
+    <Case>lower</Case>
+  </ConnectionString>
 
   <ConnectionString>
     <Disabled>1</Disabled>
