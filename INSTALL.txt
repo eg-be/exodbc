@@ -198,6 +198,8 @@ There are a few CMake options to configure which tests to include:
 
   ENABLE_SQLSERVER_TEST:  Enable the test for Sql Server
                           Default: ON
+  ENABLE_POSTGRESQL_TEST: Enable the test for PostgreSQL
+                          Default: ON
   ENABLE_MYSQL_TEST:      Enable the test for MySql
                           Default: ON for Windows, OFF for Linux.
   ENABLE_DB2_TEST:        Enable the test for DB2
@@ -210,6 +212,7 @@ There are a few CMake options to configure which tests to include:
 To run tests against a specific database, a connection string is required:
 
   SQLSERVER_TEST_CS       Connection-String used to run tests against Sql Server
+  POSTGRESQL_TEST_CS      Connection-String used to run tests against PostgreSQL
   MYSQL_TEST_CS           Connection-String used to run tests against MySql
   DB2_TEST_CS             Connection-String used to run tests against DB2
   ACCESS_TEST_CS          Connection-String used to run tests against Access
@@ -222,8 +225,10 @@ for a list of tests known to fail.
   
   SQLSERVER_TEST_GTEST_FILTER Argument value for '--gtest_filter'
                               Default: '*' - all tests are supposed to work on Sql Server
+  POSTGRESQL_TEST_GTEST_FILTER Argument value for '--gtest_filter'
+                              Default: Filter out tests that are known to fail with PostgreSQL
   MYSQL_TEST_GTEST_FILTER     Argument value for '--gtest_filter'
-                              Default: Filter out tests that are known to fail with My Sql
+                              Default: Filter out tests that are known to fail with MySql
   DB2_TEST_GTEST_FILTER       Argument value for '--gtest_filter'
                               Default: '*' - all tests are supposed to work on DB2
   ACCESS_TEST_GTEST_FILTER    Argument value for '--gtest_filter'
@@ -233,6 +238,7 @@ for a list of tests known to fail.
   
 The log level used in exodbctest can be set using the following cache variables:
   SQLSERVER_TEST_LOG_LEVEL    Default: 'Warning'
+  POSTGRESQL_TEST_LOG_LEVEL   Default: 'Warning'
   MYSQL_TEST_LOG_LEVEL        Default: 'Warning'
   DB2_TEST_LOG_LEVEL          Default: 'Warning'
   ACCESS_TEST_LOG_LEVEL       Default: 'Warning'
