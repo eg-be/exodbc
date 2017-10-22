@@ -21,11 +21,13 @@
 #include "exodbc/Environment.h"
 
 #include "boost/format.hpp"
+#include "boost/program_options.hpp"
 
 using namespace exodbc;
 using namespace std;
 
 namespace ba = boost::algorithm;
+namespace po = boost::program_options;
 
 void printUsage()
 {
@@ -53,12 +55,136 @@ void printUsage()
 	WRITE_STDOUT_ENDL(u8" --help                  Show this text and return with -1.");
 }
 
+
+void printUsage(const std::vector<po::options_description>& optDescs)
+{
+	WRITE_STDOUT_ENDL(u8"Usage: odbcconnect [OPTION] CONNECTPARAM");
+	WRITE_STDERR_ENDL(u8"");
+	for (auto it = optDescs.begin(); it != optDescs.end(); ++it)
+	{
+		const po::options_description& optDesc = *it;
+		std::stringstream ss;
+		ss << optDesc;
+		WRITE_STDOUT_ENDL(ss.str());
+	}
+}
+
+
+
+/* Function used to check that 'opt1' and 'opt2' are not specified
+at the same time. */
+void conflicting_options(const po::variables_map& vm,
+	const char* opt1, const char* opt2)
+{
+	if (vm.count(opt1) && !vm[opt1].defaulted()
+		&& vm.count(opt2) && !vm[opt2].defaulted())
+		throw logic_error(string("Conflicting options '")
+			+ opt1 + "' and '" + opt2 + "'.");
+}
+
+
+
+//namespace exodbc
+//{
+//	std::istream& operator >> (std::istream& in, exodbc::OdbcVersion& ov)
+//	{
+//		std::string token;
+//		in >> token;
+//		if (token == u8"2")
+//			ov = exodbc::OdbcVersion::V_2;
+//		else if (token == u8"3")
+//			ov = exodbc::OdbcVersion::V_3;
+//		else if (token == u8"3.8")
+//			ov = exodbc::OdbcVersion::V_3_8;
+//		else
+//			in.setstate(std::ios_base::failbit);
+//		return in;
+//	}
+//
+//
+//	std::ostream& operator << (std::ostream& os, const exodbc::OdbcVersion& ov)
+//	{
+//		switch (ov)
+//		{
+//		case OdbcVersion::V_2:
+//			os << u8"2";
+//			break;
+//		case OdbcVersion::V_3:
+//			os << u8"3";
+//			break;
+//		case OdbcVersion::V_3_8:
+//			os << u8"3.8";
+//			break;
+//		default:
+//			os.setstate(std::ios_base::failbit);
+//		}
+//		return os;
+//	}
+//}
+
+
 #ifdef _WIN32
 int _tmain(int argc, _TCHAR* argv[])
 #else
 int main(int argc, char* argv[])
 #endif
 {
+	std::string connectionString, dsn;
+
+	po::options_description poConnection("CONNECTPARAM must be exactly one of");
+	poConnection.add_options()
+		(u8"str,s", po::value<std::string>(&connectionString), u8"Connection String")
+		(u8"dsn,d", po::value<std::string>(&dsn), u8"System or User Data Source Name (DSN)")
+		;
+
+	bool silent = false;
+	std::string user, pass;
+	exodbc::OdbcVersion ov;
+	po::options_description poOptions("OPTION can be");
+	poOptions.add_options()
+		(u8"user,u", po::value<std::string>(&user)->default_value(u8""), u8"A username to be used with a DSN CONNECTPARAM")
+		(u8"pass,p", po::value<std::string>(&pass)->default_value(u8""), u8"A password to be used with a DSN CONNECTPARAM")
+		(u8"odbcversion,o", po::value<exodbc::OdbcVersion>(&ov)->default_value(exodbc::OdbcVersion::V_3_8), u8"Set ODBC Version to use. Valid values are:\n"
+			u8"  2:   \tVersion 2\n"
+			u8"  3:   \tVersion 3\n"
+			u8"  3.8: \tVersion 3.8")
+		(u8"silent", po::bool_switch(&silent), u8"Hide all output, including any error information")
+		(u8"help", "Print help and exit")
+		;
+
+	po::options_description poAll(u8"odbcconnect usage");
+	poAll.add(poConnection).add(poOptions);
+
+	try
+	{
+		po::variables_map vm;
+		po::store(po::parse_command_line(argc, argv, poAll), vm);
+		po::notify(vm);
+
+		if (vm.count(u8"help"))
+		{
+			printUsage({ poConnection, poOptions });
+			return 0;
+		}
+
+		conflicting_options(vm, u8"str", u8"dsn");
+		conflicting_options(vm, u8"str", u8"user");
+		conflicting_options(vm, u8"str", u8"pass");
+	}
+	catch (const exception& ex)
+	{
+		WRITE_STDERR_ENDL(ex.what());
+		WRITE_STDERR_ENDL(u8"");
+		WRITE_STDERR_ENDL(u8"see --help for more information");
+		//printUsage({ poAll });
+		return 1;
+	}
+
+	return 0;
+
+
+	//boost::optional<int> silent;
+
 	// if no args given print usage
 	if (argc <= 1)
 	{

@@ -142,6 +142,36 @@ namespace exodbc
 	};
 
 
+	/*
+	* \brief istream overload for OdbcVersion:
+	* \details The following conversions are applied:
+	*
+	* OdbcVersion		| String value
+	* ------------------|------------
+	* V_2				| 2
+	* V_3				| 3
+	* V_3_8				| 3.8
+	*
+	* UNKOWN sets the failure bit in the istream.
+	*/
+	std::istream& operator >> (std::istream& in, exodbc::OdbcVersion& ov);
+
+
+	/*
+	* \brief ostream overload for OdbcVersion:
+	* \details The following conversions are applied:
+	*
+	* String value		| OdbcVersion
+	* ------------------|------------
+	* 2					| V_2
+	* 3					| V_3
+	* 3.8				| V_3_8
+	*
+	* All other string values set the failure bit in the ostream.
+	*/
+	std::ostream& operator << (std::ostream& os, const exodbc::OdbcVersion& ov);
+
+
 	/*!
 	* \enum		DatabaseProduct
 	* \brief	Known databases, identified by their product name while connecting the Database.
