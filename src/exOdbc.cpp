@@ -209,4 +209,40 @@ namespace exodbc {
 		ss << u8"SQLSTATE " << SqlState << u8"; Native Error: " << NativeError << u8"; " << Msg.c_str();
 		return ss.str();
 	}
+
+
+	std::istream& operator >> (std::istream& in, exodbc::OdbcVersion& ov)
+	{
+		std::string token;
+		in >> token;
+		if (token == u8"2")
+			ov = exodbc::OdbcVersion::V_2;
+		else if (token == u8"3")
+			ov = exodbc::OdbcVersion::V_3;
+		else if (token == u8"3.8")
+			ov = exodbc::OdbcVersion::V_3_8;
+		else
+			in.setstate(std::ios_base::failbit);
+		return in;
+	}
+
+
+	std::ostream& operator << (std::ostream& os, const exodbc::OdbcVersion& ov)
+	{
+		switch (ov)
+		{
+		case OdbcVersion::V_2:
+			os << u8"2";
+			break;
+		case OdbcVersion::V_3:
+			os << u8"3";
+			break;
+		case OdbcVersion::V_3_8:
+			os << u8"3.8";
+			break;
+		default:
+			os.setstate(std::ios_base::failbit);
+		}
+		return os;
+	}
 }
