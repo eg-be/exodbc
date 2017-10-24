@@ -56,18 +56,7 @@ void printUsage()
 }
 
 
-void printUsage(const std::vector<po::options_description>& optDescs)
-{
-	WRITE_STDOUT_ENDL(u8"Usage: odbcconnect [OPTION] CONNECTPARAM");
-	WRITE_STDERR_ENDL(u8"");
-	for (auto it = optDescs.begin(); it != optDescs.end(); ++it)
-	{
-		const po::options_description& optDesc = *it;
-		std::stringstream ss;
-		ss << optDesc;
-		WRITE_STDOUT_ENDL(ss.str());
-	}
-}
+
 
 
 
@@ -83,44 +72,27 @@ void conflicting_options(const po::variables_map& vm,
 }
 
 
+void option_dependency(const boost::program_options::variables_map & vm,
+	const std::string & for_what, const std::string & required_option)
+{
+	if (vm.count(for_what) && !vm[for_what].defaulted())
+		if (vm.count(required_option) == 0 || vm[required_option].defaulted())
+			throw std::logic_error(std::string("Option '") + for_what
+				+ "' requires option '" + required_option + "'.");
+}
 
-//namespace exodbc
-//{
-//	std::istream& operator >> (std::istream& in, exodbc::OdbcVersion& ov)
-//	{
-//		std::string token;
-//		in >> token;
-//		if (token == u8"2")
-//			ov = exodbc::OdbcVersion::V_2;
-//		else if (token == u8"3")
-//			ov = exodbc::OdbcVersion::V_3;
-//		else if (token == u8"3.8")
-//			ov = exodbc::OdbcVersion::V_3_8;
-//		else
-//			in.setstate(std::ios_base::failbit);
-//		return in;
-//	}
-//
-//
-//	std::ostream& operator << (std::ostream& os, const exodbc::OdbcVersion& ov)
-//	{
-//		switch (ov)
-//		{
-//		case OdbcVersion::V_2:
-//			os << u8"2";
-//			break;
-//		case OdbcVersion::V_3:
-//			os << u8"3";
-//			break;
-//		case OdbcVersion::V_3_8:
-//			os << u8"3.8";
-//			break;
-//		default:
-//			os.setstate(std::ios_base::failbit);
-//		}
-//		return os;
-//	}
-//}
+
+void printUsage(const std::vector<po::options_description>& optDescs)
+{
+	WRITE_STDOUT_ENDL(u8"Usage: odbcconnect [OPTION] ConnectionString");
+	for (auto it = optDescs.begin(); it != optDescs.end(); ++it)
+	{
+		const po::options_description& optDesc = *it;
+		std::stringstream ss;
+		ss << optDesc;
+		WRITE_STDOUT_ENDL(ss.str());
+	}
+}
 
 
 #ifdef _WIN32
@@ -129,22 +101,24 @@ int _tmain(int argc, _TCHAR* argv[])
 int main(int argc, char* argv[])
 #endif
 {
-	std::string connectionString, dsn;
+	std::string connectionString;
 
-	po::options_description poConnection("CONNECTPARAM must be exactly one of");
-	poConnection.add_options()
-		(u8"str,s", po::value<std::string>(&connectionString), u8"Connection String")
-		(u8"dsn,d", po::value<std::string>(&dsn), u8"System or User Data Source Name (DSN)")
-		;
+	// Make ConnectionString a hidden option and use it as a positional option
+	po::options_description descConnStr(u8"Connection Parameter");
+	descConnStr.add_options()(u8"ConnectionString", po::value<std::string>(&connectionString), u8"Connection String");
+	po::positional_options_description posConnStr;
+	posConnStr.add("ConnectionString", 1);
 
 	bool silent = false;
+	bool dsn = false;
 	std::string user, pass;
 	exodbc::OdbcVersion ov;
-	po::options_description poOptions("OPTION can be");
-	poOptions.add_options()
-		(u8"user,u", po::value<std::string>(&user)->default_value(u8""), u8"A username to be used with a DSN CONNECTPARAM")
-		(u8"pass,p", po::value<std::string>(&pass)->default_value(u8""), u8"A password to be used with a DSN CONNECTPARAM")
-		(u8"odbcversion,o", po::value<exodbc::OdbcVersion>(&ov)->default_value(exodbc::OdbcVersion::V_3_8), u8"Set ODBC Version to use. Valid values are:\n"
+	po::options_description descOptions("Options");
+	descOptions.add_options()
+		(u8"dsn", po::bool_switch(&dsn), u8"Use a Data Source Name (DSN) instead of a Connection String. The argument ConnectionString will be treated as DSN.")
+		(u8"user", po::value<std::string>(&user)->default_value(u8""), u8"A username to be used with a DSN. Can only be used if flag dsn is set.")
+		(u8"pass", po::value<std::string>(&pass)->default_value(u8""), u8"A password to be used with a DSN. Can only be used if flag dsn is set.")
+		(u8"ov", po::value<exodbc::OdbcVersion>(&ov)->default_value(exodbc::OdbcVersion::V_3), u8"Set ODBC Version to use. Valid values are:\n"
 			u8"  2:   \tVersion 2\n"
 			u8"  3:   \tVersion 3\n"
 			u8"  3.8: \tVersion 3.8")
@@ -152,31 +126,36 @@ int main(int argc, char* argv[])
 		(u8"help", "Print help and exit")
 		;
 
-	po::options_description poAll(u8"odbcconnect usage");
-	poAll.add(poConnection).add(poOptions);
+	po::options_description descAll(u8"All Options");
+	descAll.add(descConnStr).add(descOptions);
 
 	try
 	{
 		po::variables_map vm;
-		po::store(po::parse_command_line(argc, argv, poAll), vm);
-		po::notify(vm);
+		po::store(po::wcommand_line_parser(argc, argv).options(descAll).positional(posConnStr).run(), vm);
 
+		// Parse help first
 		if (vm.count(u8"help"))
 		{
-			printUsage({ poConnection, poOptions });
-			return 0;
+			printUsage({ descOptions });
+			return 1;
 		}
 
-		conflicting_options(vm, u8"str", u8"dsn");
-		conflicting_options(vm, u8"str", u8"user");
-		conflicting_options(vm, u8"str", u8"pass");
+		po::notify(vm);
+
+		option_dependency(vm, u8"user", u8"dsn");
+		option_dependency(vm, u8"pass", u8"dsn");
+
+		if (connectionString.empty())
+		{
+			throw po::error(u8"A ConnectionString must be passed");
+		}
 	}
 	catch (const exception& ex)
 	{
 		WRITE_STDERR_ENDL(ex.what());
 		WRITE_STDERR_ENDL(u8"");
 		WRITE_STDERR_ENDL(u8"see --help for more information");
-		//printUsage({ poAll });
 		return 1;
 	}
 
