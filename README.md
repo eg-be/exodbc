@@ -6,7 +6,7 @@ exOdbc is an open source C++ library to access [ODBC](https://en.wikipedia.org/w
 
 See [TestedDatabases](docs/TestedDatabases.md) for an overview of Databases and ODBC drivers exOdbc has been tested with.
 
-exOdbc is released under the GNU LESSER GENERAL PUBLIC LICENSE, see [exOdbcLicense](docs/exOdbcLicense.md).
+exOdbc is released under the GNU LESSER GENERAL PUBLIC LICENSE, see [exOdbcLicense](lgpl.txt).
 
 exOdbc uses [CMake](https://cmake.org/) to support different plattforms. It has been tested on Windows and Linux.
 
