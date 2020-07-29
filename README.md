@@ -2,13 +2,13 @@
 
 [[PageOutline]]
 
-exOdbc is an open source C++ library to access [ODBC](https://en.wikipedia.org/wiki/Open_Database_Connectivity) data sources. It was inspired by [wxOdbc](https://wiki.wxwidgets.org/ODBC), but has been rewritten completely. At its core exOdbc uses a (boost::variant)[http://www.boost.org/doc/libs/release/doc/html/variant.html] to store the different types of column buffers. 
+exOdbc is an open source C++ library to access [ODBC](https://en.wikipedia.org/wiki/Open_Database_Connectivity) data sources. It was inspired by [wxOdbc](https://wiki.wxwidgets.org/ODBC), but has been rewritten completely. At its core exOdbc uses a [boost::variant](http://www.boost.org/doc/libs/release/doc/html/variant.html) to store the different types of column buffers. 
 
 See [TestedDatabases](docs/TestedDatabases.md) for an overview of Databases and ODBC drivers exOdbc has been tested with.
 
-exOdbc is released under the GNU LESSER GENERAL PUBLIC LICENSE, see [wiki:exOdbcLicense].
+exOdbc is released under the GNU LESSER GENERAL PUBLIC LICENSE, see [exOdbcLicense](docs/exOdbcLicense.md).
 
-exOdbc uses (CMake)[https://cmake.org/] to support different plattforms. It has been tested on Windows and Linux.
+exOdbc uses [CMake](https://cmake.org/) to support different plattforms. It has been tested on Windows and Linux.
 
 ## Features ##
 * Easy access to the catalog functions of the ODBC-API: Search for tables, views, etc. List catalogs, schemas and types. Query primary keys and special columns.
@@ -18,8 +18,8 @@ exOdbc uses (CMake)[https://cmake.org/] to support different plattforms. It has 
 * Provides wrappers for the SQL C types to quickly create a Buffer to hold the result of a query, or to be used as a parameter.
 * Easily extensible for new SQL C types.
 * UTF-8 compatible. Internally, only utf-8 std::string objects are stored. On Windows strings will get converted to UTF-16 when calling the ODBC API.
-* Testing with [https://github.com/google/googletest Google Test].
-* Doxygen generated and nightly updated [https://exodbc.elisium.ch/doc Documentation].
+* Testing with [Google Test](https://github.com/google/googletest Google Test).
+* Doxygen generated and nightly updated https://exodbc.elisium.ch/doc Documentation.
 
 ## Current Version ##
 
@@ -32,7 +32,7 @@ Last Release is [[milestone:exOdbc 0.9.4]]
 ## Download and Compile ##
 Source Tarballs can be found at https://exodbc.elisium.ch/tarball.
 
-Make sure you have [https://cmake.org/ CMake] installed and that you have a copy of the [http://www.boost.org/ boost] library ready. To build the tests, you need compiled libraries of boost-filesystem and boost-system.
+Make sure you have [CMake](https://cmake.org/) installed and that you have a copy of the [boost library](http://www.boost.org/) ready. To build the tests, you need compiled libraries of boost-filesystem and boost-system.
 
 After extracting the tarball, cd into the top-level directory and:
 
