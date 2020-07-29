@@ -58,7 +58,7 @@ The source:exodbc/trunk/ tarball is updated nightly.
 Anonymous SVN read-access is granted for user `anonymous` with no password at https://www.elisium.ch/svn/exodbc/ .
 
 ## Tests ##
-exOdbc uses [ggogletest)[https://code.google.com/p/googletest/] to test the functionality against different databases and ODBC drivers.
+exOdbc uses [ggogletest](https://code.google.com/p/googletest/) to test the functionality against different databases and ODBC drivers.
 
 To build the tests, set cmake option `BUILD_TESTS` to `ON` (default).
 
@@ -77,17 +77,17 @@ cmake --build .
 
 Resulting test executable `exodbctest` has been placed in `bin`.
 
-Most of the tests require a database with some tables. See [wiki:exOdbcTest] for how to prepare the test database.
+Most of the tests require a database with some tables. See [exOdbcTest](docs/exOdbcTest.md) for how to prepare the test database.
 
 TestedDatabases has more information about the tested databases and the known failures of exOdbc.
 
 ## Samples ##
-Samples are described on the [wiki:Samples] page and can be browsed at source:/exodbc/trunk/samples.
+Samples are available [online](docs/samples.md) with some additional [Description](docs/samples.md).
 
 ## Short Intro ##
 The following sample demonstrates basic usage of exOdbc:
 
-See source:exodbc/trunk/samples/ShortIntro for updated versions.
+See [samples/ShortIntro](samples/ShortIntro) for updated versions.
 
 ```cpp
 /*!
