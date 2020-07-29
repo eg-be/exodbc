@@ -50,7 +50,7 @@ cmake --build .
 
 Resulting binaries have been placed in `bin`.
 
-See source:exodbc/trunk/INSTALL.txt for more cmake configuration options.
+See [INSTALL.txt](INSTALL.txt) for more cmake configuration options.
 
 The source:exodbc/trunk/ tarball is updated nightly.
 
