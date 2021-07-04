@@ -1,7 +1,4 @@
 # exOdbc - open source C++ ODBC library #
-
-[[PageOutline]]
-
 exOdbc is an open source C++ library to access [ODBC](https://en.wikipedia.org/wiki/Open_Database_Connectivity) data sources. It was inspired by [wxOdbc](https://wiki.wxwidgets.org/ODBC), but has been rewritten completely. At its core exOdbc uses a [boost::variant](http://www.boost.org/doc/libs/release/doc/html/variant.html) to store the different types of column buffers. 
 
 See [TestedDatabases](docs/TestedDatabases.md) for an overview of Databases and ODBC drivers exOdbc has been tested with.
@@ -19,7 +16,7 @@ exOdbc uses [CMake](https://cmake.org/) to support different plattforms. It has 
 * Easily extensible for new SQL C types.
 * UTF-8 compatible. Internally, only utf-8 std::string objects are stored. On Windows strings will get converted to UTF-16 when calling the ODBC API.
 * Testing with [Google Test](https://github.com/google/googletest Google Test).
-* Doxygen generated and nightly updated https://exodbc.elisium.ch/doc Documentation.
+* Doxygen generated Documentation. #1
 
 ## Current Version ##
 
