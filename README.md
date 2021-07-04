@@ -15,20 +15,13 @@ exOdbc uses [CMake](https://cmake.org/) to support different plattforms. It has 
 * Provides wrappers for the SQL C types to quickly create a Buffer to hold the result of a query, or to be used as a parameter.
 * Easily extensible for new SQL C types.
 * UTF-8 compatible. Internally, only utf-8 std::string objects are stored. On Windows strings will get converted to UTF-16 when calling the ODBC API.
-* Testing with [Google Test](https://github.com/google/googletest Google Test).
-* Doxygen generated Documentation. #1
+* Testing with [Google Test](https://github.com/google/googletest).
+* Doxygen generated Documentation TODO: https://github.com/eg-be/exodbc/issues/1
 
 ## Current Version ##
-
-Last Release is [[milestone:exOdbc 0.9.4]] 
- * Source tarball: https://exodbc.elisium.ch/tarball/libexodbc-0.9.4-r1990.tar.gz
- * Browse source: source:exodbc/tags/exOdbc_0.9.4
- * SVN: [https://www.elisium.ch/svn/exodbc/tags/exOdbc_0.9.4]
- * Documentation: [https://exodbc.elisium.ch/doc/0.9.4]
+Last Release is https://github.com/eg-be/exodbc/releases/tag/exOdbc_0.9.4
 
 ## Download and Compile ##
-Source Tarballs can be found at https://exodbc.elisium.ch/tarball.
-
 Make sure you have [CMake](https://cmake.org/) installed and that you have a copy of the [boost library](http://www.boost.org/) ready. To build the tests, you need compiled libraries of boost-filesystem and boost-system.
 
 After extracting the tarball, cd into the top-level directory and:
@@ -50,9 +43,6 @@ Resulting binaries have been placed in `bin`.
 See [INSTALL.txt](INSTALL.txt) for more cmake configuration options.
 
 The source:exodbc/trunk/ tarball is updated nightly.
-
-## Building from SVN ##
-Anonymous SVN read-access is granted for user `anonymous` with no password at https://www.elisium.ch/svn/exodbc/ .
 
 ## Tests ##
 exOdbc uses [ggogletest](https://code.google.com/p/googletest/) to test the functionality against different databases and ODBC drivers.
@@ -76,7 +66,7 @@ Resulting test executable `exodbctest` has been placed in `bin`.
 
 Most of the tests require a database with some tables. See [exOdbcTest](docs/exOdbcTest.md) for how to prepare the test database.
 
-TestedDatabases has more information about the tested databases and the known failures of exOdbc.
+[TestedDatabases](docs/TestedDatabases.md) has more information about the tested databases and the known failures of exOdbc.
 
 ## Samples ##
 Samples are available [online](docs/samples.md) with some additional [Description](docs/samples.md).
