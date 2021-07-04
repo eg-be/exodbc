@@ -42,8 +42,6 @@ Resulting binaries have been placed in `bin`.
 
 See [INSTALL.txt](INSTALL.txt) for more cmake configuration options.
 
-The source:exodbc/trunk/ tarball is updated nightly.
-
 ## Tests ##
 exOdbc uses [ggogletest](https://code.google.com/p/googletest/) to test the functionality against different databases and ODBC drivers.
 
