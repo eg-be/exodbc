@@ -67,12 +67,12 @@ Most of the tests require a database with some tables. See [exOdbcTest](docs/exO
 [TestedDatabases](docs/TestedDatabases.md) has more information about the tested databases and the known failures of exOdbc.
 
 ## Samples ##
-Samples are available [online](docs/samples.md) with some additional [Description](docs/samples.md).
+Samples are available [online](/samples/) with some additional [Description](docs/samples.md).
 
 ## Short Intro ##
 The following sample demonstrates basic usage of exOdbc:
 
-See [samples/ShortIntro](samples/ShortIntro) for updated versions.
+See [samples/ShortIntro](/samples/ShortIntro) for updated versions.
 
 ```cpp
 /*!
