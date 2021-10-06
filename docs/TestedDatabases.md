@@ -1,5 +1,5 @@
 # Tested Databases
-The test from exodbctest run directly against a test database. The following list contains links for every test-database with details about the test setup used (odbc driver, dbms system, test tables). Note that the content of the pages linked to was generated using the sample [ExodbcExec](/samples/ExodbcExec/).
+The test from exodbctest run directly against a test database. The following list contains links for every test-database with details about the test setup used (odbc driver, dbms system, test tables). Note that the content of the pages linked to was generated using the sample [ExodbcExec](/samples/ExodbcExec/). TODO: All these pages are missing, see [#6](/../../issues/6)
 
 See [exOdbcTest](exOdbcTest.md) for how to prepare and run the tests.
 
