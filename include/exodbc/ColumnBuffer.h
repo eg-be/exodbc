@@ -301,7 +301,7 @@ namespace exodbc
 			// get a notification if unbound
 			if (m_unbindColumnsConnections.find(pHStmt->GetHandle()) == m_unbindColumnsConnections.end())
 			{
-				std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBindable::OnUnbindColumns, this, _1)), pHStmt);
+				std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBindable::OnUnbindColumns, this, boost::placeholders::_1)), pHStmt);
 				m_unbindColumnsConnections[pHStmt->GetHandle()] = p;
 			}
 		};
@@ -327,7 +327,7 @@ namespace exodbc
 			// Connect a signal that we are bound to this handle now and get notified if params get reseted
 			if (m_resetParamsConnections.find(pHStmt->GetHandle()) == m_resetParamsConnections.end())
 			{
-				std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBindable::OnResetParams, this, _1)), pHStmt);
+				std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectResetParamsSignal(boost::bind(&ColumnBindable::OnResetParams, this, boost::placeholders::_1)), pHStmt);
 				m_resetParamsConnections[pHStmt->GetHandle()] = p;
 			}
 		}
@@ -674,7 +674,7 @@ namespace exodbc
 		// get a notification if unbound
 		if (m_unbindColumnsConnections.find(pHStmt->GetHandle()) == m_unbindColumnsConnections.end())
 		{
-			std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBindable::OnUnbindColumns, this, _1)), pHStmt);
+			std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectUnbindColumnsSignal(boost::bind(&ColumnBindable::OnUnbindColumns, this, boost::placeholders::_1)), pHStmt);
 			m_unbindColumnsConnections[pHStmt->GetHandle()] = p;
 		}
 	}
@@ -848,7 +848,7 @@ namespace exodbc
 				// get a notification if unbound
 				if (m_unbindColumnsConnections.find(pHStmt->GetHandle()) == m_unbindColumnsConnections.end())
 				{
-					std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectUnbindColumnsSignal(boost::bind(&SqlCPointerBuffer::OnUnbindColumns, this, _1)), pHStmt);
+					std::pair<boost::signals2::connection, ConstSqlStmtHandlePtr> p(pHStmt->ConnectUnbindColumnsSignal(boost::bind(&SqlCPointerBuffer::OnUnbindColumns, this, boost::placeholders::_1)), pHStmt);
 					m_unbindColumnsConnections[pHStmt->GetHandle()] = p;
 				}
 			}
