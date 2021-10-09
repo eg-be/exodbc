@@ -1,0 +1,3 @@
+build/
+include/exodbc/exOdbcConfig.h
+test/exOdbcTestConfig.h
