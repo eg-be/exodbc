@@ -17,12 +17,12 @@ set(CPACK_GENERATOR TGZ)
 
 # try to add revision to filename
 SET(CPACK_PACKAGE_VERSION_TWEAK 0)
-find_package(Subversion)
-if(SUBVERSION_FOUND)
-  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-  set (CPACK_PACKAGE_VERSION_TWEAK ${Project_WC_LAST_CHANGED_REV})
-  message(STATUS "Updating CPACK_PACKAGE_VERSION_TWEAK to ${CPACK_PACKAGE_VERSION_TWEAK}, read from ${PROJECT_SOURCE_DIR}")
-endif()
+#find_package(Subversion)
+#if(SUBVERSION_FOUND)
+#  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
+#  set (CPACK_PACKAGE_VERSION_TWEAK ${Project_WC_LAST_CHANGED_REV})
+#  message(STATUS "Updating CPACK_PACKAGE_VERSION_TWEAK to ${CPACK_PACKAGE_VERSION_TWEAK}, read from ${PROJECT_SOURCE_DIR}")
+#endif()
 
 if(DEFINED CPACK_EXPLICIT_VERSIONNAME)
   set(

@@ -3,12 +3,13 @@ project (libexodbc)
 
 # update tweak version with info from subversion, if available:
 # note: WC_LOG needs access to the repo, do not use
-find_package(Subversion)
-if(SUBVERSION_FOUND)
-  Subversion_WC_INFO(${PROJECT_SOURCE_DIR}/.. Project)
-  set (LIBEXODBC_VERSION_TWEAK ${Project_WC_LAST_CHANGED_REV})
-  message(STATUS "Updating LIBEXODBC_VERSION_TWEAK to ${LIBEXODBC_VERSION_TWEAK}, read from ${PROJECT_SOURCE_DIR}")
-endif()
+SET(LIBEXODBC_VERSION_TWEAK 0)
+#find_package(Subversion)
+#if(SUBVERSION_FOUND)
+#  Subversion_WC_INFO(${PROJECT_SOURCE_DIR}/.. Project)
+#  set (LIBEXODBC_VERSION_TWEAK ${Project_WC_LAST_CHANGED_REV})
+#  message(STATUS "Updating LIBEXODBC_VERSION_TWEAK to ${LIBEXODBC_VERSION_TWEAK}, read from ${PROJECT_SOURCE_DIR}")
+#endif()
 
 # create some files from the version information 
 # and place it in the include-folder (so it could be used)
