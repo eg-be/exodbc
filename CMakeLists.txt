@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.0.2)
+﻿cmake_minimum_required (VERSION 3.5)
 project (exodbc
   VERSION 0.9.5.0
   LANGUAGES CXX
@@ -125,20 +125,7 @@ if(${BUILD_TESTS})
   # runtime lib):
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-  # Add googletest directly to our build. This defines
-  # the gtest and gtest_main targets.
-  # hide some warnings from within googletest 1.8.0 with cmake 3.x
-  # by setting policy CMP0048 to OLD:
-  file(READ ${CMAKE_BINARY_DIR}/googletest-src/CMakeLists.txt GOOGELTEST_CMAKELISTS)
-  if(NOT GOOGELTEST_CMAKELISTS MATCHES "SET CMP0048 OLD")
-    string(TIMESTAMP NOW)
-    STRING(REGEX REPLACE 
-      "(.*cmake_minimum_required.*)project\\(" 
-      "\\1# ${NOW} edited by exodbc/CMakeLists.txt. Avoid CMP0048 warnings:\ncmake_policy(SET CMP0048 OLD)\n\nproject(" 
-      GOOGELTEST_CMAKELISTS ${GOOGELTEST_CMAKELISTS})
-    file(WRITE ${CMAKE_BINARY_DIR}/googletest-src/CMakeLists.txt ${GOOGELTEST_CMAKELISTS})
-  endif()
-  
+  # Add googletest directly to our build. This defines the gtest and gtest_main targets.
   add_subdirectory(${CMAKE_BINARY_DIR}/googletest-src
                    ${CMAKE_BINARY_DIR}/googletest-build)
   

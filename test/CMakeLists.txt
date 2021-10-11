@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.0.2)
+﻿cmake_minimum_required (VERSION 3.5)
 project (exodbctest)
 
 # add some options to enable / disable tests and add database specific values
