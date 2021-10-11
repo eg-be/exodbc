@@ -20,6 +20,7 @@ set ( HEADERS_SQLCPOINTERBUFFER
 )
 
 # we depend on boost, but header-only:
+cmake_policy(SET CMP0074 NEW)
 find_package(Boost 1.55.0 REQUIRED)
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})

@@ -199,6 +199,7 @@ set (RES_EXODBCTEST
 
 # we depend on boost, with some built libs:
 # http://stackoverflow.com/questions/28887680/linking-boost-library-with-boost-use-static-lib-off-on-windows
+cmake_policy(SET CMP0074 NEW)
 find_package(Boost 1.55.0 REQUIRED COMPONENTS
                 system filesystem)
 include_directories(${Boost_INCLUDE_DIRS})
