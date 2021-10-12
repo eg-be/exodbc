@@ -5,7 +5,7 @@ project (exodbctest)
 
 # SqlServer
 option(ENABLE_SQLSERVER_TEST "Enable the test for Sql Server" ON)
-set(SQLSERVER_TEST_CS "Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC,1433;Database=exodbc;Uid=ex;Pwd=extest;" CACHE STRING "Connection-String used to run tests against Sql Server")
+set(SQLSERVER_TEST_CS "Driver={SQL Server Native Client 11.0};Server=192.168.56.20\\EXODBC;Database=exodbc;Uid=ex;Pwd=extest;" CACHE STRING "Connection-String used to run tests against Sql Server")
 set(SQLSERVER_TEST_GTEST_FILTER "*" CACHE STRING "value for gtest argument '--gtest_filter': Run all tests")
 set(SQLSERVER_TEST_LOG_LEVEL "Warning" CACHE STRING "LogLevel argument passed to exodbctest to run tests against Sql Server")
 
