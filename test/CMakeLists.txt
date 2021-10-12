@@ -46,7 +46,7 @@ else()
   option(ENABLE_MYSQL_TEST "Enable the test for MySql" OFF)
 endif()
 if(ENABLE_MYSQL_TEST)
-  set(MYSQL_TEST_CS "Provider=MSDASQL;Driver={MySQL ODBC 5.3 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;" CACHE STRING "Connection-String used to run tests against MySql")
+  set(MYSQL_TEST_CS "Provider=MSDASQL;Driver={MySQL ODBC 8.0 UNICODE Driver};Server=192.168.56.20;Database=exodbc;User=ex;Password=extest;Option=3;" CACHE STRING "Connection-String used to run tests against MySql")
 	string(CONCAT mySqlFilters	"-StatementCloserTest.CloseStmtHandle"
 								":TableTest.DeleteFailOnNoData")  
   set(MYSQL_TEST_GTEST_FILTER "${mySqlFilters}" CACHE STRING "value for gtest argument '--gtest_filter': Skip tests known to fail")

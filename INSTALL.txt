@@ -254,6 +254,7 @@ currently no scripts available to do so (why not? -> see #11). The following
 constraints must be met for the test-databases:
 
 * Sql Server: Database and schema must be named 'exodbc'
+* MySql: Schema must be named 'exodbc'
 
 Run the scripts in the test/sql directory to create the required tables with 
 their values in that database. 
