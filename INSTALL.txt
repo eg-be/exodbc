@@ -246,15 +246,23 @@ The log level used in exodbctest can be set using the following cache variables:
   
 Prepare Test Database
 ---------------------
-Scripts to create test databases are provided in test/sql. For Access and Excel, there are database
-files provided in test/db.
+Database-type specific scripts to create test tables are provided in test/sql.
+For Access and Excel, database files are provided in test/db.
 
-First create a new database using the database specific tools. Then run the scripts in the test/sql 
-directory to create the required tables with their values in that database. You can also use 
-exodbctest with the --createDb parameter to create the required tables:
-If the --createDb parameter is passed to exodbctest, exodbctest will try to connect to the database,
-using the passed connection string or dsn arguments, try to identify the database-type and run
-the corresponding scripts inside test/sql. Afterwards the tests are run.
+The database itself must be created using db-specific tools, there are
+currently no scripts available to do so (why not? -> see #11). The following
+constraints must be met for the test-databases:
+
+* Sql Server: Database and schema must be named 'exodbc'
+
+Run the scripts in the test/sql directory to create the required tables with 
+their values in that database. 
+Alternatively, you can also use exodbctest with the --createDb parameter to 
+create the required tables:
+If the --createDb parameter is passed to exodbctest, exodbctest will try to 
+connect to the database, using the passed connection string or dsn arguments,
+try to identify the database-type and run the corresponding scripts inside 
+test/sql. Afterwards the tests are run.
 
 see exodbctest help for more information:
   
