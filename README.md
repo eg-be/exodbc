@@ -1,4 +1,7 @@
 # exOdbc - open source C++ ODBC library #
+> [!IMPORTANT]
+> **Unfortunately I don't have the time to give this project the love it deserves.** The source is "as-is" and no issues will be addressed currently. The docs have been imported from the original trac-wiki and only some parts have been transformed to proper markdown.
+
 exOdbc is an open source C++ library to access [ODBC](https://en.wikipedia.org/wiki/Open_Database_Connectivity) data sources. It was inspired by [wxOdbc](https://wiki.wxwidgets.org/ODBC), but has been rewritten completely. At its core exOdbc uses a [boost::variant](http://www.boost.org/doc/libs/release/doc/html/variant.html) to store the different types of column buffers. 
 
 See [TestedDatabases](docs/TestedDatabases.md) for an overview of Databases and ODBC drivers exOdbc has been tested with.
